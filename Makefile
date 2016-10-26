@@ -48,7 +48,7 @@ endif
 ifeq ($(PLATFORM),Darwin)
 CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
-LDFLAGS += -framework AppKit -framework Carbon
+LDFLAGS += -framework AppKit -framework Carbon -framework QuartzCore
 SDL_LDFLAGS := -framework SDL
 endif
 

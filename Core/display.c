@@ -11,14 +11,12 @@
 #include <Windows.h>
 #endif
 
-#pragma pack(push, 1)
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint8_t y;
     uint8_t x;
     uint8_t tile;
     uint8_t flags;
 } GB_sprite_t;
-#pragma pack(pop)
 
 static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
@@ -438,4 +436,179 @@ updateSTAT:
     if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
         gb->io_registers[GB_IO_IF] |= 2;
     }
+}
+
+void GB_draw_tileset(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index)
+{
+    uint32_t none_palette[4];
+    uint32_t *palette = NULL;
+    
+    switch (gb->is_cgb? palette_type : GB_PALETTE_NONE) {
+        default:
+        case GB_PALETTE_NONE:
+            none_palette[0] = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+            none_palette[1] = gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA);
+            none_palette[2] = gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55);
+            none_palette[3] = gb->rgb_encode_callback(gb, 0,    0,    0   );
+            palette = none_palette;
+            break;
+        case GB_PALETTE_BACKGROUND:
+            palette = gb->background_palletes_rgb + (4 * (palette_index & 7));
+            break;
+        case GB_PALETTE_OAM:
+            palette = gb->sprite_palletes_rgb + (4 * (palette_index & 7));
+            break;
+    }
+    
+    for (unsigned y = 0; y < 192; y++) {
+        for (unsigned x = 0; x < 256; x++) {
+            if (x >= 128 && !gb->is_cgb) {
+                *(dest++) = gb->background_palletes_rgb[0];
+                continue;
+            }
+            uint16_t tile = (x % 128) / 8 + y / 8 * 16;
+            uint16_t tile_address = tile * 0x10 + (x >= 128? 0x2000 : 0);
+            uint8_t pixel = (((gb->vram[tile_address + (y & 7) * 2    ] >> ((~x)&7)) & 1 ) |
+                             ((gb->vram[tile_address + (y & 7) * 2 + 1] >> ((~x)&7)) & 1) << 1);
+            
+            if (!gb->cgb_mode) {
+                if (palette_type == GB_PALETTE_BACKGROUND) {
+                    pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
+                }
+                else if (!gb->cgb_mode) {
+                    if (palette_type == GB_PALETTE_OAM) {
+                        pixel = ((gb->io_registers[palette_index == 0? GB_IO_OBP0 : GB_IO_OBP1] >> (pixel << 1)) & 3);
+                    }
+                }
+            }
+            
+            
+            *(dest++) = palette[pixel];
+        }
+    }
+}
+
+void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index, GB_map_type_t map_type, GB_tileset_type_t tileset_type)
+{
+    uint32_t none_palette[4];
+    uint32_t *palette = NULL;
+    uint16_t map = 0x1800;
+    
+    switch (gb->is_cgb? palette_type : GB_PALETTE_NONE) {
+        case GB_PALETTE_NONE:
+            none_palette[0] = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+            none_palette[1] = gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA);
+            none_palette[2] = gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55);
+            none_palette[3] = gb->rgb_encode_callback(gb, 0,    0,    0   );
+            palette = none_palette;
+            break;
+        case GB_PALETTE_BACKGROUND:
+            palette = gb->background_palletes_rgb + (4 * (palette_index & 7));
+            break;
+        case GB_PALETTE_OAM:
+            palette = gb->sprite_palletes_rgb + (4 * (palette_index & 7));
+            break;
+        case GB_PALETTE_AUTO:
+            break;
+    }
+    
+    if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && gb->io_registers[GB_IO_LCDC] & 0x08)) {
+        map = 0x1c00;
+    }
+    
+    if (tileset_type == GB_TILESET_AUTO) {
+        tileset_type = (gb->io_registers[GB_IO_LCDC] & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
+    }
+    
+    for (unsigned y = 0; y < 256; y++) {
+        for (unsigned x = 0; x < 256; x++) {
+            uint8_t tile = gb->vram[map + x/8 + y/8 * 32];
+            uint16_t tile_address;
+            uint8_t attributes = 0;
+            
+            if (tileset_type == GB_TILESET_8800) {
+                tile_address = tile * 0x10;
+            }
+            else {
+                tile_address = (int8_t) tile * 0x10 + 0x1000;
+            }
+            
+            if (gb->cgb_mode) {
+                attributes = gb->vram[map + x/8 + y/8 * 32 + 0x2000];
+            }
+            
+            if (attributes & 0x8) {
+                tile_address += 0x2000;
+            }
+            
+            uint8_t pixel = (((gb->vram[tile_address + (((attributes & 0x40)? ~y : y) & 7) * 2    ] >> (((attributes & 0x20)? x : ~x)&7)) & 1 ) |
+                             ((gb->vram[tile_address + (((attributes & 0x40)? ~y : y) & 7) * 2 + 1] >> (((attributes & 0x20)? x : ~x)&7)) & 1) << 1);
+            
+            if (!gb->cgb_mode && (palette_type == GB_PALETTE_BACKGROUND || palette_type == GB_PALETTE_AUTO)) {
+                pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
+            }
+            
+            if (palette) {
+                *(dest++) = palette[pixel];
+            }
+            else {
+                *(dest++) = gb->background_palletes_rgb[(attributes & 7) * 4 + pixel];
+            }
+        }
+    }
+}
+
+uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
+{
+    uint8_t count = 0;
+    unsigned sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
+    uint8_t oam_to_dest_index[40] = {0,};
+    for (unsigned y = 0; y < 144; y++) {
+        GB_sprite_t *sprite = (GB_sprite_t *) &gb->oam;
+        uint8_t sprites_in_line = 0;
+        for (uint8_t i = 0; i < 40; i++, sprite++) {
+            int sprite_y = sprite->y - 16;
+            bool obscured = false;
+            // Is sprite not in this line?
+            if (sprite_y > y || sprite_y + sprite_height <= y) continue;
+            if (++sprites_in_line == 11) obscured = true;
+            
+            GB_oam_info_t *info = NULL;
+            if (!oam_to_dest_index[i]) {
+                info = dest + count;
+                oam_to_dest_index[i] = ++count;
+                info->x = sprite->x;
+                info->y = sprite->y;
+                info->tile = sprite_height == 16? sprite->tile & 0xFE : sprite->tile;
+                info->flags = sprite->flags;
+                info->obscured_by_line_limit = false;
+                info->oam_addr = 0xFE00 + i * sizeof(*sprite);
+            }
+            else {
+                info = dest + oam_to_dest_index[i] - 1;
+            }
+            info->obscured_by_line_limit |= obscured;
+        }
+    }
+    
+    
+    for (unsigned i = 0; i < count; i++) {
+        uint16_t vram_address = dest[i].tile * 0x10;
+        uint8_t flags = dest[i].flags;
+        uint8_t palette = gb->cgb_mode? (flags & 7) : ((flags & 0x10)? 1 : 0);
+
+        for (unsigned y = 0; y < sprite_height; y++) {
+            for (unsigned x = 0; x < 8; x++) {
+                uint8_t color = (((gb->vram[vram_address    ] >> ((~x)&7)) & 1 ) |
+                                 ((gb->vram[vram_address + 1] >> ((~x)&7)) & 1) << 1 );
+                
+                if (!gb->cgb_mode) {
+                    color = (gb->io_registers[palette? GB_IO_OBP1:GB_IO_OBP0] >> (color << 1)) & 3;
+                }
+                dest[i].image[((flags & 0x20)?7-x:x) + ((flags & 0x40)?sprite_height - 1 -y:y) * 8] = gb->sprite_palletes_rgb[palette * 4 + color];
+            }
+            vram_address += 2;
+        }
+    }
+    return count;
 }

@@ -19,11 +19,7 @@
 /* Used for the anchor range and location */
 #define NO_SELECTION ULLONG_MAX
 
-#if ! NDEBUG
 #define VALIDATE_SELECTION() [self _ensureSelectionIsValid]
-#else
-#define VALIDATE_SELECTION() do { } while (0)
-#endif
 
 #define BENCHMARK_BYTEARRAYS 0
 
@@ -456,7 +452,6 @@ static inline Class preferredByteArrayClass(void) {
     return [HFRangeWrapper organizeAndMergeRanges:result];
 }
 
-#if ! NDEBUG
 - (void)_ensureSelectionIsValid {
     HFASSERT(selectedContentsRanges != nil);
     HFASSERT([selectedContentsRanges count] > 0);
@@ -464,11 +459,13 @@ static inline Class preferredByteArrayClass(void) {
     FOREACH(HFRangeWrapper*, wrapper, selectedContentsRanges) {
         EXPECT_CLASS(wrapper, HFRangeWrapper);
         HFRange range = [wrapper HFRange];
-        HFASSERT(HFRangeIsSubrangeOfRange(range, HFRangeMake(0, [self contentsLength])));
+        if (!HFRangeIsSubrangeOfRange(range, HFRangeMake(0, [self contentsLength]))){
+            [self setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(0, 0)]]];
+            return;
+        }
         if (onlyOneWrapper == NO) HFASSERT(range.length > 0); /* If we have more than one wrapper, then none of them should be zero length */
     }
 }
-#endif
 
 - (void)_setSingleSelectedContentsRange:(HFRange)newSelection {
     HFASSERT(HFRangeIsSubrangeOfRange(newSelection, HFRangeMake(0, [self contentsLength])));

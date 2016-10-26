@@ -375,6 +375,12 @@
                                     <action selector="showMemory:" target="-1" id="Ngn-2u-n12"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show VRAM Viewer" id="EYc-et-cG0">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showVRAMViewer:" target="-1" id="nhw-4h-Sl4"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

@@ -7,10 +7,12 @@
 #include "debugger.h"
 #include "memory.h"
 #include "camera.h"
+#include "display.h"
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
+/* Todo: Split into category files! This is so messy!!! */
 
 @interface Document ()
 {
@@ -30,6 +32,11 @@
     AVCaptureSession *cameraSession;
     AVCaptureConnection *cameraConnection;
     AVCaptureStillImageOutput *cameraOutput;
+    
+    GB_oam_info_t oamInfo[40];
+    uint16_t oamCount;
+    uint8_t oamHeight;
+    bool oamUpdating;
 }
 
 @property GBAudioClient *audioClient;
@@ -140,6 +147,7 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [self.view flip];
     GB_set_pixels_output(&gb, self.view.pixels);
+    [self reloadVRAMData: nil];
 }
 
 - (void) run
@@ -262,6 +270,7 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     window_frame.size.height = MAX([[NSUserDefaults standardUserDefaults] integerForKey:@"LastWindowHeight"],
                                    window_frame.size.height);
     [self.mainWindow setFrame:window_frame display:YES];
+    self.vramStatusLabel.cell.backgroundStyle = NSBackgroundStyleRaised;
     [self start];
 
 }
@@ -450,6 +459,7 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     NSString *nsstring = @(string); // For ref-counting
     dispatch_async(dispatch_get_main_queue(), ^{
         [hex_controller reloadData];
+        [self reloadVRAMData: nil];
 
         NSFont *font = [NSFont userFixedPitchFontOfSize:12];
         NSUnderlineStyle underline = NSUnderlineStyleNone;
@@ -595,10 +605,105 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     }
 }
 
++ (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale
+{
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef) data);
+    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+    
+    CGImageRef iref = CGImageCreate(width,
+                                    height,
+                                    8,
+                                    32,
+                                    4 * width,
+                                    colorSpaceRef,
+                                    bitmapInfo,
+                                    provider,
+                                    NULL,
+                                    YES,
+                                    renderingIntent);
+    
+    return [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(width * scale, height * scale)];
+}
+
 - (void) reloadMemoryView
 {
     if (self.memoryWindow.isVisible) {
         [hex_controller reloadData];
+    }
+}
+
+- (IBAction) reloadVRAMData: (id) sender
+{
+    if (self.vramWindow.isVisible) {
+        switch ([self.vramTabView.tabViewItems indexOfObject:self.vramTabView.selectedTabViewItem]) {
+            case 0:
+            /* Tileset */
+            {
+                GB_palette_type_t palette_type = GB_PALETTE_NONE;
+                NSUInteger palette_menu_index = self.tilesetPaletteButton.indexOfSelectedItem;
+                if (palette_menu_index) {
+                    palette_type = palette_menu_index > 8? GB_PALETTE_OAM : GB_PALETTE_BACKGROUND;
+                }
+                size_t bufferLength = 256 * 192 * 4;
+                NSMutableData *data = [NSMutableData dataWithCapacity:bufferLength];
+                data.length = bufferLength;
+                GB_draw_tileset(&gb, (uint32_t *)data.mutableBytes, palette_type, (palette_menu_index - 1) & 7);
+                
+                self.tilesetImageView.image = [Document imageFromData:data width:256 height:192 scale:1.0];
+                self.tilesetImageView.layer.magnificationFilter = kCAFilterNearest;
+            }
+            break;
+                
+            case 1:
+            /* Tilemap */
+            {
+                GB_palette_type_t palette_type = GB_PALETTE_NONE;
+                NSUInteger palette_menu_index = self.tilemapPaletteButton.indexOfSelectedItem;
+                if (palette_menu_index > 1) {
+                    palette_type = palette_menu_index > 9? GB_PALETTE_OAM : GB_PALETTE_BACKGROUND;
+                }
+                else if (palette_menu_index == 1) {
+                    palette_type = GB_PALETTE_AUTO;
+                }
+                
+                size_t bufferLength = 256 * 256 * 4;
+                NSMutableData *data = [NSMutableData dataWithCapacity:bufferLength];
+                data.length = bufferLength;
+                GB_draw_tilemap(&gb, (uint32_t *)data.mutableBytes, palette_type, (palette_menu_index - 2) & 7,
+                                (GB_map_type_t) self.tilemapMapButton.indexOfSelectedItem,
+                                (GB_tileset_type_t) self.TilemapSetButton.indexOfSelectedItem);
+                
+                self.tilemapImageView.image = [Document imageFromData:data width:256 height:256 scale:1.0];
+                self.tilemapImageView.layer.magnificationFilter = kCAFilterNearest;
+            }
+            break;
+                
+            case 2:
+            /* OAM */
+            {
+                oamCount = GB_get_oam_info(&gb, oamInfo);
+                oamHeight = (gb.io_registers[GB_IO_LCDC] & 4) ? 16:8;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (!oamUpdating) {
+                        oamUpdating = true;
+                        [self.spritesTableView reloadData];
+                        oamUpdating = false;
+                    }
+                });
+            }
+            break;
+            
+            case 3:
+            /* Palettes */
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.paletteTableView reloadData];
+                });
+            }
+            break;
+        }
     }
 }
 
@@ -776,5 +881,196 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     uint8_t ret = baseAddress[(x + offsetX) * 2 + (y + offsetY) * bytesPerRow];
 
     return ret;
+}
+
+- (IBAction)toggleTilesetGrid:(NSButton *)sender
+{
+    if (sender.state) {
+        self.tilesetImageView.horizontalGrids = @[
+                                                  [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.25] size:8],
+                                                  [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.5] size:128],
+                                                  
+        ];
+        self.tilesetImageView.verticalGrids = @[
+                                                  [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.25] size:8],
+                                                  [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.5] size:64],
+        ];
+        self.tilemapImageView.horizontalGrids = @[
+                                                  [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.25] size:8],
+                                                  ];
+        self.tilemapImageView.verticalGrids = @[
+                                                [[GBImageViewGridConfiguration alloc] initWithColor:[NSColor colorWithCalibratedRed:0 green:0 blue:0 alpha:0.25] size:8],
+                                                ];
+    }
+    else {
+        self.tilesetImageView.horizontalGrids = nil;
+        self.tilesetImageView.verticalGrids = nil;
+        self.tilemapImageView.horizontalGrids = nil;
+        self.tilemapImageView.verticalGrids = nil;
+    }
+}
+
+- (IBAction)vramTabChanged:(NSSegmentedControl *)sender
+{
+    [self.vramTabView selectTabViewItemAtIndex:[sender selectedSegment]];
+    [self reloadVRAMData:sender];
+    [self.vramTabView.selectedTabViewItem.view addSubview:self.gridButton];
+    self.gridButton.hidden = [sender selectedSegment] >= 2;
+
+    NSUInteger height_diff = self.vramWindow.frame.size.height - self.vramWindow.contentView.frame.size.height;
+    CGRect window_rect = self.vramWindow.frame;
+    window_rect.origin.y += window_rect.size.height;
+    switch ([sender selectedSegment]) {
+        case 0:
+            window_rect.size.height = 384 + height_diff + 48;
+            break;
+        case 1:
+        case 2:
+            window_rect.size.height = 512 + height_diff + 48;
+            break;
+        case 3:
+            window_rect.size.height = 20 * 16 + height_diff + 24;
+            break;
+            
+        default:
+            break;
+    }
+    window_rect.origin.y -= window_rect.size.height;
+    [self.vramWindow setFrame:window_rect display:YES animate:YES];
+}
+
+- (void)mouseDidLeaveImageView:(GBImageView *)view
+{
+    self.vramStatusLabel.stringValue = @"";
+}
+
+- (void)imageView:(GBImageView *)view mouseMovedToX:(NSUInteger)x Y:(NSUInteger)y
+{
+    if (view == self.tilesetImageView) {
+        uint8_t bank = x >= 128? 1 : 0;
+        x &= 127;
+        uint16_t tile = x / 8 + y / 8 * 16;
+        self.vramStatusLabel.stringValue = [NSString stringWithFormat:@"Tile number $%02x at %d:$%04x", tile & 0xFF, bank, 0x8000 + tile * 0x10];
+    }
+    else if (view == self.tilemapImageView) {
+        uint16_t map_offset = x / 8 + y / 8 * 32;
+        uint16_t map_base = 0x1800;
+        GB_map_type_t map_type = (GB_map_type_t) self.tilemapMapButton.indexOfSelectedItem;
+        GB_tileset_type_t tileset_type = (GB_tileset_type_t) self.TilemapSetButton.indexOfSelectedItem;
+        
+        if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && gb.io_registers[GB_IO_LCDC] & 0x08)) {
+            map_base = 0x1c00;
+        }
+        
+        if (tileset_type == GB_TILESET_AUTO) {
+            tileset_type = (gb.io_registers[GB_IO_LCDC] & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
+        }
+        
+        uint8_t tile = gb.vram[map_base + map_offset];
+        uint16_t tile_address = 0;
+        if (tileset_type == GB_TILESET_8000) {
+            tile_address = 0x8000 + tile * 0x10;
+        }
+        else {
+            tile_address = 0x9000 + (int8_t)tile * 0x10;
+        }
+        
+        if (gb.is_cgb) {
+            uint8_t attributes = gb.vram[map_base + map_offset + 0x2000];
+            self.vramStatusLabel.stringValue = [NSString stringWithFormat:@"Tile number $%02x (%d:$%04x) at map address $%04x (Attributes: %c%c%c%d%d)",
+                                                tile,
+                                                attributes & 0x8? 1 : 0,
+                                                tile_address,
+                                                0x8000 + map_base + map_offset,
+                                                (attributes & 0x80) ? 'P' : '-',
+                                                (attributes & 0x40) ? 'V' : '-',
+                                                (attributes & 0x20) ? 'H' : '-',
+                                                attributes & 0x8? 1 : 0,
+                                                attributes & 0x7
+                                                ];
+        }
+        else {
+            self.vramStatusLabel.stringValue = [NSString stringWithFormat:@"Tile number $%02x ($%04x) at map address $%04x",
+                                                tile,
+                                                tile_address,
+                                                0x8000 + map_base + map_offset
+                                                ];
+        }
+
+    }
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+{
+    if (tableView == self.paletteTableView) {
+        return 16; /* 8 BG palettes, 8 OBJ palettes*/
+    }
+    else if (tableView == self.spritesTableView) {
+        return oamCount;
+    }
+    return 0;
+}
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
+    if (tableView == self.paletteTableView) {
+        if (columnIndex == 0) {
+            return [NSString stringWithFormat:@"%s %d", row >=8? "Object" : "Background", (int)(row & 7)];
+        }
+
+        uint16_t index = columnIndex - 1 + (row & 7) * 4;
+        return @(((row >= 8? gb.sprite_palletes_data : gb.background_palletes_data)[(index << 1) + 1] << 8) |
+                  (row >= 8? gb.sprite_palletes_data : gb.background_palletes_data)[(index << 1)]);
+    }
+    else if (tableView == self.spritesTableView) {
+        switch (columnIndex) {
+            case 0:
+                return [Document imageFromData:[NSData dataWithBytesNoCopy:oamInfo[row].image length:64 * 4] width:8 height:oamHeight scale:16.0/oamHeight];
+            case 1:
+                return @((int)oamInfo[row].x - 8);
+            case 2:
+                return @((int)oamInfo[row].y - 16);
+            case 3:
+                return [NSString stringWithFormat:@"$%02x", oamInfo[row].tile];
+            case 4:
+                return [NSString stringWithFormat:@"$%04x", 0x8000 + oamInfo[row].tile * 0x10];
+            case 5:
+                return [NSString stringWithFormat:@"$%04x", oamInfo[row].oam_addr];
+            case 6:
+                if (gb.cgb_mode) {
+                    return [NSString stringWithFormat:@"%c%c%c%d%d",
+                            oamInfo[row].flags & 0x80? 'P' : '-',
+                            oamInfo[row].flags & 0x40? 'Y' : '-',
+                            oamInfo[row].flags & 0x20? 'X' : '-',
+                            oamInfo[row].flags & 0x08? 1 : 0,
+                            oamInfo[row].flags & 0x07];
+                }
+                return [NSString stringWithFormat:@"%c%c%c%d",
+                        oamInfo[row].flags & 0x80? 'P' : '-',
+                        oamInfo[row].flags & 0x40? 'Y' : '-',
+                        oamInfo[row].flags & 0x20? 'X' : '-',
+                        oamInfo[row].flags & 0x10? 1 : 0];
+            case 7:
+                return oamInfo[row].obscured_by_line_limit? @"Dropped: Too many sprites in line": @"";
+
+        }
+    }
+    return nil;
+}
+
+- (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
+{
+    return tableView == self.spritesTableView;
+}
+
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    return NO;
+}
+
+- (IBAction)showVRAMViewer:(id)sender
+{
+    [self.vramWindow makeKeyAndOrderFront:sender];
 }
 @end

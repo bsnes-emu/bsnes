@@ -95,7 +95,9 @@ void GB_init(GB_gameboy_t *gb)
     gb->magic = (uintptr_t)'SAME';
     gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000);
+    memset(gb->ram, 0, gb->ram_size);
     gb->vram = malloc(gb->vram_size = 0x2000);
+    memset(gb->vram, 0, gb->vram_size);
 
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
@@ -121,7 +123,9 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->magic = (uintptr_t)'SAME';
     gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000 * 8);
+    memset(gb->ram, 0, gb->ram_size);
     gb->vram = malloc(gb->vram_size = 0x2000 * 2);
+    memset(gb->vram, 0, gb->vram_size);
     gb->is_cgb = true;
     gb->cgb_mode = true;
 
