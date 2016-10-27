@@ -116,9 +116,8 @@ auto MSU1::audioOpen() -> void {
 
 auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
   cpu.synchronize(*this);
-  addr = 0x2000 | (addr & 7);
 
-  switch(addr) {
+  switch(0x2000 | (addr & 7)) {
   case 0x2000:
     return (
       Revision       << 0
@@ -145,9 +144,8 @@ auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
 
 auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
   cpu.synchronize(*this);
-  addr = 0x2000 | (addr & 7);
 
-  switch(addr) {
+  switch(0x2000 | (addr & 7)) {
   case 0x2000: io.dataSeekOffset.byte(0) = data; break;
   case 0x2001: io.dataSeekOffset.byte(1) = data; break;
   case 0x2002: io.dataSeekOffset.byte(2) = data; break;
@@ -157,6 +155,8 @@ auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
     break;
   case 0x2004: io.audioTrack.byte(0) = data; break;
   case 0x2005: io.audioTrack.byte(1) = data;
+    io.audioPlay = false;
+    io.audioRepeat = false;
     io.audioPlayOffset = 8;
     if(io.audioTrack == io.audioResumeTrack) {
       io.audioPlayOffset = io.audioResumeOffset;
@@ -171,7 +171,7 @@ auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
   case 0x2007:
     if(io.audioBusy) break;
     if(io.audioError) break;
-    io.audioPlay   = data.bit(0);
+    io.audioPlay = data.bit(0);
     io.audioRepeat = data.bit(1);
     bool audioResume = data.bit(2);
     if(!io.audioPlay && audioResume) {

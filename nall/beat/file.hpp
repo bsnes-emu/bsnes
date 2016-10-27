@@ -11,12 +11,12 @@ struct File : file {
 
 auto File::read() -> uint8_t {
   uint8_t data = file::read();
-  checksum.data(data);
+  checksum.input(data);
   return data;
 }
 
 auto File::write(uint8_t data) -> void {
-  checksum.data(data);
+  checksum.input(data);
   return file::write(data);
 }
 

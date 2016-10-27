@@ -108,10 +108,6 @@ Interface::Interface() {
     expansionPort.devices.append(device);
   }
 
-  { Device device{ID::Device::SuperDisc, "Super Disc"};
-    expansionPort.devices.append(device);
-  }
-
   { Device device{ID::Device::S21FX, "21fx"};
     expansionPort.devices.append(device);
   }

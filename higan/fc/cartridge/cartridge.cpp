@@ -29,8 +29,8 @@ auto Cartridge::load() -> bool {
   if(!board) return false;
 
   Hash::SHA256 sha;
-  sha.data(board->prgrom.data, board->prgrom.size);
-  sha.data(board->chrrom.data, board->chrrom.size);
+  sha.input(board->prgrom.data, board->prgrom.size);
+  sha.input(board->chrrom.data, board->chrrom.size);
   information.sha256 = sha.digest();
   return true;
 }

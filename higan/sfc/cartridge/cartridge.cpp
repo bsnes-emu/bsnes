@@ -52,8 +52,8 @@ auto Cartridge::load() -> bool {
   //Sufami Turbo
   else if(cartridge.has.SufamiTurboSlots) {
     Hash::SHA256 sha;
-    sha.data(sufamiturboA.rom.data(), sufamiturboA.rom.size());
-    sha.data(sufamiturboB.rom.data(), sufamiturboB.rom.size());
+    sha.input(sufamiturboA.rom.data(), sufamiturboA.rom.size());
+    sha.input(sufamiturboB.rom.data(), sufamiturboB.rom.size());
     information.sha256 = sha.digest();
   }
 
@@ -61,22 +61,22 @@ auto Cartridge::load() -> bool {
   else {
     Hash::SHA256 sha;
     //hash each ROM image that exists; any with size() == 0 is ignored by sha256_chunk()
-    sha.data(rom.data(), rom.size());
-    sha.data(mcc.rom.data(), mcc.rom.size());
-    sha.data(sa1.rom.data(), sa1.rom.size());
-    sha.data(superfx.rom.data(), superfx.rom.size());
-    sha.data(hitachidsp.rom.data(), hitachidsp.rom.size());
-    sha.data(spc7110.prom.data(), spc7110.prom.size());
-    sha.data(spc7110.drom.data(), spc7110.drom.size());
-    sha.data(sdd1.rom.data(), sdd1.rom.size());
+    sha.input(rom.data(), rom.size());
+    sha.input(mcc.rom.data(), mcc.rom.size());
+    sha.input(sa1.rom.data(), sa1.rom.size());
+    sha.input(superfx.rom.data(), superfx.rom.size());
+    sha.input(hitachidsp.rom.data(), hitachidsp.rom.size());
+    sha.input(spc7110.prom.data(), spc7110.prom.size());
+    sha.input(spc7110.drom.data(), spc7110.drom.size());
+    sha.input(sdd1.rom.data(), sdd1.rom.size());
     //hash all firmware that exists
     vector<uint8> buffer;
     buffer = armdsp.firmware();
-    sha.data(buffer.data(), buffer.size());
+    sha.input(buffer.data(), buffer.size());
     buffer = hitachidsp.firmware();
-    sha.data(buffer.data(), buffer.size());
+    sha.input(buffer.data(), buffer.size());
     buffer = necdsp.firmware();
-    sha.data(buffer.data(), buffer.size());
+    sha.input(buffer.data(), buffer.size());
     //finalize hash
     information.sha256 = sha.digest();
   }

@@ -52,22 +52,22 @@ struct shared_pointer {
     operator=(move(source));
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   shared_pointer(const shared_pointer<U>& source) {
     operator=<U>(source);
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   shared_pointer(shared_pointer<U>&& source) {
     operator=<U>(move(source));
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   shared_pointer(const shared_pointer_weak<U>& source) {
     operator=<U>(source);
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   shared_pointer(const shared_pointer<U>& source, T* pointer) {
     if((bool)source && (T*)source.manager->pointer == pointer) {
       manager = source.manager;
@@ -108,7 +108,7 @@ struct shared_pointer {
     return *this;
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   auto operator=(const shared_pointer<U>& source) -> shared_pointer& {
     if((uintptr)this != (uintptr)&source) {
       reset();
@@ -120,7 +120,7 @@ struct shared_pointer {
     return *this;
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   auto operator=(shared_pointer&& source) -> shared_pointer& {
     if((uintptr)this != (uintptr)&source) {
       reset();
@@ -130,7 +130,7 @@ struct shared_pointer {
     return *this;
   }
 
-  template<typename U, typename = enable_if<is_compatible<U>>>
+  template<typename U, typename = enable_if_t<is_compatible<U>::value>>
   auto operator=(const shared_pointer_weak<U>& source) -> shared_pointer& {
     reset();
     if((bool)source) {

@@ -132,7 +132,7 @@ auto bpspatch::apply() -> result {
 
   auto read = [&]() -> uint8_t {
     uint8_t data = modifyData[modifyOffset++];
-    modifyChecksum.data(data);
+    modifyChecksum.input(data);
     return data;
   };
 
@@ -150,7 +150,7 @@ auto bpspatch::apply() -> result {
 
   auto write = [&](uint8_t data) {
     targetData[outputOffset++] = data;
-    targetChecksum.data(data);
+    targetChecksum.input(data);
   };
 
   if(read() != 'B') return result::patch_invalid_header;
@@ -199,13 +199,13 @@ auto bpspatch::apply() -> result {
   uint32_t modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
   for(uint n = 0; n < 32; n += 8) modifySourceChecksum |= read() << n;
   for(uint n = 0; n < 32; n += 8) modifyTargetChecksum |= read() << n;
-  uint32_t checksum = modifyChecksum.value();
+  uint32_t checksum = modifyChecksum.digest().hex();
   for(uint n = 0; n < 32; n += 8) modifyModifyChecksum |= read() << n;
 
-  uint32_t sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).digest().hex();
 
   if(sourceChecksum != modifySourceChecksum) return result::source_checksum_invalid;
-  if(targetChecksum.value() != modifyTargetChecksum) return result::target_checksum_invalid;
+  if(targetChecksum.digest().hex() != modifyTargetChecksum) return result::target_checksum_invalid;
   if(checksum != modifyModifyChecksum) return result::patch_checksum_invalid;
 
   return result::success;

@@ -5,13 +5,19 @@ namespace nall { namespace Decode {
 //returns empty string on malformed content
 inline auto URL(const string& input) -> string {
   string output;
-  for(unsigned n = 0; n < input.size();) {
+  for(uint n = 0; n < input.size();) {
     char c = input[n];
+
+    //unreserved characters
     if(c >= 'A' && c <= 'Z') { output.append(c); n++; continue; }
     if(c >= 'a' && c <= 'z') { output.append(c); n++; continue; }
     if(c >= '0' && c <= '9') { output.append(c); n++; continue; }
     if(c == '-' || c == '_' || c == '.' || c == '~') { output.append(c); n++; continue; }
+
+    //special characters
     if(c == '+') { output.append(' '); n++; continue; }
+
+    //reserved characters
     if(c != '%' || n + 2 >= input.size()) return "";
     char hi = input[n + 1];
     char lo = input[n + 2];

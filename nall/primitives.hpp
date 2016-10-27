@@ -24,11 +24,11 @@ private:
 
 template<uint Bits> struct Natural {
   using type =
-    type_if<expression<Bits <=  8>,  uint8_t,
-    type_if<expression<Bits <= 16>, uint16_t,
-    type_if<expression<Bits <= 32>, uint32_t,
-    type_if<expression<Bits <= 64>, uint64_t,
-    void>>>>;
+    typename conditional<Bits <=  8,  uint8_t,
+    typename conditional<Bits <= 16, uint16_t,
+    typename conditional<Bits <= 32, uint32_t,
+    typename conditional<Bits <= 64, uint64_t,
+    void>::type>::type>::type>::type;
 
   enum : type { Mask = ~0ull >> (64 - Bits) };
 
@@ -127,11 +127,11 @@ private:
 
 template<uint Bits> struct Integer {
   using type =
-    type_if<expression<Bits <=  8>,  int8_t,
-    type_if<expression<Bits <= 16>, int16_t,
-    type_if<expression<Bits <= 32>, int32_t,
-    type_if<expression<Bits <= 64>, int64_t,
-    void>>>>;
+    typename conditional<Bits <=  8,  int8_t,
+    typename conditional<Bits <= 16, int16_t,
+    typename conditional<Bits <= 32, int32_t,
+    typename conditional<Bits <= 64, int64_t,
+    void>::type>::type>::type>::type;
   using utype = typename Natural<Bits>::type;
 
   enum : utype { Mask = ~0ull >> (64 - Bits), Sign = 1ull << (Bits - 1) };
@@ -231,10 +231,9 @@ private:
 
 template<uint Bits> struct Real {
   using type =
-    type_if<expression<Bits == 32>, float32_t,
-    type_if<expression<Bits == 64>, float64_t,
-  //type_if<expression<Bits == 80>, float80_t,
-    void>>;
+    typename conditional<Bits == 32, float32_t,
+    typename conditional<Bits == 64, float64_t,
+    void>::type>::type;
 
   inline Real() : data(0.0) {}
   template<typename T> inline Real(const T& value) : data((type)value) {}

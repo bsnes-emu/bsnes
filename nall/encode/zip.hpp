@@ -20,7 +20,7 @@ struct ZIP {
   //append file: append("path/file", data, size);
   auto append(string filename, const uint8_t* data = nullptr, unsigned size = 0u) -> void {
     filename.transform("\\", "/");
-    uint32_t checksum = Hash::CRC32(data, size).value();
+    uint32_t checksum = Hash::CRC32(data, size).digest().hex();
     directory.append({filename, checksum, size, fp.offset()});
 
     fp.writel(0x04034b50, 4);         //signature

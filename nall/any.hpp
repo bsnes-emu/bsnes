@@ -39,7 +39,7 @@ struct any {
   }
 
   template<typename T> auto operator=(const T& value) -> any& {
-    using auto_t = type_if<is_array<T>, typename remove_extent<typename add_const<T>::type>::type*, T>;
+    using auto_t = typename conditional<is_array<T>::value, typename remove_extent<typename add_const<T>::type>::type*, T>::type;
 
     if(type() == typeid(auto_t)) {
       static_cast<holder<auto_t>*>(container)->value = (auto_t)value;

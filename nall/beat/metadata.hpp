@@ -77,7 +77,7 @@ auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
 
   auto write = [&](uint8_t data) {
     targetFile.write(data);
-    checksum.data(data);
+    checksum.input(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -103,7 +103,7 @@ auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
   for(uint n = 0; n < targetLength; n++) write(metadata[n]);
   uint length = sourceFile.size() - sourceFile.offset() - 4;
   for(uint n = 0; n < length; n++) write(read());
-  uint32_t outputChecksum = checksum.value();
+  uint32_t outputChecksum = checksum.digest().hex();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   targetFile.close();

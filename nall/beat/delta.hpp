@@ -67,7 +67,7 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
 
   auto write = [&](uint8_t data) {
     modifyFile.write(data);
-    modifyChecksum.data(data);
+    modifyChecksum.input(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -102,7 +102,7 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
   //source tree creation
   for(uint offset = 0; offset < sourceSize; offset++) {
     uint16_t symbol = sourceData[offset + 0];
-    sourceChecksum.data(symbol);
+    sourceChecksum.input(symbol);
     if(offset < sourceSize - 1) symbol |= sourceData[offset + 1] << 8;
     Node *node = new Node;
     node->offset = offset;
@@ -198,10 +198,10 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
 
   targetReadFlush();
 
-  for(uint n = 0; n < 32; n += 8) write(sourceChecksum.value() >> n);
-  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
+  for(uint n = 0; n < 32; n += 8) write(sourceChecksum.digest().hex() >> n);
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).digest().hex();
   for(uint n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32_t outputChecksum = modifyChecksum.value();
+  uint32_t outputChecksum = modifyChecksum.digest().hex();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

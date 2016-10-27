@@ -1,43 +1,28 @@
 #pragma once
 
-#include <nall/range.hpp>
-#include <nall/string.hpp>
+#include <nall/hash/hash.hpp>
 
 namespace nall { namespace Hash {
 
-struct CRC64 {
-  CRC64() { reset(); }
-  CRC64(const void* values, uint size) : CRC64() { data(values, size); }
-  CRC64(const vector<uint8_t>& values) : CRC64() { data(values); }
-  CRC64(const string& values) : CRC64() { data(values); }
+struct CRC64 : Hash {
+  nallHash(CRC64)
 
-  auto reset() -> void {
+  auto reset() -> void override {
     checksum = ~0;
   }
 
-  auto data(uint8_t value) -> void {
+  auto input(uint8_t value) -> void override {
     checksum = (checksum >> 8) ^ table(checksum ^ value);
   }
 
-  auto data(const void* values, uint size) -> void {
-    auto p = (const uint8_t*)values;
-    while(size--) data(*p++);
-  }
-
-  auto data(const vector<uint8_t>& values) -> void {
-    for(auto value : values) data(value);
-  }
-
-  auto data(const string& values) -> void {
-    for(auto value : values) data(value);
+  auto output() const -> vector<uint8_t> {
+    vector<uint8_t> result;
+    for(auto n : rrange(8)) result.append(~checksum >> n * 8);
+    return result;
   }
 
   auto value() const -> uint64_t {
     return ~checksum;
-  }
-
-  inline auto digest() const -> string {
-    return hex(value(), 16L);
   }
 
 private:
@@ -59,7 +44,7 @@ private:
     return table[index];
   }
 
-  uint64_t checksum;
+  uint64_t checksum = 0;
 };
 
 }}

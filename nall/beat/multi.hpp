@@ -48,14 +48,14 @@ struct bpsmulti {
         for(uint n = 0; n < sp.size(); n++) {
           uint8_t byte = sp.read();
           if(identical && byte != dp.read()) identical = false;
-          cksum.data(byte);
+          cksum.input(byte);
         }
 
         if(identical) {
           writeNumber(MirrorFile | ((targetName.length() - 1) << 2));
           writeString(targetName);
           writeNumber(OriginSource);
-          writeChecksum(cksum.value());
+          writeChecksum(cksum.digest().hex());
         } else {
           writeNumber(ModifyFile | ((targetName.length() - 1) << 2));
           writeString(targetName);
@@ -83,12 +83,12 @@ struct bpsmulti {
         auto buffer = file::read({targetPath, targetName});
         writeNumber(buffer.size());
         for(auto& byte : buffer) write(byte);
-        writeChecksum(Hash::CRC32(buffer.data(), buffer.size()).value());
+        writeChecksum(Hash::CRC32(buffer.data(), buffer.size()).digest().hex());
       }
     }
 
     //checksum
-    writeChecksum(checksum.value());
+    writeChecksum(checksum.digest().hex());
     fp.close();
     return true;
   }
@@ -141,7 +141,7 @@ struct bpsmulti {
       }
     }
 
-    uint32_t cksum = checksum.value();
+    uint32_t cksum = checksum.digest().hex();
     if(read() != (uint8_t)(cksum >>  0)) return false;
     if(read() != (uint8_t)(cksum >>  8)) return false;
     if(read() != (uint8_t)(cksum >> 16)) return false;
@@ -171,7 +171,7 @@ protected:
 
   auto write(uint8_t data) -> void {
     fp.write(data);
-    checksum.data(data);
+    checksum.input(data);
   }
 
   auto writeNumber(uint64_t data) -> void {
@@ -202,7 +202,7 @@ protected:
   //apply() functions
   auto read() -> uint8_t {
     uint8_t data = fp.read();
-    checksum.data(data);
+    checksum.input(data);
     return data;
   }
 

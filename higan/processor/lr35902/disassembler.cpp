@@ -1,3 +1,7 @@
+static auto hex(uintmax value, long precision = 0, char padchar = '0') -> string {
+  return nall::hex(value, precision, padchar);
+}
+
 auto LR35902::disassemble(uint16 pc) -> string {
   char output[80];
   memset(output, ' ', sizeof output);

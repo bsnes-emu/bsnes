@@ -28,7 +28,6 @@ struct ID {
     Justifiers,
 
     Satellaview,
-    SuperDisc,
     S21FX,
   };};
 };

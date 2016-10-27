@@ -63,9 +63,9 @@ template<typename T> struct stringify;
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
 template<typename T> inline auto pad(const T& value, long precision = 0, char padchar = ' ') -> string;
-inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
-inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
-inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto hex(T value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto octal(T value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto binary(T value, long precision = 0, char padchar = '0') -> string;
 template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
 inline auto pointer(uintptr value, long precision = 0) -> string;
 
@@ -75,9 +75,9 @@ inline auto tokenize(string_vector& list, const char* s, const char* p) -> bool;
 
 //utility.hpp
 inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
-inline auto fromInteger(char* result, intmax value) -> char*;
-inline auto fromNatural(char* result, uintmax value) -> char*;
-inline auto fromReal(char* str, long double value) -> uint;
+template<typename T> inline auto fromInteger(char* result, T value) -> char*;
+template<typename T> inline auto fromNatural(char* result, T value) -> char*;
+template<typename T> inline auto fromReal(char* str, T value) -> uint;
 
 struct string {
   using type = string;
@@ -177,6 +177,10 @@ public:
   inline auto operator[](int) const -> const char&;
   inline auto operator()(int, char) const -> char;
   template<typename... P> inline auto assign(P&&...) -> type&;
+  template<typename T, typename... P> inline auto prepend(const T&, P&&...) -> type&;
+  template<typename... P> inline auto prepend(const nall::string_format&, P&&...) -> type&;
+  inline auto prepend() -> type&;
+  template<typename T> inline auto _prepend(const stringify<T>&) -> string&;
   template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
   template<typename... P> inline auto append(const nall::string_format&, P&&...) -> type&;
   inline auto append() -> type&;

@@ -84,9 +84,9 @@ template<typename T> auto pad(const T& value, long precision, char padchar) -> s
   return buffer;
 }
 
-auto hex(uintmax value, long precision, char padchar) -> string {
+template<typename T> auto hex(T value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 2);
+  buffer.resize(sizeof(T) * 2);
   char* p = buffer.get();
 
   uint size = 0;
@@ -101,9 +101,9 @@ auto hex(uintmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto octal(uintmax value, long precision, char padchar) -> string {
+template<typename T> auto octal(T value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 3);
+  buffer.resize(sizeof(T) * 3);
   char* p = buffer.get();
 
   uint size = 0;
@@ -117,9 +117,9 @@ auto octal(uintmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto binary(uintmax value, long precision, char padchar) -> string {
+template<typename T> auto binary(T value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 8);
+  buffer.resize(sizeof(T) * 8);
   char* p = buffer.get();
 
   uint size = 0;

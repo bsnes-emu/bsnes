@@ -7,3 +7,12 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <nall/xorg/guard.hpp>
+
+struct XDisplay {
+  XDisplay() { _display = XOpenDisplay(nullptr); }
+  ~XDisplay() { XCloseDisplay(_display); }
+  operator XlibDisplay*() const { return _display; }
+
+private:
+  XlibDisplay* _display;
+};

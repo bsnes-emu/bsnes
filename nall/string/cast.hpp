@@ -67,7 +67,7 @@ template<> struct stringify<signed long long> {
   char _data[2 + sizeof(signed long long) * 3];
 };
 
-#if INTMAX_BITS >= 128
+#if defined(__SIZEOF_INT128__)
 template<> struct stringify<int128_t> {
   stringify(int128_t source) { fromInteger(_data, source); }
   auto data() const -> const char* { return _data; }
@@ -120,7 +120,7 @@ template<> struct stringify<unsigned long long> {
   char _data[1 + sizeof(unsigned long long) * 3];
 };
 
-#if INTMAX_BITS >= 128
+#if defined(__SIZEOF_INT128__)
 template<> struct stringify<uint128_t> {
   stringify(uint128_t source) { fromNatural(_data, source); }
   auto data() const -> const char* { return _data; }

@@ -20,7 +20,7 @@ template<typename R, typename... P> struct function<auto (P...) -> R> {
   function(auto (*function)(P...) -> R) { callback = new global(function); }
   template<typename C> function(auto (C::*function)(P...) -> R, C* object) { callback = new member<C>(function, object); }
   template<typename C> function(auto (C::*function)(P...) const -> R, C* object) { callback = new member<C>((auto (C::*)(P...) -> R)function, object); }
-  template<typename L, typename = enable_if<is_compatible<L>>> function(const L& object) { callback = new lambda<L>(object); }
+  template<typename L, typename = enable_if_t<is_compatible<L>::value>> function(const L& object) { callback = new lambda<L>(object); }
   ~function() { if(callback) delete callback; }
 
   explicit operator bool() const { return callback; }

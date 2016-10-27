@@ -1,3 +1,7 @@
+static auto hex(uintmax value, long precision = 0, char padchar = '0') -> string {
+  return nall::hex(value, precision, padchar);
+}
+
 auto R65816::dreadb(uint24 addr) -> uint8 {
   if((addr & 0x40ffff) >= 0x2000 && (addr & 0x40ffff) <= 0x5fff) {
     //$00-3f|80-bf:2000-5fff

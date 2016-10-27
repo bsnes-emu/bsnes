@@ -59,7 +59,7 @@ auto bpslinear::create(const string& filename, const string& metadata) -> bool {
 
   auto write = [&](uint8_t data) {
     modifyFile.write(data);
-    modifyChecksum.data(data);
+    modifyChecksum.input(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -134,11 +134,11 @@ auto bpslinear::create(const string& filename, const string& metadata) -> bool {
 
   targetReadFlush();
 
-  uint32_t sourceChecksum = Hash::CRC32(sourceData, sourceSize).value();
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, sourceSize).digest().hex();
   for(uint n = 0; n < 32; n += 8) write(sourceChecksum >> n);
-  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).digest().hex();
   for(uint n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32_t outputChecksum = modifyChecksum.value();
+  uint32_t outputChecksum = modifyChecksum.digest().hex();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

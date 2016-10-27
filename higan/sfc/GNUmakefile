@@ -3,14 +3,13 @@ processors += r65816 spc700 arm gsu hg51b upd96050
 objects += sfc-interface sfc-system sfc-controller
 objects += sfc-cartridge sfc-memory
 objects += sfc-cpu sfc-smp sfc-dsp sfc-ppu
-objects += sfc-expansion sfc-satellaview sfc-superdisc
-objects += sfc-21fx
+objects += sfc-expansion sfc-satellaview sfc-21fx
 objects += sfc-icd2 sfc-mcc sfc-nss sfc-event
 objects += sfc-sa1 sfc-superfx
 objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 objects += sfc-epsonrtc sfc-sharprtc
-objects += sfc-spc7110 sfc-sdd1 sfc-obc1
-objects += sfc-msu1
+objects += sfc-spc7110 sfc-sdd1
+objects += sfc-obc1 sfc-msu1
 objects += sfc-bsmemory sfc-sufamiturbo
 
 obj/sfc-interface.o:   sfc/interface/interface.cpp $(call rwildcard,sfc/interface)
@@ -26,7 +25,6 @@ obj/sfc-ppu.o:         sfc/ppu/ppu.cpp $(call rwildcard,sfc/ppu/)
 
 obj/sfc-expansion.o:   sfc/expansion/expansion.cpp $(call rwildcard,sfc/expansion/)
 obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp $(call rwildcard,sfc/expansion/satellaview/)
-obj/sfc-superdisc.o:   sfc/expansion/superdisc/superdisc.cpp $(call rwildcard,sfc/expansion/superdisc/)
 obj/sfc-21fx.o:        sfc/expansion/21fx/21fx.cpp $(call rwildcard,sfc/expansion/21fx/)
 
 obj/sfc-icd2.o:        sfc/coprocessor/icd2/icd2.cpp $(call rwildcard,sfc/coprocessor/icd2/)

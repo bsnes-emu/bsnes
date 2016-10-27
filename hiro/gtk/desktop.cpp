@@ -17,26 +17,24 @@ auto pDesktop::workspace() -> Geometry {
   #endif
 
   #if defined(DISPLAY_XORG)
-  XlibDisplay* display = XOpenDisplay(nullptr);
+  auto display = XOpenDisplay(nullptr);
   int screen = DefaultScreen(display);
-
-  static Atom atom = XlibNone;
-  if(atom == XlibNone) atom = XInternAtom(display, "_NET_WORKAREA", True);
 
   int format;
   unsigned char* data = nullptr;
   unsigned long items, after;
-  Atom returnAtom;
+  XlibAtom returnAtom;
 
   int result = XGetWindowProperty(
-    display, RootWindow(display, screen), atom, 0, 4, False, XA_CARDINAL, &returnAtom, &format, &items, &after, &data
+    display, RootWindow(display, screen), XInternAtom(display, "_NET_WORKAREA", XlibTrue), 0, 4, XlibFalse,
+    XInternAtom(display, "CARDINAL", XlibTrue), &returnAtom, &format, &items, &after, &data
   );
 
   XCloseDisplay(display);
 
-  if(result == Success && returnAtom == XA_CARDINAL && format == 32 && items == 4) {
-    unsigned long *workarea = (unsigned long*)data;
-    return {(signed)workarea[0], (signed)workarea[1], (signed)workarea[2], (signed)workarea[3]};
+  if(result == Success && returnAtom == XInternAtom(display, "CARDINAL", XlibTrue) && format == 32 && items == 4) {
+    unsigned long* workarea = (unsigned long*)data;
+    return {(int)workarea[0], (int)workarea[1], (int)workarea[2], (int)workarea[3]};
   }
 
   return {

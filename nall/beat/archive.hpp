@@ -42,14 +42,14 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
       auto size = input.size();
       beat.writevu(size);
       while(size--) beat.write(input.read());
-      beat.writel(input.checksum.value(), 4);
+      beat.writel(input.checksum.digest().hex(), 4);
     } else {
       beat.writevu(0);
       beat.writel(0x00000000, 4);
     }
   }
 
-  beat.writel(beat.checksum.value(), 4);
+  beat.writel(beat.checksum.digest().hex(), 4);
   return true;
 }
 
@@ -82,11 +82,11 @@ auto Archive::unpack(const string& beatname, const string& pathname) -> bool {
 
       auto size = beat.readvu();
       while(size--) output.write(beat.read());
-      if(beat.readl(4) != output.checksum.value()) return false;
+      if(beat.readl(4) != output.checksum.digest().hex()) return false;
     }
   }
 
-  uint32_t checksum = beat.checksum.value();
+  uint32_t checksum = beat.checksum.digest().hex();
   return beat.readl(4) == checksum;
 }
 
@@ -113,7 +113,7 @@ auto Archive::extract(const string& beatname, const string& filename) -> vector<
     result.resize(size);
     beat.checksum.reset();
     for(auto n : range(size)) result[n] = beat.read();
-    uint32_t checksum = beat.checksum.value();
+    uint32_t checksum = beat.checksum.digest().hex();
     if(beat.readl(4) != checksum) return {};
     return result;
   }

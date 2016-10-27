@@ -27,6 +27,12 @@ namespace nall { namespace memory {
 
   template<typename T> inline auto assign(T* target) -> void {}
   template<typename T, typename U, typename... P> inline auto assign(T* target, const U& value, P&&... p) -> void;
+
+  template<uint size, typename T = uint64_t> inline auto readl(const void* source) -> T;
+  template<uint size, typename T = uint64_t> inline auto readm(const void* source) -> T;
+
+  template<uint size, typename T = uint64_t> inline auto writel(void* target, T data) -> void;
+  template<uint size, typename T = uint64_t> inline auto writem(void* target, T data) -> void;
 }}
 
 namespace nall {
@@ -128,6 +134,30 @@ template<typename T, typename U, typename... P>
 auto memory::assign(T* target, const U& value, P&&... p) -> void {
   *target++ = value;
   assign(target, forward<P>(p)...);
+}
+
+template<uint size, typename T> auto memory::readl(const void* source) -> T {
+  auto p = (const uint8_t*)source;
+  T data = 0;
+  for(uint n = 0; n < size; n++) data |= T(*p++) << n * 8;
+  return data;
+}
+
+template<uint size, typename T> auto memory::readm(const void* source) -> T {
+  auto p = (const uint8_t*)source;
+  T data = 0;
+  for(int n = size - 1; n >= 0; n--) data |= T(*p++) << n * 8;
+  return data;
+}
+
+template<uint size, typename T> auto memory::writel(void* target, T data) -> void {
+  auto p = (uint8_t*)target;
+  for(uint n = 0; n < size; n++) *p++ = data >> n * 8;
+}
+
+template<uint size, typename T> auto memory::writem(void* target, T data) -> void {
+  auto p = (uint8_t*)target;
+  for(int n = size - 1; n >= 0; n--) *p++ = data >> n * 8;
 }
 
 }

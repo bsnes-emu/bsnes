@@ -52,7 +52,6 @@ auto Peripherals::connect(uint port, uint device) -> void {
     switch(device) { default:
     case ID::Device::None:        expansionPort = new Expansion; break;
     case ID::Device::Satellaview: expansionPort = new Satellaview; break;
-    case ID::Device::SuperDisc:   expansionPort = new SuperDisc; break;
     case ID::Device::S21FX:       expansionPort = new S21FX; break;
     }
   }

@@ -87,7 +87,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(state.sections++) state.output.append("</section>");
       state.output.append("<section>");
     }
-    auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L);
+    auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
     state.output.append("<header id=\"", name, "\">", data);
@@ -100,7 +100,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
 
   //header
   else if(auto depth = count(block, '=')) {
-    auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L);
+    auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
     if(depth <= 6) {
@@ -121,7 +121,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(auto depth = count(line, '-')) {
         while(level < depth) level++, state.output.append("<ul>\n");
         while(level > depth) level--, state.output.append("</ul>\n");
-        auto content = slice(line, depth + 1).split("::", 1L);
+        auto content = slice(line, depth + 1).split("::", 1L).strip();
         auto data = markup(content[0]);
         auto name = escape(content(1, data.hash()));
         state.output.append("<li><a href=\"#", name, "\">", data, "</a></li>\n");
@@ -203,69 +203,6 @@ auto DML::escape(const string& text) -> string {
   }
   return output;
 }
-
-/* //revision 0.03 parser
-auto DML::markup(const string& text) -> string {
-  string output;
-
-  char match = 0;
-  uint offset = 0;
-  for(uint n = 0; n < text.size();) {
-    char a = n ? text[n - 1] : 0;
-    char b = text[n];
-    char c = text[n++ + 1];
-
-    bool d = !a || a == ' ' || a == '\t' || a == '\r' || a == '\n';  //is previous character whitespace?
-    bool e = !c || c == ' ' || c == '\t' || c == '\r' || c == '\n';  //is next character whitespace?
-    bool f = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');  //is next character alphanumeric?
-
-    if(!match && d && !e) {
-      if(b == '*') { match = '*'; offset = n; continue; }
-      if(b == '/') { match = '/'; offset = n; continue; }
-      if(b == '_') { match = '_'; offset = n; continue; }
-      if(b == '~') { match = '~'; offset = n; continue; }
-      if(b == '|') { match = '|'; offset = n; continue; }
-      if(b == '[') { match = ']'; offset = n; continue; }
-      if(b == '{') { match = '}'; offset = n; continue; }
-    }
-
-    //if we reach the end of the string without a match; force a match so the content is still output
-    if(match && b != match && !c) { b = match; f = 0; n++; }
-
-    if(match && b == match && !f) {
-      match = 0;
-      auto content = slice(text, offset, n - offset - 1);
-      if(b == '*') { output.append("<strong>", escape(content), "</strong>"); continue; }
-      if(b == '/') { output.append("<em>", escape(content), "</em>"); continue; }
-      if(b == '_') { output.append("<ins>", escape(content), "</ins>"); continue; }
-      if(b == '~') { output.append("<del>", escape(content), "</del>"); continue; }
-      if(b == '|') { output.append("<code>", escape(content), "</code>"); continue; }
-      if(b == ']') {
-        auto p = content.split(" => ", 1L);
-        p[0].replace("@/", settings.host);
-        output.append("<a href=\"", escape(p[0]), "\">", escape(p(1, p[0])), "</a>");
-        continue;
-      }
-      if(b == '}') {
-        auto p = content.split(" => ", 1L);
-        p[0].replace("@/", settings.host);
-        output.append("<img src=\"", escape(p[0]), "\" alt=\"", escape(p(1, "")), "\">");
-        continue;
-      }
-      continue;
-    }
-
-    if(match) continue;
-    if(b == '\\' && c) { output.append(c); n++; continue; }  //character escaping
-    if(b == '&') { output.append("&amp;"); continue; }       //entity escaping
-    if(b == '<') { output.append("&lt;"); continue; }        //...
-    if(b == '>') { output.append("&gt;"); continue; }        //...
-    if(b == '"') { output.append("&quot;"); continue; }      //...
-    output.append(b);
-  }
-
-  return output;
-} */
 
 auto DML::markup(const string& s) -> string {
   string t;

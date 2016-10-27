@@ -58,8 +58,8 @@ static_assert(sizeof(uint16_t) == 2, "int16_t is not of the correct size");
 static_assert(sizeof(uint32_t) == 4, "int32_t is not of the correct size");
 static_assert(sizeof(uint64_t) == 8, "int64_t is not of the correct size");
 
-static_assert(sizeof(float)       >=  4, "float32_t is not of the correct size");
-static_assert(sizeof(double)      >=  8, "float64_t is not of the correct size");
+static_assert(sizeof(float)  >= 4, "float32_t is not of the correct size");
+static_assert(sizeof(double) >= 8, "float64_t is not of the correct size");
 //static_assert(sizeof(long double) >= 10, "float80_t is not of the correct size");
 
 using uint = unsigned int;

@@ -92,11 +92,11 @@ auto slice(string_view self, int offset, int length) -> string {
   return result;
 }
 
-auto fromInteger(char* result, intmax value) -> char* {
+template<typename T> auto fromInteger(char* result, T value) -> char* {
   bool negative = value < 0;
   if(negative) value = -value;
 
-  char buffer[64];
+  char buffer[1 + sizeof(T) * 3];
   uint size = 0;
 
   do {
@@ -111,8 +111,8 @@ auto fromInteger(char* result, intmax value) -> char* {
   return result;
 }
 
-auto fromNatural(char* result, uintmax value) -> char* {
-  char buffer[64];
+template<typename T> auto fromNatural(char* result, T value) -> char* {
+  char buffer[1 + sizeof(T) * 3];
   uint size = 0;
 
   do {
@@ -129,13 +129,13 @@ auto fromNatural(char* result, uintmax value) -> char* {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-auto fromReal(char* result, long double value) -> uint {
+template<typename T> auto fromReal(char* result, T value) -> uint {
   char buffer[256];
   #ifdef _WIN32
   //Windows C-runtime does not support long double via sprintf()
   sprintf(buffer, "%f", (double)value);
   #else
-  sprintf(buffer, "%Lf", value);
+  sprintf(buffer, "%Lf", (long double)value);
   #endif
 
   //remove excess 0's in fraction (2.500000 -> 2.5)
