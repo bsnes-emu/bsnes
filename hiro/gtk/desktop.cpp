@@ -25,18 +25,20 @@ auto pDesktop::workspace() -> Geometry {
   unsigned long items, after;
   XlibAtom returnAtom;
 
+  XlibAtom netWorkarea = XInternAtom(display, "_NET_WORKAREA", XlibTrue);
   int result = XGetWindowProperty(
-    display, RootWindow(display, screen), XInternAtom(display, "_NET_WORKAREA", XlibTrue), 0, 4, XlibFalse,
+    display, RootWindow(display, screen), netWorkarea, 0, 4, XlibFalse,
     XInternAtom(display, "CARDINAL", XlibTrue), &returnAtom, &format, &items, &after, &data
   );
 
-  XCloseDisplay(display);
-
-  if(result == Success && returnAtom == XInternAtom(display, "CARDINAL", XlibTrue) && format == 32 && items == 4) {
+  XlibAtom cardinal = XInternAtom(display, "CARDINAL", XlibTrue);
+  if(result == Success && returnAtom == cardinal && format == 32 && items == 4) {
     unsigned long* workarea = (unsigned long*)data;
+    XCloseDisplay(display);
     return {(int)workarea[0], (int)workarea[1], (int)workarea[2], (int)workarea[3]};
   }
 
+  XCloseDisplay(display);
   return {
     0, 0,
     gdk_screen_get_width(gdk_screen_get_default()),
