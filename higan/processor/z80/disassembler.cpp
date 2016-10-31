@@ -67,6 +67,7 @@ auto Z80::disassemble(uint16 pc) -> string {
 #define SP  "sp"
 #define PC  "pc"
 
+#define IC "(c)"
 #define IBC "(bc)"
 #define IDE "(de)"
 #define IHL string{"(", HL, displace(), ")"}
@@ -113,6 +114,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x0d, "dec ", C)
   op(0x0e, "ld  ", C, N)
   op(0x0f, "rrca")
+  op(0x10, "djnz", R)
   op(0x11, "ld  ", DE, NN)
   op(0x12, "ld  ", IDE, A)
   op(0x13, "inc ", DE)
@@ -135,6 +137,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x24, "inc ", H)
   op(0x25, "dec ", H)
   op(0x26, "ld  ", H, N)
+  op(0x27, "daa ")
   op(0x28, "jr  ", "z", R)
   op(0x29, "add ", HL, HL)
   op(0x2a, "ld  ", HL, INN)
@@ -287,25 +290,72 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0xbd, "cp  ", A, L)
   op(0xbe, "cp  ", A, IHL)
   op(0xbf, "cp  ", A, A)
+  op(0xc0, "ret ", "nz")
+  op(0xc1, "pop ", BC)
   op(0xc2, "jp  ", "nz", NN)
   op(0xc3, "jp  ", NN)
+  op(0xc4, "call", "nz", NN)
+  op(0xc5, "push", BC)
+  op(0xc6, "add ", A, N)
+  op(0xc7, "rst ", "0")
+  op(0xc8, "ret ", "z")
+  op(0xc9, "ret ")
   op(0xca, "jp  ", "z", NN)
   op(0xcb, "cb: ")
+  op(0xcc, "call", "z", NN)
+  op(0xcd, "call", NN)
+  op(0xce, "adc ", A, N)
+  op(0xcf, "rst ", "1")
+  op(0xd0, "ret ", "nc")
+  op(0xd1, "pop ", DE)
   op(0xd2, "jp  ", "nc", NN)
+  op(0xd3, "out ", IN, A)
+  op(0xd4, "call", "nc", NN)
+  op(0xd5, "push", DE)
+  op(0xd6, "sub ", A, N)
+  op(0xd7, "rst ", "2")
+  op(0xd8, "ret ", "c")
+  op(0xd9, "exx ")
   op(0xda, "jp  ", "c", NN)
   op(0xdb, "in  ", A, IN)
+  op(0xdc, "call", "c", NN)
+  op(0xdd, "ix: ")
+  op(0xde, "sbc ", A, N)
+  op(0xdf, "rst ", "3")
+  op(0xe0, "ret ", "po")
+  op(0xe1, "pop ", HL)
   op(0xe2, "jp  ", "po", NN)
+  op(0xe4, "call", "po", NN)
+  op(0xe5, "push", HL)
+  op(0xe6, "and ", A, N)
+  op(0xe7, "rst ", "4")
+  op(0xe8, "ret ", "pe")
+  op(0xe9, "jp  ", HL)  //officially jp (hl); but as read is not indirect, use jp hl
   op(0xea, "jp  ", "pe", NN)
   op(0xeb, "ex  ", DE, _HL)
+  op(0xec, "call", "pe", NN)
   op(0xed, "ed: ")
+  op(0xee, "xor ", A, N)
+  op(0xef, "rst ", "5")
+  op(0xf0, "ret ", "p")
+  op(0xf1, "pop ", AF)
   op(0xf2, "jp  ", "p", NN)
   op(0xf3, "di  ")
+  op(0xf4, "call", "p", NN)
+  op(0xf5, "push", AF)
+  op(0xf6, "or  ", A, N)
+  op(0xf7, "rst ", "6")
+  op(0xf8, "ret ", "m")
+  op(0xf9, "ld  ", SP, HL)
   op(0xfa, "jp  ", "m", NN)
   op(0xfb, "ei  ")
+  op(0xfc, "call", "m", NN)
+  op(0xfd, "iy: ")
   op(0xfe, "cp  ", A, N)
+  op(0xff, "rst ", "7")
   }
 
-  return {"???: ", hex(code, 2L)};
+  unreachable;
 }
 
 auto Z80::disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string {
@@ -587,6 +637,7 @@ auto Z80::disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0xfe, "set ", "7,", IHL)
   op(0xff, "set ", "7,", A)
   }
+
   unreachable;
 }
 
@@ -612,9 +663,46 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
   };
 
   switch(code) {
+  op(0x40, "in  ", B, IC)
+  op(0x41, "out ", IC, B)
+  op(0x44, "neg ")
+  op(0x45, "retn")
   op(0x46, "im  ", "0")
+  op(0x48, "in  ", C, IC)
+  op(0x49, "out ", IC, C)
+  op(0x4c, "neg ")
+  op(0x4d, "reti")
+  op(0x4e, "im  ", "0")
+  op(0x50, "in  ", D, IC)
+  op(0x51, "out ", IC, D)
+  op(0x54, "neg ")
+  op(0x55, "retn")
   op(0x56, "im  ", "1")
+  op(0x58, "in  ", E, IC)
+  op(0x59, "out ", IC, E)
+  op(0x5c, "neg ")
+  op(0x5d, "reti")
   op(0x5e, "im  ", "2")
+  op(0x60, "in  ", H, IC)
+  op(0x61, "out ", IC, H)
+  op(0x64, "neg ")
+  op(0x65, "retn")
+  op(0x66, "im  ", "0")
+  op(0x68, "in  ", L, IC)
+  op(0x69, "out ", IC, L)
+  op(0x6c, "neg ")
+  op(0x6d, "reti")
+  op(0x6e, "im  ", "0")
+  op(0x70, "in  ", F, IC)
+  op(0x71, "out ", IC, F)
+  op(0x74, "neg ")
+  op(0x75, "retn")
+  op(0x76, "im  ", "1")
+  op(0x78, "in  ", A, IC)
+  op(0x79, "out ", IC, A)
+  op(0x7c, "neg ")
+  op(0x7d, "reti")
+  op(0x7e, "im  ", "2")
   op(0xa0, "ldi ")
   op(0xa1, "cpi ")
   op(0xa2, "ini ")
@@ -669,6 +757,7 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
 #undef SP
 #undef PC
 
+#undef IC
 #undef IBC
 #undef IDE
 #undef IHL

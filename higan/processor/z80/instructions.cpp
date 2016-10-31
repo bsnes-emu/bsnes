@@ -261,12 +261,20 @@ auto Z80::instructionADC_a_irr(uint16& x) -> void {
   A = ADD(A, read(displace(x)), CF);
 }
 
+auto Z80::instructionADC_a_n() -> void {
+  A = ADD(A, operand(), CF);
+}
+
 auto Z80::instructionADC_a_r(uint8& x) -> void {
   A = ADD(A, x, CF);
 }
 
 auto Z80::instructionADD_a_irr(uint16& x) -> void {
   A = ADD(A, read(displace(x)));
+}
+
+auto Z80::instructionADD_a_n() -> void {
+  A = ADD(A, operand());
 }
 
 auto Z80::instructionADD_a_r(uint8& x) -> void {
@@ -284,6 +292,10 @@ auto Z80::instructionAND_a_irr(uint16& x) -> void {
   A = AND(A, read(displace(x)));
 }
 
+auto Z80::instructionAND_a_n() -> void {
+  A = AND(A, operand());
+}
+
 auto Z80::instructionAND_a_r(uint8& x) -> void {
   A = AND(A, x);
 }
@@ -294,6 +306,21 @@ auto Z80::instructionBIT_o_irr(uint3 bit, uint16& x) -> void {
 
 auto Z80::instructionBIT_o_r(uint3 bit, uint8& x) -> void {
   BIT(bit, x);
+}
+
+auto Z80::instructionCALL_c_nn(bool c) -> void {
+  auto addr = operands();
+  if(!c) return;
+  wait(1);
+  push(PC);
+  PC = addr;
+}
+
+auto Z80::instructionCALL_nn() -> void {
+  auto addr = operands();
+  wait(1);
+  push(PC);
+  PC = addr;
 }
 
 auto Z80::instructionCCF() -> void {
@@ -330,9 +357,9 @@ auto Z80::instructionCPDR() -> void {
 
 auto Z80::instructionCPI() -> void {
   auto data = read(_HL++);
+  wait(5);
   SUB(A, data);
   VF = --BC > 0;
-  wait(5);
 }
 
 auto Z80::instructionCPIR() -> void {
@@ -349,6 +376,10 @@ auto Z80::instructionCPL() -> void {
   XF = A.bit(3);
   HF = 1;
   YF = A.bit(5);
+}
+
+auto Z80::instructionDAA() -> void {
+  //todo: implement decimal adjust
 }
 
 auto Z80::instructionDEC_irr(uint16& x) -> void {
@@ -372,6 +403,14 @@ auto Z80::instructionDI() -> void {
   r.iff2 = 0;
 }
 
+auto Z80::instructionDJNZ_e() -> void {
+  wait(1);
+  auto e = operand();
+  if(!--B) return;
+  wait(5);
+  PC += (int8)e;
+}
+
 auto Z80::instructionEI() -> void {
   r.iff1 = 1;
   r.iff2 = 1;
@@ -381,6 +420,12 @@ auto Z80::instructionEX_rr_rr(uint16& x, uint16& y) -> void {
   auto z = x;
   x = y;
   y = z;
+}
+
+auto Z80::instructionEXX() -> void {
+  swap(BC, BC_);
+  swap(DE, DE_);
+  swap(_HL, HL_);
 }
 
 auto Z80::instructionHALT() -> void {
@@ -394,6 +439,10 @@ auto Z80::instructionIM_o(uint2 code) -> void {
 
 auto Z80::instructionIN_a_in() -> void {
   A = in(operand());
+}
+
+auto Z80::instructionIN_r_ic(uint8& x) -> void {
+  x = in(C);
 }
 
 auto Z80::instructionINC_irr(uint16& x) -> void {
@@ -412,13 +461,12 @@ auto Z80::instructionINC_rr(uint16& x) -> void {
   x++;
 }
 
-//note: should be T(4,5,3,4); is instead T(4,4,4,4)
 auto Z80::instructionIND() -> void {
+  wait(1);
   auto data = in(C);
   write(_HL--, data);
   NF = 0;
-  ZF = --BC > 0;
-  wait(4);
+  ZF = --B > 0;
 }
 
 auto Z80::instructionINDR() -> void {
@@ -428,13 +476,12 @@ auto Z80::instructionINDR() -> void {
   PC -= 2;
 }
 
-//note: should be T(4,5,3,4); is instead T(4,4,4,4)
 auto Z80::instructionINI() -> void {
+  wait(1);
   auto data = in(C);
   write(_HL++, data);
   NF = 0;
-  ZF = --BC > 0;
-  wait(4);
+  ZF = --B > 0;
 }
 
 auto Z80::instructionINIR() -> void {
@@ -447,6 +494,10 @@ auto Z80::instructionINIR() -> void {
 auto Z80::instructionJP_c_nn(bool c) -> void {
   auto pc = operands();
   if(c) r.pc = pc;
+}
+
+auto Z80::instructionJP_rr(uint16& x) -> void {
+  PC = x;
 }
 
 auto Z80::instructionJR_c_e(bool c) -> void {
@@ -507,6 +558,11 @@ auto Z80::instructionLD_rr_nn(uint16& x) -> void {
   x = operands();
 }
 
+auto Z80::instructionLD_sp_rr(uint16& x) -> void {
+  wait(2);
+  SP = x;
+}
+
 auto Z80::instructionLDD() -> void {
   auto data = read(_HL--);
   write(DE--, data);
@@ -539,11 +595,19 @@ auto Z80::instructionLDIR() -> void {
   PC -= 2;
 }
 
+auto Z80::instructionNEG() -> void {
+  A = SUB(0, A);
+}
+
 auto Z80::instructionNOP() -> void {
 }
 
 auto Z80::instructionOR_a_irr(uint16& x) -> void {
   A = OR(A, read(displace(x)));
+}
+
+auto Z80::instructionOR_a_n() -> void {
+  A = OR(A, operand());
 }
 
 auto Z80::instructionOR_a_r(uint8& x) -> void {
@@ -564,20 +628,38 @@ auto Z80::instructionOTIR() -> void {
   PC -= 2;
 }
 
-//note: should be T(4,5,3,4); instead is T(4,4,4,4)
+auto Z80::instructionOUT_ic_r(uint8& x) -> void {
+  out(C, x);
+}
+
+auto Z80::instructionOUT_n_a() -> void {
+  auto addr = operand();
+  out(addr, A);
+}
+
 auto Z80::instructionOUTD() -> void {
+  wait(1);
   auto data = read(_HL--);
   out(C, data);
   NF = 1;
-  ZF = --BC > 0;
+  ZF = --B > 0;
 }
 
-//note: should be T(4,5,3,4); instead is T(4,4,4,4)
 auto Z80::instructionOUTI() -> void {
+  wait(1);
   auto data = read(_HL++);
   out(C, data);
   NF = 1;
-  ZF = --BC > 0;
+  ZF = --B > 0;
+}
+
+auto Z80::instructionPOP_rr(uint16& x) -> void {
+  x = pop();
+}
+
+auto Z80::instructionPUSH_rr(uint16& x) -> void {
+  wait(1);
+  push(x);
 }
 
 auto Z80::instructionRES_o_irr(uint3 bit, uint16& x) -> void {
@@ -587,6 +669,27 @@ auto Z80::instructionRES_o_irr(uint3 bit, uint16& x) -> void {
 
 auto Z80::instructionRES_o_r(uint3 bit, uint8& x) -> void {
   x = RES(bit, x);
+}
+
+auto Z80::instructionRET() -> void {
+  wait(1);
+  PC = pop();
+}
+
+auto Z80::instructionRET_c(bool c) -> void {
+  wait(1);
+  if(!c) return;
+  PC = pop();
+}
+
+auto Z80::instructionRETI() -> void {
+  PC = pop();
+  //todo: there's more to RETI than just PC restore ...
+}
+
+auto Z80::instructionRETN() -> void {
+  PC = pop();
+  r.iff1 = r.iff2;
 }
 
 auto Z80::instructionRL_irr(uint16& x) -> void {
@@ -669,8 +772,18 @@ auto Z80::instructionRRCA() -> void {
   YF = A.bit(5);
 }
 
+auto Z80::instructionRST_o(uint3 vector) -> void {
+  wait(1);
+  push(PC);
+  PC = vector << 3;
+}
+
 auto Z80::instructionSBC_a_irr(uint16& x) -> void {
   A = SUB(A, read(displace(x)), CF);
+}
+
+auto Z80::instructionSBC_a_n() -> void {
+  A = SUB(A, operand(), CF);
 }
 
 auto Z80::instructionSBC_a_r(uint8& x) -> void {
@@ -732,12 +845,20 @@ auto Z80::instructionSUB_a_irr(uint16& x) -> void {
   A = SUB(A, read(displace(x)));
 }
 
+auto Z80::instructionSUB_a_n() -> void {
+  A = SUB(A, operand());
+}
+
 auto Z80::instructionSUB_a_r(uint8& x) -> void {
   A = SUB(A, x);
 }
 
 auto Z80::instructionXOR_a_irr(uint16& x) -> void {
   A = XOR(A, read(displace(x)));
+}
+
+auto Z80::instructionXOR_a_n() -> void {
+  A = XOR(A, operand());
 }
 
 auto Z80::instructionXOR_a_r(uint8& x) -> void {

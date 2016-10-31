@@ -17,6 +17,16 @@ auto Z80::operands() -> uint16 {
   return data | operand() << 8;
 }
 
+auto Z80::push(uint16 x) -> void {
+  write(--SP, x >> 8);
+  write(--SP, x >> 0);
+}
+
+auto Z80::pop() -> uint16 {
+  uint16 data = read(SP++) << 0;
+  return data | read(SP++) << 8;
+}
+
 auto Z80::displace(uint16& x) -> uint16 {
   if(&x != &r.ix.word && &x != &r.iy.word) return x;
   auto d = read(x);

@@ -25,6 +25,8 @@ struct Z80 {
   auto opcode() -> uint8;
   auto operand() -> uint8;
   auto operands() -> uint16;
+  auto push(uint16) -> void;
+  auto pop() -> uint16;
   auto displace(uint16&) -> uint16;
   auto read(uint16 addr) -> uint8;
   auto write(uint16 addr, uint8 data) -> void;
@@ -59,14 +61,19 @@ struct Z80 {
   auto XOR(uint8, uint8) -> uint8;
 
   auto instructionADC_a_irr(uint16&) -> void;
+  auto instructionADC_a_n() -> void;
   auto instructionADC_a_r(uint8&) -> void;
   auto instructionADD_a_irr(uint16&) -> void;
+  auto instructionADD_a_n() -> void;
   auto instructionADD_a_r(uint8&) -> void;
   auto instructionADD_rr_rr(uint16&, uint16&) -> void;
   auto instructionAND_a_irr(uint16&) -> void;
+  auto instructionAND_a_n() -> void;
   auto instructionAND_a_r(uint8&) -> void;
   auto instructionBIT_o_irr(uint3, uint16&) -> void;
   auto instructionBIT_o_r(uint3, uint8&) -> void;
+  auto instructionCALL_c_nn(bool c) -> void;
+  auto instructionCALL_nn() -> void;
   auto instructionCCF() -> void;
   auto instructionCP_a_irr(uint16& x) -> void;
   auto instructionCP_a_n() -> void;
@@ -76,15 +83,19 @@ struct Z80 {
   auto instructionCPI() -> void;
   auto instructionCPIR() -> void;
   auto instructionCPL() -> void;
+  auto instructionDAA() -> void;
   auto instructionDEC_irr(uint16&) -> void;
   auto instructionDEC_r(uint8&) -> void;
   auto instructionDEC_rr(uint16&) -> void;
   auto instructionDI() -> void;
+  auto instructionDJNZ_e() -> void;
   auto instructionEI() -> void;
   auto instructionEX_rr_rr(uint16&, uint16&) -> void;
+  auto instructionEXX() -> void;
   auto instructionHALT() -> void;
   auto instructionIM_o(uint2) -> void;
   auto instructionIN_a_in() -> void;
+  auto instructionIN_r_ic(uint8&) -> void;
   auto instructionINC_irr(uint16&) -> void;
   auto instructionINC_r(uint8&) -> void;
   auto instructionINC_rr(uint16&) -> void;
@@ -93,6 +104,7 @@ struct Z80 {
   auto instructionINI() -> void;
   auto instructionINIR() -> void;
   auto instructionJP_c_nn(bool) -> void;
+  auto instructionJP_rr(uint16&) -> void;
   auto instructionJR_c_e(bool) -> void;
   auto instructionLD_a_inn() -> void;
   auto instructionLD_a_irr(uint16& x) -> void;
@@ -106,19 +118,30 @@ struct Z80 {
   auto instructionLD_r_r(uint8&, uint8&) -> void;
   auto instructionLD_rr_inn(uint16&) -> void;
   auto instructionLD_rr_nn(uint16&) -> void;
+  auto instructionLD_sp_rr(uint16&) -> void;
   auto instructionLDD() -> void;
   auto instructionLDDR() -> void;
   auto instructionLDI() -> void;
   auto instructionLDIR() -> void;
+  auto instructionNEG() -> void;
   auto instructionNOP() -> void;
   auto instructionOR_a_irr(uint16&) -> void;
+  auto instructionOR_a_n() -> void;
   auto instructionOR_a_r(uint8&) -> void;
   auto instructionOTDR() -> void;
   auto instructionOTIR() -> void;
+  auto instructionOUT_ic_r(uint8&) -> void;
+  auto instructionOUT_n_a() -> void;
   auto instructionOUTD() -> void;
   auto instructionOUTI() -> void;
+  auto instructionPOP_rr(uint16&) -> void;
+  auto instructionPUSH_rr(uint16&) -> void;
   auto instructionRES_o_irr(uint3, uint16&) -> void;
   auto instructionRES_o_r(uint3, uint8&) -> void;
+  auto instructionRET() -> void;
+  auto instructionRET_c(bool c) -> void;
+  auto instructionRETI() -> void;
+  auto instructionRETN() -> void;
   auto instructionRL_irr(uint16&) -> void;
   auto instructionRL_r(uint8&) -> void;
   auto instructionRLA() -> void;
@@ -131,7 +154,9 @@ struct Z80 {
   auto instructionRRC_irr(uint16&) -> void;
   auto instructionRRC_r(uint8&) -> void;
   auto instructionRRCA() -> void;
+  auto instructionRST_o(uint3) -> void;
   auto instructionSBC_a_irr(uint16&) -> void;
+  auto instructionSBC_a_n() -> void;
   auto instructionSBC_a_r(uint8&) -> void;
   auto instructionSCF() -> void;
   auto instructionSET_o_irr(uint3, uint16&) -> void;
@@ -145,8 +170,10 @@ struct Z80 {
   auto instructionSRL_irr(uint16&) -> void;
   auto instructionSRL_r(uint8&) -> void;
   auto instructionSUB_a_irr(uint16&) -> void;
+  auto instructionSUB_a_n() -> void;
   auto instructionSUB_a_r(uint8&) -> void;
   auto instructionXOR_a_irr(uint16&) -> void;
+  auto instructionXOR_a_n() -> void;
   auto instructionXOR_a_r(uint8&) -> void;
 
   //disassembler.cpp
