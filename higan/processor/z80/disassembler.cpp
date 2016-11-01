@@ -40,7 +40,7 @@ auto Z80::disassemble(uint16 pc) -> string {
 #define IN  string{"(", N, ")"}
 #define NN  string{"$", hex(word(), 4L)}
 #define INN string{"(", NN, ")"}
-#define R   string{"$", hex(branch(), 4L)}
+#define REL string{"$", hex(branch(), 4L)}
 
 #define A   "a"
 #define F   "f"
@@ -66,6 +66,9 @@ auto Z80::disassemble(uint16 pc) -> string {
 
 #define SP  "sp"
 #define PC  "pc"
+
+#define I "i"
+#define R "r"
 
 #define IC "(c)"
 #define IBC "(bc)"
@@ -114,7 +117,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x0d, "dec ", C)
   op(0x0e, "ld  ", C, N)
   op(0x0f, "rrca")
-  op(0x10, "djnz", R)
+  op(0x10, "djnz", REL)
   op(0x11, "ld  ", DE, NN)
   op(0x12, "ld  ", IDE, A)
   op(0x13, "inc ", DE)
@@ -122,7 +125,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x15, "dec ", D)
   op(0x16, "ld  ", E, N)
   op(0x17, "rla ")
-  op(0x18, "jr  ", R)
+  op(0x18, "jr  ", REL)
   op(0x19, "add ", HL, DE)
   op(0x1a, "ld  ", A, IDE)
   op(0x1b, "dec ", DE)
@@ -130,7 +133,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x1d, "dec ", E)
   op(0x1e, "ld  ", E, N)
   op(0x1f, "rra ")
-  op(0x20, "jr  ", "nz", R)
+  op(0x20, "jr  ", "nz", REL)
   op(0x21, "ld  ", HL, NN)
   op(0x22, "ld  ", INN, HL)
   op(0x23, "inc ", HL)
@@ -138,7 +141,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x25, "dec ", H)
   op(0x26, "ld  ", H, N)
   op(0x27, "daa ")
-  op(0x28, "jr  ", "z", R)
+  op(0x28, "jr  ", "z", REL)
   op(0x29, "add ", HL, HL)
   op(0x2a, "ld  ", HL, INN)
   op(0x2b, "dec ", HL)
@@ -146,7 +149,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x2d, "dec ", L)
   op(0x2e, "ld  ", L, N)
   op(0x2f, "cpl ")
-  op(0x30, "jr  ", "nc", R)
+  op(0x30, "jr  ", "nc", REL)
   op(0x31, "ld  ", SP, NN)
   op(0x32, "ld  ", INN, A)
   op(0x33, "inc ", SP)
@@ -154,7 +157,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x35, "dec ", IHL)
   op(0x36, "ld  ", IHL, N)
   op(0x37, "scf ")
-  op(0x38, "jr  ", "c", R)
+  op(0x38, "jr  ", "c", REL)
   op(0x39, "add ", HL, SP)
   op(0x3a, "ld  ", A, INN)
   op(0x3b, "dec ", SP)
@@ -665,44 +668,68 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
   switch(code) {
   op(0x40, "in  ", B, IC)
   op(0x41, "out ", IC, B)
+  op(0x42, "sbc ", HL, BC)
+  op(0x43, "ld  ", INN, BC)
   op(0x44, "neg ")
   op(0x45, "retn")
   op(0x46, "im  ", "0")
+  op(0x47, "ld  ", I, A)
   op(0x48, "in  ", C, IC)
   op(0x49, "out ", IC, C)
+  op(0x4a, "adc ", HL, BC)
+  op(0x4b, "ld  ", BC, INN)
   op(0x4c, "neg ")
   op(0x4d, "reti")
   op(0x4e, "im  ", "0")
+  op(0x4f, "ld  ", R, A)
   op(0x50, "in  ", D, IC)
   op(0x51, "out ", IC, D)
+  op(0x52, "sbc ", HL, DE)
+  op(0x53, "ld  ", INN, DE)
   op(0x54, "neg ")
   op(0x55, "retn")
   op(0x56, "im  ", "1")
+  op(0x57, "ld  ", A, I)
   op(0x58, "in  ", E, IC)
   op(0x59, "out ", IC, E)
+  op(0x5a, "adc ", HL, DE)
+  op(0x5b, "ld  ", DE, INN)
   op(0x5c, "neg ")
   op(0x5d, "reti")
   op(0x5e, "im  ", "2")
+  op(0x5f, "ld  ", A, R)
   op(0x60, "in  ", H, IC)
   op(0x61, "out ", IC, H)
+  op(0x62, "sbc ", HL, HL)
+  op(0x63, "ld  ", INN, HL)
   op(0x64, "neg ")
   op(0x65, "retn")
   op(0x66, "im  ", "0")
+  op(0x67, "rrd ")
   op(0x68, "in  ", L, IC)
   op(0x69, "out ", IC, L)
+  op(0x6a, "adc ", HL, HL)
+  op(0x6b, "ld  ", HL, INN)
   op(0x6c, "neg ")
   op(0x6d, "reti")
   op(0x6e, "im  ", "0")
+  op(0x6f, "rld ")
   op(0x70, "in  ", F, IC)
   op(0x71, "out ", IC, F)
+  op(0x72, "sbc ", HL, SP)
+  op(0x73, "ld  ", INN, SP)
   op(0x74, "neg ")
   op(0x75, "retn")
   op(0x76, "im  ", "1")
+  op(0x77, "nop ")
   op(0x78, "in  ", A, IC)
   op(0x79, "out ", IC, A)
+  op(0x7a, "adc ", HL, SP)
+  op(0x7b, "ld  ", SP, INN)
   op(0x7c, "neg ")
   op(0x7d, "reti")
   op(0x7e, "im  ", "2")
+  op(0x7f, "nop ")
   op(0xa0, "ldi ")
   op(0xa1, "cpi ")
   op(0xa2, "ini ")
@@ -721,7 +748,7 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0xbb, "otdr")
   }
 
-  return {"???: ed ", hex(code, 2L)};
+  return {"nop ", "(ed ", hex(code, 2L), ")"};
 }
 
 #undef op
@@ -730,7 +757,7 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
 #undef IN
 #undef NN
 #undef INN
-#undef R
+#undef REL
 
 #undef A
 #undef F
@@ -756,6 +783,9 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
 
 #undef SP
 #undef PC
+
+#undef I
+#undef R
 
 #undef IC
 #undef IBC

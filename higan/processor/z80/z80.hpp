@@ -34,7 +34,6 @@ struct Z80 {
   auto out(uint8 addr, uint8 data) -> void;
 
   //instruction.cpp
-  auto trap(uint8 prefix, uint8 code) -> void;
   auto instruction() -> void;
   auto instruction__(uint8 code) -> void;
   auto instructionCB(uint8 code) -> void;
@@ -63,10 +62,11 @@ struct Z80 {
   auto instructionADC_a_irr(uint16&) -> void;
   auto instructionADC_a_n() -> void;
   auto instructionADC_a_r(uint8&) -> void;
+  auto instructionADC_hl_rr(uint16&) -> void;
   auto instructionADD_a_irr(uint16&) -> void;
   auto instructionADD_a_n() -> void;
   auto instructionADD_a_r(uint8&) -> void;
-  auto instructionADD_rr_rr(uint16&, uint16&) -> void;
+  auto instructionADD_hl_rr(uint16&) -> void;
   auto instructionAND_a_irr(uint16&) -> void;
   auto instructionAND_a_n() -> void;
   auto instructionAND_a_r(uint8&) -> void;
@@ -116,6 +116,7 @@ struct Z80 {
   auto instructionLD_r_n(uint8&) -> void;
   auto instructionLD_r_irr(uint8&, uint16&) -> void;
   auto instructionLD_r_r(uint8&, uint8&) -> void;
+  auto instructionLD_r_r1(uint8&, uint8&) -> void;
   auto instructionLD_rr_inn(uint16&) -> void;
   auto instructionLD_rr_nn(uint16&) -> void;
   auto instructionLD_sp_rr(uint16&) -> void;
@@ -148,16 +149,19 @@ struct Z80 {
   auto instructionRLC_irr(uint16&) -> void;
   auto instructionRLC_r(uint8&) -> void;
   auto instructionRLCA() -> void;
+  auto instructionRLD() -> void;
   auto instructionRR_irr(uint16&) -> void;
   auto instructionRR_r(uint8&) -> void;
   auto instructionRRA() -> void;
   auto instructionRRC_irr(uint16&) -> void;
   auto instructionRRC_r(uint8&) -> void;
   auto instructionRRCA() -> void;
+  auto instructionRRD() -> void;
   auto instructionRST_o(uint3) -> void;
   auto instructionSBC_a_irr(uint16&) -> void;
   auto instructionSBC_a_n() -> void;
   auto instructionSBC_a_r(uint8&) -> void;
+  auto instructionSBC_hl_rr(uint16&) -> void;
   auto instructionSCF() -> void;
   auto instructionSET_o_irr(uint3, uint16&) -> void;
   auto instructionSET_o_r(uint3, uint8&) -> void;

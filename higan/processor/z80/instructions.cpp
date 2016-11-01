@@ -269,6 +269,15 @@ auto Z80::instructionADC_a_r(uint8& x) -> void {
   A = ADD(A, x, CF);
 }
 
+auto Z80::instructionADC_hl_rr(uint16& x) -> void {
+  wait(4);
+  auto lo = ADD(HL >> 0, x >> 0, CF);
+  wait(3);
+  auto hi = ADD(HL >> 8, x >> 8, CF);
+  HL = hi << 8 | lo << 0;
+  ZF = HL == 0;
+}
+
 auto Z80::instructionADD_a_irr(uint16& x) -> void {
   A = ADD(A, read(displace(x)));
 }
@@ -281,11 +290,13 @@ auto Z80::instructionADD_a_r(uint8& x) -> void {
   A = ADD(A, x);
 }
 
-auto Z80::instructionADD_rr_rr(uint16& x, uint16& y) -> void {
+auto Z80::instructionADD_hl_rr(uint16& x) -> void {
   wait(4);
-  x.byte(0) = ADD(x.byte(0), y.byte(0));
+  auto lo = ADD(HL >> 0, x >> 0);
   wait(3);
-  x.byte(1) = ADD(x.byte(1), y.byte(1), CF);
+  auto hi = ADD(HL >> 8, x >> 8, CF);
+  HL = hi << 8 | lo << 0;
+  ZF = HL == 0;
 }
 
 auto Z80::instructionAND_a_irr(uint16& x) -> void {
@@ -379,7 +390,30 @@ auto Z80::instructionCPL() -> void {
 }
 
 auto Z80::instructionDAA() -> void {
-  //todo: implement decimal adjust
+  uint8 lo = A.bits(0,3);
+  uint8 hi = A.bits(4,7);
+  uint8 diff;
+
+  if(CF) {
+    diff = lo <= 9 && !HF ? 0x60 : 0x66;
+  } else if(lo >= 10) {
+    diff = hi <= 8 ? 0x06 : 0x66;
+  } else if(hi >= 10) {
+    diff = HF ? 0x66 : 0x60;
+  } else {
+    diff = HF ? 0x06 : 0x00;
+  }
+
+  if(NF == 0) A += diff;
+  if(NF == 1) A -= diff;
+
+  CF = CF || (lo <= 9 ? hi >= 10 : hi >= 9);
+  PF = parity(A);
+  XF = A.bit(3);
+  HF = NF ? (HF && lo <= 5) : (lo >= 10);
+  YF = A.bit(5);
+  ZF = A == 0;
+  SF = A.bit(7);
 }
 
 auto Z80::instructionDEC_irr(uint16& x) -> void {
@@ -545,6 +579,12 @@ auto Z80::instructionLD_r_irr(uint8& x, uint16& y) -> void {
 }
 
 auto Z80::instructionLD_r_r(uint8& x, uint8& y) -> void {
+  x = y;
+}
+
+//LD to/from I/R requires an extra T-cycle
+auto Z80::instructionLD_r_r1(uint8& x, uint8& y) -> void {
+  wait(1);
   x = y;
 }
 
@@ -732,6 +772,22 @@ auto Z80::instructionRLCA() -> void {
   YF = A.bit(5);
 }
 
+auto Z80::instructionRLD() -> void {
+  auto data = read(HL);
+  wait(1);
+  write(HL, (data << 4) | (A & 0x0f));
+  wait(3);
+  A = (A & 0xf0) | (data >> 4);
+
+  NF = 0;
+  PF = parity(A);
+  XF = A.bit(3);
+  HF = 0;
+  YF = A.bit(5);
+  ZF = A == 0;
+  SF = A.bit(7);
+}
+
 auto Z80::instructionRR_irr(uint16& x) -> void {
   auto addr = displace(x);
   write(addr, RR(read(addr)));
@@ -772,6 +828,22 @@ auto Z80::instructionRRCA() -> void {
   YF = A.bit(5);
 }
 
+auto Z80::instructionRRD() -> void {
+  auto data = read(HL);
+  wait(1);
+  write(HL, (data >> 4) | (A << 4));
+  wait(3);
+  A = (A & 0xf0) | (data & 0x0f);
+
+  NF = 0;
+  PF = parity(A);
+  XF = A.bit(3);
+  HF = 0;
+  YF = A.bit(5);
+  ZF = A == 0;
+  SF = A.bit(7);
+}
+
 auto Z80::instructionRST_o(uint3 vector) -> void {
   wait(1);
   push(PC);
@@ -788,6 +860,15 @@ auto Z80::instructionSBC_a_n() -> void {
 
 auto Z80::instructionSBC_a_r(uint8& x) -> void {
   A = SUB(A, x, CF);
+}
+
+auto Z80::instructionSBC_hl_rr(uint16& x) -> void {
+  wait(4);
+  auto lo = SUB(HL >> 0, x >> 0, CF);
+  wait(3);
+  auto hi = SUB(HL >> 8, x >> 8, CF);
+  HL = hi << 8 | lo << 0;
+  ZF = HL == 0;
 }
 
 auto Z80::instructionSCF() -> void {
