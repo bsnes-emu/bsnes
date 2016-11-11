@@ -162,6 +162,9 @@ typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_si
 typedef uint8_t (*GB_camera_get_pixel_callback_t)(GB_gameboy_t *gb, uint8_t x, uint8_t y);
 typedef void (*GB_camera_update_request_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
+typedef void (*GB_serial_transfer_start_callback_t)(GB_gameboy_t *gb, uint8_t byte_to_send);
+typedef uint8_t (*GB_serial_transfer_end_callback_t)(GB_gameboy_t *gb);
+
 
 typedef struct {
     enum {
@@ -418,7 +421,8 @@ typedef struct GB_gameboy_s {
     GB_camera_get_pixel_callback_t camera_get_pixel_callback;
     GB_camera_update_request_callback_t camera_update_request_callback;
     GB_rumble_callback_t rumble_callback;
-
+    GB_serial_transfer_start_callback_t serial_transfer_start_callback;
+    GB_serial_transfer_end_callback_t serial_transfer_end_callback;
     /* IR */
     long cycles_since_ir_change;
     long cycles_since_input_ir_change;
@@ -497,4 +501,13 @@ void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback)
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
+
+/* These APIs are used when using internal clock */
+void GB_set_serial_transfer_start_callback(GB_gameboy_t *gb, GB_serial_transfer_start_callback_t callback);
+void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_end_callback_t callback);
+
+/* These APIs are used when using external clock */
+uint8_t GB_serial_get_data(GB_gameboy_t *gb);
+void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
+
 #endif /* GB_h */

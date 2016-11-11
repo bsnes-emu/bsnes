@@ -503,6 +503,35 @@ void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback)
     gb->rumble_callback = callback;
 }
 
+void GB_set_serial_transfer_start_callback(GB_gameboy_t *gb, GB_serial_transfer_start_callback_t callback)
+{
+    gb->serial_transfer_start_callback = callback;
+}
+
+void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_end_callback_t callback)
+{
+    gb->serial_transfer_end_callback = callback;
+}
+
+uint8_t GB_serial_get_data(GB_gameboy_t *gb)
+{
+    if (gb->io_registers[GB_IO_SC] & 1) {
+        /* Internal Clock */
+        GB_log(gb, "Serial read request while using internal clock. \n");
+        return 0xFF;
+    }
+    return gb->io_registers[GB_IO_SB];
+}
+void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data)
+{
+    if (gb->io_registers[GB_IO_SC] & 1) {
+        /* Internal Clock */
+        GB_log(gb, "Serial write request while using internal clock. \n");
+        return;
+    }
+    gb->io_registers[GB_IO_SB] = data;
+}
+
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
 {
     if (gb->audio_buffer) {

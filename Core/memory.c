@@ -576,6 +576,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_SC] = value | (~0x83);
                 if ((value & 0x80) && (value & 0x1) ) {
                     gb->serial_cycles = gb->cgb_mode && (value & 2)? 128 : 4096;
+                    if (gb->serial_transfer_start_callback) {
+                        gb->serial_transfer_start_callback(gb, gb->io_registers[GB_IO_SB]);
+                    }
                 }
                 else {
                     gb->serial_cycles = 0;
