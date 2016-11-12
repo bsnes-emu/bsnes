@@ -530,6 +530,7 @@ void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data)
         return;
     }
     gb->io_registers[GB_IO_SB] = data;
+    gb->io_registers[GB_IO_IF] |= 8;
 }
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
