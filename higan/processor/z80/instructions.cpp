@@ -15,11 +15,11 @@ auto Z80::ADD(uint8 x, uint8 y, bool c) -> uint8 {
 
   CF = z.bit(8);
   NF = 0;
-  VF = ~(x ^ y) & (x ^ z) & 0x80;
+  VF = uint8(~(x ^ y) & (x ^ z)).bit(7);
   XF = z.bit(3);
-  HF = (x ^ y ^ z) & 0x10;
+  HF = uint8(x ^ y ^ z).bit(4);
   YF = z.bit(5);
-  ZF = (uint8)z == 0;
+  ZF = uint8(z) == 0;
   SF = z.bit(7);
 
   return z;
@@ -230,11 +230,11 @@ auto Z80::SUB(uint8 x, uint8 y, bool c) -> uint8 {
 
   CF = z.bit(8);
   NF = 1;
-  VF = (x ^ y) & (x ^ z) & 0x80;
+  VF = uint8((x ^ y) & (x ^ z)).bit(7);
   XF = z.bit(3);
-  HF = (x ^ y ^ z) & 0x10;
+  HF = uint8(x ^ y ^ z).bit(4);
   YF = z.bit(5);
-  ZF = (uint8)z == 0;
+  ZF = uint8(z) == 0;
   SF = z.bit(7);
 
   return z;
@@ -291,12 +291,13 @@ auto Z80::instructionADD_a_r(uint8& x) -> void {
 }
 
 auto Z80::instructionADD_hl_rr(uint16& x) -> void {
+  auto vf = VF, zf = ZF, sf = SF;
   wait(4);
   auto lo = ADD(HL >> 0, x >> 0);
   wait(3);
   auto hi = ADD(HL >> 8, x >> 8, CF);
   HL = hi << 8 | lo << 0;
-  ZF = HL == 0;
+  VF = vf, ZF = zf, SF = sf;  //restore unaffected flags
 }
 
 auto Z80::instructionAND_a_irr(uint16& x) -> void {
@@ -390,27 +391,13 @@ auto Z80::instructionCPL() -> void {
 }
 
 auto Z80::instructionDAA() -> void {
-  uint8 lo = A.bits(0,3);
-  uint8 hi = A.bits(4,7);
-  uint8 diff;
+  auto a = A;
+  if(CF || (A.bits(0,7) > 0x99)) { A += NF ? -0x60 : 0x60; CF = 1; }
+  if(HF || (A.bits(0,3) > 0x09)) { A += NF ? -0x06 : 0x06; }
 
-  if(CF) {
-    diff = lo <= 9 && !HF ? 0x60 : 0x66;
-  } else if(lo >= 10) {
-    diff = hi <= 8 ? 0x06 : 0x66;
-  } else if(hi >= 10) {
-    diff = HF ? 0x66 : 0x60;
-  } else {
-    diff = HF ? 0x06 : 0x00;
-  }
-
-  if(NF == 0) A += diff;
-  if(NF == 1) A -= diff;
-
-  CF = CF || (lo <= 9 ? hi >= 10 : hi >= 9);
   PF = parity(A);
   XF = A.bit(3);
-  HF = NF ? (HF && lo <= 5) : (lo >= 10);
+  HF = uint8(A ^ a).bit(4);
   YF = A.bit(5);
   ZF = A == 0;
   SF = A.bit(7);
@@ -724,7 +711,7 @@ auto Z80::instructionRET_c(bool c) -> void {
 
 auto Z80::instructionRETI() -> void {
   PC = pop();
-  //todo: there's more to RETI than just PC restore ...
+  r.iff1 = r.iff2;
 }
 
 auto Z80::instructionRETN() -> void {
