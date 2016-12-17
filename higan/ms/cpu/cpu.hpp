@@ -7,6 +7,9 @@ struct CPU : Processor::Z80, Thread {
 
   auto power() -> void;
   auto reset() -> void;
+
+private:
+  uint64 instructionsExecuted;
 };
 
 extern CPU cpu;

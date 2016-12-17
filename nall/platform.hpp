@@ -59,8 +59,7 @@ namespace Math {
 #endif
 
 #if defined(PLATFORM_WINDOWS)
-  //fight Microsoft's ardent efforts at vendor lock-in
-
+  #undef  IN
   #undef  interface
   #define dllexport __declspec(dllexport)
   #define MSG_NOSIGNAL 0

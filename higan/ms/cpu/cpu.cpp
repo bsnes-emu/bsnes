@@ -9,6 +9,12 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
+  #if 1
+  if(instructionsExecuted < 20)
+  print(disassemble(r.pc), "\n");
+  instructionsExecuted++;
+  #endif
+
   instruction();
 }
 
@@ -26,6 +32,8 @@ auto CPU::power() -> void {
 auto CPU::reset() -> void {
   Z80::reset();
   create(CPU::Enter, system.colorburst());
+
+  instructionsExecuted = 0;
 }
 
 }

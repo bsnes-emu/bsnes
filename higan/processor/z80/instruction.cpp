@@ -1,11 +1,4 @@
 auto Z80::instruction() -> void {
-  #if 1
-  if(instructionsExecuted < 20)
-  print(disassemble(r.pc), "\n");
-  #endif
-
-  instructionsExecuted++;
-
   auto code = opcode();
   if(code == 0xdd) { r.hlp = &r.ix; return; }
   if(code == 0xfd) { r.hlp = &r.iy; return; }
