@@ -2,6 +2,13 @@ auto Z80::instruction() -> void {
   auto code = opcode();
   if(code == 0xdd) { r.hlp = &r.ix; return; }
   if(code == 0xfd) { r.hlp = &r.iy; return; }
+
+  if(r.ei) {
+    r.ei = 0;
+    r.iff1 = 1;
+    r.iff2 = 1;
+  }
+
   instruction__(code);
   r.hlp = &r.hl;
 }

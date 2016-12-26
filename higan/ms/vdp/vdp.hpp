@@ -6,6 +6,9 @@ struct VDP : Thread {
   auto step(uint clocks) -> void;
   auto refresh() -> void;
 
+  auto vlines() -> uint;
+  auto vblank() -> bool;
+
   auto power() -> void;
   auto reset() -> void;
 
@@ -25,9 +28,20 @@ private:
   uint8 cram[0x40];
 
   struct IO {
-    uint vcounter;
-    uint hcounter;
+    uint vcounter;  //vertical counter
+    uint hcounter;  //horizontal counter
+    uint lcounter;  //line counter
 
+    //interrupt flags
+    bool intLine;
+    bool intFrame;
+
+    //status flags
+    bool spriteOverflow;
+    bool spriteCollision;
+    uint5 fifthSprite;
+
+    //latches
     bool controlLatch;
     uint16 controlData;
     uint2 code;

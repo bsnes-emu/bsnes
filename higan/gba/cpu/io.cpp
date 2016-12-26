@@ -383,7 +383,7 @@ auto CPU::writeIO(uint32 addr, uint8 data) -> void {
     regs.wait.control.swait[2] = data.bit (2);
     regs.wait.control.phi      = data.bit (3);
     regs.wait.control.prefetch = data.bit (6);
-    regs.wait.control.gametype = data.bit (7);
+  //regs.wait.control.gametype is read-only
     return;
 
   //IME

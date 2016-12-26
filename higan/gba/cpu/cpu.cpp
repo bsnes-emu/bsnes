@@ -148,7 +148,7 @@ auto CPU::power() -> void {
   for(auto& swait : regs.wait.control.swait) swait = 0;
   regs.wait.control.phi = 0;
   regs.wait.control.prefetch = 0;
-  regs.wait.control.gametype = 0;
+  regs.wait.control.gametype = 0;  //0 = GBA, 1 = GBC
   regs.postboot = 0;
   regs.mode = Registers::Mode::Normal;
   regs.clock = 0;

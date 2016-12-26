@@ -24,7 +24,7 @@ ifeq ($(platform),windows)
   else
     link += -mwindows
   endif
-  link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
+  link += -mthreads -lpthread -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
   link += -Wl,-enable-auto-import
   link += -Wl,-enable-runtime-pseudo-reloc
 else ifeq ($(platform),macosx)

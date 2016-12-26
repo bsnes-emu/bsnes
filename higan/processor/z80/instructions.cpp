@@ -433,8 +433,7 @@ auto Z80::instructionDJNZ_e() -> void {
 }
 
 auto Z80::instructionEI() -> void {
-  r.iff1 = 1;
-  r.iff2 = 1;
+  r.ei = 1;  //raise IFF1, IFF2 after the next instruction
 }
 
 auto Z80::instructionEX_rr_rr(uint16& x, uint16& y) -> void {

@@ -18,6 +18,7 @@ struct Z80 {
   auto power() -> void;
   auto reset() -> void;
 
+  auto irq(bool maskable, uint16 vector = 0x0000, uint8 extbus = 0xff) -> bool;
   auto parity(uint8) const -> bool;
 
   //memory.cpp
@@ -203,6 +204,7 @@ struct Z80 {
     uint16 sp;
     uint16 pc;
 
+    boolean ei;    //EI instruction executed
     boolean halt;  //HALT instruction executed
     boolean iff1;  //interrupt flip-flop 1
     boolean iff2;  //interrupt flip-flop 2

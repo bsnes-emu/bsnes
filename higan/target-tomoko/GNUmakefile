@@ -20,6 +20,7 @@ ifeq ($(platform),windows)
   ruby += video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.wasapi audio.xaudio2 audio.directsound
   ruby += input.windows
+  windres := windres
 else ifeq ($(platform),macosx)
   ruby += video.cgl
   ruby += audio.openal
@@ -62,7 +63,7 @@ obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
 
 obj/ui-resource.o:
-	windres data/resource.rc obj/ui-resource.o
+	$(windres) data/resource.rc obj/ui-resource.o
 
 # targets
 build: $(objects)
