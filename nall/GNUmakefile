@@ -70,6 +70,7 @@ endif
 # windows settings
 ifeq ($(platform),windows)
   link += -lws2_32 -lole32
+  windres := windres
 endif
 
 # macosx settings

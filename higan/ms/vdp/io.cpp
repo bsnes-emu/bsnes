@@ -50,7 +50,7 @@ auto VDP::data(uint8 data) -> void {
   if(io.code <= 2) {
     vram[io.address++] = data;
   } else {
-    cram[io.address++ & 0x3f] = data;
+    cram[io.address++ & 0x1f] = data;
   }
 }
 

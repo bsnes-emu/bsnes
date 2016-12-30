@@ -4,6 +4,8 @@ namespace MasterSystem {
 
 VDP vdp;
 #include "io.cpp"
+#include "background.cpp"
+#include "sprite.cpp"
 
 auto VDP::Enter() -> void {
   while(true) scheduler.synchronize(), vdp.main();
@@ -15,16 +17,34 @@ auto VDP::main() -> void {
       io.lcounter = io.lineCounter;
       io.intLine = 1;
     }
+  } else {
+    io.lcounter = io.lineCounter;
   }
 
   if(io.vcounter == vlines() + 1) {
-    io.lcounter = io.lineCounter;
     io.intFrame = 1;
   }
 
-  for(uint x : range(684)) {
-    step(1);
+  background.scanline();
+  sprite.scanline();
+
+  //684 clocks/scanline
+  for(uint x : range(256)) {
+    background.run();
+    sprite.run();
+    step(2);
+
+    uint5 color = cram[16 | io.backdropColor];
+    if(background.output.color && (background.output.priority || !sprite.output.color)) {
+      color = cram[background.output.palette << 4 | background.output.color];
+    } else if(sprite.output.color) {
+      color = cram[16 | sprite.output.color];
+    }
+    if(x <= 7 && io.leftClip) color = cram[7];
+    if(!io.displayEnable) color = 0;
+    buffer[io.vcounter * 256 + x] = color;
   }
+  step(172);
 
   if(io.vcounter == 240) scheduler.exit(Scheduler::Event::Frame);
 }
@@ -59,12 +79,17 @@ auto VDP::vblank() -> bool {
 }
 
 auto VDP::power() -> void {
+  background.power();
+  sprite.power();
 }
 
 auto VDP::reset() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 5.0);
 
   memory::fill(&io, sizeof(IO));
+
+  background.reset();
+  sprite.reset();
 }
 
 }

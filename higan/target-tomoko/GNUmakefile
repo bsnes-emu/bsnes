@@ -20,7 +20,6 @@ ifeq ($(platform),windows)
   ruby += video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.wasapi audio.xaudio2 audio.directsound
   ruby += input.windows
-  windres := windres
 else ifeq ($(platform),macosx)
   ruby += video.cgl
   ruby += audio.openal

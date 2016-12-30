@@ -29,7 +29,7 @@ obj/icarus.o: icarus.cpp $(call rwildcard,core/) $(call rwildcard,heuristics/) $
 	$(compiler) $(cppflags) $(flags) -o obj/icarus.o -c icarus.cpp
 
 obj/resource.o:
-	windres ../hiro/windows/hiro.rc obj/resource.o
+	$(windres) ../hiro/windows/hiro.rc obj/resource.o
 
 clean:
 ifeq ($(platform),macosx)
