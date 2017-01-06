@@ -36,8 +36,9 @@ struct Z80 {
 
   //instruction.cpp
   auto instruction() -> void;
-  auto instruction__(uint8 code) -> void;
+  auto instruction(uint8 code) -> void;
   auto instructionCB(uint8 code) -> void;
+  auto instructionCBd(uint16 addr, uint8 code) -> void;
   auto instructionED(uint8 code) -> void;
 
   //instructions.cpp
@@ -148,6 +149,7 @@ struct Z80 {
   auto instructionRL_r(uint8&) -> void;
   auto instructionRLA() -> void;
   auto instructionRLC_irr(uint16&) -> void;
+  auto instructionRLC_irr_r(uint16&, uint8&) -> void;
   auto instructionRLC_r(uint8&) -> void;
   auto instructionRLCA() -> void;
   auto instructionRLD() -> void;
@@ -155,6 +157,7 @@ struct Z80 {
   auto instructionRR_r(uint8&) -> void;
   auto instructionRRA() -> void;
   auto instructionRRC_irr(uint16&) -> void;
+  auto instructionRRC_irr_r(uint16&, uint8&) -> void;
   auto instructionRRC_r(uint8&) -> void;
   auto instructionRRCA() -> void;
   auto instructionRRD() -> void;
@@ -183,8 +186,9 @@ struct Z80 {
 
   //disassembler.cpp
   auto disassemble(uint16 pc) -> string;
-  auto disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string;
+  auto disassemble(uint16 pc, uint8 prefix, uint8 code) -> string;
   auto disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string;
+  auto disassembleCBd(uint16 pc, uint8 prefix, int8 d, uint8 code) -> string;
   auto disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string;
 
   struct Registers {

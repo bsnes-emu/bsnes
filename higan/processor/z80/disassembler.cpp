@@ -1,5 +1,5 @@
 auto Z80::disassemble(uint16 pc) -> string {
-  string s;
+  string s, output;
   s.append(hex(pc, 4L), "  ");
 
   uint8 prefix = 0x00;
@@ -20,7 +20,21 @@ auto Z80::disassemble(uint16 pc) -> string {
     }
   }
 
-  s.append(pad(disassemble__(pc, prefix, code), -18L, ' '));
+  if(code == 0xcb && prefix) {
+    auto d = (int8)code;
+    code = bus->read(pc++);
+    output = disassembleCBd(pc, prefix, d, code);
+  } else if(code == 0xcb) {
+    code = bus->read(pc++);
+    output = disassembleCB(pc, prefix, code);
+  } else if(code == 0xed) {
+    code = bus->read(pc++);
+    output = disassembleED(pc, prefix, code);
+  } else {
+    output = disassemble(pc, prefix, code);
+  }
+
+  s.append(pad(output, -18L, ' '));
 
   finish:
   s.append(" AF:", hex(r.af.word, 4L));
@@ -76,7 +90,7 @@ auto Z80::disassemble(uint16 pc) -> string {
 #define IHL string{"(", HL, displace(), ")"}
 #define ISP "(sp)"
 
-auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
+auto Z80::disassemble(uint16 pc, uint8 prefix, uint8 code) -> string {
   auto byte = [&] {
     return bus->read(pc++);
   };
@@ -96,9 +110,6 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
     auto d = (int8)byte();
     return d >= 0 ? string{"+$", hex(d, 2L)} : string{"-$", hex(-d, 2L)};
   };
-
-  if(code == 0xcb) return code = byte(), disassembleCB(pc, prefix, code);
-  if(code == 0xed) return code = byte(), disassembleED(pc, prefix, code);
 
   switch(code) {
   op(0x00, "nop ")
@@ -382,6 +393,12 @@ auto Z80::disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string {
     return d >= 0 ? string{"+$", hex(d, 2L)} : string{"-$", hex(-d, 2L)};
   };
 
+  if(prefix) {
+    auto d = (int8)code;
+    string ds = d >= 0 ? string{"+$", hex(d, 2L)} : string{"-$", hex(-d, 2L)};
+    return {"rlc (", HL, ds, ")"};
+  }
+
   switch(code) {
   op(0x00, "rlc ", B)
   op(0x01, "rlc ", C)
@@ -642,6 +659,33 @@ auto Z80::disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string {
   }
 
   unreachable;
+}
+
+auto Z80::disassembleCBd(uint16 pc, uint8 prefix, int8 d, uint8 code) -> string {
+  auto displace = [&] {
+    return d >= 0 ? string{"+$", hex(d, 2L)} : string{"-$", hex(-d, 2L)};
+  };
+
+  switch(code) {
+  op(0x00, "rlc ", IHL, B)
+  op(0x01, "rlc ", IHL, C)
+  op(0x02, "rlc ", IHL, D)
+  op(0x03, "rlc ", IHL, E)
+  op(0x04, "rlc ", IHL, H)
+  op(0x05, "rlc ", IHL, L)
+  op(0x06, "rlc ", IHL)
+  op(0x07, "rlc ", IHL, A)
+  op(0x08, "rrc ", IHL, B)
+  op(0x09, "rrc ", IHL, C)
+  op(0x0a, "rrc ", IHL, D)
+  op(0x0b, "rrc ", IHL, E)
+  op(0x0c, "rrc ", IHL, H)
+  op(0x0d, "rrc ", IHL, L)
+  op(0x0e, "rrc ", IHL)
+  op(0x0f, "rrc ", IHL, A)
+  }
+
+  return {"???"};
 }
 
 auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {

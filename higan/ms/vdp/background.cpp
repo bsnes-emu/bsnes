@@ -12,15 +12,17 @@ auto VDP::Background::run() -> void {
   }
 
   uint8 hoffset = state.x;
-  if(!vdp.io.horizontalScrollLock || hoffset >= 16) hoffset += vdp.io.hscroll;
+  if(!vdp.io.horizontalScrollLock || hoffset >= 16) hoffset -= vdp.io.hscroll;
 
-  uint8 voffset = state.y;
+  uint9 voffset = state.y;
   if(!vdp.io.verticalScrollLock || hoffset <= 191) voffset += vdp.io.vscroll;
 
   uint14 nameTableAddress;
   if(vdp.vlines() == 192) {
+    if(voffset >= 224) voffset -= 224;
     nameTableAddress = vdp.io.nameTableAddress << 11;
   } else {
+    voffset &= 255;
     nameTableAddress = (vdp.io.nameTableAddress & ~1) << 11 | 0x700;
   }
   nameTableAddress += ((voffset >> 3) << 6) + ((hoffset >> 3) << 1);
@@ -35,7 +37,7 @@ auto VDP::Background::run() -> void {
   output.palette = tiledata.bit(11);
   output.priority = tiledata.bit(12);
 
-  auto index = hoffset & 7;
+  auto index = 7 - (hoffset & 7);
   patternAddress += (voffset & 7) << 2;
   output.color.bit(0) = vdp.vram[patternAddress + 0].bit(index);
   output.color.bit(1) = vdp.vram[patternAddress + 1].bit(index);

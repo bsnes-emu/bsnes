@@ -34,13 +34,13 @@ auto VDP::main() -> void {
     sprite.run();
     step(2);
 
-    uint5 color = cram[16 | io.backdropColor];
+    uint6 color = cram[io.backdropColor];
     if(background.output.color && (background.output.priority || !sprite.output.color)) {
       color = cram[background.output.palette << 4 | background.output.color];
     } else if(sprite.output.color) {
       color = cram[16 | sprite.output.color];
     }
-    if(x <= 7 && io.leftClip) color = cram[7];
+    if(x <= 7 && io.leftClip) color = cram[io.backdropColor];
     if(!io.displayEnable) color = 0;
     buffer[io.vcounter * 256 + x] = color;
   }

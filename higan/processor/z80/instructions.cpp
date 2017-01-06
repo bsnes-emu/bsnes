@@ -738,9 +738,12 @@ auto Z80::instructionRLA() -> void {
   YF = A.bit(5);
 }
 
-auto Z80::instructionRLC_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionRLC_irr(uint16& addr) -> void {
   write(addr, RLC(read(addr)));
+}
+
+auto Z80::instructionRLC_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = RLC(read(addr)));
 }
 
 auto Z80::instructionRLC_r(uint8& x) -> void {
@@ -794,9 +797,12 @@ auto Z80::instructionRRA() -> void {
   YF = A.bit(5);
 }
 
-auto Z80::instructionRRC_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionRRC_irr(uint16& addr) -> void {
   write(addr, RRC(read(addr)));
+}
+
+auto Z80::instructionRRC_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = RRC(read(addr)));
 }
 
 auto Z80::instructionRRC_r(uint8& x) -> void {

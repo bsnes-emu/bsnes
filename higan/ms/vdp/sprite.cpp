@@ -43,11 +43,12 @@ auto VDP::Sprite::run() -> void {
     address += o.pattern << 5;
     address += (y & (large ? 15 : 7)) << 2;
 
+    auto index = 7 - (x & 7);
     uint4 color;
-    color.bit(0) = vdp.vram[address + 0].bit(x & 7);
-    color.bit(1) = vdp.vram[address + 1].bit(x & 7);
-    color.bit(2) = vdp.vram[address + 2].bit(x & 7);
-    color.bit(3) = vdp.vram[address + 3].bit(x & 7);
+    color.bit(0) = vdp.vram[address + 0].bit(index);
+    color.bit(1) = vdp.vram[address + 1].bit(index);
+    color.bit(2) = vdp.vram[address + 2].bit(index);
+    color.bit(3) = vdp.vram[address + 3].bit(index);
     if(color == 0) continue;
 
     if(output.color) {

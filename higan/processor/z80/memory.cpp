@@ -29,7 +29,7 @@ auto Z80::pop() -> uint16 {
 
 auto Z80::displace(uint16& x) -> uint16 {
   if(&x != &r.ix.word && &x != &r.iy.word) return x;
-  auto d = read(x);
+  auto d = operand();
   wait(5);
   return x + (int8)d;
 }

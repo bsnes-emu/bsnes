@@ -3,6 +3,7 @@
 namespace MasterSystem {
 
 Cartridge cartridge;
+#include "mapper.cpp"
 
 auto Cartridge::load() -> bool {
   information = {};
@@ -73,17 +74,23 @@ auto Cartridge::unload() -> void {
   ram = {};
 }
 
-auto Cartridge::read(uint16 addr) -> uint8 {
-  return rom.data[addr & rom.mask];
-}
-
-auto Cartridge::write(uint16 addr, uint8 data) -> void {
-}
-
 auto Cartridge::power() -> void {
 }
 
 auto Cartridge::reset() -> void {
+  memory::fill(&mapper, sizeof(Mapper));
+  mapper.romPage0 = 0;
+  mapper.romPage1 = 1;
+  mapper.romPage2 = 2;
+}
+
+auto Cartridge::Memory::read(uint addr) -> uint8 {
+  if(addr < this->size) return this->data[addr];
+  return 0x00;
+}
+
+auto Cartridge::Memory::write(uint addr, uint8 data) -> void {
+  if(addr < this->size) this->data[addr] = data;
 }
 
 }
