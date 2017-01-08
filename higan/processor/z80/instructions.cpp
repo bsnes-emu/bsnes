@@ -40,10 +40,12 @@ auto Z80::AND(uint8 x, uint8 y) -> uint8 {
   return z;
 }
 
-auto Z80::BIT(uint3 bit, uint8 x) -> void {
+auto Z80::BIT(uint3 bit, uint8 x) -> uint8 {
   NF = 0;
   HF = 1;
   ZF = (x & 1 << bit) == 0;
+
+  return x;
 }
 
 auto Z80::DEC(uint8 x) -> uint8 {
@@ -312,8 +314,12 @@ auto Z80::instructionAND_a_r(uint8& x) -> void {
   A = AND(A, x);
 }
 
-auto Z80::instructionBIT_o_irr(uint3 bit, uint16& x) -> void {
-  BIT(bit, read(displace(x)));
+auto Z80::instructionBIT_o_irr(uint3 bit, uint16& addr) -> void {
+  BIT(bit, read(addr));
+}
+
+auto Z80::instructionBIT_o_irr_r(uint3 bit, uint16& addr, uint8& x) -> void {
+  x = BIT(bit, read(addr));
 }
 
 auto Z80::instructionBIT_o_r(uint3 bit, uint8& x) -> void {
@@ -688,9 +694,12 @@ auto Z80::instructionPUSH_rr(uint16& x) -> void {
   push(x);
 }
 
-auto Z80::instructionRES_o_irr(uint3 bit, uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionRES_o_irr(uint3 bit, uint16& addr) -> void {
   write(addr, RES(bit, read(addr)));
+}
+
+auto Z80::instructionRES_o_irr_r(uint3 bit, uint16& addr, uint8& x) -> void {
+  write(addr, x = RES(bit, read(addr)));
 }
 
 auto Z80::instructionRES_o_r(uint3 bit, uint8& x) -> void {
@@ -718,9 +727,12 @@ auto Z80::instructionRETN() -> void {
   r.iff1 = r.iff2;
 }
 
-auto Z80::instructionRL_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionRL_irr(uint16& addr) -> void {
   write(addr, RL(read(addr)));
+}
+
+auto Z80::instructionRL_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = RL(read(addr)));
 }
 
 auto Z80::instructionRL_r(uint8& x) -> void {
@@ -777,9 +789,12 @@ auto Z80::instructionRLD() -> void {
   SF = A.bit(7);
 }
 
-auto Z80::instructionRR_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionRR_irr(uint16& addr) -> void {
   write(addr, RR(read(addr)));
+}
+
+auto Z80::instructionRR_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = RR(read(addr)));
 }
 
 auto Z80::instructionRR_r(uint8& x) -> void {
@@ -869,45 +884,60 @@ auto Z80::instructionSCF() -> void {
   HF = 0;
 }
 
-auto Z80::instructionSET_o_irr(uint3 bit, uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionSET_o_irr(uint3 bit, uint16& addr) -> void {
   write(addr, SET(bit, read(addr)));
+}
+
+auto Z80::instructionSET_o_irr_r(uint3 bit, uint16& addr, uint8& x) -> void {
+  write(addr, x = SET(bit, read(addr)));
 }
 
 auto Z80::instructionSET_o_r(uint3 bit, uint8& x) -> void {
   x = SET(bit, x);
 }
 
-auto Z80::instructionSLA_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionSLA_irr(uint16& addr) -> void {
   write(addr, SLA(read(addr)));
+}
+
+auto Z80::instructionSLA_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = SLA(read(addr)));
 }
 
 auto Z80::instructionSLA_r(uint8& x) -> void {
   x = SLA(x);
 }
 
-auto Z80::instructionSLL_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionSLL_irr(uint16& addr) -> void {
   write(addr, SLL(read(addr)));
+}
+
+auto Z80::instructionSLL_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = SLL(read(addr)));
 }
 
 auto Z80::instructionSLL_r(uint8& x) -> void {
   x = SLL(x);
 }
 
-auto Z80::instructionSRA_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionSRA_irr(uint16& addr) -> void {
   write(addr, SRA(read(addr)));
+}
+
+auto Z80::instructionSRA_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = SRA(read(addr)));
 }
 
 auto Z80::instructionSRA_r(uint8& x) -> void {
   x = SRA(x);
 }
 
-auto Z80::instructionSRL_irr(uint16& x) -> void {
-  auto addr = displace(x);
+auto Z80::instructionSRL_irr(uint16& addr) -> void {
   write(addr, SRL(read(addr)));
+}
+
+auto Z80::instructionSRL_irr_r(uint16& addr, uint8& x) -> void {
+  write(addr, x = SRL(read(addr)));
 }
 
 auto Z80::instructionSRL_r(uint8& x) -> void {

@@ -11,6 +11,8 @@ struct CPU : Processor::Z80, Thread {
   auto power() -> void;
   auto reset() -> void;
 
+  vector<Thread*> peripherals;
+
 private:
   struct State {
     boolean nmiLine;

@@ -9,7 +9,7 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  #if 1
+  #if 0
   static uint64 instructionsExecuted = 0;
   if(instructionsExecuted < 20)
   print(disassemble(r.pc), "\n");
@@ -35,6 +35,7 @@ auto CPU::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(vdp);
   synchronize(psg);
+  for(auto peripheral : peripherals) synchronize(*peripheral);
 }
 
 auto CPU::setNMI(bool value) -> void {

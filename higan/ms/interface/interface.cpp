@@ -22,6 +22,11 @@ Interface::Interface() {
   Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
   Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
 
+  { Device device{ID::Device::None, "None"};
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
+  }
+
   { Device device{ID::Device::Gamepad, "Gamepad"};
     device.inputs.append({0, "Up"});
     device.inputs.append({0, "Down"});
@@ -97,6 +102,10 @@ auto Interface::save() -> void {
 
 auto Interface::unload() -> void {
   system.unload();
+}
+
+auto Interface::connect(uint port, uint device) -> void {
+  MasterSystem::peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

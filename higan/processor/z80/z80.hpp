@@ -44,7 +44,7 @@ struct Z80 {
   //instructions.cpp
   auto ADD(uint8, uint8, bool = false) -> uint8;
   auto AND(uint8, uint8) -> uint8;
-  auto BIT(uint3, uint8) -> void;
+  auto BIT(uint3, uint8) -> uint8;
   auto DEC(uint8) -> uint8;
   auto INC(uint8) -> uint8;
   auto OR (uint8, uint8) -> uint8;
@@ -73,6 +73,7 @@ struct Z80 {
   auto instructionAND_a_n() -> void;
   auto instructionAND_a_r(uint8&) -> void;
   auto instructionBIT_o_irr(uint3, uint16&) -> void;
+  auto instructionBIT_o_irr_r(uint3, uint16&, uint8&) -> void;
   auto instructionBIT_o_r(uint3, uint8&) -> void;
   auto instructionCALL_c_nn(bool c) -> void;
   auto instructionCALL_nn() -> void;
@@ -140,12 +141,14 @@ struct Z80 {
   auto instructionPOP_rr(uint16&) -> void;
   auto instructionPUSH_rr(uint16&) -> void;
   auto instructionRES_o_irr(uint3, uint16&) -> void;
+  auto instructionRES_o_irr_r(uint3, uint16&, uint8&) -> void;
   auto instructionRES_o_r(uint3, uint8&) -> void;
   auto instructionRET() -> void;
   auto instructionRET_c(bool c) -> void;
   auto instructionRETI() -> void;
   auto instructionRETN() -> void;
   auto instructionRL_irr(uint16&) -> void;
+  auto instructionRL_irr_r(uint16&, uint8&) -> void;
   auto instructionRL_r(uint8&) -> void;
   auto instructionRLA() -> void;
   auto instructionRLC_irr(uint16&) -> void;
@@ -154,6 +157,7 @@ struct Z80 {
   auto instructionRLCA() -> void;
   auto instructionRLD() -> void;
   auto instructionRR_irr(uint16&) -> void;
+  auto instructionRR_irr_r(uint16&, uint8&) -> void;
   auto instructionRR_r(uint8&) -> void;
   auto instructionRRA() -> void;
   auto instructionRRC_irr(uint16&) -> void;
@@ -168,14 +172,19 @@ struct Z80 {
   auto instructionSBC_hl_rr(uint16&) -> void;
   auto instructionSCF() -> void;
   auto instructionSET_o_irr(uint3, uint16&) -> void;
+  auto instructionSET_o_irr_r(uint3, uint16&, uint8&) -> void;
   auto instructionSET_o_r(uint3, uint8&) -> void;
   auto instructionSLA_irr(uint16&) -> void;
+  auto instructionSLA_irr_r(uint16&, uint8&) -> void;
   auto instructionSLA_r(uint8&) -> void;
   auto instructionSLL_irr(uint16&) -> void;
+  auto instructionSLL_irr_r(uint16&, uint8&) -> void;
   auto instructionSLL_r(uint8&) -> void;
   auto instructionSRA_irr(uint16&) -> void;
+  auto instructionSRA_irr_r(uint16&, uint8&) -> void;
   auto instructionSRA_r(uint8&) -> void;
   auto instructionSRL_irr(uint16&) -> void;
+  auto instructionSRL_irr_r(uint16&, uint8&) -> void;
   auto instructionSRL_r(uint8&) -> void;
   auto instructionSUB_a_irr(uint16&) -> void;
   auto instructionSUB_a_n() -> void;

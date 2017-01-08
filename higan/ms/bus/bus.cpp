@@ -30,6 +30,18 @@ auto Bus::in(uint8 addr) -> uint8 {
     return !addr.bit(0) ? vdp.data() : vdp.status();
   }
 
+  case 3: {
+    auto A = peripherals.controllerPort1->readData();
+    auto B = peripherals.controllerPort2->readData();
+    if(addr.bit(0) == 0) {
+      return A.bits(0,5) << 0 | B.bits(0,1) << 6;
+    } else {
+      //d4 = reset button
+      //d5 = cartridge CONT pin
+      return B.bits(2,5) << 0 | 1 << 4 | 1 << 5 | A.bit(6) << 6 | B.bit(6) << 7;
+    }
+  }
+
   }
 
   return 0xff;

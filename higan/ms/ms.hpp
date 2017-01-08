@@ -30,6 +30,8 @@ namespace MasterSystem {
     }
   };
 
+  #include <ms/controller/controller.hpp>
+
   #include <ms/cpu/cpu.hpp>
   #include <ms/vdp/vdp.hpp>
   #include <ms/psg/psg.hpp>

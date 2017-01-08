@@ -2,6 +2,7 @@
 
 namespace MasterSystem {
 
+#include "peripherals.cpp"
 System system;
 Scheduler scheduler;
 
@@ -29,6 +30,7 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
+  peripherals.unload();
   cartridge.unload();
 }
 
@@ -54,6 +56,8 @@ auto System::reset() -> void {
   vdp.reset();
   psg.reset();
   scheduler.primary(cpu);
+
+  peripherals.reset();
 }
 
 }
