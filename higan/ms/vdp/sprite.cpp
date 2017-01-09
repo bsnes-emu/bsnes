@@ -32,16 +32,17 @@ auto VDP::Sprite::run() -> void {
   if(state.y >= vdp.vlines()) return;
 
   bool large = vdp.io.extendedHeight;
+  uint mask = vdp.io.extendedHeight ? 15 : 7;
   for(auto& o : objects) {
     if(state.x < o.x) continue;
     if(state.x > o.x + 7) continue;
 
-    uint x = o.x - state.x;
-    uint y = o.y - state.y;
+    uint x = state.x - o.x;
+    uint y = state.y - o.y;
 
     uint14 address = vdp.io.spritePatternTableAddress << 13;
     address += o.pattern << 5;
-    address += (y & (large ? 15 : 7)) << 2;
+    address += (y & mask) << 2;
 
     auto index = 7 - (x & 7);
     uint4 color;

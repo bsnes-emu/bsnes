@@ -14,7 +14,7 @@ struct SMP : Processor::SPC700, Thread {
   uint8 iplrom[64];
   uint8 apuram[64 * 1024];
 
-privileged:
+private:
   struct IO {
     //timing
     uint clockCounter;

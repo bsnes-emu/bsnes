@@ -41,7 +41,7 @@ auto VDP::main() -> void {
       color = cram[16 | sprite.output.color];
     }
     if(x <= 7 && io.leftClip) color = cram[io.backdropColor];
-    if(!io.displayEnable) color = 0;
+    if(!io.displayEnable || io.vcounter >= vlines()) color = 0;
     buffer[io.vcounter * 256 + x] = color;
   }
   step(172);

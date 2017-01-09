@@ -29,7 +29,7 @@ struct PPU : Thread, PPUcounter {
   auto latchCounters() -> void;
   auto updateVideoMode() -> void;
 
-privileged:
+private:
   struct VRAM {
     auto& operator[](uint addr) { return data[addr & mask]; }
     uint16 data[64 * 1024];

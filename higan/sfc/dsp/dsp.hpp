@@ -19,7 +19,7 @@ struct DSP : Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-privileged:
+private:
   enum GlobalRegister : uint {
     MVOLL = 0x0c, MVOLR = 0x1c,
     EVOLL = 0x2c, EVOLR = 0x3c,

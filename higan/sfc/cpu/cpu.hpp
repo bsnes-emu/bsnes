@@ -83,7 +83,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   vector<Thread*> coprocessors;
   vector<Thread*> peripherals;
 
-privileged:
+private:
   uint version = 2;  //allowed: 1, 2
 
   struct Status {

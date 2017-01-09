@@ -20,7 +20,6 @@ auto CPU::read(uint24 addr) -> uint8 {
   r.mdr = bus.read(addr, r.mdr);
   step(4);
   aluEdge();
-  debug(cpu.read, addr, r.mdr);
   return r.mdr;
 }
 
@@ -30,7 +29,6 @@ auto CPU::write(uint24 addr, uint8 data) -> void {
   dmaEdge();
   step(status.clockCount);
   bus.write(addr, r.mdr = data);
-  debug(cpu.write, addr, r.mdr);
 }
 
 auto CPU::speed(uint24 addr) const -> uint {

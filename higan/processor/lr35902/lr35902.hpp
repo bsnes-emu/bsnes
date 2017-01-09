@@ -20,7 +20,7 @@ struct LR35902 {
 
   #include "registers.hpp"
 
-privileged:
+private:
   auto op_xx();
   auto op_cb();
 

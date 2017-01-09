@@ -183,7 +183,6 @@ auto SMP::read(uint16 addr) -> uint8 {
   uint8 data = readBus(addr);
   step(12);
   cycleEdge();
-  debug(smp.read, addr, data);
   return data;
 }
 
@@ -191,7 +190,6 @@ auto SMP::write(uint16 addr, uint8 data) -> void {
   step(24);
   writeBus(addr, data);
   cycleEdge();
-  debug(smp.write, addr, data);
 }
 
 auto SMP::readDisassembler(uint16 addr) -> uint8 {

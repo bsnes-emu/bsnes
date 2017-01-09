@@ -1,7 +1,9 @@
 auto Z80::instruction() -> void {
+  //todo: return instruction() could cause stack crash from recursion
+  //but this is needed to prevent IRQs from firing between prefixes and opcodes
   auto code = opcode();
-  if(code == 0xdd) { r.hlp = &r.ix; return; }
-  if(code == 0xfd) { r.hlp = &r.iy; return; }
+  if(code == 0xdd) { r.hlp = &r.ix; return instruction(); }
+  if(code == 0xfd) { r.hlp = &r.iy; return instruction(); }
 
   if(r.ei) {
     r.ei = 0;

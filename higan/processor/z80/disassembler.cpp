@@ -21,7 +21,7 @@ auto Z80::disassemble(uint16 pc) -> string {
   }
 
   if(code == 0xcb && prefix) {
-    auto d = (int8)code;
+    auto d = (int8)bus->read(pc++);
     code = bus->read(pc++);
     output = disassembleCBd(pc, prefix, d, code);
   } else if(code == 0xcb) {

@@ -30,12 +30,10 @@ auto CPU::main() -> void {
       status.nmiPending = false;
       r.vector = r.e ? 0xfffa : 0xffea;
       interrupt();
-      debug(cpu.nmi);
     } else if(status.irqPending) {
       status.irqPending = false;
       r.vector = r.e ? 0xfffe : 0xffee;
       interrupt();
-      debug(cpu.irq);
     } else if(status.resetPending) {
       status.resetPending = false;
       step(132);
@@ -49,7 +47,6 @@ auto CPU::main() -> void {
     }
   }
 
-  debug(cpu.execute, r.pc);
   instruction();
 }
 

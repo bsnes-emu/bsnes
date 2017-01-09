@@ -45,7 +45,7 @@ struct System : IO {
     bool rotate;
   } keypad;
 
-privileged:
+private:
   struct Registers {
     //$0060  DISP_MODE
     uint5 unknown;
