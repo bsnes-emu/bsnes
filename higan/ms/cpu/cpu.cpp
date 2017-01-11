@@ -9,13 +9,6 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  #if 0
-  static uint64 instructionsExecuted = 0;
-  if(instructionsExecuted < 20)
-  print(disassemble(r.pc), "\n");
-  instructionsExecuted++;
-  #endif
-
   //note: SMS1 extbus value is random; SMS2+ is pulled high ($ff)
 
   if(state.nmiLine) {

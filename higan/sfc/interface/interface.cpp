@@ -4,7 +4,6 @@ namespace SuperFamicom {
 
 Interface* interface = nullptr;
 Settings settings;
-Debugger debugger;
 
 Interface::Interface() {
   interface = this;

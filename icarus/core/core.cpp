@@ -3,6 +3,7 @@ Icarus::Icarus() {
   database.superFamicom = BML::unserialize(string::read(locate("Database/Super Famicom.bml")));
   database.masterSystem = BML::unserialize(string::read(locate("Database/Master System.bml")));
   database.megaDrive = BML::unserialize(string::read(locate("Database/Mega Drive.bml")));
+  database.pcEngine = BML::unserialize(string::read(locate("Database/PC Engine.bml")));
   database.gameBoy = BML::unserialize(string::read(locate("Database/Game Boy.bml")));
   database.gameBoyColor = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")));
   database.gameBoyAdvance = BML::unserialize(string::read(locate("Database/Game Boy Advance.bml")));
@@ -36,6 +37,7 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".sfc") return superFamicomManifest(location);
   if(type == ".ms") return masterSystemManifest(location);
   if(type == ".md") return megaDriveManifest(location);
+  if(type == ".pce") return pcEngineManifest(location);
   if(type == ".gb") return gameBoyManifest(location);
   if(type == ".gbc") return gameBoyColorManifest(location);
   if(type == ".gba") return gameBoyAdvanceManifest(location);
@@ -74,6 +76,7 @@ auto Icarus::import(string location) -> string {
   if(type == ".sfc" || type == ".smc") return superFamicomImport(buffer, location);
   if(type == ".ms" || type == ".sms") return masterSystemImport(buffer, location);
   if(type == ".md" || type == ".smd" || type == ".gen") return megaDriveImport(buffer, location);
+  if(type == ".pce") return pcEngineImport(buffer, location);
   if(type == ".gb") return gameBoyImport(buffer, location);
   if(type == ".gbc") return gameBoyColorImport(buffer, location);
   if(type == ".gba") return gameBoyAdvanceImport(buffer, location);

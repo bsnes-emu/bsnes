@@ -376,7 +376,7 @@ auto Z80::instructionCPD() -> void {
 
 auto Z80::instructionCPDR() -> void {
   instructionCPD();
-  if(!VF || ZF) return;
+  if(!BC) return;
   wait(5);
   PC -= 2;
 }
@@ -392,7 +392,7 @@ auto Z80::instructionCPI() -> void {
 
 auto Z80::instructionCPIR() -> void {
   instructionCPI();
-  if(!VF || ZF) return;
+  if(!BC) return;
   wait(5);
   PC -= 2;
 }
@@ -452,6 +452,15 @@ auto Z80::instructionEI() -> void {
   r.ei = 1;  //raise IFF1, IFF2 after the next instruction
 }
 
+auto Z80::instructionEX_irr_rr(uint16& x, uint16& y) -> void {
+  uint16 z;
+  z.byte(0) = read(x + 0);
+  z.byte(1) = read(x + 1);
+  write(x + 0, y.byte(0));
+  write(x + 1, y.byte(1));
+  y = z;
+}
+
 auto Z80::instructionEX_rr_rr(uint16& x, uint16& y) -> void {
   auto z = x;
   x = y;
@@ -501,13 +510,13 @@ auto Z80::instructionIND() -> void {
   wait(1);
   auto data = in(C);
   write(_HL--, data);
-  NF = 0;
+  NF = 1;
   ZF = --B == 0;
 }
 
 auto Z80::instructionINDR() -> void {
   instructionIND();
-  if(ZF) return;
+  if(!B) return;
   wait(5);
   PC -= 2;
 }
@@ -516,13 +525,13 @@ auto Z80::instructionINI() -> void {
   wait(1);
   auto data = in(C);
   write(_HL++, data);
-  NF = 0;
+  NF = 1;
   ZF = --B == 0;
 }
 
 auto Z80::instructionINIR() -> void {
   instructionINI();
-  if(ZF) return;
+  if(!B) return;
   wait(5);
   PC -= 2;
 }
@@ -616,7 +625,7 @@ auto Z80::instructionLDD() -> void {
 
 auto Z80::instructionLDDR() -> void {
   instructionLDD();
-  if(!VF) return;
+  if(!BC) return;
   wait(5);
   PC -= 2;
 }
@@ -632,7 +641,7 @@ auto Z80::instructionLDI() -> void {
 
 auto Z80::instructionLDIR() -> void {
   instructionLDI();
-  if(!VF) return;
+  if(!BC) return;
   wait(5);
   PC -= 2;
 }
@@ -658,14 +667,14 @@ auto Z80::instructionOR_a_r(uint8& x) -> void {
 
 auto Z80::instructionOTDR() -> void {
   instructionOUTD();
-  if(ZF) return;
+  if(!B) return;
   wait(5);
   PC -= 2;
 }
 
 auto Z80::instructionOTIR() -> void {
   instructionOUTI();
-  if(ZF) return;
+  if(!B) return;
   wait(5);
   PC -= 2;
 }

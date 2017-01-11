@@ -339,6 +339,7 @@ auto Z80::disassemble(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0xe0, "ret ", "po")
   op(0xe1, "pop ", HL)
   op(0xe2, "jp  ", "po", NN)
+  op(0xe3, "ex  ", ISP, HL)
   op(0xe4, "call", "po", NN)
   op(0xe5, "push", HL)
   op(0xe6, "and ", A, N)

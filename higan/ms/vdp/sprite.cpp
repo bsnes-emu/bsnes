@@ -3,7 +3,7 @@ auto VDP::Sprite::scanline() -> void {
   state.y = vdp.io.vcounter;
   objects.reset();
 
-  bool large = vdp.io.extendedHeight;
+  uint limit = vdp.io.spriteTile ? 15 : 7;
   uint14 attributeAddress = vdp.io.spriteAttributeTableAddress << 8;
   for(uint index : range(64)) {
     uint8 y = vdp.vram[attributeAddress + index];
@@ -14,9 +14,9 @@ auto VDP::Sprite::scanline() -> void {
     if(vdp.io.spriteShift) x -= 8;
     y += 1;
     if(state.y < y) continue;
-    if(state.y > y + (large ? 15 : 7)) continue;
+    if(state.y > y + limit) continue;
 
-    if(large) pattern.bit(0) = 0;
+    if(limit == 15) pattern.bit(0) = 0;
 
     objects.append({x, y, pattern});
     if(objects.size() == 8) {
@@ -31,8 +31,7 @@ auto VDP::Sprite::run() -> void {
 
   if(state.y >= vdp.vlines()) return;
 
-  bool large = vdp.io.extendedHeight;
-  uint mask = vdp.io.extendedHeight ? 15 : 7;
+  uint limit = vdp.io.spriteTile ? 15 : 7;
   for(auto& o : objects) {
     if(state.x < o.x) continue;
     if(state.x > o.x + 7) continue;
@@ -42,7 +41,7 @@ auto VDP::Sprite::run() -> void {
 
     uint14 address = vdp.io.spritePatternTableAddress << 13;
     address += o.pattern << 5;
-    address += (y & mask) << 2;
+    address += (y & limit) << 2;
 
     auto index = 7 - (x & 7);
     uint4 color;

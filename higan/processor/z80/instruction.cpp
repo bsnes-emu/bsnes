@@ -257,6 +257,7 @@ auto Z80::instruction(uint8 code) -> void {
   op(0xe0, RET_c, PF == 0)
   op(0xe1, POP_rr, HL)
   op(0xe2, JP_c_nn, PF == 0)
+  op(0xe3, EX_irr_rr, SP, HL)
   op(0xe4, CALL_c_nn, PF == 0)
   op(0xe5, PUSH_rr, HL)
   op(0xe6, AND_a_n)

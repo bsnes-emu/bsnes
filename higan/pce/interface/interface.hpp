@@ -1,32 +1,18 @@
-namespace SuperFamicom {
+namespace PCEngine {
 
 struct ID {
   enum : uint {
     System,
-    SuperFamicom,
-    GameBoy,
-    BSMemory,
-    SufamiTurboA,
-    SufamiTurboB,
+    PCEngine,
   };
 
   struct Port { enum : uint {
-    Controller1,
-    Controller2,
-    Expansion,
+    Controller,
   };};
 
   struct Device { enum : uint {
     None,
     Gamepad,
-    Mouse,
-    SuperMultitap,
-    SuperScope,
-    Justifier,
-    Justifiers,
-
-    Satellaview,
-    S21FX,
   };};
 };
 
@@ -47,23 +33,16 @@ struct Interface : Emulator::Interface {
   auto audioFrequency() -> double override;
 
   auto loaded() -> bool override;
-  auto sha256() -> string override;
   auto load(uint id) -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
 
   auto connect(uint port, uint device) -> void override;
   auto power() -> void override;
-  auto reset() -> void override;
   auto run() -> void override;
-
-  auto rtc() -> bool override;
-  auto rtcsync() -> void override;
 
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
-
-  auto cheatSet(const string_vector&) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
@@ -71,14 +50,7 @@ struct Interface : Emulator::Interface {
 };
 
 struct Settings {
-  bool blurEmulation = true;
-  bool colorEmulation = true;
-  bool scanlineEmulation = true;
-
-  uint controllerPort1 = 0;
-  uint controllerPort2 = 0;
-  uint expansionPort = 0;
-  bool random = true;
+  uint controllerPort = 0;
 };
 
 extern Interface* interface;

@@ -93,6 +93,7 @@ struct Z80 {
   auto instructionDI() -> void;
   auto instructionDJNZ_e() -> void;
   auto instructionEI() -> void;
+  auto instructionEX_irr_rr(uint16&, uint16&) -> void;
   auto instructionEX_rr_rr(uint16&, uint16&) -> void;
   auto instructionEXX() -> void;
   auto instructionHALT() -> void;

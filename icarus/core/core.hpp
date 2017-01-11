@@ -32,6 +32,11 @@ struct Icarus {
   auto megaDriveManifest(vector<uint8_t>& buffer, string location) -> string;
   auto megaDriveImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //pc-engine.cpp
+  auto pcEngineManifest(string location) -> string;
+  auto pcEngineManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto pcEngineImport(vector<uint8_t>& buffer, string location) -> string;
+
   //game-boy.cpp
   auto gameBoyManifest(string location) -> string;
   auto gameBoyManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -80,6 +85,7 @@ private:
     Markup::Node superFamicom;
     Markup::Node masterSystem;
     Markup::Node megaDrive;
+    Markup::Node pcEngine;
     Markup::Node gameBoy;
     Markup::Node gameBoyColor;
     Markup::Node gameBoyAdvance;

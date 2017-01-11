@@ -102,9 +102,13 @@ auto ScanDialog::gamePakType(const string& type) -> bool {
   return type == ".sys"
   || type == ".fc"
   || type == ".sfc"
+  || type == ".ms"
+  || type == ".md"
+  || type == ".pce"
   || type == ".gb"
   || type == ".gbc"
   || type == ".gba"
+  || type == ".gg"
   || type == ".bs"
   || type == ".st";
 }
@@ -113,9 +117,13 @@ auto ScanDialog::gameRomType(const string& type) -> bool {
   return type == ".zip"
   || type == ".fc" || type == ".nes"
   || type == ".sfc" || type == ".smc"
+  || type == ".ms" || type == ".sms"
+  || type == ".md" || type == ".smd" || type == ".gen"
+  || type == ".pce"
   || type == ".gb"
   || type == ".gbc"
   || type == ".gba"
+  || type == ".gg"
   || type == ".bs"
   || type == ".st";
 }

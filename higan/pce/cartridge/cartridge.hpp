@@ -9,11 +9,6 @@ struct Cartridge {
   auto unload() -> void;
 
   auto power() -> void;
-  auto reset() -> void;
-
-  //mapper.cpp
-  auto read(uint16 addr) -> maybe<uint8>;
-  auto write(uint16 addr, uint8 data) -> bool;
 
 private:
   struct Information {
@@ -26,7 +21,6 @@ private:
   struct Memory {
     uint8* data = nullptr;
     uint size = 0;
-    uint mask = 0;
 
     static auto mirror(uint addr, uint size) -> uint;
     auto read(uint addr) -> uint8;
@@ -35,24 +29,6 @@ private:
 
   Memory rom;
   Memory ram;
-
-  struct Mapper {
-    //$fffc
-    uint2 shift;
-    uint1 ramPage2;
-    uint1 ramEnablePage2;
-    uint1 ramEnablePage3;
-    uint1 romWriteEnable;
-
-    //$fffd
-    uint8 romPage0;
-
-    //$fffe
-    uint8 romPage1;
-
-    //$ffff
-    uint8 romPage2;
-  } mapper;
 };
 
 extern Cartridge cartridge;

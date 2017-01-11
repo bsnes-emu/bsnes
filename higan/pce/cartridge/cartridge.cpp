@@ -1,25 +1,15 @@
-#include <ms/ms.hpp>
+#include <pce/pce.hpp>
 
-namespace MasterSystem {
+namespace PCEngine {
 
 Cartridge cartridge;
-#include "mapper.cpp"
 
 auto Cartridge::load() -> bool {
   information = {};
 
-  switch(system.model()) {
-  case Model::MasterSystem:
-    if(auto pathID = interface->load(ID::MasterSystem, "Master System", "ms")) {
-      information.pathID = pathID();
-    } else return false;
-    break;
-  case Model::GameGear:
-    if(auto pathID = interface->load(ID::GameGear, "Game Gear", "gg")) {
-      information.pathID = pathID();
-    } else return false;
-    break;
-  }
+  if(auto pathID = interface->load(ID::PCEngine, "PC Engine", "pce")) {
+    information.pathID = pathID();
+  } else return false;
 
   if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
@@ -30,9 +20,8 @@ auto Cartridge::load() -> bool {
 
   if(auto node = document["board/rom"]) {
     rom.size = node["size"].natural();
-    rom.mask = bit::round(rom.size) - 1;
     if(rom.size) {
-      rom.data = new uint8[rom.mask + 1];
+      rom.data = new uint8[rom.size]();
       if(auto name = node["name"].text()) {
         if(auto fp = interface->open(pathID(), name, File::Read, File::Required)) {
           fp->read(rom.data, rom.size);
@@ -43,9 +32,8 @@ auto Cartridge::load() -> bool {
 
   if(auto node = document["board/ram"]) {
     ram.size = node["size"].natural();
-    ram.mask = bit::round(ram.size) - 1;
     if(ram.size) {
-      ram.data = new uint8[ram.mask + 1];
+      ram.data = new uint8[ram.size]();
       if(auto name = node["name"].text()) {
         if(auto fp = interface->open(pathID(), name, File::Read)) {
           fp->read(ram.data, ram.size);
@@ -77,16 +65,9 @@ auto Cartridge::unload() -> void {
 auto Cartridge::power() -> void {
 }
 
-auto Cartridge::reset() -> void {
-  memory::fill(&mapper, sizeof(Mapper));
-  mapper.romPage0 = 0;
-  mapper.romPage1 = 1;
-  mapper.romPage2 = 2;
-}
-
 auto Cartridge::Memory::mirror(uint addr, uint size) -> uint {
   uint base = 0;
-  uint mask = 1 << 21;
+  uint mask = 1 << 23;
   while(addr >= size) {
     while(!(addr & mask)) mask >>= 1;
     addr -= mask;
