@@ -425,6 +425,12 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                           size_t length, bool *error,
                           uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
 {
+    /* Disable watchpoints while evaulating expressions */
+    uint16_t n_watchpoints = gb->n_watchpoints;
+    gb->n_watchpoints = 0;
+    
+    value_t ret = ERROR;
+    
     *error = false;
     // Strip whitespace
     while (length && (string[0] == ' ' || string[0] == '\n' || string[0] == '\r' || string[0] == '\t')) {
@@ -438,7 +444,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     {
         GB_log(gb, "Expected expression.\n");
         *error = true;
-        return ERROR;
+        goto exit;
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
@@ -452,7 +458,10 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             }
             if (string[i] == ')') depth--;
         }
-        if (depth == 0) return debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
+        if (depth == 0) {
+            ret = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
+            goto exit;
+        }
     }
     else if (string[0] == '[' && string[length - 1] == ']') {
         // Attempt to strip square parentheses (memory dereference)
@@ -471,14 +480,14 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             value_t addr = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
             banking_state_t state;
             if (addr.bank) {
-            save_banking_state(gb, &state);
-            switch_banking_state(gb, addr.bank);
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, addr.bank);
             }
-            value_t r = VALUE_16(GB_read_memory(gb, addr.value));
+            ret = VALUE_16(GB_read_memory(gb, addr.value));
             if (addr.bank) {
-            restore_banking_state(gb, &state);
+                restore_banking_state(gb, &state);
             }
-            return r;
+            goto exit;
         }
 
     }
@@ -511,15 +520,17 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (operator_index != -1) {
         unsigned int right_start = (unsigned int)(operator_pos + strlen(operators[operator_index].string));
         value_t right = debugger_evaluate(gb, string + right_start, length - right_start, error, watchpoint_address, watchpoint_new_value);
-        if (*error) return ERROR;
+        if (*error) goto exit;
         if (operators[operator_index].lvalue_operator) {
             lvalue_t left = debugger_evaluate_lvalue(gb, string, operator_pos, error, watchpoint_address, watchpoint_new_value);
-            if (*error) return ERROR;
-            return operators[operator_index].lvalue_operator(gb, left, right.value);
+            if (*error) goto exit;
+            ret = operators[operator_index].lvalue_operator(gb, left, right.value);
+            goto exit;
         }
         value_t left = debugger_evaluate(gb, string, operator_pos, error, watchpoint_address, watchpoint_new_value);
-        if (*error) return ERROR;
-        return operators[operator_index].operator(left, right);
+        if (*error) goto exit;
+        ret = operators[operator_index].operator(left, right);
+        goto exit;
     }
 
     // Not an expression - must be a register or a literal
@@ -528,38 +539,41 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
         if (length == 1) {
             switch (string[0]) {
-                case 'a': return VALUE_16(gb->registers[GB_REGISTER_AF] >> 8);
-                case 'f': return VALUE_16(gb->registers[GB_REGISTER_AF] & 0xFF);
-                case 'b': return VALUE_16(gb->registers[GB_REGISTER_BC] >> 8);
-                case 'c': return VALUE_16(gb->registers[GB_REGISTER_BC] & 0xFF);
-                case 'd': return VALUE_16(gb->registers[GB_REGISTER_DE] >> 8);
-                case 'e': return VALUE_16(gb->registers[GB_REGISTER_DE] & 0xFF);
-                case 'h': return VALUE_16(gb->registers[GB_REGISTER_HL] >> 8);
-                case 'l': return VALUE_16(gb->registers[GB_REGISTER_HL] & 0xFF);
+                case 'a': ret = VALUE_16(gb->registers[GB_REGISTER_AF] >> 8); goto exit;
+                case 'f': ret = VALUE_16(gb->registers[GB_REGISTER_AF] & 0xFF); goto exit;
+                case 'b': ret = VALUE_16(gb->registers[GB_REGISTER_BC] >> 8); goto exit;
+                case 'c': ret = VALUE_16(gb->registers[GB_REGISTER_BC] & 0xFF); goto exit;
+                case 'd': ret = VALUE_16(gb->registers[GB_REGISTER_DE] >> 8); goto exit;
+                case 'e': ret = VALUE_16(gb->registers[GB_REGISTER_DE] & 0xFF); goto exit;
+                case 'h': ret = VALUE_16(gb->registers[GB_REGISTER_HL] >> 8); goto exit;
+                case 'l': ret = VALUE_16(gb->registers[GB_REGISTER_HL] & 0xFF); goto exit;
             }
         }
         else if (length == 2) {
             switch (string[0]) {
-                case 'a': if (string[1] == 'f') return VALUE_16(gb->registers[GB_REGISTER_AF]);
-                case 'b': if (string[1] == 'c') return VALUE_16(gb->registers[GB_REGISTER_BC]);
-                case 'd': if (string[1] == 'e') return VALUE_16(gb->registers[GB_REGISTER_DE]);
-                case 'h': if (string[1] == 'l') return VALUE_16(gb->registers[GB_REGISTER_HL]);
-                case 's': if (string[1] == 'p') return VALUE_16(gb->registers[GB_REGISTER_SP]);
-                case 'p': if (string[1] == 'c') return (value_t){true, bank_for_addr(gb, gb->pc), gb->pc};
+                case 'a': if (string[1] == 'f') {ret = VALUE_16(gb->registers[GB_REGISTER_AF]); goto exit;}
+                case 'b': if (string[1] == 'c') {ret = VALUE_16(gb->registers[GB_REGISTER_BC]); goto exit;}
+                case 'd': if (string[1] == 'e') {ret = VALUE_16(gb->registers[GB_REGISTER_DE]); goto exit;}
+                case 'h': if (string[1] == 'l') {ret = VALUE_16(gb->registers[GB_REGISTER_HL]); goto exit;}
+                case 's': if (string[1] == 'p') {ret = VALUE_16(gb->registers[GB_REGISTER_SP]); goto exit;}
+                case 'p': if (string[1] == 'c') {ret = (value_t){true, bank_for_addr(gb, gb->pc), gb->pc};  goto exit;}
             }
         }
         else if (length == 3) {
             if (watchpoint_address && memcmp(string, "old", 3) == 0) {
-                return VALUE_16(GB_read_memory(gb, *watchpoint_address));
+                ret = VALUE_16(GB_read_memory(gb, *watchpoint_address));
+                goto exit;
             }
 
             if (watchpoint_new_value && memcmp(string, "new", 3) == 0) {
-                return VALUE_16(*watchpoint_new_value);
+                ret = VALUE_16(*watchpoint_new_value);
+                goto exit;
             }
 
             /* $new is identical to $old in read conditions */
             if (watchpoint_address && memcmp(string, "new", 3) == 0) {
-                return VALUE_16(GB_read_memory(gb, *watchpoint_address));
+                ret = VALUE_16(GB_read_memory(gb, *watchpoint_address));
+                goto exit;
             }
         }
 
@@ -568,12 +582,13 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
         symbol_name[length] = 0;
         const GB_symbol_t *symbol = GB_reversed_map_find_symbol(&gb->reversed_symbol_map, symbol_name);
         if (symbol) {
-            return (value_t){true, symbol->bank, symbol->addr};
+            ret = (value_t){true, symbol->bank, symbol->addr};
+            goto exit;
         }
 
         GB_log(gb, "Unknown register or symbol: %.*s\n", (unsigned int) length, string);
         *error = true;
-        return ERROR;
+        goto exit;
     }
 
     char *end;
@@ -587,9 +602,12 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (end != string + length) {
         GB_log(gb, "Failed to parse: %.*s\n", (unsigned int) length, string);
         *error = true;
-        return ERROR;
+        goto exit;
     }
-    return VALUE_16(literal);
+    ret = VALUE_16(literal);
+exit:
+    gb->n_watchpoints = n_watchpoints;
+    return ret;
 }
 
 struct debugger_command_s;
@@ -1460,7 +1478,7 @@ static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
         }
         return true;
     }
-    for (const debugger_command_t *command = commands; command->command; command++) {
+    for (command = commands; command->command; command++) {
         if (command->help_string) {
             print_command_description(gb, command);
         }
