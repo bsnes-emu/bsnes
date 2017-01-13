@@ -1,0 +1,47 @@
+# NOTE: This file is not part of the official higan source, it's been added
+# to help build WIP binaries with minimal fuss.
+
+image: debian:stable
+
+linux-x86_64-binaries:
+  script:
+    - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+    - make -C icarus compiler=g++
+    - make -C higan compiler=g++
+    - mkdir higan-nightly
+    - cp -a icarus/out/icarus higan-nightly/icarus
+    - cp -a icarus/Database higan-nightly/
+    - cp -a higan/out/higan higan-nightly/higan
+    - cp -a higan/data/cheats.bml higan-nightly/
+    - cp -a higan/systems/* higan-nightly/
+  artifacts:
+    paths:
+      - higan-nightly/*
+  cache:
+    paths:
+      - icarus/obj/*.o
+      - higan/obj/*.o
+
+windows-x86_64-binaries:
+  # This is a normal Windows cross-compile process, except that
+  # nall::chrono tries to use clock_gettime on Windows even
+  # though it's a POSIX function, and for some weird reason mingw has
+  # clock_gettime() in the pthread library.
+  script:
+    - apt-get update && apt-get -y install build-essential mingw-w64
+    - sed -i -e 's/-lole32/& -static -lpthread/' nall/GNUmakefile
+    - make -C icarus platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
+    - make -C higan platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
+    - mkdir higan-nightly
+    - cp -a icarus/out/icarus higan-nightly/icarus.exe
+    - cp -a icarus/Database higan-nightly/
+    - cp -a higan/out/higan higan-nightly/higan.exe
+    - cp -a higan/data/cheats.bml higan-nightly/
+    - cp -a higan/systems/* higan-nightly/
+  artifacts:
+    paths:
+      - higan-nightly/*
+  cache:
+    paths:
+      - icarus/obj/*.o
+      - higan/obj/*.o
