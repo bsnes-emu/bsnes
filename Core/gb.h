@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include "printer.h"
 #include "apu.h"
 #include "save_struct.h"
 #include "symbol_hash.h"
@@ -264,9 +265,9 @@ typedef struct GB_gameboy_s {
         bool ime_toggle; /* ei (and di in CGB) have delayed effects.*/
         bool halt_bug;
 
-        /* Misc state*/
-        /* IR */
+        /* Misc state */
         bool infrared_input;
+        GB_printer_t printer;
     );
 
     /* DMA and HDMA */
@@ -510,4 +511,5 @@ void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_en
 uint8_t GB_serial_get_data(GB_gameboy_t *gb);
 void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
 
+void GB_disconnect_serial(GB_gameboy_t *gb);
 #endif /* GB_h */

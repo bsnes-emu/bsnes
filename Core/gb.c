@@ -543,3 +543,12 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
     gb->sample_rate = sample_rate;
     gb->audio_position = 0;
 }
+
+void GB_disconnect_serial(GB_gameboy_t *gb)
+{
+    gb->serial_transfer_start_callback = NULL;
+    gb->serial_transfer_end_callback = NULL;
+    
+    /* Reset any internally-emulated device. Currently, only the printer. */
+    memset(&gb->printer, 0, sizeof(gb->printer));
+}
