@@ -25,6 +25,9 @@
 @property (strong) IBOutlet NSTextField *vramStatusLabel;
 @property (strong) IBOutlet NSTableView *paletteTableView;
 @property (strong) IBOutlet NSTableView *spritesTableView;
+@property (strong) IBOutlet NSPanel *printerFeedWindow;
+@property (strong) IBOutlet NSImageView *feedImageView;
+@property (strong) IBOutlet NSButton *feedSaveButton;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

@@ -37,6 +37,9 @@
     uint16_t oamCount;
     uint8_t oamHeight;
     bool oamUpdating;
+    
+    NSMutableData *currentPrinterImageData;
+    enum {GBAccessoryNone, GBAccessoryPrinter} accessory;
 }
 
 @property GBAudioClient *audioClient;
@@ -46,6 +49,9 @@
 - (const char *) getAsyncDebuggerInput;
 - (void) cameraRequestUpdate;
 - (uint8_t) cameraGetPixelAtX:(uint8_t)x andY:(uint8_t)y;
+- (void) printImage:(uint32_t *)image height:(unsigned) height
+          topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
+           exposure:(unsigned) exposure;
 @end
 
 static void vblank(GB_gameboy_t *gb)
@@ -75,7 +81,7 @@ static char *asyncConsoleInput(GB_gameboy_t *gb)
 
 static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
-    return (r << 0) | (g << 8) | (b << 16);
+    return (r << 0) | (g << 8) | (b << 16) | 0xFF000000;
 }
 
 static void cameraRequestUpdate(GB_gameboy_t *gb)
@@ -88,6 +94,13 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
     Document *self = (__bridge Document *)(gb->user_data);
     return [self cameraGetPixelAtX:x andY:y];
+}
+
+static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
+                       uint8_t top_margin, uint8_t bottom_margin, uint8_t exposure)
+{
+    Document *self = (__bridge Document *)(gb->user_data);
+    [self printImage:image height:height topMargin:top_margin bottomMargin:bottom_margin exposure:exposure];
 }
 
 @implementation Document
@@ -132,6 +145,7 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 
 - (void) initCommon
 {
+    gb.user_data = (__bridge void *)(self);
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
@@ -139,7 +153,6 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
-    gb.user_data = (__bridge void *)(self);
 }
 
 - (void) vblank
@@ -271,6 +284,14 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
                                    window_frame.size.height);
     [self.mainWindow setFrame:window_frame display:YES];
     self.vramStatusLabel.cell.backgroundStyle = NSBackgroundStyleRaised;
+    
+    
+    [self.feedSaveButton removeFromSuperview];
+    /* contentView.superview.subviews.lastObject is the titlebar view */
+    NSView *titleView = self.printerFeedWindow.contentView.superview.subviews.lastObject;
+    [titleView addSubview: self.feedSaveButton];
+    self.feedSaveButton.frame = (NSRect){{268, 2}, {48, 17}};
+    
     [self start];
 
 }
@@ -399,6 +420,12 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
             return false;
         }
+    }
+    else if ([anItem action] == @selector(disconnectAllAccessories:)) {
+        [(NSMenuItem*)anItem setState:accessory == GBAccessoryNone];
+    }
+    else if ([anItem action] == @selector(connectPrinter:)) {
+        [(NSMenuItem*)anItem setState:accessory == GBAccessoryPrinter];
     }
     return [super validateUserInterfaceItem:anItem];
 }
@@ -1073,4 +1100,71 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
     [self.vramWindow makeKeyAndOrderFront:sender];
 }
+
+- (void) printImage:(uint32_t *)imageBytes height:(unsigned) height
+          topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
+           exposure:(unsigned) exposure
+{
+    uint32_t paddedImage[160 * (topMargin + height + bottomMargin)];
+    memset(paddedImage, 0xFF, sizeof(paddedImage));
+    memcpy(paddedImage + (160 * topMargin), imageBytes, 160 * height * sizeof(imageBytes[0]));
+    if (!self.printerFeedWindow.isVisible) {
+        currentPrinterImageData = [[NSMutableData alloc] init];
+    }
+    [currentPrinterImageData appendBytes:paddedImage length:sizeof(paddedImage)];
+    self.feedImageView.image = [Document imageFromData:currentPrinterImageData
+                                                 width:160
+                                                height:currentPrinterImageData.length / 160 / sizeof(imageBytes[0])
+                                                 scale:2.0];
+    /* UI related code must run on main thread. */
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSRect frame = self.printerFeedWindow.frame;
+        frame.size = self.feedImageView.image.size;
+        frame.size.height += self.printerFeedWindow.frame.size.height - self.printerFeedWindow.contentView.frame.size.height;
+        [self.printerFeedWindow setMaxSize:frame.size];
+        [self.printerFeedWindow setFrame:frame display:NO animate: self.printerFeedWindow.isVisible];
+        [self.printerFeedWindow orderFront:NULL];
+    });
+    
+}
+- (IBAction)savePrinterFeed:(id)sender
+{
+    bool shouldResume = running;
+    [self stop];
+    NSSavePanel * savePanel = [NSSavePanel savePanel];
+    [savePanel setAllowedFileTypes:@[@"png"]];
+    [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            [savePanel orderOut:self];
+            CGImageRef cgRef = [self.feedImageView.image CGImageForProposedRect:NULL
+                                                                        context:nil
+                                                                          hints:nil];
+            NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
+            [imageRep setSize:(NSSize){160, self.feedImageView.image.size.height / 2}];
+            NSData *data = [imageRep representationUsingType:NSPNGFileType properties:@{}];
+            [data writeToURL:savePanel.URL atomically:NO];
+            [self.printerFeedWindow setIsVisible:NO];
+        }
+        if (shouldResume) {
+            [self start];
+        }
+    }];
+}
+
+- (IBAction)disconnectAllAccessories:(id)sender
+{
+    [self performAtomicBlock:^{
+        accessory = GBAccessoryNone;
+        GB_disconnect_serial(&gb);
+    }];
+}
+
+- (IBAction)connectPrinter:(id)sender
+{
+    [self performAtomicBlock:^{
+            accessory = GBAccessoryPrinter;
+        GB_connect_printer(&gb, printImage);
+    }];
+}
+
 @end

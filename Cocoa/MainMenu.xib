@@ -339,6 +339,25 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Connectivity" id="IcW-ZC-4wb">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Connectivity" id="BDM-Cv-BOm">
+                        <items>
+                            <menuItem title="None" id="SiH-Q4-OBY">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="disconnectAllAccessories:" target="-1" id="5hY-9U-nRn"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="GameBoy Printer" id="zHR-Ha-pOR">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="connectPrinter:" target="-1" id="tl1-CL-tAw"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Developer" id="IwX-DJ-dBk">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Developer" id="UVb-cc-at0">
