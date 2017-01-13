@@ -11,6 +11,7 @@
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
+  #define platform Emulator::platform
   using File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   using Cheat = Emulator::Cheat;

@@ -2,11 +2,9 @@
 
 namespace SuperFamicom {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
   system.init();
 
   information.manufacturer = "Nintendo";
@@ -185,7 +183,7 @@ auto Interface::sha256() -> string {
 }
 
 auto Interface::load(uint id) -> bool {
-  if(id == ID::SuperFamicom) return system.load();
+  if(id == ID::SuperFamicom) return system.load(this);
   if(id == ID::BSMemory) return cartridge.loadBSMemory();
   if(id == ID::SufamiTurboA) return cartridge.loadSufamiTurboA();
   if(id == ID::SufamiTurboB) return cartridge.loadSufamiTurboB();
@@ -202,7 +200,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  SuperFamicom::peripherals.connect(port, device);
+  peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

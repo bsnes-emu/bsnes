@@ -1,5 +1,3 @@
-struct Interface;
-
 struct System {
   enum class Region : bool { NTSC = 0, PAL = 1 };
 
@@ -12,7 +10,7 @@ struct System {
 
   auto init() -> void;
   auto term() -> void;
-  auto load() -> bool;
+  auto load(Emulator::Interface*) -> bool;
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -27,6 +25,8 @@ struct System {
   auto unserialize(serializer&) -> bool;
 
 private:
+  Emulator::Interface* interface = nullptr;
+
   struct Information {
     string manifest;
     bool loaded = false;

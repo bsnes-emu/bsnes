@@ -64,7 +64,7 @@ auto CPU::readIO(uint32 addr) -> uint8 {
     static const uint lookup[] = {5, 4, 8, 9, 3, 2, 0, 1};
     if(auto result = player.keyinput()) return result() >> 0;
     uint8 result = 0;
-    for(uint n = 0; n < 8; n++) result |= interface->inputPoll(0, 0, lookup[n]) << n;
+    for(uint n = 0; n < 8; n++) result |= platform->inputPoll(0, 0, lookup[n]) << n;
     if((result & 0xc0) == 0xc0) result &= (uint8)~0xc0;  //up+down cannot be pressed simultaneously
     if((result & 0x30) == 0x30) result &= (uint8)~0x30;  //left+right cannot be pressed simultaneously
     return result ^ 0xff;
@@ -72,8 +72,8 @@ auto CPU::readIO(uint32 addr) -> uint8 {
   case 0x04000131: {
     if(auto result = player.keyinput()) return result() >> 8;
     uint8 result = 0;
-    result |= interface->inputPoll(0, 0, 7) << 0;
-    result |= interface->inputPoll(0, 0, 6) << 1;
+    result |= platform->inputPoll(0, 0, 7) << 0;
+    result |= platform->inputPoll(0, 0, 6) << 1;
     return result ^ 0x03;
   }
 

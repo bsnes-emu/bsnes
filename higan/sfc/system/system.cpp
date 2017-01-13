@@ -24,8 +24,6 @@ auto System::runToSave() -> void {
 }
 
 auto System::init() -> void {
-  assert(interface != nullptr);
-
   icd2.init();
   mcc.init();
   nss.init();
@@ -48,10 +46,10 @@ auto System::init() -> void {
 auto System::term() -> void {
 }
 
-auto System::load() -> bool {
+auto System::load(Emulator::Interface* interface) -> bool {
   information = Information();
 
-  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -93,6 +91,7 @@ auto System::load() -> bool {
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
+  this->interface = interface;
   return information.loaded = true;
 }
 

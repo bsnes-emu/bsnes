@@ -21,15 +21,17 @@ auto System::runToSave() -> void {
   for(auto peripheral : cpu.peripherals) scheduler.synchronize(*peripheral);
 }
 
-auto System::load() -> bool {
+auto System::load(Emulator::Interface* interface) -> bool {
   information = Information();
-  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else {
     return false;
   }
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
+
+  this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   serializeInit();
   return information.loaded = true;

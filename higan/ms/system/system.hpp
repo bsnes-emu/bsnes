@@ -5,14 +5,15 @@ struct System {
 
   auto run() -> void;
 
-  auto load(Model model) -> bool;
+  auto load(Emulator::Interface* interface, Model model) -> bool;
   auto save() -> void;
   auto unload() -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
 private:
+  Emulator::Interface* interface = nullptr;
+
   struct Information {
     bool loaded = false;
     Model model = Model::MasterSystem;
@@ -26,6 +27,7 @@ struct Peripherals {
   auto reset() -> void;
   auto connect(uint port, uint device) -> void;
 
+  Controller* hardware = nullptr;
   Controller* controllerPort1 = nullptr;
   Controller* controllerPort2 = nullptr;
 };

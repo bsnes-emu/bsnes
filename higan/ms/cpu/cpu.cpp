@@ -42,10 +42,6 @@ auto CPU::setINT(bool value) -> void {
 auto CPU::power() -> void {
   Z80::bus = &MasterSystem::bus;
   Z80::power();
-}
-
-auto CPU::reset() -> void {
-  Z80::reset();
   create(CPU::Enter, system.colorburst());
 
   memory::fill(&state, sizeof(State));

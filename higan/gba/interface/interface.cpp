@@ -2,12 +2,9 @@
 
 namespace GameBoyAdvance {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
-
   information.manufacturer = "Nintendo";
   information.name         = "Game Boy Advance";
   information.overscan     = false;
@@ -96,7 +93,7 @@ auto Interface::loaded() -> bool {
 }
 
 auto Interface::load(uint id) -> bool {
-  return system.load();
+  return system.load(this);
 }
 
 auto Interface::save() -> void {

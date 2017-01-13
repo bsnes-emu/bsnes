@@ -51,9 +51,6 @@ auto VDP::Background::run() -> void {
 }
 
 auto VDP::Background::power() -> void {
-}
-
-auto VDP::Background::reset() -> void {
   memory::fill(&state, sizeof(State));
   memory::fill(&output, sizeof(Output));
 }

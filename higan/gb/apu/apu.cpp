@@ -29,7 +29,7 @@ auto APU::main() -> void {
     stream->sample(sequencer.left / 32768.0, sequencer.right / 32768.0);
   } else {
     double samples[] = {sequencer.left / 32768.0, sequencer.right / 32768.0};
-    interface->audioSample(samples, 2);
+  //interface->audioSample(samples, 2);
   }
 
   if(cycle == 0) {  //512hz

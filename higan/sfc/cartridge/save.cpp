@@ -56,7 +56,7 @@ auto Cartridge::saveSuperFX(Markup::Node node) -> void {
 auto Cartridge::saveARMDSP(Markup::Node node) -> void {
   if(!node["ram/volatile"]) {
     if(auto name = node["ram/name"].text()) {
-      if(auto fp = interface->open(ID::SuperFamicom, name, File::Write)) {
+      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
         for(auto n : range(16 * 1024)) fp->write(armdsp.programRAM[n]);
       }
     }
@@ -68,7 +68,7 @@ auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
 
   if(!node["dram/volatile"]) {
     if(auto name = node["dram/name"].text()) {
-      if(auto fp = interface->open(ID::SuperFamicom, name, File::Write)) {
+      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
         for(auto n : range(3 * 1024)) fp->write(hitachidsp.dataRAM[n]);
       }
     }
@@ -79,7 +79,7 @@ auto Cartridge::saveNECDSP(Markup::Node node) -> void {
   if(!node["dram/volatile"]) {
     uint size = necdsp.revision == NECDSP::Revision::uPD7725 ? 256 : 2048;
     if(auto name = node["dram/name"].text()) {
-      if(auto fp = interface->open(ID::SuperFamicom, name, File::Write)) {
+      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
         for(auto n : range(size)) fp->writel(necdsp.dataRAM[n], 2);
       }
     }
@@ -89,7 +89,7 @@ auto Cartridge::saveNECDSP(Markup::Node node) -> void {
 auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
   if(!node["ram/volatile"]) {
     if(auto name = node["ram/name"].text()) {
-      if(auto fp = interface->open(ID::SuperFamicom, name, File::Write)) {
+      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
         uint8 data[16] = {0};
         epsonrtc.save(data);
         fp->write(data, 16);
@@ -101,7 +101,7 @@ auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
 auto Cartridge::saveSharpRTC(Markup::Node node) -> void {
   if(!node["ram/volatile"]) {
     if(auto name = node["ram/name"].text()) {
-      if(auto fp = interface->open(ID::SuperFamicom, name, File::Write)) {
+      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
         uint8 data[16] = {0};
         sharprtc.save(data);
         fp->write(data, 16);
@@ -129,7 +129,7 @@ auto Cartridge::saveMemory(MappedRAM& memory, Markup::Node node, maybe<uint> id)
   if(!node || node["volatile"]) return;
   auto name = node["name"].text();
   auto size = node["size"].natural();
-  if(auto fp = interface->open(id(), name, File::Write)) {
+  if(auto fp = platform->open(id(), name, File::Write)) {
     fp->write(memory.data(), memory.size());
   }
 }

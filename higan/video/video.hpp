@@ -30,7 +30,7 @@ struct Video {
   auto refresh(uint32* input, uint pitch, uint width, uint height) -> void;
 
 private:
-  Emulator::Interface* interface = nullptr;
+  Interface* interface = nullptr;
   vector<shared_pointer<Sprite>> sprites;
 
   uint32* output = nullptr;

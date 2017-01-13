@@ -5,7 +5,7 @@ struct System {
   auto run() -> void;
   auto runToSave() -> void;
 
-  auto load() -> bool;
+  auto load(Emulator::Interface*) -> bool;
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -26,13 +26,15 @@ struct System {
   auto serializeAll(serializer&) -> void;
   auto serializeInit() -> void;
 
+private:
+  Emulator::Interface* interface = nullptr;
+
   struct Information {
     bool loaded = false;
     double colorburst = 0.0;
     string manifest;
   } information;
 
-private:
   uint _serializeSize = 0;
 };
 

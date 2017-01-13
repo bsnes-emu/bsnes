@@ -11,7 +11,7 @@ struct Stream;
 
 struct Audio {
   auto reset(maybe<uint> channels = nothing, maybe<double> frequency = nothing) -> void;
-  auto setInterface(Interface*) -> void;
+  auto setInterface(Interface* interface) -> void;
 
   auto setVolume(double volume) -> void;
   auto setBalance(double balance) -> void;

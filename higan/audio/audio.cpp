@@ -6,6 +6,8 @@ namespace Emulator {
 Audio audio;
 
 auto Audio::reset(maybe<uint> channels_, maybe<double> frequency_) -> void {
+  interface = nullptr;
+
   if(channels_) channels = channels_();
   if(frequency_) frequency = frequency_();
 
@@ -81,7 +83,7 @@ auto Audio::process() -> void {
       if(balance > 0.0) samples[0] *= 1.0 - balance;
     }
 
-    interface->audioSample(samples, channels);
+    platform->audioSample(samples, channels);
   }
 }
 

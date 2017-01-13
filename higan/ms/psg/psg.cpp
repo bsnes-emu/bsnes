@@ -19,9 +19,6 @@ auto PSG::step(uint clocks) -> void {
 }
 
 auto PSG::power() -> void {
-}
-
-auto PSG::reset() -> void {
   create(PSG::Enter, system.colorburst());
   stream = Emulator::audio.createStream(2, system.colorburst());
 }

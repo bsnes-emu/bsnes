@@ -18,11 +18,11 @@ S21FX::S21FX() {
   ram[1] = 0xfc;
   ram[2] = 0xff;
 
-  if(auto buffer = file::read({interface->path(ID::System), "21fx.rom"})) {
+  if(auto buffer = file::read({platform->path(ID::System), "21fx.rom"})) {
     memory::copy(ram, sizeof(ram), buffer.data(), buffer.size());
   }
 
-  string filename{interface->path(ID::SuperFamicom), "21fx.so"};
+  string filename{platform->path(ID::SuperFamicom), "21fx.so"};
   if(link.openAbsolute(filename)) {
     linkInit = link.sym("fx_init");
     linkMain = link.sym("fx_main");

@@ -17,15 +17,16 @@ Program::Program(string_vector args) {
   program = this;
   Application::onMain({&Program::main, this});
 
+  Emulator::platform = this;
   emulators.append(new Famicom::Interface);
   emulators.append(new SuperFamicom::Interface);
-  emulators.append(new MasterSystem::Interface);
+  emulators.append(new MasterSystem::MasterSystemInterface);
   emulators.append(new MegaDrive::Interface);
   emulators.append(new PCEngine::Interface);
   emulators.append(new GameBoy::Interface);
   emulators.append(new GameBoyAdvance::Interface);
+  emulators.append(new MasterSystem::GameGearInterface);
   emulators.append(new WonderSwan::Interface);
-  for(auto& emulator : emulators) emulator->bind = this;
 
   new Presentation;
   presentation->setVisible();

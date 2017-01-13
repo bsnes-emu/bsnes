@@ -10,17 +10,18 @@ auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vdp.refresh();
 }
 
-auto System::load(Model model) -> bool {
+auto System::load(Emulator::Interface* interface, Model model) -> bool {
   information = {};
   information.model = model;
 
-  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   return information.loaded = true;
 }
@@ -35,14 +36,6 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  cartridge.power();
-  cpu.power();
-  vdp.power();
-  psg.power();
-  reset();
-}
-
-auto System::reset() -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   Emulator::video.setPalette();
@@ -51,10 +44,10 @@ auto System::reset() -> void {
   Emulator::audio.setInterface(interface);
 
   scheduler.reset();
-  cartridge.reset();
-  cpu.reset();
-  vdp.reset();
-  psg.reset();
+  cartridge.power();
+  cpu.power();
+  vdp.power();
+  psg.power();
   scheduler.primary(cpu);
 
   peripherals.reset();

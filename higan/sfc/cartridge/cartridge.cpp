@@ -26,14 +26,14 @@ auto Cartridge::title() const -> string {
 }
 
 auto Cartridge::load() -> bool {
-  information = Information();
-  has = Has();
+  information = {};
+  has = {};
 
-  if(auto pathID = interface->load(ID::SuperFamicom, "Super Famicom", "sfc")) {
+  if(auto pathID = platform->load(ID::SuperFamicom, "Super Famicom", "sfc")) {
     information.pathID = pathID();
   } else return false;
 
-  if(auto fp = interface->open(ID::SuperFamicom, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::SuperFamicom, "manifest.bml", File::Read, File::Required)) {
     information.manifest.cartridge = fp->reads();
   } else return false;
   auto document = BML::unserialize(information.manifest.cartridge);
@@ -99,7 +99,7 @@ auto Cartridge::loadGameBoy() -> bool {
 }
 
 auto Cartridge::loadBSMemory() -> bool {
-  if(auto fp = interface->open(bsmemory.pathID, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(bsmemory.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.bsMemory = fp->reads();
   } else return false;
   loadBSMemory(BML::unserialize(information.manifest.bsMemory));
@@ -107,7 +107,7 @@ auto Cartridge::loadBSMemory() -> bool {
 }
 
 auto Cartridge::loadSufamiTurboA() -> bool {
-  if(auto fp = interface->open(sufamiturboA.pathID, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(sufamiturboA.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboA = fp->reads();
   } else return false;
   loadSufamiTurboA(BML::unserialize(information.manifest.sufamiTurboA));
@@ -115,7 +115,7 @@ auto Cartridge::loadSufamiTurboA() -> bool {
 }
 
 auto Cartridge::loadSufamiTurboB() -> bool {
-  if(auto fp = interface->open(sufamiturboB.pathID, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(sufamiturboB.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboB = fp->reads();
   } else return false;
   loadSufamiTurboB(BML::unserialize(information.manifest.sufamiTurboB));

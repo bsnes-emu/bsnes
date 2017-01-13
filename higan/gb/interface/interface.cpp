@@ -2,11 +2,9 @@
 
 namespace GameBoy {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
   hook = nullptr;
 
   information.manufacturer = "Nintendo";
@@ -134,9 +132,9 @@ auto Interface::sha256() -> string {
 }
 
 auto Interface::load(uint id) -> bool {
-  if(id == ID::GameBoy) return system.load(System::Revision::GameBoy);
-  if(id == ID::SuperGameBoy) return system.load(System::Revision::SuperGameBoy);
-  if(id == ID::GameBoyColor) return system.load(System::Revision::GameBoyColor);
+  if(id == ID::GameBoy) return system.load(this, System::Revision::GameBoy);
+  if(id == ID::SuperGameBoy) return system.load(this, System::Revision::SuperGameBoy);
+  if(id == ID::GameBoyColor) return system.load(this, System::Revision::GameBoyColor);
   return false;
 }
 

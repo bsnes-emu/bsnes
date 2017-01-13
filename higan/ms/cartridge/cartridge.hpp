@@ -9,7 +9,6 @@ struct Cartridge {
   auto unload() -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
   //mapper.cpp
   auto read(uint16 addr) -> maybe<uint8>;

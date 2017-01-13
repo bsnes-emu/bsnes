@@ -9,7 +9,6 @@ struct CPU : Processor::Z80, Thread {
   auto setINT(bool value) -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
   vector<Thread*> peripherals;
 

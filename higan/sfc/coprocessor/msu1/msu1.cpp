@@ -84,7 +84,7 @@ auto MSU1::dataOpen() -> void {
   auto document = BML::unserialize(cartridge.information.manifest.cartridge);
   string name = document["board/msu1/rom/name"].text();
   if(!name) name = "msu1.rom";
-  if(dataFile = interface->open(ID::SuperFamicom, name, File::Read)) {
+  if(dataFile = platform->open(ID::SuperFamicom, name, File::Read)) {
     dataFile->seek(io.dataReadOffset);
   }
 }
@@ -98,7 +98,7 @@ auto MSU1::audioOpen() -> void {
     name = track["name"].text();
     break;
   }
-  if(audioFile = interface->open(ID::SuperFamicom, name, File::Read)) {
+  if(audioFile = platform->open(ID::SuperFamicom, name, File::Read)) {
     if(audioFile->size() >= 8) {
       uint32 header = audioFile->readm(4);
       if(header == 0x4d535531) {  //"MSU1"

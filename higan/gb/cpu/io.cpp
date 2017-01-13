@@ -8,15 +8,15 @@ auto CPU::wramAddress(uint16 addr) const -> uint {
 auto CPU::joypPoll() -> void {
   uint button = 0, dpad = 0;
 
-  button |= interface->inputPoll(0, 0, (uint)Input::Start) << 3;
-  button |= interface->inputPoll(0, 0, (uint)Input::Select) << 2;
-  button |= interface->inputPoll(0, 0, (uint)Input::B) << 1;
-  button |= interface->inputPoll(0, 0, (uint)Input::A) << 0;
+  button |= platform->inputPoll(0, 0, (uint)Input::Start) << 3;
+  button |= platform->inputPoll(0, 0, (uint)Input::Select) << 2;
+  button |= platform->inputPoll(0, 0, (uint)Input::B) << 1;
+  button |= platform->inputPoll(0, 0, (uint)Input::A) << 0;
 
-  dpad |= interface->inputPoll(0, 0, (uint)Input::Down) << 3;
-  dpad |= interface->inputPoll(0, 0, (uint)Input::Up) << 2;
-  dpad |= interface->inputPoll(0, 0, (uint)Input::Left) << 1;
-  dpad |= interface->inputPoll(0, 0, (uint)Input::Right) << 0;
+  dpad |= platform->inputPoll(0, 0, (uint)Input::Down) << 3;
+  dpad |= platform->inputPoll(0, 0, (uint)Input::Up) << 2;
+  dpad |= platform->inputPoll(0, 0, (uint)Input::Left) << 1;
+  dpad |= platform->inputPoll(0, 0, (uint)Input::Right) << 0;
 
   if(system.revision() != System::Revision::SuperGameBoy) {
     //D-pad pivot makes it impossible to press opposing directions at the same time
@@ -145,7 +145,7 @@ auto CPU::writeIO(uint16 addr, uint8 data) -> void {
   if(addr == 0xff00) {  //JOYP
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
-    interface->joypWrite(status.p15, status.p14);
+  //interface->joypWrite(status.p15, status.p14);
     return;
   }
 

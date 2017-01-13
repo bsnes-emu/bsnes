@@ -2,12 +2,9 @@
 
 namespace MegaDrive {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
-
   information.manufacturer = "Sega";
   information.name         = "Mega Drive";
   information.overscan     = true;
@@ -97,7 +94,7 @@ auto Interface::loaded() -> bool {
 }
 
 auto Interface::load(uint id) -> bool {
-  return system.load();
+  return system.load(this);
 }
 
 auto Interface::save() -> void {
@@ -109,7 +106,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  MegaDrive::peripherals.connect(port, device);
+  peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

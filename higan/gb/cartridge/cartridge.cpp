@@ -19,23 +19,23 @@ auto Cartridge::load(System::Revision revision) -> bool {
 
   switch(revision) {
   case System::Revision::GameBoy:
-    if(auto pathID = interface->load(ID::GameBoy, "Game Boy", "gb")) {
+    if(auto pathID = platform->load(ID::GameBoy, "Game Boy", "gb")) {
       information.pathID = pathID();
     } else return false;
     break;
   case System::Revision::SuperGameBoy:
-    if(auto pathID = interface->load(ID::SuperGameBoy, "Game Boy", "gb")) {
+    if(auto pathID = platform->load(ID::SuperGameBoy, "Game Boy", "gb")) {
       information.pathID = pathID();
     } else return false;
     break;
   case System::Revision::GameBoyColor:
-    if(auto pathID = interface->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
+    if(auto pathID = platform->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
       information.pathID = pathID();
     } else return false;
     break;
   }
 
-  if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -64,12 +64,12 @@ auto Cartridge::load(System::Revision revision) -> bool {
   ram.data = (uint8*)memory::allocate(ram.size, 0xff);
 
   if(auto name = board["rom/name"].text()) {
-    if(auto fp = interface->open(pathID(), name, File::Read, File::Required)) {
+    if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
       fp->read(rom.data, min(rom.size, fp->size()));
     }
   }
   if(auto name = board["ram/name"].text()) {
-    if(auto fp = interface->open(pathID(), name, File::Read, File::Optional)) {
+    if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
       fp->read(ram.data, min(ram.size, fp->size()));
     }
   }
@@ -96,7 +96,7 @@ auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
   if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = interface->open(pathID(), name, File::Write)) {
+    if(auto fp = platform->open(pathID(), name, File::Write)) {
       fp->write(ram.data, ram.size);
     }
   }

@@ -5,7 +5,7 @@ Gamepad::Gamepad(bool port) : Controller(port) {
 
 auto Gamepad::data() -> uint2 {
   if(counter >= 16) return 1;
-  if(latched == 1) return interface->inputPoll(port, ID::Device::Gamepad, B);
+  if(latched == 1) return platform->inputPoll(port, ID::Device::Gamepad, B);
 
   //note: D-pad physically prevents up+down and left+right from being pressed at the same time
   switch(counter++) {
@@ -32,17 +32,17 @@ auto Gamepad::latch(bool data) -> void {
   counter = 0;
 
   if(latched == 0) {
-    b      = interface->inputPoll(port, ID::Device::Gamepad, B);
-    y      = interface->inputPoll(port, ID::Device::Gamepad, Y);
-    select = interface->inputPoll(port, ID::Device::Gamepad, Select);
-    start  = interface->inputPoll(port, ID::Device::Gamepad, Start);
-    up     = interface->inputPoll(port, ID::Device::Gamepad, Up);
-    down   = interface->inputPoll(port, ID::Device::Gamepad, Down);
-    left   = interface->inputPoll(port, ID::Device::Gamepad, Left);
-    right  = interface->inputPoll(port, ID::Device::Gamepad, Right);
-    a      = interface->inputPoll(port, ID::Device::Gamepad, A);
-    x      = interface->inputPoll(port, ID::Device::Gamepad, X);
-    l      = interface->inputPoll(port, ID::Device::Gamepad, L);
-    r      = interface->inputPoll(port, ID::Device::Gamepad, R);
+    b      = platform->inputPoll(port, ID::Device::Gamepad, B);
+    y      = platform->inputPoll(port, ID::Device::Gamepad, Y);
+    select = platform->inputPoll(port, ID::Device::Gamepad, Select);
+    start  = platform->inputPoll(port, ID::Device::Gamepad, Start);
+    up     = platform->inputPoll(port, ID::Device::Gamepad, Up);
+    down   = platform->inputPoll(port, ID::Device::Gamepad, Down);
+    left   = platform->inputPoll(port, ID::Device::Gamepad, Left);
+    right  = platform->inputPoll(port, ID::Device::Gamepad, Right);
+    a      = platform->inputPoll(port, ID::Device::Gamepad, A);
+    x      = platform->inputPoll(port, ID::Device::Gamepad, X);
+    l      = platform->inputPoll(port, ID::Device::Gamepad, L);
+    r      = platform->inputPoll(port, ID::Device::Gamepad, R);
   }
 }

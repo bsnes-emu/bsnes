@@ -22,10 +22,10 @@ auto System::init() -> void {
   assert(interface != nullptr);
 }
 
-auto System::load(Revision revision) -> bool {
+auto System::load(Emulator::Interface* interface, Revision revision) -> bool {
   _revision = revision;
 
-  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -34,7 +34,7 @@ auto System::load(Revision revision) -> bool {
   if(revision == Revision::SuperGameBoy) path = "board/icd2/rom/name";
 
   if(auto name = document[path].text()) {
-    if(auto fp = interface->open(ID::System, name, File::Read, File::Required)) {
+    if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
       if(revision == Revision::GameBoy) fp->read(bootROM.dmg, 256);
       if(revision == Revision::SuperGameBoy) fp->read(bootROM.sgb, 256);
       if(revision == Revision::GameBoyColor) fp->read(bootROM.cgb, 2048);
@@ -43,6 +43,7 @@ auto System::load(Revision revision) -> bool {
 
   if(!cartridge.load(revision)) return false;
   serializeInit();
+  this->interface = interface;
   return _loaded = true;
 }
 

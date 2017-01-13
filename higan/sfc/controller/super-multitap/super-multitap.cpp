@@ -53,18 +53,18 @@ auto SuperMultitap::latch(bool data) -> void {
   if(latched == 0) {
     for(uint id : range(4)) {
       auto& gamepad = gamepads[id];
-      gamepad.b      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + B);
-      gamepad.y      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Y);
-      gamepad.select = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Select);
-      gamepad.start  = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Start);
-      gamepad.up     = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Up);
-      gamepad.down   = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Down);
-      gamepad.left   = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Left);
-      gamepad.right  = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Right);
-      gamepad.a      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + A);
-      gamepad.x      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + X);
-      gamepad.l      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + L);
-      gamepad.r      = interface->inputPoll(port, ID::Device::SuperMultitap, id * 12 + R);
+      gamepad.b      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + B);
+      gamepad.y      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Y);
+      gamepad.select = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Select);
+      gamepad.start  = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Start);
+      gamepad.up     = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Up);
+      gamepad.down   = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Down);
+      gamepad.left   = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Left);
+      gamepad.right  = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + Right);
+      gamepad.a      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + A);
+      gamepad.x      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + X);
+      gamepad.l      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + L);
+      gamepad.r      = platform->inputPoll(port, ID::Device::SuperMultitap, id * 12 + R);
     }
   }
 }

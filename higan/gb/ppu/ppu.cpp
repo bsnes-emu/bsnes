@@ -16,7 +16,7 @@ auto PPU::Enter() -> void {
 
 auto PPU::main() -> void {
   status.lx = 0;
-  interface->lcdScanline();  //Super Game Boy notification
+//interface->lcdScanline();  //Super Game Boy notification
 
   if(status.ly <= 143) {
     mode(2);

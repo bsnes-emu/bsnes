@@ -29,19 +29,20 @@ auto VDP::main() -> void {
   sprite.scanline();
 
   //684 clocks/scanline
+  uint y = io.vcounter;
   for(uint x : range(256)) {
     background.run();
     sprite.run();
     step(2);
 
-    uint6 color = cram[io.backdropColor];
+    uint12 color = palette(io.backdropColor);
     if(background.output.color && (background.output.priority || !sprite.output.color)) {
-      color = cram[background.output.palette << 4 | background.output.color];
+      color = palette(background.output.palette << 4 | background.output.color);
     } else if(sprite.output.color) {
-      color = cram[16 | sprite.output.color];
+      color = palette(16 | sprite.output.color);
     }
-    if(x <= 7 && io.leftClip) color = cram[io.backdropColor];
-    if(!io.displayEnable || io.vcounter >= vlines()) color = 0;
+    if(x <= 7 && io.leftClip) color = palette(io.backdropColor);
+    if(!io.displayEnable || y >= vlines()) color = 0;
     buffer[io.vcounter * 256 + x] = color;
   }
   step(172);
@@ -65,7 +66,13 @@ auto VDP::step(uint clocks) -> void {
 }
 
 auto VDP::refresh() -> void {
-  Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
+  if(system.model() == Model::MasterSystem) {
+    Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
+  }
+
+  if(system.model() == Model::GameGear) {
+    Emulator::video.refresh(buffer + 24 * 256 + 48, 256 * sizeof(uint32), 160, 144);
+  }
 }
 
 auto VDP::vlines() -> uint {
@@ -79,17 +86,24 @@ auto VDP::vblank() -> bool {
 }
 
 auto VDP::power() -> void {
-  background.power();
-  sprite.power();
-}
-
-auto VDP::reset() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 5.0);
 
   memory::fill(&io, sizeof(IO));
 
-  background.reset();
-  sprite.reset();
+  background.power();
+  sprite.power();
+}
+
+auto VDP::palette(uint5 index) -> uint12 {
+  if(system.model() == Model::MasterSystem) {
+    return cram[index];
+  }
+
+  if(system.model() == Model::GameGear) {
+    return cram[index * 2 + 0] << 0 | cram[index * 2 + 1] << 8;
+  }
+
+  return 0;
 }
 
 }

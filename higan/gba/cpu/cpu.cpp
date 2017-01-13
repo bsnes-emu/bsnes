@@ -97,7 +97,7 @@ auto CPU::keypadRun() -> void {
   bool test = regs.keypad.control.condition;  //0 = OR, 1 = AND
   for(auto n : range(10)) {
     if(!regs.keypad.control.flag[n]) continue;
-    bool input = interface->inputPoll(0, 0, lookup[n]);
+    bool input = platform->inputPoll(0, 0, lookup[n]);
     if(regs.keypad.control.condition == 0) test |= input;
     if(regs.keypad.control.condition == 1) test &= input;
   }

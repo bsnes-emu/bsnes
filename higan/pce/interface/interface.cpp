@@ -2,12 +2,9 @@
 
 namespace PCEngine {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
-
   information.manufacturer = "NEC";
   information.name         = "PC Engine";
   information.overscan     = true;
@@ -80,7 +77,7 @@ auto Interface::loaded() -> bool {
 }
 
 auto Interface::load(uint id) -> bool {
-  if(id == ID::PCEngine) return system.load();
+  if(id == ID::PCEngine) return system.load(this);
   return false;
 }
 

@@ -10,7 +10,6 @@ struct VDP : Thread {
   auto vblank() -> bool;
 
   auto power() -> void;
-  auto reset() -> void;
 
   //io.cpp
   auto vcounter() -> uint8;
@@ -28,7 +27,6 @@ struct VDP : Thread {
     auto run() -> void;
 
     auto power() -> void;
-    auto reset() -> void;
 
     struct State {
       uint x;
@@ -48,7 +46,6 @@ struct VDP : Thread {
     auto run() -> void;
 
     auto power() -> void;
-    auto reset() -> void;
 
     struct Object {
       uint8 x;
@@ -69,9 +66,11 @@ struct VDP : Thread {
   } sprite;
 
 private:
+  auto palette(uint5 index) -> uint12;
+
   uint32 buffer[256 * 262];
   uint8 vram[0x4000];
-  uint8 cram[0x20];
+  uint8 cram[0x40];  //MS = 0x20, GG = 0x40
 
   struct IO {
     uint vcounter;  //vertical counter

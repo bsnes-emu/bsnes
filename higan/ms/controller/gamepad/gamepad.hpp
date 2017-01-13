@@ -5,5 +5,5 @@ struct Gamepad : Controller {
 
   Gamepad(uint port);
 
-  auto readData() -> uint7 override;
+  auto readData() -> uint8 override;
 };

@@ -2,12 +2,9 @@
 
 namespace Famicom {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
-
   information.manufacturer = "Nintendo";
   information.name         = "Famicom";
   information.overscan     = true;
@@ -134,7 +131,7 @@ auto Interface::sha256() -> string {
 }
 
 auto Interface::load(uint id) -> bool {
-  return system.load();
+  return system.load(this);
 }
 
 auto Interface::save() -> void {
@@ -147,7 +144,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  Famicom::peripherals.connect(port, device);
+  peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

@@ -2,12 +2,9 @@
 
 namespace WonderSwan {
 
-Interface* interface = nullptr;
 Settings settings;
 
 Interface::Interface() {
-  interface = this;
-
   information.manufacturer = "Bandai";
   information.name         = "WonderSwan";
   information.overscan     = false;
@@ -104,8 +101,8 @@ auto Interface::sha256() -> string {
 }
 
 auto Interface::load(uint id) -> bool {
-  if(id == ID::WonderSwan) return system.load(Model::WonderSwan);
-  if(id == ID::WonderSwanColor) return system.load(Model::WonderSwanColor);
+  if(id == ID::WonderSwan) return system.load(this, Model::WonderSwan);
+  if(id == ID::WonderSwanColor) return system.load(this, Model::WonderSwanColor);
   return false;
 }
 

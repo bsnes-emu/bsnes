@@ -63,9 +63,6 @@ auto VDP::Sprite::run() -> void {
 }
 
 auto VDP::Sprite::power() -> void {
-}
-
-auto VDP::Sprite::reset() -> void {
   memory::fill(&state, sizeof(State));
   memory::fill(&output, sizeof(Output));
 }

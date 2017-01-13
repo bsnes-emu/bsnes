@@ -42,22 +42,22 @@ Board::Board(Markup::Node& document) {
   if(chrram.size) chrram.data = new uint8_t[chrram.size]();
 
   if(prgrom.name = prom["name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), prgrom.name, File::Read, File::Required)) {
+    if(auto fp = platform->open(cartridge.pathID(), prgrom.name, File::Read, File::Required)) {
       fp->read(prgrom.data, min(prgrom.size, fp->size()));
     }
   }
   if(prgram.name = pram["name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), prgram.name, File::Read)) {
+    if(auto fp = platform->open(cartridge.pathID(), prgram.name, File::Read)) {
       fp->read(prgram.data, min(prgram.size, fp->size()));
     }
   }
   if(chrrom.name = crom["name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), chrrom.name, File::Read, File::Required)) {
+    if(auto fp = platform->open(cartridge.pathID(), chrrom.name, File::Read, File::Required)) {
       fp->read(chrrom.data, min(chrrom.size, fp->size()));
     }
   }
   if(chrram.name = cram["name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), chrram.name, File::Read)) {
+    if(auto fp = platform->open(cartridge.pathID(), chrram.name, File::Read)) {
       fp->read(chrram.data, min(chrram.size, fp->size()));
     }
   }
@@ -70,13 +70,13 @@ auto Board::save() -> void {
   auto document = BML::unserialize(cartridge.manifest());
 
   if(auto name = document["board/prg/ram/name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), name, File::Write)) {
+    if(auto fp = platform->open(cartridge.pathID(), name, File::Write)) {
       fp->write(prgram.data, prgram.size);
     }
   }
 
   if(auto name = document["board/chr/ram/name"].text()) {
-    if(auto fp = interface->open(cartridge.pathID(), name, File::Write)) {
+    if(auto fp = platform->open(cartridge.pathID(), name, File::Write)) {
       fp->write(chrram.data, chrram.size);
     }
   }

@@ -158,7 +158,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
     }
   }
 
-  interface->videoRefresh(output, width * sizeof(uint32), width, height);
+  platform->videoRefresh(output, width * sizeof(uint32), width, height);
 }
 
 }

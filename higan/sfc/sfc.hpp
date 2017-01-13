@@ -20,6 +20,7 @@
 #endif
 
 namespace SuperFamicom {
+  #define platform Emulator::platform
   using File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   using Cheat = Emulator::Cheat;

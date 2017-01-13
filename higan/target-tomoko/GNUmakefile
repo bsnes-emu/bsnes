@@ -1,5 +1,5 @@
 name := higan
-flags += -DSFC_SUPERGAMEBOY
+#flags += -DSFC_SUPERGAMEBOY
 
 include fc/GNUmakefile
 include sfc/GNUmakefile

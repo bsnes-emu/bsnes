@@ -64,7 +64,6 @@ struct Settings {
   uint expansionPort = 0;
 };
 
-extern Interface* interface;
 extern Settings settings;
 
 }

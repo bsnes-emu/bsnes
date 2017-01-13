@@ -1,5 +1,3 @@
-struct Interface;
-
 enum class Input : uint {
   Up, Down, Left, Right, B, A, Select, Start,
 };
@@ -23,7 +21,7 @@ struct System {
   auto runToSave() -> void;
 
   auto init() -> void;
-  auto load(Revision) -> bool;
+  auto load(Emulator::Interface*, Revision) -> bool;
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -39,6 +37,8 @@ struct System {
   auto serialize(serializer&) -> void;
   auto serializeAll(serializer&) -> void;
   auto serializeInit() -> void;
+
+  Emulator::Interface* interface = nullptr;
 
   struct BootROM {
     uint8 dmg[ 256];

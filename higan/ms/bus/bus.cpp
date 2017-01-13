@@ -19,6 +19,11 @@ auto Bus::in(uint8 addr) -> uint8 {
   switch(addr >> 6) {
 
   case 0: {
+    if(system.model() == Model::GameGear) {
+      auto hardware = peripherals.hardware->readData();
+      return hardware.bit(6) << 7 | 0x7f;
+    }
+
     return 0xff;  //SMS1 = MDR, SMS2 = 0xff
   }
 
@@ -31,15 +36,25 @@ auto Bus::in(uint8 addr) -> uint8 {
   }
 
   case 3: {
-    auto A = peripherals.controllerPort1->readData();
-    auto B = peripherals.controllerPort2->readData();
-    if(addr.bit(0) == 0) {
-      return A.bits(0,5) << 0 | B.bits(0,1) << 6;
-    } else {
-      //d4 = reset button
-      //d5 = cartridge CONT pin
-      return B.bits(2,5) << 0 | 1 << 4 | 1 << 5 | A.bit(6) << 6 | B.bit(6) << 7;
+    if(system.model() == Model::MasterSystem) {
+      auto hardware = peripherals.hardware->readData();
+      auto port1 = peripherals.controllerPort1->readData();
+      auto port2 = peripherals.controllerPort2->readData();
+      if(addr.bit(0) == 0) {
+        return port1.bits(0,5) << 0 | port2.bits(0,1) << 6;
+      } else {
+        return port2.bits(2,5) << 0 | hardware.bit(0) << 4 | 1 << 5 | port1.bit(6) << 6 | port2.bit(6) << 7;
+      }
     }
+    if(system.model() == Model::GameGear) {
+      auto hardware = peripherals.hardware->readData();
+      if(addr.bit(0) == 0) {
+        return hardware.bits(0,5) << 0 | 0xc0;
+      } else {
+        return 0xff;
+      }
+    }
+    return 0xff;
   }
 
   }

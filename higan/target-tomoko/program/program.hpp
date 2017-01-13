@@ -1,4 +1,4 @@
-struct Program : Emulator::Interface::Bind {
+struct Program : Emulator::Platform {
   //program.cpp
   Program(string_vector args);
   auto main() -> void;

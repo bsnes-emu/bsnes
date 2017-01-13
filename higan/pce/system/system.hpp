@@ -4,13 +4,15 @@ struct System {
 
   auto run() -> void;
 
-  auto load() -> bool;
+  auto load(Emulator::Interface*) -> bool;
   auto save() -> void;
   auto unload() -> void;
 
   auto power() -> void;
 
 private:
+  Emulator::Interface* interface = nullptr;
+
   struct Information {
     bool loaded = false;
     string manifest;

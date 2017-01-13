@@ -100,7 +100,7 @@ auto Player::write(uint2 addr, uint8 byte) -> void {
 
   if(addr == 3 && status.packet == 15) {
     status.rumble = (status.recv & 0xff) == 0x26;  //on = 0x26, off = 0x04
-    interface->inputRumble(0, 0, 10, status.rumble);
+    platform->inputRumble(0, 0, 10, status.rumble);
   }
 }
 

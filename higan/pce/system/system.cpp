@@ -10,16 +10,17 @@ auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vdc.refresh();
 }
 
-auto System::load() -> bool {
+auto System::load(Emulator::Interface* interface) -> bool {
   information = {};
 
-  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   return information.loaded = true;
 }

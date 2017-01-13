@@ -2,6 +2,18 @@
 
 namespace Emulator {
 
+struct Platform {
+  virtual auto path(uint id) -> string { return ""; }
+  virtual auto open(uint id, string name, vfs::file::mode mode, bool required = false) -> vfs::shared::file { return {}; }
+  virtual auto load(uint id, string name, string type) -> maybe<uint> { return nothing; }
+  virtual auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {}
+  virtual auto audioSample(const double* samples, uint channels) -> void {}
+  virtual auto inputPoll(uint port, uint device, uint input) -> int16 { return 0; }
+  virtual auto inputRumble(uint port, uint device, uint input, bool enable) -> void {}
+  virtual auto dipSettings(Markup::Node node) -> uint { return 0; }
+  virtual auto notify(string text) -> void { print(text, "\n"); }
+};
+
 struct Interface {
   struct Information {
     string manufacturer;
@@ -37,30 +49,6 @@ struct Interface {
     vector<Device> devices;
   };
   vector<Port> ports;
-
-  struct Bind {
-    virtual auto path(uint) -> string { return ""; }
-    virtual auto open(uint, string, vfs::file::mode, bool) -> vfs::shared::file { return {}; }
-    virtual auto load(uint, string, string) -> maybe<uint> { return nothing; }
-    virtual auto videoRefresh(const uint32*, uint, uint, uint) -> void {}
-    virtual auto audioSample(const double*, uint) -> void {}
-    virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
-    virtual auto inputRumble(uint, uint, uint, bool) -> void {}
-    virtual auto dipSettings(Markup::Node) -> uint { return 0; }
-    virtual auto notify(string text) -> void { print(text, "\n"); }
-  };
-  Bind* bind = nullptr;
-
-  //callback bindings (provided by user interface)
-  auto path(uint id) -> string { return bind->path(id); }
-  auto open(uint id, string name, vfs::file::mode mode, bool required = false) -> vfs::shared::file { return bind->open(id, name, mode, required); }
-  auto load(uint id, string name, string type) -> maybe<uint> { return bind->load(id, name, type); }
-  auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(data, pitch, width, height); }
-  auto audioSample(const double* samples, uint channels) -> void { return bind->audioSample(samples, channels); }
-  auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }
-  auto inputRumble(uint port, uint device, uint input, bool enable) -> void { return bind->inputRumble(port, device, input, enable); }
-  auto dipSettings(Markup::Node node) -> uint { return bind->dipSettings(node); }
-  template<typename... P> auto notify(P&&... p) -> void { return bind->notify({forward<P>(p)...}); }
 
   //information
   virtual auto manifest() -> string = 0;
@@ -117,5 +105,7 @@ struct File {
   static const auto Optional = false;
   static const auto Required = true;
 };
+
+extern Platform* platform;
 
 }

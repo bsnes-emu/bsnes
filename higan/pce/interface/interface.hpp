@@ -53,7 +53,6 @@ struct Settings {
   uint controllerPort = 0;
 };
 
-extern Interface* interface;
 extern Settings settings;
 
 }

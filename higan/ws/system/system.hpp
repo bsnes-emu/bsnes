@@ -9,7 +9,7 @@ struct System : IO {
 
   auto init() -> void;
   auto term() -> void;
-  auto load(Model) -> bool;
+  auto load(Emulator::Interface*, Model) -> bool;
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -46,6 +46,8 @@ struct System : IO {
   } keypad;
 
 private:
+  Emulator::Interface* interface = nullptr;
+
   struct Registers {
     //$0060  DISP_MODE
     uint5 unknown;

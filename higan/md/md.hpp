@@ -11,6 +11,7 @@
 #include <processor/z80/z80.hpp>
 
 namespace MegaDrive {
+  #define platform Emulator::platform
   using File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   extern Scheduler scheduler;

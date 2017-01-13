@@ -57,7 +57,6 @@ struct Settings {
   bool colorEmulation = true;
 };
 
-extern Interface* interface;
 extern Settings settings;
 
 }
