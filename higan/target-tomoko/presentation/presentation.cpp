@@ -42,8 +42,7 @@ Presentation::Presentation() {
   }
 
   systemMenu.setText("System").setVisible(false);
-  powerSystem.setText("Power").onActivate([&] { program->powerCycle(); });
-  resetSystem.setText("Reset").onActivate([&] { program->softReset(); });
+  reloadSystem.setText("Power Cycle").onActivate([&] { program->powerCycle(); });
   unloadSystem.setText("Unload").onActivate([&] { program->unloadMedium(); });
 
   settingsMenu.setText("Settings");
@@ -171,7 +170,6 @@ Presentation::Presentation() {
 
 auto Presentation::updateEmulator() -> void {
   if(!emulator) return;
-  resetSystem.setVisible(emulator->information.resettable);
   inputPort1.setVisible(false).reset();
   inputPort2.setVisible(false).reset();
   inputPort3.setVisible(false).reset();

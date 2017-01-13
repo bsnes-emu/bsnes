@@ -21,7 +21,6 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
 
   Emulator::audio.reset(2, audio->get(Audio::Frequency).get<uint>(44100));
   inputManager->bind(emulator = &interface);
-  connectDevices();
   if(!emulator->load(medium.id)) {
     emulator = nullptr;
     mediumPaths.reset();
@@ -29,6 +28,7 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
   }
   updateAudioDriver();
   updateAudioEffects();
+  connectDevices();
   emulator->power();
 
   presentation->resizeViewport();

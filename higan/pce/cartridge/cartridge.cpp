@@ -30,44 +30,32 @@ auto Cartridge::load() -> bool {
     }
   }
 
-  if(auto node = document["board/ram"]) {
-    ram.size = node["size"].natural();
-    if(ram.size) {
-      ram.data = new uint8[ram.size]();
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read)) {
-          fp->read(ram.data, ram.size);
-        }
-      }
-    }
-  }
-
   return true;
 }
 
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
-
-  if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Write)) {
-      fp->write(ram.data, ram.size);
-    }
-  }
 }
 
 auto Cartridge::unload() -> void {
   delete[] rom.data;
-  delete[] ram.data;
   rom = {};
-  ram = {};
 }
 
 auto Cartridge::power() -> void {
 }
 
-auto Cartridge::Memory::mirror(uint addr, uint size) -> uint {
+auto Cartridge::read(uint20 addr) -> uint8 {
+  if(!rom.size) return 0x00;
+  return rom.data[mirror(addr, rom.size)];
+}
+
+auto Cartridge::write(uint20 addr, uint8 data) -> void {
+}
+
+auto Cartridge::mirror(uint addr, uint size) -> uint {
   uint base = 0;
-  uint mask = 1 << 23;
+  uint mask = 1 << 20;
   while(addr >= size) {
     while(!(addr & mask)) mask >>= 1;
     addr -= mask;
@@ -78,16 +66,6 @@ auto Cartridge::Memory::mirror(uint addr, uint size) -> uint {
     mask >>= 1;
   }
   return base + addr;
-}
-
-auto Cartridge::Memory::read(uint addr) -> uint8 {
-  if(!size) return 0x00;
-  return this->data[mirror(addr, size)];
-}
-
-auto Cartridge::Memory::write(uint addr, uint8 data) -> void {
-  if(!size) return;
-  this->data[mirror(addr, size)] = data;
 }
 
 }

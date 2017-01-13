@@ -7,7 +7,10 @@ System system;
 Scheduler scheduler;
 
 auto System::run() -> void {
-  if(scheduler.enter() == Scheduler::Event::Frame) vdp.refresh();
+  if(scheduler.enter() == Scheduler::Event::Frame) {
+    cpu.pollPause();
+    vdp.refresh();
+  }
 }
 
 auto System::load(Emulator::Interface* interface, Model model) -> bool {

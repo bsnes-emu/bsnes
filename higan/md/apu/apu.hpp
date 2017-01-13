@@ -6,7 +6,6 @@ struct APU : Processor::Z80, Thread {
   auto step(uint clocks) -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 };
 
 extern APU apu;

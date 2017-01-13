@@ -16,7 +16,6 @@ struct Z80 {
 
   //z80.cpp
   auto power() -> void;
-  auto reset() -> void;
 
   auto irq(bool maskable, uint16 vector = 0x0000, uint8 extbus = 0xff) -> bool;
   auto parity(uint8) const -> bool;

@@ -30,20 +30,26 @@ auto VDP::main() -> void {
 
   //684 clocks/scanline
   uint y = io.vcounter;
-  for(uint x : range(256)) {
-    background.run();
-    sprite.run();
-    step(2);
+  if(y < vlines()) {
+    uint32* screen = buffer + (24 + y) * 256;
+    for(uint x : range(256)) {
+      background.run();
+      sprite.run();
+      step(2);
 
-    uint12 color = palette(io.backdropColor);
-    if(background.output.color && (background.output.priority || !sprite.output.color)) {
-      color = palette(background.output.palette << 4 | background.output.color);
-    } else if(sprite.output.color) {
-      color = palette(16 | sprite.output.color);
+      uint12 color = palette(io.backdropColor);
+      if(background.output.color && (background.output.priority || !sprite.output.color)) {
+        color = palette(background.output.palette << 4 | background.output.color);
+      } else if(sprite.output.color) {
+        color = palette(16 | sprite.output.color);
+      }
+      if(x <= 7 && io.leftClip) color = palette(io.backdropColor);
+      if(!io.displayEnable) color = 0;
+      *screen++ = color;
     }
-    if(x <= 7 && io.leftClip) color = palette(io.backdropColor);
-    if(!io.displayEnable || y >= vlines()) color = 0;
-    buffer[io.vcounter * 256 + x] = color;
+  } else {
+    //Vblank
+    step(512);
   }
   step(172);
 
@@ -67,11 +73,16 @@ auto VDP::step(uint clocks) -> void {
 
 auto VDP::refresh() -> void {
   if(system.model() == Model::MasterSystem) {
-    Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
+    //center the video output vertically in the viewport
+    uint32* screen = buffer;
+    if(vlines() == 224) screen += 16 * 256;
+    if(vlines() == 240) screen += 24 * 256;
+
+    Emulator::video.refresh(screen, 256 * sizeof(uint32), 256, 240);
   }
 
   if(system.model() == Model::GameGear) {
-    Emulator::video.refresh(buffer + 24 * 256 + 48, 256 * sizeof(uint32), 160, 144);
+    Emulator::video.refresh(buffer + 48 * 256 + 48, 256 * sizeof(uint32), 160, 144);
   }
 }
 
@@ -88,6 +99,7 @@ auto VDP::vblank() -> bool {
 auto VDP::power() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 5.0);
 
+  memory::fill(&buffer, sizeof(buffer));
   memory::fill(&io, sizeof(IO));
 
   background.power();

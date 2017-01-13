@@ -10,9 +10,6 @@ namespace Processor {
 #include "instructions.cpp"
 
 auto Z80::power() -> void {
-}
-
-auto Z80::reset() -> void {
   memory::fill(&r, sizeof(Registers));
   r.hlp = &r.hl;
 }
@@ -22,7 +19,7 @@ auto Z80::irq(bool maskable, uint16 pc, uint8 extbus) -> bool {
 
   push(r.pc);
 
-  switch(r.im) {
+  switch(maskable ? r.im : (uint2)1) {
 
   case 0: {
     //external data bus ($ff = RST $38)

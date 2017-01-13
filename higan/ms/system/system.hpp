@@ -27,7 +27,6 @@ struct Peripherals {
   auto reset() -> void;
   auto connect(uint port, uint device) -> void;
 
-  Controller* hardware = nullptr;
   Controller* controllerPort1 = nullptr;
   Controller* controllerPort2 = nullptr;
 };

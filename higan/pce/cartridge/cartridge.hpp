@@ -10,7 +10,12 @@ struct Cartridge {
 
   auto power() -> void;
 
+  auto read(uint20 addr) -> uint8;
+  auto write(uint20 addr, uint8 data) -> void;
+
 private:
+  auto mirror(uint addr, uint size) -> uint;
+
   struct Information {
     uint pathID = 0;
     string sha256;
@@ -21,14 +26,9 @@ private:
   struct Memory {
     uint8* data = nullptr;
     uint size = 0;
-
-    static auto mirror(uint addr, uint size) -> uint;
-    auto read(uint addr) -> uint8;
-    auto write(uint addr, uint8 data) -> void;
   };
 
   Memory rom;
-  Memory ram;
 };
 
 extern Cartridge cartridge;

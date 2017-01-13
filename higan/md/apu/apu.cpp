@@ -20,10 +20,6 @@ auto APU::step(uint clocks) -> void {
 auto APU::power() -> void {
   Z80::bus = &busAPU;
   Z80::power();
-}
-
-auto APU::reset() -> void {
-  Z80::reset();
   create(APU::Enter, system.colorburst());
 }
 

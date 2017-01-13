@@ -88,7 +88,6 @@ struct GameGearInterface : Emulator::Interface {
 };
 
 struct Settings {
-  uint hardware = 0;
   uint controllerPort1 = 0;
   uint controllerPort2 = 0;
 };

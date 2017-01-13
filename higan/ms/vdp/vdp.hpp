@@ -68,7 +68,7 @@ struct VDP : Thread {
 private:
   auto palette(uint5 index) -> uint12;
 
-  uint32 buffer[256 * 262];
+  uint32 buffer[256 * 264];
   uint8 vram[0x4000];
   uint8 cram[0x40];  //MS = 0x20, GG = 0x40
 

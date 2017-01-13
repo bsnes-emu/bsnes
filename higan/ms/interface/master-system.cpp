@@ -15,6 +15,7 @@ MasterSystemInterface::MasterSystemInterface() {
 
   { Device device{ID::Device::MasterSystemControls, "Controls"};
     device.inputs.append({0, "Reset"});
+    device.inputs.append({0, "Pause"});
     hardware.devices.append(device);
   }
 

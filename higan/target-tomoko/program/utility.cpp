@@ -4,13 +4,6 @@ auto Program::powerCycle() -> void {
   showMessage("Power cycled");
 }
 
-auto Program::softReset() -> void {
-  if(!emulator) return;
-  if(!emulator->information.resettable) return powerCycle();
-  emulator->reset();
-  showMessage("System reset");
-}
-
 auto Program::connectDevices() -> void {
   if(!emulator) return;
   for(auto& port : emulator->ports) {

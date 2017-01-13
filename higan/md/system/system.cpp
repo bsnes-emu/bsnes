@@ -55,7 +55,7 @@ auto System::reset() -> void {
   scheduler.reset();
   cartridge.reset();
   cpu.reset();
-  apu.reset();
+  apu.power();
   vdp.reset();
   psg.reset();
   ym2612.reset();
