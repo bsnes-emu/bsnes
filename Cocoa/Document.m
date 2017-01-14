@@ -266,6 +266,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void)dealloc
 {
+    [cameraSession stopRunning];
     GB_free(&gb);
     if (cameraImage) {
         CVBufferRelease(cameraImage);
@@ -866,7 +867,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
                 [cameraSession addInput: input];
                 [cameraSession addOutput: cameraOutput];
-                /* ARC will stop the session when the window is closed. */
                 [cameraSession startRunning];
                 cameraConnection = [cameraOutput connectionWithMediaType: AVMediaTypeVideo];
             }
