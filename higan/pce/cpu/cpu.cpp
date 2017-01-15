@@ -51,6 +51,9 @@ auto CPU::write(uint21 addr, uint8 data) -> void {
   if(bank == 0xff) return;  //hardware
 }
 
+auto CPU::st(uint2 addr, uint8 data) -> void {
+}
+
 auto CPU::lastCycle() -> void {
 }
 

@@ -8,6 +8,7 @@ struct HuC6280 {
   virtual auto step(uint clocks) -> void = 0;
   virtual auto read(uint21 addr) -> uint8 = 0;
   virtual auto write(uint21 addr, uint8 data) -> void = 0;
+  virtual auto st(uint2, uint8) -> void = 0;
   virtual auto lastCycle() -> void = 0;
 
   auto power() -> void;
@@ -28,6 +29,7 @@ struct HuC6280 {
   auto instruction() -> void;
 
   //instructions.cpp
+  using fp = auto (HuC6280::*)(uint8) -> uint8;
   auto ADC(uint8) -> uint8;
   auto AND(uint8) -> uint8;
   auto ASL(uint8) -> uint8;
@@ -44,39 +46,60 @@ struct HuC6280 {
   auto ROL(uint8) -> uint8;
   auto ROR(uint8) -> uint8;
   auto SBC(uint8) -> uint8;
+  auto TRB(uint8) -> uint8;
+  auto TSB(uint8) -> uint8;
 
-  using fp = auto (HuC6280::*)(uint8) -> uint8;
-  auto instruction_alu_absolute(fp, uint8 = 0) -> void;
-  auto instruction_alu_immediate(fp) -> void;
-  auto instruction_alu_implied(fp, uint8&) -> void;
-  auto instruction_alu_indirect(fp, uint8 = 0) -> void;
-  auto instruction_alu_indirectY(fp) -> void;
-  auto instruction_alu_memory(fp) -> void;
-  auto instruction_alu_zeropage(fp, uint8 = 0) -> void;
-  auto instruction_bra(bool) -> void;
-  auto instruction_CLb(uint8&) -> void;
-  auto instruction_CLf(bool&) -> void;
+  using bp = auto (HuC6280::*)(uint16&, uint16&) -> void;
+  auto TAI(uint16&, uint16&) -> void;
+  auto TDD(uint16&, uint16&) -> void;
+  auto TIA(uint16&, uint16&) -> void;
+  auto TII(uint16&, uint16&) -> void;
+  auto TIN(uint16&, uint16&) -> void;
+
+  auto instruction_absoluteLoad(fp, uint8&, uint8 = 0) -> void;
+  auto instruction_absoluteModify(fp, uint8 = 0) -> void;
+  auto instruction_absoluteStore(uint8, uint8 = 0) -> void;
+  auto instruction_blockmove(bp) -> void;
+  auto instruction_branch(bool) -> void;
+  auto instruction_clear(uint8&) -> void;
+  auto instruction_clear(bool&) -> void;
+  auto instruction_immediate(fp, uint8&) -> void;
+  auto instruction_implied(fp, uint8&) -> void;
+  auto instruction_indirectLoad(fp, uint8&, uint8 = 0) -> void;
+  auto instruction_indirectStore(uint8, uint8 = 0) -> void;
+  auto instruction_indirectYLoad(fp, uint8&) -> void;
+  auto instruction_indirectYStore(uint8) -> void;
+  auto instruction_memory(fp) -> void;
+  auto instruction_pull(uint8&) -> void;
+  auto instruction_pullP() -> void;
+  auto instruction_push(uint8) -> void;
+  auto instruction_set(bool&) -> void;
+  auto instruction_swap(uint8&, uint8&) -> void;
+  auto instruction_transfer(uint8&, uint8&) -> void;
+  auto instruction_zeropageLoad(fp, uint8&, uint8 = 0) -> void;
+  auto instruction_zeropageModify(fp, uint8 = 0) -> void;
+  auto instruction_zeropageStore(uint8, uint8 = 0) -> void;
+
+  auto instruction_BBR(uint3) -> void;
+  auto instruction_BBS(uint3) -> void;
+  auto instruction_BRK() -> void;
+  auto instruction_BSR() -> void;
   auto instruction_CSL() -> void;
   auto instruction_CSH() -> void;
-  auto instruction_LDA_indirect(uint8 index = 0) -> void;
-  auto instruction_LDA_indirectY() -> void;
-  auto instruction_LDb_absolute(uint8&, uint8 = 0) -> void;
-  auto instruction_LDb_immediate(uint8&) -> void;
-  auto instruction_LDb_zeropage(uint8&, uint8 = 0) -> void;
+  auto instruction_JMP_absolute() -> void;
+  auto instruction_JMP_indirect(uint8 = 0) -> void;
+  auto instruction_JSR() -> void;
   auto instruction_NOP() -> void;
-  auto instruction_PHb(uint8&) -> void;
   auto instruction_PHP() -> void;
-  auto instruction_PLb(uint8&) -> void;
-  auto instruction_PLP() -> void;
-  auto instruction_SEf(bool&) -> void;
-  auto instruction_STA_indirect(uint8 index = 0) -> void;
-  auto instruction_STA_indirectY() -> void;
-  auto instruction_STb_absolute(uint8, uint8 = 0) -> void;
-  auto instruction_STb_zeropage(uint8, uint8 = 0) -> void;
-  auto instruction_Sbb(uint8&, uint8&) -> void;
+  auto instruction_RMB(uint3) -> void;
+  auto instruction_RTI() -> void;
+  auto instruction_RTS() -> void;
+  auto instruction_SMB(uint3) -> void;
+  auto instruction_ST(uint2) -> void;
   auto instruction_TAM() -> void;
-  auto instruction_Tbb(uint8&, uint8&) -> void;
   auto instruction_TMA() -> void;
+  auto instruction_TST_absolute(uint8 = 0) -> void;
+  auto instruction_TST_zeropage(uint8 = 0) -> void;
   auto instruction_TXS() -> void;
 
   //disassembler.cpp

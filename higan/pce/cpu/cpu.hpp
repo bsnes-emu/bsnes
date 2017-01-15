@@ -9,6 +9,7 @@ struct CPU : Processor::HuC6280, Thread {
 
   auto read(uint21 addr) -> uint8 override;
   auto write(uint21 addr, uint8 data) -> void override;
+  auto st(uint2 addr, uint8 data) -> void override;
   auto lastCycle() -> void override;
 
   vector<Thread*> peripherals;
