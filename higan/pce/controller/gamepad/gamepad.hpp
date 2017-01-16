@@ -5,5 +5,9 @@ struct Gamepad : Controller {
 
   Gamepad();
 
-  auto readData() -> uint8 override;
+  auto readData() -> uint4 override;
+  auto writeData(uint2 data) -> void override;
+
+  bool sel;
+  bool clr;
 };

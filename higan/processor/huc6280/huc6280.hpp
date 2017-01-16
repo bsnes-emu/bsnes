@@ -8,7 +8,6 @@ struct HuC6280 {
   virtual auto step(uint clocks) -> void = 0;
   virtual auto read(uint21 addr) -> uint8 = 0;
   virtual auto write(uint21 addr, uint8 data) -> void = 0;
-  virtual auto st(uint2, uint8) -> void = 0;
   virtual auto lastCycle() -> void = 0;
 
   auto power() -> void;
@@ -26,6 +25,7 @@ struct HuC6280 {
   auto pull() -> uint8;
 
   //instruction.cpp
+  auto interrupt(uint16 vector) -> void;
   auto instruction() -> void;
 
   //instructions.cpp

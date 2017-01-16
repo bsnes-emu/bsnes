@@ -5,7 +5,8 @@ struct Controller : Thread {
   static auto Enter() -> void;
   auto main() -> void;
 
-  virtual auto readData() -> uint8 { return 0x00; }
+  virtual auto readData() -> uint4 { return 0; }
+  virtual auto writeData(uint2) -> void {}
 };
 
 #include "gamepad/gamepad.hpp"

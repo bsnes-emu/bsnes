@@ -1,6 +1,18 @@
 #define op(id, name, ...) case id: instruction_##name(__VA_ARGS__); return;
 #define fp(name) &HuC6280::name
 
+auto HuC6280::interrupt(uint16 vector) -> void {
+  io();
+  io();
+  push(PC >> 8);
+  push(PC >> 0);
+  push(P);
+  PC.byte(0) = load(vector + 0);
+  PC.byte(1) = load(vector + 1);
+  D = 0;
+  I = 1;
+}
+
 auto HuC6280::instruction() -> void {
   auto code = opcode();
 
@@ -35,7 +47,7 @@ U op(0x0b, NOP)
   op(0x10, branch, N == 0)
   op(0x11, indirectYLoad, fp(ORA), A)
   op(0x12, indirectLoad, fp(ORA), A)
-  op(0x13, ST, 1)
+  op(0x13, ST, 2)
   op(0x14, zeropageModify, fp(TRB))
   op(0x15, zeropageLoad, fp(ORA), A, X)
   op(0x16, zeropageModify, fp(ASL), X)
@@ -51,7 +63,7 @@ U op(0x1b, NOP)
   op(0x20, JSR)
   op(0x21, indirectLoad, fp(AND), A, X)
   op(0x22, swap, A, X)
-  op(0x23, ST, 2)
+  op(0x23, ST, 3)
   op(0x24, zeropageLoad, fp(BIT), A)
   op(0x25, zeropageLoad, fp(AND), A)
   op(0x26, zeropageModify, fp(ROL))

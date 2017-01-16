@@ -375,12 +375,12 @@ L push((PC - 1) >> 0);
 }
 
 auto HuC6280::instruction_CSL() -> void {
-  r.cs = 12;
+  r.cs = 4;
 L io();
 }
 
 auto HuC6280::instruction_CSH() -> void {
-  r.cs = 3;
+  r.cs = 1;
 L io();
 }
 
@@ -457,7 +457,7 @@ auto HuC6280::instruction_ST(uint2 index) -> void {
   auto data = operand();
   io();
 L io();
-  st(index, data);
+  write(0x1fe000 + index, data);
 }
 
 auto HuC6280::instruction_TAM() -> void {

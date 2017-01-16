@@ -65,7 +65,15 @@ auto Interface::videoColors() -> uint32 {
 }
 
 auto Interface::videoColor(uint32 color) -> uint64 {
-  return 0;
+  uint3 B = color.bits(0,2);
+  uint3 G = color.bits(3,5);
+  uint3 R = color.bits(6,8);
+
+  uint64 r = image::normalize(R, 3, 16);
+  uint64 g = image::normalize(G, 3, 16);
+  uint64 b = image::normalize(B, 3, 16);
+
+  return r << 32 | g << 16 | b << 0;
 }
 
 auto Interface::audioFrequency() -> double {

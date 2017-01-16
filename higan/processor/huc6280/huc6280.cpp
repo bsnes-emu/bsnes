@@ -62,7 +62,7 @@ auto HuC6280::power() -> void {
   r.mpr[7] = 0x00;
   r.mdr = 0x00;
   r.p = 0x04;
-  r.cs = 3;
+  r.cs = 1;
 }
 
 }
