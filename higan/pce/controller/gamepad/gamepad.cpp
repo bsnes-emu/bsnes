@@ -7,17 +7,23 @@ auto Gamepad::readData() -> uint4 {
   uint4 data;
 
   if(sel) {
-    data.bit(0) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Up);
-    data.bit(1) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Down);
-    data.bit(2) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Right);
-    data.bit(3) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Left);
-    if(data.bits(0,1) == 0) data.bits(0,1) = 3;  //disallow up+down at the same time
-    if(data.bits(2,3) == 0) data.bits(2,3) = 3;  //disallow left+right at the same time
+    bool up    = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Up);
+    bool right = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Right);
+    bool down  = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Down);
+    bool left  = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Left);
+    data.bit(0) = !(up & !down);
+    data.bit(1) = !(right & !left);
+    data.bit(2) = !(down & !up);
+    data.bit(3) = !(left & !right);
   } else {
-    data.bit(0) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, One);
-    data.bit(1) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Two);
-    data.bit(2) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Select);
-    data.bit(3) = !platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Run);
+    bool one    = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, One);
+    bool two    = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Two);
+    bool select = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Select);
+    bool run    = platform->inputPoll(ID::Port::Controller, ID::Device::Gamepad, Run);
+    data.bit(0) = !one;
+    data.bit(1) = !two;
+    data.bit(2) = !select;
+    data.bit(3) = !run;
   }
 
   return data;

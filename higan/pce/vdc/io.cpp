@@ -99,8 +99,8 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
           irq.enableLineCoincidence = data.bit(2);
           irq.enableVblank = data.bit(3);
           io.externalSync = data.bits(4,5);
-          io.spriteBlank = data.bit(6);
-          io.backgroundBlank = data.bit(7);
+          sprite.blank = data.bit(6);
+          background.blank = data.bit(7);
         } else {
           io.displayOutput = data.bits(0,1);
           io.dramRefresh = data.bit(2);
@@ -120,13 +120,13 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
 
       if(io.address == 0x07) {
         //BXR
-        io.backgroundHscroll.byte(a0) = data;
+        background.hscroll.byte(a0) = data;
         return;
       }
 
       if(io.address == 0x08) {
         //BYR
-        io.backgroundVscroll.byte(a0) = data;
+        background.vscroll.byte(a0) = data;
         return;
       }
 
@@ -135,12 +135,12 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
         if(a0) return;
         io.vramAccess = data.bits(0,1);
         io.spriteAccess = data.bits(2,3);
-        if(data.bits(4,5) == 0) io.backgroundWidth =  32;
-        if(data.bits(4,5) == 1) io.backgroundWidth =  64;
-        if(data.bits(4,5) == 2) io.backgroundWidth = 128;
-        if(data.bits(4,5) == 3) io.backgroundWidth = 128;
-        if(data.bit(6) == 0) io.backgroundHeight = 32;
-        if(data.bit(6) == 1) io.backgroundHeight = 64;
+        if(data.bits(4,5) == 0) background.width =  32;
+        if(data.bits(4,5) == 1) background.width =  64;
+        if(data.bits(4,5) == 2) background.width = 128;
+        if(data.bits(4,5) == 3) background.width = 128;
+        if(data.bit(6) == 0) background.height = 32;
+        if(data.bit(6) == 1) background.height = 64;
         io.cgMode = data.bit(7);
         return;
       }

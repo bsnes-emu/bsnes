@@ -12,14 +12,7 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  #if 1
-  static uint counter = 0;
-  if(counter++ < 40) {
-    print(disassemble(r.pc), "\n");
-  }
-  #endif
-
-  if(irq.pending()) interrupt(irq.vector());
+  if(irq.pending()) return interrupt(irq.vector());
   instruction();
 }
 

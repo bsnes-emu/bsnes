@@ -6,6 +6,8 @@ VDC vdc;
 #include "io.cpp"
 #include "irq.cpp"
 #include "dma.cpp"
+#include "background.cpp"
+#include "sprite.cpp"
 
 auto VDC::Enter() -> void {
   while(true) scheduler.synchronize(), vdc.main();
@@ -13,7 +15,25 @@ auto VDC::Enter() -> void {
 
 auto VDC::main() -> void {
   //1365 cycles/scanline
+  uint y = state.y;
+  auto output = buffer + y * 512;
+  background.scanline(y);
+  sprite.scanline(y);
   for(uint x : range(256)) {
+    if(y < 240) {
+      background.run(x, y);
+      sprite.run(x, y);
+
+      if(sprite.color && sprite.priority) {
+        *output++ = sprite.color();
+      } else if(background.color) {
+        *output++ = background.color();
+      } else if(sprite.color) {
+        *output++ = sprite.color();
+      } else {
+        *output++ = cram[0];
+      }
+    }
     step(4);
   }
   step(341);
@@ -41,7 +61,7 @@ auto VDC::step(uint clocks) -> void {
 }
 
 auto VDC::refresh() -> void {
-  Emulator::video.refresh(buffer, 512 * sizeof(uint32), 512, 484);
+  Emulator::video.refresh(buffer, 512 * sizeof(uint32), 256, 240);
 }
 
 auto VDC::power() -> void {
@@ -55,6 +75,8 @@ auto VDC::power() -> void {
   memory::fill(&irq, sizeof(IRQ));
   memory::fill(&dma, sizeof(DMA));
   memory::fill(&io, sizeof(IO));
+  memory::fill(&background, sizeof(Background));
+  memory::fill(&sprite, sizeof(Sprite));
 }
 
 }

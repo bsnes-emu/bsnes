@@ -23,34 +23,34 @@ auto HuC6280::ASL(uint8 i) -> uint8 {
 }
 
 auto HuC6280::BIT(uint8 i) -> uint8 {
-  Z = i == 0;
+  Z = (A & i) == 0;
   V = i.bit(6);
   N = i.bit(7);
-  return i;
+  return A;
 }
 
 auto HuC6280::CMP(uint8 i) -> uint8 {
   uint9 o = A - i;
-  C = o.bit(8);
+  C = !o.bit(8);
   Z = uint8(o) == 0;
   N = o.bit(7);
-  return i;
+  return A;
 }
 
 auto HuC6280::CPX(uint8 i) -> uint8 {
   uint9 o = X - i;
-  C = o.bit(8);
+  C = !o.bit(8);
   Z = uint8(o) == 0;
   N = o.bit(7);
-  return i;
+  return X;
 }
 
 auto HuC6280::CPY(uint8 i) -> uint8 {
   uint9 o = Y - i;
-  C = o.bit(8);
+  C = !o.bit(8);
   Z = uint8(o) == 0;
   N = o.bit(7);
-  return i;
+  return Y;
 }
 
 auto HuC6280::DEC(uint8 i) -> uint8 {
@@ -114,23 +114,26 @@ auto HuC6280::ROR(uint8 i) -> uint8 {
 }
 
 auto HuC6280::SBC(uint8 i) -> uint8 {
-  return ADC(~i);
+  uint9 o = A - i - !C;
+  C = !o.bit(8);
+  Z = uint8(o) == 0;
+  V = (A ^ i) & (A ^ o) & 0x80;
+  N = o.bit(7);
+  return o;
 }
 
 auto HuC6280::TRB(uint8 i) -> uint8 {
-  uint8 o = i & A;
-  Z = o == 0;
-  V = o.bit(6);
-  N = o.bit(7);
-  return i & ~A;
+  Z = (A & i) == 0;
+  V = i.bit(6);
+  N = i.bit(7);
+  return ~A & i;
 }
 
 auto HuC6280::TSB(uint8 i) -> uint8 {
-  uint8 o = i & A;
-  Z = o == 0;
-  V = o.bit(6);
-  N = o.bit(7);
-  return i | A;
+  Z = (A & i) == 0;
+  V = i.bit(6);
+  N = i.bit(7);
+  return A | i;
 }
 
 //
@@ -187,15 +190,29 @@ L store(absolute + index, data);
 auto HuC6280::instruction_blockmove(bp alu) -> void {
   uint16 source = operand();
   source |= operand() << 8;
+  io();
+  io();
+  io();
   uint16 target = operand();
   target |= operand() << 8;
+  io();
+  io();
+  io();
   uint16 length = operand();
   length |= operand() << 8;
+  io();
+  io();
+  io();
   do {
     auto data = load(source);
     store(target, data);
     ALU(source, target);
+    io();
+    io();
+    io();
+    io();
   } while(--length);
+  io();
 L io();
 }
 
@@ -211,23 +228,22 @@ auto HuC6280::instruction_branch(bool take) -> void {
 }
 
 auto HuC6280::instruction_clear(uint8& data) -> void {
-  data = 0;
 L io();
+  data = 0;
 }
 
 auto HuC6280::instruction_clear(bool& flag) -> void {
-  flag = 0;
 L io();
+  flag = 0;
 }
 
 auto HuC6280::instruction_immediate(fp alu, uint8& data) -> void {
-  data = ALU(operand());
-L io();
+L data = ALU(operand());
 }
 
 auto HuC6280::instruction_implied(fp alu, uint8& data) -> void {
-  data = ALU(data);
 L io();
+  data = ALU(data);
 }
 
 auto HuC6280::instruction_indirectLoad(fp alu, uint8& data, uint8 index) -> void {
@@ -242,7 +258,7 @@ L data = ALU(load(absolute));
 auto HuC6280::instruction_indirectStore(uint8 data, uint8 index) -> void {
   auto zeropage = operand();
   io();
-  auto absolute = load(0x2000 + zeropage + index);
+  uint16 absolute = load(0x2000 + zeropage + index);
   absolute |= load(0x2001 + zeropage + index) << 8;
 L store(absolute, data);
 }
@@ -259,7 +275,7 @@ L data = ALU(load(absolute + Y));
 auto HuC6280::instruction_indirectYStore(uint8 data) -> void {
   auto zeropage = operand();
   io();
-  auto absolute = load(0x2000 + zeropage);
+  uint16 absolute = load(0x2000 + zeropage);
   absolute |= load(0x2001 + zeropage) << 8;
 L store(absolute + Y, data);
 }
@@ -289,19 +305,19 @@ L push(data);
 }
 
 auto HuC6280::instruction_set(bool& flag) -> void {
-  flag = 1;
 L io();
+  flag = 1;
 }
 
 auto HuC6280::instruction_swap(uint8& lhs, uint8& rhs) -> void {
-  swap(lhs, rhs);
   io();
 L io();
+  swap(lhs, rhs);
 }
 
 auto HuC6280::instruction_transfer(uint8& source, uint8& target) -> void {
-  target = source;
 L io();
+  target = source;
   Z = target == 0;
   N = target.bit(7);
 }
@@ -333,8 +349,8 @@ auto HuC6280::instruction_BBR(uint3 index) -> void {
   auto displacement = operand();
   io();
   io();
-L io();
-  if(zeropage.bit(index) == 0) {
+L auto data = load(0x2000 + zeropage);
+  if(data.bit(index) == 0) {
     PC += (int8)displacement;
   }
 }
@@ -344,8 +360,8 @@ auto HuC6280::instruction_BBS(uint3 index) -> void {
   auto displacement = operand();
   io();
   io();
-L io();
-  if(zeropage.bit(index) == 1) {
+L auto data = load(0x2000 + zeropage);
+  if(data.bit(index) == 1) {
     PC += (int8)displacement;
   }
 }
@@ -357,8 +373,8 @@ auto HuC6280::instruction_BRK() -> void {
   push(PC >> 0);
   uint8 p = P;
   push(p | 0x10);  //B flag set on push
-  I = 1;
   D = 0;
+  I = 1;
   PC.byte(0) = load(0xfff6);
 L PC.byte(1) = load(0xfff7);
 }
@@ -375,13 +391,13 @@ L push((PC - 1) >> 0);
 }
 
 auto HuC6280::instruction_CSL() -> void {
-  r.cs = 4;
 L io();
+  r.cs = 4;
 }
 
 auto HuC6280::instruction_CSH() -> void {
-  r.cs = 1;
 L io();
+  r.cs = 1;
 }
 
 auto HuC6280::instruction_JMP_absolute() -> void {
@@ -486,8 +502,8 @@ auto HuC6280::instruction_TST_absolute(uint8 index) -> void {
   io();
   io();
   io();
-L uint8 data = load(absolute + index) & mask;
-  Z = data == 0;
+L uint8 data = load(absolute + index);
+  Z = (data & mask) == 0;
   V = data.bit(6);
   N = data.bit(7);
 }
@@ -498,13 +514,13 @@ auto HuC6280::instruction_TST_zeropage(uint8 index) -> void {
   io();
   io();
   io();
-L uint8 data = load(0x2000 + zeropage + index) & mask;
-  Z = data == 0;
+L uint8 data = load(0x2000 + zeropage + index);
+  Z = (data & mask) == 0;
   V = data.bit(6);
   N = data.bit(7);
 }
 
 auto HuC6280::instruction_TXS() -> void {
-  S = X;
 L io();
+  S = X;
 }

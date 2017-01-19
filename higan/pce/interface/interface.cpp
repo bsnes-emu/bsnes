@@ -45,13 +45,13 @@ auto Interface::title() -> string {
 }
 
 auto Interface::videoSize() -> VideoSize {
-  return {512, 484};
+  return {256, 240};
 }
 
 auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
   auto a = arc ? 8.0 / 7.0 : 1.0;
   uint w = 256;
-  uint h = 242;
+  uint h = 240;
   uint m = min(width / (w * a), height / h);
   return {uint(w * a * m), uint(h * m)};
 }
@@ -66,8 +66,8 @@ auto Interface::videoColors() -> uint32 {
 
 auto Interface::videoColor(uint32 color) -> uint64 {
   uint3 B = color.bits(0,2);
-  uint3 G = color.bits(3,5);
-  uint3 R = color.bits(6,8);
+  uint3 R = color.bits(3,5);
+  uint3 G = color.bits(6,8);
 
   uint64 r = image::normalize(R, 3, 16);
   uint64 g = image::normalize(G, 3, 16);

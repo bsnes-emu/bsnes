@@ -31,9 +31,9 @@ auto HuC6280::operand() -> uint8 {
 //
 
 auto HuC6280::push(uint8 data) -> void {
-  store(0x2100 + ++S, data);
+  store(0x2100 + (S--), data);
 }
 
 auto HuC6280::pull() -> uint8 {
-  return load(0x2100 + S--);
+  return load(0x2100 + (++S));
 }
