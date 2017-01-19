@@ -14,8 +14,11 @@ struct HuC6280 {
 
   //memory.cpp
   inline auto mmu(uint16) const -> uint21;
-  inline auto load(uint16) -> uint8;
-  inline auto store(uint16, uint8) -> void;
+  inline auto load8(uint8) -> uint8;
+  inline auto load16(uint16) -> uint8;
+  inline auto store8(uint8, uint8) -> void;
+  inline auto store16(uint16, uint8) -> void;
+  inline auto store21(uint21, uint8) -> void;
 
   auto io() -> uint8;
   auto opcode() -> uint8;
@@ -49,12 +52,12 @@ struct HuC6280 {
   auto TRB(uint8) -> uint8;
   auto TSB(uint8) -> uint8;
 
-  using bp = auto (HuC6280::*)(uint16&, uint16&) -> void;
-  auto TAI(uint16&, uint16&) -> void;
-  auto TDD(uint16&, uint16&) -> void;
-  auto TIA(uint16&, uint16&) -> void;
-  auto TII(uint16&, uint16&) -> void;
-  auto TIN(uint16&, uint16&) -> void;
+  using bp = auto (HuC6280::*)(uint16&, uint16&, bool) -> void;
+  auto TAI(uint16&, uint16&, bool) -> void;
+  auto TDD(uint16&, uint16&, bool) -> void;
+  auto TIA(uint16&, uint16&, bool) -> void;
+  auto TII(uint16&, uint16&, bool) -> void;
+  auto TIN(uint16&, uint16&, bool) -> void;
 
   auto instruction_absoluteLoad(fp, uint8&, uint8 = 0) -> void;
   auto instruction_absoluteModify(fp, uint8 = 0) -> void;

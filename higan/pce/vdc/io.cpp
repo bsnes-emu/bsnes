@@ -99,8 +99,8 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
           irq.enableLineCoincidence = data.bit(2);
           irq.enableVblank = data.bit(3);
           io.externalSync = data.bits(4,5);
-          sprite.blank = data.bit(6);
-          background.blank = data.bit(7);
+          sprite.enable = data.bit(6);
+          background.enable = data.bit(7);
         } else {
           io.displayOutput = data.bits(0,1);
           io.dramRefresh = data.bit(2);
@@ -127,6 +127,7 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       if(io.address == 0x08) {
         //BYR
         background.vscroll.byte(a0) = data;
+        background.voffset = background.vscroll;
         return;
       }
 

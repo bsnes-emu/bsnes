@@ -1,14 +1,20 @@
 auto VDC::Background::scanline(uint y) -> void {
+  hoffset = hscroll;
+  if(y == 0) {
+    voffset = vscroll;
+  } else {
+    voffset++;
+  }
 }
 
 auto VDC::Background::run(uint x, uint y) -> void {
   color = nothing;
-//if(blank) return;
 
-  uint10 hoffset = x + hscroll;
-  uint9  voffset = y + vscroll;
+  uint16 batAddress;
+  batAddress  = (voffset >> 3) & (height - 1);
+  batAddress *= width;
+  batAddress += (hoffset >> 3) & (width  - 1);
 
-  uint16 batAddress = (voffset >> 3) * width + (hoffset >> 3);
   uint16 tiledata = vdc.vramRead(batAddress);
   uint16 patternAddress = tiledata.bits(0,11) << 4;
   patternAddress += (voffset & 7);
@@ -24,6 +30,6 @@ auto VDC::Background::run(uint x, uint y) -> void {
   output.bit(2) = d1.bit(0 + index);
   output.bit(3) = d1.bit(8 + index);
 
-  if(output == 0) return;
-  color = vdc.cram[palette << 4 | output];
+  if(enable && output) color = vdc.cram[palette << 4 | output];
+  hoffset++;
 }

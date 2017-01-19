@@ -39,7 +39,9 @@ auto VDC::Sprite::scanline(uint y) -> void {
 auto VDC::Sprite::run(uint x, uint y) -> void {
   x += 32;
   y += 64;
+
   color = nothing;
+  if(!enable) return;
 
   bool zero = 0;
   uint index = 0;
@@ -58,10 +60,11 @@ auto VDC::Sprite::run(uint x, uint y) -> void {
     if(object.height == 31) pattern.bit(1) = 0;
     if(object.height == 63) pattern.bits(1,2) = 0;
 
-    uint16 patternAddress = pattern << 6;
-    patternAddress += (voffset >> 4) << (6 + (object.height == 31));
-    patternAddress += (hoffset >> 4) << 6;
-    patternAddress += (voffset & 15);
+    uint16 patternAddress = pattern;
+    patternAddress  += (voffset >> 4) << 1;
+    patternAddress  += (hoffset >> 4);
+    patternAddress <<= 6;
+    patternAddress  += (voffset & 15);
 
     uint16 d0 = vdc.vramRead(patternAddress +  0);
     uint16 d1 = vdc.vramRead(patternAddress + 16);

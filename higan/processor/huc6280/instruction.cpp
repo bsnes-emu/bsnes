@@ -9,8 +9,8 @@ auto HuC6280::interrupt(uint16 vector) -> void {
   push(P);
   D = 0;
   I = 1;
-  PC.byte(0) = load(vector + 0);
-L PC.byte(1) = load(vector + 1);
+  PC.byte(0) = load16(vector + 0);
+L PC.byte(1) = load16(vector + 1);
 }
 
 auto HuC6280::instruction() -> void {

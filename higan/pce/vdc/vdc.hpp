@@ -4,7 +4,6 @@
 struct VDC : Thread {
   static auto Enter() -> void;
   auto main() -> void;
-  auto scanline() -> void;
   auto step(uint clocks) -> void;
   auto refresh() -> void;
 
@@ -85,11 +84,14 @@ private:
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
-    bool   blank;
+    bool   enable;
     uint10 hscroll;
     uint9  vscroll;
     uint8  width;
     uint8  height;
+
+    uint10 hoffset;
+    uint9  voffset;
 
     maybe<uint9> color;
   } background;
@@ -99,7 +101,7 @@ private:
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
-    bool blank;
+    bool enable;
 
     struct Object {
       uint10 y;

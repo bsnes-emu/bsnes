@@ -15,6 +15,7 @@ auto VDC::Enter() -> void {
 
 auto VDC::main() -> void {
   //1365 cycles/scanline
+  state.x = 0;
   uint y = state.y;
   auto output = buffer + y * 512;
   background.scanline(y);
@@ -37,11 +38,7 @@ auto VDC::main() -> void {
     step(4);
   }
   step(341);
-  scanline();
-}
 
-auto VDC::scanline() -> void {
-  state.x = 0;
   if(++state.y == 262) {
     state.y = 0;
   }
