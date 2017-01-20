@@ -51,6 +51,9 @@ typedef struct
     uint16_t image_offset;
     
     GB_print_image_callback_t callback;
+    
+    uint8_t compression_run_lenth;
+    bool compression_run_is_compressed;
 } GB_printer_t;
 
 

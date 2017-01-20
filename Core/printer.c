@@ -110,7 +110,28 @@ static void serial_start(GB_gameboy_t *gb, uint8_t byte_received)
             
         case GB_PRINTER_COMMAND_DATA:
             if (gb->printer.command_length != GB_PRINTER_MAX_COMMAND_LENGTH) {
-                gb->printer.command_data[gb->printer.command_length++] = byte_received;
+                if (gb->printer.compression) {
+                    if (!gb->printer.compression_run_lenth) {
+                        gb->printer.compression_run_is_compressed = byte_received & 0x80;
+                        gb->printer.compression_run_lenth = (byte_received & 0x7F) + 1 + gb->printer.compression_run_is_compressed;
+                    }
+                    else if (gb->printer.compression_run_is_compressed) {
+                        while (gb->printer.compression_run_lenth) {
+                            gb->printer.command_data[gb->printer.command_length++] = byte_received;
+                            gb->printer.compression_run_lenth--;
+                            if (gb->printer.command_length == GB_PRINTER_MAX_COMMAND_LENGTH) {
+                                gb->printer.compression_run_lenth = 0;
+                            }
+                        }
+                    }
+                    else {
+                        gb->printer.command_data[gb->printer.command_length++] = byte_received;
+                        gb->printer.compression_run_lenth--;
+                    }
+                }
+                else {
+                    gb->printer.command_data[gb->printer.command_length++] = byte_received;
+                }
             }
             gb->printer.length_left--;
             break;
@@ -173,6 +194,7 @@ static uint8_t serial_end(GB_gameboy_t *gb)
 
 void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback)
 {
+    memset(&gb->printer, 0, sizeof(gb->printer));
     GB_set_serial_transfer_start_callback(gb, serial_start);
     GB_set_serial_transfer_end_callback(gb, serial_end);
     gb->printer.callback = callback;
