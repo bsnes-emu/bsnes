@@ -46,8 +46,9 @@ LDFLAGS += -lc -lm
 endif
 
 ifeq ($(PLATFORM),Darwin)
+SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> /dev/null)
 CFLAGS += -F/Library/Frameworks
-OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
+OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT) -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework Carbon -framework QuartzCore
 SDL_LDFLAGS := -framework SDL
 endif
