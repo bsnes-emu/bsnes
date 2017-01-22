@@ -2,7 +2,7 @@
 #include <Cocoa/Cocoa.h>
 #include "get_image_for_rom.h"
 
-static OSStatus render(CGContextRef cgContext, CFURLRef url, cancel_callback_t cancelCallback, void *cancelData, bool showBorder)
+static OSStatus render(CGContextRef cgContext, CFURLRef url, bool showBorder)
 {
     /* Load the template NSImages when generating the first thumbnail */
     static NSImage *template = nil;
@@ -24,7 +24,7 @@ static OSStatus render(CGContextRef cgContext, CFURLRef url, cancel_callback_t c
     /* The cgb_boot_fast boot ROM skips the boot animation */
     if (get_image_for_rom([[(__bridge NSURL *)url path] UTF8String],
                           [[bundle pathForResource:@"cgb_boot_fast" ofType:@"bin"] UTF8String],
-                          bitmap, &cgbFlag, cancelCallback, cancelData)) {
+                          bitmap, &cgbFlag)) {
         return -1;
     }
     
@@ -93,7 +93,7 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
 {
     @autoreleasepool {
         CGContextRef cgContext = QLPreviewRequestCreateContext(preview, ((NSSize){640, 576}), true, nil);
-        if (render(cgContext, url, (cancel_callback_t)QLPreviewRequestIsCancelled, preview, false) == noErr) {
+        if (render(cgContext, url, false) == noErr) {
             QLPreviewRequestFlushContext(preview, cgContext);
             CGContextRelease(cgContext);
             return noErr;
@@ -107,7 +107,7 @@ OSStatus GenerateThumbnailForURL(void *thisInterface, QLThumbnailRequestRef thum
 {
     @autoreleasepool {
         CGContextRef cgContext = QLThumbnailRequestCreateContext(thumbnail, ((NSSize){1024, 1024}), true, (__bridge CFDictionaryRef)(@{@"IconFlavor" : @(0)}));
-        if (render(cgContext, url, (cancel_callback_t)QLThumbnailIsCancelled, thumbnail, true) == noErr) {
+        if (render(cgContext, url, true) == noErr) {
             QLThumbnailRequestFlushContext(thumbnail, cgContext);
             CGContextRelease(cgContext);
             return noErr;

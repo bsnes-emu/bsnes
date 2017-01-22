@@ -11,8 +11,6 @@
 struct local_data {
     unsigned long frames;
     bool running;
-    cancel_callback_t cancel_callback;
-    void *callback_data;
 };
 
 static char *async_input_callback(GB_gameboy_t *gb)
@@ -30,11 +28,6 @@ static void vblank(GB_gameboy_t *gb)
 {
 
     struct local_data *local_data = (struct local_data *)gb->user_data;
-    
-    if (local_data->cancel_callback(local_data->callback_data)) {
-        local_data->running = false;
-        return;
-    }
 
     if (local_data->frames == LENGTH) {
         local_data->running = false;
@@ -51,8 +44,7 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return (b << 16) | (g << 8) | (r) | 0xFF000000;
 }
 
-int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *output, uint8_t *cgb_flag,
-                      cancel_callback_t cancel_callback, void *callback_data)
+int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *output, uint8_t *cgb_flag)
 {
     GB_gameboy_t gb;
     GB_init_cgb(&gb);
@@ -77,19 +69,15 @@ int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *out
     gb.user_data = &local_data;
     local_data.running = true;
     local_data.frames = 0;
-    local_data.cancel_callback = cancel_callback;
-    local_data.callback_data = callback_data;
     gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
     
     while (local_data.running) {
         GB_run(&gb);
     }
     
-    
     *cgb_flag = gb.rom[0x143] & 0xC0;
     
     GB_free(&gb);
-    /* Report failure if cancelled */
-    return local_data.frames != LENGTH + 1;
+    return 0;
 }
 
