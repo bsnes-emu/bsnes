@@ -116,5 +116,7 @@
 			</dict>
 		</dict>
 	</array>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
 </dict>
 </plist>
