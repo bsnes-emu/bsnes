@@ -119,9 +119,6 @@ struct MMC3 : Chip {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     chrMode = 0;
     prgMode = 0;
     bankSelect = 0;

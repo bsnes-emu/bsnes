@@ -45,12 +45,8 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
-  board->power();
-}
-
-auto Cartridge::reset() -> void {
   create(Cartridge::Enter, system.colorburst() * 6.0);
-  board->reset();
+  board->power();
 }
 
 auto Cartridge::readPRG(uint addr) -> uint8 {

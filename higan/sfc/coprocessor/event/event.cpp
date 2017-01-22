@@ -43,9 +43,6 @@ auto Event::unload() -> void {
 }
 
 auto Event::power() -> void {
-}
-
-auto Event::reset() -> void {
   create(Event::Enter, 1);
 
   for(auto n : range(ram.size())) ram.write(n, 0x00);

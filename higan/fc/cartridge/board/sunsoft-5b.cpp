@@ -14,7 +14,7 @@ struct Sunsoft5B : Board {
       if(disable) output = 0;
     }
 
-    auto reset() -> void {
+    auto power() -> void {
       disable = 1;
       frequency = 1;
       volume = 0;
@@ -164,13 +164,11 @@ struct Sunsoft5B : Board {
   }
 
   auto power() -> void {
-    for(signed n : range(16)) {
+    for(int n : range(16)) {
       double volume = 1.0 / pow(2, 1.0 / 2 * (15 - n));
       dac[n] = volume * 8192.0;
     }
-  }
 
-  auto reset() -> void {
     mmuPort = 0;
     apuPort = 0;
 
@@ -181,9 +179,9 @@ struct Sunsoft5B : Board {
     irqCounterEnable = 0;
     irqCounter = 0;
 
-    pulse[0].reset();
-    pulse[1].reset();
-    pulse[2].reset();
+    pulse[0].power();
+    pulse[1].power();
+    pulse[2].power();
   }
 
   auto serialize(serializer& s) -> void {

@@ -1,15 +1,4 @@
 auto M68K::instruction() -> void {
-  instructionsExecuted++;
-
-  #if 0
-  if(instructionsExecuted >= 10000010) while(true) step(1);
-  if(instructionsExecuted >= 10000000) {
-    print(disassembleRegisters(), "\n");
-    print(disassemble(r.pc), "\n");
-    print("\n");
-  }
-  #endif
-
   opcode = readPC();
   return instructionTable[opcode]();
 }

@@ -10,7 +10,7 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Thread {
   auto load() -> bool;
   auto unload() -> void;
   auto power() -> void;
-  auto reset(bool soft = false) -> void;
+  auto reset() -> void;  //software reset
 
   //interface.cpp
   auto lcdScanline() -> void override;

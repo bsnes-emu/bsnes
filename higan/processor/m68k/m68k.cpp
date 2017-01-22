@@ -14,11 +14,6 @@ enum : bool { Reverse = 1 };
 #include "instruction.cpp"
 
 auto M68K::power() -> void {
-}
-
-auto M68K::reset() -> void {
-  instructionsExecuted = 0;
-
   for(auto& dr : r.d) dr = 0;
   for(auto& ar : r.a) ar = 0;
   r.sp = 0;

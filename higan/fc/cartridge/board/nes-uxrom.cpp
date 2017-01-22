@@ -33,9 +33,6 @@ struct NES_UxROM : Board {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     prgBank = 0;
   }
 

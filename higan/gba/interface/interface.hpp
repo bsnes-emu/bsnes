@@ -37,7 +37,6 @@ struct Interface : Emulator::Interface {
   auto unload() -> void override;
 
   auto power() -> void override;
-  auto reset() -> void override;
   auto run() -> void override;
 
   auto serialize() -> serializer override;

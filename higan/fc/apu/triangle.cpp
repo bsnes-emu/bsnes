@@ -28,10 +28,6 @@ auto APU::Triangle::clock() -> uint8 {
 }
 
 auto APU::Triangle::power() -> void {
-  reset();
-}
-
-auto APU::Triangle::reset() -> void {
   lengthCounter = 0;
 
   linearLength = 0;

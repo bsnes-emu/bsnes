@@ -17,9 +17,6 @@ auto MCC::unload() -> void {
 }
 
 auto MCC::power() -> void {
-}
-
-auto MCC::reset() -> void {
   for(auto n : range(16)) r[n] = 0x00;
   r[0x07] = 0x80;
   r[0x08] = 0x80;

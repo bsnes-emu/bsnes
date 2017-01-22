@@ -16,9 +16,6 @@ auto OBC1::unload() -> void {
 }
 
 auto OBC1::power() -> void {
-}
-
-auto OBC1::reset() -> void {
   status.baseptr = (ramRead(0x1ff5) & 1) ? 0x1800 : 0x1c00;
   status.address = (ramRead(0x1ff6) & 0x7f);
   status.shift   = (ramRead(0x1ff6) & 3) << 1;

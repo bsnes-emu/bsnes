@@ -15,7 +15,6 @@ struct R6502 {
 
   auto mdr() const -> uint8;
   auto power() -> void;
-  auto reset() -> void;
   auto interrupt() -> void;
   auto instruction() -> void;
 

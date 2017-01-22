@@ -77,9 +77,6 @@ auto VDP::Background::run(uint x, uint y) -> void {
 }
 
 auto VDP::Background::power() -> void {
-}
-
-auto VDP::Background::reset() -> void {
   memory::fill(&io, sizeof(IO));
   memory::fill(&state, sizeof(State));
 }

@@ -26,17 +26,13 @@ auto CPU::step(uint clocks) -> void {
 
 auto CPU::power() -> void {
   R6502::power();
+  create(CPU::Enter, system.colorburst() * 6.0);
 
   for(auto addr : range(0x0800)) ram[addr] = 0xff;
   ram[0x0008] = 0xf7;
   ram[0x0009] = 0xef;
   ram[0x000a] = 0xdf;
   ram[0x000f] = 0xbf;
-}
-
-auto CPU::reset() -> void {
-  R6502::reset();
-  create(CPU::Enter, system.colorburst() * 6.0);
 
   regs.pc  = bus.read(0xfffc) << 0;
   regs.pc |= bus.read(0xfffd) << 8;

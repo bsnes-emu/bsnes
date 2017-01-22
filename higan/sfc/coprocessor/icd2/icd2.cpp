@@ -49,12 +49,9 @@ auto ICD2::unload() -> void {
 }
 
 auto ICD2::power() -> void {
-}
-
-auto ICD2::reset(bool soft) -> void {
   auto frequency = system.colorburst() * 6.0;
   create(ICD2::Enter, frequency / 5);
-  if(!soft) stream = Emulator::audio.createStream(2, frequency / 10);
+  stream = Emulator::audio.createStream(2, frequency / 10);
 
   r6003 = 0x00;
   r6004 = 0xff;
@@ -78,6 +75,10 @@ auto ICD2::reset(bool soft) -> void {
 
   GameBoy::system.init();
   GameBoy::system.power();
+}
+
+auto ICD2::reset() -> void {
+  //todo: same as power() but without re-creating the audio stream
 }
 
 #endif

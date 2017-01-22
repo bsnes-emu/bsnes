@@ -7,7 +7,6 @@ struct MSU1 : Thread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto dataOpen() -> void;
   auto audioOpen() -> void;

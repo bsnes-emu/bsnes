@@ -27,13 +27,6 @@ auto SMP::load(Markup::Node node) -> bool {
 }
 
 auto SMP::power() -> void {
-  //targets not initialized/changed upon reset
-  timer0.target = 0;
-  timer1.target = 0;
-  timer2.target = 0;
-}
-
-auto SMP::reset() -> void {
   create(Enter, 32040.0 * 768.0);
 
   regs.pc.l = iplrom[62];
@@ -95,6 +88,10 @@ auto SMP::reset() -> void {
   timer0.enable = false;
   timer1.enable = false;
   timer2.enable = false;
+
+  timer0.target = 0;
+  timer1.target = 0;
+  timer2.target = 0;
 }
 
 }

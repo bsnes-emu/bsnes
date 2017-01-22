@@ -160,7 +160,7 @@ auto PPU::Screen::fixedColor() const -> uint15 {
   return io.colorBlue << 10 | io.colorGreen << 5 | io.colorRed << 0;
 }
 
-auto PPU::Screen::reset() -> void {
+auto PPU::Screen::power() -> void {
   for(auto& n : cgram) n = random(0x0000);
 
   io.blendMode = random(false);

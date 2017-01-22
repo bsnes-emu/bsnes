@@ -14,7 +14,7 @@ objects += obj/icarus.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)
 
 all: $(objects)
-	$(call unique,$(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
+	$(strip $(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
 ifeq ($(platform),macosx)
 	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
 	mkdir -p out/$(name).app/Contents/MacOS/

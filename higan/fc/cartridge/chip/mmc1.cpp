@@ -74,9 +74,6 @@ struct MMC1 : Chip {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     writedelay = 0;
     shiftaddr = 0;
     shiftdata = 0;

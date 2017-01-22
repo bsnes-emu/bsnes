@@ -9,7 +9,6 @@ struct Event : Thread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto mcuRead(uint24 addr, uint8) -> uint8;
   auto mcuWrite(uint24 addr, uint8) -> void;

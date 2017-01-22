@@ -25,7 +25,6 @@ struct GSU {
 
   //gsu.cpp
   auto power() -> void;
-  auto reset() -> void;
 
   //instructions.cpp
   auto op_add_adc(uint n);

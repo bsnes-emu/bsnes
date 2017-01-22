@@ -10,7 +10,6 @@ struct SPC7110 : Thread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto addClocks(uint clocks) -> void;
 

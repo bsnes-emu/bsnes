@@ -33,9 +33,6 @@ struct NES_CNROM : Board {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     chrBank = 0;
   }
 

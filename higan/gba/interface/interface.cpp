@@ -8,7 +8,6 @@ Interface::Interface() {
   information.manufacturer = "Nintendo";
   information.name         = "Game Boy Advance";
   information.overscan     = false;
-  information.resettable   = false;
 
   information.capability.states = true;
   information.capability.cheats = false;
@@ -106,10 +105,6 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::power() -> void {
-  system.power();
-}
-
-auto Interface::reset() -> void {
   system.power();
 }
 

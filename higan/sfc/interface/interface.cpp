@@ -10,7 +10,6 @@ Interface::Interface() {
   information.manufacturer = "Nintendo";
   information.name         = "Super Famicom";
   information.overscan     = true;
-  information.resettable   = true;
 
   information.capability.states = true;
   information.capability.cheats = true;
@@ -205,10 +204,6 @@ auto Interface::connect(uint port, uint device) -> void {
 
 auto Interface::power() -> void {
   system.power();
-}
-
-auto Interface::reset() -> void {
-  system.reset();
 }
 
 auto Interface::run() -> void {

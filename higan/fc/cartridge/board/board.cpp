@@ -131,9 +131,6 @@ auto Board::writeCHR(uint addr, uint8 data) -> void {
 auto Board::power() -> void {
 }
 
-auto Board::reset() -> void {
-}
-
 auto Board::serialize(serializer& s) -> void {
   if(prgram.size) s.array(prgram.data, prgram.size);
   if(chrram.size) s.array(chrram.data, chrram.size);

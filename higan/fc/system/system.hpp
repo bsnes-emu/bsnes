@@ -9,7 +9,6 @@ struct System {
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto init() -> void;
   auto term() -> void;

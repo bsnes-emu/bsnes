@@ -9,7 +9,6 @@ struct HitachiDSP : Processor::HG51B, Thread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   //HG51B read/write
   auto read(uint24 addr) -> uint8 override;

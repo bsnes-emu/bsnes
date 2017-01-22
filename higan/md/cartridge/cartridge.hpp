@@ -8,7 +8,6 @@ struct Cartridge {
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto read(uint24 addr) -> uint16;
   auto write(uint24 addr, uint16 data) -> void;

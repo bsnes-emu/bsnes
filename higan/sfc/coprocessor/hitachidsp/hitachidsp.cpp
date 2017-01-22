@@ -37,6 +37,9 @@ auto HitachiDSP::unload() -> void {
 }
 
 auto HitachiDSP::power() -> void {
+  HG51B::power();
+  create(HitachiDSP::Enter, Frequency);
+
   mmio.dma = false;
 
   mmio.dmaSource = 0x000000;
@@ -50,11 +53,6 @@ auto HitachiDSP::power() -> void {
   mmio.r1f50 = 0x33;
   mmio.r1f51 = 0x00;
   mmio.r1f52 = 0x01;
-}
-
-auto HitachiDSP::reset() -> void {
-  create(HitachiDSP::Enter, Frequency);
-  HG51B::power();
 }
 
 }

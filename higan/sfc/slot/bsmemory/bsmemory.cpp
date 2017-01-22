@@ -18,9 +18,6 @@ auto BSMemory::unload() -> void {
 }
 
 auto BSMemory::power() -> void {
-}
-
-auto BSMemory::reset() -> void {
   regs.command   = 0;
   regs.writeOld = 0x00;
   regs.writeNew = 0x00;

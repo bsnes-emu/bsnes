@@ -21,14 +21,9 @@ auto R6502::power() -> void {
   regs.a = 0x00;
   regs.x = 0x00;
   regs.y = 0x00;
-  regs.s = 0x00;
+  regs.s = 0xff;
   regs.p = 0x04;
-}
-
-auto R6502::reset() -> void {
   regs.mdr = 0x00;
-  regs.s -= 3;
-  regs.p.i = 1;
 }
 
 auto R6502::interrupt() -> void {

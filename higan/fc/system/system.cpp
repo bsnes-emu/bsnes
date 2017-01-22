@@ -49,14 +49,6 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  cartridge.power();
-  cpu.power();
-  apu.power();
-  ppu.power();
-  reset();
-}
-
-auto System::reset() -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   configureVideoPalette();
@@ -66,10 +58,10 @@ auto System::reset() -> void {
   Emulator::audio.setInterface(interface);
 
   scheduler.reset();
-  cartridge.reset();
-  cpu.reset();
-  apu.reset();
-  ppu.reset();
+  cartridge.power();
+  cpu.power();
+  apu.power();
+  ppu.power();
   scheduler.primary(cpu);
   peripherals.reset();
 }

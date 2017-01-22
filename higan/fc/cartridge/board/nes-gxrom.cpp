@@ -37,9 +37,6 @@ struct NES_GxROM : Board {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     prgBank = 0;
     chrBank = 0;
   }

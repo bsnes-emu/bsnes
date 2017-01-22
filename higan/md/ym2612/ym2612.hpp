@@ -6,7 +6,6 @@ struct YM2612 : Thread {
   auto step(uint clocks) -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 };
 
 extern YM2612 ym2612;

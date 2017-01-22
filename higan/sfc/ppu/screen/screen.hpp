@@ -1,7 +1,7 @@
 struct Screen {
   auto scanline() -> void;
   alwaysinline auto run() -> void;
-  auto reset() -> void;
+  auto power() -> void;
 
   auto below(bool hires) -> uint16;
   auto above() -> uint16;

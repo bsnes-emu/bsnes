@@ -25,7 +25,7 @@ struct Object {
   auto scanline() -> void;
   auto run() -> void;
   auto tilefetch() -> void;
-  auto reset() -> void;
+  auto power() -> void;
 
   auto onScanline(PPU::OAM::Object&) -> bool;
 

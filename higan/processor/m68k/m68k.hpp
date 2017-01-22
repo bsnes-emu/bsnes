@@ -58,7 +58,6 @@ struct M68K {
 
   M68K();
   auto power() -> void;
-  auto reset() -> void;
   auto supervisor() -> bool;
   auto exception(uint exception, uint vector, uint priority = 7) -> void;
 
@@ -273,7 +272,6 @@ struct M68K {
   } r;
 
   uint16 opcode = 0;
-  uint instructionsExecuted = 0;
 
   function<void ()> instructionTable[65536];
   Bus* bus = nullptr;

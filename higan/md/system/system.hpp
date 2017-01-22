@@ -8,7 +8,6 @@ struct System {
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
 private:
   Emulator::Interface* interface = nullptr;

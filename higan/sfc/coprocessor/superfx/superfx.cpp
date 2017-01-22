@@ -44,10 +44,6 @@ auto SuperFX::unload() -> void {
 
 auto SuperFX::power() -> void {
   GSU::power();
-}
-
-auto SuperFX::reset() -> void {
-  GSU::reset();
   create(SuperFX::Enter, system.colorburst() * 6.0);
 
   romMask = rom.size() - 1;

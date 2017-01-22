@@ -128,8 +128,17 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
+  Emulator::video.reset();
+  Emulator::video.setInterface(interface);
+  configureVideoPalette();
+  configureVideoEffects();
+
+  Emulator::audio.reset();
+  Emulator::audio.setInterface(interface);
+
   random.seed((uint)time(0));
 
+  scheduler.reset();
   cpu.power();
   smp.power();
   dsp.power();
@@ -152,42 +161,6 @@ auto System::power() -> void {
   if(cartridge.has.MSU1) msu1.power();
 
   if(cartridge.has.BSMemorySlot) bsmemory.power();
-
-  reset();
-}
-
-auto System::reset() -> void {
-  Emulator::video.reset();
-  Emulator::video.setInterface(interface);
-  configureVideoPalette();
-  configureVideoEffects();
-
-  Emulator::audio.reset();
-  Emulator::audio.setInterface(interface);
-
-  scheduler.reset();
-  cpu.reset();
-  smp.reset();
-  dsp.reset();
-  ppu.reset();
-
-  if(cartridge.has.ICD2) icd2.reset();
-  if(cartridge.has.MCC) mcc.reset();
-  if(cartridge.has.NSSDIP) nss.reset();
-  if(cartridge.has.Event) event.reset();
-  if(cartridge.has.SA1) sa1.reset();
-  if(cartridge.has.SuperFX) superfx.reset();
-  if(cartridge.has.ARMDSP) armdsp.reset();
-  if(cartridge.has.HitachiDSP) hitachidsp.reset();
-  if(cartridge.has.NECDSP) necdsp.reset();
-  if(cartridge.has.EpsonRTC) epsonrtc.reset();
-  if(cartridge.has.SharpRTC) sharprtc.reset();
-  if(cartridge.has.SPC7110) spc7110.reset();
-  if(cartridge.has.SDD1) sdd1.reset();
-  if(cartridge.has.OBC1) obc1.reset();
-  if(cartridge.has.MSU1) msu1.reset();
-
-  if(cartridge.has.BSMemorySlot) bsmemory.reset();
 
   if(cartridge.has.ICD2) cpu.coprocessors.append(&icd2);
   if(cartridge.has.Event) cpu.coprocessors.append(&event);

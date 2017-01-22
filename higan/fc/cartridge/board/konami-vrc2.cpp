@@ -35,10 +35,6 @@ struct KonamiVRC2 : Board {
     vrc2.power();
   }
 
-  auto reset() -> void {
-    vrc2.reset();
-  }
-
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
     vrc2.serialize(s);

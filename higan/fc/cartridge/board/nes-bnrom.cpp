@@ -31,9 +31,6 @@ struct NES_BNROM : Board {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     prgBank = 0;
   }
 

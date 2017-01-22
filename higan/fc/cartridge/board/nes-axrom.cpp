@@ -30,9 +30,6 @@ struct NES_AxROM : Board {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     prgBank = 0x0f;
     mirrorSelect = 0;
   }

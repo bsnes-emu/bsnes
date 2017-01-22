@@ -37,9 +37,6 @@ auto SharpRTC::unload() -> void {
 }
 
 auto SharpRTC::power() -> void {
-}
-
-auto SharpRTC::reset() -> void {
   create(SharpRTC::Enter, 1);
 
   state = State::Read;

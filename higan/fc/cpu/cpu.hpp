@@ -4,7 +4,6 @@ struct CPU : Processor::R6502, Thread {
   auto step(uint clocks) -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
   //memory.cpp
   auto readRAM(uint11 addr) -> uint8;

@@ -55,9 +55,6 @@ struct VRC1 : Chip {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     for(auto& n : prgBank) n = 0;
     for(auto& n : chrBankLo) n = 0;
     for(auto& n : chrBankHi) n = 0;

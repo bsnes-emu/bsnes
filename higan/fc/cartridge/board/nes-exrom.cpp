@@ -31,10 +31,6 @@ struct NES_ExROM : Board {
     mmc5.power();
   }
 
-  auto reset() -> void {
-    mmc5.reset();
-  }
-
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
     mmc5.serialize(s);

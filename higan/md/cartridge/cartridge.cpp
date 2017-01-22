@@ -67,9 +67,6 @@ auto Cartridge::unload() -> void {
 auto Cartridge::power() -> void {
 }
 
-auto Cartridge::reset() -> void {
-}
-
 auto Cartridge::read(uint24 addr) -> uint16 {
   uint16 data = rom.data[addr + 0 & rom.mask] << 8;
   return data | rom.data[addr + 1 & rom.mask] << 0;

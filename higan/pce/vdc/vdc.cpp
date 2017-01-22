@@ -52,7 +52,7 @@ auto VDC::main() -> void {
     step(vce.clock);
   }
 
-  if(vce.vclock == io.lineCoincidence - (66 - vce.vstart)) {
+  if(vce.vclock == io.lineCoincidence - (65 - vce.vstart)) {
     irq.raise(IRQ::Line::LineCoincidence);
   }
 
@@ -70,7 +70,7 @@ auto VDC::scanline() -> void {
   if(vce.clock == 4) vce.hstart += 0;
 
   vce.vclock++;
-  if(vce.vclock >= vce.vstart) vce.voffset++;
+  if(vce.vclock > vce.vstart) vce.voffset++;
 
   if(vce.vclock == 262) {
     frame();
@@ -87,7 +87,7 @@ auto VDC::frame() -> void {
 
   vce.vclock = 0;
   vce.voffset = 0;
-  vce.vstart = vce.verticalDisplayStart - 2;
+  vce.vstart = max((uint8)2, vce.verticalDisplayStart) - 2;
   vce.vlength = min(242, vce.verticalDisplayLength + 1);
 }
 

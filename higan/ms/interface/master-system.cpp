@@ -2,7 +2,6 @@ MasterSystemInterface::MasterSystemInterface() {
   information.manufacturer = "Sega";
   information.name         = "Master System";
   information.overscan     = true;
-  information.resettable   = false;
 
   information.capability.states = false;
   information.capability.cheats = false;

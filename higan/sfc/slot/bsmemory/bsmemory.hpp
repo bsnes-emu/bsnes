@@ -3,7 +3,6 @@ struct BSMemory : Memory {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto size() const -> uint;
   auto read(uint24 addr, uint8) -> uint8;

@@ -26,9 +26,6 @@ auto APU::Noise::clock() -> uint8 {
 }
 
 auto APU::Noise::power() -> void {
-}
-
-auto APU::Noise::reset() -> void {
   lengthCounter = 0;
 
   envelope.speed = 0;

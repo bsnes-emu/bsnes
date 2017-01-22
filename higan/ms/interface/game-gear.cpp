@@ -2,7 +2,6 @@ GameGearInterface::GameGearInterface() {
   information.manufacturer = "Sega";
   information.name         = "Game Gear";
   information.overscan     = false;
-  information.resettable   = false;
 
   information.capability.states = false;
   information.capability.cheats = false;

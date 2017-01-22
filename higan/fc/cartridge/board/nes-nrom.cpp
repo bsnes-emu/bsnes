@@ -31,6 +31,9 @@ struct NES_NROM : Board {
     if(chrram.size) return chrram.write(addr, data);
   }
 
+  auto power() -> void {
+  }
+
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
   }

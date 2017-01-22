@@ -38,6 +38,3 @@ auto APU::Sweep::power() -> void {
   reload = 0;
   pulsePeriod = 0;
 }
-
-auto APU::Sweep::reset() -> void {
-}

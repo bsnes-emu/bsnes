@@ -35,16 +35,6 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  cartridge.power();
-  cpu.power();
-  apu.power();
-  vdp.power();
-  psg.power();
-  ym2612.power();
-  reset();
-}
-
-auto System::reset() -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   Emulator::video.setPalette();
@@ -53,12 +43,12 @@ auto System::reset() -> void {
   Emulator::audio.setInterface(interface);
 
   scheduler.reset();
-  cartridge.reset();
-  cpu.reset();
+  cartridge.power();
+  cpu.power();
   apu.power();
-  vdp.reset();
-  psg.reset();
-  ym2612.reset();
+  vdp.power();
+  psg.power();
+  ym2612.power();
   scheduler.primary(cpu);
 
   peripherals.reset();

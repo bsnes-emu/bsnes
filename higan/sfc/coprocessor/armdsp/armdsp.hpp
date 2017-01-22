@@ -22,8 +22,7 @@ struct ArmDSP : Processor::ARM, Thread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
-  auto resetARM() -> void;
+  auto reset() -> void;  //soft reset
 
   auto firmware() const -> nall::vector<uint8>;
   auto serialize(serializer&) -> void;

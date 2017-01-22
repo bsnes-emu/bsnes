@@ -7,7 +7,6 @@ struct VDP : Thread {
   auto refresh() -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
   //io.cpp
   auto read(uint24 addr) -> uint16;
@@ -47,7 +46,6 @@ struct VDP : Thread {
     auto run(uint x, uint y) -> void;
 
     auto power() -> void;
-    auto reset() -> void;
 
     struct IO {
       uint15 nametableAddress;
@@ -87,7 +85,6 @@ struct VDP : Thread {
     auto run(uint x, uint y) -> void;
 
     auto power() -> void;
-    auto reset() -> void;
 
     struct IO {
       uint15 attributeAddress;

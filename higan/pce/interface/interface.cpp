@@ -8,7 +8,6 @@ Interface::Interface() {
   information.manufacturer = "NEC";
   information.name         = "PC Engine";
   information.overscan     = true;
-  information.resettable   = false;
 
   information.capability.states = false;
   information.capability.cheats = false;

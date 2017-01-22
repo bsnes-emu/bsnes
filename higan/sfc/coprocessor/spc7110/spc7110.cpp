@@ -45,9 +45,6 @@ auto SPC7110::unload() -> void {
 }
 
 auto SPC7110::power() -> void {
-}
-
-auto SPC7110::reset() -> void {
   create(SPC7110::Enter, 21'477'272);
 
   r4801 = 0x00;

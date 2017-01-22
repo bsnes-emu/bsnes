@@ -53,11 +53,8 @@ auto NECDSP::unload() -> void {
 }
 
 auto NECDSP::power() -> void {
-}
-
-auto NECDSP::reset() -> void {
-  create(NECDSP::Enter, Frequency);
   uPD96050::power();
+  create(NECDSP::Enter, Frequency);
 }
 
 }

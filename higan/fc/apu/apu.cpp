@@ -76,6 +76,9 @@ auto APU::setSample(int16 sample) -> void {
 }
 
 auto APU::power() -> void {
+  create(APU::Enter, system.colorburst() * 6.0);
+  stream = Emulator::audio.createStream(1, system.colorburst() / 2.0);
+
   filter.hipassStrong = 0;
   filter.hipassWeak = 0;
   filter.lopass = 0;
@@ -85,17 +88,6 @@ auto APU::power() -> void {
   triangle.power();
   noise.power();
   dmc.power();
-}
-
-auto APU::reset() -> void {
-  create(APU::Enter, system.colorburst() * 6.0);
-  stream = Emulator::audio.createStream(1, system.colorburst() / 2.0);
-
-  pulse[0].reset();
-  pulse[1].reset();
-  triangle.reset();
-  noise.reset();
-  dmc.reset();
 
   frame.irqPending = 0;
 

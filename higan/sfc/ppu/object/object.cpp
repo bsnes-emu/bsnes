@@ -154,7 +154,7 @@ auto PPU::Object::tilefetch() -> void {
   io.rangeOver |= (t.itemCount > 32);
 }
 
-auto PPU::Object::reset() -> void {
+auto PPU::Object::power() -> void {
   for(auto& object : oam.object) {
     object.x = 0;
     object.y = 0;

@@ -78,9 +78,6 @@ auto EpsonRTC::unload() -> void {
 }
 
 auto EpsonRTC::power() -> void {
-}
-
-auto EpsonRTC::reset() -> void {
   create(EpsonRTC::Enter, 32'768 * 64);
 
   clocks = 0;

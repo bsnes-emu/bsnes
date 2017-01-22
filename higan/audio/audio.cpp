@@ -56,13 +56,15 @@ auto Audio::process() -> void {
       if(!stream->pending()) return;
     }
 
-    double samples[channels] = {0.0};
+    double samples[channels];
+    for(auto& sample : samples) sample = 0.0;
+
     for(auto& stream : streams) {
       double buffer[16];
       uint length = stream->read(buffer), offset = 0;
 
-      for(auto c : range(channels)) {
-        samples[c] += buffer[offset];
+      for(auto& sample : samples) {
+        sample += buffer[offset];
         if(++offset >= length) offset = 0;
       }
     }

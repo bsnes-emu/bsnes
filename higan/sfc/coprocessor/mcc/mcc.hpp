@@ -8,7 +8,6 @@ struct MCC {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   auto memoryAccess(bool write, Memory& memory, uint24 addr, uint8 data) -> uint8;
   auto mcuAccess(bool write, uint24 addr, uint8 data) -> uint8;

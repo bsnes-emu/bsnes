@@ -34,10 +34,6 @@ struct NES_TxROM : Board {
     mmc3.power();
   }
 
-  auto reset() -> void {
-    mmc3.reset();
-  }
-
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
     mmc3.serialize(s);

@@ -61,10 +61,6 @@ struct NES_SxROM : Board {
     mmc1.power();
   }
 
-  auto reset() -> void {
-    mmc1.reset();
-  }
-
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
     mmc1.serialize(s);

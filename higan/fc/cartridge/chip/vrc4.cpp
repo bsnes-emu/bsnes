@@ -126,9 +126,6 @@ struct VRC4 : Chip {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     prgMode = 0;
     for(auto& n : prgBank) n = 0;
     mirror = 0;

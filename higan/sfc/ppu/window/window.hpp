@@ -2,7 +2,7 @@ struct Window {
   auto scanline() -> void;
   auto run() -> void;
   auto test(bool oneEnable, bool one, bool twoEnable, bool two, uint mask) -> bool;
-  auto reset() -> void;
+  auto power() -> void;
 
   auto serialize(serializer&) -> void;
 

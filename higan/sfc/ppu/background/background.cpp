@@ -206,7 +206,7 @@ auto PPU::Background::getTileColor() -> uint {
   return color;
 }
 
-auto PPU::Background::reset() -> void {
+auto PPU::Background::power() -> void {
   io.tiledataAddress = (random(0x0000) & 0x0f) << 12;
   io.screenAddress = (random(0x0000) & 0xfc) << 8;
   io.screenSize = random(0);

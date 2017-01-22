@@ -17,9 +17,6 @@ auto APU::Envelope::clock() -> void {
 }
 
 auto APU::Envelope::power() -> void {
-}
-
-auto APU::Envelope::reset() -> void {
   speed = 0;
   useSpeedAsVolume = 0;
   loopMode = 0;

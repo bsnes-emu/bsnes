@@ -8,7 +8,7 @@ struct Background {
   auto scanline() -> void;
   auto begin() -> void;
   auto run(bool screen) -> void;
-  auto reset() -> void;
+  auto power() -> void;
 
   auto getTile() -> void;
   auto getTileColor() -> uint;

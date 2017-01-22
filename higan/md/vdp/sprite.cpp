@@ -83,8 +83,5 @@ auto VDP::Sprite::run(uint x, uint y) -> void {
 }
 
 auto VDP::Sprite::power() -> void {
-}
-
-auto VDP::Sprite::reset() -> void {
   memory::fill(&io, sizeof(IO));
 }

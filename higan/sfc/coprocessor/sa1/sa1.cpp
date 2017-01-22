@@ -124,13 +124,6 @@ auto SA1::unload() -> void {
 }
 
 auto SA1::power() -> void {
-  r.a = 0x0000;
-  r.x = 0x0000;
-  r.y = 0x0000;
-  r.s = 0x01ff;
-}
-
-auto SA1::reset() -> void {
   create(SA1::Enter, system.colorburst() * 6.0);
 
   cpubwram.dma = false;
@@ -139,9 +132,10 @@ auto SA1::reset() -> void {
   }
 
   r.pc.d   = 0x000000;
-  r.x.h    = 0x00;
-  r.y.h    = 0x00;
-  r.s.h    = 0x01;
+  r.a      = 0x0000;
+  r.x      = 0x0000;
+  r.y      = 0x0000;
+  r.s      = 0x01ff;
   r.d      = 0x0000;
   r.db     = 0x00;
   r.p      = 0x34;

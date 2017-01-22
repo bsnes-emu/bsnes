@@ -1,5 +1,5 @@
 /*
-  libco v18 (2016-09-14)
+  libco v18.01 (2017-01-22)
   author: byuu
   license: public domain
 */

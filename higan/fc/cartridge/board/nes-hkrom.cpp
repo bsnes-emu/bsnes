@@ -33,10 +33,6 @@ struct NES_HKROM : Board {
     mmc6.power();
   }
 
-  auto reset() -> void {
-    mmc6.reset();
-  }
-
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
     mmc6.serialize(s);

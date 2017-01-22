@@ -8,7 +8,6 @@ Interface::Interface() {
   information.manufacturer = "Sega";
   information.name         = "Mega Drive";
   information.overscan     = true;
-  information.resettable   = true;
 
   information.capability.states = false;
   information.capability.cheats = false;
@@ -111,10 +110,6 @@ auto Interface::connect(uint port, uint device) -> void {
 
 auto Interface::power() -> void {
   system.power();
-}
-
-auto Interface::reset() -> void {
-  system.reset();
 }
 
 auto Interface::run() -> void {

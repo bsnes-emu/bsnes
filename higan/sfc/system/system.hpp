@@ -14,7 +14,6 @@ struct System {
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
 
   //video.cpp
   auto configureVideoPalette() -> void;

@@ -18,7 +18,6 @@ struct CPU : Processor::M68K, Thread {
   auto lower(Interrupt) -> void;
 
   auto power() -> void;
-  auto reset() -> void;
 
   vector<Thread*> peripherals;
 

@@ -335,9 +335,6 @@ struct MMC5 : Chip {
   }
 
   auto power() -> void {
-  }
-
-  auto reset() -> void {
     for(auto& n : exram) n = 0xff;
 
     prgMode = 3;

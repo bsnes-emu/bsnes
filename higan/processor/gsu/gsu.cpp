@@ -13,9 +13,6 @@ namespace Processor {
 #include "disassembler.cpp"
 
 auto GSU::power() -> void {
-}
-
-auto GSU::reset() -> void {
   for(auto& r : regs.r) {
     r.data = 0x0000;
     r.modified = false;

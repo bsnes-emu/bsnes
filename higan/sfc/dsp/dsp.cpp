@@ -229,7 +229,15 @@ auto DSP::load(Markup::Node node) -> bool {
 }
 
 auto DSP::power() -> void {
+  create(Enter, 32040.0 * 768.0);
+  stream = Emulator::audio.createStream(2, 32040.0);
+
   memory::fill(&state, sizeof(State));
+  state.noise = 0x4000;
+  state.echoHistoryOffset = 0;
+  state.everyOtherSample = 1;
+  state.echoOffset = 0;
+  state.counter = 0;
 
   for(auto n : range(8)) {
     memory::fill(&voice[n], sizeof(Voice));
@@ -237,18 +245,8 @@ auto DSP::power() -> void {
     voice[n].vbit = 1 << n;
     voice[n].vidx = n * 0x10;
   }
-}
-
-auto DSP::reset() -> void {
-  create(Enter, 32040.0 * 768.0);
-  stream = Emulator::audio.createStream(2, 32040.0);
 
   REG(FLG) = 0xe0;
-  state.noise = 0x4000;
-  state.echoHistoryOffset = 0;
-  state.everyOtherSample = 1;
-  state.echoOffset = 0;
-  state.counter = 0;
 }
 
 #undef REG

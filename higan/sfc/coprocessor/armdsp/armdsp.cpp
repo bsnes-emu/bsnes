@@ -94,7 +94,7 @@ auto ArmDSP::write(uint24 addr, uint8 data) -> void {
 
   if(addr == 0x3804) {
     data &= 1;
-    if(!bridge.reset && data) resetARM();
+    if(!bridge.reset && data) reset();
     bridge.reset = data;
   }
 }
@@ -110,14 +110,11 @@ auto ArmDSP::unload() -> void {
 
 auto ArmDSP::power() -> void {
   for(auto n : range(16 * 1024)) programRAM[n] = random(0x00);
+  bridge.reset = false;
+  reset();
 }
 
 auto ArmDSP::reset() -> void {
-  bridge.reset = false;
-  resetARM();
-}
-
-auto ArmDSP::resetARM() -> void {
   create(ArmDSP::Enter, 21'477'272);
   ARM::power();
 
