@@ -33,6 +33,7 @@ auto CPU::power() -> void {
 
   memory::fill(&irq, sizeof(IRQ));
   memory::fill(&timer, sizeof(Timer));
+  memory::fill(&io, sizeof(IO));
 }
 
 auto CPU::lastCycle() -> void {

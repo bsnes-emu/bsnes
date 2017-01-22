@@ -55,6 +55,10 @@ struct CPU : Processor::HuC6280, Thread {
     friend class CPU;
   } timer;
 
+  struct IO {
+    uint8 mdr;
+  } io;
+
 private:
   uint8 ram[0x2000];
 };

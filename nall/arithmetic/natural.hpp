@@ -319,7 +319,7 @@ template<> struct stringify<Pair> {
     do {
       Pair quotient, remainder;
       div(source, 10, quotient, remainder);
-      *p++ = '0' + remainder;
+      *p++ = remainder + '0';
       source = quotient;
     } while(source);
     _size = p - _output;

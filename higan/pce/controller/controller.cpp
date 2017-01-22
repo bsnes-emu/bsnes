@@ -9,6 +9,7 @@ Controller::Controller() {
 }
 
 Controller::~Controller() {
+  scheduler.remove(*this);
 }
 
 auto Controller::Enter() -> void {

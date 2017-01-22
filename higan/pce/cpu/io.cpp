@@ -22,12 +22,12 @@ auto CPU::read(uint21 addr) -> uint8 {
 
     //$0800-0bff  PSG
     if((addr & 0x1c00) == 0x0800) {
-      return 0x00;
+      return io.mdr;
     }
 
     //$0c00-0fff  Timer
     if((addr & 0x1c00) == 0x0c00) {
-      return timer.value;
+      return (io.mdr & 0x80) | timer.value;
     }
 
     //$1000-13ff  I/O
@@ -43,11 +43,20 @@ auto CPU::read(uint21 addr) -> uint8 {
 
     //$1400-17ff  IRQ
     if((addr & 0x1c00) == 0x1400) {
+      if(addr.bits(0,1) == 0) {
+        return io.mdr;
+      }
+
+      if(addr.bits(0,1) == 1) {
+        return io.mdr;
+      }
+
       if(addr.bits(0,1) == 2) {
         return (
           irq.disableExternal << 0
         | irq.disableVDC << 1
         | irq.disableTimer << 2
+        | (io.mdr & 0xf8)
         );
       }
 
@@ -56,6 +65,7 @@ auto CPU::read(uint21 addr) -> uint8 {
           irq.pendingExternal << 0
         | irq.pendingVDC << 1
         | irq.pendingTimer << 2
+        | (io.mdr & 0xf8)
         );
       }
     }
@@ -71,7 +81,7 @@ auto CPU::read(uint21 addr) -> uint8 {
     }
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto CPU::write(uint21 addr, uint8 data) -> void {
@@ -99,11 +109,13 @@ auto CPU::write(uint21 addr, uint8 data) -> void {
 
     //$0800-0bff  PSG
     if((addr & 0x1c00) == 0x0800) {
+      io.mdr = data;
       return;
     }
 
     //$0c00-0fff  Timer
     if((addr & 0x1c00) == 0x0c00) {
+      io.mdr = data;
       if(!addr.bit(0)) {
         timer.latch = data.bits(0,6);
       } else {
@@ -115,12 +127,14 @@ auto CPU::write(uint21 addr, uint8 data) -> void {
 
     //$1000-13ff  I/O
     if((addr & 0x1c00) == 0x1000) {
+      io.mdr = data;
       PCEngine::peripherals.controllerPort->writeData(data.bits(0,1));
       return;
     }
 
     //$1400-17ff  IRQ
     if((addr & 0x1c00) == 0x1400) {
+      io.mdr = data;
       if(addr.bits(0,1) == 2) {
         irq.disableExternal = data.bit(0);
         irq.disableVDC = data.bit(1);

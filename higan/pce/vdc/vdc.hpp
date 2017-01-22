@@ -5,28 +5,54 @@ struct VDC : Thread {
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;
+  auto scanline() -> void;
+  auto frame() -> void;
   auto refresh() -> void;
 
   auto power() -> void;
 
   //io.cpp
-  auto vramRead(uint16 addr) -> uint16;
-  auto vramWrite(uint16 addr, uint16 data) -> void;
-
   auto read(uint11 addr) -> uint8;
   auto write(uint11 addr, uint8 data) -> void;
 
 private:
-  uint32 buffer[512 * 484];
+  uint32 buffer[1140 * 512];
 
-  uint16 vram[0x8000];
-  uint16 satb[0x100];
-  uint9 cram[0x200];
+  struct VRAM {
+    //memory.cpp
+    auto read(uint16 addr) -> uint16;
+    auto write(uint16 addr, uint16 data) -> void;
 
-  struct State {
-    uint x;
-    uint y;
-  } state;
+    uint16 addressRead;
+    uint16 addressWrite;
+    uint16 addressIncrement;
+
+    uint16 dataRead;
+    uint16 dataWrite;
+
+  private:
+    uint16 data[0x8000];
+  } vram;
+
+  struct SATB {
+    //memory.cpp
+    auto read(uint8 addr) -> uint16;
+    auto write(uint8 addr, uint16 data) -> void;
+
+  private:
+    uint16 data[0x100];
+  } satb;
+
+  struct CRAM {
+    //memory.cpp
+    auto read(uint9 addr) -> uint9;
+    auto write(uint9 addr, bool a0, uint8 data) -> void;
+
+    uint9 address;
+
+  private:
+    uint9 data[0x200];
+  } cram;
 
   struct IRQ {
     enum class Line : uint {
@@ -79,6 +105,32 @@ private:
     uint16 satbOffset;
   } dma;
 
+  struct VCE {
+    uint5 horizontalSyncWidth;
+    uint7 horizontalDisplayStart;
+    uint7 horizontalDisplayLength;
+    uint7 horizontalDisplayEnd;
+
+    uint5 verticalSyncWidth;
+    uint8 verticalDisplayStart;
+    uint9 verticalDisplayLength;
+    uint8 verticalDisplayEnd;
+
+    uint  clock;
+
+    uint  hclock;
+    uint  vclock;
+
+    uint  hoffset;
+    uint  voffset;
+
+    uint  hstart;
+    uint  vstart;
+
+    uint  hlength;
+    uint  vlength;
+  } vce;
+
   struct Background {
     //background.cpp
     auto scanline(uint y) -> void;
@@ -87,6 +139,7 @@ private:
     bool   enable;
     uint10 hscroll;
     uint9  vscroll;
+    uint9  vcounter;
     uint8  width;
     uint8  height;
 
@@ -114,6 +167,7 @@ private:
       bool   hflip;
       uint   height;
       bool   vflip;
+      bool   first;
     };
     array<Object, 64> objects;
 
@@ -124,60 +178,22 @@ private:
   struct IO {
     uint5  address;
 
-    //VDC
-
-    //$00  MAWR (W)
-    uint16 vramAddressWrite;
-
-    //$01  MARR (W)
-    uint16 vramAddressRead;
-
-    //$02  VWR (W)
-    //$02  VRR (R)
-    uint16 vramDataWrite;
-    uint16 vramDataRead;
-
-    //$05  CR (W)
+    //$0005  CR (W)
     uint2  externalSync;
     uint2  displayOutput;
     bool   dramRefresh;
-    uint   vramAddressIncrement;
 
-    //$06  RCR
+    //$0006  RCR
     uint10 lineCoincidence;
 
-    //$09  MWR
+    //$0009  MWR
     uint2  vramAccess;
     uint2  spriteAccess;
     bool   cgMode;
 
-    //$0a  HSR
-    uint5  horizontalSyncWidth;
-    uint7  horizontalDisplayStart;
-
-    //$0b  HDR
-    uint7  horizontalDisplayWidth;
-    uint7  horizontalDisplayEnd;
-
-    //$0c  VPR
-    uint5  verticalSyncWidth;
-    uint8  verticalDisplayStart;
-
-    //$0d  VDR
-    uint9  verticalDisplayWidth;
-
-    //$0e  VCR
-    uint8  verticalDisplayEnd;
-
-    //VCE
-
-    //$00  CR
-    uint2  divisionRatio;
+    //$0400  CR
     bool   colorBlur;
     bool   grayscale;
-
-    //$02  CTA
-    uint9  colorAddress;
   } io;
 };
 

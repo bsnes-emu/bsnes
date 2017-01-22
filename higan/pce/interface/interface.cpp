@@ -45,13 +45,13 @@ auto Interface::title() -> string {
 }
 
 auto Interface::videoSize() -> VideoSize {
-  return {256, 240};
+  return {1140, 242};
 }
 
 auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
   auto a = arc ? 8.0 / 7.0 : 1.0;
-  uint w = 256;
-  uint h = 240;
+  uint w = 285;
+  uint h = 242;
   uint m = min(width / (w * a), height / h);
   return {uint(w * a * m), uint(h * m)};
 }

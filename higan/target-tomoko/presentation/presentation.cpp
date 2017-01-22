@@ -237,8 +237,8 @@ auto Presentation::resizeViewport() -> void {
   uint windowWidth = 0, windowHeight = 0;
   bool aspectCorrection = true;
   if(!fullScreen()) {
-    windowWidth  = 320 * scale;
-    windowHeight = 240 * scale;
+    windowWidth  = 326 * scale;
+    windowHeight = 242 * scale;
     aspectCorrection = settings["Video/AspectCorrection"].boolean();
   } else {
     windowWidth  = geometry().width();

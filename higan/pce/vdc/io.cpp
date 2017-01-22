@@ -1,17 +1,6 @@
-auto VDC::vramRead(uint16 addr) -> uint16 {
-  if(addr.bit(15)) return 0x00;
-  return vram[addr];
-}
-
-auto VDC::vramWrite(uint16 addr, uint16 data) -> void {
-  if(addr.bit(15)) return;
-  vram[addr] = data;
-}
-
 auto VDC::read(uint11 addr) -> uint8 {
   bool a0 = addr.bit(0);
   if(!addr.bit(10)) {
-    //VDC
     if(addr.bit(1) == 0) {
       //SR
       if(a0) return 0x00;
@@ -29,26 +18,25 @@ auto VDC::read(uint11 addr) -> uint8 {
     if(addr.bit(1) == 1) {
       if(io.address == 0x02) {
         //VRR
-        uint8 data = io.vramDataRead.byte(a0);
+        uint8 data = vram.dataRead.byte(a0);
         if(a0) {
-          io.vramAddressRead += io.vramAddressIncrement;
-          io.vramDataRead = vramRead(io.vramAddressRead);
+          vram.addressRead += vram.addressIncrement;
+          vram.dataRead = vram.read(vram.addressRead);
         }
         return data;
       }
     }
   } else {
-    //VCE
     if(addr.bits(0,2) == 0x04) {
       //CTR
-      uint8 data = cram[io.colorAddress].bits(0,7);
+      uint8 data = cram.read(cram.address).bits(0,7);
       return data;
     }
 
     if(addr.bits(0,2) == 0x05) {
       //CTR
-      uint8 data = cram[io.colorAddress].bit(0);
-      io.colorAddress++;
+      uint8 data = 0xfe | cram.read(cram.address).bit(0);
+      cram.address++;
       return data;
     }
   }
@@ -59,7 +47,6 @@ auto VDC::read(uint11 addr) -> uint8 {
 auto VDC::write(uint11 addr, uint8 data) -> void {
   bool a0 = addr.bit(0);
   if(!addr.bit(10)) {
-    //VDC
     if(addr.bit(1) == 0) {
       //AR
       if(a0) return;
@@ -70,23 +57,23 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
     if(addr.bit(1) == 1) {
       if(io.address == 0x00) {
         //MAWR
-        io.vramAddressWrite.byte(a0) = data;
+        vram.addressWrite.byte(a0) = data;
         return;
       }
 
       if(io.address == 0x01) {
         //MARR
-        io.vramAddressRead.byte(a0) = data;
-        io.vramDataRead = vramRead(io.vramAddressRead);
+        vram.addressRead.byte(a0) = data;
+        vram.dataRead = vram.read(vram.addressRead);
         return;
       }
 
       if(io.address == 0x02) {
         //VWR
-        io.vramDataWrite.byte(a0) = data;
+        vram.dataWrite.byte(a0) = data;
         if(a0) {
-          vramWrite(io.vramAddressWrite, io.vramDataWrite);
-          io.vramAddressWrite += io.vramAddressIncrement;
+          vram.write(vram.addressWrite, vram.dataWrite);
+          vram.addressWrite += vram.addressIncrement;
         }
         return;
       }
@@ -104,10 +91,10 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
         } else {
           io.displayOutput = data.bits(0,1);
           io.dramRefresh = data.bit(2);
-          if(data.bits(3,4) == 0) io.vramAddressIncrement = 0x01;
-          if(data.bits(3,4) == 1) io.vramAddressIncrement = 0x20;
-          if(data.bits(3,4) == 2) io.vramAddressIncrement = 0x40;
-          if(data.bits(3,4) == 3) io.vramAddressIncrement = 0x80;
+          if(data.bits(3,4) == 0) vram.addressIncrement = 0x01;
+          if(data.bits(3,4) == 1) vram.addressIncrement = 0x20;
+          if(data.bits(3,4) == 2) vram.addressIncrement = 0x40;
+          if(data.bits(3,4) == 3) vram.addressIncrement = 0x80;
         }
         return;
       }
@@ -127,7 +114,7 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       if(io.address == 0x08) {
         //BYR
         background.vscroll.byte(a0) = data;
-        background.voffset = background.vscroll;
+        background.vcounter = background.vscroll;
         return;
       }
 
@@ -149,9 +136,9 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       if(io.address == 0x0a) {
         //HSR
         if(!a0) {
-          io.horizontalSyncWidth = data.bits(0,4);
+          vce.horizontalSyncWidth = data.bits(0,4);
         } else {
-          io.horizontalDisplayStart = data.bits(0,6);
+          vce.horizontalDisplayStart = data.bits(0,6);
         }
         return;
       }
@@ -159,9 +146,9 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       if(io.address == 0x0b) {
         //HDR
         if(!a0) {
-          io.horizontalDisplayWidth = data.bits(0,6);
+          vce.horizontalDisplayLength = data.bits(0,6);
         } else {
-          io.horizontalDisplayEnd = data.bits(0,6);
+          vce.horizontalDisplayEnd = data.bits(0,6);
         }
         return;
       }
@@ -169,23 +156,27 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       if(io.address == 0x0c) {
         //VPR
         if(!a0) {
-          io.verticalSyncWidth = data.bits(0,4);
+          vce.verticalSyncWidth = data.bits(0,4);
         } else {
-          io.verticalDisplayStart = data.bits(0,7);
+          vce.verticalDisplayStart = data.bits(0,7);
         }
         return;
       }
 
       if(io.address == 0x0d) {
         //VDR
-        io.verticalDisplayWidth.byte(a0) = data;
+        if(!a0) {
+          vce.verticalDisplayLength.bits(0,7) = data.bits(0,7);
+        } else {
+          vce.verticalDisplayLength.bit(8) = data.bit(0);
+        }
         return;
       }
 
       if(io.address == 0x0e) {
         //VCR
         if(a0) return;
-        io.verticalDisplayEnd = data.bits(0,7);
+        vce.verticalDisplayEnd = data.bits(0,7);
         return;
       }
 
@@ -227,10 +218,12 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
       }
     }
   } else {
-    //VCE
     if(addr.bits(0,2) == 0x00) {
       //CR
-      io.divisionRatio = data.bits(0,1);
+      if(data.bits(0,1) == 0) vce.clock = 4;
+      if(data.bits(0,1) == 1) vce.clock = 3;
+      if(data.bits(0,1) == 2) vce.clock = 2;
+      if(data.bits(0,1) == 3) vce.clock = 2;
       io.colorBlur = data.bit(2);
       io.grayscale = data.bit(7);
       return;
@@ -238,26 +231,26 @@ auto VDC::write(uint11 addr, uint8 data) -> void {
 
     if(addr.bits(0,2) == 0x02) {
       //CTA
-      io.colorAddress.bits(0,7) = data.bits(0,7);
+      cram.address.bits(0,7) = data.bits(0,7);
       return;
     }
 
     if(addr.bits(0,2) == 0x03) {
       //CTA
-      io.colorAddress.bit(8) = data.bit(0);
+      cram.address.bit(8) = data.bit(0);
       return;
     }
 
     if(addr.bits(0,2) == 0x04) {
       //CTW
-      cram[io.colorAddress].bits(0,7) = data.bits(0,7);
+      cram.write(cram.address, 0, data.bits(0,7));
       return;
     }
 
     if(addr.bits(0,2) == 0x05) {
       //CTW
-      cram[io.colorAddress].bit(8) = data.bit(0);
-      io.colorAddress++;
+      cram.write(cram.address, 1, data.bit(0));
+      cram.address++;
       return;
     }
   }

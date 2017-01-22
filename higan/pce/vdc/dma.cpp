@@ -1,8 +1,8 @@
 auto VDC::DMA::step(uint clocks) -> void {
   while(clocks--) {
     if(vramActive) {
-      uint16 data = vdc.vramRead(source);
-      vdc.vramWrite(target, data);
+      uint16 data = vdc.vram.read(source);
+      vdc.vram.write(target, data);
       sourceIncrementMode == 0 ? source++ : source--;
       targetIncrementMode == 0 ? target++ : target--;
       if(!--length) {
@@ -12,8 +12,8 @@ auto VDC::DMA::step(uint clocks) -> void {
     }
 
     if(satbActive) {
-      uint16 data = vdc.vramRead(satbSource + satbOffset);
-      vdc.satb[satbOffset] = data;
+      uint16 data = vdc.vram.read(satbSource + satbOffset);
+      vdc.satb.write(satbOffset, data);
       if(++satbOffset == 256) {
         satbActive = false;
         satbOffset = 0;
