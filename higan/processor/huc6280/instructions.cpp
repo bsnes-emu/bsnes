@@ -495,7 +495,8 @@ L store8(zeropage, data);
 auto HuC6280::instruction_ST(uint2 index) -> void {
   auto data = operand();
   io();
-L store21(0x1fe000 + index, data);
+L io();
+  store(index, data);
 }
 
 auto HuC6280::instruction_TAM() -> void {

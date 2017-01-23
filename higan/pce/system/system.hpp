@@ -4,7 +4,7 @@ struct System {
 
   auto run() -> void;
 
-  auto load(Emulator::Interface*) -> bool;
+  auto load(Emulator::Interface*, uint) -> bool;
   auto save() -> void;
   auto unload() -> void;
 

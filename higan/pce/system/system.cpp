@@ -2,15 +2,17 @@
 
 namespace PCEngine {
 
+uint Model::id;
 System system;
 Scheduler scheduler;
 #include "peripherals.cpp"
 
 auto System::run() -> void {
-  if(scheduler.enter() == Scheduler::Event::Frame) vdc.refresh();
+  if(scheduler.enter() == Scheduler::Event::Frame) vce.refresh();
 }
 
-auto System::load(Emulator::Interface* interface) -> bool {
+auto System::load(Emulator::Interface* interface, uint id) -> bool {
+  Model::id = id;
   information = {};
 
   if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
@@ -45,7 +47,10 @@ auto System::power() -> void {
   scheduler.reset();
   cartridge.power();
   cpu.power();
-  vdc.power();
+  vpc.power();
+  vce.power();
+  vdc0.power();
+  vdc1.power();
   psg.power();
   scheduler.primary(cpu);
 

@@ -6,19 +6,18 @@ namespace Processor {
 
 struct HuC6280 {
   virtual auto step(uint clocks) -> void = 0;
-  virtual auto read(uint21 addr) -> uint8 = 0;
-  virtual auto write(uint21 addr, uint8 data) -> void = 0;
+  virtual auto read(uint8 bank, uint13 addr) -> uint8 = 0;
+  virtual auto write(uint8 bank, uint13 addr, uint8 data) -> void = 0;
+  virtual auto store(uint2 addr, uint8 data) -> void = 0;
   virtual auto lastCycle() -> void = 0;
 
   auto power() -> void;
 
   //memory.cpp
-  inline auto mmu(uint16) const -> uint21;
   inline auto load8(uint8) -> uint8;
   inline auto load16(uint16) -> uint8;
   inline auto store8(uint8, uint8) -> void;
   inline auto store16(uint16, uint8) -> void;
-  inline auto store21(uint21, uint8) -> void;
 
   auto io() -> uint8;
   auto opcode() -> uint8;

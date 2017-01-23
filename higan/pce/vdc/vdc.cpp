@@ -2,7 +2,8 @@
 
 namespace PCEngine {
 
-VDC vdc;
+VDC vdc0;
+VDC vdc1;
 #include "memory.cpp"
 #include "io.cpp"
 #include "irq.cpp"
@@ -11,112 +12,105 @@ VDC vdc;
 #include "sprite.cpp"
 
 auto VDC::Enter() -> void {
-  while(true) scheduler.synchronize(), vdc.main();
+  while(true) {
+    scheduler.synchronize();
+    if(vdc0.active()) vdc0.main();
+    if(vdc1.active()) vdc1.main();
+  }
 }
 
 auto VDC::main() -> void {
-  auto output = buffer + 1140 * vce.vclock;
+  if(Model::PCEngine() && vdc1.active()) return step(frequency());
 
-  //todo: if block breaks TV Sports Basketball
-  //if(vce.vclock >= vce.vstart && vce.voffset < vce.vlength) {
-    background.scanline(vce.voffset);
-    sprite.scanline(vce.voffset);
-  //}
+  timing.vpulse = false;
+  timing.vclock = 0;
+  timing.voffset = 0;
+  timing.vstart = max((uint8)2, timing.verticalDisplayStart) - 2;
+  timing.vlength = min(242, timing.verticalDisplayLength + 1);
 
-  while(vce.hclock < 1140) {
-    uint9 color = 0;
+  while(!timing.vpulse) {
+    timing.hpulse = false;
+    timing.hclock = 0;
+    timing.hoffset = 0;
+    timing.hstart = timing.horizontalDisplayStart;
+    timing.hlength = (timing.horizontalDisplayLength + 1) << 3;
 
-    if(vce.vclock >= vce.vstart && vce.voffset < vce.vlength
-    && vce.hclock >= vce.hstart && vce.hoffset < vce.hlength
-    ) {
-      background.run(vce.hoffset, vce.voffset);
-      sprite.run(vce.hoffset, vce.voffset);
-      vce.hoffset++;
+    if(timing.vclock >= timing.vstart && timing.voffset < timing.vlength) {
+      background.scanline(timing.voffset);
+      sprite.scanline(timing.voffset);
 
-      if(sprite.color && sprite.priority) {
-        color = sprite.color();
-      } else if(background.color) {
-        color = background.color();
-      } else if(sprite.color) {
-        color = sprite.color();
-      } else {
-        color = cram.read(0);
+      step(timing.hstart);
+
+      while(timing.hoffset < timing.hlength) {
+        data = 0;
+
+        background.run(timing.hoffset, timing.voffset);
+        sprite.run(timing.hoffset, timing.voffset);
+
+        if(sprite.color && sprite.priority) {
+          data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
+        } else if(background.color) {
+          data = 0 << 8 | background.palette << 4 | background.color << 0;
+        } else if(sprite.color) {
+          data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
+        }
+
+        step(vce.clock());
+        timing.hoffset++;
       }
+      data = 0;
+
+      if(timing.voffset == io.lineCoincidence - 64) {
+        irq.raise(IRQ::Line::LineCoincidence);
+      }
+
+      while(!timing.hpulse) step(1);
+      timing.vclock++;
+      timing.voffset++;
+    } else {
+      data = 0;
+      while(!timing.hpulse) step(1);
+      timing.vclock++;
     }
 
-    if(vce.clock >= 2) *output++ = color;
-    if(vce.clock >= 2) *output++ = color;
-    if(vce.clock >= 3) *output++ = color;
-    if(vce.clock >= 4) *output++ = color;
-
-    step(vce.clock);
+    if(timing.vclock == timing.vstart + timing.vlength) {
+      irq.raise(IRQ::Line::Vblank);
+      dma.satbStart();
+    }
   }
-
-  if(vce.vclock == io.lineCoincidence - (65 - vce.vstart)) {
-    irq.raise(IRQ::Line::LineCoincidence);
-  }
-
-  step(1365 - vce.hclock);
-  scanline();
 }
 
 auto VDC::scanline() -> void {
-  vce.hclock = 0;
-  vce.hoffset = 0;
-  vce.hstart = vce.horizontalDisplayStart * vce.clock;
-  vce.hlength = (vce.horizontalDisplayLength + 1) << 3;
-  if(vce.clock == 2) vce.hstart += 0;
-  if(vce.clock == 3) vce.hstart += 0;
-  if(vce.clock == 4) vce.hstart += 0;
-
-  vce.vclock++;
-  if(vce.vclock > vce.vstart) vce.voffset++;
-
-  if(vce.vclock == 262) {
-    frame();
-  }
-
-  if(vce.vclock == vce.vstart + vce.vlength) {
-    irq.raise(IRQ::Line::Vblank);
-    dma.satbStart();
-  }
+  timing.hpulse = true;
 }
 
 auto VDC::frame() -> void {
-  scheduler.exit(Scheduler::Event::Frame);
-
-  vce.vclock = 0;
-  vce.voffset = 0;
-  vce.vstart = max((uint8)2, vce.verticalDisplayStart) - 2;
-  vce.vlength = min(242, vce.verticalDisplayLength + 1);
+  timing.vpulse = true;
 }
 
 auto VDC::step(uint clocks) -> void {
-  vce.hclock += clocks;
   Thread::step(clocks);
-  dma.step(clocks);
   synchronize(cpu);
-}
 
-auto VDC::refresh() -> void {
-  Emulator::video.refresh(buffer + 1140 * vce.vstart, 1140 * sizeof(uint32), 1140, 242);
+  timing.hclock += clocks;
+  dma.step(clocks);
 }
 
 auto VDC::power() -> void {
   create(VDC::Enter, system.colorburst() * 6.0);
 
-  for(auto& pixel : buffer) pixel = 0;
   memory::fill(&vram, sizeof(VRAM));
   memory::fill(&satb, sizeof(SATB));
-  memory::fill(&cram, sizeof(CRAM));
+  memory::fill(&timing, sizeof(Timing));
   memory::fill(&irq, sizeof(IRQ));
   memory::fill(&dma, sizeof(DMA));
-  memory::fill(&vce, sizeof(VCE));
   memory::fill(&io, sizeof(IO));
   memory::fill(&background, sizeof(Background));
   memory::fill(&sprite, sizeof(Sprite));
 
-  vce.clock = 4;
+  dma.vdc = this;
+  background.vdc = this;
+  sprite.vdc = this;
 }
 
 }

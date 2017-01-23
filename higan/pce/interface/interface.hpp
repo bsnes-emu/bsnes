@@ -4,6 +4,7 @@ struct ID {
   enum : uint {
     System,
     PCEngine,
+    SuperGrafx,
   };
 
   struct Port { enum : uint {
@@ -33,7 +34,6 @@ struct Interface : Emulator::Interface {
   auto audioFrequency() -> double override;
 
   auto loaded() -> bool override;
-  auto load(uint id) -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
 
@@ -47,6 +47,18 @@ struct Interface : Emulator::Interface {
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
   auto set(const string& name, const any& value) -> bool override;
+};
+
+struct PCEngineInterface : Interface {
+  PCEngineInterface();
+
+  auto load(uint id) -> bool override;
+};
+
+struct SuperGrafxInterface : Interface {
+  SuperGrafxInterface();
+
+  auto load(uint id) -> bool override;
 };
 
 struct Settings {

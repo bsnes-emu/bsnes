@@ -9,8 +9,9 @@ struct CPU : Processor::HuC6280, Thread {
   auto lastCycle() -> void override;
 
   //io.cpp
-  auto read(uint21 addr) -> uint8 override;
-  auto write(uint21 addr, uint8 data) -> void override;
+  auto read(uint8 bank, uint13 addr) -> uint8 override;
+  auto write(uint8 bank, uint13 addr, uint8 data) -> void override;
+  auto store(uint2 addr, uint8 data) -> void override;
 
   //timer.cpp
   auto timerStep(uint clocks) -> void;
@@ -60,7 +61,7 @@ struct CPU : Processor::HuC6280, Thread {
   } io;
 
 private:
-  uint8 ram[0x2000];
+  uint8 ram[0x8000];  //PC Engine = 8KB, SuperGrafx = 32KB
 };
 
 extern CPU cpu;

@@ -26,9 +26,17 @@ namespace PCEngine {
     }
   };
 
+  struct Model {
+    inline static auto PCEngine() -> bool { return id == 1; }
+    inline static auto SuperGrafx() -> bool { return id == 2; }
+    static uint id;
+  };
+
   #include <pce/controller/controller.hpp>
 
   #include <pce/cpu/cpu.hpp>
+  #include <pce/vpc/vpc.hpp>
+  #include <pce/vce/vce.hpp>
   #include <pce/vdc/vdc.hpp>
   #include <pce/psg/psg.hpp>
 

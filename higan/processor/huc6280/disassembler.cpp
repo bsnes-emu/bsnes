@@ -1,14 +1,16 @@
-auto HuC6280::disassemble(uint16 pc_) -> string {
-  uint21 pc = mmu(pc_);
-  string s{hex((uint)pc.bits(13,20), 2L), ":", hex((uint)pc.bits(0,12), 4L), "  "};
+auto HuC6280::disassemble(uint16 pc) -> string {
+  uint8 bank = r.mpr[pc.bits(13,15)];
+  uint13 addr = pc.bits(0,12);
+
+  string s{hex(bank, 2L), ":", hex(addr, 4L), "  "};
 
   auto readByte = [&]() -> uint8 {
-    return read(pc++);
+    return read(bank, addr++);
   };
 
   auto readWord = [&]() -> uint16 {
-    uint16 data = read(pc++);
-    return data | read(pc++) << 8;
+    uint16 data = read(bank, addr++) << 0;
+    return data | read(bank, addr++) << 8;
   };
 
   auto absolute = [&]() -> string { return {"$", hex(readWord(), 4L)}; };
@@ -338,7 +340,7 @@ U op(0xfc, "nop", "$fc")
   s.append(" X:", hex(r.x, 2L));
   s.append(" Y:", hex(r.y, 2L));
   s.append(" S:", hex(r.s, 2L));
-  s.append(" PC:", hex(pc_, 4L));
+  s.append(" PC:", hex(pc, 4L));
   s.append(" ");
   s.append(r.p.n ? "N" : "n");
   s.append(r.p.v ? "V" : "v");

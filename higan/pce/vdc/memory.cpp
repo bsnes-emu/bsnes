@@ -15,15 +15,3 @@ auto VDC::SATB::read(uint8 addr) -> uint16 {
 auto VDC::SATB::write(uint8 addr, uint16 value) -> void {
   data[addr] = value;
 }
-
-auto VDC::CRAM::read(uint9 addr) -> uint9 {
-  return data[addr];
-}
-
-auto VDC::CRAM::write(uint9 addr, bool a0, uint8 value) -> void {
-  if(!a0) {
-    data[addr].bits(0,7) = value.bits(0,7);
-  } else {
-    data[addr].bit(8) = value.bit(0);
-  }
-}

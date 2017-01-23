@@ -1,22 +1,22 @@
-//Hudson Soft HuC6260 -- Video Color Encoder
 //Hudson Soft HuC6270 -- Video Display Controller
 
 struct VDC : Thread {
+  inline auto bus() const -> uint9 { return data; }
+
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;
   auto scanline() -> void;
   auto frame() -> void;
-  auto refresh() -> void;
 
   auto power() -> void;
 
   //io.cpp
-  auto read(uint11 addr) -> uint8;
-  auto write(uint11 addr, uint8 data) -> void;
+  auto read(uint2 addr) -> uint8;
+  auto write(uint2 addr, uint8 data) -> void;
 
 private:
-  uint32 buffer[1140 * 512];
+  uint9 data;
 
   struct VRAM {
     //memory.cpp
@@ -43,16 +43,32 @@ private:
     uint16 data[0x100];
   } satb;
 
-  struct CRAM {
-    //memory.cpp
-    auto read(uint9 addr) -> uint9;
-    auto write(uint9 addr, bool a0, uint8 data) -> void;
+  struct Timing {
+    uint5 horizontalSyncWidth;
+    uint7 horizontalDisplayStart;
+    uint7 horizontalDisplayLength;
+    uint7 horizontalDisplayEnd;
 
-    uint9 address;
+    uint5 verticalSyncWidth;
+    uint8 verticalDisplayStart;
+    uint9 verticalDisplayLength;
+    uint8 verticalDisplayEnd;
 
-  private:
-    uint9 data[0x200];
-  } cram;
+    bool  vpulse;
+    bool  hpulse;
+
+    uint  hclock;
+    uint  vclock;
+
+    uint  hoffset;
+    uint  voffset;
+
+    uint  hstart;
+    uint  vstart;
+
+    uint  hlength;
+    uint  vlength;
+  } timing;
 
   struct IRQ {
     enum class Line : uint {
@@ -85,6 +101,8 @@ private:
   } irq;
 
   struct DMA {
+    VDC* vdc = nullptr;
+
     //dma.cpp
     auto step(uint clocks) -> void;
     auto vramStart() -> void;
@@ -105,33 +123,9 @@ private:
     uint16 satbOffset;
   } dma;
 
-  struct VCE {
-    uint5 horizontalSyncWidth;
-    uint7 horizontalDisplayStart;
-    uint7 horizontalDisplayLength;
-    uint7 horizontalDisplayEnd;
-
-    uint5 verticalSyncWidth;
-    uint8 verticalDisplayStart;
-    uint9 verticalDisplayLength;
-    uint8 verticalDisplayEnd;
-
-    uint  clock;
-
-    uint  hclock;
-    uint  vclock;
-
-    uint  hoffset;
-    uint  voffset;
-
-    uint  hstart;
-    uint  vstart;
-
-    uint  hlength;
-    uint  vlength;
-  } vce;
-
   struct Background {
+    VDC* vdc = nullptr;
+
     //background.cpp
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
@@ -146,10 +140,13 @@ private:
     uint10 hoffset;
     uint9  voffset;
 
-    maybe<uint9> color;
+    uint4 color;
+    uint4 palette;
   } background;
 
   struct Sprite {
+    VDC* vdc = nullptr;
+
     //sprite.cpp
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
@@ -171,7 +168,8 @@ private:
     };
     array<Object, 64> objects;
 
-    maybe<uint9> color;
+    uint4 color;
+    uint4 palette;
     bool priority;
   } sprite;
 
@@ -197,4 +195,5 @@ private:
   } io;
 };
 
-extern VDC vdc;
+extern VDC vdc0;
+extern VDC vdc1;

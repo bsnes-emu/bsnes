@@ -2,17 +2,16 @@
 
 namespace PCEngine {
 
+Model model;
 Settings settings;
+#include "pc-engine.cpp"
+#include "supergrafx.cpp"
 
 Interface::Interface() {
-  information.manufacturer = "NEC";
-  information.name         = "PC Engine";
-  information.overscan     = true;
+  information.overscan = true;
 
   information.capability.states = false;
   information.capability.cheats = false;
-
-  media.append({ID::PCEngine, "PC Engine", "pce"});
 
   Port controllerPort{ID::Port::Controller, "Controller Port"};
 
@@ -81,11 +80,6 @@ auto Interface::audioFrequency() -> double {
 
 auto Interface::loaded() -> bool {
   return system.loaded();
-}
-
-auto Interface::load(uint id) -> bool {
-  if(id == ID::PCEngine) return system.load(this);
-  return false;
 }
 
 auto Interface::save() -> void {

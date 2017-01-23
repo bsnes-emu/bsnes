@@ -7,10 +7,10 @@ auto VDC::Sprite::scanline(uint y) -> void {
 
   uint count = 0;
   for(uint index : range(64)) {
-    uint16 d0 = vdc.satb.read(index << 2 | 0);
-    uint16 d1 = vdc.satb.read(index << 2 | 1);
-    uint16 d2 = vdc.satb.read(index << 2 | 2);
-    uint16 d3 = vdc.satb.read(index << 2 | 3);
+    uint16 d0 = vdc->satb.read(index << 2 | 0);
+    uint16 d1 = vdc->satb.read(index << 2 | 1);
+    uint16 d2 = vdc->satb.read(index << 2 | 2);
+    uint16 d3 = vdc->satb.read(index << 2 | 3);
 
     Object object;
     object.y = d0.bits(0,9);
@@ -34,18 +34,18 @@ auto VDC::Sprite::scanline(uint y) -> void {
 
     if(object.width == 15) {
       objects.append(object);
-      if(++count >= 16) return vdc.irq.raise(VDC::IRQ::Line::Overflow);
+      if(++count >= 16) return vdc->irq.raise(VDC::IRQ::Line::Overflow);
     } else {
       //32-width sprites count as two 16-width sprite slots
       object.pattern ^= object.hflip;
       object.width = 15;
       objects.append(object);
-      if(++count >= 16) return vdc.irq.raise(VDC::IRQ::Line::Overflow);
+      if(++count >= 16) return vdc->irq.raise(VDC::IRQ::Line::Overflow);
 
       object.x += 16;
       object.pattern ^= 1;
       objects.append(object);
-      if(++count >= 16) return vdc.irq.raise(VDC::IRQ::Line::Overflow);
+      if(++count >= 16) return vdc->irq.raise(VDC::IRQ::Line::Overflow);
     }
   }
 }
@@ -54,7 +54,9 @@ auto VDC::Sprite::run(uint x, uint y) -> void {
   x += 32;
   y += 64;
 
-  color = nothing;
+  color = 0;
+  palette = 0;
+  priority = 0;
   if(!enable) return;
 
   bool first = false;
@@ -73,26 +75,28 @@ auto VDC::Sprite::run(uint x, uint y) -> void {
     patternAddress <<= 6;
     patternAddress  += (voffset & 15);
 
-    uint16 d0 = vdc.vram.read(patternAddress +  0);
-    uint16 d1 = vdc.vram.read(patternAddress + 16);
-    uint16 d2 = vdc.vram.read(patternAddress + 32);
-    uint16 d3 = vdc.vram.read(patternAddress + 48);
+    uint16 d0 = vdc->vram.read(patternAddress +  0);
+    uint16 d1 = vdc->vram.read(patternAddress + 16);
+    uint16 d2 = vdc->vram.read(patternAddress + 32);
+    uint16 d3 = vdc->vram.read(patternAddress + 48);
 
     uint4 index = 15 - (hoffset & 15);
-    uint4 output;
-    output.bit(0) = d0.bit(index);
-    output.bit(1) = d1.bit(index);
-    output.bit(2) = d2.bit(index);
-    output.bit(3) = d3.bit(index);
-    if(output == 0) continue;
+    uint4 color;
+    color.bit(0) = d0.bit(index);
+    color.bit(1) = d1.bit(index);
+    color.bit(2) = d2.bit(index);
+    color.bit(3) = d3.bit(index);
+    if(color == 0) continue;
 
-    if(color) {
-      if(first) return vdc.irq.raise(VDC::IRQ::Line::Collision);
+    if(this->color) {
+      if(first) return vdc->irq.raise(VDC::IRQ::Line::Collision);
       return;
     }
 
-    color = vdc.cram.read(1 << 8 | object.palette << 4 | output);
-    priority = object.priority;
+    this->color = color;
+    this->palette = object.palette;
+    this->priority = object.priority;
+
     if(object.first) first = true;
   }
 }

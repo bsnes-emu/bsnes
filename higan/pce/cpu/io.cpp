@@ -1,23 +1,26 @@
-auto CPU::read(uint21 addr) -> uint8 {
-  //$000000-0fffff  HuCard
-  if(!addr.bit(20)) {
-    return cartridge.read(addr);
+auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
+  //$00-7f  HuCard
+  if(!bank.bit(7)) {
+    return cartridge.read(bank << 13 | addr);
   }
 
-  uint8 bank = addr.bits(13,20);
-  addr = addr.bits(0,12);
-
-  //$1f8000-1fbfff  RAM
+  //$f8-fb  RAM
   if(bank >= 0xf8 && bank <= 0xfb) {
-    return ram[addr];
+    if(Model::PCEngine()) return ram[addr];
+    if(Model::SuperGrafx()) return ram[bank.bits(0,1) << 13 | addr];
   }
 
-  //$1fe000-$1fffff  Hardware
+  //$ff  Hardware
   if(bank == 0xff) {
-    //$0000-03ff  VDC
+    //$0000-03ff  VDC or VPC
+    if((addr & 0x1c00) == 0x0000) {
+      if(Model::PCEngine()) return vdc0.read(addr);
+      if(Model::SuperGrafx()) return vpc.read(addr);
+    }
+
     //$0400-07ff  VCE
-    if((addr & 0x1800) == 0x0000) {
-      return vdc.read(addr);
+    if((addr & 0x1c00) == 0x0400) {
+      return vce.read(addr);
     }
 
     //$0800-0bff  PSG
@@ -84,27 +87,30 @@ auto CPU::read(uint21 addr) -> uint8 {
   return 0xff;
 }
 
-auto CPU::write(uint21 addr, uint8 data) -> void {
-  //$000000-0fffff  HuCard
-  if(!addr.bit(20)) {
-    return cartridge.write(addr, data);
+auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
+  //$00-7f  HuCard
+  if(!bank.bit(7)) {
+    return cartridge.write(bank << 13 | addr, data);
   }
 
-  uint8 bank = addr.bits(13,20);
-  addr = addr.bits(0,12);
-
-  //$1f8000-1fbfff  RAM
+  //$f8-fb  RAM
   if(bank >= 0xf8 && bank <= 0xfb) {
-    ram[addr] = data;
+    if(Model::PCEngine()) ram[addr] = data;
+    if(Model::SuperGrafx()) ram[bank.bits(0,1) << 13 | addr] = data;
     return;
   }
 
   //$1fe000-1fffff  Hardware
   if(bank == 0xff) {
-    //$0000-03ff  VDC
+    //$0000-03ff  VDC or VPC
+    if((addr & 0x1c00) == 0x0000) {
+      if(Model::PCEngine()) return vdc0.write(addr, data);
+      if(Model::SuperGrafx()) return vpc.write(addr, data);
+    }
+
     //$0400-07ff  VCE
-    if((addr & 0x1800) == 0x0000) {
-      return vdc.write(addr, data);
+    if((addr & 0x1c00) == 0x0400) {
+      return vce.write(addr, data);
     }
 
     //$0800-0bff  PSG
@@ -158,4 +164,11 @@ auto CPU::write(uint21 addr, uint8 data) -> void {
       return;
     }
   }
+}
+
+//ST0, ST1, ST2
+auto CPU::store(uint2 addr, uint8 data) -> void {
+  if(addr) addr++;  //0,1,2 => 0,2,3
+  if(Model::PCEngine()) vdc0.write(addr, data);
+  if(Model::SuperGrafx()) vpc.store(addr, data);
 }

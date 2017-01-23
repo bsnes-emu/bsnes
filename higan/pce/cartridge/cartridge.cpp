@@ -7,9 +7,17 @@ Cartridge cartridge;
 auto Cartridge::load() -> bool {
   information = {};
 
-  if(auto pathID = platform->load(ID::PCEngine, "PC Engine", "pce")) {
-    information.pathID = pathID();
-  } else return false;
+  if(Model::PCEngine()) {
+    if(auto pathID = platform->load(ID::PCEngine, "PC Engine", "pce")) {
+      information.pathID = pathID();
+    } else return false;
+  }
+
+  if(Model::SuperGrafx()) {
+    if(auto pathID = platform->load(ID::SuperGrafx, "SuperGrafx", "sg")) {
+      information.pathID = pathID();
+    } else return false;
+  }
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
