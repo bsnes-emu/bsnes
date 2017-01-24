@@ -163,11 +163,12 @@
 
 -(void)keyDown:(NSEvent *)theEvent
 {
+    unsigned short keyCode = theEvent.keyCode;
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (GBButton i = 0; i < GBButtonCount; i++) {
-        if ([[defaults stringForKey:button_to_preference_name(i)] isEqualToString:theEvent.charactersIgnoringModifiers]) {
+        if ([defaults integerForKey:button_to_preference_name(i)] == keyCode) {
             handled = true;
             switch (i) {
                 case GBTurbo:
@@ -188,11 +189,12 @@
 
 -(void)keyUp:(NSEvent *)theEvent
 {
+    unsigned short keyCode = theEvent.keyCode;
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (GBButton i = 0; i < GBButtonCount; i++) {
-        if ([[defaults stringForKey:button_to_preference_name(i)] isEqualToString:theEvent.charactersIgnoringModifiers]) {
+        if ([defaults integerForKey:button_to_preference_name(i)] == keyCode) {
             handled = true;
             switch (i) {
                 case GBTurbo:
@@ -209,27 +211,6 @@
     if (!handled) {
         [super keyUp:theEvent];
     }
-}
-
-- (BOOL)becomeFirstResponder
-{
-    /* Non-Roman keyboard layouts breaks user input. */
-    TSMDocumentID document = TSMGetActiveDocument();
-
-    CFArrayRef inpu_sources = TISCreateASCIICapableInputSourceList();
-    TSMSetDocumentProperty(document, kTSMDocumentEnabledInputSourcesPropertyTag,
-                           sizeof(CFArrayRef), &inpu_sources);
-    CFRelease(inpu_sources);
-
-    return [super becomeFirstResponder];
-}
-
-- (BOOL)resignFirstResponder
-{
-    TSMDocumentID document = TSMGetActiveDocument();
-    TSMRemoveDocumentProperty(document, kTSMDocumentEnabledInputSourcesPropertyTag);
-
-    return [super resignFirstResponder];
 }
 
 - (BOOL)acceptsFirstResponder

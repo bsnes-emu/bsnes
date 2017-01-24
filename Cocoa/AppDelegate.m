@@ -1,8 +1,6 @@
 #import "AppDelegate.h"
-
-@interface AppDelegate ()
-
-@end
+#include "GBButtons.h"
+#import <Carbon/Carbon.h>
 
 @implementation AppDelegate
 {
@@ -11,26 +9,31 @@
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
 {
-#define KEY(x) ({unichar __x = x; [NSString stringWithCharacters:&(__x) length:1];})
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    for (unsigned i = 0; i < GBButtonCount; i++) {
+        if ([[defaults objectForKey:button_to_preference_name(i)] isKindOfClass:[NSString class]]) {
+            [defaults removeObjectForKey:button_to_preference_name(i)];
+        }
+    }
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{
-                                                              @"GBRight": KEY(NSRightArrowFunctionKey),
-                                                              @"GBLeft": KEY(NSLeftArrowFunctionKey),
-                                                              @"GBUp": KEY(NSUpArrowFunctionKey),
-                                                              @"GBDown": KEY(NSDownArrowFunctionKey),
+                                                              @"GBRight": @(kVK_RightArrow),
+                                                              @"GBLeft": @(kVK_LeftArrow),
+                                                              @"GBUp": @(kVK_UpArrow),
+                                                              @"GBDown": @(kVK_DownArrow),
 
-                                                              @"GBA": @"x",
-                                                              @"GBB": @"z",
-                                                              @"GBSelect": @"\x7f",
-                                                              @"GBStart": @"\r",
+                                                              @"GBA": @(kVK_ANSI_X),
+                                                              @"GBB": @(kVK_ANSI_Z),
+                                                              @"GBSelect": @(kVK_Delete),
+                                                              @"GBStart": @(kVK_Return),
 
-                                                              @"GBTurbo": @" ",
+                                                              @"GBTurbo": @(kVK_Space),
 
                                                               @"GBFilter": @"NearestNeighbor",
                                                               }];
-#undef KEY
 }
 
-- (IBAction)toggleDeveloperMode:(id)sender {
+- (IBAction)toggleDeveloperMode:(id)sender
+{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setBool:![defaults boolForKey:@"DeveloperMode"] forKey:@"DeveloperMode"];
 }

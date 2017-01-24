@@ -1,6 +1,7 @@
 #import "GBPreferencesWindow.h"
 #import "NSString+StringForKey.h"
 #import "GBButtons.h"
+#import <Carbon/Carbon.h>
 
 @implementation GBPreferencesWindow
 {
@@ -60,7 +61,7 @@
         return @"Select a new key...";
     }
 
-    return [NSString displayStringForKeyString:[[NSUserDefaults standardUserDefaults] stringForKey:
+    return [NSString displayStringForKeyCode:[[NSUserDefaults standardUserDefaults] integerForKey:
                                                 button_to_preference_name(row)]];
 }
 
@@ -87,7 +88,7 @@
 
     is_button_being_modified = false;
 
-    [[NSUserDefaults standardUserDefaults] setObject:theEvent.charactersIgnoringModifiers
+    [[NSUserDefaults standardUserDefaults] setInteger:theEvent.keyCode
                                               forKey:button_to_preference_name(button_being_modified)];
     self.controlsTableView.enabled = YES;
     [self.controlsTableView reloadData];
@@ -117,6 +118,17 @@
 {
     _aspectRatioCheckbox = aspectRatioCheckbox;
     [_aspectRatioCheckbox setState: ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]];
+}
+
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+    [[NSDistributedNotificationCenter defaultCenter] addObserver:self.controlsTableView selector:@selector(reloadData) name:(NSString*)kTISNotifySelectedKeyboardInputSourceChanged object:nil];
+}
+
+- (void)dealloc
+{
+    [[NSDistributedNotificationCenter defaultCenter] removeObserver:self.controlsTableView];
 }
 
 @end
