@@ -275,6 +275,14 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
+    
+    /* Close Open Panels, if any */
+    for (NSWindow *window in [[NSApplication sharedApplication] windows]) {
+        if ([window isKindOfClass:[NSOpenPanel class]]) {
+            [(NSOpenPanel *)window cancel:self];
+        }
+    }
+    
     self.consoleOutput.textContainerInset = NSMakeSize(4, 4);
     [self.view becomeFirstResponder];
     self.view.shouldBlendFrameWithPrevious = ![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableFrameBlending"];
