@@ -89,9 +89,9 @@ auto Cartridge::load() -> bool {
 auto Cartridge::loadGameBoy() -> bool {
   #if defined(SFC_SUPERGAMEBOY)
   //invoked from ICD2::load()
-  information.sha256 = GameBoy::interface->sha256();
-  information.manifest.gameBoy = GameBoy::interface->manifest();
-  information.title.gameBoy = GameBoy::interface->title();
+  information.sha256 = GameBoy::cartridge.sha256();
+  information.manifest.gameBoy = GameBoy::cartridge.manifest();
+  information.title.gameBoy = GameBoy::cartridge.title();
   loadGameBoy(BML::unserialize(information.manifest.gameBoy));
   return true;
   #endif

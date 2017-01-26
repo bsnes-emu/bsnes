@@ -3,6 +3,7 @@
 namespace PCEngine {
 
 CPU cpu;
+#include "memory.cpp"
 #include "io.cpp"
 #include "irq.cpp"
 #include "timer.cpp"

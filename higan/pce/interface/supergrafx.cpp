@@ -6,6 +6,6 @@ SuperGrafxInterface::SuperGrafxInterface() {
 }
 
 auto SuperGrafxInterface::load(uint id) -> bool {
-  if(id == ID::SuperGrafx) return system.load(this, id);
+  if(id == ID::SuperGrafx) return system.load(this, System::Model::SuperGrafx);
   return false;
 }

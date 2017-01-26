@@ -6,6 +6,7 @@ ICD2 icd2;
 
 #if defined(SFC_SUPERGAMEBOY)
 
+#include "platform.cpp"
 #include "interface.cpp"
 #include "io.cpp"
 #include "serialization.cpp"
@@ -34,18 +35,14 @@ auto ICD2::init() -> void {
 }
 
 auto ICD2::load() -> bool {
-  bind = GameBoy::interface->bind;
-  hook = GameBoy::interface->hook;
-  GameBoy::interface->bind = this;
-  GameBoy::interface->hook = this;
-  GameBoy::interface->load(GameBoy::ID::SuperGameBoy);
+  GameBoy::superGameBoy = this;
+  GameBoy::system.load(&gameBoyInterface, GameBoy::System::Model::SuperGameBoy, cartridge.pathID());
   return cartridge.loadGameBoy();
 }
 
 auto ICD2::unload() -> void {
-  GameBoy::interface->unload();
-  GameBoy::interface->bind = bind;
-  GameBoy::interface->hook = hook;
+  GameBoy::system.save();
+  GameBoy::system.unload();
 }
 
 auto ICD2::power() -> void {
@@ -78,7 +75,31 @@ auto ICD2::power() -> void {
 }
 
 auto ICD2::reset() -> void {
-  //todo: same as power() but without re-creating the audio stream
+  auto frequency = system.colorburst() * 6.0;
+  create(ICD2::Enter, frequency / 5);
+
+  r6003 = 0x00;
+  r6004 = 0xff;
+  r6005 = 0xff;
+  r6006 = 0xff;
+  r6007 = 0xff;
+  for(auto& r : r7000) r = 0x00;
+  mltReq = 0;
+
+  for(auto& n : output) n = 0xff;
+  readBank = 0;
+  readAddress = 0;
+  writeBank = 0;
+  writeAddress = 0;
+
+  packetSize = 0;
+  joypID = 3;
+  joyp15Lock = 0;
+  joyp14Lock = 0;
+  pulseLock = true;
+
+  GameBoy::system.init();
+  GameBoy::system.power();
 }
 
 #endif

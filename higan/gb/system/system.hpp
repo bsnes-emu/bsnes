@@ -3,25 +3,21 @@ enum class Input : uint {
 };
 
 struct System {
-  enum class Revision : uint {
+  enum class Model : uint {
     GameBoy,
-    SuperGameBoy,
     GameBoyColor,
+    SuperGameBoy,
   };
 
-  auto loaded() const -> bool { return _loaded; }
-  auto revision() const -> Revision { return _revision; }
-  auto clocksExecuted() const -> uint { return _clocksExecuted; }
-
-  inline auto dmg() const { return _revision == Revision::GameBoy; }
-  inline auto sgb() const { return _revision == Revision::SuperGameBoy; }
-  inline auto cgb() const { return _revision == Revision::GameBoyColor; }
+  inline auto loaded() const -> bool { return _loaded; }
+  inline auto model() const -> Model { return _model; }
+  inline auto clocksExecuted() const -> uint { return _clocksExecuted; }
 
   auto run() -> void;
   auto runToSave() -> void;
 
   auto init() -> void;
-  auto load(Emulator::Interface*, Revision) -> bool;
+  auto load(Emulator::Interface*, Model, maybe<uint> = nothing) -> bool;
   auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -51,7 +47,7 @@ struct System {
   } information;
 
   bool _loaded = false;
-  Revision _revision = Revision::GameBoy;
+  Model _model = Model::GameBoy;
   uint _serializeSize = 0;
   uint _clocksExecuted = 0;
 };
@@ -59,3 +55,7 @@ struct System {
 #include <gb/interface/interface.hpp>
 
 extern System system;
+
+auto Model::GameBoy() -> bool { return system.model() == System::Model::GameBoy; }
+auto Model::GameBoyColor() -> bool { return system.model() == System::Model::GameBoyColor; }
+auto Model::SuperGameBoy() -> bool { return system.model() == System::Model::SuperGameBoy; }

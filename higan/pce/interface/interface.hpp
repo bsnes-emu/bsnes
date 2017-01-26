@@ -18,8 +18,6 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  using Emulator::Interface::load;
-
   Interface();
 
   auto manifest() -> string override;
@@ -34,6 +32,7 @@ struct Interface : Emulator::Interface {
   auto audioFrequency() -> double override;
 
   auto loaded() -> bool override;
+  auto sha256() -> string override;
   auto save() -> void override;
   auto unload() -> void override;
 

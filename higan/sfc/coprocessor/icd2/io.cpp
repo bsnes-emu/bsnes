@@ -54,7 +54,7 @@ auto ICD2::writeIO(uint24 addr, uint8 data) -> void {
   //d1,d0: 0 = frequency divider (clock rate adjust)
   if(addr == 0x6003) {
     if((r6003 & 0x80) == 0x00 && (data & 0x80) == 0x80) {
-      reset(true);
+      reset();
     }
     auto frequency = system.colorburst() * 6.0;
     switch(data & 3) {

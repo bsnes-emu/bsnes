@@ -4,6 +4,11 @@ auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
     return cartridge.read(bank << 13 | addr);
   }
 
+  //$f7  BRAM
+  if(bank == 0xf7) {
+    return bram[addr.bits(0,10)];
+  }
+
   //$f8-fb  RAM
   if(bank >= 0xf8 && bank <= 0xfb) {
     if(Model::PCEngine()) return ram[addr];
@@ -35,12 +40,17 @@ auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
 
     //$1000-13ff  I/O
     if((addr & 0x1c00) == 0x1000) {
+      //note 1: Turbografx-16 games check this bit for region protection.
+      //yet PC Engine games do not. since we cannot tell the games apart,
+      //it's more compatible to always identify as a Turbografx-16 system.
+      //note 2: we state that the CD-ROM drive is present.
+      //this is so games can use its backup RAM for save data.
       return (
         PCEngine::peripherals.controllerPort->readData() << 0
       | 1 << 4
       | 1 << 5
       | 0 << 6  //device (0 = Turbografx-16; 1 = PC Engine)
-      | 1 << 7  //add-on (0 = CD-ROM; 1 = nothing)
+      | 0 << 7  //add-on (0 = CD-ROM; 1 = nothing)
       );
     }
 
@@ -64,10 +74,13 @@ auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
       }
 
       if(addr.bits(0,1) == 3) {
+        bool pendingExternal = 0;
+        bool pendingVDC = vdc0.irqLine() | vdc1.irqLine();
+        bool pendingTimer = timer.irqLine();
         return (
-          irq.pendingExternal << 0
-        | irq.pendingVDC << 1
-        | irq.pendingTimer << 2
+          pendingExternal << 0
+        | pendingVDC << 1
+        | pendingTimer << 2
         | (io.mdr & 0xf8)
         );
       }
@@ -91,6 +104,12 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
   //$00-7f  HuCard
   if(!bank.bit(7)) {
     return cartridge.write(bank << 13 | addr, data);
+  }
+
+  //$f7  BRAM
+  if(bank == 0xf7) {
+    bram[addr.bits(0,10)] = data;
+    return;
   }
 
   //$f8-fb  RAM
@@ -149,7 +168,7 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
       }
 
       if(addr.bits(0,1) == 3) {
-        irq.level(IRQ::Line::Timer, 0);
+        timer.line = 0;
         return;
       }
     }

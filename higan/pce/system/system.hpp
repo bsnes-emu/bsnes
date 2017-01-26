@@ -1,10 +1,13 @@
 struct System {
-  auto loaded() const -> bool { return information.loaded; }
-  auto colorburst() const -> double { return information.colorburst; }
+  enum class Model : uint { PCEngine, SuperGrafx };
+
+  inline auto loaded() const -> bool { return information.loaded; }
+  inline auto model() const -> Model { return information.model; }
+  inline auto colorburst() const -> double { return information.colorburst; }
 
   auto run() -> void;
 
-  auto load(Emulator::Interface*, uint) -> bool;
+  auto load(Emulator::Interface*, Model) -> bool;
   auto save() -> void;
   auto unload() -> void;
 
@@ -15,6 +18,7 @@ private:
 
   struct Information {
     bool loaded = false;
+    Model model = Model::PCEngine;
     string manifest;
     double colorburst = 0.0;
   } information;
@@ -30,3 +34,6 @@ struct Peripherals {
 
 extern System system;
 extern Peripherals peripherals;
+
+auto Model::PCEngine() -> bool { return system.model() == System::Model::PCEngine; }
+auto Model::SuperGrafx() -> bool { return system.model() == System::Model::SuperGrafx; }

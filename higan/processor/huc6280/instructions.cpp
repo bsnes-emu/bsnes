@@ -314,12 +314,8 @@ auto HuC6280::instruction_pull(uint8& data) -> void {
   io();
   io();
 L data = pull();
-}
-
-auto HuC6280::instruction_pullP() -> void {
-  io();
-  io();
-L P = pull();
+  Z = data == 0;
+  N = data.bit(7);
 }
 
 auto HuC6280::instruction_push(uint8 data) -> void {
@@ -451,6 +447,12 @@ L push((PC - 1) >> 0);
 
 auto HuC6280::instruction_NOP() -> void {
 L io();
+}
+
+auto HuC6280::instruction_PLP() -> void {
+  io();
+  io();
+L P = pull();
 }
 
 auto HuC6280::instruction_RMB(uint3 index) -> void {

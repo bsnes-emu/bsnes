@@ -4,7 +4,7 @@ struct Cartridge : MMIO {
   auto manifest() const -> string { return information.manifest; }
   auto title() const -> string { return information.title; }
 
-  auto load(System::Revision revision) -> bool;
+  auto load() -> bool;
   auto save() -> void;
   auto unload() -> void;
 

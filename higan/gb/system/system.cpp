@@ -22,26 +22,49 @@ auto System::init() -> void {
   assert(interface != nullptr);
 }
 
-auto System::load(Emulator::Interface* interface, Revision revision) -> bool {
-  _revision = revision;
+auto System::load(Emulator::Interface* interface, Model model_, maybe<uint> systemID) -> bool {
+  _model = model_;
 
-  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
-    information.manifest = fp->reads();
-  } else return false;
+  if(model() == Model::GameBoy) {
+    if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+      information.manifest = fp->reads();
+    } else return false;
 
-  auto document = BML::unserialize(information.manifest);
-  string path = "system/cpu/rom/name";
-  if(revision == Revision::SuperGameBoy) path = "board/icd2/rom/name";
-
-  if(auto name = document[path].text()) {
-    if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
-      if(revision == Revision::GameBoy) fp->read(bootROM.dmg, 256);
-      if(revision == Revision::SuperGameBoy) fp->read(bootROM.sgb, 256);
-      if(revision == Revision::GameBoyColor) fp->read(bootROM.cgb, 2048);
+    auto document = BML::unserialize(information.manifest);
+    if(auto name = document["system/cpu/rom/name"].text()) {
+      if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
+        fp->read(bootROM.dmg, 256);
+      }
     }
   }
 
-  if(!cartridge.load(revision)) return false;
+  if(model() == Model::GameBoyColor) {
+    if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+      information.manifest = fp->reads();
+    } else return false;
+
+    auto document = BML::unserialize(information.manifest);
+    if(auto name = document["system/cpu/rom/name"].text()) {
+      if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
+        fp->read(bootROM.cgb, 2048);
+      }
+    }
+  }
+
+  if(model() == Model::SuperGameBoy) {
+    if(auto fp = platform->open(systemID(), "manifest.bml", File::Read, File::Required)) {
+      information.manifest = fp->reads();
+    } else return false;
+
+    auto document = BML::unserialize(information.manifest);
+    if(auto name = document["board/icd2/rom/name"].text()) {
+      if(auto fp = platform->open(systemID(), name, File::Read, File::Required)) {
+        fp->read(bootROM.sgb, 256);
+      }
+    }
+  }
+
+  if(!cartridge.load()) return false;
   serializeInit();
   this->interface = interface;
   return _loaded = true;
@@ -59,7 +82,7 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  if(!system.sgb()) {
+  if(model() != Model::SuperGameBoy) {
     Emulator::video.reset();
     Emulator::video.setInterface(interface);
     configureVideoPalette();

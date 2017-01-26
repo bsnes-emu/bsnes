@@ -16,7 +16,7 @@ private:
   } settings[4];
 
   uint10 window[2];
-  bool select;
+  bool   select;
 };
 
 extern VPC vpc;

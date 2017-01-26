@@ -142,7 +142,7 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
 
     //hardware bug: writes to STAT on DMG,SGB during vblank triggers STAT IRQ
     //note: this behavior isn't entirely correct; more research is needed ...
-    if(!system.cgb() && status.mode == 1) {
+    if(!Model::GameBoyColor() && status.mode == 1) {
       cpu.raise(CPU::Interrupt::Stat);
     }
 

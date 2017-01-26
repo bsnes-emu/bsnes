@@ -5,49 +5,48 @@ namespace PCEngine {
 VPC vpc;
 
 auto VPC::bus(uint hclock) -> uint9 {
+  //bus values are direct CRAM entry indexes:
+  //d0-d3 => color (0 = neither background nor sprite)
+  //d4-d7 => palette
+  //d8    => source (0 = background; 1 = sprite)
   auto bus0 = vdc0.bus();
   auto bus1 = vdc1.bus();
 
-  auto color0 = bus0.bits(0,3);
-  auto color1 = bus1.bits(0,3);
+  //note: timing may not be correct here; unable to test behavior
+  //no official SuperGrafx games ever use partial screen-width windows
+  bool window0 = window[0] >= 64 && (window[0] - 64) >= hclock / 2;
+  bool window1 = window[1] >= 64 && (window[1] - 64) >= hclock / 2;
 
-  auto palette0 = bus0.bits(4,7);
-  auto palette1 = bus1.bits(4,7);
-
-  auto mode0 = bus0.bit(8);
-  auto mode1 = bus1.bit(8);
-
-  //todo: I am unsure how the window coordinates relate to raw screen pixels ...
-  bool window0 = window[0] >= 64 && (window[0] - 64) >= hclock;
-  bool window1 = window[1] >= 64 && (window[1] - 64) >= hclock;
-
-  uint2 mode;
-  if(!window0 && !window1) mode = 1;
-  if( window0 && !window1) mode = 0;
-  if(!window0 &&  window1) mode = 3;
-  if( window0 &&  window1) mode = 2;
-
-  auto enableVDC0 = settings[mode].enableVDC0;
-  auto enableVDC1 = settings[mode].enableVDC1;
+  uint2 mode = !window0 << 0 | !window1 << 1;
+  auto enableVDC0 = settings[mode].enableVDC0 && bus0.bits(0,3);
+  auto enableVDC1 = settings[mode].enableVDC1 && bus1.bits(0,3);
   auto priority = settings[mode].priority;
 
-  //todo: I am unsure how this should work ...
   if(priority == 0 || priority == 3) {
-    if(color1) return bus1;
-    return bus0;
+    //SP0 > BG0 > SP1 > BG1
+    if(bus0.bit(8) == 1 && enableVDC0) return bus0;
+    if(bus0.bit(8) == 0 && enableVDC0) return bus0;
+    if(bus1.bit(8) == 1 && enableVDC1) return bus1;
+    if(bus1.bit(8) == 0 && enableVDC1) return bus1;
   }
 
   if(priority == 1) {
-    if(color1) return bus1;
-    return bus0;
+    //SP0 > SP1 > BG0 > BG1
+    if(bus0.bit(8) == 1 && enableVDC0) return bus0;
+    if(bus1.bit(8) == 1 && enableVDC1) return bus1;
+    if(bus0.bit(8) == 0 && enableVDC0) return bus0;
+    if(bus1.bit(8) == 0 && enableVDC1) return bus1;
   }
 
   if(priority == 2) {
-    if(color1) return bus1;
-    return bus0;
+    //BG0 > SP1 > BG1 > SP0
+    if(bus0.bit(8) == 0 && enableVDC0) return bus0;
+    if(bus1.bit(8) == 1 && enableVDC1) return bus1;
+    if(bus1.bit(8) == 0 && enableVDC1) return bus1;
+    if(bus0.bit(8) == 1 && enableVDC0) return bus0;
   }
 
-  unreachable;
+  return 0x000;
 }
 
 auto VPC::power() -> void {
@@ -68,7 +67,7 @@ auto VPC::power() -> void {
   settings[3].priority = 0;
 
   window[0] = 0;
-  window[1] = 1;
+  window[1] = 0;
 
   select = 0;
 }

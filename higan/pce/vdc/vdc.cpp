@@ -91,6 +91,7 @@ auto VDC::frame() -> void {
 auto VDC::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(cpu);
+  synchronize(vce);
 
   timing.hclock += clocks;
   dma.step(clocks);

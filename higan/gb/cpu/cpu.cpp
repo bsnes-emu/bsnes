@@ -102,7 +102,7 @@ auto CPU::power() -> void {
   bus.mmio[0xff0f] = this;  //IF
   bus.mmio[0xffff] = this;  //IE
 
-  if(system.cgb()) {
+  if(Model::GameBoyColor()) {
   bus.mmio[0xff4d] = this;  //KEY1
   bus.mmio[0xff51] = this;  //HDMA1
   bus.mmio[0xff52] = this;  //HDMA2

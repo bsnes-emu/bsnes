@@ -21,7 +21,7 @@ auto CPU::step(uint clocks) -> void {
     synchronize(apu);
   }
 
-  if(system.sgb()) {
+  if(Model::SuperGameBoy()) {
     system._clocksExecuted += clocks;
     scheduler.exit(Scheduler::Event::Step);
   }

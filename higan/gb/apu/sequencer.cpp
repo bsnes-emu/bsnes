@@ -91,10 +91,10 @@ auto APU::Sequencer::write(uint16 addr, uint8 data) -> void {
 
       if(!enable) {
         //power(bool) resets length counters when true (eg for CGB only)
-        apu.square1.power(system.cgb());
-        apu.square2.power(system.cgb());
-        apu.wave.power(system.cgb());
-        apu.noise.power(system.cgb());
+        apu.square1.power(Model::GameBoyColor());
+        apu.square2.power(Model::GameBoyColor());
+        apu.wave.power(Model::GameBoyColor());
+        apu.noise.power(Model::GameBoyColor());
         power();
       } else {
         apu.phase = 0;

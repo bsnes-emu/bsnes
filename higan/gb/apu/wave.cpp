@@ -47,7 +47,7 @@ auto APU::Wave::read(uint16 addr) -> uint8 {
 
   if(addr >= 0xff30 && addr <= 0xff3f) {
     if(enable) {
-      if(!system.cgb() && !patternHold) return 0xff;
+      if(!Model::GameBoyColor() && !patternHold) return 0xff;
       return pattern[patternOffset >> 1];
     } else {
       return pattern[addr & 15];
@@ -84,7 +84,7 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
     frequency.bits(10,8) = data.bits(2,0);
 
     if(data.bit(7)) {
-      if(!system.cgb() && patternHold) {
+      if(!Model::GameBoyColor() && patternHold) {
         //DMG,SGB trigger while channel is being read corrupts wave RAM
         if((patternOffset >> 1) <= 3) {
           //if current pattern is with 0-3; only byte 0 is corrupted
@@ -113,7 +113,7 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
 
   if(addr >= 0xff30 && addr <= 0xff3f) {
     if(enable) {
-      if(!system.cgb() && !patternHold) return;
+      if(!Model::GameBoyColor() && !patternHold) return;
       pattern[patternOffset >> 1] = data;
     } else {
       pattern[addr & 15] = data;

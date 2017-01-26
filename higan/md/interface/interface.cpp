@@ -101,6 +101,7 @@ auto Interface::save() -> void {
 }
 
 auto Interface::unload() -> void {
+  save();
   system.unload();
 }
 

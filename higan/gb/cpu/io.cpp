@@ -6,19 +6,22 @@ auto CPU::wramAddress(uint16 addr) const -> uint {
 }
 
 auto CPU::joypPoll() -> void {
-  uint button = 0, dpad = 0;
+  function<auto (uint, uint, uint) -> int16> inputPoll = {&Emulator::Platform::inputPoll, platform};
+  if(Model::SuperGameBoy()) inputPoll = {&SuperGameBoyInterface::inputPoll, superGameBoy};
 
-  button |= platform->inputPoll(0, 0, (uint)Input::Start) << 3;
-  button |= platform->inputPoll(0, 0, (uint)Input::Select) << 2;
-  button |= platform->inputPoll(0, 0, (uint)Input::B) << 1;
-  button |= platform->inputPoll(0, 0, (uint)Input::A) << 0;
+  uint button = 0;
+  button |= inputPoll(0, 0, (uint)Input::Start) << 3;
+  button |= inputPoll(0, 0, (uint)Input::Select) << 2;
+  button |= inputPoll(0, 0, (uint)Input::B) << 1;
+  button |= inputPoll(0, 0, (uint)Input::A) << 0;
 
-  dpad |= platform->inputPoll(0, 0, (uint)Input::Down) << 3;
-  dpad |= platform->inputPoll(0, 0, (uint)Input::Up) << 2;
-  dpad |= platform->inputPoll(0, 0, (uint)Input::Left) << 1;
-  dpad |= platform->inputPoll(0, 0, (uint)Input::Right) << 0;
+  uint dpad = 0;
+  dpad |= inputPoll(0, 0, (uint)Input::Down) << 3;
+  dpad |= inputPoll(0, 0, (uint)Input::Up) << 2;
+  dpad |= inputPoll(0, 0, (uint)Input::Left) << 1;
+  dpad |= inputPoll(0, 0, (uint)Input::Right) << 0;
 
-  if(system.revision() != System::Revision::SuperGameBoy) {
+  if(!Model::SuperGameBoy()) {
     //D-pad pivot makes it impossible to press opposing directions at the same time
     //however, Super Game Boy BIOS is able to set these bits together
     if(dpad & 4) dpad &= ~8;  //disallow up+down
@@ -145,7 +148,7 @@ auto CPU::writeIO(uint16 addr, uint8 data) -> void {
   if(addr == 0xff00) {  //JOYP
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
-  //interface->joypWrite(status.p15, status.p14);
+    if(Model::SuperGameBoy()) superGameBoy->joypWrite(status.p15, status.p14);
     return;
   }
 

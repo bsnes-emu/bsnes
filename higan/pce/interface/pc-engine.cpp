@@ -6,6 +6,6 @@ PCEngineInterface::PCEngineInterface() {
 }
 
 auto PCEngineInterface::load(uint id) -> bool {
-  if(id == ID::PCEngine) return system.load(this, id);
+  if(id == ID::PCEngine) return system.load(this, System::Model::PCEngine);
   return false;
 }

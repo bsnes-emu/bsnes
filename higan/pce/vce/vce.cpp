@@ -48,6 +48,8 @@ auto VCE::main() -> void {
 auto VCE::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(cpu);
+  synchronize(vdc0);
+  synchronize(vdc1);
 
   timing.hclock += clocks;
 }

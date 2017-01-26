@@ -10,28 +10,18 @@ auto CPU::IRQ::poll() -> void {
   pendingIRQ = false;
   if(cpu.r.p.i) return;
 
-  if(!disableExternal && pendingExternal) {
-    pendingIRQ = true;
+  if(0) {  //external IRQ sources
+    pendingIRQ = !disableExternal;
     pendingVector = 0xfff6;
-  } else if(!disableVDC && pendingVDC) {
-    pendingIRQ = true;
+  }
+
+  if(!disableVDC && (vdc0.irqLine() | vdc1.irqLine())) {
+    pendingIRQ = !disableVDC;
     pendingVector = 0xfff8;
-  } else if(!disableTimer && pendingTimer) {
-    pendingIRQ = true;
+  }
+
+  if(cpu.timer.irqLine()) {
+    pendingIRQ = !disableTimer;
     pendingVector = 0xfffa;
-  }
-}
-
-auto CPU::IRQ::level(Line line, bool level) -> void {
-  if(line == Line::External) {
-    pendingExternal = level;
-  }
-
-  if(line == Line::VDC) {
-    pendingVDC = level;
-  }
-
-  if(line == Line::Timer) {
-    pendingTimer = level;
   }
 }

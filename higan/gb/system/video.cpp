@@ -1,9 +1,9 @@
 auto System::configureVideoPalette() -> void {
-  if(sgb()) return;
+  if(model() == Model::SuperGameBoy) return;
   Emulator::video.setPalette();
 }
 
 auto System::configureVideoEffects() -> void {
-  if(sgb()) return;
+  if(model() == Model::SuperGameBoy) return;
   Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
 }

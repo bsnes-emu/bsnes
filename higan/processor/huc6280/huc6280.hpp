@@ -73,7 +73,6 @@ struct HuC6280 {
   auto instruction_indirectYStore(uint8) -> void;
   auto instruction_memory(fp) -> void;
   auto instruction_pull(uint8&) -> void;
-  auto instruction_pullP() -> void;
   auto instruction_push(uint8) -> void;
   auto instruction_set(bool&) -> void;
   auto instruction_swap(uint8&, uint8&) -> void;
@@ -92,7 +91,7 @@ struct HuC6280 {
   auto instruction_JMP_indirect(uint8 = 0) -> void;
   auto instruction_JSR() -> void;
   auto instruction_NOP() -> void;
-  auto instruction_PHP() -> void;
+  auto instruction_PLP() -> void;
   auto instruction_RMB(uint3) -> void;
   auto instruction_RTI() -> void;
   auto instruction_RTS() -> void;

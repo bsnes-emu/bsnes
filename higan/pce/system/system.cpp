@@ -2,7 +2,6 @@
 
 namespace PCEngine {
 
-uint Model::id;
 System system;
 Scheduler scheduler;
 #include "peripherals.cpp"
@@ -11,9 +10,9 @@ auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vce.refresh();
 }
 
-auto System::load(Emulator::Interface* interface, uint id) -> bool {
-  Model::id = id;
+auto System::load(Emulator::Interface* interface, Model model) -> bool {
   information = {};
+  information.model = model;
 
   if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
@@ -22,6 +21,7 @@ auto System::load(Emulator::Interface* interface, uint id) -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  cpu.load();
   this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   return information.loaded = true;
@@ -29,6 +29,7 @@ auto System::load(Emulator::Interface* interface, uint id) -> bool {
 
 auto System::save() -> void {
   cartridge.save();
+  cpu.save();
 }
 
 auto System::unload() -> void {
@@ -47,8 +48,8 @@ auto System::power() -> void {
   scheduler.reset();
   cartridge.power();
   cpu.power();
-  vpc.power();
   vce.power();
+  vpc.power();
   vdc0.power();
   vdc1.power();
   psg.power();

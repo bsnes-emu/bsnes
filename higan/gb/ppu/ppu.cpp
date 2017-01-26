@@ -16,7 +16,7 @@ auto PPU::Enter() -> void {
 
 auto PPU::main() -> void {
   status.lx = 0;
-//interface->lcdScanline();  //Super Game Boy notification
+  if(Model::SuperGameBoy()) superGameBoy->lcdScanline();
 
   if(status.ly <= 143) {
     mode(2);
@@ -71,7 +71,7 @@ auto PPU::coincidence() -> bool {
 }
 
 auto PPU::refresh() -> void {
-  if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
+  if(!Model::SuperGameBoy()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
 }
 
 auto PPU::step(uint clocks) -> void {
@@ -109,7 +109,7 @@ auto PPU::hflip(uint data) const -> uint {
 auto PPU::power() -> void {
   create(Enter, 4 * 1024 * 1024);
 
-  if(system.cgb()) {
+  if(Model::GameBoyColor()) {
     scanline = {&PPU::scanlineCGB, this};
     run = {&PPU::runCGB, this};
   } else {
@@ -133,7 +133,7 @@ auto PPU::power() -> void {
   bus.mmio[0xff4a] = this;  //WY
   bus.mmio[0xff4b] = this;  //WX
 
-  if(system.cgb()) {
+  if(Model::GameBoyColor()) {
   bus.mmio[0xff4f] = this;  //VBK
   bus.mmio[0xff68] = this;  //BGPI
   bus.mmio[0xff69] = this;  //BGPD

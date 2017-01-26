@@ -27,9 +27,8 @@ namespace PCEngine {
   };
 
   struct Model {
-    inline static auto PCEngine() -> bool { return id == 1; }
-    inline static auto SuperGrafx() -> bool { return id == 2; }
-    static uint id;
+    inline static auto PCEngine() -> bool;
+    inline static auto SuperGrafx() -> bool;
   };
 
   #include <pce/controller/controller.hpp>

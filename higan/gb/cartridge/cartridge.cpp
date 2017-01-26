@@ -14,25 +14,25 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-auto Cartridge::load(System::Revision revision) -> bool {
-  information = Information();
+auto Cartridge::load() -> bool {
+  information = {};
 
-  switch(revision) {
-  case System::Revision::GameBoy:
+  if(Model::GameBoy()) {
     if(auto pathID = platform->load(ID::GameBoy, "Game Boy", "gb")) {
       information.pathID = pathID();
     } else return false;
-    break;
-  case System::Revision::SuperGameBoy:
-    if(auto pathID = platform->load(ID::SuperGameBoy, "Game Boy", "gb")) {
-      information.pathID = pathID();
-    } else return false;
-    break;
-  case System::Revision::GameBoyColor:
+  }
+
+  if(Model::GameBoyColor()) {
     if(auto pathID = platform->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
       information.pathID = pathID();
     } else return false;
-    break;
+  }
+
+  if(Model::SuperGameBoy()) {
+    if(auto pathID = platform->load(ID::SuperGameBoy, "Game Boy", "gb")) {
+      information.pathID = pathID();
+    } else return false;
   }
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {
@@ -136,13 +136,11 @@ auto Cartridge::readIO(uint16 addr) -> uint8 {
 
   if(bootromEnable) {
     const uint8* data = nullptr;
-    switch(system.revision()) { default:
-    case System::Revision::GameBoy: data = system.bootROM.dmg; break;
-    case System::Revision::SuperGameBoy: data = system.bootROM.sgb; break;
-    case System::Revision::GameBoyColor: data = system.bootROM.cgb; break;
-    }
+    if(Model::GameBoy()) data = system.bootROM.dmg;
+    if(Model::GameBoyColor()) data = system.bootROM.cgb;
+    if(Model::SuperGameBoy()) data = system.bootROM.sgb;
     if(addr >= 0x0000 && addr <= 0x00ff) return data[addr];
-    if(addr >= 0x0200 && addr <= 0x08ff && system.cgb()) return data[addr - 256];
+    if(addr >= 0x0200 && addr <= 0x08ff && Model::GameBoyColor()) return data[addr - 256];
   }
 
   return mapper->readIO(addr);

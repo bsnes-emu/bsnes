@@ -2,6 +2,7 @@
 
 struct VDC : Thread {
   inline auto bus() const -> uint9 { return data; }
+  inline auto irqLine() const -> bool { return irq.line; }
 
   static auto Enter() -> void;
   auto main() -> void;
@@ -98,6 +99,8 @@ private:
     bool pendingVblank;
     bool pendingTransferVRAM;
     bool pendingTransferSATB;
+
+    bool line;
   } irq;
 
   struct DMA {

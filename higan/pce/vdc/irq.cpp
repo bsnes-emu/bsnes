@@ -6,7 +6,7 @@ auto VDC::IRQ::poll() -> void {
   pending |= pendingVblank;
   pending |= pendingTransferVRAM;
   pending |= pendingTransferSATB;
-  cpu.irq.level(CPU::IRQ::Line::VDC, pending);
+  line = pending;
 }
 
 auto VDC::IRQ::raise(Line line) -> void {
@@ -44,6 +44,5 @@ auto VDC::IRQ::lower() -> void {
   pendingVblank = false;
   pendingTransferVRAM = false;
   pendingTransferSATB = false;
-
-  poll();
+  line = false;
 }

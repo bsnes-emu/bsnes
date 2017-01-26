@@ -29,6 +29,12 @@ namespace GameBoy {
     }
   };
 
+  struct Model {
+    inline static auto GameBoy() -> bool;
+    inline static auto GameBoyColor() -> bool;
+    inline static auto SuperGameBoy() -> bool;
+  };
+
   #include <gb/memory/memory.hpp>
   #include <gb/system/system.hpp>
   #include <gb/cartridge/cartridge.hpp>

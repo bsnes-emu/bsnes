@@ -25,11 +25,11 @@ auto APU::main() -> void {
   hipass(sequencer.left, sequencer.leftBias);
   hipass(sequencer.right, sequencer.rightBias);
 
-  if(!system.sgb()) {
+  if(!Model::SuperGameBoy()) {
     stream->sample(sequencer.left / 32768.0, sequencer.right / 32768.0);
   } else {
     double samples[] = {sequencer.left / 32768.0, sequencer.right / 32768.0};
-  //interface->audioSample(samples, 2);
+    superGameBoy->audioSample(samples, 2);
   }
 
   if(cycle == 0) {  //512hz
@@ -63,7 +63,7 @@ auto APU::hipass(int16& sample, int64& bias) -> void {
 
 auto APU::power() -> void {
   create(Enter, 2 * 1024 * 1024);
-  if(!system.sgb()) stream = Emulator::audio.createStream(2, 2 * 1024 * 1024);
+  if(!Model::SuperGameBoy()) stream = Emulator::audio.createStream(2, 2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   square1.power();
@@ -91,7 +91,7 @@ auto APU::readIO(uint16 addr) -> uint8 {
 auto APU::writeIO(uint16 addr, uint8 data) -> void {
   if(!sequencer.enable) {
     bool valid = addr == 0xff26;  //NR52
-    if(!system.cgb()) {
+    if(!Model::GameBoyColor()) {
       //NRx1 length is writable only on DMG,SGB; not on CGB
       if(addr == 0xff11) valid = true, data &= 0x3f;  //NR11; duty is not writable (remains 0)
       if(addr == 0xff16) valid = true, data &= 0x3f;  //NR21; duty is not writable (remains 0)

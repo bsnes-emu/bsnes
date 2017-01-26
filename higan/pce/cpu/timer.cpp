@@ -10,7 +10,7 @@ auto CPU::Timer::step(uint clocks) -> void {
     clock -= 1024;
     if(!value--) {
       value = latch;
-      cpu.irq.level(CPU::IRQ::Line::Timer, 1);
+      line = 1;
     }
   }
 }
