@@ -1421,7 +1421,7 @@ static const debugger_command_t commands[] = {
     {"eval", 2, }, /* Alias */
     {"examine", 2, examine, "Examine values at address", "<expression>", "count"},
     {"x", 1, }, /* Alias */
-    {"disassemble", 1, disassemble, "disassemble instructions at address", "<expression>", "count"},
+    {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count"},
 
 
     {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
@@ -1455,7 +1455,7 @@ static void print_command_description(GB_gameboy_t *gb, const debugger_command_t
 {
     print_command_shortcut(gb, command);
     GB_log(gb, ": ");
-    GB_log(gb, (const char *)&"          %s\n" + strlen(command->command), command->help_string);
+    GB_log(gb, (const char *)&"           %s\n" + strlen(command->command), command->help_string);
 }
 
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *ignored)
