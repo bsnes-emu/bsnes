@@ -646,7 +646,7 @@ static void print_usage(GB_gameboy_t *gb, const debugger_command_t *command)
 {
     GB_log(gb, "Usage: %s", command->command);
 
-    if (command->arguments_format) {
+    if (command->modifiers_format) {
         GB_log(gb, "[/%s]", command->modifiers_format);
     }
 
@@ -1388,7 +1388,7 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const d
 }
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
-#define HELP_NEWLINE "\n            "
+#define HELP_NEWLINE "\n             "
 
 /* Commands without implementations are aliases of the previous non-alias commands */
 static const debugger_command_t commands[] = {
