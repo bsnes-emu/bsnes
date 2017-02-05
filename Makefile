@@ -17,7 +17,7 @@ ifeq ($(MAKECMDGOALS),)
 MAKECMDGOALS := $(DEFAULT)
 endif
 
-VERSION := 0.7
+VERSION := 0.8
 CONF ?= debug
 
 BIN := build/bin

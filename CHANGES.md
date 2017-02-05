@@ -1,5 +1,52 @@
 # Change Log
 
+## Version 0.8
+
+### New/Improved Features
+ * The debugger now includes a ticks command, to allow tick counting
+ * The debugger now includes a palettes command, to allow dumping the palettes in CGB mode
+ * General optimizations
+ * Complete GameBoy Camera support in the Cocoa port, basic support in the SDL port
+ * Debugger syntax improved, commands now allow modifiers
+    * print/eval can now have a format modifier (e.g. print/d)
+    * examine can now have a byte count modifier (e.g. x/4)
+ * The debugger now includes a disassemble command
+ * Added a VRAM viewer to the Cocoa port
+ * GameBoy Printer emulation in the Cocoa port
+ * New icon for GBC files, following Nintendo's color-coding convention, fixed icon alignment for both GB and GBC icons
+ * Quick Look support in Cocoa: GB and GBC files now display in-game screenshots on their cartridge icon
+
+### Accuracy Improvements/Fixes
+ * The APU emulation was refactored, and is now faster and now longer dependent on the sampling rate
+ * LCDC's bit 0 is now properly emulated (Fixes: Krusty's Fun House)
+ * The HALT bug is now emulated
+ * The user is now prevented from pressing opposite keys at the same time (Fixes Pocket Bomberman)
+ * Fixed MBC2 RAM emulation
+ * Corrected emulation of the palette registers in CGB mode
+ * HUC1 is now partially emulated, sans the IR sensor
+ * Basic HUC3 support, only the MBC is emulated
+ * Implemented the STAT-write interrupt bug (Fixed: Road Rash and Zero no Densetsu; these games do not work on CGBs)
+ * Limited the LY=144 interrupt to DMG mode, as hinted by MooneyeGB's test ROMs
+
+The following games now pass the automatic testing:
+> All-Star Baseball '99, Cave Noire, Daisenryaku, F-1 Race, Gameboy Camera, Hatris, Ironman, Konami Golf, Kwirk, Meitantei Conan, Nintendo World Cup, Pocket Bomberman (J), Puzzle Boy, SS Spinner, The Smurfs, Speedball 2, Tecmo Bowl, Teenage Mutant Ninja Turtles 2, Tsuri Sensei, Ultima, Ultra Golf, WordZap, Z - The Miracle of the Zone, Zerd no Densetsu
+
+### Bug Fixes
+ * Fixed a deadlock in the Hex Editor/Viewer when viewing APU data
+ * Fixed a crash when accessing MBC RAM on some ROMs that do not have MBC RAM
+ * Multiple watchpoints did not function correctly
+ * Improved the behavior and performance of the open dialog in Cocoa
+ * Fixed dereferencing a non-banked address in the debugger
+ * VRAM was not initialized
+ * Fixed an edge case where the Hex Editor/Viewer crashed
+ * Breakpoint and watchpoint conditions no longer trigger other watchpoints; fixed potential crashes
+ * Better handling of input in the Cocoa port when the system has a non-ASCII keyboard layout
+ * Minor fixes for the help debugger command
+
+### Misc Internal Changes
+ * Added rumble API, but it is not actually used by any of the GUIs
+ * Added serial API, but it is currently only used internally for the GameBoy Printer
+
 ## Version 0.7
 
 ### New/Improved Features
