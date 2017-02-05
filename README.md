@@ -1,6 +1,6 @@
 # SameBoy
 
-SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, and an incomplete experimental SDL frontend for other operating systems. It also includes a text-based debugger with an expression evaluator.
+SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, and an incomplete experimental SDL frontend for other operating systems. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
 
 ## Features
 Features common to both Cocoa and SDL versions:
@@ -25,11 +25,13 @@ Features currently supported only with the Cocoa version:
  * Native Cocoa interface, with support for all system-wide features, such as drag-and-drop and smart titlebars
  * Retina display support, allowing a wider range of scaling factors without artifacts
  * Optional frame blending
- * Several [scaling algorithms](SCALING.md) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
+ * Several [scaling algorithms](https://sameboy.github.io/scaling/) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
  * GameBoy Camera support
+ 
+[Read more](https://sameboy.github.io/features/).
 
 ## Compatibility
-SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), as well as most of [mooneye-gb's](https://github.com/Gekkio/mooneye-gb) acceptance tests. SameBoy should work with most games and demos, please [report](https://github.com/LIJI32/SameBoy/issues/new) any broken ROM. The latest results for SameBoy's automatic tester are available [here](http://htmlpreview.github.io/?https://github.com/LIJI32/SameBoy/blob/automation_results/results.html).
+SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), as well as most of [mooneye-gb's](https://github.com/Gekkio/mooneye-gb) acceptance tests. SameBoy should work with most games and demos, please [report](https://github.com/LIJI32/SameBoy/issues/new) any broken ROM. The latest results for SameBoy's automatic tester are available [here](https://sameboy.github.io/automation/).
 
 ## Compilation
 SameBoy requires the following tools and libraries to build:
