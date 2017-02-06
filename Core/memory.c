@@ -677,6 +677,17 @@ void GB_hdma_run(GB_gameboy_t *gb)
         }
         gb->hdma_current_src += 0x10;
         gb->hdma_current_dest += 0x10;
+        
+        gb->io_registers[GB_IO_HDMA2] += 0x10;
+        if ((gb->io_registers[GB_IO_HDMA2] & 0xF0) == 0) {
+            gb->io_registers[GB_IO_HDMA1]++;
+        }
+        
+        gb->io_registers[GB_IO_HDMA4] += 0x10;
+        if ((gb->io_registers[GB_IO_HDMA4] & 0xF0) == 0) {
+            gb->io_registers[GB_IO_HDMA3]++;
+        }
+        
         if(--gb->hdma_steps_left == 0){
             gb->hdma_on = false;
             gb->hdma_on_hblank = false;
