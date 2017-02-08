@@ -155,18 +155,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_PCM_12:
             case GB_IO_PCM_34:
             {
+                if (!gb->is_cgb) return 0xFF;
                 GB_sample_t dummy;
                 GB_apu_get_samples_and_update_pcm_regs(gb, &dummy);
             }
-            case GB_IO_HDMA1:
-            case GB_IO_HDMA2:
-            case GB_IO_HDMA3:
-            case GB_IO_HDMA4:
-
-                if (!gb->is_cgb) {
-                    return 0xFF;
-                }
-                /* Fall through */
+            /* Fall through */
             case GB_IO_JOYP:
             case GB_IO_TMA:
             case GB_IO_LCDC:
@@ -190,10 +183,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_DIV:
                 return gb->div_cycles >> 8;
             case GB_IO_HDMA5:
-                if (!gb->is_cgb) {
-                    return 0xFF;
-                }
-                return (gb->io_registers[GB_IO_HDMA5] & 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
+                if (!gb->is_cgb) return 0xFF;
+                return ((gb->hdma_on || gb->hdma_on_hblank)? 0 : 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
                     return 0xFF;
@@ -416,10 +407,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_OBP1:
             case GB_IO_WY:
             case GB_IO_WX:
-            case GB_IO_HDMA1:
-            case GB_IO_HDMA2:
-            case GB_IO_HDMA3:
-            case GB_IO_HDMA4:
             case GB_IO_SB:
             case GB_IO_DMG_EMULATION_INDICATION:
                 gb->io_registers[addr & 0xFF] = value;
@@ -547,7 +534,30 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 gb->io_registers[GB_IO_KEY1] = value;
                 return;
-
+            case GB_IO_HDMA1:
+                if (gb->is_cgb) {
+                    gb->hdma_current_src &= 0xF0;
+                    gb->hdma_current_src |= value << 8;
+                }
+                return;
+            case GB_IO_HDMA2:
+                if (gb->is_cgb) {
+                    gb->hdma_current_src &= 0xFF00;
+                    gb->hdma_current_src |= value & 0xF0;
+                }
+                return;
+            case GB_IO_HDMA3:
+                if (gb->is_cgb) {
+                    gb->hdma_current_dest &= 0xF0;
+                    gb->hdma_current_dest |= value << 8;
+                }
+                return;
+            case GB_IO_HDMA4:
+                if (gb->is_cgb) {
+                    gb->hdma_current_dest &= 0x1F00;
+                    gb->hdma_current_dest |= value & 0xF0;
+                }
+                return;
             case GB_IO_HDMA5:
                 if ((value & 0x80) == 0 && gb->hdma_on_hblank) {
                     gb->hdma_on_hblank = false;
@@ -556,8 +566,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->hdma_on = (value & 0x80) == 0;
                 gb->hdma_on_hblank = (value & 0x80) != 0;
                 gb->io_registers[GB_IO_HDMA5] = value;
-                gb->hdma_current_src = (gb->io_registers[GB_IO_HDMA1] << 8) | (gb->io_registers[GB_IO_HDMA2] & 0xF0);
-                gb->hdma_current_dest = (gb->io_registers[GB_IO_HDMA3] << 8) | (gb->io_registers[GB_IO_HDMA4] & 0xF0);
                 gb->hdma_steps_left = (gb->io_registers[GB_IO_HDMA5] & 0x7F) + 1;
                 /* Todo: Verify this. Gambatte's DMA tests require this. */
                 if (gb->hdma_current_dest + (gb->hdma_steps_left << 4) > 0xFFFF) {
@@ -663,29 +671,9 @@ void GB_hdma_run(GB_gameboy_t *gb)
     if (!gb->hdma_on) return;
     while (gb->hdma_cycles >= 8) {
         gb->hdma_cycles -= 8;
-        // The CGB boot rom uses the dest in "absolute" space, while some games use it relative to VRAM.
-        // This "normalizes" the dest to the CGB address space.
-        gb->hdma_current_dest &= 0x1fff;
-        gb->hdma_current_dest |= 0x8000;
-        if ((gb->hdma_current_src < 0x8000 || (gb->hdma_current_src >= 0xa000 &&  gb->hdma_current_src < 0xe000))) {
-            for (uint8_t i = 0; i < 0x10; i++) {
-                GB_write_memory(gb, gb->hdma_current_dest + i, GB_read_memory(gb, gb->hdma_current_src + i));
-            }
-        }
-        else {
-            gb->halted = false;
-        }
-        gb->hdma_current_src += 0x10;
-        gb->hdma_current_dest += 0x10;
-        
-        gb->io_registers[GB_IO_HDMA2] += 0x10;
-        if ((gb->io_registers[GB_IO_HDMA2] & 0xF0) == 0) {
-            gb->io_registers[GB_IO_HDMA1]++;
-        }
-        
-        gb->io_registers[GB_IO_HDMA4] += 0x10;
-        if ((gb->io_registers[GB_IO_HDMA4] & 0xF0) == 0) {
-            gb->io_registers[GB_IO_HDMA3]++;
+
+        for (uint8_t i = 0; i < 0x10; i++) {
+            GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), GB_read_memory(gb, (gb->hdma_current_src++)));
         }
         
         if(--gb->hdma_steps_left == 0){
