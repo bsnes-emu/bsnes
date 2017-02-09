@@ -75,7 +75,7 @@ auto Interface::videoColor(uint32 color) -> uint64 {
 }
 
 auto Interface::audioFrequency() -> double {
-  return 44'100.0;  //todo: not accurate
+  return 315.0 / 88.0 * 1'000'000.0;  //3.57MHz
 }
 
 auto Interface::loaded() -> bool {

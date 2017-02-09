@@ -134,8 +134,7 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
 
     //$0800-0bff  PSG
     if((addr & 0x1c00) == 0x0800) {
-      io.mdr = data;
-      return;
+      return psg.write(addr, io.mdr = data);
     }
 
     //$0c00-0fff  Timer
