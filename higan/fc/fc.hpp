@@ -12,7 +12,7 @@
 
 namespace Famicom {
   #define platform Emulator::platform
-  using File = Emulator::File;
+  namespace File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   using Cheat = Emulator::Cheat;
   extern Scheduler scheduler;

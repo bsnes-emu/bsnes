@@ -10,7 +10,7 @@ auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vdp.refresh();
 }
 
-auto System::load(Emulator::Interface* interface) -> bool {
+auto System::load(Emulator::Interface* interface, maybe<Region> region) -> bool {
   information = {};
 
   if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
@@ -20,6 +20,7 @@ auto System::load(Emulator::Interface* interface) -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  information.region = Region::NTSCU;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   this->interface = interface;
   return information.loaded = true;

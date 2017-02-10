@@ -12,7 +12,7 @@
 
 namespace MegaDrive {
   #define platform Emulator::platform
-  using File = Emulator::File;
+  namespace File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   extern Scheduler scheduler;
 
@@ -34,6 +34,12 @@ namespace MegaDrive {
     }
 
     uint wait = 0;
+  };
+
+  struct Region {
+    inline static auto NTSCJ() -> bool;
+    inline static auto NTSCU() -> bool;
+    inline static auto PAL() -> bool;
   };
 
   #include <md/controller/controller.hpp>

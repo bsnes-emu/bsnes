@@ -1,23 +1,11 @@
+build := release
 include ../nall/GNUmakefile
 
 target := tomoko
 objects := libco emulator audio video resource
-build := release
 # console := true
 
 flags += -I. -I..
-
-ifeq ($(build),release)
-  flags += -O3
-  link += -s
-else ifeq ($(build),debug)
-  flags += -g
-else ifeq ($(build),instrument)
-  flags += -O3 -fprofile-generate
-  link += -lgcov
-else ifeq ($(build),optimize)
-  flags += -O3 -fprofile-use
-endif
 
 ifeq ($(platform),windows)
   ifeq ($(console),true)

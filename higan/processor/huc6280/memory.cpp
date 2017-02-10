@@ -20,9 +20,8 @@ auto HuC6280::store16(uint16 addr, uint8 data) -> void {
 
 //
 
-auto HuC6280::io() -> uint8 {
+auto HuC6280::io() -> void {
   step(r.cs);
-  return 0xff;
 }
 
 auto HuC6280::opcode() -> uint8 {

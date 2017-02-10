@@ -19,12 +19,14 @@ auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
   if(bank == 0xff) {
     //$0000-03ff  VDC or VPC
     if((addr & 0x1c00) == 0x0000) {
+      HuC6280::io();  //penalty cycle
       if(Model::PCEngine()) return vdc0.read(addr);
       if(Model::SuperGrafx()) return vpc.read(addr);
     }
 
     //$0400-07ff  VCE
     if((addr & 0x1c00) == 0x0400) {
+      HuC6280::io();  //penalty cycle
       return vce.read(addr);
     }
 
@@ -123,12 +125,14 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
   if(bank == 0xff) {
     //$0000-03ff  VDC or VPC
     if((addr & 0x1c00) == 0x0000) {
+      HuC6280::io();  //penalty cycle
       if(Model::PCEngine()) return vdc0.write(addr, data);
       if(Model::SuperGrafx()) return vpc.write(addr, data);
     }
 
     //$0400-07ff  VCE
     if((addr & 0x1c00) == 0x0400) {
+      HuC6280::io();  //penalty cycle
       return vce.write(addr, data);
     }
 
@@ -186,6 +190,7 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
 
 //ST0, ST1, ST2
 auto CPU::store(uint2 addr, uint8 data) -> void {
+  HuC6280::io();  //penalty cycle
   if(addr) addr++;  //0,1,2 => 0,2,3
   if(Model::PCEngine()) vdc0.write(addr, data);
   if(Model::SuperGrafx()) vpc.store(addr, data);

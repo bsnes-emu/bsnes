@@ -9,6 +9,9 @@ struct PCEngineCartridge {
 };
 
 PCEngineCartridge::PCEngineCartridge(string location, uint8_t* data, uint size) {
+  //skip header
+  if((size & 0x1fff) == 512) data += 512, size -= 512;
+
   manifest.append("board\n");
   manifest.append("  rom name=program.rom size=0x", hex(size), "\n");
   manifest.append("\n");

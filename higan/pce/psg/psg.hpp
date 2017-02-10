@@ -24,24 +24,29 @@ private:
 
   struct Channel {
     //channel.cpp
-    auto power() -> void;
+    auto power(uint id) -> void;
     auto run() -> void;
+    auto loadWavePeriod() -> void;
+    auto loadWaveSample() -> void;
     auto sample(uint5 sample) -> void;
 
+    //io.cpp
+    auto write(uint4 addr, uint8 data) -> void;
+
     struct IO {
-      uint12 frequency;
+      uint12 waveFrequency;
       uint4  volume;
       uint1  direct;
       uint1  enable;
       uint4  volumeLeft;
       uint4  volumeRight;
-      uint5  waveData[32];
-      uint5  waveOffset;
-      uint5  waveDirect;
+      uint5  waveBuffer[32];
       uint5  noiseFrequency;  //channels 4 and 5 only
       uint1  noiseEnable;     //channels 4 and 5 only
 
-      uint12 period;
+      uint12 wavePeriod;
+      uint5  waveSample;
+      uint5  waveOffset;
       uint12 noisePeriod;
       uint5  noiseSample;
     } io;
@@ -50,6 +55,8 @@ private:
       uint left;
       uint right;
     } output;
+
+    uint id;
   } channel[6];
 };
 

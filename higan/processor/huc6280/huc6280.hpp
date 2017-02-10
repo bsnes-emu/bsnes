@@ -19,7 +19,7 @@ struct HuC6280 {
   inline auto store8(uint8, uint8) -> void;
   inline auto store16(uint16, uint8) -> void;
 
-  auto io() -> uint8;
+  auto io() -> void;
   auto opcode() -> uint8;
   auto operand() -> uint8;
 

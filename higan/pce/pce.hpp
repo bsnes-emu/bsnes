@@ -11,7 +11,7 @@
 
 namespace PCEngine {
   #define platform Emulator::platform
-  using File = Emulator::File;
+  namespace File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
   extern Scheduler scheduler;
 

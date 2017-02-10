@@ -37,7 +37,7 @@ auto PSG::power() -> void {
   stream = Emulator::audio.createStream(2, system.colorburst());
 
   memory::fill(&io, sizeof(IO));
-  for(auto C : range(6)) channel[C].power();
+  for(auto C : range(6)) channel[C].power(C);
 }
 
 }

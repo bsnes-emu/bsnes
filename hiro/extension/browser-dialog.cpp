@@ -7,7 +7,7 @@ struct BrowserDialogWindow {
   auto change() -> void;
   auto isFolder(const string& name) -> bool;
   auto isMatch(const string& name) -> bool;
-  auto run() -> string_vector;
+  auto run() -> BrowserDialog::Response;
   auto setPath(string path) -> void;
 
 private:
@@ -20,12 +20,14 @@ private:
         Button pathUp{&pathLayout, Size{0, 0}, 0};
       ListView view{&layout, Size{~0, ~0}, 5};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-        ComboButton filterList{&controlLayout, Size{120, 0}, 5};
+        ComboButton filterList{&controlLayout, Size{0, 0}, 5};
         LineEdit fileName{&controlLayout, Size{~0, 0}, 5};
+        ComboButton optionList{&controlLayout, Size{0, 0}, 5};
         Button acceptButton{&controlLayout, Size{80, 0}, 5};
         Button cancelButton{&controlLayout, Size{80, 0}, 5};
 
   BrowserDialog::State& state;
+  BrowserDialog::Response response;
   vector<string_vector> filters;
 };
 
@@ -37,20 +39,20 @@ auto BrowserDialogWindow::accept() -> void {
   if(state.action == "openFile" && batched) {
     string name = batched.left()->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
-    state.response.append(string{state.path, name});
+    response.selected.append(string{state.path, name});
   }
 
   if(state.action == "openFiles") {
     for(auto item : batched) {
       string name = item->cell(0)->text();
-      state.response.append(string{state.path, name, isFolder(name) ? "/" : ""});
+      response.selected.append(string{state.path, name, isFolder(name) ? "/" : ""});
     }
   }
 
   if(state.action == "openFolder" && batched) {
     string name = batched.left()->cell(0)->text();
     if(!isMatch(name)) return setPath({state.path, name});
-    state.response.append(string{state.path, name, "/"});
+    response.selected.append(string{state.path, name, "/"});
   }
 
   if(state.action == "saveFile") {
@@ -60,15 +62,15 @@ auto BrowserDialogWindow::accept() -> void {
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
     }
-    state.response.append(string{state.path, name});
+    response.selected.append(string{state.path, name});
   }
 
   if(state.action == "selectFolder" && batched) {
     string name = batched.left()->cell(0)->text();
-    if(isFolder(name)) state.response.append(string{state.path, name, "/"});
+    if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
   }
 
-  if(state.response) window.setModal(false);
+  if(response.selected) window.setModal(false);
 }
 
 //table view item double-clicked, or enter pressed on selected table view item
@@ -113,8 +115,8 @@ auto BrowserDialogWindow::isMatch(const string& name) -> bool {
   return false;
 }
 
-auto BrowserDialogWindow::run() -> string_vector {
-  state.response.reset();
+auto BrowserDialogWindow::run() -> BrowserDialog::Response {
+  response = {};
 
   layout.setMargin(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
@@ -127,6 +129,11 @@ auto BrowserDialogWindow::run() -> string_vector {
     auto part = filter.split("|", 1L);
     filterList.append(ComboButtonItem().setText(part.left()));
   }
+  optionList.setVisible((bool)state.options).onChange([&] { response.option = optionList.selected().text(); });
+  for(auto& option : state.options) {
+    optionList.append(ComboButtonItem().setText(option));
+  }
+  optionList.doChange();  //updates response.option to point to the default (first) option
   fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); });
   acceptButton.onActivate([&] { accept(); });
   if(state.action == "openFile" || state.action == "openFiles" || state.action == "openFolder") acceptButton.setText("Open");
@@ -151,7 +158,7 @@ auto BrowserDialogWindow::run() -> string_vector {
   window.setModal();
   window.setVisible(false);
 
-  return state.response;
+  return response;
 }
 
 auto BrowserDialogWindow::setPath(string path) -> void {
@@ -211,11 +218,19 @@ auto BrowserDialog::openFolder() -> string {
   return {};
 }
 
+auto BrowserDialog::option() -> string {
+  return response.option;
+}
+
 auto BrowserDialog::saveFile() -> string {
   state.action = "saveFile";
   if(!state.title) state.title = "Save File";
   if(auto result = _run()) return result.left();
   return {};
+}
+
+auto BrowserDialog::selected() -> string_vector {
+  return response.selected;
 }
 
 auto BrowserDialog::selectFolder() -> string {
@@ -227,6 +242,11 @@ auto BrowserDialog::selectFolder() -> string {
 
 auto BrowserDialog::setFilters(const string_vector& filters) -> type& {
   state.filters = filters;
+  return *this;
+}
+
+auto BrowserDialog::setOptions(const string_vector& options) -> type& {
+  state.options = options;
   return *this;
 }
 
@@ -247,7 +267,8 @@ auto BrowserDialog::setTitle(const string& title) -> type& {
 
 auto BrowserDialog::_run() -> string_vector {
   if(!state.path) state.path = Path::user();
-  return BrowserDialogWindow(state).run();
+  response = BrowserDialogWindow(state).run();
+  return response.selected;
 }
 
 #endif

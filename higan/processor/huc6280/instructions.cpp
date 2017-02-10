@@ -4,11 +4,11 @@ auto HuC6280::ADC(uint8 i) -> uint8 {
     o = A + i + C;
     V = ~(A ^ i) & (A ^ o) & 0x80;
   } else {
+    io();
     o = (A & 0x0f) + (i & 0x0f) + (C << 0);
     if(o > 0x09) o += 0x06;
     C = o > 0x0f;
     o = (A & 0xf0) + (i & 0xf0) + (C << 4) + (o & 0x0f);
-    V = ~(A ^ i) & (A ^ o) & 0x80;
     if(o > 0x9f) o += 0x60;
   }
   C = o.bit(8);
@@ -130,11 +130,11 @@ auto HuC6280::SBC(uint8 i) -> uint8 {
     o = A + i + C;
     V = ~(A ^ i) & (A ^ o) & 0x80;
   } else {
+    io();
     o = (A & 0x0f) + (i & 0x0f) + (C << 0);
     if(o <= 0x0f) o -= 0x06;
     C = o > 0x0f;
     o = (A & 0xf0) + (i & 0xf0) + (C << 4) + (o & 0x0f);
-    V = ~(A ^ i) & (A ^ o) & 0x80;
     if(o <= 0xff) o -= 0x60;
   }
   C = o.bit(8);
@@ -218,7 +218,6 @@ auto HuC6280::instruction_blockmove(bp alu) -> void {
   push(Y);
   push(A);
   push(X);
-  io();
   io();
   io();
   io();
@@ -497,8 +496,8 @@ L store8(zeropage, data);
 auto HuC6280::instruction_ST(uint2 index) -> void {
   auto data = operand();
   io();
-L io();
-  store(index, data);
+  io();
+L store(index, data);
 }
 
 auto HuC6280::instruction_TAM() -> void {
