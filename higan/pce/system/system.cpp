@@ -5,9 +5,18 @@ namespace PCEngine {
 System system;
 Scheduler scheduler;
 #include "peripherals.cpp"
+#include "serialization.cpp"
 
 auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vce.refresh();
+}
+
+auto System::runToSave() -> void {
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(vce);
+  scheduler.synchronize(vdc0);
+  scheduler.synchronize(vdc1);
+  scheduler.synchronize(psg);
 }
 
 auto System::load(Emulator::Interface* interface, Model model) -> bool {
@@ -22,6 +31,7 @@ auto System::load(Emulator::Interface* interface, Model model) -> bool {
   if(!cartridge.load()) return false;
 
   cpu.load();
+  serializeInit();
   this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   return information.loaded = true;

@@ -49,7 +49,7 @@ auto PSG::Channel::write(uint4 addr, uint8 data) -> void {
       io.waveOffset++;
       io.waveSample = io.waveBuffer[io.waveOffset];
     }
-    io.volume = data.bits(0,3);
+    io.volume = data.bits(0,4);
     io.direct = data.bit(6);
     io.enable = data.bit(7);
   }

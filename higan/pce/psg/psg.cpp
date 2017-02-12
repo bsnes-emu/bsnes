@@ -5,25 +5,43 @@ namespace PCEngine {
 PSG psg;
 #include "io.cpp"
 #include "channel.cpp"
+#include "serialization.cpp"
 
 auto PSG::Enter() -> void {
   while(true) scheduler.synchronize(), psg.main();
 }
 
 auto PSG::main() -> void {
-  uint left = 0, right = 0;
+  static const uint5 volumeScale[16] = {
+    0x00, 0x03, 0x05, 0x07, 0x09, 0x0b, 0x0d, 0x0f,
+    0x10, 0x13, 0x15, 0x17, 0x19, 0x1b, 0x1d, 0x1f,
+  };
+
+  uint5 lmal = volumeScale[io.volumeLeft];
+  uint5 rmal = volumeScale[io.volumeRight];
+
+  double outputLeft  = 0.0;
+  double outputRight = 0.0;
 
   for(auto C : range(6)) {
+    uint5  al = channel[C].io.volume;
+    uint5 lal = volumeScale[channel[C].io.volumeLeft];
+    uint5 ral = volumeScale[channel[C].io.volumeRight];
+
+    uint5 volumeLeft  = min(0x1f, (0x1f - lmal) + (0x1f - lal) + (0x1f - al));
+    uint5 volumeRight = min(0x1f, (0x1f - rmal) + (0x1f - ral) + (0x1f - al));
+
     channel[C].run();
     if(C == 1 && io.lfoEnable) {
       //todo: frequency modulation of channel 0 using channel 1's output
     } else {
-      left += channel[C].output.left;
-      right += channel[C].output.right;
+      outputLeft  += channel[C].io.output * volumeScalar[volumeLeft];
+      outputRight += channel[C].io.output * volumeScalar[volumeRight];
     }
   }
 
-  stream->sample(left / 32768.0, right / 32768.0);
+  //normalize 0.0 to 65536.0 => -1.0 to +1.0
+  stream->sample(outputLeft / 32768.0 - 1.0, outputRight / 32768.0 - 1.0);
   step(1);
 }
 
@@ -38,6 +56,14 @@ auto PSG::power() -> void {
 
   memory::fill(&io, sizeof(IO));
   for(auto C : range(6)) channel[C].power(C);
+
+  double level = 65536.0 / 6.0 / 32.0;  //max volume / channels / steps
+  double step = 48.0 / 32.0;            //48dB volume range spread over 32 steps
+  for(uint n : range(31)) {
+    volumeScalar[n] = level;
+    level /= pow(10.0, step / 20.0);
+  }
+  volumeScalar[31] = 0.0;
 }
 
 }

@@ -5,6 +5,7 @@ namespace PCEngine {
 VCE vce;
 #include "memory.cpp"
 #include "io.cpp"
+#include "serialization.cpp"
 
 auto VCE::Enter() -> void {
   while(true) scheduler.synchronize(), vce.main();

@@ -12,6 +12,9 @@ struct PSG : Thread {
   //io.cpp
   auto write(uint4 addr, uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   struct IO {
     uint3 channel;
@@ -26,8 +29,6 @@ private:
     //channel.cpp
     auto power(uint id) -> void;
     auto run() -> void;
-    auto loadWavePeriod() -> void;
-    auto loadWaveSample() -> void;
     auto sample(uint5 sample) -> void;
 
     //io.cpp
@@ -35,7 +36,7 @@ private:
 
     struct IO {
       uint12 waveFrequency;
-      uint4  volume;
+      uint5  volume;
       uint1  direct;
       uint1  enable;
       uint4  volumeLeft;
@@ -49,15 +50,14 @@ private:
       uint5  waveOffset;
       uint12 noisePeriod;
       uint5  noiseSample;
-    } io;
 
-    struct Output {
-      uint left;
-      uint right;
-    } output;
+      uint5  output;
+    } io;
 
     uint id;
   } channel[6];
+
+  double volumeScalar[32];
 };
 
 extern PSG psg;

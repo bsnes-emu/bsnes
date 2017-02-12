@@ -6,12 +6,20 @@ struct System {
   inline auto colorburst() const -> double { return information.colorburst; }
 
   auto run() -> void;
+  auto runToSave() -> void;
 
   auto load(Emulator::Interface*, Model) -> bool;
   auto save() -> void;
   auto unload() -> void;
 
   auto power() -> void;
+
+  //serialization.cpp
+  auto serializeInit() -> void;
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+  auto serializeAll(serializer&) -> void;
+  auto serialize(serializer&) -> void;
 
 private:
   Emulator::Interface* interface = nullptr;
@@ -21,6 +29,7 @@ private:
     Model model = Model::PCEngine;
     string manifest;
     double colorburst = 0.0;
+    uint serializeSize = 0;
   } information;
 };
 

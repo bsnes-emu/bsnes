@@ -8,6 +8,9 @@ struct VPC {
   auto write(uint5 addr, uint8 data) -> void;
   auto store(uint2 addr, uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   struct Settings {
     bool  enableVDC0;

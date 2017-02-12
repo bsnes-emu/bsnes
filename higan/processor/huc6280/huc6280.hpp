@@ -106,6 +106,9 @@ struct HuC6280 {
   //disassembler.cpp
   auto disassemble(uint16 pc) -> string;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct Flags {
     bool c;  //carry
     bool z;  //zero

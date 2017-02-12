@@ -10,6 +10,7 @@ VDC vdc1;
 #include "dma.cpp"
 #include "background.cpp"
 #include "sprite.cpp"
+#include "serialization.cpp"
 
 auto VDC::Enter() -> void {
   while(true) {

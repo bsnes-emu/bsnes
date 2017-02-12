@@ -16,6 +16,9 @@ struct VDC : Thread {
   auto read(uint2 addr) -> uint8;
   auto write(uint2 addr, uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   uint9 data;
 
@@ -24,15 +27,14 @@ private:
     auto read(uint16 addr) -> uint16;
     auto write(uint16 addr, uint16 data) -> void;
 
+    uint16 data[0x8000];
+
     uint16 addressRead;
     uint16 addressWrite;
     uint16 addressIncrement;
 
     uint16 dataRead;
     uint16 dataWrite;
-
-  private:
-    uint16 data[0x8000];
   } vram;
 
   struct SATB {
@@ -40,7 +42,6 @@ private:
     auto read(uint8 addr) -> uint16;
     auto write(uint8 addr, uint16 data) -> void;
 
-  private:
     uint16 data[0x100];
   } satb;
 
@@ -191,10 +192,6 @@ private:
     uint2  vramAccess;
     uint2  spriteAccess;
     bool   cgMode;
-
-    //$0400  CR
-    bool   colorBlur;
-    bool   grayscale;
   } io;
 };
 

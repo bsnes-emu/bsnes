@@ -13,6 +13,9 @@ struct VCE : Thread {
   auto read(uint3 addr) -> uint8;
   auto write(uint3 addr, uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   uint32 buffer[1365 * 263];
 
@@ -21,10 +24,8 @@ private:
     auto read(uint9 addr) -> uint9;
     auto write(uint9 addr, bool a0, uint8 data) -> void;
 
-    uint9 address;
-
-  private:
     uint9 data[0x200];
+    uint9 address;
   } cram;
 
   struct Timing {

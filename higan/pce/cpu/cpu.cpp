@@ -7,6 +7,7 @@ CPU cpu;
 #include "io.cpp"
 #include "irq.cpp"
 #include "timer.cpp"
+#include "serialization.cpp"
 
 auto CPU::Enter() -> void {
   while(true) scheduler.synchronize(), cpu.main();

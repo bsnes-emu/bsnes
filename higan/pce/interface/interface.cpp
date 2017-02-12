@@ -10,7 +10,7 @@ Settings settings;
 Interface::Interface() {
   information.overscan = true;
 
-  information.capability.states = false;
+  information.capability.states = true;
   information.capability.cheats = false;
 
   Port controllerPort{ID::Port::Controller, "Controller Port"};
@@ -108,11 +108,12 @@ auto Interface::run() -> void {
 }
 
 auto Interface::serialize() -> serializer {
-  return {};
+  system.runToSave();
+  return system.serialize();
 }
 
 auto Interface::unserialize(serializer& s) -> bool {
-  return false;
+  return system.unserialize(s);
 }
 
 auto Interface::cap(const string& name) -> bool {

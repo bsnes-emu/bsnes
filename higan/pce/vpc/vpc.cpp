@@ -3,6 +3,7 @@
 namespace PCEngine {
 
 VPC vpc;
+#include "serialization.cpp"
 
 auto VPC::bus(uint hclock) -> uint9 {
   //bus values are direct CRAM entry indexes:

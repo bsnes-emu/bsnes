@@ -19,7 +19,14 @@ struct CPU : Processor::HuC6280, Thread {
   //timer.cpp
   auto timerStep(uint clocks) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   vector<Thread*> peripherals;
+
+private:
+  uint8 ram[0x8000];  //PC Engine = 8KB, SuperGrafx = 32KB
+  uint8 bram[0x800];  //PC Engine CD-ROM Backup RAM = 2KB
 
   struct IRQ {
     //irq.cpp
@@ -59,10 +66,6 @@ struct CPU : Processor::HuC6280, Thread {
   struct IO {
     uint8 mdr;
   } io;
-
-private:
-  uint8 ram[0x8000];  //PC Engine = 8KB, SuperGrafx = 32KB
-  uint8 bram[0x800];  //PC Engine CD-ROM Backup RAM = 2KB
 };
 
 extern CPU cpu;
