@@ -1061,15 +1061,10 @@ static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode)
 
 static void di(GB_gameboy_t *gb, uint8_t opcode)
 {
+    /* DI is NOT delayed, not even on a CGB. Mooneye's di_timing-GS test fails on a CGB
+       for different reasons.*/
     GB_advance_cycles(gb, 4);
-
-    /* di is delayed in CGB */
-    if (!gb->is_cgb) {
-        gb->ime = false;
-    }
-    else if (gb->ime) {
-        gb->ime_toggle = true;
-    }
+    gb->ime = false;
 }
 
 static void ei(GB_gameboy_t *gb, uint8_t opcode)
