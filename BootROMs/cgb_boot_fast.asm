@@ -7,9 +7,6 @@ Start:
 ; Init stack pointer
   ld sp, $fffe
 
-; Select RAM bank
-  ld a, 2
-  ldh [$70], a
   xor a
 ; Clear memory VRAM
   ld hl, $8000
