@@ -322,6 +322,14 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     break;
             }
             break;
+        case GB_HUC1:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x2000: case 0x3000: gb->huc1.bank_low  = value; break;
+                case 0x4000: case 0x5000: gb->huc1.bank_high = value; break;
+                case 0x6000: case 0x7000: gb->huc1.mode      = value; break;
+            }
+            break;
         case GB_HUC3:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;

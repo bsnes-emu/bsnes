@@ -174,11 +174,11 @@ typedef struct {
         GB_MBC2,
         GB_MBC3,
         GB_MBC5,
+        GB_HUC1, /* Todo: HUC1 features are not emulated. Should be unified with the CGB IR sensor API. */
         GB_HUC3,
     } mbc_type;
     enum {
         GB_STANDARD_MBC,
-        GB_HUC1, /* Todo: HUC1 features are not emulated. Should be unified with the CGB IR sensor API. */
         GB_CAMERA,
     } mbc_subtype;
     bool has_ram;
@@ -313,6 +313,12 @@ typedef struct GB_gameboy_s {
                 uint8_t rom_bank_high:1;
                 uint8_t ram_bank:4;
             } mbc5;
+            
+            struct {
+                uint8_t bank_low:6;
+                uint8_t bank_high:3;
+                uint8_t mode:1;
+            } huc1;
 
             struct {
                 uint8_t rom_bank;

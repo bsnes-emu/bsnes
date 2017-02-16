@@ -39,7 +39,7 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_MBC5  , GB_CAMERA      , true , true , false, false}, // FCh  POCKET CAMERA
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5 (Todo: Not supported)
     {  GB_HUC3  , GB_STANDARD_MBC, true , true , false, false}, // FEh  HuC3 (Todo: Mapper support only)
-    {  GB_MBC1  , GB_HUC1        , true , true , false, false}, // FFh  HuC1+RAM+BATTERY (Todo: No IR bindings)
+    {  GB_HUC1  , GB_STANDARD_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY (Todo: No IR bindings)
 };
 
 void GB_update_mbc_mappings(GB_gameboy_t *gb)
@@ -85,6 +85,16 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
         case GB_MBC5:
             gb->mbc_rom_bank = gb->mbc5.rom_bank_low | (gb->mbc5.rom_bank_high << 8);
             gb->mbc_ram_bank = gb->mbc5.ram_bank;
+            break;
+        case GB_HUC1:
+            if (gb->huc1.mode == 0) {
+                gb->mbc_rom_bank = gb->huc1.bank_low | (gb->mbc1.bank_high << 6);
+                gb->mbc_ram_bank = 0;
+            }
+            else {
+                gb->mbc_rom_bank = gb->huc1.bank_low;
+                gb->mbc_ram_bank = gb->huc1.bank_high;
+            }
             break;
         case GB_HUC3:
             gb->mbc_rom_bank = gb->huc3.rom_bank;
