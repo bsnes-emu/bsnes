@@ -22,8 +22,14 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 
 static void stop(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
-    GB_log(gb, "STOP\n");
     (*pc)++;
+    uint8_t next = GB_read_memory(gb, (*pc)++);
+    if (next) {
+        GB_log(gb, "CORRUPTED STOP (%02x)\n", next);
+    }
+    else {
+        GB_log(gb, "STOP\n");
+    }
 }
 
 static char *register_names[] = {"af", "bc", "de", "hl", "sp"};

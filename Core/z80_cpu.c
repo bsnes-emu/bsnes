@@ -32,6 +32,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     else {
         gb->stopped = true;
     }
+    gb->pc++;
 }
 
 /* Operand naming conventions for functions:
