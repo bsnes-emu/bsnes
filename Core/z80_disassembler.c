@@ -450,7 +450,7 @@ static void sub_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LBC $%02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "SBC $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void and_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
