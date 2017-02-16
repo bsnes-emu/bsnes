@@ -137,4 +137,9 @@ void GB_configure_cart(GB_gameboy_t *gb)
             gb->mbc1_wiring = GB_MBC1M_WIRING;
         }
     }
+    
+    /* Set MBC5's bank to 1 correctly */
+    if (gb->cartridge_type->mbc_type == GB_MBC5) {
+        gb->mbc5.rom_bank_low = 1;
+    }
 }
