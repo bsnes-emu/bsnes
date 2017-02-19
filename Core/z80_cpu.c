@@ -25,6 +25,11 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_advance_cycles(gb, 4);
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
+        /* Make sure we don't leave display_cycles not divisble by 4 in single speed mode */
+        if (gb->display_cycles % 4 == 2) {
+            GB_advance_cycles(gb, 4);
+        }
+        
         /* Todo: the switch is not instant. We should emulate this. */
         gb->cgb_double_speed ^= true;
         gb->io_registers[GB_IO_KEY1] = 0;

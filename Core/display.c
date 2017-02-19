@@ -11,6 +11,25 @@
 #include <Windows.h>
 #endif
 
+/*
+ Each line is 456 cycles, approximately:
+ Mode 2 - 80  cycles / OAM Transfer
+ Mode 3 - 172 cycles / Rendering
+ Mode 0 - 204 cycles / HBlank
+ 
+ Mode 1 is VBlank
+ 
+ Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
+ */
+
+#define MODE2_LENGTH (80)
+#define MODE3_LENGTH (172)
+#define MODE0_LENGTH (204)
+#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
+#define LINES (144)
+#define WIDTH (160)
+#define VIRTUAL_LINES (LCDC_PERIOD / LINE_LENGTH) // = 154
+
 typedef struct __attribute__((packed)) {
     uint8_t y;
     uint8_t x;
@@ -244,7 +263,7 @@ void display_vblank(GB_gameboy_t *gb)
 
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) {
         /* LCD is off, memset screen to white */
-        memset(gb->screen, 0xFF, 160 * 144 * 4);
+        memset(gb->screen, 0xFF, WIDTH * LINES * 4);
     }
 
     gb->vblank_callback(gb);
@@ -281,25 +300,232 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
     (background_palette? gb->background_palletes_rgb : gb->sprite_palletes_rgb)[index / 2] = gb->rgb_encode_callback(gb, r, g, b);
 }
 
-
 /*
- Each line is 456 cycles, approximately:
- Mode 2 - 80  cycles / OAM Transfer
- Mode 3 - 172 cycles / Rendering
- Mode 0 - 204 cycles / HBlank
+ STAT interrupt is implemented based on this finding:
+ http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
  
- Mode 1 is VBlank
-
- Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
+ General timing is based on GiiBiiAdvance's documents:
+ https://github.com/AntonioND/giibiiadvance
+ 
  */
 
-#define MODE2_LENGTH (80)
-#define MODE3_LENGTH (172)
-#define MODE0_LENGTH (204)
-#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
-
-void GB_display_run(GB_gameboy_t *gb)
+static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
 {
+    uint8_t previous_stat_interrupt_line = gb->stat_interrupt_line;
+    gb->stat_interrupt_line = false;
+    
+    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+        /* LCD is disabled, do nothing */
+        
+        /* When the LCD is off, LY is 0 and STAT mode is 0.
+           Todo: how is the LY=LYC flag handled? */
+        gb->io_registers[GB_IO_LY] = 0;
+        gb->io_registers[GB_IO_STAT] &= ~7;
+        
+        /* Keep sending vblanks to user even if the screen is off */
+        gb->display_cycles += cycles;
+        if (gb->display_cycles >= LCDC_PERIOD) {
+            /* VBlank! */
+            gb->display_cycles -= LCDC_PERIOD;
+            display_vblank(gb);
+        }
+
+        /* Reset window rendering state */
+        gb->effective_window_enabled = false;
+        gb->effective_window_y = 0xFF;
+        return;
+    }
+    
+    uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
+    uint8_t stat_delay = gb->cgb_double_speed? 2 : (gb->cgb_mode? 0 : 4);
+    
+    for (; cycles; cycles -= atomic_increase) {
+        gb->display_cycles += atomic_increase;
+        bool should_compare_ly = true;
+        uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
+        
+        /* Handle cycle completion. STAT's initial value depends on model and mode */
+        if (gb->display_cycles == LCDC_PERIOD) {
+            /* VBlank! */
+            gb->display_cycles = 0;
+            gb->io_registers[GB_IO_STAT] &= ~3;
+            if (gb->is_cgb) {
+                if (stat_delay) {
+                    gb->io_registers[GB_IO_STAT] |= 1;
+                }
+                else {
+                    gb->io_registers[GB_IO_STAT] |= 2;
+                }
+            }
+            ly_for_comparison = gb->io_registers[GB_IO_LY] = 0;
+            display_vblank(gb);
+        }
+        
+        /* Entered VBlank state, update STAT and IF */
+        else if (gb->display_cycles == LINES * LINE_LENGTH + stat_delay) {
+            gb->io_registers[GB_IO_STAT] &= ~3;
+            gb->io_registers[GB_IO_STAT] |= 1;
+            gb->io_registers[GB_IO_IF] |= 1;
+            
+            /* Entering VBlank state triggers the OAM interrupt */
+            if (gb->io_registers[GB_IO_STAT] & 0x20) {
+                gb->stat_interrupt_line = true;
+            }
+        }
+        
+        /* Handle STAT changes for lines 0-143 */
+        else if (gb->display_cycles < LINES * LINE_LENGTH ) {
+            unsigned position_in_line = gb->display_cycles % LINE_LENGTH;
+            if (position_in_line == stat_delay) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->io_registers[GB_IO_STAT] |= 2;
+            }
+            else if (position_in_line == 0) {
+                should_compare_ly = gb->is_cgb;
+                ly_for_comparison--;
+            }
+            else if (position_in_line == MODE2_LENGTH + stat_delay) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->io_registers[GB_IO_STAT] |= 3;
+            }
+            else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                if (gb->hdma_on_hblank) {
+                    gb->hdma_on = true;
+                    gb->hdma_cycles = 0;
+                }
+            }
+        }
+        
+        /* Line 153 is special */
+        else if (gb->display_cycles >= (VIRTUAL_LINES - 1) * LINE_LENGTH) {
+            /* DMG */
+            if (!gb->is_cgb) {
+                switch (gb->display_cycles - (VIRTUAL_LINES - 1) * LINE_LENGTH) {
+                    case 0:
+                        should_compare_ly = false;
+                        break;
+                    case 4:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        ly_for_comparison = VIRTUAL_LINES - 1;
+                        break;
+                    case 8:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        should_compare_ly = false;
+                        break;
+                    default:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        ly_for_comparison = 0;
+                }
+            }
+            /* CGB in DMG mode */
+            else if (!gb->cgb_mode) {
+                switch (gb->display_cycles - (VIRTUAL_LINES - 1) * LINE_LENGTH) {
+                    case 0:
+                        ly_for_comparison = VIRTUAL_LINES - 2;
+                        break;
+                    case 4:
+                        break;
+                    case 8:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        break;
+                    default:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        ly_for_comparison = 0;
+                }
+            }
+            /* Single speed CGB */
+            else if (!gb->cgb_double_speed) {
+                switch (gb->display_cycles - (VIRTUAL_LINES - 1) * LINE_LENGTH) {
+                    case 0:
+                        break;
+                    case 4:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        break;
+                    default:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        ly_for_comparison = 0;
+                }
+            }
+            
+            /* Double speed CGB */
+            else {
+                switch (gb->display_cycles - (VIRTUAL_LINES - 1) * LINE_LENGTH) {
+                    case 0:
+                        ly_for_comparison = VIRTUAL_LINES - 2;
+                        break;
+                    case 2:
+                    case 4:
+                        break;
+                    case 6:
+                    case 8:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        break;
+                    default:
+                        gb->io_registers[GB_IO_LY] = 0;
+                        ly_for_comparison = 0;
+                }
+            }
+        }
+        
+        /* Lines 144 - 152 */
+        else {
+            if (stat_delay && gb->display_cycles % LINE_LENGTH == 0) {
+                should_compare_ly = gb->is_cgb;
+                ly_for_comparison--;
+            }
+        }
+        
+        /* Set LY=LYC bit */
+        if (should_compare_ly && (ly_for_comparison == gb->io_registers[GB_IO_LYC])) {
+            gb->io_registers[GB_IO_STAT] |= 4;
+        }
+        else {
+            gb->io_registers[GB_IO_STAT] &= ~4;
+        }
+        
+        if (!gb->stat_interrupt_line) {
+            switch (gb->io_registers[GB_IO_STAT] & 3) {
+                case 0: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 8; break;
+                case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
+                case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
+            }
+            
+            /* Use requested a LY=LYC interrupt and the LY=LYC bit is on */
+            if ((gb->io_registers[GB_IO_STAT] & 0x44) == 0x44) {
+                gb->stat_interrupt_line = true;
+            }
+        }
+        
+        if (!gb->stat_interrupt_line) {
+        }
+    }
+    
+    if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
+        gb->io_registers[GB_IO_IF] |= 2;
+    }
+    
+    /* The value of LY is glitched in the last cycle of every line in CGB mode CGB in single speed
+       This is based on GiiBiiAdvance's docs */
+    if (gb->cgb_mode && !gb->cgb_double_speed &&
+        gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 4) {
+        uint8_t glitch_pattern[] = {0, 0, 2, 0, 4, 4, 6, 0, 8};
+        if ((gb->io_registers[GB_IO_LY] & 0xF) == 0xF) {
+            gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] >> 4] << 4;
+        }
+        else {
+            gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] & 7] | (gb->io_registers[GB_IO_LY] & 0xF8);
+        }
+    }
+}
+
+void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
+{
+    update_display_state(gb, cycles);
+    if (gb->disable_rendering) {
+        return;
+    }
+    
     /*
        Display controller bug: For some reason, the OAM STAT interrupt is called, as expected, for LY = 0..143.
        However, it is also called from LY = 144.
@@ -307,134 +533,46 @@ void GB_display_run(GB_gameboy_t *gb)
        See http://forums.nesdev.com/viewtopic.php?f=20&t=13727
     */
 
-    /*
-        STAT interrupt is implemented based on this finding:
-        http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
-     */
-
-    uint8_t previous_stat_interrupt_line = gb->stat_interrupt_line;
-    gb->stat_interrupt_line = false;
-
-    uint8_t last_mode = gb->io_registers[GB_IO_STAT] & 3;
-    gb->io_registers[GB_IO_STAT] &= ~3;
-
-    if (gb->display_cycles >= LCDC_PERIOD) {
-        /* VBlank! */
-        gb->display_cycles -= LCDC_PERIOD;
-        display_vblank(gb);
-    }
-
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         /* LCD is disabled, do nothing */
-
-        /* Some games expect LY to be zero when the LCD is off.
-           Todo: Verify this behavior.
-         Keep in mind that this only affects the value being read from the Gameboy, not the actualy display state. 
-         This also explains why the coincidence interrupt triggers when LYC = 0 and LY = 153. */
-        gb->io_registers[GB_IO_LY] = 0;
         return;
     }
-
-
-    gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
-
-    /* Todo: This behavior is seen in BGB and it fixes some ROMs with delicate timing, such as Hitman's 8bit.
-       This should be verified to be correct on a real gameboy. */
-    if (gb->io_registers[GB_IO_LY] == 153 && gb->display_cycles % LINE_LENGTH > 8) {
-        gb->io_registers[GB_IO_LY] = 0;
-    }
-
-    gb->io_registers[GB_IO_STAT] &= ~4;
-    if (gb->io_registers[GB_IO_LY] == gb->io_registers[GB_IO_LYC]) {
-        gb->io_registers[GB_IO_STAT] |= 4;
-        if (gb->io_registers[GB_IO_STAT] & 0x40) {
-            /* User requests LYC interrupt. */
-            gb->stat_interrupt_line = true;
-        }
-    }
-
     if (gb->display_cycles >= LINE_LENGTH * 144) { /* VBlank */
-        gb->io_registers[GB_IO_STAT] |= 1; /* Set mode to 1 */
-        gb->effective_window_enabled = false;
-        gb->effective_window_y = 0xFF;
-
-        if (gb->io_registers[GB_IO_STAT] & 16) { /* User requests an interrupt on VBlank*/
-            gb->stat_interrupt_line = true;
-        }
-        if (last_mode != 1) {
-            gb->io_registers[GB_IO_IF] |= 1;
-        }
-
-        // LY = 144 interrupt bug
-        if (gb->io_registers[GB_IO_LY] == 144 && !gb->is_cgb) {
-            /* User requests an interrupt on Mode 2 */
-            if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH && gb->io_registers[GB_IO_STAT] & 0x20) { // Mode 2
-                gb->stat_interrupt_line = true;
-            }
-        }
-
-        goto updateSTAT;
+        return;
     }
+    
+    uint8_t effective_ly = gb->display_cycles / LINE_LENGTH;
 
     // Todo: verify this window behavior. It is assumed from the expected behavior of 007 - The World Is Not Enough.
-    if ((gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_LY] == gb->io_registers[GB_IO_WY]) {
+    if ((gb->io_registers[GB_IO_LCDC] & 0x20) && effective_ly == gb->io_registers[GB_IO_WY]) {
         gb->effective_window_enabled = true;
     }
 
     if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH) { /* Mode 2 */
-        gb->io_registers[GB_IO_STAT] |= 2; /* Set mode to 2 */
-
-        if (gb->io_registers[GB_IO_STAT] & 0x20) { /* User requests an interrupt on Mode 2 */
-            gb->stat_interrupt_line = true;
-        }
 
         /* See above comment about window behavior. */
         if (gb->effective_window_enabled && gb->effective_window_y == 0xFF) {
-            gb->effective_window_y =  gb->io_registers[GB_IO_LY];
+            gb->effective_window_y = effective_ly;
         }
 
         gb->effective_scx = gb->io_registers[GB_IO_SCX];
         gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
-        goto updateSTAT;
+        return;
     }
 
 
-    /* Render. This  chunk is outside the Mode 3 if, because otherwise we might not render some pixels, since this
-       function only runs between atomic CPU changes, and not every clock. */
-    if (!gb->disable_rendering) {
-        int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
-        for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
-            if (gb->previous_lcdc_x >= 160) {
-                continue;
-            }
-            if (gb->previous_lcdc_x < 0) {
-                continue;
-            }
-            gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
-            get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
+    /* Render */
+    int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+    
+    for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
+        if (gb->previous_lcdc_x >= WIDTH) {
+            continue;
         }
-    }
-
-    if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH + MODE3_LENGTH) { /* Mode 3 */
-        gb->io_registers[GB_IO_STAT] |= 3; /* Set mode to 3 */
-        goto updateSTAT;
-    }
-
-     /* Mode 0*/
-    if (gb->io_registers[GB_IO_STAT] & 8) { /* User requests an interrupt on Mode 0 */
-        gb->stat_interrupt_line = true;
-    }
-
-    if (last_mode != 0) {
-        if (gb->hdma_on_hblank) {
-            gb->hdma_on = true;
-            gb->hdma_cycles = 0;
+        if (gb->previous_lcdc_x < 0) {
+            continue;
         }
-    }
-
-updateSTAT:
-    if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
-        gb->io_registers[GB_IO_IF] |= 2;
+        gb->screen[effective_ly * WIDTH + gb->previous_lcdc_x] =
+        get_pixel(gb, gb->previous_lcdc_x, effective_ly);
     }
 }
 
@@ -563,7 +701,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
     uint8_t count = 0;
     unsigned sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
     uint8_t oam_to_dest_index[40] = {0,};
-    for (unsigned y = 0; y < 144; y++) {
+    for (unsigned y = 0; y < LINES; y++) {
         GB_sprite_t *sprite = (GB_sprite_t *) &gb->oam;
         uint8_t sprites_in_line = 0;
         for (uint8_t i = 0; i < 40; i++, sprite++) {

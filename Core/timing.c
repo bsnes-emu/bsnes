@@ -68,7 +68,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 
     // Not affected by speed boost
     gb->hdma_cycles += cycles;
-    gb->display_cycles += cycles;
     gb->apu_sample_cycles += cycles;
     gb->apu.apu_cycles += cycles;
     gb->cycles_since_ir_change += cycles;
@@ -76,7 +75,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     GB_dma_run(gb);
     GB_hdma_run(gb);
     GB_apu_run(gb);
-    GB_display_run(gb);
+    GB_display_run(gb, cycles);
     GB_ir_run(gb);
 }
 
