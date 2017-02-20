@@ -85,7 +85,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-sdl: $(SDL_TARGET) $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE
+sdl: $(SDL_TARGET) $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE $(BIN)/sdl/registers.sym
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
 all: cocoa sdl tester
@@ -150,6 +150,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     $(shell ls Cocoa/*.icns) \
                     Cocoa/License.html \
                     Cocoa/Info.plist \
+                    Misc/registers.sym \
                     $(BIN)/SameBoy.app/Contents/Resources/dmg_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/cgb_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/Document.nib \
@@ -158,7 +159,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     $(BIN)/SameBoy.qlgenerator \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
-	cp Cocoa/*.icns $(BIN)/SameBoy.app/Contents/Resources/
+	cp Cocoa/*.icns Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
 	cp Cocoa/License.html $(BIN)/SameBoy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders
@@ -257,6 +258,9 @@ $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	cp -f $^ $@
 	
 $(BIN)/sdl/LICENSE: LICENSE
+	cp -f $^ $@
+
+$(BIN)/sdl/registers.sym: Misc/registers.sym
 	cp -f $^ $@
 
 # Boot ROMs

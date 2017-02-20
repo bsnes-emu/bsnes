@@ -292,6 +292,8 @@ usage:
     GB_load_battery(&gb, battery_save_path);
 
     /* Configure symbols */
+    GB_debugger_load_symbol_file(&gb, executable_relative_path("registers.sym"));
+    
     char symbols_path[path_length + 5];
     replace_extension(filename, path_length, symbols_path, ".sym");
     GB_debugger_load_symbol_file(&gb, symbols_path);

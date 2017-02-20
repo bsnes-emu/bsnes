@@ -369,6 +369,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     }
     GB_load_rom(&gb, [fileName UTF8String]);
     GB_load_battery(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
     GB_debugger_load_symbol_file(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
 
     return YES;
