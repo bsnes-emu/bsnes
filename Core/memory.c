@@ -441,7 +441,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_LCDC:
                 if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
-                    gb->display_cycles = 0;
+                    /* It appears that there's a slight delay after enabling the screen? */
+                    /* Todo: verify this. */
+                    gb->display_cycles = gb->cgb_double_speed? -2 : -4;
                 }
                 gb->io_registers[GB_IO_LCDC] = value;
                 return;
