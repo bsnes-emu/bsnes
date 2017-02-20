@@ -1,4 +1,10 @@
 auto CPU::read(uint8 bank, uint13 addr) -> uint8 {
+  auto data = read_(bank, addr);
+  if(auto result = cheat.find(bank << 13 | addr, data)) data = result();
+  return data;
+}
+
+auto CPU::read_(uint8 bank, uint13 addr) -> uint8 {
   //$00-7f  HuCard
   if(!bank.bit(7)) {
     return cartridge.read(bank << 13 | addr);

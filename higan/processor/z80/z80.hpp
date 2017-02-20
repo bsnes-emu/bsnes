@@ -6,10 +6,21 @@ namespace Processor {
 
 struct Z80 {
   struct Bus {
+    virtual auto requested() -> bool { return _requested; }
+    virtual auto granted() -> bool { return _granted; }
+
+    virtual auto request(bool value) -> void { _requested = value; }
+    virtual auto grant(bool value) -> void { _granted = value; }
+
     virtual auto read(uint16 addr) -> uint8 = 0;
     virtual auto write(uint16 addr, uint8 data) -> void = 0;
+
     virtual auto in(uint8 addr) -> uint8 = 0;
     virtual auto out(uint8 addr, uint8 data) -> void = 0;
+
+  private:
+    bool _requested;
+    bool _granted;
   };
 
   virtual auto step(uint clocks) -> void = 0;
@@ -21,6 +32,7 @@ struct Z80 {
   auto parity(uint8) const -> bool;
 
   //memory.cpp
+  auto yield() -> void;
   auto wait(uint clocks = 1) -> void;
   auto opcode() -> uint8;
   auto operand() -> uint8;

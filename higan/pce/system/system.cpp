@@ -4,6 +4,7 @@ namespace PCEngine {
 
 System system;
 Scheduler scheduler;
+Cheat cheat;
 #include "peripherals.cpp"
 #include "serialization.cpp"
 

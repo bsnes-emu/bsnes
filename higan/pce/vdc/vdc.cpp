@@ -23,61 +23,58 @@ auto VDC::Enter() -> void {
 auto VDC::main() -> void {
   if(Model::PCEngine() && vdc1.active()) return step(frequency());
 
-  timing.vpulse = false;
-  timing.vclock = 0;
-  timing.voffset = 0;
-  timing.vstart = max((uint8)2, timing.verticalDisplayStart) - 2;
-  timing.vlength = min(242, timing.verticalDisplayLength + 1);
+  if(timing.vclock == 0) {
+    timing.voffset = 0;
+    timing.vstart = max((uint8)2, timing.verticalDisplayStart) - 2;
+    timing.vlength = min(242, timing.verticalDisplayLength + 1);
+  }
 
-  while(!timing.vpulse) {
-    timing.hpulse = false;
-    timing.hclock = 0;
-    timing.hoffset = 0;
-    timing.hstart = timing.horizontalDisplayStart;
-    timing.hlength = (timing.horizontalDisplayLength + 1) << 3;
+  timing.hclock = 0;
+  timing.hoffset = 0;
+  timing.hstart = timing.horizontalDisplayStart;
+  timing.hlength = (timing.horizontalDisplayLength + 1) << 3;
 
-    if(timing.vclock >= timing.vstart && timing.voffset < timing.vlength) {
-      background.scanline(timing.voffset);
-      sprite.scanline(timing.voffset);
+  if(timing.vclock >= timing.vstart && timing.voffset < timing.vlength) {
+    background.scanline(timing.voffset);
+    sprite.scanline(timing.voffset);
 
-      step(timing.hstart);
+    step(timing.hstart);
 
-      while(timing.hoffset < timing.hlength) {
-        data = 0;
-
-        background.run(timing.hoffset, timing.voffset);
-        sprite.run(timing.hoffset, timing.voffset);
-
-        if(sprite.color && sprite.priority) {
-          data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
-        } else if(background.color) {
-          data = 0 << 8 | background.palette << 4 | background.color << 0;
-        } else if(sprite.color) {
-          data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
-        }
-
-        step(vce.clock());
-        timing.hoffset++;
-      }
+    while(timing.hclock < 1360 && timing.hoffset < timing.hlength) {
       data = 0;
 
-      if(timing.voffset == io.lineCoincidence - 64) {
-        irq.raise(IRQ::Line::LineCoincidence);
+      background.run(timing.hoffset, timing.voffset);
+      sprite.run(timing.hoffset, timing.voffset);
+
+      if(sprite.color && sprite.priority) {
+        data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
+      } else if(background.color) {
+        data = 0 << 8 | background.palette << 4 | background.color << 0;
+      } else if(sprite.color) {
+        data = 1 << 8 | sprite.palette << 4 | sprite.color << 0;
       }
 
-      while(!timing.hpulse) step(1);
-      timing.vclock++;
-      timing.voffset++;
-    } else {
-      data = 0;
-      while(!timing.hpulse) step(1);
-      timing.vclock++;
+      step(vce.clock());
+      timing.hoffset++;
     }
 
-    if(timing.vclock == timing.vstart + timing.vlength) {
-      irq.raise(IRQ::Line::Vblank);
-      dma.satbStart();
+    if(timing.voffset == io.lineCoincidence - 64) {
+      irq.raise(IRQ::Line::LineCoincidence);
     }
+
+    timing.voffset++;
+  }
+
+  data = 0;
+  step(1365 - timing.hclock);
+
+  if(timing.vclock == timing.vstart + timing.vlength) {
+    irq.raise(IRQ::Line::Vblank);
+    dma.satbStart();
+  }
+
+  if(++timing.vclock == 262) {
+    timing.vclock = 0;
   }
 }
 

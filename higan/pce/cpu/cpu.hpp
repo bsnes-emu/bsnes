@@ -13,6 +13,7 @@ struct CPU : Processor::HuC6280, Thread {
 
   //io.cpp
   auto read(uint8 bank, uint13 addr) -> uint8 override;
+  auto read_(uint8 bank, uint13 addr) -> uint8;
   auto write(uint8 bank, uint13 addr, uint8 data) -> void override;
   auto store(uint2 addr, uint8 data) -> void override;
 

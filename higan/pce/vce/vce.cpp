@@ -12,38 +12,36 @@ auto VCE::Enter() -> void {
 }
 
 auto VCE::main() -> void {
-  vdc0.frame();
-  vdc1.frame();
-  timing.vclock = 0;
-
-  while(timing.vclock < 262) {
-    vdc0.scanline();
-    vdc1.scanline();
-    timing.hclock = 0;
-
-    auto output = buffer + 1365 * timing.vclock;
-
-    while(timing.hclock < 1360) {
-      uint9 color;
-      if(Model::PCEngine()) color = vdc0.bus();
-      if(Model::SuperGrafx()) color = vpc.bus(timing.hclock);
-      color = cram.read(color);
-
-    //*output++ = color;
-    //step(1);
-
-      if(clock() >= 2) *output++ = color;
-      if(clock() >= 2) *output++ = color;
-      if(clock() >= 3) *output++ = color;
-      if(clock() >= 4) *output++ = color;
-      step(clock());
-    }
-
-    step(1365 - timing.hclock);
-    timing.vclock++;
+  if(timing.vclock == 0) {
+    vdc0.frame();
+    vdc1.frame();
   }
 
-  scheduler.exit(Scheduler::Event::Frame);
+  vdc0.scanline();
+  vdc1.scanline();
+  timing.hclock = 0;
+
+  auto output = buffer + 1365 * timing.vclock;
+
+  while(timing.hclock < 1360) {
+    uint9 color;
+    if(Model::PCEngine()) color = vdc0.bus();
+    if(Model::SuperGrafx()) color = vpc.bus(timing.hclock);
+    color = cram.read(color);
+
+    if(clock() >= 2) *output++ = color;
+    if(clock() >= 2) *output++ = color;
+    if(clock() >= 3) *output++ = color;
+    if(clock() >= 4) *output++ = color;
+    step(clock());
+  }
+
+  step(1365 - timing.hclock);
+
+  if(++timing.vclock == 262) {
+    timing.vclock = 0;
+    scheduler.exit(Scheduler::Event::Frame);
+  }
 }
 
 auto VCE::step(uint clocks) -> void {

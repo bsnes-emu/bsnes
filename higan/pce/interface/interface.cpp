@@ -11,7 +11,7 @@ Interface::Interface() {
   information.overscan = true;
 
   information.capability.states = true;
-  information.capability.cheats = false;
+  information.capability.cheats = true;
 
   Port controllerPort{ID::Port::Controller, "Controller Port"};
 
@@ -114,6 +114,10 @@ auto Interface::serialize() -> serializer {
 
 auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
+}
+
+auto Interface::cheatSet(const string_vector& list) -> void {
+  cheat.assign(list);
 }
 
 auto Interface::cap(const string& name) -> bool {

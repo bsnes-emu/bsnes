@@ -33,8 +33,10 @@ auto VDP::main() -> void {
       if(io.verticalBlankInterruptEnable) {
         cpu.raise(CPU::Interrupt::VerticalBlank);
       }
+      apu.setINT(true);
     }
     step(1710);
+    apu.setINT(false);
   }
 }
 
@@ -43,6 +45,7 @@ auto VDP::step(uint clocks) -> void {
     dmaRun();
     Thread::step(1);
     synchronize(cpu);
+    synchronize(apu);
   }
 }
 

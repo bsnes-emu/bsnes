@@ -8,6 +8,9 @@ struct PSG : Thread {
   auto step(uint clocks) -> void;
 
   auto power() -> void;
+
+  //io.cpp
+  auto write(uint8 data) -> void;
 };
 
 extern PSG psg;

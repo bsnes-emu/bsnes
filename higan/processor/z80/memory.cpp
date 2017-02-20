@@ -1,13 +1,25 @@
+auto Z80::yield() -> void {
+  //freeze Z80, allow external access until relinquished
+  if(bus->requested()) {
+    bus->grant(true);
+    while(bus->requested()) step(1);
+    bus->grant(false);
+  }
+}
+
 auto Z80::wait(uint clocks) -> void {
+  yield();
   step(clocks);
 }
 
 auto Z80::opcode() -> uint8 {
+  yield();
   step(4);
   return bus->read(r.pc++);
 }
 
 auto Z80::operand() -> uint8 {
+  yield();
   step(3);
   return bus->read(r.pc++);
 }
@@ -35,21 +47,25 @@ auto Z80::displace(uint16& x) -> uint16 {
 }
 
 auto Z80::read(uint16 addr) -> uint8 {
+  yield();
   step(3);
   return bus->read(addr);
 }
 
 auto Z80::write(uint16 addr, uint8 data) -> void {
+  yield();
   step(3);
   return bus->write(addr, data);
 }
 
 auto Z80::in(uint8 addr) -> uint8 {
+  yield();
   step(4);
   return bus->in(addr);
 }
 
 auto Z80::out(uint8 addr, uint8 data) -> void {
+  yield();
   step(4);
   return bus->out(addr, data);
 }

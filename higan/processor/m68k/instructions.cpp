@@ -706,7 +706,7 @@ auto M68K::instructionMOVE_FROM_SR(EffectiveAddress ea) -> void {
 }
 
 auto M68K::instructionMOVE_TO_CCR(EffectiveAddress ea) -> void {
-  auto data = read<Byte>(ea);
+  auto data = read<Word>(ea);
   writeCCR(data);
 }
 
