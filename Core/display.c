@@ -380,7 +380,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
             }
-            else if (position_in_line == 0) {
+            else if (position_in_line == 0 && gb->display_cycles != 0) {
                 should_compare_ly = gb->is_cgb;
                 ly_for_comparison--;
             }
