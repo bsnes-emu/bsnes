@@ -318,9 +318,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         /* LCD is disabled, do nothing */
         
         /* When the LCD is off, LY is 0 and STAT mode is 0.
-           Todo: how is the LY=LYC flag handled? */
+           Todo: Verify the LY=LYC flag should be on. */
         gb->io_registers[GB_IO_LY] = 0;
-        gb->io_registers[GB_IO_STAT] &= ~7;
+        gb->io_registers[GB_IO_STAT] &= ~3;
+        gb->io_registers[GB_IO_STAT] |= 4;
         
         /* Keep sending vblanks to user even if the screen is off */
         gb->display_cycles += cycles;
