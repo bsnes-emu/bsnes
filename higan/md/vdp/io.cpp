@@ -74,8 +74,9 @@ auto VDP::writeDataPort(uint16 data) -> void {
   io.commandPending = false;
 
   //DMA VRAM fill
-  if(io.dmaFillWait.lower()) {
-    io.dmaFillByte = data >> 8;
+  if(dma.io.wait.lower()) {
+    dma.io.fill = data >> 8;
+    return;
   }
 
   //VRAM write
@@ -132,7 +133,7 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
     io.command.bits(2,5) = data.bits(4,7);
     io.address.bits(14,15) = data.bits(0,1);
-    io.dmaFillWait = io.dmaMode == 2 && io.command.bits(4,5) == 2;
+    if(dma.io.mode == 3) dma.io.wait = false;
     return;
   }
 
@@ -162,12 +163,12 @@ auto VDP::writeControlPort(uint16 data) -> void {
   case 0x01: {
     io.videoMode = data.bit(2);
     io.overscan = data.bit(3);
-    io.dmaEnable = data.bit(4);
+    dma.io.enable = data.bit(4);
     io.verticalBlankInterruptEnable = data.bit(5);
     io.displayEnable = data.bit(6);
     io.externalVRAM = data.bit(7);
 
-    if(!io.dmaEnable) io.command.bit(5) = 0;
+    if(!dma.io.enable) io.command.bit(5) = 0;
 
     return;
   }
@@ -280,32 +281,33 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //DMA length
   case 0x13: {
-    io.dmaLength.bits(0,7) = data.bits(0,7);
+    dma.io.length.bits(0,7) = data.bits(0,7);
     return;
   }
 
   //DMA length
   case 0x14: {
-    io.dmaLength.bits(8,15) = data.bits(0,7);
+    dma.io.length.bits(8,15) = data.bits(0,7);
     return;
   }
 
   //DMA source
   case 0x15: {
-    io.dmaSource.bits(0,7) = data.bits(0,7);
+    dma.io.source.bits(0,7) = data.bits(0,7);
     return;
   }
 
   //DMA source
   case 0x16: {
-    io.dmaSource.bits(8,15) = data.bits(0,7);
+    dma.io.source.bits(8,15) = data.bits(0,7);
     return;
   }
 
   //DMA source
   case 0x17: {
-    io.dmaSource.bits(16,21) = data.bits(0,5);
-    io.dmaMode = data.bits(6,7);
+    dma.io.source.bits(16,21) = data.bits(0,5);
+    dma.io.mode = data.bits(6,7);
+    dma.io.wait = dma.io.mode.bit(1);
     return;
   }
 

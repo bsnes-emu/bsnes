@@ -15,7 +15,7 @@ auto Peripherals::reset() -> void {
 auto Peripherals::connect(uint port, uint device) -> void {
   cpu.peripherals.reset();
 
-  if(system.model() == Model::MasterSystem) {
+  if(Model::MasterSystem()) {
     if(port == ID::Port::Controller1) {
       settings.controllerPort1 = device;
       if(!system.loaded()) return;

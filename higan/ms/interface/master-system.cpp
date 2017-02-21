@@ -69,6 +69,6 @@ auto MasterSystemInterface::videoColor(uint32 color) -> uint64 {
 }
 
 auto MasterSystemInterface::load(uint id) -> bool {
-  if(id == ID::MasterSystem) return system.load(this, Model::MasterSystem);
+  if(id == ID::MasterSystem) return system.load(this, System::Model::MasterSystem);
   return false;
 }

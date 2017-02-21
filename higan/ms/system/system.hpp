@@ -1,4 +1,6 @@
 struct System {
+  enum class Model : uint { MasterSystem, GameGear };
+
   auto loaded() const -> bool { return information.loaded; }
   auto model() const -> Model { return information.model; }
   auto colorburst() const -> double { return information.colorburst; }
@@ -33,3 +35,6 @@ struct Peripherals {
 
 extern System system;
 extern Peripherals peripherals;
+
+auto Model::MasterSystem() -> bool { return system.model() == System::Model::MasterSystem; }
+auto Model::GameGear() -> bool { return system.model() == System::Model::GameGear; }

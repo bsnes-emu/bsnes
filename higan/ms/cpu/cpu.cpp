@@ -31,7 +31,7 @@ auto CPU::step(uint clocks) -> void {
 
 //called once per frame
 auto CPU::pollPause() -> void {
-  if(system.model() == Model::MasterSystem) {
+  if(Model::MasterSystem()) {
     static bool pause = 0;
     bool state = platform->inputPoll(ID::Port::Hardware, ID::Device::MasterSystemControls, 1);
     if(!pause && state) setNMI(1);

@@ -72,7 +72,7 @@ auto VDP::step(uint clocks) -> void {
 }
 
 auto VDP::refresh() -> void {
-  if(system.model() == Model::MasterSystem) {
+  if(Model::MasterSystem()) {
     //center the video output vertically in the viewport
     uint32* screen = buffer;
     if(vlines() == 224) screen += 16 * 256;
@@ -81,7 +81,7 @@ auto VDP::refresh() -> void {
     Emulator::video.refresh(screen, 256 * sizeof(uint32), 256, 240);
   }
 
-  if(system.model() == Model::GameGear) {
+  if(Model::GameGear()) {
     Emulator::video.refresh(buffer + 48 * 256 + 48, 256 * sizeof(uint32), 160, 144);
   }
 }
@@ -107,11 +107,11 @@ auto VDP::power() -> void {
 }
 
 auto VDP::palette(uint5 index) -> uint12 {
-  if(system.model() == Model::MasterSystem) {
+  if(Model::MasterSystem()) {
     return cram[index];
   }
 
-  if(system.model() == Model::GameGear) {
+  if(Model::GameGear()) {
     return cram[index * 2 + 0] << 0 | cram[index * 2 + 1] << 8;
   }
 

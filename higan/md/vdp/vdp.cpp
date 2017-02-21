@@ -42,7 +42,7 @@ auto VDP::main() -> void {
 
 auto VDP::step(uint clocks) -> void {
   while(clocks--) {
-    dmaRun();
+    dma.run();
     Thread::step(1);
     synchronize(cpu);
     synchronize(apu);
@@ -63,6 +63,7 @@ auto VDP::power() -> void {
   window.power();
   planeB.power();
   sprite.power();
+  dma.power();
 }
 
 }

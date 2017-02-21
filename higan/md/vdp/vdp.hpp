@@ -19,10 +19,23 @@ struct VDP : Thread {
   auto writeControlPort(uint16 data) -> void;
 
   //dma.cpp
-  auto dmaRun() -> void;
-  auto dmaLoad() -> void;
-  auto dmaFill() -> void;
-  auto dmaCopy() -> void;
+  struct DMA {
+    auto run() -> void;
+    auto load() -> void;
+    auto fill() -> void;
+    auto copy() -> void;
+
+    auto power() -> void;
+
+    struct IO {
+      uint2   mode;
+      uint22  source;
+      uint16  length;
+      uint8   fill;
+      boolean enable;
+      boolean wait;
+    } io;
+  } dma;
 
   //render.cpp
   auto scanline() -> void;
@@ -119,15 +132,10 @@ private:
   auto screenHeight() const -> uint { return io.overscan ? 240 : 224; }
 
   uint16 vram[32768];
-  uint16 vramExpansion[32768];  //not present in stock Mega Drive hardware
   uint9 cram[64];
   uint10 vsram[40];
 
   struct IO {
-    //internal state
-    boolean dmaFillWait;
-    uint8 dmaFillByte;
-
     //command
     uint6 command;
     uint16 address;
@@ -142,7 +150,6 @@ private:
     //$01  mode register 2
     uint1 videoMode;  //0 = Master System; 1 = Mega Drive
     uint1 overscan;   //0 = 224 lines; 1 = 240 lines
-    uint1 dmaEnable;
     uint1 verticalBlankInterruptEnable;
     uint1 displayEnable;
     uint1 externalVRAM;
@@ -170,13 +177,6 @@ private:
 
     //$0f  data port auto-increment value
     uint8 dataIncrement;
-
-    //$13-$14  DMA length
-    uint16 dmaLength;
-
-    //$15-$17  DMA source
-    uint22 dmaSource;
-    uint2 dmaMode;
   } io;
 
   struct State {

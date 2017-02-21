@@ -53,6 +53,6 @@ auto GameGearInterface::videoColor(uint32 color) -> uint64 {
 }
 
 auto GameGearInterface::load(uint id) -> bool {
-  if(id == ID::GameGear) return system.load(this, Model::GameGear);
+  if(id == ID::GameGear) return system.load(this, System::Model::GameGear);
   return false;
 }

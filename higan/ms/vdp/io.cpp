@@ -51,8 +51,8 @@ auto VDP::data(uint8 data) -> void {
     vram[io.address++] = data;
   } else {
     uint mask = 0;
-    if(system.model() == Model::MasterSystem) mask = 0x1f;
-    if(system.model() == Model::GameGear) mask = 0x3f;
+    if(Model::MasterSystem()) mask = 0x1f;
+    if(Model::GameGear()) mask = 0x3f;
     cram[io.address++ & mask] = data;
   }
 }

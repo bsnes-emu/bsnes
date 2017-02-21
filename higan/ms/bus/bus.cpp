@@ -19,7 +19,7 @@ auto Bus::in(uint8 addr) -> uint8 {
   switch(addr >> 6) {
 
   case 0: {
-    if(system.model() == Model::GameGear) {
+    if(Model::GameGear()) {
       bool start = !platform->inputPoll(ID::Port::Hardware, ID::Device::GameGearControls, 6);
       return start << 7 | 0x7f;
     }
@@ -36,7 +36,7 @@ auto Bus::in(uint8 addr) -> uint8 {
   }
 
   case 3: {
-    if(system.model() == Model::MasterSystem) {
+    if(Model::MasterSystem()) {
       bool reset = !platform->inputPoll(ID::Port::Hardware, ID::Device::MasterSystemControls, 0);
       auto port1 = peripherals.controllerPort1->readData();
       auto port2 = peripherals.controllerPort2->readData();
@@ -46,7 +46,8 @@ auto Bus::in(uint8 addr) -> uint8 {
         return port2.bits(2,5) << 0 | reset << 4 | 1 << 5 | port1.bit(6) << 6 | port2.bit(6) << 7;
       }
     }
-    if(system.model() == Model::GameGear) {
+
+    if(Model::GameGear()) {
       bool up    = !platform->inputPoll(ID::Port::Hardware, ID::Device::GameGearControls, 0);
       bool down  = !platform->inputPoll(ID::Port::Hardware, ID::Device::GameGearControls, 1);
       bool left  = !platform->inputPoll(ID::Port::Hardware, ID::Device::GameGearControls, 2);
@@ -61,6 +62,7 @@ auto Bus::in(uint8 addr) -> uint8 {
         return 0xff;
       }
     }
+
     return 0xff;
   }
 
@@ -70,7 +72,15 @@ auto Bus::in(uint8 addr) -> uint8 {
 }
 
 auto Bus::out(uint8 addr, uint8 data) -> void {
+  if(addr == 0x06) {
+    if(Model::GameGear()) return psg.balance(data);
+  }
+
   switch(addr >> 6) {
+
+  case 1: {
+    return psg.write(data);
+  }
 
   case 2: {
     return !addr.bit(0) ? vdp.data(data) : vdp.control(data);
