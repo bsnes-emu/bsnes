@@ -315,13 +315,20 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     gb->stat_interrupt_line = false;
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
-        /* LCD is disabled, do nothing */
+        /* LCD is disabled, state is constant */
         
         /* When the LCD is off, LY is 0 and STAT mode is 0.
            Todo: Verify the LY=LYC flag should be on. */
         gb->io_registers[GB_IO_LY] = 0;
         gb->io_registers[GB_IO_STAT] &= ~3;
         gb->io_registers[GB_IO_STAT] |= 4;
+        if (gb->hdma_on_hblank) {
+            gb->hdma_on_hblank = false;
+            gb->hdma_on = false;
+            
+            /* Todo: is this correct? */
+            gb->hdma_steps_left = 0xff;
+        }
         
         /* Keep sending vblanks to user even if the screen is off */
         gb->display_cycles += cycles;
