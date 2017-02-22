@@ -8,6 +8,7 @@ namespace Processor {
 #include "memory.cpp"
 #include "instruction.cpp"
 #include "instructions.cpp"
+#include "serialization.cpp"
 
 auto Z80::power() -> void {
   memory::fill(&r, sizeof(Registers));

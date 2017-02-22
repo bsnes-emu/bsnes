@@ -1,7 +1,3 @@
-//note: tone is supposed to reload counters on volume writes
-//however, if this is always done, the output is very grainy
-//as such, this behavior is suppressed when pitch >= 2 (which is a hack)
-
 auto PSG::write(uint8 data) -> void {
   bool l = data.bit(7);
   if(l) select = data.bits(4,6);
@@ -16,10 +12,6 @@ auto PSG::write(uint8 data) -> void {
 
   case 1: {
     tone0.volume = data.bits(0,3);
-    if(tone0.pitch < 2) {
-      tone0.output = 1;
-      tone0.counter = tone0.pitch;
-    }
     break;
   }
 
@@ -31,10 +23,6 @@ auto PSG::write(uint8 data) -> void {
 
   case 3: {
     tone1.volume = data.bits(0,3);
-    if(tone1.pitch < 2) {
-      tone1.output = 1;
-      tone1.counter = tone1.pitch;
-    }
     break;
   }
 
@@ -46,10 +34,6 @@ auto PSG::write(uint8 data) -> void {
 
   case 5: {
     tone2.volume = data.bits(0,3);
-    if(tone2.pitch < 2) {
-      tone2.output = 1;
-      tone2.counter = tone2.pitch;
-    }
     break;
   }
 
@@ -62,7 +46,6 @@ auto PSG::write(uint8 data) -> void {
 
   case 7: {
     noise.volume = data.bits(0,3);
-    noise.output = 1;
     break;
   }
 

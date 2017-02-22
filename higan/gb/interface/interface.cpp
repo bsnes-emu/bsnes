@@ -8,9 +8,6 @@ Settings settings;
 #include "game-boy-color.cpp"
 
 Interface::Interface() {
-  information.capability.states = true;
-  information.capability.cheats = true;
-
   Port hardwarePort{ID::Port::Hardware, "Hardware"};
 
   { Device device{ID::Device::Controls, "Controls"};

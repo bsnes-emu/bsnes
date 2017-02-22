@@ -9,9 +9,6 @@ Interface::Interface() {
   information.name         = "Mega Drive";
   information.overscan     = true;
 
-  information.capability.states = false;
-  information.capability.cheats = false;
-
   regions.append({"Autodetect"});
   regions.append({"NTSC-J"});
   regions.append({"NTSC-U"});

@@ -6,6 +6,7 @@
 #include <emulator/emulator.hpp>
 #include <emulator/thread.hpp>
 #include <emulator/scheduler.hpp>
+#include <emulator/cheat.hpp>
 
 #include <processor/z80/z80.hpp>
 
@@ -13,8 +14,9 @@ namespace MasterSystem {
   #define platform Emulator::platform
   namespace File = Emulator::File;
   using Scheduler = Emulator::Scheduler;
+  using Cheat = Emulator::Cheat;
   extern Scheduler scheduler;
-  struct Interface;
+  extern Cheat cheat;
 
   struct Thread : Emulator::Thread {
     auto create(auto (*entrypoint)() -> void, double frequency) -> void {

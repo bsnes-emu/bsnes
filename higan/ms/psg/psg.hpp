@@ -13,11 +13,17 @@ struct PSG : Thread {
   auto write(uint8 data) -> void;
   auto balance(uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   struct Tone {
     //tone.cpp
     auto run() -> void;
     auto power() -> void;
+
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
 
     uint4  volume;
     uint10 counter;
@@ -33,6 +39,9 @@ private:
     //noise.cpp
     auto run() -> void;
     auto power() -> void;
+
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
 
     uint4   volume;
     uint6   counter;

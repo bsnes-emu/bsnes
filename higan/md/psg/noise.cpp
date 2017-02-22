@@ -23,7 +23,4 @@ auto PSG::Noise::power() -> void {
   lfsr = 0x8000;
   clock = 0;
   output = 0;
-
-  left = 1;
-  right = 1;
 }

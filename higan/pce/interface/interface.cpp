@@ -10,9 +10,6 @@ Settings settings;
 Interface::Interface() {
   information.overscan = true;
 
-  information.capability.states = true;
-  information.capability.cheats = true;
-
   Port controllerPort{ID::Port::Controller, "Controller Port"};
 
   { Device device{ID::Device::None, "None"};

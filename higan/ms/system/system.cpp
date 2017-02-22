@@ -2,15 +2,23 @@
 
 namespace MasterSystem {
 
-#include "peripherals.cpp"
 System system;
 Scheduler scheduler;
+Cheat cheat;
+#include "peripherals.cpp"
+#include "serialization.cpp"
 
 auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) {
     cpu.pollPause();
     vdp.refresh();
   }
+}
+
+auto System::runToSave() -> void {
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(vdp);
+  scheduler.synchronize(psg);
 }
 
 auto System::load(Emulator::Interface* interface, Model model) -> bool {
@@ -24,6 +32,7 @@ auto System::load(Emulator::Interface* interface, Model model) -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  serializeInit();
   this->interface = interface;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   return information.loaded = true;

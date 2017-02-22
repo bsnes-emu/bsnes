@@ -3,6 +3,7 @@
 namespace MasterSystem {
 
 CPU cpu;
+#include "serialization.cpp"
 
 auto CPU::Enter() -> void {
   while(true) scheduler.synchronize(), cpu.main();
@@ -48,13 +49,16 @@ auto CPU::setINT(bool value) -> void {
 }
 
 auto CPU::power() -> void {
-  Z80::bus = &MasterSystem::bus;
   Z80::power();
   create(CPU::Enter, system.colorburst());
 
   r.pc = 0x0000;  //reset vector address
 
   memory::fill(&state, sizeof(State));
+}
+
+CPU::CPU() {
+  Z80::bus = &MasterSystem::bus;
 }
 
 }

@@ -6,6 +6,7 @@ PSG psg;
 #include "io.cpp"
 #include "tone.cpp"
 #include "noise.cpp"
+#include "serialization.cpp"
 
 auto PSG::Enter() -> void {
   while(true) scheduler.synchronize(), psg.main();
@@ -25,7 +26,7 @@ auto PSG::main() -> void {
 
   lowpassLeft += (left - lowpassLeft) * 20.0 / 256.0;
   left = left * 2.0 / 6.0 + lowpassLeft * 3.0 / 4.0;
-  left = sclamp<16>(left);
+  left = sclamp<16>(left - 32768);
 
   int right = 0;
   if(tone0.output && tone0.right) right += levels[tone0.volume];
@@ -35,10 +36,10 @@ auto PSG::main() -> void {
 
   lowpassRight += (right - lowpassRight) * 20.0 / 256.0;
   right = right * 2.0 / 6.0 + lowpassRight * 3.0 / 4.0;
-  right = sclamp<16>(right);
+  right = sclamp<16>(right - 32768);
 
-  step(1);
   stream->sample(left / 32768.0, right / 32768.0);
+  step(1);
 }
 
 auto PSG::step(uint clocks) -> void {

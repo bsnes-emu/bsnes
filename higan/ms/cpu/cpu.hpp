@@ -11,12 +11,17 @@ struct CPU : Processor::Z80, Thread {
 
   auto power() -> void;
 
+  CPU();
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   vector<Thread*> peripherals;
 
 private:
   struct State {
-    boolean nmiLine;
-    boolean intLine;
+    bool nmiLine;
+    bool intLine;
   } state;
 };
 

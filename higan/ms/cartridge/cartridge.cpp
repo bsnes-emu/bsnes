@@ -4,6 +4,7 @@ namespace MasterSystem {
 
 Cartridge cartridge;
 #include "mapper.cpp"
+#include "serialization.cpp"
 
 auto Cartridge::load() -> bool {
   information = {};

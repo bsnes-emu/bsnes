@@ -7,8 +7,6 @@ Settings settings;
 #include "game-gear.cpp"
 
 Interface::Interface() {
-  information.capability.states = false;
-  information.capability.cheats = false;
 }
 
 auto Interface::manifest() -> string {
@@ -49,11 +47,16 @@ auto Interface::run() -> void {
 }
 
 auto Interface::serialize() -> serializer {
-  return {};
+  system.runToSave();
+  return system.serialize();
 }
 
 auto Interface::unserialize(serializer& s) -> bool {
-  return false;
+  return system.unserialize(s);
+}
+
+auto Interface::cheatSet(const string_vector& list) -> void {
+  cheat.assign(list);
 }
 
 auto Interface::cap(const string& name) -> bool {

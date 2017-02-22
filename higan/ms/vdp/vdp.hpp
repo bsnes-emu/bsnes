@@ -28,6 +28,9 @@ struct VDP : Thread {
 
     auto power() -> void;
 
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
+
     struct State {
       uint x;
       uint y;
@@ -47,6 +50,9 @@ struct VDP : Thread {
 
     auto power() -> void;
 
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
+
     struct Object {
       uint8 x;
       uint8 y;
@@ -64,6 +70,9 @@ struct VDP : Thread {
 
     array<Object, 8> objects;
   } sprite;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
 
 private:
   auto palette(uint5 index) -> uint12;

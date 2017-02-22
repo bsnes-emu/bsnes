@@ -14,6 +14,9 @@ struct Cartridge {
   auto read(uint16 addr) -> maybe<uint8>;
   auto write(uint16 addr, uint8 data) -> bool;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   struct Information {
     uint pathID = 0;

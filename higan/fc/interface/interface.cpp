@@ -9,9 +9,6 @@ Interface::Interface() {
   information.name         = "Famicom";
   information.overscan     = true;
 
-  information.capability.states = true;
-  information.capability.cheats = true;
-
   media.append({ID::Famicom, "Famicom", "fc"});
 
   Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
