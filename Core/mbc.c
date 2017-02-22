@@ -5,7 +5,7 @@
 
 const GB_cartridge_t GB_cart_defs[256] = {
     // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type
-    /* MBC        SUBTYPE          RAM    BAT.   RTC    RUMB.  EXTRA    */
+    /* MBC        SUBTYPE          RAM    BAT.   RTC    RUMB.   */
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 00h  ROM ONLY
     {  GB_MBC1  , GB_STANDARD_MBC, false, false, false, false}, // 01h  MBC1
     {  GB_MBC1  , GB_STANDARD_MBC, true , false, false, false}, // 02h  MBC1+RAM

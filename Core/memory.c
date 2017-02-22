@@ -75,7 +75,9 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
-    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) && gb->cartridge_type->mbc_subtype != GB_CAMERA) return 0xFF;
+    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) &&
+        gb->cartridge_type->mbc_subtype != GB_CAMERA &&
+        gb->cartridge_type->mbc_type != GB_HUC1) return 0xFF;
     
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
