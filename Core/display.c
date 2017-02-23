@@ -366,6 +366,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 }
             }
             ly_for_comparison = gb->io_registers[GB_IO_LY] = 0;
+            
+            /* Reset window rendering state */
+            gb->effective_window_enabled = false;
+            gb->effective_window_y = 0xFF;
             display_vblank(gb);
         }
         
