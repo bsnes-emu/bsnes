@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice, start_is_bad;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -52,12 +52,12 @@ static void vblank(GB_gameboy_t *gb)
     if (push_start_a && (frames < test_length - 120 || do_not_stop)) { 
         unsigned combo_length = 40;
         if (start_is_not_first || push_a_twice) combo_length = 60; /* The start item in the menu is not the first, so also push down */
-        else if (a_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
+        else if (a_is_bad || start_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
 
         switch ((push_faster ? frames * 2 :
                  push_slower ? frames / 2 : 
                  push_a_twice? frames / 4:
-                               frames) % combo_length) {
+                 frames) % combo_length + (start_is_bad? 20 : 0) ) {
             case 0:
                 gb->keys[7] = true; // Start down
                 break;
@@ -316,6 +316,7 @@ int main(int argc, char **argv)
                     /* Restarting in Puzzle Boy/Kwirk (Start followed by A) leaks stack. */
                    strcmp((const char *)(gb.rom + 0x134), "KWIRK") == 0 ||
                    strcmp((const char *)(gb.rom + 0x134), "PUZZLE BOY") == 0;
+        start_is_bad = strcmp((const char *)(gb.rom + 0x134), "BLUESALPHA") == 0;
         b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0;
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
