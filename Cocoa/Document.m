@@ -10,6 +10,7 @@
 #include "display.h"
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
+#include "GBWarningPopover.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -40,6 +41,10 @@
     
     NSMutableData *currentPrinterImageData;
     enum {GBAccessoryNone, GBAccessoryPrinter} accessory;
+    
+    bool rom_warning_issued;
+    
+    NSMutableString *capturedOutput;
 }
 
 @property GBAudioClient *audioClient;
@@ -146,7 +151,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
-    [self loadROM];
+    NSString *rom_warnings = [self captureOutputForBlock:^{
+        [self loadROM];
+    }];
+    if (rom_warnings && !rom_warning_issued) {
+        rom_warning_issued = true;
+        [GBWarningPopover popoverWithContents:rom_warnings onWindow:self.mainWindow];
+    }
 }
 
 - (void) vblank
@@ -483,6 +494,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void) log: (const char *) string withAttributes: (GB_log_attributes) attributes
 {
+    NSString *nsstring = @(string); // For ref-counting
+    if (capturedOutput) {
+        [capturedOutput appendString:nsstring];
+        return;
+    }
+    
     if (pendingLogLines > 128) {
         /* The ROM causes so many errors in such a short time, and we can't handle it. */
         tooMuchLogs = true;
@@ -493,7 +510,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     /* Make sure mouse is not hidden while debugging */
     self.view.mouseHidingEnabled = NO;
 
-    NSString *nsstring = @(string); // For ref-counting
     dispatch_async(dispatch_get_main_queue(), ^{
         [hex_controller reloadData];
         [self reloadVRAMData: nil];
@@ -585,25 +601,30 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (IBAction)saveState:(id)sender
 {
-    bool was_running = running;
-    if (!gb.debug_stopped) {
-        [self stop];
-    }
-    GB_save_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
-    if (was_running) {
-        [self start];
+    bool __block success = false;
+    [self performAtomicBlock:^{
+        success = GB_save_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]) == 0;
+    }];
+    
+    if (!success) {
+        [GBWarningPopover popoverWithContents:@"Failed to write save state." onWindow:self.mainWindow];
+        NSBeep();
     }
 }
 
 - (IBAction)loadState:(id)sender
 {
-    bool was_running = running;
-    if (!gb.debug_stopped) {
-        [self stop];
-    }
-    GB_load_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
-    if (was_running) {
-        [self start];
+    bool __block success = false;
+    NSString *error =
+    [self captureOutputForBlock:^{
+        success = GB_load_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]) == 0;
+    }];
+    
+    if (!success) {
+        if (error) {
+            [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];
+        }
+        NSBeep();
     }
 }
 
@@ -640,6 +661,15 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (was_running) {
         [self start];
     }
+}
+
+- (NSString *) captureOutputForBlock: (void (^)())block
+{
+    capturedOutput = [[NSMutableString alloc] init];
+    [self performAtomicBlock:block];
+    NSString *ret = [capturedOutput stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    capturedOutput = nil;
+    return [ret length]? ret : nil;
 }
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale
@@ -754,29 +784,31 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (IBAction)hexGoTo:(id)sender
 {
-    [self performAtomicBlock:^{
+    NSString *error = [self captureOutputForBlock:^{
         uint16_t addr;
         if (GB_debugger_evaluate(&gb, [[sender stringValue] UTF8String], &addr, NULL)) {
-            NSBeep();
             return;
         }
         addr -= lineRep.valueOffset;
         if (addr >= hex_controller.byteArray.length) {
-            NSBeep();
+            GB_log(&gb, "Value $%04x is out of range.\n", addr);
             return;
         }
         [hex_controller setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(addr, 0)]]];
         [hex_controller _ensureVisibilityOfLocation:addr];
         [self.memoryWindow makeFirstResponder:self.memoryView.subviews[0].subviews[0]];
     }];
+    if (error) {
+        NSBeep();
+        [GBWarningPopover popoverWithContents:error onView:sender];
+    }
 }
 
 - (IBAction)hexUpdateBank:(NSControl *)sender
 {
-    [self performAtomicBlock:^{
+    NSString *error = [self captureOutputForBlock:^{
         uint16_t addr, bank;
         if (GB_debugger_evaluate(&gb, [[sender stringValue] UTF8String], &addr, &bank)) {
-            NSBeep();
             return;
         }
 
@@ -808,6 +840,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:bank];
         [hex_controller reloadData];
     }];
+    
+    if (error) {
+        NSBeep();
+        [GBWarningPopover popoverWithContents:error onView:sender];
+    }
 }
 
 - (IBAction)hexUpdateSpace:(NSPopUpButtonCell *)sender

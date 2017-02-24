@@ -153,9 +153,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     Misc/registers.sym \
                     $(BIN)/SameBoy.app/Contents/Resources/dmg_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/cgb_boot.bin \
-                    $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/Document.nib \
-                    $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/MainMenu.nib \
-                    $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/Preferences.nib \
+                    $(patsubst %.xib,%.nib,$(addprefix $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/,$(shell cd Cocoa;ls *.xib))) \
                     $(BIN)/SameBoy.qlgenerator \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
