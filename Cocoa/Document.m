@@ -110,7 +110,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     volatile bool stopping;
     NSConditionLock *has_debugger_input;
     NSMutableArray *debugger_input_queue;
-    volatile bool is_inited;
 }
 
 - (instancetype)init {
@@ -118,12 +117,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (self) {
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
         debugger_input_queue = [[NSMutableArray alloc] init];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
-            [self initDMG];
-        }
-        else {
-            [self initCGB];
-        }
     }
     return self;
 }
@@ -131,15 +124,15 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) initDMG
 {
     GB_init(&gb);
-    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
     [self initCommon];
+    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
 }
 
 - (void) initCGB
 {
     GB_init_cgb(&gb);
-    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
     [self initCommon];
+    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
 
 }
 
@@ -153,6 +146,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
+    [self loadROM];
 }
 
 - (void) vblank
@@ -213,7 +207,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     bool was_cgb = gb.is_cgb;
     [self stop];
-    is_inited = false;
 
     /* Back up user's breakpoints/watchpoints */
     typeof(gb.breakpoints) breakpoints = gb.breakpoints;
@@ -301,6 +294,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [titleView addSubview: self.feedSaveButton];
     self.feedSaveButton.frame = (NSRect){{268, 2}, {48, 17}};
     
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
+        [self initDMG];
+    }
+    else {
+        [self initCGB];
+    }
+    
     [self start];
 
 }
@@ -364,15 +364,15 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)type
 {
-    if (is_inited++) {
-        return YES;
-    }
-    GB_load_rom(&gb, [fileName UTF8String]);
-    GB_load_battery(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
-    GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
-    GB_debugger_load_symbol_file(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
-
     return YES;
+}
+
+- (void) loadROM
+{
+    GB_load_rom(&gb, [self.fileName UTF8String]);
+    GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
+    GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
 }
 
 - (void)close
@@ -619,19 +619,19 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (uint8_t) readMemory:(uint16_t)addr
 {
-    while (!is_inited);
+    while (!GB_is_inited(&gb));
     return GB_read_memory(&gb, addr);
 }
 
 - (void) writeMemory:(uint16_t)addr value:(uint8_t)value
 {
-    while (!is_inited);
+    while (!GB_is_inited(&gb));
     GB_write_memory(&gb, addr, value);
 }
 
 - (void) performAtomicBlock: (void (^)())block
 {
-    while (!is_inited);
+    while (!GB_is_inited(&gb));
     bool was_running = running && !gb.debug_stopped;
     if (was_running) {
         [self stop];

@@ -216,7 +216,7 @@ typedef struct GB_gameboy_s {
         /* The magic makes sure a state file is:
             - Indeed a SameBoy state file.
             - Has the same endianess has the current platform. */
-        uint32_t magic;
+        volatile uint32_t magic;
         /* The version field makes sure we don't load save state files with a completely different structure.
            This happens when struct fields are removed/resized in an backward incompatible manner. */
         uint32_t version;
@@ -518,4 +518,9 @@ uint8_t GB_serial_get_data(GB_gameboy_t *gb);
 void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
 
 void GB_disconnect_serial(GB_gameboy_t *gb);
+
+static inline bool GB_is_inited(GB_gameboy_t *gb)
+{
+    return gb->magic == 'SAME';
+}
 #endif /* GB_h */

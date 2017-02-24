@@ -92,7 +92,6 @@ static char *default_async_input_callback(GB_gameboy_t *gb)
 void GB_init(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
-    gb->magic = (uintptr_t)'SAME';
     gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000);
     memset(gb->ram, 0, gb->ram_size);
@@ -115,12 +114,12 @@ void GB_init(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->io_registers[GB_IO_SC] = 0x7E;
+    gb->magic = (uintptr_t)'SAME';
 }
 
 void GB_init_cgb(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
-    gb->magic = (uintptr_t)'SAME';
     gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000 * 8);
     memset(gb->ram, 0, gb->ram_size);
@@ -140,10 +139,12 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->io_registers[GB_IO_SC] = 0x7C;
+    gb->magic = 'SAME';
 }
 
 void GB_free(GB_gameboy_t *gb)
 {
+    gb->magic = 0;
     if (gb->ram) {
         free(gb->ram);
     }
@@ -174,6 +175,7 @@ void GB_free(GB_gameboy_t *gb)
             gb->reversed_symbol_map.buckets[i] = next;
         }
     }
+    memset(gb, 0, sizeof(*gb));
 }
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
