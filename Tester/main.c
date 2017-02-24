@@ -88,7 +88,8 @@ static void vblank(GB_gameboy_t *gb)
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {
         if (gb->backtrace_size >= 0x200 || (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80)) {
-            GB_log(gb, "A stack overflow has probably occurred.\n");
+            GB_log(gb, "A stack overflow has probably occurred. (SP = $%04x; backtrace size = %d) \n",
+                   gb->registers[GB_REGISTER_SP], gb->backtrace_size);
             frames = test_length - 1;
         }
         if (gb->halted && !gb->interrupt_enable) {
