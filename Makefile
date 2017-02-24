@@ -34,6 +34,12 @@ else
 MKDIR := mkdir
 endif
 
+ifeq ($(CONF),native_release)
+override CONF := release
+LDFLAGS += -march=native -mtune=native
+CFLAGS += -march=native -mtune=native
+endif
+
 # Set compilation and linkage flags based on target, platform and configuration
 
 CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
@@ -70,7 +76,7 @@ LDFLAGS += -flto
 CFLAGS += -flto
 endif
 else
-$(error Invalid value for CONF: $(CONF). Use "debug" or "release")
+$(error Invalid value for CONF: $(CONF). Use "debug", "release" or "native_release")
 endif
 
 # Define our targets
