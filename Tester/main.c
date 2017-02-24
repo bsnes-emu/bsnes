@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice, start_is_bad;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -87,7 +87,7 @@ static void vblank(GB_gameboy_t *gb)
     
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {
-        if (gb->backtrace_size >= 0x200 || (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80)) {
+        if (gb->backtrace_size >= 0x200 || (!allow_weird_sp_values && (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80))) {
             GB_log(gb, "A stack overflow has probably occurred. (SP = $%04x; backtrace size = %d) \n",
                    gb->registers[GB_REGISTER_SP], gb->backtrace_size);
             frames = test_length - 1;
@@ -322,6 +322,9 @@ int main(int argc, char **argv)
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
+        
+        /* This game temporarily sets SP to OAM RAM */
+        allow_weird_sp_values = strcmp((const char *)(gb.rom + 0x134), "WDL:TT") == 0;
         
         /* Pressing start while in the map in Tsuri Sensi will leak an internal screen-stack which
            will eventually overflow, override an array of jump-table indexes, jump to a random
