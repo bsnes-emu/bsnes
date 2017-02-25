@@ -20,7 +20,8 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower,
+            do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values, large_stack, push_right;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -59,10 +60,10 @@ static void vblank(GB_gameboy_t *gb)
                  push_a_twice? frames / 4:
                  frames) % combo_length + (start_is_bad? 20 : 0) ) {
             case 0:
-                gb->keys[7] = true; // Start down
+                gb->keys[push_right? 0 : 7] = true; // Start (Or right) down
                 break;
             case 10:
-                gb->keys[7] = false; // Start up
+                gb->keys[push_right? 0 : 7] = false; // Start (Or right) up
                 break;
             case 20:
                 gb->keys[b_is_confirm? 5: 4] = true; // A down (or B)
@@ -87,7 +88,7 @@ static void vblank(GB_gameboy_t *gb)
     
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {
-        if (gb->backtrace_size >= 0x200 || (!allow_weird_sp_values && (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80))) {
+        if (gb->backtrace_size >= 0x200 + (large_stack? 0x80: 0) || (!allow_weird_sp_values && (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80))) {
             GB_log(gb, "A stack overflow has probably occurred. (SP = $%04x; backtrace size = %d) \n",
                    gb->registers[GB_REGISTER_SP], gb->backtrace_size);
             frames = test_length - 1;
@@ -322,10 +323,15 @@ int main(int argc, char **argv)
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
+        push_right = memcmp((const char *)(gb.rom + 0x134), "BOB ET BOB", strlen("BOB ET BOB")) == 0;
+
         
         /* This game temporarily sets SP to OAM RAM */
         allow_weird_sp_values = strcmp((const char *)(gb.rom + 0x134), "WDL:TT") == 0;
         
+        /* This game uses some recursive algorithms and therefore requires quite a large call stack */
+        large_stack = memcmp((const char *)(gb.rom + 0x134), "MICRO EPAK1BM", strlen("MICRO EPAK1BM")) == 0;
+
         /* Pressing start while in the map in Tsuri Sensi will leak an internal screen-stack which
            will eventually overflow, override an array of jump-table indexes, jump to a random
            address, execute an invalid opcode, and crash. Pressing A twice while slowing down
