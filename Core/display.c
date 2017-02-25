@@ -346,6 +346,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     
     uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
     uint8_t stat_delay = gb->cgb_double_speed? 2 : (gb->cgb_mode? 0 : 4);
+    /* This is correct for DMG. Is it correct for the 3 CGB modes (DMG/single/double)?*/
+    uint8_t scx_delay = ((gb->effective_scx & 7) + atomic_increase - 1) & ~(atomic_increase - 1);
     
     for (; cycles; cycles -= atomic_increase) {
         gb->display_cycles += atomic_increase;
@@ -399,8 +401,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             else if (position_in_line == MODE2_LENGTH + stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 3;
+                gb->effective_scx = gb->io_registers[GB_IO_SCX];
+                gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
             }
-            else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay) {
+            else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 if (gb->hdma_on_hblank) {
                     gb->hdma_on = true;
@@ -566,9 +570,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         if (gb->effective_window_enabled && gb->effective_window_y == 0xFF) {
             gb->effective_window_y = effective_ly;
         }
-
-        gb->effective_scx = gb->io_registers[GB_IO_SCX];
-        gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
         return;
     }
 
