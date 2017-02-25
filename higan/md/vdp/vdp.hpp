@@ -131,9 +131,38 @@ private:
   auto screenWidth() const -> uint { return io.tileWidth ? 320 : 256; }
   auto screenHeight() const -> uint { return io.overscan ? 240 : 224; }
 
-  uint16 vram[32768];
-  uint9 cram[64];
-  uint10 vsram[40];
+  //video RAM
+  struct VRAM {
+    //memory.cpp
+    auto read(uint15 address) const -> uint16;
+    auto write(uint15 address, uint16 data) -> void;
+
+    auto readByte(uint16 address) const -> uint8;
+    auto writeByte(uint16 address, uint8 data) -> void;
+
+  private:
+    uint16 memory[32768];
+  } vram;
+
+  //vertical scroll RAM
+  struct VSRAM {
+    //memory.cpp
+    auto read(uint6 address) const -> uint10;
+    auto write(uint6 address, uint10 data) -> void;
+
+  private:
+    uint10 memory[40];
+  } vsram;
+
+  //color RAM
+  struct CRAM {
+    //memory.cpp
+    auto read(uint6 address) const -> uint9;
+    auto write(uint6 address, uint9 data) -> void;
+
+  private:
+    uint9 memory[64];
+  } cram;
 
   struct IO {
     //command

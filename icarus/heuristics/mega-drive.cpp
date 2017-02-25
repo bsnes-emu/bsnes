@@ -11,6 +11,8 @@ struct MegaDriveCartridge {
 MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size) {
   manifest.append("board\n");
   manifest.append("  rom name=program.rom size=0x", hex(size), "\n");
+  if(size <= 0x200000)
+  manifest.append("  ram name=save.ram size=0x8000\n");
   manifest.append("\n");
   manifest.append("information\n");
   manifest.append("  title: ", Location::prefix(location), "\n");

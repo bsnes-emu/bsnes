@@ -45,7 +45,7 @@ auto VDP::readDataPort() -> uint16 {
   //VRAM read
   if(io.command.bits(0,3) == 0) {
     auto address = io.address.bits(1,15);
-    auto data = vram[address];
+    auto data = vram.read(address);
     io.address += io.dataIncrement;
     return data;
   }
@@ -53,8 +53,7 @@ auto VDP::readDataPort() -> uint16 {
   //VSRAM read
   if(io.command.bits(0,3) == 4) {
     auto address = io.address.bits(1,6);
-    if(address >= 40) return 0x0000;
-    auto data = vsram[address];
+    auto data = vsram.read(address);
     io.address += io.dataIncrement;
     return data;
   }
@@ -62,7 +61,7 @@ auto VDP::readDataPort() -> uint16 {
   //CRAM read
   if(io.command.bits(0,3) == 8) {
     auto address = io.address.bits(1,6);
-    auto data = cram[address];
+    auto data = cram.read(address);
     io.address += io.dataIncrement;
     return data.bits(0,2) << 1 | data.bits(3,5) << 2 | data.bits(6,8) << 3;
   }
@@ -76,17 +75,15 @@ auto VDP::writeDataPort(uint16 data) -> void {
   //DMA VRAM fill
   if(dma.io.wait.lower()) {
     dma.io.fill = data >> 8;
-    return;
+    //falls through to memory write
+    //causes extra transfer to occur on VRAM fill operations
   }
 
   //VRAM write
   if(io.command.bits(0,3) == 1) {
     auto address = io.address.bits(1,15);
     if(io.address.bit(0)) data = data >> 8 | data << 8;
-    vram[address] = data;
-    if(address >= sprite.io.attributeAddress && address < sprite.io.attributeAddress + 320) {
-      sprite.write(address, data);
-    }
+    vram.write(address, data);
     io.address += io.dataIncrement;
     return;
   }
@@ -94,9 +91,8 @@ auto VDP::writeDataPort(uint16 data) -> void {
   //VSRAM write
   if(io.command.bits(0,3) == 5) {
     auto address = io.address.bits(1,6);
-    if(address >= 40) return;
     //data format: ---- --yy yyyy yyyy
-    vsram[address] = data.bits(0,9);
+    vsram.write(address, data.bits(0,9));
     io.address += io.dataIncrement;
     return;
   }
@@ -105,7 +101,7 @@ auto VDP::writeDataPort(uint16 data) -> void {
   if(io.command.bits(0,3) == 3) {
     auto address = io.address.bits(1,6);
     //data format: ---- bbb- ggg- rrr-
-    cram[address] = data.bits(1,3) << 0 | data.bits(5,7) << 3 | data.bits(9,11) << 6;
+    cram.write(address, data.bits(1,3) << 0 | data.bits(5,7) << 3 | data.bits(9,11) << 6);
     io.address += io.dataIncrement;
     return;
   }

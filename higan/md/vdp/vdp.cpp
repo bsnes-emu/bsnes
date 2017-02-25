@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 VDP vdp;
+#include "memory.cpp"
 #include "io.cpp"
 #include "dma.cpp"
 #include "render.cpp"

@@ -29,6 +29,7 @@ auto PSG::write(uint8 data) -> void {
   case 4: {
     if(l) tone2.pitch.bits(0,3) = data.bits(0,3);
     else  tone2.pitch.bits(4,9) = data.bits(0,5);
+    noise.pitch = tone2.pitch;
     break;
   }
 

@@ -1,23 +1,22 @@
 auto PSG::Noise::run() -> void {
-  auto latch = clock;
+  if(--counter) return;
 
-  counter++;
-  if(rate == 0) output ^= !counter.bits(0,3);
-  if(rate == 1) output ^= !counter.bits(0,4);
-  if(rate == 2) output ^= !counter.bits(0,5);
-  if(rate == 3) output ^= psg.tone2.clock;
+  if(rate == 0) counter = 0x10;
+  if(rate == 1) counter = 0x20;
+  if(rate == 2) counter = 0x40;
+  if(rate == 3) counter = pitch;  //shared with tone2
 
-  if(!latch && clock) {
+  if(clock ^= 1) {  //0->1 transition
+    output = lfsr.bit(0);
     auto eor = enable ? ~lfsr >> 3 : 0;
     lfsr = (lfsr ^ eor) << 15 | lfsr >> 1;
   }
-
-  output = lfsr.bit(0);
 }
 
 auto PSG::Noise::power() -> void {
   volume = ~0;
   counter = 0;
+  pitch = 0;
   enable = 0;
   rate = 0;
   lfsr = 0x8000;

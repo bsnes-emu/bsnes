@@ -57,7 +57,7 @@ auto PSG::power() -> void {
   lowpassLeft = 0;
   lowpassRight = 0;
   for(auto n : range(15)) {
-    levels[n] = 0x3fff * pow(2, n * -2.0 / 6.0) + 0.5;
+    levels[n] = 0x2000 * pow(2, n * -2.0 / 6.0) + 0.5;
   }
   levels[15] = 0;
 

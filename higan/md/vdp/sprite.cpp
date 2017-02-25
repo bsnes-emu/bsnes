@@ -72,7 +72,7 @@ auto VDP::Sprite::run(uint x, uint y) -> void {
     uint pixelY = objectY & 7;
     tileAddress += pixelY << 1 | pixelX >> 2;
 
-    uint16 tileData = vdp.vram[tileAddress];
+    uint16 tileData = vdp.vram.read(tileAddress);
     uint4 color = tileData >> (((pixelX & 3) ^ 3) << 2);
     if(color) {
       output.color = o.palette << 4 | color;
