@@ -1,5 +1,5 @@
 auto PSG::Noise::run() -> void {
-  if(--counter) return;
+  if(counter--) return;
 
   if(rate == 0) counter = 0x10;
   if(rate == 1) counter = 0x20;

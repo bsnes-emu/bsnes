@@ -38,6 +38,7 @@ struct VDP : Thread {
   } dma;
 
   //render.cpp
+  auto frame() -> void;
   auto scanline() -> void;
   auto run() -> void;
   auto outputPixel(uint9 color) -> void;
@@ -128,8 +129,9 @@ struct VDP : Thread {
   Sprite sprite;
 
 private:
-  auto screenWidth() const -> uint { return io.tileWidth ? 320 : 256; }
-  auto screenHeight() const -> uint { return io.overscan ? 240 : 224; }
+  auto pixelWidth() const -> uint { return latch.displayWidth ? 4 : 5; }
+  auto screenWidth() const -> uint { return latch.displayWidth ? 320 : 256; }
+  auto screenHeight() const -> uint { return latch.overscan ? 240 : 224; }
 
   //video RAM
   struct VRAM {
@@ -193,7 +195,7 @@ private:
     uint1 externalInterruptEnable;
 
     //$0c  mode register 4
-    uint2 tileWidth;
+    uint2 displayWidth;
     uint2 interlaceMode;
     uint1 shadowHighlightEnable;
     uint1 externalColorEnable;
@@ -208,8 +210,17 @@ private:
     uint8 dataIncrement;
   } io;
 
+  struct Latch {
+    //per-frame
+    uint1 overscan;
+
+    //per-scanline
+    uint2 displayWidth;
+  } latch;
+
   struct State {
     uint32* output = nullptr;
+    uint hcounter;
     uint x;
     uint y;
   } state;

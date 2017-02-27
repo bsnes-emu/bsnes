@@ -63,11 +63,11 @@ template<typename T> struct stringify;
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
 template<typename T> inline auto pad(const T& value, long precision = 0, char padchar = ' ') -> string;
-template<typename T> inline auto hex(T value, long precision = 0, char padchar = '0') -> string;
-template<typename T> inline auto octal(T value, long precision = 0, char padchar = '0') -> string;
-template<typename T> inline auto binary(T value, long precision = 0, char padchar = '0') -> string;
-template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
+inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
 inline auto pointer(uintptr value, long precision = 0) -> string;
+template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
 
 //match.hpp
 inline auto tokenize(const char* s, const char* p) -> bool;

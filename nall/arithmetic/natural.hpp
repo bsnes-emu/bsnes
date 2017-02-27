@@ -343,6 +343,19 @@ inline auto to_vector(Pair value) -> vector<uint8_t> {
   return result;
 }
 
+/*
+inline auto hex(const Pair& value, long precision = 0, char padchar = '0') -> string {
+  string text;
+  if(!upper(value)) {
+    text.append(hex(lower(value)));
+  } else {
+    text.append(hex(upper(value)));
+    text.append(hex(lower(value), TypeBits / 4, '0'));
+  }
+  return pad(text, precision, padchar);
+}
+*/
+
 }
 
 #undef ConcatenateType

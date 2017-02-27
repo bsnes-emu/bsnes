@@ -223,7 +223,7 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //mode register 4
   case 0x0c: {
-    io.tileWidth = data.bit(0) | data.bit(7) << 1;
+    io.displayWidth = data.bit(0) | data.bit(7) << 1;
     io.interlaceMode = data.bits(1,2);
     io.shadowHighlightEnable = data.bit(3);
     io.externalColorEnable = data.bit(4);

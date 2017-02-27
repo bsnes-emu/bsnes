@@ -74,7 +74,7 @@ auto BusCPU::readIO(uint24 addr) -> uint16 {
   case 0xa1000a: return peripherals.controllerPort2->readControl();
   case 0xa1000c: return peripherals.extensionPort->readControl();
 
-  case 0xa11000: return !busAPU.granted();
+  case 0xa11100: return !busAPU.granted();
   }
 
   return 0x0000;

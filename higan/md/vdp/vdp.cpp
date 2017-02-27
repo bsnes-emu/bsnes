@@ -21,9 +21,9 @@ auto VDP::main() -> void {
       cpu.lower(CPU::Interrupt::VerticalBlank);
     }
     cpu.lower(CPU::Interrupt::HorizontalBlank);
-    for(uint x : range(320)) {
+    while(state.hcounter < 1280) {
       run();
-      step(4);
+      step(pixelWidth());
     }
     if(io.horizontalBlankInterruptEnable) {
       cpu.raise(CPU::Interrupt::HorizontalBlank);
@@ -42,6 +42,7 @@ auto VDP::main() -> void {
 }
 
 auto VDP::step(uint clocks) -> void {
+  state.hcounter += clocks;
   while(clocks--) {
     dma.run();
     Thread::step(1);
@@ -58,6 +59,7 @@ auto VDP::power() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 2.0);
 
   memory::fill(&io, sizeof(IO));
+  memory::fill(&latch, sizeof(Latch));
   memory::fill(&state, sizeof(State));
 
   planeA.power();

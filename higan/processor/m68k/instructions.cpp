@@ -1131,7 +1131,7 @@ auto M68K::instructionTAS(EffectiveAddress with) -> void {
 }
 
 auto M68K::instructionTRAP(uint4 vector) -> void {
-  exception(Exception::Trap, vector);
+  exception(Exception::Trap, 32 + vector);
 }
 
 auto M68K::instructionTRAPV() -> void {

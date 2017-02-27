@@ -1,5 +1,5 @@
 auto PSG::Tone::run() -> void {
-  if(--counter) return;
+  if(counter--) return;
 
   counter = pitch;
   output ^= 1;

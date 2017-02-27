@@ -34,6 +34,7 @@ auto PSG::main() -> void {
 auto PSG::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(cpu);
+  synchronize(apu);
 }
 
 auto PSG::power() -> void {
