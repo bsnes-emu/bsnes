@@ -55,10 +55,6 @@ auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
   return {w * m, h * m};
 }
 
-auto Interface::videoFrequency() -> double {
-  return 21477272.0 / (262.0 * 1364.0 - 4.0);
-}
-
 auto Interface::videoColors() -> uint32 {
   return 1 << 9;
 }
@@ -112,10 +108,6 @@ auto Interface::videoColor(uint32 n) -> uint64 {
   uint64 b = uclamp<16>(65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q));
 
   return r << 32 | g << 16 | b << 0;
-}
-
-auto Interface::audioFrequency() -> double {
-  return 21477272.0 / 12.0;
 }
 
 auto Interface::loaded() -> bool {

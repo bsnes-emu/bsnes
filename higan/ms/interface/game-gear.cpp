@@ -32,10 +32,6 @@ auto GameGearInterface::videoSize(uint width, uint height, bool arc) -> VideoSiz
   return {w * m, h * m};
 }
 
-auto GameGearInterface::videoFrequency() -> double {
-  return 60.0;
-}
-
 auto GameGearInterface::videoColors() -> uint32 {
   return 1 << 12;
 }

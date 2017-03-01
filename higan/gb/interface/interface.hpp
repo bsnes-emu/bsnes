@@ -25,9 +25,6 @@ struct Interface : Emulator::Interface {
 
   auto videoSize() -> VideoSize override;
   auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
-  auto videoFrequency() -> double override;
-
-  auto audioFrequency() -> double override;
 
   auto loaded() -> bool override;
   auto sha256() -> string override;

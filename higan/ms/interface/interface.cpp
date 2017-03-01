@@ -17,10 +17,6 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::audioFrequency() -> double {
-  return 44'100.0;  //todo: not correct
-}
-
 auto Interface::loaded() -> bool {
   return system.loaded();
 }

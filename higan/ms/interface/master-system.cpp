@@ -48,10 +48,6 @@ auto MasterSystemInterface::videoSize(uint width, uint height, bool arc) -> Vide
   return {uint(w * a * m), uint(h * m)};
 }
 
-auto MasterSystemInterface::videoFrequency() -> double {
-  return 60.0;
-}
-
 auto MasterSystemInterface::videoColors() -> uint32 {
   return 1 << 6;
 }

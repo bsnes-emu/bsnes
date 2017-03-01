@@ -8,8 +8,7 @@ auto PSG::Noise::run() -> void {
 
   if(clock ^= 1) {  //0->1 transition
     output = lfsr.bit(0);
-    auto eor = enable ? ~lfsr >> 3 : 0;
-    lfsr = (lfsr ^ eor) << 15 | lfsr >> 1;
+    lfsr = (lfsr.bit(0) ^ (lfsr.bit(3) & enable)) << 15 | lfsr >> 1;
   }
 }
 
