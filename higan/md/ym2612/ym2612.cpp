@@ -22,9 +22,9 @@ auto YM2612::main() -> void {
     lfo.divider = 0;
     lfo.clock++;
     for(auto& channel : channels) {
-      for(auto index : range(4)) {
-        channel.updatePhase(index);  //due to vibrato
-        channel.updateLevel(index);  //due to tremolo
+      for(auto& op : channel.operators) {
+        op.updatePhase();  //due to vibrato
+        op.updateLevel();  //due to tremolo
       }
     }
   }
@@ -32,17 +32,13 @@ auto YM2612::main() -> void {
   if(++envelope.divider == 3) {
     envelope.divider = 0;
     envelope.clock++;
-    for(auto& channel : channels) {
-      for(auto index : range(4)) {
-        channel.runPhase(index);
-        channel.runEnvelope(index);
-      }
-    }
-  } else {
-    for(auto& channel : channels) {
-      for(auto index : range(4)) {
-        channel.runPhase(index);
-      }
+  }
+
+  for(auto& channel : channels) {
+    for(auto& op : channel.operators) {
+      op.runPhase();
+      if(envelope.divider) continue;
+      op.runEnvelope();
     }
   }
 
@@ -60,14 +56,14 @@ auto YM2612::sample() -> void {
     const int sumMask = -(1 << 5);
     const int outMask = -(1 << 5);
 
-    auto old = [&](uint n) -> int { return modMask & op[n].prior;  };
-    auto mod = [&](uint n) -> int { return modMask & op[n].output; };
-    auto out = [&](uint n) -> int { return sumMask & op[n].output; };
+    auto old = [&](uint n) -> int { return op[n].prior  & modMask; };
+    auto mod = [&](uint n) -> int { return op[n].output & modMask; };
+    auto out = [&](uint n) -> int { return op[n].output & sumMask; };
 
-    auto wave = [&](uint n, int modulation) -> int {
-      int x = modulation / 2 + op[n].phase.value / 0x400;
+    auto wave = [&](uint n, uint modulation) -> int {
+      int x = (modulation >> 1) + (op[n].phase.value >> 10);
       int y = sine[x & 0x3ff] + op[n].outputLevel;
-      return y < 0x2000 ? pow2[y & 0x1ff] << 2 >> y / 0x200 : 0;
+      return y < 0x2000 ? pow2[y & 0x1ff] << 2 >> (y >> 9) : 0;
     };
 
     int feedback = modMask & op[0].output + op[0].prior >> 9 - channel.feedback;
@@ -142,7 +138,7 @@ auto YM2612::sample() -> void {
     }
 
     int voiceData = outMask & min(max(accumulator, -0x1ffff), +0x1ffff);
-    if(dac.enable && (&channel == &channels[5])) voiceData = dac.sample - 0x80 << 5;
+    if(dac.enable && (&channel == &channels[5])) voiceData = dac.sample << 6;
 
     if(channel.leftEnable ) left  += voiceData;
     if(channel.rightEnable) right += voiceData;
@@ -178,21 +174,21 @@ auto YM2612::power() -> void {
   timerB.power();
   for(auto& channel : channels) channel.power();
 
-  const int pos = 0;
-  const int neg = 1;
+  const uint positive = 0;
+  const uint negative = 1;
 
   for(int x = 0; x <= 0xff; x++) {
-    int y = int(-256 * log(sin((2 * x + 1) * Math::Pi / 1024)) / log(2) + 0.5);
-    sine[0x000 + x] = pos + (y << 1);
-    sine[0x1ff - x] = pos + (y << 1);
-    sine[0x200 + x] = neg + (y << 1);
-    sine[0x3ff - x] = neg + (y << 1);
+    int y = -256 * log(sin((2 * x + 1) * Math::Pi / 1024)) / log(2) + 0.5;
+    sine[0x000 + x] = positive + (y << 1);
+    sine[0x1ff - x] = positive + (y << 1);
+    sine[0x200 + x] = negative + (y << 1);
+    sine[0x3ff - x] = negative + (y << 1);
   }
 
   for(int y = 0; y <= 0xff; y++) {
-    int z = int(1024 * pow(2, (0xff - y) / 256.0) + 0.5);
-    pow2[pos + (y << 1)] = +z;
-    pow2[neg + (y << 1)] = ~z;  //not -z
+    int z = 1024 * pow(2, (0xff - y) / 256.0) + 0.5;
+    pow2[positive + (y << 1)] = +z;
+    pow2[negative + (y << 1)] = ~z;  //not -z
   }
 }
 

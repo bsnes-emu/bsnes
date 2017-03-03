@@ -1,5 +1,5 @@
 auto YM2612::readStatus() -> uint8 {
-  //d7 = busy
+  //d7 = busy (not emulated, requires cycle timing accuracy)
   return timerA.line << 0 | timerB.line << 1;
 }
 
@@ -52,7 +52,7 @@ auto YM2612::writeData(uint8 data) -> void {
     if(data.bit(5)) timerB.line = 0;
 
     channels[2].mode = data.bits(6,7);
-    for(uint index : range(4)) channels[2].updatePitch(index);
+    for(auto& op : channels[2].operators) op.updatePitch();
 
     break;
   }
@@ -63,12 +63,11 @@ auto YM2612::writeData(uint8 data) -> void {
     uint index = data.bits(0,2);
     if(index == 3 || index == 7) break;
     if(index >= 4) index--;
-    auto& channel = channels[index];
 
-    channel.trigger(0, data.bit(4));
-    channel.trigger(1, data.bit(5));
-    channel.trigger(2, data.bit(6));
-    channel.trigger(3, data.bit(7));
+    channels[index][0].trigger(data.bit(4));
+    channels[index][1].trigger(data.bit(5));
+    channels[index][2].trigger(data.bit(6));
+    channels[index][3].trigger(data.bit(7));
 
     break;
   }
@@ -87,10 +86,9 @@ auto YM2612::writeData(uint8 data) -> void {
 
   }
 
-  if(io.address % 0x100 < 0x30 || io.address % 0x100 >= 0xb8 || io.address % 4 == 3) return;
-
-  uint voice = io.address % 4 + 3 * (io.address >> 8);
-  uint index = (voice * 4 + (io.address >> 3 & 1) + (io.address >> 1 & 2)) % 4;
+  if(io.address.bits(0,1) == 3) return;
+  uint3 voice = io.address.bit(8) * 3 + io.address.bits(0,1);
+  uint2 index = io.address.bits(2,3) >> 1 | io.address.bits(2,3) << 1;  //0,1,2,3 => 0,2,1,3
 
   auto& channel = channels[voice];
   auto& op = channel.operators[index];
@@ -101,14 +99,14 @@ auto YM2612::writeData(uint8 data) -> void {
   case 0x030: {
     op.multiple = data.bits(0,3);
     op.detune = data.bits(4,6);
-    channel.updatePhase(index);
+    channel[index].updatePhase();
     break;
   }
 
   //total level
   case 0x040: {
     op.totalLevel = data.bits(0,6);
-    channel.updateLevel(index);
+    channel[index].updateLevel();
     break;
   }
 
@@ -116,8 +114,8 @@ auto YM2612::writeData(uint8 data) -> void {
   case 0x050: {
     op.envelope.attackRate = data.bits(0,4);
     op.envelope.keyScale = data.bits(6,7);
-    channel.updateEnvelope(index);
-    channel.updatePhase(index);
+    channel[index].updateEnvelope();
+    channel[index].updatePhase();
     break;
   }
 
@@ -125,15 +123,15 @@ auto YM2612::writeData(uint8 data) -> void {
   case 0x060: {
     op.envelope.decayRate = data.bits(0,4);
     op.lfoEnable = data.bit(7);
-    channel.updateEnvelope(index);
-    channel.updateLevel(index);
+    channel[index].updateEnvelope();
+    channel[index].updateLevel();
     break;
   }
 
   //sustain rate
   case 0x070: {
     op.envelope.sustainRate = data.bits(0,4);
-    channel.updateEnvelope(index);
+    channel[index].updateEnvelope();
     break;
   }
 
@@ -141,14 +139,14 @@ auto YM2612::writeData(uint8 data) -> void {
   case 0x080: {
     op.envelope.releaseRate = data.bits(0,3) << 1 | 1;
     op.envelope.sustainLevel = data.bits(4,7);
-    channel.updateEnvelope(index);
+    channel[index].updateEnvelope();
     break;
   }
 
   //SSG-EG
   case 0x090: {
     op.ssg.hold = data.bit(0);
-    op.ssg.pingPong = data.bit(1);
+    op.ssg.alternate = data.bit(1);
     op.ssg.attack = data.bit(2);
     op.ssg.enable = data.bit(3);
     break;
@@ -160,33 +158,37 @@ auto YM2612::writeData(uint8 data) -> void {
 
   //pitch (low)
   case 0x0a0: {
-    channel.operators[0].pitch.value = channel.operators[0].pitch.latch | data;
-    channel.operators[0].octave.value = channel.operators[0].octave.latch;
-    for(auto index : range(4)) channel.updatePitch(index);
+    channel[3].pitch.reload = channel[3].pitch.latch | data;
+    channel[3].octave.reload = channel[3].octave.latch;
+    for(auto index : range(4)) channel[index].updatePitch();
     break;
   }
 
   //pitch (high)
   case 0x0a4: {
-    channel.operators[0].pitch.latch = data << 8;
-    channel.operators[0].octave.latch = data >> 3;
+    channel[3].pitch.latch = data << 8;
+    channel[3].octave.latch = data >> 3;
     break;
   }
 
   //...
   case 0x0a8: {
-    if(voice > 2) break;
-    channels[2].operators[1 + voice].pitch.value = channels[2].operators[1 + voice].pitch.latch | data;
-    channels[2].operators[1 + voice].octave.value = channels[2].operators[1 + voice].octave.latch;
-    channels[2].updatePitch(1 + voice);
+    if(io.address == 0x0a9) voice = 0;
+    if(io.address == 0x0aa) voice = 1;
+    if(io.address == 0x0a8) voice = 2;
+    channels[2][voice].pitch.value = channels[2][voice].pitch.latch | data;
+    channels[2][voice].octave.value = channels[2][voice].octave.latch;
+    channels[2][voice].updatePitch();
     break;
   }
 
   //...
   case 0x0ac: {
-    if(voice > 2) break;
-    channels[2].operators[1 + voice].pitch.latch = data << 8;
-    channels[2].operators[1 + voice].octave.latch = data >> 3;
+    if(io.address == 0x0ad) voice = 0;
+    if(io.address == 0x0ae) voice = 1;
+    if(io.address == 0x0ac) voice = 2;
+    channels[2][voice].pitch.latch = data << 8;
+    channels[2][voice].octave.latch = data >> 3;
     break;
   }
 
@@ -204,8 +206,8 @@ auto YM2612::writeData(uint8 data) -> void {
     channel.rightEnable = data.bit(6);
     channel.leftEnable = data.bit(7);
     for(auto index : range(4)) {
-      channel.updateLevel(index);
-      channel.updatePhase(index);
+      channel[index].updateLevel();
+      channel[index].updatePhase();
     }
     break;
   }

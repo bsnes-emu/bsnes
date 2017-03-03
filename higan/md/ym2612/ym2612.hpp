@@ -66,15 +66,6 @@ private:
 
   struct Channel {
     //channel.cpp
-    auto runEnvelope(uint2 index) -> void;
-    auto runPhase(uint2 index) -> void;
-    auto trigger(uint2 index, bool keyOn) -> void;
-
-    auto updateEnvelope(uint2 index) -> void;
-    auto updatePitch(uint2 index) -> void;
-    auto updatePhase(uint2 index) -> void;
-    auto updateLevel(uint2 index) -> void;
-
     auto power() -> void;
 
     bool  leftEnable;
@@ -88,6 +79,20 @@ private:
     uint2  mode;
 
     struct Operator {
+      Channel& channel;
+      Operator(Channel& channel) : channel(channel) {}
+
+      //channel.cpp
+      auto trigger(bool) -> void;
+
+      auto runEnvelope() -> void;
+      auto runPhase() -> void;
+
+      auto updateEnvelope() -> void;
+      auto updatePitch() -> void;
+      auto updatePhase() -> void;
+      auto updateLevel() -> void;
+
       bool   keyOn;
       bool   lfoEnable;
       uint3  detune;
@@ -117,9 +122,9 @@ private:
 
       struct Envelope {
         uint   state;
-        uint   rate;
-        uint   divider;
-        uint   steps;
+        int    rate;
+        int    divider;
+        uint32 steps;
         uint10 value;
 
         uint2  keyScale;
@@ -133,11 +138,13 @@ private:
       struct SSG {
         bool enable;
         bool attack;
-        bool pingPong;
+        bool alternate;
         bool hold;
         bool invert;
       } ssg;
-    } operators[4];
+    } operators[4]{*this, *this, *this, *this};
+
+    auto operator[](uint2 index) -> Operator& { return operators[index]; }
   } channels[6];
 
   uint16 sine[0x400];

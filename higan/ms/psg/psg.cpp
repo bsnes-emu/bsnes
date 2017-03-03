@@ -24,8 +24,8 @@ auto PSG::main() -> void {
   if(tone2.output && tone2.left) left += levels[tone2.volume];
   if(noise.output && noise.left) left += levels[noise.volume];
 
-  lowpassLeft += (left - lowpassLeft) * 20.0 / 256.0;
-  left = left * 2.0 / 6.0 + lowpassLeft * 3.0 / 4.0;
+  lowpassLeft += (left - lowpassLeft) * 20 / 256;
+  left = left * 2 / 6 + lowpassLeft * 3 / 4;
   left = sclamp<16>(left - 32768);
 
   int right = 0;
@@ -34,8 +34,8 @@ auto PSG::main() -> void {
   if(tone2.output && tone2.right) right += levels[tone2.volume];
   if(noise.output && noise.right) right += levels[noise.volume];
 
-  lowpassRight += (right - lowpassRight) * 20.0 / 256.0;
-  right = right * 2.0 / 6.0 + lowpassRight * 3.0 / 4.0;
+  lowpassRight += (right - lowpassRight) * 20 / 256;
+  right = right * 2 / 6 + lowpassRight * 3 / 4;
   right = sclamp<16>(right - 32768);
 
   stream->sample(left / 32768.0, right / 32768.0);

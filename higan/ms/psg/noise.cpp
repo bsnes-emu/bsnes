@@ -7,7 +7,7 @@ auto PSG::Noise::run() -> void {
   if(rate == 3) counter = pitch;  //shared with tone2
 
   if(clock ^= 1) {  //0->1 transition
-    output = lfsr.bit(0);
+    output = !lfsr.bit(0);
     lfsr = (lfsr.bit(0) ^ (lfsr.bit(3) & enable)) << 15 | lfsr >> 1;
   }
 }

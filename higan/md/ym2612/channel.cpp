@@ -1,159 +1,137 @@
-auto YM2612::Channel::runEnvelope(uint2 index) -> void {
-  auto& op = operators[index];
+auto YM2612::Channel::Operator::trigger(bool state) -> void {
+  if(keyOn == state) return;  //no change
 
-  int sustain = op.envelope.sustainLevel < 15 ? op.envelope.sustainLevel << 5 : 0x3f0;
-  if(ym2612.envelope.clock & (1 << op.envelope.divider) - 1) return;
-
-  int value = ym2612.envelope.clock >> op.envelope.divider;
-  int step = op.envelope.steps >> ~value % 8 * 4 & 0xf;
-  if(op.ssg.enable) step <<= 2;  //SSG results in a 4x faster envelope
-
-  if(op.envelope.state == Attack) {
-    int next = op.envelope.value + (~uint16(op.envelope.value) * step >> 4) & 0x3ff;
-    if(next <= op.envelope.value) {
-      op.envelope.value = next;
-    } else {
-      op.envelope.value = 0;
-      op.envelope.state = op.envelope.value < sustain ? Decay : Sustain;
-      updateEnvelope(index);
-    }
-  } else if(!op.ssg.enable || op.envelope.value < 0x200) {
-    op.envelope.value = min(op.envelope.value + step, 0x3ff);
-    if(op.envelope.state == Decay && op.envelope.value >= sustain) {
-      op.envelope.state = Sustain;
-      updateEnvelope(index);
-    }
-  }
-
-  updateLevel(index);
-}
-
-auto YM2612::Channel::runPhase(uint2 index) -> void {
-  auto& op = operators[index];
-
-  op.phase.value += op.phase.delta;  //advance wave position
-  if(!(op.ssg.enable && op.envelope.value >= 0x200)) return;  //SSG loop check
-
-  if(!op.ssg.hold && !op.ssg.pingPong) op.phase.value = 0;
-
-  if(!op.ssg.hold || op.ssg.attack == op.ssg.invert) op.ssg.invert ^= op.ssg.pingPong;
-
-  if(op.envelope.state == Attack) {
-    //do nothing; SSG is meant to skip the attack phase
-  } else if(op.envelope.state != Release && !op.ssg.hold) {
-    //if still looping, reset the envelope
-    op.envelope.state = Attack;
-    if(op.envelope.attackRate >= 62) {
-      op.envelope.value = 0;
-      op.envelope.state = op.envelope.sustainLevel ? Decay : Sustain;
-    }
-    updateEnvelope(index);
-  } else if(op.envelope.state == Release || (op.ssg.hold && op.ssg.attack == op.ssg.invert)) {
-    //clear envelope once finished
-    op.envelope.value = 0x3ff;
-  }
-  updateLevel(index);
-}
-
-auto YM2612::Channel::trigger(uint2 index, bool keyOn) -> void {
-  auto& op = operators[index];
-  if(op.keyOn == keyOn) return;  //no change
-
-  op.keyOn = keyOn;
-  op.envelope.state = Release;
-  updateEnvelope(index);
+  keyOn = state;
+  envelope.state = Release;
+  updateEnvelope();
 
   if(keyOn) {
     //restart phase and envelope generators
-    op.phase.value = 0;
-    op.envelope.state = Attack;
-    updateEnvelope(index);
+    phase.value = 0;
+    ssg.invert = false;
+    envelope.state = Attack;
+    updateEnvelope();
 
-    if(op.envelope.rate >= 62) {
+    if(envelope.rate >= 62) {
       //skip attack and possibly decay stages
-      op.envelope.value = 0;
-      op.envelope.state = op.envelope.sustainLevel ? Decay : Sustain;
-      updateEnvelope(index);
+      envelope.value = 0;
+      envelope.state = envelope.sustainLevel ? Decay : Sustain;
+      updateEnvelope();
     }
-  } else if(op.ssg.enable && op.ssg.attack != op.ssg.invert) {
+  } else if(ssg.enable && ssg.attack != ssg.invert) {
     //SSG-EG key-off
-    op.envelope.value = 0x200 - op.envelope.value;
+    envelope.value = 0x200 - envelope.value;
   }
 
-  updateLevel(index);
+  updateLevel();
 }
 
-auto YM2612::Channel::updateEnvelope(uint2 index) -> void {
-  auto& op = operators[index];
+auto YM2612::Channel::Operator::runEnvelope() -> void {
+  uint sustain = envelope.sustainLevel < 15 ? envelope.sustainLevel << 5 : 0x3f0;
+  if(ym2612.envelope.clock & (1 << envelope.divider) - 1) return;
 
-  int key = min(max((uint)op.pitch.value, 0x300), 0x4ff);
-  int ksr = op.octave.value * 4 + (key - 0x300) / 0x80;
-  int rate = 0;
+  uint value = ym2612.envelope.clock >> envelope.divider;
+  uint step = envelope.steps >> ((~value & 7) << 2) & 0xf;
+  if(ssg.enable) step <<= 2;  //SSG results in a 4x faster envelope
 
-  if(op.envelope.state == Attack)  rate += (op.envelope.attackRate  << 1);
-  if(op.envelope.state == Decay)   rate += (op.envelope.decayRate   << 1);
-  if(op.envelope.state == Sustain) rate += (op.envelope.sustainRate << 1);
-  if(op.envelope.state == Release) rate += (op.envelope.releaseRate << 1);
+  if(envelope.state == Attack) {
+    uint next = envelope.value + (~uint16(envelope.value) * step >> 4) & 0x3ff;
+    if(next <= envelope.value) {
+      envelope.value = next;
+    } else {
+      envelope.value = 0;
+      envelope.state = envelope.value < sustain ? Decay : Sustain;
+      updateEnvelope();
+    }
+  } else if(!ssg.enable || envelope.value < 0x200) {
+    envelope.value = min(envelope.value + step, 0x3ff);
+    if(envelope.state == Decay && envelope.value >= sustain) {
+      envelope.state = Sustain;
+      updateEnvelope();
+    }
+  }
 
-  rate += (ksr >> 3 - op.envelope.keyScale) * (rate > 0);
+  updateLevel();
+}
+
+auto YM2612::Channel::Operator::runPhase() -> void {
+  phase.value += phase.delta;  //advance wave position
+  if(!(ssg.enable && envelope.value >= 0x200)) return;  //SSG loop check
+
+  if(!ssg.hold && !ssg.alternate) phase.value = 0;
+  if(!ssg.hold || ssg.attack == ssg.invert) ssg.invert ^= ssg.alternate;
+
+  if(envelope.state == Attack) {
+    //do nothing; SSG is meant to skip the attack phase
+  } else if(envelope.state != Release && !ssg.hold) {
+    //if still looping, reset the envelope
+    envelope.state = Attack;
+    if(envelope.attackRate >= 62) {
+      envelope.value = 0;
+      envelope.state = envelope.sustainLevel ? Decay : Sustain;
+    }
+    updateEnvelope();
+  } else if(envelope.state == Release || (ssg.hold && ssg.attack == ssg.invert)) {
+    //clear envelope once finished
+    envelope.value = 0x3ff;
+  }
+
+  updateLevel();
+}
+
+auto YM2612::Channel::Operator::updateEnvelope() -> void {
+  uint key = min(max((uint)pitch.value, 0x300), 0x4ff);
+  uint ksr = (octave.value << 2) + ((key - 0x300) >> 7);
+  uint rate = 0;
+
+  if(envelope.state == Attack)  rate += (envelope.attackRate  << 1);
+  if(envelope.state == Decay)   rate += (envelope.decayRate   << 1);
+  if(envelope.state == Sustain) rate += (envelope.sustainRate << 1);
+  if(envelope.state == Release) rate += (envelope.releaseRate << 1);
+
+  rate += (ksr >> 3 - envelope.keyScale) * (rate > 0);
   rate  = min(rate, 63);
 
   auto& entry = envelopeRates[rate >> 2];
-  op.envelope.rate    = rate;
-  op.envelope.divider = entry.divider;
-  op.envelope.steps   = entry.steps[rate & 3];
+  envelope.rate    = rate;
+  envelope.divider = entry.divider;
+  envelope.steps   = entry.steps[rate & 3];
 }
 
-auto YM2612::Channel::updatePitch(uint2 index) -> void {
-  auto& op = operators[index];
+auto YM2612::Channel::Operator::updatePitch() -> void {
+  //only channel[2] allows per-operator frequencies
+  //implemented by forcing mode to zero (single frequency) for other channels
+  //in single frequency mode, operator[3] frequency is used for all operators
+  pitch.value = channel.mode ? pitch.reload : channel[3].pitch.reload;
+  octave.value = channel.mode ? octave.reload : channel[3].octave.reload;
 
-  op.pitch.value = mode ? op.pitch.reload : operators[0].pitch.reload;
-  op.octave.value = mode ? op.octave.reload : operators[0].octave.reload;
-
-  updatePhase(index);
-  updateEnvelope(index);  //due to key scaling
+  updatePhase();
+  updateEnvelope();  //due to key scaling
 }
 
-auto YM2612::Channel::updatePhase(uint2 index) -> void {
-  auto& op = operators[index];
+auto YM2612::Channel::Operator::updatePhase() -> void {
+  uint key = min(max((uint)pitch.value, 0x300), 0x4ff);
+  uint ksr = (octave.value << 2) + ((key - 0x300) >> 7);
+  uint tuning = detune & 3 ? detunes[(detune & 3) - 1][ksr & 7] >> (3 - (ksr >> 3)) : 0;
 
-  int ratio = op.multiple ? 2 * op.multiple : 1;
+  uint lfo = ym2612.lfo.clock >> 2 & 0x1f;
+  uint pm = 4 * vibratos[channel.vibrato][lfo & 15] * (-lfo >> 4);
+  uint msb = 10;
+  while(msb > 4 && ~pitch.value & 1 << msb) msb--;
 
-  int detune = op.detune & 3;
-  int key = min(max((uint)op.pitch.value, 0x300), 0x4ff);
-  int ksr = op.octave.value * 4 + (key - 0x300) / 0x80;
-  int tuning = detune ? detunes[detune - 1][ksr & 7] >> (3 - (ksr >> 3)) : 0;
-
-  int lfo = ym2612.lfo.clock >> 2 & 0x1f;
-  int pm = 4 * vibratos[vibrato][lfo & 15] * (-lfo >> 4);
-  int msb = 10;
-
-  while(msb > 4 && ~op.pitch.value & 1 << msb) msb--;
-
-  op.phase.delta = op.pitch.value + (pm >> 10 - msb) << 6 >> 7 - op.octave.value;
-
-  if(op.detune < 4) op.phase.delta += tuning;
-  else              op.phase.delta -= tuning;
-
-  op.phase.delta  &= 0x1ffff;
-  op.phase.delta  *= ratio;
-  op.phase.delta >>= 1;
-  op.phase.delta  &= 0xfffff;
+  phase.delta = pitch.value + (pm >> 10 - msb) << 6 >> 7 - octave.value;
+  phase.delta = (!detune.bit(2) ? phase.delta + tuning : phase.delta - tuning) & 0x1ffff;
+  phase.delta = (multiple ? phase.delta * multiple : phase.delta >> 1) & 0xfffff;
 }
 
-auto YM2612::Channel::updateLevel(uint2 index) -> void {
-  auto& op = operators[index];
+auto YM2612::Channel::Operator::updateLevel() -> void {
+  uint lfo = ym2612.lfo.clock & 0x40 ? ym2612.lfo.clock & 0x3f : ~ym2612.lfo.clock & 0x3f;
+  uint depth = tremolos[channel.tremolo];
 
-  int lfo = ym2612.lfo.clock & 0x40 ? ym2612.lfo.clock & 0x3f : ~ym2612.lfo.clock & 0x3f;
-  int depth = tremolos[tremolo];
+  bool invert = ssg.attack != ssg.invert && envelope.state != Release;
+  uint10 value = ssg.enable && invert ? 0x200 - envelope.value : 0 + envelope.value;
 
-  bool invert = op.ssg.attack != op.ssg.invert && op.envelope.state != Release;
-  uint10 envelope = op.ssg.enable && invert ? 0x200 - op.envelope.value : 0 + op.envelope.value;
-
-  op.outputLevel   = op.totalLevel << 3;
-  op.outputLevel  += envelope;
-  op.outputLevel  += (2 * lfo >> depth) * ym2612.lfo.enable;
-  op.outputLevel <<= 2 + 1;  //sign bit
+  outputLevel = ((totalLevel << 3) + value + (lfoEnable ? lfo << 1 >> depth : 0)) << 3;
 }
 
 auto YM2612::Channel::power() -> void {
@@ -204,13 +182,11 @@ auto YM2612::Channel::power() -> void {
 
     op.ssg.enable = false;
     op.ssg.attack = false;
-    op.ssg.pingPong = false;
+    op.ssg.alternate = false;
     op.ssg.hold = false;
     op.ssg.invert = false;
-  }
 
-  for(auto index : range(4)) {
-    updatePitch(index);
-    updateLevel(index);
+    op.updatePitch();
+    op.updateLevel();
   }
 }

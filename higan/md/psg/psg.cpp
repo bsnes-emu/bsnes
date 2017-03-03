@@ -23,8 +23,8 @@ auto PSG::main() -> void {
   if(tone2.output) output += levels[tone2.volume];
   if(noise.output) output += levels[noise.volume];
 
-  lowpass += (output - lowpass) * 20.0 / 256.0;
-  output = output * 2.0 / 6.0 + lowpass * 3.0 / 4.0;
+  lowpass += (output - lowpass) * 20 / 256;
+  output = output * 2 / 6 + lowpass * 3 / 4;
   output = sclamp<16>(output - 32768);
 
   stream->sample(output / 32768.0);

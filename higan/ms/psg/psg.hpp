@@ -1,4 +1,4 @@
-//TI SN76489
+//TI SN76489 (derivative)
 
 struct PSG : Thread {
   shared_pointer<Emulator::Stream> stream;
