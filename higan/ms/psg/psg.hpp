@@ -55,10 +55,8 @@ private:
     uint1   right;
   } noise;
 
-  uint3  select;
-  int    lowpassLeft;
-  int    lowpassRight;
-  uint16 levels[16];
+  uint3 select;
+  int16 levels[16];
 };
 
 extern PSG psg;

@@ -7,8 +7,6 @@ auto PSG::serialize(serializer& s) -> void {
   noise.serialize(s);
 
   s.integer(select);
-  s.integer(lowpassLeft);
-  s.integer(lowpassRight);
   s.array(levels);
 }
 

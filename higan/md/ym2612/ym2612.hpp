@@ -17,49 +17,47 @@ struct YM2612 : Thread {
 
 private:
   struct IO {
-    uint9 address;
+    uint9 address = 0;
   } io;
 
   struct LFO {
-    uint1  enable;
-    uint3  rate;
-    uint32 clock;
-    uint32 divider;
+    uint1  enable = 0;
+    uint3  rate = 0;
+    uint32 clock = 0;
+    uint32 divider = 0;
   } lfo;
 
   struct DAC {
-    uint1 enable;
-    uint8 sample;
+    uint1 enable = 0;
+    uint8 sample = 0;
   } dac;
 
   struct Envelope {
-    uint32 clock;
-    uint32 divider;
+    uint32 clock = 0;
+    uint32 divider = 0;
   } envelope;
 
   struct TimerA {
     //timer.cpp
     auto run() -> void;
-    auto power() -> void;
 
-    uint1  enable;
-    uint1  irq;
-    uint1  line;
-    uint10 period;
-    uint10 counter;
+    uint1  enable = 0;
+    uint1  irq = 0;
+    uint1  line = 0;
+    uint10 period = 0;
+    uint10 counter = 0;
   } timerA;
 
   struct TimerB {
     //timer.cpp
     auto run() -> void;
-    auto power() -> void;
 
-    uint1 enable;
-    uint1 irq;
-    uint1 line;
-    uint8 period;
-    uint8 counter;
-    uint4 divider;
+    uint1 enable = 0;
+    uint1 irq = 0;
+    uint1 line = 0;
+    uint8 period = 0;
+    uint8 counter = 0;
+    uint4 divider = 0;
   } timerB;
 
   enum : uint { Attack, Decay, Sustain, Release };
@@ -68,15 +66,15 @@ private:
     //channel.cpp
     auto power() -> void;
 
-    bool  leftEnable;
-    bool  rightEnable;
+    uint1 leftEnable = 1;
+    uint1 rightEnable = 1;
 
-    uint3 algorithm;
-    uint3 feedback;
-    uint3 vibrato;
-    uint2 tremolo;
+    uint3 algorithm = 0;
+    uint3 feedback = 0;
+    uint3 vibrato = 0;
+    uint2 tremolo = 0;
 
-    uint2  mode;
+    uint2 mode = 0;
 
     struct Operator {
       Channel& channel;
@@ -93,54 +91,54 @@ private:
       auto updatePhase() -> void;
       auto updateLevel() -> void;
 
-      bool   keyOn;
-      bool   lfoEnable;
-      uint3  detune;
-      uint4  multiple;
-      uint7  totalLevel;
+      uint1 keyOn = 0;
+      uint1 lfoEnable = 0;
+      uint3 detune = 0;
+      uint4 multiple = 0;
+      uint7 totalLevel = 0;
 
-      uint16 outputLevel;
-      int16  output;
-      int16  prior;
+      uint16 outputLevel = 0x1fff;
+      int16  output = 0;
+      int16  prior = 0;
 
       struct Pitch {
-        uint11 value;
-        uint11 reload;
-        uint11 latch;
+        uint11 value = 0;
+        uint11 reload = 0;
+        uint11 latch = 0;
       } pitch;
 
       struct Octave {
-        uint3 value;
-        uint3 reload;
-        uint3 latch;
+        uint3 value = 0;
+        uint3 reload = 0;
+        uint3 latch = 0;
       } octave;
 
       struct Phase {
-        uint20 value;
-        uint20 delta;
+        uint20 value = 0;
+        uint20 delta = 0;
       } phase;
 
       struct Envelope {
-        uint   state;
-        int    rate;
-        int    divider;
-        uint32 steps;
-        uint10 value;
+        uint   state = Release;
+        int    rate = 0;
+        int    divider = 11;
+        uint32 steps = 0;
+        uint10 value = 0x3ff;
 
-        uint2  keyScale;
-        uint5  attackRate;
-        uint5  decayRate;
-        uint5  sustainRate;
-        uint4  sustainLevel;
-        uint5  releaseRate;
+        uint2  keyScale = 0;
+        uint5  attackRate = 0;
+        uint5  decayRate = 0;
+        uint5  sustainRate = 0;
+        uint4  sustainLevel = 0;
+        uint5  releaseRate = 1;
       } envelope;
 
       struct SSG {
-        bool enable;
-        bool attack;
-        bool alternate;
-        bool hold;
-        bool invert;
+        uint1 enable = 0;
+        uint1 attack = 0;
+        uint1 alternate = 0;
+        uint1 hold = 0;
+        uint1 invert = 0;
       } ssg;
     } operators[4]{*this, *this, *this, *this};
 
@@ -149,9 +147,6 @@ private:
 
   uint16 sine[0x400];
   int16  pow2[0x200];
-
-  int lpfLeft;
-  int lpfRight;
 
   //constants.cpp
   struct EnvelopeRate {

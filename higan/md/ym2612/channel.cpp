@@ -135,8 +135,8 @@ auto YM2612::Channel::Operator::updateLevel() -> void {
 }
 
 auto YM2612::Channel::power() -> void {
-  leftEnable = true;
-  rightEnable = true;
+  leftEnable = 1;
+  rightEnable = 1;
 
   algorithm = 0;
   feedback = 0;
@@ -146,8 +146,8 @@ auto YM2612::Channel::power() -> void {
   mode = 0;
 
   for(auto& op : operators) {
-    op.keyOn = false;
-    op.lfoEnable = false;
+    op.keyOn = 0;
+    op.lfoEnable = 0;
     op.detune = 0;
     op.multiple = 0;
     op.totalLevel = 0;
@@ -180,11 +180,11 @@ auto YM2612::Channel::power() -> void {
     op.envelope.sustainLevel = 0;
     op.envelope.releaseRate = 1;
 
-    op.ssg.enable = false;
-    op.ssg.attack = false;
-    op.ssg.alternate = false;
-    op.ssg.hold = false;
-    op.ssg.invert = false;
+    op.ssg.enable = 0;
+    op.ssg.attack = 0;
+    op.ssg.alternate = 0;
+    op.ssg.hold = 0;
+    op.ssg.invert = 0;
 
     op.updatePitch();
     op.updateLevel();

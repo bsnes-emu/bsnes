@@ -18,16 +18,12 @@ auto PSG::main() -> void {
   noise.run();
 
   int output = 0;
-  if(tone0.output) output += levels[tone0.volume];
-  if(tone1.output) output += levels[tone1.volume];
-  if(tone2.output) output += levels[tone2.volume];
-  if(noise.output) output += levels[noise.volume];
+  output += levels[tone0.volume] * tone0.output;
+  output += levels[tone1.volume] * tone1.output;
+  output += levels[tone2.volume] * tone2.output;
+  output += levels[noise.volume] * noise.output;
 
-  lowpass += (output - lowpass) * 20 / 256;
-  output = output * 2 / 6 + lowpass * 3 / 4;
-  output = sclamp<16>(output - 32768);
-
-  stream->sample(output / 32768.0);
+  stream->sample(sclamp<16>(output) / 32768.0);
   step(1);
 }
 
@@ -42,9 +38,8 @@ auto PSG::power() -> void {
   stream = Emulator::audio.createStream(1, frequency());
 
   select = 0;
-  lowpass = 0;
   for(auto n : range(15)) {
-    levels[n] = 0x1000 * pow(2, n * -2.0 / 6.0) + 0.5;
+    levels[n] = 0x2000 * pow(2, n * -2.0 / 6.0) + 0.5;
   }
   levels[15] = 0;
 

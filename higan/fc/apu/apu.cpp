@@ -49,15 +49,11 @@ auto APU::main() -> void {
 
   clockFrameCounterDivider();
 
-  int output = pulseDAC[pulse_output] + dmcTriangleNoiseDAC[dmc_output][triangle_output][noise_output];
-
-  output  = filter.runHipassStrong(output);
+  int output = 0;
+  output += pulseDAC[pulse_output];
+  output += dmcTriangleNoiseDAC[dmc_output][triangle_output][noise_output];
   output += cartridgeSample;
-  output  = filter.runHipassWeak(output);
-//output  = filter.runLopass(output);
-  output  = sclamp<16>(output);
-
-  stream->sample(output / 32768.0);
+  stream->sample(sclamp<16>(output) / 32768.0);
 
   tick();
 }
@@ -78,10 +74,6 @@ auto APU::setSample(int16 sample) -> void {
 auto APU::power() -> void {
   create(APU::Enter, system.colorburst() * 6.0);
   stream = Emulator::audio.createStream(1, system.colorburst() / 2.0);
-
-  filter.hipassStrong = 0;
-  filter.hipassWeak = 0;
-  filter.lopass = 0;
 
   pulse[0].power();
   pulse[1].power();
@@ -263,21 +255,6 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
   }
 
   }
-}
-
-auto APU::Filter::runHipassStrong(int sample) -> int {
-  hipassStrong += ((((int64)sample << 16) - (hipassStrong >> 16)) * HiPassStrong) >> 16;
-  return sample - (hipassStrong >> 32);
-}
-
-auto APU::Filter::runHipassWeak(int sample) -> int {
-  hipassWeak += ((((int64)sample << 16) - (hipassWeak >> 16)) * HiPassWeak) >> 16;
-  return sample - (hipassWeak >> 32);
-}
-
-auto APU::Filter::runLopass(int sample) -> int {
-  lopass += ((((int64)sample << 16) - (lopass >> 16)) * LoPass) >> 16;
-  return (lopass >> 32);
 }
 
 auto APU::clockFrameCounter() -> void {

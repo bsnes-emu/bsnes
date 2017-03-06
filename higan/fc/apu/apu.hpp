@@ -16,20 +16,6 @@ struct APU : Thread {
 
   auto serialize(serializer&) -> void;
 
-  struct Filter {
-    auto runHipassStrong(int sample) -> int;
-    auto runHipassWeak(int sample) -> int;
-    auto runLopass(int sample) -> int;
-
-    auto serialize(serializer&) -> void;
-
-    enum : int { HiPassStrong = 225574, HiPassWeak = 57593, LoPass = 86322413 };
-
-    int64 hipassStrong;
-    int64 hipassWeak;
-    int64 lopass;
-  };
-
   struct Envelope {
     auto volume() const -> uint;
     auto clock() -> void;
@@ -174,7 +160,6 @@ struct APU : Thread {
   auto clockFrameCounter() -> void;
   auto clockFrameCounterDivider() -> void;
 
-  Filter filter;
   FrameCounter frame;
 
   uint8 enabledChannels;

@@ -15,23 +15,25 @@ struct Biquad {
     HighShelf,
   };
 
-  inline auto reset(Type type, double cutoff, double quality, double gain = 0.0) -> void;
+  inline auto reset(Type type, double cutoffFrequency, double samplingFrequency, double quality, double gain = 0.0) -> void;
   inline auto process(double in) -> double;  //normalized sample (-1.0 to +1.0)
 
   inline static auto butterworth(uint order, uint phase) -> double;
 
 private:
-  Type type;                  //filter type
-  double cutoff;              //frequency cutoff
+  Type type;
+  double cutoffFrequency;
+  double samplingFrequency;
   double quality;             //frequency response quality
   double gain;                //peak gain
   double a0, a1, a2, b1, b2;  //coefficients
   double z1, z2;              //second-order IIR
 };
 
-auto Biquad::reset(Type type, double cutoff, double quality, double gain) -> void {
+auto Biquad::reset(Type type, double cutoffFrequency, double samplingFrequency, double quality, double gain) -> void {
   this->type = type;
-  this->cutoff = cutoff;
+  this->cutoffFrequency = cutoffFrequency;
+  this->samplingFrequency = samplingFrequency;
   this->quality = quality;
   this->gain = gain;
 
@@ -39,7 +41,7 @@ auto Biquad::reset(Type type, double cutoff, double quality, double gain) -> voi
   z2 = 0.0;
 
   double v = pow(10, fabs(gain) / 20.0);
-  double k = tan(Math::Pi * cutoff);
+  double k = tan(Math::Pi * cutoffFrequency / samplingFrequency);
   double q = quality;
   double n = 0.0;
 

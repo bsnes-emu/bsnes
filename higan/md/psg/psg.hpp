@@ -39,9 +39,8 @@ private:
     uint1  output;
   } noise;
 
-  uint3  select;
-  int    lowpass;
-  uint16 levels[16];
+  uint3 select;
+  int16 levels[16];
 };
 
 extern PSG psg;

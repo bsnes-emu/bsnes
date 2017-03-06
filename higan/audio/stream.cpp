@@ -7,7 +7,7 @@ auto Stream::reset(uint channels_, double inputFrequency, double outputFrequency
       channel.iir.resize(order / 2);
       for(auto phase : range(order / 2)) {
         double q = DSP::IIR::Biquad::butterworth(order, phase);
-        channel.iir[phase].reset(DSP::IIR::Biquad::Type::LowPass, 20000.0 / inputFrequency, q);
+        channel.iir[phase].reset(DSP::IIR::Biquad::Type::LowPass, 20000.0, inputFrequency, q);
       }
     }
 
