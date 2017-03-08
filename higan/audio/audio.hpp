@@ -40,6 +40,9 @@ private:
 struct Stream {
   auto reset(uint channels, double inputFrequency, double outputFrequency) -> void;
 
+  auto addLowPassFilter(double cutoffFrequency, uint passes = 1) -> void;
+  auto addHighPassFilter(double cutoffFrequency, uint passes = 1) -> void;
+
   auto pending() const -> bool;
   auto read(double* samples) -> uint;
   auto write(const double* samples) -> void;
@@ -50,12 +53,13 @@ struct Stream {
   }
 
 private:
-  const uint order = 6;  //Nth-order filter (must be an even number)
   struct Channel {
-    vector<DSP::IIR::Biquad> iir;
+    vector<DSP::IIR::Biquad> filters;
     DSP::Resampler::Cubic resampler;
   };
   vector<Channel> channels;
+  double inputFrequency;
+  double outputFrequency;
 
   friend class Audio;
 };

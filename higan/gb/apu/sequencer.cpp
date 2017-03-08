@@ -3,8 +3,6 @@ auto APU::Sequencer::run() -> void {
     center = 0;
     left   = 0;
     right  = 0;
-
-    centerBias = leftBias = rightBias = 0;
     return;
   }
 
@@ -121,10 +119,6 @@ auto APU::Sequencer::power() -> void {
   center = 0;
   left   = 0;
   right  = 0;
-
-  centerBias = 0;
-  leftBias = 0;
-  rightBias = 0;
 }
 
 auto APU::Sequencer::serialize(serializer& s) -> void {
@@ -145,8 +139,4 @@ auto APU::Sequencer::serialize(serializer& s) -> void {
   s.integer(center);
   s.integer(left);
   s.integer(right);
-
-  s.integer(centerBias);
-  s.integer(leftBias);
-  s.integer(rightBias);
 }

@@ -46,9 +46,10 @@ auto ICD2::unload() -> void {
 }
 
 auto ICD2::power() -> void {
-  auto frequency = system.colorburst() * 6.0;
-  create(ICD2::Enter, frequency / 5);
-  stream = Emulator::audio.createStream(2, frequency / 10);
+  create(ICD2::Enter, system.colorburst() * 6.0 / 5.0);
+  stream = Emulator::audio.createStream(2, frequency() / 2.0);
+  stream->addLowPassFilter(20000.0, 3);
+  stream->addHighPassFilter(20.0, 3);
 
   r6003 = 0x00;
   r6004 = 0xff;

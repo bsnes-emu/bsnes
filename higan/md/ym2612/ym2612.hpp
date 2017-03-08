@@ -15,6 +15,9 @@ struct YM2612 : Thread {
   auto writeAddress(uint9 data) -> void;
   auto writeData(uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
 private:
   struct IO {
     uint9 address = 0;
@@ -66,6 +69,9 @@ private:
     //channel.cpp
     auto power() -> void;
 
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
+
     uint1 leftEnable = 1;
     uint1 rightEnable = 1;
 
@@ -90,6 +96,9 @@ private:
       auto updatePitch() -> void;
       auto updatePhase() -> void;
       auto updateLevel() -> void;
+
+      //serialization.cpp
+      auto serialize(serializer&) -> void;
 
       uint1 keyOn = 0;
       uint1 lfoEnable = 0;

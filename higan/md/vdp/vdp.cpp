@@ -9,6 +9,7 @@ VDP vdp;
 #include "render.cpp"
 #include "background.cpp"
 #include "sprite.cpp"
+#include "serialization.cpp"
 
 auto VDP::Enter() -> void {
   while(true) scheduler.synchronize(), vdp.main();

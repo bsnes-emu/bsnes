@@ -6,6 +6,7 @@ PSG psg;
 #include "io.cpp"
 #include "tone.cpp"
 #include "noise.cpp"
+#include "serialization.cpp"
 
 auto PSG::Enter() -> void {
   while(true) scheduler.synchronize(), psg.main();
@@ -36,6 +37,8 @@ auto PSG::step(uint clocks) -> void {
 auto PSG::power() -> void {
   create(PSG::Enter, system.colorburst() / 16.0);
   stream = Emulator::audio.createStream(1, frequency());
+  stream->addLowPassFilter(20000.0, 3);
+  stream->addHighPassFilter(20.0, 3);
 
   select = 0;
   for(auto n : range(15)) {

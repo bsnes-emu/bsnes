@@ -171,24 +171,24 @@ auto YM2612::writeData(uint8 data) -> void {
     break;
   }
 
-  //...
+  //per-operator pitch (low)
   case 0x0a8: {
-    if(io.address == 0x0a9) voice = 0;
-    if(io.address == 0x0aa) voice = 1;
-    if(io.address == 0x0a8) voice = 2;
-    channels[2][voice].pitch.value = channels[2][voice].pitch.latch | data;
-    channels[2][voice].octave.value = channels[2][voice].octave.latch;
-    channels[2][voice].updatePitch();
+    if(io.address == 0x0a9) index = 0;
+    if(io.address == 0x0aa) index = 1;
+    if(io.address == 0x0a8) index = 2;
+    channels[2][index].pitch.reload = channels[2][index].pitch.latch | data;
+    channels[2][index].octave.reload = channels[2][index].octave.latch;
+    channels[2][index].updatePitch();
     break;
   }
 
-  //...
+  //per-operator pitch (high)
   case 0x0ac: {
-    if(io.address == 0x0ad) voice = 0;
-    if(io.address == 0x0ae) voice = 1;
-    if(io.address == 0x0ac) voice = 2;
-    channels[2][voice].pitch.latch = data << 8;
-    channels[2][voice].octave.latch = data >> 3;
+    if(io.address == 0x0ad) index = 0;
+    if(io.address == 0x0ae) index = 1;
+    if(io.address == 0x0ac) index = 2;
+    channels[2][index].pitch.latch = data << 8;
+    channels[2][index].octave.latch = data >> 3;
     break;
   }
 

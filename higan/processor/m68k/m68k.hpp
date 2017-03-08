@@ -248,6 +248,9 @@ struct M68K {
   template<uint Size> auto instructionTST(EffectiveAddress ea) -> void;
                       auto instructionUNLK(AddressRegister with) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   //disassembler.cpp
   auto disassemble(uint32 pc) -> string;
   auto disassembleRegisters() -> string;

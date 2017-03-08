@@ -19,6 +19,9 @@ struct CPU : Processor::M68K, Thread {
 
   auto power() -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   vector<Thread*> peripherals;
 
 private:

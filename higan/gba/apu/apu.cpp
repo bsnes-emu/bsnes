@@ -74,7 +74,8 @@ auto APU::step(uint clocks) -> void {
 
 auto APU::power() -> void {
   create(APU::Enter, 16'777'216);
-  stream = Emulator::audio.createStream(2, 16'777'216.0 / 512.0);
+  stream = Emulator::audio.createStream(2, frequency() / 512.0);
+  //todo: run sequencer at higher frequency; add low-pass filter
 
   square1.power();
   square2.power();

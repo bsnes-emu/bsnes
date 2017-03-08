@@ -44,6 +44,8 @@ auto PSG::power() -> void {
   //use stereo mode for both; output same sample to both channels for Master System
   create(PSG::Enter, system.colorburst() / 16.0);
   stream = Emulator::audio.createStream(2, frequency());
+  stream->addLowPassFilter(20000.0, 3);
+  stream->addHighPassFilter(20.0, 3);
 
   select = 0;
   for(auto n : range(15)) {

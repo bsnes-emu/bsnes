@@ -3,7 +3,6 @@ struct APU : Thread, MMIO {
 
   static auto Enter() -> void;
   auto main() -> void;
-  auto hipass(int16& sample, int64& bias) -> void;
   auto power() -> void;
 
   auto readIO(uint16 addr) -> uint8;
@@ -163,10 +162,6 @@ struct APU : Thread, MMIO {
     int16 center;
     int16 left;
     int16 right;
-
-    int64 centerBias;
-    int64 leftBias;
-    int64 rightBias;
   } sequencer;
 
   uint3 phase;   //high 3-bits of clock counter

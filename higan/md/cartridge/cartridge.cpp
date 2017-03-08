@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 Cartridge cartridge;
+#include "serialization.cpp"
 
 auto Cartridge::load() -> bool {
   information = {};

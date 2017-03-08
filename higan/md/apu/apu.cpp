@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 APU apu;
+#include "serialization.cpp"
 
 auto APU::Enter() -> void {
   while(true) scheduler.synchronize(), apu.main();

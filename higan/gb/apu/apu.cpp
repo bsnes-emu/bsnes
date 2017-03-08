@@ -21,10 +21,6 @@ auto APU::main() -> void {
   noise.run();
   sequencer.run();
 
-  hipass(sequencer.center, sequencer.centerBias);
-  hipass(sequencer.left, sequencer.leftBias);
-  hipass(sequencer.right, sequencer.rightBias);
-
   if(!Model::SuperGameBoy()) {
     stream->sample(sequencer.left / 32768.0, sequencer.right / 32768.0);
   } else {
@@ -55,15 +51,13 @@ auto APU::main() -> void {
   synchronize(cpu);
 }
 
-//filter to remove DC bias
-auto APU::hipass(int16& sample, int64& bias) -> void {
-  bias += ((((int64)sample << 16) - (bias >> 16)) * 57593) >> 16;
-  sample = sclamp<16>(sample - (bias >> 32));
-}
-
 auto APU::power() -> void {
   create(Enter, 2 * 1024 * 1024);
-  if(!Model::SuperGameBoy()) stream = Emulator::audio.createStream(2, 2 * 1024 * 1024);
+  if(!Model::SuperGameBoy()) {
+    stream = Emulator::audio.createStream(2, frequency());
+    stream->addLowPassFilter(20000.0, 3);
+    stream->addHighPassFilter(20.0, 3);
+  }
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   square1.power();

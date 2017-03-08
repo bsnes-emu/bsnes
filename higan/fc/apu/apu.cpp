@@ -73,7 +73,9 @@ auto APU::setSample(int16 sample) -> void {
 
 auto APU::power() -> void {
   create(APU::Enter, system.colorburst() * 6.0);
-  stream = Emulator::audio.createStream(1, system.colorburst() / 2.0);
+  stream = Emulator::audio.createStream(1, frequency() / 12.0);
+  stream->addLowPassFilter(20000.0, 3);
+  stream->addHighPassFilter(20.0, 3);
 
   pulse[0].power();
   pulse[1].power();

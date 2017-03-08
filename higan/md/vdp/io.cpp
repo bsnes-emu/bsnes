@@ -73,7 +73,8 @@ auto VDP::writeDataPort(uint16 data) -> void {
   io.commandPending = false;
 
   //DMA VRAM fill
-  if(dma.io.wait.lower()) {
+  if(dma.io.wait) {
+    dma.io.wait = false;
     dma.io.fill = data >> 8;
     //falls through to memory write
     //causes extra transfer to occur on VRAM fill operations

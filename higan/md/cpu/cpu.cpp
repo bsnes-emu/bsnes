@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 CPU cpu;
+#include "serialization.cpp"
 
 auto CPU::Enter() -> void {
   cpu.boot();

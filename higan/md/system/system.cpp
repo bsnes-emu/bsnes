@@ -2,12 +2,22 @@
 
 namespace MegaDrive {
 
-#include "peripherals.cpp"
 System system;
 Scheduler scheduler;
+Cheat cheat;
+#include "peripherals.cpp"
+#include "serialization.cpp"
 
 auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) vdp.refresh();
+}
+
+auto System::runToSave() -> void {
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(apu);
+  scheduler.synchronize(vdp);
+  scheduler.synchronize(psg);
+  scheduler.synchronize(ym2612);
 }
 
 auto System::load(Emulator::Interface* interface, maybe<Region> region) -> bool {
@@ -20,6 +30,7 @@ auto System::load(Emulator::Interface* interface, maybe<Region> region) -> bool 
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  serializeInit();
   information.region = Region::NTSCU;
   information.colorburst = Emulator::Constants::Colorburst::NTSC;
   this->interface = interface;

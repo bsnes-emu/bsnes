@@ -4,6 +4,7 @@ namespace MegaDrive {
 
 BusCPU busCPU;
 BusAPU busAPU;
+#include "serialization.cpp"
 
 auto BusCPU::readByte(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.read(addr & ~1).byte(!addr.bit(0));

@@ -12,6 +12,9 @@ struct Cartridge {
   auto read(uint24 addr) -> uint16;
   auto write(uint24 addr, uint16 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct Information {
     uint pathID = 0;
     string sha256;

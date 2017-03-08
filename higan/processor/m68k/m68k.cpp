@@ -12,6 +12,7 @@ enum : bool { Reverse = 1 };
 #include "instructions.cpp"
 #include "disassembler.cpp"
 #include "instruction.cpp"
+#include "serialization.cpp"
 
 auto M68K::power() -> void {
   for(auto& dr : r.d) dr = 0;
