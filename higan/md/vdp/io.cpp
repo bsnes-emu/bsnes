@@ -130,6 +130,7 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
     io.command.bits(2,5) = data.bits(4,7);
     io.address.bits(14,15) = data.bits(0,1);
+    if(!dma.io.enable) io.command.bit(5) = 0;
     if(dma.io.mode == 3) dma.io.wait = false;
     return;
   }

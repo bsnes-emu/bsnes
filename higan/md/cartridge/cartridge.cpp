@@ -66,23 +66,43 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
+  ramEnable = 1;
+  ramWritable = 1;
+  for(auto n : range(8)) bank[n] = n;
 }
 
 auto Cartridge::read(uint24 addr) -> uint16 {
-  if(addr.bit(21) && ram.size) {
+  if(addr.bit(21) && ram.size && ramEnable) {
     uint16 data = ram.data[addr + 0 & ram.mask] << 8;
     return data | ram.data[addr + 1 & ram.mask] << 0;
   } else {
+    addr = bank[addr >> 19 & 7] << 19 | (addr & 0x7ffff);
     uint16 data = rom.data[addr + 0 & rom.mask] << 8;
     return data | rom.data[addr + 1 & rom.mask] << 0;
   }
 }
 
 auto Cartridge::write(uint24 addr, uint16 data) -> void {
-  if(addr.bit(21) && ram.size) {
+  //emulating RAM write protect bit breaks some commercial software
+  if(addr.bit(21) && ram.size && ramEnable /* && ramWritable */) {
     ram.data[addr + 0 & ram.mask] = data >> 8;
     ram.data[addr + 1 & ram.mask] = data >> 0;
   }
+}
+
+auto Cartridge::readIO(uint24 addr) -> uint16 {
+  return 0x0000;
+}
+
+auto Cartridge::writeIO(uint24 addr, uint16 data) -> void {
+  if(addr == 0xa130f1) ramEnable = data.bit(0), ramWritable = data.bit(1);
+  if(addr == 0xa130f3) bank[1] = data;
+  if(addr == 0xa130f5) bank[2] = data;
+  if(addr == 0xa130f7) bank[3] = data;
+  if(addr == 0xa130f9) bank[4] = data;
+  if(addr == 0xa130fb) bank[5] = data;
+  if(addr == 0xa130fd) bank[6] = data;
+  if(addr == 0xa130ff) bank[7] = data;
 }
 
 }

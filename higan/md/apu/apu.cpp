@@ -10,7 +10,9 @@ auto APU::Enter() -> void {
 }
 
 auto APU::main() -> void {
-  if(!state.enabled) return step(1);
+  if(!state.enabled) {
+    return step(1);
+  }
 
   if(state.nmiLine) {
     state.nmiLine = 0;  //edge-sensitive
@@ -39,7 +41,9 @@ auto APU::setINT(bool value) -> void {
 }
 
 auto APU::enable(bool value) -> void {
-  if(state.enabled && !value) power();
+  //68K cannot disable the Z80 without bus access
+  if(!bus->granted() && !value) return;
+  if(state.enabled && !value) reset();
   state.enabled = value;
 }
 
@@ -48,12 +52,12 @@ auto APU::power() -> void {
   Z80::power();
   create(APU::Enter, system.colorburst());
   memory::fill(&state, sizeof(State));
+}
 
-  r.pc = 0x0000;
-  r.im = 0;
-  r.iff1 = 0;
-  r.iff2 = 0;
-  r.ir = {};
+auto APU::reset() -> void {
+  create(APU::Enter, system.colorburst());
+  memory::fill(&r, sizeof(Registers));
+  memory::fill(&state, sizeof(State));
 }
 
 }

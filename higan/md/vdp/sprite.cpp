@@ -38,6 +38,7 @@ auto VDP::Sprite::scanline(uint y) -> void {
 
   uint7 link = 0;
   uint tiles = 0;
+  uint count = 0;
   do {
     auto& object = oam[link];
     link = object.link;
@@ -48,7 +49,7 @@ auto VDP::Sprite::scanline(uint y) -> void {
 
     objects.append(object);
     tiles += object.width >> 3;
-  } while(link && link < 80 && objects.size() < 20 && tiles < 40);
+  } while(link && link < 80 && objects.size() < 20 && tiles < 40 && ++count < 80);
 }
 
 auto VDP::Sprite::run(uint x, uint y) -> void {

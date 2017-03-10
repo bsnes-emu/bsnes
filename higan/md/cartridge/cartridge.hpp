@@ -12,6 +12,9 @@ struct Cartridge {
   auto read(uint24 addr) -> uint16;
   auto write(uint24 addr, uint16 data) -> void;
 
+  auto readIO(uint24 addr) -> uint16;
+  auto writeIO(uint24 addr, uint16 data) -> void;
+
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
@@ -30,6 +33,10 @@ struct Cartridge {
 
   Memory rom;
   Memory ram;
+
+  uint1 ramEnable;
+  uint1 ramWritable;
+  uint6 bank[8];
 };
 
 extern Cartridge cartridge;

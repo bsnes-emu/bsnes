@@ -139,7 +139,7 @@ auto YM2612::sample() -> void {
     }
 
     int voiceData = sclamp<14>(accumulator) & outMask;
-    if(dac.enable && (&channel == &channels[5])) voiceData = dac.sample << 6;
+    if(dac.enable && (&channel == &channels[5])) voiceData = (int)dac.sample - 0x80 << 6;
 
     if(channel.leftEnable ) left  += voiceData;
     if(channel.rightEnable) right += voiceData;

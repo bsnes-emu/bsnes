@@ -18,9 +18,7 @@ auto APU::Enter() -> void {
 }
 
 auto APU::main() -> void {
-  for(auto n : range(64)) {
-    runsequencer();
-  }
+  runsequencer();
 
   int lsample = regs.bias.level - 0x0200;
   int rsample = regs.bias.level - 0x0200;
@@ -64,7 +62,7 @@ auto APU::main() -> void {
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
   stream->sample(sclamp<16>(lsample << 6) / 32768.0, sclamp<16>(rsample << 6) / 32768.0);  //should be <<5; use <<6 for added volume
-  step(512);
+  step(8);
 }
 
 auto APU::step(uint clocks) -> void {
@@ -74,8 +72,9 @@ auto APU::step(uint clocks) -> void {
 
 auto APU::power() -> void {
   create(APU::Enter, 16'777'216);
-  stream = Emulator::audio.createStream(2, frequency() / 512.0);
-  //todo: run sequencer at higher frequency; add low-pass filter
+  stream = Emulator::audio.createStream(2, frequency() / 8.0);
+  stream->addLowPassFilter(20000.0, 3);
+  stream->addHighPassFilter(20.0, 3);
 
   square1.power();
   square2.power();

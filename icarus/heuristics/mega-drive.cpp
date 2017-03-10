@@ -9,10 +9,29 @@ struct MegaDriveCartridge {
 };
 
 MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size) {
+  if(size < 0x200) return;
+
+  uint32_t ramFrom = 0;
+  ramFrom |= data[0x01b4] << 24;
+  ramFrom |= data[0x01b5] << 16;
+  ramFrom |= data[0x01b6] <<  8;
+  ramFrom |= data[0x01b7] <<  0;
+  ramFrom &= ~1;  //for some reason, most games specify 00200001 as RAM start offset
+
+  uint32_t ramTo = 0;
+  ramTo |= data[0x01b8] << 24;
+  ramTo |= data[0x01b9] << 16;
+  ramTo |= data[0x01ba] <<  8;
+  ramTo |= data[0x01bb] <<  0;
+
+  uint32_t ramSize = ramTo - ramFrom;
+  if(ramSize > 0x020000) ramSize = 0;  //sanity check
+  ramSize = bit::round(ramSize);
+
   manifest.append("board\n");
   manifest.append("  rom name=program.rom size=0x", hex(size), "\n");
-  if(size <= 0x200000)
-  manifest.append("  ram name=save.ram size=0x8000\n");
+  if(ramSize)
+  manifest.append("  ram name=save.ram size=0x", hex(ramSize), " offset=0x", hex(ramFrom), "\n");
   manifest.append("\n");
   manifest.append("information\n");
   manifest.append("  title: ", Location::prefix(location), "\n");
