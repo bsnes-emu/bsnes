@@ -227,7 +227,7 @@ static bool dump_section(FILE *f, const void *src, uint32_t size)
 /* Todo: we need a sane and protable save state format. */
 int GB_save_state(GB_gameboy_t *gb, const char *path)
 {
-    FILE *f = fopen(path, "w");
+    FILE *f = fopen(path, "wb");
     if (!f) {
         return errno;
     }
@@ -294,7 +294,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     /* Every unread value should be kept the same. */
     memcpy(&save, gb, sizeof(save));
 
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path, "rb");
     if (!f) {
         return errno;
     }
@@ -370,7 +370,7 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
-    FILE *f = fopen(path, "w");
+    FILE *f = fopen(path, "wb");
     if (!f) {
         return errno;
     }
@@ -399,7 +399,7 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
 /* Loading will silently stop if the format is incomplete */
 void GB_load_battery(GB_gameboy_t *gb, const char *path)
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path, "rb");
     if (!f) {
         return;
     }
