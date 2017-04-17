@@ -135,6 +135,10 @@ $(OBJ)/%.dep: %
 
 # Compilation rules
 
+$(OBJ)/Core/%.c.o: Core/%.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) -DGB_INTERNAL -c $< -o $@
+
 $(OBJ)/%.c.o: %.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -16,7 +16,6 @@
 #endif
 
 #include "gb.h"
-#include "debugger.h"
 
 static bool running = false;
 static char *filename;
@@ -38,34 +37,33 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
                 running = false;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                gb->stopped = false;
                 switch (event.key.keysym.sym) {
                     case SDLK_RIGHT:
-                        gb->keys[0] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_LEFT:
-                        gb->keys[1] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_LEFT, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_UP:
-                        gb->keys[2] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_UP, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_DOWN:
-                        gb->keys[3] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_DOWN, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_x:
-                        gb->keys[4] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_A, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_z:
-                        gb->keys[5] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_B, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_BACKSPACE:
-                        gb->keys[6] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_SELECT, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_RETURN:
-                        gb->keys[7] = event.type == SDL_KEYDOWN;
+                        GB_set_key_state(gb, GB_KEY_START, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_SPACE:
-                        gb->turbo = event.type == SDL_KEYDOWN;
+                        GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_LCTRL:
                     case SDLK_RCTRL:
@@ -85,7 +83,7 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
                     case SDLK_c:
                         if (ctrl && event.type == SDL_KEYDOWN) {
                             ctrl = false;
-                            gb->debug_stopped = true;
+                            GB_debugger_break(gb);
 
                         }
                         break;
@@ -122,7 +120,7 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
-    SDL_Surface *screen = gb->user_data;
+    SDL_Surface *screen = GB_get_user_data(gb);
     SDL_Flip(screen);
     GB_update_keys_status(gb);
 
@@ -189,10 +187,10 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static void debugger_interrupt(int ignore)
 {
     /* ^C twice to exit */
-    if (gb.debug_stopped) {
+    if (GB_debugger_is_stopped(&gb)) {
         exit(0);
     }
-    gb.debug_stopped = true;
+    GB_debugger_break(&gb);
 }
 
 
@@ -280,7 +278,7 @@ usage:
     /* Configure Screen */
     SDL_LockSurface(screen);
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    gb.user_data = screen;
+    GB_set_user_data(&gb, screen);
     GB_set_pixels_output(&gb, screen->pixels);
     GB_set_rgb_encode_callback(&gb, rgb_encode);
 

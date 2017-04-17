@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "gb.h"
-#include "joypad.h"
+#include <assert.h>
 
 void GB_update_joyp(GB_gameboy_t *gb)
 {
@@ -54,4 +54,10 @@ void GB_update_joyp(GB_gameboy_t *gb)
         gb->io_registers[GB_IO_IF] |= 0x10;
     }
     gb->io_registers[GB_IO_JOYP] |= 0xC0; // No SGB support
+}
+
+void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed)
+{
+    assert(index >= 0 && index < GB_KEY_MAX);
+    gb->keys[index] = pressed;
 }

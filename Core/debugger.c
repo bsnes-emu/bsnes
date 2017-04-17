@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "debugger.h"
-#include "memory.h"
-#include "z80_cpu.h"
 #include "gb.h"
 
 typedef struct {
@@ -1791,4 +1788,19 @@ bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result
         *result_bank = value.has_bank? value.value : -1;
     }
     return error;
+}
+
+void GB_debugger_break(GB_gameboy_t *gb)
+{
+    gb->debug_stopped = true;
+}
+
+bool GB_debugger_is_stopped(GB_gameboy_t *gb)
+{
+    return gb->debug_stopped;
+}
+
+void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled)
+{
+    gb->debug_disable = disabled;
 }

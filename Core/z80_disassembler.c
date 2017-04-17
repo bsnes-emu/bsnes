@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "z80_cpu.h"
-#include "memory.h"
 #include "gb.h"
-#include "debugger.h"
 
 
 typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);

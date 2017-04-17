@@ -1,3 +1,4 @@
+#define GB_INTERNAL // Todo: Some memory accesses are being done using the struct directly
 #import "GBMemoryByteArray.h"
 #import "GBCompleteByteSlice.h"
 

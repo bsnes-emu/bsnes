@@ -1,7 +1,4 @@
 #include "gb.h"
-#include "timing.h"
-#include "memory.h"
-#include "display.h"
 
 static void GB_ir_run(GB_gameboy_t *gb)
 {

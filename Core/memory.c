@@ -1,13 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "gb.h"
-#include "joypad.h"
-#include "display.h"
-#include "memory.h"
-#include "debugger.h"
-#include "mbc.h"
-#include "timing.h"
-#include "camera.h"
 
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);

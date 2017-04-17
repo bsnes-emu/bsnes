@@ -1,9 +1,5 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "z80_cpu.h"
-#include "timing.h"
-#include "memory.h"
-#include "debugger.h"
 #include "gb.h"
 
 

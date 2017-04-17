@@ -1,3 +1,6 @@
+// The tester requires low-level access to the GB struct to detect failures
+#define GB_INTERNAL
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>

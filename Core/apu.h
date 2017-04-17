@@ -2,15 +2,11 @@
 #define apu_h
 #include <stdbool.h>
 #include <stdint.h>
-
+#include "gb_struct_def.h"
 /* Divides nicely and never overflows with 4 channels */
 #define MAX_CH_AMP 0x1E00
 #define CH_STEP (0x1E00/0xF)
 
-#include "save_struct.h"
-
-struct GB_gameboy_s;
-typedef struct GB_gameboy_s GB_gameboy_t;
 
 typedef struct
 {
@@ -59,10 +55,13 @@ typedef struct
 } GB_apu_t;
 
 void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count);
+
+#ifdef GB_INTERNAL
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *samples);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
+#endif
 
 #endif /* apu_h */

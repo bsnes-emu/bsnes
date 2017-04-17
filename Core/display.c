@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <string.h>
 #include "gb.h"
-#include "display.h"
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0500
 #include <Windows.h>

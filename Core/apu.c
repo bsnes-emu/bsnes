@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
-#include "apu.h"
 #include "gb.h"
 
 #undef max

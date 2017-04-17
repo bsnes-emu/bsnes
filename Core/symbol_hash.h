@@ -21,16 +21,17 @@ typedef struct {
     size_t n_symbols;
 } GB_symbol_map_t;
 
-GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name);
-const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr);
-GB_symbol_map_t *GB_map_alloc(void);
-void GB_map_free(GB_symbol_map_t *map);
-
 typedef struct {
     GB_symbol_t *buckets[0x400];
 } GB_reversed_symbol_map_t;
 
+#ifdef GB_INTERNAL
 void GB_reversed_map_add_symbol(GB_reversed_symbol_map_t *map, uint16_t bank, GB_bank_symbol_t *symbol);
 const GB_symbol_t *GB_reversed_map_find_symbol(GB_reversed_symbol_map_t *map, const char *name);
+GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name);
+const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr);
+GB_symbol_map_t *GB_map_alloc(void);
+void GB_map_free(GB_symbol_map_t *map);
+#endif
 
 #endif /* symbol_hash_h */

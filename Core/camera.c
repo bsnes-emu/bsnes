@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "gb.h"
 
 static int noise_seed = 0;
 

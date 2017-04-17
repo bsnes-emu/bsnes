@@ -1,16 +1,13 @@
+#define GB_INTERNAL // Todo: several debugging functions access the GB struct directly
 #include <AVFoundation/AVFoundation.h>
 #include <CoreAudio/CoreAudio.h>
 #include "GBAudioClient.h"
 #include "Document.h"
 #include "AppDelegate.h"
-#include "gb.h"
-#include "debugger.h"
-#include "memory.h"
-#include "camera.h"
-#include "display.h"
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 #include "GBWarningPopover.h"
+#include "gb.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -61,25 +58,25 @@
 
 static void vblank(GB_gameboy_t *gb)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self vblank];
 }
 
 static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self log:string withAttributes: attributes];
 }
 
 static char *consoleInput(GB_gameboy_t *gb)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     return strdup([self getDebuggerInput]);
 }
 
 static char *asyncConsoleInput(GB_gameboy_t *gb)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     const char *ret = [self getAsyncDebuggerInput];
     return ret? strdup(ret) : NULL;
 }
@@ -91,20 +88,20 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 static void cameraRequestUpdate(GB_gameboy_t *gb)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self cameraRequestUpdate];
 }
 
 static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     return [self cameraGetPixelAtX:x andY:y];
 }
 
 static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
                        uint8_t top_margin, uint8_t bottom_margin, uint8_t exposure)
 {
-    Document *self = (__bridge Document *)(gb->user_data);
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self printImage:image height:height topMargin:top_margin bottomMargin:bottom_margin exposure:exposure];
 }
 
@@ -138,12 +135,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_init_cgb(&gb);
     [self initCommon];
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
-
 }
 
 - (void) initCommon
 {
-    gb.user_data = (__bridge void *)(self);
+    GB_set_user_data(&gb, (__bridge void *)(self));
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
@@ -151,13 +147,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
-    NSString *rom_warnings = [self captureOutputForBlock:^{
-        [self loadROM];
-    }];
-    if (rom_warnings && !rom_warning_issued) {
-        rom_warning_issued = true;
-        [GBWarningPopover popoverWithContents:rom_warnings onWindow:self.mainWindow];
-    }
+    [self loadROM];
 }
 
 - (void) vblank
@@ -203,52 +193,37 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) stop
 {
     if (!running) return;
-    gb.debug_disable = true;
-    if (gb.debug_stopped) {
+    GB_debugger_set_disabled(&gb, true);
+    if (GB_debugger_is_stopped(&gb)) {
         gb.debug_stopped = false;
         [self consoleInput:nil];
     }
     stopping = true;
     running = false;
     while (stopping);
-    gb.debug_disable = false;
+    GB_debugger_set_disabled(&gb, false);
 }
 
 - (IBAction)reset:(id)sender
 {
-    bool was_cgb = gb.is_cgb;
     [self stop];
 
-    /* Back up user's breakpoints/watchpoints */
-    typeof(gb.breakpoints) breakpoints = gb.breakpoints;
-    typeof(gb.n_breakpoints) n_breakpoints = gb.n_breakpoints;
-    typeof(gb.watchpoints) watchpoints = gb.watchpoints;
-    typeof(gb.n_watchpoints) n_watchpoints = gb.n_watchpoints;
-
-    /* Reset them so they're not freed*/
-    gb.watchpoints = NULL;
-    gb.breakpoints = NULL;
-    gb.n_watchpoints = gb.n_breakpoints = 0;
-    
-    GB_free(&gb);
-    if (([sender tag] == 0 && was_cgb) || [sender tag] == 2) {
-        [self initCGB];
+    if ([sender tag] == 0) {
+        GB_reset(&gb);
     }
     else {
-        [self initDMG];
+        GB_switch_model_and_reset(&gb, [sender tag] == 2);
+        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:[sender tag] == 2? @"cgb_boot" : @"dmg_boot" ofType:@"bin"] UTF8String]);
     }
-
-    /* Restore backpoints/watchpoints */
-    gb.breakpoints = breakpoints;
-    gb.n_breakpoints = n_breakpoints;
-    gb.watchpoints = watchpoints;
-    gb.n_watchpoints = n_watchpoints;
 
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
-        [[NSUserDefaults standardUserDefaults] setBool:!gb.is_cgb forKey:@"EmulateDMG"];
+        [[NSUserDefaults standardUserDefaults] setBool:[sender tag] == 1 forKey:@"EmulateDMG"];
     }
-    [self readFromFile:self.fileName ofType:@"gb"];
+    
+    /* Reload the ROM, SAV and SYM files */
+    [self loadROM];
+
     [self start];
 
     if (hex_controller) {
@@ -380,10 +355,16 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void) loadROM
 {
-    GB_load_rom(&gb, [self.fileName UTF8String]);
-    GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
-    GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
-    GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
+    NSString *rom_warnings = [self captureOutputForBlock:^{
+        GB_load_rom(&gb, [self.fileName UTF8String]);
+        GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+        GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
+        GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
+    }];
+    if (rom_warnings && !rom_warning_issued) {
+        rom_warning_issued = true;
+        [GBWarningPopover popoverWithContents:rom_warnings onWindow:self.mainWindow];
+    }
 }
 
 - (void)close
@@ -398,7 +379,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (IBAction) interrupt:(id)sender
 {
     [self log:"^C\n"];
-    gb.debug_stopped = true;
+    GB_debugger_break(&gb);
     if (!running) {
         [self start];
     }
@@ -428,8 +409,8 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
-        [(NSMenuItem*)anItem setState:(!running) || (gb.debug_stopped)];
-        return !gb.debug_stopped;
+        [(NSMenuItem*)anItem setState:(!running) || (GB_debugger_is_stopped(&gb))];
+        return !GB_debugger_is_stopped(&gb);
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
         [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !gb.is_cgb) || (anItem.tag == 2 && gb.is_cgb)];
@@ -653,7 +634,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) performAtomicBlock: (void (^)())block
 {
     while (!GB_is_inited(&gb));
-    bool was_running = running && !gb.debug_stopped;
+    bool was_running = running && !GB_debugger_is_stopped(&gb);
     if (was_running) {
         [self stop];
     }

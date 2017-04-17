@@ -4,11 +4,21 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
-#include "printer.h"
-#include "apu.h"
-#include "save_struct.h"
-#include "symbol_hash.h"
 
+#include "gb_struct_def.h"
+#include "save_struct.h"
+
+#include "apu.h"
+#include "camera.h"
+#include "debugger.h"
+#include "display.h"
+#include "joypad.h"
+#include "mbc.h"
+#include "memory.h"
+#include "printer.h"
+#include "timing.h"
+#include "z80_cpu.h"
+#include "symbol_hash.h"
 
 #define GB_STRUCT_VERSION 10
 
@@ -140,12 +150,6 @@ enum {
     GB_IO_UNKNOWN8   = 0x7F, // Unknown, write only
 };
 
-#define LCDC_PERIOD 70224
-#define CPU_FREQUENCY 0x400000
-#define DIV_CYCLES (0x100)
-#define INTERNAL_DIV_CYCLES (0x40000)
-#define FRAME_LENGTH 16742706 // in nanoseconds
-
 typedef enum {
     GB_LOG_BOLD = 1,
     GB_LOG_DASHED_UNDERLINE = 2,
@@ -153,39 +157,22 @@ typedef enum {
     GB_LOG_UNDERLINE_MASK =  GB_LOG_DASHED_UNDERLINE | GB_LOG_UNDERLINE
 } GB_log_attributes;
 
-struct GB_gameboy_s;
-typedef struct GB_gameboy_s GB_gameboy_t;
+#ifdef GB_INTERNAL
+#define LCDC_PERIOD 70224
+#define CPU_FREQUENCY 0x400000
+#define DIV_CYCLES (0x100)
+#define INTERNAL_DIV_CYCLES (0x40000)
+#define FRAME_LENGTH 16742706 // in nanoseconds
+#endif
+
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
-typedef uint8_t (*GB_camera_get_pixel_callback_t)(GB_gameboy_t *gb, uint8_t x, uint8_t y);
-typedef void (*GB_camera_update_request_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
 typedef void (*GB_serial_transfer_start_callback_t)(GB_gameboy_t *gb, uint8_t byte_to_send);
 typedef uint8_t (*GB_serial_transfer_end_callback_t)(GB_gameboy_t *gb);
-
-
-typedef struct {
-    enum {
-        GB_NO_MBC,
-        GB_MBC1,
-        GB_MBC2,
-        GB_MBC3,
-        GB_MBC5,
-        GB_HUC1, /* Todo: HUC1 features are not emulated. Should be unified with the CGB IR sensor API. */
-        GB_HUC3,
-    } mbc_type;
-    enum {
-        GB_STANDARD_MBC,
-        GB_CAMERA,
-    } mbc_subtype;
-    bool has_ram;
-    bool has_battery;
-    bool has_rtc;
-    bool has_rumble;
-} GB_cartridge_t;
 
 typedef struct {
     bool state;
@@ -205,13 +192,11 @@ struct GB_watchpoint_s;
 /* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
 _Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
-enum {
-    GB_TIMA_RUNNING = 0,
-    GB_TIMA_RELOADING = 1,
-    GB_TIMA_RELOADED = 2
-};
-
-typedef struct GB_gameboy_s {
+#ifdef GB_INTERNAL
+struct GB_gameboy_s {
+#else
+struct GB_gameboy_internal_s {
+#endif
     GB_SECTION(header,
         /* The magic makes sure a state file is:
             - Indeed a SameBoy state file.
@@ -389,95 +374,103 @@ typedef struct GB_gameboy_s {
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
+    /* This data is reserved on reset and must come last in the struct */
+    GB_SECTION(unsaved,
+        /* ROM */
+        uint8_t *rom;
+        uint32_t rom_size;
+        const GB_cartridge_t *cartridge_type;
+        enum {
+            GB_STANDARD_MBC1_WIRING,
+            GB_MBC1M_WIRING,
+        } mbc1_wiring;
 
-    /* ROM */
-    uint8_t *rom;
-    uint32_t rom_size;
-    const GB_cartridge_t *cartridge_type;
-    enum {
-        GB_STANDARD_MBC1_WIRING,
-        GB_MBC1M_WIRING,
-    } mbc1_wiring;
+        /* Various RAMs */
+        uint8_t *ram;
+        uint8_t *vram;
+        uint8_t *mbc_ram;
 
-    /* Various RAMs */
-    uint8_t *ram;
-    uint8_t *vram;
-    uint8_t *mbc_ram;
+        /* I/O */
+        uint32_t *screen;
+        GB_sample_t *audio_buffer;
+        bool keys[GB_KEY_MAX];
 
-    /* I/O */
-    uint32_t *screen;
-    GB_sample_t *audio_buffer;
-    bool keys[8];
+        /* Audio Specific */
+        unsigned int buffer_size;
+        unsigned int sample_rate;
+        unsigned int audio_position;
+        bool audio_stream_started; // detects first copy request to minimize lag
+        volatile bool audio_copy_in_progress;
+        volatile bool apu_lock;
 
-    /* Audio Specific */
-    unsigned int buffer_size;
-    unsigned int sample_rate;
-    unsigned int audio_position;
-    bool audio_stream_started; // detects first copy request to minimize lag
-    volatile bool audio_copy_in_progress;
-    volatile bool apu_lock;
+        /* Callbacks */
+        void *user_data;
+        GB_log_callback_t log_callback;
+        GB_input_callback_t input_callback;
+        GB_input_callback_t async_input_callback;
+        GB_rgb_encode_callback_t rgb_encode_callback;
+        GB_vblank_callback_t vblank_callback;
+        GB_infrared_callback_t infrared_callback;
+        GB_camera_get_pixel_callback_t camera_get_pixel_callback;
+        GB_camera_update_request_callback_t camera_update_request_callback;
+        GB_rumble_callback_t rumble_callback;
+        GB_serial_transfer_start_callback_t serial_transfer_start_callback;
+        GB_serial_transfer_end_callback_t serial_transfer_end_callback;
+        /* IR */
+        long cycles_since_ir_change;
+        long cycles_since_input_ir_change;
+        GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
+        size_t ir_queue_length;
 
-    /* Callbacks */
-    void *user_data;
-    GB_log_callback_t log_callback;
-    GB_input_callback_t input_callback;
-    GB_input_callback_t async_input_callback;
-    GB_rgb_encode_callback_t rgb_encode_callback;
-    GB_vblank_callback_t vblank_callback;
-    GB_infrared_callback_t infrared_callback;
-    GB_camera_get_pixel_callback_t camera_get_pixel_callback;
-    GB_camera_update_request_callback_t camera_update_request_callback;
-    GB_rumble_callback_t rumble_callback;
-    GB_serial_transfer_start_callback_t serial_transfer_start_callback;
-    GB_serial_transfer_end_callback_t serial_transfer_end_callback;
-    /* IR */
-    long cycles_since_ir_change;
-    long cycles_since_input_ir_change;
-    GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
-    size_t ir_queue_length;
+        /*** Debugger ***/
+        volatile bool debug_stopped, debug_disable;
+        bool debug_fin_command, debug_next_command;
 
-    /*** Debugger ***/
-    volatile bool debug_stopped, debug_disable;
-    bool debug_fin_command, debug_next_command;
+        /* Breakpoints */
+        uint16_t n_breakpoints;
+        struct GB_breakpoint_s *breakpoints;
 
-    /* Breakpoints */
-    uint16_t n_breakpoints;
-    struct GB_breakpoint_s *breakpoints;
+        /* SLD (Todo: merge with backtrace) */
+        bool stack_leak_detection;
+        int debug_call_depth;
+        uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
+        uint16_t addr_for_call_depth[0x200];
 
-    /* SLD (Todo: merge with backtrace) */
-    bool stack_leak_detection;
-    int debug_call_depth;
-    uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
-    uint16_t addr_for_call_depth[0x200];
+        /* Backtrace */
+        unsigned int backtrace_size;
+        uint16_t backtrace_sps[0x200];
+        struct {
+            uint16_t bank;
+            uint16_t addr;
+        } backtrace_returns[0x200];
 
-    /* Backtrace */
-    unsigned int backtrace_size;
-    uint16_t backtrace_sps[0x200];
-    struct {
-        uint16_t bank;
-        uint16_t addr;
-    } backtrace_returns[0x200];
+        /* Watchpoints */
+        uint16_t n_watchpoints;
+        struct GB_watchpoint_s *watchpoints;
 
-    /* Watchpoints */
-    uint16_t n_watchpoints;
-    struct GB_watchpoint_s *watchpoints;
+        /* Symbol tables */
+        GB_symbol_map_t *bank_symbols[0x200];
+        GB_reversed_symbol_map_t reversed_symbol_map;
 
-    /* Symbol tables */
-    GB_symbol_map_t *bank_symbols[0x200];
-    GB_reversed_symbol_map_t reversed_symbol_map;
+        /* Ticks command */
+        unsigned long debugger_ticks;
 
-    /* Ticks command */
-    unsigned long debugger_ticks;
+        /* Misc */
+        bool turbo;
+        bool turbo_dont_skip;
+        bool disable_rendering;
+        uint32_t ram_size; // Different between CGB and DMG
+        uint8_t boot_rom[0x900];
+        bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
+   );
+};
+    
+#ifndef GB_INTERNAL
+struct GB_gameboy_s {
+    char __internal[sizeof(struct GB_gameboy_internal_s)];
+};
+#endif
 
-    /* Misc */
-    bool turbo;
-    bool turbo_dont_skip;
-    bool disable_rendering;
-    uint32_t ram_size; // Different between CGB and DMG
-    uint8_t boot_rom[0x900];
-    bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
-
-} GB_gameboy_t;
 
 #ifndef __printflike
 /* Missing from Linux headers. */
@@ -488,6 +481,8 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 void GB_init(GB_gameboy_t *gb);
 void GB_init_cgb(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
+void GB_reset(GB_gameboy_t *gb);
+void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb);
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
 int GB_save_battery(GB_gameboy_t *gb, const char *path);
@@ -519,8 +514,8 @@ void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
 
 void GB_disconnect_serial(GB_gameboy_t *gb);
 
-static inline bool GB_is_inited(GB_gameboy_t *gb)
-{
-    return gb->magic == 'SAME';
-}
+bool GB_is_inited(GB_gameboy_t *gb);
+void GB_set_turbo_mode(GB_gameboy_t *gb, bool on);
+void *GB_get_user_data(GB_gameboy_t *gb);
+void GB_set_user_data(GB_gameboy_t *gb, void *data);
 #endif /* GB_h */

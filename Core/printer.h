@@ -2,11 +2,9 @@
 #define printer_h
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "gb_struct_def.h"
 #define GB_PRINTER_MAX_COMMAND_LENGTH 0x280
 #define GB_PRINTER_DATA_SIZE 0x280
-
-typedef struct GB_gameboy_s GB_gameboy_t;
 
 typedef void (*GB_print_image_callback_t)(GB_gameboy_t *gb,
                                           uint32_t *image,
@@ -56,8 +54,6 @@ typedef struct
     bool compression_run_is_compressed;
 } GB_printer_t;
 
-
-typedef struct GB_gameboy_s GB_gameboy_t;
 
 void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback);
 #endif

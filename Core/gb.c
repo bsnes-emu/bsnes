@@ -9,13 +9,6 @@
 #include <sys/time.h>
 #include <sys/select.h>
 #include "gb.h"
-#include "memory.h"
-#include "timing.h"
-#include "z80_cpu.h"
-#include "joypad.h"
-#include "display.h"
-#include "debugger.h"
-#include "mbc.h"
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
@@ -92,54 +85,28 @@ static char *default_async_input_callback(GB_gameboy_t *gb)
 void GB_init(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
-    gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000);
-    memset(gb->ram, 0, gb->ram_size);
     gb->vram = malloc(gb->vram_size = 0x2000);
-    memset(gb->vram, 0, gb->vram_size);
 
-    gb->mbc_rom_bank = 1;
-    gb->last_rtc_second = time(NULL);
-    gb->last_vblank = clock();
-    gb->cgb_ram_bank = 1;
-
-    /* Todo: this bypasses the rgb encoder because it is not set yet. */
-    gb->sprite_palletes_rgb[4] = gb->sprite_palletes_rgb[0] = gb->background_palletes_rgb[0] = 0xFFFFFFFF;
-    gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] = 0xAAAAAAAA;
-    gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] = 0x55555555;
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
-
-    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
-    gb->io_registers[GB_IO_JOYP] = 0xF;
-    gb->io_registers[GB_IO_SC] = 0x7E;
-    gb->magic = (uintptr_t)'SAME';
+    
+    GB_reset(gb);
 }
 
 void GB_init_cgb(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
-    gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000 * 8);
-    memset(gb->ram, 0, gb->ram_size);
     gb->vram = malloc(gb->vram_size = 0x2000 * 2);
-    memset(gb->vram, 0, gb->vram_size);
     gb->is_cgb = true;
-    gb->cgb_mode = true;
 
-    gb->mbc_rom_bank = 1;
-    gb->last_rtc_second = time(NULL);
-    gb->last_vblank = clock();
-    gb->cgb_ram_bank = 1;
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
-    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
-    gb->io_registers[GB_IO_JOYP] = 0xF;
-    gb->io_registers[GB_IO_SC] = 0x7C;
-    gb->magic = 'SAME';
+    GB_reset(gb);
 }
 
 void GB_free(GB_gameboy_t *gb)
@@ -200,6 +167,9 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
         gb->rom_size++;
     }
     fseek(f, 0, SEEK_SET);
+    if (gb->rom) {
+        free(gb->rom);
+    }
     gb->rom = malloc(gb->rom_size);
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
     fread(gb->rom, gb->rom_size, 1, f);
@@ -476,6 +446,16 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
+    if (!gb->rgb_encode_callback && !gb->is_cgb) {
+        gb->sprite_palletes_rgb[4] = gb->sprite_palletes_rgb[0] = gb->background_palletes_rgb[0] =
+        callback(gb, 0xFF, 0xFF, 0xFF);
+        gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] =
+        callback(gb, 0xAA, 0xAA, 0xAA);
+        gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] =
+        callback(gb, 0x55, 0x55, 0x55);
+        gb->sprite_palletes_rgb[7] = gb->sprite_palletes_rgb[3] = gb->background_palletes_rgb[3] =
+        callback(gb, 0, 0, 0);
+    }
     gb->rgb_encode_callback = callback;
 }
 
@@ -553,4 +533,85 @@ void GB_disconnect_serial(GB_gameboy_t *gb)
     
     /* Reset any internally-emulated device. Currently, only the printer. */
     memset(&gb->printer, 0, sizeof(gb->printer));
+}
+
+bool GB_is_inited(GB_gameboy_t *gb)
+{
+    return gb->magic == 'SAME';
+}
+
+void GB_set_turbo_mode(GB_gameboy_t *gb, bool on)
+{
+    gb->turbo = on;
+}
+
+void *GB_get_user_data(GB_gameboy_t *gb)
+{
+    return gb->user_data;
+}
+
+void GB_set_user_data(GB_gameboy_t *gb, void *data)
+{
+    gb->user_data = data;
+}
+
+void GB_reset(GB_gameboy_t *gb)
+{
+    bool cgb = gb->is_cgb;
+    memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
+    gb->version = GB_STRUCT_VERSION;
+    
+    gb->mbc_rom_bank = 1;
+    gb->last_rtc_second = time(NULL);
+    gb->last_vblank = clock();
+    gb->cgb_ram_bank = 1;
+    gb->io_registers[GB_IO_JOYP] = 0xF;
+    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
+
+    if (cgb) {
+        gb->ram_size = 0x2000 * 8;
+        memset(gb->ram, 0, gb->ram_size);
+        gb->vram_size = 0x2000 * 2;
+        memset(gb->vram, 0, gb->vram_size);
+        
+        gb->is_cgb = true;
+        gb->cgb_mode = true;
+        
+        gb->io_registers[GB_IO_SC] = 0x7C;
+    }
+    else {
+        gb->ram_size = 0x2000;
+        memset(gb->ram, 0, gb->ram_size);
+        gb->vram_size = 0x2000;
+        memset(gb->vram, 0, gb->vram_size);
+        
+        if (gb->rgb_encode_callback) {
+            gb->sprite_palletes_rgb[4] = gb->sprite_palletes_rgb[0] = gb->background_palletes_rgb[0] =
+                gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+            gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] =
+                gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA);
+            gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] =
+                gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55);
+            gb->sprite_palletes_rgb[7] = gb->sprite_palletes_rgb[3] = gb->background_palletes_rgb[3] =
+                gb->rgb_encode_callback(gb, 0, 0, 0);
+        }
+        
+        gb->io_registers[GB_IO_SC] = 0x7E;
+    }
+    gb->magic = (uintptr_t)'SAME';
+}
+
+void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb)
+{
+    if (is_cgb) {
+        gb->ram = realloc(gb->ram, gb->ram_size = 0x2000 * 8);
+        gb->vram = realloc(gb->vram, gb->vram_size = 0x2000 * 2);
+    }
+    else {
+        gb->ram = realloc(gb->ram, gb->ram_size = 0x2000);
+        gb->vram = realloc(gb->vram, gb->vram_size = 0x2000);
+    }
+    gb->is_cgb = is_cgb;
+    GB_reset(gb);
+
 }

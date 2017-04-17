@@ -172,11 +172,11 @@
             handled = true;
             switch (i) {
                 case GBTurbo:
-                    _gb->turbo = true;
+                    GB_set_turbo_mode(_gb, true);
                     break;
                     
                 default:
-                    _gb->keys[i] = true;
+                    GB_set_key_state(_gb, (GB_key_t)i, true);
                     break;
             }
         }
@@ -198,11 +198,11 @@
             handled = true;
             switch (i) {
                 case GBTurbo:
-                    _gb->turbo = false;
+                    GB_set_turbo_mode(_gb, false);
                     break;
 
                 default:
-                    _gb->keys[i] = false;
+                    GB_set_key_state(_gb, (GB_key_t)i, false);
                     break;
             }
         }
