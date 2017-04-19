@@ -540,9 +540,15 @@ bool GB_is_inited(GB_gameboy_t *gb)
     return gb->magic == 'SAME';
 }
 
-void GB_set_turbo_mode(GB_gameboy_t *gb, bool on)
+void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip)
 {
     gb->turbo = on;
+    gb->turbo_dont_skip = no_frame_skip;
+}
+
+void GB_set_rendering_disabled(GB_gameboy_t *gb, bool disabled)
+{
+    gb->disable_rendering = disabled;
 }
 
 void *GB_get_user_data(GB_gameboy_t *gb)

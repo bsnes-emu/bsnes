@@ -1,6 +1,3 @@
-#define GB_INTERNAL // Todo: This file runs SameBoy in a special configuration
-                    // of the turbo mode, which is not available without direct
-                    // struct access
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -36,7 +33,7 @@ static void vblank(GB_gameboy_t *gb)
         local_data->running = false;
     }
     else if (local_data->frames == LENGTH - 1) {
-        gb->disable_rendering = false;
+        GB_set_rendering_disabled(gb, false);
     }
     
     local_data->frames++;
@@ -72,13 +69,16 @@ int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *out
     GB_set_user_data(&gb, &local_data);
     local_data.running = true;
     local_data.frames = 0;
-    gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
+    GB_set_rendering_disabled(&gb, true);
+    GB_set_turbo_mode(&gb, true, true);
+    
+    *cgb_flag = GB_read_memory(&gb, 0x143) & 0xC0;
+
     
     while (local_data.running) {
         GB_run(&gb);
     }
     
-    *cgb_flag = gb.rom[0x143] & 0xC0;
     
     GB_free(&gb);
     return 0;

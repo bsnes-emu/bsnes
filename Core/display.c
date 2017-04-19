@@ -239,29 +239,10 @@ void display_vblank(GB_gameboy_t *gb)
         }
         gb->last_vblank = nanoseconds;
     }
-
-    /*
-    static long start = 0;
-    static long last = 0;
-    static long frames = 0;
-
-    if (last == 0) {
-        last = time(NULL);
-    }
-
-    if (last != time(NULL)) {
-        last = time(NULL);
-        if (start == 0) {
-            start = last;
-            frames = 0;
-        }
-        printf("Average FPS: %f\n", frames / (double)(last - start));
-    }
-    frames++;
-     */
-
-    if (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) {
+    
+    if (!gb->disable_rendering && (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped)) {
         /* LCD is off, memset screen to white */
+        /* Todo: use RGB callback */
         memset(gb->screen, 0xFF, WIDTH * LINES * 4);
     }
 

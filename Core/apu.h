@@ -54,6 +54,7 @@ typedef struct
     GB_apu_channel_t wave_channels[4];
 } GB_apu_t;
 
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
 void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count);
 
 #ifdef GB_INTERNAL

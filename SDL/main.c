@@ -63,7 +63,7 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
                         GB_set_key_state(gb, GB_KEY_START, event.type == SDL_KEYDOWN);
                         break;
                     case SDLK_SPACE:
-                        GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN);
+                        GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
                         break;
                     case SDLK_LCTRL:
                     case SDLK_RCTRL:

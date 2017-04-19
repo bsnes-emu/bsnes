@@ -480,28 +480,41 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 
 void GB_init(GB_gameboy_t *gb);
 void GB_init_cgb(GB_gameboy_t *gb);
+bool GB_is_inited(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb);
+void GB_run(GB_gameboy_t *gb);
+
+void *GB_get_user_data(GB_gameboy_t *gb);
+void GB_set_user_data(GB_gameboy_t *gb, void *data);
+
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
+    
 int GB_save_battery(GB_gameboy_t *gb, const char *path);
 void GB_load_battery(GB_gameboy_t *gb, const char *path);
+    
 int GB_save_state(GB_gameboy_t *gb, const char *path);
 int GB_load_state(GB_gameboy_t *gb, const char *path);
-void GB_run(GB_gameboy_t *gb);
-void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
-void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
-void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
+
+void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip);
+void GB_set_rendering_disabled(GB_gameboy_t *gb, bool disabled);
+    
 void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
-void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
-void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
-void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
-void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
-void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
+
+void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
+
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change);
+    
+void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
+void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
+void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
+void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 
 /* These APIs are used when using internal clock */
@@ -511,11 +524,7 @@ void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_en
 /* These APIs are used when using external clock */
 uint8_t GB_serial_get_data(GB_gameboy_t *gb);
 void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
-
+    
 void GB_disconnect_serial(GB_gameboy_t *gb);
 
-bool GB_is_inited(GB_gameboy_t *gb);
-void GB_set_turbo_mode(GB_gameboy_t *gb, bool on);
-void *GB_get_user_data(GB_gameboy_t *gb);
-void GB_set_user_data(GB_gameboy_t *gb, void *data);
 #endif /* GB_h */

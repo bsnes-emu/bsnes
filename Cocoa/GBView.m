@@ -172,7 +172,7 @@
             handled = true;
             switch (i) {
                 case GBTurbo:
-                    GB_set_turbo_mode(_gb, true);
+                    GB_set_turbo_mode(_gb, true, false);
                     break;
                     
                 default:
@@ -198,7 +198,7 @@
             handled = true;
             switch (i) {
                 case GBTurbo:
-                    GB_set_turbo_mode(_gb, false);
+                    GB_set_turbo_mode(_gb, false, false);
                     break;
 
                 default:
