@@ -1368,7 +1368,7 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const d
 
     GB_log(gb, "Background palettes: \n");
     for (unsigned i = 0; i < 32; i++) {
-        GB_log(gb, "%04x ", ((uint16_t *)&gb->background_palletes_data)[i]);
+        GB_log(gb, "%04x ", ((uint16_t *)&gb->background_palettes_data)[i]);
         if (i % 4 == 3) {
             GB_log(gb, "\n");
         }
@@ -1376,7 +1376,7 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const d
 
     GB_log(gb, "Sprites palettes: \n");
     for (unsigned i = 0; i < 32; i++) {
-        GB_log(gb, "%04x ", ((uint16_t *)&gb->sprite_palletes_data)[i]);
+        GB_log(gb, "%04x ", ((uint16_t *)&gb->sprite_palettes_data)[i]);
         if (i % 4 == 3) {
             GB_log(gb, "\n");
         }
@@ -1703,6 +1703,12 @@ next_command:
         gb->debug_fin_command = false;
         gb->stack_leak_detection = false;
         input = gb->input_callback(gb);
+
+        if (input == NULL) {
+            /* Debugging is no currently available, continue running */
+            gb->debug_stopped = false;
+            return;
+        }
 
         if (GB_debugger_do_command(gb, input)) {
             goto next_command;

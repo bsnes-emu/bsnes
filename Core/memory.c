@@ -206,8 +206,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
                 return ((addr & 0xFF) == GB_IO_BGPD?
-                       gb->background_palletes_data :
-                       gb->sprite_palletes_data)[gb->io_registers[index_reg] & 0x3F];
+                       gb->background_palettes_data :
+                       gb->sprite_palettes_data)[gb->io_registers[index_reg] & 0x3F];
             }
 
             case GB_IO_KEY1:
@@ -526,8 +526,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
                 ((addr & 0xFF) == GB_IO_BGPD?
-                 gb->background_palletes_data :
-                 gb->sprite_palletes_data)[gb->io_registers[index_reg] & 0x3F] = value;
+                 gb->background_palettes_data :
+                 gb->sprite_palettes_data)[gb->io_registers[index_reg] & 0x3F] = value;
                 GB_palette_changed(gb, (addr & 0xFF) == GB_IO_BGPD, gb->io_registers[index_reg] & 0x3F);
                 if (gb->io_registers[index_reg] & 0x80) {
                     gb->io_registers[index_reg]++;

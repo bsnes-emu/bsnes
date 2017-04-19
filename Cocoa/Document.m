@@ -1,4 +1,3 @@
-#define GB_INTERNAL // Todo: several debugging functions access the GB struct directly
 #include <AVFoundation/AVFoundation.h>
 #include <CoreAudio/CoreAudio.h>
 #include "GBAudioClient.h"
@@ -47,8 +46,8 @@
 @property GBAudioClient *audioClient;
 - (void) vblank;
 - (void) log: (const char *) log withAttributes: (GB_log_attributes) attributes;
-- (const char *) getDebuggerInput;
-- (const char *) getAsyncDebuggerInput;
+- (char *) getDebuggerInput;
+- (char *) getAsyncDebuggerInput;
 - (void) cameraRequestUpdate;
 - (uint8_t) cameraGetPixelAtX:(uint8_t)x andY:(uint8_t)y;
 - (void) printImage:(uint32_t *)image height:(unsigned) height
@@ -71,14 +70,14 @@ static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes a
 static char *consoleInput(GB_gameboy_t *gb)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
-    return strdup([self getDebuggerInput]);
+    return [self getDebuggerInput];
 }
 
 static char *asyncConsoleInput(GB_gameboy_t *gb)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
-    const char *ret = [self getAsyncDebuggerInput];
-    return ret? strdup(ret) : NULL;
+    char *ret = [self getAsyncDebuggerInput];
+    return ret;
 }
 
 static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
@@ -195,8 +194,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (!running) return;
     GB_debugger_set_disabled(&gb, true);
     if (GB_debugger_is_stopped(&gb)) {
-        gb.debug_stopped = false;
-        [self consoleInput:nil];
+        [self interruptDebugInputRead];
     }
     stopping = true;
     running = false;
@@ -413,7 +411,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         return !GB_debugger_is_stopped(&gb);
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
-        [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !gb.is_cgb) || (anItem.tag == 2 && gb.is_cgb)];
+        [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !GB_is_cgb(&gb)) || (anItem.tag == 2 && GB_is_cgb(&gb))];
     }
     else if ([anItem action] == @selector(toggleBlend:)) {
         [(NSMenuItem*)anItem setState:self.view.shouldBlendFrameWithPrevious];
@@ -557,7 +555,14 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [sender setStringValue:@""];
 }
 
-- (const char *) getDebuggerInput
+- (void) interruptDebugInputRead
+{
+    [has_debugger_input lock];
+    [debugger_input_queue addObject:[NSNull null]];
+    [has_debugger_input unlockWithCondition:1];
+}
+
+- (char *) getDebuggerInput
 {
     [self log:">"];
     in_sync_input = true;
@@ -566,10 +571,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [debugger_input_queue removeObjectAtIndex:0];
     [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
     in_sync_input = false;
-    return [input UTF8String];
+    if ((id) input == [NSNull null]) {
+        return NULL;
+    }
+    return strdup([input UTF8String]);
 }
 
-- (const char *) getAsyncDebuggerInput
+- (char *) getAsyncDebuggerInput
 {
     [has_debugger_input lock];
     NSString *input = [debugger_input_queue firstObject];
@@ -577,7 +585,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         [debugger_input_queue removeObjectAtIndex:0];
     }
     [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
-    return [input UTF8String];
+    return input? strdup([input UTF8String]): NULL;
 }
 
 - (IBAction)saveState:(id)sender
@@ -731,8 +739,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             case 2:
             /* OAM */
             {
-                oamCount = GB_get_oam_info(&gb, oamInfo);
-                oamHeight = (gb.io_registers[GB_IO_LCDC] & 4) ? 16:8;
+                oamCount = GB_get_oam_info(&gb, oamInfo, &oamHeight);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (!oamUpdating) {
                         oamUpdating = true;
@@ -799,17 +806,23 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
         uint16_t n_banks = 1;
         switch ([(GBMemoryByteArray *)(hex_controller.byteArray) mode]) {
-            case GBMemoryROM:
-                n_banks = gb.rom_size / 0x4000;
+            case GBMemoryROM: {
+                size_t rom_size;
+                GB_get_direct_access(&gb, GB_DIRECT_ACCESS_ROM, &rom_size, NULL);
+                n_banks = rom_size / 0x4000;
                 break;
+            }
             case GBMemoryVRAM:
-                n_banks = gb.is_cgb ? 2 : 1;
+                n_banks = GB_is_cgb(&gb) ? 2 : 1;
                 break;
-            case GBMemoryExternalRAM:
-                n_banks = (gb.mbc_ram_size + 0x1FFF) / 0x2000;
+            case GBMemoryExternalRAM: {
+                size_t ram_size;
+                GB_get_direct_access(&gb, GB_DIRECT_ACCESS_CART_RAM, &ram_size, NULL);
+                n_banks = (ram_size + 0x1FFF) / 0x2000;
                 break;
+            }
             case GBMemoryRAM:
-                n_banks = gb.is_cgb ? 8 : 1;
+                n_banks = GB_is_cgb(&gb) ? 8 : 1;
                 break;
             case GBMemoryEntireSpace:
                 break;
@@ -833,23 +846,28 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     self.memoryBankItem.enabled = [sender indexOfSelectedItem] != GBMemoryEntireSpace;
     GBMemoryByteArray *byteArray = (GBMemoryByteArray *)(hex_controller.byteArray);
     [byteArray setMode:(GB_memory_mode_t)[sender indexOfSelectedItem]];
+    uint16_t bank;
     switch ((GB_memory_mode_t)[sender indexOfSelectedItem]) {
         case GBMemoryEntireSpace:
         case GBMemoryROM:
             lineRep.valueOffset = 0;
-            byteArray.selectedBank = gb.mbc_rom_bank;
+            GB_get_direct_access(&gb, GB_DIRECT_ACCESS_ROM, NULL, &bank);
+            byteArray.selectedBank = bank;
             break;
         case GBMemoryVRAM:
             lineRep.valueOffset = 0x8000;
-            byteArray.selectedBank = gb.cgb_vram_bank;
+            GB_get_direct_access(&gb, GB_DIRECT_ACCESS_VRAM, NULL, &bank);
+            byteArray.selectedBank = bank;
             break;
         case GBMemoryExternalRAM:
             lineRep.valueOffset = 0xA000;
-            byteArray.selectedBank = gb.mbc_ram_bank;
+            GB_get_direct_access(&gb, GB_DIRECT_ACCESS_CART_RAM, NULL, &bank);
+            byteArray.selectedBank = bank;
             break;
         case GBMemoryRAM:
             lineRep.valueOffset = 0xC000;
-            byteArray.selectedBank = gb.cgb_ram_bank;
+            GB_get_direct_access(&gb, GB_DIRECT_ACCESS_RAM, NULL, &bank);
+            byteArray.selectedBank = bank;
             break;
     }
     [self.memoryBankInput setStringValue:[NSString stringWithFormat:@"$%x", byteArray.selectedBank]];
@@ -1011,16 +1029,18 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         uint16_t map_base = 0x1800;
         GB_map_type_t map_type = (GB_map_type_t) self.tilemapMapButton.indexOfSelectedItem;
         GB_tileset_type_t tileset_type = (GB_tileset_type_t) self.TilemapSetButton.indexOfSelectedItem;
+        uint8_t lcdc = ((uint8_t *)GB_get_direct_access(&gb, GB_DIRECT_ACCESS_IO, NULL, NULL))[GB_IO_LCDC];
+        uint8_t *vram = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_VRAM, NULL, NULL);
         
-        if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && gb.io_registers[GB_IO_LCDC] & 0x08)) {
+        if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && lcdc & 0x08)) {
             map_base = 0x1c00;
         }
         
         if (tileset_type == GB_TILESET_AUTO) {
-            tileset_type = (gb.io_registers[GB_IO_LCDC] & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
+            tileset_type = (lcdc & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
         }
         
-        uint8_t tile = gb.vram[map_base + map_offset];
+        uint8_t tile = vram[map_base + map_offset];
         uint16_t tile_address = 0;
         if (tileset_type == GB_TILESET_8000) {
             tile_address = 0x8000 + tile * 0x10;
@@ -1029,8 +1049,8 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             tile_address = 0x9000 + (int8_t)tile * 0x10;
         }
         
-        if (gb.is_cgb) {
-            uint8_t attributes = gb.vram[map_base + map_offset + 0x2000];
+        if (GB_is_cgb(&gb)) {
+            uint8_t attributes = vram[map_base + map_offset + 0x2000];
             self.vramStatusLabel.stringValue = [NSString stringWithFormat:@"Tile number $%02x (%d:$%04x) at map address $%04x (Attributes: %c%c%c%d%d)",
                                                 tile,
                                                 attributes & 0x8? 1 : 0,
@@ -1070,12 +1090,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
     if (tableView == self.paletteTableView) {
         if (columnIndex == 0) {
-            return [NSString stringWithFormat:@"%s %d", row >=8? "Object" : "Background", (int)(row & 7)];
+            return [NSString stringWithFormat:@"%s %d", row >=8 ? "Object" : "Background", (int)(row & 7)];
         }
+        
+        uint8_t *palette_data = GB_get_direct_access(&gb, row >= 8? GB_DIRECT_ACCESS_OBP : GB_DIRECT_ACCESS_BGP, NULL, NULL);
 
         uint16_t index = columnIndex - 1 + (row & 7) * 4;
-        return @(((row >= 8? gb.sprite_palletes_data : gb.background_palletes_data)[(index << 1) + 1] << 8) |
-                  (row >= 8? gb.sprite_palletes_data : gb.background_palletes_data)[(index << 1)]);
+        return @((palette_data[(index << 1) + 1] << 8) | palette_data[(index << 1)]);
     }
     else if (tableView == self.spritesTableView) {
         switch (columnIndex) {
@@ -1092,7 +1113,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             case 5:
                 return [NSString stringWithFormat:@"$%04x", oamInfo[row].oam_addr];
             case 6:
-                if (gb.cgb_mode) {
+                if (GB_is_cgb(&gb)) {
                     return [NSString stringWithFormat:@"%c%c%c%d%d",
                             oamInfo[row].flags & 0x80? 'P' : '-',
                             oamInfo[row].flags & 0x40? 'Y' : '-',

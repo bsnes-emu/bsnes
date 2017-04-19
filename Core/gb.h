@@ -361,10 +361,10 @@ struct GB_gameboy_internal_s {
         uint32_t vram_size; // Different between CGB and DMG
         uint8_t cgb_vram_bank;
         uint8_t oam[0xA0];
-        uint8_t background_palletes_data[0x40];
-        uint8_t sprite_palletes_data[0x40];
-        uint32_t background_palletes_rgb[0x20];
-        uint32_t sprite_palletes_rgb[0x20];
+        uint8_t background_palettes_data[0x40];
+        uint8_t sprite_palettes_data[0x40];
+        uint32_t background_palettes_rgb[0x20];
+        uint32_t sprite_palettes_rgb[0x20];
         int16_t previous_lcdc_x;
         uint8_t padding;
         bool effective_window_enabled;
@@ -481,10 +481,28 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 void GB_init(GB_gameboy_t *gb);
 void GB_init_cgb(GB_gameboy_t *gb);
 bool GB_is_inited(GB_gameboy_t *gb);
+bool GB_is_cgb(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb);
 void GB_run(GB_gameboy_t *gb);
+
+typedef enum {
+    GB_DIRECT_ACCESS_ROM,
+    GB_DIRECT_ACCESS_RAM,
+    GB_DIRECT_ACCESS_CART_RAM,
+    GB_DIRECT_ACCESS_VRAM,
+    GB_DIRECT_ACCESS_HRAM,
+    GB_DIRECT_ACCESS_IO, /* Warning: Some registers can only be read/written correctly via GB_memory_read/write. */
+    GB_DIRECT_ACCESS_BOOTROM,
+    GB_DIRECT_ACCESS_OAM,
+    GB_DIRECT_ACCESS_BGP,
+    GB_DIRECT_ACCESS_OBP,
+} GB_direct_access_t;
+
+/* Returns a mutable pointer to various hardware memories. If that memory is banked, the current bank
+   is returned at *bank, even if only a portion of the memory is banked. */
+void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank);
 
 void *GB_get_user_data(GB_gameboy_t *gb);
 void GB_set_user_data(GB_gameboy_t *gb, void *data);

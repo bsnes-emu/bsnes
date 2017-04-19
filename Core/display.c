@@ -157,7 +157,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
             sprite_pixel = (gb->io_registers[use_obp1? GB_IO_OBP1:GB_IO_OBP0] >> (sprite_pixel << 1)) & 3;
             sprite_palette = use_obp1;
         }
-        return gb->sprite_palletes_rgb[sprite_palette * 4 + sprite_pixel];
+        return gb->sprite_palettes_rgb[sprite_palette * 4 + sprite_pixel];
     }
 
     if (bg_enabled) {
@@ -188,14 +188,14 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
             sprite_pixel = (gb->io_registers[use_obp1? GB_IO_OBP1:GB_IO_OBP0] >> (sprite_pixel << 1)) & 3;
             sprite_palette = use_obp1;
         }
-        return gb->sprite_palletes_rgb[sprite_palette * 4 + sprite_pixel];
+        return gb->sprite_palettes_rgb[sprite_palette * 4 + sprite_pixel];
     }
 
     if (!gb->cgb_mode) {
         background_pixel = ((gb->io_registers[GB_IO_BGP] >> (background_pixel << 1)) & 3);
     }
 
-    return gb->background_palletes_rgb[(attributes & 7) * 4 + background_pixel];
+    return gb->background_palettes_rgb[(attributes & 7) * 4 + background_pixel];
 }
 
 static int64_t get_nanoseconds(void)
@@ -269,7 +269,7 @@ static inline uint8_t scale_channel(uint8_t x)
 
 void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index)
 {
-    uint8_t *palette_data = background_palette? gb->background_palletes_data : gb->sprite_palletes_data;
+    uint8_t *palette_data = background_palette? gb->background_palettes_data : gb->sprite_palettes_data;
     uint16_t color = palette_data[index & ~1] | (palette_data[index | 1] << 8);
 
     // No need to &, scale channel does that.
@@ -277,7 +277,7 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
     uint8_t g = scale_channel(color >> 5);
     uint8_t b = scale_channel(color >> 10);
     assert (gb->rgb_encode_callback);
-    (background_palette? gb->background_palletes_rgb : gb->sprite_palletes_rgb)[index / 2] = gb->rgb_encode_callback(gb, r, g, b);
+    (background_palette? gb->background_palettes_rgb : gb->sprite_palettes_rgb)[index / 2] = gb->rgb_encode_callback(gb, r, g, b);
 }
 
 /*
@@ -584,17 +584,17 @@ void GB_draw_tileset(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
             palette = none_palette;
             break;
         case GB_PALETTE_BACKGROUND:
-            palette = gb->background_palletes_rgb + (4 * (palette_index & 7));
+            palette = gb->background_palettes_rgb + (4 * (palette_index & 7));
             break;
         case GB_PALETTE_OAM:
-            palette = gb->sprite_palletes_rgb + (4 * (palette_index & 7));
+            palette = gb->sprite_palettes_rgb + (4 * (palette_index & 7));
             break;
     }
     
     for (unsigned y = 0; y < 192; y++) {
         for (unsigned x = 0; x < 256; x++) {
             if (x >= 128 && !gb->is_cgb) {
-                *(dest++) = gb->background_palletes_rgb[0];
+                *(dest++) = gb->background_palettes_rgb[0];
                 continue;
             }
             uint16_t tile = (x % 128) / 8 + y / 8 * 16;
@@ -634,10 +634,10 @@ void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
             palette = none_palette;
             break;
         case GB_PALETTE_BACKGROUND:
-            palette = gb->background_palletes_rgb + (4 * (palette_index & 7));
+            palette = gb->background_palettes_rgb + (4 * (palette_index & 7));
             break;
         case GB_PALETTE_OAM:
-            palette = gb->sprite_palletes_rgb + (4 * (palette_index & 7));
+            palette = gb->sprite_palettes_rgb + (4 * (palette_index & 7));
             break;
         case GB_PALETTE_AUTO:
             break;
@@ -683,16 +683,16 @@ void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
                 *(dest++) = palette[pixel];
             }
             else {
-                *(dest++) = gb->background_palletes_rgb[(attributes & 7) * 4 + pixel];
+                *(dest++) = gb->background_palettes_rgb[(attributes & 7) * 4 + pixel];
             }
         }
     }
 }
 
-uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
+uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_height)
 {
     uint8_t count = 0;
-    unsigned sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
+    *sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
     uint8_t oam_to_dest_index[40] = {0,};
     for (unsigned y = 0; y < LINES; y++) {
         GB_sprite_t *sprite = (GB_sprite_t *) &gb->oam;
@@ -701,7 +701,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
             int sprite_y = sprite->y - 16;
             bool obscured = false;
             // Is sprite not in this line?
-            if (sprite_y > y || sprite_y + sprite_height <= y) continue;
+            if (sprite_y > y || sprite_y + *sprite_height <= y) continue;
             if (++sprites_in_line == 11) obscured = true;
             
             GB_oam_info_t *info = NULL;
@@ -710,7 +710,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
                 oam_to_dest_index[i] = ++count;
                 info->x = sprite->x;
                 info->y = sprite->y;
-                info->tile = sprite_height == 16? sprite->tile & 0xFE : sprite->tile;
+                info->tile = *sprite_height == 16? sprite->tile & 0xFE : sprite->tile;
                 info->flags = sprite->flags;
                 info->obscured_by_line_limit = false;
                 info->oam_addr = 0xFE00 + i * sizeof(*sprite);
@@ -727,8 +727,11 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
         uint16_t vram_address = dest[i].tile * 0x10;
         uint8_t flags = dest[i].flags;
         uint8_t palette = gb->cgb_mode? (flags & 7) : ((flags & 0x10)? 1 : 0);
+        if (gb->is_cgb && (flags & 0x8)) {
+            vram_address += 0x2000;
+        }
 
-        for (unsigned y = 0; y < sprite_height; y++) {
+        for (unsigned y = 0; y < *sprite_height; y++) {
             for (unsigned x = 0; x < 8; x++) {
                 uint8_t color = (((gb->vram[vram_address    ] >> ((~x)&7)) & 1 ) |
                                  ((gb->vram[vram_address + 1] >> ((~x)&7)) & 1) << 1 );
@@ -736,7 +739,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest)
                 if (!gb->cgb_mode) {
                     color = (gb->io_registers[palette? GB_IO_OBP1:GB_IO_OBP0] >> (color << 1)) & 3;
                 }
-                dest[i].image[((flags & 0x20)?7-x:x) + ((flags & 0x40)?sprite_height - 1 -y:y) * 8] = gb->sprite_palletes_rgb[palette * 4 + color];
+                dest[i].image[((flags & 0x20)?7-x:x) + ((flags & 0x40)?*sprite_height - 1 -y:y) * 8] = gb->sprite_palettes_rgb[palette * 4 + color];
             }
             vram_address += 2;
         }

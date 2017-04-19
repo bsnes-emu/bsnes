@@ -447,13 +447,13 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
     if (!gb->rgb_encode_callback && !gb->is_cgb) {
-        gb->sprite_palletes_rgb[4] = gb->sprite_palletes_rgb[0] = gb->background_palletes_rgb[0] =
+        gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
         callback(gb, 0xFF, 0xFF, 0xFF);
-        gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] =
+        gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
         callback(gb, 0xAA, 0xAA, 0xAA);
-        gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] =
+        gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
         callback(gb, 0x55, 0x55, 0x55);
-        gb->sprite_palletes_rgb[7] = gb->sprite_palletes_rgb[3] = gb->background_palletes_rgb[3] =
+        gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
         callback(gb, 0, 0, 0);
     }
     gb->rgb_encode_callback = callback;
@@ -540,6 +540,11 @@ bool GB_is_inited(GB_gameboy_t *gb)
     return gb->magic == 'SAME';
 }
 
+bool GB_is_cgb(GB_gameboy_t *gb)
+{
+    return gb->is_cgb;
+}
+
 void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip)
 {
     gb->turbo = on;
@@ -592,13 +597,13 @@ void GB_reset(GB_gameboy_t *gb)
         memset(gb->vram, 0, gb->vram_size);
         
         if (gb->rgb_encode_callback) {
-            gb->sprite_palletes_rgb[4] = gb->sprite_palletes_rgb[0] = gb->background_palletes_rgb[0] =
+            gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
                 gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
-            gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] =
+            gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
                 gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA);
-            gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] =
+            gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
                 gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55);
-            gb->sprite_palletes_rgb[7] = gb->sprite_palletes_rgb[3] = gb->background_palletes_rgb[3] =
+            gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
                 gb->rgb_encode_callback(gb, 0, 0, 0);
         }
         
@@ -620,4 +625,64 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb)
     gb->is_cgb = is_cgb;
     GB_reset(gb);
 
+}
+
+void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank)
+{
+    /* Set size and bank to dummy pointers if not set */
+    if (!size) {
+        size = alloca(sizeof(size));
+    }
+    
+    if (!bank) {
+        bank = alloca(sizeof(bank));
+    }
+    
+    
+    switch (access) {
+        case GB_DIRECT_ACCESS_ROM:
+            *size = gb->rom_size;
+            *bank = gb->mbc_rom_bank;
+            return gb->rom;
+        case GB_DIRECT_ACCESS_RAM:
+            *size = gb->ram_size;
+            *bank = gb->cgb_ram_bank;
+            return gb->ram;
+        case GB_DIRECT_ACCESS_CART_RAM:
+            *size = gb->mbc_ram_size;
+            *bank = gb->mbc_ram_bank;
+            return gb->mbc_ram;
+        case GB_DIRECT_ACCESS_VRAM:
+            *size = gb->vram_size;
+            *bank = gb->cgb_vram_bank;
+            return gb->vram;
+        case GB_DIRECT_ACCESS_HRAM:
+            *size = sizeof(gb->hram);
+            *bank = 0;
+            return &gb->hram;
+        case GB_DIRECT_ACCESS_IO:
+            *size = sizeof(gb->io_registers);
+            *bank = 0;
+            return &gb->io_registers;
+        case GB_DIRECT_ACCESS_BOOTROM:
+            *size = gb->is_cgb? sizeof(gb->boot_rom) : 0x100;
+            *bank = 0;
+            return &gb->boot_rom;
+        case GB_DIRECT_ACCESS_OAM:
+            *size = sizeof(gb->oam);
+            *bank = 0;
+            return &gb->oam;
+        case GB_DIRECT_ACCESS_BGP:
+            *size = sizeof(gb->background_palettes_data);
+            *bank = 0;
+            return &gb->background_palettes_data;
+        case GB_DIRECT_ACCESS_OBP:
+            *size = sizeof(gb->sprite_palettes_data);
+            *bank = 0;
+            return &gb->sprite_palettes_data;
+        default:
+            *size = 0;
+            *bank = 0;
+            return NULL;
+    }
 }
