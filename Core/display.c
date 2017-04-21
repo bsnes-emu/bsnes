@@ -1,14 +1,9 @@
 #include <stdbool.h>
 #include <unistd.h>
-#include <sys/time.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include "gb.h"
-#ifdef _WIN32
-#define _WIN32_WINNT 0x0500
-#include <Windows.h>
-#endif
 
 /*
  Each line is 456 cycles, approximately:
@@ -198,46 +193,12 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     return gb->background_palettes_rgb[(attributes & 7) * 4 + background_pixel];
 }
 
-static int64_t get_nanoseconds(void)
+static void display_vblank(GB_gameboy_t *gb)
 {
-#ifndef _WIN32
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    return (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
-#else
-    FILETIME time;
-	GetSystemTimeAsFileTime(&time);
-	return (((int64_t)time.dwHighDateTime << 32) | time.dwLowDateTime) * 100L;
-#endif
-}
-
-static void nsleep(uint64_t nanoseconds)
-{
-#ifndef _WIN32
-    struct timespec sleep = {0, nanoseconds};
-    nanosleep(&sleep, NULL);
-#else
-	HANDLE timer;
-	LARGE_INTEGER time;
-	timer = CreateWaitableTimer(NULL, true, NULL);
-	time.QuadPart = -(nanoseconds / 100L);
-	SetWaitableTimer(timer, &time, 0, NULL, NULL, false);
-	WaitForSingleObject(timer, INFINITE);
-	CloseHandle(timer);
-#endif
-}
-
-// Todo: FPS capping should not be related to vblank, as the display is not always on, and this causes "jumps"
-// when switching the display on and off.
-void display_vblank(GB_gameboy_t *gb)
-{
-    /* Called every Gameboy vblank. Does FPS-capping and calls user's vblank callback if Turbo Mode allows. */
-    if (gb->turbo && !gb->turbo_dont_skip) {
-        int64_t nanoseconds = get_nanoseconds();
-        if (nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
+    if (gb->turbo) {
+        if (GB_timing_sync_turbo(gb)) {
             return;
         }
-        gb->last_vblank = nanoseconds;
     }
     
     if (!gb->disable_rendering && (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped)) {
@@ -247,16 +208,7 @@ void display_vblank(GB_gameboy_t *gb)
     }
 
     gb->vblank_callback(gb);
-    if (!gb->turbo) {
-        int64_t nanoseconds = get_nanoseconds();
-        if (labs((signed long)(nanoseconds - gb->last_vblank)) < FRAME_LENGTH ) {
-            nsleep(FRAME_LENGTH  + gb->last_vblank - nanoseconds);
-            gb->last_vblank += FRAME_LENGTH;
-        }
-        else {
-            gb->last_vblank = nanoseconds;
-        }
-    }
+    GB_timing_sync(gb);
 
     gb->vblank_just_occured = true;
 }
@@ -352,7 +304,6 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             /* Reset window rendering state */
             gb->effective_window_enabled = false;
             gb->effective_window_y = 0xFF;
-            display_vblank(gb);
         }
         
         /* Entered VBlank state, update STAT and IF */
@@ -365,6 +316,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             if (gb->io_registers[GB_IO_STAT] & 0x20) {
                 gb->stat_interrupt_line = true;
             }
+            display_vblank(gb);
         }
         
         /* Handle STAT changes for lines 0-143 */

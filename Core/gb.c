@@ -574,7 +574,6 @@ void GB_reset(GB_gameboy_t *gb)
     
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
-    gb->last_vblank = clock();
     gb->cgb_ram_bank = 1;
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;

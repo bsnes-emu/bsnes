@@ -325,7 +325,7 @@ struct GB_gameboy_internal_s {
 
     /* Timing */
     GB_SECTION(timing,
-        int64_t last_vblank;
+        GB_PADDING(int64_t, last_vblank);
         uint32_t display_cycles;
         uint32_t div_cycles;
         GB_PADDING(uint32_t, tima_cycles);
@@ -394,12 +394,16 @@ struct GB_gameboy_internal_s {
         uint32_t *screen;
         GB_sample_t *audio_buffer;
         bool keys[GB_KEY_MAX];
+               
+        /* Timing */
+        uint64_t last_sync;
+        uint64_t cycles_since_last_sync;
 
-        /* Audio Specific */
+        /* Audio */
         unsigned int buffer_size;
         unsigned int sample_rate;
         unsigned int audio_position;
-        bool audio_stream_started; // detects first copy request to minimize lag
+        bool audio_stream_started; /* detects first copy request to minimize lag */
         volatile bool audio_copy_in_progress;
         volatile bool apu_lock;
 
@@ -416,6 +420,7 @@ struct GB_gameboy_internal_s {
         GB_rumble_callback_t rumble_callback;
         GB_serial_transfer_start_callback_t serial_transfer_start_callback;
         GB_serial_transfer_end_callback_t serial_transfer_end_callback;
+               
         /* IR */
         long cycles_since_ir_change;
         long cycles_since_input_ir_change;

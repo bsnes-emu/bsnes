@@ -440,6 +440,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     /* Todo: verify this. */
                     gb->display_cycles = gb->cgb_double_speed? -2 : -4;
                 }
+                else if (!(value & 0x80) && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
+                    /* Sync after turning off LCD */
+                    GB_timing_sync(gb);
+                }
                 gb->io_registers[GB_IO_LCDC] = value;
                 return;
 
