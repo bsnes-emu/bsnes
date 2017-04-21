@@ -57,34 +57,77 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
    va_end(va);
 }
 
+static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
+{
+    memcpy(dest, src, length);
+    dest[length] = 0;
+
+    /* Remove extension */
+    for (size_t i = length; i--;) {
+        if (dest[i] == '/') break;
+        if (dest[i] == '.') {
+            dest[i] = 0;
+            break;
+        }
+    }
+
+    /* Add new extension */
+    strcat(dest, ext);
+}
 
 static void GB_update_keys_status(GB_gameboy_t *gb)
 {
+	int i;
 
-  input_poll_cb();
 
-GB_set_key_state(gb, GB_KEY_RIGHT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT));
-GB_set_key_state(gb, GB_KEY_LEFT, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT));
-GB_set_key_state(gb, GB_KEY_UP,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) );
-GB_set_key_state(gb, GB_KEY_DOWN,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN));
-GB_set_key_state(gb, GB_KEY_A,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) );
-GB_set_key_state(gb, GB_KEY_B,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) );
-GB_set_key_state(gb, GB_KEY_SELECT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
-GB_set_key_state(gb, GB_KEY_START,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
-/*
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A)) << 0;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B)) << 1;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) << 2;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START)) << 3;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT)) << 4;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT)) << 5;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP)) << 6;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN)) << 7;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R)) << 8;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L)) << 9;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X)) << 10;
-   keys |= (!!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y)) << 11;
-*/
+	input_poll_cb();
+
+	GB_set_key_state(gb, GB_KEY_RIGHT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT));
+	GB_set_key_state(gb, GB_KEY_LEFT, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT));
+	GB_set_key_state(gb, GB_KEY_UP,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) );
+	GB_set_key_state(gb, GB_KEY_DOWN,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN));
+	GB_set_key_state(gb, GB_KEY_A,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) );
+	GB_set_key_state(gb, GB_KEY_B,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) );
+	GB_set_key_state(gb, GB_KEY_SELECT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
+	GB_set_key_state(gb, GB_KEY_START,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
+
+	GB_set_turbo_mode(gb, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X),false );
+
+	static bool ctrl = false;
+	static bool shift = false;
+
+	ctrl = input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RCTRL) ||input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RCTRL);
+
+	shift = input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RSHIFT) ||input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_LSHIFT);
+
+	if(input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_c))
+		if(ctrl){
+			ctrl=false;
+			GB_debugger_break(gb);
+		}
+
+
+	for(i=0;i<10;i++)
+		if(input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_0+i)){
+			if(ctrl){
+
+				char save_path[strlen(retro_game_path) + 4];
+                                char save_extension[] =".s0";
+                                save_extension[2] += i;
+                                replace_extension(retro_game_path, strlen(retro_game_path), save_path, save_extension);
+
+                                if (shift) {
+                                    GB_load_state(gb, save_path);
+                                }
+                                else {
+                                    GB_save_state(gb, save_path);
+                                }
+
+				
+			}
+		}
+
+
 }
 
 
@@ -115,24 +158,6 @@ static void debugger_interrupt(int ignore)
         exit(0);
     }
     GB_debugger_break(&gb);
-}
-
-static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
-{
-    memcpy(dest, src, length);
-    dest[length] = 0;
-
-    /* Remove extension */
-    for (size_t i = length; i--;) {
-        if (dest[i] == '/') break;
-        if (dest[i] == '.') {
-            dest[i] = 0;
-            break;
-        }
-    }
-
-    /* Add new extension */
-    strcat(dest, ext);
 }
 
 static retro_environment_t environ_cb;
