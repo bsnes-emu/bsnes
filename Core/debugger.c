@@ -743,8 +743,6 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     GB_log(gb, "HL = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_HL], false));
     GB_log(gb, "SP = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_SP], false));
     GB_log(gb, "PC = %s\n", value_to_string(gb, gb->pc, false));
-
-    GB_log(gb, "Display Controller: LY = %d/%u\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
     return true;
 }
 
@@ -1384,6 +1382,45 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const d
 
     return true;
 }
+
+static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+    GB_log(gb, "LCDC:\n");
+    GB_log(gb, "    LCD enabled: %s\n",(gb->io_registers[GB_IO_LCDC] & 128)? "Enabled" : "Disabled");
+    GB_log(gb, "    %s: %s\n", gb->is_cgb? (gb->cgb_mode? "Sprite priority flags" : "Background and Window") : "Background",
+                               (gb->io_registers[GB_IO_LCDC] & 1)? "Enabled" : "Disabled");
+    GB_log(gb, "    Objects: %s\n", (gb->io_registers[GB_IO_LCDC] & 2)? "Enabled" : "Disabled");
+    GB_log(gb, "    Object size: %s\n", (gb->io_registers[GB_IO_LCDC] & 4)? "8x16" : "8x8");
+    GB_log(gb, "    Background tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & 8)? "$9C00" : "$9800");
+    GB_log(gb, "    Background and Window Tileset: %s\n", (gb->io_registers[GB_IO_LCDC] & 16)? "$8000" : "$8800");
+    GB_log(gb, "    Window: %s\n", (gb->io_registers[GB_IO_LCDC] & 32)? "Enabled" : "Disabled");
+    GB_log(gb, "    Window tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & 64)? "$9C00" : "$9800");
+    
+    GB_log(gb, "\nSTAT:\n");
+    static const char *modes[] = {"Mode 0, H-Blank", "Mode 1, V-Blank", "Mode 2, OAM", "Mode 3, Rendering"};
+    GB_log(gb, "    Current mode: %s\n", modes[gb->io_registers[GB_IO_STAT] & 3]);
+    GB_log(gb, "    LYC flag: %s\n", (gb->io_registers[GB_IO_STAT] & 4)? "On" : "Off");
+    GB_log(gb, "    H-Blank interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 8)? "Enabled" : "Disabled");
+    GB_log(gb, "    V-Blank interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 16)? "Enabled" : "Disabled");
+    GB_log(gb, "    OAM interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 32)? "Enabled" : "Disabled");
+    GB_log(gb, "    LYC interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 64)? "Enabled" : "Disabled");
+    
+    
+    GB_log(gb, "\nCycles since frame start: %d\n", gb->display_cycles);
+    GB_log(gb, "Current line: %d\n", gb->display_cycles / 456);
+    GB_log(gb, "LY: %d\n", gb->io_registers[GB_IO_LY]);
+    GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
+    GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
+    GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
+    
+    return true;
+}
+
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
 #define HELP_NEWLINE "\n             "
@@ -1401,6 +1438,7 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
+    {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints.",

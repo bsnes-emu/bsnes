@@ -366,7 +366,7 @@ struct GB_gameboy_internal_s {
         uint32_t background_palettes_rgb[0x20];
         uint32_t sprite_palettes_rgb[0x20];
         int16_t previous_lcdc_x;
-        uint8_t padding;
+        GB_PADDING(uint8_t, padding);
         bool effective_window_enabled;
         uint8_t effective_window_y;
         bool stat_interrupt_line;
