@@ -146,6 +146,25 @@ void GB_free(GB_gameboy_t *gb)
     memset(gb, 0, sizeof(*gb));
 }
 
+#ifdef __LIBRETRO__
+#include "../libretro/cgb_boot.h"
+#include "../libretro/dmg_boot.h"
+
+int GB_load_boot_rom_dmg(GB_gameboy_t *gb)
+{
+   memset(gb->boot_rom, 0x900, sizeof(gb->boot_rom));
+   memcpy(gb->boot_rom, dmg_boot, dmg_boot_length);
+   return 0;
+}
+
+int GB_load_boot_rom_cgb(GB_gameboy_t *gb)
+{
+   memset(gb->boot_rom, 0x900, sizeof(gb->boot_rom));
+   memcpy(gb->boot_rom, cgb_boot, cgb_boot_length);
+   return 0;
+}
+#endif
+
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");

@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <stdarg.h>
 
+
 #define AUDIO_FREQUENCY 44100
 
 #ifdef _WIN32
@@ -313,13 +314,20 @@ bool retro_load_game(const struct retro_game_info *info)
       GB_init(&gb);
       snprintf(buf, sizeof(buf), "%s%cdmg_boot.bin", retro_base_directory, slash);
       err = GB_load_boot_rom(&gb, buf);
+
+      if (err)
+         err = GB_load_boot_rom_dmg(&gb);
    }
    else 
    {
       GB_init_cgb(&gb);
       snprintf(buf, sizeof(buf), "%s%ccgb_boot.bin", retro_base_directory, slash);
       err = GB_load_boot_rom(&gb, buf);
+
+      if (err)
+         err = GB_load_boot_rom_cgb(&gb);
    }
+
    if (err) 
       log_cb(RETRO_LOG_INFO, "Failed to load boot ROM %s %d\n", buf, err);
    (void)info;
