@@ -416,6 +416,26 @@ void GB_run(GB_gameboy_t *gb)
     }
 }
 
+uint64_t GB_run_frame(GB_gameboy_t *gb)
+{
+    /* Configure turbo temporarily, the user wants to handle FPS capping manually. */
+    bool old_turbo = gb->turbo;
+    bool old_dont_skip = gb->turbo_dont_skip;
+    gb->turbo = true;
+    gb->turbo_dont_skip = true;
+    
+    gb->cycles_since_last_sync = 0;
+    while (true) {
+        GB_run(gb);
+        if (gb->vblank_just_occured) {
+            break;
+        }
+    }
+    gb->turbo = old_turbo;
+    gb->turbo_dont_skip = old_dont_skip;
+    return gb->cycles_since_last_sync * FRAME_LENGTH * LCDC_PERIOD;
+}
+
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
 {
     gb->screen = output;
