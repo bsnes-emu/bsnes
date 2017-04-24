@@ -152,14 +152,14 @@ void GB_free(GB_gameboy_t *gb)
 
 int GB_load_boot_rom_dmg(GB_gameboy_t *gb)
 {
-   memset(gb->boot_rom, 0x900, sizeof(gb->boot_rom));
+   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
    memcpy(gb->boot_rom, dmg_boot, dmg_boot_length);
    return 0;
 }
 
 int GB_load_boot_rom_cgb(GB_gameboy_t *gb)
 {
-   memset(gb->boot_rom, 0x900, sizeof(gb->boot_rom));
+   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
    memcpy(gb->boot_rom, cgb_boot, cgb_boot_length);
    return 0;
 }
