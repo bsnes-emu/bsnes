@@ -90,9 +90,6 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 	GB_set_key_state(gb, GB_KEY_B,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) );
 	GB_set_key_state(gb, GB_KEY_SELECT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
 	GB_set_key_state(gb, GB_KEY_START,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
-
-	GB_set_turbo_mode(gb, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X),false );
-
 }
 
 
@@ -136,10 +133,10 @@ void retro_init(void)
    else
       snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", ".");
 
-   if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
-      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", dir);
+   if (environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &dir) && dir)
+      snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", dir);
    else
-      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", ".");
+      snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", ".");
 }
 
 void retro_deinit(void)
