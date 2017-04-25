@@ -78,8 +78,6 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
 
 static void GB_update_keys_status(GB_gameboy_t *gb)
 {
-	int i;
-
 
 	input_poll_cb();
 
@@ -94,57 +92,21 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 
 	GB_set_turbo_mode(gb, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X),false );
 
-	static bool ctrl = false;
-	static bool shift = false;
-
-	ctrl = input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RCTRL) ||input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RCTRL);
-
-	shift = input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_RSHIFT) ||input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_LSHIFT);
-
-	if(input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_c))
-		if(ctrl){
-			ctrl=false;
-			GB_debugger_break(gb);
-		}
-
-
-	for(i=0;i<10;i++)
-		if(input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,RETROK_0+i)){
-			if(ctrl){
-
-				char save_path[strlen(retro_game_path) + 4];
-                                char save_extension[] =".s0";
-                                save_extension[2] += i;
-                                replace_extension(retro_game_path, strlen(retro_game_path), save_path, save_extension);
-
-                                if (shift) {
-                                    GB_load_state(gb, save_path);
-                                }
-                                else {
-                                    GB_save_state(gb, save_path);
-                                }
-
-				
-			}
-		}
-
-
 }
 
 
 static void audio_callback(void *gb)
 {
-    GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, 735);
-    audio_batch_cb(soundbuf, 735);
+   GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, 735);
+   audio_batch_cb(soundbuf, 735);
 }
 
 
 static void vblank(GB_gameboy_t *gb)
 {
-    GB_update_keys_status(gb);
-    GB_set_pixels_output(gb, frame_buf);
-    audio_callback(gb);
-    RLOOP=0;
+   GB_update_keys_status(gb);
+   GB_set_pixels_output(gb, frame_buf);
+   audio_callback(gb);
 }
 
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
@@ -307,7 +269,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    char buf[256];
    int err = 0;
-   if (strstr(info->path, "gbc"))
+   if (!strstr(info->path, "gbc"))
    {
       GB_init(&gb);
       snprintf(buf, sizeof(buf), "%s%cdmg_boot.bin", retro_base_directory, slash);
@@ -335,28 +297,26 @@ bool retro_load_game(const struct retro_game_info *info)
         exit(1);
    }
 
-   signal(SIGINT, debugger_interrupt);
+   GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
+   GB_set_user_data(&gb, (void*)NULL);
+   GB_set_pixels_output(&gb,(unsigned char *) frame_buf);
+   GB_set_rgb_encode_callback(&gb, rgb_encode);
 
-    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    GB_set_user_data(&gb, (void*)NULL);
-    GB_set_pixels_output(&gb,(unsigned char *) frame_buf);
-    GB_set_rgb_encode_callback(&gb, rgb_encode);
+   size_t path_length = strlen(retro_game_path);
 
-    size_t path_length = strlen(retro_game_path);
+   /* Configure battery */
+   replace_extension(retro_game_path, path_length, battery_save_path, ".sav");
+   GB_load_battery(&gb, battery_save_path);
+   printf("(%s)\n",battery_save_path);
+   /* Configure symbols */
 
-    /* Configure battery */
-    replace_extension(retro_game_path, path_length, battery_save_path, ".sav");
-    GB_load_battery(&gb, battery_save_path);
-    printf("(%s)\n",battery_save_path);
-    /* Configure symbols */
+   sprintf(TMPC,"%s/registers.sym",retro_base_directory);
+   GB_debugger_load_symbol_file(&gb, TMPC);
+ 
+   replace_extension(retro_game_path, path_length, symbols_path, ".sym");
+   GB_debugger_load_symbol_file(&gb, symbols_path);
 
-    sprintf(TMPC,"%s/registers.sym",retro_base_directory);
-    GB_debugger_load_symbol_file(&gb, TMPC);
-    
-    replace_extension(retro_game_path, path_length, symbols_path, ".sym");
-    GB_debugger_load_symbol_file(&gb, symbols_path);
-
-    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
+   GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
    return true;
 }
 
