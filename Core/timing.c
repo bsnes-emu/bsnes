@@ -59,7 +59,9 @@ void GB_timing_sync(GB_gameboy_t *gb)
     uint64_t target_nanoseconds = gb->cycles_since_last_sync * FRAME_LENGTH / LCDC_PERIOD;
     int64_t nanoseconds = get_nanoseconds();
     if (labs((signed long)(nanoseconds - gb->last_sync)) < target_nanoseconds ) {
+#ifndef __LIBRETRO__
         nsleep(target_nanoseconds  + gb->last_sync - nanoseconds);
+#endif
         gb->last_sync += target_nanoseconds;
     }
     else {

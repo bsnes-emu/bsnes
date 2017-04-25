@@ -43,7 +43,8 @@ static retro_input_state_t input_state_cb;
 
 signed short soundbuf[1024*2];
 
-char retro_base_directory[4096];
+char retro_system_directory[4096];
+char retro_save_directory[4096];
 char retro_game_path[4096];
 int RLOOP=1;
 
@@ -131,10 +132,14 @@ void retro_init(void)
    const char *dir = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
-   {
-      snprintf(retro_base_directory, sizeof(retro_base_directory), "%s/sameboy", dir);
-   }
-   else snprintf(retro_base_directory, sizeof(retro_base_directory), "%s", ".");
+      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", dir);
+   else
+      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", ".");
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
+      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", dir);
+   else
+      snprintf(retro_system_directory, sizeof(retro_system_directory), "%s", ".");
 }
 
 void retro_deinit(void)
@@ -272,7 +277,8 @@ bool retro_load_game(const struct retro_game_info *info)
    if (!strstr(info->path, "gbc"))
    {
       GB_init(&gb);
-      snprintf(buf, sizeof(buf), "%s%cdmg_boot.bin", retro_base_directory, slash);
+      snprintf(buf, sizeof(buf), "%s%cdmg_boot.bin", retro_system_directory, slash);
+      log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
       err = GB_load_boot_rom(&gb, buf);
 
       if (err)
@@ -281,7 +287,8 @@ bool retro_load_game(const struct retro_game_info *info)
    else 
    {
       GB_init_cgb(&gb);
-      snprintf(buf, sizeof(buf), "%s%ccgb_boot.bin", retro_base_directory, slash);
+      snprintf(buf, sizeof(buf), "%s%ccgb_boot.bin", retro_system_directory, slash);
+      log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
       err = GB_load_boot_rom(&gb, buf);
 
       if (err)
@@ -310,7 +317,7 @@ bool retro_load_game(const struct retro_game_info *info)
    printf("(%s)\n",battery_save_path);
    /* Configure symbols */
 
-   sprintf(TMPC,"%s/registers.sym",retro_base_directory);
+   sprintf(TMPC,"%s/registers.sym",retro_system_directory);
    GB_debugger_load_symbol_file(&gb, TMPC);
  
    replace_extension(retro_game_path, path_length, symbols_path, ".sym");
