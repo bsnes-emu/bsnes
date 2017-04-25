@@ -194,8 +194,8 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
 void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
-   info->library_name     = "sameboy";
-   info->library_version  = "0.1";
+   info->library_name     = "SameBoy";
+   info->library_version  = "0.8";
    info->need_fullpath    = true;
    info->valid_extensions = "gb|gbc";
 }
@@ -204,7 +204,7 @@ void retro_get_system_info(struct retro_system_info *info)
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    struct retro_game_geometry geom = { VIDEO_WIDTH, VIDEO_HEIGHT,VIDEO_WIDTH, VIDEO_HEIGHT ,160.0 / 144.0 };
-   struct retro_system_timing timing = { 60.0, 44100.0 };
+   struct retro_system_timing timing = { 59.72, 44100.0 };
 
    info->geometry = geom;
    info->timing   = timing;
@@ -275,9 +275,7 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
 
-   while(RLOOP==1)GB_run(&gb);
-   RLOOP=1;
-
+   GB_run_frame(&gb);
    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, 0);
 
 }
@@ -349,7 +347,7 @@ bool retro_load_game(const struct retro_game_info *info)
     /* Configure battery */
     replace_extension(retro_game_path, path_length, battery_save_path, ".sav");
     GB_load_battery(&gb, battery_save_path);
-printf("(%s)\n",battery_save_path);
+    printf("(%s)\n",battery_save_path);
     /* Configure symbols */
 
     sprintf(TMPC,"%s/registers.sym",retro_base_directory);

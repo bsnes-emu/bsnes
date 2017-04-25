@@ -29,11 +29,14 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 	system_platform = win
 endif
 
+ifeq ($(platform), win)
+	INCLUDES += -I Windows
+endif
 
 CORE_DIR     += ./Core
 LIBRETRO_DIR += ./libretro
 TARGET_NAME  = sameboy
-LIBM		    = -lc -lm
+LIBM		    = -lm
 INCLUDES     += -I $(CORE_DIR)
 
 ifeq ($(ARCHFLAGS),)
