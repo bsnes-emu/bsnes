@@ -300,7 +300,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
    GB_set_user_data(&gb, (void*)NULL);
-   GB_set_pixels_output(&gb,(unsigned char *) frame_buf);
+   GB_set_pixels_output(&gb,(unsigned int*)frame_buf);
    GB_set_rgb_encode_callback(&gb, rgb_encode);
 
    size_t path_length = strlen(retro_game_path);
