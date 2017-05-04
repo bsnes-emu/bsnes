@@ -5,8 +5,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <sys/time.h>
 #ifndef _WIN32
-#include <unistd.h>
 #include <sys/select.h>
 #endif
 #include "gb.h"
