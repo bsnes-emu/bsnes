@@ -1,14 +1,19 @@
-SOURCES_C   := $(CORE_DIR)/gb.c \
-					$(CORE_DIR)/apu.c \
-					$(CORE_DIR)/memory.c \
-					$(CORE_DIR)/mbc.c \
-					$(CORE_DIR)/timing.c \
-					$(CORE_DIR)/display.c \
-					$(CORE_DIR)/symbol_hash.c \
-					$(CORE_DIR)/debugger.c \
-					$(CORE_DIR)/camera.c \
-					$(CORE_DIR)/z80_cpu.c \
-					$(CORE_DIR)/z80_disassembler.c \
-					$(CORE_DIR)/joypad.c \
-					$(LIBRETRO_DIR)/libretro.c
+INCFLAGS    := -I$(CORE_DIR) \
+					-I$(CORE_DIR)/Core
+
+SOURCES_C   := $(CORE_DIR)/Core/gb.c \
+					$(CORE_DIR)/Core/apu.c \
+					$(CORE_DIR)/Core/memory.c \
+					$(CORE_DIR)/Core/mbc.c \
+					$(CORE_DIR)/Core/timing.c \
+					$(CORE_DIR)/Core/display.c \
+					$(CORE_DIR)/Core/symbol_hash.c \
+					$(CORE_DIR)/Core/debugger.c \
+					$(CORE_DIR)/Core/camera.c \
+					$(CORE_DIR)/Core/z80_cpu.c \
+					$(CORE_DIR)/Core/z80_disassembler.c \
+					$(CORE_DIR)/Core/joypad.c \
+					$(CORE_DIR)/libretro/libretro.c
+
+SOURCES_CXX :=
 					
