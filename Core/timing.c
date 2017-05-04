@@ -19,6 +19,7 @@ static int64_t get_nanoseconds(void)
 #endif
 }
 
+#ifndef __LIBRETRO__
 static void nsleep(uint64_t nanoseconds)
 {
 #ifndef _WIN32
@@ -34,6 +35,7 @@ static void nsleep(uint64_t nanoseconds)
     CloseHandle(timer);
 #endif
 }
+#endif
 
 bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 {
