@@ -8,12 +8,15 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
 					$(CORE_DIR)/Core/timing.c \
 					$(CORE_DIR)/Core/display.c \
 					$(CORE_DIR)/Core/symbol_hash.c \
-					$(CORE_DIR)/Core/debugger.c \
 					$(CORE_DIR)/Core/camera.c \
 					$(CORE_DIR)/Core/z80_cpu.c \
-					$(CORE_DIR)/Core/z80_disassembler.c \
 					$(CORE_DIR)/Core/joypad.c \
 					$(CORE_DIR)/libretro/libretro.c
+
+ifeq ($(HAVE_DEBUGGER), 1)
+SOURCES_C +=  $(CORE_DIR)/Core/debugger.c \
+				  $(CORE_DIR)/Core/z80_disassembler.c
+endif
 
 SOURCES_CXX :=
 					

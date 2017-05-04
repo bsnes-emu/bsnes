@@ -111,14 +111,15 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return r<<16|g<<8|b;
 }
 
+#ifdef HAVE_DEBUGGER
 static void debugger_interrupt(int ignore)
 {
     /* ^C twice to exit */
-    if (GB_debugger_is_stopped(&gb)) {
+    if (GB_debugger_is_stopped(&gb))
         exit(0);
-    }
     GB_debugger_break(&gb);
 }
+#endif
 
 static retro_environment_t environ_cb;
 
@@ -252,8 +253,6 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0 },
    };
 
-   char TMPC[512];
-
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
@@ -312,11 +311,19 @@ bool retro_load_game(const struct retro_game_info *info)
    printf("(%s)\n",battery_save_path);
    /* Configure symbols */
 
-   sprintf(TMPC,"%s/registers.sym",retro_system_directory);
-   GB_debugger_load_symbol_file(&gb, TMPC);
+#ifdef HAVE_DEBUGGER
+   {
+      char TMPC[512];
+      sprintf(TMPC,"%s/registers.sym",retro_system_directory);
+      GB_debugger_load_symbol_file(&gb, TMPC);
+   }
+#endif
  
    replace_extension(retro_game_path, path_length, symbols_path, ".sym");
+
+#ifdef HAVE_DEBUGGER
    GB_debugger_load_symbol_file(&gb, symbols_path);
+#endif
 
    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
    return true;
