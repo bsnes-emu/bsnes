@@ -31,6 +31,16 @@ typedef struct __attribute__((packed)) {
     uint8_t flags;
 } GB_sprite_t;
 
+static bool window_enabled(GB_gameboy_t *gb)
+{
+    if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
+        if (!gb->cgb_mode && gb->is_cgb) {
+            return false;
+        }
+    }
+    return (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] < 167;
+}
+
 static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
     /*
@@ -56,25 +66,18 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     uint8_t lowest_sprite_x = 0xFF;
     bool use_obp1 = false, priority = false;
     bool in_window = false;
-    bool window_enabled = (gb->io_registers[GB_IO_LCDC] & 0x20);
     bool bg_enabled = true;
     bool bg_behind = false;
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
         if (gb->cgb_mode) {
             bg_behind = true;
         }
-        else if (gb->is_cgb) { /* CGB in DMG mode*/
-            bg_enabled = window_enabled = false;
-        }
         else {
-            /* DMG */
             bg_enabled = false;
         }
     }
-    if (gb->effective_window_enabled && window_enabled) { /* Window Enabled */
-        if (y >= gb->effective_window_y && x + 7 >= gb->io_registers[GB_IO_WX]) {
-            in_window = true;
-        }
+    if (window_enabled(gb) && y >= gb->io_registers[GB_IO_WY] && x + 7 >= gb->io_registers[GB_IO_WX] && gb->current_window_line != 0xFF) {
+        in_window = true;
     }
 
     if (sprites_enabled) {
@@ -125,8 +128,8 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     }
 
     if (in_window) {
-        x -= gb->io_registers[GB_IO_WX] - 7;
-        y -= gb->effective_window_y;
+        x -= gb->io_registers[GB_IO_WX] - 7; // Todo: This value is probably latched
+        y = gb->current_window_line;
     }
     else {
         x += gb->effective_scx;
@@ -271,8 +274,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         }
 
         /* Reset window rendering state */
-        gb->effective_window_enabled = false;
-        gb->effective_window_y = 0xFF;
+        gb->current_window_line = 0xFF;
         return;
     }
     
@@ -302,8 +304,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             ly_for_comparison = gb->io_registers[GB_IO_LY] = 0;
             
             /* Reset window rendering state */
-            gb->effective_window_enabled = false;
-            gb->effective_window_y = 0xFF;
+            gb->current_window_line = 0xFF;
         }
         
         /* Entered VBlank state, update STAT and IF */
@@ -325,6 +326,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             if (position_in_line == stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
+                if (window_enabled(gb) && gb->display_cycles / LINE_LENGTH >= gb->io_registers[GB_IO_WY]) {
+                    gb->current_window_line++;
+                }
             }
             else if (position_in_line == 0 && gb->display_cycles != 0) {
                 should_compare_ly = gb->is_cgb;
@@ -335,6 +339,11 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_STAT] |= 3;
                 gb->effective_scx = gb->io_registers[GB_IO_SCX];
                 gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
+                
+                /* Todo: This works on both 007 - The World Is Not Enough and Donkey Kong 94, but should be verified better */
+                if (window_enabled(gb) && gb->display_cycles / LINE_LENGTH == gb->io_registers[GB_IO_WY] && gb->current_window_line == 0xFF) {
+                    gb->current_window_line = 0;
+                }
             }
             else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
@@ -491,17 +500,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     uint8_t effective_ly = gb->display_cycles / LINE_LENGTH;
 
-    // Todo: verify this window behavior. It is assumed from the expected behavior of 007 - The World Is Not Enough.
-    if ((gb->io_registers[GB_IO_LCDC] & 0x20) && effective_ly == gb->io_registers[GB_IO_WY]) {
-        gb->effective_window_enabled = true;
-    }
 
     if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH) { /* Mode 2 */
-
-        /* See above comment about window behavior. */
-        if (gb->effective_window_enabled && gb->effective_window_y == 0xFF) {
-            gb->effective_window_y = effective_ly;
-        }
         return;
     }
 

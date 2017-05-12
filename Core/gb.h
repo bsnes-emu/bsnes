@@ -362,10 +362,9 @@ struct GB_gameboy_internal_s {
         uint32_t background_palettes_rgb[0x20];
         uint32_t sprite_palettes_rgb[0x20];
         int16_t previous_lcdc_x;
-        bool effective_window_enabled;
-        uint8_t effective_window_y;
         bool stat_interrupt_line;
         uint8_t effective_scx;
+        uint8_t current_window_line;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
