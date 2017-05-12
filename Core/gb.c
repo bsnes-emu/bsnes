@@ -91,6 +91,7 @@ void GB_init(GB_gameboy_t *gb)
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
+    gb->audio_quality = 4;
     
     GB_reset(gb);
 }
@@ -105,6 +106,7 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
+    gb->audio_quality = 4;
 
     GB_reset(gb);
 }

@@ -186,23 +186,52 @@ void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *sampl
 void GB_apu_run(GB_gameboy_t *gb)
 {
     if (gb->sample_rate == 0) return;
-    static bool should_log_overflow = true;
     while (gb->audio_copy_in_progress);
     double ticks_per_sample = (double) CPU_FREQUENCY / gb->sample_rate;
+
+    if (gb->audio_quality == 0) {
+        GB_sample_t sample;
+        GB_apu_get_samples_and_update_pcm_regs(gb, &sample);
+        gb->current_supersample.left += sample.left;
+        gb->current_supersample.right += sample.right;
+        gb->n_subsamples++;
+    }
+    else if (gb->audio_quality != 1) {
+        double ticks_per_subsample = ticks_per_sample / gb->audio_quality;
+        if (ticks_per_subsample < 1) {
+            ticks_per_subsample = 1;
+        }
+        if (gb->apu_subsample_cycles > ticks_per_subsample) {
+            gb->apu_subsample_cycles -= ticks_per_subsample;
+        }
+        
+        GB_sample_t sample;
+        GB_apu_get_samples_and_update_pcm_regs(gb, &sample);
+        gb->current_supersample.left += sample.left;
+        gb->current_supersample.right += sample.right;
+        gb->n_subsamples++;
+    }
 
     if (gb->apu_sample_cycles > ticks_per_sample) {
         gb->apu_sample_cycles -= ticks_per_sample;
         if (gb->audio_position == gb->buffer_size) {
             /*
-             if (should_log_overflow && !gb->turbo) {
-             GB_log(gb, "Audio overflow\n");
-             should_log_overflow = false;
+             if (!gb->turbo) {
+                 GB_log(gb, "Audio overflow\n");
              }
              */
         }
         else {
-            GB_apu_get_samples_and_update_pcm_regs(gb, &gb->audio_buffer[gb->audio_position++]);
-            should_log_overflow = true;
+            if (gb->audio_quality == 1) {
+                GB_apu_get_samples_and_update_pcm_regs(gb, &gb->audio_buffer[gb->audio_position++]);
+            }
+            else {
+                gb->audio_buffer[gb->audio_position].left = round(gb->current_supersample.left / gb->n_subsamples);
+                gb->audio_buffer[gb->audio_position].right = round(gb->current_supersample.right / gb->n_subsamples);
+                gb->n_subsamples = 0;
+                gb->current_supersample = (GB_double_sample_t){0, };
+                gb->audio_position++;
+            }
         }
     }
 }
@@ -219,7 +248,14 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
 
     if (count > gb->audio_position) {
         // GB_log(gb, "Audio underflow: %d\n", count - gb->audio_position);
-        memset(dest + gb->audio_position, 0, (count - gb->audio_position) * sizeof(*gb->audio_buffer));
+        if (gb->audio_position != 0) {
+            for (unsigned i = 0; i < count - gb->audio_position; i++) {
+                dest[gb->audio_position + i] = gb->audio_buffer[gb->audio_position - 1];
+            }
+        }
+        else {
+            memset(dest + gb->audio_position, 0, (count - gb->audio_position) * sizeof(*gb->audio_buffer));
+        }
         count = gb->audio_position;
     }
     memcpy(dest, gb->audio_buffer, count * sizeof(*gb->audio_buffer));
@@ -442,4 +478,14 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
             break;
     }
+}
+
+void GB_set_audio_quality(GB_gameboy_t *gb, unsigned quality)
+{
+    gb->audio_quality = quality;
+}
+
+unsigned GB_apu_get_current_buffer_length(GB_gameboy_t *gb)
+{
+    return  gb->audio_position;
 }
