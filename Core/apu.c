@@ -159,7 +159,7 @@ void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *sampl
         gb->io_registers[GB_IO_PCM_12] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
     }
 
-    if (gb->apu.wave_enable)
+    if (gb->apu.wave_channels[2].is_playing)
     {
         int16_t sample = generate_wave(gb->apu.wave_channels[2].phase,
                                        gb->apu.wave_channels[2].wave_length,
