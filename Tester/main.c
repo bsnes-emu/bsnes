@@ -326,14 +326,19 @@ int main(int argc, char **argv)
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
-        push_right = memcmp((const char *)(gb.rom + 0x134), "BOB ET BOB", strlen("BOB ET BOB")) == 0;
+        push_right = memcmp((const char *)(gb.rom + 0x134), "BOB ET BOB", strlen("BOB ET BOB")) == 0 ||
+                     strcmp((const char *)(gb.rom + 0x134), "LITTLE MASTER") == 0 ||
+                     /* M&M's Minis Madness Demo (which has no menu but the same title as the full game) */
+                     (memcmp((const char *)(gb.rom + 0x134), "MINIMADNESSBMIE", strlen("MINIMADNESSBMIE")) == 0 &&
+                      gb.rom[0x14e] == 0x6c);
 
         
         /* This game temporarily sets SP to OAM RAM */
         allow_weird_sp_values = strcmp((const char *)(gb.rom + 0x134), "WDL:TT") == 0;
         
         /* This game uses some recursive algorithms and therefore requires quite a large call stack */
-        large_stack = memcmp((const char *)(gb.rom + 0x134), "MICRO EPAK1BM", strlen("MICRO EPAK1BM")) == 0;
+        large_stack = memcmp((const char *)(gb.rom + 0x134), "MICRO EPAK1BM", strlen("MICRO EPAK1BM")) == 0 ||
+                      strcmp((const char *)(gb.rom + 0x134), "TECMO BOWL") == 0;
 
         /* Pressing start while in the map in Tsuri Sensi will leak an internal screen-stack which
            will eventually overflow, override an array of jump-table indexes, jump to a random
