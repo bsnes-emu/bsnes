@@ -651,12 +651,14 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb)
 void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank)
 {
     /* Set size and bank to dummy pointers if not set */
+    size_t dummy_size;
+    uint16_t dummy_bank;
     if (!size) {
-        size = alloca(sizeof(size));
+        size = &dummy_size;
     }
     
     if (!bank) {
-        bank = alloca(sizeof(bank));
+        bank = &dummy_bank;
     }
     
     

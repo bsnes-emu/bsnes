@@ -43,10 +43,10 @@ endif
 # Set compilation and linkage flags based on target, platform and configuration
 
 CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
-SDL_LDFLAGS := -lSDL
+SDL_LDFLAGS := -lSDL2
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows
-LDFLAGS += -lmsvcrt -lSDLmain -Wl,/MANIFESTFILE:NUL
+LDFLAGS += -lmsvcrt -lSDL2main -Wl,/MANIFESTFILE:NUL
 else
 LDFLAGS += -lc -lm
 endif
@@ -56,19 +56,16 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> /dev/null)
 CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT) -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore
-SDL_LDFLAGS := -F/Library/Frameworks -framework SDL
+SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
 endif
-
+CFLAGS += -Wno-deprecated-declarations
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -Wno-deprecated-declarations # Seems like Microsoft deprecated every single LIBC function
-LDFLAGS += -Wl,/NODEFAULTLIB:libcmt
+CFLAGS += -Wno-deprecated-declarations -Dstrdup=_strdup # Seems like Microsoft deprecated every single LIBC function
+LDFLAGS += -Wl,/NODEFAULTLIB:libcmt.lib
 endif
 
 ifeq ($(CONF),debug)
 CFLAGS += -g
-ifeq ($(PLATFORM),windows32)
-LDFLAGS += -Wl,/debug
-endif
 else ifeq ($(CONF), release)
 CFLAGS += -O3 -DNDEBUG
 ifneq ($(PLATFORM),windows32)
@@ -82,7 +79,7 @@ endif
 # Define our targets
 
 ifeq ($(PLATFORM),windows32)
-SDL_TARGET := $(BIN)/sdl/sameboy.exe $(BIN)/sdl/sameboy_debugger.exe $(BIN)/sdl/SDL.dll
+SDL_TARGET := $(BIN)/sdl/sameboy.exe $(BIN)/sdl/sameboy_debugger.exe $(BIN)/sdl/SDL2.dll
 TESTER_TARGET := $(BIN)/tester/sameboy_tester.exe
 else
 SDL_TARGET := $(BIN)/sdl/sameboy
@@ -105,7 +102,6 @@ TESTER_SOURCES := $(shell ls Tester/*.c)
 ifeq ($(PLATFORM),Darwin)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
-SDL_SOURCES += $(shell ls SDL/*.m)
 endif
 
 CORE_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(CORE_SOURCES))
@@ -236,11 +232,11 @@ $(OBJ)/%.res: %.rc
 %.o: %.res
 	cvtres /OUT:"$@" $^
 
-# We must provide SDL.dll with the Windows port. This is an AWFUL HACK to find it.
+# We must provide SDL2.dll with the Windows port. This is an AWFUL HACK to find it.
 SPACE :=
 SPACE +=
-$(BIN)/sdl/SDL.dll:
-	@$(eval POTENTIAL_MATCHES := $(subst @@@," ",$(patsubst %,%/SDL.dll,$(subst ;,$(SPACE),$(subst $(SPACE),@@@,$(lib))))))
+$(BIN)/sdl/SDL2.dll:
+	@$(eval POTENTIAL_MATCHES := $(subst @@@," ",$(patsubst %,%/SDL2.dll,$(subst ;,$(SPACE),$(subst $(SPACE),@@@,$(lib))))))
 	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
 	cp "$(MATCH)" $@
 

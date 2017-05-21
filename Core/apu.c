@@ -15,6 +15,14 @@ _a > _b ? _a : _b; })
 __typeof__ (b) _b = (b); \
 _a < _b ? _a : _b; })
 
+#ifdef _WIN32
+/* "Old" (Pre-2015) Windows headers/libc don't have round. */
+static inline double round(double f)
+{
+    return f >= 0? (int)(f + 0.5) : (int)(f - 0.5);
+}
+#endif
+
 #define APU_FREQUENCY 0x80000
 
 static int16_t generate_square(uint64_t phase, uint32_t wave_length, int16_t amplitude, uint8_t duty)

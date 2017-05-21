@@ -4,7 +4,7 @@
 #include <time.h>
 #include <assert.h>
 #include <signal.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
@@ -15,28 +15,94 @@
 #define snprintf _snprintf
 #endif
 
+#if defined(__APPLE__) && SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL == 5
+#error You are using SDL2-2.0.5, which contains a bug that prevents 96KHz audio playback on macOS. Use SDL2-2.0.4 or alternatively modify this file to reduce the frequency to 44100 and disable this error.
+#endif
+
 #include "gb.h"
 
-static bool running = false;
 static char *filename;
+static char *battery_save_path_ptr;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
+
+static SDL_Window *window = NULL;
+static SDL_Renderer *renderer = NULL;
+static SDL_Texture *texture = NULL;
+static SDL_PixelFormat *pixel_format = NULL;
+static uint32_t pixels[160*144];
 GB_gameboy_t gb;
 
-static void GB_update_keys_status(GB_gameboy_t *gb)
+static enum {
+    GB_SDL_NO_COMMAND,
+    GB_SDL_SAVE_STATE_COMMAND,
+    GB_SDL_LOAD_STATE_COMMAND,
+    GB_SDL_RESET_COMMAND,
+} pending_command;
+static unsigned command_parameter;
+
+static void handle_events(GB_gameboy_t *gb)
 {
     static bool ctrl = false;
     static bool shift = false;
 #ifdef __APPLE__
     static bool cmd = false;
+#define MODIFIER cmd
+#else
+#define MODIFIER ctrl
 #endif
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
         switch( event.type ){
             case SDL_QUIT:
-                running = false;
+                GB_save_battery(gb, battery_save_path_ptr);
+                exit(0);
+                
             case SDL_KEYDOWN:
-            case SDL_KEYUP:
+                switch (event.key.keysym.sym) {
+                    case SDLK_c:
+                        if (ctrl && event.type == SDL_KEYDOWN) {
+                            ctrl = false;
+                            GB_debugger_break(gb);
+                            
+                        }
+                        break;
+                        
+                    case SDLK_r:
+                        if (MODIFIER) {
+                            pending_command = GB_SDL_RESET_COMMAND;
+                        }
+                        break;
+                        
+                    case SDLK_m:
+                        if (MODIFIER) {
+#ifdef __APPLE__
+                            // Can't over CMD+M (Minimize) in SDL
+                            if (!shift) {
+                                break;
+                            }
+#endif
+                            SDL_PauseAudio(SDL_GetAudioStatus() == SDL_AUDIO_PLAYING? true : false);
+                        }
+                        break;
+                        
+                    default:
+                        /* Save states */
+                        if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) {
+                            if (MODIFIER) {
+                                command_parameter = event.key.keysym.sym - SDLK_0;
+                                
+                                if (shift) {
+                                    pending_command = GB_SDL_LOAD_STATE_COMMAND;
+                                }
+                                else {
+                                    pending_command = GB_SDL_SAVE_STATE_COMMAND;
+                                }
+                            }
+                        }
+                        break;
+                }
+            case SDL_KEYUP: // Fallthrough
                 switch (event.key.keysym.sym) {
                     case SDLK_RIGHT:
                         GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_KEYDOWN);
@@ -74,42 +140,11 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
                         shift = event.type == SDL_KEYDOWN;
                         break;
 #ifdef __APPLE__
-                    case SDLK_LMETA:
-                    case SDLK_RMETA:
+                    case SDLK_LGUI:
+                    case SDLK_RGUI:
                         cmd = event.type == SDL_KEYDOWN;
                         break;
 #endif
-
-                    case SDLK_c:
-                        if (ctrl && event.type == SDL_KEYDOWN) {
-                            ctrl = false;
-                            GB_debugger_break(gb);
-
-                        }
-                        break;
-
-                    default:
-                        /* Save states */
-                        if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) {
-#ifdef __APPLE__
-                            if (cmd) {
-#else
-                            if (ctrl) {
-#endif
-                                char save_path[strlen(filename) + 4];
-                                char save_extension[] =".s0";
-                                save_extension[2] += event.key.keysym.sym - SDLK_0;
-                                replace_extension(filename, strlen(filename), save_path, save_extension);
-
-                                if (shift) {
-                                    GB_load_state(gb, save_path);
-                                }
-                                else {
-                                    GB_save_state(gb, save_path);
-                                }
-                            }
-                        }
-                        break;
                 }
                 break;
             default:
@@ -120,11 +155,11 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
-    SDL_Surface *screen = GB_get_user_data(gb);
-    SDL_Flip(screen);
-    GB_update_keys_status(gb);
-
-    GB_set_pixels_output(gb, screen->pixels);
+    SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+    handle_events(gb);
 }
 
 #ifdef __APPLE__
@@ -177,11 +212,10 @@ static char *executable_relative_path(const char *filename)
     snprintf(path, sizeof(path), "%s/%s", executable_folder(), filename);
     return path;
 }
-
-static SDL_Surface *screen = NULL;
+    
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
-    return SDL_MapRGB(screen->format, r, g, b);
+    return SDL_MapRGB(pixel_format, r, g, b);
 }
 
 static void debugger_interrupt(int ignore)
@@ -217,9 +251,6 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
     strcat(dest, ext);
 }
 
-#ifdef __APPLE__
-extern void cocoa_disable_filtering(void);
-#endif
 int main(int argc, char **argv)
 {
     bool dmg = false;
@@ -270,16 +301,18 @@ usage:
     signal(SIGINT, debugger_interrupt);
 
     SDL_Init( SDL_INIT_EVERYTHING );
-    screen = SDL_SetVideoMode(160, 144, 32, SDL_SWSURFACE );
-    SDL_WM_SetCaption("SameBoy v" xstr(VERSION), "SameBoy v" xstr(VERSION));
-#ifdef __APPLE__
-    cocoa_disable_filtering();
-#endif
+    
+    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              160, 144, SDL_WINDOW_OPENGL);
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    
+    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
+    
+    pixel_format = SDL_AllocFormat(SDL_GetWindowPixelFormat(window));
+
     /* Configure Screen */
-    SDL_LockSurface(screen);
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    GB_set_user_data(&gb, screen);
-    GB_set_pixels_output(&gb, screen->pixels);
+    GB_set_pixels_output(&gb, pixels);
     GB_set_rgb_encode_callback(&gb, rgb_encode);
 
     size_t path_length = strlen(filename);
@@ -287,6 +320,7 @@ usage:
     /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
     replace_extension(filename, path_length, battery_save_path, ".sav");
+    battery_save_path_ptr = battery_save_path;
     GB_load_battery(&gb, battery_save_path);
 
     /* Configure symbols */
@@ -306,19 +340,39 @@ usage:
     want.callback = audio_callback;
     want.userdata = &gb;
     SDL_OpenAudio(&want, &have);
-    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
+    GB_set_sample_rate(&gb, have.freq);
     
     /* Start Audio */
-    SDL_PauseAudio(0);
+    SDL_PauseAudio(false);
 
     /* Run emulation */
-    running = true;
-    while (running) {
+    while (true) {
         GB_run(&gb);
+        switch (pending_command) {
+            case GB_SDL_LOAD_STATE_COMMAND:
+            case GB_SDL_SAVE_STATE_COMMAND: {
+                char save_path[strlen(filename) + 4];
+                char save_extension[] = ".s0";
+                save_extension[2] += command_parameter;
+                replace_extension(filename, strlen(filename), save_path, save_extension);
+                
+                if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
+                    GB_load_state(&gb, save_path);
+                }
+                else {
+                    GB_save_state(&gb, save_path);
+                }
+            break;
+            }
+                
+            case GB_SDL_RESET_COMMAND:
+                GB_reset(&gb);
+                break;
+                
+            case GB_SDL_NO_COMMAND:
+                break;
+        }
+        pending_command = GB_SDL_NO_COMMAND;
     }
-    SDL_CloseAudio();
-
-    GB_save_battery(&gb, battery_save_path);
-    return 0;
 }
 
