@@ -79,16 +79,16 @@ endif
 # Define our targets
 
 ifeq ($(PLATFORM),windows32)
-SDL_TARGET := $(BIN)/sdl/sameboy.exe $(BIN)/sdl/sameboy_debugger.exe $(BIN)/sdl/SDL2.dll
+SDL_TARGET := $(BIN)/SDL/sameboy.exe $(BIN)/SDL/sameboy_debugger.exe $(BIN)/SDL/SDL2.dll
 TESTER_TARGET := $(BIN)/tester/sameboy_tester.exe
 else
-SDL_TARGET := $(BIN)/sdl/sameboy
+SDL_TARGET := $(BIN)/SDL/sameboy
 TESTER_TARGET := $(BIN)/tester/sameboy_tester
 endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-sdl: $(SDL_TARGET) $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE $(BIN)/sdl/registers.sym
+sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/drop.bmp
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
 all: cocoa sdl tester
@@ -209,7 +209,7 @@ $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs
 # SDL Port
 
 # Unix versions build only one binary
-$(BIN)/sdl/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
+$(BIN)/SDL/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
 ifeq ($(CONF), release)
@@ -217,11 +217,11 @@ ifeq ($(CONF), release)
 endif
 
 # Windows version builds two, one with a conole and one without it
-$(BIN)/sdl/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
+$(BIN)/SDL/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:windows
 
-$(BIN)/sdl/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
+$(BIN)/SDL/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:console
 
@@ -235,7 +235,7 @@ $(OBJ)/%.res: %.rc
 # We must provide SDL2.dll with the Windows port. This is an AWFUL HACK to find it.
 SPACE :=
 SPACE +=
-$(BIN)/sdl/SDL2.dll:
+$(BIN)/SDL/SDL2.dll:
 	@$(eval POTENTIAL_MATCHES := $(subst @@@," ",$(patsubst %,%/SDL2.dll,$(subst ;,$(SPACE),$(subst $(SPACE),@@@,$(lib))))))
 	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
 	cp "$(MATCH)" $@
@@ -253,7 +253,7 @@ $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 
-$(BIN)/sdl/%.bin $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
+$(BIN)/SDL/%.bin $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	
@@ -261,10 +261,13 @@ $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	
-$(BIN)/sdl/LICENSE: LICENSE
+$(BIN)/SDL/LICENSE: LICENSE
 	cp -f $^ $@
 
-$(BIN)/sdl/registers.sym: Misc/registers.sym
+$(BIN)/SDL/registers.sym: Misc/registers.sym
+	cp -f $^ $@
+	
+$(BIN)/SDL/drop.bmp: SDL/drop.bmp
 	cp -f $^ $@
 
 # Boot ROMs

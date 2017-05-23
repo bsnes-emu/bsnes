@@ -15,13 +15,10 @@
 #define snprintf _snprintf
 #endif
 
-#if defined(__APPLE__) && SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL == 5
-#error You are using SDL2-2.0.5, which contains a bug that prevents 96KHz audio playback on macOS. Use SDL2-2.0.4 or alternatively modify this file to reduce the frequency to 44100 and disable this error.
-#endif
-
 #include "gb.h"
 
-static char *filename;
+static char *filename = NULL;
+static bool should_free_filename = false;
 static char *battery_save_path_ptr;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 
@@ -29,6 +26,8 @@ static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 static SDL_PixelFormat *pixel_format = NULL;
+static SDL_AudioSpec want_aspec, have_aspec;
+
 static uint32_t pixels[160*144];
 GB_gameboy_t gb;
 
@@ -37,6 +36,8 @@ static enum {
     GB_SDL_SAVE_STATE_COMMAND,
     GB_SDL_LOAD_STATE_COMMAND,
     GB_SDL_RESET_COMMAND,
+    GB_SDL_NEW_FILE_COMMAND,
+    GB_SDL_TOGGLE_MODEL_COMMAND,
 } pending_command;
 static unsigned command_parameter;
 
@@ -58,6 +59,16 @@ static void handle_events(GB_gameboy_t *gb)
                 GB_save_battery(gb, battery_save_path_ptr);
                 exit(0);
                 
+            case SDL_DROPFILE: {
+                if (should_free_filename) {
+                    SDL_free(filename);
+                }
+                filename = event.drop.file;
+                should_free_filename = true;
+                pending_command = GB_SDL_NEW_FILE_COMMAND;
+                break;
+            }
+                
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_c:
@@ -74,10 +85,16 @@ static void handle_events(GB_gameboy_t *gb)
                         }
                         break;
                         
+                    case SDLK_t:
+                        if (MODIFIER) {
+                            pending_command = GB_SDL_TOGGLE_MODEL_COMMAND;
+                        }
+                        break;
+                        
                     case SDLK_m:
                         if (MODIFIER) {
 #ifdef __APPLE__
-                            // Can't over CMD+M (Minimize) in SDL
+                            // Can't override CMD+M (Minimize) in SDL
                             if (!shift) {
                                 break;
                             }
@@ -230,7 +247,12 @@ static void debugger_interrupt(int ignore)
 
 static void audio_callback(void *gb, Uint8 *stream, int len)
 {
-    GB_apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
+    if (GB_is_inited(gb)) {
+        GB_apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
+    }
+    else {
+        memset(stream, 0, len);
+    }
 }
 
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
@@ -250,101 +272,62 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
     /* Add new extension */
     strcat(dest, ext);
 }
-
-int main(int argc, char **argv)
+    
+static bool dmg = false;
+    
+static void run(void)
 {
-    bool dmg = false;
-
-#define str(x) #x
-#define xstr(x) str(x)
-    fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
-
-    if (argc == 1 || argc > 3) {
-usage:
-        fprintf(stderr, "Usage: %s [--dmg] rom\n", argv[0]);
-        exit(1);
+restart:
+    if (GB_is_inited(&gb)) {
+        GB_switch_model_and_reset(&gb, !dmg);
     }
-
-    if (argc == 3) {
-        if (strcmp(argv[1], "--dmg") == 0) {
-            dmg = true;
+    else {
+        if (dmg) {
+            GB_init(&gb);
         }
         else {
-            goto usage;
+            GB_init_cgb(&gb);
         }
+        
+        GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
+        GB_set_pixels_output(&gb, pixels);
+        GB_set_rgb_encode_callback(&gb, rgb_encode);
+        GB_set_sample_rate(&gb, have_aspec.freq);
     }
-
-
+    
     if (dmg) {
-        GB_init(&gb);
         if (GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"))) {
             perror("Failed to load boot ROM");
             exit(1);
         }
     }
     else {
-        GB_init_cgb(&gb);
         if (GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"))) {
             perror("Failed to load boot ROM");
             exit(1);
         }
     }
-
-    filename = argv[argc - 1];
-
+    
     if (GB_load_rom(&gb, filename)) {
         perror("Failed to load ROM");
         exit(1);
     }
     
-
-    signal(SIGINT, debugger_interrupt);
-
-    SDL_Init( SDL_INIT_EVERYTHING );
-    
-    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              160, 144, SDL_WINDOW_OPENGL);
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    
-    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
-    
-    pixel_format = SDL_AllocFormat(SDL_GetWindowPixelFormat(window));
-
-    /* Configure Screen */
-    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    GB_set_pixels_output(&gb, pixels);
-    GB_set_rgb_encode_callback(&gb, rgb_encode);
-
     size_t path_length = strlen(filename);
-
+    
     /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
     replace_extension(filename, path_length, battery_save_path, ".sav");
     battery_save_path_ptr = battery_save_path;
     GB_load_battery(&gb, battery_save_path);
-
+    
     /* Configure symbols */
     GB_debugger_load_symbol_file(&gb, executable_relative_path("registers.sym"));
     
     char symbols_path[path_length + 5];
     replace_extension(filename, path_length, symbols_path, ".sym");
     GB_debugger_load_symbol_file(&gb, symbols_path);
-
-    /* Configure Audio */
-    SDL_AudioSpec want, have;
-    SDL_memset(&want, 0, sizeof(want));
-    want.freq = AUDIO_FREQUENCY;
-    want.format = AUDIO_S16SYS;
-    want.channels = 2;
-    want.samples = 512;
-    want.callback = audio_callback;
-    want.userdata = &gb;
-    SDL_OpenAudio(&want, &have);
-    GB_set_sample_rate(&gb, have.freq);
     
-    /* Start Audio */
-    SDL_PauseAudio(false);
-
     /* Run emulation */
     while (true) {
         GB_run(&gb);
@@ -362,7 +345,7 @@ usage:
                 else {
                     GB_save_state(&gb, save_path);
                 }
-            break;
+                break;
             }
                 
             case GB_SDL_RESET_COMMAND:
@@ -371,8 +354,100 @@ usage:
                 
             case GB_SDL_NO_COMMAND:
                 break;
+            
+            case GB_SDL_NEW_FILE_COMMAND:
+                pending_command = GB_SDL_NO_COMMAND;
+                goto restart;
+                
+            case GB_SDL_TOGGLE_MODEL_COMMAND:
+                dmg = !dmg;
+                pending_command = GB_SDL_NO_COMMAND;
+                goto restart;
         }
         pending_command = GB_SDL_NO_COMMAND;
     }
 }
+    
+int main(int argc, char **argv)
+{
+#define str(x) #x
+#define xstr(x) str(x)
+    fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
 
+    if (argc > 3) {
+usage:
+        fprintf(stderr, "Usage: %s [--dmg] [rom]\n", argv[0]);
+        exit(1);
+    }
+    
+    for (unsigned i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--dmg") == 0) {
+            if (dmg) {
+                goto usage;
+            }
+            dmg = true;
+        }
+        else if (!filename) {
+            filename = argv[i];
+        }
+        else {
+            goto usage;
+        }
+    }
+
+    signal(SIGINT, debugger_interrupt);
+
+    SDL_Init( SDL_INIT_EVERYTHING );
+    
+    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              160, 144, SDL_WINDOW_OPENGL);
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    
+    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
+    
+    pixel_format = SDL_AllocFormat(SDL_GetWindowPixelFormat(window));
+
+    /* Configure Audio */
+    memset(&want_aspec, 0, sizeof(want_aspec));
+    want_aspec.freq = AUDIO_FREQUENCY;
+    want_aspec.format = AUDIO_S16SYS;
+    want_aspec.channels = 2;
+    want_aspec.samples = 2048;
+    want_aspec.callback = audio_callback;
+    want_aspec.userdata = &gb;
+    SDL_OpenAudio(&want_aspec, &have_aspec);
+    
+    /* Start Audio */
+    SDL_PauseAudio(false);
+
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    
+    if (filename == NULL) {
+        /* Draw the "Drop file" screen */
+        SDL_Surface *drop_backround = SDL_LoadBMP(executable_relative_path("drop.bmp"));
+        SDL_Surface *drop_converted = SDL_ConvertSurface(drop_backround, pixel_format, 0);
+        SDL_LockSurface(drop_converted);
+        SDL_UpdateTexture(texture, NULL, drop_converted->pixels, drop_converted->pitch);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
+        SDL_FreeSurface(drop_converted);
+        SDL_FreeSurface(drop_backround)
+        ;
+        SDL_Event event;
+        while (SDL_WaitEvent(&event))
+        {
+            if (event.type == SDL_QUIT) {
+                exit(0);
+            }
+            else if (event.type == SDL_DROPFILE) {
+                filename = event.drop.file;
+                should_free_filename = true;
+                break;
+            }
+        }
+    }
+
+    run(); // Never returns
+    return 0;
+}
