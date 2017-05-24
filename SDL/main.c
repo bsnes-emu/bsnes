@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <SDL2/SDL.h>
+
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
@@ -28,6 +29,8 @@ static SDL_Texture *texture = NULL;
 static SDL_PixelFormat *pixel_format = NULL;
 static SDL_AudioSpec want_aspec, have_aspec;
 
+static bool paused = false;
+
 static uint32_t pixels[160*144];
 GB_gameboy_t gb;
 
@@ -39,7 +42,53 @@ static enum {
     GB_SDL_NEW_FILE_COMMAND,
     GB_SDL_TOGGLE_MODEL_COMMAND,
 } pending_command;
+
+static enum {
+    GB_SDL_SCALING_ENTIRE_WINDOW,
+    GB_SDL_SCALING_KEEP_RATIO,
+    GB_SDL_SCALING_INTEGER_FACTOR,
+    GB_SDL_SCALING_MAX,
+} scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR;
 static unsigned command_parameter;
+
+static void update_viewport(void)
+{
+    int win_width, win_height;
+    SDL_GetWindowSize(window, &win_width, &win_height);
+    double x_factor = win_width / 160.0;
+    double y_factor = win_height / 144.0;
+    
+    if (scaling_mode == GB_SDL_SCALING_INTEGER_FACTOR) {
+        x_factor = floor(x_factor);
+        y_factor = floor(y_factor);
+    }
+
+    if (scaling_mode != GB_SDL_SCALING_ENTIRE_WINDOW) {
+        if (x_factor > y_factor) {
+            x_factor = y_factor;
+        }
+        else {
+            y_factor = x_factor;
+        }
+    }
+    
+    unsigned new_width = x_factor * 160;
+    unsigned new_height = y_factor * 144;
+    
+    SDL_Rect rect = (SDL_Rect){(win_width  - new_width) / 2, (win_height - new_height) /2,
+        new_width, new_height};
+    SDL_RenderSetViewport(renderer, &rect);
+}
+
+static void cycle_scaling(void)
+{
+    scaling_mode++;
+    scaling_mode %= GB_SDL_SCALING_MAX;
+    update_viewport();
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+}
 
 static void handle_events(GB_gameboy_t *gb)
 {
@@ -54,7 +103,7 @@ static void handle_events(GB_gameboy_t *gb)
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
-        switch( event.type ){
+        switch (event.type) {
             case SDL_QUIT:
                 GB_save_battery(gb, battery_save_path_ptr);
                 exit(0);
@@ -67,6 +116,12 @@ static void handle_events(GB_gameboy_t *gb)
                 should_free_filename = true;
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 break;
+            }
+                
+            case SDL_WINDOWEVENT: {
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    update_viewport();
+                }
             }
                 
             case SDL_KEYDOWN:
@@ -90,6 +145,12 @@ static void handle_events(GB_gameboy_t *gb)
                             pending_command = GB_SDL_TOGGLE_MODEL_COMMAND;
                         }
                         break;
+                    
+                    case SDLK_p:
+                        if (MODIFIER) {
+                            paused = !paused;
+                        }
+                        break;
                         
                     case SDLK_m:
                         if (MODIFIER) {
@@ -101,6 +162,10 @@ static void handle_events(GB_gameboy_t *gb)
 #endif
                             SDL_PauseAudio(SDL_GetAudioStatus() == SDL_AUDIO_PLAYING? true : false);
                         }
+                        break;
+                        
+                    case SDLK_TAB:
+                        cycle_scaling();
                         break;
                         
                     default:
@@ -330,7 +395,13 @@ restart:
     
     /* Run emulation */
     while (true) {
-        GB_run(&gb);
+        if (paused) {
+            SDL_WaitEvent(NULL);
+            handle_events(&gb);
+        }
+        else {
+            GB_run(&gb);
+        }
         switch (pending_command) {
             case GB_SDL_LOAD_STATE_COMMAND:
             case GB_SDL_SAVE_STATE_COMMAND: {
@@ -400,7 +471,8 @@ usage:
     SDL_Init( SDL_INIT_EVERYTHING );
     
     window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              160, 144, SDL_WINDOW_OPENGL);
+                              160 * 2, 144 * 2, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    SDL_SetWindowMinimumSize(window, 160, 144);
     renderer = SDL_CreateRenderer(window, -1, 0);
     
     texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
@@ -437,17 +509,33 @@ usage:
         SDL_Event event;
         while (SDL_WaitEvent(&event))
         {
-            if (event.type == SDL_QUIT) {
-                exit(0);
-            }
-            else if (event.type == SDL_DROPFILE) {
-                filename = event.drop.file;
-                should_free_filename = true;
-                break;
+            switch (event.type) {
+                case SDL_QUIT: {
+                    exit(0);
+                }
+                case SDL_WINDOWEVENT: {
+                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        update_viewport();
+                        SDL_RenderClear(renderer);
+                        SDL_RenderCopy(renderer, texture, NULL, NULL);
+                        SDL_RenderPresent(renderer);
+                    }
+                    break;
+                }
+                case SDL_DROPFILE: {
+                    filename = event.drop.file;
+                    should_free_filename = true;
+                    goto start;
+                }
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_TAB) {
+                        cycle_scaling();
+                    }
+                    break;
             }
         }
     }
-
+start:
     run(); // Never returns
     return 0;
 }
