@@ -60,7 +60,7 @@ SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
 endif
 CFLAGS += -Wno-deprecated-declarations
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -Wno-deprecated-declarations -Dstrdup=_strdup # Seems like Microsoft deprecated every single LIBC function
+CFLAGS += -Wno-deprecated-declarations # Seems like Microsoft deprecated every single LIBC function
 LDFLAGS += -Wl,/NODEFAULTLIB:libcmt.lib
 endif
 

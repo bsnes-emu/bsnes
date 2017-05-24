@@ -1,38 +1,32 @@
-#include <stdio.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <time.h>
-#include <assert.h>
 #include <signal.h>
 #include <SDL2/SDL.h>
+#include "gb.h"
+
+#include "utils.h"
 
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
 /* Windows (well, at least my VM) can't handle 96KHz sound well :( */
 #define AUDIO_FREQUENCY 44100
-#include <direct.h>
-#include <windows.h>
-#define snprintf _snprintf
 #endif
 
-#include "gb.h"
+
+GB_gameboy_t gb;
+static bool dmg = false;
+static bool paused = false;
+static uint32_t pixels[160*144];
 
 static char *filename = NULL;
 static bool should_free_filename = false;
 static char *battery_save_path_ptr;
-static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 static SDL_PixelFormat *pixel_format = NULL;
 static SDL_AudioSpec want_aspec, have_aspec;
-
-static bool paused = false;
-
-static uint32_t pixels[160*144];
-GB_gameboy_t gb;
 
 static enum {
     GB_SDL_NO_COMMAND,
@@ -59,8 +53,8 @@ static void update_viewport(void)
     double y_factor = win_height / 144.0;
     
     if (scaling_mode == GB_SDL_SCALING_INTEGER_FACTOR) {
-        x_factor = floor(x_factor);
-        y_factor = floor(y_factor);
+        x_factor = (int)(x_factor);
+        y_factor = (int)(y_factor);
     }
 
     if (scaling_mode != GB_SDL_SCALING_ENTIRE_WINDOW) {
@@ -244,57 +238,7 @@ static void vblank(GB_gameboy_t *gb)
     handle_events(gb);
 }
 
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-#endif
 
-static const char *executable_folder(void)
-{
-    static char path[1024] = {0,};
-    if (path[0]) {
-        return path;
-    }
-    /* Ugly unportable code! :( */
-#ifdef __APPLE__
-    unsigned int length = sizeof(path) - 1;
-    _NSGetExecutablePath(&path[0], &length);
-#else
-#ifdef __linux__
-    ssize_t length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
-    assert (length != -1);
-#else
-#ifdef _WIN32
-    HMODULE hModule = GetModuleHandle(NULL);
-    GetModuleFileName(hModule, path, sizeof(path) - 1);
-#else
-    /* No OS-specific way, assume running from CWD */
-    getcwd(&path[0], sizeof(path) - 1);
-    return path;
-#endif
-#endif
-#endif
-    size_t pos = strlen(path);
-    while (pos) {
-        pos--;
-#ifdef _WIN32
-        if (path[pos] == '\\') {
-#else
-        if (path[pos] == '/') {
-#endif
-            path[pos] = 0;
-            break;
-        }
-    }
-    return path;
-}
-
-static char *executable_relative_path(const char *filename)
-{
-    static char path[1024];
-    snprintf(path, sizeof(path), "%s/%s", executable_folder(), filename);
-    return path;
-}
-    
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return SDL_MapRGB(pixel_format, r, g, b);
@@ -319,27 +263,43 @@ static void audio_callback(void *gb, Uint8 *stream, int len)
         memset(stream, 0, len);
     }
 }
-
-static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
+    
+static bool handle_pending_command(void)
 {
-    memcpy(dest, src, length);
-    dest[length] = 0;
-
-    /* Remove extension */
-    for (size_t i = length; i--;) {
-        if (dest[i] == '/') break;
-        if (dest[i] == '.') {
-            dest[i] = 0;
-            break;
+    switch (pending_command) {
+        case GB_SDL_LOAD_STATE_COMMAND:
+        case GB_SDL_SAVE_STATE_COMMAND: {
+            char save_path[strlen(filename) + 4];
+            char save_extension[] = ".s0";
+            save_extension[2] += command_parameter;
+            replace_extension(filename, strlen(filename), save_path, save_extension);
+            
+            if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
+                GB_load_state(&gb, save_path);
+            }
+            else {
+                GB_save_state(&gb, save_path);
+            }
+            return false;
         }
+            
+        case GB_SDL_RESET_COMMAND:
+            GB_reset(&gb);
+            return false;
+            
+        case GB_SDL_NO_COMMAND:
+            return false;
+            
+        case GB_SDL_NEW_FILE_COMMAND:
+            return true;
+            
+        case GB_SDL_TOGGLE_MODEL_COMMAND:
+            dmg = !dmg;
+            return true;
     }
-
-    /* Add new extension */
-    strcat(dest, ext);
+    return false;
 }
-    
-static bool dmg = false;
-    
+
 static void run(void)
 {
 restart:
@@ -402,38 +362,11 @@ restart:
         else {
             GB_run(&gb);
         }
-        switch (pending_command) {
-            case GB_SDL_LOAD_STATE_COMMAND:
-            case GB_SDL_SAVE_STATE_COMMAND: {
-                char save_path[strlen(filename) + 4];
-                char save_extension[] = ".s0";
-                save_extension[2] += command_parameter;
-                replace_extension(filename, strlen(filename), save_path, save_extension);
-                
-                if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
-                    GB_load_state(&gb, save_path);
-                }
-                else {
-                    GB_save_state(&gb, save_path);
-                }
-                break;
-            }
-                
-            case GB_SDL_RESET_COMMAND:
-                GB_reset(&gb);
-                break;
-                
-            case GB_SDL_NO_COMMAND:
-                break;
-            
-            case GB_SDL_NEW_FILE_COMMAND:
-                pending_command = GB_SDL_NO_COMMAND;
-                goto restart;
-                
-            case GB_SDL_TOGGLE_MODEL_COMMAND:
-                dmg = !dmg;
-                pending_command = GB_SDL_NO_COMMAND;
-                goto restart;
+        
+        /* These commands can't run in the handle_event function, because they're not safe in a vblank context. */
+        if (handle_pending_command()) {
+            pending_command = GB_SDL_NO_COMMAND;
+            goto restart;
         }
         pending_command = GB_SDL_NO_COMMAND;
     }

@@ -2,12 +2,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
-#include <sys/time.h>
+#ifndef _WIN32
+#include <unistd.h>
 #include <sys/select.h>
+#endif
 #include "gb.h"
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
@@ -34,7 +35,7 @@ void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const cha
     va_end(args);
 }
 
-void GB_log(GB_gameboy_t *gb,const char *fmt, ...)
+void GB_log(GB_gameboy_t *gb, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

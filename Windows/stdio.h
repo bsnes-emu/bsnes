@@ -67,3 +67,5 @@ static inline size_t getline(char **lineptr, size_t *n, FILE *stream) {
 
     return p - bufptr - 1;
 }
+
+#define snprintf _snprintf
