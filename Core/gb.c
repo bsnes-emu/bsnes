@@ -151,7 +151,10 @@ void GB_free(GB_gameboy_t *gb)
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");
-    if (!f) return errno;
+    if (!f) {
+        GB_log(gb, "Could not open boot ROM: %s.\n", strerror(errno));
+        return errno;
+    }
     fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f);
     fclose(f);
     return 0;
@@ -160,7 +163,10 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 int GB_load_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");
-    if (!f) return errno;
+    if (!f) {
+        GB_log(gb, "Could not open ROM: %s.\n", strerror(errno));
+        return errno;
+    }
     fseek(f, 0, SEEK_END);
     gb->rom_size = (ftell(f) + 0x3FFF) & ~0x3FFF; /* Round to bank */
     /* And then round to a power of two */
@@ -202,6 +208,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "wb");
     if (!f) {
+        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
         return errno;
     }
 
@@ -269,6 +276,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
 
     FILE *f = fopen(path, "rb");
     if (!f) {
+        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
         return errno;
     }
 
@@ -345,6 +353,7 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
     FILE *f = fopen(path, "wb");
     if (!f) {
+        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
         return errno;
     }
 

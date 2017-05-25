@@ -12,6 +12,36 @@
 #define AUDIO_FREQUENCY 44100
 #endif
 
+#ifdef __APPLE__
+#define MODIFIER_NAME "Cmd"
+#else
+#define MODIFIER_NAME "Ctrl"
+#endif
+
+static const char help[] =
+"Drop a GB or GBC ROM file to play.\n"
+"\n"
+"Controls:\n"
+"    D-Pad: Arrow Keys\n"
+"    A: X\n"
+"    B: Z\n"
+"    Start: Enter\n"
+"    Select: Backspace\n"
+"\n"
+"Keyboard Shortcuts: \n"
+"    Restart: " MODIFIER_NAME "+R\n"
+"    Pause: " MODIFIER_NAME "+P\n"
+"    Turbo: Space\n"
+#ifdef __APPLE__
+"    Mute/Unmute: " MODIFIER_NAME "+Shift+M\n"
+#else
+"    Mute/Unmute: " MODIFIER_NAME "+M\n"
+#endif
+"    Save state: " MODIFIER_NAME "+Number (0-9)\n"
+"    Load state: " MODIFIER_NAME "+Shift+Number (0-9)\n"
+"    Cycle between DMG/CGB emulation: " MODIFIER_NAME "+T\n"
+"    Cycle scaling modes: Tab"
+;
 
 GB_gameboy_t gb;
 static bool dmg = false;
@@ -27,6 +57,45 @@ static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 static SDL_PixelFormat *pixel_format = NULL;
 static SDL_AudioSpec want_aspec, have_aspec;
+
+static char *captured_log = NULL;
+
+static void log_capture_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
+{
+    size_t current_len = strlen(captured_log);
+    size_t len_to_add = strlen(string);
+    captured_log = realloc(captured_log, current_len + len_to_add + 1);
+    memcpy(captured_log + current_len, string, len_to_add);
+    captured_log[current_len + len_to_add] = 0;
+}
+
+static void start_capturing_logs(void)
+{
+    if (captured_log != NULL) {
+        free(captured_log);
+    }
+    captured_log = malloc(1);
+    captured_log[0] = 0;
+    GB_set_log_callback(&gb, log_capture_callback);
+}
+
+static const char *end_capturing_logs(bool show_popup, bool should_exit)
+{
+    GB_set_log_callback(&gb, NULL);
+    if (captured_log[0] == 0) {
+        free(captured_log);
+        captured_log = NULL;
+    }
+    else {
+        if (show_popup) {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", captured_log, window);
+        }
+        if (should_exit) {
+            exit(1);
+        }
+    }
+    return captured_log;
+}
 
 static enum {
     GB_SDL_NO_COMMAND,
@@ -86,13 +155,10 @@ static void cycle_scaling(void)
 
 static void handle_events(GB_gameboy_t *gb)
 {
-    static bool ctrl = false;
-    static bool shift = false;
 #ifdef __APPLE__
-    static bool cmd = false;
-#define MODIFIER cmd
+#define MODIFIER KMOD_GUI
 #else
-#define MODIFIER ctrl
+#define MODIFIER KMOD_CTRL
 #endif
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -121,36 +187,35 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_c:
-                        if (ctrl && event.type == SDL_KEYDOWN) {
-                            ctrl = false;
+                        if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
                             GB_debugger_break(gb);
                             
                         }
                         break;
                         
                     case SDLK_r:
-                        if (MODIFIER) {
+                        if (event.key.keysym.mod & MODIFIER) {
                             pending_command = GB_SDL_RESET_COMMAND;
                         }
                         break;
                         
                     case SDLK_t:
-                        if (MODIFIER) {
+                        if (event.key.keysym.mod & MODIFIER) {
                             pending_command = GB_SDL_TOGGLE_MODEL_COMMAND;
                         }
                         break;
                     
                     case SDLK_p:
-                        if (MODIFIER) {
+                        if (event.key.keysym.mod & MODIFIER) {
                             paused = !paused;
                         }
                         break;
                         
                     case SDLK_m:
-                        if (MODIFIER) {
+                        if (event.key.keysym.mod & MODIFIER) {
 #ifdef __APPLE__
                             // Can't override CMD+M (Minimize) in SDL
-                            if (!shift) {
+                            if (!(event.key.keysym.mod & KMOD_SHIFT)) {
                                 break;
                             }
 #endif
@@ -161,14 +226,26 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDLK_TAB:
                         cycle_scaling();
                         break;
+#ifndef __APPLE__
+                    case SDLK_F1:
+                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
+                        break;
+#else
+                    case SDLK_SLASH:
+                        if (!(event.key.keysym.sym && (event.key.keysym.mod & KMOD_SHIFT))) {
+                            break;
+                        }
+                    case SDLK_QUESTION:
+                            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
+#endif
                         
                     default:
                         /* Save states */
                         if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) {
-                            if (MODIFIER) {
+                            if (event.key.keysym.mod & MODIFIER) {
                                 command_parameter = event.key.keysym.sym - SDLK_0;
                                 
-                                if (shift) {
+                                if (event.key.keysym.mod & KMOD_SHIFT) {
                                     pending_command = GB_SDL_LOAD_STATE_COMMAND;
                                 }
                                 else {
@@ -207,20 +284,6 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDLK_SPACE:
                         GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
                         break;
-                    case SDLK_LCTRL:
-                    case SDLK_RCTRL:
-                        ctrl = event.type == SDL_KEYDOWN;
-                        break;
-                    case SDLK_LSHIFT:
-                    case SDLK_RSHIFT:
-                        shift = event.type == SDL_KEYDOWN;
-                        break;
-#ifdef __APPLE__
-                    case SDLK_LGUI:
-                    case SDLK_RGUI:
-                        cmd = event.type == SDL_KEYDOWN;
-                        break;
-#endif
                 }
                 break;
             default:
@@ -274,12 +337,14 @@ static bool handle_pending_command(void)
             save_extension[2] += command_parameter;
             replace_extension(filename, strlen(filename), save_path, save_extension);
             
+            start_capturing_logs();
             if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
                 GB_load_state(&gb, save_path);
             }
             else {
                 GB_save_state(&gb, save_path);
             }
+            end_capturing_logs(true, false);
             return false;
         }
             
@@ -320,23 +385,18 @@ restart:
         GB_set_sample_rate(&gb, have_aspec.freq);
     }
     
+    start_capturing_logs();
     if (dmg) {
-        if (GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"))) {
-            perror("Failed to load boot ROM");
-            exit(1);
-        }
+        GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"));
     }
     else {
-        if (GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"))) {
-            perror("Failed to load boot ROM");
-            exit(1);
-        }
+        GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"));
     }
+    end_capturing_logs(true, true);
     
-    if (GB_load_rom(&gb, filename)) {
-        perror("Failed to load ROM");
-        exit(1);
-    }
+    start_capturing_logs();
+    GB_load_rom(&gb, filename);
+    end_capturing_logs(true, true);
     
     size_t path_length = strlen(filename);
     
@@ -437,8 +497,7 @@ usage:
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
         SDL_FreeSurface(drop_converted);
-        SDL_FreeSurface(drop_backround)
-        ;
+        SDL_FreeSurface(drop_backround);
         SDL_Event event;
         while (SDL_WaitEvent(&event))
         {
@@ -464,6 +523,15 @@ usage:
                     if (event.key.keysym.sym == SDLK_TAB) {
                         cycle_scaling();
                     }
+#ifndef __APPLE__
+                    else if (event.key.keysym.sym == SDLK_F1) {
+                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
+                    }
+#else
+                    else if (event.key.keysym.sym == SDLK_QUESTION || (event.key.keysym.sym && (event.key.keysym.mod & KMOD_SHIFT))) {
+                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
+                    }
+#endif
                     break;
             }
         }
