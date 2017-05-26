@@ -41,6 +41,8 @@
     bool rom_warning_issued;
     
     NSMutableString *capturedOutput;
+    bool logToSideView;
+    bool shouldClearSideView;
 }
 
 @property GBAudioClient *audioClient;
@@ -259,6 +261,18 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             [(NSOpenPanel *)window cancel:self];
         }
     }
+    
+    NSMutableParagraphStyle *paragraph_style = [[NSMutableParagraphStyle alloc] init];
+    [paragraph_style setLineSpacing:2];
+    
+    self.debuggerSideViewInput.font = [NSFont userFixedPitchFontOfSize:12];
+    self.debuggerSideViewInput.textColor = [NSColor whiteColor];
+    self.debuggerSideViewInput.defaultParagraphStyle = paragraph_style;
+    [self.debuggerSideViewInput setString:@"registers\nbacktrace\n"];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateSideView)
+                                                 name:NSTextDidChangeNotification
+                                               object:self.debuggerSideViewInput];
     
     self.consoleOutput.textContainerInset = NSMakeSize(4, 4);
     [self.view becomeFirstResponder];
@@ -479,7 +493,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         return;
     }
     
-    if (pendingLogLines > 128) {
+    NSTextView *textView = logToSideView? self.debuggerSideView : self.consoleOutput;
+    
+    if (!logToSideView && pendingLogLines > 128) {
         /* The ROM causes so many errors in such a short time, and we can't handle it. */
         tooMuchLogs = true;
         return;
@@ -490,6 +506,10 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     self.view.mouseHidingEnabled = NO;
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (shouldClearSideView) {
+            shouldClearSideView = false;
+            [self.debuggerSideView setString:@""];
+        }
         [hex_controller reloadData];
         [self reloadVRAMData: nil];
 
@@ -511,13 +531,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
                                                          NSForegroundColorAttributeName: [NSColor whiteColor],
                                                          NSUnderlineStyleAttributeName: @(underline),
                                                          NSParagraphStyleAttributeName: paragraph_style}];
-        [self.consoleOutput.textStorage appendAttributedString:attributed];
+        [textView.textStorage appendAttributedString:attributed];
         if (pendingLogLines == 1) {
             if (tooMuchLogs) {
                 tooMuchLogs = false;
                 [self log:"[...]\n"];
             }
-            [self.consoleOutput scrollToEndOfDocument:nil];
+            [textView scrollToEndOfDocument:nil];
             if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
                 [self.consoleWindow orderBack:nil];
             }
@@ -562,8 +582,29 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [has_debugger_input unlockWithCondition:1];
 }
 
+- (void) updateSideView
+{
+    if (!GB_debugger_is_stopped(&gb)) {
+        return;
+    }
+    shouldClearSideView = true;
+    logToSideView = true;
+    for (NSString *line in [self.debuggerSideViewInput.string componentsSeparatedByString:@"\n"]) {
+        NSString *stripped = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if ([stripped length]) {
+            char *dupped = strdup([stripped UTF8String]);
+            GB_attributed_log(&gb, GB_LOG_BOLD, "%s:\n", dupped);
+            GB_debugger_execute_command(&gb, dupped);
+            GB_log(&gb, "\n");
+            free(dupped);
+        }
+    }
+    logToSideView = false;
+}
+
 - (char *) getDebuggerInput
 {
+    [self updateSideView];
     [self log:">"];
     in_sync_input = true;
     [has_debugger_input lockWhenCondition:1];
@@ -571,6 +612,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [debugger_input_queue removeObjectAtIndex:0];
     [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
     in_sync_input = false;
+    shouldClearSideView = true;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(NSEC_PER_SEC / 10)), dispatch_get_main_queue(), ^{
+        if (shouldClearSideView) {
+            shouldClearSideView = false;
+            [self.debuggerSideView setString:@""];
+        }
+    });
     if ((id) input == [NSNull null]) {
         return NULL;
     }

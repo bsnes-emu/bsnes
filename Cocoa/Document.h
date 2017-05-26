@@ -28,6 +28,8 @@
 @property (strong) IBOutlet NSPanel *printerFeedWindow;
 @property (strong) IBOutlet NSImageView *feedImageView;
 @property (strong) IBOutlet NSButton *feedSaveButton;
+@property (strong) IBOutlet NSTextView *debuggerSideViewInput;
+@property (strong) IBOutlet NSTextView *debuggerSideView;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

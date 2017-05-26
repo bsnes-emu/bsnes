@@ -1679,7 +1679,7 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
 }
 
 /* Returns true if debugger waits for more commands */
-bool GB_debugger_do_command(GB_gameboy_t *gb, char *input)
+bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
 {
     if (!input[0]) {
         return true;
@@ -1748,7 +1748,7 @@ next_command:
             return;
         }
 
-        if (GB_debugger_do_command(gb, input)) {
+        if (GB_debugger_execute_command(gb, input)) {
             goto next_command;
         }
 
@@ -1761,7 +1761,7 @@ void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
     char *input = NULL;
 
     while (gb->async_input_callback && (input = gb->async_input_callback(gb))) {
-        GB_debugger_do_command(gb, input);
+        GB_debugger_execute_command(gb, input);
         free(input);
     }
 }

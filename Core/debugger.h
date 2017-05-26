@@ -15,6 +15,14 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
 #endif
 
+#ifdef GB_INTERNAL
+bool /* Returns true if debugger waits for more commands. Not relevant for non-GB_INTERNAL */
+#else
+void
+#endif
+GB_debugger_execute_command(GB_gameboy_t *gb, char *input); /* Destroys input. */
+
+
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path);
 const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr);
 bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result, uint16_t *result_bank); /* result_bank is -1 if unused. */
