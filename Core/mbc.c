@@ -31,7 +31,6 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, false}, // 19h  MBC5
     {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, false}, // 1Ah  MBC5+RAM
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
-    /* Todo: Rumble supported yet */
     {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, true }, // 1Ch  MBC5+RUMBLE
     {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
@@ -128,7 +127,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
         }
         gb->mbc_ram = malloc(gb->mbc_ram_size);
 
-        /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridges types?*/
+        /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridges types? */
         memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
     }
 

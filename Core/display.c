@@ -204,9 +204,11 @@ static void display_vblank(GB_gameboy_t *gb)
     }
     
     if (!gb->disable_rendering && (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped)) {
-        /* LCD is off, memset screen to white */
-        /* Todo: use RGB callback */
-        memset(gb->screen, 0xFF, WIDTH * LINES * 4);
+        /* LCD is off, set screen to white */
+        uint32_t white = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+        for (unsigned i = 0; i < WIDTH * LINES; i++) {
+            gb ->screen[i] = white;
+        }
     }
 
     gb->vblank_callback(gb);

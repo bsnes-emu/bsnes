@@ -137,7 +137,6 @@ void GB_camera_write_register(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_log(gb, "Wrote invalid camera register %02x: %2x\n", addr, value);
             return;
         }
-        /* Todo: find out what these registers do */
         gb->camera_registers[addr] = value;
     }
 }
