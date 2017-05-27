@@ -1195,6 +1195,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (IBAction)showVRAMViewer:(id)sender
 {
     [self.vramWindow makeKeyAndOrderFront:sender];
+    [self reloadVRAMData: nil];
 }
 
 - (void) printImage:(uint32_t *)imageBytes height:(unsigned) height
