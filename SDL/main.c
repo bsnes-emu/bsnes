@@ -477,7 +477,13 @@ usage:
     want_aspec.freq = AUDIO_FREQUENCY;
     want_aspec.format = AUDIO_S16SYS;
     want_aspec.channels = 2;
+#if SDL_COMPILEDVERSION == 2005 && defined(__APPLE__)
+    /* SDL 2.0.5 on macOS introduced a bug where certain combinations of buffer lengths and frequencies 
+       fail to produce audio correctly. This bug was fixed 2.0.6. */
     want_aspec.samples = 2048;
+#else
+    want_aspec.samples = 512;
+#endif
     want_aspec.callback = audio_callback;
     want_aspec.userdata = &gb;
     SDL_OpenAudio(&want_aspec, &have_aspec);
