@@ -385,18 +385,19 @@ restart:
         GB_set_sample_rate(&gb, have_aspec.freq);
     }
     
+    bool error = false;
     start_capturing_logs();
     if (dmg) {
-        GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"));
+        error = GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"));
     }
     else {
-        GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"));
+        error = GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"));
     }
-    end_capturing_logs(true, true);
+    end_capturing_logs(true, error);
     
     start_capturing_logs();
-    GB_load_rom(&gb, filename);
-    end_capturing_logs(true, true);
+    error = GB_load_rom(&gb, filename);
+    end_capturing_logs(true, error);
     
     size_t path_length = strlen(filename);
     
