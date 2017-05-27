@@ -395,6 +395,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (!running) {
         [self start];
     }
+    [self.consoleWindow makeKeyAndOrderFront:nil];
     [self.consoleInput becomeFirstResponder];
 }
 
