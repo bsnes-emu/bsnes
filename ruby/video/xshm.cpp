@@ -13,25 +13,25 @@ struct VideoXShm : Video {
 
   struct Device {
     Display* display = nullptr;
-    signed screen = 0;
-    signed depth = 0;
+    int screen = 0;
+    int depth = 0;
     Visual* visual = nullptr;
     Window window = 0;
 
     XShmSegmentInfo shmInfo;
     XImage* image = nullptr;
     uint32_t* buffer = nullptr;
-    unsigned width = 0;
-    unsigned height = 0;
+    uint width = 0;
+    uint height = 0;
   } device;
 
   struct Settings {
     uintptr_t handle = 0;
-    unsigned filter = Video::FilterLinear;
+    uint filter = Video::FilterLinear;
 
     uint32_t* buffer = nullptr;
-    unsigned width = 0;
-    unsigned height = 0;
+    uint width = 0;
+    uint height = 0;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -51,15 +51,15 @@ struct VideoXShm : Video {
       settings.handle = value.get<uintptr_t>();
       return true;
     }
-    if(name == Video::Filter && value.is<unsigned>()) {
-      settings.filter = value.get<unsigned>();
+    if(name == Video::Filter && value.is<uint>()) {
+      settings.filter = value.get<uint>();
       return true;
     }
     return false;
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
-    if(settings.buffer == nullptr || settings.width != width || settings.height != height) {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!settings.buffer || settings.width != width || settings.height != height) {
       if(settings.buffer) delete[] settings.buffer;
       settings.width = width, settings.height = height;
       settings.buffer = new uint32_t[width * height + 16];  //+16 is padding for linear interpolation
@@ -74,36 +74,36 @@ struct VideoXShm : Video {
   }
 
   auto clear() -> void {
-    if(settings.buffer == nullptr) return;
+    if(!settings.buffer) return;
     uint32_t* dp = settings.buffer;
-    unsigned length = settings.width * settings.height;
+    uint length = settings.width * settings.height;
     while(length--) *dp++ = 255u << 24;
     refresh();
   }
 
   auto refresh() -> void {
-    if(settings.buffer == nullptr) return;
+    if(!settings.buffer) return;
     size();
 
     float xratio = (float)settings.width  / (float)device.width;
     float yratio = (float)settings.height / (float)device.height;
 
     #pragma omp parallel for
-    for(unsigned y = 0; y < device.height; y++) {
+    for(uint y = 0; y < device.height; y++) {
       float ystep = y * yratio;
       float xstep = 0;
 
-      uint32_t* sp = settings.buffer + (unsigned)ystep * settings.width;
+      uint32_t* sp = settings.buffer + (uint)ystep * settings.width;
       uint32_t* dp = device.buffer + y * device.width;
 
       if(settings.filter == Video::FilterNearest) {
-        for(unsigned x = 0; x < device.width; x++) {
-          *dp++ = 255u << 24 | sp[(unsigned)xstep];
+        for(uint x = 0; x < device.width; x++) {
+          *dp++ = 255u << 24 | sp[(uint)xstep];
           xstep += xratio;
         }
       } else {  //settings.filter == Video::FilterLinear
-        for(unsigned x = 0; x < device.width; x++) {
-          *dp++ = 255u << 24 | interpolate(xstep - (unsigned)xstep, sp[(unsigned)xstep], sp[(unsigned)xstep + 1]);
+        for(uint x = 0; x < device.width; x++) {
+          *dp++ = 255u << 24 | interpolate(xstep - (uint)xstep, sp[(uint)xstep], sp[(uint)xstep + 1]);
           xstep += xratio;
         }
       }
@@ -149,7 +149,7 @@ struct VideoXShm : Video {
       XNextEvent(device.display, &event);
     }
 
-    if(size() == false) return false;
+    if(!size()) return false;
     return true;
   }
 
@@ -186,7 +186,7 @@ private:
   }
 
   auto free() -> void {
-    if(device.buffer == nullptr) return;
+    if(!device.buffer) return;
     device.buffer = nullptr;
     XShmDetach(device.display, &device.shmInfo);
     XDestroyImage(device.image);

@@ -55,10 +55,10 @@ struct InputJoypadXInput {
 
       int16_t hatX = 0;
       int16_t hatY = 0;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP   ) hatY = -32768;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ) hatY = +32767;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ) hatX = -32768;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) hatX = +32767;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP   ) hatY -= 32767;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ) hatY += 32767;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ) hatX -= 32767;
+      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) hatX += 32767;
 
       assign(jp.hid, HID::Joypad::GroupID::Hat, 0, hatX);
       assign(jp.hid, HID::Joypad::GroupID::Hat, 1, hatY);

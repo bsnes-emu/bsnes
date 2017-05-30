@@ -81,11 +81,11 @@ struct vector {
   auto take(uint offset) -> T;
 
   //iterator.hpp
-  auto begin() { return vector_iterator<T>{*this, 0}; }
-  auto end() { return vector_iterator<T>{*this, size()}; }
+  auto begin() -> vector_iterator<T> { return vector_iterator<T>{*this, 0}; }
+  auto end() -> vector_iterator<T> { return vector_iterator<T>{*this, size()}; }
 
-  auto begin() const { return vector_iterator_const<T>{*this, 0}; }
-  auto end() const { return vector_iterator_const<T>{*this, size()}; }
+  auto begin() const -> vector_iterator_const<T> { return vector_iterator_const<T>{*this, 0}; }
+  auto end() const -> vector_iterator_const<T> { return vector_iterator_const<T>{*this, size()}; }
 
   //utility.hpp
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;

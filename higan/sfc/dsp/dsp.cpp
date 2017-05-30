@@ -246,6 +246,15 @@ auto DSP::power() -> void {
     voice[n].vidx = n * 0x10;
   }
 
+  for(auto r : range(0x80)) {
+    REG(r) = random(0x00);
+  }
+
+  for(auto v : range(8)) {
+    REG(v * 0x10 + ENVX) = 0;
+    REG(v * 0x10 + OUTX) = 0;
+  }
+
   REG(FLG) = 0xe0;
 }
 
