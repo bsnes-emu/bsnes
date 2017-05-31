@@ -508,7 +508,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
 
     /* Render */
-    int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+    /* Todo: it appears that the actual rendering starts 4 cycles after mode 3 starts. Is this correct? */
+    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 4;
     
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= WIDTH) {
