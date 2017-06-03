@@ -318,7 +318,13 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             if (gb->io_registers[GB_IO_STAT] & 0x20) {
                 gb->stat_interrupt_line = true;
             }
-            display_vblank(gb);
+            if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
+                gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_SKIPPED;
+            }
+            else {
+                gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                display_vblank(gb);
+            }
         }
         
         /* Handle STAT changes for lines 0-143 */

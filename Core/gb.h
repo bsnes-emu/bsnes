@@ -365,6 +365,14 @@ struct GB_gameboy_internal_s {
         bool stat_interrupt_line;
         uint8_t effective_scx;
         uint8_t current_window_line;
+        /* The LCDC will skip the first frame it renders after turning it on, unless the previous
+           frame was skipped as well.
+           See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
+        enum {
+            GB_FRAMESKIP_LCD_TURNED_ON,
+            GB_FRAMESKIP_FIRST_FRAME_SKIPPED,
+            GB_FRAMESKIP_SECOND_FRAME_RENDERED,
+        } frame_skip_state;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
