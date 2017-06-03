@@ -1326,7 +1326,7 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
         return true;
     }
     
-    GB_log(gb, "  1. %s\n", debugger_value_to_string(gb, (value_t){gb->pc, bank_for_addr(gb, gb->pc)}, true));
+    GB_log(gb, "  1. %s\n", debugger_value_to_string(gb, (value_t){true, bank_for_addr(gb, gb->pc), gb->pc}, true));
     for (unsigned int i = gb->backtrace_size; i--;) {
         GB_log(gb, "%3d. %s\n", gb->backtrace_size - i + 1, debugger_value_to_string(gb, (value_t){true, gb->backtrace_returns[i].bank, gb->backtrace_returns[i].addr}, true));
     }
