@@ -11,7 +11,7 @@ auto PPU::readVRAM(uint mode, uint32 addr) -> uint32 {
     return vram[addr];
   }
 
-  return 0;  //should never occur
+  unreachable;
 }
 
 auto PPU::writeVRAM(uint mode, uint32 addr, uint32 word) -> void {
@@ -29,8 +29,8 @@ auto PPU::writeVRAM(uint mode, uint32 addr, uint32 word) -> void {
     vram[addr + 1] = word >>  8;
   } else if(mode & Byte) {
     //8-bit writes to OBJ section of VRAM are ignored
-    if(regs.control.bgmode <= 2 && addr >= 0x10000) return;
-    if(regs.control.bgmode <= 5 && addr >= 0x14000) return;
+    if(Background::IO::mode <= 2 && addr >= 0x10000) return;
+    if(Background::IO::mode <= 5 && addr >= 0x14000) return;
 
     addr &= ~1;
     vram[addr + 0] = (uint8)word;
@@ -64,14 +64,14 @@ auto PPU::readOAM(uint mode, uint32 addr) -> uint32 {
   if(mode & Byte) return readOAM(Half, addr) >> ((addr & 1) * 8);
 
   auto& obj = object[addr >> 3 & 127];
-  auto& par = objectparam[addr >> 5 & 31];
+  auto& par = objectParam[addr >> 5 & 31];
 
   switch(addr & 6) {
 
   case 0: return (
     (obj.y          <<  0)
   | (obj.affine     <<  8)
-  | (obj.affinesize <<  9)
+  | (obj.affineSize <<  9)
   | (obj.mode       << 10)
   | (obj.mosaic     << 12)
   | (obj.colors     << 13)
@@ -80,7 +80,7 @@ auto PPU::readOAM(uint mode, uint32 addr) -> uint32 {
 
   case 2: return (
     (obj.x           <<  0)
-  | (obj.affineparam <<  9)
+  | (obj.affineParam <<  9)
   | (obj.hflip       << 12)
   | (obj.vflip       << 13)
   | (obj.size        << 14)
@@ -113,13 +113,13 @@ auto PPU::writeOAM(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Byte) return;  //8-bit writes to OAM are ignored
 
   auto& obj = object[addr >> 3 & 127];
-  auto& par = objectparam[addr >> 5 & 31];
+  auto& par = objectParam[addr >> 5 & 31];
   switch(addr & 6) {
 
   case 0:
     obj.y          = word >>  0;
     obj.affine     = word >>  8;
-    obj.affinesize = word >>  9;
+    obj.affineSize = word >>  9;
     obj.mode       = word >> 10;
     obj.mosaic     = word >> 12;
     obj.colors     = word >> 13;
@@ -128,7 +128,7 @@ auto PPU::writeOAM(uint mode, uint32 addr, uint32 word) -> void {
 
   case 2:
     obj.x           = word >>  0;
-    obj.affineparam = word >>  9;
+    obj.affineParam = word >>  9;
     obj.hflip       = word >> 12;
     obj.vflip       = word >> 13;
     obj.size        = word >> 14;
@@ -166,4 +166,11 @@ auto PPU::writeOAM(uint mode, uint32 addr, uint32 word) -> void {
 
   obj.width  = widths [obj.shape * 4 + obj.size];
   obj.height = heights[obj.shape * 4 + obj.size];
+}
+
+auto PPU::readObjectVRAM(uint addr) const -> uint8 {
+  if(Background::IO::mode == 3 || Background::IO::mode == 4 || Background::IO::mode == 5) {
+    if(addr <= 0x3fff) return 0u;
+  }
+  return vram[0x10000 + (addr & 0x7fff)];
 }

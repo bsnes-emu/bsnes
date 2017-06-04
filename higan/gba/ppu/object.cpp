@@ -1,13 +1,9 @@
-auto PPU::renderObjects() -> void {
-  if(regs.control.enable[OBJ] == false) return;
-  for(auto n : range(128)) renderObject(object[n]);
-}
-
+/*
 //px,py = pixel coordinates within sprite [0,0 - width,height)
 //fx,fy = affine pixel coordinates
 //pa,pb,pc,pd = affine pixel adjustments
 //x,y = adjusted coordinates within sprite (linear = vflip/hflip, affine = rotation/zoom)
-auto PPU::renderObject(Object& obj) -> void {
+auto PPU::renderObject(ObjectInfo& obj) -> void {
   uint8 py = regs.vcounter - obj.y;
   if(obj.affine == 0 && obj.affinesize == 1) return;  //hidden
   if(py >= obj.height << obj.affinesize) return;  //offscreen
@@ -71,10 +67,86 @@ auto PPU::renderObject(Object& obj) -> void {
     fy += pc;
   }
 }
+*/
 
-auto PPU::readObjectVRAM(uint addr) const -> uint8 {
-  if(regs.control.bgmode == 3 || regs.control.bgmode == 4 || regs.control.bgmode == 5) {
-    if(addr <= 0x3fff) return 0u;
+auto PPU::Objects::scanline(uint y) -> void {
+  for(auto& pixel : buffer) pixel = {};
+  if(ppu.blank() || !io.enable) return;
+
+  for(auto& object : ppu.object) {
+    uint8 py = y - object.y;
+    if(object.affine == 0 && object.affineSize == 1) continue;  //hidden
+    if(py >= object.height << object.affineSize) continue;  //offscreen
+
+    uint rowSize = io.mapping == 0 ? 32 >> object.colors : object.width >> 3;
+    uint baseAddress = object.character << 5;
+
+    if(object.mosaic && io.mosaicHeight) {
+      int mosaicY = (y / (1 + io.mosaicHeight)) * (1 + io.mosaicHeight);
+      py = object.y >= 160 || mosaicY - object.y >= 0 ? mosaicY - object.y : 0;
+    }
+
+    int16 pa = ppu.objectParam[object.affineParam].pa;
+    int16 pb = ppu.objectParam[object.affineParam].pb;
+    int16 pc = ppu.objectParam[object.affineParam].pc;
+    int16 pd = ppu.objectParam[object.affineParam].pd;
+
+    //center-of-sprite coordinates
+    int16 centerX = object.width  >> 1;
+    int16 centerY = object.height >> 1;
+
+    //origin coordinates (top-left of sprite)
+    int28 originX = -(centerX << object.affineSize);
+    int28 originY = -(centerY << object.affineSize) + py;
+
+    //fractional pixel coordinates
+    int28 fx = originX * pa + originY * pb;
+    int28 fy = originX * pc + originY * pd;
+
+    for(uint px : range(object.width << object.affineSize)) {
+      uint sx, sy;
+      if(!object.affine) {
+        sx = px ^ (object.hflip ? object.width  - 1 : 0);
+        sy = py ^ (object.vflip ? object.height - 1 : 0);
+      } else {
+        sx = (fx >> 8) + centerX;
+        sy = (fy >> 8) + centerY;
+      }
+
+      uint9 bx = object.x + px;
+      if(bx < 240 && sx < object.width && sy < object.height) {
+        uint offset = (sy >> 3) * rowSize + (sx >> 3);
+        offset = offset * 64 + (sy & 7) * 8 + (sx & 7);
+
+        uint8 color = ppu.readObjectVRAM(baseAddress + (offset >> !object.colors));
+        if(object.colors == 0) color = sx & 1 ? color >> 4 : color & 15;
+        if(color) {
+          if(object.mode & 2) {
+            buffer[bx].window = true;
+          } else if(!buffer[bx].enable || object.priority < buffer[bx].priority) {
+            if(object.colors == 0) color = object.palette * 16 + color;
+            buffer[bx].enable = true;
+            buffer[bx].priority = object.priority;
+            buffer[bx].color = ppu.pram[256 + color];
+            buffer[bx].translucent = object.mode == 1;
+            buffer[bx].mosaic = object.mosaic;
+          }
+        }
+      }
+
+      fx += pa;
+      fy += pc;
+    }
   }
-  return vram[0x10000 + (addr & 0x7fff)];
+}
+
+auto PPU::Objects::run(uint x, uint y) -> void {
+  output = {};
+  if(ppu.blank() || !io.enable) return;
+
+  output = buffer[x];
+}
+
+auto PPU::Objects::power() -> void {
+  memory::fill(&io, sizeof(IO));
 }

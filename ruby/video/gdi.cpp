@@ -39,7 +39,7 @@ struct VideoGDI : Video {
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     if(!settings.buffer || settings.width != width || settings.height != height) {
       if(settings.buffer) {
-        delete] settings.buffer;
+        delete[] settings.buffer;
         DeleteObject(device.bitmap);
         DeleteObject(device.dc);
       }
@@ -80,7 +80,7 @@ struct VideoGDI : Video {
 
     SetDIBits(device.dc, device.bitmap, 0, settings.height, (void*)settings.buffer, &device.info, DIB_RGB_COLORS);
     HDC hdc = GetDC(settings.handle);
-    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, device.dc, 0, -settings.height, settings.width, settings.height, SRCCOPY);
+    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, device.dc, 0, 0, settings.width, settings.height, SRCCOPY);
     ReleaseDC(settings.handle, hdc);
   }
 

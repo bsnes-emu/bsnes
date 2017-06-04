@@ -4,121 +4,120 @@ auto PPU::serialize(serializer& s) -> void {
   s.array(vram, 96 * 1024);
   s.array(pram, 512);
 
-  s.integer(regs.control.bgmode);
-  s.integer(regs.control.cgbmode);
-  s.integer(regs.control.frame);
-  s.integer(regs.control.hblank);
-  s.integer(regs.control.objmapping);
-  s.integer(regs.control.forceblank);
-  for(auto& flag : regs.control.enable) s.integer(flag);
-  for(auto& flag : regs.control.enablewindow) s.integer(flag);
+  s.integer(io.gameBoyColorMode);
+  s.integer(io.forceBlank);
+  s.integer(io.greenSwap);
+  s.integer(io.vblank);
+  s.integer(io.hblank);
+  s.integer(io.vcoincidence);
+  s.integer(io.irqvblank);
+  s.integer(io.irqhblank);
+  s.integer(io.irqvcoincidence);
+  s.integer(io.vcompare);
+  s.integer(io.vcounter);
 
-  s.integer(regs.greenswap);
+  s.integer(Background::IO::mode);
+  s.integer(Background::IO::frame);
+  s.integer(Background::IO::mosaicWidth);
+  s.integer(Background::IO::mosaicHeight);
+  bg0.serialize(s);
+  bg1.serialize(s);
+  bg2.serialize(s);
+  bg3.serialize(s);
+  objects.serialize(s);
+  window0.serialize(s);
+  window1.serialize(s);
+  window2.serialize(s);
+  window3.serialize(s);
+  screen.serialize(s);
+  for(auto& object : this->object) object.serialize(s);
+  for(auto& param : this->objectParam) param.serialize(s);
+}
 
-  s.integer(regs.status.vblank);
-  s.integer(regs.status.hblank);
-  s.integer(regs.status.vcoincidence);
-  s.integer(regs.status.irqvblank);
-  s.integer(regs.status.irqhblank);
-  s.integer(regs.status.irqvcoincidence);
-  s.integer(regs.status.vcompare);
+auto PPU::Background::serialize(serializer& s) -> void {
+  s.integer(id);
 
-  s.integer(regs.vcounter);
+  s.integer(io.enable);
+  s.integer(io.priority);
+  s.integer(io.characterBase);
+  s.integer(io.unused);
+  s.integer(io.mosaic);
+  s.integer(io.colorMode);
+  s.integer(io.screenBase);
+  s.integer(io.affineWrap);
+  s.integer(io.screenSize);
+  s.integer(io.hoffset);
+  s.integer(io.voffset);
+  s.integer(io.pa);
+  s.integer(io.pb);
+  s.integer(io.pc);
+  s.integer(io.pd);
+  s.integer(io.x);
+  s.integer(io.y);
+  s.integer(io.lx);
+  s.integer(io.ly);
 
-  for(auto& bg : regs.bg) {
-    s.integer(bg.control.priority);
-    s.integer(bg.control.characterbaseblock);
-    s.integer(bg.control.unused);
-    s.integer(bg.control.mosaic);
-    s.integer(bg.control.colormode);
-    s.integer(bg.control.screenbaseblock);
-    s.integer(bg.control.affinewrap);
-    s.integer(bg.control.screensize);
-    s.integer(bg.hoffset);
-    s.integer(bg.voffset);
-    s.integer(bg.pa);
-    s.integer(bg.pb);
-    s.integer(bg.pc);
-    s.integer(bg.pd);
-    s.integer(bg.x);
-    s.integer(bg.y);
-    s.integer(bg.lx);
-    s.integer(bg.ly);
-    s.integer(bg.vmosaic);
-    s.integer(bg.hmosaic);
-    s.integer(bg.id);
-  }
+  s.integer(hmosaic);
+  s.integer(vmosaic);
+  s.integer(hoffset);
+  s.integer(voffset);
+  s.integer(fx);
+  s.integer(fy);
+}
 
-  for(auto& window : regs.window) {
-    s.integer(window.x1);
-    s.integer(window.x2);
-    s.integer(window.y1);
-    s.integer(window.y2);
-  }
+auto PPU::Objects::serialize(serializer& s) -> void {
+  s.integer(io.enable);
+  s.integer(io.hblank);
+  s.integer(io.mapping);
+  s.integer(io.mosaicWidth);
+  s.integer(io.mosaicHeight);
+}
 
-  for(auto& windowflags : regs.windowflags) {
-    for(auto& flag : windowflags.enable) s.integer(flag);
-  }
+auto PPU::Window::serialize(serializer& s) -> void {
+  s.integer(id);
 
-  s.integer(regs.mosaic.bghsize);
-  s.integer(regs.mosaic.bgvsize);
-  s.integer(regs.mosaic.objhsize);
-  s.integer(regs.mosaic.objvsize);
+  s.integer(io.enable);
+  s.array(io.active);
+  s.integer(io.x1);
+  s.integer(io.x2);
+  s.integer(io.y1);
+  s.integer(io.y2);
 
-  for(auto& flag : regs.blend.control.above) s.integer(flag);
-  for(auto& flag : regs.blend.control.below) s.integer(flag);
-  s.integer(regs.blend.control.mode);
-  s.integer(regs.blend.eva);
-  s.integer(regs.blend.evb);
-  s.integer(regs.blend.evy);
+  s.integer(output);
+}
 
-  for(auto l : range(6)) {
-    for(auto p : range(240)) {
-      auto& pixel = layer[l][p];
-      s.integer(pixel.enable);
-      s.integer(pixel.priority);
-      s.integer(pixel.color);
-      s.integer(pixel.translucent);
-      s.integer(pixel.mosaic);
-    }
-  }
+auto PPU::Screen::serialize(serializer& s) -> void {
+  s.integer(io.blendMode);
+  s.array(io.blendAbove);
+  s.array(io.blendBelow);
+  s.integer(io.blendEVA);
+  s.integer(io.blendEVB);
+  s.integer(io.blendEVY);
+}
 
-  for(auto w : range(3)) {
-    for(auto p : range(240)) {
-      s.integer(windowmask[w][p]);
-    }
-  }
+auto PPU::Object::serialize(serializer& s) -> void {
+  s.integer(y);
+  s.integer(affine);
+  s.integer(affineSize);
+  s.integer(mode);
+  s.integer(mosaic);
+  s.integer(colors);
+  s.integer(shape);
+  s.integer(x);
+  s.integer(affineParam);
+  s.integer(hflip);
+  s.integer(vflip);
+  s.integer(size);
+  s.integer(character);
+  s.integer(priority);
+  s.integer(palette);
+  s.integer(width);
+  s.integer(height);
+}
 
-  for(auto& value : vmosaic) s.integer(value);
-  for(auto& value : hmosaic) s.integer(value);
-
-  for(auto& obj : object) {
-    s.integer(obj.y);
-    s.integer(obj.affine);
-    s.integer(obj.affinesize);
-    s.integer(obj.mode);
-    s.integer(obj.mosaic);
-    s.integer(obj.colors);
-    s.integer(obj.shape);
-
-    s.integer(obj.x);
-    s.integer(obj.affineparam);
-    s.integer(obj.hflip);
-    s.integer(obj.vflip);
-    s.integer(obj.size);
-
-    s.integer(obj.character);
-    s.integer(obj.priority);
-    s.integer(obj.palette);
-
-    s.integer(obj.width);
-    s.integer(obj.height);
-  }
-
-  for(auto& par : objectparam) {
-    s.integer(par.pa);
-    s.integer(par.pb);
-    s.integer(par.pc);
-    s.integer(par.pd);
-  }
+auto PPU::ObjectParam::serialize(serializer& s) -> void {
+  s.integer(pa);
+  s.integer(pb);
+  s.integer(pc);
+  s.integer(pd);
 }
