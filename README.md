@@ -118,6 +118,8 @@ The WonderSwan rotates!
 
 Shaders look weird on SNES because of interlace/hi-res
 
+GBA in-game saves are Difficult
+
 Frequently Asked Questions
 ==========================
 
