@@ -62,11 +62,14 @@ Unofficial higan resources
     collects shaders that higan can use
     to add special effects like TV scanlines to its video output,
     or smarter algorithms for scaling up to modern PC resolutions.
-    See "Installing custom shaders" below for details.
+    See [Installing custom shaders][shaders] below for details.
   - [Mercurial Magic](https://github.com/hex-usr/Mercurial-Magic/)
     is a tool for converting MSU-1 games and mods into a format
     higan can use.
-    See "Importing MSU-1 games" below for details.
+    See [Importing MSU-1 games][msu1] below for details.
+
+[shaders]: #installing-custom-shaders
+[msu1]: #importing-msu-1-games
 
 There are also other projects
 based on current or older versions of higan,
