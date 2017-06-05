@@ -54,7 +54,7 @@ Official higan resources
 Unofficial higan resources
 --------------------------
 
-  - [Source code repository](https://gitlab.com/higan/higan/):
+  - [Source code repository](https://gitlab.com/higan/higan/)
     archives official higan releases
     and WIP snapshots
     since approximately v067r21.
