@@ -2,6 +2,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   auto interruptPending() const -> bool override;
   auto pio() const -> uint8;
   auto joylatch() const -> bool;
+  auto synchronizing() const -> bool override;
 
   CPU();
 
@@ -122,7 +123,6 @@ private:
 
     //DMA
     bool dmaActive;
-    uint dmaCounter;
     uint dmaClocks;
     bool dmaPending;
     bool hdmaPending;

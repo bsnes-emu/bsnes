@@ -1,19 +1,13 @@
-auto CPU::dmaCounter() const -> uint {
-  return clockCounter & 7;
-//return (status.dmaCounter + hcounter()) & 7;
-}
-
-auto CPU::joypadCounter() const -> uint {
-  return clockCounter & 255;
-}
+auto CPU::dmaCounter() const -> uint { return clockCounter & 7; }
+auto CPU::joypadCounter() const -> uint { return clockCounter & 255; }
 
 auto CPU::step(uint clocks) -> void {
   status.irqLock = false;
   uint ticks = clocks >> 1;
   while(ticks--) {
+    clockCounter += 2;
     tick();
     if(hcounter() & 2) pollInterrupts();
-    clockCounter += 2;
     if(joypadCounter() == 0) joypadEdge();
   }
 
@@ -37,7 +31,6 @@ auto CPU::step(uint clocks) -> void {
 
 //called by ppu.tick() when Hcounter=0
 auto CPU::scanline() -> void {
-  status.dmaCounter = (status.dmaCounter + status.lineClocks) & 7;
   status.lineClocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating

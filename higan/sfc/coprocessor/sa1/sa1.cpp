@@ -14,6 +14,9 @@ auto SA1::Enter() -> void {
 }
 
 auto SA1::main() -> void {
+  if(r.wai) return op_wai();
+  if(r.stp) return op_stp();
+
   if(mmio.sa1_rdyb || mmio.sa1_resb) {
     //SA-1 co-processor is asleep
     tick();
@@ -73,6 +76,10 @@ auto SA1::lastCycle() -> void {
 
 auto SA1::interruptPending() const -> bool {
   return status.interruptPending;
+}
+
+auto SA1::synchronizing() const -> bool {
+  return scheduler.synchronizing();
 }
 
 auto SA1::tick() -> void {
@@ -142,6 +149,7 @@ auto SA1::power() -> void {
   r.e      = 1;
   r.mdr    = 0x00;
   r.wai    = false;
+  r.stp    = false;
   r.vector = 0x0000;
 
   status.counter = 0;

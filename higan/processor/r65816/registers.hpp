@@ -75,6 +75,7 @@ struct Registers {
 
   bool irq = false;   //IRQ pin (0 = low, 1 = trigger)
   bool wai = false;   //raised during wai, cleared after interrupt triggered
+  bool stp = false;   //raised during stp, never cleared
   uint8 mdr = 0;      //memory data register
   uint16 vector = 0;  //interrupt vector address
 };

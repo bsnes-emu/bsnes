@@ -2,7 +2,7 @@
 //keeps track of previous counter positions in history table
 auto PPUcounter::tick() -> void {
   status.hcounter += 2;  //increment by smallest unit of time
-  if(status.hcounter >= 1360 && status.hcounter == lineclocks()) {
+  if(status.hcounter == lineclocks()) {
     status.hcounter = 0;
     vcounterTick();
   }
@@ -27,12 +27,12 @@ auto PPUcounter::tick(uint clocks) -> void {
 auto PPUcounter::vcounterTick() -> void {
   if(++status.vcounter == 128) status.interlace = ppu.interlace();
 
-  if((system.region() == System::Region::NTSC && status.interlace == false && status.vcounter == 262)
-  || (system.region() == System::Region::NTSC && status.interlace == true  && status.vcounter == 263)
-  || (system.region() == System::Region::NTSC && status.interlace == true  && status.vcounter == 262 && status.field == 1)
-  || (system.region() == System::Region::PAL  && status.interlace == false && status.vcounter == 312)
-  || (system.region() == System::Region::PAL  && status.interlace == true  && status.vcounter == 313)
-  || (system.region() == System::Region::PAL  && status.interlace == true  && status.vcounter == 312 && status.field == 1)
+  if((system.region() == System::Region::NTSC && status.interlace == 0 && status.vcounter == 262)
+  || (system.region() == System::Region::NTSC && status.interlace == 1 && status.vcounter == 263)
+  || (system.region() == System::Region::NTSC && status.interlace == 1 && status.vcounter == 262 && status.field == 1)
+  || (system.region() == System::Region::PAL  && status.interlace == 0 && status.vcounter == 312)
+  || (system.region() == System::Region::PAL  && status.interlace == 1 && status.vcounter == 313)
+  || (system.region() == System::Region::PAL  && status.interlace == 1 && status.vcounter == 312 && status.field == 1)
   ) {
     status.vcounter = 0;
     status.field = !status.field;
@@ -58,7 +58,7 @@ auto PPUcounter::hcounter(uint offset) const -> uint16 { return history.hcounter
 //dot 327 range = {1310, 1312, 1314}
 
 auto PPUcounter::hdot() const -> uint16 {
-  if(system.region() == System::Region::NTSC && status.interlace == false && vcounter() == 240 && field() == 1) {
+  if(system.region() == System::Region::NTSC && status.interlace == 0 && vcounter() == 240 && field() == 1) {
     return (hcounter() >> 2);
   } else {
     return (hcounter() - ((hcounter() > 1292) << 1) - ((hcounter() > 1310) << 1)) >> 2;
@@ -66,12 +66,12 @@ auto PPUcounter::hdot() const -> uint16 {
 }
 
 auto PPUcounter::lineclocks() const -> uint16 {
-  if(system.region() == System::Region::NTSC && status.interlace == false &&  vcounter() == 240 &&  field() == 1) return 1360;
+  if(system.region() == System::Region::NTSC && status.interlace == 0 && vcounter() == 240 && field() == 1) return 1360;
   return 1364;
 }
 
 auto PPUcounter::reset() -> void {
-  status.interlace = false;
+  status.interlace = 0;
   status.field     = 0;
   status.vcounter  = 0;
   status.hcounter  = 0;

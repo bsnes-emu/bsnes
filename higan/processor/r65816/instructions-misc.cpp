@@ -53,15 +53,16 @@ L r.pc.h = readLong(vector + 1);
   r.pc.b = 0x00;
 }
 
-auto R65816::op_stp() {
-  while(r.wai = true) {
+auto R65816::op_stp() -> void {
+  r.stp = true;
+  while(r.stp && !synchronizing()) {
 L   idle();
   }
 }
 
-auto R65816::op_wai() {
+auto R65816::op_wai() -> void {
   r.wai = true;
-  while(r.wai) {
+  while(r.wai && !synchronizing()) {
 L   idle();
   }
   idle();

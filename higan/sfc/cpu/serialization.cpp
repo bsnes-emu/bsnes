@@ -40,7 +40,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.resetPending);
 
   s.integer(status.dmaActive);
-  s.integer(status.dmaCounter);
   s.integer(status.dmaClocks);
   s.integer(status.dmaPending);
   s.integer(status.hdmaPending);

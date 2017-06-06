@@ -95,12 +95,10 @@ auto InputSettings::reloadMappings() -> void {
   mappingList.append(TableViewHeader().setVisible()
     .append(TableViewColumn().setText("Name"))
     .append(TableViewColumn().setText("Mapping").setExpandable())
-    .append(TableViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
   );
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(TableViewItem()
       .append(TableViewCell().setText(mapping.name))
-      .append(TableViewCell())
       .append(TableViewCell())
     );
   }
@@ -110,8 +108,7 @@ auto InputSettings::reloadMappings() -> void {
 auto InputSettings::refreshMappings() -> void {
   uint position = 0;
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.item(position).cell(1).setText(mapping.assignmentName());
-    mappingList.item(position).cell(2).setText(mapping.deviceName());
+    mappingList.item(position).cell(1).setText(mapping.displayName());
     position++;
   }
   mappingList.resizeColumns();

@@ -8,6 +8,7 @@ struct SA1 : Processor::R65816, Thread {
   alwaysinline auto triggerIRQ() -> void;
   alwaysinline auto lastCycle() -> void override;
   alwaysinline auto interruptPending() const -> bool override;
+  auto synchronizing() const -> bool override;
 
   auto init() -> void;
   auto load() -> void;

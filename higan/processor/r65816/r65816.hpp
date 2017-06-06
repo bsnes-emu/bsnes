@@ -19,6 +19,7 @@ struct R65816 {
   virtual auto lastCycle() -> void = 0;
   virtual auto interruptPending() const -> bool = 0;
   virtual auto interrupt() -> void;
+  virtual auto synchronizing() const -> bool = 0;
 
   virtual auto readDisassembler(uint24 addr) -> uint8 { return 0; }
 
@@ -174,8 +175,8 @@ struct R65816 {
   auto op_move_b(int adjust);
   auto op_move_w(int adjust);
   auto op_interrupt(uint16);
-  auto op_stp();
-  auto op_wai();
+  auto op_stp() -> void;
+  auto op_wai() -> void;
   auto op_xce();
   auto op_set_flag(uint bit);
   auto op_clear_flag(uint bit);

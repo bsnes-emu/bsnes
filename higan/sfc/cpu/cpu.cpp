@@ -13,6 +13,7 @@ CPU cpu;
 auto CPU::interruptPending() const -> bool { return status.interruptPending; }
 auto CPU::pio() const -> uint8 { return io.pio; }
 auto CPU::joylatch() const -> bool { return io.joypadStrobeLatch; }
+auto CPU::synchronizing() const -> bool { return scheduler.synchronizing(); }
 
 CPU::CPU() {
   PPUcounter::scanline = {&CPU::scanline, this};
@@ -23,6 +24,9 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
+  if(r.wai) return op_wai();
+  if(r.stp) return op_stp();
+
   if(status.interruptPending) {
     status.interruptPending = false;
     if(status.nmiPending) {
@@ -93,6 +97,7 @@ auto CPU::power() -> void {
   r.e      = 1;
   r.mdr    = 0x00;
   r.wai    = false;
+  r.stp    = false;
   r.vector = 0xfffc;  //reset vector address
 
   //DMA
@@ -209,7 +214,6 @@ auto CPU::power() -> void {
   status.interruptPending = true;
 
   status.dmaActive   = false;
-  status.dmaCounter  = 0;
   status.dmaClocks   = 0;
   status.dmaPending  = false;
   status.hdmaPending = false;

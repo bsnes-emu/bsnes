@@ -24,7 +24,7 @@ struct Pair {
   auto operator!() const -> bool { return !(hi || lo); }
 
   auto operator++() -> Pair& { lo++; hi += lo == 0; return *this; }
-  auto operator--() -> Pair& { hi -= lo == 0; lo--; }
+  auto operator--() -> Pair& { hi -= lo == 0; lo--; return *this; }
 
   auto operator++(int) -> Pair { Pair r = *this; lo++; hi += lo == 0; return r; }
   auto operator--(int) -> Pair { Pair r = *this; hi -= lo == 0; lo--; return r; }

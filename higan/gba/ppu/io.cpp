@@ -68,7 +68,7 @@ auto PPU::readIO(uint32 addr) -> uint8 {
   case 0x0400'004a: return window3.io.active[BG0] << 0 | window3.io.active[BG1] << 1 | window3.io.active[BG2] << 2 | window3.io.active[BG3] << 3 | window3.io.active[OBJ] << 4 | window3.io.active[SFX] << 5;
 
   //WININ2
-  case 0x0400'004b: return window2.io.active[BG0] << 0 | window2.io.active[BG1] << 1 | window2.io.active[BG2] << 3 | window2.io.active[BG3] << 3 | window2.io.active[OBJ] << 4 | window2.io.active[SFX] << 5;
+  case 0x0400'004b: return window2.io.active[BG0] << 0 | window2.io.active[BG1] << 1 | window2.io.active[BG2] << 2 | window2.io.active[BG3] << 3 | window2.io.active[OBJ] << 4 | window2.io.active[SFX] << 5;
 
   //MOSAIC (write-only)
 
@@ -266,7 +266,7 @@ auto PPU::writeIO(uint32 addr, uint8 data) -> void {
 
   //BG3PB
   case 0x0400'0032: bg3.io.pb.byte(0) = data; return;
-  case 0x0400'0033: bg3.io.pb.byte(0) = data; return;
+  case 0x0400'0033: bg3.io.pb.byte(1) = data; return;
 
   //BG3PC
   case 0x0400'0034: bg3.io.pc.byte(0) = data; return;
