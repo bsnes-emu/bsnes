@@ -54,7 +54,8 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   auto writeDMA(uint24 addr, uint8 data) -> void;
 
   //timing.cpp
-  auto dmaCounter() const -> uint;
+  inline auto dmaCounter() const -> uint;
+  inline auto joypadCounter() const -> uint;
 
   auto step(uint clocks) -> void;
   auto scanline() -> void;
@@ -73,7 +74,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   alwaysinline auto irqTest() -> bool;
 
   //joypad.cpp
-  auto stepAutoJoypadPoll() -> void;
+  auto joypadEdge() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -84,6 +85,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
 
 private:
   uint version = 2;  //allowed: 1, 2
+  uint clockCounter;
 
   struct Status {
     bool interruptPending;
@@ -130,7 +132,6 @@ private:
     bool autoJoypadActive;
     bool autoJoypadLatch;
     uint autoJoypadCounter;
-    uint autoJoypadClock;
   } status;
 
   struct IO {

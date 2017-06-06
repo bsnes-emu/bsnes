@@ -60,6 +60,7 @@ namespace Math {
 
 #if defined(PLATFORM_WINDOWS)
   #undef  IN
+  #undef  OUT
   #undef  interface
   #define dllexport __declspec(dllexport)
   #define MSG_NOSIGNAL 0

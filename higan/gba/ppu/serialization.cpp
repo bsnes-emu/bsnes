@@ -57,10 +57,9 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(io.lx);
   s.integer(io.ly);
 
+  s.integer(mosaicOffset);
   s.integer(hmosaic);
   s.integer(vmosaic);
-  s.integer(hoffset);
-  s.integer(voffset);
   s.integer(fx);
   s.integer(fy);
 }
@@ -71,6 +70,8 @@ auto PPU::Objects::serialize(serializer& s) -> void {
   s.integer(io.mapping);
   s.integer(io.mosaicWidth);
   s.integer(io.mosaicHeight);
+
+  s.integer(mosaicOffset);
 }
 
 auto PPU::Window::serialize(serializer& s) -> void {

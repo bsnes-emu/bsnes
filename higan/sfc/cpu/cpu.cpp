@@ -8,7 +8,6 @@ CPU cpu;
 #include "io.cpp"
 #include "timing.cpp"
 #include "irq.cpp"
-#include "joypad.cpp"
 #include "serialization.cpp"
 
 auto CPU::interruptPending() const -> bool { return status.interruptPending; }
@@ -178,6 +177,8 @@ auto CPU::power() -> void {
   pipe.data = 0;
 
   //Timing
+  clockCounter = 0;
+
   status.clockCount = 0;
   status.lineClocks = lineclocks();
 
@@ -217,7 +218,6 @@ auto CPU::power() -> void {
   status.autoJoypadActive  = false;
   status.autoJoypadLatch   = false;
   status.autoJoypadCounter = 0;
-  status.autoJoypadClock   = 0;
 }
 
 }

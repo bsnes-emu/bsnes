@@ -202,35 +202,35 @@ auto PPU::writeIO(uint32 addr, uint8 data) -> void {
 
   //BG0HOFS
   case 0x0400'0010: bg0.io.hoffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'0011: bg0.io.hoffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'0011: bg0.io.hoffset.bit (8)   = data.bit (0);   return;
 
   //BG0VOFS
   case 0x0400'0012: bg0.io.voffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'0013: bg0.io.voffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'0013: bg0.io.voffset.bit (8)   = data.bit (0);   return;
 
   //BG1HOFS
   case 0x0400'0014: bg1.io.hoffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'0015: bg1.io.hoffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'0015: bg1.io.hoffset.bit (8)   = data.bit (0);   return;
 
   //BG1VOFS
   case 0x0400'0016: bg1.io.voffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'0017: bg1.io.voffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'0017: bg1.io.voffset.bit (8)   = data.bit (0);   return;
 
   //BG2HOFS
   case 0x0400'0018: bg2.io.hoffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'0019: bg2.io.hoffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'0019: bg2.io.hoffset.bit (8)   = data.bit (0);   return;
 
   //BG2VOFS
   case 0x0400'001a: bg2.io.voffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'001b: bg2.io.voffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'001b: bg2.io.voffset.bit (8)   = data.bit (0);   return;
 
   //BG3HOFS
   case 0x0400'001c: bg3.io.hoffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'001d: bg3.io.hoffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'001d: bg3.io.hoffset.bit (8)   = data.bit (0);   return;
 
   //BG3VOFS
   case 0x0400'001e: bg3.io.voffset.bits(0,7) = data.bits(0,7); return;
-  case 0x0400'001f: bg3.io.voffset.bit (8)   = data.bit (8);   return;
+  case 0x0400'001f: bg3.io.voffset.bit (8)   = data.bit (0);   return;
 
   //BG2PA
   case 0x0400'0020: bg2.io.pa.byte(0) = data; return;

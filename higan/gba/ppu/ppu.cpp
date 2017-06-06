@@ -16,7 +16,6 @@ PPU ppu;
 #include "background.cpp"
 #include "object.cpp"
 #include "window.cpp"
-#include "mosaic.cpp"
 #include "screen.cpp"
 #include "io.cpp"
 #include "memory.cpp"
@@ -49,7 +48,7 @@ auto PPU::main() -> void {
   io.vblank = io.vcounter >= 160 && io.vcounter <= 226;
   io.vcoincidence = io.vcounter == io.vcompare;
 
-  if(io.vcounter ==   0) {
+  if(io.vcounter == 0) {
     frame();
 
     bg2.io.lx = bg2.io.x;
@@ -121,14 +120,19 @@ auto PPU::power() -> void {
 
   for(uint n = 0; n < 240 * 160; n++) output[n] = 0;
 
+  for(uint n = 0; n < 96 * 1024; n++) vram[n] = 0x00;
   for(uint n = 0; n < 1024; n += 2) writePRAM(n, Half, 0x0000);
   for(uint n = 0; n < 1024; n += 2) writeOAM(n, Half, 0x0000);
 
   memory::fill(&io, sizeof(IO));
+  for(auto& object : this->object) object = {};
+  for(auto& param : this->objectParam) param = {};
+
   bg0.power(BG0);
   bg1.power(BG1);
   bg2.power(BG2);
   bg3.power(BG3);
+  objects.power();
   window0.power(IN0);
   window1.power(IN1);
   window2.power(IN2);

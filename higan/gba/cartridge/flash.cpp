@@ -85,16 +85,3 @@ auto Cartridge::FLASH::power() -> void {
   writeselect = false;
   bank = 0;
 }
-
-auto Cartridge::FLASH::serialize(serializer& s) -> void {
-  s.array(data, size);
-  s.integer(size);
-  s.integer(id);
-  s.integer(unlockhi);
-  s.integer(unlocklo);
-  s.integer(idmode);
-  s.integer(erasemode);
-  s.integer(bankselect);
-  s.integer(writeselect);
-  s.integer(bank);
-}

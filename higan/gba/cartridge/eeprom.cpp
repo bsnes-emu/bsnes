@@ -81,14 +81,3 @@ auto Cartridge::EEPROM::power() -> void {
   offset = 0;
   address = 0;
 }
-
-auto Cartridge::EEPROM::serialize(serializer& s) -> void {
-  s.array(data, size);
-  s.integer(size);
-  s.integer(mask);
-  s.integer(test);
-  s.integer(bits);
-  s.integer((uint&)mode);
-  s.integer(offset);
-  s.integer(address);
-}

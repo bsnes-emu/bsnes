@@ -1,5 +1,10 @@
 auto CPU::dmaCounter() const -> uint {
-  return (status.dmaCounter + hcounter()) & 7;
+  return clockCounter & 7;
+//return (status.dmaCounter + hcounter()) & 7;
+}
+
+auto CPU::joypadCounter() const -> uint {
+  return clockCounter & 255;
 }
 
 auto CPU::step(uint clocks) -> void {
@@ -8,20 +13,19 @@ auto CPU::step(uint clocks) -> void {
   while(ticks--) {
     tick();
     if(hcounter() & 2) pollInterrupts();
+    clockCounter += 2;
+    if(joypadCounter() == 0) joypadEdge();
   }
 
   Thread::step(clocks);
   for(auto peripheral : peripherals) synchronize(*peripheral);
 
-  status.autoJoypadClock += clocks;
-  if(status.autoJoypadClock >= 256) {
-    status.autoJoypadClock -= 256;
-    stepAutoJoypadPoll();
-  }
-
   if(!status.dramRefreshed && hcounter() >= status.dramRefreshPosition) {
     status.dramRefreshed = true;
-    step(40);
+    for(auto _ : range(5)) {
+      step(8);
+      aluEdge();
+    }
   }
 
   #if defined(DEBUGGER)
@@ -136,6 +140,34 @@ auto CPU::dmaEdge() -> void {
       status.dmaClocks = 0;
       status.dmaActive = true;
     }
+  }
+}
+
+//called every 256 clocks; see CPU::step()
+auto CPU::joypadEdge() -> void {
+  if(vcounter() >= ppu.vdisp()) {
+    //cache enable state at first iteration
+    if(status.autoJoypadCounter == 0) status.autoJoypadLatch = io.autoJoypadPoll;
+    status.autoJoypadActive = status.autoJoypadCounter <= 15;
+
+    if(status.autoJoypadActive && status.autoJoypadLatch) {
+      if(status.autoJoypadCounter == 0) {
+        SuperFamicom::peripherals.controllerPort1->latch(1);
+        SuperFamicom::peripherals.controllerPort2->latch(1);
+        SuperFamicom::peripherals.controllerPort1->latch(0);
+        SuperFamicom::peripherals.controllerPort2->latch(0);
+      }
+
+      uint2 port0 = SuperFamicom::peripherals.controllerPort1->data();
+      uint2 port1 = SuperFamicom::peripherals.controllerPort2->data();
+
+      io.joy1 = io.joy1 << 1 | port0.bit(0);
+      io.joy2 = io.joy2 << 1 | port1.bit(0);
+      io.joy3 = io.joy3 << 1 | port0.bit(1);
+      io.joy4 = io.joy4 << 1 | port1.bit(1);
+    }
+
+    status.autoJoypadCounter++;
   }
 }
 

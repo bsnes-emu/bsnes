@@ -18,6 +18,7 @@ auto CPU::serialize(serializer& s) -> void {
     s.integer(dma.control.timingmode);
     s.integer(dma.control.irq);
     s.integer(dma.control.enable);
+    s.integer(dma.pending);
     s.integer(dma.run.target);
     s.integer(dma.run.source);
     s.integer(dma.run.length);
@@ -91,7 +92,14 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer((uint&)regs.mode);
   s.integer(regs.clock);
 
+  s.array(prefetch.slot);
+  s.integer(prefetch.addr);
+  s.integer(prefetch.load);
+  s.integer(prefetch.wait);
+
   s.integer(pending.dma.vblank);
   s.integer(pending.dma.hblank);
   s.integer(pending.dma.hdma);
+
+  s.integer(active.dma);
 }

@@ -18,6 +18,3 @@ auto Cartridge::MROM::read(uint mode, uint32 addr) -> uint32 {
 
 auto Cartridge::MROM::write(uint mode, uint32 addr, uint32 word) -> void {
 }
-
-auto Cartridge::MROM::serialize(serializer& s) -> void {
-}

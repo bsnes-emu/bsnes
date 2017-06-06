@@ -32,7 +32,9 @@ struct PPU : Thread, IO {
   uint16 pram[512];
   uint32* output;
 
-//private:
+private:
+  //note: I/O register order is {BG0-BG3, OBJ, SFX}
+  //however; layer ordering is {OBJ, BG0-BG3, SFX}
   enum : uint { OBJ = 0, BG0 = 1, BG1 = 2, BG2 = 3, BG3 = 4, SFX = 5 };
   enum : uint { IN0 = 0, IN1 = 1, IN2 = 2, OUT = 3 };
 
@@ -109,12 +111,11 @@ struct PPU : Thread, IO {
     } io;
 
     Pixel output;
+    Pixel mosaic;
+    uint mosaicOffset;
 
     uint hmosaic;
     uint vmosaic;
-
-    uint9 hoffset;
-    uint9 voffset;
 
     int28 fx;
     int28 fy;
@@ -138,6 +139,8 @@ struct PPU : Thread, IO {
 
     Pixel buffer[240];
     Pixel output;
+    Pixel mosaic;
+    uint mosaicOffset;
   } objects;
 
   struct Window {

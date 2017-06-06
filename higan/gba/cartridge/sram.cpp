@@ -8,7 +8,3 @@ auto Cartridge::SRAM::read(uint mode, uint32 addr) -> uint32 {
 auto Cartridge::SRAM::write(uint mode, uint32 addr, uint32 word) -> void {
   data[addr & mask] = word;
 }
-
-auto Cartridge::SRAM::serialize(serializer& s) -> void {
-  s.array(data, size);
-}
