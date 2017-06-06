@@ -177,6 +177,42 @@ and choosing an archive format.
 Compiling from source on Linux
 ------------------------------
 
+Official higan releases are distributed in [7-zip][7z] archives.
+You will need to install 7-zip,
+or another compatible archiving tool,
+to extract the higan source code.
+Alternatively,
+you may obtain higan source code from
+[the unofficial git repo](https://gitlab.com/higan/higan/)
+using the Git source-code management tool,
+or by clicking the download button on the right-hand side of the web-page
+and choosing an archive format.
+
+You will also need GCC 4.9 or higher,
+including the C and C++ compiler,
+GNU Make,
+and development files
+(headers, etc.)
+for the following libraries:
+
+  - GTK 2.x
+  - PulseAudio
+  - Mesa
+  - gtksourceview 2.x
+  - Cairo
+  - SDL 1.2
+  - libXv
+  - libAO
+  - OpenAL
+  - udev
+
+On a Debian-derived Linux distribution,
+you can install everything you need with a command like:
+
+    sudo apt-get install build-essential libgtk2.0-dev libpulse-dev \
+        mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev \
+        libxv-dev libao-dev libopenal-dev libudev-dev
+
 Installing the GBA BIOS
 -----------------------
 
