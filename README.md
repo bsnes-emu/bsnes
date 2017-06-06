@@ -33,6 +33,8 @@ Microsoft Windows XP and above.
 It also includes some level of support
 for GNU/Linux and macOS.
 
+higan is officially spelled with a lowercase "h", not a capital.
+
 About this document
 -------------------
 
@@ -97,14 +99,18 @@ that you might want to check out.
     is a fork of bsnes v073
     that adds improved support for debugging SNES software.
 
-Installing higan
-================
+Installing and uninstalling higan
+=================================
 
 Installing an official release on Windows
 -----------------------------------------
 
-Installing an official release on Linux
----------------------------------------
+Official higan releases are distributed in [7-zip][7z] archives.
+You will need to install 7-zip,
+or another compatible archiving tool,
+to install higan.
+
+[7z]: http://www.7-zip.org/
 
 Compiling from source on Windows
 --------------------------------
