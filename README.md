@@ -216,6 +216,10 @@ Installing custom shaders
 Controls
 --------
 
+  - mapping PC inputs to emulated controllers
+  - configuring which emulated controllers
+    are connected to the emulated system
+
 Notes on specific emulation cores
 =================================
 
