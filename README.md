@@ -102,6 +102,11 @@ that you might want to check out.
 Installing and uninstalling higan
 =================================
 
+The best way to install higan
+depends on what platform you're using,
+as well as whether you want to use official binaries
+or compile the source-code from scratch.
+
 Installing an official release on Windows
 -----------------------------------------
 
@@ -112,8 +117,62 @@ to install higan.
 
 [7z]: http://www.7-zip.org/
 
+Once you have a suitable archiving tool,
+extract the contents of the higan archive into a new directory.
+
+When you're done,
+the new directory should contain `higan.exe` and `icarus.exe`
+along with other assorted files and directories
+that describe the systems higan emulates.
+
+You may put that directory wherever you like.
+
+To run higan, open the `higan.exe` file.
+
+Before you can actually play games,
+you'll need to [import them][#importing-games]
+and [configure higan][#configuring-higan].
+
+Uninstalling an official release on Windows
+-------------------------------------------
+
+Delete the directory containing `higan.exe`
+and the other associated data from the original archive.
+
+To remove higan's configuration:
+
+ 1. Press Win+R to open the Run dialog
+ 2. Type `%APPDATA%` and press Enter
+    to open the folder where higan's configuration data lives
+ 3. Delete the subdirectories named `icarus` and `higan`
+    if they exist.
+
+You might also want to remove the games imported into higan's library
+(including in-game saves and save-states):
+
+ 1. Press Win+R to open the Run dialog
+ 2. Type `%USERPROFILE%` and press Enter
+    to open the folder where higan keeps its game library
+ 3. Delete the subdirectory named `Emulation` if it exists
+
 Compiling from source on Windows
 --------------------------------
+
+Official higan releases are distributed in [7-zip][7z] archives.
+You will need to install 7-zip,
+or another compatible archiving tool,
+to extract the higan source code.
+Alternatively,
+you may obtain higan source code from
+[the unofficial git repo](https://gitlab.com/higan/higan/)
+using the Git source-code management tool,
+or by clicking the download button on the right-hand side of the web-page
+and choosing an archive format.
+
+- TDM-GCC?
+- mingw-w64?
+- mingw?
+- isn't there some bug with building higan for 32-bit Windows?
 
 Compiling from source on Linux
 ------------------------------
