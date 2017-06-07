@@ -48,11 +48,13 @@ static char *default_input_callback(GB_gameboy_t *gb)
     char *expression = NULL;
     size_t size = 0;
 
+#ifndef __LIBRETRO__
     if (getline(&expression, &size, stdin) == -1) {
         /* The user doesn't have STDIN or used ^D. We make sure the program keeps running. */
         GB_set_async_input_callback(gb, NULL); /* Disable async input */
         return strdup("c");
     }
+#endif
 
     if (!expression) {
         return strdup("");
