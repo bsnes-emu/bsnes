@@ -600,6 +600,7 @@ void GB_set_user_data(GB_gameboy_t *gb, void *data)
 
 void GB_reset(GB_gameboy_t *gb)
 {
+    uint32_t mbc_ram_size = gb->mbc_ram_size;
     bool cgb = gb->is_cgb;
     memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
     gb->version = GB_STRUCT_VERSION;
@@ -609,7 +610,7 @@ void GB_reset(GB_gameboy_t *gb)
     gb->cgb_ram_bank = 1;
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
-
+    gb->mbc_ram_size = mbc_ram_size;
     if (cgb) {
         gb->ram_size = 0x2000 * 8;
         memset(gb->ram, 0, gb->ram_size);
