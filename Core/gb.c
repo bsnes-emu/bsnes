@@ -302,7 +302,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
         goto error;
     }
 
-    if (gb->mbc_ram_size != save.mbc_ram_size) {
+    if (gb->mbc_ram_size < save.mbc_ram_size) {
         GB_log(gb, "Save state has non-matching MBC RAM size.\n");
         errno = -1;
         goto error;
@@ -320,7 +320,8 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
         goto error;
     }
 
-    if (fread(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
+    memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
+    if (fread(gb->mbc_ram, 1, save.mbc_ram_size, f) != save.mbc_ram_size) {
         fclose(f);
         return EIO;
     }
