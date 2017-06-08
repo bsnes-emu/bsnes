@@ -27,6 +27,7 @@ struct Program : Emulator::Platform {
 
   //utility.cpp
   auto powerCycle() -> void;
+  auto rotateDisplay() -> void;
   auto connectDevices() -> void;
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;

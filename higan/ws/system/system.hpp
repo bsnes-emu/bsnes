@@ -1,7 +1,6 @@
 struct System : IO {
   auto loaded() const -> bool { return _loaded; }
   auto model() const -> Model { return _model; }
-  auto orientation() const -> bool { return _orientation; }
   auto color() const -> bool { return r.color; }
   auto planar() const -> bool { return r.format == 0; }
   auto packed() const -> bool { return r.format == 1; }
@@ -58,7 +57,6 @@ private:
 
   bool _loaded = false;
   Model _model = Model::WonderSwan;
-  bool _orientation = 0;  //0 = horizontal, 1 = vertical
   uint _serializeSize = 0;
 };
 

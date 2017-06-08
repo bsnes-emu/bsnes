@@ -12,14 +12,17 @@ Video::~Video() {
 auto Video::reset() -> void {
   interface = nullptr;
   sprites.reset();
-  delete output;
-  output = nullptr;
+  delete buffer;
+  buffer = nullptr;
+  delete rotate;
+  rotate = nullptr;
   delete palette;
   palette = nullptr;
   width = 0;
   height = 0;
   effects.colorBleed = false;
   effects.interframeBlending = false;
+  effects.rotateLeft = false;
 }
 
 auto Video::setInterface(Interface* interface) -> void {
@@ -85,6 +88,10 @@ auto Video::setEffect(Effect effect, const any& value) -> void {
   if(effect == Effect::InterframeBlending && value.is<bool>()) {
     effects.interframeBlending = value.get<bool>();
   }
+
+  if(effect == Effect::RotateLeft && value.is<bool>()) {
+    effects.rotateLeft = value.get<bool>();
+  }
 }
 
 auto Video::createSprite(uint width, uint height) -> shared_pointer<Sprite> {
@@ -105,13 +112,17 @@ auto Video::removeSprite(shared_pointer<Sprite> sprite) -> bool {
 
 auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void {
   if(this->width != width || this->height != height) {
-    delete output;
-    output = new uint32[width * height]();
+    delete buffer;
+    delete rotate;
+    buffer = new uint32[width * height]();
+    rotate = new uint32[height * width]();
     this->width = width;
     this->height = height;
   }
 
+  auto output = buffer;
   pitch >>= 2;  //bytes to words
+
   for(uint y : range(height)) {
     auto source = input + y * pitch;
     auto target = output + y * width;
@@ -139,6 +150,18 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
         target[x] = (a + b - ((a ^ b) & 0x01010101)) >> 1;
       }
     }
+  }
+
+  if(effects.rotateLeft) {
+    for(uint y : range(height)) {
+      auto source = buffer + y * width;
+      for(uint x : range(width)) {
+        auto target = rotate + (width - 1 - x) * height + y;
+        *target = *source++;
+      }
+    }
+    output = rotate;
+    swap(width, height);
   }
 
   for(auto& sprite : sprites) {

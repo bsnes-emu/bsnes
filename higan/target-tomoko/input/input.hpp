@@ -30,7 +30,7 @@ struct InputMapping {
 };
 
 struct InputHotkey : InputMapping {
-  auto logic() const -> Logic override { return Logic::AND; }
+//auto logic() const -> Logic override { return Logic::AND; }
 
   function<auto () -> void> press;
   function<auto () -> void> release;

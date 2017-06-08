@@ -36,7 +36,7 @@ MasterSystemInterface::MasterSystemInterface() {
   ports.append(move(controllerPort2));
 }
 
-auto MasterSystemInterface::videoSize() -> VideoSize {
+auto MasterSystemInterface::videoResolution() -> VideoSize {
   return {256, 240};
 }
 

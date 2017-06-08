@@ -39,14 +39,14 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoSize() -> VideoSize {
-  return {1140, 242};
+auto Interface::videoResolution() -> VideoSize {
+  return {1140, 240};
 }
 
 auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
   auto a = arc ? 8.0 / 7.0 : 1.0;
   uint w = 285;
-  uint h = 242;
+  uint h = 240;
   uint m = min(width / (w * a), height / h);
   return {uint(w * a * m), uint(h * m)};
 }

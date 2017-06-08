@@ -61,7 +61,9 @@ auto CPU::readIO(uint32 addr) -> uint8 {
 
   //KEYINPUT
   case 0x04000130: {
-    static const uint lookup[] = {5, 4, 8, 9, 3, 2, 0, 1};
+    static const uint landscape[] = {5, 4, 8, 9, 3, 2, 0, 1};
+    static const uint portrait[]  = {5, 4, 8, 9, 0, 1, 2, 3};
+    auto lookup = !settings.rotateLeft ? landscape : portrait;
     if(auto result = player.keyinput()) return result() >> 0;
     uint8 result = 0;
     for(uint n = 0; n < 8; n++) result |= platform->inputPoll(0, 0, lookup[n]) << n;

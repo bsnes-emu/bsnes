@@ -28,10 +28,7 @@ auto PPU::main() -> void {
         if(l.screenTwoEnable) renderScreenTwo();
         if(l.spriteEnable) renderSprite();
       }
-      switch(l.orientation) {
-      case 0: output[(s.vclk + 40) * 224 + s.hclk] = s.pixel.color; break;
-      case 1: output[(223 - s.hclk) * 224 + (s.vclk + 40)] = s.pixel.color; break;
-      }
+      output[s.vclk * 224 + x] = s.pixel.color;
       step(1);
     }
     step(32);
@@ -76,14 +73,10 @@ auto PPU::frame() -> void {
   s.field = !s.field;
   s.vclk = 0;
   scheduler.exit(Scheduler::Event::Frame);
-  if(l.orientation != system.orientation()) {
-    l.orientation = system.orientation();
-    memory::fill(output, 224 * 224 * sizeof(uint32));
-  }
 }
 
 auto PPU::refresh() -> void {
-  Emulator::video.refresh(output, 224 * sizeof(uint32), 224, 224);
+  Emulator::video.refresh(output, 224 * sizeof(uint32), 224, 144);
 }
 
 auto PPU::step(uint clocks) -> void {

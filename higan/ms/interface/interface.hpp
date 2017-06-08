@@ -50,7 +50,7 @@ struct MasterSystemInterface : Interface {
 
   MasterSystemInterface();
 
-  auto videoSize() -> VideoSize override;
+  auto videoResolution() -> VideoSize override;
   auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
   auto videoColors() -> uint32 override;
   auto videoColor(uint32 color) -> uint64 override;
@@ -63,7 +63,7 @@ struct GameGearInterface : Interface {
 
   GameGearInterface();
 
-  auto videoSize() -> VideoSize override;
+  auto videoResolution() -> VideoSize override;
   auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
   auto videoColors() -> uint32 override;
   auto videoColor(uint32 color) -> uint64 override;

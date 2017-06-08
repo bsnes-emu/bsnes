@@ -8,8 +8,7 @@ struct ID {
   };
 
   struct Port { enum : uint {
-    HardwareHorizontal,
-    HardwareVertical,
+    Hardware,
   };};
 
   struct Device { enum : uint {
@@ -23,7 +22,7 @@ struct Interface : Emulator::Interface {
   auto manifest() -> string override;
   auto title() -> string override;
 
-  auto videoSize() -> VideoSize override;
+  auto videoResolution() -> VideoSize override;
   auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
 
   auto loaded() -> bool override;
@@ -69,6 +68,7 @@ struct WonderSwanColorInterface : Interface {
 struct Settings {
   bool blurEmulation = true;
   bool colorEmulation = true;
+  bool rotateLeft = false;
 };
 
 extern Settings settings;

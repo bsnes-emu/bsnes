@@ -61,6 +61,17 @@ struct serializer {
     return *this;
   }
 
+  template<typename T> auto boolean(T& value) -> serializer& {
+    if(_mode == Save) {
+      _data[_size++] = (bool)value;
+    } else if(_mode == Load) {
+      value = (bool)_data[_size++];
+    } else if(_mode == Size) {
+      _size += 1;
+    }
+    return *this;
+  }
+
   template<typename T> auto integer(T& value) -> serializer& {
     enum : uint { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
     if(_mode == Save) {

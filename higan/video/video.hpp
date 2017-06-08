@@ -10,6 +10,7 @@ struct Video {
   enum class Effect : uint {
     ColorBleed,
     InterframeBlending,
+    RotateLeft,
   };
 
   ~Video();
@@ -33,7 +34,8 @@ private:
   Interface* interface = nullptr;
   vector<shared_pointer<Sprite>> sprites;
 
-  uint32* output = nullptr;
+  uint32* buffer = nullptr;
+  uint32* rotate = nullptr;
   uint32* palette = nullptr;
 
   uint width = 0;
@@ -47,6 +49,7 @@ private:
   struct Effects {
     bool colorBleed = false;
     bool interframeBlending = false;
+    bool rotateLeft = false;
   } effects;
 
   friend class Sprite;

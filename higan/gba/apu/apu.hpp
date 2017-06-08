@@ -14,6 +14,8 @@ struct APU : Thread, IO {
   auto runsequencer() -> void;
 
   auto serialize(serializer&) -> void;
+
+  uint clock;
 };
 
 extern APU apu;

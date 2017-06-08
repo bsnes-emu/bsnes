@@ -18,34 +18,36 @@ auto APU::Enter() -> void {
 }
 
 auto APU::main() -> void {
+  //GBA clock runs at 16777216hz
+  //GBA PSG channels run at 2097152hz
   runsequencer();
+  step(8);
+
+  //audio PWM output frequency and bit-rate are dependent upon amplitude setting:
+  //0 = 9-bit @  32768hz
+  //1 = 8-bit @  65536hz
+  //2 = 7-bit @ 131072hz
+  //3 = 6-bit @ 262144hz
+
+  //dynamically changing the output frequency under emulation would be difficult;
+  //always run the output frequency at the maximum 262144hz
+  if(++clock & 7) return;
 
   int lsample = regs.bias.level - 0x0200;
   int rsample = regs.bias.level - 0x0200;
 
-  //(4-bit x 4 -> 6-bit) + 3-bit volume = 9-bit output
-  if(sequencer.masterenable) {
-    int lsequence = 0;
-    if(sequencer.lenable[0]) lsequence += square1.output;
-    if(sequencer.lenable[1]) lsequence += square2.output;
-    if(sequencer.lenable[2]) lsequence +=    wave.output;
-    if(sequencer.lenable[3]) lsequence +=   noise.output;
-
-    int rsequence = 0;
-    if(sequencer.renable[0]) rsequence += square1.output;
-    if(sequencer.renable[1]) rsequence += square2.output;
-    if(sequencer.renable[2]) rsequence +=    wave.output;
-    if(sequencer.renable[3]) rsequence +=   noise.output;
-
-    if(sequencer.volume < 3) {
-      lsample += lsequence * (sequencer.lvolume + 1) >> (2 - sequencer.volume);
-      rsample += rsequence * (sequencer.rvolume + 1) >> (2 - sequencer.volume);
-    }
+  //amplitude: 0 = 32768hz; 1 = 65536hz; 2 = 131072hz; 3 = 262144hz
+  if((clock & (63 >> (3 - regs.bias.amplitude))) == 0) {
+    sequencer.sample();
+    fifo[0].sample();
+    fifo[1].sample();
   }
 
-  //(8-bit x 2 -> 7-bit) + 1-bit volume = 10-bit output
-  int fifo0 = fifo[0].output + (1 << fifo[0].volume);
-  int fifo1 = fifo[1].output + (1 << fifo[1].volume);
+  lsample += sequencer.loutput;
+  rsample += sequencer.routput;
+
+  int fifo0 = fifo[0].output << fifo[0].volume;
+  int fifo1 = fifo[1].output << fifo[1].volume;
 
   if(fifo[0].lenable) lsample += fifo0;
   if(fifo[1].lenable) lsample += fifo1;
@@ -53,16 +55,18 @@ auto APU::main() -> void {
   if(fifo[0].renable) rsample += fifo0;
   if(fifo[1].renable) rsample += fifo1;
 
-  lsample = sclamp<10>(lsample);
-  rsample = sclamp<10>(rsample);
+  lsample = sclamp<11>(lsample);
+  rsample = sclamp<11>(rsample);
 
-  if(regs.bias.amplitude == 1) lsample &=  ~3, rsample &=  ~3;
-  if(regs.bias.amplitude == 2) lsample &=  ~7, rsample &=  ~7;
-  if(regs.bias.amplitude == 3) lsample &= ~15, rsample &= ~15;
+  //clip 11-bit signed output to more limited output bit-rate
+  //note: leaving 2-bits more on output to prevent quantization noise
+  if(regs.bias.amplitude == 0) lsample &= ~0, rsample &= ~0;  //9-bit
+  if(regs.bias.amplitude == 1) lsample &= ~1, rsample &= ~1;  //8-bit
+  if(regs.bias.amplitude == 2) lsample &= ~3, rsample &= ~3;  //7-bit
+  if(regs.bias.amplitude == 3) lsample &= ~7, rsample &= ~7;  //6-bit
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
-  stream->sample(sclamp<16>(lsample << 6) / 32768.0, sclamp<16>(rsample << 6) / 32768.0);  //should be <<5; use <<6 for added volume
-  step(8);
+  stream->sample((lsample << 5) / 32768.0, (rsample << 5) / 32768.0);
 }
 
 auto APU::step(uint clocks) -> void {
@@ -72,10 +76,11 @@ auto APU::step(uint clocks) -> void {
 
 auto APU::power() -> void {
   create(APU::Enter, 16'777'216);
-  stream = Emulator::audio.createStream(2, frequency() / 8.0);
+  stream = Emulator::audio.createStream(2, frequency() / 64.0);
   stream->addLowPassFilter(20000.0, 3);
   stream->addHighPassFilter(20.0, 3);
 
+  clock = 0;
   square1.power();
   square2.power();
   wave.power();

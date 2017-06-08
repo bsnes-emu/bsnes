@@ -1,9 +1,10 @@
 auto APU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
+  s.integer(clock);
+
   s.integer(regs.bias.level);
   s.integer(regs.bias.amplitude);
-  s.integer(regs.clock);
 
   s.integer(square1.sweep.shift);
   s.integer(square1.sweep.direction);
@@ -91,9 +92,12 @@ auto APU::serialize(serializer& s) -> void {
   s.integer(sequencer.step);
   s.integer(sequencer.lsample);
   s.integer(sequencer.rsample);
+  s.integer(sequencer.loutput);
+  s.integer(sequencer.routput);
 
   for(auto& f : fifo) {
-    for(auto& value : f.sample) s.integer(value);
+    for(auto& value : f.samples) s.integer(value);
+    s.integer(f.active);
     s.integer(f.output);
     s.integer(f.rdoffset);
     s.integer(f.wroffset);

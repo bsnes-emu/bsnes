@@ -138,9 +138,11 @@ auto CPU::power() -> void {
     timer.control.irq = 0;
     timer.control.enable = 0;
   }
+  regs.serial = {};
   for(auto& flag : regs.keypad.control.flag) flag = 0;
   regs.keypad.control.enable = 0;
   regs.keypad.control.condition = 0;
+  regs.joybus = {};
   regs.ime = 0;
   regs.irq.enable = 0;
   regs.irq.flag = 0;
@@ -149,14 +151,17 @@ auto CPU::power() -> void {
   regs.wait.control.phi = 0;
   regs.wait.control.prefetch = 0;
   regs.wait.control.gametype = 0;  //0 = GBA, 1 = GBC
-  regs.postboot = 0;
-  regs.mode = Registers::Mode::Normal;
-  regs.clock = 0;
   regs.memory.control.disable = 0;
   regs.memory.control.unknown1 = 0;
   regs.memory.control.ewram = 1;
   regs.memory.control.ewramwait = 13;
   regs.memory.control.unknown2 = 0;
+  regs.postboot = 0;
+  regs.mode = Registers::Mode::Normal;
+  regs.clock = 0;
+
+  prefetch = {};
+  prefetch.wait = 1;
 
   pending.dma.vblank = 0;
   pending.dma.hblank = 0;

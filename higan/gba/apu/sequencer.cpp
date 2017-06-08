@@ -26,6 +26,28 @@ auto APU::runsequencer() -> void {
   if(noise.enable) noise.run();
 }
 
+auto APU::Sequencer::sample() -> void {
+  loutput = 0;
+  routput = 0;
+  if(!masterenable) return;
+
+  if(lenable[0]) loutput += apu.square1.output;
+  if(lenable[1]) loutput += apu.square2.output;
+  if(lenable[2]) loutput +=    apu.wave.output;
+  if(lenable[3]) loutput +=   apu.noise.output;
+  loutput  *= 1 + lvolume;
+  loutput <<= 1;
+  loutput >>= 3 - volume;
+
+  if(renable[0]) routput += apu.square1.output;
+  if(renable[1]) routput += apu.square2.output;
+  if(renable[2]) routput +=    apu.wave.output;
+  if(renable[3]) routput +=   apu.noise.output;
+  routput  *= 1 + rvolume;
+  routput <<= 1;
+  routput >>= 3 - volume;
+}
+
 auto APU::Sequencer::read(uint addr) const -> uint8 {
   switch(addr) {
   case 0: return (rvolume << 0) | (lvolume << 4);

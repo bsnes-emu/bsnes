@@ -35,7 +35,7 @@ struct PPU : Thread, IO {
     uint12 color;
   };
 
-  uint32 output[224 * 224];
+  uint32 output[224 * 144];
 
   struct State {
     bool field;
@@ -45,9 +45,6 @@ struct PPU : Thread, IO {
   } s;
 
   struct Latches {
-    //frame(), power()
-    bool orientation;
-
     //latchRegisters()
     uint8 backColor;
 

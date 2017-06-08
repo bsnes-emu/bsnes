@@ -7,7 +7,6 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer((uint&)this->s.pixel.source);
   s.integer(this->s.pixel.color);
 
-  s.integer(l.orientation);
   s.integer(l.backColor);
   s.integer(l.screenOneEnable);
   s.integer(l.screenOneMapBase);

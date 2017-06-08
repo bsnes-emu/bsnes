@@ -7,8 +7,7 @@ Settings settings;
 #include "wonderswan-color.cpp"
 
 Interface::Interface() {
-  Port hardwareHorizontalPort{ID::Port::HardwareHorizontal, "Hardware - Horizontal"};
-  Port hardwareVerticalPort{ID::Port::HardwareVertical, "Hardware - Vertical"};
+  Port hardwarePort{ID::Port::Hardware, "Hardware"};
 
   { Device device{ID::Device::Controls, "Controls"};
     device.inputs.append({0, "Y1"});
@@ -22,13 +21,10 @@ Interface::Interface() {
     device.inputs.append({0, "B"});
     device.inputs.append({0, "A"});
     device.inputs.append({0, "Start"});
-    device.inputs.append({0, "Rotate"});
-    hardwareHorizontalPort.devices.append(device);
-    hardwareVerticalPort.devices.append(device);
+    hardwarePort.devices.append(device);
   }
 
-  ports.append(move(hardwareHorizontalPort));
-  ports.append(move(hardwareVerticalPort));
+  ports.append(move(hardwarePort));
 }
 
 auto Interface::manifest() -> string {
@@ -39,13 +35,17 @@ auto Interface::title() -> string {
   return cartridge.information.title;
 }
 
-auto Interface::videoSize() -> VideoSize {
-  return {224, 224};
+auto Interface::videoResolution() -> VideoSize {
+  if(!settings.rotateLeft) {
+    return {224, 144};
+  } else {
+    return {144, 224};
+  }
 }
 
 auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
-  uint w = 224;
-  uint h = 224;
+  uint w = videoResolution().width;
+  uint h = videoResolution().height;
   uint m = min(width / w, height / h);
   return {w * m, h * m};
 }
@@ -91,12 +91,14 @@ auto Interface::cheatSet(const string_vector& list) -> void {
 auto Interface::cap(const string& name) -> bool {
   if(name == "Blur Emulation") return true;
   if(name == "Color Emulation") return true;
+  if(name == "Rotate Display") return true;
   return false;
 }
 
 auto Interface::get(const string& name) -> any {
   if(name == "Blur Emulation") return settings.blurEmulation;
   if(name == "Color Emulation") return settings.colorEmulation;
+  if(name == "Rotate Display") return settings.rotateLeft;
   return {};
 }
 
@@ -110,6 +112,12 @@ auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Color Emulation" && value.is<bool>()) {
     settings.colorEmulation = value.get<bool>();
     system.configureVideoPalette();
+    return true;
+  }
+
+  if(name == "Rotate Display" && value.is<bool>()) {
+    settings.rotateLeft = value.get<bool>();
+    system.configureVideoEffects();
     return true;
   }
 

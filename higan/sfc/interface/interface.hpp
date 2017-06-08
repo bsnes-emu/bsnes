@@ -38,7 +38,7 @@ struct Interface : Emulator::Interface {
   auto manifest() -> string override;
   auto title() -> string override;
 
-  auto videoSize() -> VideoSize override;
+  auto videoResolution() -> VideoSize override;
   auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
   auto videoColors() -> uint32 override;
   auto videoColor(uint32 color) -> uint64 override;
@@ -54,7 +54,7 @@ struct Interface : Emulator::Interface {
   auto run() -> void override;
 
   auto rtc() -> bool override;
-  auto rtcsync() -> void override;
+  auto rtcSynchronize() -> void override;
 
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;

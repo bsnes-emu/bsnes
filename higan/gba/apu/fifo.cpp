@@ -1,17 +1,22 @@
+auto APU::FIFO::sample() -> void {
+  output = active;
+}
+
 auto APU::FIFO::read() -> void {
   if(size == 0) return;
   size--;
-  output = sample[rdoffset++];
+  active = samples[rdoffset++];
 }
 
 auto APU::FIFO::write(int8 byte) -> void {
   if(size == 32) rdoffset++;
   else size++;
-  sample[wroffset++] = byte;
+  samples[wroffset++] = byte;
 }
 
 auto APU::FIFO::reset() -> void {
-  for(auto& byte : sample) byte = 0;
+  for(auto& byte : samples) byte = 0;
+  active = 0;
   output = 0;
 
   rdoffset = 0;

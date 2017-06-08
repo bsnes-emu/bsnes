@@ -3,8 +3,6 @@ struct Registers {
     uint10 level;
     uint2 amplitude;
   } bias;
-
-  uint clock;
 } regs;
 
 struct Sweep {
@@ -128,13 +126,19 @@ struct Sequencer {
   int16 lsample;
   int16 rsample;
 
+  uint10 loutput;
+  uint10 routput;
+
+  auto sample() -> void;
+
   auto read(uint addr) const -> uint8;
   auto write(uint addr, uint8 byte) -> void;
   auto power() -> void;
 } sequencer;
 
 struct FIFO {
-  int8 sample[32];
+  int8 samples[32];
+  int8 active;
   int8 output;
 
   uint5 rdoffset;
@@ -146,6 +150,7 @@ struct FIFO {
   uint1 renable;
   uint1 timer;
 
+  auto sample() -> void;
   auto read() -> void;
   auto write(int8 byte) -> void;
   auto reset() -> void;

@@ -118,7 +118,7 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoSize() -> VideoSize {
+auto Interface::videoResolution() -> VideoSize {
   return {512, 480};
 }
 
@@ -204,7 +204,7 @@ auto Interface::rtc() -> bool {
   return false;
 }
 
-auto Interface::rtcsync() -> void {
+auto Interface::rtcSynchronize() -> void {
   if(cartridge.has.EpsonRTC) epsonrtc.sync();
   if(cartridge.has.SharpRTC) sharprtc.sync();
 }
