@@ -14,7 +14,7 @@
 #include "display.h"
 #include "joypad.h"
 #include "mbc.h"
-#include "memory.h"
+#include "gbmemory.h"
 #include "printer.h"
 #include "timing.h"
 #include "z80_cpu.h"
