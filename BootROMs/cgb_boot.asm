@@ -34,16 +34,8 @@ Start:
   ldh [$25], a
   ld a, $77
   ldh [$24], a
-
-  ld hl, $FF30
-; Init waveform
-  xor a
-  ld c, $10
-.waveformLoop
-  ldi [hl], a
-  cpl
-  dec c
-  jr nz, .waveformLoop
+  
+  call InitWaveform
 
 ; Init BG palette
   ld a, $fc
@@ -196,8 +188,15 @@ Start:
   call PlaySound
 
 ; Wait ~0.5 seconds
-  ld b, 30
-  call WaitBFrames
+  ld a, 30
+  ld [WaitLoopCounter], a
+  
+.waitLoop
+  call GetInputPaletteIndex
+  call WaitFrame
+  ld hl, WaitLoopCounter
+  dec [hl]
+  jr nz, .waitLoop
   call Preboot
 
 ; Will be filled with NOPs
@@ -871,7 +870,7 @@ LoadPalettesFromIndex: ; a = index of combination
   call LoadBGPalettes
   ret
 
-BrithenColor:
+BrightenColor:
   ld a, [hli]
   ld e, a
   ld a, [hld]
@@ -929,7 +928,7 @@ FadeOut:
   ld hl, BgPalettes
 .frameLoop
   push bc
-  call BrithenColor
+  call BrightenColor
   pop bc
   dec c
   jr nz, .frameLoop
@@ -1062,7 +1061,9 @@ ChangeAnimationPalette:
   ld d, 64 ; Length of write
   ld e, 0 ; Index of write
   call LoadBGPalettes
-
+  ; Delay the wait loop while the user is selecting a palette
+  ld a, 30
+  ld [WaitLoopCounter], a
   pop de
   pop bc
   pop hl
@@ -1098,6 +1099,18 @@ LoadDMGTilemap:
   pop af
   ret
 
+InitWaveform:
+  ld hl, $FF30
+; Init waveform
+  xor a
+  ld c, $10
+.waveformLoop
+  ldi [hl], a
+  cpl
+  dec c
+  jr nz, .waveformLoop
+  ret
+
 SECTION "ROMMax", ROM0[$900]
   ; Prevent us from overflowing
   ds 1
@@ -1106,4 +1119,6 @@ SECTION "RAM", WRAM0[$C000]
 BgPalettes:
   ds 8 * 4 * 2
 InputPalette:
+  ds 1
+WaitLoopCounter:
   ds 1
