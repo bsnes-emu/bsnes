@@ -1,4 +1,4 @@
-processors += r6502
+processors += mos6502
 
 objects += fc-interface fc-system fc-controller
 objects += fc-memory fc-cartridge fc-cpu fc-apu fc-ppu

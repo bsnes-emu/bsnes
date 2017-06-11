@@ -11,6 +11,7 @@ struct HuC6280 {
   virtual auto store(uint2 addr, uint8 data) -> void = 0;
   virtual auto lastCycle() -> void = 0;
 
+  //huc6280.cpp
   auto power() -> void;
 
   //memory.cpp

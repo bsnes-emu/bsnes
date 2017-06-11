@@ -6,22 +6,22 @@ auto CPU::read(uint16 addr) -> uint8 {
   }
 
   while(io.rdyLine == 0) {
-    regs.mdr = bus.read(io.rdyAddrValid ? io.rdyAddrValue : addr);
+    r.mdr = bus.read(io.rdyAddrValid ? io.rdyAddrValue : addr);
     step(12);
   }
 
-  regs.mdr = bus.read(addr);
+  r.mdr = bus.read(addr);
   step(12);
-  return regs.mdr;
+  return r.mdr;
 }
 
 auto CPU::write(uint16 addr, uint8 data) -> void {
-  bus.write(addr, regs.mdr = data);
+  bus.write(addr, r.mdr = data);
   step(12);
 }
 
 auto CPU::lastCycle() -> void {
-  io.interruptPending = ((io.irqLine | io.apuLine) & ~regs.p.i) | io.nmiPending;
+  io.interruptPending = ((io.irqLine | io.apuLine) & ~r.p.i) | io.nmiPending;
 }
 
 auto CPU::nmi(uint16& vector) -> void {

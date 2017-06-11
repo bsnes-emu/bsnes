@@ -1,5 +1,5 @@
 #include <processor/processor.hpp>
-#include "r65816.hpp"
+#include "wdc65816.hpp"
 
 namespace Processor {
 

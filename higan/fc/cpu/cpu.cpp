@@ -12,7 +12,12 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  if(io.interruptPending) return interrupt();
+  if(io.interruptPending) {
+    uint16 vector = 0xfffe;
+    if(io.nmiPending) io.nmiPending = false, vector = 0xfffa;
+    return interrupt(vector);
+  }
+
   instruction();
 }
 
@@ -25,7 +30,8 @@ auto CPU::step(uint clocks) -> void {
 }
 
 auto CPU::power() -> void {
-  R6502::power();
+  MOS6502::BCD = 0;
+  MOS6502::power();
   create(CPU::Enter, system.colorburst() * 6.0);
 
   for(auto addr : range(0x0800)) ram[addr] = 0xff;
@@ -34,8 +40,8 @@ auto CPU::power() -> void {
   ram[0x000a] = 0xdf;
   ram[0x000f] = 0xbf;
 
-  regs.pc  = bus.read(0xfffc) << 0;
-  regs.pc |= bus.read(0xfffd) << 8;
+  r.pc.byte(0) = bus.read(0xfffc);
+  r.pc.byte(1) = bus.read(0xfffd);
 
   memory::fill(&io, sizeof(IO));
   io.rdyLine = 1;

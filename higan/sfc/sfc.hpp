@@ -11,9 +11,9 @@
 #include <processor/arm/arm.hpp>
 #include <processor/gsu/gsu.hpp>
 #include <processor/hg51b/hg51b.hpp>
-#include <processor/r65816/r65816.hpp>
 #include <processor/spc700/spc700.hpp>
 #include <processor/upd96050/upd96050.hpp>
+#include <processor/wdc65816/wdc65816.hpp>
 
 #if defined(SFC_SUPERGAMEBOY)
   #include <gb/gb.hpp>
