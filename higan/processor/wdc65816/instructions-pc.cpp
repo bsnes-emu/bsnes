@@ -1,8 +1,8 @@
-auto R65816::op_branch(bool flag, bool value) {
-  if(flag != value) {
-L   rd.l = readPC();
+auto WDC65816::instructionBranch(bool take) -> void {
+  if(!take) {
+L   rd.l = fetch();
   } else {
-    rd.l = readPC();
+    rd.l = fetch();
     aa.w = r.pc.d + (int8)rd.l;
     idle6(aa.w);
 L   idle();
@@ -10,128 +10,120 @@ L   idle();
   }
 }
 
-auto R65816::op_bra() {
-  rd.l = readPC();
-  aa.w = r.pc.d + (int8)rd.l;
-  idle6(aa.w);
-L idle();
-  r.pc.w = aa.w;
-}
-
-auto R65816::op_brl() {
-  rd.l = readPC();
-  rd.h = readPC();
+auto WDC65816::instructionBRL() -> void {
+  rd.l = fetch();
+  rd.h = fetch();
 L idle();
   r.pc.w = r.pc.d + (int16)rd.w;
 }
 
-auto R65816::op_jmp_addr() {
-  rd.l = readPC();
-L rd.h = readPC();
+auto WDC65816::instructionJMPShort() -> void {
+  rd.l = fetch();
+L rd.h = fetch();
   r.pc.w = rd.w;
 }
 
-auto R65816::op_jmp_long() {
-  rd.l = readPC();
-  rd.h = readPC();
-L rd.b = readPC();
+auto WDC65816::instructionJMPLong() -> void {
+  rd.l = fetch();
+  rd.h = fetch();
+L rd.b = fetch();
   r.pc.d = rd.d;
 }
 
-auto R65816::op_jmp_iaddr() {
-  aa.l = readPC();
-  aa.h = readPC();
-  rd.l = readAddr(aa.w + 0);
-L rd.h = readAddr(aa.w + 1);
+auto WDC65816::instructionJMPIndirect() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
+  rd.l = read(uint16(aa.w + 0));
+L rd.h = read(uint16(aa.w + 1));
   r.pc.w = rd.w;
 }
 
-auto R65816::op_jmp_iaddrx() {
-  aa.l = readPC();
-  aa.h = readPC();
+auto WDC65816::instructionJMPIndexedIndirect() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
   idle();
-  rd.l = readPB(aa.w + r.x.w + 0);
-L rd.h = readPB(aa.w + r.x.w + 1);
+  rd.l = read(PCB << 16 | uint16(aa.w + r.x.w + 0));
+L rd.h = read(PCB << 16 | uint16(aa.w + r.x.w + 1));
   r.pc.w = rd.w;
 }
 
-auto R65816::op_jmp_iladdr() {
-  aa.l = readPC();
-  aa.h = readPC();
-  rd.l = readAddr(aa.w + 0);
-  rd.h = readAddr(aa.w + 1);
-L rd.b = readAddr(aa.w + 2);
+auto WDC65816::instructionJMPIndirectLong() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
+  rd.l = read(uint16(aa.w + 0));
+  rd.h = read(uint16(aa.w + 1));
+L rd.b = read(uint16(aa.w + 2));
   r.pc.d = rd.d;
 }
 
-auto R65816::op_jsr_addr() {
-  aa.l = readPC();
-  aa.h = readPC();
+auto WDC65816::instructionJSRShort() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
   idle();
   r.pc.w--;
-  writeSP(r.pc.h);
-L writeSP(r.pc.l);
+  push(r.pc.h);
+L push(r.pc.l);
   r.pc.w = aa.w;
 }
 
-auto R65816::op_jsr_long() {
-  aa.l = readPC();
-  aa.h = readPC();
-  writeSPn(r.pc.b);
+auto WDC65816::instructionJSRLong() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
+  pushN(r.pc.b);
   idle();
-  aa.b = readPC();
+  aa.b = fetch();
   r.pc.w--;
-  writeSPn(r.pc.h);
-L writeSPn(r.pc.l);
+  pushN(r.pc.h);
+L pushN(r.pc.l);
   r.pc.d = aa.d;
 E r.s.h = 0x01;
 }
 
-auto R65816::op_jsr_iaddrx() {
-  aa.l = readPC();
-  writeSPn(r.pc.h);
-  writeSPn(r.pc.l);
-  aa.h = readPC();
+auto WDC65816::instructionJSRIndexedIndirect() -> void {
+  aa.l = fetch();
+  pushN(r.pc.h);
+  pushN(r.pc.l);
+  aa.h = fetch();
   idle();
-  rd.l = readPB(aa.w + r.x.w + 0);
-L rd.h = readPB(aa.w + r.x.w + 1);
+  rd.l = read(PCB << 16 | uint16(aa.w + r.x.w + 0));
+L rd.h = read(PCB << 16 | uint16(aa.w + r.x.w + 1));
   r.pc.w = rd.w;
 E r.s.h = 0x01;
 }
 
-auto R65816::op_rti() {
+auto WDC65816::instructionRTI() -> void {
   idle();
   idle();
-  r.p = readSP();
+  r.p = pull();
 E r.p.m = 1, r.p.x = 1;
   if(r.p.x) {
     r.x.h = 0x00;
     r.y.h = 0x00;
   }
-  r.pc.l = readSP();
+  r.pc.l = pull();
   if(r.e) {
-  L r.pc.h = readSP();
+  L r.pc.h = pull();
   } else {
-    r.pc.h = readSP();
-  L r.pc.b = readSP();
+    r.pc.h = pull();
+  L r.pc.b = pull();
   }
 }
 
-auto R65816::op_rts() {
+auto WDC65816::instructionRTS() -> void {
   idle();
   idle();
-  rd.l = readSP();
-  rd.h = readSP();
+  rd.l = pull();
+  rd.h = pull();
 L idle();
   r.pc.w = ++rd.w;
 }
 
-auto R65816::op_rtl() {
+auto WDC65816::instructionRTL() -> void {
   idle();
   idle();
-  rd.l = readSPn();
-  rd.h = readSPn();
-L rd.b = readSPn();
+  rd.l = pullN();
+  rd.h = pullN();
+L rd.b = pullN();
   r.pc.b = rd.b;
   r.pc.w = ++rd.w;
 E r.s.h = 0x01;

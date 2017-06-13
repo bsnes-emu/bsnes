@@ -99,7 +99,7 @@ auto PPU::readIO(uint32 addr) -> uint8 {
 
   }
 
-  return 0;
+  return cpu.pipeline.fetch.instruction.byte(addr & 1);
 }
 
 auto PPU::writeIO(uint32 addr, uint8 data) -> void {

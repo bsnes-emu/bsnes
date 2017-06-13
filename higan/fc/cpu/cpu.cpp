@@ -12,12 +12,7 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  if(io.interruptPending) {
-    uint16 vector = 0xfffe;
-    if(io.nmiPending) io.nmiPending = false, vector = 0xfffa;
-    return interrupt(vector);
-  }
-
+  if(io.interruptPending) return interrupt();
   instruction();
 }
 

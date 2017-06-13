@@ -26,6 +26,8 @@ struct V30MZ {
   auto warning(string text) -> void;
   auto power() -> void;
   auto exec() -> void;
+
+  //instruction.cpp
   auto interrupt(uint8 vector) -> void;
   auto instruction() -> void;
 
@@ -61,29 +63,29 @@ struct V30MZ {
 
   //algorithms.cpp
   auto parity(uint8) const -> bool;
-  auto alAdc(Size, uint16, uint16) -> uint16;
-  auto alAdd(Size, uint16, uint16) -> uint16;
-  auto alAnd(Size, uint16, uint16) -> uint16;
-  auto alDec(Size, uint16        ) -> uint16;
-  auto alDiv(Size, uint32, uint32) -> uint32;
-  auto alDivi(Size, int32,  int32) -> uint32;
-  auto alInc(Size, uint16        ) -> uint16;
-  auto alMul(Size, uint16, uint16) -> uint32;
-  auto alMuli(Size, int16,  int16) -> uint32;
-  auto alNeg(Size, uint16        ) -> uint16;
-  auto alNot(Size, uint16        ) -> uint16;
-  auto alOr (Size, uint16, uint16) -> uint16;
-  auto alRcl(Size, uint16, uint5 ) -> uint16;
-  auto alRcr(Size, uint16, uint5 ) -> uint16;
-  auto alRol(Size, uint16, uint4 ) -> uint16;
-  auto alRor(Size, uint16, uint4 ) -> uint16;
-  auto alSal(Size, uint16, uint5 ) -> uint16;
-  auto alSar(Size, uint16, uint5 ) -> uint16;
-  auto alSbb(Size, uint16, uint16) -> uint16;
-  auto alSub(Size, uint16, uint16) -> uint16;
-  auto alShl(Size, uint16, uint5 ) -> uint16;
-  auto alShr(Size, uint16, uint5 ) -> uint16;
-  auto alXor(Size, uint16, uint16) -> uint16;
+  auto alAdc (Size, uint16, uint16) -> uint16;
+  auto alAdd (Size, uint16, uint16) -> uint16;
+  auto alAnd (Size, uint16, uint16) -> uint16;
+  auto alDec (Size, uint16        ) -> uint16;
+  auto alDiv (Size, uint32, uint32) -> uint32;
+  auto alDivi(Size,  int32,  int32) -> uint32;
+  auto alInc (Size, uint16        ) -> uint16;
+  auto alMul (Size, uint16, uint16) -> uint32;
+  auto alMuli(Size,  int16,  int16) -> uint32;
+  auto alNeg (Size, uint16        ) -> uint16;
+  auto alNot (Size, uint16        ) -> uint16;
+  auto alOr  (Size, uint16, uint16) -> uint16;
+  auto alRcl (Size, uint16,  uint5) -> uint16;
+  auto alRcr (Size, uint16,  uint5) -> uint16;
+  auto alRol (Size, uint16,  uint4) -> uint16;
+  auto alRor (Size, uint16,  uint4) -> uint16;
+  auto alSal (Size, uint16,  uint5) -> uint16;
+  auto alSar (Size, uint16,  uint5) -> uint16;
+  auto alSbb (Size, uint16, uint16) -> uint16;
+  auto alSub (Size, uint16, uint16) -> uint16;
+  auto alShl (Size, uint16,  uint5) -> uint16;
+  auto alShr (Size, uint16,  uint5) -> uint16;
+  auto alXor (Size, uint16, uint16) -> uint16;
 
   //instructions-adjust.cpp
   auto opDecimalAdjust(bool);

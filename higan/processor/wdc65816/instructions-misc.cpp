@@ -1,12 +1,23 @@
-auto R65816::op_nop() {
+auto WDC65816::instructionBITImmediate8() -> void {
+L uint8 immediate = fetch();
+  ZF = (immediate & AL) == 0;
+}
+
+auto WDC65816::instructionBITImmediate16() -> void {
+  uint16 immediate = fetch();
+L immediate |= fetch() << 8;
+  ZF = (immediate & AW) == 0;
+}
+
+auto WDC65816::instructionNOP() -> void {
 L idleIRQ();
 }
 
-auto R65816::op_wdm() {
-L readPC();
+auto WDC65816::instructionWDM() -> void {
+L fetch();
 }
 
-auto R65816::op_xba() {
+auto WDC65816::instructionXBA() -> void {
   idle();
 L idle();
   r.a.w = r.a.w >> 8 | r.a.w << 8;
@@ -14,12 +25,12 @@ L idle();
   r.p.z = (r.a.l == 0);
 }
 
-auto R65816::op_move_b(int adjust) {
-  dp = readPC();
-  sp = readPC();
+auto WDC65816::instructionBlockMove8(int adjust) -> void {
+  dp = fetch();
+  sp = fetch();
   r.db = dp;
-  rd.l = readLong(sp << 16 | r.x.w);
-  writeLong(dp << 16 | r.y.w, rd.l);
+  rd.l = read(sp << 16 | r.x.w);
+  write(dp << 16 | r.y.w, rd.l);
   idle();
   r.x.l += adjust;
   r.y.l += adjust;
@@ -27,12 +38,12 @@ L idle();
   if(r.a.w--) r.pc.w -= 3;
 }
 
-auto R65816::op_move_w(int adjust) {
-  dp = readPC();
-  sp = readPC();
+auto WDC65816::instructionBlockMove16(int adjust) -> void {
+  dp = fetch();
+  sp = fetch();
   r.db = dp;
-  rd.l = readLong(sp << 16 | r.x.w);
-  writeLong(dp << 16 | r.y.w, rd.l);
+  rd.l = read(sp << 16 | r.x.w);
+  write(dp << 16 | r.y.w, rd.l);
   idle();
   r.x.w += adjust;
   r.y.w += adjust;
@@ -40,27 +51,27 @@ L idle();
   if(r.a.w--) r.pc.w -= 3;
 }
 
-auto R65816::op_interrupt(uint16 vector) {
-  readPC();
-N writeSP(r.pc.b);
-  writeSP(r.pc.h);
-  writeSP(r.pc.l);
-  writeSP(r.p);
-  r.pc.l = readLong(vector + 0);
-  r.p.i = 1;
-  r.p.d = 0;
-L r.pc.h = readLong(vector + 1);
-  r.pc.b = 0x00;
+auto WDC65816::instructionInterrupt(uint16 vector) -> void {
+  fetch();
+N push(PCB);
+  push(PCH);
+  push(PCL);
+  push(P);
+  IF = 1;
+  DF = 0;
+  PCL = read(vector++);
+L PCH = read(vector++);
+  PCB = 0x00;
 }
 
-auto R65816::op_stp() -> void {
+auto WDC65816::instructionSTP() -> void {
   r.stp = true;
   while(r.stp && !synchronizing()) {
 L   idle();
   }
 }
 
-auto R65816::op_wai() -> void {
+auto WDC65816::instructionWAI() -> void {
   r.wai = true;
   while(r.wai && !synchronizing()) {
 L   idle();
@@ -68,7 +79,7 @@ L   idle();
   idle();
 }
 
-auto R65816::op_xce() {
+auto WDC65816::instructionXCE() -> void {
 L idleIRQ();
   bool carry = r.p.c;
   r.p.c = r.e;
@@ -82,139 +93,144 @@ L idleIRQ();
   }
 }
 
-auto R65816::op_set_flag(uint bit) {
+auto WDC65816::instructionSetFlag(bool& flag) -> void {
 L idleIRQ();
-  r.p |= 1 << bit;
+  flag = 1;
 }
 
-auto R65816::op_clear_flag(uint bit) {
+auto WDC65816::instructionClearFlag(bool& flag) -> void {
 L idleIRQ();
-  r.p &= ~(1 << bit);
+  flag = 0;
 }
 
-auto R65816::op_pflag(bool mode) {
-  rd.l = readPC();
+auto WDC65816::instructionREP() -> void {
+  auto data = fetch();
 L idle();
-  r.p = (mode ? r.p | rd.l : r.p & ~rd.l);
-E r.p.m = 1, r.p.x = 1;
-  if(r.p.x) {
-    r.x.h = 0x00;
-    r.y.h = 0x00;
-  }
+  P = P & ~data;
+E XF = 1, MF = 1;
+  if(XF) XH = 0x00, YH = 0x00;
 }
 
-auto R65816::op_transfer_b(Reg16& from, Reg16& to) {
+auto WDC65816::instructionSEP() -> void {
+  auto data = fetch();
+L idle();
+  P = P | data;
+E XF = 1, MF = 1;
+  if(XF) XH = 0x00, YH = 0x00;
+}
+
+auto WDC65816::instructionTransfer8(uint16& from, uint16& to) -> void {
 L idleIRQ();
-  to.l = from.l;
-  r.p.n = (to.l & 0x80);
-  r.p.z = (to.l == 0);
+  LO(to) = LO(from);
+  r.p.n = (LO(to) & 0x80);
+  r.p.z = (LO(to) == 0);
 }
 
-auto R65816::op_transfer_w(Reg16& from, Reg16& to) {
+auto WDC65816::instructionTransfer16(uint16& from, uint16& to) -> void {
 L idleIRQ();
-  to.w = from.w;
-  r.p.n = (to.w & 0x8000);
-  r.p.z = (to.w == 0);
+  to = from;
+  r.p.n = (to & 0x8000);
+  r.p.z = (to == 0);
 }
 
-auto R65816::op_tcs() {
+auto WDC65816::instructionTCS() -> void {
 L idleIRQ();
   r.s.w = r.a.w;
 E r.s.h = 0x01;
 }
 
-auto R65816::op_tsx_b() {
+auto WDC65816::instructionTSX8() -> void {
 L idleIRQ();
   r.x.l = r.s.l;
   r.p.n = (r.x.l & 0x80);
   r.p.z = (r.x.l == 0);
 }
 
-auto R65816::op_tsx_w() {
+auto WDC65816::instructionTSX16() -> void {
 L idleIRQ();
   r.x.w = r.s.w;
   r.p.n = (r.x.w & 0x8000);
   r.p.z = (r.x.w == 0);
 }
 
-auto R65816::op_txs() {
+auto WDC65816::instructionTXS() -> void {
 L idleIRQ();
 E r.s.l = r.x.l;
 N r.s.w = r.x.w;
 }
 
-auto R65816::op_push_b(Reg16& reg) {
+auto WDC65816::instructionPush8(uint16& reg) -> void {
   idle();
-L writeSP(reg.l);
+L push(reg);
 }
 
-auto R65816::op_push_w(Reg16& reg) {
+auto WDC65816::instructionPush16(uint16& reg) -> void {
   idle();
-  writeSP(reg.h);
-L writeSP(reg.l);
+  push(reg >> 8);
+L push(reg >> 0);
 }
 
-auto R65816::op_phd() {
+auto WDC65816::instructionPHD() -> void {
   idle();
-  writeSPn(r.d.h);
-L writeSPn(r.d.l);
+  pushN(r.d.h);
+L pushN(r.d.l);
 E r.s.h = 0x01;
 }
 
-auto R65816::op_phb() {
+auto WDC65816::instructionPHB() -> void {
   idle();
-L writeSP(r.db);
+L push(r.db);
 }
 
-auto R65816::op_phk() {
+auto WDC65816::instructionPHK() -> void {
   idle();
-L writeSP(r.pc.b);
+L push(r.pc.b);
 }
 
-auto R65816::op_php() {
+auto WDC65816::instructionPHP() -> void {
   idle();
-L writeSP(r.p);
+L push(r.p);
 }
 
-auto R65816::op_pull_b(Reg16& reg) {
+auto WDC65816::instructionPull8(uint16& reg) -> void {
   idle();
   idle();
-L reg.l = readSP();
-  r.p.n = (reg.l & 0x80);
-  r.p.z = (reg.l == 0);
+L LO(reg) = pull();
+  r.p.n = (LO(reg) & 0x80);
+  r.p.z = (LO(reg) == 0);
 }
 
-auto R65816::op_pull_w(Reg16& reg) {
+auto WDC65816::instructionPull16(uint16& reg) -> void {
   idle();
   idle();
-  reg.l = readSP();
-L reg.h = readSP();
-  r.p.n = (reg.w & 0x8000);
-  r.p.z = (reg.w == 0);
+  LO(reg) = pull();
+L HI(reg) = pull();
+  r.p.n = (reg & 0x8000);
+  r.p.z = (reg == 0);
 }
 
-auto R65816::op_pld() {
+auto WDC65816::instructionPLD() -> void {
   idle();
   idle();
-  r.d.l = readSPn();
-L r.d.h = readSPn();
+  r.d.l = pullN();
+L r.d.h = pullN();
   r.p.n = (r.d.w & 0x8000);
   r.p.z = (r.d.w == 0);
 E r.s.h = 0x01;
 }
 
-auto R65816::op_plb() {
+auto WDC65816::instructionPLB() -> void {
   idle();
   idle();
-L r.db = readSP();
+L r.db = pull();
   r.p.n = (r.db & 0x80);
   r.p.z = (r.db == 0);
 }
 
-auto R65816::op_plp() {
+auto WDC65816::instructionPLP() -> void {
   idle();
   idle();
-L r.p = readSP();
+L r.p = pull();
 E r.p.m = 1, r.p.x = 1;
   if(r.p.x) {
     r.x.h = 0x00;
@@ -222,30 +238,30 @@ E r.p.m = 1, r.p.x = 1;
   }
 }
 
-auto R65816::op_pea() {
-  aa.l = readPC();
-  aa.h = readPC();
-  writeSPn(aa.h);
-L writeSPn(aa.l);
+auto WDC65816::instructionPEA() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
+  pushN(aa.h);
+L pushN(aa.l);
 E r.s.h = 0x01;
 }
 
-auto R65816::op_pei() {
-  dp = readPC();
+auto WDC65816::instructionPEI() -> void {
+  dp = fetch();
   idle2();
-  aa.l = readDPn(dp + 0);
-  aa.h = readDPn(dp + 1);
-  writeSPn(aa.h);
-L writeSPn(aa.l);
+  aa.l = readDirectN(dp + 0);
+  aa.h = readDirectN(dp + 1);
+  pushN(aa.h);
+L pushN(aa.l);
 E r.s.h = 0x01;
 }
 
-auto R65816::op_per() {
-  aa.l = readPC();
-  aa.h = readPC();
+auto WDC65816::instructionPER() -> void {
+  aa.l = fetch();
+  aa.h = fetch();
   idle();
   rd.w = r.pc.d + (int16)aa.w;
-  writeSPn(rd.h);
-L writeSPn(rd.l);
+  pushN(rd.h);
+L pushN(rd.l);
 E r.s.h = 0x01;
 }

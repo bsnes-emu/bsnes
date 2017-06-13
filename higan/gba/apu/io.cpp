@@ -3,7 +3,7 @@ auto APU::readIO(uint32 addr) -> uint8 {
 
   //NR10
   case 0x0400'0060: return square1.read(0);
-  case 0x0400'0061: return 0;
+  case 0x0400'0061: return 0x00;
 
   //NR11, NR12
   case 0x0400'0062: return square1.read(1);
@@ -13,6 +13,10 @@ auto APU::readIO(uint32 addr) -> uint8 {
   case 0x0400'0064: return square1.read(3);
   case 0x0400'0065: return square1.read(4);
 
+  //zero
+  case 0x0400'0066: return 0x00;
+  case 0x0400'0067: return 0x00;
+
   //NR21, NR22
   case 0x0400'0068: return square2.read(1);
   case 0x0400'0069: return square2.read(2);
@@ -21,9 +25,13 @@ auto APU::readIO(uint32 addr) -> uint8 {
   case 0x0400'006c: return square2.read(3);
   case 0x0400'006d: return square2.read(4);
 
+  //zero
+  case 0x0400'006e: return 0x00;
+  case 0x0400'006f: return 0x00;
+
   //NR30
   case 0x0400'0070: return wave.read(0);
-  case 0x0400'0071: return 0;
+  case 0x0400'0071: return 0x00;
 
   //NR31, NR32
   case 0x0400'0072: return wave.read(1);
@@ -33,13 +41,25 @@ auto APU::readIO(uint32 addr) -> uint8 {
   case 0x0400'0074: return wave.read(3);
   case 0x0400'0075: return wave.read(4);
 
+  //zero
+  case 0x0400'0076: return 0x00;
+  case 0x0400'0077: return 0x00;
+
   //NR41, NR42
   case 0x0400'0078: return noise.read(1);
   case 0x0400'0079: return noise.read(2);
 
+  //zero
+  case 0x0400'007a: return 0x00;
+  case 0x0400'007b: return 0x00;
+
   //NR43, NR44
   case 0x0400'007c: return noise.read(3);
   case 0x0400'007d: return noise.read(4);
+
+  //zero
+  case 0x0400'007e: return 0x00;
+  case 0x0400'007f: return 0x00;
 
   //NR50, NR51
   case 0x0400'0080: return sequencer.read(0);
@@ -63,7 +83,11 @@ auto APU::readIO(uint32 addr) -> uint8 {
 
   //NR52
   case 0x0400'0084: return sequencer.read(2);
-  case 0x0400'0085: return 0;
+  case 0x0400'0085: return 0x00;
+
+  //zero
+  case 0x0400'0086: return 0x00;
+  case 0x0400'0087: return 0x00;
 
   //SOUNDBIAS
   case 0x0400'0088: return (
@@ -73,6 +97,10 @@ auto APU::readIO(uint32 addr) -> uint8 {
     regs.bias.level.bits(8,9) << 0
   | regs.bias.amplitude       << 6
   );
+
+  //zero
+  case 0x0400'008a: return 0x00;
+  case 0x0400'008b: return 0x00;
 
   //WAVE_RAM0_L
   case 0x0400'0090: return wave.readram( 0);
@@ -108,7 +136,7 @@ auto APU::readIO(uint32 addr) -> uint8 {
 
   }
 
-  return 0;
+  return cpu.pipeline.fetch.instruction.byte(addr & 1);
 }
 
 auto APU::writeIO(uint32 addr, uint8 data) -> void {

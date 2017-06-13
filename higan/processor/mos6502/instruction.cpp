@@ -1,16 +1,17 @@
 #define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
 #define fp(name) &MOS6502::name
 
-auto MOS6502::interrupt(uint16 vector) -> void {
+auto MOS6502::interrupt() -> void {
   idle();
   idle();
   push(PCH);
   push(PCL);
-  push(P);
+  uint16 vector = 0xfffe;
+  nmi(vector);
+  push(P | 0x20);
+  I = 1;
   PCL = read(vector++);
 L PCH = read(vector++);
-  I = 1;
-  D = 0;
 }
 
 auto MOS6502::instruction() -> void {

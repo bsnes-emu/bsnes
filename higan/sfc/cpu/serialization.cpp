@@ -1,5 +1,5 @@
 auto CPU::serialize(serializer& s) -> void {
-  R65816::serialize(s);
+  WDC65816::serialize(s);
   Thread::serialize(s);
   PPUcounter::serialize(s);
 

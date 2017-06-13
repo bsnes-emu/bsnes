@@ -24,8 +24,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  if(r.wai) return op_wai();
-  if(r.stp) return op_stp();
+  if(r.wai) return instructionWAI();
+  if(r.stp) return instructionSTP();
 
   if(status.interruptPending) {
     status.interruptPending = false;
@@ -59,6 +59,7 @@ auto CPU::load(Markup::Node node) -> bool {
 }
 
 auto CPU::power() -> void {
+  WDC65816::power();
   create(Enter, system.colorburst() * 6.0);
   coprocessors.reset();
   PPUcounter::reset();
@@ -84,21 +85,6 @@ auto CPU::power() -> void {
   bus.map(reader, writer, "7e-7f:0000-ffff", 0x20000);
 
   for(auto& byte : wram) byte = random(0x55);
-
-  //CPU
-  r.pc     = 0x000000;
-  r.a      = 0x0000;
-  r.x      = 0x0000;
-  r.y      = 0x0000;
-  r.s      = 0x01ff;
-  r.d      = 0x0000;
-  r.db     = 0x00;
-  r.p      = 0x34;
-  r.e      = 1;
-  r.mdr    = 0x00;
-  r.wai    = false;
-  r.stp    = false;
-  r.vector = 0xfffc;  //reset vector address
 
   //DMA
   for(auto& channel : this->channel) {

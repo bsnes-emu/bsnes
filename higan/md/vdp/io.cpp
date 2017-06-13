@@ -115,8 +115,8 @@ auto VDP::readControlPort() -> uint16 {
 
   uint16 result = 0b0011'0100'0000'0000;
   result |= 1 << 9;  //FIFO empty
-  result |= (state.y >= 240) << 3;  //vertical blank
-  result |= (state.y >= 240 || state.x >= 320) << 2;  //horizontal blank
+  result |= (state.y >= screenHeight()) << 3;  //vertical blank
+  result |= (state.y >= screenHeight() || state.x >= 320) << 2;  //horizontal blank
   result |= io.command.bit(5) << 1;  //DMA active
   return result;
 }

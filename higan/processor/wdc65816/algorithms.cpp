@@ -1,4 +1,4 @@
-auto R65816::op_adc_b() {
+auto WDC65816::algorithmADC8() -> void {
   int result;
 
   if(!r.p.d) {
@@ -19,7 +19,7 @@ auto R65816::op_adc_b() {
   r.a.l = result;
 }
 
-auto R65816::op_adc_w() {
+auto WDC65816::algorithmADC16() -> void {
   int result;
 
   if(!r.p.d) {
@@ -46,133 +46,217 @@ auto R65816::op_adc_w() {
   r.a.w = result;
 }
 
-auto R65816::op_and_b() {
+auto WDC65816::algorithmAND8() -> void {
   r.a.l &= rd.l;
   r.p.n = r.a.l & 0x80;
   r.p.z = r.a.l == 0;
 }
 
-auto R65816::op_and_w() {
+auto WDC65816::algorithmAND16() -> void {
   r.a.w &= rd.w;
   r.p.n = r.a.w & 0x8000;
   r.p.z = r.a.w == 0;
 }
 
-auto R65816::op_bit_b() {
+auto WDC65816::algorithmASL8() -> void {
+  r.p.c = rd.l & 0x80;
+  rd.l <<= 1;
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmASL16() -> void {
+  r.p.c = rd.w & 0x8000;
+  rd.w <<= 1;
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmBIT8() -> void {
   r.p.n = rd.l & 0x80;
   r.p.v = rd.l & 0x40;
   r.p.z = (rd.l & r.a.l) == 0;
 }
 
-auto R65816::op_bit_w() {
+auto WDC65816::algorithmBIT16() -> void {
   r.p.n = rd.w & 0x8000;
   r.p.v = rd.w & 0x4000;
   r.p.z = (rd.w & r.a.w) == 0;
 }
 
-auto R65816::op_cmp_b() {
+auto WDC65816::algorithmCMP8() -> void {
   int result = r.a.l - rd.l;
   r.p.n = result & 0x80;
   r.p.z = (uint8)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_cmp_w() {
+auto WDC65816::algorithmCMP16() -> void {
   int result = r.a.w - rd.w;
   r.p.n = result & 0x8000;
   r.p.z = (uint16)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_cpx_b() {
+auto WDC65816::algorithmCPX8() -> void {
   int result = r.x.l - rd.l;
   r.p.n = result & 0x80;
   r.p.z = (uint8)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_cpx_w() {
+auto WDC65816::algorithmCPX16() -> void {
   int result = r.x.w - rd.w;
   r.p.n = result & 0x8000;
   r.p.z = (uint16)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_cpy_b() {
+auto WDC65816::algorithmCPY8() -> void {
   int result = r.y.l - rd.l;
   r.p.n = result & 0x80;
   r.p.z = (uint8)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_cpy_w() {
+auto WDC65816::algorithmCPY16() -> void {
   int result = r.y.w - rd.w;
   r.p.n = result & 0x8000;
   r.p.z = (uint16)result == 0;
   r.p.c = result >= 0;
 }
 
-auto R65816::op_eor_b() {
+auto WDC65816::algorithmDEC8() -> void {
+  rd.l--;
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmDEC16() -> void {
+  rd.w--;
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmEOR8() -> void {
   r.a.l ^= rd.l;
   r.p.n = r.a.l & 0x80;
   r.p.z = r.a.l == 0;
 }
 
-auto R65816::op_eor_w() {
+auto WDC65816::algorithmEOR16() -> void {
   r.a.w ^= rd.w;
   r.p.n = r.a.w & 0x8000;
   r.p.z = r.a.w == 0;
 }
 
-auto R65816::op_lda_b() {
+auto WDC65816::algorithmINC8() -> void {
+  rd.l++;
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmINC16() -> void {
+  rd.w++;
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmLDA8() -> void {
   r.a.l = rd.l;
   r.p.n = r.a.l & 0x80;
   r.p.z = r.a.l == 0;
 }
 
-auto R65816::op_lda_w() {
+auto WDC65816::algorithmLDA16() -> void {
   r.a.w = rd.w;
   r.p.n = r.a.w & 0x8000;
   r.p.z = r.a.w == 0;
 }
 
-auto R65816::op_ldx_b() {
+auto WDC65816::algorithmLDX8() -> void {
   r.x.l = rd.l;
   r.p.n = r.x.l & 0x80;
   r.p.z = r.x.l == 0;
 }
 
-auto R65816::op_ldx_w() {
+auto WDC65816::algorithmLDX16() -> void {
   r.x.w = rd.w;
   r.p.n = r.x.w & 0x8000;
   r.p.z = r.x.w == 0;
 }
 
-auto R65816::op_ldy_b() {
+auto WDC65816::algorithmLDY8() -> void {
   r.y.l = rd.l;
   r.p.n = r.y.l & 0x80;
   r.p.z = r.y.l == 0;
 }
 
-auto R65816::op_ldy_w() {
+auto WDC65816::algorithmLDY16() -> void {
   r.y.w = rd.w;
   r.p.n = r.y.w & 0x8000;
   r.p.z = r.y.w == 0;
 }
 
-auto R65816::op_ora_b() {
+auto WDC65816::algorithmLSR8() -> void {
+  r.p.c = rd.l & 1;
+  rd.l >>= 1;
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmLSR16() -> void {
+  r.p.c = rd.w & 1;
+  rd.w >>= 1;
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmORA8() -> void {
   r.a.l |= rd.l;
   r.p.n = r.a.l & 0x80;
   r.p.z = r.a.l == 0;
 }
 
-auto R65816::op_ora_w() {
+auto WDC65816::algorithmORA16() -> void {
   r.a.w |= rd.w;
   r.p.n = r.a.w & 0x8000;
   r.p.z = r.a.w == 0;
 }
 
-auto R65816::op_sbc_b() {
+auto WDC65816::algorithmROL8() -> void {
+  auto carry = (uint)r.p.c;
+  r.p.c = rd.l & 0x80;
+  rd.l = (rd.l << 1) | carry;
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmROL16() -> void {
+  auto carry = (uint)r.p.c;
+  r.p.c = rd.w & 0x8000;
+  rd.w = (rd.w << 1) | carry;
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmROR8() -> void {
+  auto carry = (uint)r.p.c << 7;
+  r.p.c = rd.l & 1;
+  rd.l = carry | (rd.l >> 1);
+  r.p.n = rd.l & 0x80;
+  r.p.z = rd.l == 0;
+}
+
+auto WDC65816::algorithmROR16() -> void {
+  auto carry = (uint)r.p.c << 15;
+  r.p.c = rd.w & 1;
+  rd.w = carry | (rd.w >> 1);
+  r.p.n = rd.w & 0x8000;
+  r.p.z = rd.w == 0;
+}
+
+auto WDC65816::algorithmSBC8() -> void {
   int result;
   rd.l ^= 0xff;
 
@@ -194,7 +278,7 @@ auto R65816::op_sbc_b() {
   r.a.l = result;
 }
 
-auto R65816::op_sbc_w() {
+auto WDC65816::algorithmSBC16() -> void {
   int result;
   rd.w ^= 0xffff;
 
@@ -222,106 +306,22 @@ auto R65816::op_sbc_w() {
   r.a.w = result;
 }
 
-auto R65816::op_inc_b() {
-  rd.l++;
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_inc_w() {
-  rd.w++;
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_dec_b() {
-  rd.l--;
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_dec_w() {
-  rd.w--;
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_asl_b() {
-  r.p.c = rd.l & 0x80;
-  rd.l <<= 1;
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_asl_w() {
-  r.p.c = rd.w & 0x8000;
-  rd.w <<= 1;
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_lsr_b() {
-  r.p.c = rd.l & 1;
-  rd.l >>= 1;
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_lsr_w() {
-  r.p.c = rd.w & 1;
-  rd.w >>= 1;
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_rol_b() {
-  auto carry = (uint)r.p.c;
-  r.p.c = rd.l & 0x80;
-  rd.l = (rd.l << 1) | carry;
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_rol_w() {
-  auto carry = (uint)r.p.c;
-  r.p.c = rd.w & 0x8000;
-  rd.w = (rd.w << 1) | carry;
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_ror_b() {
-  auto carry = (uint)r.p.c << 7;
-  r.p.c = rd.l & 1;
-  rd.l = carry | (rd.l >> 1);
-  r.p.n = rd.l & 0x80;
-  r.p.z = rd.l == 0;
-}
-
-auto R65816::op_ror_w() {
-  auto carry = (uint)r.p.c << 15;
-  r.p.c = rd.w & 1;
-  rd.w = carry | (rd.w >> 1);
-  r.p.n = rd.w & 0x8000;
-  r.p.z = rd.w == 0;
-}
-
-auto R65816::op_trb_b() {
+auto WDC65816::algorithmTRB8() -> void {
   r.p.z = (rd.l & r.a.l) == 0;
   rd.l &= ~r.a.l;
 }
 
-auto R65816::op_trb_w() {
+auto WDC65816::algorithmTRB16() -> void {
   r.p.z = (rd.w & r.a.w) == 0;
   rd.w &= ~r.a.w;
 }
 
-auto R65816::op_tsb_b() {
+auto WDC65816::algorithmTSB8() -> void {
   r.p.z = (rd.l & r.a.l) == 0;
   rd.l |= r.a.l;
 }
 
-auto R65816::op_tsb_w() {
+auto WDC65816::algorithmTSB16() -> void {
   r.p.z = (rd.w & r.a.w) == 0;
   rd.w |= r.a.w;
 }

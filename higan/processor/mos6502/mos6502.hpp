@@ -27,7 +27,7 @@ struct MOS6502 {
   auto pull() -> uint8;
 
   //instruction.cpp
-  auto interrupt(uint16 vector) -> void;
+  auto interrupt() -> void;
   auto instruction() -> void;
 
   //instructions.cpp
@@ -90,6 +90,9 @@ struct MOS6502 {
   //disassembler.cpp
   auto disassemble(uint16 pc) -> string;
 
+  //set to false to disable BCD mode in ADC, SBC instructions
+  bool BCD = true;
+
   struct Flags {
     bool c;  //carry
     bool z;  //zero
@@ -122,8 +125,6 @@ struct MOS6502 {
     Flags  p;
     uint8  mdr;
   } r;
-
-  bool BCD = true;
 };
 
 }

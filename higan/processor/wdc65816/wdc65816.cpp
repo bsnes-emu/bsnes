@@ -3,74 +3,128 @@
 
 namespace Processor {
 
-#include "algorithms.cpp"
-#include "disassembler.cpp"
-#include "serialization.cpp"
+#define A r.a.w
+#define X r.x.w
+#define Y r.y.w
+#define Z r.z.w
+#define S r.s.w
+#define D r.d.w
+#define B r.db
+#define P r.p
+#define PC r.pc.d
+#define CF r.p.c
+#define ZF r.p.z
+#define IF r.p.i
+#define DF r.p.d
+#define XF r.p.x
+#define MF r.p.m
+#define VF r.p.v
+#define NF r.p.n
+#define EF r.e
+#define AW r.a.w
+#define AH r.a.h
+#define AL r.a.l
+#define XW r.x.w
+#define XH r.x.h
+#define XL r.x.l
+#define YW r.y.w
+#define YH r.y.h
+#define YL r.y.l
+#define ZW r.x.w
+#define ZH r.z.h
+#define ZL r.z.l
+#define SH r.s.h
+#define SL r.s.l
+#define DH r.d.h
+#define DL r.d.l
+#define PCB r.pc.b
+#define PCW r.pc.w
+#define PCH r.pc.h
+#define PCL r.pc.l
 
 #define E if(r.e)
 #define N if(!r.e)
 #define L lastCycle();
 #define call(op) (this->*op)()
 
+#define LO(n) n.byte(0)
+#define HI(n) n.byte(1)
+
+#include "memory.cpp"
+#include "algorithms.cpp"
+
 #include "instructions-read.cpp"
 #include "instructions-write.cpp"
-#include "instructions-rmw.cpp"
+#include "instructions-modify.cpp"
 #include "instructions-pc.cpp"
 #include "instructions-misc.cpp"
-#include "switch.cpp"
+#include "instruction.cpp"
 
-auto R65816::interrupt() -> void {
-  read(r.pc.d);
-  idle();
-N writeSP(r.pc.b);
-  writeSP(r.pc.h);
-  writeSP(r.pc.l);
-  writeSP(r.e ? (r.p & ~0x10) : r.p);
-  r.pc.l = read(r.vector + 0);
-  r.p.i = 1;
-  r.p.d = 0;
-  r.pc.h = read(r.vector + 1);
-  r.pc.b = 0x00;
+auto WDC65816::power() -> void {
+  PC = 0x000000;
+  A  = 0x0000;
+  X  = 0x0000;
+  Y  = 0x0000;
+  S  = 0x01ff;
+  D  = 0x0000;
+  B  = 0x00;
+  P  = 0x34;
+  EF = 1;
+
+  r.mdr    = 0x00;
+  r.wai    = false;
+  r.stp    = false;
+  r.vector = 0xfffc;  //reset vector address
 }
 
-//immediate, 2-cycle opcodes with idle cycle will become bus read
-//when an IRQ is to be triggered immediately after opcode completion.
-//this affects the following opcodes:
-//  clc, cld, cli, clv, sec, sed, sei,
-//  tax, tay, txa, txy, tya, tyx,
-//  tcd, tcs, tdc, tsc, tsx, txs,
-//  inc, inx, iny, dec, dex, dey,
-//  asl, lsr, rol, ror, nop, xce.
-auto R65816::idleIRQ() -> void {
-  if(interruptPending()) {
-    //modify I/O cycle to bus read cycle, do not increment PC
-    read(r.pc.d);
-  } else {
-    idle();
-  }
-}
-
-auto R65816::idle2() -> void {
-  if(r.d.l != 0x00) {
-    idle();
-  }
-}
-
-auto R65816::idle4(uint16 x, uint16 y) -> void {
-  if(!r.p.x || (x & 0xff00) != (y & 0xff00)) {
-    idle();
-  }
-}
-
-auto R65816::idle6(uint16 addr) -> void {
-  if(r.e && (r.pc.w & 0xff00) != (addr & 0xff00)) {
-    idle();
-  }
-}
+#undef A
+#undef X
+#undef Y
+#undef Z
+#undef S
+#undef D
+#undef B
+#undef P
+#undef PC
+#undef CF
+#undef ZF
+#undef IF
+#undef DF
+#undef XF
+#undef MF
+#undef VF
+#undef NF
+#undef EF
+#undef AW
+#undef AH
+#undef AL
+#undef XW
+#undef XH
+#undef XL
+#undef YW
+#undef YH
+#undef YL
+#undef ZW
+#undef ZH
+#undef ZL
+#undef SH
+#undef SL
+#undef DH
+#undef DL
+#undef PCB
+#undef PCW
+#undef PCH
+#undef PCL
 
 #undef E
 #undef N
 #undef L
 #undef call
+
+#undef LO
+#undef HI
+
+//#include "disassembler.cpp"
+#include "serialization.cpp"
 
 }

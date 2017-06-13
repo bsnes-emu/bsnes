@@ -41,8 +41,12 @@ auto IO::writeIO(uint mode, uint32 addr, uint32 word) -> void {
 }
 
 struct UnmappedIO : IO {
-  auto readIO(uint32 addr) -> uint8 override { return 0; }
-  auto writeIO(uint32 addr, uint8 byte) -> void override {}
+  auto readIO(uint32 addr) -> uint8 override {
+    return cpu.pipeline.fetch.instruction.byte(addr & 1);
+  }
+
+  auto writeIO(uint32 addr, uint8 byte) -> void override {
+  }
 };
 
 static UnmappedIO unmappedIO;

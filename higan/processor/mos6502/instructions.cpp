@@ -314,11 +314,12 @@ auto MOS6502::instructionBRK() -> void {
   operand();
   push(PCH);
   push(PCL);
+  uint16 vector = 0xfffe;
+  nmi(vector);
   push(P | 0x30);
-  PCL = read(0xfffe);
-L PCH = read(0xffff);
   I = 1;
-  D = 0;
+  PCL = read(vector++);
+L PCH = read(vector++);
 }
 
 auto MOS6502::instructionJMPAbsolute() -> void {
@@ -331,7 +332,8 @@ auto MOS6502::instructionJMPIndirect() -> void {
   uint16 absolute = operand();
   absolute |= operand() << 8;
   uint16 pc = read(absolute);
-L pc |= read((absolute & 0xff00) | ((absolute & 0x00ff) + 1)) << 8;
+  absolute.byte(0)++;  //MOS6502: $00ff wraps here to $0000; not $0100
+L pc |= read(absolute) << 8;
   PC = pc;
 }
 
@@ -346,7 +348,7 @@ L push(PCL);
 }
 
 auto MOS6502::instructionNOP() -> void {
-  idle();
+L idle();
 }
 
 auto MOS6502::instructionPHP() -> void {

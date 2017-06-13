@@ -7,7 +7,7 @@ namespace Processor {
 //* ARMv4T (ARM7TDMI)
 
 struct ARM {
-  enum : uint {       //mode flags for bus_read, bus_write:
+  enum : uint {           //mode flags for bus_read, bus_write:
     Nonsequential =   1,  //N cycle
     Sequential    =   2,  //S cycle
     Prefetch      =   4,  //instruction fetch (eligible for prefetch)

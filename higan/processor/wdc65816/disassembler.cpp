@@ -1,4 +1,28 @@
-auto R65816::dreadb(uint24 addr) -> uint8 {
+enum : uint {
+  OPTYPE_DP = 0,    //dp
+  OPTYPE_DPX,       //dp,x
+  OPTYPE_DPY,       //dp,y
+  OPTYPE_IDP,       //(dp)
+  OPTYPE_IDPX,      //(dp,x)
+  OPTYPE_IDPY,      //(dp),y
+  OPTYPE_ILDP,      //[dp]
+  OPTYPE_ILDPY,     //[dp],y
+  OPTYPE_ADDR,      //addr
+  OPTYPE_ADDRX,     //addr,x
+  OPTYPE_ADDRY,     //addr,y
+  OPTYPE_IADDRX,    //(addr,x)
+  OPTYPE_ILADDR,    //[addr]
+  OPTYPE_LONG,      //long
+  OPTYPE_LONGX,     //long, x
+  OPTYPE_SR,        //sr,s
+  OPTYPE_ISRY,      //(sr,s),y
+  OPTYPE_ADDR_PC,   //pbr:addr
+  OPTYPE_IADDR_PC,  //pbr:(addr)
+  OPTYPE_RELB,      //relb
+  OPTYPE_RELW,      //relw
+};
+
+auto WDC65816::dreadb(uint24 addr) -> uint8 {
   if((addr & 0x40ffff) >= 0x2000 && (addr & 0x40ffff) <= 0x5fff) {
     //$00-3f|80-bf:2000-5fff
     //do not read MMIO registers within debugger
@@ -7,14 +31,14 @@ auto R65816::dreadb(uint24 addr) -> uint8 {
   return readDisassembler(addr);
 }
 
-auto R65816::dreadw(uint24 addr) -> uint16 {
+auto WDC65816::dreadw(uint24 addr) -> uint16 {
   uint16 data;
   data.byte(0) = dreadb(addr++);
   data.byte(1) = dreadb(addr++);
   return data;
 }
 
-auto R65816::dreadl(uint24 addr) -> uint24 {
+auto WDC65816::dreadl(uint24 addr) -> uint24 {
   uint24 data;
   data.byte(0) = dreadb(addr++);
   data.byte(1) = dreadb(addr++);
@@ -22,7 +46,7 @@ auto R65816::dreadl(uint24 addr) -> uint24 {
   return data;
 }
 
-auto R65816::decode(uint8 mode, uint24 addr) -> uint24 {
+auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
   uint24 a = 0;
 
   switch(mode) {
@@ -102,16 +126,16 @@ auto R65816::decode(uint8 mode, uint24 addr) -> uint24 {
   return a;
 }
 
-auto R65816::disassemble() -> string {
+auto WDC65816::disassemble() -> string {
   return disassemble(r.pc.d, r.e, r.p.m, r.p.x);
 }
 
-auto R65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
+auto WDC65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   string s;
 
-  Reg24 pc;
+  Long pc;
   pc.d = addr;
-  s = {hex(pc, 6), " "};
+  s = {hex(pc.d, 6), " "};
 
   uint8 op  = dreadb(pc.d); pc.w++;
   uint8 op0 = dreadb(pc.d); pc.w++;

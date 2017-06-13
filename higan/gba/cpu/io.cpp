@@ -4,6 +4,10 @@ auto CPU::readIO(uint32 addr) -> uint8 {
 
   switch(addr) {
 
+  //DMA0CNT_L, DMA1CNT_L, DMA2CNT_L, DMA3CNT_L
+  case 0x0400'00b8: case 0x0400'00c4: case 0x0400'00d0: case 0x0400'00dc: return 0x00;
+  case 0x0400'00b9: case 0x0400'00c5: case 0x0400'00d1: case 0x0400'00dd: return 0x00;
+
   //DMA0CNT_H, DMA1CNT_H, DMA2CNT_H, DMA3CNT_H
   case 0x0400'00ba: case 0x0400'00c6: case 0x0400'00d2: case 0x0400'00de: return (
     dma().control.targetmode        << 5
@@ -195,7 +199,7 @@ auto CPU::readIO(uint32 addr) -> uint8 {
 
   }
 
-  return 0;
+  return cpu.pipeline.fetch.instruction.byte(addr & 1);
 }
 
 auto CPU::writeIO(uint32 addr, uint8 data) -> void {

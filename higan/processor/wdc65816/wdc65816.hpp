@@ -6,12 +6,8 @@
 
 namespace Processor {
 
-struct R65816 {
-  #include "registers.hpp"
-  #include "memory.hpp"
-  #include "disassembler.hpp"
-
-  using fp = auto (R65816::*)() -> void;
+struct WDC65816 {
+  using fp = auto (WDC65816::*)() -> void;
 
   virtual auto idle() -> void = 0;
   virtual auto read(uint24 addr) -> uint8 = 0;
@@ -23,193 +19,268 @@ struct R65816 {
 
   virtual auto readDisassembler(uint24 addr) -> uint8 { return 0; }
 
-  //r65816.cpp
-  alwaysinline auto idleIRQ() -> void;
-  alwaysinline auto idle2() -> void;
-  alwaysinline auto idle4(uint16 x, uint16 y) -> void;
-  alwaysinline auto idle6(uint16 addr) -> void;
+  //wdc65816.cpp
+  auto power() -> void;
+
+  //memory.cpp
+  inline auto idleIRQ() -> void;
+  inline auto idle2() -> void;
+  inline auto idle4(uint16 x, uint16 y) -> void;
+  inline auto idle6(uint16 addr) -> void;
+  inline auto fetch() -> uint8;
+  inline auto pull() -> uint8;
+         auto push(uint8 data) -> void;
+  inline auto pullN() -> uint8;
+  inline auto pushN(uint8 data) -> void;
+  inline auto readDirect(uint addr) -> uint8;
+  inline auto writeDirect(uint addr, uint8 data) -> void;
+  inline auto readDirectN(uint addr) -> uint8;
+  inline auto readBank(uint addr) -> uint8;
+  inline auto writeBank(uint addr, uint8 data) -> void;
+  inline auto readStack(uint addr) -> uint8;
+  inline auto writeStack(uint addr, uint8 data) -> void;
 
   //algorithms.cpp
-  auto op_adc_b();
-  auto op_adc_w();
-  auto op_and_b();
-  auto op_and_w();
-  auto op_bit_b();
-  auto op_bit_w();
-  auto op_cmp_b();
-  auto op_cmp_w();
-  auto op_cpx_b();
-  auto op_cpx_w();
-  auto op_cpy_b();
-  auto op_cpy_w();
-  auto op_eor_b();
-  auto op_eor_w();
-  auto op_lda_b();
-  auto op_lda_w();
-  auto op_ldx_b();
-  auto op_ldx_w();
-  auto op_ldy_b();
-  auto op_ldy_w();
-  auto op_ora_b();
-  auto op_ora_w();
-  auto op_sbc_b();
-  auto op_sbc_w();
+  auto algorithmADC8() ->void;
+  auto algorithmADC16() -> void;
+  auto algorithmAND8() -> void;
+  auto algorithmAND16() -> void;
+  auto algorithmASL8() -> void;
+  auto algorithmASL16() -> void;
+  auto algorithmBIT8() -> void;
+  auto algorithmBIT16() -> void;
+  auto algorithmCMP8() -> void;
+  auto algorithmCMP16() -> void;
+  auto algorithmCPX8() -> void;
+  auto algorithmCPX16() -> void;
+  auto algorithmCPY8() -> void;
+  auto algorithmCPY16() -> void;
+  auto algorithmDEC8() -> void;
+  auto algorithmDEC16() -> void;
+  auto algorithmEOR8() -> void;
+  auto algorithmEOR16() -> void;
+  auto algorithmINC8() -> void;
+  auto algorithmINC16() -> void;
+  auto algorithmLDA8() -> void;
+  auto algorithmLDA16() -> void;
+  auto algorithmLDX8() -> void;
+  auto algorithmLDX16() -> void;
+  auto algorithmLDY8() -> void;
+  auto algorithmLDY16() -> void;
+  auto algorithmLSR8() -> void;
+  auto algorithmLSR16() -> void;
+  auto algorithmORA8() -> void;
+  auto algorithmORA16() -> void;
+  auto algorithmROL8() -> void;
+  auto algorithmROL16() -> void;
+  auto algorithmROR8() -> void;
+  auto algorithmROR16() -> void;
+  auto algorithmSBC8() -> void;
+  auto algorithmSBC16() -> void;
+  auto algorithmTRB8() -> void;
+  auto algorithmTRB16() -> void;
+  auto algorithmTSB8() -> void;
+  auto algorithmTSB16() -> void;
 
-  auto op_inc_b();
-  auto op_inc_w();
-  auto op_dec_b();
-  auto op_dec_w();
-  auto op_asl_b();
-  auto op_asl_w();
-  auto op_lsr_b();
-  auto op_lsr_w();
-  auto op_rol_b();
-  auto op_rol_w();
-  auto op_ror_b();
-  auto op_ror_w();
-  auto op_trb_b();
-  auto op_trb_w();
-  auto op_tsb_b();
-  auto op_tsb_w();
+  //instructions-read.cpp
+  auto instructionImmediateRead8(fp) -> void;
+  auto instructionImmediateRead16(fp) -> void;
+  auto instructionBankRead8(fp) -> void;
+  auto instructionBankRead16(fp) -> void;
+  auto instructionBankRead8(fp, uint16) -> void;
+  auto instructionBankRead16(fp, uint16) -> void;
+  auto instructionLongRead8(fp, uint16 = 0) -> void;
+  auto instructionLongRead16(fp, uint16 = 0) -> void;
+  auto instructionDirectRead8(fp) -> void;
+  auto instructionDirectRead16(fp) -> void;
+  auto instructionDirectRead8(fp, uint16) -> void;
+  auto instructionDirectRead16(fp, uint16) -> void;
+  auto instructionIndirectRead8(fp) -> void;
+  auto instructionIndirectRead16(fp) -> void;
+  auto instructionIndexedIndirectRead8(fp) -> void;
+  auto instructionIndexedIndirectRead16(fp) -> void;
+  auto instructionIndirectIndexedRead8(fp) -> void;
+  auto instructionIndirectIndexedRead16(fp) -> void;
+  auto instructionIndirectLongRead8(fp, uint16 = 0) -> void;
+  auto instructionIndirectLongRead16(fp, uint16 = 0) -> void;
+  auto instructionStackRead8(fp) -> void;
+  auto instructionStackRead16(fp) -> void;
+  auto instructionIndirectStackRead8(fp) -> void;
+  auto instructionIndirectStackRead16(fp) -> void;
 
-  //opcode_read.cpp
-  auto op_read_const_b(fp);
-  auto op_read_const_w(fp);
-  auto op_read_bit_const_b();
-  auto op_read_bit_const_w();
-  auto op_read_addr_b(fp);
-  auto op_read_addr_w(fp);
-  auto op_read_addrx_b(fp);
-  auto op_read_addrx_w(fp);
-  auto op_read_addry_b(fp);
-  auto op_read_addry_w(fp);
-  auto op_read_long_b(fp);
-  auto op_read_long_w(fp);
-  auto op_read_longx_b(fp);
-  auto op_read_longx_w(fp);
-  auto op_read_dp_b(fp);
-  auto op_read_dp_w(fp);
-  auto op_read_dpr_b(fp, Reg16&);
-  auto op_read_dpr_w(fp, Reg16&);
-  auto op_read_idp_b(fp);
-  auto op_read_idp_w(fp);
-  auto op_read_idpx_b(fp);
-  auto op_read_idpx_w(fp);
-  auto op_read_idpy_b(fp);
-  auto op_read_idpy_w(fp);
-  auto op_read_ildp_b(fp);
-  auto op_read_ildp_w(fp);
-  auto op_read_ildpy_b(fp);
-  auto op_read_ildpy_w(fp);
-  auto op_read_sr_b(fp);
-  auto op_read_sr_w(fp);
-  auto op_read_isry_b(fp);
-  auto op_read_isry_w(fp);
+  //instructions-write.cpp
+  auto instructionBankWrite8(uint16&) -> void;
+  auto instructionBankWrite16(uint16&) -> void;
+  auto instructionBankWrite8(uint16&, uint16) -> void;
+  auto instructionBankWrite16(uint16&, uint16) -> void;
+  auto instructionLongWrite8(uint16 = 0) -> void;
+  auto instructionLongWrite16(uint16 = 0) -> void;
+  auto instructionDirectWrite8(uint16&) -> void;
+  auto instructionDirectWrite16(uint16&) -> void;
+  auto instructionDirectWrite8(uint16&, uint16) -> void;
+  auto instructionDirectWrite16(uint16&, uint16) -> void;
+  auto instructionIndirectWrite8() -> void;
+  auto instructionIndirectWrite16() -> void;
+  auto instructionIndexedIndirectWrite8() -> void;
+  auto instructionIndexedIndirectWrite16() -> void;
+  auto instructionIndirectIndexedWrite8() -> void;
+  auto instructionIndirectIndexedWrite16() -> void;
+  auto instructionIndirectLongWrite8(uint16 = 0) -> void;
+  auto instructionIndirectLongWrite16(uint16 = 0) -> void;
+  auto instructionStackWrite8() -> void;
+  auto instructionStackWrite16() -> void;
+  auto instructionIndirectStackWrite8() -> void;
+  auto instructionIndirectStackWrite16() -> void;
 
-  //opcode_write.cpp
-  auto op_write_addr_b(Reg16&);
-  auto op_write_addr_w(Reg16&);
-  auto op_write_addrr_b(Reg16&, Reg16&);
-  auto op_write_addrr_w(Reg16&, Reg16&);
-  auto op_write_longr_b(Reg16&);
-  auto op_write_longr_w(Reg16&);
-  auto op_write_dp_b(Reg16&);
-  auto op_write_dp_w(Reg16&);
-  auto op_write_dpr_b(Reg16&, Reg16&);
-  auto op_write_dpr_w(Reg16&, Reg16&);
-  auto op_sta_idp_b();
-  auto op_sta_idp_w();
-  auto op_sta_ildp_b();
-  auto op_sta_ildp_w();
-  auto op_sta_idpx_b();
-  auto op_sta_idpx_w();
-  auto op_sta_idpy_b();
-  auto op_sta_idpy_w();
-  auto op_sta_ildpy_b();
-  auto op_sta_ildpy_w();
-  auto op_sta_sr_b();
-  auto op_sta_sr_w();
-  auto op_sta_isry_b();
-  auto op_sta_isry_w();
+  //instructions-modify.cpp
+  auto instructionINCImplied8(uint16&) -> void;
+  auto instructionINCImplied16(uint16&) -> void;
+  auto instructionDECImplied8(uint16&) -> void;
+  auto instructionDECImplied16(uint16&) -> void;
+  auto instructionASLImplied8() -> void;
+  auto instructionASLImplied16() -> void;
+  auto instructionLSRImplied8() -> void;
+  auto instructionLSRImplied16() -> void;
+  auto instructionROLImplied8() -> void;
+  auto instructionROLImplied16() -> void;
+  auto instructionRORImplied8() -> void;
+  auto instructionRORImplied16() -> void;
+  auto instructionBankModify8(fp op) -> void;
+  auto instructionBankModify16(fp op) -> void;
+  auto instructionBankIndexedModify8(fp op) -> void;
+  auto instructionBankIndexedModify16(fp op) -> void;
+  auto instructionDirectModify8(fp op) -> void;
+  auto instructionDirectModify16(fp op) -> void;
+  auto instructionDirectIndexedModify8(fp op) -> void;
+  auto instructionDirectIndexedModify16(fp op) -> void;
 
-  //opcode_rmw.cpp
-  auto op_adjust_imm_b(Reg16&, int);
-  auto op_adjust_imm_w(Reg16&, int);
-  auto op_asl_imm_b();
-  auto op_asl_imm_w();
-  auto op_lsr_imm_b();
-  auto op_lsr_imm_w();
-  auto op_rol_imm_b();
-  auto op_rol_imm_w();
-  auto op_ror_imm_b();
-  auto op_ror_imm_w();
-  auto op_adjust_addr_b(fp op);
-  auto op_adjust_addr_w(fp op);
-  auto op_adjust_addrx_b(fp op);
-  auto op_adjust_addrx_w(fp op);
-  auto op_adjust_dp_b(fp op);
-  auto op_adjust_dp_w(fp op);
-  auto op_adjust_dpx_b(fp op);
-  auto op_adjust_dpx_w(fp op);
+  //instructions-pc.cpp
+  auto instructionBranch(bool take = 1) -> void;
+  auto instructionBRL() -> void;
+  auto instructionJMPShort() -> void;
+  auto instructionJMPLong() -> void;
+  auto instructionJMPIndirect() -> void;
+  auto instructionJMPIndexedIndirect() -> void;
+  auto instructionJMPIndirectLong() -> void;
+  auto instructionJSRShort() -> void;
+  auto instructionJSRLong() -> void;
+  auto instructionJSRIndexedIndirect() -> void;
+  auto instructionRTI() -> void;
+  auto instructionRTS() -> void;
+  auto instructionRTL() -> void;
 
-  //opcode_pc.cpp
-  auto op_branch(bool flag, bool value);
-  auto op_bra();
-  auto op_brl();
-  auto op_jmp_addr();
-  auto op_jmp_long();
-  auto op_jmp_iaddr();
-  auto op_jmp_iaddrx();
-  auto op_jmp_iladdr();
-  auto op_jsr_addr();
-  auto op_jsr_long();
-  auto op_jsr_iaddrx();
-  auto op_rti();
-  auto op_rts();
-  auto op_rtl();
+  //instructions-misc.cpp
+  auto instructionBITImmediate8() -> void;
+  auto instructionBITImmediate16() -> void;
+  auto instructionNOP() -> void;
+  auto instructionWDM() -> void;
+  auto instructionXBA() -> void;
+  auto instructionBlockMove8(int adjust) -> void;
+  auto instructionBlockMove16(int adjust) -> void;
+  auto instructionInterrupt(uint16) -> void;
+  auto instructionSTP() -> void;
+  auto instructionWAI() -> void;
+  auto instructionXCE() -> void;
+  auto instructionSetFlag(bool& flag) -> void;
+  auto instructionClearFlag(bool& flag) -> void;
+  auto instructionREP() -> void;
+  auto instructionSEP() -> void;
+  auto instructionTransfer8(uint16&, uint16&) -> void;
+  auto instructionTransfer16(uint16&, uint16&) -> void;
+  auto instructionTCS() -> void;
+  auto instructionTSX8() -> void;
+  auto instructionTSX16() -> void;
+  auto instructionTXS() -> void;
+  auto instructionPush8(uint16&) -> void;
+  auto instructionPush16(uint16&) -> void;
+  auto instructionPHD() -> void;
+  auto instructionPHB() -> void;
+  auto instructionPHK() -> void;
+  auto instructionPHP() -> void;
+  auto instructionPull8(uint16&) -> void;
+  auto instructionPull16(uint16&) -> void;
+  auto instructionPLD() -> void;
+  auto instructionPLB() -> void;
+  auto instructionPLP() -> void;
+  auto instructionPEA() -> void;
+  auto instructionPEI() -> void;
+  auto instructionPER() -> void;
 
-  //opcode_misc.cpp
-  auto op_nop();
-  auto op_wdm();
-  auto op_xba();
-  auto op_move_b(int adjust);
-  auto op_move_w(int adjust);
-  auto op_interrupt(uint16);
-  auto op_stp() -> void;
-  auto op_wai() -> void;
-  auto op_xce();
-  auto op_set_flag(uint bit);
-  auto op_clear_flag(uint bit);
-  auto op_pflag(bool);
-  auto op_transfer_b(Reg16&, Reg16&);
-  auto op_transfer_w(Reg16&, Reg16&);
-  auto op_tcs();
-  auto op_tsx_b();
-  auto op_tsx_w();
-  auto op_txs();
-  auto op_push_b(Reg16&);
-  auto op_push_w(Reg16&);
-  auto op_phd();
-  auto op_phb();
-  auto op_phk();
-  auto op_php();
-  auto op_pull_b(Reg16&);
-  auto op_pull_w(Reg16&);
-  auto op_pld();
-  auto op_plb();
-  auto op_plp();
-  auto op_pea();
-  auto op_pei();
-  auto op_per();
-
-  //switch.cpp
+  //instruction.cpp
   auto instruction() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
+  //disassembler.cpp
+  auto disassemble() -> string;
+  auto disassemble(uint24 addr, bool e, bool m, bool x) -> string;
+  auto dreadb(uint24 addr) -> uint8;
+  auto dreadw(uint24 addr) -> uint16;
+  auto dreadl(uint24 addr) -> uint24;
+  auto decode(uint8 mode, uint24 addr) -> uint24;
+
+  struct Flags {
+    bool c;  //carry
+    bool z;  //zero
+    bool i;  //interrupt disable
+    bool d;  //decimal mode
+    bool x;  //index register mode
+    bool m;  //accumulator mode
+    bool v;  //overflow
+    bool n;  //negative
+
+    inline operator uint() const {
+      return c << 0 | z << 1 | i << 2 | d << 3 | x << 4 | m << 5 | v << 6 | n << 7;
+    }
+
+    inline auto& operator=(uint8 data) {
+      c = data.bit(0);
+      z = data.bit(1);
+      i = data.bit(2);
+      d = data.bit(3);
+      x = data.bit(4);
+      m = data.bit(5);
+      v = data.bit(6);
+      n = data.bit(7);
+      return *this;
+    }
+  };
+
+  union Word {
+    Word() : w(0) {}
+    uint16 w;
+    struct { uint8_t order_lsb2(l, h); };
+  };
+
+  union Long {
+    Long() : d(0) {}
+    uint32 d;
+    struct { uint16_t order_lsb2(w, wh); };
+    struct { uint8_t  order_lsb4(l, h, b, bh); };
+  };
+
+  struct Registers {
+    Long pc;
+    Word a;
+    Word x;
+    Word y;
+    Word z;
+    Word s;
+    Word d;
+    Flags p;
+    uint8 db = 0;
+    bool e = false;
+
+    bool irq = false;   //IRQ pin (0 = low, 1 = trigger)
+    bool wai = false;   //raised during wai, cleared after interrupt triggered
+    bool stp = false;   //raised during stp, never cleared
+    uint8 mdr = 0;      //memory data register
+    uint16 vector = 0;  //interrupt vector address
+  };
+
   Registers r;
-  Reg24 aa, rd;
+  Long aa, rd;
   uint8 sp, dp;
 };
 

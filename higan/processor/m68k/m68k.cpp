@@ -45,6 +45,7 @@ auto M68K::exception(uint exception, uint vector, uint priority) -> void {
   auto pc = r.pc;
   auto sr = readSR();
 
+  if(!r.s) swap(r.a[7], r.sp);
   r.i = priority;
   r.s = 1;
   r.t = 0;

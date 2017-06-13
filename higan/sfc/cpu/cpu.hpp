@@ -1,4 +1,4 @@
-struct CPU : Processor::R65816, Thread, PPUcounter {
+struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto interruptPending() const -> bool override;
   auto pio() const -> uint8;
   auto joylatch() const -> bool;

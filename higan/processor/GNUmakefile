@@ -20,8 +20,6 @@ obj/processor-huc6280.o:  processor/huc6280/huc6280.cpp $(call rwildcard,process
 obj/processor-lr35902.o:  processor/lr35902/lr35902.cpp $(call rwildcard,processor/lr35902)
 obj/processor-m68k.o:     processor/m68k/m68k.cpp $(call rwildcard,processor/m68k)
 obj/processor-mos6502.o:  processor/mos6502/mos6502.cpp $(call rwildcard,processor/mos6502)
-obj/processor-r6502.o:    processor/r6502/r6502.cpp $(call rwildcard,processor/r6502)
-obj/processor-r65816.o:   processor/r65816/r65816.cpp $(call rwildcard,processor/r65816)
 obj/processor-spc700.o:   processor/spc700/spc700.cpp $(call rwildcard,processor/spc700)
 obj/processor-upd96050.o: processor/upd96050/upd96050.cpp $(call rwildcard,processor/upd96050)
 obj/processor-v30mz.o:    processor/v30mz/v30mz.cpp $(call rwildcard,processor/v30mz)
