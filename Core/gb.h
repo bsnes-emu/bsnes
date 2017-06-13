@@ -6,7 +6,7 @@
 #include <time.h>
 
 #include "gb_struct_def.h"
-#include "save_struct.h"
+#include "save_state.h"
 
 #include "apu.h"
 #include "camera.h"
@@ -529,9 +529,6 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path);
     
 int GB_save_battery(GB_gameboy_t *gb, const char *path);
 void GB_load_battery(GB_gameboy_t *gb, const char *path);
-    
-int GB_save_state(GB_gameboy_t *gb, const char *path);
-int GB_load_state(GB_gameboy_t *gb, const char *path);
 
 void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip);
 void GB_set_rendering_disabled(GB_gameboy_t *gb, bool disabled);
