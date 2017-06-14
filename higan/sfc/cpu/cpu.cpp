@@ -45,16 +45,23 @@ auto CPU::main() -> void {
     } else if(status.powerPending) {
       status.powerPending = false;
       step(186);
-      r.pc.l = bus.read(0xfffc, r.mdr);
-      r.pc.h = bus.read(0xfffd, r.mdr);
+      r.pc.byte(0) = bus.read(0xfffc, r.mdr);
+      r.pc.byte(1) = bus.read(0xfffd, r.mdr);
     }
   }
+
+  #if 1
+  static uint counter = 0;
+  if(++counter < 40) print(disassemble(), "\n");
+  #endif
 
   instruction();
 }
 
 auto CPU::load(Markup::Node node) -> bool {
-  version = max(1, min(2, node["cpu/version"].natural()));
+  version = node["cpu/version"].natural();
+  if(version < 1) version = 1;
+  if(version > 2) version = 2;
   return true;
 }
 

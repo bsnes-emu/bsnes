@@ -7,8 +7,6 @@
 namespace Processor {
 
 struct WDC65816 {
-  using fp = auto (WDC65816::*)() -> void;
-
   virtual auto idle() -> void = 0;
   virtual auto read(uint24 addr) -> uint8 = 0;
   virtual auto write(uint24 addr, uint8 data) -> void = 0;
@@ -41,72 +39,75 @@ struct WDC65816 {
   inline auto writeStack(uint addr, uint8 data) -> void;
 
   //algorithms.cpp
-  auto algorithmADC8() ->void;
-  auto algorithmADC16() -> void;
-  auto algorithmAND8() -> void;
-  auto algorithmAND16() -> void;
-  auto algorithmASL8() -> void;
-  auto algorithmASL16() -> void;
-  auto algorithmBIT8() -> void;
-  auto algorithmBIT16() -> void;
-  auto algorithmCMP8() -> void;
-  auto algorithmCMP16() -> void;
-  auto algorithmCPX8() -> void;
-  auto algorithmCPX16() -> void;
-  auto algorithmCPY8() -> void;
-  auto algorithmCPY16() -> void;
-  auto algorithmDEC8() -> void;
-  auto algorithmDEC16() -> void;
-  auto algorithmEOR8() -> void;
-  auto algorithmEOR16() -> void;
-  auto algorithmINC8() -> void;
-  auto algorithmINC16() -> void;
-  auto algorithmLDA8() -> void;
-  auto algorithmLDA16() -> void;
-  auto algorithmLDX8() -> void;
-  auto algorithmLDX16() -> void;
-  auto algorithmLDY8() -> void;
-  auto algorithmLDY16() -> void;
-  auto algorithmLSR8() -> void;
-  auto algorithmLSR16() -> void;
-  auto algorithmORA8() -> void;
-  auto algorithmORA16() -> void;
-  auto algorithmROL8() -> void;
-  auto algorithmROL16() -> void;
-  auto algorithmROR8() -> void;
-  auto algorithmROR16() -> void;
-  auto algorithmSBC8() -> void;
-  auto algorithmSBC16() -> void;
-  auto algorithmTRB8() -> void;
-  auto algorithmTRB16() -> void;
-  auto algorithmTSB8() -> void;
-  auto algorithmTSB16() -> void;
+  using alu8 = auto (WDC65816::*)(uint8) -> uint8;
+  using alu16 = auto (WDC65816::*)(uint16) -> uint16;
+
+  auto algorithmADC8(uint8) -> uint8;
+  auto algorithmADC16(uint16) -> uint16;
+  auto algorithmAND8(uint8) -> uint8;
+  auto algorithmAND16(uint16) -> uint16;
+  auto algorithmASL8(uint8) -> uint8;
+  auto algorithmASL16(uint16) -> uint16;
+  auto algorithmBIT8(uint8) -> uint8;
+  auto algorithmBIT16(uint16) -> uint16;
+  auto algorithmCMP8(uint8) -> uint8;
+  auto algorithmCMP16(uint16) -> uint16;
+  auto algorithmCPX8(uint8) -> uint8;
+  auto algorithmCPX16(uint16) -> uint16;
+  auto algorithmCPY8(uint8) -> uint8;
+  auto algorithmCPY16(uint16) -> uint16;
+  auto algorithmDEC8(uint8) -> uint8;
+  auto algorithmDEC16(uint16) -> uint16;
+  auto algorithmEOR8(uint8) -> uint8;
+  auto algorithmEOR16(uint16) -> uint16;
+  auto algorithmINC8(uint8) -> uint8;
+  auto algorithmINC16(uint16) -> uint16;
+  auto algorithmLDA8(uint8) -> uint8;
+  auto algorithmLDA16(uint16) -> uint16;
+  auto algorithmLDX8(uint8) -> uint8;
+  auto algorithmLDX16(uint16) -> uint16;
+  auto algorithmLDY8(uint8) -> uint8;
+  auto algorithmLDY16(uint16) -> uint16;
+  auto algorithmLSR8(uint8) -> uint8;
+  auto algorithmLSR16(uint16) -> uint16;
+  auto algorithmORA8(uint8) -> uint8;
+  auto algorithmORA16(uint16) -> uint16;
+  auto algorithmROL8(uint8) -> uint8;
+  auto algorithmROL16(uint16) -> uint16;
+  auto algorithmROR8(uint8) -> uint8;
+  auto algorithmROR16(uint16) -> uint16;
+  auto algorithmSBC8(uint8) -> uint8;
+  auto algorithmSBC16(uint16) -> uint16;
+  auto algorithmTRB8(uint8) -> uint8;
+  auto algorithmTRB16(uint16) -> uint16;
+  auto algorithmTSB8(uint8) -> uint8;
+  auto algorithmTSB16(uint16) -> uint16;
 
   //instructions-read.cpp
-  auto instructionImmediateRead8(fp) -> void;
-  auto instructionImmediateRead16(fp) -> void;
-  auto instructionBankRead8(fp) -> void;
-  auto instructionBankRead16(fp) -> void;
-  auto instructionBankRead8(fp, uint16) -> void;
-  auto instructionBankRead16(fp, uint16) -> void;
-  auto instructionLongRead8(fp, uint16 = 0) -> void;
-  auto instructionLongRead16(fp, uint16 = 0) -> void;
-  auto instructionDirectRead8(fp) -> void;
-  auto instructionDirectRead16(fp) -> void;
-  auto instructionDirectRead8(fp, uint16) -> void;
-  auto instructionDirectRead16(fp, uint16) -> void;
-  auto instructionIndirectRead8(fp) -> void;
-  auto instructionIndirectRead16(fp) -> void;
-  auto instructionIndexedIndirectRead8(fp) -> void;
-  auto instructionIndexedIndirectRead16(fp) -> void;
-  auto instructionIndirectIndexedRead8(fp) -> void;
-  auto instructionIndirectIndexedRead16(fp) -> void;
-  auto instructionIndirectLongRead8(fp, uint16 = 0) -> void;
-  auto instructionIndirectLongRead16(fp, uint16 = 0) -> void;
-  auto instructionStackRead8(fp) -> void;
-  auto instructionStackRead16(fp) -> void;
-  auto instructionIndirectStackRead8(fp) -> void;
-  auto instructionIndirectStackRead16(fp) -> void;
+  auto instructionImmediateRead8(alu8) -> void;
+  auto instructionImmediateRead16(alu16) -> void;
+  auto instructionBankRead8(alu8) -> void;
+  auto instructionBankRead16(alu16) -> void;
+  auto instructionBankRead8(alu8, uint16) -> void;
+  auto instructionBankRead16(alu16, uint16) -> void;
+  auto instructionLongRead8(alu8, uint16 = 0) -> void;
+  auto instructionLongRead16(alu16, uint16 = 0) -> void;
+  auto instructionDirectRead8(alu8) -> void;
+  auto instructionDirectRead16(alu16) -> void;
+  auto instructionDirectRead8(alu8, uint16) -> void;
+  auto instructionDirectRead16(alu16, uint16) -> void;
+  auto instructionIndirectRead8(alu8) -> void;
+  auto instructionIndirectRead16(alu16) -> void;
+  auto instructionIndexedIndirectRead8(alu8) -> void;
+  auto instructionIndexedIndirectRead16(alu16) -> void;
+  auto instructionIndirectIndexedRead8(alu8) -> void;
+  auto instructionIndirectIndexedRead16(alu16) -> void;
+  auto instructionIndirectLongRead8(alu8, uint16 = 0) -> void;
+  auto instructionIndirectLongRead16(alu16, uint16 = 0) -> void;
+  auto instructionStackRead8(alu8) -> void;
+  auto instructionStackRead16(alu16) -> void;
+  auto instructionIndirectStackRead8(alu8) -> void;
+  auto instructionIndirectStackRead16(alu16) -> void;
 
   //instructions-write.cpp
   auto instructionBankWrite8(uint16&) -> void;
@@ -133,29 +134,19 @@ struct WDC65816 {
   auto instructionIndirectStackWrite16() -> void;
 
   //instructions-modify.cpp
-  auto instructionINCImplied8(uint16&) -> void;
-  auto instructionINCImplied16(uint16&) -> void;
-  auto instructionDECImplied8(uint16&) -> void;
-  auto instructionDECImplied16(uint16&) -> void;
-  auto instructionASLImplied8() -> void;
-  auto instructionASLImplied16() -> void;
-  auto instructionLSRImplied8() -> void;
-  auto instructionLSRImplied16() -> void;
-  auto instructionROLImplied8() -> void;
-  auto instructionROLImplied16() -> void;
-  auto instructionRORImplied8() -> void;
-  auto instructionRORImplied16() -> void;
-  auto instructionBankModify8(fp op) -> void;
-  auto instructionBankModify16(fp op) -> void;
-  auto instructionBankIndexedModify8(fp op) -> void;
-  auto instructionBankIndexedModify16(fp op) -> void;
-  auto instructionDirectModify8(fp op) -> void;
-  auto instructionDirectModify16(fp op) -> void;
-  auto instructionDirectIndexedModify8(fp op) -> void;
-  auto instructionDirectIndexedModify16(fp op) -> void;
+  auto instructionImpliedModify8(alu8, uint16&) -> void;
+  auto instructionImpliedModify16(alu16, uint16&) -> void;
+  auto instructionBankModify8(alu8) -> void;
+  auto instructionBankModify16(alu16) -> void;
+  auto instructionBankIndexedModify8(alu8) -> void;
+  auto instructionBankIndexedModify16(alu16) -> void;
+  auto instructionDirectModify8(alu8) -> void;
+  auto instructionDirectModify16(alu16) -> void;
+  auto instructionDirectIndexedModify8(alu8) -> void;
+  auto instructionDirectIndexedModify16(alu16) -> void;
 
   //instructions-pc.cpp
-  auto instructionBranch(bool take = 1) -> void;
+  auto instructionBranch(bool = 1) -> void;
   auto instructionBRL() -> void;
   auto instructionJMPShort() -> void;
   auto instructionJMPLong() -> void;
@@ -175,14 +166,14 @@ struct WDC65816 {
   auto instructionNOP() -> void;
   auto instructionWDM() -> void;
   auto instructionXBA() -> void;
-  auto instructionBlockMove8(int adjust) -> void;
-  auto instructionBlockMove16(int adjust) -> void;
+  auto instructionBlockMove8(int) -> void;
+  auto instructionBlockMove16(int) -> void;
   auto instructionInterrupt(uint16) -> void;
   auto instructionSTP() -> void;
   auto instructionWAI() -> void;
   auto instructionXCE() -> void;
-  auto instructionSetFlag(bool& flag) -> void;
-  auto instructionClearFlag(bool& flag) -> void;
+  auto instructionSetFlag(bool&) -> void;
+  auto instructionClearFlag(bool&) -> void;
   auto instructionREP() -> void;
   auto instructionSEP() -> void;
   auto instructionTransfer8(uint16&, uint16&) -> void;
@@ -191,12 +182,9 @@ struct WDC65816 {
   auto instructionTSX8() -> void;
   auto instructionTSX16() -> void;
   auto instructionTXS() -> void;
-  auto instructionPush8(uint16&) -> void;
-  auto instructionPush16(uint16&) -> void;
+  auto instructionPush8(uint8) -> void;
+  auto instructionPush16(uint16) -> void;
   auto instructionPHD() -> void;
-  auto instructionPHB() -> void;
-  auto instructionPHK() -> void;
-  auto instructionPHP() -> void;
   auto instructionPull8(uint16&) -> void;
   auto instructionPull16(uint16&) -> void;
   auto instructionPLD() -> void;
@@ -247,41 +235,24 @@ struct WDC65816 {
     }
   };
 
-  union Word {
-    Word() : w(0) {}
-    uint16 w;
-    struct { uint8_t order_lsb2(l, h); };
-  };
-
-  union Long {
-    Long() : d(0) {}
-    uint32 d;
-    struct { uint16_t order_lsb2(w, wh); };
-    struct { uint8_t  order_lsb4(l, h, b, bh); };
-  };
-
   struct Registers {
-    Long pc;
-    Word a;
-    Word x;
-    Word y;
-    Word z;
-    Word s;
-    Word d;
+    uint24 pc;
+    uint16 a;
+    uint16 x;
+    uint16 y;
+    uint16 z;
+    uint16 s;
+    uint16 d;
+    uint8 b;
     Flags p;
-    uint8 db = 0;
     bool e = false;
 
-    bool irq = false;   //IRQ pin (0 = low, 1 = trigger)
-    bool wai = false;   //raised during wai, cleared after interrupt triggered
-    bool stp = false;   //raised during stp, never cleared
-    uint8 mdr = 0;      //memory data register
-    uint16 vector = 0;  //interrupt vector address
-  };
-
-  Registers r;
-  Long aa, rd;
-  uint8 sp, dp;
+    bool irq = false;  //IRQ pin (0 = low, 1 = trigger)
+    bool wai = false;  //raised during wai, cleared after interrupt triggered
+    bool stp = false;  //raised during stp, never cleared
+    uint8 mdr;         //memory data register
+    uint16 vector;     //interrupt vector address
+  } r;
 };
 
 }

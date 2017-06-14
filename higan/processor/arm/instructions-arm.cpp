@@ -78,6 +78,8 @@ auto ARM::arm_op_multiply() {
   uint4 s = instruction() >> 8;
   uint4 m = instruction();
 
+  if(accumulate) idle();
+
   r(d) = mul(accumulate ? r(n) : 0u, r(m), r(s));
 }
 
@@ -103,9 +105,23 @@ auto ARM::arm_op_multiply_long() {
 
   uint64 rm = r(m);
   uint64 rs = r(s);
+
+  idle();
+  idle();
+
+  //this instruction uses an 8-bit Booth algorithm for multiplication
+  //this supports short-circuiting, so that smaller numbers multiply faster
+  //for now, simulate the timing of this operation
   if(signextend) {
+    if(rs >>  8 && (rs >>  8) != 0xffffff) idle();
+    if(rs >> 16 && (rs >> 16) !=   0xffff) idle();
+    if(rs >> 24 && (rs >> 24) !=     0xff) idle();
     rm = (int32)rm;
     rs = (int32)rs;
+  } else {
+    if(rs >>  8) idle();
+    if(rs >> 16) idle();
+    if(rs >> 24) idle();
   }
 
   uint64 rd = rm * rs;

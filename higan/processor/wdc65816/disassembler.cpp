@@ -61,15 +61,15 @@ auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
     break;
   case OPTYPE_IDP:
     addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = (r.db << 16) + dreadw(addr);
+    a = (r.b << 16) + dreadw(addr);
     break;
   case OPTYPE_IDPX:
     addr = (r.d + r.x + (addr & 0xffff)) & 0xffff;
-    a = (r.db << 16) + dreadw(addr);
+    a = (r.b << 16) + dreadw(addr);
     break;
   case OPTYPE_IDPY:
     addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = (r.db << 16) + dreadw(addr) + r.y;
+    a = (r.b << 16) + dreadw(addr) + r.y;
     break;
   case OPTYPE_ILDP:
     addr = (r.d + (addr & 0xffff)) & 0xffff;
@@ -80,22 +80,22 @@ auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
     a = dreadl(addr) + r.y;
     break;
   case OPTYPE_ADDR:
-    a = (r.db << 16) + (addr & 0xffff);
+    a = (r.b << 16) + (addr & 0xffff);
     break;
   case OPTYPE_ADDR_PC:
-    a = (r.pc.b << 16) + (addr & 0xffff);
+    a = (r.pc & 0xff0000) + (addr & 0xffff);
     break;
   case OPTYPE_ADDRX:
-    a = (r.db << 16) + (addr & 0xffff) + r.x;
+    a = (r.b << 16) + (addr & 0xffff) + r.x;
     break;
   case OPTYPE_ADDRY:
-    a = (r.db << 16) + (addr & 0xffff) + r.y;
+    a = (r.b << 16) + (addr & 0xffff) + r.y;
     break;
   case OPTYPE_IADDR_PC:
-    a = (r.pc.b << 16) + (addr & 0xffff);
+    a = (r.pc & 0xff0000) + (addr & 0xffff);
     break;
   case OPTYPE_IADDRX:
-    a = (r.pc.b << 16) + ((addr + r.x) & 0xffff);
+    a = (r.pc & 0xff0000) + ((addr + r.x) & 0xffff);
     break;
   case OPTYPE_ILADDR:
     a = addr;
@@ -111,14 +111,14 @@ auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
     break;
   case OPTYPE_ISRY:
     addr = (r.s + (addr & 0xff)) & 0xffff;
-    a = (r.db << 16) + dreadw(addr) + r.y;
+    a = (r.b << 16) + dreadw(addr) + r.y;
     break;
   case OPTYPE_RELB:
-    a  = (r.pc.b << 16) + ((r.pc.w + 2) & 0xffff);
+    a  = (r.pc & 0xff0000) + (((r.pc & 0xffff) + 2) & 0xffff);
     a += int8(addr);
     break;
   case OPTYPE_RELW:
-    a  = (r.pc.b << 16) + ((r.pc.w + 3) & 0xffff);
+    a  = (r.pc & 0xff0000) + (((r.pc & 0xffff) + 3) & 0xffff);
     a += (int16)addr;
     break;
   }
@@ -127,20 +127,19 @@ auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
 }
 
 auto WDC65816::disassemble() -> string {
-  return disassemble(r.pc.d, r.e, r.p.m, r.p.x);
+  return disassemble(r.pc, r.e, r.p.m, r.p.x);
 }
 
 auto WDC65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   string s;
 
-  Long pc;
-  pc.d = addr;
-  s = {hex(pc.d, 6), " "};
+  uint24 pc = addr;
+  s = {hex(pc, 6), " "};
 
-  uint8 op  = dreadb(pc.d); pc.w++;
-  uint8 op0 = dreadb(pc.d); pc.w++;
-  uint8 op1 = dreadb(pc.d); pc.w++;
-  uint8 op2 = dreadb(pc.d);
+  uint8 op  = dreadb(pc); pc.bits(0,15)++;
+  uint8 op0 = dreadb(pc); pc.bits(0,15)++;
+  uint8 op1 = dreadb(pc); pc.bits(0,15)++;
+  uint8 op2 = dreadb(pc);
 
   #define op8  ((op0))
   #define op16 ((op0) | (op1 << 8))
@@ -427,8 +426,8 @@ auto WDC65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   #undef x8
 
   s.append(t, " A:{0} X:{1} Y:{2} S:{3} D:{4} B:{5} ", string_format{
-    hex(r.a.w, 4), hex(r.x.w, 4), hex(r.y.w, 4),
-    hex(r.s.w, 4), hex(r.d.w, 4), hex(r.db,  2)
+    hex(r.a, 4), hex(r.x, 4), hex(r.y, 4),
+    hex(r.s, 4), hex(r.d, 4), hex(r.b, 2)
   });
 
   if(r.e) {

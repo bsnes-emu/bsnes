@@ -98,9 +98,8 @@ auto SA1::writeIO(uint24 addr, uint8 data) -> void {
   //(CCNT) SA-1 control
   case 0x2200: {
     if(mmio.sa1_resb && !(data & 0x80)) {
-      //reset SA-1 CPU
-      r.pc.w = mmio.crv;
-      r.pc.b = 0x00;
+      //reset SA-1 CPU (PC bank set to 0x00)
+      r.pc = mmio.crv;
     }
 
     mmio.sa1_irq  = (data & 0x80);

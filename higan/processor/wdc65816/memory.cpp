@@ -16,35 +16,29 @@ auto WDC65816::idleIRQ() -> void {
 }
 
 auto WDC65816::idle2() -> void {
-  if(DL != 0x00) {
-    idle();
-  }
+  if(lo(D)) idle();
 }
 
 auto WDC65816::idle4(uint16 x, uint16 y) -> void {
-  if(!XF || (x & 0xff00) != (y & 0xff00)) {
-    idle();
-  }
+  if(!XF || hi(x) != hi(y)) idle();
 }
 
 auto WDC65816::idle6(uint16 addr) -> void {
-  if(EF && (PC & 0xff00) != (addr & 0xff00)) {
-    idle();
-  }
+  if(EF && hi(PC) != hi(addr)) idle();
 }
 
 auto WDC65816::fetch() -> uint8 {
-  return read(PCB << 16 | PCW++);
+  return read(db(PC) << 16 | aa(PC)++);
 }
 
 auto WDC65816::pull() -> uint8 {
-  EF ? SL++ : S++;
+  EF ? lo(S)++ : S++;
   return read(S);
 }
 
 auto WDC65816::push(uint8 data) -> void {
   write(S, data);
-  EF ? SL-- : S--;
+  EF ? lo(S)-- : S--;
 }
 
 auto WDC65816::pullN() -> uint8 {
@@ -56,12 +50,12 @@ auto WDC65816::pushN(uint8 data) -> void {
 }
 
 auto WDC65816::readDirect(uint addr) -> uint8 {
-  if(EF && !DL) return read(D | uint8(addr));
+  if(EF && !lo(D)) return read(D | uint8(addr));
   return read(uint16(D + addr));
 }
 
 auto WDC65816::writeDirect(uint addr, uint8 data) -> void {
-  if(EF && !DL) return write(D | uint8(addr), data);
+  if(EF && !lo(D)) return write(D | uint8(addr), data);
   write(uint16(D + addr), data);
 }
 

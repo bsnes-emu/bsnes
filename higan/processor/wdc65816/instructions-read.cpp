@@ -1,209 +1,209 @@
-auto WDC65816::instructionImmediateRead8(fp op) -> void {
-L rd.l = fetch();
-  call(op);
+auto WDC65816::instructionImmediateRead8(alu8 op) -> void {
+L uint8 data = fetch();
+  alu(data);
 }
 
-auto WDC65816::instructionImmediateRead16(fp op) -> void {
-  rd.l = fetch();
-L rd.h = fetch();
-  call(op);
+auto WDC65816::instructionImmediateRead16(alu16 op) -> void {
+  uint16 data = fetch();
+L hi(data) = fetch();
+  alu(data);
 }
 
-auto WDC65816::instructionBankRead8(fp op) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-L rd.l = readBank(aa.w);
-  call(op);
+auto WDC65816::instructionBankRead8(alu8 op) -> void {
+  uint16 absolute = fetch();
+  hi(absolute) = fetch();
+L uint8 data = readBank(absolute);
+  alu(data);
 }
 
-auto WDC65816::instructionBankRead16(fp op) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  rd.l = readBank(aa.w + 0);
-L rd.h = readBank(aa.w + 1);
-  call(op);
+auto WDC65816::instructionBankRead16(alu16 op) -> void {
+  uint16 absolute = fetch();
+  hi(absolute) = fetch();
+  uint16 data = readBank(absolute + 0);
+L hi(data) = readBank(absolute + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionBankRead8(fp op, uint16 index) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  idle4(aa.w, aa.w + index);
-L rd.l = readBank(aa.w + index);
-  call(op);
+auto WDC65816::instructionBankRead8(alu8 op, uint16 index) -> void {
+  uint16 absolute = fetch();
+  hi(absolute) = fetch();
+  idle4(absolute, absolute + index);
+L uint8 data = readBank(absolute + index);
+  alu(data);
 }
 
-auto WDC65816::instructionBankRead16(fp op, uint16 index) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  idle4(aa.w, aa.w + index);
-  rd.l = readBank(aa.w + index + 0);
-L rd.h = readBank(aa.w + index + 1);
-  call(op);
+auto WDC65816::instructionBankRead16(alu16 op, uint16 index) -> void {
+  uint16 absolute = fetch();
+  hi(absolute) = fetch();
+  idle4(absolute, absolute + index);
+  uint16 data = readBank(absolute + index + 0);
+L hi(data) = readBank(absolute + index + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionLongRead8(fp op, uint16 index) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  aa.b = fetch();
-L rd.l = read(aa.d + index);
-  call(op);
+auto WDC65816::instructionLongRead8(alu8 op, uint16 index) -> void {
+  uint24 address = fetch();
+  hi(address) = fetch();
+  db(address) = fetch();
+L uint8 data = read(address + index);
+  alu(data);
 }
 
-auto WDC65816::instructionLongRead16(fp op, uint16 index) -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  aa.b = fetch();
-  rd.l = read(aa.d + index + 0);
-L rd.h = read(aa.d + index + 1);
-  call(op);
+auto WDC65816::instructionLongRead16(alu16 op, uint16 index) -> void {
+  uint24 address = fetch();
+  hi(address) = fetch();
+  db(address) = fetch();
+  uint16 data = read(address + index + 0);
+L hi(data) = read(address + index + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionDirectRead8(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionDirectRead8(alu8 op) -> void {
+  uint8 direct = fetch();
   idle2();
-L rd.l = readDirect(dp);
-  call(op);
+L uint8 data = readDirect(direct);
+  alu(data);
 }
 
-auto WDC65816::instructionDirectRead16(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionDirectRead16(alu16 op) -> void {
+  uint8 direct = fetch();
   idle2();
-  rd.l = readDirect(dp + 0);
-L rd.h = readDirect(dp + 1);
-  call(op);
+  uint16 data = readDirect(direct + 0);
+L hi(data) = readDirect(direct + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionDirectRead8(fp op, uint16 index) -> void {
-  dp = fetch();
-  idle2();
-  idle();
-L rd.l = readDirect(dp + index);
-  call(op);
-}
-
-auto WDC65816::instructionDirectRead16(fp op, uint16 index) -> void {
-  dp = fetch();
+auto WDC65816::instructionDirectRead8(alu8 op, uint16 index) -> void {
+  uint8 direct = fetch();
   idle2();
   idle();
-  rd.l = readDirect(dp + index + 0);
-L rd.h = readDirect(dp + index + 1);
-  call(op);
+L uint8 data = readDirect(direct + index);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectRead8(fp op) -> void {
-  dp = fetch();
-  idle2();
-  aa.l = readDirect(dp + 0);
-  aa.h = readDirect(dp + 1);
-L rd.l = readBank(aa.w);
-  call(op);
-}
-
-auto WDC65816::instructionIndirectRead16(fp op) -> void {
-  dp = fetch();
-  idle2();
-  aa.l = readDirect(dp + 0);
-  aa.h = readDirect(dp + 1);
-  rd.l = readBank(aa.w + 0);
-L rd.h = readBank(aa.w + 1);
-  call(op);
-}
-
-auto WDC65816::instructionIndexedIndirectRead8(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionDirectRead16(alu16 op, uint16 index) -> void {
+  uint8 direct = fetch();
   idle2();
   idle();
-  aa.l = readDirect(dp + r.x.w + 0);
-  aa.h = readDirect(dp + r.x.w + 1);
-L rd.l = readBank(aa.w);
-  call(op);
+  uint16 data = readDirect(direct + index + 0);
+L hi(data) = readDirect(direct + index + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionIndexedIndirectRead16(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionIndirectRead8(alu8 op) -> void {
+  uint8 direct = fetch();
+  idle2();
+  uint16 absolute = readDirect(direct + 0);
+  hi(absolute) = readDirect(direct + 1);
+L uint8 data = readBank(absolute);
+  alu(data);
+}
+
+auto WDC65816::instructionIndirectRead16(alu16 op) -> void {
+  uint8 direct = fetch();
+  idle2();
+  uint16 absolute = readDirect(direct + 0);
+  hi(absolute) = readDirect(direct + 1);
+  uint16 data = readBank(absolute + 0);
+L hi(data) = readBank(absolute + 1);
+  alu(data);
+}
+
+auto WDC65816::instructionIndexedIndirectRead8(alu8 op) -> void {
+  uint8 direct = fetch();
   idle2();
   idle();
-  aa.l = readDirect(dp + r.x.w + 0);
-  aa.h = readDirect(dp + r.x.w + 1);
-  rd.l = readBank(aa.w + 0);
-L rd.h = readBank(aa.w + 1);
-  call(op);
+  uint16 absolute = readDirect(direct + X + 0);
+  hi(absolute) = readDirect(direct + X + 1);
+L uint8 data = readBank(absolute);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectIndexedRead8(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionIndexedIndirectRead16(alu16 op) -> void {
+  uint8 direct = fetch();
   idle2();
-  aa.l = readDirect(dp + 0);
-  aa.h = readDirect(dp + 1);
-  idle4(aa.w, aa.w + r.y.w);
-L rd.l = readBank(aa.w + r.y.w);
-  call(op);
+  idle();
+  uint16 absolute = readDirect(direct + X + 0);
+  hi(absolute) = readDirect(direct + X + 1);
+  uint16 data = readBank(absolute + 0);
+L hi(data) = readBank(absolute + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectIndexedRead16(fp op) -> void {
-  dp = fetch();
+auto WDC65816::instructionIndirectIndexedRead8(alu8 op) -> void {
+  uint8 direct = fetch();
   idle2();
-  aa.l = readDirect(dp + 0);
-  aa.h = readDirect(dp + 1);
-  idle4(aa.w, aa.w + r.y.w);
-  rd.l = readBank(aa.w + r.y.w + 0);
-L rd.h = readBank(aa.w + r.y.w + 1);
-  call(op);
+  uint16 absolute = readDirect(direct + 0);
+  hi(absolute) = readDirect(direct + 1);
+  idle4(absolute, absolute + Y);
+L uint8 data = readBank(absolute + Y);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectLongRead8(fp op, uint16 index) -> void {
-  dp = fetch();
+auto WDC65816::instructionIndirectIndexedRead16(alu16 op) -> void {
+  uint8 direct = fetch();
   idle2();
-  aa.l = readDirectN(dp + 0);
-  aa.h = readDirectN(dp + 1);
-  aa.b = readDirectN(dp + 2);
-L rd.l = read(aa.d + index);
-  call(op);
+  uint16 absolute = readDirect(direct + 0);
+  hi(absolute) = readDirect(direct + 1);
+  idle4(absolute, absolute + Y);
+  uint16 data = readBank(absolute + Y + 0);
+L hi(data) = readBank(absolute + Y + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectLongRead16(fp op, uint16 index) -> void {
-  dp = fetch();
+auto WDC65816::instructionIndirectLongRead8(alu8 op, uint16 index) -> void {
+  uint8 direct = fetch();
   idle2();
-  aa.l = readDirectN(dp + 0);
-  aa.h = readDirectN(dp + 1);
-  aa.b = readDirectN(dp + 2);
-  rd.l = read(aa.d + index + 0);
-L rd.h = read(aa.d + index + 1);
-  call(op);
+  uint24 address = readDirectN(direct + 0);
+  hi(address) = readDirectN(direct + 1);
+  db(address) = readDirectN(direct + 2);
+L uint8 data = read(address + index);
+  alu(data);
 }
 
-auto WDC65816::instructionStackRead8(fp op) -> void {
-  sp = fetch();
-  idle();
-L rd.l = readStack(sp);
-  call(op);
+auto WDC65816::instructionIndirectLongRead16(alu16 op, uint16 index) -> void {
+  uint8 direct = fetch();
+  idle2();
+  uint24 address = readDirectN(direct + 0);
+  hi(address) = readDirectN(direct + 1);
+  db(address) = readDirectN(direct + 2);
+  uint16 data = read(address + index + 0);
+L hi(data) = read(address + index + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionStackRead16(fp op) -> void {
-  sp = fetch();
+auto WDC65816::instructionStackRead8(alu8 op) -> void {
+  uint8 stack = fetch();
   idle();
-  rd.l = readStack(sp + 0);
-L rd.h = readStack(sp + 1);
-  call(op);
+L uint8 data = readStack(stack);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectStackRead8(fp op) -> void {
-  sp = fetch();
+auto WDC65816::instructionStackRead16(alu16 op) -> void {
+  uint8 stack = fetch();
   idle();
-  aa.l = readStack(sp + 0);
-  aa.h = readStack(sp + 1);
-  idle();
-L rd.l = readBank(aa.w + r.y.w);
-  call(op);
+  uint16 data = readStack(stack + 0);
+L hi(data) = readStack(stack + 1);
+  alu(data);
 }
 
-auto WDC65816::instructionIndirectStackRead16(fp op) -> void {
-  sp = fetch();
+auto WDC65816::instructionIndirectStackRead8(alu8 op) -> void {
+  uint8 stack = fetch();
   idle();
-  aa.l = readStack(sp + 0);
-  aa.h = readStack(sp + 1);
+  uint16 absolute = readStack(stack + 0);
+  hi(absolute) = readStack(stack + 1);
   idle();
-  rd.l = readBank(aa.w + r.y.w + 0);
-L rd.h = readBank(aa.w + r.y.w + 1);
-  call(op);
+L uint8 data = readBank(absolute + Y);
+  alu(data);
+}
+
+auto WDC65816::instructionIndirectStackRead16(alu16 op) -> void {
+  uint8 stack = fetch();
+  idle();
+  uint16 absolute = readStack(stack + 0);
+  hi(absolute) = readStack(stack + 1);
+  idle();
+  uint16 data = readBank(absolute + Y + 0);
+L hi(data) = readBank(absolute + Y + 1);
+  alu(data);
 }

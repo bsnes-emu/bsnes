@@ -1,12 +1,12 @@
 auto WDC65816::instructionBITImmediate8() -> void {
 L uint8 immediate = fetch();
-  ZF = (immediate & AL) == 0;
+  ZF = (immediate & lo(A)) == 0;
 }
 
 auto WDC65816::instructionBITImmediate16() -> void {
   uint16 immediate = fetch();
 L immediate |= fetch() << 8;
-  ZF = (immediate & AW) == 0;
+  ZF = (immediate & A) == 0;
 }
 
 auto WDC65816::instructionNOP() -> void {
@@ -20,48 +20,48 @@ L fetch();
 auto WDC65816::instructionXBA() -> void {
   idle();
 L idle();
-  r.a.w = r.a.w >> 8 | r.a.w << 8;
-  r.p.n = (r.a.l & 0x80);
-  r.p.z = (r.a.l == 0);
+  A = A >> 8 | A << 8;
+  ZF = lo(A) == 0;
+  NF = A & 0x80;
 }
 
 auto WDC65816::instructionBlockMove8(int adjust) -> void {
-  dp = fetch();
-  sp = fetch();
-  r.db = dp;
-  rd.l = read(sp << 16 | r.x.w);
-  write(dp << 16 | r.y.w, rd.l);
+  auto targetBank = fetch();
+  auto sourceBank = fetch();
+  B = targetBank;
+  auto data = read(sourceBank << 16 | X);
+  write(targetBank << 16 | Y, data);
   idle();
-  r.x.l += adjust;
-  r.y.l += adjust;
+  lo(X) += adjust;
+  lo(Y) += adjust;
 L idle();
-  if(r.a.w--) r.pc.w -= 3;
+  if(A--) aa(PC) -= 3;
 }
 
 auto WDC65816::instructionBlockMove16(int adjust) -> void {
-  dp = fetch();
-  sp = fetch();
-  r.db = dp;
-  rd.l = read(sp << 16 | r.x.w);
-  write(dp << 16 | r.y.w, rd.l);
+  auto targetBank = fetch();
+  auto sourceBank = fetch();
+  B = targetBank;
+  auto data = read(sourceBank << 16 | X);
+  write(targetBank << 16 | Y, data);
   idle();
-  r.x.w += adjust;
-  r.y.w += adjust;
+  X += adjust;
+  Y += adjust;
 L idle();
-  if(r.a.w--) r.pc.w -= 3;
+  if(A--) aa(PC) -= 3;
 }
 
 auto WDC65816::instructionInterrupt(uint16 vector) -> void {
   fetch();
-N push(PCB);
-  push(PCH);
-  push(PCL);
+N push(db(PC));
+  push(hi(PC));
+  push(lo(PC));
   push(P);
   IF = 1;
   DF = 0;
-  PCL = read(vector++);
-L PCH = read(vector++);
-  PCB = 0x00;
+  lo(PC) = read(vector++);
+L hi(PC) = read(vector++);
+  db(PC) = 0x00;
 }
 
 auto WDC65816::instructionSTP() -> void {
@@ -81,15 +81,13 @@ L   idle();
 
 auto WDC65816::instructionXCE() -> void {
 L idleIRQ();
-  bool carry = r.p.c;
-  r.p.c = r.e;
-  r.e = carry;
-  if(r.e) {
-    r.p.m = 1;
-    r.p.x = 1;
-    r.x.h = 0x00;
-    r.y.h = 0x00;
-    r.s.h = 0x01;
+  swap(CF, EF);
+  if(EF) {
+    XF = 1;
+    MF = 1;
+    hi(X) = 0x00;
+    hi(Y) = 0x00;
+    hi(S) = 0x01;
   }
 }
 
@@ -108,7 +106,7 @@ auto WDC65816::instructionREP() -> void {
 L idle();
   P = P & ~data;
 E XF = 1, MF = 1;
-  if(XF) XH = 0x00, YH = 0x00;
+  if(XF) hi(X) = 0x00, hi(Y) = 0x00;
 }
 
 auto WDC65816::instructionSEP() -> void {
@@ -116,152 +114,134 @@ auto WDC65816::instructionSEP() -> void {
 L idle();
   P = P | data;
 E XF = 1, MF = 1;
-  if(XF) XH = 0x00, YH = 0x00;
+  if(XF) hi(X) = 0x00, hi(Y) = 0x00;
 }
 
 auto WDC65816::instructionTransfer8(uint16& from, uint16& to) -> void {
 L idleIRQ();
-  LO(to) = LO(from);
-  r.p.n = (LO(to) & 0x80);
-  r.p.z = (LO(to) == 0);
+  lo(to) = lo(from);
+  ZF = lo(to) == 0;
+  NF = to & 0x80;
 }
 
 auto WDC65816::instructionTransfer16(uint16& from, uint16& to) -> void {
 L idleIRQ();
   to = from;
-  r.p.n = (to & 0x8000);
-  r.p.z = (to == 0);
+  ZF = to == 0;
+  NF = to & 0x8000;
 }
 
 auto WDC65816::instructionTCS() -> void {
 L idleIRQ();
-  r.s.w = r.a.w;
-E r.s.h = 0x01;
+  S = A;
+E hi(S) = 0x01;
 }
 
 auto WDC65816::instructionTSX8() -> void {
 L idleIRQ();
-  r.x.l = r.s.l;
-  r.p.n = (r.x.l & 0x80);
-  r.p.z = (r.x.l == 0);
+  lo(X) = lo(S);
+  ZF = lo(X) == 0;
+  NF = X & 0x80;
 }
 
 auto WDC65816::instructionTSX16() -> void {
 L idleIRQ();
-  r.x.w = r.s.w;
-  r.p.n = (r.x.w & 0x8000);
-  r.p.z = (r.x.w == 0);
+  X = S;
+  ZF = X == 0;
+  NF = X & 0x8000;
 }
 
 auto WDC65816::instructionTXS() -> void {
 L idleIRQ();
-E r.s.l = r.x.l;
-N r.s.w = r.x.w;
+E lo(S) = lo(X);
+N S = X;
 }
 
-auto WDC65816::instructionPush8(uint16& reg) -> void {
+auto WDC65816::instructionPush8(uint8 data) -> void {
   idle();
-L push(reg);
+L push(data);
 }
 
-auto WDC65816::instructionPush16(uint16& reg) -> void {
+auto WDC65816::instructionPush16(uint16 data) -> void {
   idle();
-  push(reg >> 8);
-L push(reg >> 0);
+  push(hi(data));
+L push(lo(data));
 }
 
 auto WDC65816::instructionPHD() -> void {
   idle();
-  pushN(r.d.h);
-L pushN(r.d.l);
-E r.s.h = 0x01;
+  pushN(hi(D));
+L pushN(hi(D));
+E hi(S) = 0x01;
 }
 
-auto WDC65816::instructionPHB() -> void {
+auto WDC65816::instructionPull8(uint16& data) -> void {
   idle();
-L push(r.db);
+  idle();
+L lo(data) = pull();
+  ZF = lo(data) == 0;
+  NF = data & 0x80;
 }
 
-auto WDC65816::instructionPHK() -> void {
-  idle();
-L push(r.pc.b);
-}
-
-auto WDC65816::instructionPHP() -> void {
-  idle();
-L push(r.p);
-}
-
-auto WDC65816::instructionPull8(uint16& reg) -> void {
+auto WDC65816::instructionPull16(uint16& data) -> void {
   idle();
   idle();
-L LO(reg) = pull();
-  r.p.n = (LO(reg) & 0x80);
-  r.p.z = (LO(reg) == 0);
-}
-
-auto WDC65816::instructionPull16(uint16& reg) -> void {
-  idle();
-  idle();
-  LO(reg) = pull();
-L HI(reg) = pull();
-  r.p.n = (reg & 0x8000);
-  r.p.z = (reg == 0);
+  lo(data) = pull();
+L hi(data) = pull();
+  ZF = data == 0;
+  NF = data & 0x8000;
 }
 
 auto WDC65816::instructionPLD() -> void {
   idle();
   idle();
-  r.d.l = pullN();
-L r.d.h = pullN();
-  r.p.n = (r.d.w & 0x8000);
-  r.p.z = (r.d.w == 0);
-E r.s.h = 0x01;
+  lo(D) = pullN();
+L hi(D) = pullN();
+  ZF = D == 0;
+  NF = D & 0x8000;
+E hi(S) = 0x01;
 }
 
 auto WDC65816::instructionPLB() -> void {
   idle();
   idle();
-L r.db = pull();
-  r.p.n = (r.db & 0x80);
-  r.p.z = (r.db == 0);
+L B = pull();
+  ZF = B == 0;
+  NF = B & 0x80;
 }
 
 auto WDC65816::instructionPLP() -> void {
   idle();
   idle();
-L r.p = pull();
-E r.p.m = 1, r.p.x = 1;
-  if(r.p.x) {
-    r.x.h = 0x00;
-    r.y.h = 0x00;
-  }
+L P = pull();
+E XF = 1, MF = 1;
+  if(XF) hi(X) = 0x00, hi(Y) = 0x00;
 }
 
 auto WDC65816::instructionPEA() -> void {
-  aa.l = fetch();
-  aa.h = fetch();
-  pushN(aa.h);
-L pushN(aa.l);
-E r.s.h = 0x01;
+  uint16 data = fetch();
+  hi(data) = fetch();
+  pushN(hi(data));
+L pushN(lo(data));
+E hi(S) = 0x01;
 }
 
 auto WDC65816::instructionPEI() -> void {
-  dp = fetch();
+  auto direct = fetch();
   idle2();
-  aa.l = readDirectN(dp + 0);
-  aa.h = readDirectN(dp + 1);
-  pushN(aa.h);
-L pushN(aa.l);
-E r.s.h = 0x01;
+  uint16 data = readDirectN(direct + 0);
+  hi(data) = readDirectN(direct + 1);
+  pushN(hi(data));
+L pushN(lo(data));
+E hi(S) = 0x01;
 }
 
 auto WDC65816::instructionPER() -> void {
-  aa.l = fetch();
-  aa.h = fetch();
+  uint16 displacement = fetch();
+  hi(displacement) = fetch();
   idle();
-  rd.w = r.pc.d + (int16)aa.w;
-  pushN(rd.h);
-L pushN(rd.l);
-E r.s.h = 0x01;
+  uint16 data = PC + (int16)displacement;
+  pushN(hi(data));
+L pushN(lo(data));
+E hi(S) = 0x01;
 }
