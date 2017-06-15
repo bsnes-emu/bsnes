@@ -7,6 +7,10 @@
 #include <direct.h>
 #include <windows.h>
 #endif
+#ifdef __linux__
+#include <assert.h>
+#include <unistd.h>
+#endif
 #include "utils.h"
 
 const char *executable_folder(void)
@@ -21,7 +25,7 @@ const char *executable_folder(void)
     _NSGetExecutablePath(&path[0], &length);
 #else
 #ifdef __linux__
-    ssize_t length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
+    ssize_t __attribute__((unused)) length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
     assert (length != -1);
 #else
 #ifdef _WIN32
