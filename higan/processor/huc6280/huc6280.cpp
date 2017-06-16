@@ -24,6 +24,7 @@ namespace Processor {
 #define ALU (this->*alu)
 
 #include "memory.cpp"
+#include "algorithms.cpp"
 #include "instruction.cpp"
 #include "instructions.cpp"
 #include "disassembler.cpp"

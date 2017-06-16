@@ -1,10 +1,16 @@
 auto SPC700::serialize(serializer& s) -> void {
-  s.integer(regs.pc.w);
-  s.integer(regs.a);
-  s.integer(regs.x);
-  s.integer(regs.y);
-  s.integer(regs.s);
-  s.integer(regs.p.data);
+  s.integer(r.pc.w);
+  s.integer(r.ya.w);
+  s.integer(r.x);
+  s.integer(r.s);
+  s.integer(r.p.c);
+  s.integer(r.p.z);
+  s.integer(r.p.i);
+  s.integer(r.p.h);
+  s.integer(r.p.b);
+  s.integer(r.p.p);
+  s.integer(r.p.v);
+  s.integer(r.p.n);
 
   s.integer(opcode);
   s.integer(dp.w);
@@ -12,5 +18,4 @@ auto SPC700::serialize(serializer& s) -> void {
   s.integer(rd.w);
   s.integer(wr.w);
   s.integer(bit.w);
-  s.integer(ya.w);
 }

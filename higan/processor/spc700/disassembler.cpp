@@ -10,7 +10,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
 
   auto a = [&] { return hex((read(addr + 1) << 0) + (read(addr + 2) << 8), 4L); };
   auto b = [&](uint n) { return hex(read(addr + 1 + n), 2L); };
-  auto r = [&](uint r, uint n = 0) { return hex(addr + r + (int8)read(addr + 1 + n), 4L); };
+  auto rel = [&](uint r, uint n = 0) { return hex(addr + r + (int8)read(addr + 1 + n), 4L); };
   auto dp = [&](uint n) { return hex((p << 8) + read(addr + 1 + n), 3L); };
   auto ab = [&] {
     uint n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
@@ -22,7 +22,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x00: return { "nop" };
     case 0x01: return { "jst $ffde" };
     case 0x02: return { "set $", dp(0), ":0" };
-    case 0x03: return { "bbs $", dp(0), ":0=$", r(+3, 1) };
+    case 0x03: return { "bbs $", dp(0), ":0=$", rel(+3, 1) };
     case 0x04: return { "ora $", dp(0) };
     case 0x05: return { "ora $", a() };
     case 0x06: return { "ora (x)" };
@@ -35,10 +35,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x0d: return { "php" };
     case 0x0e: return { "tsb $", a() };
     case 0x0f: return { "brk" };
-    case 0x10: return { "bpl $", r(+2) };
+    case 0x10: return { "bpl $", rel(+2) };
     case 0x11: return { "jst $ffdc" };
     case 0x12: return { "clr $", dp(0), ":0" };
-    case 0x13: return { "bbc $", dp(0), ":0=$", r(+3, 1) };
+    case 0x13: return { "bbc $", dp(0), ":0=$", rel(+3, 1) };
     case 0x14: return { "ora $", dp(0), ",x" };
     case 0x15: return { "ora $", a(), ",x" };
     case 0x16: return { "ora $", a(), ",y" };
@@ -54,7 +54,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x20: return { "clp" };
     case 0x21: return { "jst $ffda" };
     case 0x22: return { "set $", dp(0), ":1" };
-    case 0x23: return { "bbs $", dp(0), ":1=$", r(+3, 1) };
+    case 0x23: return { "bbs $", dp(0), ":1=$", rel(+3, 1) };
     case 0x24: return { "and $", dp(0) };
     case 0x25: return { "and $", a() };
     case 0x26: return { "and (x)" };
@@ -64,13 +64,13 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x2b: return { "rol $", dp(0) };
     case 0x2c: return { "rol $", a() };
     case 0x2d: return { "pha" };
-    case 0x2e: return { "bne $", dp(0), "=$", r(+3, 1) };
+    case 0x2e: return { "bne $", dp(0), "=$", rel(+3, 1) };
     case 0x28: return { "and #$", b(0) };
-    case 0x2f: return { "bra $", r(+2) };
-    case 0x30: return { "bmi $", r(+2) };
+    case 0x2f: return { "bra $", rel(+2) };
+    case 0x30: return { "bmi $", rel(+2) };
     case 0x31: return { "jst $ffd8" };
     case 0x32: return { "clr $", dp(0), ":1" };
-    case 0x33: return { "bbc $", dp(0), ":1=$", r(+3, 1) };
+    case 0x33: return { "bbc $", dp(0), ":1=$", rel(+3, 1) };
     case 0x34: return { "and $", dp(0), ",x" };
     case 0x35: return { "and $", a(), ",x" };
     case 0x36: return { "and $", a(), ",y" };
@@ -86,7 +86,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x40: return { "sep" };
     case 0x41: return { "jst $ffd6" };
     case 0x42: return { "set $", dp(0), ":2" };
-    case 0x43: return { "bbs $", dp(0), ":2=$", r(+3, 1) };
+    case 0x43: return { "bbs $", dp(0), ":2=$", rel(+3, 1) };
     case 0x44: return { "eor $", dp(0) };
     case 0x45: return { "eor $", a() };
     case 0x46: return { "eor (x)" };
@@ -99,10 +99,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x4d: return { "phx" };
     case 0x4e: return { "trb $", a() };
     case 0x4f: return { "jsp $ff", b(0) };
-    case 0x50: return { "bvc $", r(+2) };
+    case 0x50: return { "bvc $", rel(+2) };
     case 0x51: return { "jst $ffd4" };
     case 0x52: return { "clr $", dp(0), ":2" };
-    case 0x53: return { "bbc $", dp(0), ":2=$", r(+3, 1) };
+    case 0x53: return { "bbc $", dp(0), ":2=$", rel(+3, 1) };
     case 0x54: return { "eor $", dp(0), ",x" };
     case 0x55: return { "eor $", a(), ",x" };
     case 0x56: return { "eor $", a(), ",y" };
@@ -118,7 +118,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x60: return { "clc" };
     case 0x61: return { "jst $ffd2" };
     case 0x62: return { "set $", dp(0), ":3" };
-    case 0x63: return { "bbs $", dp(0), ":3=$", r(+3, 1) };
+    case 0x63: return { "bbs $", dp(0), ":3=$", rel(+3, 1) };
     case 0x64: return { "cmp $", dp(0) };
     case 0x65: return { "cmp $", a() };
     case 0x66: return { "cmp (x)" };
@@ -129,12 +129,12 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x6b: return { "ror $", dp(0) };
     case 0x6c: return { "ror $", a() };
     case 0x6d: return { "phy" };
-    case 0x6e: return { "bne --$", dp(0), "=$", r(+3, 1) };
+    case 0x6e: return { "bne --$", dp(0), "=$", rel(+3, 1) };
     case 0x6f: return { "rts" };
-    case 0x70: return { "bvs $", r(+2) };
+    case 0x70: return { "bvs $", rel(+2) };
     case 0x71: return { "jst $ffd0" };
     case 0x72: return { "clr $", dp(0), ":3" };
-    case 0x73: return { "bbc $", dp(0), ":3=$", r(+3, 1) };
+    case 0x73: return { "bbc $", dp(0), ":3=$", rel(+3, 1) };
     case 0x74: return { "cmp $", dp(0), ",x" };
     case 0x75: return { "cmp $", a(), ",x" };
     case 0x76: return { "cmp $", a(), ",y" };
@@ -150,7 +150,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x80: return { "sec" };
     case 0x81: return { "jst $ffce" };
     case 0x82: return { "set $", dp(0), ":4" };
-    case 0x83: return { "bbs $", dp(0), ":4=$", r(+3, 1) };
+    case 0x83: return { "bbs $", dp(0), ":4=$", rel(+3, 1) };
     case 0x84: return { "adc $", dp(0) };
     case 0x85: return { "adc $", a() };
     case 0x86: return { "adc (x)" };
@@ -163,10 +163,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x8d: return { "ldy #$", b(0) };
     case 0x8e: return { "plp" };
     case 0x8f: return { "str $", dp(1), "=#$", b(0) };
-    case 0x90: return { "bcc $", r(+2) };
+    case 0x90: return { "bcc $", rel(+2) };
     case 0x91: return { "jst $ffcc" };
     case 0x92: return { "clr $", dp(0), ":4" };
-    case 0x93: return { "bbc $", dp(0), ":4=$", r(+3, 1) };
+    case 0x93: return { "bbc $", dp(0), ":4=$", rel(+3, 1) };
     case 0x94: return { "adc $", dp(0), ",x" };
     case 0x95: return { "adc $", a(), ",x" };
     case 0x96: return { "adc $", a(), ",y" };
@@ -182,7 +182,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xa0: return { "sei" };
     case 0xa1: return { "jst $ffca" };
     case 0xa2: return { "set $", dp(0), ":5" };
-    case 0xa3: return { "bbs $", dp(0), ":5=$", r(+3, 1) };
+    case 0xa3: return { "bbs $", dp(0), ":5=$", rel(+3, 1) };
     case 0xa4: return { "sbc $", dp(0) };
     case 0xa5: return { "sbc $", a() };
     case 0xa6: return { "sbc (x)" };
@@ -195,10 +195,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xad: return { "cpy #$", b(0) };
     case 0xae: return { "pla" };
     case 0xaf: return { "sta (x++)" };
-    case 0xb0: return { "bcs $", r(+2) };
+    case 0xb0: return { "bcs $", rel(+2) };
     case 0xb1: return { "jst $ffc8" };
     case 0xb2: return { "clr $", dp(0), ":5" };
-    case 0xb3: return { "bbc $", dp(0), ":5=$", r(+3, 1) };
+    case 0xb3: return { "bbc $", dp(0), ":5=$", rel(+3, 1) };
     case 0xb4: return { "sbc $", dp(0), ",x" };
     case 0xb5: return { "sbc $", a(), ",x" };
     case 0xb6: return { "sbc $", a(), ",y" };
@@ -214,7 +214,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xc0: return { "cli" };
     case 0xc1: return { "jst $ffc6" };
     case 0xc2: return { "set $", dp(0), ":6" };
-    case 0xc3: return { "bbs $", dp(0), ":6=$", r(+3, 1) };
+    case 0xc3: return { "bbs $", dp(0), ":6=$", rel(+3, 1) };
     case 0xc4: return { "sta $", dp(0) };
     case 0xc5: return { "sta $", a() };
     case 0xc6: return { "sta (x)" };
@@ -227,10 +227,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xcd: return { "ldx #$", b(0) };
     case 0xce: return { "plx" };
     case 0xcf: return { "mul" };
-    case 0xd0: return { "bne $", r(+2) };
+    case 0xd0: return { "bne $", rel(+2) };
     case 0xd1: return { "jst $ffc4" };
     case 0xd2: return { "clr $", dp(0), ":6" };
-    case 0xd3: return { "bbc $", dp(0), ":6=$", r(+3, 1) };
+    case 0xd3: return { "bbc $", dp(0), ":6=$", rel(+3, 1) };
     case 0xd4: return { "sta $", dp(0), ",x" };
     case 0xd5: return { "sta $", a(), ",x" };
     case 0xd6: return { "sta $", a(), ",y" };
@@ -241,12 +241,12 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xdb: return { "sty $", dp(0), ",x" };
     case 0xdc: return { "dey" };
     case 0xdd: return { "tya" };
-    case 0xde: return { "bne $", dp(0), ",x=$", r(+3, 1) };
+    case 0xde: return { "bne $", dp(0), ",x=$", rel(+3, 1) };
     case 0xdf: return { "daa" };
     case 0xe0: return { "clv" };
     case 0xe1: return { "jst $ffc2" };
     case 0xe2: return { "set $", dp(0), ":7" };
-    case 0xe3: return { "bbs $", dp(0), ":7=$", r(+3, 1) };
+    case 0xe3: return { "bbs $", dp(0), ":7=$", rel(+3, 1) };
     case 0xe4: return { "lda $", dp(0) };
     case 0xe5: return { "lda $", a() };
     case 0xe6: return { "lda (x)" };
@@ -259,10 +259,10 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xed: return { "cmc" };
     case 0xee: return { "ply" };
     case 0xef: return { "wai" };
-    case 0xf0: return { "beq $", r(+2) };
+    case 0xf0: return { "beq $", rel(+2) };
     case 0xf1: return { "jst $ffc0" };
     case 0xf2: return { "clr $", dp(0), ":7" };
-    case 0xf3: return { "bbc $", dp(0), ":7=$", r(+3, 1) };
+    case 0xf3: return { "bbc $", dp(0), ":7=$", rel(+3, 1) };
     case 0xf4: return { "lda $", dp(0), ",x" };
     case 0xf5: return { "lda $", a(), ",x" };
     case 0xf6: return { "lda $", a(), ",y" };
@@ -273,7 +273,7 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0xfb: return { "ldy $", dp(0), ",x" };
     case 0xfc: return { "iny" };
     case 0xfd: return { "tay" };
-    case 0xfe: return { "bne --y=$", r(+2) };
+    case 0xfe: return { "bne --y=$", rel(+2) };
     case 0xff: return { "stp" };
     }
     throw;
@@ -285,20 +285,20 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
   while(length++ < 30) output.append(" ");
 
   output.append(
-    "YA:", hex(regs.ya, 4L),
-    " A:", hex(regs.a,  2L),
-    " X:", hex(regs.x,  2L),
-    " Y:", hex(regs.y,  2L),
-    " S:", hex(regs.s,  2L),
+    "YA:", hex(YA, 4L),
+    " A:", hex(A,  2L),
+    " X:", hex(X,  2L),
+    " Y:", hex(Y,  2L),
+    " S:", hex(S,  2L),
     " ",
-    regs.p.n ? "N" : "n",
-    regs.p.v ? "V" : "v",
-    regs.p.p ? "P" : "p",
-    regs.p.b ? "B" : "b",
-    regs.p.h ? "H" : "h",
-    regs.p.i ? "I" : "i",
-    regs.p.z ? "Z" : "z",
-    regs.p.c ? "C" : "c"
+    NF ? "N" : "n",
+    VF ? "V" : "v",
+    PF ? "P" : "p",
+    BF ? "B" : "b",
+    HF ? "H" : "h",
+    IF ? "I" : "i",
+    ZF ? "Z" : "z",
+    CF ? "C" : "c"
   );
 
   return output;

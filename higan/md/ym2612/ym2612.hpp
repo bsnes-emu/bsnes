@@ -32,7 +32,7 @@ private:
 
   struct DAC {
     uint1 enable = 0;
-    uint8 sample = 0;
+    uint8 sample = 0x80;
   } dac;
 
   struct Envelope {

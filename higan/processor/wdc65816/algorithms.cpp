@@ -38,7 +38,7 @@ auto WDC65816::algorithmADC16(uint16 data) -> uint16 {
   }
 
   VF = ~(A ^ data) & (A ^ result) & 0x8000;
-  if(D && result > 0x9fff) result += 0x6000;
+  if(DF && result > 0x9fff) result += 0x6000;
   CF = result > 0xffff;
   ZF = (uint16)result == 0;
   NF = result & 0x8000;
@@ -48,7 +48,7 @@ auto WDC65816::algorithmADC16(uint16 data) -> uint16 {
 
 auto WDC65816::algorithmAND8(uint8 data) -> uint8 {
   lo(A) &= data;
-  ZF = A == 0;
+  ZF = lo(A) == 0;
   NF = A & 0x80;
   return data;
 }
@@ -148,13 +148,13 @@ auto WDC65816::algorithmDEC8(uint8 data) -> uint8 {
 auto WDC65816::algorithmDEC16(uint16 data) -> uint16 {
   data--;
   ZF = data == 0;
-  NF = data & 0x80;
+  NF = data & 0x8000;
   return data;
 }
 
 auto WDC65816::algorithmEOR8(uint8 data) -> uint8 {
   lo(A) ^= data;
-  ZF = A == 0;
+  ZF = lo(A) == 0;
   NF = A & 0x80;
   return lo(A);
 }

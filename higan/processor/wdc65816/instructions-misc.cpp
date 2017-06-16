@@ -171,7 +171,7 @@ L push(lo(data));
 auto WDC65816::instructionPHD() -> void {
   idle();
   pushN(hi(D));
-L pushN(hi(D));
+L pushN(lo(D));
 E hi(S) = 0x01;
 }
 

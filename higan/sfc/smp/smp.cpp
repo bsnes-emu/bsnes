@@ -27,15 +27,11 @@ auto SMP::load(Markup::Node node) -> bool {
 }
 
 auto SMP::power() -> void {
+  SPC700::power();
   create(Enter, 32040.0 * 768.0);
 
-  regs.pc.l = iplrom[62];
-  regs.pc.h = iplrom[63];
-  regs.a = 0x00;
-  regs.x = 0x00;
-  regs.y = 0x00;
-  regs.s = 0xef;
-  regs.p = 0x02;
+  r.pc.byte.l = iplrom[62];
+  r.pc.byte.h = iplrom[63];
 
   for(auto& byte : apuram) byte = random(0x00);
   apuram[0x00f4] = 0x00;

@@ -1,5 +1,5 @@
 #define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
-#define fp(name) &MOS6502::name
+#define fp(name) &MOS6502::algorithm##name
 
 auto MOS6502::interrupt() -> void {
   idle();

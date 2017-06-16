@@ -50,11 +50,6 @@ auto CPU::main() -> void {
     }
   }
 
-  #if 1
-  static uint counter = 0;
-  if(++counter < 40) print(disassemble(), "\n");
-  #endif
-
   instruction();
 }
 

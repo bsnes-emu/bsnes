@@ -108,6 +108,7 @@ auto ARM::arm_op_multiply_long() {
 
   idle();
   idle();
+  if(accumulate) idle();
 
   //this instruction uses an 8-bit Booth algorithm for multiplication
   //this supports short-circuiting, so that smaller numbers multiply faster

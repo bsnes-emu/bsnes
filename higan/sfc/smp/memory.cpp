@@ -74,7 +74,7 @@ auto SMP::readBus(uint16 addr) -> uint8 {
 auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   switch(addr) {
   case 0xf0:  //TEST
-    if(regs.p.p) break;  //writes only valid when P flag is clear
+    if(r.p.p) break;  //writes only valid when P flag is clear
 
     io.clockSpeed    = (data >> 6) & 3;
     io.timerSpeed    = (data >> 4) & 3;

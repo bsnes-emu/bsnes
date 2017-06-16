@@ -112,7 +112,7 @@ auto WDC65816::instructionRTS() -> void {
   uint16 data = pull();
   hi(data) = pull();
 L idle();
-  PC = data;
+  aa(PC) = data;
   aa(PC)++;
 }
 

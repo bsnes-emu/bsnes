@@ -21,6 +21,7 @@ namespace Processor {
 #define L lastCycle();
 
 #include "memory.cpp"
+#include "algorithms.cpp"
 #include "instruction.cpp"
 #include "instructions.cpp"
 #include "disassembler.cpp"

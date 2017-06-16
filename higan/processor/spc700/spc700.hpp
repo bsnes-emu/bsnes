@@ -8,103 +8,178 @@ struct SPC700 {
   virtual auto write(uint16 addr, uint8 data) -> void = 0;
   virtual auto readDisassembler(uint16 addr) -> uint8 = 0;
 
+  //spc700.cpp
+  auto power() -> void;
+
+  //instruction.cpp
   auto instruction() -> void;
 
-  auto serialize(serializer&) -> void;
+  //memory.cpp
+  auto fetch() -> uint8;
+  auto pull() -> uint8;
+  auto push(uint8 data) -> void;
+  auto load(uint8 addr) -> uint8;
+  auto store(uint8 addr, uint8 data) -> void;
 
-  auto disassemble(uint16 addr, bool p) -> string;
+  //algorithms.cpp
+  auto algorithmADC(uint8, uint8) -> uint8;
+  auto algorithmAND(uint8, uint8) -> uint8;
+  auto algorithmASL(uint8) -> uint8;
+  auto algorithmCMP(uint8, uint8) -> uint8;
+  auto algorithmDEC(uint8) -> uint8;
+  auto algorithmEOR(uint8, uint8) -> uint8;
+  auto algorithmINC(uint8) -> uint8;
+  auto algorithmLD (uint8, uint8) -> uint8;
+  auto algorithmLSR(uint8) -> uint8;
+  auto algorithmOR (uint8, uint8) -> uint8;
+  auto algorithmROL(uint8) -> uint8;
+  auto algorithmROR(uint8) -> uint8;
+  auto algorithmSBC(uint8, uint8) -> uint8;
+  auto algorithmST (uint8, uint8) -> uint8;
+  auto algorithmADW(uint16, uint16) -> uint16;
+  auto algorithmCPW(uint16, uint16) -> uint16;
+  auto algorithmLDW(uint16, uint16) -> uint16;
+  auto algorithmSBW(uint16, uint16) -> uint16;
 
-  #include "registers.hpp"
-  #include "memory.hpp"
-
-  Registers regs;
-  Register dp, sp, rd, wr, bit, ya;
-  uint8 opcode;
-
-protected:
+  //instructions.cpp
   using fps = auto (SPC700::*)(uint8) -> uint8;
   using fpb = auto (SPC700::*)(uint8, uint8) -> uint8;
   using fpw = auto (SPC700::*)(uint16, uint16) -> uint16;
-  using reg = uint8_t&;
 
-  auto op_adc(uint8, uint8) -> uint8;
-  auto op_and(uint8, uint8) -> uint8;
-  auto op_asl(uint8) -> uint8;
-  auto op_cmp(uint8, uint8) -> uint8;
-  auto op_dec(uint8) -> uint8;
-  auto op_eor(uint8, uint8) -> uint8;
-  auto op_inc(uint8) -> uint8;
-  auto op_ld (uint8, uint8) -> uint8;
-  auto op_lsr(uint8) -> uint8;
-  auto op_or (uint8, uint8) -> uint8;
-  auto op_rol(uint8) -> uint8;
-  auto op_ror(uint8) -> uint8;
-  auto op_sbc(uint8, uint8) -> uint8;
-  auto op_st (uint8, uint8) -> uint8;
-  auto op_adw(uint16, uint16) -> uint16;
-  auto op_cpw(uint16, uint16) -> uint16;
-  auto op_ldw(uint16, uint16) -> uint16;
-  auto op_sbw(uint16, uint16) -> uint16;
+  auto instructionImpliedModify(fps, uint8&) -> void;
+  auto instructionAbsoluteModify(fps) -> void;
+  auto instructionDirectPageModify(fps) -> void;
+  auto instructionDirectPageModifyWord(int) -> void;
+  auto instructionDirectPageXModify(fps) -> void;
+  auto instructionBranch(bool) -> void;
+  auto instructionPull(uint8&) -> void;
+  auto instructionPush(uint8) -> void;
+  auto instructionAbsoluteRead(fpb, uint8&) -> void;
+  auto instructionAbsoluteIndexedRead(fpb, uint8&) -> void;
+  auto instructionImmediateRead(fpb, uint8&) -> void;
+  auto instructionDirectPageRead(fpb, uint8&) -> void;
+  auto instructionDirectPageIndexedRead(fpb, uint8&, uint8&) -> void;
+  auto instructionDirectPageReadWord(fpw) -> void;
+  auto instructionIndirectPageXRead(fpb) -> void;
+  auto instructionIndirectPageYRead(fpb) -> void;
+  auto instructionIndirectXRead(fpb) -> void;
+  auto instructionAbsoluteModifyBit() -> void;
+  auto instructionFlagClear(bool&) -> void;
+  auto instructionFlagSet(bool&) -> void;
+  auto instructionTransfer(uint8&, uint8&) -> void;
+  auto instructionAbsoluteWrite(uint8&) -> void;
+  auto instructionAbsoluteIndexedWrite(uint8&) -> void;
+  auto instructionDirectPageWrite(uint8&) -> void;
+  auto instructionDirectPageIndexedWrite(uint8&, uint8&) -> void;
+  auto instructionDirectPageWriteImmediate(fpb) -> void;
+  auto instructionDirectPageWriteDirectPage(fpb) -> void;
+  auto instructionIndirectXWriteIndirectY(fpb) -> void;
 
-  auto op_adjust(fps, reg);
-  auto op_adjust_addr(fps);
-  auto op_adjust_dp(fps);
-  auto op_adjust_dpw(int);
-  auto op_adjust_dpx(fps);
-  auto op_branch(bool);
-  auto op_branch_bit();
-  auto op_pull(reg);
-  auto op_push(uint8);
-  auto op_read_addr(fpb, reg);
-  auto op_read_addri(fpb, reg);
-  auto op_read_const(fpb, reg);
-  auto op_read_dp(fpb, reg);
-  auto op_read_dpi(fpb, reg, reg);
-  auto op_read_dpw(fpw);
-  auto op_read_idpx(fpb);
-  auto op_read_idpy(fpb);
-  auto op_read_ix(fpb);
-  auto op_set_addr_bit();
-  auto op_set_bit();
-  auto op_set_flag(uint, bool);
-  auto op_test_addr(bool);
-  auto op_transfer(reg, reg);
-  auto op_write_addr(reg);
-  auto op_write_addri(reg);
-  auto op_write_dp(reg);
-  auto op_write_dpi(reg, reg);
-  auto op_write_dp_const(fpb);
-  auto op_write_dp_dp(fpb);
-  auto op_write_ix_iy(fpb);
+  auto instructionBBC(uint3) -> void;
+  auto instructionBBS(uint3) -> void;
+  auto instructionBNEDirectPage() -> void;
+  auto instructionBNEDirectPageDecrement() -> void;
+  auto instructionBNEDirectPageX() -> void;
+  auto instructionBNEYDecrement() -> void;
+  auto instructionBRK() -> void;
+  auto instructionCLR(uint3) -> void;
+  auto instructionCLV() -> void;
+  auto instructionCMC() -> void;
+  auto instructionDAA() -> void;
+  auto instructionDAS() -> void;
+  auto instructionDIV() -> void;
+  auto instructionJMPAbsolute() -> void;
+  auto instructionJMPIndirectAbsoluteX() -> void;
+  auto instructionJSPDirectPage() -> void;
+  auto instructionJSRAbsolute() -> void;
+  auto instructionJST(uint4) -> void;
+  auto instructionLDAIndirectXIncrement() -> void;
+  auto instructionMUL() -> void;
+  auto instructionNOP() -> void;
+  auto instructionPLP() -> void;
+  auto instructionRTI() -> void;
+  auto instructionRTS() -> void;
+  auto instructionSET(uint3) -> void;
+  auto instructionSTAIndirectPageX() -> void;
+  auto instructionSTAIndirectPageY() -> void;
+  auto instructionSTAIndirectX() -> void;
+  auto instructionSTAIndirectXIncrement() -> void;
+  auto instructionSTP() -> void;
+  auto instructionSTWDirectPage() -> void;
+  auto instructionTRBAbsolute() -> void;
+  auto instructionTSBAbsolute() -> void;
+  auto instructionWAI() -> void;
+  auto instructionXCN() -> void;
 
-  auto op_bne_dp();
-  auto op_bne_dpdec();
-  auto op_bne_dpx();
-  auto op_bne_ydec();
-  auto op_brk();
-  auto op_clv();
-  auto op_cmc();
-  auto op_daa();
-  auto op_das();
-  auto op_div_ya_x();
-  auto op_jmp_addr();
-  auto op_jmp_iaddrx();
-  auto op_jsp_dp();
-  auto op_jsr_addr();
-  auto op_jst();
-  auto op_lda_ixinc();
-  auto op_mul_ya();
-  auto op_nop();
-  auto op_plp();
-  auto op_rti();
-  auto op_rts();
-  auto op_sta_idpx();
-  auto op_sta_idpy();
-  auto op_sta_ix();
-  auto op_sta_ixinc();
-  auto op_stw_dp();
-  auto op_wait();
-  auto op_xcn();
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
+  //disassembler.cpp
+  auto disassemble(uint16 addr, bool p) -> string;
+
+  struct Flags {
+    bool c;  //carry
+    bool z;  //zero
+    bool i;  //interrupt disable
+    bool h;  //half-carry
+    bool b;  //break
+    bool p;  //page
+    bool v;  //overflow
+    bool n;  //negative
+
+    inline operator uint() const {
+      return c << 0 | z << 1 | i << 2 | h << 3 | b << 4 | p << 5 | v << 6 | n << 7;
+    }
+
+    inline auto& operator=(uint8 data) {
+      c = data.bit(0);
+      z = data.bit(1);
+      i = data.bit(2);
+      h = data.bit(3);
+      b = data.bit(4);
+      p = data.bit(5);
+      v = data.bit(6);
+      n = data.bit(7);
+      return *this;
+    }
+  };
+
+  struct Registers {
+    union Pair {
+      Pair() : w(0) {}
+      uint16 w;
+      struct Byte { uint8 order_lsb2(l, h); } byte;
+    } pc, ya;
+    uint8 x, s;
+    Flags p;
+  } r;
+
+  struct Register {
+    union {
+      uint16_t w = 0;
+      NaturalBitField<uint16_t, 0,  7> l;
+      NaturalBitField<uint16_t, 8, 15> h;
+    };
+
+    inline operator uint() const { return w; }
+    inline auto operator=(const Register& value) { w = value.w; }
+
+    inline auto operator++(int) { uint value = w++; return value; }
+    inline auto operator--(int) { uint value = w--; return value; }
+
+    inline auto& operator++() { return ++w, *this; }
+    inline auto& operator--() { return --w, *this; }
+
+    inline auto& operator =(uint value) { return w  = value, *this; }
+    inline auto& operator&=(uint value) { return w &= value, *this; }
+    inline auto& operator|=(uint value) { return w |= value, *this; }
+    inline auto& operator^=(uint value) { return w ^= value, *this; }
+    inline auto& operator+=(uint value) { return w += value, *this; }
+    inline auto& operator-=(uint value) { return w -= value, *this; }
+  };
+
+  Register dp, sp, rd, wr, bit;
+  uint8 opcode;
 };
 
 }

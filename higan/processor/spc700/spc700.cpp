@@ -3,276 +3,53 @@
 
 namespace Processor {
 
+#define PC r.pc.w
+#define YA r.ya.w
+#define A r.ya.byte.l
+#define X r.x
+#define Y r.ya.byte.h
+#define S r.s
+#define P r.p
+
+#define CF r.p.c
+#define ZF r.p.z
+#define IF r.p.i
+#define HF r.p.h
+#define BF r.p.b
+#define PF r.p.p
+#define VF r.p.v
+#define NF r.p.n
+
+#include "memory.cpp"
 #include "algorithms.cpp"
 #include "instructions.cpp"
-#include "disassembler.cpp"
+#include "instruction.cpp"
 #include "serialization.cpp"
+#include "disassembler.cpp"
 
-#define op(id, name, ...) case id: return op_##name(__VA_ARGS__);
-#define fp(name) &SPC700::op_##name
+#undef PC
+#undef YA
+#undef A
+#undef X
+#undef Y
+#undef S
+#undef P
 
-auto SPC700::instruction() -> void {
-  switch(opcode = readPC()) {
-  op(0x00, nop)
-  op(0x01, jst)
-  op(0x02, set_bit)
-  op(0x03, branch_bit)
-  op(0x04, read_dp, fp(or), regs.a)
-  op(0x05, read_addr, fp(or), regs.a)
-  op(0x06, read_ix, fp(or))
-  op(0x07, read_idpx, fp(or))
-  op(0x08, read_const, fp(or), regs.a)
-  op(0x09, write_dp_dp, fp(or))
-  op(0x0a, set_addr_bit)
-  op(0x0b, adjust_dp, fp(asl))
-  op(0x0c, adjust_addr, fp(asl))
-  op(0x0d, push, regs.p)
-  op(0x0e, test_addr, 1)
-  op(0x0f, brk)
-  op(0x10, branch, regs.p.n == 0)
-  op(0x11, jst)
-  op(0x12, set_bit)
-  op(0x13, branch_bit)
-  op(0x14, read_dpi, fp(or), regs.a, regs.x)
-  op(0x15, read_addri, fp(or), regs.x)
-  op(0x16, read_addri, fp(or), regs.y)
-  op(0x17, read_idpy, fp(or))
-  op(0x18, write_dp_const, fp(or))
-  op(0x19, write_ix_iy, fp(or))
-  op(0x1a, adjust_dpw, -1)
-  op(0x1b, adjust_dpx, fp(asl))
-  op(0x1c, adjust, fp(asl), regs.a)
-  op(0x1d, adjust, fp(dec), regs.x)
-  op(0x1e, read_addr, fp(cmp), regs.x)
-  op(0x1f, jmp_iaddrx)
-  op(0x20, set_flag, regs.p.p.bit, 0)
-  op(0x21, jst)
-  op(0x22, set_bit)
-  op(0x23, branch_bit)
-  op(0x24, read_dp, fp(and), regs.a)
-  op(0x25, read_addr, fp(and), regs.a)
-  op(0x26, read_ix, fp(and))
-  op(0x27, read_idpx, fp(and))
-  op(0x28, read_const, fp(and), regs.a)
-  op(0x29, write_dp_dp, fp(and))
-  op(0x2a, set_addr_bit)
-  op(0x2b, adjust_dp, fp(rol))
-  op(0x2c, adjust_addr, fp(rol))
-  op(0x2d, push, regs.a)
-  op(0x2e, bne_dp)
-  op(0x2f, branch, true)
-  op(0x30, branch, regs.p.n == 1)
-  op(0x31, jst)
-  op(0x32, set_bit)
-  op(0x33, branch_bit)
-  op(0x34, read_dpi, fp(and), regs.a, regs.x)
-  op(0x35, read_addri, fp(and), regs.x)
-  op(0x36, read_addri, fp(and), regs.y)
-  op(0x37, read_idpy, fp(and))
-  op(0x38, write_dp_const, fp(and))
-  op(0x39, write_ix_iy, fp(and))
-  op(0x3a, adjust_dpw, +1)
-  op(0x3b, adjust_dpx, fp(rol))
-  op(0x3c, adjust, fp(rol), regs.a)
-  op(0x3d, adjust, fp(inc), regs.x)
-  op(0x3e, read_dp, fp(cmp), regs.x)
-  op(0x3f, jsr_addr)
-  op(0x40, set_flag, regs.p.p.bit, 1)
-  op(0x41, jst)
-  op(0x42, set_bit)
-  op(0x43, branch_bit)
-  op(0x44, read_dp, fp(eor), regs.a)
-  op(0x45, read_addr, fp(eor), regs.a)
-  op(0x46, read_ix, fp(eor))
-  op(0x47, read_idpx, fp(eor))
-  op(0x48, read_const, fp(eor), regs.a)
-  op(0x49, write_dp_dp, fp(eor))
-  op(0x4a, set_addr_bit)
-  op(0x4b, adjust_dp, fp(lsr))
-  op(0x4c, adjust_addr, fp(lsr))
-  op(0x4d, push, regs.x)
-  op(0x4e, test_addr, 0)
-  op(0x4f, jsp_dp)
-  op(0x50, branch, regs.p.v == 0)
-  op(0x51, jst)
-  op(0x52, set_bit)
-  op(0x53, branch_bit)
-  op(0x54, read_dpi, fp(eor), regs.a, regs.x)
-  op(0x55, read_addri, fp(eor), regs.x)
-  op(0x56, read_addri, fp(eor), regs.y)
-  op(0x57, read_idpy, fp(eor))
-  op(0x58, write_dp_const, fp(eor))
-  op(0x59, write_ix_iy, fp(eor))
-  op(0x5a, read_dpw, fp(cpw))
-  op(0x5b, adjust_dpx, fp(lsr))
-  op(0x5c, adjust, fp(lsr), regs.a)
-  op(0x5d, transfer, regs.a, regs.x)
-  op(0x5e, read_addr, fp(cmp), regs.y)
-  op(0x5f, jmp_addr)
-  op(0x60, set_flag, regs.p.c.bit, 0)
-  op(0x61, jst)
-  op(0x62, set_bit)
-  op(0x63, branch_bit)
-  op(0x64, read_dp, fp(cmp), regs.a)
-  op(0x65, read_addr, fp(cmp), regs.a)
-  op(0x66, read_ix, fp(cmp))
-  op(0x67, read_idpx, fp(cmp))
-  op(0x68, read_const, fp(cmp), regs.a)
-  op(0x69, write_dp_dp, fp(cmp))
-  op(0x6a, set_addr_bit)
-  op(0x6b, adjust_dp, fp(ror))
-  op(0x6c, adjust_addr, fp(ror))
-  op(0x6d, push, regs.y)
-  op(0x6e, bne_dpdec)
-  op(0x6f, rts)
-  op(0x70, branch, regs.p.v == 1)
-  op(0x71, jst)
-  op(0x72, set_bit)
-  op(0x73, branch_bit)
-  op(0x74, read_dpi, fp(cmp), regs.a, regs.x)
-  op(0x75, read_addri, fp(cmp), regs.x)
-  op(0x76, read_addri, fp(cmp), regs.y)
-  op(0x77, read_idpy, fp(cmp))
-  op(0x78, write_dp_const, fp(cmp))
-  op(0x79, write_ix_iy, fp(cmp))
-  op(0x7a, read_dpw, fp(adw))
-  op(0x7b, adjust_dpx, fp(ror))
-  op(0x7c, adjust, fp(ror), regs.a)
-  op(0x7d, transfer, regs.x, regs.a)
-  op(0x7e, read_dp, fp(cmp), regs.y)
-  op(0x7f, rti)
-  op(0x80, set_flag, regs.p.c.bit, 1)
-  op(0x81, jst)
-  op(0x82, set_bit)
-  op(0x83, branch_bit)
-  op(0x84, read_dp, fp(adc), regs.a)
-  op(0x85, read_addr, fp(adc), regs.a)
-  op(0x86, read_ix, fp(adc))
-  op(0x87, read_idpx, fp(adc))
-  op(0x88, read_const, fp(adc), regs.a)
-  op(0x89, write_dp_dp, fp(adc))
-  op(0x8a, set_addr_bit)
-  op(0x8b, adjust_dp, fp(dec))
-  op(0x8c, adjust_addr, fp(dec))
-  op(0x8d, read_const, fp(ld), regs.y)
-  op(0x8e, plp)
-  op(0x8f, write_dp_const, fp(st))
-  op(0x90, branch, regs.p.c == 0)
-  op(0x91, jst)
-  op(0x92, set_bit)
-  op(0x93, branch_bit)
-  op(0x94, read_dpi, fp(adc), regs.a, regs.x)
-  op(0x95, read_addri, fp(adc), regs.x)
-  op(0x96, read_addri, fp(adc), regs.y)
-  op(0x97, read_idpy, fp(adc))
-  op(0x98, write_dp_const, fp(adc))
-  op(0x99, write_ix_iy, fp(adc))
-  op(0x9a, read_dpw, fp(sbw))
-  op(0x9b, adjust_dpx, fp(dec))
-  op(0x9c, adjust, fp(dec), regs.a)
-  op(0x9d, transfer, regs.s, regs.x)
-  op(0x9e, div_ya_x)
-  op(0x9f, xcn)
-  op(0xa0, set_flag, regs.p.i.bit, 1)
-  op(0xa1, jst)
-  op(0xa2, set_bit)
-  op(0xa3, branch_bit)
-  op(0xa4, read_dp, fp(sbc), regs.a)
-  op(0xa5, read_addr, fp(sbc), regs.a)
-  op(0xa6, read_ix, fp(sbc))
-  op(0xa7, read_idpx, fp(sbc))
-  op(0xa8, read_const, fp(sbc), regs.a)
-  op(0xa9, write_dp_dp, fp(sbc))
-  op(0xaa, set_addr_bit)
-  op(0xab, adjust_dp, fp(inc))
-  op(0xac, adjust_addr, fp(inc))
-  op(0xad, read_const, fp(cmp), regs.y)
-  op(0xae, pull, regs.a)
-  op(0xaf, sta_ixinc)
-  op(0xb0, branch, regs.p.c == 1)
-  op(0xb1, jst)
-  op(0xb2, set_bit)
-  op(0xb3, branch_bit)
-  op(0xb4, read_dpi, fp(sbc), regs.a, regs.x)
-  op(0xb5, read_addri, fp(sbc), regs.x)
-  op(0xb6, read_addri, fp(sbc), regs.y)
-  op(0xb7, read_idpy, fp(sbc))
-  op(0xb8, write_dp_const, fp(sbc))
-  op(0xb9, write_ix_iy, fp(sbc))
-  op(0xba, read_dpw, fp(ldw))
-  op(0xbb, adjust_dpx, fp(inc))
-  op(0xbc, adjust, fp(inc), regs.a)
-  op(0xbd, transfer, regs.x, regs.s)
-  op(0xbe, das)
-  op(0xbf, lda_ixinc)
-  op(0xc0, set_flag, regs.p.i.bit, 0)
-  op(0xc1, jst)
-  op(0xc2, set_bit)
-  op(0xc3, branch_bit)
-  op(0xc4, write_dp, regs.a)
-  op(0xc5, write_addr, regs.a)
-  op(0xc6, sta_ix)
-  op(0xc7, sta_idpx)
-  op(0xc8, read_const, fp(cmp), regs.x)
-  op(0xc9, write_addr, regs.x)
-  op(0xca, set_addr_bit)
-  op(0xcb, write_dp, regs.y)
-  op(0xcc, write_addr, regs.y)
-  op(0xcd, read_const, fp(ld), regs.x)
-  op(0xce, pull, regs.x)
-  op(0xcf, mul_ya)
-  op(0xd0, branch, regs.p.z == 0)
-  op(0xd1, jst)
-  op(0xd2, set_bit)
-  op(0xd3, branch_bit)
-  op(0xd4, write_dpi, regs.a, regs.x)
-  op(0xd5, write_addri, regs.x)
-  op(0xd6, write_addri, regs.y)
-  op(0xd7, sta_idpy)
-  op(0xd8, write_dp, regs.x)
-  op(0xd9, write_dpi, regs.x, regs.y)
-  op(0xda, stw_dp)
-  op(0xdb, write_dpi, regs.y, regs.x)
-  op(0xdc, adjust, fp(dec), regs.y)
-  op(0xdd, transfer, regs.y, regs.a)
-  op(0xde, bne_dpx)
-  op(0xdf, daa)
-  op(0xe0, clv)
-  op(0xe1, jst)
-  op(0xe2, set_bit)
-  op(0xe3, branch_bit)
-  op(0xe4, read_dp, fp(ld), regs.a)
-  op(0xe5, read_addr, fp(ld), regs.a)
-  op(0xe6, read_ix, fp(ld))
-  op(0xe7, read_idpx, fp(ld))
-  op(0xe8, read_const, fp(ld), regs.a)
-  op(0xe9, read_addr, fp(ld), regs.x)
-  op(0xea, set_addr_bit)
-  op(0xeb, read_dp, fp(ld), regs.y)
-  op(0xec, read_addr, fp(ld), regs.y)
-  op(0xed, cmc)
-  op(0xee, pull, regs.y)
-  op(0xef, wait)
-  op(0xf0, branch, regs.p.z == 1)
-  op(0xf1, jst)
-  op(0xf2, set_bit)
-  op(0xf3, branch_bit)
-  op(0xf4, read_dpi, fp(ld), regs.a, regs.x)
-  op(0xf5, read_addri, fp(ld), regs.x)
-  op(0xf6, read_addri, fp(ld), regs.y)
-  op(0xf7, read_idpy, fp(ld))
-  op(0xf8, read_dp, fp(ld), regs.x)
-  op(0xf9, read_dpi, fp(ld), regs.x, regs.y)
-  op(0xfa, write_dp_dp, fp(st))
-  op(0xfb, read_dpi, fp(ld), regs.y, regs.x)
-  op(0xfc, adjust, fp(inc), regs.y)
-  op(0xfd, transfer, regs.a, regs.y)
-  op(0xfe, bne_ydec)
-  op(0xff, wait)
-  }
+#undef CF
+#undef ZF
+#undef IF
+#undef HF
+#undef BF
+#undef PF
+#undef VF
+#undef NF
+
+auto SPC700::power() -> void {
+  r.pc.w = 0x0000;
+  r.ya.w = 0x0000;
+  r.x = 0x00;
+  r.s = 0xef;
+  r.p = 0x02;
 }
-
-#undef op
-#undef fp
 
 }
