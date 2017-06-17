@@ -266,6 +266,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->hdma_steps_left = 0xff;
         }
         
+        gb->oam_blocked = false;
+        gb->vram_blocked = false;
+        
         /* Keep sending vblanks to user even if the screen is off */
         gb->display_cycles += cycles;
         if (gb->display_cycles >= LCDC_PERIOD) {
@@ -281,13 +284,24 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     
     uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
     uint8_t stat_delay = gb->cgb_double_speed? 2 : (gb->cgb_mode? 0 : 4);
-    /* This is correct for DMG. Is it correct for the 3 CGB modes (DMG/single/double)?*/
+    /* Todo: This is correct for DMG. Is it correct for the 3 CGB modes (DMG/single/double)?*/
     uint8_t scx_delay = ((gb->effective_scx & 7) + atomic_increase - 1) & ~(atomic_increase - 1);
+    /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
+    uint8_t oam_blocking_rush = gb->cgb_double_speed? 2 : 4;
+    uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
+        
         gb->display_cycles += atomic_increase;
+        /* The very first line is 2 (4 from the CPU's perseptive) clocks shorter when the LCD turns on.
+           Todo: Verify on the 3 CGB modes, especially double speed mode. */
+        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - atomic_increase) {
+            gb->first_scanline = false;
+            gb->display_cycles += atomic_increase;
+        }
         bool should_compare_ly = true;
         uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
+        
         
         /* Handle cycle completion. STAT's initial value depends on model and mode */
         if (gb->display_cycles == LCDC_PERIOD) {
@@ -303,6 +317,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 }
             }
             ly_for_comparison = gb->io_registers[GB_IO_LY] = 0;
+            
+            /* Todo: verify timing */
+            gb->oam_blocked = true;
+            gb->vram_blocked = false;
             
             /* Reset window rendering state */
             gb->current_window_line = 0xFF;
@@ -333,9 +351,42 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             }
         }
         
+        /* Handle line 0 right after turning the LCD on  */
+        else if (gb->first_scanline) {
+            /* OAM and VRAM blocking is not delayed in the very first scanline */
+            if (gb->display_cycles == atomic_increase) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->oam_blocked = false;
+                gb->vram_blocked = false;
+            }
+            else if (gb->display_cycles == MODE2_LENGTH) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->io_registers[GB_IO_STAT] |= 3;
+                gb->oam_blocked = true;
+                gb->vram_blocked = true;
+            }
+            else if (gb->display_cycles == MODE2_LENGTH + MODE3_LENGTH) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->oam_blocked = false;
+                gb->vram_blocked = false;
+            }
+        }
+        
         /* Handle STAT changes for lines 0-143 */
-        else if (gb->display_cycles < LINES * LINE_LENGTH ) {
+        else if (gb->display_cycles < LINES * LINE_LENGTH) {
             unsigned position_in_line = gb->display_cycles % LINE_LENGTH;
+            
+            /* Handle OAM and VRAM blocking */
+            if (position_in_line == stat_delay - oam_blocking_rush ||
+                 // In case stat_delay is 0
+                (position_in_line == LINE_LENGTH + stat_delay - oam_blocking_rush && gb->io_registers[GB_IO_LY] != 143)) {
+                gb->oam_blocked = true;
+            }
+            else if (position_in_line == MODE2_LENGTH + stat_delay - vram_blocking_rush) {
+                gb->vram_blocked = true;
+            }
+            
+            /* Handle everything else */
             if (position_in_line == stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
@@ -360,6 +411,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             }
             else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->vram_blocked = false;
+                gb->oam_blocked = false;
                 if (gb->hdma_on_hblank) {
                     gb->hdma_on = true;
                     gb->hdma_cycles = 0;
@@ -465,9 +518,6 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             if ((gb->io_registers[GB_IO_STAT] & 0x44) == 0x44) {
                 gb->stat_interrupt_line = true;
             }
-        }
-        
-        if (!gb->stat_interrupt_line) {
         }
     }
     

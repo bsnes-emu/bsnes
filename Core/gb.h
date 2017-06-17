@@ -375,6 +375,9 @@ struct GB_gameboy_internal_s {
             GB_FRAMESKIP_FIRST_FRAME_SKIPPED, // This state is 'skipped' when emulating a DMG
             GB_FRAMESKIP_SECOND_FRAME_RENDERED,
         } frame_skip_state;
+        bool first_scanline; // The very first scan line after turning the LCD behaves differently.
+        bool oam_blocked;
+        bool vram_blocked;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
