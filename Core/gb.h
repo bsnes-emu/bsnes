@@ -376,8 +376,10 @@ struct GB_gameboy_internal_s {
             GB_FRAMESKIP_SECOND_FRAME_RENDERED,
         } frame_skip_state;
         bool first_scanline; // The very first scan line after turning the LCD behaves differently.
-        bool oam_blocked;
-        bool vram_blocked;
+        bool oam_read_blocked;
+        bool vram_read_blocked;
+        bool oam_write_blocked;
+        bool vram_write_blocked;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

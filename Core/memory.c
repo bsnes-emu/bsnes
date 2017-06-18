@@ -60,7 +60,7 @@ static uint8_t read_mbc_rom(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (gb->vram_blocked) {
+    if (gb->vram_read_blocked) {
         return 0xFF;
     }
     return gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000];
@@ -115,7 +115,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFEA0) {
-        if (gb->oam_blocked || (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
+        if (gb->oam_read_blocked || (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
             return 0xFF;
         }
         return gb->oam[addr & 0xFF];
@@ -338,7 +338,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (gb->vram_blocked) {
+    if (gb->vram_write_blocked) {
         //GB_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
         return;
     }
@@ -385,7 +385,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (addr < 0xFEA0) {
-        if (gb->oam_blocked|| (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
+        if (gb->oam_write_blocked|| (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
             return;
         }
         gb->oam[addr & 0xFF] = value;
