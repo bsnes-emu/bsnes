@@ -194,7 +194,7 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
     FILE *f = fopen(path, "wb");
     if (!f) {
-        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
+        GB_log(gb, "Could not open battery save: %s.\n", strerror(errno));
         return errno;
     }
 

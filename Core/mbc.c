@@ -46,12 +46,12 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
     switch (gb->cartridge_type->mbc_type) {
         case GB_NO_MBC: return;
         case GB_MBC1:
-            /* Todo: some obscure behaviors of MBC1 are not supported. See http://forums.nesdev.com/viewtopic.php?f=20&t=14099 */
             if (gb->mbc1.mode == 0) {
                 switch (gb->mbc1_wiring) {
                     case GB_STANDARD_MBC1_WIRING:
                         gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
                         gb->mbc_ram_bank = 0;
+                        gb->mbc_rom0_bank = 0;
                         break;
 
                     case GB_MBC1M_WIRING:
@@ -63,8 +63,9 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             else {
                 switch (gb->mbc1_wiring) {
                     case GB_STANDARD_MBC1_WIRING:
-                        gb->mbc_rom_bank = gb->mbc1.bank_low;
+                        gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
                         gb->mbc_ram_bank = gb->mbc1.bank_high;
+                        gb->mbc_rom0_bank = gb->mbc1.bank_high << 5;
                         break;
                         
                     case GB_MBC1M_WIRING:
@@ -100,8 +101,8 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_ram_bank = gb->huc3.ram_bank;
             break;
     }
-    if (gb->mbc_rom_bank == 0 && gb->cartridge_type->mbc_type != GB_MBC5  && gb->cartridge_type->mbc_type != GB_HUC3) {
-        gb->mbc_rom_bank = 1;
+    if ((gb->mbc_rom_bank & 0x1F) == 0 && gb->cartridge_type->mbc_type != GB_MBC5  && gb->cartridge_type->mbc_type != GB_HUC3) {
+        gb->mbc_rom_bank++;
     }
 }
 
