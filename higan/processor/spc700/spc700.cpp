@@ -20,6 +20,8 @@ namespace Processor {
 #define VF r.p.v
 #define NF r.p.n
 
+#define alu (this->*op)
+
 #include "memory.cpp"
 #include "algorithms.cpp"
 #include "instructions.cpp"
@@ -44,12 +46,17 @@ namespace Processor {
 #undef VF
 #undef NF
 
+#undef alu
+
 auto SPC700::power() -> void {
   r.pc.w = 0x0000;
   r.ya.w = 0x0000;
   r.x = 0x00;
   r.s = 0xef;
   r.p = 0x02;
+
+  r.wai = false;
+  r.stp = false;
 }
 
 }

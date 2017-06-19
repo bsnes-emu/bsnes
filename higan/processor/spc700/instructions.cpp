@@ -1,5 +1,3 @@
-#define alu (this->*op)
-
 auto SPC700::instructionImpliedModify(fps op, uint8& target) -> void {
   idle();
   target = alu(target);
@@ -81,76 +79,81 @@ auto SPC700::instructionDirectPageRead(fpb op, uint8& target) -> void {
   target = alu(target, data);
 }
 
-auto SPC700::instructionDirectPageIndexedRead(fpb op, uint8& data, uint8& index) -> void {
-  dp = fetch();
+auto SPC700::instructionDirectPageIndexedRead(fpb op, uint8& target, uint8& index) -> void {
+  uint8 direct = fetch();
   idle();
-  rd = load(dp + index);
-  data = alu(data, rd);
+  uint8 data = load(direct + index);
+  target = alu(target, data);
 }
 
 auto SPC700::instructionDirectPageReadWord(fpw op) -> void {
-  dp = fetch();
-  rd.l = load(dp++);
+  uint8 direct = fetch();
+  uint16 data = load(direct++);
   if(op != &SPC700::algorithmCPW) idle();
-  rd.h = load(dp++);
-  YA = alu(YA, rd);
+  data |= load(direct++) << 8;
+  YA = alu(YA, data);
 }
 
 auto SPC700::instructionIndirectPageXRead(fpb op) -> void {
-  dp = fetch() + X;
+  uint8 direct = fetch() + X;
   idle();
-  sp.l = load(dp++);
-  sp.h = load(dp++);
-  rd = read(sp);
-  A = alu(A, rd);
+  uint16 absolute = load(direct++);
+  absolute |= load(direct++) << 8;
+  uint8 data = read(absolute);
+  A = alu(A, data);
 }
 
 auto SPC700::instructionIndirectPageYRead(fpb op) -> void {
-  dp = fetch();
+  uint8 direct = fetch();
   idle();
-  sp.l = load(dp++);
-  sp.h = load(dp++);
-  rd = read(sp + Y);
-  A = alu(A, rd);
+  uint16 absolute = load(direct++);
+  absolute |= load(direct++) << 8;
+  uint8 data = read(absolute + Y);
+  A = alu(A, data);
 }
 
 auto SPC700::instructionIndirectXRead(fpb op) -> void {
   idle();
-  rd = load(X);
-  A = alu(A, rd);
+  uint8 data = load(X);
+  A = alu(A, data);
 }
 
-auto SPC700::instructionAbsoluteModifyBit() -> void {
-  dp.l = fetch();
-  dp.h = fetch();
-  bit = dp >> 13;
-  dp &= 0x1fff;
-  rd = read(dp);
-  switch(opcode >> 5) {
+auto SPC700::instructionAbsoluteModifyBit(uint3 mode) -> void {
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
+  uint3 bit = absolute >> 13;
+  absolute &= 0x1fff;
+  uint8 data = read(absolute);
+  switch(mode) {
   case 0:  //orc  addr:bit
+    idle();
+    CF |= data.bit(bit);
+    break;
   case 1:  //orc !addr:bit
     idle();
-    CF |= (rd & (1 << bit)) ^ (bool)(opcode & 0x20);
+    CF |= !data.bit(bit);
     break;
   case 2:  //and  addr:bit
+    CF &= data.bit(bit);
+    break;
   case 3:  //and !addr:bit
-    CF &= (rd & (1 << bit)) ^ (bool)(opcode & 0x20);
+    CF &= !data.bit(bit);
     break;
   case 4:  //eor  addr:bit
     idle();
-    CF ^= (bool)(rd & (1 << bit));
+    CF ^= data.bit(bit);
     break;
   case 5:  //ldc  addr:bit
-    CF  = (rd & (1 << bit));
+    CF = data.bit(bit);
     break;
   case 6:  //stc  addr:bit
     idle();
-    rd = (rd & ~(1 << bit)) | (CF << bit);
-    write(dp, rd);
+    data.bit(bit) = CF;
+    write(absolute, data);
     break;
   case 7:  //not  addr:bit
-    rd ^= 1 << bit;
-    write(dp, rd);
+    data.bit(bit) ^= 1;
+    write(absolute, data);
     break;
   }
 }
@@ -176,136 +179,137 @@ auto SPC700::instructionTransfer(uint8& from, uint8& to) -> void {
 }
 
 auto SPC700::instructionAbsoluteWrite(uint8& data) -> void {
-  dp.l = fetch();
-  dp.h = fetch();
-  read(dp);
-  write(dp, data);
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
+  read(absolute);
+  write(absolute, data);
 }
 
 auto SPC700::instructionAbsoluteIndexedWrite(uint8& index) -> void {
-  dp.l = fetch();
-  dp.h = fetch();
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
   idle();
-  dp += index;
-  read(dp);
-  write(dp, A);
+  absolute += index;
+  read(absolute);
+  write(absolute, A);
 }
 
 auto SPC700::instructionDirectPageWrite(uint8& data) -> void {
-  dp = fetch();
-  load(dp);
-  store(dp, data);
+  uint8 direct = fetch();
+  load(direct);
+  store(direct, data);
 }
 
 auto SPC700::instructionDirectPageIndexedWrite(uint8& data, uint8& index) -> void {
-  dp = fetch() + index;
+  uint8 direct = fetch() + index;
   idle();
-  load(dp);
-  store(dp, data);
+  load(direct);
+  store(direct, data);
 }
 
 auto SPC700::instructionDirectPageWriteImmediate(fpb op) -> void {
-  rd = fetch();
-  dp = fetch();
-  wr = load(dp);
-  wr = alu(wr, rd);
-  op != &SPC700::algorithmCMP ? store(dp, wr) : idle();
+  uint8 immediate = fetch();
+  uint8 direct = fetch();
+  uint8 data = load(direct);
+  data = alu(data, immediate);
+  op != &SPC700::algorithmCMP ? store(direct, data) : idle();
 }
 
 auto SPC700::instructionDirectPageWriteDirectPage(fpb op) -> void {
-  sp = fetch();
-  rd = load(sp);
-  dp = fetch();
-  if(op != &SPC700::algorithmST) wr = load(dp);
-  wr = alu(wr, rd);
-  op != &SPC700::algorithmCMP ? store(dp, wr) : idle();
+  uint8 source = fetch();
+  uint8 rhs = load(source);
+  uint8 target = fetch();
+  uint8 lhs;
+  if(op != &SPC700::algorithmST) lhs = load(target);
+  lhs = alu(lhs, rhs);
+  op != &SPC700::algorithmCMP ? store(target, lhs) : idle();
 }
 
 auto SPC700::instructionIndirectXWriteIndirectY(fpb op) -> void {
   idle();
-  rd = load(Y);
-  wr = load(X);
-  wr = alu(wr, rd);
-  op != &SPC700::algorithmCMP ? store(X, wr) : idle();
+  uint8 rhs = load(Y);
+  uint8 lhs = load(X);
+  lhs = alu(lhs, rhs);
+  op != &SPC700::algorithmCMP ? store(X, lhs) : idle();
 }
 
 //
 
 auto SPC700::instructionBBC(uint3 bit) -> void {
-  dp = fetch();
-  uint8 data = load(dp);
-  rd = fetch();
+  uint8 direct = fetch();
+  uint8 data = load(direct);
+  uint8 displacement = fetch();
   idle();
   if(data.bit(bit) == 1) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBBS(uint3 bit) -> void {
-  dp = fetch();
-  uint8 data = load(dp);
-  rd = fetch();
+  uint8 direct = fetch();
+  uint8 data = load(direct);
+  uint8 displacement = fetch();
   idle();
   if(data.bit(bit) == 0) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBNEDirectPage() -> void {
-  dp = fetch();
-  sp = load(dp);
-  rd = fetch();
+  uint8 direct = fetch();
+  uint8 data = load(direct);
+  uint8 displacement = fetch();
   idle();
-  if(A == sp) return;
+  if(A == data) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBNEDirectPageDecrement() -> void {
-  dp = fetch();
-  wr = load(dp);
-  store(dp, --wr);
-  rd = fetch();
-  if(wr == 0) return;
+  uint8 direct = fetch();
+  uint8 data = load(direct);
+  store(direct, --data);
+  uint8 displacement = fetch();
+  if(data == 0) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBNEDirectPageX() -> void {
-  dp = fetch();
+  uint8 direct = fetch();
   idle();
-  sp = load(dp + X);
-  rd = fetch();
+  uint8 data = load(direct + X);
+  uint8 displacement = fetch();
   idle();
-  if(A == sp) return;
+  if(A == data) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBNEYDecrement() -> void {
-  rd = fetch();
+  uint8 displacement = fetch();
   idle();
   idle();
   if(--Y == 0) return;
   idle();
   idle();
-  PC += (int8)rd;
+  PC += (int8)displacement;
 }
 
 auto SPC700::instructionBRK() -> void {
-  rd.l = read(0xffde);
-  rd.h = read(0xffdf);
+  uint16 absolute = read(0xffde);
+  absolute |= read(0xffdf) << 8;
   idle();
   idle();
   push(PC >> 8);
   push(PC >> 0);
   push(P);
-  PC = rd;
+  PC = absolute;
   IF = 0;
   BF = 1;
 }
@@ -389,51 +393,51 @@ auto SPC700::instructionDIV() -> void {
 }
 
 auto SPC700::instructionJMPAbsolute() -> void {
-  rd.l = fetch();
-  rd.h = fetch();
-  PC = rd;
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
+  PC = absolute;
 }
 
 auto SPC700::instructionJMPIndirectAbsoluteX() -> void {
-  dp.l = fetch();
-  dp.h = fetch();
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
   idle();
-  dp += X;
-  rd.l = read(dp++);
-  rd.h = read(dp++);
-  PC = rd;
+  absolute += X;
+  uint16 pc = read(absolute++);
+  pc |= read(absolute++) << 8;
+  PC = pc;
 }
 
 auto SPC700::instructionJSPDirectPage() -> void {
-  rd = fetch();
+  uint8 direct = fetch();
   idle();
   idle();
   push(PC >> 8);
   push(PC >> 0);
-  PC = 0xff00 | rd;
+  PC = 0xff00 | direct;
 }
 
 auto SPC700::instructionJSRAbsolute() -> void {
-  rd.l = fetch();
-  rd.h = fetch();
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
   idle();
   idle();
   idle();
   push(PC >> 8);
   push(PC >> 0);
-  PC = rd;
+  PC = absolute;
 }
 
 auto SPC700::instructionJST(uint4 vector) -> void {
-  dp = 0xffde - (vector << 1);
-  rd.l = read(dp++);
-  rd.h = read(dp++);
+  uint16 absolute = 0xffde - (vector << 1);
+  uint16 pc = read(absolute++);
+  pc |= read(absolute++) << 8;
   idle();
   idle();
   idle();
   push(PC >> 8);
   push(PC >> 0);
-  PC = rd;
+  PC = pc;
 }
 
 auto SPC700::instructionLDAIndirectXIncrement() -> void {
@@ -473,19 +477,19 @@ auto SPC700::instructionPLP() -> void {
 
 auto SPC700::instructionRTI() -> void {
   P = pull();
-  rd.l = pull();
-  rd.h = pull();
+  uint16 absolute = pull();
+  absolute |= pull() << 8;
   idle();
   idle();
-  PC = rd;
+  PC = absolute;
 }
 
 auto SPC700::instructionRTS() -> void {
-  rd.l = pull();
-  rd.h = pull();
+  uint16 absolute = pull();
+  absolute |= pull() << 8;
   idle();
   idle();
-  PC = rd;
+  PC = absolute;
 }
 
 auto SPC700::instructionSET(uint3 bit) -> void {
@@ -496,22 +500,22 @@ auto SPC700::instructionSET(uint3 bit) -> void {
 }
 
 auto SPC700::instructionSTAIndirectPageX() -> void {
-  sp = fetch() + X;
+  uint8 direct = fetch() + X;
   idle();
-  dp.l = load(sp++);
-  dp.h = load(sp++);
-  read(dp);
-  write(dp, A);
+  uint16 absolute = load(direct++);
+  absolute |= load(direct++) << 8;
+  read(absolute);
+  write(absolute, A);
 }
 
 auto SPC700::instructionSTAIndirectPageY() -> void {
-  sp = fetch();
-  dp.l = load(sp++);
-  dp.h = load(sp++);
+  uint8 direct = fetch();
+  uint16 absolute = load(direct++);
+  absolute |= load(direct++) << 8;
   idle();
-  dp += Y;
-  read(dp);
-  write(dp, A);
+  absolute += Y;
+  read(absolute);
+  write(absolute, A);
 }
 
 auto SPC700::instructionSTAIndirectX() -> void {
@@ -527,41 +531,43 @@ auto SPC700::instructionSTAIndirectXIncrement() -> void {
 }
 
 auto SPC700::instructionSTP() -> void {
-  while(true) {
+  r.stp = true;
+  while(r.stp && !synchronizing()) {
     idle();
     idle();
   }
 }
 
 auto SPC700::instructionSTWDirectPage() -> void {
-  dp = fetch();
-  load(dp);
-  store(dp++, A);
-  store(dp++, Y);
+  uint8 direct = fetch();
+  load(direct);
+  store(direct++, A);
+  store(direct++, Y);
 }
 
 auto SPC700::instructionTRBAbsolute() -> void {
-  dp.l = fetch();
-  dp.h = fetch();
-  rd = read(dp);
-  ZF = (A - rd) == 0;
-  NF = (A - rd) & 0x80;
-  read(dp);
-  write(dp, rd & ~A);
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
+  uint8 data = read(absolute);
+  ZF = (A - data) == 0;
+  NF = (A - data) & 0x80;
+  read(absolute);
+  write(absolute, data & ~A);
 }
 
 auto SPC700::instructionTSBAbsolute() -> void {
-  dp.l = fetch();
-  dp.h = fetch();
-  rd = read(dp);
-  ZF = (A - rd) == 0;
-  NF = (A - rd) & 0x80;
-  read(dp);
-  write(dp, rd | A);
+  uint16 absolute = fetch();
+  absolute |= fetch() << 8;
+  uint8 data = read(absolute);
+  ZF = (A - data) == 0;
+  NF = (A - data) & 0x80;
+  read(absolute);
+  write(absolute, data | A);
 }
 
 auto SPC700::instructionWAI() -> void {
-  while(true) {
+  r.wai = true;
+  while(r.wai && !synchronizing()) {
     idle();
     idle();
   }
@@ -576,5 +582,3 @@ auto SPC700::instructionXCN() -> void {
   ZF = A == 0;
   NF = A & 0x80;
 }
-
-#undef alu

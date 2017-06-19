@@ -55,7 +55,7 @@ struct Z80 {
   auto instructionCBd(uint16 addr, uint8 code) -> void;
   auto instructionED(uint8 code) -> void;
 
-  //instructions.cpp
+  //algorithms.cpp
   auto ADD(uint8, uint8, bool = false) -> uint8;
   auto AND(uint8, uint8) -> uint8;
   auto BIT(uint3, uint8) -> uint8;
@@ -75,6 +75,7 @@ struct Z80 {
   auto SUB(uint8, uint8, bool = false) -> uint8;
   auto XOR(uint8, uint8) -> uint8;
 
+  //instructions.cpp
   auto instructionADC_a_irr(uint16&) -> void;
   auto instructionADC_a_n() -> void;
   auto instructionADC_a_r(uint8&) -> void;

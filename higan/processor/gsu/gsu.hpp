@@ -27,46 +27,46 @@ struct GSU {
   auto power() -> void;
 
   //instructions.cpp
-  auto op_add_adc(uint n);
-  auto op_alt1();
-  auto op_alt2();
-  auto op_alt3();
-  auto op_and_bic(uint n);
-  auto op_asr_div2();
-  auto op_branch(bool c);
-  auto op_cache();
-  auto op_color_cmode();
-  auto op_dec(uint n);
-  auto op_fmult_lmult();
-  auto op_from_moves(uint n);
-  auto op_getb();
-  auto op_getc_ramb_romb();
-  auto op_hib();
-  auto op_ibt_lms_sms(uint n);
-  auto op_inc(uint n);
-  auto op_iwt_lm_sm(uint n);
-  auto op_jmp_ljmp(uint n);
-  auto op_link(uint n);
-  auto op_load(uint n);
-  auto op_lob();
-  auto op_loop();
-  auto op_lsr();
-  auto op_merge();
-  auto op_mult_umult(uint n);
-  auto op_nop();
-  auto op_not();
-  auto op_or_xor(uint n);
-  auto op_plot_rpix();
-  auto op_rol();
-  auto op_ror();
-  auto op_sbk();
-  auto op_sex();
-  auto op_store(uint n);
-  auto op_stop();
-  auto op_sub_sbc_cmp(uint n);
-  auto op_swap();
-  auto op_to_move(uint n);
-  auto op_with(uint n);
+  auto instructionADD_ADC(uint n) -> void;
+  auto instructionALT1() -> void;
+  auto instructionALT2() -> void;
+  auto instructionALT3() -> void;
+  auto instructionAND_BIC(uint n) -> void;
+  auto instructionASR_DIV2() -> void;
+  auto instructionBranch(bool c) -> void;
+  auto instructionCACHE() -> void;
+  auto instructionCOLOR_CMODE() -> void;
+  auto instructionDEC(uint n) -> void;
+  auto instructionFMULT_LMULT() -> void;
+  auto instructionFROM_MOVES(uint n) -> void;
+  auto instructionGETB() -> void;
+  auto instructionGETC_RAMB_ROMB() -> void;
+  auto instructionHIB() -> void;
+  auto instructionIBT_LMS_SMS(uint n) -> void;
+  auto instructionINC(uint n) -> void;
+  auto instructionIWT_LM_SM(uint n) -> void;
+  auto instructionJMP_LJMP(uint n) -> void;
+  auto instructionLINK(uint n) -> void;
+  auto instructionLoad(uint n) -> void;
+  auto instructionLOB() -> void;
+  auto instructionLOOP() -> void;
+  auto instructionLSR() -> void;
+  auto instructionMERGE() -> void;
+  auto instructionMULT_UMULT(uint n) -> void;
+  auto instructionNOP() -> void;
+  auto instructionNOT() -> void;
+  auto instructionOR_XOR(uint n) -> void;
+  auto instructionPLOT_RPIX() -> void;
+  auto instructionROL() -> void;
+  auto instructionROR() -> void;
+  auto instructionSBK() -> void;
+  auto instructionSEX() -> void;
+  auto instructionStore(uint n) -> void;
+  auto instructionSTOP() -> void;
+  auto instructionSUB_SBC_CMP(uint n) -> void;
+  auto instructionSWAP() -> void;
+  auto instructionTO_MOVE(uint n) -> void;
+  auto instructionWITH(uint n) -> void;
 
   //switch.cpp
   auto instruction(uint8 opcode) -> void;
@@ -76,10 +76,10 @@ struct GSU {
 
   //disassembler.cpp
   auto disassembleOpcode(char* output) -> void;
-  auto disassembleAlt0(char* output) -> void;
-  auto disassembleAlt1(char* output) -> void;
-  auto disassembleAlt2(char* output) -> void;
-  auto disassembleAlt3(char* output) -> void;
+  auto disassembleALT0(char* output) -> void;
+  auto disassembleALT1(char* output) -> void;
+  auto disassembleALT2(char* output) -> void;
+  auto disassembleALT3(char* output) -> void;
 };
 
 }

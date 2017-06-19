@@ -6,7 +6,9 @@ struct SPC700 {
   virtual auto idle() -> void = 0;
   virtual auto read(uint16 addr) -> uint8 = 0;
   virtual auto write(uint16 addr, uint8 data) -> void = 0;
-  virtual auto readDisassembler(uint16 addr) -> uint8 = 0;
+  virtual auto synchronizing() const -> bool = 0;
+
+  virtual auto readDisassembler(uint16 addr) -> uint8 { return 0; }
 
   //spc700.cpp
   auto power() -> void;
@@ -63,7 +65,7 @@ struct SPC700 {
   auto instructionIndirectPageXRead(fpb) -> void;
   auto instructionIndirectPageYRead(fpb) -> void;
   auto instructionIndirectXRead(fpb) -> void;
-  auto instructionAbsoluteModifyBit() -> void;
+  auto instructionAbsoluteModifyBit(uint3) -> void;
   auto instructionFlagClear(bool&) -> void;
   auto instructionFlagSet(bool&) -> void;
   auto instructionTransfer(uint8&, uint8&) -> void;
@@ -152,34 +154,10 @@ struct SPC700 {
     } pc, ya;
     uint8 x, s;
     Flags p;
+
+    bool wai = false;
+    bool stp = false;
   } r;
-
-  struct Register {
-    union {
-      uint16_t w = 0;
-      NaturalBitField<uint16_t, 0,  7> l;
-      NaturalBitField<uint16_t, 8, 15> h;
-    };
-
-    inline operator uint() const { return w; }
-    inline auto operator=(const Register& value) { w = value.w; }
-
-    inline auto operator++(int) { uint value = w++; return value; }
-    inline auto operator--(int) { uint value = w--; return value; }
-
-    inline auto& operator++() { return ++w, *this; }
-    inline auto& operator--() { return --w, *this; }
-
-    inline auto& operator =(uint value) { return w  = value, *this; }
-    inline auto& operator&=(uint value) { return w &= value, *this; }
-    inline auto& operator|=(uint value) { return w |= value, *this; }
-    inline auto& operator^=(uint value) { return w ^= value, *this; }
-    inline auto& operator+=(uint value) { return w += value, *this; }
-    inline auto& operator-=(uint value) { return w -= value, *this; }
-  };
-
-  Register dp, sp, rd, wr, bit;
-  uint8 opcode;
 };
 
 }

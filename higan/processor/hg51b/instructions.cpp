@@ -34,7 +34,7 @@ auto HG51B::sa() -> uint {
 //Register-or-Immediate: most opcodes can load from a register or immediate
 auto HG51B::ri() -> uint {
   if(opcode & 0x0400) return opcode & 0xff;
-  return regRead(opcode & 0xff);
+  return registerRead(opcode & 0xff);
 }
 
 //New-PC: determine jump target address; opcode.d9 = long jump flag (1 = yes)
@@ -306,7 +306,7 @@ auto HG51B::instruction() -> void {
   else if((opcode & 0xff00) == 0xe000) {
     //1110 0000 .... ....
     //st r,a
-    regWrite(opcode & 0xff, regs.a);
+    registerWrite(opcode & 0xff, regs.a);
   }
 
   else if((opcode & 0xfb00) == 0xe800) {
@@ -333,10 +333,10 @@ auto HG51B::instruction() -> void {
   else if((opcode & 0xff00) == 0xf000) {
     //1111 0000 .... ....
     //swap a,r
-    uint24 source = regRead(opcode & 0xff);
+    uint24 source = registerRead(opcode & 0xff);
     uint24 target = regs.a;
     regs.a = source;
-    regWrite(opcode & 0xff, target);
+    registerWrite(opcode & 0xff, target);
   }
 
   else if((opcode & 0xffff) == 0xfc00) {

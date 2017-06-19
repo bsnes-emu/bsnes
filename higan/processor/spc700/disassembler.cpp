@@ -59,13 +59,13 @@ auto SPC700::disassemble(uint16 addr, bool p) -> string {
     case 0x25: return { "and $", a() };
     case 0x26: return { "and (x)" };
     case 0x27: return { "and ($", dp(0), ",x)" };
+    case 0x28: return { "and #$", b(0) };
     case 0x29: return { "and $", dp(1), "=$", dp(0) };
     case 0x2a: return { "orc !$", ab() };
     case 0x2b: return { "rol $", dp(0) };
     case 0x2c: return { "rol $", a() };
     case 0x2d: return { "pha" };
     case 0x2e: return { "bne $", dp(0), "=$", rel(+3, 1) };
-    case 0x28: return { "and #$", b(0) };
     case 0x2f: return { "bra $", rel(+2) };
     case 0x30: return { "bmi $", rel(+2) };
     case 0x31: return { "jst $ffd8" };

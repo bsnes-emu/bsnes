@@ -2,10 +2,10 @@ auto GSU::disassembleOpcode(char* output) -> void {
   *output = 0;
 
   switch(regs.sfr.alt2 << 1 | regs.sfr.alt1 << 0) {
-  case 0: disassembleAlt0(output); break;
-  case 1: disassembleAlt1(output); break;
-  case 2: disassembleAlt2(output); break;
-  case 3: disassembleAlt3(output); break;
+  case 0: disassembleALT0(output); break;
+  case 1: disassembleALT1(output); break;
+  case 2: disassembleALT2(output); break;
+  case 3: disassembleALT3(output); break;
   }
 
   uint length = strlen(output);
@@ -30,7 +30,7 @@ auto GSU::disassembleOpcode(char* output) -> void {
 #define op1 read((regs.pbr << 16) + regs.r[15] + 0)
 #define op2 read((regs.pbr << 16) + regs.r[15] + 1)
 
-auto GSU::disassembleAlt0(char* output) -> void {
+auto GSU::disassembleALT0(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -87,7 +87,7 @@ auto GSU::disassembleAlt0(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassembleAlt1(char* output) -> void {
+auto GSU::disassembleALT1(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -144,7 +144,7 @@ auto GSU::disassembleAlt1(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassembleAlt2(char* output) -> void {
+auto GSU::disassembleALT2(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -201,7 +201,7 @@ auto GSU::disassembleAlt2(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassembleAlt3(char* output) -> void {
+auto GSU::disassembleALT3(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;

@@ -7,8 +7,8 @@
 
 namespace Processor {
 
+#include "instruction.cpp"
 #include "instructions.cpp"
-#include "switch.cpp"
 #include "serialization.cpp"
 #include "disassembler.cpp"
 

@@ -1,6 +1,9 @@
 //Sony CXP1100Q-1
 
 struct SMP : Processor::SPC700, Thread {
+  //smp.cpp
+  auto synchronizing() const -> bool override;
+
   auto readPort(uint2 port) const -> uint8;
   auto writePort(uint2 port, uint8 data) -> void;
 
@@ -8,6 +11,7 @@ struct SMP : Processor::SPC700, Thread {
   auto load(Markup::Node) -> bool;
   auto power() -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
   uint8 iplrom[64];

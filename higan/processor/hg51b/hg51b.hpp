@@ -25,8 +25,8 @@ protected:
   auto instruction() -> void;
 
   //registers.cpp
-  auto regRead(uint8 addr) const -> uint24;
-  auto regWrite(uint8 addr, uint24 data) -> void;
+  auto registerRead(uint8 addr) const -> uint24;
+  auto registerWrite(uint8 addr, uint24 data) -> void;
 
   struct Registers {
     bool halt;

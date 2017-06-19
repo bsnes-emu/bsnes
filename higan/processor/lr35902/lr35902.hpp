@@ -11,11 +11,15 @@ struct LR35902 {
   virtual auto stop() -> bool = 0;
   virtual auto debuggerRead(uint16 addr) -> uint8 { return 0; }
 
+  //lr35902.cpp
   auto power() -> void;
+
+  //instruction.cpp
   auto interrupt(uint16 vector) -> void;
   auto instruction() -> void;
   auto instructionCB() -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
   #include "registers.hpp"

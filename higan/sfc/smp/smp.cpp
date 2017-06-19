@@ -8,11 +8,17 @@ SMP smp;
 #include "timing.cpp"
 #include "serialization.cpp"
 
+auto SMP::synchronizing() const -> bool {
+  return scheduler.synchronizing();
+}
+
 auto SMP::Enter() -> void {
   while(true) scheduler.synchronize(), smp.main();
 }
 
 auto SMP::main() -> void {
+  if(r.wai) return instructionWAI();
+  if(r.stp) return instructionSTP();
   instruction();
 }
 

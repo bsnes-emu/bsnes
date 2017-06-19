@@ -7,6 +7,7 @@ namespace Processor {
 #include "registers.cpp"
 #include "memory.cpp"
 #include "instruction.cpp"
+#include "algorithms.cpp"
 #include "instructions.cpp"
 #include "serialization.cpp"
 
