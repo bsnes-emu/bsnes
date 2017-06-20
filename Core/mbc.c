@@ -46,41 +46,49 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
     switch (gb->cartridge_type->mbc_type) {
         case GB_NO_MBC: return;
         case GB_MBC1:
-            if (gb->mbc1.mode == 0) {
-                switch (gb->mbc1_wiring) {
-                    case GB_STANDARD_MBC1_WIRING:
-                        gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
+            switch (gb->mbc1_wiring) {
+                case GB_STANDARD_MBC1_WIRING:
+                    gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
+                    if (gb->mbc1.mode == 0) {
                         gb->mbc_ram_bank = 0;
                         gb->mbc_rom0_bank = 0;
-                        break;
-
-                    case GB_MBC1M_WIRING:
-                        gb->mbc_rom_bank = (gb->mbc1.bank_low & 0xF) | (gb->mbc1.bank_high << 4);
-                        gb->mbc_ram_bank = 0;
-                        gb->mbc_rom0_bank = 0;
-                }
-            }
-            else {
-                switch (gb->mbc1_wiring) {
-                    case GB_STANDARD_MBC1_WIRING:
-                        gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
+                    }
+                    else {
                         gb->mbc_ram_bank = gb->mbc1.bank_high;
                         gb->mbc_rom0_bank = gb->mbc1.bank_high << 5;
-                        break;
-                        
-                    case GB_MBC1M_WIRING:
-                        gb->mbc_rom_bank = (gb->mbc1.bank_low & 0xF) | (gb->mbc1.bank_high << 4);
+                    }
+                    if ((gb->mbc_rom_bank & 0x1F) == 0) {
+                        gb->mbc_rom_bank++;
+                    }
+                    break;
+                case GB_MBC1M_WIRING:
+                    gb->mbc_rom_bank = (gb->mbc1.bank_low & 0xF) | (gb->mbc1.bank_high << 4);
+                    if (gb->mbc1.mode == 0) {
+                        gb->mbc_ram_bank = 0;
+                        gb->mbc_rom0_bank = 0;
+                    }
+                    else {
                         gb->mbc_rom0_bank = gb->mbc1.bank_high << 4;
                         gb->mbc_ram_bank = 0;
-                }
+                    }
+                    if ((gb->mbc1.bank_low & 0x1F) == 0) {
+                        gb->mbc_rom_bank++;
+                    }
+                    break;
             }
             break;
         case GB_MBC2:
             gb->mbc_rom_bank = gb->mbc2.rom_bank;
+            if ((gb->mbc_rom_bank & 0xF) == 0) {
+                gb->mbc_rom_bank = 1;
+            }
             break;
         case GB_MBC3:
             gb->mbc_rom_bank = gb->mbc3.rom_bank;
             gb->mbc_ram_bank = gb->mbc3.ram_bank;
+            if (gb->mbc_rom_bank == 0) {
+                gb->mbc_rom_bank = 1;
+            }
             break;
         case GB_MBC5:
             gb->mbc_rom_bank = gb->mbc5.rom_bank_low | (gb->mbc5.rom_bank_high << 8);
@@ -100,9 +108,6 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_rom_bank = gb->huc3.rom_bank;
             gb->mbc_ram_bank = gb->huc3.ram_bank;
             break;
-    }
-    if ((gb->mbc_rom_bank & 0x1F) == 0 && gb->cartridge_type->mbc_type != GB_MBC5  && gb->cartridge_type->mbc_type != GB_HUC3) {
-        gb->mbc_rom_bank++;
     }
 }
 

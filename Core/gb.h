@@ -279,7 +279,8 @@ struct GB_gameboy_internal_s {
         union {
             struct {
                 uint8_t bank_low:5;
-                uint8_t bank_high:3;
+                uint8_t bank_high:2;
+                uint8_t padding:1; // Save state compatibility with 0.9
                 uint8_t mode:1;
             } mbc1;
 
