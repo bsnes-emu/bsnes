@@ -22,7 +22,8 @@ auto System::runToSave() -> void {
 }
 
 auto System::load(Emulator::Interface* interface) -> bool {
-  information = Information();
+  information = {};
+
   if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else {
@@ -31,8 +32,16 @@ auto System::load(Emulator::Interface* interface) -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
+  if(cartridge.region() == "NTSC") {
+    information.region = Region::NTSC;
+    information.colorburst = Emulator::Constants::Colorburst::NTSC;
+  }
+  if(cartridge.region() == "PAL") {
+    information.region = Region::PAL;
+    information.colorburst = Emulator::Constants::Colorburst::PAL * 4.0 / 5.0;
+  }
+
   this->interface = interface;
-  information.colorburst = Emulator::Constants::Colorburst::NTSC;
   serializeInit();
   return information.loaded = true;
 }

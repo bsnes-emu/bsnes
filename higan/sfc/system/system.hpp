@@ -1,5 +1,5 @@
 struct System {
-  enum class Region : bool { NTSC = 0, PAL = 1 };
+  enum class Region : uint { NTSC, PAL };
 
   inline auto loaded() const -> bool { return information.loaded; }
   inline auto region() const -> Region { return information.region; }
@@ -30,7 +30,7 @@ private:
     string manifest;
     bool loaded = false;
     Region region = Region::NTSC;
-    double colorburst = 0.0;
+    double colorburst = Emulator::Constants::Colorburst::NTSC;
   } information;
 
   uint serializeSize = 0;
@@ -64,3 +64,6 @@ private:
 extern System system;
 extern Peripherals peripherals;
 extern Random random;
+
+auto Region::NTSC() -> bool { return system.region() == System::Region::NTSC; }
+auto Region::PAL() -> bool { return system.region() == System::Region::PAL; }

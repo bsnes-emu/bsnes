@@ -1,4 +1,7 @@
 struct PPU : Thread {
+  inline auto vlines() const -> uint { return Region::NTSC() ? 262 : 312; }
+
+  //ppu.cpp
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;

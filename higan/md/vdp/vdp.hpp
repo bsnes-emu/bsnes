@@ -144,6 +144,7 @@ private:
   auto pixelWidth() const -> uint { return latch.displayWidth ? 4 : 5; }
   auto screenWidth() const -> uint { return latch.displayWidth ? 320 : 256; }
   auto screenHeight() const -> uint { return latch.overscan ? 240 : 224; }
+  auto frameHeight() const -> uint { return Region::PAL() ? 312 : 262; }
 
   //video RAM
   struct VRAM {
@@ -234,6 +235,7 @@ private:
   struct Latch {
     //per-frame
     uint1 overscan;
+    uint8 horizontalInterruptCounter;
 
     //per-scanline
     uint2 displayWidth;
@@ -241,9 +243,9 @@ private:
 
   struct State {
     uint32* output = nullptr;
+    uint hdot;
     uint hcounter;
-    uint x;
-    uint y;
+    uint vcounter;
   } state;
 
   uint32 buffer[1280 * 480];

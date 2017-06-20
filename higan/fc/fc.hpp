@@ -29,6 +29,11 @@ namespace Famicom {
     }
   };
 
+  struct Region {
+    static inline auto NTSC() -> bool;
+    static inline auto PAL() -> bool;
+  };
+
   #include <fc/controller/controller.hpp>
   #include <fc/system/system.hpp>
   #include <fc/memory/memory.hpp>

@@ -60,7 +60,7 @@ auto PPU::renderSprite() -> void {
   if(!enable()) return;
 
   uint n = latch.oamIterator++;
-  int ly = io.ly == 261 ? -1 : io.ly;
+  int ly = io.ly == vlines() - 1 ? -1 : io.ly;
   uint y = ly - oam[n * 4 + 0];
 
   if(y >= io.spriteHeight) return;
@@ -79,7 +79,7 @@ auto PPU::renderSprite() -> void {
 
 auto PPU::renderScanline() -> void {
   //Vblank
-  if(io.ly >= 240 && io.ly <= 260) return step(341), scanline();
+  if(io.ly >= 240 && io.ly <= vlines() - 2) return step(341), scanline();
 
   latch.oamIterator = 0;
   latch.oamCounter = 0;
@@ -162,7 +162,7 @@ auto PPU::renderScanline() -> void {
     latch.oam[sprite].tiledataHi = loadCHR(tileaddr + 8);
     step(2);
 
-    if(enable() && sprite == 6 && io.ly == 261) {
+    if(enable() && sprite == 6 && io.ly == vlines() - 1) {
       //305
       io.v.address = io.t.address;
     }
@@ -197,7 +197,7 @@ auto PPU::renderScanline() -> void {
   //337-338
   loadCHR(0x2000 | (uint12)io.v.address);
   step(1);
-  bool skip = enable() && io.field == 1 && io.ly == 261;
+  bool skip = enable() && io.field == 1 && io.ly == vlines() - 1;
   step(1);
 
   //339

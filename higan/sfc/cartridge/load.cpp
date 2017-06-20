@@ -1,17 +1,20 @@
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
   information.title.cartridge = node["information/title"].text();
   auto board = node["board"];
-  information.region = board["region"].text() == "pal" ? Region::PAL : Region::NTSC;
+  if(!region() || region() == "Auto") {
+    if(board["region"].text() == "ntsc") information.region = "NTSC";
+    if(board["region"].text() == "pal") information.region = "PAL";
+  }
 
   if(board["mcc"] || board["bsmemory"]) {
-    if(auto pathID = platform->load(ID::BSMemory, "BS Memory", "bs")) {
-      bsmemory.pathID = pathID();
+    if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
+      bsmemory.pathID = loaded.pathID();
       loadBSMemory();
     }
   }
   if(board["sufamiturbo"]) {
-    if(auto pathID = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
-      sufamiturboA.pathID = pathID();
+    if(auto loaded = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
+      sufamiturboA.pathID = loaded.pathID();
       loadSufamiTurboA();
     }
   }
@@ -55,8 +58,8 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, sufamiturboA.pathID);
 
   if(node["board/linkable"]) {
-    if(auto pathID = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
-      sufamiturboB.pathID = pathID();
+    if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
+      sufamiturboB.pathID = loaded.pathID();
       loadSufamiTurboB();
     }
   }

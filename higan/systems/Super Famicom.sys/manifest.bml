@@ -1,4 +1,4 @@
-system region=auto name:Super Famicom
+system name:Super Famicom
   cpu version=2
     ram name=work.ram size=0x20000 volatile
   smp

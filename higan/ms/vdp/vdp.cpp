@@ -61,7 +61,7 @@ auto VDP::step(uint clocks) -> void {
   while(clocks--) {
     if(++io.hcounter == 684) {
       io.hcounter = 0;
-      if(++io.vcounter == 262) {
+      if(++io.vcounter == (Region::NTSC() ? 262 : 312)) {
         io.vcounter = 0;
       }
     }

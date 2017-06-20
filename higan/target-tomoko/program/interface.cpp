@@ -23,22 +23,30 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   return {};
 }
 
-auto Program::load(uint id, string name, string type) -> maybe<uint> {
-  string location;
+auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
+  string location, option;
   if(mediumQueue) {
-    location = mediumQueue.takeLeft();
+    auto entry = mediumQueue.takeLeft().split(":", 1L);
+    location = entry.right();
+    if(entry.size() == 2) option = entry.left();
   } else {
-    location = BrowserDialog()
+    BrowserDialog dialog;
+    location = dialog
     .setTitle({"Load ", name})
     .setPath({settings["Library/Location"].text(), name})
     .setFilters({string{name, "|*.", type}, "All|*.*"})
+    .setOptions(options)
     .openFolder();
+    option = dialog.option();
   }
-  if(!directory::exists(location)) return mediumQueue.reset(), nothing;
+  if(!directory::exists(location)) {
+    mediumQueue.reset();
+    return {};
+  }
 
   uint pathID = mediumPaths.size();
   mediumPaths.append(location);
-  return pathID;
+  return {pathID, option};
 }
 
 auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {

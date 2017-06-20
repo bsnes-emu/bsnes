@@ -6,7 +6,7 @@ auto VDP::VRAM::write(uint15 address, uint16 data) -> void {
   memory[address] = data;
   if(address < vdp.sprite.io.attributeAddress) return;
   if(address > vdp.sprite.io.attributeAddress + 319) return;
-  vdp.sprite.write(address, data);
+  vdp.sprite.write(address - vdp.sprite.io.attributeAddress, data);
 }
 
 auto VDP::VRAM::readByte(uint16 address) const -> uint8 {

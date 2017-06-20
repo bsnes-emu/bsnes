@@ -37,11 +37,12 @@ auto VDP::serialize(serializer& s) -> void {
   s.integer(io.dataIncrement);
 
   s.integer(latch.overscan);
+  s.integer(latch.horizontalInterruptCounter);
   s.integer(latch.displayWidth);
 
+  s.integer(state.hdot);
   s.integer(state.hcounter);
-  s.integer(state.x);
-  s.integer(state.y);
+  s.integer(state.vcounter);
 }
 
 auto VDP::DMA::serialize(serializer& s) -> void {

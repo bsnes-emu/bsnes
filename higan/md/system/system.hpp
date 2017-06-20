@@ -28,10 +28,10 @@ private:
   Emulator::Interface* interface = nullptr;
 
   struct Information {
+    string manifest;
     bool loaded = false;
     Region region = Region::NTSCJ;
-    string manifest;
-    double colorburst = 0.0;
+    double colorburst = Emulator::Constants::Colorburst::NTSC;
     uint serializeSize = 0;
   } information;
 };

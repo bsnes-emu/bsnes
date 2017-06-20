@@ -8,14 +8,14 @@ auto Cartridge::load() -> bool {
   information = {};
 
   if(Model::PCEngine()) {
-    if(auto pathID = platform->load(ID::PCEngine, "PC Engine", "pce")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::PCEngine, "PC Engine", "pce")) {
+      information.pathID = loaded.pathID();
     } else return false;
   }
 
   if(Model::SuperGrafx()) {
-    if(auto pathID = platform->load(ID::SuperGrafx, "SuperGrafx", "sg")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::SuperGrafx, "SuperGrafx", "sg")) {
+      information.pathID = loaded.pathID();
     } else return false;
   }
 

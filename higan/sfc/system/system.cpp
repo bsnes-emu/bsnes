@@ -47,7 +47,7 @@ auto System::term() -> void {
 }
 
 auto System::load(Emulator::Interface* interface) -> bool {
-  information = Information();
+  information = {};
 
   if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
@@ -63,13 +63,14 @@ auto System::load(Emulator::Interface* interface) -> bool {
   if(!dsp.load(system)) return false;
   if(!cartridge.load()) return false;
 
-  information.region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
-  if(system["region"].text() == "NTSC") information.region = Region::NTSC;
-  if(system["region"].text() == "PAL" ) information.region = Region::PAL;
-
-  information.colorburst = region() == Region::NTSC
-  ? Emulator::Constants::Colorburst::NTSC
-  : Emulator::Constants::Colorburst::PAL * 4.0 / 5.0;
+  if(cartridge.region() == "NTSC") {
+    information.region = Region::NTSC;
+    information.colorburst = Emulator::Constants::Colorburst::NTSC;
+  }
+  if(cartridge.region() == "PAL") {
+    information.region = Region::PAL;
+    information.colorburst = Emulator::Constants::Colorburst::PAL * 4.0 / 5.0;
+  }
 
   if(cartridge.has.ICD2) icd2.load();
   if(cartridge.has.MCC) mcc.load();

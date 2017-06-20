@@ -42,18 +42,18 @@ auto Cartridge::power() -> void {
 }
 
 auto Cartridge::load() -> bool {
-  information = Information();
+  information = {};
 
   switch(system.model()) {
   case Model::WonderSwan:
-    if(auto pathID = platform->load(ID::WonderSwan, "WonderSwan", "ws")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::WonderSwan, "WonderSwan", "ws")) {
+      information.pathID = loaded.pathID();
     } else return false;
     break;
   case Model::WonderSwanColor:
   case Model::SwanCrystal:
-    if(auto pathID = platform->load(ID::WonderSwanColor, "WonderSwan Color", "wsc")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::WonderSwanColor, "WonderSwan Color", "wsc")) {
+      information.pathID = loaded.pathID();
     } else return false;
     break;
   }

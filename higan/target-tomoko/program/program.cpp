@@ -69,7 +69,8 @@ Program::Program(string_vector args) {
   for(auto& argument : args) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
-    } else if(directory::exists(argument)) {
+    } else if(directory::exists(argument.split(":", 1L).right())) {
+      if(!argument.transform("\\", "/").endsWith("/")) argument.append("/");
       mediumQueue.append(argument);
     } else if(file::exists(argument)) {
       if(auto result = execute("icarus", "--import", argument)) {

@@ -8,8 +8,9 @@ Cartridge cartridge;
 auto Cartridge::load() -> bool {
   information = {};
 
-  if(auto pathID = platform->load(ID::MegaDrive, "Mega Drive", "md")) {
-    information.pathID = pathID();
+  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md", {"NTSC-J", "NTSC-U", "PAL"})) {
+    information.pathID = loaded.pathID();
+    information.region = loaded.option();
   } else return false;
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {

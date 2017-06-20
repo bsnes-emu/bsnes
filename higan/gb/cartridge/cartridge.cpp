@@ -18,20 +18,20 @@ auto Cartridge::load() -> bool {
   information = {};
 
   if(Model::GameBoy()) {
-    if(auto pathID = platform->load(ID::GameBoy, "Game Boy", "gb")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::GameBoy, "Game Boy", "gb")) {
+      information.pathID = loaded.pathID();
     } else return false;
   }
 
   if(Model::GameBoyColor()) {
-    if(auto pathID = platform->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
+      information.pathID = loaded.pathID();
     } else return false;
   }
 
   if(Model::SuperGameBoy()) {
-    if(auto pathID = platform->load(ID::SuperGameBoy, "Game Boy", "gb")) {
-      information.pathID = pathID();
+    if(auto loaded = platform->load(ID::SuperGameBoy, "Game Boy", "gb")) {
+      information.pathID = loaded.pathID();
     } else return false;
   }
 

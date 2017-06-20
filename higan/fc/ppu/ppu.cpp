@@ -16,16 +16,18 @@ auto PPU::main() -> void {
 }
 
 auto PPU::step(uint clocks) -> void {
+  uint L = vlines();
+
   while(clocks--) {
     if(io.ly == 240 && io.lx == 340) io.nmiHold = 1;
     if(io.ly == 241 && io.lx ==   0) io.nmiFlag = io.nmiHold;
     if(io.ly == 241 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
-    if(io.ly == 260 && io.lx == 340) io.spriteZeroHit = 0, io.spriteOverflow = 0;
+    if(io.ly == L-2 && io.lx == 340) io.spriteZeroHit = 0, io.spriteOverflow = 0;
 
-    if(io.ly == 260 && io.lx == 340) io.nmiHold = 0;
-    if(io.ly == 261 && io.lx ==   0) io.nmiFlag = io.nmiHold;
-    if(io.ly == 261 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
+    if(io.ly == L-2 && io.lx == 340) io.nmiHold = 0;
+    if(io.ly == L-1 && io.lx ==   0) io.nmiFlag = io.nmiHold;
+    if(io.ly == L-1 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
     Thread::step(4);
     synchronize(cpu);
@@ -36,7 +38,7 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::scanline() -> void {
   io.lx = 0;
-  if(++io.ly == 262) {
+  if(++io.ly == vlines()) {
     io.ly = 0;
     frame();
   }
