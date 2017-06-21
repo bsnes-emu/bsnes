@@ -450,7 +450,6 @@ void GB_reset(GB_gameboy_t *gb)
     gb->last_rtc_second = time(NULL);
     gb->cgb_ram_bank = 1;
     gb->io_registers[GB_IO_JOYP] = 0xF;
-    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     gb->mbc_ram_size = mbc_ram_size;
     if (cgb) {
         gb->ram_size = 0x2000 * 8;
@@ -460,8 +459,7 @@ void GB_reset(GB_gameboy_t *gb)
         
         gb->is_cgb = true;
         gb->cgb_mode = true;
-        
-        gb->io_registers[GB_IO_SC] = 0x7C;
+        gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0x00;
     }
     else {
         gb->ram_size = 0x2000;
@@ -479,9 +477,9 @@ void GB_reset(GB_gameboy_t *gb)
             gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
                 gb->rgb_encode_callback(gb, 0, 0, 0);
         }
-        
-        gb->io_registers[GB_IO_SC] = 0x7E;
+        gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     }
+    gb->io_registers[GB_IO_SC] = 0x7E;
     gb->magic = (uintptr_t)'SAME';
 }
 

@@ -142,7 +142,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_STAT:
                 return gb->io_registers[GB_IO_STAT] | 0x80;
             case GB_IO_DMG_EMULATION_INDICATION:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode) {
                     return 0xFF;
                 }
                 return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
@@ -178,7 +178,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_DIV:
                 return gb->div_cycles >> 8;
             case GB_IO_HDMA5:
-                if (!gb->is_cgb) return 0xFF;
+                if (!gb->cgb_mode) return 0xFF;
                 return ((gb->hdma_on || gb->hdma_on_hblank)? 0 : 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
@@ -186,14 +186,15 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return gb->cgb_ram_bank | ~0x7;
             case GB_IO_VBK:
-                if (!gb->cgb_mode) {
+                if (!gb->is_cgb) {
                     return 0xFF;
                 }
                 return gb->cgb_vram_bank | ~0x1;
 
+            /* Todo: It seems that a CGB in DMG mode can access BGPI and OBPI, but not BGPD and OBPD? */
             case GB_IO_BGPI:
             case GB_IO_OBPI:
-                if (!gb->cgb_mode && gb->boot_rom_finished) {
+                if (!gb->is_cgb) {
                     return 0xFF;
                 }
                 return gb->io_registers[addr & 0xFF] | 0x40;
@@ -217,7 +218,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return (gb->io_registers[GB_IO_KEY1] & 0x7F) | (gb->cgb_double_speed? 0xFE : 0x7E);
 
             case GB_IO_RP: {
-                if (!gb->is_cgb) return 0xFF;
+                if (!gb->cgb_mode) return 0xFF;
                 /* You will read your own IR LED if it's on. */
                 bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1);
                 uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
@@ -226,6 +227,16 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return ret;
             }
+            case GB_IO_DMA:
+                /* Todo: is this documented? */
+                return gb->is_cgb? 0x00 : 0xFF;
+            case GB_IO_UNKNOWN2:
+            case GB_IO_UNKNOWN3:
+                return gb->is_cgb? gb->io_registers[addr & 0xFF] : 0xFF;
+            case GB_IO_UNKNOWN4:
+                return gb->cgb_mode? gb->io_registers[addr & 0xFF] : 0xFF;
+            case GB_IO_UNKNOWN5:
+                return gb->is_cgb? gb->io_registers[addr & 0xFF] | 0x8F : 0xFF;
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
                     return GB_apu_read(gb, addr & 0xFF);
@@ -412,6 +423,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_WX:
             case GB_IO_SB:
             case GB_IO_DMG_EMULATION_INDICATION:
+            case GB_IO_UNKNOWN2:
+            case GB_IO_UNKNOWN3:
+            case GB_IO_UNKNOWN4:
+            case GB_IO_UNKNOWN5:
                 gb->io_registers[addr & 0xFF] = value;
                 return;
                 
@@ -520,7 +535,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_BGPI:
             case GB_IO_OBPI:
-                if (!gb->cgb_mode && gb->boot_rom_finished) {
+                if (!gb->is_cgb) {
                     return;
                 }
                 gb->io_registers[addr & 0xFF] = value;
@@ -549,30 +564,31 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_KEY1] = value;
                 return;
             case GB_IO_HDMA1:
-                if (gb->is_cgb) {
+                if (gb->cgb_mode) {
                     gb->hdma_current_src &= 0xF0;
                     gb->hdma_current_src |= value << 8;
                 }
                 return;
             case GB_IO_HDMA2:
-                if (gb->is_cgb) {
+                if (gb->cgb_mode) {
                     gb->hdma_current_src &= 0xFF00;
                     gb->hdma_current_src |= value & 0xF0;
                 }
                 return;
             case GB_IO_HDMA3:
-                if (gb->is_cgb) {
+                if (gb->cgb_mode) {
                     gb->hdma_current_dest &= 0xF0;
                     gb->hdma_current_dest |= value << 8;
                 }
                 return;
             case GB_IO_HDMA4:
-                if (gb->is_cgb) {
+                if (gb->cgb_mode) {
                     gb->hdma_current_dest &= 0x1F00;
                     gb->hdma_current_dest |= value & 0xF0;
                 }
                 return;
             case GB_IO_HDMA5:
+                if (!gb->cgb_mode) return;
                 if ((value & 0x80) == 0 && gb->hdma_on_hblank) {
                     gb->hdma_on_hblank = false;
                     return;

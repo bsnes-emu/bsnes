@@ -185,7 +185,13 @@ void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *sampl
 
 void GB_apu_run(GB_gameboy_t *gb)
 {
-    if (gb->sample_rate == 0) return;
+    if (gb->sample_rate == 0) {
+        if (gb->apu.apu_cycles > 0xFF00) {
+            GB_sample_t dummy;
+            GB_apu_get_samples_and_update_pcm_regs(gb, &dummy);
+        }
+        return;
+    }
     while (gb->audio_copy_in_progress);
     double ticks_per_sample = (double) CPU_FREQUENCY / gb->sample_rate;
 

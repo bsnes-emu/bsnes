@@ -337,8 +337,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_STAT] |= 1;
             gb->io_registers[GB_IO_IF] |= 1;
             
-            /* Entering VBlank state triggers the OAM interrupt */
-            if (gb->io_registers[GB_IO_STAT] & 0x20) {
+            /* Entering VBlank state triggers the OAM interrupt. In CGB, it happens 4 cycles earlier */
+            if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->is_cgb) {
                 gb->stat_interrupt_line = true;
             }
             if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
@@ -355,6 +355,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 display_vblank(gb);
             }
         }
+
         
         /* Handle line 0 right after turning the LCD on  */
         else if (gb->first_scanline) {
@@ -546,6 +547,14 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->stat_interrupt_line = true;
             }
         }
+    }
+    
+    /* On the CGB, the last cycle of line 144 triggers an OAM interrupt
+     Todo: Verify timing for CGB in CGB mode and double speed CGB */
+    if (gb->is_cgb &&
+        gb->display_cycles == LINES * LINE_LENGTH + stat_delay - atomic_increase &&
+        (gb->io_registers[GB_IO_STAT] & 0x20)) {
+        gb->stat_interrupt_line = true;
     }
     
     if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
