@@ -213,6 +213,7 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
     strcat(dest, ext);
 }
 
+
 int main(int argc, char **argv)
 {
 #define str(x) #x
@@ -220,7 +221,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "SameBoy Tester v" xstr(VERSION) "\n");
 
     if (argc == 1) {
-        fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds]"
+        fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds] [--boot path to boot ROM]"
 #ifndef _WIN32
                         " [--jobs number of tests to run simultaneously]"
 #endif
@@ -234,6 +235,8 @@ int main(int argc, char **argv)
 #endif
 
     bool dmg = false;
+    const char *boot_rom_path = NULL;
+
     for (unsigned i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--dmg") == 0) {
             fprintf(stderr, "Using DMG mode\n");
@@ -250,6 +253,12 @@ int main(int argc, char **argv)
         if (strcmp(argv[i], "--length") == 0 && i != argc - 1) {
             test_length = atoi(argv[++i]) * 60;
             fprintf(stderr, "Test length is %d seconds\n", test_length / 60);
+            continue;
+        }
+        
+        if (strcmp(argv[i], "--boot") == 0 && i != argc - 1) {
+            fprintf(stderr, "Using boot ROM %s\n", argv[i + 1]);
+            boot_rom_path = argv[++i];
             continue;
         }
         
@@ -289,14 +298,14 @@ int main(int argc, char **argv)
         
         if (dmg) {
             GB_init(&gb);
-            if (GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"))) {
+            if (GB_load_boot_rom(&gb, boot_rom_path? boot_rom_path : executable_relative_path("dmg_boot.bin"))) {
                 perror("Failed to load boot ROM");
                 exit(1);
             }
         }
         else {
             GB_init_cgb(&gb);
-            if (GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"))) {
+            if (GB_load_boot_rom(&gb, boot_rom_path? boot_rom_path : executable_relative_path("cgb_boot.bin"))) {
                 perror("Failed to load boot ROM");
                 exit(1);
             }
@@ -334,13 +343,15 @@ int main(int argc, char **argv)
 
         
         /* This game temporarily sets SP to OAM RAM */
-        allow_weird_sp_values = strcmp((const char *)(gb.rom + 0x134), "WDL:TT") == 0;
+        allow_weird_sp_values = strcmp((const char *)(gb.rom + 0x134), "WDL:TT") == 0 ||
+        /* Some mooneye-gb tests abuse the stack */
+                                strcmp((const char *)(gb.rom + 0x134), "mooneye-gb test") == 0;
         
         /* This game uses some recursive algorithms and therefore requires quite a large call stack */
         large_stack = memcmp((const char *)(gb.rom + 0x134), "MICRO EPAK1BM", strlen("MICRO EPAK1BM")) == 0 ||
                       strcmp((const char *)(gb.rom + 0x134), "TECMO BOWL") == 0;
 
-        /* Pressing start while in the map in Tsuri Sensi will leak an internal screen-stack which
+        /* Pressing start while in the map in Tsuri Sensei will leak an internal screen-stack which
            will eventually overflow, override an array of jump-table indexes, jump to a random
            address, execute an invalid opcode, and crash. Pressing A twice while slowing down
            will prevent this scenario. */
