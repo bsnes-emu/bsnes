@@ -248,10 +248,9 @@ as described under "Installing an official release on Windows" above.
 Compiling from source on Linux
 ------------------------------
 
-Official higan releases are distributed in [7-zip][7z] archives.
-You will need to install 7-zip,
-or another compatible archiving tool,
-to extract the higan source code.
+You will need a copy of the higan source-code.
+If you download an official release from the higan homepage,
+you will need [7-zip][7z] or a compatible tool to extract it.
 Alternatively,
 you may obtain higan source code from
 [the unofficial git repo](https://gitlab.com/higan/higan/)
