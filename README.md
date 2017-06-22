@@ -158,10 +158,9 @@ You might also want to remove the games imported into higan's library
 Compiling from source on Windows
 --------------------------------
 
-Official higan releases are distributed in [7-zip][7z] archives.
-You will need to install 7-zip,
-or another compatible archiving tool,
-to extract the higan source code.
+You will need a copy of the higan source-code.
+If you download an official release from the higan homepage,
+you will need [7-zip][7z] or a compatible tool to extract it.
 Alternatively,
 you may obtain higan source code from
 [the unofficial git repo](https://gitlab.com/higan/higan/)
@@ -169,10 +168,82 @@ using the Git source-code management tool,
 or by clicking the download button on the right-hand side of the web-page
 and choosing an archive format.
 
-- TDM-GCC?
-- mingw-w64?
-- mingw?
-- isn't there some bug with building higan for 32-bit Windows?
+You will need a C++ compiler to compile higan.
+We recommend installing [TDM64-GCC][tdm],
+preferably the latest version
+but anything newer than 4.9 should be fine.
+higan does not support building with clang++
+(Clang is still not quite there yet for Windows)
+nor Microsoft Visual C++
+(last we checked, it didn't support all the C++ features higan uses).
+
+**Note:** Make sure you get TDM64-GCC,
+not TDM-GCC.
+When compiled in x86 (32-bit) mode,
+higan may crash at startup
+because gcc targeting x86 does not support
+Windows' structured exception handling (SEH).
+Also,
+historically in x86 mode
+gcc has miscompiled a part of the NES emulation core.
+See the higan forum
+[for](https://board.byuu.org/viewtopic.php?p=41977#p41977)
+[details](https://board.byuu.org/viewtopic.php?p=42253#p42253).
+
+Once you've installed mingw-w64,
+open a command-prompt window,
+type `g++ --version`
+then press Enter
+to check it's installed correctly.
+You should see a message like
+
+    g++ 1.2.3 20010101
+    Copyright (C) 2001 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+...except it should mention the version of mingw that you installed
+and the corresponding dates.
+If you see an error message like "command not found"
+or "bad command or filename",
+you may need to add mingw's "bin" directory
+to your computer's `%PATH%`.
+See the mingw documentation for help with that.
+
+Once mingw is installed and available from the command prompt:
+
+ 1. Put the higan source code in some convenient location,
+    like `C:\higan-src`
+ 2. Open the command-prompt
+ 3. Type `cd C:\higan-src`
+    (or wherever you put the higan source)
+    and press Enter
+ 4. Type `mingw32-make -C icarus compiler=g++` and press Enter
+    to build the icarus import tool
+ 5. Type `mingw32-make -C higan compiler=g++` and press Enter
+    to build the main higan executable
+ 6. In Windows Explorer,
+    create a new directory to hold the working copy of higan
+ 7. Copy `C:\higan-src\icarus\out\icarus.exe`
+    into the new directory
+ 8. Copy `C:\higan-src\icarus\Database` and its contents
+    into the new directory
+ 9. Copy `C:\higan-src\higan\out\higan.exe`
+    into the new directory
+10. Copy all the `*.sys` directories
+    in `C:\higan-src\higan\systems`
+    into the new directory
+
+The new directory should now contain
+`icarus.exe`,
+`higan.exe`,
+a directory named `Database`,
+and half a dozen directories named after the systems higan emulates
+with `.sys` at the end.
+This is what you would get by downloading an official build,
+as described under "Installing an official release on Windows" above.
+
+[tdm]: http://tdm-gcc.tdragon.net/download
 
 Compiling from source on Linux
 ------------------------------
