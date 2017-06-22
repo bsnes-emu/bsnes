@@ -142,7 +142,7 @@ and the other associated data from the original archive.
 To remove higan's configuration:
 
  1. Press Win+R to open the Run dialog
- 2. Type `%APPDATA%` and press Enter
+ 2. Type `%LOCALAPPDATA%` and press Enter
     to open the folder where higan's configuration data lives
  3. Delete the subdirectories named `icarus` and `higan`
     if they exist.
