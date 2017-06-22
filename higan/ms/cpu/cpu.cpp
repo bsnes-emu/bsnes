@@ -30,6 +30,10 @@ auto CPU::step(uint clocks) -> void {
   for(auto peripheral : peripherals) synchronize(*peripheral);
 }
 
+auto CPU::synchronizing() const -> bool {
+  return scheduler.synchronizing();
+}
+
 //called once per frame
 auto CPU::pollPause() -> void {
   if(Model::MasterSystem()) {

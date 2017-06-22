@@ -2,7 +2,7 @@ auto Z80::yield() -> void {
   //freeze Z80, allow external access until relinquished
   if(bus->requested()) {
     bus->grant(true);
-    while(bus->requested()) step(1);
+    while(bus->requested() && !synchronizing()) step(1);
     bus->grant(false);
   }
 }

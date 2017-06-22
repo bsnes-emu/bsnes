@@ -3,7 +3,7 @@ struct System {
 
   auto loaded() const -> bool { return information.loaded; }
   auto region() const -> Region { return information.region; }
-  auto colorburst() const -> double { return information.colorburst; }
+  auto frequency() const -> double { return information.frequency; }
 
   auto run() -> void;
   auto runToSave() -> void;
@@ -34,7 +34,7 @@ private:
   struct Information {
     bool loaded = false;
     Region region = Region::NTSC;
-    double colorburst = Emulator::Constants::Colorburst::NTSC;
+    double frequency = Emulator::Constants::Colorburst::NTSC * 6.0;
     string manifest;
   } information;
 

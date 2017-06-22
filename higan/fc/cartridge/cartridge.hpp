@@ -2,6 +2,9 @@
 #include "board/board.hpp"
 
 struct Cartridge : Thread {
+  inline auto rate() const -> uint { return Region::NTSC() ? 12 : 16; }
+
+  //cartridge.cpp
   static auto Enter() -> void;
   auto main() -> void;
 
@@ -17,6 +20,7 @@ struct Cartridge : Thread {
 
   auto power() -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
   struct Information {

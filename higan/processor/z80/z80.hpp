@@ -27,6 +27,7 @@ struct Z80 {
   };
 
   virtual auto step(uint clocks) -> void = 0;
+  virtual auto synchronizing() const -> bool = 0;
 
   //z80.cpp
   auto power() -> void;

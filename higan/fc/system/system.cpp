@@ -34,11 +34,11 @@ auto System::load(Emulator::Interface* interface) -> bool {
 
   if(cartridge.region() == "NTSC") {
     information.region = Region::NTSC;
-    information.colorburst = Emulator::Constants::Colorburst::NTSC;
+    information.frequency = Emulator::Constants::Colorburst::NTSC * 6.0;
   }
   if(cartridge.region() == "PAL") {
     information.region = Region::PAL;
-    information.colorburst = Emulator::Constants::Colorburst::PAL * 4.0 / 5.0;
+    information.frequency = Emulator::Constants::Colorburst::PAL * 6.0;
   }
 
   this->interface = interface;

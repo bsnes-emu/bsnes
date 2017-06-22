@@ -32,6 +32,10 @@ auto APU::step(uint clocks) -> void {
   synchronize(cpu);
 }
 
+auto APU::synchronizing() const -> bool {
+  return scheduler.synchronizing();
+}
+
 auto APU::setNMI(bool value) -> void {
   state.nmiLine = value;
 }

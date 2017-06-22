@@ -25,7 +25,7 @@ struct Cheat {
     reset();
     for(auto& entry : list) {
       for(auto code : entry.split("+")) {
-        auto part = code.split("/");
+        auto part = code.transform("=?", "//").split("/");
         if(part.size() == 2) append(part[0].hex(), part[1].hex());
         if(part.size() == 3) append(part[0].hex(), part[2].hex(), part[1].hex());
       }

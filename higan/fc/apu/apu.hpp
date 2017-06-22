@@ -1,6 +1,9 @@
 struct APU : Thread {
   shared_pointer<Emulator::Stream> stream;
 
+  inline auto rate() const -> uint { return Region::NTSC() ? 12 : 16; }
+
+  //apu.cpp
   APU();
 
   static auto Enter() -> void;
@@ -14,6 +17,7 @@ struct APU : Thread {
   auto readIO(uint16 addr) -> uint8;
   auto writeIO(uint16 addr, uint8 data) -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
   struct Envelope {

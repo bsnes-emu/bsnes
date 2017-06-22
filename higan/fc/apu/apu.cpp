@@ -59,7 +59,7 @@ auto APU::main() -> void {
 }
 
 auto APU::tick() -> void {
-  Thread::step(12);
+  Thread::step(rate());
   synchronize(cpu);
 }
 
@@ -72,8 +72,8 @@ auto APU::setSample(int16 sample) -> void {
 }
 
 auto APU::power() -> void {
-  create(APU::Enter, system.colorburst() * 6.0);
-  stream = Emulator::audio.createStream(1, frequency() / 12.0);
+  create(APU::Enter, system.frequency());
+  stream = Emulator::audio.createStream(1, frequency() / rate());
   stream->addLowPassFilter(20000.0, 3);
   stream->addHighPassFilter(20.0, 3);
 
@@ -303,7 +303,7 @@ const uint16 APU::noisePeriodTableNTSC[16] = {
 };
 
 const uint16 APU::noisePeriodTablePAL[16] = {
-  4, 7, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778,
+  4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778,
 };
 
 const uint16 APU::dmcPeriodTableNTSC[16] = {

@@ -4,6 +4,7 @@ namespace Famicom {
 
 #include "chip/chip.cpp"
 #include "board/board.cpp"
+#include "serialization.cpp"
 Cartridge cartridge;
 
 auto Cartridge::Enter() -> void {
@@ -46,7 +47,7 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
-  create(Cartridge::Enter, system.colorburst() * 6.0);
+  create(Cartridge::Enter, system.frequency());
   board->power();
 }
 
@@ -68,11 +69,6 @@ auto Cartridge::writeCHR(uint addr, uint8 data) -> void {
 
 auto Cartridge::scanline(uint y) -> void {
   return board->scanline(y);
-}
-
-auto Cartridge::serialize(serializer& s) -> void {
-  Thread::serialize(s);
-  return board->serialize(s);
 }
 
 }

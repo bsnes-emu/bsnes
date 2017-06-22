@@ -1,4 +1,7 @@
 struct CPU : Processor::MOS6502, Thread {
+  inline auto rate() const -> uint { return Region::NTSC() ? 12 : 16; }
+
+  //cpu.cpp
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;

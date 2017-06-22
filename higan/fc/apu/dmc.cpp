@@ -57,7 +57,7 @@ auto APU::DMC::clock() -> uint8 {
       }
     }
 
-    periodCounter = dmcPeriodTableNTSC[period];
+    periodCounter = Region::NTSC() ? dmcPeriodTableNTSC[period] : dmcPeriodTablePAL[period];
   }
 
   if(lengthCounter > 0 && !dmaBufferValid && dmaDelayCounter == 0) {
@@ -73,7 +73,7 @@ auto APU::DMC::power() -> void {
   irqPending = 0;
 
   period = 0;
-  periodCounter = dmcPeriodTableNTSC[0];
+  periodCounter = Region::NTSC() ? dmcPeriodTableNTSC[0] : dmcPeriodTablePAL[0];
   irqEnable = 0;
   loopMode = 0;
   dacLatch = 0;

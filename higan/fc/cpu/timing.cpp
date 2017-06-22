@@ -7,17 +7,17 @@ auto CPU::read(uint16 addr) -> uint8 {
 
   while(io.rdyLine == 0) {
     r.mdr = bus.read(io.rdyAddrValid ? io.rdyAddrValue : addr);
-    step(12);
+    step(rate());
   }
 
   r.mdr = bus.read(addr);
-  step(12);
+  step(rate());
   return r.mdr;
 }
 
 auto CPU::write(uint16 addr, uint8 data) -> void {
   bus.write(addr, r.mdr = data);
-  step(12);
+  step(rate());
 }
 
 auto CPU::lastCycle() -> void {

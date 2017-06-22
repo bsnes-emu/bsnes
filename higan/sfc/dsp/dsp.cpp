@@ -249,7 +249,6 @@ auto DSP::power() -> void {
   //note: memory is pseudo-random at startup; but internal state is less so
   //exact differences are unknown. need to separate memory from internal state
   for(auto r : range(0x80)) REG(r) = 0x00;
-  REG(ENDX) = random(0x00);
   REG(FLG) = 0xe0;
 }
 

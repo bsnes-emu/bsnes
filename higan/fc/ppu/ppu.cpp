@@ -29,7 +29,7 @@ auto PPU::step(uint clocks) -> void {
     if(io.ly == L-1 && io.lx ==   0) io.nmiFlag = io.nmiHold;
     if(io.ly == L-1 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
-    Thread::step(4);
+    Thread::step(rate());
     synchronize(cpu);
 
     io.lx++;
@@ -55,7 +55,7 @@ auto PPU::refresh() -> void {
 }
 
 auto PPU::power() -> void {
-  create(PPU::Enter, system.colorburst() * 6.0);
+  create(PPU::Enter, system.frequency());
 
   memory::fill(&io, sizeof(IO));
   memory::fill(&latch, sizeof(Latches));
