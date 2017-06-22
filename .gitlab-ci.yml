@@ -12,7 +12,6 @@ linux-x86_64-binaries:
     - cp -a icarus/out/icarus higan-nightly/icarus
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
-    - cp -a higan/data/cheats.bml higan-nightly/
     - cp -a higan/systems/* higan-nightly/
   artifacts:
     paths:
@@ -36,7 +35,6 @@ windows-x86_64-binaries:
     - cp -a icarus/out/icarus higan-nightly/icarus.exe
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan.exe
-    - cp -a higan/data/cheats.bml higan-nightly/
     - cp -a higan/systems/* higan-nightly/
   artifacts:
     paths:
