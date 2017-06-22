@@ -13,6 +13,7 @@ linux-x86_64-binaries:
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
     - cp -a higan/systems/* higan-nightly/
+    - cp -a shaders "higan-nightly/Video Shaders"
   artifacts:
     paths:
       - higan-nightly/*
@@ -36,6 +37,7 @@ windows-x86_64-binaries:
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan.exe
     - cp -a higan/systems/* higan-nightly/
+    - cp -a shaders "higan-nightly/Video Shaders"
   artifacts:
     paths:
       - higan-nightly/*
