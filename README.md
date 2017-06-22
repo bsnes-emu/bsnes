@@ -29,7 +29,7 @@ It also includes some level of support for these consoles:
 
 higan is actively supported on
 FreeBSD 10 and above, and
-Microsoft Windows XP and above.
+Microsoft Windows 7 and above.
 It also includes some level of support
 for GNU/Linux and macOS.
 
