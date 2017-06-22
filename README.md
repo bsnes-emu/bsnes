@@ -230,7 +230,7 @@ Once mingw is installed and available from the command prompt:
     into the new directory
  9. Copy `C:\higan-src\higan\out\higan.exe`
     into the new directory
-10. Copy all the `*.sys` directories
+ 10. Copy all the `*.sys` directories
     in `C:\higan-src\higan\systems`
     into the new directory
 
