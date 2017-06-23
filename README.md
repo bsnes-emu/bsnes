@@ -222,15 +222,22 @@ Once mingw is installed and available from the command prompt:
     to build the icarus import tool
  5. Type `mingw32-make -C higan compiler=g++` and press Enter
     to build the main higan executable
- 6. In Windows Explorer,
-    create a new directory to hold the working copy of higan
- 7. Copy `C:\higan-src\icarus\out\icarus.exe`
+
+[tdm]: http://tdm-gcc.tdragon.net/download
+
+Installing a compiled build on Windows
+--------------------------------------
+
+ 1. In Windows Explorer,
+    create the directory where you want higan to live
+ 2. Assuming you built higan in `C:\higan-src`,
+    copy `C:\higan-src\icarus\out\icarus.exe`
     into the new directory
- 8. Copy `C:\higan-src\icarus\Database` and its contents
+ 3. Copy `C:\higan-src\icarus\Database` and its contents
     into the new directory
- 9. Copy `C:\higan-src\higan\out\higan.exe`
+ 4. Copy `C:\higan-src\higan\out\higan.exe`
     into the new directory
- 10. Copy all the `*.sys` directories
+ 5. Copy all the `*.sys` directories
     in `C:\higan-src\higan\systems`
     into the new directory
 
@@ -241,9 +248,24 @@ a directory named `Database`,
 and half a dozen directories named after the systems higan emulates
 with `.sys` at the end.
 This is what you would get by downloading an official build,
-as described under "Installing an official release on Windows" above.
+as described under
+[Installing an official release on Windows][instwin]
+above.
 
-[tdm]: http://tdm-gcc.tdragon.net/download
+[instwin]: #installing-an-official-release-on-windows
+
+Before you can actually play games,
+you'll need to [import them][#importing-games]
+and [configure higan][#configuring-higan].
+
+Uninstalling a compiled build on Windows
+----------------------------------------
+
+The process is the same as
+[Uninstalling an official release on Windows][uninstwin]
+above. You may also wish to delete the higan source directory.
+
+[uninstwin]: #uninstalling-an-official-release-on-windows
 
 Compiling from source on Linux
 ------------------------------
