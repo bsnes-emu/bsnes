@@ -130,8 +130,8 @@ You may put that directory wherever you like.
 To run higan, open the `higan.exe` file.
 
 Before you can actually play games,
-you'll need to [import them][#importing-games]
-and [configure higan][#configuring-higan].
+you'll need to [import them](#importing-games)
+and [configure higan](#configuring-higan).
 
 Uninstalling an official release on Windows
 -------------------------------------------
@@ -255,8 +255,8 @@ above.
 [instwin]: #installing-an-official-release-on-windows
 
 Before you can actually play games,
-you'll need to [import them][#importing-games]
-and [configure higan][#configuring-higan].
+you'll need to [import them](#importing-games)
+and [configure higan](#configuring-higan).
 
 Uninstalling a compiled build on Windows
 ----------------------------------------
@@ -370,8 +370,8 @@ for changes to `~/.profile` or `~/.bash_profile`
 to take effect.
 
 Before you can actually play games,
-you'll need to [import them][#importing-games]
-and [configure higan][#configuring-higan].
+you'll need to [import them](#importing-games)
+and [configure higan](#configuring-higan).
 
 Uninstalling a compiled build on Linux
 --------------------------------------
