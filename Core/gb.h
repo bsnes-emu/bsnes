@@ -329,7 +329,9 @@ struct GB_gameboy_internal_s {
         uint32_t display_cycles;
         uint32_t div_cycles;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
-        uint16_t serial_cycles;
+        GB_PADDING(uint16_t, serial_cycles);
+        uint16_t serial_cycles; /* This field changed its meaning in v0.10 */
+        uint16_t serial_length;
     );
 
     /* APU */

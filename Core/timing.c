@@ -107,9 +107,11 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         }
     }
 
-    if (gb->serial_cycles) {
-        if (gb->serial_cycles <= cycles) {
-            gb->serial_cycles = 0;
+    uint16_t previous_serial_cycles = gb->serial_cycles;
+    gb->serial_cycles += cycles;
+    if (gb->serial_length) {
+        if ((gb->serial_cycles & gb->serial_length) != (previous_serial_cycles & gb->serial_length)) {
+            gb->serial_length = 0;
             gb->io_registers[GB_IO_SC] &= ~0x80;
             /* TODO: Does SB "update" bit by bit? */
             if (gb->serial_transfer_end_callback) {
@@ -120,9 +122,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
             }
             
             gb->io_registers[GB_IO_IF] |= 8;
-        }
-        else {
-            gb->serial_cycles -= cycles;
         }
     }
 
