@@ -118,14 +118,14 @@ to install higan.
 [7z]: http://www.7-zip.org/
 
 Once you have a suitable archiving tool,
-extract the contents of the higan archive into a new directory.
+extract the contents of the higan archive into a new folder.
 
 When you're done,
-the new directory should contain `higan.exe` and `icarus.exe`
+the new folder should contain `higan.exe` and `icarus.exe`
 along with other assorted files and directories
 that describe the systems higan emulates.
 
-You may put that directory wherever you like.
+You may put that folder wherever you like.
 
 To run higan, open the `higan.exe` file.
 
@@ -136,7 +136,7 @@ and [configure higan](#configuring-higan).
 Uninstalling an official release on Windows
 -------------------------------------------
 
-Delete the directory containing `higan.exe`
+Delete the folder containing `higan.exe`
 and the other associated data from the original archive.
 
 To remove higan's configuration:
@@ -153,7 +153,7 @@ You might also want to remove the games imported into higan's library
  1. Press Win+R to open the Run dialog
  2. Type `%USERPROFILE%` and press Enter
     to open the folder where higan keeps its game library
- 3. Delete the subdirectory named `Emulation` if it exists
+ 3. Delete the folder named `Emulation` if it exists
 
 Compiling from source on Windows
 --------------------------------
@@ -206,7 +206,7 @@ You should see a message like
 and the corresponding dates.
 If you see an error message like "command not found"
 or "bad command or filename",
-you may need to add mingw's "bin" directory
+you may need to add mingw's "bin" folder
 to your computer's `%PATH%`.
 See the mingw documentation for help with that.
 
@@ -229,23 +229,23 @@ Installing a compiled build on Windows
 --------------------------------------
 
  1. In Windows Explorer,
-    create the directory where you want higan to live
+    create the folder where you want higan to live
  2. Assuming you built higan in `C:\higan-src`,
     copy `C:\higan-src\icarus\out\icarus.exe`
-    into the new directory
+    into the new folder
  3. Copy `C:\higan-src\icarus\Database` and its contents
-    into the new directory
+    into the new folder
  4. Copy `C:\higan-src\higan\out\higan.exe`
-    into the new directory
+    into the new folder
  5. Copy all the `*.sys` directories
     in `C:\higan-src\higan\systems`
-    into the new directory
+    into the new folder
 
-The new directory should now contain
+The new folder should now contain
 `icarus.exe`,
 `higan.exe`,
-a directory named `Database`,
-and half a dozen directories named after the systems higan emulates
+a folder named `Database`,
+and half a dozen folders named after the systems higan emulates
 with `.sys` at the end.
 This is what you would get by downloading an official build,
 as described under
@@ -263,7 +263,7 @@ Uninstalling a compiled build on Windows
 
 The process is the same as
 [Uninstalling an official release on Windows][uninstwin]
-above. You may also wish to delete the higan source directory.
+above. You may also wish to delete the higan source folder.
 
 [uninstwin]: #uninstalling-an-official-release-on-windows
 
