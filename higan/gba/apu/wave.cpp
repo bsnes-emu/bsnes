@@ -1,7 +1,7 @@
 auto APU::Wave::run() -> void {
   if(period && --period == 0) {
     period = 1 * (2048 - frequency);
-    patternsample = pattern[patternbank * 16 + patternaddr++];
+    patternsample = pattern[patternbank << 5 | patternaddr++];
     if(patternaddr == 0) patternbank ^= mode;
   }
 
@@ -66,14 +66,14 @@ auto APU::Wave::write(uint addr, uint8 byte) -> void {
 
 auto APU::Wave::readram(uint addr) const -> uint8 {
   uint8 byte = 0;
-  byte |= pattern[addr * 2 + 0] << 0;
-  byte |= pattern[addr * 2 + 1] << 4;
+  byte |= pattern[!bank << 5 | addr << 1 | 0] << 0;
+  byte |= pattern[!bank << 5 | addr << 1 | 1] << 4;
   return byte;
 }
 
 auto APU::Wave::writeram(uint addr, uint8 byte) -> void {
-  pattern[addr * 2 + 0] = byte >> 0;
-  pattern[addr * 2 + 1] = byte >> 4;
+  pattern[!bank << 5 | addr << 1 | 0] = byte >> 0;
+  pattern[!bank << 5 | addr << 1 | 1] = byte >> 4;
 }
 
 auto APU::Wave::power() -> void {

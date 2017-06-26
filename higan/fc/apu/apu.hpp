@@ -1,7 +1,7 @@
 struct APU : Thread {
   shared_pointer<Emulator::Stream> stream;
 
-  inline auto rate() const -> uint { return Region::NTSC() ? 12 : 16; }
+  inline auto rate() const -> uint { return Region::PAL() ? 16 : 12; }
 
   //apu.cpp
   APU();

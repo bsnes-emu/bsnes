@@ -26,20 +26,19 @@ auto OnePole::reset(Type type, double cutoffFrequency, double samplingFrequency)
   this->cutoffFrequency = cutoffFrequency;
   this->samplingFrequency = samplingFrequency;
 
-  b1 = exp(-2.0 * Math::Pi * cutoffFrequency / samplingFrequency);
-  a0 = 1.0 - b1;
-
   z1 = 0.0;
+  double x = cos(2.0 * Math::Pi * cutoffFrequency / samplingFrequency);
+  if(type == Type::LowPass) {
+    b1 = +2.0 - x - sqrt((+2.0 - x) * (+2.0 - x) - 1);
+    a0 = 1.0 - b1;
+  } else {
+    b1 = -2.0 - x + sqrt((-2.0 - x) * (-2.0 - x) - 1);
+    a0 = 1.0 + b1;
+  }
 }
 
 auto OnePole::process(double in) -> double {
-  z1 = in * a0 + z1 * b1;
-
-  switch(type) {
-  case Type::LowPass: return z1;
-  case Type::HighPass: return in - z1;
-  default: return 0.0;
-  }
+  return z1 = in * a0 + z1 * b1;
 }
 
 }}}

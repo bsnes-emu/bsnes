@@ -37,12 +37,13 @@ auto PSG::step(uint clocks) -> void {
 auto PSG::power() -> void {
   create(PSG::Enter, system.colorburst() / 16.0);
   stream = Emulator::audio.createStream(1, frequency());
-  stream->addLowPassFilter(20000.0, 3);
-  stream->addHighPassFilter(20.0, 3);
+  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
+  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 2840.0);
+  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   select = 0;
   for(auto n : range(15)) {
-    levels[n] = 0x2000 * pow(2, n * -2.0 / 6.0) + 0.5;
+    levels[n] = 0x1400 * pow(2, n * -2.0 / 6.0) + 0.5;
   }
   levels[15] = 0;
 

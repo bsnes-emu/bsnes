@@ -1,6 +1,6 @@
 struct PPU : Thread {
-  inline auto rate() const -> uint { return Region::NTSC() ? 4 : 5; }
-  inline auto vlines() const -> uint { return Region::NTSC() ? 262 : 312; }
+  inline auto rate() const -> uint { return Region::PAL() ? 5 : 4; }
+  inline auto vlines() const -> uint { return Region::PAL() ? 312 : 262; }
 
   //ppu.cpp
   static auto Enter() -> void;

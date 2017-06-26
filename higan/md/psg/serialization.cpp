@@ -7,7 +7,6 @@ auto PSG::serialize(serializer& s) -> void {
   noise.serialize(s);
 
   s.integer(select);
-  s.array(levels);
 }
 
 auto PSG::Tone::serialize(serializer& s) -> void {

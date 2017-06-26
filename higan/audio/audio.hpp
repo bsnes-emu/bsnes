@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nall/dsp/iir/one-pole.hpp>
 #include <nall/dsp/iir/biquad.hpp>
 #include <nall/dsp/resampler/cubic.hpp>
 
@@ -7,6 +8,7 @@ namespace Emulator {
 
 struct Interface;
 struct Audio;
+struct Filter;
 struct Stream;
 
 struct Audio {
@@ -37,11 +39,19 @@ private:
   friend class Stream;
 };
 
+struct Filter {
+  enum class Order : uint { First, Second };
+  enum class Type : uint { LowPass, HighPass };
+
+  Order order;
+  DSP::IIR::OnePole onePole;  //first-order
+  DSP::IIR::Biquad biquad;    //second-order
+};
+
 struct Stream {
   auto reset(uint channels, double inputFrequency, double outputFrequency) -> void;
 
-  auto addLowPassFilter(double cutoffFrequency, uint passes = 1) -> void;
-  auto addHighPassFilter(double cutoffFrequency, uint passes = 1) -> void;
+  auto addFilter(Filter::Order order, Filter::Type type, double cutoffFrequency, uint passes = 1) -> void;
 
   auto pending() const -> bool;
   auto read(double* samples) -> uint;
@@ -54,7 +64,7 @@ struct Stream {
 
 private:
   struct Channel {
-    vector<DSP::IIR::Biquad> filters;
+    vector<Filter> filters;
     DSP::Resampler::Cubic resampler;
   };
   vector<Channel> channels;

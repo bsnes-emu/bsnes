@@ -32,8 +32,12 @@ auto System::load(Emulator::Interface* interface) -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
 
-  if(cartridge.region() == "NTSC") {
-    information.region = Region::NTSC;
+  if(cartridge.region() == "NTSC-J") {
+    information.region = Region::NTSCJ;
+    information.frequency = Emulator::Constants::Colorburst::NTSC * 6.0;
+  }
+  if(cartridge.region() == "NTSC-U") {
+    information.region = Region::NTSCU;
     information.frequency = Emulator::Constants::Colorburst::NTSC * 6.0;
   }
   if(cartridge.region() == "PAL") {

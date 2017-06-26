@@ -157,6 +157,9 @@ auto YM2612::step(uint clocks) -> void {
 auto YM2612::power() -> void {
   create(YM2612::Enter, system.colorburst() * 15.0 / 7.0);
   stream = Emulator::audio.createStream(2, frequency() / 144.0);
+  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
+  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 2840.0);
+  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   io = {};
   lfo = {};

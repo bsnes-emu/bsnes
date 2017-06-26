@@ -30,6 +30,7 @@ auto VDP::main() -> void {
     if(io.verticalBlankInterruptEnable) {
       cpu.raise(CPU::Interrupt::VerticalBlank);
     }
+    //todo: should only stay high for ~2573/2 clocks
     apu.setINT(true);
   }
 

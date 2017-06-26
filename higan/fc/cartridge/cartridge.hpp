@@ -2,7 +2,7 @@
 #include "board/board.hpp"
 
 struct Cartridge : Thread {
-  inline auto rate() const -> uint { return Region::NTSC() ? 12 : 16; }
+  inline auto rate() const -> uint { return Region::PAL() ? 16 : 12; }
 
   //cartridge.cpp
   static auto Enter() -> void;
