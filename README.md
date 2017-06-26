@@ -132,6 +132,8 @@ To run higan, open the `higan.exe` file.
 Before you can actually play games,
 you'll need to [import them](#importing-games)
 and [configure higan](#configuring-higan).
+If you want to play Game Boy Advance games,
+you will need [a GBA BIOS](#installing-the-gba-bios).
 
 Uninstalling an official release on Windows
 -------------------------------------------
@@ -257,6 +259,8 @@ above.
 Before you can actually play games,
 you'll need to [import them](#importing-games)
 and [configure higan](#configuring-higan).
+If you want to play Game Boy Advance games,
+you will need [a GBA BIOS](#installing-the-gba-bios).
 
 Uninstalling a compiled build on Windows
 ----------------------------------------
@@ -372,6 +376,8 @@ to take effect.
 Before you can actually play games,
 you'll need to [import them](#importing-games)
 and [configure higan](#configuring-higan).
+If you want to play Game Boy Advance games,
+you will need [a GBA BIOS](#installing-the-gba-bios).
 
 Uninstalling a compiled build on Linux
 --------------------------------------
