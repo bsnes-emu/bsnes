@@ -1,3 +1,7 @@
+auto SPC700::idle() -> void {
+  read(PC);
+}
+
 auto SPC700::fetch() -> uint8 {
   return read(PC++);
 }

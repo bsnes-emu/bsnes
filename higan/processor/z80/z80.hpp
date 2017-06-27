@@ -242,9 +242,9 @@ struct Z80 {
     bool iff1;  //interrupt flip-flop 1
     bool iff2;  //interrupt flip-flop 2
     uint2 im;   //interrupt mode (0-2)
-
-    Pair* hlp = nullptr;
   } r;
+
+  enum class Prefix : uint { hl, ix, iy } prefix = Prefix::hl;
 
   Bus* bus = nullptr;
 };

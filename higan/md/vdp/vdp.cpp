@@ -68,7 +68,7 @@ auto VDP::refresh() -> void {
 }
 
 auto VDP::power() -> void {
-  create(VDP::Enter, system.colorburst() * 15.0 / 2.0);
+  create(VDP::Enter, system.frequency() / 2.0);
 
   memory::fill(&io, sizeof(IO));
   memory::fill(&latch, sizeof(Latch));

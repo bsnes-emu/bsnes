@@ -73,13 +73,13 @@ auto BusCPU::readIO(uint24 addr) -> uint16 {
   | 0 << 0                 //0 = Model 1; 1 = Model 2+
   );
 
-  case 0xa10002: return peripherals.controllerPort1->readData();
-  case 0xa10004: return peripherals.controllerPort2->readData();
-  case 0xa10006: return peripherals.extensionPort->readData();
+  case 0xa10002: return controllerPort1.readData();
+  case 0xa10004: return controllerPort2.readData();
+  case 0xa10006: return extensionPort.readData();
 
-  case 0xa10008: return peripherals.controllerPort1->readControl();
-  case 0xa1000a: return peripherals.controllerPort2->readControl();
-  case 0xa1000c: return peripherals.extensionPort->readControl();
+  case 0xa10008: return controllerPort1.readControl();
+  case 0xa1000a: return controllerPort2.readControl();
+  case 0xa1000c: return extensionPort.readControl();
 
   case 0xa11100: return !busAPU.granted();
   }
@@ -89,13 +89,13 @@ auto BusCPU::readIO(uint24 addr) -> uint16 {
 
 auto BusCPU::writeIO(uint24 addr, uint16 data) -> void {
   switch(addr & ~1) {
-  case 0xa10002: return peripherals.controllerPort1->writeData(data);
-  case 0xa10004: return peripherals.controllerPort2->writeData(data);
-  case 0xa10006: return peripherals.extensionPort->writeData(data);
+  case 0xa10002: return controllerPort1.writeData(data);
+  case 0xa10004: return controllerPort2.writeData(data);
+  case 0xa10006: return extensionPort.writeData(data);
 
-  case 0xa10008: return peripherals.controllerPort1->writeControl(data);
-  case 0xa1000a: return peripherals.controllerPort2->writeControl(data);
-  case 0xa1000c: return peripherals.extensionPort->writeControl(data);
+  case 0xa10008: return controllerPort1.writeControl(data);
+  case 0xa1000a: return controllerPort2.writeControl(data);
+  case 0xa1000c: return extensionPort.writeControl(data);
 
   case 0xa11100: return busAPU.request(data.bit(0));
   case 0xa11200: return apu.enable(data.bit(0));

@@ -3,7 +3,6 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto idle() -> void = 0;
   virtual auto read(uint16 addr) -> uint8 = 0;
   virtual auto write(uint16 addr, uint8 data) -> void = 0;
   virtual auto synchronizing() const -> bool = 0;
@@ -17,6 +16,7 @@ struct SPC700 {
   auto instruction() -> void;
 
   //memory.cpp
+  auto idle() -> void;
   auto fetch() -> uint8;
   auto pull() -> uint8;
   auto push(uint8 data) -> void;
@@ -48,40 +48,45 @@ struct SPC700 {
   using fpb = auto (SPC700::*)(uint8, uint8) -> uint8;
   using fpw = auto (SPC700::*)(uint16, uint16) -> uint16;
 
-  auto instructionImpliedModify(fps, uint8&) -> void;
-  auto instructionAbsoluteModify(fps) -> void;
-  auto instructionDirectPageModify(fps) -> void;
-  auto instructionDirectPageModifyWord(int) -> void;
-  auto instructionDirectPageXModify(fps) -> void;
-  auto instructionBranch(bool) -> void;
-  auto instructionPull(uint8&) -> void;
-  auto instructionPush(uint8) -> void;
+  auto instructionAbsoluteBitModify(uint3) -> void;
   auto instructionAbsoluteRead(fpb, uint8&) -> void;
+  auto instructionAbsoluteModify(fps) -> void;
+  auto instructionAbsoluteWrite(uint8&) -> void;
   auto instructionAbsoluteIndexedRead(fpb, uint8&) -> void;
-  auto instructionImmediateRead(fpb, uint8&) -> void;
-  auto instructionDirectPageRead(fpb, uint8&) -> void;
-  auto instructionDirectPageIndexedRead(fpb, uint8&, uint8&) -> void;
-  auto instructionDirectPageReadWord(fpw) -> void;
-  auto instructionIndirectPageXRead(fpb) -> void;
-  auto instructionIndirectPageYRead(fpb) -> void;
-  auto instructionIndirectXRead(fpb) -> void;
-  auto instructionAbsoluteModifyBit(uint3) -> void;
+  auto instructionAbsoluteIndexedWrite(uint8&) -> void;
+  auto instructionBranch(bool) -> void;
+  auto instructionDirectRead(fpb, uint8&) -> void;
+  auto instructionDirectModify(fps) -> void;
+  auto instructionDirectWrite(uint8&) -> void;
+  auto instructionDirectWriteDirect(fpb) -> void;
+  auto instructionDirectWriteImmediate(fpb) -> void;
+  auto instructionDirectReadWord(fpw) -> void;
+  auto instructionDirectModifyWord(int) -> void;
+  auto instructionDirectIndexedRead(fpb, uint8&, uint8&) -> void;
+  auto instructionDirectIndexedModify(fps, uint8&) -> void;
+  auto instructionDirectIndexedWrite(uint8&, uint8&) -> void;
   auto instructionFlagClear(bool&) -> void;
   auto instructionFlagSet(bool&) -> void;
-  auto instructionTransfer(uint8&, uint8&) -> void;
-  auto instructionAbsoluteWrite(uint8&) -> void;
-  auto instructionAbsoluteIndexedWrite(uint8&) -> void;
-  auto instructionDirectPageWrite(uint8&) -> void;
-  auto instructionDirectPageIndexedWrite(uint8&, uint8&) -> void;
-  auto instructionDirectPageWriteImmediate(fpb) -> void;
-  auto instructionDirectPageWriteDirectPage(fpb) -> void;
+  auto instructionImmediateRead(fpb, uint8&) -> void;
+  auto instructionImpliedModify(fps, uint8&) -> void;
+  auto instructionIndexedIndirectRead(fpb, uint8&) -> void;
+  auto instructionIndexedIndirectWrite(uint8&, uint8&) -> void;
+  auto instructionIndirectIndexedRead(fpb, uint8&) -> void;
+  auto instructionIndirectIndexedWrite(uint8&, uint8&) -> void;
+  auto instructionIndirectXRead(fpb) -> void;
+  auto instructionIndirectXWrite(uint8&) -> void;
+  auto instructionIndirectXIncrementRead(uint8&) -> void;
+  auto instructionIndirectXIncrementWrite(uint8&) -> void;
   auto instructionIndirectXWriteIndirectY(fpb) -> void;
+  auto instructionPull(uint8&) -> void;
+  auto instructionPush(uint8) -> void;
+  auto instructionTransfer(uint8&, uint8&) -> void;
 
   auto instructionBBC(uint3) -> void;
   auto instructionBBS(uint3) -> void;
-  auto instructionBNEDirectPage() -> void;
-  auto instructionBNEDirectPageDecrement() -> void;
-  auto instructionBNEDirectPageX() -> void;
+  auto instructionBNEDirect() -> void;
+  auto instructionBNEDirectDecrement() -> void;
+  auto instructionBNEDirectX() -> void;
   auto instructionBNEYDecrement() -> void;
   auto instructionBRK() -> void;
   auto instructionCLR(uint3) -> void;
@@ -91,23 +96,18 @@ struct SPC700 {
   auto instructionDAS() -> void;
   auto instructionDIV() -> void;
   auto instructionJMPAbsolute() -> void;
-  auto instructionJMPIndirectAbsoluteX() -> void;
-  auto instructionJSPDirectPage() -> void;
+  auto instructionJMPIndirectX() -> void;
+  auto instructionJSPDirect() -> void;
   auto instructionJSRAbsolute() -> void;
   auto instructionJST(uint4) -> void;
-  auto instructionLDAIndirectXIncrement() -> void;
   auto instructionMUL() -> void;
   auto instructionNOP() -> void;
   auto instructionPLP() -> void;
   auto instructionRTI() -> void;
   auto instructionRTS() -> void;
   auto instructionSET(uint3) -> void;
-  auto instructionSTAIndirectPageX() -> void;
-  auto instructionSTAIndirectPageY() -> void;
-  auto instructionSTAIndirectX() -> void;
-  auto instructionSTAIndirectXIncrement() -> void;
   auto instructionSTP() -> void;
-  auto instructionSTWDirectPage() -> void;
+  auto instructionSTWDirect() -> void;
   auto instructionTRBAbsolute() -> void;
   auto instructionTSBAbsolute() -> void;
   auto instructionWAI() -> void;

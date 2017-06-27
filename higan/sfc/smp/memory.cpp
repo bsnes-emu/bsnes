@@ -173,11 +173,6 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   writeRAM(addr, data);  //all writes, even to MMIO registers, appear on bus
 }
 
-auto SMP::idle() -> void {
-  step(24);
-  cycleEdge();
-}
-
 auto SMP::read(uint16 addr) -> uint8 {
   step(12);
   uint8 data = readBus(addr);

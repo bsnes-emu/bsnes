@@ -1,7 +1,7 @@
 #define AF r.af.word
 #define BC r.bc.word
 #define DE r.de.word
-#define HL r.hlp->word  //virtual HL (overridden by IX/IY prefixes)
+#define HL (prefix == Prefix::ix ? r.ix.word : prefix == Prefix::iy ? r.iy.word : r.hl.word)
 
 #define A r.af.byte.hi
 #define F r.af.byte.lo
@@ -9,8 +9,8 @@
 #define C r.bc.byte.lo
 #define D r.de.byte.hi
 #define E r.de.byte.lo
-#define H r.hlp->byte.hi
-#define L r.hlp->byte.lo
+#define H (prefix == Prefix::ix ? r.ix.byte.hi : prefix == Prefix::iy ? r.iy.byte.hi : r.hl.byte.hi)
+#define L (prefix == Prefix::ix ? r.ix.byte.lo : prefix == Prefix::iy ? r.iy.byte.lo : r.hl.byte.lo)
 
 #define _HL r.hl.word  //true HL (ignores IX/IY prefixes)
 #define _H r.hl.byte.hi

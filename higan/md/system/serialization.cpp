@@ -63,6 +63,9 @@ auto System::serializeAll(serializer& s) -> void {
   vdp.serialize(s);
   psg.serialize(s);
   ym2612.serialize(s);
+  controllerPort1.serialize(s);
+  controllerPort2.serialize(s);
+  extensionPort.serialize(s);
 }
 
 auto System::serialize(serializer& s) -> void {

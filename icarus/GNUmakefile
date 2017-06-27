@@ -45,7 +45,7 @@ ifeq ($(platform),macosx)
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/$(name)/Database/
 	if [ -f out/$(name) ]; then cp out/$(name) $(prefix)/bin/$(name); fi
-	cp -R Database/ $(prefix)/share/$(name)/Database/
+	cp -R Database/* $(prefix)/share/$(name)/Database/
 endif
 
 uninstall:

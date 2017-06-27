@@ -68,9 +68,9 @@ auto CPU::lower(Interrupt interrupt) -> void {
 auto CPU::power() -> void {
   M68K::bus = &busCPU;
   M68K::power();
-  create(CPU::Enter, system.colorburst() * 15.0 / 7.0);
+  create(CPU::Enter, system.frequency() / 7.0);
 
-  memory::fill(&state, sizeof(State));
+  state = {};
   state.interruptPending.bit((uint)Interrupt::Reset) = 1;
 }
 

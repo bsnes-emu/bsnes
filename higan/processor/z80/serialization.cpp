@@ -17,8 +17,7 @@ auto Z80::serialize(serializer& s) -> void {
   s.integer(r.iff1);
   s.integer(r.iff2);
   s.integer(r.im);
-
-  //todo: r.hlp is not serializable
+  s.integer((uint&)prefix);
 }
 
 auto Z80::Bus::serialize(serializer& s) -> void {

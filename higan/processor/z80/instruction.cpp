@@ -2,8 +2,8 @@ auto Z80::instruction() -> void {
   //todo: return instruction() could cause stack crash from recursion
   //but this is needed to prevent IRQs from firing between prefixes and opcodes
   auto code = opcode();
-  if(code == 0xdd) { r.hlp = &r.ix; return instruction(); }
-  if(code == 0xfd) { r.hlp = &r.iy; return instruction(); }
+  if(code == 0xdd) { prefix = Prefix::ix; return instruction(); }
+  if(code == 0xfd) { prefix = Prefix::iy; return instruction(); }
 
   if(r.ei) {
     r.ei = 0;
@@ -11,7 +11,7 @@ auto Z80::instruction() -> void {
     r.iff2 = 1;
   }
 
-  if(code == 0xcb && r.hlp != &r.hl) {
+  if(code == 0xcb && prefix != Prefix::hl) {
     uint16 addr = HL + (int8)operand();
     wait(1);
     instructionCBd(addr, opcode());
@@ -23,7 +23,7 @@ auto Z80::instruction() -> void {
     instruction(code);
   }
 
-  r.hlp = &r.hl;
+  prefix = Prefix::hl;
 }
 
 #define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);

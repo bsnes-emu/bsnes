@@ -7,7 +7,7 @@ struct System {
 
   auto loaded() const -> bool { return information.loaded; }
   auto region() const -> Region { return information.region; }
-  auto colorburst() const -> double { return information.colorburst; }
+  auto frequency() const -> double { return information.frequency; }
 
   auto run() -> void;
   auto runToSave() -> void;
@@ -31,23 +31,12 @@ private:
     string manifest;
     bool loaded = false;
     Region region = Region::NTSCJ;
-    double colorburst = Emulator::Constants::Colorburst::NTSC;
+    double frequency = Emulator::Constants::Colorburst::NTSC * 15.0;
     uint serializeSize = 0;
   } information;
 };
 
-struct Peripherals {
-  auto unload() -> void;
-  auto reset() -> void;
-  auto connect(uint port, uint device) -> void;
-
-  Controller* controllerPort1 = nullptr;
-  Controller* controllerPort2 = nullptr;
-  Controller* extensionPort = nullptr;
-};
-
 extern System system;
-extern Peripherals peripherals;
 
 auto Region::NTSCJ() -> bool { return system.region() == System::Region::NTSCJ; }
 auto Region::NTSCU() -> bool { return system.region() == System::Region::NTSCU; }

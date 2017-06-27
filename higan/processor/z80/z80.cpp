@@ -12,10 +12,8 @@ namespace Processor {
 #include "serialization.cpp"
 
 auto Z80::power() -> void {
-  memory::fill(&r, sizeof(Registers));
-  r.hlp = &r.hl;
-  bus->request(false);
-  bus->grant(true);
+  r = {};
+  prefix = Prefix::hl;
 }
 
 auto Z80::irq(bool maskable, uint16 pc, uint8 extbus) -> bool {

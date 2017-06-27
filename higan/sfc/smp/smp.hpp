@@ -52,7 +52,6 @@ private:
   auto readBus(uint16 addr) -> uint8;
   auto writeBus(uint16 addr, uint8 data) -> void;
 
-  auto idle() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
 

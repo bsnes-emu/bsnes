@@ -35,7 +35,7 @@ auto PSG::step(uint clocks) -> void {
 }
 
 auto PSG::power() -> void {
-  create(PSG::Enter, system.colorburst() / 16.0);
+  create(PSG::Enter, system.frequency() / 15.0);
   stream = Emulator::audio.createStream(1, frequency());
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 2840.0);
