@@ -141,7 +141,7 @@ You may put that folder wherever you like.
 To run higan, open the `higan.exe` file.
 
 Before you can actually play games,
-you'll need to [import them](#importing-games)
+you'll need to [import them](#the-game-library)
 and [configure higan](#configuring-higan).
 If you want to play Game Boy Advance games,
 you will need [a GBA BIOS](#installing-the-gba-bios).
@@ -268,7 +268,7 @@ above.
 [instwin]: #installing-an-official-release-on-windows
 
 Before you can actually play games,
-you'll need to [import them](#importing-games)
+you'll need to [import them](#the-game-library)
 and [configure higan](#configuring-higan).
 If you want to play Game Boy Advance games,
 you will need [a GBA BIOS](#installing-the-gba-bios).
@@ -385,7 +385,7 @@ for changes to `~/.profile` or `~/.bash_profile`
 to take effect.
 
 Before you can actually play games,
-you'll need to [import them](#importing-games)
+you'll need to [import them](#the-game-library)
 and [configure higan](#configuring-higan).
 If you want to play Game Boy Advance games,
 you will need [a GBA BIOS](#installing-the-gba-bios).
@@ -465,11 +465,106 @@ of the new version.
 
 [bios]: http://problemkaputt.de/gbatek.htm#biosfunctions
 
-Importing games
-===============
+The Game Library
+================
 
-What's a game folder?
----------------------
+higan maintains a "game library"
+containing all the games you've played.
+
+  - In Windows, the game library is the `Emulation` folder
+    inside your profile folder.
+      - to find your profile folder,
+        press `Win+R` to open the Run dialog,
+        then type `%USERPROFILE%` and press Enter.
+  - In Linux, the game library is the `Emulation` directory
+    inside your home directory.
+
+On all platforms, the game library location
+can be configured.
+Launch higan,
+then from the Settings menu,
+choose "Configuration ..."
+then click the Advanced tab
+then click the "Change ..." button.
+A directory-picker window will appear,
+allowing you to choose any existing directory
+to be your game library.
+Next launch icarus,
+then click the "Settings ..." button in the lower-right,
+then click the "Change ..." button.
+A directory-picker window will appear,
+allowing you to choose the same directory again.
+
+Inside the library directory there is a subdirectory for each system,
+and inside each system directory are the game folders
+for each imported game.
+For more information about game folders,
+see [Why game folders?](#why-game-folders) below.
+
+To play a game from your library,
+start higan,
+click on the Library menu,
+click on the console manufacturer submenu
+(Nintendo for the SNES,
+Bandai for the WonderSwan,
+etc.)
+then click on the console menu item.
+A window will appear listing all the games in your library
+for that particular console.
+Select the game you want to play
+and click the Open button,
+or just double-click the game,
+and it will begin playing as though you'd just turned on the console.
+
+To add a new game to your library,
+choose "Load ROM File ..." from the Library menu.
+A file-picker dialog will appear,
+allowing you to pick any ROM image for any supported system,
+with any of the most common file extensions.
+It also allows loading ROM images from `.zip` archives,
+if the archive contains a single ROM image.
+
+To add many games at once,
+run icarus,
+or choose "Import ROM Files ..." from the Library menu
+(which just runs icarus anyway).
+A file-picker will appear,
+with a check-box for each file in the current directory.
+Check the check-boxes for all the files you want to import,
+then click "Import ..." in the bottom right.
+
+Why game folders?
+-----------------
+
+A game is more than just
+the raw data originally encased in a game's ROM chip.
+If a game allows you to save your progress,
+that information needs to be stored somewhere.
+If you use an emulator's save-state feature,
+those save-states need to be stored somewhere.
+If you use Game Genie or Pro Action Replay codes,
+information about what codes exist,
+what codes are enabled,
+and what they do
+needs to be stored somewhere.
+
+On the technical side,
+a physical game cartridge contains a circuit board
+that makes the game data available to the console,
+and different games used circuit boards that work differently.
+That circuit-layout information needs to be stored somewhere.
+Some games included custom processors
+to do calculations the base console could not do quickly enough
+(like the SuperFX chip used in _StarFox_ for the SNES)
+and information about extra chips needs to be stored somewhere.
+Some of those custom processors require extra data to work
+that's not part of the main game data
+(like the DSP chip used in Super Mario Kart for the SNES),
+and that data needs to be stored somewhere too.
+
+higan keeps all this game-related information together
+in a single place:
+a game folder in the higan library.
 
 Importing regular games
 -----------------------
