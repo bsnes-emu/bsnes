@@ -54,6 +54,7 @@ auto M68K::instructionABCD(EffectiveAddress with, EffectiveAddress from) -> void
   auto source = read<Byte>(from);
   auto target = read<Byte, Hold>(with);
   auto result = source + target + r.x;
+  bool c = false;
   bool v = false;
 
   if(((target ^ source ^ result) & 0x10) || (result & 0x0f) >= 0x0a) {
@@ -65,12 +66,13 @@ auto M68K::instructionABCD(EffectiveAddress with, EffectiveAddress from) -> void
   if(result >= 0xa0) {
     auto previous = result;
     result += 0x60;
+    c  = true;
     v |= ((~previous & 0x80) & (result & 0x80));
   }
 
   write<Byte>(with, result);
 
-  r.c = sign<Byte>(result >> 1) < 0;
+  r.c = c;
   r.v = v;
   r.z = clip<Byte>(result) ? 0 : r.z;
   r.n = sign<Byte>(result) < 0;
@@ -754,9 +756,10 @@ auto M68K::instructionMULU(DataRegister with, EffectiveAddress from) -> void {
 }
 
 auto M68K::instructionNBCD(EffectiveAddress with) -> void {
-  auto source = 0u;
-  auto target = read<Byte, Hold>(with);
+  auto source = read<Byte, Hold>(with);
+  auto target = 0u;
   auto result = target - source - r.x;
+  bool c = false;
   bool v = false;
 
   const bool adjustLo = (target ^ source ^ result) & 0x10;
@@ -765,21 +768,24 @@ auto M68K::instructionNBCD(EffectiveAddress with) -> void {
   if(adjustLo) {
     auto previous = result;
     result -= 0x06;
-    v |= (previous & 0x80) & (~result & 0x80);
+    c  = (~previous & 0x80) & ( result & 0x80);
+    v |= ( previous & 0x80) & (~result & 0x80);
   }
 
   if(adjustHi) {
     auto previous = result;
     result -= 0x60;
+    c  = true;
     v |= (previous & 0x80) & (~result & 0x80);
   }
 
   write<Byte>(with, result);
 
-  r.c = sign<Byte>(result >> 1) < 0;
+  r.c = c;
   r.v = v;
   r.z = clip<Byte>(result) ? 0 : r.z;
   r.n = sign<Byte>(result) < 0;
+  r.x = r.c;
 }
 
 template<uint Size> auto M68K::instructionNEG(EffectiveAddress with) -> void {
@@ -1011,6 +1017,7 @@ auto M68K::instructionSBCD(EffectiveAddress with, EffectiveAddress from) -> void
   auto source = read<Byte>(from);
   auto target = read<Byte, Hold>(with);
   auto result = target - source - r.x;
+  bool c = false;
   bool v = false;
 
   const bool adjustLo = (target ^ source ^ result) & 0x10;
@@ -1019,21 +1026,24 @@ auto M68K::instructionSBCD(EffectiveAddress with, EffectiveAddress from) -> void
   if(adjustLo) {
     auto previous = result;
     result -= 0x06;
-    v |= (previous & 0x80) & (~result & 0x80);
+    c  = (~previous & 0x80) & ( result & 0x80);
+    v |= ( previous & 0x80) & (~result & 0x80);
   }
 
   if(adjustHi) {
     auto previous = result;
     result -= 0x60;
+    c  = true;
     v |= (previous & 0x80) & (~result & 0x80);
   }
 
   write<Byte>(with, result);
 
-  r.c = sign<Byte>(result >> 1) < 0;
+  r.c = c;
   r.v = v;
   r.z = clip<Byte>(result) ? 0 : r.z;
   r.n = sign<Byte>(result) < 0;
+  r.x = r.c;
 }
 
 auto M68K::instructionSCC(uint4 condition, EffectiveAddress to) -> void {

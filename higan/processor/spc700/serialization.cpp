@@ -12,6 +12,6 @@ auto SPC700::serialize(serializer& s) -> void {
   s.integer(r.p.v);
   s.integer(r.p.n);
 
-  s.integer(r.wai);
-  s.integer(r.stp);
+  s.integer(r.wait);
+  s.integer(r.stop);
 }

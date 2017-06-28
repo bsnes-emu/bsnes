@@ -22,12 +22,34 @@ namespace Processor {
 
 #define alu (this->*op)
 
-#include "memory.cpp"
 #include "algorithms.cpp"
 #include "instructions.cpp"
 #include "instruction.cpp"
 #include "serialization.cpp"
 #include "disassembler.cpp"
+
+auto SPC700::idle(uint16 address) -> void {
+  read(address);
+}
+
+auto SPC700::page(uint8 address) const -> uint16 {
+  return PF << 8 | address;
+}
+
+auto SPC700::stack(uint8 address) const -> uint16 {
+  return 1 << 8 | address;
+}
+
+auto SPC700::power() -> void {
+  PC = 0x0000;
+  YA = 0x0000;
+  X = 0x00;
+  S = 0xef;
+  P = 0x02;
+
+  r.wait = false;
+  r.stop = false;
+}
 
 #undef PC
 #undef YA
@@ -47,16 +69,5 @@ namespace Processor {
 #undef NF
 
 #undef alu
-
-auto SPC700::power() -> void {
-  r.pc.w = 0x0000;
-  r.ya.w = 0x0000;
-  r.x = 0x00;
-  r.s = 0xef;
-  r.p = 0x02;
-
-  r.wai = false;
-  r.stp = false;
-}
 
 }

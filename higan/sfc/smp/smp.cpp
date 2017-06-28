@@ -17,8 +17,8 @@ auto SMP::Enter() -> void {
 }
 
 auto SMP::main() -> void {
-  if(r.wai) return instructionWAI();
-  if(r.stp) return instructionSTP();
+  if(r.wait) return instructionWait();
+  if(r.stop) return instructionStop();
   instruction();
 }
 

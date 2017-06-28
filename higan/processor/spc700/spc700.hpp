@@ -3,25 +3,21 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto read(uint16 addr) -> uint8 = 0;
-  virtual auto write(uint16 addr, uint8 data) -> void = 0;
+  virtual auto read(uint16 address) -> uint8 = 0;
+  virtual auto write(uint16 addessr, uint8 data) -> void = 0;
   virtual auto synchronizing() const -> bool = 0;
 
-  virtual auto readDisassembler(uint16 addr) -> uint8 { return 0; }
+  virtual auto readDisassembler(uint16 address) -> uint8 { return 0; }
 
   //spc700.cpp
+  inline auto idle(uint16 address) -> void;
+  inline auto page(uint8 address) const -> uint16;
+  inline auto stack(uint8 address) const -> uint16;
+
   auto power() -> void;
 
   //instruction.cpp
   auto instruction() -> void;
-
-  //memory.cpp
-  auto idle() -> void;
-  auto fetch() -> uint8;
-  auto pull() -> uint8;
-  auto push(uint8 data) -> void;
-  auto load(uint8 addr) -> uint8;
-  auto store(uint8 addr, uint8 data) -> void;
 
   //algorithms.cpp
   auto algorithmADC(uint8, uint8) -> uint8;
@@ -49,12 +45,25 @@ struct SPC700 {
   using fpw = auto (SPC700::*)(uint16, uint16) -> uint16;
 
   auto instructionAbsoluteBitModify(uint3) -> void;
+  auto instructionAbsoluteBitSet(uint3, bool) -> void;
   auto instructionAbsoluteRead(fpb, uint8&) -> void;
   auto instructionAbsoluteModify(fps) -> void;
   auto instructionAbsoluteWrite(uint8&) -> void;
   auto instructionAbsoluteIndexedRead(fpb, uint8&) -> void;
   auto instructionAbsoluteIndexedWrite(uint8&) -> void;
   auto instructionBranch(bool) -> void;
+  auto instructionBranchBit(uint3, bool) -> void;
+  auto instructionBranchNotDirect() -> void;
+  auto instructionBranchNotDirectDecrement() -> void;
+  auto instructionBranchNotDirectX() -> void;
+  auto instructionBranchNotYDecrement() -> void;
+  auto instructionBreak() -> void;
+  auto instructionCallAbsolute() -> void;
+  auto instructionCallPage() -> void;
+  auto instructionCallTable(uint4) -> void;
+  auto instructionComplementCarry() -> void;
+  auto instructionDecimalAdjustAdd() -> void;
+  auto instructionDecimalAdjustSub() -> void;
   auto instructionDirectRead(fpb, uint8&) -> void;
   auto instructionDirectModify(fps) -> void;
   auto instructionDirectWrite(uint8&) -> void;
@@ -62,11 +71,13 @@ struct SPC700 {
   auto instructionDirectWriteImmediate(fpb) -> void;
   auto instructionDirectReadWord(fpw) -> void;
   auto instructionDirectModifyWord(int) -> void;
+  auto instructionDirectWriteWord() -> void;
   auto instructionDirectIndexedRead(fpb, uint8&, uint8&) -> void;
   auto instructionDirectIndexedModify(fps, uint8&) -> void;
   auto instructionDirectIndexedWrite(uint8&, uint8&) -> void;
-  auto instructionFlagClear(bool&) -> void;
-  auto instructionFlagSet(bool&) -> void;
+  auto instructionDivide() -> void;
+  auto instructionExchangeNibble() -> void;
+  auto instructionFlagSet(bool&, bool) -> void;
   auto instructionImmediateRead(fpb, uint8&) -> void;
   auto instructionImpliedModify(fps, uint8&) -> void;
   auto instructionIndexedIndirectRead(fpb, uint8&) -> void;
@@ -78,46 +89,26 @@ struct SPC700 {
   auto instructionIndirectXIncrementRead(uint8&) -> void;
   auto instructionIndirectXIncrementWrite(uint8&) -> void;
   auto instructionIndirectXWriteIndirectY(fpb) -> void;
+  auto instructionJumpAbsolute() -> void;
+  auto instructionJumpIndirectX() -> void;
+  auto instructionMultiply() -> void;
+  auto instructionNoOperation() -> void;
+  auto instructionOverflowClear() -> void;
   auto instructionPull(uint8&) -> void;
+  auto instructionPullP() -> void;
   auto instructionPush(uint8) -> void;
+  auto instructionReturnInterrupt() -> void;
+  auto instructionReturnSubroutine() -> void;
+  auto instructionStop() -> void;
+  auto instructionTestSetBitsAbsolute(bool) -> void;
   auto instructionTransfer(uint8&, uint8&) -> void;
-
-  auto instructionBBC(uint3) -> void;
-  auto instructionBBS(uint3) -> void;
-  auto instructionBNEDirect() -> void;
-  auto instructionBNEDirectDecrement() -> void;
-  auto instructionBNEDirectX() -> void;
-  auto instructionBNEYDecrement() -> void;
-  auto instructionBRK() -> void;
-  auto instructionCLR(uint3) -> void;
-  auto instructionCLV() -> void;
-  auto instructionCMC() -> void;
-  auto instructionDAA() -> void;
-  auto instructionDAS() -> void;
-  auto instructionDIV() -> void;
-  auto instructionJMPAbsolute() -> void;
-  auto instructionJMPIndirectX() -> void;
-  auto instructionJSPDirect() -> void;
-  auto instructionJSRAbsolute() -> void;
-  auto instructionJST(uint4) -> void;
-  auto instructionMUL() -> void;
-  auto instructionNOP() -> void;
-  auto instructionPLP() -> void;
-  auto instructionRTI() -> void;
-  auto instructionRTS() -> void;
-  auto instructionSET(uint3) -> void;
-  auto instructionSTP() -> void;
-  auto instructionSTWDirect() -> void;
-  auto instructionTRBAbsolute() -> void;
-  auto instructionTSBAbsolute() -> void;
-  auto instructionWAI() -> void;
-  auto instructionXCN() -> void;
+  auto instructionWait() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
   //disassembler.cpp
-  auto disassemble(uint16 addr, bool p) -> string;
+  auto disassemble(uint16 address, bool p) -> string;
 
   struct Flags {
     bool c;  //carry
@@ -155,8 +146,8 @@ struct SPC700 {
     uint8 x, s;
     Flags p;
 
-    bool wai = false;
-    bool stp = false;
+    bool wait = false;
+    bool stop = false;
   } r;
 };
 
