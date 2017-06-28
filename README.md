@@ -27,6 +27,17 @@ It also includes some level of support for these consoles:
   - Bandai Wonderswan
   - Bandai Wonderswan Color
 
+**Note:** Some console were released under different names
+in different geographic regions.
+To avoid listing all possible names
+every time such a console is mentioned,
+higan uses the name from the console's region of origin.
+In practice,
+that means Japanese names:
+"Famicom" and "Super Famicom" instead of NES and SNES,
+"Mega Drive" instead of "Genesis",
+"PC Engine" instead of "TurboGrafx-16".
+
 higan is actively supported on
 FreeBSD 10 and above, and
 Microsoft Windows 7 and above.
