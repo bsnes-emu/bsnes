@@ -465,6 +465,155 @@ of the new version.
 
 [bios]: http://problemkaputt.de/gbatek.htm#biosfunctions
 
+The higan interface
+===================
+
+When you launch higan,
+the main window appears,
+with a menu-bar across the top,
+a status-bar across the bottom,
+and a large area in the middle where the game's video output appears.
+
+The Library menu
+----------------
+
+The Library menu allows you
+to import games into higan's game library,
+and to load games from the library.
+
+To play a game from your library,
+click on the Library menu,
+click on the console manufacturer submenu
+(Nintendo for the Super Famicom,
+Bandai for the WonderSwan,
+etc.)
+then click on the console menu item.
+A window will appear listing all the games in your library
+for that particular console.
+Select the game you want to play
+and click the Open button,
+or just double-click the game,
+and it will begin playing as though you'd just turned on the console.
+
+To add a new game to your library,
+choose "Load ROM File ..." from the Library menu.
+A file-picker dialog will appear,
+allowing you to pick any ROM image for any supported system,
+with any of the most common file extensions.
+It also allows loading ROM images from `.zip` archives,
+if the archive contains a single ROM image.
+
+To add many games at once,
+run icarus,
+or choose "Import ROM Files ..." from the Library menu
+(which just runs icarus anyway).
+A file-picker will appear,
+with a check-box for each file in the current directory.
+Check the check-boxes for all the files you want to import,
+then click "Import ..." in the bottom right.
+
+For more information about the higan game library,
+see [The Game Library](#the-game-library) below.
+
+The system menu
+---------------
+
+TODO
+
+The Settings menu
+-----------------
+
+This menu lets you configure things
+that aren't specific to any particular console.
+
+  - **Video Scale** determines the size and shape
+    of the emulated console's video output
+      - Small, Medium and Large
+        control the size of the video output
+        when higan is running in windowed
+        (as opposed to full-screen)
+        mode.
+      - Aspect Correction,
+        when enabled,
+        stretches the image to match the aspect ratio
+        produced by the original console hardware,
+        since modern computer monitors use pixels
+        that are exactly as wide as they are tall,
+        but many TV-based consoles expected pixels to be
+        wider or narrower.
+        Aspect correction applies
+        to full-screen mode
+        as well as windowed mode.
+
+  - **Video Emulation** applies various effects
+    to the emulated console's video output
+    to reproduce some behaviours
+    that aren't technically part of the console itself.
+      - "Blurring" simulates the limited horizontal resolution
+        of standard-definition TVs
+        by blurring together horizontally-adjacent pixels.
+        Games like Jurassic Park for the Super Famicom
+        depend on this to emulate a transparency effect.
+        For hand-held consoles like the Game Boy Advance,
+        this simulates the slow response time
+        of the cheap LCD screens these consoles used
+        by blurring each output frame with the previous one.
+      - "Colors" simulates the way a console's display device
+        differs from modern computer monitor's colour reproduction.
+        In particular,
+        it simulates the slightly-different gamma correction
+        used by the Super Famicom,
+        the dim, washed out colours of the original Game Boy Advance,
+        and the pea-green display of the original Game Boy.
+      - "Mask Overscan" hides parts of
+        the video output that would have been hidden
+        by the bezel around the edge of
+        a standard-definition television screen.
+        Some games (particularly on the Famicom)
+        allowed random glitchy output to be displayed in this area.
+        The amount masked can be configured
+        in the [configuration dialog](#the-configuration-dialog).
+  - **Video Shader** TODO
+  - **Synchronize Audio** TODO
+  - **Mute Audio** TODO
+  - **Show Status Bar** TODO
+  - **Configuration ...** TODO
+
+The Tools menu
+--------------
+
+TODO
+
+The Help menu
+-------------
+
+TODO
+
+The status bar
+--------------
+
+TODO
+
+The Configuration dialog
+-----------------------
+
+TODO
+
+The Cheat Editor
+----------------
+
+TODO
+
+The State Manager
+-----------------
+
+TODO
+
+The Manifest Viewer
+-------------------
+
+TODO
+
 The Game Library
 ================
 
@@ -501,37 +650,6 @@ for each imported game.
 For more information about game folders,
 see [Why game folders?](#why-game-folders) below.
 
-To play a game from your library,
-start higan,
-click on the Library menu,
-click on the console manufacturer submenu
-(Nintendo for the SNES,
-Bandai for the WonderSwan,
-etc.)
-then click on the console menu item.
-A window will appear listing all the games in your library
-for that particular console.
-Select the game you want to play
-and click the Open button,
-or just double-click the game,
-and it will begin playing as though you'd just turned on the console.
-
-To add a new game to your library,
-choose "Load ROM File ..." from the Library menu.
-A file-picker dialog will appear,
-allowing you to pick any ROM image for any supported system,
-with any of the most common file extensions.
-It also allows loading ROM images from `.zip` archives,
-if the archive contains a single ROM image.
-
-To add many games at once,
-run icarus,
-or choose "Import ROM Files ..." from the Library menu
-(which just runs icarus anyway).
-A file-picker will appear,
-with a check-box for each file in the current directory.
-Check the check-boxes for all the files you want to import,
-then click "Import ..." in the bottom right.
 
 Why game folders?
 -----------------
