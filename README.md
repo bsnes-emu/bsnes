@@ -91,24 +91,24 @@ that you might want to check out.
 
   - [Mednafen](https://mednafen.github.io/)
     is another multi-system emulator.
-    Its SNES emulation is based on bsnes v059,
+    Its Super Famicom emulation is based on bsnes v059,
     from the time before bsnes was renamed to higan.
   - [BizHawk](http://tasvideos.org/BizHawk.html)
     is another multi-system emulator,
     specialising in the creation of
     tool-assisted speedruns.
-    Its SNES emulation is based on bsnes v087.
+    Its Super Famicom emulation is based on bsnes v087.
   - [nSide](https://github.com/hex-usr/nSide)
     is a fork of higan that greatly enhances
     its NES emulation support,
     and adds minor features to the other cores too.
-    It also restores the "balanced" SNES emulation core
+    It also restores the "balanced" Super Famicom emulation core
     that was removed from higan in v099,
     which is less CPU intensive
     than the current accuracy-focussed core.
   - [bsnes-plus](https://github.com/devinacker/bsnes-plus)
     is a fork of bsnes v073
-    that adds improved support for debugging SNES software.
+    that adds improved support for debugging Super Famicom software.
 
 Installing and uninstalling higan
 =================================
@@ -555,11 +555,11 @@ and different games used circuit boards that work differently.
 That circuit-layout information needs to be stored somewhere.
 Some games included custom processors
 to do calculations the base console could not do quickly enough
-(like the SuperFX chip used in _StarFox_ for the SNES)
+(like the SuperFX chip used in _StarFox_ for the Super Famicom)
 and information about extra chips needs to be stored somewhere.
 Some of those custom processors require extra data to work
 that's not part of the main game data
-(like the DSP chip used in Super Mario Kart for the SNES),
+(like the DSP chip used in Super Mario Kart for the Super Famicom)
 and that data needs to be stored somewhere too.
 
 higan keeps all this game-related information together
@@ -605,7 +605,7 @@ Notes on specific emulation cores
 
 The WonderSwan rotates!
 
-Shaders look weird on SNES because of interlace/hi-res
+Shaders look weird on Super Famicom because of interlace/hi-res
 
 GBA in-game saves are Difficult
 
