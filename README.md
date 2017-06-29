@@ -594,6 +594,10 @@ The status bar
 
 TODO
 
+- FPS
+- "Paused" flag
+- "No cartridge loaded"
+
 The Configuration dialog
 -----------------------
 
