@@ -523,7 +523,7 @@ TODO
 The Settings menu
 -----------------
 
-This menu lets you configure things
+The Settings menu lets you configure things
 that aren't specific to any particular console.
 
   - **Video Scale** determines the size and shape
