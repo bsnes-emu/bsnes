@@ -586,7 +586,7 @@ but few consoles have all of them.
 The Settings menu
 -----------------
 
-The Settings menu lets you configure things
+The Settings menu allows you to configure things
 that aren't specific to any particular console.
 
   - **Video Scale** determines the size and shape
