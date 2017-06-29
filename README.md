@@ -515,10 +515,73 @@ then click "Import ..." in the bottom right.
 For more information about the higan game library,
 see [The Game Library](#the-game-library) below.
 
-The system menu
+The console menu
 ---------------
 
-TODO
+**Note:**
+The console menu does not appear
+until a game is loaded.
+Also,
+it's not named "console",
+it's named for the kind of console
+the loaded game runs on.
+For example,
+when playing a Game Boy game,
+you will have a "Game Boy" menu.
+
+The console menu contains commands relevant
+to the particular console being emulated.
+All consoles will have some of the following items,
+but few consoles have all of them.
+
+  - **Controller Port 1**
+    allows you
+    to connect different emulated controllers
+    to the first controller port,
+    if there is one.
+      - See [the Configuration dialog](#the-configuration-dialog)
+        for information about configuring
+        which host controller inputs are used
+        for the emulated controllers.
+      - This menu appears for the Famicom,
+        even though the Famicom did not support alternate controllers,
+        because the Famicom emulation core also emulates the NES,
+        which did.
+  - **Controller Port 2**
+    allows you
+    to connect different emulated controllers
+    to the second controller port,
+    if there is one.
+      - See [the Configuration dialog](#the-configuration-dialog)
+        for information about configuring
+        which host controller inputs are used
+        for the emulated controllers.
+      - This menu appears for the Famicom,
+        even though the Famicom did not support alternate controllers,
+        because the Famicom emulation core also emulates the NES,
+        which did.
+  - **Expansion Port**
+    allows you
+    to connect different emulated devices
+    to the console's expansion port,
+    if there is one.
+      - For the Super Famicom,
+        the [21fx][21fx] is a homebrew device
+        that allows a program running on a PC
+        to control a physical Super Famicom (or SNES).
+        This option allows the same program
+        to control the emulated SNES,
+        for development or testing.
+  - **Power Cycle**
+    restarts the loaded game
+    as though the emulated console were switched off and on again.
+  - **Unload**
+    stops the current game,
+    as though the emulated console were switched off.
+    You can load the same or a different game
+    from [the Library menu](#the-library-menu).
+
+[21fx]: https://github.com/defparam/21FX
 
 The Settings menu
 -----------------
