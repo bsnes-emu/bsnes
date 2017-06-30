@@ -607,7 +607,6 @@ that aren't specific to any particular console.
         Aspect correction applies
         to full-screen mode
         as well as windowed mode.
-
   - **Video Emulation** applies various effects
     to the emulated console's video output
     to reproduce some behaviours
@@ -636,7 +635,25 @@ that aren't specific to any particular console.
         allowed random glitchy output to be displayed in this area.
         The amount masked can be configured
         in the [configuration dialog](#the-configuration-dialog).
-  - **Video Shader** TODO
+  - **Video Shader** controls
+    how the low-resolution video output of the emulated console
+    is scaled up to suit modern high-resolution displays.
+    The availability of items in this submenu depends on
+    which video driver higan is using,
+    so see [Drivers](#drivers) for more information.
+      - "None" draws each output pixel according to
+        the colour of the single nearest input pixel,
+        sometimes called "nearest neighbour" scaling.
+        This produces unnaturally crisp and blocky images.
+      - "Blur" draws each output pixel by
+        averaging the colours of the four nearest input pixels,
+        sometimes called "bilinear" scaling.
+        This produces unnaturally blurry images.
+      - When using the OpenGL [driver](#drivers),
+        an additional item appears in this menu for
+        each installed Quark shader.
+        See [Installing custom shaders](#installing-custom-shaders)
+        for details.
   - **Synchronize Audio** TODO
   - **Mute Audio** TODO
   - **Show Status Bar** TODO
