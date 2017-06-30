@@ -145,14 +145,14 @@ auto CPU::joypadEdge() -> void {
 
     if(status.autoJoypadActive && status.autoJoypadLatch) {
       if(status.autoJoypadCounter == 0) {
-        SuperFamicom::peripherals.controllerPort1->latch(1);
-        SuperFamicom::peripherals.controllerPort2->latch(1);
-        SuperFamicom::peripherals.controllerPort1->latch(0);
-        SuperFamicom::peripherals.controllerPort2->latch(0);
+        controllerPort1.device->latch(1);
+        controllerPort2.device->latch(1);
+        controllerPort1.device->latch(0);
+        controllerPort2.device->latch(0);
       }
 
-      uint2 port0 = SuperFamicom::peripherals.controllerPort1->data();
-      uint2 port1 = SuperFamicom::peripherals.controllerPort2->data();
+      uint2 port0 = controllerPort1.device->data();
+      uint2 port1 = controllerPort2.device->data();
 
       io.joy1 = io.joy1 << 1 | port0.bit(0);
       io.joy2 = io.joy2 << 1 | port1.bit(0);

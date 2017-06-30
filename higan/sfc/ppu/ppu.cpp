@@ -87,7 +87,7 @@ auto PPU::load(Markup::Node node) -> bool {
 }
 
 auto PPU::power() -> void {
-  create(Enter, system.colorburst() * 6.0);
+  create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill(output, 512 * 480 * sizeof(uint32));
 

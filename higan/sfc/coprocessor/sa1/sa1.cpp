@@ -131,7 +131,7 @@ auto SA1::unload() -> void {
 
 auto SA1::power() -> void {
   WDC65816::power();
-  create(SA1::Enter, system.colorburst() * 6.0);
+  create(SA1::Enter, system.cpuFrequency());
 
   cpubwram.dma = false;
   for(auto addr : range(iram.size())) {
@@ -142,7 +142,7 @@ auto SA1::power() -> void {
 
   status.interruptPending = false;
 
-  status.scanlines = (system.region() == System::Region::NTSC ? 262 : 312);
+  status.scanlines = Region::PAL() ? 312 : 262;
   status.vcounter  = 0;
   status.hcounter  = 0;
 

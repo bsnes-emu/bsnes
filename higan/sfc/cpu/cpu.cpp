@@ -62,7 +62,7 @@ auto CPU::load(Markup::Node node) -> bool {
 
 auto CPU::power() -> void {
   WDC65816::power();
-  create(Enter, system.colorburst() * 6.0);
+  create(Enter, system.cpuFrequency());
   coprocessors.reset();
   PPUcounter::reset();
 

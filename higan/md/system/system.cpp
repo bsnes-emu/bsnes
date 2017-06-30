@@ -52,6 +52,7 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
+  cpu.peripherals.reset();
   controllerPort1.unload();
   controllerPort2.unload();
   extensionPort.unload();

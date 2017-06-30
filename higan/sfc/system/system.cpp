@@ -6,7 +6,6 @@ System system;
 Scheduler scheduler;
 Cheat cheat;
 #include "video.cpp"
-#include "peripherals.cpp"
 #include "random.cpp"
 #include "serialization.cpp"
 
@@ -65,11 +64,11 @@ auto System::load(Emulator::Interface* interface) -> bool {
 
   if(cartridge.region() == "NTSC") {
     information.region = Region::NTSC;
-    information.colorburst = Emulator::Constants::Colorburst::NTSC;
+    information.cpuFrequency = Emulator::Constants::Colorburst::NTSC * 6.0;
   }
   if(cartridge.region() == "PAL") {
     information.region = Region::PAL;
-    information.colorburst = Emulator::Constants::Colorburst::PAL * 4.0 / 5.0;
+    information.cpuFrequency = Emulator::Constants::Colorburst::PAL * 4.8;
   }
 
   if(cartridge.has.ICD2) icd2.load();
@@ -98,12 +97,17 @@ auto System::load(Emulator::Interface* interface) -> bool {
 
 auto System::save() -> void {
   if(!loaded()) return;
+
   cartridge.save();
 }
 
 auto System::unload() -> void {
   if(!loaded()) return;
-  peripherals.unload();
+
+  cpu.peripherals.reset();
+  controllerPort1.unload();
+  controllerPort2.unload();
+  expansionPort.unload();
 
   if(cartridge.has.ICD2) icd2.unload();
   if(cartridge.has.MCC) mcc.unload();
@@ -176,7 +180,14 @@ auto System::power() -> void {
   if(cartridge.has.MSU1) cpu.coprocessors.append(&msu1);
 
   scheduler.primary(cpu);
-  peripherals.reset();
+
+  controllerPort1.power(ID::Port::Controller1);
+  controllerPort2.power(ID::Port::Controller2);
+  expansionPort.power();
+
+  controllerPort1.connect(settings.controllerPort1);
+  controllerPort2.connect(settings.controllerPort2);
+  expansionPort.connect(settings.expansionPort);
 }
 
 }

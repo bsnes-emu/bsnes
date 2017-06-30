@@ -187,7 +187,9 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  peripherals.connect(port, device);
+  if(port == ID::Port::Controller1) controllerPort1.connect(settings.controllerPort1 = device);
+  if(port == ID::Port::Controller2) controllerPort2.connect(settings.controllerPort2 = device);
+  if(port == ID::Port::Expansion) expansionPort.connect(settings.expansionPort = device);
 }
 
 auto Interface::power() -> void {

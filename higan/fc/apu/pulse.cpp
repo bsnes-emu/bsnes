@@ -9,10 +9,10 @@ auto APU::Pulse::clock() -> uint8 {
   if(lengthCounter == 0) return 0;
 
   static const uint dutyTable[4][8] = {
-    {0, 1, 0, 0, 0, 0, 0, 0},  //12.5%
-    {0, 1, 1, 0, 0, 0, 0, 0},  //25.0%
-    {0, 1, 1, 1, 1, 0, 0, 0},  //50.0%
-    {1, 0, 0, 1, 1, 1, 1, 1},  //25.0% (inverted)
+    {0, 0, 0, 0, 0, 0, 0, 1},  //12.5%
+    {0, 0, 0, 0, 0, 0, 1, 1},  //25.0%
+    {0, 0, 0, 0, 1, 1, 1, 1},  //50.0%
+    {1, 1, 1, 1, 1, 1, 0, 0},  //25.0% (negated)
   };
   uint8 result = dutyTable[duty][dutyCounter] ? envelope.volume() : 0;
   if(sweep.pulsePeriod < 0x008) result = 0;

@@ -19,6 +19,8 @@ auto SMP::serialize(serializer& s) -> void {
 
   s.integer(io.dspAddr);
 
+  s.array(io.port);
+
   s.integer(io.ram00f8);
   s.integer(io.ram00f9);
 

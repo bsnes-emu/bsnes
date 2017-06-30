@@ -38,6 +38,9 @@ private:
     //$00f2
     uint8 dspAddr;
 
+    //$00f4-00f7
+    uint8 port[4];
+
     //$00f8,$00f9
     uint8 ram00f8;
     uint8 ram00f9;
@@ -52,6 +55,7 @@ private:
   auto readBus(uint16 addr) -> uint8;
   auto writeBus(uint16 addr, uint8 data) -> void;
 
+  auto idle() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
 

@@ -156,7 +156,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
     latch.vcounter = 0;
 
     ppu2.mdr.bits(0,3) = ppu2.version;
-    ppu2.mdr.bit (  4) = system.region() == System::Region::PAL;  //0 = NTSC
+    ppu2.mdr.bit (  4) = Region::PAL();  //0 = NTSC, 1 = PAL
     if(!cpu.pio().bit(7)) {
       ppu2.mdr.bit( 6) = 1;
     } else {

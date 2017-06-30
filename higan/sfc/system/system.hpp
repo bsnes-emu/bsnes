@@ -3,7 +3,8 @@ struct System {
 
   inline auto loaded() const -> bool { return information.loaded; }
   inline auto region() const -> Region { return information.region; }
-  inline auto colorburst() const -> double { return information.colorburst; }
+  inline auto cpuFrequency() const -> double { return information.cpuFrequency; }
+  inline auto apuFrequency() const -> double { return information.apuFrequency; }
 
   auto run() -> void;
   auto runToSave() -> void;
@@ -30,7 +31,8 @@ private:
     string manifest;
     bool loaded = false;
     Region region = Region::NTSC;
-    double colorburst = Emulator::Constants::Colorburst::NTSC;
+    double cpuFrequency = Emulator::Constants::Colorburst::NTSC * 6.0;
+    double apuFrequency = 32040.0 * 768.0;
   } information;
 
   uint serializeSize = 0;
@@ -40,16 +42,6 @@ private:
   auto serializeInit() -> void;
 
   friend class Cartridge;
-};
-
-struct Peripherals {
-  auto unload() -> void;
-  auto reset() -> void;
-  auto connect(uint port, uint device) -> void;
-
-  Controller* controllerPort1 = nullptr;
-  Controller* controllerPort2 = nullptr;
-  Expansion* expansionPort = nullptr;
 };
 
 struct Random {
@@ -62,7 +54,6 @@ private:
 };
 
 extern System system;
-extern Peripherals peripherals;
 extern Random random;
 
 auto Region::NTSC() -> bool { return system.region() == System::Region::NTSC; }

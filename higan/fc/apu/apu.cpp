@@ -153,7 +153,7 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
     pulse[n].period = (pulse[n].period & 0x00ff) | (data << 8);
     pulse[n].sweep.pulsePeriod = (pulse[n].sweep.pulsePeriod & 0x00ff) | (data << 8);
 
-    pulse[n].dutyCounter = 7;
+    pulse[n].dutyCounter = 0;
     pulse[n].envelope.reloadDecay = true;
 
     if(enabledChannels & (1 << n)) {

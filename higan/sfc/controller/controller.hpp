@@ -27,6 +27,20 @@ struct Controller : Thread {
   const bool port;
 };
 
+struct ControllerPort {
+  auto connect(uint deviceID) -> void;
+
+  auto power(uint port) -> void;
+  auto unload() -> void;
+  auto serialize(serializer&) -> void;
+
+  uint port;
+  Controller* device = nullptr;
+};
+
+extern ControllerPort controllerPort1;
+extern ControllerPort controllerPort2;
+
 #include "gamepad/gamepad.hpp"
 #include "mouse/mouse.hpp"
 #include "super-multitap/super-multitap.hpp"

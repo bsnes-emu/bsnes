@@ -10,11 +10,11 @@ alwaysinline auto SMP::writeRAM(uint16 addr, uint8 data) -> void {
 }
 
 auto SMP::readPort(uint2 port) const -> uint8 {
-  return apuram[0xf4 + port];
+  return io.port[0xf4 + port];
 }
 
 auto SMP::writePort(uint2 port, uint8 data) -> void {
-  apuram[0xf4 + port] = data;
+  io.port[0xf4 + port] = data;
 }
 
 auto SMP::readBus(uint16 addr) -> uint8 {
@@ -171,6 +171,11 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   }
 
   writeRAM(addr, data);  //all writes, even to MMIO registers, appear on bus
+}
+
+auto SMP::idle() -> void {
+  step(24);
+  cycleEdge();
 }
 
 auto SMP::read(uint16 addr) -> uint8 {

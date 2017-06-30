@@ -34,16 +34,12 @@ auto SMP::load(Markup::Node node) -> bool {
 
 auto SMP::power() -> void {
   SPC700::power();
-  create(Enter, 32040.0 * 768.0);
+  create(Enter, system.apuFrequency());
 
   r.pc.byte.l = iplrom[62];
   r.pc.byte.h = iplrom[63];
 
   for(auto& byte : apuram) byte = random(0x00);
-  apuram[0x00f4] = 0x00;
-  apuram[0x00f5] = 0x00;
-  apuram[0x00f6] = 0x00;
-  apuram[0x00f7] = 0x00;
 
   io.clockCounter = 0;
   io.dspCounter = 0;
@@ -62,6 +58,12 @@ auto SMP::power() -> void {
 
   //$00f2
   io.dspAddr = 0x00;
+
+  //$00f4-00f7
+  io.port[0] = 0x00;
+  io.port[1] = 0x00;
+  io.port[2] = 0x00;
+  io.port[3] = 0x00;
 
   //$00f8,$00f9
   io.ram00f8 = 0x00;

@@ -12,10 +12,7 @@ struct Controller : Thread {
 };
 
 struct ControllerPort {
-  auto connect(uint device) -> void;
-
-  auto readData() -> uint8;
-  auto writeData(uint8 data) -> void;
+  auto connect(uint deviceID) -> void;
 
   auto readControl() -> uint8;
   auto writeControl(uint8 data) -> void;
@@ -26,7 +23,7 @@ struct ControllerPort {
 
   uint port;
   uint8 control;
-  Controller* controller = nullptr;
+  Controller* device = nullptr;
 };
 
 extern ControllerPort controllerPort1;

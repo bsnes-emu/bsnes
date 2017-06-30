@@ -229,7 +229,7 @@ auto DSP::load(Markup::Node node) -> bool {
 }
 
 auto DSP::power() -> void {
-  create(Enter, 32040.0 * 768.0);
+  create(Enter, system.apuFrequency());
   stream = Emulator::audio.createStream(2, frequency() / 768.0);
 
   memory::fill(&state, sizeof(State));

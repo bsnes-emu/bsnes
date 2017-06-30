@@ -8,7 +8,7 @@ ControllerPort extensionPort;
 #include "gamepad/gamepad.cpp"
 
 Controller::Controller(uint port) : port(port) {
-  if(!handle()) create(Controller::Enter, 100);
+  if(!handle()) create(Controller::Enter, 1);
 }
 
 Controller::~Controller() {
@@ -18,9 +18,9 @@ Controller::~Controller() {
 auto Controller::Enter() -> void {
   while(true) {
     scheduler.synchronize();
-    if(controllerPort1.controller->active()) controllerPort1.controller->main();
-    if(controllerPort2.controller->active()) controllerPort2.controller->main();
-    if(extensionPort.controller->active())   extensionPort.controller->main();
+    if(controllerPort1.device->active()) controllerPort1.device->main();
+    if(controllerPort2.device->active()) controllerPort2.device->main();
+    if(extensionPort.device->active()) extensionPort.device->main();
   }
 }
 
@@ -31,27 +31,19 @@ auto Controller::main() -> void {
 
 //
 
-auto ControllerPort::connect(uint device) -> void {
+auto ControllerPort::connect(uint deviceID) -> void {
   if(!system.loaded()) return;
-  delete controller;
+  delete device;
 
-  switch(device) { default:
-  case ID::Device::None: controller = new Controller(port); break;
-  case ID::Device::Gamepad: controller = new Gamepad(port); break;
+  switch(deviceID) { default:
+  case ID::Device::None: device = new Controller(port); break;
+  case ID::Device::Gamepad: device = new Gamepad(port); break;
   }
 
   cpu.peripherals.reset();
-  cpu.peripherals.append(controllerPort1.controller);
-  cpu.peripherals.append(controllerPort2.controller);
-  cpu.peripherals.append(extensionPort.controller);
-}
-
-auto ControllerPort::readData() -> uint8 {
-  return controller->readData();
-}
-
-auto ControllerPort::writeData(uint8 data) -> void {
-  return controller->writeData(data);
+  if(auto device = controllerPort1.device) cpu.peripherals.append(device);
+  if(auto device = controllerPort2.device) cpu.peripherals.append(device);
+  if(auto device = extensionPort.device) cpu.peripherals.append(device);
 }
 
 auto ControllerPort::readControl() -> uint8 {
@@ -68,8 +60,8 @@ auto ControllerPort::power(uint port) -> void {
 }
 
 auto ControllerPort::unload() -> void {
-  delete controller;
-  controller = nullptr;
+  delete device;
+  device = nullptr;
 }
 
 auto ControllerPort::serialize(serializer& s) -> void {

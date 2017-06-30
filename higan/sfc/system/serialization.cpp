@@ -66,6 +66,10 @@ auto System::serializeAll(serializer& s) -> void {
   if(cartridge.has.MSU1) msu1.serialize(s);
 
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
+
+  controllerPort1.serialize(s);
+  controllerPort2.serialize(s);
+  expansionPort.serialize(s);
 }
 
 //perform dry-run state save:

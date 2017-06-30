@@ -52,7 +52,7 @@ S21FX::~S21FX() {
 }
 
 auto S21FX::Enter() -> void {
-  while(true) scheduler.synchronize(), peripherals.expansionPort->main();
+  while(true) scheduler.synchronize(), expansionPort.device->main();
 }
 
 auto S21FX::step(uint clocks) -> void {

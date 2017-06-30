@@ -73,9 +73,9 @@ auto BusCPU::readIO(uint24 addr) -> uint16 {
   | 0 << 0                 //0 = Model 1; 1 = Model 2+
   );
 
-  case 0xa10002: return controllerPort1.readData();
-  case 0xa10004: return controllerPort2.readData();
-  case 0xa10006: return extensionPort.readData();
+  case 0xa10002: return controllerPort1.device->readData();
+  case 0xa10004: return controllerPort2.device->readData();
+  case 0xa10006: return extensionPort.device->readData();
 
   case 0xa10008: return controllerPort1.readControl();
   case 0xa1000a: return controllerPort2.readControl();
@@ -89,9 +89,9 @@ auto BusCPU::readIO(uint24 addr) -> uint16 {
 
 auto BusCPU::writeIO(uint24 addr, uint16 data) -> void {
   switch(addr & ~1) {
-  case 0xa10002: return controllerPort1.writeData(data);
-  case 0xa10004: return controllerPort2.writeData(data);
-  case 0xa10006: return extensionPort.writeData(data);
+  case 0xa10002: return controllerPort1.device->writeData(data);
+  case 0xa10004: return controllerPort2.device->writeData(data);
+  case 0xa10006: return extensionPort.device->writeData(data);
 
   case 0xa10008: return controllerPort1.writeControl(data);
   case 0xa1000a: return controllerPort2.writeControl(data);
