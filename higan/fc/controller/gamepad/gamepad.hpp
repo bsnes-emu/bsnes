@@ -3,7 +3,7 @@ struct Gamepad : Controller {
     Up, Down, Left, Right, B, A, Select, Start,
   };
 
-  Gamepad(bool port);
+  Gamepad(uint port);
   auto data() -> uint3;
   auto latch(bool data) -> void;
 

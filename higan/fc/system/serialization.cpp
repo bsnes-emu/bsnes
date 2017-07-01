@@ -45,6 +45,8 @@ auto System::serializeAll(serializer& s) -> void {
   cpu.serialize(s);
   apu.serialize(s);
   ppu.serialize(s);
+  controllerPort1.serialize(s);
+  controllerPort2.serialize(s);
 }
 
 auto System::serializeInit() -> void {

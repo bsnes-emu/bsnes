@@ -10,7 +10,7 @@ ControllerPort controllerPort2;
 #include "super-scope/super-scope.cpp"
 #include "justifier/justifier.cpp"
 
-Controller::Controller(bool port) : port(port) {
+Controller::Controller(uint port) : port(port) {
   if(!handle()) create(Controller::Enter, 1);
 }
 
@@ -33,15 +33,16 @@ auto Controller::main() -> void {
 
 auto Controller::iobit() -> bool {
   switch(port) {
-  case Controller::Port1: return cpu.pio() & 0x40;
-  case Controller::Port2: return cpu.pio() & 0x80;
+  case ID::Port::Controller1: return cpu.pio() & 0x40;
+  case ID::Port::Controller2: return cpu.pio() & 0x80;
   }
+  unreachable;
 }
 
 auto Controller::iobit(bool data) -> void {
   switch(port) {
-  case Controller::Port1: bus.write(0x4201, (cpu.pio() & ~0x40) | (data << 6)); break;
-  case Controller::Port2: bus.write(0x4201, (cpu.pio() & ~0x80) | (data << 7)); break;
+  case ID::Port::Controller1: bus.write(0x4201, (cpu.pio() & ~0x40) | (data << 6)); break;
+  case ID::Port::Controller2: bus.write(0x4201, (cpu.pio() & ~0x80) | (data << 7)); break;
   }
 }
 

@@ -30,10 +30,6 @@ auto Interface::unload() -> void {
   system.unload();
 }
 
-auto Interface::connect(uint port, uint device) -> void {
-  peripherals.connect(port, device);
-}
-
 auto Interface::power() -> void {
   system.power();
 }

@@ -28,10 +28,6 @@ namespace Processor {
 #include "serialization.cpp"
 #include "disassembler.cpp"
 
-auto SPC700::idle(uint16 address) -> void {
-  read(address);
-}
-
 auto SPC700::page(uint8 address) const -> uint16 {
   return PF << 8 | address;
 }

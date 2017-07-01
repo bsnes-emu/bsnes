@@ -3,7 +3,7 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto idle() -> void = 0;
+  virtual auto idle(uint16 address, bool read = true) -> void = 0;
   virtual auto read(uint16 address) -> uint8 = 0;
   virtual auto write(uint16 addessr, uint8 data) -> void = 0;
   virtual auto synchronizing() const -> bool = 0;
@@ -11,7 +11,6 @@ struct SPC700 {
   virtual auto readDisassembler(uint16 address) -> uint8 { return 0; }
 
   //spc700.cpp
-  inline auto idle(uint16 address) -> void;
   inline auto page(uint8 address) const -> uint16;
   inline auto stack(uint8 address) const -> uint16;
 

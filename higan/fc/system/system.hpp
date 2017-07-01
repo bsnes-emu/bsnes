@@ -41,17 +41,7 @@ private:
   uint _serializeSize = 0;
 };
 
-struct Peripherals {
-  auto unload() -> void;
-  auto reset() -> void;
-  auto connect(uint port, uint device) -> void;
-
-  Controller* controllerPort1 = nullptr;
-  Controller* controllerPort2 = nullptr;
-};
-
 extern System system;
-extern Peripherals peripherals;
 
 auto Region::NTSCJ() -> bool { return system.region() == System::Region::NTSCJ; }
 auto Region::NTSCU() -> bool { return system.region() == System::Region::NTSCU; }

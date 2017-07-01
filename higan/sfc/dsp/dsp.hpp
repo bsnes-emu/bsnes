@@ -2,6 +2,7 @@
 
 struct DSP : Thread {
   shared_pointer<Emulator::Stream> stream;
+  uint8 apuram[64 * 1024];
 
   DSP();
 

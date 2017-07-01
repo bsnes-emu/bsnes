@@ -1,4 +1,4 @@
-Gamepad::Gamepad(bool port) : Controller(port) {
+Gamepad::Gamepad(uint port) : Controller(port) {
   latched = 0;
   counter = 0;
 }

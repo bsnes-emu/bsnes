@@ -10,12 +10,12 @@ auto CPU::readIO(uint16 addr) -> uint8 {
   switch(addr) {
 
   case 0x4016: {
-    auto data = Famicom::peripherals.controllerPort1->data();
+    auto data = controllerPort1.device->data();
     return (mdr() & 0xc0) | data.bit(2) << 4 | data.bit(1) << 3 | data.bit(0) << 0;
   }
 
   case 0x4017: {
-    auto data = Famicom::peripherals.controllerPort2->data();
+    auto data = controllerPort2.device->data();
     return (mdr() & 0xc0) | data.bit(2) << 4 | data.bit(1) << 3 | data.bit(0) << 0;
   }
 
@@ -34,8 +34,8 @@ auto CPU::writeIO(uint16 addr, uint8 data) -> void {
   }
 
   case 0x4016: {
-    Famicom::peripherals.controllerPort1->latch(data.bit(0));
-    Famicom::peripherals.controllerPort2->latch(data.bit(0));
+    controllerPort1.device->latch(data.bit(0));
+    controllerPort2.device->latch(data.bit(0));
     return;
   }
 

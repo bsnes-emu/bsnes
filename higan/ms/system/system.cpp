@@ -5,7 +5,6 @@ namespace MasterSystem {
 System system;
 Scheduler scheduler;
 Cheat cheat;
-#include "peripherals.cpp"
 #include "serialization.cpp"
 
 auto System::run() -> void {
@@ -51,7 +50,11 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
-  peripherals.unload();
+  if(MasterSystem::Model::MasterSystem()) {
+    cpu.peripherals.reset();
+    controllerPort1.unload();
+    controllerPort2.unload();
+  }
   cartridge.unload();
 }
 
@@ -70,7 +73,13 @@ auto System::power() -> void {
   psg.power();
   scheduler.primary(cpu);
 
-  peripherals.reset();
+  if(MasterSystem::Model::MasterSystem()) {
+    controllerPort1.power(ID::Port::Controller1);
+    controllerPort2.power(ID::Port::Controller2);
+
+    controllerPort1.connect(settings.controllerPort1);
+    controllerPort2.connect(settings.controllerPort2);
+  }
 }
 
 }

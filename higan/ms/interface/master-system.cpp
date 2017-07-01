@@ -68,3 +68,8 @@ auto MasterSystemInterface::load(uint id) -> bool {
   if(id == ID::MasterSystem) return system.load(this, System::Model::MasterSystem);
   return false;
 }
+
+auto MasterSystemInterface::connect(uint port, uint device) -> void {
+  if(port == ID::Port::Controller1) controllerPort1.connect(settings.controllerPort1 = device);
+  if(port == ID::Port::Controller2) controllerPort2.connect(settings.controllerPort2 = device);
+}

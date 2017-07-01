@@ -33,16 +33,7 @@ private:
   } information;
 };
 
-struct Peripherals {
-  auto unload() -> void;
-  auto reset() -> void;
-  auto connect(uint port, uint device) -> void;
-
-  Controller* controllerPort = nullptr;
-};
-
 extern System system;
-extern Peripherals peripherals;
 
 auto Model::PCEngine() -> bool { return system.model() == System::Model::PCEngine; }
 auto Model::SuperGrafx() -> bool { return system.model() == System::Model::SuperGrafx; }

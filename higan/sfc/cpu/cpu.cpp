@@ -116,9 +116,6 @@ auto CPU::power() -> void {
     channel.hdmaDoTransfer = false;
   }
 
-  //$2140-217f
-  for(auto& port : io.port) port = 0x00;
-
   //$2181-$2183
   io.wramAddress = 0x000000;
 

@@ -54,7 +54,7 @@ auto CPU::read_(uint8 bank, uint13 addr) -> uint8 {
       //note 2: we state that the CD-ROM drive is present.
       //this is so games can use its backup RAM for save data.
       return (
-        PCEngine::peripherals.controllerPort->readData() << 0
+        controllerPort.device->readData() << 0
       | 1 << 4
       | 1 << 5
       | 0 << 6  //device (0 = Turbografx-16; 1 = PC Engine)
@@ -162,7 +162,7 @@ auto CPU::write(uint8 bank, uint13 addr, uint8 data) -> void {
     //$1000-13ff  I/O
     if((addr & 0x1c00) == 0x1000) {
       io.mdr = data;
-      PCEngine::peripherals.controllerPort->writeData(data.bits(0,1));
+      controllerPort.device->writeData(data.bits(0,1));
       return;
     }
 

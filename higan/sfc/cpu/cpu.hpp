@@ -4,10 +4,8 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto joylatch() const -> bool;
   auto synchronizing() const -> bool override;
 
+  //cpu.cpp
   CPU();
-
-  auto readPort(uint2 port) const -> uint8;
-  auto writePort(uint2 port, uint8 data) -> void;
 
   static auto Enter() -> void;
   auto main() -> void;
@@ -135,9 +133,6 @@ private:
   } status;
 
   struct IO {
-    //$2140-217f
-    uint8 port[4];
-
     //$2181-$2183
     uint17 wramAddress;
 

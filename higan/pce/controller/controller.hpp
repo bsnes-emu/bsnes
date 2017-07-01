@@ -9,4 +9,16 @@ struct Controller : Thread {
   virtual auto writeData(uint2) -> void {}
 };
 
+struct ControllerPort {
+  auto connect(uint deviceID) -> void;
+
+  auto power() -> void;
+  auto unload() -> void;
+  auto serialize(serializer&) -> void;
+
+  Controller* device = nullptr;
+};
+
+extern ControllerPort controllerPort;
+
 #include "gamepad/gamepad.hpp"

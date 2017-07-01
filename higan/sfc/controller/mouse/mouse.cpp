@@ -1,4 +1,4 @@
-Mouse::Mouse(bool port) : Controller(port) {
+Mouse::Mouse(uint port) : Controller(port) {
   latched = 0;
   counter = 0;
 

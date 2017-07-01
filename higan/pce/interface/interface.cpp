@@ -85,7 +85,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  PCEngine::peripherals.connect(port, device);
+  if(port == ID::Port::Controller) controllerPort.connect(settings.controllerPort = device);
 }
 
 auto Interface::power() -> void {

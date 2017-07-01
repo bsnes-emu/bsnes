@@ -15,15 +15,6 @@ auto SMP::cycleEdge() -> void {
   timer0.tick();
   timer1.tick();
   timer2.tick();
-
-  //TEST register S-SMP speed control
-  //24 clocks have already been added for this cycle at this point
-  switch(io.clockSpeed) {
-  case 0: break;                 //100% speed
-  case 1: step(24); break;       // 50% speed
-  case 2: while(true) step(24);  //  0% speed -- locks S-SMP
-  case 3: step(24 * 9); break;   // 10% speed
-  }
 }
 
 template<uint Frequency> auto SMP::Timer<Frequency>::tick() -> void {

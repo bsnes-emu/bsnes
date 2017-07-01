@@ -413,7 +413,7 @@ auto SPC700::instructionIndirectXWrite(uint8& data) -> void {
 
 auto SPC700::instructionIndirectXIncrementRead(uint8& data) -> void {
   idle(PC);
-  idle();  //quirk: does not read internal SMP registers
+  idle(page(X), false);  //quirk: does not read internal SMP registers
   data = read(page(X++));
   ZF = data == 0;
   NF = data & 0x80;
@@ -421,7 +421,7 @@ auto SPC700::instructionIndirectXIncrementRead(uint8& data) -> void {
 
 auto SPC700::instructionIndirectXIncrementWrite(uint8& data) -> void {
   idle(PC);
-  idle();  //quirk: does not read internal SMP registers
+  idle(page(X), false);  //quirk: does not read internal SMP registers
   write(page(X++), data);
 }
 

@@ -39,19 +39,24 @@ auto SMP::power() -> void {
   r.pc.byte.l = iplrom[62];
   r.pc.byte.h = iplrom[63];
 
-  for(auto& byte : apuram) byte = random(0x00);
-
+  //timing
   io.clockCounter = 0;
   io.dspCounter = 0;
-  io.timerStep = 3;
+  io.timerStep = (1 << 0) + (2 << 0);
+
+  //external
+  io.apu0 = 0x00;
+  io.apu1 = 0x00;
+  io.apu2 = 0x00;
+  io.apu3 = 0x00;
 
   //$00f0
-  io.clockSpeed = 0;
-  io.timerSpeed = 0;
-  io.timersEnable = true;
-  io.ramDisable = false;
-  io.ramWritable = true;
   io.timersDisable = false;
+  io.ramWritable = true;
+  io.ramDisable = false;
+  io.timersEnable = true;
+  io.ramSpeed = 0;
+  io.romIOSpeed = 0;
 
   //$00f1
   io.iplromEnable = true;
@@ -60,14 +65,14 @@ auto SMP::power() -> void {
   io.dspAddr = 0x00;
 
   //$00f4-00f7
-  io.port[0] = 0x00;
-  io.port[1] = 0x00;
-  io.port[2] = 0x00;
-  io.port[3] = 0x00;
+  io.cpu0 = 0x00;
+  io.cpu1 = 0x00;
+  io.cpu2 = 0x00;
+  io.cpu3 = 0x00;
 
-  //$00f8,$00f9
-  io.ram00f8 = 0x00;
-  io.ram00f9 = 0x00;
+  //$00f8-$00f9
+  io.aux4 = 0x00;
+  io.aux5 = 0x00;
 
   timer0.stage0 = 0;
   timer1.stage0 = 0;

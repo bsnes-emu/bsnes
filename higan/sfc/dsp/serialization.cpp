@@ -1,6 +1,8 @@
 void DSP::serialize(serializer& s) {
   Thread::serialize(s);
 
+  s.array(apuram);
+
   s.array(state.regs, 128);
   s.array(state.echoHistory[0]);
   s.array(state.echoHistory[1]);

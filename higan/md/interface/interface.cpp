@@ -34,9 +34,6 @@ Interface::Interface() {
     device.inputs.append({0, "A"    });
     device.inputs.append({0, "B"    });
     device.inputs.append({0, "C"    });
-    device.inputs.append({0, "X"    });
-    device.inputs.append({0, "Y"    });
-    device.inputs.append({0, "Z"    });
     device.inputs.append({0, "Start"});
     controllerPort1.devices.append(device);
     controllerPort2.devices.append(device);

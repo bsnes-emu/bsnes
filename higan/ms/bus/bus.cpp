@@ -45,8 +45,8 @@ auto Bus::in(uint8 addr) -> uint8 {
   case 3: {
     if(Model::MasterSystem()) {
       bool reset = !platform->inputPoll(ID::Port::Hardware, ID::Device::MasterSystemControls, 0);
-      auto port1 = peripherals.controllerPort1->readData();
-      auto port2 = peripherals.controllerPort2->readData();
+      auto port1 = controllerPort1.device->readData();
+      auto port2 = controllerPort2.device->readData();
       if(addr.bit(0) == 0) {
         return port1.bits(0,5) << 0 | port2.bits(0,1) << 6;
       } else {

@@ -36,17 +36,7 @@ private:
   } information;
 };
 
-struct Peripherals {
-  auto unload() -> void;
-  auto reset() -> void;
-  auto connect(uint port, uint device) -> void;
-
-  Controller* controllerPort1 = nullptr;
-  Controller* controllerPort2 = nullptr;
-};
-
 extern System system;
-extern Peripherals peripherals;
 
 auto Model::MasterSystem() -> bool { return system.model() == System::Model::MasterSystem; }
 auto Model::GameGear() -> bool { return system.model() == System::Model::GameGear; }

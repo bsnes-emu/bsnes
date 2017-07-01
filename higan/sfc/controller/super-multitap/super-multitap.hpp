@@ -3,7 +3,7 @@ struct SuperMultitap : Controller {
     Up, Down, Left, Right, B, A, Y, X, L, R, Select, Start,
   };
 
-  SuperMultitap(bool port);
+  SuperMultitap(uint port);
 
   auto data() -> uint2;
   auto latch(bool data) -> void;

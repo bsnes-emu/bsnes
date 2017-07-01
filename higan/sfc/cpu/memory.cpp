@@ -1,11 +1,3 @@
-auto CPU::readPort(uint2 port) const -> uint8 {
-  return io.port[port];
-}
-
-auto CPU::writePort(uint2 port, uint8 data) -> void {
-  io.port[port] = data;
-}
-
 auto CPU::idle() -> void {
   status.clockCount = 6;
   dmaEdge();

@@ -1,9 +1,9 @@
-Justifier::Justifier(bool port, bool chained):
+Justifier::Justifier(uint port, bool chained):
 Controller(port),
 chained(chained),
 device(!chained ? ID::Device::Justifier : ID::Device::Justifiers)
 {
-  create(Controller::Enter, 21'477'272);
+  create(Controller::Enter, system.cpuFrequency());
   latched = 0;
   counter = 0;
   active = 0;

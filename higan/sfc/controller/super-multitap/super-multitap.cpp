@@ -1,4 +1,4 @@
-SuperMultitap::SuperMultitap(bool port) : Controller(port) {
+SuperMultitap::SuperMultitap(uint port) : Controller(port) {
   latched = 0;
   counter1 = 0;
   counter2 = 0;

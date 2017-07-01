@@ -12,7 +12,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "103.04";
+  static const string Version = "103.05";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";

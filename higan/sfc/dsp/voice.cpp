@@ -22,8 +22,8 @@ auto DSP::voice2(Voice& v) -> void {
   //read sample pointer (ignored if not needed)
   uint16 addr = state._dirAddress;
   if(!v.konDelay) addr += 2;
-  uint8 lo = smp.apuram[(uint16)(addr + 0)];
-  uint8 hi = smp.apuram[(uint16)(addr + 1)];
+  uint8 lo = apuram[(uint16)(addr + 0)];
+  uint8 hi = apuram[(uint16)(addr + 1)];
   state._brrNextAddress = ((hi << 8) + lo);
 
   state._adsr0 = VREG(ADSR0);
@@ -43,8 +43,8 @@ auto DSP::voice3a(Voice& v) -> void {
 }
 
 auto DSP::voice3b(Voice& v) -> void {
-  state._brrByte   = smp.apuram[(uint16)(v.brrAddress + v.brrOffset)];
-  state._brrHeader = smp.apuram[(uint16)(v.brrAddress)];
+  state._brrByte   = apuram[(uint16)(v.brrAddress + v.brrOffset)];
+  state._brrHeader = apuram[(uint16)(v.brrAddress)];
 }
 
 auto DSP::voice3c(Voice& v) -> void {

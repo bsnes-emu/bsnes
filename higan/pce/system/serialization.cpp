@@ -61,6 +61,7 @@ auto System::serializeAll(serializer& s) -> void {
   vdc0.serialize(s);
   vdc1.serialize(s);
   psg.serialize(s);
+  controllerPort.serialize(s);
 }
 
 auto System::serialize(serializer& s) -> void {

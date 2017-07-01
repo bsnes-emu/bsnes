@@ -49,8 +49,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.autoJoypadLatch);
   s.integer(status.autoJoypadCounter);
 
-  s.array(io.port);
-
   s.integer(io.wramAddress);
 
   s.integer(io.joypadStrobeLatch);

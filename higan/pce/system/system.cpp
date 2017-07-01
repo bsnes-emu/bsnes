@@ -5,7 +5,6 @@ namespace PCEngine {
 System system;
 Scheduler scheduler;
 Cheat cheat;
-#include "peripherals.cpp"
 #include "serialization.cpp"
 
 auto System::run() -> void {
@@ -44,7 +43,8 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
-  peripherals.unload();
+  cpu.peripherals.reset();
+  controllerPort.unload();
   cartridge.unload();
 }
 
@@ -66,7 +66,8 @@ auto System::power() -> void {
   psg.power();
   scheduler.primary(cpu);
 
-  peripherals.reset();
+  controllerPort.power();
+  controllerPort.connect(settings.controllerPort);
 }
 
 }

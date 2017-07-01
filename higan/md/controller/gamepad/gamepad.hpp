@@ -1,6 +1,6 @@
 struct Gamepad : Controller {
   enum : uint {
-    Up, Down, Left, Right, A, B, C, X, Y, Z, Start,
+    Up, Down, Left, Right, A, B, C, Start,
   };
 
   Gamepad(uint port);

@@ -3,7 +3,7 @@ struct Justifier : Controller {
     X, Y, Trigger, Start,
   };
 
-  Justifier(bool port, bool chained);
+  Justifier(uint port, bool chained);
   ~Justifier();
 
   auto main() -> void;
