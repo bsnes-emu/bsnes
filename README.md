@@ -591,22 +591,16 @@ that aren't specific to any particular console.
 
   - **Video Scale** determines the size and shape
     of the emulated console's video output
+    in windowed mode
+    (as opposed to full-screen)
       - Small, Medium and Large
         control the size of the video output
-        when higan is running in windowed
-        (as opposed to full-screen)
-        mode.
-      - Aspect Correction,
-        when enabled,
+        (and resize the window to match)
+      - Aspect Correction
         stretches the image to match the aspect ratio
         produced by the original console hardware,
-        since modern computer monitors use pixels
-        that are exactly as wide as they are tall,
-        but many TV-based consoles expected pixels to be
-        wider or narrower.
-        Aspect correction applies
-        to full-screen mode
-        as well as windowed mode.
+        but can cause a "ripple" effect at small sizes,
+        due to rounding errors.
   - **Video Emulation** applies various effects
     to the emulated console's video output
     to reproduce some behaviours
