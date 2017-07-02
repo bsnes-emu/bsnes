@@ -320,7 +320,14 @@ you can install everything you need with a command like:
         mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev \
         libxv-dev libao-dev libopenal-dev libudev-dev
 
-Once you have all the dependencies installed:
+Once you have all the dependencies installed,
+you may build and install higan.
+
+Note: Run these commands as yourself,
+**do not run them as root**
+(no `sudo`, no `su`, etc.),
+because higan does not support
+being installed system-wide.
 
  1. Put the higan source code in some convenient location,
     like `~/higan-src`
