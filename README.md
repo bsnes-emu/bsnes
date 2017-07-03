@@ -110,6 +110,16 @@ that you might want to check out.
     is a fork of bsnes v073
     that adds improved support for debugging Super Famicom software.
 
+Quick Start
+===========
+
+TODO
+
+- install
+- configure inputs
+- load a game
+- connect a controller
+
 Installing and uninstalling higan
 =================================
 
