@@ -819,6 +819,21 @@ Controls
   - configuring which emulated controllers
     are connected to the emulated system
 
+Save States
+===========
+
+Save states versus in-game saves
+--------------------------------
+
+Menu save states
+----------------
+
+Manager save states
+-------------------
+
+Hotkey save states
+------------------
+
 Notes on specific emulation cores
 =================================
 
