@@ -655,10 +655,26 @@ that aren't specific to any particular console.
         each installed Quark shader.
         See [Installing custom shaders](#installing-custom-shaders)
         for details.
-  - **Synchronize Audio** TODO
-  - **Mute Audio** TODO
-  - **Show Status Bar** TODO
-  - **Configuration ...** TODO
+  - **Synchronize Audio**
+    causes higan to wait for audio playback to complete
+    before resuming emulation.
+    This should reduce popping and glitching noises,
+    but if your PC's video refresh-rate and audio-playback rate
+    are in a different ratio than the emulated console,
+    this may increase them.
+    If your PC cannot emulate at full-speed,
+    (60fps for most consoles, 75fps for WonderSwan)
+    this has no noticable effect.
+  - **Mute Audio**
+    causes higan to not output sound from the emulated console.
+    The sound hardware is still emulated.
+  - **Show Status Bar**
+    causes higan to show or hide the status bar
+    at the bottom of the window.
+    This option has no effect in full-screen mode.
+    See [The status bar](#the-status-bar) for more information.
+  - **Configuration ...**
+    opens [the Configuration dialog](#the-configuration-dialog)
 
 The Tools menu
 --------------
