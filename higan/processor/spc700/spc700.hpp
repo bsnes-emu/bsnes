@@ -3,7 +3,7 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto idle(uint16 address, bool read = true) -> void = 0;
+  virtual auto idle() -> void = 0;
   virtual auto read(uint16 address) -> uint8 = 0;
   virtual auto write(uint16 addessr, uint8 data) -> void = 0;
   virtual auto synchronizing() const -> bool = 0;
@@ -11,10 +11,14 @@ struct SPC700 {
   virtual auto readDisassembler(uint16 address) -> uint8 { return 0; }
 
   //spc700.cpp
-  inline auto page(uint8 address) const -> uint16;
-  inline auto stack(uint8 address) const -> uint16;
-
   auto power() -> void;
+
+  //memory.cpp
+  inline auto fetch() -> uint8;
+  inline auto load(uint8 address) -> uint8;
+  inline auto store(uint8 address, uint8 data) -> void;
+  inline auto pull() -> uint8;
+  inline auto push(uint8 data) -> void;
 
   //instruction.cpp
   auto instruction() -> void;
@@ -33,7 +37,6 @@ struct SPC700 {
   auto algorithmROL(uint8) -> uint8;
   auto algorithmROR(uint8) -> uint8;
   auto algorithmSBC(uint8, uint8) -> uint8;
-  auto algorithmST (uint8, uint8) -> uint8;
   auto algorithmADW(uint16, uint16) -> uint16;
   auto algorithmCPW(uint16, uint16) -> uint16;
   auto algorithmLDW(uint16, uint16) -> uint16;
@@ -67,8 +70,13 @@ struct SPC700 {
   auto instructionDirectRead(fpb, uint8&) -> void;
   auto instructionDirectModify(fps) -> void;
   auto instructionDirectWrite(uint8&) -> void;
-  auto instructionDirectWriteDirect(fpb) -> void;
-  auto instructionDirectWriteImmediate(fpb) -> void;
+  auto instructionDirectDirectCompare(fpb) -> void;
+  auto instructionDirectDirectModify(fpb) -> void;
+  auto instructionDirectDirectWrite() -> void;
+  auto instructionDirectImmediateCompare(fpb) -> void;
+  auto instructionDirectImmediateModify(fpb) -> void;
+  auto instructionDirectImmediateWrite() -> void;
+  auto instructionDirectCompareWord(fpw) -> void;
   auto instructionDirectReadWord(fpw) -> void;
   auto instructionDirectModifyWord(int) -> void;
   auto instructionDirectWriteWord() -> void;
@@ -88,6 +96,7 @@ struct SPC700 {
   auto instructionIndirectXWrite(uint8&) -> void;
   auto instructionIndirectXIncrementRead(uint8&) -> void;
   auto instructionIndirectXIncrementWrite(uint8&) -> void;
+  auto instructionIndirectXCompareIndirectY(fpb) -> void;
   auto instructionIndirectXWriteIndirectY(fpb) -> void;
   auto instructionJumpAbsolute() -> void;
   auto instructionJumpIndirectX() -> void;

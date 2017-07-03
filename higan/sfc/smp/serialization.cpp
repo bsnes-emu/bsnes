@@ -4,7 +4,6 @@ auto SMP::serialize(serializer& s) -> void {
 
   s.integer(io.clockCounter);
   s.integer(io.dspCounter);
-  s.integer(io.timerStep);
 
   s.integer(io.apu0);
   s.integer(io.apu1);
@@ -15,8 +14,8 @@ auto SMP::serialize(serializer& s) -> void {
   s.integer(io.ramWritable);
   s.integer(io.ramDisable);
   s.integer(io.timersEnable);
-  s.integer(io.ramSpeed);
-  s.integer(io.romIOSpeed);
+  s.integer(io.externalWaitStates);
+  s.integer(io.internalWaitStates);
 
   s.integer(io.iplromEnable);
 

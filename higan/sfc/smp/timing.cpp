@@ -1,3 +1,24 @@
+//DSP clock (~24576khz) / 12 (~2048khz) is fed into the SMP
+//from here, the wait states value is really a clock divider of {2, 4, 8, 16}
+//because dividers of 8 and 16 are not evenly divislbe into 12, the SMP glitches
+//in these two cases, the SMP ends up consuming 10 and 20 cycles instead
+//this causes unpredictable behavior on real hardware
+//sometimes the SMP will run far slower than expected
+//other times (and more likely), the SMP will deadlock until the system is reset
+//the timers are not affected by this and advance by their expected values
+auto SMP::wait(maybe<uint16> addr) -> void {
+  static const uint cycleWaitStates[4] = {2, 4, 10, 20};
+  static const uint timerWaitStates[4] = {2, 4,  8, 16};
+
+  uint waitStates = io.externalWaitStates;
+  if(!addr) waitStates = io.internalWaitStates;  //idle cycles
+  else if((*addr & 0xfff0) == 0x00f0) waitStates = io.internalWaitStates;  //IO registers
+  else if(*addr >= 0xffc0 && io.iplromEnable) waitStates = io.internalWaitStates;  //IPLROM
+
+  step(cycleWaitStates[waitStates]);
+  stepTimers(timerWaitStates[waitStates]);
+}
+
 auto SMP::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(dsp);
@@ -11,15 +32,15 @@ auto SMP::step(uint clocks) -> void {
   #endif
 }
 
-auto SMP::cycleEdge() -> void {
-  timer0.tick();
-  timer1.tick();
-  timer2.tick();
+auto SMP::stepTimers(uint clocks) -> void {
+  timer0.step(clocks);
+  timer1.step(clocks);
+  timer2.step(clocks);
 }
 
-template<uint Frequency> auto SMP::Timer<Frequency>::tick() -> void {
+template<uint Frequency> auto SMP::Timer<Frequency>::step(uint clocks) -> void {
   //stage 0 increment
-  stage0 += smp.io.timerStep;
+  stage0 += clocks;
   if(stage0 < Frequency) return;
   stage0 -= Frequency;
 

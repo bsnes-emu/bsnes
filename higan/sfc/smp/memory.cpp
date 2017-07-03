@@ -92,14 +92,12 @@ auto SMP::busWrite(uint16 addr, uint8 data) -> void {
   case 0xf0:  //TEST
     if(r.p.p) break;  //writes only valid when P flag is clear
 
-    io.timersDisable = data.bit (0);
-    io.ramWritable   = data.bit (1);
-    io.ramDisable    = data.bit (2);
-    io.timersEnable  = data.bit (3);
-    io.ramSpeed      = data.bits(4,5);
-    io.romIOSpeed    = data.bits(6,7);
-
-    io.timerStep = (1 << io.romIOSpeed) + (2 << io.ramSpeed);
+    io.timersDisable      = data.bit (0);
+    io.ramWritable        = data.bit (1);
+    io.ramDisable         = data.bit (2);
+    io.timersEnable       = data.bit (3);
+    io.externalWaitStates = data.bits(4,5);
+    io.internalWaitStates = data.bits(6,7);
 
     timer0.synchronizeStage1();
     timer1.synchronizeStage1();
@@ -199,30 +197,19 @@ auto SMP::busWrite(uint16 addr, uint8 data) -> void {
   ramWrite(addr, data);  //all writes, even to I/O registers, appear on bus
 }
 
-auto SMP::speed(uint16 addr) const -> uint {
-  static const uint waitStates[4] = {1, 2, 5, 10};
-  if((addr & 0xfff0) == 0x00f0) return waitStates[io.romIOSpeed];
-  if(addr >= 0xffc0 && io.iplromEnable) return waitStates[io.romIOSpeed];
-  return waitStates[io.ramSpeed];
-}
-
-auto SMP::idle(uint16 addr, bool read) -> void {
-  step(24 * speed(addr));
-  if(read) busRead(addr);
-  cycleEdge();
+auto SMP::idle() -> void {
+  wait();
 }
 
 auto SMP::read(uint16 addr) -> uint8 {
-  step(24 * speed(addr));
+  wait(addr);
   uint8 data = busRead(addr);
-  cycleEdge();
   return data;
 }
 
 auto SMP::write(uint16 addr, uint8 data) -> void {
-  step(24 * speed(addr));
+  wait(addr);
   busWrite(addr, data);
-  cycleEdge();
 }
 
 auto SMP::readDisassembler(uint16 addr) -> uint8 {

@@ -21,7 +21,6 @@ private:
     //timing
     uint clockCounter;
     uint dspCounter;
-    uint timerStep;
 
     //external
     uint8 apu0;
@@ -34,8 +33,8 @@ private:
     uint1 ramWritable;
     uint1 ramDisable;
     uint1 timersEnable;
-    uint2 ramSpeed;
-    uint2 romIOSpeed;
+    uint2 externalWaitStates;
+    uint2 internalWaitStates;
 
     //$00f1
     bool iplromEnable;
@@ -63,8 +62,7 @@ private:
   auto busRead(uint16 addr) -> uint8;
   auto busWrite(uint16 addr, uint8 data) -> void;
 
-  auto speed(uint16 addr) const -> uint;
-  auto idle(uint16 addr, bool read = true) -> void override;
+  auto idle() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
 
@@ -80,16 +78,17 @@ private:
     bool enable;
     uint8 target;
 
-    auto tick() -> void;
+    auto step(uint clocks) -> void;
     auto synchronizeStage1() -> void;
   };
 
-  Timer<192> timer0;
-  Timer<192> timer1;
-  Timer< 24> timer2;
+  Timer<128> timer0;
+  Timer<128> timer1;
+  Timer< 16> timer2;
 
-  alwaysinline auto step(uint clocks) -> void;
-  alwaysinline auto cycleEdge() -> void;
+  inline auto wait(maybe<uint16> address = nothing) -> void;
+  inline auto step(uint clocks) -> void;
+  inline auto stepTimers(uint clocks) -> void;
 };
 
 extern SMP smp;

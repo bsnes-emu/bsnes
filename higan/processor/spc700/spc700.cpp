@@ -22,19 +22,12 @@ namespace Processor {
 
 #define alu (this->*op)
 
+#include "memory.cpp"
 #include "algorithms.cpp"
 #include "instructions.cpp"
 #include "instruction.cpp"
 #include "serialization.cpp"
 #include "disassembler.cpp"
-
-auto SPC700::page(uint8 address) const -> uint16 {
-  return PF << 8 | address;
-}
-
-auto SPC700::stack(uint8 address) const -> uint16 {
-  return 1 << 8 | address;
-}
 
 auto SPC700::power() -> void {
   PC = 0x0000;

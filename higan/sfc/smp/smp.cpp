@@ -34,7 +34,7 @@ auto SMP::load(Markup::Node node) -> bool {
 
 auto SMP::power() -> void {
   SPC700::power();
-  create(Enter, system.apuFrequency());
+  create(Enter, system.apuFrequency() / 12.0);
 
   r.pc.byte.l = iplrom[62];
   r.pc.byte.h = iplrom[63];
@@ -42,7 +42,6 @@ auto SMP::power() -> void {
   //timing
   io.clockCounter = 0;
   io.dspCounter = 0;
-  io.timerStep = (1 << 0) + (2 << 0);
 
   //external
   io.apu0 = 0x00;
@@ -55,8 +54,8 @@ auto SMP::power() -> void {
   io.ramWritable = true;
   io.ramDisable = false;
   io.timersEnable = true;
-  io.ramSpeed = 0;
-  io.romIOSpeed = 0;
+  io.externalWaitStates = 0;
+  io.internalWaitStates = 0;
 
   //$00f1
   io.iplromEnable = true;
