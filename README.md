@@ -689,21 +689,69 @@ that aren't specific to any particular console.
 The Tools menu
 --------------
 
-TODO
+The Tools menu
+contains features for manipulating the emulated console.
+
+  - **Save State**
+    stores the current state of the emulated console
+    into one of the listed slots.
+    See [Save States](#save-states) for more information.
+  - **Load State**
+    restores the emulated console to
+    a state previously created by the Save State menu.
+    See [Save States](#save-states) for more information.
+  - **Cheat Editor**
+    opens [the Cheat Editor window](#the-cheat-editor)
+  - **State Manager**
+    opens [the State Manager window](#the-state-manager)
+  - **Manifest Viewer**
+    opens [the Manifest Viewer window](#the-manifest-viewer)
 
 The Help menu
 -------------
 
-TODO
+The Help menu contains information about higan itself.
+
+  - **Documentation**
+    loads the official higan documentation
+    in your web-browser.
+  - **About**
+    opens the About dialog,
+    which displays basic information about higan,
+    including the version number.
 
 The status bar
 --------------
 
-TODO
+The status bar appears
+at the bottom of the main higan window,
+while "Show Status Bar" is ticked in the Settings menu.
 
-- FPS
-- "Paused" flag
-- "No cartridge loaded"
+Before any game is loaded,
+the status bar displays "No cartridge loaded".
+
+When a game is loaded and running,
+the status bar displays the current emulation speeed
+in frames-per-second.
+For PAL-based consoles,
+this should be around 50 FPS for "full speed" emulation,
+for NTSC and most portable consoles the ideal speed is 60 FPS,
+but the WonderSwan runs at 75 FPS.
+If the number is too low,
+you may need a faster computer,
+or a faster [video driver](#drivers).
+If the number is too high,
+you may need to [Synchronize Audio](#the-settings-menu),
+or you may have pressed the "turbo" [hotkey](#the-configuration-dialog).
+
+The status bar displays "Paused"
+if you have pressed the "pause" [hotkey](#the-configuration-dialog),
+or if "When focus is lost: Pause Emulation" is ticked
+in [the Input tab of the Configuration dialog](#the-configuration-dialog)
+and the main higan window is not the foreground window.
+To resume emulation,
+make sure the main higan window is in the foreground,
+and/or press the "pause" hotkey.
 
 The Configuration dialog
 -----------------------
