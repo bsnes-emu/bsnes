@@ -114,14 +114,14 @@ LDFLAGS += $(LIBM)
 ifeq ($(DEBUG), 1)
    CXXFLAGS += -O0 -g
 else
-   CXXFLAGS += -O3
+   CXXFLAGS += -O2 -DNDEBUG
 endif
 
 include Makefile.common
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
-CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES -DNDEBUG
+CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic)
 
 all: $(TARGET)
