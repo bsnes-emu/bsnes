@@ -2,12 +2,12 @@
 
 namespace GameBoyAdvance {
 
+Cartridge cartridge;
 #include "mrom.cpp"
 #include "sram.cpp"
 #include "eeprom.cpp"
 #include "flash.cpp"
 #include "serialization.cpp"
-Cartridge cartridge;
 
 Cartridge::Cartridge() {
   mrom.data = new uint8[mrom.size = 32 * 1024 * 1024];

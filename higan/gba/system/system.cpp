@@ -2,12 +2,11 @@
 
 namespace GameBoyAdvance {
 
+System system;
+Scheduler scheduler;
 #include "bios.cpp"
 #include "video.cpp"
 #include "serialization.cpp"
-BIOS bios;
-System system;
-Scheduler scheduler;
 
 auto System::init() -> void {
 }

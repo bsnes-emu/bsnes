@@ -4,8 +4,8 @@ namespace GameBoyAdvance {
 
 //Game Boy Player emulation
 
-#include "serialization.cpp"
 Player player;
+#include "serialization.cpp"
 
 auto Player::power() -> void {
   status.enable = false;
@@ -33,23 +33,23 @@ auto Player::frame() -> void {
 
   //todo: verify which settings are actually required
   //values were taken from observing GBP-compatible games
-  if(!cpu.regs.joybus.settings.sc
-  && !cpu.regs.joybus.settings.sd
-  && !cpu.regs.joybus.settings.si
-  && !cpu.regs.joybus.settings.so
-  && !cpu.regs.joybus.settings.scmode
-  && !cpu.regs.joybus.settings.sdmode
-  && !cpu.regs.joybus.settings.simode
-  && !cpu.regs.joybus.settings.somode
-  && !cpu.regs.joybus.settings.irqenable
-  && !cpu.regs.joybus.settings.mode
-  && !cpu.regs.serial.control.shiftclockselect
-  && !cpu.regs.serial.control.shiftclockfrequency
-  && !cpu.regs.serial.control.transferenablereceive
-  &&  cpu.regs.serial.control.transferenablesend
-  &&  cpu.regs.serial.control.startbit
-  &&  cpu.regs.serial.control.transferlength
-  &&  cpu.regs.serial.control.irqenable
+  if(!cpu.joybus.sc
+  && !cpu.joybus.sd
+  && !cpu.joybus.si
+  && !cpu.joybus.so
+  && !cpu.joybus.scMode
+  && !cpu.joybus.sdMode
+  && !cpu.joybus.siMode
+  && !cpu.joybus.soMode
+  && !cpu.joybus.siIRQEnable
+  && !cpu.joybus.mode
+  && !cpu.serial.shiftClockSelect
+  && !cpu.serial.shiftClockFrequency
+  && !cpu.serial.transferEnableReceive
+  &&  cpu.serial.transferEnableSend
+  &&  cpu.serial.startBit
+  &&  cpu.serial.transferLength
+  &&  cpu.serial.irqEnable
   ) {
     status.packet = (status.packet + 1) % 17;
     switch(status.packet) {
@@ -71,7 +71,7 @@ auto Player::frame() -> void {
     case 15: status.send = 0x30000003; break;
     case 16: status.send = 0x30000003; break;
     }
-    cpu.regs.irq.flag |= CPU::Interrupt::Serial;
+    cpu.irq.flag |= CPU::Interrupt::Serial;
   }
 }
 

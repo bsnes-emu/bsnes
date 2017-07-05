@@ -1,88 +1,77 @@
-auto CPU::dmaRun() -> void {
-  active.dma = true;
+auto CPU::DMA::run() -> bool {
+  if(!active) return false;
+  if(waiting && --waiting) return false;
 
-  while(true) {
-    bool transferred = false;
-    for(auto n : range(4)) {
-      auto& dma = regs.dma[n];
-      if(dma.pending) {
-        dmaExecute(dma);
-        if(dma.control.irq) regs.irq.flag |= Interrupt::DMA0 << n;
-        if(dma.control.drq && n == 3) regs.irq.flag |= Interrupt::Cartridge;
-        transferred = true;
-        break;
-      }
-    }
-    if(!transferred) break;
-  }
-
-  active.dma = false;
+  transfer();
+  if(irq) cpu.irq.flag |= CPU::Interrupt::DMA0 << id;
+  if(drq && id == 3) cpu.irq.flag |= CPU::Interrupt::Cartridge;
+  return true;
 }
 
-auto CPU::dmaExecute(Registers::DMA& dma) -> void {
-  uint seek = dma.control.size ? 4 : 2;
-  uint mode = dma.control.size ? Word : Half;
-  mode |= dma.run.length == dma.length ? Nonsequential : Sequential;
+auto CPU::DMA::transfer() -> void {
+  uint seek = size ? 4 : 2;
+  uint mode = size ? Word : Half;
+  mode |= latch.length == length ? Nonsequential : Sequential;
 
   if(mode & Nonsequential) {
-    if((dma.source & 0x0800'0000) && (dma.target & 0x0800'0000)) {
+    if((source & 0x0800'0000) && (target & 0x0800'0000)) {
       //ROM -> ROM transfer
     } else {
-      idle();
-      idle();
+      cpu.idle();
+      cpu.idle();
     }
   }
 
-  if(dma.run.source < 0x0200'0000) {
-    idle();  //cannot access BIOS
+  if(latch.source < 0x0200'0000) {
+    cpu.idle();  //cannot access BIOS
   } else {
-    uint32 addr = dma.run.source;
+    uint32 addr = latch.source;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    dma.data = _read(mode, addr);
+    data = cpu._read(mode, addr);
   }
 
-  if(dma.run.target < 0x0200'0000) {
-    idle();  //cannot access BIOS
+  if(latch.target < 0x0200'0000) {
+    cpu.idle();  //cannot access BIOS
   } else {
-    uint32 addr = dma.run.target;
+    uint32 addr = latch.target;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    _write(mode, addr, dma.data);
+    cpu._write(mode, addr, data);
   }
 
-  switch(dma.control.sourcemode) {
-  case 0: dma.run.source += seek; break;
-  case 1: dma.run.source -= seek; break;
+  switch(sourceMode) {
+  case 0: latch.source += seek; break;
+  case 1: latch.source -= seek; break;
   }
 
-  switch(dma.control.targetmode) {
-  case 0: dma.run.target += seek; break;
-  case 1: dma.run.target -= seek; break;
-  case 3: dma.run.target += seek; break;
+  switch(targetMode) {
+  case 0: latch.target += seek; break;
+  case 1: latch.target -= seek; break;
+  case 3: latch.target += seek; break;
   }
 
-  if(--dma.run.length == 0) {
-    dma.pending = false;
-    if(dma.control.targetmode == 3) dma.run.target = dma.target;
-    if(dma.control.repeat == 1) dma.run.length = dma.length;
-    if(dma.control.repeat == 0) dma.control.enable = false;
+  if(--latch.length == 0) {
+    active = false;
+    if(targetMode == 3) latch.target = target;
+    if(repeat == 1) latch.length = length;
+    if(repeat == 0) enable = false;
   }
 }
 
 auto CPU::dmaVblank() -> void {
-  for(auto& dma : regs.dma) {
-    if(dma.control.enable && dma.control.timingmode == 1) dma.pending = true;
+  for(auto& dma : this->dma) {
+    if(dma.enable && dma.timingMode == 1) dma.active = true;
   }
 }
 
 auto CPU::dmaHblank() -> void {
-  for(auto& dma : regs.dma) {
-    if(dma.control.enable && dma.control.timingmode == 2) dma.pending = true;
+  for(auto& dma : this->dma) {
+    if(dma.enable && dma.timingMode == 2) dma.active = true;
   }
 }
 
 auto CPU::dmaHDMA() -> void {
-  auto& dma = regs.dma[3];
-  if(dma.control.enable && dma.control.timingmode == 3) dma.pending = true;
+  auto& dma = this->dma[3];
+  if(dma.enable && dma.timingMode == 3) dma.active = true;
 }

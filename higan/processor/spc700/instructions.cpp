@@ -93,7 +93,7 @@ auto SPC700::instructionBranch(bool take) -> void {
 auto SPC700::instructionBranchBit(uint3 bit, bool match) -> void {
   uint8 address = fetch();
   uint8 data = load(address);
-  load(address);
+  idle();
   uint8 displacement = fetch();
   if(data.bit(bit) != match) return;
   idle();
@@ -104,7 +104,7 @@ auto SPC700::instructionBranchBit(uint3 bit, bool match) -> void {
 auto SPC700::instructionBranchNotDirect() -> void {
   uint8 address = fetch();
   uint8 data = load(address);
-  load(address);
+  idle();
   uint8 displacement = fetch();
   if(A == data) return;
   idle();
@@ -123,10 +123,10 @@ auto SPC700::instructionBranchNotDirectDecrement() -> void {
   PC += (int8)displacement;
 }
 
-auto SPC700::instructionBranchNotDirectX() -> void {
+auto SPC700::instructionBranchNotDirectIndexed(uint8& index) -> void {
   uint8 address = fetch();
   idle();
-  uint8 data = load(address + X);
+  uint8 data = load(address + index);
   idle();
   uint8 displacement = fetch();
   if(A == data) return;
@@ -300,7 +300,7 @@ auto SPC700::instructionDirectCompareWord(fpw op) -> void {
 auto SPC700::instructionDirectReadWord(fpw op) -> void {
   uint8 address = fetch();
   uint16 data = load(address + 0);
-  load(address + 0);
+  idle();
   data |= load(address + 1) << 8;
   YA = alu(YA, data);
 }

@@ -22,7 +22,7 @@ PPU ppu;
 #include "serialization.cpp"
 
 auto PPU::blank() -> bool {
-  return io.forceBlank || cpu.regs.mode == CPU::Registers::Mode::Stop;
+  return io.forceBlank || cpu.stopped();
 }
 
 PPU::PPU() {
@@ -43,7 +43,7 @@ auto PPU::step(uint clocks) -> void {
 }
 
 auto PPU::main() -> void {
-  cpu.keypadRun();
+  cpu.keypad.run();
 
   io.vblank = io.vcounter >= 160 && io.vcounter <= 226;
   io.vcoincidence = io.vcounter == io.vcompare;
@@ -59,12 +59,12 @@ auto PPU::main() -> void {
   }
 
   if(io.vcounter == 160) {
-    if(io.irqvblank) cpu.regs.irq.flag |= CPU::Interrupt::VBlank;
+    if(io.irqvblank) cpu.irq.flag |= CPU::Interrupt::VBlank;
     cpu.dmaVblank();
   }
 
   if(io.irqvcoincidence) {
-    if(io.vcoincidence) cpu.regs.irq.flag |= CPU::Interrupt::VCoincidence;
+    if(io.vcoincidence) cpu.irq.flag |= CPU::Interrupt::VCoincidence;
   }
 
   if(io.vcounter < 160) {
@@ -93,7 +93,7 @@ auto PPU::main() -> void {
   }
 
   io.hblank = 1;
-  if(io.irqhblank) cpu.regs.irq.flag |= CPU::Interrupt::HBlank;
+  if(io.irqhblank) cpu.irq.flag |= CPU::Interrupt::HBlank;
   if(io.vcounter < 160) cpu.dmaHblank();
 
   step(240);
@@ -114,7 +114,7 @@ auto PPU::refresh() -> void {
 }
 
 auto PPU::power() -> void {
-  create(PPU::Enter, 16'777'216);
+  create(PPU::Enter, system.frequency());
 
   for(uint n = 0x000; n <= 0x055; n++) bus.io[n] = this;
 

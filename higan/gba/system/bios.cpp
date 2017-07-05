@@ -1,3 +1,5 @@
+BIOS bios;
+
 BIOS::BIOS() {
   size = 16384;
   data = new uint8[size]();

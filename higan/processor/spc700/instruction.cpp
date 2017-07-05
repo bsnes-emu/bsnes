@@ -225,7 +225,7 @@ auto SPC700::instruction() -> void {
   op(0xdb, DirectIndexedWrite, Y, X)
   op(0xdc, ImpliedModify, fp(DEC), Y)
   op(0xdd, Transfer, Y, A)
-  op(0xde, BranchNotDirectX)
+  op(0xde, BranchNotDirectIndexed, X)
   op(0xdf, DecimalAdjustAdd)
   op(0xe0, OverflowClear)
   op(0xe1, CallTable, 14)

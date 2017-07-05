@@ -2,104 +2,99 @@ auto CPU::serialize(serializer& s) -> void {
   ARM::serialize(s);
   Thread::serialize(s);
 
-  s.array(iwram,  32 * 1024);
-  s.array(ewram, 256 * 1024);
+  s.array(iwram);
+  s.array(ewram);
 
-  for(auto& dma : regs.dma) {
+  for(auto& dma : this->dma) {
+    s.integer(dma.id);
+    s.boolean(dma.active);
+    s.integer(dma.waiting);
+    s.integer(dma.targetMode);
+    s.integer(dma.sourceMode);
+    s.integer(dma.repeat);
+    s.integer(dma.size);
+    s.integer(dma.drq);
+    s.integer(dma.timingMode);
+    s.integer(dma.irq);
+    s.integer(dma.enable);
     s.integer(dma.source);
     s.integer(dma.target);
     s.integer(dma.length);
     s.integer(dma.data);
-    s.integer(dma.control.targetmode);
-    s.integer(dma.control.sourcemode);
-    s.integer(dma.control.repeat);
-    s.integer(dma.control.size);
-    s.integer(dma.control.drq);
-    s.integer(dma.control.timingmode);
-    s.integer(dma.control.irq);
-    s.integer(dma.control.enable);
-    s.integer(dma.pending);
-    s.integer(dma.run.target);
-    s.integer(dma.run.source);
-    s.integer(dma.run.length);
+    s.integer(dma.latch.target);
+    s.integer(dma.latch.source);
+    s.integer(dma.latch.length);
   }
 
-  for(auto& timer : regs.timer) {
+  for(auto& timer : this->timer) {
+    s.integer(timer.id);
+    s.boolean(timer.pending);
     s.integer(timer.period);
     s.integer(timer.reload);
-    s.integer(timer.pending);
-    s.integer(timer.control.frequency);
-    s.integer(timer.control.cascade);
-    s.integer(timer.control.irq);
-    s.integer(timer.control.enable);
+    s.integer(timer.frequency);
+    s.integer(timer.cascade);
+    s.integer(timer.irq);
+    s.integer(timer.enable);
   }
 
-  for(auto& value : regs.serial.data) s.integer(value);
-  s.integer(regs.serial.control.shiftclockselect);
-  s.integer(regs.serial.control.shiftclockfrequency);
-  s.integer(regs.serial.control.transferenablereceive);
-  s.integer(regs.serial.control.transferenablesend);
-  s.integer(regs.serial.control.startbit);
-  s.integer(regs.serial.control.transferlength);
-  s.integer(regs.serial.control.irqenable);
-  s.integer(regs.serial.data8);
+  s.integer(serial.shiftClockSelect);
+  s.integer(serial.shiftClockFrequency);
+  s.integer(serial.transferEnableReceive);
+  s.integer(serial.transferEnableSend);
+  s.integer(serial.startBit);
+  s.integer(serial.transferLength);
+  s.integer(serial.irqEnable);
+  for(auto& value : serial.data) s.integer(value);
+  s.integer(serial.data8);
 
-  for(auto& flag : regs.keypad.control.flag) s.integer(flag);
-  s.integer(regs.keypad.control.enable);
-  s.integer(regs.keypad.control.condition);
+  s.integer(keypad.enable);
+  s.integer(keypad.condition);
+  for(auto& flag : keypad.flag) s.integer(flag);
 
-  s.integer(regs.joybus.settings.sc);
-  s.integer(regs.joybus.settings.sd);
-  s.integer(regs.joybus.settings.si);
-  s.integer(regs.joybus.settings.so);
-  s.integer(regs.joybus.settings.scmode);
-  s.integer(regs.joybus.settings.sdmode);
-  s.integer(regs.joybus.settings.simode);
-  s.integer(regs.joybus.settings.somode);
-  s.integer(regs.joybus.settings.irqenable);
-  s.integer(regs.joybus.settings.mode);
+  s.integer(joybus.sc);
+  s.integer(joybus.sd);
+  s.integer(joybus.si);
+  s.integer(joybus.so);
+  s.integer(joybus.scMode);
+  s.integer(joybus.sdMode);
+  s.integer(joybus.siMode);
+  s.integer(joybus.soMode);
+  s.integer(joybus.siIRQEnable);
+  s.integer(joybus.mode);
+  s.integer(joybus.resetSignal);
+  s.integer(joybus.receiveComplete);
+  s.integer(joybus.sendComplete);
+  s.integer(joybus.resetIRQEnable);
+  s.integer(joybus.receive);
+  s.integer(joybus.transmit);
+  s.integer(joybus.receiveFlag);
+  s.integer(joybus.sendFlag);
+  s.integer(joybus.generalFlag);
 
-  s.integer(regs.joybus.control.resetsignal);
-  s.integer(regs.joybus.control.receivecomplete);
-  s.integer(regs.joybus.control.sendcomplete);
-  s.integer(regs.joybus.control.irqenable);
+  s.integer(irq.ime);
+  s.integer(irq.enable);
+  s.integer(irq.flag);
 
-  s.integer(regs.joybus.receive);
-  s.integer(regs.joybus.transmit);
+  for(auto& flag : wait.nwait) s.integer(flag);
+  for(auto& flag : wait.swait) s.integer(flag);
+  s.integer(wait.phi);
+  s.integer(wait.prefetch);
+  s.integer(wait.gameType);
 
-  s.integer(regs.joybus.status.receiveflag);
-  s.integer(regs.joybus.status.sendflag);
-  s.integer(regs.joybus.status.generalflag);
-
-  s.integer(regs.ime);
-
-  s.integer(regs.irq.enable);
-  s.integer(regs.irq.flag);
-
-  for(auto& flag : regs.wait.control.nwait) s.integer(flag);
-  for(auto& flag : regs.wait.control.swait) s.integer(flag);
-  s.integer(regs.wait.control.phi);
-  s.integer(regs.wait.control.prefetch);
-  s.integer(regs.wait.control.gametype);
-
-  s.integer(regs.memory.control.disable);
-  s.integer(regs.memory.control.unknown1);
-  s.integer(regs.memory.control.ewram);
-  s.integer(regs.memory.control.ewramwait);
-  s.integer(regs.memory.control.unknown2);
-
-  s.integer(regs.postboot);
-  s.integer((uint&)regs.mode);
-  s.integer(regs.clock);
+  s.integer(memory.disable);
+  s.integer(memory.unknown1);
+  s.integer(memory.ewram);
+  s.integer(memory.ewramWait);
+  s.integer(memory.unknown2);
 
   s.array(prefetch.slot);
   s.integer(prefetch.addr);
   s.integer(prefetch.load);
   s.integer(prefetch.wait);
 
-  s.integer(pending.dma.vblank);
-  s.integer(pending.dma.hblank);
-  s.integer(pending.dma.hdma);
-
-  s.integer(active.dma);
+  s.integer(context.clock);
+  s.boolean(context.halted);
+  s.boolean(context.stopped);
+  s.boolean(context.booted);
+  s.boolean(context.dmaActive);
 }

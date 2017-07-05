@@ -2,6 +2,7 @@
 
 namespace GameBoyAdvance {
 
+APU apu;
 #include "io.cpp"
 #include "square.cpp"
 #include "square1.cpp"
@@ -11,7 +12,6 @@ namespace GameBoyAdvance {
 #include "sequencer.cpp"
 #include "fifo.cpp"
 #include "serialization.cpp"
-APU apu;
 
 auto APU::Enter() -> void {
   while(true) scheduler.synchronize(), apu.main();
@@ -65,7 +65,7 @@ auto APU::main() -> void {
   if(regs.bias.amplitude == 2) lsample &= ~3, rsample &= ~3;  //7-bit
   if(regs.bias.amplitude == 3) lsample &= ~7, rsample &= ~7;  //6-bit
 
-  if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
+  if(cpu.stopped()) lsample = 0, rsample = 0;
   stream->sample((lsample << 5) / 32768.0, (rsample << 5) / 32768.0);
 }
 
@@ -75,7 +75,7 @@ auto APU::step(uint clocks) -> void {
 }
 
 auto APU::power() -> void {
-  create(APU::Enter, 16'777'216);
+  create(APU::Enter, system.frequency());
   stream = Emulator::audio.createStream(2, frequency() / 64.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
   stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);

@@ -58,7 +58,7 @@ struct SPC700 {
   auto instructionBranchBit(uint3, bool) -> void;
   auto instructionBranchNotDirect() -> void;
   auto instructionBranchNotDirectDecrement() -> void;
-  auto instructionBranchNotDirectX() -> void;
+  auto instructionBranchNotDirectIndexed(uint8&) -> void;
   auto instructionBranchNotYDecrement() -> void;
   auto instructionBreak() -> void;
   auto instructionCallAbsolute() -> void;
