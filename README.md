@@ -1003,7 +1003,55 @@ The dialog has a tab for each main category of options:
 The Cheat Editor
 ----------------
 
-TODO
+higan supports applying temporary changes to the code of a running game.
+For example,
+you could disable the code that registers when the player takes damage,
+resulting in an "invulnerability" mode.
+On real,
+physical consoles,
+this requires a device like
+the [Action Replay][ar], [Game Genie][gg] or [Game Shark][gs].
+higan supports such changes ("cheats") natively.
+
+[ar]: https://en.wikipedia.org/wiki/Action_Replay
+[gg]: https://en.wikipedia.org/wiki/Game_Genie
+[gs]: https://en.wikipedia.org/wiki/GameShark
+
+higan stores the known cheats for a particular game
+in the file `cheats.bml`
+inside the corresponding game folder
+in [the Game Library](#the-game-library).
+
+If your copy of higan included a cheat database
+(a file named `cheats.bml` in the same directory as `Super Famicom.sys`),
+you can click the "Find Codes ..." button in the bottom left
+to load all known cheats for the currently-running game.
+
+To add a new cheat,
+select an unused row in the list,
+then type the relevant codes in the "Code(s)" field at the bottom,
+and a description in the "Description" field.
+Cheats are saved to disk
+when the game is unloaded,
+or when higan exits.
+
+TODO: code formats? comma-separated? ROM codes? RAM codes?
+
+To enable or disable an existing cheat,
+tick the checkbox in the first column of the list.
+The code should take effect immediately.
+higan saves whether a cheat is enabled or disabled
+when the game is unloaded,
+or when higan exits.
+
+To clear out an existing cheat,
+select it from the list
+and click the "Erase" button in the bottom right,
+or just manually delete
+the contents of the "Code(s)" and "Description" fields.
+
+To clear out all existing cheats,
+click the "Reset" button in the bottom right.
 
 The State Manager
 -----------------
