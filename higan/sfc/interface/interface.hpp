@@ -39,7 +39,8 @@ struct Interface : Emulator::Interface {
   auto title() -> string override;
 
   auto videoResolution() -> VideoSize override;
-  auto videoSize(uint width, uint height, bool arc) -> VideoSize override;
+  auto videoSize(uint width, uint height, bool aspectCorrection, uint cropWidth, uint cropHeight) -> VideoSize override;
+  auto videoCrop(const uint32*& data, uint& width, uint& height, uint cropWidth, uint cropHeight) -> void override;
   auto videoColors() -> uint32 override;
   auto videoColor(uint32 color) -> uint64 override;
 

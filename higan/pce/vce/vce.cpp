@@ -54,7 +54,7 @@ auto VCE::step(uint clocks) -> void {
 }
 
 auto VCE::refresh() -> void {
-  Emulator::video.refresh(buffer + 1365 * 13, 1365 * sizeof(uint32), 1140, 240);
+  Emulator::video.refresh(buffer + 1365 * 13, 1365 * sizeof(uint32), 1120, 240);
 }
 
 auto VCE::power() -> void {

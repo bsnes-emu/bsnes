@@ -53,26 +53,19 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   uint32_t* output;
   uint length;
 
+  pitch >>= 2;
+
+  if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
+    uint horizontal = settings["Video/Overscan/Horizontal"].natural();
+    uint vertical = settings["Video/Overscan/Vertical"].natural();
+    emulator->videoCrop(data, width, height, horizontal, vertical);
+  }
+
   if(video->lock(output, length, width, height)) {
-    pitch >>= 2, length >>= 2;
+    length >>= 2;
 
     for(auto y : range(height)) {
       memory::copy(output + y * length, data + y * pitch, width * sizeof(uint32));
-    }
-
-    if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
-      auto h = settings["Video/Overscan/Horizontal"].natural();
-      auto v = settings["Video/Overscan/Vertical"].natural();
-
-      if(h) for(auto y : range(height)) {
-        memory::fill(output + y * length, 4 * h);
-        memory::fill(output + y * length + (width - h), 4 * h);
-      }
-
-      if(v) for(auto y : range(v)) {
-        memory::fill(output + y * length, 4 * width);
-        memory::fill(output + (height - 1 - y) * length, 4 * width);
-      }
     }
 
     video->unlock();

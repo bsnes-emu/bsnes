@@ -18,10 +18,10 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   overscanMaskLabel.setFont(Font().setBold()).setText("Overscan Mask");
   horizontalMaskLabel.setText("Horizontal:");
   horizontalMaskValue.setAlignment(0.5);
-  horizontalMaskSlider.setLength(17).setPosition(settings["Video/Overscan/Horizontal"].natural()).onChange([&] { updateOverscan(); });
+  horizontalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Horizontal"].natural()).onChange([&] { updateOverscan(); });
   verticalMaskLabel.setText("Vertical:");
   verticalMaskValue.setAlignment(0.5);
-  verticalMaskSlider.setLength(17).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
+  verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
 
   updateColor();
   updateOverscan();
@@ -40,6 +40,7 @@ auto VideoSettings::updateColor() -> void {
 auto VideoSettings::updateOverscan() -> void {
   settings["Video/Overscan/Horizontal"].setValue(horizontalMaskSlider.position());
   settings["Video/Overscan/Vertical"].setValue(verticalMaskSlider.position());
-  horizontalMaskValue.setText({horizontalMaskSlider.position(), "px"});
-  verticalMaskValue.setText({verticalMaskSlider.position(), "px"});
+  horizontalMaskValue.setText({horizontalMaskSlider.position()});
+  verticalMaskValue.setText({verticalMaskSlider.position()});
+  presentation->resizeViewport();
 }

@@ -45,7 +45,8 @@ struct Interface {
   //video information
   struct VideoSize { uint width, height; };
   virtual auto videoResolution() -> VideoSize = 0;
-  virtual auto videoSize(uint width, uint height, bool arc) -> VideoSize = 0;
+  virtual auto videoSize(uint width, uint height, bool aspectCorrection, uint cropWidth = 0, uint cropHeight = 0) -> VideoSize = 0;
+  virtual auto videoCrop(const uint32*& data, uint& width, uint& height, uint cropWidth, uint cropHeight) -> void {}
   virtual auto videoColors() -> uint32 = 0;
   virtual auto videoColor(uint32 color) -> uint64 = 0;
 

@@ -248,7 +248,8 @@ private:
     uint vcounter;
   } state;
 
-  uint32 buffer[1280 * 480];
+  uint32 buffer[1280 * 512];
+  uint32* output = nullptr;
 };
 
 extern VDP vdp;

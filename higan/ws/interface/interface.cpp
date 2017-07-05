@@ -43,11 +43,11 @@ auto Interface::videoResolution() -> VideoSize {
   }
 }
 
-auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
-  uint w = videoResolution().width;
-  uint h = videoResolution().height;
-  uint m = min(width / w, height / h);
-  return {w * m, h * m};
+auto Interface::videoSize(uint width, uint height, bool, uint, uint) -> VideoSize {
+  double widthDivider = videoResolution().width;
+  double heightDivider = videoResolution().height;
+  uint multiplier = min(width / widthDivider, height / heightDivider);
+  return {uint(widthDivider * multiplier), uint(heightDivider * multiplier)};
 }
 
 auto Interface::loaded() -> bool {

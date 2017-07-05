@@ -19,7 +19,7 @@ auto VDP::scanline() -> void {
 
   if(state.vcounter == 240) scheduler.exit(Scheduler::Event::Frame);
 
-  state.output = buffer + (state.vcounter * 2 + 0) * 1280;
+  state.output = output + (state.vcounter * 2 + 0) * 1280;
 }
 
 auto VDP::run() -> void {

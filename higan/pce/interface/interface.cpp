@@ -40,15 +40,21 @@ auto Interface::title() -> string {
 }
 
 auto Interface::videoResolution() -> VideoSize {
-  return {1140, 240};
+  return {1120, 240};
 }
 
-auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
-  auto a = arc ? 8.0 / 7.0 : 1.0;
-  uint w = 285;
-  uint h = 240;
-  uint m = min(width / (w * a), height / h);
-  return {uint(w * a * m), uint(h * m)};
+auto Interface::videoSize(uint width, uint height, bool aspectCorrection, uint cropHorizontal, uint cropVertical) -> VideoSize {
+  double widthDivider = (280 - cropHorizontal * 2) * (aspectCorrection ? 8.0 / 7.0 : 1.0);
+  double heightDivider = (240 - cropVertical * 2);
+  uint multiplier = min(width / widthDivider, height / heightDivider);
+  return {uint(widthDivider * multiplier), uint(heightDivider * multiplier)};
+}
+
+auto Interface::videoCrop(const uint32*& data, uint& width, uint& height, uint cropHorizontal, uint cropVertical) -> void {
+  cropHorizontal *= 4;
+  data += cropVertical * 1120 + cropHorizontal;
+  width -= cropHorizontal * 2;
+  height -= cropVertical * 2;
 }
 
 auto Interface::videoColors() -> uint32 {

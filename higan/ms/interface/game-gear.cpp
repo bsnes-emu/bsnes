@@ -25,11 +25,11 @@ auto GameGearInterface::videoResolution() -> VideoSize {
   return {160, 144};
 }
 
-auto GameGearInterface::videoSize(uint width, uint height, bool arc) -> VideoSize {
-  uint w = 160;
-  uint h = 144;
-  uint m = min(width / w, height / h);
-  return {w * m, h * m};
+auto GameGearInterface::videoSize(uint width, uint height, bool, uint, uint) -> VideoSize {
+  double widthDivider = 160;
+  double heightDivider = 144;
+  uint multiplier = min(width / widthDivider, height / heightDivider);
+  return {uint(widthDivider * multiplier), uint(heightDivider * multiplier)};
 }
 
 auto GameGearInterface::videoColors() -> uint32 {

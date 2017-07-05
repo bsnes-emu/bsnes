@@ -1,29 +1,31 @@
-auto Program::stateName(uint slot, bool manager) -> string {
+auto Program::stateName(uint slot, bool managed) -> string {
   return {
     mediumPaths(1), "higan/states/",
-    manager ? "managed/" : "quick/",
+    managed ? "managed/" : "quick/",
     "slot-", slot, ".bst"
   };
 }
 
-auto Program::loadState(uint slot, bool manager) -> bool {
+auto Program::loadState(uint slot, bool managed) -> bool {
   if(!emulator) return false;
-  auto location = stateName(slot, manager);
+  string type = managed ? "managed" : "quick";
+  auto location = stateName(slot, managed);
   auto memory = file::read(location);
-  if(memory.size() == 0) return showMessage({"Slot ", slot, " does not exist"}), false;
+  if(memory.size() == 0) return showMessage({"Slot ", slot, " ", type, " state does not exist"}), false;
   serializer s(memory.data(), memory.size());
-  if(emulator->unserialize(s) == false) return showMessage({"Slot ", slot, " state incompatible"}), false;
-  return showMessage({"Loaded from slot ", slot}), true;
+  if(emulator->unserialize(s) == false) return showMessage({"Slot ", slot, " ", type, " state incompatible"}), false;
+  return showMessage({"Loaded from ", type, " slot ", slot}), true;
 }
 
-auto Program::saveState(uint slot, bool manager) -> bool {
+auto Program::saveState(uint slot, bool managed) -> bool {
   if(!emulator) return false;
-  auto location = stateName(slot, manager);
+  string type = managed ? "managed" : "quick";
+  auto location = stateName(slot, managed);
   serializer s = emulator->serialize();
   if(s.size() == 0) return showMessage({"Failed to save state to slot ", slot}), false;
   directory::create(Location::path(location));
   if(file::write(location, s.data(), s.size()) == false) {
-    return showMessage({"Unable to write to slot ", slot}), false;
+    return showMessage({"Unable to write to ", type, " slot ", slot}), false;
   }
-  return showMessage({"Saved to slot ", slot}), true;
+  return showMessage({"Saved to ", type, " slot ", slot}), true;
 }

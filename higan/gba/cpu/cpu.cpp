@@ -33,6 +33,12 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
+  for(auto _ : range(clocks)) {
+    for(auto& dma : this->dma) {
+      if(dma.waiting) dma.waiting--;
+    }
+  }
+
   if(!context.dmaActive) {
     context.dmaActive = true;
     while(true) {

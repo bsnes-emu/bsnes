@@ -81,6 +81,7 @@ Presentation::Presentation() {
   });
   maskOverscan.setText("Mask Overscan").setChecked(settings["Video/Overscan/Mask"].boolean()).onToggle([&] {
     settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
+    resizeViewport();
   });
   videoShaderMenu.setText("Video Shader");
   videoShaderNone.setText("None").onActivate([&] {
@@ -125,13 +126,13 @@ Presentation::Presentation() {
   });
 
   toolsMenu.setText("Tools").setVisible(false);
-  saveStateMenu.setText("Save State");
+  saveStateMenu.setText("Save Quickstate");
   saveSlot1.setText("Slot 1").onActivate([&] { program->saveState(1); });
   saveSlot2.setText("Slot 2").onActivate([&] { program->saveState(2); });
   saveSlot3.setText("Slot 3").onActivate([&] { program->saveState(3); });
   saveSlot4.setText("Slot 4").onActivate([&] { program->saveState(4); });
   saveSlot5.setText("Slot 5").onActivate([&] { program->saveState(5); });
-  loadStateMenu.setText("Load State");
+  loadStateMenu.setText("Load Quickstate");
   loadSlot1.setText("Slot 1").onActivate([&] { program->loadState(1); });
   loadSlot2.setText("Slot 2").onActivate([&] { program->loadState(2); });
   loadSlot3.setText("Slot 3").onActivate([&] { program->loadState(3); });
@@ -250,7 +251,7 @@ auto Presentation::resizeViewport() -> void {
   uint windowWidth = 0, windowHeight = 0;
   bool aspectCorrection = true;
   if(!fullScreen()) {
-    windowWidth  = 326 * scale;
+    windowWidth  = 320 * scale;
     windowHeight = 240 * scale;
     aspectCorrection = settings["Video/AspectCorrection"].boolean();
   } else {
@@ -262,7 +263,12 @@ auto Presentation::resizeViewport() -> void {
   if(!emulator) {
     viewport.setGeometry({0, 0, windowWidth, windowHeight});
   } else {
-    auto videoSize = emulator->videoSize(windowWidth, windowHeight, aspectCorrection);
+    uint overscanWidth = 0, overscanHeight = 0;
+    if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
+      overscanWidth  = settings["Video/Overscan/Horizontal"].natural();
+      overscanHeight = settings["Video/Overscan/Vertical"  ].natural();
+    }
+    auto videoSize = emulator->videoSize(windowWidth, windowHeight, aspectCorrection, overscanWidth, overscanHeight);
     viewport.setGeometry({
       (windowWidth - videoSize.width) / 2, (windowHeight - videoSize.height) / 2,
       videoSize.width, videoSize.height
