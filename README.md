@@ -938,28 +938,19 @@ The dialog has a tab for each main category of options:
         in a different way.
   - **Advanced**: This tab contains all the settings
     that didn't fit into one of the other categories.
-    Note that when changing a driver,
-    you must restart higan for the change to take effect.
       - "Video" controls how higan will draw
         the emulated console's video output
         to the PC screen.
-        The best option is "OpenGL"
-        (since it allows you to use
-        [custom shaders](#installing-custom-shaders)),
-        and the safest is "Direct Draw" (for Windows)
-        or SDL (for Linux).
         "None" means no video will be drawn.
+        See [Drivers](#drivers) for details.
       - "Audio" controls how higan will present
         the emulated console's audio output.
-        On Linux,
-        "PulseAudioSimple" is the most likely to work.
+        "None" means no audio will be played.
+        See [Drivers](#drivers) for details.
       - "Input" controls how higan checks for input
         from the PC's input devices.
-        On Linux,
-        "udev" is the most flexble,
-        but requires a modern Linux system,
-        while "Xlib" should work on other Unix-like OSs
-        but only supports a mouse and keyboard.
+        "None" means the emulated console cannot be controlled.
+        See [Drivers](#drivers) for details.
       - "Location" selects where the [Game Library](#the-game-library)
         looks for games to load.
         This should be set to match icarus' library location.
@@ -1079,9 +1070,6 @@ Importing MSU-1 games
 Configuring higan
 =================
 
-Drivers
--------
-
 Installing custom shaders
 -------------------------
 
@@ -1091,6 +1079,59 @@ Controls
   - mapping PC inputs to emulated controllers
   - configuring which emulated controllers
     are connected to the emulated system
+
+Drivers
+=======
+
+TODO
+
+Note that when changing a driver,
+you must restart higan for the change to take effect.
+
+Video
+-----
+
+TODO
+
+The best option is "OpenGL"
+(since it allows you to use
+[custom shaders](#installing-custom-shaders)),
+and the safest is "Direct Draw" (for Windows)
+or SDL (for Linux).
+
+Audio
+-----
+
+TODO
+
+On Linux,
+"PulseAudioSimple" is the most likely to work.
+
+On Windows, "DirectSound" is probably what you want.
+"XAudio" targets XAudio 2.7,
+(the last version to work on Windows 7),
+so it requires the latest (June 2010) version
+of the [DirectX 9 End-User Runtime][dx9]
+to be installed.
+
+[dx9]: https://www.microsoft.com/en-us/download/details.aspx?id=35
+
+Input
+-----
+
+TODO
+
+On Linux,
+"udev" is the most flexble,
+but requires a modern Linux system,
+while "Xlib" should work on other Unix-like OSs
+but only supports a mouse and keyboard.
+
+On Windows,
+"Windows" is the only input driver available,
+and automatically uses RawInput for keyboard/mouse,
+XInput for Xbox controllers,
+and DirectInput for other controllers.
 
 Save States
 ===========
