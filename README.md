@@ -781,6 +781,13 @@ The dialog has a tab for each main category of options:
         the border drawn by the [Settings](#the-settings-menu)
         → Video Emulation
         → Mask Overscan option.
+        The units are "pixels in the emulated console's standard video-mode".
+        For example, setting "Horizontal" to 8
+        will clip 8/256ths from the left and right sides
+        of the Super Famicom's video output,
+        whether the Super Famicom is in
+        lo-res (256px) or hi-res (512px)
+        mode.
   - **Audio**: This tab contains options that affect
     how higan reproduces
     the emulated console's audio output.
