@@ -692,13 +692,13 @@ The Tools menu
 The Tools menu
 contains features for manipulating the emulated console.
 
-  - **Save State**
+  - **Save Quickstate**
     stores the current state of the emulated console
-    into one of the listed menu state slots.
+    into one of the quickstate slots.
     See [Save States](#save-states) for more information.
-  - **Load State**
+  - **Load Quickstate**
     restores the emulated console to
-    a state previously created by the Save State menu.
+    a state previously saved to one of the quickstate slots.
     See [Save States](#save-states) for more information.
   - **Cheat Editor**
     opens [the Cheat Editor window](#the-cheat-editor)
@@ -752,6 +752,31 @@ and the main higan window is not the foreground window.
 To resume emulation,
 make sure the main higan window is in the foreground,
 and/or press the "pause" hotkey.
+
+The status bar briefly displays "Selected quick slot X"
+(where X is one of the Quickstate slot numbers)
+when you press the "Increment Quick State"
+or "Decrement Quick State"
+hotkeys,
+to show which Quickstate slot will be used
+the next time you press the "Save Quick State"
+or "Load Quick State" hotkeys.
+
+The status bar briefly displays "Slot X quick state does not exist"
+(where X is one of the Quickstate slot numbers)
+when you choose a slot from the
+[Tools](#the-tools-menu) → "Load Quickstate"
+sub-menu that has not had a save-state saved to it,
+or when you press the "Load Quick State" hotkey
+while the current Quickstate slot has not had a save-state saved to it,
+
+The status bar briefly displays "Power cycled"
+when you choose "Power Cycle" from [the console menu](#the-console menu),
+or press the "Power Cycle" hotkey.
+
+The status bar briefly displays "Display rotation not supported"
+when you press the "Rotate Display" hotkey
+while the emulated console does not support display rotation.
 
 The Configuration dialog
 -----------------------
@@ -919,10 +944,14 @@ The dialog has a tab for each main category of options:
         and captures the mouse so it cannot leave the higan window.
         This is useful when the mouse is being used to emulate
         a light-gun controller like the Super Scope.
-      - "Save State" saves the current state of the emulated console
-        to the "hotkey state" slot.
-      - "Load State" restores the emulated console
-        to the state saved in the "hotkey state" slot.
+      - "Save Quick State" saves the current state of the emulated console
+        to the currently-selected Quickstate slot.
+      - "Load Quick State" restores the emulated console
+        to the state saved in the currently-selected Quickstate slot.
+      - "Decrement Quick State" selects the previous Quickstate slot.
+        The status bar will briefly display the new current slot number.
+      - "Increment Quick State" selects the next Quickstate slot.
+        The status bar will briefly display the new current slot number.
       - "Pause Emulation" pauses the emulated console
         until the Pause Emulation hotkey is pressed a second time.
       - "Fast Forward" disables audio and video synchronisation
@@ -1146,14 +1175,11 @@ Save States
 Save states versus in-game saves
 --------------------------------
 
-Menu save states
-----------------
+Quickstates
+-----------
 
-Manager save states
--------------------
-
-Hotkey save states
-------------------
+Manager states
+--------------
 
 Notes on specific emulation cores
 =================================
