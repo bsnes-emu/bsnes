@@ -1003,27 +1003,62 @@ The dialog has a tab for each main category of options:
 The Cheat Editor
 ----------------
 
+For some consoles,
 higan supports applying temporary changes to the code of a running game.
 For example,
 you could disable the code that registers when the player takes damage,
 resulting in an "invulnerability" mode.
-On real,
-physical consoles,
-this requires a device like
-the [Action Replay][ar], [Game Genie][gg] or [Game Shark][gs].
-higan supports such changes ("cheats") natively.
+Currently,
+higan supports cheats for the following consoles:
 
-[ar]: https://en.wikipedia.org/wiki/Action_Replay
-[gg]: https://en.wikipedia.org/wiki/Game_Genie
-[gs]: https://en.wikipedia.org/wiki/GameShark
+  - Famicom
+  - Super Famicom
+  - Game Boy
+  - Master System
+  - PC Engine
+  - Wonder Swan
 
+A cheat code of the format `addr=data`
+will cause the emulated console to obtain `data`
+whenever it reads from memory address `addr`.
+A cheat code of the format `addr=comp?data`
+will cause reads from `addr` to obtain `data`,
+but only if the true value at `addr` is `comp`.
+In both formats,
+`data` is a single byte expressed as two hexadecimal digits,
+`comp` is also a single byte expressed as two hexadecimal digits,
+and `addr` is a memory address in the emulated console,
+expressed as however many hexadecimal digits are required
+for the console in question
+(typically 4 for 8-bit CPUs,
+6 for 16-bit CPUs,
+and 8 for 32-bit CPUs).
+
+For compatibility with older versions of higan,
+the older syntaxes of `addr/data` and `addr/comp/data`
+are still supported.
+
+For cheats that require more than a single-byte change,
+higan allows multiple codes to be combined with `+`
+so that all of them can have a single description
+and be toggled with a single click.
+For example,
+in Super Mario World,
+you can lock the time to 999 with these codes:
+`7e0f31=09+7e0f32=09+7e0f33=09`.
+
+Changes made in the Cheat Editor are saved to disk
+when the game is unloaded,
+or when higan exits.
 higan stores the known cheats for a particular game
 in the file `cheats.bml`
 inside the corresponding game folder
 in [the Game Library](#the-game-library).
 
-If your copy of higan included a cheat database
-(a file named `cheats.bml` in the same directory as `Super Famicom.sys`),
+If your copy of higan includes a cheat database
+(a file named `cheats.bml`
+in the same directory as `Super Famicom.sys`
+and the other `*.sys` directories),
 you can click the "Find Codes ..." button in the bottom left
 to load all known cheats for the currently-running game.
 
@@ -1031,18 +1066,10 @@ To add a new cheat,
 select an unused row in the list,
 then type the relevant codes in the "Code(s)" field at the bottom,
 and a description in the "Description" field.
-Cheats are saved to disk
-when the game is unloaded,
-or when higan exits.
-
-TODO: code formats? comma-separated? ROM codes? RAM codes?
 
 To enable or disable an existing cheat,
 tick the checkbox in the first column of the list.
 The code should take effect immediately.
-higan saves whether a cheat is enabled or disabled
-when the game is unloaded,
-or when higan exits.
 
 To clear out an existing cheat,
 select it from the list
