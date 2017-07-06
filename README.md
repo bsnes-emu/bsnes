@@ -609,15 +609,7 @@ that aren't specific to any particular console.
   - **Video Scale** determines the size and shape
     of the emulated console's video output
     in windowed mode
-    (as opposed to fullscreen)
-      - Small, Medium and Large
-        control the size of the video output
-        (and resize the window to match)
-      - Aspect Correction
-        stretches the image to match the aspect ratio
-        produced by the original console hardware,
-        but can cause a "ripple" effect at small sizes,
-        due to rounding errors.
+    (as opposed to fullscreen).
   - **Video Emulation** applies various effects
     to the emulated console's video output
     to reproduce some behaviours
@@ -813,6 +805,40 @@ The dialog has a tab for each main category of options:
         whether the Super Famicom is in
         lo-res (256px) or hi-res (512px)
         mode.
+      - "Aspect Correction"
+        (in both Windowed Mode and Fullscreen Mode)
+        stretches the image to match the aspect ratio
+        produced by the original console hardware,
+        but can cause a "ripple" effect,
+        due to rounding errors.
+      - "Resize Window to Viewport"
+        (under "Windowed mode")
+        causes higan to resize its window
+        to fit snugly around the emulated console's video
+        whenever it changes size:
+        because a game was loaded for a different console
+        with a different display size or aspect ratio,
+        because the "Overscan Mask" controls were adjusted,
+        because the game switched to a different video mode,
+        because the user pressed the "Rotate Display" hotkey,
+        etc.
+        When this option is disabled,
+        the higan window stays at a fixed size,
+        large enough to contain the video for any supported console,
+        padded with black borders for all smaller video modes.
+      - "Resize Viewport to Window"
+        (under "Fullscreen mode")
+        causes higan to stretch the emulated console's video output
+        to touch the edges of the screen.
+        Since most screens are not an exact multiple
+        of the size of all emulated consoles,
+        this may cause a "ripple" effect,
+        due to rounding errors.
+        When this option is disabled,
+        higan stretches the emulated console's video output
+        to the largest exact multiple
+        of the emulated console's video output
+        that is smaller than or equal to the screen size.
   - **Audio**: This tab contains options that affect
     how higan reproduces
     the emulated console's audio output.
