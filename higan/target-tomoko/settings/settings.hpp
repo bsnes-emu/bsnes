@@ -2,7 +2,7 @@ struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
 
   VerticalLayout layout{this};
-    Label colorAdjustmentLabel{&layout, Size{~0, 0}};
+    Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
       Label saturationLabel{&saturationLayout, Size{80, 0}};
       Label saturationValue{&saturationLayout, Size{50, 0}};
@@ -15,7 +15,7 @@ struct VideoSettings : TabFrameItem {
       Label luminanceLabel{&luminanceLayout, Size{80, 0}};
       Label luminanceValue{&luminanceLayout, Size{50, 0}};
       HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
-    Label overscanMaskLabel{&layout, Size{~0, 0}};
+    Label overscanMaskLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout horizontalMaskLayout{&layout, Size{~0, 0}};
       Label horizontalMaskLabel{&horizontalMaskLayout, Size{80, 0}};
       Label horizontalMaskValue{&horizontalMaskLayout, Size{50, 0}};
@@ -24,16 +24,25 @@ struct VideoSettings : TabFrameItem {
       Label verticalMaskLabel{&verticalMaskLayout, Size{80, 0}};
       Label verticalMaskValue{&verticalMaskLayout, Size{50, 0}};
       HorizontalSlider verticalMaskSlider{&verticalMaskLayout, Size{~0, 0}};
+    Label windowedModeLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout windowedModeLayout{&layout, Size{~0, 0}};
+      CheckLabel windowedModeAspectCorrection{&windowedModeLayout, Size{0, 0}};
+      CheckLabel windowedModeAdaptive{&windowedModeLayout, Size{0, 0}};
+    Label fullscreenModeLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout fullscreenModeLayout{&layout, Size{~0, 0}};
+      CheckLabel fullscreenModeAspectCorrection{&fullscreenModeLayout, Size{0, 0}};
+      CheckLabel fullscreenModeAdaptive{&fullscreenModeLayout, Size{0, 0}};
 
   auto updateColor() -> void;
   auto updateOverscan() -> void;
+  auto updateViewport() -> void;
 };
 
 struct AudioSettings : TabFrameItem {
   AudioSettings(TabFrame*);
 
   VerticalLayout layout{this};
-    Label driverLabel{&layout, Size{~0, 0}};
+    Label driverLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Label latencyLabel{&controlLayout, Size{0, 0}};
       ComboButton latencyCombo{&controlLayout, Size{~0, 0}};
@@ -42,7 +51,7 @@ struct AudioSettings : TabFrameItem {
       Label resamplerLabel{&controlLayout, Size{0, 0}};
       ComboButton resamplerCombo{&controlLayout, Size{~0, 0}};
     CheckLabel exclusiveMode{&layout, Size{~0, 0}};
-    Label effectsLabel{&layout, Size{~0, 0}};
+    Label effectsLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
       Label volumeLabel{&volumeLayout, Size{80, 0}};
       Label volumeValue{&volumeLayout, Size{50, 0}};

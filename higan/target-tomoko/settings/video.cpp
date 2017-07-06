@@ -23,8 +23,17 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   verticalMaskValue.setAlignment(0.5);
   verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
 
+  windowedModeLabel.setFont(Font().setBold()).setText("Windowed Mode");
+  windowedModeAspectCorrection.setText("Correct aspect ratio").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
+  windowedModeAdaptive.setText("Resize window to viewport").setChecked(settings["Video/Windowed/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
+
+  fullscreenModeLabel.setFont(Font().setBold()).setText("Fullscreen Mode");
+  fullscreenModeAspectCorrection.setText("Correct aspect ratio").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
+  fullscreenModeAdaptive.setText("Resize viewport to window").setChecked(settings["Video/Fullscreen/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
+
   updateColor();
   updateOverscan();
+  updateViewport();
 }
 
 auto VideoSettings::updateColor() -> void {
@@ -42,5 +51,13 @@ auto VideoSettings::updateOverscan() -> void {
   settings["Video/Overscan/Vertical"].setValue(verticalMaskSlider.position());
   horizontalMaskValue.setText({horizontalMaskSlider.position()});
   verticalMaskValue.setText({verticalMaskSlider.position()});
+  presentation->resizeViewport();
+}
+
+auto VideoSettings::updateViewport() -> void {
+  settings["Video/Windowed/AspectCorrection"].setValue(windowedModeAspectCorrection.checked());
+  settings["Video/Windowed/Adaptive"].setValue(windowedModeAdaptive.checked());
+  settings["Video/Fullscreen/AspectCorrection"].setValue(fullscreenModeAspectCorrection.checked());
+  settings["Video/Fullscreen/Adaptive"].setValue(fullscreenModeAdaptive.checked());
   presentation->resizeViewport();
 }

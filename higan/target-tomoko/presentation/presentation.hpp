@@ -31,8 +31,6 @@ struct Presentation : Window {
         MenuRadioItem videoScaleMedium{&videoScaleMenu};
         MenuRadioItem videoScaleLarge{&videoScaleMenu};
           Group videoScales{&videoScaleSmall, &videoScaleMedium, &videoScaleLarge};
-        MenuSeparator videoScaleSeparator{&videoScaleMenu};
-        MenuCheckItem aspectCorrection{&videoScaleMenu};
       Menu videoEmulationMenu{&settingsMenu};
         MenuCheckItem blurEmulation{&videoEmulationMenu};
         MenuCheckItem colorEmulation{&videoEmulationMenu};

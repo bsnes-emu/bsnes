@@ -47,23 +47,19 @@ Presentation::Presentation() {
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
-  if(settings["Video/Scale"].text() == "Small") videoScaleSmall.setChecked();
-  if(settings["Video/Scale"].text() == "Medium") videoScaleMedium.setChecked();
-  if(settings["Video/Scale"].text() == "Large") videoScaleLarge.setChecked();
+  if(settings["Video/Windowed/Multiplier"].text() == "Small") videoScaleSmall.setChecked();
+  if(settings["Video/Windowed/Multiplier"].text() == "Medium") videoScaleMedium.setChecked();
+  if(settings["Video/Windowed/Multiplier"].text() == "Large") videoScaleLarge.setChecked();
   videoScaleSmall.setText("Small").onActivate([&] {
-    settings["Video/Scale"].setValue("Small");
+    settings["Video/Windowed/Multiplier"].setValue("Small");
     resizeViewport();
   });
   videoScaleMedium.setText("Medium").onActivate([&] {
-    settings["Video/Scale"].setValue("Medium");
+    settings["Video/Windowed/Multiplier"].setValue("Medium");
     resizeViewport();
   });
   videoScaleLarge.setText("Large").onActivate([&] {
-    settings["Video/Scale"].setValue("Large");
-    resizeViewport();
-  });
-  aspectCorrection.setText("Aspect Correction").setChecked(settings["Video/AspectCorrection"].boolean()).onToggle([&] {
-    settings["Video/AspectCorrection"].setValue(aspectCorrection.checked());
+    settings["Video/Windowed/Multiplier"].setValue("Large");
     resizeViewport();
   });
   videoEmulationMenu.setText("Video Emulation");
@@ -243,35 +239,59 @@ auto Presentation::resizeViewport() -> void {
   //clear video area before resizing to avoid seeing distorted video momentarily
   clearViewport();
 
-  uint scale = 2;
-  if(settings["Video/Scale"].text() == "Small" ) scale = 2;
-  if(settings["Video/Scale"].text() == "Medium") scale = 3;
-  if(settings["Video/Scale"].text() == "Large" ) scale = 4;
-
-  uint windowWidth = 0, windowHeight = 0;
-  bool aspectCorrection = true;
-  if(!fullScreen()) {
-    windowWidth  = 320 * scale;
-    windowHeight = 240 * scale;
-    aspectCorrection = settings["Video/AspectCorrection"].boolean();
-  } else {
-    windowWidth  = geometry().width();
-    windowHeight = geometry().height();
-  }
-  if(!fullScreen()) setSize({windowWidth, windowHeight});
-
-  if(!emulator) {
-    viewport.setGeometry({0, 0, windowWidth, windowHeight});
-  } else {
-    uint overscanWidth = 0, overscanHeight = 0;
+  double emulatorWidth = 320;
+  double emulatorHeight = 240;
+  double aspectCorrection = 1.0;
+  if(emulator) {
+    auto resolution = emulator->videoResolution();
+    emulatorWidth = resolution.width;
+    emulatorHeight = resolution.height;
+    aspectCorrection = resolution.aspectCorrection;
     if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
-      overscanWidth  = settings["Video/Overscan/Horizontal"].natural();
-      overscanHeight = settings["Video/Overscan/Vertical"  ].natural();
+      uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
+      uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
+      emulatorWidth -= overscanHorizontal * 2;
+      emulatorHeight -= overscanVertical * 2;
     }
-    auto videoSize = emulator->videoSize(windowWidth, windowHeight, aspectCorrection, overscanWidth, overscanHeight);
+  }
+
+  if(!fullScreen()) {
+    if(settings["Video/Windowed/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
+    uint viewportMultiplier = 2;
+    if(settings["Video/Windowed/Multiplier"].text() == "Small") viewportMultiplier = settings["Video/Windowed/Multiplier/Small"].natural();
+    if(settings["Video/Windowed/Multiplier"].text() == "Medium") viewportMultiplier = settings["Video/Windowed/Multiplier/Medium"].natural();
+    if(settings["Video/Windowed/Multiplier"].text() == "Large") viewportMultiplier = settings["Video/Windowed/Multiplier/Large"].natural();
+    uint viewportWidth = 320 * viewportMultiplier;
+    uint viewportHeight = 240 * viewportMultiplier;
+    uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
+    if(!settings["Video/Windowed/Adaptive"].boolean()) {
+      emulatorWidth *= multiplier;
+      emulatorHeight *= multiplier;
+      setSize({viewportWidth, viewportHeight});
+      viewport.setGeometry({
+        (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
+        emulatorWidth, emulatorHeight
+      });
+    } else {
+      setSize({emulatorWidth * multiplier, emulatorHeight * multiplier});
+      viewport.setGeometry({0, 0, emulatorWidth * multiplier, emulatorHeight * multiplier});
+    }
+  } else {
+    if(settings["Video/Fullscreen/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
+    uint viewportWidth = geometry().width();
+    uint viewportHeight = geometry().height();
+    if(!settings["Video/Fullscreen/Adaptive"].boolean()) {
+      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
+      emulatorWidth *= multiplier;
+      emulatorHeight *= multiplier;
+    } else {
+      double multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
+      emulatorWidth *= multiplier;
+      emulatorHeight *= multiplier;
+    }
     viewport.setGeometry({
-      (windowWidth - videoSize.width) / 2, (windowHeight - videoSize.height) / 2,
-      videoSize.width, videoSize.height
+      (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
+      emulatorWidth, emulatorHeight
     });
   }
 

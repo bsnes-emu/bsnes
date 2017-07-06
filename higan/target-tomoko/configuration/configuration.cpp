@@ -16,8 +16,6 @@ Settings::Settings() {
 
   set("Video/Driver", ruby::Video::optimalDriver());
   set("Video/Synchronize", false);
-  set("Video/Scale", "Small");
-  set("Video/AspectCorrection", true);
   set("Video/Shader", "Blur");
   set("Video/BlurEmulation", true);
   set("Video/ColorEmulation", true);
@@ -30,6 +28,16 @@ Settings::Settings() {
   set("Video/Overscan/Mask", false);
   set("Video/Overscan/Horizontal", 8);
   set("Video/Overscan/Vertical", 8);
+
+  set("Video/Windowed/AspectCorrection", true);
+  set("Video/Windowed/Adaptive", false);
+  set("Video/Windowed/Multiplier", "Small");
+  set("Video/Windowed/Multiplier/Small", 2);
+  set("Video/Windowed/Multiplier/Medium", 3);
+  set("Video/Windowed/Multiplier/Large", 4);
+
+  set("Video/Fullscreen/AspectCorrection", true);
+  set("Video/Fullscreen/Adaptive", false);
 
   set("Audio/Driver", ruby::Audio::optimalDriver());
   set("Audio/Device", "");

@@ -52,23 +52,8 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoSize {
-  return {1280, 480};
-}
-
-auto Interface::videoSize(uint width, uint height, bool aspectCorrection, uint cropHorizontal, uint cropVertical) -> VideoSize {
-  double widthDivider = (320 - cropHorizontal * 2);
-  double heightDivider = (240 - cropVertical * 2);
-  uint multiplier = min(width / widthDivider, height / heightDivider);
-  return {uint(widthDivider * multiplier), uint(heightDivider * multiplier)};
-}
-
-auto Interface::videoCrop(const uint32*& data, uint& width, uint& height, uint cropHorizontal, uint cropVertical) -> void {
-  cropHorizontal *= 4;
-  cropVertical *= 2;
-  data += cropVertical * 1280 + cropHorizontal;
-  width -= cropHorizontal * 2;
-  height -= cropVertical * 2;
+auto Interface::videoResolution() -> VideoResolution {
+  return {320, 240, 1280, 480, 1.0};
 }
 
 auto Interface::videoColors() -> uint32 {

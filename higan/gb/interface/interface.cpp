@@ -33,15 +33,8 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoSize {
-  return {160, 144};
-}
-
-auto Interface::videoSize(uint width, uint height, bool, uint, uint) -> VideoSize {
-  double widthDivider = 160;
-  double heightDivider = 144;
-  uint multiplier = min(width / widthDivider, height / heightDivider);
-  return {uint(widthDivider * multiplier), uint(heightDivider * multiplier)};
+auto Interface::videoResolution() -> VideoResolution {
+  return {160, 144, 160, 144, 1.0};
 }
 
 auto Interface::loaded() -> bool {

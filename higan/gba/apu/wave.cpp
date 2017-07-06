@@ -66,14 +66,14 @@ auto APU::Wave::write(uint addr, uint8 byte) -> void {
 
 auto APU::Wave::readram(uint addr) const -> uint8 {
   uint8 byte = 0;
-  byte |= pattern[!bank << 5 | addr << 1 | 0] << 0;
-  byte |= pattern[!bank << 5 | addr << 1 | 1] << 4;
+  byte |= pattern[!bank << 5 | addr << 1 | 0] << 4;
+  byte |= pattern[!bank << 5 | addr << 1 | 1] << 0;
   return byte;
 }
 
 auto APU::Wave::writeram(uint addr, uint8 byte) -> void {
-  pattern[!bank << 5 | addr << 1 | 0] = byte >> 0;
-  pattern[!bank << 5 | addr << 1 | 1] = byte >> 4;
+  pattern[!bank << 5 | addr << 1 | 0] = byte >> 4;
+  pattern[!bank << 5 | addr << 1 | 1] = byte >> 0;
 }
 
 auto APU::Wave::power() -> void {
