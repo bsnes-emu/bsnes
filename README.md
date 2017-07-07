@@ -1077,7 +1077,7 @@ Changes made in the Cheat Editor are saved to disk
 when the game is unloaded,
 or when higan exits.
 higan stores the known cheats for a particular game
-in the file `cheats.bml`
+in `higan/cheats.bml`
 inside the corresponding game folder
 in [the Game Library](#the-game-library).
 
