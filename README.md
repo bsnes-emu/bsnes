@@ -1160,8 +1160,8 @@ A game is more than just
 the raw data originally encased in a game's ROM chip.
 If a game allows you to save your progress,
 that information needs to be stored somewhere.
-If you use an emulator's save-state feature,
-those save-states need to be stored somewhere.
+If you use an emulator's [save states](#save-states),
+those save states need to be stored somewhere.
 If you use Game Genie or Pro Action Replay codes,
 information about what codes exist,
 what codes are enabled,
