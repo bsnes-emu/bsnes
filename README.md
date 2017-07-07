@@ -684,13 +684,13 @@ The Tools menu
 The Tools menu
 contains features for manipulating the emulated console.
 
-  - **Save Quickstate**
+  - **Save Quick State**
     stores the current state of the emulated console
-    into one of the quickstate slots.
+    into one of the quick state slots.
     See [Save States](#save-states) for more information.
-  - **Load Quickstate**
+  - **Load Quick State**
     restores the emulated console to
-    a state previously saved to one of the quickstate slots.
+    a state previously saved to one of the quick state slots.
     See [Save States](#save-states) for more information.
   - **Cheat Editor**
     opens [the Cheat Editor window](#the-cheat-editor)
@@ -745,22 +745,22 @@ To resume emulation,
 make sure the main higan window is in the foreground,
 and/or press the "pause" hotkey.
 
-The status bar briefly displays "Selected quick slot X"
-(where X is one of the Quickstate slot numbers)
+The status bar briefly displays "Selected quick state slot X"
+(where X is one of the Quick State slot numbers)
 when you press the "Increment Quick State"
 or "Decrement Quick State"
 hotkeys,
-to show which Quickstate slot will be used
+to show which Quick State slot will be used
 the next time you press the "Save Quick State"
 or "Load Quick State" hotkeys.
 
 The status bar briefly displays "Slot X quick state does not exist"
-(where X is one of the Quickstate slot numbers)
+(where X is one of the Quick State slot numbers)
 when you choose a slot from the
-[Tools](#the-tools-menu) → "Load Quickstate"
+[Tools](#the-tools-menu) → "Load Quick State"
 sub-menu that has not had a save-state saved to it,
 or when you press the "Load Quick State" hotkey
-while the current Quickstate slot has not had a save-state saved to it,
+while the current Quick State slot has not had a save-state saved to it,
 
 The status bar briefly displays "Power cycled"
 when you choose "Power Cycle" from [the console menu](#the-console menu),
@@ -971,12 +971,12 @@ The dialog has a tab for each main category of options:
         This is useful when the mouse is being used to emulate
         a light-gun controller like the Super Scope.
       - "Save Quick State" saves the current state of the emulated console
-        to the currently-selected Quickstate slot.
+        to the currently-selected Quick State slot.
       - "Load Quick State" restores the emulated console
-        to the state saved in the currently-selected Quickstate slot.
-      - "Decrement Quick State" selects the previous Quickstate slot.
+        to the state saved in the currently-selected Quick State slot.
+      - "Decrement Quick State" selects the previous Quick State slot.
         The status bar will briefly display the new current slot number.
-      - "Increment Quick State" selects the next Quickstate slot.
+      - "Increment Quick State" selects the next Quick State slot.
         The status bar will briefly display the new current slot number.
       - "Pause Emulation" pauses the emulated console
         until the Pause Emulation hotkey is pressed a second time.
@@ -1276,8 +1276,8 @@ Save States
 Save states versus in-game saves
 --------------------------------
 
-Quickstates
------------
+Quick states
+------------
 
 Manager states
 --------------
