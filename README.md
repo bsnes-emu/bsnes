@@ -1109,7 +1109,37 @@ click the "Reset" button in the bottom right.
 The State Manager
 -----------------
 
-TODO
+The State Manager allows you to create,
+load,
+and remove Manager states.
+For more information on Manager states,
+quick states,
+saved games
+and how they compare,
+see [Save States](#save-states).
+
+To create a new manager state,
+or to replace an existing one,
+select the slot in the list
+then click "Save" in the bottom-left corner.
+You can then type a description in the "Description" field,
+to help you find the state again later.
+
+To rename a state,
+select the slot in the list
+and edit the "Description" field.
+
+To load a state,
+select the slot in the list
+and click "Load" in the bottom-left corner,
+or just double-click it.
+
+To clear the state out of a slot,
+select the slot in the list
+and click "Erase" in the bottom-right corner.
+
+To clear all the slots at once,
+click "Reset" in the bottom-right corner.
 
 The Manifest Viewer
 -------------------
