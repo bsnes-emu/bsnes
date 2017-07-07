@@ -47,19 +47,16 @@ Presentation::Presentation() {
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
-  if(settings["Video/Windowed/Multiplier"].text() == "Small") videoScaleSmall.setChecked();
-  if(settings["Video/Windowed/Multiplier"].text() == "Medium") videoScaleMedium.setChecked();
-  if(settings["Video/Windowed/Multiplier"].text() == "Large") videoScaleLarge.setChecked();
   videoScaleSmall.setText("Small").onActivate([&] {
-    settings["Video/Windowed/Multiplier"].setValue("Small");
+    settings["Video/Windowed/Scale"].setValue("Small");
     resizeViewport();
   });
   videoScaleMedium.setText("Medium").onActivate([&] {
-    settings["Video/Windowed/Multiplier"].setValue("Medium");
+    settings["Video/Windowed/Scale"].setValue("Medium");
     resizeViewport();
   });
   videoScaleLarge.setText("Large").onActivate([&] {
-    settings["Video/Windowed/Multiplier"].setValue("Large");
+    settings["Video/Windowed/Scale"].setValue("Large");
     resizeViewport();
   });
   videoEmulationMenu.setText("Video Emulation");
@@ -122,13 +119,13 @@ Presentation::Presentation() {
   });
 
   toolsMenu.setText("Tools").setVisible(false);
-  saveStateMenu.setText("Save Quickstate");
+  saveQuickStateMenu.setText("Save Quick State");
   saveSlot1.setText("Slot 1").onActivate([&] { program->saveState(1); });
   saveSlot2.setText("Slot 2").onActivate([&] { program->saveState(2); });
   saveSlot3.setText("Slot 3").onActivate([&] { program->saveState(3); });
   saveSlot4.setText("Slot 4").onActivate([&] { program->saveState(4); });
   saveSlot5.setText("Slot 5").onActivate([&] { program->saveState(5); });
-  loadStateMenu.setText("Load Quickstate");
+  loadQuickStateMenu.setText("Load Quick State");
   loadSlot1.setText("Slot 1").onActivate([&] { program->loadState(1); });
   loadSlot2.setText("Slot 2").onActivate([&] { program->loadState(2); });
   loadSlot3.setText("Slot 3").onActivate([&] { program->loadState(3); });
@@ -155,10 +152,15 @@ Presentation::Presentation() {
     program->loadMedium();
   });
 
-  onClose([&] { program->quit(); });
+  onSize([&] {
+    resizeViewport(true);
+  });
+
+  onClose([&] {
+    program->quit();
+  });
 
   setTitle({"higan v", Emulator::Version});
-  setResizable(false);
   setBackgroundColor({0, 0, 0});
   resizeViewport();
   setCentered();
@@ -235,9 +237,15 @@ auto Presentation::clearViewport() -> void {
   }
 }
 
-auto Presentation::resizeViewport() -> void {
+//onSize is true only for events generated from window resizing
+//it will suppress automatic viewport scaling, and disable adaptive scaling
+//it does this so that the main window can always be resizable
+auto Presentation::resizeViewport(bool onSize) -> void {
   //clear video area before resizing to avoid seeing distorted video momentarily
   clearViewport();
+
+  uint viewportWidth = geometry().width();
+  uint viewportHeight = geometry().height();
 
   double emulatorWidth = 320;
   double emulatorHeight = 240;
@@ -257,30 +265,37 @@ auto Presentation::resizeViewport() -> void {
 
   if(!fullScreen()) {
     if(settings["Video/Windowed/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
-    uint viewportMultiplier = 2;
-    if(settings["Video/Windowed/Multiplier"].text() == "Small") viewportMultiplier = settings["Video/Windowed/Multiplier/Small"].natural();
-    if(settings["Video/Windowed/Multiplier"].text() == "Medium") viewportMultiplier = settings["Video/Windowed/Multiplier/Medium"].natural();
-    if(settings["Video/Windowed/Multiplier"].text() == "Large") viewportMultiplier = settings["Video/Windowed/Multiplier/Large"].natural();
-    uint viewportWidth = 320 * viewportMultiplier;
-    uint viewportHeight = 240 * viewportMultiplier;
-    uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-    if(!settings["Video/Windowed/Adaptive"].boolean()) {
+
+    if(!onSize) {
+      string viewportScale = "640x480";
+      if(settings["Video/Windowed/Scale"].text() == "Small") viewportScale = settings["Video/Windowed/Scale/Small"].text();
+      if(settings["Video/Windowed/Scale"].text() == "Medium") viewportScale = settings["Video/Windowed/Scale/Medium"].text();
+      if(settings["Video/Windowed/Scale"].text() == "Large") viewportScale = settings["Video/Windowed/Scale/Large"].text();
+      auto resolution = viewportScale.isplit("x", 1L);
+      viewportWidth = resolution(0).natural();
+      viewportHeight = resolution(1).natural();
+    }
+
+    if(settings["Video/Windowed/AdaptiveSizing"].boolean() && !onSize) {
+      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
-      setSize({viewportWidth, viewportHeight});
-      viewport.setGeometry({
-        (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
-        emulatorWidth, emulatorHeight
-      });
+      setSize({viewportWidth = emulatorWidth, viewportHeight = emulatorHeight});
+    } else if(settings["Video/Windowed/IntegralScaling"].boolean()) {
+      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
+      emulatorWidth *= multiplier;
+      emulatorHeight *= multiplier;
+      if(!onSize) setSize({viewportWidth, viewportHeight});
     } else {
-      setSize({emulatorWidth * multiplier, emulatorHeight * multiplier});
-      viewport.setGeometry({0, 0, emulatorWidth * multiplier, emulatorHeight * multiplier});
+      double multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
+      emulatorWidth *= multiplier;
+      emulatorHeight *= multiplier;
+      if(!onSize) setSize({viewportWidth, viewportHeight});
     }
   } else {
     if(settings["Video/Fullscreen/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
-    uint viewportWidth = geometry().width();
-    uint viewportHeight = geometry().height();
-    if(!settings["Video/Fullscreen/Adaptive"].boolean()) {
+
+    if(settings["Video/Fullscreen/IntegralScaling"].boolean()) {
       uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
@@ -289,11 +304,12 @@ auto Presentation::resizeViewport() -> void {
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
     }
-    viewport.setGeometry({
-      (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
-      emulatorWidth, emulatorHeight
-    });
   }
+
+  viewport.setGeometry({
+    (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
+    emulatorWidth, emulatorHeight
+  });
 
   //clear video area again to ensure entire viewport area has been painted in
   clearViewport();

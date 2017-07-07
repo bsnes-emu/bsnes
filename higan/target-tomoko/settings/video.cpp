@@ -24,12 +24,13 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
 
   windowedModeLabel.setFont(Font().setBold()).setText("Windowed Mode");
-  windowedModeAspectCorrection.setText("Correct aspect ratio").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
-  windowedModeAdaptive.setText("Resize window to viewport").setChecked(settings["Video/Windowed/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
+  windowedModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
+  windowedModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Windowed/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
+  windowedModeAdaptiveSizing.setText("Adaptive sizing").setChecked(settings["Video/Windowed/AdaptiveSizing"].boolean()).onToggle([&] { updateViewport(); });
 
   fullscreenModeLabel.setFont(Font().setBold()).setText("Fullscreen Mode");
-  fullscreenModeAspectCorrection.setText("Correct aspect ratio").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
-  fullscreenModeAdaptive.setText("Resize viewport to window").setChecked(settings["Video/Fullscreen/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
+  fullscreenModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
+  fullscreenModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Fullscreen/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
 
   updateColor();
   updateOverscan();
@@ -56,8 +57,9 @@ auto VideoSettings::updateOverscan() -> void {
 
 auto VideoSettings::updateViewport() -> void {
   settings["Video/Windowed/AspectCorrection"].setValue(windowedModeAspectCorrection.checked());
-  settings["Video/Windowed/Adaptive"].setValue(windowedModeAdaptive.checked());
+  settings["Video/Windowed/IntegralScaling"].setValue(windowedModeIntegralScaling.checked());
+  settings["Video/Windowed/AdaptiveSizing"].setValue(windowedModeAdaptiveSizing.checked());
   settings["Video/Fullscreen/AspectCorrection"].setValue(fullscreenModeAspectCorrection.checked());
-  settings["Video/Fullscreen/Adaptive"].setValue(fullscreenModeAdaptive.checked());
+  settings["Video/Fullscreen/IntegralScaling"].setValue(fullscreenModeIntegralScaling.checked());
   presentation->resizeViewport();
 }

@@ -37,7 +37,7 @@ auto InputManager::appendHotkeys() -> void {
     hotkey->name = "Decrement Quick State";
     hotkey->press = [&] {
       if(--quickStateSlot < 1) quickStateSlot = 5;
-      program->showMessage({"Selected quick slot ", quickStateSlot});
+      program->showMessage({"Selected quick state slot ", quickStateSlot});
     };
     hotkeys.append(hotkey);
   }
@@ -46,7 +46,7 @@ auto InputManager::appendHotkeys() -> void {
     hotkey->name = "Increment Quick State";
     hotkey->press = [&] {
       if(++quickStateSlot > 5) quickStateSlot = 1;
-      program->showMessage({"Selected quick slot ", quickStateSlot});
+      program->showMessage({"Selected quick state slot ", quickStateSlot});
     };
     hotkeys.append(hotkey);
   }

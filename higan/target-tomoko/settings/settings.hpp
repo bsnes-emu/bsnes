@@ -27,11 +27,12 @@ struct VideoSettings : TabFrameItem {
     Label windowedModeLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout windowedModeLayout{&layout, Size{~0, 0}};
       CheckLabel windowedModeAspectCorrection{&windowedModeLayout, Size{0, 0}};
-      CheckLabel windowedModeAdaptive{&windowedModeLayout, Size{0, 0}};
+      CheckLabel windowedModeIntegralScaling{&windowedModeLayout, Size{0, 0}};
+      CheckLabel windowedModeAdaptiveSizing{&windowedModeLayout, Size{0, 0}};
     Label fullscreenModeLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout fullscreenModeLayout{&layout, Size{~0, 0}};
       CheckLabel fullscreenModeAspectCorrection{&fullscreenModeLayout, Size{0, 0}};
-      CheckLabel fullscreenModeAdaptive{&fullscreenModeLayout, Size{0, 0}};
+      CheckLabel fullscreenModeIntegralScaling{&fullscreenModeLayout, Size{0, 0}};
 
   auto updateColor() -> void;
   auto updateOverscan() -> void;

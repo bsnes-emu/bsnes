@@ -27,6 +27,9 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   findCodesButton.setText("Find Codes ...").onActivate([&] { cheatDatabase->findCodes(); });
   resetButton.setText("Reset").onActivate([&] { doReset(); });
   eraseButton.setText("Erase").onActivate([&] { doErase(); });
+
+  //do not display "Find Codes" button if there is no cheat database to look up codes in
+  if(!file::exists(locate("cheats.bml"))) findCodesButton.setVisible(false);
 }
 
 auto CheatEditor::doChangeSelected() -> void {
@@ -128,7 +131,7 @@ auto CheatEditor::addCode(const string& code, const string& description, bool en
 
 auto CheatEditor::loadCheats() -> void {
   doReset(true);
-  auto contents = string::read({program->mediumPaths(1), "cheats.bml"});
+  auto contents = string::read({program->mediumPaths(1), "higan/cheats.bml"});
   auto document = BML::unserialize(contents);
   for(auto cheat : document["cartridge"].find("cheat")) {
     if(!addCode(cheat["code"].text(), cheat["description"].text(), (bool)cheat["enabled"])) break;
@@ -149,9 +152,10 @@ auto CheatEditor::saveCheats() -> void {
     count++;
   }
   if(count) {
-    file::write({program->mediumPaths(1), "cheats.bml"}, document);
+    directory::create({program->mediumPaths(1), "higan/"});
+    file::write({program->mediumPaths(1), "higan/cheats.bml"}, document);
   } else {
-    file::remove({program->mediumPaths(1), "cheats.bml"});
+    file::remove({program->mediumPaths(1), "higan/cheats.bml"});
   }
   doReset(true);
 }

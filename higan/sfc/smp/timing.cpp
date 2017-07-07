@@ -1,7 +1,7 @@
 //DSP clock (~24576khz) / 12 (~2048khz) is fed into the SMP
 //from here, the wait states value is really a clock divider of {2, 4, 8, 16}
-//because dividers of 8 and 16 are not evenly divislbe into 12, the SMP glitches
-//in these two cases, the SMP ends up consuming 10 and 20 cycles instead
+//due to an unknown hardware issue, clock dividers of 8 and 16 are glitchy
+//the SMP ends up consuming 10 and 20 clocks per opcode cycle instead
 //this causes unpredictable behavior on real hardware
 //sometimes the SMP will run far slower than expected
 //other times (and more likely), the SMP will deadlock until the system is reset
