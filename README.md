@@ -630,14 +630,6 @@ that aren't specific to any particular console.
         used by the Super Famicom,
         the dim, washed out colours of the original Game Boy Advance,
         and the pea-green display of the original Game Boy.
-      - "Mask Overscan" hides parts of
-        the video output that would have been hidden
-        by the bezel around the edge of
-        a standard-definition television screen.
-        Some games (particularly on the Famicom)
-        allowed random glitchy output to be displayed in this area.
-        The amount masked can be configured
-        in the [configuration dialog](#the-configuration-dialog).
   - **Video Shader** controls
     how the low-resolution video output of the emulated console
     is scaled up to suit modern high-resolution displays.
@@ -794,10 +786,13 @@ The dialog has a tab for each main category of options:
       - "Luminance" adjusts the overall brightness,
         where 100% is normal,
         and 0% is totally black.
-      - "Overscan Mask" controls the size of
-        the border drawn by the [Settings](#the-settings-menu)
-        → Video Emulation
-        → Mask Overscan option.
+      - "Overscan Mask" hides parts of
+        the video output that would have been hidden
+        by the bezel around the edge of
+        a standard-definition television screen.
+        Some games (particularly on the Famicom)
+        displayed random glitchy output in this area,
+        which can be distracting.
         The units are "pixels in the emulated console's standard video-mode".
         For example, setting "Horizontal" to 8
         will clip 8/256ths from the left and right sides
