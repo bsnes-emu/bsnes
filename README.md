@@ -834,6 +834,7 @@ The dialog has a tab for each main category of options:
         to the largest exact multiple
         of the emulated console's video output
         that is smaller than or equal to the screen size.
+      - TODO: Update this to match 103r11, or whatever the latest version is.
   - **Audio**: This tab contains options that affect
     how higan reproduces
     the emulated console's audio output.
