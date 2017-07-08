@@ -18,10 +18,10 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   overscanMaskLabel.setFont(Font().setBold()).setText("Overscan Mask");
   horizontalMaskLabel.setText("Horizontal:");
   horizontalMaskValue.setAlignment(0.5);
-  horizontalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Horizontal"].natural()).onChange([&] { updateOverscan(); });
+  horizontalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Horizontal"].natural()).onChange([&] { updateViewport(); });
   verticalMaskLabel.setText("Vertical:");
   verticalMaskValue.setAlignment(0.5);
-  verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
+  verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateViewport(); });
 
   windowedModeLabel.setFont(Font().setBold()).setText("Windowed Mode");
   windowedModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
@@ -32,34 +32,34 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   fullscreenModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
   fullscreenModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Fullscreen/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
 
-  updateColor();
-  updateOverscan();
-  updateViewport();
+  updateColor(true);
+  updateViewport(true);
 }
 
-auto VideoSettings::updateColor() -> void {
+auto VideoSettings::updateColor(bool initializing) -> void {
   settings["Video/Saturation"].setValue(saturationSlider.position());
   settings["Video/Gamma"].setValue(100 + gammaSlider.position());
   settings["Video/Luminance"].setValue(luminanceSlider.position());
   saturationValue.setText({saturationSlider.position(), "%"});
   gammaValue.setText({100 + gammaSlider.position(), "%"});
   luminanceValue.setText({luminanceSlider.position(), "%"});
-  program->updateVideoPalette();
+
+  if(!initializing) program->updateVideoPalette();
 }
 
-auto VideoSettings::updateOverscan() -> void {
+auto VideoSettings::updateViewport(bool initializing) -> void {
+  bool wasAdaptive = settings["Video/Windowed/AdaptiveSizing"].boolean();
+  bool isAdaptive = windowedModeAdaptiveSizing.checked();
+
   settings["Video/Overscan/Horizontal"].setValue(horizontalMaskSlider.position());
   settings["Video/Overscan/Vertical"].setValue(verticalMaskSlider.position());
-  horizontalMaskValue.setText({horizontalMaskSlider.position()});
-  verticalMaskValue.setText({verticalMaskSlider.position()});
-  presentation->resizeViewport();
-}
-
-auto VideoSettings::updateViewport() -> void {
   settings["Video/Windowed/AspectCorrection"].setValue(windowedModeAspectCorrection.checked());
   settings["Video/Windowed/IntegralScaling"].setValue(windowedModeIntegralScaling.checked());
   settings["Video/Windowed/AdaptiveSizing"].setValue(windowedModeAdaptiveSizing.checked());
   settings["Video/Fullscreen/AspectCorrection"].setValue(fullscreenModeAspectCorrection.checked());
   settings["Video/Fullscreen/IntegralScaling"].setValue(fullscreenModeIntegralScaling.checked());
-  presentation->resizeViewport();
+  horizontalMaskValue.setText({horizontalMaskSlider.position()});
+  verticalMaskValue.setText({verticalMaskSlider.position()});
+
+  if(!initializing) presentation->resizeViewport(isAdaptive || wasAdaptive != isAdaptive);
 }

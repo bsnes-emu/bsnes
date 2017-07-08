@@ -59,8 +59,6 @@ Program::Program(string_vector args) {
   new ToolsManager;
   new AboutWindow;
 
-  presentation->setFocused();
-
   updateVideoShader();
   updateAudioDriver();
   updateAudioEffects();

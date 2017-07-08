@@ -25,9 +25,8 @@ Settings::Settings() {
   set("Video/Gamma", 100);
   set("Video/Luminance", 100);
 
-  set("Video/Overscan/Mask", false);
-  set("Video/Overscan/Horizontal", 8);
-  set("Video/Overscan/Vertical", 8);
+  set("Video/Overscan/Horizontal", 0);
+  set("Video/Overscan/Vertical", 0);
 
   set("Video/Windowed/AspectCorrection", true);
   set("Video/Windowed/IntegralScaling", true);

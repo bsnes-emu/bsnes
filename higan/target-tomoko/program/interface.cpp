@@ -55,7 +55,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
   pitch >>= 2;
 
-  if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
+  if(emulator->information.overscan) {
     uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
     uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
     auto resolution = emulator->videoResolution();

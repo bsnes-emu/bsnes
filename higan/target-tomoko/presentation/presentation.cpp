@@ -72,10 +72,6 @@ Presentation::Presentation() {
     settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
     if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });
-  maskOverscan.setText("Mask Overscan").setChecked(settings["Video/Overscan/Mask"].boolean()).onToggle([&] {
-    settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
-    resizeViewport();
-  });
   videoShaderMenu.setText("Video Shader");
   videoShaderNone.setText("None").onActivate([&] {
     settings["Video/Shader"].setValue("None");
@@ -153,7 +149,7 @@ Presentation::Presentation() {
   });
 
   onSize([&] {
-    resizeViewport(true);
+    resizeViewport(false);
   });
 
   onClose([&] {
@@ -237,10 +233,7 @@ auto Presentation::clearViewport() -> void {
   }
 }
 
-//onSize is true only for events generated from window resizing
-//it will suppress automatic viewport scaling, and disable adaptive scaling
-//it does this so that the main window can always be resizable
-auto Presentation::resizeViewport(bool onSize) -> void {
+auto Presentation::resizeViewport(bool resizeWindow) -> void {
   //clear video area before resizing to avoid seeing distorted video momentarily
   clearViewport();
 
@@ -255,7 +248,7 @@ auto Presentation::resizeViewport(bool onSize) -> void {
     emulatorWidth = resolution.width;
     emulatorHeight = resolution.height;
     aspectCorrection = resolution.aspectCorrection;
-    if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
+    if(emulator->information.overscan) {
       uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
       uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
       emulatorWidth -= overscanHorizontal * 2;
@@ -266,7 +259,7 @@ auto Presentation::resizeViewport(bool onSize) -> void {
   if(!fullScreen()) {
     if(settings["Video/Windowed/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
 
-    if(!onSize) {
+    if(resizeWindow) {
       string viewportScale = "640x480";
       if(settings["Video/Windowed/Scale"].text() == "Small") viewportScale = settings["Video/Windowed/Scale/Small"].text();
       if(settings["Video/Windowed/Scale"].text() == "Medium") viewportScale = settings["Video/Windowed/Scale/Medium"].text();
@@ -276,7 +269,7 @@ auto Presentation::resizeViewport(bool onSize) -> void {
       viewportHeight = resolution(1).natural();
     }
 
-    if(settings["Video/Windowed/AdaptiveSizing"].boolean() && !onSize) {
+    if(settings["Video/Windowed/AdaptiveSizing"].boolean() && resizeWindow) {
       uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
@@ -285,12 +278,12 @@ auto Presentation::resizeViewport(bool onSize) -> void {
       uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
-      if(!onSize) setSize({viewportWidth, viewportHeight});
+      if(resizeWindow) setSize({viewportWidth, viewportHeight});
     } else {
       double multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
       emulatorWidth *= multiplier;
       emulatorHeight *= multiplier;
-      if(!onSize) setSize({viewportWidth, viewportHeight});
+      if(resizeWindow) setSize({viewportWidth, viewportHeight});
     }
   } else {
     if(settings["Video/Fullscreen/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;

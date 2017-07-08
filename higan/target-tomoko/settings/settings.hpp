@@ -34,9 +34,8 @@ struct VideoSettings : TabFrameItem {
       CheckLabel fullscreenModeAspectCorrection{&fullscreenModeLayout, Size{0, 0}};
       CheckLabel fullscreenModeIntegralScaling{&fullscreenModeLayout, Size{0, 0}};
 
-  auto updateColor() -> void;
-  auto updateOverscan() -> void;
-  auto updateViewport() -> void;
+  auto updateColor(bool initializing = false) -> void;
+  auto updateViewport(bool initializing = false) -> void;
 };
 
 struct AudioSettings : TabFrameItem {
