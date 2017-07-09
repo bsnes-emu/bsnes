@@ -6,9 +6,9 @@
 struct VideoGLX2 : Video {
   ~VideoGLX2() { term(); }
 
-  auto (*glXSwapInterval)(signed) -> signed = nullptr;
+  auto (*glXSwapInterval)(int) -> int = nullptr;
   Display* display = nullptr;
-  signed screen = 0;
+  int screen = 0;
   Window xwindow = 0;
   Colormap colormap = 0;
   GLXContext glxcontext = nullptr;
@@ -17,10 +17,10 @@ struct VideoGLX2 : Video {
   struct {
     Window handle = 0;
     bool synchronize = false;
-    unsigned filter = 1;  //linear
+    uint filter = Video::FilterLinear;
 
-    unsigned width = 256;
-    unsigned height = 256;
+    uint width = 256;
+    uint height = 256;
 
     bool isDoubleBuffered = false;
     bool isDirect = false;
@@ -34,15 +34,15 @@ struct VideoGLX2 : Video {
   }
 
   auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
+    if(name == Video::Handle) return (uintptr)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
     return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = value.get<uintptr>();
       return true;
     }
 
@@ -54,15 +54,15 @@ struct VideoGLX2 : Video {
       }
     }
 
-    if(name == Video::Filter && value.is<unsigned>()) {
-      settings.filter = value.get<unsigned>();
+    if(name == Video::Filter && value.is<uint>()) {
+      settings.filter = value.get<uint>();
       return true;
     }
 
     return false;
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     if(width != settings.width || height != settings.height) resize(width, height);
     pitch = glwidth * sizeof(uint32_t);
     return data = glbuffer;
@@ -105,8 +105,8 @@ struct VideoGLX2 : Video {
 
     double w = (double)settings.width / (double)glwidth;
     double h = (double)settings.height / (double)glheight;
-    signed u = parent.width;
-    signed v = parent.height;
+    int u = parent.width;
+    int v = parent.height;
 
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2f(0, 0); glVertex3i(0, v, 0);
@@ -123,14 +123,14 @@ struct VideoGLX2 : Video {
     display = XOpenDisplay(0);
     screen = DefaultScreen(display);
 
-    signed versionMajor = 0, versionMinor = 0;
+    int versionMajor = 0, versionMinor = 0;
     glXQueryVersion(display, &versionMajor, &versionMinor);
     if(versionMajor < 1 || (versionMajor == 1 && versionMinor < 2)) return false;
 
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(display, settings.handle, &windowAttributes);
 
-    signed attributeList[] = {
+    int attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
@@ -140,7 +140,7 @@ struct VideoGLX2 : Video {
       None
     };
 
-    signed fbCount = 0;
+    int fbCount = 0;
     auto fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
     if(fbCount == 0) return false;
 
@@ -163,12 +163,12 @@ struct VideoGLX2 : Video {
     glxcontext = glXCreateContext(display, vi, 0, GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
-    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
-    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
+    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
 
     if(glXSwapInterval) glXSwapInterval(settings.synchronize);
 
-    signed value = 0;
+    int value = 0;
     glXGetConfig(display, vi, GLX_DOUBLEBUFFER, &value);
     settings.isDoubleBuffered = value;
     settings.isDirect = glXIsDirect(display, glxcontext);
@@ -224,10 +224,10 @@ struct VideoGLX2 : Video {
 private:
   GLuint gltexture = 0;
   uint32_t* glbuffer = nullptr;
-  unsigned glwidth = 0;
-  unsigned glheight = 0;
+  uint glwidth = 0;
+  uint glheight = 0;
 
-  auto resize(unsigned width, unsigned height) -> void {
+  auto resize(uint width, uint height) -> void {
     settings.width = width;
     settings.height = height;
 

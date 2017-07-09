@@ -28,8 +28,8 @@ struct VideoGDI : Video {
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (HWND)value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = (HWND)value.get<uintptr>();
       return true;
     }
 
@@ -44,7 +44,7 @@ struct VideoGDI : Video {
         DeleteObject(device.dc);
       }
       settings.buffer = new uint32_t[width * height]();
-      settings.width  = width;
+      settings.width = width;
       settings.height = height;
 
       HDC hdc = GetDC(settings.handle);
@@ -56,13 +56,13 @@ struct VideoGDI : Video {
       ReleaseDC(settings.handle, hdc);
 
       memory::fill(&device.info, sizeof(BITMAPINFO));
-      device.info.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-      device.info.bmiHeader.biWidth       = width;
-      device.info.bmiHeader.biHeight      = -height;
-      device.info.bmiHeader.biPlanes      = 1;
-      device.info.bmiHeader.biBitCount    = 32;
+      device.info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+      device.info.bmiHeader.biWidth = width;
+      device.info.bmiHeader.biHeight = -height;
+      device.info.bmiHeader.biPlanes = 1;
+      device.info.bmiHeader.biBitCount = 32;
       device.info.bmiHeader.biCompression = BI_RGB;
-      device.info.bmiHeader.biSizeImage   = width * height * sizeof(uint32_t);
+      device.info.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
     }
 
     data = settings.buffer;

@@ -26,11 +26,13 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   windowedModeLabel.setFont(Font().setBold()).setText("Windowed Mode");
   windowedModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
   windowedModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Windowed/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
-  windowedModeAdaptiveSizing.setText("Adaptive sizing").setChecked(settings["Video/Windowed/AdaptiveSizing"].boolean()).onToggle([&] { updateViewport(); });
+  windowedModeAdaptive.setText("Adaptive sizing").setChecked(settings["Video/Windowed/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
 
   fullscreenModeLabel.setFont(Font().setBold()).setText("Fullscreen Mode");
   fullscreenModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
   fullscreenModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Fullscreen/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
+  fullscreenModeExclusive.setText("Exclusive mode").setChecked(settings["Video/Fullscreen/Exclusive"].boolean()).onToggle([&] { updateViewport(); });
+  if(!video->cap(Video::Exclusive)) fullscreenModeExclusive.remove();
 
   updateColor(true);
   updateViewport(true);
@@ -48,16 +50,17 @@ auto VideoSettings::updateColor(bool initializing) -> void {
 }
 
 auto VideoSettings::updateViewport(bool initializing) -> void {
-  bool wasAdaptive = settings["Video/Windowed/AdaptiveSizing"].boolean();
-  bool isAdaptive = windowedModeAdaptiveSizing.checked();
+  bool wasAdaptive = settings["Video/Windowed/Adaptive"].boolean();
+  bool isAdaptive = windowedModeAdaptive.checked();
 
   settings["Video/Overscan/Horizontal"].setValue(horizontalMaskSlider.position());
   settings["Video/Overscan/Vertical"].setValue(verticalMaskSlider.position());
   settings["Video/Windowed/AspectCorrection"].setValue(windowedModeAspectCorrection.checked());
   settings["Video/Windowed/IntegralScaling"].setValue(windowedModeIntegralScaling.checked());
-  settings["Video/Windowed/AdaptiveSizing"].setValue(windowedModeAdaptiveSizing.checked());
+  settings["Video/Windowed/Adaptive"].setValue(windowedModeAdaptive.checked());
   settings["Video/Fullscreen/AspectCorrection"].setValue(fullscreenModeAspectCorrection.checked());
   settings["Video/Fullscreen/IntegralScaling"].setValue(fullscreenModeIntegralScaling.checked());
+  settings["Video/Fullscreen/Exclusive"].setValue(fullscreenModeExclusive.checked());
   horizontalMaskValue.setText({horizontalMaskSlider.position()});
   verticalMaskValue.setText({verticalMaskSlider.position()});
 

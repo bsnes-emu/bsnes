@@ -35,6 +35,7 @@ struct Program : Emulator::Platform {
   auto updateVideoShader() -> void;
   auto updateAudioDriver() -> void;
   auto updateAudioEffects() -> void;
+  auto allowInput(bool hotkey = false) -> bool;
 
   bool hasQuit = false;
   bool pause = false;

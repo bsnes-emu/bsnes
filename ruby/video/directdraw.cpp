@@ -1,7 +1,7 @@
 #include <ddraw.h>
 
-struct VideoDD : Video {
-  ~VideoDD() { term(); }
+struct VideoDirectDraw : Video {
+  ~VideoDirectDraw() { term(); }
 
   LPDIRECTDRAW lpdd = nullptr;
   LPDIRECTDRAW7 lpdd7 = nullptr;
@@ -10,15 +10,15 @@ struct VideoDD : Video {
   LPDIRECTDRAWCLIPPER clipper = nullptr;
   DDSURFACEDESC2 ddsd;
   DDSCAPS2 ddscaps;
-  unsigned iwidth;
-  unsigned iheight;
+  uint iwidth;
+  uint iheight;
 
   struct {
     HWND handle = nullptr;
     bool synchronize = false;
 
-    unsigned width;
-    unsigned height;
+    uint width;
+    uint height;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -34,8 +34,8 @@ struct VideoDD : Video {
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (HWND)value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = (HWND)value.get<uintptr>();
       return true;
     }
 
@@ -47,7 +47,7 @@ struct VideoDD : Video {
     return false;
   }
 
-  auto resize(unsigned width, unsigned height) -> void {
+  auto resize(uint width, uint height) -> void {
     if(iwidth >= width && iheight >= height) return;
 
     iwidth  = max(width,  iwidth);
@@ -94,7 +94,7 @@ struct VideoDD : Video {
     raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -136,6 +136,8 @@ struct VideoDD : Video {
   }
 
   auto init() -> bool {
+    term();
+
     DirectDrawCreate(0, &lpdd, 0);
     lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
     if(lpdd) { lpdd->Release(); lpdd = 0; }

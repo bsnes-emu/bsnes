@@ -32,7 +32,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   resamplerCombo.append(ComboButtonItem().setText("IIR - Biquad"));
   resamplerCombo.setEnabled(false);
 
-  exclusiveMode.setText("Exclusive Mode");
+  exclusiveMode.setText("Exclusive mode");
   exclusiveMode.setChecked(settings["Audio/Exclusive"].boolean()).onToggle([&] { updateDriver(); });
   if(!audio->cap(Audio::Exclusive)) exclusiveMode.remove();
 

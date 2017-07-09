@@ -11,14 +11,14 @@ struct VideoSDL : Video {
   Display* display = nullptr;
   SDL_Surface* screen = nullptr;
   SDL_Surface* buffer = nullptr;
-  unsigned iwidth = 0;
-  unsigned iheight = 0;
+  uint iwidth = 0;
+  uint iheight = 0;
 
   struct {
-    uintptr_t handle = 0;
+    uintptr handle = 0;
 
-    unsigned width = 0;
-    unsigned height = 0;
+    uint width = 0;
+    uint height = 0;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -32,15 +32,15 @@ struct VideoSDL : Video {
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = value.get<uintptr>();
       return true;
     }
 
     return false;
   }
 
-  auto resize(unsigned width, unsigned height) -> void {
+  auto resize(uint width, uint height) -> void {
     if(iwidth >= width && iheight >= height) return;
 
     iwidth  = max(width,  iwidth);
@@ -53,7 +53,7 @@ struct VideoSDL : Video {
     );
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -69,9 +69,9 @@ struct VideoSDL : Video {
 
   auto clear() -> void {
     if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
-    for(unsigned y = 0; y < iheight; y++) {
+    for(uint y : range(iheight)) {
       uint32_t* data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
-      for(unsigned x = 0; x < iwidth; x++) *data++ = 0xff000000;
+      for(uint x : range(iwidth)) *data++ = 0xff000000;
     }
     if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
     refresh();
@@ -82,9 +82,9 @@ struct VideoSDL : Video {
     //as SDL forces us to use a 32-bit buffer, we must set alpha to 255 (full opacity)
     //to prevent blending against the window beneath when X window visual is 32-bits.
     if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
-    for(unsigned y = 0; y < settings.height; y++) {
+    for(uint y : range(settings.height)) {
       uint32_t* data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
-      for(unsigned x = 0; x < settings.width; x++) *data++ |= 0xff000000;
+      for(uint x : range(settings.width)) *data++ |= 0xff000000;
     }
     if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
 
@@ -119,8 +119,8 @@ struct VideoSDL : Video {
     screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
     XUndefineCursor(display, settings.handle);
 
-    buffer  = 0;
-    iwidth  = 0;
+    buffer = nullptr;
+    iwidth = 0;
     iheight = 0;
     resize(settings.width = 256, settings.height = 256);
 

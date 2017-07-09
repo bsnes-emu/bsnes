@@ -72,14 +72,15 @@ using namespace ruby;
 
 namespace ruby {
 
+const string Video::Exclusive = "Exclusive";
 const string Video::Handle = "Handle";
 const string Video::Synchronize = "Synchronize";
 const string Video::Depth = "Depth";
 const string Video::Filter = "Filter";
 const string Video::Shader = "Shader";
 
-const unsigned Video::FilterNearest = 0;
-const unsigned Video::FilterLinear = 1;
+const uint Video::FilterNearest = 0;
+const uint Video::FilterLinear = 1;
 
 auto Video::create(const string& driver) -> Video* {
   if(!driver) return create(optimalDriver());
@@ -89,11 +90,11 @@ auto Video::create(const string& driver) -> Video* {
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  if(driver == "Direct3D") return new VideoD3D;
+  if(driver == "Direct3D") return new VideoDirect3D;
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  if(driver == "DirectDraw") return new VideoDD;
+  if(driver == "DirectDraw") return new VideoDirectDraw;
   #endif
 
   #if defined(VIDEO_GDI)

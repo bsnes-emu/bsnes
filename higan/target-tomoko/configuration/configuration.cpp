@@ -30,7 +30,7 @@ Settings::Settings() {
 
   set("Video/Windowed/AspectCorrection", true);
   set("Video/Windowed/IntegralScaling", true);
-  set("Video/Windowed/AdaptiveSizing", false);
+  set("Video/Windowed/Adaptive", false);
   set("Video/Windowed/Scale", "Small");
   set("Video/Windowed/Scale/Small", "640x480");
   set("Video/Windowed/Scale/Medium", "960x720");
@@ -38,6 +38,7 @@ Settings::Settings() {
 
   set("Video/Fullscreen/AspectCorrection", true);
   set("Video/Fullscreen/IntegralScaling", true);
+  set("Video/Fullscreen/Exclusive", false);
 
   set("Audio/Driver", ruby::Audio::optimalDriver());
   set("Audio/Device", "");
