@@ -44,6 +44,9 @@ Microsoft Windows 7 and above.
 It also includes some level of support
 for GNU/Linux and macOS.
 
+If you want to install higan and try it out,
+see the [Quick Start](#quick-start) section below.
+
 higan is officially spelled with a lowercase "h", not a capital.
 
 About this document
