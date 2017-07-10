@@ -468,7 +468,7 @@ Once you have the correct BIOS file:
         so you don't wind up with a file called
         `bios.rom.dat`
         or whatever the file's original extension was.
- 2. Copy the file into higan`s `Game Boy Advance.sys` directory,
+ 2. Copy the file into higan's `Game Boy Advance.sys` directory,
     alongside the `manifest.bml` file that is already there.
       - In Windows,
         find `Game Boy Advance.sys` in the same folder
