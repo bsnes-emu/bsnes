@@ -1014,7 +1014,8 @@ The dialog has a tab for each main category of options:
         See [Drivers](#drivers) for details.
       - "Location" selects where the [Game Library](#the-game-library)
         looks for games to load.
-        This should be set to match icarus' library location.
+        See [Moving the Game Library](#moving-the-game-library)
+        for more information.
       - "Ignore Manifests" makes higan ignore the manifest file
         in the a loaded game's [game folder](#why-game-folders)
         in favour of asking icarus
@@ -1232,36 +1233,75 @@ The Game Library
 higan maintains a "game library"
 containing all the games you've played.
 
-  - In Windows, the game library is the `Emulation` folder
-    inside your profile folder.
-      - to find your profile folder,
-        press `Win+R` to open the Run dialog,
-        then type `%USERPROFILE%` and press Enter.
-  - In Linux, the game library is the `Emulation` directory
+  - In Windows,
+    the default location of
+    the game library is the `Emulation` folder
+    inside your profile folder
+    (To find your profile folder,
+    press `Win+R` to open the Run dialog,
+    then type `%USERPROFILE%` and press Enter).
+  - In Linux,
+    the default location of
+    the game library is the `Emulation` directory
     inside your home directory.
-
-On all platforms, the game library location
-can be configured.
-Launch higan,
-then from the Settings menu,
-choose "Configuration ..."
-then click the Advanced tab
-then click the "Change ..." button.
-A directory-picker window will appear,
-allowing you to choose any existing directory
-to be your game library.
-Next launch icarus,
-then click the "Settings ..." button in the lower-right,
-then click the "Change ..." button.
-A directory-picker window will appear,
-allowing you to choose the same directory again.
+  - On all platforms,
+    the game library location can be configured.
+    See [Moving the Game Library](#moving-the-game-library)
+    below.
 
 Inside the library directory there is a subdirectory for each system,
 and inside each system directory are the game folders
 for each imported game.
+
 For more information about game folders,
 see [Why game folders?](#why-game-folders) below.
 
+Importing regular games
+-----------------------
+
+TODO
+
+Importing games with co-processor firmware
+------------------------------------------
+
+Importing BS-X games
+--------------------
+
+Importing Sufami Turbo games
+----------------------------
+
+Importing Super Game Boy games
+------------------------------
+
+Importing MSU-1 games
+---------------------
+
+Moving the game library
+-----------------------
+
+Moving the game library is a little complicated,
+because there's two parts to it:
+telling icarus where to put imported games,
+and telling higan where to find them.
+
+ 1. If necessary,
+    create the folder you want higan to use
+    as its game library.
+ 1. Launch icarus,
+    then click the "Settings ..." button in the lower-right,
+    to open the Settings dialog.
+ 1. Click the "Change ..." button on the right.
+    A [filesystem browser](#the-filesystem-browser) window will appear,
+    allowing you to choose
+    where imported games will be stored.
+ 1. Launch higan,
+    then from the Settings menu,
+    choose "Configuration ..."
+    to open [the Configuration dialog](#the-configuration-dialog).
+ 1. Click the Advanced tab
+    then click the "Change ..." button.
+    A [filesystem browser](#the-filesystem-browser) will appear,
+    allowing you to choose the same directory again.
 
 Why game folders?
 -----------------
@@ -1295,24 +1335,6 @@ and that data needs to be stored somewhere too.
 higan keeps all this game-related information together
 in a single place:
 a game folder in the higan library.
-
-Importing regular games
------------------------
-
-Importing games with co-processor firmware
-------------------------------------------
-
-Importing BS-X games
---------------------
-
-Importing Sufami Turbo games
-----------------------------
-
-Importing Super Game Boy games
-------------------------------
-
-Importing MSU-1 games
----------------------
 
 Configuring higan
 =================
