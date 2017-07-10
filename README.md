@@ -1262,7 +1262,9 @@ and inside each system directory are the game folders
 for each imported game.
 
 For more information about game folders,
-see [Why game folders?](#why-game-folders) below.
+see [Why game folders?](#why-game-folders)
+and [What's in a game folder?](#whats-in-a-game-folder)
+below.
 
 Importing regular games
 -----------------------
@@ -1343,6 +1345,11 @@ and that data needs to be stored somewhere too.
 higan keeps all this game-related information together
 in a single place:
 a game folder in the higan library.
+
+What's in a game folder?
+------------------------
+
+TODO
 
 Configuring higan
 =================
