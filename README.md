@@ -1324,6 +1324,7 @@ Frequently Asked Questions
 ==========================
 
 where is the vsync option?
+https://board.byuu.org/viewtopic.php?p=43305#p43305
 
 exclusive full-screen?
 
