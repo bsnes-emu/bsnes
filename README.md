@@ -1143,7 +1143,26 @@ click "Reset" in the bottom-right corner.
 The Manifest Viewer
 -------------------
 
-TODO
+As mentioned in
+[Why game folders?](#why-game-folders),
+a game cartridge contains
+more than just the raw data of the game.
+
+higan uses a "manifest" to
+describe how the various parts of a game cartridge
+are wired up together,
+and the Manifest Viewer lets you examine
+the configuration higan is using for the currently-running game.
+
+For some games,
+an actual cartridge has been taken apart and carefully examined
+and its configuration has been recorded in icarus' database,
+so the manifest icarus produces
+is guaranteed accurate.
+For games that do not exist in icarus' database,
+icarus will make a reasonable guess.
+This is enough to get the game running,
+but does not necessarily reflect the original cartridge.
 
 The Game Library
 ================
