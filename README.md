@@ -527,10 +527,8 @@ To add many games at once,
 run icarus,
 or choose "Import ROM Files ..." from the Library menu
 (which just runs icarus anyway).
-A file-picker will appear,
-with a check-box for each file in the current directory.
-Check the check-boxes for all the files you want to import,
-then click "Import ..." in the bottom right.
+See [the icarus interface](#the-icarus-interface)
+for more information about bulk-importing.
 
 For more information about the higan game library,
 see [The Game Library](#the-game-library) below.
@@ -1226,6 +1224,16 @@ they just switch to viewing that directory.
 
 The "Cancel" button in the bottom-right
 closes the file-system browser without selecting anything.
+
+The icarus interface
+--------------------
+
+TODO
+
+The icarus Settings dialog
+--------------------------
+
+TODO
 
 The Game Library
 ================
