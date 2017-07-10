@@ -1407,6 +1407,8 @@ TODO
 Configuring higan
 =================
 
+TODO
+
 Installing custom shaders
 -------------------------
 
@@ -1473,6 +1475,8 @@ and DirectInput for other controllers.
 Save States
 ===========
 
+TODO
+
 Save states versus in-game saves
 --------------------------------
 
@@ -1485,6 +1489,8 @@ Manager states
 Notes on specific emulation cores
 =================================
 
+TODO
+
 The WonderSwan rotates!
 
 Shaders look weird on Super Famicom because of interlace/hi-res
@@ -1496,6 +1502,8 @@ PSG volume for the Mega Drive
 
 Frequently Asked Questions
 ==========================
+
+TODO
 
 where is the vsync option?
 https://board.byuu.org/viewtopic.php?p=43305#p43305
