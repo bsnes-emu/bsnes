@@ -1542,6 +1542,11 @@ higan keeps all this game-related information together
 in a single place:
 a game folder in the higan library.
 
+For a more detailed motivation for game folders,
+see [Game Paks on the higan website][gp]
+
+[gp]: https://byuu.org/emulation/higan/game-paks
+
 What's in a game folder?
 ------------------------
 
