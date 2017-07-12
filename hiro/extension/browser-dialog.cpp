@@ -153,6 +153,7 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   window.setTitle(state.title);
   window.setSize({640, 480});
   window.setCentered(state.parent);
+  window.setDismissable();
   window.setVisible();
   view.setFocused();
   window.setModal();

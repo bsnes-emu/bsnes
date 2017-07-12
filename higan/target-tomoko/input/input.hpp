@@ -39,11 +39,13 @@ struct InputHotkey : InputMapping {
 };
 
 struct InputDevice {
+  uint id;
   string name;
   vector<InputMapping> mappings;
 };
 
 struct InputPort {
+  uint id;
   string name;
   vector<InputDevice> devices;
 };
@@ -62,6 +64,7 @@ struct InputManager {
   auto onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void;
   auto quit() -> void;
 
+  auto mapping(uint port, uint device, uint input) -> maybe<InputMapping&>;
   auto findMouse() -> shared_pointer<HID::Device>;
 
   //hotkeys.cpp

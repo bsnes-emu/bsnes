@@ -3,7 +3,7 @@ GameBoyColorInterface::GameBoyColorInterface() {
   information.name         = "Game Boy Color";
   information.overscan     = false;
 
-  media.append({ID::GameBoyColor, "Game Boy Color", "gb"});
+  media.append({ID::GameBoyColor, "Game Boy Color", "gbc"});
 }
 
 auto GameBoyColorInterface::videoColors() -> uint32 {

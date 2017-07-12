@@ -672,6 +672,7 @@ struct mWindow : mObject {
   auto append(sMenuBar menuBar) -> type&;
   auto append(sStatusBar statusBar) -> type&;
   auto backgroundColor() const -> Color;
+  auto dismissable() const -> bool;
   auto doClose() const -> void;
   auto doDrop(string_vector) const -> void;
   auto doKeyPress(signed) const -> void;
@@ -699,6 +700,7 @@ struct mWindow : mObject {
   auto setAlignment(Alignment alignment) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setCentered(sWindow parent = {}) -> type&;
+  auto setDismissable(bool dismissable = true) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
   auto setFrameGeometry(Geometry geometry) -> type&;
   auto setFramePosition(Position position) -> type&;
@@ -716,6 +718,7 @@ struct mWindow : mObject {
 //private:
   struct State {
     Color backgroundColor;
+    bool dismissable = false;
     bool droppable = false;
     bool fullScreen = false;
     Geometry geometry = {128, 128, 256, 256};

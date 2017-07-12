@@ -96,12 +96,12 @@ auto InputManager::appendHotkeys() -> void {
 }
 
 auto InputManager::pollHotkeys() -> void {
-  if(program->allowInput(true)) {
-    for(auto& hotkey : hotkeys) {
-      int16 state = hotkey->poll();
-      if(hotkey->state == 0 && state == 1 && hotkey->press) hotkey->press();
-      if(hotkey->state == 1 && state == 0 && hotkey->release) hotkey->release();
-      hotkey->state = state;
-    }
+  if(!program->focused()) return;
+
+  for(auto& hotkey : hotkeys) {
+    int16 state = hotkey->poll();
+    if(hotkey->state == 0 && state == 1 && hotkey->press) hotkey->press();
+    if(hotkey->state == 1 && state == 0 && hotkey->release) hotkey->release();
+    hotkey->state = state;
   }
 }

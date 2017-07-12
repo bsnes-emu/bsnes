@@ -29,7 +29,8 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(latch.vram);
   s.integer(latch.oam);
   s.integer(latch.cgram);
-  s.integer(latch.bgofs);
+  s.integer(latch.bgofsPPU1);
+  s.integer(latch.bgofsPPU2);
   s.integer(latch.mode7);
   s.integer(latch.counters);
   s.integer(latch.hcounter);

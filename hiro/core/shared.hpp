@@ -936,6 +936,7 @@ struct Window : sWindow {
   auto append(sMenuBar menuBar) { return self().append(menuBar), *this; }
   auto append(sStatusBar statusBar) { return self().append(statusBar), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
+  auto dismissable() const { return self().dismissable(); }
   auto doClose() const { return self().doClose(); }
   auto doDrop(string_vector names) const { return self().doDrop(names); }
   auto doKeyPress(signed key) const { return self().doKeyPress(key); }
@@ -963,6 +964,7 @@ struct Window : sWindow {
   auto setAlignment(Alignment alignment) { return self().setAlignment(alignment), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
   auto setCentered(sWindow parent = {}) { return self().setCentered(parent), *this; }
+  auto setDismissable(bool dismissable = true) { return self().setDismissable(dismissable), *this; }
   auto setDroppable(bool droppable = true) { return self().setDroppable(droppable), *this; }
   auto setFrameGeometry(Geometry geometry) { return self().setFrameGeometry(geometry), *this; }
   auto setFramePosition(Position position) { return self().setFramePosition(position), *this; }

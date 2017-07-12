@@ -12,6 +12,7 @@ CheatDatabase::CheatDatabase() {
 
   setSize({800, 400});
   setAlignment({0.5, 1.0});
+  setDismissable();
 }
 
 auto CheatDatabase::findCodes() -> void {

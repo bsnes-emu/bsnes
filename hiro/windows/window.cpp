@@ -67,6 +67,9 @@ auto pWindow::setBackgroundColor(Color color) -> void {
   if(color) hbrush = CreateSolidBrush(hbrushColor);
 }
 
+auto pWindow::setDismissable(bool dismissable) -> void {
+}
+
 auto pWindow::setDroppable(bool droppable) -> void {
   DragAcceptFiles(hwnd, droppable);
 }

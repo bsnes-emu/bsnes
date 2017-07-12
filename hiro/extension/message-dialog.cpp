@@ -71,6 +71,7 @@ auto MessageDialog::_run() -> string {
   window.setResizable(false);
   window.setSize({width, layout.minimumSize().height()});
   window.setCentered(state.parent);
+  window.setDismissable();
   window.setVisible();
   window.setModal();
   window.setVisible(false);

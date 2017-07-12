@@ -94,14 +94,14 @@ auto slice(string_view self, int offset, int length) -> string {
 
 template<typename T> auto fromInteger(char* result, T value) -> char* {
   bool negative = value < 0;
-  if(negative) value = -value;
+  if(!negative) value = -value;  //negate positive integers to support eg INT_MIN
 
   char buffer[1 + sizeof(T) * 3];
   uint size = 0;
 
   do {
-    uint n = value % 10;
-    buffer[size++] = '0' + n;
+    int n = value % 10;  //-0 to -9
+    buffer[size++] = '0' - n;  //'0' to '9'
     value /= 10;
   } while(value);
   if(negative) buffer[size++] = '-';

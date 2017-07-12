@@ -293,8 +293,9 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
     io.hoffsetMode7 = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    bg1.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg1.io.hoffset >> 8 & 7);
-    latch.bgofs = data;
+    bg1.io.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
+    latch.bgofsPPU1 = data;
+    latch.bgofsPPU2 = data;
     return;
   }
 
@@ -303,50 +304,53 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
     io.voffsetMode7 = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    bg1.io.voffset = data << 8 | latch.bgofs;
-    latch.bgofs = data;
+    bg1.io.voffset = data << 8 | latch.bgofsPPU1;
+    latch.bgofsPPU1 = data;
     return;
   }
 
   //BG2HOFS
   case 0x210f: {
-    bg2.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg2.io.hoffset >> 8 & 7);
-    latch.bgofs = data;
+    bg2.io.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
+    latch.bgofsPPU1 = data;
+    latch.bgofsPPU2 = data;
     return;
   }
 
   //BG2VOFS
   case 0x2110: {
-    bg2.io.voffset = data << 8 | latch.bgofs;
-    latch.bgofs = data;
+    bg2.io.voffset = data << 8 | latch.bgofsPPU1;
+    latch.bgofsPPU1 = data;
     return;
   }
 
   //BG3HOFS
   case 0x2111: {
-    bg3.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg3.io.hoffset >> 8 & 7);
-    latch.bgofs = data;
+    bg3.io.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
+    latch.bgofsPPU1 = data;
+    latch.bgofsPPU2 = data;
     return;
   }
 
   //BG3VOFS
   case 0x2112: {
-    bg3.io.voffset = data << 8 | latch.bgofs;
-    latch.bgofs = data;
+    bg3.io.voffset = data << 8 | latch.bgofsPPU1;
+    latch.bgofsPPU1 = data;
     return;
   }
 
   //BG4HOFS
   case 0x2113: {
-    bg4.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg4.io.hoffset >> 8 & 7);
-    latch.bgofs = data;
+    bg4.io.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
+    latch.bgofsPPU1 = data;
+    latch.bgofsPPU2 = data;
     return;
   }
 
   //BG4VOFS
   case 0x2114: {
-    bg4.io.voffset = data << 8 | latch.bgofs;
-    latch.bgofs = data;
+    bg4.io.voffset = data << 8 | latch.bgofsPPU1;
+    latch.bgofsPPU1 = data;
     return;
   }
 

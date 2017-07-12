@@ -146,8 +146,15 @@ static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
     if(auto self = window->self()) {
       if(!self->_modalityDisabled()) {
         if(auto code = pKeyboard::_translate(wparam, lparam)) {
-          if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) window->doKeyPress(code);
-          if(msg == WM_KEYUP || msg == WM_SYSKEYUP) window->doKeyRelease(code);
+          if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) {
+            window->doKeyPress(code);
+          }
+          if(msg == WM_KEYUP || msg == WM_SYSKEYUP) {
+            window->doKeyRelease(code);
+          }
+        }
+        if(window->state.dismissable && msg == WM_KEYDOWN && wparam == VK_ESCAPE) {
+          self->onClose();
         }
       }
     }

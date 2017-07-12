@@ -93,7 +93,7 @@ auto Program::updateAudioEffects() -> void {
   Emulator::audio.setReverb(reverbEnable);
 }
 
-auto Program::allowInput(bool hotkey) -> bool {
+auto Program::focused() -> bool {
   //exclusive mode creates its own top-level window: presentation window will not have focus
   if(video->cap(Video::Exclusive)) {
     auto value = video->get(Video::Exclusive);
@@ -101,8 +101,6 @@ auto Program::allowInput(bool hotkey) -> bool {
   }
 
   if(presentation && presentation->focused()) return true;
-
-  if(!hotkey && settings["Input/FocusLoss/AllowInput"].boolean()) return true;
 
   return false;
 }

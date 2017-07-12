@@ -100,6 +100,9 @@ auto pWindow::setBackgroundColor(Color color) -> void {
   }
 }
 
+auto pWindow::setDismissable(bool dismissable) -> void {
+}
+
 auto pWindow::setDroppable(bool droppable) -> void {
   qtWindow->setAcceptDrops(droppable);
 }
@@ -144,10 +147,6 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
     qtContainer->setMinimumSize(1, 1);
   }
 
-//  for(auto& layout : window.state.layout) {
-//    geometry.x = geometry.y = 0;
-//    layout.setGeometry(geometry);
-//  }
   unlock();
 }
 
@@ -193,20 +192,6 @@ auto pWindow::setVisible(bool visible) -> void {
   }
   unlock();
 }
-
-/*
-  if(!widget.font() && window.state.widgetFont) {
-    widget.setFont(window.state.widgetFont);
-  }
-  if(!widget.font()) widget.p.setFont(Font::sans(8));
-  if(GetParentWidget(&widget)) {
-    widget.p.qtWidget->setParent(GetParentWidget(&widget)->p.container(widget));
-  } else {
-    widget.p.qtWidget->setParent(qtContainer);
-  }
-  widget.setVisible(widget.visible());
-}
-*/
 
 auto pWindow::_append(mWidget& widget) -> void {
   if(auto self = widget.self()) {
@@ -274,13 +259,19 @@ auto QtWindow::dropEvent(QDropEvent* event) -> void {
 }
 
 auto QtWindow::keyPressEvent(QKeyEvent* event) -> void {
-//  Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
-//  if(sym != Keyboard::Keycode::None && self.window.onKeyPress) self.window.onKeyPress(sym);
+//Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
+//if(sym != Keyboard::Keycode::None && self.window.onKeyPress) self.window.onKeyPress(sym);
+
+  if(p.state().dismissable && event->key() == Qt::Key_Escape) {
+    if(p.state().onClose) p.self().doClose();
+    else p.self().setVisible(false);
+    if(p.state().modal && !p.self().visible()) p.self().setModal(false);
+  }
 }
 
 auto QtWindow::keyReleaseEvent(QKeyEvent* event) -> void {
-//  Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
-//  if(sym != Keyboard::Keycode::None && self.window.onKeyRelease) self.window.onKeyRelease(sym);
+//Keyboard::Keycode sym = Keysym(event->nativeVirtualKey());
+//if(sym != Keyboard::Keycode::None && self.window.onKeyRelease) self.window.onKeyRelease(sym);
 }
 
 auto QtWindow::resizeEvent(QResizeEvent*) -> void {

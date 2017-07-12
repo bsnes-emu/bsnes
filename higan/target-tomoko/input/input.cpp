@@ -192,27 +192,29 @@ InputManager::InputManager() {
   frequency = max(1u, settings["Input/Frequency"].natural());
 
   for(auto& emulator : program->emulators) {
-    auto& inputEmulator = emulators(emulators.size());
+    InputEmulator inputEmulator;
     inputEmulator.interface = emulator;
     inputEmulator.name = emulator->information.name;
-
     for(auto& port : emulator->ports) {
-      auto& inputPort = inputEmulator.ports(port.id);
-      inputPort.name = port.name;
+      InputPort inputPort{port.id, port.name};
       for(auto& device : port.devices) {
-        auto& inputDevice = inputPort.devices(device.id);
-        inputDevice.name = device.name;
+        InputDevice inputDevice{device.id, device.name};
         for(auto& input : device.inputs) {
-          auto& inputMapping = inputDevice.mappings(inputDevice.mappings.size());
+          InputMapping inputMapping;
           inputMapping.name = input.name;
           inputMapping.type = input.type;
 
           inputMapping.path = string{inputEmulator.name, "/", inputPort.name, "/", inputDevice.name, "/", inputMapping.name}.replace(" ", "");
           inputMapping.assignment = settings(inputMapping.path).text();
           inputMapping.bind();
+
+          inputDevice.mappings.append(inputMapping);
         }
+        inputPort.devices.append(inputDevice);
       }
+      inputEmulator.ports.append(move(inputPort));
     }
+    emulators.append(move(inputEmulator));
   }
 
   appendHotkeys();
@@ -276,6 +278,19 @@ auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint
 auto InputManager::quit() -> void {
   emulators.reset();
   hotkeys.reset();
+}
+
+auto InputManager::mapping(uint port, uint device, uint input) -> maybe<InputMapping&> {
+  if(!emulator) return nothing;
+  for(auto& inputPort : emulator->ports) {
+    if(inputPort.id != port) continue;
+    for(auto& inputDevice : inputPort.devices) {
+      if(inputDevice.id != device) continue;
+      if(input >= inputDevice.mappings.size()) return nothing;
+      return inputDevice.mappings[input];
+    }
+  }
+  return nothing;
 }
 
 auto InputManager::findMouse() -> shared_pointer<HID::Device> {

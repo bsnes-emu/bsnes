@@ -43,6 +43,10 @@ auto mWindow::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
+auto mWindow::dismissable() const -> bool {
+  return state.dismissable;
+}
+
 auto mWindow::doClose() const -> void {
   if(state.onClose) return state.onClose();
 }
@@ -186,6 +190,12 @@ auto mWindow::setCentered(sWindow parent) -> type& {
   if(workspace.width() > geometry.width()) x += (workspace.width() - geometry.width()) / 2;
   if(workspace.height() > geometry.height()) y += (workspace.height() - geometry.height()) / 2;
   return setFrameGeometry({x, y, geometry.width(), geometry.height()});
+}
+
+auto mWindow::setDismissable(bool dismissable) -> type& {
+  state.dismissable = dismissable;
+  signal(setDismissable, dismissable);
+  return *this;
 }
 
 auto mWindow::setDroppable(bool droppable) -> type& {

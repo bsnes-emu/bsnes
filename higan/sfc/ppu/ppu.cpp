@@ -103,7 +103,8 @@ auto PPU::power() -> void {
   latch.vram = random(0x0000);
   latch.oam = random(0x00);
   latch.cgram = random(0x00);
-  latch.bgofs = random(0x00);
+  latch.bgofsPPU1 = random(0x00);
+  latch.bgofsPPU2 = random(0x00);
   latch.mode7 = random(0x00);
   latch.counters = false;
   latch.hcounter = 0;

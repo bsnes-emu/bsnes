@@ -243,6 +243,10 @@ auto pWindow::setBackgroundColor(Color color) -> void {
   }
 }
 
+auto pWindow::setDismissable(bool dismissable) -> void {
+  //todo: not implemented
+}
+
 auto pWindow::setDroppable(bool droppable) -> void {
   @autoreleasepool {
     if(droppable) {
@@ -403,15 +407,6 @@ auto pWindow::_geometry() -> Geometry {
     };
   }
 }
-
-/*
-auto pWindow::remove(Widget& widget) -> void {
-  @autoreleasepool {
-    [widget.p.cocoaView removeFromSuperview];
-    [[cocoaWindow contentView] setNeedsDisplay:YES];
-  }
-}
-*/
 
 }
 

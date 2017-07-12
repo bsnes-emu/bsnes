@@ -96,18 +96,20 @@ auto Program::audioSample(const double* samples, uint channels) -> void {
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
-  if(allowInput()) {
+  if(focused() || settings["Input/FocusLoss/AllowInput"].boolean()) {
     inputManager->poll();
-    auto& mapping = inputManager->emulator->ports[port].devices[device].mappings[input];
-    return mapping.poll();
+    if(auto mapping = inputManager->mapping(port, device, input)) {
+      return mapping->poll();
+    }
   }
   return 0;
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
-  if(allowInput() || !enable) {
-    auto& mapping = inputManager->emulator->ports[port].devices[device].mappings[input];
-    return mapping.rumble(enable);
+  if(focused() || settings["Input/FocusLoss/AllowInput"].boolean() || !enable) {
+    if(auto mapping = inputManager->mapping(port, device, input)) {
+      return mapping->rumble(enable);
+    }
   }
 }
 

@@ -23,4 +23,5 @@ AboutWindow::AboutWindow() {
   setResizable(false);
   setSize(layout.minimumSize());
   setCentered();
+  setDismissable();
 }

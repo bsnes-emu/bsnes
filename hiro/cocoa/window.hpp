@@ -39,6 +39,7 @@ struct pWindow : pObject {
   auto remove(sMenuBar menuBar) -> void;
   auto remove(sStatusBar statusBar) -> void;
   auto setBackgroundColor(Color color) -> void;
+  auto setDismissable(bool dismissable) -> void;
   auto setDroppable(bool droppable) -> void;
   auto setFocused() -> void override;
   auto setFullScreen(bool fullScreen) -> void;
