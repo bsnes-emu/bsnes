@@ -27,7 +27,7 @@ It also includes some level of support for these consoles:
   - Bandai Wonderswan
   - Bandai Wonderswan Color
 
-**Note:** Some console were released under different names
+**Note:** Some consoles were released under different names
 in different geographic regions.
 To avoid listing all possible names
 every time such a console is mentioned,
