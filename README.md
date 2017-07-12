@@ -500,8 +500,10 @@ The Library menu
 The Library menu allows you
 to import games into higan's game library,
 and to load games from the library.
+higan organises the games in your library
+according to which console they were intended to run on.
 
-To play a game from your library,
+To play a game for a particular console from your library,
 click on the Library menu,
 click on the console manufacturer submenu
 (Nintendo for the Super Famicom,
