@@ -1552,9 +1552,9 @@ with software to control the modem,
 browse online services,
 and download games and data.
 This control cartridge was called
-"BS-X Sore wa Namae o Nusumareta Machi no Monogatari",
+*BS-X Sore wa Namae o Nusumareta Machi no Monogatari*,
 which translates as
-"BS-X The Story of The Town Whose Name Was Stolen".
+*BS-X The Story of The Town Whose Name Was Stolen*.
 
 [wpbsx]: https://en.wikipedia.org/wiki/Satellaview
 
