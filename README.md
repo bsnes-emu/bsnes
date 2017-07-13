@@ -15,7 +15,7 @@ higan has top-tier support for the following consoles:
 
 It also includes some level of support for these consoles:
 
-  - BS-X Satellaview addon for the Super Famicom
+  - Satellaview addon for the Super Famicom
   - Nintendo Famicom/Nintendo Entertainment System
   - Nintendo Game Boy
   - Nintendo Game Boy Color
@@ -1539,13 +1539,10 @@ with "No cartridge loaded" in
 Once a game with co-processor firmware is imported,
 you can play it just like any [regular game](#importing-and-playing-regular-games).
 
-Importing and playing BS-X games
+Importing and playing Satellaview games
 --------------------------------
 
-The [Bandai Satellaview][wpbsx]
-(often abbreviated,
-for some reason,
-to "BS-X")
+The [Satellaview][wpbsx]
 was a satellite modem peripheral
 released for the Super Famicom in Japan.
 As well as the actual modem
@@ -1561,7 +1558,7 @@ which translates as
 
 [wpbsx]: https://en.wikipedia.org/wiki/Satellaview
 
-The BS-X control cartridge had a slot that accepted
+The control cartridge had a slot that accepted
 rewritable "memory paks",
 so that people could store the games and data they downloaded.
 A small number of games that did not use the Satellaview modem
@@ -1575,7 +1572,7 @@ some read-only memory paks
 were sold in retail stores
 containing extra content for specific games.
 
-Importing a game that has a slot for a BS-X memory pak
+Importing a game that has a slot for a memory pak
 is just like [importing a regular game](#importing-and-playing-regular-games).
 
 Importing a memory pak is like importing a regular game,
@@ -1591,7 +1588,7 @@ regular Super Famicom games,
 and fail miserably.
 Rename the file and it should work beautifully.
 
-Playing a game that has a slot for a BS-X memory pak
+Playing a game that has a slot for a memory pak
 is just like playing a regular game,
 but after you have selected which game you want to play
 higan will open another
@@ -1602,9 +1599,7 @@ If you press "Cancel" at this point,
 the game will load without any cartridge in its memory pak slot.
 
 Note that although you can load
-the BS-X control cartridge,
-*BS-X Sore wa Namae o Nusumareta Machi no Monogatari*
-into higan,
+the control cartridge into higan,
 higan does not emulate the Satellaview modem itself,
 and even if it did,
 the Satellaview online service
@@ -1613,7 +1608,7 @@ so there'd be nothing for it to talk to.
 
 Playing a memory pak on its own doesn't make much sense,
 it's not a standalone cartridge.
-Play a game with a BS-X memory pak slot,
+Play a game with a memory pak slot,
 and choose which memory pak you want when higan asks for it.
 
 Importing and playing Sufami Turbo games
