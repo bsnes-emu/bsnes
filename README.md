@@ -1542,6 +1542,80 @@ you can play it just like any [regular game](#importing-and-playing-regular-game
 Importing and playing BS-X games
 --------------------------------
 
+The [Bandai Satellaview][wpbsx]
+(often abbreviated,
+for some reason,
+to "BS-X")
+was a satellite modem peripheral
+released for the Super Famicom in Japan.
+As well as the actual modem
+(designed to sit underneath the Super Famicom),
+it also included a cartridge
+with software to control the modem,
+browse online services,
+and download games and data.
+This control cartridge was called
+"BS-X Sore wa Namae o Nusumareta Machi no Monogatari",
+which translates as
+"BS-X The Story of The Town Whose Name Was Stolen".
+
+[wpbsx]: https://en.wikipedia.org/wiki/Satellaview
+
+The BS-X control cartridge had a slot that accepted
+rewritable "memory paks",
+so that people could store the games and data they downloaded.
+A small number of games that did not use the Satellaview modem
+also had a memory pak slot,
+so the game's publishers could
+publish extra content for the game
+via the Satellaview service
+after the game's release.
+For the benefit of people who didn't own a Satellaview
+some read-only memory paks
+were sold in retail stores
+containing extra content for specific games.
+
+Importing a game that has a slot for a BS-X memory pak
+is just like [importing a regular game](#importing-and-playing-regular-games).
+
+Importing a memory pak is like importing a regular game,
+but the name of the memory pak file *must* end in `.bs`
+(if it's in a `.zip` file,
+that's OK,
+but the name *inside* the `.zip` file
+must end in `.bs`)
+in order for it to be successfully imported.
+Sometimes memory pak filenames end in `(BSROM).sfc`,
+which will make higan try to import them as
+regular Super Famicom games,
+and fail miserably.
+Rename the file and it should work beautifully.
+
+Playing a game that has a slot for a BS-X memory pak
+is just like playing a regular game,
+but after you have selected which game you want to play
+higan will open another
+[filesystem browser](#the-filesystem-browser)
+to let you pick which previously-imported memory pak
+you want to insert into the game.
+If you press "Cancel" at this point,
+the game will load without any cartridge in its memory pak slot.
+
+Note that although you can load
+the BS-X control cartridge,
+*BS-X Sore wa Namae o Nusumareta Machi no Monogatari*
+into higan,
+higan does not emulate the Satellaview modem itself,
+and even if it did,
+the Satellaview online service
+went offline years ago,
+so there'd be nothing for it to talk to.
+
+Playing a memory pak on its own doesn't make much sense,
+it's not a standalone cartridge.
+Play a game with a BS-X memory pak slot,
+and choose which memory pak you want when higan asks for it.
+
 Importing and playing Sufami Turbo games
 ----------------------------------------
 
