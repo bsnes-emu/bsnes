@@ -1511,7 +1511,30 @@ it will assume it uses DSP1B.
 Many games work just as well with either DSP1 or DSP1B,
 but Pilotwings is a notable exception.
 
-TODO: If you try to import a game without the correct firmware present, what happens?
+If you try to import a game
+using the "Import ROM Files ..." option
+in [the Library menu](#the-library-menu)
+(or using icarus directly)
+but do not have the required firmware files
+in the correct place,
+a window will appear saying
+"Import completed, but with 1 errors. View log?"
+(or howevery many games were lacking the correct firmware).
+If you press "Yes",
+a new window will appear listing the games that couldn't be imported,
+and at least one firmware file that was missing or incorrect, like this:
+
+> [smk.zip] firmware (dsp1b.program.rom) missing or invalid
+
+If you try to import a game
+using the "Load ROM File ..." option
+in [the Library menu](#the-library-menu)
+but do not have the required firmware files
+in the correct place,
+nothing will happen,
+and higan will just sit there
+with "No cartridge loaded" in
+[the status bar](#the-status-bar).
 
 Once a game with co-processor firmware is imported,
 you can play it just like any [regular game](#importing-and-playing-regular-games).
