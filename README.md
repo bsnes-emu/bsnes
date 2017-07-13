@@ -1601,10 +1601,11 @@ the game will load without any cartridge in its memory pak slot.
 Note that although you can load
 the control cartridge into higan,
 higan does not emulate the Satellaview modem itself,
-and even if it did,
+so it's not very useful.
+Even if higan did emulate it,
 the Satellaview online service
 went offline years ago,
-so there'd be nothing for it to talk to.
+so there'd be nothing for the emulated modem to talk to.
 
 Playing a memory pak on its own doesn't make much sense,
 it's not a standalone cartridge.
