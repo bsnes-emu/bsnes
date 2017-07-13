@@ -1401,95 +1401,95 @@ here's the firmware files you'll need:
     <tbody>
         <tr>
             <th scope="row">CX4</th>
-            <td><pre>cx4.data.rom</pre></td>
+            <td><code>cx4.data.rom</code></td>
             <td>3072</td>
             <td>ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18</td>
         </tr>
         <tr>
-            <th scope="row" rows=2>DSP1/1A (Note 1)</th>
-            <td><pre>dsp1.data.rom</pre></td>
+            <th scope="row" rowspan=2>DSP1/1A (Note 1)</th>
+            <td><code>dsp1.data.rom</code></td>
             <td>2048</td>
             <td>0b5da6533e55852ee8fc397977ec5576c5b9f1fb2e05656d8f87123a121b076e</td>
         </tr>
         <tr>
-            <td><pre>dsp1.program.rom</pre></td>
+            <td><code>dsp1.program.rom</code></td>
             <td>6144</td>
             <td>269584b347a22953a2989494c850a7c1c027f4ca5add517a60e0c7d8833d0fac</td>
         </tr>
         <tr>
-            <th scope="row" rows=2>DSP1B (Note 2)</th>
-            <td><pre>dsp1b.data.rom</pre></td>
+            <th scope="row" rowspan=2>DSP1B (Note 2)</th>
+            <td><code>dsp1b.data.rom</code></td>
             <td>2048</td>
             <td>8546cbac530830446bb8a277f6b139d4ad64d650bdbac7e4e150e2f095665049</td>
         </tr>
         <tr>
-            <td><pre>dsp1b.program.rom</pre></td>
+            <td><code>dsp1b.program.rom</code></td>
             <td>6144</td>
             <td>2eccb54a8f89374911f7e2db48f1b4cde855655e28103f7bda2982a5b418a187</td>
         </tr>
         <tr>
-            <th scope="row" rows=2>DSP2</th>
-            <td><pre>dsp2.data.rom</pre></td>
+            <th scope="row" rowspan=2>DSP2</th>
+            <td><code>dsp2.data.rom</code></td>
             <td>2048</td>
             <td>3beef9bffdc1e84c9f99f3301d8bd3e520d2e62909a995320f9faeae8f46ec11</td>
         </tr>
         <tr>
-            <td><pre>dsp2.program.rom</pre></td>
+            <td><code>dsp2.program.rom</code></td>
             <td>6144</td>
             <td>62a2ef8d2d7db638f4ec0fbcebf0e5bf18a75ee95be06e885d9519a10487f0da</td>
         </tr>
         <tr>
-            <th scope="row" rows="2">DSP3</th>
-            <td><pre>dsp3.data.rom</pre></td>
+            <th scope="row" rowspan="2">DSP3</th>
+            <td><code>dsp3.data.rom</code></td>
             <td>2048</td>
             <td>7fe51796e9c97fee1fa2aab40592b7c78997f67dd00333e69d0f79a12f3cb69f</td>
         </tr>
         <tr>
-            <td><pre>dsp3.program.rom</pre></td>
+            <td><code>dsp3.program.rom</code></td>
             <td>6144</td>
             <td>aea7b622e7c1de346cb15d16afcbedf92b6798507e179f83ed2a4cff40d0e663</td>
         </tr>
         <tr>
-            <th scope="row" rows="2">DSP4</th>
-            <td><pre>dsp4.data.rom</pre></td>
+            <th scope="row" rowspan="2">DSP4</th>
+            <td><code>dsp4.data.rom</code></td>
             <td>2048</td>
             <td>ef3ffb4256dd896a60213269b4e2d3bdd120c97e2fd623bddabbf43c2be422af</td>
         </tr>
         <tr>
-            <td><pre>dsp4.program.rom</pre></td>
+            <td><code>dsp4.program.rom</code></td>
             <td>6144</td>
             <td>89b1826e6038be3a0ea0f923e85d589ff6f02dc1a1819fb2ec8c0cea5b333dcd</td>
         </tr>
         <tr>
-            <th scope="row" rows="2">ST010</th>
-            <td><pre>st010.data.rom</pre></td>
+            <th scope="row" rowspan="2">ST010</th>
+            <td><code>st010.data.rom</code></td>
             <td>4096</td>
             <td>dc7056a51b53993d7a8ba5bacf9501f785d2fce5e5be748e9ff2737c5938d4a5</td>
         </tr>
         <tr>
-            <td><pre>st010.program.rom</pre></td>
+            <td><code>st010.program.rom</code></td>
             <td>49152</td>
             <td>2c1f74bb5f466d81c64c326e71ac054489efe1abc9a5d6f91aac7747f2ddab67</td>
         </tr>
         <tr>
-            <th scope="row" rows="2">ST011</th>
-            <td><pre>st011.data.rom</pre></td>
+            <th scope="row" rowspan="2">ST011</th>
+            <td><code>st011.data.rom</code></td>
             <td>4096</td>
             <td>b5377d1bebe8adc507a024b6e2b9b8fdf4877e451da84fbad05dff4e4a70311e</td>
         </tr>
         <tr>
-            <td><pre>st011.program.rom</pre></td>
+            <td><code>st011.program.rom</code></td>
             <td>49152</td>
             <td>d90a5cda380e81cb9ba11a9da7539b173c49b31bedc7a3ac9c3c8b3f97e89e14</td>
         </tr>
         <tr>
-            <th scope="row" rows="2">ST018</th>
-            <td><pre>st018.data.rom</pre></td>
+            <th scope="row" rowspan="2">ST018</th>
+            <td><code>st018.data.rom</code></td>
             <td>32768</td>
             <td>b5377d1bebe8adc507a024b6e2b9b8fdf4877e451da84fbad05dff4e4a70311e</td>
         </tr>
         <tr>
-            <td><pre>st018.program.rom</pre></td>
+            <td><code>st018.program.rom</code></td>
             <td>131072</td>
             <td>d90a5cda380e81cb9ba11a9da7539b173c49b31bedc7a3ac9c3c8b3f97e89e14</td>
         </tr>
