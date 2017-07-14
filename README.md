@@ -1540,7 +1540,7 @@ Once a game with co-processor firmware is imported,
 you can play it just like any [regular game](#importing-and-playing-regular-games).
 
 Importing and playing Satellaview games
---------------------------------
+---------------------------------------
 
 The [Satellaview][wpbsx]
 was a satellite modem peripheral
