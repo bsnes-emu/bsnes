@@ -1602,10 +1602,10 @@ Note that although you can load
 the control cartridge into higan,
 higan does not emulate the Satellaview modem itself,
 so it's not very useful.
-Even if higan did emulate it,
-the Satellaview online service
-went offline years ago,
-so there'd be nothing for the emulated modem to talk to.
+For more information about the Satellaview service,
+a translation patch for the control cartridge
+and emulators that do a better job of Satellaview emulation,
+see [the BS-X Project](https://bsxproj.superfamicom.org/).
 
 Playing a memory pak on its own doesn't make much sense,
 it's not a standalone cartridge.
