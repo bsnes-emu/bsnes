@@ -1699,7 +1699,7 @@ so it needs a boot ROM:
             <td><code>0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360</code></td>
         </tr>
         <tr>
-            <th scope="row>SGB2</th>
+            <th scope="row">SGB2</th>
             <td><code>sgb.boot.rom</code></td>
             <td>256</td>
             <td><code>fd243c4fb27008986316ce3df29e9cfbcdc0cd52704970555a8bb76edbec3988</code></td>
