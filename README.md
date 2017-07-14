@@ -1665,6 +1665,77 @@ the Sufami Turbo cartridge will boot without anything in slot B.
 Importing and playing Super Game Boy games
 ------------------------------------------
 
+The Super Game Boy was a special cartridge
+released for the Super Famicom
+(and all its regional variants around the world)
+that allowed Game Boy games to be played
+via the Super Famicom's controllers and video output.
+The Super Game Boy 2 was released in Japan,
+and had some minor extra features
+beyond the original Super Game Boy,
+but importing and playing games
+works the same way in higan.
+
+The Super Game Boy cartrige includes
+the complete hardware of an original
+(black-and-white)
+Game Boy,
+so it needs a boot ROM:
+
+<table>
+    <thead>
+        <tr>
+            <th>Cartridge</th>
+            <th>Filename</th>
+            <th>Size (bytes)</th>
+            <th>SHA256</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">SGB</th>
+            <td><code>sgb.boot.rom</code></td>
+            <td>256</td>
+            <td><code>0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360</code></td>
+        </tr>
+        <tr>
+            <th scope="row>SGB2</th>
+            <td><code>sgb.boot.rom</code></td>
+            <td>256</td>
+            <td><code>fd243c4fb27008986316ce3df29e9cfbcdc0cd52704970555a8bb76edbec3988</code></td>
+        </tr>
+    </tbody>
+</table>
+
+Yes,
+the SGB and SGB2 have different firmware,
+but higan expects the same filename for both.
+
+To import the SGB base cartridge,
+you must copy the required firmware file
+into the same directory.
+Then you may import it just like
+[a regular game](#importing-and-playing-regular-games).
+
+To play a Game Boy game in Super Game Boy mode,
+load the Super Game Boy cartridge like any other game.
+higan will open another
+[filesystem browser](#the-filesystem-browser)
+to let you pick which previously-imported Game Boy game
+you want to insert into the Super Game Boy.
+If you press "Cancel" at this point,
+higan will crash, so don't do that.
+
+Note that only games for the original, black-and-white Game Boy
+can be used with the Super Game Boy.
+Some games designed for the Game Boy Color
+were backward compatible with the original Game Boy
+and hence the Super Game Boy;
+see [Playing Game Boy Colour games in Game Boy mode][blackcarts]
+for details.
+
+[blackcarts]: #playing-game-boy-color-games-in-game-boy-mode
+
 Importing and playing MSU-1 games
 ---------------------------------
 
