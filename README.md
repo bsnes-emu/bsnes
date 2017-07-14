@@ -1741,6 +1741,11 @@ Importing and playing MSU-1 games
 
 TODO
 
+Importing and playing patched games
+-----------------------------------
+
+TODO
+
 Moving the game library
 -----------------------
 
