@@ -1668,11 +1668,7 @@ Importing and playing Super Game Boy games
 Importing and playing MSU-1 games
 ---------------------------------
 
-Importing and playing Game Boy Color games
-------------------------------------------
-
-Importing and playing Game Boy Advance games
---------------------------------------------
+TODO
 
 Moving the game library
 -----------------------
@@ -1834,6 +1830,9 @@ TODO
 The WonderSwan rotates!
 
 Shaders look weird on Super Famicom because of interlace/hi-res
+
+Playing Game Boy Colour games in Game Boy mode
+----------------------------------------------
 
 GBA in-game saves are Difficult
 
