@@ -1615,6 +1615,53 @@ and choose which memory pak you want when higan asks for it.
 Importing and playing Sufami Turbo games
 ----------------------------------------
 
+The [Sufami Turbo][wpst]
+was a special cartridge released
+for the Super Famicom in Japan.
+The Sufami Turbo on its own does nothing,
+but it has two slots in the top
+that accept Sufami Turbo mini-cartridges.
+The game in slot A is the one that actually plays,
+but some games can make use of additional data
+from a game in slot B.
+
+Importing the Sufami Turbo cartridge
+is just like [importing a regular game](#importing-and-playing-regular-games).
+
+Importing a mini-cartridge is like importing a regular game,
+but the name of the memory pak file *must* end in `.st`
+(if it's in a `.zip` file,
+that's OK,
+but the name *inside* the `.zip` file
+must end in `.st`)
+in order for it to be successfully imported.
+Sometimes memory pak filenames end in `(ST).sfc`,
+which will make higan try to import them as
+regular Super Famicom games,
+and fail miserably.
+Rename the file and it should work beautifully.
+
+To play a Sufami Turbo game,
+load the Sufami Turbo cartridge like any other game.
+higan will open another
+[filesystem browser](#the-filesystem-browser)
+to let you pick which previously-imported mini-cartridge
+you want to insert into slot A.
+If you press "Cancel" at this point,
+the Sufami Turbo cartridge will boot without anything in slot A,
+which just displays an image telling you
+to turn off your Super Famicom,
+insert a game into slot A,
+and try again.
+If you chose a cartridge for slot A,
+higan will yet open another
+filesystem browser
+to let you choose a mini-cartridge for slot B.
+If you press "Cancel" at this point,
+the Sufami Turbo cartridge will boot without anything in slot B.
+
+[wpst]: https://en.wikipedia.org/wiki/Sufami_Turbo
+
 Importing and playing Super Game Boy games
 ------------------------------------------
 
