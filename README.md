@@ -1739,7 +1739,37 @@ for details.
 Importing and playing MSU-1 games
 ---------------------------------
 
-TODO
+The MSU-1 is a fictional expansion chip
+invented by higan's author byuu
+for use with Super Famicom games,
+designed to allow streaming data and audio.
+Although the MSU-1 is not specific
+to any particular storage medium,
+it gives the Super Famicom similar capabilities
+to CD-based add-ons
+like the Mega Drive's Mega CD
+and the PC Engine's CD-ROM²,
+such as CD-quality music and full-motion video.
+
+Unfortunately,
+although the interface between the MSU-1
+and the emulated Super Famicom is standard
+and has multiple independent implementations
+(higan, snes9x,
+and on real hardware with
+the [SD2SNES][sd2snes] programmable cartridge)
+there's no standard
+for how a Super Famicom emulator
+should find the data the MSU-1 asks it to stream,
+or the audio tracks the MSU-1 asks it to play.
+Or rather,
+there are multiple standards
+and not all MSU-1 patches are designed for
+the system higan currently follows.
+
+
+[sd2snes]: https://sd2snes.de/
+[flips]: http://www.romhacking.net/utilities/1040/
 
 Importing and playing patched games
 -----------------------------------
