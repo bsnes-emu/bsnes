@@ -238,6 +238,10 @@ auto Video::availableDrivers() -> string_vector {
   #include <ruby/audio/ao.cpp>
 #endif
 
+#if defined(AUDIO_ASIO)
+  #include <ruby/audio/asio.cpp>
+#endif
+
 #if defined(AUDIO_DIRECTSOUND)
   #include <ruby/audio/directsound.cpp>
 #endif
@@ -286,8 +290,12 @@ auto Audio::create(const string& driver) -> Audio* {
   if(driver == "libao") return new AudioAO;
   #endif
 
+  #if defined(AUDIO_ASIO)
+  if(driver == "ASIO") return new AudioASIO;
+  #endif
+
   #if defined(AUDIO_DIRECTSOUND)
-  if(driver == "DirectSound") return new AudioDS;
+  if(driver == "DirectSound") return new AudioDirectSound;
   #endif
 
   #if defined(AUDIO_OPENAL)
@@ -318,7 +326,9 @@ auto Audio::create(const string& driver) -> Audio* {
 }
 
 auto Audio::optimalDriver() -> string {
-  #if defined(AUDIO_WASAPI)
+  #if defined(AUDIO_ASIO)
+  return "ASIO";
+  #elif defined(AUDIO_WASAPI)
   return "WASAPI";
   #elif defined(AUDIO_XAUDIO2)
   return "XAudio2";
@@ -360,6 +370,8 @@ auto Audio::safestDriver() -> string {
   return "PulseAudioSimple";
   #elif defined(AUDIO_AO)
   return "libao";
+  #elif defined(AUDIO_ASIO)
+  return "ASIO";
   #else
   return "None";
   #endif
@@ -367,6 +379,10 @@ auto Audio::safestDriver() -> string {
 
 auto Audio::availableDrivers() -> string_vector {
   return {
+
+  #if defined(AUDIO_ASIO)
+  "ASIO",
+  #endif
 
   #if defined(AUDIO_WASAPI)
   "WASAPI",

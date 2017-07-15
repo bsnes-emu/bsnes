@@ -1,7 +1,7 @@
 #include <dsound.h>
 
-struct AudioDS : Audio {
-  ~AudioDS() { term(); }
+struct AudioDirectSound : Audio {
+  ~AudioDirectSound() { term(); }
 
   LPDIRECTSOUND ds = nullptr;
   LPDIRECTSOUNDBUFFER dsb_p = nullptr;

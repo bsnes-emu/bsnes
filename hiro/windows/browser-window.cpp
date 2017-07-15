@@ -41,8 +41,8 @@ static auto BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) -> 
   if(path) {
     //clear COMDLG32 MRU (most recently used) file list
     //this is required in order for lpstrInitialDir to be honored in Windows 7 and above
-    registry::remove("HKCU/Software/Microsoft/Windows/CurrentVersion/Explorer/ComDlg32/LastVisitedPidlMRU/");
-    registry::remove("HKCU/Software/Microsoft/Windows/CurrentVersion/Explorer/ComDlg32/OpenSavePidlMRU/");
+    registry::remove("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU\\");
+    registry::remove("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU\\");
   }
 
   OPENFILENAME ofn;

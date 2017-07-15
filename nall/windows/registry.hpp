@@ -24,7 +24,7 @@ namespace nall {
 
 struct registry {
   static auto exists(const string& name) -> bool {
-    auto part = name.split("/");
+    auto part = name.split("\\");
     HKEY handle, rootKey = root(part.takeLeft());
     string node = part.takeRight();
     string path = part.merge("\\");
@@ -39,7 +39,7 @@ struct registry {
   }
 
   static auto read(const string& name) -> string {
-    auto part = name.split("/");
+    auto part = name.split("\\");
     HKEY handle, rootKey = root(part.takeLeft());
     string node = part.takeRight();
     string path = part.merge("\\");
@@ -54,7 +54,7 @@ struct registry {
   }
 
   static auto write(const string& name, const string& data = "") -> void {
-    auto part = name.split("/");
+    auto part = name.split("\\");
     HKEY handle, rootKey = root(part.takeLeft());
     string node = part.takeRight(), path;
     DWORD disposition;
@@ -71,7 +71,7 @@ struct registry {
   }
 
   static auto remove(const string& name) -> bool {
-    auto part = name.split("/");
+    auto part = name.split("\\");
     HKEY rootKey = root(part.takeLeft());
     string node = part.takeRight();
     string path = part.merge("\\");
@@ -81,7 +81,7 @@ struct registry {
 
   static auto contents(const string& name) -> string_vector {
     string_vector result;
-    auto part = name.split("/");
+    auto part = name.split("\\");
     HKEY handle, rootKey = root(part.takeLeft());
     part.removeRight();
     string path = part.merge("\\");
@@ -92,7 +92,7 @@ struct registry {
         wchar_t name[NWR_SIZE] = L"";
         DWORD size = NWR_SIZE * sizeof(wchar_t);
         RegEnumKeyEx(handle, n, (wchar_t*)&name, &size, nullptr, nullptr, nullptr, nullptr);
-        result.append(string{(const char*)utf8_t(name), "/"});
+        result.append(string{(const char*)utf8_t(name), "\\"});
       }
       for(uint n = 0; n < nodes; n++) {
         wchar_t name[NWR_SIZE] = L"";
