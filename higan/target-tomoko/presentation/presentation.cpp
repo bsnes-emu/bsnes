@@ -82,7 +82,7 @@ Presentation::Presentation() {
     program->updateVideoShader();
   });
   loadShaders();
-  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).setVisible(false).onToggle([&] {
+  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).onToggle([&] {
     settings["Video/Synchronize"].setValue(synchronizeVideo.checked());
     video->setBlocking(synchronizeVideo.checked());
   });
@@ -99,20 +99,23 @@ Presentation::Presentation() {
     statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeViewport();
   });
-  showConfiguration.setText("Configuration ...").onActivate([&] {
-    //if no emulation core active; default to hotkeys panel
-    if(!emulator) return settingsManager->show(3);
-
-    //default to input panel with current core's input settings active
-    for(auto item : settingsManager->input.emulatorList.items()) {
-      if(systemMenu.text() == item.text()) {
-        item.setSelected();
-        settingsManager->input.emulatorList.doChange();
-        break;
+  showVideoSettings.setText("Video Settings ...").onActivate([&] { settingsManager->show(0); });
+  showAudioSettings.setText("Audio Settings ...").onActivate([&] { settingsManager->show(1); });
+  showInputSettings.setText("Input Settings ...").onActivate([&] {
+    if(emulator) {
+      //default input panel to current core's input settings
+      for(auto item : settingsManager->input.emulatorList.items()) {
+        if(systemMenu.text() == item.text()) {
+          item.setSelected();
+          settingsManager->input.emulatorList.doChange();
+          break;
+        }
       }
     }
     settingsManager->show(2);
   });
+  showHotkeySettings.setText("Hotkey Settings ...").onActivate([&] { settingsManager->show(3); });
+  showAdvancedSettings.setText("Advanced Settings ...").onActivate([&] { settingsManager->show(4); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveQuickStateMenu.setText("Save Quick State");

@@ -31,6 +31,13 @@ auto Audio::setInterface(Interface* interface) -> void {
   this->interface = interface;
 }
 
+auto Audio::setFrequency(double frequency) -> void {
+  this->frequency = frequency;
+  for(auto& stream : streams) {
+    stream->setFrequency(stream->inputFrequency, frequency);
+  }
+}
+
 auto Audio::setVolume(double volume) -> void {
   this->volume = volume;
 }

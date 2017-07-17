@@ -50,7 +50,6 @@ Settings::Settings() {
   set("Audio/Volume", 100);
   set("Audio/Balance", 50);
   set("Audio/Reverb/Enable", false);
-  set("Audio/Resampler", "Sinc");
 
   set("Input/Driver", ruby::Input::optimalDriver());
   set("Input/Frequency", 5);

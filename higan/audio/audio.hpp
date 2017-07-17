@@ -15,6 +15,7 @@ struct Audio {
   auto reset(maybe<uint> channels = nothing, maybe<double> frequency = nothing) -> void;
   auto setInterface(Interface* interface) -> void;
 
+  auto setFrequency(double frequency) -> void;
   auto setVolume(double volume) -> void;
   auto setBalance(double balance) -> void;
   auto setReverb(bool enabled) -> void;
@@ -51,11 +52,13 @@ struct Filter {
 struct Stream {
   auto reset(uint channels, double inputFrequency, double outputFrequency) -> void;
 
+  auto setFrequency(double inputFrequency, maybe<double> outputFrequency = nothing) -> void;
+
   auto addFilter(Filter::Order order, Filter::Type type, double cutoffFrequency, uint passes = 1) -> void;
 
   auto pending() const -> bool;
-  auto read(double* samples) -> uint;
-  auto write(const double* samples) -> void;
+  auto read(double samples[]) -> uint;
+  auto write(const double samples[]) -> void;
 
   template<typename... P> auto sample(P&&... p) -> void {
     double samples[sizeof...(P)] = {forward<P>(p)...};

@@ -54,8 +54,8 @@ struct Audio {
   static auto availableDrivers() -> nall::string_vector;
 
   struct Information {
-    nall::vector<nall::string> devices;
-    nall::vector<uint> frequencies;
+    nall::string_vector devices;
+    nall::vector<double> frequencies;
     nall::vector<uint> latencies;
     nall::vector<uint> channels;
   };
@@ -63,14 +63,14 @@ struct Audio {
   virtual ~Audio() = default;
 
   virtual auto ready() -> bool { return true; }
-  virtual auto information() -> Information { return {{"None"}, {48000}, {0}, {2}}; }
+  virtual auto information() -> Information { return {{"None"}, {48000.0}, {0}, {2}}; }
 
   virtual auto exclusive() -> bool { return false; }
   virtual auto context() -> uintptr { return 0; }
   virtual auto device() -> nall::string { return "None"; }
   virtual auto blocking() -> bool { return false; }
   virtual auto channels() -> uint { return 2; }
-  virtual auto frequency() -> uint { return 48000; }
+  virtual auto frequency() -> double { return 48000.0; }
   virtual auto latency() -> uint { return 0; }
 
   virtual auto setExclusive(bool exclusive) -> bool { return false; }
@@ -78,7 +78,7 @@ struct Audio {
   virtual auto setDevice(nall::string device) -> bool { return false; }
   virtual auto setBlocking(bool blocking) -> bool { return false; }
   virtual auto setChannels(uint channels) -> bool { return false; }
-  virtual auto setFrequency(uint frequency) -> bool { return false; }
+  virtual auto setFrequency(double frequency) -> bool { return false; }
   virtual auto setLatency(uint latency) -> bool { return false; }
 
   virtual auto clear() -> void {}

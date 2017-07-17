@@ -7,188 +7,188 @@
 #endif
 
 struct AudioOpenAL : Audio {
-  ~AudioOpenAL() { term(); }
+  AudioOpenAL() { initialize(); }
+  ~AudioOpenAL() { terminate(); }
 
-  struct {
-    ALCdevice* handle = nullptr;
-    ALCcontext* context = nullptr;
-    ALuint source = 0;
-    ALenum format = AL_FORMAT_STEREO16;
-    unsigned latency = 0;
-    unsigned queueLength = 0;
-  } device;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    uint32_t* data = nullptr;
-    unsigned length = 0;
-    unsigned size = 0;
-  } buffer;
-
-  struct {
-    bool synchronize = true;
-    unsigned frequency = 48000;
-    unsigned latency = 40;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Synchronize) return true;
-    if(name == Audio::Frequency) return true;
-    if(name == Audio::Latency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    for(auto& device : queryDevices()) information.devices.append(device);
+    information.channels = {2};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {20, 40, 60, 80, 100};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Synchronize) return settings.synchronize;
-    if(name == Audio::Frequency) return settings.frequency;
-    if(name == Audio::Latency) return settings.latency;
-    return {};
+  auto device() -> string { return _device; }
+  auto blocking() -> bool { return _blocking; }
+  auto channels() -> uint { return _channels; }
+  auto frequency() -> double { return (double)_frequency; }
+  auto latency() -> uint { return _latency; }
+
+  auto setDevice(string device) -> bool {
+    if(_device == device) return true;
+    _device = device;
+    return initialize();
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      return true;
-    }
-
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
-      return true;
-    }
-
-    if(name == Audio::Latency && value.is<unsigned>()) {
-      if(settings.latency != value.get<unsigned>()) {
-        settings.latency = value.get<unsigned>();
-        updateLatency();
-      }
-      return true;
-    }
-
-    return false;
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    return true;
   }
 
-  auto sample(int16_t left, int16_t right) -> void {
-    buffer.data[buffer.length++] = (uint16_t)left << 0 | (uint16_t)right << 16;
-    if(buffer.length < buffer.size) return;
+  auto setFrequency(double frequency) -> bool {
+    if(_frequency == (uint)frequency) return true;
+    _frequency = (uint)frequency;
+    return initialize();
+  }
 
-    ALuint albuffer = 0;
+  auto setLatency(uint latency) -> bool {
+    if(_latency == latency) return true;
+    _latency = latency;
+    if(_ready) updateLatency();
+    return true;
+  }
+
+  auto output(const double samples[]) -> void {
+    _buffer[_bufferLength]  = int16_t(samples[0] * 32768.0) <<  0;
+    _buffer[_bufferLength] |= int16_t(samples[1] * 32768.0) << 16;
+    if(++_bufferLength < _bufferSize) return;
+
+    ALuint alBuffer = 0;
     int processed = 0;
     while(true) {
-      alGetSourcei(device.source, AL_BUFFERS_PROCESSED, &processed);
+      alGetSourcei(_source, AL_BUFFERS_PROCESSED, &processed);
       while(processed--) {
-        alSourceUnqueueBuffers(device.source, 1, &albuffer);
-        alDeleteBuffers(1, &albuffer);
-        device.queueLength--;
+        alSourceUnqueueBuffers(_source, 1, &alBuffer);
+        alDeleteBuffers(1, &alBuffer);
+        _queueLength--;
       }
       //wait for buffer playback to catch up to sample generation if not synchronizing
-      if(settings.synchronize == false || device.queueLength < 3) break;
+      if(!_blocking || _queueLength < 3) break;
     }
 
-    if(device.queueLength < 3) {
-      alGenBuffers(1, &albuffer);
-      alBufferData(albuffer, device.format, buffer.data, buffer.size * 4, settings.frequency);
-      alSourceQueueBuffers(device.source, 1, &albuffer);
-      device.queueLength++;
+    if(_queueLength < 3) {
+      alGenBuffers(1, &alBuffer);
+      alBufferData(alBuffer, _format, _buffer, _bufferSize * 4, _frequency);
+      alSourceQueueBuffers(_source, 1, &alBuffer);
+      _queueLength++;
     }
 
     ALint playing;
-    alGetSourcei(device.source, AL_SOURCE_STATE, &playing);
-    if(playing != AL_PLAYING) alSourcePlay(device.source);
-    buffer.length = 0;
+    alGetSourcei(_source, AL_SOURCE_STATE, &playing);
+    if(playing != AL_PLAYING) alSourcePlay(_source);
+    _bufferLength = 0;
   }
 
-  auto clear() -> void {
-  }
+private:
+  auto initialize() -> bool {
+    terminate();
 
-  auto init() -> bool {
+    if(!queryDevices().find(_device)) _device = "";
+    _queueLength = 0;
     updateLatency();
-    device.queueLength = 0;
 
     bool success = false;
-    if(device.handle = alcOpenDevice(nullptr)) {
-      if(device.context = alcCreateContext(device.handle, nullptr)) {
-        alcMakeContextCurrent(device.context);
-        alGenSources(1, &device.source);
+    if(_openAL = alcOpenDevice(_device)) {
+      if(_context = alcCreateContext(_openAL, nullptr)) {
+        alcMakeContextCurrent(_context);
+        alGenSources(1, &_source);
 
-      //alSourcef (device.source, AL_PITCH, 1.0);
-      //alSourcef (device.source, AL_GAIN, 1.0);
-      //alSource3f(device.source, AL_POSITION, 0.0, 0.0, 0.0);
-      //alSource3f(device.source, AL_VELOCITY, 0.0, 0.0, 0.0);
-      //alSource3f(device.source, AL_DIRECTION, 0.0, 0.0, 0.0);
-      //alSourcef (device.source, AL_ROLLOFF_FACTOR, 0.0);
-      //alSourcei (device.source, AL_SOURCE_RELATIVE, AL_TRUE);
+      //alSourcef (_source, AL_PITCH, 1.0);
+      //alSourcef (_source, AL_GAIN, 1.0);
+      //alSource3f(_source, AL_POSITION, 0.0, 0.0, 0.0);
+      //alSource3f(_source, AL_VELOCITY, 0.0, 0.0, 0.0);
+      //alSource3f(_source, AL_DIRECTION, 0.0, 0.0, 0.0);
+      //alSourcef (_source, AL_ROLLOFF_FACTOR, 0.0);
+      //alSourcei (_source, AL_SOURCE_RELATIVE, AL_TRUE);
 
         alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
         alListener3f(AL_VELOCITY, 0.0, 0.0, 0.0);
-        ALfloat listener_orientation[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-        alListenerfv(AL_ORIENTATION, listener_orientation);
+        ALfloat listenerOrientation[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        alListenerfv(AL_ORIENTATION, listenerOrientation);
 
         success = true;
       }
     }
 
-    if(success == false) {
-      term();
-      return false;
-    }
-
-    return true;
+    if(!success) return terminate(), false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    if(alIsSource(device.source) == AL_TRUE) {
+  auto terminate() -> void {
+    _ready = false;
+
+    if(alIsSource(_source) == AL_TRUE) {
       int playing = 0;
-      alGetSourcei(device.source, AL_SOURCE_STATE, &playing);
+      alGetSourcei(_source, AL_SOURCE_STATE, &playing);
       if(playing == AL_PLAYING) {
-        alSourceStop(device.source);
+        alSourceStop(_source);
         int queued = 0;
-        alGetSourcei(device.source, AL_BUFFERS_QUEUED, &queued);
+        alGetSourcei(_source, AL_BUFFERS_QUEUED, &queued);
         while(queued--) {
-          ALuint albuffer = 0;
-          alSourceUnqueueBuffers(device.source, 1, &albuffer);
-          alDeleteBuffers(1, &albuffer);
-          device.queueLength--;
+          ALuint alBuffer = 0;
+          alSourceUnqueueBuffers(_source, 1, &alBuffer);
+          alDeleteBuffers(1, &alBuffer);
+          _queueLength--;
         }
       }
 
-      alDeleteSources(1, &device.source);
-      device.source = 0;
+      alDeleteSources(1, &_source);
+      _source = 0;
     }
 
-    if(device.context) {
+    if(_context) {
       alcMakeContextCurrent(nullptr);
-      alcDestroyContext(device.context);
-      device.context = 0;
+      alcDestroyContext(_context);
+      _context = nullptr;
     }
 
-    if(device.handle) {
-      alcCloseDevice(device.handle);
-      device.handle = 0;
+    if(_openAL) {
+      alcCloseDevice(_openAL);
+      _openAL = nullptr;
     }
 
-    if(buffer.data) {
-      delete[] buffer.data;
-      buffer.data = 0;
-    }
+    delete[] _buffer;
+    _buffer = nullptr;
   }
 
-private:
   auto queryDevices() -> string_vector {
     string_vector result;
 
-    const char* buffer = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
-    if(!buffer) return result;
+    const char* list = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
+    if(!list) return result;
 
-    while(buffer[0] || buffer[1]) {
-      result.append(buffer);
-      while(buffer[0]) buffer++;
+    while(list[0] || list[1]) {
+      result.append(list);
+      while(list[0]) list++;
     }
 
     return result;
   }
 
   auto updateLatency() -> void {
-    if(buffer.data) delete[] buffer.data;
-    buffer.size = settings.frequency * settings.latency / 1000.0 + 0.5;
-    buffer.data = new uint32_t[buffer.size]();
+    delete[] _buffer;
+    _bufferSize = _frequency * _latency / 1000.0 + 0.5;
+    _buffer = new uint32_t[_bufferSize]();
   }
+
+  bool _ready = false;
+  string _device;
+  bool _blocking = true;
+  uint _channels = 2;
+  uint _frequency = 48000;
+  uint _latency = 20;
+
+  ALCdevice* _openAL = nullptr;
+  ALCcontext* _context = nullptr;
+  ALuint _source = 0;
+  ALenum _format = AL_FORMAT_STEREO16;
+  uint _queueLength = 0;
+
+  uint32_t* _buffer = nullptr;
+  uint _bufferLength = 0;
+  uint _bufferSize = 0;
 };

@@ -38,13 +38,12 @@ Program::Program(string_vector args) {
   video->setContext(presentation->viewport.handle());
   video->setBlocking(settings["Video/Synchronize"].boolean());
   if(!video->ready()) MessageDialog().setText("Failed to initialize video driver").warning();
-
   presentation->clearViewport();
 
   audio = Audio::create(settings["Audio/Driver"].text());
   audio->setContext(presentation->viewport.handle());
+  audio->setDevice(settings["Audio/Device"].text());
   audio->setBlocking(settings["Audio/Synchronize"].boolean());
-  audio->setFrequency(settings["Audio/Frequency"].natural());
   audio->setChannels(2);
   if(!audio->ready()) MessageDialog().setText("Failed to initialize audio driver").warning();
 

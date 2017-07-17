@@ -22,14 +22,21 @@ struct AudioASIO : Audio {
   }
 
   auto context() -> uintptr { return _context; }
+  auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
   auto channels() -> uint { return _channels; }
-  auto frequency() -> uint { return _frequency; }
+  auto frequency() -> double { return _frequency; }
   auto latency() -> uint { return _latency; }
 
   auto setContext(uintptr context) -> bool {
     if(_context == context) return true;
     _context = context;
+    return initialize();
+  }
+
+  auto setDevice(string device) -> bool {
+    if(_device == device) return true;
+    _device = device;
     return initialize();
   }
 
@@ -51,18 +58,6 @@ struct AudioASIO : Audio {
     return initialize();
   }
 
-  auto output(const double samples[]) -> void {
-    if(!_ready) return;
-    if(_blocking) {
-      while(_queue.count >= _latency);
-    }
-    for(uint n : range(_channels)) {
-      _queue.samples[_queue.write][n] = samples[n];
-    }
-    _queue.write++;
-    _queue.count++;
-  }
-
   auto clear() -> void {
     if(!_ready) return;
     for(uint n : range(_channels)) {
@@ -73,6 +68,18 @@ struct AudioASIO : Audio {
     _queue.read = 0;
     _queue.write = 0;
     _queue.count = 0;
+  }
+
+  auto output(const double samples[]) -> void {
+    if(!_ready) return;
+    if(_blocking) {
+      while(_queue.count >= _latency);
+    }
+    for(uint n : range(_channels)) {
+      _queue.samples[_queue.write][n] = samples[n];
+    }
+    _queue.write++;
+    _queue.count++;
   }
 
 private:
@@ -236,7 +243,7 @@ private:
   string _device;
   bool _blocking = true;
   uint _channels = 2;
-  uint _frequency = 48000;
+  double _frequency = 48000.0;
   uint _latency = 0;
 
   struct Queue {

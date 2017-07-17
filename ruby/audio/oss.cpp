@@ -23,7 +23,7 @@ struct AudioOSS : Audio {
     Information information;
     information.devices = {"/dev/dsp"};
     for(auto& device : directory::files("/dev/", "dsp?*")) information.devices.append(string{"/dev/", device});
-    information.frequencies = {44100, 48000, 96000};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
     information.latencies = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     information.channels = {1, 2};
     return information;
@@ -32,7 +32,7 @@ struct AudioOSS : Audio {
   auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
   auto channels() -> uint { return _channels; }
-  auto frequency() -> uint { return _frequency; }
+  auto frequency() -> double { return _frequency; }
   auto latency() -> uint { return _latency; }
 
   auto setDevice(string device) -> bool {
@@ -54,7 +54,7 @@ struct AudioOSS : Audio {
     return initialize();
   }
 
-  auto setFrequency(uint frequency) -> bool {
+  auto setFrequency(double frequency) -> bool {
     if(_frequency == frequency) return true;
     _frequency = frequency;
     return initialize();
@@ -78,6 +78,10 @@ private:
   auto initialize() -> bool {
     terminate();
 
+    if(!information().devices.find(_device)) {
+      _device = information().devices.left();
+    }
+
     _fd = open(_device, O_WRONLY, O_NONBLOCK);
     if(_fd < 0) return false;
 
@@ -86,9 +90,11 @@ private:
     //policy: 0 = minimum latency (higher CPU usage); 10 = maximum latency (lower CPU usage)
     int policy = min(10, _latency);
     ioctl(_fd, SNDCTL_DSP_POLICY, &policy);
-    ioctl(_fd, SNDCTL_DSP_CHANNELS, &_channels);
+    int channels = _channels;
+    ioctl(_fd, SNDCTL_DSP_CHANNELS, &channels);
     ioctl(_fd, SNDCTL_DSP_SETFMT, &_format);
-    ioctl(_fd, SNDCTL_DSP_SPEED, &_frequency);
+    int frequency = _frequency;
+    ioctl(_fd, SNDCTL_DSP_SPEED, &frequency);
 
     updateBlocking();
     return _ready = true;
@@ -110,11 +116,11 @@ private:
   }
 
   bool _ready = false;
-  string _device = "/dev/dsp";
+  string _device;
   bool _blocking = true;
-  int _channels = 2;
-  int _frequency = 48000;
-  int _latency = 2;
+  uint _channels = 2;
+  double _frequency = 48000.0;
+  uint _latency = 2;
 
   int _fd = -1;
   int _format = AFMT_S16_LE;

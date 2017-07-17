@@ -23,15 +23,15 @@ ifeq ($(platform),windows)
   ruby += input.windows
 else ifeq ($(platform),macosx)
   ruby += #video.cgl
-  ruby += #audio.openal
+  ruby += audio.openal
   ruby += #input.quartz input.carbon
 else ifeq ($(platform),linux)
   ruby += video.xshm  #video.glx video.xv video.xshm video.sdl
-  ruby += audio.oss  #audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
+  ruby += audio.oss audio.openal  #audio.alsa audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.xlib  #input.udev input.sdl input.xlib
 else ifeq ($(platform),bsd)
   ruby += video.xshm  #video.glx video.xv video.xshm video.sdl
-  ruby += audio.oss  #audio.alsa
+  ruby += audio.oss audio.openal
   ruby += input.sdl input.xlib
 endif
 

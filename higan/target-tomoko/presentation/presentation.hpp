@@ -43,8 +43,12 @@ struct Presentation : Window {
       MenuCheckItem synchronizeAudio{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
-      MenuSeparator showConfigurationSeparator{&settingsMenu};
-      MenuItem showConfiguration{&settingsMenu};
+      MenuSeparator settingsSeparator{&settingsMenu};
+      MenuItem showVideoSettings{&settingsMenu};
+      MenuItem showAudioSettings{&settingsMenu};
+      MenuItem showInputSettings{&settingsMenu};
+      MenuItem showHotkeySettings{&settingsMenu};
+      MenuItem showAdvancedSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveQuickStateMenu{&toolsMenu};
         MenuItem saveSlot1{&saveQuickStateMenu};

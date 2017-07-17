@@ -11,6 +11,15 @@ auto Stream::reset(uint channels_, double inputFrequency, double outputFrequency
   }
 }
 
+auto Stream::setFrequency(double inputFrequency, maybe<double> outputFrequency) -> void {
+  this->inputFrequency = inputFrequency;
+  if(outputFrequency) this->outputFrequency = outputFrequency();
+
+  for(auto& channel : channels) {
+    channel.resampler.reset(this->inputFrequency, this->outputFrequency);
+  }
+}
+
 auto Stream::addFilter(Filter::Order order, Filter::Type type, double cutoffFrequency, uint passes) -> void {
   for(auto& channel : channels) {
     for(auto pass : range(passes)) {
@@ -40,12 +49,12 @@ auto Stream::pending() const -> bool {
   return channels && channels[0].resampler.pending();
 }
 
-auto Stream::read(double* samples) -> uint {
+auto Stream::read(double samples[]) -> uint {
   for(auto c : range(channels)) samples[c] = channels[c].resampler.read();
   return channels.size();
 }
 
-auto Stream::write(const double* samples) -> void {
+auto Stream::write(const double samples[]) -> void {
   for(auto c : range(channels)) {
     double sample = samples[c] + 1e-25;  //constant offset used to suppress denormals
     for(auto& filter : channels[c].filters) {

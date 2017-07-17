@@ -80,8 +80,9 @@ auto Program::updateAudioDriver() -> void {
   audio->clear();
   audio->setDevice(settings["Audio/Device"].text());
   audio->setExclusive(settings["Audio/Exclusive"].boolean());
-//audio->setFrequency(settings["Audio/Frequency"].natural());
+  audio->setFrequency(settings["Audio/Frequency"].real());
   audio->setLatency(settings["Audio/Latency"].natural());
+  Emulator::audio.setFrequency(settings["Audio/Frequency"].real());
 }
 
 auto Program::updateAudioEffects() -> void {
