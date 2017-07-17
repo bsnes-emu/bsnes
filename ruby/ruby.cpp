@@ -72,16 +72,6 @@ using namespace ruby;
 
 namespace ruby {
 
-const string Video::Exclusive = "Exclusive";
-const string Video::Handle = "Handle";
-const string Video::Synchronize = "Synchronize";
-const string Video::Depth = "Depth";
-const string Video::Filter = "Filter";
-const string Video::Shader = "Shader";
-
-const uint Video::FilterNearest = 0;
-const uint Video::FilterLinear = 1;
-
 auto Video::create(const string& driver) -> Video* {
   if(!driver) return create(optimalDriver());
 
@@ -272,13 +262,6 @@ auto Video::availableDrivers() -> string_vector {
 
 namespace ruby {
 
-const string Audio::Device = "Device";
-const string Audio::Exclusive = "Exclusive";
-const string Audio::Handle = "Handle";
-const string Audio::Synchronize = "Synchronize";
-const string Audio::Frequency = "Frequency";
-const string Audio::Latency = "Latency";
-
 auto Audio::create(const string& driver) -> Audio* {
   if(!driver) return create(optimalDriver());
 
@@ -452,12 +435,6 @@ auto Audio::availableDrivers() -> string_vector {
 #endif
 
 namespace ruby {
-
-const string Input::Handle = "Handle";
-const string Input::KeyboardSupport = "KeyboardSupport";
-const string Input::MouseSupport = "MouseSupport";
-const string Input::JoypadSupport = "JoypadSupport";
-const string Input::JoypadRumbleSupport = "JoypadRumbleSupport";
 
 auto Input::create(const string& driver) -> Input* {
   if(!driver) return create(optimalDriver());

@@ -14,104 +14,108 @@
 #endif
 
 struct AudioOSS : Audio {
-  ~AudioOSS() { term(); }
+  AudioOSS() { initialize(); }
+  ~AudioOSS() { terminate(); }
 
-  struct {
-    int fd = -1;
-    int format = AFMT_S16_LE;
-    int channels = 2;
-  } device;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    string device = "/dev/dsp";
-    bool synchronize = true;
-    uint frequency = 48000;
-    uint latency = 60;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Device) return true;
-    if(name == Audio::Synchronize) return true;
-    if(name == Audio::Frequency) return true;
-    if(name == Audio::Latency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    information.devices = {"/dev/dsp"};
+    for(auto& device : directory::files("/dev/", "dsp?*")) information.devices.append(string{"/dev/", device});
+    information.frequencies = {44100, 48000, 96000};
+    information.latencies = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    information.channels = {1, 2};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Device) return settings.device;
-    if(name == Audio::Synchronize) return settings.synchronize;
-    if(name == Audio::Frequency) return settings.frequency;
-    if(name == Audio::Latency) return settings.latency;
-    return {};
+  auto device() -> string { return _device; }
+  auto blocking() -> bool { return _blocking; }
+  auto channels() -> uint { return _channels; }
+  auto frequency() -> uint { return _frequency; }
+  auto latency() -> uint { return _latency; }
+
+  auto setDevice(string device) -> bool {
+    if(_device == device) return true;
+    _device = device;
+    return initialize();
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Device && value.is<string>()) {
-      settings.device = value.get<string>();
-      if(!settings.device) settings.device = "/dev/dsp";
-      return true;
-    }
-
-    if(name == Audio::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      updateSynchronization();
-      return true;
-    }
-
-    if(name == Audio::Frequency && value.is<uint>()) {
-      settings.frequency = value.get<uint>();
-      if(device.fd >= 0) init();
-      return true;
-    }
-
-    if(name == Audio::Latency && value.is<uint>()) {
-      settings.latency = value.get<uint>();
-      if(device.fd >= 0) init();
-      return true;
-    }
-
-    return false;
-  }
-
-  auto sample(int16_t left, int16_t right) -> void {
-    uint32_t sample = (uint16_t)left << 0 | (uint16_t)right << 16;
-    auto unused = write(device.fd, &sample, 4);
-  }
-
-  auto clear() -> void {
-  }
-
-  auto init() -> bool {
-    device.fd = open(settings.device, O_WRONLY, O_NONBLOCK);
-    if(device.fd < 0) return false;
-
-    int cooked = 1;
-    ioctl(device.fd, SNDCTL_DSP_COOKEDMODE, &cooked);
-    //policy: 0 = minimum latency (higher CPU usage); 10 = maximum latency (lower CPU usage)
-    int policy = min(10, settings.latency / 20);  //note: latency measurement isn't exact
-    ioctl(device.fd, SNDCTL_DSP_POLICY, &policy);
-    int frequency = settings.frequency;
-    ioctl(device.fd, SNDCTL_DSP_CHANNELS, &device.channels);
-    ioctl(device.fd, SNDCTL_DSP_SETFMT, &device.format);
-    ioctl(device.fd, SNDCTL_DSP_SPEED, &frequency);
-
-    updateSynchronization();
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    updateBlocking();
     return true;
   }
 
-  auto term() -> void {
-    if(device.fd >= 0) {
-      close(device.fd);
-      device.fd = -1;
+  auto setChannels(uint channels) -> bool {
+    if(_channels == channels) return true;
+    _channels = channels;
+    return initialize();
+  }
+
+  auto setFrequency(uint frequency) -> bool {
+    if(_frequency == frequency) return true;
+    _frequency = frequency;
+    return initialize();
+  }
+
+  auto setLatency(uint latency) -> bool {
+    if(_latency == latency) return true;
+    _latency = latency;
+    return initialize();
+  }
+
+  auto output(const double samples[]) -> void {
+    if(!_ready) return;
+    for(auto n : range(_channels)) {
+      int16_t sample = samples[n] * 32768.0;
+      auto unused = write(_fd, &sample, 2);
     }
   }
 
 private:
-  auto updateSynchronization() -> void {
-    if(device.fd < 0) return;
-    auto flags = fcntl(device.fd, F_GETFL);
-    if(flags < 0) return;
-    settings.synchronize ? flags &=~ O_NONBLOCK : flags |= O_NONBLOCK;
-    fcntl(device.fd, F_SETFL, flags);
+  auto initialize() -> bool {
+    terminate();
+
+    _fd = open(_device, O_WRONLY, O_NONBLOCK);
+    if(_fd < 0) return false;
+
+    int cooked = 1;
+    ioctl(_fd, SNDCTL_DSP_COOKEDMODE, &cooked);
+    //policy: 0 = minimum latency (higher CPU usage); 10 = maximum latency (lower CPU usage)
+    int policy = min(10, _latency);
+    ioctl(_fd, SNDCTL_DSP_POLICY, &policy);
+    ioctl(_fd, SNDCTL_DSP_CHANNELS, &_channels);
+    ioctl(_fd, SNDCTL_DSP_SETFMT, &_format);
+    ioctl(_fd, SNDCTL_DSP_SPEED, &_frequency);
+
+    updateBlocking();
+    return _ready = true;
   }
+
+  auto terminate() -> void {
+    _ready = false;
+    if(_fd < 0) return;
+    close(_fd);
+    _fd = -1;
+  }
+
+  auto updateBlocking() -> void {
+    if(!_ready) return;
+    auto flags = fcntl(_fd, F_GETFL);
+    if(flags < 0) return;
+    _blocking ? flags &=~ O_NONBLOCK : flags |= O_NONBLOCK;
+    fcntl(_fd, F_SETFL, flags);
+  }
+
+  bool _ready = false;
+  string _device = "/dev/dsp";
+  bool _blocking = true;
+  int _channels = 2;
+  int _frequency = 48000;
+  int _latency = 2;
+
+  int _fd = -1;
+  int _format = AFMT_S16_LE;
 };

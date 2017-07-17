@@ -36,7 +36,7 @@ struct InputKeyboardXlib {
     devices.append(hid);
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     display = XOpenDisplay(0);
 
     keys.append({"Escape", XK_Escape});
@@ -163,7 +163,7 @@ struct InputKeyboardXlib {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     if(display) {
       XCloseDisplay(display);
       display = nullptr;

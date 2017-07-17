@@ -9,97 +9,93 @@
 #include "joypad/directinput.cpp"
 
 struct InputWindows : Input {
-  InputKeyboardRawInput rawinputKeyboard;
-  InputMouseRawInput rawinputMouse;
-  InputJoypadXInput xinput;
-  InputJoypadDirectInput directinput;
-  InputWindows() : rawinputKeyboard(*this), rawinputMouse(*this), xinput(*this), directinput(*this) {}
-  ~InputWindows() { term(); }
+  InputWindows() : _keyboard(*this), _mouse(*this), _joypadXInput(*this), _joypadDirectInput(*this) { initialize(); }
+  ~InputWindows() { terminate(); }
 
-  LPDIRECTINPUT8 directinputContext = nullptr;
+  auto ready() -> bool { return _ready; }
 
-  struct Settings {
-    uintptr_t handle = 0;
-  } settings;
+  auto context() -> uintptr { return _context; }
 
-  auto cap(const string& name) -> bool {
-    if(name == Input::Handle) return true;
-    if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
-    if(name == Input::JoypadSupport) return true;
-    if(name == Input::JoypadRumbleSupport) return true;
-    return false;
-  }
-
-  auto get(const string& name) -> any {
-    if(name == Input::Handle) return (uintptr_t)settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
-    }
-    return false;
-  }
-
-  auto acquire() -> bool {
-    return rawinputMouse.acquire();
-  }
-
-  auto release() -> bool {
-    return rawinputMouse.release();
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
   auto acquired() -> bool {
-    return rawinputMouse.acquired();
+    return _mouse.acquired();
+  }
+
+  auto acquire() -> bool {
+    return _mouse.acquire();
+  }
+
+  auto release() -> bool {
+    return _mouse.release();
   }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    rawinputKeyboard.poll(devices);
-    rawinputMouse.poll(devices);
-    xinput.poll(devices);
-    directinput.poll(devices);
+    _keyboard.poll(devices);
+    _mouse.poll(devices);
+    _joypadXInput.poll(devices);
+    _joypadDirectInput.poll(devices);
     return devices;
   }
 
   auto rumble(uint64_t id, bool enable) -> bool {
-    if(xinput.rumble(id, enable)) return true;
-    if(directinput.rumble(id, enable)) return true;
+    if(_joypadXInput.rumble(id, enable)) return true;
+    if(_joypadDirectInput.rumble(id, enable)) return true;
     return false;
   }
 
-  auto init() -> bool {
-    if(rawinput.initialized == false) {
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
+    if(!rawinput.initialized) {
       rawinput.initialized = true;
-      rawinput.mutex = CreateMutex(NULL, FALSE, NULL);
-      CreateThread(NULL, 0, RawInputThreadProc, 0, 0, NULL);
+      rawinput.mutex = CreateMutex(nullptr, false, nullptr);
+      CreateThread(nullptr, 0, RawInputThreadProc, 0, 0, nullptr);
 
       do {
         Sleep(1);
         WaitForSingleObject(rawinput.mutex, INFINITE);
         ReleaseMutex(rawinput.mutex);
-      } while(rawinput.ready == false);
+      } while(!rawinput.ready);
     }
 
-    DirectInput8Create(GetModuleHandle(0), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directinputContext, 0);
-    if(directinputContext == nullptr) return false;
+    DirectInput8Create(GetModuleHandle(0), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&_directInputContext, 0);
+    if(!_directInputContext) return false;
 
-    if(rawinputKeyboard.init() == false) return false;
-    if(rawinputMouse.init(settings.handle) == false) return false;
-    bool xinputAvailable = xinput.init();
-    if(directinput.init(settings.handle, directinputContext, xinputAvailable) == false) return false;
-    return true;
+    if(!_keyboard.initialize()) return false;
+    if(!_mouse.initialize(_context)) return false;
+    bool xinputAvailable = _joypadXInput.initialize();
+    if(!_joypadDirectInput.initialize(_context, _directInputContext, xinputAvailable)) return false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    rawinputKeyboard.term();
-    rawinputMouse.term();
-    xinput.term();
-    directinput.term();
+  auto terminate() -> void {
+    _ready = false;
 
-    if(directinputContext) { directinputContext->Release(); directinputContext = nullptr; }
+    _keyboard.terminate();
+    _mouse.terminate();
+    _joypadXInput.terminate();
+    _joypadDirectInput.terminate();
+
+    if(_directInputContext) {
+      _directInputContext->Release();
+      _directInputContext = nullptr;
+    }
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  InputKeyboardRawInput _keyboard;
+  InputMouseRawInput _mouse;
+  InputJoypadXInput _joypadXInput;
+  InputJoypadDirectInput _joypadDirectInput;
+  LPDIRECTINPUT8 _directInputContext = nullptr;
 };

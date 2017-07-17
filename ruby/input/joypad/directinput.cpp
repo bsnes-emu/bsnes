@@ -86,7 +86,8 @@ struct InputJoypadDirectInput {
     return false;
   }
 
-  auto init(uintptr_t handle, LPDIRECTINPUT8 context, bool xinputAvailable) -> bool {
+  auto initialize(uintptr handle, LPDIRECTINPUT8 context, bool xinputAvailable) -> bool {
+    if(!handle) return false;
     this->handle = handle;
     this->context = context;
     this->xinputAvailable = xinputAvailable;
@@ -94,7 +95,7 @@ struct InputJoypadDirectInput {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     for(auto& jp : joypads) {
       jp.device->Unacquire();
       if(jp.effect) jp.effect->Release();

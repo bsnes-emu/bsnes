@@ -45,12 +45,12 @@ struct AudioSettings : TabFrameItem {
   VerticalLayout layout{this};
     Label driverLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Label latencyLabel{&controlLayout, Size{0, 0}};
-      ComboButton latencyCombo{&controlLayout, Size{~0, 0}};
+      Label deviceLabel{&controlLayout, Size{0, 0}};
+      ComboButton deviceList{&controlLayout, Size{~0, 0}};
       Label frequencyLabel{&controlLayout, Size{0, 0}};
-      ComboButton frequencyCombo{&controlLayout, Size{~0, 0}};
-      Label resamplerLabel{&controlLayout, Size{0, 0}};
-      ComboButton resamplerCombo{&controlLayout, Size{~0, 0}};
+      ComboButton frequencyList{&controlLayout, Size{~0, 0}};
+      Label latencyLabel{&controlLayout, Size{0, 0}};
+      ComboButton latencyList{&controlLayout, Size{~0, 0}};
     CheckLabel exclusiveMode{&layout, Size{~0, 0}};
     Label effectsLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout volumeLayout{&layout, Size{~0, 0}};

@@ -39,7 +39,7 @@ struct InputKeyboardRawInput {
     devices.append(kb.hid);
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     rawinput.updateKeyboard = {&InputKeyboardRawInput::update, this};
 
     //Pause sends 0x001d,4 + 0x0045,0; NumLock sends only 0x0045,0
@@ -170,7 +170,7 @@ struct InputKeyboardRawInput {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     rawinput.updateKeyboard.reset();
   }
 };

@@ -42,7 +42,7 @@ struct InputJoypadSDL {
     }
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
 
@@ -67,7 +67,7 @@ struct InputJoypadSDL {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     for(auto& jp : joypads) {
       SDL_JoystickClose(jp.handle);
     }

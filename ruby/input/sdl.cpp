@@ -7,55 +7,36 @@
 #include "joypad/sdl.cpp"
 
 struct InputSDL : Input {
-  InputKeyboardXlib xlibKeyboard;
-  InputMouseXlib xlibMouse;
-  InputJoypadSDL sdl;
-  InputSDL() : xlibKeyboard(*this), xlibMouse(*this), sdl(*this) {}
-  ~InputSDL() { term(); }
+  InputSDL() : _keyboard(*this), _mouse(*this), _joypad(*this) { initialize(); }
+  ~InputSDL() { terminate(); }
 
-  struct Settings {
-    uintptr_t handle = 0;
-  } settings;
+  auto ready() -> bool { return _ready; }
 
-  auto cap(const string& name) -> bool {
-    if(name == Input::Handle) return true;
-    if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
-    if(name == Input::JoypadSupport) return true;
-    return false;
-  }
+  auto context() -> uintptr { return _context; }
 
-  auto get(const string& name) -> any {
-    if(name == Input::Handle) return (uintptr_t)settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
-    }
-
-    return false;
-  }
-
-  auto acquire() -> bool {
-    return xlibMouse.acquire();
-  }
-
-  auto release() -> bool {
-    return xlibMouse.release();
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
   auto acquired() -> bool {
-    return xlibMouse.acquired();
+    return _mouse.acquired();
+  }
+
+  auto acquire() -> bool {
+    return _mouse.acquire();
+  }
+
+  auto release() -> bool {
+    return _mouse.release();
   }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    xlibKeyboard.poll(devices);
-    xlibMouse.poll(devices);
-    sdl.poll(devices);
+    _keyboard.poll(devices);
+    _mouse.poll(devices);
+    _joypad.poll(devices);
     return devices;
   }
 
@@ -63,16 +44,26 @@ struct InputSDL : Input {
     return false;
   }
 
-  auto init() -> bool {
-    if(!xlibKeyboard.init()) return false;
-    if(!xlibMouse.init(settings.handle)) return false;
-    if(!sdl.init()) return false;
-    return true;
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_keyboard.initialize()) return false;
+    if(!_mouse.initialize(_context)) return false;
+    if(!_joypad.initialize()) return false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    xlibKeyboard.term();
-    xlibMouse.term();
-    sdl.term();
+  auto terminate() -> void {
+    _ready = false;
+    _keyboard.terminate();
+    _mouse.terminate();
+    _joypad.terminate();
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  InputKeyboardXlib _keyboard;
+  InputMouseXlib _mouse;
+  InputJoypadSDL _joypad;
 };

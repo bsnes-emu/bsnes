@@ -52,14 +52,6 @@ enum : long {
   ASIOSTLastEntry,
 };
 
-struct ASIODriverInfo {
-  long asioVersion;
-  long driverVersion;
-  char name[32];
-  char errorMessage[124];
-  void* sysRef;
-};
-
 struct ASIOBufferInfo {
   ASIOBool isInput;
   long channelNum;
@@ -123,9 +115,9 @@ struct ASIOTime {
 
 struct ASIOCallbacks {
   auto (*bufferSwitch)(long doubleBufferIndex, ASIOBool directProcess) -> void;
-  auto (*sampleRateDidChange)(ASIOSampleRate sRate) -> void;
-  auto (*asioMessage)(long selector, long value, void* message, double* opt) -> long;
-  auto (*bufferSwitchTimeInfo)(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess) -> ASIOTime*;
+  auto (*sampleRateDidChange)(ASIOSampleRate sampleRate) -> void;
+  auto (*asioMessage)(long selector, long value, void* message, double* optional) -> long;
+  auto (*bufferSwitchTimeInfo)(ASIOTime* parameters, long doubleBufferIndex, ASIOBool directProcess) -> ASIOTime*;
 };
 enum : long {
   kAsioSelectorSupported = 1,
@@ -147,25 +139,25 @@ enum : long {
 };
 
 struct IASIO : public IUnknown {
-  virtual auto init(void* sysHandle) -> ASIOBool;
+  virtual auto init(void* systemHandle) -> ASIOBool;
   virtual auto getDriverName(char* name) -> void;
   virtual auto getDriverVersion() -> long;
   virtual auto getErrorMessage(char* error) -> void;
   virtual auto start() -> ASIOError;
   virtual auto stop() -> ASIOError;
-  virtual auto getChannels(long* numInputChannels, long* numOutputChannels) -> ASIOError = 0;
+  virtual auto getChannels(long* inputChannels, long* outputChannels) -> ASIOError = 0;
   virtual auto getLatencies(long* inputLatency, long* outputLatency) -> ASIOError = 0;
-  virtual auto getBufferSize(long* minSize, long* maxSize, long* preferredSize, long* granularity) -> ASIOError = 0;
+  virtual auto getBufferSize(long* minimumSize, long* maximumSize, long* preferredSize, long* granularity) -> ASIOError = 0;
   virtual auto canSampleRate(ASIOSampleRate sampleRate) -> ASIOError = 0;
   virtual auto getSampleRate(ASIOSampleRate* sampleRate) -> ASIOError = 0;
   virtual auto setSampleRate(ASIOSampleRate sampleRate) -> ASIOError = 0;
-  virtual auto getClockSources(ASIOClockSource* clocks, long* numSources) -> ASIOError = 0;
+  virtual auto getClockSources(ASIOClockSource* clocks, long* sources) -> ASIOError = 0;
   virtual auto setClockSource(long reference) -> ASIOError = 0;
-  virtual auto getSamplePosition(ASIOSamples* sPos, ASIOTimeStamp* tStamp) -> ASIOError = 0;
-  virtual auto getChannelInfo(ASIOChannelInfo* info) -> ASIOError = 0;
-  virtual auto createBuffers(ASIOBufferInfo* bufferInfos, long numChannels, long bufferSize, ASIOCallbacks* callbacks) -> ASIOError = 0;
+  virtual auto getSamplePosition(ASIOSamples* samplePosition, ASIOTimeStamp* timeStamp) -> ASIOError = 0;
+  virtual auto getChannelInfo(ASIOChannelInfo* information) -> ASIOError = 0;
+  virtual auto createBuffers(ASIOBufferInfo* bufferInformation, long channels, long bufferSize, ASIOCallbacks* callbacks) -> ASIOError = 0;
   virtual auto disposeBuffers() -> ASIOError = 0;
   virtual auto controlPanel() -> ASIOError = 0;
-  virtual auto future(long selector, void* opt) -> ASIOError = 0;
+  virtual auto future(long selector, void* optional) -> ASIOError = 0;
   virtual auto outputReady() -> ASIOError = 0;
 };

@@ -62,12 +62,12 @@ auto InputManager::appendHotkeys() -> void {
   { auto hotkey = new InputHotkey;
     hotkey->name = "Fast Forward";
     hotkey->press = [] {
-      video->set(Video::Synchronize, false);
-      audio->set(Audio::Synchronize, false);
+      video->setBlocking(false);
+      audio->setBlocking(false);
     };
     hotkey->release = [] {
-      video->set(Video::Synchronize, settings["Video/Synchronize"].boolean());
-      audio->set(Audio::Synchronize, settings["Audio/Synchronize"].boolean());
+      video->setBlocking(settings["Video/Synchronize"].boolean());
+      audio->setBlocking(settings["Audio/Synchronize"].boolean());
     };
     hotkeys.append(hotkey);
   }

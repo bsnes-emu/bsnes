@@ -84,11 +84,11 @@ Presentation::Presentation() {
   loadShaders();
   synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).setVisible(false).onToggle([&] {
     settings["Video/Synchronize"].setValue(synchronizeVideo.checked());
-    video->set(Video::Synchronize, synchronizeVideo.checked());
+    video->setBlocking(synchronizeVideo.checked());
   });
   synchronizeAudio.setText("Synchronize Audio").setChecked(settings["Audio/Synchronize"].boolean()).onToggle([&] {
     settings["Audio/Synchronize"].setValue(synchronizeAudio.checked());
-    audio->set(Audio::Synchronize, synchronizeAudio.checked());
+    audio->setBlocking(synchronizeAudio.checked());
   });
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());
@@ -229,7 +229,7 @@ auto Presentation::clearViewport() -> void {
     }
 
     video->unlock();
-    video->refresh();
+    video->output();
   }
 }
 
@@ -313,11 +313,11 @@ auto Presentation::toggleFullScreen() -> void {
     menuBar.setVisible(false);
     statusBar.setVisible(false);
     setFullScreen(true);
-    video->set(Video::Exclusive, settings["Video/Fullscreen/Exclusive"].boolean());
+    video->setExclusive(settings["Video/Fullscreen/Exclusive"].boolean());
     if(!input->acquired()) input->acquire();
   } else {
     if(input->acquired()) input->release();
-    video->set(Video::Exclusive, false);
+    video->setExclusive(false);
     setFullScreen(false);
     menuBar.setVisible(true);
     statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());

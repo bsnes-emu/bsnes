@@ -8,51 +8,25 @@
 #include "mouse/xlib.cpp"
 
 struct InputXlib : Input {
-  InputKeyboardXlib xlibKeyboard;
-  InputMouseXlib xlibMouse;
-  InputXlib() : xlibKeyboard(*this), xlibMouse(*this) {}
-  ~InputXlib() { term(); }
+  InputXlib() : _keyboard(*this), _mouse(*this) { initialize(); }
+  ~InputXlib() { terminate(); }
 
-  struct Settings {
-    uintptr_t handle = 0;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
-    return false;
-  }
-
-  auto get(const string& name) -> any {
-    if(name == Input::Handle) return (uintptr_t)settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
-    }
-
-    return false;
+  auto acquired() -> bool {
+    return _mouse.acquired();
   }
 
   auto acquire() -> bool {
-    return xlibMouse.acquire();
+    return _mouse.acquire();
   }
 
   auto release() -> bool {
-    return xlibMouse.release();
-  }
-
-  auto acquired() -> bool {
-    return xlibMouse.acquired();
+    return _mouse.release();
   }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    xlibKeyboard.poll(devices);
-    xlibMouse.poll(devices);
+    _keyboard.poll(devices);
+    _mouse.poll(devices);
     return devices;
   }
 
@@ -60,14 +34,23 @@ struct InputXlib : Input {
     return false;
   }
 
-  auto init() -> bool {
-    if(!xlibKeyboard.init()) return false;
-    if(!xlibMouse.init(settings.handle)) return false;
-    return true;
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_keyboard.initialize()) return false;
+    if(!_mouse.initialize(_context)) return false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    xlibKeyboard.term();
-    xlibMouse.term();
+  auto terminate() -> void {
+    _ready = false;
+    _keyboard.terminate();
+    _mouse.terminate();
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  InputKeyboardXlib _keyboard;
+  InputMouseXlib _mouse;
 };

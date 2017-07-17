@@ -9,64 +9,35 @@
 #include <X11/extensions/XShm.h>
 
 struct VideoXShm : Video {
-  ~VideoXShm() { term(); }
+  VideoXShm() { initialize(); }
+  ~VideoXShm() { terminate(); }
 
-  struct Device {
-    Display* display = nullptr;
-    int screen = 0;
-    int depth = 0;
-    Visual* visual = nullptr;
-    Window window = 0;
+  auto ready() -> bool { return _ready; }
 
-    XShmSegmentInfo shmInfo;
-    XImage* image = nullptr;
-    uint32_t* buffer = nullptr;
-    uint width = 0;
-    uint height = 0;
-  } device;
+  auto context() -> uintptr { return _context; }
+  auto smooth() -> bool { return _smooth; }
 
-  struct Settings {
-    uintptr_t handle = 0;
-    uint filter = Video::FilterLinear;
-
-    uint32_t* buffer = nullptr;
-    uint width = 0;
-    uint height = 0;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    if(name == Video::Filter) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return settings.handle;
-    if(name == Video::Filter) return settings.filter;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
-    }
-    if(name == Video::Filter && value.is<uint>()) {
-      settings.filter = value.get<uint>();
-      return true;
-    }
-    return false;
+  auto setSmooth(bool smooth) -> bool {
+    _smooth = smooth;
+    return true;
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(!settings.buffer || settings.width != width || settings.height != height) {
-      if(settings.buffer) delete[] settings.buffer;
-      settings.width = width, settings.height = height;
-      settings.buffer = new uint32_t[width * height + 16];  //+16 is padding for linear interpolation
+    if(!_inputBuffer || _inputWidth != width || _inputHeight != height) {
+      if(_inputBuffer) delete[] _inputBuffer;
+      _inputWidth = width;
+      _inputHeight = height;
+      _inputBuffer = new uint32_t[width * height + 16];  //+16 is padding for linear interpolation
     }
 
-    data = settings.buffer;
-    pitch = settings.width * sizeof(uint32_t);
+    data = _inputBuffer;
+    pitch = _inputWidth * sizeof(uint32_t);
     return true;
   }
 
@@ -74,124 +45,124 @@ struct VideoXShm : Video {
   }
 
   auto clear() -> void {
-    if(!settings.buffer) return;
-    uint32_t* dp = settings.buffer;
-    uint length = settings.width * settings.height;
+    if(!_ready) return;
+    auto dp = _inputBuffer;
+    uint length = _inputWidth * _inputHeight;
     while(length--) *dp++ = 255u << 24;
-    refresh();
+    output();
   }
 
-  auto refresh() -> void {
-    if(!settings.buffer) return;
+  auto output() -> void {
+    if(!_ready) return;
     size();
 
-    float xratio = (float)settings.width  / (float)device.width;
-    float yratio = (float)settings.height / (float)device.height;
+    float xratio = (float)_inputWidth / (float)_outputWidth;
+    float yratio = (float)_inputHeight / (float)_outputHeight;
 
     #pragma omp parallel for
-    for(uint y = 0; y < device.height; y++) {
+    for(uint y = 0; y < _outputHeight; y++) {
       float ystep = y * yratio;
       float xstep = 0;
 
-      uint32_t* sp = settings.buffer + (uint)ystep * settings.width;
-      uint32_t* dp = device.buffer + y * device.width;
+      uint32_t* sp = _inputBuffer + (uint)ystep * _inputWidth;
+      uint32_t* dp = _outputBuffer + y * _outputWidth;
 
-      if(settings.filter == Video::FilterNearest) {
-        for(uint x = 0; x < device.width; x++) {
+      if(!_smooth) {
+        for(uint x = 0; x < _outputWidth; x++) {
           *dp++ = 255u << 24 | sp[(uint)xstep];
           xstep += xratio;
         }
-      } else {  //settings.filter == Video::FilterLinear
-        for(uint x = 0; x < device.width; x++) {
+      } else {
+        for(uint x = 0; x < _outputWidth; x++) {
           *dp++ = 255u << 24 | interpolate(xstep - (uint)xstep, sp[(uint)xstep], sp[(uint)xstep + 1]);
           xstep += xratio;
         }
       }
     }
 
-    GC gc = XCreateGC(device.display, device.window, 0, 0);
-    XShmPutImage(
-      device.display, device.window, gc, device.image,
-      0, 0, 0, 0, device.width, device.height, False
-    );
-    XFreeGC(device.display, gc);
-    XFlush(device.display);
+    GC gc = XCreateGC(_display, _window, 0, 0);
+    XShmPutImage(_display, _window, gc, _image, 0, 0, 0, 0, _outputWidth, _outputHeight, False);
+    XFreeGC(_display, gc);
+    XFlush(_display);
   }
 
-  auto init() -> bool {
-    device.display = XOpenDisplay(0);
-    device.screen = DefaultScreen(device.display);
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
+    _display = XOpenDisplay(0);
+    _screen = DefaultScreen(_display);
 
     XWindowAttributes getAttributes;
-    XGetWindowAttributes(device.display, (Window)settings.handle, &getAttributes);
-    device.depth = getAttributes.depth;
-    device.visual = getAttributes.visual;
+    XGetWindowAttributes(_display, (Window)_context, &getAttributes);
+    _depth = getAttributes.depth;
+    _visual = getAttributes.visual;
     //driver only supports 32-bit pixels
     //note that even on 15-bit and 16-bit displays, the window visual's depth should be 32
-    if(device.depth < 24 || device.depth > 32) {
+    if(_depth < 24 || _depth > 32) {
       free();
       return false;
     }
 
     XSetWindowAttributes setAttributes = {0};
     setAttributes.border_pixel = 0;
-    device.window = XCreateWindow(device.display, (Window)settings.handle,
+    _window = XCreateWindow(_display, (Window)_context,
       0, 0, 256, 256, 0,
       getAttributes.depth, InputOutput, getAttributes.visual,
       CWBorderPixel, &setAttributes
     );
-    XSetWindowBackground(device.display, device.window, 0);
-    XMapWindow(device.display, device.window);
-    XFlush(device.display);
+    XSetWindowBackground(_display, _window, 0);
+    XMapWindow(_display, _window);
+    XFlush(_display);
 
-    while(XPending(device.display)) {
+    while(XPending(_display)) {
       XEvent event;
-      XNextEvent(device.display, &event);
+      XNextEvent(_display, &event);
     }
 
     if(!size()) return false;
-    return true;
+    return _ready = true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     free();
-    if(device.display) {
-      XCloseDisplay(device.display);
-      device.display = nullptr;
+    if(_display) {
+      XCloseDisplay(_display);
+      _display = nullptr;
     }
   }
 
-private:
   auto size() -> bool {
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(device.display, settings.handle, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
 
-    if(device.buffer && device.width == windowAttributes.width && device.height == windowAttributes.height) return true;
-    device.width = windowAttributes.width, device.height = windowAttributes.height;
-    XResizeWindow(device.display, device.window, device.width, device.height);
+    if(_outputBuffer && _outputWidth == windowAttributes.width && _outputHeight == windowAttributes.height) return true;
+    _outputWidth = windowAttributes.width;
+    _outputHeight = windowAttributes.height;
+    XResizeWindow(_display, _window, _outputWidth, _outputHeight);
     free();
 
-    device.shmInfo.shmid = shmget(IPC_PRIVATE, device.width * device.height * sizeof(uint32_t), IPC_CREAT | 0777);
-    if(device.shmInfo.shmid < 0) return false;
+    _shmInfo.shmid = shmget(IPC_PRIVATE, _outputWidth * _outputHeight * sizeof(uint32_t), IPC_CREAT | 0777);
+    if(_shmInfo.shmid < 0) return false;
 
-    device.shmInfo.shmaddr = (char*)shmat(device.shmInfo.shmid, 0, 0);
-    device.shmInfo.readOnly = False;
-    XShmAttach(device.display, &device.shmInfo);
-    device.buffer = (uint32_t*)device.shmInfo.shmaddr;
-    device.image = XShmCreateImage(device.display, device.visual, device.depth,
-      ZPixmap, device.shmInfo.shmaddr, &device.shmInfo, device.width, device.height
-    );
+    _shmInfo.shmaddr = (char*)shmat(_shmInfo.shmid, 0, 0);
+    _shmInfo.readOnly = False;
+    XShmAttach(_display, &_shmInfo);
+    _outputBuffer = (uint32_t*)_shmInfo.shmaddr;
+    _image = XShmCreateImage(_display, _visual, _depth, ZPixmap, _shmInfo.shmaddr, &_shmInfo, _outputWidth, _outputHeight);
 
     return true;
   }
 
   auto free() -> void {
-    if(!device.buffer) return;
-    device.buffer = nullptr;
-    XShmDetach(device.display, &device.shmInfo);
-    XDestroyImage(device.image);
-    shmdt(device.shmInfo.shmaddr);
-    shmctl(device.shmInfo.shmid, IPC_RMID, 0);
+    if(_outputBuffer) {
+      _outputBuffer = nullptr;
+      XShmDetach(_display, &_shmInfo);
+      XDestroyImage(_image);
+      shmdt(_shmInfo.shmaddr);
+      shmctl(_shmInfo.shmid, IPC_RMID, 0);
+    }
   }
 
   alwaysinline auto interpolate(float mu, uint32_t a, uint32_t b) -> uint32_t {
@@ -202,4 +173,25 @@ private:
     uint8_t cb = ab * (1.0 - mu) + bb * mu;
     return cr << 16 | cg << 8 | cb << 0;
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+  bool _smooth = true;
+
+  uint32_t* _inputBuffer = nullptr;
+  uint _inputWidth = 0;
+  uint _inputHeight = 0;
+
+  Display* _display = nullptr;
+  int _screen = 0;
+  int _depth = 0;
+  Visual* _visual = nullptr;
+  Window _window = 0;
+
+  XShmSegmentInfo _shmInfo;
+  XImage* _image = nullptr;
+
+  uint32_t* _outputBuffer = nullptr;
+  uint _outputWidth = 0;
+  uint _outputHeight = 0;
 };

@@ -7,11 +7,11 @@ struct InputMouseXlib {
 
   shared_pointer<HID::Mouse> hid{new HID::Mouse};
 
-  uintptr_t handle = 0;
+  uintptr handle = 0;
 
   Display* display = nullptr;
-  Window rootWindow;
-  Cursor invisibleCursor;
+  Window rootWindow = 0;
+  Cursor invisibleCursor = 0;
   unsigned screenWidth = 0;
   unsigned screenHeight = 0;
 
@@ -23,6 +23,10 @@ struct InputMouseXlib {
     unsigned relativeX = 0;
     unsigned relativeY = 0;
   } ms;
+
+  auto acquired() -> bool {
+    return ms.acquired;
+  }
 
   auto acquire() -> bool {
     if(acquired()) return true;
@@ -51,10 +55,6 @@ struct InputMouseXlib {
       ms.acquired = false;
     }
     return true;
-  }
-
-  auto acquired() -> bool {
-    return ms.acquired;
   }
 
   auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
@@ -103,7 +103,10 @@ struct InputMouseXlib {
     devices.append(hid);
   }
 
-  auto init(uintptr_t handle) -> bool {
+  auto initialize(uintptr handle) -> bool {
+    terminate();
+    if(!handle) return false;
+
     this->handle = handle;
     display = XOpenDisplay(0);
     rootWindow = DefaultRootWindow(display);
@@ -143,10 +146,16 @@ struct InputMouseXlib {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     release();
-    XFreeCursor(display, invisibleCursor);
-    XCloseDisplay(display);
+    if(invisibleCursor) {
+      XFreeCursor(display, invisibleCursor);
+      invisibleCursor = 0;
+    }
+    if(display) {
+      XCloseDisplay(display);
+      display = nullptr;
+    }
   }
 };
 

@@ -103,7 +103,7 @@ struct InputJoypadXInput {
     return false;
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     if(!libxinput) libxinput = LoadLibraryA("xinput1_3.dll");
     if(!libxinput) return false;
 
@@ -112,7 +112,7 @@ struct InputJoypadXInput {
     XInputGetStateEx = (pXInputGetStateEx)GetProcAddress(libxinput, oXInputGetStateEx);
     XInputSetState = (pXInputSetState)GetProcAddress(libxinput, oXInputSetState);
     if(!XInputGetStateEx) XInputGetStateEx = (pXInputGetStateEx)GetProcAddress(libxinput, oXInputGetState);
-    if(!XInputGetStateEx || !XInputSetState) return term(), false;
+    if(!XInputGetStateEx || !XInputSetState) return terminate(), false;
 
     //XInput supports a maximum of four controllers
     //add all four to devices list now. If they are not connected, they will not show up in poll() results
@@ -151,7 +151,7 @@ struct InputJoypadXInput {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     if(!libxinput) return;
 
     FreeLibrary(libxinput);

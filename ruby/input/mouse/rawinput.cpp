@@ -5,7 +5,7 @@ struct InputMouseRawInput {
   Input& input;
   InputMouseRawInput(Input& input) : input(input) {}
 
-  uintptr_t handle = 0;
+  uintptr handle = 0;
   bool mouseAcquired = false;
 
   struct Mouse {
@@ -16,6 +16,17 @@ struct InputMouseRawInput {
     signed relativeZ = 0;
     bool buttons[5] = {0};
   } ms;
+
+  auto acquired() -> bool {
+    if(mouseAcquired) {
+      SetFocus((HWND)handle);
+      SetCapture((HWND)handle);
+      RECT rc;
+      GetWindowRect((HWND)handle, &rc);
+      ClipCursor(&rc);
+    }
+    return GetCapture() == (HWND)handle;
+  }
 
   auto acquire() -> bool {
     if(!mouseAcquired) {
@@ -33,17 +44,6 @@ struct InputMouseRawInput {
       ShowCursor(true);
     }
     return true;
-  }
-
-  auto acquired() -> bool {
-    if(mouseAcquired) {
-      SetFocus((HWND)handle);
-      SetCapture((HWND)handle);
-      RECT rc;
-      GetWindowRect((HWND)handle, &rc);
-      ClipCursor(&rc);
-    }
-    return GetCapture() == (HWND)handle;
   }
 
   auto update(RAWINPUT* input) -> void {
@@ -95,7 +95,8 @@ struct InputMouseRawInput {
     devices.append(ms.hid);
   }
 
-  auto init(uintptr_t handle) -> bool {
+  auto initialize(uintptr handle) -> bool {
+    if(!handle) return false;
     this->handle = handle;
 
     ms.hid->setID(2);
@@ -114,7 +115,7 @@ struct InputMouseRawInput {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     rawinput.updateMouse.reset();
     release();
   }

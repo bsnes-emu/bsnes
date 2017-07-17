@@ -74,7 +74,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
     }
 
     video->unlock();
-    video->refresh();
+    video->output();
   }
 
   static uint frameCounter = 0;
@@ -90,9 +90,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 }
 
 auto Program::audioSample(const double* samples, uint channels) -> void {
-  int16 left  = sclamp<16>(samples[0] * 32768.0);
-  int16 right = sclamp<16>(samples[1] * 32768.0);
-  audio->sample(left, right);
+  audio->output(samples);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

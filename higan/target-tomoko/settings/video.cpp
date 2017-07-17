@@ -32,7 +32,6 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   fullscreenModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
   fullscreenModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Fullscreen/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
   fullscreenModeExclusive.setText("Exclusive mode").setChecked(settings["Video/Fullscreen/Exclusive"].boolean()).onToggle([&] { updateViewport(); });
-  if(!video->cap(Video::Exclusive)) fullscreenModeExclusive.remove();
 
   updateColor(true);
   updateViewport(true);

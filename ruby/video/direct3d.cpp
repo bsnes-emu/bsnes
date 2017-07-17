@@ -8,183 +8,182 @@ static LRESULT CALLBACK VideoDirect3D_WindowProcedure(HWND hwnd, UINT msg, WPARA
 }
 
 struct VideoDirect3D : Video {
-  VideoDirect3D() {
-    POINT point = {0, 0};
-    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEX information = {};
-    information.cbSize = sizeof(MONITORINFOEX);
-    GetMonitorInfo(monitor, &information);
-    monitorWidth = information.rcMonitor.right - information.rcMonitor.left;
-    monitorHeight = information.rcMonitor.bottom - information.rcMonitor.top;
+  VideoDirect3D() { initialize(); }
+  ~VideoDirect3D() { terminate(); }
 
-    WNDCLASS windowClass = {};
-    windowClass.cbClsExtra = 0;
-    windowClass.cbWndExtra = 0;
-    windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    windowClass.hCursor = LoadCursor(0, IDC_ARROW);
-    windowClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
-    windowClass.hInstance = GetModuleHandle(0);
-    windowClass.lpfnWndProc = VideoDirect3D_WindowProcedure;
-    windowClass.lpszClassName = L"VideoDirect3D_Window";
-    windowClass.lpszMenuName = 0;
-    windowClass.style = CS_HREDRAW | CS_VREDRAW;
-    RegisterClass(&windowClass);
+  auto ready() -> bool { return _ready; }
 
-    settings.exclusiveHandle = CreateWindowEx(WS_EX_TOPMOST, L"VideoDirect3D_Window", L"", WS_POPUP,
-      information.rcMonitor.left, information.rcMonitor.top, monitorWidth, monitorHeight,
-      nullptr, nullptr, GetModuleHandle(0), nullptr);
+  auto exclusive() -> bool { return _exclusive; }
+  auto context() -> uintptr { return _context; }
+  auto blocking() -> bool { return _blocking; }
+  auto smooth() -> bool { return _smooth; }
+
+  auto setExclusive(bool exclusive) -> bool {
+    if(_exclusive == exclusive) return true;
+    _exclusive = exclusive;
+    return initialize();
   }
 
-  ~VideoDirect3D() {
-    term();
-    DestroyWindow(settings.exclusiveHandle);
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  LPDIRECT3D9 context = nullptr;
-  LPDIRECT3DDEVICE9 device = nullptr;
-  LPDIRECT3DVERTEXBUFFER9 vertexBuffer = nullptr;
-  D3DPRESENT_PARAMETERS presentation = {};
-  D3DCAPS9 capabilities = {};
-  LPDIRECT3DTEXTURE9 texture = nullptr;
-  LPDIRECT3DSURFACE9 surface = nullptr;
-
-  bool lost = true;
-  uint windowWidth;
-  uint windowHeight;
-  uint textureWidth;
-  uint textureHeight;
-  uint monitorWidth;
-  uint monitorHeight;
-
-  struct Vertex {
-    float x, y, z, rhw;  //screen coordinates
-    float u, v;          //texture coordinates
-  };
-
-  struct {
-    uint32_t textureUsage;
-    uint32_t texturePool;
-    uint32_t vertexUsage;
-    uint32_t vertexPool;
-    uint32_t filter;
-  } flags;
-
-  struct {
-    bool exclusive = false;
-    HWND handle = nullptr;
-    bool synchronize = false;
-    uint filter = Video::FilterLinear;
-
-    HWND exclusiveHandle = nullptr;
-    uint width;
-    uint height;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Exclusive) return true;
-    if(name == Video::Handle) return true;
-    if(name == Video::Synchronize) return true;
-    if(name == Video::Filter) return true;
-    if(name == Video::Shader) return false;
-    return false;
+  auto setBlocking(bool blocking) -> bool {
+    _blocking = blocking;
+    return true;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Exclusive) return settings.exclusive;
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    if(name == Video::Synchronize) return settings.synchronize;
-    if(name == Video::Filter) return settings.filter;
-    return {};
+  auto setSmooth(bool smooth) -> bool {
+    _smooth = smooth;
+    if(_ready) updateFilter();
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Exclusive && value.is<bool>()) {
-      settings.exclusive = value.get<bool>();
-      if(context) init();
-      return true;
+  auto clear() -> void {
+    if(_lost && !recover()) return;
+
+    D3DSURFACE_DESC surfaceDescription;
+    _texture->GetLevelDesc(0, &surfaceDescription);
+    _texture->GetSurfaceLevel(0, &_surface);
+
+    if(_surface) {
+      _device->ColorFill(_surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
+      _surface->Release();
+      _surface = nullptr;
     }
 
-    if(name == Video::Handle && value.is<uintptr>()) {
-      settings.handle = (HWND)value.get<uintptr>();
-      return true;
+    //clear primary display and all backbuffers
+    for(uint n : range(3)) {
+      _device->Clear(0, 0, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0x00, 0x00, 0x00), 1.0f, 0);
+      _device->Present(0, 0, 0, 0);
     }
-
-    if(name == Video::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      return true;
-    }
-
-    if(name == Video::Filter && value.is<uint>()) {
-      settings.filter = value.get<uint>();
-      if(context) updateFilter();
-      return true;
-    }
-
-    return false;
   }
 
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(_lost && !recover()) return false;
+
+    if(width != _inputWidth || height != _inputHeight) {
+      resize(_inputWidth = width, _inputHeight = height);
+    }
+
+    D3DSURFACE_DESC surfaceDescription;
+    _texture->GetLevelDesc(0, &surfaceDescription);
+    _texture->GetSurfaceLevel(0, &_surface);
+
+    D3DLOCKED_RECT lockedRectangle;
+    _surface->LockRect(&lockedRectangle, 0, D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD);
+    pitch = lockedRectangle.Pitch;
+    return data = (uint32_t*)lockedRectangle.pBits;
+  }
+
+  auto unlock() -> void {
+    _surface->UnlockRect();
+    _surface->Release();
+    _surface = nullptr;
+  }
+
+  auto output() -> void {
+    if(_lost && !recover()) return;
+
+    RECT rectangle;
+    GetClientRect((HWND)_context, &rectangle);
+
+    //if output size changed, driver must be re-initialized.
+    //failure to do so causes scaling issues on some video drivers.
+    if(_windowWidth != rectangle.right || _windowHeight != rectangle.bottom) initialize();
+
+    _device->BeginScene();
+    uint x = 0, y = 0;
+    if(_exclusive) {
+      //center output in exclusive mode fullscreen window
+      x = (_monitorWidth - _windowWidth) / 2;
+      y = (_monitorHeight - _windowHeight) / 2;
+    }
+    setVertex(0, 0, _inputWidth, _inputHeight, _textureWidth, _textureHeight, x, y, _windowWidth, _windowHeight);
+    _device->SetTexture(0, _texture);
+    _device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+    _device->EndScene();
+
+    if(_blocking) {
+      D3DRASTER_STATUS status;
+      while(true) {  //wait for a previous vblank to finish, if necessary
+        _device->GetRasterStatus(0, &status);
+        if(!status.InVBlank) break;
+      }
+      while(true) {  //wait for next vblank to begin
+        _device->GetRasterStatus(0, &status);
+        if(status.InVBlank) break;
+      }
+    }
+
+    if(_device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) _lost = true;
+  }
+
+private:
   auto recover() -> bool {
-    if(!device) return false;
+    if(!_device) return false;
 
-    if(lost) {
-      if(vertexBuffer) { vertexBuffer->Release(); vertexBuffer = nullptr; }
-      if(surface) { surface->Release(); surface = nullptr; }
-      if(texture) { texture->Release(); texture = nullptr; }
-      if(device->Reset(&presentation) != D3D_OK) return false;
+    if(_lost) {
+      if(_vertexBuffer) { _vertexBuffer->Release(); _vertexBuffer = nullptr; }
+      if(_surface) { _surface->Release(); _surface = nullptr; }
+      if(_texture) { _texture->Release(); _texture = nullptr; }
+      if(_device->Reset(&_presentation) != D3D_OK) return false;
     }
-    lost = false;
+    _lost = false;
 
-    device->SetDialogBoxMode(false);
+    _device->SetDialogBoxMode(false);
 
-    device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    _device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+    _device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    _device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-    device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    _device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    _device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    _device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
-    device->SetRenderState(D3DRS_LIGHTING, false);
-    device->SetRenderState(D3DRS_ZENABLE, false);
-    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    _device->SetRenderState(D3DRS_LIGHTING, false);
+    _device->SetRenderState(D3DRS_ZENABLE, false);
+    _device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
-    device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+    _device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    _device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    _device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
 
-    device->SetVertexShader(nullptr);
-    device->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
+    _device->SetVertexShader(nullptr);
+    _device->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
 
-    device->CreateVertexBuffer(sizeof(Vertex) * 4, flags.vertexUsage, D3DFVF_XYZRHW | D3DFVF_TEX1,
-      (D3DPOOL)flags.vertexPool, &vertexBuffer, nullptr);
-    textureWidth = 0;
-    textureHeight = 0;
-    resize(settings.width = 256, settings.height = 256);
+    _device->CreateVertexBuffer(sizeof(Vertex) * 4, _vertexUsage, D3DFVF_XYZRHW | D3DFVF_TEX1,
+      (D3DPOOL)_vertexPool, &_vertexBuffer, nullptr);
+    _textureWidth = 0;
+    _textureHeight = 0;
+    resize(_inputWidth = 256, _inputHeight = 256);
     updateFilter();
     clear();
     return true;
   }
 
   auto resize(uint width, uint height) -> void {
-    if(textureWidth >= width && textureHeight >= height) return;
+    if(_textureWidth >= width && _textureHeight >= height) return;
 
-    textureWidth = bit::round(max(width, textureWidth));
-    textureHeight = bit::round(max(height, textureHeight));
+    _textureWidth = bit::round(max(width, _textureWidth));
+    _textureHeight = bit::round(max(height, _textureHeight));
 
-    if(capabilities.MaxTextureWidth < textureWidth || capabilities.MaxTextureWidth < textureHeight) return;
+    if(_capabilities.MaxTextureWidth < _textureWidth || _capabilities.MaxTextureWidth < _textureHeight) return;
 
-    if(texture) texture->Release();
-    device->CreateTexture(textureWidth, textureHeight, 1, flags.textureUsage, D3DFMT_X8R8G8B8,
-      (D3DPOOL)flags.texturePool, &texture, nullptr);
+    if(_texture) _texture->Release();
+    _device->CreateTexture(_textureWidth, _textureHeight, 1, _textureUsage, D3DFMT_X8R8G8B8,
+      (D3DPOOL)_texturePool, &_texture, nullptr);
   }
 
   auto updateFilter() -> void {
-    if(!device) return;
-    if(lost && !recover()) return;
+    if(!_device) return;
+    if(_lost && !recover()) return;
 
-    flags.filter = settings.filter == Video::FilterNearest ? D3DTEXF_POINT : D3DTEXF_LINEAR;
-    device->SetSamplerState(0, D3DSAMP_MINFILTER, flags.filter);
-    device->SetSamplerState(0, D3DSAMP_MAGFILTER, flags.filter);
+    auto filter = !_smooth ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+    _device->SetSamplerState(0, D3DSAMP_MINFILTER, filter);
+    _device->SetSamplerState(0, D3DSAMP_MAGFILTER, filter);
   }
 
   //(x,y) screen coordinates, in pixels
@@ -212,164 +211,147 @@ struct VideoDirect3D : Video {
     vertex[2].v = vertex[3].v = (double)(py + h) / rh;
 
     LPDIRECT3DVERTEXBUFFER9* vertexPointer = nullptr;
-    vertexBuffer->Lock(0, sizeof(Vertex) * 4, (void**)&vertexPointer, 0);
+    _vertexBuffer->Lock(0, sizeof(Vertex) * 4, (void**)&vertexPointer, 0);
     memory::copy(vertexPointer, vertex, sizeof(Vertex) * 4);
-    vertexBuffer->Unlock();
+    _vertexBuffer->Unlock();
 
-    device->SetStreamSource(0, vertexBuffer, 0, sizeof(Vertex));
+    _device->SetStreamSource(0, _vertexBuffer, 0, sizeof(Vertex));
   }
 
-  auto clear() -> void {
-    if(lost && !recover()) return;
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
 
-    D3DSURFACE_DESC surfaceDescription;
-    texture->GetLevelDesc(0, &surfaceDescription);
-    texture->GetSurfaceLevel(0, &surface);
+    POINT point = {0, 0};
+    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
+    MONITORINFOEX information = {};
+    information.cbSize = sizeof(MONITORINFOEX);
+    GetMonitorInfo(monitor, &information);
+    _monitorWidth = information.rcMonitor.right - information.rcMonitor.left;
+    _monitorHeight = information.rcMonitor.bottom - information.rcMonitor.top;
 
-    if(surface) {
-      device->ColorFill(surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
-      surface->Release();
-      surface = nullptr;
-    }
+    WNDCLASS windowClass = {};
+    windowClass.cbClsExtra = 0;
+    windowClass.cbWndExtra = 0;
+    windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    windowClass.hCursor = LoadCursor(0, IDC_ARROW);
+    windowClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    windowClass.hInstance = GetModuleHandle(0);
+    windowClass.lpfnWndProc = VideoDirect3D_WindowProcedure;
+    windowClass.lpszClassName = L"VideoDirect3D_Window";
+    windowClass.lpszMenuName = 0;
+    windowClass.style = CS_HREDRAW | CS_VREDRAW;
+    RegisterClass(&windowClass);
 
-    //clear primary display and all backbuffers
-    for(uint n : range(3)) {
-      device->Clear(0, 0, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0x00, 0x00, 0x00), 1.0f, 0);
-      device->Present(0, 0, 0, 0);
-    }
-  }
-
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(lost && !recover()) return false;
-
-    if(width != settings.width || height != settings.height) {
-      resize(settings.width = width, settings.height = height);
-    }
-
-    D3DSURFACE_DESC surfaceDescription;
-    texture->GetLevelDesc(0, &surfaceDescription);
-    texture->GetSurfaceLevel(0, &surface);
-
-    D3DLOCKED_RECT lockedRectangle;
-    surface->LockRect(&lockedRectangle, 0, D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD);
-    pitch = lockedRectangle.Pitch;
-    return data = (uint32_t*)lockedRectangle.pBits;
-  }
-
-  auto unlock() -> void {
-    surface->UnlockRect();
-    surface->Release();
-    surface = nullptr;
-  }
-
-  auto refresh() -> void {
-    if(lost && !recover()) return;
+    _exclusiveContext = (uintptr)CreateWindowEx(WS_EX_TOPMOST, L"VideoDirect3D_Window", L"", WS_POPUP,
+      information.rcMonitor.left, information.rcMonitor.top, _monitorWidth, _monitorHeight,
+      nullptr, nullptr, GetModuleHandle(0), nullptr);
 
     RECT rectangle;
-    GetClientRect(settings.handle, &rectangle);
+    GetClientRect((HWND)_context, &rectangle);
+    _windowWidth = rectangle.right;
+    _windowHeight = rectangle.bottom;
 
-    //if output size changed, driver must be re-initialized.
-    //failure to do so causes scaling issues on some video drivers.
-    if(windowWidth != rectangle.right || windowHeight != rectangle.bottom) init();
+    _instance = Direct3DCreate9(D3D_SDK_VERSION);
+    if(!_instance) return false;
 
-    device->BeginScene();
-    uint x = 0, y = 0;
-    if(settings.exclusive) {
-      //center output in exclusive mode fullscreen window
-      x = (monitorWidth - windowWidth) / 2;
-      y = (monitorHeight - windowHeight) / 2;
-    }
-    setVertex(0, 0, settings.width, settings.height, textureWidth, textureHeight, x, y, windowWidth, windowHeight);
-    device->SetTexture(0, texture);
-    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-    device->EndScene();
+    memory::fill(&_presentation, sizeof(_presentation));
+    _presentation.Flags = D3DPRESENTFLAG_VIDEO;
+    _presentation.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    _presentation.BackBufferCount = 1;
+    _presentation.MultiSampleType = D3DMULTISAMPLE_NONE;
+    _presentation.MultiSampleQuality = 0;
+    _presentation.EnableAutoDepthStencil = false;
+    _presentation.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
+    _presentation.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-    if(settings.synchronize) {
-      D3DRASTER_STATUS status;
-      while(true) {  //wait for a previous vblank to finish, if necessary
-        device->GetRasterStatus(0, &status);
-        if(!status.InVBlank) break;
-      }
-      while(true) {  //wait for next vblank to begin
-        device->GetRasterStatus(0, &status);
-        if(status.InVBlank) break;
-      }
-    }
+    if(!_exclusive) {
+      _presentation.hDeviceWindow = (HWND)_context;
+      _presentation.Windowed = true;
+      _presentation.BackBufferFormat = D3DFMT_UNKNOWN;
+      _presentation.BackBufferWidth = 0;
+      _presentation.BackBufferHeight = 0;
 
-    if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
-  }
-
-  auto init() -> bool {
-    term();
-
-    RECT rectangle;
-    GetClientRect(settings.handle, &rectangle);
-    windowWidth = rectangle.right;
-    windowHeight = rectangle.bottom;
-
-    context = Direct3DCreate9(D3D_SDK_VERSION);
-    if(!context) return false;
-
-    memory::fill(&presentation, sizeof(presentation));
-    presentation.Flags = D3DPRESENTFLAG_VIDEO;
-    presentation.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    presentation.BackBufferCount = 1;
-    presentation.MultiSampleType = D3DMULTISAMPLE_NONE;
-    presentation.MultiSampleQuality = 0;
-    presentation.EnableAutoDepthStencil = false;
-    presentation.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
-    presentation.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-
-    if(!settings.exclusive) {
-      presentation.hDeviceWindow = settings.handle;
-      presentation.Windowed = true;
-      presentation.BackBufferFormat = D3DFMT_UNKNOWN;
-      presentation.BackBufferWidth = 0;
-      presentation.BackBufferHeight = 0;
-
-      ShowWindow(settings.exclusiveHandle, SW_HIDE);
-      if(context->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, settings.handle,
-        D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentation, &device) != D3D_OK) {
+      ShowWindow((HWND)_exclusiveContext, SW_HIDE);
+      if(_instance->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, (HWND)_context,
+        D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &_presentation, &_device) != D3D_OK) {
         return false;
       }
     } else {
-      presentation.hDeviceWindow = settings.exclusiveHandle;
-      presentation.Windowed = false;
-      presentation.BackBufferFormat = D3DFMT_X8R8G8B8;
-      presentation.BackBufferWidth = monitorWidth;
-      presentation.BackBufferHeight = monitorHeight;
-      presentation.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+      _presentation.hDeviceWindow = (HWND)_exclusiveContext;
+      _presentation.Windowed = false;
+      _presentation.BackBufferFormat = D3DFMT_X8R8G8B8;
+      _presentation.BackBufferWidth = _monitorWidth;
+      _presentation.BackBufferHeight = _monitorHeight;
+      _presentation.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 
-      ShowWindow(settings.exclusiveHandle, SW_SHOWNORMAL);
-      if(context->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, settings.exclusiveHandle,
-        D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentation, &device) != D3D_OK) {
+      ShowWindow((HWND)_exclusiveContext, SW_SHOWNORMAL);
+      if(_instance->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, (HWND)_exclusiveContext,
+        D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &_presentation, &_device) != D3D_OK) {
         return false;
       }
     }
 
-    device->GetDeviceCaps(&capabilities);
+    _device->GetDeviceCaps(&_capabilities);
 
-    if(capabilities.Caps2 & D3DCAPS2_DYNAMICTEXTURES) {
-      flags.textureUsage = D3DUSAGE_DYNAMIC;
-      flags.texturePool = D3DPOOL_DEFAULT;
-      flags.vertexUsage = D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
-      flags.vertexPool = D3DPOOL_DEFAULT;
+    if(_capabilities.Caps2 & D3DCAPS2_DYNAMICTEXTURES) {
+      _textureUsage = D3DUSAGE_DYNAMIC;
+      _texturePool = D3DPOOL_DEFAULT;
+      _vertexUsage = D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
+      _vertexPool = D3DPOOL_DEFAULT;
     } else {
-      flags.textureUsage = 0;
-      flags.texturePool = D3DPOOL_MANAGED;
-      flags.vertexUsage = D3DUSAGE_WRITEONLY;
-      flags.vertexPool = D3DPOOL_MANAGED;
+      _textureUsage = 0;
+      _texturePool = D3DPOOL_MANAGED;
+      _vertexUsage = D3DUSAGE_WRITEONLY;
+      _vertexPool = D3DPOOL_MANAGED;
     }
 
-    lost = false;
-    return recover();
+    _lost = false;
+    return _ready = recover();
   }
 
-  auto term() -> void {
-    if(vertexBuffer) { vertexBuffer->Release(); vertexBuffer = nullptr; }
-    if(surface) { surface->Release(); surface = nullptr; }
-    if(texture) { texture->Release(); texture = nullptr; }
-    if(device) { device->Release(); device = nullptr; }
-    if(context) { context->Release(); context = nullptr; }
+  auto terminate() -> void {
+    if(_vertexBuffer) { _vertexBuffer->Release(); _vertexBuffer = nullptr; }
+    if(_surface) { _surface->Release(); _surface = nullptr; }
+    if(_texture) { _texture->Release(); _texture = nullptr; }
+    if(_device) { _device->Release(); _device = nullptr; }
+    if(_instance) { _instance->Release(); _instance = nullptr; }
+    if(_exclusiveContext) { DestroyWindow((HWND)_exclusiveContext); _exclusiveContext = 0; }
   }
+
+  struct Vertex {
+    float x, y, z, rhw;  //screen coordinates
+    float u, v;          //texture coordinates
+  };
+
+  bool _exclusive = false;
+  bool _ready = false;
+  uintptr _context = 0;
+  bool _blocking = false;
+  bool _smooth = true;
+
+  uintptr _exclusiveContext = 0;
+
+  LPDIRECT3D9 _instance = nullptr;
+  LPDIRECT3DDEVICE9 _device = nullptr;
+  LPDIRECT3DVERTEXBUFFER9 _vertexBuffer = nullptr;
+  D3DPRESENT_PARAMETERS _presentation = {};
+  D3DCAPS9 _capabilities = {};
+  LPDIRECT3DTEXTURE9 _texture = nullptr;
+  LPDIRECT3DSURFACE9 _surface = nullptr;
+
+  bool _lost = true;
+  uint _windowWidth;
+  uint _windowHeight;
+  uint _textureWidth;
+  uint _textureHeight;
+  uint _monitorWidth;
+  uint _monitorHeight;
+  uint _inputWidth;
+  uint _inputHeight;
+
+  uint32_t _textureUsage;
+  uint32_t _texturePool;
+  uint32_t _vertexUsage;
+  uint32_t _vertexPool;
 };

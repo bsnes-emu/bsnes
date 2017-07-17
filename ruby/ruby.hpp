@@ -14,88 +14,100 @@
 namespace ruby {
 
 struct Video {
-  static const nall::string Exclusive;
-  static const nall::string Handle;
-  static const nall::string Synchronize;
-  static const nall::string Depth;
-  static const nall::string Filter;
-  static const nall::string Shader;
-
-  static const uint FilterNearest;
-  static const uint FilterLinear;
-
   static auto create(const nall::string& driver = "") -> Video*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
+  struct Information {
+  };
+
   virtual ~Video() = default;
 
-  virtual auto cap(const nall::string& name) -> bool { return false; }
-  virtual auto get(const nall::string& name) -> nall::any { return false; }
-  virtual auto set(const nall::string& name, const nall::any& value) -> bool { return false; }
+  virtual auto ready() -> bool { return true; }
+  virtual auto information() -> Information { return {}; }
 
+  virtual auto exclusive() -> bool { return false; }
+  virtual auto context() -> uintptr { return 0; }
+  virtual auto blocking() -> bool { return false; }
+  virtual auto depth() -> uint { return 24; }
+  virtual auto smooth() -> bool { return false; }
+  virtual auto shader() -> nall::string { return ""; }
+
+  virtual auto setExclusive(bool exclusive) -> bool { return false; }
+  virtual auto setContext(uintptr context) -> bool { return false; }
+  virtual auto setBlocking(bool blocking) -> bool { return false; }
+  virtual auto setDepth(uint depth) -> bool { return false; }
+  virtual auto setSmooth(bool smooth) -> bool { return false; }
+  virtual auto setShader(nall::string shader) -> bool { return false; }
+
+  virtual auto clear() -> void {}
   virtual auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
   virtual auto unlock() -> void {}
-  virtual auto clear() -> void {}
-  virtual auto refresh() -> void {}
-
-  virtual auto init() -> bool { return true; }
-  virtual auto term() -> void {}
+  virtual auto output() -> void {}
 };
 
 struct Audio {
-  static const nall::string Device;
-  static const nall::string Exclusive;
-  static const nall::string Handle;
-  static const nall::string Synchronize;
-  static const nall::string Frequency;
-  static const nall::string Latency;
-
   static auto create(const nall::string& driver = "") -> Audio*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
+  struct Information {
+    nall::vector<nall::string> devices;
+    nall::vector<uint> frequencies;
+    nall::vector<uint> latencies;
+    nall::vector<uint> channels;
+  };
+
   virtual ~Audio() = default;
 
-  virtual auto cap(const nall::string& name) -> bool { return false; }
-  virtual auto get(const nall::string& name) -> nall::any { return false; }
-  virtual auto set(const nall::string& name, const nall::any& value) -> bool { return false; }
+  virtual auto ready() -> bool { return true; }
+  virtual auto information() -> Information { return {{"None"}, {48000}, {0}, {2}}; }
 
-  virtual auto sample(int16_t left, int16_t right) -> void {}
+  virtual auto exclusive() -> bool { return false; }
+  virtual auto context() -> uintptr { return 0; }
+  virtual auto device() -> nall::string { return "None"; }
+  virtual auto blocking() -> bool { return false; }
+  virtual auto channels() -> uint { return 2; }
+  virtual auto frequency() -> uint { return 48000; }
+  virtual auto latency() -> uint { return 0; }
+
+  virtual auto setExclusive(bool exclusive) -> bool { return false; }
+  virtual auto setContext(uintptr context) -> bool { return false; }
+  virtual auto setDevice(nall::string device) -> bool { return false; }
+  virtual auto setBlocking(bool blocking) -> bool { return false; }
+  virtual auto setChannels(uint channels) -> bool { return false; }
+  virtual auto setFrequency(uint frequency) -> bool { return false; }
+  virtual auto setLatency(uint latency) -> bool { return false; }
+
   virtual auto clear() -> void {}
-
-  virtual auto init() -> bool { return true; }
-  virtual auto term() -> void {}
+  virtual auto output(const double samples[]) -> void {}
 };
 
 struct Input {
-  static const nall::string Handle;
-  static const nall::string KeyboardSupport;
-  static const nall::string MouseSupport;
-  static const nall::string JoypadSupport;
-  static const nall::string JoypadRumbleSupport;
-
   static auto create(const nall::string& driver = "") -> Input*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
+  struct Information {
+  };
+
   virtual ~Input() = default;
 
-  virtual auto cap(const nall::string& name) -> bool { return false; }
-  virtual auto get(const nall::string& name) -> nall::any { return false; }
-  virtual auto set(const nall::string& name, const nall::any& value) -> bool { return false; }
+  virtual auto ready() -> bool { return true; }
+  virtual auto information() -> Information { return {}; }
 
+  virtual auto context() -> uintptr { return 0; }
+
+  virtual auto setContext(uintptr context) -> bool { return false; }
+
+  virtual auto acquired() -> bool { return false; }
   virtual auto acquire() -> bool { return false; }
   virtual auto release() -> bool { return false; }
-  virtual auto acquired() -> bool { return false; }
   virtual auto poll() -> nall::vector<nall::shared_pointer<nall::HID::Device>> { return {}; }
   virtual auto rumble(uint64_t id, bool enable) -> bool { return false; }
-
-  virtual auto init() -> bool { return true; }
-  virtual auto term() -> void {}
 
   auto onChange(const nall::function<void (nall::shared_pointer<nall::HID::Device>, uint, uint, int16_t, int16_t)>& callback) { _onChange = callback; }
   auto doChange(nall::shared_pointer<nall::HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {
