@@ -844,11 +844,9 @@ The dialog has a tab for each main category of options:
   - **Audio**: This tab contains options that affect
     how higan reproduces
     the emulated console's audio output.
-      - "Latency" controls how much audio output higan calculates in advance.
-        Higher values reduce the chance of
-        "popping" or "glitching" noises,
-        but increase the delay between an action occurring on-screen
-        and the corresponding sound-effect being played.
+      - "Device" allows you to choose
+        which audio device higan sends
+        the emulated game's audio to.
       - "Frequency" controls the sample-rate that higan will use
         when generating audio.
         If your PC's audio hardware has a "native" sample-rate
@@ -856,9 +854,11 @@ The dialog has a tab for each main category of options:
         pick that.
         Otherwise,
         44.1kHz or 48kHz should be fine.
-      - "Resampler" selects the algorithm higan uses
-        to convert the console's native audio sample-rate
-        to the value selected for "Frequency" above.
+      - "Latency" controls how much audio output higan calculates in advance.
+        Higher values reduce the chance of
+        "popping" or "glitching" noises,
+        but increase the delay between an action occurring on-screen
+        and the corresponding sound-effect being played.
       - "Exclusive Mode" appears
         if the current audio driver
         allows higan to take exclusive control of your PC's audio output,
