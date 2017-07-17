@@ -1751,25 +1751,72 @@ like the Mega Drive's Mega CD
 and the PC Engine's CD-ROM²,
 such as CD-quality music and full-motion video.
 
-Unfortunately,
-although the interface between the MSU-1
-and the emulated Super Famicom is standard
-and has multiple independent implementations
-(higan, snes9x,
-and on real hardware with
-the [SD2SNES][sd2snes] programmable cartridge)
-there's no standard
-for how a Super Famicom emulator
-should find the data the MSU-1 asks it to stream,
-or the audio tracks the MSU-1 asks it to play.
-Or rather,
-there are multiple standards
-and not all MSU-1 patches are designed for
-the system higan currently follows.
+To import an MSU-1 game:
 
+ 1. If you have a single, large file
+    with the `.msu1` extension,
+    that is a pack for use with [Mercurial Magic][mermag],
+    which can automatically set up a game folder
+    in the correct format.
+    Go read Mercurial Magic's documentation
+    instead of these instructions.
+ 2. Import the Super Famicom ROM with icarus,
+    [like a regular game](#importing-and-playing-regular-games).
+      - If this is a homebrew game with MSU-1 support,
+        there will probably be an ordinary ROM
+        whose name ends in `.sfc`,
+        which is the file you want to import
+      - If this is a commercial game modded for MSU-1 support,
+        there will probably be a patch file
+        whose name ends in `.ips` or `.bps`.
+        Get a copy of the correct version of the commercial game,
+        apply the patch with a tool like [Flips][flips],
+        then import the patched file.
+      - If you have to choose between two patches,
+        you want the "hardware" version,
+        not the "emulator" version that lowers audio quality
+        to match [a bug][msu1vol]
+        found in old [SD2SNES][sd2snes] firmware revisions.
+ 3. Find the game folder in [the game library](#the-game-library)
+    that icarus created when it imported the game.
+ 4. Copy the MSU-1 data file into the game folder.
+      - This should be named `msu1.rom`
+      - If there's no file by that name,
+        look for a file with a `.msu` extension
+        and rename it to `msu1.rom`.
+      - If there's no file by that name either,
+        create an empty file with that name.
+ 5. Copy the audio tracks into the game folder.
+      - If you have to choose between two sets of audio files,
+        you want the regular files,
+        not the ones that are "boosted"
+        (potentially losing quality)
+        to work around [a bug][msu1vol]
+        found in old [SD2SNES][sd2snes] firmware revisions.
+      - These should be named
+        `track-1.pcm`,
+        `track-2.pcm`,
+        ... `track-9.pcm`,
+        `track-10.pcm`,
+        etc.
+      - If there's no files with those names,
+        there should be other numbered `.pcm` files
+        that you can rename to match what higan expects.
+      - If the `.pcm` files have no numbers in the filenames,
+        there maybe a `.bml` or `.xml` file that lists
+        which number goes with which file.
+      - If there's no `.pcm` files at all,
+        that's OK,
+        this game probably just doesn't use the audio-playback feature.
+
+Once the game folder is set up,
+playing an MSU-1 game is just like
+[a regular game](#importing-and-playing-regular-games).
 
 [sd2snes]: https://sd2snes.de/
 [flips]: http://www.romhacking.net/utilities/1040/
+[msu1vol]: http://blog.qwertymodo.com/2017/07/the-msu-1-volume-fiasco-explained.html
+[mermag]: https://github.com/hex-usr/Mercurial-Magic/
 
 Importing and playing patched games
 -----------------------------------
