@@ -655,13 +655,19 @@ that aren't specific to any particular console.
         each installed Quark shader.
         See [Installing custom shaders](#installing-custom-shaders)
         for details.
+  - **Synchronize Video**
+    (sometimes called "vsync")
+    causes higan to wait for each video frame
+    to be completely displayed
+    before resuming emulation.
+    This reduces visual "tearing",
+    but [tends to increase][svsa] audio pops and glitches,
+    even if "Synchronize Audio" is enabled.
   - **Synchronize Audio**
     causes higan to wait for audio playback to complete
     before resuming emulation.
     This should reduce popping and glitching noises,
-    but if your PC's video refresh-rate and audio-playback rate
-    are in a different ratio than the emulated console,
-    this may increase them.
+    but is [less effective][svsa] if "Synchronize Video" is enabled.
     If your PC cannot emulate at full-speed,
     (60fps for most consoles, 75fps for WonderSwan)
     this has no noticable effect.
@@ -673,8 +679,19 @@ that aren't specific to any particular console.
     at the bottom of the window.
     This option has no effect in full-screen mode.
     See [The status bar](#the-status-bar) for more information.
-  - **Configuration ...**
-    opens [the Configuration dialog](#the-configuration-dialog)
+  - **Video Settings ...**
+    opens the Video tab of [the Configuration dialog][cfgdlg].
+  - **Audio Settings ...**
+    opens the Audio tab of [the Configuration dialog][cfgdlg].
+  - **Input Settings ...**
+    opens the Input tab of [the Configuration dialog][cfgdlg].
+  - **Hotkey Settings ...**
+    opens the Hotkeys tab of [the Configuration dialog][cfgdlg].
+  - **Advanced Settings ...**
+    opens the Advanced tab of [the Configuration dialog][cfgdlg].
+
+[svsa]: #why-do-synchronize-video-and-synchronize-audio-conflict
+[cfgdlg]: #the-configuration-dialog
 
 The Tools menu
 --------------
@@ -1997,7 +2014,10 @@ Frequently Asked Questions
 
 TODO
 
-where is the vsync option?
+Why do Synchronize Video and Synchronize Audio conflict?
+------------------------------------------------------------
+
+where is the vsync option, and the video/audio rate tradeoff
 https://board.byuu.org/viewtopic.php?p=43305#p43305
 
 exclusive full-screen?
