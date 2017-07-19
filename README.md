@@ -1607,19 +1607,30 @@ you want to insert into the game.
 If you press "Cancel" at this point,
 the game will load without any cartridge in its memory pak slot.
 
-Note that although you can load
-the control cartridge into higan,
-higan does not emulate the Satellaview modem itself,
-so it's not very useful.
-For more information about the Satellaview service,
-a translation patch for the control cartridge
-and emulators that do a better job of Satellaview emulation,
-see [the BS-X Project](https://bsxproj.superfamicom.org/).
+If you load the control cartridge into higan,
+make sure the emulated Satellaview
+is connected to the emulated Super Famicom's expansion port
+by going to the "Super Famicom" menu,
+selecting the "Expansion Port" sub-menu,
+and choosing "Satellaview".
+If the expansion port was previously
+configured with a different option,
+power-cycle the Super Famicom
+(also in the "Super Famicom" menu)
+to make sure the control cartridge will find the Satellaview
+when it starts up.
+Note that higan's Satellaview emulation is not very accurate,
+so the control cartridge may not work as it should.
 
 Playing a memory pak on its own doesn't make much sense,
 it's not a standalone cartridge.
 Play a game with a memory pak slot,
 and choose which memory pak you want when higan asks for it.
+
+For more information about the Satellaview service,
+a translation patch for the control cartridge
+and emulators that do a better job of Satellaview emulation,
+see [the BS-X Project](https://bsxproj.superfamicom.org/).
 
 Importing and playing Sufami Turbo games
 ----------------------------------------
