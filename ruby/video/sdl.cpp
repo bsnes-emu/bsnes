@@ -1,3 +1,6 @@
+//note: this driver works under Linux, but crashes with SIGSEGV under FreeBSD
+//exact reason is unknown; but I suspect it's a bug in FreeBSD's SDL 1.2 package
+
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/Xv.h>
@@ -6,130 +9,124 @@
 #include <SDL/SDL.h>
 
 struct VideoSDL : Video {
-  ~VideoSDL() { term(); }
+  VideoSDL() { initialize(); }
+  ~VideoSDL() { terminate(); }
 
-  Display* display = nullptr;
-  SDL_Surface* screen = nullptr;
-  SDL_Surface* buffer = nullptr;
-  uint iwidth = 0;
-  uint iheight = 0;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    uintptr handle = 0;
+  auto context() -> uintptr { return _context; }
 
-    uint width = 0;
-    uint height = 0;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    return false;
-  }
-
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr>()) {
-      settings.handle = value.get<uintptr>();
-      return true;
-    }
-
-    return false;
-  }
-
-  auto resize(uint width, uint height) -> void {
-    if(iwidth >= width && iheight >= height) return;
-
-    iwidth  = max(width,  iwidth);
-    iheight = max(height, iheight);
-
-    if(buffer) SDL_FreeSurface(buffer);
-    buffer = SDL_CreateRGBSurface(
-      SDL_SWSURFACE, iwidth, iheight, 32,
-      0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
-    );
-  }
-
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(width != settings.width || height != settings.height) {
-      resize(settings.width = width, settings.height = height);
-    }
-
-    if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
-    pitch = buffer->pitch;
-    return data = (uint32_t*)buffer->pixels;
-  }
-
-  auto unlock() -> void {
-    if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
   auto clear() -> void {
-    if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
-    for(uint y : range(iheight)) {
-      uint32_t* data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
-      for(uint x : range(iwidth)) *data++ = 0xff000000;
+    if(SDL_MUSTLOCK(_buffer)) SDL_LockSurface(_buffer);
+    for(uint y : range(_bufferHeight)) {
+      uint32_t* data = (uint32_t*)_buffer->pixels + y * (_buffer->pitch >> 2);
+      for(uint x : range(_bufferWidth)) *data++ = 0xff000000;
     }
-    if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
-    refresh();
+    if(SDL_MUSTLOCK(_buffer)) SDL_UnlockSurface(_buffer);
+    output();
   }
 
-  auto refresh() -> void {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(width != _width || height != _height) {
+      resize(_width = width, _height = height);
+    }
+
+    if(SDL_MUSTLOCK(_buffer)) SDL_LockSurface(_buffer);
+    pitch = _buffer->pitch;
+    return data = (uint32_t*)_buffer->pixels;
+  }
+
+  auto unlock() -> void {
+    if(SDL_MUSTLOCK(_buffer)) SDL_UnlockSurface(_buffer);
+  }
+
+  auto output() -> void {
     //ruby input is X8R8G8B8, top 8-bits are ignored.
     //as SDL forces us to use a 32-bit buffer, we must set alpha to 255 (full opacity)
     //to prevent blending against the window beneath when X window visual is 32-bits.
-    if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
-    for(uint y : range(settings.height)) {
-      uint32_t* data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
-      for(uint x : range(settings.width)) *data++ |= 0xff000000;
+    if(SDL_MUSTLOCK(_buffer)) SDL_LockSurface(_buffer);
+    for(uint y : range(_height)) {
+      uint32_t* data = (uint32_t*)_buffer->pixels + y * (_buffer->pitch >> 2);
+      for(uint x : range(_width)) *data++ |= 0xff000000;
     }
-    if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);
+    if(SDL_MUSTLOCK(_buffer)) SDL_UnlockSurface(_buffer);
 
     XWindowAttributes attributes;
-    XGetWindowAttributes(display, settings.handle, &attributes);
+    XGetWindowAttributes(_display, _context, &attributes);
 
-    SDL_Rect src, dest;
+    SDL_Rect source;
+    SDL_Rect target;
 
-    src.x = 0;
-    src.y = 0;
-    src.w = settings.width;
-    src.h = settings.height;
+    source.x = 0;
+    source.y = 0;
+    source.w = _width;
+    source.h = _height;
 
-    dest.x = 0;
-    dest.y = 0;
-    dest.w = attributes.width;
-    dest.h = attributes.height;
+    target.x = 0;
+    target.y = 0;
+    target.w = attributes.width;
+    target.h = attributes.height;
 
-    SDL_SoftStretch(buffer, &src, screen, &dest);
-    SDL_UpdateRect(screen, dest.x, dest.y, dest.w, dest.h);
+    SDL_SoftStretch(_buffer, &source, _screen, &target);
+    SDL_UpdateRect(_screen, target.x, target.y, target.w, target.h);
   }
 
-  auto init() -> bool {
-    display = XOpenDisplay(0);
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
 
-    //todo: this causes a segfault inside SDL_SetVideoMode on FreeBSD (works under Linux)
+    _display = XOpenDisplay(0);
+
     char env[512];
-    sprintf(env, "SDL_WINDOWID=%ld", (long)settings.handle);
+    sprintf(env, "SDL_WINDOWID=%ld", (long)_context);
     putenv(env);
 
     SDL_InitSubSystem(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
-    XUndefineCursor(display, settings.handle);
+    _screen = SDL_SetVideoMode(2560, 1600, 32, SDL_HWSURFACE);
+    XUndefineCursor(_display, _context);
 
-    buffer = nullptr;
-    iwidth = 0;
-    iheight = 0;
-    resize(settings.width = 256, settings.height = 256);
+    _buffer = nullptr;
+    _bufferWidth = 0;
+    _bufferHeight = 0;
+    resize(_width = 256, _height = 256);
 
     return true;
   }
 
-  auto term() -> void {
-    XCloseDisplay(display);
-    SDL_FreeSurface(buffer);
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+  auto terminate() -> void {
+    if(_buffer) SDL_FreeSurface(_buffer), _buffer = nullptr;
+    if(_screen) SDL_QuitSubSystem(SDL_INIT_VIDEO), _screen = nullptr;
+    if(_display) XCloseDisplay(_display), _display = nullptr;
   }
+
+  auto resize(uint width, uint height) -> void {
+    if(_bufferWidth >= width && _bufferHeight >= height) return;
+
+    _bufferWidth = max(width, _bufferWidth);
+    _bufferHeight = max(height, _bufferHeight);
+
+    if(_buffer) SDL_FreeSurface(_buffer);
+    _buffer = SDL_CreateRGBSurface(
+      SDL_SWSURFACE, _bufferWidth, _bufferHeight, 32,
+      0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
+    );
+  }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  Display* _display = nullptr;
+  SDL_Surface* _screen = nullptr;
+  SDL_Surface* _buffer = nullptr;
+  uint _bufferWidth = 0;
+  uint _bufferHeight = 0;
+  uint _width = 0;
+  uint _height = 0;
 };

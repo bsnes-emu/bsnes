@@ -28,6 +28,14 @@ struct VideoXShm : Video {
     return true;
   }
 
+  auto clear() -> void {
+    if(!_ready) return;
+    auto dp = _inputBuffer;
+    uint length = _inputWidth * _inputHeight;
+    while(length--) *dp++ = 255u << 24;
+    output();
+  }
+
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     if(!_inputBuffer || _inputWidth != width || _inputHeight != height) {
       if(_inputBuffer) delete[] _inputBuffer;
@@ -42,14 +50,6 @@ struct VideoXShm : Video {
   }
 
   auto unlock() -> void {
-  }
-
-  auto clear() -> void {
-    if(!_ready) return;
-    auto dp = _inputBuffer;
-    uint length = _inputWidth * _inputHeight;
-    while(length--) *dp++ = 255u << 24;
-    output();
   }
 
   auto output() -> void {

@@ -82,7 +82,7 @@ Presentation::Presentation() {
     program->updateVideoShader();
   });
   loadShaders();
-  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).onToggle([&] {
+  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).setVisible(false).onToggle([&] {
     settings["Video/Synchronize"].setValue(synchronizeVideo.checked());
     video->setBlocking(synchronizeVideo.checked());
   });
@@ -99,9 +99,9 @@ Presentation::Presentation() {
     statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeViewport();
   });
-  showVideoSettings.setText("Video Settings ...").onActivate([&] { settingsManager->show(0); });
-  showAudioSettings.setText("Audio Settings ...").onActivate([&] { settingsManager->show(1); });
-  showInputSettings.setText("Input Settings ...").onActivate([&] {
+  showVideoSettings.setText("Video ...").onActivate([&] { settingsManager->show(0); });
+  showAudioSettings.setText("Audio ...").onActivate([&] { settingsManager->show(1); });
+  showInputSettings.setText("Input ...").onActivate([&] {
     if(emulator) {
       //default input panel to current core's input settings
       for(auto item : settingsManager->input.emulatorList.items()) {
@@ -114,8 +114,8 @@ Presentation::Presentation() {
     }
     settingsManager->show(2);
   });
-  showHotkeySettings.setText("Hotkey Settings ...").onActivate([&] { settingsManager->show(3); });
-  showAdvancedSettings.setText("Advanced Settings ...").onActivate([&] { settingsManager->show(4); });
+  showHotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsManager->show(3); });
+  showAdvancedSettings.setText("Advanced ...").onActivate([&] { settingsManager->show(4); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveQuickStateMenu.setText("Save Quick State");
@@ -130,9 +130,9 @@ Presentation::Presentation() {
   loadSlot3.setText("Slot 3").onActivate([&] { program->loadState(3); });
   loadSlot4.setText("Slot 4").onActivate([&] { program->loadState(4); });
   loadSlot5.setText("Slot 5").onActivate([&] { program->loadState(5); });
-  cheatEditor.setText("Cheat Editor").onActivate([&] { toolsManager->show(0); });
-  stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
-  manifestViewer.setText("Manifest Viewer").onActivate([&] { toolsManager->show(2); });
+  cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsManager->show(0); });
+  stateManager.setText("State Manager ...").onActivate([&] { toolsManager->show(1); });
+  manifestViewer.setText("Manifest Viewer ...").onActivate([&] { toolsManager->show(2); });
 
   helpMenu.setText("Help");
   documentation.setText("Documentation ...").onActivate([&] {

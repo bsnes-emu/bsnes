@@ -41,6 +41,7 @@ Program::Program(string_vector args) {
   presentation->clearViewport();
 
   audio = Audio::create(settings["Audio/Driver"].text());
+  audio->setExclusive(settings["Audio/Exclusive"].boolean());
   audio->setContext(presentation->viewport.handle());
   audio->setDevice(settings["Audio/Device"].text());
   audio->setBlocking(settings["Audio/Synchronize"].boolean());
