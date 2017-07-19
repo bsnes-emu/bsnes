@@ -655,19 +655,11 @@ that aren't specific to any particular console.
         each installed Quark shader.
         See [Installing custom shaders](#installing-custom-shaders)
         for details.
-  - **Synchronize Video**
-    (sometimes called "vsync")
-    causes higan to wait for each video frame
-    to be completely displayed
-    before resuming emulation.
-    This reduces visual "tearing",
-    but [tends to increase][svsa] audio pops and glitches,
-    even if "Synchronize Audio" is enabled.
   - **Synchronize Audio**
     causes higan to wait for audio playback to complete
     before resuming emulation.
     This should reduce popping and glitching noises,
-    but is [less effective][svsa] if "Synchronize Video" is enabled.
+    and slows the emulation down to approximately the correct speed.
     If your PC cannot emulate at full-speed,
     (60fps for most consoles, 75fps for WonderSwan)
     this has no noticable effect.
@@ -679,15 +671,15 @@ that aren't specific to any particular console.
     at the bottom of the window.
     This option has no effect in full-screen mode.
     See [The status bar](#the-status-bar) for more information.
-  - **Video Settings ...**
+  - **Video ...**
     opens the Video tab of [the Configuration dialog][cfgdlg].
-  - **Audio Settings ...**
+  - **Audio ...**
     opens the Audio tab of [the Configuration dialog][cfgdlg].
-  - **Input Settings ...**
+  - **Input ...**
     opens the Input tab of [the Configuration dialog][cfgdlg].
-  - **Hotkey Settings ...**
+  - **Hotkey ...**
     opens the Hotkeys tab of [the Configuration dialog][cfgdlg].
-  - **Advanced Settings ...**
+  - **Advanced ...**
     opens the Advanced tab of [the Configuration dialog][cfgdlg].
 
 [svsa]: #why-do-synchronize-video-and-synchronize-audio-conflict
