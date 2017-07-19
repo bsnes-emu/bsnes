@@ -1777,12 +1777,13 @@ To import an MSU-1 game:
     in the correct format.
     Go read Mercurial Magic's documentation
     instead of these instructions.
- 2. Import the Super Famicom ROM with icarus,
+ 2. Otherwise,
+    Import the Super Famicom ROM with icarus,
     [like a regular game](#importing-and-playing-regular-games).
       - If this is a homebrew game with MSU-1 support,
         there will probably be an ordinary ROM
         whose name ends in `.sfc`,
-        which is the file you want to import
+        which is the file you want to import.
       - If this is a commercial game modded for MSU-1 support,
         there will probably be a patch file
         whose name ends in `.ips` or `.bps`.
@@ -1801,8 +1802,8 @@ To import an MSU-1 game:
       - If there's no file by that name,
         look for a file with a `.msu` extension
         and rename it to `msu1.rom`.
-      - If there's no file by that name either,
-        create an empty file with that name.
+      - If there's no file ending in `.msu` either,
+        create an empty file named `msu1.rom`.
  5. Copy the audio tracks into the game folder.
       - If you have to choose between two sets of audio files,
         you want the regular files,
