@@ -1,6 +1,3 @@
-//note: this driver works under Linux, but crashes with SIGSEGV under FreeBSD
-//exact reason is unknown; but I suspect it's a bug in FreeBSD's SDL 1.2 package
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/Xv.h>
@@ -97,10 +94,11 @@ private:
     _bufferHeight = 0;
     resize(_width = 256, _height = 256);
 
-    return true;
+    return _ready = true;
   }
 
   auto terminate() -> void {
+    _ready = false;
     if(_buffer) SDL_FreeSurface(_buffer), _buffer = nullptr;
     if(_screen) SDL_QuitSubSystem(SDL_INIT_VIDEO), _screen = nullptr;
     if(_display) XCloseDisplay(_display), _display = nullptr;

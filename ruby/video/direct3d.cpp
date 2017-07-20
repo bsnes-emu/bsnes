@@ -311,6 +311,7 @@ private:
   }
 
   auto terminate() -> void {
+    _ready = false;
     if(_vertexBuffer) { _vertexBuffer->Release(); _vertexBuffer = nullptr; }
     if(_surface) { _surface->Release(); _surface = nullptr; }
     if(_texture) { _texture->Release(); _texture = nullptr; }

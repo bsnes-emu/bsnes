@@ -63,9 +63,9 @@ struct AudioSettings : TabFrameItem {
       HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
     CheckLabel reverbEnable{&layout, Size{~0, 0}};
 
+  auto updateDevice() -> void;
   auto updateDriver(bool initializing = false) -> void;
   auto updateEffects(bool initializing = false) -> void;
-  auto updateDriverLists() -> void;
 };
 
 struct InputSettings : TabFrameItem {
