@@ -1863,7 +1863,28 @@ playing an MSU-1 game is just like
 Importing and playing patched games
 -----------------------------------
 
-TODO
+The console emulation community
+has a long and vibrant history of game modding,
+or [ROM hacking][rhdn],
+including fan-translations,
+new levels for existing games,
+and more.
+Since distributing the modified versions of existing games
+would be copyright infringement,
+the changes are typically distributed as "patches",
+a file containing a list of modifications to make,
+that can be automatically applied by a "patcher" tool
+like [Flips][flips].
+
+higan does not support soft-patching,
+so if you want to play a patched game in higan,
+you will need to use a patcher to apply it yourself,
+creating a new, patched copy of the game.
+
+Then you can import and play the patched game just like
+[a regular game](#importing-and-playing-regular-games).
+
+[rhdn]: http://www.romhacking.net/
 
 Moving the game library
 -----------------------
