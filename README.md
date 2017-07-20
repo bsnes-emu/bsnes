@@ -1771,6 +1771,34 @@ like the Mega Drive's Mega CD
 and the PC Engine's CD-ROM²,
 such as CD-quality music and full-motion video.
 
+One thing to be aware of
+when importing an MSU-1 game
+is that early firmware versions
+of the [SD2SNES][sd2snes] programmable cartridge
+had a bug that caused MSU-1 music to play too quietly.
+Skipping over [the full details][msu1vol],
+the short version is this:
+
+  - If offered the choice between "boosted" or non-boosted audio,
+    you want the non-boosted version.
+  - If an MSU-1 mod for a commercial game offers
+    "emulator" and "hardware" versions of the patch file,
+    it means the audio tracks are already boosted.
+      - Some
+        [third](https://www.zeldix.net/t1265-#18320)
+        [parties](https://www.zeldix.net/t1339-#19818)
+        have created replacement, non-boosted audio tracks
+        for the most popular MSU-1 mods.
+        If the mod you want to play has a replacement pack,
+        use it with the "hardware" version of the patch.
+      - Even without access to non-boosted audio tracks,
+        it may be that the existing audio is only slightly boosted,
+        so try the "hardware" version first, for best quality.
+      - If the audio tracks are heavily boosted,
+        the "hardware" patch may sound terrible,
+        distorting and clipping,
+        in which case try the "emulator" patch.
+
 To import an MSU-1 game:
 
  1. If you have a single, large file
@@ -1781,7 +1809,7 @@ To import an MSU-1 game:
     Go read Mercurial Magic's documentation
     instead of these instructions.
  2. Otherwise,
-    Import the Super Famicom ROM with icarus,
+    import the Super Famicom ROM with icarus,
     [like a regular game](#importing-and-playing-regular-games).
       - If this is a homebrew game with MSU-1 support,
         there will probably be an ordinary ROM
@@ -1793,11 +1821,8 @@ To import an MSU-1 game:
         Get a copy of the correct version of the commercial game,
         apply the patch with a tool like [Flips][flips],
         then import the patched file.
-      - If you have to choose between two patches,
-        you want the "hardware" version,
-        not the "emulator" version that lowers audio quality
-        to match [a bug][msu1vol]
-        found in old [SD2SNES][sd2snes] firmware revisions.
+      - If there's "hardware" and "emulator" versions of the patch,
+        see "One thing to be aware of..." above.
  3. Find the game folder in [the game library](#the-game-library)
     that icarus created when it imported the game.
  4. Copy the MSU-1 data file into the game folder.
@@ -1809,11 +1834,7 @@ To import an MSU-1 game:
         create an empty file named `msu1.rom`.
  5. Copy the audio tracks into the game folder.
       - If you have to choose between two sets of audio files,
-        you want the regular files,
-        not the ones that are "boosted"
-        (potentially losing quality)
-        to work around [a bug][msu1vol]
-        found in old [SD2SNES][sd2snes] firmware revisions.
+        see "One thing to be aware of..." above.
       - These should be named
         `track-1.pcm`,
         `track-2.pcm`,
