@@ -25,8 +25,8 @@ pages:
         - Using custom shaders: guides/shaders.md
         - Choosing drivers: guides/drivers.md
     - Concepts:
-        - The Game Library: game-library.md
-        - Save States: save-states.md
+        - The Game Library: concepts/game-library.md
+        - Save States: concepts/save-states.md
     - Frequently Asked Questions: faq.md
     - Console-specific Notes: notes.md
 
