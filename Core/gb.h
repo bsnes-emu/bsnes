@@ -419,11 +419,6 @@ struct GB_gameboy_internal_s {
         volatile bool audio_copy_in_progress;
         volatile bool apu_lock;
         double apu_sample_cycles;
-        double apu_subsample_cycles;
-        GB_double_sample_t current_supersample;
-        unsigned n_subsamples;
-        unsigned audio_quality;
-        
 
         /* Callbacks */
         void *user_data;

@@ -134,14 +134,12 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     // Not affected by speed boost
     gb->hdma_cycles += cycles;
     gb->apu_sample_cycles += cycles;
-    gb->apu_subsample_cycles += cycles;
-    gb->apu.apu_cycles += cycles;
     gb->cycles_since_ir_change += cycles;
     gb->cycles_since_input_ir_change += cycles;
     gb->cycles_since_last_sync += cycles;
     GB_dma_run(gb);
     GB_hdma_run(gb);
-    GB_apu_run(gb);
+    GB_apu_run(gb, cycles);
     GB_display_run(gb, cycles);
     GB_ir_run(gb);
 }
@@ -171,6 +169,9 @@ void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
     if ((gb->io_registers[GB_IO_TAC] & 4) &&
         counter_overflow_check(gb->div_cycles, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
+    }
+    if (counter_overflow_check(gb->div_cycles, value, gb->cgb_double_speed? 0x4000 : 0x2000)) {
+        GB_apu_div_event(gb);
     }
     gb->div_cycles = value;
 }

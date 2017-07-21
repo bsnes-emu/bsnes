@@ -148,13 +148,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
 
             case GB_IO_PCM_12:
-            case GB_IO_PCM_34:
-            {
                 if (!gb->is_cgb) return 0xFF;
-                GB_sample_t dummy;
-                GB_apu_get_samples_and_update_pcm_regs(gb, &dummy);
-            }
-            /* Fall through */
+                return (gb->apu.samples[GB_SQUARE_2] << 4) | gb->apu.samples[GB_SQUARE_1];
+            case GB_IO_PCM_34:
+                if (!gb->is_cgb) return 0xFF;
+                return (gb->apu.samples[GB_NOISE] << 4) | gb->apu.samples[GB_WAVE];
             case GB_IO_JOYP:
             case GB_IO_TMA:
             case GB_IO_LCDC:
