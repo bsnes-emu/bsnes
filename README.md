@@ -6,7 +6,7 @@ allowing you to play classic games on a modern general-purpose computer.
 
 As of v102,
 higan has top-tier support for the following consoles:
-q
+
   - Nintendo Super Famicom/Super Nintendo Entertainment System,
     including addon hardware:
       - Super Game Boy
@@ -778,7 +778,7 @@ when you press the "Rotate Display" hotkey
 while the emulated console does not support display rotation.
 
 The Configuration dialog
------------------------
+------------------------
 
 The Configuration dialog
 contains less-frequently-modified configuration options.
