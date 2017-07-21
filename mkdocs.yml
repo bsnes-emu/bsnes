@@ -20,9 +20,10 @@ pages:
         - higan's command line: interface/higan-cli.md
         - icarus: interface/icarus.md
         - Common: interface/common.md
-    - Configuration Guide:
-        - Custom shaders: config/shaders.md
-        - Choosing drivers: config/drivers.md
+    - Guides:
+        - Importing and playing games: guides/import.md
+        - Using custom shaders: guides/shaders.md
+        - Choosing drivers: guides/drivers.md
     - Concepts:
         - The Game Library: game-library.md
         - Save States: save-states.md
