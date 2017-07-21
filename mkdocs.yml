@@ -1,0 +1,36 @@
+site_name: higan
+repo_url: https://gitlab.com/higan/higan
+repo_name: Source
+
+docs_dir: docs
+site_dir: docs_build
+theme: readthedocs
+
+pages:
+    - Introduction: index.md
+    - Quick Start: qs.md
+    - Building and Installing:
+        - Windows: install/windows.md
+        - Linux: install/linux.md
+        - General: install/general.md
+    - User Interface:
+        - higan's main window: interface/higan.md
+        - higan's Settings window: interface/higan-config.md
+        - higan's Tools window: interface/higan-tools.md
+        - higan's command line: interface/higan-cli.md
+        - icarus: interface/icarus.md
+        - Common: interface/common.md
+    - Configuration Guide:
+        - Custom shaders: config/shaders.md
+        - Choosing drivers: config/drivers.md
+    - Concepts:
+        - The Game Library: game-library.md
+        - Save States: save-states.md
+    - Frequently Asked Questions: faq.md
+    - Console-specific Notes: notes.md
+
+markdown_extensions:
+    - smarty
+    - toc:
+        permalink: true
+
