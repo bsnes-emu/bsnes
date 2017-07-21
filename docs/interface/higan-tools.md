@@ -1,3 +1,10 @@
+The Tools window
+appears when you choose
+one of the items at the bottom of
+[the Tools menu](higan.md#the-tools-menu).
+
+The window has a tab for each tool:
+
 The Cheat Editor
 ----------------
 
