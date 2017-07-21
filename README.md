@@ -6,7 +6,7 @@ allowing you to play classic games on a modern general-purpose computer.
 
 As of v102,
 higan has top-tier support for the following consoles:
-
+q
   - Nintendo Super Famicom/Super Nintendo Entertainment System,
     including addon hardware:
       - Super Game Boy
@@ -1954,7 +1954,63 @@ see [Game Paks on the higan website][gp]
 What's in a game folder?
 ------------------------
 
-TODO
+As mentioned [above](#why-game-folders),
+a game folder collects all the information relevant
+to emulating a particular game.
+Not all of the following files
+are relevant to every emulated console,
+or to every game on a given console,
+but they may be relevantunder particular circumstances.
+
+The most important file in a game folder is `manifest.bml`,
+which describes how all the other files should be wired together
+to create a runnable game cartridge.
+However,
+the manifest format has occasionally changed
+as new emulation details were uncovered
+that could not be represented in the old format.
+Therefore,
+icarus [defaults](#the-icarus-settings-dialog)
+to not writing out manifests when it imports games,
+and higan [defaults](#the-configuration-dialog)
+to ignoring manifests that are present.
+Instead,
+when higan loads a game,
+it will ask icarus to generate a temporary manifest in the latest format,
+based on the files present in the game folder
+and how they are likely to go together.
+You can view this temporary manifestin [the Manifest Viewer](#the-manifest-viewer).
+
+  - `program.rom`:
+    For most consoles,
+    this contains
+    the executable instructions and graphics data
+    from the cartridge's ROM chips.
+    For the Famicom,
+    this contains only the executable instructions.
+  - `character.rom`:
+    For the Famicom,
+    this contains only the graphics data
+    from the cartridge's ROM chips.
+  - `ines.rom`:
+    While other consoles typically include enough hints
+    in `program.rom` for icarus to generate a manifest,
+    the Famicom does not.
+    Famicom games not stored in game folders
+    typically include an "iNES header" to store that information,
+    which icarus preserves after import as `ines.rom`.
+  - `save.ram`:
+    Games that include a save feature
+    will create this file.
+    Note that it is only written to disk
+    when higan exits gracefully,
+    if higan crashes or is forced to quit,
+    in-game saves may be lost.
+  - `rtc.ram`:
+    Games that include a calendar or real-time clock
+    will create this file.
+
+TODO: describe more files.
 
 Configuring higan
 =================
