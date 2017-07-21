@@ -32,10 +32,17 @@ Official higan resources
 Unofficial higan resources
 --------------------------
 
+  - Documentation for
+    [the current stable version][stadocs]
   - [Source code repository](https://gitlab.com/higan/higan/)
     archives official higan releases
     and WIP snapshots
-    since approximately v067r21.
-      - [Latest WIP build for Windows][wipwin]
+    since approximately v067r21
+  - [Latest WIP build for Windows][wipwin]
+  - Documentation for
+    [the latest WIP version][wipdocs]
+
 
 [wipwin]: https://gitlab.com/higan/higan/-/jobs/artifacts/master/download?job=windows-x86_64-binaries
+[stadocs]: https://higan.readthedocs.io/
+[wipdocs]: https://higan.readthedocs.io/en/latest/
