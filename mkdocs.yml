@@ -25,6 +25,7 @@ pages:
         - Using custom shaders: guides/shaders.md
         - Choosing drivers: guides/drivers.md
     - Concepts:
+        - Manifests and Game Folders: concepts/game-folders.md
         - The Game Library: concepts/game-library.md
         - Save States: concepts/save-states.md
     - Frequently Asked Questions: faq.md
