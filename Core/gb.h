@@ -404,7 +404,6 @@ struct GB_gameboy_internal_s {
 
         /* I/O */
         uint32_t *screen;
-        GB_sample_t *audio_buffer;
         bool keys[GB_KEY_MAX];
                
         /* Timing */
@@ -412,13 +411,7 @@ struct GB_gameboy_internal_s {
         uint64_t cycles_since_last_sync;
 
         /* Audio */
-        unsigned buffer_size;
-        unsigned sample_rate;
-        unsigned audio_position;
-        bool audio_stream_started; /* detects first copy request to minimize lag */
-        volatile bool audio_copy_in_progress;
-        volatile bool apu_lock;
-        double apu_sample_cycles;
+        GB_apu_output_t apu_output;
 
         /* Callbacks */
         void *user_data;

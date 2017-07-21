@@ -6,9 +6,9 @@
 
 
 #ifdef GB_INTERNAL
-/* Divides nicely and never overflows with 4 channels */
-#define MAX_CH_AMP 0x1E00
-#define CH_STEP (MAX_CH_AMP/0xF)
+/* Divides nicely and never overflows with 4 channels and 8 volume levels */
+#define MAX_CH_AMP 0x1FFE
+#define CH_STEP (MAX_CH_AMP/0xF/7)
 #endif
 
 /* Lengths are in either DIV ticks (256Hz, triggered by the DIV register) or
@@ -19,12 +19,6 @@ typedef struct
     int16_t left;
     int16_t right;
 } GB_sample_t;
-
-typedef struct
-{
-    double left;
-    double right;
-} GB_double_sample_t;
 
 enum GB_CHANNELS {
     GB_SQUARE_1,
@@ -37,8 +31,6 @@ enum GB_CHANNELS {
 typedef struct
 {
     bool global_enable;
-    uint8_t left_volume;
-    uint8_t right_volume;
     
     uint8_t samples[GB_N_CHANNELS];
     bool left_enabled[GB_N_CHANNELS];
@@ -61,9 +53,29 @@ typedef struct
     } wave_channel;
 } GB_apu_t;
 
+typedef struct {
+    unsigned sample_rate;
+    
+    GB_sample_t *buffer;
+    size_t buffer_size;
+    size_t buffer_position;
+    
+    bool stream_started; /* detects first copy request to minimize lag */
+    volatile bool copy_in_progress;
+    volatile bool lock;
+    
+    double sample_cycles;
+    
+    // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
+    unsigned cycles_since_render;
+    unsigned last_update[GB_N_CHANNELS];
+    GB_sample_t current_sample[GB_N_CHANNELS];
+    GB_sample_t summed_samples[GB_N_CHANNELS];
+} GB_apu_output_t;
+
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
-void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count);
-unsigned GB_apu_get_current_buffer_length(GB_gameboy_t *gb);
+void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count);
+size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb);
 
 #ifdef GB_INTERNAL
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);

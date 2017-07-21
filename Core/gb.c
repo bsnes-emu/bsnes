@@ -125,8 +125,8 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->rom) {
         free(gb->rom);
     }
-    if (gb->audio_buffer) {
-        free(gb->audio_buffer);
+    if (gb->apu_output.buffer) {
+        free(gb->apu_output.buffer);
     }
     if (gb->breakpoints) {
         free(gb->breakpoints);
@@ -388,13 +388,13 @@ void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data)
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
 {
-    if (gb->audio_buffer) {
-        free(gb->audio_buffer);
+    if (gb->apu_output.buffer) {
+        free(gb->apu_output.buffer);
     }
-    gb->buffer_size = sample_rate / 25; // 40ms delay
-    gb->audio_buffer = malloc(gb->buffer_size * sizeof(*gb->audio_buffer));
-    gb->sample_rate = sample_rate;
-    gb->audio_position = 0;
+    gb->apu_output.buffer_size = sample_rate / 25; // 40ms delay
+    gb->apu_output.buffer = malloc(gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
+    gb->apu_output.sample_rate = sample_rate;
+    gb->apu_output.buffer_position = 0;
 }
 
 void GB_disconnect_serial(GB_gameboy_t *gb)
