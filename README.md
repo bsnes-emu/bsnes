@@ -1990,7 +1990,12 @@ when higan loads a game,
 it will ask icarus to generate a temporary manifest in the latest format,
 based on the files present in the game folder
 and how they are likely to go together.
-You can view this temporary manifestin [the Manifest Viewer](#the-manifest-viewer).
+You can view this temporary manifest
+in [the Manifest Viewer](#the-manifest-viewer).
+
+All the files directly in the game folder
+are expected to be useful
+to all emulators that support them:
 
   - `program.rom`:
     For most consoles,
@@ -2017,11 +2022,36 @@ You can view this temporary manifestin [the Manifest Viewer](#the-manifest-viewe
     when higan exits gracefully,
     if higan crashes or is forced to quit,
     in-game saves may be lost.
+    Other emulators sometimes call this an "SRAM file",
+    even though the same filename is used
+    for cartridges that use EEPROM or Flash storage,
+    not just battery-backed Static RAM.
   - `rtc.ram`:
     Games that include a calendar or real-time clock
     will create this file.
+  - `*.data.rom`, `*.program.rom`:
+    Files named like this are usually
+    [co-processor firmware](#importing-and-playing-games-with-co-processor-firmware).
+  - `msu1.rom`:
+    Holds streamable data for
+    [the MSU-1](#importing-and-playing-MSU-1-games).
+  - `track-*.pcm`:
+    Holds streamable audio for
+    [the MSU-1](#importing-and-playing-MSU-1-games).
 
-TODO: describe more files.
+Files that are only useful to higan specifically
+are placed in a `higan` subdirectory:
+
+  - `cheats.bml`:
+    All information present in
+    [the Cheat Editor](#the-cheat-editor)
+    is stored here.
+  - `states/quick/slot-*.bst`:
+    All the save states made to
+    [Quick state slots](#quick-states).
+  - `states/managed/slot-*.bst`:
+    All the save states made with
+    [the State Manager](#the-state-manager).
 
 Configuring higan
 =================
