@@ -785,6 +785,9 @@ contains less-frequently-modified configuration options.
 Most of these can be safely ignored,
 or set once and never changed again.
 
+TODO: Break this into separate sections for each tab,
+like for the tools window.
+
 The dialog has a tab for each main category of options:
 
   - **Video**: This tab contains options that affect
@@ -1304,6 +1307,14 @@ The icarus Settings dialog contains the following settings:
     This option is still relevant when "Create Manifests" is unticked:
     higan uses icarus to generate a manifest when a game is loaded,
     not just at import-time.
+
+The higan command-line interface
+--------------------------------
+
+TODO
+
+higan accepts a path to a game folder,
+and also the `--fullscreen` option.
 
 The Game Library
 ================
