@@ -283,7 +283,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                 }
                 gb->apu.is_active[GB_WAVE] = true;
-                gb->apu.wave_channel.pulse_length = ~gb->io_registers[GB_IO_NR31];
+                gb->apu.wave_channel.pulse_length = (~gb->io_registers[GB_IO_NR31]) * 2;
                 gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length + 3;
                 gb->apu.wave_channel.current_sample_index = 0;
                 /* Note that we don't change the sample just yet! This was verified on hardware. */

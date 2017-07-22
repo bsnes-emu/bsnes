@@ -11,8 +11,8 @@
 #define CH_STEP (MAX_CH_AMP/0xF/7)
 #endif
 
-/* Lengths are in either DIV ticks (256Hz, triggered by the DIV register) or
-   APU ticks (2MHz, triggered by an internal APU clock)*/
+/* Lengths are in either DIV ticks (512Hz, triggered by the DIV register) or
+   APU ticks (2MHz, triggered by an internal APU clock) */
 
 typedef struct
 {
