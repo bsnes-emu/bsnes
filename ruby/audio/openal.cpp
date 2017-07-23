@@ -161,9 +161,9 @@ private:
     const char* list = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     if(!list) return result;
 
-    while(list[0] || list[1]) {
+    while(list && *list) {
       result.append(list);
-      while(list[0]) list++;
+      list += strlen(list) + 1;
     }
 
     return result;

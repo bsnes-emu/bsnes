@@ -14,7 +14,7 @@ rubylink += $(if $(findstring video.direct3d,$(ruby)),-ld3d9)
 rubylink += $(if $(findstring video.directdraw,$(ruby)),-lddraw)
 rubylink += $(if $(findstring video.glx,$(ruby)),-lGL)
 rubylink += $(if $(findstring video.wgl,$(ruby)),-lopengl32)
-rubylink += $(if $(findstring video.xv,$(ruby)),-lXv)
+rubylink += $(if $(findstring video.xvideo,$(ruby)),-lXv)
 
 rubylink += $(if $(findstring audio.alsa,$(ruby)),-lasound)
 rubylink += $(if $(findstring audio.ao,$(ruby)),-lao)

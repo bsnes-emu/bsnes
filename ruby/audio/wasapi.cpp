@@ -37,7 +37,7 @@ struct AudioWASAPI : Audio {
   auto setDevice(string device) -> bool {
     if(_device == device) return true;
     _device = device;
-    return true;
+    return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool {
@@ -177,12 +177,12 @@ private:
       _audioClient->GetCurrentPadding(&padding);
       available = _bufferSize - padding;
     }
+    uint32_t length = min(available, _queue.count);
 
     uint8_t* buffer = nullptr;
-    if(_renderClient->GetBuffer(available, &buffer) == S_OK) {
+    if(_renderClient->GetBuffer(length, &buffer) == S_OK) {
       uint bufferFlags = 0;
-      for(uint _ : range(available)) {
-        //if more samples are available than we have queued, fill remainder with silence
+      for(uint _ : range(length)) {
         double samples[8] = {};
         if(_queue.count) {
           for(uint n : range(_channels)) {
@@ -210,7 +210,7 @@ private:
           break;
         }
       }
-      _renderClient->ReleaseBuffer(available, bufferFlags);
+      _renderClient->ReleaseBuffer(length, bufferFlags);
     }
   }
 

@@ -6,9 +6,9 @@
 
 extern "C" auto XvShmCreateImage(Display*, XvPortID, int, char*, int, int, XShmSegmentInfo*) -> XvImage*;
 
-struct VideoXv : Video {
-  VideoXv() { initialize(); }
-  ~VideoXv() { terminate(); }
+struct VideoXVideo : Video {
+  VideoXVideo() { initialize(); }
+  ~VideoXVideo() { terminate(); }
 
   auto ready() -> bool { return _ready; }
 
@@ -44,6 +44,8 @@ struct VideoXv : Video {
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!_ready) return false;
+
     if(width != _width || height != _height) {
       resize(_width = width, _height = height);
     }
@@ -56,8 +58,7 @@ struct VideoXv : Video {
   }
 
   auto output() -> void {
-    uint width = _width;
-    uint height = _height;
+    if(!_ready) return;
 
     XWindowAttributes target;
     XGetWindowAttributes(_display, _window, &target);
@@ -76,16 +77,18 @@ struct VideoXv : Video {
     XGetWindowAttributes(_display, _window, &target);
 
     switch(_format) {
-      case XvFormatRGB32: renderRGB32(width, height); break;
-      case XvFormatRGB24: renderRGB24(width, height); break;
-      case XvFormatRGB16: renderRGB16(width, height); break;
-      case XvFormatRGB15: renderRGB15(width, height); break;
-      case XvFormatYUY2:  renderYUY2 (width, height); break;
-      case XvFormatUYVY:  renderUYVY (width, height); break;
+    case XvFormatRGB32: renderRGB32(_width, _height); break;
+    case XvFormatRGB24: renderRGB24(_width, _height); break;
+    case XvFormatRGB16: renderRGB16(_width, _height); break;
+    case XvFormatRGB15: renderRGB15(_width, _height); break;
+    case XvFormatUYVY:  renderUYVY (_width, _height); break;
+    case XvFormatYUY2:  renderYUY2 (_width, _height); break;
+    case XvFormatYV12:  renderYV12 (_width, _height); break;
+    case XvFormatI420:  renderI420 (_width, _height); break;
     }
 
     XvShmPutImage(_display, _port, _window, _gc, _image,
-      0, 0, width, height,
+      0, 0, _width, _height,
       0, 0, target.width, target.height,
       true);
   }
@@ -157,9 +160,16 @@ struct VideoXv : Video {
 
     _gc = XCreateGC(_display, _window, 0, 0);
 
-    //set colorkey to auto paint, so that Xv video output is always visible
-    Atom atom = XInternAtom(_display, "XV_AUTOPAINT_COLORKEY", true);
-    if(atom != None) XvSetPortAttribute(_display, _port, atom, 1);
+    int attributeCount = 0;
+    XvAttribute* attributeList = XvQueryPortAttributes(_display, _port, &attributeCount);
+    for(auto n : range(attributeCount)) {
+      if(string{attributeList[n].name} == "XV_AUTOPAINT_COLORKEY") {
+        //set colorkey to auto paint, so that Xv video output is always visible
+        Atom atom = XInternAtom(_display, "XV_AUTOPAINT_COLORKEY", true);
+        if(atom != None) XvSetPortAttribute(_display, _port, atom, 1);
+      }
+    }
+    XFree(attributeList);
 
     //find optimal rendering format
     _format = XvFormatUnknown;
@@ -200,6 +210,18 @@ struct VideoXv : Video {
 
     if(_format == XvFormatUnknown) for(auto n : range(formatCount)) {
       if(format[n].type == XvYUV && format[n].bits_per_pixel == 16 && format[n].format == XvPacked) {
+        if(format[n].component_order[0] == 'U' && format[n].component_order[1] == 'Y'
+        && format[n].component_order[2] == 'V' && format[n].component_order[3] == 'Y'
+        ) {
+          _format = XvFormatUYVY;
+          _fourCC = format[n].id;
+          break;
+        }
+      }
+    }
+
+    if(_format == XvFormatUnknown) for(auto n : range(formatCount)) {
+      if(format[n].type == XvYUV && format[n].bits_per_pixel == 16 && format[n].format == XvPacked) {
         if(format[n].component_order[0] == 'Y' && format[n].component_order[1] == 'U'
         && format[n].component_order[2] == 'Y' && format[n].component_order[3] == 'V'
         ) {
@@ -211,11 +233,23 @@ struct VideoXv : Video {
     }
 
     if(_format == XvFormatUnknown) for(auto n : range(formatCount)) {
-      if(format[n].type == XvYUV && format[n].bits_per_pixel == 16 && format[n].format == XvPacked) {
-        if(format[n].component_order[0] == 'U' && format[n].component_order[1] == 'Y'
-        && format[n].component_order[2] == 'V' && format[n].component_order[3] == 'Y'
+      if(format[n].type == XvYUV && format[n].bits_per_pixel == 12 && format[n].format == XvPlanar) {
+        if(format[n].component_order[0] == 'Y' && format[n].component_order[1] == 'V'
+        && format[n].component_order[2] == 'U' && format[n].component_order[3] == '\x00'
         ) {
-          _format = XvFormatUYVY;
+          _format = XvFormatYV12;
+          _fourCC = format[n].id;
+          break;
+        }
+      }
+    }
+
+    if(_format == XvFormatUnknown) for(auto n : range(formatCount)) {
+      if(format[n].type == XvYUV && format[n].bits_per_pixel == 12 && format[n].format == XvPlanar) {
+        if(format[n].component_order[0] == 'Y' && format[n].component_order[1] == 'U'
+        && format[n].component_order[2] == 'V' && format[n].component_order[3] == '\x00'
+        ) {
+          _format = XvFormatI420;
           _fourCC = format[n].id;
           break;
         }
@@ -228,29 +262,11 @@ struct VideoXv : Video {
       return false;
     }
 
-    _bufferWidth = 256;
-    _bufferHeight = 256;
-
-    _image = XvShmCreateImage(_display, _port, _fourCC, 0, _bufferWidth, _bufferHeight, &_shmInfo);
-    if(!_image) {
-      print("VideoXv: XShmCreateImage failed.\n");
-      return false;
-    }
-
-    _shmInfo.shmid = shmget(IPC_PRIVATE, _image->data_size, IPC_CREAT | 0777);
-    _shmInfo.shmaddr = _image->data = (char*)shmat(_shmInfo.shmid, 0, 0);
-    _shmInfo.readOnly = false;
-    if(!XShmAttach(_display, &_shmInfo)) {
-      print("VideoXv: XShmAttach failed.\n");
-      return false;
-    }
-
-    _buffer = new uint32_t[_bufferWidth * _bufferHeight];
-    _width = 256;
-    _height = 256;
+    _ready = true;
     initializeTables();
+    resize(_width = 256, _height = 256);
     clear();
-    return _ready = true;
+    return true;
   }
 
   auto terminate() -> void {
@@ -279,7 +295,7 @@ struct VideoXv : Video {
       _display = nullptr;
     }
 
-    delete[] _buffer, _buffer = nullptr;
+    delete[] _buffer, _buffer = nullptr, _bufferWidth = 0, _bufferHeight = 0;
     delete[] _ytable, _ytable = nullptr;
     delete[] _utable, _utable = nullptr;
     delete[] _vtable, _vtable = nullptr;
@@ -290,10 +306,19 @@ struct VideoXv : Video {
     _bufferWidth = max(width, _bufferWidth);
     _bufferHeight = max(height, _bufferHeight);
 
-    XShmDetach(_display, &_shmInfo);
-    shmdt(_shmInfo.shmaddr);
-    shmctl(_shmInfo.shmid, IPC_RMID, nullptr);
-    XFree(_image);
+    //must round to be evenly divisible by 4
+    if(uint round = _bufferWidth & 3) _bufferWidth += 4 - round;
+    if(uint round = _bufferHeight & 3) _bufferHeight += 4 - round;
+
+    _bufferWidth = bit::round(_bufferWidth);
+    _bufferHeight = bit::round(_bufferHeight);
+
+    if(_image) {
+      XShmDetach(_display, &_shmInfo);
+      shmdt(_shmInfo.shmaddr);
+      shmctl(_shmInfo.shmid, IPC_RMID, nullptr);
+      XFree(_image);
+    }
 
     _image = XvShmCreateImage(_display, _port, _fourCC, 0, _bufferWidth, _bufferHeight, &_shmInfo);
 
@@ -324,8 +349,8 @@ struct VideoXv : Video {
     for(uint y : range(height)) {
       for(uint x : range(width)) {
         uint32_t p = *input++;
-        *output++ = p;
-        *output++ = p >> 8;
+        *output++ = p >>  0;
+        *output++ = p >>  8;
         *output++ = p >> 16;
       }
 
@@ -340,8 +365,8 @@ struct VideoXv : Video {
 
     for(uint y : range(height)) {
       for(uint x : range(width)) {
-        uint32_t p = *input++;
-        *output++ = ((p >> 8) & 0xf800) | ((p >> 5) & 0x07e0) | ((p >> 3) & 0x001f);  //RGB32->RGB16
+        uint32_t p = toRGB16(*input++);
+        *output++ = p;
       }
 
       input += _bufferWidth - width;
@@ -355,31 +380,8 @@ struct VideoXv : Video {
 
     for(uint y : range(height)) {
       for(uint x : range(width)) {
-        uint32_t p = *input++;
-        *output++ = ((p >> 9) & 0x7c00) | ((p >> 6) & 0x03e0) | ((p >> 3) & 0x001f);  //RGB32->RGB15
-      }
-
-      input += _bufferWidth - width;
-      output += _bufferWidth - width;
-    }
-  }
-
-  auto renderYUY2(uint width, uint height) -> void {
-    uint32_t* input = (uint32_t*)_buffer;
-    uint16_t* output = (uint16_t*)_image->data;
-
-    for(uint y : range(height)) {
-      for(uint x : range(width >> 1)) {
-        uint32_t p0 = *input++;
-        uint32_t p1 = *input++;
-        p0 = ((p0 >> 8) & 0xf800) + ((p0 >> 5) & 0x07e0) + ((p0 >> 3) & 0x001f);  //RGB32->RGB16
-        p1 = ((p1 >> 8) & 0xf800) + ((p1 >> 5) & 0x07e0) + ((p1 >> 3) & 0x001f);  //RGB32->RGB16
-
-        uint8_t u = (_utable[p0] + _utable[p1]) >> 1;
-        uint8_t v = (_vtable[p0] + _vtable[p1]) >> 1;
-
-        *output++ = (u << 8) | _ytable[p0];
-        *output++ = (v << 8) | _ytable[p1];
+        uint32_t p = toRGB15(*input++);
+        *output++ = p;
       }
 
       input += _bufferWidth - width;
@@ -388,26 +390,97 @@ struct VideoXv : Video {
   }
 
   auto renderUYVY(uint width, uint height) -> void {
-    uint32_t* input = (uint32_t*)_buffer;
+    const uint32_t* input = (const uint32_t*)_buffer;
     uint16_t* output = (uint16_t*)_image->data;
 
     for(uint y : range(height)) {
       for(uint x : range(width >> 1)) {
-        uint32_t p0 = *input++;
-        uint32_t p1 = *input++;
-        p0 = ((p0 >> 8) & 0xf800) + ((p0 >> 5) & 0x07e0) + ((p0 >> 3) & 0x001f);
-        p1 = ((p1 >> 8) & 0xf800) + ((p1 >> 5) & 0x07e0) + ((p1 >> 3) & 0x001f);
+        uint32_t p0 = toRGB16(*input++);
+        uint32_t p1 = toRGB16(*input++);
 
-        uint8_t u = (_utable[p0] + _utable[p1]) >> 1;
-        uint8_t v = (_vtable[p0] + _vtable[p1]) >> 1;
-
-        *output++ = (_ytable[p0] << 8) | u;
-        *output++ = (_ytable[p1] << 8) | v;
+        *output++ = _ytable[p0] << 8 | ((_utable[p0] + _utable[p1]) >> 1) << 0;
+        *output++ = _ytable[p1] << 8 | ((_vtable[p0] + _vtable[p1]) >> 1) << 0;
       }
 
       input += _bufferWidth - width;
       output += _bufferWidth - width;
     }
+  }
+
+  auto renderYUY2(uint width, uint height) -> void {
+    const uint32_t* input = (const uint32_t*)_buffer;
+    uint16_t* output = (uint16_t*)_image->data;
+
+    for(uint y : range(height)) {
+      for(uint x : range(width >> 1)) {
+        uint32_t p0 = toRGB16(*input++);
+        uint32_t p1 = toRGB16(*input++);
+
+        *output++ = ((_utable[p0] + _utable[p1]) >> 1) << 8 | _ytable[p0] << 0;
+        *output++ = ((_vtable[p0] + _vtable[p1]) >> 1) << 8 | _ytable[p1] << 0;
+      }
+
+      input += _bufferWidth - width;
+      output += _bufferWidth - width;
+    }
+  }
+
+  auto renderYV12(uint width, uint height) -> void {
+    const uint w = _bufferWidth, h = _bufferHeight;
+
+    for(uint y : range(height >> 1)) {
+      const uint32_t* input0 = (const uint32_t*)_buffer + (2 * y * w);
+      const uint32_t* input1 = input0 + w;
+      uint16_t* youtput0 = (uint16_t*)_image->data + ((2 * y * w) >> 1);
+      uint16_t* youtput1 = youtput0 + (w >> 1);
+      uint8_t* voutput = (uint8_t*)_image->data + (w * h) + ((2 * y * w) >> 2);
+      uint8_t* uoutput = (uint8_t*)_image->data + (w * h) + ((w * h) >> 2) + ((2 * y * w) >> 2);
+
+      for(uint x : range(width >> 1)) {
+        uint16_t p0 = toRGB16(*input0++);
+        uint16_t p1 = toRGB16(*input0++);
+        uint16_t p2 = toRGB16(*input1++);
+        uint16_t p3 = toRGB16(*input1++);
+
+        *youtput0++ = _ytable[p0] << 0 | _ytable[p1] << 8;
+        *youtput1++ = _ytable[p2] << 0 | _ytable[p3] << 8;
+        *voutput++ = (_vtable[p0] + _vtable[p1] + _vtable[p2] + _vtable[p3]) >> 2;
+        *uoutput++ = (_utable[p0] + _utable[p1] + _utable[p2] + _utable[p3]) >> 2;
+      }
+    }
+  }
+
+  auto renderI420(uint width, uint height) -> void {
+    const uint w = _bufferWidth, h = _bufferHeight;
+
+    for(uint y : range(height >> 1)) {
+      const uint32_t* input0 = (const uint32_t*)_buffer + (2 * y * w);
+      const uint32_t* input1 = input0 + w;
+      uint16_t* youtput0 = (uint16_t*)_image->data + ((2 * y * w) >> 1);
+      uint16_t* youtput1 = youtput0 + (w >> 1);
+      uint8_t* uoutput = (uint8_t*)_image->data + (w * h) + ((2 * y * w) >> 2);
+      uint8_t* voutput = (uint8_t*)_image->data + (w * h) + ((w * h) >> 2) + ((2 * y * w) >> 2);
+
+      for(uint x : range(width >> 1)) {
+        uint16_t p0 = toRGB16(*input0++);
+        uint16_t p1 = toRGB16(*input0++);
+        uint16_t p2 = toRGB16(*input1++);
+        uint16_t p3 = toRGB16(*input1++);
+
+        *youtput0++ = _ytable[p0] << 0 | _ytable[p1] << 8;
+        *youtput1++ = _ytable[p2] << 0 | _ytable[p3] << 8;
+        *uoutput++ = (_utable[p0] + _utable[p1] + _utable[p2] + _utable[p3]) >> 2;
+        *voutput++ = (_vtable[p0] + _vtable[p1] + _vtable[p2] + _vtable[p3]) >> 2;
+      }
+    }
+  }
+
+  inline auto toRGB15(uint32_t rgb32) const -> uint16_t {
+    return ((rgb32 >> 9) & 0x7c00) + ((rgb32 >> 6) & 0x03e0) + ((rgb32 >> 3) & 0x001f);
+  }
+
+  inline auto toRGB16(uint32_t rgb32) const -> uint16_t {
+    return ((rgb32 >> 8) & 0xf800) + ((rgb32 >> 5) & 0x07e0) + ((rgb32 >> 3) & 0x001f);
   }
 
   auto initializeTables() -> void {
@@ -460,8 +533,10 @@ struct VideoXv : Video {
     XvFormatRGB24,
     XvFormatRGB16,
     XvFormatRGB15,
-    XvFormatYUY2,
     XvFormatUYVY,
+    XvFormatYUY2,
+    XvFormatYV12,
+    XvFormatI420,
     XvFormatUnknown,
   };
 

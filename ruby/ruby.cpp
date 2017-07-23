@@ -66,8 +66,8 @@ using namespace ruby;
   #include <ruby/video/xshm.cpp>
 #endif
 
-#if defined(VIDEO_XV)
-  #include <ruby/video/xv.cpp>
+#if defined(VIDEO_XVIDEO)
+  #include <ruby/video/xvideo.cpp>
 #endif
 
 namespace ruby {
@@ -111,8 +111,8 @@ auto Video::create(const string& driver) -> Video* {
   if(driver == "XShm") return new VideoXShm;
   #endif
 
-  #if defined(VIDEO_XV)
-  if(driver == "X-Video") return new VideoXv;
+  #if defined(VIDEO_XVIDEO)
+  if(driver == "XVideo") return new VideoXVideo;
   #endif
 
   return new Video;
@@ -133,8 +133,8 @@ auto Video::optimalDriver() -> string {
   return "OpenGL";
   #elif defined(VIDEO_GLX2)
   return "OpenGL2";
-  #elif defined(VIDEO_XV)
-  return "X-Video";
+  #elif defined(VIDEO_XVIDEO)
+  return "XVideo";
   #elif defined(VIDEO_XSHM)
   return "XShm";
   #elif defined(VIDEO_SDL)
@@ -159,8 +159,8 @@ auto Video::safestDriver() -> string {
   return "XShm";
   #elif defined(VIDEO_SDL)
   return "SDL";
-  #elif defined(VIDEO_XV)
-  return "X-Video";
+  #elif defined(VIDEO_XVIDEO)
+  return "XVideo";
   #elif defined(VIDEO_GLX2)
   return "OpenGL2";
   #elif defined(VIDEO_GLX)
@@ -201,8 +201,8 @@ auto Video::availableDrivers() -> string_vector {
   "OpenGL2",
   #endif
 
-  #if defined(VIDEO_XV)
-  "X-Video",
+  #if defined(VIDEO_XVIDEO)
+  "XVideo",
   #endif
 
   #if defined(VIDEO_XSHM)

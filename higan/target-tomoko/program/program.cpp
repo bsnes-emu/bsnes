@@ -15,7 +15,6 @@ unique_pointer<Program> program;
 
 Program::Program(string_vector args) {
   program = this;
-  Application::onMain({&Program::main, this});
 
   Emulator::platform = this;
   emulators.append(new Famicom::Interface);
@@ -77,6 +76,8 @@ Program::Program(string_vector args) {
     }
   }
   loadMedium();
+
+  Application::onMain({&Program::main, this});
 }
 
 auto Program::main() -> void {
