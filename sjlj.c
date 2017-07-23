@@ -12,6 +12,7 @@
 #define LIBCO_C
 #include "libco.h"
 
+#define _XOPEN_SOURCE 500
 #include <stdlib.h>
 #include <signal.h>
 #include <setjmp.h>
