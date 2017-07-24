@@ -1,10 +1,4 @@
 /*
-  libco.ucontext (2008-01-28)
-  author: Nach
-  license: public domain
-*/
-
-/*
   WARNING: the overhead of POSIX ucontext is very high,
   assembly versions of libco or libco_sjlj should be much faster
 

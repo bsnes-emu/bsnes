@@ -1,9 +1,3 @@
-/*
-  libco.amd64 (2016-09-14)
-  author: byuu
-  license: public domain
-*/
-
 #define LIBCO_C
 #include "libco.h"
 #include "settings.h"

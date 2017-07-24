@@ -1,16 +1,11 @@
 /*
-  libco.sjlj (2008-01-28)
-  author: Nach
-  license: public domain
-*/
-
-/*
   note this was designed for UNIX systems. Based on ideas expressed in a paper by Ralf Engelschall.
   for SJLJ on other systems, one would want to rewrite springboard() and co_create() and hack the jmb_buf stack pointer.
 */
 
 #define LIBCO_C
 #include "libco.h"
+#include "settings.h"
 
 #define _XOPEN_SOURCE 500
 #include <stdlib.h>

@@ -1,8 +1,3 @@
-/*
-  libco
-  license: public domain
-*/
-
 #if defined(__clang__)
   #pragma clang diagnostic ignored "-Wparentheses"
 #endif
