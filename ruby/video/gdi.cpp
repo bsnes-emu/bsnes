@@ -1,103 +1,94 @@
-#include <assert.h>
-
 struct VideoGDI : Video {
-  ~VideoGDI() { term(); }
+  VideoGDI() { initialize(); }
+  ~VideoGDI() { terminate(); }
 
-  struct Device {
-    HBITMAP bitmap = nullptr;
-    HDC dc = nullptr;
-    BITMAPINFO info = {};
-  } device;
+  auto ready() -> bool { return _ready; }
 
-  struct Settings {
-    HWND handle = nullptr;
+  auto context() -> uintptr { return _context; }
 
-    uint32_t* buffer = nullptr;
-    uint width = 0;
-    uint height = 0;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr>()) {
-      settings.handle = (HWND)value.get<uintptr>();
-      return true;
-    }
-
-    return false;
+  auto clear() -> void {
+    if(!ready()) return;
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(!settings.buffer || settings.width != width || settings.height != height) {
-      if(settings.buffer) {
-        delete[] settings.buffer;
-        DeleteObject(device.bitmap);
-        DeleteObject(device.dc);
-      }
-      settings.buffer = new uint32_t[width * height]();
-      settings.width = width;
-      settings.height = height;
+    if(!ready()) return false;
 
-      HDC hdc = GetDC(settings.handle);
-      device.dc = CreateCompatibleDC(hdc);
-      assert(device.dc);
-      device.bitmap = CreateCompatibleBitmap(hdc, width, height);
-      assert(device.bitmap);
-      SelectObject(device.dc, device.bitmap);
-      ReleaseDC(settings.handle, hdc);
+    if(!_buffer || _width != width || _height != height) {
+      if(_buffer) delete[] _buffer;
+      if(_bitmap) DeleteObject(_bitmap);
+      if(_dc) DeleteObject(_dc);
 
-      memory::fill(&device.info, sizeof(BITMAPINFO));
-      device.info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-      device.info.bmiHeader.biWidth = width;
-      device.info.bmiHeader.biHeight = -height;
-      device.info.bmiHeader.biPlanes = 1;
-      device.info.bmiHeader.biBitCount = 32;
-      device.info.bmiHeader.biCompression = BI_RGB;
-      device.info.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
+      _buffer = new uint32_t[width * height]();
+      _width = width;
+      _height = height;
+
+      HDC hdc = GetDC((HWND)_context);
+      _dc = CreateCompatibleDC(hdc);
+      _bitmap = CreateCompatibleBitmap(hdc, width, height);
+      SelectObject(_dc, _bitmap);
+      ReleaseDC((HWND)_context, hdc);
+
+      memory::fill(&_info, sizeof(BITMAPINFO));
+      _info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+      _info.bmiHeader.biWidth = width;
+      _info.bmiHeader.biHeight = -height;
+      _info.bmiHeader.biPlanes = 1;
+      _info.bmiHeader.biBitCount = 32;
+      _info.bmiHeader.biCompression = BI_RGB;
+      _info.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
     }
 
-    data = settings.buffer;
-    pitch = settings.width * sizeof(uint32_t);
-    return true;
+    pitch = _width * sizeof(uint32_t);
+    return data = _buffer;
   }
 
-  auto unlock() -> void {}
+  auto unlock() -> void {
+    if(!ready()) return;
+  }
 
-  auto clear() -> void {}
+  auto output() -> void {
+    if(!ready()) return;
 
-  auto refresh() -> void {
     RECT rc;
-    GetClientRect(settings.handle, &rc);
+    GetClientRect((HWND)_context, &rc);
 
-    SetDIBits(device.dc, device.bitmap, 0, settings.height, (void*)settings.buffer, &device.info, DIB_RGB_COLORS);
-    HDC hdc = GetDC(settings.handle);
-    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, device.dc, 0, 0, settings.width, settings.height, SRCCOPY);
-    ReleaseDC(settings.handle, hdc);
+    SetDIBits(_dc, _bitmap, 0, _height, (void*)_buffer, &_info, DIB_RGB_COLORS);
+    HDC hdc = GetDC((HWND)_context);
+    StretchBlt(hdc, rc.left, rc.top, rc.right, rc.bottom, _dc, 0, 0, _width, _height, SRCCOPY);
+    ReleaseDC((HWND)_context, hdc);
   }
 
-  auto init() -> bool {
-    settings.width  = 0;
-    settings.height = 0;
-    return true;
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
+    _width = 0;
+    _height = 0;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    if(settings.buffer) {
-      delete[] settings.buffer;
-      DeleteObject(device.bitmap);
-      DeleteDC(device.dc);
-      settings.buffer = nullptr;
-      device.bitmap = nullptr;
-      device.dc = nullptr;
-    }
+  auto terminate() -> void {
+    _ready = false;
+    if(_buffer) { delete[] _buffer; _buffer = nullptr; }
+    if(_bitmap) { DeleteObject(_bitmap); _bitmap = nullptr; }
+    if(_dc) { DeleteDC(_dc); _dc = nullptr; }
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  uint32_t* _buffer = nullptr;
+  uint _width = 0;
+  uint _height = 0;
+
+  HBITMAP _bitmap = nullptr;
+  HDC _dc = nullptr;
+  BITMAPINFO _info = {};
 };

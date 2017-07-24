@@ -10,7 +10,7 @@ auto OpenGL::shader(const string& pathname) -> void {
   absoluteWidth = 0, absoluteHeight = 0;
   relativeWidth = 0, relativeHeight = 0;
 
-  unsigned historySize = 0;
+  uint historySize = 0;
   if(pathname) {
     auto document = BML::unserialize(file::read({pathname, "manifest.bml"}));
 
@@ -38,7 +38,7 @@ auto OpenGL::shader(const string& pathname) -> void {
     }
 
     for(auto node : document.find("program")) {
-      unsigned n = programs.size();
+      uint n = programs.size();
       programs(n).bind(this, node, pathname);
     }
   }
@@ -51,7 +51,7 @@ auto OpenGL::shader(const string& pathname) -> void {
   allocateHistory(historySize);
 }
 
-auto OpenGL::allocateHistory(unsigned size) -> void {
+auto OpenGL::allocateHistory(uint size) -> void {
   for(auto& frame : history) glDeleteTextures(1, &frame.texture);
   history.reset();
   while(size--) {
@@ -63,11 +63,6 @@ auto OpenGL::allocateHistory(unsigned size) -> void {
     glTexImage2D(GL_TEXTURE_2D, 0, format, frame.width = width, frame.height = height, 0, getFormat(), getType(), buffer);
     history.append(frame);
   }
-}
-
-auto OpenGL::lock(uint32_t*& data, unsigned& pitch) -> bool {
-  pitch = width * sizeof(uint32_t);
-  return data = buffer;
 }
 
 auto OpenGL::clear() -> void {
@@ -83,7 +78,12 @@ auto OpenGL::clear() -> void {
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-auto OpenGL::refresh() -> void {
+auto OpenGL::lock(uint32_t*& data, uint& pitch) -> bool {
+  pitch = width * sizeof(uint32_t);
+  return data = buffer;
+}
+
+auto OpenGL::output() -> void {
   clear();
 
   glActiveTexture(GL_TEXTURE0);
@@ -92,15 +92,15 @@ auto OpenGL::refresh() -> void {
 
   struct Source {
     GLuint texture;
-    unsigned width, height;
+    uint width, height;
     GLuint filter, wrap;
   };
   vector<Source> sources;
   sources.prepend({texture, width, height, filter, wrap});
 
   for(auto& p : programs) {
-    unsigned targetWidth = p.absoluteWidth ? p.absoluteWidth : outputWidth;
-    unsigned targetHeight = p.absoluteHeight ? p.absoluteHeight : outputHeight;
+    uint targetWidth = p.absoluteWidth ? p.absoluteWidth : outputWidth;
+    uint targetHeight = p.absoluteHeight ? p.absoluteHeight : outputHeight;
     if(p.relativeWidth) targetWidth = sources[0].width * p.relativeWidth;
     if(p.relativeHeight) targetHeight = sources[0].height * p.relativeHeight;
 
@@ -115,7 +115,7 @@ auto OpenGL::refresh() -> void {
     glrUniform4f("targetSize", targetWidth, targetHeight, 1.0 / targetWidth, 1.0 / targetHeight);
     glrUniform4f("outputSize", outputWidth, outputHeight, 1.0 / outputWidth, 1.0 / outputHeight);
 
-    unsigned aid = 0;
+    uint aid = 0;
     for(auto& frame : history) {
       glrUniform1i({"history[", aid, "]"}, aid);
       glrUniform4f({"historySize[", aid, "]"}, frame.width, frame.height, 1.0 / frame.width, 1.0 / frame.height);
@@ -124,7 +124,7 @@ auto OpenGL::refresh() -> void {
       glrParameters(frame.filter, frame.wrap);
     }
 
-    unsigned bid = 0;
+    uint bid = 0;
     for(auto& source : sources) {
       glrUniform1i({"source[", bid, "]"}, aid + bid);
       glrUniform4f({"sourceSize[", bid, "]"}, source.width, source.height, 1.0 / source.width, 1.0 / source.height);
@@ -133,7 +133,7 @@ auto OpenGL::refresh() -> void {
       glrParameters(source.filter, source.wrap);
     }
 
-    unsigned cid = 0;
+    uint cid = 0;
     for(auto& pixmap : p.pixmaps) {
       glrUniform1i({"pixmap[", cid, "]"}, aid + bid + cid);
       glrUniform4f({"pixmapSize[", bid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
@@ -151,8 +151,8 @@ auto OpenGL::refresh() -> void {
     sources.prepend({p.texture, p.width, p.height, p.filter, p.wrap});
   }
 
-  unsigned targetWidth = absoluteWidth ? absoluteWidth : outputWidth;
-  unsigned targetHeight = absoluteHeight ? absoluteHeight : outputHeight;
+  uint targetWidth = absoluteWidth ? absoluteWidth : outputWidth;
+  uint targetHeight = absoluteHeight ? absoluteHeight : outputHeight;
   if(relativeWidth) targetWidth = sources[0].width * relativeWidth;
   if(relativeHeight) targetHeight = sources[0].height * relativeHeight;
 
@@ -180,7 +180,7 @@ auto OpenGL::refresh() -> void {
   }
 }
 
-auto OpenGL::init() -> bool {
+auto OpenGL::initialize() -> bool {
   if(!OpenGLBind()) return false;
 
   glDisable(GL_ALPHA_TEST);
@@ -203,8 +203,8 @@ auto OpenGL::init() -> bool {
   return initialized = true;
 }
 
-auto OpenGL::term() -> void {
-  if(initialized == false) return;
+auto OpenGL::terminate() -> void {
+  if(!initialized) return;
   shader("");  //release shader resources (eg frame[] history)
   OpenGLSurface::release();
   if(buffer) { delete[] buffer; buffer = nullptr; }

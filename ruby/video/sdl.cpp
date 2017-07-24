@@ -20,6 +20,7 @@ struct VideoSDL : Video {
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     if(SDL_MUSTLOCK(_buffer)) SDL_LockSurface(_buffer);
     for(uint y : range(_bufferHeight)) {
       uint32_t* data = (uint32_t*)_buffer->pixels + y * (_buffer->pitch >> 2);
@@ -30,20 +31,21 @@ struct VideoSDL : Video {
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(width != _width || height != _height) {
-      resize(_width = width, _height = height);
-    }
-
+    if(!ready()) return false;
+    if(width != _width || height != _height) resize(_width = width, _height = height);
     if(SDL_MUSTLOCK(_buffer)) SDL_LockSurface(_buffer);
     pitch = _buffer->pitch;
     return data = (uint32_t*)_buffer->pixels;
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
     if(SDL_MUSTLOCK(_buffer)) SDL_UnlockSurface(_buffer);
   }
 
   auto output() -> void {
+    if(!ready()) return;
+
     //ruby input is X8R8G8B8, top 8-bits are ignored.
     //as SDL forces us to use a 32-bit buffer, we must set alpha to 255 (full opacity)
     //to prevent blending against the window beneath when X window visual is 32-bits.

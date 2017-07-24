@@ -12,81 +12,50 @@ struct VideoCGL;
 @end
 
 struct VideoCGL : Video, OpenGL {
-  ~VideoCGL() { term(); }
+  VideoCGL() { initialize(); }
+  ~VideoCGL() { terminate(); }
 
-  RubyVideoCGL* view = nullptr;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    NSView* handle = nullptr;
-    bool synchronize = false;
-    uint filter = Video::FilterNearest;
-    string shader;
-  } settings;
+  auto context() -> uintptr { return (uintptr)_context; }
+  auto blocking() -> bool { return _blocking; }
+  auto smooth() -> bool { return _smooth; }
+  auto shader() -> string { return _shader; }
 
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    if(name == Video::Synchronize) return true;
-    if(name == Video::Filter) return true;
-    if(name == Video::Shader) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == (NSView*)context) return true;
+    _context = (NSView*)context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    if(name == Video::Synchronize) return settings.synchronize;
-    if(name == Video::Filter) return settings.filter;
-    return {};
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    if(!view) return true;
+    @autoreleasepool {
+      [[view openGLContext] makeCurrentContext];
+      int blocking = _blocking;
+      [[view openGLContext] setValues:&blocking forParameter:NSOpenGLCPSwapInterval];
+    }
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (NSView*)value.get<uintptr_t>();
-      return true;
-    }
-
-    if(name == Video::Synchronize && value.is<bool>()) {
-      if(settings.synchronize != value.get<bool>()) {
-        settings.synchronize = value.get<bool>();
-
-        if(view) {
-          @autoreleasepool {
-            [[view openGLContext] makeCurrentContext];
-            int synchronize = settings.synchronize;
-            [[view openGLContext] setValues:&synchronize forParameter:NSOpenGLCPSwapInterval];
-          }
-        }
-      }
-      return true;
-    }
-
-    if(name == Video::Filter && value.is<uint>()) {
-      settings.filter = value.get<uint>();
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    if(name == Video::Shader && value.is<string>()) {
-      settings.shader = value.get<string>();
-      @autoreleasepool {
-        [[view openGLContext] makeCurrentContext];
-      }
-      OpenGL::shader(settings.shader);
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    return false;
+  auto setSmooth(bool smooth) -> bool {
+    if(_smooth == smooth) return true;
+    _smooth = smooth;
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    OpenGL::size(width, height);
-    return OpenGL::lock(data, pitch);
-  }
-
-  auto unlock() -> void {
+  auto setShader(string shader) -> string {
+    if(_shader == shader) return true;
+    OpenGL::shader(_shader = shader);
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     @autoreleasepool {
       [view lockFocus];
       OpenGL::clear();
@@ -95,22 +64,37 @@ struct VideoCGL : Video, OpenGL {
     }
   }
 
-  auto refresh() -> void {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
+    OpenGL::size(width, height);
+    return OpenGL::lock(data, pitch);
+  }
+
+  auto unlock() -> void {
+    if(!ready()) return;
+  }
+
+  auto output() -> void {
+    if(!ready()) return;
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
         auto area = [view frame];
-        outputWidth = area.size.width;
-        outputHeight = area.size.height;
-        OpenGL::refresh();
+        OpenGL::outputWidth = area.size.width;
+        OpenGL::outputHeight = area.size.height;
+        OpenGL::output();
         [[view openGLContext] flushBuffer];
         [view unlockFocus];
       }
     }
   }
 
-  auto init() -> bool {
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
     @autoreleasepool {
-      NSOpenGLPixelFormatAttribute attributes[] = {
+      NSOpenGLPixelFormatAttribute attributeList[] = {
         NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
         NSOpenGLPFAColorSize, 24,
         NSOpenGLPFAAlphaSize, 8,
@@ -118,41 +102,49 @@ struct VideoCGL : Video, OpenGL {
         0
       };
 
-      auto size = [settings.handle frame].size;
-      auto format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes] autorelease];
+      auto size = [_context frame].size;
+      auto format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attributeList] autorelease];
       auto context = [[[NSOpenGLContext alloc] initWithFormat:format shareContext:nil] autorelease];
 
       view = [[RubyVideoCGL alloc] initWith:this pixelFormat:format];
       [view setOpenGLContext:context];
       [view setFrame:NSMakeRect(0, 0, size.width, size.height)];
       [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-      [settings.handle addSubview:view];
+      [_context addSubview:view];
       [context setView:view];
 
       [view lockFocus];
 
-      OpenGL::init();
-    //print((const char*)glGetString(GL_VERSION), "\n");
+      OpenGL::initialize();
 
-      int synchronize = settings.synchronize;
-      [[view openGLContext] setValues:&synchronize forParameter:NSOpenGLCPSwapInterval];
+      int blocking = _blocking;
+      [[view openGLContext] setValues:&blocking forParameter:NSOpenGLCPSwapInterval];
 
       [view unlockFocus];
     }
 
     clear();
-    return true;
+    return _ready = true;
   }
 
   auto term() -> void {
-    OpenGL::term();
+    _ready = false;
+    OpenGL::terminate();
 
+    if(!view) return;
     @autoreleasepool {
       [view removeFromSuperview];
       [view release];
       view = nil;
     }
   }
+
+  RubyVideoCGL* view = nullptr;
+
+  NSView* _context = nullptr;
+  bool _blocking = false;
+  bool _smooth = true;
+  string _shader;
 };
 
 @implementation RubyVideoCGL : NSOpenGLView
@@ -165,7 +157,7 @@ struct VideoCGL : Video, OpenGL {
 }
 
 -(void) reshape {
-  video->refresh();
+  video->output();
 }
 
 @end

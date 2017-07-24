@@ -8,185 +8,154 @@ auto VideoGLX_X11ErrorHandler(Display*, XErrorEvent*) -> int {
 }
 
 struct VideoGLX : Video, OpenGL {
-  ~VideoGLX() { term(); }
+  VideoGLX() { initialize(); }
+  ~VideoGLX() { terminate(); }
 
-  auto (*glXSwapInterval)(signed) -> signed = nullptr;
+  auto ready() -> bool { return _ready; }
 
-  Display* display = nullptr;
-  signed screen = 0;
-  Window xwindow = 0;
-  Colormap colormap = 0;
-  GLXContext glxcontext = nullptr;
-  GLXWindow glxwindow = 0;
+  auto context() -> uintptr { return _context; }
+  auto blocking() -> bool { return _blocking; }
+  auto depth() -> uint { return _depth; }
+  auto smooth() -> bool { return _smooth; }
+  auto shader() -> string { return _shader; }
 
-  struct {
-    signed versionMajor = 0;
-    signed versionMinor = 0;
-    bool doubleBuffer = false;
-    bool isDirect = false;
-  } glx;
-
-  struct {
-    Window handle = 0;
-    bool synchronize = false;
-    unsigned depth = 24;
-    unsigned filter = 1;  //linear
-    string shader;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    if(name == Video::Synchronize) return true;
-    if(name == Video::Depth) return true;
-    if(name == Video::Filter) return true;
-    if(name == Video::Shader) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    if(name == Video::Synchronize) return settings.synchronize;
-    if(name == Video::Depth) return settings.depth;
-    if(name == Video::Filter) return settings.filter;
-    if(name == Video::Shader) return settings.shader;
-    return {};
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    if(glXSwapInterval) glXSwapInterval(_blocking);
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
+  auto setDepth(uint depth) -> bool {
+    if(_depth == depth) return true;
+    switch(depth) {
+    case 24: _depth = depth; OpenGL::inputFormat = GL_RGBA8; return true;
+    case 30: _depth = depth; OpenGL::inputFormat = GL_RGB10_A2; return true;
+    default: return false;
     }
-
-    if(name == Video::Synchronize && value.is<bool>()) {
-      if(settings.synchronize != value.get<bool>()) {
-        settings.synchronize = value.get<bool>();
-        if(glXSwapInterval) glXSwapInterval(settings.synchronize);
-        return true;
-      }
-    }
-
-    if(name == Video::Depth && value.is<unsigned>()) {
-      unsigned depth = value.get<unsigned>();
-      if(depth > DefaultDepth(display, screen)) return false;
-
-      switch(depth) {
-      case 24: inputFormat = GL_RGBA8; break;
-      case 30: inputFormat = GL_RGB10_A2; break;
-      default: return false;
-      }
-
-      settings.depth = depth;
-      return true;
-    }
-
-    if(name == Video::Filter && value.is<unsigned>()) {
-      settings.filter = value.get<unsigned>();
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    if(name == Video::Shader && value.is<string>()) {
-      settings.shader = value.get<string>();
-      OpenGL::shader(settings.shader);
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    return false;
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto setSmooth(bool smooth) -> bool {
+    if(_smooth == smooth) return true;
+    _smooth = smooth;
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
+  }
+
+  auto setShader(string shader) -> bool {
+    if(_shader == shader) return true;
+    OpenGL::shader(_shader = shader);
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
+  }
+
+  auto clear() -> void {
+    if(!ready()) return;
+    OpenGL::clear();
+    if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
+  }
+
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
   }
 
-  auto clear() -> void {
-    OpenGL::clear();
-    if(glx.doubleBuffer) glXSwapBuffers(display, glxwindow);
-  }
+  auto output() -> void {
+    if(!ready()) return;
 
-  auto refresh() -> void {
     //we must ensure that the child window is the same size as the parent window.
     //unfortunately, we cannot hook the parent window resize event notification,
     //as we did not create the parent window, nor have any knowledge of the toolkit used.
     //therefore, inelegant as it may be, we query each window size and resize as needed.
     XWindowAttributes parent, child;
-    XGetWindowAttributes(display, settings.handle, &parent);
-    XGetWindowAttributes(display, xwindow, &child);
+    XGetWindowAttributes(_display, (Window)_context, &parent);
+    XGetWindowAttributes(_display, (Window)_window, &child);
     if(child.width != parent.width || child.height != parent.height) {
-      XResizeWindow(display, xwindow, parent.width, parent.height);
+      XResizeWindow(_display, _window, parent.width, parent.height);
     }
 
-    outputWidth = parent.width, outputHeight = parent.height;
-    OpenGL::refresh();
-    if(glx.doubleBuffer) glXSwapBuffers(display, glxwindow);
+    OpenGL::outputWidth = parent.width;
+    OpenGL::outputHeight = parent.height;
+    OpenGL::output();
+    if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
   }
 
-  auto init() -> bool {
-    display = XOpenDisplay(0);
-    screen = DefaultScreen(display);
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
+    _display = XOpenDisplay(nullptr);
+    _screen = DefaultScreen(_display);
 
     //require GLX 1.2+ API
-    glXQueryVersion(display, &glx.versionMajor, &glx.versionMinor);
-    if(glx.versionMajor < 1 || (glx.versionMajor == 1 && glx.versionMinor < 2)) return false;
+    glXQueryVersion(_display, &_versionMajor, &_versionMinor);
+    if(_versionMajor < 1 || (_versionMajor == 1 && _versionMinor < 2)) return false;
 
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(display, settings.handle, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
-    signed attributeList[] = {
+    int attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
-      GLX_RED_SIZE, (signed)(settings.depth / 3),
-      GLX_GREEN_SIZE, (signed)(settings.depth / 3) + (signed)(settings.depth % 3),
-      GLX_BLUE_SIZE, (signed)(settings.depth / 3),
+      GLX_RED_SIZE, (int)(_depth / 3),
+      GLX_GREEN_SIZE, (int)(_depth / 3) + (int)(_depth % 3),
+      GLX_BLUE_SIZE, (int)(_depth / 3),
       None
     };
 
-    signed fbCount = 0;
-    GLXFBConfig* fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
+    int fbCount = 0;
+    GLXFBConfig* fbConfig = glXChooseFBConfig(_display, _screen, attributeList, &fbCount);
     if(fbCount == 0) return false;
 
-    XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbConfig[0]);
+    XVisualInfo* vi = glXGetVisualFromFBConfig(_display, fbConfig[0]);
 
-    //Window settings.handle has already been realized, most likely with DefaultVisual.
+    //(Window)_context has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
     //it is not possible to change the Visual of an already realized (created) window.
-    //therefore a new child window, using the same GLX Visual, must be created and binded to settings.handle.
-    colormap = XCreateColormap(display, RootWindow(display, vi->screen), vi->visual, AllocNone);
+    //therefore a new child window, using the same GLX Visual, must be created and binded to it.
+    _colormap = XCreateColormap(_display, RootWindow(_display, vi->screen), vi->visual, AllocNone);
     XSetWindowAttributes attributes;
-    attributes.colormap = colormap;
+    attributes.colormap = _colormap;
     attributes.border_pixel = 0;
-    xwindow = XCreateWindow(display, /* parent = */ settings.handle,
+    _window = XCreateWindow(_display, /* parent = */ (Window)_context,
       /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
       CWColormap | CWBorderPixel, &attributes);
-    XSetWindowBackground(display, xwindow, /* color = */ 0);
-    XMapWindow(display, xwindow);
-    XFlush(display);
+    XSetWindowBackground(_display, _window, /* color = */ 0);
+    XMapWindow(_display, _window);
+    XFlush(_display);
 
     //window must be realized (appear onscreen) before we make the context current
-    while(XPending(display)) {
+    while(XPending(_display)) {
       XEvent event;
-      XNextEvent(display, &event);
+      XNextEvent(_display, &event);
     }
 
-    glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
-    glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
+    _glXContext = glXCreateContext(_display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
+    glXMakeCurrent(_display, _glXWindow = _window, _glXContext);
 
     //glXSwapInterval is used to toggle Vsync
     //note that the ordering is very important! MESA declares SGI, but the SGI function does nothing
-    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
-    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
+    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
 
-    if(auto glXCreateContextAttribs = (auto (*)(Display*, GLXFBConfig, GLXContext, signed, const signed*) -> GLXContext)glGetProcAddress("glXCreateContextAttribsARB")) {
-      signed attributes[] = {
+    if(auto glXCreateContextAttribs = (auto (*)(Display*, GLXFBConfig, GLXContext, int, const int*) -> GLXContext)glGetProcAddress("glXCreateContextAttribsARB")) {
+      int attributes[] = {
         GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
         GLX_CONTEXT_MINOR_VERSION_ARB, 2,
         None
@@ -194,14 +163,14 @@ struct VideoGLX : Video, OpenGL {
 
       //glXCreateContextAttribs tends to throw BadRequest errors instead of simply failing gracefully
       auto originalHandler = XSetErrorHandler(VideoGLX_X11ErrorHandler);
-      auto context = glXCreateContextAttribs(display, fbConfig[0], nullptr, true, attributes);
-      XSync(display, False);
+      auto context = glXCreateContextAttribs(_display, fbConfig[0], nullptr, true, attributes);
+      XSync(_display, False);
       XSetErrorHandler(originalHandler);
 
       if(context) {
-        glXMakeCurrent(display, 0, nullptr);
-        glXDestroyContext(display, glxcontext);
-        glXMakeCurrent(display, glxwindow, glxcontext = context);
+        glXMakeCurrent(_display, 0, nullptr);
+        glXDestroyContext(_display, _glXContext);
+        glXMakeCurrent(_display, _glXWindow, _glXContext = context);
       } else {
         //OpenGL 3.2+ not supported (most likely OpenGL 2.x)
         return false;
@@ -211,39 +180,60 @@ struct VideoGLX : Video, OpenGL {
       return false;
     }
 
-    if(glXSwapInterval) glXSwapInterval(settings.synchronize);
+    if(glXSwapInterval) glXSwapInterval(_blocking);
 
     //read attributes of frame buffer for later use, as requested attributes from above are not always granted
-    signed value = 0;
-    glXGetConfig(display, vi, GLX_DOUBLEBUFFER, &value);
-    glx.doubleBuffer = value;
-    glx.isDirect = glXIsDirect(display, glxcontext);
+    int value = 0;
+    glXGetConfig(_display, vi, GLX_DOUBLEBUFFER, &value);
+    _doubleBuffer = value;
+    _isDirect = glXIsDirect(_display, _glXContext);
 
-    OpenGL::init();
-    return true;
+    return _ready = OpenGL::initialize();
   }
 
-  auto term() -> void {
-    OpenGL::term();
+  auto terminate() -> void {
+    _ready = false;
+    OpenGL::terminate();
 
-    if(glxcontext) {
-      glXDestroyContext(display, glxcontext);
-      glxcontext = nullptr;
+    if(_glXContext) {
+      glXDestroyContext(_display, _glXContext);
+      _glXContext = nullptr;
     }
 
-    if(xwindow) {
-      XUnmapWindow(display, xwindow);
-      xwindow = 0;
+    if(_window) {
+      XUnmapWindow(_display, _window);
+      _window = 0;
     }
 
-    if(colormap) {
-      XFreeColormap(display, colormap);
-      colormap = 0;
+    if(_colormap) {
+      XFreeColormap(_display, _colormap);
+      _colormap = 0;
     }
 
-    if(display) {
-      XCloseDisplay(display);
-      display = nullptr;
+    if(_display) {
+      XCloseDisplay(_display);
+      _display = nullptr;
     }
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+  bool _blocking = false;
+  uint _depth = 24;
+  bool _smooth = true;
+  string _shader;
+
+  auto (*glXSwapInterval)(int) -> int = nullptr;
+
+  Display* _display = nullptr;
+  int _screen = 0;
+  Window _window = 0;
+  Colormap _colormap = 0;
+  GLXContext _glXContext = nullptr;
+  GLXWindow _glXWindow = 0;
+
+  int _versionMajor = 0;
+  int _versionMinor = 0;
+  bool _doubleBuffer = false;
+  bool _isDirect = false;
 };

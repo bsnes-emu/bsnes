@@ -51,6 +51,7 @@ struct VideoGLX2 : Video {
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     memory::fill(_glBuffer, _glWidth * _glHeight * sizeof(uint32_t));
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -59,15 +60,19 @@ struct VideoGLX2 : Video {
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
     if(width != _width || height != _height) resize(width, height);
     pitch = _glWidth * sizeof(uint32_t);
     return data = _glBuffer;
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
   }
 
   auto output() -> void {
+    if(!ready()) return;
+
     XWindowAttributes parent, child;
     XGetWindowAttributes(_display, (Window)_context, &parent);
     XGetWindowAttributes(_display, _window, &child);

@@ -1,9 +1,3 @@
-/*
-  libco.ppc (2016-09-14)
-  author: blargg
-  license: public domain
-*/
-
 #define LIBCO_C
 #include "libco.h"
 #include "settings.h"

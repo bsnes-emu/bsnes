@@ -4,7 +4,7 @@ auto OpenGLSurface::allocate() -> void {
   glGenBuffers(3, &vbo[0]);
 }
 
-auto OpenGLSurface::size(unsigned w, unsigned h) -> void {
+auto OpenGLSurface::size(uint w, uint h) -> void {
   if(width == w && height == h) return;
   width = w, height = h;
   w = glrSize(w), h = glrSize(h);
@@ -37,7 +37,7 @@ auto OpenGLSurface::release() -> void {
   width = 0, height = 0;
 }
 
-auto OpenGLSurface::render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight) -> void {
+auto OpenGLSurface::render(uint sourceWidth, uint sourceHeight, uint targetWidth, uint targetHeight) -> void {
   glViewport(0, 0, targetWidth, targetHeight);
 
   float w = (float)sourceWidth / (float)glrSize(sourceWidth);
@@ -70,7 +70,7 @@ auto OpenGLSurface::render(unsigned sourceWidth, unsigned sourceHeight, unsigned
   };
 
   GLfloat positions[4 * 4];
-  for(unsigned n = 0; n < 16; n += 4) {
+  for(uint n = 0; n < 16; n += 4) {
     Matrix::Multiply(&positions[n], &vertices[n], 1, 4, modelViewProjection, 4, 4);
   }
 

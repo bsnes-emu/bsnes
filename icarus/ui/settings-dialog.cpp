@@ -19,6 +19,6 @@ SettingsDialog::SettingsDialog() {
     settings["icarus/UseDatabase"].setValue(useDatabaseOption.checked());
   });
 
-  setTitle("icarus Settings");
+  setTitle("Settings");
   setSize({480, layout.minimumSize().height()});
 }

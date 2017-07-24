@@ -47,7 +47,7 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
     GLuint texture;
     glGenTextures(1, &texture);
 
-    unsigned n = pixmaps.size();
+    uint n = pixmaps.size();
     pixmaps(n).texture = texture;
     pixmaps(n).width = image.width();
     pixmaps(n).height = image.height();
@@ -58,7 +58,7 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
     if(leaf["filter"]) pixmaps(n).filter = glrFilter(leaf["filter"].text());
     if(leaf["wrap"]) pixmaps(n).wrap = glrWrap(leaf["wrap"].text());
 
-    unsigned w = glrSize(image.width()), h = glrSize(image.height());
+    uint w = glrSize(image.width()), h = glrSize(image.height());
     uint32_t* buffer = new uint32_t[w * h]();
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, pixmaps(n).format, w, h, 0, pixmaps(n).getFormat(), pixmaps(n).getType(), buffer);

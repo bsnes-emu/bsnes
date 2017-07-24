@@ -4,139 +4,129 @@
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 
 struct VideoWGL : Video, OpenGL {
-  ~VideoWGL() { term(); }
+  VideoWGL() { initialize(); }
+  ~VideoWGL() { terminate(); }
 
-  auto (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) -> HGLRC = nullptr;
-  auto (APIENTRY* wglSwapInterval)(int) -> BOOL = nullptr;
+  auto ready() -> bool { return _ready; }
 
-  HDC display = nullptr;
-  HGLRC wglcontext = nullptr;
-  HWND window = nullptr;
-  HINSTANCE glwindow = nullptr;
+  auto context() -> uintptr { return _context; }
+  auto blocking() -> bool { return _blocking; }
+  auto smooth() -> bool { return _smooth; }
+  auto shader() -> string { return _shader; }
 
-  struct {
-    HWND handle = nullptr;
-    bool synchronize = false;
-    uint filter = Video::FilterNearest;
-    string shader;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    if(name == Video::Synchronize) return true;
-    if(name == Video::Filter) return true;
-    if(name == Video::Shader) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    if(name == Video::Synchronize) return settings.synchronize;
-    if(name == Video::Filter) return settings.filter;
-    return {};
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    if(wglSwapInterval) wglSwapInterval(_blocking);
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (HWND)value.get<uintptr_t>();
-      return true;
-    }
+  auto setSmooth(bool smooth) -> bool {
+    if(_smooth == smooth) return true;
+    _smooth = smooth;
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
+  }
 
-    if(name == Video::Synchronize && value.is<bool>()) {
-      if(settings.synchronize != value.get<bool>()) {
-        settings.synchronize = value.get<bool>();
-        if(wglcontext) {
-          init();
-          OpenGL::shader(settings.shader);
-          if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-        }
-      }
-    }
+  auto setShader(string shader) -> bool {
+    if(_shader == shader) return true;
+    OpenGL::shader(_shader = shader);
+    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+    return true;
+  }
 
-    if(name == Video::Filter && value.is<uint>()) {
-      settings.filter = value.get<uint>();
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    if(name == Video::Shader && value.is<string>()) {
-      settings.shader = value.get<string>();
-      OpenGL::shader(settings.shader);
-      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
-      return true;
-    }
-
-    return false;
+  auto clear() -> void {
+    if(!ready()) return;
+    OpenGL::clear();
+    SwapBuffers(_display);
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
   }
 
-  auto clear() -> void {
-    OpenGL::clear();
-    SwapBuffers(display);
+  auto output() -> void {
+    if(!ready()) return;
+    RECT rectangle;
+    GetClientRect((HWND)_context, &rectangle);
+    OpenGL::outputWidth = rectangle.right - rectangle.left;
+    OpenGL::outputHeight = rectangle.bottom - rectangle.top;
+    OpenGL::output();
+    SwapBuffers(_display);
   }
 
-  auto refresh() -> void {
-    RECT rc;
-    GetClientRect(settings.handle, &rc);
-    outputWidth = rc.right - rc.left, outputHeight = rc.bottom - rc.top;
-    OpenGL::refresh();
-    SwapBuffers(display);
-  }
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
 
-  auto init() -> bool {
-    GLuint pixel_format;
-    PIXELFORMATDESCRIPTOR pfd;
-    memory::fill(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
+    PIXELFORMATDESCRIPTOR descriptor = {};
+    descriptor.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    descriptor.nVersion = 1;
+    descriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    descriptor.iPixelType = PFD_TYPE_RGBA;
 
-    display = GetDC(settings.handle);
-    pixel_format = ChoosePixelFormat(display, &pfd);
-    SetPixelFormat(display, pixel_format, &pfd);
+    _display = GetDC((HWND)_context);
+    GLuint pixelFormat = ChoosePixelFormat(_display, &descriptor);
+    SetPixelFormat(_display, pixelFormat, &descriptor);
 
-    wglcontext = wglCreateContext(display);
-    wglMakeCurrent(display, wglcontext);
+    _wglContext = wglCreateContext(_display);
+    wglMakeCurrent(_display, _wglContext);
 
     wglCreateContextAttribs = (HGLRC (APIENTRY*)(HDC, HGLRC, const int*))glGetProcAddress("wglCreateContextAttribsARB");
     wglSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
 
     if(wglCreateContextAttribs) {
-      int attributes[] = {
+      int attributeList[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
         WGL_CONTEXT_MINOR_VERSION_ARB, 2,
         0
       };
-      HGLRC context = wglCreateContextAttribs(display, 0, attributes);
+      HGLRC context = wglCreateContextAttribs(_display, 0, attributeList);
       if(context) {
         wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(wglcontext);
-        wglMakeCurrent(display, wglcontext = context);
+        wglDeleteContext(_wglContext);
+        wglMakeCurrent(_display, _wglContext = context);
       }
     }
 
-    if(wglSwapInterval) {
-      wglSwapInterval(settings.synchronize);
-    }
-
-    OpenGL::init();
-    return true;
+    if(wglSwapInterval) wglSwapInterval(_blocking);
+    return _ready = OpenGL::initialize();
   }
 
-  auto term() -> void {
-    OpenGL::term();
+  auto terminate() -> void {
+    _ready = false;
+    OpenGL::terminate();
 
-    if(wglcontext) {
-      wglDeleteContext(wglcontext);
-      wglcontext = nullptr;
+    if(_wglContext) {
+      wglDeleteContext(_wglContext);
+      _wglContext = nullptr;
     }
   }
+
+  auto (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) -> HGLRC = nullptr;
+  auto (APIENTRY* wglSwapInterval)(int) -> BOOL = nullptr;
+
+  bool _ready = false;
+  uintptr _context = 0;
+  bool _blocking = false;
+  bool _smooth = true;
+  string _shader;
+
+  HDC _display = nullptr;
+  HGLRC _wglContext = nullptr;
+  HWND _window = nullptr;
+  HINSTANCE _glWindow = nullptr;
 };

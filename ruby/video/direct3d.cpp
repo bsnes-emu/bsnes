@@ -42,6 +42,7 @@ struct VideoDirect3D : Video {
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     if(_lost && !recover()) return;
 
     D3DSURFACE_DESC surfaceDescription;
@@ -62,6 +63,7 @@ struct VideoDirect3D : Video {
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
     if(_lost && !recover()) return false;
 
     if(width != _inputWidth || height != _inputHeight) {
@@ -79,12 +81,14 @@ struct VideoDirect3D : Video {
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
     _surface->UnlockRect();
     _surface->Release();
     _surface = nullptr;
   }
 
   auto output() -> void {
+    if(!ready()) return;
     if(_lost && !recover()) return;
 
     RECT rectangle;

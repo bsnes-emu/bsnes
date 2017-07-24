@@ -12,7 +12,7 @@ SettingsManager::SettingsManager() {
   layout.setMargin(5);
   statusBar.setFont(Font().setBold());
 
-  setTitle("Configuration Settings");
+  setTitle("Settings");
   setSize({600, 405});
   setAlignment({0.0, 1.0});
   setDismissable();

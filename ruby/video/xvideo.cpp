@@ -37,6 +37,7 @@ struct VideoXVideo : Video {
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     memory::fill(_buffer, _bufferWidth * _bufferHeight * sizeof(uint32_t));
     //clear twice in case video is double buffered ...
     output();
@@ -44,21 +45,18 @@ struct VideoXVideo : Video {
   }
 
   auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(!_ready) return false;
-
-    if(width != _width || height != _height) {
-      resize(_width = width, _height = height);
-    }
-
+    if(!ready()) return false;
+    if(width != _width || height != _height) resize(_width = width, _height = height);
     pitch = _bufferWidth * 4;
     return data = _buffer;
   }
 
   auto unlock() -> void {
+    if(!ready()) return;
   }
 
   auto output() -> void {
-    if(!_ready) return;
+    if(!ready()) return;
 
     XWindowAttributes target;
     XGetWindowAttributes(_display, _window, &target);
@@ -93,6 +91,7 @@ struct VideoXVideo : Video {
       true);
   }
 
+private:
   auto initialize() -> bool {
     terminate();
     if(!_context) return false;

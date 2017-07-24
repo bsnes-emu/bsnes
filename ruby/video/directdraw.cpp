@@ -1,173 +1,167 @@
 #include <ddraw.h>
+#undef interface
 
 struct VideoDirectDraw : Video {
-  ~VideoDirectDraw() { term(); }
+  VideoDirectDraw() { initialize(); }
+  ~VideoDirectDraw() { terminate(); }
 
-  LPDIRECTDRAW lpdd = nullptr;
-  LPDIRECTDRAW7 lpdd7 = nullptr;
-  LPDIRECTDRAWSURFACE7 screen = nullptr;
-  LPDIRECTDRAWSURFACE7 raster = nullptr;
-  LPDIRECTDRAWCLIPPER clipper = nullptr;
-  DDSURFACEDESC2 ddsd;
-  DDSCAPS2 ddscaps;
-  uint iwidth;
-  uint iheight;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    HWND handle = nullptr;
-    bool synchronize = false;
+  auto context() -> uintptr { return _context; }
+  auto blocking() -> bool { return _blocking; }
 
-    uint width;
-    uint height;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Video::Handle) return true;
-    if(name == Video::Synchronize) return true;
-    return false;
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
-  auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
-    if(name == Video::Synchronize) return settings.synchronize;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr>()) {
-      settings.handle = (HWND)value.get<uintptr>();
-      return true;
-    }
-
-    if(name == Video::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      return true;
-    }
-
-    return false;
-  }
-
-  auto resize(uint width, uint height) -> void {
-    if(iwidth >= width && iheight >= height) return;
-
-    iwidth  = max(width,  iwidth);
-    iheight = max(height, iheight);
-
-    if(raster) raster->Release();
-
-    screen->GetSurfaceDesc(&ddsd);
-    int depth = ddsd.ddpfPixelFormat.dwRGBBitCount;
-    if(depth == 32) goto try_native_surface;
-
-    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-    ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
-    ddsd.dwWidth  = iwidth;
-    ddsd.dwHeight = iheight;
-
-    ddsd.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
-    ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
-    ddsd.ddpfPixelFormat.dwRGBBitCount = 32;
-    ddsd.ddpfPixelFormat.dwRBitMask = 0xff0000;
-    ddsd.ddpfPixelFormat.dwGBitMask = 0x00ff00;
-    ddsd.ddpfPixelFormat.dwBBitMask = 0x0000ff;
-
-    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return clear();
-
-    try_native_surface:
-    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-    ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
-    ddsd.dwWidth  = iwidth;
-    ddsd.dwHeight = iheight;
-
-    if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return clear();
-  }
-
-  auto clear() -> void {
-    DDBLTFX fx;
-    fx.dwSize = sizeof(DDBLTFX);
-    fx.dwFillColor = 0x00000000;
-    screen->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
-    raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
-  }
-
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-    if(width != settings.width || height != settings.height) {
-      resize(settings.width = width, settings.height = height);
-    }
-
-    if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) {
-      raster->Restore();
-      if(raster->Lock(0, &ddsd, DDLOCK_WAIT, 0) != DD_OK) return false;
-    }
-    pitch = ddsd.lPitch;
-    return data = (uint32_t*)ddsd.lpSurface;
-  }
-
-  auto unlock() -> void {
-    raster->Unlock(0);
-  }
-
-  auto refresh() -> void {
-    if(settings.synchronize) {
-      while(true) {
-        BOOL in_vblank;
-        lpdd7->GetVerticalBlankStatus(&in_vblank);
-        if(in_vblank == true) break;
-      }
-    }
-
-    HRESULT hr;
-    RECT rd, rs;
-    SetRect(&rs, 0, 0, settings.width, settings.height);
-
-    POINT p = {0, 0};
-    ClientToScreen(settings.handle, &p);
-    GetClientRect(settings.handle, &rd);
-    OffsetRect(&rd, p.x, p.y);
-
-    if(screen->Blt(&rd, raster, &rs, DDBLT_WAIT, 0) == DDERR_SURFACELOST) {
-      screen->Restore();
-      raster->Restore();
-    }
-  }
-
-  auto init() -> bool {
-    term();
-
-    DirectDrawCreate(0, &lpdd, 0);
-    lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
-    if(lpdd) { lpdd->Release(); lpdd = 0; }
-
-    lpdd7->SetCooperativeLevel(settings.handle, DDSCL_NORMAL);
-
-    memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-    ddsd.dwSize = sizeof(DDSURFACEDESC2);
-
-    ddsd.dwFlags = DDSD_CAPS;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-    lpdd7->CreateSurface(&ddsd, &screen, 0);
-
-    lpdd7->CreateClipper(0, &clipper, 0);
-    clipper->SetHWnd(0, settings.handle);
-    screen->SetClipper(clipper);
-
-    raster  = 0;
-    iwidth  = 0;
-    iheight = 0;
-    resize(settings.width = 256, settings.height = 256);
-
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
     return true;
   }
 
-  auto term() -> void {
-    if(clipper) { clipper->Release(); clipper = 0; }
-    if(raster) { raster->Release(); raster = 0; }
-    if(screen) { screen->Release(); screen = 0; }
-    if(lpdd7) { lpdd7->Release(); lpdd7 = 0; }
-    if(lpdd) { lpdd->Release(); lpdd = 0; }
+  auto clear() -> void {
+    if(!ready()) return;
+    DDBLTFX fx = {};
+    fx.dwSize = sizeof(DDBLTFX);
+    fx.dwFillColor = 0x00000000;
+    _screen->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
+    _raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
+
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+    if(!ready()) return false;
+    if(width != _width || height != _height) resize(_width = width, _height = height);
+    DDSURFACEDESC2 description = {};
+    description.dwSize = sizeof(DDSURFACEDESC2);
+    if(_raster->Lock(0, &description, DDLOCK_WAIT, 0) != DD_OK) {
+      _raster->Restore();
+      if(_raster->Lock(0, &description, DDLOCK_WAIT, 0) != DD_OK) return false;
+    }
+    pitch = description.lPitch;
+    return data = (uint32_t*)description.lpSurface;
+  }
+
+  auto unlock() -> void {
+    if(!ready()) return;
+    _raster->Unlock(0);
+  }
+
+  auto output() -> void {
+    if(!ready()) return;
+    if(_blocking) while(true) {
+      BOOL vblank;
+      _interface->GetVerticalBlankStatus(&vblank);
+      if(vblank) break;
+    }
+
+    RECT source;
+    SetRect(&source, 0, 0, _width, _height);
+
+    POINT point = {0, 0};
+    ClientToScreen((HWND)_context, &point);
+
+    RECT target;
+    GetClientRect((HWND)_context, &target);
+    OffsetRect(&target, point.x, point.y);
+
+    if(_screen->Blt(&target, _raster, &source, DDBLT_WAIT, 0) == DDERR_SURFACELOST) {
+      _screen->Restore();
+      _raster->Restore();
+    }
+  }
+
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_context) return false;
+
+    LPDIRECTDRAW interface = nullptr;
+    DirectDrawCreate(0, &interface, 0);
+    interface->QueryInterface(IID_IDirectDraw7, (void**)&_interface);
+    interface->Release();
+
+    _interface->SetCooperativeLevel((HWND)_context, DDSCL_NORMAL);
+
+    DDSURFACEDESC2 description = {};
+    description.dwSize = sizeof(DDSURFACEDESC2);
+    description.dwFlags = DDSD_CAPS;
+    description.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+    _interface->CreateSurface(&description, &_screen, 0);
+
+    _interface->CreateClipper(0, &_clipper, 0);
+    _clipper->SetHWnd(0, (HWND)_context);
+    _screen->SetClipper(_clipper);
+
+    _raster = nullptr;
+    _surfaceWidth = 0;
+    _surfaceHeight = 0;
+    resize(_width = 256, _height = 256);
+    return _ready = true;
+  }
+
+  auto terminate() -> void {
+    _ready = false;
+    if(_clipper) { _clipper->Release(); _clipper = nullptr; }
+    if(_raster) { _raster->Release(); _raster = nullptr; }
+    if(_screen) { _screen->Release(); _screen = nullptr; }
+    if(_interface) { _interface->Release(); _interface = nullptr; }
+  }
+
+  auto resize(uint width, uint height) -> void {
+    if(_surfaceWidth >= width && _surfaceHeight >= height) return;
+
+    _surfaceWidth = max(width, _surfaceWidth);
+    _surfaceHeight = max(height, _surfaceHeight);
+
+    if(_raster) _raster->Release();
+
+    DDSURFACEDESC2 description = {};
+    description.dwSize = sizeof(DDSURFACEDESC2);
+    _screen->GetSurfaceDesc(&description);
+    int depth = description.ddpfPixelFormat.dwRGBBitCount;
+    if(depth == 32) goto tryNativeSurface;
+
+    memory::fill(&description, sizeof(DDSURFACEDESC2));
+    description.dwSize = sizeof(DDSURFACEDESC2);
+    description.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
+    description.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
+    description.dwWidth = _surfaceWidth;
+    description.dwHeight = _surfaceHeight;
+
+    description.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+    description.ddpfPixelFormat.dwFlags = DDPF_RGB;
+    description.ddpfPixelFormat.dwRGBBitCount = 32;
+    description.ddpfPixelFormat.dwRBitMask = 0xff0000;
+    description.ddpfPixelFormat.dwGBitMask = 0x00ff00;
+    description.ddpfPixelFormat.dwBBitMask = 0x0000ff;
+
+    if(_interface->CreateSurface(&description, &_raster, 0) == DD_OK) return clear();
+
+  tryNativeSurface:
+    memory::fill(&description, sizeof(DDSURFACEDESC2));
+    description.dwSize = sizeof(DDSURFACEDESC2);
+    description.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+    description.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;  //DDSCAPS_SYSTEMMEMORY
+    description.dwWidth = _surfaceWidth;
+    description.dwHeight = _surfaceHeight;
+
+    if(_interface->CreateSurface(&description, &_raster, 0) == DD_OK) return clear();
+  }
+
+  bool _ready = false;
+  uintptr _context = 0;
+  bool _blocking = false;
+
+  uint _width = 0;
+  uint _height = 0;
+
+  LPDIRECTDRAW7 _interface = nullptr;
+  LPDIRECTDRAWSURFACE7 _screen = nullptr;
+  LPDIRECTDRAWSURFACE7 _raster = nullptr;
+  LPDIRECTDRAWCLIPPER _clipper = nullptr;
+  uint _surfaceWidth = 0;
+  uint _surfaceHeight = 0;
 };
