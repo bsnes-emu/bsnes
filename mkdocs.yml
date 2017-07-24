@@ -22,7 +22,7 @@ pages:
         - Common: interface/common.md
     - Guides:
         - Importing and playing games: guides/import.md
-        - Using custom shaders: guides/shaders.md
+        - Using video shaders: guides/shaders.md
         - Choosing drivers: guides/drivers.md
     - Concepts:
         - Manifests and Game Folders: concepts/game-folders.md
