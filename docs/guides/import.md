@@ -1,7 +1,7 @@
 Before it can load a game,
 higan requires that all the game's data
 be stored correctly in
-[the Game Library](../game-library.md).
+[the Game Library](../concepts/game-library.md).
 For [regular games](#regular-games)
 this is simple,
 but some games require special treatment,
