@@ -6,8 +6,9 @@ Shaders customise how a console's video output
 is drawn to the computer screen,
 and can apply just about any effect you can imagine.
 
-For most [drivers](drivers.md),
-the only shaders available are:
+Most [drivers](drivers.md)
+only support these shaders
+(some only support one or the other):
 
   - **None** draws each computer pixel
     in the same colour as the nearest console pixel.
