@@ -84,7 +84,7 @@ On Windows:
   - **WASAPI** offers low latency,
     but is only slightly more likely to work.
     It also offers
-    [Exclusive Mode](../interface/higan-config.md#audio,
+    [Exclusive Mode](../interface/higan-config.md#audio),
     which can improve audio quality and lower latency,
     but may be better or worse than shared mode
     in practice.
