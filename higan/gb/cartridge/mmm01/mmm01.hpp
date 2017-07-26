@@ -1,15 +1,18 @@
-struct MMM01 : MMIO {
-  auto readIO(uint16 addr) -> uint8;
-  auto writeIO(uint16 addr, uint8 data) -> void;
+struct MMM01 : Mapper {
+  auto read(uint16 address) -> uint8;
+  auto write(uint16 address, uint8 data) -> void;
   auto power() -> void;
+  auto serialize(serializer& s) -> void;
 
-  struct ROM {
-    uint6 base;
-    uint8 select;
-  } rom;
-  struct RAM {
-    bool enable;
-    uint8 select;
-  } ram;
-  bool mode;
+  struct IO {
+    uint1 mode;
+    struct ROM {
+      uint6 base;
+      uint8 bank = 0x01;
+    } rom;
+    struct RAM {
+      uint1 enable;
+      uint8 bank;
+    } ram;
+  } io;
 } mmm01;

@@ -1,11 +1,13 @@
-struct MBC1M : MMIO {
-  auto readIO(uint16 addr) -> uint8;
-  auto writeIO(uint16 addr, uint8 data) -> void;
+struct MBC1M : Mapper {
+  auto read(uint16 address) -> uint8;
+  auto write(uint16 address, uint8 data) -> void;
   auto power() -> void;
+  auto serialize(serializer&) -> void;
 
-  struct ROM {
-    uint4 lo;
-    uint2 hi;
-  } rom;
-  uint1 mode;
+  struct IO {
+    uint1 mode;
+    struct ROM {
+      uint6 bank = 0x01;
+    } rom;
+  } io;
 } mbc1m;

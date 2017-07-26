@@ -1,30 +1,33 @@
-struct MBC3 : MMIO {
+struct MBC3 : Mapper {
   auto second() -> void;
-  auto readIO(uint16 addr) -> uint8;
-  auto writeIO(uint16 addr, uint8 data) -> void;
+  auto read(uint16 address) -> uint8;
+  auto write(uint16 address, uint8 data) -> void;
   auto power() -> void;
+  auto serialize(serializer& s) -> void;
 
-  struct ROM {
-    uint8 select;
-  } rom;
-  struct RAM {
-    bool enable;
-    uint8 select;
-  } ram;
-  struct RTC {
-    bool latch;
+  struct IO {
+    struct ROM {
+      uint8 bank = 0x01;
+    } rom;
+    struct RAM {
+      uint1 enable;
+      uint8 bank;
+    } ram;
+    struct RTC {
+      uint1 halt = true;
+      uint1 latch;
 
-    bool halt;
-    uint second;
-    uint minute;
-    uint hour;
-    uint day;
-    bool dayCarry;
+      uint8 second;
+      uint8 minute;
+      uint8 hour;
+      uint9 day;
+      uint1 dayCarry;
 
-    uint latchSecond;
-    uint latchMinute;
-    uint latchHour;
-    uint latchDay;
-    uint latchDayCarry;
-  } rtc;
+      uint8 latchSecond;
+      uint8 latchMinute;
+      uint8 latchHour;
+      uint9 latchDay;
+      uint1 latchDayCarry;
+    } rtc;
+  } io;
 } mbc3;

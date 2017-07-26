@@ -99,5 +99,8 @@ auto Program::quit() -> void {
   unloadMedium();
   settings.quit();
   inputManager->quit();
+  video.reset();
+  audio.reset();
+  input.reset();
   Application::quit();
 }

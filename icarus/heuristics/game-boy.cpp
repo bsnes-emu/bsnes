@@ -1,106 +1,224 @@
 struct GameBoyCartridge {
-  GameBoyCartridge(uint8_t* data, unsigned size);
+  GameBoyCartridge(uint8_t* data, uint size);
 
   string markup;
 
-//private:
-  struct Information {
-    string mapper;
-    bool ram;
-    bool battery;
-    bool rtc;
-    bool rumble;
+  bool black = false;  //cartridge works in DMG+CGB mode
+  bool clear = false;  //cartridge works in CGB mode only
 
-    unsigned romsize;
-    unsigned ramsize;
+  string mapper = "MBC0";
+  bool battery = false;
+  bool ram = false;
+  bool rtc = false;
+  bool rumble = false;
+  bool accelerometer = false;
 
-    bool cgb;
-    bool cgbonly;
-  } info;
+  uint romSize = 0;
+  uint ramSize = 0;
+  uint rtcSize = 0;
 };
 
-GameBoyCartridge::GameBoyCartridge(uint8_t* romdata, unsigned romsize) {
-  if(romsize < 0x4000) return;
+GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
+  if(size < 0x4000) return;
 
-  info.mapper = "unknown";
-  info.ram = false;
-  info.battery = false;
-  info.rtc = false;
-  info.rumble = false;
-
-  info.romsize = 0;
-  info.ramsize = 0;
-
-  unsigned base = romsize - 0x8000;
-  if(romdata[base + 0x0104] == 0xce && romdata[base + 0x0105] == 0xed
-  && romdata[base + 0x0106] == 0x66 && romdata[base + 0x0107] == 0x66
-  && romdata[base + 0x0108] == 0xcc && romdata[base + 0x0109] == 0x0d
-  && romdata[base + 0x0147] >= 0x0b && romdata[base + 0x0147] <= 0x0d
+  uint index = size < 0x8000 ? size : size - 0x8000;
+  if(data[index + 0x0104] == 0xce && data[index + 0x0105] == 0xed
+  && data[index + 0x0106] == 0x66 && data[index + 0x0107] == 0x66
+  && data[index + 0x0108] == 0xcc && data[index + 0x0109] == 0x0d
+  && data[index + 0x0147] >= 0x0b && data[index + 0x0147] <= 0x0d
   ) {
-    //MMM01 stores header at bottom of image
-    //flip this around for consistency with all other mappers
-    uint8_t header[0x8000];
-    memcpy(header, romdata + base, 0x8000);
-    memmove(romdata + 0x8000, romdata, romsize - 0x8000);
-    memcpy(romdata, header, 0x8000);
+    //MMM01 stores header at bottom of data[]
+  } else {
+    //all other mappers store header at top of data[]
+    index = 0;
   }
 
-  info.cgb     = (romdata[0x0143] & 0x80) == 0x80;
-  info.cgbonly = (romdata[0x0143] & 0xc0) == 0xc0;
+  black = (data[index + 0x0143] & 0xc0) == 0x80;
+  clear = (data[index + 0x0143] & 0xc0) == 0xc0;
 
-  switch(romdata[0x0147]) {
-    case 0x00: info.mapper = "none";  break;
-    case 0x01: info.mapper = "MBC1";  break;
-    case 0x02: info.mapper = "MBC1";  info.ram = true; break;
-    case 0x03: info.mapper = "MBC1";  info.ram = true; info.battery = true; break;
-    case 0x05: info.mapper = "MBC2";  info.ram = true; break;
-    case 0x06: info.mapper = "MBC2";  info.ram = true; info.battery = true; break;
-    case 0x08: info.mapper = "none";  info.ram = true; break;
-    case 0x09: info.mapper = "MBC0";  info.ram = true; info.battery = true; break;
-    case 0x0b: info.mapper = "MMM01"; break;
-    case 0x0c: info.mapper = "MMM01"; info.ram = true; break;
-    case 0x0d: info.mapper = "MMM01"; info.ram = true; info.battery = true; break;
-    case 0x0f: info.mapper = "MBC3";  info.rtc = true; info.battery = true; break;
-    case 0x10: info.mapper = "MBC3";  info.rtc = true; info.ram = true; info.battery = true; break;
-    case 0x11: info.mapper = "MBC3";  break;
-    case 0x12: info.mapper = "MBC3";  info.ram = true; break;
-    case 0x13: info.mapper = "MBC3";  info.ram = true; info.battery = true; break;
-    case 0x19: info.mapper = "MBC5";  break;
-    case 0x1a: info.mapper = "MBC5";  info.ram = true; break;
-    case 0x1b: info.mapper = "MBC5";  info.ram = true; info.battery = true; break;
-    case 0x1c: info.mapper = "MBC5";  info.rumble = true; break;
-    case 0x1d: info.mapper = "MBC5";  info.rumble = true; info.ram = true; break;
-    case 0x1e: info.mapper = "MBC5";  info.rumble = true; info.ram = true; info.battery = true; break;
-    case 0xfc: break;  //Pocket Camera
-    case 0xfd: break;  //Bandai TAMA5
-    case 0xfe: info.mapper = "HuC3";  break;
-    case 0xff: info.mapper = "HuC1";  info.ram = true; info.battery = true; break;
+  switch(data[index + 0x0147]) {
+
+  case 0x00:
+    mapper = "MBC0";
+    break;
+
+  case 0x01:
+    mapper = "MBC1";
+    break;
+
+  case 0x02:
+    mapper = "MBC1";
+    ram = true;
+    break;
+
+  case 0x03:
+    mapper = "MBC1";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x05:
+    mapper = "MBC2";
+    ram = true;
+    break;
+
+  case 0x06:
+    mapper = "MBC2";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x08:
+    mapper = "MBC0";
+    ram = true;
+    break;
+
+  case 0x09:
+    mapper = "MBC0";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x0b:
+    mapper = "MMM01";
+    break;
+
+  case 0x0c:
+    mapper = "MMM01";
+    ram = true;
+    break;
+
+  case 0x0d:
+    mapper = "MMM01";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x0f:
+    mapper = "MBC3";
+    battery = true;
+    rtc = true;
+    break;
+
+  case 0x10:
+    mapper = "MBC3";
+    battery = true;
+    ram = true;
+    rtc = true;
+    break;
+
+  case 0x11:
+    mapper = "MBC3";
+    break;
+
+  case 0x12:
+    mapper = "MBC3";
+    ram = true;
+    break;
+
+  case 0x13:
+    mapper = "MBC3";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x19:
+    mapper = "MBC5";
+    break;
+
+  case 0x1a:
+    mapper = "MBC5";
+    ram = true;
+    break;
+
+  case 0x1b:
+    mapper = "MBC5";
+    battery = true;
+    ram = true;
+    break;
+
+  case 0x1c:
+    mapper = "MBC5";
+    rumble = true;
+    break;
+
+  case 0x1d:
+    mapper = "MBC5";
+    ram = true;
+    rumble = true;
+    break;
+
+  case 0x1e:
+    mapper = "MBC5";
+    battery = true;
+    ram = true;
+    rumble = true;
+    break;
+
+  case 0x20:
+    mapper = "MBC6";
+    break;
+
+  case 0x22:
+    mapper = "MBC7";
+    battery = true;
+    ram = true;
+    rumble = true;
+    accelerometer = true;
+    break;
+
+  case 0xfc:
+    mapper = "CAMERA";
+    break;
+
+  case 0xfd:
+    mapper = "TAMA";
+    battery = true;
+    ram = true;
+    rtc = true;
+    break;
+
+  case 0xfe:
+    mapper = "HuC3";
+    break;
+
+  case 0xff:
+    mapper = "HuC1";
+    battery = true;
+    ram = true;
+    break;
+
   }
 
-  switch(romdata[0x0148]) { default:
-    case 0x00: info.romsize =   2 * 16 * 1024; break;
-    case 0x01: info.romsize =   4 * 16 * 1024; break;
-    case 0x02: info.romsize =   8 * 16 * 1024; break;
-    case 0x03: info.romsize =  16 * 16 * 1024; break;
-    case 0x04: info.romsize =  32 * 16 * 1024; break;
-    case 0x05: info.romsize =  64 * 16 * 1024; break;
-    case 0x06: info.romsize = 128 * 16 * 1024; break;
-    case 0x07: info.romsize = 256 * 16 * 1024; break;
-    case 0x52: info.romsize =  72 * 16 * 1024; break;
-    case 0x53: info.romsize =  80 * 16 * 1024; break;
-    case 0x54: info.romsize =  96 * 16 * 1024; break;
+  switch(data[index + 0x0148]) { default:
+  case 0x00: romSize =   2 * 16 * 1024; break;
+  case 0x01: romSize =   4 * 16 * 1024; break;
+  case 0x02: romSize =   8 * 16 * 1024; break;
+  case 0x03: romSize =  16 * 16 * 1024; break;
+  case 0x04: romSize =  32 * 16 * 1024; break;
+  case 0x05: romSize =  64 * 16 * 1024; break;
+  case 0x06: romSize = 128 * 16 * 1024; break;
+  case 0x07: romSize = 256 * 16 * 1024; break;
+  case 0x52: romSize =  72 * 16 * 1024; break;
+  case 0x53: romSize =  80 * 16 * 1024; break;
+  case 0x54: romSize =  96 * 16 * 1024; break;
   }
 
-  switch(romdata[0x0149]) { default:
-    case 0x00: info.ramsize =  0 * 1024; break;
-    case 0x01: info.ramsize =  2 * 1024; break;
-    case 0x02: info.ramsize =  8 * 1024; break;
-    case 0x03: info.ramsize = 32 * 1024; break;
+  switch(data[index + 0x0149]) { default:
+  case 0x00: ramSize =  0 * 1024; break;
+  case 0x01: ramSize =  2 * 1024; break;
+  case 0x02: ramSize =  8 * 1024; break;
+  case 0x03: ramSize = 32 * 1024; break;
   }
 
-  if(info.mapper == "MBC2") info.ramsize = 512;  //512 x 4-bit
+  if(mapper == "MBC2" && ram) ramSize = 256;
+  if(mapper == "TAMA" && ram) ramSize =  32;
 
-  markup.append("board mapper=", info.mapper, "\n");
-  markup.append("  rom name=program.rom size=0x", hex(romsize), "\n");
-  if(info.ramsize > 0) markup.append("  ram name=save.ram size=0x", hex(info.ramsize), "\n");
+  if(mapper == "MBC3" && rtc) rtcSize = 13;
+  if(mapper == "TAMA" && rtc) rtcSize = 21;
+
+  markup.append("board mapper=", mapper, "\n");
+  markup.append("  rom name=program.rom size=0x", hex(romSize), "\n");
+  if(ram && ramSize) markup.append("  ram ", battery ? "name=save.ram " : "", "size=0x", hex(ramSize), "\n");
+  if(rtc && rtcSize) markup.append("  rtc ", battery ? "name=rtc.ram " : "", "size=0x", hex(rtcSize), "\n");
 }

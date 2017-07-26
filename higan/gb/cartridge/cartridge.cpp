@@ -2,6 +2,7 @@
 
 namespace GameBoy {
 
+Cartridge cartridge;
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"
 #include "mbc1m/mbc1m.cpp"
@@ -11,8 +12,8 @@ namespace GameBoy {
 #include "mmm01/mmm01.cpp"
 #include "huc1/huc1.cpp"
 #include "huc3/huc3.cpp"
+#include "tama/tama.cpp"
 #include "serialization.cpp"
-Cartridge cartridge;
 
 auto Cartridge::load() -> bool {
   information = {};
@@ -43,49 +44,40 @@ auto Cartridge::load() -> bool {
   auto board = document["board"];
   information.title = document["information/title"].text();
 
-  auto mapperid = document["board/mapper"].text();
-  if(mapperid == "none" ) information.mapper = Mapper::MBC0;
-  if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
-  if(mapperid == "MBC1M") information.mapper = Mapper::MBC1M;
-  if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
-  if(mapperid == "MBC3" ) information.mapper = Mapper::MBC3;
-  if(mapperid == "MBC5" ) information.mapper = Mapper::MBC5;
-  if(mapperid == "MMM01") information.mapper = Mapper::MMM01;
-  if(mapperid == "HuC1" ) information.mapper = Mapper::HuC1;
-  if(mapperid == "HuC3" ) information.mapper = Mapper::HuC3;
+  auto mapperID = document["board/mapper"].text();
+  if(mapperID == "MBC0" ) mapper = &mbc0;
+  if(mapperID == "MBC1" ) mapper = &mbc1;
+  if(mapperID == "MBC1M") mapper = &mbc1m;
+  if(mapperID == "MBC2" ) mapper = &mbc2;
+  if(mapperID == "MBC3" ) mapper = &mbc3;
+  if(mapperID == "MBC5" ) mapper = &mbc5;
+  if(mapperID == "MMM01") mapper = &mmm01;
+  if(mapperID == "HuC1" ) mapper = &huc1;
+  if(mapperID == "HuC3" ) mapper = &huc3;
+  if(mapperID == "TAMA" ) mapper = &tama;
 
-  information.rtc = false;
-  information.rumble = false;
-
-  rom.size = max(32768u, board["rom/size"].natural());
+  rom.size = max(0x4000, document["board/rom/size"].natural());
   rom.data = (uint8*)memory::allocate(rom.size, 0xff);
-
-  ram.size = board["ram/size"].natural();
-  ram.data = (uint8*)memory::allocate(ram.size, 0xff);
-
-  if(auto name = board["rom/name"].text()) {
+  if(auto name = document["board/rom/name"].text()) {
     if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
       fp->read(rom.data, min(rom.size, fp->size()));
     }
   }
-  if(auto name = board["ram/name"].text()) {
+
+  ram.size = document["board/ram/size"].natural();
+  ram.data = (uint8*)memory::allocate(ram.size, 0xff);
+  if(auto name = document["board/ram/name"].text()) {
     if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
       fp->read(ram.data, min(ram.size, fp->size()));
     }
   }
 
-  information.battery = (bool)board["ram/name"];
-
-  switch(information.mapper) { default:
-  case Mapper::MBC0:  mapper = &mbc0;  break;
-  case Mapper::MBC1:  mapper = &mbc1;  break;
-  case Mapper::MBC1M: mapper = &mbc1m; break;
-  case Mapper::MBC2:  mapper = &mbc2;  break;
-  case Mapper::MBC3:  mapper = &mbc3;  break;
-  case Mapper::MBC5:  mapper = &mbc5;  break;
-  case Mapper::MMM01: mapper = &mmm01; break;
-  case Mapper::HuC1:  mapper = &huc1;  break;
-  case Mapper::HuC3:  mapper = &huc3;  break;
+  rtc.size = document["board/rtc/size"].natural();
+  rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
+  if(auto name = document["board/rtc/name"].text()) {
+    if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
+      fp->read(rtc.data, min(rtc.size, fp->size()));
+    }
   }
 
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
@@ -100,35 +92,21 @@ auto Cartridge::save() -> void {
       fp->write(ram.data, ram.size);
     }
   }
+
+  if(auto name = document["board/rtc/name"].text()) {
+    if(auto fp = platform->open(pathID(), name, File::Write)) {
+      fp->write(rtc.data, rtc.size);
+    }
+  }
 }
 
 auto Cartridge::unload() -> void {
   delete[] rom.data;
   delete[] ram.data;
+  delete[] rtc.data;
   rom = {};
   ram = {};
-}
-
-auto Cartridge::readROM(uint addr) -> uint8 {
-  if(addr >= rom.size) addr %= rom.size;
-  return rom.data[addr];
-}
-
-auto Cartridge::writeROM(uint addr, uint8 data) -> void {
-  if(addr >= rom.size) addr %= rom.size;
-  rom.data[addr] = data;
-}
-
-auto Cartridge::readRAM(uint addr) -> uint8 {
-  if(ram.size == 0) return 0xff;
-  if(addr >= ram.size) addr %= ram.size;
-  return ram.data[addr];
-}
-
-auto Cartridge::writeRAM(uint addr, uint8 data) -> void {
-  if(ram.size == 0) return;
-  if(addr >= ram.size) addr %= ram.size;
-  ram.data[addr] = data;
+  rtc = {};
 }
 
 auto Cartridge::readIO(uint16 addr) -> uint8 {
@@ -140,10 +118,10 @@ auto Cartridge::readIO(uint16 addr) -> uint8 {
     if(Model::GameBoyColor()) data = system.bootROM.cgb;
     if(Model::SuperGameBoy()) data = system.bootROM.sgb;
     if(addr >= 0x0000 && addr <= 0x00ff) return data[addr];
-    if(addr >= 0x0200 && addr <= 0x08ff && Model::GameBoyColor()) return data[addr - 256];
+    if(addr >= 0x0200 && addr <= 0x08ff && Model::GameBoyColor()) return data[addr - 0x100];
   }
 
-  return mapper->readIO(addr);
+  return mapper->read(addr);
 }
 
 auto Cartridge::writeIO(uint16 addr, uint8 data) -> void {
@@ -152,25 +130,33 @@ auto Cartridge::writeIO(uint16 addr, uint8 data) -> void {
     return;
   }
 
-  mapper->writeIO(addr, data);
+  mapper->write(addr, data);
 }
 
 auto Cartridge::power() -> void {
-  bootromEnable = true;
-
-  mbc0.power();
-  mbc1.power();
-  mbc1m.power();
-  mbc2.power();
-  mbc3.power();
-  mbc5.power();
-  mmm01.power();
-  huc1.power();
-  huc3.power();
-
   for(uint n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
   for(uint n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = this;
   bus.mmio[0xff50] = this;
+
+  bootromEnable = true;
+
+  mapper->power();
+}
+
+auto Cartridge::second() -> void {
+  mapper->second();
+}
+
+auto Cartridge::Memory::read(uint address) const -> uint8 {
+  if(!size) return 0xff;
+  if(address >= size) address %= size;
+  return data[address];
+}
+
+auto Cartridge::Memory::write(uint address, uint8 byte) -> void {
+  if(!size) return;
+  if(address >= size) address %= size;
+  data[address] = byte;
 }
 
 }

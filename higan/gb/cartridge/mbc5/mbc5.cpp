@@ -1,49 +1,53 @@
-auto Cartridge::MBC5::readIO(uint16 addr) -> uint8 {
-  if((addr & 0xc000) == 0x0000) {  //$0000-3fff
-    return cartridge.readROM(addr);
+auto Cartridge::MBC5::read(uint16 address) -> uint8 {
+  if((address & 0xc000) == 0x0000) {  //$0000-3fff
+    return cartridge.rom.read(address.bits(0,13));
   }
 
-  if((addr & 0xc000) == 0x4000) {  //$4000-7fff
-    return cartridge.readROM(rom.select << 14 | (uint14)addr);
+  if((address & 0xc000) == 0x4000) {  //$4000-7fff
+    return cartridge.rom.read(io.rom.bank << 14 | address.bits(0,13));
   }
 
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    if(ram.enable) return cartridge.readRAM(ram.select << 13 | (uint13)addr);
-    return 0xff;
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    if(!io.ram.enable) return 0xff;
+    return cartridge.ram.read(io.ram.bank << 13 | address.bits(0,12));
   }
 
   return 0xff;
 }
 
-auto Cartridge::MBC5::writeIO(uint16 addr, uint8 data) -> void {
-  if((addr & 0xe000) == 0x0000) {  //$0000-1fff
-    ram.enable = data.bits(0,3) == 0x0a;
+auto Cartridge::MBC5::write(uint16 address, uint8 data) -> void {
+  if((address & 0xe000) == 0x0000) {  //$0000-1fff
+    io.ram.enable = data.bits(0,3) == 0x0a;
     return;
   }
 
-  if((addr & 0xf000) == 0x2000) {  //$2000-2fff
-    rom.select.byte(0) = data;
+  if((address & 0xf000) == 0x2000) {  //$2000-2fff
+    io.rom.bank.bits(0,7) = data.bits(0,7);
     return;
   }
 
-  if((addr & 0xf000) == 0x3000) {  //$3000-3fff
-    rom.select.byte(1) = data.bit(0);
+  if((address & 0xf000) == 0x3000) {  //$3000-3fff
+    io.rom.bank.bit(8) = data.bit(0);
     return;
   }
 
-  if((addr & 0xe000) == 0x4000) {  //$4000-5fff
-    ram.select = data.bits(0,3);
+  if((address & 0xe000) == 0x4000) {  //$4000-5fff
+    io.ram.bank = data.bits(0,3);
     return;
   }
 
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    if(ram.enable) cartridge.writeRAM(ram.select << 13 | (uint13)addr, data);
-    return;
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    if(!io.ram.enable) return;
+    return cartridge.ram.write(io.ram.bank << 13 | address.bits(0,12), data);
   }
 }
 
 auto Cartridge::MBC5::power() -> void {
-  rom.select = 0x001;
-  ram.enable = false;
-  ram.select = 0x00;
+  io = {};
+}
+
+auto Cartridge::MBC5::serialize(serializer& s) -> void {
+  s.integer(io.rom.bank);
+  s.integer(io.ram.enable);
+  s.integer(io.ram.bank);
 }

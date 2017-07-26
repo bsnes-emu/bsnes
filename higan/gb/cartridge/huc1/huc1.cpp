@@ -1,49 +1,54 @@
-auto Cartridge::HuC1::readIO(uint16 addr) -> uint8 {
-  if((addr & 0xc000) == 0x0000) {  //$0000-3fff
-    return cartridge.readROM(addr);
+auto Cartridge::HuC1::read(uint16 address) -> uint8 {
+  if((address & 0xc000) == 0x0000) {  //$0000-3fff
+    return cartridge.rom.read(address.bits(0,13));
   }
 
-  if((addr & 0xc000) == 0x4000) {  //$4000-7fff
-    return cartridge.readROM(rom.select << 14 | (uint14)addr);
+  if((address & 0xc000) == 0x4000) {  //$4000-7fff
+    return cartridge.rom.read(io.rom.bank << 14 | address.bits(0,13));
   }
 
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    return cartridge.readRAM(ram.select << 13 | (uint13)addr);
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    return cartridge.ram.read(io.ram.bank << 13 | address.bits(0,12));
   }
 
   return 0xff;
 }
 
-auto Cartridge::HuC1::writeIO(uint16 addr, uint8 data) -> void {
-  if((addr & 0xe000) == 0x0000) {  //$0000-1fff
-    ram.writable = data.bits(0,3) == 0x0a;
+auto Cartridge::HuC1::write(uint16 address, uint8 data) -> void {
+  if((address & 0xe000) == 0x0000) {  //$0000-1fff
+    io.ram.writable = data.bits(0,3) == 0x0a;
     return;
   }
 
-  if((addr & 0xe000) == 0x2000) {  //$2000-3fff
-    rom.select = data + (data == 0);
+  if((address & 0xe000) == 0x2000) {  //$2000-3fff
+    io.rom.bank = data;
+    if(!io.rom.bank) io.rom.bank = 0x01;
     return;
   }
 
-  if((addr & 0xe000) == 0x4000) {  //$4000-5fff
-    ram.select = data;
+  if((address & 0xe000) == 0x4000) {  //$4000-5fff
+    io.ram.bank = data;
     return;
   }
 
-  if((addr & 0xe000) == 0x6000) {  //$6000-7fff
-    model = data.bit(0);
+  if((address & 0xe000) == 0x6000) {  //$6000-7fff
+    io.model = data.bit(0);
     return;
   }
 
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    if(!ram.writable) return;
-    return cartridge.writeRAM(ram.select << 13 | (uint13)addr, data);
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    if(!io.ram.writable) return;
+    return cartridge.ram.write(io.ram.bank << 13 | address.bits(0,12), data);
   }
 }
 
 auto Cartridge::HuC1::power() -> void {
-  rom.select = 0x01;
-  ram.writable = false;
-  ram.select = 0x00;
-  model = 0;
+  io = {};
+}
+
+auto Cartridge::HuC1::serialize(serializer& s) -> void {
+  s.integer(io.model);
+  s.integer(io.rom.bank);
+  s.integer(io.ram.writable);
+  s.integer(io.ram.bank);
 }

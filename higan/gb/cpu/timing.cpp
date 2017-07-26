@@ -5,7 +5,7 @@
 auto CPU::step(uint clocks) -> void {
   for(auto n : range(clocks)) {
     if(++status.clock == 0) {
-      cartridge.mbc3.second();
+      cartridge.second();
     }
 
     //4MHz / N(hz) - 1 = mask

@@ -1,21 +1,24 @@
-auto Cartridge::MBC0::readIO(uint16 addr) -> uint8 {
-  if((addr & 0x8000) == 0x0000) {  //$0000-7fff
-    return cartridge.readROM(addr);
+auto Cartridge::MBC0::read(uint16 address) -> uint8 {
+  if((address & 0x8000) == 0x0000) {  //$0000-7fff
+    return cartridge.rom.read(address.bits(0,14));
   }
 
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    return cartridge.readRAM((uint13)addr);
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    return cartridge.ram.read(address.bits(0,12));
   }
 
   return 0xff;
 }
 
-auto Cartridge::MBC0::writeIO(uint16 addr, uint8 data) -> void {
-  if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    cartridge.writeRAM((uint13)addr, data);
+auto Cartridge::MBC0::write(uint16 address, uint8 data) -> void {
+  if((address & 0xe000) == 0xa000) {  //$a000-bfff
+    cartridge.ram.write(address.bits(0,12), data);
     return;
   }
 }
 
 auto Cartridge::MBC0::power() -> void {
+}
+
+auto Cartridge::MBC0::serialize(serializer& s) -> void {
 }

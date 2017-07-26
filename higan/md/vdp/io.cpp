@@ -63,7 +63,7 @@ auto VDP::readDataPort() -> uint16 {
     auto address = io.address.bits(1,6);
     auto data = cram.read(address);
     io.address += io.dataIncrement;
-    return data.bits(0,2) << 1 | data.bits(3,5) << 2 | data.bits(6,8) << 3;
+    return data.bits(0,2) << 1 | data.bits(3,5) << 5 | data.bits(6,8) << 9;
   }
 
   return 0x0000;
