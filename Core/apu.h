@@ -31,15 +31,36 @@ enum GB_CHANNELS {
 typedef struct
 {
     bool global_enable;
+    uint8_t apu_cycles;
     
     uint8_t samples[GB_N_CHANNELS];
     bool left_enabled[GB_N_CHANNELS];
     bool right_enabled[GB_N_CHANNELS];
     bool is_active[GB_N_CHANNELS];
     
+    uint8_t square_carry; // The square channels tick at 1MHz instead of 2,
+                          // so we need a carry to divide the signal
+    
+    uint8_t square_sweep_div; // The DIV-APU ticks are divided by 4 to handle tone sweeping
+    uint8_t square_sweep_countdown; // In 128Hz
+    uint8_t square_sweep_stop_countdown; // In 2 MHz
+    
+    struct {
+        uint16_t pulse_length; // Reloaded from NRX1 (xorred), in DIV ticks
+        uint8_t current_volume; // Reloaded from NRX2
+        uint8_t volume_countdown; // Reloaded from NRX2
+        uint8_t current_sample_index;
+        bool sample_emitted;
+        
+        uint16_t sample_countdown; // in APU ticks
+        uint16_t sample_length; // Reloaded from NRX3, NRX4, in APU ticks
+        bool length_enabled; // NRX4
+
+    } square_channels[2];
+    
     struct {
         bool enable; // NR30
-        uint8_t pulse_length; // Reloaded from NR31 (xorred), in DIV ticks
+        uint16_t pulse_length; // Reloaded from NR31 (xorred), in DIV ticks
         uint8_t shift; // NR32
         uint16_t sample_length; // NR33, NR34, in APU ticks
         bool length_enabled; // NR34
@@ -82,7 +103,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 void GB_apu_div_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
-void GB_apu_run(GB_gameboy_t *gb, uint8_t cycles);
+void GB_apu_run(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */

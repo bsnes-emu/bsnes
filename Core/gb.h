@@ -65,6 +65,7 @@ enum {
     GB_IO_NR12       = 0x12, // Channel 1 Volume Envelope (R/W)
     GB_IO_NR13       = 0x13, // Channel 1 Frequency lo (Write Only)
     GB_IO_NR14       = 0x14, // Channel 1 Frequency hi (R/W)
+    /* NR20 does not exist */
     GB_IO_NR21       = 0x16, // Channel 2 Sound Length/Wave Pattern Duty (R/W)
     GB_IO_NR22       = 0x17, // Channel 2 Volume Envelope (R/W)
     GB_IO_NR23       = 0x18, // Channel 2 Frequency lo data (W)
@@ -74,9 +75,7 @@ enum {
     GB_IO_NR32       = 0x1c, // Channel 3 Select output level (R/W)
     GB_IO_NR33       = 0x1d, // Channel 3 Frequency's lower data (W)
     GB_IO_NR34       = 0x1e, // Channel 3 Frequency's higher data (R/W)
-
-    /* Missing */
-
+    /* NR40 does not exist */
     GB_IO_NR41       = 0x20, // Channel 4 Sound Length (R/W)
     GB_IO_NR42       = 0x21, // Channel 4 Volume Envelope (R/W)
     GB_IO_NR43       = 0x22, // Channel 4 Polynomial Counter (R/W)

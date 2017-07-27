@@ -97,7 +97,10 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 
     advance_tima_state_machine(gb);
     for (int i = 0; i < cycles; i += 4) {
+        /* This is a bit tricky. The DIV and APU are tightly coupled, but DIV is affected
+           by the speed boost while the APU is not */
         GB_set_internal_div_counter(gb, gb->div_cycles + 4);
+        gb->apu.apu_cycles += 4 >> gb->cgb_double_speed;
     }
 
     if (cycles > 4) {
@@ -127,9 +130,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 
     gb->debugger_ticks += cycles;
 
-    if (gb->cgb_double_speed) {
-        cycles >>=1;
-    }
+    cycles >>= gb->cgb_double_speed;
 
     // Not affected by speed boost
     gb->hdma_cycles += cycles;
@@ -139,7 +140,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_last_sync += cycles;
     GB_dma_run(gb);
     GB_hdma_run(gb);
-    GB_apu_run(gb, cycles);
+    GB_apu_run(gb);
     GB_display_run(gb, cycles);
     GB_ir_run(gb);
 }
@@ -171,6 +172,7 @@ void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
         increase_tima(gb);
     }
     if (counter_overflow_check(gb->div_cycles, value, gb->cgb_double_speed? 0x4000 : 0x2000)) {
+        GB_apu_run(gb);
         GB_apu_div_event(gb);
     }
     gb->div_cycles = value;
