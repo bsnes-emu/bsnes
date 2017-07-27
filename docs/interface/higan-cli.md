@@ -5,6 +5,11 @@
 
 # Description
 
+TODO: Put `NTSC-J|`, `NTSC-U|` or `PAL|`
+at the beginning of the path
+to force a region
+for consoles where it can't be detected.
+
 When launched with `--fullscreen`,
 higan will automatically enter full-screen mode
 when it starts.

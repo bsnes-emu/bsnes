@@ -38,6 +38,8 @@ if the archive contains a single ROM image.
 **Note:** Some games require extra steps to import correctly;
 see [the Game Library](#the-game-library) for details.
 
+TODO: Mention the region-picker.
+
 To add many games at once,
 run icarus,
 or choose "Import ROM Files ..." from the Library menu
