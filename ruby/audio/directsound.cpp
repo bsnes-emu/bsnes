@@ -1,184 +1,172 @@
 #include <dsound.h>
 
 struct AudioDirectSound : Audio {
-  ~AudioDirectSound() { term(); }
+  AudioDirectSound() { initialize(); }
+  ~AudioDirectSound() { terminate(); }
 
-  LPDIRECTSOUND ds = nullptr;
-  LPDIRECTSOUNDBUFFER dsb_p = nullptr;
-  LPDIRECTSOUNDBUFFER dsb_b = nullptr;
-  DSBUFFERDESC dsbd;
-  WAVEFORMATEX wfx;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    uint rings = 0;
-    uint latency = 0;
-
-    uint32_t* buffer = nullptr;
-    uint bufferoffset = 0;
-
-    uint readring = 0;
-    uint writering = 0;
-    int distance = 0;
-  } device;
-
-  struct {
-    HWND handle = nullptr;
-    bool synchronize = false;
-    uint frequency = 48000;
-    uint latency = 120;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Handle) return true;
-    if(name == Audio::Synchronize) return true;
-    if(name == Audio::Frequency) return true;
-    if(name == Audio::Latency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    information.devices = {"Default"};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {40, 60, 80, 100};
+    information.channels = {2};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Handle) return (uintptr_t)settings.handle;
-    if(name == Audio::Synchronize) return settings.synchronize;
-    if(name == Audio::Frequency) return settings.frequency;
-    if(name == Audio::Latency) return settings.latency;
-    return {};
+  auto blocking() -> bool { return _blocking; }
+  auto channels() -> uint { return _channels; }
+  auto frequency() -> double { return _frequency; }
+  auto latency() -> uint { return _latency; }
+
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Handle && value.is<uintptr_t>()) {
-      settings.handle = (HWND)value.get<uintptr_t>();
-      return true;
-    }
-
-    if(name == Audio::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      if(ds) clear();
-      return true;
-    }
-
-    if(name == Audio::Frequency && value.is<uint>()) {
-      settings.frequency = value.get<uint>();
-      if(ds) init();
-      return true;
-    }
-
-    if(name == Audio::Latency && value.is<uint>()) {
-      //latency settings below 40ms causes DirectSound to hang
-      settings.latency = max(40u, value.get<uint>());
-      if(ds) init();
-      return true;
-    }
-
-    return false;
+  auto setFrequency(double frequency) -> bool {
+    if(_frequency == frequency) return true;
+    _frequency = frequency;
+    return initialize();
   }
 
-  auto sample(int16_t left, int16_t right) -> void {
-    device.buffer[device.bufferoffset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
-    if(device.bufferoffset < device.latency) return;
-    device.bufferoffset = 0;
+  auto setLatency(uint latency) -> bool {
+    if(_latency == latency) return true;
+    _latency = latency;
+    return initialize();
+  }
 
-    DWORD pos, size;
+  auto clear() -> void {
+    if(!ready()) return;
+
+    _ringRead = 0;
+    _ringWrite = _rings - 1;
+    _ringDistance = _rings - 1;
+
+    if(_buffer) memory::fill(_buffer, _period * _rings * 4);
+    _offset = 0;
+
+    if(!_secondary) return;
+    _secondary->Stop();
+    _secondary->SetCurrentPosition(0);
+
     void* output;
+    DWORD size;
+    _secondary->Lock(0, _period * _rings * 4, &output, &size, 0, 0, 0);
+    memory::fill(output, size);
+    _secondary->Unlock(output, size, 0, 0);
 
-    if(settings.synchronize) {
+    _secondary->Play(0, 0, DSBPLAY_LOOPING);
+  }
+
+  auto output(const double samples[]) -> void {
+    if(!ready()) return;
+
+    _buffer[_offset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
+    if(_offset < _period) return;
+    _offset = 0;
+
+    if(_blocking) {
       //wait until playback buffer has an empty ring to write new audio data to
-      while(device.distance >= device.rings - 1) {
-        dsb_b->GetCurrentPosition(&pos, 0);
-        uint activering = pos / (device.latency * 4);
-        if(activering == device.readring) continue;
+      while(_ringDistance >= _rings - 1) {
+        DWORD position;
+        _secondary->GetCurrentPosition(&position, 0);
+        uint ringActive = position / (_period * 4);
+        if(ringActive == _ringRead) continue;
 
         //subtract number of played rings from ring distance counter
-        device.distance -= (device.rings + activering - device.readring) % device.rings;
-        device.readring = activering;
+        _ringDistance -= (_rings + ringActive - _ringRead) % _rings;
+        _ringRead = ringActive;
 
-        if(device.distance < 2) {
+        if(_ringDistance < 2) {
           //buffer underflow; set max distance to recover quickly
-          device.distance  = device.rings - 1;
-          device.writering = (device.rings + device.readring - 1) % device.rings;
+          _ringDistance = _rings - 1;
+          _ringWrite = (_rings + _ringRead - 1) % _rings;
           break;
         }
       }
     }
 
-    device.writering = (device.writering + 1) % device.rings;
-    device.distance  = (device.distance  + 1) % device.rings;
+    _ringWrite = (_ringWrite + 1) % _rings;
+    _ringDistance = (_ringDistance + 1) % _rings;
 
-    if(dsb_b->Lock(device.writering * device.latency * 4, device.latency * 4, &output, &size, 0, 0, 0) == DS_OK) {
-      memcpy(output, device.buffer, device.latency * 4);
-      dsb_b->Unlock(output, size, 0, 0);
+    void* output;
+    DWORD size;
+    if(_secondary->Lock(_ringWrite * _period * 4, _period * 4, &output, &size, 0, 0, 0) == DS_OK) {
+      memory::copy(output, _buffer, _period * 4);
+      _secondary->Unlock(output, size, 0, 0);
     }
   }
 
-  auto clear() -> void {
-    device.readring  = 0;
-    device.writering = device.rings - 1;
-    device.distance  = device.rings - 1;
+private:
+  auto initialize() -> bool {
+    terminate();
 
-    device.bufferoffset = 0;
-    if(device.buffer) memset(device.buffer, 0, device.latency * device.rings * 4);
+    _rings = 8;
+    _period = _frequency * _latency / _rings / 1000.0 + 0.5;
+    _buffer = new uint32_t[_period * _rings];
+    _offset = 0;
 
-    if(!dsb_b) return;
-    dsb_b->Stop();
-    dsb_b->SetCurrentPosition(0);
+    if(DirectSoundCreate(0, &_interface, 0) != DS_OK) return term(), false;
+    _interface->SetCooperativeLevel(GetDesktopWindow(), DSSCL_PRIORITY);
 
-    DWORD size;
-    void* output;
-    dsb_b->Lock(0, device.latency * device.rings * 4, &output, &size, 0, 0, 0);
-    memset(output, 0, size);
-    dsb_b->Unlock(output, size, 0, 0);
+    DSBUFFERDESC primaryDescription = {};
+    primaryDescription.dwSize = sizeof(DSBUFFERDESC);
+    primaryDescription.dwFlags = DSBCAPS_PRIMARYBUFFER;
+    primaryDescription.dwBufferBytes = 0;
+    primaryDescription.lpwfxFormat = 0;
+    _interface->CreateSoundBuffer(&primaryDescription, &_primary, 0);
 
-    dsb_b->Play(0, 0, DSBPLAY_LOOPING);
-  }
+    WAVEFORMATEX waveFormat = {};
+    waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+    waveFormat.nChannels = _channels;
+    waveFormat.nSamplesPerSec = (uint)_frequency;
+    waveFormat.wBitsPerSample = 16;
+    waveFormat.nBlockAlign = waveFormat.nChannels * waveFormat.wBitsPerSample / 8;
+    waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+    _primary->SetFormat(&waveFormat);
 
-  auto init() -> bool {
-    settings.handle = GetDesktopWindow();
+    DSBUFFERDESC secondaryDescription = {};
+    secondaryDescription.dwSize = sizeof(DSBUFFERDESC);
+    secondaryDescription.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
+    secondaryDescription.dwBufferBytes = _period * _rings * 4;
+    secondaryDescription.guid3DAlgorithm = GUID_NULL;
+    secondaryDescription.lpwfxFormat = &waveFormat;
+    _interface->CreateSoundBuffer(&secondaryDescription, &_secondary, 0);
+    _secondary->SetFrequency((uint)_frequency);
+    _secondary->SetCurrentPosition(0);
 
-    device.rings   = 8;
-    device.latency = settings.frequency * settings.latency / device.rings / 1000.0 + 0.5;
-    device.buffer  = new uint32_t[device.latency * device.rings];
-    device.bufferoffset = 0;
-
-    if(DirectSoundCreate(0, &ds, 0) != DS_OK) return term(), false;
-    ds->SetCooperativeLevel((HWND)settings.handle, DSSCL_PRIORITY);
-
-    memory::fill(&dsbd, sizeof(dsbd));
-    dsbd.dwSize        = sizeof(dsbd);
-    dsbd.dwFlags       = DSBCAPS_PRIMARYBUFFER;
-    dsbd.dwBufferBytes = 0;
-    dsbd.lpwfxFormat   = 0;
-    ds->CreateSoundBuffer(&dsbd, &dsb_p, 0);
-
-    memory::fill(&wfx, sizeof(wfx));
-    wfx.wFormatTag      = WAVE_FORMAT_PCM;
-    wfx.nChannels       = 2;
-    wfx.nSamplesPerSec  = settings.frequency;
-    wfx.wBitsPerSample  = 16;
-    wfx.nBlockAlign     = wfx.wBitsPerSample / 8 * wfx.nChannels;
-    wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
-    dsb_p->SetFormat(&wfx);
-
-    memory::fill(&dsbd, sizeof(dsbd));
-    dsbd.dwSize  = sizeof(dsbd);
-    dsbd.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
-    dsbd.dwBufferBytes   = device.latency * device.rings * sizeof(uint32_t);
-    dsbd.guid3DAlgorithm = GUID_NULL;
-    dsbd.lpwfxFormat     = &wfx;
-    ds->CreateSoundBuffer(&dsbd, &dsb_b, 0);
-    dsb_b->SetFrequency(settings.frequency);
-    dsb_b->SetCurrentPosition(0);
-
+    _ready = true;
     clear();
     return true;
   }
 
-  auto term() -> void {
-    if(device.buffer) {
-      delete[] device.buffer;
-      device.buffer = nullptr;
-    }
-
-    if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = nullptr; }
-    if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = nullptr; }
-    if(ds) { ds->Release(); ds = nullptr; }
+  auto terminate() -> void {
+    _ready = false;
+    if(_buffer) { delete[] _buffer; _buffer = nullptr; }
+    if(_secondary) { _secondary->Stop(); _secondary->Release(); _secondary = nullptr; }
+    if(_primary) { _primary->Stop(); _primary->Release(); _primary = nullptr; }
+    if(_interface) { _interface->Release(); _interface = nullptr; }
   }
+
+  bool _ready = false;
+  bool _blocking = true;
+  uint _channels = 2;
+  double _frequency = 48000.0;
+  uint _latency = 40;
+
+  LPDIRECTSOUND _interface = nullptr;
+  LPDIRECTSOUNDBUFFER _primary = nullptr;
+  LPDIRECTSOUNDBUFFER _secondary = nullptr;
+
+  uint32_t* _buffer = nullptr;
+  uint _offset = 0;
+
+  uint _period = 0;
+  uint _rings = 0;
+  uint _ringRead = 0;
+  uint _ringWrite = 0;
+  int _ringDistance = 0;
 };

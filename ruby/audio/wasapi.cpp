@@ -59,24 +59,28 @@ struct AudioWASAPI : Audio {
   }
 
   auto clear() -> void {
+    if(!ready()) return;
     _queue.read = 0;
     _queue.write = 0;
     _queue.count = 0;
-    if(!_audioClient) return;
     _audioClient->Stop();
     _audioClient->Reset();
     _audioClient->Start();
   }
 
   auto output(const double samples[]) -> void {
-    if(_queue.count < _bufferSize) {
-      for(uint n : range(_channels)) {
-        _queue.samples[_queue.write][n] = samples[n];
+    if(!ready()) return;
+
+    for(uint n : range(_channels)) {
+      _queue.samples[_queue.write][n] = samples[n];
+    }
+    _queue.write++;
+    _queue.count++;
+
+    if(_queue.count >= _bufferSize) {
+      if(WaitForSingleObject(_eventHandle, _blocking ? INFINITE : 0) == WAIT_OBJECT_0) {
+        write();
       }
-      _queue.write++;
-      _queue.count++;
-    } else if(WaitForSingleObject(_eventHandle, _blocking ? INFINITE : 0) == WAIT_OBJECT_0) {
-      write();
     }
   }
 
@@ -156,11 +160,13 @@ private:
     _mode = waveFormat.SubFormat.Data1;
     _precision = waveFormat.Format.wBitsPerSample;
 
+    _ready = true;
     clear();
-    return _ready = true;
+    return true;
   }
 
   auto terminate() -> void {
+    _ready = false;
     _devices.reset();
     if(_audioClient) _audioClient->Stop();
     if(_renderClient) _renderClient->Release(), _renderClient = nullptr;

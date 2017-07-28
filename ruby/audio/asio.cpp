@@ -59,7 +59,7 @@ struct AudioASIO : Audio {
   }
 
   auto clear() -> void {
-    if(!_ready) return;
+    if(!ready()) return;
     for(uint n : range(_channels)) {
       memory::fill(_channel[n].buffers[0], _latency * _sampleSize);
       memory::fill(_channel[n].buffers[1], _latency * _sampleSize);
@@ -71,7 +71,7 @@ struct AudioASIO : Audio {
   }
 
   auto output(const double samples[]) -> void {
-    if(!_ready) return;
+    if(!ready()) return;
     if(_blocking) {
       while(_queue.count >= _latency);
     }
@@ -146,20 +146,22 @@ private:
     default: return false;  //unsupported sample format
     }
 
+    _ready = true;
     clear();
-    if(_asio->start() != ASE_OK) return false;
-    return _ready = true;
+    if(_asio->start() != ASE_OK) return _ready = false;
+    return true;
   }
 
   auto terminate() -> void {
     _ready = false;
     _devices.reset();
     _active = {};
-    if(!_asio) return;
-    _asio->stop();
-    _asio->disposeBuffers();
-    _asio->Release();
-    _asio = nullptr;
+    if(_asio) {
+      _asio->stop();
+      _asio->disposeBuffers();
+      _asio->Release();
+      _asio = nullptr;
+    }
   }
 
 private:

@@ -31,7 +31,7 @@ struct InputKeyboardCarbon {
     devices.append(hid);
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     keys.append({0x35, "Escape"});
     keys.append({0x7a, "F1"});
     keys.append({0x78, "F2"});
@@ -153,6 +153,6 @@ struct InputKeyboardCarbon {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
   }
 };

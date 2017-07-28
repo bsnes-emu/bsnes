@@ -26,7 +26,7 @@ struct InputKeyboardQuartz {
     devices.append(hid);
   }
 
-  auto init() -> bool {
+  auto initialize() -> bool {
     keys.append({"Escape", kVK_Escape});
     keys.append({"F1", kVK_F1});
     keys.append({"F2", kVK_F2});
@@ -148,6 +148,6 @@ struct InputKeyboardQuartz {
     return true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
   }
 };

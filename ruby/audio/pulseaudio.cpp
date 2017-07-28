@@ -1,159 +1,149 @@
 #include <pulse/pulseaudio.h>
 
 struct AudioPulseAudio : Audio {
-  ~AudioPulseAudio() { term(); }
+  AudioPulseAudio() { initialize(); }
+  ~AudioPulseAudio() { terminate(); }
 
-  struct {
-    pa_mainloop* mainloop = nullptr;
-    pa_context* context = nullptr;
-    pa_stream* stream = nullptr;
-    pa_sample_spec spec;
-    pa_buffer_attr buffer_attr;
-    bool first;
-  } device;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    uint32_t* data = nullptr;
-    size_t size;
-    unsigned offset;
-  } buffer;
-
-  struct {
-    bool synchronize = false;
-    unsigned frequency = 48000;
-    unsigned latency = 60;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Synchronize) return true;
-    if(name == Audio::Frequency) return true;
-    if(name == Audio::Latency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    information.devices = {"Default"};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {20, 40, 60, 80, 100};
+    information.channels = {2};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Synchronize) return settings.synchronize;
-    if(name == Audio::Frequency) return settings.frequency;
-    if(name == Audio::Latency) return settings.latency;
-    return {};
+  auto blocking() -> bool { return _blocking; }
+  auto channels() -> uint { return 2; }
+  auto frequency() -> double { return _frequency; }
+  auto latency() -> uint { return _latency; }
+
+  auto setBlocking(bool blocking) -> bool {
+    if(_blocking == blocking) return true;
+    _blocking = blocking;
+    return true;
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Synchronize && value.is<bool>()) {
-      settings.synchronize = value.get<bool>();
-      return true;
-    }
-
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
-      if(device.stream) {
-        pa_operation_unref(pa_stream_update_sample_rate(device.stream, settings.frequency, NULL, NULL));
-      }
-      return true;
-    }
-
-    if(name == Audio::Latency && value.is<unsigned>()) {
-      settings.latency = value.get<unsigned>();
-      if(device.stream) {
-        device.buffer_attr.tlength = pa_usec_to_bytes(settings.latency * PA_USEC_PER_MSEC, &device.spec);
-        pa_stream_set_buffer_attr(device.stream, &device.buffer_attr, NULL, NULL);
-      }
-      return true;
-    }
-
-    return false;
+  auto setFrequency(double frequency) -> bool {
+    if(_frequency == frequency) return true;
+    _frequency = frequency;
+    return initialize();
   }
 
-  auto sample(int16_t left, int16_t right) -> void {
-    pa_stream_begin_write(device.stream, (void**)&buffer.data, &buffer.size);
-    buffer.data[buffer.offset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
-    if((buffer.offset + 1) * pa_frame_size(&device.spec) <= buffer.size) return;
+  auto setLatency(uint latency) -> bool {
+    if(_latency == latency) return true;
+    _latency = latency;
+    return initialize();
+  }
+
+  auto output(const double samples[]) -> void {
+    pa_stream_begin_write(_stream, (void**)&_buffer, &_period);
+    _buffer[_offset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
+    if((_offset + 1) * pa_frame_size(&_specification) <= _period) return;
 
     while(true) {
-      if(device.first) {
-        device.first = false;
-        pa_mainloop_iterate(device.mainloop, 0, NULL);
+      if(_first) {
+        _first = false;
+        pa_mainloop_iterate(_mainLoop, 0, nullptr);
       } else {
-        pa_mainloop_iterate(device.mainloop, 1, NULL);
+        pa_mainloop_iterate(_mainLoop, 1, nullptr);
       }
-      unsigned length = pa_stream_writable_size(device.stream);
-      if(length >= buffer.offset * pa_frame_size(&device.spec)) break;
-      if(settings.synchronize == false) {
-        buffer.offset = 0;
+      uint length = pa_stream_writable_size(_stream);
+      if(length >= buffer.offset * pa_frame_size(&_specification)) break;
+      if(!_blocking) {
+        _offset = 0;
         return;
       }
     }
 
-    pa_stream_write(device.stream, (const void*)buffer.data, buffer.offset * pa_frame_size(&device.spec), NULL, 0LL, PA_SEEK_RELATIVE);
-    buffer.data = 0;
-    buffer.offset = 0;
+    pa_stream_write(_stream, (const void*)_buffer, _offset * pa_frame_size(&_specification), nullptr, 0LL, PA_SEEK_RELATIVE);
+    _buffer = nullptr;
+    _offset = 0;
   }
 
-  auto clear() -> void {
-  }
+private:
+  auto initialize() -> bool {
+    terminate();
 
-  auto init() -> bool {
-    device.mainloop = pa_mainloop_new();
+    _mainLoop = pa_mainloop_new();
+    _context = pa_context_new(pa_mainloop_get_api(_mainLoop), "ruby::pulseAudio");
+    pa_context_connect(_context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
 
-    device.context = pa_context_new(pa_mainloop_get_api(device.mainloop), "ruby::pulseaudio");
-    pa_context_connect(device.context, NULL, PA_CONTEXT_NOFLAGS, NULL);
-
-    pa_context_state_t cstate;
+    pa_context_state_t contextState;
     do {
-      pa_mainloop_iterate(device.mainloop, 1, NULL);
-      cstate = pa_context_get_state(device.context);
-      if(!PA_CONTEXT_IS_GOOD(cstate)) return false;
-    } while(cstate != PA_CONTEXT_READY);
+      pa_mainloop_iterate(_mainLoop, 1, nullptr);
+      contextState = pa_context_get_state(_context);
+      if(!PA_CONTEXT_IS_GOOD(contextState)) return false;
+    } while(contextState != PA_CONTEXT_READY);
 
-    device.spec.format = PA_SAMPLE_S16LE;
-    device.spec.channels = 2;
-    device.spec.rate = settings.frequency;
-    device.stream = pa_stream_new(device.context, "audio", &device.spec, NULL);
+    _specification.format = PA_SAMPLE_S16LE;
+    _specification.channels = 2;
+    _specification.rate = (uint)_frequency;
+    _stream = pa_stream_new(_context, "audio", &_specification, nullptr);
 
-    device.buffer_attr.maxlength = -1;
-    device.buffer_attr.tlength = pa_usec_to_bytes(settings.latency * PA_USEC_PER_MSEC, &device.spec);
-    device.buffer_attr.prebuf = -1;
-    device.buffer_attr.minreq = -1;
-    device.buffer_attr.fragsize = -1;
+    pa_buffer_attr bufferAttributes;
+    bufferAttributes.maxlength = -1;
+    bufferAttributes.tlength = pa_usec_to_bytes(_latency * PA_USEC_PER_MSEC, &_specification);
+    bufferAttributes.prebuf = -1;
+    bufferAttributes.minreq = -1;
+    bufferAttributes.fragsize = -1;
 
     pa_stream_flags_t flags = (pa_stream_flags_t)(PA_STREAM_ADJUST_LATENCY | PA_STREAM_VARIABLE_RATE);
-    pa_stream_connect_playback(device.stream, NULL, &device.buffer_attr, flags, NULL, NULL);
+    pa_stream_connect_playback(_stream, nullptr, &bufferAttributes, flags, nullptr, nullptr);
 
-    pa_stream_state_t sstate;
+    pa_stream_state_t streamState;
     do {
-      pa_mainloop_iterate(device.mainloop, 1, NULL);
-      sstate = pa_stream_get_state(device.stream);
-      if(!PA_STREAM_IS_GOOD(sstate)) return false;
-    } while(sstate != PA_STREAM_READY);
+      pa_mainloop_iterate(_mainLoop, 1, nullptr);
+      streamState = pa_stream_get_state(_stream);
+      if(!PA_STREAM_IS_GOOD(streamState)) return false;
+    } while(streamState != PA_STREAM_READY);
 
-    buffer.size = 960;
-    buffer.offset = 0;
-    device.first = true;
-
-    return true;
+    _period = 960;
+    _offset = 0;
+    _first = true;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    if(buffer.data) {
-      pa_stream_cancel_write(device.stream);
-      buffer.data = nullptr;
+  auto terminate() -> void {
+    _ready = false;
+
+    if(_buffer) {
+      pa_stream_cancel_write(_buffer);
+      _buffer = nullptr;
     }
 
-    if(device.stream) {
-      pa_stream_disconnect(device.stream);
-      pa_stream_unref(device.stream);
-      device.stream = nullptr;
+    if(_stream) {
+      pa_stream_disconnect(_stream);
+      pa_stream_unref(_stream);
+      _stream = nullptr;
     }
 
-    if(device.context) {
-      pa_context_disconnect(device.context);
-      pa_context_unref(device.context);
-      device.context = nullptr;
+    if(_context) {
+      pa_context_disconnect(_context);
+      pa_context_unref(_context);
+      _context = nullptr;
     }
 
-    if(device.mainloop) {
-      pa_mainloop_free(device.mainloop);
-      device.mainloop = nullptr;
+    if(_mainLoop) {
+      pa_mainloop_free(_mainLoop);
+      _mainLoop = nullptr;
     }
   }
+
+  bool _ready = false;
+  bool _blocking = true;
+  double _frequency = 48000.0;
+  uint _latency = 40;
+
+  uint32_t* _buffer = nullptr;
+  size_t _period = 0;
+  uint _offset = 0;
+
+  pa_mainloop* _mainLoop = nullptr;
+  pa_context* _context = nullptr;
+  pa_stream* _stream = nullptr;
+  pa_sample_spec _specification;
+  bool _first = true;
 };

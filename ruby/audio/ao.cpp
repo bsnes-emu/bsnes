@@ -1,73 +1,76 @@
 #include <ao/ao.h>
 
 struct AudioAO : Audio {
-  ~AudioAO() { term(); }
+  AudioAO() { initialize(); }
+  ~AudioAO() { terminate(); }
 
-  int driver_id;
-  ao_sample_format driver_format;
-  ao_device* audio_device = nullptr;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    unsigned frequency = 48000;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Frequency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    information.devices = {_device};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {100};
+    information.channels = {2};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Frequency) return settings.frequency;
-    return {};
+  auto blocking() -> bool { return true; }
+  auto channels() -> uint { return 2; }
+  auto frequency() -> double { return _frequency; }
+  auto latency() -> uint { return 100; }
+
+  auto setFrequency(double frequency) -> bool {
+    if(_frequency == frequency) return true;
+    _frequency = frequency;
+    return initialize();
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
-      if(audio_device) init();
-      return true;
-    }
-
-    return false;
+  auto output(const double samples[]) -> void {
+    uint32_t sample = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 0;
+    ao_play(_interface, (char*)&sample, 4);  //this may need to be byte swapped for big endian
   }
 
-  auto sample(int16_t left, int16_t right) -> void {
-    uint32_t samp = (uint16_t)left << 0 | (uint16_t)right << 0;
-    ao_play(audio_device, (char*)&samp, 4); //This may need to be byte swapped for Big Endian
-  }
+  auto initialize() -> bool {
+    terminate();
 
-  auto clear() -> void {
-  }
-
-  auto init() -> bool {
     ao_initialize();
 
-    driver_id = ao_default_driver_id(); //ao_driver_id((const char*)driver)
-    if(driver_id < 0) return false;
+    int driverID = ao_default_driver_id();
+    if(driverID < 0) return false;
 
-    driver_format.bits = 16;
-    driver_format.channels = 2;
-    driver_format.rate = settings.frequency;
-    driver_format.byte_format = AO_FMT_LITTLE;
+    ao_sample_format format;
+    format.bits = 16;
+    format.channels = 2;
+    format.rate = (uint)_frequency;
+    format.byte_format = AO_FMT_LITTLE;
 
-    ao_option* options = nullptr;
-    ao_info *di = ao_driver_info(driver_id);
-    if(!di) return false;
-    if(!strcmp(di->short_name, "alsa")) {
-      ao_append_option(&options, "buffer_time", "100000"); //100ms latency (default was 500ms)
+    ao_info* information = ao_driver_info(driverID);
+    if(!information) return false;
+    _device = information->short_name;
+    if(_device == "alsa") {
+      ao_option* options = nullptr;
+      ao_append_option(&options, "buffer_time", "100000");  //100ms latency (default was 500ms)
     }
 
-    audio_device = ao_open_live(driver_id, &driver_format, options);
-    if(!audio_device) return false;
+    _interface = ao_open_live(driverID, &format, options);
+    if(!_interface) return false;
 
-    return true;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    if(audio_device) {
-      ao_close(audio_device);
-      audio_device = nullptr;
+  auto terminate() -> void {
+    _ready = false;
+    if(_interface) {
+      ao_close(_interface);
+      _interface = nullptr;
     }
     ao_shutdown();
   }
+
+  bool _ready = false;
+  string _device = "Default";
+
+  int _driverID;
+  ao_device* _interface = nullptr;
 };

@@ -1,30 +1,18 @@
 #include "keyboard/quartz.cpp"
 
 struct InputQuartz : Input {
-  InputKeyboardQuartz quartzKeyboard;
-  InputQuartz() : quartzKeyboard(*this) {}
-  ~InputQuartz() { term(); }
+  InputQuartz() : _keyboard(*this) { initialize(); }
+  ~InputQuartz() { terminate(); }
 
-  auto cap(const string& name) -> bool {
-    if(name == Input::KeyboardSupport) return true;
-    return false;
-  }
+  auto ready() -> bool { return _ready; }
 
-  auto get(const string& name) -> any {
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    return false;
-  }
-
+  auto acquired() -> bool { return false; }
   auto acquire() -> bool { return false; }
   auto release() -> bool { return false; }
-  auto acquired() -> bool { return false; }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    quartzKeyboard.poll(devices);
+    _keyboard.poll(devices);
     return devices;
   }
 
@@ -32,12 +20,18 @@ struct InputQuartz : Input {
     return false;
   }
 
-  auto init() -> bool {
-    if(!quartzKeyboard.init()) return false;
-    return true;
+  auto initialize() -> bool {
+    terminate();
+    if(!_keyboard.init()) return false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    quartzKeyboard.term();
+  auto terminate() -> void {
+    _ready = false;
+    _keyboard.term();
   }
+
+  bool _ready = false;
+
+  InputKeyboardQuartz _keyboard;
 };

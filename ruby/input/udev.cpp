@@ -13,72 +13,64 @@
 #include "joypad/udev.cpp"
 
 struct InputUdev : Input {
-  InputKeyboardXlib xlibKeyboard;
-  InputMouseXlib xlibMouse;
-  InputJoypadUdev udev;
-  InputUdev() : xlibKeyboard(*this), xlibMouse(*this), udev(*this) {}
-  ~InputUdev() { term(); }
+  InputUdev() : _keyboard(*this), _mouse(*this), _joypad(*this) { initialize(); }
+  ~InputUdev() { terminate(); }
 
-  struct Settings {
-    uintptr_t handle = 0;
-  } settings;
+  auto ready() -> bool { return _ready; }
 
-  auto cap(const string& name) -> bool {
-    if(name == Input::Handle) return true;
-    if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
-    if(name == Input::JoypadSupport) return true;
-    if(name == Input::JoypadRumbleSupport) return true;
-    return false;
-  }
+  auto context() -> uintptr { return _context; }
 
-  auto get(const string& name) -> any {
-    if(name == Input::Handle) return settings.handle;
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
-      return true;
-    }
-    return false;
-  }
-
-  auto acquire() -> bool {
-    return xlibMouse.acquire();
-  }
-
-  auto release() -> bool {
-    return xlibMouse.release();
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
   }
 
   auto acquired() -> bool {
-    return xlibMouse.acquired();
+    return _mouse.acquired();
+  }
+
+  auto acquire() -> bool {
+    return _mouse.acquire();
+  }
+
+  auto release() -> bool {
+    return _mouse.release();
   }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    xlibKeyboard.poll(devices);
-    xlibMouse.poll(devices);
-    udev.poll(devices);
+    _keyboard.poll(devices);
+    _mouse.poll(devices);
+    _joypad.poll(devices);
     return devices;
   }
 
   auto rumble(uint64_t id, bool enable) -> bool {
-    return udev.rumble(id, enable);
+    return _joypad.rumble(id, enable);
   }
 
+private:
   auto init() -> bool {
-    if(xlibKeyboard.init() == false) return false;
-    if(xlibMouse.init(settings.handle) == false) return false;
-    if(udev.init() == false) return false;
-    return true;
+    terminate();
+    if(!_context) return false;
+    if(!_keyboard.initialize()) return false;
+    if(!_mouse.initialize(_context)) return false;
+    if(!_joypad.initialize()) return false;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    xlibKeyboard.term();
-    xlibMouse.term();
-    udev.term();
+  auto terminate() -> void {
+    _ready = false;
+    _keyboard.terminate();
+    _mouse.terminate();
+    _joypad.terminate();
   }
+
+  bool _ready = false;
+  uintptr _context = 0;
+
+  InputKeyboardXlib _keyboard;
+  InputMouseXlib _mouse;
+  InputJoypadUdev _joypad;
 };

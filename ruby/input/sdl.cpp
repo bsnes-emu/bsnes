@@ -47,6 +47,7 @@ struct InputSDL : Input {
 private:
   auto initialize() -> bool {
     terminate();
+    if(!_context) return false;
     if(!_keyboard.initialize()) return false;
     if(!_mouse.initialize(_context)) return false;
     if(!_joypad.initialize()) return false;

@@ -1,30 +1,18 @@
 #include "keyboard/carbon.cpp"
 
 struct InputCarbon : Input {
-  InputKeyboardCarbon carbonKeyboard;
-  InputCarbon() : carbonKeyboard(*this) {}
-  ~InputCarbon() { term(); }
+  InputCarbon() : _keyboard(*this) { initialize(); }
+  ~InputCarbon() { terminate(); }
 
-  auto cap(const string& name) -> bool {
-    if(name == Input::KeyboardSupport) return true;
-    return false;
-  }
+  auto ready() -> bool { return _ready; }
 
-  auto get(const string& name) -> any {
-    return {};
-  }
-
-  auto set(const string& name, const any& value) -> bool {
-    return false;
-  }
-
+  auto acquired() -> bool { return false; }
   auto acquire() -> bool { return false; }
   auto release() -> bool { return false; }
-  auto acquired() -> bool { return false; }
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    carbonKeyboard.poll(devices);
+    _keyboard.poll(devices);
     return devices;
   }
 
@@ -32,12 +20,19 @@ struct InputCarbon : Input {
     return false;
   }
 
-  auto init() -> bool {
-    if(!carbonKeyboard.init()) return false;
-    return true;
+private:
+  auto initialize() -> bool {
+    terminate();
+    if(!_keyboard.initialize()) return false;
+    return _ready = true;
   }
 
   auto term() -> void {
-    carbonKeyboard.term();
+    _ready = false;
+    _keyboard.terminate();
   }
+
+  bool _ready = false;
+
+  InputKeyboardCarbon _keyboard;
 };

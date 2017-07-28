@@ -2,94 +2,91 @@
 #include <pulse/error.h>
 
 struct AudioPulseAudioSimple : Audio {
-  ~AudioPulseAudioSimple() { term(); }
+  AudioPulseAudio() { initialize(); }
+  ~AudioPulseAudioSimple() { terminate(); }
 
-  struct {
-    pa_simple* handle = nullptr;
-    pa_sample_spec spec;
-  } device;
+  auto ready() -> bool { return _ready; }
 
-  struct {
-    uint32_t* data = nullptr;
-    unsigned offset = 0;
-  } buffer;
-
-  struct {
-    unsigned frequency = 48000;
-  } settings;
-
-  auto cap(const string& name) -> bool {
-    if(name == Audio::Frequency) return true;
-    return false;
+  auto information() -> Information {
+    Information information;
+    information.devices = {"Default"};
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {40};
+    information.channels = {2};
+    return information;
   }
 
-  auto get(const string& name) -> any {
-    if(name == Audio::Frequency) return settings.frequency;
-    return {};
+  auto blocking() -> bool { return true; }
+  auto channels() -> uint { return 2; }
+  auto frequency() -> double { return _frequency; }
+  auto latency() -> uint { return 40; }
+
+  auto setFrequency(double frequency) -> bool {
+    if(_frequency == frequency) return true;
+    _frequency = frequency;
+    return initialize();
   }
 
-  auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
-      if(device.handle) init();
-      return true;
-    }
+  auto output(const double samples[]) -> void {
+    if(!ready()) return;
 
-    return false;
-  }
-
-  auto sample(int16_t left, int16_t right) -> void {
-    if(!device.handle) return;
-
-    buffer.data[buffer.offset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
-    if(buffer.offset >= 64) {
+    _buffer[_offset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
+    if(_offset >= 64) {
       int error;
-      pa_simple_write(device.handle, (const void*)buffer.data, buffer.offset * sizeof(uint32_t), &error);
-      buffer.offset = 0;
+      pa_simple_write(_interface, (const void*)_buffer, _offset * sizeof(uint32_t), &error);
+      _offset = 0;
     }
   }
 
-  auto clear() -> void {
-  }
+private:
+  auto initialize() -> bool {
+    terminate();
 
-  auto init() -> bool {
-    device.spec.format   = PA_SAMPLE_S16LE;
-    device.spec.channels = 2;
-    device.spec.rate     = settings.frequency;
+    pa_sample_spec specification;
+    specification.format = PA_SAMPLE_S16LE;
+    specification.channels = 2;
+    specification.rate = (uint)_frequency;
 
     int error = 0;
-    device.handle = pa_simple_new(
+    _interface = pa_simple_new(
       0,                         //default server
-      "ruby::pulseaudiosimple",  //application name
+      "ruby::pulseAudioSimple",  //application name
       PA_STREAM_PLAYBACK,        //direction
       0,                         //default device
       "audio",                   //stream description
-      &device.spec,              //sample format
+      &specification,            //sample format
       0,                         //default channel map
       0,                         //default buffering attributes
       &error                     //error code
     );
-    if(!device.handle) {
-      fprintf(stderr, "ruby::pulseaudiosimple failed to initialize - %s\n", pa_strerror(error));
-      return false;
-    }
+    if(!_interface) return false;
 
-    buffer.data = new uint32_t[64];
-    buffer.offset = 0;
-    return true;
+    _buffer = new uint32_t[64]();
+    _offset = 0;
+    return _ready = true;
   }
 
-  auto term() -> void {
-    if(device.handle) {
+  auto terminate() -> void {
+    _ready = false;
+
+    if(_interface) {
       int error;
-      pa_simple_flush(device.handle, &error);
-      pa_simple_free(device.handle);
-      device.handle = nullptr;
+      pa_simple_flush(_interface, &error);
+      pa_simple_free(_interface);
+      _interface = nullptr;
     }
 
-    if(buffer.data) {
-      delete[] buffer.data;
-      buffer.data = nullptr;
+    if(_buffer) {
+      delete[] _buffer;
+      _buffer = nullptr;
     }
   }
+
+  bool _ready = false;
+  double _frequency = 48000.0;
+
+  pa_simple* _interface = nullptr;
+
+  uint32_t* _buffer = nullptr;
+  uint _offset = 0;
 };
