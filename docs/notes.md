@@ -11,3 +11,5 @@ GBA in-game saves are Difficult
 
 PSG volume for the Mega Drive
 (see https://board.byuu.org/viewtopic.php?p=42158#p42158 for info)
+
+Rumble for GB and GBA?
