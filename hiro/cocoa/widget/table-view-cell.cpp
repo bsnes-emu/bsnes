@@ -9,29 +9,31 @@ auto pTableViewCell::destruct() -> void {
 }
 
 auto pTableViewCell::setAlignment(Alignment alignment) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setBackgroundColor(Color color) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setCheckable(bool checkable) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setChecked(bool checked) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setForegroundColor(Color color) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setIcon(const image& icon) -> void {
+  _redraw();
 }
 
 auto pTableViewCell::setText(const string& text) -> void {
-  @autoreleasepool {
-    if(auto pTableView = _grandparent()) {
-      [[pTableView->cocoaView content] reloadData];
-    }
-  }
+  _redraw();
 }
 
 auto pTableViewCell::_grandparent() -> maybe<pTableView&> {
@@ -43,6 +45,19 @@ auto pTableViewCell::_parent() -> maybe<pTableViewItem&> {
     if(auto self = parent->self()) return *self;
   }
   return nothing;
+}
+
+auto pTableViewCell::_redraw() -> void {
+  @autoreleasepool {
+    if(auto pTableViewItem = _parent()) {
+      if(auto pTableView = _grandparent()) {
+        auto column = self().offset();
+        auto row = pTableViewItem->self().offset();
+        NSRect rect = [[pTableView->cocoaTableView content] frameOfCellAtColumn:column row:row];
+        [[pTableView->cocoaTableView content] setNeedsDisplayInRect:rect];
+      }
+    }
+  }
 }
 
 }

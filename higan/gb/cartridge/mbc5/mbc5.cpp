@@ -32,6 +32,7 @@ auto Cartridge::MBC5::write(uint16 address, uint8 data) -> void {
   }
 
   if((address & 0xe000) == 0x4000) {  //$4000-5fff
+    if(cartridge.rumble) platform->inputRumble(ID::Port::Hardware, ID::Device::Controls, 10, data.bit(3));
     io.ram.bank = data.bits(0,3);
     return;
   }

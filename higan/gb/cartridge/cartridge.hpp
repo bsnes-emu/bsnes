@@ -42,6 +42,8 @@ private:
     virtual auto serialize(serializer&) -> void = 0;
   };
   Mapper* mapper = nullptr;
+  bool accelerometer = false;
+  bool rumble = false;
 
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
@@ -49,6 +51,8 @@ private:
   #include "mbc2/mbc2.hpp"
   #include "mbc3/mbc3.hpp"
   #include "mbc5/mbc5.hpp"
+  #include "mbc6/mbc6.hpp"
+  #include "mbc7/mbc7.hpp"
   #include "mmm01/mmm01.hpp"
   #include "huc1/huc1.hpp"
   #include "huc3/huc3.hpp"

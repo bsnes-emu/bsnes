@@ -7,12 +7,14 @@ struct GameBoyCartridge {
   bool clear = false;  //cartridge works in CGB mode only
 
   string mapper = "MBC0";
+  bool flash = false;
   bool battery = false;
   bool ram = false;
   bool rtc = false;
-  bool rumble = false;
   bool accelerometer = false;
+  bool rumble = false;
 
+  uint flashSize = 0;
   uint romSize = 0;
   uint ramSize = 0;
   uint rtcSize = 0;
@@ -157,14 +159,17 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
 
   case 0x20:
     mapper = "MBC6";
+    flash = true;
+    battery = true;
+    ram = true;
     break;
 
   case 0x22:
     mapper = "MBC7";
     battery = true;
     ram = true;
-    rumble = true;
     accelerometer = true;
+    rumble = true;
     break;
 
   case 0xfc:
@@ -204,6 +209,8 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
   case 0x54: romSize =  96 * 16 * 1024; break;
   }
 
+  if(mapper == "MBC6" && flash) flashSize = 1024 * 1024;
+
   switch(data[index + 0x0149]) { default:
   case 0x00: ramSize =  0 * 1024; break;
   case 0x01: ramSize =  2 * 1024; break;
@@ -212,13 +219,16 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
   }
 
   if(mapper == "MBC2" && ram) ramSize = 256;
+  if(mapper == "MBC6" && ram) ramSize =  32 * 1024;
+  if(mapper == "MBC7" && ram) ramSize = 256;
   if(mapper == "TAMA" && ram) ramSize =  32;
 
   if(mapper == "MBC3" && rtc) rtcSize = 13;
   if(mapper == "TAMA" && rtc) rtcSize = 21;
 
-  markup.append("board mapper=", mapper, "\n");
+  markup.append("board mapper=", mapper, accelerometer ? " accelerometer" : "", rumble ? " rumble" : "", "\n");
   markup.append("  rom name=program.rom size=0x", hex(romSize), "\n");
+  if(flash && flashSize) markup.append("  flash name=download.rom size=0x", hex(flashSize), "\n");
   if(ram && ramSize) markup.append("  ram ", battery ? "name=save.ram " : "", "size=0x", hex(ramSize), "\n");
   if(rtc && rtcSize) markup.append("  rtc ", battery ? "name=rtc.ram " : "", "size=0x", hex(rtcSize), "\n");
 }

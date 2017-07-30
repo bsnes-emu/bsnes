@@ -169,12 +169,10 @@ Presentation::Presentation() {
   #endif
 
   #if defined(PLATFORM_MACOSX)
-  showConfigurationSeparator.setVisible(false);
-  showConfiguration.setVisible(false);
   about.setVisible(false);
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
-  Application::Cocoa::onPreferences([&] { showConfiguration.doActivate(); });
+  Application::Cocoa::onPreferences([&] { showInputSettings.doActivate(); });
   Application::Cocoa::onQuit([&] { doClose(); });
   #endif
 }

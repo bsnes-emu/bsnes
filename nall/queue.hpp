@@ -35,6 +35,7 @@ struct queue {
     _write = source._write;
     source._data = nullptr;
     source.reset();
+    return *this;
   }
 
   ~queue() {

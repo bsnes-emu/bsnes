@@ -19,6 +19,9 @@ Interface::Interface() {
     device.inputs.append({0, "A"     });
     device.inputs.append({0, "Select"});
     device.inputs.append({0, "Start" });
+    device.inputs.append({1, "X-axis"});
+    device.inputs.append({1, "Y-axis"});
+    device.inputs.append({2, "Rumble"});
     hardwarePort.devices.append(device);
   }
 

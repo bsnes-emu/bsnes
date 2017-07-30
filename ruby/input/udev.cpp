@@ -51,7 +51,7 @@ struct InputUdev : Input {
   }
 
 private:
-  auto init() -> bool {
+  auto initialize() -> bool {
     terminate();
     if(!_context) return false;
     if(!_keyboard.initialize()) return false;

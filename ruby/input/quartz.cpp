@@ -22,13 +22,13 @@ struct InputQuartz : Input {
 
   auto initialize() -> bool {
     terminate();
-    if(!_keyboard.init()) return false;
+    if(!_keyboard.initialize()) return false;
     return _ready = true;
   }
 
   auto terminate() -> void {
     _ready = false;
-    _keyboard.term();
+    _keyboard.terminate();
   }
 
   bool _ready = false;

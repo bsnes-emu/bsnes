@@ -2,7 +2,7 @@
 #include <pulse/error.h>
 
 struct AudioPulseAudioSimple : Audio {
-  AudioPulseAudio() { initialize(); }
+  AudioPulseAudioSimple() { initialize(); }
   ~AudioPulseAudioSimple() { terminate(); }
 
   auto ready() -> bool { return _ready; }

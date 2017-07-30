@@ -51,7 +51,7 @@ struct AudioPulseAudio : Audio {
         pa_mainloop_iterate(_mainLoop, 1, nullptr);
       }
       uint length = pa_stream_writable_size(_stream);
-      if(length >= buffer.offset * pa_frame_size(&_specification)) break;
+      if(length >= _offset * pa_frame_size(&_specification)) break;
       if(!_blocking) {
         _offset = 0;
         return;
@@ -110,7 +110,7 @@ private:
     _ready = false;
 
     if(_buffer) {
-      pa_stream_cancel_write(_buffer);
+      pa_stream_cancel_write(_stream);
       _buffer = nullptr;
     }
 

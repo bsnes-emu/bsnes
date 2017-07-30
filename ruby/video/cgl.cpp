@@ -47,7 +47,7 @@ struct VideoCGL : Video, OpenGL {
     return true;
   }
 
-  auto setShader(string shader) -> string {
+  auto setShader(string shader) -> bool {
     if(_shader == shader) return true;
     OpenGL::shader(_shader = shader);
     if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
@@ -141,6 +141,7 @@ private:
 
   RubyVideoCGL* view = nullptr;
 
+  bool _ready = false;
   NSView* _context = nullptr;
   bool _blocking = false;
   bool _smooth = true;

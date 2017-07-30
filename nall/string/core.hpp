@@ -48,6 +48,7 @@ template<typename T> auto string::_prepend(const stringify<T>& source) -> string
   resize(source.size() + size());
   memory::move(get() + source.size(), get(), size() - source.size());
   memory::copy(get(), source.data(), source.size());
+  return *this;
 }
 
 template<typename T, typename... P> auto string::append(const T& value, P&&... p) -> string& {

@@ -52,6 +52,7 @@
   [content setFont:font];
   [content setRowHeight:fontHeight];
   [self reloadColumns];
+  tableView->resizeColumns();
 }
 
 -(void) reloadColumns {
@@ -214,7 +215,7 @@
 //needed to trigger trackMouse events
 -(NSUInteger) hitTestForEvent:(NSEvent*)event inRect:(NSRect)frame ofView:(NSView*)view {
   NSUInteger hitTest = [super hitTestForEvent:event inRect:frame ofView:view];
-  NSPoint point = [view convertPointFromBase:[event locationInWindow]];
+  NSPoint point = [view convertPoint:[event locationInWindow] fromView:nil];
   NSRect rect = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.height, frame.size.height);
   if(NSMouseInRect(point, rect, [view isFlipped])) {
     hitTest |= NSCellHitTrackableArea;
@@ -230,7 +231,7 @@
     NSEvent* nextEvent;
     while((nextEvent = [window nextEventMatchingMask:(NSLeftMouseDragged | NSLeftMouseUp)])) {
       if([nextEvent type] == NSLeftMouseUp) {
-        NSPoint point = [view convertPointFromBase:[nextEvent locationInWindow]];
+        NSPoint point = [view convertPoint:[nextEvent locationInWindow] fromView:nil];
         NSRect rect = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.height, frame.size.height);
         if(NSMouseInRect(point, rect, [view isFlipped])) {
           if(auto tableViewItem = tableView->item([view rowAtPoint:point])) {
@@ -279,6 +280,7 @@ auto pTableView::destruct() -> void {
 auto pTableView::append(sTableViewHeader header) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
+    resizeColumns();
 
     header->setVisible(header->visible());
   }
@@ -293,6 +295,7 @@ auto pTableView::append(sTableViewItem item) -> void {
 auto pTableView::remove(sTableViewHeader header) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
+    resizeColumns();
   }
 }
 

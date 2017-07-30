@@ -9,6 +9,8 @@ Cartridge cartridge;
 #include "mbc2/mbc2.cpp"
 #include "mbc3/mbc3.cpp"
 #include "mbc5/mbc5.cpp"
+#include "mbc6/mbc6.cpp"
+#include "mbc7/mbc7.cpp"
 #include "mmm01/mmm01.cpp"
 #include "huc1/huc1.cpp"
 #include "huc3/huc3.cpp"
@@ -51,10 +53,16 @@ auto Cartridge::load() -> bool {
   if(mapperID == "MBC2" ) mapper = &mbc2;
   if(mapperID == "MBC3" ) mapper = &mbc3;
   if(mapperID == "MBC5" ) mapper = &mbc5;
+  if(mapperID == "MBC6" ) mapper = &mbc6;
+  if(mapperID == "MBC7" ) mapper = &mbc7;
   if(mapperID == "MMM01") mapper = &mmm01;
   if(mapperID == "HuC1" ) mapper = &huc1;
   if(mapperID == "HuC3" ) mapper = &huc3;
   if(mapperID == "TAMA" ) mapper = &tama;
+  if(!mapper) mapper = &mbc0;
+
+  accelerometer = (bool)document["board/accelerometer"];
+  rumble = (bool)document["board/rumble"];
 
   rom.size = max(0x4000, document["board/rom/size"].natural());
   rom.data = (uint8*)memory::allocate(rom.size, 0xff);

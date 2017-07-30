@@ -27,6 +27,8 @@ auto image::loadBMP(const uint8_t* bmpData, unsigned bmpSize) -> bool {
       dp += stride();
     }
   }
+
+  return true;
 }
 
 auto image::loadPNG(const string& filename) -> bool {

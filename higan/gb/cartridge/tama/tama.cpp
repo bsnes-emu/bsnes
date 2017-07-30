@@ -183,6 +183,10 @@ auto Cartridge::TAMA::write(uint16 address, uint8 data) -> void {
         rtc.second = 0;  //hack: unclear where this is really being set (if it is at all)
       }
 
+      if(io.mode == 4 && io.index == 0x02 && io.input.bits(0,3) == 0xb) {
+        rtc.leapYear = data.bits(4,5);
+      }
+
       if(io.mode == 4 && io.index == 0x02 && io.input.bits(0,3) == 0xe) {
         rtc.test = io.input.bits(4,7);
       }

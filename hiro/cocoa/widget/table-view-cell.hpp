@@ -15,6 +15,7 @@ struct pTableViewCell : pObject {
 
   auto _grandparent() -> maybe<pTableView&>;
   auto _parent() -> maybe<pTableViewItem&>;
+  auto _redraw() -> void;
 };
 
 }

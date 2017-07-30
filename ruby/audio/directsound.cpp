@@ -109,7 +109,7 @@ private:
     _buffer = new uint32_t[_period * _rings];
     _offset = 0;
 
-    if(DirectSoundCreate(0, &_interface, 0) != DS_OK) return term(), false;
+    if(DirectSoundCreate(0, &_interface, 0) != DS_OK) return terminate(), false;
     _interface->SetCooperativeLevel(GetDesktopWindow(), DSSCL_PRIORITY);
 
     DSBUFFERDESC primaryDescription = {};

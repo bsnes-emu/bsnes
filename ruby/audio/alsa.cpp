@@ -64,11 +64,11 @@ struct AudioALSA : Audio {
     }
 
     if(i < 0) {
-      if(buffer == output) {
+      if(_buffer == output) {
         _offset--;
         output++;
       }
-      memory::move(buffer, output, _offset * sizeof(uint32_t));
+      memory::move(_buffer, output, _offset * sizeof(uint32_t));
     }
   }
 

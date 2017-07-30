@@ -36,8 +36,8 @@ clean:
 ifeq ($(platform),macosx)
 	@if [ -d out/$(name).app ]; then rm out/$(name).app; fi
 endif
-	$(call delete,obj/*)
-	$(call delete,out/*)
+	-@$(call delete,obj/*)
+	-@$(call delete,out/*)
 
 install:
 ifeq ($(platform),macosx)

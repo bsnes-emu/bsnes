@@ -27,8 +27,8 @@ struct AudioAO : Audio {
   }
 
   auto output(const double samples[]) -> void {
-    uint32_t sample = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 0;
-    ao_play(_interface, (char*)&sample, 4);  //this may need to be byte swapped for big endian
+    uint32_t sample = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
+    ao_play(_interface, (char*)&sample, 4);
   }
 
   auto initialize() -> bool {
@@ -48,8 +48,9 @@ struct AudioAO : Audio {
     ao_info* information = ao_driver_info(driverID);
     if(!information) return false;
     _device = information->short_name;
+
+    ao_option* options = nullptr;
     if(_device == "alsa") {
-      ao_option* options = nullptr;
       ao_append_option(&options, "buffer_time", "100000");  //100ms latency (default was 500ms)
     }
 
@@ -70,7 +71,7 @@ struct AudioAO : Audio {
 
   bool _ready = false;
   string _device = "Default";
+  double _frequency = 48000.0;
 
-  int _driverID;
   ao_device* _interface = nullptr;
 };
