@@ -26,7 +26,7 @@ Interface::Interface() {
     extensionPort.devices.append(device);
   }
 
-  { Device device{ID::Device::Gamepad, "Gamepad"};
+  { Device device{ID::Device::ControlPad, "Control Pad"};
     device.inputs.append({0, "Up"   });
     device.inputs.append({0, "Down" });
     device.inputs.append({0, "Left" });
@@ -34,6 +34,23 @@ Interface::Interface() {
     device.inputs.append({0, "A"    });
     device.inputs.append({0, "B"    });
     device.inputs.append({0, "C"    });
+    device.inputs.append({0, "Start"});
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
+  }
+
+  { Device device{ID::Device::FightingPad, "Fighting Pad"};
+    device.inputs.append({0, "Up"   });
+    device.inputs.append({0, "Down" });
+    device.inputs.append({0, "Left" });
+    device.inputs.append({0, "Right"});
+    device.inputs.append({0, "A"    });
+    device.inputs.append({0, "B"    });
+    device.inputs.append({0, "C"    });
+    device.inputs.append({0, "X"    });
+    device.inputs.append({0, "Y"    });
+    device.inputs.append({0, "Z"    });
+    device.inputs.append({0, "Mode" });
     device.inputs.append({0, "Start"});
     controllerPort1.devices.append(device);
     controllerPort2.devices.append(device);

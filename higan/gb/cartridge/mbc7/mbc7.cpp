@@ -3,7 +3,7 @@ auto Cartridge::MBC7::read(uint16 address) -> uint8 {
     return cartridge.rom.read(address.bits(0,13));
   }
 
-  if((address & 0xc000) == 0x0000) {  //$4000-7fff
+  if((address & 0xc000) == 0x4000) {  //$4000-7fff
     return cartridge.rom.read(io.rom.bank << 14 | address.bits(0,13));
   }
 
@@ -15,8 +15,8 @@ auto Cartridge::MBC7::read(uint16 address) -> uint8 {
     case 3: return io.accelerometer.x.bits(8,15);
     case 4: return io.accelerometer.y.bits(0, 7);
     case 5: return io.accelerometer.y.bits(8,15);
-    case 6: return io.accelerometer.z.bits(0, 7);
-    case 7: return io.accelerometer.z.bits(8,15);
+    case 6: return 0x00;  //z?
+    case 7: return 0xff;  //z?
     case 8: return 0xff;
     }
 
@@ -78,4 +78,9 @@ auto Cartridge::MBC7::power() -> void {
 }
 
 auto Cartridge::MBC7::serialize(serializer& s) -> void {
+  s.integer(io.rom.bank);
+  s.integer(io.ram.enable[0]);
+  s.integer(io.ram.enable[1]);
+  s.integer(io.accelerometer.x);
+  s.integer(io.accelerometer.y);
 }

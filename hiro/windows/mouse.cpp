@@ -3,7 +3,7 @@
 namespace hiro {
 
 auto pMouse::position() -> Position {
-  POINT point{0};
+  POINT point{};
   GetCursorPos(&point);
   return {point.x, point.y};
 }

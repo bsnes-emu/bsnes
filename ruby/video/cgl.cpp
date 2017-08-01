@@ -127,7 +127,7 @@ private:
     return _ready = true;
   }
 
-  auto term() -> void {
+  auto terminate() -> void {
     _ready = false;
     OpenGL::terminate();
 

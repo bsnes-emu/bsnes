@@ -19,7 +19,6 @@ auto PPU::readTileDMG(bool select, uint x, uint y, uint& data) -> void {
 
 auto PPU::scanlineDMG() -> void {
   px = 0;
-  if(!enabled()) return;
 
   const uint Height = (status.obSize == 0 ? 8 : 16);
   sprites = 0;
@@ -60,20 +59,18 @@ auto PPU::runDMG() -> void {
   ob.palette = 0;
 
   uint color = 0;
-  if(enabled()) {
-    if(status.bgEnable) runBackgroundDMG();
-    if(status.windowDisplayEnable) runWindowDMG();
-    if(status.obEnable) runObjectsDMG();
+  if(status.bgEnable) runBackgroundDMG();
+  if(status.windowDisplayEnable) runWindowDMG();
+  if(status.obEnable) runObjectsDMG();
 
-    if(ob.palette == 0) {
-      color = bg.color;
-    } else if(bg.palette == 0) {
-      color = ob.color;
-    } else if(ob.priority) {
-      color = ob.color;
-    } else {
-      color = bg.color;
-    }
+  if(ob.palette == 0) {
+    color = bg.color;
+  } else if(bg.palette == 0) {
+    color = ob.color;
+  } else if(ob.priority) {
+    color = ob.color;
+  } else {
+    color = bg.color;
   }
 
   uint32* output = screen + status.ly * 160 + px++;

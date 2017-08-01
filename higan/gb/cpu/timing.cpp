@@ -76,8 +76,8 @@ auto CPU::hblank() -> void {
   if(status.dmaMode == 1 && status.dmaLength && ppu.status.ly < 144) {
     for(auto n : range(16)) {
       writeDMA(status.dmaTarget++, readDMA(status.dmaSource++));
+      status.dmaLength--;
+      if(n & 1) step(1 << status.speedDouble);
     }
-    step(8 << status.speedDouble);
-    status.dmaLength -= 16;
   }
 }

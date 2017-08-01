@@ -14,7 +14,6 @@ struct MBC7 : Mapper {
     struct Accelerometer {
       uint16 x = 0x8000;
       uint16 y = 0x8000;
-      uint16 z = 0xff00;  //unused
     } accelerometer;
   } io;
 } mbc7;

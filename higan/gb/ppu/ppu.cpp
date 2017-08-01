@@ -8,13 +8,13 @@ PPU ppu;
 #include "cgb.cpp"
 #include "serialization.cpp"
 
-auto PPU::enabled() const -> bool { return status.displayEnable; }
-
 auto PPU::Enter() -> void {
   while(true) scheduler.synchronize(), ppu.main();
 }
 
 auto PPU::main() -> void {
+  if(!status.displayEnable) return step(456);
+
   status.lx = 0;
   if(Model::SuperGameBoy()) superGameBoy->lcdScanline();
 
@@ -30,7 +30,7 @@ auto PPU::main() -> void {
     }
 
     mode(0);
-    if(enabled()) cpu.hblank();
+    cpu.hblank();
     step(204);
   } else {
     mode(1);
@@ -40,7 +40,7 @@ auto PPU::main() -> void {
   status.ly++;
 
   if(status.ly == 144) {
-    if(enabled()) cpu.raise(CPU::Interrupt::Vblank);
+    cpu.raise(CPU::Interrupt::Vblank);
     scheduler.exit(Scheduler::Event::Frame);
   }
 

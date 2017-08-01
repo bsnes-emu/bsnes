@@ -63,7 +63,7 @@ struct Audio {
   virtual ~Audio() = default;
 
   virtual auto ready() -> bool { return true; }
-  virtual auto information() -> Information { return {{"None"}, {48000.0}, {0}, {2}}; }
+  virtual auto information() -> Information { return {{"Default"}, {48000.0}, {0}, {2}}; }
 
   virtual auto exclusive() -> bool { return false; }
   virtual auto context() -> uintptr { return 0; }

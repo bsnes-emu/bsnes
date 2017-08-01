@@ -44,6 +44,7 @@ struct AudioAO : Audio {
     format.channels = 2;
     format.rate = (uint)_frequency;
     format.byte_format = AO_FMT_LITTLE;
+    format.matrix = nullptr;
 
     ao_info* information = ao_driver_info(driverID);
     if(!information) return false;

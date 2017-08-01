@@ -5,7 +5,8 @@ namespace MegaDrive {
 ControllerPort controllerPort1;
 ControllerPort controllerPort2;
 ControllerPort extensionPort;
-#include "gamepad/gamepad.cpp"
+#include "control-pad/control-pad.cpp"
+#include "fighting-pad/fighting-pad.cpp"
 
 Controller::Controller(uint port) : port(port) {
   if(!handle()) create(Controller::Enter, 1);
@@ -37,7 +38,8 @@ auto ControllerPort::connect(uint deviceID) -> void {
 
   switch(deviceID) { default:
   case ID::Device::None: device = new Controller(port); break;
-  case ID::Device::Gamepad: device = new Gamepad(port); break;
+  case ID::Device::ControlPad: device = new ControlPad(port); break;
+  case ID::Device::FightingPad: device = new FightingPad(port); break;
   }
 
   cpu.peripherals.reset();

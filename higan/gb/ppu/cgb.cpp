@@ -37,7 +37,6 @@ auto PPU::readTileCGB(bool select, uint x, uint y, uint& attr, uint& data) -> vo
 
 auto PPU::scanlineCGB() -> void {
   px = 0;
-  if(!enabled()) return;
 
   const uint Height = (status.obSize == 0 ? 8 : 16);
   sprites = 0;
@@ -69,24 +68,22 @@ auto PPU::runCGB() -> void {
   ob.priority = 0;
 
   uint color = 0x7fff;
-  if(enabled()) {
-    runBackgroundCGB();
-    if(status.windowDisplayEnable) runWindowCGB();
-    if(status.obEnable) runObjectsCGB();
+  runBackgroundCGB();
+  if(status.windowDisplayEnable) runWindowCGB();
+  if(status.obEnable) runObjectsCGB();
 
-    if(ob.palette == 0) {
-      color = bg.color;
-    } else if(bg.palette == 0) {
-      color = ob.color;
-    } else if(status.bgEnable == 0) {
-      color = ob.color;
-    } else if(bg.priority) {
-      color = bg.color;
-    } else if(ob.priority) {
-      color = ob.color;
-    } else {
-      color = bg.color;
-    }
+  if(ob.palette == 0) {
+    color = bg.color;
+  } else if(bg.palette == 0) {
+    color = ob.color;
+  } else if(status.bgEnable == 0) {
+    color = ob.color;
+  } else if(bg.priority) {
+    color = bg.color;
+  } else if(ob.priority) {
+    color = ob.color;
+  } else {
+    color = bg.color;
   }
 
   uint32* output = screen + status.ly * 160 + px++;

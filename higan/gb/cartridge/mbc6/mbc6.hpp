@@ -6,7 +6,11 @@ struct MBC6 : Mapper {
 
   struct IO {
     struct ROM {
-      uint8 bank = 0x01;
+      uint8 bank[2];
     } rom;
+    struct RAM {
+      uint1 enable;
+      uint8 bank[2];
+    } ram;
   } io;
 } mbc6;

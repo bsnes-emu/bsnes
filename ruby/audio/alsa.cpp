@@ -6,10 +6,26 @@ struct AudioALSA : Audio {
 
   auto ready() -> bool { return _ready; }
 
+  auto information() -> Information {
+    Information information;
+    information.devices = queryDevices();
+    information.frequencies = {44100.0, 48000.0, 96000.0};
+    information.latencies = {20, 40, 60, 80, 100};
+    information.channels = {2};
+    return information;
+  }
+
+  auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
   auto channels() -> uint { return 2; }
   auto frequency() -> double { return _frequency; }
   auto latency() -> uint { return _latency; }
+
+  auto setDevice(string device) -> bool {
+    if(_device == device) return true;
+    _device = device;
+    return initialize();
+  }
 
   auto setBlocking(bool blocking) -> bool {
     if(_blocking == blocking) return true;
@@ -76,7 +92,9 @@ private:
   auto initialize() -> bool {
     terminate();
 
-    if(snd_pcm_open(&_interface, "default", SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) return terminate(), false;
+    string device = "default";
+    if(queryDevices().find(_device)) device = _device;
+    if(snd_pcm_open(&_interface, device, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) return terminate(), false;
 
     uint rate = (uint)_frequency;
     uint bufferTime = _latency * 1000;
@@ -122,10 +140,29 @@ private:
     if(_buffer) {
       delete[] _buffer;
       _buffer = nullptr;
-	}
+    }
+  }
+
+  auto queryDevices() -> string_vector {
+    string_vector devices;
+
+    const char** list;
+    if(snd_device_name_hint(-1, "pcm", (void***)&list) == 0) {
+      uint index = 0;
+      while(list[index]) {
+        const char* deviceName = snd_device_name_get_hint(list[index], "NAME");
+        if(deviceName) devices.append(deviceName);
+        free(deviceName);
+        index++;
+      }
+    }
+
+    snd_device_name_free_hint((void**)list);
+    return devices;
   }
 
   bool _ready = false;
+  string _device;
   bool _blocking = true;
   double _frequency = 48000.0;
   uint _latency = 40;
