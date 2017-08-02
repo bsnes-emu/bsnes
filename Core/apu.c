@@ -73,42 +73,54 @@ static void render(GB_gameboy_t *gb)
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
-    for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-        if (gb->apu.square_channels[i].length_enabled) {
-            if (gb->apu.square_channels[i].pulse_length) {
-                if (!--gb->apu.square_channels[i].pulse_length) {
-                    gb->apu.is_active[i] = false;
-                    update_sample(gb, i, 0, 0);
+    gb->apu.div_divider++;
+
+    if ((gb->apu.div_divider & 1) == 1) {
+        for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+            if (gb->apu.square_channels[i].length_enabled) {
+                if (gb->apu.square_channels[i].pulse_length) {
+                    if (!--gb->apu.square_channels[i].pulse_length) {
+                        gb->apu.is_active[i] = false;
+                        update_sample(gb, i, 0, 0);
+                    }
+                }
+            }
+            
+            uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
+            
+            if (gb->apu.square_channels[i].volume_countdown) {
+                if (!--gb->apu.square_channels[i].volume_countdown) {
+                    if ((nrx2 & 8) && gb->apu.square_channels[i].current_volume < 0xF) {
+                        gb->apu.square_channels[i].current_volume++;
+                    }
+                    
+                    else if (!(nrx2 & 8) && gb->apu.square_channels[i].current_volume > 0) {
+                        gb->apu.square_channels[i].current_volume--;
+                    }
+                    
+                    gb->apu.square_channels[i].volume_countdown = (nrx2 & 7) * 4;
+                    
+                    uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
+                    update_sample(gb, i,
+                                  duties[gb->apu.square_channels[i].current_sample_index + duty * 8]?
+                                  gb->apu.square_channels[i].current_volume : 0,
+                                  0);
                 }
             }
         }
         
-        uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
-        
-        if (gb->apu.square_channels[i].volume_countdown) {
-            if (!--gb->apu.square_channels[i].volume_countdown) {
-                if ((nrx2 & 8) && gb->apu.square_channels[i].current_volume < 0xF) {
-                    gb->apu.square_channels[i].current_volume++;
+        if (gb->apu.wave_channel.length_enabled) {
+            if (gb->apu.wave_channel.pulse_length) {
+                if (!--gb->apu.wave_channel.pulse_length) {
+                    gb->apu.is_active[GB_WAVE] = false;
+                    gb->apu.wave_channel.current_sample = 0;
+                    update_sample(gb, GB_WAVE, 0, 0);
                 }
-                
-                else if (!(nrx2 & 8) && gb->apu.square_channels[i].current_volume > 0) {
-                    gb->apu.square_channels[i].current_volume--;
-                }
-                
-                gb->apu.square_channels[i].volume_countdown = (nrx2 & 7) * 8;
-                
-                uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
-                update_sample(gb, i,
-                              duties[gb->apu.square_channels[i].current_sample_index + duty * 8]?
-                              gb->apu.square_channels[i].current_volume : 0,
-                              0);
             }
         }
     }
     
-    gb->apu.square_sweep_div++;
-    
-    if ((gb->apu.square_sweep_div & 3) == 3) {
+    if ((gb->apu.div_divider & 3) == 3) {
         if (gb->apu.square_sweep_countdown) {
             if (!--gb->apu.square_sweep_countdown) {
                 gb->apu.square_channels[GB_SQUARE_1].sample_length ^= 0x7FF;
@@ -127,16 +139,6 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                 
                 
                 gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
-            }
-        }
-    }
-    
-    if (gb->apu.wave_channel.length_enabled) {
-        if (gb->apu.wave_channel.pulse_length) {
-            if (!--gb->apu.wave_channel.pulse_length) {
-                gb->apu.is_active[GB_WAVE] = false;
-                gb->apu.wave_channel.current_sample = 0;
-                update_sample(gb, GB_WAVE, 0, 0);
             }
         }
     }
@@ -252,10 +254,11 @@ void GB_apu_init(GB_gameboy_t *gb)
     memset(&gb->apu, 0, sizeof(gb->apu));
     // gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 4;
     // gb->apu.lfsr = 0x7FFF;
-    gb->io_registers[GB_IO_NR50] = 0x77;
     for (int i = 0; i < 4; i++) {
         gb->apu.left_enabled[i] = gb->apu.right_enabled[i] = true;
     }
+    gb->apu.square_channels[GB_SQUARE_1].sample_length = 0x7FF;
+    gb->apu.square_channels[GB_SQUARE_2].sample_length = 0x7FF;
     gb->apu.wave_channel.sample_length = 0x7FF;
     gb->apu.square_carry = 1;
 }
@@ -314,7 +317,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
     }
     
     gb->io_registers[reg] = value;
-    
+
     switch (reg) {
         /* Globals */
         case GB_IO_NR50:
@@ -347,7 +350,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR11:
         case GB_IO_NR21: {
             unsigned index = reg == GB_IO_NR21? GB_SQUARE_2: GB_SQUARE_1;
-            gb->apu.square_channels[index].pulse_length = (0x40 - (value & 0x3f)) * 2 - 1;
+            gb->apu.square_channels[index].pulse_length = (0x40 - (value & 0x3f));
             break;
         }
             
@@ -376,7 +379,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR14:
         case GB_IO_NR24: {
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
-            gb->apu.square_channels[index].length_enabled = value & 0x40;
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= ((~value) & 7) << 8;
             if (value & 0x80) {
@@ -398,16 +400,35 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
-                gb->apu.square_channels[index].volume_countdown = (gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7) * 8;
+                gb->apu.square_channels[index].volume_countdown = (gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7) * 4;
                 
                 if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0) {
                     gb->apu.is_active[index] = true;
                 }
                 if (gb->apu.square_channels[index].pulse_length == 0) {
-                    gb->apu.square_channels[index].pulse_length = 0x7F;
+                    gb->apu.square_channels[index].pulse_length = 0x40;
+                    gb->apu.square_channels[index].length_enabled = false;
                 }
                 /* Note that we don't change the sample just yet! This was verified on hardware. */
             }
+            
+            /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
+            if ((value & 0x40) &&
+                !gb->apu.square_channels[index].length_enabled &&
+                (gb->apu.div_divider & 1) &&
+                gb->apu.square_channels[index].pulse_length) {
+                gb->apu.square_channels[index].pulse_length--;
+                if (gb->apu.square_channels[index].pulse_length == 0) {
+                    if (value & 0x80) {
+                        gb->apu.square_channels[index].pulse_length = 0x3F;
+                    }
+                    else {
+                        update_sample(gb, index, 0, 0);
+                        gb->apu.is_active[index] = false;
+                    }
+                }
+            }
+            gb->apu.square_channels[index].length_enabled = value & 0x40;
             break;
         }
             
@@ -421,7 +442,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
             break;
         case GB_IO_NR31:
-            gb->apu.wave_channel.pulse_length = (0x100 - value) * 2 - 1;
+            gb->apu.wave_channel.pulse_length = (0x100 - value);
             break;
         case GB_IO_NR32:
             gb->apu.wave_channel.shift = (uint8_t[]){4, 0, 1, 2}[(value >> 5) & 3];
@@ -432,13 +453,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.wave_channel.sample_length |= (~value) & 0xFF;
             break;
         case GB_IO_NR34:
-            gb->apu.wave_channel.length_enabled = value & 0x40;
             gb->apu.wave_channel.sample_length &= 0xFF;
             gb->apu.wave_channel.sample_length |= ((~value) & 7) << 8;
-            if ((value & 0x80) && gb->apu.wave_channel.enable) {
+            if ((value & 0x80)) {
                 /* DMG bug: wave RAM gets corrupted if the channel is retriggerred 1 cycle before the APU
                             reads from it. */
-                if (!gb->is_cgb && gb->apu.is_active[GB_WAVE] && gb->apu.wave_channel.sample_countdown == 0) {
+                if (!gb->is_cgb &&
+                    gb->apu.is_active[GB_WAVE] &&
+                    gb->apu.wave_channel.sample_countdown == 0 &&
+                    gb->apu.wave_channel.enable) {
                     unsigned offset = ((gb->apu.wave_channel.current_sample_index + 1) >> 1) & 0xF;
                     
                     /* On SGB2 (and probably SGB1 and MGB as well) this behavior is not accurate,
@@ -461,10 +484,31 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length + 3;
                 gb->apu.wave_channel.current_sample_index = 0;
                 if (gb->apu.wave_channel.pulse_length == 0) {
-                    gb->apu.wave_channel.pulse_length = 0x1FF;
+                    gb->apu.wave_channel.pulse_length = 0x100;
+                    gb->apu.wave_channel.length_enabled = false;
                 }
                 /* Note that we don't change the sample just yet! This was verified on hardware. */
             }
+            
+            /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
+            if ((value & 0x40) &&
+                !gb->apu.wave_channel.length_enabled &&
+                (gb->apu.div_divider & 1) &&
+                gb->apu.wave_channel.pulse_length) {
+                gb->apu.wave_channel.pulse_length--;
+                if (gb->apu.wave_channel.pulse_length == 0) {
+                    if (value & 0x80) {
+                        gb->apu.wave_channel.pulse_length = 0xFF;
+                    }
+                    else {
+                        update_sample(gb, GB_WAVE, 0, 0);
+                        gb->apu.is_active[GB_WAVE] = false;
+                    }
+                }
+            }
+            gb->apu.wave_channel.length_enabled = value & 0x40;
+            gb->apu.is_active[GB_WAVE] &= gb->apu.wave_channel.enable;
+
             break;
         
         default:

@@ -11,8 +11,7 @@
 #define CH_STEP (MAX_CH_AMP/0xF/7)
 #endif
 
-/* Lengths are in either DIV ticks (512Hz, triggered by the DIV register) or
-   APU ticks (2MHz, triggered by an internal APU clock) */
+/* APU ticks are 2MHz, triggered by an internal APU clock. */
 
 typedef struct
 {
@@ -38,29 +37,31 @@ typedef struct
     bool right_enabled[GB_N_CHANNELS];
     bool is_active[GB_N_CHANNELS];
     
+    uint8_t div_divider; // The DIV register ticks the APU at 512Hz, but is then divided
+                         // once more to generate 128Hz and 64Hz clocks
+    
     uint8_t square_carry; // The square channels tick at 1MHz instead of 2,
                           // so we need a carry to divide the signal
     
-    uint8_t square_sweep_div; // The DIV-APU ticks are divided by 4 to handle tone sweeping
     uint8_t square_sweep_countdown; // In 128Hz
     uint8_t square_sweep_stop_countdown; // In 2 MHz
     
     struct {
-        uint16_t pulse_length; // Reloaded from NRX1 (xorred), in DIV ticks
+        uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
         uint8_t current_volume; // Reloaded from NRX2
         uint8_t volume_countdown; // Reloaded from NRX2
         uint8_t current_sample_index;
         bool sample_emitted;
         
         uint16_t sample_countdown; // in APU ticks
-        uint16_t sample_length; // Reloaded from NRX3, NRX4, in APU ticks
+        uint16_t sample_length; // From NRX3, NRX4, in APU ticks
         bool length_enabled; // NRX4
 
     } square_channels[2];
     
     struct {
         bool enable; // NR30
-        uint16_t pulse_length; // Reloaded from NR31 (xorred), in DIV ticks
+        uint16_t pulse_length; // Reloaded from NR31 (xorred), in 256Hz DIV ticks
         uint8_t shift; // NR32
         uint16_t sample_length; // NR33, NR34, in APU ticks
         bool length_enabled; // NR34
