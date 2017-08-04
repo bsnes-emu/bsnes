@@ -183,14 +183,11 @@ auto OpenGL::output() -> void {
 auto OpenGL::initialize() -> bool {
   if(!OpenGLBind()) return false;
 
-  glDisable(GL_ALPHA_TEST);
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_POLYGON_SMOOTH);
   glDisable(GL_STENCIL_TEST);
-
   glEnable(GL_DITHER);
-  glEnable(GL_TEXTURE_2D);
 
   program = glCreateProgram();
   vertex = glrCreateShader(program, GL_VERTEX_SHADER, OpenGLOutputVertexShader);

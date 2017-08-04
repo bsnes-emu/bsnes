@@ -1,4 +1,4 @@
-auto CPU::io() -> void {
+auto CPU::idle() -> void {
   cycleEdge();
   step(4);
 }

@@ -52,32 +52,37 @@ auto PPU::Background::linear(uint x, uint y) -> void {
     fy = vmosaic + io.voffset;
   }
 
-  uint6 tx = fx >> 3;
-  uint6 ty = fy >> 3;
-
   uint3 px = fx;
   uint3 py = fy;
 
-  uint offset = (ty & 31) << 5 | (tx & 31);
-  if(io.screenSize.bit(0) && (tx & 32)) offset += 32 << 5;
-  if(io.screenSize.bit(1) && (ty & 32)) offset += 32 << 5 + io.screenSize.bit(0);
-  offset = (io.screenBase << 11) + (offset << 1);
+  if(x == 0 || px == 0) {
+    uint6 tx = fx >> 3;
+    uint6 ty = fy >> 3;
 
-  uint16 tilemap = ppu.readVRAM(Half, offset);
-  uint10 character = tilemap.bits( 0, 9);
-  uint4  palette   = tilemap.bits(12,15);
-  if(tilemap.bit(10)) px ^= 7;
-  if(tilemap.bit(11)) py ^= 7;
+    uint offset = (ty & 31) << 5 | (tx & 31);
+    if(io.screenSize.bit(0) && (tx & 32)) offset += 32 << 5;
+    if(io.screenSize.bit(1) && (ty & 32)) offset += 32 << 5 + io.screenSize.bit(0);
+    offset = (io.screenBase << 11) + (offset << 1);
+
+    uint16 tilemap = ppu.readVRAM(Half, offset);
+    latch.character = tilemap.bits(0,9);
+    latch.hflip = tilemap.bit(10);
+    latch.vflip = tilemap.bit(11);
+    latch.palette = tilemap.bits(12,15);
+  }
+
+  if(latch.hflip) px = ~px;
+  if(latch.vflip) py = ~py;
 
   if(io.colorMode == 0) {
-    offset = (io.characterBase << 14) + (character << 5) + (py << 2) + (px >> 1);
+    uint offset = (io.characterBase << 14) + (latch.character << 5) + (py << 2) + (px >> 1);
     if(uint4 color = ppu.readVRAM(Byte, offset) >> (px & 1 ? 4 : 0)) {
       output.enable = true;
       output.priority = io.priority;
-      output.color = ppu.pram[palette << 4 | color];
+      output.color = ppu.pram[latch.palette << 4 | color];
     }
   } else {
-    offset = (io.characterBase << 14) + (character << 6) + (py << 3) + (px);
+    uint offset = (io.characterBase << 14) + (latch.character << 6) + (py << 3) + (px);
     if(uint8 color = ppu.readVRAM(Byte, offset)) {
       output.enable = true;
       output.priority = io.priority;
@@ -172,7 +177,8 @@ auto PPU::Background::bitmap(uint x, uint y) -> void {
 auto PPU::Background::power(uint id) -> void {
   this->id = id;
 
-  memory::fill(&io, sizeof(IO));
+  io = {};
+  latch = {};
   output = {};
   mosaic = {};
   mosaicOffset = 0;

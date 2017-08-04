@@ -89,19 +89,19 @@ auto OpenGLSurface::render(uint sourceWidth, uint sourceHeight, uint targetWidth
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-  GLuint locationVertex = glGetAttribLocation(program, "vertex");
+  GLint locationVertex = glGetAttribLocation(program, "vertex");
   glEnableVertexAttribArray(locationVertex);
   glVertexAttribPointer(locationVertex, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), positions, GL_STATIC_DRAW);
-  GLuint locationPosition = glGetAttribLocation(program, "position");
+  GLint locationPosition = glGetAttribLocation(program, "position");
   glEnableVertexAttribArray(locationPosition);
   glVertexAttribPointer(locationPosition, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
   glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), texCoords, GL_STATIC_DRAW);
-  GLuint locationTexCoord = glGetAttribLocation(program, "texCoord");
+  GLint locationTexCoord = glGetAttribLocation(program, "texCoord");
   glEnableVertexAttribArray(locationTexCoord);
   glVertexAttribPointer(locationTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
 

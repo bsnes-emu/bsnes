@@ -1,6 +1,6 @@
 auto LR35902::disassemble(uint16 pc) -> string {
   char output[80];
-  memset(output, ' ', sizeof output);
+  memory::fill(output, sizeof output, ' ');
   output[79] = 0;
 
   string opcode = disassembleOpcode(pc);
@@ -12,18 +12,18 @@ auto LR35902::disassemble(uint16 pc) -> string {
     " SP:", hex(r[SP], 4L)
   };
 
-  memcpy(output +   0, hex(pc, 4L).data(), 4);
-  memcpy(output +   6, opcode.data(), opcode.length());
-  memcpy(output +  23, registers.data(), registers.length());
+  memory::copy(output +   0, hex(pc, 4L).data(), 4);
+  memory::copy(output +   6, opcode.data(), opcode.length());
+  memory::copy(output +  23, registers.data(), registers.length());
   output[63] = 0;
   return output;
 }
 
 auto LR35902::disassembleOpcode(uint16 pc) -> string {
-  uint8 opcode = debuggerRead(pc);
-  uint8 p0 = debuggerRead(pc + 1);
-  uint8 p1 = debuggerRead(pc + 2);
-  uint8 p2 = debuggerRead(pc + 3);
+  uint8 opcode = readDebugger(pc);
+  uint8 p0 = readDebugger(pc + 1);
+  uint8 p1 = readDebugger(pc + 2);
+  uint8 p2 = readDebugger(pc + 3);
 
   switch(opcode) {
   case 0x00: return { "nop" };
@@ -288,10 +288,10 @@ auto LR35902::disassembleOpcode(uint16 pc) -> string {
 }
 
 auto LR35902::disassembleOpcodeCB(uint16 pc) -> string {
-  uint8 opcode = debuggerRead(pc);
-  uint8 p0 = debuggerRead(pc + 1);
-  uint8 p1 = debuggerRead(pc + 2);
-  uint8 p2 = debuggerRead(pc + 3);
+  uint8 opcode = readDebugger(pc);
+  uint8 p0 = readDebugger(pc + 1);
+  uint8 p1 = readDebugger(pc + 2);
+  uint8 p2 = readDebugger(pc + 3);
 
   switch(opcode) {
   case 0x00: return { "rlc  b" };

@@ -123,13 +123,6 @@ auto CPU::power() -> void {
   for(auto& n : wram) n = 0x00;
   for(auto& n : hram) n = 0x00;
 
-  r[PC] = 0x0000;
-  r[SP] = 0x0000;
-  r[AF] = 0x0000;
-  r[BC] = 0x0000;
-  r[DE] = 0x0000;
-  r[HL] = 0x0000;
-
   memory::fill(&status, sizeof(Status));
   status.dmaCompleted = true;
   status.wramBank = 1;

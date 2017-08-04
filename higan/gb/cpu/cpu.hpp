@@ -17,13 +17,13 @@ struct CPU : Processor::LR35902, Thread, MMIO {
   auto writeIO(uint16 addr, uint8 data) -> void;
 
   //memory.cpp
-  auto io() -> void override;
+  auto idle() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
   auto cycleEdge() -> void;
   auto readDMA(uint16 addr) -> uint8;
   auto writeDMA(uint16 addr, uint8 data) -> void;
-  auto readDebugger(uint16 addr) -> uint8;
+  auto readDebugger(uint16 addr) -> uint8 override;
 
   //timing.cpp
   auto step(uint clocks) -> void;

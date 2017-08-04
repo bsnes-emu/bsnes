@@ -114,6 +114,7 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
 
   if(addr == 0xff40) {  //LCDC
     if(status.displayEnable && !data.bit(7)) {
+      status.mode = 0;
       status.ly = 0;
       status.lx = 0;
 

@@ -13,27 +13,33 @@ auto PPU::Enter() -> void {
 }
 
 auto PPU::main() -> void {
-  if(!status.displayEnable) return step(456);
+  if(!status.displayEnable) {
+    for(uint n : range(160 * 144)) screen[n] = Model::GameBoy() ? 0 : 0x7fff;
+    Thread::step(154 * 456);
+    synchronize(cpu);
+    scheduler.exit(Scheduler::Event::Frame);
+    return;
+  }
 
   status.lx = 0;
   if(Model::SuperGameBoy()) superGameBoy->lcdScanline();
 
   if(status.ly <= 143) {
-    mode(2);
+    status.mode = 2;
     scanline();
     step(92);
 
-    mode(3);
+    status.mode = 3;
     for(auto n : range(160)) {
       run();
       step(1);
     }
 
-    mode(0);
+    status.mode = 0;
     cpu.hblank();
     step(204);
   } else {
-    mode(1);
+    status.mode = 1;
     step(456);
   }
 
@@ -47,10 +53,6 @@ auto PPU::main() -> void {
   if(status.ly == 154) {
     status.ly = 0;
   }
-}
-
-auto PPU::mode(uint mode) -> void {
-  status.mode = mode;
 }
 
 auto PPU::stat() -> void {

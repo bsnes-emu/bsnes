@@ -110,6 +110,13 @@ private:
       int28 ly;
     } io;
 
+    struct Latch {
+      uint10 character;
+      uint1  hflip;
+      uint1  vflip;
+      uint4  palette;
+    } latch;
+
     Pixel output;
     Pixel mosaic;
     uint mosaicOffset;

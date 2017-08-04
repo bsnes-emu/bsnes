@@ -1,15 +1,14 @@
-//Sharp LR35902 (Game Boy Z80-derivative)
+//Sharp LR35902
 
 #pragma once
 
 namespace Processor {
 
 struct LR35902 {
-  virtual auto io() -> void = 0;
-  virtual auto read(uint16 addr) -> uint8 = 0;
-  virtual auto write(uint16 addr, uint8 data) -> void = 0;
+  virtual auto idle() -> void = 0;
+  virtual auto read(uint16 address) -> uint8 = 0;
+  virtual auto write(uint16 address, uint8 data) -> void = 0;
   virtual auto stop() -> bool = 0;
-  virtual auto debuggerRead(uint16 addr) -> uint8 { return 0; }
 
   //lr35902.cpp
   auto power() -> void;
@@ -22,149 +21,108 @@ struct LR35902 {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  #include "registers.hpp"
-
-private:
-  auto op_xx();
-  auto op_cb();
-
-  //8-bit load commands
-  auto op_ld_r_r(uint x, uint y);
-  auto op_ld_r_n(uint x);
-  auto op_ld_r_hl(uint x);
-  auto op_ld_hl_r(uint x);
-  auto op_ld_hl_n();
-  auto op_ld_a_rr(uint x);
-  auto op_ld_a_nn();
-  auto op_ld_rr_a(uint x);
-  auto op_ld_nn_a();
-  auto op_ld_a_ffn();
-  auto op_ld_ffn_a();
-  auto op_ld_a_ffc();
-  auto op_ld_ffc_a();
-  auto op_ldi_hl_a();
-  auto op_ldi_a_hl();
-  auto op_ldd_hl_a();
-  auto op_ldd_a_hl();
-
-  //16-bit load commands
-  auto op_ld_rr_nn(uint x);
-  auto op_ld_nn_sp();
-  auto op_ld_sp_hl();
-  auto op_push_rr(uint x);
-  auto op_pop_rr(uint x);
-
-  //8-bit arithmetic commands
-  auto opi_add_a(uint8 x);
-  auto op_add_a_r(uint x);
-  auto op_add_a_n();
-  auto op_add_a_hl();
-
-  auto opi_adc_a(uint8 x);
-  auto op_adc_a_r(uint x);
-  auto op_adc_a_n();
-  auto op_adc_a_hl();
-
-  auto opi_sub_a(uint8 x);
-  auto op_sub_a_r(uint x);
-  auto op_sub_a_n();
-  auto op_sub_a_hl();
-
-  auto opi_sbc_a(uint8 x);
-  auto op_sbc_a_r(uint x);
-  auto op_sbc_a_n();
-  auto op_sbc_a_hl();
-
-  auto opi_and_a(uint8 x);
-  auto op_and_a_r(uint x);
-  auto op_and_a_n();
-  auto op_and_a_hl();
-
-  auto opi_xor_a(uint8 x);
-  auto op_xor_a_r(uint x);
-  auto op_xor_a_n();
-  auto op_xor_a_hl();
-
-  auto opi_or_a(uint8 x);
-  auto op_or_a_r(uint x);
-  auto op_or_a_n();
-  auto op_or_a_hl();
-
-  auto opi_cp_a(uint8 x);
-  auto op_cp_a_r(uint x);
-  auto op_cp_a_n();
-  auto op_cp_a_hl();
-
-  auto op_inc_r(uint x);
-  auto op_inc_hl();
-  auto op_dec_r(uint x);
-  auto op_dec_hl();
-  auto op_daa();
-  auto op_cpl();
-
-  //16-bit arithmetic commands
-  auto op_add_hl_rr(uint x);
-  auto op_inc_rr(uint x);
-  auto op_dec_rr(uint x);
-  auto op_add_sp_n();
-  auto op_ld_hl_sp_n();
-
-  //rotate/shift commands
-  auto op_rlca();
-  auto op_rla();
-  auto op_rrca();
-  auto op_rra();
-  auto op_rlc_r(uint x);
-  auto op_rlc_hl();
-  auto op_rl_r(uint x);
-  auto op_rl_hl();
-  auto op_rrc_r(uint x);
-  auto op_rrc_hl();
-  auto op_rr_r(uint x);
-  auto op_rr_hl();
-  auto op_sla_r(uint x);
-  auto op_sla_hl();
-  auto op_swap_r(uint x);
-  auto op_swap_hl();
-  auto op_sra_r(uint x);
-  auto op_sra_hl();
-  auto op_srl_r(uint x);
-  auto op_srl_hl();
-
-  //single-bit commands
-  auto op_bit_n_r(uint b, uint x);
-  auto op_bit_n_hl(uint b);
-  auto op_set_n_r(uint b, uint x);
-  auto op_set_n_hl(uint b);
-  auto op_res_n_r(uint b, uint x);
-  auto op_res_n_hl(uint b);
-
-  //control commands
-  auto op_ccf();
-  auto op_scf();
-  auto op_nop();
-  auto op_halt();
-  auto op_stop();
-  auto op_di();
-  auto op_ei();
-
-  //jump commands
-  auto op_jp_nn();
-  auto op_jp_hl();
-  auto op_jp_f_nn(uint x, bool y);
-  auto op_jr_n();
-  auto op_jr_f_n(uint x, bool y);
-  auto op_call_nn();
-  auto op_call_f_nn(uint x, bool y);
-  auto op_ret();
-  auto op_ret_f(uint x, bool y);
-  auto op_reti();
-  auto op_rst_n(uint n);
-
   //disassembler.cpp
-  auto disassemble(uint16 pc) -> string;
-  auto disassembleOpcode(uint16 pc) -> string;
-  auto disassembleOpcodeCB(uint16 pc) -> string;
+  virtual auto readDebugger(uint16 address) -> uint8 { return 0; }
+  auto disassemble() -> string { return ""; }
+
+  //memory.cpp
+  auto operand() -> uint8;
+  auto operands() -> uint16;
+  auto load(uint16 address) -> uint16;
+  auto store(uint16 address, uint16 data) -> void;
+  auto pop() -> uint16;
+  auto push(uint16 data) -> void;
+
+  //algorithms.cpp
+  auto ADC(uint8, uint8) -> uint8;
+  auto ADD(uint8, uint8) -> uint8;
+  auto AND(uint8, uint8) -> uint8;
+  auto CP(uint8, uint8) -> void;
+  auto OR(uint8, uint8) -> uint8;
+  auto SBC(uint8, uint8) -> uint8;
+  auto SUB(uint8, uint8) -> uint8;
+  auto XOR(uint8, uint8) -> uint8;
+
+  //instructions.cpp
+  auto instructionADC_Direct_Data(uint8&) -> void;
+  auto instructionADC_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionADC_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionADD_Direct_Data(uint8&) -> void;
+  auto instructionADD_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionADD_Direct_Direct(uint16&, uint16&) -> void;
+  auto instructionADD_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionAND_Direct_Data(uint8&) -> void;
+  auto instructionAND_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionAND_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionCCF() -> void;
+  auto instructionCP_Direct_Data(uint8&) -> void;
+  auto instructionCP_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionCP_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionCPL() -> void;
+  auto instructionDAA() -> void;
+  auto instructionDEC_Direct(uint8&) -> void;
+  auto instructionDEC_Direct(uint16&) -> void;
+  auto instructionDEC_Indirect(uint16&) -> void;
+  auto instructionDI() -> void;
+  auto instructionEI() -> void;
+  auto instructionHALT() -> void;
+  auto instructionINC_Direct(uint8&) -> void;
+  auto instructionINC_Direct(uint16&) -> void;
+  auto instructionINC_Indirect(uint16&) -> void;
+  auto instructionJR_Condition_Relative(bool) -> void;
+  auto instructionLD_Address_Direct(uint16&) -> void;
+  auto instructionLD_Direct_Data(uint8&) -> void;
+  auto instructionLD_Direct_Data(uint16&) -> void;
+  auto instructionLD_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionLD_Direct_Indirect(uint8&, uint8&) -> void;
+  auto instructionLD_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionLD_Direct_IndirectDecrement(uint8&, uint16&) -> void;
+  auto instructionLD_Direct_IndirectIncrement(uint8&, uint16&) -> void;
+  auto instructionLD_Indirect_Data(uint16&) -> void;
+  auto instructionLD_Indirect_Direct(uint8&, uint8&) -> void;
+  auto instructionLD_Indirect_Direct(uint16&, uint8&) -> void;
+  auto instructionLD_IndirectDecrement_Direct(uint16&, uint8&) -> void;
+  auto instructionLD_IndirectIncrement_Direct(uint16&, uint8&) -> void;
+  auto instructionNOP() -> void;
+  auto instructionOR_Direct_Data(uint8&) -> void;
+  auto instructionOR_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionOR_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionRET_Condition(bool) -> void;
+  auto instructionRL_Direct(uint8&) -> void;
+  auto instructionRLC_Direct(uint8&) -> void;
+  auto instructionRR_Direct(uint8&) -> void;
+  auto instructionRRC_Direct(uint8&) -> void;
+  auto instructionSBC_Direct_Data(uint8&) -> void;
+  auto instructionSBC_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionSBC_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionSCF() -> void;
+  auto instructionSUB_Direct_Data(uint8&) -> void;
+  auto instructionSUB_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionSUB_Direct_Indirect(uint8&, uint16&) -> void;
+  auto instructionSTOP() -> void;
+  auto instructionXOR_Direct_Data(uint8&) -> void;
+  auto instructionXOR_Direct_Direct(uint8&, uint8&) -> void;
+  auto instructionXOR_Direct_Indirect(uint8&, uint16&) -> void;
+
+  struct Registers {
+    union Pair {
+      Pair() : word(0) {}
+      uint16 word;
+      struct Byte { uint8 order_msb2(hi, lo); } byte;
+    };
+
+    Pair af;
+    Pair bc;
+    Pair de;
+    Pair hl;
+    Pair sp;
+    Pair pc;
+
+    uint1 ei;
+    uint1 halt;
+    uint1 stop;
+    uint1 ime;
+  } r;
 };
 
 }

@@ -3,15 +3,16 @@
 
 namespace Processor {
 
-#include "registers.cpp"
-#include "memory.cpp"
-#include "algorithms.cpp"
-#include "instruction.cpp"
 #include "instructions.cpp"
+#include "instruction.cpp"
 #include "serialization.cpp"
+#include "disassembler.cpp"
 
 auto LR35902::power() -> void {
-  r = {};
+  r.halt = false;
+  r.stop = false;
+  r.ei = false;
+  r.ime = false;
 }
 
 }
