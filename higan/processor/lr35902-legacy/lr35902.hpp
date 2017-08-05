@@ -5,10 +5,12 @@
 namespace Processor {
 
 struct LR35902 {
-  virtual auto io() -> void = 0;
+  virtual auto idle() -> void = 0;
   virtual auto read(uint16 addr) -> uint8 = 0;
   virtual auto write(uint16 addr, uint8 data) -> void = 0;
   virtual auto stop() -> bool = 0;
+
+  auto io() -> void { idle(); }
 
   //lr35902.cpp
   auto power() -> void;

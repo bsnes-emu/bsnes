@@ -98,7 +98,7 @@ struct Registers {
   bool ei;
   bool ime;
 
-  Register& operator[](uint r) {
+  auto operator[](uint r) -> Register& {
     static Register* const table[] = {&a, &f, &af, &b, &c, &bc, &d, &e, &de, &h, &l, &hl, &sp, &pc};
     return *table[r];
   }

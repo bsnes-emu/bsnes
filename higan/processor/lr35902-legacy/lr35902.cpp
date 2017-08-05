@@ -9,6 +9,13 @@ namespace Processor {
 #include "disassembler.cpp"
 
 auto LR35902::power() -> void {
+  r[AF] = 0x0000;
+  r[BC] = 0x0000;
+  r[DE] = 0x0000;
+  r[HL] = 0x0000;
+  r[SP] = 0x0000;
+  r[PC] = 0x0000;
+
   r.halt = false;
   r.stop = false;
   r.ei = false;

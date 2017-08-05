@@ -2,11 +2,11 @@ auto LR35902::disassemble(uint16 pc) -> string {
   return {
     hex(pc, 4L), "  ",
     pad(disassembleOpcode(pc), -16, ' '), "  ",
-    " AF:", hex(r[AF], 4L),
-    " BC:", hex(r[BC], 4L),
-    " DE:", hex(r[DE], 4L),
-    " HL:", hex(r[HL], 4L),
-    " SP:", hex(r[SP], 4L)
+    " AF:", hex(AF, 4L),
+    " BC:", hex(BC, 4L),
+    " DE:", hex(DE, 4L),
+    " HL:", hex(HL, 4L),
+    " SP:", hex(SP, 4L)
   };
 }
 
@@ -264,7 +264,7 @@ auto LR35902::disassembleOpcode(uint16 pc) -> string {
   case 0xff: return {"rst  $0038"};
   }
 
-  return "xx";
+  return {"xx"};
 }
 
 auto LR35902::disassembleOpcodeCB(uint16 pc) -> string {

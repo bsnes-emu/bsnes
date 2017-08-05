@@ -9,6 +9,7 @@ namespace Processor {
 #include "instruction.cpp"
 #include "instructions.cpp"
 #include "serialization.cpp"
+#include "disassembler.cpp"
 
 auto LR35902::power() -> void {
   r = {};
