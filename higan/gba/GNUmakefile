@@ -1,4 +1,4 @@
-processors += arm
+processors += arm arm7tdmi
 
 objects += gba-memory gba-interface gba-system
 objects += gba-cartridge gba-player

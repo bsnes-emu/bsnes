@@ -13,7 +13,7 @@ namespace Processor {
 
 auto ARM::power() -> void {
   processor.power();
-  vector(0x00000000, Processor::Mode::SVC);
+  interrupt(Processor::Mode::SVC, 0x00);
   pipeline.reload = true;
   pipeline.nonsequential = true;
   crash = false;
@@ -31,16 +31,16 @@ auto ARM::exec() -> void {
 
 auto ARM::idle() -> void {
   pipeline.nonsequential = true;
-  return _idle();
+  return sleep();
 }
 
 auto ARM::read(uint mode, uint32 addr) -> uint32 {
-  return _read(mode, addr);
+  return get(mode, addr);
 }
 
 auto ARM::load(uint mode, uint32 addr) -> uint32 {
   pipeline.nonsequential = true;
-  uint32 word = _read(Load | mode, addr);
+  uint32 word = get(Load | mode, addr);
 
   if(mode & Half) {
     addr &= 1;
@@ -64,7 +64,7 @@ auto ARM::load(uint mode, uint32 addr) -> uint32 {
 
 auto ARM::write(uint mode, uint32 addr, uint32 word) -> void {
   pipeline.nonsequential = true;
-  return _write(mode, addr, word);
+  return set(mode, addr, word);
 }
 
 auto ARM::store(uint mode, uint32 addr, uint32 word) -> void {
@@ -73,10 +73,10 @@ auto ARM::store(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Half) { word &= 0xffff; word |= word << 16; }
   if(mode & Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
 
-  return _write(Store | mode, addr, word);
+  return set(Store | mode, addr, word);
 }
 
-auto ARM::vector(uint32 addr, Processor::Mode mode) -> void {
+auto ARM::interrupt(Processor::Mode mode, uint32 addr) -> void {
   auto psr = cpsr();
   processor.setMode(mode);
   spsr() = psr;

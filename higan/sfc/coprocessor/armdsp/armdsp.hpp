@@ -11,9 +11,9 @@ struct ArmDSP : Processor::ARM, Thread {
   auto main() -> void;
 
   auto step(uint clocks) -> void override;
-  auto _idle() -> void override;
-  auto _read(uint mode, uint32 addr) -> uint32 override;
-  auto _write(uint mode, uint32 addr, uint32 word) -> void override;
+  auto sleep() -> void override;
+  auto get(uint mode, uint32 addr) -> uint32 override;
+  auto set(uint mode, uint32 addr, uint32 word) -> void override;
 
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;

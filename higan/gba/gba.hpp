@@ -8,6 +8,7 @@
 #include <emulator/scheduler.hpp>
 
 #include <processor/arm/arm.hpp>
+#include <processor/arm7tdmi/arm7tdmi.hpp>
 
 namespace GameBoyAdvance {
   #define platform Emulator::platform

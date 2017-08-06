@@ -1,8 +1,8 @@
-auto CPU::_idle() -> void {
+auto CPU::sleep() -> void {
   prefetchStep(1);
 }
 
-auto CPU::_read(uint mode, uint32 addr) -> uint32 {
+auto CPU::get(uint mode, uint32 addr) -> uint32 {
   uint clocks = _wait(mode, addr);
   uint word = pipeline.fetch.instruction;
 
@@ -35,7 +35,7 @@ auto CPU::_read(uint mode, uint32 addr) -> uint32 {
   return word;
 }
 
-auto CPU::_write(uint mode, uint32 addr, uint32 word) -> void {
+auto CPU::set(uint mode, uint32 addr, uint32 word) -> void {
   uint clocks = _wait(mode, addr);
 
   if(addr >= 0x1000'0000) {

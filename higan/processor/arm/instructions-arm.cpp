@@ -598,5 +598,5 @@ auto ARM::arm_op_branch() {
 auto ARM::arm_op_software_interrupt() {
   uint24 immediate = instruction();
 
-  vector(0x00000008, Processor::Mode::SVC);
+  interrupt(Processor::Mode::SVC, 0x08);
 }

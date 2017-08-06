@@ -328,7 +328,7 @@ auto ARM::thumb_op_move_multiple() {
 auto ARM::thumb_op_software_interrupt() {
   uint8 immediate = instruction();
 
-  vector(0x00000008, Processor::Mode::SVC);
+  interrupt(Processor::Mode::SVC, 0x08);
 }
 
 //b{condition}

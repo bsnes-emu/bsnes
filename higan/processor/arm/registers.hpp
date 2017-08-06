@@ -55,13 +55,18 @@ struct Pipeline {
 
 struct Processor {
   enum class Mode : uint {
-    USR = 0x10,  //user
-    FIQ = 0x11,  //fast interrupt request
-    IRQ = 0x12,  //interrupt request
-    SVC = 0x13,  //supervisor (software interrupt)
-    ABT = 0x17,  //abort
-    UND = 0x1b,  //undefined
-    SYS = 0x1f,  //system
+    USR26 = 0x00,  //26-bit user
+    FIQ26 = 0x01,  //26-bit fast-interrupt
+    IRQ26 = 0x02,  //26-bit interrupt
+    SVC26 = 0x03,  //26-bit service
+
+    USR   = 0x10,  //user
+    FIQ   = 0x11,  //fast-interrupt
+    IRQ   = 0x12,  //interrupt
+    SVC   = 0x13,  //service
+    ABT   = 0x17,  //abort
+    UND   = 0x1b,  //undefined
+    SYS   = 0x1f,  //system
   };
 
   GPR r0, r1, r2, r3, r4, r5, r6, r7;

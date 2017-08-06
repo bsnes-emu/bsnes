@@ -38,9 +38,9 @@ struct CPU : Processor::ARM, Thread, IO {
   auto prefetchRead() -> uint16;
 
   //bus.cpp
-  auto _idle() -> void override;
-  auto _read(uint mode, uint32 addr) -> uint32 override;
-  auto _write(uint mode, uint32 addr, uint32 word) -> void override;
+  auto sleep() -> void override;
+  auto get(uint mode, uint32 addr) -> uint32 override;
+  auto set(uint mode, uint32 addr, uint32 word) -> void override;
   auto _wait(uint mode, uint32 addr) -> uint;
 
   //io.cpp

@@ -1,11 +1,11 @@
 //note: timings are completely unverified
 //due to the ST018 chip design (on-die ROM), testing is nearly impossible
 
-auto ArmDSP::_idle() -> void {
+auto ArmDSP::sleep() -> void {
   step(1);
 }
 
-auto ArmDSP::_read(uint mode, uint32 addr) -> uint32 {
+auto ArmDSP::get(uint mode, uint32 addr) -> uint32 {
   step(1);
 
   static auto memory = [&](const uint8* memory, uint mode, uint32 addr) -> uint32 {
@@ -46,7 +46,7 @@ auto ArmDSP::_read(uint mode, uint32 addr) -> uint32 {
   return 0;
 }
 
-auto ArmDSP::_write(uint mode, uint32 addr, uint32 word) -> void {
+auto ArmDSP::set(uint mode, uint32 addr, uint32 word) -> void {
   step(1);
 
   static auto memory = [](uint8* memory, uint mode, uint32 addr, uint32 word) {

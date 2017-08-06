@@ -25,9 +25,9 @@ struct ARM {
   #include "disassembler.hpp"
 
   virtual auto step(uint clocks) -> void = 0;
-  virtual auto _idle() -> void = 0;
-  virtual auto _read(uint mode, uint32 addr) -> uint32 = 0;
-  virtual auto _write(uint mode, uint32 addr, uint32 word) -> void = 0;
+  virtual auto sleep() -> void = 0;
+  virtual auto get(uint mode, uint32 addr) -> uint32 = 0;
+  virtual auto set(uint mode, uint32 addr, uint32 word) -> void = 0;
 
   //arm.cpp
   auto power() -> void;
@@ -37,7 +37,7 @@ struct ARM {
   auto load(uint mode, uint32 addr) -> uint32;
   auto write(uint mode, uint32 addr, uint32 word) -> void;
   auto store(uint mode, uint32 addr, uint32 word) -> void;
-  auto vector(uint32 addr, Processor::Mode mode) -> void;
+  auto interrupt(Processor::Mode mode, uint32 addr) -> void;
 
   //algorithms.cpp
   auto condition(uint4 condition) -> bool;

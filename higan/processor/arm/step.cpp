@@ -33,7 +33,7 @@ auto ARM::stepARM() -> void {
   stepPipeline();
 
   if(processor.irqline && cpsr().i == 0) {
-    vector(0x00000018, Processor::Mode::IRQ);
+    interrupt(Processor::Mode::IRQ, 0x18);
     return;
   }
 
@@ -90,8 +90,8 @@ auto ARM::stepTHUMB() -> void {
   stepPipeline();
 
   if(processor.irqline && cpsr().i == 0) {
-    vector(0x00000018, Processor::Mode::IRQ);
-    r(14) += 2;
+    interrupt(Processor::Mode::IRQ, 0x18);
+    r(14).data += 2;
     return;
   }
 

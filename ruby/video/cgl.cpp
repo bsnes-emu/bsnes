@@ -78,7 +78,7 @@ struct VideoCGL : Video, OpenGL {
     if(!ready()) return;
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
-        auto area = [view frame];
+        auto area = [view convertRectToBacking:[view bounds]];
         OpenGL::outputWidth = area.size.width;
         OpenGL::outputHeight = area.size.height;
         OpenGL::output();
@@ -110,6 +110,7 @@ private:
       [view setOpenGLContext:context];
       [view setFrame:NSMakeRect(0, 0, size.width, size.height)];
       [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+      [view setWantsBestResolutionOpenGLSurface:YES];
       [_context addSubview:view];
       [context setView:view];
 
