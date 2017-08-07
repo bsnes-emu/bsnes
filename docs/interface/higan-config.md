@@ -1,3 +1,5 @@
+TODO: Rename this file to "higan-settings.md"
+
 The Settings window
 appears when you choose
 one of the items at the bottom of
