@@ -80,6 +80,11 @@ while higan waits for a video frame to be shown,
 and video is likely to stutter
 while higan waits for an audio buffer to complete.
 
+Games run too slow
+------------------
+
+TODO: pin the CPU governor on Linux, get a faster computer, try different audio drivers.
+
 Games run too fast
 ------------------
 
