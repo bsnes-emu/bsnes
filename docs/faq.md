@@ -80,13 +80,78 @@ while higan waits for a video frame to be shown,
 and video is likely to stutter
 while higan waits for an audio buffer to complete.
 
-This game is running too fast!
-------------------------------
+Games run too fast
+------------------
 
-TODO
+higan runs as fast as it can,
+but it will pause and wait
+for the audio and video drivers to catch up
+if [Synchronize Audio](interface/higan.md#the-settings-menu)
+and [video synchronization][vsync]
+are enabled, respectively.
+If games are running way too fast, here's some things to check:
 
-games run in fast-forward if there's no audio device
-https://board.byuu.org/viewtopic.php?p=44138#p44138
+  - Make sure "Synchronize Audio" is ticked in
+    [the Settings menu](interface/higan.md#the-settings-menu)
+  - Make sure the Audio driver is not set to "None"
+    in [the Advanced settings](interface/higan-config.md#advanced)
+    (remember to restart higan if you change driver settings)
+  - Make sure your computer has speakers or headphones connected
+    (some computers disable all audio if no ouputs are available)
+      - If you want the game to be silent,
+        tick "Mute Audio" in
+        [the Settings menu](interface/higan.md#the-settings-menu)
 
-Can I run higan on a phone or tablet?
--------------------------------------
+[vsync]: #i-see-tearing-when-a-game-scrolls-how-can-i-enable-vsync
+
+Why is higan so much slower than other emulators?
+-------------------------------------------------
+
+The consoles higan emulates
+generally contain different devices
+(say, a CPU, an audio chip and a video chip)
+that do their own thing,
+but can interrupt each other at any time.
+Games can and do depend on timing details like
+"when the audio chip is done playing this sound,
+it will interrupt the CPU at exactly the right time
+for the CPU to fiddle with the video chip".
+higan is therefore very cautious about timing:
+it always checks all possible devices
+to see if anyone wants to interrupt anyone else
+before proceeding to the next emulated step.
+Although repeated checking is slow,
+higan checks anyway
+to ensure the emulated console
+always matches the behaviour
+of the original.
+
+Other emulators,
+especially ones that are popular on phones and tablets,
+typically work differently.
+Although emulated devices *can* interrupt each other at any time,
+usually they don't,
+and often the only exceptions are a handful of unpopular games.
+So it's pretty safe
+(and much, much more efficient)
+to let certain devices run "ahead" of the others.
+For example,
+letting the video chip render an entire scanline at a time
+instead of working pixel-by-pixel.
+The downside is that some games don't work properly
+in these emulators,
+with game-breaking bugs,
+minor visual glitches,
+or anything in between.
+
+Some emulators try to recognise
+when the user loads a specific problematic game,
+and will adjust the shortcuts the emulator takes
+so that the game runs correctly.
+This is a good way to increase game compatibility
+without losing efficiency,
+but it means the emulator does not accurately reflect
+how the original console worked,
+and it requires the emulator authors to diagnose and work around
+each individual supported game,
+instead of having one emulator that works for everything.
