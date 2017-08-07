@@ -81,7 +81,7 @@ auto ARM::disassembleInstructionARM(uint32 pc) -> string {
     uint4 rm = instruction;
 
     output.append("swp", conditions[condition], byte ? "b " : " ");
-    output.append(registers[rd], ",", registers[rm], "[", registers[rn], "]");
+    output.append(registers[rd], ",", registers[rm], ",[", registers[rn], "]");
 
     return output;
   }

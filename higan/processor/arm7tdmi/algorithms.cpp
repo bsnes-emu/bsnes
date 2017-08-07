@@ -1,6 +1,6 @@
-auto ARM7TDMI::ADD(uint32 source, uint32 modify, bool carry, bool updateFlags) -> uint32 {
+auto ARM7TDMI::ADD(uint32 source, uint32 modify, bool carry) -> uint32 {
   uint32 result = source + modify + carry;
-  if(updateFlags) {
+  if(cpsr().t || opcode.bit(20)) {
     uint32 overflow = ~(source ^ modify) & (source ^ result);
     cpsr().v = 1 << 31 & (overflow);
     cpsr().c = 1 << 31 & (overflow ^ source ^ modify ^ result);
@@ -18,8 +18,8 @@ auto ARM7TDMI::ASR(uint32 source, uint8 shift) -> uint32 {
   return source;
 }
 
-auto ARM7TDMI::BIT(uint32 result, bool updateFlags) -> uint32 {
-  if(updateFlags) {
+auto ARM7TDMI::BIT(uint32 result) -> uint32 {
+  if(cpsr().t || opcode.bit(20)) {
     cpsr().c = carry;
     cpsr().z = result == 0;
     cpsr().n = result.bit(31);
@@ -43,13 +43,13 @@ auto ARM7TDMI::LSR(uint32 source, uint8 shift) -> uint32 {
   return source;
 }
 
-auto ARM7TDMI::MUL(uint32 product, uint32 multiplicand, uint32 multiplier, bool updateFlags) -> uint32 {
+auto ARM7TDMI::MUL(uint32 product, uint32 multiplicand, uint32 multiplier) -> uint32 {
   idle();
   if(multiplier >>  8 && multiplier >>  8 != 0xffffff) idle();
   if(multiplier >> 16 && multiplier >> 16 !=   0xffff) idle();
   if(multiplier >> 24 && multiplier >> 24 !=     0xff) idle();
   product += multiplicand * multiplier;
-  if(updateFlags) {
+  if(cpsr().t || opcode.bit(20)) {
     cpsr().z = product == 0;
     cpsr().n = product.bit(31);
   }
@@ -69,8 +69,8 @@ auto ARM7TDMI::RRX(uint32 source) -> uint32 {
   return cpsr().c << 31 | source >> 1;
 }
 
-auto ARM7TDMI::SUB(uint32 source, uint32 modify, bool carry, bool updateFlags) -> uint32 {
-  return ADD(source, ~modify, carry, updateFlags);
+auto ARM7TDMI::SUB(uint32 source, uint32 modify, bool carry) -> uint32 {
+  return ADD(source, ~modify, carry);
 }
 
 auto ARM7TDMI::TST(uint4 mode) -> bool {

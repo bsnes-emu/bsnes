@@ -18,3 +18,13 @@ auto ARM7TDMI::thumbALU(uint4 mode, uint4 target, uint4 source) -> void {
   case 15: r(target) = BIT(~r(source));                     break;  //MVN
   }
 }
+
+//
+
+auto ARM7TDMI::thumbInstructionAdjustRegister
+(uint3 d, uint3 n, uint3 m, uint1 mode) -> void {
+  switch(mode) {
+  case 0: r(d) = ADD(r(n), r(m), 0); break;
+  case 1: r(d) = SUB(r(n), r(m), 1); break;
+  }
+}
