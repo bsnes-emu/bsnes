@@ -496,7 +496,6 @@ auto ARM::arm_op_move_register_offset() {
   uint32 rd = r(d);
   uint32 rs = immediate;
   uint32 rm = r(m);
-  bool c = cpsr().c;
 
   if(mode == 0) rm = lsl(rm, rs);
   if(mode == 1) rm = lsr(rm, rs ? rs : (uint32)32);

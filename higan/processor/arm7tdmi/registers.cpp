@@ -34,28 +34,6 @@ auto ARM7TDMI::r(uint4 index) -> GPR& {
   unreachable;
 }
 
-auto ARM7TDMI::u(uint4 index) -> GPR& {
-  switch(index) {
-  case  0: return processor.r0;
-  case  1: return processor.r1;
-  case  2: return processor.r2;
-  case  3: return processor.r3;
-  case  4: return processor.r4;
-  case  5: return processor.r5;
-  case  6: return processor.r6;
-  case  7: return processor.r7;
-  case  8: return processor.r8;
-  case  9: return processor.r9;
-  case 10: return processor.r10;
-  case 11: return processor.r11;
-  case 12: return processor.r12;
-  case 13: return processor.r13;
-  case 14: return processor.r14;
-  case 15: return processor.r15;
-  }
-  unreachable;
-}
-
 auto ARM7TDMI::cpsr() -> PSR& {
   return processor.cpsr;
 }

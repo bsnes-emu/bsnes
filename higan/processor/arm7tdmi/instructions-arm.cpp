@@ -46,11 +46,56 @@ auto ARM7TDMI::armMoveToStatus(uint4 field, uint1 mode, uint32 data) -> void {
 
 //
 
+auto ARM7TDMI::armInstructionBranch
+(int24 displacement, uint1 link) -> void {
+  if(link) r(14) = r(15) - 4;
+  r(15) = r(15) + displacement * 4;
+}
+
 auto ARM7TDMI::armInstructionBranchExchangeRegister
 (uint4 m) -> void {
   uint32 address = r(m);
   cpsr().t = address.bit(0);
   r(15) = address;
+}
+
+auto ARM7TDMI::armInstructionDataImmediate
+(uint8 immediate, uint4 shift, uint4 d, uint4 n, uint1 save, uint4 mode) -> void {
+  uint32 data = immediate;
+  carry = cpsr().c;
+  if(shift) data = ROR(data, shift << 1);
+  armALU(mode, d, n, data);
+}
+
+auto ARM7TDMI::armInstructionDataImmediateShift
+(uint4 m, uint2 type, uint5 shift, uint4 d, uint4 n, uint1 save, uint4 mode) -> void {
+  uint32 rm = r(m);
+  carry = cpsr().c;
+
+  switch(type) {
+  case 0: rm = LSL(rm, shift); break;
+  case 1: rm = LSR(rm, shift ? (uint)shift : 32); break;
+  case 2: rm = ASR(rm, shift ? (uint)shift : 32); break;
+  case 3: rm = shift ? ROR(rm, shift) : RRX(rm); break;
+  }
+
+  armALU(mode, d, n, rm);
+}
+
+auto ARM7TDMI::armInstructionDataRegisterShift
+(uint4 m, uint2 type, uint4 s, uint4 d, uint4 n, uint1 save, uint4 mode) -> void {
+  uint8 rs = r(s) + (s == 15 ? 4 : 0);
+  uint32 rm = r(m) + (m == 15 ? 4 : 0);
+  carry = cpsr().c;
+
+  switch(type) {
+  case 0: rm = LSL(rm, rs < 33 ? rs : (uint8)33); break;
+  case 1: rm = LSR(rm, rs < 33 ? rs : (uint8)33); break;
+  case 2: rm = ASR(rm, rs < 32 ? rs : (uint8)32); break;
+  case 3: if(rs) rm = ROR(rm, rs & 31 ? rs & 31 : 32); break;
+  }
+
+  armALU(mode, d, n, rm);
 }
 
 auto ARM7TDMI::armInstructionLoadImmediate
@@ -116,6 +161,87 @@ auto ARM7TDMI::armInstructionMoveHalfRegister
   if(mode == 1) r(d) = rd;
 }
 
+auto ARM7TDMI::armInstructionMoveImmediateOffset
+(uint12 immediate, uint4 d, uint4 n, uint1 mode, uint1 writeback, uint1 byte, uint1 up, uint1 pre) -> void {
+  uint32 rn = r(n);
+  uint32 rd = r(d);
+
+  if(pre == 1) rn = up ? rn + immediate : rn - immediate;
+  if(mode == 1) rd = load((byte ? Byte : Word) | Nonsequential, rn);
+  if(mode == 0) store((byte ? Byte : Word) | Nonsequential, rn, rd);
+  if(pre == 0) rn = up ? rn + immediate : rn - immediate;
+
+  if(pre == 0 || writeback) r(n) = rn;
+  if(mode == 1) r(d) = rd;
+}
+
+auto ARM7TDMI::armInstructionMoveMultiple
+(uint16 list, uint4 n, uint1 mode, uint1 writeback, uint1 type, uint1 up, uint1 pre) -> void {
+  uint32 rn = r(n);
+  if(pre == 0 && up == 1) rn = rn + 0;  //IA
+  if(pre == 1 && up == 1) rn = rn + 4;  //IB
+  if(pre == 1 && up == 0) rn = rn - bit::count(list) * 4 + 0;  //DB
+  if(pre == 0 && up == 0) rn = rn - bit::count(list) * 4 + 4;  //DA
+
+  if(writeback && mode == 1) {
+    if(up == 1) r(n) = r(n) + bit::count(list) * 4;  //IA,IB
+    if(up == 0) r(n) = r(n) - bit::count(list) * 4;  //DA,DB
+  }
+
+  auto cpsrMode = cpsr().m;
+  bool usr = false;
+  if(type && mode == 1 && !list.bit(15)) usr = true;
+  if(type && mode == 0) usr = true;
+  if(usr) cpsr().m = PSR::USR;
+
+  uint sequential = Nonsequential;
+  for(uint m : range(16)) {
+    if(!list.bit(m)) continue;
+    if(mode == 1) r(m) = read(Word | sequential, rn);
+    if(mode == 0) write(Word | sequential, rn, r(m));
+    rn += 4;
+    sequential = Sequential;
+  }
+
+  if(usr) cpsr().m = cpsrMode;
+
+  if(mode) {
+    idle();
+    if(type && list.bit(15) && cpsr().m != PSR::USR && cpsr().m != PSR::SYS) {
+      cpsr() = spsr();
+    }
+  } else {
+    pipeline.nonsequential = true;
+  }
+
+  if(writeback && mode == 0) {
+    if(up == 1) r(n) = r(n) + bit::count(list) * 4;  //IA,IB
+    if(up == 0) r(n) = r(n) - bit::count(list) * 4;  //DA,DB
+  }
+}
+
+auto ARM7TDMI::armInstructionMoveRegisterOffset
+(uint4 m, uint2 type, uint5 shift, uint4 d, uint4 n, uint1 mode, uint1 writeback, uint1 byte, uint1 up, uint1 pre) -> void {
+  uint32 rm = r(m);
+  uint32 rd = r(d);
+  uint32 rn = r(n);
+
+  switch(type) {
+  case 0: rm = LSL(rm, shift); break;
+  case 1: rm = LSR(rm, shift ? (uint)shift : 32); break;
+  case 2: rm = ASR(rm, shift ? (uint)shift : 32); break;
+  case 3: rm = shift ? ROR(rm, shift) : RRX(rm); break;
+  }
+
+  if(pre == 1) rn = up ? rn + rm : rn - rm;
+  if(mode == 1) rd = load((byte ? Byte : Word) | Nonsequential, rn);
+  if(mode == 0) store((byte ? Byte : Word) | Nonsequential, rn, rd);
+  if(pre == 0) rn = up ? rn + rm : rn - rm;
+
+  if(pre == 0 || writeback) r(n) = rn;
+  if(mode == 1) r(d) = rd;
+}
+
 auto ARM7TDMI::armInstructionMoveToRegisterFromStatus
 (uint4 d, uint1 mode) -> void {
   if(mode && (cpsr().m == PSR::USR || cpsr().m == PSR::SYS)) return;
@@ -171,4 +297,9 @@ auto ARM7TDMI::armInstructionMultiplyLong
     cpsr().z = rd == 0;
     cpsr().n = rd.bit(63);
   }
+}
+
+auto ARM7TDMI::armInstructionSoftwareInterrupt
+(uint24 immediate) -> void {
+  interrupt(PSR::SVC, 0x08);
 }

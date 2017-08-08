@@ -31,7 +31,6 @@ struct ARM7TDMI {
   struct GPR;
   struct PSR;
   inline auto r(uint4) -> GPR&;
-  inline auto u(uint4) -> GPR&;
   inline auto cpsr() -> PSR&;
   inline auto spsr() -> PSR&;
   inline auto privileged() const -> bool;
@@ -67,22 +66,33 @@ struct ARM7TDMI {
   auto armALU(uint4 mode, uint4 target, uint4 source, uint32 data) -> void;
   auto armMoveToStatus(uint4 field, uint1 source, uint32 data) -> void;
 
+  auto armInstructionBranch(int24, uint1) -> void;
   auto armInstructionBranchExchangeRegister(uint4) -> void;
+  auto armInstructionDataImmediate(uint8, uint4, uint4, uint4, uint1, uint4) -> void;
+  auto armInstructionDataImmediateShift(uint4, uint2, uint5, uint4, uint4, uint1, uint4) -> void;
+  auto armInstructionDataRegisterShift(uint4, uint2, uint4, uint4, uint4, uint1, uint4) -> void;
   auto armInstructionLoadImmediate(uint8, uint1, uint4, uint4, uint1, uint1, uint1) -> void;
   auto armInstructionLoadRegister(uint4, uint1, uint4, uint4, uint1, uint1, uint1) -> void;
   auto armInstructionMemorySwap(uint4, uint4, uint4, uint1) -> void;
   auto armInstructionMoveHalfImmediate(uint8, uint4, uint4, uint1, uint1, uint1, uint1) -> void;
   auto armInstructionMoveHalfRegister(uint4, uint4, uint4, uint1, uint1, uint1, uint1) -> void;
+  auto armInstructionMoveImmediateOffset(uint12, uint4, uint4, uint1, uint1, uint1, uint1, uint1) -> void;
+  auto armInstructionMoveMultiple(uint16, uint4, uint1, uint1, uint1, uint1, uint1) -> void;
+  auto armInstructionMoveRegisterOffset(uint4, uint2, uint5, uint4, uint4, uint1, uint1, uint1, uint1, uint1) -> void;
   auto armInstructionMoveToRegisterFromStatus(uint4, uint1) -> void;
   auto armInstructionMoveToStatusFromImmediate(uint8, uint4, uint4, uint1) -> void;
   auto armInstructionMoveToStatusFromRegister(uint4, uint4, uint1) -> void;
   auto armInstructionMultiply(uint4, uint4, uint4, uint4, uint1, uint1) -> void;
   auto armInstructionMultiplyLong(uint4, uint4, uint4, uint4, uint1, uint1, uint1) -> void;
+  auto armInstructionSoftwareInterrupt(uint24 immediate) -> void;
 
   //instructions-thumb.cpp
-  auto thumbALU(uint4 mode, uint4 target, uint4 source) -> void;
-
+  auto thumbInstructionALU(uint3, uint3, uint4) -> void;
+  auto thumbInstructionAdjustImmediate(uint3, uint3, uint3, uint1) -> void;
   auto thumbInstructionAdjustRegister(uint3, uint3, uint3, uint1) -> void;
+  auto thumbInstructionBranchExchange(uint4) -> void;
+  auto thumbInstructionImmediate(uint8, uint3, uint2) -> void;
+  auto thumbInstructionShiftImmediate(uint3, uint3, uint5, uint2) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -210,19 +220,32 @@ struct ARM7TDMI {
   function<string ()> thumbDisassemble[65536];
 
   //disassembler.cpp
+  auto armDisassembleBranch(int24, uint1) -> string;
   auto armDisassembleBranchExchangeRegister(uint4) -> string;
+  auto armDisassembleDataImmediate(uint8, uint4, uint4, uint4, uint1, uint4) -> string;
+  auto armDisassembleDataImmediateShift(uint4, uint2, uint5, uint4, uint4, uint1, uint4) -> string;
+  auto armDisassembleDataRegisterShift(uint4, uint2, uint4, uint4, uint4, uint1, uint4) -> string;
   auto armDisassembleLoadImmediate(uint8, uint1, uint4, uint4, uint1, uint1, uint1) -> string;
   auto armDisassembleLoadRegister(uint4, uint1, uint4, uint4, uint1, uint1, uint1) -> string;
   auto armDisassembleMemorySwap(uint4, uint4, uint4, uint1) -> string;
   auto armDisassembleMoveHalfImmediate(uint8, uint4, uint4, uint1, uint1, uint1, uint1) -> string;
   auto armDisassembleMoveHalfRegister(uint4, uint4, uint4, uint1, uint1, uint1, uint1) -> string;
+  auto armDisassembleMoveImmediateOffset(uint12, uint4, uint4, uint1, uint1, uint1, uint1, uint1) -> string;
+  auto armDisassembleMoveMultiple(uint16, uint4, uint1, uint1, uint1, uint1, uint1) -> string;
+  auto armDisassembleMoveRegisterOffset(uint4, uint2, uint5, uint4, uint4, uint1, uint1, uint1, uint1, uint1) -> string;
   auto armDisassembleMoveToRegisterFromStatus(uint4, uint1) -> string;
   auto armDisassembleMoveToStatusFromImmediate(uint8, uint4, uint4, uint1) -> string;
   auto armDisassembleMoveToStatusFromRegister(uint4, uint4, uint1) -> string;
   auto armDisassembleMultiply(uint4, uint4, uint4, uint4, uint1, uint1) -> string;
   auto armDisassembleMultiplyLong(uint4, uint4, uint4, uint4, uint1, uint1, uint1) -> string;
+  auto armDisassembleSoftwareInterrupt(uint24) -> string;
 
+  auto thumbDisassembleALU(uint3, uint3, uint4) -> string;
+  auto thumbDisassembleAdjustImmediate(uint3, uint3, uint3, uint1) -> string;
   auto thumbDisassembleAdjustRegister(uint3, uint3, uint3, uint1) -> string;
+  auto thumbDisassembleBranchExchange(uint4) -> string;
+  auto thumbDisassembleImmediate(uint8, uint3, uint2) -> string;
+  auto thumbDisassembleShiftImmediate(uint3, uint3, uint5, uint2) -> string;
 };
 
 }

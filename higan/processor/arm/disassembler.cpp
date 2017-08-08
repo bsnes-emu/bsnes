@@ -301,7 +301,7 @@ auto ARM::disassembleInstructionARM(uint32 pc) -> string {
 
     output.append(opcodes[opcode], conditions[condition]);
     if(isMove(opcode)) output.append(save ? "s " : " ", registers[rd], ",");
-    if(isComp(opcode)) output.append(registers[rn], ",");
+    if(isComp(opcode)) output.append(" ", registers[rn], ",");
     if(isMath(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn], ",");
     output.append(registers[rm]);
     if(mode == 0) output.append(" lsl ");
@@ -357,7 +357,7 @@ auto ARM::disassembleInstructionARM(uint32 pc) -> string {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex(read((byte ? Byte : Word) | Nonsequential, pc + 8 + (up ? +immediate : -immediate)), 8L));
+    if(rn == 15) output.append(" =0x", hex(read((byte ? Byte : Word) | Nonsequential, pc + 8 + (up ? +immediate : -immediate)), byte ? 2L : 4L));
     return output;
   }
 

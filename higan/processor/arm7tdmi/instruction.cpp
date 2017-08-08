@@ -67,10 +67,73 @@ auto ARM7TDMI::armInitialize() -> void {
     std::integral_constant<uint32_t, bit::test(s)>::value
 
   #define arguments \
+    opcode.bits( 0,23),  /* displacement */ \
+    opcode.bit (24)      /* link */
+  for(uint4 displacementLo : range(16))
+  for(uint4 displacementHi : range(16))
+  for(uint1 link : range(2)) {
+    auto opcode = pattern(".... 101? ???? ???? ???? ???? ???? ????")
+                | displacementLo << 4 | displacementHi << 20 | link << 24;
+    bind(opcode, Branch);
+  }
+  #undef arguments
+
+  #define arguments \
     opcode.bits( 0, 3)   /* m */
   {
     auto opcode = pattern(".... 0001 0010 ---- ---- ---- 0001 ????");
     bind(opcode, BranchExchangeRegister);
+  }
+  #undef arguments
+
+  #define arguments \
+    opcode.bits( 0, 7),  /* immediate */ \
+    opcode.bits( 8,11),  /* shift */ \
+    opcode.bits(12,15),  /* d */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* save */ \
+    opcode.bits(21,24)   /* mode */
+  for(uint4 shiftHi : range(16))
+  for(uint1 save : range(2))
+  for(uint4 mode : range(16)) {
+    if(mode >= 8 && mode <= 11 && !save) continue;  //TST, TEQ, CMP, CMN
+    auto opcode = pattern(".... 001? ???? ???? ???? ???? ???? ????") | shiftHi << 4 | save << 20 | mode << 21;
+    bind(opcode, DataImmediate);
+  }
+  #undef arguments
+
+  #define arguments \
+    opcode.bits( 0, 3),  /* m */ \
+    opcode.bits( 5, 6),  /* type */ \
+    opcode.bits( 7,11),  /* shift */ \
+    opcode.bits(12,15),  /* d */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* save */ \
+    opcode.bits(21,24)   /* mode */
+  for(uint2 type : range(4))
+  for(uint1 shiftLo : range(2))
+  for(uint1 save : range(2))
+  for(uint4 mode : range(16)) {
+    if(mode >= 8 && mode <= 11 && !save) continue;  //TST, TEQ, CMP, CMN
+    auto opcode = pattern(".... 000? ???? ???? ???? ???? ???0 ????") | type << 5 | shiftLo << 7 | save << 20 | mode << 21;
+    bind(opcode, DataImmediateShift);
+  }
+  #undef arguments
+
+  #define arguments \
+    opcode.bits( 0, 3),  /* m */ \
+    opcode.bits( 5, 6),  /* type */ \
+    opcode.bits( 8,11),  /* s */ \
+    opcode.bits(12,15),  /* d */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* save */ \
+    opcode.bits(21,24)   /* mode */
+  for(uint2 type : range(4))
+  for(uint1 save : range(2))
+  for(uint4 mode : range(16)) {
+    if(mode >= 8 && mode <= 11 && !save) continue;  //TST, TEQ, CMP, CMN
+    auto opcode = pattern(".... 000? ???? ???? ???? ???? 0??1 ????") | type << 5 | save << 20 | mode << 21;
+    bind(opcode, DataRegisterShift);
   }
   #undef arguments
 
@@ -154,6 +217,71 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
+    opcode.bits( 0,11),  /* immediate */ \
+    opcode.bits(12,15),  /* d */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* mode */ \
+    opcode.bit (21),     /* writeback */ \
+    opcode.bit (22),     /* byte */ \
+    opcode.bit (23),     /* up */ \
+    opcode.bit (24)      /* pre */
+  for(uint4 immediatePart : range(16))
+  for(uint1 mode : range(2))
+  for(uint1 writeback : range(2))
+  for(uint1 byte : range(2))
+  for(uint1 up : range(2))
+  for(uint1 pre : range(2)) {
+    auto opcode = pattern(".... 010? ???? ???? ???? ???? ???? ????")
+                | immediatePart << 4 | mode << 20 | writeback << 21 | byte << 22 | up << 23 | pre << 24;
+    bind(opcode, MoveImmediateOffset);
+  }
+  #undef arguments
+
+  #define arguments \
+    opcode.bits( 0,15),  /* list */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* mode */ \
+    opcode.bit (21),     /* writeback */ \
+    opcode.bit (22),     /* type */ \
+    opcode.bit (23),     /* up */ \
+    opcode.bit (24)      /* pre */
+  for(uint4 listPart : range(16))
+  for(uint1 mode : range(2))
+  for(uint1 writeback : range(2))
+  for(uint1 type : range(2))
+  for(uint1 up : range(2))
+  for(uint1 pre : range(2)) {
+    auto opcode = pattern(".... 100? ???? ???? ???? ???? ???? ????")
+                | listPart << 4 | mode << 20 | writeback << 21 | type << 22 | up << 23 | pre << 24;
+    bind(opcode, MoveMultiple);
+  }
+  #undef arguments
+
+  #define arguments \
+    opcode.bits( 0, 3),  /* m */ \
+    opcode.bits( 5, 6),  /* type */ \
+    opcode.bits( 7,11),  /* shift */ \
+    opcode.bits(12,15),  /* d */ \
+    opcode.bits(16,19),  /* n */ \
+    opcode.bit (20),     /* mode */ \
+    opcode.bit (21),     /* writeback */ \
+    opcode.bit (22),     /* byte */ \
+    opcode.bit (23),     /* up */ \
+    opcode.bit (24)      /* pre */
+  for(uint2 type : range(4))
+  for(uint1 shiftLo : range(2))
+  for(uint1 mode : range(2))
+  for(uint1 writeback : range(2))
+  for(uint1 byte : range(2))
+  for(uint1 up : range(2))
+  for(uint1 pre : range(2)) {
+    auto opcode = pattern(".... 011? ???? ???? ???? ???? ???0 ????")
+                | type << 5 | shiftLo << 7 | mode << 20 | writeback << 21 | byte << 22 | up << 23 | pre << 24;
+    bind(opcode, MoveRegisterOffset);
+  }
+  #undef arguments
+
+  #define arguments \
     opcode.bits( 0, 3),  /* d */ \
     opcode.bit (22)      /* mode */
   for(uint1 mode : range(2)) {
@@ -214,6 +342,15 @@ auto ARM7TDMI::armInitialize() -> void {
   }
   #undef arguments
 
+  #define arguments \
+    opcode.bits( 0,23)  /* immediate */
+  for(uint4 immediateLo : range(16))
+  for(uint4 immediateHi : range(16)) {
+    auto opcode = pattern(".... 1111 ???? ???? ???? ???? ???? ????") | immediateLo << 4 | immediateHi << 20;
+    bind(opcode, SoftwareInterrupt);
+  }
+  #undef arguments
+
   #undef bind
   #undef pattern
 }
@@ -229,6 +366,21 @@ auto ARM7TDMI::thumbInitialize() -> void {
     std::integral_constant<uint16_t, bit::test(s)>::value
 
   for(uint3 d : range(8))
+  for(uint3 m : range(8))
+  for(uint4 mode : range(16)) {
+    auto opcode = pattern("0100 00?? ???? ????") | d << 0 | m << 3 | mode << 6;
+    bind(opcode, ALU, d, m, mode);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 n : range(8))
+  for(uint3 immediate : range(8))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("0001 11?? ???? ????") | d << 0 | n << 3 | immediate << 6 | mode << 9;
+    bind(opcode, AdjustImmediate, d, n, immediate, mode);
+  }
+
+  for(uint3 d : range(8))
   for(uint3 n : range(8))
   for(uint3 m : range(8))
   for(uint1 mode : range(2)) {
@@ -236,6 +388,49 @@ auto ARM7TDMI::thumbInitialize() -> void {
     bind(opcode, AdjustRegister, d, n, m, mode);
   }
 
+  for(uint3 _ : range(8))
+  for(uint4 m : range(16)) {
+    auto opcode = pattern("0100 0111 0??? ?---") | _ << 0 | m << 3;
+    bind(opcode, BranchExchange, m);
+  }
+
+  for(uint8 immediate : range(256))
+  for(uint3 d : range(8))
+  for(uint2 mode : range(4)) {
+    auto opcode = pattern("001? ???? ???? ????") | immediate << 0 | d << 8 | mode << 11;
+    bind(opcode, Immediate, immediate, d, mode);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 m : range(8))
+  for(uint5 immediate : range(32))
+  for(uint2 mode : range(4)) {
+    if(mode == 3) continue;
+    auto opcode = pattern("000? ???? ???? ????") | d << 0 | m << 3 | immediate << 6 | mode << 11;
+    bind(opcode, ShiftImmediate, d, m, immediate, mode);
+  }
+
   #undef bind
   #undef pattern
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
