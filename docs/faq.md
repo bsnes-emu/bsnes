@@ -165,11 +165,23 @@ Games can and do depend on timing details like
 it will interrupt the CPU at exactly the right time
 for the CPU to fiddle with the video chip".
 higan is therefore very cautious about timing:
-it always checks all possible devices
-to see if anyone wants to interrupt anyone else
-before proceeding to the next emulated step.
-Although repeated checking is slow,
-higan checks anyway
+while it's emulating the audio chip (for example),
+at every point the emulated CPU *might* interrupt
+the emulated audio chip,
+higan switches to emulating the CPU up to the same point
+to find out whether the CPU *will* interrupt it.
+
+In this way,
+higan is a little bit like
+an office-worker trying to do the jobs of three other people
+by running from desk to desk,
+sending the same emails
+that those three people would send to each other,
+leaving themselves a note at each desk to remind themselves
+where they were up to when they come back.
+Although this constant switching
+is slow and inefficient,
+higan does it
 to ensure the emulated console
 always matches the behaviour
 of the original.
