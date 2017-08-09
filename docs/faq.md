@@ -215,3 +215,65 @@ how the original console worked,
 and it requires the emulator authors to diagnose and work around
 each individual supported game,
 instead of having one emulator that works for everything.
+
+Why can't higan use multiple CPU cores?
+---------------------------------------
+
+These days,
+most computers contain multiple CPU cores,
+allowing them to run different programs,
+or different parts of the same program
+at the same time.
+Since higan requires high CPU performance,
+sometimes people suggest that it should split its work
+into multiple threads
+so it can run across multiple cores
+instead of stressing one core while the others lie idle.
+After all,
+the original consoles higan emulates
+had separate devices running independently,
+so why not run each emulated device in a separate thread?
+
+The big problem with this approach is timing.
+The devices in a physical Super Famicom (for example)
+run at whatever speed they run at,
+and talk to each other whenever they feel like.
+Because every Super Famicom uses the exact same components,
+every Super Famicom runs compatible games at the exact same speed,
+and games can blindly assume that
+when operation X is complete on device A,
+device B will have finished operation Y
+and be ready to do something new.
+Meanwhile, higan's emulated components
+take an unpredictable amount of time to do their work,
+so without deliberate synchronization
+things would break almost immediately.
+
+It's not practical to make higan's emulated devices
+do their work in exactly the same amount of time
+as their hardware counterparts.
+The problem is forty years of technology
+designed to make programs run as fast as possible:
+optimizing compilers and superscalar, out-of-order CPU architectures
+change programs to make them faster,
+speeding up some programs more than others
+in ways that are very difficult to understand and predict.
+Even if higan's emulated devices
+ran at the exact, correct speed
+on one particular computer,
+they'd still run differently on any other computer,
+or with a smarter compiler,
+or with a smarter CPU.
+
+Since higan needs its emulated components
+to run at particular speeds,
+and they won't run at those speeds naturally,
+it must force them manually.
+An emulated device runs for a little while,
+then all the others are run until they catch up.
+It's this careful management,
+regular stopping and starting,
+that makes higan slow,
+not the actual emulation of each device,
+and so it doesn't make sense
+for higan to be multi-threaded.
