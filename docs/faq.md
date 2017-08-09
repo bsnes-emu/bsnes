@@ -80,11 +80,6 @@ while higan waits for a video frame to be shown,
 and video is likely to stutter
 while higan waits for an audio buffer to complete.
 
-Games run too slow
-------------------
-
-TODO: pin the CPU governor on Linux, get a faster computer, try different audio drivers.
-
 Games run too fast
 ------------------
 
@@ -108,6 +103,54 @@ If games are running way too fast, here's some things to check:
         [the Settings menu](interface/higan.md#the-settings-menu)
 
 [vsync]: #i-see-tearing-when-a-game-scrolls-how-can-i-enable-vsync
+
+Games run too slow
+------------------
+
+Of all the consoles higan can emulate,
+higan's Super Famicom emulation
+is the most resource intensive.
+Full-speed emulation for the Super Famicom base unit
+requires an Intel Core 2 Duo (or AMD equivalent),
+full-speed for games with the SuperFX chip
+requires an Intel Ivy Bridge (or equivalent),
+full-speed for the wireframe animations in Mega Man X2
+requires an even faster computer.
+Low-power CPUs like ARM chips,
+or Intel Atom and Celeron CPUS
+generally aren't fast enough to emulate the Super Famicom with higan,
+although other emulated consoles may work.
+
+If your computer meets the general speed requirements
+but games run too slowly,
+try choosing a different
+[audio driver](interface/higan-config.md#advanced),
+since that's usually what drives higan's timing.
+
+On some computers,
+the operating system's power-management system
+may be confused by higan's unusual pattern of CPU usage
+(it runs furiously to calculate the next video frame
+and the next few milliseconds of audio,
+then stops dead as it waits for output to complete).
+If holding down
+the [fast forward hotkey](interface/higan-config.md#hotkeys)
+runs too fast but the game normally runs too slow,
+try disabling "power saver" mode
+or enabling "performance" mode.
+
+On Linux specifically,
+if your desktop environment doesn't provide a way
+to change the CPU usage governor,
+you can temporarily force your CPUs to run at full-speed
+by running the following command in a terminal:
+
+    echo "performance" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
+To put things back to normal,
+reboot the computer, or run this command instead:
+
+    echo "ondemand" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 Why is higan so much slower than other emulators?
 -------------------------------------------------
