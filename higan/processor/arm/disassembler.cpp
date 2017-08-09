@@ -562,13 +562,13 @@ auto ARM::disassembleInstructionTHUMB(uint32 pc) -> string {
   }
 
   //load_literal()
-  //ldr rd,[pc,#+/-offset]
+  //ldr rd,[pc,#offset]
   if((instruction & 0xf800) == 0x4800) {
     uint3 rd = instruction >> 8;
     uint8 displacement = instruction;
 
     uint rm = ((pc + 4) & ~3) + displacement * 4;
-    output.append("ldr ", registers[rd], ",[pc,#0x", hex(rm, 3L), "]");
+    output.append("ldr ", registers[rd], ",[pc,#0x", hex(rm, 8L), "]");
     output.append(" =0x", hex(read(Word | Nonsequential, rm), 8L));
 
     return output;
@@ -636,9 +636,9 @@ auto ARM::disassembleInstructionTHUMB(uint32 pc) -> string {
   if((instruction & 0xf000) == 0x9000) {
     uint1 opcode = instruction >> 11;
     uint3 rd = instruction >> 8;
-    int8 relative = instruction;
+    uint8 immediate = instruction;
 
-    output.append(opcode ? "ldr" : "str", " ", registers[rd], ",[sp,#0x", hex(relative * 4, 3L), "]");
+    output.append(opcode ? "ldr" : "str", " ", registers[rd], ",[sp,#0x", hex(immediate * 4, 3L), "]");
 
     return output;
   }
@@ -750,7 +750,7 @@ auto ARM::disassembleInstructionTHUMB(uint32 pc) -> string {
   //branch_long_suffix()
   //bl address
   if((instruction & 0xf800) == 0xf800) {
-    output.append("...");
+    output.append("b (suffix)");
 
     return output;
   }

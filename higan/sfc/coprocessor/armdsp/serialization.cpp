@@ -8,7 +8,7 @@ auto ArmDSP::firmware() const -> nall::vector<uint8> {
 }
 
 auto ArmDSP::serialize(serializer& s) -> void {
-  ARM::serialize(s);
+  ARM7TDMI::serialize(s);
   Thread::serialize(s);
 
   s.array(programRAM, 16 * 1024);

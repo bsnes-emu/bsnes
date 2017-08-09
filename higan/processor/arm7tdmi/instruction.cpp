@@ -38,9 +38,10 @@ auto ARM7TDMI::instruction() -> void {
   opcode = pipeline.execute.instruction;
   if(!cpsr().t) {
     if(!TST(opcode.bits(28,31))) return;
-    armInstruction[(opcode & 0x0ff00000) >> 16 | (opcode & 0x000000f0) >> 4](opcode);
+    uint12 index = (opcode & 0x0ff00000) >> 16 | (opcode & 0x000000f0) >> 4;
+    armInstruction[index](opcode);
   } else {
-    thumbInstruction[opcode & 0xffff]();
+    thumbInstruction[(uint16)opcode]();
   }
 }
 
@@ -372,6 +373,21 @@ auto ARM7TDMI::thumbInitialize() -> void {
     bind(opcode, ALU, d, m, mode);
   }
 
+  for(uint4 d : range(16))
+  for(uint4 m : range(16))
+  for(uint2 mode : range(4)) {
+    if(mode == 3) continue;
+    auto opcode = pattern("0100 01?? ???? ????") | d.bits(0,2) << 0 | m << 3 | d.bit(3) << 7 | mode << 8;
+    bind(opcode, ALUExtended, d, m, mode);
+  }
+
+  for(uint8 immediate : range(256))
+  for(uint3 d : range(8))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1010 ???? ???? ????") | immediate << 0 | d << 8 | mode << 11;
+    bind(opcode, AddRegister, immediate, d, mode);
+  }
+
   for(uint3 d : range(8))
   for(uint3 n : range(8))
   for(uint3 immediate : range(8))
@@ -388,10 +404,38 @@ auto ARM7TDMI::thumbInitialize() -> void {
     bind(opcode, AdjustRegister, d, n, m, mode);
   }
 
+  for(uint7 immediate : range(128))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1011 0000 ???? ????") | immediate << 0 | mode << 7;
+    bind(opcode, AdjustStack, immediate, mode);
+  }
+
   for(uint3 _ : range(8))
   for(uint4 m : range(16)) {
     auto opcode = pattern("0100 0111 0??? ?---") | _ << 0 | m << 3;
     bind(opcode, BranchExchange, m);
+  }
+
+  for(uint11 displacement : range(2048)) {
+    auto opcode = pattern("1111 0??? ???? ????") | displacement << 0;
+    bind(opcode, BranchFarPrefix, displacement);
+  }
+
+  for(uint11 displacement : range(2048)) {
+    auto opcode = pattern("1111 1??? ???? ????") | displacement << 0;
+    bind(opcode, BranchFarSuffix, displacement);
+  }
+
+  for(uint11 displacement : range(2048)) {
+    auto opcode = pattern("1110 0??? ???? ????") | displacement << 0;
+    bind(opcode, BranchNear, displacement);
+  }
+
+  for(uint8 displacement : range(256))
+  for(uint4 condition : range(16)) {
+    if(condition == 15) continue;  //BNV
+    auto opcode = pattern("1101 ???? ???? ????") | displacement << 0 | condition << 8;
+    bind(opcode, BranchTest, displacement, condition);
   }
 
   for(uint8 immediate : range(256))
@@ -399,6 +443,58 @@ auto ARM7TDMI::thumbInitialize() -> void {
   for(uint2 mode : range(4)) {
     auto opcode = pattern("001? ???? ???? ????") | immediate << 0 | d << 8 | mode << 11;
     bind(opcode, Immediate, immediate, d, mode);
+  }
+
+  for(uint8 displacement : range(256))
+  for(uint3 d : range(8)) {
+    auto opcode = pattern("0100 1??? ???? ????") | displacement << 0 | d << 8;
+    bind(opcode, LoadLiteral, displacement, d);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 n : range(8))
+  for(uint5 immediate : range(32))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("0111 ???? ???? ????") | d << 0 | n << 3 | immediate << 6 | mode << 11;
+    bind(opcode, MoveByteImmediate, d, n, immediate, mode);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 n : range(8))
+  for(uint5 immediate : range(32))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1000 ???? ???? ????") | d << 0 | n << 3 | immediate << 6 | mode << 11;
+    bind(opcode, MoveHalfImmediate, d, n, immediate, mode);
+  }
+
+  for(uint8 list : range(256))
+  for(uint3 n : range(8))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1100 ???? ???? ????") | list << 0 | n << 8 | mode << 11;
+    bind(opcode, MoveMultiple, list, n, mode);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 n : range(8))
+  for(uint3 m : range(8))
+  for(uint3 mode : range(8)) {
+    auto opcode = pattern("0101 ???? ???? ????") | d << 0 | n << 3 | m << 6 | mode << 9;
+    bind(opcode, MoveRegisterOffset, d, n, m, mode);
+  }
+
+  for(uint8 immediate : range(256))
+  for(uint3 d : range(8))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1001 ???? ???? ????") | immediate << 0 | d << 8 | mode << 11;
+    bind(opcode, MoveStack, immediate, d, mode);
+  }
+
+  for(uint3 d : range(8))
+  for(uint3 n : range(8))
+  for(uint5 offset : range(32))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("0110 ???? ???? ????") | d << 0 | n << 3 | offset << 6 | mode << 11;
+    bind(opcode, MoveWordImmediate, d, n, offset, mode);
   }
 
   for(uint3 d : range(8))
@@ -410,27 +506,18 @@ auto ARM7TDMI::thumbInitialize() -> void {
     bind(opcode, ShiftImmediate, d, m, immediate, mode);
   }
 
+  for(uint8 immediate : range(256)) {
+    auto opcode = pattern("1101 1111 ???? ????") | immediate << 0;
+    bind(opcode, SoftwareInterrupt, immediate);
+  }
+
+  for(uint8 list : range(256))
+  for(uint1 lrpc : range(2))
+  for(uint1 mode : range(2)) {
+    auto opcode = pattern("1011 ?10? ???? ????") | list << 0 | lrpc << 8 | mode << 11;
+    bind(opcode, StackMultiple, list, lrpc, mode);
+  }
+
   #undef bind
   #undef pattern
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

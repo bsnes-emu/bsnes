@@ -225,6 +225,7 @@ auto ARM7TDMI::armInstructionMoveRegisterOffset
   uint32 rm = r(m);
   uint32 rd = r(d);
   uint32 rn = r(n);
+  carry = cpsr().c;
 
   switch(type) {
   case 0: rm = LSL(rm, shift); break;

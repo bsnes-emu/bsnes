@@ -134,7 +134,7 @@ auto ARM::thumb_op_alu_hi() {
   }
 }
 
-//ldr rd,[pc,#+/-offset]
+//ldr rd,[pc,#offset]
 //0100 1ddd oooo oooo
 //d = rd
 //o = offset

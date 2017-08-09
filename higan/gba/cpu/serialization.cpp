@@ -1,5 +1,5 @@
 auto CPU::serialize(serializer& s) -> void {
-  ARM::serialize(s);
+  ARM7TDMI::serialize(s);
   Thread::serialize(s);
 
   s.array(iwram);

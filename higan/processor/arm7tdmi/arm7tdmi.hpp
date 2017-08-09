@@ -1,4 +1,3 @@
-//ARMv3 (ARM60)
 //ARMv4 (ARM7TDMI)
 
 #pragma once
@@ -88,17 +87,34 @@ struct ARM7TDMI {
 
   //instructions-thumb.cpp
   auto thumbInstructionALU(uint3, uint3, uint4) -> void;
+  auto thumbInstructionALUExtended(uint4, uint4, uint2) -> void;
+  auto thumbInstructionAddRegister(uint8, uint3, uint1) -> void;
   auto thumbInstructionAdjustImmediate(uint3, uint3, uint3, uint1) -> void;
   auto thumbInstructionAdjustRegister(uint3, uint3, uint3, uint1) -> void;
+  auto thumbInstructionAdjustStack(uint7, uint1) -> void;
   auto thumbInstructionBranchExchange(uint4) -> void;
+  auto thumbInstructionBranchFarPrefix(int11) -> void;
+  auto thumbInstructionBranchFarSuffix(uint11) -> void;
+  auto thumbInstructionBranchNear(int11) -> void;
+  auto thumbInstructionBranchTest(int8, uint4) -> void;
   auto thumbInstructionImmediate(uint8, uint3, uint2) -> void;
+  auto thumbInstructionLoadLiteral(uint8, uint3) -> void;
+  auto thumbInstructionMoveByteImmediate(uint3, uint3, uint5, uint1) -> void;
+  auto thumbInstructionMoveHalfImmediate(uint3, uint3, uint5, uint1) -> void;
+  auto thumbInstructionMoveMultiple(uint8, uint3, uint1) -> void;
+  auto thumbInstructionMoveRegisterOffset(uint3, uint3, uint3, uint3) -> void;
+  auto thumbInstructionMoveStack(uint8, uint3, uint1) -> void;
+  auto thumbInstructionMoveWordImmediate(uint3, uint3, uint5, uint1) -> void;
   auto thumbInstructionShiftImmediate(uint3, uint3, uint5, uint2) -> void;
+  auto thumbInstructionSoftwareInterrupt(uint8) -> void;
+  auto thumbInstructionStackMultiple(uint8, uint1, uint1) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
   //disassembler.cpp
-  auto disassemble(uint32 pc) -> string;
+  auto disassemble(maybe<uint32> pc = nothing, maybe<uint1> thumb = nothing) -> string;
+  auto disassembleRegisters() -> string;
 
   struct GPR {
     inline operator uint32_t() const {
@@ -241,11 +257,30 @@ struct ARM7TDMI {
   auto armDisassembleSoftwareInterrupt(uint24) -> string;
 
   auto thumbDisassembleALU(uint3, uint3, uint4) -> string;
+  auto thumbDisassembleALUExtended(uint4, uint4, uint2) -> string;
+  auto thumbDisassembleAddRegister(uint8, uint3, uint1) -> string;
   auto thumbDisassembleAdjustImmediate(uint3, uint3, uint3, uint1) -> string;
   auto thumbDisassembleAdjustRegister(uint3, uint3, uint3, uint1) -> string;
+  auto thumbDisassembleAdjustStack(uint7, uint1) -> string;
   auto thumbDisassembleBranchExchange(uint4) -> string;
+  auto thumbDisassembleBranchFarPrefix(int11) -> string;
+  auto thumbDisassembleBranchFarSuffix(uint11) -> string;
+  auto thumbDisassembleBranchNear(int11) -> string;
+  auto thumbDisassembleBranchTest(int8, uint4) -> string;
   auto thumbDisassembleImmediate(uint8, uint3, uint2) -> string;
+  auto thumbDisassembleLoadLiteral(uint8, uint3) -> string;
+  auto thumbDisassembleMoveByteImmediate(uint3, uint3, uint5, uint1) -> string;
+  auto thumbDisassembleMoveHalfImmediate(uint3, uint3, uint5, uint1) -> string;
+  auto thumbDisassembleMoveMultiple(uint8, uint3, uint1) -> string;
+  auto thumbDisassembleMoveRegisterOffset(uint3, uint3, uint3, uint3) -> string;
+  auto thumbDisassembleMoveStack(uint8, uint3, uint1) -> string;
+  auto thumbDisassembleMoveWordImmediate(uint3, uint3, uint5, uint1) -> string;
   auto thumbDisassembleShiftImmediate(uint3, uint3, uint5, uint2) -> string;
+  auto thumbDisassembleSoftwareInterrupt(uint8) -> string;
+  auto thumbDisassembleStackMultiple(uint8, uint1, uint1) -> string;
+
+  uint32 _pc;
+  string _c;
 };
 
 }

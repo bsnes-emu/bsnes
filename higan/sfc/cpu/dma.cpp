@@ -227,6 +227,7 @@ auto CPU::hdmaInit() -> void {
   dmaWrite(false);
 
   for(auto n : range(8)) {
+    channel[n].hdmaDoTransfer = true;  //note: needs hardware verification (2017-08-09)
     if(!channel[n].hdmaEnabled) continue;
     channel[n].dmaEnabled = false;  //HDMA init during DMA will stop DMA mid-transfer
 

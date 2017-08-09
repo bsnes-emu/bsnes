@@ -38,14 +38,8 @@ auto ArmDSP::boot() -> void {
 }
 
 auto ArmDSP::main() -> void {
-  if(crash) {
-    print(disassembleRegisters(), "\n");
-    print(disassembleInstructionARM(pipeline.execute.address), "\n");
-    print("Executed: ", instructions, "\n");
-    while(true) step(21'477'272);
-  }
-
-  stepARM();
+  processor.cpsr.t = 0;  //force ARM mode
+  instruction();
 }
 
 auto ArmDSP::step(uint clocks) -> void {
@@ -115,8 +109,8 @@ auto ArmDSP::power() -> void {
 }
 
 auto ArmDSP::reset() -> void {
+  ARM7TDMI::power();
   create(ArmDSP::Enter, 21'477'272);
-  ARM::power();
 
   bridge.ready = false;
   bridge.signal = false;

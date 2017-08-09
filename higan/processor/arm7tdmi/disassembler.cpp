@@ -1,17 +1,59 @@
-static uint32 _pc;
-static string _c;
 static const string _r[] = {
   "r0", "r1",  "r2",  "r3",  "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc"
 };
+static const string _conditions[] = {
+  "eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
+  "hi", "ls", "ge", "lt", "gt", "le", "",   "nv",
+};
 #define _s save ? "s" : ""
+#define _move(mode) (mode == 13 || mode == 15)
+#define _comp(mode) (mode >=  8 && mode <= 11)
+#define _math(mode) (mode <=  7 || mode == 12 || mode == 14)
 
-#define isMove(mode) (mode == 13 || mode == 15)
-#define isComp(mode) (mode >=  8 && mode <= 11)
-#define isMath(mode) (mode <=  7 || mode == 12 || mode == 14)
+auto ARM7TDMI::disassemble(maybe<uint32> pc, maybe<uint1> thumb) -> string {
+  if(!pc) pc = pipeline.execute.address;
+  if(!thumb) thumb = cpsr().t;
 
-auto ARM7TDMI::disassemble(uint32 pc) -> string {
-  return "";
+  _pc = pc();
+  if(!thumb()) {
+    uint32 opcode = read(Word | Nonsequential, _pc & ~3);
+    uint12 index = (opcode & 0x0ff00000) >> 16 | (opcode & 0x000000f0) >> 4;
+    _c = _conditions[opcode >> 28];
+    return armDisassemble[index](opcode);
+  } else {
+    uint16 opcode = read(Half | Nonsequential, _pc & ~1);
+    return thumbDisassemble[opcode]();
+  }
+}
+
+auto ARM7TDMI::disassembleRegisters() -> string {
+  string output;
+  for(uint n : range(16)) {
+    output.append(_r[n], ":", hex(r(n), 8L), " ");
+  }
+
+  output.append("cpsr:");
+  output.append(cpsr().n ? "N" : "n");
+  output.append(cpsr().z ? "Z" : "z");
+  output.append(cpsr().c ? "C" : "c");
+  output.append(cpsr().v ? "V" : "v", "/");
+  output.append(cpsr().i ? "I" : "i");
+  output.append(cpsr().f ? "F" : "f");
+  output.append(cpsr().t ? "T" : "t", "/");
+  output.append(hex(cpsr().m, 2L));
+  if(cpsr().m == PSR::USR || cpsr().m == PSR::SYS) return output;
+
+  output.append("spsr:");
+  output.append(spsr().n ? "N" : "n");
+  output.append(spsr().z ? "Z" : "z");
+  output.append(spsr().c ? "C" : "c");
+  output.append(spsr().v ? "V" : "v", "/");
+  output.append(spsr().i ? "I" : "i");
+  output.append(spsr().f ? "F" : "f");
+  output.append(spsr().t ? "T" : "t", "/");
+  output.append(hex(spsr().m, 2L));
+  return output;
 }
 
 //
@@ -34,9 +76,9 @@ auto ARM7TDMI::armDisassembleDataImmediate
   };
   uint32 data = immediate >> (shift << 1) | immediate << 32 - (shift << 1);
   return {opcode[mode], _c,
-    isMove(mode) ? string{_s, " ", _r[d]} : string{},
-    isComp(mode) ? string{" ", _r[n]} : string{},
-    isMath(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
+    _move(mode) ? string{_s, " ", _r[d]} : string{},
+    _comp(mode) ? string{" ", _r[n]} : string{},
+    _math(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
     ",#0x", hex(data, 8L)};
 }
 
@@ -47,9 +89,9 @@ auto ARM7TDMI::armDisassembleDataImmediateShift
     "tst", "teq", "cmp", "cmn", "orr", "mov", "bic", "mvn",
   };
   return {opcode[mode], _c,
-    isMove(mode) ? string{_s, " ", _r[d]} : string{},
-    isComp(mode) ? string{" ", _r[n]} : string{},
-    isMath(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
+    _move(mode) ? string{_s, " ", _r[d]} : string{},
+    _comp(mode) ? string{" ", _r[n]} : string{},
+    _math(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
     ",", _r[m],
     type == 0 && shift ? string{" lsl #", shift} : string{},
     type == 1 ? string{" lsr #", shift ? (uint)shift : 32} : string{},
@@ -65,9 +107,9 @@ auto ARM7TDMI::armDisassembleDataRegisterShift
     "tst", "teq", "cmp", "cmn", "orr", "mov", "bic", "mvn",
   };
   return {opcode[mode], _c,
-    isMove(mode) ? string{_s, " ", _r[d]} : string{},
-    isComp(mode) ? string{" ", _r[n]} : string{},
-    isMath(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
+    _move(mode) ? string{_s, " ", _r[d]} : string{},
+    _comp(mode) ? string{" ", _r[n]} : string{},
+    _math(mode) ? string{_s, " ", _r[d], ",", _r[n]} : string{},
     ",", _r[m], " ",
     type == 0 ? "lsl" : "",
     type == 1 ? "lsr" : "",
@@ -227,6 +269,18 @@ auto ARM7TDMI::thumbDisassembleALU
   return {opcode[mode], " ", _r[d], ",", _r[m]};
 }
 
+auto ARM7TDMI::thumbDisassembleALUExtended
+(uint4 d, uint4 m, uint2 mode) -> string {
+  static const string opcode[] = {"add", "sub", "mov"};
+  if(d == 8 && m == 8 && mode == 2) return {"nop"};
+  return {opcode[mode], " ", _r[d], ",", _r[m]};
+}
+
+auto ARM7TDMI::thumbDisassembleAddRegister
+(uint8 immediate, uint3 d, uint1 mode) -> string {
+  return {"add ", _r[d], ",", mode ? "sp" : "pc", ",#0x", hex(immediate, 2L)};
+}
+
 auto ARM7TDMI::thumbDisassembleAdjustImmediate
 (uint3 d, uint3 n, uint3 immediate, uint1 mode) -> string {
   return {!mode ? "add" : "sub", " ", _r[d], ",", _r[n], ",#", immediate};
@@ -237,9 +291,39 @@ auto ARM7TDMI::thumbDisassembleAdjustRegister
   return {!mode ? "add" : "sub", " ", _r[d], ",", _r[n], ",", _r[m]};
 }
 
+auto ARM7TDMI::thumbDisassembleAdjustStack
+(uint7 immediate, uint1 mode) -> string {
+  return {!mode ? "add" : "sub", " sp,#0x", hex(immediate * 4, 3L)};
+}
+
 auto ARM7TDMI::thumbDisassembleBranchExchange
 (uint4 m) -> string {
   return {"bx ", _r[m]};
+}
+
+auto ARM7TDMI::thumbDisassembleBranchFarPrefix
+(int11 displacementHi) -> string {
+  uint11 displacementLo = read(Half | Nonsequential, (_pc & ~1) + 2);
+  int22 displacement = displacementHi << 11 | displacementLo << 0;
+  uint32 address = _pc + 4 + displacement * 2;
+  return {"b 0x", hex(address, 8L)};
+}
+
+auto ARM7TDMI::thumbDisassembleBranchFarSuffix
+(uint11 displacement) -> string {
+  return {"b (suffix)"};
+}
+
+auto ARM7TDMI::thumbDisassembleBranchNear
+(int11 displacement) -> string {
+  uint32 address = _pc + 4 + displacement * 2;
+  return {"b 0x", hex(address, 8L)};
+}
+
+auto ARM7TDMI::thumbDisassembleBranchTest
+(int8 displacement, uint4 condition) -> string {
+  uint32 address = _pc + 4 + displacement * 2;
+  return {"b", _conditions[condition], " 0x", hex(address, 8L)};
 }
 
 auto ARM7TDMI::thumbDisassembleImmediate
@@ -248,40 +332,72 @@ auto ARM7TDMI::thumbDisassembleImmediate
   return {opcode[mode], " ", _r[d], ",#0x", hex(immediate, 2L)};
 }
 
+auto ARM7TDMI::thumbDisassembleLoadLiteral
+(uint8 displacement, uint3 d) -> string {
+  uint32 address = ((_pc + 4) & ~3) + (displacement << 2);
+  uint32 data = read(Word | Nonsequential, address);
+  return {"ldr ", _r[d], ",[pc,#0x", hex(address, 8L), "] =0x", hex(data, 8L)};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveByteImmediate
+(uint3 d, uint3 n, uint5 offset, uint1 mode) -> string {
+  return {mode ? "ldrb" : "strb", " ", _r[d], ",[", _r[n], ",#0x", hex(offset, 2L), "]"};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveHalfImmediate
+(uint3 d, uint3 n, uint5 offset, uint1 mode) -> string {
+  return {mode ? "ldrh" : "strh", " ", _r[d], ",[", _r[n], ",#0x", hex(offset * 2, 2L), "]"};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveMultiple
+(uint8 list, uint3 n, uint1 mode) -> string {
+  string registers;
+  for(uint m : range(8)) {
+    if(list.bit(m)) registers.append(_r[m], ",");
+  }
+  registers.trimRight(",", 1L);
+  return {mode ? "ldmia" : "stmia", " ", _r[n], "!,{", registers, "}"};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveRegisterOffset
+(uint3 d, uint3 n, uint3 m, uint3 mode) -> string {
+  static const string opcode[] = {"str", "strh", "strb", "ldsb", "ldr", "ldrh", "ldrb", "ldsh"};
+  return {opcode[mode], " ", _r[d], ",[", _r[n], ",", _r[m], "]"};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveStack
+(uint8 immediate, uint3 d, uint1 mode) -> string {
+  return {mode ? "ldr" : "str", " ", _r[d], ",[sp,#0x", hex(immediate * 4, 3L), "]"};
+}
+
+auto ARM7TDMI::thumbDisassembleMoveWordImmediate
+(uint3 d, uint3 n, uint5 offset, uint1 mode) -> string {
+  return {mode ? "ldr" : "str", " ", _r[d], ",[", _r[n], ",#0x", hex(offset * 4, 2L), "]"};
+}
+
 auto ARM7TDMI::thumbDisassembleShiftImmediate
 (uint3 d, uint3 m, uint5 immediate, uint2 mode) -> string {
   static const string opcode[] = {"lsl", "lsr", "asr"};
   return {opcode[mode], " ", _r[d], ",", _r[m], ",#", immediate};
 }
 
+auto ARM7TDMI::thumbDisassembleSoftwareInterrupt
+(uint8 immediate) -> string {
+  return {"swi #0x", hex(immediate, 2L)};
+}
 
+auto ARM7TDMI::thumbDisassembleStackMultiple
+(uint8 list, uint1 lrpc, uint1 mode) -> string {
+  string registers;
+  for(uint m : range(8)) {
+    if(list.bit(m)) registers.append(_r[m], ",");
+  }
+  if(lrpc) registers.append(!mode ? "lr," : "pc,");
+  registers.trimRight(",", 1L);
+  return {!mode ? "push" : "pop", " {", registers, "}"};
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#undef _s
+#undef _move
+#undef _comp
+#undef _save

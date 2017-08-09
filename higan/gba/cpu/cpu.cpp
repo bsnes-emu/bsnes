@@ -17,7 +17,7 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  processor.irqline = irq.ime && (irq.enable & irq.flag);
+  ARM7TDMI::irq = irq.ime && (irq.enable & irq.flag);
 
   if(stopped()) {
     if(!(irq.enable & irq.flag & Interrupt::Keypad)) return step(16);
@@ -29,7 +29,7 @@ auto CPU::main() -> void {
     context.halted = false;
   }
 
-  exec();
+  instruction();
 }
 
 auto CPU::step(uint clocks) -> void {
@@ -60,7 +60,7 @@ auto CPU::step(uint clocks) -> void {
 }
 
 auto CPU::power() -> void {
-  ARM::power();
+  ARM7TDMI::power();
   create(CPU::Enter, system.frequency());
 
   for(auto& byte : iwram) byte = 0x00;
