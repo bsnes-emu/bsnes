@@ -1,4 +1,4 @@
-auto V30MZ::opInString(Size size) {
+auto V30MZ::instructionInString(Size size) -> void {
   wait(5);
   if(!repeat() || r.cx) {
     auto data = in(size, r.dx);
@@ -12,7 +12,7 @@ auto V30MZ::opInString(Size size) {
   }
 }
 
-auto V30MZ::opOutString(Size size) {
+auto V30MZ::instructionOutString(Size size) -> void {
   wait(6);
   if(!repeat() || r.cx) {
     auto data = read(size, segment(r.ds), r.si);
@@ -26,7 +26,7 @@ auto V30MZ::opOutString(Size size) {
   }
 }
 
-auto V30MZ::opMoveString(Size size) {
+auto V30MZ::instructionMoveString(Size size) -> void {
   wait(4);
   if(!repeat() || r.cx) {
     auto data = read(size, segment(r.ds), r.si);
@@ -41,14 +41,14 @@ auto V30MZ::opMoveString(Size size) {
   }
 }
 
-auto V30MZ::opCompareString(Size size) {
+auto V30MZ::instructionCompareString(Size size) -> void {
   wait(5);
   if(!repeat() || r.cx) {
     auto x = read(size, segment(r.ds), r.si);
     auto y = read(size, r.es, r.di);
     r.si += r.f.d ? -size : size;
     r.di += r.f.d ? -size : size;
-    alSub(size, x, y);
+    SUB(size, x, y);
 
     if(!repeat() || !--r.cx) return;
     if(repeat() == RepeatWhileZero && r.f.z == 0) return;
@@ -59,7 +59,7 @@ auto V30MZ::opCompareString(Size size) {
   }
 }
 
-auto V30MZ::opStoreString(Size size) {
+auto V30MZ::instructionStoreString(Size size) -> void {
   wait(2);
   if(!repeat() || r.cx) {
     write(size, r.es, r.di, getAcc(size));
@@ -72,9 +72,7 @@ auto V30MZ::opStoreString(Size size) {
   }
 }
 
-//ac  lodsb
-//ad  lodsw
-auto V30MZ::opLoadString(Size size) {
+auto V30MZ::instructionLoadString(Size size) -> void {
   wait(2);
   if(!repeat() || r.cx) {
     setAcc(size, read(size, segment(r.ds), r.si));
@@ -87,15 +85,13 @@ auto V30MZ::opLoadString(Size size) {
   }
 }
 
-//ae  scasb
-//af  scasw
-auto V30MZ::opScanString(Size size) {
+auto V30MZ::instructionScanString(Size size) -> void {
   wait(3);
   if(!repeat() || r.cx) {
     auto x = getAcc(size);
     auto y = read(size, r.es, r.di);
     r.di += r.f.d ? -size : size;
-    alSub(size, x, y);
+    SUB(size, x, y);
 
     if(!repeat() || !--r.cx) return;
     if(repeat() == RepeatWhileZero && r.f.z == 0) return;

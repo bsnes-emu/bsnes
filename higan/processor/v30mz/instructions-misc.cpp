@@ -1,17 +1,11 @@
-//26  es:
-//2e  cs:
-//36  ss:
-//3e  ds:
-auto V30MZ::opSegment(uint16 segment) {
+auto V30MZ::instructionSegment(uint16 segment) -> void {
   if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   state.prefix = true;
   state.poll = false;
 }
 
-//f2  repnz:
-//f3  repz:
-auto V30MZ::opRepeat(bool flag) {
+auto V30MZ::instructionRepeat(bool flag) -> void {
   if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   wait(4);
@@ -19,56 +13,50 @@ auto V30MZ::opRepeat(bool flag) {
   state.poll = false;
 }
 
-//f0  lock:
-auto V30MZ::opLock() {
+auto V30MZ::instructionLock() -> void {
   if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   state.prefix = true;
   state.poll = false;
 }
 
-//9b  wait
-auto V30MZ::opWait() {
+auto V30MZ::instructionWait() -> void {
 }
 
-//f4  hlt
-auto V30MZ::opHalt() {
+auto V30MZ::instructionHalt() -> void {
   wait(8);
   state.halt = true;
 }
 
-//90  nop
-auto V30MZ::opNop() {
+auto V30MZ::instructionNop() -> void {
 }
 
-auto V30MZ::opIn(Size size) {
+auto V30MZ::instructionIn(Size size) -> void {
   wait(5);
   setAcc(size, in(size, fetch()));
 }
 
-auto V30MZ::opOut(Size size) {
+auto V30MZ::instructionOut(Size size) -> void {
   wait(5);
   out(size, fetch(), getAcc(size));
 }
 
-auto V30MZ::opInDX(Size size) {
+auto V30MZ::instructionInDX(Size size) -> void {
   wait(5);
   setAcc(size, in(size, r.dx));
 }
 
-auto V30MZ::opOutDX(Size size) {
+auto V30MZ::instructionOutDX(Size size) -> void {
   wait(5);
   out(size, r.dx, getAcc(size));
 }
 
-//d7  xlat
-auto V30MZ::opTranslate() {
+auto V30MZ::instructionTranslate() -> void {
   wait(4);
   r.al = read(Byte, segment(r.ds), r.bx + r.al);
 }
 
-//62  bound reg,mem,mem
-auto V30MZ::opBound() {
+auto V30MZ::instructionBound() -> void {
   wait(12);
   modRM();
   auto lo = getMem(Word, 0);

@@ -1,27 +1,24 @@
-//9e  sahf
-auto V30MZ::opStoreFlagsAcc() {
+auto V30MZ::instructionStoreFlagsAcc() -> void {
   wait(3);
   r.f = (r.f & 0xff00) | r.ah;
 }
 
-//9f  lahf
-auto V30MZ::opLoadAccFlags() {
+auto V30MZ::instructionLoadAccFlags() -> void {
   wait(1);
   r.ah = (r.f & 0x00ff);
 }
 
-//f5  cmc
-auto V30MZ::opComplementCarry() {
+auto V30MZ::instructionComplementCarry() -> void {
   wait(3);
   r.f.c = !r.f.c;
 }
 
-auto V30MZ::opClearFlag(uint bit) {
+auto V30MZ::instructionClearFlag(uint bit) -> void {
   wait(3);
   r.f &= ~(1 << bit);
 }
 
-auto V30MZ::opSetFlag(uint bit) {
+auto V30MZ::instructionSetFlag(uint bit) -> void {
   wait(3);
   r.f |= 1 << bit;
   if(bit == r.f.i.bit) state.poll = false;

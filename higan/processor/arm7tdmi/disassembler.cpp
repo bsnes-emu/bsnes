@@ -11,7 +11,7 @@ static const string _conditions[] = {
 #define _comp(mode) (mode >=  8 && mode <= 11)
 #define _math(mode) (mode <=  7 || mode == 12 || mode == 14)
 
-auto ARM7TDMI::disassemble(maybe<uint32> pc, maybe<uint1> thumb) -> string {
+auto ARM7TDMI::disassemble(maybe<uint32> pc, maybe<boolean> thumb) -> string {
   if(!pc) pc = pipeline.execute.address;
   if(!thumb) thumb = cpsr().t;
 
@@ -44,7 +44,7 @@ auto ARM7TDMI::disassembleRegisters() -> string {
   output.append(hex(cpsr().m, 2L));
   if(cpsr().m == PSR::USR || cpsr().m == PSR::SYS) return output;
 
-  output.append("spsr:");
+  output.append(" spsr:");
   output.append(spsr().n ? "N" : "n");
   output.append(spsr().z ? "Z" : "z");
   output.append(spsr().c ? "C" : "c");
@@ -189,7 +189,7 @@ auto ARM7TDMI::armDisassembleMoveMultiple
     if(list.bit(index)) registers.append(_r[index], ",");
   }
   registers.trimRight(",", 1L);
-  return {mode ? "ldm" : "stm",
+  return {mode ? "ldm" : "stm", _c,
     up == 0 && pre == 0 ? "da" : "",
     up == 0 && pre == 1 ? "db" : "",
     up == 1 && pre == 0 ? "ia" : "",
@@ -306,12 +306,12 @@ auto ARM7TDMI::thumbDisassembleBranchFarPrefix
   uint11 displacementLo = read(Half | Nonsequential, (_pc & ~1) + 2);
   int22 displacement = displacementHi << 11 | displacementLo << 0;
   uint32 address = _pc + 4 + displacement * 2;
-  return {"b 0x", hex(address, 8L)};
+  return {"bl 0x", hex(address, 8L)};
 }
 
 auto ARM7TDMI::thumbDisassembleBranchFarSuffix
 (uint11 displacement) -> string {
-  return {"b (suffix)"};
+  return {"bl (suffix)"};
 }
 
 auto ARM7TDMI::thumbDisassembleBranchNear

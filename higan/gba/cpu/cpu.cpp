@@ -33,10 +33,8 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
-  for(auto _ : range(clocks)) {
-    for(auto& dma : this->dma) {
-      if(dma.waiting) dma.waiting--;
-    }
+  for(auto& dma : this->dma) {
+    dma.waiting = max(0, dma.waiting - (int)clocks);
   }
 
   if(!context.dmaActive) {

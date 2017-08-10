@@ -47,13 +47,13 @@ auto ARM7TDMI::Processor::serialize(serializer& s) -> void {
 
 auto ARM7TDMI::PSR::serialize(serializer& s) -> void {
   s.integer(m);
-  s.integer(t);
-  s.integer(f);
-  s.integer(i);
-  s.integer(v);
-  s.integer(c);
-  s.integer(z);
-  s.integer(n);
+  s.boolean(t);
+  s.boolean(f);
+  s.boolean(i);
+  s.boolean(v);
+  s.boolean(c);
+  s.boolean(z);
+  s.boolean(n);
 }
 
 auto ARM7TDMI::Pipeline::serialize(serializer& s) -> void {

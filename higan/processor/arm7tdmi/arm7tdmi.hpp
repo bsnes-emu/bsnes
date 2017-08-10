@@ -113,7 +113,7 @@ struct ARM7TDMI {
   auto serialize(serializer&) -> void;
 
   //disassembler.cpp
-  auto disassemble(maybe<uint32> pc = nothing, maybe<uint1> thumb = nothing) -> string;
+  auto disassemble(maybe<uint32> pc = nothing, maybe<boolean> thumb = nothing) -> string;
   auto disassembleRegisters() -> string;
 
   struct GPR {
@@ -127,17 +127,18 @@ struct ARM7TDMI {
       return *this;
     }
 
+    inline auto operator=(const GPR& value) -> GPR& {
+      data = value.data;
+      if(modify) modify();
+      return *this;
+    }
+
     uint32 data;
     function<auto () -> void> modify;
   };
 
   struct PSR {
     enum : uint {
-      USR26 = 0x00,  //26-bit user
-      FIQ26 = 0x01,  //26-bit fast interrupt
-      IRQ26 = 0x02,  //26-bit interrupt
-      SVC26 = 0x03,  //26-bit service
-
       USR = 0x10,  //user
       FIQ = 0x11,  //fast interrupt
       IRQ = 0x12,  //interrupt
@@ -166,14 +167,14 @@ struct ARM7TDMI {
     //serialization.cpp
     auto serialize(serializer&) -> void;
 
-    uint5 m;  //mode
-    uint1 t;  //thumb
-    uint1 f;  //fiq
-    uint1 i;  //irq
-    uint1 v;  //overflow
-    uint1 c;  //carry
-    uint1 z;  //zero
-    uint1 n;  //negative
+    uint5 m;    //mode
+    boolean t;  //thumb
+    boolean f;  //fiq
+    boolean i;  //irq
+    boolean v;  //overflow
+    boolean c;  //carry
+    boolean z;  //zero
+    boolean n;  //negative
   };
 
   struct Processor {

@@ -10,11 +10,11 @@ auto V30MZ::parity(uint8 value) const -> bool {
 #define mask (size == Byte ? 0xff : 0xffff)
 #define sign (size == Byte ? 0x80 : 0x8000)
 
-auto V30MZ::alAdc(Size size, uint16 x, uint16 y) -> uint16 {
-  return alAdd(size, x, y + r.f.c);
+auto V30MZ::ADC(Size size, uint16 x, uint16 y) -> uint16 {
+  return ADD(size, x, y + r.f.c);
 }
 
-auto V30MZ::alAdd(Size size, uint16 x, uint16 y) -> uint16 {
+auto V30MZ::ADD(Size size, uint16 x, uint16 y) -> uint16 {
   uint16 result = (x + y) & mask;
   r.f.c = x + y > mask;
   r.f.p = parity(result);
@@ -25,7 +25,7 @@ auto V30MZ::alAdd(Size size, uint16 x, uint16 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alAnd(Size size, uint16 x, uint16 y) -> uint16 {
+auto V30MZ::AND(Size size, uint16 x, uint16 y) -> uint16 {
   uint16 result = (x & y) & mask;
   r.f.c = 0;
   r.f.p = parity(result);
@@ -36,7 +36,7 @@ auto V30MZ::alAnd(Size size, uint16 x, uint16 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alDec(Size size, uint16 x) -> uint16 {
+auto V30MZ::DEC(Size size, uint16 x) -> uint16 {
   uint16 result = (x - 1) & mask;
   r.f.p = parity(result);
   r.f.h = (x & 0x0f) == 0;
@@ -46,14 +46,14 @@ auto V30MZ::alDec(Size size, uint16 x) -> uint16 {
   return result;
 }
 
-auto V30MZ::alDiv(Size size, uint32 x, uint32 y) -> uint32 {
+auto V30MZ::DIV(Size size, uint32 x, uint32 y) -> uint32 {
   if(y == 0) return interrupt(0), 0;
   uint32 quotient = x / y;
   uint32 remainder = x % y;
   return (remainder & mask) << bits | (quotient & mask);
 }
 
-auto V30MZ::alDivi(Size size, int32 x, int32 y) -> uint32 {
+auto V30MZ::DIVI(Size size, int32 x, int32 y) -> uint32 {
   if(y == 0) return interrupt(0), 0;
   x = size == Byte ? (int8_t)x : (int16_t)x;
   y = size == Byte ? (int8_t)y : (int16_t)y;
@@ -62,7 +62,7 @@ auto V30MZ::alDivi(Size size, int32 x, int32 y) -> uint32 {
   return (remainder & mask) << bits | (quotient & mask);
 }
 
-auto V30MZ::alInc(Size size, uint16 x) -> uint16 {
+auto V30MZ::INC(Size size, uint16 x) -> uint16 {
   uint16 result = (x + 1) & mask;
   r.f.p = parity(result);
   r.f.h = (x & 0x0f) == 0x0f;
@@ -72,14 +72,14 @@ auto V30MZ::alInc(Size size, uint16 x) -> uint16 {
   return result;
 }
 
-auto V30MZ::alMul(Size size, uint16 x, uint16 y) -> uint32 {
+auto V30MZ::MUL(Size size, uint16 x, uint16 y) -> uint32 {
   uint32 result = x * y;
   r.f.c = result >> bits;
   r.f.v = result >> bits;
   return result;
 }
 
-auto V30MZ::alMuli(Size size, int16 x, int16 y) -> uint32 {
+auto V30MZ::MULI(Size size, int16 x, int16 y) -> uint32 {
   x = size == Byte ? (int8_t)x : (int16_t)x;
   y = size == Byte ? (int8_t)y : (int16_t)y;
   uint32 result = x * y;
@@ -88,7 +88,7 @@ auto V30MZ::alMuli(Size size, int16 x, int16 y) -> uint32 {
   return result;
 }
 
-auto V30MZ::alNeg(Size size, uint16 x) -> uint16 {
+auto V30MZ::NEG(Size size, uint16 x) -> uint16 {
   uint16 result = (-x) & mask;
   r.f.c = x;
   r.f.p = parity(result);
@@ -99,12 +99,12 @@ auto V30MZ::alNeg(Size size, uint16 x) -> uint16 {
   return result;
 }
 
-auto V30MZ::alNot(Size size, uint16 x) -> uint16 {
+auto V30MZ::NOT(Size size, uint16 x) -> uint16 {
   uint16 result = (~x) & mask;
   return result;
 }
 
-auto V30MZ::alOr(Size size, uint16 x, uint16 y) -> uint16 {
+auto V30MZ::OR(Size size, uint16 x, uint16 y) -> uint16 {
   uint16 result = (x | y) & mask;
   r.f.c = 0;
   r.f.p = parity(result);
@@ -115,7 +115,7 @@ auto V30MZ::alOr(Size size, uint16 x, uint16 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alRcl(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::RCL(Size size, uint16 x, uint5 y) -> uint16 {
   uint16 result = x;
   for(uint n = 0; n < y; n++) {
     bool carry = result & sign;
@@ -126,7 +126,7 @@ auto V30MZ::alRcl(Size size, uint16 x, uint5 y) -> uint16 {
   return result & mask;
 }
 
-auto V30MZ::alRcr(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::RCR(Size size, uint16 x, uint5 y) -> uint16 {
   uint16 result = x;
   for(uint n = 0; n < y; n++) {
     bool carry = result & 1;
@@ -137,21 +137,21 @@ auto V30MZ::alRcr(Size size, uint16 x, uint5 y) -> uint16 {
   return result & mask;
 }
 
-auto V30MZ::alRol(Size size, uint16 x, uint4 y) -> uint16 {
+auto V30MZ::ROL(Size size, uint16 x, uint4 y) -> uint16 {
   r.f.c = (x << y) & (1 << bits);
   uint16 result = ((x << y) | (x >> (bits - y))) & mask;
   r.f.v = (x ^ result) & sign;
   return result;
 }
 
-auto V30MZ::alRor(Size size, uint16 x, uint4 y) -> uint16 {
+auto V30MZ::ROR(Size size, uint16 x, uint4 y) -> uint16 {
   r.f.c = (x >> (y - 1)) & 1;
   uint16 result = ((x >> y) | (x << (bits - y))) & mask;
   r.f.v = (x ^ result) & sign;
   return result;
 }
 
-auto V30MZ::alSal(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::SAL(Size size, uint16 x, uint5 y) -> uint16 {
   r.f.c = (x << y) & (1 << bits);
   uint16 result = (x << y) & mask;
   r.f.p = parity(result);
@@ -161,7 +161,7 @@ auto V30MZ::alSal(Size size, uint16 x, uint5 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alSar(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::SAR(Size size, uint16 x, uint5 y) -> uint16 {
   if(y & 16) {
     r.f.c = x & sign;
     return 0 - r.f.c;
@@ -176,11 +176,11 @@ auto V30MZ::alSar(Size size, uint16 x, uint5 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alSbb(Size size, uint16 x, uint16 y) -> uint16 {
-  return alSub(size, x, y + r.f.c);
+auto V30MZ::SBB(Size size, uint16 x, uint16 y) -> uint16 {
+  return SUB(size, x, y + r.f.c);
 }
 
-auto V30MZ::alShl(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::SHL(Size size, uint16 x, uint5 y) -> uint16 {
   r.f.c = (x << y) & (1 << bits);
   uint16 result = (x << y) & mask;
   r.f.p = parity(result);
@@ -190,7 +190,7 @@ auto V30MZ::alShl(Size size, uint16 x, uint5 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alShr(Size size, uint16 x, uint5 y) -> uint16 {
+auto V30MZ::SHR(Size size, uint16 x, uint5 y) -> uint16 {
   r.f.c = (x >> (y - 1)) & 1;
   uint16 result = (x >> y) & mask;
   r.f.p = parity(result);
@@ -200,7 +200,7 @@ auto V30MZ::alShr(Size size, uint16 x, uint5 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alSub(Size size, uint16 x, uint16 y) -> uint16 {
+auto V30MZ::SUB(Size size, uint16 x, uint16 y) -> uint16 {
   uint16 result = (x - y) & mask;
   r.f.c = y > x;
   r.f.p = parity(result);
@@ -211,7 +211,7 @@ auto V30MZ::alSub(Size size, uint16 x, uint16 y) -> uint16 {
   return result;
 }
 
-auto V30MZ::alXor(Size size, uint16 x, uint16 y) -> uint16 {
+auto V30MZ::XOR(Size size, uint16 x, uint16 y) -> uint16 {
   uint16 result = (x ^ y) & mask;
   r.f.c = 0;
   r.f.p = parity(result);

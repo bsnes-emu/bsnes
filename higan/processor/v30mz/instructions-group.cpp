@@ -1,8 +1,4 @@
-//80  grp1 memb,immb
-//81  grp1 memw,immw
-//82  grp1 memb,immbs
-//83  grp1 memw,immbs
-auto V30MZ::opGroup1MemImm(Size size, bool sign) {
+auto V30MZ::instructionGroup1MemImm(Size size, bool sign) -> void {
   modRM();
   auto mem = getMem(size);
   uint16 imm = 0;
@@ -10,24 +6,18 @@ auto V30MZ::opGroup1MemImm(Size size, bool sign) {
   else if(size == Byte) imm = fetch();
   else imm = fetch(Word);
   switch(modrm.reg) {
-  case 0: setMem(size, alAdd(size, mem, imm)); break;
-  case 1: setMem(size, alOr (size, mem, imm)); break;
-  case 2: setMem(size, alAdc(size, mem, imm)); break;
-  case 3: setMem(size, alSbb(size, mem, imm)); break;
-  case 4: setMem(size, alAnd(size, mem, imm)); break;
-  case 5: setMem(size, alSub(size, mem, imm)); break;
-  case 6: setMem(size, alXor(size, mem, imm)); break;
-  case 7:              alSub(size, mem, imm);  break;
+  case 0: setMem(size, ADD(size, mem, imm)); break;
+  case 1: setMem(size, OR (size, mem, imm)); break;
+  case 2: setMem(size, ADC(size, mem, imm)); break;
+  case 3: setMem(size, SBB(size, mem, imm)); break;
+  case 4: setMem(size, AND(size, mem, imm)); break;
+  case 5: setMem(size, SUB(size, mem, imm)); break;
+  case 6: setMem(size, XOR(size, mem, imm)); break;
+  case 7:              SUB(size, mem, imm);  break;
   }
 }
 
-//c0  grp2 memb,imm8
-//c1  grp2 memw,imm8
-//d0  grp2 memb,1
-//d1  grp2 memw,1
-//d2  grp2 memb,cl
-//d3  grp2 memw,cl
-auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
+auto V30MZ::instructionGroup2MemImm(Size size, maybe<uint8> imm) -> void {
   modRM();
   auto mem = getMem(size);
   if(!imm) {
@@ -35,46 +25,42 @@ auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
     imm = fetch();
   }
   switch(modrm.reg) {
-  case 0: setMem(size, alRol(size, mem, *imm)); break;
-  case 1: setMem(size, alRor(size, mem, *imm)); break;
-  case 2: setMem(size, alRcl(size, mem, *imm)); break;
-  case 3: setMem(size, alRcr(size, mem, *imm)); break;
-  case 4: setMem(size, alShl(size, mem, *imm)); break;
-  case 5: setMem(size, alShr(size, mem, *imm)); break;
-  case 6: setMem(size, alSal(size, mem, *imm)); break;
-  case 7: setMem(size, alSar(size, mem, *imm)); break;
+  case 0: setMem(size, ROL(size, mem, *imm)); break;
+  case 1: setMem(size, ROR(size, mem, *imm)); break;
+  case 2: setMem(size, RCL(size, mem, *imm)); break;
+  case 3: setMem(size, RCR(size, mem, *imm)); break;
+  case 4: setMem(size, SHL(size, mem, *imm)); break;
+  case 5: setMem(size, SHR(size, mem, *imm)); break;
+  case 6: setMem(size, SAL(size, mem, *imm)); break;
+  case 7: setMem(size, SAR(size, mem, *imm)); break;
   }
 }
 
-//f6  grp3 memb
-//f7  grp3 memw
-auto V30MZ::opGroup3MemImm(Size size) {
+auto V30MZ::instructionGroup3MemImm(Size size) -> void {
   modRM();
   auto mem = getMem(size);
   switch(modrm.reg) {
-  case 0: alAnd(size, mem, fetch(size)); break;
+  case 0: AND(size, mem, fetch(size)); break;
   case 1: warning("[V30MZ] GRP3.1"); break;
-  case 2: wait(2); setMem(size, alNot(size, mem)); break;
-  case 3: wait(2); setMem(size, alNeg(size, mem)); break;
-  case 4: wait(2); setAcc(size * 2, alMul(size, getAcc(size), mem)); break;
-  case 5: wait(2); setAcc(size * 2, alMuli(size, getAcc(size), mem)); break; break;
-  case 6: wait(size == Byte ? 15 : 23); setAcc(size * 2, alDiv(size, getAcc(size * 2), mem)); break;
-  case 7: wait(size == Byte ? 17 : 24); setAcc(size * 2, alDivi(size, getAcc(size * 2), mem)); break;
+  case 2: wait(2); setMem(size, NOT(size, mem)); break;
+  case 3: wait(2); setMem(size, NEG(size, mem)); break;
+  case 4: wait(2); setAcc(size * 2, MUL(size, getAcc(size), mem)); break;
+  case 5: wait(2); setAcc(size * 2, MULI(size, getAcc(size), mem)); break; break;
+  case 6: wait(size == Byte ? 15 : 23); setAcc(size * 2, DIV(size, getAcc(size * 2), mem)); break;
+  case 7: wait(size == Byte ? 17 : 24); setAcc(size * 2, DIVI(size, getAcc(size * 2), mem)); break;
   }
 }
 
-//fe  grp4 memb
-//ff  grp4 memw
-auto V30MZ::opGroup4MemImm(Size size) {
+auto V30MZ::instructionGroup4MemImm(Size size) -> void {
   modRM();
   switch(modrm.reg) {
   case 0:
     wait(2);
-    setMem(size, alInc(size, getMem(size)));
+    setMem(size, INC(size, getMem(size)));
     break;
   case 1:
     wait(2);
-    setMem(size, alDec(size, getMem(size)));
+    setMem(size, DEC(size, getMem(size)));
     break;
   case 2:
     if(size == Byte) { warning("[V30MZ] GRP4.2"); break; }

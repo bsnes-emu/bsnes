@@ -1,6 +1,5 @@
 processors := $(call unique,$(processors))
 
-objects += $(if $(findstring arm,$(processors)),processor-arm)
 objects += $(if $(findstring arm7tdmi,$(processors)),processor-arm7tdmi)
 objects += $(if $(findstring gsu,$(processors)),processor-gsu)
 objects += $(if $(findstring hg51b,$(processors)),processor-hg51b)
@@ -14,7 +13,6 @@ objects += $(if $(findstring v30mz,$(processors)),processor-v30mz)
 objects += $(if $(findstring wdc65816,$(processors)),processor-wdc65816)
 objects += $(if $(findstring z80,$(processors)),processor-z80)
 
-obj/processor-arm.o:      processor/arm/arm.cpp $(call rwildcard,processor/arm/)
 obj/processor-arm7tdmi.o: processor/arm7tdmi/arm7tdmi.cpp $(call rwildcard,processor/arm7tdmi/)
 obj/processor-gsu.o:      processor/gsu/gsu.cpp $(call rwildcard,processor/gsu/)
 obj/processor-hg51b.o:    processor/hg51b/hg51b.cpp $(call rwildcard,processor/hg51b/)

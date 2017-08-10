@@ -1,5 +1,9 @@
 //ARMv3 (ARM60)
 
+//note: this coprocessor uses the ARMv4 (ARM7TDMI) core as its base
+//instruction execution forces ARM mode to remove ARMv4 THUMB access
+//there is a possibility the ARMv3 supports 26-bit mode; but cannot be verified
+
 struct ArmDSP : Processor::ARM7TDMI, Thread {
   #include "registers.hpp"
 

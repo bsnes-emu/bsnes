@@ -1,4 +1,4 @@
-auto V30MZ::opLoop() {
+auto V30MZ::instructionLoop() -> void {
   wait(1);
   auto offset = (int8)fetch();
   if(--r.cx) {
@@ -7,7 +7,7 @@ auto V30MZ::opLoop() {
   }
 }
 
-auto V30MZ::opLoopWhile(bool value) {
+auto V30MZ::instructionLoopWhile(bool value) -> void {
   wait(2);
   auto offset = (int8)fetch();
   if(--r.cx && r.f.z == value) {
@@ -16,23 +16,23 @@ auto V30MZ::opLoopWhile(bool value) {
   }
 }
 
-auto V30MZ::opJumpShort() {
+auto V30MZ::instructionJumpShort() -> void {
   wait(3);
   auto offset = (int8)fetch();
   r.ip += offset;
 }
 
-auto V30MZ::opJumpIf(bool condition) {
+auto V30MZ::instructionJumpIf(bool condition) -> void {
   auto offset = (int8)fetch();
   if(condition) r.ip += offset;
 }
 
-auto V30MZ::opJumpNear() {
+auto V30MZ::instructionJumpNear() -> void {
   wait(3);
   r.ip += (int16)fetch(Word);
 }
 
-auto V30MZ::opJumpFar() {
+auto V30MZ::instructionJumpFar() -> void {
   wait(6);
   auto ip = fetch(Word);
   auto cs = fetch(Word);
@@ -40,14 +40,14 @@ auto V30MZ::opJumpFar() {
   r.ip = ip;
 }
 
-auto V30MZ::opCallNear() {
+auto V30MZ::instructionCallNear() -> void {
   wait(4);
   auto offset = (int16)fetch(Word);
   push(r.ip);
   r.ip += offset;
 }
 
-auto V30MZ::opCallFar() {
+auto V30MZ::instructionCallFar() -> void {
   wait(9);
   auto ip = fetch(Word);
   auto cs = fetch(Word);
@@ -57,25 +57,25 @@ auto V30MZ::opCallFar() {
   r.ip = ip;
 }
 
-auto V30MZ::opReturn() {
+auto V30MZ::instructionReturn() -> void {
   wait(5);
   r.ip = pop();
 }
 
-auto V30MZ::opReturnImm() {
+auto V30MZ::instructionReturnImm() -> void {
   wait(5);
   auto offset = fetch(Word);
   r.ip = pop();
   r.sp += offset;
 }
 
-auto V30MZ::opReturnFar() {
+auto V30MZ::instructionReturnFar() -> void {
   wait(7);
   r.ip = pop();
   r.cs = pop();
 }
 
-auto V30MZ::opReturnFarImm() {
+auto V30MZ::instructionReturnFarImm() -> void {
   wait(8);
   auto offset = fetch(Word);
   r.ip = pop();
@@ -83,8 +83,7 @@ auto V30MZ::opReturnFarImm() {
   r.sp += offset;
 }
 
-//cf  iret
-auto V30MZ::opReturnInt() {
+auto V30MZ::instructionReturnInt() -> void {
   wait(9);
   r.ip = pop();
   r.cs = pop();
@@ -92,22 +91,22 @@ auto V30MZ::opReturnInt() {
   state.poll = false;
 }
 
-auto V30MZ::opInt3() {
+auto V30MZ::instructionInt3() -> void {
   wait(8);
   interrupt(3);
 }
 
-auto V30MZ::opIntImm() {
+auto V30MZ::instructionIntImm() -> void {
   wait(9);
   interrupt(fetch());
 }
 
-auto V30MZ::opInto() {
+auto V30MZ::instructionInto() -> void {
   wait(5);
   interrupt(4);
 }
 
-auto V30MZ::opEnter() {
+auto V30MZ::instructionEnter() -> void {
   wait(7);
   auto offset = fetch(Word);
   auto length = fetch(Byte) & 0x1f;
@@ -126,36 +125,33 @@ auto V30MZ::opEnter() {
   }
 }
 
-auto V30MZ::opLeave() {
+auto V30MZ::instructionLeave() -> void {
   wait(1);
   r.sp = r.bp;
   r.bp = pop();
 }
 
-auto V30MZ::opPushReg(uint16_t& reg) {
+auto V30MZ::instructionPushReg(uint16_t& reg) -> void {
   push(reg);
 }
 
-auto V30MZ::opPopReg(uint16_t& reg) {
+auto V30MZ::instructionPopReg(uint16_t& reg) -> void {
   reg = pop();
   if(&reg == &r.ss) state.poll = false;
 }
 
-//9c  pushf
-auto V30MZ::opPushFlags() {
+auto V30MZ::instructionPushFlags() -> void {
   wait(1);
   push(r.f);
 }
 
-//9d  popf
-auto V30MZ::opPopFlags() {
+auto V30MZ::instructionPopFlags() -> void {
   wait(2);
   r.f = pop();
   state.poll = false;
 }
 
-//60  pusha
-auto V30MZ::opPushAll() {
+auto V30MZ::instructionPushAll() -> void {
   wait(8);
   auto sp = r.sp;
   push(r.ax);
@@ -168,8 +164,7 @@ auto V30MZ::opPushAll() {
   push(r.di);
 }
 
-//61  popa
-auto V30MZ::opPopAll() {
+auto V30MZ::instructionPopAll() -> void {
   wait(7);
   r.di = pop();
   r.si = pop();
@@ -182,15 +177,12 @@ auto V30MZ::opPopAll() {
   //r.sp is not restored
 }
 
-//68  push imm16
-//6a  push imm8s
-auto V30MZ::opPushImm(Size size) {
+auto V30MZ::instructionPushImm(Size size) -> void {
   if(size == Byte) push((int8)fetch(Byte));
   if(size == Word) push(fetch(Word));
 }
 
-auto V30MZ::opPopMem() {
+auto V30MZ::instructionPopMem() -> void {
   modRM();
   setMem(Word, pop());
 }
-

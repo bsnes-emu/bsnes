@@ -30,8 +30,9 @@ auto ARM7TDMI::instruction() -> void {
   fetch();
 
   if(irq && !cpsr().i) {
+    bool t = cpsr().t;
     interrupt(PSR::IRQ, 0x18);
-    if(cpsr().t) r(14).data += 2;
+    if(t) r(14).data += 2;
     return;
   }
 
@@ -283,10 +284,10 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    opcode.bits( 0, 3),  /* d */ \
+    opcode.bits(12,15),  /* d */ \
     opcode.bit (22)      /* mode */
   for(uint1 mode : range(2)) {
-    auto opcode = pattern(".... 0001 0?00 ---- ---- ---- 0000 ????") | mode << 22;
+    auto opcode = pattern(".... 0001 0?00 ---- ???? ---- 0000 ----") | mode << 22;
     bind(opcode, MoveToRegisterFromStatus);
   }
   #undef arguments

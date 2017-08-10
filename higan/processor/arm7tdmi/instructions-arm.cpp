@@ -1,24 +1,26 @@
-auto ARM7TDMI::armALU(uint4 mode, uint4 target, uint4 source, uint32 data) -> void {
+auto ARM7TDMI::armALU(uint4 mode, uint4 d, uint4 n, uint32 rm) -> void {
+  uint32 rn = r(n);
+
   switch(mode) {
-  case  0: r(target) = BIT(r(source) & data);          break;  //AND
-  case  1: r(target) = BIT(r(source) ^ data);          break;  //EOR
-  case  2: r(target) = SUB(r(source), data, 1);        break;  //SUB
-  case  3: r(target) = SUB(data, r(source), 1);        break;  //RSB
-  case  4: r(target) = ADD(r(source), data, 0);        break;  //ADD
-  case  5: r(target) = ADD(r(source), data, cpsr().c); break;  //ADC
-  case  6: r(target) = SUB(r(source), data, cpsr().c); break;  //SBC
-  case  7: r(target) = SUB(data, r(source), cpsr().c); break;  //RSC
-  case  8:             BIT(r(source) & data);          break;  //TST
-  case  9:             BIT(r(source) ^ data);          break;  //TEQ
-  case 10:             SUB(r(source), data, 1);        break;  //CMP
-  case 11:             ADD(r(source), data, 0);        break;  //CMN
-  case 12: r(target) = BIT(r(source) | data);          break;  //ORR
-  case 13: r(target) = BIT(data);                      break;  //MOV
-  case 14: r(target) = BIT(r(source) & ~data);         break;  //BIC
-  case 15: r(target) = BIT(~data);                     break;  //MVN
+  case  0: r(d) = BIT(rn & rm); break;  //AND
+  case  1: r(d) = BIT(rn ^ rm); break;  //EOR
+  case  2: r(d) = SUB(rn, rm, 1); break;  //SUB
+  case  3: r(d) = SUB(rm, rn, 1); break;  //RSB
+  case  4: r(d) = ADD(rn, rm, 0); break;  //ADD
+  case  5: r(d) = ADD(rn, rm, cpsr().c); break;  //ADC
+  case  6: r(d) = SUB(rn, rm, cpsr().c); break;  //SBC
+  case  7: r(d) = SUB(rm, rn, cpsr().c); break;  //RSC
+  case  8:        BIT(rn & rm); break;  //TST
+  case  9:        BIT(rn ^ rm); break;  //TEQ
+  case 10:        SUB(rn, rm, 1); break;  //CMP
+  case 11:        ADD(rn, rm, 0); break;  //CMN
+  case 12: r(d) = BIT(rn | rm); break;  //ORR
+  case 13: r(d) = BIT(rm); break;  //MOV
+  case 14: r(d) = BIT(rn & ~rm); break;  //BIC
+  case 15: r(d) = BIT(~rm); break;  //MVN
   }
 
-  if(exception() && target == 15 && opcode.bit(20)) {
+  if(exception() && d == 15 && opcode.bit(20)) {
     cpsr() = spsr();
   }
 }
@@ -29,7 +31,7 @@ auto ARM7TDMI::armMoveToStatus(uint4 field, uint1 mode, uint32 data) -> void {
 
   if(field.bit(0)) {
     if(mode || privileged()) {
-      psr.m = 0x10 | data.bits(0,4);
+      psr.m = data.bits(0,4);
       psr.t = data.bit (5);
       psr.f = data.bit (6);
       psr.i = data.bit (7);

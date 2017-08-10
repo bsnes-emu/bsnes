@@ -7,6 +7,7 @@ namespace Processor {
 #include "modrm.cpp"
 #include "memory.cpp"
 #include "algorithms.cpp"
+#include "instruction.cpp"
 #include "instructions-adjust.cpp"
 #include "instructions-alu.cpp"
 #include "instructions-exec.cpp"
@@ -15,7 +16,6 @@ namespace Processor {
 #include "instructions-misc.cpp"
 #include "instructions-move.cpp"
 #include "instructions-string.cpp"
-#include "instruction.cpp"
 #include "serialization.cpp"
 #include "disassembler.cpp"
 

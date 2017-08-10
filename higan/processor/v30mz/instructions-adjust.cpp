@@ -1,6 +1,4 @@
-//27  daa
-//2f  das
-auto V30MZ::opDecimalAdjust(bool negate) {
+auto V30MZ::instructionDecimalAdjust(bool negate) -> void {
   wait(9);
   uint8 al = r.al;
   if(r.f.h || ((al & 0x0f) > 0x09)) {
@@ -16,9 +14,7 @@ auto V30MZ::opDecimalAdjust(bool negate) {
   r.f.p = parity(r.al);
 }
 
-//37  aaa
-//3f  aas
-auto V30MZ::opAsciiAdjust(bool negate) {
+auto V30MZ::instructionAsciiAdjust(bool negate) -> void {
   wait(8);
   if(r.f.h || ((r.al & 0x0f) > 0x09)) {
     r.al += negate ? -0x06 : 0x06;
@@ -32,8 +28,7 @@ auto V30MZ::opAsciiAdjust(bool negate) {
   r.al &= 0x0f;
 }
 
-//d4  aam,immb
-auto V30MZ::opAdjustAfterMultiply() {
+auto V30MZ::instructionAdjustAfterMultiply() -> void {
   wait(16);
   auto imm = fetch();
   if(imm == 0) return interrupt(0);
@@ -44,8 +39,7 @@ auto V30MZ::opAdjustAfterMultiply() {
   r.f.z = r.ax == 0;
 }
 
-//d5  aad,immw
-auto V30MZ::opAdjustAfterDivide() {
+auto V30MZ::instructionAdjustAfterDivide() -> void {
   wait(5);
   auto imm = fetch();
   r.al += r.ah * imm;

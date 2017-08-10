@@ -1,172 +1,142 @@
-//00  addb mem,reg
-//01  addw mem,reg
-auto V30MZ::opAddMemReg(Size size) {
+auto V30MZ::instructionAddMemReg(Size size) -> void {
   modRM();
-  setMem(size, alAdd(size, getMem(size), getReg(size)));
+  setMem(size, ADD(size, getMem(size), getReg(size)));
 }
 
-//02  addb reg,mem
-//03  addw reg,mem
-auto V30MZ::opAddRegMem(Size size) {
+auto V30MZ::instructionAddRegMem(Size size) -> void {
   modRM();
-  setReg(size, alAdd(size, getReg(size), getMem(size)));
+  setReg(size, ADD(size, getReg(size), getMem(size)));
 }
 
-//04  add al,#imm
-//05  add ax,#imm
-auto V30MZ::opAddAccImm(Size size) {
-  setAcc(size, alAdd(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionAddAccImm(Size size) -> void {
+  setAcc(size, ADD(size, getAcc(size), fetch(size)));
 }
 
-//08  orb mem,reg
-//09  orb mem,reg
-auto V30MZ::opOrMemReg(Size size) {
+auto V30MZ::instructionOrMemReg(Size size) -> void {
   modRM();
-  setMem(size, alOr(size, getMem(size), getReg(size)));
+  setMem(size, OR(size, getMem(size), getReg(size)));
 }
 
-//0a  orb reg,mem
-//0b  orb reg,mem
-auto V30MZ::opOrRegMem(Size size) {
+auto V30MZ::instructionOrRegMem(Size size) -> void {
   modRM();
-  setReg(size, alOr(size, getReg(size), getMem(size)));
+  setReg(size, OR(size, getReg(size), getMem(size)));
 }
 
-//0c  or al,#imm
-//0d  or ax,#imm
-auto V30MZ::opOrAccImm(Size size) {
-  setAcc(size, alOr(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionOrAccImm(Size size) -> void {
+  setAcc(size, OR(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opAdcMemReg(Size size) {
+auto V30MZ::instructionAdcMemReg(Size size) -> void {
   modRM();
-  setMem(size, alAdc(size, getMem(size), getReg(size)));
+  setMem(size, ADC(size, getMem(size), getReg(size)));
 }
 
-auto V30MZ::opAdcRegMem(Size size) {
+auto V30MZ::instructionAdcRegMem(Size size) -> void {
   modRM();
-  setReg(size, alAdc(size, getReg(size), getMem(size)));
+  setReg(size, ADC(size, getReg(size), getMem(size)));
 }
 
-auto V30MZ::opAdcAccImm(Size size) {
-  setAcc(size, alAdc(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionAdcAccImm(Size size) -> void {
+  setAcc(size, ADC(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opSbbMemReg(Size size) {
+auto V30MZ::instructionSbbMemReg(Size size) -> void {
   modRM();
-  setMem(size, alSbb(size, getMem(size), getReg(size)));
+  setMem(size, SBB(size, getMem(size), getReg(size)));
 }
 
-auto V30MZ::opSbbRegMem(Size size) {
+auto V30MZ::instructionSbbRegMem(Size size) -> void {
   modRM();
-  setReg(size, alSbb(size, getReg(size), getMem(size)));
+  setReg(size, SBB(size, getReg(size), getMem(size)));
 }
 
-auto V30MZ::opSbbAccImm(Size size) {
-  setAcc(size, alSbb(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionSbbAccImm(Size size) -> void {
+  setAcc(size, SBB(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opAndMemReg(Size size) {
+auto V30MZ::instructionAndMemReg(Size size) -> void {
   modRM();
-  setMem(size, alAnd(size, getMem(size), getReg(size)));
+  setMem(size, AND(size, getMem(size), getReg(size)));
 }
 
-auto V30MZ::opAndRegMem(Size size) {
+auto V30MZ::instructionAndRegMem(Size size) -> void {
   modRM();
-  setReg(size, alAnd(size, getReg(size), getMem(size)));
+  setReg(size, AND(size, getReg(size), getMem(size)));
 }
 
-auto V30MZ::opAndAccImm(Size size) {
-  setAcc(size, alAnd(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionAndAccImm(Size size) -> void {
+  setAcc(size, AND(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opSubMemReg(Size size) {
+auto V30MZ::instructionSubMemReg(Size size) -> void {
   modRM();
-  setMem(size, alSub(size, getMem(size), getReg(size)));
+  setMem(size, SUB(size, getMem(size), getReg(size)));
 }
 
-auto V30MZ::opSubRegMem(Size size) {
+auto V30MZ::instructionSubRegMem(Size size) -> void {
   modRM();
-  setReg(size, alSub(size, getReg(size), getMem(size)));
+  setReg(size, SUB(size, getReg(size), getMem(size)));
 }
 
-auto V30MZ::opSubAccImm(Size size) {
-  setAcc(size, alSub(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionSubAccImm(Size size) -> void {
+  setAcc(size, SUB(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opXorMemReg(Size size) {
+auto V30MZ::instructionXorMemReg(Size size) -> void {
   modRM();
-  setMem(size, alXor(size, getMem(size), getReg(size)));
+  setMem(size, XOR(size, getMem(size), getReg(size)));
 }
 
-auto V30MZ::opXorRegMem(Size size) {
+auto V30MZ::instructionXorRegMem(Size size) -> void {
   modRM();
-  setReg(size, alXor(size, getReg(size), getMem(size)));
+  setReg(size, XOR(size, getReg(size), getMem(size)));
 }
 
-auto V30MZ::opXorAccImm(Size size) {
-  setAcc(size, alXor(size, getAcc(size), fetch(size)));
+auto V30MZ::instructionXorAccImm(Size size) -> void {
+  setAcc(size, XOR(size, getAcc(size), fetch(size)));
 }
 
-auto V30MZ::opCmpMemReg(Size size) {
+auto V30MZ::instructionCmpMemReg(Size size) -> void {
   modRM();
-  alSub(size, getMem(size), getReg(size));
+  SUB(size, getMem(size), getReg(size));
 }
 
-auto V30MZ::opCmpRegMem(Size size) {
+auto V30MZ::instructionCmpRegMem(Size size) -> void {
   modRM();
-  alSub(size, getReg(size), getMem(size));
+  SUB(size, getReg(size), getMem(size));
 }
 
-auto V30MZ::opCmpAccImm(Size size) {
-  alSub(size, getAcc(size), fetch(size));
+auto V30MZ::instructionCmpAccImm(Size size) -> void {
+  SUB(size, getAcc(size), fetch(size));
 }
 
-auto V30MZ::opTestAcc(Size size) {
-  alAnd(size, getAcc(size), fetch(size));
+auto V30MZ::instructionTestAcc(Size size) -> void {
+  AND(size, getAcc(size), fetch(size));
 }
 
-auto V30MZ::opTestMemReg(Size size) {
+auto V30MZ::instructionTestMemReg(Size size) -> void {
   modRM();
-  alAnd(size, getMem(size), getReg(size));
+  AND(size, getMem(size), getReg(size));
 }
 
-auto V30MZ::opMultiplySignedRegMemImm(Size size) {
+auto V30MZ::instructionMultiplySignedRegMemImm(Size size) -> void {
   wait(2);
   modRM();
-  setReg(Word, alMuli(Word, getMem(Word), size == Word ? (int16_t)fetch(Word) : (int8_t)fetch(Byte)));
+  setReg(Word, MULI(Word, getMem(Word), size == Word ? (int16_t)fetch(Word) : (int8_t)fetch(Byte)));
 }
 
-//40  inc ax
-//41  inc cx
-//42  inc dx
-//43  inc bx
-//44  inc sp
-//45  inc bp
-//46  inc si
-//47  inc di
-auto V30MZ::opIncReg(uint16_t& reg) {
-  reg = alInc(Word, reg);
+auto V30MZ::instructionIncReg(uint16_t& reg) -> void {
+  reg = INC(Word, reg);
 }
 
-//48  dec ax
-//49  dec cx
-//4a  dec dx
-//4b  dec bx
-//4c  dec sp
-//4d  dec bp
-//4e  dec si
-//4f  dec di
-auto V30MZ::opDecReg(uint16_t& reg) {
-  reg = alDec(Word, reg);
+auto V30MZ::instructionDecReg(uint16_t& reg) -> void {
+  reg = DEC(Word, reg);
 }
 
-//98  cbw
-auto V30MZ::opSignExtendByte() {
+auto V30MZ::instructionSignExtendByte() -> void {
   setAcc(Word, (int8)getAcc(Byte));
 }
 
-//99  cwd
-auto V30MZ::opSignExtendWord() {
+auto V30MZ::instructionSignExtendWord() -> void {
   setAcc(Long, (int16)getAcc(Word));
 }

@@ -73,7 +73,7 @@ struct CPU : Processor::ARM7TDMI, Thread, IO {
     uint2 id;
 
     boolean active;
-    natural waiting;
+    integer waiting;
 
     uint2 targetMode;
     uint2 sourceMode;
