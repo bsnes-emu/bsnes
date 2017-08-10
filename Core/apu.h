@@ -53,7 +53,7 @@ typedef struct
         uint8_t current_sample_index;
         bool sample_emitted;
         
-        uint16_t sample_countdown; // in APU ticks
+        uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint16_t sample_length; // From NRX3, NRX4, in APU ticks
         bool length_enabled; // NRX4
 
@@ -66,7 +66,7 @@ typedef struct
         uint16_t sample_length; // NR33, NR34, in APU ticks
         bool length_enabled; // NR34
         
-        uint16_t sample_countdown; // in APU ticks
+        uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint8_t current_sample_index;
         uint8_t current_sample; // Current sample before shifting.
         
