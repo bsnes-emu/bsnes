@@ -151,6 +151,9 @@ then manually copy files between the
 in the "Game Boy" and "Game Boy Color" sub-folders
 of the [Game Library](concepts/game-library.md) folder.
 
+Do not expect save-states to be compatible between
+Game Boy and Game Boy Color.
+
 In-Game Saves and the Game Boy Advance
 --------------------------------------
 
