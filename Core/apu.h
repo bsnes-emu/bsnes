@@ -40,8 +40,8 @@ typedef struct
     uint8_t div_divider; // The DIV register ticks the APU at 512Hz, but is then divided
                          // once more to generate 128Hz and 64Hz clocks
     
-    uint8_t square_carry; // The square channels tick at 1MHz instead of 2,
-                          // so we need a carry to divide the signal
+    uint8_t lf_div; // The APU runs in 2MHz, but channels 1, 2 and 4 run in 1MHZ so we divide
+                    // need to divide the signal.
     
     uint8_t square_sweep_countdown; // In 128Hz
     uint8_t square_sweep_stop_countdown; // In 2 MHz
@@ -73,6 +73,20 @@ typedef struct
         int8_t wave_form[32];
         bool wave_form_just_read;
     } wave_channel;
+    
+    struct {
+        uint16_t pulse_length; // Reloaded from NR41 (xorred), in 256Hz DIV ticks
+        uint8_t current_volume; // Reloaded from NR42
+        uint8_t volume_countdown; // Reloaded from NR42
+        uint16_t lfsr;
+        bool narrow;
+        
+        uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length)
+        uint16_t sample_length; // From NR43, in APU ticks
+        bool length_enabled; // NR44
+        
+    } noise_channel;
+    
 } GB_apu_t;
 
 typedef struct {

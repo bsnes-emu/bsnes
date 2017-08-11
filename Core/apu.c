@@ -86,7 +86,7 @@ static void sweep_event(GB_gameboy_t *gb)
 {
     gb->apu.square_channels[GB_SQUARE_1].sample_length = new_sweep_frequency(gb);
     /* Overflow checking only occurs after a delay */
-    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.square_carry;
+    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.lf_div;
     
     gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
@@ -140,6 +140,36 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                 }
             }
         }
+        
+        if (gb->apu.noise_channel.length_enabled) {
+            if (gb->apu.noise_channel.pulse_length) {
+                if (!--gb->apu.noise_channel.pulse_length) {
+                    gb->apu.is_active[GB_NOISE] = false;
+                    update_sample(gb, GB_NOISE, 0, 0);
+                }
+            }
+        }
+        
+        uint8_t nr42 = gb->io_registers[GB_IO_NR42];
+        
+        if (gb->apu.noise_channel.volume_countdown) {
+            if (!--gb->apu.noise_channel.volume_countdown) {
+                if ((nr42 & 8) && gb->apu.noise_channel.current_volume < 0xF) {
+                    gb->apu.noise_channel.current_volume++;
+                }
+                
+                else if (!(nr42 & 8) && gb->apu.noise_channel.current_volume > 0) {
+                    gb->apu.noise_channel.current_volume--;
+                }
+                
+                gb->apu.noise_channel.volume_countdown = (nr42 & 7) * 4;
+                
+                update_sample(gb, GB_NOISE,
+                              (gb->apu.noise_channel.lfsr & 1) ?
+                              gb->apu.noise_channel.current_volume : 0,
+                              0);
+            }
+        }
     }
     
     if ((gb->apu.div_divider & 3) == 3) {
@@ -158,8 +188,9 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 1;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
+    
     /* To align the square signal to 1MHz */
-    gb->apu.square_carry ^= cycles & 1;
+    gb->apu.lf_div ^= cycles & 1;
     
     if (gb->apu.square_sweep_stop_countdown) {
         if (gb->apu.square_sweep_stop_countdown > cycles) {
@@ -219,6 +250,36 @@ void GB_apu_run(GB_gameboy_t *gb)
         }
     }
     
+    if (gb->apu.is_active[GB_NOISE]) {
+        uint8_t cycles_left = cycles;
+        while (unlikely(cycles_left > gb->apu.noise_channel.sample_countdown)) {
+            cycles_left -= gb->apu.noise_channel.sample_countdown + 1;
+            gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 2 + 1;
+            
+            /* Step LFSR */
+            unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
+            // This formula is different on a GBA!
+            bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
+            gb->apu.noise_channel.lfsr >>= 1;
+            
+            if (new_high_bit) {
+                gb->apu.noise_channel.lfsr |= high_bit_mask;
+            }
+            else {
+                /* This code is not redundent, it's relevant when switching LFSR widths */
+                gb->apu.noise_channel.lfsr &= ~high_bit_mask;
+            }
+            
+            update_sample(gb, GB_NOISE,
+                          (gb->apu.noise_channel.lfsr & 1) ?
+                          gb->apu.noise_channel.current_volume : 0,
+                          0);
+        }
+        if (cycles_left) {
+            gb->apu.noise_channel.sample_countdown -= cycles_left;
+        }
+    }
+    
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_since_render += cycles;
         double cycles_per_sample = CPU_FREQUENCY / (double)gb->apu_output.sample_rate; // TODO: this should be cached!
@@ -267,7 +328,8 @@ void GB_apu_init(GB_gameboy_t *gb)
     for (int i = 0; i < 4; i++) {
         gb->apu.left_enabled[i] = gb->apu.right_enabled[i] = true;
     }
-    gb->apu.square_carry = 1;
+    gb->apu.lf_div = 1;
+    gb->apu.noise_channel.sample_length = 1;
 }
 
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
@@ -350,6 +412,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
             break;
             
+        /* Square channels */
         case GB_IO_NR10:
             gb->apu.square_sweep_countdown = ((value >> 4) & 7);
             break;
@@ -382,7 +445,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             break;
         }
         
-        /* Square channels */
         case GB_IO_NR14:
         case GB_IO_NR24: {
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
@@ -392,17 +454,17 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.square_channels[index].current_sample_index = 7;
 
                 if (!gb->apu.is_active[index]) {
-                    gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.square_carry;
+                    gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                 }
                 else {
                     /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.
                        if both active AND already emitted a sample, sound starts the next 1MHz tick, 
                        and one sample is skipped */
                     if (!gb->apu.square_channels[index].sample_emitted) {
-                        gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.square_carry;
+                        gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
                     }
                     else {
-                        gb->apu.square_channels[index].sample_countdown = gb->apu.square_carry;
+                        gb->apu.square_channels[index].sample_countdown = gb->apu.lf_div;
                         gb->apu.square_channels[index].current_sample_index = 0;
                     }
                 }
@@ -419,7 +481,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 
                 if (index == GB_SQUARE_1 && gb->io_registers[GB_IO_NR10] & 7) {
                     /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
-                    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.square_carry;
+                    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.lf_div;
                 }
                 
                 /* Note that we don't change the sample just yet! This was verified on hardware. */
@@ -524,6 +586,76 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
             break;
         
+        /* Noise Channel */
+            
+        case GB_IO_NR41: {
+            gb->apu.noise_channel.pulse_length = (0x40 - (value & 0x3f));
+            break;
+        }
+            
+        case GB_IO_NR42: {
+            /* TODO: What happens when changing bits 0-2 after triggering? */
+            if ((value & 0xF8) == 0) {
+                /* According to Blargg's test ROM this should disable the channel instantly
+                 TODO: verify how "instant" the change is using PCM34 */
+                update_sample(gb, GB_NOISE, 0, 0);
+                gb->apu.is_active[GB_NOISE] = false;
+            }
+            break;
+        }
+            
+        case GB_IO_NR43: {
+            gb->apu.noise_channel.narrow = value & 8;
+            unsigned divisor = (value & 0x07) << 2;
+            if (!divisor) divisor = 2;
+            gb->apu.noise_channel.sample_length = (divisor << (value >> 4)) - 1;
+            break;
+        }
+            
+        case GB_IO_NR44: {
+            if (value & 0x80) {
+                gb->apu.noise_channel.lfsr = 0;
+
+                gb->apu.noise_channel.sample_countdown = (gb->apu.noise_channel.sample_length) * 2 + 4 - gb->apu.lf_div;
+                if (gb->apu.is_active[GB_NOISE]) {
+                    gb->apu.noise_channel.sample_countdown += 2;
+                }
+                
+                gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
+                gb->apu.noise_channel.volume_countdown = (gb->io_registers[GB_IO_NR42] & 7) * 4;
+                
+                if ((gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
+                    gb->apu.is_active[GB_NOISE] = true;
+                }
+                
+                if (gb->apu.noise_channel.pulse_length == 0) {
+                    gb->apu.noise_channel.pulse_length = 0x40;
+                    gb->apu.noise_channel.length_enabled = false;
+                }
+                
+                /* Note that we don't change the sample just yet! This was verified on hardware. */
+            }
+            
+            /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
+            if ((value & 0x40) &&
+                !gb->apu.noise_channel.length_enabled &&
+                (gb->apu.div_divider & 1) &&
+                gb->apu.noise_channel.pulse_length) {
+                gb->apu.noise_channel.pulse_length--;
+                if (gb->apu.noise_channel.pulse_length == 0) {
+                    if (value & 0x80) {
+                        gb->apu.noise_channel.pulse_length = 0x3F;
+                    }
+                    else {
+                        update_sample(gb, GB_NOISE, 0, 0);
+                        gb->apu.is_active[GB_NOISE] = false;
+                    }
+                }
+            }
+            gb->apu.noise_channel.length_enabled = value & 0x40;
+            break;
+        }
+            
         default:
             if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END) {
                 gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2]     = value >> 4;
