@@ -304,5 +304,10 @@ auto ARM7TDMI::armInstructionMultiplyLong
 
 auto ARM7TDMI::armInstructionSoftwareInterrupt
 (uint24 immediate) -> void {
-  interrupt(PSR::SVC, 0x08);
+  exception(PSR::SVC, 0x08);
+}
+
+auto ARM7TDMI::armInstructionUndefined
+() -> void {
+  exception(PSR::UND, 0x04);
 }

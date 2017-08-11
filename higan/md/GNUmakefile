@@ -2,7 +2,7 @@ processors += m68k z80
 
 objects += md-interface
 objects += md-cpu md-apu md-vdp md-psg md-ym2612
-objects += md-system md-cartridge md-bus
+objects += md-system md-cartridge
 objects += md-controller
 
 obj/md-interface.o:  md/interface/interface.cpp $(call rwildcard,md/interface)
@@ -13,5 +13,4 @@ obj/md-psg.o:        md/psg/psg.cpp $(call rwildcard,md/psg)
 obj/md-ym2612.o:     md/ym2612/ym2612.cpp $(call rwildcard,md/ym2612)
 obj/md-system.o:     md/system/system.cpp $(call rwildcard,md/system)
 obj/md-cartridge.o:  md/cartridge/cartridge.cpp $(call rwildcard,md/cartridge)
-obj/md-bus.o:        md/bus/bus.cpp $(call rwildcard,md/bus)
 obj/md-controller.o: md/controller/controller.cpp $(call rwildcard,md/controller)

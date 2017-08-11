@@ -1,6 +1,6 @@
 struct Settings : Markup::Node {
   Settings();
-  auto quit() -> void;
+  auto save() -> void;
 };
 
 extern Settings settings;

@@ -61,8 +61,11 @@ auto ARM7TDMI::Pipeline::serialize(serializer& s) -> void {
   s.integer(nonsequential);
   s.integer(fetch.address);
   s.integer(fetch.instruction);
+  s.boolean(fetch.thumb);
   s.integer(decode.address);
   s.integer(decode.instruction);
+  s.boolean(decode.thumb);
   s.integer(execute.address);
   s.integer(execute.instruction);
+  s.boolean(execute.thumb);
 }

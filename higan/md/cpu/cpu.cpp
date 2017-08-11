@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 CPU cpu;
+#include "bus.cpp"
 #include "serialization.cpp"
 
 auto CPU::Enter() -> void {
@@ -65,10 +66,30 @@ auto CPU::lower(Interrupt interrupt) -> void {
   state.interruptPending.bit((uint)interrupt) = 0;
 }
 
+auto CPU::load(Markup::Node node) -> bool {
+  tmssEnable = false;
+  if(node["cpu/version"].natural() == 1) {
+    if(auto name = node["cpu/rom/name"].text()) {
+      if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
+        fp->read(tmss, 2 * 1024);
+        tmssEnable = true;
+      }
+    }
+  }
+
+  return true;
+}
+
 auto CPU::power() -> void {
-  M68K::bus = &busCPU;
+  M68K::bus = this;
   M68K::power();
   create(CPU::Enter, system.frequency() / 7.0);
+
+  io = {};
+  io.version = tmssEnable;
+  io.romEnable = !tmssEnable;
+  io.vdpEnable[0] = !tmssEnable;
+  io.vdpEnable[1] = !tmssEnable;
 
   state = {};
   state.interruptPending.bit((uint)Interrupt::Reset) = 1;

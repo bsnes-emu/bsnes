@@ -32,7 +32,7 @@ auto ARM7TDMI::thumbInstructionALUExtended
 auto ARM7TDMI::thumbInstructionAddRegister
 (uint8 immediate, uint3 d, uint1 mode) -> void {
   switch(mode) {
-  case 0: r(d) = (r(15) & ~2) + immediate * 4; break;  //ADD pc (todo: is this really &~2 and not &~3?)
+  case 0: r(d) = (r(15) & ~3) + immediate * 4; break;  //ADD pc
   case 1: r(d) = r(13) + immediate * 4; break;  //ADD sp
   }
 }
@@ -180,7 +180,7 @@ auto ARM7TDMI::thumbInstructionShiftImmediate
 
 auto ARM7TDMI::thumbInstructionSoftwareInterrupt
 (uint8 immediate) -> void {
-  interrupt(PSR::SVC, 0x08);
+  exception(PSR::SVC, 0x08);
 }
 
 auto ARM7TDMI::thumbInstructionStackMultiple
@@ -203,9 +203,9 @@ auto ARM7TDMI::thumbInstructionStackMultiple
   }
 
   if(lrpc) {
-    switch(mode) {  //todo: is this really always nonsequential?
-    case 0: write(Word | Nonsequential, sp, r(14)); break;  //PUSH
-    case 1: r(15) = read(Word | Nonsequential, sp); break;  //POP
+    switch(mode) {
+    case 0: write(Word | sequential, sp, r(14)); break;  //PUSH
+    case 1: r(15) = read(Word | sequential, sp); break;  //POP
     }
     sp += 4;
   }
@@ -217,4 +217,9 @@ auto ARM7TDMI::thumbInstructionStackMultiple
     pipeline.nonsequential = true;
     r(13) = r(13) - (bit::count(list) + lrpc) * 4;  //PUSH
   }
+}
+
+auto ARM7TDMI::thumbInstructionUndefined
+() -> void {
+  exception(PSR::UND, 0x04);
 }

@@ -55,7 +55,6 @@ namespace MegaDrive {
 
   #include <md/system/system.hpp>
   #include <md/cartridge/cartridge.hpp>
-  #include <md/bus/bus.hpp>
 }
 
 #include <md/interface/interface.hpp>

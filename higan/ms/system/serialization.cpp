@@ -55,7 +55,6 @@ auto System::unserialize(serializer& s) -> bool {
 
 auto System::serializeAll(serializer& s) -> void {
   system.serialize(s);
-  bus.serialize(s);
   cartridge.serialize(s);
   cpu.serialize(s);
   vdp.serialize(s);

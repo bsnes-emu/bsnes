@@ -20,10 +20,10 @@ auto ARM7TDMI::disassemble(maybe<uint32> pc, maybe<boolean> thumb) -> string {
     uint32 opcode = read(Word | Nonsequential, _pc & ~3);
     uint12 index = (opcode & 0x0ff00000) >> 16 | (opcode & 0x000000f0) >> 4;
     _c = _conditions[opcode >> 28];
-    return armDisassemble[index](opcode);
+    return {hex(_pc, 8L), "  ", armDisassemble[index](opcode)};
   } else {
     uint16 opcode = read(Half | Nonsequential, _pc & ~1);
-    return thumbDisassemble[opcode]();
+    return {hex(_pc, 8L), "  ", thumbDisassemble[opcode]()};
   }
 }
 
@@ -258,6 +258,11 @@ auto ARM7TDMI::armDisassembleSoftwareInterrupt
   return {"swi #0x", hex(immediate, 6L)};
 }
 
+auto ARM7TDMI::armDisassembleUndefined
+() -> string {
+  return {"undefined"};
+}
+
 //
 
 auto ARM7TDMI::thumbDisassembleALU
@@ -395,6 +400,11 @@ auto ARM7TDMI::thumbDisassembleStackMultiple
   if(lrpc) registers.append(!mode ? "lr," : "pc,");
   registers.trimRight(",", 1L);
   return {!mode ? "push" : "pop", " {", registers, "}"};
+}
+
+auto ARM7TDMI::thumbDisassembleUndefined
+() -> string {
+  return {"undefined"};
 }
 
 #undef _s

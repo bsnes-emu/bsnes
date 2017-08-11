@@ -1,6 +1,7 @@
 auto ARM7TDMI::fetch() -> void {
   pipeline.execute = pipeline.decode;
   pipeline.decode = pipeline.fetch;
+  pipeline.decode.thumb = cpsr().t;
 
   uint sequential = Sequential;
   if(pipeline.nonsequential) {
@@ -30,14 +31,13 @@ auto ARM7TDMI::instruction() -> void {
   fetch();
 
   if(irq && !cpsr().i) {
-    bool t = cpsr().t;
-    interrupt(PSR::IRQ, 0x18);
-    if(t) r(14).data += 2;
+    exception(PSR::IRQ, 0x18);
+    if(pipeline.execute.thumb) r(14).data += 2;
     return;
   }
 
   opcode = pipeline.execute.instruction;
-  if(!cpsr().t) {
+  if(!pipeline.execute.thumb) {
     if(!TST(opcode.bits(28,31))) return;
     uint12 index = (opcode & 0x0ff00000) >> 16 | (opcode & 0x000000f0) >> 4;
     armInstruction[index](opcode);
@@ -46,9 +46,9 @@ auto ARM7TDMI::instruction() -> void {
   }
 }
 
-auto ARM7TDMI::interrupt(uint mode, uint32 address) -> void {
+auto ARM7TDMI::exception(uint mode, uint32 address) -> void {
   auto psr = cpsr();
-  cpsr().m = 0x10 | mode;
+  cpsr().m = mode;
   spsr() = psr;
   cpsr().t = 0;
   if(cpsr().m == PSR::FIQ) cpsr().f = 1;
@@ -353,6 +353,14 @@ auto ARM7TDMI::armInitialize() -> void {
   }
   #undef arguments
 
+  #define arguments
+  for(uint12 id : range(4096)) {
+    if(armInstruction[id]) continue;
+    auto opcode = pattern(".... ???? ???? ---- ---- ---- ???? ----") | id.bits(0,3) << 4 | id.bits(4,11) << 20;
+    bind(opcode, Undefined);
+  }
+  #undef arguments
+
   #undef bind
   #undef pattern
 }
@@ -517,6 +525,12 @@ auto ARM7TDMI::thumbInitialize() -> void {
   for(uint1 mode : range(2)) {
     auto opcode = pattern("1011 ?10? ???? ????") | list << 0 | lrpc << 8 | mode << 11;
     bind(opcode, StackMultiple, list, lrpc, mode);
+  }
+
+  for(uint16 id : range(65536)) {
+    if(thumbInstruction[id]) continue;
+    auto opcode = pattern("???? ???? ???? ????") | id << 0;
+    bind(opcode, Undefined);
   }
 
   #undef bind

@@ -33,12 +33,26 @@ Program::Program(string_vector args) {
   new Presentation;
   presentation->setVisible();
 
+  if(settings["Video/Driver/Crashed"].boolean()) {
+    settings["Video/Driver"].setValue("None");
+    MessageDialog().setText("Video driver crash detected. Driver has been reset to 'None'").information();
+  }
+  settings["Video/Driver/Crashed"].setValue(true);
+  settings.save();
   video = Video::create(settings["Video/Driver"].text());
   video->setContext(presentation->viewport.handle());
   video->setBlocking(settings["Video/Synchronize"].boolean());
   if(!video->ready()) MessageDialog().setText("Failed to initialize video driver").warning();
+  settings["Video/Driver/Crashed"].setValue(false);
+  settings.save();
   presentation->clearViewport();
 
+  if(settings["Audio/Driver/Crashed"].boolean()) {
+    settings["Audio/Driver"].setValue("None");
+    MessageDialog().setText("Audio driver crash detected. Driver has been reset to 'None'").information();
+  }
+  settings["Audio/Driver/Crashed"].setValue(true);
+  settings.save();
   audio = Audio::create(settings["Audio/Driver"].text());
   audio->setExclusive(settings["Audio/Exclusive"].boolean());
   audio->setContext(presentation->viewport.handle());
@@ -46,11 +60,21 @@ Program::Program(string_vector args) {
   audio->setBlocking(settings["Audio/Synchronize"].boolean());
   audio->setChannels(2);
   if(!audio->ready()) MessageDialog().setText("Failed to initialize audio driver").warning();
+  settings["Audio/Driver/Crashed"].setValue(false);
+  settings.save();
 
+  if(settings["Input/Driver/Crashed"].boolean()) {
+    settings["Input/Driver"].setValue("None");
+    MessageDialog().setText("Input driver crash detected. Driver has been reset to 'None'").information();
+  }
+  settings["Input/Driver/Crashed"].setValue(true);
+  settings.save();
   input = Input::create(settings["Input/Driver"].text());
   input->setContext(presentation->viewport.handle());
   input->onChange({&InputManager::onChange, &inputManager()});
   if(!input->ready()) MessageDialog().setText("Failed to initialize input driver").warning();
+  settings["Input/Driver/Crashed"].setValue(false);
+  settings.save();
 
   new InputManager;
   new SettingsManager;
@@ -97,7 +121,7 @@ auto Program::main() -> void {
 auto Program::quit() -> void {
   hasQuit = true;
   unloadMedium();
-  settings.quit();
+  settings.save();
   inputManager->quit();
   video.reset();
   audio.reset();

@@ -57,7 +57,7 @@ struct ARM7TDMI {
   //instruction.cpp
   auto fetch() -> void;
   auto instruction() -> void;
-  auto interrupt(uint mode, uint32 address) -> void;
+  auto exception(uint mode, uint32 address) -> void;
   auto armInitialize() -> void;
   auto thumbInitialize() -> void;
 
@@ -84,6 +84,7 @@ struct ARM7TDMI {
   auto armInstructionMultiply(uint4, uint4, uint4, uint4, uint1, uint1) -> void;
   auto armInstructionMultiplyLong(uint4, uint4, uint4, uint4, uint1, uint1, uint1) -> void;
   auto armInstructionSoftwareInterrupt(uint24 immediate) -> void;
+  auto armInstructionUndefined() -> void;
 
   //instructions-thumb.cpp
   auto thumbInstructionALU(uint3, uint3, uint4) -> void;
@@ -108,6 +109,7 @@ struct ARM7TDMI {
   auto thumbInstructionShiftImmediate(uint3, uint3, uint5, uint2) -> void;
   auto thumbInstructionSoftwareInterrupt(uint8) -> void;
   auto thumbInstructionStackMultiple(uint8, uint1, uint1) -> void;
+  auto thumbInstructionUndefined() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -117,18 +119,11 @@ struct ARM7TDMI {
   auto disassembleRegisters() -> string;
 
   struct GPR {
-    inline operator uint32_t() const {
-      return data;
-    }
+    inline operator uint32_t() const { return data; }
+    inline auto operator=(const GPR& value) -> GPR& { return operator=(value.data); }
 
     inline auto operator=(uint32 value) -> GPR& {
       data = value;
-      if(modify) modify();
-      return *this;
-    }
-
-    inline auto operator=(const GPR& value) -> GPR& {
-      data = value.data;
       if(modify) modify();
       return *this;
     }
@@ -217,6 +212,7 @@ struct ARM7TDMI {
     struct Instruction {
       uint32 address;
       uint32 instruction;
+      boolean thumb;  //not used by fetch stage
     };
 
     uint1 reload = 1;
@@ -230,11 +226,8 @@ struct ARM7TDMI {
   boolean carry;
   boolean irq;
 
-  function<void (uint32 opcode)> armInstruction[4096];
-  function<void ()> thumbInstruction[65536];
-
-  function<string (uint32 opcode)> armDisassemble[4096];
-  function<string ()> thumbDisassemble[65536];
+  function<auto (uint32 opcode) -> void> armInstruction[4096];
+  function<auto () -> void> thumbInstruction[65536];
 
   //disassembler.cpp
   auto armDisassembleBranch(int24, uint1) -> string;
@@ -256,6 +249,7 @@ struct ARM7TDMI {
   auto armDisassembleMultiply(uint4, uint4, uint4, uint4, uint1, uint1) -> string;
   auto armDisassembleMultiplyLong(uint4, uint4, uint4, uint4, uint1, uint1, uint1) -> string;
   auto armDisassembleSoftwareInterrupt(uint24) -> string;
+  auto armDisassembleUndefined() -> string;
 
   auto thumbDisassembleALU(uint3, uint3, uint4) -> string;
   auto thumbDisassembleALUExtended(uint4, uint4, uint2) -> string;
@@ -279,6 +273,10 @@ struct ARM7TDMI {
   auto thumbDisassembleShiftImmediate(uint3, uint3, uint5, uint2) -> string;
   auto thumbDisassembleSoftwareInterrupt(uint8) -> string;
   auto thumbDisassembleStackMultiple(uint8, uint1, uint1) -> string;
+  auto thumbDisassembleUndefined() -> string;
+
+  function<auto (uint32 opcode) -> string> armDisassemble[4096];
+  function<auto () -> string> thumbDisassemble[65536];
 
   uint32 _pc;
   string _c;

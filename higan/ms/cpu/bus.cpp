@@ -1,28 +1,27 @@
-#include <ms/ms.hpp>
+auto CPU::read(uint16 addr) -> uint8 {
+  uint8 data;
 
-namespace MasterSystem {
+  if(auto result = cartridge.read(addr)) {
+    data = result();
+  } else if(addr >= 0xc000) {
+    data = ram[addr & 0x1fff];
+  }
 
-Bus bus;
-#include "serialization.cpp"
+  if(auto result = cheat.find(addr, data)) {
+    data = result();
+  }
 
-auto Bus::read(uint16 addr) -> uint8 {
-  auto data = read_(addr);
-  if(auto result = cheat.find(addr, data)) data = result();
   return data;
 }
 
-auto Bus::read_(uint16 addr) -> uint8 {
-  if(auto data = cartridge.read(addr)) return data();
-  if(addr >= 0xc000) return ram[addr & 0x1fff];
-  return 0x00;
+auto CPU::write(uint16 addr, uint8 data) -> void {
+  if(cartridge.write(addr, data)) {
+  } else if(addr >= 0xc000) {
+    ram[addr & 0x1fff] = data;
+  }
 }
 
-auto Bus::write(uint16 addr, uint8 data) -> void {
-  if(cartridge.write(addr, data)) return;
-  if(addr >= 0xc000) ram[addr & 0x1fff] = data;
-}
-
-auto Bus::in(uint8 addr) -> uint8 {
+auto CPU::in(uint8 addr) -> uint8 {
   switch(addr >> 6) {
 
   case 0: {
@@ -78,7 +77,7 @@ auto Bus::in(uint8 addr) -> uint8 {
   return 0xff;
 }
 
-auto Bus::out(uint8 addr, uint8 data) -> void {
+auto CPU::out(uint8 addr, uint8 data) -> void {
   if(addr == 0x06) {
     if(Model::GameGear()) return psg.balance(data);
   }
@@ -98,6 +97,4 @@ auto Bus::out(uint8 addr, uint8 data) -> void {
   }
 
   }
-}
-
 }

@@ -19,11 +19,12 @@ ARM7TDMI::ARM7TDMI() {
 
 auto ARM7TDMI::power() -> void {
   processor = {};
-  interrupt(PSR::SVC, 0x00);
   processor.r15.modify = [&] { pipeline.reload = true; };
   pipeline = {};
   carry = 0;
   irq = 0;
+  cpsr().f = 1;
+  exception(PSR::SVC, 0x00);
 }
 
 }
