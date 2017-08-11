@@ -33,8 +33,6 @@ typedef struct
     uint8_t apu_cycles;
     
     uint8_t samples[GB_N_CHANNELS];
-    bool left_enabled[GB_N_CHANNELS];
-    bool right_enabled[GB_N_CHANNELS];
     bool is_active[GB_N_CHANNELS];
     
     uint8_t div_divider; // The DIV register ticks the APU at 512Hz, but is then divided

@@ -323,11 +323,6 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
-    // gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 4;
-    // gb->apu.lfsr = 0x7FFF;
-    for (int i = 0; i < 4; i++) {
-        gb->apu.left_enabled[i] = gb->apu.right_enabled[i] = true;
-    }
     gb->apu.lf_div = 1;
     gb->apu.noise_channel.sample_length = 1;
 }
@@ -374,7 +369,14 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
-    if (!gb->apu.global_enable && reg != GB_IO_NR52) {
+    if (!gb->apu.global_enable && reg != GB_IO_NR52 && (gb->is_cgb ||
+                                                        (
+                                                        reg != GB_IO_NR11 &&
+                                                        reg != GB_IO_NR21 &&
+                                                        reg != GB_IO_NR31 &&
+                                                        reg != GB_IO_NR41
+                                                        )
+                                                        )) {
         return;
     }
 
@@ -397,7 +399,14 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 update_sample(gb, i, gb->apu.samples[i], 0);
             }
             break;
-        case GB_IO_NR52:
+        case GB_IO_NR52: {
+            
+            uint8_t old_nrx1[] = {
+                gb->io_registers[GB_IO_NR11],
+                gb->io_registers[GB_IO_NR21],
+                gb->io_registers[GB_IO_NR31],
+                gb->io_registers[GB_IO_NR41]
+            };
             if ((value & 0x80) && !gb->apu.global_enable) {
                 GB_apu_init(gb);
                 gb->apu.global_enable = true;
@@ -408,9 +417,18 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 memset(&gb->apu, 0, sizeof(gb->apu));
                 memset(gb->io_registers + GB_IO_NR10, 0, GB_IO_WAV_START - GB_IO_NR10);
+                
                 gb->apu.global_enable = false;
             }
-            break;
+            
+            if (!gb->is_cgb && (value & 0x80)) {
+                GB_apu_write(gb, GB_IO_NR11, old_nrx1[0] & 0x3F);
+                GB_apu_write(gb, GB_IO_NR21, old_nrx1[1] & 0x3F);
+                GB_apu_write(gb, GB_IO_NR31, old_nrx1[2]);
+                GB_apu_write(gb, GB_IO_NR41, old_nrx1[3]);
+            }
+        }
+        break;
             
         /* Square channels */
         case GB_IO_NR10:
