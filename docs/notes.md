@@ -60,6 +60,9 @@ This is sometimes referred to as "480i" video.
 
 TODO: https://board.byuu.org/viewtopic.php?p=44758#p44758
 
+This also affects the PC Engine:
+https://board.byuu.org/viewtopic.php?p=44779#p44779
+
 Music and Sound Effect Volume on the Mega Drive
 -----------------------------------------------
 
@@ -99,18 +102,54 @@ Games for the original Game Boy
 came in solid grey cartridges,
 and only supported four-shade greyscale graphics.
 ROM files for these games
-typically have filenames ending in `*.gb`.
+typically have filenames ending in `.gb`.
 
 The Game Boy Color played all the original Game Boy games,
 but extended the hardware to support colour graphics.
 Games that required
 the extra hardware in the Game Boy Color
-came in transparent cartridges.
+came in transparent cartridges,
+and had a slightly different shape
+to prevent them from being used in original Game Boys..
 ROM files for these games
-typically have filenames ending in `*.gbc`.
+typically have filenames ending in `.gbc`.
 
-TODO: Rename files before import!
-Or afterward.
+However,
+there were also some games
+that could use colour if it was available,
+but would stick to greyscale if it wasn't.
+These games came in black cartridges.
+ROM files for these games
+typically have filenames ending in `.gbc`
+(since they are genuinely designed for the Game Boy Color)
+or `.gbb`.
+
+Sometimes people ask
+for higan to include these backwards-compatible Game Boy Color games
+when asking for a Game Boy game to load.
+However,
+this would make higan much more complex
+for not much benefit:
+it's just the same game as in Color mode,
+but with bits chopped off.
+You might as well play backward-compatible games
+in Game Boy Color mode
+and get the full experience the developers intended.
+
+If you really, really want to see
+what a particular game's backward-compatible mode looked like,
+change the filename to end with `.gb`
+(instead of `.gbc` or `.gbb`)
+before [importing it](guides/import.md).
+If you want to experiment
+with loading in-game saves from colour-mode in monochrome mode
+or vice-versa,
+you can import the game once with `.gb`
+and once with `.gbc`,
+then manually copy files between the
+[game folders](concepts/game-folders.md)
+in the "Game Boy" and "Game Boy Color" sub-folders
+of the [Game Library](concepts/game-library.md) folder.
 
 In-Game Saves and the Game Boy Advance
 --------------------------------------
