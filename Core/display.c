@@ -204,10 +204,12 @@ static void display_vblank(GB_gameboy_t *gb)
     }
     
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
-        /* LCD is off, set screen to white */
-        uint32_t white = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+        /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
+        uint32_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ?
+                            gb->rgb_encode_callback(gb, 0, 0, 0) :
+                            gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
         for (unsigned i = 0; i < WIDTH * LINES; i++) {
-            gb ->screen[i] = white;
+            gb ->screen[i] = color;
         }
     }
 
