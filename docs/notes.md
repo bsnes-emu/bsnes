@@ -218,15 +218,62 @@ see [What's the deal with... GBA save files?][gbasaves]
 Rumble compatibility for Game Boy (Color)
 -----------------------------------------
 
-TODO: Test Pokémon Pinball
+The Game Boy and Game Boy Color did not natively support
+any kind of rumble or force-feedback system,
+but some game cartridges (such as Pokémon Pinball)
+included a rumble motor within the cartridge itself.
+
+Because higan does not currently support
+game-specific controller features,
+to experience the rumble effect in higan
+you'll need to configure the console itself:
+
+  - Open
+    [higan's Input settings](interface/higan-config.md#input)
+  - In the list of consoles,
+    select Game Boy, or Game Boy Color
+    depending on which console you want to use to play the game
+  - In the list of inputs,
+    double-click "Rumble"
+    or select it and press Enter
+  - Press any button on the gamepad that should shake
+    when the game turns on the rumble effect.
 
 Rumble compatibility for Game Boy Advance
 -----------------------------------------
 
-TODO:
-Some GBA carts contained an actual rumble feature (which?),
-some only supported rumble via the GBA Player (which?).
-Which does higan support?
+The original Game Boy Advance
+and the Game Boy Advance SP
+did not support any kind of rumble or force-feedback system,
+but the Game Boy Player addon for the Gamecube
+allowed Game Boy Advance games
+to use the rumble feature in Gamecube controllers.
+
+Because rumble is a feature of the Game Boy Player,
+to experience the rumble effect in higan
+you'll need to configure the console itself:
+
+  - Open
+    [higan's Input settings](interface/higan-config.md#input)
+  - In the list of consoles,
+    select Game Boy Advance
+  - In the list of inputs,
+    double-click "Rumble"
+    or select it and press Enter
+  - Press any button on the gamepad that should shake
+    when the game turns on the rumble effect.
+
+As well as the Game Boy Player rumble feature,
+some Game Boy Advance cartridges
+included a rumble motor within the cartridge itself.
+higan does not support this rumble technology,
+but that's not a big deal:
+the only two such games are *Drill Dozer*,
+which can use Game Boy Player rumble,
+and *WarioWare: Twisted*,
+which doesn't work anyway
+because it requires gyroscope hardware
+that higan does not yet emulate.
 
 WonderSwan rotation
 -------------------
