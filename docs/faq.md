@@ -101,6 +101,9 @@ If games are running way too fast, here's some things to check:
       - If you want the game to be silent,
         tick "Mute Audio" in
         [the Settings menu](interface/higan.md#the-settings-menu)
+  - If you can't connect speakers or headphones to your computer,
+    you did but it didn't help,
+    try enabling the secret [video synchronization][vsync] option.
 
 [vsync]: #i-see-tearing-when-a-game-scrolls-how-can-i-enable-vsync
 

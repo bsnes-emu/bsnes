@@ -121,12 +121,11 @@ On Linux:
     PulseAudio's OSS emulation,
     or not work at all.
 
-TODO: If the audio driver is set to None,
-or you have no audio device,
-Sync Audio does not work
-and games will run in fast-forward
-unless you enable Sync Video.
-https://board.byuu.org/viewtopic.php?p=44138#p44138
+**Note:**
+By default,
+higan uses the audio driver to regulate its emulation speed.
+If games run too faston your computer,
+see [Games run too fast](../faq.md#games-run-too-fast) in the FAQ.
 
 Input
 -----
