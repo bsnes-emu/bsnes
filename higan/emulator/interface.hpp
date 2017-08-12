@@ -9,11 +9,6 @@ struct Interface {
     bool overscan;
   } information;
 
-  struct Region {
-    string name;
-  };
-  vector<Region> regions;
-
   struct Medium {
     uint id;
     string name;

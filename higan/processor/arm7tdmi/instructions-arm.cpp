@@ -35,6 +35,7 @@ auto ARM7TDMI::armMoveToStatus(uint4 field, uint1 mode, uint32 data) -> void {
       psr.t = data.bit (5);
       psr.f = data.bit (6);
       psr.i = data.bit (7);
+      if(!mode && psr.t) r(15).data += 2;
     }
   }
 

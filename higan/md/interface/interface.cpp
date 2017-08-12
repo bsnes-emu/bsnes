@@ -9,11 +9,6 @@ Interface::Interface() {
   information.name         = "Mega Drive";
   information.overscan     = true;
 
-  regions.append({"Autodetect"});
-  regions.append({"NTSC-J"});
-  regions.append({"NTSC-U"});
-  regions.append({"PAL"});
-
   media.append({ID::MegaDrive, "Mega Drive", "md"});
 
   Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};

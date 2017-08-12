@@ -8,7 +8,7 @@ Cartridge cartridge;
 auto Cartridge::load() -> bool {
   information = {};
 
-  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md", {"NTSC-J", "NTSC-U", "PAL"})) {
+  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md", {"Auto", "NTSC-J", "NTSC-U", "PAL"})) {
     information.pathID = loaded.pathID();
     information.region = loaded.option();
   } else return false;
@@ -20,27 +20,43 @@ auto Cartridge::load() -> bool {
   auto document = BML::unserialize(information.manifest);
   information.title = document["information/title"].text();
 
+  if(information.region == "Auto") {
+    if(auto region = document["board/region"].text()) {
+      information.region = region.upcase();
+    } else {
+      information.region = "NTSC-J";
+    }
+  }
+
   if(auto node = document["board/rom"]) {
-    rom.size = node["size"].natural();
+    rom.size = node["size"].natural() >> 1;
     rom.mask = bit::round(rom.size) - 1;
     if(rom.size) {
-      rom.data = new uint8[rom.mask + 1];
+      rom.data = new uint16[rom.mask + 1]();
       if(auto name = node["name"].text()) {
         if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-          fp->read(rom.data, rom.size);
+          for(uint n : range(rom.size)) rom.data[n] = fp->readm(2);
         }
       }
     }
   }
 
   if(auto node = document["board/ram"]) {
-    ram.size = node["size"].natural();
+    if(auto mode = node["mode"].text()) {
+      if(mode == "lo"  ) ram.bits = 0x00ff;
+      if(mode == "hi"  ) ram.bits = 0xff00;
+      if(mode == "word") ram.bits = 0xffff;
+    }
+    ram.size = node["size"].natural() >> (ram.bits == 0xffff);
     ram.mask = bit::round(ram.size) - 1;
     if(ram.size) {
-      ram.data = new uint8[ram.mask + 1];
+      ram.data = new uint16[ram.mask + 1]();
       if(auto name = node["name"].text()) {
         if(auto fp = platform->open(pathID(), name, File::Read)) {
-          fp->read(ram.data, ram.size);
+          for(uint n : range(ram.size)) {
+            if(ram.bits != 0xffff) ram.data[n] = fp->readm(1) * 0x0101;
+            if(ram.bits == 0xffff) ram.data[n] = fp->readm(2);
+          }
         }
       }
     }
@@ -54,7 +70,10 @@ auto Cartridge::save() -> void {
 
   if(auto name = document["board/ram/name"].text()) {
     if(auto fp = platform->open(pathID(), name, File::Write)) {
-      fp->write(ram.data, ram.size);
+      for(uint n : range(ram.size)) {
+        if(ram.bits != 0xffff) fp->writem(ram.data[n], 1);
+        if(ram.bits == 0xffff) fp->writem(ram.data[n], 2);
+      }
     }
   }
 }
@@ -72,22 +91,21 @@ auto Cartridge::power() -> void {
   for(auto n : range(8)) bank[n] = n;
 }
 
-auto Cartridge::read(uint24 addr) -> uint16 {
-  if(addr.bit(21) && ram.size && ramEnable) {
-    uint16 data = ram.data[addr + 0 & ram.mask] << 8;
-    return data | ram.data[addr + 1 & ram.mask] << 0;
+auto Cartridge::read(uint24 address) -> uint16 {
+  if(address.bit(21) && ram.size && ramEnable) {
+    return ram.data[address >> 1 & ram.mask];
   } else {
-    addr = bank[addr >> 19 & 7] << 19 | (addr & 0x7ffff);
-    uint16 data = rom.data[addr + 0 & rom.mask] << 8;
-    return data | rom.data[addr + 1 & rom.mask] << 0;
+    address = bank[address.bits(19,21)] << 19 | address.bits(0,18);
+    return rom.data[address >> 1 & rom.mask];
   }
 }
 
-auto Cartridge::write(uint24 addr, uint16 data) -> void {
+auto Cartridge::write(uint24 address, uint16 data) -> void {
   //emulating RAM write protect bit breaks some commercial software
-  if(addr.bit(21) && ram.size && ramEnable /* && ramWritable */) {
-    ram.data[addr + 0 & ram.mask] = data >> 8;
-    ram.data[addr + 1 & ram.mask] = data >> 0;
+  if(address.bit(21) && ram.size && ramEnable /* && ramWritable */) {
+    if(ram.bits == 0x00ff) data = data.byte(0) * 0x0101;
+    if(ram.bits == 0xff00) data = data.byte(1) * 0x0101;
+    ram.data[address >> 1 & ram.mask] = data;
   }
 }
 

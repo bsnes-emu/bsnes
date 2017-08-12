@@ -20,12 +20,18 @@ auto CPU::main() -> void {
   ARM7TDMI::irq = irq.ime && (irq.enable & irq.flag);
 
   if(stopped()) {
-    if(!(irq.enable & irq.flag & Interrupt::Keypad)) return step(16);
+    if(!(irq.enable & irq.flag & Interrupt::Keypad)) {
+      Thread::step(16);
+      synchronize(cpu);
+      synchronize(apu);
+    }
     context.stopped = false;
   }
 
   if(halted()) {
-    if(!(irq.enable & irq.flag)) return step(16);
+    if(!(irq.enable & irq.flag)) {
+      return step(16);
+    }
     context.halted = false;
   }
 
@@ -33,22 +39,22 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
-  for(auto& dma : this->dma) {
-    dma.waiting = max(0, dma.waiting - (int)clocks);
-  }
+  dma[0].waiting = max(0, dma[0].waiting - (int)clocks);
+  dma[1].waiting = max(0, dma[1].waiting - (int)clocks);
+  dma[2].waiting = max(0, dma[2].waiting - (int)clocks);
+  dma[3].waiting = max(0, dma[3].waiting - (int)clocks);
 
   if(!context.dmaActive) {
     context.dmaActive = true;
-    while(true) {
-      bool transferred = false;
-      for(auto& dma : this->dma) transferred |= dma.run();
-      if(!transferred) break;
-    }
+    while(dma[0].run() | dma[1].run() | dma[2].run() | dma[3].run());
     context.dmaActive = false;
   }
 
   for(auto _ : range(clocks)) {
-    for(auto& timer : this->timer) timer.run();
+    timer[0].run();
+    timer[1].run();
+    timer[2].run();
+    timer[3].run();
     context.clock++;
   }
 

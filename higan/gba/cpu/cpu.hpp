@@ -67,7 +67,7 @@ struct CPU : Processor::ARM7TDMI, Thread, IO {
 //private:
   struct DMA {
     //dma.cpp
-    auto run() -> bool;
+    inline auto run() -> bool;
     auto transfer() -> void;
 
     uint2 id;
@@ -98,7 +98,7 @@ struct CPU : Processor::ARM7TDMI, Thread, IO {
 
   struct Timer {
     //timer.cpp
-    auto run() -> void;
+    inline auto run() -> void;
     auto step() -> void;
 
     uint2 id;
@@ -128,7 +128,7 @@ struct CPU : Processor::ARM7TDMI, Thread, IO {
   } serial;
 
   struct Keypad {
-    //auto keypad.cpp
+    //keypad.cpp
     auto run() -> void;
 
     uint1 enable;
@@ -189,8 +189,8 @@ struct CPU : Processor::ARM7TDMI, Thread, IO {
     uint32 load;       //write location of slot buffer
     integer wait = 1;  //number of clocks before next slot load
 
-    auto empty() const { return addr == load; }
-    auto full() const { return load - addr == 16; }
+    inline auto empty() const { return addr == load; }
+    inline auto full() const { return load - addr == 16; }
   } prefetch;
 
   struct Context {

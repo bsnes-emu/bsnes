@@ -11,12 +11,13 @@ struct MegaDriveCartridge {
 MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size) {
   if(size < 0x200) return;
 
+  string ramMode = "none";
+
   uint32_t ramFrom = 0;
   ramFrom |= data[0x01b4] << 24;
   ramFrom |= data[0x01b5] << 16;
   ramFrom |= data[0x01b6] <<  8;
   ramFrom |= data[0x01b7] <<  0;
-  ramFrom &= ~1;  //for some reason, most games specify 00200001 as RAM start offset
 
   uint32_t ramTo = 0;
   ramTo |= data[0x01b8] << 24;
@@ -24,14 +25,42 @@ MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size
   ramTo |= data[0x01ba] <<  8;
   ramTo |= data[0x01bb] <<  0;
 
-  uint32_t ramSize = ramTo - ramFrom;
-  if(ramSize > 0x020000) ramSize = 0;  //sanity check
-  ramSize = bit::round(ramSize);
+  if(!(ramFrom & 1) && !(ramTo & 1)) ramMode = "lo";
+  if( (ramFrom & 1) &&  (ramTo & 1)) ramMode = "hi";
+  if(!(ramFrom & 1) &&  (ramTo & 1)) ramMode = "word";
 
-  manifest.append("board\n");
+  uint32_t ramSize = ramTo - ramFrom + 1;
+  if(ramMode == "lo") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
+  if(ramMode == "hi") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
+  if(ramMode == "word") ramSize = ramTo - ramFrom + 1;
+  if(ramMode != "none") ramSize = bit::round(min(0x20000, ramSize));
+
+  string_vector regions;
+  string region = slice((const char*)&data[0x1f0], 0, 16).trimRight(" ");
+  if(!regions) {
+    if(region == "JAPAN" ) regions.append("ntsc-j");
+    if(region == "EUROPE") regions.append("pal");
+  }
+  if(!regions) {
+    if(region.find("J")) regions.append("ntsc-j");
+    if(region.find("U")) regions.append("ntsc-u");
+    if(region.find("E")) regions.append("pal");
+    if(region.find("W")) regions.append("ntsc-j", "ntsc-u", "pal");
+  }
+  if(!regions && region.size() == 1) {
+    uint8_t field = region.hex();
+    if(field & 0x01) regions.append("ntsc-j");
+    if(field & 0x04) regions.append("ntsc-u");
+    if(field & 0x08) regions.append("pal");
+  }
+  if(!regions) {
+    regions.append("ntsc-j");
+  }
+
+  manifest.append("board region=", regions.left(), "\n");
   manifest.append("  rom name=program.rom size=0x", hex(size), "\n");
-  if(ramSize)
-  manifest.append("  ram name=save.ram size=0x", hex(ramSize), " offset=0x", hex(ramFrom), "\n");
+  if(ramSize && ramMode != "none")
+  manifest.append("  ram name=save.ram size=0x", hex(ramSize), " offset=0x", hex(ramFrom), " mode=", ramMode, "\n");
   manifest.append("\n");
   manifest.append("information\n");
   manifest.append("  title: ", Location::prefix(location), "\n");

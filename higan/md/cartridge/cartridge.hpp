@@ -28,9 +28,10 @@ struct Cartridge {
   } information;
 
   struct Memory {
-    uint8* data = nullptr;
+    uint16* data = nullptr;
     uint size = 0;
     uint mask = 0;
+    uint bits = 0;
   };
 
   Memory rom;

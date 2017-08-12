@@ -1,5 +1,5 @@
 auto CPU::DMA::run() -> bool {
-  if(cpu.stopped() || !active || waiting) return false;
+  if(!active || waiting) return false;
 
   transfer();
   if(irq) cpu.irq.flag |= CPU::Interrupt::DMA0 << id;

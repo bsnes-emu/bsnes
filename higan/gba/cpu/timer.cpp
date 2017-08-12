@@ -1,6 +1,4 @@
 auto CPU::Timer::run() -> void {
-  if(cpu.stopped()) return;
-
   if(pending) {
     pending = false;
     if(enable) period = reload;
@@ -29,6 +27,7 @@ auto CPU::Timer::step() -> void {
 }
 
 auto CPU::runFIFO(uint n) -> void {
+  synchronize(apu);
   apu.fifo[n].read();
   if(apu.fifo[n].size > 16) return;
 
