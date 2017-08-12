@@ -27,6 +27,19 @@ and click the Open button,
 or just double-click the game,
 and it will begin playing as though you'd just turned on the console.
 
+**Note:**
+Sometimes
+the NTSC and PAL variants of a particular console
+behave differently,
+or the Japanese and American variants.
+When opening a game from the Game Library,
+a drop-down list in the bottom-right of the window
+allows you to choose which regional variation
+of the console it should emulate.
+For most consoles,
+higan can reliably guess which variant to use,
+and the list defaults to "Auto".
+
 To add a new game to your library,
 choose "Load ROM File ..." from the Library menu.
 A [filesystem browser](#the-filesystem-browser) will appear,
@@ -37,8 +50,6 @@ if the archive contains a single ROM image.
 
 **Note:** Some games require extra steps to import correctly;
 see [the Game Library](#the-game-library) for details.
-
-TODO: Mention the region-picker.
 
 To add many games at once,
 run icarus,
