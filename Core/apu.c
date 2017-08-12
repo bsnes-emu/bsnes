@@ -309,13 +309,14 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
 
     if (count > gb->apu_output.buffer_position) {
         // GB_log(gb, "Audio underflow: %d\n", count - gb->apu_output.buffer_position);
-        if (gb->apu_output.buffer_position != 0) {
-            for (unsigned i = 0; i < count - gb->apu_output.buffer_position; i++) {
-                dest[gb->apu_output.buffer_position + i] = gb->apu_output.buffer[gb->apu_output.buffer_position - 1];
-            }
+        GB_sample_t output = {0,0};
+        for (unsigned i = GB_N_CHANNELS; i--;) {
+            output.left += gb->apu_output.current_sample[i].left * CH_STEP;
+            output.right += gb->apu_output.current_sample[i].right * CH_STEP;
         }
-        else {
-            memset(dest + gb->apu_output.buffer_position, 0, (count - gb->apu_output.buffer_position) * sizeof(*gb->apu_output.buffer));
+        
+        for (unsigned i = 0; i < count - gb->apu_output.buffer_position; i++) {
+            dest[gb->apu_output.buffer_position + i] = output;
         }
         count = gb->apu_output.buffer_position;
     }
