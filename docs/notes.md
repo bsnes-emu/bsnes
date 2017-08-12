@@ -178,7 +178,42 @@ Game Boy and Game Boy Color.
 In-Game Saves and the Game Boy Advance
 --------------------------------------
 
-TODO: GBA in-game saves are Difficult
+For most of the consoles that higan emulates,
+in-game saves are simple:
+the cartridge contains some battery-backed RAM
+that the game accesses like any other memory,
+and the game's internal header usually contains some hint
+about where in memory the save data appears
+and how large it is.
+
+The Game Boy Advance is different.
+By the time of the GBA,
+many save-storage technologies were available,
+most with a more complex interface than plain memory.
+Frustratingly, the GBA's internal header
+does *not* describe which storage variant the game expects.
+Therefore,
+when importing a GBA game,
+higan must guess which storage type to use
+and sometimes it guesses incorrectly.
+
+If higan guesses incorrectly for a game you want to play,
+you will need to turn on
+"Create manifests" in
+[the Icarus settings dialog](interface/icarus.md#the-icarus-settings-dialog),
+turn off
+"Ignore manifests" in
+[higan's Advanced settings](interface/higan-config.md#advanced),
+re-import the game,
+and edit `manifest.bml` in
+[the game folder](concepts/game-folders.md)
+to describe the correct storage type.
+Try importing other GBA games to see what save types they use.
+
+For more discussion of the GBA save type mess,
+see [What's the deal with... GBA save files?][gbasaves]
+
+[gbasaves]: http://zork.net/~st/jottings/GBA_saves.html
 
 Rumble compatibility for Game Boy (Color)
 -----------------------------------------
