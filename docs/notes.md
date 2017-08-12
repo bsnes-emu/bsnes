@@ -275,8 +275,37 @@ which doesn't work anyway
 because it requires gyroscope hardware
 that higan does not yet emulate.
 
+Game Boy Advance rotation
+-------------------------
+
+Some Game Boy Advance homebrew games,
+as well as a bonus mode in *Dr Mario + Puzzle League*,
+expect the player to physically rotate the device
+so the screen is tall rather than wide.
+higan supports this feature with
+a Rotate [hotkey](interface/higan-config.md#hotkeys).
+
+When the user presses the Rotate hotkey,
+the console's video output is rotated 90° anti-clockwise,
+and the directional-pad controls are also rotated
+so that (for example) pushing the button for "up"
+sends the signal "right" to the emulated console,
+so that the player character moves "up" on the rotated screen.
+
 WonderSwan rotation
 -------------------
 
-TODO: The WonderSwan rotates!
+The WonderSwan hardware
+included multiple sets of buttons
+so the player could hold the device
+vertically or horizontally.
+*Makaimura for WonderSwan* includes a level
+that requires the player to repeatedly rotate
+the device as they play.
+higan supports this feature with
+a Rotate [hotkey](interface/higan-config.md#hotkeys).
 
+When the user presses the Rotate hotkey,
+the console's video output is rotated 90° anti-clockwise,
+and the X and Y button cluster mappings
+are adjusted to match.
