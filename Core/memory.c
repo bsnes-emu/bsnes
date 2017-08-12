@@ -558,7 +558,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 return;
             case GB_IO_KEY1:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode) {
                     return;
                 }
                 gb->io_registers[GB_IO_KEY1] = value;
