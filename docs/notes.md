@@ -3,10 +3,8 @@ are similar in many ways,
 but some of them do have particular quirks
 that you should be aware of.
 
-Video Shaders and the Super Famicom (and Mega Drive)
-----------------------------------------------------
-
-Shaders look weird on Super Famicom because of interlace/hi-res
+Video Shaders and TV-based consoles
+-----------------------------------
 
 [Video Shaders](guides/shaders.md)
 customize how higan scales
@@ -22,46 +20,69 @@ try to produce higher-quality output
 by recognising particular patterns of pixel,
 like taking three diagonal pixels
 and turning that into a smooth diagonal line.
+
 These shaders assume that
 each pixel drawn by the game's artists
-is a single pixel in the video output they analyze.
-
-Most of the consoles higan emulates
+becomes a single pixel in the video output they analyze.
+Many of the consoles higan emulates
 can only output video at one specific resolution,
 so this "one pixel equals one pixel" rule holds true,
-and shaders like "xBR" work just fine.
+and pattern-based shaders like "xBR" work just fine.
+
 Unfortunately,
 this is not the case for the Super Famicom.
-
-The "normal" video mode for the Super Famicom
+The "normal" video mode
 draws 256 pixels across the width of the screen,
-but it also supports a "hi-res" mode
-that draws 512 pixels on each line.
-Since Super Famicom games can enable hi-res mode at any time,
-even halfway through a frame,
-higan always renders Super Famicom video output at 512 pixels wide,
-just in case hi-res mode is enabled later on.
+but the "high resolution" mode draws 512.
+Since Super Famicom games can enable hi-res mode at any time
+(even halfway through a frame),
+higan always renders Super Famicom video output 512 pixels wide,
+just in case.
 This means that in "normal" mode,
 each pixel drawn by the game's artists
 becomes two pixels in the video output,
-breaking the assumption pattern-based shaders are based on.
+breaking the assumption
+that pattern-based shaders are based on.
 
 The Super Famicom has a similar issue in the vertical direction:
 normally,
-an NTSC-based Super Famicom draws 238 rows of output,
-~60 times per second.
-This is sometimes referred to as "240p" video.
+an NTSC-based Super Famicom draws about 240 rows of output every frame,
+sometimes referred to as "240p" video.
 When a game turns on "interlaced" mode,
-it draws ~480 lines of output,
-~30 times a second;
-first the ~240 odd-numbered lines,
-then going back to the top and drawing the ~240 even-numbered lines.
+it draws the 240 odd-numbered lines of one frame,
+then the 240 even-numbered lines of the next,
+and so forth.
 This is sometimes referred to as "480i" video.
+Although interlaced mode cannot be enabled mid-frame
+like high-resolution mode,
+resolution switching is still complex,
+so higan always draws all 480 lines of video output.
+This means for a normal, non-interlaced game,
+each pixel drawn by the game's artists
+becomes four pixels in the video output
+(two horizontally and two vertically)
+making pattern-based shaders even less useful.
+It also breaks most scanline-emulation shaders,
+since they typically draw a scanline
+for each row of pixels in the video output.
 
-TODO: https://board.byuu.org/viewtopic.php?p=44758#p44758
+The Mega Drive has similar problems
+to the Super Famicom.
+It has the same behaviour with interlacing,
+but its high-resolution mode switches
+from 256 pixels across to 320 pixels across.
+Therefore in normal mode,
+each pixel drawn by the game's artists
+becomes five pixels in the video output,
+while in high-resolution mode,
+each pixel drawn by the game's artists
+becomes four pixels in the video output
+(or 10 and 8 pixels in non-interlaced mode).
 
-This also affects the PC Engine:
-https://board.byuu.org/viewtopic.php?p=44779#p44779
+The PC Engine does not support an interlaced mode,
+but its horizontal resolution is much more flexible
+than the Super Famicom or Mega Drive,
+and so it has the same problems with shaders.
 
 Music and Sound Effect Volume on the Mega Drive
 -----------------------------------------------
