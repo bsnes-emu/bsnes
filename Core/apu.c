@@ -33,7 +33,7 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsig
         if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
             right_volume = (gb->io_registers[GB_IO_NR50] >> 4) & 7;;
         }
-        GB_sample_t output = {value * left_volume, value * right_volume};
+        GB_sample_t output = {(0xf - value) * left_volume, (0xf - value) * right_volume};
         if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
             refresh_channel(gb, index, cycles_offset);
             gb->apu_output.current_sample[index] = output;
