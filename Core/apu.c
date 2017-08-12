@@ -97,17 +97,9 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     if (!gb->apu.global_enable) return;
     gb->apu.div_divider++;
 
-    if ((gb->apu.div_divider & 1) == 1) {
+    /* gb->apu.div_divider is even; handle volume envelopes */
+    if ((gb->apu.div_divider & 1) == 0) {
         for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-            if (gb->apu.square_channels[i].length_enabled) {
-                if (gb->apu.square_channels[i].pulse_length) {
-                    if (!--gb->apu.square_channels[i].pulse_length) {
-                        gb->apu.is_active[i] = false;
-                        update_sample(gb, i, 0, 0);
-                    }
-                }
-            }
-            
             uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
             
             if (gb->apu.square_channels[i].volume_countdown) {
@@ -131,25 +123,6 @@ void GB_apu_div_event(GB_gameboy_t *gb)
             }
         }
         
-        if (gb->apu.wave_channel.length_enabled) {
-            if (gb->apu.wave_channel.pulse_length) {
-                if (!--gb->apu.wave_channel.pulse_length) {
-                    gb->apu.is_active[GB_WAVE] = false;
-                    gb->apu.wave_channel.current_sample = 0;
-                    update_sample(gb, GB_WAVE, 0, 0);
-                }
-            }
-        }
-        
-        if (gb->apu.noise_channel.length_enabled) {
-            if (gb->apu.noise_channel.pulse_length) {
-                if (!--gb->apu.noise_channel.pulse_length) {
-                    gb->apu.is_active[GB_NOISE] = false;
-                    update_sample(gb, GB_NOISE, 0, 0);
-                }
-            }
-        }
-        
         uint8_t nr42 = gb->io_registers[GB_IO_NR42];
         
         if (gb->apu.noise_channel.volume_countdown) {
@@ -168,6 +141,38 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                               (gb->apu.noise_channel.lfsr & 1) ?
                               gb->apu.noise_channel.current_volume : 0,
                               0);
+            }
+        }
+    }
+    /* gb->apu.div_divider is odd; handle length controls */
+    else {
+        for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+            if (gb->apu.square_channels[i].length_enabled) {
+                if (gb->apu.square_channels[i].pulse_length) {
+                    if (!--gb->apu.square_channels[i].pulse_length) {
+                        gb->apu.is_active[i] = false;
+                        update_sample(gb, i, 0, 0);
+                    }
+                }
+            }
+        }
+        
+        if (gb->apu.wave_channel.length_enabled) {
+            if (gb->apu.wave_channel.pulse_length) {
+                if (!--gb->apu.wave_channel.pulse_length) {
+                    gb->apu.is_active[GB_WAVE] = false;
+                    gb->apu.wave_channel.current_sample = 0;
+                    update_sample(gb, GB_WAVE, 0, 0);
+                }
+            }
+        }
+        
+        if (gb->apu.noise_channel.length_enabled) {
+            if (gb->apu.noise_channel.pulse_length) {
+                if (!--gb->apu.noise_channel.pulse_length) {
+                    gb->apu.is_active[GB_NOISE] = false;
+                    update_sample(gb, GB_NOISE, 0, 0);
+                }
             }
         }
     }
