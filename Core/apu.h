@@ -83,6 +83,9 @@ typedef struct
         uint16_t sample_length; // From NR43, in APU ticks
         bool length_enabled; // NR44
         
+        uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
+                           // 1MHz. This variable keeps track of the alignment.
+        
     } noise_channel;
     
 } GB_apu_t;

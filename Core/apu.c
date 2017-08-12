@@ -191,6 +191,7 @@ void GB_apu_run(GB_gameboy_t *gb)
     
     /* To align the square signal to 1MHz */
     gb->apu.lf_div ^= cycles & 1;
+    gb->apu.noise_channel.alignment += cycles;
     
     if (gb->apu.square_sweep_stop_countdown) {
         if (gb->apu.square_sweep_stop_countdown > cycles) {
@@ -254,7 +255,7 @@ void GB_apu_run(GB_gameboy_t *gb)
         uint8_t cycles_left = cycles;
         while (unlikely(cycles_left > gb->apu.noise_channel.sample_countdown)) {
             cycles_left -= gb->apu.noise_channel.sample_countdown + 1;
-            gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 2 + 1;
+            gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 4 + 3;
             
             /* Step LFSR */
             unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
@@ -324,7 +325,6 @@ void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
     gb->apu.lf_div = 1;
-    gb->apu.noise_channel.sample_length = 1;
 }
 
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
@@ -393,7 +393,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         /* Globals */
         case GB_IO_NR50:
         case GB_IO_NR51:
-            /* These registers affect the output of all 3 channels (but not the output of the PCM registers).*/
+            /* These registers affect the output of all 4 channels (but not the output of the PCM registers).*/
             /* We call update_samples with the current value so the APU output is updated with the new outputs */
             for (unsigned i = GB_N_CHANNELS; i--;) {
                 update_sample(gb, i, gb->apu.samples[i], 0);
@@ -624,17 +624,32 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         case GB_IO_NR43: {
             gb->apu.noise_channel.narrow = value & 8;
-            unsigned divisor = (value & 0x07) << 2;
-            if (!divisor) divisor = 2;
+            unsigned divisor = (value & 0x07) << 1;
+            if (!divisor) divisor = 1;
             gb->apu.noise_channel.sample_length = (divisor << (value >> 4)) - 1;
-            break;
+            
+            /* Todo: changing the frequency sometimes delays the next sample. This is probably
+               due to how the frequency is actually calculated in the noise channel, which is probably
+               not by calculating the effective sample length and counting simiarly to the other channels.
+               This is not emulated correctly. */
         }
             
         case GB_IO_NR44: {
             if (value & 0x80) {
                 gb->apu.noise_channel.lfsr = 0;
 
-                gb->apu.noise_channel.sample_countdown = (gb->apu.noise_channel.sample_length) * 2 + 4 - gb->apu.lf_div;
+                gb->apu.noise_channel.sample_countdown = (gb->apu.noise_channel.sample_length) * 2 + 6 - gb->apu.lf_div;
+                
+                /* I'm COMPLETELY unsure about this logic, but it passes all relevant tests.
+                   See comment in NR43. */
+                if ((gb->io_registers[GB_IO_NR43] & 7) && (gb->apu.noise_channel.alignment & 2) == 0) {
+                    if ((gb->io_registers[GB_IO_NR43] & 7) == 1) {
+                        gb->apu.noise_channel.sample_countdown += 2;
+                    }
+                    else {
+                        gb->apu.noise_channel.sample_countdown -= 2;
+                    }
+                }
                 if (gb->apu.is_active[GB_NOISE]) {
                     gb->apu.noise_channel.sample_countdown += 2;
                 }
