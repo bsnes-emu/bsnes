@@ -22,7 +22,7 @@ auto CPU::main() -> void {
   if(stopped()) {
     if(!(irq.enable & irq.flag & Interrupt::Keypad)) {
       Thread::step(16);
-      synchronize(cpu);
+      synchronize(ppu);
       synchronize(apu);
     }
     context.stopped = false;
