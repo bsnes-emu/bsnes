@@ -423,13 +423,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 memset(&gb->apu, 0, sizeof(gb->apu));
                 memset(gb->io_registers + GB_IO_NR10, 0, GB_IO_WAV_START - GB_IO_NR10);
+                old_nrx1[0] &= 0x3F;
+                old_nrx1[1] &= 0x3F;
                 
                 gb->apu.global_enable = false;
             }
             
             if (!gb->is_cgb && (value & 0x80)) {
-                GB_apu_write(gb, GB_IO_NR11, old_nrx1[0] & 0x3F);
-                GB_apu_write(gb, GB_IO_NR21, old_nrx1[1] & 0x3F);
+                GB_apu_write(gb, GB_IO_NR11, old_nrx1[0]);
+                GB_apu_write(gb, GB_IO_NR21, old_nrx1[1]);
                 GB_apu_write(gb, GB_IO_NR31, old_nrx1[2]);
                 GB_apu_write(gb, GB_IO_NR41, old_nrx1[3]);
             }
@@ -638,6 +640,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                due to how the frequency is actually calculated in the noise channel, which is probably
                not by calculating the effective sample length and counting simiarly to the other channels.
                This is not emulated correctly. */
+            break;
         }
             
         case GB_IO_NR44: {
