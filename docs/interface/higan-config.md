@@ -17,66 +17,100 @@ This tab contains options that affect
 how higan displays
 the emulated console's video output.
 
-  - **Saturation**: adjusts the vibrancy of colours displayed,
+**Color Adjustment**
+settings adjust the colour and brightness
+of the emulated console's video output:
+
+  - **Saturation** adjusts the vibrancy of colours displayed,
     where 0% makes things pure grey,
     100% is normal,
     and 200% is garishly brightly coloured.
-  - **Gamma**: adjusts how bright mid-range colours are
+  - **Gamma** adjusts how bright mid-range colours are
     compared to the brightest colours,
     where 100% is normal,
     and 200% makes mid-range colours much darker.
-  - **Luminance**: adjusts the overall brightness,
+  - **Luminance** adjusts the overall brightness,
     where 100% is normal,
     and 0% is totally black.
-  - **Overscan Mask**: hides parts of
-    the video output that would have been hidden
-    by the bezel around the edge of
-    a standard-definition television screen.
-    Some games (particularly on the Famicom)
-    displayed random glitchy output in this area,
-    which can be distracting.
-    The units are "pixels in the emulated console's standard video-mode".
-    For example, setting "Horizontal" to 8
-    will clip 8/256ths from the left and right sides
-    of the Super Famicom's video output,
-    whether the Super Famicom is in
-    lo-res (256px) or hi-res (512px)
-    mode.
-  - **Aspect Correction**:
-    (in both Windowed Mode and Fullscreen Mode)
+
+**Overscan Mask**
+removes parts of
+the video output that would have been hidden
+by the bezel around the edge of
+a standard-definition television screen.
+
+  - **Horizontal**
+    removes pixels from the left and right of the video output.
+  - **Vertical**
+    removes pixels from the top and bottom of the video output.
+
+Some games (particularly on the Famicom)
+displayed random glitchy output in this area,
+which can be distracting.
+The units are "pixels in the emulated console's standard video-mode".
+For example, setting "Horizontal" to 8
+will clip 8/256ths from the left and right sides
+of the Super Famicom's video output,
+whether the Super Famicom is in
+lo-res (256px) or hi-res (512px)
+mode.
+
+**Windowed Mode**
+settings apply when higan is running
+in a normal window.
+
+  - **Aspect Correction**
     stretches the image to match the aspect ratio
     produced by the original console hardware,
-    but can cause a "ripple" effect,
+    but can cause a "ripple" effect
+    during horizontal scrolling,
     due to rounding errors.
-  - **Resize Window to Viewport**:
-    (under "Windowed mode")
-    causes higan to resize its window
-    to fit snugly around the emulated console's video
-    whenever it changes size:
-    because a game was loaded for a different console
-    with a different display size or aspect ratio,
-    because the "Overscan Mask" controls were adjusted,
-    because the game switched to a different video mode,
-    because the user pressed the "Rotate Display" hotkey,
-    etc.
-    When this option is disabled,
-    the higan window stays at a fixed size,
-    large enough to contain the video for any supported console,
-    padded with black borders for all smaller video modes.
-  - **Resize Viewport to Window**:
-    (under "Fullscreen mode")
-    causes higan to stretch the emulated console's video output
-    to touch the edges of the screen.
-    Since most screens are not an exact multiple
-    of the size of all emulated consoles,
-    this may cause a "ripple" effect,
-    due to rounding errors.
-    When this option is disabled,
-    higan stretches the emulated console's video output
-    to the largest exact multiple
-    of the emulated console's video output
-    that is smaller than or equal to the screen size.
-  - TODO: Update this to match 103r11, or whatever the latest version is.
+    [Video shaders](../guides/shaders.md)
+    can reduce this effect.
+  - **Integral Scaling**
+    makes higan draw the emulated video output
+    at a whole-number multiple of the original size,
+    rather than completely filling the available space.
+    This means that every game pixel
+    uses the same number of computer pixels,
+    and avoids graphics looking chunky and uneven.
+    Note that Aspect Correction
+    is applied after integral scaling,
+    so some unevenness may be visible
+    even with this option enabled.
+  - **Adaptive Sizing**
+    automatically resizes the higan window
+    to fit snugly around the emulated video output
+    whenever it changes size
+    (because the user loaded a game for a different console,
+    chose a different option from
+    the [Video Scale submenu](higan.md#the-settings-menu),
+    toggled Aspect Correction, etc.)
+    When disabled,
+    higan generally respects manual resizing.
+
+**Fullscreen Mode**
+settings apply
+when higan was started with the `--fullscreen`
+[command-line option](higan-cli.md)
+or when the user pressed
+the Toggle Fullscreen [hotkey](higan-config.md#hotkeys).
+
+  - **Aspect Correction**
+    behaves the same way as in Windowed mode above.
+  - **Integral Scaling**
+    behaves the same way as in Windowed mode above.
+  - **Exclusive Mode**
+    requests exclusive access
+    to the computer's video output
+    when higan enters fullscreen mode.
+    This prevents other applications
+    or the operating system itself
+    from drawing anything,
+    and may also temporarily disable any kind of compositing.
+    As of v104,
+    only the Direct3D driver is capable of exclusive mode;
+    with other drivers this option does nothing.
 
 Audio
 =====
