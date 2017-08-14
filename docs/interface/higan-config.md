@@ -212,9 +212,6 @@ Configuring the selected controller:
   - **Erase** removes the mapping
     for the selected button or axis.
   - **Reset** removes all the mappings currently in the list.
-  - TODO: Mention that controllers must be connected
-    in the console menu
-    before they can be used.
 
 To map
 a keyboard or gamepad button on your PC to
@@ -273,6 +270,14 @@ tries to use the rumble feature
 of the Game Boy Player,
 higan will turn on the force-feedback
 of whatever gamepad the mapped button is part of.
+
+**Note:**
+Once you've configured which computer inputs
+higan should route to which controllers,
+make sure the controller in question
+is actually connected to the correct controller port
+in [the console menu](higan.md#the-console-menu).
+
 
 Hotkeys
 =======
