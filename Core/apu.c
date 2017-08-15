@@ -31,7 +31,7 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsig
         }
         unsigned right_volume = 0;
         if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
-            right_volume = (gb->io_registers[GB_IO_NR50] >> 4) & 7;;
+            right_volume = (gb->io_registers[GB_IO_NR50] >> 4) & 7;
         }
         GB_sample_t output = {(0xf - value) * left_volume, (0xf - value) * right_volume};
         if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
@@ -106,26 +106,13 @@ static void render(GB_gameboy_t *gb)
     gb->apu_output.lock = false;
 }
 
-static uint16_t new_sweep_frequency(GB_gameboy_t *gb)
+static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
 {
-    if ((gb->io_registers[GB_IO_NR10] & 0x70) == 0) {
-        return gb->apu.square_channels[GB_SQUARE_1].sample_length;
-    }
     uint16_t delta = gb->apu.square_channels[GB_SQUARE_1].sample_length >> (gb->io_registers[GB_IO_NR10] & 7);
     if (gb->io_registers[GB_IO_NR10] & 8) {
         return gb->apu.square_channels[GB_SQUARE_1].sample_length - delta;
     }
     return gb->apu.square_channels[GB_SQUARE_1].sample_length + delta;
-}
-
-static void sweep_event(GB_gameboy_t *gb)
-{
-    gb->apu.square_channels[GB_SQUARE_1].sample_length = new_sweep_frequency(gb);
-    /* Overflow checking only occurs after a delay */
-    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.lf_div;
-    
-    gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
-    gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
 }
 
 void GB_apu_div_event(GB_gameboy_t *gb)
@@ -214,9 +201,19 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
     
     if ((gb->apu.div_divider & 3) == 3) {
+        if (!gb->apu.sweep_enabled) {
+            return;
+        }
         if (gb->apu.square_sweep_countdown) {
             if (!--gb->apu.square_sweep_countdown) {
-                sweep_event(gb);
+                if ((gb->io_registers[GB_IO_NR10] & 0x70) && (gb->io_registers[GB_IO_NR10] & 0x07)) {
+                    gb->apu.square_channels[GB_SQUARE_1].sample_length = gb->apu.new_sweep_sample_legnth;
+                }
+                /* Recalculation and overflow check only occurs after a delay */
+                gb->apu.square_sweep_calculate_countdown = 0x13 - gb->apu.lf_div;
+                
+                gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
+                gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
             }
         }
     }
@@ -234,17 +231,19 @@ void GB_apu_run(GB_gameboy_t *gb)
     gb->apu.lf_div ^= cycles & 1;
     gb->apu.noise_channel.alignment += cycles;
     
-    if (gb->apu.square_sweep_stop_countdown) {
-        if (gb->apu.square_sweep_stop_countdown > cycles) {
-            gb->apu.square_sweep_stop_countdown -= cycles;
+    if (gb->apu.square_sweep_calculate_countdown) {
+        if (gb->apu.square_sweep_calculate_countdown > cycles) {
+            gb->apu.square_sweep_calculate_countdown -= cycles;
         }
         else {
             /* APU bug: sweep frequency is checked after adding the sweep delta twice */
-            if (new_sweep_frequency(gb) > 0x7ff) {
+            gb->apu.new_sweep_sample_legnth = new_sweep_sample_legnth(gb);
+            if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
-                update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_stop_countdown - cycles);
+                update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
+                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
             }
-            gb->apu.square_sweep_stop_countdown = 0;
+            gb->apu.square_sweep_calculate_countdown = 0;
         }
     }
     
@@ -345,7 +344,7 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
 
     if (count > gb->apu_output.buffer_position) {
         // GB_log(gb, "Audio underflow: %d\n", count - gb->apu_output.buffer_position);
-        GB_sample_t output = {0,0};
+        GB_sample_t output = {-gb->apu_output.highpass_diff.left, -gb->apu_output.highpass_diff.right};
         for (unsigned i = GB_N_CHANNELS; i--;) {
             output.left += gb->apu_output.current_sample[i].left * CH_STEP;
             output.right += gb->apu_output.current_sample[i].right * CH_STEP;
@@ -477,6 +476,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         /* Square channels */
         case GB_IO_NR10:
             gb->apu.square_sweep_countdown = ((value >> 4) & 7);
+            if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
             break;
         
         case GB_IO_NR11:
@@ -504,6 +504,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             unsigned index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].sample_length &= ~0xFF;
             gb->apu.square_channels[index].sample_length |= value & 0xFF;
+            if (index == GB_SQUARE_1) {
+                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
+            }
             break;
         }
         
@@ -512,6 +515,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
+            if (index == GB_SQUARE_1) {
+                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
+            }
             if (value & 0x80) {
                 gb->apu.square_channels[index].current_sample_index = 7;
 
@@ -543,7 +549,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 
                 if (index == GB_SQUARE_1 && gb->io_registers[GB_IO_NR10] & 7) {
                     /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
-                    gb->apu.square_sweep_stop_countdown = 0x13 - gb->apu.lf_div;
+                    /* Todo: check actual timing */
+                    gb->apu.square_sweep_calculate_countdown = 0x3 - gb->apu.lf_div;
+                }
+                
+                if (index == GB_SQUARE_1) {
+                    gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x77;
                 }
                 
                 /* Note that we don't change the sample just yet! This was verified on hardware. */

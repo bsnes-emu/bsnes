@@ -48,7 +48,9 @@ typedef struct
                     // need to divide the signal.
     
     uint8_t square_sweep_countdown; // In 128Hz
-    uint8_t square_sweep_stop_countdown; // In 2 MHz
+    uint8_t square_sweep_calculate_countdown; // In 2 MHz
+    uint16_t new_sweep_sample_legnth;
+    bool sweep_enabled;
     
     struct {
         uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
