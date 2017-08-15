@@ -386,17 +386,6 @@ void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data)
     gb->io_registers[GB_IO_IF] |= 8;
 }
 
-void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
-{
-    if (gb->apu_output.buffer) {
-        free(gb->apu_output.buffer);
-    }
-    gb->apu_output.buffer_size = sample_rate / 25; // 40ms delay
-    gb->apu_output.buffer = malloc(gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
-    gb->apu_output.sample_rate = sample_rate;
-    gb->apu_output.buffer_position = 0;
-}
-
 void GB_disconnect_serial(GB_gameboy_t *gb)
 {
     gb->serial_transfer_start_callback = NULL;
@@ -495,7 +484,6 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb)
     }
     gb->is_cgb = is_cgb;
     GB_reset(gb);
-
 }
 
 void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank)

@@ -19,6 +19,12 @@ typedef struct
     int16_t right;
 } GB_sample_t;
 
+typedef struct
+{
+    double left;
+    double right;
+} GB_double_sample_t;
+
 enum GB_CHANNELS {
     GB_SQUARE_1,
     GB_SQUARE_2,
@@ -90,6 +96,12 @@ typedef struct
     
 } GB_apu_t;
 
+typedef enum {
+    GB_HIGHPASS_OFF, // Do not apply any filter, keep DC offset
+    GB_HIGHPASS_ACCURATE, // Apply a highpass filter similar to the one used on hardware
+    GB_HIGHPASS_REMOVE_DC_OFFSET, // Remove DC Offset without affecting the waveform
+} GB_highpass_mode_t;
+
 typedef struct {
     unsigned sample_rate;
     
@@ -108,11 +120,16 @@ typedef struct {
     unsigned last_update[GB_N_CHANNELS];
     GB_sample_t current_sample[GB_N_CHANNELS];
     GB_sample_t summed_samples[GB_N_CHANNELS];
+    
+    GB_highpass_mode_t highpass_mode;
+    double highpass_rate;
+    GB_double_sample_t highpass_diff;
 } GB_apu_output_t;
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
 void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count);
 size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb);
+void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
 
 #ifdef GB_INTERNAL
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);

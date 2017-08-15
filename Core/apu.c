@@ -62,10 +62,46 @@ static void render(GB_gameboy_t *gb)
     gb->apu_output.cycles_since_render = 0;
     
 
+
+    GB_sample_t filtered_output = gb->apu_output.highpass_mode?
+        (GB_sample_t) {output.left - gb->apu_output.highpass_diff.left,
+                       output.right - gb->apu_output.highpass_diff.right} :
+        output;
+    
+    switch (gb->apu_output.highpass_mode) {
+        case GB_HIGHPASS_OFF:
+            gb->apu_output.highpass_diff = (GB_double_sample_t) {0, 0};
+            break;
+        case GB_HIGHPASS_ACCURATE:
+            gb->apu_output.highpass_diff = (GB_double_sample_t)
+                {output.left - filtered_output.left * gb->apu_output.highpass_rate,
+                    output.right - filtered_output.right * gb->apu_output.highpass_rate};
+            break;
+        case GB_HIGHPASS_REMOVE_DC_OFFSET: {
+            unsigned mask = gb->io_registers[GB_IO_NR51];
+            unsigned left_volume = 0;
+            unsigned right_volume = 0;
+            for (unsigned i = GB_N_CHANNELS; i--;) {
+                if (mask & 1) {
+                    left_volume += (gb->io_registers[GB_IO_NR50] & 7) * CH_STEP * 0xF;
+                }
+                if (mask & 0x10) {
+                    right_volume += ((gb->io_registers[GB_IO_NR50] >> 4) & 7) * CH_STEP * 0xF;
+                }
+                mask >>= 1;
+            }
+            gb->apu_output.highpass_diff = (GB_double_sample_t)
+            {left_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
+                right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate};
+
+        }
+            
+    }
+
     while (gb->apu_output.copy_in_progress);
     while (!__sync_bool_compare_and_swap(&gb->apu_output.lock, false, true));
     if (gb->apu_output.buffer_position < gb->apu_output.buffer_size) {
-        gb->apu_output.buffer[gb->apu_output.buffer_position++] = output;
+        gb->apu_output.buffer[gb->apu_output.buffer_position++] = filtered_output;
     }
     gb->apu_output.lock = false;
 }
@@ -711,4 +747,23 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb)
 {
     return  gb->apu_output.buffer_position;
+}
+
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
+{
+    if (gb->apu_output.buffer) {
+        free(gb->apu_output.buffer);
+    }
+    gb->apu_output.buffer_size = sample_rate / 25; // 40ms delay
+    gb->apu_output.buffer = malloc(gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
+    gb->apu_output.sample_rate = sample_rate;
+    gb->apu_output.buffer_position = 0;
+    if (sample_rate) {
+        gb->apu_output.highpass_rate = pow(0.999958,  CPU_FREQUENCY / (double)sample_rate);
+    }
+}
+
+void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode)
+{
+    gb->apu_output.highpass_mode = mode;
 }
