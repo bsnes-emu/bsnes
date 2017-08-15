@@ -9,6 +9,7 @@
     NSInteger button_being_modified;
 
     NSPopUpButton *_graphicsFilterPopupButton;
+    NSPopUpButton *_highpassFilterPopupButton;
     NSButton *_aspectRatioCheckbox;
 }
 
@@ -44,6 +45,17 @@
     _graphicsFilterPopupButton = graphicsFilterPopupButton;
     NSString *filter = [[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"];
     [_graphicsFilterPopupButton selectItemAtIndex:[[[self class] filterList] indexOfObject:filter]];
+}
+
+- (NSPopUpButton *)highpassFilterPopupButton
+{
+    return _highpassFilterPopupButton;
+}
+
+- (void)setHighpassFilterPopupButton:(NSPopUpButton *)highpassFilterPopupButton
+{
+    _highpassFilterPopupButton = highpassFilterPopupButton;
+    [_highpassFilterPopupButton selectItemAtIndex:[[[NSUserDefaults standardUserDefaults] objectForKey:@"GBHighpassFilter"] unsignedIntegerValue]];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
@@ -94,12 +106,19 @@
     [self.controlsTableView reloadData];
     [self makeFirstResponder:self.controlsTableView];
 }
+
 - (IBAction)graphicFilterChanged:(NSPopUpButton *)sender
 {
-
     [[NSUserDefaults standardUserDefaults] setObject:[[self class] filterList][[sender indexOfSelectedItem]]
                                               forKey:@"GBFilter"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
+}
+
+- (IBAction)highpassFilterChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+                                              forKey:@"GBHighpassFilter"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBHighpassFilterChanged" object:nil];
 }
 
 - (IBAction)changeAspectRatio:(id)sender

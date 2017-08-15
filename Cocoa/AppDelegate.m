@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #include "GBButtons.h"
+#include "gb.h"
 #import <Carbon/Carbon.h>
 
 @implementation AppDelegate
@@ -29,6 +30,7 @@
                                                               @"GBTurbo": @(kVK_Space),
 
                                                               @"GBFilter": @"NearestNeighbor",
+                                                              @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET),
                                                               }];
 }
 

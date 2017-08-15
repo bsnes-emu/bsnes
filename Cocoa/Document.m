@@ -148,6 +148,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
+    GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
     [self loadROM];
 }
 
@@ -291,6 +292,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     NSView *titleView = self.printerFeedWindow.contentView.superview.subviews.lastObject;
     [titleView addSubview: self.feedSaveButton];
     self.feedSaveButton.frame = (NSRect){{268, 2}, {48, 17}};
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateHighpassFilter)
+                                                 name:@"GBHighpassFilterChanged"
+                                               object:nil];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
         [self initDMG];
@@ -1263,6 +1269,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             accessory = GBAccessoryPrinter;
         GB_connect_printer(&gb, printImage);
     }];
+}
+
+- (void) updateHighpassFilter
+{
+    if (GB_is_inited(&gb)) {
+        GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
+    }
 }
 
 @end

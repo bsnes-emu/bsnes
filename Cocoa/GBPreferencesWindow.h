@@ -4,4 +4,5 @@
 @property IBOutlet NSTableView *controlsTableView;
 @property IBOutlet NSPopUpButton *graphicsFilterPopupButton;
 @property (strong) IBOutlet NSButton *aspectRatioCheckbox;
+@property (strong) IBOutlet NSPopUpButton *highpassFilterPopupButton;
 @end
