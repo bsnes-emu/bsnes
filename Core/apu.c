@@ -120,8 +120,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     if (!gb->apu.global_enable) return;
     gb->apu.div_divider++;
 
-    /* gb->apu.div_divider is even; handle volume envelopes */
-    if ((gb->apu.div_divider & 1) == 0) {
+    if ((gb->apu.div_divider & 7) == 0) {
         for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
             
@@ -135,7 +134,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                         gb->apu.square_channels[i].current_volume--;
                     }
                     
-                    gb->apu.square_channels[i].volume_countdown = (nrx2 & 7) * 4;
+                    gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
                     
                     uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
                     update_sample(gb, i,
@@ -158,7 +157,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                     gb->apu.noise_channel.current_volume--;
                 }
                 
-                gb->apu.noise_channel.volume_countdown = (nr42 & 7) * 4;
+                gb->apu.noise_channel.volume_countdown = nr42 & 7;
                 
                 update_sample(gb, GB_NOISE,
                               (gb->apu.noise_channel.lfsr & 1) ?
@@ -167,8 +166,8 @@ void GB_apu_div_event(GB_gameboy_t *gb)
             }
         }
     }
-    /* gb->apu.div_divider is odd; handle length controls */
-    else {
+    
+    if ((gb->apu.div_divider & 1) == 1) {
         for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             if (gb->apu.square_channels[i].length_enabled) {
                 if (gb->apu.square_channels[i].pulse_length) {
@@ -537,7 +536,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
-                gb->apu.square_channels[index].volume_countdown = (gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7) * 4;
+                gb->apu.square_channels[index].volume_countdown = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7;
                 
                 if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0) {
                     gb->apu.is_active[index] = true;
@@ -711,7 +710,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 
                 gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
-                gb->apu.noise_channel.volume_countdown = (gb->io_registers[GB_IO_NR42] & 7) * 4;
+                gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
                 
                 if ((gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
                     gb->apu.is_active[GB_NOISE] = true;
