@@ -28,6 +28,7 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
   if(mediumQueue) {
     auto entry = mediumQueue.takeLeft().split("|", 1L);
     location = entry.right();
+    if(entry.size() == 1) option = options(0);
     if(entry.size() == 2) option = entry.left();
   } else {
     BrowserDialog dialog;

@@ -1,7 +1,7 @@
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
   information.title.cartridge = node["information/title"].text();
   auto board = node["board"];
-  if(!region() || region() == "Auto") {
+  if(region() == "Auto") {
     if(board["region"].text() == "ntsc") information.region = "NTSC";
     if(board["region"].text() == "pal") information.region = "PAL";
   }

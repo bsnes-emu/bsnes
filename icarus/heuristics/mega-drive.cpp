@@ -25,13 +25,13 @@ MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size
   ramTo |= data[0x01ba] <<  8;
   ramTo |= data[0x01bb] <<  0;
 
-  if(!(ramFrom & 1) && !(ramTo & 1)) ramMode = "lo";
-  if( (ramFrom & 1) &&  (ramTo & 1)) ramMode = "hi";
+  if(!(ramFrom & 1) && !(ramTo & 1)) ramMode = "hi";
+  if( (ramFrom & 1) &&  (ramTo & 1)) ramMode = "lo";
   if(!(ramFrom & 1) &&  (ramTo & 1)) ramMode = "word";
 
   uint32_t ramSize = ramTo - ramFrom + 1;
-  if(ramMode == "lo") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
   if(ramMode == "hi") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
+  if(ramMode == "lo") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
   if(ramMode == "word") ramSize = ramTo - ramFrom + 1;
   if(ramMode != "none") ramSize = bit::round(min(0x20000, ramSize));
 

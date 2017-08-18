@@ -48,6 +48,8 @@ auto VDP::Background::run() -> void {
   output.color.bit(1) = vdp.vram[patternAddress + 1].bit(index);
   output.color.bit(2) = vdp.vram[patternAddress + 2].bit(index);
   output.color.bit(3) = vdp.vram[patternAddress + 3].bit(index);
+
+  if(output.color == 0) output.priority = 0;
 }
 
 auto VDP::Background::power() -> void {
