@@ -104,6 +104,13 @@ that you might want to check out.
     specialising in the creation of
     tool-assisted speedruns.
     Its Super Famicom emulation is based on bsnes v087.
+  - [bsnes-plus](https://github.com/devinacker/bsnes-plus)
+    is a fork of bsnes v073
+    that adds improved support for debugging Super Famicom software.
+  - [bsnes-mercury](https://github.com/libretro/bsnes-mercury/)
+    is a fork of bsnes v094
+    adapted to work as a
+    [libretro](https://www.libretro.com/) emulation core.
   - [nSide](https://github.com/hex-usr/nSide)
     is a fork of higan that greatly enhances
     its NES emulation support,
@@ -112,6 +119,3 @@ that you might want to check out.
     that was removed from higan in v099,
     which is less CPU intensive
     than the current accuracy-focussed core.
-  - [bsnes-plus](https://github.com/devinacker/bsnes-plus)
-    is a fork of bsnes v073
-    that adds improved support for debugging Super Famicom software.
