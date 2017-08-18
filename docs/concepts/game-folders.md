@@ -1,81 +1,93 @@
 What is a game folder?
 ----------------------
 
-TODO
+A game folder
+is higan's way of grouping all
+the information and resources required
+to properly emulate a particular game.
+Other emulators group resources related to a game
+by requiring that every file has the base name
+but different file extensions.
+
+For example,
+if another emulator loaded the game `dkc3.sfc`
+it might store the save data in `dkc3.srm`:
+
+```text
++- Super Famicom
+   |
+   +- dkc3.sfc
+   |
+   +- dkc3.srm
+```
+
+higan would create a game folder named `dkc3.sfc`,
+and inside it store the game data as `program.rom`
+and the save data as `save.ram`:
+
+```text
++- Super Famicom
+   |
+   +- dkc3.sfc
+      |
+      +- program.rom
+      |
+      +- save.ram
+```
 
 Why game folders?
 -----------------
 
-A game is more than just
-the raw data originally encased in a game's ROM chip.
-If a game allows you to save your progress,
-that information needs to be stored somewhere.
-If you use an emulator's [save states](#save-states),
-those save states need to be stored somewhere.
-If you use Game Genie or Pro Action Replay codes,
-information about what codes exist,
-what codes are enabled,
-and what they do
-needs to be stored somewhere.
+The traditional files-with-different-extensions system
+works well enough when a game only requires
+a small number of files,
+because a file extension doesn't offer
+much room for description.
+Also,
+since file extensions traditionally describe
+the format of the file in question,
+it also means a game can't use
+two or more files in the same format.
 
-On the technical side,
-a physical game cartridge contains a circuit board
-that makes the game data available to the console,
-and different games used circuit boards that work differently.
-That circuit-layout information needs to be stored somewhere.
-Some games included custom processors
-to do calculations the base console could not do quickly enough
-(like the SuperFX chip used in _StarFox_ for the Super Famicom)
-and information about extra chips needs to be stored somewhere.
-Some of those custom processors require extra data to work
-that's not part of the main game data
-(like the DSP chip used in Super Mario Kart for the Super Famicom)
-and that data needs to be stored somewhere too.
+Compared to other emulators,
+higan tends to use a larger number of files per game.
+For example,
+higan's low-level emulation of Super Famicom co-processors
+often requires [separate firmware files][firmware].
+higan's [MSU-1 support][msu1]
+requires up to 99 audio tracks per game,
+and higan supports up to 133 save-states per game.
+Therefore,
+higan suffers from the limitations of name-based-grouping
+more than most.
 
-higan keeps all this game-related information together
-in a single place:
-a game folder in the higan library.
+higan's game folders allow all a game's resources
+to be given unique, descriptive filenames,
+and to use the file-extension
+that's most appropriate for that file.
+They also allow emulator-specific data
+like save-states and the cheat database
+to be kept separate from the game's actual data,
+by putting it in a sub-folder.
+
+[msu1]: ../guides/import.md#msu-1-games
+[firmware]: ../guides/import.md#games-with-co-processor-firmware
 
 For a more detailed motivation for game folders,
-see [Game Paks on the higan website][gp]
+see [Game Paks on the higan website][gp].
 
 [gp]: https://byuu.org/emulation/higan/game-paks
-
-What is a manifest?
--------------------
-
-TODO
-
-The most important file in a game folder is `manifest.bml`,
-which describes how all the other files should be wired together
-to create a runnable game cartridge.
-However,
-the manifest format has occasionally changed
-as new emulation details were uncovered
-that could not be represented in the old format.
-Therefore,
-icarus [defaults](#the-icarus-settings-dialog)
-to not writing out manifests when it imports games,
-and higan [defaults](#the-configuration-dialog)
-to ignoring manifests that are present.
-Instead,
-when higan loads a game,
-it will ask icarus to generate a temporary manifest in the latest format,
-based on the files present in the game folder
-and how they are likely to go together.
-You can view this temporary manifest
-in [the Manifest Viewer](#the-manifest-viewer).
 
 What's in a game folder?
 ------------------------
 
-As mentioned [above](#why-game-folders),
+As mentioned [above](#what-is-a-game-folder),
 a game folder collects all the information relevant
 to emulating a particular game.
 Not all of the following files
 are relevant to every emulated console,
 or to every game on a given console,
-but they may be relevantunder particular circumstances.
+but they may be present under particular circumstances.
 
 All the files directly in the game folder
 are expected to be useful
@@ -97,7 +109,7 @@ to all emulators that support them:
     from the cartridge's ROM chips.
   - `ines.rom`:
     While other consoles typically include enough hints
-    in `program.rom` for icarus to generate a manifest,
+    in `program.rom` for icarus to guess a working manifest,
     the Famicom does not.
     Famicom games not stored in game folders
     typically include an "iNES header" to store that information,
@@ -117,25 +129,20 @@ to all emulators that support them:
     Games that include a calendar or real-time clock
     will create this file.
   - `*.data.rom`, `*.program.rom`:
-    Files named like this are usually
-    [co-processor firmware](#importing-and-playing-games-with-co-processor-firmware).
+    Files named like this are usually [co-processor firmware][firmware].
   - `msu1.rom`:
-    Holds streamable data for
-    [the MSU-1](#importing-and-playing-MSU-1-games).
+    Holds streamable data for [the MSU-1][msu1].
   - `track-*.pcm`:
-    Holds streamable audio for
-    [the MSU-1](#importing-and-playing-MSU-1-games).
+    Holds streamable audio for [the MSU-1][msu1].
 
 Files that are only useful to higan specifically
 are placed in a `higan` subdirectory:
 
   - `cheats.bml`:
     All information present in
-    [the Cheat Editor](#the-cheat-editor)
+    [the Cheat Editor](../interface/higan-tools.md#the-cheat-editor)
     is stored here.
   - `states/quick/slot-*.bst`:
-    All the save states made to
-    [Quick state slots](#quick-states).
+    All [Quick States](save-states.md#quick-states) are stored here.
   - `states/managed/slot-*.bst`:
-    All the save states made with
-    [the State Manager](#the-state-manager).
+    All [Manager States](save-states.md#manager-states) are stored here.
