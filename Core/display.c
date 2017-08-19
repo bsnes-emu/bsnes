@@ -75,7 +75,8 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
             bg_enabled = false;
         }
     }
-    if (window_enabled(gb) && y >= gb->io_registers[GB_IO_WY] && x + 7 >= gb->io_registers[GB_IO_WX] && gb->current_window_line != 0xFF) {
+
+    if (window_enabled(gb) && y >= gb->io_registers[GB_IO_WY] + gb->wy_diff && x + 7 >= gb->io_registers[GB_IO_WX]) {
         in_window = true;
     }
 
@@ -128,7 +129,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 
     if (in_window) {
         x -= gb->io_registers[GB_IO_WX] - 7; // Todo: This value is probably latched
-        y = gb->current_window_line;
+        y -= gb->io_registers[GB_IO_WY] + gb->wy_diff;
     }
     else {
         x += gb->effective_scx;
@@ -282,7 +283,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         }
 
         /* Reset window rendering state */
-        gb->current_window_line = 0xFF;
+        gb->wy_diff = 0;
+        gb->window_disabled_while_active = false;
         return;
     }
     
@@ -330,7 +332,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
 
             
             /* Reset window rendering state */
-            gb->current_window_line = 0xFF;
+            gb->wy_diff = 0;
+            gb->window_disabled_while_active = false;
         }
         
         /* Entered VBlank state, update STAT and IF */
@@ -418,9 +421,6 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             if (position_in_line == stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
-                if (window_enabled(gb) && gb->display_cycles / LINE_LENGTH >= gb->io_registers[GB_IO_WY]) {
-                    gb->current_window_line++;
-                }
             }
             else if (position_in_line == 0 && gb->display_cycles != 0) {
                 should_compare_ly = gb->is_cgb;
@@ -431,11 +431,6 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_STAT] |= 3;
                 gb->effective_scx = gb->io_registers[GB_IO_SCX];
                 gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
-                
-                /* Todo: This works on both 007 - The World Is Not Enough and Donkey Kong 94, but should be verified better */
-                if (window_enabled(gb) && gb->display_cycles / LINE_LENGTH == gb->io_registers[GB_IO_WY] && gb->current_window_line == 0xFF) {
-                    gb->current_window_line = 0;
-                }
             }
             else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
@@ -799,4 +794,33 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
         }
     }
     return count;
+}
+
+/* Called when a write might enable or disable the window */
+void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
+{
+    bool before = window_enabled(gb);
+    gb->io_registers[addr] = value;
+    bool after = window_enabled(gb);
+    
+    if (before != after && gb->display_cycles < LINES * LINE_LENGTH) {
+        /* Window was disabled or enabled outside of vblank */
+        uint8_t current_line = gb->display_cycles / LINE_LENGTH;
+        if (current_line >= gb->io_registers[GB_IO_WY]) {
+            if (after) {
+                if (!gb->window_disabled_while_active) {
+                    /* Window was turned on for the first time this frame while LY > WY,
+                       should start window in the next line */
+                    gb->wy_diff = current_line + 1 - gb->io_registers[GB_IO_WY];
+                }
+                else {
+                    gb->wy_diff += current_line;
+                }
+            }
+            else {
+                gb->wy_diff -= current_line;
+                gb->window_disabled_while_active = true;
+            }
+        }
+    }
 }

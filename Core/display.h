@@ -5,6 +5,7 @@
 #ifdef GB_INTERNAL
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles);
 void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index);
+void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value);
 #endif
 
 typedef enum {

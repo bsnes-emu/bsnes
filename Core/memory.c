@@ -406,10 +406,14 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
+    /* Todo: Clean this code up: use a function table and move relevant code to display.c and timing.c
+       (APU read and writes are already at apu.c) */
     if (addr < 0xFF80) {
         /* Hardware registers */
         switch (addr & 0xFF) {
-
+            case GB_IO_WX:
+                GB_window_related_write(gb, addr & 0xFF, value);
+                break;
             case GB_IO_SCX:
             case GB_IO_IF:
             case GB_IO_SCY:
@@ -418,7 +422,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_OBP0:
             case GB_IO_OBP1:
             case GB_IO_WY:
-            case GB_IO_WX:
             case GB_IO_SB:
             case GB_IO_DMG_EMULATION_INDICATION:
             case GB_IO_UNKNOWN2:
@@ -461,7 +464,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     /* Sync after turning off LCD */
                     GB_timing_sync(gb);
                 }
-                gb->io_registers[GB_IO_LCDC] = value;
+                /* Writing to LCDC might enable to disable the window, so we write it via GB_window_related_write */
+                GB_window_related_write(gb, addr & 0xFF, value);
                 return;
 
             case GB_IO_STAT:
