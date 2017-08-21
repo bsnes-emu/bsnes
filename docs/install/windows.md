@@ -20,12 +20,6 @@ You may put that folder wherever you like.
 
 To run higan, open the `higan.exe` file.
 
-Before you can actually play games,
-you'll need to [import them](#the-game-library)
-and [configure higan](#configuring-higan).
-If you want to play Game Boy Advance games,
-you will need [a GBA BIOS](#installing-the-gba-bios).
-
 Uninstalling an official release on Windows
 -------------------------------------------
 
@@ -146,12 +140,6 @@ as described under
 above.
 
 [instwin]: #installing-an-official-release-on-windows
-
-Before you can actually play games,
-you'll need to [import them](#the-game-library)
-and [configure higan](#configuring-higan).
-If you want to play Game Boy Advance games,
-you will need [a GBA BIOS](#installing-the-gba-bios).
 
 Uninstalling a compiled build on Windows
 ----------------------------------------

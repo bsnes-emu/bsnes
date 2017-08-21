@@ -107,12 +107,6 @@ You will need to log out and log back in
 for changes to `~/.profile` or `~/.bash_profile`
 to take effect.
 
-Before you can actually play games,
-you'll need to [import them](#the-game-library)
-and [configure higan](#configuring-higan).
-If you want to play Game Boy Advance games,
-you will need [a GBA BIOS](#installing-the-gba-bios).
-
 Uninstalling a compiled build on Linux
 --------------------------------------
 

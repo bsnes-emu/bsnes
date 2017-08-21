@@ -1,8 +1,8 @@
 When launching icarus,
 directly or by picking "Import ROM Files ..."
-from higan's [Library menu](#the-library-menu),
+from higan's [Library menu](higan.md#the-library-menu),
 the main icarus window appears.
-This is [a filesystem browser](#the-filesystem-browser),
+This is [a filesystem browser](common.md#the-filesystem-browser),
 with customisations:
 
   - The filesystem browser only lists
@@ -22,11 +22,11 @@ Pressing "Import ..." in the bottom-right
 will close the filesystem browser
 then try to import all the files
 whose check-boxes are ticked
-into [the Game Library](#the-game-library).
+into [the Game Library][gamelib].
 icarus displays a progress dialog during the import process.
 
 **Note:** Some games require extra steps to import correctly;
-see [the Game Library](#the-game-library) for details.
+see [the Game Library][gamelib] for details.
 
 The icarus Settings dialog
 --------------------------
@@ -35,20 +35,20 @@ The icarus Settings dialog contains the following settings:
 
   - **Library Location** determines
     where icarus puts the games it imports.
-    See [Moving the Game Library](#moving-the-game-library)
+    See [Moving the Game Library][movgamelib]
     for details.
   - **Create Manifests** causes icarus
     to write out a manifest file describing
     each imported game
-    to that game's [game folder](#whats-in-a-game-folder).
+    to that game's [game folder](../concepts/game-folders.md).
     This means that higan doesn't have to regenerate
     the manifest each time an imported game is loaded,
     but it means that a future version of higan
     with an incompatible manifest format
     may be unable to play these games.
     Note that higan also has an "Ignore Manifests" option
-    in the Advanced tab of
-    [its Configuration dialog](#the-configuration-dialog).
+    in its
+    [Advanced settings](../interface/higan-config#advanced).
   - **Use Database** causes icarus to use manifest information
     from its database of known-good manifests,
     if it's importing a game it recognises.
@@ -58,3 +58,6 @@ The icarus Settings dialog contains the following settings:
     This option is still relevant when "Create Manifests" is unticked:
     higan uses icarus to generate a manifest when a game is loaded,
     not just at import-time.
+
+[gamelib]: ../concepts/game-library.md
+[movgamelib]: ../concepts/game-library.md#moving-the-game-library

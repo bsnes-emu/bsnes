@@ -558,3 +558,21 @@ Then you can import and play the patched game just like
 
 [rhdn]: http://www.romhacking.net/
 
+Game Boy Advance games
+----------------------
+
+Before you can play Game Boy Advance games,
+you must provide a copy of the Game Boy Advance BIOS.
+Unlike game-specific firmware,
+the GBA BIOS was part of the console,
+not the cartridge,
+so it must be installed
+[into higan](../install/general.md).
+
+Once the GBA BIOS is installed,
+GBA games can be imported and played just like
+[any other games](#regular-games).
+
+Note that some GBA games
+have trouble with
+[in-game saves](../notes#in-game-saves-and-the-game-boy-advance).

@@ -58,7 +58,7 @@ or when higan exits.
 higan stores the known cheats for a particular game
 in `higan/cheats.bml`
 inside the corresponding game folder
-in [the Game Library](#the-game-library).
+in [the Game Library](../concepts/game-library.md).
 
 If your copy of higan includes a cheat database
 (a file named `cheats.bml`
@@ -95,7 +95,7 @@ For more information on Manager states,
 quick states,
 saved games
 and how they compare,
-see [Save States](#save-states).
+see [Save States](../concepts/save-states.md).
 
 To create a new manager state,
 or to replace an existing one,
@@ -123,23 +123,10 @@ click "Reset" in the bottom-right corner.
 The Manifest Viewer
 -------------------
 
-As mentioned in
-[Why game folders?](#why-game-folders),
-a game cartridge contains
-more than just the raw data of the game.
-
+As described in
+[Game Manifests](../concepts/manifests.md),
 higan uses a "manifest" to
 describe how the various parts of a game cartridge
 are wired up together,
 and the Manifest Viewer lets you examine
 the configuration higan is using for the currently-running game.
-
-For some games,
-an actual cartridge has been taken apart and carefully examined
-and its configuration has been recorded in icarus' database,
-so the manifest icarus produces
-is guaranteed accurate.
-For games that do not exist in icarus' database,
-icarus will make a reasonable guess.
-This is enough to get the game running,
-but does not necessarily reflect the original cartridge.

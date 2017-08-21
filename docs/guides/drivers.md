@@ -15,7 +15,7 @@ so you can find the one that works best for you.
 To see what drivers you're currently using,
 or to choose different ones,
 go to
-[the Advanced tab](../interface/higan-config.md#Advanced)
+[the Advanced tab](../interface/higan-config.md#advanced)
 of the Settings window.
 
 Here are the most notable drivers
