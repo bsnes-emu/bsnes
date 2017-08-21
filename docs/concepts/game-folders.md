@@ -1,6 +1,3 @@
-What is a game folder?
-----------------------
-
 A game folder
 is higan's way of grouping all
 the information and resources required

@@ -1,6 +1,3 @@
-What is a manifest?
--------------------
-
 If a [game folder](game-folders.md) is
 the emulation equivalent of
 a physical game cartridge,
