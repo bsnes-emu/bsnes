@@ -1,29 +1,56 @@
-higan maintains a "game library"
-containing all the games you've played.
+The game library
+is the folder where all the
+[game folders](game-folders.md) go.
+When [icarus](../interface/icarus.md) imports a game,
+it creates or updates
+the corresponding game folder in the game library.
+When you use the console menu items
+in [higan's Library menu](../interface/higan.md#the-library-menu),
+it higan shows you the games for that console
+already in the library.
 
-  - In Windows,
-    the default location of
-    the game library is the `Emulation` folder
-    inside your profile folder
-    (To find your profile folder,
-    press `Win+R` to open the Run dialog,
-    then type `%USERPROFILE%` and press Enter).
-  - In Linux,
-    the default location of
-    the game library is the `Emulation` directory
-    inside your home directory.
-  - On all platforms,
-    the game library location can be configured.
-    See [Moving the Game Library](#moving-the-game-library)
-    below.
-
-Inside the library directory there is a subdirectory for each system,
-and inside each system directory are the game folders
+Inside the game library folder
+there is a subfolder for each system.
+Inside each system folder
+are the game folders
 for each imported game.
 
-For more information about game folders,
-see [Why game folders?](#why-game-folders)
-and [What's in a game folder?](#whats-in-a-game-folder)
+Why a game library?
+-------------------
+
+higan [requires game folders](game-folders.md#why-game-folders),
+but it also invented game folders,
+so existing games need
+to be converted to game folder format
+before higan can play them.
+The converted copy of a game needs to go *somewhere*.
+
+Also,
+for people who have a huge collection of games,
+the game library only lists the games they actually play,
+rather than every possible game,
+making it easier to find the games they like.
+
+
+Where is the game library?
+--------------------------
+
+In Windows,
+the default location of
+the game library is the `Emulation` folder
+inside your profile folder
+(To find your profile folder,
+press `Win+R` to open the Run dialog,
+then type `%USERPROFILE%` and press Enter).
+
+In Linux,
+the default location of
+the game library is the `Emulation` directory
+inside your home directory.
+
+On all platforms,
+the game library location can be configured.
+See [Moving the Game Library](#moving-the-game-library)
 below.
 
 Moving the game library
@@ -39,18 +66,21 @@ and telling higan where to find them.
     as its game library.
  1. Launch icarus,
     then click the "Settings ..." button in the lower-right,
-    to open the Settings dialog.
+    to open
+    [the Settings dialog][icsettings].
  1. Click the "Change ..." button on the right.
-    A [filesystem browser](#the-filesystem-browser) window will appear,
+    A [filesystem browser][fsbrowser] window will appear,
     allowing you to choose
     where imported games will be stored.
  1. Launch higan,
-    then from the Settings menu,
-    choose "Configuration ..."
-    to open [the Configuration dialog](#the-configuration-dialog).
- 1. Click the Advanced tab
-    then click the "Change ..." button.
-    A [filesystem browser](#the-filesystem-browser) will appear,
+    then from [the Settings menu][settingsmenu],
+    choose "Advanced..."
+    to open [higan's Advanced settings][advsettings].
+ 1. Click the "Change ..." button on the right.
+    A [filesystem browser][fsbrowser] will appear,
     allowing you to choose the same directory again.
 
-
+[icsettings]: ../interface/icarus.md#the-icarus-settings-dialog
+[fsbrowser]: ../interface/common.md#the-filesystem-browser
+[settingsmenu]: ../interface/higan.md#the-settings-menu
+[advsettings]: ../interface/higan-config.md#advanced)
