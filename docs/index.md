@@ -48,7 +48,7 @@ It also includes some level of support
 for GNU/Linux and macOS.
 
 If you want to install higan and try it out,
-see the [Quick Start](#quick-start) section below.
+see the [Quick Start](qs.md) section below.
 
 higan is officially spelled with a lowercase "h", not a capital.
 
@@ -81,14 +81,14 @@ Unofficial higan resources
     collects shaders that higan can use
     to add special effects like TV scanlines to its video output,
     or smarter algorithms for scaling up to modern PC resolutions.
-    See [Installing custom shaders][shaders] below for details.
+    See [Using video shaders][shaders] below for details.
   - [Mercurial Magic](https://github.com/hex-usr/Mercurial-Magic/)
     is a tool for converting MSU-1 games and mods into a format
     higan can use.
-    See [Importing MSU-1 games][msu1] below for details.
+    See [Importing MSU-1 games][msu1] for details.
 
-[shaders]: #installing-custom-shaders
-[msu1]: #importing-msu-1-games
+[shaders]: guides/shaders.md
+[msu1]: guides/import.md#msu-1-games
 
 There are also other projects
 based on current or older versions of higan,

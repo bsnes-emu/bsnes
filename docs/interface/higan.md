@@ -42,24 +42,24 @@ and the list defaults to "Auto".
 
 To add a new game to your library,
 choose "Load ROM File ..." from the Library menu.
-A [filesystem browser](#the-filesystem-browser) will appear,
+A [filesystem browser](common.md#the-filesystem-browser) will appear,
 allowing you to pick any ROM image for any supported system,
 with any of the most common file extensions.
 It also allows loading ROM images from `.zip` archives,
 if the archive contains a single ROM image.
 
 **Note:** Some games require extra steps to import correctly;
-see [the Game Library](#the-game-library) for details.
+see [Importing and playing games](../guides/import.md) for details.
 
 To add many games at once,
 run icarus,
 or choose "Import ROM Files ..." from the Library menu
 (which just runs icarus anyway).
-See [the icarus interface](#the-icarus-interface)
+See [the icarus interface](icarus.md)
 for more information about bulk-importing.
 
 For more information about the higan game library,
-see [The Game Library](#the-game-library) below.
+see [The Game Library](../concepts/game-library.md).
 
 The console menu
 ---------------
@@ -85,7 +85,7 @@ but few consoles have all of them.
     to connect different emulated controllers
     to the first controller port,
     if there is one.
-      - See [the Configuration dialog](#the-configuration-dialog)
+      - See [higan's Input settings](higan-config.md#input)
         for information about configuring
         which host controller inputs are used
         for the emulated controllers.
@@ -98,7 +98,7 @@ but few consoles have all of them.
     to connect different emulated controllers
     to the second controller port,
     if there is one.
-      - See [the Configuration dialog](#the-configuration-dialog)
+      - See [higan's Input settings](higan-config.md#input)
         for information about configuring
         which host controller inputs are used
         for the emulated controllers.
@@ -164,7 +164,7 @@ that aren't specific to any particular console.
     is scaled up to suit modern high-resolution displays.
     The availability of items in this submenu depends on
     which video driver higan is using,
-    so see [Drivers](#drivers) for more information.
+    so see [Choosing drivers](../guides/drivers.md) for more information.
       - "None" draws each output pixel according to
         the colour of the single nearest input pixel,
         sometimes called "nearest neighbour" scaling.
@@ -173,10 +173,10 @@ that aren't specific to any particular console.
         averaging the colours of the four nearest input pixels,
         sometimes called "bilinear" scaling.
         This produces unnaturally blurry images.
-      - When using the OpenGL [driver](#drivers),
+      - When using the OpenGL driver,
         an additional item appears in this menu for
         each installed Quark shader.
-        See [Installing custom shaders](#installing-custom-shaders)
+        See [Using video shaders](../guides/shaders.md)
         for details.
   - **Synchronize Audio**
     causes higan to wait for audio playback to complete
@@ -195,18 +195,17 @@ that aren't specific to any particular console.
     This option has no effect in full-screen mode.
     See [The status bar](#the-status-bar) for more information.
   - **Video ...**
-    opens the Video tab of [the Configuration dialog][cfgdlg].
+    opens [higan's Video settings](higan-config.md#video).
   - **Audio ...**
-    opens the Audio tab of [the Configuration dialog][cfgdlg].
+    opens [higan's Audio settings](higan-config.md#audio).
   - **Input ...**
-    opens the Input tab of [the Configuration dialog][cfgdlg].
-  - **Hotkey ...**
-    opens the Hotkeys tab of [the Configuration dialog][cfgdlg].
+    opens [higan's Input settings](higan-config.md#input).
+  - **Hotkeys ...**
+    opens [higan's Hotkeys settings](higan-config.md#hotkeys).
   - **Advanced ...**
-    opens the Advanced tab of [the Configuration dialog][cfgdlg].
+    opens [higan's Advanced settings](higan-config.md#advanced).
 
 [svsa]: #why-do-synchronize-video-and-synchronize-audio-conflict
-[cfgdlg]: #the-configuration-dialog
 
 The Tools menu
 --------------
@@ -217,17 +216,17 @@ contains features for manipulating the emulated console.
   - **Save Quick State**
     stores the current state of the emulated console
     into one of the quick state slots.
-    See [Save States](#save-states) for more information.
+    See [Save States](../concepts/save-states.md) for more information.
   - **Load Quick State**
     restores the emulated console to
     a state previously saved to one of the quick state slots.
-    See [Save States](#save-states) for more information.
+    See [Save States](../concepts/save-states.md) for more information.
   - **Cheat Editor**
-    opens [the Cheat Editor window](#the-cheat-editor)
+    opens [the Cheat Editor window](higan-tools.md#the-cheat-editor)
   - **State Manager**
-    opens [the State Manager window](#the-state-manager)
+    opens [the State Manager window](higan-tools.md#the-state-manager)
   - **Manifest Viewer**
-    opens [the Manifest Viewer window](#the-manifest-viewer)
+    opens [the Manifest Viewer window](higan-tools.md#the-manifest-viewer)
 
 The Help menu
 -------------
@@ -261,15 +260,15 @@ for NTSC and most portable consoles the ideal speed is 60 FPS,
 but the WonderSwan runs at 75 FPS.
 If the number is too low,
 you may need a faster computer,
-or a faster [video driver](#drivers).
+or a faster [video driver](../guides/drivers.md#video).
 If the number is too high,
 you may need to [Synchronize Audio](#the-settings-menu),
-or you may have pressed the "turbo" [hotkey](#the-configuration-dialog).
+or you may have pressed the "turbo" [hotkey](higan-config.md#hotkeys).
 
 The status bar displays "Paused"
-if you have pressed the "pause" [hotkey](#the-configuration-dialog),
+if you have pressed the "pause" [hotkey](higan-config.md#hotkeys),
 or if "When focus is lost: Pause Emulation" is ticked
-in [the Input tab of the Configuration dialog](#the-configuration-dialog)
+in [higan's Input settings](higan-config.md#input)
 and the main higan window is not the foreground window.
 To resume emulation,
 make sure the main higan window is in the foreground,
@@ -293,7 +292,7 @@ or when you press the "Load Quick State" hotkey
 while the current Quick State slot has not had a save-state saved to it,
 
 The status bar briefly displays "Power cycled"
-when you choose "Power Cycle" from [the console menu](#the-console menu),
+when you choose "Power Cycle" from [the console menu](#the-console-menu),
 or press the "Power Cycle" hotkey.
 
 The status bar briefly displays "Display rotation not supported"

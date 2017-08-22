@@ -83,4 +83,4 @@ and telling higan where to find them.
 [icsettings]: ../interface/icarus.md#the-icarus-settings-dialog
 [fsbrowser]: ../interface/common.md#the-filesystem-browser
 [settingsmenu]: ../interface/higan.md#the-settings-menu
-[advsettings]: ../interface/higan-config.md#advanced)
+[advsettings]: ../interface/higan-config.md#advanced

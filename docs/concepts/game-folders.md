@@ -78,7 +78,7 @@ see [Game Paks on the higan website][gp].
 What's in a game folder?
 ------------------------
 
-As mentioned [above](#what-is-a-game-folder),
+As mentioned above,
 a game folder collects all the information relevant
 to emulating a particular game.
 Not all of the following files
@@ -91,8 +91,7 @@ are expected to be useful
 to all emulators that support them:
 
   - `manifest.bml`:
-    The [manifest](#what-is-a-manifest)
-    for this game folder.
+    The [manifest](manifests.md) for this game folder.
   - `program.rom`:
     For most consoles,
     this contains

@@ -21,16 +21,17 @@ like RAR or 7-zip are not supported.
 For most games
 that do not use special chips or co-processors,
 importing a game is straight-forward.
-From [the Library menu](#the-library-menu)
+From [the Library menu](../interface/higan.md#the-library-menu)
 choose "Load ROM File ..."
-to open [a filesystem browser](#the-filesystem-browser),
+to open [a filesystem browser](../interface/common.md#the-filesystem-browser),
 choose the game you want to play,
 and it will be imported into the library and loaded.
 
 To play the game again
 select the console the game runs on from
-[the Library menu](#the-library-menu)
-to open another [filesystem browser](#the-filesystem-browser)
+[the Library menu](../interface/higan.md#the-library-menu)
+to open another
+[filesystem browser](../interface/common.md#the-filesystem-browser)
 that lists all the previously-imported games for that platform.
 
 Games with co-processor firmware
@@ -194,7 +195,7 @@ but Pilotwings is a notable exception.
 
 If you try to import a game
 using the "Import ROM Files ..." option
-in [the Library menu](#the-library-menu)
+in [the Library menu](../interface/higan.md#the-library-menu)
 (or using icarus directly)
 but do not have the required firmware files
 in the correct place,
@@ -209,16 +210,16 @@ and at least one firmware file that was missing or incorrect, like this:
 
 If you try to import a game
 using the "Load ROM File ..." option
-in [the Library menu](#the-library-menu)
+in [the Library menu](../interface/higan.md#the-library-menu)
 but do not have the required firmware files
 in the correct place,
 nothing will happen,
 and higan will just sit there
 with "No cartridge loaded" in
-[the status bar](#the-status-bar).
+[the status bar](../interface/higan.md#the-status-bar).
 
 Once a game with co-processor firmware is imported,
-you can play it just like any [regular game](#importing-and-playing-regular-games).
+you can play it just like any [regular game](#regular-games).
 
 Satellaview games
 -----------------
@@ -254,7 +255,7 @@ were sold in retail stores
 containing extra content for specific games.
 
 Importing a game that has a slot for a memory pak
-is just like [importing a regular game](#importing-and-playing-regular-games).
+is just like [importing a regular game](#regular-games).
 
 Importing a memory pak is like importing a regular game,
 but the name of the memory pak file *must* end in `.bs`
@@ -273,7 +274,7 @@ Playing a game that has a slot for a memory pak
 is just like playing a regular game,
 but after you have selected which game you want to play
 higan will open another
-[filesystem browser](#the-filesystem-browser)
+[filesystem browser](../interface/common.md#the-filesystem-browser)
 to let you pick which previously-imported memory pak
 you want to insert into the game.
 If you press "Cancel" at this point,
@@ -318,7 +319,7 @@ but some games can make use of additional data
 from a game in slot B.
 
 Importing the Sufami Turbo cartridge
-is just like [importing a regular game](#importing-and-playing-regular-games).
+is just like [importing a regular game](#regular-games).
 
 Importing a mini-cartridge is like importing a regular game,
 but the name of the memory pak file *must* end in `.st`
@@ -336,7 +337,7 @@ Rename the file and it should work beautifully.
 To play a Sufami Turbo game,
 load the Sufami Turbo cartridge like any other game.
 higan will open another
-[filesystem browser](#the-filesystem-browser)
+[filesystem browser](../interface/common.md#the-filesystem-browser)
 to let you pick which previously-imported mini-cartridge
 you want to insert into slot A.
 If you press "Cancel" at this point,
@@ -407,12 +408,12 @@ To import the SGB base cartridge,
 you must copy the required firmware file
 into the same directory.
 Then you may import it just like
-[a regular game](#importing-and-playing-regular-games).
+[a regular game](#regular-games).
 
 To play a Game Boy game in Super Game Boy mode,
 load the Super Game Boy cartridge like any other game.
 higan will open another
-[filesystem browser](#the-filesystem-browser)
+[filesystem browser](../interface/common.md#the-filesystem-browser)
 to let you pick which previously-imported Game Boy game
 you want to insert into the Super Game Boy.
 If you press "Cancel" at this point,
@@ -426,7 +427,7 @@ and hence the Super Game Boy;
 see [Playing Game Boy Colour games in Game Boy mode][blackcarts]
 for details.
 
-[blackcarts]: #playing-game-boy-color-games-in-game-boy-mode
+[blackcarts]: ../notes.md#playing-game-boy-color-games-in-game-boy-mode
 
 MSU-1 games
 -----------
@@ -482,7 +483,7 @@ To import an MSU-1 game:
     instead of these instructions.
  2. Otherwise,
     import the Super Famicom ROM with icarus,
-    [like a regular game](#importing-and-playing-regular-games).
+    [like a regular game](#regular-games).
       - If this is a homebrew game with MSU-1 support,
         there will probably be an ordinary ROM
         whose name ends in `.sfc`,
@@ -495,7 +496,8 @@ To import an MSU-1 game:
         then import the patched file.
       - If there's "hardware" and "emulator" versions of the patch,
         see "One thing to be aware of..." above.
- 3. Find the game folder in [the game library](#the-game-library)
+ 3. Find the game folder in
+    [the game library](../concepts/game-library.md)
     that icarus created when it imported the game.
  4. Copy the MSU-1 data file into the game folder.
       - This should be named `msu1.rom`
@@ -525,7 +527,7 @@ To import an MSU-1 game:
 
 Once the game folder is set up,
 playing an MSU-1 game is just like
-[a regular game](#importing-and-playing-regular-games).
+[a regular game](#regular-games).
 
 [sd2snes]: https://sd2snes.de/
 [flips]: http://www.romhacking.net/utilities/1040/
@@ -554,7 +556,7 @@ you will need to use a patcher to apply it yourself,
 creating a new, patched copy of the game.
 
 Then you can import and play the patched game just like
-[a regular game](#importing-and-playing-regular-games).
+[a regular game](#regular-games).
 
 [rhdn]: http://www.romhacking.net/
 

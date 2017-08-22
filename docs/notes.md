@@ -116,8 +116,8 @@ to a Mega Drive calibrated to a different scale
 [vol]: https://board.byuu.org/viewtopic.php?p=42482#p42482
 [va6]: https://board.byuu.org/viewtopic.php?p=42195#p42195
 
-Playing Game Boy Colour games in Game Boy mode
-----------------------------------------------
+Playing Game Boy Color games in Game Boy mode
+---------------------------------------------
 
 Games for the original Game Boy
 came in solid grey cartridges,

@@ -101,9 +101,9 @@ heuristics will always be needed as a fallback,
 but at least if the heuristics are wrong
 the can be overridden.
 
-Manifests can be found inside
-[game folders](game-folders.md),
-but usually aren't.
+Ignoring manifests
+------------------
+
 Occasionally,
 a newly-dumped game will turn out to have
 a configuration that can't be expressed
@@ -114,12 +114,26 @@ games with old-format manifests
 would break when played in emulators that supported the new format.
 
 Therefore,
-icarus [defaults](#the-icarus-settings-dialog)
+icarus [defaults](../interface/icarus.md#the-icarus-settings-dialog)
 to not writing out manifests when it imports games,
-and higan [defaults](#the-configuration-dialog)
+and higan [defaults](../interface/higan-config.md#advanced)
 to ignoring manifests that are present.
 Instead,
 when higan loads a game,
 it will ask icarus to generate a temporary manifest in the latest format,
 based on the files present in the game folder
 and how they are likely to go together.
+
+If the manifest that icarus generates
+for some particular game
+is broken or buggy,
+you'll need to switch the manifest machinery back on
+so you can fix the problem:
+
+  - Turn "Create manifests" back on in icarus' settings
+  - Re-import the game in question,
+    to store the broken manifest
+    as `manifest.bml` in the game folder.
+  - Edit `manifest.bml`
+  - Turn "Ignore manifests" off in higan's settings
+  - Load the game in higan to check that your edit fixed the problem

@@ -38,17 +38,13 @@ The icarus Settings dialog contains the following settings:
     See [Moving the Game Library][movgamelib]
     for details.
   - **Create Manifests** causes icarus
-    to write out a manifest file describing
-    each imported game
-    to that game's [game folder](../concepts/game-folders.md).
-    This means that higan doesn't have to regenerate
-    the manifest each time an imported game is loaded,
-    but it means that a future version of higan
-    with an incompatible manifest format
-    may be unable to play these games.
-    Note that higan also has an "Ignore Manifests" option
-    in its
-    [Advanced settings](../interface/higan-config#advanced).
+    to include
+    [a manifest file](../concepts/manifests.md)
+    inside
+    [the game folder](../concepts/game-folders.md)
+    for each imported game.
+    See [Ignoring manifests](../concepts/manifests.md#ignoring-manifests)
+    for details.
   - **Use Database** causes icarus to use manifest information
     from its database of known-good manifests,
     if it's importing a game it recognises.

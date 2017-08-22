@@ -168,7 +168,7 @@ Input
 This tab controls which PC inputs
 are used for which emulated controllers.
 The exact PC inputs that can be mapped
-depend on [the input driver](#drivers).
+depend on [the input driver](../guides/drivers.md#input).
 
 General input settings:
 
@@ -314,7 +314,7 @@ instead of for the emulated console.
   - **Power Cycle** turns the emulated console off and back on,
     (a "hard reset"),
     just like the "Power Cycle" menu item
-    in [the console menu](#the-console-menu).
+    in [the console menu](higan.md#the-console-menu).
   - **Rotate Display** will toggle the display
     of the Game Boy Advance
     and WonderSwan (Color)
@@ -359,10 +359,11 @@ with the [Game Library](../concepts/game-library.md).
     looks for games to load.
     See [Moving the Game Library](../concepts/game-library.md#moving-the-game-library)
     for more information.
-  - **Ignore Manifests** makes higan ignore the manifest file
-    in the a loaded game's
+  - **Ignore Manifests** makes higan ignore
+    the [manifest](../concepts/manifests.md) file
+    in the loaded game's
     [game folder](../concepts/game-folders.md)
     in favour of asking icarus
     to guess a manifest on the fly.
-    See [What is a manifest?](../concepts/game-folders#what-is-a-manifest)
+    See [Ignoring manifests](../concepts/manifests.md#ignoring-manifests)
     for details.
