@@ -47,9 +47,6 @@ auto VDP::Background::scanline(uint y) -> void {
 auto VDP::Background::run(uint x, uint y) -> void {
   updateVerticalScroll(x, y);
 
-  output.priority = 0;
-  output.color = 0;
-
   x -= state.horizontalScroll;
   y += state.verticalScroll;
 
@@ -70,13 +67,11 @@ auto VDP::Background::run(uint x, uint y) -> void {
 
   uint16 tileData = vdp.vram.read(tileAddress);
   uint4 color = tileData >> (((pixelX & 3) ^ 3) << 2);
-  if(color) {
-    output.color = tileAttributes.bits(13,14) << 4 | color;
-    output.priority = tileAttributes.bit(15);
-  }
+  output.color = color ? tileAttributes.bits(13,14) << 4 | color : 0;
+  output.priority = tileAttributes.bit(15);
 }
 
 auto VDP::Background::power() -> void {
-  memory::fill(&io, sizeof(IO));
-  memory::fill(&state, sizeof(State));
+  io = {};
+  state = {};
 }

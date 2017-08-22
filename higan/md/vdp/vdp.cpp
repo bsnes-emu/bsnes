@@ -37,6 +37,7 @@ auto VDP::main() -> void {
   if(state.vcounter < screenHeight()) {
     while(state.hcounter < 1280) {
       run();
+      state.hdot++;
       step(pixelWidth());
     }
 
@@ -51,6 +52,15 @@ auto VDP::main() -> void {
   } else {
     step(1710);
   }
+
+  state.hdot = 0;
+  state.hcounter = 0;
+  if(++state.vcounter >= frameHeight()) {
+    state.vcounter = 0;
+    state.field ^= 1;
+    latch.overscan = io.overscan;
+  }
+  latch.displayWidth = io.displayWidth;
 }
 
 auto VDP::step(uint clocks) -> void {
@@ -74,9 +84,9 @@ auto VDP::power() -> void {
 
   output = buffer + 16 * 1280;  //overscan offset
 
-  memory::fill(&io, sizeof(IO));
-  memory::fill(&latch, sizeof(Latch));
-  memory::fill(&state, sizeof(State));
+  io = {};
+  latch = {};
+  state = {};
 
   planeA.power();
   window.power();

@@ -13,7 +13,9 @@ auto VDP::read(uint24 addr) -> uint16 {
 
   //counter
   case 0xc00008: case 0xc0000a: case 0xc0000c: case 0xc0000e: {
-    return state.vcounter << 8 | (state.hdot >> 1) << 0;
+    auto vcounter = state.vcounter;
+    if(io.interlaceMode == 3) vcounter.bit(0) = vcounter.bit(8);
+    return vcounter << 8 | (state.hdot >> 1) << 0;
   }
 
   }
@@ -114,11 +116,12 @@ auto VDP::readControlPort() -> uint16 {
   io.commandPending = false;
 
   uint16 result = 0b0011'0100'0000'0000;
-  result |= 1 << 9;  //FIFO empty
-  result |= (state.vcounter >= screenHeight()) << 3;  //vertical blank
-  result |= (state.hcounter >= 1280) << 2;  //horizontal blank
-  result |= io.command.bit(5) << 1;  //DMA active
   result |= Region::PAL() << 0;
+  result |= io.command.bit(5) << 1;  //DMA active
+  result |= (state.hcounter >= 1280) << 2;  //horizontal blank
+  result |= (state.vcounter >= screenHeight()) << 3;  //vertical blank
+  result |= io.interlaceMode.bit(0) ? state.field << 4 : 0;
+  result |= 1 << 9;  //FIFO empty
   return result;
 }
 
