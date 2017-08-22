@@ -14,7 +14,10 @@ auto VDP::read(uint24 addr) -> uint16 {
   //counter
   case 0xc00008: case 0xc0000a: case 0xc0000c: case 0xc0000e: {
     auto vcounter = state.vcounter;
-    if(io.interlaceMode == 3) vcounter.bit(0) = vcounter.bit(8);
+    if(io.interlaceMode == 3) {
+      vcounter = vcounter << 1 | state.field;  //todo: unverified
+      vcounter.bit(0) = vcounter.bit(8);
+    }
     return vcounter << 8 | (state.hdot >> 1) << 0;
   }
 

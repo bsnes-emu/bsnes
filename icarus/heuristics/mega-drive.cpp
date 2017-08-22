@@ -28,12 +28,14 @@ MegaDriveCartridge::MegaDriveCartridge(string location, uint8_t* data, uint size
   if(!(ramFrom & 1) && !(ramTo & 1)) ramMode = "hi";
   if( (ramFrom & 1) &&  (ramTo & 1)) ramMode = "lo";
   if(!(ramFrom & 1) &&  (ramTo & 1)) ramMode = "word";
+  if(data[0x01b0] != 'R' || data[0x01b1] != 'A') ramMode = "none";
 
   uint32_t ramSize = ramTo - ramFrom + 1;
   if(ramMode == "hi") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
   if(ramMode == "lo") ramSize = (ramTo >> 1) - (ramFrom >> 1) + 1;
   if(ramMode == "word") ramSize = ramTo - ramFrom + 1;
   if(ramMode != "none") ramSize = bit::round(min(0x20000, ramSize));
+  if(ramMode == "none") ramSize = 0;
 
   string_vector regions;
   string region = slice((const char*)&data[0x1f0], 0, 16).trimRight(" ");

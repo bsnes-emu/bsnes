@@ -16,7 +16,7 @@ auto VDP::Background::updateHorizontalScroll(uint y) -> void {
   state.horizontalScroll = vdp.vram.read(address).bits(0,9);
 }
 
-auto VDP::Background::updateVerticalScroll(uint x, uint y) -> void {
+auto VDP::Background::updateVerticalScroll(uint x) -> void {
   if(id == ID::Window) return;
 
   auto address = (x >> 4 & 0 - io.verticalScrollMode) << 1;
@@ -45,24 +45,27 @@ auto VDP::Background::scanline(uint y) -> void {
 }
 
 auto VDP::Background::run(uint x, uint y) -> void {
-  updateVerticalScroll(x, y);
+  updateVerticalScroll(x);
+
+  bool interlace = vdp.io.interlaceMode == 3;
+  if(interlace) y = y << 1 | vdp.state.field;
 
   x -= state.horizontalScroll;
   y += state.verticalScroll;
 
-  uint width  = nametableWidth();
-  uint height = nametableHeight();
-
-  uint tileX = x >> 3 & width  - 1;
-  uint tileY = y >> 3 & height - 1;
+  uint tileX = x >> 3 & nametableWidth() - 1;
+  uint tileY = y >> 3 + interlace & nametableHeight() - 1;
 
   auto address = nametableAddress();
-  address += (tileY * width + tileX) & 0x0fff;
+  address += (tileY * nametableWidth() + tileX) & 0x0fff;
+
+  uint pixelX = x & 7;
+  uint pixelY = y & 7 + interlace * 8;
 
   uint16 tileAttributes = vdp.vram.read(address);
-  uint15 tileAddress = tileAttributes.bits(0,10) << 4;
-  uint pixelX = (x & 7) ^ (tileAttributes.bit(11) ? 7 : 0);
-  uint pixelY = (y & 7) ^ (tileAttributes.bit(12) ? 7 : 0);
+  uint15 tileAddress = tileAttributes.bits(0,10) << 4 + interlace;
+  if(tileAttributes.bit(11)) pixelX ^= 7;
+  if(tileAttributes.bit(12)) pixelY ^= 7 + interlace * 8;
   tileAddress += pixelY << 1 | pixelX >> 2;
 
   uint16 tileData = vdp.vram.read(tileAddress);

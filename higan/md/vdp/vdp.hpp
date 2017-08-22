@@ -60,7 +60,7 @@ struct VDP : Thread {
     auto isWindowed(uint x, uint y) -> bool;
 
     auto updateHorizontalScroll(uint y) -> void;
-    auto updateVerticalScroll(uint x, uint y) -> void;
+    auto updateVerticalScroll(uint x) -> void;
 
     auto nametableAddress() -> uint15;
     auto nametableWidth() -> uint;
@@ -102,6 +102,26 @@ struct VDP : Thread {
   Background window{Background::ID::Window};
   Background planeB{Background::ID::PlaneB};
 
+  struct Object {
+    //sprite.cpp
+    inline auto width() const -> uint;
+    inline auto height() const -> uint;
+
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
+
+    uint9  x;
+    uint10 y;
+    uint2  tileWidth;
+    uint2  tileHeight;
+    uint1  horizontalFlip;
+    uint1  verticalFlip;
+    uint2  palette;
+    uint1  priority;
+    uint11 address;
+    uint7  link;
+  };
+
   struct Sprite {
     //sprite.cpp
     auto write(uint9 addr, uint16 data) -> void;
@@ -117,19 +137,6 @@ struct VDP : Thread {
       uint15 attributeAddress;
       uint1  nametableAddressBase;
     } io;
-
-    struct Object {
-      uint9  x;
-      uint9  y;
-      uint   width;
-      uint   height;
-      bool   horizontalFlip;
-      bool   verticalFlip;
-      uint2  palette;
-      uint1  priority;
-      uint15 address;
-      uint7  link;
-    };
 
     Pixel output;
 

@@ -43,6 +43,7 @@ auto VDP::serialize(serializer& s) -> void {
   s.integer(state.hdot);
   s.integer(state.hcounter);
   s.integer(state.vcounter);
+  s.integer(state.field);
 }
 
 auto VDP::DMA::serialize(serializer& s) -> void {
@@ -73,6 +74,19 @@ auto VDP::Background::serialize(serializer& s) -> void {
   s.integer(output.priority);
 }
 
+auto VDP::Object::serialize(serializer& s) -> void {
+  s.integer(x);
+  s.integer(y);
+  s.integer(tileWidth);
+  s.integer(tileHeight);
+  s.integer(horizontalFlip);
+  s.integer(verticalFlip);
+  s.integer(palette);
+  s.integer(priority);
+  s.integer(address);
+  s.integer(link);
+}
+
 auto VDP::Sprite::serialize(serializer& s) -> void {
   s.integer(io.attributeAddress);
   s.integer(io.nametableAddressBase);
@@ -80,8 +94,8 @@ auto VDP::Sprite::serialize(serializer& s) -> void {
   s.integer(output.color);
   s.integer(output.priority);
 
-  //todo: serialize oam
-  //todo: serialize objects
+  for(uint n : range(80)) oam[n].serialize(s);
+  for(uint n : range(20)) objects[n].serialize(s);
 }
 
 auto VDP::VRAM::serialize(serializer& s) -> void {
