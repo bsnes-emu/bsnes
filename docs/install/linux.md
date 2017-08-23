@@ -3,7 +3,8 @@ Compiling from source on Linux
 
 You will need a copy of the higan source-code.
 If you download an official release from the higan homepage,
-you will need [7-zip][7z] or a compatible tool to extract it.
+you will need [7-zip](http://www.7-zip.org)
+or a compatible tool to extract it.
 Alternatively,
 you may obtain higan source code from
 [the unofficial git repo](https://gitlab.com/higan/higan/)
@@ -29,7 +30,8 @@ for the following libraries:
   - OpenAL
   - udev
 
-On a Debian-derived Linux distribution,
+On a Debian-derived Linux distribution
+(including Ubuntu and Mint),
 you can install everything you need with a command like:
 
     sudo apt-get install build-essential libgtk2.0-dev libpulse-dev \
@@ -121,7 +123,13 @@ as installed by the above instructions:
  4. Type `make -C higan uninstall` and press Enter
 
 To remove higan's configuration,
-delete the directory `~/.config/higan` as well.
+you should also delete the following directories
+if they exist:
+
+  - `~/.config/higan/`
+  - `~/.config/hiro/`
+  - `~/.local/share/higan/`
+  - `~/.local/share/hiro/`
 
 To remove the games imported into higan's library
 (including in-game saves and save-states),

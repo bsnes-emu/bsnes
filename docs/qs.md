@@ -63,7 +63,7 @@ In the future,
 if you want to play this game again,
 you can choose "Load ROM File ..." as you did before,
 or you can choose the appropriate console name
-from [the Library menu](interface/higan.md#the-library-menu),
+from the Library menu,
 which will list all the games for that console
 in the Game Library.
 
@@ -96,7 +96,7 @@ like the Game Boy and WonderSwan,
 since the "controller" is always connected.
 This *does* apply to the Famicom,
 even though the Famicom's controllers are hard-wired,
-because higan uses "Famicom"
-to mean Nintendo's 8-bit home console
+because higan uses the name "Famicom"
+to refer to Nintendo's 8-bit home console
 in all territories,
 including the Nintendo Entertainment System.

@@ -1,13 +1,12 @@
 Installing an official release on Windows
 -----------------------------------------
 
-Official higan releases are distributed in [7-zip][7z] archives.
-You will need to install 7-zip,
-or another compatible archiving tool,
+Official higan releases are distributed in
+[7-zip](http://www.7-zip.org/)
+archives.
+You will need to install 7-zip
+(or another compatible archiving tool)
 to install higan.
-
-[7z]: http://www.7-zip.org/
-
 Once you have a suitable archiving tool,
 extract the contents of the higan archive into a new folder.
 
@@ -15,8 +14,7 @@ When you're done,
 the new folder should contain `higan.exe` and `icarus.exe`
 along with other assorted files and folders
 that describe the systems higan emulates.
-
-You may put that folder wherever you like.
+You may put that new folder wherever you like.
 
 To run higan, open the `higan.exe` file.
 
@@ -34,20 +32,17 @@ To remove higan's configuration:
  3. Delete the subfolders named `icarus` and `higan`
     if they exist.
 
-You might also want to remove the games imported into higan's library
-(including in-game saves and save-states):
-
- 1. Press Win+R to open the Run dialog
- 2. Type `%USERPROFILE%` and press Enter
-    to open the folder where higan keeps its game library
- 3. Delete the folder named `Emulation` if it exists
+You might also want to remove
+[higan's game library](../concepts/game-library.md#where-is-the-game-library)
+(including in-game saves and save-states).
 
 Compiling from source on Windows
 --------------------------------
 
 You will need a copy of the higan source-code.
 If you download an official release from the higan homepage,
-you will need [7-zip][7z] or a compatible tool to extract it.
+you will need [7-zip](http://www.7-zip.org/)
+or a compatible tool to extract it.
 Alternatively,
 you may obtain higan source code from
 [the unofficial git repo](https://gitlab.com/higan/higan/)
@@ -77,25 +72,27 @@ See the higan forum
 [for](https://board.byuu.org/viewtopic.php?p=41977#p41977)
 [details](https://board.byuu.org/viewtopic.php?p=42253#p42253).
 
-Once you've installed mingw-w64,
+Once you've installed the compiler,
 open a command-prompt window,
 type `g++ --version`
 then press Enter
 to check it's installed correctly.
 You should see a message like
 
-    g++ 1.2.3 20010101
-    Copyright (C) 2001 Free Software Foundation, Inc.
-    This is free software; see the source for copying conditions.  There is NO
-    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```text
+g++ 1.2.3 20010101
+Copyright (C) 2001 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
 
-...except it should mention the version of mingw that you installed
+...except it should mention the compiler version that you installed
 and the corresponding dates.
 If you see an error message like "command not found"
 or "bad command or filename",
-you may need to add mingw's "bin" folder
+you may need to add the compiler's "bin" folder
 to your computer's `%PATH%`.
-See the mingw documentation for help with that.
+See the compiler's documentation for help with that.
 
 Once mingw is installed and available from the command prompt:
 

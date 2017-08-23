@@ -12,11 +12,12 @@ for [common functions games require][bios],
 often called a "BIOS"
 by analogy with the Basic Input/Output System
 used in IBM PC compatibles.
-
-For the same legal reasons that commercial games
-cannot be distributed with emulators,
-the GBA BIOS cannot be distributed with higan,
-but is required for GBA software to run.
+Although the GBA BIOS is required
+in order to emulate GBA games,
+it cannot be distributed with higan
+for the same legal reasons that commercial games
+cannot be distributed with higan,
+so you'll need to obtain a copy of the BIOS for yourself.
 
 If you have a real GBA and a flashcart,
 the Internet contains many tools
@@ -24,7 +25,7 @@ that will extract the BIOS image so it can be copied
 to your desktop computer.
 The correct GBA BIOS file is exactly 16384 bytes long,
 and has the SHA-256 hash
-fd2547724b505f487e6dcb29ec2ecff3af35a841a77ab2e85fd87350abd36570.
+`fd2547724b505f487e6dcb29ec2ecff3af35a841a77ab2e85fd87350abd36570`.
 
 Once you have the correct BIOS file:
 
