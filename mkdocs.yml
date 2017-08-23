@@ -1,6 +1,4 @@
 site_name: higan
-repo_url: https://gitlab.com/higan/higan
-repo_name: Source
 
 docs_dir: docs
 site_dir: docs_build
