@@ -32,10 +32,10 @@ Pressing this button will
 switch to the parent of the current folder.
 
 Most of the filesystem browser lists the contents
-of the current directory.
+of the current folder.
 Double-clicking a folder,
 or selecting it and pressing Enter,
-will switch to showing the contents of that directory.
+will switch to showing the contents of that folder.
 If the list has keyboard focus,
 typing any text will jump to the first inem in the list
 whose name begins with the text you typed.
@@ -50,12 +50,12 @@ by double-clicking it,
 by selecting it and pressing Enter,
 or by selecting it and clicking the "Select" button in the bottom-right.
 
-If this filesystem browser is asking for a directory,
+If this filesystem browser is asking for a folder,
 you can choose one
 by selecting it and clicking the "Select" button in the bottom-right.
 Double-clicking
 or selecting and pressing Enter don't work,
-they just switch to viewing that directory.
+they just switch to viewing that folder.
 
 The "Cancel" button in the bottom-right
 closes the filesystem browser without selecting anything.

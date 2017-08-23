@@ -62,8 +62,8 @@ in [the Game Library](../concepts/game-library.md).
 
 If your copy of higan includes a cheat database
 (a file named `cheats.bml`
-in the same directory as `Super Famicom.sys`
-and the other `*.sys` directories),
+in the same folder as `Super Famicom.sys`
+and the other `*.sys` folders),
 you can click the "Find Codes ..." button in the bottom left
 to load all known cheats for the currently-running game.
 

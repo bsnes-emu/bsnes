@@ -406,7 +406,7 @@ but higan expects the same filename for both.
 
 To import the SGB base cartridge,
 you must copy the required firmware file
-into the same directory.
+into the same folder.
 Then you may import it just like
 [a regular game](#regular-games).
 

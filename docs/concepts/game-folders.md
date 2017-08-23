@@ -132,7 +132,7 @@ to all emulators that support them:
     Holds streamable audio for [the MSU-1][msu1].
 
 Files that are only useful to higan specifically
-are placed in a `higan` subdirectory:
+are placed in a `higan` subfolder:
 
   - `cheats.bml`:
     All information present in

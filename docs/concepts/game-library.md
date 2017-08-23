@@ -78,7 +78,7 @@ and telling higan where to find them.
     to open [higan's Advanced settings][advsettings].
  1. Click the "Change ..." button on the right.
     A [filesystem browser][fsbrowser] will appear,
-    allowing you to choose the same directory again.
+    allowing you to choose the same folder again.
 
 [icsettings]: ../interface/icarus.md#the-icarus-settings-dialog
 [fsbrowser]: ../interface/common.md#the-filesystem-browser

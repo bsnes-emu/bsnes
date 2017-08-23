@@ -13,7 +13,7 @@ extract the contents of the higan archive into a new folder.
 
 When you're done,
 the new folder should contain `higan.exe` and `icarus.exe`
-along with other assorted files and directories
+along with other assorted files and folders
 that describe the systems higan emulates.
 
 You may put that folder wherever you like.
@@ -31,7 +31,7 @@ To remove higan's configuration:
  1. Press Win+R to open the Run dialog
  2. Type `%LOCALAPPDATA%` and press Enter
     to open the folder where higan's configuration data lives
- 3. Delete the subdirectories named `icarus` and `higan`
+ 3. Delete the subfolders named `icarus` and `higan`
     if they exist.
 
 You might also want to remove the games imported into higan's library
@@ -124,7 +124,7 @@ Installing a compiled build on Windows
     into the new folder
  4. Copy `C:\higan-src\higan\out\higan.exe`
     into the new folder
- 5. Copy all the `*.sys` directories
+ 5. Copy all the `*.sys` folders
     in `C:\higan-src\higan\systems`
     into the new folder
 

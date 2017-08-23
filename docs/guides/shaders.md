@@ -53,14 +53,14 @@ it should contain a file named `manifest.bml`,
 and probably some `*.fs` or `*.vs` files.
 
 Place the shader folder inside
-the `Video Shaders` directory
+the `Video Shaders` folder
 of your higan installation.
-If you don't have a `Video Shaders` directory,
-create it beside the `*.sys` directories
+If you don't have a `Video Shaders` folder,
+create it beside the `*.sys` folders
 like `Game Boy Advance.sys` and `Super Famicom.sys`.
 
   - On Windows,
-    this is probably the directory containing `higan.exe`
+    this is probably the folder containing `higan.exe`
   - On Linux,
     this is probably `~/.local/share/higan`
 
