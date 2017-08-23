@@ -41,7 +41,7 @@ every time such a console is mentioned,
 higan uses the name from the console's region of origin.
 In practice,
 that means Japanese names:
-"Famicom" and "Super Famicom" instead of NES and SNES,
+"Famicom" and "Super Famicom" instead of "NES" and "SNES",
 "Mega Drive" instead of "Genesis",
 "PC Engine" instead of "TurboGrafx-16".
 
