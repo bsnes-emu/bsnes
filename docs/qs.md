@@ -1,4 +1,4 @@
-If this is you're first time using higan,
+If this is your first time using higan,
 welcome!
 Here's a brief guide to getting started:
 
