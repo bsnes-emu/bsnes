@@ -13,7 +13,7 @@ and extracting it.
 [More information...](install/windows.md)
 
 On Linux,
-if your distribution doesn't include the latest version,
+if your distribution doesn't already include the latest version,
 you'll need to compile it yourself — but don't worry,
 it's not too complex.
 [More information...](install/linux.md)
