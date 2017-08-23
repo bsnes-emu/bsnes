@@ -72,6 +72,10 @@ as described in the previous section:
     to install icarus and its game database
  4. Type `make -C higan install` and press Enter
     to install higan and its supporting files
+ 5. If the higan source includes a `shaders` subdirectory,
+    type `make -C shaders install`
+    to install the example
+    [video shaders](../guides/shaders.md).
 
 This installs higan and its associated data files
 into the `~/.local` directory hierarchy.

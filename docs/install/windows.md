@@ -124,6 +124,12 @@ Installing a compiled build on Windows
  5. Copy all the `*.sys` folders
     in `C:\higan-src\higan\systems`
     into the new folder
+ 6. If the higan source includes a `shaders` folder,
+    make another new folder named `Video Shaders`
+    inside the new folder,
+    and copy all the `*.shader` folders
+    from `C:\higan-src\shaders\`
+    into the `Video Shaders` folder.
 
 The new folder should now contain
 `icarus.exe`,
