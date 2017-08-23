@@ -7,7 +7,7 @@ allowing you to play classic games on a modern general-purpose computer.
 About higan
 -----------
 
-As of v102,
+As of v104,
 higan has top-tier support for the following consoles:
 
   - Nintendo Super Famicom/Super Nintendo Entertainment System,
