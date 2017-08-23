@@ -85,7 +85,7 @@ but few consoles have all of them.
     to connect different emulated controllers
     to the first controller port,
     if there is one.
-      - See [higan's Input settings](higan-config.md#input)
+      - See [higan's Input settings](higan-settings.md#input)
         for information about configuring
         which host controller inputs are used
         for the emulated controllers.
@@ -98,7 +98,7 @@ but few consoles have all of them.
     to connect different emulated controllers
     to the second controller port,
     if there is one.
-      - See [higan's Input settings](higan-config.md#input)
+      - See [higan's Input settings](higan-settings.md#input)
         for information about configuring
         which host controller inputs are used
         for the emulated controllers.
@@ -195,15 +195,15 @@ that aren't specific to any particular console.
     This option has no effect in full-screen mode.
     See [The status bar](#the-status-bar) for more information.
   - **Video ...**
-    opens [higan's Video settings](higan-config.md#video).
+    opens [higan's Video settings](higan-settings.md#video).
   - **Audio ...**
-    opens [higan's Audio settings](higan-config.md#audio).
+    opens [higan's Audio settings](higan-settings.md#audio).
   - **Input ...**
-    opens [higan's Input settings](higan-config.md#input).
+    opens [higan's Input settings](higan-settings.md#input).
   - **Hotkeys ...**
-    opens [higan's Hotkeys settings](higan-config.md#hotkeys).
+    opens [higan's Hotkeys settings](higan-settings.md#hotkeys).
   - **Advanced ...**
-    opens [higan's Advanced settings](higan-config.md#advanced).
+    opens [higan's Advanced settings](higan-settings.md#advanced).
 
 [svsa]: #why-do-synchronize-video-and-synchronize-audio-conflict
 
@@ -263,12 +263,12 @@ you may need a faster computer,
 or a faster [video driver](../guides/drivers.md#video).
 If the number is too high,
 you may need to [Synchronize Audio](#the-settings-menu),
-or you may have pressed the "turbo" [hotkey](higan-config.md#hotkeys).
+or you may have pressed the "turbo" [hotkey](higan-settings.md#hotkeys).
 
 The status bar displays "Paused"
-if you have pressed the "pause" [hotkey](higan-config.md#hotkeys),
+if you have pressed the "pause" [hotkey](higan-settings.md#hotkeys),
 or if "When focus is lost: Pause Emulation" is ticked
-in [higan's Input settings](higan-config.md#input)
+in [higan's Input settings](higan-settings.md#input)
 and the main higan window is not the foreground window.
 To resume emulation,
 make sure the main higan window is in the foreground,

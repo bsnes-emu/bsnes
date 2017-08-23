@@ -203,7 +203,7 @@ you will need to turn on
 [the Icarus settings dialog](interface/icarus.md#the-icarus-settings-dialog),
 turn off
 "Ignore manifests" in
-[higan's Advanced settings](interface/higan-config.md#advanced),
+[higan's Advanced settings](interface/higan-settings.md#advanced),
 re-import the game,
 and edit `manifest.bml` in
 [the game folder](concepts/game-folders.md)
@@ -229,7 +229,7 @@ to experience the rumble effect in higan
 you'll need to configure the console itself:
 
   - Open
-    [higan's Input settings](interface/higan-config.md#input)
+    [higan's Input settings](interface/higan-settings.md#input)
   - In the list of consoles,
     select Game Boy, or Game Boy Color
     depending on which console you want to use to play the game
@@ -254,7 +254,7 @@ to experience the rumble effect in higan
 you'll need to configure the console itself:
 
   - Open
-    [higan's Input settings](interface/higan-config.md#input)
+    [higan's Input settings](interface/higan-settings.md#input)
   - In the list of consoles,
     select Game Boy Advance
   - In the list of inputs,
@@ -283,7 +283,7 @@ as well as a bonus mode in *Dr Mario + Puzzle League*,
 expect the player to physically rotate the device
 so the screen is tall rather than wide.
 higan supports this feature with
-a Rotate [hotkey](interface/higan-config.md#hotkeys).
+a Rotate [hotkey](interface/higan-settings.md#hotkeys).
 
 When the user presses the Rotate hotkey,
 the console's video output is rotated 90° anti-clockwise,
@@ -303,7 +303,7 @@ vertically or horizontally.
 that requires the player to repeatedly rotate
 the device as they play.
 higan supports this feature with
-a Rotate [hotkey](interface/higan-config.md#hotkeys).
+a Rotate [hotkey](interface/higan-settings.md#hotkeys).
 
 When the user presses the Rotate hotkey,
 the console's video output is rotated 90° anti-clockwise,

@@ -12,7 +12,7 @@ This is not much use unless you also specify `PATH`,
 because you won't be able to load a game
 until you exit full-screen mode
 by pressing the "Toggle Fullscreen"
-[hotkey](higan-config.md#hotkeys).
+[hotkey](higan-settings.md#hotkeys).
 
 When `PATH` is the path to an existing
 [game folder](../concepts/game-folders.md)

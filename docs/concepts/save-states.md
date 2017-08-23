@@ -105,7 +105,7 @@ higan has five Quick State slots,
 which can be used from
 [the Tools menu](../interface/higan.md#the-tools-menu),
 or with the appropriate
-[hotkeys](../interface/higan-config.md#hotkeys).
+[hotkeys](../interface/higan-settings.md#hotkeys).
 
 Quick states are useful
 as extra checkpoints

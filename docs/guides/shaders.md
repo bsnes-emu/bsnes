@@ -67,7 +67,7 @@ like `Game Boy Advance.sys` and `Super Famicom.sys`.
 Launch higan,
 open the Settings menu,
 and choose "Advanced ..."
-to open [the Advanced tab](../interface/higan-config.md#advanced)
+to open [the Advanced tab](../interface/higan-settings.md#advanced)
 of the Settings dialog.
 Under "Driver Selection",
 make sure "Video" is set to "OpenGL".

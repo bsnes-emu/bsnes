@@ -25,7 +25,7 @@ Once higan's installed,
 start it up.
 Open the "Settings" menu,
 and choose "Input ..."
-to open [the Input settings](interface/higan-config.md#input).
+to open [the Input settings](interface/higan-settings.md#input).
 
 higan supports a *lot* of different controllers
 for a lot of different consoles,

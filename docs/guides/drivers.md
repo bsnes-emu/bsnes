@@ -15,7 +15,7 @@ so you can find the one that works best for you.
 To see what drivers you're currently using,
 or to choose different ones,
 go to
-[the Advanced tab](../interface/higan-config.md#advanced)
+[the Advanced tab](../interface/higan-settings.md#advanced)
 of the Settings window.
 
 Here are the most notable drivers
@@ -52,7 +52,7 @@ On Windows:
   - **Direct3D** is a good choice
     if OpenGL is unavailable.
     It also allows
-    [Exclusive fullscreen](../interface/higan-config.md#video),
+    [Exclusive fullscreen](../interface/higan-settings.md#video),
     bypassing Windows' desktop compositor.
   - **GDI** is the safest choice,
     but performs very poorly at large sizes.
@@ -84,7 +84,7 @@ On Windows:
   - **WASAPI** offers low latency,
     but is only slightly more likely to work.
     It also offers
-    [Exclusive Mode](../interface/higan-config.md#audio),
+    [Exclusive Mode](../interface/higan-settings.md#audio),
     which can improve audio quality and lower latency,
     but may be better or worse than shared mode
     in practice.

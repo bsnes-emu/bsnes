@@ -94,7 +94,7 @@ If games are running way too fast, here's some things to check:
   - Make sure "Synchronize Audio" is ticked in
     [the Settings menu](interface/higan.md#the-settings-menu)
   - Make sure the Audio driver is not set to "None"
-    in [the Advanced settings](interface/higan-config.md#advanced)
+    in [the Advanced settings](interface/higan-settings.md#advanced)
     (remember to restart higan if you change driver settings)
   - Make sure your computer has speakers or headphones connected
     (some computers disable all audio if no ouputs are available)
@@ -127,7 +127,7 @@ although other emulated consoles may work.
 If your computer meets the general speed requirements
 but games run too slowly,
 try choosing a different
-[audio driver](interface/higan-config.md#advanced),
+[audio driver](interface/higan-settings.md#advanced),
 since that's usually what drives higan's timing.
 
 On some computers,
@@ -137,7 +137,7 @@ may be confused by higan's unusual pattern of CPU usage
 and the next few milliseconds of audio,
 then stops dead as it waits for output to complete).
 If holding down
-the [fast forward hotkey](interface/higan-config.md#hotkeys)
+the [fast forward hotkey](interface/higan-settings.md#hotkeys)
 runs too fast but the game normally runs too slow,
 try disabling "power saver" mode
 or enabling "performance" mode.

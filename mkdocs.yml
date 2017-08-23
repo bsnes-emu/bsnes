@@ -13,7 +13,7 @@ pages:
         - General: install/general.md
     - User Interface:
         - higan's main window: interface/higan.md
-        - higan's Settings window: interface/higan-config.md
+        - higan's Settings window: interface/higan-settings.md
         - higan's Tools window: interface/higan-tools.md
         - higan's command line: interface/higan-cli.md
         - icarus: interface/icarus.md

@@ -116,7 +116,7 @@ would break when played in emulators that supported the new format.
 Therefore,
 icarus [defaults](../interface/icarus.md#the-icarus-settings-dialog)
 to not writing out manifests when it imports games,
-and higan [defaults](../interface/higan-config.md#advanced)
+and higan [defaults](../interface/higan-settings.md#advanced)
 to ignoring manifests that are present.
 Instead,
 when higan loads a game,
