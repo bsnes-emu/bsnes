@@ -56,14 +56,14 @@ higan is officially spelled with a lowercase "h", not a capital.
 About this document
 -------------------
 
-This is the unofficial higan README,
+This is the semi-official higan manual,
 a community-maintained introduction and reference.
 It may be out of date
 by the time you read this,
 and it may contain errors or omissions.
 If you find something that's wrong,
 or you have a suggestion,
-see "Unofficial higan resources" below.
+post a message on the official higan forum.
 
 Official higan resources
 ------------------------
