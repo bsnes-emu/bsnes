@@ -4,6 +4,10 @@ higan, the multi-system emulator
 higan emulates a number of classic videogame consoles of the 1980s and 1990s,
 allowing you to play classic games on a modern general-purpose computer.
 
+To get started with higan right away,
+see the [Quick Start](qs.md) section of the documentation.
+
+
 About higan
 -----------
 
@@ -46,9 +50,6 @@ FreeBSD 10 and above, and
 Microsoft Windows 7 and above.
 It also includes some level of support
 for GNU/Linux and macOS.
-
-If you want to install higan and try it out,
-see the [Quick Start](qs.md) section below.
 
 higan is officially spelled with a lowercase "h", not a capital.
 
