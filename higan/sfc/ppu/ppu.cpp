@@ -95,8 +95,7 @@ auto PPU::power() -> void {
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
-  random.seed();
-  for(auto& n : vram.data) n = random();
+  random.array((uint8*)vram.data, sizeof(vram.data));
 
   ppu1.mdr = random.bias(0xff);
   ppu2.mdr = random.bias(0xff);

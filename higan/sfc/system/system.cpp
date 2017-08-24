@@ -141,7 +141,7 @@ auto System::power() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
-  random.entropy(Random::Entropy::High);
+  random.entropy(Random::Entropy::Low);
 
   scheduler.reset();
   cpu.power();

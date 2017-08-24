@@ -7,9 +7,6 @@
 struct ArmDSP : Processor::ARM7TDMI, Thread {
   #include "registers.hpp"
 
-  ArmDSP();
-  ~ArmDSP();
-
   static auto Enter() -> void;
   auto boot() -> void;
   auto main() -> void;
@@ -31,9 +28,9 @@ struct ArmDSP : Processor::ARM7TDMI, Thread {
   auto firmware() const -> nall::vector<uint8>;
   auto serialize(serializer&) -> void;
 
-  uint8* programROM;
-  uint8* dataROM;
-  uint8* programRAM;
+  uint8 programROM[128 * 1024];
+  uint8 dataROM[32 * 1024];
+  uint8 programRAM[16 * 1024];
 };
 
 extern ArmDSP armdsp;

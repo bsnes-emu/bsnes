@@ -24,6 +24,7 @@ auto CPU::main() -> void {
       Thread::step(16);
       synchronize(ppu);
       synchronize(apu);
+      synchronize(player);
     }
     context.stopped = false;
   }
@@ -61,6 +62,7 @@ auto CPU::step(uint clocks) -> void {
   Thread::step(clocks);
   synchronize(ppu);
   synchronize(apu);
+  synchronize(player);
 }
 
 auto CPU::power() -> void {

@@ -49,7 +49,7 @@ struct InputJoypadUdev {
     set<JoypadInput> hats;
     set<JoypadInput> buttons;
     bool rumble = false;
-    uint effectID = 0;
+    int effectID = -1;
   };
   vector<Joypad> joypads;
 
@@ -102,12 +102,31 @@ struct InputJoypadUdev {
       if(jp.hid->id() != id) continue;
       if(!jp.hid->rumble()) continue;
 
-      input_event play;
-      memset(&play, 0, sizeof(input_event));
-      play.type = EV_FF;
-      play.code = jp.effectID;
-      play.value = enable;
-      auto unused = write(jp.fd, &play, sizeof(input_event));
+      if(!enable) {
+        if(jp.effectID == -1) return true;  //already stopped?
+
+        ioctl(jp.fd, EVIOCRMFF, jp.effectID);
+        jp.effectID = -1;
+      } else {
+        if(jp.effectID != -1) return true;  //already started?
+
+        ff_effect effect;
+        memory::fill(&effect, sizeof(ff_effect));
+        effect.type = FF_RUMBLE;
+        effect.id = -1;
+        effect.u.rumble.strong_magnitude = 65535;
+        effect.u.rumble.weak_magnitude   = 65535;
+        ioctl(jp.fd, EVIOCSFF, &effect);
+        jp.effectID = effect.id;
+
+        input_event play;
+        memory::fill(&play, sizeof(input_event));
+        play.type = EV_FF;
+        play.code = jp.effectID;
+        play.value = enable;
+        auto unused = write(jp.fd, &play, sizeof(input_event));
+      }
+
       return true;
     }
 
@@ -237,16 +256,6 @@ private:
         }
       }
       jp.rumble = jp.effects >= 2 && testBit(jp.ffbit, FF_RUMBLE);
-      if(jp.rumble) {
-        ff_effect effect;
-        memset(&effect, 0, sizeof(ff_effect));
-        effect.type = FF_RUMBLE;
-        effect.id = -1;
-        effect.u.rumble.strong_magnitude = 65535;
-        effect.u.rumble.weak_magnitude   = 65535;
-        ioctl(jp.fd, EVIOCSFF, &effect);
-        jp.effectID = effect.id;
-      }
 
       createJoypadHID(jp);
       joypads.append(jp);

@@ -5,110 +5,92 @@ namespace Emulator {
 struct Random {
   enum class Entropy : uint { None, Low, High };
 
+  auto operator()() -> uint64 {
+    return random();
+  }
+
   auto entropy(Entropy entropy) -> void {
-    settings.entropy = entropy;
+    _entropy = entropy;
     seed();
   }
 
   auto seed(maybe<uint32> seed = nothing, maybe<uint32> sequence = nothing) -> void {
     if(!seed) seed = (uint32)clock();
     if(!sequence) sequence = 0;
-    seed32(seed(), sequence());
+
+    _state = 0;
+    _increment = sequence() << 1 | 1;
+    step();
+    _state += seed();
+    step();
   }
 
-  auto operator()() -> uint64 {
-    return iterate64();
+  auto random() -> uint64 {
+    if(_entropy == Entropy::None) return 0;
+    return (uint64)step() << 32 | (uint64)step() << 0;
   }
 
   auto bias(uint64 bias) -> uint64 {
-    if(settings.entropy == Entropy::None) return bias;
-    return operator()();
+    if(_entropy == Entropy::None) return bias;
+    return random();
   }
 
   auto bound(uint64 bound) -> uint64 {
     uint64 threshold = -bound % bound;
     while(true) {
-      uint64 result = iterate64();
+      uint64 result = random();
       if(result >= threshold) return result % bound;
     }
   }
 
+  auto array(uint8* data, uint32 size) -> void {
+    if(_entropy == Entropy::None) {
+      memory::fill(data, size);
+      return;
+    }
+
+    if(_entropy == Entropy::High) {
+      for(uint32 address : range(size)) {
+        data[address] = random();
+      }
+      return;
+    }
+
+    //Entropy::Low
+    uint lobit = random() & 3;
+    uint hibit = (lobit + 8 + (random() & 3)) & 15;
+    uint lovalue = random() & 255;
+    uint hivalue = random() & 255;
+    if((random() & 3) == 0) lovalue = 0;
+    if((random() & 1) == 0) hivalue = ~lovalue;
+
+    for(uint32 address : range(size)) {
+      uint8 value = address.bit(lobit) ? lovalue : hivalue;
+      if(address.bit(hibit)) value = ~value;
+      if((random() &  511) == 0) value.bit(random() & 7) ^= 1;
+      if((random() & 2047) == 0) value.bit(random() & 7) ^= 1;
+      data[address] = value;
+    }
+  }
+
   auto serialize(serializer& s) -> void {
-    s.integer((uint&)settings.entropy);
-    s.integer(ram.state);
-    s.integer(ram.increment);
-    s.integer(pcg.state);
-    s.integer(pcg.increment);
+    s.integer((uint&)_entropy);
+    s.integer(_state);
+    s.integer(_increment);
   }
 
 private:
-  auto seed32(uint32 seed, uint32 sequence) -> void {
-    switch(settings.entropy) {
-
-    case Entropy::None: {
-      break;
-    }
-
-    case Entropy::Low: {
-      ram.state = seed;
-      ram.increment = 0;
-      break;
-    }
-
-    case Entropy::High: {
-      pcg.state = 0;
-      pcg.increment = sequence << 1 | 1;
-      iterate32();
-      pcg.state += seed;
-      iterate32();
-      break;
-    }
-
-    }
+  auto step() -> uint32 {
+    uint64 state = _state;
+    _state = state * 6364136223846793005ull + _increment;
+    uint32 xorshift = (state >> 18 ^ state) >> 27;
+    uint32 rotate = state >> 59;
+    return xorshift >> rotate | xorshift << (-rotate & 31);
   }
 
-  auto iterate32() -> uint32 {
-    switch(settings.entropy) {
-
-    case Entropy::None: {
-      return 0;
-    }
-
-    case Entropy::Low: {
-      uint64 result = 0;
-      if(ram.increment.bit(4 + ram.state.bits(0,1))) result = ~0;
-      ram.increment++;
-      return result;
-    }
-
-    case Entropy::High: {
-      uint64 state = pcg.state;
-      pcg.state = state * 6364136223846793005ull + pcg.increment;
-      uint32 xorshift = (state >> 18 ^ state) >> 27;
-      uint32 rotate = state >> 59;
-      return xorshift >> rotate | xorshift << (-rotate & 31);
-    }
-
-    }
-  }
-
-  auto iterate64() -> uint64 {
-    return (uint64)iterate32() << 32 | (uint64)iterate32() << 0;
-  }
-
-  struct Settings {
-    Entropy entropy = Entropy::High;
-  } settings;
-
-  struct RAM {  //Entropy::Low
-    uint64 state;
-    uint64 increment;
-  } ram;
-
-  struct PCG {  //Entropy::High
-    uint64 state;
-    uint64 increment;
-  } pcg;
+  Entropy _entropy = Entropy::High;
+  uint64 _state;
+  uint64 _increment;
 };
 
 }

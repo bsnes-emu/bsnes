@@ -7,7 +7,26 @@ namespace GameBoyAdvance {
 Player player;
 #include "serialization.cpp"
 
+auto Player::Enter() -> void {
+  while(true) scheduler.synchronize(), player.main();
+}
+
+auto Player::main() -> void {
+  if(status.timeout && !--status.timeout) {
+    platform->inputRumble(0, 0, 10, false);
+  }
+
+  step(1);
+}
+
+auto Player::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
+}
+
 auto Player::power() -> void {
+  create(Player::Enter, 1'000.0);
+
   status.enable = false;
   status.rumble = false;
 
@@ -17,9 +36,12 @@ auto Player::power() -> void {
   status.packet = 0;
   status.send = 0;
   status.recv = 0;
+
+  status.timeout = 0;
 }
 
 auto Player::frame() -> void {
+  //todo: this is not a very performant way of detecting the GBP logo ...
   uint32 hash = Hash::CRC32(ppu.output, 240 * 160 * sizeof(uint32)).value();
   status.logoDetected = (hash == 0x7776eb55);
 
@@ -101,6 +123,7 @@ auto Player::write(uint2 addr, uint8 byte) -> void {
   if(addr == 3 && status.packet == 15) {
     status.rumble = (status.recv & 0xff) == 0x26;  //on = 0x26, off = 0x04
     platform->inputRumble(0, 0, 10, status.rumble);
+    if(status.rumble) status.timeout = 500;  //stop rumble manually after 500ms
   }
 }
 

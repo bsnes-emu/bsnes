@@ -8,4 +8,6 @@ auto Player::serialize(serializer& s) -> void {
   s.integer(status.packet);
   s.integer(status.send);
   s.integer(status.recv);
+
+  s.integer(status.timeout);
 }

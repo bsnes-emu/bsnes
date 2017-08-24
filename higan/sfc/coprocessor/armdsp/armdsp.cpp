@@ -6,18 +6,6 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 ArmDSP armdsp;
 
-ArmDSP::ArmDSP() {
-  programROM = new uint8[128 * 1024];
-  dataROM = new uint8[32 * 1024];
-  programRAM = new uint8[16 * 1024];
-}
-
-ArmDSP::~ArmDSP() {
-  delete[] programROM;
-  delete[] dataROM;
-  delete[] programRAM;
-}
-
 auto ArmDSP::Enter() -> void {
   armdsp.boot();
   while(true) scheduler.synchronize(), armdsp.main();
@@ -103,8 +91,7 @@ auto ArmDSP::unload() -> void {
 }
 
 auto ArmDSP::power() -> void {
-  random.seed();
-  for(auto n : range(16 * 1024)) programRAM[n] = random();
+  random.array((uint8*)programRAM, sizeof(programRAM));
   bridge.reset = false;
   reset();
 }

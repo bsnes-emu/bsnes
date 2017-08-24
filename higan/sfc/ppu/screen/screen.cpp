@@ -161,8 +161,8 @@ auto PPU::Screen::fixedColor() const -> uint15 {
 }
 
 auto PPU::Screen::power() -> void {
-  random.seed();
-  for(auto& n : cgram) n = random();
+  random.array((uint8*)cgram, sizeof(cgram));
+  for(auto& word : cgram) word &= 0x7fff;
 
   io.blendMode = random();
   io.directColor = random();
