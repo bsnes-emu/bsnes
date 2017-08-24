@@ -98,7 +98,6 @@ struct InputJoypadUdev {
   }
 
   auto rumble(uint64_t id, bool enable) -> bool {
-    print("Joypad ", id, " rumble: ", enable, "\n");
     for(auto& jp : joypads) {
       if(jp.hid->id() != id) continue;
       if(!jp.hid->rumble()) continue;
