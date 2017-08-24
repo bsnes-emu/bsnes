@@ -42,9 +42,9 @@ auto System::serialize(serializer& s) -> void {
 }
 
 auto System::serializeAll(serializer& s) -> void {
+  random.serialize(s);
   cartridge.serialize(s);
   system.serialize(s);
-  random.serialize(s);
   cpu.serialize(s);
   smp.serialize(s);
   ppu.serialize(s);

@@ -207,17 +207,17 @@ auto PPU::Background::getTileColor() -> uint {
 }
 
 auto PPU::Background::power() -> void {
-  io.tiledataAddress = (random(0x0000) & 0x0f) << 12;
-  io.screenAddress = (random(0x0000) & 0xfc) << 8;
-  io.screenSize = random(0);
-  io.mosaic = random(0);
-  io.tileSize = random(0);
+  io.tiledataAddress = (random() & 0x0f) << 12;
+  io.screenAddress = (random() & 0xfc) << 8;
+  io.screenSize = random();
+  io.mosaic = random();
+  io.tileSize = random();
   io.mode = 0;
   for(auto& p : io.priority) p = 0;
-  io.aboveEnable = random(0);
-  io.belowEnable = random(0);
-  io.hoffset = random(0x0000);
-  io.voffset = random(0x0000);
+  io.aboveEnable = random();
+  io.belowEnable = random();
+  io.hoffset = random();
+  io.voffset = random();
 
   latch.hoffset = 0;
   latch.voffset = 0;

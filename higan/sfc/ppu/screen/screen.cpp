@@ -161,19 +161,20 @@ auto PPU::Screen::fixedColor() const -> uint15 {
 }
 
 auto PPU::Screen::power() -> void {
-  for(auto& n : cgram) n = random(0x0000);
+  random.seed();
+  for(auto& n : cgram) n = random();
 
-  io.blendMode = random(false);
-  io.directColor = random(false);
-  io.colorMode = random(false);
-  io.colorHalve = random(false);
-  io.bg1.colorEnable = random(false);
-  io.bg2.colorEnable = random(false);
-  io.bg3.colorEnable = random(false);
-  io.bg4.colorEnable = random(false);
-  io.obj.colorEnable = random(false);
-  io.back.colorEnable = random(false);
-  io.colorBlue = random(0);
-  io.colorGreen = random(0);
-  io.colorRed = random(0);
+  io.blendMode = random();
+  io.directColor = random();
+  io.colorMode = random();
+  io.colorHalve = random();
+  io.bg1.colorEnable = random();
+  io.bg2.colorEnable = random();
+  io.bg3.colorEnable = random();
+  io.bg4.colorEnable = random();
+  io.obj.colorEnable = random();
+  io.back.colorEnable = random();
+  io.colorBlue = random();
+  io.colorGreen = random();
+  io.colorRed = random();
 }

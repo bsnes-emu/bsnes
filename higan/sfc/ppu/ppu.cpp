@@ -95,17 +95,18 @@ auto PPU::power() -> void {
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
-  for(auto& n : vram.data) n = random(0x0000);
+  random.seed();
+  for(auto& n : vram.data) n = random();
 
-  ppu1.mdr = random(0xff);
-  ppu2.mdr = random(0xff);
+  ppu1.mdr = random.bias(0xff);
+  ppu2.mdr = random.bias(0xff);
 
-  latch.vram = random(0x0000);
-  latch.oam = random(0x00);
-  latch.cgram = random(0x00);
-  latch.bgofsPPU1 = random(0x00);
-  latch.bgofsPPU2 = random(0x00);
-  latch.mode7 = random(0x00);
+  latch.vram = random();
+  latch.oam = random();
+  latch.cgram = random();
+  latch.bgofsPPU1 = random();
+  latch.bgofsPPU2 = random();
+  latch.mode7 = random();
   latch.counters = false;
   latch.hcounter = 0;
   latch.vcounter = 0;
@@ -119,59 +120,59 @@ auto PPU::power() -> void {
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  io.oamBaseAddress = random(0x0000);
-  io.oamAddress = random(0x0000);
-  io.oamPriority = random(false);
+  io.oamBaseAddress = random();
+  io.oamAddress = random();
+  io.oamPriority = random();
 
   //$2105  BGMODE
   io.bgPriority = false;
   io.bgMode = 0;
 
   //$210d  BG1HOFS
-  io.hoffsetMode7 = random(0x0000);
+  io.hoffsetMode7 = random();
 
   //$210e  BG1VOFS
-  io.voffsetMode7 = random(0x0000);
+  io.voffsetMode7 = random();
 
   //$2115  VMAIN
-  io.vramIncrementMode = random(1);
-  io.vramMapping = random(0);
+  io.vramIncrementMode = random.bias(1);
+  io.vramMapping = random();
   io.vramIncrementSize = 1;
 
   //$2116  VMADDL
   //$2117  VMADDH
-  io.vramAddress = random(0x0000);
+  io.vramAddress = random();
 
   //$211a  M7SEL
-  io.repeatMode7 = random(0);
-  io.vflipMode7 = random(false);
-  io.hflipMode7 = random(false);
+  io.repeatMode7 = random();
+  io.vflipMode7 = random();
+  io.hflipMode7 = random();
 
   //$211b  M7A
-  io.m7a = random(0x0000);
+  io.m7a = random();
 
   //$211c  M7B
-  io.m7b = random(0x0000);
+  io.m7b = random();
 
   //$211d  M7C
-  io.m7c = random(0x0000);
+  io.m7c = random();
 
   //$211e  M7D
-  io.m7d = random(0x0000);
+  io.m7d = random();
 
   //$211f  M7X
-  io.m7x = random(0x0000);
+  io.m7x = random();
 
   //$2120  M7Y
-  io.m7y = random(0x0000);
+  io.m7y = random();
 
   //$2121  CGADD
-  io.cgramAddress = random(0x00);
-  io.cgramAddressLatch = random(0);
+  io.cgramAddress = random();
+  io.cgramAddressLatch = random();
 
   //$2133  SETINI
-  io.extbg = random(false);
-  io.pseudoHires = random(false);
+  io.extbg = random();
+  io.pseudoHires = random();
   io.overscan = false;
   io.interlace = false;
 

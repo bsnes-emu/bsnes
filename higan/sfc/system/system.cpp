@@ -4,9 +4,9 @@ namespace SuperFamicom {
 
 System system;
 Scheduler scheduler;
+Random random;
 Cheat cheat;
 #include "video.cpp"
-#include "random.cpp"
 #include "serialization.cpp"
 
 auto System::run() -> void {
@@ -141,7 +141,7 @@ auto System::power() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
-  random.seed((uint)time(0));
+  random.entropy(Random::Entropy::High);
 
   scheduler.reset();
   cpu.power();

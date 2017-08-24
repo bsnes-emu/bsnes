@@ -86,7 +86,8 @@ auto CPU::power() -> void {
   bus.map(reader, writer, "00-3f,80-bf:0000-1fff", 0x2000);
   bus.map(reader, writer, "7e-7f:0000-ffff", 0x20000);
 
-  for(auto& byte : wram) byte = random(0x55);
+  random.seed();
+  for(auto& byte : wram) byte = random.bias(0x55);
 
   //DMA
   for(auto& channel : this->channel) {

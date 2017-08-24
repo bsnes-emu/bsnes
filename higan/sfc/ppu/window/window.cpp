@@ -47,58 +47,58 @@ auto PPU::Window::test(bool oneEnable, bool one, bool twoEnable, bool two, uint 
 }
 
 auto PPU::Window::power() -> void {
-  io.bg1.oneEnable = random(false);
-  io.bg1.oneInvert = random(false);
-  io.bg1.twoEnable = random(false);
-  io.bg1.twoInvert = random(false);
-  io.bg1.mask = random(0);
-  io.bg1.aboveEnable = random(false);
-  io.bg1.belowEnable = random(false);
+  io.bg1.oneEnable = random();
+  io.bg1.oneInvert = random();
+  io.bg1.twoEnable = random();
+  io.bg1.twoInvert = random();
+  io.bg1.mask = random();
+  io.bg1.aboveEnable = random();
+  io.bg1.belowEnable = random();
 
-  io.bg2.oneEnable = random(false);
-  io.bg2.oneInvert = random(false);
-  io.bg2.twoEnable = random(false);
-  io.bg2.twoInvert = random(false);
-  io.bg2.mask = random(0);
-  io.bg2.aboveEnable = random(false);
-  io.bg2.belowEnable = random(false);
+  io.bg2.oneEnable = random();
+  io.bg2.oneInvert = random();
+  io.bg2.twoEnable = random();
+  io.bg2.twoInvert = random();
+  io.bg2.mask = random();
+  io.bg2.aboveEnable = random();
+  io.bg2.belowEnable = random();
 
-  io.bg3.oneEnable = random(false);
-  io.bg3.oneInvert = random(false);
-  io.bg3.twoEnable = random(false);
-  io.bg3.twoInvert = random(false);
-  io.bg3.mask = random(0);
-  io.bg3.aboveEnable = random(false);
-  io.bg3.belowEnable = random(false);
+  io.bg3.oneEnable = random();
+  io.bg3.oneInvert = random();
+  io.bg3.twoEnable = random();
+  io.bg3.twoInvert = random();
+  io.bg3.mask = random();
+  io.bg3.aboveEnable = random();
+  io.bg3.belowEnable = random();
 
-  io.bg4.oneEnable = random(false);
-  io.bg4.oneInvert = random(false);
-  io.bg4.twoEnable = random(false);
-  io.bg4.twoInvert = random(false);
-  io.bg4.mask = random(0);
-  io.bg4.aboveEnable = random(false);
-  io.bg4.belowEnable = random(false);
+  io.bg4.oneEnable = random();
+  io.bg4.oneInvert = random();
+  io.bg4.twoEnable = random();
+  io.bg4.twoInvert = random();
+  io.bg4.mask = random();
+  io.bg4.aboveEnable = random();
+  io.bg4.belowEnable = random();
 
-  io.obj.oneEnable = random(false);
-  io.obj.oneInvert = random(false);
-  io.obj.twoEnable = random(false);
-  io.obj.twoInvert = random(false);
-  io.obj.mask = random(0);
-  io.obj.aboveEnable = random(false);
-  io.obj.belowEnable = random(false);
+  io.obj.oneEnable = random();
+  io.obj.oneInvert = random();
+  io.obj.twoEnable = random();
+  io.obj.twoInvert = random();
+  io.obj.mask = random();
+  io.obj.aboveEnable = random();
+  io.obj.belowEnable = random();
 
-  io.col.oneEnable = random(false);
-  io.col.oneInvert = random(false);
-  io.col.twoEnable = random(false);
-  io.col.twoInvert = random(false);
-  io.col.mask = random(0);
-  io.col.aboveMask = random(0);
-  io.col.belowMask = random(0);
+  io.col.oneEnable = random();
+  io.col.oneInvert = random();
+  io.col.twoEnable = random();
+  io.col.twoInvert = random();
+  io.col.mask = random();
+  io.col.aboveMask = random();
+  io.col.belowMask = random();
 
-  io.oneLeft = random(0x00);
-  io.oneRight = random(0x00);
-  io.twoLeft = random(0x00);
-  io.twoRight = random(0x00);
+  io.oneLeft = random();
+  io.oneRight = random();
+  io.twoLeft = random();
+  io.twoRight = random();
 
   output.above.colorEnable = 0;
   output.below.colorEnable = 0;

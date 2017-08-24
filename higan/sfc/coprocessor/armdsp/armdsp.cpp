@@ -103,7 +103,8 @@ auto ArmDSP::unload() -> void {
 }
 
 auto ArmDSP::power() -> void {
-  for(auto n : range(16 * 1024)) programRAM[n] = random(0x00);
+  random.seed();
+  for(auto n : range(16 * 1024)) programRAM[n] = random();
   bridge.reset = false;
   reset();
 }

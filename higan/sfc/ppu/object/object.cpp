@@ -189,13 +189,13 @@ auto PPU::Object::power() -> void {
     }
   }
 
-  io.aboveEnable = random(false);
-  io.belowEnable = random(false);
-  io.interlace = random(false);
+  io.aboveEnable = random();
+  io.belowEnable = random();
+  io.interlace = random();
 
-  io.baseSize = random(0);
-  io.nameselect = random(0);
-  io.tiledataAddress = (random(0x0000) & 7) << 13;
+  io.baseSize = random();
+  io.nameselect = random();
+  io.tiledataAddress = (random() & 7) << 13;
   io.firstSprite = 0;
 
   for(auto& p : io.priority) p = 0;
