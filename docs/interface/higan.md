@@ -1,65 +1,31 @@
-When you launch higan,
+When you launch higan
 the main window appears,
 with a menu-bar across the top,
 a status-bar across the bottom,
-and a large area in the middle where the game's video output appears.
+and a large area in the middle that shows
+the running game's video output.
 
 The Library menu
 ----------------
 
-The Library menu allows you
-to import games into higan's game library,
-and to load games from the library.
-higan organises the games in your library
-according to which console they were intended to run on.
-
-To play a game for a particular console from your library,
-click on the Library menu,
-click on the console manufacturer submenu
-(Nintendo for the Super Famicom,
-Bandai for the WonderSwan,
-etc.)
-then click on the console menu item.
-A window will appear listing all the games in your library
-for that particular console.
-Select the game you want to play
-and click the Open button,
-or just double-click the game,
-and it will begin playing as though you'd just turned on the console.
-
-**Note:**
-Sometimes
-the NTSC and PAL variants of a particular console
-behave differently,
-or the Japanese and American variants.
-When opening a game from the Game Library,
-a drop-down list in the bottom-right of the window
-allows you to choose which regional variation
-of the console it should emulate.
-For most consoles,
-higan can reliably guess which variant to use,
-and the list defaults to "Auto".
-
-To add a new game to your library,
-choose "Load ROM File ..." from the Library menu.
-A [filesystem browser](common.md#the-filesystem-browser) will appear,
-allowing you to pick any ROM image for any supported system,
-with any of the most common file extensions.
-It also allows loading ROM images from `.zip` archives,
-if the archive contains a single ROM image.
-
-**Note:** Some games require extra steps to import correctly;
-see [Importing and playing games](../guides/import.md) for details.
-
-To add many games at once,
-run icarus,
-or choose "Import ROM Files ..." from the Library menu
-(which just runs icarus anyway).
-See [the icarus interface](icarus.md)
-for more information about bulk-importing.
-
-For more information about the higan game library,
-see [The Game Library](../concepts/game-library.md).
+Manufacturer submenus
+allow you to play
+games you've already imported
+into higan's 
+[game library](../concepts/game-library.md).
+See [Importing and playing games](../guides/import.md).
+    
+**Load ROM File ...**
+opens a [filesystem browser](common.md#the-filesystem-browser)
+allowing you to choose a single ROM file.
+It will be imported and immediately start playing.
+See [Importing and playing games](../guides/import.md).
+    
+**Import ROM Files ...**
+launches the icarus importing tool,
+allowing you to bulk-import many ROM files at once.
+See [the icarus documentation](icarus.md).
+    
 
 The console menu
 ---------------
@@ -80,52 +46,60 @@ to the particular console being emulated.
 All consoles will have some of the following items,
 but few consoles have all of them.
 
-  - **Controller Port 1**
-    allows you
-    to connect different emulated controllers
-    to the first controller port,
-    if there is one.
-      - See [higan's Input settings](higan-settings.md#input)
-        for information about configuring
-        which host controller inputs are used
-        for the emulated controllers.
-      - This menu appears for the Famicom,
-        even though the Famicom did not support alternate controllers,
-        because the Famicom emulation core also emulates the NES,
-        which did.
-  - **Controller Port 2**
-    allows you
-    to connect different emulated controllers
-    to the second controller port,
-    if there is one.
-      - See [higan's Input settings](higan-settings.md#input)
-        for information about configuring
-        which host controller inputs are used
-        for the emulated controllers.
-      - This menu appears for the Famicom,
-        even though the Famicom did not support alternate controllers,
-        because the Famicom emulation core also emulates the NES,
-        which did.
-  - **Expansion Port**
-    allows you
-    to connect different emulated devices
-    to the console's expansion port,
-    if there is one.
-      - For the Super Famicom,
-        the [21fx][21fx] is a homebrew device
-        that allows a program running on a PC
-        to control a physical Super Famicom (or SNES).
-        This option allows the same program
-        to control the emulated SNES,
-        for development or testing.
-  - **Power Cycle**
-    restarts the loaded game
-    as though the emulated console were switched off and on again.
-  - **Unload**
-    stops the current game,
-    as though the emulated console were switched off.
-    You can load the same or a different game
-    from [the Library menu](#the-library-menu).
+
+**Controller Port 1**
+allows you
+to connect different emulated controllers
+to the first controller port,
+if there is one.
+See [higan's Input settings](higan-settings.md#input)
+for information about configuring
+which PC controller inputs are used
+for the emulated controllers.
+
+This menu appears for the Famicom,
+even though the Famicom did not support alternate controllers,
+because the Famicom emulation core also emulates the NES,
+which did.
+
+**Controller Port 2**
+allows you
+to connect different emulated controllers
+to the second controller port,
+if there is one.
+See [higan's Input settings](higan-settings.md#input)
+for information about configuring
+which PC controller inputs are used
+for the emulated controllers.
+
+This menu appears for the Famicom,
+even though the Famicom did not support alternate controllers,
+because the Famicom emulation core also emulates the NES,
+which did.
+    
+**Expansion Port**
+allows you
+to connect different emulated devices
+to the console's expansion port,
+if there is one.
+
+For the Super Famicom,
+the [21fx][21fx] is a homebrew device
+that allows a program running on a PC
+to control a physical Super Famicom (or SNES).
+This option allows the same program
+to control the emulated SNES,
+for development or testing.
+
+**Power Cycle**
+restarts the loaded game
+as though the emulated console were switched off and on again.
+
+**Unload**
+stops the current game,
+as though the emulated console were switched off.
+You can load a new game
+from [the Library menu](#the-library-menu).
 
 [21fx]: https://github.com/defparam/21FX
 
@@ -135,75 +109,96 @@ The Settings menu
 The Settings menu allows you to configure things
 that aren't specific to any particular console.
 
-  - **Video Scale** determines the size and shape
-    of the emulated console's video output
-    in windowed mode
-    (as opposed to fullscreen).
-  - **Video Emulation** applies various effects
-    to the emulated console's video output
-    to reproduce some behaviours
-    that aren't technically part of the console itself.
-      - "Blurring" simulates the limited horizontal resolution
-        of standard-definition TVs
-        by blurring together horizontally-adjacent pixels.
-        Games like Jurassic Park for the Super Famicom
+
+**Video Scale** determines the size
+of the emulated console's video output
+when higan is running in windowed mode
+(as opposed to fullscreen).
+
+**Video Emulation** applies various effects
+to the emulated console's video output
+to reproduce some behaviours
+that aren't technically part of the console itself:
+
+  - **Blurring**
+    simulates the limited horizontal resolution
+    of standard-definition TVs
+    by blurring together horizontally-adjacent pixels.
+    For hand-held consoles,
+    this simulates the slow response time
+    of the cheap LCD screens these consoles used
+    by blending each output frame with the previous one.
+      - Games like
+        Jurassic Park for the Super Famicom
+        or Chikyuu Kaihou Gun ZAS for the Game Boy
         depend on this to emulate a transparency effect.
-        For hand-held consoles like the Game Boy Advance,
-        this simulates the slow response time
-        of the cheap LCD screens these consoles used
-        by blurring each output frame with the previous one.
-      - "Colors" simulates the way a console's display device
-        differs from modern computer monitor's colour reproduction.
-        In particular,
-        it simulates the slightly-different gamma correction
-        used by the Super Famicom,
-        the dim, washed out colours of the original Game Boy Advance,
-        and the pea-green display of the original Game Boy.
-  - **Video Shader** controls
-    how the low-resolution video output of the emulated console
-    is scaled up to suit modern high-resolution displays.
-    The availability of items in this submenu depends on
-    which video driver higan is using,
-    so see [Choosing drivers](../guides/drivers.md) for more information.
-      - "None" draws each output pixel according to
-        the colour of the single nearest input pixel,
-        sometimes called "nearest neighbour" scaling.
-        This produces unnaturally crisp and blocky images.
-      - "Blur" draws each output pixel by
-        averaging the colours of the four nearest input pixels,
-        sometimes called "bilinear" scaling.
-        This produces unnaturally blurry images.
-      - When using the OpenGL driver,
-        an additional item appears in this menu for
-        each installed Quark shader.
-        See [Using video shaders](../guides/shaders.md)
-        for details.
-  - **Synchronize Audio**
-    causes higan to wait for audio playback to complete
-    before resuming emulation.
-    This should reduce popping and glitching noises,
-    and slows the emulation down to approximately the correct speed.
-    If your PC cannot emulate at full-speed,
-    (60fps for most consoles, 75fps for WonderSwan)
-    this has no noticable effect.
-  - **Mute Audio**
-    causes higan to not output sound from the emulated console.
-    The sound hardware is still emulated.
-  - **Show Status Bar**
-    causes higan to show or hide the status bar
-    at the bottom of the window.
-    This option has no effect in full-screen mode.
-    See [The status bar](#the-status-bar) for more information.
-  - **Video ...**
-    opens [higan's Video settings](higan-settings.md#video).
-  - **Audio ...**
-    opens [higan's Audio settings](higan-settings.md#audio).
-  - **Input ...**
-    opens [higan's Input settings](higan-settings.md#input).
-  - **Hotkeys ...**
-    opens [higan's Hotkeys settings](higan-settings.md#hotkeys).
-  - **Advanced ...**
-    opens [higan's Advanced settings](higan-settings.md#advanced).
+  - **Colors**
+    simulates the way a console's display device
+    differs from modern computer monitor's colour reproduction.
+    In particular,
+    it simulates the slightly-different gamma correction
+    used by the Super Famicom,
+    the dim, washed out colours of the original Game Boy Advance,
+    and the pea-green display of the original Game Boy.
+    
+**Video Shader** controls
+how the low-resolution video output of the emulated console
+is scaled up to suit modern high-resolution displays.
+The availability of items in this submenu depends on
+which video driver higan is using,
+so see [Choosing drivers](../guides/drivers.md) for more information.
+
+  - **None**
+    draws each output pixel according to
+    the colour of the single nearest input pixel,
+    sometimes called "nearest neighbour" scaling.
+    This produces unnaturally crisp and blocky images.
+
+  - **Blur**
+    draws each output pixel by
+    averaging the colours of the four nearest input pixels,
+    sometimes called "bilinear" scaling.
+    This produces unnaturally blurry images.
+
+  - When using the OpenGL driver,
+    an additional item appears in this menu for
+    each installed shader.
+    See [Using video shaders](../guides/shaders.md)
+    for details.
+
+**Synchronize Audio**
+causes higan to wait for audio playback to complete
+before resuming emulation.
+This should reduce popping and glitching noises,
+and slows the emulation down to approximately the correct speed.
+If your PC cannot emulate at full-speed,
+(60fps for most consoles, 75fps for WonderSwan)
+this has no noticable effect.
+
+**Mute Audio**
+causes higan to not output sound from the emulated console.
+The sound hardware is still emulated.
+
+**Show Status Bar**
+causes higan to show or hide the status bar
+at the bottom of the window.
+This option has no effect in full-screen mode.
+See [The status bar](#the-status-bar) for more information.
+
+**Video ...**
+opens [higan's Video settings](higan-settings.md#video).
+
+**Audio ...**
+opens [higan's Audio settings](higan-settings.md#audio).
+
+**Input ...**
+opens [higan's Input settings](higan-settings.md#input).
+
+**Hotkeys ...**
+opens [higan's Hotkeys settings](higan-settings.md#hotkeys).
+
+**Advanced ...**
+opens [higan's Advanced settings](higan-settings.md#advanced).
 
 [svsa]: #why-do-synchronize-video-and-synchronize-audio-conflict
 
@@ -213,33 +208,38 @@ The Tools menu
 The Tools menu
 contains features for manipulating the emulated console.
 
-  - **Save Quick State**
-    stores the current state of the emulated console
-    into one of the quick state slots.
-    See [Save States](../concepts/save-states.md) for more information.
-  - **Load Quick State**
-    restores the emulated console to
-    a state previously saved to one of the quick state slots.
-    See [Save States](../concepts/save-states.md) for more information.
-  - **Cheat Editor**
-    opens [the Cheat Editor window](higan-tools.md#the-cheat-editor)
-  - **State Manager**
-    opens [the State Manager window](higan-tools.md#the-state-manager)
-  - **Manifest Viewer**
-    opens [the Manifest Viewer window](higan-tools.md#the-manifest-viewer)
+**Save Quick State**
+stores the current state of the emulated console
+into one of the quick state slots.
+See [Save States](../concepts/save-states.md) for more information.
+
+**Load Quick State**
+restores the emulated console to
+a state previously saved to one of the quick state slots.
+See [Save States](../concepts/save-states.md) for more information.
+
+**Cheat Editor**
+opens [the Cheat Editor window](higan-tools.md#the-cheat-editor)
+
+**State Manager**
+opens [the State Manager window](higan-tools.md#the-state-manager)
+
+**Manifest Viewer**
+opens [the Manifest Viewer window](higan-tools.md#the-manifest-viewer)
 
 The Help menu
 -------------
 
 The Help menu contains information about higan itself.
 
-  - **Documentation**
-    loads the official higan documentation
-    in your web-browser.
-  - **About**
-    opens the About dialog,
-    which displays basic information about higan,
-    including the version number.
+**Documentation**
+loads the official higan documentation
+in your web-browser.
+
+**About**
+opens the About dialog,
+which displays basic information about higan,
+including the version number.
 
 The status bar
 --------------

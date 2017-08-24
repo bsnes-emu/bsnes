@@ -61,8 +61,9 @@ because there's two parts to it:
 telling icarus where to put imported games,
 and telling higan where to find them.
 
- 1. If necessary,
-    create the folder you want higan to use
+ 1. Move your existing game library folder
+    to the new location,
+    or otherwise create the folder you want higan to use
     as its game library.
  1. Launch icarus,
     then click the "Settings ..." button in the lower-right,

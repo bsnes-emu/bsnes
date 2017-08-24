@@ -11,28 +11,56 @@ unusual hardware.
 Regular games
 -------------
 
-icarus supports importing games
+icarus can import games
 in the most commonly-used formats
 for each supported console,
-and also those same formats inside `.zip` files.
+and also those same formats inside `.zip` files
+(as long as tthe `.zip` file contains only one game).
 More advanced compression formats
 like RAR or 7-zip are not supported.
 
-For most games
-that do not use special chips or co-processors,
-importing a game is straight-forward.
-From [the Library menu](../interface/higan.md#the-library-menu)
+To import a game,
+open [the Library menu](../interface/higan.md#the-library-menu),
 choose "Load ROM File ..."
 to open [a filesystem browser](../interface/common.md#the-filesystem-browser),
-choose the game you want to play,
+choose the ROM file of the game you want to play,
 and it will be imported into the library and loaded.
 
-To play the game again
-select the console the game runs on from
-[the Library menu](../interface/higan.md#the-library-menu)
-to open another
-[filesystem browser](../interface/common.md#the-filesystem-browser)
-that lists all the previously-imported games for that platform.
+**Note:**
+If you want to import many games,
+run icarus directly,
+or choose "Import ROM Files ..."
+from the Library menu
+(which just runs icarus anyway).
+See [the icarus documentation](../interface/icarus.md) for details.
+
+To play a game for a particular console from your library,
+open the Library menu,
+pick the console manufacturer submenu
+(Nintendo for the Super Famicom,
+Bandai for the WonderSwan,
+etc.)
+then choose the appropriate console menu item.
+A filesystem browser will appear
+listing all the games in your library
+for that particular console.
+Select the game you want to play
+and click the Open button,
+or just double-click the game,
+and it will begin playing as though you'd just turned on the console.
+
+**Note:**
+Sometimes
+the NTSC and PAL variants of a particular console
+behave differently,
+or the Japanese and American variants.
+When choosing a game from the Game Library,
+a drop-down list in the bottom-right of the filesystem browser
+allows you to choose which regional variation
+of the console it should emulate.
+For most consoles,
+higan can reliably guess which variant to use,
+and the list defaults to "Auto".
 
 Games with co-processor firmware
 --------------------------------

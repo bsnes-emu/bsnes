@@ -2,7 +2,15 @@ When launching icarus,
 directly or by picking "Import ROM Files ..."
 from higan's [Library menu](higan.md#the-library-menu),
 the main icarus window appears.
-This is [a filesystem browser](common.md#the-filesystem-browser),
+This window allows you to bulk-import ROM files
+into [higan's game library][gamelib],
+and also to access icarus' settings.
+
+Bulk importing ROM files
+------------------------
+
+icarus' main window
+is [a filesystem browser](common.md#the-filesystem-browser),
 with customisations:
 
   - The filesystem browser only lists
@@ -15,21 +23,23 @@ with customisations:
   - You can un-tick all the check-boxes
     by pressing "Unselect All" in the bottom-left.
 
-Pressing "Settings ..." in the bottom-right
-opens [the icarus Settings dialog](#the-icarus-settings-dialog).
-
 Pressing "Import ..." in the bottom-right
 will close the filesystem browser
 then try to import all the files
 whose check-boxes are ticked
 into [the Game Library][gamelib].
-icarus displays a progress dialog during the import process.
+icarus displays a progress dialog during the import process,
+and a result window if any errors occurred.
 
 **Note:** Some games require extra steps to import correctly;
-see [the Game Library][gamelib] for details.
+see [Importing and playing games](../guides/import.md) for details.
 
 The icarus Settings dialog
 --------------------------
+
+Pressing "Settings ..."
+in the bottom-right corner of the main icarus window
+opens the settings dialog.
 
 The icarus Settings dialog contains the following settings:
 

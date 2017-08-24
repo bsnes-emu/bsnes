@@ -31,7 +31,7 @@ It also includes some level of support for these consoles:
   - Sega Megadrive/Genesis
   - NEC PC Engine/TurboGrafx 16 (but not the CD-ROM² System/TurboGrafx-CD)
   - NEC SuperGrafx
-  - Bandai Wonderswan
+  - Bandai WonderSwan
   - Bandai Wonderswan Color
 
 **Note:** Some consoles were released under different names
