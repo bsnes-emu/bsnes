@@ -1,8 +1,8 @@
 The Settings window
 appears when you choose
 one of the items at the bottom of
-[the Settings menu](higan.md#the-settings-menu).
-It contains less-frequently-modified configuration options.
+[the Settings menu](higan.md#the-settings-menu),
+and contains less-frequently-modified settings.
 Most of these can be safely ignored,
 or set once and never changed again.
 
@@ -27,6 +27,11 @@ of the emulated console's video output:
     compared to the brightest colours,
     where 100% is normal,
     and 200% makes mid-range colours much darker.
+    This is in addition to
+    any adjustment applied by
+    the "Colors" option
+    in the "Video Emulation" submenu
+    of the [Settings menu](higan.md#the-settings-menu).
   - **Luminance** adjusts the overall brightness,
     where 100% is normal,
     and 0% is totally black.
@@ -36,15 +41,15 @@ removes parts of
 the video output that would have been hidden
 by the bezel around the edge of
 a standard-definition television screen.
+Some games (particularly on the Famicom)
+displayed random glitchy output in this area,
+which can be distracting.
 
   - **Horizontal**
     removes pixels from the left and right of the video output.
   - **Vertical**
     removes pixels from the top and bottom of the video output.
 
-Some games (particularly on the Famicom)
-displayed random glitchy output in this area,
-which can be distracting.
 The units are "pixels in the emulated console's standard video-mode".
 For example, setting "Horizontal" to 8
 will clip 8/256ths from the left and right sides
@@ -61,7 +66,7 @@ in a normal window.
     stretches the image to match the aspect ratio
     produced by the original console hardware,
     but can cause a "ripple" effect
-    during horizontal scrolling,
+    during horizontal scrolling
     due to rounding errors.
     [Video shaders](../guides/shaders.md)
     can reduce this effect.
@@ -89,9 +94,10 @@ in a normal window.
 
 **Fullscreen Mode**
 settings apply
-when higan was started with the `--fullscreen`
+when higan is running fullscreen,
+because it was started with the `--fullscreen`
 [command-line option](higan-cli.md)
-or when the user pressed
+or because the user pressed
 the Toggle Fullscreen [hotkey](higan-settings.md#hotkeys).
 
   - **Aspect Correction**
@@ -105,9 +111,10 @@ the Toggle Fullscreen [hotkey](higan-settings.md#hotkeys).
     This prevents other applications
     or the operating system itself
     from drawing anything,
-    and may also temporarily disable any kind of compositing.
+    and may also temporarily disable any kind of compositing,
+    reducing video latency.
     As of v104,
-    only the Direct3D driver is capable of exclusive mode;
+    only the Direct3D video driver is capable of exclusive mode;
     with other drivers this option does nothing.
 
 Audio
@@ -119,11 +126,12 @@ the emulated console's audio output.
 
 **Driver**
 settings affect the
-[the Audio driver](../guides/drivers.md).
+the current [Audio driver](../guides/drivers.md).
 
   - **Device** allows you to choose
     which audio device higan sends
-    the emulated game's audio to.
+    the emulated game's audio to,
+    if you have more than one.
   - **Frequency** controls the sample-rate that higan will use
     when generating audio.
     If your PC's audio hardware has a "native" sample-rate
@@ -158,13 +166,13 @@ before it is sent to your computer's speakers.
     and 100% means only the right speaker produces sound.
   - **Reverb** adds a slight reverberation effect
     to the emulated console's audio output,
-    as though the console were in a tunnel or small room.
+    as though you were playing the game in a tunnel or small room.
 
 Input
 =====
 
 This tab controls which PC inputs
-are used for which emulated controllers.
+are mapped to which emulated controllers.
 The exact PC inputs that can be mapped
 depend on [the input driver](../guides/drivers.md#input).
 
@@ -205,7 +213,7 @@ Configuring the selected controller:
 
   - The mapping list includes
     every button and axis on the selected controller,
-    and the PC inputs that are mapped to it
+    and the PC inputs that will be mapped to it
     when it is connected to the selected port of the selected console.
   - **Erase** removes the mapping
     for the selected button or axis.
@@ -216,7 +224,7 @@ a keyboard or gamepad button on your PC to
 a controller button,
 double-click the controller button in the list,
 or select it and press Enter.
-The window will grey out,
+The Settings window will grey out,
 and a message will appear in the bottom left:
 "Press a key or button to map [the button]".
 Press the key or button you want to map,
@@ -229,19 +237,19 @@ a controller button,
 select the controller button in the list,
 then click one of the "Mouse Left",
 "Mouse Middle",
-or "Mouse Right" buttons in the bottom-left of the window.
+or "Mouse Right" buttons in the bottom-left of the Settings window.
 
 To map
 a joystick axis on your PC to
 a controller axis,
 double-click the axis in the list,
 or select it and press Enter.
-The window will grey out,
+The Settings window will grey out,
 and a message will appear in the bottom left:
 "Press a key or button to map [the axis]".
 Press the joystick in the direction you want to map,
 and it should appear in the list
-next to the controller button it is mapped to.
+next to the controller axis it is mapped to.
 
 To map
 a mouse axis on your PC to
@@ -258,16 +266,15 @@ you can press Escape
 to exit the "Press a key or button to map..." mode
 without actually mapping anything.
 
-The "Rumble" setting
-for the Game Boy 
-and Game Boy Advance
-is treated like a button,
-and can be mapped to a PC gamepad.
-When the emulated Game Boy Advance
-tries to use the rumble feature
-of the Game Boy Player,
-higan will turn on the force-feedback
-of whatever gamepad the mapped button is part of.
+**Note:**
+Consoles in the Game Boy family include
+a Rumble "input" which is really more of an output.
+See [Rumble Compatibility for Game Boy (Color)][gbcrumble]
+and [Rumble Compatibility for Game Boy Advance][gbarumble]
+for details.
+
+[gbcrumble]: ../notes.md#rumble-compatibility-for-game-boy-color
+[gbarumble]: ../notes.md#rumble-compatibility-for-game-boy-advance
 
 **Note:**
 Once you've configured which computer inputs
@@ -276,13 +283,12 @@ make sure the controller in question
 is actually connected to the correct controller port
 in [the console menu](higan.md#the-console-menu).
 
-
 Hotkeys
 =======
 
 This tab is like "Inputs" above,
-except it contains controls for higan itself,
-instead of for the emulated console.
+except it contains controls for higan itself
+instead of the emulated console.
 
   - **Toggle Fullscreen** puts higan into fullscreen mode,
     where the menu and status bar are hidden,
@@ -294,12 +300,12 @@ instead of for the emulated console.
     This is useful when the mouse is being used to emulate
     a light-gun controller like the Super Scope.
   - **Save Quick State** saves the current state of the emulated console
-    to the currently-selected Quick State slot.
+    to the currently-selected [Quick State][qstates] slot.
   - **Load Quick State** restores the emulated console
-    to the state saved in the currently-selected Quick State slot.
-  - **Decrement Quick State** selects the previous Quick State slot.
+    to the state saved in the currently-selected [Quick State][qstates] slot.
+  - **Decrement Quick State** selects the previous [Quick State][qstates] slot.
     The status bar will briefly display the new current slot number.
-  - **Increment Quick State** selects the next Quick State slot.
+  - **Increment Quick State** selects the next [Quick State][qstates] slot.
     The status bar will briefly display the new current slot number.
   - **Pause Emulation** pauses the emulated console
     until the Pause Emulation hotkey is pressed a second time.
@@ -309,18 +315,18 @@ instead of for the emulated console.
     If your PC struggles to hit "real time"
     (60fps for most emulated consoles),
     this likely won't have any effect.
-  - **Power Cycle** turns the emulated console off and back on,
+  - **Power Cycle** turns the emulated console off and back on
     (a "hard reset"),
     just like the "Power Cycle" menu item
     in [the console menu](higan.md#the-console-menu).
-  - **Rotate Display** will toggle the display
+  - **Rotate Display** will rotate the display
     of the Game Boy Advance
-    and WonderSwan (Color)
-    between the usual landscape orientation
-    and a portrait orientation (90° counter-clockwise).
-    These consoles have games
-    that expect the player to hold the console
-    in a different way.
+    and WonderSwan (Color).
+    See [Game Boy Advance rotation](../notes.md#game-boy-advance-rotation)
+    and [WonderSwan rotation](../notes.md#wonderswan-rotation)
+    for details.
+
+[qstates]: ../concepts/save-states.md#quick-states
 
 Advanced
 ========
@@ -353,7 +359,7 @@ for help choosing which drivers you should use.
 configures how higan interacts
 with the [Game Library](../concepts/game-library.md).
 
-  - **Location** selects where the Game Library
+  - **Location** selects where higan
     looks for games to load.
     See [Moving the Game Library](../concepts/game-library.md#moving-the-game-library)
     for more information.
