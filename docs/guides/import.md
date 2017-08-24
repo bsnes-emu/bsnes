@@ -24,7 +24,7 @@ open [the Library menu](../interface/higan.md#the-library-menu),
 choose "Load ROM File ..."
 to open [a filesystem browser](../interface/common.md#the-filesystem-browser),
 choose the ROM file of the game you want to play,
-and it will be imported into the library and loaded.
+and it will be imported into the library and start playing.
 
 **Note:**
 If you want to import many games,
