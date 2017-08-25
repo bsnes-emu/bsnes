@@ -5,13 +5,13 @@ be stored correctly in
 For [regular games](#regular-games)
 this is simple,
 but some games require special treatment,
-especially games that make use of
+especially those that make use of
 unusual hardware.
 
 Regular games
 -------------
 
-icarus can import games
+higan's importing tool, icarus, can import games
 in the most commonly-used formats
 for each supported console,
 and also those same formats inside `.zip` files
@@ -42,12 +42,12 @@ Bandai for the WonderSwan,
 etc.)
 then choose the appropriate console menu item.
 A filesystem browser will appear
-listing all the games in your library
+listing all the games in the library
 for that particular console.
 Select the game you want to play
 and click the Open button,
 or just double-click the game,
-and it will begin playing as though you'd just turned on the console.
+and it will begin playing.
 
 **Note:**
 Sometimes
@@ -56,8 +56,8 @@ behave differently,
 or the Japanese and American variants.
 When choosing a game from the Game Library,
 a drop-down list in the bottom-right of the filesystem browser
-allows you to choose which regional variation
-of the console it should emulate.
+allows you to choose which regional variant
+of the console higan should emulate.
 For most consoles,
 higan can reliably guess which variant to use,
 and the list defaults to "Auto".
@@ -72,7 +72,7 @@ those extra chips were separate CPUs
 running their own separate firmware,
 and for those cases
 higan requires a copy of the co-processor firmware
-as well as the actual game.
+as well as the actual game data.
 Unfortunately,
 like games themselves,
 co-processor firmware cannot legally be distributed,
@@ -81,10 +81,10 @@ copies of the relevant firmware data
 yourself.
 
 To import a game that requires co-processor firmware,
-you must copy the required firmware files
+you must put a copy of the required firmware files
 beside the game you want to import.
 For example,
-if you want to import Megaman X2,
+if you want to import Megaman X2 for the Super Famicom,
 which is stored in the file `mmx2.sfc`,
 the file `cx4.data.rom`
 must be placed in the same folder
@@ -212,14 +212,15 @@ but the firmware inside is identical.
 
 **Note 2:**
 The DSP1B is very similar to the DSP1A,
-but has some bugs fixed.
+but fixes some bugs.
 Note that icarus' heuristics cannot distinguish between
-a game that uses DSP1
-and one that uses DSP1B,
+a game that uses the DSP1
+and one that uses the DSP1B,
 so if it cannot find your game in its manifest database,
 it will assume it uses DSP1B.
-Many games work just as well with either DSP1 or DSP1B,
-but Pilotwings is a notable exception.
+Many games work just as well with either variant,
+but Pilotwings for the Super Famicom is a notable exception,
+requiring the DSP1 firmware.
 
 If you try to import a game
 using the "Import ROM Files ..." option
@@ -229,7 +230,7 @@ but do not have the required firmware files
 in the correct place,
 a window will appear saying
 "Import completed, but with 1 errors. View log?"
-(or howevery many games were lacking the correct firmware).
+(or however many games were lacking the correct firmware).
 If you press "Yes",
 a new window will appear listing the games that couldn't be imported,
 and at least one firmware file that was missing or incorrect, like this:
@@ -263,7 +264,7 @@ browse online services,
 and download games and data.
 This control cartridge was called
 *BS-X Sore wa Namae o Nusumareta Machi no Monogatari*,
-which translates as
+which in English is
 *BS-X The Story of The Town Whose Name Was Stolen*.
 
 [wpbsx]: https://en.wikipedia.org/wiki/Satellaview
@@ -294,8 +295,8 @@ must end in `.bs`)
 in order for it to be successfully imported.
 Sometimes memory pak filenames end in `(BSROM).sfc`,
 which will make higan try to import them as
-regular Super Famicom games,
-and fail miserably.
+regular Super Famicom games
+and fail.
 Rename the file and it should work beautifully.
 
 Playing a game that has a slot for a memory pak
@@ -311,8 +312,8 @@ the game will load without any cartridge in its memory pak slot.
 If you load the control cartridge into higan,
 make sure the emulated Satellaview
 is connected to the emulated Super Famicom's expansion port
-by going to the "Super Famicom" menu,
-selecting the "Expansion Port" sub-menu,
+by opening the "Super Famicom" menu,
+selecting the "Expansion Port" submenu,
 and choosing "Satellaview".
 If the expansion port was previously
 configured with a different option,
@@ -447,12 +448,13 @@ you want to insert into the Super Game Boy.
 If you press "Cancel" at this point,
 higan will crash, so don't do that.
 
-Note that only games for the original, black-and-white Game Boy
+**Note:**
+Only games for the original, black-and-white Game Boy
 can be used with the Super Game Boy.
 Some games designed for the Game Boy Color
 were backward compatible with the original Game Boy
 and hence the Super Game Boy;
-see [Playing Game Boy Colour games in Game Boy mode][blackcarts]
+see [Playing Game Boy Color games in Game Boy mode][blackcarts]
 for details.
 
 [blackcarts]: ../notes.md#playing-game-boy-color-games-in-game-boy-mode
@@ -461,9 +463,9 @@ MSU-1 games
 -----------
 
 The MSU-1 is a fictional expansion chip
-invented by higan's author byuu
-for use with Super Famicom games,
-designed to allow streaming data and audio.
+invented by higan's author byuu,
+designed to allow the Super Famicom
+to stream data and audio.
 Although the MSU-1 is not specific
 to any particular storage medium,
 it gives the Super Famicom similar capabilities
@@ -472,10 +474,18 @@ like the Mega Drive's Mega CD
 and the PC Engine's CD-ROM²,
 such as CD-quality music and full-motion video.
 
+Although the MSU-1 was invented for higan,
+it is now supported by other Super Famicom emulators too.
+The [SD2SNES][sd2snes] programmable cartridge
+even allows you to play MSU-1 games on a real console.
+There are a number of homebrew games
+that make use of the MSU-1,
+and also mods for commercial Super Famicom games
+that add higher-quality music and sometimes video.
+
 One thing to be aware of
 when importing an MSU-1 game
-is that early firmware versions
-of the [SD2SNES][sd2snes] programmable cartridge
+is that early firmware versions of the SD2SNES
 had a bug that caused MSU-1 music to play too quietly.
 Skipping over [the full details][msu1vol],
 the short version is this:
@@ -485,20 +495,20 @@ the short version is this:
   - If an MSU-1 mod for a commercial game offers
     "emulator" and "hardware" versions of the patch file,
     it means the audio tracks are already boosted.
-      - Some
-        [third](https://www.zeldix.net/t1265-#18320)
-        [parties](https://www.zeldix.net/t1339-#19818)
-        have created replacement, non-boosted audio tracks
-        for the most popular MSU-1 mods.
-        If the mod you want to play has a replacement pack,
-        use it with the "hardware" version of the patch.
-      - Even without access to non-boosted audio tracks,
-        it may be that the existing audio is only slightly boosted,
-        so try the "hardware" version first, for best quality.
-      - If the audio tracks are heavily boosted,
-        the "hardware" patch may sound terrible,
-        distorting and clipping,
-        in which case try the "emulator" patch.
+  - Some
+    [third](https://www.zeldix.net/t1265-#18320)
+    [parties](https://www.zeldix.net/t1339-#19818)
+    have created replacement, non-boosted audio tracks
+    for the most popular MSU-1 mods.
+    If the mod you want to play has a replacement pack,
+    use it with the "hardware" version of the patch.
+  - Even without access to non-boosted audio tracks,
+    it may be that the existing audio is only slightly boosted,
+    so try the "hardware" version first, for best quality.
+  - If the audio tracks are heavily boosted,
+    the "hardware" patch may sound terrible,
+    distorting and clipping,
+    in which case try the "emulator" patch.
 
 To import an MSU-1 game:
 

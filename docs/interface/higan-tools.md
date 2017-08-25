@@ -11,7 +11,7 @@ The Cheat Editor
 For some consoles,
 higan supports applying temporary changes to the code of a running game.
 For example,
-you could disable the code that registers when the player takes damage,
+you could disable the code that detects when the player takes damage,
 resulting in an "invulnerability" mode.
 Currently,
 higan supports cheats for the following consoles:
@@ -22,6 +22,43 @@ higan supports cheats for the following consoles:
   - Master System
   - PC Engine
   - Wonder Swan
+
+To add a new cheat,
+select an unused row in the list,
+then type the relevant codes in the "Code(s)" field at the bottom,
+and a description in the "Description" field.
+See [Cheat code formats](#cheat-code-formats)
+for a description of the codes higan understands.
+
+To enable or disable an existing cheat,
+tick the checkbox in the first column of the list.
+The change should take effect immediately.
+
+To clear out an existing cheat,
+select it from the list
+and click the "Erase" button in the bottom right,
+or just manually delete
+the contents of the "Code(s)" and "Description" fields.
+
+To clear out all existing cheats,
+click the "Reset" button in the bottom right.
+
+Changes made in the Cheat Editor are saved to disk
+when the game is unloaded,
+or when higan exits.
+higan stores the known cheats for a particular game
+in `higan/cheats.bml`
+inside the game's [game folder](../concepts/game-folders.md).
+
+If your copy of higan includes a cheat database
+(a file named `cheats.bml`
+in the same folder as `Super Famicom.sys`
+and the other `*.sys` folders),
+you can click the "Find Codes ..." button in the bottom left
+to load all known cheats for the currently-running game.
+
+Cheat code formats
+------------------
 
 A cheat code of the format `addr=data`
 will cause the emulated console to obtain `data`
@@ -52,39 +89,6 @@ in Super Mario World,
 you can lock the time to 999 with these codes:
 `7e0f31=09+7e0f32=09+7e0f33=09`.
 
-Changes made in the Cheat Editor are saved to disk
-when the game is unloaded,
-or when higan exits.
-higan stores the known cheats for a particular game
-in `higan/cheats.bml`
-inside the corresponding game folder
-in [the Game Library](../concepts/game-library.md).
-
-If your copy of higan includes a cheat database
-(a file named `cheats.bml`
-in the same folder as `Super Famicom.sys`
-and the other `*.sys` folders),
-you can click the "Find Codes ..." button in the bottom left
-to load all known cheats for the currently-running game.
-
-To add a new cheat,
-select an unused row in the list,
-then type the relevant codes in the "Code(s)" field at the bottom,
-and a description in the "Description" field.
-
-To enable or disable an existing cheat,
-tick the checkbox in the first column of the list.
-The code should take effect immediately.
-
-To clear out an existing cheat,
-select it from the list
-and click the "Erase" button in the bottom right,
-or just manually delete
-the contents of the "Code(s)" and "Description" fields.
-
-To clear out all existing cheats,
-click the "Reset" button in the bottom right.
-
 The State Manager
 -----------------
 
@@ -97,8 +101,9 @@ saved games
 and how they compare,
 see [Save States](../concepts/save-states.md).
 
-To create a new manager state,
-or to replace an existing one,
+To save the current state of the loaded game
+in a new slot,
+or to replace the contents of an existing slot,
 select the slot in the list
 then click "Save" in the bottom-left corner.
 You can then type a description in the "Description" field,
@@ -111,7 +116,7 @@ and edit the "Description" field.
 To load a state,
 select the slot in the list
 and click "Load" in the bottom-left corner,
-or just double-click it.
+or just double-click the slot.
 
 To clear the state out of a slot,
 select the slot in the list
@@ -127,6 +132,6 @@ As described in
 [Game Manifests](../concepts/manifests.md),
 higan uses a "manifest" to
 describe how the various parts of a game cartridge
-are wired up together,
-and the Manifest Viewer lets you examine
-the configuration higan is using for the currently-running game.
+are wired up together.
+The Manifest Viewer lets you examine
+the configuration higan is using for the loaded game.

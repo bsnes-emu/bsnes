@@ -182,7 +182,7 @@ The sound hardware is still emulated.
 **Show Status Bar**
 causes higan to show or hide the status bar
 at the bottom of the window.
-This option has no effect in full-screen mode.
+This option has no effect in fullscreen mode.
 See [The status bar](#the-status-bar) for more information.
 
 **Video ...**
@@ -219,13 +219,16 @@ a state previously saved to one of the quick state slots.
 See [Save States](../concepts/save-states.md) for more information.
 
 **Cheat Editor**
-opens [the Cheat Editor window](higan-tools.md#the-cheat-editor)
+opens [the Cheat Editor tab](higan-tools.md#the-cheat-editor)
+of the Tools window.
 
 **State Manager**
-opens [the State Manager window](higan-tools.md#the-state-manager)
+opens [the State Manager tab](higan-tools.md#the-state-manager)
+of the Tools window.
 
 **Manifest Viewer**
-opens [the Manifest Viewer window](higan-tools.md#the-manifest-viewer)
+opens [the Manifest Viewer tab](higan-tools.md#the-manifest-viewer)
+of the Tools window.
 
 The Help menu
 -------------
@@ -287,7 +290,7 @@ The status bar briefly displays "Slot X quick state does not exist"
 (where X is one of the Quick State slot numbers)
 when you choose a slot from the
 [Tools](#the-tools-menu) → "Load Quick State"
-sub-menu that has not had a save-state saved to it,
+submenu that has not had a save-state saved to it,
 or when you press the "Load Quick State" hotkey
 while the current Quick State slot has not had a save-state saved to it,
 
