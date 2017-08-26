@@ -144,27 +144,8 @@ that aren't technically part of the console itself:
 **Video Shader** controls
 how the low-resolution video output of the emulated console
 is scaled up to suit modern high-resolution displays.
-The availability of items in this submenu depends on
-which video driver higan is using,
-so see [Choosing drivers](../guides/drivers.md) for more information.
-
-  - **None**
-    draws each output pixel according to
-    the colour of the single nearest input pixel,
-    sometimes called "nearest neighbour" scaling.
-    This produces unnaturally crisp and blocky images.
-
-  - **Blur**
-    draws each output pixel by
-    averaging the colours of the four nearest input pixels,
-    sometimes called "bilinear" scaling.
-    This produces unnaturally blurry images.
-
-  - When using the OpenGL driver,
-    an additional item appears in this menu for
-    each installed shader.
-    See [Using video shaders](../guides/shaders.md)
-    for details.
+[Using video shaders](../guides/shaders.md)
+describes all the options in this submenu.
 
 **Synchronize Audio**
 causes higan to wait for audio playback to complete
