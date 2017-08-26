@@ -36,10 +36,6 @@ namespace GameBoyAdvance {
     inline auto synchronize(Thread& thread) -> void {
       if(clock() >= thread.clock()) scheduler.resume(thread);
     }
-
-    inline auto step(uint clocks) -> void {
-      _clock += clocks;
-    }
   };
 
   #include <gba/memory/memory.hpp>

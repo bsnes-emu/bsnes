@@ -4,17 +4,23 @@ struct AudioALSA : Audio {
   AudioALSA() { initialize(); }
   ~AudioALSA() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
-
-  auto information() -> Information {
-    Information information;
-    information.devices = queryDevices();
-    information.frequencies = {44100.0, 48000.0, 96000.0};
-    information.latencies = {20, 40, 60, 80, 100};
-    information.channels = {2};
-    return information;
+  auto availableDevices() -> string_vector {
+    return queryDevices();
   }
 
+  auto availableFrequencies() -> vector<double> {
+    return {44100.0, 48000.0, 96000.0};
+  }
+
+  auto availableLatencies() -> vector<uint> {
+    return {20, 40, 60, 80, 100};
+  }
+
+  auto availableChannels() -> vector<uint> {
+    return {2};
+  }
+
+  auto ready() -> bool { return _ready; }
   auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
   auto channels() -> uint { return 2; }

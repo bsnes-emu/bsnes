@@ -32,6 +32,6 @@ auto WonderSwanColorInterface::videoColor(uint32 color) -> uint64 {
 }
 
 auto WonderSwanColorInterface::load(uint id) -> bool {
-  if(id == ID::WonderSwanColor) return system.load(this, Model::WonderSwanColor);
+  if(id == ID::WonderSwanColor) return system.load(this, System::Model::WonderSwanColor);
   return false;
 }

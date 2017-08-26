@@ -44,18 +44,16 @@ auto Cartridge::power() -> void {
 auto Cartridge::load() -> bool {
   information = {};
 
-  switch(system.model()) {
-  case Model::WonderSwan:
+  if(Model::WonderSwan()) {
     if(auto loaded = platform->load(ID::WonderSwan, "WonderSwan", "ws")) {
       information.pathID = loaded.pathID();
     } else return false;
-    break;
-  case Model::WonderSwanColor:
-  case Model::SwanCrystal:
+  }
+
+  if(Model::WonderSwanColor() || Model::SwanCrystal()) {
     if(auto loaded = platform->load(ID::WonderSwanColor, "WonderSwan Color", "wsc")) {
       information.pathID = loaded.pathID();
     } else return false;
-    break;
   }
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {

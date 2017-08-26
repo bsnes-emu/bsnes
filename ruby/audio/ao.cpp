@@ -4,17 +4,23 @@ struct AudioAO : Audio {
   AudioAO() { initialize(); }
   ~AudioAO() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
-
-  auto information() -> Information {
-    Information information;
-    information.devices = {_device};
-    information.frequencies = {44100.0, 48000.0, 96000.0};
-    information.latencies = {100};
-    information.channels = {2};
-    return information;
+  auto availableDevices() -> string_vector {
+    return {"Default"};
   }
 
+  auto availableFrequencies() -> vector<double> {
+    return {44100.0, 48000.0, 96000.0};
+  }
+
+  auto availableLatencies() -> vector<uint> {
+    return {100};
+  }
+
+  auto availableChannels() -> vector<uint> {
+    return {2};
+  }
+
+  auto ready() -> bool { return _ready; }
   auto blocking() -> bool { return true; }
   auto channels() -> uint { return 2; }
   auto frequency() -> double { return _frequency; }

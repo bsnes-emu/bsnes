@@ -10,17 +10,23 @@ struct AudioWASAPI : Audio {
   AudioWASAPI() { initialize(); }
   ~AudioWASAPI() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
-
-  auto information() -> Information {
-    Information information;
-    for(auto& device : _devices) information.devices.append(device);
-    information.channels = {2};
-    information.frequencies = {(double)_frequency};
-    information.latencies = {0, 20, 40, 60, 80, 100};
-    return information;
+  auto availableDevices() -> string_vector {
+    return _devices;
   }
 
+  auto availableFrequencies() -> vector<double> {
+    return {(double)_frequency};
+  }
+
+  auto availableLatencies() -> vector<uint> {
+    return {0, 20, 40, 60, 80, 100};
+  }
+
+  auto availableChannels() -> vector<uint> {
+    return {2};
+  }
+
+  auto ready() -> bool { return _ready; }
   auto exclusive() -> bool { return _exclusive; }
   auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
@@ -239,7 +245,7 @@ private:
   } _queue;
 
   IMMDeviceEnumerator* _enumerator = nullptr;
-  vector<string> _devices;
+  string_vector _devices;
   IMMDevice* _audioDevice = nullptr;
   IAudioClient* _audioClient = nullptr;
   IAudioRenderClient* _renderClient = nullptr;

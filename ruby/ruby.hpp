@@ -53,18 +53,14 @@ struct Audio {
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
-  struct Information {
-    nall::string_vector devices;
-    nall::vector<double> frequencies;
-    nall::vector<uint> latencies;
-    nall::vector<uint> channels;
-  };
-
   virtual ~Audio() = default;
 
-  virtual auto ready() -> bool { return true; }
-  virtual auto information() -> Information { return {{"Default"}, {48000.0}, {0}, {2}}; }
+  virtual auto availableDevices() -> nall::string_vector { return {"Default"}; }
+  virtual auto availableFrequencies() -> nall::vector<double> { return {44100.0}; }
+  virtual auto availableLatencies() -> nall::vector<uint> { return {0}; }
+  virtual auto availableChannels() -> nall::vector<uint> { return {2}; }
 
+  virtual auto ready() -> bool { return true; }
   virtual auto exclusive() -> bool { return false; }
   virtual auto context() -> uintptr { return 0; }
   virtual auto device() -> nall::string { return "None"; }

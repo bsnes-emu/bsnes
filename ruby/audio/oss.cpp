@@ -17,18 +17,26 @@ struct AudioOSS : Audio {
   AudioOSS() { initialize(); }
   ~AudioOSS() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
-
-  auto information() -> Information {
-    Information information;
-    information.devices = {"/dev/dsp"};
-    for(auto& device : directory::files("/dev/", "dsp?*")) information.devices.append(string{"/dev/", device});
-    information.frequencies = {44100.0, 48000.0, 96000.0};
-    information.latencies = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    information.channels = {1, 2};
-    return information;
+  auto availableDevices() -> string_vector {
+    string_vector devices;
+    devices.append("/dev/dsp");
+    for(auto& device : directory::files("/dev/", "dsp?*")) devices.append(string{"/dev/", device});
+    return devices;
   }
 
+  auto availableFrequencies() -> vector<double> {
+    return {44100.0, 48000.0, 96000.0};
+  }
+
+  auto availableLatencies() -> vector<uint> {
+    return {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  }
+
+  auto availableChannels() -> vector<uint> {
+    return {1, 2};
+  }
+
+  auto ready() -> bool { return _ready; }
   auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }
   auto channels() -> uint { return _channels; }
@@ -78,8 +86,8 @@ private:
   auto initialize() -> bool {
     terminate();
 
-    if(!information().devices.find(_device)) {
-      _device = information().devices.left();
+    if(!availableDevices().find(_device)) {
+      _device = availableDevices().left();
     }
 
     _fd = open(_device, O_WRONLY, O_NONBLOCK);

@@ -18,12 +18,6 @@ namespace WonderSwan {
   extern Scheduler scheduler;
   extern Cheat cheat;
 
-  enum class Model : uint {
-    WonderSwan,       //SW-001  (ASWAN)
-    WonderSwanColor,  //WSC-001 (SPHINX)
-    SwanCrystal,      //SCT-001 (SPHINX2)
-  };
-
   enum : uint { Byte = 1, Word = 2, Long = 4 };
 
   struct Thread : Emulator::Thread {
@@ -35,10 +29,12 @@ namespace WonderSwan {
     inline auto synchronize(Thread& thread) -> void {
       if(clock() >= thread.clock()) scheduler.resume(thread);
     }
+  };
 
-    inline auto step(uint clocks) -> void {
-      _clock += clocks;
-    }
+  struct Model {
+    inline static auto WonderSwan() -> bool;       //SW-001 (ASWAN)
+    inline static auto WonderSwanColor() -> bool;  //WSC-001 (SPHINX)
+    inline static auto SwanCrystal() -> bool;      //SCT-001 (SPHINX2)
   };
 
   #include <ws/memory/memory.hpp>

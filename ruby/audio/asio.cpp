@@ -5,22 +5,32 @@ struct AudioASIO : Audio {
   AudioASIO() { self = this; initialize(); }
   ~AudioASIO() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
-
-  auto information() -> Information {
-    Information information;
-    for(auto& device : _devices) information.devices.append(device.name);
-    information.frequencies = {_frequency};
-    uint latencies[] = {64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 6144};  //factors of 6144
-    for(auto& latency : latencies) {
-      if(latency < _active.minimumBufferSize) continue;
-      if(latency > _active.maximumBufferSize) continue;
-      information.latencies.append(latency);
-    }
-    information.channels = {1, 2};
-    return information;
+  auto availableDevices() -> string_vector {
+    string_vector devices;
+    for(auto& device : _devices) devices.append(device.name);
+    return devices;
   }
 
+  auto availableFrequencies() -> vector<double> {
+    return {_frequency};
+  }
+
+  auto availableLatencies() -> vector<uint> {
+    vector<uint> latencies;
+    uint latencyList[] = {64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 6144};  //factors of 6144
+    for(auto& latency : latencyList) {
+      if(latency < _active.minimumBufferSize) continue;
+      if(latency > _active.maximumBufferSize) continue;
+      latencies.append(latency);
+    }
+    return latencies;
+  }
+
+  auto availableChannels() -> vector<uint> {
+    return {1, 2};
+  }
+
+  auto ready() -> bool { return _ready; }
   auto context() -> uintptr { return _context; }
   auto device() -> string { return _device; }
   auto blocking() -> bool { return _blocking; }

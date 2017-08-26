@@ -209,11 +209,11 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
     r.lcdContrast = data.bit (1);
     r.lcdUnknown  = data.bits(2,7);
 
-    if(system.model() == Model::WonderSwanColor) {
+    if(Model::WonderSwanColor()) {
       r.lcdUnknown &= 0b111100;
     }
 
-    if(system.model() == Model::SwanCrystal) {
+    if(Model::SwanCrystal()) {
       r.lcdContrast = 0;
       r.lcdUnknown  = 0;
     }

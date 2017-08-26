@@ -43,33 +43,9 @@ Program::Program(string_vector args) {
   settings["Crashed"].setValue(true);
   settings.save();
 
-  if(!Video::availableDrivers().find(settings["Video/Driver"].text())) {
-    settings["Video/Driver"].setValue("None");
-  }
-  video = Video::create(settings["Video/Driver"].text());
-  video->setContext(presentation->viewport.handle());
-  video->setBlocking(settings["Video/Synchronize"].boolean());
-  if(!video->ready()) MessageDialog().setText("Failed to initialize video driver").warning();
-  presentation->clearViewport();
-
-  if(!Audio::availableDrivers().find(settings["Audio/Driver"].text())) {
-    settings["Audio/Driver"].setValue("None");
-  }
-  audio = Audio::create(settings["Audio/Driver"].text());
-  audio->setExclusive(settings["Audio/Exclusive"].boolean());
-  audio->setContext(presentation->viewport.handle());
-  audio->setDevice(settings["Audio/Device"].text());
-  audio->setBlocking(settings["Audio/Synchronize"].boolean());
-  audio->setChannels(2);
-  if(!audio->ready()) MessageDialog().setText("Failed to initialize audio driver").warning();
-
-  if(!Input::availableDrivers().find(settings["Input/Driver"].text())) {
-    settings["Input/Driver"].setValue("None");
-  }
-  input = Input::create(settings["Input/Driver"].text());
-  input->setContext(presentation->viewport.handle());
-  input->onChange({&InputManager::onChange, &inputManager()});
-  if(!input->ready()) MessageDialog().setText("Failed to initialize input driver").warning();
+  initializeVideoDriver();
+  initializeAudioDriver();
+  initializeInputDriver();
 
   settings["Crashed"].setValue(false);
   settings.save();
