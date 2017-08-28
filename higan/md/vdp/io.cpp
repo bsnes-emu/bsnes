@@ -118,13 +118,23 @@ auto VDP::writeDataPort(uint16 data) -> void {
 auto VDP::readControlPort() -> uint16 {
   io.commandPending = false;
 
-  uint16 result = 0b0011'0100'0000'0000;
-  result |= Region::PAL() << 0;
-  result |= io.command.bit(5) << 1;  //DMA active
-  result |= (state.hcounter >= 1280) << 2;  //horizontal blank
-  result |= (state.vcounter >= screenHeight()) << 3;  //vertical blank
-  result |= io.interlaceMode.bit(0) ? state.field << 4 : 0;
-  result |= 1 << 9;  //FIFO empty
+  uint16 result;
+  result.bit( 0) = Region::PAL();
+  result.bit( 1) = io.command.bit(5);  //DMA active
+  result.bit( 2) = state.hcounter >= 1280;  //horizontal blank
+  result.bit( 3) = state.vcounter >= screenHeight();  //vertical blank
+  result.bit( 4) = io.interlaceMode.bit(0) && state.field;
+  result.bit( 5) = 0;  //SCOL
+  result.bit( 6) = 0;  //SOVR
+  result.bit( 7) = io.vblankIRQ;
+  result.bit( 8) = 0;  //FIFO full
+  result.bit( 9) = 1;  //FIFO empty
+  result.bit(10) = 1;  //constants (bits 10-15)
+  result.bit(11) = 0;
+  result.bit(12) = 1;
+  result.bit(13) = 1;
+  result.bit(14) = 0;
+  result.bit(15) = 0;
   return result;
 }
 

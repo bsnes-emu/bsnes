@@ -197,6 +197,9 @@ private:
   } cram;
 
   struct IO {
+    //status
+    uint1 vblankIRQ;  //true after VIRQ triggers; cleared at start of next frame
+
     //command
     uint6  command;
     uint16 address;

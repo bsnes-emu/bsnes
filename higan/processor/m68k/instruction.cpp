@@ -538,7 +538,7 @@ M68K::M68K() {
   //ILLEGAL
   { auto opcode = pattern("0100 1010 1111 1100");
 
-    bind(opcode, ILLEGAL);
+    bind(opcode, ILLEGAL, opcode);
   }
 
   //JMP
@@ -1257,7 +1257,7 @@ M68K::M68K() {
   //ILLEGAL
   for(uint16 opcode : range(65536)) {
     if(instructionTable[opcode]) continue;
-    bind(opcode, ILLEGAL);
+    bind(opcode, ILLEGAL, opcode);
   }
 
   #undef bind

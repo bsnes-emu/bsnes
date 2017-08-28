@@ -43,6 +43,8 @@ template<uint Size> auto M68K::_immediate() -> string {
 }
 
 template<uint Size> auto M68K::_address(EffectiveAddress& ea) -> string {
+  if(ea.mode == 7) return {"$", hex((int16)_readPC<Word>(), 6L)};
+  if(ea.mode == 8) return {"$", hex(readPC<Long>(), 6L)};
   if(ea.mode == 9) return {"$", hex(_pc + (int16)_readPC(), 6L)};
   return "???";
 }
@@ -291,7 +293,9 @@ template<uint Size> auto M68K::disassembleEXT(DataRegister with) -> string {
   return {"ext", _suffix<Size>(), "   ", _dataRegister(with)};
 }
 
-auto M68K::disassembleILLEGAL() -> string {
+auto M68K::disassembleILLEGAL(uint16 code) -> string {
+  if(code.bits(12,15) == 0xa) return {"linea   $", hex(code.bits(0,11), 3L)};
+  if(code.bits(12,15) == 0xf) return {"linef   $", hex(code.bits(0,11), 3L)};
   return {"illegal "};
 }
 

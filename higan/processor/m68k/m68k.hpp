@@ -171,7 +171,7 @@ struct M68K {
                       auto instructionEXG(AddressRegister x, AddressRegister y) -> void;
                       auto instructionEXG(DataRegister x, AddressRegister y) -> void;
   template<uint Size> auto instructionEXT(DataRegister with) -> void;
-                      auto instructionILLEGAL() -> void;
+                      auto instructionILLEGAL(uint16 code) -> void;
                       auto instructionJMP(EffectiveAddress target) -> void;
                       auto instructionJSR(EffectiveAddress target) -> void;
                       auto instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void;
@@ -326,7 +326,7 @@ private:
                       auto disassembleEXG(AddressRegister x, AddressRegister y) -> string;
                       auto disassembleEXG(DataRegister x, AddressRegister y) -> string;
   template<uint Size> auto disassembleEXT(DataRegister with) -> string;
-                      auto disassembleILLEGAL() -> string;
+                      auto disassembleILLEGAL(uint16 code) -> string;
                       auto disassembleJMP(EffectiveAddress target) -> string;
                       auto disassembleJSR(EffectiveAddress target) -> string;
                       auto disassembleLEA(AddressRegister ar, EffectiveAddress ea) -> string;

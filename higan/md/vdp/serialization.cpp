@@ -11,6 +11,7 @@ auto VDP::serialize(serializer& s) -> void {
   vsram.serialize(s);
   cram.serialize(s);
 
+  s.integer(io.vblankIRQ);
   s.integer(io.command);
   s.integer(io.address);
   s.integer(io.commandPending);

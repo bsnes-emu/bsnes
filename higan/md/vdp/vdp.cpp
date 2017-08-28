@@ -23,11 +23,13 @@ auto VDP::main() -> void {
 
   if(state.vcounter == 0) {
     latch.horizontalInterruptCounter = io.horizontalInterruptCounter;
+    io.vblankIRQ = false;
     cpu.lower(CPU::Interrupt::VerticalBlank);
   }
 
   if(state.vcounter == screenHeight()) {
     if(io.verticalBlankInterruptEnable) {
+      io.vblankIRQ = true;
       cpu.raise(CPU::Interrupt::VerticalBlank);
     }
     //todo: should only stay high for ~2573/2 clocks

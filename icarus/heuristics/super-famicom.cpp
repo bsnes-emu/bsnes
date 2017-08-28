@@ -57,12 +57,12 @@ struct SuperFamicomCartridge {
     HiROM,
   };
 
-  bool loaded = false;             //is a base cartridge inserted?
-  uint crc32 = 0;                  //crc32 of all cartridges (base+slot(s))
+  bool loaded = false;  //is a base cartridge inserted?
+  uint crc32 = 0;       //crc32 of all cartridges (base+slot(s))
   uint rom_size = 0;
   uint ram_size = 0;
-  bool firmware_required = false;  //true if firmware is required for emulation
-  bool firmware_appended = false;  //true if firmware is present at end of data
+  uint firmware_size = 0;
+  string firmware_missing;
 
   Type type = Type::Unknown;
   Region region = Region::NTSC;
@@ -90,6 +90,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, boo
   //skip copier header
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
+  //ignore images too small to be valid
   if(size < 0x8000) return;
 
   readHeader(data, size);
@@ -102,79 +103,89 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, boo
   const char* range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
   markup.append("board region=", region == Region::NTSC ? "ntsc" : "pal", "\n");
 
-  //detect appended firmware
+  //detect firmware
 
   if(has_dsp1) {
-    firmware_required = true;
     if((size & 0x7fff) == 0x2000) {
-      firmware_appended = true;
-      rom_size -= 0x2000;
+      firmware_size = 0x2000;
+    } else {
+      firmware_missing = "DSP1";
     }
   }
 
   if(has_dsp2) {
-    firmware_required = true;
     if((size & 0x7fff) == 0x2000) {
-      firmware_appended = true;
-      rom_size -= 0x2000;
+      firmware_size = 0x2000;
+    } else {
+      firmware_missing = "DSP2";
     }
   }
 
   if(has_dsp3) {
-    firmware_required = true;
     if((size & 0x7fff) == 0x2000) {
-      firmware_appended = true;
-      rom_size -= 0x2000;
+      firmware_size = 0x2000;
+    } else {
+      firmware_missing = "DSP3";
     }
   }
 
   if(has_dsp4) {
-    firmware_required = true;
     if((size & 0x7fff) == 0x2000) {
-      firmware_appended = true;
-      rom_size -= 0x2000;
+      firmware_size = 0x2000;
+    } else {
+      firmware_missing = "DSP4";
     }
   }
 
   if(has_st010) {
-    firmware_required = true;
     if((size & 0xffff) == 0xd000) {
-      firmware_appended = true;
-      rom_size -= 0xd000;
+      firmware_size = 0xd000;
+    } else {
+      firmware_missing = "ST010";
     }
   }
 
   if(has_st011) {
-    firmware_required = true;
     if((size & 0xffff) == 0xd000) {
-      firmware_appended = true;
-      rom_size -= 0xd000;
+      firmware_size = 0xd000;
+    } else {
+      firmware_missing = "ST011";
     }
   }
 
   if(has_st018) {
-    firmware_required = true;
     if((size & 0x3ffff) == 0x28000) {
-      firmware_appended = true;
-      rom_size -= 0x28000;
+      firmware_size = 0x28000;
+    } else {
+      firmware_missing = "ST018";
     }
   }
 
   if(has_cx4) {
-    firmware_required = true;
     if((rom_size & 0x7fff) == 0xc00) {
-      firmware_appended = true;
-      rom_size -= 0xc00;
+      firmware_size = 0xc00;
+    } else {
+      firmware_missing = "CX4";
     }
   }
 
-  if(type == Type::SuperGameBoy1BIOS || type == Type::SuperGameBoy2BIOS) {
-    firmware_required = true;
+  if(type == Type::SuperGameBoy1BIOS) {
     if((rom_size & 0x7fff) == 0x100) {
-      firmware_appended = true;
-      rom_size -= 0x100;
+      firmware_size = 0x100;
+    } else {
+      firmware_missing = "SGB1";
     }
   }
+
+  if(type == Type::SuperGameBoy2BIOS) {
+    if((rom_size & 0x7fff) == 0x100) {
+      firmware_size = 0x100;
+    } else {
+      firmware_missing = "SGB2";
+    }
+  }
+
+  rom_size -= firmware_size;
 
   //end firmware detection
 
@@ -211,14 +222,25 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, boo
     );
   }
 
-  else if(type == Type::SuperGameBoy1BIOS || type == Type::SuperGameBoy2BIOS) {
+  else if(type == Type::SuperGameBoy1BIOS) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
       "    map address=40-7d,c0-ff:0000-7fff mask=0x8000\n"
       "  icd2 revision=1\n"
       "    map address=00-3f,80-bf:6000-67ff,7000-7fff\n"
-      "    rom name=sgb.boot.rom size=0x100\n"
+      "    rom name=sgb1.boot.rom size=0x100\n"
+    );
+  }
+
+  else if(type == Type::SuperGameBoy2BIOS) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
+      "    map address=40-7d,c0-ff:0000-7fff mask=0x8000\n"
+      "  icd2 revision=2\n"
+      "    map address=00-3f,80-bf:6000-67ff,7000-7fff\n"
+      "    rom name=sgb2.boot.rom size=0x100\n"
     );
   }
 

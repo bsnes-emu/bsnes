@@ -10,7 +10,7 @@ auto Icarus::superFamicomManifest(string location) -> string {
   return superFamicomManifest(buffer, location);
 }
 
-auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location, bool* firmwareAppended) -> string {
+auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location, string* firmwareMissing) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -27,7 +27,7 @@ auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location, bool
     bool hasMSU1 = file::exists({location, "msu1.rom"});
     SuperFamicomCartridge cartridge{buffer.data(), buffer.size(), hasMSU1};
     if(markup = cartridge.markup) {
-      if(firmwareAppended) *firmwareAppended = cartridge.firmware_appended;
+      if(firmwareMissing) *firmwareMissing = cartridge.firmware_missing;
       markup.append("\n");
       markup.append("information\n");
       markup.append("  region: ", cartridge.region == SuperFamicomCartridge::Region::NTSC ? "NTSC" : "PAL", "\n");
@@ -51,19 +51,10 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
   string target{settings["Library/Location"].text(), "Super Famicom/", name, ".sfc/"};
 //if(directory::exists(target)) return failure("game already exists");
 
-  bool firmwareAppended = true;
-  auto markup = superFamicomManifest(buffer, location, &firmwareAppended);
+  string firmwareMissing;
+  auto markup = superFamicomManifest(buffer, location, &firmwareMissing);
   if(!markup) return failure("failed to parse ROM image");
-
-  auto document = BML::unserialize(markup);
-  vector<Markup::Node> roms;
-  superFamicomManifestScan(roms, document["board"]);
-  for(auto rom : roms) {
-    auto name = rom["name"].text();
-    auto size = rom["size"].natural();
-    if(name == "program.rom" || name == "data.rom" || firmwareAppended) continue;
-    if(file::size({source, name}) != size) return failure({"firmware (", name, ") missing or invalid"});
-  }
+  if(firmwareMissing) return failure({"ROM image is missing ", firmwareMissing, " firmware data"});
 
   if(!directory::create(target)) return failure("library path unwritable");
   if(file::exists({source, name, ".srm"}) && !file::exists({target, "save.ram"})) {
@@ -72,17 +63,15 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
 
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   uint offset = (buffer.size() & 0x7fff) == 512 ? 512 : 0;  //skip header if present
+  auto document = BML::unserialize(markup);
+  vector<Markup::Node> roms;
+  superFamicomManifestScan(roms, document["board"]);
   for(auto rom : roms) {
     auto name = rom["name"].text();
     auto size = rom["size"].natural();
-    if(name == "program.rom" || name == "data.rom" || firmwareAppended) {
-      if(size > buffer.size() - offset) return failure("ROM image is missing data");
-      file::write({target, name}, buffer.data() + offset, size);
-      offset += size;
-    } else {
-      auto firmware = file::read({source, name});
-      file::write({target, name}, firmware);
-    }
+    if(size > buffer.size() - offset) return failure("ROM image is missing data");
+    file::write({target, name}, buffer.data() + offset, size);
+    offset += size;
   }
   return success(target);
 }

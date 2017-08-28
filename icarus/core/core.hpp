@@ -18,7 +18,7 @@ struct Icarus {
 
   //super-famicom.cpp
   auto superFamicomManifest(string location) -> string;
-  auto superFamicomManifest(vector<uint8_t>& buffer, string location, bool* firmwareAppended = nullptr) -> string;
+  auto superFamicomManifest(vector<uint8_t>& buffer, string location, string* firmwareMissing = nullptr) -> string;
   auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
