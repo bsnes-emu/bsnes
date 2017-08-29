@@ -1,9 +1,8 @@
 Unfortunately,
-there's no standard for
+there's no cross-platform standard for
 displaying video,
 playing audio,
-and accepting input from game controllers
-that works on every operating system.
+and accepting input from game controllers.
 Or rather,
 there's many standards,
 and different ones work best
@@ -20,7 +19,7 @@ of the Settings window.
 
 Here are the most notable drivers
 for each platform
-for each category.
+in each category.
 If your copy of higan
 includes a driver not listed here,
 it's probably a reasonable choice,
@@ -44,11 +43,11 @@ Video
 
 On Windows:
 
-  - **OpenGL** is usually the best choice,
-    since it supports [custom shaders](shaders.md),
-    however it does require support for OpenGL 3.2
-    which excludes some integrated graphics chipsets
-    and old graphics cards.
+  - **OpenGL** is the best choice,
+    since it's fast
+    and it supports [custom shaders](shaders.md),
+    but requires support for OpenGL 3.2.
+    This excludes some older and weaker hardware.
   - **Direct3D** is a good choice
     if OpenGL is unavailable.
     It also allows
@@ -62,7 +61,7 @@ On Linux:
   - **OpenGL** is the best choice,
     since it's fast
     and it supports [custom shaders](shaders.md),
-    but requires OpenGL 3.2.
+    but requires support for OpenGL 3.2.
     You can check what version of OpenGL
     your system supports by running
     `glxinfo | grep 'core profile version'`
@@ -82,7 +81,7 @@ On Windows:
   - **ASIO** offers the lowest possible latency,
     but is the least likely to work on any given computer.
   - **WASAPI** offers low latency,
-    but is only slightly more likely to work.
+    but is only slightly more likely to work than ASIO.
     It also offers
     [Exclusive Mode](../interface/higan-settings.md#audio),
     which can improve audio quality and lower latency,

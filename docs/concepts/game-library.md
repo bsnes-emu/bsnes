@@ -4,10 +4,10 @@ is the folder where all the
 When [icarus](../interface/icarus.md) imports a game,
 it creates or updates
 the corresponding game folder in the game library.
-When you use the console menu items
+When you use the console submenu items
 in [higan's Library menu](../interface/higan.md#the-library-menu),
 it higan shows you the games for that console
-already in the library.
+that are already in the library.
 
 Inside the game library folder
 there is a subfolder for each system.
@@ -75,7 +75,7 @@ and telling higan where to find them.
     where imported games will be stored.
  1. Launch higan,
     then from [the Settings menu][settingsmenu],
-    choose "Advanced..."
+    choose "Advanced ..."
     to open [higan's Advanced settings][advsettings].
  1. Click the "Change ..." button on the right.
     A [filesystem browser][fsbrowser] will appear,

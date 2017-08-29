@@ -1,24 +1,21 @@
 The consoles that higan emulates
 are similar in many ways,
-but some of them do have particular quirks
-that you should be aware of.
+but some of them do have particular quirks of their own.
 
 Music and Sound Effect Volume on the Mega Drive
 -----------------------------------------------
 
 The Mega Drive has two different audio-generating chips:
 
-  - the SN76489 or "PSG" chip,
+  - the SN76489 or "PSG" chip
     inherited from the Master System,
     mostly used for sound-effects
-    like Sonic picking up rings
   - the YM2612 or "FM" chip,
     mostly used for music
 
 With two different sound sources,
-it's important that they have similar volumes,
-or the sound-effects will drown out the music,
-or vice-versa.
+it's important that they have similar volumes
+or one kind of sound will drown out the other.
 Sega did *not* do this,
 and different hardware revisions
 used different relative volumes.
@@ -26,8 +23,8 @@ used different relative volumes.
 higan currently
 sets the PSG volume to [125% of the FM volume][vol],
 based on [a Sega Genesis model 1 VA6][va6] that byuu owns.
-If you feel sound-effects in higan's Mega Drive core
-are too loud or too quiet,
+If you feel sound-effects in higan's Mega Drive emulation
+are too loud or too quiet compared to the music,
 you may be comparing it
 to a Mega Drive calibrated to a different scale
 (or to an emulator tweaked to match such a Mega Drive).
@@ -50,7 +47,7 @@ Games that required
 the extra hardware in the Game Boy Color
 came in transparent cartridges,
 and had a slightly different shape
-to prevent them from being used in original Game Boys..
+to prevent them from being used in original Game Boys.
 ROM files for these games
 typically have filenames ending in `.gbc`.
 
@@ -117,17 +114,9 @@ higan must guess which storage type to use
 and sometimes it guesses incorrectly.
 
 If higan guesses incorrectly for a game you want to play,
-you will need to turn on
-"Create manifests" in
-[the Icarus settings dialog](interface/icarus.md#the-icarus-settings-dialog),
-turn off
-"Ignore manifests" in
-[higan's Advanced settings](interface/higan-settings.md#advanced),
-re-import the game,
-and edit `manifest.bml` in
-[the game folder](concepts/game-folders.md)
-to describe the correct storage type.
-Try importing other GBA games to see what save types they use.
+you will need to override the automatically-generated manifest.
+See [Ignoring manifests](concepts/manifests.md#ignoring-manifests)
+for details.
 
 For more discussion of the GBA save type mess,
 see [What's the deal with... GBA save files?][gbasaves]
@@ -145,7 +134,7 @@ included a rumble motor within the cartridge itself.
 Because higan does not currently support
 game-specific controller features,
 to experience the rumble effect in higan
-you'll need to configure the console itself:
+you'll need to configure the console:
 
   - Open
     [higan's Input settings](interface/higan-settings.md#input)

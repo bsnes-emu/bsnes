@@ -109,8 +109,8 @@ or with the appropriate
 
 Quick states are useful
 as extra checkpoints
-in games that don't have them,
-or where they aren't close enough together.
+in games whose checkpoints are too far apart,
+or in games that don't have checkpoints at all.
 Map the "Save Quick State" and "Load Quick State" hotkeys
 to your controller,
 and you can cheese your way through just about anything.

@@ -6,10 +6,9 @@ to the display's vertical-synchronization (or "vsync") signal,
 but the option is hidden
 because it often causes more problems than it solves
 (see the next question).
-
 To enable video synchronization:
 
-  - Open the higan's configuration file, `settings.bml`
+  - Open higan's configuration file, `settings.bml`
       - On Windows, look in `%LOCALAPPDATA%\higan`
         or beside `higan.exe`
       - On Linux, look in `~/.local/share/higan`
@@ -50,8 +49,8 @@ the emulated console's refresh rate:
   - The Super Famicom usually runs a little faster than 60Hz
   - the PAL variants of most consoles run at 50Hz
   - the WonderSwan runs at 75Hz
-  - While the Game Boy does run its LCD at 60Hz
-    it can turn it off and on at any time,
+  - While the Game Boy does run its LCD at 60Hz,
+    games can turn the LCD off and on at any time,
     requiring emulation to pause
     until it can get back in sync
     with the computer display.
@@ -120,7 +119,7 @@ requires an Intel Ivy Bridge (or equivalent),
 full-speed for the wireframe animations in Mega Man X2
 requires an even faster computer.
 Low-power CPUs like ARM chips,
-or Intel Atom and Celeron CPUS
+or Intel Atom and Celeron CPUs
 generally aren't fast enough to emulate the Super Famicom with higan,
 although other emulated consoles may work.
 
@@ -168,11 +167,11 @@ Games can and do depend on timing details like
 it will interrupt the CPU at exactly the right time
 for the CPU to fiddle with the video chip".
 higan is therefore very cautious about timing:
-while it's emulating the audio chip (for example),
-at every point the emulated CPU *might* interrupt
-the emulated audio chip,
-higan switches to emulating the CPU up to the same point
-to find out whether the CPU *will* interrupt it.
+while it's emulating the CPU (for example),
+at every point the emulated audio chip *might* interrupt
+the emulated CPU,
+higan switches to emulating the audio chip up to the same point
+to find out whether it *will* interrupt the CPU.
 
 In this way,
 higan is a little bit like
@@ -180,8 +179,8 @@ an office-worker trying to do the jobs of three other people
 by running from desk to desk,
 sending the same emails
 that those three people would send to each other,
-leaving themselves a note at each desk to remind themselves
-where they were up to when they come back.
+leaving itself a note at each desk to remind it
+where it was up to when it comes back.
 Although this constant switching
 is slow and inefficient,
 higan does it
@@ -224,8 +223,8 @@ Why can't higan use multiple CPU cores?
 
 These days,
 most computers contain multiple CPU cores,
-allowing them to run different programs,
-or different parts of the same program
+allowing them to run different programs
+(or different parts of the same program)
 at the same time.
 Since higan requires high CPU performance,
 sometimes people suggest that it should split its work
@@ -257,26 +256,28 @@ do their work in exactly the same amount of time
 as their hardware counterparts.
 The problem is forty years of technology
 designed to make programs run as fast as possible:
-optimizing compilers and superscalar, out-of-order CPU architectures
+optimizing compilers
+and superscalar, out-of-order CPU architectures
 change programs to make them faster,
 speeding up some programs more than others
 in ways that are very difficult to understand and predict.
 Even if higan's emulated devices
 ran at the exact, correct speed
 on one particular computer,
-they'd still run differently on any other computer,
-or with a smarter compiler,
-or with a smarter CPU.
+they'd still run differently on
+a computer with a smarter CPU,
+or when compiled with a smarter compiler.
 
 Since higan needs its emulated components
 to run at particular speeds,
-and they won't run at those speeds naturally,
+and it's not practical
+to make them run at those speeds naturally,
 it must force them manually.
 An emulated device runs for a little while,
 then all the others are run until they catch up.
 It's this careful management,
 regular stopping and starting,
 that makes higan slow,
-not the actual emulation of each device,
-and so it doesn't make sense
-for higan to be multi-threaded.
+not the actual emulation of each device.
+Having multiple CPU cores waiting on each other
+would not help them wait any faster.

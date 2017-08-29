@@ -3,8 +3,8 @@ the emulation equivalent of
 a physical game cartridge,
 a manifest is like
 the circuit board inside the cartridge:
-it controls how all the other parts of the cartridge
-talk to one another and to the console itself.
+it connects all the other parts together
+and to the console itself.
 
 If you load a game into higan,
 you can look at the game's manifest
@@ -14,15 +14,14 @@ and choosing [Manifest Viewer](../interface/higan-tools.md#the-manifest-viewer).
 Why manifests?
 --------------
 
-Any given console might support
-hundreds or thousands of different games,
-but the vast majority of those games
-use one of a few different circuit boards.
 For most consoles,
+a manifest isn't strictly necessary:
 the raw game data provides enough clues
-to guess a circuit board configuration
-that will get the game running,
-but relying on heuristics often leads to problems:
+for emulators to guess the circuit board configuration,
+or at least
+to guess a *reasonable* configuration.
+However,
+relying on such heuristics often leads to problems:
 
   - Inventing heuristics
     that correctly guess the configuration
@@ -47,10 +46,10 @@ but relying on heuristics often leads to problems:
       - If a homebrew developer
         takes a game that almost does what they want
         and changes it slightly,
-        it can result in the emulator
-        doing something completely different
-        because it now matches
-        some completely different game.
+        it may cause the emulator
+        to do something completely different
+        because the modified game
+        is now a closer match to some other game.
   - Heuristics can make sensible configurations impossible.
       - If a homebrew developer wants
         a particular hardware configuration
@@ -63,8 +62,9 @@ but relying on heuristics often leads to problems:
         it just used the actual configuration
         of the actual hardware.
 
-Manifests provide a way to *tell* the emulator
-what hardware configuration to use,
+Manifests provide a way to describe
+*exactly* what hardware configuration to use,
+no guessing required,
 avoiding all these problems entirely.
 
 Where do manifests come from?
@@ -72,8 +72,7 @@ Where do manifests come from?
 
 Ideally,
 everybody who extracts the data from a game cartridge would
-(at the same time)
-record the board configuration in a manifest file.
+also record the board configuration in a manifest file.
 Unfortunately,
 manifests were invented long after cartridge extracting,
 so there are a lot of previously extracted games
@@ -95,7 +94,7 @@ this doesn't help for any other console.
 Even for the Super Famicom,
 there will always be games
 too rare to acquire for re-dumping,
-and homebrew that was never on a cartridge to begin with.
+and homebrew that was never on a physical cartridge to begin with.
 For these games,
 heuristics will always be needed as a fallback,
 but at least if the heuristics are wrong
@@ -128,12 +127,16 @@ If the manifest that icarus generates
 for some particular game
 is broken or buggy,
 you'll need to switch the manifest machinery back on
-so you can fix the problem:
+so you can fix it:
 
-  - Turn "Create manifests" back on in icarus' settings
-  - Re-import the game in question,
+  - Turn on "Create manifests" in icarus' settings
+  - Re-import the game in question
     to store the broken manifest
     as `manifest.bml` in the game folder.
-  - Edit `manifest.bml`
-  - Turn "Ignore manifests" off in higan's settings
-  - Load the game in higan to check that your edit fixed the problem
+  - Edit `manifest.bml` as you see fit
+  - Turn off "Ignore manifests" in higan's settings
+  - Load the game in higan to check that your changes fixed the problem
+
+If the manifest format changes in the future,
+you'll have to repeat this process
+to create a fixed manifest in the new format.
