@@ -219,8 +219,8 @@ and one that uses the DSP1B,
 so if it cannot find your game in its manifest database,
 it will assume it uses DSP1B.
 Many games work just as well with either variant,
-but Pilotwings for the Super Famicom is a notable exception,
-requiring the DSP1 firmware.
+but Pilotwings requires the DSP1 firmware,
+while Ballz 3D requires the DSP1B.
 
 If you try to import a game
 using the "Import ROM Files ..." option
