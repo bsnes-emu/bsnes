@@ -351,13 +351,13 @@ Importing the Sufami Turbo cartridge
 is just like [importing a regular game](#regular-games).
 
 Importing a mini-cartridge is like importing a regular game,
-but the name of the memory pak file *must* end in `.st`
+but the name of the mini-cartridge file *must* end in `.st`
 (if it's in a `.zip` file,
 that's OK,
 but the name *inside* the `.zip` file
 must end in `.st`)
 in order for it to be successfully imported.
-Sometimes memory pak filenames end in `(ST).sfc`,
+Sometimes mini-cartridge filenames end in `(ST).sfc`,
 which will make higan try to import them as
 regular Super Famicom games,
 and fail miserably.
