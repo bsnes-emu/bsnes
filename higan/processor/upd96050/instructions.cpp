@@ -31,7 +31,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
   case  4: idb = regs.dp; break;
   case  5: idb = regs.rp; break;
   case  6: idb = dataROM[regs.rp]; break;
-  case  7: idb = 0x8000 - regs.flaga.s1; break;
+  case  7: idb = 0x8000 - flags.a.s1; break;
   case  8: idb = regs.dr; regs.sr.rqm = 1; break;
   case  9: idb = regs.dr; break;
   case 10: idb = regs.sr; break;
@@ -45,7 +45,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
   if(alu) {
     uint16 p, q, r;
     Flag flag;
-    bool c;
+    boolean c;
 
     switch(pselect) {
     case 0: p = dataRAM[regs.dp]; break;
@@ -55,61 +55,83 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     }
 
     switch(asl) {
-    case 0: q = regs.a; flag = regs.flaga; c = regs.flagb.c; break;
-    case 1: q = regs.b; flag = regs.flagb; c = regs.flaga.c; break;
+    case 0: q = regs.a; flag = flags.a; c = flags.b.c; break;
+    case 1: q = regs.b; flag = flags.b; c = flags.a.c; break;
     }
 
     switch(alu) {
-    case  1: r = q | p; break;                    //OR
-    case  2: r = q & p; break;                    //AND
-    case  3: r = q ^ p; break;                    //XOR
-    case  4: r = q - p; break;                    //SUB
-    case  5: r = q + p; break;                    //ADD
-    case  6: r = q - p - c; break;                //SBB
-    case  7: r = q + p + c; break;                //ADC
-    case  8: r = q - 1; p = 1; break;             //DEC
-    case  9: r = q + 1; p = 1; break;             //INC
-    case 10: r = ~q; break;                       //CMP
-    case 11: r = (q >> 1) | (q & 0x8000); break;  //SHR1 (ASR)
-    case 12: r = (q << 1) | c; break;             //SHL1 (ROL)
-    case 13: r = (q << 2) |  3; break;            //SHL2
-    case 14: r = (q << 4) | 15; break;            //SHL4
-    case 15: r = (q << 8) | (q >> 8); break;      //XCHG
+    case  1: r = q | p; break;                //OR
+    case  2: r = q & p; break;                //AND
+    case  3: r = q ^ p; break;                //XOR
+    case  4: r = q - p; break;                //SUB
+    case  5: r = q + p; break;                //ADD
+    case  6: r = q - p - c; break;            //SBB
+    case  7: r = q + p + c; break;            //ADC
+    case  8: r = q - 1; p = 1; break;         //DEC
+    case  9: r = q + 1; p = 1; break;         //INC
+    case 10: r = ~q; break;                   //CMP
+    case 11: r = q >> 1 | q & 0x8000; break;  //SHR1 (ASR)
+    case 12: r = q << 1 | c; break;           //SHL1 (ROL)
+    case 13: r = q << 2 | 3; break;           //SHL2
+    case 14: r = q << 4 | 15; break;          //SHL4
+    case 15: r = q << 8 | q >> 8; break;      //XCHG
     }
 
-    flag.s0 = (r & 0x8000);
-    flag.z = (r == 0);
+    flag.s0 = r & 0x8000;
+    flag.z = r == 0;
 
     switch(alu) {
-    case  1: case  2: case  3: case 10: case 13: case 14: case 15: {
+    case  1:    //OR
+    case  2:    //AND
+    case  3:    //XOR
+    case 10:    //CMP
+    case 13:    //SHL2
+    case 14:    //SHL4
+    case 15: {  //XCHG
       flag.c = 0;
       flag.ov0 = 0;
       flag.ov1 = 0;
       break;
     }
-    case  4: case  5: case  6: case  7: case  8: case  9: {
+    case  4:    //SUB
+    case  5:    //ADD
+    case  6:    //SBB
+    case  7:    //ADC
+    case  8:    //DEC
+    case  9: {  //INC
+      if(!flag.ov1) {
+        flag.s1 = flag.s0;
+      }
+
       if(alu & 1) {
         //addition
         flag.ov0 = (q ^ r) & ~(q ^ p) & 0x8000;
-        flag.c = (r < q);
+        flag.c = r < q;
       } else {
         //subtraction
         flag.ov0 = (q ^ r) &  (q ^ p) & 0x8000;
-        flag.c = (r > q);
+        flag.c = r > q;
       }
-      if(flag.ov0) {
-        flag.s1 = flag.ov1 ^ !(r & 0x8000);
-        flag.ov1 = !flag.ov1;
-      }
+
+      //ovh[] = last three overflow flags (0 = most recent result)
+      flag.ovh[2] = flag.ovh[1];
+      flag.ovh[1] = flag.ovh[0];
+      flag.ovh[0] = flag.ov0;
+
+      flag.ov1 = (
+        (flag.ovh[0] ^  flag.ovh[1] ^ flag.ovh[2])
+      | (flag.ovh[0] & !flag.ovh[1] & flag.ovh[2] & flag.s0 == flag.s1)
+      );
+
       break;
     }
-    case 11: {
+    case 11: {  //SHR1 (ASR)
       flag.c = q & 1;
       flag.ov0 = 0;
       flag.ov1 = 0;
       break;
     }
-    case 12: {
+    case 12: {  //SHL1 (ROL)
       flag.c = q >> 15;
       flag.ov0 = 0;
       flag.ov1 = 0;
@@ -118,16 +140,16 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     }
 
     switch(asl) {
-    case 0: regs.a = r; regs.flaga = flag; break;
-    case 1: regs.b = r; regs.flagb = flag; break;
+    case 0: regs.a = r; flags.a = flag; break;
+    case 1: regs.b = r; flags.b = flag; break;
     }
   }
 
   execLD((idb << 6) + dst);
 
   switch(dpl) {
-  case 1: regs.dp = (regs.dp & 0xf0) + ((regs.dp + 1) & 0x0f); break;  //DPINC
-  case 2: regs.dp = (regs.dp & 0xf0) + ((regs.dp - 1) & 0x0f); break;  //DPDEC
+  case 1: regs.dp = (regs.dp & 0xf0) + (regs.dp + 1 & 0x0f); break;  //DPINC
+  case 2: regs.dp = (regs.dp & 0xf0) + (regs.dp - 1 & 0x0f); break;  //DPDEC
   case 3: regs.dp = (regs.dp & 0xf0); break;  //DPCLR
   }
 
@@ -146,45 +168,51 @@ auto uPD96050::execJP(uint24 opcode) -> void {
   uint11 na  = opcode >>  2;  //next address
   uint2 bank = opcode >>  0;  //bank address
 
-  uint14 jp = (regs.pc & 0x2000) | (bank << 11) | (na << 0);
+  uint14 jp = regs.pc & 0x2000 | bank << 11 | na << 0;
 
   switch(brch) {
   case 0x000: regs.pc = regs.so; return;  //JMPSO
 
-  case 0x080: if(regs.flaga.c == 0) regs.pc = jp; return;  //JNCA
-  case 0x082: if(regs.flaga.c == 1) regs.pc = jp; return;  //JCA
-  case 0x084: if(regs.flagb.c == 0) regs.pc = jp; return;  //JNCB
-  case 0x086: if(regs.flagb.c == 1) regs.pc = jp; return;  //JCB
+  case 0x080: if(flags.a.c == 0) regs.pc = jp; return;  //JNCA
+  case 0x082: if(flags.a.c == 1) regs.pc = jp; return;  //JCA
+  case 0x084: if(flags.b.c == 0) regs.pc = jp; return;  //JNCB
+  case 0x086: if(flags.b.c == 1) regs.pc = jp; return;  //JCB
 
-  case 0x088: if(regs.flaga.z == 0) regs.pc = jp; return;  //JNZA
-  case 0x08a: if(regs.flaga.z == 1) regs.pc = jp; return;  //JZA
-  case 0x08c: if(regs.flagb.z == 0) regs.pc = jp; return;  //JNZB
-  case 0x08e: if(regs.flagb.z == 1) regs.pc = jp; return;  //JZB
+  case 0x088: if(flags.a.z == 0) regs.pc = jp; return;  //JNZA
+  case 0x08a: if(flags.a.z == 1) regs.pc = jp; return;  //JZA
+  case 0x08c: if(flags.b.z == 0) regs.pc = jp; return;  //JNZB
+  case 0x08e: if(flags.b.z == 1) regs.pc = jp; return;  //JZB
 
-  case 0x090: if(regs.flaga.ov0 == 0) regs.pc = jp; return;  //JNOVA0
-  case 0x092: if(regs.flaga.ov0 == 1) regs.pc = jp; return;  //JOVA0
-  case 0x094: if(regs.flagb.ov0 == 0) regs.pc = jp; return;  //JNOVB0
-  case 0x096: if(regs.flagb.ov0 == 1) regs.pc = jp; return;  //JOVB0
+  case 0x090: if(flags.a.ov0 == 0) regs.pc = jp; return;  //JNOVA0
+  case 0x092: if(flags.a.ov0 == 1) regs.pc = jp; return;  //JOVA0
+  case 0x094: if(flags.b.ov0 == 0) regs.pc = jp; return;  //JNOVB0
+  case 0x096: if(flags.b.ov0 == 1) regs.pc = jp; return;  //JOVB0
 
-  case 0x098: if(regs.flaga.ov1 == 0) regs.pc = jp; return;  //JNOVA1
-  case 0x09a: if(regs.flaga.ov1 == 1) regs.pc = jp; return;  //JOVA1
-  case 0x09c: if(regs.flagb.ov1 == 0) regs.pc = jp; return;  //JNOVB1
-  case 0x09e: if(regs.flagb.ov1 == 1) regs.pc = jp; return;  //JOVB1
+  case 0x098: if(flags.a.ov1 == 0) regs.pc = jp; return;  //JNOVA1
+  case 0x09a: if(flags.a.ov1 == 1) regs.pc = jp; return;  //JOVA1
+  case 0x09c: if(flags.b.ov1 == 0) regs.pc = jp; return;  //JNOVB1
+  case 0x09e: if(flags.b.ov1 == 1) regs.pc = jp; return;  //JOVB1
 
-  case 0x0a0: if(regs.flaga.s0 == 0) regs.pc = jp; return;  //JNSA0
-  case 0x0a2: if(regs.flaga.s0 == 1) regs.pc = jp; return;  //JSA0
-  case 0x0a4: if(regs.flagb.s0 == 0) regs.pc = jp; return;  //JNSB0
-  case 0x0a6: if(regs.flagb.s0 == 1) regs.pc = jp; return;  //JSB0
+  case 0x0a0: if(flags.a.s0 == 0) regs.pc = jp; return;  //JNSA0
+  case 0x0a2: if(flags.a.s0 == 1) regs.pc = jp; return;  //JSA0
+  case 0x0a4: if(flags.b.s0 == 0) regs.pc = jp; return;  //JNSB0
+  case 0x0a6: if(flags.b.s0 == 1) regs.pc = jp; return;  //JSB0
 
-  case 0x0a8: if(regs.flaga.s1 == 0) regs.pc = jp; return;  //JNSA1
-  case 0x0aa: if(regs.flaga.s1 == 1) regs.pc = jp; return;  //JSA1
-  case 0x0ac: if(regs.flagb.s1 == 0) regs.pc = jp; return;  //JNSB1
-  case 0x0ae: if(regs.flagb.s1 == 1) regs.pc = jp; return;  //JSB1
+  case 0x0a8: if(flags.a.s1 == 0) regs.pc = jp; return;  //JNSA1
+  case 0x0aa: if(flags.a.s1 == 1) regs.pc = jp; return;  //JSA1
+  case 0x0ac: if(flags.b.s1 == 0) regs.pc = jp; return;  //JNSB1
+  case 0x0ae: if(flags.b.s1 == 1) regs.pc = jp; return;  //JSB1
 
   case 0x0b0: if((regs.dp & 0x0f) == 0x00) regs.pc = jp; return;  //JDPL0
   case 0x0b1: if((regs.dp & 0x0f) != 0x00) regs.pc = jp; return;  //JDPLN0
   case 0x0b2: if((regs.dp & 0x0f) == 0x0f) regs.pc = jp; return;  //JDPLF
   case 0x0b3: if((regs.dp & 0x0f) != 0x0f) regs.pc = jp; return;  //JDPLNF
+
+  //serial input/output acknowledge not emulated
+  case 0x0b4: if(0) regs.pc = jp; return;  //JNSIAK
+  case 0x0b6: if(0) regs.pc = jp; return;  //JSIAK
+  case 0x0b8: if(0) regs.pc = jp; return;  //JNSOAK
+  case 0x0ba: if(0) regs.pc = jp; return;  //JSOAK
 
   case 0x0bc: if(regs.sr.rqm == 0) regs.pc = jp; return;  //JNRQM
   case 0x0be: if(regs.sr.rqm == 1) regs.pc = jp; return;  //JRQM
@@ -209,7 +237,7 @@ auto uPD96050::execLD(uint24 opcode) -> void {
   case  4: regs.dp = id; break;
   case  5: regs.rp = id; break;
   case  6: regs.dr = id; regs.sr.rqm = 1; break;
-  case  7: regs.sr = (regs.sr & 0x907c) | (id & ~0x907c); break;
+  case  7: regs.sr = regs.sr & 0x907c | id & ~0x907c; break;
   case  8: regs.so = id; break;  //LSB
   case  9: regs.so = id; break;  //MSB
   case 10: regs.k = id; break;

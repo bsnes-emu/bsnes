@@ -1,4 +1,3 @@
-//NEC uPD7720 (not supported)
 //NEC uPD7725
 //NEC uPD96050
 
@@ -33,62 +32,95 @@ struct uPD96050 {
   uint16 dataRAM[2048];
 
   struct Flag {
-    union {
-      uint8_t data = 0;
-      BooleanBitField<uint8_t, 5> s1;
-      BooleanBitField<uint8_t, 4> s0;
-      BooleanBitField<uint8_t, 3> c;
-      BooleanBitField<uint8_t, 2> z;
-      BooleanBitField<uint8_t, 1> ov1;
-      BooleanBitField<uint8_t, 0> ov0;
-    };
+    inline operator uint() const {
+      return ov0 << 0 | ov1 << 1 | z << 2 | c << 3 | s0 << 4 | s1 << 5;
+    }
 
-    inline operator uint() const { return data & 0x3f; }
-    inline auto& operator=(uint value) { return data = value, *this; }
-    inline auto& operator=(const Flag& value) { return data = value.data, *this; }
+    inline auto operator=(uint16 data) -> Flag& {
+      ov0 = data.bit(0);
+      ov1 = data.bit(1);
+      z   = data.bit(2);
+      c   = data.bit(3);
+      s0  = data.bit(4);
+      s1  = data.bit(5);
+      return *this;
+    }
+
+    auto serialize(serializer&) -> void;
+
+    boolean ov0;  //overflow 0
+    boolean ov1;  //overflow 1
+    boolean z;    //zero
+    boolean c;    //carry
+    boolean s0;   //sign 0
+    boolean s1;   //sign 1
+
+    boolean ovh[3];  //overflow history (internal)
   };
 
   struct Status {
-    union {
-      uint16_t data = 0;
-      BooleanBitField<uint16_t, 15> rqm;
-      BooleanBitField<uint16_t, 14> usf1;
-      BooleanBitField<uint16_t, 13> usf0;
-      BooleanBitField<uint16_t, 12> drs;
-      BooleanBitField<uint16_t, 11> dma;
-      BooleanBitField<uint16_t, 10> drc;
-      BooleanBitField<uint16_t,  9> soc;
-      BooleanBitField<uint16_t,  8> sic;
-      BooleanBitField<uint16_t,  7> ei;
-      BooleanBitField<uint16_t,  1> p1;
-      BooleanBitField<uint16_t,  0> p0;
-    };
+    inline operator uint() const {
+      bool _drs = drs & !drc;  //when DRC=1, DRS=0
+      return p0 << 0 | p1 << 1 | ei << 7 | sic << 8 | soc << 9 | drc << 10
+           | dma << 11 | _drs << 12 | uf0 << 13 | uf1 << 14 | rqm << 15;
+    }
 
-    inline operator uint() const { return data & 0xff83; }
-    inline auto& operator=(uint value) { return data = value, *this; }
+    inline auto operator=(uint16 data) -> Status& {
+      p0  = data.bit( 0);
+      p1  = data.bit( 1);
+      ei  = data.bit( 7);
+      sic = data.bit( 8);
+      soc = data.bit( 9);
+      drc = data.bit(10);
+      dma = data.bit(11);
+      drs = data.bit(12);
+      uf0 = data.bit(13);
+      uf1 = data.bit(14);
+      rqm = data.bit(15);
+      return *this;
+    }
+
+    auto serialize(serializer&) -> void;
+
+    boolean p0;   //output port 0
+    boolean p1;   //output port 1
+    boolean ei;   //enable interrupts
+    boolean sic;  //serial input control  (0 = 16-bit; 1 = 8-bit)
+    boolean soc;  //serial output control (0 = 16-bit; 1 = 8-bit)
+    boolean drc;  //data register size    (0 = 16-bit; 1 = 8-bit)
+    boolean dma;  //data register DMA mode
+    boolean drs;  //data register status  (1 = active; 0 = stopped)
+    boolean uf0;  //user flag 0
+    boolean uf1;  //user flag 1
+    boolean rqm;  //request mode (=1 on internal access; =0 on external access)
   };
 
-  struct Regs {
+  struct Registers {
+    auto serialize(serializer&) -> void;
+
     uint16 stack[16];    //LIFO
     VariadicNatural pc;  //program counter
     VariadicNatural rp;  //ROM pointer
     VariadicNatural dp;  //data pointer
     uint4 sp;            //stack pointer
+    uint16 si;           //serial input
+    uint16 so;           //serial output
     int16 k;
     int16 l;
     int16 m;
     int16 n;
     int16 a;             //accumulator
     int16 b;             //accumulator
-    Flag flaga;
-    Flag flagb;
     uint16 tr;           //temporary register
     uint16 trb;          //temporary register
-    Status sr;           //status register
     uint16 dr;           //data register
-    uint16 si;
-    uint16 so;
+    Status sr;           //status register
   } regs;
+
+  struct Flags {
+    Flag a;
+    Flag b;
+  } flags;
 };
 
 }

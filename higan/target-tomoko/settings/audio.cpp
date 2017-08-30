@@ -57,7 +57,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 auto AudioSettings::updateDevice() -> void {
   frequencyList.reset();
   for(auto& frequency : audio->availableFrequencies()) {
-    frequencyList.append(ComboButtonItem().setText(frequency));
+    frequencyList.append(ComboButtonItem().setText((uint)frequency));
     if(frequency == settings["Audio/Frequency"].real()) {
       frequencyList.item(frequencyList.itemCount() - 1).setSelected();
     }

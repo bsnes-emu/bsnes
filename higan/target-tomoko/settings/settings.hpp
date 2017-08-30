@@ -48,9 +48,9 @@ struct AudioSettings : TabFrameItem {
       Label deviceLabel{&controlLayout, Size{0, 0}};
       ComboButton deviceList{&controlLayout, Size{~0, 0}};
       Label frequencyLabel{&controlLayout, Size{0, 0}};
-      ComboButton frequencyList{&controlLayout, Size{~0, 0}};
+      ComboButton frequencyList{&controlLayout, Size{80, 0}};
       Label latencyLabel{&controlLayout, Size{0, 0}};
-      ComboButton latencyList{&controlLayout, Size{~0, 0}};
+      ComboButton latencyList{&controlLayout, Size{80, 0}};
     CheckLabel exclusiveMode{&layout, Size{~0, 0}};
     Label effectsLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
