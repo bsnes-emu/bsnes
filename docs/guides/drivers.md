@@ -4,7 +4,7 @@ displaying video,
 playing audio,
 and accepting input from game controllers.
 Or rather,
-there's many standards,
+there are many standards,
 and different ones work best
 on different computers.
 Therefore,

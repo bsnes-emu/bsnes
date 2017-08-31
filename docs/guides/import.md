@@ -376,7 +376,7 @@ to turn off your Super Famicom,
 insert a game into slot A,
 and try again.
 If you chose a cartridge for slot A,
-higan will yet open another
+higan will open yet another
 filesystem browser
 to let you choose a mini-cartridge for slot B.
 If you press "Cancel" at this point,
@@ -431,7 +431,7 @@ so it needs a boot ROM:
 
 To import the SGB base cartridge,
 you must copy the required firmware file
-into the same folder.
+into the same folder as the base cartridge.
 Then you may import it just like
 [a regular game](#regular-games).
 

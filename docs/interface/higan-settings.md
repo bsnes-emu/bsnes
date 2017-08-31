@@ -125,7 +125,7 @@ how higan reproduces
 the emulated console's audio output.
 
 **Driver**
-settings affect the
+settings affect
 the current [Audio driver](../guides/drivers.md).
 
   - **Device** allows you to choose

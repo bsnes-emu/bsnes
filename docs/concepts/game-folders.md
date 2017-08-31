@@ -53,7 +53,7 @@ higan can use a larger number of files per game.
 For example,
 higan's low-level emulation of Super Famicom co-processors
 often requires [separate firmware files][firmware].
-higan's [MSU-1 support][msu1]
+higan's [MSU-1 feature][msu1]
 supports up to 99 audio tracks per game,
 and higan supports up to 133 save-states per game.
 Thus,

@@ -88,7 +88,7 @@ for the audio and video drivers to catch up
 if [Synchronize Audio](interface/higan.md#the-settings-menu)
 and [video synchronization][vsync]
 are enabled, respectively.
-If games are running way too fast, here's some things to check:
+If games are running way too fast, here are some things to check:
 
   - Make sure "Synchronize Audio" is ticked in
     [the Settings menu](interface/higan.md#the-settings-menu)
@@ -101,7 +101,7 @@ If games are running way too fast, here's some things to check:
         tick "Mute Audio" in
         [the Settings menu](interface/higan.md#the-settings-menu)
   - If you can't connect speakers or headphones to your computer,
-    you did but it didn't help,
+    or you did but it didn't help,
     try enabling the secret [video synchronization][vsync] option.
 
 [vsync]: #i-see-tearing-when-a-game-scrolls-how-can-i-enable-vsync

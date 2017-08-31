@@ -98,7 +98,7 @@ and homebrew that was never on a physical cartridge to begin with.
 For these games,
 heuristics will always be needed as a fallback,
 but at least if the heuristics are wrong
-the can be overridden.
+they can be overridden.
 
 Ignoring manifests
 ------------------

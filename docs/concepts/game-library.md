@@ -6,7 +6,7 @@ it creates or updates
 the corresponding game folder in the game library.
 When you use the console sub-menu items
 in [higan's Library menu](../interface/higan.md#the-library-menu),
-it higan shows you the games for that console
+higan shows you the games for that console
 that are already in the library.
 
 Inside the game library folder
@@ -57,7 +57,7 @@ Moving the game library
 -----------------------
 
 Moving the game library is a little complicated,
-because there's two parts to it:
+because there are two parts to it:
 telling icarus where to put imported games,
 and telling higan where to find them.
 

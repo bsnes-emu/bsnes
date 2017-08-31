@@ -12,7 +12,7 @@ The available video shaders are listed in
 the "Video Shaders" sub-menu of
 [the Settings menu](../interface/higan.md#the-settings-menu).
 Which shaders are available depends on
-[video driver](drivers.md#video) higan is configured to use.
+the [video driver](drivers.md#video) higan is configured to use.
 Most drivers only support these shaders:
 
   - **None**
@@ -27,8 +27,7 @@ Most drivers only support these shaders:
   - **Blur**
     draws each computer pixel according to
     the weighted average colour
-    of the four nearest console pixels.
-    averaging the colours of the four nearest console pixels,
+    of the four nearest console pixels,
     sometimes called "bilinear" scaling.
     This produces unnaturally blurry images.
 
