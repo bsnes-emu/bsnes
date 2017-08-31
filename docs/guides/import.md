@@ -81,14 +81,31 @@ copies of the relevant firmware data
 yourself.
 
 To import a game that requires co-processor firmware,
-you must put a copy of the required firmware files
-beside the game you want to import.
+you must first combine the game data and the firmware into a single file.
 For example,
-if you want to import *Mega Man X2* for the Super Famicom,
-which is stored in the file `mmx2.sfc`,
-the file `cx4.data.rom`
-must be placed in the same folder
-for the import to succeed.
+let's say you want to import *Super Bases Loaded 2* for the Super Famicom,
+which is stored in the file `sbl2.sfc`
+and requires firmware for the DSP1 co-processor
+stored in `dsp1.program.rom` and `dsp1.data.rom`.
+On Windows,
+you can combine them from the command-line like this:
+
+```dos
+copy /b sbl2.sfc + dsp1.program.rom + dsp1.data.rom
+```
+
+On Linux,
+the equivalent command-line syntax is:
+
+```bash
+cat dsp1.program.rom dsp1.data.rom >> sbl2.sfc
+```
+
+(note the use of `>>` to append rather than `>` to overwrite)
+
+**Note:**
+For co-processor chips with multiple firmware files,
+you must put the "program" file before the "data" file.
 
 Wikipedia [lists which Super Famicom games use which co-processors][wpec],
 although not all co-processors require separate firmware.
@@ -226,22 +243,20 @@ If you try to import a game
 using the "Import ROM Files ..." option
 in [the Library menu](../interface/higan.md#the-library-menu)
 (or using icarus directly)
-but do not have the required firmware files
-in the correct place,
+but it does not include the correct firmware data,
 a window will appear saying
 "Import completed, but with 1 errors. View log?"
 (or however many games were lacking the correct firmware).
 If you press "Yes",
 a new window will appear listing the games that couldn't be imported,
-and at least one firmware file that was missing or incorrect, like this:
+and what problem was detected:
 
-> [smk.zip] firmware (dsp1b.program.rom) missing or invalid
+> [sbl2.sfc] ROM image is missing DSP1 firmware data
 
 If you try to import a game
 using the "Load ROM File ..." option
 in [the Library menu](../interface/higan.md#the-library-menu)
-but do not have the required firmware files
-in the correct place,
+but it does not include the correct firmware data,
 nothing will happen,
 and higan will just sit there
 with "No cartridge loaded" in
@@ -430,10 +445,11 @@ so it needs a boot ROM:
 </table>
 
 To import the SGB base cartridge,
-you must copy the required firmware file
-into the same folder as the base cartridge.
-Then you may import it just like
-[a regular game](#regular-games).
+you must first combine the base cartridge data
+and the boot ROM into a single file,
+just like
+[games with co-processor firmware](#games-with-co-processor-firmware).
+Then you may import it like [a regular game](#regular-games).
 
 To play a Game Boy game in Super Game Boy mode,
 load the Super Game Boy cartridge like any other game.
