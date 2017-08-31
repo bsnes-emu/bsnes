@@ -15,7 +15,7 @@ higan's importing tool, icarus, can import games
 in the most commonly-used formats
 for each supported console,
 and also those same formats inside `.zip` files
-(as long as tthe `.zip` file contains only one game).
+(as long as the `.zip` file contains only one game).
 More advanced compression formats
 like RAR or 7-zip are not supported.
 
@@ -36,7 +36,7 @@ See [the icarus documentation](../interface/icarus.md) for details.
 
 To play a game for a particular console from your library,
 open the Library menu,
-pick the console manufacturer submenu
+pick the console manufacturer sub-menu
 (Nintendo for the Super Famicom,
 Bandai for the WonderSwan,
 etc.)
@@ -270,7 +270,7 @@ which in English is
 [wpbsx]: https://en.wikipedia.org/wiki/Satellaview
 
 The control cartridge had a slot that accepted
-rewritable "memory paks",
+re-writable "memory paks",
 so that people could store the games and data they downloaded.
 A small number of games that did not use the Satellaview modem
 also had a memory pak slot,
@@ -313,7 +313,7 @@ If you load the control cartridge into higan,
 make sure the emulated Satellaview
 is connected to the emulated Super Famicom's expansion port
 by opening the "Super Famicom" menu,
-selecting the "Expansion Port" submenu,
+selecting the "Expansion Port" sub-menu,
 and choosing "Satellaview".
 If the expansion port was previously
 configured with a different option,
@@ -398,7 +398,7 @@ beyond the original Super Game Boy,
 but importing and playing games
 works the same way in higan.
 
-The Super Game Boy cartrige includes
+The Super Game Boy cartridge includes
 the complete hardware of an original
 (black-and-white)
 Game Boy,

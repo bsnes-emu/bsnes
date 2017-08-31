@@ -9,7 +9,7 @@ reproduce the scanlines and blurring of the original display,
 or any other visual effect.
 
 The available video shaders are listed in
-the "Video Shaders" submenu of
+the "Video Shaders" sub-menu of
 [the Settings menu](../interface/higan.md#the-settings-menu).
 Which shaders are available depends on
 [video driver](drivers.md#video) higan is configured to use.
@@ -43,7 +43,7 @@ higan's emulation of certain consoles
 can produce surprising behaviour
 in certain shaders,
 particularly shaders that compare each console pixel
-with its neigbours.
+with its neighbours.
 See [Video Shaders and TV-based consoles][vstv] for details.
 
 [vstv]: #video-shaders-and-tv-based-consoles
@@ -92,7 +92,7 @@ you'll need to restart higan
 for the change to take effect.
 
 Open the Settings menu again,
-choose the "Video Shader" submenu,
+choose the "Video Shader" sub-menu,
 and now the shaders you installed
 should be listed at the bottom of the menu.
 
@@ -132,7 +132,7 @@ but some are particularly noteworthy:
     and shimmer
     that most game players would have seen
     on real televisions.
-    Some games depend on NTSC artifacts
+    Some games depend on NTSC artefacts
     to display colours outside the console's official palette
     or to create effects like transparency.
 

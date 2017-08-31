@@ -1,7 +1,7 @@
 higan, the multi-system emulator
 ================================
 
-higan emulates a number of classic videogame consoles of the 1980s and 1990s,
+higan emulates a number of classic video-game consoles of the 1980s and 1990s,
 allowing you to play classic games on a modern general-purpose computer.
 
 To get started with higan right away,
@@ -15,24 +15,24 @@ As of v104,
 higan has top-tier support for the following consoles:
 
   - Nintendo Super Famicom/Super Nintendo Entertainment System,
-    including addon hardware:
+    including add-on hardware:
       - Super Game Boy
       - Sufami Turbo
   - Nintendo Game Boy Advance
 
 It also includes some level of support for these consoles:
 
-  - Satellaview addon for the Super Famicom
+  - Satellaview add-on for the Super Famicom
   - Nintendo Famicom/Nintendo Entertainment System
   - Nintendo Game Boy
   - Nintendo Game Boy Color
   - Sega Master System
   - Sega Game Gear
-  - Sega Megadrive/Genesis
+  - Sega Mega Drive/Genesis
   - NEC PC Engine/TurboGrafx 16 (but not the CD-ROM² System/TurboGrafx-CD)
   - NEC SuperGrafx
   - Bandai WonderSwan
-  - Bandai Wonderswan Color
+  - Bandai WonderSwan Color
 
 **Note:** Some consoles were released under different names
 in different geographic regions.
@@ -103,7 +103,7 @@ that you might want to check out.
   - [BizHawk](http://tasvideos.org/BizHawk.html)
     is another multi-system emulator,
     specialising in the creation of
-    tool-assisted speedruns.
+    tool-assisted speed-runs.
     Its Super Famicom emulation is based on bsnes v087.
   - [bsnes-plus](https://github.com/devinacker/bsnes-plus)
     is a fork of bsnes v073
@@ -119,4 +119,4 @@ that you might want to check out.
     It also restores the "balanced" Super Famicom emulation core
     that was removed from higan in v099,
     which is less CPU intensive
-    than the current accuracy-focussed core.
+    than the current accuracy-focused core.

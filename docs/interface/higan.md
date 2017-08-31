@@ -8,7 +8,7 @@ the running game's video output.
 The Library menu
 ----------------
 
-Manufacturer submenus
+Manufacturer sub-menus
 allow you to play
 games you've already imported
 into higan's 
@@ -145,7 +145,7 @@ that aren't technically part of the console itself:
 how the low-resolution video output of the emulated console
 is scaled up to suit modern high-resolution displays.
 [Using video shaders](../guides/shaders.md)
-describes all the options in this submenu.
+describes all the options in this sub-menu.
 
 **Synchronize Audio**
 causes higan to wait for audio playback to complete
@@ -154,7 +154,7 @@ This should reduce popping and glitching noises,
 and slows the emulation down to approximately the correct speed.
 If your PC cannot emulate at full-speed,
 (60fps for most consoles, 75fps for WonderSwan)
-this has no noticable effect.
+this has no noticeable effect.
 
 **Mute Audio**
 causes higan to not output sound from the emulated console.
@@ -236,7 +236,7 @@ Before any game is loaded,
 the status bar displays "No cartridge loaded".
 
 When a game is loaded and running,
-the status bar displays the current emulation speeed
+the status bar displays the current emulation speed
 in frames-per-second.
 For PAL-based consoles,
 this should be around 50 FPS for "full speed" emulation,
@@ -271,7 +271,7 @@ The status bar briefly displays "Slot X quick state does not exist"
 (where X is one of the Quick State slot numbers)
 when you choose a slot from the
 [Tools](#the-tools-menu) → "Load Quick State"
-submenu that has not had a save-state saved to it,
+sub-menu that has not had a save-state saved to it,
 or when you press the "Load Quick State" hotkey
 while the current Quick State slot has not had a save-state saved to it,
 

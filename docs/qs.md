@@ -79,11 +79,11 @@ that's a Super Famicom game
 so there will be a Super Famicom menu.
 
 Open [the console menu](interface/higan.md#the-console-menu),
-and if there is a submenu for a controller port,
+and if there is a sub-menu for a controller port,
 make sure the port is using
 the controller you [set up previously](#configuring-inputs).
 If you configured inputs for a Gamepad in Controller Port 1,
-the Controller Port 1 submenu
+the Controller Port 1 sub-menu
 should be set to Gamepad.
 Like a real console,
 higan's controller ports

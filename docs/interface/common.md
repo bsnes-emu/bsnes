@@ -5,7 +5,7 @@ Sometimes higan will need you
 to choose a file or folder.
 For this, it uses a special Filesystem Browser dialog.
 Although many operating systems provide a native filesystem browser,
-they do not all allow the same customizations.
+they do not all allow the same customisations.
 Therefore,
 higan provides its own filesystem browser
 that works the same way on every platform.
@@ -55,7 +55,7 @@ you can choose one
 by selecting it and clicking the "Select" button in the bottom-right.
 Double-clicking
 or selecting and pressing Enter don't work,
-they just switch to viewing the conents of that folder.
+they just switch to viewing the contents of that folder.
 
 The "Cancel" button in the bottom-right
 closes the filesystem browser without selecting anything.

@@ -123,7 +123,7 @@ On Linux:
 **Note:**
 By default,
 higan uses the audio driver to regulate its emulation speed.
-If games run too faston your computer,
+If games run too fast on your computer,
 see [Games run too fast](../faq.md#games-run-too-fast) in the FAQ.
 
 Input

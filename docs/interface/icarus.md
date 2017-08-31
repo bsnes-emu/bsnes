@@ -60,7 +60,7 @@ The icarus Settings dialog contains the following settings:
     if it's importing a game it recognises.
     For unrecognised games,
     and for all games if this box is unticked,
-    icarus gueses the manifest data.
+    icarus guesses the manifest data.
     This option is still relevant when "Create Manifests" is unticked:
     higan uses icarus to generate a manifest when a game is loaded,
     not just at import-time.

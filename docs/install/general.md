@@ -19,7 +19,7 @@ for the same legal reasons that commercial games
 cannot be distributed with higan,
 so you'll need to obtain a copy of the BIOS for yourself.
 
-If you have a real GBA and a flashcart,
+If you have a real GBA and a flash-cart,
 the Internet contains many tools
 that will extract the BIOS image so it can be copied
 to your desktop computer.

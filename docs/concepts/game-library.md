@@ -4,13 +4,13 @@ is the folder where all the
 When [icarus](../interface/icarus.md) imports a game,
 it creates or updates
 the corresponding game folder in the game library.
-When you use the console submenu items
+When you use the console sub-menu items
 in [higan's Library menu](../interface/higan.md#the-library-menu),
 it higan shows you the games for that console
 that are already in the library.
 
 Inside the game library folder
-there is a subfolder for each system.
+there is a sub-folder for each system.
 Inside each system folder
 are the game folders
 for each imported game.

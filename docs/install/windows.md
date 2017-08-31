@@ -29,7 +29,7 @@ To remove higan's configuration:
  1. Press Win+R to open the Run dialog
  2. Type `%LOCALAPPDATA%` and press Enter
     to open the folder where higan's configuration data lives
- 3. Delete the subfolders named `icarus` and `higan`
+ 3. Delete the sub-folders named `icarus` and `higan`
     if they exist.
 
 You might also want to remove

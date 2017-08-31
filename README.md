@@ -1,7 +1,7 @@
 The unofficial higan repository
 ===============================
 
-higan emulates a number of classic videogame consoles of the 1980s and 1990s,
+higan emulates a number of classic video-game consoles of the 1980s and 1990s,
 allowing you to play classic games on a modern general-purpose computer.
 
 This repository includes

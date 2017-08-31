@@ -37,7 +37,7 @@ Playing Game Boy Color games in Game Boy mode
 
 Games for the original Game Boy
 came in solid grey cartridges,
-and only supported four-shade greyscale graphics.
+and only supported four-shade grey-scale graphics.
 ROM files for these games
 typically have filenames ending in `.gb`.
 
@@ -54,7 +54,7 @@ typically have filenames ending in `.gbc`.
 However,
 there were also some games
 that could use colour if it was available,
-but would stick to greyscale if it wasn't.
+but would stick to grey-scale if it wasn't.
 These games came in black cartridges.
 ROM files for these games
 typically have filenames ending in `.gbc`
@@ -153,9 +153,9 @@ Rumble compatibility for Game Boy Advance
 The original Game Boy Advance
 and the Game Boy Advance SP
 did not support any kind of rumble or force-feedback system,
-but the Game Boy Player addon for the Gamecube
+but the Game Boy Player add-on for the GameCube
 allowed Game Boy Advance games
-to use the rumble feature in Gamecube controllers.
+to use the rumble feature in GameCube controllers.
 
 Because rumble is a feature of the Game Boy Player,
 to experience the rumble effect in higan

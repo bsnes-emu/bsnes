@@ -30,7 +30,7 @@ of the emulated console's video output:
     This is in addition to
     any adjustment applied by
     the "Colors" option
-    in the "Video Emulation" submenu
+    in the "Video Emulation" sub-menu
     of the [Settings menu](higan.md#the-settings-menu).
   - **Luminance** adjusts the overall brightness,
     where 100% is normal,
@@ -87,7 +87,7 @@ in a normal window.
     whenever it changes size
     (because the user loaded a game for a different console,
     chose a different option from
-    the [Video Scale submenu](higan.md#the-settings-menu),
+    the [Video Scale sub-menu](higan.md#the-settings-menu),
     toggled Aspect Correction, etc.)
     When disabled,
     higan generally respects manual resizing.

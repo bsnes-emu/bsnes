@@ -96,7 +96,7 @@ If games are running way too fast, here's some things to check:
     in [the Advanced settings](interface/higan-settings.md#advanced)
     (remember to restart higan if you change driver settings)
   - Make sure your computer has speakers or headphones connected
-    (some computers disable all audio if no ouputs are available)
+    (some computers disable all audio if no outputs are available)
       - If you want the game to be silent,
         tick "Mute Audio" in
         [the Settings menu](interface/higan.md#the-settings-menu)
@@ -116,7 +116,7 @@ Full-speed emulation for the Super Famicom base unit
 requires an Intel Core 2 Duo (or AMD equivalent),
 full-speed for games with the SuperFX chip
 requires an Intel Ivy Bridge (or equivalent),
-full-speed for the wireframe animations in Mega Man X2
+full-speed for the wire-frame animations in Mega Man X2
 requires an even faster computer.
 Low-power CPUs like ARM chips,
 or Intel Atom and Celeron CPUs
@@ -256,8 +256,8 @@ do their work in exactly the same amount of time
 as their hardware counterparts.
 The problem is forty years of technology
 designed to make programs run as fast as possible:
-optimizing compilers
-and superscalar, out-of-order CPU architectures
+optimising compilers
+and super-scalar, out-of-order CPU architectures
 change programs to make them faster,
 speeding up some programs more than others
 in ways that are very difficult to understand and predict.
