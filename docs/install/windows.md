@@ -88,8 +88,9 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ...except it should mention the compiler version that you installed
 and the corresponding dates.
-If you see an error message like "command not found"
-or "bad command or filename",
+If you see an error message like
+"'g++' is not recognized as an internal or external command,
+operable program or batch file",
 you may need to add the compiler's "bin" folder
 to your computer's `%PATH%`.
 See the compiler's documentation for help with that.
