@@ -24,7 +24,7 @@ the Internet contains many tools
 that will extract the BIOS image so it can be copied
 to your desktop computer.
 The correct GBA BIOS file is exactly 16384 bytes long,
-and has the SHA-256 hash
+and has the SHA256 hash
 `fd2547724b505f487e6dcb29ec2ecff3af35a841a77ab2e85fd87350abd36570`.
 
 Once you have the correct BIOS file:
