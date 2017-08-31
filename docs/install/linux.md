@@ -53,10 +53,10 @@ being installed system-wide.
  3. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 4. Type `make -C icarus compiler=g++` and press Enter
-    to build the icarus import tool
- 5. Type `make -C higan compiler=g++` and press Enter
+ 4. Type `make -C higan compiler=g++` and press Enter
     to build the main higan executable
+ 5. Type `make -C icarus compiler=g++` and press Enter
+    to build the icarus import tool
 
 Installing a compiled build on Linux
 ------------------------------------
@@ -68,10 +68,10 @@ as described in the previous section:
  2. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 3. Type `make -C icarus install` and press Enter
-    to install icarus and its game database
- 4. Type `make -C higan install` and press Enter
+ 3. Type `make -C higan install` and press Enter
     to install higan and its supporting files
+ 4. Type `make -C icarus install` and press Enter
+    to install icarus and its game database
  5. If the higan source includes a `shaders` subdirectory,
     type `make -C shaders install`
     to install the example
@@ -123,8 +123,8 @@ as installed by the above instructions:
  2. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 3. Type `make -C icarus uninstall` and press Enter
- 4. Type `make -C higan uninstall` and press Enter
+ 3. Type `make -C higan uninstall` and press Enter
+ 4. Type `make -C icarus uninstall` and press Enter
 
 To remove higan's configuration,
 you should also delete the following directories
