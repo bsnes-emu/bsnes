@@ -293,7 +293,7 @@ that's OK,
 but the name *inside* the `.zip` file
 must end in `.bs`)
 in order for it to be successfully imported.
-Sometimes memory pak filenames end in `(BSROM).sfc`,
+Sometimes memory pak filenames end in `.sfc`,
 which will make higan try to import them as
 regular Super Famicom games
 and fail.
@@ -357,7 +357,7 @@ that's OK,
 but the name *inside* the `.zip` file
 must end in `.st`)
 in order for it to be successfully imported.
-Sometimes mini-cartridge filenames end in `(ST).sfc`,
+Sometimes mini-cartridge filenames end in `.sfc`,
 which will make higan try to import them as
 regular Super Famicom games,
 and fail miserably.
