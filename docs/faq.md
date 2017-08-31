@@ -1,12 +1,12 @@
 I see "tearing" when a game scrolls. How can I enable vsync?
 ------------------------------------------------------------
 
-higan supports synchronizing video output
-to the display's vertical-synchronization (or "vsync") signal,
+higan supports synchronising video output
+to the display's vertical-synchronisation (or "vsync") signal,
 but the option is hidden
 because it often causes more problems than it solves
 (see the next question).
-To enable video synchronization:
+To enable video synchronisation:
 
   - Open higan's configuration file, `settings.bml`
       - On Windows, look in `%LOCALAPPDATA%\higan`
@@ -22,19 +22,19 @@ To enable video synchronization:
   - Save your changes to `settings.bml`
     and restart higan
 
-Why is video synchronization a problem for higan?
+Why is video synchronisation a problem for higan?
 -------------------------------------------------
 
 **The short version:**
-Turning on video synchronization
+Turning on video synchronisation
 cleans up video tearing,
-turning on audio synchronization
+turning on audio synchronisation
 cleans up audio glitches,
 but turning on both
 makes audio glitches worse.
 
 **The long version:**
-Enabling video synchronization
+Enabling video synchronisation
 locks the frame-rate of the emulated console
 to the frame-rate of your computer's display.
 If your display's refresh rate exactly matches
@@ -56,13 +56,13 @@ the emulated console's refresh rate:
     with the computer display.
 
 Because of these frame-rate differences,
-enabling video synchronization
+enabling video synchronisation
 can force games to run
 faster or slower than intended.
 
 The consoles that higan emulates
 produce video frames and audio samples at a particular rate.
-If video synchronization causes
+If video synchronisation causes
 the emulated console to run, say, 5% faster than intended,
 that means audio samples are also being produced 5% faster.
 You might not notice the changed game speed,
@@ -71,9 +71,9 @@ the game's audio glitching constantly
 as your sound card tries to keep up.
 
 Enabling
-[audio synchronization](interface/higan.md#the-settings-menu)
+[audio synchronisation](interface/higan.md#the-settings-menu)
 normally fixes this kind of audio glitching,
-but with video synchronization it makes things worse:
+but with video synchronisation it makes things worse:
 audio is likely to glitch
 while higan waits for a video frame to be shown,
 and video is likely to stutter
@@ -85,8 +85,8 @@ Games run too fast
 higan runs as fast as it can,
 but it will pause and wait
 for the audio and video drivers to catch up
-if [Synchronize Audio](interface/higan.md#the-settings-menu)
-and [video synchronization][vsync]
+if [audio synchronisation](interface/higan.md#the-settings-menu)
+and [video synchronisation][vsync]
 are enabled, respectively.
 If games are running way too fast, here are some things to check:
 
@@ -102,7 +102,7 @@ If games are running way too fast, here are some things to check:
         [the Settings menu](interface/higan.md#the-settings-menu)
   - If you can't connect speakers or headphones to your computer,
     or you did but it didn't help,
-    try enabling the secret [video synchronization][vsync] option.
+    try enabling the secret [video synchronisation][vsync] option.
 
 [vsync]: #i-see-tearing-when-a-game-scrolls-how-can-i-enable-vsync
 
@@ -248,7 +248,7 @@ device B will have finished operation Y
 and be ready to do something new.
 Meanwhile, higan's emulated components
 take an unpredictable amount of time to do their work,
-so without deliberate synchronization
+so without deliberate synchronisation
 things would break almost immediately.
 
 It's not practical to make higan's emulated devices
