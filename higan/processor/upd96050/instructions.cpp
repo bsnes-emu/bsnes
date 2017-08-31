@@ -31,7 +31,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
   case  4: idb = regs.dp; break;
   case  5: idb = regs.rp; break;
   case  6: idb = dataROM[regs.rp]; break;
-  case  7: idb = 0x8000 - flags.a.s1; break;
+  case  7: idb = 0x8000 - (!asl ? flags.a.s1 : flags.b.s1); break;
   case  8: idb = regs.dr; regs.sr.rqm = 1; break;
   case  9: idb = regs.dr; break;
   case 10: idb = regs.sr; break;
@@ -81,6 +81,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     flag.z = r == 0;
 
     switch(alu) {
+
     case  1:    //OR
     case  2:    //AND
     case  3:    //XOR
@@ -93,16 +94,13 @@ auto uPD96050::execOP(uint24 opcode) -> void {
       flag.ov1 = 0;
       break;
     }
+
     case  4:    //SUB
     case  5:    //ADD
     case  6:    //SBB
     case  7:    //ADC
     case  8:    //DEC
     case  9: {  //INC
-      if(!flag.ov1) {
-        flag.s1 = flag.s0;
-      }
-
       if(alu & 1) {
         //addition
         flag.ov0 = (q ^ r) & ~(q ^ p) & 0x8000;
@@ -118,25 +116,30 @@ auto uPD96050::execOP(uint24 opcode) -> void {
       flag.ovh[1] = flag.ovh[0];
       flag.ovh[0] = flag.ov0;
 
+      boolean s1 = !flag.ov1 ? flag.s0 : flag.s1;
       flag.ov1 = (
         (flag.ovh[0] ^  flag.ovh[1] ^ flag.ovh[2])
       | (flag.ovh[0] & !flag.ovh[1] & flag.ovh[2] & flag.s0 == flag.s1)
       );
+      flag.s1 = s1;
 
       break;
     }
+
     case 11: {  //SHR1 (ASR)
       flag.c = q & 1;
       flag.ov0 = 0;
       flag.ov1 = 0;
       break;
     }
+
     case 12: {  //SHL1 (ROL)
       flag.c = q >> 15;
       flag.ov0 = 0;
       flag.ov1 = 0;
       break;
     }
+
     }
 
     switch(asl) {
@@ -209,10 +212,10 @@ auto uPD96050::execJP(uint24 opcode) -> void {
   case 0x0b3: if((regs.dp & 0x0f) != 0x0f) regs.pc = jp; return;  //JDPLNF
 
   //serial input/output acknowledge not emulated
-  case 0x0b4: if(0) regs.pc = jp; return;  //JNSIAK
-  case 0x0b6: if(0) regs.pc = jp; return;  //JSIAK
-  case 0x0b8: if(0) regs.pc = jp; return;  //JNSOAK
-  case 0x0ba: if(0) regs.pc = jp; return;  //JSOAK
+  case 0x0b4: if(regs.sr.siack == 0) regs.pc = jp; return;  //JNSIAK
+  case 0x0b6: if(regs.sr.siack == 1) regs.pc = jp; return;  //JSIAK
+  case 0x0b8: if(regs.sr.soack == 0) regs.pc = jp; return;  //JNSOAK
+  case 0x0ba: if(regs.sr.soack == 1) regs.pc = jp; return;  //JSOAK
 
   case 0x0bc: if(regs.sr.rqm == 0) regs.pc = jp; return;  //JNRQM
   case 0x0be: if(regs.sr.rqm == 1) regs.pc = jp; return;  //JRQM

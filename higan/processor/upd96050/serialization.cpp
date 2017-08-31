@@ -24,9 +24,11 @@ auto uPD96050::Status::serialize(serializer& s) -> void {
   s.boolean(drc);
   s.boolean(dma);
   s.boolean(drs);
-  s.boolean(uf0);
-  s.boolean(uf1);
+  s.boolean(usf0);
+  s.boolean(usf1);
   s.boolean(rqm);
+  s.boolean(siack);
+  s.boolean(soack);
 }
 
 auto uPD96050::Registers::serialize(serializer& s) -> void {

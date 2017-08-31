@@ -55,44 +55,49 @@ struct uPD96050 {
     boolean s0;   //sign 0
     boolean s1;   //sign 1
 
-    boolean ovh[3];  //overflow history (internal)
+    //internal
+    boolean ovh[3];  //overflow 0 history
   };
 
   struct Status {
     inline operator uint() const {
       bool _drs = drs & !drc;  //when DRC=1, DRS=0
       return p0 << 0 | p1 << 1 | ei << 7 | sic << 8 | soc << 9 | drc << 10
-           | dma << 11 | _drs << 12 | uf0 << 13 | uf1 << 14 | rqm << 15;
+           | dma << 11 | _drs << 12 | usf0 << 13 | usf1 << 14 | rqm << 15;
     }
 
     inline auto operator=(uint16 data) -> Status& {
-      p0  = data.bit( 0);
-      p1  = data.bit( 1);
-      ei  = data.bit( 7);
-      sic = data.bit( 8);
-      soc = data.bit( 9);
-      drc = data.bit(10);
-      dma = data.bit(11);
-      drs = data.bit(12);
-      uf0 = data.bit(13);
-      uf1 = data.bit(14);
-      rqm = data.bit(15);
+      p0   = data.bit( 0);
+      p1   = data.bit( 1);
+      ei   = data.bit( 7);
+      sic  = data.bit( 8);
+      soc  = data.bit( 9);
+      drc  = data.bit(10);
+      dma  = data.bit(11);
+      drs  = data.bit(12);
+      usf0 = data.bit(13);
+      usf1 = data.bit(14);
+      rqm  = data.bit(15);
       return *this;
     }
 
     auto serialize(serializer&) -> void;
 
-    boolean p0;   //output port 0
-    boolean p1;   //output port 1
-    boolean ei;   //enable interrupts
-    boolean sic;  //serial input control  (0 = 16-bit; 1 = 8-bit)
-    boolean soc;  //serial output control (0 = 16-bit; 1 = 8-bit)
-    boolean drc;  //data register size    (0 = 16-bit; 1 = 8-bit)
-    boolean dma;  //data register DMA mode
-    boolean drs;  //data register status  (1 = active; 0 = stopped)
-    boolean uf0;  //user flag 0
-    boolean uf1;  //user flag 1
-    boolean rqm;  //request mode (=1 on internal access; =0 on external access)
+    boolean p0;    //output port 0
+    boolean p1;    //output port 1
+    boolean ei;    //enable interrupts
+    boolean sic;   //serial input control  (0 = 16-bit; 1 = 8-bit)
+    boolean soc;   //serial output control (0 = 16-bit; 1 = 8-bit)
+    boolean drc;   //data register size    (0 = 16-bit; 1 = 8-bit)
+    boolean dma;   //data register DMA mode
+    boolean drs;   //data register status  (1 = active; 0 = stopped)
+    boolean usf0;  //user flag 0
+    boolean usf1;  //user flag 1
+    boolean rqm;   //request for master (=1 on internal access; =0 on external access)
+
+    //internal
+    boolean siack;  //serial input acknowledge
+    boolean soack;  //serial output acknowledge
   };
 
   struct Registers {
