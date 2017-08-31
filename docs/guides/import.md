@@ -84,7 +84,7 @@ To import a game that requires co-processor firmware,
 you must put a copy of the required firmware files
 beside the game you want to import.
 For example,
-if you want to import Megaman X2 for the Super Famicom,
+if you want to import *Mega Man X2* for the Super Famicom,
 which is stored in the file `mmx2.sfc`,
 the file `cx4.data.rom`
 must be placed in the same folder

@@ -129,8 +129,8 @@ that aren't technically part of the console itself:
     of the cheap LCD screens these consoles used
     by blending each output frame with the previous one.
       - Games like
-        Jurassic Park for the Super Famicom
-        or Chikyuu Kaihou Gun ZAS for the Game Boy
+        *Jurassic Park* for the Super Famicom
+        or *Chikyuu Kaihou Gun ZAS* for the Game Boy
         depend on this to emulate a transparency effect.
   - **Colors**
     simulates the way a console's display device

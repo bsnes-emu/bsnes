@@ -116,7 +116,7 @@ Full-speed emulation for the Super Famicom base unit
 requires an Intel Core 2 Duo (or AMD equivalent),
 full-speed for games with the SuperFX chip
 requires an Intel Ivy Bridge (or equivalent),
-full-speed for the wire-frame animations in Mega Man X2
+full-speed for the wire-frame animations in *Mega Man X2*
 requires an even faster computer.
 Low-power CPUs like ARM chips,
 or Intel Atom and Celeron CPUs
