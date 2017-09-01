@@ -31,7 +31,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
   case  4: idb = regs.dp; break;
   case  5: idb = regs.rp; break;
   case  6: idb = dataROM[regs.rp]; break;
-  case  7: idb = 0x8000 - (!asl ? flags.a.s1 : flags.b.s1); break;
+  case  7: idb = 0x8000 - flags.a.s1; break;  //ASL ignored; always SA1
   case  8: idb = regs.dr; regs.sr.rqm = 1; break;
   case  9: idb = regs.dr; break;
   case 10: idb = regs.sr; break;
@@ -77,8 +77,8 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     case 15: r = q << 8 | q >> 8; break;      //XCHG
     }
 
-    flag.s0 = r & 0x8000;
     flag.z = r == 0;
+    flag.s0 = r & 0x8000;
 
     switch(alu) {
 
@@ -89,9 +89,9 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     case 13:    //SHL2
     case 14:    //SHL4
     case 15: {  //XCHG
-      flag.c = 0;
       flag.ov0 = 0;
       flag.ov1 = 0;
+      flag.c = 0;
       break;
     }
 
@@ -110,33 +110,22 @@ auto uPD96050::execOP(uint24 opcode) -> void {
         flag.ov0 = (q ^ r) &  (q ^ p) & 0x8000;
         flag.c = r > q;
       }
-
-      //ovh[] = last three overflow flags (0 = most recent result)
-      flag.ovh[2] = flag.ovh[1];
-      flag.ovh[1] = flag.ovh[0];
-      flag.ovh[0] = flag.ov0;
-
-      boolean s1 = !flag.ov1 ? flag.s0 : flag.s1;
-      flag.ov1 = (
-        (flag.ovh[0] ^  flag.ovh[1] ^ flag.ovh[2])
-      | (flag.ovh[0] & !flag.ovh[1] & flag.ovh[2] & flag.s0 == flag.s1)
-      );
-      flag.s1 = s1;
-
+      if(!flag.ov1) flag.s1 = flag.s0;
+      flag.ov1 = flag.ov0 & flag.ov1 ? flag.s0 == flag.s1 : flag.ov0 | flag.ov1;
       break;
     }
 
     case 11: {  //SHR1 (ASR)
-      flag.c = q & 1;
       flag.ov0 = 0;
       flag.ov1 = 0;
+      flag.c = q & 1;
       break;
     }
 
     case 12: {  //SHL1 (ROL)
-      flag.c = q >> 15;
       flag.ov0 = 0;
       flag.ov1 = 0;
+      flag.c = q >> 15;
       break;
     }
 
@@ -148,17 +137,20 @@ auto uPD96050::execOP(uint24 opcode) -> void {
     }
   }
 
-  execLD((idb << 6) + dst);
+  execLD(idb << 6 | dst);
 
-  switch(dpl) {
-  case 1: regs.dp = (regs.dp & 0xf0) + (regs.dp + 1 & 0x0f); break;  //DPINC
-  case 2: regs.dp = (regs.dp & 0xf0) + (regs.dp - 1 & 0x0f); break;  //DPDEC
-  case 3: regs.dp = (regs.dp & 0xf0); break;  //DPCLR
+  if(dst != 4) {  //if LD does not write to DP
+    switch(dpl) {
+    case 1: regs.dp = (regs.dp & 0xf0) + (regs.dp + 1 & 0x0f); break;  //DPINC
+    case 2: regs.dp = (regs.dp & 0xf0) + (regs.dp - 1 & 0x0f); break;  //DPDEC
+    case 3: regs.dp = (regs.dp & 0xf0); break;  //DPCLR
+    }
+    regs.dp ^= dphm << 4;
   }
 
-  regs.dp ^= dphm << 4;
-
-  if(rpdcr) regs.rp--;
+  if(dst != 5) {  //if LD does not write to RP
+    if(rpdcr) regs.rp--;
+  }
 }
 
 auto uPD96050::execRT(uint24 opcode) -> void {

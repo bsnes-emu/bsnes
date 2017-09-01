@@ -12,7 +12,6 @@ auto uPD96050::Flag::serialize(serializer& s) -> void {
   s.boolean(c);
   s.boolean(s0);
   s.boolean(s1);
-  s.array(ovh);
 }
 
 auto uPD96050::Status::serialize(serializer& s) -> void {

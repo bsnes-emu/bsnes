@@ -54,9 +54,6 @@ struct uPD96050 {
     boolean c;    //carry
     boolean s0;   //sign 0
     boolean s1;   //sign 1
-
-    //internal
-    boolean ovh[3];  //overflow 0 history
   };
 
   struct Status {
