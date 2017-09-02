@@ -299,11 +299,11 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     for (; cycles; cycles -= atomic_increase) {
         
         gb->display_cycles += atomic_increase;
-        /* The very first line is 2 (4 from the CPU's perseptive) clocks shorter when the LCD turns on.
-           Todo: Verify on the 3 CGB modes, especially double speed mode. */
-        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - atomic_increase) {
+        /* The very first line is 4 clocks shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
+         CGB in double speed mode. */
+        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - 4) {
             gb->first_scanline = false;
-            gb->display_cycles += atomic_increase;
+            gb->display_cycles += 4;
         }
         bool should_compare_ly = true;
         uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
