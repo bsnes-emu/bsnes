@@ -300,7 +300,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
-        
+        gb->delayed_interrupts &= ~3;
         gb->display_cycles += atomic_increase;
         /* The very first line is 4 clocks shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
          CGB in double speed mode. */
@@ -344,6 +344,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 1;
             gb->io_registers[GB_IO_IF] |= 1;
+            if (gb->is_cgb) {
+                /* See comment on STAT interrupt at the end of the loop */
+                gb->delayed_interrupts |= 1;
+            }
             
             /* Entering VBlank state triggers the OAM interrupt. In CGB, it happens 4 cycles earlier */
             if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->is_cgb) {
@@ -559,6 +563,12 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     
     if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
         gb->io_registers[GB_IO_IF] |= 2;
+        if (gb->is_cgb) {
+            /* On CGB, the STAT interrupt is not aligned to a T-Cycle, therefore it is only effective the next T-Cycle
+               Todo: verify on DMG mode CGB. This was only tested on LYC STAT interrupts, should be tested on others
+               as well. */
+            gb->delayed_interrupts |= 2;
+        }
     }
     
 #if 0
