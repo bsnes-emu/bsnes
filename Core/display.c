@@ -289,7 +289,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     }
     
     uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
-    uint8_t stat_delay = gb->cgb_double_speed? 2 : (gb->cgb_mode? 0 : 4);
+    /* According to AntonioND's docs this value should be 0 in CGB mode, but tests I ran on my CGB seem to contradict
+       these findings.
+       Todo: Investigate what causes the difference between our findings */
+    uint8_t stat_delay = gb->cgb_double_speed? 2 : 4; //(gb->cgb_mode? 0 : 4);
     /* Todo: This is correct for DMG. Is it correct for the 3 CGB modes (DMG/single/double)?*/
     uint8_t scx_delay = ((gb->effective_scx & 7) + atomic_increase - 1) & ~(atomic_increase - 1);
     /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
@@ -558,8 +561,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         gb->io_registers[GB_IO_IF] |= 2;
     }
     
+#if 0
     /* The value of LY is glitched in the last cycle of every line in CGB mode CGB in single speed
-       This is based on GiiBiiAdvance's docs */
+       This is based on AntonioND's docs, however I could not reproduce these findings on my CGB.
+       Todo: Find out why my tests contradict these docs */
     if (gb->cgb_mode && !gb->cgb_double_speed &&
         gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 4) {
         uint8_t glitch_pattern[] = {0, 0, 2, 0, 4, 4, 6, 0, 8};
@@ -570,6 +575,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] & 7] | (gb->io_registers[GB_IO_LY] & 0xF8);
         }
     }
+#endif
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
