@@ -82,10 +82,13 @@ static void GB_ir_run(GB_gameboy_t *gb)
 
 static void advance_tima_state_machine(GB_gameboy_t *gb)
 {
+    gb->delayed_interrupts &= ~4;
     if (gb->tima_reload_state == GB_TIMA_RELOADED) {
         gb->tima_reload_state = GB_TIMA_RUNNING;
     }
     else if (gb->tima_reload_state == GB_TIMA_RELOADING) {
+        gb->io_registers[GB_IO_IF] |= 4;
+        gb->delayed_interrupts |= 4; // Timer interrupt is not aligned to a T-cycle and therefore is effective only the next one.
         gb->tima_reload_state = GB_TIMA_RELOADED;
     }
 }
@@ -154,7 +157,6 @@ static void increase_tima(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_TIMA]++;
     if (gb->io_registers[GB_IO_TIMA] == 0) {
         gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
-        gb->io_registers[GB_IO_IF] |= 4;
         gb->tima_reload_state = GB_TIMA_RELOADING;
     }
 }
