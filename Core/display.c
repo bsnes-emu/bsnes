@@ -133,7 +133,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     }
     else {
         x += gb->effective_scx;
-        y += gb->io_registers[GB_IO_SCY];
+        y += gb->effective_scy;
     }
     if (gb->io_registers[GB_IO_LCDC] & 0x08 && !in_window) {
         map = 0x1C00;
@@ -619,13 +619,17 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
 
     /* Render */
-    /* Todo: it appears that the actual rendering starts 4 cycles after mode 3 starts. Is this correct? */
-    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 4;
+    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 7;
     
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= WIDTH) {
             continue;
         }
+        
+        if (((gb->previous_lcdc_x + gb->effective_scx) & 7) == 0) {
+            gb->effective_scy = gb->io_registers[GB_IO_SCY];
+        }
+        
         if (gb->previous_lcdc_x < 0) {
             continue;
         }

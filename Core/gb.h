@@ -385,6 +385,7 @@ struct GB_gameboy_internal_s {
         bool oam_write_blocked;
         bool vram_write_blocked;
         bool window_disabled_while_active;
+        uint8_t effective_scy; // SCY is latched when starting to draw a tile
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
