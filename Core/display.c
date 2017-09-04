@@ -133,7 +133,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     }
     else {
         x += gb->effective_scx;
-        y += gb->io_registers[GB_IO_SCY];
+        y += gb->effective_scy;
     }
     if (gb->io_registers[GB_IO_LCDC] & 0x08 && !in_window) {
         map = 0x1C00;
@@ -289,7 +289,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     }
     
     uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
-    uint8_t stat_delay = gb->cgb_double_speed? 2 : (gb->cgb_mode? 0 : 4);
+    /* According to AntonioND's docs this value should be 0 in CGB mode, but tests I ran on my CGB seem to contradict
+       these findings.
+       Todo: Investigate what causes the difference between our findings */
+    uint8_t stat_delay = gb->cgb_double_speed? 2 : 4; //(gb->cgb_mode? 0 : 4);
     /* Todo: This is correct for DMG. Is it correct for the 3 CGB modes (DMG/single/double)?*/
     uint8_t scx_delay = ((gb->effective_scx & 7) + atomic_increase - 1) & ~(atomic_increase - 1);
     /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
@@ -297,13 +300,13 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
-        
+        gb->delayed_interrupts &= ~3;
         gb->display_cycles += atomic_increase;
-        /* The very first line is 2 (4 from the CPU's perseptive) clocks shorter when the LCD turns on.
-           Todo: Verify on the 3 CGB modes, especially double speed mode. */
-        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - atomic_increase) {
+        /* The very first line is 4 clocks shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
+         CGB in double speed mode. */
+        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - 4) {
             gb->first_scanline = false;
-            gb->display_cycles += atomic_increase;
+            gb->display_cycles += 4;
         }
         bool should_compare_ly = true;
         uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
@@ -341,6 +344,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 1;
             gb->io_registers[GB_IO_IF] |= 1;
+            if (gb->is_cgb) {
+                /* See comment on STAT interrupt at the end of the loop */
+                gb->delayed_interrupts |= 1;
+            }
             
             /* Entering VBlank state triggers the OAM interrupt. In CGB, it happens 4 cycles earlier */
             if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->is_cgb) {
@@ -556,10 +563,18 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     
     if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
         gb->io_registers[GB_IO_IF] |= 2;
+        if (gb->is_cgb) {
+            /* On CGB, the STAT interrupt is not aligned to a T-Cycle, therefore it is only effective the next T-Cycle
+               Todo: verify on DMG mode CGB. This was only tested on LYC STAT interrupts, should be tested on others
+               as well. */
+            gb->delayed_interrupts |= 2;
+        }
     }
     
+#if 0
     /* The value of LY is glitched in the last cycle of every line in CGB mode CGB in single speed
-       This is based on GiiBiiAdvance's docs */
+       This is based on AntonioND's docs, however I could not reproduce these findings on my CGB.
+       Todo: Find out why my tests contradict these docs */
     if (gb->cgb_mode && !gb->cgb_double_speed &&
         gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 4) {
         uint8_t glitch_pattern[] = {0, 0, 2, 0, 4, 4, 6, 0, 8};
@@ -570,6 +585,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] & 7] | (gb->io_registers[GB_IO_LY] & 0xF8);
         }
     }
+#endif
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
@@ -603,13 +619,17 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
 
     /* Render */
-    /* Todo: it appears that the actual rendering starts 4 cycles after mode 3 starts. Is this correct? */
-    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 4;
+    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 7;
     
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= WIDTH) {
             continue;
         }
+        
+        if (((gb->previous_lcdc_x + gb->effective_scx) & 7) == 0) {
+            gb->effective_scy = gb->io_registers[GB_IO_SCY];
+        }
+        
         if (gb->previous_lcdc_x < 0) {
             continue;
         }

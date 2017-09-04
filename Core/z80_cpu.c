@@ -1337,9 +1337,9 @@ static GB_opcode_t *opcodes[256] = {
 void GB_cpu_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
-    bool interrupt = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
+    uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F  & ~gb->delayed_interrupts;
 
-    if (interrupt) {
+    if (interrupt_queue) {
         gb->halted = false;
     }
 
@@ -1354,9 +1354,8 @@ void GB_cpu_run(GB_gameboy_t *gb)
         gb->ime_toggle = false;
     }
 
-    if (effecitve_ime && interrupt) {
+    if (effecitve_ime && interrupt_queue) {
         uint8_t interrupt_bit = 0;
-        uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
         while (!(interrupt_queue & 1)) {
             interrupt_queue >>= 1;
             interrupt_bit++;

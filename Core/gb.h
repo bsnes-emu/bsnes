@@ -331,6 +331,10 @@ struct GB_gameboy_internal_s {
         GB_PADDING(uint16_t, serial_cycles);
         uint16_t serial_cycles; /* This field changed its meaning in v0.10 */
         uint16_t serial_length;
+        uint8_t delayed_interrupts; /* When an interrupt occurs while not aligned to a T-cycle, it must be "delayed" */
+        bool dont_delay_timer_interrupt; /* If the timer glitch causes a TIMA overflow, it causes the timer to overflow
+                                            with different timing, so the triggered interrupt is not delayed.
+                                            Todo: needs test ROM. */
     );
 
     /* APU */
@@ -383,6 +387,7 @@ struct GB_gameboy_internal_s {
         bool oam_write_blocked;
         bool vram_write_blocked;
         bool window_disabled_while_active;
+        uint8_t effective_scy; // SCY is latched when starting to draw a tile
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
