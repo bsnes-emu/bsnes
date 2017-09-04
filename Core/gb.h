@@ -333,6 +333,9 @@ struct GB_gameboy_internal_s {
         uint16_t serial_cycles; /* This field changed its meaning in v0.10 */
         uint16_t serial_length;
         uint8_t delayed_interrupts; /* When an interrupt occurs while not aligned to a T-cycle, it must be "delayed" */
+        bool dont_delay_timer_interrupt; /* If the timer glitch causes a TIMA overflow, it causes the timer to overflow
+                                            with different timing, so the triggered interrupt is not delayed.
+                                            Todo: needs test ROM. */
     );
 
     /* APU */
