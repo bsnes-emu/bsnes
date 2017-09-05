@@ -238,11 +238,11 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //MOSAIC
   case 0x2106: {
-    uint mosaicSize = data.bits(4,7);
-    bg1.io.mosaic = data.bit(0) ? mosaicSize : 0;
-    bg2.io.mosaic = data.bit(1) ? mosaicSize : 0;
-    bg3.io.mosaic = data.bit(2) ? mosaicSize : 0;
-    bg4.io.mosaic = data.bit(3) ? mosaicSize : 0;
+    bg1.mosaic.enable = data.bit(0);
+    bg2.mosaic.enable = data.bit(1);
+    bg3.mosaic.enable = data.bit(2);
+    bg4.mosaic.enable = data.bit(3);
+    Background::Mosaic::size = data.bits(4,7);
     return;
   }
 

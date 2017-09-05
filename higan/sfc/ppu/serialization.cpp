@@ -93,15 +93,11 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(io.tiledataAddress);
   s.integer(io.screenAddress);
   s.integer(io.screenSize);
-  s.integer(io.mosaic);
   s.integer(io.tileSize);
-
   s.integer(io.mode);
   s.array(io.priority);
-
   s.integer(io.aboveEnable);
   s.integer(io.belowEnable);
-
   s.integer(io.hoffset);
   s.integer(io.voffset);
 
@@ -111,23 +107,22 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(output.above.priority);
   s.integer(output.above.palette);
   s.integer(output.above.tile);
-
   s.integer(output.below.priority);
   s.integer(output.below.palette);
   s.integer(output.below.tile);
 
+  s.integer(mosaic.size);
+  s.integer(mosaic.enable);
+  s.integer(mosaic.vcounter);
+  s.integer(mosaic.hcounter);
+  s.integer(mosaic.voffset);
+  s.integer(mosaic.hoffset);
+  s.integer(mosaic.pixel.priority);
+  s.integer(mosaic.pixel.palette);
+  s.integer(mosaic.pixel.tile);
+
   s.integer(x);
   s.integer(y);
-
-  s.integer(mosaic.priority);
-  s.integer(mosaic.palette);
-  s.integer(mosaic.tile);
-
-  s.integer(mosaic.vcounter);
-  s.integer(mosaic.voffset);
-  s.integer(mosaic.hcounter);
-  s.integer(mosaic.hoffset);
-
   s.integer(tileCounter);
   s.integer(tile);
   s.integer(priority);

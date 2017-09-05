@@ -1,8 +1,9 @@
 struct Background {
   Background(uint id) : id(id) {}
 
-  alwaysinline auto voffset() const -> uint16;
+  alwaysinline auto hires() const -> bool;
   alwaysinline auto hoffset() const -> uint16;
+  alwaysinline auto voffset() const -> uint16;
 
   auto frame() -> void;
   auto scanline() -> void;
@@ -31,14 +32,13 @@ struct Background {
     uint16 tiledataAddress;
     uint16 screenAddress;
     uint2 screenSize;
-    uint4 mosaic;
-    bool tileSize;
+    uint1 tileSize;
 
-    uint mode;
-    uint priority[2];
+    uint8 mode;
+    uint8 priority[2];
 
-    bool aboveEnable;
-    bool belowEnable;
+    uint1 aboveEnable;
+    uint1 belowEnable;
 
     uint16 hoffset;
     uint16 voffset;
@@ -49,32 +49,39 @@ struct Background {
     uint16 voffset;
   } latch;
 
+  struct Pixel {
+    uint8 priority;  //0 = none (transparent)
+    uint8 palette;
+    uint16 tile;
+  } above, below;
+
   struct Output {
-    struct Pixel {
-      uint priority;  //0 = none (transparent)
-      uint8 palette;
-      uint16 tile;
-    } above, below;
+    Pixel above;
+    Pixel below;
   } output;
 
-  struct Mosaic : Output::Pixel {
-    uint vcounter;
-    uint voffset;
-    uint hcounter;
-    uint hoffset;
+  struct Mosaic {
+    static uint4 size;
+    uint1 enable;
+
+    uint16 vcounter;
+    uint16 hcounter;
+
+    uint16 voffset;
+    uint16 hoffset;
+
+    Pixel pixel;
   } mosaic;
 
-  struct {
-    int x;
-    int y;
+  int x;
+  int y;
 
-    uint tileCounter;
-    uint tile;
-    uint priority;
-    uint paletteNumber;
-    uint paletteIndex;
-    uint32 data[2];
-  };
+  uint3 tileCounter;
+  uint16 tile;
+  uint8 priority;
+  uint3 paletteNumber;
+  uint8 paletteIndex;
+  uint32 data[2];
 
   friend class PPU;
 };

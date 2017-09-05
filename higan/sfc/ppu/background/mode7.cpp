@@ -25,8 +25,8 @@ auto PPU::Background::runMode7() -> void {
   uint y = ppu.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
   if(--mosaic.hcounter == 0) {
-    mosaic.hcounter = io.mosaic + 1;
-    mosaic.hoffset += io.mosaic + 1;
+    mosaic.hcounter = mosaic.size + 1;
+    mosaic.hoffset += mosaic.size + 1;
   }
 
   if(ppu.io.hflipMode7) x = 255 - x;
