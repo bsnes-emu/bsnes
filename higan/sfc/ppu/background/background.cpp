@@ -84,7 +84,7 @@ auto PPU::Background::getTile() -> void {
   uint voffset = vscroll + py;
 
   if(ppu.io.bgMode == 2 || ppu.io.bgMode == 4 || ppu.io.bgMode == 6) {
-    uint16 offsetX = x + (hscroll & 7);
+    uint16 offsetX = px + (hscroll & 7);
 
     if(offsetX >= 8) {
       uint hval = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 0);
@@ -96,12 +96,12 @@ auto PPU::Background::getTile() -> void {
           if((hval & 0x8000) == 0) {
             hoffset = offsetX + (hval & ~7);
           } else {
-            voffset = y + hval;
+            voffset = py + hval;
           }
         }
       } else {
         if(hval & validMask) hoffset = offsetX + (hval & ~7);
-        if(vval & validMask) voffset = y + vval;
+        if(vval & validMask) voffset = py + vval;
       }
     }
   }
@@ -175,9 +175,9 @@ auto PPU::Background::run(bool screen) -> void {
   pixel.tile = tile;
 
   if(x == 0) {
-    mosaic.hcounter = 1;
+    mosaic.hcounter = mosaic.size + 1;
     mosaic.pixel = pixel;
-  } else if(x >= 1 && screen == Screen::Above && --mosaic.hcounter == 0) {
+  } else if((!hires() || screen == Screen::Below) && --mosaic.hcounter == 0) {
     mosaic.hcounter = mosaic.size + 1;
     mosaic.pixel = pixel;
   } else if(mosaic.enable) {

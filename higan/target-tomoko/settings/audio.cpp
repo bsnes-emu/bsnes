@@ -42,7 +42,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   volumeLabel.setText("Volume:");
   volumeValue.setAlignment(0.5);
-  volumeSlider.setLength(501).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateEffects(); });
+  volumeSlider.setLength(201).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateEffects(); });
 
   balanceLabel.setText("Balance:");
   balanceValue.setAlignment(0.5);

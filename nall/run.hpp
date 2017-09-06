@@ -192,7 +192,8 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
   string_vector argl(forward<P>(p)...);
   for(auto& arg : argl) if(arg.find(" ")) arg = {"\"", arg, "\""};
   string arguments = argl.merge(" ");
-  ShellExecute(nullptr, nullptr, utf16_t(name), utf16_t(arguments), nullptr, SW_SHOWNORMAL);
+  string directory = Path::program().replace("/", "\\");
+  ShellExecute(nullptr, nullptr, utf16_t(name), utf16_t(arguments), utf16_t(directory), SW_SHOWNORMAL);
 }
 
 #else

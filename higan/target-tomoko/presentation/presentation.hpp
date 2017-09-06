@@ -68,6 +68,7 @@ struct Presentation : Window {
       MenuItem manifestViewer{&toolsMenu};
     Menu helpMenu{&menuBar};
       MenuItem documentation{&helpMenu};
+      MenuItem credits{&helpMenu};
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};

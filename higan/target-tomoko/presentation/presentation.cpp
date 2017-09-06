@@ -136,7 +136,10 @@ Presentation::Presentation() {
 
   helpMenu.setText("Help");
   documentation.setText("Documentation ...").onActivate([&] {
-    invoke("http://doc.byuu.org/higan/");
+    invoke("https://doc.byuu.org/higan/");
+  });
+  credits.setText("Credits ...").onActivate([&] {
+    invoke("https://doc.byuu.org/higan/credits/");
   });
   about.setText("About ...").onActivate([&] {
     aboutWindow->setVisible().setFocused();
