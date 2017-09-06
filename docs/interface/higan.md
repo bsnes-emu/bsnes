@@ -220,6 +220,10 @@ The Help menu contains information about higan itself.
 loads the official higan documentation
 in your web-browser.
 
+**Credits**
+loads a list of people who have contributed to higan
+in your web-browser.
+
 **About**
 opens the About dialog,
 which displays basic information about higan,
