@@ -1,4 +1,4 @@
-build := release
+build := optimize
 include ../nall/GNUmakefile
 include ../hiro/GNUmakefile
 

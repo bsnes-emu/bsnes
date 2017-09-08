@@ -4,7 +4,7 @@ const string Font::Sans  = "{sans}";
 const string Font::Serif = "{serif}";
 const string Font::Mono  = "{mono}";
 
-Font::Font(const string& family, unsigned size) {
+Font::Font(const string& family, float size) {
   setFamily(family);
   setSize(size);
   state.bold = false;
@@ -58,12 +58,12 @@ auto Font::setItalic(bool italic) -> type& {
   return *this;
 }
 
-auto Font::setSize(unsigned size) -> type& {
+auto Font::setSize(float size) -> type& {
   state.size = size;
   return *this;
 }
 
-auto Font::size() const -> unsigned {
+auto Font::size() const -> float {
   return state.size;
 }
 

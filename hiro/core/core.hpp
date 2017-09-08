@@ -90,8 +90,8 @@ Declare(Viewport)
 
 #undef Declare
 
-enum class Orientation : unsigned { Horizontal, Vertical };
-enum class Navigation : unsigned { Top, Bottom, Left, Right };
+enum class Orientation : uint { Horizontal, Vertical };
+enum class Navigation : uint { Top, Bottom, Left, Right };
 
 #if defined(Hiro_Color)
 struct Color {
@@ -153,18 +153,18 @@ struct Alignment {
   using type = Alignment;
 
   Alignment();
-  Alignment(double horizontal, double vertical = 0.5);
+  Alignment(float horizontal, float vertical = 0.5);
 
   explicit operator bool() const;
   auto operator==(const Alignment& source) const -> bool;
   auto operator!=(const Alignment& source) const -> bool;
 
-  auto horizontal() const -> double;
+  auto horizontal() const -> float;
   auto reset() -> type&;
-  auto setAlignment(double horizontal = -1.0, double vertical = 0.5) -> type&;
-  auto setHorizontal(double horizontal) -> type&;
-  auto setVertical(double vertical) -> type&;
-  auto vertical() const -> double;
+  auto setAlignment(float horizontal = -1.0, float vertical = 0.5) -> type&;
+  auto setHorizontal(float horizontal) -> type&;
+  auto setVertical(float vertical) -> type&;
+  auto vertical() const -> float;
 
 //private:
   struct State {
@@ -203,9 +203,9 @@ struct Position {
   using type = Position;
 
   Position();
-  Position(signed x, signed y);
+  Position(float x, float y);
   template<typename X, typename Y>
-  Position(X x, Y y) : Position((signed)x, (signed)y) {}
+  Position(X x, Y y) : Position((float)x, (float)y) {}
 
   explicit operator bool() const;
   auto operator==(const Position& source) const -> bool;
@@ -213,16 +213,16 @@ struct Position {
 
   auto reset() -> type&;
   auto setPosition(Position position = {}) -> type&;
-  auto setPosition(signed x, signed y) -> type&;
-  auto setX(signed x) -> type&;
-  auto setY(signed y) -> type&;
-  auto x() const -> signed;
-  auto y() const -> signed;
+  auto setPosition(float x, float y) -> type&;
+  auto setX(float x) -> type&;
+  auto setY(float y) -> type&;
+  auto x() const -> float;
+  auto y() const -> float;
 
 //private:
   struct State {
-    signed x;
-    signed y;
+    float x;
+    float y;
   } state;
 };
 #endif
@@ -232,29 +232,29 @@ struct Size {
   using type = Size;
 
   Size();
-  Size(signed width, signed height);
+  Size(float width, float height);
   template<typename W, typename H>
-  Size(W width, H height) : Size((signed)width, (signed)height) {}
+  Size(W width, H height) : Size((float)width, (float)height) {}
 
   explicit operator bool() const;
   auto operator==(const Size& source) const -> bool;
   auto operator!=(const Size& source) const -> bool;
 
-  auto height() const -> signed;
+  auto height() const -> float;
   auto reset() -> type&;
-  auto setHeight(signed height) -> type&;
+  auto setHeight(float height) -> type&;
   auto setSize(Size source = {}) -> type&;
-  auto setSize(signed width, signed height) -> type&;
-  auto setWidth(signed width) -> type&;
-  auto width() const -> signed;
+  auto setSize(float width, float height) -> type&;
+  auto setWidth(float width) -> type&;
+  auto width() const -> float;
 
-  static const signed Maximum = ~0;  //~0 == -1
-  static const signed Minimum =  0;
+  static constexpr float Maximum = -1.0;
+  static constexpr float Minimum = +0.0;
 
 //private:
   struct State {
-    signed width;
-    signed height;
+    float width;
+    float height;
   } state;
 };
 #endif
@@ -265,39 +265,39 @@ struct Geometry {
 
   Geometry();
   Geometry(Position position, Size size);
-  Geometry(signed x, signed y, signed width, signed height);
+  Geometry(float x, float y, float width, float height);
   template<typename X, typename Y, typename W, typename H>
-  Geometry(X x, Y y, W width, H height) : Geometry((signed)x, (signed)y, (signed)width, (signed)height) {}
+  Geometry(X x, Y y, W width, H height) : Geometry((float)x, (float)y, (float)width, (float)height) {}
 
   explicit operator bool() const;
   auto operator==(const Geometry& source) const -> bool;
   auto operator!=(const Geometry& source) const -> bool;
 
-  auto height() const -> signed;
+  auto height() const -> float;
   auto position() const -> Position;
   auto reset() -> type&;
   auto setGeometry(Geometry geometry = {}) -> type&;
   auto setGeometry(Position position, Size size) -> type&;
-  auto setGeometry(signed x, signed y, signed width, signed height) -> type&;
-  auto setHeight(signed height) -> type&;
+  auto setGeometry(float x, float y, float width, float height) -> type&;
+  auto setHeight(float height) -> type&;
   auto setPosition(Position position = {}) -> type&;
-  auto setPosition(signed x, signed y) -> type&;
+  auto setPosition(float x, float y) -> type&;
   auto setSize(Size size = {}) -> type&;
-  auto setSize(signed width, signed height) -> type&;
-  auto setWidth(signed width) -> type&;
-  auto setX(signed x) -> type&;
-  auto setY(signed y) -> type&;
+  auto setSize(float width, float height) -> type&;
+  auto setWidth(float width) -> type&;
+  auto setX(float x) -> type&;
+  auto setY(float y) -> type&;
   auto size() const -> Size;
-  auto width() const -> signed;
-  auto x() const -> signed;
-  auto y() const -> signed;
+  auto width() const -> float;
+  auto x() const -> float;
+  auto y() const -> float;
 
 //private:
   struct State {
-    signed x;
-    signed y;
-    signed width;
-    signed height;
+    float x;
+    float y;
+    float width;
+    float height;
   } state;
 };
 #endif
@@ -306,7 +306,7 @@ struct Geometry {
 struct Font {
   using type = Font;
 
-  Font(const string& family = "", unsigned size = 0);
+  Font(const string& family = "", float size = 0);
 
   explicit operator bool() const;
   auto operator==(const Font& source) const -> bool;
@@ -319,8 +319,8 @@ struct Font {
   auto setBold(bool bold = true) -> type&;
   auto setFamily(const string& family = "") -> type&;
   auto setItalic(bool italic = true) -> type&;
-  auto setSize(unsigned size = 0) -> type&;
-  auto size() const -> unsigned;
+  auto setSize(float size = 0) -> type&;
+  auto size() const -> float;
   auto size(const string& text) const -> Size;
 
   static const string Sans;
@@ -330,7 +330,7 @@ struct Font {
 //private:
   struct State {
     string family;
-    unsigned size;
+    float size;
     bool bold;
     bool italic;
   } state;
@@ -377,11 +377,14 @@ struct Application {
   static auto name() -> string;
   static auto onMain(const function<void ()>& callback = {}) -> void;
   static auto run() -> void;
+  static auto scale() -> float;
+  static auto scale(float value) -> float;
   static auto pendingEvents() -> bool;
   static auto processEvents() -> void;
   static auto quit() -> void;
   static auto setFont(const Font& font = {}) -> void;
   static auto setName(const string& name = "") -> void;
+  static auto setScale(float scale = 1.0) -> void;
 
   struct Windows {
     static auto doModalChange(bool modal) -> void;
@@ -405,6 +408,7 @@ struct Application {
     string name;
     function<void ()> onMain;
     bool quit = false;
+    float scale = 1.0;
 
     struct Windows {
       function<void (bool)> onModalChange;
@@ -435,9 +439,10 @@ struct Desktop {
 struct Monitor {
   Monitor() = delete;
 
-  static auto count() -> unsigned;
-  static auto geometry(unsigned monitor) -> Geometry;
-  static auto primary() -> unsigned;
+  static auto count() -> uint;
+  static auto dpi(uint monitor) -> Position;
+  static auto geometry(uint monitor) -> Geometry;
+  static auto primary() -> uint;
 };
 #endif
 
@@ -1680,7 +1685,7 @@ struct mTableViewColumn : mObject {
   auto editable() const -> bool;
   auto expandable() const -> bool;
   auto foregroundColor() const -> Color;
-  auto horizontalAlignment() const -> double;
+  auto horizontalAlignment() const -> float;
   auto icon() const -> image;
   auto remove() -> type& override;
   auto resizable() const -> bool;
@@ -1690,18 +1695,18 @@ struct mTableViewColumn : mObject {
   auto setEditable(bool editable = true) -> type&;
   auto setExpandable(bool expandable = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setHorizontalAlignment(double alignment = 0.0) -> type&;
+  auto setHorizontalAlignment(float alignment = 0.0) -> type&;
   auto setIcon(const image& icon = {}) -> type&;
   auto setResizable(bool resizable = true) -> type&;
   auto setSortable(bool sortable = true) -> type&;
   auto setText(const string& text = "") -> type&;
-  auto setVerticalAlignment(double alignment = 0.5) -> type&;
+  auto setVerticalAlignment(float alignment = 0.5) -> type&;
   auto setVisible(bool visible = true) -> type&;
-  auto setWidth(signed width = 0) -> type&;
+  auto setWidth(float width = 0) -> type&;
   auto sortable() const -> bool;
   auto text() const -> string;
-  auto verticalAlignment() const -> double;
-  auto width() const -> signed;
+  auto verticalAlignment() const -> float;
+  auto width() const -> float;
 
 //private:
   struct State {
@@ -1710,14 +1715,14 @@ struct mTableViewColumn : mObject {
     bool editable = false;
     bool expandable = false;
     Color foregroundColor;
-    double horizontalAlignment = 0.0;
+    float horizontalAlignment = 0.0;
     image icon;
     bool resizable = true;
     bool sortable = false;
     string text;
-    double verticalAlignment = 0.5;
+    float verticalAlignment = 0.5;
     bool visible = true;
-    signed width = 0;
+    float width = 0;
   } state;
 };
 #endif

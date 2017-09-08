@@ -1,41 +1,41 @@
 #if defined(Hiro_VerticalLayout)
 
-auto mVerticalLayout::append(sSizable sizable, Size size, signed spacing) -> type& {
+auto mVerticalLayout::append(sSizable sizable, Size size, float spacing) -> type& {
   properties.append({size.width(), size.height(), spacing < 0 ? settings.spacing : spacing});
   mLayout::append(sizable);
   return *this;
 }
 
-auto mVerticalLayout::modify(sSizable sizable, Size size, signed spacing) -> type& {
+auto mVerticalLayout::modify(sSizable sizable, Size size, float spacing) -> type& {
   if(sizable && this->sizable(sizable->offset()) == sizable) {
     auto& properties = this->properties[sizable->offset()];
-    properties.width = size.width();
-    properties.height = size.height();
-    properties.spacing = spacing;
+    properties.setWidth(size.width());
+    properties.setHeight(size.height());
+    properties.setSpacing(spacing);
   }
   return *this;
 }
 
 auto mVerticalLayout::minimumSize() const -> Size {
-  signed width = 0, height = 0;
+  float width = 0, height = 0;
 
   for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
-    if(child.width == Size::Minimum || child.width == Size::Maximum) {
+    if(child.width() == Size::Minimum || child.width() == Size::Maximum) {
       width = max(width, sizable(n)->minimumSize().width());
       continue;
     }
-    width = max(width, child.width);
+    width = max(width, child.width());
   }
 
   for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
-    if(child.height == Size::Minimum || child.height == Size::Maximum) {
+    if(child.height() == Size::Minimum || child.height() == Size::Maximum) {
       height += sizable(n)->minimumSize().height();
     } else {
-      height += child.height;
+      height += child.height();
     }
-    if(&child != &properties.right()) height += child.spacing;
+    if(&child != &properties.right()) height += child.spacing();
   }
 
   return {settings.margin * 2 + width, settings.margin * 2 + height};
@@ -53,7 +53,7 @@ auto mVerticalLayout::reset() -> type& {
   return *this;
 }
 
-auto mVerticalLayout::setAlignment(double alignment) -> type& {
+auto mVerticalLayout::setAlignment(float alignment) -> type& {
   settings.alignment = max(0.0, min(1.0, alignment));
   return *this;
 }
@@ -80,8 +80,8 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   auto properties = this->properties;
   for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
-    if(child.width  == Size::Minimum) child.width  = sizable(n)->minimumSize().width();
-    if(child.height == Size::Minimum) child.height = sizable(n)->minimumSize().height();
+    if(child.width()  == Size::Minimum) child.setWidth(sizable(n)->minimumSize().width());
+    if(child.height() == Size::Minimum) child.setHeight(sizable(n)->minimumSize().height());
   }
 
   Geometry geometry = containerGeometry;
@@ -90,42 +90,42 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   geometry.setWidth (geometry.width()  - settings.margin * 2);
   geometry.setHeight(geometry.height() - settings.margin * 2);
 
-  signed minimumHeight = 0, maximumHeightCounter = 0;
+  float minimumHeight = 0, maximumHeightCounter = 0;
   for(auto& child : properties) {
-    if(child.height == Size::Maximum) maximumHeightCounter++;
-    if(child.height != Size::Maximum) minimumHeight += child.height;
-    if(&child != &properties.right()) minimumHeight += child.spacing;
+    if(child.height() == Size::Maximum) maximumHeightCounter++;
+    if(child.height() != Size::Maximum) minimumHeight += child.height();
+    if(&child != &properties.right()) minimumHeight += child.spacing();
   }
 
   for(auto& child : properties) {
-    if(child.width  == Size::Maximum) child.width  = geometry.width();
-    if(child.height == Size::Maximum) child.height = (geometry.height() - minimumHeight) / maximumHeightCounter;
+    if(child.width()  == Size::Maximum) child.setWidth(geometry.width());
+    if(child.height() == Size::Maximum) child.setHeight((geometry.height() - minimumHeight) / maximumHeightCounter);
   }
 
-  signed maximumWidth = 0;
-  for(auto& child : properties) maximumWidth = max(maximumWidth, child.width);
+  float maximumWidth = 0;
+  for(auto& child : properties) maximumWidth = max(maximumWidth, child.width());
 
   for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
-    signed pivot = (maximumWidth - child.width) * settings.alignment;
-    Geometry childGeometry = {geometry.x() + pivot, geometry.y(), child.width, child.height};
+    float pivot = (maximumWidth - child.width()) * settings.alignment;
+    Geometry childGeometry = {geometry.x() + pivot, geometry.y(), child.width(), child.height()};
     if(childGeometry.width()  < 1) childGeometry.setWidth (1);
     if(childGeometry.height() < 1) childGeometry.setHeight(1);
     sizable(n)->setGeometry(childGeometry);
 
-    geometry.setY     (geometry.y()      + child.height + child.spacing);
-    geometry.setHeight(geometry.height() - child.height + child.spacing);
+    geometry.setY     (geometry.y()      + child.height() + child.spacing());
+    geometry.setHeight(geometry.height() - child.height() + child.spacing());
   }
 
   return *this;
 }
 
-auto mVerticalLayout::setMargin(signed margin) -> type& {
+auto mVerticalLayout::setMargin(float margin) -> type& {
   settings.margin = margin;
   return *this;
 }
 
-auto mVerticalLayout::setSpacing(signed spacing) -> type& {
+auto mVerticalLayout::setSpacing(float spacing) -> type& {
   settings.spacing = spacing;
   return *this;
 }

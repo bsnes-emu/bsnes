@@ -60,8 +60,10 @@ ifeq ($(compiler),)
 endif
 
 # build settings
-ifeq ($(build),release)
+ifeq ($(build),optimize)
   flags += -O3
+else ifeq ($(build),release)
+  flags += -O2
 else ifeq ($(build),stable)
   flags += -O1
 else ifeq ($(build),debug)

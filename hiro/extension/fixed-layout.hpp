@@ -14,10 +14,10 @@ struct mFixedLayout : mLayout {
   auto setFont(const Font& font = {}) -> type& override;
   auto setVisible(bool visible = true) ->type& override;
 
-  struct Properties {
+  struct Property {
     Geometry geometry;
   };
-  vector<Properties> properties;
+  vector<Property> properties;
 };
 
 #endif

@@ -16,7 +16,7 @@ auto mFixedLayout::modify(sSizable sizable, Geometry geometry) -> type& {
 }
 
 auto mFixedLayout::minimumSize() const -> Size {
-  signed width = Size::Minimum, height = Size::Minimum;
+  float width = Size::Minimum, height = Size::Minimum;
   for(auto n : range(sizableCount())) {
     width  = max(width,  sizable(n)->minimumSize().width());
     height = max(height, sizable(n)->minimumSize().height());

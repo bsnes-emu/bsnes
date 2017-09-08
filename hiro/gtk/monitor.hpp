@@ -4,7 +4,8 @@ namespace hiro {
 
 struct pMonitor {
   static auto count() -> uint;
-  static auto geometry(unsigned monitor) -> Geometry;
+  static auto dpi(uint monitor) -> Position;
+  static auto geometry(uint monitor) -> Geometry;
   static auto primary() -> uint;
 };
 

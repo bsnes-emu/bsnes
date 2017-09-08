@@ -4,7 +4,7 @@ Size::Size() {
   setSize(0, 0);
 }
 
-Size::Size(signed width, signed height) {
+Size::Size(float width, float height) {
   setSize(width, height);
 }
 
@@ -20,7 +20,7 @@ auto Size::operator!=(const Size& source) const -> bool {
   return !operator==(source);
 }
 
-auto Size::height() const -> signed {
+auto Size::height() const -> float {
   return state.height;
 }
 
@@ -28,7 +28,7 @@ auto Size::reset() -> type& {
   return setSize(0, 0);
 }
 
-auto Size::setHeight(signed height) -> type& {
+auto Size::setHeight(float height) -> type& {
   state.height = height;
   return *this;
 }
@@ -37,18 +37,18 @@ auto Size::setSize(Size size) -> type& {
   return setSize(size.width(), size.height());
 }
 
-auto Size::setSize(signed width, signed height) -> type& {
+auto Size::setSize(float width, float height) -> type& {
   state.width = width;
   state.height = height;
   return *this;
 }
 
-auto Size::setWidth(signed width) -> type& {
+auto Size::setWidth(float width) -> type& {
   state.width = width;
   return *this;
 }
 
-auto Size::width() const -> signed {
+auto Size::width() const -> float {
   return state.width;
 }
 

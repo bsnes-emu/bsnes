@@ -648,11 +648,13 @@ struct TableViewColumn : sTableViewColumn {
   auto setEditable(bool editable = true) { return self().setEditable(editable), *this; }
   auto setExpandable(bool expandable = true) { return self().setExpandable(expandable), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
+  auto setHorizontalAlignment(float alignment = 0.0) { return self().setHorizontalAlignment(alignment), *this; }
   auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setResizable(bool resizable = true) { return self().setResizable(resizable), *this; }
   auto setSortable(bool sortable = true) { return self().setSortable(sortable), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
-  auto setWidth(signed width = 0) { return self().setWidth(width), *this; }
+  auto setVerticalAlignment(float alignment = 0.5) { return self().setVerticalAlignment(alignment), *this; }
+  auto setWidth(float width = 0) { return self().setWidth(width), *this; }
   auto sortable() const { return self().sortable(); }
   auto text() const { return self().text(); }
   auto verticalAlignment() const { return self().verticalAlignment(); }
