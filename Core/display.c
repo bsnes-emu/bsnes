@@ -250,9 +250,6 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
 
 static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
 {
-    uint8_t previous_stat_interrupt_line = gb->stat_interrupt_line;
-    gb->stat_interrupt_line = false;
-    
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         /* LCD is disabled, state is constant */
         
@@ -261,6 +258,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         gb->io_registers[GB_IO_LY] = 0;
         gb->io_registers[GB_IO_STAT] &= ~3;
         gb->io_registers[GB_IO_STAT] |= 4;
+        gb->effective_scx = gb->io_registers[GB_IO_SCX];
         if (gb->hdma_on_hblank) {
             gb->hdma_on_hblank = false;
             gb->hdma_on = false;
@@ -294,15 +292,16 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
        Todo: Investigate what causes the difference between our findings */
     uint8_t stat_delay = gb->cgb_double_speed? 2 : 4; // (gb->cgb_mode? 0 : 4);
     /* Todo: This is correct for DMG and single speed CGB. Is it correct for double speed and DMG mode CGB?*/
-    uint8_t scx_delay = ((uint8_t []){0, 2, 2, 4, 4, 6, 6, 8})[gb->effective_scx];
-    if (!gb->cgb_double_speed) {
-        scx_delay &= ~3;
-    }
+    uint8_t scx_delay = (gb->effective_scx + (gb->first_scanline ? 2 : 0)) & (gb->cgb_double_speed? ~1 : ~3);
+    
     /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
     uint8_t oam_blocking_rush = gb->cgb_double_speed? 2 : 4;
     uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
+        bool previous_stat_interrupt_line = gb->stat_interrupt_line;
+        gb->stat_interrupt_line = false;
+        
         gb->display_cycles += atomic_increase;
         /* The very first line is 4 clocks shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
          CGB in double speed mode. */
@@ -312,6 +311,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         }
         bool should_compare_ly = true;
         uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
+        bool just_entered_hblank = false;
         
         
         /* Handle cycle completion. STAT's initial value depends on model and mode */
@@ -380,6 +380,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             else if (gb->display_cycles == MODE2_LENGTH) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 3;
+                gb->effective_scx = gb->io_registers[GB_IO_SCX];
                 gb->oam_read_blocked = true;
                 gb->vram_read_blocked = true;
                 gb->oam_write_blocked = true;
@@ -391,6 +392,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->vram_read_blocked = false;
                 gb->oam_write_blocked = false;
                 gb->vram_write_blocked = false;
+                just_entered_hblank = true;
             }
         }
         
@@ -438,6 +440,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
             }
             else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay) {
+                just_entered_hblank = true;
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->oam_read_blocked = false;
                 gb->vram_read_blocked = false;
@@ -539,28 +542,33 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         
         if (!gb->stat_interrupt_line) {
             switch (gb->io_registers[GB_IO_STAT] & 3) {
-                case 0: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 8; break;
+                case 0:
+                    gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8);
+                    if (just_entered_hblank && ((gb->effective_scx + (gb->first_scanline ? 2 : 0)) & 3) == 3) {
+                        gb->stat_interrupt_line = false;
+                    }
+                    break;
                 case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
                 case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
             }
             
-            /* Use requested a LY=LYC interrupt and the LY=LYC bit is on */
+            /* User requested a LY=LYC interrupt and the LY=LYC bit is on */
             if ((gb->io_registers[GB_IO_STAT] & 0x44) == 0x44) {
                 gb->stat_interrupt_line = true;
             }
         }
-    }
-    
-    /* On the CGB, the last cycle of line 144 triggers an OAM interrupt
-     Todo: Verify timing for CGB in CGB mode and double speed CGB */
-    if (gb->is_cgb &&
-        gb->display_cycles == LINES * LINE_LENGTH + stat_delay - atomic_increase &&
-        (gb->io_registers[GB_IO_STAT] & 0x20)) {
-        gb->stat_interrupt_line = true;
-    }
-    
-    if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
-        gb->io_registers[GB_IO_IF] |= 2;
+        
+        /* On the CGB, the last cycle of line 144 triggers an OAM interrupt
+         Todo: Verify timing for CGB in CGB mode and double speed CGB */
+        if (gb->is_cgb &&
+            gb->display_cycles == LINES * LINE_LENGTH + stat_delay - atomic_increase &&
+            (gb->io_registers[GB_IO_STAT] & 0x20)) {
+            gb->stat_interrupt_line = true;
+        }
+        
+        if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
+            gb->io_registers[GB_IO_IF] |= 2;
+        }
     }
     
 #if 0
