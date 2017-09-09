@@ -1,7 +1,7 @@
 
 # Synopsis
 
-> higan [*\-\-fullscreen*] [*GAME*]
+> higan [*\-\-fullscreen*] [*GAME* [*SUBGAME1* [*SUBGAME2*]]]
 
 # Description
 
@@ -46,6 +46,37 @@ The list of region codes differs from console to console,
 so load a game from the library
 and check the list
 before loading it from the command-line.
+
+When `GAME` refers to a game with
+a [Satellaview](../guides/import.md#satellaview-games) memory pak slot,
+`SUBGAME1` should be
+the path to a game folder or ROM file
+representing the memory pak to insert into the slot.
+If `SUBGAME1` is not supplied,
+higan will prompt for one.
+`SUBGAME2` is ignored.
+
+When `GAME` refers to
+the [Super Game Boy](../guides/import.md#super-game-boy-games),
+`SUBGAME1` should be
+the path to a game folder or ROM file
+representing a Game Boy game to insert into the slot.
+If `SUBGAME1` is not supplied,
+higan will prompt for one.
+`SUBGAME2` is ignored.
+
+When `GAME` refers to
+the [Sufami Turbo](../guides/import.md#sufami-turbo-games),
+then `SUBGAME1` should be
+the path to a game folder or ROM file
+representing the mini-cartridge to be inserted into
+slot A of the Sufami Turbo base cartridge,
+and `SUBGAME2` is the same thing for slot B.
+higan will prompt for
+any mini-cartridges not supplied on the command-line.
+
+When `GAME` refers to any other game,
+both `SUBGAME1` and `SUBGAME2` are ignored.
 
 # Examples
 
