@@ -628,3 +628,96 @@ GBA games can be imported and played just like
 Note that some GBA games
 have trouble with
 [in-game saves](../notes#in-game-saves-and-the-game-boy-advance).
+
+PowerFest '94
+-------------
+
+[PowerFest '94](https://en.wikipedia.org/wiki/Nintendo_PowerFest_%2794)
+was a video game competition
+organised by Nintendo,
+in which contestants had six minutes
+to complete a challenge based on three Super Famicom games.
+The PowerFest '94 cartridge
+was custom-built for the competition,
+and included the three base games
+as well as software to run each game,
+switch between them after a specific time,
+extract a score,
+and display the combined total at the end.
+
+icarus cannot automatically import
+dumps of the PowerFest '94 ROMs,
+but if you have the files,
+you can import them manually.
+
+You will need the following files:
+
+<table>
+    <thead>
+        <tr>
+            <th>Part</th>
+            <th>Filename</th>
+            <th>Size (bytes)</th>
+            <th>SHA256</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Scoring</th>
+            <td><code>program.rom</code></td>
+            <td>262144</td>
+            <td><code>2fc9dca305ce3fb2f1a476567de500d50c174fbfbabd32b1b91c3ea6a731b4a1</code></td>
+        </tr>
+        <tr>
+            <th scope="row">Super Mario Bros. - The Lost Levels</th>
+            <td><code>slot1.rom</code></td>
+            <td>524288</td>
+            <td><code>7fd86113c5f95f794d65807bb75ab91c93c914670c27fc813ffa2ca20a48705e</code></td>
+        </tr>
+        <tr>
+            <th scope="row">Super Mario Kart</th>
+            <td><code>slot2.rom</code></td>
+            <td>524288</td>
+            <td><code>19eb77affbf8dd068f5d79a3cf80a2084fd73237cd1ae4e47192b4422449e64a</code></td>
+        </tr>
+        <tr>
+            <th scope="row">Ken Griffey Jr. Presents Major League Baseball</th>
+            <td><code>slot3.rom</code></td>
+            <td>1048576</td>
+            <td><code>d47bc9f9a6289c4f2e7f6bf74095f6ed36b1043a761e3e729ac9af2fc39ae062</code></td>
+        </tr>
+   </tbody>
+</table>
+
+You will also need
+the usual `dsp1.program.rom` and `dsp1.data.rom`
+[co-processor firmware](#games-with-co-processor-firmware) files.
+
+**Note:** the versions of
+*Super Mario Kart*
+and *Ken Griffey Jr...*
+in *PowerFest '94*
+are not the same as the stand-alone versions of those games.
+
+To "import" *PowerFest '94*,
+collect all the files mentioned above, then:
+
+ 1. Inside [the game library](../concepts/game-library.md),
+    create the `Super Famicom` folder
+    (if it does not already exist).
+ 2. Inside the `Super Famicom` folder,
+    create a `PowerFest '94.sfc` folder
+    (the `.sfc` extension is important,
+    but you can choose a different base name if you want).
+ 3. Copy the various ROM files into the `PowerFest '94.sfc` folder.
+
+To play *PowerFest '94*,
+open the Library menu,
+pick the Nintendo sub-menu,
+then choose the Super Famicom sub-menu item
+to open a filesystem browser listing
+all the Super Famicom games in the library.
+Select *PowerFest '94* from the list
+and click the Open button,
+or just double-click the game,
+and it will begin playing.
