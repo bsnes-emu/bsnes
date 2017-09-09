@@ -305,6 +305,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
+        bool dmg_future_stat = false;
         gb->io_registers[GB_IO_IF] |= gb->future_interrupts & 3;
         gb->future_interrupts &= ~3;
         
@@ -561,6 +562,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                     if (!gb->cgb_double_speed && just_entered_hblank && ((gb->effective_scx + (gb->first_scanline ? 2 : 0)) & 3) == 3) {
                         gb->stat_interrupt_line = false;
                     }
+                    else if (just_entered_hblank && ((gb->effective_scx + (gb->first_scanline ? 2 : 0)) & 3) != 0) {
+                        dmg_future_stat = true;
+                    }
                     break;
                 case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
                 case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
@@ -569,6 +573,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             /* User requested a LY=LYC interrupt and the LY=LYC bit is on */
             if ((gb->io_registers[GB_IO_STAT] & 0x44) == 0x44) {
                 gb->stat_interrupt_line = true;
+                dmg_future_stat = false;
             }
         }
         
@@ -581,7 +586,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         }
         
         if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
-            if (gb->is_cgb) {
+            if (gb->is_cgb || dmg_future_stat) {
                 gb->future_interrupts |= 2;
             }
             else {
