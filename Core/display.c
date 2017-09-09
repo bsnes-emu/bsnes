@@ -294,10 +294,10 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     /* Todo: Is this correct for DMG mode CGB? */
     uint8_t scx_delay = gb->effective_scx;
     if (gb->cgb_double_speed) {
-        scx_delay = (scx_delay + 1) & ~1;
+        scx_delay = (scx_delay + 1) & ~1 & 7;
     }
     else {
-        scx_delay = (scx_delay + (gb->first_scanline ? 2 : 0)) & ~3;
+        scx_delay = (scx_delay + (gb->first_scanline ? 2 : 0)) & ~3 & 7;
     }
     
     /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
