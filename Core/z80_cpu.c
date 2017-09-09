@@ -1341,8 +1341,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
     if (!gb->halted) {
         interrupt_queue |= gb->future_interrupts & gb->interrupt_enable;
     }
-    
 
+    gb->io_registers[GB_IO_IF] |= gb->future_interrupts;
+    gb->future_interrupts = 0;
+    
     if (interrupt_queue) {
         gb->halted = false;
     }
