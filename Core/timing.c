@@ -82,14 +82,13 @@ static void GB_ir_run(GB_gameboy_t *gb)
 
 static void advance_tima_state_machine(GB_gameboy_t *gb)
 {
+    gb->io_registers[GB_IO_IF] |= gb->future_interrupts & 4;
+    gb->future_interrupts &= ~4;
     if (gb->tima_reload_state == GB_TIMA_RELOADED) {
         gb->tima_reload_state = GB_TIMA_RUNNING;
     }
     else if (gb->tima_reload_state == GB_TIMA_RELOADING) {
-        gb->io_registers[GB_IO_IF] |= 4;
-        if (!gb->dont_delay_timer_interrupt) {
-            // Todo
-        }
+        gb->future_interrupts |= 4;
         gb->tima_reload_state = GB_TIMA_RELOADED;
     }
 }
@@ -157,7 +156,6 @@ static void increase_tima(GB_gameboy_t *gb)
 {
     gb->io_registers[GB_IO_TIMA]++;
     if (gb->io_registers[GB_IO_TIMA] == 0) {
-        gb->dont_delay_timer_interrupt = false;
         gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
         gb->tima_reload_state = GB_TIMA_RELOADING;
     }
@@ -197,7 +195,6 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
         /* And now either the timer must be disabled, or the new bit used for overflow testing be 0. */
         if (!(new_tac & 4) || gb->div_cycles & (new_clocks >> 1)) {
             increase_tima(gb);
-            gb->dont_delay_timer_interrupt = true;
         }
     }
 }

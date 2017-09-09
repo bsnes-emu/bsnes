@@ -1338,6 +1338,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
     uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
+    if (!gb->halted) {
+        interrupt_queue |= gb->future_interrupts & gb->interrupt_enable;
+    }
+    
 
     if (interrupt_queue) {
         gb->halted = false;

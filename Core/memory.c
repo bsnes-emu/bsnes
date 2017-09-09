@@ -136,7 +136,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     if (addr < 0xFF80) {
         switch (addr & 0xFF) {
             case GB_IO_IF:
-                return gb->io_registers[GB_IO_IF] | 0xE0;
+                return gb->io_registers[GB_IO_IF] | 0xE0 | gb->future_interrupts;
             case GB_IO_TAC:
                 return gb->io_registers[GB_IO_TAC] | 0xF8;
             case GB_IO_STAT:
@@ -416,8 +416,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_WX:
                 GB_window_related_write(gb, addr & 0xFF, value);
                 break;
-            case GB_IO_SCX:
             case GB_IO_IF:
+                gb->future_interrupts = 0;
+            case GB_IO_SCX:
             case GB_IO_SCY:
             case GB_IO_LYC:
             case GB_IO_BGP:

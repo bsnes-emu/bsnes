@@ -305,6 +305,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
     uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
     
     for (; cycles; cycles -= atomic_increase) {
+        gb->io_registers[GB_IO_IF] |= gb->future_interrupts & 3;
+        gb->future_interrupts &= ~3;
+        
         bool previous_stat_interrupt_line = gb->stat_interrupt_line;
         gb->stat_interrupt_line = false;
         
@@ -351,7 +354,12 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         else if (gb->display_cycles == LINES * LINE_LENGTH + stat_delay) {
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 1;
-            gb->io_registers[GB_IO_IF] |= 1;
+            if (gb->is_cgb) {
+                gb->future_interrupts |= 1;
+            }
+            else {
+                gb->io_registers[GB_IO_IF] |= 1;
+            }
             
             /* Entering VBlank state triggers the OAM interrupt. In CGB, it happens 4 cycles earlier */
             if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->is_cgb) {
@@ -573,7 +581,12 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         }
         
         if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
-            gb->io_registers[GB_IO_IF] |= 2;
+            if (gb->is_cgb) {
+                gb->future_interrupts |= 2;
+            }
+            else {
+                gb->io_registers[GB_IO_IF] |= 2;
+            }
         }
     }
     
