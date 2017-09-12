@@ -670,19 +670,19 @@ You will need the following files:
         </tr>
         <tr>
             <th scope="row">Super Mario Bros. - The Lost Levels</th>
-            <td><code>slot1.rom</code></td>
+            <td><code>slot-1.rom</code></td>
             <td>524288</td>
             <td><code>7fd86113c5f95f794d65807bb75ab91c93c914670c27fc813ffa2ca20a48705e</code></td>
         </tr>
         <tr>
             <th scope="row">Super Mario Kart</th>
-            <td><code>slot2.rom</code></td>
+            <td><code>slot-2.rom</code></td>
             <td>524288</td>
             <td><code>19eb77affbf8dd068f5d79a3cf80a2084fd73237cd1ae4e47192b4422449e64a</code></td>
         </tr>
         <tr>
             <th scope="row">Ken Griffey Jr. Presents Major League Baseball</th>
-            <td><code>slot3.rom</code></td>
+            <td><code>slot-3.rom</code></td>
             <td>1048576</td>
             <td><code>d47bc9f9a6289c4f2e7f6bf74095f6ed36b1043a761e3e729ac9af2fc39ae062</code></td>
         </tr>
