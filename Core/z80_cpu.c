@@ -1361,16 +1361,31 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
 
     if (effecitve_ime && interrupt_queue) {
-        uint8_t interrupt_bit = 0;
-        while (!(interrupt_queue & 1)) {
-            interrupt_queue >>= 1;
-            interrupt_bit++;
-        }
-        gb->io_registers[GB_IO_IF] &= ~(1 << interrupt_bit);
-        gb->ime = false;
         nop(gb, 0);
-        /* Run pseudo instructions rst 40-60*/
-        rst(gb, 0x87 + interrupt_bit * 8);
+        uint16_t call_addr = gb->pc - 1;
+        GB_advance_cycles(gb, 8);
+        gb->registers[GB_REGISTER_SP] -= 2;
+        GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc) >> 8);
+        GB_advance_cycles(gb, 4);
+        interrupt_queue = (gb->interrupt_enable | gb->future_interrupts) & gb->io_registers[GB_IO_IF] & 0x1F;
+        gb->io_registers[GB_IO_IF] |= gb->future_interrupts;
+        gb->future_interrupts = 0;
+        GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+        GB_advance_cycles(gb, 4);
+        if (interrupt_queue) {
+            uint8_t interrupt_bit = 0;
+            while (!(interrupt_queue & 1)) {
+                interrupt_queue >>= 1;
+                interrupt_bit++;
+            }
+            gb->io_registers[GB_IO_IF] &= ~(1 << interrupt_bit);
+            gb->pc = interrupt_bit * 8 + 0x40;
+        }
+        else {
+            gb->pc = 0;
+        }
+        gb->ime = false;
+        GB_debugger_call_hook(gb, call_addr);
     }
     else if(!gb->halted && !gb->stopped) {
         uint8_t opcode = GB_read_memory(gb, gb->pc++);
