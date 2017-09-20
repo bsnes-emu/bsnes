@@ -1361,16 +1361,19 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
 
     if (effecitve_ime && interrupt_queue) {
+        
         nop(gb, 0);
         uint16_t call_addr = gb->pc - 1;
         GB_advance_cycles(gb, 8);
         gb->registers[GB_REGISTER_SP] -= 2;
         GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc) >> 8);
+        interrupt_queue = gb->interrupt_enable;
         GB_advance_cycles(gb, 4);
-        interrupt_queue = (gb->interrupt_enable | gb->future_interrupts) & gb->io_registers[GB_IO_IF] & 0x1F;
+        GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+        interrupt_queue &= (gb->io_registers[GB_IO_IF] | gb->future_interrupts) & 0x1F;
         gb->io_registers[GB_IO_IF] |= gb->future_interrupts;
         gb->future_interrupts = 0;
-        GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+
         GB_advance_cycles(gb, 4);
         if (interrupt_queue) {
             uint8_t interrupt_bit = 0;
