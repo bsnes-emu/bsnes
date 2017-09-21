@@ -59,7 +59,6 @@ typedef struct
         uint8_t current_volume; // Reloaded from NRX2
         uint8_t volume_countdown; // Reloaded from NRX2
         uint8_t current_sample_index;
-        bool sample_emitted;
         
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint16_t sample_length; // From NRX3, NRX4, in APU ticks

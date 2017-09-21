@@ -267,7 +267,6 @@ void GB_apu_run(GB_gameboy_t *gb)
                               duties[gb->apu.square_channels[i].current_sample_index + duty * 8]?
                               gb->apu.square_channels[i].current_volume : 0,
                               cycles - cycles_left);
-                gb->apu.square_channels[i].sample_emitted = true;
             }
             if (cycles_left) {
                 gb->apu.square_channels[i].sample_countdown -= cycles_left;
@@ -530,22 +529,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[0].sample_length;
             }
             if (value & 0x80) {
-                gb->apu.square_channels[index].current_sample_index = 7;
 
                 if (!gb->apu.is_active[index]) {
+                    gb->apu.square_channels[index].current_sample_index = 7;
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                 }
                 else {
                     /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.
-                       if both active AND already emitted a sample, sound starts the next 1MHz tick, 
-                       and one sample is skipped */
-                    if (!gb->apu.square_channels[index].sample_emitted) {
-                        gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
-                    }
-                    else {
-                        gb->apu.square_channels[index].sample_countdown = gb->apu.lf_div;
-                        gb->apu.square_channels[index].current_sample_index = 0;
-                    }
+                       The current sample index remains unchanged! */
+                    gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
                 gb->apu.square_channels[index].volume_countdown = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7;
