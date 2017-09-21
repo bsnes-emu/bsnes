@@ -108,11 +108,11 @@ static void render(GB_gameboy_t *gb)
 
 static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
 {
-    uint16_t delta = gb->apu.square_channels[GB_SQUARE_1].sample_length >> (gb->io_registers[GB_IO_NR10] & 7);
+    uint16_t delta = gb->apu.shadow_sweep_sample_legnth >> (gb->io_registers[GB_IO_NR10] & 7);
     if (gb->io_registers[GB_IO_NR10] & 8) {
-        return gb->apu.square_channels[GB_SQUARE_1].sample_length - delta;
+        return gb->apu.shadow_sweep_sample_legnth - delta;
     }
-    return gb->apu.square_channels[GB_SQUARE_1].sample_length + delta;
+    return gb->apu.shadow_sweep_sample_legnth + delta;
 }
 
 void GB_apu_div_event(GB_gameboy_t *gb)
@@ -206,12 +206,16 @@ void GB_apu_div_event(GB_gameboy_t *gb)
         if (gb->apu.square_sweep_countdown) {
             if (!--gb->apu.square_sweep_countdown) {
                 if ((gb->io_registers[GB_IO_NR10] & 0x70) && (gb->io_registers[GB_IO_NR10] & 0x07)) {
-                    gb->apu.square_channels[GB_SQUARE_1].sample_length = gb->apu.new_sweep_sample_legnth;
+                    gb->apu.square_channels[GB_SQUARE_1].sample_length =
+                        gb->apu.shadow_sweep_sample_legnth =
+                        gb->apu.new_sweep_sample_legnth;
                 }
-                /* Recalculation and overflow check only occurs after a delay */
-                gb->apu.square_sweep_calculate_countdown = 0x13 - gb->apu.lf_div;
                 
-                gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
+                if (gb->io_registers[GB_IO_NR10] & 0x70) {
+                    /* Recalculation and overflow check only occurs after a delay */
+                    gb->apu.square_sweep_calculate_countdown = 0x13 - gb->apu.lf_div;
+                }
+                
                 gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
                 if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
             }
@@ -241,8 +245,9 @@ void GB_apu_run(GB_gameboy_t *gb)
             if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
-                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
+                gb->apu.sweep_enabled = false;
             }
+            gb->apu.sweep_decreasing |= gb->io_registers[GB_IO_NR10] & 8;
             gb->apu.square_sweep_calculate_countdown = 0;
         }
     }
@@ -475,6 +480,11 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         /* Square channels */
         case GB_IO_NR10:
+            if (gb->apu.sweep_decreasing && !(gb->io_registers[GB_IO_NR10] & 8)) {
+                gb->apu.is_active[GB_SQUARE_1] = false;
+                update_sample(gb, GB_SQUARE_1, 0, 0);
+                gb->apu.sweep_enabled = false;
+            }
             break;
         
         case GB_IO_NR11:
@@ -502,9 +512,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             unsigned index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].sample_length &= ~0xFF;
             gb->apu.square_channels[index].sample_length |= value & 0xFF;
-            if (index == GB_SQUARE_1) {
-                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
-            }
             break;
         }
         
@@ -514,7 +521,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (index == GB_SQUARE_1) {
-                gb->apu.new_sweep_sample_legnth = gb->apu.square_channels[0].sample_length;
+                gb->apu.sweep_decreasing = false;
+                gb->apu.shadow_sweep_sample_legnth =
+                    gb->apu.new_sweep_sample_legnth =
+                    gb->apu.square_channels[0].sample_length;
             }
             if (value & 0x80) {
                 gb->apu.square_channels[index].current_sample_index = 7;
