@@ -7,10 +7,10 @@
 #define unlikely(x) __builtin_expect((x), 0)
 
 static const uint8_t duties[] = {
-    0, 0, 0, 0, 0, 0, 1, 0,
-    0, 0, 0, 0, 0, 0, 1, 1,
-    0, 0, 0, 0, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 1, 1, 1,
+    0, 1, 1, 1, 1, 1, 1, 0,
 };
 
 static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_offset)
@@ -529,14 +529,13 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[0].sample_length;
             }
             if (value & 0x80) {
-
+                /* Current sample index remains unchanged when restarting channels 1 or 2. It is only reset by
+                   turning the APU off. */
                 if (!gb->apu.is_active[index]) {
-                    gb->apu.square_channels[index].current_sample_index = 7;
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                 }
                 else {
-                    /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.
-                       The current sample index remains unchanged! */
+                    /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.*/
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
