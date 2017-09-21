@@ -213,6 +213,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                 
                 gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
                 gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
+                if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
             }
         }
     }
@@ -474,8 +475,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         /* Square channels */
         case GB_IO_NR10:
-            gb->apu.square_sweep_countdown = ((value >> 4) & 7);
-            if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
             break;
         
         case GB_IO_NR11:
@@ -554,6 +553,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 
                 if (index == GB_SQUARE_1) {
                     gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x77;
+                    gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
+                    if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
                 }
                 
                 /* Note that we don't change the sample just yet! This was verified on hardware. */
