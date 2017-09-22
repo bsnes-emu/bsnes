@@ -560,6 +560,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = 0x13 - gb->apu.lf_div;
                     }
+                    else {
+                        gb->apu.square_sweep_calculate_countdown = 0;
+                    }
                     gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x77;
                     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
                     if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
