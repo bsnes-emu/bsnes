@@ -483,6 +483,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, 0);
                 gb->apu.sweep_enabled = false;
+                gb->apu.square_sweep_calculate_countdown = 0;
+            }
+            if ((gb->io_registers[GB_IO_NR10] & 0x70) == 0) {
+                /* Todo: what happens if we set period to 0 while a calculate event is scheduled, and then
+                         re-set it to non-zero? */
+                gb->apu.square_sweep_calculate_countdown = 0;
             }
             break;
         
