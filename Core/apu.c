@@ -523,7 +523,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (index == GB_SQUARE_1) {
-                gb->apu.sweep_decreasing = false;
                 gb->apu.shadow_sweep_sample_legnth =
                     gb->apu.new_sweep_sample_legnth =
                     gb->apu.square_channels[0].sample_length;
@@ -549,13 +548,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[index].length_enabled = false;
                 }
                 
-                if (index == GB_SQUARE_1 && gb->io_registers[GB_IO_NR10] & 7) {
-                    /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
-                    /* Todo: check actual timing */
-                    gb->apu.square_sweep_calculate_countdown = 0x3 - gb->apu.lf_div;
-                }
-                
                 if (index == GB_SQUARE_1) {
+                    gb->apu.sweep_decreasing = false;
+                    if (gb->io_registers[GB_IO_NR10] & 7) {
+                        /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
+                        gb->apu.square_sweep_calculate_countdown = 0x13 - gb->apu.lf_div;
+                    }
                     gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x77;
                     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
                     if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
