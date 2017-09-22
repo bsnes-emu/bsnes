@@ -20,7 +20,7 @@
 #include "z80_cpu.h"
 #include "symbol_hash.h"
 
-#define GB_STRUCT_VERSION 11
+#define GB_STRUCT_VERSION 12
 
 enum {
     GB_REGISTER_AF,
@@ -279,7 +279,6 @@ struct GB_gameboy_internal_s {
             struct {
                 uint8_t bank_low:5;
                 uint8_t bank_high:2;
-                uint8_t padding:1; // Save state compatibility with 0.9
                 uint8_t mode:1;
             } mbc1;
 
@@ -328,8 +327,7 @@ struct GB_gameboy_internal_s {
         uint32_t display_cycles;
         uint32_t div_cycles;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
-        GB_PADDING(uint16_t, serial_cycles);
-        uint16_t serial_cycles; /* This field changed its meaning in v0.10 */
+        uint16_t serial_cycles;
         uint16_t serial_length;
         uint8_t future_interrupts; /* Interrupts can occur in any T-cycle. Some timings result in different interrupt
                                      timing when the CPU is in halt mode, and might also affect the DI instruction. */
