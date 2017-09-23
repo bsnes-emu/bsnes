@@ -440,6 +440,14 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             }
             
             /* Handle everything else */
+            /* OAM interrupt happens slightly before STAT is actually updated. (About 1-3 T-cycles)
+               Todo: Test double speed CGB */
+            if (position_in_line == 0 && stat_delay) {
+                if (gb->io_registers[GB_IO_STAT] & 0x20) {
+                    gb->stat_interrupt_line = true;
+                    dmg_future_stat = true;
+                }
+            }
             if (position_in_line == stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
@@ -593,7 +601,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_IF] |= 2;
             }
         }
-    }
+    };
     
 #if 0
     /* The value of LY is glitched in the last cycle of every line in CGB mode CGB in single speed
