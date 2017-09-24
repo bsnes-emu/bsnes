@@ -21,7 +21,7 @@ ifeq ($(platform),windows)
   ruby += video.wgl video.direct3d video.directdraw video.gdi
   ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound
   ruby += input.windows
-else ifeq ($(platform),macosx)
+else ifeq ($(platform),macos)
   ruby += video.cgl
   ruby += audio.openal
   ruby += input.quartz input.carbon
@@ -68,7 +68,7 @@ obj/ui-resource.o:
 # targets
 build: $(objects)
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
-ifeq ($(platform),macosx)
+ifeq ($(platform),macos)
 	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
 	mkdir -p out/$(name).app/Contents/MacOS/
 	mkdir -p out/$(name).app/Contents/Resources/
@@ -81,7 +81,7 @@ install:
 ifeq ($(shell id -un),root)
 	$(error "make install should not be run as root")
 else ifeq ($(platform),windows)
-else ifeq ($(platform),macosx)
+else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Emulation/System/
 	cp -R out/$(name).app /Applications/$(name).app
@@ -101,7 +101,7 @@ uninstall:
 ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),windows)
-else ifeq ($(platform),macosx)
+else ifeq ($(platform),macos)
 	if [ -d /Applications/$(name).app ]; then rm -r /Applications/$(name).app; fi
 else ifneq ($(filter $(platform),linux bsd),)
 	if [ -f $(prefix)/bin/$(name) ]; then rm $(prefix)/bin/$(name); fi

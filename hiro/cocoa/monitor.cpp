@@ -11,7 +11,7 @@ auto pMonitor::count() -> uint {
 auto pMonitor::dpi(uint monitor) -> Position {
   @autoreleasepool {
     NSScreen* screen = [[NSScreen screens] objectAtIndex:monitor];
-    NSDistionary* dictionary = [screen deviceDescription];
+    NSDictionary* dictionary = [screen deviceDescription];
     NSSize dpi = [[dictionary objectForKey:NSDeviceSize] sizeValue];
     return {dpi.width, dpi.height};
   }

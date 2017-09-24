@@ -226,8 +226,7 @@ private:
     terminate();
     if(!_context) return false;
 
-    POINT point = {0, 0};
-    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
+    HMONITOR monitor = MonitorFromWindow((HWND)_context, MONITOR_DEFAULTTOPRIMARY);
     MONITORINFOEX information = {};
     information.cbSize = sizeof(MONITORINFOEX);
     GetMonitorInfo(monitor, &information);
@@ -247,7 +246,7 @@ private:
     windowClass.style = CS_HREDRAW | CS_VREDRAW;
     RegisterClass(&windowClass);
 
-    _exclusiveContext = (uintptr)CreateWindowEx(WS_EX_TOPMOST, L"VideoDirect3D_Window", L"", WS_POPUP,
+    _exclusiveContext = (uintptr)CreateWindow(L"VideoDirect3D_Window", L"", WS_POPUP,
       information.rcMonitor.left, information.rcMonitor.top, _monitorWidth, _monitorHeight,
       nullptr, nullptr, GetModuleHandle(0), nullptr);
 

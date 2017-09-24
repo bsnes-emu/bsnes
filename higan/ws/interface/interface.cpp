@@ -35,12 +35,19 @@ auto Interface::title() -> string {
   return cartridge.information.title;
 }
 
-auto Interface::videoResolution() -> VideoResolution {
-  if(!settings.rotateLeft) {
-    return {224, 144, 224, 144, 1.0};
-  } else {
-    return {144, 224, 144, 224, 1.0};
+auto Interface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 224;
+  vi.height = 144;
+  vi.internalWidth  = 224;
+  vi.internalHeight = 144;
+  vi.aspectCorrection = 1.0;
+  vi.refreshRate = 3'072'000.0 / (159.0 * 256.0);
+  if(settings.rotateLeft) {
+    swap(vi.width, vi.height);
+    swap(vi.internalWidth, vi.internalHeight);
   }
+  return vi;
 }
 
 auto Interface::loaded() -> bool {

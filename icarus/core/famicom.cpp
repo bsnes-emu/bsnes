@@ -41,22 +41,21 @@ auto Icarus::famicomImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = Location::prefix(location);
   auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "Famicom/", name, ".fc/"};
-//if(directory::exists(target)) return failure("game already exists");
 
   uint prgrom = 0;
   uint chrrom = 0;
   auto markup = famicomManifest(buffer, location, &prgrom, &chrrom);
   if(!markup) return failure("failed to parse ROM image");
 
-  if(!directory::create(target)) return failure("library path unwritable");
-  if(file::exists({source, name, ".sav"}) && !file::exists({target, "save.ram"})) {
-    file::copy({source, name, ".sav"}, {target, "save.ram"});
+  if(!create(target)) return failure("library path unwritable");
+  if(exists({source, name, ".sav"}) && !exists({target, "save.ram"})) {
+    copy({source, name, ".sav"}, {target, "save.ram"});
   }
 
-  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
-  file::write({target, "ines.rom"}, buffer.data(), 16);
-  file::write({target, "program.rom"}, buffer.data() + 16, prgrom);
+  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, markup);
+  write({target, "ines.rom"}, buffer.data(), 16);
+  write({target, "program.rom"}, buffer.data() + 16, prgrom);
   if(!chrrom) return success(target);
-  file::write({target, "character.rom"}, buffer.data() + 16 + prgrom, chrrom);
+  write({target, "character.rom"}, buffer.data() + 16 + prgrom, chrrom);
   return success(target);
 }

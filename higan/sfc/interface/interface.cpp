@@ -118,8 +118,16 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoResolution {
-  return {256, 240, 512, 480, 8.0 / 7.0};
+auto Interface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 256;
+  vi.height = 240;
+  vi.internalWidth  = 512;
+  vi.internalHeight = 480;
+  vi.aspectCorrection = 8.0 / 7.0;
+  if(Region::NTSC()) vi.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
+  if(Region::PAL())  vi.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
+  return vi;
 }
 
 auto Interface::videoColors() -> uint32 {

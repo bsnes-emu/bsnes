@@ -30,7 +30,7 @@ auto pFont::family(const string& family) -> string {
 auto pFont::create(const Font& font) -> NSFont* {
   auto fontName = family(font.family());
   NSString* family = [NSString stringWithUTF8String:fontName];
-  CGFloat size = (float)(font.size() ? font.size() : 8);
+  CGFloat size = Application::scale(font.size() ? font.size() : 8);
   NSFontTraitMask traits = 0;
 
   if(font.bold()) traits |= NSBoldFontMask;

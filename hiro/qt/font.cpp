@@ -26,7 +26,7 @@ auto pFont::family(const string& family) -> QString {
 auto pFont::create(const Font& font) -> QFont {
   QFont qtFont;
   qtFont.setFamily(family(font.family()));
-  qtFont.setPointSize(font.size() ? font.size() : 8);
+  qtFont.setPointSize(Application::scale(font.size() ? font.size() : 8));
   qtFont.setBold(font.bold());
   qtFont.setItalic(font.italic());
   return qtFont;

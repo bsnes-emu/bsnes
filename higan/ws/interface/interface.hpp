@@ -22,7 +22,7 @@ struct Interface : Emulator::Interface {
   auto manifest() -> string override;
   auto title() -> string override;
 
-  auto videoResolution() -> VideoResolution override;
+  auto videoInformation() -> VideoInformation override;
 
   auto loaded() -> bool override;
   auto sha256() -> string override;

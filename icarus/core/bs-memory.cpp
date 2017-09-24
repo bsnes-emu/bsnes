@@ -35,13 +35,13 @@ auto Icarus::bsMemoryImport(vector<uint8_t>& buffer, string location) -> string 
   auto name = Location::prefix(location);
   auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "BS Memory/", name, ".bs/"};
-//if(directory::exists(target)) return failure("game already exists");
 
-  auto markup = bsMemoryManifest(buffer, location);
-  if(!markup) return failure("failed to parse ROM image");
-  if(!directory::create(target)) return failure("library path unwritable");
+  auto manifest = bsMemoryManifest(buffer, location);
+  if(!manifest) return failure("failed to parse ROM image");
 
-  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
-  file::write({target, "program.rom"}, buffer);
+  if(!create(target)) return failure("library path unwritable");
+
+  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
+  write({target, "program.rom"}, buffer);
   return success(target);
 }

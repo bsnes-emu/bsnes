@@ -14,7 +14,7 @@ auto pFont::size(PangoFontDescription* font, const string& text) -> Size {
   PangoLayout* layout = pango_layout_new(context);
   pango_layout_set_font_description(layout, font);
   pango_layout_set_text(layout, text, -1);
-  signed width = 0, height = 0;
+  int width = 0, height = 0;
   pango_layout_get_pixel_size(layout, &width, &height);
   g_object_unref((gpointer)layout);
   return {width, height};
@@ -39,7 +39,7 @@ auto pFont::family(const string& family) -> string {
 auto pFont::create(const Font& font) -> PangoFontDescription* {
   auto p = pango_font_description_new();
   pango_font_description_set_family(p, family(font.family()));
-  pango_font_description_set_size(p, (font.size() ? font.size() : 8) * PANGO_SCALE);
+  pango_font_description_set_size(p, Application::scale(font.size() ? font.size() : 8) * PANGO_SCALE);
   pango_font_description_set_weight(p, font.bold() ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
   pango_font_description_set_style(p, font.italic() ? PANGO_STYLE_OBLIQUE : PANGO_STYLE_NORMAL);
   return p;

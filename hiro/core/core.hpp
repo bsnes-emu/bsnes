@@ -385,6 +385,7 @@ struct Application {
   static auto setFont(const Font& font = {}) -> void;
   static auto setName(const string& name = "") -> void;
   static auto setScale(float scale = 1.0) -> void;
+  static auto unscale(float value) -> float;
 
   struct Windows {
     static auto doModalChange(bool modal) -> void;

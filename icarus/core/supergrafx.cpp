@@ -29,17 +29,16 @@ auto Icarus::superGrafxImport(vector<uint8_t>& buffer, string location) -> strin
   auto name = Location::prefix(location);
   auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "SuperGrafx/", name, ".sg/"};
-//if(directory::exists(target)) return failure("game already exists");
 
   auto manifest = superGrafxManifest(buffer, location);
   if(!manifest) return failure("failed to parse ROM image");
 
-  if(!directory::create(target)) return failure("library path unwritable");
-  if(file::exists({source, name, ".sav"}) && !file::exists({target, "save.ram"})) {
-    file::copy({source, name, ".sav"}, {target, "save.ram"});
+  if(!create(target)) return failure("library path unwritable");
+  if(exists({source, name, ".sav"}) && !exists({target, "save.ram"})) {
+    copy({source, name, ".sav"}, {target, "save.ram"});
   }
 
-  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, manifest);
-  file::write({target, "program.rom"}, buffer);
+  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
+  write({target, "program.rom"}, buffer);
   return success(target);
 }

@@ -31,9 +31,9 @@ auto pFrame::setGeometry(Geometry geometry) -> void {
   auto size = pFont::size(hfont, state().text);
   pWidget::setGeometry({
     geometry.x(),
-    geometry.y() - (empty ? size.height() >> 1 : 0),
+    geometry.y() - (empty ? size.height() / 2 : 0),
     geometry.width(),
-    geometry.height() + (empty ? size.height() >> 1 : 0)
+    geometry.height() + (empty ? size.height() / 2 : 0)
   });
   if(auto layout = state().layout) {
     if(empty) size.setHeight(1);

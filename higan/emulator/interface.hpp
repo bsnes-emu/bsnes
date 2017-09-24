@@ -37,15 +37,15 @@ struct Interface {
   virtual auto manifest() -> string = 0;
   virtual auto title() -> string = 0;
 
-  //video information
-  struct VideoResolution {
-    uint width;
-    uint height;
-    uint internalWidth;
-    uint internalHeight;
-    double aspectCorrection;
+  struct VideoInformation {
+    uint width = 0;
+    uint height = 0;
+    uint internalWidth = 0;
+    uint internalHeight = 0;
+    double aspectCorrection = 0;
+    double refreshRate = 0;
   };
-  virtual auto videoResolution() -> VideoResolution = 0;
+  virtual auto videoInformation() -> VideoInformation = 0;
   virtual auto videoColors() -> uint32 = 0;
   virtual auto videoColor(uint32 color) -> uint64 = 0;
 

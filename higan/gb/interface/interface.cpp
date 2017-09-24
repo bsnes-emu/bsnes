@@ -36,8 +36,15 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoResolution {
-  return {160, 144, 160, 144, 1.0};
+auto Interface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 160;
+  vi.height = 144;
+  vi.internalWidth  = 160;
+  vi.internalHeight = 144;
+  vi.aspectCorrection = 1.0;
+  vi.refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
+  return vi;
 }
 
 auto Interface::loaded() -> bool {

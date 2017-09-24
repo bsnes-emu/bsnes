@@ -35,17 +35,16 @@ auto Icarus::gameBoyColorImport(vector<uint8_t>& buffer, string location) -> str
   auto name = Location::prefix(location);
   auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "Game Boy Color/", name, ".gbc/"};
-//if(directory::exists(target)) return failure("game already exists");
 
   auto markup = gameBoyColorManifest(buffer, location);
   if(!markup) return failure("failed to parse ROM image");
 
-  if(!directory::create(target)) return failure("library path unwritable");
-  if(file::exists({source, name, ".sav"}) && !file::exists({target, "save.ram"})) {
-    file::copy({source, name, ".sav"}, {target, "save.ram"});
+  if(!create(target)) return failure("library path unwritable");
+  if(exists({source, name, ".sav"}) && !exists({target, "save.ram"})) {
+    copy({source, name, ".sav"}, {target, "save.ram"});
   }
 
-  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
-  file::write({target, "program.rom"}, buffer);
+  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, markup);
+  write({target, "program.rom"}, buffer);
   return success(target);
 }

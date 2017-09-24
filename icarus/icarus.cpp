@@ -47,8 +47,10 @@ Settings settings;
 #include "core/wonderswan-color.cpp"
 #include "core/bs-memory.cpp"
 #include "core/sufami-turbo.cpp"
-Icarus icarus;
 
+#if !defined(ICARUS_LIBRARY)
+
+Icarus icarus;
 #include "ui/ui.hpp"
 #include "ui/scan-dialog.cpp"
 #include "ui/settings-dialog.cpp"
@@ -126,3 +128,5 @@ auto nall::main(string_vector args) -> void {
   scanDialog->show();
   Application::run();
 }
+
+#endif

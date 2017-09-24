@@ -21,8 +21,15 @@ GameGearInterface::GameGearInterface() {
   ports.append(move(hardware));
 }
 
-auto GameGearInterface::videoResolution() -> VideoResolution {
-  return {160, 144, 160, 144, 1.0};
+auto GameGearInterface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 160;
+  vi.height = 144;
+  vi.internalWidth  = 160;
+  vi.internalHeight = 144;
+  vi.aspectCorrection = 1.0;
+  vi.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
+  return vi;
 }
 
 auto GameGearInterface::videoColors() -> uint32 {

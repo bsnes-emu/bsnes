@@ -55,6 +55,10 @@ auto Application::setScale(float scale) -> void {
   state.scale = scale;
 }
 
+auto Application::unscale(float value) -> float {
+  return value * (1.0 / state.scale);
+}
+
 //Windows
 //=======
 

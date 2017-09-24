@@ -39,12 +39,19 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoResolution {
-  if(!settings.rotateLeft) {
-    return {240, 160, 240, 160, 1.0};
-  } else {
-    return {160, 240, 160, 240, 1.0};
+auto Interface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 240;
+  vi.height = 160;
+  vi.internalWidth  = 240;
+  vi.internalHeight = 160;
+  vi.aspectCorrection = 1.0;
+  vi.refreshRate = system.frequency() / (228.0 * 1232.0);
+  if(settings.rotateLeft) {
+    swap(vi.width, vi.height);
+    swap(vi.internalWidth, vi.internalHeight);
   }
+  return vi;
 }
 
 auto Interface::videoColors() -> uint32 {

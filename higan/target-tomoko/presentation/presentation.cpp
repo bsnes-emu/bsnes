@@ -248,10 +248,10 @@ auto Presentation::resizeViewport(bool resizeWindow) -> void {
   double emulatorHeight = 240;
   double aspectCorrection = 1.0;
   if(emulator) {
-    auto resolution = emulator->videoResolution();
-    emulatorWidth = resolution.width;
-    emulatorHeight = resolution.height;
-    aspectCorrection = resolution.aspectCorrection;
+    auto information = emulator->videoInformation();
+    emulatorWidth = information.width;
+    emulatorHeight = information.height;
+    aspectCorrection = information.aspectCorrection;
     if(emulator->information.overscan) {
       uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
       uint overscanVertical = settings["Video/Overscan/Vertical"].natural();

@@ -127,6 +127,5 @@ private:
 
   HDC _display = nullptr;
   HGLRC _wglContext = nullptr;
-  HWND _window = nullptr;
   HINSTANCE _glWindow = nullptr;
 };

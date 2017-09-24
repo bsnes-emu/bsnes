@@ -44,8 +44,15 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoResolution() -> VideoResolution {
-  return {256, 240, 256, 240, 8.0 / 7.0};
+auto Interface::videoInformation() -> VideoInformation {
+  VideoInformation vi;
+  vi.width  = 256;
+  vi.height = 240;
+  vi.internalWidth  = 256;
+  vi.internalHeight = 240;
+  vi.aspectCorrection = 8.0 / 7.0;
+  vi.refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
+  return vi;
 }
 
 auto Interface::videoColors() -> uint32 {

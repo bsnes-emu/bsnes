@@ -262,6 +262,8 @@ private:
 
   uint32 buffer[1280 * 512];
   uint32* output = nullptr;
+
+  friend class Interface;
 };
 
 extern VDP vdp;

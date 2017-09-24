@@ -173,7 +173,12 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, 
     SetTextColor(ps.hdc, GetSysColor(IsWindowEnabled(hwnd) ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
     auto hFont = pFont::create(font);
     SelectObject(ps.hdc, hFont);
-    RECT rcText{textGeometry.x(), textGeometry.y(), textGeometry.x() + textGeometry.width(), textGeometry.y() + textGeometry.height()};
+    RECT rcText{
+      LONG(textGeometry.x()),
+      LONG(textGeometry.y()),
+      LONG(textGeometry.x() + textGeometry.width()),
+      LONG(textGeometry.y() + textGeometry.height())
+    };
     DrawText(ps.hdc, wText, -1, &rcText, DT_NOPREFIX | DT_END_ELLIPSIS);
     DeleteObject(hFont);
   }
