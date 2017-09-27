@@ -22,6 +22,7 @@
     [_backgroundColor release];
     [_bookmarkStarts release];
     [_bookmarkExtents release];
+    [_bookmarkEnds release];
     [super dealloc];
 }
 

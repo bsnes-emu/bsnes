@@ -157,7 +157,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [self.view flip];
     GB_set_pixels_output(&gb, self.view.pixels);
-    [self reloadVRAMData: nil];
+    if (self.vramWindow.isVisible) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self reloadVRAMData: nil];
+        });
+    }
 }
 
 - (void) run
@@ -734,8 +738,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
                                     NULL,
                                     YES,
                                     renderingIntent);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpaceRef);
     
-    return [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(width * scale, height * scale)];
+    NSImage *ret = [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(width * scale, height * scale)];
+    CGImageRelease(iref);
+    
+    return ret;
 }
 
 - (void) reloadMemoryView

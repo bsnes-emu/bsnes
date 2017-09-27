@@ -137,7 +137,7 @@ void GB_free(GB_gameboy_t *gb)
         }
     }
     for (int i = 0x400; i--;) {
-        if (gb->reversed_symbol_map.buckets[i]) {
+        while (gb->reversed_symbol_map.buckets[i]) {
             GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
             free(gb->reversed_symbol_map.buckets[i]);
             gb->reversed_symbol_map.buckets[i] = next;
