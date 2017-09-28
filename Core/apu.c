@@ -115,6 +115,41 @@ static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
     return gb->apu.shadow_sweep_sample_legnth + delta;
 }
 
+static void update_square_sample(GB_gameboy_t *gb, unsigned index)
+{
+    uint8_t duty = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
+    update_sample(gb, index,
+                  duties[gb->apu.square_channels[index].current_sample_index + duty * 8]?
+                  gb->apu.square_channels[index].current_volume : 0,
+                  0);
+}
+
+
+/* the effects of NRX2 writes on current volume are not well documented and differ
+   between models and variants. The exact behavior can only be verified on CGB as it
+   requires the PCM12 register. The behavior implemented here was verified on *my*
+   CGB, which might behave differently from other CGB revisions, as well as from the
+   DMG, MGB or SGB/2 */
+static void nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
+{
+    if (value & 8) {
+        (*volume)++;
+    }
+    
+    if (((value ^ old_value) & 8)) {
+        *volume = 0x10 - *volume;
+    }
+    
+    if ((value & 7) && !(old_value & 7) && *volume && !(value & 8)) {
+        (*volume)--;
+    }
+    
+    if ((old_value & 7) && (value & 8)) {
+        (*volume)--;
+    }
+    
+    (*volume) &= 0xF;
+}
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
@@ -136,11 +171,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                     
                     gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
                     
-                    uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
-                    update_sample(gb, i,
-                                  duties[gb->apu.square_channels[i].current_sample_index + duty * 8]?
-                                  gb->apu.square_channels[i].current_volume : 0,
-                                  0);
+                    update_square_sample(gb, i);
                 }
             }
         }
@@ -261,12 +292,7 @@ void GB_apu_run(GB_gameboy_t *gb)
                 gb->apu.square_channels[i].current_sample_index++;
                 gb->apu.square_channels[i].current_sample_index &= 0x7;
                 
-                uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
-
-                update_sample(gb, i,
-                              duties[gb->apu.square_channels[i].current_sample_index + duty * 8]?
-                              gb->apu.square_channels[i].current_volume : 0,
-                              cycles - cycles_left);
+                update_square_sample(gb, i);
             }
             if (cycles_left) {
                 gb->apu.square_channels[i].sample_countdown -= cycles_left;
@@ -432,8 +458,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         reg = GB_IO_WAV_START + gb->apu.wave_channel.current_sample_index / 2;
     }
     
-    gb->io_registers[reg] = value;
-
+    /* Todo: this can and should be rewritten with a function table. */
     switch (reg) {
         /* Globals */
         case GB_IO_NR50:
@@ -479,13 +504,13 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         /* Square channels */
         case GB_IO_NR10:
-            if (gb->apu.sweep_decreasing && !(gb->io_registers[GB_IO_NR10] & 8)) {
+            if (gb->apu.sweep_decreasing && !(value & 8)) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, 0);
                 gb->apu.sweep_enabled = false;
                 gb->apu.square_sweep_calculate_countdown = 0;
             }
-            if ((gb->io_registers[GB_IO_NR10] & 0x70) == 0) {
+            if ((value & 0x70) == 0) {
                 /* Todo: what happens if we set period to 0 while a calculate event is scheduled, and then
                          re-set it to non-zero? */
                 gb->apu.square_sweep_calculate_countdown = 0;
@@ -504,14 +529,18 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         case GB_IO_NR12:
         case GB_IO_NR22: {
-            /* TODO: What happens when changing bits 0-2 after triggering? */
+            unsigned index = reg == GB_IO_NR22? GB_SQUARE_2: GB_SQUARE_1;
             if ((value & 0xF8) == 0) {
                 /* According to Blargg's test ROM this should disable the channel instantly
-                   TODO: verify how "instant" the change is using PCM12*/
-                unsigned index = reg == GB_IO_NR22? GB_SQUARE_2: GB_SQUARE_1;
+                 TODO: verify how "instant" the change is using PCM12 */
                 update_sample(gb, index, 0, 0);
                 gb->apu.is_active[index] = false;
             }
+            else if (gb->apu.is_active[index]) {
+                nrx2_glitch(&gb->apu.square_channels[index].current_volume, value, gb->io_registers[reg]);
+                update_square_sample(gb, index);
+            }
+            
             break;
         }
             
@@ -678,12 +707,16 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         }
             
         case GB_IO_NR42: {
-            /* TODO: What happens when changing bits 0-2 after triggering? */
+
             if ((value & 0xF8) == 0) {
                 /* According to Blargg's test ROM this should disable the channel instantly
-                 TODO: verify how "instant" the change is using PCM34 */
+                 TODO: verify how "instant" the change is using PCM12 */
                 update_sample(gb, GB_NOISE, 0, 0);
                 gb->apu.is_active[GB_NOISE] = false;
+            }
+            else if (gb->apu.is_active[GB_NOISE]){
+                nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
+                update_square_sample(gb, GB_NOISE);
             }
             break;
         }
@@ -762,8 +795,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2 + 1] = value & 0xF;
             }
     }
-
-
+    gb->io_registers[reg] = value;
 }
 
 size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb)
