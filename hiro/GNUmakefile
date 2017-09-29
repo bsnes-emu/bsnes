@@ -19,7 +19,7 @@ ifeq ($(platform),windows)
   endif
 endif
 
-ifeq ($(platform),macosx)
+ifeq ($(platform),macos)
   ifeq ($(hiro),)
     hiro := cocoa
   endif

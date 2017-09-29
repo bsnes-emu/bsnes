@@ -5,7 +5,7 @@ namespace nall {
 
   struct Intrinsics {
     enum class Compiler : uint { Clang, GCC, VisualCPP, Unknown };
-    enum class Platform : uint { Windows, MacOSX, Linux, BSD, Unknown };
+    enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
     enum class API : uint { Windows, Posix, Unknown };
     enum class Display : uint { Windows, Quartz, Xorg, Unknown };
     enum class Processor : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
@@ -72,10 +72,10 @@ namespace nall {
   auto Intrinsics::api() -> API { return API::Windows; }
   auto Intrinsics::display() -> Display { return Display::Windows; }
 #elif defined(__APPLE__)
-  #define PLATFORM_MACOSX
+  #define PLATFORM_MACOS
   #define API_POSIX
   #define DISPLAY_QUARTZ
-  auto Intrinsics::platform() -> Platform { return Platform::MacOSX; }
+  auto Intrinsics::platform() -> Platform { return Platform::MacOS; }
   auto Intrinsics::api() -> API { return API::Posix; }
   auto Intrinsics::display() -> Display { return Display::Quartz; }
 #elif defined(linux) || defined(__linux__)
@@ -104,7 +104,7 @@ namespace nall {
 
 }
 
-#if defined(PLATFORM_MACOSX)
+#if defined(PLATFORM_MACOS)
   #include <machine/endian.h>
 #elif defined(PLATFORM_LINUX)
   #include <endian.h>

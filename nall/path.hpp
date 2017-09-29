@@ -77,7 +77,7 @@ inline auto config() -> string {
   SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  #elif defined(PLATFORM_MACOSX)
+  #elif defined(PLATFORM_MACOS)
   string result = {Path::user(), "Library/Application Support/"};
   #else
   string result = {Path::user(), ".config/"};
@@ -95,7 +95,7 @@ inline auto local() -> string {
   SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  #elif defined(PLATFORM_MACOSX)
+  #elif defined(PLATFORM_MACOS)
   string result = {Path::user(), "Library/Application Support/"};
   #else
   string result = {Path::user(), ".local/share/"};
@@ -114,7 +114,7 @@ inline auto shared() -> string {
   SHGetFolderPathW(nullptr, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  #elif defined(PLATFORM_MACOSX)
+  #elif defined(PLATFORM_MACOS)
   string result = "/Library/Application Support/";
   #else
   string result = "/usr/share/";

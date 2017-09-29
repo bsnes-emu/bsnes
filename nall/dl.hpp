@@ -61,7 +61,7 @@ inline auto library::close() -> void {
   dlclose((void*)handle);
   handle = 0;
 }
-#elif defined(PLATFORM_MACOSX)
+#elif defined(PLATFORM_MACOS)
 inline auto library::open(const string& name, const string& path) -> bool {
   if(handle) close();
   if(path) handle = (uintptr)dlopen(string(path, "lib", name, ".dylib"), RTLD_LAZY);

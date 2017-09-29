@@ -97,7 +97,7 @@ namespace Math {
   #define dllexport
 #endif
 
-#if defined(PLATFORM_MACOSX)
+#if defined(PLATFORM_MACOS)
   #define MSG_NOSIGNAL 0
 #endif
 

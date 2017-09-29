@@ -10,27 +10,27 @@ L   idle();
   }
 }
 
-auto WDC65816::instructionBRL() -> void {
+auto WDC65816::instructionBranchLong() -> void {
   uint16 displacement = fetch();
   hi(displacement) = fetch();
 L idle();
   aa(PC) = PC + (int16)displacement;
 }
 
-auto WDC65816::instructionJMPShort() -> void {
+auto WDC65816::instructionJumpShort() -> void {
   uint16 data = fetch();
 L hi(data) = fetch();
   aa(PC) = data;
 }
 
-auto WDC65816::instructionJMPLong() -> void {
+auto WDC65816::instructionJumpLong() -> void {
   uint24 data = fetch();
   hi(data) = fetch();
 L db(data) = fetch();
   PC = data;
 }
 
-auto WDC65816::instructionJMPIndirect() -> void {
+auto WDC65816::instructionJumpIndirect() -> void {
   uint16 absolute = fetch();
   hi(absolute) = fetch();
   uint16 data = read(uint16(absolute + 0));
@@ -38,7 +38,7 @@ L hi(data) = read(uint16(absolute + 1));
   aa(PC) = data;
 }
 
-auto WDC65816::instructionJMPIndexedIndirect() -> void {
+auto WDC65816::instructionJumpIndexedIndirect() -> void {
   uint16 absolute = fetch();
   hi(absolute) = fetch();
   idle();
@@ -47,7 +47,7 @@ L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
   aa(PC) = data;
 }
 
-auto WDC65816::instructionJMPIndirectLong() -> void {
+auto WDC65816::instructionJumpIndirectLong() -> void {
   uint16 absolute = fetch();
   hi(absolute) = fetch();
   uint24 data = read(uint16(absolute + 0));
@@ -56,7 +56,7 @@ L db(data) = read(uint16(absolute + 2));
   PC = data;
 }
 
-auto WDC65816::instructionJSRShort() -> void {
+auto WDC65816::instructionCallShort() -> void {
   uint16 data = fetch();
   hi(data) = fetch();
   idle();
@@ -66,7 +66,7 @@ L push(lo(PC));
   aa(PC) = data;
 }
 
-auto WDC65816::instructionJSRLong() -> void {
+auto WDC65816::instructionCallLong() -> void {
   uint24 data = fetch();
   hi(data) = fetch();
   pushN(db(PC));
@@ -79,7 +79,7 @@ L pushN(lo(PC));
 E hi(S) = 0x01;
 }
 
-auto WDC65816::instructionJSRIndexedIndirect() -> void {
+auto WDC65816::instructionCallIndexedIndirect() -> void {
   uint16 absolute = fetch();
   pushN(hi(PC));
   pushN(lo(PC));
@@ -91,7 +91,7 @@ L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
 E hi(S) = 0x01;
 }
 
-auto WDC65816::instructionRTI() -> void {
+auto WDC65816::instructionReturnInterrupt() -> void {
   idle();
   idle();
   P = pull();
@@ -106,7 +106,7 @@ E XF = 1, MF = 1;
   }
 }
 
-auto WDC65816::instructionRTS() -> void {
+auto WDC65816::instructionReturnShort() -> void {
   idle();
   idle();
   uint16 data = pull();
@@ -116,7 +116,7 @@ L idle();
   aa(PC)++;
 }
 
-auto WDC65816::instructionRTL() -> void {
+auto WDC65816::instructionReturnLong() -> void {
   idle();
   idle();
   uint24 data = pullN();

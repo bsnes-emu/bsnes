@@ -1,4 +1,4 @@
-#if defined(PLATFORM_MACOSX)
+#if defined(PLATFORM_MACOS)
   #include <OpenAL/al.h>
   #include <OpenAL/alc.h>
 #else

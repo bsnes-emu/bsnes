@@ -40,7 +40,7 @@ namespace Processor {
 #include "instructions-write.cpp"
 #include "instructions-modify.cpp"
 #include "instructions-pc.cpp"
-#include "instructions-misc.cpp"
+#include "instructions-other.cpp"
 #include "instruction.cpp"
 
 auto WDC65816::power() -> void {
@@ -54,9 +54,9 @@ auto WDC65816::power() -> void {
   P  = 0x34;
   EF = 1;
 
-  r.mdr    = 0x00;
-  r.wai    = false;
-  r.stp    = false;
+  r.mdr = 0x00;
+  r.wai = false;
+  r.stp = false;
   r.vector = 0xfffc;  //reset vector address
 }
 

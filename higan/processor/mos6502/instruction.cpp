@@ -18,11 +18,11 @@ auto MOS6502::instruction() -> void {
   auto code = opcode();
 
   switch(code) {
-  op(0x00, BRK)
+  op(0x00, Break)
   op(0x01, IndirectXRead, fp(ORA), A)
   op(0x05, ZeroPageRead, fp(ORA), A)
   op(0x06, ZeroPageModify, fp(ASL))
-  op(0x08, PHP)
+  op(0x08, PushP)
   op(0x09, Immediate, fp(ORA), A)
   op(0x0a, Implied, fp(ASL), A)
   op(0x0d, AbsoluteRead, fp(ORA), A)
@@ -35,12 +35,12 @@ auto MOS6502::instruction() -> void {
   op(0x19, AbsoluteRead, fp(ORA), A, Y)
   op(0x1d, AbsoluteRead, fp(ORA), A, X)
   op(0x1e, AbsoluteModify, fp(ASL), X)
-  op(0x20, JSRAbsolute)
+  op(0x20, CallAbsolute)
   op(0x21, IndirectXRead, fp(AND), A)
   op(0x24, ZeroPageRead, fp(BIT), A)
   op(0x25, ZeroPageRead, fp(AND), A)
   op(0x26, ZeroPageModify, fp(ROL))
-  op(0x28, PLP)
+  op(0x28, PullP)
   op(0x29, Immediate, fp(AND), A)
   op(0x2a, Implied, fp(ROL), A)
   op(0x2c, AbsoluteRead, fp(BIT), A)
@@ -54,14 +54,14 @@ auto MOS6502::instruction() -> void {
   op(0x39, AbsoluteRead, fp(AND), A, Y)
   op(0x3d, AbsoluteRead, fp(AND), A, X)
   op(0x3e, AbsoluteModify, fp(ROL), X)
-  op(0x40, RTI)
+  op(0x40, ReturnInterrupt)
   op(0x41, IndirectXRead, fp(EOR), A)
   op(0x45, ZeroPageRead, fp(EOR), A)
   op(0x46, ZeroPageModify, fp(LSR))
   op(0x48, Push, A)
   op(0x49, Immediate, fp(EOR), A)
   op(0x4a, Implied, fp(LSR), A)
-  op(0x4c, JMPAbsolute)
+  op(0x4c, JumpAbsolute)
   op(0x4d, AbsoluteRead, fp(EOR), A)
   op(0x4e, AbsoluteModify, fp(LSR))
   op(0x50, Branch, V == 0)
@@ -72,14 +72,14 @@ auto MOS6502::instruction() -> void {
   op(0x59, AbsoluteRead, fp(EOR), A, Y)
   op(0x5d, AbsoluteRead, fp(EOR), A, X)
   op(0x5e, AbsoluteModify, fp(LSR), X)
-  op(0x60, RTS)
+  op(0x60, ReturnSubroutine)
   op(0x61, IndirectXRead, fp(ADC), A)
   op(0x65, ZeroPageRead, fp(ADC), A)
   op(0x66, ZeroPageModify, fp(ROR))
   op(0x68, Pull, A)
   op(0x69, Immediate, fp(ADC), A)
   op(0x6a, Implied, fp(ROR), A)
-  op(0x6c, JMPIndirect)
+  op(0x6c, JumpIndirect)
   op(0x6d, AbsoluteRead, fp(ADC), A)
   op(0x6e, AbsoluteModify, fp(ROR))
   op(0x70, Branch, V == 1)
@@ -157,7 +157,7 @@ auto MOS6502::instruction() -> void {
   op(0xe6, ZeroPageModify, fp(INC))
   op(0xe8, Implied, fp(INC), X)
   op(0xe9, Immediate, fp(SBC), A)
-  op(0xea, NOP)
+  op(0xea, NoOperation)
   op(0xec, AbsoluteRead, fp(CPX), X)
   op(0xed, AbsoluteRead, fp(SBC), A)
   op(0xee, AbsoluteModify, fp(INC))
@@ -172,7 +172,7 @@ auto MOS6502::instruction() -> void {
   }
 
   //unimplemented instruction
-  return instructionNOP();
+  return instructionNoOperation();
 }
 
 #undef op

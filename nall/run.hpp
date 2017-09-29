@@ -24,7 +24,7 @@ struct execute_result_t {
   string error;
 };
 
-#if defined(PLATFORM_MACOSX) || defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
+#if defined(PLATFORM_MACOS) || defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
 
 template<typename... P> inline auto execute(const string& name, P&&... p) -> execute_result_t {
   int fdout[2];

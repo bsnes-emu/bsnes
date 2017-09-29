@@ -14,8 +14,8 @@ auto SA1::Enter() -> void {
 }
 
 auto SA1::main() -> void {
-  if(r.wai) return instructionWAI();
-  if(r.stp) return instructionSTP();
+  if(r.wai) return instructionWait();
+  if(r.stp) return instructionStop();
 
   if(mmio.sa1_rdyb || mmio.sa1_resb) {
     //SA-1 co-processor is asleep

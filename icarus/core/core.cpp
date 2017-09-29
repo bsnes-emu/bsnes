@@ -19,6 +19,10 @@ auto Icarus::error() const -> string {
   return errorMessage;
 }
 
+auto Icarus::missing() const -> string_vector {
+  return missingFiles;
+}
+
 auto Icarus::success(string location) -> string {
   errorMessage = "";
   return location;
@@ -53,6 +57,9 @@ auto Icarus::manifest(string location) -> string {
 }
 
 auto Icarus::import(string location) -> string {
+  errorMessage = {};
+  missingFiles = {};
+
   location.transform("\\", "/").trimRight("/");
   if(!file::exists(location)) return failure("file does not exist");
   if(!file::readable(location)) return failure("file is unreadable");

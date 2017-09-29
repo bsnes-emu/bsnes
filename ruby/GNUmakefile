@@ -1,4 +1,4 @@
-ifeq ($(platform),macosx)
+ifeq ($(platform),macos)
   rubyflags = $(objcppflags) $(flags)
 else
   rubyflags = $(cppflags) $(flags)
@@ -33,7 +33,7 @@ ifeq ($(platform),windows)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
 endif
 
-ifeq ($(platform),macosx)
+ifeq ($(platform),macos)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 endif
 

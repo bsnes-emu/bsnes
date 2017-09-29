@@ -27,6 +27,7 @@ struct Icarus {
   Icarus();
 
   auto error() const -> string;
+  auto missing() const -> string_vector;
   auto success(string location) -> string;
   auto failure(string message) -> string;
 
@@ -42,7 +43,7 @@ struct Icarus {
 
   //super-famicom.cpp
   auto superFamicomManifest(string location) -> string;
-  auto superFamicomManifest(vector<uint8_t>& buffer, string location, string* firmwareMissing = nullptr) -> string;
+  auto superFamicomManifest(vector<uint8_t>& buffer, string location) -> string;
   auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
@@ -108,6 +109,7 @@ struct Icarus {
 
 private:
   string errorMessage;
+  string_vector missingFiles;
 
   struct {
     Markup::Node famicom;

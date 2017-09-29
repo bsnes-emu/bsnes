@@ -52,6 +52,28 @@ auto MOS6502::instructionBranch(bool take) -> void {
   }
 }
 
+auto MOS6502::instructionBreak() -> void {
+  operand();
+  push(PCH);
+  push(PCL);
+  uint16 vector = 0xfffe;
+  nmi(vector);
+  push(P | 0x30);
+  I = 1;
+  PCL = read(vector++);
+L PCH = read(vector++);
+}
+
+auto MOS6502::instructionCallAbsolute() -> void {
+  uint16 absolute = operand();
+  absolute |= operand() << 8;
+  idle();
+  PC--;
+  push(PCH);
+L push(PCL);
+  PC = absolute;
+}
+
 auto MOS6502::instructionClear(bool& flag) -> void {
 L idle();
   flag = 0;
@@ -98,6 +120,25 @@ auto MOS6502::instructionIndirectYWrite(uint8& data) -> void {
 L write(absolute + Y, data);
 }
 
+auto MOS6502::instructionJumpAbsolute() -> void {
+  uint16 absolute = operand();
+L absolute |= operand() << 8;
+  PC = absolute;
+}
+
+auto MOS6502::instructionJumpIndirect() -> void {
+  uint16 absolute = operand();
+  absolute |= operand() << 8;
+  uint16 pc = read(absolute);
+  absolute.byte(0)++;  //MOS6502: $00ff wraps here to $0000; not $0100
+L pc |= read(absolute) << 8;
+  PC = pc;
+}
+
+auto MOS6502::instructionNoOperation() -> void {
+L idle();
+}
+
 auto MOS6502::instructionPull(uint8& data) -> void {
   idle();
   idle();
@@ -106,9 +147,37 @@ L data = pull();
   N = data.bit(7);
 }
 
+auto MOS6502::instructionPullP() -> void {
+  idle();
+  idle();
+L P = pull();
+}
+
 auto MOS6502::instructionPush(uint8& data) -> void {
   idle();
 L push(data);
+}
+
+auto MOS6502::instructionPushP() -> void {
+  idle();
+L push(P | 0x30);
+}
+
+auto MOS6502::instructionReturnInterrupt() -> void {
+  idle();
+  idle();
+  P = pull();
+  PCL = pull();
+L PCH = pull();
+}
+
+auto MOS6502::instructionReturnSubroutine() -> void {
+  idle();
+  idle();
+  PCL = pull();
+  PCH = pull();
+L idle();
+  PC++;
 }
 
 auto MOS6502::instructionSet(bool& flag) -> void {
@@ -159,75 +228,4 @@ auto MOS6502::instructionZeroPageWrite(uint8& data, uint8 index) -> void {
   auto zeroPage = operand();
   read(zeroPage);
 L store(zeroPage + index, data);
-}
-
-//
-
-auto MOS6502::instructionBRK() -> void {
-  operand();
-  push(PCH);
-  push(PCL);
-  uint16 vector = 0xfffe;
-  nmi(vector);
-  push(P | 0x30);
-  I = 1;
-  PCL = read(vector++);
-L PCH = read(vector++);
-}
-
-auto MOS6502::instructionJMPAbsolute() -> void {
-  uint16 absolute = operand();
-L absolute |= operand() << 8;
-  PC = absolute;
-}
-
-auto MOS6502::instructionJMPIndirect() -> void {
-  uint16 absolute = operand();
-  absolute |= operand() << 8;
-  uint16 pc = read(absolute);
-  absolute.byte(0)++;  //MOS6502: $00ff wraps here to $0000; not $0100
-L pc |= read(absolute) << 8;
-  PC = pc;
-}
-
-auto MOS6502::instructionJSRAbsolute() -> void {
-  uint16 absolute = operand();
-  absolute |= operand() << 8;
-  idle();
-  PC--;
-  push(PCH);
-L push(PCL);
-  PC = absolute;
-}
-
-auto MOS6502::instructionNOP() -> void {
-L idle();
-}
-
-auto MOS6502::instructionPHP() -> void {
-  idle();
-L push(P | 0x30);
-}
-
-auto MOS6502::instructionPLP() -> void {
-  idle();
-  idle();
-L P = pull();
-}
-
-auto MOS6502::instructionRTI() -> void {
-  idle();
-  idle();
-  P = pull();
-  PCL = pull();
-L PCH = pull();
-}
-
-auto MOS6502::instructionRTS() -> void {
-  idle();
-  idle();
-  PCL = pull();
-  PCH = pull();
-L idle();
-  PC++;
 }

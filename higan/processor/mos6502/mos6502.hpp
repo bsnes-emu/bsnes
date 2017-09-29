@@ -57,6 +57,8 @@ struct MOS6502 {
   auto instructionAbsoluteWrite(uint8& data) -> void;
   auto instructionAbsoluteWrite(uint8& data, uint8 index) -> void;
   auto instructionBranch(bool take) -> void;
+  auto instructionBreak() -> void;
+  auto instructionCallAbsolute() -> void;
   auto instructionClear(bool& flag) -> void;
   auto instructionImmediate(fp alu, uint8& data) -> void;
   auto instructionImplied(fp alu, uint8& data) -> void;
@@ -64,8 +66,15 @@ struct MOS6502 {
   auto instructionIndirectXWrite(uint8& data) -> void;
   auto instructionIndirectYRead(fp alu, uint8& data) -> void;
   auto instructionIndirectYWrite(uint8& data) -> void;
+  auto instructionJumpAbsolute() -> void;
+  auto instructionJumpIndirect() -> void;
+  auto instructionNoOperation() -> void;
   auto instructionPull(uint8& data) -> void;
+  auto instructionPullP() -> void;
   auto instructionPush(uint8& data) -> void;
+  auto instructionPushP() -> void;
+  auto instructionReturnInterrupt() -> void;
+  auto instructionReturnSubroutine() -> void;
   auto instructionSet(bool& flag) -> void;
   auto instructionTransfer(uint8& source, uint8& target, bool flag) -> void;
   auto instructionZeroPageModify(fp alu) -> void;
@@ -74,16 +83,6 @@ struct MOS6502 {
   auto instructionZeroPageRead(fp alu, uint8& data, uint8 index) -> void;
   auto instructionZeroPageWrite(uint8& data) -> void;
   auto instructionZeroPageWrite(uint8& data, uint8 index) -> void;
-
-  auto instructionBRK() -> void;
-  auto instructionJMPAbsolute() -> void;
-  auto instructionJMPIndirect() -> void;
-  auto instructionJSRAbsolute() -> void;
-  auto instructionNOP() -> void;
-  auto instructionPHP() -> void;
-  auto instructionPLP() -> void;
-  auto instructionRTI() -> void;
-  auto instructionRTS() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

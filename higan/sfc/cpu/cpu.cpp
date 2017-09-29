@@ -24,8 +24,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  if(r.wai) return instructionWAI();
-  if(r.stp) return instructionSTP();
+  if(r.wai) return instructionWait();
+  if(r.stp) return instructionStop();
 
   if(status.interruptPending) {
     status.interruptPending = false;
