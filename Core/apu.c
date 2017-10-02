@@ -150,6 +150,7 @@ static void nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
     
     (*volume) &= 0xF;
 }
+
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
