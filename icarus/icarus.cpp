@@ -127,6 +127,7 @@ auto nall::main(string_vector args) -> void {
   #endif
   scanDialog->show();
   Application::run();
+  settings.save();
 }
 
 #endif

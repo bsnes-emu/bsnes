@@ -79,6 +79,7 @@ auto uPD96050::execOP(uint24 opcode) -> void {
 
     flag.z = r == 0;
     flag.s0 = r & 0x8000;
+    if(!flag.ov1) flag.s1 = flag.s0;
 
     switch(alu) {
 
@@ -110,7 +111,6 @@ auto uPD96050::execOP(uint24 opcode) -> void {
         flag.ov0 = (q ^ r) &  (q ^ p) & 0x8000;
         flag.c = r > q;
       }
-      if(!flag.ov1) flag.s1 = flag.s0;
       flag.ov1 = flag.ov0 & flag.ov1 ? flag.s0 == flag.s1 : flag.ov0 | flag.ov1;
       break;
     }

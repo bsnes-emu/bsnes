@@ -1,6 +1,6 @@
 struct Settings : Markup::Node {
   Settings();
-  ~Settings();
+  auto save() -> void;
 };
 
 Settings::Settings() {
@@ -19,6 +19,6 @@ Settings::Settings() {
   set("icarus/UseHeuristics", true);
 }
 
-Settings::~Settings() {
+auto Settings::save() -> void {
   file::write(locate("settings.bml"), BML::serialize(*this));
 }
