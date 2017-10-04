@@ -88,7 +88,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/drop.bmp
+sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
 all: cocoa sdl tester
@@ -267,7 +267,7 @@ $(BIN)/SDL/LICENSE: LICENSE
 $(BIN)/SDL/registers.sym: Misc/registers.sym
 	cp -f $^ $@
 	
-$(BIN)/SDL/drop.bmp: SDL/drop.bmp
+$(BIN)/SDL/background.bmp: SDL/background.bmp
 	cp -f $^ $@
 
 # Boot ROMs

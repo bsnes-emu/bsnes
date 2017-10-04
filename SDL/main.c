@@ -2,8 +2,8 @@
 #include <signal.h>
 #include <SDL2/SDL.h>
 #include "gb.h"
-
 #include "utils.h"
+#include "gui.h"
 
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
@@ -11,37 +11,6 @@
 /* Windows (well, at least my VM) can't handle 96KHz sound well :( */
 #define AUDIO_FREQUENCY 44100
 #endif
-
-#ifdef __APPLE__
-#define MODIFIER_NAME "Cmd"
-#else
-#define MODIFIER_NAME "Ctrl"
-#endif
-
-static const char help[] =
-"Drop a GB or GBC ROM file to play.\n"
-"\n"
-"Controls:\n"
-"    D-Pad: Arrow Keys\n"
-"    A: X\n"
-"    B: Z\n"
-"    Start: Enter\n"
-"    Select: Backspace\n"
-"\n"
-"Keyboard Shortcuts: \n"
-"    Restart: " MODIFIER_NAME "+R\n"
-"    Pause: " MODIFIER_NAME "+P\n"
-"    Turbo: Space\n"
-#ifdef __APPLE__
-"    Mute/Unmute: " MODIFIER_NAME "+Shift+M\n"
-#else
-"    Mute/Unmute: " MODIFIER_NAME "+M\n"
-#endif
-"    Save state: " MODIFIER_NAME "+Number (0-9)\n"
-"    Load state: " MODIFIER_NAME "+Shift+Number (0-9)\n"
-"    Cycle between DMG/CGB emulation: " MODIFIER_NAME "+T\n"
-"    Cycle scaling modes: Tab"
-;
 
 GB_gameboy_t gb;
 static bool dmg = false;
@@ -52,10 +21,15 @@ static char *filename = NULL;
 static bool should_free_filename = false;
 static char *battery_save_path_ptr;
 
-static SDL_Window *window = NULL;
-static SDL_Renderer *renderer = NULL;
-static SDL_Texture *texture = NULL;
-static SDL_PixelFormat *pixel_format = NULL;
+void set_filename(const char *new_filename, bool new_should_free)
+{
+    if (filename && should_free_filename) {
+        free(filename);
+    }
+    filename = (char *) new_filename;
+    should_free_filename = new_should_free;
+}
+
 static SDL_AudioSpec want_aspec, have_aspec;
 
 static char *captured_log = NULL;
@@ -106,52 +80,7 @@ static enum {
     GB_SDL_TOGGLE_MODEL_COMMAND,
 } pending_command;
 
-static enum {
-    GB_SDL_SCALING_ENTIRE_WINDOW,
-    GB_SDL_SCALING_KEEP_RATIO,
-    GB_SDL_SCALING_INTEGER_FACTOR,
-    GB_SDL_SCALING_MAX,
-} scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR;
 static unsigned command_parameter;
-
-static void update_viewport(void)
-{
-    int win_width, win_height;
-    SDL_GetWindowSize(window, &win_width, &win_height);
-    double x_factor = win_width / 160.0;
-    double y_factor = win_height / 144.0;
-    
-    if (scaling_mode == GB_SDL_SCALING_INTEGER_FACTOR) {
-        x_factor = (int)(x_factor);
-        y_factor = (int)(y_factor);
-    }
-
-    if (scaling_mode != GB_SDL_SCALING_ENTIRE_WINDOW) {
-        if (x_factor > y_factor) {
-            x_factor = y_factor;
-        }
-        else {
-            y_factor = x_factor;
-        }
-    }
-    
-    unsigned new_width = x_factor * 160;
-    unsigned new_height = y_factor * 144;
-    
-    SDL_Rect rect = (SDL_Rect){(win_width  - new_width) / 2, (win_height - new_height) /2,
-        new_width, new_height};
-    SDL_RenderSetViewport(renderer, &rect);
-}
-
-static void cycle_scaling(void)
-{
-    scaling_mode++;
-    scaling_mode %= GB_SDL_SCALING_MAX;
-    update_viewport();
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-}
 
 static void handle_events(GB_gameboy_t *gb)
 {
@@ -169,11 +98,7 @@ static void handle_events(GB_gameboy_t *gb)
                 exit(0);
                 
             case SDL_DROPFILE: {
-                if (should_free_filename) {
-                    SDL_free(filename);
-                }
-                filename = event.drop.file;
-                should_free_filename = true;
+                set_filename(filename, true);
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 break;
             }
@@ -236,7 +161,7 @@ static void handle_events(GB_gameboy_t *gb)
                             break;
                         }
                     case SDLK_QUESTION:
-                            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
+                        show_help();
 #endif
                         
                     default:
@@ -495,55 +420,8 @@ usage:
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
     if (filename == NULL) {
-        /* Draw the "Drop file" screen */
-        SDL_Surface *drop_backround = SDL_LoadBMP(executable_relative_path("drop.bmp"));
-        SDL_Surface *drop_converted = SDL_ConvertSurface(drop_backround, pixel_format, 0);
-        SDL_LockSurface(drop_converted);
-        SDL_UpdateTexture(texture, NULL, drop_converted->pixels, drop_converted->pitch);
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
-        SDL_RenderPresent(renderer);
-        SDL_FreeSurface(drop_converted);
-        SDL_FreeSurface(drop_backround);
-        SDL_Event event;
-        while (SDL_WaitEvent(&event))
-        {
-            switch (event.type) {
-                case SDL_QUIT: {
-                    exit(0);
-                }
-                case SDL_WINDOWEVENT: {
-                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        update_viewport();
-                        SDL_RenderClear(renderer);
-                        SDL_RenderCopy(renderer, texture, NULL, NULL);
-                        SDL_RenderPresent(renderer);
-                    }
-                    break;
-                }
-                case SDL_DROPFILE: {
-                    filename = event.drop.file;
-                    should_free_filename = true;
-                    goto start;
-                }
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_TAB) {
-                        cycle_scaling();
-                    }
-#ifndef __APPLE__
-                    else if (event.key.keysym.sym == SDLK_F1) {
-                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
-                    }
-#else
-                    else if (event.key.keysym.sym == SDLK_QUESTION || (event.key.keysym.sym && (event.key.keysym.mod & KMOD_SHIFT))) {
-                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
-                    }
-#endif
-                    break;
-            }
-        }
+        run_gui();
     }
-start:
     run(); // Never returns
     return 0;
 }
