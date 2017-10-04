@@ -24,7 +24,7 @@ static char *battery_save_path_ptr;
 void set_filename(const char *new_filename, bool new_should_free)
 {
     if (filename && should_free_filename) {
-        free(filename);
+        SDL_free(filename);
     }
     filename = (char *) new_filename;
     should_free_filename = new_should_free;
@@ -98,7 +98,7 @@ static void handle_events(GB_gameboy_t *gb)
                 exit(0);
                 
             case SDL_DROPFILE: {
-                set_filename(filename, true);
+                set_filename(event.drop.file, true);
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 break;
             }
