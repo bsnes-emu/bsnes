@@ -102,8 +102,8 @@ struct M68K {
   };
 
   template<uint Size> auto fetch(EffectiveAddress& ea) -> uint32;
-  template<uint Size, bool Hold = 0> auto read(EffectiveAddress& ea) -> uint32;
-  template<uint Size, bool Hold = 0> auto write(EffectiveAddress& ea, uint32 data) -> void;
+  template<uint Size, bool hold = 0> auto read(EffectiveAddress& ea) -> uint32;
+  template<uint Size, bool hold = 0> auto write(EffectiveAddress& ea, uint32 data) -> void;
 
   //instruction.cpp
   auto instruction() -> void;
@@ -120,7 +120,7 @@ struct M68K {
   template<uint Size> auto sign(uint32 data) -> int32;
 
                       auto instructionABCD(EffectiveAddress with, EffectiveAddress from) -> void;
-  template<uint Size, bool Extend = false> auto ADD(uint32 source, uint32 target) -> uint32;
+  template<uint Size, bool extend = false> auto ADD(uint32 source, uint32 target) -> uint32;
   template<uint Size> auto instructionADD(EffectiveAddress from, DataRegister with) -> void;
   template<uint Size> auto instructionADD(DataRegister from, EffectiveAddress with) -> void;
   template<uint Size> auto instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void;
@@ -233,7 +233,7 @@ struct M68K {
                       auto instructionSBCD(EffectiveAddress with, EffectiveAddress from) -> void;
                       auto instructionSCC(uint4 condition, EffectiveAddress to) -> void;
                       auto instructionSTOP() -> void;
-  template<uint Size, bool Extend = false> auto SUB(uint32 source, uint32 target) -> uint32;
+  template<uint Size, bool extend = false> auto SUB(uint32 source, uint32 target) -> uint32;
   template<uint Size> auto instructionSUB(EffectiveAddress source, DataRegister target) -> void;
   template<uint Size> auto instructionSUB(DataRegister source, EffectiveAddress target) -> void;
   template<uint Size> auto instructionSUBA(AddressRegister to, EffectiveAddress from) -> void;

@@ -44,7 +44,7 @@ template<uint Size> auto M68K::_immediate() -> string {
 
 template<uint Size> auto M68K::_address(EffectiveAddress& ea) -> string {
   if(ea.mode == 7) return {"$", hex((int16)_readPC<Word>(), 6L)};
-  if(ea.mode == 8) return {"$", hex(readPC<Long>(), 6L)};
+  if(ea.mode == 8) return {"$", hex(_readPC<Long>(), 6L)};
   if(ea.mode == 9) return {"$", hex(_pc + (int16)_readPC(), 6L)};
   return "???";
 }
