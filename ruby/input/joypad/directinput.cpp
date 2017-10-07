@@ -55,10 +55,10 @@ struct InputJoypadDirectInput {
         int16_t yaxis = 0;
 
         if(pov < 36000) {
-          if(pov >= 31500 || pov <=  4500) yaxis = -32768;
+          if(pov >= 31500 || pov <=  4500) yaxis = -32767;
           if(pov >=  4500 && pov <= 13500) xaxis = +32767;
           if(pov >= 13500 && pov <= 22500) yaxis = +32767;
-          if(pov >= 22500 && pov <= 31500) xaxis = -32768;
+          if(pov >= 22500 && pov <= 31500) xaxis = -32767;
         }
 
         assign(jp.hid, HID::Joypad::GroupID::Hat, n * 2 + 0, xaxis);

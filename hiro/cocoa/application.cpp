@@ -33,17 +33,18 @@
 @end
 
 CocoaDelegate* cocoaDelegate = nullptr;
+NSTimer* applicationTimer = nullptr;
 
 namespace hiro {
 
 auto pApplication::run() -> void {
-//NSTimer* timer = [NSTimer scheduledTimerWithTimeInterval:0.1667 target:cocoaDelegate selector:@selector(updateInDock:) userInfo:nil repeats:YES];
+//applicationTimer = [NSTimer scheduledTimerWithTimeInterval:0.1667 target:cocoaDelegate selector:@selector(updateInDock:) userInfo:nil repeats:YES];
 
   if(Application::state.onMain) {
-    NSTimer* timer = [NSTimer scheduledTimerWithTimeInterval:0.0 target:cocoaDelegate selector:@selector(run:) userInfo:nil repeats:YES];
+    applicationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0 target:cocoaDelegate selector:@selector(run:) userInfo:nil repeats:YES];
 
     //below line is needed to run application during window resize; however it has a large performance penalty on the resize smoothness
-    //[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
+    //[[NSRunLoop currentRunLoop] addTimer:applicationTimer forMode:NSEventTrackingRunLoopMode];
   }
 
   @autoreleasepool {
@@ -74,6 +75,7 @@ auto pApplication::processEvents() -> void {
 
 auto pApplication::quit() -> void {
   @autoreleasepool {
+    [applicationTimer invalidate];
     [NSApp stop:nil];
     NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined location:NSMakePoint(0, 0) modifierFlags:0 timestamp:0.0 windowNumber:0 context:nil subtype:0 data1:0 data2:0];
     [NSApp postEvent:event atStart:true];

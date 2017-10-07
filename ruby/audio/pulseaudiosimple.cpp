@@ -36,8 +36,9 @@ struct AudioPulseAudioSimple : Audio {
   auto output(const double samples[]) -> void {
     if(!ready()) return;
 
-    _buffer[_offset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
-    if(_offset >= 64) {
+    _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
+    _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
+    if(++_offset >= 64) {
       int error;
       pa_simple_write(_interface, (const void*)_buffer, _offset * sizeof(uint32_t), &error);
       _offset = 0;

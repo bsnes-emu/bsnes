@@ -77,7 +77,7 @@ struct AudioOSS : Audio {
   auto output(const double samples[]) -> void {
     if(!ready()) return;
     for(auto n : range(_channels)) {
-      int16_t sample = samples[n] * 32768.0;
+      auto sample = (uint16_t)sclamp<16>(samples[n] * 32767.0);
       auto unused = write(_fd, &sample, 2);
     }
   }

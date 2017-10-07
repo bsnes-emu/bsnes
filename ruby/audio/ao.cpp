@@ -33,7 +33,9 @@ struct AudioAO : Audio {
   }
 
   auto output(const double samples[]) -> void {
-    uint32_t sample = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
+    uint32_t sample = 0;
+    sample |= (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
+    sample |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     ao_play(_interface, (char*)&sample, 4);
   }
 

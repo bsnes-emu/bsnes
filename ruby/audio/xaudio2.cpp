@@ -59,8 +59,9 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
   }
 
   auto output(const double samples[]) -> void {
-    _buffer[_bufferIndex * _period + _bufferOffset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
-    if(_bufferOffset < _period) return;
+    _buffer[_bufferIndex * _period + _bufferOffset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
+    _buffer[_bufferIndex * _period + _bufferOffset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
+    if(++_bufferOffset < _period) return;
     _bufferOffset = 0;
 
     if(_bufferQueue == _bufferCount - 1) {

@@ -46,8 +46,9 @@ struct AudioPulseAudio : Audio {
 
   auto output(const double samples[]) -> void {
     pa_stream_begin_write(_stream, (void**)&_buffer, &_period);
-    _buffer[_offset++] = uint16_t(samples[0] * 32768.0) << 0 | uint16_t(samples[1] * 32768.0) << 16;
-    if((_offset + 1) * pa_frame_size(&_specification) <= _period) return;
+    _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
+    _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
+    if((++_offset + 1) * pa_frame_size(&_specification) <= _period) return;
 
     while(true) {
       if(_first) {

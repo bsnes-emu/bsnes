@@ -61,8 +61,8 @@ struct AudioOpenAL : Audio {
   }
 
   auto output(const double samples[]) -> void {
-    _buffer[_bufferLength]  = int16_t(samples[0] * 32768.0) <<  0;
-    _buffer[_bufferLength] |= int16_t(samples[1] * 32768.0) << 16;
+    _buffer[_bufferLength]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
+    _buffer[_bufferLength] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     if(++_bufferLength < _bufferSize) return;
 
     ALuint alBuffer = 0;

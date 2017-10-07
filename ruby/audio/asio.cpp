@@ -208,30 +208,30 @@ private:
 
         switch(_sampleFormat) {
         case ASIOSTInt16LSB: {
-          *(int16_t*)buffer = samples[n] * double(1 << 15);
+          *(uint16_t*)buffer = (uint16_t)sclamp<16>(samples[n] * (32768.0 - 1.0));
           break;
         }
 
         case ASIOSTInt24LSB: {
-          int value = samples[n] * double(1 << 23);
-          buffer[0] = value >> 0;
-          buffer[1] = value >> 8;
+          auto value = (uint32_t)sclamp<24>(samples[n] * (256.0 * 32768.0 - 1.0));
+          buffer[0] = value >>  0;
+          buffer[1] = value >>  8;
           buffer[2] = value >> 16;
           break;
         }
 
         case ASIOSTInt32LSB: {
-          *(int32_t*)buffer = samples[n] * double(1 << 31);
+          *(uint32_t*)buffer = (uint32_t)sclamp<32>(samples[n] * (65536.0 * 32768.0 - 1.0));
           break;
         }
 
         case ASIOSTFloat32LSB: {
-          *(float*)buffer = samples[n];
+          *(float*)buffer = max(-1.0, min(+1.0, samples[n]));
           break;
         }
 
         case ASIOSTFloat64LSB: {
-          *(double*)buffer = samples[n];
+          *(double*)buffer = max(-1.0, min(+1.0, samples[n]));
           break;
         }
         }

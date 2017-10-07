@@ -8,7 +8,7 @@ objects := libco emulator audio video resource
 flags += -I. -I..
 
 ifeq ($(platform),windows)
-  link += -mwindows
+  link += $(if $(call streq,$(console),true),-mconsole,-mwindows)
   ifeq ($(binary),application)
     link += -mthreads -lpthread -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
     link += -Wl,-enable-auto-import

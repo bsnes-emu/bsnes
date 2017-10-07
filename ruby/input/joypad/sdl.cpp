@@ -30,8 +30,8 @@ struct InputJoypadSDL {
 
       for(signed n = 0; n < (signed)jp.hid->hats().size() - 1; n += 2) {
         uint8_t state = SDL_JoystickGetHat(jp.handle, n >> 1);
-        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 0, state & SDL_HAT_LEFT ? -32768 : state & SDL_HAT_RIGHT ? +32767 : 0);
-        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 1, state & SDL_HAT_UP ? -32768 : state & SDL_HAT_DOWN ? +32767 : 0);
+        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 0, state & SDL_HAT_LEFT ? -32767 : state & SDL_HAT_RIGHT ? +32767 : 0);
+        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 1, state & SDL_HAT_UP ? -32767 : state & SDL_HAT_DOWN ? +32767 : 0);
       }
 
       for(auto n : range(jp.hid->buttons())) {
