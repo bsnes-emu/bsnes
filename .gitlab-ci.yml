@@ -41,7 +41,7 @@ windows-x86_64-binaries:
 libretro-test:
   script:
     - apt-get update && apt-get -y install build-essential git
-    - git merge origin/libretro
+    - git merge --no-commit origin/libretro
     - make -C higan compiler=g++ binary=library target=libretro
     - mkdir libretro-nightly
     - cp -a higan/out/higan/out/higan_sfc_libretro.so higan-nightly/
