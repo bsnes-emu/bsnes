@@ -37,3 +37,14 @@ windows-x86_64-binaries:
   artifacts:
     paths:
       - higan-nightly/*
+
+libretro-test:
+  script:
+    - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+    - git merge libretro
+    - make -C higan compiler=g++ binary=library target=libretro
+    - mkdir libretro-nightly
+    - cp -a higan/out/higan/out/higan_sfc_libretro.so higan-nightly/
+  artifacts:
+    paths:
+      - libretro-nightly/*
