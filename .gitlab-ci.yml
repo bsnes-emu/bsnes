@@ -46,7 +46,7 @@ libretro-test:
     - EMAIL=fake-email@example.com git merge origin/libretro
     - make -C higan compiler=g++ binary=library target=libretro
     - mkdir libretro-nightly
-    - cp -a higan/out/higan_sfc_libretro.so higan-nightly/
+    - cp -a higan/out/higan_sfc_libretro.so libretro-nightly/
   artifacts:
     paths:
       - libretro-nightly/*
