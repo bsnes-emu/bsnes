@@ -41,7 +41,9 @@ windows-x86_64-binaries:
 libretro-test:
   script:
     - apt-get update && apt-get -y install build-essential git
-    - git merge --no-commit origin/libretro
+    # git refuses to even attempt a merge if you haven't told it who you are,
+    # even if you use --no-commit. *sigh*
+    - EMAIL=fake-email@example.com git merge origin/libretro
     - make -C higan compiler=g++ binary=library target=libretro
     - mkdir libretro-nightly
     - cp -a higan/out/higan/out/higan_sfc_libretro.so higan-nightly/
