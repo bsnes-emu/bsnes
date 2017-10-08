@@ -40,7 +40,7 @@ windows-x86_64-binaries:
 
 libretro-test:
   script:
-    - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+    - apt-get update && apt-get -y install build-essential git
     - git merge libretro
     - make -C higan compiler=g++ binary=library target=libretro
     - mkdir libretro-nightly
