@@ -6,7 +6,6 @@
 #include <signal.h>
 #include <stdarg.h>
 
-
 #define AUDIO_FREQUENCY 44100
 
 #ifdef _WIN32
@@ -14,6 +13,8 @@
 #include <windows.h>
 #define snprintf _snprintf
 #endif
+
+#define GB_INTERNAL
 
 #include "gb.h"
 #include "libretro.h"
@@ -187,7 +188,7 @@ void retro_set_environment(retro_environment_t cb)
       log_cb = fallback_log;
 
    static const struct retro_controller_description controllers[] = {
-      { "Nintendo DS", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
+      { "Nintendo Gameboy", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
    };
 
    static const struct retro_controller_info ports[] = {
@@ -250,6 +251,10 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
       { 0 },
    };
 
@@ -305,12 +310,6 @@ bool retro_load_game(const struct retro_game_info *info)
 
    size_t path_length = strlen(retro_game_path);
 
-   /* Configure battery */
-   replace_extension(retro_game_path, path_length, battery_save_path, ".sav");
-   GB_load_battery(&gb, battery_save_path);
-   printf("(%s)\n",battery_save_path);
-   /* Configure symbols */
-
 #ifdef HAVE_DEBUGGER
    {
       char TMPC[512];
@@ -346,29 +345,74 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-   return false;
+   return GB_get_save_state_size(&gb);
 }
 
-bool retro_serialize(void *data_, size_t size)
+bool retro_serialize(void *data, size_t size)
 {
-   return false;
+   GB_save_state_to_buffer(&gb, (uint8_t*) data);
+   if (data)
+      return true;
+   else
+      return false;
 }
 
-bool retro_unserialize(const void *data_, size_t size)
+bool retro_unserialize(const void *data, size_t size)
 {
-   return false;
+   if (GB_load_state_from_buffer(&gb, (uint8_t*) data, size) == 0)
+      return true;
+   else
+      return false;
 }
 
-void *retro_get_memory_data(unsigned id)
+void *retro_get_memory_data(unsigned type)
 {
-   (void)id;
-   return NULL;
+   void* data;
+   switch(type)
+   {
+      case RETRO_MEMORY_SAVE_RAM:
+         if (gb.cartridge_type->has_battery && gb.mbc_ram_size != 0)
+            data = gb.mbc_ram;
+         else
+            data = NULL;
+         break;
+      case RETRO_MEMORY_RTC:
+         if(gb.cartridge_type->has_battery)
+            data = &gb.rtc_real;
+         else
+            data = NULL;
+         break;
+     default:
+         data = NULL;
+       break;
+   }
+   
+   return data;
 }
 
-size_t retro_get_memory_size(unsigned id)
+size_t retro_get_memory_size(unsigned type)
 {
-   (void)id;
-   return 0;
+   size_t size;
+   switch(type)
+   {
+      case RETRO_MEMORY_SAVE_RAM:
+         if (gb.cartridge_type->has_battery && gb.mbc_ram_size != 0)
+            size = gb.mbc_ram_size;
+         else
+            size = 0;
+         break;
+      case RETRO_MEMORY_RTC:
+         if(gb.cartridge_type->has_battery)
+            size = sizeof (gb.rtc_real);
+         else
+            size =  0;
+         break;
+     default:
+        size = 0;
+       break;
+   }
+   
+   return size;
 }
 
 void retro_cheat_reset(void)

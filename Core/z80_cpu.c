@@ -1398,7 +1398,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
             gb->pc = 0;
         }
         gb->ime = false;
+#ifdef HAVE_DEBUGGER        
         GB_debugger_call_hook(gb, call_addr);
+#endif
     }
     else if(!gb->halted && !gb->stopped) {
         uint8_t opcode = GB_read_memory(gb, gb->pc++);

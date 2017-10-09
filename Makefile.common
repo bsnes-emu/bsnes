@@ -11,6 +11,7 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
 					$(CORE_DIR)/Core/camera.c \
 					$(CORE_DIR)/Core/z80_cpu.c \
 					$(CORE_DIR)/Core/joypad.c \
+               $(CORE_DIR)/Core/save_state.c \
 					$(CORE_DIR)/libretro/libretro.c
 
 ifeq ($(HAVE_DEBUGGER), 1)
