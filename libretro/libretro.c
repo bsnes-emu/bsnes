@@ -95,8 +95,8 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 
 static void audio_callback(void *gb)
 {
-   GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, 735);
-   audio_batch_cb(soundbuf, 735);
+   GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, (float)AUDIO_FREQUENCY / 59.72);
+   audio_batch_cb(soundbuf, (float)AUDIO_FREQUENCY / 59.72);
 }
 
 
@@ -235,13 +235,22 @@ static void check_variables(void)
 
 void retro_run(void)
 {
+   static int frames;
+   size_t samples;
+
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
+   samples = GB_apu_get_current_buffer_length(&gb);
+   if (!(frames < (samples / 35112)))
+   {
+      GB_run_frame(&gb);
+      frames ++;
+   }
+   else
+      frames = 0;
 
-   GB_run_frame(&gb);
    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, 0);
-
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -325,6 +334,7 @@ bool retro_load_game(const struct retro_game_info *info)
 #endif
 
    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
+   /* GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_REMOVE_DC_OFFSET); */ 
    return true;
 }
 
