@@ -521,6 +521,7 @@ typedef enum {
     GB_DIRECT_ACCESS_OAM,
     GB_DIRECT_ACCESS_BGP,
     GB_DIRECT_ACCESS_OBP,
+    GB_DIRECT_ACCESS_IE,
 } GB_direct_access_t;
 
 /* Returns a mutable pointer to various hardware memories. If that memory is banked, the current bank

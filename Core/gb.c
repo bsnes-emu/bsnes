@@ -541,6 +541,10 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
             *size = sizeof(gb->sprite_palettes_data);
             *bank = 0;
             return &gb->sprite_palettes_data;
+        case GB_DIRECT_ACCESS_IE:
+            *size = sizeof(gb->interrupt_enable);
+            *bank = 0;
+            return &gb->interrupt_enable;
         default:
             *size = 0;
             *bank = 0;
