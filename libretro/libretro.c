@@ -49,6 +49,8 @@ char retro_game_path[4096];
 int RLOOP=1;
 
 GB_gameboy_t gb;
+extern const unsigned char dmg_boot[], cgb_boot[];
+extern const unsigned dmg_boot_length, cgb_boot_length;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -289,8 +291,10 @@ bool retro_load_game(const struct retro_game_info *info)
       log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
       err = GB_load_boot_rom(&gb, buf);
 
-      if (err)
-         err = GB_load_boot_rom_dmg(&gb);
+      if (err) {
+         GB_load_boot_rom_from_buffer(&gb, dmg_boot, dmg_boot_length);
+         err = 0;
+      }
    }
    else 
    {
@@ -299,10 +303,11 @@ bool retro_load_game(const struct retro_game_info *info)
       log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
       err = GB_load_boot_rom(&gb, buf);
 
-      if (err)
-         err = GB_load_boot_rom_cgb(&gb);
+      if (err) {
+         GB_load_boot_rom_from_buffer(&gb, cgb_boot, cgb_boot_length);
+         err = 0;
+      }
    }
-
    if (err) 
       log_cb(RETRO_LOG_INFO, "Failed to load boot ROM %s %d\n", buf, err);
    (void)info;

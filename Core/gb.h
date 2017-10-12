@@ -530,12 +530,10 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
 void *GB_get_user_data(GB_gameboy_t *gb);
 void GB_set_user_data(GB_gameboy_t *gb, void *data);
 
-#ifdef __LIBRETRO__
-int GB_load_boot_rom_dmg(GB_gameboy_t *gb);
-int GB_load_boot_rom_cgb(GB_gameboy_t *gb);
-#endif
+
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
+void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
     
 int GB_save_battery(GB_gameboy_t *gb, const char *path);

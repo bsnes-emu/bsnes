@@ -153,25 +153,6 @@ void GB_free(GB_gameboy_t *gb)
     memset(gb, 0, sizeof(*gb));
 }
 
-#ifdef __LIBRETRO__
-extern const char dmg_boot[], cgb_boot[];
-extern const unsigned dmg_boot_length, cgb_boot_length;
-
-int GB_load_boot_rom_dmg(GB_gameboy_t *gb)
-{
-   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
-   memcpy(gb->boot_rom, dmg_boot, dmg_boot_length);
-   return 0;
-}
-
-int GB_load_boot_rom_cgb(GB_gameboy_t *gb)
-{
-   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
-   memcpy(gb->boot_rom, cgb_boot, cgb_boot_length);
-   return 0;
-}
-#endif
-
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");
@@ -182,6 +163,15 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
     fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f);
     fclose(f);
     return 0;
+}
+
+void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size)
+{
+    if (size > sizeof(gb->boot_rom)) {
+        size = sizeof(gb->boot_rom);
+    }
+    memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
+    memcpy(gb->boot_rom, buffer, size);
 }
 
 int GB_load_rom(GB_gameboy_t *gb, const char *path)
