@@ -133,6 +133,16 @@ CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic)
 
 all: $(TARGET)
 
+$(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/build/bin/BootROMs/%_boot.bin
+	echo "/* AUTO-GENERATED */" > $@
+	echo "const char $(notdir $(@:%.c=%))[] = {" >> $@
+	cat $< | xxd -i >> $@
+	echo "};" >> $@
+	echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
+
+$(CORE_DIR)/build/bin/BootROMs/%_boot.bin:
+	make -C $(CORE_DIR) $@
+
 $(TARGET): $(OBJECTS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJECTS)

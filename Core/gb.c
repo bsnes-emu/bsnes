@@ -154,8 +154,8 @@ void GB_free(GB_gameboy_t *gb)
 }
 
 #ifdef __LIBRETRO__
-#include "../libretro/cgb_boot.h"
-#include "../libretro/dmg_boot.h"
+extern const char dmg_boot[], cgb_boot[];
+extern const unsigned dmg_boot_length, cgb_boot_length;
 
 int GB_load_boot_rom_dmg(GB_gameboy_t *gb)
 {
