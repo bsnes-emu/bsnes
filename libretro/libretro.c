@@ -112,7 +112,7 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return r<<16|g<<8|b;
 }
 
-#ifdef HAVE_DEBUGGER
+#ifndef DISABLE_DEBUGGER
 static void debugger_interrupt(int ignore)
 {
     /* ^C twice to exit */
@@ -319,7 +319,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    size_t path_length = strlen(retro_game_path);
 
-#ifdef HAVE_DEBUGGER
+#ifndef DISABLE_DEBUGGER
    {
       char TMPC[512];
       sprintf(TMPC,"%s/registers.sym",retro_system_directory);
@@ -329,7 +329,7 @@ bool retro_load_game(const struct retro_game_info *info)
  
    replace_extension(retro_game_path, path_length, symbols_path, ".sym");
 
-#ifdef HAVE_DEBUGGER
+#ifndef DISABLE_DEBUGGER
    GB_debugger_load_symbol_file(&gb, symbols_path);
 #endif
 

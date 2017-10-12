@@ -1,23 +1,24 @@
 INCFLAGS    := -I$(CORE_DIR) \
-					-I$(CORE_DIR)/Core
+               -I$(CORE_DIR)/Core
 
 SOURCES_C   := $(CORE_DIR)/Core/gb.c \
-					$(CORE_DIR)/Core/apu.c \
-					$(CORE_DIR)/Core/gbmemory.c \
-					$(CORE_DIR)/Core/mbc.c \
-					$(CORE_DIR)/Core/timing.c \
-					$(CORE_DIR)/Core/display.c \
-					$(CORE_DIR)/Core/symbol_hash.c \
-					$(CORE_DIR)/Core/camera.c \
-					$(CORE_DIR)/Core/z80_cpu.c \
-					$(CORE_DIR)/Core/joypad.c \
+               $(CORE_DIR)/Core/apu.c \
+               $(CORE_DIR)/Core/gbmemory.c \
+               $(CORE_DIR)/Core/mbc.c \
+               $(CORE_DIR)/Core/timing.c \
+               $(CORE_DIR)/Core/display.c \
+               $(CORE_DIR)/Core/symbol_hash.c \
+               $(CORE_DIR)/Core/camera.c \
+               $(CORE_DIR)/Core/z80_cpu.c \
+               $(CORE_DIR)/Core/joypad.c \
                $(CORE_DIR)/Core/save_state.c \
-					$(CORE_DIR)/libretro/libretro.c
+               $(CORE_DIR)/libretro/libretro.c
 
 ifeq ($(HAVE_DEBUGGER), 1)
 SOURCES_C +=  $(CORE_DIR)/Core/debugger.c \
-				  $(CORE_DIR)/Core/z80_disassembler.c
+              $(CORE_DIR)/Core/z80_disassembler.c
+else
+CFLAGS += -DDISABLE_DEBUGGER
 endif
 
-SOURCES_CXX :=
-					
+SOURCES_CXX :=	

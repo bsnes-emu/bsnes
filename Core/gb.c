@@ -280,16 +280,12 @@ exit:
 
 void GB_run(GB_gameboy_t *gb)
 {
-#ifdef HAVE_DEBUGGER
     GB_debugger_run(gb);
-#endif
     GB_cpu_run(gb);
     if (gb->vblank_just_occured) {
         GB_update_joyp(gb);
         GB_rtc_run(gb);
-#ifdef HAVE_DEBUGGER
         GB_debugger_handle_async_commands(gb);
-#endif
     }
 }
 
