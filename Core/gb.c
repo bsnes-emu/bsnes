@@ -44,18 +44,17 @@ void GB_log(GB_gameboy_t *gb, const char *fmt, ...)
     va_end(args);
 }
 
+#ifndef DISABLE_DEBUGGER
 static char *default_input_callback(GB_gameboy_t *gb)
 {
     char *expression = NULL;
     size_t size = 0;
 
-#ifndef __LIBRETRO__
     if (getline(&expression, &size, stdin) == -1) {
         /* The user doesn't have STDIN or used ^D. We make sure the program keeps running. */
         GB_set_async_input_callback(gb, NULL); /* Disable async input */
         return strdup("c");
     }
-#endif
 
     if (!expression) {
         return strdup("");
@@ -85,6 +84,7 @@ static char *default_async_input_callback(GB_gameboy_t *gb)
 #endif
     return NULL;
 }
+#endif
 
 void GB_init(GB_gameboy_t *gb)
 {
@@ -92,8 +92,10 @@ void GB_init(GB_gameboy_t *gb)
     gb->ram = malloc(gb->ram_size = 0x2000);
     gb->vram = malloc(gb->vram_size = 0x2000);
 
+#ifndef DISABLE_DEBUGGER
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
+#endif
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
     
     GB_reset(gb);
@@ -106,8 +108,10 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->vram = malloc(gb->vram_size = 0x2000 * 2);
     gb->is_cgb = true;
 
+#ifndef DISABLE_DEBUGGER
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
+#endif
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     GB_reset(gb);
@@ -326,16 +330,21 @@ void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback)
 
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
+#ifndef DISABLE_DEBUGGER
     if (gb->input_callback == default_input_callback) {
         gb->async_input_callback = NULL;
     }
     gb->input_callback = callback;
+#endif
 }
 
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
+#ifndef DISABLE_DEBUGGER
     gb->async_input_callback = callback;
+#endif
 }
+
 
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
