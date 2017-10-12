@@ -33,7 +33,7 @@ ifeq ($(platform), win)
 	INCFLAGS += -I Windows
 endif
 
-CORE_DIR     += .
+CORE_DIR     += ..
 
 TARGET_NAME  = sameboy
 LIBM		    = -lm
@@ -113,7 +113,7 @@ else
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 endif
 
-TARGET := build/bin/libretro/$(TARGET)
+TARGET := $(CORE_DIR)/build/bin/$(TARGET)
 
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
@@ -128,7 +128,7 @@ endif
 
 include Makefile.common
 
-OBJECTS := $(patsubst %.c,build/obj/%_libretro.c.o,$(SOURCES_C))
+OBJECTS := $(patsubst %.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
 
 CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic)
@@ -143,7 +143,7 @@ $(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/build/bin/BootROMs/%_boot.bin
 	echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
 
 $(CORE_DIR)/build/bin/BootROMs/%_boot.bin:
-	make -C $(CORE_DIR) $@
+	make -C $(CORE_DIR) $(patsubst $(CORE_DIR)/%,%,$@)
 
 $(TARGET): $(OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
@@ -153,7 +153,7 @@ else
 	$(CC) $(fpic) $(SHARED) $(INCFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 endif
 
-build/obj/%_libretro.c.o: %.c
+$(CORE_DIR)/build/obj/%_libretro.c.o: %.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) -c -o $@ $< $(CFLAGS) $(fpic) -DGB_INTERNAL
 

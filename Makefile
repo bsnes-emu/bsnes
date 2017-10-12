@@ -91,7 +91,7 @@ quicklook: $(BIN)/SameBoy.qlgenerator
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/drop.bmp
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
-all: cocoa sdl tester
+all: cocoa sdl tester libretro
 
 # Get a list of our source files and their respective object file targets
 
@@ -279,7 +279,12 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 	head -c $(if $(findstring dmg,$@), 256, 2304) $@.tmp2 > $@
 	@rm $@.tmp $@.tmp2
 
+# Libretro Core (uses its own build system)
+libretro:
+	make -C libretro
+	
 # Clean
-
 clean:
 	rm -rf build
+
+.PHONY: libretro
