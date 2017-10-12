@@ -5,10 +5,11 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <sys/time.h>
 #ifndef _WIN32
-#include <unistd.h>
 #include <sys/select.h>
 #endif
+#include <unistd.h>
 #include "gb.h"
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
@@ -48,11 +49,13 @@ static char *default_input_callback(GB_gameboy_t *gb)
     char *expression = NULL;
     size_t size = 0;
 
+#ifndef __LIBRETRO__
     if (getline(&expression, &size, stdin) == -1) {
         /* The user doesn't have STDIN or used ^D. We make sure the program keeps running. */
         GB_set_async_input_callback(gb, NULL); /* Disable async input */
         return strdup("c");
     }
+#endif
 
     if (!expression) {
         return strdup("");
@@ -145,6 +148,25 @@ void GB_free(GB_gameboy_t *gb)
     }
     memset(gb, 0, sizeof(*gb));
 }
+
+#ifdef __LIBRETRO__
+#include "../libretro/cgb_boot.h"
+#include "../libretro/dmg_boot.h"
+
+int GB_load_boot_rom_dmg(GB_gameboy_t *gb)
+{
+   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
+   memcpy(gb->boot_rom, dmg_boot, dmg_boot_length);
+   return 0;
+}
+
+int GB_load_boot_rom_cgb(GB_gameboy_t *gb)
+{
+   memset(gb->boot_rom, 0xFF, sizeof(gb->boot_rom));
+   memcpy(gb->boot_rom, cgb_boot, cgb_boot_length);
+   return 0;
+}
+#endif
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
@@ -258,12 +280,16 @@ exit:
 
 void GB_run(GB_gameboy_t *gb)
 {
+#ifdef HAVE_DEBUGGER
     GB_debugger_run(gb);
+#endif
     GB_cpu_run(gb);
     if (gb->vblank_just_occured) {
         GB_update_joyp(gb);
         GB_rtc_run(gb);
+#ifdef HAVE_DEBUGGER
         GB_debugger_handle_async_commands(gb);
+#endif
     }
 }
 

@@ -2,6 +2,7 @@
 #include_next <stdio.h>
 #include <stdlib.h>
 
+#ifndef __LIBRETRO__
 static inline int vasprintf(char **str, const char *fmt, va_list args)
 {
     size_t size = _vscprintf(fmt, args) + 1;
@@ -14,6 +15,7 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
     }
     return ret;
 }
+#endif
 
 /* This code is public domain -- Will Hartung 4/9/09 */
 static inline size_t getline(char **lineptr, size_t *n, FILE *stream) {
