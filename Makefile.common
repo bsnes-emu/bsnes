@@ -3,7 +3,7 @@ INCFLAGS    := -I$(CORE_DIR) \
 
 SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/apu.c \
-               $(CORE_DIR)/Core/gbmemory.c \
+               $(CORE_DIR)/Core/memory.c \
                $(CORE_DIR)/Core/mbc.c \
                $(CORE_DIR)/Core/timing.c \
                $(CORE_DIR)/Core/display.c \
@@ -20,5 +20,7 @@ SOURCES_C +=  $(CORE_DIR)/Core/debugger.c \
 else
 CFLAGS += -DDISABLE_DEBUGGER
 endif
+CFLAGS += -DDISABLE_TIMEKEEPING
+
 
 SOURCES_CXX :=	

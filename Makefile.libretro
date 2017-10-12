@@ -58,7 +58,7 @@ EXT := a
 endif
 
 ifeq ($(platform), unix)
-	EXT ?= so
+    EXT ?= so
    TARGET := $(TARGET_NAME)_libretro.$(EXT)
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
@@ -113,6 +113,9 @@ else
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 endif
 
+# To force use of the Unix version instead of the Windows version
+MKDIR := $(shell which mkdir)
+
 LDFLAGS += $(LIBM)
 
 ifeq ($(DEBUG), 1)
@@ -123,7 +126,7 @@ endif
 
 include Makefile.common
 
-OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
+OBJECTS := $(patsubst %.c,build/obj/%_libretro.c.o,$(SOURCES_C))
 
 CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic)
@@ -137,7 +140,8 @@ else
 	$(CC) $(fpic) $(SHARED) $(INCFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 endif
 
-Core/%.o: Core/%.c
+build/obj/%_libretro.c.o: %.c
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) -c -o $@ $< $(CFLAGS) $(fpic) -DGB_INTERNAL
 
 %.o: %.c
