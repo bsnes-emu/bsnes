@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "apu.h"
+#import <Core/gb.h>
 
 @interface GBAudioClient : NSObject
 @property (strong) void (^renderBlock)(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer);

@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
+#include <Core/gb.h>
 #import "GBShader.h"
-#include "gb.h"
 
 @interface GBView : NSOpenGLView
 - (void) flip;

@@ -1,5 +1,4 @@
-INCFLAGS    := -I$(CORE_DIR) \
-               -I$(CORE_DIR)/Core
+INCFLAGS    := -I$(CORE_DIR)
 
 SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/apu.c \

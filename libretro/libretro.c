@@ -14,9 +14,7 @@
 #define snprintf _snprintf
 #endif
 
-#define GB_INTERNAL
-
-#include "gb.h"
+#include <Core/gb.h>
 #include "libretro.h"
 
 #ifdef _WIN32

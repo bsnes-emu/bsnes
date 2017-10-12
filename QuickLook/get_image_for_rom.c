@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <assert.h>
+#include <Core/gb.h>
 
 #include "get_image_for_rom.h"
-#include "gb.h"
 
 #define LENGTH 60 * 10
 

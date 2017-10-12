@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <SDL2/SDL.h>
-#include "gb.h"
+#include <Core/gb.h>
 
 #include "utils.h"
 

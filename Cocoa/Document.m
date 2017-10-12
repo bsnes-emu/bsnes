@@ -1,12 +1,12 @@
 #include <AVFoundation/AVFoundation.h>
 #include <CoreAudio/CoreAudio.h>
+#include <Core/gb.h>
 #include "GBAudioClient.h"
 #include "Document.h"
 #include "AppDelegate.h"
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 #include "GBWarningPopover.h"
-#include "gb.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */

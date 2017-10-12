@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #include "GBButtons.h"
-#include "gb.h"
+#include <Core/gb.h>
 #import <Carbon/Carbon.h>
 
 @implementation AppDelegate

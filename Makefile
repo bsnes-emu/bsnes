@@ -42,7 +42,7 @@ endif
 
 # Set compilation and linkage flags based on target, platform and configuration
 
-CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+CFLAGS += -Werror -Wall -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 SDL_LDFLAGS := -lSDL2
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows

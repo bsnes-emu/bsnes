@@ -13,9 +13,7 @@
 #define snprintf _snprintf
 #endif
 
-#include "gb.h"
-#include "debugger.h"
-#include "memory.h"
+#include <Core/gb.h>
 
 static bool running = false;
 static char *filename;
