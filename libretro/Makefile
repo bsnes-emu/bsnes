@@ -143,7 +143,7 @@ $(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/build/bin/BootROMs/%_boot.bin
 	echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
 
 $(CORE_DIR)/build/bin/BootROMs/%_boot.bin:
-	make -C $(CORE_DIR) $(patsubst $(CORE_DIR)/%,%,$@)
+	$(MAKE) -C $(CORE_DIR) $(patsubst $(CORE_DIR)/%,%,$@)
 
 $(TARGET): $(OBJECTS)
 	-@$(MKDIR) -p $(dir $@)

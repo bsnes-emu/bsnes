@@ -281,7 +281,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 
 # Libretro Core (uses its own build system)
 libretro:
-	make -C libretro
+	$(MAKE) -C libretro
 	
 # Clean
 clean:
