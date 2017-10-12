@@ -1,6 +1,6 @@
 # SameBoy
 
-SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, and an incomplete experimental SDL frontend for other operating systems. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
+SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, an incomplete experimental SDL frontend for other operating systems, and a libretro core. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
 
 ## Features
 Features common to both Cocoa and SDL versions:
@@ -46,6 +46,6 @@ On Windows, SameBoy also requires:
  * [GnuWin](http://gnuwin32.sourceforge.net/)
  * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, repsectively.
 
-To compile, simply run `make`. The targets are cocoa (Default for OS X), sdl (Default for everything else), bootroms and tester. You may also specify CONF=debug (default), CONF=release or CONF=native_release to control optimization and symbols. native_release is faster than release, but is optimized to the host's CPU and therefore is not portable. You may set BOOTROMS_DIR=... to a directory containing precompiled dmg_boot.bin and cgb_boot.bin files, otherwise the build system will compile and use SameBoy's own boot ROMs.
+To compile, simply run `make`. The targets are cocoa (Default for OS X), sdl (Default for everything else), libretro, bootroms and tester. You may also specify CONF=debug (default), CONF=release or CONF=native_release to control optimization and symbols. native_release is faster than release, but is optimized to the host's CPU and therefore is not portable. You may set BOOTROMS_DIR=... to a directory containing precompiled dmg_boot.bin and cgb_boot.bin files, otherwise the build system will compile and use SameBoy's own boot ROMs.
 
 SameBoy was compiled and tested on macOS, Ubuntu and 32-bit Windows 7.
