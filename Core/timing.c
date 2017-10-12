@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #endif
 
+#ifdef DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
 {
 #ifndef _WIN32
@@ -19,7 +20,6 @@ static int64_t get_nanoseconds(void)
 #endif
 }
 
-#ifndef __LIBRETRO__
 static void nsleep(uint64_t nanoseconds)
 {
 #ifndef _WIN32
@@ -35,7 +35,6 @@ static void nsleep(uint64_t nanoseconds)
     CloseHandle(timer);
 #endif
 }
-#endif
 
 bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 {
@@ -61,9 +60,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
     uint64_t target_nanoseconds = gb->cycles_since_last_sync * FRAME_LENGTH / LCDC_PERIOD;
     int64_t nanoseconds = get_nanoseconds();
     if (labs((signed long)(nanoseconds - gb->last_sync)) < target_nanoseconds ) {
-#ifndef __LIBRETRO__
         nsleep(target_nanoseconds  + gb->last_sync - nanoseconds);
-#endif
         gb->last_sync += target_nanoseconds;
     }
     else {
@@ -72,7 +69,18 @@ void GB_timing_sync(GB_gameboy_t *gb)
 
     gb->cycles_since_last_sync = 0;
 }
+#else
 
+bool GB_timing_sync_turbo(GB_gameboy_t *gb)
+{
+    return false;
+}
+
+void GB_timing_sync(GB_gameboy_t *gb)
+{
+}
+
+#endif
 static void GB_ir_run(GB_gameboy_t *gb)
 {
     if (gb->ir_queue_length == 0) return;
