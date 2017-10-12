@@ -162,6 +162,14 @@ typedef enum {
 #define DIV_CYCLES (0x100)
 #define INTERNAL_DIV_CYCLES (0x40000)
 #define FRAME_LENGTH 16742706 // in nanoseconds
+
+#if !defined(MIN)
+#define MIN(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
+#endif
+
+#if !defined(MAX)
+#define MAX(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
+#endif
 #endif
 
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
@@ -361,8 +369,6 @@ struct GB_gameboy_internal_s {
         uint8_t oam[0xA0];
         uint8_t background_palettes_data[0x40];
         uint8_t sprite_palettes_data[0x40];
-        uint32_t background_palettes_rgb[0x20];
-        uint32_t sprite_palettes_rgb[0x20];
         int16_t previous_lcdc_x;
         bool stat_interrupt_line;
         uint8_t effective_scx;
@@ -405,6 +411,9 @@ struct GB_gameboy_internal_s {
 
         /* I/O */
         uint32_t *screen;
+        uint32_t background_palettes_rgb[0x20];
+        uint32_t sprite_palettes_rgb[0x20];
+        GB_color_correction_mode_t color_correction_mode;
         bool keys[GB_KEY_MAX];
                
         /* Timing */

@@ -10,6 +10,7 @@
 
     NSPopUpButton *_graphicsFilterPopupButton;
     NSPopUpButton *_highpassFilterPopupButton;
+    NSPopUpButton *_colorCorrectionPopupButton;
     NSButton *_aspectRatioCheckbox;
 }
 
@@ -50,6 +51,18 @@
 - (NSPopUpButton *)highpassFilterPopupButton
 {
     return _highpassFilterPopupButton;
+}
+
+- (void)setColorCorrectionPopupButton:(NSPopUpButton *)colorCorrectionPopupButton
+{
+    _colorCorrectionPopupButton = colorCorrectionPopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"];
+    [_colorCorrectionPopupButton selectItemAtIndex:mode];
+}
+
+- (NSPopUpButton *)colorCorrectionPopupButton
+{
+    return _colorCorrectionPopupButton;
 }
 
 - (void)setHighpassFilterPopupButton:(NSPopUpButton *)highpassFilterPopupButton
@@ -126,6 +139,14 @@
     [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
                                             forKey:@"GBAspectRatioUnkept"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBAspectChanged" object:nil];
+}
+
+- (IBAction)colorCorrectionChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+                                              forKey:@"GBColorCorrection"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
+
 }
 
 - (NSButton *)aspectRatioCheckbox

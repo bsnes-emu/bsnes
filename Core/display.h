@@ -34,8 +34,16 @@ typedef struct {
     bool obscured_by_line_limit;
 } GB_oam_info_t;
 
+typedef enum {
+    GB_COLOR_CORRECTION_DISABLED,
+    GB_COLOR_CORRECTION_CORRECT_CURVES,
+    GB_COLOR_CORRECTION_EMULATE_HARDWARE,
+    GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS,
+} GB_color_correction_mode_t;
+
 void GB_draw_tileset(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index);
 void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index, GB_map_type_t map_type, GB_tileset_type_t tileset_type);
 uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_height);
-
+uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color);
+void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode);
 #endif /* display_h */
