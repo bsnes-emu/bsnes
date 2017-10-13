@@ -17,9 +17,20 @@ enum scaling_mode {
 
 extern enum scaling_mode scaling_mode;
 
+enum pending_command {
+    GB_SDL_NO_COMMAND,
+    GB_SDL_SAVE_STATE_COMMAND,
+    GB_SDL_LOAD_STATE_COMMAND,
+    GB_SDL_RESET_COMMAND,
+    GB_SDL_NEW_FILE_COMMAND,
+    GB_SDL_TOGGLE_MODEL_COMMAND,
+};
+
+extern enum pending_command pending_command;
+extern unsigned command_parameter;
+
 void update_viewport(void);
 void cycle_scaling(void);
-void show_help(void);
 
-void run_gui(void);
+void run_gui(bool is_running);
 #endif

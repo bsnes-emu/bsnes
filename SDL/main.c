@@ -71,17 +71,6 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit)
     return captured_log;
 }
 
-static enum {
-    GB_SDL_NO_COMMAND,
-    GB_SDL_SAVE_STATE_COMMAND,
-    GB_SDL_LOAD_STATE_COMMAND,
-    GB_SDL_RESET_COMMAND,
-    GB_SDL_NEW_FILE_COMMAND,
-    GB_SDL_TOGGLE_MODEL_COMMAND,
-} pending_command;
-
-static unsigned command_parameter;
-
 static void handle_events(GB_gameboy_t *gb)
 {
 #ifdef __APPLE__
@@ -111,6 +100,10 @@ static void handle_events(GB_gameboy_t *gb)
                 
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        run_gui(true);
+                        break;
+                        
                     case SDLK_c:
                         if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
                             GB_debugger_break(gb);
@@ -151,18 +144,6 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDLK_TAB:
                         cycle_scaling();
                         break;
-#ifndef __APPLE__
-                    case SDLK_F1:
-                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
-                        break;
-#else
-                    case SDLK_SLASH:
-                        if (!(event.key.keysym.sym && (event.key.keysym.mod & KMOD_SHIFT))) {
-                            break;
-                        }
-                    case SDLK_QUESTION:
-                        show_help();
-#endif
                         
                     default:
                         /* Save states */
@@ -292,6 +273,7 @@ static bool handle_pending_command(void)
 
 static void run(void)
 {
+    pending_command = GB_SDL_NO_COMMAND;
 restart:
     if (GB_is_inited(&gb)) {
         GB_switch_model_and_reset(&gb, !dmg);
@@ -420,7 +402,7 @@ usage:
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
     if (filename == NULL) {
-        run_gui();
+        run_gui(false);
     }
     run(); // Never returns
     return 0;

@@ -12,39 +12,48 @@ SDL_Renderer *renderer = NULL;
 SDL_Texture *texture = NULL;
 SDL_PixelFormat *pixel_format = NULL;
 enum scaling_mode scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR;
+enum pending_command pending_command;
+unsigned command_parameter;
 
 
 #ifdef __APPLE__
-#define MODIFIER_NAME "Cmd"
+#define MODIFIER_NAME " " CMD_STRING
 #else
-#define MODIFIER_NAME "Ctrl"
+#define MODIFIER_NAME CTRL_STRING
 #endif
 
 
-static const char help[] =
-"Drop a GB or GBC ROM file to play.\n"
+static const char *help[] ={
+"Drop a GB or GBC ROM\n"
+"file to play.\n"
 "\n"
+
 "Controls:\n"
-"    D-Pad: Arrow Keys\n"
-"    A: X\n"
-"    B: Z\n"
-"    Start: Enter\n"
-"    Select: Backspace\n"
+" D-Pad:        Arrow Keys\n"
+" A:                     X\n"
+" B:                     Z\n"
+" Start:             Enter\n"
+" Select:        Backspace\n"
 "\n"
+" Turbo:             Space\n"
+" Menu:             Escape\n",
 "Keyboard Shortcuts: \n"
-"    Restart: " MODIFIER_NAME "+R\n"
-"    Pause: " MODIFIER_NAME "+P\n"
-"    Turbo: Space\n"
+" Reset:             " MODIFIER_NAME "+R\n"
+" Pause:             " MODIFIER_NAME "+P\n"
+" Toggle DMG/CGB:    " MODIFIER_NAME "+T\n"
+"\n"
+" Save state:    " MODIFIER_NAME "+(0-9)\n"
+" Load state:  " MODIFIER_NAME "+" SHIFT_STRING "+(0-9)\n"
+"\n"
 #ifdef __APPLE__
-"    Mute/Unmute: " MODIFIER_NAME "+Shift+M\n"
+" Mute/Unmute:     " MODIFIER_NAME "+" SHIFT_STRING "+M\n"
 #else
-"    Mute/Unmute: " MODIFIER_NAME "+M\n"
+" Mute/Unmute:       " MODIFIER_NAME "+M\n"
 #endif
-"    Save state: " MODIFIER_NAME "+Number (0-9)\n"
-"    Load state: " MODIFIER_NAME "+Shift+Number (0-9)\n"
-"    Cycle between DMG/CGB emulation: " MODIFIER_NAME "+T\n"
-"    Cycle scaling modes: Tab"
-;
+" Cycle scaling modes: Tab"
+"\n"
+" Break Debugger:    " CTRL_STRING "+C"
+};
 
 void cycle_scaling(void)
 {
@@ -85,15 +94,10 @@ void update_viewport(void)
     SDL_RenderSetViewport(renderer, &rect);
 }
 
-void show_help(void)
-{
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Help", help, window);
-}
-
 /* Does NOT check for bounds! */
 static void draw_char(uint32_t *buffer, unsigned char ch, uint32_t color)
 {
-    if (ch < ' ' || ch > '~') {
+    if (ch < ' ' || ch > font_max) {
         ch = '?';
     }
     
@@ -110,17 +114,7 @@ static void draw_char(uint32_t *buffer, unsigned char ch, uint32_t color)
     }
 }
 
-/* Does NOT check for bounds! */
-static void draw_bordered_char(uint32_t *buffer, unsigned char ch, uint32_t color, uint32_t border)
-{
-    draw_char(buffer - 1, ch, border);
-    draw_char(buffer + 1, ch, border);
-    draw_char(buffer - 160, ch, border);
-    draw_char(buffer + 160, ch, border);
-    draw_char(buffer, ch, color);
-}
-
-static void draw_text(uint32_t *buffer, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
+static void draw_unbordered_text(uint32_t *buffer, unsigned x, unsigned y, const char *string, uint32_t color)
 {
     unsigned orig_x = x;
     while (*string) {
@@ -131,24 +125,75 @@ static void draw_text(uint32_t *buffer, unsigned x, unsigned y, const char *stri
             continue;
         }
         
-        if (x == 0 || x > 160 - GLYPH_WIDTH - 1 || y == 0 || y > 144 - GLYPH_HEIGHT - 1) {
+        if (x > 160 - GLYPH_WIDTH || y == 0 || y > 144 - GLYPH_HEIGHT) {
             break;
         }
         
-        draw_bordered_char(&buffer[x + 160 * y], *string, color, border);
+        draw_char(&buffer[x + 160 * y], *string, color);
         x += GLYPH_WIDTH;
         string++;
     }
 }
 
-static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string, uint32_t color, uint32_t border)
+static void draw_text(uint32_t *buffer, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
 {
-    draw_text(buffer, 160 / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2, y, string, color, border);
+    draw_unbordered_text(buffer, x - 1, y, string, border);
+    draw_unbordered_text(buffer, x + 1, y, string, border);
+    draw_unbordered_text(buffer, x, y - 1, string, border);
+    draw_unbordered_text(buffer, x, y + 1, string, border);
+    draw_unbordered_text(buffer, x, y, string, color);
 }
+
+static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string, uint32_t color, uint32_t border, bool show_selection)
+{
+    unsigned x = 160 / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
+    draw_text(buffer, x, y, string, color, border);
+    if (show_selection) {
+        draw_text(buffer, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+    }
+}
+
+struct menu_item {
+    const char *string;
+    void (*handler)(void);
+};
+static const struct menu_item *current_menu = NULL;
+static unsigned current_selection = 0;
+
+static enum {
+    SHOWING_DROP_MESSAGE,
+    SHOWING_MENU,
+    SHOWING_HELP,
+} gui_state;
+
+static void item_exit(void)
+{
+    exit(0);
+}
+
+static unsigned current_help_page = 0;
+static void item_help(void)
+{
+    current_help_page = 0;
+    gui_state = SHOWING_HELP;
+}
+
+static const struct menu_item paused_menu[] = {
+    {"Resume", NULL},
+    {"Help", item_help},
+    {"Exit", item_exit},
+    {NULL,}
+};
+
+static const struct menu_item nonpaused_menu[] = {
+    {"Help", item_help},
+    {"Exit", item_exit},
+    {NULL,}
+};
 
 
 extern void set_filename(const char *new_filename, bool new_should_free);
-void run_gui(void)
+void run_gui(bool is_running)
 {
     /* Draw the "Drop file" screen */
     static SDL_Surface *converted_background = NULL;
@@ -165,18 +210,37 @@ void run_gui(void)
     }
 
     uint32_t pixels[160 * 144];
-    memcpy(pixels, converted_background->pixels, sizeof(pixels));
-    
-    draw_text_centered(pixels, 116, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0]);
-    draw_text_centered(pixels, 128, "file to play", gui_palette_native[3], gui_palette_native[0]);
-    
-    SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-
     SDL_Event event;
+    gui_state = is_running? SHOWING_MENU : SHOWING_DROP_MESSAGE;
+    bool should_render = true;
+    current_menu = is_running? paused_menu : nonpaused_menu;
     while (SDL_WaitEvent(&event)) {
+        if (should_render) {
+            should_render = false;
+            memcpy(pixels, converted_background->pixels, sizeof(pixels));
+            
+            switch (gui_state) {
+                case SHOWING_DROP_MESSAGE:
+                    draw_text_centered(pixels, 116, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_text_centered(pixels, 128, "file to play", gui_palette_native[3], gui_palette_native[0], false);
+                    break;
+                case SHOWING_MENU:
+                    draw_text_centered(pixels, 16, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
+                    unsigned i = 0;
+                    for (const struct menu_item *item = current_menu; item->string; item++, i++) {
+                        draw_text_centered(pixels, 12 * i + 40, item->string, gui_palette_native[3], gui_palette_native[0], i == current_selection);
+                    }
+                break;
+                case SHOWING_HELP:
+                    draw_text(pixels, 2, 2, help[current_help_page], gui_palette_native[3], gui_palette_native[0]);
+                break;
+            }
+            
+            SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, texture, NULL, NULL);
+            SDL_RenderPresent(renderer);
+        }
         switch (event.type) {
             case SDL_QUIT: {
                 exit(0);
@@ -192,21 +256,54 @@ void run_gui(void)
             }
             case SDL_DROPFILE: {
                 set_filename(event.drop.file, true);
+                pending_command = GB_SDL_NEW_FILE_COMMAND;
                 return;
             }
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_TAB) {
                     cycle_scaling();
                 }
-#ifndef __APPLE__
-                else if (event.key.keysym.sym == SDLK_F1) {
-                    show_help();
+                else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    if (is_running) {
+                        return;
+                    }
+                    else {
+                        if (gui_state == SHOWING_DROP_MESSAGE) {
+                            gui_state = SHOWING_MENU;
+                        }
+                        else if (gui_state == SHOWING_MENU) {
+                            gui_state = SHOWING_DROP_MESSAGE;
+                        }
+                        should_render = true;
+                    }
                 }
-#else
-                else if (event.key.keysym.sym == SDLK_QUESTION || (event.key.keysym.sym && (event.key.keysym.mod & KMOD_SHIFT))) {
-                    show_help();
+                
+                if (gui_state == SHOWING_MENU) {
+                    if (event.key.keysym.sym == SDLK_DOWN && current_menu[current_selection + 1].string) {
+                        current_selection++;
+                        should_render = true;
+                    }
+                    else if (event.key.keysym.sym == SDLK_UP && current_selection) {
+                        current_selection--;
+                        should_render = true;
+                    }
+                    else if (event.key.keysym.sym == SDLK_RETURN) {
+                        if (current_menu[current_selection].handler) {
+                            current_menu[current_selection].handler();
+                            should_render = true;
+                        }
+                        else {
+                            return;
+                        }
+                    }
                 }
-#endif
+                else if(gui_state == SHOWING_HELP) {
+                    current_help_page++;
+                    if (current_help_page == sizeof(help) / sizeof(help[0])) {
+                        gui_state = SHOWING_MENU;
+                    }
+                    should_render = true;
+                }
                 break;
         }
     }
