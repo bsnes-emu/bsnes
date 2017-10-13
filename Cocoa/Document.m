@@ -145,6 +145,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
+    GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
@@ -300,6 +301,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateHighpassFilter)
                                                  name:@"GBHighpassFilterChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateColorCorrectionMode)
+                                                 name:@"GBColorCorrectionChanged"
                                                object:nil];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
@@ -1284,6 +1290,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     if (GB_is_inited(&gb)) {
         GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
+    }
+}
+
+- (void) updateColorCorrectionMode
+{
+    if (GB_is_inited(&gb)) {
+        GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
     }
 }
 

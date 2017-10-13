@@ -30,7 +30,8 @@
                                                               @"GBTurbo": @(kVK_Space),
 
                                                               @"GBFilter": @"NearestNeighbor",
-                                                              @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET),
+                                                              @"GBColorCorrection": @(GB_COLOR_CORRECTION_EMULATE_HARDWARE),
+                                                              @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET)
                                                               }];
 }
 
