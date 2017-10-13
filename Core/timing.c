@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef DISABLE_TIMEKEEPING
+#ifndef DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
 {
 #ifndef _WIN32
