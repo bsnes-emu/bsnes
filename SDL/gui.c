@@ -14,7 +14,7 @@ SDL_PixelFormat *pixel_format = NULL;
 enum scaling_mode scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR;
 enum pending_command pending_command;
 unsigned command_parameter;
-
+GB_color_correction_mode_t color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE;
 
 #ifdef __APPLE__
 #define MODIFIER_NAME " " CMD_STRING
@@ -156,8 +156,10 @@ static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string,
 struct menu_item {
     const char *string;
     void (*handler)(void);
+    const char *(*value_getter)(void);
 };
 static const struct menu_item *current_menu = NULL;
+static const struct menu_item *root_menu = NULL;
 static unsigned current_selection = 0;
 
 static enum {
@@ -168,7 +170,7 @@ static enum {
 
 static void item_exit(void)
 {
-    exit(0);
+    pending_command = GB_SDL_QUIT_COMMAND;
 }
 
 static unsigned current_help_page = 0;
@@ -178,19 +180,61 @@ static void item_help(void)
     gui_state = SHOWING_HELP;
 }
 
+static void enter_graphics_menu(void);
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
+    {"Graphic Options", enter_graphics_menu},
     {"Help", item_help},
     {"Exit", item_exit},
     {NULL,}
 };
 
 static const struct menu_item nonpaused_menu[] = {
+    {"Graphic Options", enter_graphics_menu},
     {"Help", item_help},
     {"Exit", item_exit},
     {NULL,}
 };
 
+const char *current_scaling_mode(void)
+{
+    return (const char *[]){"Fill Entire Window", "Retain Aspect Ratio", "Retain Integer Factor"}[scaling_mode];
+}
+
+const char *current_color_correction_mode(void)
+{
+    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness"}[color_correction_mode];
+}
+
+static void cycle_color_correction(void)
+{
+    if (color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
+        color_correction_mode = GB_COLOR_CORRECTION_DISABLED;
+    }
+    else {
+        color_correction_mode++;
+    }
+}
+
+static void return_to_root_menu(void)
+{
+    current_menu = root_menu;
+    current_selection = 0;
+}
+
+static const struct menu_item graphics_menu[] = {
+    {"Scaling Mode:", cycle_scaling, current_scaling_mode},
+    {"Color Correction:", cycle_color_correction, current_color_correction_mode},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_graphics_menu(void)
+{
+    current_menu = graphics_menu;
+    current_selection = 0;
+}
 
 extern void set_filename(const char *new_filename, bool new_should_free);
 void run_gui(bool is_running)
@@ -213,7 +257,8 @@ void run_gui(bool is_running)
     SDL_Event event;
     gui_state = is_running? SHOWING_MENU : SHOWING_DROP_MESSAGE;
     bool should_render = true;
-    current_menu = is_running? paused_menu : nonpaused_menu;
+    current_menu = root_menu = is_running? paused_menu : nonpaused_menu;
+    current_selection = 0;
     while (SDL_WaitEvent(&event)) {
         if (should_render) {
             should_render = false;
@@ -226,9 +271,14 @@ void run_gui(bool is_running)
                     break;
                 case SHOWING_MENU:
                     draw_text_centered(pixels, 16, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
-                    unsigned i = 0;
+                    unsigned i = 0, y = 40;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
-                        draw_text_centered(pixels, 12 * i + 40, item->string, gui_palette_native[3], gui_palette_native[0], i == current_selection);
+                        draw_text_centered(pixels, y, item->string, gui_palette_native[3], gui_palette_native[0], i == current_selection);
+                        y += 12;
+                        if (item->value_getter) {
+                            draw_text_centered(pixels, y, item->value_getter(), gui_palette_native[3], gui_palette_native[0], false);
+                            y += 12;
+                        }
                     }
                 break;
                 case SHOWING_HELP:
@@ -243,7 +293,14 @@ void run_gui(bool is_running)
         }
         switch (event.type) {
             case SDL_QUIT: {
-                exit(0);
+                if (!is_running) {
+                    exit(0);
+                }
+                else {
+                    pending_command = GB_SDL_QUIT_COMMAND;
+                    return;
+                }
+                
             }
             case SDL_WINDOWEVENT: {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -290,6 +347,12 @@ void run_gui(bool is_running)
                     else if (event.key.keysym.sym == SDLK_RETURN) {
                         if (current_menu[current_selection].handler) {
                             current_menu[current_selection].handler();
+                            if (pending_command) {
+                                if (!is_running && pending_command == GB_SDL_QUIT_COMMAND) {
+                                    exit(0);
+                                }
+                                return;
+                            }
                             should_render = true;
                         }
                         else {

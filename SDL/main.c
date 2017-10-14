@@ -83,8 +83,8 @@ static void handle_events(GB_gameboy_t *gb)
     {
         switch (event.type) {
             case SDL_QUIT:
-                GB_save_battery(gb, battery_save_path_ptr);
-                exit(0);
+                pending_command = GB_SDL_QUIT_COMMAND;
+                break;
                 
             case SDL_DROPFILE: {
                 set_filename(event.drop.file, true);
@@ -102,6 +102,7 @@ static void handle_events(GB_gameboy_t *gb)
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         run_gui(true);
+                        GB_set_color_correction_mode(gb, color_correction_mode);
                         break;
                         
                     case SDLK_c:
@@ -215,8 +216,10 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 static void debugger_interrupt(int ignore)
 {
+    if (!GB_is_inited(&gb)) return;
     /* ^C twice to exit */
     if (GB_debugger_is_stopped(&gb)) {
+        GB_save_battery(&gb, battery_save_path_ptr);
         exit(0);
     }
     GB_debugger_break(&gb);
@@ -267,6 +270,10 @@ static bool handle_pending_command(void)
         case GB_SDL_TOGGLE_MODEL_COMMAND:
             dmg = !dmg;
             return true;
+            
+        case GB_SDL_QUIT_COMMAND:
+            GB_save_battery(&gb, battery_save_path_ptr);
+            exit(0);
     }
     return false;
 }
@@ -290,6 +297,7 @@ restart:
         GB_set_pixels_output(&gb, pixels);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_sample_rate(&gb, have_aspec.freq);
+        GB_set_color_correction_mode(&gb, color_correction_mode);
     }
     
     bool error = false;

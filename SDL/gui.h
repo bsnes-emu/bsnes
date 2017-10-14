@@ -2,6 +2,7 @@
 #define gui_h
 
 #include <SDL2/SDL.h>
+#include <Core/gb.h>
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
@@ -24,10 +25,12 @@ enum pending_command {
     GB_SDL_RESET_COMMAND,
     GB_SDL_NEW_FILE_COMMAND,
     GB_SDL_TOGGLE_MODEL_COMMAND,
+    GB_SDL_QUIT_COMMAND,
 };
 
 extern enum pending_command pending_command;
 extern unsigned command_parameter;
+extern GB_color_correction_mode_t color_correction_mode;
 
 void update_viewport(void);
 void cycle_scaling(void);
