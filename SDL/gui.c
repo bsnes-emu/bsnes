@@ -362,10 +362,10 @@ void run_gui(bool is_running)
                 return;
             }
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_TAB) {
+                if (event.key.keysym.scancode == SDL_SCANCODE_TAB) {
                     cycle_scaling();
                 }
-                else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     if (is_running) {
                         return;
                     }
@@ -381,15 +381,15 @@ void run_gui(bool is_running)
                 }
                 
                 if (gui_state == SHOWING_MENU) {
-                    if (event.key.keysym.sym == SDLK_DOWN && current_menu[current_selection + 1].string) {
+                    if (event.key.keysym.scancode == SDL_SCANCODE_DOWN && current_menu[current_selection + 1].string) {
                         current_selection++;
                         should_render = true;
                     }
-                    else if (event.key.keysym.sym == SDLK_UP && current_selection) {
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_UP && current_selection) {
                         current_selection--;
                         should_render = true;
                     }
-                    else if (event.key.keysym.sym == SDLK_RETURN) {
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
                         if (current_menu[current_selection].handler) {
                             current_menu[current_selection].handler();
                             if (pending_command) {
@@ -404,11 +404,11 @@ void run_gui(bool is_running)
                             return;
                         }
                     }
-                    else if (event.key.keysym.sym == SDLK_RIGHT && current_menu[current_selection].backwards_handler) {
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT && current_menu[current_selection].backwards_handler) {
                         current_menu[current_selection].handler();
                         should_render = true;
                     }
-                    else if (event.key.keysym.sym == SDLK_LEFT && current_menu[current_selection].backwards_handler) {
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_LEFT && current_menu[current_selection].backwards_handler) {
                         current_menu[current_selection].backwards_handler();
                         should_render = true;
                     }

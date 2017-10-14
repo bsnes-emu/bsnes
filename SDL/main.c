@@ -99,38 +99,38 @@ static void handle_events(GB_gameboy_t *gb)
             }
                 
             case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_ESCAPE:
+                switch (event.key.keysym.scancode) {
+                    case SDL_SCANCODE_ESCAPE:
                         run_gui(true);
                         GB_set_color_correction_mode(gb, color_correction_mode);
                         break;
                         
-                    case SDLK_c:
+                    case SDL_SCANCODE_C:
                         if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
                             GB_debugger_break(gb);
                             
                         }
                         break;
                         
-                    case SDLK_r:
+                    case SDL_SCANCODE_R:
                         if (event.key.keysym.mod & MODIFIER) {
                             pending_command = GB_SDL_RESET_COMMAND;
                         }
                         break;
                         
-                    case SDLK_t:
+                    case SDL_SCANCODE_T:
                         if (event.key.keysym.mod & MODIFIER) {
                             pending_command = GB_SDL_TOGGLE_MODEL_COMMAND;
                         }
                         break;
                     
-                    case SDLK_p:
+                    case SDL_SCANCODE_P:
                         if (event.key.keysym.mod & MODIFIER) {
                             paused = !paused;
                         }
                         break;
                         
-                    case SDLK_m:
+                    case SDL_SCANCODE_M:
                         if (event.key.keysym.mod & MODIFIER) {
 #ifdef __APPLE__
                             // Can't override CMD+M (Minimize) in SDL
@@ -142,15 +142,15 @@ static void handle_events(GB_gameboy_t *gb)
                         }
                         break;
                         
-                    case SDLK_TAB:
+                    case SDL_SCANCODE_TAB:
                         cycle_scaling();
                         break;
                         
                     default:
                         /* Save states */
-                        if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) {
+                        if (event.key.keysym.scancode >= SDL_SCANCODE_0 && event.key.keysym.scancode <= SDL_SCANCODE_9) {
                             if (event.key.keysym.mod & MODIFIER) {
-                                command_parameter = event.key.keysym.sym - SDLK_0;
+                                command_parameter = event.key.keysym.scancode - SDL_SCANCODE_0;
                                 
                                 if (event.key.keysym.mod & KMOD_SHIFT) {
                                     pending_command = GB_SDL_LOAD_STATE_COMMAND;
@@ -163,32 +163,32 @@ static void handle_events(GB_gameboy_t *gb)
                         break;
                 }
             case SDL_KEYUP: // Fallthrough
-                switch (event.key.keysym.sym) {
-                    case SDLK_RIGHT:
+                switch (event.key.keysym.scancode) {
+                    case SDL_SCANCODE_RIGHT:
                         GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_LEFT:
+                    case SDL_SCANCODE_LEFT:
                         GB_set_key_state(gb, GB_KEY_LEFT, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_UP:
+                    case SDL_SCANCODE_UP:
                         GB_set_key_state(gb, GB_KEY_UP, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_DOWN:
+                    case SDL_SCANCODE_DOWN:
                         GB_set_key_state(gb, GB_KEY_DOWN, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_x:
+                    case SDL_SCANCODE_X:
                         GB_set_key_state(gb, GB_KEY_A, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_z:
+                    case SDL_SCANCODE_Z:
                         GB_set_key_state(gb, GB_KEY_B, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_BACKSPACE:
+                    case SDL_SCANCODE_BACKSPACE:
                         GB_set_key_state(gb, GB_KEY_SELECT, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_RETURN:
+                    case SDL_SCANCODE_RETURN:
                         GB_set_key_state(gb, GB_KEY_START, event.type == SDL_KEYDOWN);
                         break;
-                    case SDLK_SPACE:
+                    case SDL_SCANCODE_SPACE:
                         GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
                         break;
                 }
