@@ -55,16 +55,6 @@ static const char *help[] ={
 " Break Debugger:    " CTRL_STRING "+C"
 };
 
-void cycle_scaling(void)
-{
-    scaling_mode++;
-    scaling_mode %= GB_SDL_SCALING_MAX;
-    update_viewport();
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-}
-
 void update_viewport(void)
 {
     int win_width, win_height;
@@ -144,12 +134,27 @@ static void draw_text(uint32_t *buffer, unsigned x, unsigned y, const char *stri
     draw_unbordered_text(buffer, x, y, string, color);
 }
 
-static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string, uint32_t color, uint32_t border, bool show_selection)
+enum decoration {
+    DECORATION_NONE,
+    DECORATION_SELECTION,
+    DECORATION_ARROWS,
+};
+
+static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
 {
     unsigned x = 160 / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
     draw_text(buffer, x, y, string, color, border);
-    if (show_selection) {
-        draw_text(buffer, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+    switch (decoration) {
+        case DECORATION_SELECTION:
+            draw_text(buffer, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+            break;
+        case DECORATION_ARROWS:
+            draw_text(buffer, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border);
+            draw_text(buffer, 160 - x, y, RIGHT_ARROW_STRING, color, border);
+            break;
+            
+        case DECORATION_NONE:
+            break;
     }
 }
 
@@ -157,6 +162,7 @@ struct menu_item {
     const char *string;
     void (*handler)(void);
     const char *(*value_getter)(void);
+    void (*backwards_handler)(void);
 };
 static const struct menu_item *current_menu = NULL;
 static const struct menu_item *root_menu = NULL;
@@ -207,6 +213,32 @@ const char *current_color_correction_mode(void)
     return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness"}[color_correction_mode];
 }
 
+void cycle_scaling(void)
+{
+    scaling_mode++;
+    if (scaling_mode == GB_SDL_SCALING_MAX) {
+        scaling_mode = 0;
+    }
+    update_viewport();
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+}
+
+void cycle_scaling_backwards(void)
+{
+    if (scaling_mode == 0) {
+        scaling_mode = GB_SDL_SCALING_MAX - 1;
+    }
+    else {
+        scaling_mode--;
+    }
+    update_viewport();
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+}
+
 static void cycle_color_correction(void)
 {
     if (color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
@@ -217,6 +249,17 @@ static void cycle_color_correction(void)
     }
 }
 
+static void cycle_color_correction_backwards(void)
+{
+    if (color_correction_mode == GB_COLOR_CORRECTION_DISABLED) {
+        color_correction_mode = GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS;
+    }
+    else {
+        color_correction_mode--;
+    }
+}
+
+
 static void return_to_root_menu(void)
 {
     current_menu = root_menu;
@@ -224,8 +267,8 @@ static void return_to_root_menu(void)
 }
 
 static const struct menu_item graphics_menu[] = {
-    {"Scaling Mode:", cycle_scaling, current_scaling_mode},
-    {"Color Correction:", cycle_color_correction, current_color_correction_mode},
+    {"Scaling Mode:", cycle_scaling, current_scaling_mode, cycle_scaling_backwards},
+    {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -273,10 +316,12 @@ void run_gui(bool is_running)
                     draw_text_centered(pixels, 16, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
                     unsigned i = 0, y = 40;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
-                        draw_text_centered(pixels, y, item->string, gui_palette_native[3], gui_palette_native[0], i == current_selection);
+                        draw_text_centered(pixels, y, item->string, gui_palette_native[3], gui_palette_native[0],
+                                           i == current_selection && !item->value_getter ? DECORATION_SELECTION : DECORATION_NONE);
                         y += 12;
                         if (item->value_getter) {
-                            draw_text_centered(pixels, y, item->value_getter(), gui_palette_native[3], gui_palette_native[0], false);
+                            draw_text_centered(pixels, y, item->value_getter(), gui_palette_native[3], gui_palette_native[0],
+                                               i == current_selection ? DECORATION_ARROWS : DECORATION_NONE);
                             y += 12;
                         }
                     }
@@ -358,6 +403,14 @@ void run_gui(bool is_running)
                         else {
                             return;
                         }
+                    }
+                    else if (event.key.keysym.sym == SDLK_RIGHT && current_menu[current_selection].backwards_handler) {
+                        current_menu[current_selection].handler();
+                        should_render = true;
+                    }
+                    else if (event.key.keysym.sym == SDLK_LEFT && current_menu[current_selection].backwards_handler) {
+                        current_menu[current_selection].backwards_handler();
+                        should_render = true;
                     }
                 }
                 else if(gui_state == SHOWING_HELP) {

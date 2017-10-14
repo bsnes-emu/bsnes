@@ -1023,6 +1023,16 @@ uint8_t font[] = {
     X, X, X, X, X, _,
     X, _, _, X, _, X,
     _, _, _, _, X, _,
+    
+    /* Left Arrow */
+    _, _, _, _, X, _,
+    _, _, _, X, X, _,
+    _, _, X, X, X, _,
+    _, X, X, X, X, _,
+    _, _, X, X, X, _,
+    _, _, _, X, X, _,
+    _, _, _, _, X, _,
+    _, _, _, _, _, _,
 };
 
 const uint8_t font_max = sizeof(font) / GLYPH_HEIGHT / GLYPH_WIDTH + ' ';
