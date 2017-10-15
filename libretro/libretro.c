@@ -231,7 +231,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_reset(void)
 {
-
+   GB_reset(&gb);
 }
 
 static void check_variables(void)
@@ -418,7 +418,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
 void retro_unload_game(void)
 {
-
+   GB_free(&gb);
 }
 
 unsigned retro_get_region(void)
