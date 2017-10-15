@@ -77,6 +77,8 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
     strcat(dest, ext);
 }
 
+static struct retro_rumble_interface rumble;
+
 static void GB_update_keys_status(GB_gameboy_t *gb)
 {
 
@@ -89,7 +91,13 @@ static void GB_update_keys_status(GB_gameboy_t *gb)
 	GB_set_key_state(gb, GB_KEY_A,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) );
 	GB_set_key_state(gb, GB_KEY_B,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) );
 	GB_set_key_state(gb, GB_KEY_SELECT,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
-	GB_set_key_state(gb, GB_KEY_START,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
+   GB_set_key_state(gb, GB_KEY_START,input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
+   
+   if (gb->rumble_state)
+      rumble.set_rumble_state(0, RETRO_RUMBLE_STRONG, 65535);
+   else
+      rumble.set_rumble_state(0, RETRO_RUMBLE_STRONG, 0);
+
 }
 
 
@@ -175,8 +183,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->timing   = timing;
 
 }
-
-static struct retro_rumble_interface rumble;
 
 void retro_set_environment(retro_environment_t cb)
 {
@@ -410,6 +416,11 @@ bool retro_load_game(const struct retro_game_info *info)
 
    bool yes = true;
    environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE, &rumble))
+      log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
+   else
+      log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
    check_variables();
 
