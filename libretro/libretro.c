@@ -310,8 +310,6 @@ bool retro_load_game(const struct retro_game_info *info)
 
    snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
 
-   check_variables();
-
    char buf[256];
    int err = 0;
    if (!strstr(info->path, "gbc"))
@@ -412,6 +410,8 @@ bool retro_load_game(const struct retro_game_info *info)
 
    bool yes = true;
    environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+
+   check_variables();
 
    return true;
 }
