@@ -195,8 +195,14 @@ void retro_set_environment(retro_environment_t cb)
       { controllers, 1 },
       { NULL, 0 },
    };
-
    cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+
+   static struct retro_variable vars[] = {
+      { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
+      { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+   };
+   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -230,7 +236,33 @@ void retro_reset(void)
 
 static void check_variables(void)
 {
+   struct retro_variable var = {0};
 
+   var.key = "sameboy_color_correction_mode";
+   var.value = NULL;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "off") == 0)
+         GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_DISABLED);
+      else if (strcmp(var.value, "correct curves") == 0)
+         GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_CORRECT_CURVES);
+      else if (strcmp(var.value, "emulate hardware") == 0)
+         GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+      else if (strcmp(var.value, "preserve brightness") == 0)
+         GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+   }
+
+   var.key = "sameboy_high_pass_filter_mode";
+   var.value = NULL;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "off") == 0)
+         GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_OFF);
+      else if (strcmp(var.value, "accurate") == 0)
+         GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_ACCURATE);
+      else if (strcmp(var.value, "remove dc offset") == 0)
+         GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_REMOVE_DC_OFFSET);
+   }
 }
 
 void retro_run(void)
@@ -337,7 +369,6 @@ bool retro_load_game(const struct retro_game_info *info)
 #endif
 
    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
-   /* GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_REMOVE_DC_OFFSET); */ 
    return true;
 }
 
