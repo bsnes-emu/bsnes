@@ -369,6 +369,50 @@ bool retro_load_game(const struct retro_game_info *info)
 #endif
 
    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
+
+   struct retro_memory_descriptor descs[7];
+   size_t size;
+   uint16_t bank;
+
+   memset(descs, 0, sizeof(descs));
+
+   descs[0].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_IE, &size, &bank);
+   descs[0].start = 0xFFFF;
+   descs[0].len   = 1;
+
+   descs[1].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_HRAM, &size, &bank);
+   descs[1].start = 0xFF80;
+   descs[1].len   = 0x0080;
+   
+   descs[2].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_RAM, &size, &bank);
+   descs[2].start = 0xC000;
+   descs[2].len   = 0x2000;
+      
+   descs[3].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
+   descs[3].start = 0xA000;
+   descs[3].len   = 0x2000;
+      
+   descs[4].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_VRAM, &size, &bank);
+   descs[4].start = 0x8000;
+   descs[4].len   = 0x2000;
+      
+   descs[5].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_ROM, &size, &bank);
+   descs[5].start = 0x0000;
+   descs[5].len   = 0x4000;
+   descs[5].flags = RETRO_MEMDESC_CONST;
+
+   descs[6].ptr   = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_OAM, &size, &bank);
+   descs[6].start = 0xFE00;
+   descs[6].len   = 0x00A0;
+      
+   struct retro_memory_map mmaps;
+   mmaps.descriptors = descs;
+   mmaps.num_descriptors = sizeof(descs) / sizeof(descs[0]);
+   environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
+
+   bool yes = true;
+   environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+
    return true;
 }
 
