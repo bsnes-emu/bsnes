@@ -261,8 +261,11 @@ auto Cartridge::loadEpsonRTC(Markup::Node node) -> void {
 
   if(auto fp = platform->open(ID::SuperFamicom, node["ram"]["name"].text(), File::Read)) {
     uint8 data[16] = {0};
-    for(auto& byte : data) fp->read();
+    for(auto& byte : data) byte = fp->read();
     epsonrtc.load(data);
+  }
+  else {
+    epsonrtc.load();
   }
 
   for(auto leaf : node.find("map")) loadMap(leaf, {&EpsonRTC::read, &epsonrtc}, {&EpsonRTC::write, &epsonrtc});
@@ -273,8 +276,11 @@ auto Cartridge::loadSharpRTC(Markup::Node node) -> void {
 
   if(auto fp = platform->open(ID::SuperFamicom, node["ram"]["name"].text(), File::Read)) {
     uint8 data[16] = {0};
-    for(auto& byte : data) fp->read();
+    for(auto& byte : data) byte = fp->read();
     sharprtc.load(data);
+  }
+  else {
+    sharprtc.load();
   }
 
   for(auto leaf : node.find("map")) loadMap(leaf, {&SharpRTC::read, &sharprtc}, {&SharpRTC::write, &sharprtc});

@@ -80,8 +80,6 @@ auto System::load(Emulator::Interface* interface) -> bool {
   if(cartridge.has.ARMDSP) armdsp.load();
   if(cartridge.has.HitachiDSP) hitachidsp.load();
   if(cartridge.has.NECDSP) necdsp.load();
-  if(cartridge.has.EpsonRTC) epsonrtc.load();
-  if(cartridge.has.SharpRTC) sharprtc.load();
   if(cartridge.has.SPC7110) spc7110.load();
   if(cartridge.has.SDD1) sdd1.load();
   if(cartridge.has.OBC1) obc1.load();
@@ -118,8 +116,6 @@ auto System::unload() -> void {
   if(cartridge.has.ARMDSP) armdsp.unload();
   if(cartridge.has.HitachiDSP) hitachidsp.unload();
   if(cartridge.has.NECDSP) necdsp.unload();
-  if(cartridge.has.EpsonRTC) epsonrtc.unload();
-  if(cartridge.has.SharpRTC) sharprtc.unload();
   if(cartridge.has.SPC7110) spc7110.unload();
   if(cartridge.has.SDD1) sdd1.unload();
   if(cartridge.has.OBC1) obc1.unload();

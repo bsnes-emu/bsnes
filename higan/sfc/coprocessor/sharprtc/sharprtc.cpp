@@ -22,8 +22,6 @@ auto SharpRTC::init() -> void {
 }
 
 auto SharpRTC::load() -> void {
-  return;
-
   second = 0;
   minute = 0;
   hour = 0;
