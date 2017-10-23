@@ -407,17 +407,24 @@ released for the Super Famicom
 (and all its regional variants around the world)
 that allowed Game Boy games to be played
 via the Super Famicom's controllers and video output.
-The Super Game Boy 2 was released in Japan,
-and had some minor extra features
-beyond the original Super Game Boy,
-but importing and playing games
-works the same way in higan.
+The Super Game Boy does not emulate the Game Boy hardware,
+it physically includes all the Game Boy components
+so compatibility with Game Boy games is high.
+However, the Super Game Boy drives the Game Boy hardware
+from the Super Famicom's timing signals, which means
+games play 2.4% faster than on a real Game Boy.
 
-The Super Game Boy cartridge includes
-the complete hardware of an original
-(black-and-white)
-Game Boy,
-so it needs a boot ROM:
+The Super Game Boy 2 was a Japan-only release
+that fixed the timing problem of the original Super Game Boy,
+and included a different set of default borders.
+higan supports the Super Game Boy 2 base cartridge,
+so you can use the extra borders,
+but does not yet emulate the timing change
+so games still play slightly too fast.
+
+Because the Super Game Boy cartridge includes
+the original Game Boy hardware,
+it needs a boot ROM:
 
 <table>
     <thead>
