@@ -62,7 +62,7 @@ auto SPC700::instruction() -> void {
   op(0x38, DirectImmediateModify, fp(AND))
   op(0x39, IndirectXWriteIndirectY, fp(AND))
   op(0x3a, DirectModifyWord, +1)
-  op(0x3b, DirectIndexedModify, fp(ROL), A)
+  op(0x3b, DirectIndexedModify, fp(ROL), X)
   op(0x3c, ImpliedModify, fp(ROL), A)
   op(0x3d, ImpliedModify, fp(INC), X)
   op(0x3e, DirectRead, fp(CMP), X)
