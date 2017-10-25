@@ -1,7 +1,7 @@
 /*
   libco v18.01 (2017-01-22)
   author: byuu
-  license: public domain
+  license: ISC
 */
 
 #ifndef LIBCO_H
