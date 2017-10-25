@@ -1,5 +1,6 @@
 ----------------------------------------------------------------------
-higan - Suite of videogame console emulators
+higan  - Suite of videogame console emulators
+icarus - Game library importer for higan
 
   Copyright © 2004-2017  byuu
 
@@ -20,10 +21,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 ----------------------------------------------------------------------
 
 ----------------------------------------------------------------------
-hiro  - User interface toolkit
-libco - C cooperative threading library
-nall  - C++ template library
-ruby  - Hardware abstraction layer
+hiro   - User interface toolkit
+libco  - C cooperative threading library
+nall   - C++ template library
+ruby   - Hardware abstraction layer
 
   Copyright © 2006-2017  byuu
 
