@@ -268,7 +268,7 @@ by the following individuals:
    AWJ                   Jonas Quinn           RedDwarf
    Bisqwit               kode54                Richard Bannister
    blargg                krom                  Ryphecha
-   Ćukasz Krawczyk       Lioncash              segher
+   Łukasz Krawczyk       Lioncash              segher
    Cydrak                Lord Nightmare        Sintendo
    Danish                lowkey                SuperMikeMan
    DMV27                 MerryMage             tetsuo55
