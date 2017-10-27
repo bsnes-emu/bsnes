@@ -53,7 +53,7 @@ libretro-test:
     - make -C higan compiler=g++ binary=library target=libretro
     - mkdir libretro-nightly
     - cp -a higan/out/higan_sfc_libretro.so libretro-nightly/
-    - cp -a GPLv3.txt higan-nightly/
+    - cp -a GPLv3.txt libretro-nightly/
   artifacts:
     paths:
       - libretro-nightly/*
