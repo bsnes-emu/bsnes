@@ -31,7 +31,7 @@ auto System::unserialize(serializer& s) -> bool {
   if(signature != 0x31545342) return false;
   if(string{version} != Emulator::SerializerVersion) return false;
 
-  power();
+  power(/* reset = */ false);
   serializeAll(s);
   return true;
 }

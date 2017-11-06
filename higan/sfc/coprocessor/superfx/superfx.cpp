@@ -31,12 +31,6 @@ auto SuperFX::main() -> void {
   }
 }
 
-auto SuperFX::init() -> void {
-}
-
-auto SuperFX::load() -> void {
-}
-
 auto SuperFX::unload() -> void {
   rom.reset();
   ram.reset();

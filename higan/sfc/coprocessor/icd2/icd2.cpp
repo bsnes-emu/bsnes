@@ -31,9 +31,6 @@ auto ICD2::main() -> void {
   synchronize(cpu);
 }
 
-auto ICD2::init() -> void {
-}
-
 auto ICD2::load() -> bool {
   GameBoy::superGameBoy = this;
   GameBoy::system.load(&gameBoyInterface, GameBoy::System::Model::SuperGameBoy, cartridge.pathID());

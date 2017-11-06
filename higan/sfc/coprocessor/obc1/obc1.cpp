@@ -5,12 +5,6 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 OBC1 obc1;
 
-auto OBC1::init() -> void {
-}
-
-auto OBC1::load() -> void {
-}
-
 auto OBC1::unload() -> void {
   ram.reset();
 }

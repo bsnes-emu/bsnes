@@ -52,11 +52,13 @@ auto APU::enable(bool value) -> void {
   state.enabled = value;
 }
 
-auto APU::power() -> void {
+auto APU::power(bool reset) -> void {
   Z80::bus = this;
   Z80::power();
   bus->grant(false);
   create(APU::Enter, system.frequency() / 15.0);
+
+  if(!reset) memory::fill(ram, sizeof ram);
   state = {};
 }
 

@@ -1,7 +1,4 @@
 struct NSS {
-  auto init() -> void;
-  auto load() -> void;
-  auto unload() -> void;
   auto power() -> void;
 
   auto setDip(uint16 dip) -> void;

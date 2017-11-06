@@ -32,12 +32,6 @@ auto SPC7110::addClocks(uint clocks) -> void {
   synchronize(cpu);
 }
 
-auto SPC7110::init() -> void {
-}
-
-auto SPC7110::load() -> void {
-}
-
 auto SPC7110::unload() -> void {
   prom.reset();
   drom.reset();

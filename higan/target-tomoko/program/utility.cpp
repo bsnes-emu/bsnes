@@ -64,10 +64,17 @@ auto Program::initializeInputDriver() -> void {
   }
 }
 
+auto Program::softReset() -> void {
+  if(!emulator) return;
+  if(!emulator->information.resettable) return;
+  emulator->reset();
+  showMessage("System has been soft reset");
+}
+
 auto Program::powerCycle() -> void {
   if(!emulator) return;
   emulator->power();
-  showMessage("Power cycled");
+  showMessage("System has been power cycled");
 }
 
 auto Program::rotateDisplay() -> void {
@@ -94,12 +101,12 @@ auto Program::connectDevices() -> void {
 }
 
 auto Program::showMessage(const string& text) -> void {
-  statusTime = time(0);
+  statusTime = time(nullptr);
   statusMessage = text;
 }
 
 auto Program::updateStatusText() -> void {
-  time_t currentTime = time(0);
+  time_t currentTime = time(nullptr);
 
   string text;
   if((currentTime - statusTime) <= 2) {

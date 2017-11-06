@@ -3,14 +3,10 @@ body {
   color: #fff;
 }
 
-a {
-  color: #aaf;
-}
-
-a:visited {
-  color: #faf;
-}
-
 code {
   background: #444;
+}
+
+a {
+  color: #aaf;
 }

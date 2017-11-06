@@ -30,6 +30,7 @@ struct Program : Emulator::Platform {
   auto initializeAudioDriver() -> void;
   auto initializeInputDriver() -> void;
 
+  auto softReset() -> void;
   auto powerCycle() -> void;
   auto rotateDisplay() -> void;
   auto connectDevices() -> void;
@@ -48,6 +49,8 @@ struct Program : Emulator::Platform {
 
   vector<string> mediumQueue;  //for command-line and drag-and-drop loading
   vector<string> mediumPaths;  //for keeping track of loaded folder locations
+
+  time_t autoSaveTime = 0;  //for automatically saving RAM periodically
 
   string statusText;
   string statusMessage;

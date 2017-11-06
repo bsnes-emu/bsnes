@@ -4,15 +4,6 @@ namespace SuperFamicom {
 
 NSS nss;
 
-auto NSS::init() -> void {
-}
-
-auto NSS::load() -> void {
-}
-
-auto NSS::unload() -> void {
-}
-
 auto NSS::power() -> void {
 }
 

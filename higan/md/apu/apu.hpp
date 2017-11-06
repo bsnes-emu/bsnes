@@ -8,7 +8,7 @@ struct APU : Processor::Z80, Processor::Z80::Bus, Thread {
   auto synchronizing() const -> bool override;
 
   auto enable(bool) -> void;
-  auto power() -> void;
+  auto power(bool reset) -> void;
   auto reset() -> void;
 
   auto setNMI(bool value) -> void;

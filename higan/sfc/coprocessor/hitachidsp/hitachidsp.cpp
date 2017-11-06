@@ -25,12 +25,6 @@ auto HitachiDSP::main() -> void {
   synchronize(cpu);
 }
 
-auto HitachiDSP::init() -> void {
-}
-
-auto HitachiDSP::load() -> void {
-}
-
 auto HitachiDSP::unload() -> void {
   rom.reset();
   ram.reset();

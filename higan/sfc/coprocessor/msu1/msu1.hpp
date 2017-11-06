@@ -3,8 +3,6 @@ struct MSU1 : Thread {
 
   static auto Enter() -> void;
   auto main() -> void;
-  auto init() -> void;
-  auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
 

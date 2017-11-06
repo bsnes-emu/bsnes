@@ -228,11 +228,11 @@ auto DSP::load(Markup::Node node) -> bool {
   return true;
 }
 
-auto DSP::power() -> void {
+auto DSP::power(bool reset) -> void {
   create(Enter, system.apuFrequency());
   stream = Emulator::audio.createStream(2, frequency() / 768.0);
 
-  random.array(apuram, sizeof(apuram));
+  if(!reset) random.array(apuram, sizeof(apuram));
 
   memory::fill(&state, sizeof(State));
   state.noise = 0x4000;

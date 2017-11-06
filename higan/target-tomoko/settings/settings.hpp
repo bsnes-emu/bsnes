@@ -141,6 +141,8 @@ struct AdvancedSettings : TabFrameItem {
       LineEdit libraryLocation{&libraryLayout, Size{~0, 0}};
       Button libraryChange{&libraryLayout, Size{0, 0}};
     CheckLabel ignoreManifests{&layout, Size{~0, 0}};
+    Label otherLabel{&layout, Size{~0, 0}, 2};
+    CheckLabel autoSaveRAM{&layout, Size{~0, 0}};
 };
 
 struct SettingsManager : Window {

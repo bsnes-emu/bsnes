@@ -32,7 +32,7 @@ auto SMP::load(Markup::Node node) -> bool {
   return false;
 }
 
-auto SMP::power() -> void {
+auto SMP::power(bool reset) -> void {
   SPC700::power();
   create(Enter, system.apuFrequency() / 12.0);
 

@@ -11,7 +11,7 @@ struct PPU : Thread {
   auto frame() -> void;
   auto refresh() -> void;
 
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //memory.cpp
   auto readCIRAM(uint11 addr) -> uint8;

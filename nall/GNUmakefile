@@ -51,7 +51,7 @@ ifeq ($(compiler),)
   else ifeq ($(platform),macos)
     compiler := clang++
   else ifeq ($(platform),linux)
-    compiler := g++-4.9
+    compiler := g++
   else ifeq ($(platform),bsd)
     compiler := g++49
   else
@@ -89,6 +89,7 @@ endif
 # windows settings
 ifeq ($(platform),windows)
   link += -lws2_32 -lole32
+  link += $(if $(findstring $(console),true),-mconsole,-mwindows)
   windres := windres
 endif
 

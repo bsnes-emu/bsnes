@@ -1,5 +1,4 @@
 struct SufamiTurboCartridge {
-  auto load() -> void;
   auto unload() -> void;
   auto serialize(serializer&) -> void;
 

@@ -30,10 +30,7 @@ auto EpsonRTC::main() -> void {
   synchronize(cpu);
 }
 
-auto EpsonRTC::init() -> void {
-}
-
-auto EpsonRTC::load() -> void {
+auto EpsonRTC::initialize() -> void {
   secondlo = 0;
   secondhi = 0;
   batteryfailure = 1;
@@ -72,9 +69,6 @@ auto EpsonRTC::load() -> void {
   stop = 0;
   atime = 0;
   test = 0;
-}
-
-auto EpsonRTC::unload() -> void {
 }
 
 auto EpsonRTC::power() -> void {

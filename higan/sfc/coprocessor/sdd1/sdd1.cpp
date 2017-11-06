@@ -7,12 +7,6 @@ SDD1 sdd1;
 #include "decompressor.cpp"
 #include "serialization.cpp"
 
-auto SDD1::init() -> void {
-}
-
-void SDD1::load() {
-}
-
 auto SDD1::unload() -> void {
   rom.reset();
   ram.reset();

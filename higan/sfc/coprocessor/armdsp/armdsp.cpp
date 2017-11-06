@@ -81,15 +81,6 @@ auto ArmDSP::write(uint24 addr, uint8 data) -> void {
   }
 }
 
-auto ArmDSP::init() -> void {
-}
-
-auto ArmDSP::load() -> void {
-}
-
-auto ArmDSP::unload() -> void {
-}
-
 auto ArmDSP::power() -> void {
   random.array((uint8*)programRAM, sizeof(programRAM));
   bridge.reset = false;

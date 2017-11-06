@@ -154,7 +154,7 @@ auto YM2612::step(uint clocks) -> void {
   synchronize(apu);
 }
 
-auto YM2612::power() -> void {
+auto YM2612::power(bool reset) -> void {
   create(YM2612::Enter, system.frequency() / 7.0);
   stream = Emulator::audio.createStream(2, frequency() / 144.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);

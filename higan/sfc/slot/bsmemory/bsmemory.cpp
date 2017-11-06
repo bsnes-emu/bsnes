@@ -4,13 +4,8 @@ namespace SuperFamicom {
 
 BSMemory bsmemory;
 
-auto BSMemory::init() -> void {
-}
-
 auto BSMemory::load() -> void {
-  if(memory.size() == 0) {
-    memory.allocate(1024 * 1024);
-  }
+  if(!memory.size()) memory.allocate(1024 * 1024);
 }
 
 auto BSMemory::unload() -> void {

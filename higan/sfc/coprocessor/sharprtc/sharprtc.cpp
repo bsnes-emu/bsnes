@@ -18,10 +18,7 @@ auto SharpRTC::main() -> void {
   synchronize(cpu);
 }
 
-auto SharpRTC::init() -> void {
-}
-
-auto SharpRTC::load() -> void {
+auto SharpRTC::initialize() -> void {
   second = 0;
   minute = 0;
   hour = 0;
@@ -29,9 +26,6 @@ auto SharpRTC::load() -> void {
   month = 0;
   year = 0;
   weekday = 0;
-}
-
-auto SharpRTC::unload() -> void {
 }
 
 auto SharpRTC::power() -> void {

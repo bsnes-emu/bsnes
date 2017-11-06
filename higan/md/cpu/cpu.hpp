@@ -19,7 +19,7 @@ struct CPU : Processor::M68K, Processor::M68K::Bus, Thread {
   auto lower(Interrupt) -> void;
 
   auto load(Markup::Node) -> bool;
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //bus.cpp
   auto readByte(uint24 address) -> uint16 override;

@@ -14,7 +14,7 @@ struct DSP : Thread {
 
   auto main() -> void;
   auto load(Markup::Node) -> bool;
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

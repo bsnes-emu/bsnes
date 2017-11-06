@@ -60,7 +60,7 @@ auto CPU::load(Markup::Node node) -> bool {
   return true;
 }
 
-auto CPU::power() -> void {
+auto CPU::power(bool reset) -> void {
   WDC65816::power();
   create(Enter, system.cpuFrequency());
   coprocessors.reset();
@@ -86,7 +86,7 @@ auto CPU::power() -> void {
   bus.map(reader, writer, "00-3f,80-bf:0000-1fff", 0x2000);
   bus.map(reader, writer, "7e-7f:0000-ffff", 0x20000);
 
-  random.array(wram, sizeof(wram));
+  if(!reset) random.array(wram, sizeof(wram));
 
   //DMA
   for(auto& channel : this->channel) {

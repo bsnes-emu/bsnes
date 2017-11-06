@@ -39,12 +39,6 @@ auto MSU1::main() -> void {
   synchronize(cpu);
 }
 
-auto MSU1::init() -> void {
-}
-
-auto MSU1::load() -> void {
-}
-
 auto MSU1::unload() -> void {
   dataFile.reset();
   audioFile.reset();

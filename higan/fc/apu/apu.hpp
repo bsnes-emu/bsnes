@@ -12,7 +12,7 @@ struct APU : Thread {
   auto setIRQ() -> void;
   auto setSample(int16 sample) -> void;
 
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   auto readIO(uint16 addr) -> uint8;
   auto writeIO(uint16 addr, uint8 data) -> void;

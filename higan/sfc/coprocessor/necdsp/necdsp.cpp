@@ -43,15 +43,6 @@ auto NECDSP::writeRAM(uint24 addr, uint8 data) -> void {
   return uPD96050::writeDP(addr, data);
 }
 
-auto NECDSP::init() -> void {
-}
-
-auto NECDSP::load() -> void {
-}
-
-auto NECDSP::unload() -> void {
-}
-
 auto NECDSP::power() -> void {
   uPD96050::power();
   create(NECDSP::Enter, Frequency);

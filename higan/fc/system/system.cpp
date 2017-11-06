@@ -62,7 +62,7 @@ auto System::unload() -> void {
   information.loaded = false;
 }
 
-auto System::power() -> void {
+auto System::power(bool reset) -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   configureVideoPalette();
@@ -73,9 +73,9 @@ auto System::power() -> void {
 
   scheduler.reset();
   cartridge.power();
-  cpu.power();
-  apu.power();
-  ppu.power();
+  cpu.power(reset);
+  apu.power(reset);
+  ppu.power(reset);
   scheduler.primary(cpu);
 
   controllerPort1.power(ID::Port::Controller1);

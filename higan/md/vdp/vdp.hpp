@@ -6,7 +6,7 @@ struct VDP : Thread {
   auto step(uint clocks) -> void;
   auto refresh() -> void;
 
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //io.cpp
   auto read(uint24 addr) -> uint16;
@@ -166,7 +166,6 @@ private:
     //serialization.cpp
     auto serialize(serializer&) -> void;
 
-  private:
     uint16 memory[32768];
   } vram;
 
@@ -179,7 +178,6 @@ private:
     //serialization.cpp
     auto serialize(serializer&) -> void;
 
-  private:
     uint10 memory[40];
   } vsram;
 
@@ -192,7 +190,6 @@ private:
     //serialization.cpp
     auto serialize(serializer&) -> void;
 
-  private:
     uint9 memory[64];
   } cram;
 

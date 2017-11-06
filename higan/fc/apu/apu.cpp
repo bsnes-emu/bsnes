@@ -71,7 +71,7 @@ auto APU::setSample(int16 sample) -> void {
   cartridgeSample = sample;
 }
 
-auto APU::power() -> void {
+auto APU::power(bool reset) -> void {
   create(APU::Enter, system.frequency());
   stream = Emulator::audio.createStream(1, frequency() / rate());
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 90.0);

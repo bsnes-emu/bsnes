@@ -4,8 +4,6 @@ struct MCC {
   MappedRAM rom;
   MappedRAM ram;
 
-  auto init() -> void;
-  auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
 

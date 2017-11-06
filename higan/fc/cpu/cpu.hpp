@@ -6,7 +6,7 @@ struct CPU : Processor::MOS6502, Thread {
   auto main() -> void;
   auto step(uint clocks) -> void;
 
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //memory.cpp
   auto readRAM(uint11 addr) -> uint8;
@@ -37,7 +37,7 @@ struct CPU : Processor::MOS6502, Thread {
 //protected:
   vector<Thread*> peripherals;
 
-  uint8 ram[0x0800];
+  uint8 ram[0x800];
 
   struct IO {
     bool interruptPending;

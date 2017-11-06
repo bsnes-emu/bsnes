@@ -54,18 +54,20 @@ auto PPU::refresh() -> void {
   Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
 }
 
-auto PPU::power() -> void {
+auto PPU::power(bool reset) -> void {
   create(PPU::Enter, system.frequency());
 
   memory::fill(&io, sizeof(IO));
   memory::fill(&latch, sizeof(Latches));
   io.vramIncrement = 1;
 
-  for(auto& n : ciram ) n = 0;
-  for(auto& n : cgram ) n = 0;
-  for(auto& n : oam   ) n = 0;
+  if(!reset) {
+    for(auto& data : ciram ) data = 0;
+    for(auto& data : cgram ) data = 0;
+    for(auto& data : oam   ) data = 0;
+  }
 
-  for(auto& n : buffer) n = 0;
+  for(auto& data : buffer) data = 0;
 }
 
 }

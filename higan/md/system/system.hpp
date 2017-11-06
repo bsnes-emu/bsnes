@@ -15,7 +15,7 @@ struct System {
   auto load(Emulator::Interface*, maybe<Region> = nothing) -> bool;
   auto save() -> void;
   auto unload() -> void;
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //serialization.cpp
   auto serializeInit() -> void;

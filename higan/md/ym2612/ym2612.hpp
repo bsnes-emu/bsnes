@@ -8,7 +8,7 @@ struct YM2612 : Thread {
   auto sample() -> void;
   auto step(uint clocks) -> void;
 
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //io.cpp
   auto readStatus() -> uint8;

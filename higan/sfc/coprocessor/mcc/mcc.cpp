@@ -5,12 +5,6 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 MCC mcc;
 
-auto MCC::init() -> void {
-}
-
-auto MCC::load() -> void {
-}
-
 auto MCC::unload() -> void {
   rom.reset();
   ram.reset();

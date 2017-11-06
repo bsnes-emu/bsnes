@@ -22,29 +22,6 @@ auto System::runToSave() -> void {
   for(auto peripheral : cpu.peripherals) scheduler.synchronize(*peripheral);
 }
 
-auto System::init() -> void {
-  icd2.init();
-  mcc.init();
-  nss.init();
-  event.init();
-  sa1.init();
-  superfx.init();
-  armdsp.init();
-  hitachidsp.init();
-  necdsp.init();
-  epsonrtc.init();
-  sharprtc.init();
-  spc7110.init();
-  sdd1.init();
-  obc1.init();
-  msu1.init();
-
-  bsmemory.init();
-}
-
-auto System::term() -> void {
-}
-
 auto System::load(Emulator::Interface* interface) -> bool {
   information = {};
 
@@ -72,21 +49,7 @@ auto System::load(Emulator::Interface* interface) -> bool {
   }
 
   if(cartridge.has.ICD2) icd2.load();
-  if(cartridge.has.MCC) mcc.load();
-  if(cartridge.has.NSSDIP) nss.load();
-  if(cartridge.has.Event) event.load();
-  if(cartridge.has.SA1) sa1.load();
-  if(cartridge.has.SuperFX) superfx.load();
-  if(cartridge.has.ARMDSP) armdsp.load();
-  if(cartridge.has.HitachiDSP) hitachidsp.load();
-  if(cartridge.has.NECDSP) necdsp.load();
-  if(cartridge.has.SPC7110) spc7110.load();
-  if(cartridge.has.SDD1) sdd1.load();
-  if(cartridge.has.OBC1) obc1.load();
-  if(cartridge.has.MSU1) msu1.load();
-
   if(cartridge.has.BSMemorySlot) bsmemory.load();
-  if(cartridge.has.SufamiTurboSlots) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
   this->interface = interface;
@@ -109,18 +72,14 @@ auto System::unload() -> void {
 
   if(cartridge.has.ICD2) icd2.unload();
   if(cartridge.has.MCC) mcc.unload();
-  if(cartridge.has.NSSDIP) nss.unload();
   if(cartridge.has.Event) event.unload();
   if(cartridge.has.SA1) sa1.unload();
   if(cartridge.has.SuperFX) superfx.unload();
-  if(cartridge.has.ARMDSP) armdsp.unload();
   if(cartridge.has.HitachiDSP) hitachidsp.unload();
-  if(cartridge.has.NECDSP) necdsp.unload();
   if(cartridge.has.SPC7110) spc7110.unload();
   if(cartridge.has.SDD1) sdd1.unload();
   if(cartridge.has.OBC1) obc1.unload();
   if(cartridge.has.MSU1) msu1.unload();
-
   if(cartridge.has.BSMemorySlot) bsmemory.unload();
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.unload(), sufamiturboB.unload();
 
@@ -128,7 +87,7 @@ auto System::unload() -> void {
   information.loaded = false;
 }
 
-auto System::power() -> void {
+auto System::power(bool reset) -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   configureVideoPalette();
@@ -140,10 +99,10 @@ auto System::power() -> void {
   random.entropy(Random::Entropy::Low);
 
   scheduler.reset();
-  cpu.power();
-  smp.power();
-  dsp.power();
-  ppu.power();
+  cpu.power(reset);
+  smp.power(reset);
+  dsp.power(reset);
+  ppu.power(reset);
 
   if(cartridge.has.ICD2) icd2.power();
   if(cartridge.has.MCC) mcc.power();
@@ -160,7 +119,6 @@ auto System::power() -> void {
   if(cartridge.has.SDD1) sdd1.power();
   if(cartridge.has.OBC1) obc1.power();
   if(cartridge.has.MSU1) msu1.power();
-
   if(cartridge.has.BSMemorySlot) bsmemory.power();
 
   if(cartridge.has.ICD2) cpu.coprocessors.append(&icd2);

@@ -9,12 +9,10 @@ struct System {
   auto run() -> void;
   auto runToSave() -> void;
 
-  auto init() -> void;
-  auto term() -> void;
   auto load(Emulator::Interface*) -> bool;
   auto save() -> void;
   auto unload() -> void;
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   //video.cpp
   auto configureVideoPalette() -> void;

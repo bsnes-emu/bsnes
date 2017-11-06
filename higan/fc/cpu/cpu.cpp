@@ -24,16 +24,16 @@ auto CPU::step(uint clocks) -> void {
   for(auto peripheral : peripherals) synchronize(*peripheral);
 }
 
-auto CPU::power() -> void {
+auto CPU::power(bool reset) -> void {
   MOS6502::BCD = 0;
   MOS6502::power();
   create(CPU::Enter, system.frequency());
 
-  for(auto addr : range(0x0800)) ram[addr] = 0xff;
-  ram[0x0008] = 0xf7;
-  ram[0x0009] = 0xef;
-  ram[0x000a] = 0xdf;
-  ram[0x000f] = 0xbf;
+  if(!reset) for(auto& data : ram) data = 0xff;
+  ram[0x008] = 0xf7;  //todo: what is this about?
+  ram[0x009] = 0xef;
+  ram[0x00a] = 0xdf;
+  ram[0x00f] = 0xbf;
 
   r.pc.byte(0) = bus.read(0xfffc);
   r.pc.byte(1) = bus.read(0xfffd);

@@ -80,10 +80,12 @@ auto CPU::load(Markup::Node node) -> bool {
   return true;
 }
 
-auto CPU::power() -> void {
+auto CPU::power(bool reset) -> void {
   M68K::bus = this;
   M68K::power();
   create(CPU::Enter, system.frequency() / 7.0);
+
+  if(!reset) memory::fill(ram, sizeof ram);
 
   io = {};
   io.version = tmssEnable;

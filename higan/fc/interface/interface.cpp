@@ -8,6 +8,7 @@ Interface::Interface() {
   information.manufacturer = "Nintendo";
   information.name         = "Famicom";
   information.overscan     = true;
+  information.resettable   = true;
 
   media.append({ID::Famicom, "Famicom", "fc"});
 
@@ -137,7 +138,11 @@ auto Interface::connect(uint port, uint device) -> void {
 }
 
 auto Interface::power() -> void {
-  system.power();
+  system.power(/* reset = */ false);
+}
+
+auto Interface::reset() -> void {
+  system.power(/* reset = */ true);
 }
 
 auto Interface::run() -> void {

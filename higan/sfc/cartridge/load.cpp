@@ -259,13 +259,11 @@ auto Cartridge::loadNECDSP(Markup::Node node) -> void {
 auto Cartridge::loadEpsonRTC(Markup::Node node) -> void {
   has.EpsonRTC = true;
 
+  epsonrtc.initialize();
   if(auto fp = platform->open(ID::SuperFamicom, node["ram"]["name"].text(), File::Read)) {
     uint8 data[16] = {0};
     for(auto& byte : data) byte = fp->read();
     epsonrtc.load(data);
-  }
-  else {
-    epsonrtc.load();
   }
 
   for(auto leaf : node.find("map")) loadMap(leaf, {&EpsonRTC::read, &epsonrtc}, {&EpsonRTC::write, &epsonrtc});
@@ -274,13 +272,11 @@ auto Cartridge::loadEpsonRTC(Markup::Node node) -> void {
 auto Cartridge::loadSharpRTC(Markup::Node node) -> void {
   has.SharpRTC = true;
 
+  sharprtc.initialize();
   if(auto fp = platform->open(ID::SuperFamicom, node["ram"]["name"].text(), File::Read)) {
     uint8 data[16] = {0};
     for(auto& byte : data) byte = fp->read();
     sharprtc.load(data);
-  }
-  else {
-    sharprtc.load();
   }
 
   for(auto leaf : node.find("map")) loadMap(leaf, {&SharpRTC::read, &sharprtc}, {&SharpRTC::write, &sharprtc});

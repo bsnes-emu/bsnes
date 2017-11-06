@@ -11,7 +11,7 @@ struct System {
   auto load(Emulator::Interface*) -> bool;
   auto save() -> void;
   auto unload() -> void;
-  auto power() -> void;
+  auto power(bool reset) -> void;
 
   auto init() -> void;
   auto term() -> void;

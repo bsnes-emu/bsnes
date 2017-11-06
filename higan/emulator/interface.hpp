@@ -6,7 +6,8 @@ struct Interface {
   struct Information {
     string manufacturer;
     string name;
-    bool overscan;
+    bool overscan = false;
+    bool resettable = false;
   } information;
 
   struct Medium {
@@ -59,6 +60,7 @@ struct Interface {
   //system interface
   virtual auto connect(uint port, uint device) -> void {}
   virtual auto power() -> void {}
+  virtual auto reset() -> void {}
   virtual auto run() -> void {}
 
   //time functions

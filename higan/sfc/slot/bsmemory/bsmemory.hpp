@@ -1,5 +1,4 @@
 struct BSMemory : Memory {
-  auto init() -> void;
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;

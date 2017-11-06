@@ -28,12 +28,6 @@ auto Event::main() -> void {
   synchronize(cpu);
 }
 
-auto Event::init() -> void {
-}
-
-auto Event::load() -> void {
-}
-
 auto Event::unload() -> void {
   rom[0].reset();
   rom[1].reset();

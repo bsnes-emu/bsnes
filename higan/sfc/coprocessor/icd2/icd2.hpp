@@ -6,7 +6,6 @@ struct ICD2 : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   static auto Enter() -> void;
   auto main() -> void;
 
-  auto init() -> void;
   auto load() -> bool;
   auto unload() -> void;
   auto power() -> void;

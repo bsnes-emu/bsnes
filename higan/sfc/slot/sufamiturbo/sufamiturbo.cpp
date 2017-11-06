@@ -6,9 +6,6 @@ namespace SuperFamicom {
 SufamiTurboCartridge sufamiturboA;
 SufamiTurboCartridge sufamiturboB;
 
-auto SufamiTurboCartridge::load() -> void {
-}
-
 auto SufamiTurboCartridge::unload() -> void {
   rom.reset();
   ram.reset();
