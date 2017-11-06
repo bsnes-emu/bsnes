@@ -6,41 +6,19 @@
 <body>
 
 <b>License:</b><br/><br/>
-libco is released under the ISC license.<br/>
-<br/>
-Copyright &copy; 2006-2017 byuu<br/>
-<br/>
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.<br/>
-<br/>
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-<hr/>
-
-<b>Contact:</b><br/><br/>
-At present, you may contact me as <b>byuu</b> at
-<a href="https://board.byuu.org">https://board.byuu.org</a>.<br/>
-I am interested in knowing of any projects that make use of this library,
-though this is only a courtesy.
+libco is released under the ISC license.
 <hr/>
 
 <b>Foreword:</b><br/><br/>
 libco is a cross-platform, permissively licensed implementation of
-cooperative-multithreading; a feature that is sorely lacking
-from the ISO C/C++ standard.<br/>
-The library is designed for maximum speed and portability, and
-not for safety or features. If safety or extra functionality is desired,
-a wrapper API can easily be written to encapsulate all library functions.<br/>
-Behavior of executing operations that are listed as not permitted
-below result in undefined behavior. They may work anyway, they
-may cause undesired / unknown behavior, or they may crash the
-program entirely.<br/>
+cooperative-multithreading; a feature that is sorely lacking from the ISO C/C++
+standard.<br/>
+The library is designed for maximum speed and portability, and not for safety or
+features. If safety or extra functionality is desired, a wrapper API can easily
+be written to encapsulate all library functions.<br/>
+Behavior of executing operations that are listed as not permitted below result
+in undefined behavior. They may work anyway, they may cause undesired / unknown
+behavior, or they may crash the program entirely.<br/>
 The goal of this library was to simplify the base API as much as possible,
 implementing only that which cannot be implemented using pure C. Additional
 functionality after this would only complicate ports of this library to new
@@ -50,13 +28,12 @@ platforms.
 <b>Porting:</b><br/><br/>
 This document is included as a reference for porting libco. Please submit any
 ports you create to me, so that libco can become more useful. Please note that
-since libco is ISC, you must submit your code as a work of the public domain,
-or under the same license, in order for it to be included in the official
-distribution. Full credit will be given in the source code of the official
-release. Please do not bother submitting code to me under any other
-license&mdash;including GPL, LGPL, BSD or CC&mdash;I am not interested in
-creating a library with multiple different licenses depending on which targets
-are used.
+since libco is permissively licensed, you must submit your code as a work of the
+public domain in order for it to be included in the official distribution.
+Full credit will be given in the source code of the official release. Please
+do not bother submitting code to me under any other license -- including GPL,
+LGPL, BSD or CC -- I am not interested in creating a library with multiple
+different licenses depending on which targets are used.
 <hr/>
 
 <b>Synopsis:</b><br/><br/>
