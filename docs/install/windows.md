@@ -103,9 +103,9 @@ Once mingw is installed and available from the command prompt:
  3. Type `cd C:\higan-src`
     (or wherever you put the higan source)
     and press Enter
- 4. Type `mingw32-make -C icarus compiler=g++` and press Enter
+ 4. Type `mingw32-make -C icarus` and press Enter
     to build the icarus import tool
- 5. Type `mingw32-make -C higan compiler=g++` and press Enter
+ 5. Type `mingw32-make -C higan` and press Enter
     to build the main higan executable
 
 [tdm]: http://tdm-gcc.tdragon.net/download

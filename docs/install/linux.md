@@ -53,9 +53,9 @@ being installed system-wide.
  3. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 4. Type `make -C higan compiler=g++` and press Enter
+ 4. Type `make -C higan` and press Enter
     to build the main higan executable
- 5. Type `make -C icarus compiler=g++` and press Enter
+ 5. Type `make -C icarus` and press Enter
     to build the icarus import tool
 
 Installing a compiled build on Linux
