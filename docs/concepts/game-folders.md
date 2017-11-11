@@ -8,7 +8,7 @@ higan would create a game folder named `dkc3.sfc`,
 and inside it store the game data as `program.rom`
 and the save data as `save.ram`:
 
-```text
+```python
 +- Super Famicom
    |
    +- dkc3.sfc
@@ -27,7 +27,7 @@ For example,
 if another emulator loaded the game `dkc3.sfc`
 it might store the save data in `dkc3.srm`:
 
-```text
+```python
 +- Super Famicom
    |
    +- dkc3.sfc
