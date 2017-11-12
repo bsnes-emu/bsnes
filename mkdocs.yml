@@ -29,6 +29,7 @@ pages:
         - Save States: concepts/save-states.md
     - Frequently Asked Questions: faq.md
     - Console-specific Notes: notes.md
+    - Credits: credits.md
 
 markdown_extensions:
     - smarty
