@@ -3,6 +3,7 @@
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
 #include "manifest-viewer.cpp"
+#include "game-notes.cpp"
 unique_pointer<CheatDatabase> cheatDatabase;
 unique_pointer<ToolsManager> toolsManager;
 

@@ -142,7 +142,7 @@ struct AdvancedSettings : TabFrameItem {
       Button libraryChange{&libraryLayout, Size{0, 0}};
     CheckLabel ignoreManifests{&layout, Size{~0, 0}};
     Label otherLabel{&layout, Size{~0, 0}, 2};
-    CheckLabel autoSaveRAM{&layout, Size{~0, 0}};
+    CheckLabel autoSaveMemory{&layout, Size{~0, 0}};
 };
 
 struct SettingsManager : Window {

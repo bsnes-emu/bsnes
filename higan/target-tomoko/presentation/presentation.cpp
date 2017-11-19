@@ -134,6 +134,7 @@ Presentation::Presentation() {
   cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsManager->show(0); });
   stateManager.setText("State Manager ...").onActivate([&] { toolsManager->show(1); });
   manifestViewer.setText("Manifest Viewer ...").onActivate([&] { toolsManager->show(2); });
+  gameNotes.setText("Game Notes ...").onActivate([&] { toolsManager->show(3); });
 
   helpMenu.setText("Help");
   documentation.setText("Documentation ...").onActivate([&] {

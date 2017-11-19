@@ -45,7 +45,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
 
   otherLabel.setText("Other").setFont(Font().setBold());
-  autoSaveRAM.setText("Auto-Save RAM Periodically").setChecked(settings["Emulation/AutoSaveRAM"].boolean()).onToggle([&] {
-    settings["Emulation/AutoSaveRAM"].setValue(autoSaveRAM.checked());
+  autoSaveMemory.setText("Auto-Save Memory Periodically").setChecked(settings["Emulation/AutoSaveMemory/Enable"].boolean()).onToggle([&] {
+    settings["Emulation/AutoSaveMemory/Enable"].setValue(autoSaveMemory.checked());
   });
 }
