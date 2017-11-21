@@ -91,6 +91,27 @@ This option allows the same program
 to control the emulated SNES,
 for development or testing.
 
+**Soft Reset**
+restarts the emulated console's CPU
+while leaving the console's memory untouched,
+like pressing the "reset" button
+on a physical console.
+
+This menu item does not appear
+for consoles that did not have a "reset" button,
+like hand-helds.
+
+It also does not appear for the Sega Master System,
+since that console's reset button is wired up like a controller
+rather than directly attached to the CPU.
+To reset the Master System,
+bind a keyboard or joypad button
+to the "Reset" function
+on the "Controls" controller
+in the "Hardware" port
+of the Sega Master System
+in [higan's Input settings](higan-settings.md#input).
+
 **Power Cycle**
 restarts the loaded game
 as though the emulated console were switched off and on again.

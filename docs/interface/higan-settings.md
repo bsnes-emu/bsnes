@@ -315,6 +315,13 @@ instead of the emulated console.
     If your PC struggles to hit "real time"
     (60fps for most emulated consoles),
     this likely won't have any effect.
+  - **Soft Reset** restarts the emulated console's CPU
+    while leaving the console's memory untouched,
+    just like the "Soft Reset" menu item
+    in [the console menu](higan.md#the-console-menu).
+    This hotkey does nothing
+    when the "Soft Reset" item
+    does not appear in the console menu.
   - **Power Cycle** turns the emulated console off and back on
     (a "hard reset"),
     just like the "Power Cycle" menu item
