@@ -91,7 +91,7 @@ start out with nothing plugged in,
 so if the game you're playing needs a gamepad connected,
 you'll have to connect it!
 
-This doesn't apply to handheld consoles
+This doesn't apply to hand-held consoles
 like the Game Boy and WonderSwan,
 since the "controller" is always connected.
 This *does* apply to the Famicom,
