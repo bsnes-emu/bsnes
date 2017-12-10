@@ -1064,7 +1064,7 @@ static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode)
 static void di(GB_gameboy_t *gb, uint8_t opcode)
 {
     /* DI is NOT delayed, not even on a CGB. Mooneye's di_timing-GS test fails on a CGB
-       for different reasons.*/
+       for different reasons. */
     GB_advance_cycles(gb, 4);
     gb->ime = false;
 }
@@ -1073,8 +1073,9 @@ static void ei(GB_gameboy_t *gb, uint8_t opcode)
 {
     /* ei is actually "disable interrupts for one instruction, then enable them". */
     GB_advance_cycles(gb, 4);
-    gb->ime = false;
-    gb->ime_toggle = true;
+    if (!gb->ime && !gb->ime_toggle) {
+        gb->ime_toggle = true;
+    }
 }
 
 static void ld_hl_sp_r8(GB_gameboy_t *gb, uint8_t opcode)

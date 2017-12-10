@@ -289,9 +289,11 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode)
 {
     gb->color_correction_mode = mode;
-    for (unsigned i = 0; i < 32; i++) {
-        GB_palette_changed(gb, false, i * 2);
-        GB_palette_changed(gb, true, i * 2);
+    if (gb->is_cgb) {
+        for (unsigned i = 0; i < 32; i++) {
+            GB_palette_changed(gb, false, i * 2);
+            GB_palette_changed(gb, true, i * 2);
+        }
     }
 }
 
