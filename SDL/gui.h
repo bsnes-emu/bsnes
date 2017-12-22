@@ -33,11 +33,16 @@ typedef struct {
     SDL_Scancode keys[9];
     GB_color_correction_mode_t color_correction_mode;
     enum scaling_mode scaling_mode;
+    
+    bool div_joystick;
+    bool flip_joystick_bit_1;
+    bool swap_joysticks_bits_1_and_2;
 } configuration_t;
 
 extern configuration_t configuration;
 
 void update_viewport(void);
-
 void run_gui(bool is_running);
+unsigned fix_joypad_button(unsigned button);
+
 #endif

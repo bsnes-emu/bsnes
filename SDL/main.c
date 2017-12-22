@@ -96,7 +96,41 @@ static void handle_events(GB_gameboy_t *gb)
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     update_viewport();
                 }
+                break;
             }
+                
+            case SDL_JOYBUTTONUP:
+            case SDL_JOYBUTTONDOWN:
+                event.jbutton.button = fix_joypad_button(event.jbutton.button);
+                if (event.jbutton.button < 4) {
+                    GB_set_key_state(gb, (event.jbutton.button & 1) ? GB_KEY_A : GB_KEY_B,
+                                     event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button == 8) {
+                    GB_set_key_state(gb, GB_KEY_SELECT, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button == 9) {
+                    GB_set_key_state(gb, GB_KEY_START, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button & 1) {
+                    GB_set_turbo_mode(gb, event.type == SDL_JOYBUTTONDOWN, false);
+                }
+                else {
+                    run_gui(true);
+                    GB_set_color_correction_mode(gb, configuration.color_correction_mode);
+                }
+            break;
+                
+            case SDL_JOYAXISMOTION:
+                if ((event.jaxis.axis >> configuration.div_joystick) & 1) {
+                    GB_set_key_state(gb, GB_KEY_DOWN, event.jaxis.value > 0x4000);
+                    GB_set_key_state(gb, GB_KEY_UP, event.jaxis.value < -0x4000);
+                }
+                else {
+                    GB_set_key_state(gb, GB_KEY_RIGHT, event.jaxis.value > 0x4000);
+                    GB_set_key_state(gb, GB_KEY_LEFT, event.jaxis.value < -0x4000);
+                }
+            break;
                 
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {

@@ -174,7 +174,11 @@ static enum {
     SHOWING_MENU,
     SHOWING_HELP,
     WAITING_FOR_KEY,
+    WAITING_FOR_JBUTTON,
 } gui_state;
+
+unsigned auto_detect_progress = 0;
+unsigned auto_detect_inputs[3];
 
 static void item_exit(unsigned index)
 {
@@ -190,11 +194,13 @@ static void item_help(unsigned index)
 
 static void enter_graphics_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
+static void enter_joypad_menu(unsigned index);
 
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Graphic Options", enter_graphics_menu},
-    {"Controls", enter_controls_menu},
+    {"Keyboard", enter_controls_menu},
+    {"Joypad", enter_joypad_menu},
     {"Help", item_help},
     {"Exit", item_exit},
     {NULL,}
@@ -202,7 +208,8 @@ static const struct menu_item paused_menu[] = {
 
 static const struct menu_item nonpaused_menu[] = {
     {"Graphic Options", enter_graphics_menu},
-    {"Controls", enter_controls_menu},
+    {"Keyboard", enter_controls_menu},
+    {"Joypad", enter_joypad_menu},
     {"Help", item_help},
     {"Exit", item_exit},
     {NULL,}
@@ -316,10 +323,102 @@ static void enter_controls_menu(unsigned index)
     current_selection = 0;
 }
 
+static unsigned joypad_index = 0;
+SDL_Joystick *joystick = NULL;
+const char *current_joypad_name(unsigned index)
+{
+    static char name[23] = {0,};
+    const char *orig_name = joystick? SDL_JoystickName(joystick) : NULL;
+    if (!orig_name) return "Not Found";
+    unsigned i = 0;
+    
+    // SDL returns a name with repeated and trailing spaces
+    while (*orig_name && i < sizeof(name) - 2) {
+        if (orig_name[0] != ' ' || orig_name[1] != ' ') {
+            name[i++] = *orig_name;
+        }
+        orig_name++;
+    }
+    if (i && name[i - 1] == ' ') {
+        i--;
+    }
+    name[i] = 0;
+    
+    return name;
+}
+
+static void cycle_joypads(unsigned index)
+{
+    joypad_index++;
+    if (joypad_index >= SDL_NumJoysticks()) {
+        joypad_index = 0;
+    }
+    if (joystick) {
+        SDL_JoystickClose(joystick);
+    }
+    joystick = SDL_JoystickOpen(joypad_index);
+}
+
+unsigned fix_joypad_button(unsigned button)
+{
+    if (configuration.div_joystick) {
+        button >>= 1;
+    }
+    
+    if (button < 4) {
+        if (configuration.swap_joysticks_bits_1_and_2) {
+            button = (int[]){0, 2, 1, 3}[button];
+        }
+        
+        if (configuration.flip_joystick_bit_1) {
+            button ^= 1;
+        }
+    }
+    
+    return button;
+}
+
+static void cycle_joypads_backwards(unsigned index)
+{
+    joypad_index++;
+    if (joypad_index >= SDL_NumJoysticks()) {
+        joypad_index = SDL_NumJoysticks() - 1;
+    }
+    if (joystick) {
+        SDL_JoystickClose(joystick);
+    }
+    joystick = SDL_JoystickOpen(joypad_index);
+}
+
+static void detect_joypad_layout(unsigned index)
+{
+    gui_state = WAITING_FOR_JBUTTON;
+    auto_detect_progress = 0;
+}
+
+static const struct menu_item joypad_menu[] = {
+    {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
+    {"Detect layout", detect_joypad_layout},
+    {NULL,}
+};
+
+static void enter_joypad_menu(unsigned index)
+{
+    current_menu = joypad_menu;
+    current_selection = 0;
+}
+
 extern void set_filename(const char *new_filename, bool new_should_free);
 void run_gui(bool is_running)
 {
-    /* Draw the "Drop file" screen */
+    if (joystick && !SDL_NumJoysticks()) {
+        SDL_JoystickClose(joystick);
+        joystick = NULL;
+    }
+    else if (!joystick && SDL_NumJoysticks()) {
+        joystick = SDL_JoystickOpen(0);
+    }
+    /* Draw the background screen */
     static SDL_Surface *converted_background = NULL;
     if (!converted_background) {
         SDL_Surface *background = SDL_LoadBMP(executable_relative_path("background.bmp"));
@@ -340,6 +439,63 @@ void run_gui(bool is_running)
     current_menu = root_menu = is_running? paused_menu : nonpaused_menu;
     current_selection = 0;
     do {
+        /* Convert Joypad events (We only generate down events) */
+        if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
+            switch (event.type) {
+                case SDL_JOYBUTTONDOWN:
+                    event.type = SDL_KEYDOWN;
+                    event.jbutton.button = fix_joypad_button(event.jbutton.button);
+                    if (event.jbutton.button < 4) {
+                        event.key.keysym.scancode = (event.jbutton.button & 1) ? SDL_SCANCODE_RETURN : SDL_SCANCODE_ESCAPE;
+                    }
+                    else if (event.jbutton.button == 8 || event.jbutton.button == 9) {
+                        event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+                    }
+                    break;
+                    
+                case SDL_JOYAXISMOTION: {
+                    static bool axis_active[2] = {false, false};
+                    if ((event.jaxis.axis >> configuration.div_joystick) & 1) {
+                        if (event.jaxis.value > 0x4000) {
+                            if (!axis_active[1]) {
+                                event.type = SDL_KEYDOWN;
+                                event.key.keysym.scancode = SDL_SCANCODE_DOWN;
+                            }
+                            axis_active[1] = true;
+                        }
+                        else if (event.jaxis.value < -0x4000) {
+                            if (!axis_active[0]) {
+                                event.type = SDL_KEYDOWN;
+                                event.key.keysym.scancode = SDL_SCANCODE_UP;
+                            }
+                            axis_active[1] = true;
+                        }
+                        else {
+                            axis_active[1] = false;
+                        }
+                    }
+                    else {
+                        if (event.jaxis.value > 0x4000) {
+                            if (!axis_active[0]) {
+                                event.type = SDL_KEYDOWN;
+                                event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
+                            }
+                            axis_active[0] = true;
+                        }
+                        else if (event.jaxis.value < -0x4000) {
+                            if (!axis_active[0]) {
+                                event.type = SDL_KEYDOWN;
+                                event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+                            }
+                            axis_active[0] = true;
+                        }
+                        else {
+                            axis_active[0] = false;
+                        }
+                    }
+                }
+            }
+        }
         switch (event.type) {
             case SDL_QUIT: {
                 if (!is_running) {
@@ -364,6 +520,36 @@ void run_gui(bool is_running)
                 set_filename(event.drop.file, true);
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 return;
+            }
+            case SDL_JOYBUTTONDOWN:
+            {
+                if (gui_state == WAITING_FOR_JBUTTON) {
+                    should_render = true;
+                    auto_detect_inputs[auto_detect_progress++] = event.jbutton.button;
+                    if (auto_detect_progress == 3) {
+                        gui_state = SHOWING_MENU;
+                        
+                        configuration.div_joystick =
+                            ((auto_detect_inputs[0] | auto_detect_inputs[1] | auto_detect_inputs[2]) & 1) == 0 &&
+                            auto_detect_inputs[0] > 9;
+                        
+                        if (configuration.div_joystick) {
+                            auto_detect_inputs[0] >>= 1;
+                            auto_detect_inputs[1] >>= 1;
+                            auto_detect_inputs[2] >>= 1;
+                        }
+                        
+                        configuration.swap_joysticks_bits_1_and_2 =
+                            (auto_detect_inputs[1] & 1) == (auto_detect_inputs[2] & 1);
+                        
+                        if (configuration.swap_joysticks_bits_1_and_2) {
+                            auto_detect_inputs[1] = (int[]){0, 2, 1, 3}[auto_detect_inputs[1]];
+                            auto_detect_inputs[2] = (int[]){0, 2, 1, 3}[auto_detect_inputs[2]];
+                        }
+                        
+                        configuration.flip_joystick_bit_1 = auto_detect_inputs[2] & 1;
+                    }
+                }
             }
             case SDL_KEYDOWN:
                 if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
@@ -469,6 +655,15 @@ void run_gui(bool is_running)
                     break;
                 case WAITING_FOR_KEY:
                     draw_text_centered(pixels, 68, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    break;
+                case WAITING_FOR_JBUTTON:
+                    draw_text_centered(pixels, 68, (const char *[])
+                                       {
+                                           "Press button for Start",
+                                           "Press button for A",
+                                           "Press button for B",
+                                       } [auto_detect_progress],
+                                       gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
                     break;
             }
             
