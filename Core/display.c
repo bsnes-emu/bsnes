@@ -279,7 +279,7 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color)
 
 void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index)
 {
-    if (!gb->rgb_encode_callback) return;
+    if (!gb->rgb_encode_callback || !gb->is_cgb) return;
     uint8_t *palette_data = background_palette? gb->background_palettes_data : gb->sprite_palettes_data;
     uint16_t color = palette_data[index & ~1] | (palette_data[index | 1] << 8);
 
@@ -289,9 +289,11 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode)
 {
     gb->color_correction_mode = mode;
-    for (unsigned i = 0; i < 32; i++) {
-        GB_palette_changed(gb, false, i * 2);
-        GB_palette_changed(gb, true, i * 2);
+    if (gb->is_cgb) {
+        for (unsigned i = 0; i < 32; i++) {
+            GB_palette_changed(gb, false, i * 2);
+            GB_palette_changed(gb, true, i * 2);
+        }
     }
 }
 
