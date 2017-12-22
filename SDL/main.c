@@ -102,7 +102,7 @@ static void handle_events(GB_gameboy_t *gb)
                 switch (event.key.keysym.scancode) {
                     case SDL_SCANCODE_ESCAPE:
                         run_gui(true);
-                        GB_set_color_correction_mode(gb, color_correction_mode);
+                        GB_set_color_correction_mode(gb, configuration.color_correction_mode);
                         break;
                         
                     case SDL_SCANCODE_C:
@@ -142,10 +142,6 @@ static void handle_events(GB_gameboy_t *gb)
                         }
                         break;
                         
-                    case SDL_SCANCODE_TAB:
-                        cycle_scaling();
-                        break;
-                        
                     default:
                         /* Save states */
                         if (event.key.keysym.scancode >= SDL_SCANCODE_0 && event.key.keysym.scancode <= SDL_SCANCODE_9) {
@@ -163,34 +159,15 @@ static void handle_events(GB_gameboy_t *gb)
                         break;
                 }
             case SDL_KEYUP: // Fallthrough
-                switch (event.key.keysym.scancode) {
-                    case SDL_SCANCODE_RIGHT:
-                        GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_LEFT:
-                        GB_set_key_state(gb, GB_KEY_LEFT, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_UP:
-                        GB_set_key_state(gb, GB_KEY_UP, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_DOWN:
-                        GB_set_key_state(gb, GB_KEY_DOWN, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_X:
-                        GB_set_key_state(gb, GB_KEY_A, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_Z:
-                        GB_set_key_state(gb, GB_KEY_B, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_BACKSPACE:
-                        GB_set_key_state(gb, GB_KEY_SELECT, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_RETURN:
-                        GB_set_key_state(gb, GB_KEY_START, event.type == SDL_KEYDOWN);
-                        break;
-                    case SDL_SCANCODE_SPACE:
-                        GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
-                        break;
+                if (event.key.keysym.scancode == configuration.keys[8]) {
+                    GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
+                }
+                else {
+                    for (unsigned i = 0; i < GB_KEY_MAX; i++) {
+                        if (event.key.keysym.scancode == configuration.keys[i]) {
+                            GB_set_key_state(gb, i, event.type == SDL_KEYDOWN);
+                        }
+                    }
                 }
                 break;
             default:
@@ -297,7 +274,7 @@ restart:
         GB_set_pixels_output(&gb, pixels);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_sample_rate(&gb, have_aspec.freq);
-        GB_set_color_correction_mode(&gb, color_correction_mode);
+        GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
     }
     
     bool error = false;

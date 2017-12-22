@@ -16,7 +16,6 @@ enum scaling_mode {
     GB_SDL_SCALING_MAX,
 };
 
-extern enum scaling_mode scaling_mode;
 
 enum pending_command {
     GB_SDL_NO_COMMAND,
@@ -30,10 +29,15 @@ enum pending_command {
 
 extern enum pending_command pending_command;
 extern unsigned command_parameter;
-extern GB_color_correction_mode_t color_correction_mode;
+typedef struct {
+    SDL_Scancode keys[9];
+    GB_color_correction_mode_t color_correction_mode;
+    enum scaling_mode scaling_mode;
+} configuration_t;
+
+extern configuration_t configuration;
 
 void update_viewport(void);
-void cycle_scaling(void);
 
 void run_gui(bool is_running);
 #endif
