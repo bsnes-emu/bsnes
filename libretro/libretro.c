@@ -14,6 +14,8 @@
 #define snprintf _snprintf
 #endif
 
+#define SAMEBOY_CORE_VERSION "0.9"
+
 #include <Core/gb.h>
 #include "libretro.h"
 
@@ -168,11 +170,14 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "SameBoy";
-   info->library_version  = "0.9";
+#ifdef GIT_VERSION
+   info->library_version  = SAMEBOY_CORE_VERSION GIT_VERSION;
+#else
+   info->library_version  = SAMEBOY_CORE_VERSION;
+#endif
    info->need_fullpath    = true;
    info->valid_extensions = "gb|gbc";
 }
-
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {

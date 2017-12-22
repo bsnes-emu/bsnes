@@ -1,6 +1,11 @@
 STATIC_LINKING := 0
 AR             := ar
 
+GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+   CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
+
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
