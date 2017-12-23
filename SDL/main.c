@@ -4,6 +4,7 @@
 #include "gb.h"
 #include "utils.h"
 #include "gui.h"
+#include "shader.h"
 
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
@@ -212,10 +213,7 @@ static void handle_events(GB_gameboy_t *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
-    SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    render_texture(pixels, NULL);
     handle_events(gb);
 }
 
@@ -358,7 +356,7 @@ restart:
         pending_command = GB_SDL_NO_COMMAND;
     }
 }
-    
+
 int main(int argc, char **argv)
 {
 #define str(x) #x
@@ -390,15 +388,25 @@ usage:
 
     SDL_Init( SDL_INIT_EVERYTHING );
     
-    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              160 * 2, 144 * 2, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    SDL_SetWindowMinimumSize(window, 160, 144);
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    
-    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
-    
-    pixel_format = SDL_AllocFormat(SDL_GetWindowPixelFormat(window));
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
+    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              160 * 2, 144 * 2, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_SetWindowMinimumSize(window, 160, 144);
+    
+    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    if (gl_context == NULL) {
+        renderer = SDL_CreateRenderer(window, -1, 0);
+        texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);
+        pixel_format = SDL_AllocFormat(SDL_GetWindowPixelFormat(window));
+    }
+    else {
+        pixel_format = SDL_AllocFormat(SDL_PIXELFORMAT_ABGR8888);
+    }
+    
+    
     /* Configure Audio */
     memset(&want_aspec, 0, sizeof(want_aspec));
     want_aspec.freq = AUDIO_FREQUENCY;
@@ -419,6 +427,11 @@ usage:
     SDL_PauseAudio(false);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    
+    if (!init_shader_with_name(&shader, configuration.filter)) {
+        init_shader_with_name(&shader, "NearestNeighbor");
+    }
+    update_viewport();
     
     if (filename == NULL) {
         run_gui(false);

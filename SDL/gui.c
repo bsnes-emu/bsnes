@@ -20,6 +20,31 @@ unsigned command_parameter;
 #define MODIFIER_NAME CTRL_STRING
 #endif
 
+shader_t shader;
+SDL_Rect rect;
+
+void render_texture(void *pixels,  void *previous)
+{
+    if (renderer) {
+        if (pixels) {
+            SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
+        }
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
+    }
+    else {
+        static void *_pixels = NULL;
+        if (pixels) {
+            _pixels = pixels;
+        }
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+        render_bitmap_with_shader(&shader, _pixels, previous, rect.x, rect.y, rect.w, rect.h);
+        SDL_GL_SwapWindow(window);
+    }
+}
+
 configuration_t configuration =
 {
     {   SDL_SCANCODE_RIGHT,
@@ -59,7 +84,7 @@ static const char *help[] ={
 void update_viewport(void)
 {
     int win_width, win_height;
-    SDL_GetWindowSize(window, &win_width, &win_height);
+    SDL_GL_GetDrawableSize(window, &win_width, &win_height);
     double x_factor = win_width / 160.0;
     double y_factor = win_height / 144.0;
     
@@ -80,9 +105,15 @@ void update_viewport(void)
     unsigned new_width = x_factor * 160;
     unsigned new_height = y_factor * 144;
     
-    SDL_Rect rect = (SDL_Rect){(win_width  - new_width) / 2, (win_height - new_height) /2,
+    rect = (SDL_Rect){(win_width  - new_width) / 2, (win_height - new_height) /2,
         new_width, new_height};
-    SDL_RenderSetViewport(renderer, &rect);
+    
+    if (renderer) {
+        SDL_RenderSetViewport(renderer, &rect);
+    }
+    else {
+        glViewport(rect.x, rect.y, rect.w, rect.h);
+    }
 }
 
 /* Does NOT check for bounds! */
@@ -234,9 +265,7 @@ void cycle_scaling(unsigned index)
         configuration.scaling_mode = 0;
     }
     update_viewport();
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    render_texture(NULL, NULL);
 }
 
 void cycle_scaling_backwards(unsigned index)
@@ -248,9 +277,7 @@ void cycle_scaling_backwards(unsigned index)
         configuration.scaling_mode--;
     }
     update_viewport();
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    render_texture(NULL, NULL);
 }
 
 static void cycle_color_correction(unsigned index)
@@ -273,6 +300,82 @@ static void cycle_color_correction_backwards(unsigned index)
     }
 }
 
+struct shader_name {
+    const char *file_name;
+    const char *display_name;
+} shaders[] =
+{
+    {"NearestNeighbor", "Nearest Neighbor"},
+    {"Bilinear", "Bilinear"},
+    {"SmoothBilinear", "Smooth Bilinear"},
+    {"Scale2x", "Scale2x"},
+    {"Scale4x", "Scale4x"},
+    {"AAScale2x", "Anti-aliased Scale2x"},
+    {"AAScale4x", "Anti-aliased Scale4x"},
+    {"HQ2x", "HQ2x"},
+    {"OmniScale", "OmniScale"},
+    {"OmniScaleLegacy", "OmniScale Legacy"},
+    {"AAOmniScaleLegacy", "AA OmniScale Legacy"},
+};
+
+static void cycle_filter(unsigned index)
+{
+    unsigned i = 0;
+    for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
+        if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
+            break;
+        }
+    }
+    
+
+    i += 1;
+    if (i >= sizeof(shaders) / sizeof(shaders[0])) {
+        i -= sizeof(shaders) / sizeof(shaders[0]);
+    }
+    
+    strcpy(configuration.filter, shaders[i].file_name);
+    free_shader(&shader);
+    if (!init_shader_with_name(&shader, configuration.filter)) {
+        init_shader_with_name(&shader, "NearestNeighbor");
+    }
+}
+
+static void cycle_filter_backwards(unsigned index)
+{
+    unsigned i = 0;
+    for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
+        if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
+            break;
+        }
+    }
+    
+    i -= 1;
+    if (i >= sizeof(shaders) / sizeof(shaders[0])) {
+        i = sizeof(shaders) / sizeof(shaders[0]) - 1;
+    }
+    
+    strcpy(configuration.filter, shaders[i].file_name);
+    free_shader(&shader);
+    if (!init_shader_with_name(&shader, configuration.filter)) {
+        init_shader_with_name(&shader, "NearestNeighbor");
+    }
+
+}
+const char *current_filter_name(unsigned index)
+{
+    unsigned i = 0;
+    for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
+        if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
+            break;
+        }
+    }
+    
+    if (i == sizeof(shaders) / sizeof(shaders[0])) {
+        i = 0;
+    }
+    
+    return shaders[i].display_name;
+}
 
 static void return_to_root_menu(unsigned index)
 {
@@ -282,6 +385,7 @@ static void return_to_root_menu(unsigned index)
 
 static const struct menu_item graphics_menu[] = {
     {"Scaling Mode:", cycle_scaling, current_scaling_mode, cycle_scaling_backwards},
+    {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
     {"Back", return_to_root_menu},
     {NULL,}
@@ -399,6 +503,7 @@ static void detect_joypad_layout(unsigned index)
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Detect layout", detect_joypad_layout},
+    {"Back", return_to_root_menu},
     {NULL,}
 };
 
@@ -510,9 +615,7 @@ void run_gui(bool is_running)
             case SDL_WINDOWEVENT: {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     update_viewport();
-                    SDL_RenderClear(renderer);
-                    SDL_RenderCopy(renderer, texture, NULL, NULL);
-                    SDL_RenderPresent(renderer);
+                    render_texture(NULL, NULL);
                 }
                 break;
             }
@@ -667,10 +770,7 @@ void run_gui(bool is_running)
                     break;
             }
             
-            SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, texture, NULL, NULL);
-            SDL_RenderPresent(renderer);
+            render_texture(pixels, NULL);
         }
     } while (SDL_WaitEvent(&event));
 }

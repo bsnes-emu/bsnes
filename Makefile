@@ -43,7 +43,7 @@ endif
 # Set compilation and linkage flags based on target, platform and configuration
 
 CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
-SDL_LDFLAGS := -lSDL2
+SDL_LDFLAGS := -lSDL2 -lGL
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows
 LDFLAGS += -lmsvcrt -lSDL2main -Wl,/MANIFESTFILE:NUL
@@ -56,7 +56,7 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> /dev/null)
 CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT) -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore
-SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
+SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2 -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
 ifeq ($(PLATFORM),windows32)
@@ -88,7 +88,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp
+sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
 all: cocoa sdl tester
@@ -262,13 +262,20 @@ $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	cp -f $^ $@
 	
 $(BIN)/SDL/LICENSE: LICENSE
+	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 
 $(BIN)/SDL/registers.sym: Misc/registers.sym
+	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	
 $(BIN)/SDL/background.bmp: SDL/background.bmp
+	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
+
+$(BIN)/SDL/Shaders: Shaders
+	-@$(MKDIR) -p $(dir $@)
+	cp -rf $^ $@
 
 # Boot ROMs
 

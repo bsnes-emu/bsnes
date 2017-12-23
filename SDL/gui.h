@@ -3,11 +3,13 @@
 
 #include <SDL2/SDL.h>
 #include <Core/gb.h>
+#include "shader.h"
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern SDL_Texture *texture;
 extern SDL_PixelFormat *pixel_format;
+extern shader_t shader;
 
 enum scaling_mode {
     GB_SDL_SCALING_ENTIRE_WINDOW,
@@ -37,6 +39,8 @@ typedef struct {
     bool div_joystick;
     bool flip_joystick_bit_1;
     bool swap_joysticks_bits_1_and_2;
+    
+    char filter[32];
 } configuration_t;
 
 extern configuration_t configuration;
@@ -44,5 +48,6 @@ extern configuration_t configuration;
 void update_viewport(void);
 void run_gui(bool is_running);
 unsigned fix_joypad_button(unsigned button);
+void render_texture(void *pixels, void *previous);
 
 #endif
