@@ -119,8 +119,16 @@ static void handle_events(GB_gameboy_t *gb)
                     GB_set_turbo_mode(gb, event.type == SDL_JOYBUTTONDOWN, false);
                 }
                 else {
+                    bool audio_playing = SDL_GetAudioStatus() == SDL_AUDIO_PLAYING;
+                    if (audio_playing) {
+                        SDL_PauseAudio(true);
+                    }
                     run_gui(true);
+                    if (audio_playing) {
+                        SDL_PauseAudio(false);
+                    }
                     GB_set_color_correction_mode(gb, configuration.color_correction_mode);
+                    GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
                 }
             break;
                 
@@ -137,11 +145,19 @@ static void handle_events(GB_gameboy_t *gb)
                 
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {
-                    case SDL_SCANCODE_ESCAPE:
+                    case SDL_SCANCODE_ESCAPE: {
+                        bool audio_playing = SDL_GetAudioStatus() == SDL_AUDIO_PLAYING;
+                        if (audio_playing) {
+                            SDL_PauseAudio(true);
+                        }
                         run_gui(true);
+                        if (audio_playing) {
+                            SDL_PauseAudio(false);
+                        }
                         GB_set_color_correction_mode(gb, configuration.color_correction_mode);
+                        GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
                         break;
-                        
+                    }
                     case SDL_SCANCODE_C:
                         if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
                             GB_debugger_break(gb);
@@ -318,6 +334,7 @@ restart:
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_sample_rate(&gb, have_aspec.freq);
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+        GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
     }
     
     bool error = false;
@@ -435,7 +452,6 @@ usage:
     SDL_OpenAudio(&want_aspec, &have_aspec);
     
     /* Start Audio */
-    SDL_PauseAudio(false);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
@@ -447,6 +463,7 @@ usage:
     if (filename == NULL) {
         run_gui(false);
     }
+    SDL_PauseAudio(false);
     run(); // Never returns
     return 0;
 }

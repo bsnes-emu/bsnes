@@ -58,6 +58,7 @@ configuration_t configuration =
         SDL_SCANCODE_SPACE
     },
     .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
+    .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
     .blend_frames = true
 };
@@ -227,10 +228,12 @@ static void item_help(unsigned index)
 static void enter_graphics_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
+static void enter_audio_menu(unsigned index);
 
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Graphic Options", enter_graphics_menu},
+    {"Audio Options", enter_audio_menu},
     {"Keyboard", enter_controls_menu},
     {"Joypad", enter_joypad_menu},
     {"Help", item_help},
@@ -238,14 +241,7 @@ static const struct menu_item paused_menu[] = {
     {NULL,}
 };
 
-static const struct menu_item nonpaused_menu[] = {
-    {"Graphic Options", enter_graphics_menu},
-    {"Keyboard", enter_controls_menu},
-    {"Joypad", enter_joypad_menu},
-    {"Help", item_help},
-    {"Exit", item_exit},
-    {NULL,}
-};
+static const struct menu_item *const nonpaused_menu = &paused_menu[1];
 
 const char *current_scaling_mode(unsigned index)
 {
@@ -409,6 +405,41 @@ static void enter_graphics_menu(unsigned index)
     current_selection = 0;
 }
 
+const char *highpass_filter_string(unsigned index)
+{
+    return (const char *[]){"None (Keep DC Offset)", "Accurate", "Preserve Waveform"}
+        [configuration.highpass_mode];
+}
+
+void cycle_highpass_filter(unsigned index)
+{
+    configuration.highpass_mode++;
+    if (configuration.highpass_mode == GB_HIGHPASS_MAX) {
+        configuration.highpass_mode = 0;
+    }
+}
+
+void cycle_highpass_filter_backwards(unsigned index)
+{
+    if (configuration.highpass_mode == 0) {
+        configuration.highpass_mode = GB_HIGHPASS_MAX - 1;
+    }
+    else {
+        configuration.highpass_mode--;
+    }
+}
+
+static const struct menu_item audio_menu[] = {
+    {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_audio_menu(unsigned index)
+{
+    current_menu = audio_menu;
+    current_selection = 0;
+}
 static const char *key_name(unsigned index)
 {
     return SDL_GetScancodeName(configuration.keys[index]);

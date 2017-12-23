@@ -37,6 +37,8 @@ typedef struct {
     enum scaling_mode scaling_mode;
     bool blend_frames;
     
+    GB_highpass_mode_t highpass_mode;
+    
     bool div_joystick;
     bool flip_joystick_bit_1;
     bool swap_joysticks_bits_1_and_2;
