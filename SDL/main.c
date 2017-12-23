@@ -16,7 +16,9 @@
 GB_gameboy_t gb;
 static bool dmg = false;
 static bool paused = false;
-static uint32_t pixels[160*144];
+static uint32_t pixel_buffer_1[160*144], pixel_buffer_2[160*144];
+static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
+
 
 static char *filename = NULL;
 static bool should_free_filename = false;
@@ -213,7 +215,16 @@ static void handle_events(GB_gameboy_t *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
-    render_texture(pixels, NULL);
+    if (configuration.blend_frames) {
+        render_texture(active_pixel_buffer, previous_pixel_buffer);
+        uint32_t *temp = active_pixel_buffer;
+        active_pixel_buffer = previous_pixel_buffer;
+        previous_pixel_buffer = temp;
+        GB_set_pixels_output(gb, active_pixel_buffer);
+    }
+    else {
+        render_texture(active_pixel_buffer, NULL);
+    }
     handle_events(gb);
 }
 
@@ -303,7 +314,7 @@ restart:
         }
         
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-        GB_set_pixels_output(&gb, pixels);
+        GB_set_pixels_output(&gb, active_pixel_buffer);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_sample_rate(&gb, have_aspec.freq);
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);

@@ -47,7 +47,7 @@ void render_texture(void *pixels,  void *previous)
 
 configuration_t configuration =
 {
-    {   SDL_SCANCODE_RIGHT,
+    .keys = {   SDL_SCANCODE_RIGHT,
         SDL_SCANCODE_LEFT,
         SDL_SCANCODE_UP,
         SDL_SCANCODE_DOWN,
@@ -57,8 +57,9 @@ configuration_t configuration =
         SDL_SCANCODE_RETURN,
         SDL_SCANCODE_SPACE
     },
-    GB_COLOR_CORRECTION_EMULATE_HARDWARE,
-    GB_SDL_SCALING_INTEGER_FACTOR,
+    .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
+    .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
+    .blend_frames = true
 };
 
 
@@ -383,10 +384,21 @@ static void return_to_root_menu(unsigned index)
     current_selection = 0;
 }
 
+static void toggle_blend_frames(unsigned index)
+{
+    configuration.blend_frames ^= true;
+}
+
+const char *blend_frames_string(unsigned index)
+{
+    return configuration.blend_frames? "Enabled" : "Disabled";
+}
+
 static const struct menu_item graphics_menu[] = {
     {"Scaling Mode:", cycle_scaling, current_scaling_mode, cycle_scaling_backwards},
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
+    {"Blend Frames:", toggle_blend_frames, blend_frames_string, toggle_blend_frames},
     {"Back", return_to_root_menu},
     {NULL,}
 };

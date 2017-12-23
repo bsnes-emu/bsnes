@@ -35,6 +35,7 @@ typedef struct {
     SDL_Scancode keys[9];
     GB_color_correction_mode_t color_correction_mode;
     enum scaling_mode scaling_mode;
+    bool blend_frames;
     
     bool div_joystick;
     bool flip_joystick_bit_1;
