@@ -17,36 +17,37 @@ auto Z80::power() -> void {
 }
 
 auto Z80::irq(bool maskable, uint16 pc, uint8 extbus) -> bool {
-  if(maskable && !r.iff1) return false;
+  if(maskable && !IFF1) return false;
+  R.bits(0,6)++;
 
-  push(r.pc);
+  push(PC);
 
-  switch(maskable ? r.im : (uint2)1) {
+  switch(maskable ? IM : (uint2)1) {
 
   case 0: {
     //external data bus ($ff = RST $38)
-    r.pc = extbus;
+    PC = extbus;
     break;
   }
 
   case 1: {
     //constant address
-    r.pc = pc;
+    PC = pc;
     break;
   }
 
   case 2: {
     //vector table with external data bus
-    uint16 addr = (r.ir.byte.hi << 8) | extbus;
-    r.pc  = read(addr + 0) << 0;
-    r.pc |= read(addr + 1) << 8;
+    uint16 addr = I << 8 | extbus;
+    PC  = read(addr + 0) << 0;
+    PC |= read(addr + 1) << 8;
     break;
   }
 
   }
 
-  r.iff1 = 0;
-  if(maskable) r.iff2 = 0;
+  IFF1 = 0;
+  if(maskable) IFF2 = 0;
   return true;
 }
 

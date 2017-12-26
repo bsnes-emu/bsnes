@@ -77,6 +77,16 @@ auto Program::powerCycle() -> void {
   showMessage("System has been power cycled");
 }
 
+auto Program::togglePause() -> void {
+  program->pause = !program->pause;
+  presentation->pauseEmulation.setChecked(program->pause);
+  if(program->pause) {
+    showMessage("Emulation has been paused");
+  } else {
+    showMessage("Emulation has been unpaused");
+  }
+}
+
 auto Program::rotateDisplay() -> void {
   if(!emulator) return;
   if(!emulator->cap("Rotate Display")) return showMessage("Display rotation not supported");

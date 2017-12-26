@@ -54,7 +54,7 @@ auto InputManager::appendHotkeys() -> void {
   { auto hotkey = new InputHotkey;
     hotkey->name = "Pause Emulation";
     hotkey->press = [] {
-      program->pause = !program->pause;
+      program->togglePause();
     };
     hotkeys.append(hotkey);
   }

@@ -181,8 +181,8 @@ auto Z80::instructionDEC_rr(uint16& x) -> void {
 }
 
 auto Z80::instructionDI() -> void {
-  r.iff1 = 0;
-  r.iff2 = 0;
+  IFF1 = 0;
+  IFF2 = 0;
 }
 
 auto Z80::instructionDJNZ_e() -> void {
@@ -194,7 +194,7 @@ auto Z80::instructionDJNZ_e() -> void {
 }
 
 auto Z80::instructionEI() -> void {
-  r.ei = 1;  //raise IFF1, IFF2 after the next instruction
+  EI = 1;  //raise IFF1, IFF2 after the next instruction
 }
 
 auto Z80::instructionEX_irr_rr(uint16& x, uint16& y) -> void {
@@ -219,12 +219,12 @@ auto Z80::instructionEXX() -> void {
 }
 
 auto Z80::instructionHALT() -> void {
-  r.halt = 1;
+  HALT = 1;
 }
 
 auto Z80::instructionIM_o(uint2 code) -> void {
   wait(4);
-  r.im = code;
+  IM = code;
 }
 
 auto Z80::instructionIN_a_in() -> void {
@@ -342,6 +342,19 @@ auto Z80::instructionLD_r_r(uint8& x, uint8& y) -> void {
 auto Z80::instructionLD_r_r1(uint8& x, uint8& y) -> void {
   wait(1);
   x = y;
+}
+
+//LD from I/R sets status flags
+auto Z80::instructionLD_r_r2(uint8& x, uint8& y) -> void {
+  wait(1);
+  x = y;
+  NF = 0;
+  PF = IFF2;
+  XF = x.bit(3);
+  HF = 0;
+  YF = x.bit(5);
+  ZF = x == 0;
+  SF = x.bit(7);
 }
 
 auto Z80::instructionLD_rr_inn(uint16& x) -> void {
@@ -483,12 +496,12 @@ auto Z80::instructionRET_c(bool c) -> void {
 
 auto Z80::instructionRETI() -> void {
   PC = pop();
-  r.iff1 = r.iff2;
+  IFF1 = IFF2;
 }
 
 auto Z80::instructionRETN() -> void {
   PC = pop();
-  r.iff1 = r.iff2;
+  IFF1 = IFF2;
 }
 
 auto Z80::instructionRL_irr(uint16& addr) -> void {

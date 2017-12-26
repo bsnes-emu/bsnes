@@ -84,6 +84,19 @@ cartridge sha256:bd5e7a6bc08f64d39c54204b82c6c156f144c03e13c890128588c5faa560659
   :  name:     Addams Family - Pugsley's Scavenger Hunt, The
   :  title:    The Addams Family: Pugsley's Scavenger Hunt
 
+cartridge sha256:7a75021fb390d04645b654a3dbd986c82cee1dbf34018e7ff7bf4b6ea125fa35
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-5D-ESP
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-5D-0
+  :  name:     Bram Stoker's Dracula
+  :  title:    Bram Stoker's Dracula
+
 cartridge sha256:9eaf1c46d8a068c910d66f582e23b1155882ddfa4b9fd0813819fc5c008167e2
   :board region=pal
   :  rom name=program.rom size=0x80000
@@ -135,8 +148,8 @@ cartridge sha256:ec3e81d628a293514e303b44e3b1ac03461ddd1da32764b10b7fab1e507602d
   :  serial:   SNSP-ANNP-EUR
   :  board:    SHVC-1A0N-30
   :  revision: SPAL-ANNP-0
-  :  name:     Aaahh!! Real Monsters
-  :  title:    Aaahh!! Real Monsters
+  :  name:     Aaahh!!! Real Monsters
+  :  title:    Aaahh!!! Real Monsters
 
 cartridge sha256:a0baba78c9cad02957b80ed74fc8d09fac3c77e131e47333ef42ba471dc61228
   :board region=pal
@@ -242,6 +255,32 @@ cartridge sha256:f0cfaab9a4be5b2bac0cb3dafea14cea4cf8d7cbfa562323ab3026466985c9e
   :  name:     Bass Masters Classic - Pro Edition
   :  title:    Bass Masters Classic: Pro Edition
 
+cartridge sha256:a10f7406d76a85e27ae340ed2dd2379897321ed388b439e247b3437fa07806cb
+  :board region=pal
+  :  rom name=program.rom size=0x300000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-A3BP-EUR
+  :  board:    SHVC-1J0N-20
+  :  revision: SPAL-A3BP-0
+  :  name:     Batman Forever
+  :  title:    Batman Forever
+
+cartridge sha256:4d347d60795008852ec11bc8e0256a3d1f159bf48c130b9798cb2961e560f319
+  :board region=pal
+  :  rom name=program.rom size=0x180000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-ABUP-EUR
+  :  board:    SHVC-2A0N-20
+  :  revision: SPAL-ABUP-0
+  :  name:     Beavis and Butt-Head
+  :  title:    Beavis and Butt-Head
+
 cartridge sha256:a73c8864743dd64a61d756ebe001a1244d6ae387621a46f9da4421d061c6b7ac
   :board region=pal
   :  rom name=program.rom size=0x300000
@@ -345,6 +384,32 @@ cartridge sha256:b9d6cf21e7a280b83fadcf513029158be6f4dcdc51f73b699b7c215a5150be4
   :  revision: SPAL-AC8P-0
   :  name:     CutThroat Island
   :  title:    CutThroat Island
+
+cartridge sha256:3a158e49478bd9a25b487a347c25f401cd0ed1cd1ccf72d8010752139a2143dc
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AD6P-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-AD6P-0
+  :  name:     Demolition Man
+  :  title:    Demolition Man
+
+cartridge sha256:f6afe40ced7033c845df84b895230fd26ea0b48e6a58d6b6e18beee9b594ad6e
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-3Z-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-3Z-0
+  :  name:     Demon's Crest
+  :  title:    Demon's Crest
 
 cartridge sha256:a2dc5ffc82e8d055d030c3f021d8df3ae8b08571c8301cdd1d7652248d6f9b55
   :board region=pal
@@ -466,6 +531,19 @@ cartridge sha256:14e8f7963bd71a3d8792952ae0c0def733178ac720417b954ea5cb12cc76dec
   :  name:     Final Fight 3
   :  title:    Final Fight 3
 
+cartridge sha256:a0106f9cff7abbf25e081e2531f6d4b4aedf6f0dc8d155a66506817bff267d12
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AFMP-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-AFMP-0
+  :  name:     Firemen, The
+  :  title:    The Firemen
+
 cartridge sha256:21d79cd5382ad5503fdee1c44416a7a425904cebe37bb531d508ef62aa4f2ed0
   :board region=pal
   :  rom name=program.rom size=0x300000
@@ -479,6 +557,19 @@ cartridge sha256:21d79cd5382ad5503fdee1c44416a7a425904cebe37bb531d508ef62aa4f2ed
   :  revision: SPAL-AFKP-0
   :  name:     Frank Thomas' Big Hurt Baseball
   :  title:    Frank Thomas' Big Hurt Baseball
+
+cartridge sha256:6a6a95528e4c8cfdf46cade2a354f3e28f63b55bba002e10af0f60227ec4c833
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AF8P-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-AF8P-0
+  :  name:     Frantic Flea
+  :  title:    Frantic Flea
 
 cartridge sha256:0d7a1649915d45b4c6e0752ea06ad353c2b1a590370912c18deeb42986821624
   :board region=pal
@@ -558,6 +649,19 @@ cartridge sha256:686f2507e9969fd7617fc544c139e124668294d102e79a0eb34478c8deb7527
   :  name:     Izzy's Quest for the Olympic Rings
   :  title:    Izzy's Quest for the Olympic Rings
 
+cartridge sha256:02cb423199be3368fc2b40148f83b7a48900394983e04d43f94bb7d76ce44e94
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AJDP-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-AJDP-0
+  :  name:     Judge Dredd
+  :  title:    Judge Dredd
+
 cartridge sha256:2516843fa405ab1aa1f242b57f19977519aefb68599474d2c7065aaef88ecb88
   :board region=pal
   :  rom name=program.rom size=0x200000
@@ -570,6 +674,19 @@ cartridge sha256:2516843fa405ab1aa1f242b57f19977519aefb68599474d2c7065aaef88ecb8
   :  revision: SPAL-AJGP-0
   :  name:     Jungle Strike
   :  title:    Jungle Strike
+
+cartridge sha256:9b1dbcac063b524eef533e78cf7051e3f566a49d5ac13d23474dc6afb293d6be
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-A2JP-EUR
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-A2JP-0
+  :  name:     Jurassic Park Part 2 - The Chaos Continues
+  :  title:    Jurassic Park Part 2: The Chaos Continues
 
 cartridge sha256:07386ef7dfcc70a67beb01fa7e2300249914b2ce0b010a74cbfbf0714c32fcf1
   :board region=pal
@@ -635,6 +752,44 @@ cartridge sha256:81f90a36c07221546c441d67689d951864f071f3218aa96994c0c54e93998a6
   :  revision: SPAL-A7RP-0
   :  name:     Mega Man 7
   :  title:    Mega Man 7
+
+cartridge sha256:ae6fb12b5077eaa9c13c6124368343bfef076bc1e42f53f442973576266255c4
+  :board region=pal
+  :  hitachidsp model=HG51B169 frequency=20000000
+  :    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+  :    rom name=program.rom size=0x180000
+  :      map address=00-3f,80-bf:8000-ffff mask=0x8000
+  :    ram name=save.ram size=0 volatile
+  :      map address=70-77:0000-7fff mask=0x8000
+  :    drom name=cx4.data.rom size=0xc00
+  :    dram name=cx4.data.ram size=0xc00 volatile
+  :      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
+  :
+  :information
+  :  serial:   SNSP-ARXP-EUR
+  :  board:    SHVC-2DC0N-01
+  :  revision: SPAL-ARXP-0
+  :  name:     Mega Man X2
+  :  title:    Mega Man X2
+
+cartridge sha256:14cd1e5d7a810426c566c1c4eff16398cace6e7a4c0d7f048fdb1f4c22c1c135
+  :board region=pal
+  :  hitachidsp model=HG51B169 frequency=20000000
+  :    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+  :    rom name=program.rom size=0x200000
+  :      map address=00-3f,80-bf:8000-ffff mask=0x8000
+  :    ram name=save.ram size=0 volatile
+  :      map address=70-77:0000-7fff mask=0x8000
+  :    drom name=cx4.data.rom size=0xc00
+  :    dram name=cx4.data.ram size=0xc00 volatile
+  :      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
+  :
+  :information
+  :  serial:   SNSP-AR3P-EUR
+  :  board:    SHVC-1DC0N-01
+  :  revision: SPAL-AR3P-0
+  :  name:     Mega Man X3
+  :  title:    Mega Man X3
 
 cartridge sha256:02a85c9e783add4e3d44f8f4718c014743f252585fedd9ae5583458237122b35
   :board region=pal
@@ -1106,7 +1261,7 @@ cartridge sha256:d9127808fb02c47dd74fd22f39582c69f19936a794a8efc153cc0e51a0d4d78
   :  board:    SHVC-2A0N-20
   :  revision: SPAL-AXOP-0
   :  name:     Asterix & Obelix
-  :  title:    Asterix & Obelix
+  :  title:    Astérix & Obelix
 
 cartridge sha256:dde314fea056445685b97f9c8b554d2be81ea1fe6ace935934592464908d05fb
   :board region=pal
@@ -1555,6 +1710,45 @@ cartridge sha256:e678a29a93111cf2016c487ba9977b14de8f719040651a42c74bd74eea2d0d8
   :  name:     Death and Return of Superman, The
   :  title:    The Death and Return of Superman
 
+cartridge sha256:475c601df7384621539ebcf2586a50720cc8de5d089b71fc65ff3f605cff7c8f
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AF-NOE
+  :  board:    SHVC-1A0N-10
+  :  revision: SPAL-AF-0
+  :  name:     Addams Family, The
+  :  title:    The Addams Family
+
+cartridge sha256:12c00475e5d881c26fbdce025d05ca32d4f5534bfa441d9887624a843df74222
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-XB-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-XB-0
+  :  name:     Aero the Acro-Bat
+  :  title:    Aero the Acro-Bat
+
+cartridge sha256:a4b1e125b421c5a58e2fd73edc4d58b31d7a596c07dee263c565f00ee712223f
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-8A-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-8A-0
+  :  name:     Alfred Chicken
+  :  title:    Alfred Chicken
+
 cartridge sha256:b2df16101a2daa0f718853be92e3cf5d88f8e8843d04962e4b403d13769c1119
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -1567,6 +1761,19 @@ cartridge sha256:b2df16101a2daa0f718853be92e3cf5d88f8e8843d04962e4b403d13769c111
   :  revision: SPAL-AP-0
   :  name:     Alien vs Predator
   :  title:    Alien vs Predator
+
+cartridge sha256:daa9a6a3872f252d74d7112094b6c97409fc166dae564e032b5158d12443b68c
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-9W-NOE
+  :  board:    SHVC-1J0N-10
+  :  revision: SPAL-9W-0
+  :  name:     American Tail - Fievel Goes West, An
+  :  title:    An American Tail: Fievel Goes West
 
 cartridge sha256:85b88af9b1f2071804e27c3ff9d42da6b26417c26b6f8a9e878733b8c35724ab
   :board region=pal
@@ -1581,6 +1788,19 @@ cartridge sha256:85b88af9b1f2071804e27c3ff9d42da6b26417c26b6f8a9e878733b8c35724a
   :  name:     Another World
   :  title:    Another World
 
+cartridge sha256:d54d2703e474d7f469766d2d095ffcbbcab893e3fe58bbbcc57e24082a44bb40
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-XE-NOE
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-XE-0
+  :  name:     Asterix
+  :  title:    Asterix
+
 cartridge sha256:bb81d1730222c518084d06c5ce456ee860d5ccb6a410f14a73e68971305bdd12
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -1593,6 +1813,19 @@ cartridge sha256:bb81d1730222c518084d06c5ce456ee860d5ccb6a410f14a73e68971305bdd1
   :  revision: SPAL-AX-0
   :  name:     Axelay
   :  title:    Axelay
+
+cartridge sha256:ffd6668607ee279d79ef3f2b35713b99f8b046a53c608a82df9d37ef39bb079b
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-BJ-NOE
+  :  board:    SHVC-1A0N-10
+  :  revision: SPAL-BJ-0
+  :  name:     Batman Returns
+  :  title:    Batman Returns
 
 cartridge sha256:716214f0b17233021f8ee07500530947655c4c871cd041290adb204523984821
   :board region=pal
@@ -1619,6 +1852,19 @@ cartridge sha256:08e02381cf59bdb3ad4d561587c8ccd001c722c7731705a9d84b39cb0337ca5
   :  revision: SPAL-6Z-0
   :  name:     Blackhawk
   :  title:    Blackhawk
+
+cartridge sha256:34221406999172e342b9442e30d12c467fbcd9afa86bedb5ec5ddb5ebc2ee8a1
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-B6-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-B6-0
+  :  name:     Blues Brothers, The
+  :  title:    The Blues Brothers
 
 cartridge sha256:5a054466ffe0694599498b9d94427b25d4f4d55ab4fc1542335f69025e817a3f
   :board region=pal
@@ -1763,6 +2009,19 @@ cartridge sha256:e0c51ca00f22716531cb9138cfe8d5af4680cde1c95bfbfcd52c35f246763e6
   :  name:     Congo's Caper
   :  title:    Congo's Caper
 
+cartridge sha256:81220ffa1f167d9b5b909b0315a6734fae8957b8d708b3887fb0e9105f816edb
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-C8-NOE
+  :  board:    SHVC-1A0N-10
+  :  revision: SPAL-C8-0
+  :  name:     Cool Spot
+  :  title:    Cool Spot
+
 cartridge sha256:5d42cef66c529939b6038f4ecaf1aeb06acda2dabbf7bcf4e7203f3cb6b43f7a
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -1775,6 +2034,32 @@ cartridge sha256:5d42cef66c529939b6038f4ecaf1aeb06acda2dabbf7bcf4e7203f3cb6b43f7
   :  revision: SPAL-AV-0
   :  name:     Cybernator
   :  title:    Cybernator
+
+cartridge sha256:6ce516e3d1a7068cc9732cd3517cfd1e92179f2340c63a244625a1ff49815085
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-ADCP-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-ADCP-0
+  :  name:     Daze Before Christmas
+  :  title:    Daze Before Christmas
+
+cartridge sha256:3e4e16a5d47197a2f7bc724e3a6875b682f738800c7377ea655a6d7f54156a0e
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-4D-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-4D-0
+  :  name:     Dennis
+  :  title:    Dennis
 
 cartridge sha256:a7612dbb5fd122090d4fcbffec81d295c0911ff5c83fa865c441c7b3996fcc92
   :board region=pal
@@ -1855,6 +2140,19 @@ cartridge sha256:6cce3d0c8b2eec350475e3c274d7ad80c9a208ba101d9cf9ac637c5d09760ab
   :  name:     Flashback
   :  title:    Flashback
 
+cartridge sha256:c7935e5e147a8c1b2646fbb7776cf73198967bd053f2a58f4f01e9a3a5c2911a
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-9F-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-9F-0
+  :  name:     Flintstones - The Treasure of Sierra Madrock, The
+  :  title:    The Flintstones: The Treasure of Sierra Madrock
+
 cartridge sha256:6d0095422fe380202e62ed5b34f038681f777dcd9a943cf3534645068e118fb2
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -1893,6 +2191,19 @@ cartridge sha256:ca2d67f208e3dc7aaeea88b60d7008b6e00b525bf935c259b642ad5cad783bb
   :  revision: SPAL-HN-0
   :  name:     Home Alone 2 - Lost in New York
   :  title:    Home Alone 2: Lost in New York
+
+cartridge sha256:e4b315f714529a9ba593ffa16ac7456db178294405e26811313c08177969a05f
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-HO-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-HO-0
+  :  name:     Hook
+  :  title:    Hook
 
 cartridge sha256:a9dffa5d97855733f14b1b888bc478e8e0630107812b7b3df729c499e0e0734f
   :board region=pal
@@ -1962,6 +2273,19 @@ cartridge sha256:3fa82117fe88b0b5398995b68624f3027184259456123f2a61d55f668326c76
   :  name:     Kevin Keegan's Player Manager
   :  title:    Kevin Keegan's Player Manager
 
+cartridge sha256:53ccf6970d4577608893f38633cc0609ba0eec1b393f891df31e2e5c2f903a9c
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-ZI-NOE
+  :  board:    SHVC-1A0N-30
+  :  revision: SPAL-ZI-0
+  :  name:     Kid Klown in Crazy Chase
+  :  title:    Kid Klown in Crazy Chase
+
 cartridge sha256:11a6c5de89b25836c8b66d3e3077bacdcaf52faab5a0f7fe2bc751aa85a8dd68
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -1974,6 +2298,19 @@ cartridge sha256:11a6c5de89b25836c8b66d3e3077bacdcaf52faab5a0f7fe2bc751aa85a8dd6
   :  revision: SPAL-KM-0
   :  name:     King of the Monsters
   :  title:    King of the Monsters
+
+cartridge sha256:9bc7afdb9ffaca90db4390697e80a75bf4889cd8529e21c28ad42c41171e2630
+  :board region=pal
+  :  rom name=program.rom size=0x180000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-LO-NOE
+  :  board:    SHVC-2A0N-11
+  :  revision: SPAL-LO-0
+  :  name:     Knights of the Round
+  :  title:    Knights of the Round
 
 cartridge sha256:9ed408bb30b32c0a86605ea80e2b431563a33d54354a4b68e8b7d4eedde25295
   :board region=pal
@@ -2027,6 +2364,19 @@ cartridge sha256:8510491f99400115ccf33570269bc4e484fb56370f7ac36f12e73eec19d342d
   :  name:     Lucky Luke
   :  title:    Lucky Luke
 
+cartridge sha256:be9c42913fee053a8d854054a27a0fb4d1cf6c092b46c7291d2743e94204a323
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-YG-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-YG-0
+  :  name:     Magic Boy
+  :  title:    Magic Boy
+
 cartridge sha256:8f6920549b28a065a030fbdbe2ea2e9d966d42ab5ac1ef0e9dabc99875a51df2
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -2066,6 +2416,19 @@ cartridge sha256:4703cb071611874b0d9e9555f102278e33dd494202875dc994a232029148bf6
   :  revision: SPAL-KX-0
   :  name:     Mortal Kombat
   :  title:    Mortal Kombat
+
+cartridge sha256:41803805d28cad8873029c4b648cc6dd7503b7a33afa8ff584434a970dc9d8c1
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-N8-NOE
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-N8-0
+  :  name:     Mr. Nutz
+  :  title:    Mr. Nutz
 
 cartridge sha256:558b437e10915c2ca79f376634fa4623c87efdb9292a5878b886c7a6fbef61e2
   :board region=pal
@@ -2422,6 +2785,19 @@ cartridge sha256:613cd1a31eaded18648168bd7453a57830ca9a6f3c10de5154625436fbd4955
   :  name:     Terranigma
   :  title:    Terranigma
 
+cartridge sha256:3c94c600fefcf34e5d251885c209d6b61b40de119589b67badec38deeffb46f9
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-TA-NOE
+  :  board:    SHVC-1A0N-10
+  :  revision: SPAL-TA-0
+  :  name:     Tiny Toon Adventures - Buster Busts Loose!
+  :  title:    Tiny Toon Adventures: Buster Busts Loose!
+
 cartridge sha256:a1105819d48c04d680c8292bbfa9abbce05224f1bc231afd66af43b7e0a1fd4e
   :board region=pal
   :  rom name=program.rom size=0x200000
@@ -2586,6 +2962,19 @@ cartridge sha256:1c12660c99571692d2fba4ba871a1086b115486697e789f85fb939c55eeec7c
   :  name:     Doom
   :  title:    Doom
 
+cartridge sha256:3d4715ce44045fbb27b72c0925020a52b748c9236db1e7782ee62f74615182fc
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-E7-UKV
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-E7-0
+  :  name:     Eek! The Cat
+  :  title:    Eek! The Cat
+
 cartridge sha256:dddacae010766c1201f50810fcf15dff7c0f6d41ac1a1004c8eea4873a71db12
   :board region=pal
   :  rom name=program.rom size=0x80000
@@ -2626,6 +3015,19 @@ cartridge sha256:e9e2152411fec3bd10e8cd4587b62717169a25a4cd28f491f8e477b9aae2fce
   :  name:     Fun & Games
   :  title:    fun 'n games
 
+cartridge sha256:94b2e68503514afe956cbc8ef4fb2cb93a323761e9b7d205e44e544049a4ae3b
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-8U-UKV
+  :  board:    SHVC-1A0N-20
+  :  revision: SPAL-8U-0
+  :  name:     Incredible Hulk, The
+  :  title:    The Incredible Hulk
+
 cartridge sha256:9d936f3b0b5bea0b7c4588e65fa147fff1108d0e630337dd75eb16133a55e317
   :board region=pal
   :  rom name=program.rom size=0x80000
@@ -2665,6 +3067,19 @@ cartridge sha256:f5e74f09c485d58b444ef2b168d041a1d451056b5feb295901974ca73190dbd
   :  revision: SPAL-AJBP-0
   :  name:     Jelly Boy
   :  title:    Jelly Boy
+
+cartridge sha256:1be41a3a2d490be97b98f2ab8934d8e8812d7d2596598a7841e3027b23e95261
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-J8-UKV
+  :  board:    SHVC-2A0N-11
+  :  revision: SPAL-J8-0
+  :  name:     Jurassic Park
+  :  title:    Jurassic Park
 
 cartridge sha256:ddad4a3708b8cf760e520b784f42d7085154b0699f3824b8d722512ccab687cb
   :board region=pal
@@ -2718,6 +3133,19 @@ cartridge sha256:528f9697cdb5b50504aa4f6d6f7882c4997e7141898f9a00a630692b964204e
   :  revision: SPAL-L3-0
   :  name:     Lethal Weapon
   :  title:    Lethal Weapon
+
+cartridge sha256:1c41bb11c9df5aa8a6ca98caa5215418f37025f7a5e88ff62188b257338af3ab
+  :board region=pal
+  :  rom name=program.rom size=0x180000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-RX-UKV
+  :  board:    SHVC-2A0N-11
+  :  revision: SPAL-RX-0
+  :  name:     Mega Man X
+  :  title:    Mega Man X
 
 cartridge sha256:d33f682605b3d6c8a162506ef333a24933ae26a32f10ff8e49fc113bcd189137
   :board region=pal

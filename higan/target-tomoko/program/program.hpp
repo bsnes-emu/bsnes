@@ -32,6 +32,7 @@ struct Program : Emulator::Platform {
 
   auto softReset() -> void;
   auto powerCycle() -> void;
+  auto togglePause() -> void;
   auto rotateDisplay() -> void;
   auto connectDevices() -> void;
   auto showMessage(const string& text) -> void;

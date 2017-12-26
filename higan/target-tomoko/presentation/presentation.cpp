@@ -131,6 +131,7 @@ Presentation::Presentation() {
   loadSlot3.setText("Slot 3").onActivate([&] { program->loadState(3); });
   loadSlot4.setText("Slot 4").onActivate([&] { program->loadState(4); });
   loadSlot5.setText("Slot 5").onActivate([&] { program->loadState(5); });
+  pauseEmulation.setText("Pause Emulation").onToggle([&] { program->togglePause(); });
   cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsManager->show(0); });
   stateManager.setText("State Manager ...").onActivate([&] { toolsManager->show(1); });
   manifestViewer.setText("Manifest Viewer ...").onActivate([&] { toolsManager->show(2); });

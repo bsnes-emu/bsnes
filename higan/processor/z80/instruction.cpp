@@ -1,9 +1,12 @@
 auto Z80::instruction() -> void {
-  //todo: return instruction() could cause stack crash from recursion
-  //but this is needed to prevent IRQs from firing between prefixes and opcodes
-  auto code = opcode();
-  if(code == 0xdd) { prefix = Prefix::ix; return instruction(); }
-  if(code == 0xfd) { prefix = Prefix::iy; return instruction(); }
+  uint8 code;
+  while(true) {
+    R.bits(0,6)++;
+    code = opcode();
+    if(code == 0xdd) { prefix = Prefix::ix; continue; }
+    if(code == 0xfd) { prefix = Prefix::iy; continue; }
+    break;
+  }
 
   if(r.ei) {
     r.ei = 0;
@@ -14,10 +17,13 @@ auto Z80::instruction() -> void {
   if(code == 0xcb && prefix != Prefix::hl) {
     uint16 addr = HL + (int8)operand();
     wait(1);
+  //R is not incremented here
     instructionCBd(addr, opcode());
   } else if(code == 0xcb) {
+    R.bits(0,6)++;
     instructionCB(opcode());
   } else if(code == 0xed) {
+    R.bits(0,6)++;
     instructionED(opcode());
   } else {
     instruction(code);
@@ -838,7 +844,7 @@ auto Z80::instructionED(uint8 code) -> void {
   op(0x54, NEG)
   op(0x55, RETN)
   op(0x56, IM_o, 1)
-  op(0x57, LD_r_r1, A, I)
+  op(0x57, LD_r_r2, A, I)
   op(0x58, IN_r_ic, E)
   op(0x59, OUT_ic_r, E)
   op(0x5a, ADC_hl_rr, DE)
@@ -846,7 +852,7 @@ auto Z80::instructionED(uint8 code) -> void {
   op(0x5c, NEG)
   op(0x5d, RETI)
   op(0x5e, IM_o, 2)
-  op(0x5f, LD_r_r1, A, R)
+  op(0x5f, LD_r_r2, A, R)
   op(0x60, IN_r_ic, H)
   op(0x61, OUT_ic_r, H)
   op(0x62, SBC_hl_rr, HL)

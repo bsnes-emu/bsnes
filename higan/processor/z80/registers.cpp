@@ -49,3 +49,9 @@
 #define YF r.af.byte.lo.bit(5)
 #define ZF r.af.byte.lo.bit(6)
 #define SF r.af.byte.lo.bit(7)
+
+#define EI r.ei
+#define HALT r.halt
+#define IFF1 r.iff1
+#define IFF2 r.iff2
+#define IM r.im

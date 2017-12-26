@@ -63,6 +63,7 @@ struct Presentation : Window {
         MenuItem loadSlot3{&loadQuickStateMenu};
         MenuItem loadSlot4{&loadQuickStateMenu};
         MenuItem loadSlot5{&loadQuickStateMenu};
+      MenuCheckItem pauseEmulation{&toolsMenu};
       MenuSeparator toolsMenuSeparator{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
