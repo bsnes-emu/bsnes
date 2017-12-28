@@ -399,6 +399,17 @@ restart:
     }
 }
 
+static char prefs_path[1024] = {0, };
+
+static void save_configuration(void)
+{
+    FILE *prefs_file = fopen(prefs_path, "wb");
+    if (prefs_file) {
+        fwrite(&configuration, 1, sizeof(configuration), prefs_file);
+        fclose(prefs_file);
+    }
+}
+
 int main(int argc, char **argv)
 {
 #define str(x) #x
@@ -468,6 +479,18 @@ usage:
     /* Start Audio */
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    
+    char *prefs_dir = SDL_GetPrefPath("", "SameBoy");
+    snprintf(prefs_path, sizeof(prefs_path) - 1, "%sprefs.bin", prefs_dir);
+    SDL_free(prefs_dir);
+    
+    FILE *prefs_file = fopen(prefs_path, "rb");
+    if (prefs_file) {
+        fread(&configuration, 1, sizeof(configuration), prefs_file);
+        fclose(prefs_file);
+    }
+    
+    atexit(save_configuration);
     
     if (!init_shader_with_name(&shader, configuration.filter)) {
         init_shader_with_name(&shader, "NearestNeighbor");
