@@ -115,9 +115,22 @@ static void handle_events(GB_gameboy_t *gb)
                 else if (event.jbutton.button == 9) {
                     GB_set_key_state(gb, GB_KEY_START, event.type == SDL_JOYBUTTONDOWN);
                 }
+                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+                    GB_set_key_state(gb, GB_KEY_UP, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+                    GB_set_key_state(gb, GB_KEY_DOWN, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+                    GB_set_key_state(gb, GB_KEY_LEFT, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+                    GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_JOYBUTTONDOWN);
+                }
                 else if (event.jbutton.button & 1) {
                     GB_set_turbo_mode(gb, event.type == SDL_JOYBUTTONDOWN, false);
                 }
+                
                 else {
                     bool audio_playing = SDL_GetAudioStatus() == SDL_AUDIO_PLAYING;
                     if (audio_playing) {
@@ -133,11 +146,12 @@ static void handle_events(GB_gameboy_t *gb)
             break;
                 
             case SDL_JOYAXISMOTION:
-                if ((event.jaxis.axis >> configuration.div_joystick) & 1) {
+                event.jaxis.axis = fix_joypad_axis(event.jaxis.axis);
+                if (event.jaxis.axis == 1) {
                     GB_set_key_state(gb, GB_KEY_DOWN, event.jaxis.value > 0x4000);
                     GB_set_key_state(gb, GB_KEY_UP, event.jaxis.value < -0x4000);
                 }
-                else {
+                else if (event.jaxis.axis == 0) {
                     GB_set_key_state(gb, GB_KEY_RIGHT, event.jaxis.value > 0x4000);
                     GB_set_key_state(gb, GB_KEY_LEFT, event.jaxis.value < -0x4000);
                 }

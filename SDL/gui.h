@@ -51,6 +51,7 @@ extern configuration_t configuration;
 void update_viewport(void);
 void run_gui(bool is_running);
 unsigned fix_joypad_button(unsigned button);
+unsigned fix_joypad_axis(unsigned axis);
 void render_texture(void *pixels, void *previous);
 
 #endif

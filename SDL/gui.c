@@ -472,6 +472,7 @@ static void enter_controls_menu(unsigned index)
 
 static unsigned joypad_index = 0;
 SDL_Joystick *joystick = NULL;
+SDL_GameController *controller = NULL;
 const char *current_joypad_name(unsigned index)
 {
     static char name[23] = {0,};
@@ -500,14 +501,92 @@ static void cycle_joypads(unsigned index)
     if (joypad_index >= SDL_NumJoysticks()) {
         joypad_index = 0;
     }
-    if (joystick) {
-        SDL_JoystickClose(joystick);
+    if (controller) {
+        SDL_GameControllerClose(controller);
+        controller = NULL;
     }
-    joystick = SDL_JoystickOpen(joypad_index);
+    else if (joystick) {
+        SDL_JoystickClose(joystick);
+        joystick = NULL;
+    }
+    if ((controller = SDL_GameControllerOpen(joypad_index))){
+        joystick = SDL_GameControllerGetJoystick(controller);
+    }
+    else {
+        joystick = SDL_JoystickOpen(joypad_index);
+    }
+}
+
+static void cycle_joypads_backwards(unsigned index)
+{
+    joypad_index++;
+    if (joypad_index >= SDL_NumJoysticks()) {
+        joypad_index = SDL_NumJoysticks() - 1;
+    }
+    if (controller) {
+        SDL_GameControllerClose(controller);
+        controller = NULL;
+    }
+    else if (joystick) {
+        SDL_JoystickClose(joystick);
+        joystick = NULL;
+    }
+    if ((controller = SDL_GameControllerOpen(joypad_index))){
+        joystick = SDL_GameControllerGetJoystick(controller);
+    }
+    else {
+        joystick = SDL_JoystickOpen(joypad_index);
+    }
+}
+
+unsigned fix_joypad_axis(unsigned axis)
+{
+    if (controller) {
+        /* Convert to the mapping used by generic Xbox-style controllers */
+        for (SDL_GameControllerAxis i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++) {
+            if (SDL_GameControllerGetBindForAxis(controller, i).value.axis == axis) {
+                if (i == SDL_CONTROLLER_AXIS_LEFTX || i == SDL_CONTROLLER_AXIS_RIGHTX) return 0;
+                if (i == SDL_CONTROLLER_AXIS_LEFTY || i == SDL_CONTROLLER_AXIS_RIGHTY) return 1;
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    
+    if (configuration.div_joystick) {
+        axis >>= 1;
+    }
+    
+    return axis & 1;
 }
 
 unsigned fix_joypad_button(unsigned button)
 {
+    if (controller) {
+        /* Convert to the mapping used by generic Xbox-style controllers */
+        for (SDL_GameControllerButton i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++) {
+            if (SDL_GameControllerGetBindForButton(controller, i).value.button == button) {
+                if (i == SDL_CONTROLLER_BUTTON_START) {
+                    return 9;
+                }
+                if (i == 9) {
+                    return SDL_CONTROLLER_BUTTON_START;
+                }
+                
+                if (i == SDL_CONTROLLER_BUTTON_BACK) {
+                    return 8;
+                }
+                if (i == 8) {
+                    return SDL_CONTROLLER_BUTTON_BACK;
+                }
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    
     if (configuration.div_joystick) {
         button >>= 1;
     }
@@ -523,18 +602,6 @@ unsigned fix_joypad_button(unsigned button)
     }
     
     return button;
-}
-
-static void cycle_joypads_backwards(unsigned index)
-{
-    joypad_index++;
-    if (joypad_index >= SDL_NumJoysticks()) {
-        joypad_index = SDL_NumJoysticks() - 1;
-    }
-    if (joystick) {
-        SDL_JoystickClose(joystick);
-    }
-    joystick = SDL_JoystickOpen(joypad_index);
 }
 
 static void detect_joypad_layout(unsigned index)
@@ -560,11 +627,23 @@ extern void set_filename(const char *new_filename, bool new_should_free);
 void run_gui(bool is_running)
 {
     if (joystick && !SDL_NumJoysticks()) {
-        SDL_JoystickClose(joystick);
-        joystick = NULL;
+        if (controller) {
+            SDL_GameControllerClose(controller);
+            controller = NULL;
+            joystick = NULL;
+        }
+        else {
+            SDL_JoystickClose(joystick);
+            joystick = NULL;
+        }
     }
     else if (!joystick && SDL_NumJoysticks()) {
-        joystick = SDL_JoystickOpen(0);
+        if ((controller = SDL_GameControllerOpen(0))){
+            joystick = SDL_GameControllerGetJoystick(controller);
+        }
+        else {
+            joystick = SDL_JoystickOpen(0);
+        }
     }
     /* Draw the background screen */
     static SDL_Surface *converted_background = NULL;
@@ -599,11 +678,16 @@ void run_gui(bool is_running)
                     else if (event.jbutton.button == 8 || event.jbutton.button == 9) {
                         event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
                     }
+                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) event.key.keysym.scancode = SDL_SCANCODE_UP;
+                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) event.key.keysym.scancode = SDL_SCANCODE_DOWN;
+                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
                     break;
                     
                 case SDL_JOYAXISMOTION: {
                     static bool axis_active[2] = {false, false};
-                    if ((event.jaxis.axis >> configuration.div_joystick) & 1) {
+                    event.jaxis.axis = fix_joypad_axis(event.jaxis.axis);
+                    if (event.jaxis.axis == 1) {
                         if (event.jaxis.value > 0x4000) {
                             if (!axis_active[1]) {
                                 event.type = SDL_KEYDOWN;
@@ -622,7 +706,7 @@ void run_gui(bool is_running)
                             axis_active[1] = false;
                         }
                     }
-                    else {
+                    else if (event.jaxis.axis == 0) {
                         if (event.jaxis.value > 0x4000) {
                             if (!axis_active[0]) {
                                 event.type = SDL_KEYDOWN;
