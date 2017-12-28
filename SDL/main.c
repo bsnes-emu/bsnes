@@ -450,6 +450,16 @@ usage:
     SDL_SetWindowMinimumSize(window, 160, 144);
     
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    
+    if (major * 0x100 + minor < 0x302) {
+        SDL_GL_DeleteContext(gl_context);
+        gl_context = NULL;
+    }
+    
     if (gl_context == NULL) {
         renderer = SDL_CreateRenderer(window, -1, 0);
         texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING, 160, 144);

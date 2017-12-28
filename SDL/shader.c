@@ -65,6 +65,14 @@ static GLuint create_program(const char *vsh, const char *fsh)
 
 bool init_shader_with_name(shader_t *shader, const char *name)
 {
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    
+    if (major * 0x100 + minor < 0x302) {
+        return false;
+    }
+    
     static char master_shader_code[0x801] = {0,};
     static char shader_code[0x10001] = {0,};
     static char final_shader_code[0x10801] = {0,};
