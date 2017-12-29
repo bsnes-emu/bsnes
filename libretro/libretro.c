@@ -14,6 +14,8 @@
 #define snprintf _snprintf
 #endif
 
+#define SAMEBOY_CORE_VERSION "0.9"
+
 #include <Core/gb.h>
 #include "libretro.h"
 
@@ -168,11 +170,14 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "SameBoy";
-   info->library_version  = "0.9";
+#ifdef GIT_VERSION
+   info->library_version  = SAMEBOY_CORE_VERSION GIT_VERSION;
+#else
+   info->library_version  = SAMEBOY_CORE_VERSION;
+#endif
    info->need_fullpath    = true;
    info->valid_extensions = "gb|gbc";
 }
-
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
@@ -202,13 +207,6 @@ void retro_set_environment(retro_environment_t cb)
       { NULL, 0 },
    };
    cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
-
-   static struct retro_variable vars[] = {
-      { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
-      { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-   };
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
-
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -246,7 +244,7 @@ static void check_variables(void)
 
    var.key = "sameboy_color_correction_mode";
    var.value = NULL;
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb))
    {
       if (strcmp(var.value, "off") == 0)
          GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_DISABLED);
@@ -422,6 +420,21 @@ bool retro_load_game(const struct retro_game_info *info)
    else
       log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
+   static struct retro_variable vars_cgb[] = {
+      { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
+      { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+      { NULL }
+   };
+
+   static struct retro_variable vars_dmg[] = {
+      { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+      { NULL }
+   };
+
+   if (GB_is_cgb(&gb))
+      environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, vars_cgb);
+   else
+      environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, vars_dmg);
    check_variables();
 
    return true;

@@ -1,6 +1,11 @@
 STATIC_LINKING := 0
 AR             := ar
 
+GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+   CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
+
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
@@ -48,7 +53,7 @@ endif
 
 ifeq ($(platform), osx)
 ifndef ($(NOUNIVERSAL))
-   CXXFLAGS += $(ARCHFLAGS)
+   CFLAGS += $(ARCHFLAGS)
    LFLAGS += $(ARCHFLAGS)
 endif
 endif
@@ -88,10 +93,10 @@ else
 endif
 ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
 CC     += -miphoneos-version-min=8.0
-CXXFLAGS += -miphoneos-version-min=8.0
+CFLAGS += -miphoneos-version-min=8.0
 else
 CC     += -miphoneos-version-min=5.0
-CXXFLAGS += -miphoneos-version-min=5.0
+CFLAGS += -miphoneos-version-min=5.0
 endif
 else ifneq (,$(findstring qnx,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro_qnx.so
@@ -121,9 +126,9 @@ MKDIR := $(shell which mkdir)
 LDFLAGS += $(LIBM)
 
 ifeq ($(DEBUG), 1)
-   CXXFLAGS += -O0 -g
+   CFLAGS += -O0 -g
 else
-   CXXFLAGS += -O2 -DNDEBUG
+   CFLAGS += -O2 -DNDEBUG
 endif
 
 include Makefile.common
@@ -131,7 +136,6 @@ include Makefile.common
 OBJECTS := $(patsubst %.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
 
 CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
-CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic)
 
 all: $(TARGET)
 
