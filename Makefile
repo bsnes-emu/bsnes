@@ -47,6 +47,7 @@ SDL_LDFLAGS := -lSDL2 -lGL
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows
 LDFLAGS += -lmsvcrt -lSDL2main -Wl,/MANIFESTFILE:NUL
+SDL_LDFLAGS := -lSDL2 -lopengl32
 else
 LDFLAGS += -lc -lm
 endif

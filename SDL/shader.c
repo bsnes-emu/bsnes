@@ -75,7 +75,7 @@ bool init_shader_with_name(shader_t *shader, const char *name)
     static char master_shader_code[0x801] = {0,};
     static char shader_code[0x10001] = {0,};
     static char final_shader_code[0x10801] = {0,};
-    static ssize_t filter_token_location = 0;
+    static signed long filter_token_location = 0;
     
     if (!master_shader_code[0]) {
         FILE *master_shader_f = fopen(executable_relative_path("Shaders/MasterShader.fsh"), "r");

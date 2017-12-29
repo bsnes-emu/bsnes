@@ -1,7 +1,6 @@
 #ifndef shader_h
 #define shader_h
-#define GL_GLEXT_PROTOTYPES
-#include <SDL2/SDL_opengl.h>
+#include "opengl_compat.h"
 #include <stdbool.h>
 
 typedef struct shader_s {
