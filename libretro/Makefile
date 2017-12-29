@@ -6,6 +6,8 @@ ifneq ($(GIT_VERSION)," unknown")
    CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif
 
+CFLAGS += -DSAMEBOY_CORE_VERSION=\"$(VERSION)\"
+
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)

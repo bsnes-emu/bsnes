@@ -18,6 +18,7 @@ MAKECMDGOALS := $(DEFAULT)
 endif
 
 VERSION := 0.9
+export VERSION
 CONF ?= debug
 
 BIN := build/bin
