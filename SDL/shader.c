@@ -2,7 +2,6 @@
 #include <string.h>
 #include "shader.h"
 #include "utils.h"
-#include <OpenGL/gl3.h>
 
 static const char *vertex_shader = "\n\
 #version 150 \n\
