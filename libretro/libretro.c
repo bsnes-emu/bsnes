@@ -14,7 +14,7 @@
 #define snprintf _snprintf
 #endif
 
-#define SAMEBOY_CORE_VERSION "0.9"
+#define SAMEBOY_CORE_VERSION "0.10"
 
 #include <Core/gb.h>
 #include "libretro.h"

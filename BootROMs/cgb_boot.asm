@@ -504,7 +504,7 @@ Palettes:
   dw $7FFF, $1BEF, $6180, $0000
   ; Sameboy "Exclusives"
   dw $7FFF, $7FEA, $7D5F, $0000 ; CGA 1
-  dw $1B77, $0AD2, $25E9, $1545 ; DMG LCD
+  dw $4778, $3290, $1D87, $0861 ; DMG LCD
 
 KeyCombinationPalettes
   db 1 ; Right

@@ -1171,7 +1171,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     else if (tableView == self.spritesTableView) {
         switch (columnIndex) {
             case 0:
-                return [Document imageFromData:[NSData dataWithBytesNoCopy:oamInfo[row].image length:64 * 4] width:8 height:oamHeight scale:16.0/oamHeight];
+                return [Document imageFromData:[NSData dataWithBytesNoCopy:oamInfo[row].image
+                                                                    length:64 * 4
+                                                             freeWhenDone:NO]
+                                         width:8
+                                        height:oamHeight
+                                         scale:16.0/oamHeight];
             case 1:
                 return @((int)oamInfo[row].x - 8);
             case 2:
