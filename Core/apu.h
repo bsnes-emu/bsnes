@@ -103,6 +103,7 @@ typedef enum {
     GB_HIGHPASS_OFF, // Do not apply any filter, keep DC offset
     GB_HIGHPASS_ACCURATE, // Apply a highpass filter similar to the one used on hardware
     GB_HIGHPASS_REMOVE_DC_OFFSET, // Remove DC Offset without affecting the waveform
+    GB_HIGHPASS_MAX
 } GB_highpass_mode_t;
 
 typedef struct {

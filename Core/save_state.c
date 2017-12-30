@@ -303,6 +303,11 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
         gb->rumble_callback(gb, gb->rumble_state);
     }
     
+    for (unsigned i = 0; i < 32; i++) {
+        GB_palette_changed(gb, false, i * 2);
+        GB_palette_changed(gb, true, i * 2);
+    }
+    
     return 0;
 }
 

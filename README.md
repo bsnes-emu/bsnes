@@ -1,6 +1,6 @@
 # SameBoy
 
-SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, an incomplete experimental SDL frontend for other operating systems, and a libretro core. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
+SameBoy is an open source Gameboy (DMG) and Gameboy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for OS X, an experimental SDL frontend for other operating systems, and a libretro core. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
 
 ## Features
 Features common to both Cocoa and SDL versions:
@@ -20,12 +20,12 @@ Features common to both Cocoa and SDL versions:
  * Emulates LCD timing effects, supporting the Demotronic trick, [GBVideoPlayer](https://github.com/LIJI32/GBVideoPlayer) and other tech demos
  * Extermely high accuracy
  * Real time clock emulation
+ * Retina/High DPI display support, allowing a wider range of scaling factors without artifacts
+ * Optional frame blending (Requires OpenGL 3.2 or later)
+ * Several [scaling algorithms](https://sameboy.github.io/scaling/) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x; Requires OpenGL 3.2 or later)
 
 Features currently supported only with the Cocoa version:
  * Native Cocoa interface, with support for all system-wide features, such as drag-and-drop and smart titlebars
- * Retina display support, allowing a wider range of scaling factors without artifacts
- * Optional frame blending
- * Several [scaling algorithms](https://sameboy.github.io/scaling/) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
  * GameBoy Camera support
  
 [Read more](https://sameboy.github.io/features/).
