@@ -451,7 +451,7 @@ usage:
     
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     
-    GLint major, minor;
+    GLint major = 0, minor = 0;
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);
     

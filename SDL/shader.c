@@ -64,7 +64,7 @@ static GLuint create_program(const char *vsh, const char *fsh)
 
 bool init_shader_with_name(shader_t *shader, const char *name)
 {
-    GLint major, minor;
+    GLint major = 0, minor = 0;
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);
     
@@ -184,6 +184,14 @@ void render_bitmap_with_shader(shader_t *shader, void *bitmap, void *previous,un
 
 void free_shader(shader_t *shader)
 {
+    GLint major = 0, minor = 0;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    
+    if (major * 0x100 + minor < 0x302) {
+        return;
+    }
+    
     glDeleteProgram(shader->program);
     glDeleteTextures(1, &shader->texture);
     glDeleteTextures(1, &shader->previous_texture);
