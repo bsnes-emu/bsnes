@@ -118,7 +118,7 @@ else
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 endif
 
-TARGET := $(CORE_DIR)/$(TARGET)
+TARGET := $(TARGET)
 
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
