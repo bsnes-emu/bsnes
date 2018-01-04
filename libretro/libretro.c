@@ -482,11 +482,17 @@ void *retro_get_memory_data(unsigned type)
    void* data;
    switch(type)
    {
+      case RETRO_MEMORY_SYSTEM_RAM:
+         data = gb.ram;
+         break;
       case RETRO_MEMORY_SAVE_RAM:
          if (gb.cartridge_type->has_battery && gb.mbc_ram_size != 0)
             data = gb.mbc_ram;
          else
             data = NULL;
+         break;
+      case RETRO_MEMORY_VIDEO_RAM:
+         data = gb.vram;
          break;
       case RETRO_MEMORY_RTC:
          if(gb.cartridge_type->has_battery)
@@ -507,11 +513,17 @@ size_t retro_get_memory_size(unsigned type)
    size_t size;
    switch(type)
    {
+      case RETRO_MEMORY_SYSTEM_RAM:
+         size = gb.ram_size;
+         break;
       case RETRO_MEMORY_SAVE_RAM:
          if (gb.cartridge_type->has_battery && gb.mbc_ram_size != 0)
             size = gb.mbc_ram_size;
          else
             size = 0;
+         break;
+      case RETRO_MEMORY_VIDEO_RAM:
+         size = gb.vram_size;
          break;
       case RETRO_MEMORY_RTC:
          if(gb.cartridge_type->has_battery)
