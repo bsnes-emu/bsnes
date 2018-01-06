@@ -6,9 +6,9 @@
 
 
 #ifdef GB_INTERNAL
-/* Divides nicely and never overflows with 4 channels and 8 volume levels */
-#define MAX_CH_AMP 0x1FFE
-#define CH_STEP (MAX_CH_AMP/0xF/7)
+/* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */
+#define MAX_CH_AMP 0x1FE0
+#define CH_STEP (MAX_CH_AMP/0xF/8)
 #endif
 
 /* APU ticks are 2MHz, triggered by an internal APU clock. */
