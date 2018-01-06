@@ -284,7 +284,7 @@ void retro_run(void)
    else
       frames = 0;
 
-   video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, 0);
+   video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
 }
 
 bool retro_load_game(const struct retro_game_info *info)
