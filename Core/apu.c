@@ -575,6 +575,14 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
+                
+                /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
+                   started sound). The playback itself is not instant which is why we don't update the sample for other
+                   cases. */
+                if (gb->apu.is_active[index]) {
+                    update_square_sample(gb, index);
+                }
+                
                 gb->apu.square_channels[index].volume_countdown = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7;
                 
                 if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0) {
@@ -599,7 +607,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
                 }
                 
-                /* Note that we don't change the sample just yet! This was verified on hardware. */
             }
             
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
@@ -760,6 +767,17 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 
                 gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
+                
+                /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
+                 started sound). The playback itself is not instant which is why we don't update the sample for other
+                 cases. */
+                if (gb->apu.is_active[GB_NOISE]) {
+                    update_sample(gb, GB_NOISE,
+                                  (gb->apu.noise_channel.lfsr & 1) ?
+                                  gb->apu.noise_channel.current_volume : 0,
+                                  0);
+                }
+                
                 gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
                 
                 if ((gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
@@ -770,8 +788,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.noise_channel.pulse_length = 0x40;
                     gb->apu.noise_channel.length_enabled = false;
                 }
-                
-                /* Note that we don't change the sample just yet! This was verified on hardware. */
             }
             
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
