@@ -718,7 +718,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
             else if (gb->apu.is_active[GB_NOISE]){
                 nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
-                update_square_sample(gb, GB_NOISE);
+                update_sample(gb, GB_NOISE,
+                              (gb->apu.noise_channel.lfsr & 1) ?
+                              gb->apu.noise_channel.current_volume : 0,
+                              0);
             }
             break;
         }
