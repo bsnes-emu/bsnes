@@ -80,14 +80,14 @@ Start:
     ; Play first sound
     ld a, $83
     call PlaySound
-    ld b, 15
+    ld b, 5
     call WaitBFrames
     ; Play second sound
     ld a, $c1
     call PlaySound
 
-; Wait ~2.5 seconds
-    ld b, 150
+; Wait ~1.15 seconds
+    ld b, 70
     call WaitBFrames
     
 ; Set registers to match the original DMG boot
@@ -123,9 +123,13 @@ DoubleBitsAndWriteRow:
     ret
 
 WaitFrame:
-    ldh a, [$44]
-    cp $90
-    jr nz, WaitFrame
+    push hl
+    ld hl, $FF0F
+  res 0, [hl]
+.wait
+    bit 0, [hl]
+    jr z, .wait
+    pop hl
     ret
 
 WaitBFrames:
