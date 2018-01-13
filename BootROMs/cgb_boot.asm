@@ -732,7 +732,28 @@ Preboot:
   ld a, [InputPalette]
   and a
   jr nz, .emulateDMGForCGBGame
-  ld a, $11
+IF DEF(AGB)
+  ; Set registers to match the original AGB-CGB boot
+  ld bc, $1100
+  push bc
+  pop af
+  ld h, c
+  ld b, 1
+  ld c, c
+  ld e, $08
+  ld l, $7c
+ELSE
+  ; Set registers to match the original CGB boot
+  ld bc, $1180
+  push bc
+  pop af
+  ld c, 0
+  ld h, c
+  ld b, c
+  ld c, c
+  ld e, $08
+  ld l, $7c
+ENDC
   ret
 
 .emulateDMGForCGBGame
