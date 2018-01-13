@@ -853,6 +853,7 @@ void run_gui(bool is_running)
             
             switch (gui_state) {
                 case SHOWING_DROP_MESSAGE:
+                    draw_text_centered(pixels, 8, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], false);
                     draw_text_centered(pixels, 116, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
                     draw_text_centered(pixels, 128, "file to play", gui_palette_native[3], gui_palette_native[0], false);
                     break;
