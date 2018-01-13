@@ -311,16 +311,22 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="5GS-tt-E0a"/>
-                            <menuItem title="Gameboy" tag="1" id="vc7-yy-ARW">
+                            <menuItem title="Game Boy" tag="1" id="vc7-yy-ARW">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="reset:" target="-1" id="E4M-QG-ua9"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Gameboy Color" tag="2" id="hdG-Bl-8nJ">
+                            <menuItem title="Game Boy Color" tag="2" id="hdG-Bl-8nJ">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="reset:" target="-1" id="xAz-cr-0u2"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Game Boy Advance" tag="3" id="7jw-B1-tf5">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="reset:" target="-1" id="xQk-4e-kd7"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="DPb-Sh-5tg"/>
