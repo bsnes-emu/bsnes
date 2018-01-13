@@ -14,7 +14,6 @@
 #endif
 
 GB_gameboy_t gb;
-static bool dmg = false;
 static bool paused = false;
 static uint32_t pixel_buffer_1[160*144], pixel_buffer_2[160*144];
 static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
@@ -184,12 +183,6 @@ static void handle_events(GB_gameboy_t *gb)
                             pending_command = GB_SDL_RESET_COMMAND;
                         }
                         break;
-                        
-                    case SDL_SCANCODE_T:
-                        if (event.key.keysym.mod & MODIFIER) {
-                            pending_command = GB_SDL_TOGGLE_MODEL_COMMAND;
-                        }
-                        break;
                     
                     case SDL_SCANCODE_P:
                         if (event.key.keysym.mod & MODIFIER) {
@@ -308,17 +301,12 @@ static bool handle_pending_command(void)
         }
             
         case GB_SDL_RESET_COMMAND:
-            GB_reset(&gb);
-            return false;
+            return true;
             
         case GB_SDL_NO_COMMAND:
             return false;
             
         case GB_SDL_NEW_FILE_COMMAND:
-            return true;
-            
-        case GB_SDL_TOGGLE_MODEL_COMMAND:
-            dmg = !dmg;
             return true;
             
         case GB_SDL_QUIT_COMMAND:
@@ -333,10 +321,10 @@ static void run(void)
     pending_command = GB_SDL_NO_COMMAND;
 restart:
     if (GB_is_inited(&gb)) {
-        GB_switch_model_and_reset(&gb, !dmg);
+        GB_switch_model_and_reset(&gb, configuration.model != MODEL_DMG);
     }
     else {
-        if (dmg) {
+        if (configuration.model == MODEL_DMG) {
             GB_init(&gb);
         }
         else {
@@ -353,12 +341,8 @@ restart:
     
     bool error = false;
     start_capturing_logs();
-    if (dmg) {
-        error = GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"));
-    }
-    else {
-        error = GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"));
-    }
+    const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin"};
+    error = GB_load_boot_rom(&gb, executable_relative_path(boot_roms[configuration.model]));
     end_capturing_logs(true, error);
     
     start_capturing_logs();
@@ -416,25 +400,13 @@ int main(int argc, char **argv)
 #define xstr(x) str(x)
     fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
 
-    if (argc > 3) {
-usage:
-        fprintf(stderr, "Usage: %s [--dmg] [rom]\n", argv[0]);
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [rom]\n", argv[0]);
         exit(1);
     }
     
-    for (unsigned i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--dmg") == 0) {
-            if (dmg) {
-                goto usage;
-            }
-            dmg = true;
-        }
-        else if (!filename) {
-            filename = argv[i];
-        }
-        else {
-            goto usage;
-        }
+    if (argc == 2) {
+        filename = argv[2];
     }
 
     signal(SIGINT, debugger_interrupt);
