@@ -173,7 +173,9 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                     
                     gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
                     
-                    update_square_sample(gb, i);
+                    if (gb->apu.is_active[i]) {
+                        update_square_sample(gb, i);
+                    }
                 }
             }
         }
@@ -192,10 +194,12 @@ void GB_apu_div_event(GB_gameboy_t *gb)
                 
                 gb->apu.noise_channel.volume_countdown = nr42 & 7;
                 
-                update_sample(gb, GB_NOISE,
-                              (gb->apu.noise_channel.lfsr & 1) ?
-                              gb->apu.noise_channel.current_volume : 0,
-                              0);
+                if (gb->apu.is_active[GB_NOISE]) {
+                    update_sample(gb, GB_NOISE,
+                                  (gb->apu.noise_channel.lfsr & 1) ?
+                                  gb->apu.noise_channel.current_volume : 0,
+                                  0);
+                }
             }
         }
     }
@@ -748,8 +752,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             
         case GB_IO_NR44: {
             if (value & 0x80) {
-                gb->apu.noise_channel.lfsr = 0;
-
                 gb->apu.noise_channel.sample_countdown = (gb->apu.noise_channel.sample_length) * 2 + 6 - gb->apu.lf_div;
                 
                 /* I'm COMPLETELY unsure about this logic, but it passes all relevant tests.
@@ -777,7 +779,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                                   gb->apu.noise_channel.current_volume : 0,
                                   0);
                 }
-                
+                gb->apu.noise_channel.lfsr = 0;
                 gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
                 
                 if ((gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
@@ -821,7 +823,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
 size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb)
 {
-    return  gb->apu_output.buffer_position;
+    return gb->apu_output.buffer_position;
 }
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
