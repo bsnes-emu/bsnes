@@ -19,9 +19,9 @@
 #include "libretro.h"
 
 #ifdef _WIN32
-char slash = '\\';
+static const char slash = '\\';
 #else
-char slash = '/';
+static const char slash = '/';
 #endif
 
 #define VIDEO_WIDTH 160
@@ -30,6 +30,14 @@ char slash = '/';
 
 char battery_save_path[512]; 
 char symbols_path[512];
+
+enum model {
+    MODEL_DMG,
+    MODEL_CGB,
+    MODEL_AGB
+};
+
+static enum model model = MODEL_CGB;
 
 static uint32_t *frame_buf;
 static struct retro_log_callback logging;
@@ -48,8 +56,8 @@ char retro_game_path[4096];
 int RLOOP=1;
 
 GB_gameboy_t gb;
-extern const unsigned char dmg_boot[], cgb_boot[];
-extern const unsigned dmg_boot_length, cgb_boot_length;
+extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[];
+extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -58,24 +66,6 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
     va_start(va, fmt);
     vfprintf(stderr, fmt, va);
     va_end(va);
-}
-
-static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
-{
-    memcpy(dest, src, length);
-    dest[length] = 0;
-    
-    /* Remove extension */
-    for (size_t i = length; i--;) {
-        if (dest[i] == '/') break;
-        if (dest[i] == '.') {
-            dest[i] = 0;
-            break;
-        }
-    }
-    
-    /* Add new extension */
-    strcat(dest, ext);
 }
 
 static struct retro_rumble_interface rumble;
@@ -129,16 +119,6 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return r<<16|g<<8|b;
 }
-
-#ifndef DISABLE_DEBUGGER
-static void debugger_interrupt(int ignore)
-{
-    /* ^C twice to exit */
-    if (GB_debugger_is_stopped(&gb))
-        exit(0);
-    GB_debugger_break(&gb);
-}
-#endif
 
 static retro_environment_t environ_cb;
 
@@ -246,128 +226,35 @@ void retro_reset(void)
     GB_reset(&gb);
 }
 
-static void check_variables(void)
+static void init_for_current_model(void)
 {
-    struct retro_variable var = {0};
-    
-    var.key = "sameboy_color_correction_mode";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb))
-    {
-        if (strcmp(var.value, "off") == 0)
-            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_DISABLED);
-        else if (strcmp(var.value, "correct curves") == 0)
-            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_CORRECT_CURVES);
-        else if (strcmp(var.value, "emulate hardware") == 0)
-            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
-        else if (strcmp(var.value, "preserve brightness") == 0)
-            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+    if (GB_is_inited(&gb)) {
+        GB_switch_model_and_reset(&gb, model != MODEL_DMG);
     }
-    
-    var.key = "sameboy_high_pass_filter_mode";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-    {
-        if (strcmp(var.value, "off") == 0)
-            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_OFF);
-        else if (strcmp(var.value, "accurate") == 0)
-            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_ACCURATE);
-        else if (strcmp(var.value, "remove dc offset") == 0)
-            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_REMOVE_DC_OFFSET);
+    else {
+        if (model == MODEL_DMG) {
+            GB_init(&gb);
+        }
+        else {
+            GB_init_cgb(&gb);
+        }
     }
-}
-
-void retro_run(void)
-{
-    bool updated = false;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-        check_variables();
-    GB_run_frame(&gb);
-    
-    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
-}
-
-bool retro_load_game(const struct retro_game_info *info)
-{
-    struct retro_input_descriptor desc[] = {
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-        { 0 },
-    };
-    
-    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
-    
-    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-    {
-        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
-        return false;
-    }
-    
-    snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
+    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model];
+    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model];
+    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model];
     
     char buf[256];
-    int err = 0;
-    if (!strstr(info->path, "gbc"))
-    {
-        GB_init(&gb);
-        snprintf(buf, sizeof(buf), "%s%cdmg_boot.bin", retro_system_directory, slash);
-        log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
-        err = GB_load_boot_rom(&gb, buf);
-        
-        if (err) {
-            GB_load_boot_rom_from_buffer(&gb, dmg_boot, dmg_boot_length);
-            err = 0;
-        }
-    }
-    else
-    {
-        GB_init_cgb(&gb);
-        snprintf(buf, sizeof(buf), "%s%ccgb_boot.bin", retro_system_directory, slash);
-        log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
-        err = GB_load_boot_rom(&gb, buf);
-        
-        if (err) {
-            GB_load_boot_rom_from_buffer(&gb, cgb_boot, cgb_boot_length);
-            err = 0;
-        }
-    }
-    if (err)
-        log_cb(RETRO_LOG_INFO, "Failed to load boot ROM %s %d\n", buf, err);
-    (void)info;
+    snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
+    log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
     
-    if (GB_load_rom(&gb,info->path)) {
-        perror("Failed to load ROM");
-        exit(1);
+    if (GB_load_boot_rom(&gb, buf)) {
+        GB_load_boot_rom_from_buffer(&gb, boot_code, boot_length);
     }
     
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_user_data(&gb, (void*)NULL);
     GB_set_pixels_output(&gb,(unsigned int*)frame_buf);
     GB_set_rgb_encode_callback(&gb, rgb_encode);
-    
-    size_t path_length = strlen(retro_game_path);
-    
-#ifndef DISABLE_DEBUGGER
-    {
-        char TMPC[512];
-        sprintf(TMPC,"%s/registers.sym",retro_system_directory);
-        GB_debugger_load_symbol_file(&gb, TMPC);
-    }
-#endif
-    
-    replace_extension(retro_game_path, path_length, symbols_path, ".sym");
-    
-#ifndef DISABLE_DEBUGGER
-    GB_debugger_load_symbol_file(&gb, symbols_path);
-#endif
-    
     GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
     
     struct retro_memory_descriptor descs[7];
@@ -409,6 +296,97 @@ bool retro_load_game(const struct retro_game_info *info)
     mmaps.descriptors = descs;
     mmaps.num_descriptors = sizeof(descs) / sizeof(descs[0]);
     environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
+}
+
+static void check_variables(void)
+{
+    struct retro_variable var = {0};
+    
+    var.key = "sameboy_color_correction_mode";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb))
+    {
+        if (strcmp(var.value, "off") == 0)
+            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_DISABLED);
+        else if (strcmp(var.value, "correct curves") == 0)
+            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_CORRECT_CURVES);
+        else if (strcmp(var.value, "emulate hardware") == 0)
+            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+        else if (strcmp(var.value, "preserve brightness") == 0)
+            GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+    }
+    
+    var.key = "sameboy_high_pass_filter_mode";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        if (strcmp(var.value, "off") == 0)
+            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_OFF);
+        else if (strcmp(var.value, "accurate") == 0)
+            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_ACCURATE);
+        else if (strcmp(var.value, "remove dc offset") == 0)
+            GB_set_highpass_filter_mode(&gb, GB_HIGHPASS_REMOVE_DC_OFFSET);
+    }
+    
+    var.key = "sameboy_model";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        enum model new_model = model;
+        if (strcmp(var.value, "Game Boy") == 0)
+            new_model = MODEL_DMG;
+        else if (strcmp(var.value, "Game Boy Color") == 0)
+            new_model = MODEL_CGB;
+        else if (strcmp(var.value, "Game Boy Advance") == 0)
+            new_model = MODEL_AGB;
+        if (GB_is_inited(&gb) && new_model != model) {
+            model = new_model;
+            init_for_current_model();
+        }
+    }
+}
+
+void retro_run(void)
+{
+    bool updated = false;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+        check_variables();
+    GB_run_frame(&gb);
+    
+    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
+}
+
+bool retro_load_game(const struct retro_game_info *info)
+{
+    struct retro_input_descriptor desc[] = {
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+        { 0 },
+    };
+    
+    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+    
+    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
+    {
+        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+        return false;
+    }
+    
+    snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
+    
+    init_for_current_model();
+    
+    if (GB_load_rom(&gb,info->path)) {
+        log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
+        return false;
+    }
     
     bool yes = true;
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
@@ -418,21 +396,14 @@ bool retro_load_game(const struct retro_game_info *info)
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
     
-    static struct retro_variable vars_cgb[] = {
+    static const struct retro_variable vars[] = {
         { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
         { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+        { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
         { NULL }
     };
     
-    static struct retro_variable vars_dmg[] = {
-        { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-        { NULL }
-    };
-    
-    if (GB_is_cgb(&gb))
-        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, vars_cgb);
-    else
-        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, vars_dmg);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
     check_variables();
     
     return true;
