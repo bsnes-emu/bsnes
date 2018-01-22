@@ -406,7 +406,7 @@ int main(int argc, char **argv)
     }
     
     if (argc == 2) {
-        filename = argv[2];
+        filename = argv[1];
     }
 
     signal(SIGINT, debugger_interrupt);
