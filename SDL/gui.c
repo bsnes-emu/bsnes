@@ -60,7 +60,8 @@ configuration_t configuration =
     .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
-    .blend_frames = true
+    .blend_frames = true,
+    .model = MODEL_CGB
 };
 
 
@@ -72,7 +73,6 @@ static const char *help[] ={
 " Open Menu:        Escape\n"
 " Reset:             " MODIFIER_NAME "+R\n"
 " Pause:             " MODIFIER_NAME "+P\n"
-" Toggle DMG/CGB:    " MODIFIER_NAME "+T\n"
 " Save state:    " MODIFIER_NAME "+(0-9)\n"
 " Load state:  " MODIFIER_NAME "+" SHIFT_STRING "+(0-9)\n"
 #ifdef __APPLE__
@@ -225,6 +225,7 @@ static void item_help(unsigned index)
     gui_state = SHOWING_HELP;
 }
 
+static void enter_emulation_menu(unsigned index);
 static void enter_graphics_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
@@ -232,6 +233,7 @@ static void enter_audio_menu(unsigned index);
 
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
+    {"Enumlation Options", enter_emulation_menu},
     {"Graphic Options", enter_graphics_menu},
     {"Audio Options", enter_audio_menu},
     {"Keyboard", enter_controls_menu},
@@ -242,6 +244,49 @@ static const struct menu_item paused_menu[] = {
 };
 
 static const struct menu_item *const nonpaused_menu = &paused_menu[1];
+
+static void return_to_root_menu(unsigned index)
+{
+    current_menu = root_menu;
+    current_selection = 0;
+}
+
+static void cycle_model(unsigned index)
+{
+    
+    configuration.model++;
+    if (configuration.model == MODEL_MAX) {
+        configuration.model = 0;
+    }
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+static void cycle_model_backwards(unsigned index)
+{
+    if (configuration.model == 0) {
+        configuration.model = MODEL_MAX;
+    }
+    configuration.model--;
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+const char *current_model_string(unsigned index)
+{
+    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance"}
+        [configuration.model];
+}
+
+static const struct menu_item emulation_menu[] = {
+    {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_emulation_menu(unsigned index)
+{
+    current_menu = emulation_menu;
+    current_selection = 0;
+}
 
 const char *current_scaling_mode(unsigned index)
 {
@@ -372,12 +417,6 @@ const char *current_filter_name(unsigned index)
     }
     
     return shaders[i].display_name;
-}
-
-static void return_to_root_menu(unsigned index)
-{
-    current_menu = root_menu;
-    current_selection = 0;
 }
 
 static void toggle_blend_frames(unsigned index)
@@ -808,9 +847,12 @@ void run_gui(bool is_running)
                         current_selection--;
                         should_render = true;
                     }
-                    else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN  && !current_menu[current_selection].backwards_handler) {
                         if (current_menu[current_selection].handler) {
                             current_menu[current_selection].handler(current_selection);
+                            if (pending_command == GB_SDL_RESET_COMMAND && !is_running) {
+                                pending_command = GB_SDL_NO_COMMAND;
+                            }
                             if (pending_command) {
                                 if (!is_running && pending_command == GB_SDL_QUIT_COMMAND) {
                                     exit(0);
@@ -853,6 +895,7 @@ void run_gui(bool is_running)
             
             switch (gui_state) {
                 case SHOWING_DROP_MESSAGE:
+                    draw_text_centered(pixels, 8, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], false);
                     draw_text_centered(pixels, 116, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
                     draw_text_centered(pixels, 128, "file to play", gui_palette_native[3], gui_palette_native[0], false);
                     break;

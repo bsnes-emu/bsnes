@@ -25,7 +25,6 @@ enum pending_command {
     GB_SDL_LOAD_STATE_COMMAND,
     GB_SDL_RESET_COMMAND,
     GB_SDL_NEW_FILE_COMMAND,
-    GB_SDL_TOGGLE_MODEL_COMMAND,
     GB_SDL_QUIT_COMMAND,
 };
 
@@ -44,6 +43,12 @@ typedef struct {
     bool swap_joysticks_bits_1_and_2;
     
     char filter[32];
+    enum {
+        MODEL_DMG,
+        MODEL_CGB,
+        MODEL_AGB,
+        MODEL_MAX,
+    } model;
 } configuration_t;
 
 extern configuration_t configuration;

@@ -11,6 +11,13 @@
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
 
+enum model {
+    MODEL_NONE,
+    MODEL_DMG,
+    MODEL_CGB,
+    MODEL_AGB,
+};
+
 @interface Document ()
 {
     /* NSTextViews freeze the entire app if they're modified too often and too quickly.
@@ -43,6 +50,7 @@
     NSMutableString *capturedOutput;
     bool logToSideView;
     bool shouldClearSideView;
+    enum model current_model;
 }
 
 @property GBAudioClient *audioClient;
@@ -126,6 +134,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void) initDMG
 {
+    current_model = MODEL_DMG;
     GB_init(&gb);
     [self initCommon];
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
@@ -135,7 +144,14 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     GB_init_cgb(&gb);
     [self initCommon];
-    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]) {
+        current_model = MODEL_AGB;
+        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"agb_boot" ofType:@"bin"] UTF8String]);
+    }
+    else {
+        current_model = MODEL_CGB;
+        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
+    }
 }
 
 - (void) initCommon
@@ -214,17 +230,20 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     [self stop];
 
-    if ([sender tag] == 0) {
+    if ([sender tag] == MODEL_NONE) {
         GB_reset(&gb);
     }
     else {
-        GB_switch_model_and_reset(&gb, [sender tag] == 2);
-        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:[sender tag] == 2? @"cgb_boot" : @"dmg_boot" ofType:@"bin"] UTF8String]);
+        current_model = (enum model)[sender tag];
+        GB_switch_model_and_reset(&gb, current_model != MODEL_DMG);
+        static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot"};
+        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:boot_names[current_model - 1] ofType:@"bin"] UTF8String]);
     }
 
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
-        [[NSUserDefaults standardUserDefaults] setBool:[sender tag] == 1 forKey:@"EmulateDMG"];
+        [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_DMG forKey:@"EmulateDMG"];
+        [[NSUserDefaults standardUserDefaults] setBool:current_model== MODEL_AGB forKey:@"EmulateAGB"];
     }
     
     /* Reload the ROM, SAV and SYM files */
@@ -441,8 +460,8 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         [(NSMenuItem*)anItem setState:(!running) || (GB_debugger_is_stopped(&gb))];
         return !GB_debugger_is_stopped(&gb);
     }
-    else if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
-        [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !GB_is_cgb(&gb)) || (anItem.tag == 2 && GB_is_cgb(&gb))];
+    else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
+        [(NSMenuItem*)anItem setState:anItem.tag == current_model];
     }
     else if ([anItem action] == @selector(toggleBlend:)) {
         [(NSMenuItem*)anItem setState:self.view.shouldBlendFrameWithPrevious];
