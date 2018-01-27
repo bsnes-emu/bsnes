@@ -486,7 +486,9 @@ void *retro_get_memory_data(unsigned type)
             break;
         default:
             data = NULL;
-            break;
+         break;
+      default:
+         data = NULL;
     }
     return data;
 }
