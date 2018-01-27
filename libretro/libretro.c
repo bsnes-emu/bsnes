@@ -563,7 +563,11 @@ void *retro_get_memory_data(unsigned type)
          break;
       case RETRO_MEMORY_SAVE_RAM:
          if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
+         {
             data = gb1.mbc_ram;
+            /* let's copy the save to gb2 so it can save independently */
+            memcpy(gb2.mbc_ram, gb1.mbc_ram, gb1.mbc_ram_size);
+         }
          else
             data = NULL;
          break;
