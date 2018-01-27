@@ -480,8 +480,10 @@ void *retro_get_memory_data(unsigned type)
             else
                 data = NULL;
             break;
+        default:
+            data = NULL;
+            break;
     }
-    
     return data;
 }
 
@@ -512,7 +514,6 @@ size_t retro_get_memory_size(unsigned type)
             size = 0;
             break;
     }
-    
     return size;
 }
 
