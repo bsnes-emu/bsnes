@@ -74,6 +74,12 @@ else ifeq ($(platform), linux-portable)
    fpic := -fPIC -nostdlib
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T
 	LIBM :=
+# Nintendo Switch (libtransistor)
+else ifeq ($(platform), switch)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   include $(LIBTRANSISTOR_HOME)/libtransistor.mk
+   CFLAGS += -Wl,-q -Wall -O3 -fno-short-enums -fno-optimize-sibling-calls
+   STATIC_LINKING=1
 else ifneq (,$(findstring osx,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.dylib
    fpic := -fPIC
