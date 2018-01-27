@@ -34,11 +34,12 @@ char symbols_path[512];
 enum model {
     MODEL_DMG,
     MODEL_CGB,
-    MODEL_AGB
+    MODEL_AGB,
+    MODEL_AUTO
 };
 
-static enum model model = MODEL_CGB;
-
+static enum model model = MODEL_AUTO;
+static enum model auto_model = MODEL_CGB;
 static uint32_t *frame_buf;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
@@ -228,20 +229,24 @@ void retro_reset(void)
 
 static void init_for_current_model(void)
 {
+    enum model effective_model = model;
+    if (effective_model == MODEL_AUTO) {
+        effective_model = auto_model;
+    }
     if (GB_is_inited(&gb)) {
-        GB_switch_model_and_reset(&gb, model != MODEL_DMG);
+        GB_switch_model_and_reset(&gb, effective_model != MODEL_DMG);
     }
     else {
-        if (model == MODEL_DMG) {
+        if (effective_model == MODEL_DMG) {
             GB_init(&gb);
         }
         else {
             GB_init_cgb(&gb);
         }
     }
-    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model];
-    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model];
-    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model];
+    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[effective_model];
+    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[effective_model];
+    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[effective_model];
     
     char buf[256];
     snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
@@ -339,9 +344,14 @@ static void check_variables(void)
             new_model = MODEL_CGB;
         else if (strcmp(var.value, "Game Boy Advance") == 0)
             new_model = MODEL_AGB;
+        else if (strcmp(var.value, "Auto") == 0)
+            new_model = MODEL_AUTO;
         if (GB_is_inited(&gb) && new_model != model) {
             model = new_model;
             init_for_current_model();
+        }
+        else {
+            model = new_model;
         }
     }
 }
@@ -388,6 +398,8 @@ bool retro_load_game(const struct retro_game_info *info)
         return false;
     }
     
+    auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'c' ? MODEL_CGB : MODEL_DMG;
+    
     bool yes = true;
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
     
@@ -399,7 +411,7 @@ bool retro_load_game(const struct retro_game_info *info)
     static const struct retro_variable vars[] = {
         { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
         { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-        { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
+        { "sameboy_model", "Emulated Model; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
         { NULL }
     };
     
