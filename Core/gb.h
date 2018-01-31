@@ -483,6 +483,7 @@ struct GB_gameboy_internal_s {
         uint32_t ram_size; // Different between CGB and DMG
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
+        uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run()
    );
 };
     
@@ -506,7 +507,9 @@ bool GB_is_cgb(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb);
-void GB_run(GB_gameboy_t *gb);
+
+/* Returns the time passed, in 4MHz ticks. */
+uint8_t GB_run(GB_gameboy_t *gb);
 /* Returns the time passed since the last frame, in nanoseconds */
 uint64_t GB_run_frame(GB_gameboy_t *gb);
 

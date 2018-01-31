@@ -271,15 +271,17 @@ exit:
     return;
 }
 
-void GB_run(GB_gameboy_t *gb)
+uint8_t GB_run(GB_gameboy_t *gb)
 {
     GB_debugger_run(gb);
+    gb->cycles_since_run = 0;
     GB_cpu_run(gb);
     if (gb->vblank_just_occured) {
         GB_update_joyp(gb);
         GB_rtc_run(gb);
         GB_debugger_handle_async_commands(gb);
     }
+    return gb->cycles_since_run;
 }
 
 uint64_t GB_run_frame(GB_gameboy_t *gb)

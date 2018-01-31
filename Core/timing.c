@@ -153,6 +153,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_ir_change += cycles;
     gb->cycles_since_input_ir_change += cycles;
     gb->cycles_since_last_sync += cycles;
+    gb->cycles_since_run += cycles;
     GB_dma_run(gb);
     GB_hdma_run(gb);
     GB_apu_run(gb);
