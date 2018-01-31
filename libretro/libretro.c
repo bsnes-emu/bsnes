@@ -550,12 +550,20 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-    return GB_get_save_state_size(&gb1);
+    return 2 * GB_get_save_state_size(&gb1);
 }
 
 bool retro_serialize(void *data, size_t size)
 {
-    GB_save_state_to_buffer(&gb1, (uint8_t*) data);
+    void* gb1_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
+    void* gb2_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
+
+    GB_save_state_to_buffer(&gb1, (uint8_t*) gb1_data);
+    GB_save_state_to_buffer(&gb2, (uint8_t*) gb2_data);
+
+    memcpy(data, gb1_data, size / 2);
+    memcpy(data + (size / 2), gb2_data, size / 2);
+
     if (data)
         return true;
     else
@@ -564,7 +572,16 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void *data, size_t size)
 {
-    if (GB_load_state_from_buffer(&gb1, (uint8_t*) data, size) == 0)
+    void* gb1_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
+    void* gb2_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
+
+    memcpy (gb1_data, data, size / 2);
+    memcpy (gb2_data, data + (size / 2), size / 2);
+
+    int ret1 = GB_load_state_from_buffer(&gb1, gb1_data, size / 2);
+    int ret2 = GB_load_state_from_buffer(&gb2, gb2_data, size / 2);
+
+    if (ret1 == 0 && ret2 ==0)
         return true;
     else
         return false;
