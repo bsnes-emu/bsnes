@@ -66,6 +66,7 @@ GB_gameboy_t gb1;
 GB_gameboy_t gb2;
 extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[];
 extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length;
+bool vblank1_occurred = false, vblank2_occurred = false;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -119,12 +120,14 @@ static void audio_callback(void *gb)
 
 static void vblank1(GB_gameboy_t *gb)
 {
+    vblank1_occurred = true;
     GB_update_keys_status(gb, 0);
     audio_callback(gb);
 }
 
 static void vblank2(GB_gameboy_t *gb)
 {
+    vblank2_occurred = true;
     GB_update_keys_status(gb, 1);
     //audio_callback(gb);
 }
@@ -241,24 +244,30 @@ void retro_reset(void)
     GB_reset(&gb2);
 }
 
+static uint8_t byte_to_send1 = 0xFF, byte_to_send2 = 0xFF;
+
 static void serial_start1(GB_gameboy_t *gb, uint8_t byte_received)
 {
-   GB_serial_set_data(&gb2, byte_received);
+    byte_to_send1 = byte_received;
 }
 
 static uint8_t serial_end1(GB_gameboy_t *gb)
 {
-   return GB_serial_get_data(&gb2);
+    uint8_t ret = GB_serial_get_data(&gb2);
+    GB_serial_set_data(&gb2, byte_to_send1);
+    return ret;
 }
 
 static void serial_start2(GB_gameboy_t *gb, uint8_t byte_received)
 {
-   GB_serial_set_data(&gb1, byte_received);
+    byte_to_send2 = byte_received;
 }
 
 static uint8_t serial_end2(GB_gameboy_t *gb)
 {
-   return GB_serial_get_data(&gb1);
+    uint8_t ret = GB_serial_get_data(&gb1);
+    GB_serial_set_data(&gb1, byte_to_send2);
+    return ret;
 }
 
 static void init_for_current_model(void)
@@ -442,20 +451,28 @@ static void check_variables(void)
 int frames = 0;
 void retro_run(void)
 {
-   bool updated = false;
-
-   if (!frame_buf)
-      return;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-      check_variables();
-
-   GB_run_frame(&gb1);
-   GB_run_frame(&gb2);
-
-   video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH * sizeof(uint32_t));
-
-   frames++;
+    bool updated = false;
+    
+    if (!frame_buf)
+        return;
+    
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+        check_variables();
+    
+    vblank1_occurred = vblank2_occurred = false;
+    signed delta = 0;
+    while (!vblank1_occurred || !vblank2_occurred) {
+        if (delta >= 0) {
+            delta -= GB_run(&gb1);
+        }
+        else {
+            delta += GB_run(&gb2);
+        }
+    }
+    
+    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH * sizeof(uint32_t));
+    
+    frames++;
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -555,66 +572,66 @@ bool retro_unserialize(const void *data, size_t size)
 
 void *retro_get_memory_data(unsigned type)
 {
-   void* data;
-   switch(type)
-   {
-      case RETRO_MEMORY_SYSTEM_RAM:
-         data = gb1.ram;
-         break;
-      case RETRO_MEMORY_SAVE_RAM:
-         if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
-         {
-            data = gb1.mbc_ram;
-            /* let's copy the save to gb2 so it can save independently */
-            memcpy(gb2.mbc_ram, gb1.mbc_ram, gb1.mbc_ram_size);
-         }
-         else
+    void* data;
+    switch(type)
+    {
+        case RETRO_MEMORY_SYSTEM_RAM:
+            data = gb1.ram;
+            break;
+        case RETRO_MEMORY_SAVE_RAM:
+            if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
+            {
+                data = gb1.mbc_ram;
+                /* let's copy the save to gb2 so it can save independently */
+                memcpy(gb2.mbc_ram, gb1.mbc_ram, gb1.mbc_ram_size);
+            }
+            else
+                data = NULL;
+            break;
+        case RETRO_MEMORY_VIDEO_RAM:
+            data = gb1.vram;
+            break;
+        case RETRO_MEMORY_RTC:
+            if(gb1.cartridge_type->has_battery)
+                data = &gb1.rtc_real;
+            else
+                data = NULL;
+            break;
+        default:
             data = NULL;
-         break;
-      case RETRO_MEMORY_VIDEO_RAM:
-         data = gb1.vram;
-         break;
-      case RETRO_MEMORY_RTC:
-         if(gb1.cartridge_type->has_battery)
-            data = &gb1.rtc_real;
-         else
-            data = NULL;
-         break;
-      default:
-         data = NULL;
     }
     return data;
 }
 
 size_t retro_get_memory_size(unsigned type)
 {
-   size_t size;
-   switch(type)
-   {
-      case RETRO_MEMORY_SYSTEM_RAM:
-         size = gb1.ram_size;
-         break;
-      case RETRO_MEMORY_SAVE_RAM:
-         if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
-            size = gb1.mbc_ram_size;
-         else
+    size_t size;
+    switch(type)
+    {
+        case RETRO_MEMORY_SYSTEM_RAM:
+            size = gb1.ram_size;
+            break;
+        case RETRO_MEMORY_SAVE_RAM:
+            if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
+                size = gb1.mbc_ram_size;
+            else
+                size = 0;
+            break;
+        case RETRO_MEMORY_VIDEO_RAM:
+            size = gb1.vram_size;
+            break;
+        case RETRO_MEMORY_RTC:
+            if(gb1.cartridge_type->has_battery)
+                size = sizeof (gb1.rtc_real);
+            else
+                size =  0;
+            break;
+        default:
             size = 0;
-         break;
-      case RETRO_MEMORY_VIDEO_RAM:
-         size = gb1.vram_size;
-         break;
-      case RETRO_MEMORY_RTC:
-         if(gb1.cartridge_type->has_battery)
-            size = sizeof (gb1.rtc_real);
-         else
-            size =  0;
-         break;
-      default:
-         size = 0;
-      break;
-   }
-   
-   return size;
+            break;
+    }
+    
+    return size;
 }
 
 void retro_cheat_reset(void)
