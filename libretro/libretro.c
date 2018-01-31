@@ -391,14 +391,13 @@ bool retro_load_game(const struct retro_game_info *info)
     
     snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
     
+    auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
     init_for_current_model();
     
     if (GB_load_rom(&gb,info->path)) {
         log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
         return false;
     }
-    
-    auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'c' ? MODEL_CGB : MODEL_DMG;
     
     bool yes = true;
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
