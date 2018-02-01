@@ -51,6 +51,7 @@ enum layout {
     LAYOUT_LEFT_RIGHT
 };
 
+static enum model model[2];
 static uint32_t *frame_buf = NULL;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
@@ -288,29 +289,30 @@ static void init_for_current_model(void)
     for (i = 0; i < emulated_devices; i++)
     {
         if (GB_is_inited(&gb[i]))
-            GB_switch_model_and_reset(&gb1, effective_model != MODEL_DMG);
+            GB_switch_model_and_reset(&gb[i], effective_model[i] != MODEL_DMG);
 
         else
         {
-            if (effective_model == MODEL_DMG)
+            if (effective_model[i] == MODEL_DMG)
                 GB_init(&gb[i]);
             else
                 GB_init_cgb(&gb[i]);
         }
+        const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model[i]];
+        const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model[i]];
+        unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model[i]];
+    
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
+        log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
+        if (GB_load_boot_rom(&gb[i], buf))
+            GB_load_boot_rom_from_buffer(&gb[i], boot_code, boot_length);
     }
 
-    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model];
-    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model];
-    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model];
-    
-    char buf[256];
-    snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
-    log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
+
 
     for (i = 0; i < emulated_devices; i++)
     {
-        if (GB_load_boot_rom(&gb[i], buf))
-            GB_load_boot_rom_from_buffer(&gb[i], boot_code, boot_length);
         GB_set_user_data(&gb[i], (void*)NULL);
         GB_set_pixels_output(&gb[i],(unsigned int*)(frame_buf + i * VIDEO_PIXELS));
         GB_set_rgb_encode_callback(&gb[i], rgb_encode);
@@ -369,83 +371,172 @@ static void init_for_current_model(void)
     environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
 }
 
-static void check_variables(void)
+static void check_variables(bool link)
 {
     struct retro_variable var = {0};
 
-    var.key = "sameboy_color_correction_mode";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb[0]))
+    if (!link)
     {
-        if (strcmp(var.value, "off") == 0)
+        var.key = "sameboy_color_correction_mode";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb[0]))
         {
-            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_DISABLED);
-            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_DISABLED);
+            if (strcmp(var.value, "off") == 0)
+            {
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_DISABLED);
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_DISABLED);
+            }
+            else if (strcmp(var.value, "correct curves") == 0)
+            {
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_CORRECT_CURVES);
+            }
+            else if (strcmp(var.value, "emulate hardware") == 0)
+            {
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+            }
+            else if (strcmp(var.value, "preserve brightness") == 0)
+            {
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            }
         }
-        else if (strcmp(var.value, "correct curves") == 0)
+        
+        var.key = "sameboy_high_pass_filter_mode";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
-            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
-            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_CORRECT_CURVES);
+            if (strcmp(var.value, "off") == 0)
+            {
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_OFF);
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_OFF);
+            }
+            else if (strcmp(var.value, "accurate") == 0)
+            {
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_ACCURATE);
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_ACCURATE);
+            }
+            else if (strcmp(var.value, "remove dc offset") == 0)
+            {
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_REMOVE_DC_OFFSET);
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_REMOVE_DC_OFFSET);
+            }
         }
-        else if (strcmp(var.value, "emulate hardware") == 0)
+        
+        var.key = "sameboy_model";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
-            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
-            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
-        }
-        else if (strcmp(var.value, "preserve brightness") == 0)
-        {
-            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
-            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            enum model new_model = model[0];
+            if (strcmp(var.value, "Game Boy") == 0)
+                new_model = MODEL_DMG;
+            else if (strcmp(var.value, "Game Boy Color") == 0)
+                new_model = MODEL_CGB;
+            else if (strcmp(var.value, "Game Boy Advance") == 0)
+                new_model = MODEL_AGB;
+            else if (strcmp(var.value, "Auto") == 0)
+                new_model = MODEL_AUTO;
+            if (GB_is_inited(&gb[0]) && new_model != model[0]) {
+                model[0] = new_model;
+                init_for_current_model();
+            }
+            if (GB_is_inited(&gb[1]) && new_model != model[0]) {
+                model[0] = new_model;
+                init_for_current_model();
+            }
         }
     }
-
-    var.key = "sameboy_high_pass_filter_mode";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    else
     {
-        if (strcmp(var.value, "off") == 0)
+        var.key = "sameboy_color_correction_mode_1";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb[0]))
         {
-            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_OFF);
-            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_OFF);
+            if (strcmp(var.value, "off") == 0)
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_DISABLED);
+            else if (strcmp(var.value, "correct curves") == 0)
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
+            else if (strcmp(var.value, "emulate hardware") == 0)
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+            else if (strcmp(var.value, "preserve brightness") == 0)
+                GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
         }
-        else if (strcmp(var.value, "accurate") == 0)
-        {
-            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_ACCURATE);
-            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_ACCURATE);
-        }
-        else if (strcmp(var.value, "remove dc offset") == 0)
-        {
-            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_REMOVE_DC_OFFSET);
-            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_REMOVE_DC_OFFSET);
-        }
-    }
 
-    var.key = "sameboy_model";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-    {
-        enum model new_model = model;
-        if (strcmp(var.value, "Game Boy") == 0)
-            new_model = MODEL_DMG;
-        else if (strcmp(var.value, "Game Boy Color") == 0)
-            new_model = MODEL_CGB;
-        else if (strcmp(var.value, "Game Boy Advance") == 0)
-            new_model = MODEL_AGB;
-        else if (strcmp(var.value, "Auto") == 0)
-            new_model = MODEL_AUTO;
-        if (GB_is_inited(&gb[0]) && new_model != model) {
-            model = new_model;
-            init_for_current_model();
+        var.key = "sameboy_color_correction_mode_2";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb[1]))
+        {
+            if (strcmp(var.value, "off") == 0)
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_DISABLED);
+            else if (strcmp(var.value, "correct curves") == 0)
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_CORRECT_CURVES);
+            else if (strcmp(var.value, "emulate hardware") == 0)
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+            else if (strcmp(var.value, "preserve brightness") == 0)
+                GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
         }
-        if (GB_is_inited(&gb[1]) && new_model != model) {
-            model = new_model;
-            init_for_current_model();
-        }
-        else {
-            model = new_model;
-        }
-    }
 
+        var.key = "sameboy_high_pass_filter_mode_1";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            if (strcmp(var.value, "off") == 0)
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_OFF);
+            else if (strcmp(var.value, "accurate") == 0)
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_ACCURATE);
+            else if (strcmp(var.value, "remove dc offset") == 0)
+                GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_REMOVE_DC_OFFSET);
+        }
+
+        var.key = "sameboy_high_pass_filter_mode_2";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            if (strcmp(var.value, "off") == 0)
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_OFF);
+            else if (strcmp(var.value, "accurate") == 0)
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_ACCURATE);
+            else if (strcmp(var.value, "remove dc offset") == 0)
+                GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_REMOVE_DC_OFFSET);
+        }
+
+        var.key = "sameboy_model_1";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            enum model new_model = model[0];
+            if (strcmp(var.value, "Game Boy") == 0)
+                new_model = MODEL_DMG;
+            else if (strcmp(var.value, "Game Boy Color") == 0)
+                new_model = MODEL_CGB;
+            else if (strcmp(var.value, "Game Boy Advance") == 0)
+                new_model = MODEL_AGB;
+            if (GB_is_inited(&gb[0]) && new_model != model[0]) {
+                model[0] = new_model;
+                init_for_current_model();
+            }
+        }
+
+        var.key = "sameboy_model_2";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            enum model new_model = model[0];
+            if (strcmp(var.value, "Game Boy") == 0)
+                new_model = MODEL_DMG;
+            else if (strcmp(var.value, "Game Boy Color") == 0)
+                new_model = MODEL_CGB;
+            else if (strcmp(var.value, "Game Boy Advance") == 0)
+                new_model = MODEL_AGB;
+            if (GB_is_inited(&gb[1]) && new_model != model[0]) {
+                model[0] = new_model;
+                init_for_current_model();
+            }
+        }
+
+    }
+    
     var.key = "sameboy_link";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -475,7 +566,7 @@ void retro_run(void)
         return;
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-        check_variables();
+        check_variables(emulated_devices == 2 ? true : false);
 
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
@@ -490,6 +581,27 @@ void retro_run(void)
 
     video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH * sizeof(uint32_t));
 }
+
+static const struct retro_variable vars[] = {
+    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+    { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
+    { NULL }
+};
+static const struct retro_variable vars_link[] = {
+    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_model_1", "Emulated Model for GB #1; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model_2", "Emulated Model for GB #2; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_color_correction_mode_1", "Color Correction for GB #1; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode_2", "Color Correction for GB #2; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for GB #1; off|accurate|remove dc offset" },
+    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for GB #2; off|accurate|remove dc offset" },
+    
+    { NULL }
+};
 
 bool retro_load_game(const struct retro_game_info *info)
 {
@@ -528,7 +640,6 @@ bool retro_load_game(const struct retro_game_info *info)
         }
     }
 
-
     bool yes = true;
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
 
@@ -546,8 +657,8 @@ bool retro_load_game(const struct retro_game_info *info)
         { NULL }
     };
 
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
-    check_variables();
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+    check_variables(emulated_devices == 2 ? true : false);
 
     return true;
 }
