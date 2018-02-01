@@ -56,14 +56,16 @@ static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
+static unsigned emulated_gbs = 2;
+
 signed short soundbuf[1024 * 2];
 
 char retro_system_directory[4096];
 char retro_save_directory[4096];
 char retro_game_path[4096];
 
-GB_gameboy_t gb1;
-GB_gameboy_t gb2;
+GB_gameboy_t gb[2];
+
 extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[];
 extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length;
 bool vblank1_occurred = false, vblank2_occurred = false;
@@ -240,8 +242,9 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_reset(void)
 {
-    GB_reset(&gb1);
-    GB_reset(&gb2);
+    for (int i = 0; i < emulated_gbs; i++)
+       GB_reset(&gb[i]);
+
 }
 
 static uint8_t byte_to_send1 = 0xFF, byte_to_send2 = 0xFF;
@@ -253,8 +256,8 @@ static void serial_start1(GB_gameboy_t *gb, uint8_t byte_received)
 
 static uint8_t serial_end1(GB_gameboy_t *gb)
 {
-    uint8_t ret = GB_serial_get_data(&gb2);
-    GB_serial_set_data(&gb2, byte_to_send1);
+    uint8_t ret = GB_serial_get_data(&gb[1]);
+    GB_serial_set_data(&gb[1], byte_to_send1);
     return ret;
 }
 
@@ -265,8 +268,8 @@ static void serial_start2(GB_gameboy_t *gb, uint8_t byte_received)
 
 static uint8_t serial_end2(GB_gameboy_t *gb)
 {
-    uint8_t ret = GB_serial_get_data(&gb1);
-    GB_serial_set_data(&gb1, byte_to_send2);
+    uint8_t ret = GB_serial_get_data(&gb[0]);
+    GB_serial_set_data(&gb[0], byte_to_send2);
     return ret;
 }
 
@@ -276,91 +279,82 @@ static void init_for_current_model(void)
     if (effective_model == MODEL_AUTO) {
         effective_model = auto_model;
     }
-    if (GB_is_inited(&gb1)) {
-        GB_switch_model_and_reset(&gb1, effective_model != MODEL_DMG);
-    }
-    else {
-        if (effective_model == MODEL_DMG) {
-            GB_init(&gb1);
-        }
-        else {
-            GB_init_cgb(&gb1);
-        }
-    }
-    if (GB_is_inited(&gb2)) {
-        GB_switch_model_and_reset(&gb2, effective_model != MODEL_DMG);
-    }
-    else {
-        if (effective_model == MODEL_DMG) {
-            GB_init(&gb2);
-        }
-        else {
-            GB_init_cgb(&gb2);
+
+    for (i = 0; i < emulated_gbs; i++)
+    {
+        if (GB_is_inited(&gb[i]))
+            GB_switch_model_and_reset(&gb1, effective_model != MODEL_DMG);
+
+        else
+        {
+            if (effective_model == MODEL_DMG)
+                GB_init(&gb[i]);
+            else
+                GB_init_cgb(&gb[i]);
         }
     }
 
-    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[effective_model];
-    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[effective_model];
-    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[effective_model];
-
+    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model];
+    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model];
+    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model];
+    
     char buf[256];
     snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
     log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
-    
-    if (GB_load_boot_rom(&gb1, buf)) {
-        GB_load_boot_rom_from_buffer(&gb1, boot_code, boot_length);
+
+    for (i = 0; i < emulated_gbs; i++)
+    {
+        if (GB_load_boot_rom(&gb[i], buf))
+            GB_load_boot_rom_from_buffer(&gb[i], boot_code, boot_length);
+        GB_set_user_data(&gb[i], (void*)NULL);
+        GB_set_pixels_output(&gb[i],(unsigned int*)(frame_buf + i * VIDEO_PIXELS));
+        GB_set_rgb_encode_callback(&gb[i], rgb_encode);
+        GB_set_sample_rate(&gb[i], AUDIO_FREQUENCY);
     }
-    if (GB_load_boot_rom(&gb2, buf)) {
-        GB_load_boot_rom_from_buffer(&gb2, boot_code, boot_length);
-    }
-    
-    GB_set_vblank_callback(&gb1, (GB_vblank_callback_t) vblank1);
-    GB_set_vblank_callback(&gb2, (GB_vblank_callback_t) vblank2);
-    GB_set_user_data(&gb1, (void*)NULL);
-    GB_set_user_data(&gb2, (void*)NULL);
-    GB_set_pixels_output(&gb1,(unsigned int*)frame_buf);
-    GB_set_rgb_encode_callback(&gb1, rgb_encode);
-    GB_set_pixels_output(&gb2,(unsigned int*)(frame_buf + VIDEO_PIXELS));
-    GB_set_rgb_encode_callback(&gb2, rgb_encode);
-    GB_set_sample_rate(&gb1, AUDIO_FREQUENCY);
-    GB_set_sample_rate(&gb2, AUDIO_FREQUENCY);
-    GB_set_serial_transfer_start_callback(&gb1, serial_start1);
-    GB_set_serial_transfer_end_callback(&gb1, serial_end1);
-    GB_set_serial_transfer_start_callback(&gb2, serial_start2);
-    GB_set_serial_transfer_end_callback(&gb2, serial_end2);
+
+    /* todo: attempt to make these more generic */
+    GB_set_vblank_callback(&gb[0], (GB_vblank_callback_t) vblank1);
+    GB_set_vblank_callback(&gb[1], (GB_vblank_callback_t) vblank2);
+    GB_set_serial_transfer_start_callback(&gb[0], serial_start1);
+    GB_set_serial_transfer_end_callback(&gb[0], serial_end1);
+    GB_set_serial_transfer_start_callback(&gb[1], serial_start2);
+    GB_set_serial_transfer_end_callback(&gb[1], serial_end2);
 
     struct retro_memory_descriptor descs[7];
     size_t size;
     uint16_t bank;
 
+
+    /* todo: add netplay awareness for this so achievements can be granted on the respective client */
+    i = 0;
     memset(descs, 0, sizeof(descs));
-    
-    descs[0].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_IE, &size, &bank);
+
+    descs[0].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_IE, &size, &bank);
     descs[0].start = 0xFFFF;
     descs[0].len   = 1;
-    
-    descs[1].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_HRAM, &size, &bank);
+
+    descs[1].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_HRAM, &size, &bank);
     descs[1].start = 0xFF80;
     descs[1].len   = 0x0080;
-    
-    descs[2].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_RAM, &size, &bank);
+
+    descs[2].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_RAM, &size, &bank);
     descs[2].start = 0xC000;
     descs[2].len   = 0x2000;
-    
-    descs[3].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
+
+    descs[3].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
     descs[3].start = 0xA000;
     descs[3].len   = 0x2000;
-    
-    descs[4].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_VRAM, &size, &bank);
+
+    descs[4].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_VRAM, &size, &bank);
     descs[4].start = 0x8000;
     descs[4].len   = 0x2000;
-    
-    descs[5].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_ROM, &size, &bank);
+
+    descs[5].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_ROM, &size, &bank);
     descs[5].start = 0x0000;
     descs[5].len   = 0x4000;
     descs[5].flags = RETRO_MEMDESC_CONST;
-    
-    descs[6].ptr   = GB_get_direct_access(&gb1, GB_DIRECT_ACCESS_OAM, &size, &bank);
+
+    descs[6].ptr   = GB_get_direct_access(&gb[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
     descs[6].start = 0xFE00;
     descs[6].len   = 0x00A0;
 
@@ -376,27 +370,27 @@ static void check_variables(void)
 
     var.key = "sameboy_color_correction_mode";
     var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb1))
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gb[0]))
     {
         if (strcmp(var.value, "off") == 0)
         {
-            GB_set_color_correction_mode(&gb1, GB_COLOR_CORRECTION_DISABLED);
-            GB_set_color_correction_mode(&gb2, GB_COLOR_CORRECTION_DISABLED);
+            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_DISABLED);
+            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_DISABLED);
         }
         else if (strcmp(var.value, "correct curves") == 0)
         {
-            GB_set_color_correction_mode(&gb1, GB_COLOR_CORRECTION_CORRECT_CURVES);
-            GB_set_color_correction_mode(&gb2, GB_COLOR_CORRECTION_CORRECT_CURVES);
+            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
+            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_CORRECT_CURVES);
         }
         else if (strcmp(var.value, "emulate hardware") == 0)
         {
-            GB_set_color_correction_mode(&gb1, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
-            GB_set_color_correction_mode(&gb2, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
         }
         else if (strcmp(var.value, "preserve brightness") == 0)
         {
-            GB_set_color_correction_mode(&gb1, GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
-            GB_set_color_correction_mode(&gb2, GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            GB_set_color_correction_mode(&gb[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            GB_set_color_correction_mode(&gb[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
         }
     }
 
@@ -406,18 +400,18 @@ static void check_variables(void)
     {
         if (strcmp(var.value, "off") == 0)
         {
-            GB_set_highpass_filter_mode(&gb1, GB_HIGHPASS_OFF);
-            GB_set_highpass_filter_mode(&gb2, GB_HIGHPASS_OFF);
+            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_OFF);
+            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_OFF);
         }
         else if (strcmp(var.value, "accurate") == 0)
         {
-            GB_set_highpass_filter_mode(&gb1, GB_HIGHPASS_ACCURATE);
-            GB_set_highpass_filter_mode(&gb2, GB_HIGHPASS_ACCURATE);
+            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_ACCURATE);
+            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_ACCURATE);
         }
         else if (strcmp(var.value, "remove dc offset") == 0)
         {
-            GB_set_highpass_filter_mode(&gb1, GB_HIGHPASS_REMOVE_DC_OFFSET);
-            GB_set_highpass_filter_mode(&gb2, GB_HIGHPASS_REMOVE_DC_OFFSET);
+            GB_set_highpass_filter_mode(&gb[0], GB_HIGHPASS_REMOVE_DC_OFFSET);
+            GB_set_highpass_filter_mode(&gb[1], GB_HIGHPASS_REMOVE_DC_OFFSET);
         }
     }
 
@@ -434,11 +428,11 @@ static void check_variables(void)
             new_model = MODEL_AGB;
         else if (strcmp(var.value, "Auto") == 0)
             new_model = MODEL_AUTO;
-        if (GB_is_inited(&gb1) && new_model != model) {
+        if (GB_is_inited(&gb[0]) && new_model != model) {
             model = new_model;
             init_for_current_model();
         }
-        if (GB_is_inited(&gb2) && new_model != model) {
+        if (GB_is_inited(&gb[1]) && new_model != model) {
             model = new_model;
             init_for_current_model();
         }
@@ -446,33 +440,40 @@ static void check_variables(void)
             model = new_model;
         }
     }
+
+    var.key = "sameboy_link";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        if (strcmp(var.value, "enabled") == 0)
+            emulated_gbs = 2;
+        else
+            emulated_gbs = 2;
+    }
 }
 
-int frames = 0;
 void retro_run(void)
 {
     bool updated = false;
     
     if (!frame_buf)
         return;
-    
+
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
         check_variables();
-    
+
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
     while (!vblank1_occurred || !vblank2_occurred) {
         if (delta >= 0) {
-            delta -= GB_run(&gb1);
+            delta -= GB_run(&gb[0]);
         }
         else {
-            delta += GB_run(&gb2);
+            delta += GB_run(&gb[1]);
         }
     }
-    
+
     video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH * sizeof(uint32_t));
-    
-    frames++;
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -502,15 +503,17 @@ bool retro_load_game(const struct retro_game_info *info)
 
     auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
     init_for_current_model();
-    
-    if (GB_load_rom(&gb1,info->path)) {
-        log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
-        return false;
+
+    for (int i = 0; i < emulated_gbs; i++)
+    {
+        if (GB_load_rom(&gb[i],info->path))
+        {
+            log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
+            return false;
+        }
     }
-    if (GB_load_rom(&gb2,info->path)) {
-        log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
-        return false;
-    }
+
+
     bool yes = true;
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
 
@@ -523,6 +526,7 @@ bool retro_load_game(const struct retro_game_info *info)
         { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
         { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
         { "sameboy_model", "Emulated Model; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
+        { "sameboy_link", "Link Cable; disabled|enabled" },
         { NULL }
     };
 
@@ -534,8 +538,8 @@ bool retro_load_game(const struct retro_game_info *info)
 
 void retro_unload_game(void)
 {
-    GB_free(&gb1);
-    GB_free(&gb2);
+    for (int i = 0; i < emulated_gbs; i++)
+        GB_free(&gb[i]);
 }
 
 unsigned retro_get_region(void)
@@ -550,7 +554,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-    return 2 * GB_get_save_state_size(&gb1);
+    return 2 * GB_get_save_state_size(&gb[0]);
 }
 
 bool retro_serialize(void *data, size_t size)
@@ -558,8 +562,8 @@ bool retro_serialize(void *data, size_t size)
     void* gb1_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
     void* gb2_data = (uint8_t*)malloc(0.5 * size * sizeof(uint8_t));
 
-    GB_save_state_to_buffer(&gb1, (uint8_t*) gb1_data);
-    GB_save_state_to_buffer(&gb2, (uint8_t*) gb2_data);
+    GB_save_state_to_buffer(&gb[0], (uint8_t*) gb1_data);
+    GB_save_state_to_buffer(&gb[1], (uint8_t*) gb2_data);
 
     memcpy(data, gb1_data, size / 2);
     memcpy(data + (size / 2), gb2_data, size / 2);
@@ -578,8 +582,8 @@ bool retro_unserialize(const void *data, size_t size)
     memcpy (gb1_data, data, size / 2);
     memcpy (gb2_data, data + (size / 2), size / 2);
 
-    int ret1 = GB_load_state_from_buffer(&gb1, gb1_data, size / 2);
-    int ret2 = GB_load_state_from_buffer(&gb2, gb2_data, size / 2);
+    int ret1 = GB_load_state_from_buffer(&gb[0], gb1_data, size / 2);
+    int ret2 = GB_load_state_from_buffer(&gb[1], gb2_data, size / 2);
 
     if (ret1 == 0 && ret2 ==0)
         return true;
@@ -593,24 +597,24 @@ void *retro_get_memory_data(unsigned type)
     switch(type)
     {
         case RETRO_MEMORY_SYSTEM_RAM:
-            data = gb1.ram;
+            data = gb[0].ram;
             break;
         case RETRO_MEMORY_SAVE_RAM:
-            if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
+            if (gb[0].cartridge_type->has_battery && gb[0].mbc_ram_size != 0)
             {
-                data = gb1.mbc_ram;
-                /* let's copy the save to gb2 so it can save independently */
-                memcpy(gb2.mbc_ram, gb1.mbc_ram, gb1.mbc_ram_size);
+                data = gb[0].mbc_ram;
+                /* let's copy the save to gb[1] so it can save independently */
+                memcpy(gb[1].mbc_ram, gb[0].mbc_ram, gb[0].mbc_ram_size);
             }
             else
                 data = NULL;
             break;
         case RETRO_MEMORY_VIDEO_RAM:
-            data = gb1.vram;
+            data = gb[0].vram;
             break;
         case RETRO_MEMORY_RTC:
-            if(gb1.cartridge_type->has_battery)
-                data = &gb1.rtc_real;
+            if(gb[0].cartridge_type->has_battery)
+                data = &gb[0].rtc_real;
             else
                 data = NULL;
             break;
@@ -626,20 +630,20 @@ size_t retro_get_memory_size(unsigned type)
     switch(type)
     {
         case RETRO_MEMORY_SYSTEM_RAM:
-            size = gb1.ram_size;
+            size = gb[0].ram_size;
             break;
         case RETRO_MEMORY_SAVE_RAM:
-            if (gb1.cartridge_type->has_battery && gb1.mbc_ram_size != 0)
-                size = gb1.mbc_ram_size;
+            if (gb[0].cartridge_type->has_battery && gb[0].mbc_ram_size != 0)
+                size = gb[0].mbc_ram_size;
             else
                 size = 0;
             break;
         case RETRO_MEMORY_VIDEO_RAM:
-            size = gb1.vram_size;
+            size = gb[0].vram_size;
             break;
         case RETRO_MEMORY_RTC:
-            if(gb1.cartridge_type->has_battery)
-                size = sizeof (gb1.rtc_real);
+            if(gb[0].cartridge_type->has_battery)
+                size = sizeof (gb[0].rtc_real);
             else
                 size =  0;
             break;
