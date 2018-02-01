@@ -45,7 +45,11 @@ enum model {
 
 static enum model model = MODEL_AUTO;
 static enum model auto_model = MODEL_CGB;
-static uint32_t *frame_buf;
+
+enum layout {
+    LAYOUT_TOP_DOWN,
+    LAYOUT_LEFT_RIGHT
+};
 
 static uint32_t *frame_buf = NULL;
 static struct retro_log_callback logging;
@@ -56,7 +60,8 @@ static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
-static unsigned emulated_gbs = 2;
+static unsigned emulated_devices = 2;
+static unsigned layout = 0;
 
 signed short soundbuf[1024 * 2];
 
@@ -242,7 +247,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_reset(void)
 {
-    for (int i = 0; i < emulated_gbs; i++)
+    for (int i = 0; i < emulated_devices; i++)
        GB_reset(&gb[i]);
 
 }
@@ -280,7 +285,7 @@ static void init_for_current_model(void)
         effective_model = auto_model;
     }
 
-    for (i = 0; i < emulated_gbs; i++)
+    for (i = 0; i < emulated_devices; i++)
     {
         if (GB_is_inited(&gb[i]))
             GB_switch_model_and_reset(&gb1, effective_model != MODEL_DMG);
@@ -302,7 +307,7 @@ static void init_for_current_model(void)
     snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
     log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
 
-    for (i = 0; i < emulated_gbs; i++)
+    for (i = 0; i < emulated_devices; i++)
     {
         if (GB_load_boot_rom(&gb[i], buf))
             GB_load_boot_rom_from_buffer(&gb[i], boot_code, boot_length);
@@ -446,9 +451,19 @@ static void check_variables(void)
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
         if (strcmp(var.value, "enabled") == 0)
-            emulated_gbs = 2;
+            emulated_devices = 2;
         else
-            emulated_gbs = 2;
+            emulated_devices = 2;
+    }
+
+    var.key = "sameboy_link_layout";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        if (strcmp(var.value, "top-down") == 0)
+            layout = LAYOUT_TOP_DOWN;
+        else
+            layout = LAYOUT_LEFT_RIGHT;
     }
 }
 
@@ -504,7 +519,7 @@ bool retro_load_game(const struct retro_game_info *info)
     auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
     init_for_current_model();
 
-    for (int i = 0; i < emulated_gbs; i++)
+    for (int i = 0; i < emulated_devices; i++)
     {
         if (GB_load_rom(&gb[i],info->path))
         {
@@ -527,6 +542,7 @@ bool retro_load_game(const struct retro_game_info *info)
         { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
         { "sameboy_model", "Emulated Model; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
         { "sameboy_link", "Link Cable; disabled|enabled" },
+        { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
         { NULL }
     };
 
@@ -538,7 +554,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
 void retro_unload_game(void)
 {
-    for (int i = 0; i < emulated_gbs; i++)
+    for (int i = 0; i < emulated_devices; i++)
         GB_free(&gb[i]);
 }
 
