@@ -58,6 +58,7 @@ enum audio_out {
 
 static enum model model[2];
 static uint32_t *frame_buf = NULL;
+static uint32_t *frame_buf_copy = NULL;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
 
@@ -70,6 +71,8 @@ static unsigned emulated_devices = 1;
 static unsigned pre_init = 1;
 static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
+
+static bool geometry_updated = false;
 
 signed short soundbuf[1024 * 2];
 
@@ -452,6 +455,8 @@ static void check_variables(bool link)
             screen_layout = LAYOUT_TOP_DOWN;
         else
             screen_layout = LAYOUT_LEFT_RIGHT;
+
+        geometry_updated = true;
     }
 
     var.key = "sameboy_audio_output";
@@ -467,7 +472,6 @@ static void check_variables(bool link)
 
 void retro_init(void)
 {
-    frame_buf = (uint32_t*)malloc(2 * VIDEO_PIXELS * sizeof(uint32_t));
     const char *dir = NULL;
     
     if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
@@ -483,12 +487,20 @@ void retro_init(void)
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
     check_variables(emulated_devices == 2 ? true : false);
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+
+    frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+
+    memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
 }
 
 void retro_deinit(void)
 {
     free(frame_buf);
+    free(frame_buf_copy);
     frame_buf = NULL;
+    frame_buf_copy = NULL;
 }
 
 unsigned retro_api_version(void)
@@ -516,12 +528,24 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-    struct retro_game_geometry geom = { VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices , VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT) };
+    struct retro_game_geometry geom;
     struct retro_system_timing timing = { FRAME_RATE, AUDIO_FREQUENCY };
-    
+
+    if (screen_layout == LAYOUT_TOP_DOWN) {
+        geom.base_width = VIDEO_WIDTH;
+        geom.base_height = VIDEO_HEIGHT * emulated_devices;
+        geom.aspect_ratio = VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
+    }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+        geom.base_width = VIDEO_WIDTH * emulated_devices;
+        geom.base_height = VIDEO_HEIGHT;
+        geom.aspect_ratio = (VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
+    }
+
+    geom.max_width = VIDEO_WIDTH * emulated_devices;
+    geom.max_height = VIDEO_HEIGHT * emulated_devices;
+
     info->geometry = geom;
     info->timing   = timing;
-    
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -539,7 +563,7 @@ void retro_set_environment(retro_environment_t cb)
     
     static const struct retro_controller_info ports[] = {
         { controllers, 1 },
-        { controllers, 2 },
+        { controllers, 1 },
         { NULL, 0 },
     };
     cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
@@ -579,6 +603,17 @@ void retro_reset(void)
 void retro_run(void)
 {
     bool updated = false;
+
+    if (pre_init)
+        geometry_updated = false;
+
+    if (geometry_updated) {
+        struct retro_system_av_info info;
+        retro_get_system_av_info(&info);
+        geometry_updated = false;
+        environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info.geometry);
+    }
+
     pre_init = 0;
     
     if (!frame_buf)
@@ -603,7 +638,20 @@ void retro_run(void)
     else
         GB_run_frame(&gameboy[0]);
 
-    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
+    if (screen_layout == LAYOUT_TOP_DOWN) {
+        video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
+    }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+        /* use slow memcpy method for now */
+        for (int index = 0; index < emulated_devices; index++) {
+            for (int y = 0; y < VIDEO_HEIGHT; y++) {
+                for (int x = 0; x < VIDEO_WIDTH; x++) {
+                    frame_buf_copy[VIDEO_WIDTH * emulated_devices * y + (x + VIDEO_WIDTH * index)] = frame_buf[VIDEO_WIDTH * (y + VIDEO_HEIGHT * index) + x];
+                }
+            }
+        }
+
+        video_cb(frame_buf_copy, VIDEO_WIDTH * emulated_devices, VIDEO_HEIGHT, VIDEO_WIDTH * emulated_devices * sizeof(uint32_t));
+    }
 }
 
 bool retro_load_game(const struct retro_game_info *info)
