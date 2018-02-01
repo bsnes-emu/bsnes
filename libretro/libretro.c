@@ -46,9 +46,14 @@ enum model {
 static enum model model = MODEL_AUTO;
 static enum model auto_model = MODEL_CGB;
 
-enum layout {
+enum screen_layout {
     LAYOUT_TOP_DOWN,
     LAYOUT_LEFT_RIGHT
+};
+
+enum audio_out {
+    GB_1,
+    GB_2
 };
 
 static enum model model[2];
@@ -63,7 +68,8 @@ static retro_input_state_t input_state_cb;
 
 static unsigned emulated_devices = 1;
 static unsigned pre_init = 1;
-static unsigned layout = 0;
+static unsigned screen_layout = 0;
+static unsigned audio_out = 0;
 
 signed short soundbuf[1024 * 2];
 
@@ -130,14 +136,16 @@ static void vblank1(GB_gameboy_t *gb)
 {
     vblank1_occurred = true;
     GB_update_keys_status(gb, 0);
-    audio_callback(gb);
+    if (audio_out == GB_1)
+        audio_callback(gb);
 }
 
 static void vblank2(GB_gameboy_t *gb)
 {
     vblank2_occurred = true;
     GB_update_keys_status(gb, 1);
-    //audio_callback(gb);
+    if (audio_out == GB_2)
+        audio_callback(gb);
 }
 
 static uint8_t byte_to_send1 = 0xFF, byte_to_send2 = 0xFF;
@@ -175,7 +183,6 @@ static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
     { "sameboy_link", "Link Cable (restart); disabled|enabled" },
-    { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -184,6 +191,7 @@ static const struct retro_variable vars[] = {
 static const struct retro_variable vars_link[] = {
     { "sameboy_link", "Link Cable; disabled|enabled" },
     { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_audio_output", "Audio output; GB #1|GB #2" },
     { "sameboy_model_1", "Emulated Model for GB #1; Game Boy Color|Game Boy Advance|Game Boy" },
     { "sameboy_model_2", "Emulated Model for GB #2; Game Boy Color|Game Boy Advance|Game Boy" },
     { "sameboy_color_correction_mode_1", "Color Correction for GB #1; off|correct curves|emulate hardware|preserve brightness" },
@@ -441,9 +449,19 @@ static void check_variables(bool link)
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
         if (strcmp(var.value, "top-down") == 0)
-            layout = LAYOUT_TOP_DOWN;
+            screen_layout = LAYOUT_TOP_DOWN;
         else
-            layout = LAYOUT_LEFT_RIGHT;
+            screen_layout = LAYOUT_LEFT_RIGHT;
+    }
+
+    var.key = "sameboy_audio_output";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        if (strcmp(var.value, "GB #1") == 0)
+            audio_out = GB_1;
+        else
+            audio_out = GB_2;
     }
 }
 
