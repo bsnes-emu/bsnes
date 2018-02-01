@@ -408,15 +408,15 @@ static void check_variables(bool link)
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
-            enum model new_model = model[0];
+            enum model new_model = model[1];
             if (strcmp(var.value, "Game Boy") == 0)
                 new_model = MODEL_DMG;
             else if (strcmp(var.value, "Game Boy Color") == 0)
                 new_model = MODEL_CGB;
             else if (strcmp(var.value, "Game Boy Advance") == 0)
                 new_model = MODEL_AGB;
-            if (GB_is_inited(&gb[1]) && new_model != model[0]) {
-                model[0] = new_model;
+            if (GB_is_inited(&gb[1]) && new_model != model[1]) {
+                model[1] = new_model;
                 init_for_current_model();
             }
         }
