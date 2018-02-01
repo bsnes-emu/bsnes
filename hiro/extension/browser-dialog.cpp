@@ -60,7 +60,7 @@ auto BrowserDialogWindow::accept() -> void {
     if(!name && batched) name = batched.left()->cell(0)->text();
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
-      if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
+      if(MessageDialog("File already exists. Overwrite it?").question() != "Yes") return;
     }
     response.selected.append(string{state.path, name});
   }

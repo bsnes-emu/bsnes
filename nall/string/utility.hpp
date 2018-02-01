@@ -84,10 +84,13 @@ auto string::size(int length, char fill) -> string& {
 
 auto slice(string_view self, int offset, int length) -> string {
   string result;
-  if(offset < self.size()) {
+  if(offset < 0) offset = self.size() - abs(offset);
+  if(offset >= 0 && offset < self.size()) {
     if(length < 0) length = self.size() - offset;
-    result.resize(length);
-    memory::copy(result.get(), self.data() + offset, length);
+    if(length >= 0) {
+      result.resize(length);
+      memory::copy(result.get(), self.data() + offset, length);
+    }
   }
   return result;
 }

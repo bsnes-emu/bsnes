@@ -2,11 +2,11 @@
 MAKEFLAGS := Rr
 .SUFFIXES:
 
+[0-9] = 0 1 2 3 4 5 6 7 8 9
 [A-Z] = A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 [a-z] = a b c d e f g h i j k l m n o p q r s t u v w x y z
-[0-9] = 0 1 2 3 4 5 6 7 8 9
 [markup] = ` ~ ! @ \# $$ % ^ & * ( ) - _ = + [ { ] } \ | ; : ' " , < . > / ?
-[all] = $([A-Z]) $([a-z]) $([0-9]) $([markup])
+[all] = $([0-9]) $([A-Z]) $([a-z]) $([markup])
 [space] :=
 [space] +=
 
@@ -15,22 +15,28 @@ ifeq ($(platform),)
   uname := $(shell uname -s)
   ifeq ($(uname),)
     platform := windows
-    delete = del $(subst /,\,$1)
+    rm = del /q $(subst /,\,$1)
+    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else ifneq ($(findstring Windows,$(uname)),)
     platform := windows
-    delete = del $(subst /,\,$1)
+    rm = del /q $(subst /,\,$1)
+    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else ifneq ($(findstring _NT,$(uname)),)
     platform := windows
-    delete = del $(subst /,\,$1)
+    rm = del /q $(subst /,\,$1)
+    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else ifneq ($(findstring Darwin,$(uname)),)
     platform := macos
-    delete = rm -f $1
+    rm = rm -f $1
+    rmdir = rm -rf $1
   else ifneq ($(findstring Linux,$(uname)),)
     platform := linux
-    delete = rm -f $1
+    rm = rm -f $1
+    rmdir = rm -rf $1
   else ifneq ($(findstring BSD,$(uname)),)
     platform := bsd
-    delete = rm -f $1
+    rm = rm -f $1
+    rmdir = rm -rf $1
   else
     $(error unknown platform, please specify manually.)
   endif
@@ -59,23 +65,17 @@ ifeq ($(compiler),)
   endif
 endif
 
-# build settings
-ifeq ($(build),optimize)
-  flags += -O3
-else ifeq ($(build),release)
-  flags += -O2
+# build optimization levels
+ifeq ($(build),debug)
+  flags += -Og -DBUILD_DEBUG
 else ifeq ($(build),stable)
-  flags += -O1
-else ifeq ($(build),debug)
-  flags += -g
-else ifeq ($(build),profile)
-  flags += -pg
-  link += -pg
-else ifeq ($(build),instrument)
-  flags += -O3 -fprofile-generate
-  link += -lgcov
-else ifeq ($(build),optimize)
-  flags += -O3 -fprofile-use
+  flags += -O1 -DBUILD_STABLE
+else ifeq ($(build),size)
+  flags += -Os -DBUILD_SIZE
+else ifeq ($(build),release)
+  flags += -O2 -DBUILD_RELEASE
+else ifeq ($(build),performance)
+  flags += -O3 -DBUILD_PERFORMANCE
 endif
 
 # clang settings

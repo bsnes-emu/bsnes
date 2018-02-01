@@ -3,21 +3,21 @@
 namespace nall {
   using uint = unsigned;
 
-  struct Intrinsics {
-    enum class Compiler : uint { Clang, GCC, VisualCPP, Unknown };
-    enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
-    enum class API : uint { Windows, Posix, Unknown };
-    enum class Display : uint { Windows, Quartz, Xorg, Unknown };
-    enum class Processor : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
-    enum class Endian : uint { LSB, MSB, Unknown };
+  enum class Compiler : uint { Clang, GCC, Microsoft, Unknown };
+  enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
+  enum class API : uint { Windows, Posix, Unknown };
+  enum class DisplayServer : uint { Windows, Quartz, Xorg, Unknown };
+  enum class Processor : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
+  enum class Endian : uint { LSB, MSB, Unknown };
+  enum class Build : uint { Debug, Stable, Size, Release, Performance };
 
-    static inline auto compiler() -> Compiler;
-    static inline auto platform() -> Platform;
-    static inline auto api() -> API;
-    static inline auto display() -> Display;
-    static inline auto processor() -> Processor;
-    static inline auto endian() -> Endian;
-  };
+  static inline constexpr auto compiler() -> Compiler;
+  static inline constexpr auto platform() -> Platform;
+  static inline constexpr auto api() -> API;
+  static inline constexpr auto display() -> DisplayServer;
+  static inline constexpr auto processor() -> Processor;
+  static inline constexpr auto endian() -> Endian;
+  static inline constexpr auto build() -> Build;
 }
 
 /* Compiler detection */
@@ -26,7 +26,7 @@ namespace nall {
 
 #if defined(__clang__)
   #define COMPILER_CLANG
-  auto Intrinsics::compiler() -> Compiler { return Compiler::Clang; }
+  constexpr auto compiler() -> Compiler { return Compiler::Clang; }
 
   #pragma clang diagnostic ignored "-Wunknown-pragmas"
   #pragma clang diagnostic ignored "-Wempty-body"
@@ -42,20 +42,20 @@ namespace nall {
   #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #elif defined(__GNUC__)
   #define COMPILER_GCC
-  auto Intrinsics::compiler() -> Compiler { return Compiler::GCC; }
+  constexpr auto compiler() -> Compiler { return Compiler::GCC; }
 
   #pragma GCC diagnostic ignored "-Wunknown-pragmas"
   #pragma GCC diagnostic ignored "-Wpragmas"
   #pragma GCC diagnostic ignored "-Wswitch-bool"
 #elif defined(_MSC_VER)
-  #define COMPILER_VISUALCPP
-  auto Intrinsics::compiler() -> Compiler { return Compiler::VisualCPP; }
+  #define COMPILER_MICROSOFT
+  constexpr auto compiler() -> Compiler { return Compiler::Microsoft; }
 
   #pragma warning(disable:4996)  //libc "deprecation" warnings
 #else
   #warning "unable to detect compiler"
   #define COMPILER_UNKNOWN
-  auto Intrinsics::compiler() -> Compiler { return Compiler::Unknown; }
+  constexpr auto compiler() -> Compiler { return Compiler::Unknown; }
 #endif
 
 }
@@ -68,38 +68,38 @@ namespace nall {
   #define PLATFORM_WINDOWS
   #define API_WINDOWS
   #define DISPLAY_WINDOWS
-  auto Intrinsics::platform() -> Platform { return Platform::Windows; }
-  auto Intrinsics::api() -> API { return API::Windows; }
-  auto Intrinsics::display() -> Display { return Display::Windows; }
+  constexpr auto platform() -> Platform { return Platform::Windows; }
+  constexpr auto api() -> API { return API::Windows; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Windows; }
 #elif defined(__APPLE__)
   #define PLATFORM_MACOS
   #define API_POSIX
   #define DISPLAY_QUARTZ
-  auto Intrinsics::platform() -> Platform { return Platform::MacOS; }
-  auto Intrinsics::api() -> API { return API::Posix; }
-  auto Intrinsics::display() -> Display { return Display::Quartz; }
+  constexpr auto platform() -> Platform { return Platform::MacOS; }
+  constexpr auto api() -> API { return API::Posix; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Quartz; }
 #elif defined(linux) || defined(__linux__)
   #define PLATFORM_LINUX
   #define API_POSIX
   #define DISPLAY_XORG
-  auto Intrinsics::platform() -> Platform { return Platform::Linux; }
-  auto Intrinsics::api() -> API { return API::Posix; }
-  auto Intrinsics::display() -> Display { return Display::Xorg; }
+  constexpr auto platform() -> Platform { return Platform::Linux; }
+  constexpr auto api() -> API { return API::Posix; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Xorg; }
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #define PLATFORM_BSD
   #define API_POSIX
   #define DISPLAY_XORG
-  auto Intrinsics::platform() -> Platform { return Platform::BSD; }
-  auto Intrinsics::api() -> API { return API::Posix; }
-  auto Intrinsics::display() -> Display { return Display::Xorg; }
+  constexpr auto platform() -> Platform { return Platform::BSD; }
+  constexpr auto api() -> API { return API::Posix; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Xorg; }
 #else
   #warning "unable to detect platform"
   #define PLATFORM_UNKNOWN
   #define API_UNKNOWN
   #define DISPLAY_UNKNOWN
-  auto Intrinsics::platform() -> Platform { return Platform::Unknown; }
-  auto Intrinsics::api() -> API { return API::Unknown; }
-  auto Intrinsics::display() -> Display { return Display::Unknown; }
+  constexpr auto platform() -> Platform { return Platform::Unknown; }
+  constexpr auto api() -> API { return API::Unknown; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Unknown; }
 #endif
 
 }
@@ -112,29 +112,29 @@ namespace nall {
   #include <sys/endian.h>
 #endif
 
-/* Processor Detection */
+/* Processor detection */
 
 namespace nall {
 
 #if defined(__i386__) || defined(_M_IX86)
   #define PROCESSOR_X86
-  auto Intrinsics::processor() -> Processor { return Processor::x86; }
+  constexpr auto processor() -> Processor { return Processor::x86; }
 #elif defined(__amd64__) || defined(_M_AMD64)
   #define PROCESSOR_AMD64
-  auto Intrinsics::processor() -> Processor { return Processor::amd64; }
+  constexpr auto processor() -> Processor { return Processor::amd64; }
 #elif defined(__arm__)
   #define PROCESSOR_ARM
-  auto Intrinsics::processor() -> Processor { return Processor::ARM; }
+  constexpr auto processor() -> Processor { return Processor::ARM; }
 #elif defined(__ppc64__) || defined(_ARCH_PPC64)
   #define PROCESSOR_PPC64
-  auto Intrinsics::processor() -> Processor { return Processor::PPC64; }
+  constexpr auto processor() -> Processor { return Processor::PPC64; }
 #elif defined(__ppc__) || defined(_ARCH_PPC) || defined(_M_PPC)
   #define PROCESSOR_PPC32
-  auto Intrinsics::processor() -> Processor { return Processor::PPC32; }
+  constexpr auto processor() -> Processor { return Processor::PPC32; }
 #else
   #warning "unable to detect processor"
   #define PROCESSOR_UNKNOWN
-  auto Intrinsics::processor() -> Processor { return Processor::Unknown; }
+  constexpr auto processor() -> Processor { return Processor::Unknown; }
 #endif
 
 }
@@ -145,14 +145,44 @@ namespace nall {
 
 #if (defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
   #define ENDIAN_LSB
-  auto Intrinsics::endian() -> Endian { return Endian::LSB; }
+  constexpr auto endian() -> Endian { return Endian::LSB; }
 #elif (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || defined(__BIG_ENDIAN__) || defined(__powerpc__) || defined(_M_PPC)
   #define ENDIAN_MSB
-  auto Intrinsics::endian() -> Endian { return Endian::MSB; }
+  constexpr auto endian() -> Endian { return Endian::MSB; }
 #else
   #warning "unable to detect endian"
   #define ENDIAN_UNKNOWN
-  auto Intrinsics::endian() -> Endian { return Endian::Unknown; }
+  constexpr auto endian() -> Endian { return Endian::Unknown; }
+#endif
+
+}
+
+/* Build optimization level detection */
+
+#undef DEBUG
+#undef NDEBUG
+
+namespace nall {
+
+#if defined(BUILD_DEBUG)
+  #define DEBUG
+  constexpr auto build() -> Build { return Build::Debug; }
+#elif defined(BUILD_STABLE)
+  #define DEBUG
+  constexpr auto build() -> Build { return Build::Stable; }
+#elif defined(BUILD_SIZE)
+  #define NDEBUG
+  constexpr auto build() -> Build { return Build::Size; }
+#elif defined(BUILD_RELEASE)
+  #define NDEBUG
+  constexpr auto build() -> Build { return Build::Release; }
+#elif defined(BUILD_PERFORMANCE)
+  #define NDEBUG
+  constexpr auto build() -> Build { return Build::Performance; }
+#else
+  //default to debug mode
+  #define DEBUG
+  constexpr auto build() -> Build { return Build::Debug; }
 #endif
 
 }

@@ -3,23 +3,23 @@
 namespace nall { namespace Decode {
 
 inline auto Base64(const string& text) -> vector<uint8_t> {
-  auto value = [](char n) -> uint8_t {
-    if(n >= 'A' && n <= 'Z') return n - 'A' +  0;
-    if(n >= 'a' && n <= 'z') return n - 'a' + 26;
-    if(n >= '0' && n <= '9') return n - '0' + 52;
-    if(n == '+' || n == '-') return 62;
-    if(n == '/' || n == '_') return 63;
-    return 64;  //error code
-  };
+  static bool initialized = false;
+  static uint8_t lookup[256] = {0};
+  if(!initialized) {
+    initialized = true;
+    for(uint n : range(26)) lookup['A' + n] = n;
+    for(uint n : range(26)) lookup['a' + n] = n + 26;
+    for(uint n : range(10)) lookup['0' + n] = n + 52;
+    lookup['+'] = lookup['-'] = 62;
+    lookup['/'] = lookup['_'] = 63;
+  }
 
   vector<uint8_t> result;
-
   uint8_t buffer, output;
-  for(unsigned i = 0; i < text.size(); i++) {
-    uint8_t buffer = value(text[i]);
-    if(buffer > 63) break;
+  for(uint n : range(text.size())) {
+    uint8_t buffer = lookup[text[n]];
 
-    switch(i & 3) {
+    switch(n & 3) {
     case 0:
       output = buffer << 2;
       break;
@@ -40,6 +40,7 @@ inline auto Base64(const string& text) -> vector<uint8_t> {
     }
   }
 
+  if(text.size() & 3) result.append(output | buffer);
   return result;
 }
 

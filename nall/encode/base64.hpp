@@ -2,14 +2,15 @@
 
 namespace nall { namespace Encode {
 
-inline auto Base64(const void* vdata, unsigned size, const string& format = "MIME") -> string {
-  auto data = (const uint8_t*)vdata;
-  vector<uint8_t> result;
-
-  char lookup[65];
-  for(unsigned n = 0; n < 26; n++) lookup[ 0 + n] = 'A' + n;
-  for(unsigned n = 0; n < 26; n++) lookup[26 + n] = 'a' + n;
-  for(unsigned n = 0; n < 10; n++) lookup[52 + n] = '0' + n;
+inline auto Base64(const void* vdata, uint size, const string& format = "MIME") -> string {
+  static bool initialized = false;
+  static char lookup[65] = {0};
+  if(!initialized) {
+    initialized = true;
+    for(uint n : range(26)) lookup[n +  0] = 'A' + n;
+    for(uint n : range(26)) lookup[n + 26] = 'a' + n;
+    for(uint n : range(10)) lookup[n + 52] = '0' + n;
+  }
 
   if(format == "MIME") {
     lookup[62] = '+';
@@ -21,37 +22,36 @@ inline auto Base64(const void* vdata, unsigned size, const string& format = "MIM
     lookup[64] = 0;
   } else return "";
 
-  unsigned overflow = (3 - (size % 3)) % 3;  //bytes to round to nearest multiple of 3
+  auto data = (const uint8_t*)vdata;
+  uint overflow = (3 - (size % 3)) % 3;  //bytes to round to nearest multiple of 3
+  string result;
   uint8_t buffer;
-
-  for(unsigned i = 0; i < size; i++) {
-    switch(i % 3) {
+  for(uint n : range(size)) {
+    switch(n % 3) {
     case 0:
-      buffer = data[i] >> 2;
+      buffer = data[n] >> 2;
       result.append(lookup[buffer]);
-      buffer = (data[i] & 3) << 4;
-      result.append(lookup[buffer]);
+      buffer = (data[n] & 3) << 4;
       break;
 
     case 1:
-      buffer |= data[i] >> 4;
-      result.right() = lookup[buffer];
-      buffer = (data[i] & 15) << 2;
+      buffer |= data[n] >> 4;
       result.append(lookup[buffer]);
+      buffer = (data[n] & 15) << 2;
       break;
 
     case 2:
-      buffer |= data[i] >> 6;
-      result.right() = lookup[buffer];
-      buffer = (data[i] & 63);
+      buffer |= data[n] >> 6;
+      result.append(lookup[buffer]);
+      buffer = (data[n] & 63);
       result.append(lookup[buffer]);
       break;
     }
   }
 
+  if(overflow) result.append(lookup[buffer]);
   if(lookup[64]) {
-    if(overflow >= 1) result.append(lookup[64]);
-    if(overflow >= 2) result.append(lookup[64]);
+    while(result.size() % 4) result.append(lookup[64]);
   }
 
   return result;

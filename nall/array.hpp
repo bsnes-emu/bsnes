@@ -15,10 +15,18 @@ struct array {
   }
 
   auto operator[](uint index) -> T& {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(index >= Capacity) throw out_of_bounds{};
+    #endif
     return _pool.t[index];
   }
 
   auto operator[](uint index) const -> const T& {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(index >= Capacity) throw out_of_bounds{};
+    #endif
     return _pool.t[index];
   }
 

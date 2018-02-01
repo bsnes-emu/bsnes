@@ -47,6 +47,10 @@ struct bitvector {
   }
 
   auto get(uint position) const -> bool {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(position >= bits) throw out_of_bounds{};
+    #endif
     return pool[position >> 3] & (0x80 >> (position & 7));
   }
 

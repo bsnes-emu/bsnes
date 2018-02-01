@@ -69,7 +69,7 @@ obj/ui-resource.o:
 build: $(objects)
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 ifeq ($(platform),macos)
-	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
+	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
 	mkdir -p out/$(name).app/Contents/Resources/
 	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
@@ -102,9 +102,9 @@ ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
-	if [ -d /Applications/$(name).app ]; then rm -r /Applications/$(name).app; fi
+	rm -rf /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
-	if [ -f $(prefix)/bin/$(name) ]; then rm $(prefix)/bin/$(name); fi
-	if [ -f $(prefix)/share/applications/$(name).desktop ]; then rm $(prefix)/share/applications/$(name).desktop; fi
-	if [ -f $(prefix)/share/icons/$(name).png ]; then rm $(prefix)/share/icons/$(name).png; fi
+	rm -f $(prefix)/bin/$(name)
+	rm -f $(prefix)/share/applications/$(name).desktop
+	rm -f $(prefix)/share/icons/$(name).png
 endif

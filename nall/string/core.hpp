@@ -15,13 +15,16 @@
 
 namespace nall {
 
-auto string::operator[](int position) const -> const char& {
-//if(position > size() + 1) throw;
+auto string::operator[](uint position) const -> const char& {
+  #ifdef DEBUG
+  struct out_of_bounds {};
+  if(position >= size() + 1) throw out_of_bounds{};
+  #endif
   return data()[position];
 }
 
-auto string::operator()(int position, char fallback) const -> char {
-  if(position > size() + 1) return fallback;
+auto string::operator()(uint position, char fallback) const -> char {
+  if(position >= size() + 1) return fallback;
   return data()[position];
 }
 

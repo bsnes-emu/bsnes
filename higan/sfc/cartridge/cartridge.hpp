@@ -66,6 +66,7 @@ private:
   auto loadSufamiTurboB() -> bool;
 
   //load.cpp
+  auto loadBoard(Markup::Node) -> Markup::Node;
   auto loadCartridge(Markup::Node) -> void;
   auto loadGameBoy(Markup::Node) -> void;
   auto loadBSMemory(Markup::Node) -> void;

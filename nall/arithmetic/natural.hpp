@@ -343,7 +343,7 @@ inline auto to_vector(Pair value) -> vector<uint8_t> {
   return result;
 }
 
-/*
+#if 0
 inline auto hex(const Pair& value, long precision = 0, char padchar = '0') -> string {
   string text;
   if(!upper(value)) {
@@ -354,7 +354,7 @@ inline auto hex(const Pair& value, long precision = 0, char padchar = '0') -> st
   }
   return pad(text, precision, padchar);
 }
-*/
+#endif
 
 }
 

@@ -1,12 +1,12 @@
-build := performance
+build := stable
 include ../nall/GNUmakefile
 include ../hiro/GNUmakefile
 
-name := icarus
+name := genius
 flags += -I..
 
 objects := obj/hiro.o
-objects += obj/icarus.o
+objects += obj/genius.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)
 
 all: $(objects)
@@ -23,8 +23,8 @@ endif
 obj/hiro.o: ../hiro/hiro.cpp
 	$(compiler) $(hiroflags) -o obj/hiro.o -c ../hiro/hiro.cpp
 
-obj/icarus.o: icarus.cpp $(call rwildcard,core/) $(call rwildcard,heuristics/) $(call rwildcard,ui/)
-	$(compiler) $(cppflags) $(flags) -o obj/icarus.o -c icarus.cpp
+obj/genius.o: genius.cpp genius.hpp
+	$(compiler) $(cppflags) $(flags) -o obj/genius.o -c genius.cpp
 
 obj/resource.o:
 	$(windres) data/$(name).rc obj/resource.o
@@ -43,11 +43,10 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/applications/
 	mkdir -p $(prefix)/share/icons/
-	mkdir -p $(prefix)/share/$(name)/Database/
+	mkdir -p $(prefix)/share/$(name)/
 	cp out/$(name) $(prefix)/bin/$(name)
 	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp data/$(name).png $(prefix)/share/icons/$(name).png
-	cp -R Database/* $(prefix)/share/$(name)/Database/
 endif
 
 uninstall:

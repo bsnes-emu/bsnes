@@ -1,4 +1,4 @@
-build := optimize
+build := performance
 include ../nall/GNUmakefile
 
 binary := application
@@ -8,7 +8,6 @@ objects := libco emulator audio video resource
 flags += -I. -I..
 
 ifeq ($(platform),windows)
-  link += $(if $(call streq,$(console),true),-mconsole,-mwindows)
   ifeq ($(binary),application)
     link += -mthreads -lpthread -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
     link += -Wl,-enable-auto-import
@@ -61,5 +60,5 @@ ui := target-$(target)
 include $(ui)/GNUmakefile
 
 clean:
-	-@$(call delete,out/*)
-	-@$(call delete,obj/*)
+	$(call rm,out/*)
+	$(call rm,obj/*)

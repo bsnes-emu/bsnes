@@ -1,6 +1,61 @@
+auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
+  string output;
+
+  auto region = node["game/region"].text();
+  auto board = node["game/board"].text();
+  board.trimLeft("SHVC-", 1L);
+  board.trimLeft("SNSP-", 1L);
+  board.trimLeft("MAXI-", 1L);
+  board.trimLeft("MJSC-", 1L);
+  board.trimLeft("EA-", 1L);
+
+  if(auto fp = platform->open(ID::System, "boards.bml", File::Read, File::Required)) {
+    auto document = BML::unserialize(fp->reads());
+    for(auto leaf : document.find("board")) {
+      auto id = leaf["id"].text();
+      bool matched = id == board;
+      if(!matched && id.match("*(*)*")) {
+        auto part = id.transform("()", "||").split("|");
+        for(auto& revision : part(1).split(",")) {
+          if(string{part(0), revision, part(2)} == board) matched = true;
+        }
+      }
+      if(!matched) continue;
+      if(region.endsWith("-USA")
+      || region.endsWith("-CAN")
+      || region.endsWith("-JPN")
+      || region.endsWith("-KOR")
+      || region == "NTSC") {
+        output.append("region=ntsc\n");
+      } else {
+        output.append("region=pal\n");
+      }
+      uint counter = 0;
+      for(auto& line : leaf.text().split("\n")) {
+        if(line.endsWith("rom") || line.endsWith("ram")) {
+          auto memory = node.find("game/memory");
+          if(counter < memory.size()) {
+            line.append(" name=", memory[counter]["name"].text());
+            line.append(" size=", memory[counter]["size"].text());
+            if(memory[counter]["type"].text() == "RAM") line.append(" volatile");
+            counter++;
+          }
+        }
+        output.append(line, "\n");
+      }
+      break;
+    }
+  }
+
+  print(output, "\n");
+  return BML::unserialize(output);
+}
+
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
-  information.title.cartridge = node["information/title"].text();
+  information.title.cartridge = node["game/label"].text();
+
   auto board = node["board"];
+  if(!board) board = loadBoard(node);
   if(region() == "Auto") {
     if(board["region"].text() == "ntsc") information.region = "NTSC";
     if(board["region"].text() == "pal") information.region = "PAL";

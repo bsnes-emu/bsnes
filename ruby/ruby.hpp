@@ -1,14 +1,5 @@
 #pragma once
 
-/* ruby
- * author: byuu
- * license: ISC
- * version: 0.16 (2017-07-08)
- *
- * ruby is a cross-platform hardware abstraction layer.
- * it provides a common interface to video, audio and input devices.
- */
-
 #include <nall/nall.hpp>
 
 namespace ruby {
