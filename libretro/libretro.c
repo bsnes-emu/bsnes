@@ -62,6 +62,7 @@ static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
 static unsigned emulated_devices = 1;
+static unsigned pre_init = 1;
 static unsigned layout = 0;
 
 signed short soundbuf[1024 * 2];
@@ -173,7 +174,7 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
-    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_link", "Link Cable (restart); disabled|enabled" },
     { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
@@ -421,15 +422,18 @@ static void check_variables(bool link)
         }
 
     }
-    
+
     var.key = "sameboy_link";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
+        int old_emulated_devices = emulated_devices;
         if (strcmp(var.value, "enabled") == 0)
             emulated_devices = 2;
         else
             emulated_devices = 1;
+        if (pre_init == 0 && emulated_devices != old_emulated_devices)
+            emulated_devices = old_emulated_devices;
     }
 
     var.key = "sameboy_link_layout";
@@ -460,6 +464,7 @@ void retro_init(void)
 
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
     check_variables(emulated_devices == 2 ? true : false);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
 }
 
 void retro_deinit(void)
@@ -555,6 +560,7 @@ void retro_reset(void)
 void retro_run(void)
 {
     bool updated = false;
+    pre_init = 0;
     
     if (!frame_buf)
         return;
@@ -658,15 +664,14 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-    size_t size = 0;
-    for (int i = 0; i < emulated_devices; i++)
-        size += GB_get_save_state_size(&gb[i]);
-
-    return size;
+    return 2 * GB_get_save_state_size(&gb[0]);
 }
 
 bool retro_serialize(void *data, size_t size)
 {
+    if (pre_init == 1)
+        return false;
+
     void* save_data[2];
     for (int i = 0; i < emulated_devices; i++)
     {
