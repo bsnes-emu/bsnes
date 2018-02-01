@@ -498,7 +498,7 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-    struct retro_game_geometry geom = { VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH, VIDEO_HEIGHT * 2 ,160.0 / 288.0 };
+    struct retro_game_geometry geom = { VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices , VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT) };
     struct retro_system_timing timing = { FRAME_RATE, AUDIO_FREQUENCY };
     
     info->geometry = geom;
@@ -584,7 +584,7 @@ void retro_run(void)
     else
         GB_run_frame(&gb[0]);
 
-    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * 2, VIDEO_WIDTH * sizeof(uint32_t));
+    video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
 }
 
 bool retro_load_game(const struct retro_game_info *info)
