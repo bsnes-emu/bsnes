@@ -6,10 +6,12 @@ image: debian:stable
 linux-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev mkdocs
+    - make -C genius
     - make -C icarus
     - make -C higan
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
+    - cp -a genius/out/genius higan-nightly/genius
     - cp -a icarus/out/icarus higan-nightly/icarus
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
@@ -29,10 +31,12 @@ windows-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential mingw-w64 mkdocs
     - sed -i -e 's/-lole32/& -static -lpthread/' nall/GNUmakefile
+    - make -C genius platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
     - make -C icarus platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
     - make -C higan platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
+    - cp -a genius/out/genius higan-nightly/genius.exe
     - cp -a icarus/out/icarus higan-nightly/icarus.exe
     - cp -a icarus/Database higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan.exe
