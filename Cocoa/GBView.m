@@ -216,6 +216,7 @@
 
 - (void) joystick:(NSString *)joystick_name button: (unsigned)button changedState: (bool) state
 {
+    UpdateSystemActivity(UsrActivity);
     NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
     
     for (GBButton i = 0; i < GBButtonCount; i++) {
@@ -239,6 +240,7 @@
 
 - (void) joystick:(NSString *)joystick_name axis: (unsigned)axis movedTo: (signed) value
 {
+    UpdateSystemActivity(UsrActivity);
     NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
     NSNumber *x_axis = [mapping objectForKey:@"XAxis"];
     NSNumber *y_axis = [mapping objectForKey:@"YAxis"];
