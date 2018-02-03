@@ -43,9 +43,6 @@ enum model {
     MODEL_AUTO
 };
 
-static enum model model = MODEL_AUTO;
-static enum model auto_model = MODEL_CGB;
-
 enum screen_layout {
     LAYOUT_TOP_DOWN,
     LAYOUT_LEFT_RIGHT
@@ -57,6 +54,8 @@ enum audio_out {
 };
 
 static enum model model[2];
+static enum model auto_model = MODEL_CGB;
+
 static uint32_t *frame_buf = NULL;
 static uint32_t *frame_buf_copy = NULL;
 static struct retro_log_callback logging;
@@ -206,9 +205,14 @@ static const struct retro_variable vars_link[] = {
 
 static void init_for_current_model(void)
 {
-    enum model effective_model = model;
-    if (effective_model == MODEL_AUTO) {
-        effective_model = auto_model;
+    unsigned i = 0;
+    enum model effective_model[2];
+    for (i=0; i < emulated_devices; i++)
+    {
+        effective_model[i] = model[i];
+        if (effective_model[i] == MODEL_AUTO) {
+            effective_model[i] = auto_model;
+        }
     }
 
     for (i = 0; i < emulated_devices; i++)
