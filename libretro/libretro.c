@@ -137,7 +137,6 @@ static void audio_callback(void *gb)
 static void vblank1(GB_gameboy_t *gb)
 {
     vblank1_occurred = true;
-    GB_update_keys_status(gb, 0);
     if (audio_out == GB_1)
         audio_callback(gb);
 }
@@ -145,7 +144,6 @@ static void vblank1(GB_gameboy_t *gb)
 static void vblank2(GB_gameboy_t *gb)
 {
     vblank2_occurred = true;
-    GB_update_keys_status(gb, 1);
     if (audio_out == GB_2)
         audio_callback(gb);
 }
@@ -625,6 +623,10 @@ void retro_run(void)
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
         check_variables(emulated_devices == 2 ? true : false);
+
+    GB_update_keys_status(&gameboy[0], 0);
+    if (emulated_devices == 2)
+      GB_update_keys_status(&gameboy[1], 1);
 
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
