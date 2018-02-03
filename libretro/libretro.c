@@ -79,7 +79,10 @@ static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
 
 static bool geometry_updated = false;
-static bool link_single = false;
+static bool sameboy_dual = false;
+
+static bool link_cable_emulation = false;
+static bool infrared_emulation   = false;
 
 signed short soundbuf[1024 * 2];
 
@@ -190,15 +193,17 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
-    { "sameboy_link", "Single Game Link Cable (restart); disabled|enabled" },
+    { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
     { NULL }
 };
 
-static const struct retro_variable vars_link_single[] = {
-    { "sameboy_link", "Single Game Link Cable (restart); disabled|enabled" },
+static const struct retro_variable vars_sameboy_dual[] = {
+    { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
+    { "sameboy_link", "Link Cable Emulation; enabled|disabled" },
+    { "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -211,6 +216,8 @@ static const struct retro_variable vars_link_single[] = {
 };
 
 static const struct retro_variable vars_link_dual[] = {
+    { "sameboy_link", "Link Cable Emulation; enbled|disabled" },
+    { "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -238,13 +245,31 @@ static const struct retro_subsystem_rom_info gb_roms[] = {
 };
 
    static const struct retro_subsystem_info subsystems[] = {
-      { "2 Player Gameboy Link", "gb_link_2p", gb_roms, 2, RETRO_GAME_TYPE_GAMEBOY_LINK_2P },
+      { "2 Player Game Boy Link", "gb_link_2p", gb_roms, 2, RETRO_GAME_TYPE_GAMEBOY_LINK_2P },
       { NULL },
 };
 
 static const struct retro_controller_description controllers[] = {
-    { "Nintendo Gameboy", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
+    { "Nintendo Game Boy", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
 };
+
+static void set_link_cable_state(bool state)
+{
+    if (state && emulated_devices == 2)
+    {
+        GB_set_serial_transfer_start_callback(&gameboy[0], serial_start1);
+        GB_set_serial_transfer_end_callback(&gameboy[0], serial_end1);
+        GB_set_serial_transfer_start_callback(&gameboy[1], serial_start2);
+        GB_set_serial_transfer_end_callback(&gameboy[1], serial_end2);
+    }
+    else if (!state)
+    {
+        GB_set_serial_transfer_start_callback(&gameboy[0], NULL);
+        GB_set_serial_transfer_end_callback(&gameboy[0], NULL);
+        GB_set_serial_transfer_start_callback(&gameboy[1], NULL);
+        GB_set_serial_transfer_end_callback(&gameboy[1], NULL);
+    }
+}
 
 static void init_for_current_model(void)
 {
@@ -290,10 +315,8 @@ static void init_for_current_model(void)
     if (emulated_devices == 2)
     {
         GB_set_vblank_callback(&gameboy[1], (GB_vblank_callback_t) vblank2);
-        GB_set_serial_transfer_start_callback(&gameboy[0], serial_start1);
-        GB_set_serial_transfer_end_callback(&gameboy[0], serial_end1);
-        GB_set_serial_transfer_start_callback(&gameboy[1], serial_start2);
-        GB_set_serial_transfer_end_callback(&gameboy[1], serial_end2);
+        if (link_cable_emulation)
+            set_link_cable_state(true);
     }
 
     struct retro_memory_descriptor descs[7];
@@ -501,14 +524,29 @@ static void check_variables(bool link)
         geometry_updated = true;
     }
 
-    var.key = "sameboy_link";
+    var.key = "sameboy_dual";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
         if (strcmp(var.value, "enabled") == 0)
-            link_single = true;
+            sameboy_dual = true;
         else
-            link_single = false;
+            sameboy_dual = false;
+    }
+
+    var.key = "sameboy_link";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        bool tmp = link_cable_emulation;
+        if (strcmp(var.value, "enabled") == 0)
+            link_cable_emulation = true;
+        else
+            link_cable_emulation = false;
+        if (link_cable_emulation && link_cable_emulation != tmp)
+            set_link_cable_state(true);
+        else if (!link_cable_emulation && link_cable_emulation != tmp)
+            set_link_cable_state(false);
     }
 
     var.key = "sameboy_audio_output";
@@ -726,10 +764,10 @@ bool retro_load_game(const struct retro_game_info *info)
 {
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
     check_variables(false);
-    if (link_single)
+    if (sameboy_dual)
     {
         emulated_devices = 2;
-        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link_single);
+        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_sameboy_dual);
         check_variables(true);
     }
 
@@ -768,6 +806,7 @@ bool retro_load_game(const struct retro_game_info *info)
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
+    check_variables(emulated_devices == 2 ? true : false);
     return true;
 }
 
@@ -827,6 +866,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
+    check_variables(emulated_devices == 2 ? true : false);
     return true;
 }
 
