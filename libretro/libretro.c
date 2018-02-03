@@ -82,7 +82,7 @@ static bool geometry_updated = false;
 static bool sameboy_dual = false;
 
 static bool link_cable_emulation = false;
-static bool infrared_emulation   = false;
+/*static bool infrared_emulation   = false;*/
 
 signed short soundbuf[1024 * 2];
 
@@ -203,7 +203,7 @@ static const struct retro_variable vars[] = {
 static const struct retro_variable vars_sameboy_dual[] = {
     { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
     { "sameboy_link", "Link Cable Emulation; enabled|disabled" },
-    { "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },
+    /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -216,8 +216,8 @@ static const struct retro_variable vars_sameboy_dual[] = {
 };
 
 static const struct retro_variable vars_link_dual[] = {
-    { "sameboy_link", "Link Cable Emulation; enbled|disabled" },
-    { "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },
+    { "sameboy_link", "Link Cable Emulation; enabled|disabled" },
+    /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
