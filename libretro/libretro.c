@@ -189,14 +189,12 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
-    { "sameboy_link", "Link Cable (restart); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
     { NULL }
 };
 static const struct retro_variable vars_link[] = {
-    { "sameboy_link", "Link Cable; disabled|enabled" },
     { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; GB #1|GB #2" },
     { "sameboy_model_1", "Emulated Model for GB #1; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -463,19 +461,6 @@ static void check_variables(bool link)
 
     }
 
-    var.key = "sameboy_link";
-    var.value = NULL;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-    {
-        int old_emulated_devices = emulated_devices;
-        if (strcmp(var.value, "enabled") == 0)
-            emulated_devices = 2;
-        else
-            emulated_devices = 1;
-        if (pre_init == 0 && emulated_devices != old_emulated_devices)
-            emulated_devices = old_emulated_devices;
-    }
-
     var.key = "sameboy_link_layout";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -513,15 +498,6 @@ void retro_init(void)
     else
         snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", ".");
 
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
-    check_variables(emulated_devices == 2 ? true : false);
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
-
-    frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-    frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-
-    memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-    memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
 }
 
 void retro_deinit(void)
@@ -690,6 +666,16 @@ void retro_run(void)
 
 bool retro_load_game(const struct retro_game_info *info)
 {
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+    check_variables(emulated_devices == 2 ? true : false);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+
+    frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+
+    memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+
     struct retro_input_descriptor desc[] = {
         { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
         { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
@@ -760,6 +746,18 @@ unsigned retro_get_region(void)
 
 bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num_info)
 {
+    emulated_devices = 2;
+
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+    check_variables(emulated_devices == 2 ? true : false);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+
+    frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+
+    memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+
     struct retro_input_descriptor desc[] = {
         { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
         { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
@@ -809,15 +807,6 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
         log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
-    
-    static const struct retro_variable vars[] = {
-        { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
-        { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-        { "sameboy_model", "Emulated Model; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
-        { "sameboy_link", "Link Cable; disabled|enabled" },
-        { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
-        { NULL }
-    };
 
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
     check_variables(emulated_devices == 2 ? true : false);
