@@ -735,7 +735,10 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-    return 2 * GB_get_save_state_size(&gameboy[0]);
+    if (emulated_devices == 2)
+        return GB_get_save_state_size(&gameboy[0]) + GB_get_save_state_size(&gameboy[1]);
+    else
+        return GB_get_save_state_size(&gameboy[0]);
 }
 
 bool retro_serialize(void *data, size_t size)
@@ -744,11 +747,14 @@ bool retro_serialize(void *data, size_t size)
         return false;
 
     void* save_data[2];
+    size_t state_size[2];
+
     for (int i = 0; i < emulated_devices; i++)
     {
-        save_data[i] = (uint8_t*)malloc(size * sizeof(uint8_t) / emulated_devices);
+        state_size[i] = GB_get_save_state_size(&gameboy[i]);
+        save_data[i] = (uint8_t*)malloc(state_size[i]);
         GB_save_state_to_buffer(&gameboy[i], (uint8_t*) save_data[i]);
-        memcpy(data + (size * i / emulated_devices), save_data[i], size / emulated_devices);
+        memcpy(data + (state_size[i] * i), save_data[i], state_size[i]);
         free(save_data[i]);
     }
 
@@ -761,13 +767,15 @@ bool retro_serialize(void *data, size_t size)
 bool retro_unserialize(const void *data, size_t size)
 {
     void* save_data[2];
+    size_t state_size[2];
     int ret;
 
     for (int i = 0; i < emulated_devices; i++)
     {
-        save_data[i] = (uint8_t*)malloc(size * sizeof(uint8_t)/ emulated_devices);
-        memcpy (save_data[i], data + (size * i / emulated_devices), size / emulated_devices);
-        ret = GB_load_state_from_buffer(&gameboy[i], save_data[i], size / emulated_devices);
+        state_size[i] = GB_get_save_state_size(&gameboy[i]);
+        save_data[i] = (uint8_t*)malloc(state_size[i]);
+        memcpy (save_data[i], data + (state_size[i] * i), state_size[i]);
+        ret = GB_load_state_from_buffer(&gameboy[i], save_data[i], state_size[i]);
         free(save_data[i]);
 
         if (ret != 0)
