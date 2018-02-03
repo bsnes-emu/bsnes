@@ -621,7 +621,7 @@ unsigned retro_api_version(void)
 
 void retro_set_controller_port_device(unsigned port, unsigned device)
 {
-    log_cb(RETRO_LOG_INFO, "Plugging device %u into port %u.\n", device, port);
+    log_cb(RETRO_LOG_INFO, "Connecting device %u into port %u\n", device, port);
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -780,7 +780,7 @@ bool retro_load_game(const struct retro_game_info *info)
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
     {
-        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported\n");
         return false;
     }
 
@@ -793,7 +793,7 @@ bool retro_load_game(const struct retro_game_info *info)
     {
         if (GB_load_rom(&gameboy[i],info->path))
         {
-            log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
+            log_cb(RETRO_LOG_INFO, "Failed to load ROM at %s\n", info->path);
             return false;
         }
     }
@@ -802,9 +802,9 @@ bool retro_load_game(const struct retro_game_info *info)
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &achievements);
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE, &rumble))
-        log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
+        log_cb(RETRO_LOG_INFO, "Rumble environment supported\n");
     else
-        log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
+        log_cb(RETRO_LOG_INFO, "Rumble environment not supported\n");
 
     check_variables(emulated_devices == 2 ? true : false);
     return true;
@@ -841,7 +841,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
     {
-        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported\n");
         return false;
     }
 
@@ -862,9 +862,9 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &achievements);
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE, &rumble))
-        log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
+        log_cb(RETRO_LOG_INFO, "Rumble environment supported\n");
     else
-        log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
+        log_cb(RETRO_LOG_INFO, "Rumble environment not supported\n");
 
     check_variables(emulated_devices == 2 ? true : false);
     return true;
