@@ -112,7 +112,6 @@ static void audio_callback(void *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
-    GB_update_keys_status(gb);
     audio_callback(gb);
 }
 
@@ -361,6 +360,7 @@ void retro_run(void)
     bool updated = false;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
         check_variables();
+    GB_update_keys_status(&gb);
     GB_run_frame(&gb);
     
     video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
