@@ -33,9 +33,9 @@ static const char slash = '/';
 #define VIDEO_HEIGHT 144
 #define VIDEO_PIXELS (VIDEO_WIDTH * VIDEO_HEIGHT)
 
-#define RETRO_MEMORY_GAMEBOY_1_RAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
+#define RETRO_MEMORY_GAMEBOY_1_SRAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
 #define RETRO_MEMORY_GAMEBOY_1_RTC ((2 << 8) | RETRO_MEMORY_RTC)
-#define RETRO_MEMORY_GAMEBOY_2_RAM ((3 << 8) | RETRO_MEMORY_SAVE_RAM)
+#define RETRO_MEMORY_GAMEBOY_2_SRAM ((3 << 8) | RETRO_MEMORY_SAVE_RAM)
 #define RETRO_MEMORY_GAMEBOY_2_RTC ((3 << 8) | RETRO_MEMORY_RTC)
 
 #define RETRO_GAME_TYPE_GAMEBOY_LINK_2P 0x101
@@ -60,6 +60,12 @@ enum audio_out {
     GB_2
 };
 
+enum mode{
+    MODE_SINGLE_GAME,
+    MODE_SINGLE_GAME_DUAL,
+    MODE_DUAL_GAME
+};
+
 static enum model model[2];
 static enum model auto_model = MODEL_CGB;
 
@@ -77,6 +83,8 @@ static unsigned emulated_devices = 1;
 static unsigned pre_init = 1;
 static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
+
+static enum mode mode = MODE_SINGLE_GAME;
 
 static bool geometry_updated = false;
 static bool sameboy_dual = false;
@@ -230,12 +238,12 @@ static const struct retro_variable vars_link_dual[] = {
 };
 
 static const struct retro_subsystem_memory_info gb1_memory[] = {
-    { "srm", RETRO_MEMORY_GAMEBOY_1_RAM },
+    { "srm.slot1", RETRO_MEMORY_GAMEBOY_1_SRAM },
     { "rtc", RETRO_MEMORY_GAMEBOY_1_RTC },
 };
 
 static const struct retro_subsystem_memory_info gb2_memory[] = {
-    { "srm", RETRO_MEMORY_GAMEBOY_2_RAM },
+    { "srm.slot2", RETRO_MEMORY_GAMEBOY_2_SRAM },
     { "rtc", RETRO_MEMORY_GAMEBOY_2_RTC },
 };
 
@@ -767,9 +775,12 @@ bool retro_load_game(const struct retro_game_info *info)
     if (sameboy_dual)
     {
         emulated_devices = 2;
+        mode = MODE_SINGLE_GAME_DUAL;
         environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_sameboy_dual);
         check_variables(true);
     }
+    else
+        mode = MODE_SINGLE_GAME;
 
     frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
     frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
@@ -825,7 +836,10 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 {
 
     if (type == RETRO_GAME_TYPE_GAMEBOY_LINK_2P)
+    {
         emulated_devices = 2;
+        mode = MODE_DUAL_GAME;
+    }
     else
         return false; /* all other types are unhandled for now */
 
@@ -925,62 +939,119 @@ bool retro_unserialize(const void *data, size_t size)
 
 void *retro_get_memory_data(unsigned type)
 {
-    void* data;
-    switch(type)
+    void* data = NULL;
+    switch(mode)
     {
-        case RETRO_MEMORY_SYSTEM_RAM:
-            data = gameboy[0].ram;
-            break;
-        case RETRO_MEMORY_SAVE_RAM:
-            if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
+        case MODE_SINGLE_GAME:
+        case MODE_SINGLE_GAME_DUAL: /* todo: hook this properly */
             {
-                data = gameboy[0].mbc_ram;
-                /* let's copy the save to gameboy[1] so it can save independently */
-                //memcpy(gameboy[1].mbc_ram, gameboy[0].mbc_ram, gameboy[0].mbc_ram_size);
+                switch(type)
+                {
+                    case RETRO_MEMORY_SYSTEM_RAM:
+                        data = gameboy[0].ram;
+                        break;
+                    case RETRO_MEMORY_SAVE_RAM:
+                        if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
+                            data = gameboy[0].mbc_ram;
+                        else
+                            data = NULL;
+                        break;
+                    case RETRO_MEMORY_VIDEO_RAM:
+                        data = gameboy[0].vram;
+                        break;
+                    case RETRO_MEMORY_RTC:
+                        if(gameboy[0].cartridge_type->has_battery)
+                            data = &gameboy[0].rtc_real;
+                        else
+                            data = NULL;
+                        break;
+                    default:
+                        break;
+                }
             }
-            else
-                data = NULL;
             break;
-        case RETRO_MEMORY_VIDEO_RAM:
-            data = gameboy[0].vram;
-            break;
-        case RETRO_MEMORY_RTC:
-            if(gameboy[0].cartridge_type->has_battery)
-                data = &gameboy[0].rtc_real;
-            else
-                data = NULL;
+        case MODE_DUAL_GAME: /* todo: hook up other memory types */
+            {
+                switch (type)
+                {
+                    case RETRO_MEMORY_GAMEBOY_1_SRAM:
+                        if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
+                            data = gameboy[0].mbc_ram;
+                        else
+                            data = NULL;
+                        break;
+                    case RETRO_MEMORY_GAMEBOY_2_SRAM:
+                        if (gameboy[1].cartridge_type->has_battery && gameboy[1].mbc_ram_size != 0)
+                            data = gameboy[1].mbc_ram;
+                        else
+                            data = NULL;
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
         default:
-            data = NULL;
+            break;
     }
     return data;
 }
 
 size_t retro_get_memory_size(unsigned type)
 {
-    size_t size;
-    switch(type)
+    size_t size = 0;
+    switch(mode)
     {
-        case RETRO_MEMORY_SYSTEM_RAM:
-            size = gameboy[0].ram_size;
+        case MODE_SINGLE_GAME:
+        case MODE_SINGLE_GAME_DUAL: /* todo: hook this properly */
+            {
+                switch(type)
+                {
+                    case RETRO_MEMORY_SYSTEM_RAM:
+                        size = gameboy[0].ram_size;
+                        break;
+                    case RETRO_MEMORY_SAVE_RAM:
+                        if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
+                            size = gameboy[0].mbc_ram_size;
+                        else
+                            size = 0;
+                        break;
+                    case RETRO_MEMORY_VIDEO_RAM:
+                        size = gameboy[0].vram_size;
+                        break;
+                    case RETRO_MEMORY_RTC:
+                        if(gameboy[0].cartridge_type->has_battery)
+                            size = sizeof (gameboy[0].rtc_real);
+                        else
+                            size =  0;
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
-        case RETRO_MEMORY_SAVE_RAM:
-            if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
-                size = gameboy[0].mbc_ram_size;
-            else
-                size = 0;
-            break;
-        case RETRO_MEMORY_VIDEO_RAM:
-            size = gameboy[0].vram_size;
-            break;
-        case RETRO_MEMORY_RTC:
-            if(gameboy[0].cartridge_type->has_battery)
-                size = sizeof (gameboy[0].rtc_real);
-            else
-                size =  0;
+        case MODE_DUAL_GAME: /* todo: hook up other memory types */
+            {
+                switch (type)
+                {
+                    case RETRO_MEMORY_GAMEBOY_1_SRAM:
+                        if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
+                            size = gameboy[0].mbc_ram_size;
+                        else
+                            size = 0;
+                        break;
+                    case RETRO_MEMORY_GAMEBOY_2_SRAM:
+                        if (gameboy[1].cartridge_type->has_battery && gameboy[1].mbc_ram_size != 0)
+                            size = gameboy[1].mbc_ram_size;
+                        else
+                            size = 0;
+                        break;
+                    default:
+                        break;;
+                }
+            }
             break;
         default:
-            size = 0;
             break;
     }
 
