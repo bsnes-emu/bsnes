@@ -536,6 +536,36 @@ void retro_init(void)
     else
         snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", ".");
 
+    static const struct retro_controller_info ports[] = {
+        { controllers, 1 },
+        { controllers, 1 },
+        { NULL, 0 },
+    };
+
+    environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+
+    struct retro_input_descriptor desc[] = {
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+        { 0 },
+    };
+
+    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+
 }
 
 void retro_deinit(void)
@@ -709,20 +739,6 @@ bool retro_load_game(const struct retro_game_info *info)
     memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
     memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
 
-    struct retro_input_descriptor desc[] = {
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-        { 0 },
-    };
-
-    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
-
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
     {
@@ -752,12 +768,6 @@ bool retro_load_game(const struct retro_game_info *info)
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
-    static const struct retro_controller_info ports[] = {
-        { controllers, 1 },
-        { NULL, 0 },
-    };
-
-    environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
     return true;
 }
 
@@ -789,28 +799,6 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
     memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
 
-    struct retro_input_descriptor desc[] = {
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-        { 0 },
-    };
-
-    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
-
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
     {
@@ -838,13 +826,6 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
         log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
     else
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
-
-    static const struct retro_controller_info ports[] = {
-        { controllers, 1 },
-        { NULL, 0 },
-    };
-
-    environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
 
     return true;
 }
