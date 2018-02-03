@@ -189,20 +189,35 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
+    { "sameboy_link", "Link Cable; disabled|enabled" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
     { NULL }
 };
-static const struct retro_variable vars_link[] = {
-    { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
-    { "sameboy_audio_output", "Audio output; GB #1|GB #2" },
-    { "sameboy_model_1", "Emulated Model for GB #1; Game Boy Color|Game Boy Advance|Game Boy" },
-    { "sameboy_model_2", "Emulated Model for GB #2; Game Boy Color|Game Boy Advance|Game Boy" },
-    { "sameboy_color_correction_mode_1", "Color Correction for GB #1; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_color_correction_mode_2", "Color Correction for GB #2; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for GB #1; off|accurate|remove dc offset" },
-    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for GB #2; off|accurate|remove dc offset" },
+
+static const struct retro_variable vars_link_single[] = {
+    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
+    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
+    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for Game Boy #2; off|accurate|remove dc offset" },
+    { NULL }
+};
+
+static const struct retro_variable vars_link_dual[] = {
+    { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
+    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
+    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for Game Boy #2; off|accurate|remove dc offset" },
     { NULL }
 };
 
@@ -473,7 +488,7 @@ static void check_variables(bool link)
 
     }
 
-    var.key = "sameboy_link_layout";
+    var.key = "sameboy_screen_layout";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
@@ -489,7 +504,7 @@ static void check_variables(bool link)
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
     {
-        if (strcmp(var.value, "GB #1") == 0)
+        if (strcmp(var.value, "Game Boy #1") == 0)
             audio_out = GB_1;
         else
             audio_out = GB_2;
@@ -748,7 +763,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     else
         return false; /* all other types are unhandled for now */
 
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link_dual);
     check_variables(true);
 
     frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
