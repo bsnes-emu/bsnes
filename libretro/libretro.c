@@ -33,7 +33,14 @@ static const char slash = '/';
 #define VIDEO_HEIGHT 144
 #define VIDEO_PIXELS (VIDEO_WIDTH * VIDEO_HEIGHT)
 
-char battery_save_path[512];
+#define RETRO_MEMORY_GAMEBOY_1_RAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
+#define RETRO_MEMORY_GAMEBOY_1_RTC ((2 << 8) | RETRO_MEMORY_RTC)
+#define RETRO_MEMORY_GAMEBOY_2_RAM ((3 << 8) | RETRO_MEMORY_SAVE_RAM)
+#define RETRO_MEMORY_GAMEBOY_2_RTC ((3 << 8) | RETRO_MEMORY_RTC)
+
+#define RETRO_GAME_TYPE_GAMEBOY_LINK_2P 0x101
+
+char battery_save_path[512]; 
 char symbols_path[512];
 
 enum model {
@@ -100,7 +107,7 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 {
 
     input_poll_cb();
-    
+ 
     GB_set_key_state(gb, GB_KEY_RIGHT,input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT));
     GB_set_key_state(gb, GB_KEY_LEFT, input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT));
     GB_set_key_state(gb, GB_KEY_UP,input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) );
@@ -109,12 +116,12 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
     GB_set_key_state(gb, GB_KEY_B,input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B) );
     GB_set_key_state(gb, GB_KEY_SELECT,input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
     GB_set_key_state(gb, GB_KEY_START,input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START) );
-    
+
     if (gb->rumble_state)
         rumble.set_rumble_state(port, RETRO_RUMBLE_STRONG, 65535);
     else
         rumble.set_rumble_state(port, RETRO_RUMBLE_STRONG, 0);
-    
+
 }
 
 
@@ -199,6 +206,26 @@ static const struct retro_variable vars_link[] = {
     { "sameboy_high_pass_filter_mode_1", "High Pass Filter for GB #1; off|accurate|remove dc offset" },
     { "sameboy_high_pass_filter_mode_2", "High Pass Filter for GB #2; off|accurate|remove dc offset" },
     { NULL }
+};
+
+static const struct retro_subsystem_memory_info gb1_memory[] = {
+    { "srm", RETRO_MEMORY_GAMEBOY_1_RAM },
+    { "rtc", RETRO_MEMORY_GAMEBOY_1_RTC },
+};
+
+static const struct retro_subsystem_memory_info gb2_memory[] = {
+    { "srm", RETRO_MEMORY_GAMEBOY_2_RAM },
+    { "rtc", RETRO_MEMORY_GAMEBOY_2_RTC },
+};
+
+static const struct retro_subsystem_rom_info gb_roms[] = {
+    { "GameBoy #1", "gb|gbc", true, false, true, gb1_memory, 1 },
+    { "GameBoy #2", "gb|gbc", true, false, true, gb2_memory, 1 },
+};
+
+   static const struct retro_subsystem_info subsystems[] = {
+      { "2 Player Gameboy Link", "gb_link_2p", gb_roms, 2, RETRO_GAME_TYPE_GAMEBOY_LINK_2P | 0x1000  },
+      { NULL },
 };
 
 static void init_for_current_model(void)
@@ -569,6 +596,7 @@ void retro_set_environment(retro_environment_t cb)
         { NULL, 0 },
     };
     cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+    cb(RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO,  (void*)subsystems);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -730,9 +758,70 @@ unsigned retro_get_region(void)
     return RETRO_REGION_NTSC;
 }
 
-bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num)
+bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num_info)
 {
-    return false;
+    struct retro_input_descriptor desc[] = {
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+        { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+        { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+        { 0 },
+    };
+    
+    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+    
+    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
+    {
+        log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+        return false;
+    }
+    
+    snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
+    init_for_current_model();
+    for (int i = 0; i < emulated_devices; i++)
+    {
+        auto_model = (info[i].path[strlen(info[i].path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
+        if (GB_load_rom(&gameboy[i], info[i].path))
+        {
+            log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
+            return false;
+        }
+    }
+    
+
+    bool yes = true;
+    environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+    
+    if (environ_cb(RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE, &rumble))
+        log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
+    else
+        log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
+    
+    static const struct retro_variable vars[] = {
+        { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
+        { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
+        { "sameboy_model", "Emulated Model; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
+        { "sameboy_link", "Link Cable; disabled|enabled" },
+        { "sameboy_link_layout", "Screen Layout; top-down|left-right" },
+        { NULL }
+    };
+
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, emulated_devices == 2 ? (void *)vars_link : (void *)vars);
+    check_variables(emulated_devices == 2 ? true : false);
+    return true;
 }
 
 size_t retro_serialize_size(void)
