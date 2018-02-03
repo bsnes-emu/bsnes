@@ -233,7 +233,7 @@ static void enter_audio_menu(unsigned index);
 
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
-    {"Enumlation Options", enter_emulation_menu},
+    {"Emulation Options", enter_emulation_menu},
     {"Graphic Options", enter_graphics_menu},
     {"Audio Options", enter_audio_menu},
     {"Keyboard", enter_controls_menu},
