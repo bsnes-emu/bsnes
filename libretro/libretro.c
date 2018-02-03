@@ -79,6 +79,7 @@ static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
 
 static bool geometry_updated = false;
+static bool link_single = false;
 
 signed short soundbuf[1024 * 2];
 
@@ -189,7 +190,7 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 static retro_environment_t environ_cb;
 
 static const struct retro_variable vars[] = {
-    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_link", "Single Game Link Cable (restart); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -197,7 +198,7 @@ static const struct retro_variable vars[] = {
 };
 
 static const struct retro_variable vars_link_single[] = {
-    { "sameboy_link", "Link Cable; disabled|enabled" },
+    { "sameboy_link", "Single Game Link Cable (restart); disabled|enabled" },
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
@@ -500,6 +501,16 @@ static void check_variables(bool link)
         geometry_updated = true;
     }
 
+    var.key = "sameboy_link";
+    var.value = NULL;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+        if (strcmp(var.value, "enabled") == 0)
+            link_single = true;
+        else
+            link_single = false;
+    }
+
     var.key = "sameboy_audio_output";
     var.value = NULL;
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -685,6 +696,12 @@ bool retro_load_game(const struct retro_game_info *info)
 {
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
     check_variables(false);
+    if (link_single)
+    {
+        emulated_devices = 2;
+        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link_single);
+        check_variables(true);
+    }
 
     frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
     frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
