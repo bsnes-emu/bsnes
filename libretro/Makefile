@@ -53,6 +53,12 @@ else
 endif
 endif
 
+ifneq ($(SANITIZER),)
+   CFLAGS   := -fsanitize=$(SANITIZER) $(CFLAGS)
+   CXXFLAGS := -fsanitize=$(SANITIZER) $(CXXFLAGS)
+   LDFLAGS  := -fsanitize=$(SANITIZER) $(LDFLAGS) -lasan
+endif
+
 ifeq ($(platform), osx)
 ifndef ($(NOUNIVERSAL))
    CFLAGS += $(ARCHFLAGS)
