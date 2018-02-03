@@ -615,7 +615,7 @@ void retro_run(void)
         struct retro_system_av_info info;
         retro_get_system_av_info(&info);
         geometry_updated = false;
-        environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info.geometry);
+        environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
     }
 
     pre_init = 0;
