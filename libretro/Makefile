@@ -71,7 +71,7 @@ EXT := a
 endif
 
 ifeq ($(platform), unix)
-    EXT ?= so
+   EXT ?= so
    TARGET := $(TARGET_NAME)_libretro.$(EXT)
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
@@ -156,7 +156,13 @@ all: $(TARGET)
 $(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/BootROMs/prebuilt/%_boot.bin
 	echo "/* AUTO-GENERATED */" > $@
 	echo "const unsigned char $(notdir $(@:%.c=%))[] = {" >> $@
+ifneq ($(findstring Haiku,$(shell uname -s)),)
+	# turns out od is posix, hexdump is not hence is less portable
+	# this is still rather ugly and could be done better I guess
+	od -A none -t x1 -v $< | sed -e 's/^\ /0x/' -e 's/\ /,\ 0x/g' -e 's/$$/,/g' | tr '\n' ' ' >> $@
+else
 	hexdump -v -e '/1 "0x%02x, "' $< >> $@
+endif
 	echo "};" >> $@
 	echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
 
