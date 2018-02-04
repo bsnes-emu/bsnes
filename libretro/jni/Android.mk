@@ -28,14 +28,14 @@ CORE_DIR := ../..
 include ../Makefile.common
 
 $(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/BootROMs/prebuilt/%_boot.bin
-        echo "/* AUTO-GENERATED */" > $@
-        echo "const unsigned char $(notdir $(@:%.c=%))[] = {" >> $@
-        hexdump -v -e '/1 "0x%02x, "' $< >> $@
-        echo "};" >> $@
-        echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
+		echo "/* AUTO-GENERATED */" > $@
+		echo "const unsigned char $(notdir $(@:%.c=%))[] = {" >> $@
+		hexdump -v -e '/1 "0x%02x, "' $< >> $@
+		echo "};" >> $@
+		echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
 
 LOCAL_SRC_FILES := $(SOURCES_CXX) $(SOURCES_C)
-LOCAL_CFLAGS += -DINLINE=inline -DHAVE_STDINT_H -DHAVE_INTTYPES_H -D__LIBRETRO__ -DNDEBUG -D_USE_MATH_DEFINES  -DGB_INTERNAL
+LOCAL_CFLAGS += -DINLINE=inline -DHAVE_STDINT_H -DHAVE_INTTYPES_H -D__LIBRETRO__ -DNDEBUG -D_USE_MATH_DEFINES  -DGB_INTERNAL -std=c99 -I$(CORE_DIR) -DSAMEBOY_CORE_VERSION=\"$(VERSION)\"
 
 LOCAL_C_INCLUDES = $(INCFLAGS)
 
