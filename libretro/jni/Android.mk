@@ -25,7 +25,7 @@ endif
 
 CORE_DIR := ../..
 
-include ../../Makefile.common
+include ../Makefile.common
 
 LOCAL_SRC_FILES := $(SOURCES_CXX) $(SOURCES_C)
 LOCAL_CXXFLAGS += -DINLINE=inline -DHAVE_STDINT_H -DHAVE_INTTYPES_H -D__LIBRETRO__ -DNDEBUG -D_USE_MATH_DEFINES  -DGB_INTERNAL
