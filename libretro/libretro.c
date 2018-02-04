@@ -238,12 +238,12 @@ static const struct retro_variable vars_link_dual[] = {
 };
 
 static const struct retro_subsystem_memory_info gb1_memory[] = {
-    { "srm.slot1", RETRO_MEMORY_GAMEBOY_1_SRAM },
+    { "srm", RETRO_MEMORY_GAMEBOY_1_SRAM },
     { "rtc", RETRO_MEMORY_GAMEBOY_1_RTC },
 };
 
 static const struct retro_subsystem_memory_info gb2_memory[] = {
-    { "srm.slot2", RETRO_MEMORY_GAMEBOY_2_SRAM },
+    { "srm", RETRO_MEMORY_GAMEBOY_2_SRAM },
     { "rtc", RETRO_MEMORY_GAMEBOY_2_RTC },
 };
 
