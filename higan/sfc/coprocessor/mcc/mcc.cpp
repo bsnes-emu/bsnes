@@ -11,6 +11,9 @@ auto MCC::unload() -> void {
 }
 
 auto MCC::power() -> void {
+  rom.writeProtect(true);
+  ram.writeProtect(false);
+
   for(auto n : range(16)) r[n] = 0x00;
   r[0x07] = 0x80;
   r[0x08] = 0x80;

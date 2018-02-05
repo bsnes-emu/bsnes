@@ -120,6 +120,7 @@ auto System::power(bool reset) -> void {
   if(cartridge.has.OBC1) obc1.power();
   if(cartridge.has.MSU1) msu1.power();
   if(cartridge.has.BSMemorySlot) bsmemory.power();
+  if(cartridge.has.SufamiTurboSlots) sufamiturboA.power(), sufamiturboB.power();
 
   if(cartridge.has.ICD2) cpu.coprocessors.append(&icd2);
   if(cartridge.has.Event) cpu.coprocessors.append(&event);

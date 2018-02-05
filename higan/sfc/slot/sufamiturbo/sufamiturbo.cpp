@@ -11,4 +11,9 @@ auto SufamiTurboCartridge::unload() -> void {
   ram.reset();
 }
 
+auto SufamiTurboCartridge::power() -> void {
+  rom.writeProtect(true);
+  ram.writeProtect(false);
+}
+
 }

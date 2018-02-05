@@ -12,7 +12,7 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
   if(auto fp = platform->open(ID::System, "boards.bml", File::Read, File::Required)) {
     auto document = BML::unserialize(fp->reads());
     for(auto leaf : document.find("board")) {
-      auto id = leaf["id"].text();
+      auto id = leaf.text();
       bool matched = id == board;
       if(!matched && id.match("*(*)*")) {
         auto part = id.transform("()", "||").split("|");
@@ -31,7 +31,8 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
         output.append("region=pal\n");
       }
       uint counter = 0;
-      for(auto& line : leaf.text().split("\n")) {
+      for(auto& line : BML::serialize(leaf).split("\n")) {
+        line.trimLeft("  ", 1L);
         if(line.endsWith("rom") || line.endsWith("ram")) {
           auto memory = node.find("game/memory");
           if(counter < memory.size()) {

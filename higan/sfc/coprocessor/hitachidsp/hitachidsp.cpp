@@ -34,6 +34,9 @@ auto HitachiDSP::power() -> void {
   HG51B::power();
   create(HitachiDSP::Enter, Frequency);
 
+  rom.writeProtect(true);
+  ram.writeProtect(false);
+
   mmio.dma = false;
 
   mmio.dmaSource = 0x000000;

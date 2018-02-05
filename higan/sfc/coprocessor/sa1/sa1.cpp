@@ -127,6 +127,10 @@ auto SA1::power() -> void {
   WDC65816::power();
   create(SA1::Enter, system.cpuFrequency());
 
+  rom.writeProtect(true);
+  bwram.writeProtect(false);
+  iram.writeProtect(false);
+
   cpubwram.dma = false;
   for(auto addr : range(iram.size())) {
     iram.write(addr, 0x00);

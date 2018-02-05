@@ -41,6 +41,10 @@ auto SPC7110::unload() -> void {
 auto SPC7110::power() -> void {
   create(SPC7110::Enter, 21'477'272);
 
+  prom.writeProtect(true);
+  drom.writeProtect(true);
+  ram.writeProtect(true);
+
   r4801 = 0x00;
   r4802 = 0x00;
   r4803 = 0x00;

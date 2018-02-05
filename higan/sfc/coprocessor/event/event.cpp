@@ -39,6 +39,12 @@ auto Event::unload() -> void {
 auto Event::power() -> void {
   create(Event::Enter, 1);
 
+  rom[0].writeProtect(true);
+  rom[1].writeProtect(true);
+  rom[2].writeProtect(true);
+  rom[3].writeProtect(true);
+  ram.writeProtect(false);
+
   for(auto n : range(ram.size())) ram.write(n, 0x00);
   status = 0x00;
   select = 0x00;
