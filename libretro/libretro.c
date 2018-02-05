@@ -6,7 +6,12 @@
 #include <signal.h>
 #include <stdarg.h>
 
+#ifndef WIIU
 #define AUDIO_FREQUENCY 384000
+#else
+#define AUDIO_FREQUENCY 44100
+#endif
+
 #define FRAME_RATE (0x400000 / 70224.0)
 
 #ifdef _WIN32
@@ -54,7 +59,6 @@ signed short soundbuf[1024 * 2];
 char retro_system_directory[4096];
 char retro_save_directory[4096];
 char retro_game_path[4096];
-int RLOOP=1;
 
 GB_gameboy_t gb;
 extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[];
