@@ -96,7 +96,12 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
   return result;
 }
 
+//operator[](string)
 auto ManagedNode::_lookup(const string& path) const -> Node {
+  auto result = _find(path);
+  return result ? result[0] : Node{};
+
+/*//faster, but cannot search
   if(auto position = path.find("/")) {
     auto name = slice(path, 0, *position);
     for(auto& node : _children) {
@@ -108,6 +113,7 @@ auto ManagedNode::_lookup(const string& path) const -> Node {
     if(path == node->_name) return node;
   }
   return {};
+*/
 }
 
 auto ManagedNode::_create(const string& path) -> Node {

@@ -57,7 +57,7 @@ auto System::load(Emulator::Interface* interface, Model model_, maybe<uint> syst
     } else return false;
 
     auto document = BML::unserialize(information.manifest);
-    if(auto name = document["board/icd2/rom/name"].text()) {
+    if(auto name = document["game/memory[1]/name"].text()) {
       if(auto fp = platform->open(systemID(), name, File::Read, File::Required)) {
         fp->read(bootROM.sgb, 256);
       }

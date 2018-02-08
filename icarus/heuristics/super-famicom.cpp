@@ -53,26 +53,26 @@ auto SuperFamicom::manifest() const -> string {
   output.append("  board:    ", board(), "\n");
   output.append("  label:    ", label(), "\n");
 
-  auto board = this->board();
+  auto board = this->board().split("-");
 
-  if(board.beginsWith("CX4-")) {
+         if(board.left() == "CX4") {
     output.append(memory("ROM", size - 0xc00, "program.rom"));
     output.append(memory("ROM", 0xc00, "cx4.data.rom"));
-  } else if(board.beginsWith("DSP-")) {
+  } else if(board.left() == "DSP") {
     output.append(memory("ROM", size - 0x2000, "program.rom"));
     output.append(memory("ROM", 0x1800, "dsp.program.rom"));
     output.append(memory("ROM", 0x800, "dsp.data.rom"));
-  } else if(board.beginsWith("SETA-")) {
+  } else if(board.left() == "SETA") {
     output.append(memory("ROM", size - 0x28000, "program.rom"));
     output.append(memory("ROM", 0x20000, "seta.program.rom"));
     output.append(memory("ROM", 0x8000, "seta.data.rom"));
-  } else if(board.beginsWith("SGB-")) {
+  } else if(board.left() == "SGB") {
     output.append(memory("ROM", size - 0x100, "program.rom"));
     output.append(memory("ROM", 0x100, "sgb.boot.rom"));
-  } else if(board.beginsWith("SPC7110-")) {
+  } else if(board.left() == "SPC7110") {
     output.append(memory("ROM", 0x100000, "program.rom"));
     output.append(memory("ROM", size - 0x100000, "data.rom"));
-  } else if(board.beginsWith("ST-")) {
+  } else if(board.left() == "ST") {
     output.append(memory("ROM", size - 0xd000, "program.rom"));
     output.append(memory("ROM", 0xc000, "st.program.rom"));
     output.append(memory("ROM", 0x1000, "st.data.rom"));
@@ -81,31 +81,31 @@ auto SuperFamicom::manifest() const -> string {
   }
 
   if(auto size = ramSize()) {
-    auto type = board.endsWith("-NVRAM") ? "NVRAM" : "RAM";
+    auto type = board.right() == "NVRAM" ? "NVRAM" : "RAM";
     output.append(memory(type, size, "save.ram"));
   }
 
   if(auto size = expansionRamSize()) {
-    auto type = board.endsWith("-NVRAM") ? "NVRAM" : "RAM";
+    auto type = board.right() == "NVRAM" ? "NVRAM" : "RAM";
     output.append(memory(type, size, "expansion.ram"));
   }
 
-  if(board.beginsWith("BSX-")) {
+         if(board.left() == "BSX") {
     output.append(memory("NVRAM", 0x80000, "download.ram"));
-  } else if(board.beginsWith("CX4-")) {
+  } else if(board.left() == "CX4") {
     output.append(memory("RAM", 0, "save.ram"));
     output.append(memory("RAM", 0xc00, "cx4.data.ram"));
-  } else if(board.beginsWith("DSP-")) {
+  } else if(board.left() == "DSP") {
     output.append(memory("RAM", 0x200, "dsp.data.ram"));
-  } else if(board.beginsWith("RTC-")) {
+  } else if(board.left() == "RTC") {
     output.append(memory("NVRAM", 0x10, "rtc.ram"));
-  } else if(board.beginsWith("SA1-")) {
+  } else if(board.left() == "SA1") {
     output.append(memory("RAM", 0x800, "internal.ram"));
-  } else if(board.beginsWith("SETA-")) {
+  } else if(board.left() == "SETA") {
     output.append(memory("NVRAM", 0x4000, "seta.save.ram"));
-  } else if(board.beginsWith("SPC7110-RTC-")) {
+  } else if(board.left() == "SPC7110" && board(1) == "RTC") {
     output.append(memory("NVRAM", 0x10, "rtc.ram"));
-  } else if(board.beginsWith("ST-")) {
+  } else if(board.left() == "ST") {
     output.append(memory("NVRAM", 0x1000, "st.save.ram"));
   }
 
@@ -158,20 +158,20 @@ auto SuperFamicom::region() const -> string {
   }
 
   if(!region) {
-    if(E == 0x00) region = {"SHVC-\?\?-JPN"};  //trigraphs: why is this still a thing?
-    if(E == 0x01) region = { "SNS-\?\?-USA"};
-    if(E == 0x02) region = {"SNSP-\?\?-EUR"};
-    if(E == 0x03) region = {"SNSP-\?\?-SCN"};
-    if(E == 0x06) region = {"SNSP-\?\?-FRA"};
-    if(E == 0x07) region = {"SNSP-\?\?-HOL"};
-    if(E == 0x08) region = {"SNSP-\?\?-ESP"};
-    if(E == 0x09) region = {"SNSP-\?\?-NOE"};
-    if(E == 0x0a) region = {"SNSP-\?\?-ITA"};
-    if(E == 0x0b) region = {"SNSP-\?\?-ROC"};
-    if(E == 0x0d) region = {"SNSP-\?\?-KOR"};
-    if(E == 0x0f) region = { "SNS-\?\?-CAN"};
-    if(E == 0x10) region = { "SNS-\?\?-BRA"};
-    if(E == 0x11) region = {"SNSP-\?\?-AUS"};
+    if(E == 0x00) region = {"SHVC-JPN"};
+    if(E == 0x01) region = { "SNS-USA"};
+    if(E == 0x02) region = {"SNSP-EUR"};
+    if(E == 0x03) region = {"SNSP-SCN"};
+    if(E == 0x06) region = {"SNSP-FRA"};
+    if(E == 0x07) region = {"SNSP-HOL"};
+    if(E == 0x08) region = {"SNSP-ESP"};
+    if(E == 0x09) region = {"SNSP-NOE"};
+    if(E == 0x0a) region = {"SNSP-ITA"};
+    if(E == 0x0b) region = {"SNSP-ROC"};
+    if(E == 0x0d) region = {"SNSP-KOR"};
+    if(E == 0x0f) region = { "SNS-CAN"};
+    if(E == 0x10) region = { "SNS-BRA"};
+    if(E == 0x11) region = {"SNSP-AUS"};
   }
 
   return region ? region : "NTSC";
@@ -207,41 +207,48 @@ auto SuperFamicom::revision() const -> string {
   }
 
   if(!revision) {
-    if(E == 0x00) revision = {"SHVC-\?\?-", F};
-    if(E == 0x01) revision = { "SNS-\?\?-", F};
-    if(E == 0x02) revision = {"SNSP-\?\?-", F};
-    if(E == 0x03) revision = {"SSWE-\?\?-", F};
-    if(E == 0x06) revision = {"SFRA-\?\?-", F};
-    if(E == 0x07) revision = {"SHOL-\?\?-", F};
-    if(E == 0x08) revision = {"SESP-\?\?-", F};
-    if(E == 0x09) revision = {"SFRG-\?\?-", F};
-    if(E == 0x0a) revision = {"SITA-\?\?-", F};
-    if(E == 0x0b) revision = {"SSCN-\?\?-", F};
-    if(E == 0x0d) revision = {"SKOR-\?\?-", F};
-    if(E == 0x0f) revision = { "SNS-\?\?-", F};
-    if(E == 0x10) revision = {"SBRA-\?\?-", F};
-    if(E == 0x11) revision = {"SNSP-\?\?-", F};
+    if(E == 0x00) revision = {"SHVC-", F};
+    if(E == 0x01) revision = { "SNS-", F};
+    if(E == 0x02) revision = {"SNSP-", F};
+    if(E == 0x03) revision = {"SSWE-", F};
+    if(E == 0x06) revision = {"SFRA-", F};
+    if(E == 0x07) revision = {"SHOL-", F};
+    if(E == 0x08) revision = {"SESP-", F};
+    if(E == 0x09) revision = {"SFRG-", F};
+    if(E == 0x0a) revision = {"SITA-", F};
+    if(E == 0x0b) revision = {"SSCN-", F};
+    if(E == 0x0d) revision = {"SKOR-", F};
+    if(E == 0x0f) revision = { "SNS-", F};
+    if(E == 0x10) revision = {"SBRA-", F};
+    if(E == 0x11) revision = {"SNSP-", F};
   }
 
   return revision ? revision : string{"1.", F};
 }
 
 auto SuperFamicom::board() const -> string {
-  auto mapModeLo = data[headerAddress + 0x25] & 15;
+  auto mapMode = data[headerAddress + 0x25];
   auto cartridgeType = data[headerAddress + 0x26];
   auto cartridgeTypeLo = cartridgeType & 15;
   auto cartridgeTypeHi = cartridgeType >> 4;
-  auto cartridgeSubType = data[headerAddress + 0x2f];
+  auto cartridgeSubType = data[headerAddress + 0x0f];
 
   string board;
 
   string mode;
-  if(mapModeLo == 0x0) mode = "LOROM-";
-  if(mapModeLo == 0x1) mode = "HIROM-";
-  if(mapModeLo == 0x2) mode = "SDD1-";
-  if(mapModeLo == 0x3) mode = "SA1-";
-  if(mapModeLo == 0x5) mode = "EXHIROM-";
-  if(mapModeLo == 0xa) mode = "SPC7110-";
+  if(mapMode == 0x20 || mapMode == 0x30) mode = "LOROM-";
+  if(mapMode == 0x21 || mapMode == 0x31) mode = "HIROM-";
+  if(mapMode == 0x22 || mapMode == 0x32) mode = "SDD1-";
+  if(mapMode == 0x23 || mapMode == 0x33) mode = "SA1-";
+  if(mapMode == 0x25 || mapMode == 0x35) mode = "EXHIROM-";
+  if(mapMode == 0x2a || mapMode == 0x3a) mode = "SPC7110-";
+
+  //many games will store an extra title character, overwriting the map mode
+  if(!mode) {
+    if(headerAddress ==   0x7fb0) mode = "LOROM-";
+    if(headerAddress ==   0xffb0) mode = "HIROM-";
+    if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
+  }
 
   if(serial() == "A9PJ") {
     board.append("ST-");

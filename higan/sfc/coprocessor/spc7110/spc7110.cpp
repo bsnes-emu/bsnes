@@ -43,7 +43,7 @@ auto SPC7110::power() -> void {
 
   prom.writeProtect(true);
   drom.writeProtect(true);
-  ram.writeProtect(true);
+  ram.writeProtect(false);
 
   r4801 = 0x00;
   r4802 = 0x00;

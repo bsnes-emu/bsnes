@@ -21,6 +21,7 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
         }
       }
       if(!matched) continue;
+
       if(region.endsWith("-USA")
       || region.endsWith("-CAN")
       || region.endsWith("-JPN")
@@ -30,17 +31,30 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
       } else {
         output.append("region=pal\n");
       }
-      uint counter = 0;
+
+      vector<Markup::Node> rom;
+      vector<Markup::Node> ram;
+      for(auto memory : node.find("game/memory")) {
+        if(memory["type"].text() == "ROM" || memory["type"].text() == "EPROM") {
+          rom.append(memory);
+        }
+        if(memory["type"].text() == "RAM" || memory["type"].text() == "NVRAM") {
+          ram.append(memory);
+        }
+      }
+
       for(auto& line : BML::serialize(leaf).split("\n")) {
         line.trimLeft("  ", 1L);
-        if(line.endsWith("rom") || line.endsWith("ram")) {
-          auto memory = node.find("game/memory");
-          if(counter < memory.size()) {
-            line.append(" name=", memory[counter]["name"].text());
-            line.append(" size=", memory[counter]["size"].text());
-            if(memory[counter]["type"].text() == "RAM") line.append(" volatile");
-            counter++;
-          }
+        if(line.endsWith("rom") && rom) {
+          line.append(" name=", rom.left()["name"].text());
+          line.append(" size=", rom.left()["size"].text());
+          rom.removeLeft();
+        }
+        if(line.endsWith("ram")) {
+          line.append(" name=", ram.left()["name"].text());
+          line.append(" size=", ram.left()["size"].text());
+          if(ram.left()["type"].text() == "RAM") line.append(" volatile");
+          ram.removeLeft();
         }
         output.append(line, "\n");
       }
