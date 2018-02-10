@@ -8,7 +8,8 @@
 #ifdef GB_INTERNAL
 /* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */
 #ifdef WIIU
-#define MAX_CH_AMP 0x1FE0 / 4
+/* Todo: Remove this hack once https://github.com/libretro/RetroArch/issues/6252 is fixed*/
+#define MAX_CH_AMP (0x1FE0 / 4)
 #else
 #define MAX_CH_AMP 0x1FE0
 #endif
