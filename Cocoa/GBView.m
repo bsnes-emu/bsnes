@@ -173,7 +173,12 @@
             handled = true;
             switch (i) {
                 case GBTurbo:
-                    GB_set_turbo_mode(_gb, true, false);
+                    GB_set_turbo_mode(_gb, true, self.isRewinding);
+                    break;
+                    
+                case GBRewind:
+                    self.isRewinding = true;
+                    GB_set_turbo_mode(_gb, false, false);
                     break;
                     
                 default:
@@ -201,6 +206,10 @@
                 case GBTurbo:
                     GB_set_turbo_mode(_gb, false, false);
                     break;
+                    
+                case GBRewind:
+                    self.isRewinding = false;
+                    break;
 
                 default:
                     GB_set_key_state(_gb, (GB_key_t)i, false);
@@ -224,7 +233,14 @@
         if (mapped_button && [mapped_button integerValue] == button) {
             switch (i) {
                 case GBTurbo:
-                    GB_set_turbo_mode(_gb, state, false);
+                    GB_set_turbo_mode(_gb, state, state && self.isRewinding);
+                    break;
+                    
+                case GBRewind:
+                    self.isRewinding = state;
+                    if (state) {
+                        GB_set_turbo_mode(_gb, false, false);
+                    }
                     break;
                     
                 default:

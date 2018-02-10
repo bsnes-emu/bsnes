@@ -198,6 +198,8 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 
 static void display_vblank(GB_gameboy_t *gb)
 {
+    gb->vblank_just_occured = true;
+
     if (gb->turbo) {
         if (GB_timing_sync_turbo(gb)) {
             return;
@@ -216,8 +218,6 @@ static void display_vblank(GB_gameboy_t *gb)
 
     gb->vblank_callback(gb);
     GB_timing_sync(gb);
-
-    gb->vblank_just_occured = true;
 }
 
 static inline uint8_t scale_channel(uint8_t x)

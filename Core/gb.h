@@ -17,6 +17,7 @@
 #include "memory.h"
 #include "printer.h"
 #include "timing.h"
+#include "rewind.h"
 #include "z80_cpu.h"
 #include "symbol_hash.h"
 
@@ -161,7 +162,7 @@ typedef enum {
 #define CPU_FREQUENCY 0x400000
 #define DIV_CYCLES (0x100)
 #define INTERNAL_DIV_CYCLES (0x40000)
-#define FRAME_LENGTH 16742706 // in nanoseconds
+#define FRAME_LENGTH (1000000000LL * LCDC_PERIOD / CPU_FREQUENCY) // in nanoseconds
 
 #if !defined(MIN)
 #define MIN(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
@@ -475,6 +476,16 @@ struct GB_gameboy_internal_s {
 
         /* Ticks command */
         unsigned long debugger_ticks;
+               
+        /* Rewind */
+#define GB_REWIND_FRAMES_PER_KEY 255
+        size_t rewind_buffer_length;
+        struct {
+            uint8_t *key_state;
+            uint8_t *compressed_states[GB_REWIND_FRAMES_PER_KEY];
+            unsigned pos;
+        } *rewind_sequences; // lasts about 4 seconds
+        size_t rewind_pos;
 
         /* Misc */
         bool turbo;

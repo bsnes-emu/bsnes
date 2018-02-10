@@ -11,6 +11,10 @@
 #endif
 #include "gb.h"
 
+/* The libretro frontend does not link against rewind.c, so we provide empty weak alternatives to its functions */
+void __attribute__((weak)) GB_rewind_free(GB_gameboy_t *gb) { }
+void __attribute__((weak)) GB_rewind_push(GB_gameboy_t *gb) { }
+
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
@@ -149,6 +153,7 @@ void GB_free(GB_gameboy_t *gb)
             gb->reversed_symbol_map.buckets[i] = next;
         }
     }
+    GB_rewind_free(gb);
     memset(gb, 0, sizeof(*gb));
 }
 
@@ -280,6 +285,7 @@ uint8_t GB_run(GB_gameboy_t *gb)
         GB_update_joyp(gb);
         GB_rtc_run(gb);
         GB_debugger_handle_async_commands(gb);
+        GB_rewind_push(gb);
     }
     return gb->cycles_since_run;
 }
@@ -505,6 +511,7 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, bool is_cgb)
         gb->vram = realloc(gb->vram, gb->vram_size = 0x2000);
     }
     gb->is_cgb = is_cgb;
+    GB_rewind_free(gb);
     GB_reset(gb);
 }
 

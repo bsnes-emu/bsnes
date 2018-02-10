@@ -10,4 +10,5 @@
 @property (nonatomic) BOOL shouldBlendFrameWithPrevious;
 @property GBShader *shader;
 @property (getter=isMouseHidingEnabled) BOOL mouseHidingEnabled;
+@property bool isRewinding;
 @end

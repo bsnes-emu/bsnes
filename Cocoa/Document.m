@@ -51,6 +51,8 @@ enum model {
     bool logToSideView;
     bool shouldClearSideView;
     enum model current_model;
+    
+    bool rewind;
 }
 
 @property GBAudioClient *audioClient;
@@ -166,6 +168,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
     GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
+    GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
     [self loadROM];
 }
 
@@ -178,6 +181,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         dispatch_async(dispatch_get_main_queue(), ^{
             [self reloadVRAMData: nil];
         });
+    }
+    if (self.view.isRewinding) {
+        rewind = true;
     }
 }
 
@@ -197,7 +203,16 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
     while (running) {
-        GB_run(&gb);
+        if (rewind) {
+            rewind = false;
+            GB_rewind_pop(&gb);
+            if (!GB_rewind_pop(&gb)) {
+                rewind = self.view.isRewinding;
+            }
+        }
+        else {
+            GB_run(&gb);
+        }
     }
     [hex_timer invalidate];
     [self.audioClient stop];
@@ -325,6 +340,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateColorCorrectionMode)
                                                  name:@"GBColorCorrectionChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateRewindLength)
+                                                 name:@"GBRewindLengthChanged"
                                                object:nil];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
@@ -1321,6 +1341,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     if (GB_is_inited(&gb)) {
         GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
+    }
+}
+
+- (void) updateRewindLength
+{
+    if (GB_is_inited(&gb)) {
+        GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
     }
 }
 

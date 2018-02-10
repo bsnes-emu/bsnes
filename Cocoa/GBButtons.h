@@ -11,6 +11,7 @@ typedef enum : NSUInteger {
     GBSelect,
     GBStart,
     GBTurbo,
+    GBRewind,
     GBButtonCount
 } GBButton;
 

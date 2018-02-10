@@ -14,6 +14,7 @@
     NSPopUpButton *_graphicsFilterPopupButton;
     NSPopUpButton *_highpassFilterPopupButton;
     NSPopUpButton *_colorCorrectionPopupButton;
+    NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
 }
 
@@ -75,6 +76,18 @@
 - (NSPopUpButton *)colorCorrectionPopupButton
 {
     return _colorCorrectionPopupButton;
+}
+
+- (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
+{
+    _rewindPopupButton = rewindPopupButton;
+    NSInteger length = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"];
+    [_rewindPopupButton selectItemWithTag:length];
+}
+
+- (NSPopUpButton *)rewindPopupButton
+{
+    return _rewindPopupButton;
 }
 
 - (void)setHighpassFilterPopupButton:(NSPopUpButton *)highpassFilterPopupButton
@@ -159,6 +172,13 @@
                                               forKey:@"GBColorCorrection"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
 
+}
+
+- (IBAction)rewindLengthChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
+                                              forKey:@"GBRewindLength"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRewindLengthChanged" object:nil];
 }
 
 - (IBAction) configureJoypad:(id)sender

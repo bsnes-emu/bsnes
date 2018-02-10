@@ -28,10 +28,12 @@
                                                               @"GBStart": @(kVK_Return),
 
                                                               @"GBTurbo": @(kVK_Space),
+                                                              @"GBRewind": @(kVK_Tab),
 
                                                               @"GBFilter": @"NearestNeighbor",
                                                               @"GBColorCorrection": @(GB_COLOR_CORRECTION_EMULATE_HARDWARE),
-                                                              @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET)
+                                                              @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET),
+                                                              @"GBRewindLength": @(10)
                                                               }];
 }
 
