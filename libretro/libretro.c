@@ -205,7 +205,7 @@ static const struct retro_variable vars[] = {
     { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-    { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { NULL }
 };
 
@@ -215,8 +215,8 @@ static const struct retro_variable vars_sameboy_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
-    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -229,8 +229,8 @@ static const struct retro_variable vars_link_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Game Boy" },
-    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Game Boy" },
+    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -304,9 +304,9 @@ static void init_for_current_model(void)
             else
                 GB_init_cgb(&gameboy[i]);
         }
-        const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[model[i]];
-        const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[model[i]];
-        unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[model[i]];
+        const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[effective_model[i]];
+        const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[effective_model[i]];
+        unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[effective_model[i]];
 
         char buf[256];
         snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
@@ -492,6 +492,7 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else
                 new_model = MODEL_AUTO;
+            
             if (GB_is_inited(&gameboy[0]) && new_model != model[0]) {
                 model[0] = new_model;
                 init_for_current_model();
@@ -512,6 +513,7 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else
                 new_model = MODEL_AUTO;
+            
             if (GB_is_inited(&gameboy[1]) && new_model != model[1]) {
                 model[1] = new_model;
                 init_for_current_model();
@@ -654,11 +656,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
     if (screen_layout == LAYOUT_TOP_DOWN) {
         geom.base_width = VIDEO_WIDTH;
         geom.base_height = VIDEO_HEIGHT * emulated_devices;
-        geom.aspect_ratio = VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
+        geom.aspect_ratio = (double)VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
     }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
         geom.base_width = VIDEO_WIDTH * emulated_devices;
         geom.base_height = VIDEO_HEIGHT;
-        geom.aspect_ratio = (VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
+        geom.aspect_ratio = ((double)VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
     }
 
     geom.max_width = VIDEO_WIDTH * emulated_devices;
