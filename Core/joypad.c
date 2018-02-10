@@ -50,7 +50,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
             break;
     }
     if (previous_state != (gb->io_registers[GB_IO_JOYP] & 0xF)) {
-        /* Todo: disable when emulating CGB */
+        /* The joypad interrupt DOES occur on CGB (Tested on CGB-CPU-06), unlike what some documents say. */
         gb->io_registers[GB_IO_IF] |= 0x10;
     }
     gb->io_registers[GB_IO_JOYP] |= 0xC0; // No SGB support
