@@ -12,6 +12,7 @@ struct SuperFamicom {
   auto board() const -> string;
   auto label() const -> string;
   auto serial() const -> string;
+  auto romSize() const -> uint;
   auto ramSize() const -> uint;
   auto expansionRamSize() const -> uint;
 
@@ -62,20 +63,20 @@ auto SuperFamicom::manifest() const -> string {
     output.append(memory("ROM", size - 0x2000, "program.rom"));
     output.append(memory("ROM", 0x1800, "dsp.program.rom"));
     output.append(memory("ROM", 0x800, "dsp.data.rom"));
-  } else if(board.left() == "SETA") {
-    output.append(memory("ROM", size - 0x28000, "program.rom"));
-    output.append(memory("ROM", 0x20000, "seta.program.rom"));
-    output.append(memory("ROM", 0x8000, "seta.data.rom"));
   } else if(board.left() == "SGB") {
     output.append(memory("ROM", size - 0x100, "program.rom"));
     output.append(memory("ROM", 0x100, "sgb.boot.rom"));
   } else if(board.left() == "SPC7110") {
     output.append(memory("ROM", 0x100000, "program.rom"));
     output.append(memory("ROM", size - 0x100000, "data.rom"));
-  } else if(board.left() == "ST") {
+  } else if(board.left() == "ST010" || board.left() == "ST011") {
     output.append(memory("ROM", size - 0xd000, "program.rom"));
     output.append(memory("ROM", 0xc000, "st.program.rom"));
     output.append(memory("ROM", 0x1000, "st.data.rom"));
+  } else if(board.left() == "ST018") {
+    output.append(memory("ROM", size - 0x28000, "program.rom"));
+    output.append(memory("ROM", 0x20000, "seta.program.rom"));
+    output.append(memory("ROM", 0x8000, "seta.data.rom"));
   } else {
     output.append(memory("ROM", size, "program.rom"));
   }
@@ -90,10 +91,9 @@ auto SuperFamicom::manifest() const -> string {
     output.append(memory(type, size, "expansion.ram"));
   }
 
-         if(board.left() == "BSX") {
+         if(board.left() == "BS" && board(1) == "NVRAM") {
     output.append(memory("NVRAM", 0x80000, "download.ram"));
   } else if(board.left() == "CX4") {
-    output.append(memory("RAM", 0, "save.ram"));
     output.append(memory("RAM", 0xc00, "cx4.data.ram"));
   } else if(board.left() == "DSP") {
     output.append(memory("RAM", 0x200, "dsp.data.ram"));
@@ -101,12 +101,12 @@ auto SuperFamicom::manifest() const -> string {
     output.append(memory("NVRAM", 0x10, "rtc.ram"));
   } else if(board.left() == "SA1") {
     output.append(memory("RAM", 0x800, "internal.ram"));
-  } else if(board.left() == "SETA") {
-    output.append(memory("NVRAM", 0x4000, "seta.save.ram"));
   } else if(board.left() == "SPC7110" && board(1) == "RTC") {
     output.append(memory("NVRAM", 0x10, "rtc.ram"));
-  } else if(board.left() == "ST") {
+  } else if(board.left() == "ST010" || board.left() == "ST011") {
     output.append(memory("NVRAM", 0x1000, "st.save.ram"));
+  } else if(board.left() == "ST018") {
+    output.append(memory("NVRAM", 0x4000, "seta.save.ram"));
   }
 
   if(hasMSU1) {
@@ -250,8 +250,12 @@ auto SuperFamicom::board() const -> string {
     if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
   }
 
-  if(serial() == "A9PJ") {
-    board.append("ST-");
+         if(serial() == "A9PJ") {
+  //Sufami Turbo (JPN)
+    board.append("ST-", mode);
+  } else if(serial() == "ZSBJ") {
+  //BS-X: Sore wa Namae o Nusumareta Machi no Monogatari (JPN)
+    board.append("BS-");
   } else if(serial().match("Z\?\?J")) {
     board.append("BS-", mode);
   } else if(cartridgeTypeLo >= 0x3) {
@@ -262,15 +266,16 @@ auto SuperFamicom::board() const -> string {
     if(cartridgeTypeHi == 0x4) board.append("SDD1-");
     if(cartridgeTypeHi == 0x5) board.append("RTC-", mode);
     if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x3) board.append("SGB-");
-    if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x5) board.append("BSX-");
     if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x5) board.append("SPC7110-");
     if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x9) board.append("SPC7110-RTC-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) board.append("ST-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) board.append("SETA-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) board.append("CX4-");
-  } else {
-    board.append(mode);
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) board.append(romSize() == 0x100000 ? "ST010-" : "ST011-");
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) board.append("ST018-", mode);
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) board.append("CX4-", mode);
   }
+  if(!board) board.append(mode);
+
+  //grow ROM region and restrict RAM region for large LOROM boards ("EXLOROM")
+  if(board.beginsWith("LOROM-") && romSize() > 0x380000 && ramSize()) board.prepend("EX");
 
   if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");
   if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("NVRAM-");
@@ -302,6 +307,19 @@ auto SuperFamicom::serial() const -> string {
   }
 
   return "";
+}
+
+auto SuperFamicom::romSize() const -> uint {
+  //subtract appended firmware size, if firmware is present
+  if((size &  0x7fff) ==   0x100) return size -   0x100;
+  if((size &  0x7fff) ==   0xc00) return size -   0xc00;
+  if((size &  0x7fff) ==  0x2000) return size -  0x2000;
+  if((size &  0xffff) ==  0xd000) return size -  0xd000;
+  if((size & 0x3ffff) == 0x28000) return size - 0x28000;
+  return size;
+
+//auto romSize = data[headerAddress + 0x27] & 15;
+//return 1024 << romSize;
 }
 
 auto SuperFamicom::ramSize() const -> uint {

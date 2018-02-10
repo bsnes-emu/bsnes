@@ -1,18 +1,48 @@
-struct SufamiTurboCartridge {
-  SufamiTurboCartridge(const uint8_t* data, unsigned size);
+namespace Heuristics {
 
-  string markup;
+struct SufamiTurbo {
+  SufamiTurbo(const uint8_t* data, uint size);
+  explicit operator bool() const;
+
+  auto manifest() const -> string;
+
+private:
+  const uint8_t* data = nullptr;
+  uint size = 0;
 };
 
-SufamiTurboCartridge::SufamiTurboCartridge(const uint8_t* data, unsigned size) {
-  if(size < 0x20000) return;  //too small to be a valid game?
-  if(memcmp(data, "BANDAI SFC-ADX", 14)) return;  //missing required header?
-  unsigned romsize = data[0x36] * 0x20000;  //128KB
-  unsigned ramsize = data[0x37] *   0x800;    //2KB
-  bool linkable = data[0x35] != 0x00;  //TODO: unconfirmed
+SufamiTurbo::SufamiTurbo(const uint8_t* data, uint size) : data(data), size(size) {
+}
 
-  markup.append("board", linkable ? " linkable" : "", "\n");
-  markup.append("  rom name=program.rom size=0x", hex(romsize), "\n");
-  if(ramsize)
-  markup.append("  ram name=save.ram size=0x", hex(ramsize), "\n");
+SufamiTurbo::operator bool() const {
+  return size >= 0x20000;
+}
+
+auto SufamiTurbo::manifest() const -> string {
+  if(!operator bool()) return "";
+
+  uint romSize = data[0x36] * 0x20000;  //128KB
+  uint ramSize = data[0x37] * 0x800;  //2KB
+  bool linkable = data[0x35];  //TODO: unconfirmed
+
+  string output;
+  output.append("game\n");
+  if(linkable) {
+    output.append("  linkable\n");
+  }
+  if(romSize) {
+    output.append("  memory\n");
+    output.append("    type: ROM\n");
+    output.append("    size: 0x", hex(romSize), "\n");
+    output.append("    name: program.rom\n");
+  }
+  if(ramSize) {
+    output.append("  memory\n");
+    output.append("    type: NVRAM\n");
+    output.append("    size: 0x", hex(ramSize), "\n");
+    output.append("    name: save.ram\n");
+  }
+  return output;
+}
+
 }

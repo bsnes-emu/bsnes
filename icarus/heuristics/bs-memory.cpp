@@ -1,10 +1,34 @@
-struct BSMemoryCartridge {
-  BSMemoryCartridge(const uint8_t* data, uint size);
+namespace Heuristics {
 
-  string markup;
+struct BSMemory {
+  BSMemory(const uint8_t* data, uint size);
+  explicit operator bool() const;
+
+  auto manifest() const -> string;
+
+private:
+  const uint8_t* data = nullptr;
+  uint size = 0;
 };
 
-BSMemoryCartridge::BSMemoryCartridge(const uint8_t* data, uint size) {
-  markup.append("board\n");
-  markup.append("  rom type=flash name=program.rom size=0x", hex(size), "\n");
+BSMemory::BSMemory(const uint8_t* data, uint size) : data(data), size(size) {
+}
+
+BSMemory::operator bool() const {
+  return size == 0x100000;
+}
+
+auto BSMemory::manifest() const -> string {
+  if(!operator bool()) return "";
+
+  string output;
+  output.append("game\n");
+  output.append("  sha256: ", Hash::SHA256(data, size).digest(), "\n");
+  output.append("  memory\n");
+  output.append("    type: NAND\n");
+  output.append("    size: 0x", hex(size), "\n");
+  output.append("    name: program.rom\n");
+  return output;
+}
+
 }

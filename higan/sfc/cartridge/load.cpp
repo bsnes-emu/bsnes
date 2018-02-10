@@ -50,7 +50,7 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
           line.append(" size=", rom.left()["size"].text());
           rom.removeLeft();
         }
-        if(line.endsWith("ram")) {
+        if(line.endsWith("ram") && ram) {
           line.append(" name=", ram.left()["name"].text());
           line.append(" size=", ram.left()["size"].text());
           if(ram.left()["type"].text() == "RAM") line.append(" volatile");
@@ -115,14 +115,14 @@ auto Cartridge::loadGameBoy(Markup::Node node) -> void {
 }
 
 auto Cartridge::loadBSMemory(Markup::Node node) -> void {
-  information.title.bsMemory = node["information/title"].text();
+  information.title.bsMemory = node["game/label"].text();
   bsmemory.readonly = (node["board/rom/type"].text() == "mrom");
 
   loadMemory(bsmemory.memory, node["board/rom"], File::Required, bsmemory.pathID);
 }
 
 auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
-  information.title.sufamiTurboA = node["information/title"].text();
+  information.title.sufamiTurboA = node["game/label"].text();
 
   loadMemory(sufamiturboA.rom, node["board/rom"], File::Required, sufamiturboA.pathID);
   loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, sufamiturboA.pathID);
@@ -136,7 +136,7 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
 }
 
 auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
-  information.title.sufamiTurboB = node["information/title"].text();
+  information.title.sufamiTurboB = node["game/label"].text();
 
   loadMemory(sufamiturboB.rom, node["board/rom"], File::Required, sufamiturboB.pathID);
   loadMemory(sufamiturboB.ram, node["board/ram"], File::Optional, sufamiturboB.pathID);
