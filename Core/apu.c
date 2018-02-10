@@ -359,7 +359,7 @@ void GB_apu_run(GB_gameboy_t *gb)
     
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_since_render += cycles;
-        double cycles_per_sample = CPU_FREQUENCY / (double)gb->apu_output.sample_rate; // TODO: this should be cached!
+        double cycles_per_sample = GB_get_clock_rate(gb) / (double)gb->apu_output.sample_rate;
         
         if (gb->apu_output.sample_cycles > cycles_per_sample) {
             gb->apu_output.sample_cycles -= cycles_per_sample;
@@ -837,7 +837,7 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
     gb->apu_output.sample_rate = sample_rate;
     gb->apu_output.buffer_position = 0;
     if (sample_rate) {
-        gb->apu_output.highpass_rate = pow(0.999958,  CPU_FREQUENCY / (double)sample_rate);
+        gb->apu_output.highpass_rate = pow(0.999958,  GB_get_clock_rate(gb) / (double)sample_rate);
     }
 }
 

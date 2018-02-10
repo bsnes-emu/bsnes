@@ -12,6 +12,9 @@
     NSTrackingArea *tracking_area;
     BOOL _mouseHidingEnabled;
     bool enableAnalog;
+    bool underclockKeyDown;
+    double clockMultiplier;
+    NSEventModifierFlags previousModifiers;
 }
 
 - (void) awakeFromNib
@@ -51,6 +54,7 @@
                                                     owner:self
                                                  userInfo:nil];
     [self addTrackingArea:tracking_area];
+    clockMultiplier = 1.0;
 }
 
 - (void) filterChanged
@@ -153,6 +157,14 @@
 
 - (void) flip
 {
+    if (underclockKeyDown && clockMultiplier > 0.5) {
+        clockMultiplier -= 0.1;
+        GB_set_clock_multiplier(_gb, clockMultiplier);
+    }
+    if (!underclockKeyDown && clockMultiplier < 1.0) {
+        clockMultiplier += 0.1;
+        GB_set_clock_multiplier(_gb, clockMultiplier);
+    }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
     [self setNeedsDisplay:YES];
 }
@@ -179,6 +191,10 @@
                 case GBRewind:
                     self.isRewinding = true;
                     GB_set_turbo_mode(_gb, false, false);
+                    break;
+                
+                case GBUnderclock:
+                    underclockKeyDown = true;
                     break;
                     
                 default:
@@ -209,6 +225,10 @@
                     
                 case GBRewind:
                     self.isRewinding = false;
+                    break;
+                
+                case GBUnderclock:
+                    underclockKeyDown = false;
                     break;
 
                 default:
@@ -241,6 +261,10 @@
                     if (state) {
                         GB_set_turbo_mode(_gb, false, false);
                     }
+                    break;
+                
+                case GBUnderclock:
+                    underclockKeyDown = state;
                     break;
                     
                 default:
@@ -322,6 +346,18 @@
 - (BOOL)isMouseHidingEnabled
 {
     return _mouseHidingEnabled;
+}
+
+- (void) flagsChanged:(NSEvent *)event
+{
+    if (event.modifierFlags > previousModifiers) {
+        [self keyDown:event];
+    }
+    else {
+        [self keyUp:event];
+    }
+    
+    previousModifiers = event.modifierFlags;
 }
 
 @end

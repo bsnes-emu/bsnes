@@ -29,6 +29,7 @@
 
                                                               @"GBTurbo": @(kVK_Space),
                                                               @"GBRewind": @(kVK_Tab),
+                                                              @"GBSlow-Motion": @(kVK_Shift),
 
                                                               @"GBFilter": @"NearestNeighbor",
                                                               @"GBColorCorrection": @(GB_COLOR_CORRECTION_EMULATE_HARDWARE),

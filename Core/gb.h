@@ -162,7 +162,6 @@ typedef enum {
 #define CPU_FREQUENCY 0x400000
 #define DIV_CYCLES (0x100)
 #define INTERNAL_DIV_CYCLES (0x40000)
-#define FRAME_LENGTH (1000000000LL * LCDC_PERIOD / CPU_FREQUENCY) // in nanoseconds
 
 #if !defined(MIN)
 #define MIN(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
@@ -495,6 +494,7 @@ struct GB_gameboy_internal_s {
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
         uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run()
+        double clock_multiplier;
    );
 };
     
@@ -583,4 +583,9 @@ void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
 
+#ifdef GB_INTERNAL
+uint32_t GB_get_clock_rate(GB_gameboy_t *gb);
+#endif
+void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier);
+    
 #endif /* GB_h */

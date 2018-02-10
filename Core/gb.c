@@ -100,6 +100,7 @@ void GB_init(GB_gameboy_t *gb)
     gb->async_input_callback = default_async_input_callback;
 #endif
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
+    gb->clock_multiplier = 1.0;
     
     GB_reset(gb);
 }
@@ -116,7 +117,8 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->async_input_callback = default_async_input_callback;
 #endif
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
-
+    gb->clock_multiplier = 1.0;
+    
     GB_reset(gb);
 }
 
@@ -307,7 +309,7 @@ uint64_t GB_run_frame(GB_gameboy_t *gb)
     }
     gb->turbo = old_turbo;
     gb->turbo_dont_skip = old_dont_skip;
-    return gb->cycles_since_last_sync * FRAME_LENGTH * LCDC_PERIOD;
+    return gb->cycles_since_last_sync * 1000000000LL / GB_get_clock_rate(gb);
 }
 
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
@@ -579,4 +581,14 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
             *bank = 0;
             return NULL;
     }
+}
+
+void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
+{
+    gb->clock_multiplier = multiplier;
+}
+
+uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
+{
+    return CPU_FREQUENCY * gb->clock_multiplier;
 }

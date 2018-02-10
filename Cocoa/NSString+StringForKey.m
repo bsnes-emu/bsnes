@@ -13,21 +13,32 @@
 {
     /* These cases are not handled by stringForVirtualKey */
     switch (keyCode) {
-        case 115: return @"↖";
-        case 119: return @"↘";
-        case 116: return @"⇞";
-        case 121: return @"⇟";
-        case 51: return @"⌫";
-        case 117: return @"⌦";
-        case 76: return @"⌤";
-
+            
+        case kVK_Home: return @"↖";
+        case kVK_End: return @"↘";
+        case kVK_PageUp: return @"⇞";
+        case kVK_PageDown: return @"⇟";
+        case kVK_Delete: return @"⌫";
+        case kVK_ForwardDelete: return @"⌦";
+        case kVK_ANSI_KeypadEnter: return @"⌤";
+        case kVK_CapsLock: return @"⇪";
+        case kVK_Shift: return @"Left ⇧";
+        case kVK_Control: return @"Left ⌃";
+        case kVK_Option: return @"Left ⌥";
+        case kVK_Command: return @"Left ⌘";
+        case kVK_RightShift: return @"Right ⇧";
+        case kVK_RightControl: return @"Right ⌃";
+        case kVK_RightOption: return @"Right ⌥";
+        case kVK_RightCommand: return @"Right ⌘";
+        case kVK_Function: return @"fn";
+            
         /* Label Keypad buttons accordingly */
         default:
-            if ((keyCode < 82 || keyCode > 92)) {
+            if ((keyCode < kVK_ANSI_Keypad0 || keyCode > kVK_ANSI_Keypad9)) {
                 return [NSPrefPaneUtils stringForVirtualKey:keyCode modifiers:0];
             }
             
-        case 65: case 67: case 69: case 75: case 78: case 81:
+        case kVK_ANSI_KeypadDecimal: case kVK_ANSI_KeypadMultiply: case kVK_ANSI_KeypadPlus: case kVK_ANSI_KeypadDivide: case kVK_ANSI_KeypadMinus: case kVK_ANSI_KeypadEquals:
             return [@"Keypad " stringByAppendingString:[NSPrefPaneUtils stringForVirtualKey:keyCode modifiers:0]];
     }
 }

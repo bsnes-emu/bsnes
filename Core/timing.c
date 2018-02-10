@@ -40,7 +40,7 @@ bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 {
     if (!gb->turbo_dont_skip) {
         int64_t nanoseconds = get_nanoseconds();
-        if (nanoseconds <= gb->last_sync + FRAME_LENGTH) {
+        if (nanoseconds <= gb->last_sync + (1000000000LL * LCDC_PERIOD / GB_get_clock_rate(gb))) {
             return true;
         }
         gb->last_sync = nanoseconds;
@@ -57,7 +57,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
     /* Prevent syncing if not enough time has passed.*/
     if (gb->cycles_since_last_sync < LCDC_PERIOD / 4) return;
 
-    uint64_t target_nanoseconds = gb->cycles_since_last_sync * FRAME_LENGTH / LCDC_PERIOD;
+    uint64_t target_nanoseconds = gb->cycles_since_last_sync * 1000000000LL / GB_get_clock_rate(gb);
     int64_t nanoseconds = get_nanoseconds();
     if (labs((signed long)(nanoseconds - gb->last_sync)) < target_nanoseconds ) {
         nsleep(target_nanoseconds  + gb->last_sync - nanoseconds);

@@ -16,6 +16,7 @@
     NSPopUpButton *_colorCorrectionPopupButton;
     NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
+    NSEventModifierFlags previousModifiers;
 }
 
 + (NSArray *)filterList
@@ -143,6 +144,18 @@
     self.controlsTableView.enabled = YES;
     [self.controlsTableView reloadData];
     [self makeFirstResponder:self.controlsTableView];
+}
+
+- (void) flagsChanged:(NSEvent *)event
+{
+    if (event.modifierFlags > previousModifiers) {
+        [self keyDown:event];
+    }
+    else {
+        [self keyUp:event];
+    }
+    
+    previousModifiers = event.modifierFlags;
 }
 
 - (IBAction)graphicFilterChanged:(NSPopUpButton *)sender
