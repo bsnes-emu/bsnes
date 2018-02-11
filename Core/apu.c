@@ -26,11 +26,11 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsig
     gb->apu.samples[index] = value;
     if (gb->apu_output.sample_rate) {
         unsigned left_volume = 0;
-        if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
+        if (gb->apu.is_active[index] && (gb->io_registers[GB_IO_NR51] & (1 << index))) {
             left_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
         }
         unsigned right_volume = 0;
-        if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
+        if (gb->apu.is_active[index] && (gb->io_registers[GB_IO_NR51] & (0x10 << index))) {
             right_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
         }
         GB_sample_t output = {(0xf - value) * left_volume, (0xf - value) * right_volume};
@@ -82,11 +82,13 @@ static void render(GB_gameboy_t *gb)
             unsigned left_volume = 0;
             unsigned right_volume = 0;
             for (unsigned i = GB_N_CHANNELS; i--;) {
-                if (mask & 1) {
-                    left_volume += (gb->io_registers[GB_IO_NR50] & 7) * CH_STEP * 0xF;
-                }
-                if (mask & 0x10) {
-                    right_volume += ((gb->io_registers[GB_IO_NR50] >> 4) & 7) * CH_STEP * 0xF;
+                if (gb->apu.is_active[i]) {
+                    if (mask & 1) {
+                        left_volume += (gb->io_registers[GB_IO_NR50] & 7) * CH_STEP * 0xF;
+                    }
+                    if (mask & 0x10) {
+                        right_volume += ((gb->io_registers[GB_IO_NR50] >> 4) & 7) * CH_STEP * 0xF;
+                    }
                 }
                 mask >>= 1;
             }
@@ -540,8 +542,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if ((value & 0xF8) == 0) {
                 /* According to Blargg's test ROM this should disable the channel instantly
                  TODO: verify how "instant" the change is using PCM12 */
-                update_sample(gb, index, 0, 0);
                 gb->apu.is_active[index] = false;
+                update_sample(gb, index, 0, 0);
             }
             else if (gb->apu.is_active[index]) {
                 nrx2_glitch(&gb->apu.square_channels[index].current_volume, value, gb->io_registers[reg]);
@@ -590,8 +592,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 
                 gb->apu.square_channels[index].volume_countdown = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 7;
                 
-                if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0) {
+                if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0 && !gb->apu.is_active[index]) {
                     gb->apu.is_active[index] = true;
+                    update_square_sample(gb, index);
                 }
                 if (gb->apu.square_channels[index].pulse_length == 0) {
                     gb->apu.square_channels[index].pulse_length = 0x40;
@@ -625,8 +628,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         gb->apu.square_channels[index].pulse_length = 0x3F;
                     }
                     else {
-                        update_sample(gb, index, 0, 0);
                         gb->apu.is_active[index] = false;
+                        update_sample(gb, index, 0, 0);
                     }
                 }
             }
@@ -682,7 +685,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                                8);
                     }
                 }
-                gb->apu.is_active[GB_WAVE] = true;
+                if (!gb->apu.is_active[GB_WAVE]) {
+                    gb->apu.is_active[GB_WAVE] = true;
+                    update_sample(gb, GB_WAVE, 0, 0);
+                }
                 gb->apu.wave_channel.sample_countdown = (gb->apu.wave_channel.sample_length ^ 0x7FF) + 3;
                 gb->apu.wave_channel.current_sample_index = 0;
                 if (gb->apu.wave_channel.pulse_length == 0) {
@@ -703,13 +709,16 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         gb->apu.wave_channel.pulse_length = 0xFF;
                     }
                     else {
-                        update_sample(gb, GB_WAVE, 0, 0);
                         gb->apu.is_active[GB_WAVE] = false;
+                        update_sample(gb, GB_WAVE, 0, 0);
                     }
                 }
             }
             gb->apu.wave_channel.length_enabled = value & 0x40;
-            gb->apu.is_active[GB_WAVE] &= gb->apu.wave_channel.enable;
+            if (gb->apu.is_active[GB_WAVE] && !gb->apu.wave_channel.enable) {
+                gb->apu.is_active[GB_WAVE] = false;
+                update_sample(gb, GB_WAVE, 0, 0);
+            }
 
             break;
         
@@ -725,8 +734,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if ((value & 0xF8) == 0) {
                 /* According to Blargg's test ROM this should disable the channel instantly
                  TODO: verify how "instant" the change is using PCM12 */
-                update_sample(gb, GB_NOISE, 0, 0);
                 gb->apu.is_active[GB_NOISE] = false;
+                update_sample(gb, GB_NOISE, 0, 0);
             }
             else if (gb->apu.is_active[GB_NOISE]){
                 nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
@@ -783,8 +792,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.noise_channel.lfsr = 0;
                 gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
                 
-                if ((gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
+                if (!gb->apu.is_active[GB_NOISE] && (gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
                     gb->apu.is_active[GB_NOISE] = true;
+                    update_sample(gb, GB_NOISE, 0, 0);
                 }
                 
                 if (gb->apu.noise_channel.pulse_length == 0) {
@@ -804,8 +814,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         gb->apu.noise_channel.pulse_length = 0x3F;
                     }
                     else {
-                        update_sample(gb, GB_NOISE, 0, 0);
                         gb->apu.is_active[GB_NOISE] = false;
+                        update_sample(gb, GB_NOISE, 0, 0);
                     }
                 }
             }
