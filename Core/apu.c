@@ -24,13 +24,13 @@ static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_of
 static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsigned cycles_offset)
 {
     gb->apu.samples[index] = value;
-    if (gb->apu_output.sample_rate) {
+    if (gb->apu.is_active[index] && gb->apu_output.sample_rate) {
         unsigned left_volume = 0;
-        if (gb->apu.is_active[index] && (gb->io_registers[GB_IO_NR51] & (1 << index))) {
+        if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
             left_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
         }
         unsigned right_volume = 0;
-        if (gb->apu.is_active[index] && (gb->io_registers[GB_IO_NR51] & (0x10 << index))) {
+        if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
             right_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
         }
         GB_sample_t output = {(0xf - value) * left_volume, (0xf - value) * right_volume};
@@ -89,6 +89,10 @@ static void render(GB_gameboy_t *gb)
                     if (mask & 0x10) {
                         right_volume += ((gb->io_registers[GB_IO_NR50] >> 4) & 7) * CH_STEP * 0xF;
                     }
+                }
+                else {
+                    left_volume += gb->apu_output.current_sample[i].left * CH_STEP;
+                    right_volume += gb->apu_output.current_sample[i].right * CH_STEP;
                 }
                 mask >>= 1;
             }
