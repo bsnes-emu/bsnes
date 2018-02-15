@@ -21,7 +21,7 @@ static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_of
     gb->apu_output.last_update[index] = gb->apu_output.cycles_since_render + cycles_offset;
 }
 
-static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsigned cycles_offset)
+static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
     gb->apu.samples[index] = value;
     if (gb->apu.is_active[index] && gb->apu_output.sample_rate) {
@@ -33,7 +33,7 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, uint8_t value, unsig
         if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
             right_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
         }
-        GB_sample_t output = {(0xf - value) * left_volume, (0xf - value) * right_volume};
+        GB_sample_t output = {(0xf - value * 2) * left_volume, (0xf - value * 2) * right_volume};
         if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
             refresh_channel(gb, index, cycles_offset);
             gb->apu_output.current_sample[index] = output;
@@ -51,9 +51,9 @@ static void render(GB_gameboy_t *gb)
         }
         else {
             refresh_channel(gb, i, 0);
-            output.left += (unsigned) gb->apu_output.summed_samples[i].left * CH_STEP
+            output.left += (signed long) gb->apu_output.summed_samples[i].left * CH_STEP
                             / gb->apu_output.cycles_since_render;
-            output.right += (unsigned) gb->apu_output.summed_samples[i].right * CH_STEP
+            output.right += (signed long) gb->apu_output.summed_samples[i].right * CH_STEP
                             / gb->apu_output.cycles_since_render;
             gb->apu_output.summed_samples[i] = (GB_sample_t){0, 0};
         }
