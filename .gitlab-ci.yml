@@ -14,6 +14,7 @@ linux-x86_64-binaries:
     - cp -a genius/out/genius higan-nightly/genius
     - cp -a icarus/out/icarus higan-nightly/icarus
     - cp -a icarus/Database higan-nightly/
+    - cp -a icarus/Firmware higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
     - cp -a higan/systems/* higan-nightly/
     - cp -a shaders "higan-nightly/Video Shaders"
@@ -39,6 +40,7 @@ windows-x86_64-binaries:
     - cp -a genius/out/genius higan-nightly/genius.exe
     - cp -a icarus/out/icarus higan-nightly/icarus.exe
     - cp -a icarus/Database higan-nightly/
+    - cp -a icarus/Firmware higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan.exe
     - cp -a higan/systems/* higan-nightly/
     - cp -a shaders "higan-nightly/Video Shaders"
