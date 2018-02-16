@@ -1,5 +1,5 @@
 database
-  revision: 2018-02-01
+  revision: 2018-02-14
 
 //Super Comboy (KOR)
 
@@ -58,6 +58,317 @@ game
     size: 0x100000
     name: program.rom
 
+//Super Famicom (HKG)
+
+database
+  revision: 2018-02-14
+
+game
+  sha256:   bd763c1a56365c244be92e6cffefd318780a2a19eda7d5baf1c6d5bd6c1b3e06
+  region:   SNSN-YI-HKG
+  revision: SNS-YI-1
+  board:    SHVC-1CB5B-20
+  name:     Super Mario World 2 - Yoshi's Island
+  label:    Super Mario World 2: Yoshi's Island
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+//Super Famicom (JPN)
+
+database
+  revision: 2018-02-14
+
+game
+  sha256:   3ce321496edc5d77038de2034eb3fb354d7724afd0bc7fd0319f3eb5d57b984d
+  region:   SHVC-ZBSJ-JPN
+  revision: SHVC-ZBSJ-1
+  board:    BSC-1A5B9P-01
+  name:     BS-X - Sore wa Namae o Nusumareta Machi no Monogatari
+  label:    BS-X それは名前を盗まれた街の物語
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+  memory
+    type: PSRAM
+    size: 0x80000
+    name: download.ram
+
+game
+  sha256:   38a855229eab468c3ede7573db73082c66b157adfc7af787ccac50559b747f5f
+  region:   SHVC-ZDBJ-JPN
+  revision: SHVC-ZDBJ-0
+  board:    BSC-1A5M-02
+  name:     Derby Stallion '96
+  label:    ダービースタリオン96
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   74aa3a26b66f34819fbbdcdb2475cf9161cc2590fb1ec89fb24940ef10e44332
+  region:   SHVC-F4
+  revision: SHVC-F4-0
+  board:    SHVC-1A3B-11
+  name:     Final Fantasy IV
+  label:    ファイナルファンタジーIV
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   4dfba33201de6b5dec952d0f327aeb44ed784c025a72c982356dd41b52efc219
+  region:   SHVC-ZBPJ-JPN
+  revision: SHVC-ZBPJ-0
+  board:    BSC-1L3B-01
+  name:     Itoi Shigesato no Bass Tsuri No. 1
+  label:    糸井重里のバス釣りNo. 1
+  memory
+    type: ROM
+    size: 0x400000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+  memory
+    type: RAM
+    size: 0x800
+    name: internal.ram
+
+game
+  sha256:   23b320be74b9fc20de512080be3051575ba36c3246d5c4ee224f31a2fa7808f5
+  region:   SHVC-ZTMJ-JPN
+  revision: SHVC-ZTMJ-0
+  board:    BSC-1J3M-01
+  name:     Joushou Mahjong Tenpai
+  label:    常勝麻雀天牌
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   d712adecbde70a74c4a580fe90a45d0d19f2641d1b4e091d507bddeec9601de1
+  region:   SHVC-ZMCJ-JPN
+  revision: SHVC-ZMCJ-0
+  board:    BSC-1J5M-01
+  name:     Ongaku Tsukuuru Kanadeeru
+  label:    音楽ツクールかなでーる
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   d1e0d1c930011d22423cb7cde8feac445a00705da8067a4e53a735b08389a19d
+  region:   SHVC-ZR2J-JPN
+  revision: SHVC-ZR2J-0
+  board:    BSC-1A7M-01
+  name:     RPG Tsukuuru 2
+  label:    RPGツクール2
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x10000
+    name: save.ram
+
+game
+  sha256:   3a709383208d8258dceb20a5e566903326515ba42931bf97fd389a415a13a72d
+  region:   SHVC-ZS5J-JPN
+  revision: SHVC-ZS5J-0
+  board:    BSC-1J3M-01
+  name:     Same Game
+  label:    鮫亀
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   208f5ecb7a82b33629e67f39e96b7aa7a992cb2fcc3d1e4eb959abb0a8b7dd95
+  region:   SHVC-ZX3J-JPN
+  revision: SHVC-ZX3J-0
+  board:    BSC-1L5B-01
+  name:     SD Gundam G Next
+  label:    SDガンダム ジーネクスト
+  memory
+    type: ROM
+    size: 0x180000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+  memory
+    type: RAM
+    size: 0x800
+    name: internal.ram
+
+game
+  sha256:   7be858fc681df6728650f460d67fe6c80d816d5fbfc530c11153f652f8b1878e
+  region:   SHVC-ZSNJ-JPN
+  revision: SHVC-ZSNJ-0
+  board:    BSC-1A7M-10
+  name:     Sound Novel Tsukuuru
+  label:    サウンドノベルツクール
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x10000
+    name: save.ram
+
+game
+  sha256:   edacb453da14f825f05d1134d6035f4bf034e55f7cfb97c70c4ee107eabc7342
+  region:   SHVC-A9PJ-JPN
+  revision: SHVC-A9PJ-0
+  board:    BANDAI-PT-923
+  name:     Sufami Turbo
+  label:    スーファミターボ
+  memory
+    type: ROM
+    size: 0x40000
+    name: program.rom
+
+game
+  sha256:   4d7fc331a811b8dc630b469262fd6f45e289243cef83101f32038158967d1b28
+  region:   SHVC-SGB
+  revision: SYS-SGB-2
+  board:    SGB-R-10
+  name:     Super Game Boy
+  label:    スーパーゲームボーイ
+  memory
+    type: ROM
+    size: 0x40000
+    name: program.rom
+  memory
+    type: ROM
+    size: 0x100
+    name: sgb1.boot.rom
+
+game
+  sha256:   e1db895a9da7ce992941c1238f711437a9110c2793083bb04e0b4d49b7915916
+  region:   SHVC-SGB2-JPN
+  revision: SYS-SGB2-10
+  board:    SHVC-SGB2-01
+  name:     Super Game Boy 2
+  label:    スーパーゲームボーイ2
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: ROM
+    size: 0x100
+    name: sgb2.boot.rom
+
+game
+  sha256:   f56c083e54bc94efdc46c5224b3ceebc56c8ba7a0c38ee8620b0f73cd1317677
+  region:   SHVC-IQ
+  revision: SHVC-IQ-0
+  board:    SHVC-1A3B-13
+  name:     Super Mahjong Taikai
+  label:    スーパー麻雀大会
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   96c0cb3c670c36e068c36b38d1edae145f24f60159537da4988bf956eee58d59
+  region:   SHVC-IQ
+  revision: SHVC-IQ-1
+  board:    SHVC-1A3B-13
+  name:     Super Mahjong Taikai
+  label:    スーパー麻雀大会
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   15d1187d17fa10c77152f691197d33674e64c33a1f8ceb37e8570588be507b89
+  region:   SHVC-IQ
+  revision: SHVC-IQ-3
+  board:    SHVC-1A3B-13
+  name:     Super Mahjong Taikai
+  label:    スーパー麻雀大会
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+//Super Famicom (ROC)
+
+database
+  revision: 2018-02-11
+
+game
+  sha256:   1cf13dac329f83a7fe5347dcc20f92c3a09b3eab1511dd461f9cec90e9258403
+  region:   SNSN-S3-ROC
+  revision: SCHN-S3-0
+  board:    SHVC-1J5M-20
+  name:     Sanguozhi III
+  label:    三国志III
+  memory
+    type: ROM
+    size: 0x180000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
 //Super Nintendo (AUS)
 
 database
@@ -103,6 +414,28 @@ game
     size: 0x100000
     name: program.rom
 
+//Super Nintendo (BRA)
+
+database
+  revision: 2018-02-11
+
+game
+  sha256:   1edcceab07d1544dcbd0fd681148b0fbefeea58b7077136fa0c3011973bf34df
+  region:   SNS-A8FB-BRA
+  revision: SNS-A8FB-0
+  board:    EA-1A3M-30
+  name:     FIFA - A Caminho da Copa '98
+  label:    FIFA: A Caminho da Copa '98
+  note:     Serial# is from ROM data; it is not present on cartridge or ROM chip
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
 //Super Nintendo (CAN)
 
 database
@@ -127,7 +460,7 @@ game
 //Super Nintendo (ESP)
 
 database
-  revision: 2018-01-29
+  revision: 2018-02-11
 
 game
   sha256:   bd5e7a6bc08f64d39c54204b82c6c156f144c03e13c890128588c5faa560659c
@@ -163,6 +496,30 @@ game
   memory
     type: ROM
     size: 0x100000
+    name: program.rom
+
+game
+  sha256:   4a4803056afb251b06a2e9fa68d8062b6999156535bb66ff9fb069de180f32c1
+  region:   SNSP-JN-ESP
+  revision: SPAL-JN-0
+  board:    SHVC-1A0N-10
+  name:     Jack Nicklaus Golf
+  label:    Jack Nicklaus Golf
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+
+game
+  sha256:   929e15c8439b3beea249730e598e72cb192a3a70af0624ab7f91300f8f786a13
+  region:   SNSP-J8-ESP
+  revision: SESP-J8-0
+  board:    SHVC-2A0N-01
+  name:     Jurassic Park
+  label:    Jurassic Park
+  memory
+    type: ROM
+    size: 0x200000
     name: program.rom
 
 game
@@ -244,7 +601,7 @@ game
 //Super Nintendo (EUR)
 
 database
-  revision: 2018-01-30
+  revision: 2018-02-11
 
 game
   sha256:   ec3e81d628a293514e303b44e3b1ac03461ddd1da32764b10b7fab1e507602df
@@ -926,10 +1283,6 @@ game
     size: 0x180000
     name: program.rom
   memory
-    type: RAM
-    size: 0
-    name: save.ram
-  memory
     type: ROM
     size: 0xc00
     name: cx4.data.rom
@@ -949,10 +1302,6 @@ game
     type: ROM
     size: 0x200000
     name: program.rom
-  memory
-    type: RAM
-    size: 0
-    name: save.ram
   memory
     type: ROM
     size: 0xc00
@@ -1397,7 +1746,7 @@ game
 //Super Nintendo (FAH)
 
 database
-  revision: 2018-01-29
+  revision: 2018-02-11
 
 game
   sha256:   0aafd04a43ae29266e43920a7f9954d4a49f6fe43a5abffecc9c2fd5ad7d6cea
@@ -1501,6 +1850,18 @@ game
   memory
     type: ROM
     size: 0x100000
+    name: program.rom
+
+game
+  sha256:   5a181f25055298579d24571b4f1cd21dd81583fb41a235fc4f226fa28d9df916
+  region:   SNSP-JN-FAH
+  revision: SFRA-JN-0
+  board:    SHVC-1A0N-20
+  name:     Jack Nicklaus Golf
+  label:    Jack Nicklaus Golf
+  memory
+    type: ROM
+    size: 0x80000
     name: program.rom
 
 game
@@ -1778,7 +2139,7 @@ game
 //Super Nintendo (FRA)
 
 database
-  revision: 2018-01-29
+  revision: 2018-02-11
 
 game
   sha256:   65df600780021f13ced52e7fbc507b7b2e6491b2c5c25fe78d0515dcbe669403
@@ -1949,6 +2310,22 @@ game
     name: save.ram
 
 game
+  sha256:   1432590492b63d7103caa715e10e3c3ebbc77b63b6472ee9dee0e5afda311551
+  region:   SNSP-MQ-FRA
+  revision: SFRA-MQ-0
+  board:    SHVC-1A3M-20
+  name:     Mystic Quest Legend
+  label:    Mystic Quest Legend
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
   sha256:   a4621118ef174d2c8a9ffe934e31ff3a00f66a3aaa13340983eec43625a773f6
   region:   SNSP-25-FRA
   revision: SFRA-25-0
@@ -2074,6 +2451,27 @@ game
     size: 0x800
     name: save.ram
 
+//Super Nintendo (HOL)
+
+database
+  revision: 2018-02-11
+
+game
+  sha256:   dc8b3144329a23459bfcce93c89e0e561d133709aca6bfc74f9e0755f1a04b91
+  region:   SNSP-ANIH-HOL
+  revision: SPAL-ANIH-0
+  board:    SHVC-1A3M-30
+  name:     Lufia
+  label:    Lufia
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
 //Super Nintendo (ITA)
 
 database
@@ -2111,7 +2509,7 @@ game
 //Super Nintendo (NOE)
 
 database
-  revision: 2018-01-29
+  revision: 2018-02-11
 
 game
   sha256:   b342d12d71729edebc1911725ea23d58c1a397b27253a5c8cd96cfb58af242a9
@@ -2166,8 +2564,8 @@ game
   region:   SNSP-AP-NOE
   revision: SPAL-AP-0
   board:    SHVC-1A0N-20
-  name:     Alien vs Predator
-  label:    Alien vs Predator
+  name:     Alien vs. Predator
+  label:    Alien vs. Predator
   memory
     type: ROM
     size: 0x100000
@@ -3409,7 +3807,7 @@ game
 //Super Nintendo (UKV)
 
 database
-  revision: 2018-01-29
+  revision: 2018-02-11
 
 game
   sha256:   38e050ac3ffec01031c6dd8ead20676aacec78ebf8d890a3a00d1badaaba3d3b
@@ -3752,6 +4150,18 @@ game
     name: save.ram
 
 game
+  sha256:   21f4b54ed90de7bb0f5f02d64d11f80ba9f2147197b7a3bd09fc7aa1858ba0f5
+  region:   SNSP-4P-UKV
+  revision: SPAL-4P-0
+  board:    SHVC-1A0N-20
+  name:     Side Pocket
+  label:    Side Pocket
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+
+game
   sha256:   d02f8e6b75f9b9ede20a32b8ec93c06475f18160ced1eb069cd6a3cbbc3cba2e
   region:   SNSP-7Q-UKV
   revision: SPAL-7Q-0
@@ -4018,7 +4428,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2018-01-30
+  revision: 2018-02-11
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -5861,6 +6271,22 @@ game
   region:   SNS-ADNE-USA
   revision: SNS-ADNE-0
   board:    SHVC-1J1M-20
+  name:     Donkey Kong Country 2 - Diddy's Kong Quest
+  label:    Donkey Kong Country 2: Diddy's Kong Quest
+  memory
+    type: ROM
+    size: 0x400000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x800
+    name: save.ram
+
+game
+  sha256:   b79c2bb86f6fc76e1fc61c62fc16d51c664c381e58bc2933be643bbc4d8b610c
+  region:   SNS-ADNE-USA
+  revision: SNS-ADNE-1
+  board:    SHVC-BJ1M-20
   name:     Donkey Kong Country 2 - Diddy's Kong Quest
   label:    Donkey Kong Country 2: Diddy's Kong Quest
   memory
@@ -8496,10 +8922,6 @@ game
     size: 0x180000
     name: program.rom
   memory
-    type: NVRAM
-    size: 0
-    name: save.ram
-  memory
     type: ROM
     size: 0xc00
     name: cx4.data.rom
@@ -8519,10 +8941,6 @@ game
     type: ROM
     size: 0x200000
     name: program.rom
-  memory
-    type: NVRAM
-    size: 0
-    name: save.ram
   memory
     type: ROM
     size: 0xc00

@@ -1,10 +1,10 @@
 database
-  revision: 2018-02-10
+  revision: 2018-02-15
 
 //Boards (Production)
 
 database
-  revision: 2017-12-29
+  revision: 2018-02-11
 
 board: 1A0N-(01,02,10,20,30)
   rom
@@ -379,7 +379,7 @@ board: BJ0N-(01,20)
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
 
-board: BJ1M-10
+board: BJ1M-(10,20)
   rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -414,9 +414,21 @@ board: YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-02-10
+  revision: 2018-02-15
 
-board: BS-HIROM-NVRAM
+board: ARM-LOROM-RAM
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-6f,c0-ef:0000-7fff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff
+  armdsp frequency=21477272
+    map address=00-3f,80-bf:3800-38ff
+    prom
+    drom
+    ram
+
+board: BS-HIROM-RAM
   rom
     map address=00-1f,80-9f:8000-ffff
     map address=40-5f,c0-df:0000-ffff
@@ -426,7 +438,7 @@ board: BS-HIROM-NVRAM
     map address=20-3f,a0-bf:8000-ffff
     map address=60-7d,e0-ff:0000-ffff
 
-board: BS-LOROM-NVRAM
+board: BS-LOROM-RAM
   rom
     map address=00-1f:8000-ffff base=0x000000 mask=0x8000
     map address=20-3f:8000-ffff base=0x100000 mask=0x8000
@@ -437,7 +449,7 @@ board: BS-LOROM-NVRAM
   bsmemory
     map address=c0-ef:0000-ffff
 
-board: BS-NVRAM
+board: BS-MCC-RAM
   ram
     map address=10-1f:5000-5fff mask=0xf000
   mcc
@@ -449,7 +461,7 @@ board: BS-NVRAM
       map address=00-3f,80-bf:6000-7fff mask=0xe000
     bsmemory
 
-board: BS-SA1-NVRAM
+board: BS-SA1-RAM
   sa1
     map address=00-3f,80-bf:2200-23ff
     rom
@@ -463,17 +475,55 @@ board: BS-SA1-NVRAM
   bsmemory
     map
 
-board: CX4-LOROM
+board: HIROM
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+
+board: HIROM-RAM
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: HIROMEX-RAM
+  rom
+    map address=00-3f:8000-ffff base=0x400000
+    map address=40-7d:0000-ffff base=0x400000
+    map address=80-bf:8000-ffff mask=0xc00000
+    map address=c0-ff:0000-ffff mask=0xc00000
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+    map address=70-7d:0000-7fff
+
+board: HITACHI-LOROM
   hitachidsp model=HG51B169 frequency=20000000
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map=ram address=70-77:0000-7fff mask=0x8000
+    map address=70-77:0000-7fff
     rom
       map address=00-3f,80-bf:8000-ffff mask=0x8000
     drom
     dram
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
 
-board: DSP-HIROM
+board: LOROM
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+
+board: LOROM-RAM
+  rom
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff mask=0x8000
+
+board: LOROMEX-RAM
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: NEC-HIROM
   rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -483,7 +533,7 @@ board: DSP-HIROM
     drom
     dram
 
-board: DSP-HIROM-NVRAM
+board: NEC-HIROM-RAM
   rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -495,7 +545,7 @@ board: DSP-HIROM-NVRAM
     drom
     dram
 
-board: DSP-LOROM
+board: NEC-LOROM
   rom
     map address=00-1f,80-9f:8000-ffff mask=0x8000
   necdsp model=uPD7725 frequency=8000000
@@ -504,7 +554,7 @@ board: DSP-LOROM
     drom
     dram
 
-board: DSP-LOROM-NVRAM
+board: NEC-LOROM-RAM
   rom
     map address=00-1f,80-9f:8000-ffff mask=0x8000
   ram
@@ -515,45 +565,38 @@ board: DSP-LOROM-NVRAM
     drom
     dram
 
-board: EXHIROM-NVRAM
+board: NEC-LOROMEX-RAM
   rom
-    map address=00-3f:8000-ffff base=0x400000
-    map address=40-7d:0000-ffff base=0x400000
-    map address=80-bf:8000-ffff mask=0xc00000
-    map address=c0-ff:0000-ffff mask=0xc00000
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-    map address=70-7d:0000-7fff
-
-board: EXLOROM-NVRAM
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
   ram
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  necdsp model=uPD7725 frequency=8000000
+    map address=60-6f,e0-ef:0000-7fff mask=0x3fff
+    prom
+    drom
+    dram
 
-board: HIROM
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-
-board: HIROM-NVRAM
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: LOROM
+board: NECEX-LOROM-BATTERY#11
   rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
+  necdsp model=uPD96050 frequency=11000000
+    map address=60-67,e0-e7:0000-3fff
+    prom
+    drom
+    dram
+      map address=68-6f,e8-ef:0000-7fff mask=0x8000
 
-board: LOROM-NVRAM
+board: NECEX-LOROM-BATTERY#15
   rom
-    map address=00-6f,80-ef:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff mask=0x8000
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  necdsp model=uPD96050 frequency=15000000
+    map address=60-67,e0-e7:0000-3fff
+    prom
+    drom
+    dram
+      map address=68-6f,e8-ef:0000-7fff mask=0x8000
 
-board: OBC1-LOROM-NVRAM
+board: OBC1-LOROM-RAM
   rom
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   obc1
@@ -561,7 +604,7 @@ board: OBC1-LOROM-NVRAM
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
     ram
 
-board: RTC-EXHIROM-NVRAM
+board: RTC-HIROMEX-RAM
   rom
     map address=00-3f:8000-ffff base=0x400000
     map address=40-7d:0000-ffff base=0x400000
@@ -574,7 +617,7 @@ board: RTC-EXHIROM-NVRAM
     map address=00-3f,80-bf:2800-2801
     ram
 
-board: SA1-(RAM,NVRAM)
+board: SA1-RAM
   sa1
     map address=00-3f,80-bf:2200-23ff
     rom
@@ -593,7 +636,7 @@ board: SDD1
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
 
-board: SDD1-NVRAM
+board: SDD1-RAM
   sdd1
     map address=00-3f,80-bf:4800-480f
     rom
@@ -611,7 +654,7 @@ board: SGB-LOROM
     map address=00-3f,80-bf:6000-67ff,7000-7fff
     rom
 
-board: SPC7110-NVRAM
+board: SPC7110-RAM
   spc7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
@@ -622,7 +665,7 @@ board: SPC7110-NVRAM
     ram
       map address=00-3f,80-bf:6000-7fff mask=0xe000
 
-board: SPC7110-RTC-NVRAM
+board: SPC7110-RTC-RAM
   spc7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
@@ -651,39 +694,7 @@ board: ST-LOROM
     ram
       map address=70-7d,f0-ff:0000-ffff
 
-board: ST010-LOROM-BATTERY
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050 frequency=11000000
-    map address=60-67,e0-e7:0000-3fff
-    prom
-    drom
-    dram
-      map address=68-6f,e8-ef:0000-7fff mask=0x8000
-
-board: ST011-LOROM-BATTERY
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050 frequency=15000000
-    map address=60-67,e0-e7:0000-3fff
-    prom
-    drom
-    dram
-      map address=68-6f,e8-ef:0000-7fff mask=0x8000
-
-board: ST018-LOROM-NVRAM
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-6f,c0-ef:0000-7fff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff
-  armdsp frequency=21477272
-    map address=00-3f,80-bf:3800-38ff
-    prom
-    drom
-    ram
-
-board: SUPERFX-(RAM,NVRAM)
+board: SUPERFX-RAM
   superfx
     map address=00-3f,80-bf:3000-34ff
     rom

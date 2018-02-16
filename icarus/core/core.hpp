@@ -44,7 +44,6 @@ struct Icarus {
   //super-famicom.cpp
   auto superFamicomManifest(string location) -> string;
   auto superFamicomManifest(vector<uint8_t>& buffer, string location) -> string;
-  auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
   //master-system.cpp

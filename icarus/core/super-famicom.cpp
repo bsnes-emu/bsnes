@@ -3,7 +3,6 @@ auto Icarus::superFamicomManifest(string location) -> string {
   auto files = directory::files(location, "*.rom");
   concatenate(buffer, {location, "program.rom"});
   concatenate(buffer, {location, "data.rom"   });
-  for(auto& file : files.match("slot-*.rom"   )) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.boot.rom"   )) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.program.rom")) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.data.rom"   )) concatenate(buffer, {location, file});
@@ -11,7 +10,7 @@ auto Icarus::superFamicomManifest(string location) -> string {
 }
 
 auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location) -> string {
-  string digest = Hash::SHA256(buffer).digest();
+  auto digest = Hash::SHA256(buffer).digest();
 
   if(settings["icarus/UseDatabase"].boolean()) {
     for(auto game : database.superFamicom.find("game")) {
@@ -20,17 +19,14 @@ auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location) -> s
   }
 
   if(settings["icarus/UseHeuristics"].boolean()) {
-    bool hasMSU1 = exists({location, "msu1.rom"});
-    Heuristics::SuperFamicom game{buffer.data(), buffer.size(), hasMSU1};
-    if(string manifest = game.manifest()) return manifest;
+    Heuristics::SuperFamicom game{buffer, location};
+    if(auto manifest = game.manifest()) {
+      if(exists({location, "msu1.rom"})) manifest.append("  msu1\n");
+      return manifest;
+    }
   }
 
-  return "";
-}
-
-auto Icarus::superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void {
-  if(node["name"].text().endsWith(".rom")) roms.append(node);
-  for(auto leaf : node) superFamicomManifestScan(roms, leaf);
+  return {};
 }
 
 auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> string {
@@ -38,24 +34,28 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
   auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "Super Famicom/", name, ".sfc/"};
 
-  auto markup = superFamicomManifest(buffer, location);
-  if(!markup) return failure("failed to parse ROM image");
+  auto manifest = superFamicomManifest(buffer, location);
+  if(!manifest) return failure("failed to parse ROM image");
 
   if(!create(target)) return failure("library path unwritable");
   if(exists({source, name, ".srm"}) && !exists({target, "save.ram"})) {
     copy({source, name, ".srm"}, {target, "save.ram"});
   }
 
-  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, markup);
-  uint offset = (buffer.size() & 0x7fff) == 512 ? 512 : 0;  //skip header if present
-  auto document = BML::unserialize(markup);
-  vector<Markup::Node> roms;
-  superFamicomManifestScan(roms, document["board"]);
-  for(auto rom : roms) {
+  if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
+  uint offset = 0;
+  auto document = BML::unserialize(manifest);
+  for(auto rom : document.find("game/memory")) {
+    if(rom["type"].text() != "ROM") continue;
     auto name = rom["name"].text();
     auto size = rom["size"].natural();
     if(size > buffer.size() - offset) {
-      missingFiles.append(name);
+      auto location = locate({"Firmware/", name});
+      if(location && file::size(location) == size) {
+        write({target, name}, file::read(location));
+      } else {
+        missingFiles.append(name);
+      }
       continue;
     }
     write({target, name}, buffer.data() + offset, size);

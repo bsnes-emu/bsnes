@@ -1,12 +1,10 @@
 namespace Heuristics {
 
 struct SuperFamicom {
-  SuperFamicom(const uint8_t* data, uint size, bool hasMSU1 = false);
+  SuperFamicom(vector<uint8_t>& data, string location);
   explicit operator bool() const;
 
   auto manifest() const -> string;
-  auto memory(string type, uint size, string name) const -> string;
-  auto sha256() const -> string;
   auto region() const -> string;
   auto revision() const -> string;
   auto board() const -> string;
@@ -15,19 +13,31 @@ struct SuperFamicom {
   auto romSize() const -> uint;
   auto ramSize() const -> uint;
   auto expansionRamSize() const -> uint;
+  auto battery() const -> bool;
 
 private:
+  auto size() const -> uint { return data.size(); }
+  auto memory(string type, uint size, string name) const -> string;
   auto scoreHeader(uint address) -> uint;
+  auto firmwareARM() const -> string;
+  auto firmwareHITACHI() const -> string;
+  auto firmwareNEC() const -> string;
+  auto firmwareNECEX() const -> string;
+  auto firmwareSGB() const -> string;
 
-  const uint8_t* data = nullptr;
-  uint size = 0;
+  vector<uint8_t>& data;
+  string location;
   uint headerAddress = 0;
-  bool hasMSU1 = false;
 };
 
-SuperFamicom::SuperFamicom(const uint8_t* data, uint size, bool hasMSU1) : data(data), size(size), hasMSU1(hasMSU1) {
-  if((size & 0x7fff) == 512) data += 512, size -= 512;  //skip copier header (if present)
-  if(size < 0x8000) return;  //ignore images too small to be valid
+SuperFamicom::SuperFamicom(vector<uint8_t>& data, string location) : data(data), location(location) {
+  if((size() & 0x7fff) == 512) {
+    //remove header if present
+    memory::move(&data[0], &data[512], size() - 512);
+    data.resize(size() - 512);
+  }
+
+  if(size() < 0x8000) return;  //ignore images too small to be valid
 
   uint scoreLo = scoreHeader(  0x7fb0);
   uint scoreHi = scoreHeader(  0xffb0);
@@ -44,73 +54,70 @@ SuperFamicom::operator bool() const {
 }
 
 auto SuperFamicom::manifest() const -> string {
-  if(!operator bool()) return "error\n";
+  if(!operator bool()) return {};
 
   string output;
   output.append("game\n");
-  output.append("  sha256:   ", sha256(), "\n");
+  output.append("  sha256:   ", Hash::SHA256(data).digest(), "\n");
   output.append("  region:   ", region(), "\n");
   output.append("  revision: ", revision(), "\n");
   output.append("  board:    ", board(), "\n");
+  output.append("  name:     ", Location::prefix(location), "\n");
   output.append("  label:    ", label(), "\n");
 
   auto board = this->board().split("-");
 
-         if(board.left() == "CX4") {
-    output.append(memory("ROM", size - 0xc00, "program.rom"));
-    output.append(memory("ROM", 0xc00, "cx4.data.rom"));
-  } else if(board.left() == "DSP") {
-    output.append(memory("ROM", size - 0x2000, "program.rom"));
-    output.append(memory("ROM", 0x1800, "dsp.program.rom"));
-    output.append(memory("ROM", 0x800, "dsp.data.rom"));
+         if(board.left() == "ARM") {
+    output.append(memory("ROM", size() - 0x28000, "program.rom"));
+    output.append(memory("ROM", 0x20000, {firmwareARM(), ".program.rom"}));
+    output.append(memory("ROM",  0x8000, {firmwareARM(), ".data.rom"}));
+  } else if(board.left() == "HITACHI") {
+    output.append(memory("ROM", size() - 0xc00, "program.rom"));
+    output.append(memory("ROM", 0xc00, {firmwareHITACHI(), ".data.rom"}));
+  } else if(board.left() == "NEC") {
+    output.append(memory("ROM", size() - 0x2000, "program.rom"));
+    output.append(memory("ROM", 0x1800, {firmwareNEC(), ".program.rom"}));
+    output.append(memory("ROM",  0x800, {firmwareNEC(), ".data.rom"}));
+  } else if(board.left() == "NECEX") {
+    output.append(memory("ROM", size() - 0xd000, "program.rom"));
+    output.append(memory("ROM", 0xc000, {firmwareNECEX(), ".program.rom"}));
+    output.append(memory("ROM", 0x1000, {firmwareNECEX(), ".data.rom"}));
   } else if(board.left() == "SGB") {
-    output.append(memory("ROM", size - 0x100, "program.rom"));
-    output.append(memory("ROM", 0x100, "sgb.boot.rom"));
+    output.append(memory("ROM", size() - 0x100, "program.rom"));
+    output.append(memory("ROM", 0x100, {firmwareSGB(), ".boot.rom"}));
   } else if(board.left() == "SPC7110") {
     output.append(memory("ROM", 0x100000, "program.rom"));
-    output.append(memory("ROM", size - 0x100000, "data.rom"));
-  } else if(board.left() == "ST010" || board.left() == "ST011") {
-    output.append(memory("ROM", size - 0xd000, "program.rom"));
-    output.append(memory("ROM", 0xc000, "st.program.rom"));
-    output.append(memory("ROM", 0x1000, "st.data.rom"));
-  } else if(board.left() == "ST018") {
-    output.append(memory("ROM", size - 0x28000, "program.rom"));
-    output.append(memory("ROM", 0x20000, "seta.program.rom"));
-    output.append(memory("ROM", 0x8000, "seta.data.rom"));
+    output.append(memory("ROM", size() - 0x100000, "data.rom"));
   } else {
-    output.append(memory("ROM", size, "program.rom"));
+    output.append(memory("ROM", size(), "program.rom"));
   }
 
   if(auto size = ramSize()) {
-    auto type = board.right() == "NVRAM" ? "NVRAM" : "RAM";
+    auto type = battery() ? "NVRAM" : "RAM";
     output.append(memory(type, size, "save.ram"));
   }
 
   if(auto size = expansionRamSize()) {
-    auto type = board.right() == "NVRAM" ? "NVRAM" : "RAM";
+    auto type = battery() ? "NVRAM" : "RAM";
     output.append(memory(type, size, "expansion.ram"));
   }
 
-         if(board.left() == "BS" && board(1) == "NVRAM") {
-    output.append(memory("NVRAM", 0x80000, "download.ram"));
-  } else if(board.left() == "CX4") {
-    output.append(memory("RAM", 0xc00, "cx4.data.ram"));
-  } else if(board.left() == "DSP") {
-    output.append(memory("RAM", 0x200, "dsp.data.ram"));
+         if(board.left() == "ARM") {
+    output.append(memory("NVRAM", 0x4000, {firmwareARM(), ".data.ram"}));
+  } else if(board.left() == "BS" && board(1) == "MCC") {
+    output.append(memory("PSRAM", 0x80000, "download.ram"));
+  } else if(board.left() == "HITACHI") {
+    output.append(memory("RAM", 0xc00, {firmwareHITACHI(), ".data.ram"}));
+  } else if(board.left() == "NEC") {
+    output.append(memory("RAM", 0x200, {firmwareNEC(), ".data.ram"}));
+  } else if(board.left() == "NECEX") {
+    output.append(memory("NVRAM", 0x1000, {firmwareNEC(), ".data.ram"}));
   } else if(board.left() == "RTC") {
-    output.append(memory("NVRAM", 0x10, "rtc.ram"));
+    output.append(memory("NVRAM", 0x10, "sharp.rtc.ram"));
   } else if(board.left() == "SA1") {
     output.append(memory("RAM", 0x800, "internal.ram"));
   } else if(board.left() == "SPC7110" && board(1) == "RTC") {
-    output.append(memory("NVRAM", 0x10, "rtc.ram"));
-  } else if(board.left() == "ST010" || board.left() == "ST011") {
-    output.append(memory("NVRAM", 0x1000, "st.save.ram"));
-  } else if(board.left() == "ST018") {
-    output.append(memory("NVRAM", 0x4000, "seta.save.ram"));
-  }
-
-  if(hasMSU1) {
-    output.append("  msu1\n");
+    output.append(memory("NVRAM", 0x10, "epson.rtc.ram"));
   }
 
   return output;
@@ -123,10 +130,6 @@ auto SuperFamicom::memory(string type, uint size, string name) const -> string {
   output.append("    size: 0x", hex(size), "\n");
   output.append("    name: ", name, "\n");
   return output;
-}
-
-auto SuperFamicom::sha256() const -> string {
-  return Hash::SHA256(data, size).digest();
 }
 
 auto SuperFamicom::region() const -> string {
@@ -240,14 +243,14 @@ auto SuperFamicom::board() const -> string {
   if(mapMode == 0x21 || mapMode == 0x31) mode = "HIROM-";
   if(mapMode == 0x22 || mapMode == 0x32) mode = "SDD1-";
   if(mapMode == 0x23 || mapMode == 0x33) mode = "SA1-";
-  if(mapMode == 0x25 || mapMode == 0x35) mode = "EXHIROM-";
+  if(mapMode == 0x25 || mapMode == 0x35) mode = "HIROMEX-";
   if(mapMode == 0x2a || mapMode == 0x3a) mode = "SPC7110-";
 
   //many games will store an extra title character, overwriting the map mode
   if(!mode) {
     if(headerAddress ==   0x7fb0) mode = "LOROM-";
     if(headerAddress ==   0xffb0) mode = "HIROM-";
-    if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
+    if(headerAddress == 0x40ffb0) mode = "HIROMEX-";
   }
 
          if(serial() == "A9PJ") {
@@ -255,43 +258,143 @@ auto SuperFamicom::board() const -> string {
     board.append("ST-", mode);
   } else if(serial() == "ZSBJ") {
   //BS-X: Sore wa Namae o Nusumareta Machi no Monogatari (JPN)
-    board.append("BS-");
+    board.append("BS-MCC-");
+  } else if(serial() == "042J") {
+  //Super Game Boy 2
+    board.append("SGB-", mode);
   } else if(serial().match("Z\?\?J")) {
     board.append("BS-", mode);
   } else if(cartridgeTypeLo >= 0x3) {
-    if(cartridgeTypeHi == 0x0) board.append("DSP-", mode);
+    if(cartridgeTypeHi == 0x0) board.append("NEC-", mode);
     if(cartridgeTypeHi == 0x1) board.append("SUPERFX-");
     if(cartridgeTypeHi == 0x2) board.append("OBC1-", mode);
     if(cartridgeTypeHi == 0x3) board.append("SA1-");
     if(cartridgeTypeHi == 0x4) board.append("SDD1-");
     if(cartridgeTypeHi == 0x5) board.append("RTC-", mode);
-    if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x3) board.append("SGB-");
+    if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x3) board.append("SGB-", mode);
     if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x5) board.append("SPC7110-");
     if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x9) board.append("SPC7110-RTC-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) board.append(romSize() == 0x100000 ? "ST010-" : "ST011-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) board.append("ST018-", mode);
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) board.append("CX4-", mode);
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) board.append("NECEX-", mode);
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) board.append("ARM-", mode);
+    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) board.append("HITACHI-", mode);
   }
   if(!board) board.append(mode);
 
-  //grow ROM region and restrict RAM region for large LOROM boards ("EXLOROM")
-  if(board.beginsWith("LOROM-") && romSize() > 0x380000 && ramSize()) board.prepend("EX");
+  if(board.beginsWith("LOROM-") && romSize() > 0x200000 && ramSize()) board.replace("LOROM-", "LOROMEX-");
+  if(board.beginsWith("NEC-LOROM-") && romSize() > 0x100000) board.replace("NEC-LOROM-", "NEC-LOROMEX-");
 
-  if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");
-  if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("NVRAM-");
-  if(cartridgeTypeLo == 0x6) board.append("BATTERY-");
+  if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");  //without battery
+  if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("RAM-");  //with battery
+  if(cartridgeTypeLo == 0x6) board.append("BATTERY-");  //without RAM
 
-  return board.trimRight("-", 1L);
+  board.trimRight("-", 1L);
+
+  //NEC uPD96050 frequency
+  if(board.beginsWith("NECEX-") && firmwareNECEX() == "st010") board.append("#11");  //11MHz (22MHz / 2)
+  if(board.beginsWith("NECEX-") && firmwareNECEX() == "st011") board.append("#15");  //15MHz
+
+  return board;
 }
 
 auto SuperFamicom::label() const -> string {
   string label;
-  auto append = [&](char c) -> void {
-    if(c >= 0x20 && c <= 0x7e) label.append(c);  //ASCII
-    //todo: convert Shift-JIS half-width katakana to UTF-8 here
+
+  for(uint n = 0; n < 0x15; n++) {
+    auto x = data[headerAddress + 0x10 + n];
+    auto y = n == 0x14 ? 0 : data[headerAddress + 0x11 + n];
+
+    //null terminator (padding)
+    if(x == 0x00 || x == 0xff);
+
+    //ASCII
+    else if(x >= 0x20 && x <= 0x7e) label.append((char)x);
+
+    //Shift-JIS (half-width katakana)
+    else if(x == 0xa1) label.append("。");
+    else if(x == 0xa2) label.append("「");
+    else if(x == 0xa3) label.append("」");
+    else if(x == 0xa4) label.append("、");
+    else if(x == 0xa5) label.append("・");
+    else if(x == 0xa6) label.append("ヲ");
+    else if(x == 0xa7) label.append("ァ");
+    else if(x == 0xa8) label.append("ィ");
+    else if(x == 0xa9) label.append("ゥ");
+    else if(x == 0xaa) label.append("ェ");
+    else if(x == 0xab) label.append("ォ");
+    else if(x == 0xac) label.append("ャ");
+    else if(x == 0xad) label.append("ュ");
+    else if(x == 0xae) label.append("ョ");
+    else if(x == 0xaf) label.append("ッ");
+    else if(x == 0xb0) label.append("ー");
+
+    else if(x == 0xb1) label.append(                 "ア");
+    else if(x == 0xb2) label.append(                 "イ");
+    else if(x == 0xb3) label.append(y == 0xde ? "ヴ" : "ウ");
+    else if(x == 0xb4) label.append(                 "エ");
+    else if(x == 0xb5) label.append(                 "オ");
+
+    else if(x == 0xb6) label.append(y == 0xde ? "ガ" : "カ");
+    else if(x == 0xb7) label.append(y == 0xde ? "ギ" : "キ");
+    else if(x == 0xb8) label.append(y == 0xde ? "グ" : "ク");
+    else if(x == 0xb9) label.append(y == 0xde ? "ゲ" : "ケ");
+    else if(x == 0xba) label.append(y == 0xde ? "ゴ" : "コ");
+
+    else if(x == 0xbb) label.append(y == 0xde ? "ザ" : "サ");
+    else if(x == 0xbc) label.append(y == 0xde ? "ジ" : "シ");
+    else if(x == 0xbd) label.append(y == 0xde ? "ズ" : "ス");
+    else if(x == 0xbe) label.append(y == 0xde ? "ゼ" : "セ");
+    else if(x == 0xbf) label.append(y == 0xde ? "ゾ" : "ソ");
+
+    else if(x == 0xc0) label.append(y == 0xde ? "ダ" : "タ");
+    else if(x == 0xc1) label.append(y == 0xde ? "ヂ" : "チ");
+    else if(x == 0xc2) label.append(y == 0xde ? "ヅ" : "ツ");
+    else if(x == 0xc3) label.append(y == 0xde ? "デ" : "テ");
+    else if(x == 0xc4) label.append(y == 0xde ? "ド" : "ト");
+
+    else if(x == 0xc5) label.append("ナ");
+    else if(x == 0xc6) label.append("ニ");
+    else if(x == 0xc7) label.append("ヌ");
+    else if(x == 0xc8) label.append("ネ");
+    else if(x == 0xc9) label.append("ノ");
+
+    else if(x == 0xca) label.append(y == 0xdf ? "パ" : y == 0xde ? "バ" : "ハ");
+    else if(x == 0xcb) label.append(y == 0xdf ? "ピ" : y == 0xde ? "ビ" : "ヒ");
+    else if(x == 0xcc) label.append(y == 0xdf ? "プ" : y == 0xde ? "ブ" : "フ");
+    else if(x == 0xcd) label.append(y == 0xdf ? "ペ" : y == 0xde ? "ベ" : "ヘ");
+    else if(x == 0xce) label.append(y == 0xdf ? "ポ" : y == 0xde ? "ボ" : "ホ");
+
+    else if(x == 0xcf) label.append("マ");
+    else if(x == 0xd0) label.append("ミ");
+    else if(x == 0xd1) label.append("ム");
+    else if(x == 0xd2) label.append("メ");
+    else if(x == 0xd3) label.append("モ");
+
+    else if(x == 0xd4) label.append("ヤ");
+    else if(x == 0xd5) label.append("ユ");
+    else if(x == 0xd6) label.append("ヨ");
+
+    else if(x == 0xd7) label.append("ラ");
+    else if(x == 0xd8) label.append("リ");
+    else if(x == 0xd9) label.append("ル");
+    else if(x == 0xda) label.append("レ");
+    else if(x == 0xdb) label.append("ロ");
+
+    else if(x == 0xdc) label.append("ワ");
+    else if(x == 0xdd) label.append("ン");
+
+    else if(x == 0xde) label.append("\xef\xbe\x9e");  //dakuten
+    else if(x == 0xdf) label.append("\xef\xbe\x9f");  //handakuten
+
+    //unknown
     else label.append("?");
-  };
-  for(uint n : range(0x15)) append(data[headerAddress + 0x10 + n]);
+
+    //(han)dakuten skip
+    if(y == 0xde && x == 0xb3) n++;
+    if(y == 0xde && x >= 0xb6 && x <= 0xc4) n++;
+    if(y == 0xde && x >= 0xca && x <= 0xce) n++;
+    if(y == 0xdf && x >= 0xca && y <= 0xce) n++;
+  }
+
   return label.strip();
 }
 
@@ -311,12 +414,12 @@ auto SuperFamicom::serial() const -> string {
 
 auto SuperFamicom::romSize() const -> uint {
   //subtract appended firmware size, if firmware is present
-  if((size &  0x7fff) ==   0x100) return size -   0x100;
-  if((size &  0x7fff) ==   0xc00) return size -   0xc00;
-  if((size &  0x7fff) ==  0x2000) return size -  0x2000;
-  if((size &  0xffff) ==  0xd000) return size -  0xd000;
-  if((size & 0x3ffff) == 0x28000) return size - 0x28000;
-  return size;
+  if((size() &  0x7fff) ==   0x100) return size() -   0x100;
+  if((size() &  0x7fff) ==   0xc00) return size() -   0xc00;
+  if((size() &  0x7fff) ==  0x2000) return size() -  0x2000;
+  if((size() &  0xffff) ==  0xd000) return size() -  0xd000;
+  if((size() & 0x3ffff) == 0x28000) return size() - 0x28000;
+  return size();
 
 //auto romSize = data[headerAddress + 0x27] & 15;
 //return 1024 << romSize;
@@ -335,9 +438,14 @@ auto SuperFamicom::expansionRamSize() const -> uint {
   return 0;
 }
 
+auto SuperFamicom::battery() const -> bool {
+  auto cartridgeTypeLo = data[headerAddress + 0x26] & 15;
+  return cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5 || cartridgeTypeLo == 0x6;
+}
+
 auto SuperFamicom::scoreHeader(uint address) -> uint {
   int score = 0;
-  if(size < address + 0x50) return score;
+  if(size() < address + 0x50) return score;
 
   uint8_t  mapMode     = data[address + 0x25] & ~0x10;  //ignore FastROM bit
   uint16_t complement  = data[address + 0x2c] << 0 | data[address + 0x2d] << 8;
@@ -393,6 +501,36 @@ auto SuperFamicom::scoreHeader(uint address) -> uint {
   if(address == 0xffb0 && mapMode == 0x21) score += 2;
 
   return max(0, score);
+}
+
+auto SuperFamicom::firmwareARM() const -> string {
+  return "st018";
+}
+
+auto SuperFamicom::firmwareHITACHI() const -> string {
+  return "cx4";
+}
+
+auto SuperFamicom::firmwareNEC() const -> string {
+  if(label() == "PILOTWINGS") return "dsp1";
+  if(label() == "DUNGEON MASTER") return "dsp2";
+  if(label() == "SDガンダムGX") return "dsp3";
+  if(label() == "PLANETS CHAMP TG3000") return "dsp4";
+  if(label() == "TOP GEAR 3000") return "dsp4";
+  return "dsp1b";
+}
+
+auto SuperFamicom::firmwareNECEX() const -> string {
+  if(label() == "EXHAUST HEAT2") return "st010";
+  if(label() == "F1 ROC II") return "st010";
+  if(label() == "2DAN MORITA SHOUGI") return "st011";
+  return "st010";
+}
+
+auto SuperFamicom::firmwareSGB() const -> string {
+  if(label() == "Super GAMEBOY") return "sgb1";
+  if(label() == "Super GAMEBOY2") return "sgb2";
+  return "sgb1";
 }
 
 }

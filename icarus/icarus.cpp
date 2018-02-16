@@ -8,9 +8,6 @@ auto locate(string name) -> string {
   string location = {Path::program(), name};
   if(inode::exists(location)) return location;
 
-  location = {Path::config(), "icarus/", name};
-  if(inode::exists(location)) return location;
-
   directory::create({Path::local(), "icarus/"});
   return {Path::local(), "icarus/", name};
 }

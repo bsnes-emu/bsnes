@@ -5,7 +5,7 @@ auto Icarus::bsMemoryManifest(string location) -> string {
 }
 
 auto Icarus::bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string {
-  string digest = Hash::SHA256(buffer).digest();
+  auto digest = Hash::SHA256(buffer).digest();
 
   if(settings["icarus/UseDatabase"].boolean()) {
     for(auto game : database.bsMemory.find("game")) {
@@ -14,11 +14,11 @@ auto Icarus::bsMemoryManifest(vector<uint8_t>& buffer, string location) -> strin
   }
 
   if(settings["icarus/UseHeuristics"].boolean()) {
-    Heuristics::BSMemory game{buffer.data(), buffer.size()};
-    if(string manifest = game.manifest()) return manifest;
+    Heuristics::BSMemory game{buffer, location};
+    if(auto manifest = game.manifest()) return manifest;
   }
 
-  return "";
+  return {};
 }
 
 auto Icarus::bsMemoryImport(vector<uint8_t>& buffer, string location) -> string {
