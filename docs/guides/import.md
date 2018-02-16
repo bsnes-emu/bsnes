@@ -81,6 +81,17 @@ copies of the relevant firmware data
 yourself.
 
 To import a game that requires co-processor firmware,
+the easiest approach is to drop the firmware files into
+icarus' `Firmware` directory
+before importing the game.
+The directory should be beside the icarus executable,
+or it can be `%LOCALAPPDATA%\icarus\Firmware` (on Windows)
+or `~/.local/share/icarus/Firmware/` (on Linux).
+
+When icarus imports a game that requires firmware
+it tries to guess which firmware that game needs,
+but it does not always guess correctly.
+To ensure icarus uses specific firmware with a specific game,
 you must first combine the game data and the firmware into a single file.
 For example,
 let's say you want to import *Super Bases Loaded 2* for the Super Famicom,
@@ -451,12 +462,10 @@ it needs a boot ROM:
     </tbody>
 </table>
 
-To import the SGB base cartridge,
-you must first combine the base cartridge data
-and the boot ROM into a single file,
-just like
-[games with co-processor firmware](#games-with-co-processor-firmware).
-Then you may import it like [a regular game](#regular-games).
+icarus includes these files
+and can reliably decide when to use them,
+so importing either Super Game Boy cartridge
+is just like [importing a regular game](#regular-games).
 
 To play a Game Boy game in Super Game Boy mode,
 load the Super Game Boy cartridge like any other game.
