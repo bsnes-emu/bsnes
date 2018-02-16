@@ -149,10 +149,12 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 
             case GB_IO_PCM_12:
                 if (!gb->is_cgb) return 0xFF;
-                return (gb->apu.samples[GB_SQUARE_2] << 4) | gb->apu.samples[GB_SQUARE_1];
+                return (gb->apu.is_active[GB_SQUARE_2] ? (gb->apu.samples[GB_SQUARE_2] << 4) : 0) |
+                        (gb->apu.is_active[GB_SQUARE_1] ? (gb->apu.samples[GB_SQUARE_1]) : 0);
             case GB_IO_PCM_34:
                 if (!gb->is_cgb) return 0xFF;
-                return (gb->apu.samples[GB_NOISE] << 4) | gb->apu.samples[GB_WAVE];
+                return (gb->apu.is_active[GB_NOISE] ? (gb->apu.samples[GB_NOISE] << 4) : 0) |
+                       (gb->apu.is_active[GB_WAVE] ? (gb->apu.samples[GB_WAVE]) : 0);
             case GB_IO_JOYP:
             case GB_IO_TMA:
             case GB_IO_LCDC:

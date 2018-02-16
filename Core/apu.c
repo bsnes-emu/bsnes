@@ -23,8 +23,15 @@ static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_of
 
 static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
-    gb->apu.samples[index] = value;
-    if (gb->apu.is_active[index] && gb->apu_output.sample_rate) {
+    if (!gb->apu.is_active[index]) {
+        value = gb->apu.samples[index];
+    }
+    else {
+        gb->apu.samples[index] = value;
+        gb->apu_output.dac_discharge[index] = 1.0;
+    }
+    
+    if (gb->apu_output.sample_rate) {
         unsigned left_volume = 0;
         if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
             left_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
@@ -41,27 +48,36 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
     }
 }
 
-static void render(GB_gameboy_t *gb)
+static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
 {
     GB_sample_t output = {0,0};
     for (unsigned i = GB_N_CHANNELS; i--;) {
-        if (likely(gb->apu_output.last_update[i] == 0)) {
-            output.left += gb->apu_output.current_sample[i].left * CH_STEP;
-            output.right += gb->apu_output.current_sample[i].right * CH_STEP;
+        double multiplier = CH_STEP;
+        if (!gb->apu.is_active[i]) {
+            gb->apu_output.dac_discharge[i] -= ((double) DAC_DECAY_SPEED) / gb->apu_output.sample_rate;
+            if (gb->apu_output.dac_discharge[i] < 0) {
+                multiplier = 0;
+            }
+            else {
+                multiplier *= pow(0.05, 1 - gb->apu_output.dac_discharge[i]) * (gb->apu_output.dac_discharge[i]);
+            }
+        }
+
+        if (likely(gb->apu_output.last_update[i] == 0 || no_downsampling)) {
+            output.left += gb->apu_output.current_sample[i].left * multiplier;
+            output.right += gb->apu_output.current_sample[i].right * multiplier;
         }
         else {
             refresh_channel(gb, i, 0);
-            output.left += (signed long) gb->apu_output.summed_samples[i].left * CH_STEP
+            output.left += (signed long) gb->apu_output.summed_samples[i].left * multiplier
                             / gb->apu_output.cycles_since_render;
-            output.right += (signed long) gb->apu_output.summed_samples[i].right * CH_STEP
+            output.right += (signed long) gb->apu_output.summed_samples[i].right * multiplier
                             / gb->apu_output.cycles_since_render;
             gb->apu_output.summed_samples[i] = (GB_sample_t){0, 0};
         }
         gb->apu_output.last_update[i] = 0;
     }
     gb->apu_output.cycles_since_render = 0;
-    
-
 
     GB_sample_t filtered_output = gb->apu_output.highpass_mode?
         (GB_sample_t) {output.left - gb->apu_output.highpass_diff.left,
@@ -103,6 +119,10 @@ static void render(GB_gameboy_t *gb)
         case GB_HIGHPASS_MAX:;
         }
             
+    }
+    if (dest) {
+        *dest = filtered_output;
+        return;
     }
 
     while (gb->apu_output.copy_in_progress);
@@ -369,7 +389,7 @@ void GB_apu_run(GB_gameboy_t *gb)
         
         if (gb->apu_output.sample_cycles > cycles_per_sample) {
             gb->apu_output.sample_cycles -= cycles_per_sample;
-            render(gb);
+            render(gb, false, NULL);
         }
     }
 }
@@ -386,15 +406,13 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
 
     if (count > gb->apu_output.buffer_position) {
         // GB_log(gb, "Audio underflow: %d\n", count - gb->apu_output.buffer_position);
-        GB_sample_t output = {-gb->apu_output.highpass_diff.left, -gb->apu_output.highpass_diff.right};
-        for (unsigned i = GB_N_CHANNELS; i--;) {
-            output.left += gb->apu_output.current_sample[i].left * CH_STEP;
-            output.right += gb->apu_output.current_sample[i].right * CH_STEP;
-        }
+        GB_sample_t output;
+        render(gb, true, &output);
         
         for (unsigned i = 0; i < count - gb->apu_output.buffer_position; i++) {
             dest[gb->apu_output.buffer_position + i] = output;
         }
+        
         count = gb->apu_output.buffer_position;
     }
     memcpy(dest, gb->apu_output.buffer, count * sizeof(*gb->apu_output.buffer));

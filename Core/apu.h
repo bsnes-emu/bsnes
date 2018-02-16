@@ -6,6 +6,9 @@
 
 
 #ifdef GB_INTERNAL
+/* Speed = 1 / Length (in seconds) */
+#define DAC_DECAY_SPEED 500.0
+
 /* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */
 #ifdef WIIU
 /* Todo: Remove this hack once https://github.com/libretro/RetroArch/issues/6252 is fixed*/
@@ -15,6 +18,8 @@
 #endif
 #define CH_STEP (MAX_CH_AMP/0xF/8)
 #endif
+
+
 
 /* APU ticks are 2MHz, triggered by an internal APU clock. */
 
@@ -129,6 +134,7 @@ typedef struct {
     unsigned last_update[GB_N_CHANNELS];
     GB_sample_t current_sample[GB_N_CHANNELS];
     GB_sample_t summed_samples[GB_N_CHANNELS];
+    double dac_discharge[GB_N_CHANNELS];
     
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;
