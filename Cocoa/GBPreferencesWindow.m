@@ -28,6 +28,7 @@
                     @"NearestNeighbor",
                     @"Bilinear",
                     @"SmoothBilinear",
+                    @"LCD",
                     @"Scale2x",
                     @"Scale4x",
                     @"AAScale2x",

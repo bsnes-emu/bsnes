@@ -35,7 +35,7 @@
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6pP-kK-EEC">
                         <rect key="frame" x="30" y="474" width="245" height="26"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="I1w-05-lGl">
+                        <popUpButtonCell key="cell" type="push" title="Nearest Neighbor (Pixelated)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="neN-eo-LA7" id="I1w-05-lGl">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
                             <menu key="menu" id="xDC-0T-Qg9">
@@ -45,6 +45,7 @@
                                     </menuItem>
                                     <menuItem title="Bilinear (Blurry)" id="iDe-si-atu"/>
                                     <menuItem title="Smooth Bilinear (Less blurry)" id="1jN-pO-1iD"/>
+                                    <menuItem title="LCD Display" id="b8u-LZ-UQf"/>
                                     <menuItem title="Scale2x" id="C1I-L2-Up1"/>
                                     <menuItem title="Scale4x" id="uWA-Zp-JY9"/>
                                     <menuItem title="Anti-aliased Scale2x" id="iP6-DJ-CVH"/>
@@ -119,15 +120,15 @@
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7fg-Ww-JjR">
                         <rect key="frame" x="30" y="286" width="245" height="26"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="lxQ-4n-kEv" id="lvb-QF-0Ht">
+                        <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="lxQ-4n-kEv" id="lvb-QF-0Ht">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
                             <menu key="menu" id="lbS-Lw-kQX">
                                 <items>
-                                    <menuItem title="Disabled" id="lxQ-4n-kEv">
+                                    <menuItem title="Disabled" state="on" id="lxQ-4n-kEv">
                                         <modifierMask key="keyEquivalentModifierMask"/>
                                     </menuItem>
-                                    <menuItem title="10 Seconds" state="on" tag="10" id="bPU-vT-d5z"/>
+                                    <menuItem title="10 Seconds" tag="10" id="bPU-vT-d5z"/>
                                     <menuItem title="30 Seconds" tag="30" id="aR8-IU-fFh"/>
                                     <menuItem title="1 Minute" tag="60" id="E0R-mf-Hdl"/>
                                     <menuItem title="2 Minutes" tag="120" id="zb2-uh-lvj"/>
