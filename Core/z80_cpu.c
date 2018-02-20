@@ -21,8 +21,8 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_advance_cycles(gb, 4);
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
-        /* Make sure we don't leave display_cycles not divisble by 4 in single speed mode */
-        if (gb->display_cycles % 4 == 2) {
+        /* Make sure we don't leave display_cycles not divisble by 8 in single speed mode */
+        if (gb->display_cycles % 8 == 4) {
             GB_advance_cycles(gb, 4);
         }
         
