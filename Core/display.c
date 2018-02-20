@@ -390,12 +390,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             gb->display_cycles = 0;
             gb->io_registers[GB_IO_STAT] &= ~3;
             if (gb->is_cgb) {
-                if (stat_delay) {
-                    gb->io_registers[GB_IO_STAT] |= 1;
-                }
-                else {
-                    gb->io_registers[GB_IO_STAT] |= 2;
-                }
+                gb->io_registers[GB_IO_STAT] |= 1;
             }
             ly_for_comparison = gb->io_registers[GB_IO_LY] = 0;
             
@@ -502,19 +497,19 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             /* Handle everything else */
             /* OAM interrupt happens slightly before STAT is actually updated. (About 1-3 T-cycles)
                Todo: Test double speed CGB */
-            if (position_in_line == 0 && stat_delay) {
+            if (position_in_line == 0) {
                 if (gb->io_registers[GB_IO_STAT] & 0x20) {
                     gb->stat_interrupt_line = true;
                     dmg_future_stat = true;
                 }
+                if (gb->display_cycles != 0) {
+                    should_compare_ly = gb->is_cgb;
+                    ly_for_comparison--;
+                }
             }
-            if (position_in_line == stat_delay) {
+            else if (position_in_line == stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
-            }
-            else if (position_in_line == 0 && gb->display_cycles != 0) {
-                should_compare_ly = gb->is_cgb;
-                ly_for_comparison--;
             }
             else if (position_in_line == MODE2_LENGTH + stat_delay) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
@@ -609,7 +604,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         
         /* Lines 144 - 152 */
         else {
-            if (stat_delay && gb->display_cycles % LINE_LENGTH == 0) {
+            if (gb->display_cycles % LINE_LENGTH == 0) {
                 should_compare_ly = gb->is_cgb;
                 ly_for_comparison--;
             }
@@ -662,22 +657,6 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             }
         }
     };
-    
-#if 0
-    /* The value of LY is glitched in the last cycle of every line in CGB mode CGB in single speed
-       This is based on AntonioND's docs, however I could not reproduce these findings on my CGB.
-       Todo: Find out why my tests contradict these docs */
-    if (gb->cgb_mode && !gb->cgb_double_speed &&
-        gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 8) {
-        uint8_t glitch_pattern[] = {0, 0, 2, 0, 4, 4, 6, 0, 8};
-        if ((gb->io_registers[GB_IO_LY] & 0xF) == 0xF) {
-            gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] >> 4] << 4;
-        }
-        else {
-            gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] & 7] | (gb->io_registers[GB_IO_LY] & 0xF8);
-        }
-    }
-#endif
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
