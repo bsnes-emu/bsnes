@@ -127,7 +127,7 @@ typedef struct {
     volatile bool copy_in_progress;
     volatile bool lock;
     
-    double sample_cycles;
+    double sample_cycles; // In 8 MHz units
     
     // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
     unsigned cycles_since_render;

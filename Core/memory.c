@@ -708,8 +708,8 @@ void GB_dma_run(GB_gameboy_t *gb)
 void GB_hdma_run(GB_gameboy_t *gb)
 {
     if (!gb->hdma_on) return;
-    while (gb->hdma_cycles >= 8) {
-        gb->hdma_cycles -= 8;
+    while (gb->hdma_cycles >= 0x10) {
+        gb->hdma_cycles -= 0x10;
 
         for (uint8_t i = 0; i < 0x10; i++) {
             GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), GB_read_memory(gb, (gb->hdma_current_src++)));

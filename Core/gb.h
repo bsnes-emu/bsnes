@@ -267,7 +267,7 @@ struct GB_gameboy_internal_s {
         bool hdma_on;
         bool hdma_on_hblank;
         uint8_t hdma_steps_left;
-        uint16_t hdma_cycles;
+        uint16_t hdma_cycles; // in 8MHz units
         uint16_t hdma_current_src, hdma_current_dest;
 
         uint8_t dma_steps_left;
@@ -332,7 +332,7 @@ struct GB_gameboy_internal_s {
 
     /* Timing */
     GB_SECTION(timing,
-        uint32_t display_cycles;
+        uint32_t display_cycles; // In 8 MHz units
         uint32_t div_cycles;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
         uint16_t serial_cycles;
@@ -418,7 +418,7 @@ struct GB_gameboy_internal_s {
                
         /* Timing */
         uint64_t last_sync;
-        uint64_t cycles_since_last_sync;
+        uint64_t cycles_since_last_sync; // In 8MHz units
 
         /* Audio */
         GB_apu_output_t apu_output;
@@ -438,8 +438,8 @@ struct GB_gameboy_internal_s {
         GB_serial_transfer_end_callback_t serial_transfer_end_callback;
                
         /* IR */
-        long cycles_since_ir_change;
-        long cycles_since_input_ir_change;
+        long cycles_since_ir_change; // In 8MHz units
+        long cycles_since_input_ir_change; // In 8MHz units
         GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
         size_t ir_queue_length;
 
@@ -493,7 +493,7 @@ struct GB_gameboy_internal_s {
         uint32_t ram_size; // Different between CGB and DMG
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
-        uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run()
+        uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units
         double clock_multiplier;
    );
 };
@@ -563,7 +563,7 @@ void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const cha
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
 
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
-void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change);
+void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change); /* In 8MHz units*/
     
 void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);

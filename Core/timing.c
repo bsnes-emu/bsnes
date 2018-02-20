@@ -55,9 +55,9 @@ void GB_timing_sync(GB_gameboy_t *gb)
         return;
     }
     /* Prevent syncing if not enough time has passed.*/
-    if (gb->cycles_since_last_sync < LCDC_PERIOD / 4) return;
+    if (gb->cycles_since_last_sync < LCDC_PERIOD / 8) return;
 
-    uint64_t target_nanoseconds = gb->cycles_since_last_sync * 1000000000LL / GB_get_clock_rate(gb);
+    uint64_t target_nanoseconds = gb->cycles_since_last_sync * 1000000000LL / 2 / GB_get_clock_rate(gb); /* / 2 because we use 8MHz units */
     int64_t nanoseconds = get_nanoseconds();
     if (labs((signed long)(nanoseconds - gb->last_sync)) < target_nanoseconds ) {
         nsleep(target_nanoseconds  + gb->last_sync - nanoseconds);
@@ -145,7 +145,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 
     gb->debugger_ticks += cycles;
 
-    cycles >>= gb->cgb_double_speed;
+    cycles <<= !gb->cgb_double_speed;
 
     // Not affected by speed boost
     gb->hdma_cycles += cycles;

@@ -385,7 +385,7 @@ void GB_apu_run(GB_gameboy_t *gb)
     
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_since_render += cycles;
-        double cycles_per_sample = GB_get_clock_rate(gb) / (double)gb->apu_output.sample_rate;
+        double cycles_per_sample = 2 * GB_get_clock_rate(gb) / (double)gb->apu_output.sample_rate; /* 2 * because we use 8MHz units */
         
         if (gb->apu_output.sample_cycles > cycles_per_sample) {
             gb->apu_output.sample_cycles -= cycles_per_sample;

@@ -15,13 +15,15 @@
  Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
  */
 
-#define MODE2_LENGTH (80)
-#define MODE3_LENGTH (172)
-#define MODE0_LENGTH (204)
+/* The display (logically) runs in 8MHz units, so we double our length constants */
+#define MODE2_LENGTH (80 * 2)
+#define MODE3_LENGTH (172 * 2)
+#define MODE0_LENGTH (204 * 2)
 #define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
 #define LINES (144)
 #define WIDTH (160)
-#define VIRTUAL_LINES (LCDC_PERIOD / LINE_LENGTH) // = 154
+#define FRAME_LENGTH (LCDC_PERIOD * 2)
+#define VIRTUAL_LINES (FRAME_LENGTH / LINE_LENGTH) // = 154
 
 typedef struct __attribute__((packed)) {
     uint8_t y;
@@ -332,9 +334,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         
         /* Keep sending vblanks to user even if the screen is off */
         gb->display_cycles += cycles;
-        if (gb->display_cycles >= LCDC_PERIOD) {
+        if (gb->display_cycles >= FRAME_LENGTH) {
             /* VBlank! */
-            gb->display_cycles -= LCDC_PERIOD;
+            gb->display_cycles -= FRAME_LENGTH;
             display_vblank(gb);
         }
 
@@ -344,23 +346,23 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         return;
     }
     
-    uint8_t atomic_increase = gb->cgb_double_speed? 2 : 4;
+    uint8_t atomic_increase = gb->cgb_double_speed? 4 : 8;
     /* According to AntonioND's docs this value should be 0 in CGB mode, but tests I ran on my CGB seem to contradict
        these findings.
        Todo: Investigate what causes the difference between our findings */
-    uint8_t stat_delay = gb->cgb_double_speed? 2 : 4; // (gb->cgb_mode? 0 : 4);
+    uint8_t stat_delay = gb->cgb_double_speed? 4 : 8; // (gb->cgb_mode? 0 : 8);
     /* Todo: Is this correct for DMG mode CGB? */
-    uint8_t scx_delay = gb->effective_scx & 7;
+    uint8_t scx_delay = (gb->effective_scx & 7) * 2;
     if (gb->cgb_double_speed) {
-        scx_delay = (scx_delay + 1) & ~1;
+        scx_delay = (scx_delay + 2) & ~3;
     }
     else {
-        scx_delay = (scx_delay + (gb->first_scanline ? 2 : 0)) & ~3;
+        scx_delay = (scx_delay + (gb->first_scanline ? 4 : 0)) & ~7;
     }
     
     /* Todo: These are correct for DMG, DMG-mode CGB, and single speed CGB. Is is correct for double speed CGB? */
-    uint8_t oam_blocking_rush = gb->cgb_double_speed? 2 : 4;
-    uint8_t vram_blocking_rush = gb->is_cgb? 0 : 4;
+    uint8_t oam_blocking_rush = gb->cgb_double_speed? 4 : 8;
+    uint8_t vram_blocking_rush = gb->is_cgb? 0 : 8;
     
     for (; cycles; cycles -= atomic_increase) {
         bool dmg_future_stat = false;
@@ -371,11 +373,11 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         gb->stat_interrupt_line = false;
         
         gb->display_cycles += atomic_increase;
-        /* The very first line is 4 clocks shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
+        /* The very first line is 1 M-cycle shorter when the LCD turns on. Verified on SGB2, CGB in CGB mode and
          CGB in double speed mode. */
-        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - 8) {
+        if (gb->first_scanline && gb->display_cycles >= LINE_LENGTH - 0x10) {
             gb->first_scanline = false;
-            gb->display_cycles += 4;
+            gb->display_cycles += 8;
         }
         bool should_compare_ly = true;
         uint8_t ly_for_comparison = gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
@@ -383,7 +385,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
         
         
         /* Handle cycle completion. STAT's initial value depends on model and mode */
-        if (gb->display_cycles == LCDC_PERIOD) {
+        if (gb->display_cycles == FRAME_LENGTH) {
             /* VBlank! */
             gb->display_cycles = 0;
             gb->io_registers[GB_IO_STAT] &= ~3;
@@ -542,11 +544,11 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                     case 0:
                         should_compare_ly = false;
                         break;
-                    case 4:
+                    case 8:
                         gb->io_registers[GB_IO_LY] = 0;
                         ly_for_comparison = VIRTUAL_LINES - 1;
                         break;
-                    case 8:
+                    case 16:
                         gb->io_registers[GB_IO_LY] = 0;
                         should_compare_ly = false;
                         break;
@@ -561,9 +563,9 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                     case 0:
                         ly_for_comparison = VIRTUAL_LINES - 2;
                         break;
-                    case 4:
-                        break;
                     case 8:
+                        break;
+                    case 16:
                         gb->io_registers[GB_IO_LY] = 0;
                         break;
                     default:
@@ -576,7 +578,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                 switch (gb->display_cycles - (VIRTUAL_LINES - 1) * LINE_LENGTH) {
                     case 0:
                         break;
-                    case 4:
+                    case 8:
                         gb->io_registers[GB_IO_LY] = 0;
                         break;
                     default:
@@ -591,11 +593,11 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
                     case 0:
                         ly_for_comparison = VIRTUAL_LINES - 2;
                         break;
-                    case 2:
                     case 4:
-                        break;
-                    case 6:
                     case 8:
+                        break;
+                    case 12:
+                    case 16:
                         gb->io_registers[GB_IO_LY] = 0;
                         break;
                     default:
@@ -666,7 +668,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
        This is based on AntonioND's docs, however I could not reproduce these findings on my CGB.
        Todo: Find out why my tests contradict these docs */
     if (gb->cgb_mode && !gb->cgb_double_speed &&
-        gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 4) {
+        gb->display_cycles % LINE_LENGTH == LINE_LENGTH - 8) {
         uint8_t glitch_pattern[] = {0, 0, 2, 0, 4, 4, 6, 0, 8};
         if ((gb->io_registers[GB_IO_LY] & 0xF) == 0xF) {
             gb->io_registers[GB_IO_LY] = glitch_pattern[gb->io_registers[GB_IO_LY] >> 4] << 4;
@@ -709,7 +711,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
 
     /* Render */
-    int16_t current_lcdc_x = gb->display_cycles % LINE_LENGTH - MODE2_LENGTH - (gb->effective_scx & 0x7) - 7;
+    int16_t current_lcdc_x = (gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) / 2 - (gb->effective_scx & 0x7) - 7;
     
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= WIDTH) {
