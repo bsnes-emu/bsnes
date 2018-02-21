@@ -1,10 +1,10 @@
 database
-  revision: 2018-02-15
+  revision: 2018-02-21
 
 //Boards (Production)
 
 database
-  revision: 2018-02-11
+  revision: 2018-02-21
 
 board: 1A0N-(01,02,10,20,30)
   rom
@@ -152,10 +152,9 @@ board: 1CB7B-01
 board: 1DC0N-01
   hitachidsp model=HG51B169 frequency=20000000
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+    map address=70-77:0000-7fff
     rom
       map address=00-3f,80-bf:8000-ffff mask=0x8000
-    ram
-      map address=70-77:0000-7fff mask=0x8000
     drom
     dram
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
@@ -196,7 +195,7 @@ board: 1J3M-(01,11,20)
   ram
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
-board: 1J5M-(11,20)
+board: 1J5M-(01,11,20)
   rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -317,10 +316,9 @@ board: 2B3B-01
 board: 2DC0N-01
   hitachidsp model=HG51B169 frequency=20000000
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+    map address=70-77:0000-7fff
     rom
       map address=00-3f,80-bf:8000-ffff mask=0x8000
-    ram
-      map address=70-77:0000-7fff mask=0x8000
     drom
     dram
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
@@ -374,6 +372,20 @@ board: BA3M-(01,10)
   ram
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
 
+board: BANDAI-PT-923
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  sufamiturbo
+    rom
+      map address=20-3f,a0-bf:8000-ffff mask=0x8000
+    ram
+      map address=60-6f,e0-ef:0000-ffff
+  sufamiturbo
+    rom
+      map address=40-5f,c0-df:0000-ffff mask=0x8000
+    ram
+      map address=70-7d,f0-ff:0000-ffff
+
 board: BJ0N-(01,20)
   rom
     map address=00-3f,80-bf:8000-ffff
@@ -393,13 +405,91 @@ board: BJ3M-10
   ram
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
+board: BSC-1A5M-02
+  rom
+    map address=00-1f:8000-ffff mask=0x8000 base=0x000000
+    map address=20-3f:8000-ffff mask=0x8000 base=0x100000
+    map address=80-9f:8000-ffff mask=0x8000 base=0x200000
+    map address=a0-bf:8000-ffff mask=0x8000 base=0x100000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  bsmemory
+    map address=c0-ef:0000-ffff
+
+board: BSC-1A7M-01
+  rom
+    map address=00-1f:8000-ffff mask=0x8000 base=0x000000
+    map address=20-3f:8000-ffff mask=0x8000 base=0x100000
+    map address=80-9f:8000-ffff mask=0x8000 base=0x200000
+    map address=a0-bf:8000-ffff mask=0x8000 base=0x100000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  bsmemory
+    map address=c0-ef:0000-ffff
+
+board: BSC-1J3M-01
+  rom
+    map address=00-1f,80-9f:8000-ffff
+    map address=40-5f,c0-df:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  bsmemory
+    map address=20-3f,a0-bf:8000-ffff
+    map address=60-7d,e0-ff:0000-ffff
+
+board: BSC-1J5M-01
+  rom
+    map address=00-1f,80-9f:8000-ffff
+    map address=40-5f,c0-df:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  bsmemory
+    map address=20-3f,a0-bf:8000-ffff
+    map address=60-7d,e0-ff:0000-ffff
+
+board: BSC-1L3B-01
+  sa1
+    map address=00-3f,80-bf:2200-23ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+    bwram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=40-4f:0000-ffff
+    iram
+      map address=00-3f,80-bf:3000-37ff size=0x800
+    bsmemory
+
+board: BSC-1L5B-01
+  sa1
+    map address=00-3f,80-bf:2200-23ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+    bwram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=40-4f:0000-ffff
+    iram
+      map address=00-3f,80-bf:3000-37ff size=0x800
+    bsmemory
+
 board: SGB-R-10
   rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
-  icd2 revision=1
+  icd revision=2
     map address=00-3f,80-bf:6000-67ff,7000-7fff
     rom
+    gameboy
+
+board: SHVC-SGB2-01
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  icd revision=2 frequency=20971520
+    map address=00-3f,80-bf:6000-67ff,7000-7fff
+    rom
+    gameboy
 
 board: YA0N-01
   rom
@@ -414,7 +504,7 @@ board: YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-02-15
+  revision: 2018-02-21
 
 board: ARM-LOROM-RAM
   rom
@@ -472,8 +562,7 @@ board: BS-SA1-RAM
       map address=40-4f:0000-ffff
     iram
       map address=00-3f,80-bf:3000-37ff size=0x800
-  bsmemory
-    map
+    bsmemory
 
 board: HIROM
   rom
@@ -650,9 +739,10 @@ board: SGB-LOROM
   rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
-  icd2 revision=1
+  icd revision=2
     map address=00-3f,80-bf:6000-67ff,7000-7fff
     rom
+    gameboy
 
 board: SPC7110-RAM
   spc7110
@@ -689,8 +779,7 @@ board: ST-LOROM
       map address=60-6f,e0-ef:0000-ffff
   sufamiturbo
     rom
-      map address=40-5f,c0-df:0000-7fff mask=0x8000
-      map address=40-5f,c0-df:8000-ffff mask=0x8000
+      map address=40-5f,c0-df:0000-ffff mask=0x8000
     ram
       map address=70-7d,f0-ff:0000-ffff
 

@@ -37,7 +37,7 @@ struct Cartridge {
   } information;
 
   struct Has {
-    boolean ICD2;
+    boolean ICD;
     boolean MCC;
     boolean NSSDIP;
     boolean Event;
@@ -75,7 +75,7 @@ private:
 
   auto loadROM(Markup::Node) -> void;
   auto loadRAM(Markup::Node) -> void;
-  auto loadICD2(Markup::Node) -> void;
+  auto loadICD(Markup::Node) -> void;
   auto loadMCC(Markup::Node) -> void;
   auto loadBSMemoryPack(Markup::Node) -> void;
   auto loadSufamiTurbo(Markup::Node, bool slot) -> void;
@@ -121,7 +121,7 @@ private:
   auto saveMemory(MappedRAM&, Markup::Node, maybe<uint> = nothing) -> void;
 
   friend class Interface;
-  friend class ICD2;
+  friend class ICD;
 };
 
 extern Cartridge cartridge;

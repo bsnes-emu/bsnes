@@ -1,4 +1,4 @@
-auto ICD2::lcdScanline() -> void {
+auto ICD::lcdScanline() -> void {
   if(GameBoy::ppu.status.ly > 143) return;  //Vblank
   if((GameBoy::ppu.status.ly & 7) == 0) {
     writeBank = (writeBank + 1) & 3;
@@ -6,7 +6,7 @@ auto ICD2::lcdScanline() -> void {
   }
 }
 
-auto ICD2::lcdOutput(uint2 color) -> void {
+auto ICD::lcdOutput(uint2 color) -> void {
   uint y = writeAddress / 160;
   uint x = writeAddress % 160;
   uint addr = writeBank * 512 + y * 2 + x / 8 * 16;
@@ -15,7 +15,7 @@ auto ICD2::lcdOutput(uint2 color) -> void {
   writeAddress = (writeAddress + 1) % 1280;
 }
 
-auto ICD2::joypWrite(bool p15, bool p14) -> void {
+auto ICD::joypWrite(bool p15, bool p14) -> void {
   //joypad handling
   if(p15 == 1 && p14 == 1) {
     if(joyp15Lock == 0 && joyp14Lock == 0) {

@@ -137,6 +137,7 @@ auto SA1::mmcromRead(uint24 addr, uint8) -> uint8 {
   }
 
   static auto read = [](uint addr) {
+    if((addr & 0x400000) && bsmemory.size()) return bsmemory.read(addr, 0x00);
     return sa1.rom.read(bus.mirror(addr, sa1.rom.size()));
   };
 

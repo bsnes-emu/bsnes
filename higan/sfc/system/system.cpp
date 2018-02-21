@@ -48,7 +48,7 @@ auto System::load(Emulator::Interface* interface) -> bool {
     information.cpuFrequency = Emulator::Constants::Colorburst::PAL * 4.8;
   }
 
-  if(cartridge.has.ICD2) icd2.load();
+  if(cartridge.has.ICD) icd.load();
   if(cartridge.has.BSMemorySlot) bsmemory.load();
 
   serializeInit();
@@ -70,7 +70,7 @@ auto System::unload() -> void {
   controllerPort2.unload();
   expansionPort.unload();
 
-  if(cartridge.has.ICD2) icd2.unload();
+  if(cartridge.has.ICD) icd.unload();
   if(cartridge.has.MCC) mcc.unload();
   if(cartridge.has.Event) event.unload();
   if(cartridge.has.SA1) sa1.unload();
@@ -104,7 +104,7 @@ auto System::power(bool reset) -> void {
   dsp.power(reset);
   ppu.power(reset);
 
-  if(cartridge.has.ICD2) icd2.power();
+  if(cartridge.has.ICD) icd.power();
   if(cartridge.has.MCC) mcc.power();
   if(cartridge.has.NSSDIP) nss.power();
   if(cartridge.has.Event) event.power();
@@ -122,7 +122,7 @@ auto System::power(bool reset) -> void {
   if(cartridge.has.BSMemorySlot) bsmemory.power();
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.power(), sufamiturboB.power();
 
-  if(cartridge.has.ICD2) cpu.coprocessors.append(&icd2);
+  if(cartridge.has.ICD) cpu.coprocessors.append(&icd);
   if(cartridge.has.Event) cpu.coprocessors.append(&event);
   if(cartridge.has.SA1) cpu.coprocessors.append(&sa1);
   if(cartridge.has.SuperFX) cpu.coprocessors.append(&superfx);

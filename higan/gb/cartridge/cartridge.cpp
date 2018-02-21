@@ -48,7 +48,8 @@ auto Cartridge::load() -> bool {
     information.manifest = fp->reads();
   } else return false;
 
-  auto document = BML::unserialize(information.manifest);
+  //todo: temporary hack so (type=) node lookup works; replace with a proper game/memory parser
+  auto document = BML::unserialize(string{information.manifest}.replace("type: ", "type:"));
   information.title = document["game/label"].text();
 
   auto mapperID = document["game/board"].text();
@@ -68,7 +69,7 @@ auto Cartridge::load() -> bool {
   accelerometer = (bool)document["game/board/accelerometer"];
   rumble = (bool)document["game/board/rumble"];
 
-  if(auto node = document["game/memory[type=ROM]"]) {
+  if(auto node = document["game/memory(type=ROM)"]) {
     rom.size = max(0x4000, node["size"].natural());
     rom.data = (uint8*)memory::allocate(rom.size, 0xff);
     if(auto name = node["name"].text()) {
@@ -78,7 +79,7 @@ auto Cartridge::load() -> bool {
     }
   }
 
-  if(auto node = document["game/memory[type=NVRAM]"]) {
+  if(auto node = document["game/memory(type=NVRAM)"]) {
     ram.size = node["size"].natural();
     ram.data = (uint8*)memory::allocate(ram.size, 0xff);
     if(auto name = node["name"].text()) {
@@ -88,7 +89,7 @@ auto Cartridge::load() -> bool {
     }
   }
 
-  if(auto node = document["game/memory[type=RTC]"]) {
+  if(auto node = document["game/memory(type=RTC)"]) {
     rtc.size = node["size"].natural();
     rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
     if(auto name = node["name"].text()) {
@@ -103,9 +104,9 @@ auto Cartridge::load() -> bool {
 }
 
 auto Cartridge::save() -> void {
-  auto document = BML::unserialize(information.manifest);
+  auto document = BML::unserialize(string{information.manifest}.replace("type: ", "type:"));
 
-  if(auto node = document["game/memory[type=NVRAM]"]) {
+  if(auto node = document["game/memory(type=NVRAM)"]) {
     if(auto name = node["name"].text()) {
       if(auto fp = platform->open(pathID(), name, File::Write)) {
         fp->write(ram.data, ram.size);
@@ -113,7 +114,7 @@ auto Cartridge::save() -> void {
     }
   }
 
-  if(auto node = document["game/memory[type=RTC]"]) {
+  if(auto node = document["game/memory(type=RTC)"]) {
     if(auto name = node["name"].text()) {
       if(auto fp = platform->open(pathID(), name, File::Write)) {
         fp->write(rtc.data, rtc.size);

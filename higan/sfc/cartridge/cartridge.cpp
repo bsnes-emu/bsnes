@@ -41,7 +41,7 @@ auto Cartridge::load() -> bool {
   loadCartridge(document);
 
   //Game Boy
-  if(cartridge.has.ICD2) {
+  if(cartridge.has.ICD) {
     information.sha256 = "";  //Game Boy cartridge not loaded yet: set later via loadGameBoy()
   }
 
@@ -89,7 +89,7 @@ auto Cartridge::load() -> bool {
 
 auto Cartridge::loadGameBoy() -> bool {
   #if defined(SFC_SUPERGAMEBOY)
-  //invoked from ICD2::load()
+  //invoked from ICD::load()
   information.sha256 = GameBoy::cartridge.sha256();
   information.manifest.gameBoy = GameBoy::cartridge.manifest();
   information.title.gameBoy = GameBoy::cartridge.title();
@@ -103,7 +103,7 @@ auto Cartridge::loadBSMemory() -> bool {
   if(auto fp = platform->open(bsmemory.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.bsMemory = fp->reads();
   } else return false;
-  loadBSMemory(BML::unserialize(information.manifest.bsMemory));
+  loadBSMemory(BML::unserialize(string{information.manifest.bsMemory}.replace("type: ", "type:")));
   return true;
 }
 
@@ -111,7 +111,7 @@ auto Cartridge::loadSufamiTurboA() -> bool {
   if(auto fp = platform->open(sufamiturboA.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboA = fp->reads();
   } else return false;
-  loadSufamiTurboA(BML::unserialize(information.manifest.sufamiTurboA));
+  loadSufamiTurboA(BML::unserialize(string{information.manifest.sufamiTurboA}.replace("type: ", "type:")));
   return true;
 }
 
@@ -119,7 +119,7 @@ auto Cartridge::loadSufamiTurboB() -> bool {
   if(auto fp = platform->open(sufamiturboB.pathID, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboB = fp->reads();
   } else return false;
-  loadSufamiTurboB(BML::unserialize(information.manifest.sufamiTurboB));
+  loadSufamiTurboB(BML::unserialize(string{information.manifest.sufamiTurboB}.replace("type: ", "type:")));
   return true;
 }
 
@@ -127,8 +127,8 @@ auto Cartridge::save() -> void {
   saveCartridge(BML::unserialize(information.manifest.cartridge));
   saveGameBoy(BML::unserialize(information.manifest.gameBoy));
   saveBSMemory(BML::unserialize(information.manifest.bsMemory));
-  saveSufamiTurboA(BML::unserialize(information.manifest.sufamiTurboA));
-  saveSufamiTurboB(BML::unserialize(information.manifest.sufamiTurboB));
+  saveSufamiTurboA(BML::unserialize(string{information.manifest.sufamiTurboA}.replace("type: ", "type:")));
+  saveSufamiTurboB(BML::unserialize(string{information.manifest.sufamiTurboB}.replace("type: ", "type:")));
 }
 
 auto Cartridge::unload() -> void {

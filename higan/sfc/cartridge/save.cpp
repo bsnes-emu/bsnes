@@ -23,11 +23,11 @@ auto Cartridge::saveBSMemory(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveSufamiTurboA(Markup::Node node) -> void {
-  saveMemory(sufamiturboA.ram, node["board/ram"], sufamiturboA.pathID);
+  saveMemory(sufamiturboA.ram, node["game/memory(type=NVRAM)"], sufamiturboA.pathID);
 }
 
 auto Cartridge::saveSufamiTurboB(Markup::Node node) -> void {
-  saveMemory(sufamiturboB.ram, node["board/ram"], sufamiturboB.pathID);
+  saveMemory(sufamiturboB.ram, node["game/memory(type=NVRAM)"], sufamiturboB.pathID);
 }
 
 //

@@ -3,7 +3,7 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
 
   auto region = node["game/region"].text();
   auto board = node["game/board"].text();
-  board.trimLeft("SHVC-", 1L);
+  if(board != "SHVC-SGB2-01") board.trimLeft("SHVC-", 1L);
   board.trimLeft("SNSP-", 1L);
   board.trimLeft("MAXI-", 1L);
   board.trimLeft("MJSC-", 1L);
@@ -80,7 +80,7 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
     if(board["region"].text() == "pal") information.region = "PAL";
   }
 
-  if(board["mcc"] || board["bsmemory"]) {
+  if(board["bsmemory"] || board["mcc/bsmemory"] || board["sa1/bsmemory"]) {
     if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
       bsmemory.pathID = loaded.pathID();
       loadBSMemory();
@@ -95,7 +95,7 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
 
   if(auto node = board["rom"]) loadROM(node);
   if(auto node = board["ram"]) loadRAM(node);
-  if(auto node = board["icd2"]) loadICD2(node);
+  if(auto node = board["icd"]) loadICD(node);
   if(auto node = board["mcc"]) loadMCC(node);
   if(auto node = board["bsmemory"]) loadBSMemoryPack(node);
   if(auto node = board.find("sufamiturbo")) if(node(0)) loadSufamiTurbo(node(0), 0);
@@ -120,30 +120,28 @@ auto Cartridge::loadGameBoy(Markup::Node node) -> void {
 
 auto Cartridge::loadBSMemory(Markup::Node node) -> void {
   information.title.bsMemory = node["game/label"].text();
-  bsmemory.readonly = (node["board/rom/type"].text() == "mrom");
+  bsmemory.readonly = node["game/memory/type"].text() == "ROM";
 
-  loadMemory(bsmemory.memory, node["board/rom"], File::Required, bsmemory.pathID);
+  loadMemory(bsmemory.memory, node["game/memory"], File::Required, bsmemory.pathID);
 }
 
 auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   information.title.sufamiTurboA = node["game/label"].text();
 
-  loadMemory(sufamiturboA.rom, node["board/rom"], File::Required, sufamiturboA.pathID);
-  loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, sufamiturboA.pathID);
+  loadMemory(sufamiturboA.rom, node["game/memory(type=ROM)"  ], File::Required, sufamiturboA.pathID);
+  loadMemory(sufamiturboA.ram, node["game/memory(type=NVRAM)"], File::Optional, sufamiturboA.pathID);
 
-  if(node["board/linkable"]) {
-    if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
-      sufamiturboB.pathID = loaded.pathID();
-      loadSufamiTurboB();
-    }
+  if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
+    sufamiturboB.pathID = loaded.pathID();
+    loadSufamiTurboB();
   }
 }
 
 auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
   information.title.sufamiTurboB = node["game/label"].text();
 
-  loadMemory(sufamiturboB.rom, node["board/rom"], File::Required, sufamiturboB.pathID);
-  loadMemory(sufamiturboB.ram, node["board/ram"], File::Optional, sufamiturboB.pathID);
+  loadMemory(sufamiturboB.rom, node["game/memory(type=ROM)"  ], File::Required, sufamiturboB.pathID);
+  loadMemory(sufamiturboB.ram, node["game/memory(type=NVRAM)"], File::Optional, sufamiturboB.pathID);
 }
 
 //
@@ -158,13 +156,14 @@ auto Cartridge::loadRAM(Markup::Node node) -> void {
   for(auto leaf : node.find("map")) loadMap(leaf, ram);
 }
 
-auto Cartridge::loadICD2(Markup::Node node) -> void {
+auto Cartridge::loadICD(Markup::Node node) -> void {
   has.GameBoySlot = true;
-  has.ICD2 = true;
-  icd2.revision = max(1, node["revision"].natural());
+  has.ICD = true;
+  icd.Revision = node["revision"].natural();
+  icd.Frequency = node["frequency"].natural();
 
-  //Game Boy core loads data through ICD2 interface
-  for(auto leaf : node.find("map")) loadMap(leaf, {&ICD2::readIO, &icd2}, {&ICD2::writeIO, &icd2});
+  //Game Boy core loads data through ICD interface
+  for(auto leaf : node.find("map")) loadMap(leaf, {&ICD::readIO, &icd}, {&ICD::writeIO, &icd});
 }
 
 auto Cartridge::loadMCC(Markup::Node node) -> void {

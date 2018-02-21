@@ -1,4 +1,4 @@
-auto ICD2::serialize(serializer& s) -> void {
+auto ICD::serialize(serializer& s) -> void {
   Thread::serialize(s);
   GameBoy::system.serializeAll(s);
 

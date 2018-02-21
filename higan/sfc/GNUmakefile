@@ -4,7 +4,7 @@ objects += sfc-interface sfc-system sfc-controller
 objects += sfc-cartridge sfc-memory
 objects += sfc-cpu sfc-smp sfc-dsp sfc-ppu
 objects += sfc-expansion sfc-satellaview sfc-21fx
-objects += sfc-icd2 sfc-mcc sfc-nss sfc-event
+objects += sfc-icd sfc-mcc sfc-nss sfc-event
 objects += sfc-sa1 sfc-superfx
 objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 objects += sfc-epsonrtc sfc-sharprtc
@@ -27,7 +27,7 @@ obj/sfc-expansion.o:   sfc/expansion/expansion.cpp $(call rwildcard,sfc/expansio
 obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp $(call rwildcard,sfc/expansion/satellaview/)
 obj/sfc-21fx.o:        sfc/expansion/21fx/21fx.cpp $(call rwildcard,sfc/expansion/21fx/)
 
-obj/sfc-icd2.o:        sfc/coprocessor/icd2/icd2.cpp $(call rwildcard,sfc/coprocessor/icd2/)
+obj/sfc-icd.o:         sfc/coprocessor/icd/icd.cpp $(call rwildcard,sfc/coprocessor/icd/)
 obj/sfc-mcc.o:         sfc/coprocessor/mcc/mcc.cpp $(call rwildcard,sfc/coprocessor/mcc/)
 obj/sfc-nss.o:         sfc/coprocessor/nss/nss.cpp $(call rwildcard,sfc/coprocessor/nss/)
 obj/sfc-event.o:       sfc/coprocessor/event/event.cpp $(call rwildcard,sfc/coprocessor/event/)

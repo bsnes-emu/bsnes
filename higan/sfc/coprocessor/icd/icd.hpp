@@ -1,6 +1,6 @@
 #if defined(SFC_SUPERGAMEBOY)
 
-struct ICD2 : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
+struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   shared_pointer<Emulator::Stream> stream;
 
   static auto Enter() -> void;
@@ -27,7 +27,8 @@ struct ICD2 : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  uint revision;
+  uint Revision = 0;
+  uint Frequency = 0;
 
 private:
   struct Packet {
@@ -66,7 +67,7 @@ private:
 
 #else
 
-struct ICD2 : Thread {
+struct ICD : Thread {
   auto init() -> void {}
   auto load() -> void {}
   auto unload() -> void {}
@@ -78,9 +79,10 @@ struct ICD2 : Thread {
 
   auto serialize(serializer&) -> void {}
 
-  uint revision;
+  uint Revision = 0;
+  uint Frequency = 0;
 };
 
 #endif
 
-extern ICD2 icd2;
+extern ICD icd;

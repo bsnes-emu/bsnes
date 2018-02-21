@@ -1,4 +1,4 @@
-#include <sfc/coprocessor/icd2/icd2.hpp>
+#include <sfc/coprocessor/icd/icd.hpp>
 #include <sfc/coprocessor/mcc/mcc.hpp>
 #include <sfc/coprocessor/nss/nss.hpp>
 #include <sfc/coprocessor/event/event.hpp>

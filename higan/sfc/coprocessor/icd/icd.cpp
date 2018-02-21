@@ -2,7 +2,7 @@
 
 namespace SuperFamicom {
 
-ICD2 icd2;
+ICD icd;
 
 #if defined(SFC_SUPERGAMEBOY)
 
@@ -11,15 +11,15 @@ ICD2 icd2;
 #include "io.cpp"
 #include "serialization.cpp"
 
-auto ICD2::Enter() -> void {
+auto ICD::Enter() -> void {
   while(true) {
     if(scheduler.synchronizing()) GameBoy::system.runToSave();
     scheduler.synchronize();
-    icd2.main();
+    icd.main();
   }
 }
 
-auto ICD2::main() -> void {
+auto ICD::main() -> void {
   if(r6003 & 0x80) {
     GameBoy::system.run();
     step(GameBoy::system._clocksExecuted);
@@ -31,19 +31,20 @@ auto ICD2::main() -> void {
   synchronize(cpu);
 }
 
-auto ICD2::load() -> bool {
+auto ICD::load() -> bool {
   GameBoy::superGameBoy = this;
   GameBoy::system.load(&gameBoyInterface, GameBoy::System::Model::SuperGameBoy, cartridge.pathID());
   return cartridge.loadGameBoy();
 }
 
-auto ICD2::unload() -> void {
+auto ICD::unload() -> void {
   GameBoy::system.save();
   GameBoy::system.unload();
 }
 
-auto ICD2::power() -> void {
-  create(ICD2::Enter, system.cpuFrequency() / 5.0);
+auto ICD::power() -> void {
+  //SGB1 uses CPU oscillator; SGB2 uses dedicated oscillator
+  create(ICD::Enter, (Frequency ? Frequency : system.cpuFrequency()) / 5.0);
   stream = Emulator::audio.createStream(2, frequency() / 2.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
   stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
@@ -72,8 +73,8 @@ auto ICD2::power() -> void {
   GameBoy::system.power();
 }
 
-auto ICD2::reset() -> void {
-  create(ICD2::Enter, system.cpuFrequency() / 5.0);
+auto ICD::reset() -> void {
+  create(ICD::Enter, (Frequency ? Frequency : system.cpuFrequency()) / 5.0);
 
   r6003 = 0x00;
   r6004 = 0xff;

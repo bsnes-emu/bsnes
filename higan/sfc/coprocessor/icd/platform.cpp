@@ -1,8 +1,8 @@
-auto ICD2::audioSample(const double* samples, uint channels) -> void {
+auto ICD::audioSample(const double* samples, uint channels) -> void {
   stream->write(samples);
 }
 
-auto ICD2::inputPoll(uint port, uint device, uint id) -> int16 {
+auto ICD::inputPoll(uint port, uint device, uint id) -> int16 {
   GameBoy::cpu.status.mltReq = joypID & mltReq;
 
   uint data = 0x00;

@@ -227,7 +227,7 @@ auto Interface::unserialize(serializer& s) -> bool {
 auto Interface::cheatSet(const string_vector& list) -> void {
   cheat.reset();
   #if defined(SFC_SUPERGAMEBOY)
-  if(cartridge.has.ICD2) return GameBoy::cheat.assign(list);
+  if(cartridge.has.ICD) return GameBoy::cheat.assign(list);
   #endif
   cheat.assign(list);
 }

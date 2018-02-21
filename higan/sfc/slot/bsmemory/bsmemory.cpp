@@ -55,7 +55,7 @@ auto BSMemory::read(uint24 addr, uint8 data) -> uint8 {
     }
   }
 
-  return memory.read(addr, data);
+  return memory.read(bus.mirror(addr, memory.size()), data);
 }
 
 auto BSMemory::write(uint24 addr, uint8 data) -> void {
