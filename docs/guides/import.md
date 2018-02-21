@@ -428,10 +428,8 @@ games play 2.4% faster than on a real Game Boy.
 The Super Game Boy 2 was a Japan-only release
 that fixed the timing problem of the original Super Game Boy,
 and included a different set of default borders.
-higan supports the Super Game Boy 2 base cartridge,
-so you can use the extra borders,
-but does not yet emulate the timing change
-so games still play slightly too fast.
+higan emulates the Super Game Boy 2 completely,
+including the timing change.
 
 Because the Super Game Boy cartridge includes
 the original Game Boy hardware,
