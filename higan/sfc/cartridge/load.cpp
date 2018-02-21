@@ -22,10 +22,15 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
       }
       if(!matched) continue;
 
-      if(region.endsWith("-USA")
-      || region.endsWith("-CAN")
-      || region.endsWith("-JPN")
-      || region.endsWith("-KOR")
+      if(region.endsWith("BRA")
+      || region.endsWith("CAN")
+      || region.endsWith("HKG")
+      || region.endsWith("JPN")
+      || region.endsWith("KOR")
+      || region.endsWith("LTN")
+      || region.endsWith("ROC")
+      || region.endsWith("USA")
+      || region.beginsWith("SHVC-")
       || region == "NTSC") {
         output.append("region=ntsc\n");
       } else {
@@ -62,7 +67,6 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
     }
   }
 
-  print(output, "\n");
   return BML::unserialize(output);
 }
 

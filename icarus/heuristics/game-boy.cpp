@@ -1,12 +1,38 @@
-struct GameBoyCartridge {
-  GameBoyCartridge(uint8_t* data, uint size);
+namespace Heuristics {
 
-  string markup;
+struct GameBoy : Heuristics {
+  GameBoy(vector<uint8_t>& data, string location);
+  explicit operator bool() const;
+  auto manifest() const -> string;
 
-  bool black = false;  //cartridge works in DMG+CGB mode
-  bool clear = false;  //cartridge works in CGB mode only
+private:
+  auto read(uint offset) const -> uint8_t { return data[headerAddress + offset]; }
 
-  string mapper = "MBC0";
+  vector<uint8_t>& data;
+  string location;
+  uint headerAddress = 0;
+};
+
+GameBoy::GameBoy(vector<uint8_t>& data, string location) : data(data), location(location) {
+  headerAddress = data.size() < 0x8000 ? data.size() : data.size() - 0x8000;
+  if(read(0x0104) == 0xce && read(0x0105) == 0xed && read(0x0106) == 0x66 && read(0x0107) == 0x66
+  && read(0x0108) == 0xcc && read(0x0109) == 0x0d && read(0x0147) >= 0x0b && read(0x0147) <= 0x0d
+  ) {  //MMM01 stores header at bottom of data[]
+  } else { //all other mappers store header at top of data[]
+    headerAddress = 0;
+  }
+}
+
+GameBoy::operator bool() const {
+  return data.size() >= 0x4000;
+}
+
+auto GameBoy::manifest() const -> string {
+  if(!operator bool()) return {};
+
+  bool black = (read(0x0143) & 0xc0) == 0x80;  //cartridge works in DMG+CGB mode
+  bool clear = (read(0x0143) & 0xc0) == 0xc0;  //cartridge works in CGB mode only
+
   bool flash = false;
   bool battery = false;
   bool ram = false;
@@ -18,27 +44,10 @@ struct GameBoyCartridge {
   uint romSize = 0;
   uint ramSize = 0;
   uint rtcSize = 0;
-};
 
-GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
-  if(size < 0x4000) return;
+  string mapper = "MBC0";
 
-  uint index = size < 0x8000 ? size : size - 0x8000;
-  if(data[index + 0x0104] == 0xce && data[index + 0x0105] == 0xed
-  && data[index + 0x0106] == 0x66 && data[index + 0x0107] == 0x66
-  && data[index + 0x0108] == 0xcc && data[index + 0x0109] == 0x0d
-  && data[index + 0x0147] >= 0x0b && data[index + 0x0147] <= 0x0d
-  ) {
-    //MMM01 stores header at bottom of data[]
-  } else {
-    //all other mappers store header at top of data[]
-    index = 0;
-  }
-
-  black = (data[index + 0x0143] & 0xc0) == 0x80;
-  clear = (data[index + 0x0143] & 0xc0) == 0xc0;
-
-  switch(data[index + 0x0147]) {
+  switch(read(0x0147)) {
 
   case 0x00:
     mapper = "MBC0";
@@ -195,7 +204,7 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
 
   }
 
-  switch(data[index + 0x0148]) { default:
+  switch(read(0x0148)) { default:
   case 0x00: romSize =   2 * 16 * 1024; break;
   case 0x01: romSize =   4 * 16 * 1024; break;
   case 0x02: romSize =   8 * 16 * 1024; break;
@@ -211,7 +220,7 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
 
   if(mapper == "MBC6" && flash) flashSize = 1024 * 1024;
 
-  switch(data[index + 0x0149]) { default:
+  switch(read(0x0149)) { default:
   case 0x00: ramSize =  0 * 1024; break;
   case 0x01: ramSize =  2 * 1024; break;
   case 0x02: ramSize =  8 * 1024; break;
@@ -226,9 +235,19 @@ GameBoyCartridge::GameBoyCartridge(uint8_t* data, uint size) {
   if(mapper == "MBC3" && rtc) rtcSize = 13;
   if(mapper == "TAMA" && rtc) rtcSize = 21;
 
-  markup.append("board mapper=", mapper, accelerometer ? " accelerometer" : "", rumble ? " rumble" : "", "\n");
-  markup.append("  rom name=program.rom size=0x", hex(romSize), "\n");
-  if(flash && flashSize) markup.append("  flash name=download.rom size=0x", hex(flashSize), "\n");
-  if(ram && ramSize) markup.append("  ram ", battery ? "name=save.ram " : "", "size=0x", hex(ramSize), "\n");
-  if(rtc && rtcSize) markup.append("  rtc ", battery ? "name=rtc.ram " : "", "size=0x", hex(rtcSize), "\n");
+  string output;
+  output.append("game\n");
+  output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
+  output.append("  board:  ", mapper, "\n");
+  if(accelerometer) output.append("    accelerometer\n");
+  if(rumble) output.append("    rumble\n");
+  output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  label:  ", Location::prefix(location), "\n");
+  output.append(memory("ROM", data.size(), "program.rom"));
+  if(flash && flashSize) output.append(memory("NAND", flashSize, "download.rom"));
+  if(ram && ramSize) output.append(memory(battery ? "NVRAM" : "RAM", ramSize, "save.ram"));
+  if(rtc && rtcSize) output.append(memory("RTC", rtcSize, "rtc.ram"));
+  return output;
+}
+
 }

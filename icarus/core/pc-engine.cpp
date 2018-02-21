@@ -5,24 +5,19 @@ auto Icarus::pcEngineManifest(string location) -> string {
 }
 
 auto Icarus::pcEngineManifest(vector<uint8_t>& buffer, string location) -> string {
-  string manifest;
-
-  if(settings["icarus/UseDatabase"].boolean() && !manifest) {
-    string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
-    for(auto node : database.pcEngine) {
-      if(node["sha256"].text() == digest) {
-        manifest.append(node.text(), "\n  sha256: ", digest, "\n");
-        break;
-      }
+  if(settings["icarus/UseDatabase"].boolean()) {
+    auto digest = Hash::SHA256(buffer).digest();
+    for(auto game : Database::PCEngine.find("game")) {
+      if(game["sha256"].text() == digest) return BML::serialize(game);
     }
   }
 
-  if(settings["icarus/UseHeuristics"].boolean() && !manifest) {
-    PCEngineCartridge cartridge{location, buffer.data(), buffer.size()};
-    manifest = cartridge.manifest;
+  if(settings["icarus/UseHeuristics"].boolean()) {
+    Heuristics::PCEngine game{buffer, location};
+    if(auto manifest = game.manifest()) return manifest;
   }
 
-  return manifest;
+  return {};
 }
 
 auto Icarus::pcEngineImport(vector<uint8_t>& buffer, string location) -> string {

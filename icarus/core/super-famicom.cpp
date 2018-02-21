@@ -10,10 +10,9 @@ auto Icarus::superFamicomManifest(string location) -> string {
 }
 
 auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, string location) -> string {
-  auto digest = Hash::SHA256(buffer).digest();
-
   if(settings["icarus/UseDatabase"].boolean()) {
-    for(auto game : database.superFamicom.find("game")) {
+    auto digest = Hash::SHA256(buffer).digest();
+    for(auto game : Database::SuperFamicom.find("game")) {
       if(game["sha256"].text() == digest) return BML::serialize(game);
     }
   }

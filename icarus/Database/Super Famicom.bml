@@ -1,5 +1,34 @@
 database
-  revision: 2018-02-14
+  revision: 2018-02-16
+
+//Prototypes (JPN)
+
+database
+  revision: 2018-02-16
+
+game
+  sha256:   182cd72c2ef57119b56bef1f7c18660498422a912f1bb652771d465cd183b04e
+  region:   JPN
+  revision: 1.0
+  board:    SHVC-4PV5B-01
+  name:     From TV Animation - Slam Dunk - Shuueisha Limited
+  label:    From TV Animation - Slam Dunk - 集英社Limited
+  memory
+    type: EPROM
+    size: 0x180000
+    name: program.rom
+
+game
+  sha256:   bcba4ca39f0279f7a52657bccbffa84564eaea455e2565597b93942ec245fdb1
+  region:   JPN
+  revision: 1.0
+  board:    SHVC-2P3B-01
+  name:     Kunio-kun no Dodgeball da yo - Zen'in Shuugou! - Tournament Special
+  label:    くにおくんのドッジボールだよ 全員集合! トーナメントスペシャル
+  memory
+    type: EPROM
+    size: 0x80000
+    name: program.rom
 
 //Super Comboy (KOR)
 
@@ -82,7 +111,55 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2018-02-14
+  revision: 2018-02-16
+
+game
+  sha256:   6f6bacdd73aef29ff6a015c25db4a5cd8ba31142b2cc3fe56261d23bbf8329ea
+  region:   SHVC-AAZJ-JPN
+  revision: SHVC-AAZJ-0
+  board:    SHVC-1J5M-01
+  name:     Angelique - Premium Box
+  label:    アンジェリーク プレミアムBox
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   1f7619ea0d02f16e2b2dcbb36013bb3405eb791885f23884b583eb63768614c4
+  region:   SHVC-AQLJ-JPN
+  revision: SHVC-AQLJ-0
+  board:    SHVC-1J5M-01
+  name:     Angelique - Voice Fantasy
+  label:    アンジェリーク ヴォイス・ファンタジー
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   ecd772c4a21101d079a795e47abbe00052bef69cc1c854a328f0077016c53311
+  region:   SHVC-AH9J-JPN
+  revision: SHVC-AH9J-0
+  board:    SHVC-1J3M-20
+  name:     Bomberman B-Daman
+  label:    ボンバーマン ビーダマン
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
 
 game
   sha256:   3ce321496edc5d77038de2034eb3fb354d7724afd0bc7fd0319f3eb5d57b984d
@@ -105,6 +182,22 @@ game
     name: download.ram
 
 game
+  sha256:   c195641a1b472590cb3d0be0c48d682b9fee94d7b700dd7bd3297bb995b49307
+  region:   SHVC-B5
+  revision: SHVC-B5-0
+  board:    SHVC-1J3B-01
+  name:     Conveni Wars - Barcode Battler Senki - Super Senshi Shutsugeki seyo!
+  label:    Conveni Wars Barcode Battler 戦記 スーパー戦士 出撃せよ!
+  memory
+    type: ROM
+    size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
   sha256:   38a855229eab468c3ede7573db73082c66b157adfc7af787ccac50559b747f5f
   region:   SHVC-ZDBJ-JPN
   revision: SHVC-ZDBJ-0
@@ -121,6 +214,54 @@ game
     name: save.ram
 
 game
+  sha256:   dcb14c95f058a32f40cc329793f5d95fd6cf1755cffe02c0594d1c583a06d356
+  region:   SHVC-AEMJ-JPN
+  revision: SHVC-AEMJ-0
+  board:    SHVC-1J3M-20
+  name:     Emit Vol. 1 - Toki no Maigo
+  label:    エミット Vol. 1 時の迷子
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   dc1ecf27d9ce4fdf674c9405339016f5a812f7c4687e588cc6404e2b3b92541a
+  region:   SHVC-AEIJ-JPN
+  revision: SHVC-AEIJ-0
+  board:    SHVC-1J3M-20
+  name:     Emit Vol. 2 - Inochigake no Tabi
+  label:    エミット Vol. 2 命がけの旅
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   f49417cb8759a30e12439e846f7d581afd1519c625e6a0522876666098521fcc
+  region:   SHVC-AETJ-JPN
+  revision: SHVC-AETJ-0
+  board:    SHVC-1J3M-20
+  name:     Emit Vol. 3 - Watashi ni Sayonara o
+  label:    エミット Vol. 3 私にさよならを
+  memory
+    type: ROM
+    size: 0x300000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
   sha256:   74aa3a26b66f34819fbbdcdb2475cf9161cc2590fb1ec89fb24940ef10e44332
   region:   SHVC-F4
   revision: SHVC-F4-0
@@ -130,6 +271,22 @@ game
   memory
     type: ROM
     size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   db337a2e8cf6de653d092ba3489cabc658f91c63ec8a9db4e1866400aadf913f
+  region:   SHVC-AGHJ-JPN
+  revision: SHVC-AGHJ-0
+  board:    SHVC-2J3M-20
+  name:     Get in the Hole
+  label:    ゲットインザホール
+  memory
+    type: ROM
+    size: 0x180000
     name: program.rom
   memory
     type: NVRAM
@@ -171,6 +328,66 @@ game
     type: NVRAM
     size: 0x2000
     name: save.ram
+
+game
+  sha256:   fe44f9d0db9f04f704764577b94e5bf2e18bc7a1c4ff1e6bdaca06d49ed6813c
+  region:   SHVC-LK
+  revision: SHVC-LK-0
+  board:    SHVC-1A0N-20
+  name:     Lethal Enforcers
+  label:    リーサルエンフォーサーズ
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+
+game
+  sha256:   c51c5930b344f553415d54c3c964c050e1eb6355b10f5966deabb686e70e1750
+  region:   SHVC-WE
+  revision: SHVC-WE-0
+  board:    SHVC-YA0N-01
+  name:     Mario & Wario
+  label:    マリオとワリオ
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+
+game
+  sha256:   e842cac1a4301be196f1e137fbd1a16866d5c913f24dbca313f4dd8bd7472f45
+  region:   SHVC-MP
+  revision: SHVC-MP-0
+  board:    SHVC-1A5B-04
+  name:     Mario Paint
+  label:    マリオペイント
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   2298d92acdfecc7270a6c9a57a6ddc55d7fa841fe9c0e7c0d64e33682fffa429
+  region:   SHVC-A4WJ-JPN
+  revision: SHVC-A4WJ-0
+  board:    SHVC-1L5B-20
+  name:     Mini Yonku Shining Scorpion - Let's & Go!!
+  label:    ミニ四駆シャイニングスコーピオン レッツ&ゴー!!
+  memory
+    type: ROM
+    size: 0x400000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+  memory
+    type: RAM
+    size: 0x800
+    name: internal.ram
 
 game
   sha256:   d712adecbde70a74c4a580fe90a45d0d19f2641d1b4e091d507bddeec9601de1
@@ -269,6 +486,34 @@ game
     name: program.rom
 
 game
+  sha256:   442397be57b3740ca236cfb37633b95f88a2c80dafc94b56a805229793563ce1
+  region:   SHVC-9B
+  revision: SHVC-9B-0
+  board:    SHVC-1J0N-10
+  name:     Super Bomberman 2 - Taikenban
+  label:    スーパーボンバーマン2 体験版
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+
+game
+  sha256:   5f8e6894f71c62bc5e70485715dbd2e2d8f3c0383ec54211dc5fe180098d0e3f
+  region:   SHVC-AK8J-JPN
+  revision: SHVC-AK8J-0
+  board:    SHVC-1J3M-20
+  name:     Super Bomberman 5 - CoroCoro Comic
+  label:    スーパーボンバーマン5 コロコロコミック
+  memory
+    type: ROM
+    size: 0x200000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
   sha256:   4d7fc331a811b8dc630b469262fd6f45e289243cef83101f32038158967d1b28
   region:   SHVC-SGB
   revision: SYS-SGB-2
@@ -342,6 +587,66 @@ game
   memory
     type: ROM
     size: 0x80000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x2000
+    name: save.ram
+
+game
+  sha256:   ecd462c64516169cc83dd266af354fe676fcf53811863a361d78cc918619da0d
+  region:   SHVC-XL
+  revision: SHVC-XL-1
+  board:    SHVC-1A5M-20
+  name:     Super Sangokushi II
+  label:    スーパー三国志II 復刻版
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x8000
+    name: save.ram
+
+game
+  sha256:   fde83367c1caf6edfb41a0c609bacc90084e9808b32ba52b13d204eb59535ab5
+  region:   SHVC-LR
+  revision: SHVC-LR-0
+  board:    SHVC-1A0N-20
+  name:     Super Scope 6
+  label:    スーパースコープ6
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+
+game
+  sha256:   8dda3b0888a32005041f2feb9be4e14807d40291f951a4612461cf41dac9cb78
+  region:   SHVC-T2
+  revision: SHVC-T2-0
+  board:    SHVC-1A1B-06
+  name:     Super Tetris 2 + Bombliss
+  label:    Super Tetris 2 + Bombliss
+  memory
+    type: ROM
+    size: 0x100000
+    name: program.rom
+  memory
+    type: NVRAM
+    size: 0x800
+    name: save.ram
+
+game
+  sha256:   b66da2a23f249e525b1dd444596a3f10559cb3c30fa3c0bca83ed8f4405fcfcf
+  region:   SHVC-ANZJ-JPN
+  revision: SHVC-ANZJ-0
+  board:    SHVC-1J3M-20
+  name:     Undake 30 - Same Game Daisakusen - Mario Version
+  label:    Undake 30 鮫亀大作戦 マリオバージョン
+  memory
+    type: ROM
+    size: 0x60000
     name: program.rom
   memory
     type: NVRAM

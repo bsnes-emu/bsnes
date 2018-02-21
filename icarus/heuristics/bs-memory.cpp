@@ -1,9 +1,8 @@
 namespace Heuristics {
 
-struct BSMemory {
+struct BSMemory : Heuristics {
   BSMemory(vector<uint8_t>& data, string location);
   explicit operator bool() const;
-
   auto manifest() const -> string;
 
 private:
@@ -19,17 +18,14 @@ BSMemory::operator bool() const {
 }
 
 auto BSMemory::manifest() const -> string {
-  if(!operator bool()) return "";
+  if(!operator bool()) return {};
 
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  label:  ", Location::prefix(location), "\n");
-  output.append("  memory\n");
-  output.append("    type: NAND\n");
-  output.append("    size: 0x", hex(data.size()), "\n");
-  output.append("    name: program.rom\n");
+  output.append(memory("NAND", data.size(), "program.rom"));
   return output;
 }
 

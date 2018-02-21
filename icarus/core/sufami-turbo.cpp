@@ -5,10 +5,9 @@ auto Icarus::sufamiTurboManifest(string location) -> string {
 }
 
 auto Icarus::sufamiTurboManifest(vector<uint8_t>& buffer, string location) -> string {
-  auto digest = Hash::SHA256(buffer).digest();
-
   if(settings["icarus/UseDatabase"].boolean()) {
-    for(auto game : database.sufamiTurbo.find("game")) {
+    auto digest = Hash::SHA256(buffer).digest();
+    for(auto game : Database::SufamiTurbo.find("game")) {
       if(game["sha256"].text() == digest) return BML::serialize(game);
     }
   }

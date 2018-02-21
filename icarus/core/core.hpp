@@ -38,7 +38,7 @@ struct Icarus {
 
   //famicom.cpp
   auto famicomManifest(string location) -> string;
-  auto famicomManifest(vector<uint8_t>& buffer, string location, uint* prgrom = nullptr, uint* chrrom = nullptr) -> string;
+  auto famicomManifest(vector<uint8_t>& buffer, string location) -> string;
   auto famicomImport(vector<uint8_t>& buffer, string location) -> string;
 
   //super-famicom.cpp
@@ -109,21 +109,21 @@ struct Icarus {
 private:
   string errorMessage;
   string_vector missingFiles;
+};
 
-  struct {
-    Markup::Node famicom;
-    Markup::Node superFamicom;
-    Markup::Node masterSystem;
-    Markup::Node megaDrive;
-    Markup::Node pcEngine;
-    Markup::Node superGrafx;
-    Markup::Node gameBoy;
-    Markup::Node gameBoyColor;
-    Markup::Node gameBoyAdvance;
-    Markup::Node gameGear;
-    Markup::Node wonderSwan;
-    Markup::Node wonderSwanColor;
-    Markup::Node bsMemory;
-    Markup::Node sufamiTurbo;
-  } database;
+namespace Database {
+  Markup::Node Famicom;
+  Markup::Node SuperFamicom;
+  Markup::Node MasterSystem;
+  Markup::Node MegaDrive;
+  Markup::Node PCEngine;
+  Markup::Node SuperGrafx;
+  Markup::Node GameBoy;
+  Markup::Node GameBoyColor;
+  Markup::Node GameBoyAdvance;
+  Markup::Node GameGear;
+  Markup::Node WonderSwan;
+  Markup::Node WonderSwanColor;
+  Markup::Node BSMemory;
+  Markup::Node SufamiTurbo;
 };

@@ -1,18 +1,18 @@
 Icarus::Icarus() {
-  database.famicom = BML::unserialize(string::read(locate("Database/Famicom.bml")));
-  database.superFamicom = BML::unserialize(string::read(locate("Database/Super Famicom.bml")));
-  database.masterSystem = BML::unserialize(string::read(locate("Database/Master System.bml")));
-  database.megaDrive = BML::unserialize(string::read(locate("Database/Mega Drive.bml")));
-  database.pcEngine = BML::unserialize(string::read(locate("Database/PC Engine.bml")));
-  database.superGrafx = BML::unserialize(string::read(locate("Database/SuperGrafx.bml")));
-  database.gameBoy = BML::unserialize(string::read(locate("Database/Game Boy.bml")));
-  database.gameBoyColor = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")));
-  database.gameBoyAdvance = BML::unserialize(string::read(locate("Database/Game Boy Advance.bml")));
-  database.gameGear = BML::unserialize(string::read(locate("Database/Game Gear.bml")));
-  database.wonderSwan = BML::unserialize(string::read(locate("Database/WonderSwan.bml")));
-  database.wonderSwanColor = BML::unserialize(string::read(locate("Database/WonderSwan Color.bml")));
-  database.bsMemory = BML::unserialize(string::read(locate("Database/BS Memory.bml")));
-  database.sufamiTurbo = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")));
+  Database::Famicom = BML::unserialize(string::read(locate("Database/Famicom.bml")));
+  Database::SuperFamicom = BML::unserialize(string::read(locate("Database/Super Famicom.bml")));
+  Database::MasterSystem = BML::unserialize(string::read(locate("Database/Master System.bml")));
+  Database::MegaDrive = BML::unserialize(string::read(locate("Database/Mega Drive.bml")));
+  Database::PCEngine = BML::unserialize(string::read(locate("Database/PC Engine.bml")));
+  Database::SuperGrafx = BML::unserialize(string::read(locate("Database/SuperGrafx.bml")));
+  Database::GameBoy = BML::unserialize(string::read(locate("Database/Game Boy.bml")));
+  Database::GameBoyColor = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")));
+  Database::GameBoyAdvance = BML::unserialize(string::read(locate("Database/Game Boy Advance.bml")));
+  Database::GameGear = BML::unserialize(string::read(locate("Database/Game Gear.bml")));
+  Database::WonderSwan = BML::unserialize(string::read(locate("Database/WonderSwan.bml")));
+  Database::WonderSwanColor = BML::unserialize(string::read(locate("Database/WonderSwan Color.bml")));
+  Database::BSMemory = BML::unserialize(string::read(locate("Database/BS Memory.bml")));
+  Database::SufamiTurbo = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")));
 }
 
 auto Icarus::error() const -> string {
@@ -35,7 +35,7 @@ auto Icarus::failure(string message) -> string {
 
 auto Icarus::manifest(string location) -> string {
   location.transform("\\", "/").trimRight("/").append("/");
-  if(!directory::exists(location)) return "";
+  if(!directory::exists(location)) return {};
 
   auto type = Location::suffix(location).downcase();
   if(type == ".fc") return famicomManifest(location);
@@ -53,7 +53,7 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".bs") return bsMemoryManifest(location);
   if(type == ".st") return sufamiTurboManifest(location);
 
-  return "";
+  return {};
 }
 
 auto Icarus::import(string location) -> string {

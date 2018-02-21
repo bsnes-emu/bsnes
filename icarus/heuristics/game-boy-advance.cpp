@@ -1,50 +1,66 @@
-struct GameBoyAdvanceCartridge {
-  GameBoyAdvanceCartridge(const uint8_t* data, unsigned size);
+namespace Heuristics {
 
-  string markup;
-  string identifiers;
+struct GameBoyAdvance : Heuristics {
+  GameBoyAdvance(vector<uint8_t>& buffer, string location);
+  explicit operator bool() const;
+  auto manifest() const -> string;
+
+private:
+  vector<uint8_t>& data;
+  string location;
 };
 
-GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t* data, unsigned size) {
-  struct Identifier {
-    string name;
-    unsigned size;
+GameBoyAdvance::GameBoyAdvance(vector<uint8_t>& data, string location) : data(data), location(location) {
+}
+
+GameBoyAdvance::operator bool() const {
+  return (bool)data;
+}
+
+auto GameBoyAdvance::manifest() const -> string {
+  if(!operator bool()) return {};
+
+  string_vector identifiers = {
+    "SRAM_V",
+    "SRAM_F_V",
+    "EEPROM_V",
+    "FLASH_V",
+    "FLASH512_V",
+    "FLASH1M_V",
   };
-  vector<Identifier> idlist;
-  idlist.append({"SRAM_V",      6});
-  idlist.append({"SRAM_F_V",    8});
-  idlist.append({"EEPROM_V",    8});
-  idlist.append({"FLASH_V",     7});
-  idlist.append({"FLASH512_V", 10});
-  idlist.append({"FLASH1M_V",   9});
 
   string_vector list;
-  for(auto& id : idlist) {
-    for(signed n = 0; n < size - 16; n++) {
-      if(!memcmp(data + n, (const char*)id.name, id.size)) {
-        const char* p = (const char*)data + n + id.size;
+  for(auto& identifier : identifiers) {
+    for(int n : range(data.size() - 16)) {
+      if(!memory::compare(&data[n], identifier.data(), identifier.size())) {
+        auto p = (const char*)&data[n + identifier.size()];
         if(p[0] >= '0' && p[0] <= '9'
         && p[1] >= '0' && p[1] <= '9'
         && p[2] >= '0' && p[2] <= '9'
         ) {
           char text[16];
-          memcpy(text, data + n, id.size + 3);
-          text[id.size + 3] = 0;
+          memory::copy(text, &data[n], identifier.size() + 3);
+          text[identifier.size() + 3] = 0;
           if(!list.find(text)) list.append(text);
         }
       }
     }
   }
-  identifiers = list.merge(",");
 
-  markup.append("board\n");
-  markup.append("  rom type=mrom name=program.rom size=0x", hex(size), "\n");
-  if(0);
-  else if(identifiers.beginsWith("SRAM_V"    )) markup.append("  ram type=sram name=save.ram size=0x8000\n");
-  else if(identifiers.beginsWith("SRAM_F_V"  )) markup.append("  ram type=sram name=save.ram size=0x8000\n");
-  else if(identifiers.beginsWith("EEPROM_V"  )) markup.append("  ram type=eeprom name=save.ram size=0x0\n");
-  else if(identifiers.beginsWith("FLASH_V"   )) markup.append("  ram type=flash name=save.ram size=0x10000\n");
-  else if(identifiers.beginsWith("FLASH512_V")) markup.append("  ram type=flash name=save.ram size=0x10000\n");
-  else if(identifiers.beginsWith("FLASH1M_V" )) markup.append("  ram type=flash name=save.ram size=0x20000\n");
-//if(identifiers) markup.append("  #detected: ", identifiers, "\n");
+  string output;
+  output.append("game\n");
+  output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
+  output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  label:  ", Location::prefix(location), "\n");
+  output.append(memory("ROM", data.size(), "program.rom"));
+  if(!list);
+  else if(list.left().beginsWith("SRAM_V"    )) output.append(memory("NVRAM",   0x8000, "save.ram"));
+  else if(list.left().beginsWith("SRAM_F_V"  )) output.append(memory("NVRAM",   0x8000, "save.ram"));
+  else if(list.left().beginsWith("EEPROM_V"  )) output.append(memory("EEPROM",     0x0, "save.ram"));
+  else if(list.left().beginsWith("FLASH_V"   )) output.append(memory("NAND",   0x10000, "save.ram"));
+  else if(list.left().beginsWith("FLASH512_V")) output.append(memory("NAND",   0x10000, "save.ram"));
+  else if(list.left().beginsWith("FLASH1M_V" )) output.append(memory("NAND",   0x20000, "save.ram"));
+  return output;
+}
+
 }

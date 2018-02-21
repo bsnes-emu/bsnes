@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct SuperFamicom {
+struct SuperFamicom : Heuristics {
   SuperFamicom(vector<uint8_t>& data, string location);
   explicit operator bool() const;
 
@@ -17,7 +17,6 @@ struct SuperFamicom {
 
 private:
   auto size() const -> uint { return data.size(); }
-  auto memory(string type, uint size, string name) const -> string;
   auto scoreHeader(uint address) -> uint;
   auto firmwareARM() const -> string;
   auto firmwareHITACHI() const -> string;
@@ -120,15 +119,6 @@ auto SuperFamicom::manifest() const -> string {
     output.append(memory("NVRAM", 0x10, "epson.rtc.ram"));
   }
 
-  return output;
-}
-
-auto SuperFamicom::memory(string type, uint size, string name) const -> string {
-  string output;
-  output.append("  memory\n");
-  output.append("    type: ", type, "\n");
-  output.append("    size: 0x", hex(size), "\n");
-  output.append("    name: ", name, "\n");
   return output;
 }
 

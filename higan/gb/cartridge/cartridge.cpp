@@ -19,6 +19,12 @@ Cartridge cartridge;
 
 auto Cartridge::load() -> bool {
   information = {};
+  rom = {};
+  ram = {};
+  rtc = {};
+  mapper = &mbc0;
+  accelerometer = false;
+  rumble = false;
 
   if(Model::GameBoy()) {
     if(auto loaded = platform->load(ID::GameBoy, "Game Boy", "gb")) {
@@ -43,10 +49,9 @@ auto Cartridge::load() -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
-  auto board = document["board"];
-  information.title = document["information/title"].text();
+  information.title = document["game/label"].text();
 
-  auto mapperID = document["board/mapper"].text();
+  auto mapperID = document["game/board"].text();
   if(mapperID == "MBC0" ) mapper = &mbc0;
   if(mapperID == "MBC1" ) mapper = &mbc1;
   if(mapperID == "MBC1M") mapper = &mbc1m;
@@ -59,32 +64,37 @@ auto Cartridge::load() -> bool {
   if(mapperID == "HuC1" ) mapper = &huc1;
   if(mapperID == "HuC3" ) mapper = &huc3;
   if(mapperID == "TAMA" ) mapper = &tama;
-  if(!mapper) mapper = &mbc0;
 
-  accelerometer = (bool)document["board/accelerometer"];
-  rumble = (bool)document["board/rumble"];
+  accelerometer = (bool)document["game/board/accelerometer"];
+  rumble = (bool)document["game/board/rumble"];
 
-  rom.size = max(0x4000, document["board/rom/size"].natural());
-  rom.data = (uint8*)memory::allocate(rom.size, 0xff);
-  if(auto name = document["board/rom/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-      fp->read(rom.data, min(rom.size, fp->size()));
+  if(auto node = document["game/memory[type=ROM]"]) {
+    rom.size = max(0x4000, node["size"].natural());
+    rom.data = (uint8*)memory::allocate(rom.size, 0xff);
+    if(auto name = node["name"].text()) {
+      if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
+        fp->read(rom.data, min(rom.size, fp->size()));
+      }
     }
   }
 
-  ram.size = document["board/ram/size"].natural();
-  ram.data = (uint8*)memory::allocate(ram.size, 0xff);
-  if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
-      fp->read(ram.data, min(ram.size, fp->size()));
+  if(auto node = document["game/memory[type=NVRAM]"]) {
+    ram.size = node["size"].natural();
+    ram.data = (uint8*)memory::allocate(ram.size, 0xff);
+    if(auto name = node["name"].text()) {
+      if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
+        fp->read(ram.data, min(ram.size, fp->size()));
+      }
     }
   }
 
-  rtc.size = document["board/rtc/size"].natural();
-  rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
-  if(auto name = document["board/rtc/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
-      fp->read(rtc.data, min(rtc.size, fp->size()));
+  if(auto node = document["game/memory[type=RTC]"]) {
+    rtc.size = node["size"].natural();
+    rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
+    if(auto name = node["name"].text()) {
+      if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
+        fp->read(rtc.data, min(rtc.size, fp->size()));
+      }
     }
   }
 
@@ -95,15 +105,19 @@ auto Cartridge::load() -> bool {
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
-  if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Write)) {
-      fp->write(ram.data, ram.size);
+  if(auto node = document["game/memory[type=NVRAM]"]) {
+    if(auto name = node["name"].text()) {
+      if(auto fp = platform->open(pathID(), name, File::Write)) {
+        fp->write(ram.data, ram.size);
+      }
     }
   }
 
-  if(auto name = document["board/rtc/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Write)) {
-      fp->write(rtc.data, rtc.size);
+  if(auto node = document["game/memory[type=RTC]"]) {
+    if(auto name = node["name"].text()) {
+      if(auto fp = platform->open(pathID(), name, File::Write)) {
+        fp->write(rtc.data, rtc.size);
+      }
     }
   }
 }

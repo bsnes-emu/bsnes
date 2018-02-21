@@ -15,6 +15,8 @@ auto locate(string name) -> string {
 #include "settings.cpp"
 Settings settings;
 
+#include "heuristics/heuristics.hpp"
+#include "heuristics/heuristics.cpp"
 #include "heuristics/famicom.cpp"
 #include "heuristics/super-famicom.cpp"
 #include "heuristics/master-system.cpp"
