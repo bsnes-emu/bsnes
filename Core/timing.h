@@ -38,6 +38,6 @@ switch ((gb)->unit##_state)
 
 #define GB_STATE(gb, unit, state) case state: goto unit##state
 
-#define GB_UNIT(unit) uint32_t unit##_cycles, unit##_state
+#define GB_UNIT(unit) int32_t unit##_cycles, unit##_state
 
 #endif /* timing_h */

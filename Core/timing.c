@@ -96,13 +96,11 @@ static void GB_ir_run(GB_gameboy_t *gb)
 
 static void advance_tima_state_machine(GB_gameboy_t *gb)
 {
-    gb->io_registers[GB_IO_IF] |= gb->future_interrupts & 4;
-    gb->future_interrupts &= ~4;
     if (gb->tima_reload_state == GB_TIMA_RELOADED) {
         gb->tima_reload_state = GB_TIMA_RUNNING;
     }
     else if (gb->tima_reload_state == GB_TIMA_RELOADING) {
-        gb->future_interrupts |= 4;
+        gb->io_registers[GB_IO_IF] |= 4;
         gb->tima_reload_state = GB_TIMA_RELOADED;
     }
 }
@@ -140,14 +138,16 @@ static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     GB_STATE_MACHINE(gb, div, cycles) {
         GB_STATE(gb, div, 1);
+        GB_STATE(gb, div, 2);
     }
     
     GB_set_internal_div_counter(gb, 0);
+    GB_SLEEP(gb, div, 1, 2);
     while (true) {
         advance_tima_state_machine(gb);
         GB_set_internal_div_counter(gb, gb->div_counter + 4);
         gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
-        GB_SLEEP(gb, div, 1, 4);
+        GB_SLEEP(gb, div, 2, 4);
     }
 }
 

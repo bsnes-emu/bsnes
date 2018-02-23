@@ -661,6 +661,8 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
+    if (gb->display_hack == 1) return;
+    if (gb->display_hack == 2) cycles *= 2;
     update_display_state(gb, cycles);
     if (gb->disable_rendering) {
         return;

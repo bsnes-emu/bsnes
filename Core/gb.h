@@ -340,6 +340,7 @@ struct GB_gameboy_internal_s {
         uint16_t serial_length;
         uint8_t future_interrupts; /* Interrupts can occur in any T-cycle. Some timings result in different interrupt
                                      timing when the CPU is in halt mode, and might also affect the DI instruction. */
+        uint8_t display_hack; // Temporary hack until the display is rewritten to operate in T-cycle rates;
     );
 
     /* APU */
