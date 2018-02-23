@@ -176,7 +176,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return gb->io_registers[GB_IO_TIMA];
             case GB_IO_DIV:
-                return gb->div_cycles >> 8;
+                return gb->div_counter >> 8;
             case GB_IO_HDMA5:
                 if (!gb->cgb_mode) return 0xFF;
                 return ((gb->hdma_on || gb->hdma_on_hblank)? 0 : 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
@@ -484,7 +484,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DIV:
-                GB_set_internal_div_counter(gb, 0);
+                gb->div_state = 0; // Reset the div state machine
                 return;
 
             case GB_IO_JOYP:

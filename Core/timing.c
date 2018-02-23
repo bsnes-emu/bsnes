@@ -6,6 +6,8 @@
 #include <sys/time.h>
 #endif
 
+static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
+
 #ifndef DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
 {
@@ -105,25 +107,56 @@ static void advance_tima_state_machine(GB_gameboy_t *gb)
     }
 }
 
+static bool counter_overflow_check(uint32_t old, uint32_t new, uint32_t max)
+{
+    return (old & (max >> 1)) && !(new & (max >> 1));
+}
+
+static void increase_tima(GB_gameboy_t *gb)
+{
+    gb->io_registers[GB_IO_TIMA]++;
+    if (gb->io_registers[GB_IO_TIMA] == 0) {
+        gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
+        gb->tima_reload_state = GB_TIMA_RELOADING;
+    }
+}
+
+static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
+{
+    /* TIMA increases when a specific high-bit becomes a low-bit. */
+    value &= INTERNAL_DIV_CYCLES - 1;
+    if ((gb->io_registers[GB_IO_TAC] & 4) &&
+        counter_overflow_check(gb->div_counter, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
+        increase_tima(gb);
+    }
+    if (counter_overflow_check(gb->div_counter, value, gb->cgb_double_speed? 0x4000 : 0x2000)) {
+        GB_apu_run(gb);
+        GB_apu_div_event(gb);
+    }
+    gb->div_counter = value;
+}
+
+static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
+{
+    GB_STATE_MACHINE(gb, div, cycles) {
+        GB_STATE(gb, div, 1);
+    }
+    
+    GB_set_internal_div_counter(gb, 0);
+    while (true) {
+        advance_tima_state_machine(gb);
+        GB_set_internal_div_counter(gb, gb->div_counter + 4);
+        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        GB_SLEEP(gb, div, 1, 4);
+    }
+}
+
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
-    advance_tima_state_machine(gb);
-    for (int i = 0; i < cycles; i += 4) {
-        /* This is a bit tricky. The DIV and APU are tightly coupled, but DIV is affected
-           by the speed boost while the APU is not */
-        GB_set_internal_div_counter(gb, gb->div_cycles + 4);
-        gb->apu.apu_cycles += 4 >> gb->cgb_double_speed;
-    }
-
-    if (cycles > 4) {
-        advance_tima_state_machine(gb);
-        if (cycles > 8) {
-            advance_tima_state_machine(gb);
-        }
-    }
+    GB_timers_run(gb, cycles);
 
     uint16_t previous_serial_cycles = gb->serial_cycles;
     gb->serial_cycles += cycles;
@@ -161,38 +194,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     GB_ir_run(gb);
 }
 
-/* Standard Timers */
-static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
-
-static void increase_tima(GB_gameboy_t *gb)
-{
-    gb->io_registers[GB_IO_TIMA]++;
-    if (gb->io_registers[GB_IO_TIMA] == 0) {
-        gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
-        gb->tima_reload_state = GB_TIMA_RELOADING;
-    }
-}
-
-static bool counter_overflow_check(uint32_t old, uint32_t new, uint32_t max)
-{
-    return (old & (max >> 1)) && !(new & (max >> 1));
-}
-
-void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
-{
-    /* TIMA increases when a specific high-bit becomes a low-bit. */
-    value &= INTERNAL_DIV_CYCLES - 1;
-    if ((gb->io_registers[GB_IO_TAC] & 4) &&
-        counter_overflow_check(gb->div_cycles, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
-        increase_tima(gb);
-    }
-    if (counter_overflow_check(gb->div_cycles, value, gb->cgb_double_speed? 0x4000 : 0x2000)) {
-        GB_apu_run(gb);
-        GB_apu_div_event(gb);
-    }
-    gb->div_cycles = value;
-}
-
 /* 
    This glitch is based on the expected results of mooneye-gb rapid_toggle test.
    This glitch happens because how TIMA is increased, see GB_set_internal_div_counter.
@@ -207,9 +208,9 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
     unsigned int new_clocks = GB_TAC_RATIOS[new_tac & 3];
 
     /* The bit used for overflow testing must have been 1 */
-    if (gb->div_cycles & (old_clocks >> 1)) {
+    if (gb->div_counter & (old_clocks >> 1)) {
         /* And now either the timer must be disabled, or the new bit used for overflow testing be 0. */
-        if (!(new_tac & 4) || gb->div_cycles & (new_clocks >> 1)) {
+        if (!(new_tac & 4) || gb->div_counter & (new_clocks >> 1)) {
             increase_tima(gb);
         }
     }

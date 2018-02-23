@@ -289,8 +289,8 @@ void GB_apu_div_event(GB_gameboy_t *gb)
 
 void GB_apu_run(GB_gameboy_t *gb)
 {
-    /* Convert 4MHZ to 2MHz. apu_cycles is always even. */
-    uint8_t cycles = gb->apu.apu_cycles >> 1;
+    /* Convert 4MHZ to 2MHz. apu_cycles is always divisable by 4. */
+    uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
     
