@@ -1337,29 +1337,26 @@ static GB_opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
+    gb->vblank_just_occured = false;
+
     if (gb->hdma_on) {
         GB_advance_cycles(gb, 4);
         return;
     }
+    if (gb->stopped) {
+        GB_advance_cycles(gb, 64);
+        return;
+    }
     
-    gb->vblank_just_occured = false;
     if (gb->halted) {
-        gb->display_hack = 1;
         GB_advance_cycles(gb, 2);
     }
     
     uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
     
     if (gb->halted) {
-        gb->display_hack = 2;
         GB_advance_cycles(gb, 2);
-        gb->display_hack = 0;
     }
-
-    gb->io_registers[GB_IO_IF] |= gb->future_interrupts;
-    gb->future_interrupts = 0;
-    
- 
 
     bool effecitve_ime = gb->ime;
     if (gb->ime_toggle) {
@@ -1381,9 +1378,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         interrupt_queue = gb->interrupt_enable;
         GB_advance_cycles(gb, 4);
         GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
-        interrupt_queue &= (gb->io_registers[GB_IO_IF] | gb->future_interrupts) & 0x1F;
-        gb->io_registers[GB_IO_IF] |= gb->future_interrupts;
-        gb->future_interrupts = 0;
+        interrupt_queue &= (gb->io_registers[GB_IO_IF]) & 0x1F;
 
         GB_advance_cycles(gb, 4);
         if (interrupt_queue) {
@@ -1402,7 +1397,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_debugger_call_hook(gb, call_addr);
     }
     /* Run mode */
-    else if(!gb->halted && !gb->stopped) {
+    else if(!gb->halted) {
         uint8_t opcode = GB_read_memory(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;

@@ -18,7 +18,7 @@ enum {
 #define GB_HALT_VALUE (0xFFFF)
 
 #define GB_SLEEP(gb, unit, state, cycles) do {\
-    (gb)->unit##_cycles -= cycles; \
+    (gb)->unit##_cycles -= (cycles) * __state_machine_divisor; \
     if ((gb)->unit##_cycles <= 0) {\
         (gb)->unit##_state = state;\
         return;\
@@ -28,7 +28,8 @@ enum {
 
 #define GB_HALT(gb, unit) (gb)->unit##_cycles = GB_HALT_VALUE
 
-#define GB_STATE_MACHINE(gb, unit, cycles) \
+#define GB_STATE_MACHINE(gb, unit, cycles, divisor) \
+static const int __state_machine_divisor = divisor;\
 (gb)->unit##_cycles += cycles; \
 if ((gb)->unit##_cycles <= 0 || (gb)->unit##_cycles == GB_HALT_VALUE) {\
     return;\

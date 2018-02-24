@@ -57,7 +57,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
         return;
     }
     /* Prevent syncing if not enough time has passed.*/
-    if (gb->cycles_since_last_sync < LCDC_PERIOD / 8) return;
+    if (gb->cycles_since_last_sync < LCDC_PERIOD / 4) return;
 
     uint64_t target_nanoseconds = gb->cycles_since_last_sync * 1000000000LL / 2 / GB_get_clock_rate(gb); /* / 2 because we use 8MHz units */
     int64_t nanoseconds = get_nanoseconds();
@@ -136,7 +136,7 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 
 static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
-    GB_STATE_MACHINE(gb, div, cycles) {
+    GB_STATE_MACHINE(gb, div, cycles, 1) {
         GB_STATE(gb, div, 1);
         GB_STATE(gb, div, 2);
     }

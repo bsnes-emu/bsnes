@@ -136,7 +136,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     if (addr < 0xFF80) {
         switch (addr & 0xFF) {
             case GB_IO_IF:
-                return gb->io_registers[GB_IO_IF] | 0xE0 | gb->future_interrupts;
+                return gb->io_registers[GB_IO_IF] | 0xE0;
             case GB_IO_TAC:
                 return gb->io_registers[GB_IO_TAC] | 0xF8;
             case GB_IO_STAT:
@@ -417,10 +417,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 GB_window_related_write(gb, addr & 0xFF, value);
                 break;
             case GB_IO_IF:
-                gb->future_interrupts = 0;
             case GB_IO_SCX:
             case GB_IO_SCY:
-            case GB_IO_LYC:
             case GB_IO_BGP:
             case GB_IO_OBP0:
             case GB_IO_OBP1:
@@ -432,6 +430,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_UNKNOWN4:
             case GB_IO_UNKNOWN5:
                 gb->io_registers[addr & 0xFF] = value;
+                return;
+            case GB_IO_LYC:
+                gb->io_registers[addr & 0xFF] = value;
+                GB_STAT_update(gb);
                 return;
                 
             case GB_IO_TIMA:
@@ -456,7 +458,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_LCDC:
                 if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     gb->display_cycles = 0;
-                    gb->first_scanline = true;
+                    gb->display_state = 0;
                     if (gb->frame_skip_state == GB_FRAMESKIP_SECOND_FRAME_RENDERED) {
                         gb->frame_skip_state = GB_FRAMESKIP_LCD_TURNED_ON;
                     }
@@ -464,6 +466,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 else if (!(value & 0x80) && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     /* Sync after turning off LCD */
                     GB_timing_sync(gb);
+                    GB_lcd_off(gb);
                 }
                 /* Writing to LCDC might enable to disable the window, so we write it via GB_window_related_write */
                 GB_window_related_write(gb, addr & 0xFF, value);
@@ -481,6 +484,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_STAT] |= value & ~7;
                 /* Set unused bit to 1 */
                 gb->io_registers[GB_IO_STAT] |= 0x80;
+                
+                GB_STAT_update(gb);
                 return;
 
             case GB_IO_DIV:

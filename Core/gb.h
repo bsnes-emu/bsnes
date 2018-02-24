@@ -332,15 +332,12 @@ struct GB_gameboy_internal_s {
 
     /* Timing */
     GB_SECTION(timing,
-        uint32_t display_cycles; // In 8 MHz units
+        GB_UNIT(display);
         GB_UNIT(div);
         uint32_t div_counter;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
         uint16_t serial_cycles;
         uint16_t serial_length;
-        uint8_t future_interrupts; /* Interrupts can occur in any T-cycle. Some timings result in different interrupt
-                                     timing when the CPU is in halt mode, and might also affect the DI instruction. */
-        uint8_t display_hack; // Temporary hack until the display is rewritten to operate in T-cycle rates;
     );
 
     /* APU */
@@ -371,7 +368,7 @@ struct GB_gameboy_internal_s {
         uint8_t oam[0xA0];
         uint8_t background_palettes_data[0x40];
         uint8_t sprite_palettes_data[0x40];
-        int16_t previous_lcdc_x;
+        uint8_t position_in_line;
         bool stat_interrupt_line;
         uint8_t effective_scx;
         uint8_t wy_diff;
@@ -385,13 +382,14 @@ struct GB_gameboy_internal_s {
             GB_FRAMESKIP_FIRST_FRAME_SKIPPED, // This state is 'skipped' when emulating a DMG
             GB_FRAMESKIP_SECOND_FRAME_RENDERED,
         } frame_skip_state;
-        bool first_scanline; // The very first scan line after turning the LCD behaves differently.
         bool oam_read_blocked;
         bool vram_read_blocked;
         bool oam_write_blocked;
         bool vram_write_blocked;
         bool window_disabled_while_active;
         uint8_t effective_scy; // SCY is latched when starting to draw a tile
+        uint8_t current_line;
+        uint16_t ly_for_comparison;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
