@@ -110,10 +110,11 @@ static uint8_t read_banked_ram(GB_gameboy_t *gb, uint16_t addr)
 static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 {
 
+    if (gb->hdma_on) {
+        return gb->last_opcode_read;
+    }
+    
     if (addr < 0xFE00) {
-        if (gb->hdma_on) {
-            return gb->last_opcode_read;
-        }
         return gb->ram[addr & 0x0FFF];
     }
 
