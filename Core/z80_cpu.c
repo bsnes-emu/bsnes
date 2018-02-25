@@ -1392,12 +1392,12 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_debugger_call_hook(gb, call_addr);
     }
     else if(!gb->halted && !gb->stopped) {
-        uint8_t opcode = GB_read_memory(gb, gb->pc++);
+        gb->last_opcode_read = GB_read_memory(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;
             gb->halt_bug = false;
         }
-        opcodes[opcode](gb, opcode);
+        opcodes[gb->last_opcode_read](gb, gb->last_opcode_read);
     }
     else {
         GB_advance_cycles(gb, 4);

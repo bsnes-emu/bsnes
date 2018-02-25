@@ -111,6 +111,9 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 {
 
     if (addr < 0xFE00) {
+        if (gb->hdma_on) {
+            return gb->last_opcode_read;
+        }
         return gb->ram[addr & 0x0FFF];
     }
 
@@ -122,7 +125,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFF00) {
-        /* Unusable. CGB results are verified, but DMG results were tested on a SGB2  */
+        /* Unusable. CGB results are verified, but DMG results were tested on a SGB2 */
+        /* Also, writes to this area are not emulated */
         if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) { /* Seems to be disabled in Modes 2 and 3 */
             return 0xFF;
         }
