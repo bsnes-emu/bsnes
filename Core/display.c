@@ -309,6 +309,8 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
 
 void GB_STAT_update(GB_gameboy_t *gb)
 {
+    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
+    
     bool previous_interrupt_line = gb->stat_interrupt_line;
     gb->stat_interrupt_line = false;
     /* Set LY=LYC bit */
@@ -360,6 +362,7 @@ void GB_lcd_off(GB_gameboy_t *gb)
         /* Todo: is this correct? */
         gb->hdma_steps_left = 0xff;
     }
+    gb->stat_interrupt_line = false;
     
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
@@ -371,8 +374,6 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->window_disabled_while_active = false;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
-    
-    GB_STAT_update(gb);
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
@@ -397,6 +398,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
         GB_STATE(gb, display, 18);
+        GB_STATE(gb, display, 19);
+
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -447,7 +450,17 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->oam_write_blocked = false;
             gb->ly_for_comparison = gb->current_line? -1 : gb->current_line;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 4, 4);
+            GB_SLEEP(gb, display, 4, 3);
+            
+            /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 1.
+             PPU glitch? */
+            if (gb->current_line != 0) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->io_registers[GB_IO_STAT] |= 2;
+                GB_STAT_update(gb);
+                gb->io_registers[GB_IO_STAT] &= ~3;
+            }
+            GB_SLEEP(gb, display, 19, 1);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 2;
