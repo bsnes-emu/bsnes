@@ -239,7 +239,7 @@ static const struct menu_item paused_menu[] = {
     {"Keyboard", enter_controls_menu},
     {"Joypad", enter_joypad_menu},
     {"Help", item_help},
-    {"Exit", item_exit},
+    {"Quit SameBoy", item_exit},
     {NULL,}
 };
 
