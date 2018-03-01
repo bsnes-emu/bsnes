@@ -254,7 +254,7 @@ struct GB_gameboy_internal_s {
         bool halted;
         bool stopped;
         bool boot_rom_finished;
-        bool ime_toggle; /* ei (and di in CGB) have delayed effects.*/
+        bool ime_toggle; /* ei has delayed a effect.*/
         bool halt_bug;
 
         /* Misc state */
@@ -275,6 +275,7 @@ struct GB_gameboy_internal_s {
         uint16_t dma_current_src;
         int16_t dma_cycles;
         bool is_dma_restarting;
+        uint8_t last_opcode_read; /* Required to emulte HDMA reads from Exxx */
     );
     
     /* MBC */

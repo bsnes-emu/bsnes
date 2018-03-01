@@ -503,7 +503,7 @@ static void call_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
     uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
-    const char *symbol = GB_debugger_name_for_address(gb, 0xff00 + addr);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
     if (symbol) {
         GB_log(gb, "CALL %s ; =$%04x\n", symbol, addr);
     }

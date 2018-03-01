@@ -12,6 +12,7 @@ typedef struct {
 typedef struct {
     enum {
         LVALUE_MEMORY,
+        LVALUE_MEMORY16,
         LVALUE_REG16,
         LVALUE_REG_H,
         LVALUE_REG_L,
@@ -209,6 +210,19 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
                 return r;
             }
             return VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
+            
+        case LVALUE_MEMORY16:
+            if (lvalue.memory_address.has_bank) {
+                banking_state_t state;
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, lvalue.memory_address.bank);
+                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
+                restore_banking_state(gb, &state);
+                return r;
+            }
+            return VALUE_16(GB_read_memory(gb, lvalue.memory_address.value) |
+                            (GB_read_memory(gb, lvalue.memory_address.value + 1) * 0x100));
+
 
         case LVALUE_REG16:
             return VALUE_16(*lvalue.register_address);
@@ -234,6 +248,19 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
                 return;
             }
             GB_write_memory(gb, lvalue.memory_address.value, value);
+            return;
+        
+        case LVALUE_MEMORY16:
+            if (lvalue.memory_address.has_bank) {
+                banking_state_t state;
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, lvalue.memory_address.bank);
+                GB_write_memory(gb, lvalue.memory_address.value, value);
+                restore_banking_state(gb, &state);
+                return;
+            }
+            GB_write_memory(gb, lvalue.memory_address.value, value);
+            GB_write_memory(gb, lvalue.memory_address.value + 1, value >> 8);
             return;
 
         case LVALUE_REG16:
@@ -382,6 +409,22 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
             return (lvalue_t){LVALUE_MEMORY, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value)};
         }
     }
+    else if (string[0] == '{' && string[length - 1] == '}') {
+        // Attempt to strip curly parentheses (memory dereference)
+        signed int depth = 0;
+        for (int i = 0; i < length; i++) {
+            if (string[i] == '{') depth++;
+            if (depth == 0) {
+                // First and last are not matching
+                depth = 1;
+                break;
+            }
+            if (string[i] == '}') depth--;
+        }
+        if (depth == 0) {
+            return (lvalue_t){LVALUE_MEMORY16, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value)};
+        }
+    }
 
     // Registers
     if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
@@ -486,7 +529,33 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             }
             goto exit;
         }
-
+    }
+    else if (string[0] == '{' && string[length - 1] == '}') {
+        // Attempt to strip curly parentheses (memory dereference)
+        signed int depth = 0;
+        for (int i = 0; i < length; i++) {
+            if (string[i] == '{') depth++;
+            if (depth == 0) {
+                // First and last are not matching
+                depth = 1;
+                break;
+            }
+            if (string[i] == '}') depth--;
+        }
+        
+        if (depth == 0) {
+            value_t addr = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
+            banking_state_t state;
+            if (addr.bank) {
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, addr.bank);
+            }
+            ret = VALUE_16(GB_read_memory(gb, addr.value) | (GB_read_memory(gb, addr.value + 1) * 0x100));
+            if (addr.bank) {
+                restore_banking_state(gb, &state);
+            }
+            goto exit;
+        }
     }
     // Search for lowest priority operator
     signed int depth = 0;

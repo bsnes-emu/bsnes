@@ -1398,11 +1398,11 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     /* Run mode */
     else if(!gb->halted) {
-        uint8_t opcode = GB_read_memory(gb, gb->pc++);
+        gb->last_opcode_read = GB_read_memory(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;
             gb->halt_bug = false;
         }
-        opcodes[opcode](gb, opcode);
+        opcodes[gb->last_opcode_read](gb, gb->last_opcode_read);
     }
 }
