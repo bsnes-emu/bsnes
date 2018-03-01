@@ -760,22 +760,21 @@ void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
     gb->io_registers[addr] = value;
     bool after = window_enabled(gb);
     
-    if (before != after && gb->display_cycles < LINES * LINE_LENGTH) {
+    if (before != after && gb->current_line >= LINES) {
         /* Window was disabled or enabled outside of vblank */
-        uint8_t current_line = gb->display_cycles / LINE_LENGTH;
-        if (current_line >= gb->io_registers[GB_IO_WY]) {
+        if (gb->current_line >= gb->io_registers[GB_IO_WY]) {
             if (after) {
                 if (!gb->window_disabled_while_active) {
                     /* Window was turned on for the first time this frame while LY > WY,
                        should start window in the next line */
-                    gb->wy_diff = current_line + 1 - gb->io_registers[GB_IO_WY];
+                    gb->wy_diff = gb->current_line + 1 - gb->io_registers[GB_IO_WY];
                 }
                 else {
-                    gb->wy_diff += current_line;
+                    gb->wy_diff += gb->current_line;
                 }
             }
             else {
-                gb->wy_diff -= current_line;
+                gb->wy_diff -= gb->current_line;
                 gb->window_disabled_while_active = true;
             }
         }
