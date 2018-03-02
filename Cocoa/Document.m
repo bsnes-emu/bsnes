@@ -174,11 +174,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void) vblank
 {
-    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [self.view flip];
     GB_set_pixels_output(&gb, self.view.pixels);
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
             [self reloadVRAMData: nil];
         });
     }
@@ -196,7 +196,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         GB_apu_copy_buffer(&gb, buffer, nFrames);
     } andSampleRate:96000];
-    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"Mute"]) {
         [self.audioClient start];
     }
@@ -225,6 +224,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) start
 {
     if (running) return;
+    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
 
