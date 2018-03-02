@@ -204,7 +204,7 @@
         }
     }
 
-    if (!handled) {
+    if (!handled && [theEvent type] != NSEventTypeFlagsChanged) {
         [super keyDown:theEvent];
     }
 }
@@ -238,7 +238,7 @@
         }
     }
 
-    if (!handled) {
+    if (!handled && [theEvent type] != NSEventTypeFlagsChanged) {
         [super keyUp:theEvent];
     }
 }
