@@ -189,6 +189,19 @@ typedef struct {
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
 
+typedef struct {
+    uint8_t pixel; // Color, 0-3
+    uint8_t palette; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
+    uint8_t priority; // Sprite priority – 0 in DMG, OAM index in CGB
+    bool bg_priority; // For sprite FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
+} GB_fifo_item_t;
+
+typedef struct {
+    GB_fifo_item_t fifo[16];
+    uint8_t read_end;
+    uint8_t write_end;
+} GB_fifo_t;
+
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
    Some other changes might be "safe" as well.
@@ -391,6 +404,13 @@ struct GB_gameboy_internal_s {
         uint8_t effective_scy; // SCY is latched when starting to draw a tile
         uint8_t current_line;
         uint16_t ly_for_comparison;
+        GB_fifo_t bg_fifo, oam_fifo;
+        uint8_t fetcher_x;
+        uint16_t cycles_for_line;
+        uint8_t current_tile;
+        uint16_t current_tile_address; // TODO: is this actually cached? If not, it could be used to "mix" two tiles
+        uint8_t current_tile_data[2];
+        
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

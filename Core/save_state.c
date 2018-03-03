@@ -218,6 +218,12 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
         GB_palette_changed(gb, true, i * 2);
     }
 
+    gb->bg_fifo.read_end &= 0xF;
+    gb->bg_fifo.write_end &= 0xF;
+    gb->oam_fifo.read_end &= 0xF;
+    gb->oam_fifo.write_end &= 0xF;
+    gb->current_tile_address &= (gb->vram_size - 1);
+    
 error:
     fclose(f);
     return errno;
@@ -307,6 +313,12 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
         GB_palette_changed(gb, false, i * 2);
         GB_palette_changed(gb, true, i * 2);
     }
+    
+    gb->bg_fifo.read_end &= 0xF;
+    gb->bg_fifo.write_end &= 0xF;
+    gb->oam_fifo.read_end &= 0xF;
+    gb->oam_fifo.write_end &= 0xF;
+    gb->current_tile_address &= (gb->vram_size - 1);
     
     return 0;
 }

@@ -4,6 +4,43 @@
 #include <string.h>
 #include "gb.h"
 
+/* FIFO functions */
+
+static inline unsigned fifo_size(GB_fifo_t *fifo)
+{
+    return (fifo->write_end - fifo->read_end) & 0xF;
+}
+
+static void fifo_clear(GB_fifo_t *fifo)
+{
+    fifo->read_end = fifo->write_end = 0;
+}
+
+static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
+{
+    GB_fifo_item_t *ret = &fifo->fifo[fifo->read_end];
+    fifo->read_end++;
+    fifo->read_end &= 0xF;
+    return ret;
+}
+
+static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority)
+{
+    for (unsigned i = 8; i--;) {
+        fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+            (lower >> 7) | ((upper >> 7) << 1),
+            palette,
+            0,
+            bg_priority,
+        };
+        lower <<= 1;
+        upper <<= 1;
+        
+        fifo->write_end++;
+        fifo->write_end &= 0xF;
+    }
+}
+
 /*
  Each line is 456 cycles, approximately:
  Mode 2 - 80  cycles / OAM Transfer
@@ -41,7 +78,8 @@ static bool window_enabled(GB_gameboy_t *gb)
     return (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] < 167;
 }
 
-static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
+/* Kept as a reference until I finish rewriting the PPU */
+static uint32_t __attribute__((unused)) get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
     /*
      Bit 7 - LCD Display Enable             (0=Off, 1=On)
@@ -337,12 +375,6 @@ void GB_STAT_update(GB_gameboy_t *gb)
     }
 }
 
-static unsigned scx_delay(GB_gameboy_t *gb)
-{
-    return (gb->effective_scx & 7) + 0;
-
-}
-
 void GB_lcd_off(GB_gameboy_t *gb)
 {
     gb->display_state = 0;
@@ -354,7 +386,6 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_LY] = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 4;
-    gb->effective_scx = gb->io_registers[GB_IO_SCX];
     if (gb->hdma_on_hblank) {
         gb->hdma_on_hblank = false;
         gb->hdma_on = false;
@@ -374,6 +405,31 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->window_disabled_while_active = false;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
+}
+
+static void render_pixel_if_possible(GB_gameboy_t *gb)
+{
+    /* Drop pixels for scrollings */
+    if (gb->position_in_line >= 160 || gb->disable_rendering) {
+        gb->position_in_line++;
+        if (fifo_size(&gb->bg_fifo) != 0) {
+            fifo_pop(&gb->bg_fifo);
+        }
+        return;
+    }
+
+#ifndef NDEBUG
+    if (fifo_size(&gb->bg_fifo) == 0) {
+        GB_log(gb, "Defective BG FIFO!\n");
+        return;
+    }
+#endif
+    
+    GB_fifo_item_t *fifo_item = fifo_pop(&gb->bg_fifo);
+    
+    uint8_t pixel = ((gb->io_registers[GB_IO_BGP] >> (fifo_item->pixel << 1)) & 3);
+    gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[pixel];
+    gb->position_in_line++;
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
@@ -397,14 +453,21 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 15);
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
-        GB_STATE(gb, display, 18);
-        GB_STATE(gb, display, 19);
+        
+        GB_STATE(gb, display, 21);
+        GB_STATE(gb, display, 22);
+        GB_STATE(gb, display, 23);
+        GB_STATE(gb, display, 24);
+        GB_STATE(gb, display, 25);
+        GB_STATE(gb, display, 26);
+        GB_STATE(gb, display, 27);
+        GB_STATE(gb, display, 28);
 
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         while (true) {
-            GB_SLEEP(gb, display, 18, LCDC_PERIOD);
+            GB_SLEEP(gb, display, 1, LCDC_PERIOD);
             display_vblank(gb);
         }
         return;
@@ -418,28 +481,30 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
     gb->vram_write_blocked = false;
+    gb->cycles_for_line = MODE2_LENGTH - 4;
     GB_STAT_update(gb);
-    GB_SLEEP(gb, display, 1, MODE2_LENGTH - 4);
+    GB_SLEEP(gb, display, 2, MODE2_LENGTH - 4);
     
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 3;
-    gb->effective_scx = gb->io_registers[GB_IO_SCX];
     gb->oam_read_blocked = true;
     gb->vram_read_blocked = true;
     gb->oam_write_blocked = true;
     gb->vram_write_blocked = true;
     GB_STAT_update(gb);
-    GB_SLEEP(gb, display, 2, MODE3_LENGTH + scx_delay(gb) + 2);
+    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) + 2;
+    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) + 2);
     
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
     gb->vram_write_blocked = false;
-    GB_SLEEP(gb, display, 17, 1);
+    gb->cycles_for_line += 1;
+    GB_SLEEP(gb, display, 4, 1);
     GB_STAT_update(gb);
     /* Mode 0 is shorter in the very first line */
-    GB_SLEEP(gb, display, 3, MODE0_LENGTH - scx_delay(gb) - 2 - 1 - 4);
+    GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
     
     gb->current_line = 1;
     while (true) {
@@ -450,7 +515,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->oam_write_blocked = false;
             gb->ly_for_comparison = gb->current_line? -1 : gb->current_line;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 4, 3);
+            GB_SLEEP(gb, display, 6, 3);
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 1.
              PPU glitch? */
@@ -460,55 +525,100 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 GB_STAT_update(gb);
                 gb->io_registers[GB_IO_STAT] &= ~3;
             }
-            GB_SLEEP(gb, display, 19, 1);
+            GB_SLEEP(gb, display, 7, 1);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 2;
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 5, MODE2_LENGTH - 4);
+            GB_SLEEP(gb, display, 8, MODE2_LENGTH - 4);
             
             gb->vram_read_blocked = true;
             gb->vram_write_blocked = false;
             gb->oam_write_blocked = false;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 6, 4);
+            GB_SLEEP(gb, display, 9, 4);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
-            gb->effective_scx = gb->io_registers[GB_IO_SCX];
             gb->vram_write_blocked = true;
             gb->oam_write_blocked = true;
             GB_STAT_update(gb);
             
-            for (gb->position_in_line = 0; gb->position_in_line < WIDTH + 7; gb->position_in_line++) {
-                if (!gb->disable_rendering) {
-                    signed screen_pos = (signed) gb->position_in_line - (gb->effective_scx & 0x7);
-                    if (((screen_pos + gb->effective_scx) & 7) == 0) {
-                        gb->effective_scy = gb->io_registers[GB_IO_SCY];
+            gb->cycles_for_line = MODE2_LENGTH + 4;
+            fifo_clear(&gb->bg_fifo);
+            gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
+            gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
+            
+#define RENDER_AND_SLEEP(label) \
+{ \
+render_pixel_if_possible(gb); \
+if (gb->position_in_line == 160) break; \
+else if (gb->position_in_line == 159) {\
+    gb->io_registers[GB_IO_STAT] &= ~3; \
+    gb->oam_read_blocked = false; \
+    gb->vram_read_blocked = false; \
+    gb->oam_write_blocked = false; \
+    gb->vram_write_blocked = false; \
+    if (gb->hdma_on_hblank) { \
+        gb->hdma_on = true; \
+        gb->hdma_cycles = 0; \
+    } \
+} \
+gb->cycles_for_line++; \
+GB_SLEEP(gb, display, label, 1); \
+}
+            gb->cycles_for_line += 6;
+            GB_SLEEP(gb, display, 10, 6);
+
+            /* The actual rendering cycle */
+            while (true) {
+                // First read; the tile
+                RENDER_AND_SLEEP(21);
+                {
+                    uint16_t map = 0x1800;
+                    if (gb->io_registers[GB_IO_LCDC] & 0x08) {
+                        map = 0x1C00;
                     }
-                    if (screen_pos >= 0 && screen_pos < WIDTH) {
-                        gb->screen[gb->current_line * WIDTH + screen_pos] = get_pixel(gb, screen_pos, gb->current_line);
-                    }
+                    uint8_t y = gb->current_line + gb->io_registers[GB_IO_SCY];
+                    gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
+                    gb->fetcher_x++;
+                    gb->fetcher_x &= 0x1f;
                 }
-                GB_SLEEP(gb, display, 15, 1);
+                RENDER_AND_SLEEP(22);
+
+                // Second read, lower tile data
+                RENDER_AND_SLEEP(23);
+                {
+                    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+                        gb->current_tile_address = gb->current_tile * 0x10;
+                    }
+                    else {
+                        gb->current_tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
+                    }
+                    gb->current_tile_data[0] =
+                        gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2];
+                }
+                RENDER_AND_SLEEP(24);
+
+                
+                // Third read, upper tile data
+                RENDER_AND_SLEEP(25);
+                gb->current_tile_data[1] =
+                    gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2 + 1];
+                RENDER_AND_SLEEP(26);
+
+                
+                // The cycle ends with a fetcher sleep
+                RENDER_AND_SLEEP(27);
+                RENDER_AND_SLEEP(28);
+                
+                fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
             }
             
-            GB_SLEEP(gb, display, 7, MODE3_LENGTH + scx_delay(gb) - WIDTH - 7);
-            
-            gb->io_registers[GB_IO_STAT] &= ~3;
-            gb->oam_read_blocked = false;
-            gb->vram_read_blocked = false;
-            gb->oam_write_blocked = false;
-            gb->vram_write_blocked = false;
-            if (gb->hdma_on_hblank) {
-                gb->hdma_on = true;
-                gb->hdma_cycles = 0;
-            }
-            GB_SLEEP(gb, display, 16, 1);
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 8, MODE0_LENGTH - scx_delay(gb) - 4 - 1);
+            GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
         }
         
         /* Lines 144 - 152 */
@@ -516,7 +626,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->ly_for_comparison = -1;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 9, 4);
+            GB_SLEEP(gb, display, 12, 4);
             gb->ly_for_comparison = gb->current_line;
             
             if (gb->current_line == LINES) {
@@ -544,27 +654,27 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 10, LINE_LENGTH - 4);
+            GB_SLEEP(gb, display, 13, LINE_LENGTH - 4);
         }
         
         /* Lines 153 */
         gb->io_registers[GB_IO_LY] = 153;
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 11, 4);
+        GB_SLEEP(gb, display, 14, 4);
         
         gb->io_registers[GB_IO_LY] = 0;
         gb->ly_for_comparison = 153;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 12, 4);
+        GB_SLEEP(gb, display, 15, 4);
         
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 13, 4);
+        GB_SLEEP(gb, display, 16, 4);
         
         gb->ly_for_comparison = 0;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 14, LINE_LENGTH - 12);
+        GB_SLEEP(gb, display, 17, LINE_LENGTH - 12);
         
         gb->io_registers[GB_IO_STAT] &= ~3;
         
@@ -727,7 +837,6 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
             info->obscured_by_line_limit |= obscured;
         }
     }
-    
     
     for (unsigned i = 0; i < count; i++) {
         uint16_t vram_address = dest[i].tile * 0x10;
