@@ -444,12 +444,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
     gb->position_in_line++;
 }
-
-static inline uint8_t scrolled_y(GB_gameboy_t *gb)
-{
-    return gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
-}
-
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     
@@ -593,7 +587,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
                                 map = 0x1C00;
                             }
-                            gb->current_tile = gb->vram[map + gb->fetcher_x + scrolled_y(gb) / 8 * 32];
+                            gb->fetcher_y =
+                                gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
+                            gb->current_tile = gb->vram[map + gb->fetcher_x + gb->fetcher_y / 8 * 32];
                             gb->fetcher_x++;
                             gb->fetcher_x &= 0x1f;
                         }
@@ -607,13 +603,13 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                                 gb->current_tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
                             }
                             gb->current_tile_data[0] =
-                            gb->vram[gb->current_tile_address + (scrolled_y(gb) & 7) * 2];
+                            gb->vram[gb->current_tile_address + (gb->fetcher_y & 7) * 2];
                         }
                         break;
                         
                         case GB_FETCHER_GET_TILE_DATA_HIGH: {
                             gb->current_tile_data[1] =
-                            gb->vram[gb->current_tile_address + (scrolled_y(gb) & 7) * 2 + 1];
+                            gb->vram[gb->current_tile_address + (gb->fetcher_y & 7) * 2 + 1];
                         }
                         break;
                             

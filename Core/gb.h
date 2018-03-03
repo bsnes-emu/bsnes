@@ -401,14 +401,15 @@ struct GB_gameboy_internal_s {
         bool oam_write_blocked;
         bool vram_write_blocked;
         bool window_disabled_while_active;
-        uint8_t effective_scy; // SCY is latched when starting to draw a tile
+        uint8_t effective_scy; // Todo: delete me!
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
         uint8_t fetcher_x;
+        uint8_t fetcher_y;
         uint16_t cycles_for_line;
         uint8_t current_tile;
-        uint16_t current_tile_address; // TODO: is this actually cached? If not, it could be used to "mix" two tiles
+        uint16_t current_tile_address;
         uint8_t current_tile_data[2];
         enum {
             GB_FETCHER_GET_TILE,
