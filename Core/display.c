@@ -582,7 +582,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->fetcher_x = 0;
                     gb->fetcher_state = GB_FETCHER_GET_TILE;
                 }
-                
+                bool push = false;
                 if (gb->fetcher_divisor) {
                     switch (gb->fetcher_state) {
                         case GB_FETCHER_GET_TILE: {
@@ -618,8 +618,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         break;
                             
                         case GB_FETCHER_SLEEP:
-                            fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
-                            gb->fifo_paused = false;
+                            push = true;
                         break;
                     }
                     gb->fetcher_state++;
@@ -628,6 +627,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->fetcher_divisor ^= true;
                 
                 render_pixel_if_possible(gb);
+                if (push) {
+                    fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
+                    gb->fifo_paused = false;
+                }
                 if (gb->position_in_line == 160) break;
                 else if (gb->position_in_line == 159) {
                     gb->io_registers[GB_IO_STAT] &= ~3;
