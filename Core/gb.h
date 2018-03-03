@@ -419,7 +419,7 @@ struct GB_gameboy_internal_s {
         } fetcher_state:8;
         bool fetcher_divisor; // The fetcher runs at 2MHz
         bool fifo_paused;
-        
+        bool in_window;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
