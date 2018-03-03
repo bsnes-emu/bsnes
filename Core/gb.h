@@ -410,6 +410,15 @@ struct GB_gameboy_internal_s {
         uint8_t current_tile;
         uint16_t current_tile_address; // TODO: is this actually cached? If not, it could be used to "mix" two tiles
         uint8_t current_tile_data[2];
+        enum {
+            GB_FETCHER_GET_TILE,
+            GB_FETCHER_GET_TILE_DATA_LOWER,
+            GB_FETCHER_GET_TILE_DATA_HIGH,
+            GB_FETCHER_SLEEP,
+            GB_FETCHER_MAX = GB_FETCHER_SLEEP,
+        } fetcher_state:8;
+        bool fetcher_divisor; // The fetcher runs at 2MHz
+        bool fifo_paused;
         
     );
 

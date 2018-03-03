@@ -409,23 +409,18 @@ void GB_lcd_off(GB_gameboy_t *gb)
 
 static void render_pixel_if_possible(GB_gameboy_t *gb)
 {
+    GB_fifo_item_t *fifo_item = NULL;
+    if (!gb->fifo_paused) {
+        fifo_item = fifo_pop(&gb->bg_fifo);
+    }
+    
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || gb->disable_rendering) {
         gb->position_in_line++;
-        if (fifo_size(&gb->bg_fifo) != 0) {
-            fifo_pop(&gb->bg_fifo);
-        }
         return;
     }
-
-#ifndef NDEBUG
-    if (fifo_size(&gb->bg_fifo) == 0) {
-        GB_log(gb, "Defective BG FIFO!\n");
-        return;
-    }
-#endif
     
-    GB_fifo_item_t *fifo_item = fifo_pop(&gb->bg_fifo);
+    if (gb->fifo_paused) return;
     
     uint8_t pixel = ((gb->io_registers[GB_IO_BGP] >> (fifo_item->pixel << 1)) & 3);
     gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[pixel];
@@ -453,15 +448,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 15);
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
-        
-        GB_STATE(gb, display, 21);
-        GB_STATE(gb, display, 22);
-        GB_STATE(gb, display, 23);
-        GB_STATE(gb, display, 24);
-        GB_STATE(gb, display, 25);
-        GB_STATE(gb, display, 26);
-        GB_STATE(gb, display, 27);
-        GB_STATE(gb, display, 28);
+    
+        GB_STATE(gb, display, 20);
 
     }
     
@@ -551,72 +539,72 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             
-#define RENDER_AND_SLEEP(label) \
-{ \
-render_pixel_if_possible(gb); \
-if (gb->position_in_line == 160) break; \
-else if (gb->position_in_line == 159) {\
-    gb->io_registers[GB_IO_STAT] &= ~3; \
-    gb->oam_read_blocked = false; \
-    gb->vram_read_blocked = false; \
-    gb->oam_write_blocked = false; \
-    gb->vram_write_blocked = false; \
-    if (gb->hdma_on_hblank) { \
-        gb->hdma_on = true; \
-        gb->hdma_cycles = 0; \
-    } \
-} \
-gb->cycles_for_line++; \
-GB_SLEEP(gb, display, label, 1); \
-}
             gb->cycles_for_line += 6;
             GB_SLEEP(gb, display, 10, 6);
 
             /* The actual rendering cycle */
+            gb->fetcher_divisor = false;
+            gb->fetcher_state = GB_FETCHER_GET_TILE;
+            gb->fifo_paused = true;
             while (true) {
-                // First read; the tile
-                RENDER_AND_SLEEP(21);
-                {
-                    uint16_t map = 0x1800;
-                    if (gb->io_registers[GB_IO_LCDC] & 0x08) {
-                        map = 0x1C00;
+                if (gb->fetcher_divisor) {
+                    switch (gb->fetcher_state) {
+                        case GB_FETCHER_GET_TILE: {
+                            uint16_t map = 0x1800;
+                            if (gb->io_registers[GB_IO_LCDC] & 0x08) {
+                                map = 0x1C00;
+                            }
+                            uint8_t y = gb->current_line + gb->io_registers[GB_IO_SCY];
+                            gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
+                            gb->fetcher_x++;
+                            gb->fetcher_x &= 0x1f;
+                        }
+                        break;
+                            
+                        case GB_FETCHER_GET_TILE_DATA_LOWER: {
+                            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+                                gb->current_tile_address = gb->current_tile * 0x10;
+                            }
+                            else {
+                                gb->current_tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
+                            }
+                            gb->current_tile_data[0] =
+                            gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2];
+                        }
+                        break;
+                        
+                        case GB_FETCHER_GET_TILE_DATA_HIGH: {
+                            gb->current_tile_data[1] =
+                            gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2 + 1];
+                        }
+                        break;
+                            
+                        case GB_FETCHER_SLEEP:
+                            fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
+                            gb->fifo_paused = false;
+                        break;
                     }
-                    uint8_t y = gb->current_line + gb->io_registers[GB_IO_SCY];
-                    gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
-                    gb->fetcher_x++;
-                    gb->fetcher_x &= 0x1f;
+                    gb->fetcher_state++;
+                    gb->fetcher_state &= 3;
                 }
-                RENDER_AND_SLEEP(22);
-
-                // Second read, lower tile data
-                RENDER_AND_SLEEP(23);
-                {
-                    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
-                        gb->current_tile_address = gb->current_tile * 0x10;
+                gb->fetcher_divisor ^= true;
+                
+                render_pixel_if_possible(gb);
+                if (gb->position_in_line == 160) break;
+                else if (gb->position_in_line == 159) {
+                    gb->io_registers[GB_IO_STAT] &= ~3;
+                    gb->oam_read_blocked = false;
+                    gb->vram_read_blocked = false;
+                    gb->oam_write_blocked = false;
+                    gb->vram_write_blocked = false;
+                    if (gb->hdma_on_hblank) {
+                        gb->hdma_on = true;
+                        gb->hdma_cycles = 0;
                     }
-                    else {
-                        gb->current_tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
-                    }
-                    gb->current_tile_data[0] =
-                        gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2];
                 }
-                RENDER_AND_SLEEP(24);
-
-                
-                // Third read, upper tile data
-                RENDER_AND_SLEEP(25);
-                gb->current_tile_data[1] =
-                    gb->vram[gb->current_tile_address + ((gb->current_line + gb->io_registers[GB_IO_SCY]) & 7) * 2 + 1];
-                RENDER_AND_SLEEP(26);
-
-                
-                // The cycle ends with a fetcher sleep
-                RENDER_AND_SLEEP(27);
-                RENDER_AND_SLEEP(28);
-                
-                fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
+                gb->cycles_for_line++;
+                GB_SLEEP(gb, display, 20, 1);
             }
-            
             GB_STAT_update(gb);
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
         }
