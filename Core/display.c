@@ -6,7 +6,7 @@
 
 /* FIFO functions */
 
-static inline unsigned __attribute__((unused)) fifo_size(GB_fifo_t *fifo)
+static inline unsigned fifo_size(GB_fifo_t *fifo)
 {
     return (fifo->write_end - fifo->read_end) & 0xF;
 }
@@ -40,6 +40,31 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
         fifo->write_end &= 0xF;
     }
 }
+
+static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, uint8_t priority, bool flip_x)
+{
+    while (fifo_size(fifo) < 8) {
+        fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {0,};
+        fifo->write_end++;
+        fifo->write_end &= 0xF;
+    }
+    
+    uint8_t flip_xor = flip_x? 0: 0x7;
+    
+    for (unsigned i = 8; i--;) {
+        uint8_t pixel = (lower >> 7) | ((upper >> 7) << 1);
+        GB_fifo_item_t *target = &fifo->fifo[(fifo->read_end + (i ^ flip_xor)) & 0xF];
+        if (pixel != 0 && (target->pixel == 0 || target->priority > priority)) {
+            target->pixel = pixel;
+            target->palette = palette;
+            target->bg_priority = bg_priority;
+            target->priority = priority;
+        }
+        lower <<= 1;
+        upper <<= 1;
+    }
+}
+
 
 /*
  Each line is 456 cycles, approximately:
@@ -444,8 +469,20 @@ static void search_oam(GB_gameboy_t *gb)
 static void render_pixel_if_possible(GB_gameboy_t *gb)
 {
     GB_fifo_item_t *fifo_item = NULL;
+    GB_fifo_item_t *oam_fifo_item = NULL;
+    bool draw_oam = false;
+    bool bg_enabled = true, bg_priority = false;
+
     if (!gb->fifo_paused) {
         fifo_item = fifo_pop(&gb->bg_fifo);
+    }
+    
+    if (fifo_size(&gb->oam_fifo)) {
+        oam_fifo_item = fifo_pop(&gb->oam_fifo);
+        if (oam_fifo_item->pixel) {
+            draw_oam = true;
+            bg_priority |= oam_fifo_item->bg_priority;
+        }
     }
     
     /* Drop pixels for scrollings */
@@ -456,26 +493,41 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     if (gb->fifo_paused) return;
     
     /* Mixing */
-    bool bg_enabled = true, bg_behind = false;
     
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
         if (gb->cgb_mode) {
-            bg_behind = true;
+            bg_priority = true;
         }
         else {
             bg_enabled = false;
         }
     }
+    if (!gb->is_cgb && gb->in_window) {
+        bg_enabled = true;
+    }
+    
     if (!bg_enabled) {
         gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
     }
     else {
         uint8_t pixel = fifo_item->pixel;
+        if (pixel && bg_priority) {
+            draw_oam = false;
+        }
         if (!gb->cgb_mode) {
             pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
         }
         gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[pixel];
     }
+    
+    if (draw_oam) {
+        uint8_t pixel = oam_fifo_item->pixel;
+        if (!gb->cgb_mode) {
+            pixel = ((gb->io_registers[oam_fifo_item->palette? GB_IO_OBP1 : GB_IO_OBP0] >> (pixel << 1)) & 3);
+        }
+        gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
+    }
+    
     gb->position_in_line++;
 }
 
@@ -591,6 +643,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             
             gb->cycles_for_line = MODE2_LENGTH + 4;
             fifo_clear(&gb->bg_fifo);
+            fifo_clear(&gb->oam_fifo);
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             
@@ -618,6 +671,32 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->fetching_objects = true;
                     gb->cycles_for_line += 6;
                     GB_SLEEP(gb, display, 20, 6);
+                    GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
+                    bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
+                    uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
+                    
+                    if (object->flags & 0x40) { /* Flip Y */
+                        tile_y ^= height_16? 0xF : 7;
+                    }
+                    uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
+                    
+                    if (gb->cgb_mode && (object->flags & 0x8)) { /* Use VRAM bank 2 */
+                        line_address += 0x2000;
+                    }
+                    
+                    uint8_t palette = (object->flags & 0x10) ? 1 : 0;
+                    if (gb->cgb_mode) {
+                        palette = object->flags & 0x7;
+                    }
+#if 1
+                    fifo_overlay_object_row(&gb->oam_fifo,
+                                            gb->vram[line_address],
+                                            gb->vram[line_address + 1],
+                                            palette,
+                                            object->flags & 0x80,
+                                            gb->cgb_mode? gb->visible_objs[gb->n_visible_objs - 1] : 0,
+                                            object->flags & 0x20);
+#endif
                     gb->n_visible_objs--;
                 }
                 gb->fetching_objects = false;
