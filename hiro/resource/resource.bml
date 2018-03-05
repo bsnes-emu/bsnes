@@ -84,6 +84,7 @@ namespace name=Icon
     binary name=Desktop file=icon/place/desktop.png
     binary name=Home file=icon/place/home.png
     binary name=Server file=icon/place/server.png
+    binary name=Settings file=icon/place/settings.png
     binary name=Share file=icon/place/share.png
   namespace name=Prompt
     binary name=Error file=icon/prompt/error.png

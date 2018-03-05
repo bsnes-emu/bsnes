@@ -71,14 +71,15 @@ auto MegaDrive::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  name:   ", Location::prefix(location), "\n");
-  output.append("  label:  ", Location::prefix(location), "\n");
+  output.append("  label: ", Location::prefix(location), "\n");
+  output.append("  name: ", Location::prefix(location), "\n");
   output.append("  region: ", regions.left(), "\n");
-  output.append(memory("ROM", data.size(), "program.rom"));
+  output.append("  board\n");
+  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
   if(ramSize && ramMode != "none") {
-    output.append(memory("NVRAM", ramSize, "save.ram"));
-    output.append("    mode: ", ramMode, "\n");
-    output.append("    offset: 0x", hex(ramFrom), "\n");
+    output.append(Memory{}.type("RAM").size(ramSize).category("Save").text());
+    output.append("      mode: ", ramMode, "\n");
+    output.append("      offset: 0x", hex(ramFrom), "\n");
   }
   return output;
 }

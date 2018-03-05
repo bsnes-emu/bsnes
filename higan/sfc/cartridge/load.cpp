@@ -1,13 +1,11 @@
 auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
   string output;
 
-  auto region = node["game/region"].text();
   auto board = node["game/board"].text();
-  if(board != "SHVC-SGB2-01") board.trimLeft("SHVC-", 1L);
-  board.trimLeft("SNSP-", 1L);
-  board.trimLeft("MAXI-", 1L);
-  board.trimLeft("MJSC-", 1L);
-  board.trimLeft("EA-", 1L);
+  if(board.beginsWith("SNSP-")) board.replace("SNSP-", "SHVC-", 1L);
+  if(board.beginsWith("MAXI-")) board.replace("MAXI-", "SHVC-", 1L);
+  if(board.beginsWith("MJSC-")) board.replace("MJSC-", "SHVC-", 1L);
+  if(board.beginsWith("EA-"  )) board.replace("EA-",   "SHVC-", 1L);
 
   if(auto fp = platform->open(ID::System, "boards.bml", File::Read, File::Required)) {
     auto document = BML::unserialize(fp->reads());
@@ -20,65 +18,36 @@ auto Cartridge::loadBoard(Markup::Node node) -> Markup::Node {
           if(string{part(0), revision, part(2)} == board) matched = true;
         }
       }
-      if(!matched) continue;
-
-      if(region.endsWith("BRA")
-      || region.endsWith("CAN")
-      || region.endsWith("HKG")
-      || region.endsWith("JPN")
-      || region.endsWith("KOR")
-      || region.endsWith("LTN")
-      || region.endsWith("ROC")
-      || region.endsWith("USA")
-      || region.beginsWith("SHVC-")
-      || region == "NTSC") {
-        output.append("region=ntsc\n");
-      } else {
-        output.append("region=pal\n");
-      }
-
-      vector<Markup::Node> rom;
-      vector<Markup::Node> ram;
-      for(auto memory : node.find("game/memory")) {
-        if(memory["type"].text() == "ROM" || memory["type"].text() == "EPROM") {
-          rom.append(memory);
-        }
-        if(memory["type"].text() == "RAM" || memory["type"].text() == "NVRAM") {
-          ram.append(memory);
-        }
-      }
-
-      for(auto& line : BML::serialize(leaf).split("\n")) {
-        line.trimLeft("  ", 1L);
-        if(line.endsWith("rom") && rom) {
-          line.append(" name=", rom.left()["name"].text());
-          line.append(" size=", rom.left()["size"].text());
-          rom.removeLeft();
-        }
-        if(line.endsWith("ram") && ram) {
-          line.append(" name=", ram.left()["name"].text());
-          line.append(" size=", ram.left()["size"].text());
-          if(ram.left()["type"].text() == "RAM") line.append(" volatile");
-          ram.removeLeft();
-        }
-        output.append(line, "\n");
-      }
-      break;
+      if(matched) return leaf;
     }
   }
 
-  return BML::unserialize(output);
+  return {};
 }
 
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
   information.title.cartridge = node["game/label"].text();
 
+  if(region() == "Auto") {
+    auto region = node["game/region"].text();
+    if(region.endsWith("BRA")
+    || region.endsWith("CAN")
+    || region.endsWith("HKG")
+    || region.endsWith("JPN")
+    || region.endsWith("KOR")
+    || region.endsWith("LTN")
+    || region.endsWith("ROC")
+    || region.endsWith("USA")
+    || region.beginsWith("SHVC-")
+    || region == "NTSC") {
+      information.region = "NTSC";
+    } else {
+      information.region = "PAL";
+    }
+  }
+
   auto board = node["board"];
   if(!board) board = loadBoard(node);
-  if(region() == "Auto") {
-    if(board["region"].text() == "ntsc") information.region = "NTSC";
-    if(board["region"].text() == "pal") information.region = "PAL";
-  }
 
   if(board["bsmemory"] || board["mcc/bsmemory"] || board["sa1/bsmemory"]) {
     if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
@@ -401,6 +370,7 @@ auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, may
   auto size = node["size"].natural();
   ram.allocate(size);
   if(auto fp = platform->open(id(), name, File::Read, required)) {
+    ram.allocate(fp->size());  //TODO: temporary hack
     fp->read(ram.data(), ram.size());
   }
 }

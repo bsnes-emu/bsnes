@@ -50,16 +50,17 @@ auto GameBoyAdvance::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  label:  ", Location::prefix(location), "\n");
-  output.append(memory("ROM", data.size(), "program.rom"));
+  output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  board\n");
+  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
   if(!list);
-  else if(list.left().beginsWith("SRAM_V"    )) output.append(memory("NVRAM",   0x8000, "save.ram"));
-  else if(list.left().beginsWith("SRAM_F_V"  )) output.append(memory("NVRAM",   0x8000, "save.ram"));
-  else if(list.left().beginsWith("EEPROM_V"  )) output.append(memory("EEPROM",     0x0, "save.ram"));
-  else if(list.left().beginsWith("FLASH_V"   )) output.append(memory("NAND",   0x10000, "save.ram"));
-  else if(list.left().beginsWith("FLASH512_V")) output.append(memory("NAND",   0x10000, "save.ram"));
-  else if(list.left().beginsWith("FLASH1M_V" )) output.append(memory("NAND",   0x20000, "save.ram"));
+  else if(list.left().beginsWith("SRAM_V"    )) output.append(Memory{}.type("RAM"   ).size( 0x8000).category("Save").text());
+  else if(list.left().beginsWith("SRAM_F_V"  )) output.append(Memory{}.type("RAM"   ).size( 0x8000).category("Save").text());
+  else if(list.left().beginsWith("EEPROM_V"  )) output.append(Memory{}.type("EEPROM").size(    0x0).category("Save").text());
+  else if(list.left().beginsWith("FLASH_V"   )) output.append(Memory{}.type("Flash" ).size(0x10000).category("Save").text());
+  else if(list.left().beginsWith("FLASH512_V")) output.append(Memory{}.type("Flash" ).size(0x10000).category("Save").text());
+  else if(list.left().beginsWith("FLASH1M_V" )) output.append(Memory{}.type("Flash" ).size(0x20000).category("Save").text());
   return output;
 }
 

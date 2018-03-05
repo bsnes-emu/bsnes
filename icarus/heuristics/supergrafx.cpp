@@ -21,9 +21,10 @@ auto SuperGrafx::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  name:   ", Location::prefix(location), "\n");
-  output.append("  label:  ", Location::prefix(location), "\n");
-  output.append(memory("ROM", data.size(), "program.rom"));
+  output.append("  label: ", Location::prefix(location), "\n");
+  output.append("  name: ", Location::prefix(location), "\n");
+  output.append("  board\n");
+  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
   return output;
 }
 

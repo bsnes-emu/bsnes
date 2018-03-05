@@ -1,7 +1,26 @@
 struct Memory {
   string type;
   string size;
-  string name;
+  string category;
+  string manufacturer;
+  string part;
+  string note;
+  bool isVolatile = false;
+};
+
+struct Oscillator {
+  string frequency;
+  string note;
+};
+
+//variant meta-class
+struct Component {
+  enum class Type : uint {
+    Memory,
+    Oscillator,
+  } type;
+  Memory memory;
+  Oscillator oscillator;
 };
 
 struct Game {
@@ -12,7 +31,7 @@ struct Game {
   string name;
   string label;
   string note;
-  vector<Memory> memories;
+  vector<Component> components;
 };
 
 struct ListWindow : Window {
@@ -58,9 +77,9 @@ struct GameWindow : Window {
   auto cancel() -> void;
   auto reloadList() -> void;
   auto updateWindow() -> void;
-  auto appendMemory(Memory) -> void;
-  auto modifyMemory(Memory) -> void;
-  auto removeMemory() -> void;
+  auto appendComponent(Component) -> void;
+  auto modifyComponent(Component) -> void;
+  auto removeComponent() -> void;
 
 private:
   bool modified = false;
@@ -77,7 +96,7 @@ private:
       Label revisionLabel{&infoLayout, Size{0, 0}};
       LineEdit revisionEdit{&infoLayout, Size{~0, 0}};
       Label boardLabel{&infoLayout, Size{0, 0}};
-      LineEdit boardEdit{&infoLayout, Size{~0, 0}};
+      LineEdit boardEdit{&infoLayout, Size{~0, 0}, 0};
     HorizontalLayout nameLayout{&layout, Size{~0, 0}};
       Label nameLabel{&nameLayout, Size{50, 0}};
       LineEdit nameEdit{&nameLayout, Size{~0, 0}};
@@ -87,14 +106,17 @@ private:
     HorizontalLayout noteLayout{&layout, Size{~0, 0}};
       Label noteLabel{&noteLayout, Size{50, 0}};
       LineEdit noteEdit{&noteLayout, Size{~0, 0}};
-  TableView memoryList{&layout, Size{~0, ~0}};
-  HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-    Button appendButton{&controlLayout, Size{80, 0}};
-    Button modifyButton{&controlLayout, Size{80, 0}};
-    Button removeButton{&controlLayout, Size{80, 0}};
-    Widget spacer{&controlLayout, Size{~0, 0}};
-    Button acceptButton{&controlLayout, Size{80, 0}};
-    Button cancelButton{&controlLayout, Size{80, 0}};
+  HorizontalLayout lowerLayout{&layout, Size{~0, ~0}};
+    Label componentLabel{&lowerLayout, Size{50, ~0}};
+    TreeView componentTree{&lowerLayout, Size{~0, ~0}};
+    VerticalLayout controlLayout{&lowerLayout, Size{0, ~0}};
+      Button appendMemoryButton{&controlLayout, Size{80, 0}};
+      Button appendOscillatorButton{&controlLayout, Size{80, 0}};
+      Button modifyComponentButton{&controlLayout, Size{80, 0}};
+      Button removeComponentButton{&controlLayout, Size{80, 0}};
+      Widget controlSpacer{&controlLayout, Size{0, ~0}};
+      Button acceptButton{&controlLayout, Size{80, 0}};
+      Button cancelButton{&controlLayout, Size{80, 0}};
 };
 
 struct MemoryWindow : Window {
@@ -111,15 +133,50 @@ private:
 
   VerticalLayout layout{this};
     HorizontalLayout infoLayout{&layout, Size{~0, 0}};
-      Label typeLabel{&infoLayout, Size{40, 0}};
+      Label typeLabel{&infoLayout, Size{80, 0}};
       ComboEdit typeEdit{&infoLayout, Size{~0, 0}};
       Label sizeLabel{&infoLayout, Size{0, 0}};
       LineEdit sizeEdit{&infoLayout, Size{~0, 0}};
-    HorizontalLayout nameLayout{&layout, Size{~0, 0}};
-      Label nameLabel{&nameLayout, Size{40, 0}};
-      LineEdit nameEdit{&nameLayout, Size{~0, 0}};
+    HorizontalLayout categoryLayout{&layout, Size{~0, 0}};
+      Label categoryLabel{&categoryLayout, Size{80, 0}};
+      ComboEdit categoryEdit{&categoryLayout, Size{~0, 0}};
+    HorizontalLayout manufacturerLayout{&layout, Size{~0, 0}};
+      Label manufacturerLabel{&manufacturerLayout, Size{80, 0}};
+      LineEdit manufacturerEdit{&manufacturerLayout, Size{~0, 0}};
+    HorizontalLayout partLayout{&layout, Size{~0, 0}};
+      Label partLabel{&partLayout, Size{80, 0}};
+      LineEdit partEdit{&partLayout, Size{~0, 0}};
+    HorizontalLayout noteLayout{&layout, Size{~0, 0}};
+      Label noteLabel{&noteLayout, Size{80, 0}};
+      LineEdit noteEdit{&noteLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Widget spacer{&controlLayout, Size{~0, 0}};
+      Widget controlSpacer{&controlLayout, Size{~0, 0}};
+      CheckLabel volatileOption{&controlLayout, Size{0, 0}};
+      Button acceptButton{&controlLayout, Size{80, 0}};
+      Button cancelButton{&controlLayout, Size{80, 0}};
+};
+
+struct OscillatorWindow : Window {
+  OscillatorWindow();
+  auto show(Oscillator = {}) -> void;
+  auto accept() -> void;
+  auto cancel() -> void;
+  auto updateWindow() -> void;
+
+private:
+  bool modified = false;
+  bool create = true;
+  Oscillator oscillator;
+
+  VerticalLayout layout{this};
+    HorizontalLayout frequencyLayout{&layout, Size{~0, 0}};
+      Label frequencyLabel{&frequencyLayout, Size{60, 0}};
+      LineEdit frequencyEdit{&frequencyLayout, Size{~0, 0}};
+    HorizontalLayout noteLayout{&layout, Size{~0, 0}};
+      Label noteLabel{&noteLayout, Size{60, 0}};
+      LineEdit noteEdit{&noteLayout, Size{~0, 0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Widget controlSpacer{&controlLayout, Size{~0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};
       Button cancelButton{&controlLayout, Size{80, 0}};
 };

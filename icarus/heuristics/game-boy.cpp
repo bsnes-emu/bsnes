@@ -40,9 +40,9 @@ auto GameBoy::manifest() const -> string {
   bool accelerometer = false;
   bool rumble = false;
 
-  uint flashSize = 0;
   uint romSize = 0;
   uint ramSize = 0;
+  uint flashSize = 0;
   uint rtcSize = 0;
 
   string mapper = "MBC0";
@@ -218,8 +218,6 @@ auto GameBoy::manifest() const -> string {
   case 0x54: romSize =  96 * 16 * 1024; break;
   }
 
-  if(mapper == "MBC6" && flash) flashSize = 1024 * 1024;
-
   switch(read(0x0149)) { default:
   case 0x00: ramSize =  0 * 1024; break;
   case 0x01: ramSize =  2 * 1024; break;
@@ -232,21 +230,28 @@ auto GameBoy::manifest() const -> string {
   if(mapper == "MBC7" && ram) ramSize = 256;
   if(mapper == "TAMA" && ram) ramSize =  32;
 
+  if(mapper == "MBC6" && flash) flashSize = 1024 * 1024;
+
   if(mapper == "MBC3" && rtc) rtcSize = 13;
   if(mapper == "TAMA" && rtc) rtcSize = 21;
 
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  board:  ", mapper, "\n");
-  if(accelerometer) output.append("    accelerometer\n");
-  if(rumble) output.append("    rumble\n");
-  output.append("  name:   ", Location::prefix(location), "\n");
-  output.append("  label:  ", Location::prefix(location), "\n");
-  output.append(memory("ROM", data.size(), "program.rom"));
-  if(flash && flashSize) output.append(memory("NAND", flashSize, "download.rom"));
-  if(ram && ramSize) output.append(memory(battery ? "NVRAM" : "RAM", ramSize, "save.ram"));
-  if(rtc && rtcSize) output.append(memory("RTC", rtcSize, "rtc.ram"));
+  output.append("  label: ", Location::prefix(location), "\n");
+  output.append("  name: ", Location::prefix(location), "\n");
+  output.append("  board: ", mapper, "\n");
+  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+if(ram && ramSize)
+  output.append(Memory{}.type("RAM").size(ramSize).category("Save").battery(battery).text());
+if(flash && flashSize)
+  output.append(Memory{}.type("Flash").size(flashSize).category("Download").text());
+if(rtc && rtcSize)
+  output.append(Memory{}.type("RTC").size(rtcSize).category("Time").battery().text());
+if(accelerometer)
+  output.append("    accelerometer\n");
+if(rumble)
+  output.append("    rumble\n");
   return output;
 }
 

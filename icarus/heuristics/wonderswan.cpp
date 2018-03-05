@@ -27,11 +27,11 @@ auto WonderSwan::manifest() const -> string {
   string ramType;
   uint ramSize = 0;
   switch(metadata[11]) {
-  case 0x01: ramType = "NVRAM";  ramSize =    8 * 1024; break;
-  case 0x02: ramType = "NVRAM";  ramSize =   32 * 1024; break;
-  case 0x03: ramType = "NVRAM";  ramSize =  128 * 1024; break;
-  case 0x04: ramType = "NVRAM";  ramSize =  256 * 1024; break;
-  case 0x05: ramType = "NVRAM";  ramSize =  512 * 1024; break;
+  case 0x01: ramType = "RAM";    ramSize =    8 * 1024; break;
+  case 0x02: ramType = "RAM";    ramSize =   32 * 1024; break;
+  case 0x03: ramType = "RAM";    ramSize =  128 * 1024; break;
+  case 0x04: ramType = "RAM";    ramSize =  256 * 1024; break;
+  case 0x05: ramType = "RAM";    ramSize =  512 * 1024; break;
   case 0x10: ramType = "EEPROM"; ramSize =  128;        break;
   case 0x20: ramType = "EEPROM"; ramSize = 2048;        break;
   case 0x50: ramType = "EEPROM"; ramSize = 1024;        break;
@@ -43,12 +43,15 @@ auto WonderSwan::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256:      ", Hash::SHA256(data).digest(), "\n");
-  output.append("  name:        ", Location::prefix(location), "\n");
   output.append("  label:       ", Location::prefix(location), "\n");
+  output.append("  name:        ", Location::prefix(location), "\n");
   output.append("  orientation: ", !orientation ? "horizontal" : "vertical", "\n");
-  output.append(memory("ROM", data.size(), "program.rom"));
-  if(ramType && ramSize) output.append(memory(ramType, ramSize, "save.ram"));
-  if(hasRTC) output.append(memory("NVRAM", 16, "rtc.ram"));
+  output.append("  board\n");
+  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+if(ramType && ramSize)
+  output.append(Memory{}.type(ramType).size(ramSize).category("Save").battery(ramType == "RAM").text());
+if(hasRTC)
+  output.append(Memory{}.type("RTC").size(0x10).category("Time").text());
   return output;
 }
 

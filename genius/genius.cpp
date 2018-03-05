@@ -8,6 +8,7 @@ using namespace hiro;
 unique_pointer<ListWindow> listWindow;
 unique_pointer<GameWindow> gameWindow;
 unique_pointer<MemoryWindow> memoryWindow;
+unique_pointer<OscillatorWindow> oscillatorWindow;
 
 //
 
@@ -35,7 +36,7 @@ ListWindow::ListWindow() {
   helpMenu.setText("Help");
   aboutAction.setText("About ...").onActivate([&] {
     MessageDialog().setParent(*this).setTitle("About").setText({
-      "genius v01\n",
+      "genius\n",
       "Author: byuu\n",
       "Website: https://byuu.org/"
     }).information();
@@ -58,7 +59,7 @@ ListWindow::ListWindow() {
 
   onClose([&] { quit(); });
 
-  setSize({960, 600});
+  setSize({820, 600});
   reloadList();
   updateWindow();
   setCentered();
@@ -116,19 +117,31 @@ auto ListWindow::loadDatabase(string location) -> void {
   for(auto node : document.find("game")) {
     Game game;
     game.sha256 = node["sha256"].text();
+    game.label = node["label"].text();
+    game.name = node["name"].text();
     game.region = node["region"].text();
     game.revision = node["revision"].text();
     game.board = node["board"].text();
-    game.name = node["name"].text();
-    game.label = node["label"].text();
-    game.note = node["note"].text();
-    for(auto leaf : node.find("memory")) {
-      Memory memory;
-      memory.type = leaf["type"].text();
-      memory.size = leaf["size"].text();
-      memory.name = leaf["name"].text();
-      game.memories.append(memory);
+    for(auto object : node["board"]) {
+      Component component;
+      if(object.name() == "memory") {
+        component.type = Component::Type::Memory;
+        component.memory.type = object["type"].text();
+        component.memory.size = object["size"].text();
+        component.memory.category = object["category"].text();
+        component.memory.manufacturer = object["manufacturer"].text();
+        component.memory.part = object["part"].text();
+        component.memory.note = object["note"].text();
+        component.memory.isVolatile = (bool)object["volatile"];
+      }
+      if(object.name() == "oscillator") {
+        component.type = Component::Type::Oscillator;
+        component.oscillator.frequency = object["frequency"].text();
+        component.oscillator.note = object["note"].text();
+      }
+      game.components.append(component);
     }
+    game.note = node["note"].text();
     games.append(game);
   }
 
@@ -147,7 +160,10 @@ auto ListWindow::saveDatabase(string location) -> void {
 
   auto copy = games;
   copy.sort([](auto x, auto y) {
-    return string::icompare(x.name, y.name) < 0;
+    return string::icompare(
+      {x.name, " ", x.region, " ", x.revision},
+      {y.name, " ", y.region, " ", y.revision}
+    ) < 0;
   });
 
   fp.print("database\n");
@@ -155,22 +171,41 @@ auto ListWindow::saveDatabase(string location) -> void {
 
   for(auto& game : copy) {
     fp.print("game\n");
-    fp.print("  sha256:   ", game.sha256, "\n");
-    fp.print("  region:   ", game.region, "\n");
+    fp.print("  sha256: ", game.sha256, "\n");
+  if(game.label)
+    fp.print("  label: ", game.label, "\n");
+    fp.print("  name: ", game.name, "\n");
+    fp.print("  region: ", game.region, "\n");
     fp.print("  revision: ", game.revision, "\n");
   if(game.board)
-    fp.print("  board:    ", game.board, "\n");
-    fp.print("  name:     ", game.name, "\n");
-  if(game.label)
-    fp.print("  label:    ", game.label, "\n");
-  if(game.note)
-    fp.print("  note:     ", game.note, "\n");
-    for(auto& memory : game.memories) {
-      fp.print("  memory\n");
-      fp.print("    type: ", memory.type, "\n");
-      fp.print("    size: ", memory.size, "\n");
-      fp.print("    name: ", memory.name, "\n");
+    fp.print("  board: ", game.board, "\n");
+  else if(game.components)
+    fp.print("  board\n");
+    for(auto& component : game.components) {
+      if(component.type == Component::Type::Memory) {
+        fp.print("    memory\n");
+        fp.print("      type: ", component.memory.type, "\n");
+        fp.print("      size: ", component.memory.size, "\n");
+        fp.print("      category: ", component.memory.category, "\n");
+      if(component.memory.manufacturer)
+        fp.print("      manufacturer: ", component.memory.manufacturer, "\n");
+      if(component.memory.part)
+        fp.print("      part: ", component.memory.part, "\n");
+      if(component.memory.note)
+        fp.print("      note: ", component.memory.note, "\n");
+      if(component.memory.isVolatile)
+        fp.print("      volatile\n");
+      }
+
+      if(component.type == Component::Type::Oscillator) {
+        fp.print("    oscillator\n");
+        fp.print("      frequency: ", component.oscillator.frequency, "\n");
+      if(component.oscillator.note)
+        fp.print("      note: ", component.oscillator.note, "\n");
+      }
     }
+  if(game.note)
+    fp.print("  note: ", game.note, "\n");
     fp.print("\n");
   }
 
@@ -219,39 +254,52 @@ GameWindow::GameWindow() {
   gameWindow = this;
 
   layout.setMargin(5);
-  hashLabel.setText("SHA256:");
+  hashLabel.setText("SHA256:").setAlignment(1.0);
   hashEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
-  regionLabel.setText("Region:");
+  regionLabel.setText("Region:").setAlignment(1.0);
   regionEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
   revisionLabel.setText("Revision:");
   revisionEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
   boardLabel.setText("Board:");
   boardEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
-  nameLabel.setText("Name:");
+  nameLabel.setText("Name:").setAlignment(1.0);
   nameEdit.onChange([&] { modified = true, updateWindow(); });
-  labelLabel.setText("Label:");
+  labelLabel.setText("Label:").setAlignment(1.0);
   labelEdit.onChange([&] { modified = true, updateWindow(); });
-  noteLabel.setText("Note:");
+  noteLabel.setText("Note:").setAlignment(1.0);
   noteEdit.onChange([&] { modified = true, updateWindow(); });
-  memoryList.onActivate([&] { modifyButton.doActivate(); });
-  memoryList.onChange([&] { updateWindow(); });
-  appendButton.setText("Append").onActivate([&] {
+  componentLabel.setText("Tree:").setAlignment({1.0, 0.0});
+  componentTree.onActivate([&] { modifyComponentButton.doActivate(); });
+  componentTree.onChange([&] { updateWindow(); });
+  appendMemoryButton.setText("Memory").onActivate([&] {
     setEnabled(false);
     memoryWindow->show();
   });
-  modifyButton.setText("Modify").onActivate([&] {
-    if(auto item = memoryList.selected()) {
+  appendOscillatorButton.setText("Oscillator").onActivate([&] {
+    setEnabled(false);
+    oscillatorWindow->show();
+  });
+  modifyComponentButton.setText("Modify").onActivate([&] {
+    if(auto item = componentTree.selected()) {
       setEnabled(false);
-      memoryWindow->show(game.memories[item.offset()]);
+      auto path = item.path().split("/");
+      auto offset = path(0).natural();
+      Component component = game.components[offset];
+      if(component.type == Component::Type::Memory) {
+        memoryWindow->show(component.memory);
+      }
+      if(component.type == Component::Type::Oscillator) {
+        oscillatorWindow->show(component.oscillator);
+      }
     }
   });
-  removeButton.setText("Remove").onActivate([&] { removeMemory(); });
+  removeComponentButton.setText("Remove").onActivate([&] { removeComponent(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
 
   onClose([&] { cancel(); });
 
-  setSize({800, 480});
+  setSize({640, 480});
   setDismissable();
 }
 
@@ -260,14 +308,14 @@ auto GameWindow::show(Game game) -> void {
   modified = false;
   create = !game.sha256;
 
-  hashEdit.setText(game.sha256).setEditable(create);
+  hashEdit.setText(game.sha256);
   regionEdit.setText(game.region);
   revisionEdit.setText(game.revision);
   boardEdit.setText(game.board);
   nameEdit.setText(game.name);
   labelEdit.setText(game.label);
   noteEdit.setText(game.note);
-  acceptButton.setText(create ? "Create" : "Modify");
+  acceptButton.setText(create ? "Create" : "Apply");
 
   reloadList();
   updateWindow();
@@ -314,70 +362,90 @@ auto GameWindow::cancel() -> void {
 }
 
 auto GameWindow::reloadList() -> void {
-  memoryList.reset();
-  memoryList.append(TableViewHeader()
-    .append(TableViewColumn().setText("Type"))
-    .append(TableViewColumn().setText("Size"))
-    .append(TableViewColumn().setText("Name").setExpandable())
-  );
-  for(auto& memory : game.memories) {
-    memoryList.append(TableViewItem()
-      .append(TableViewCell().setText(memory.type))
-      .append(TableViewCell().setText(memory.size))
-      .append(TableViewCell().setText(memory.name))
-    );
+  componentTree.reset();
+  uint counter = 1;
+  for(auto& component : game.components) {
+    TreeViewItem item;
+
+    string index = {"[", counter++, "] "};
+    if(component.type == Component::Type::Memory) {
+      item.setText({index, "Memory"});
+      item.append(TreeViewItem().setText({"Type: ", component.memory.type}));
+      item.append(TreeViewItem().setText({"Size: ", component.memory.size}));
+      item.append(TreeViewItem().setText({"Category: ", component.memory.category}));
+    if(component.memory.manufacturer)
+      item.append(TreeViewItem().setText({"Manufacturer: ", component.memory.manufacturer}));
+    if(component.memory.part)
+      item.append(TreeViewItem().setText({"Part: ", component.memory.part}));
+    if(component.memory.note)
+      item.append(TreeViewItem().setText({"Note: ", component.memory.note}));
+    if(component.memory.isVolatile)
+      item.append(TreeViewItem().setText({"Volatile"}));
+    }
+
+    if(component.type == Component::Type::Oscillator) {
+      item.setText({index, "Oscillator"});
+      item.append(TreeViewItem().setText({"Frequency: ", component.oscillator.frequency}));
+    if(component.oscillator.note)
+      item.append(TreeViewItem().setText({"Note: ", component.oscillator.note}));
+    }
+
+    componentTree.append(item);
   }
+
   Application::processEvents();
-  memoryList.resizeColumns();
+  for(auto& item : componentTree.items()) item.setExpanded();
 }
 
 auto GameWindow::updateWindow() -> void {
   bool valid = true;
-  hashEdit.setBackgroundColor(
-    !create ? Color{192, 255, 192}
-  : hashEdit.text().strip().size() == 64 ? Color{}
-  : (valid = false, Color{255, 224, 224})
-  );
+  bool hashValid = hashEdit.text().strip().size() == 64;
+  hashEdit.setEditable(!hashValid).setBackgroundColor(
+    !create || hashValid ? Color{192, 255, 192}
+  : (valid = false, Color{255, 224, 224}));
   regionEdit.setBackgroundColor(regionEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   revisionEdit.setBackgroundColor(revisionEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   boardEdit.setBackgroundColor(boardEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   nameEdit.setBackgroundColor(nameEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   labelEdit.setBackgroundColor(labelEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  modifyButton.setEnabled((bool)memoryList.selected());
-  removeButton.setEnabled((bool)memoryList.selected());
+  modifyComponentButton.setEnabled((bool)componentTree.selected());
+  removeComponentButton.setEnabled((bool)componentTree.selected());
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Game" : "Modify Game Details"});
+  if(create && hashValid && hashEdit.focused()) regionEdit.setFocused();
 }
 
-auto GameWindow::appendMemory(Memory memory) -> void {
+auto GameWindow::appendComponent(Component component) -> void {
   modified = true;
-  auto offset = game.memories.size();
-  game.memories.append(memory);
+  auto offset = game.components.size();
+  game.components.append(component);
   reloadList();
-  memoryList.item(offset).setSelected().setFocused();
+  componentTree.item(offset).setSelected().setFocused();
   updateWindow();
 }
 
-auto GameWindow::modifyMemory(Memory memory) -> void {
-  if(auto item = memoryList.selected()) {
+auto GameWindow::modifyComponent(Component component) -> void {
+  if(auto item = componentTree.selected()) {
     modified = true;
-    auto offset = item.offset();
-    game.memories[offset] = memory;
+    auto path = item.path().split("/");
+    auto offset = path(0).natural();
+    game.components[offset] = component;
     reloadList();
-    memoryList.item(offset).setSelected().setFocused();
+    componentTree.item(offset).setSelected().setFocused();
     updateWindow();
   }
 }
 
-auto GameWindow::removeMemory() -> void {
-  if(auto item = memoryList.selected()) {
+auto GameWindow::removeComponent() -> void {
+  if(auto item = componentTree.selected()) {
     if(MessageDialog().setParent(*this).setText({
-      "Are you sure you want to permanently remove this memory?\n\n",
-      "Name: ", item.cell(2).text()
+      "Are you sure you want to permanently remove this component?"
     }).question() == "Yes") {
       modified = true;
-      game.memories.remove(item.offset());
+      auto path = item.path().split("/");
+      auto offset = path(0).natural();
+      game.components.remove(offset);
       reloadList();
       updateWindow();
     }
@@ -390,25 +458,35 @@ MemoryWindow::MemoryWindow() {
   memoryWindow = this;
 
   layout.setMargin(5);
-  typeLabel.setText("Type:");
+  typeLabel.setText("Type:").setAlignment(1.0);
   typeEdit.append(ComboEditItem().setText("ROM"));
-  typeEdit.append(ComboEditItem().setText("EPROM"));
   typeEdit.append(ComboEditItem().setText("EEPROM"));
-  typeEdit.append(ComboEditItem().setText("NOR"));
-  typeEdit.append(ComboEditItem().setText("PSRAM"));
-  typeEdit.append(ComboEditItem().setText("NVRAM"));
+  typeEdit.append(ComboEditItem().setText("Flash"));
   typeEdit.append(ComboEditItem().setText("RAM"));
+  typeEdit.append(ComboEditItem().setText("RTC"));
   typeEdit.onChange([&] { modified = true, updateWindow(); });
-  sizeLabel.setText("Size:");
-  sizeEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
-  nameLabel.setText("Name:");
-  nameEdit.onChange([&] { modified = true, updateWindow(); });
+  sizeLabel.setText("Size:").setAlignment(1.0);
+  sizeEdit.onChange([&] { modified = true, updateWindow(); });
+  categoryLabel.setText("Category:").setAlignment(1.0);
+  categoryEdit.append(ComboEditItem().setText("Program"));
+  categoryEdit.append(ComboEditItem().setText("Data"));
+  categoryEdit.append(ComboEditItem().setText("Character"));
+  categoryEdit.append(ComboEditItem().setText("Save"));
+  categoryEdit.append(ComboEditItem().setText("Time"));
+  categoryEdit.onChange([&] { modified = true, updateWindow(); });
+  manufacturerLabel.setText("Manufacturer:").setAlignment(1.0);
+  manufacturerEdit.onChange([&] { modified = true, updateWindow(); });
+  partLabel.setText("Part:").setAlignment(1.0);
+  partEdit.onChange([&] { modified = true, updateWindow(); });
+  noteLabel.setText("Note:").setAlignment(1.0);
+  noteEdit.onChange([&] { modified = true, updateWindow(); });
+  volatileOption.setText("Volatile").onToggle([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
 
   onClose([&] { cancel(); });
 
-  setSize({280, layout.minimumSize().height()});
+  setSize({320, layout.minimumSize().height()});
   setDismissable();
 }
 
@@ -419,7 +497,11 @@ auto MemoryWindow::show(Memory memory) -> void {
 
   typeEdit.setText(memory.type);
   sizeEdit.setText(memory.size);
-  nameEdit.setText(memory.name);
+  categoryEdit.setText(memory.category);
+  manufacturerEdit.setText(memory.manufacturer);
+  partEdit.setText(memory.part);
+  noteEdit.setText(memory.note);
+  volatileOption.setChecked(memory.isVolatile);
 
   updateWindow();
   setCentered(*gameWindow);
@@ -431,12 +513,18 @@ auto MemoryWindow::show(Memory memory) -> void {
 auto MemoryWindow::accept() -> void {
   memory.type = typeEdit.text().strip();
   memory.size = sizeEdit.text().strip();
-  memory.name = nameEdit.text().strip();
+  memory.category = categoryEdit.text().strip();
+  memory.manufacturer = manufacturerEdit.text().strip();
+  memory.part = partEdit.text().strip();
+  memory.note = noteEdit.text().strip();
+  memory.isVolatile = volatileOption.checked();
 
+  Component component{Component::Type::Memory};
+  component.memory = memory;
   if(create) {
-    gameWindow->appendMemory(memory);
+    gameWindow->appendComponent(component);
   } else {
-    gameWindow->modifyMemory(memory);
+    gameWindow->modifyComponent(component);
   }
 
   setVisible(false);
@@ -458,9 +546,81 @@ auto MemoryWindow::updateWindow() -> void {
   bool valid = true;
   typeEdit.setBackgroundColor(typeEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   sizeEdit.setBackgroundColor(sizeEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
-  nameEdit.setBackgroundColor(nameEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
+  categoryEdit.setBackgroundColor(categoryEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
+  manufacturerEdit.setBackgroundColor(manufacturerEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  partEdit.setBackgroundColor(partEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Memory" : "Modify Memory Details"});
+}
+
+//
+
+OscillatorWindow::OscillatorWindow() {
+  oscillatorWindow = this;
+
+  layout.setMargin(5);
+  frequencyLabel.setText("Frequency:").setAlignment(1.0);
+  frequencyEdit.onChange([&] { modified = true, updateWindow(); });
+  noteLabel.setText("Note:").setAlignment(1.0);
+  noteEdit.onChange([&] { modified = true, updateWindow(); });
+  acceptButton.setText("Accept").onActivate([&] { accept(); });
+  cancelButton.setText("Cancel").onActivate([&] { cancel(); });
+
+  onClose([&] { cancel(); });
+
+  setSize({320, layout.minimumSize().height()});
+  setDismissable();
+}
+
+auto OscillatorWindow::show(Oscillator oscillator) -> void {
+  this->oscillator = oscillator;
+  modified = false;
+  create = !oscillator.frequency;
+
+  frequencyEdit.setText(oscillator.frequency);
+  noteEdit.setText(oscillator.note);
+
+  updateWindow();
+  setCentered(*gameWindow);
+  setVisible();
+
+  frequencyEdit.setFocused();
+}
+
+auto OscillatorWindow::accept() -> void {
+  oscillator.frequency = frequencyEdit.text().strip();
+  oscillator.note = noteEdit.text().strip();
+
+  Component component{Component::Type::Oscillator};
+  component.oscillator = oscillator;
+  if(create) {
+    gameWindow->appendComponent(component);
+  } else {
+    gameWindow->modifyComponent(component);
+  }
+
+  setVisible(false);
+  gameWindow->setEnabled();
+  gameWindow->setFocused();
+}
+
+auto OscillatorWindow::cancel() -> void {
+  if(!modified || MessageDialog().setParent(*this).setText({
+    "Are you sure you want to discard your changes to this property?"
+  }).question() == "Yes") {
+    setVisible(false);
+    gameWindow->setEnabled();
+    gameWindow->setFocused();
+  }
+}
+
+auto OscillatorWindow::updateWindow() -> void {
+  bool valid = true;
+  frequencyEdit.setBackgroundColor(frequencyEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
+  noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  acceptButton.setEnabled(valid);
+  setTitle({modified ? "*" : "", create ? "Add New Property" : "Modify Property Details"});
 }
 
 //
@@ -471,5 +631,6 @@ auto nall::main(string_vector) -> void {
   new ListWindow;
   new GameWindow;
   new MemoryWindow;
+  new OscillatorWindow;
   Application::run();
 }

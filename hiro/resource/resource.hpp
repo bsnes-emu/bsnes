@@ -91,6 +91,7 @@ extern const nall::vector<uint8_t> Bookmarks;
 extern const nall::vector<uint8_t> Desktop;
 extern const nall::vector<uint8_t> Home;
 extern const nall::vector<uint8_t> Server;
+extern const nall::vector<uint8_t> Settings;
 extern const nall::vector<uint8_t> Share;
 }
 namespace Prompt {

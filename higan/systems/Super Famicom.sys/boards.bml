@@ -1,376 +1,10 @@
 database
-  revision: 2018-02-21
+  revision: 2018-03-04
 
 //Boards (Production)
 
 database
-  revision: 2018-02-21
-
-board: 1A0N-(01,02,10,20,30)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-
-board: 1A1B-(04,05,06)
-  rom
-    map address=00-1f,80-9f:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff
-
-board: 1A1M-(01,10,11,20)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 1A3B-(11,12,13)
-  rom
-    map address=00-1f,80-9f:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff
-
-board: 1A3B-20
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 1A3M-(10,20,21,30)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 1A5B-(02,04)
-  rom
-    map address=00-1f,80-9f:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff
-
-board: 1A5M-(01,11,20)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 1B0N-(02,03,10)
-  rom
-    map address=00-1f,80-9f:8000-ffff mask=0x8000
-  necdsp model=uPD7725 frequency=8000000
-    map address=30-3f,b0-bf:8000-ffff mask=0x3fff
-    prom
-    drom
-    dram
-
-board: 1B5B-02
-  rom
-    map address=00-1f,80-9f:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-ffff
-  necdsp model=uPD7725 frequency=8000000
-    map address=20-3f,a0-bf:8000-ffff mask=0x3fff
-    prom
-    drom
-    dram
-
-board: 1C0N
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-1f,80-9f:8000-ffff mask=0x8000
-    ram
-      map address=60-7d,e0-ff:0000-ffff
-
-board: 1C0N5S-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-1f,80-9f:8000-ffff mask=0x8000
-    ram
-      map address=60-7d,e0-ff:0000-ffff
-
-board: 1CA0N5S-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-      map address=40-5f,c0-df:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71,f0-f1:0000-ffff
-
-board: 1CA0N6S-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-      map address=40-5f,c0-df:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71,f0-f1:0000-ffff
-
-board: 1CA6B-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-      map address=40-5f,c0-df:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71,f0-f1:0000-ffff
-
-board: 1CB0N7S-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f:8000-ffff mask=0x8000
-      map address=40-5f:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71:0000-ffff
-
-board: 1CB5B-20
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f:8000-ffff mask=0x8000
-      map address=40-5f:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71:0000-ffff
-
-board: 1CB7B-01
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    rom
-      map address=00-3f:8000-ffff mask=0x8000
-      map address=40-5f:0000-ffff
-    ram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71:0000-ffff
-
-board: 1DC0N-01
-  hitachidsp model=HG51B169 frequency=20000000
-    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map address=70-77:0000-7fff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-    drom
-    dram
-      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
-
-board: 1DS0B-20
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050 frequency=11000000
-    map address=60-67,e0-e7:0000-3fff
-    prom
-    drom
-    dram
-      map address=68-6f,e8-ef:0000-7fff mask=0x8000
-
-board: 1J0N-(01,10,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-
-board: 1J1M-(11,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: 1J3B-01
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: 1J3M-(01,11,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: 1J5M-(01,11,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: 1K0N-01
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  necdsp model=uPD7725 frequency=8000000
-    map address=00-1f,80-9f:6000-7fff mask=0xfff
-    prom
-    drom
-    dram
-
-board: 1K1B-01
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-  necdsp model=uPD7725 frequency=8000000
-    map address=00-1f,80-9f:6000-7fff mask=0xfff
-    prom
-    drom
-    dram
-
-board: 1L0N3S-01
-  sa1
-    map address=00-3f,80-bf:2200-23ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x408000
-      map address=c0-ff:0000-ffff
-    bwram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=40-4f:0000-ffff
-    iram
-      map address=00-3f,80-bf:3000-37ff size=0x800
-
-board: 1L3B-(02,11)
-  sa1
-    map address=00-3f,80-bf:2200-23ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x408000
-      map address=c0-ff:0000-ffff
-    bwram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=40-4f:0000-ffff
-    iram
-      map address=00-3f,80-bf:3000-37ff size=0x800
-
-board: 1L5B-(11,20)
-  sa1
-    map address=00-3f,80-bf:2200-23ff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x408000
-      map address=c0-ff:0000-ffff
-    bwram
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=40-4f:0000-ffff
-    iram
-      map address=00-3f,80-bf:3000-37ff size=0x800
-
-board: 1N0N-01
-  sdd1
-    map address=00-3f,80-bf:4800-480f
-    rom
-      map address=00-3f,80-bf:8000-ffff
-      map address=c0-ff:0000-ffff
-
-board: 2A0N-(01,10,11,20)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-
-board: 2A1M-01
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 2A3B-01
-  rom
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 2A3M-01#R
-  rom
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 2A3M-(01,11,20)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 2A5M-01
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: 2B3B-01
-  rom
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  necdsp model=uPD7725 frequency=8000000
-    map address=60-6f,e0-ef:0000-7fff mask=0x3fff
-    prom
-    drom
-    dram
-
-board: 2DC0N-01
-  hitachidsp model=HG51B169 frequency=20000000
-    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map address=70-77:0000-7fff
-    rom
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-    drom
-    dram
-      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
-
-board: 2E3M-01
-  rom
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
-  obc1
-    map address=00-3f,80-bf:6000-7fff mask=0xe000
-    map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
-    ram
-
-board: 2J0N-(01,10,11,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-
-board: 2J3M-(01,11,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=10-1f,30-3f,90-9f,b0-bf:6000-7fff mask=0xe000
-
-board: 2J5M-01
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=10-1f,30-3f,90-9f,b0-bf:6000-7fff mask=0xe000
-
-board: 3J0N-01
-  rom
-    map address=00-2f,80-af:8000-ffff
-    map address=40-6f,c0-ef:0000-ffff
-
-board: BA0N-(01,10)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-
-board: BA1M-01
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-
-board: BA3M-(01,10)
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  revision: 2018-02-27
 
 board: BANDAI-PT-923
   rom
@@ -385,25 +19,6 @@ board: BANDAI-PT-923
       map address=40-5f,c0-df:0000-ffff mask=0x8000
     ram
       map address=70-7d,f0-ff:0000-ffff
-
-board: BJ0N-(01,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-
-board: BJ1M-(10,20)
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-
-board: BJ3M-10
-  rom
-    map address=00-3f,80-bf:8000-ffff
-    map address=40-7d,c0-ff:0000-ffff
-  ram
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
 board: BSC-1A5M-02
   rom
@@ -482,6 +97,420 @@ board: SGB-R-10
     rom
     gameboy
 
+board: SHVC-1A0N-(01,02,10,20,30)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+
+board: SHVC-1A1B-(04,05,06)
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff
+
+board: SHVC-1A1M-(01,10,11,20)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-1A3B-(11,12,13)
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff
+
+board: SHVC-1A3B-20
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-1A3M-(10,20,21,30)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-1A5B-(02,04)
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff
+
+board: SHVC-1A5M-(01,11,20)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-1B0N-(02,03,10)
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  necdsp model=uPD7725 frequency=8000000
+    map address=30-3f,b0-bf:8000-ffff mask=0x3fff
+    prom
+    drom
+    dram
+
+board: SHVC-1B5B-02
+  rom
+    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-ffff
+  necdsp model=uPD7725 frequency=8000000
+    map address=20-3f,a0-bf:8000-ffff mask=0x3fff
+    prom
+    drom
+    dram
+
+board: SHVC-1C0N
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-1f,80-9f:8000-ffff mask=0x8000
+    ram
+      map address=60-7d,e0-ff:0000-ffff
+
+board: SHVC-1C0N5S-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-1f,80-9f:8000-ffff mask=0x8000
+    ram
+      map address=60-7d,e0-ff:0000-ffff
+
+board: SHVC-1CA0N5S-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+      map address=40-5f,c0-df:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71,f0-f1:0000-ffff
+
+board: SHVC-1CA0N6S-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+      map address=40-5f,c0-df:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71,f0-f1:0000-ffff
+
+board: SHVC-1CA6B-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+      map address=40-5f,c0-df:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71,f0-f1:0000-ffff
+
+board: SHVC-1CB0N7S-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f:8000-ffff mask=0x8000
+      map address=40-5f:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71:0000-ffff
+
+board: SHVC-1CB5B-20
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f:8000-ffff mask=0x8000
+      map address=40-5f:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71:0000-ffff
+
+board: SHVC-1CB7B-01
+  superfx
+    map address=00-3f,80-bf:3000-34ff
+    rom
+      map address=00-3f:8000-ffff mask=0x8000
+      map address=40-5f:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71:0000-ffff
+
+board: SHVC-1DC0N-01
+  hitachidsp model=HG51B169 frequency=20000000
+    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+    map address=70-77:0000-7fff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+    drom
+    dram
+      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
+
+board: SHVC-1DS0B-20
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  necdsp model=uPD96050 frequency=11000000
+    map address=60-67,e0-e7:0000-3fff
+    prom
+    drom
+    dram
+      map address=68-6f,e8-ef:0000-7fff mask=0x8000
+
+board: SHVC-1J0N-(01,10,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+
+board: SHVC-1J1M-(11,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-1J3B-01
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-1J3M-(01,11,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-1J5M-(01,11,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-1K0N-01
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  necdsp model=uPD7725 frequency=8000000
+    map address=00-1f,80-9f:6000-7fff mask=0xfff
+    prom
+    drom
+    dram
+
+board: SHVC-1K1B-01
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  necdsp model=uPD7725 frequency=8000000
+    map address=00-1f,80-9f:6000-7fff mask=0xfff
+    prom
+    drom
+    dram
+
+board: SHVC-1L0N3S-01
+  sa1
+    map address=00-3f,80-bf:2200-23ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+    bwram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=40-4f:0000-ffff
+    iram
+      map address=00-3f,80-bf:3000-37ff size=0x800
+
+board: SHVC-1L3B-(02,11)
+  sa1
+    map address=00-3f,80-bf:2200-23ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+    bwram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=40-4f:0000-ffff
+    iram
+      map address=00-3f,80-bf:3000-37ff size=0x800
+
+board: SHVC-1L5B-(11,20)
+  sa1
+    map address=00-3f,80-bf:2200-23ff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+    bwram
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=40-4f:0000-ffff
+    iram
+      map address=00-3f,80-bf:3000-37ff size=0x800
+
+board: SHVC-1N0N-(01,10)
+  sdd1
+    map address=00-3f,80-bf:4800-480f
+    rom
+      map address=00-3f,80-bf:8000-ffff
+      map address=c0-ff:0000-ffff
+
+board: SHVC-2A0N-01#R
+  rom
+    map address=00-2f,80-af:8000-ffff mask=0x8000
+    map address=40-6f,c0-ef:0000-ffff mask=0x8000
+
+board: SHVC-2A0N-(01,10,11,20)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2A1M-01
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2A3B-01
+  rom
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2A3M-01#R
+  rom
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2A3M-(01,11,20)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2A5M-01
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-2B3B-01
+  rom
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  necdsp model=uPD7725 frequency=8000000
+    map address=60-6f,e0-ef:0000-7fff mask=0x3fff
+    prom
+    drom
+    dram
+
+board: SHVC-2DC0N-01
+  hitachidsp model=HG51B169 frequency=20000000
+    map address=00-3f,80-bf:6c00-6fff,7c00-7fff
+    map address=70-77:0000-7fff
+    rom
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+    drom
+    dram
+      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
+
+board: SHVC-2E3M-01
+  rom
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  obc1
+    map address=00-3f,80-bf:6000-7fff mask=0xe000
+    map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
+    ram
+
+board: SHVC-2J0N-(01,10,11,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+
+board: SHVC-2J3M-(01,11,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=10-1f,30-3f,90-9f,b0-bf:6000-7fff mask=0xe000
+
+board: SHVC-2J5M-01
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=10-1f,30-3f,90-9f,b0-bf:6000-7fff mask=0xe000
+
+board: SHVC-3J0N-01
+  rom
+    map address=00-2f,80-af:8000-ffff
+    map address=40-6f,c0-ef:0000-ffff
+
+board: SHVC-BA0N-(01,10)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+
+board: SHVC-BA1M-01
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-BA3M-(01,10)
+  rom
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  ram
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
+board: SHVC-BJ0N-(01,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+
+board: SHVC-BJ1M-(10,20)
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-BJ3M-10
+  rom
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  ram
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+
+board: SHVC-LDH3C-01
+  spc7110
+    map address=00-3f,80-bf:4800-483f
+    map address=50,58:0000-ffff
+    map=mcu address=00-3f,80-bf:8000-ffff mask=0x800000
+    map=mcu address=c0-ff:0000-ffff mask=0xc00000
+    prom
+    drom
+    ram
+      map address=00-3f,80-bf:6000-7fff mask=0xe000
+  epsonrtc
+    map address=00-3f,80-bf:4840-4842
+    ram
+
+board: SHVC-LN3B-01
+  sdd1
+    map address=00-3f,80-bf:4800-480f
+    rom
+      map address=00-3f,80-bf:8000-ffff
+      map address=c0-ff:0000-ffff
+    ram
+      map address=00-3f,80-bf:6000-7fff mask=0xe000
+      map address=70-73:0000-ffff
+
 board: SHVC-SGB2-01
   rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
@@ -491,12 +520,12 @@ board: SHVC-SGB2-01
     rom
     gameboy
 
-board: YA0N-01
+board: SHVC-YA0N-01
   rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
 
-board: YJ0N-01
+board: SHVC-YJ0N-01
   rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -504,7 +533,7 @@ board: YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-02-21
+  revision: 2018-03-04
 
 board: ARM-LOROM-RAM
   rom
@@ -565,15 +594,15 @@ board: BS-SA1-RAM
     bsmemory
 
 board: HIROM
-  rom
+  rom name=program.rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
 
 board: HIROM-RAM
-  rom
+  rom name=program.rom
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  ram
+  ram name=save.ram
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
 board: HIROMEX-RAM
@@ -597,13 +626,13 @@ board: HITACHI-LOROM
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
 
 board: LOROM
-  rom
+  rom name=program.rom
     map address=00-7d,80-ff:8000-ffff mask=0x8000
 
 board: LOROM-RAM
-  rom
+  rom name=program.rom
     map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram
+  ram name=save.ram
     map address=70-7d,f0-ff:0000-ffff mask=0x8000
 
 board: LOROMEX-RAM
