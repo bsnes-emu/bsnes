@@ -178,7 +178,15 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 
     gb->debugger_ticks += cycles;
 
-    cycles <<= !gb->cgb_double_speed;
+    if (!gb->cgb_double_speed) {
+        cycles <<= 1;
+        if ((cycles & 6) == 2) {
+            cycles--;
+        }
+        else if ((cycles & 6) == 6) {
+            cycles++;
+        }
+    }
 
     // Not affected by speed boost
     gb->hdma_cycles += cycles;

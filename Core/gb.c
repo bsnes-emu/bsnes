@@ -496,8 +496,8 @@ void GB_reset(GB_gameboy_t *gb)
         }
         gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     }
-    /* The serial interrupt always occur on the 0xF8th cycle of every 0x100 cycle since boot. */
-    gb->serial_cycles = 0x100 - 0xF8;
+    /* The serial interrupt always occur on the 0xF7th cycle of every 0x100 cycle since boot. */
+    gb->serial_cycles = 0x100-0xF7;
     gb->io_registers[GB_IO_SC] = 0x7E;
     gb->magic = (uintptr_t)'SAME';
 }

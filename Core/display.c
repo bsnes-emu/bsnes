@@ -557,6 +557,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 20);
         GB_STATE(gb, display, 21);
         GB_STATE(gb, display, 22);
+        GB_STATE(gb, display, 23);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -566,6 +567,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         }
         return;
     }
+    
+    GB_SLEEP(gb, display, 23, 1);
 
     /* Handle the very first line 0 */
     gb->current_line = 0;
