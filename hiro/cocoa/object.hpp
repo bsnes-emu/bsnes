@@ -18,7 +18,7 @@ struct pObject {
   virtual auto setFont(const Font& font) -> void;
   virtual auto setVisible(bool visible) -> void;
 
-  auto locked() const -> bool { return locks != 0; }
+  auto locked() const -> bool { return locks != 0 || Application::state.quit; }
   auto lock() -> void { ++locks; }
   auto unlock() -> void { --locks; }
 

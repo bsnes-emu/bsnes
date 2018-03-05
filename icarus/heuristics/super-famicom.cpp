@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct SuperFamicom : Heuristics {
+struct SuperFamicom {
   SuperFamicom(vector<uint8_t>& data, string location);
   explicit operator bool() const;
 

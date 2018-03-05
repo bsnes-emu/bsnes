@@ -18,22 +18,6 @@ struct Cartridge {
     uint pathID = 0;
     string region;
     string sha256;
-
-    struct Manifest {
-      string cartridge;
-      string gameBoy;
-      string bsMemory;
-      string sufamiTurboA;
-      string sufamiTurboB;
-    } manifest;
-
-    struct Title {
-      string cartridge;
-      string gameBoy;
-      string bsMemory;
-      string sufamiTurboA;
-      string sufamiTurboB;
-    } title;
   } information;
 
   struct Has {
@@ -59,6 +43,13 @@ struct Cartridge {
   } has;
 
 private:
+  Emulator::Game game;
+  Emulator::Game slotGameBoy;
+  Emulator::Game slotBSMemory;
+  Emulator::Game slotSufamiTurboA;
+  Emulator::Game slotSufamiTurboB;
+  Markup::Node board;
+
   //cartridge.cpp
   auto loadGameBoy() -> bool;
   auto loadBSMemory() -> bool;
@@ -66,7 +57,7 @@ private:
   auto loadSufamiTurboB() -> bool;
 
   //load.cpp
-  auto loadBoard(Markup::Node) -> Markup::Node;
+  auto loadBoard(string) -> Markup::Node;
   auto loadCartridge(Markup::Node) -> void;
   auto loadGameBoy(Markup::Node) -> void;
   auto loadBSMemory(Markup::Node) -> void;

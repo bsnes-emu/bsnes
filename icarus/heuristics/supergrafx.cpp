@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct SuperGrafx : Heuristics {
+struct SuperGrafx {
   SuperGrafx(vector<uint8_t>& data, string location);
   explicit operator bool() const;
   auto manifest() const -> string;

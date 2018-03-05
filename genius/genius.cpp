@@ -132,7 +132,7 @@ auto ListWindow::loadDatabase(string location) -> void {
         component.memory.manufacturer = object["manufacturer"].text();
         component.memory.part = object["part"].text();
         component.memory.note = object["note"].text();
-        component.memory.isVolatile = (bool)object["volatile"];
+        component.memory.battery = (bool)object["type/battery"];
       }
       if(object.name() == "oscillator") {
         component.type = Component::Type::Oscillator;
@@ -185,6 +185,8 @@ auto ListWindow::saveDatabase(string location) -> void {
       if(component.type == Component::Type::Memory) {
         fp.print("    memory\n");
         fp.print("      type: ", component.memory.type, "\n");
+      if(component.memory.battery)
+        fp.print("        battery\n");
         fp.print("      size: ", component.memory.size, "\n");
         fp.print("      category: ", component.memory.category, "\n");
       if(component.memory.manufacturer)
@@ -193,8 +195,6 @@ auto ListWindow::saveDatabase(string location) -> void {
         fp.print("      part: ", component.memory.part, "\n");
       if(component.memory.note)
         fp.print("      note: ", component.memory.note, "\n");
-      if(component.memory.isVolatile)
-        fp.print("      volatile\n");
       }
 
       if(component.type == Component::Type::Oscillator) {
@@ -370,7 +370,7 @@ auto GameWindow::reloadList() -> void {
     string index = {"[", counter++, "] "};
     if(component.type == Component::Type::Memory) {
       item.setText({index, "Memory"});
-      item.append(TreeViewItem().setText({"Type: ", component.memory.type}));
+      item.append(TreeViewItem().setText({"Type: ", component.memory.type, component.memory.battery ? " + Battery" : ""}));
       item.append(TreeViewItem().setText({"Size: ", component.memory.size}));
       item.append(TreeViewItem().setText({"Category: ", component.memory.category}));
     if(component.memory.manufacturer)
@@ -379,8 +379,6 @@ auto GameWindow::reloadList() -> void {
       item.append(TreeViewItem().setText({"Part: ", component.memory.part}));
     if(component.memory.note)
       item.append(TreeViewItem().setText({"Note: ", component.memory.note}));
-    if(component.memory.isVolatile)
-      item.append(TreeViewItem().setText({"Volatile"}));
     }
 
     if(component.type == Component::Type::Oscillator) {
@@ -480,7 +478,7 @@ MemoryWindow::MemoryWindow() {
   partEdit.onChange([&] { modified = true, updateWindow(); });
   noteLabel.setText("Note:").setAlignment(1.0);
   noteEdit.onChange([&] { modified = true, updateWindow(); });
-  volatileOption.setText("Volatile").onToggle([&] { modified = true, updateWindow(); });
+  batteryOption.setText("Battery").onToggle([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
 
@@ -501,7 +499,7 @@ auto MemoryWindow::show(Memory memory) -> void {
   manufacturerEdit.setText(memory.manufacturer);
   partEdit.setText(memory.part);
   noteEdit.setText(memory.note);
-  volatileOption.setChecked(memory.isVolatile);
+  batteryOption.setChecked(memory.battery);
 
   updateWindow();
   setCentered(*gameWindow);
@@ -517,7 +515,7 @@ auto MemoryWindow::accept() -> void {
   memory.manufacturer = manufacturerEdit.text().strip();
   memory.part = partEdit.text().strip();
   memory.note = noteEdit.text().strip();
-  memory.isVolatile = volatileOption.checked();
+  memory.battery = batteryOption.checked() && (memory.type == "RAM" || memory.type == "RTC");
 
   Component component{Component::Type::Memory};
   component.memory = memory;
@@ -550,6 +548,7 @@ auto MemoryWindow::updateWindow() -> void {
   manufacturerEdit.setBackgroundColor(manufacturerEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   partEdit.setBackgroundColor(partEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  batteryOption.setEnabled(typeEdit.text().strip() == "RAM" || typeEdit.text().strip() == "RTC");
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Memory" : "Modify Memory Details"});
 }

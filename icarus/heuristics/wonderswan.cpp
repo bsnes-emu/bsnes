@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct WonderSwan : Heuristics {
+struct WonderSwan {
   WonderSwan(vector<uint8_t>& buffer, string location);
   explicit operator bool() const;
   auto manifest() const -> string;

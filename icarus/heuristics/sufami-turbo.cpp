@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct SufamiTurbo : Heuristics {
+struct SufamiTurbo {
   SufamiTurbo(vector<uint8_t>& data, string location);
   explicit operator bool() const;
 

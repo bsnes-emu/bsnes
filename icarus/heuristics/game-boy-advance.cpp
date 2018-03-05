@@ -1,6 +1,6 @@
 namespace Heuristics {
 
-struct GameBoyAdvance : Heuristics {
+struct GameBoyAdvance {
   GameBoyAdvance(vector<uint8_t>& buffer, string location);
   explicit operator bool() const;
   auto manifest() const -> string;

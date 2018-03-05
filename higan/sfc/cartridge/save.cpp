@@ -1,6 +1,4 @@
 auto Cartridge::saveCartridge(Markup::Node node) -> void {
-  auto board = node["board"];
-
   if(auto node = board["ram"]) saveRAM(node);
   if(auto node = board["mcc"]) saveMCC(node);
   if(auto node = board["event"]) saveEvent(node);
@@ -23,11 +21,11 @@ auto Cartridge::saveBSMemory(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveSufamiTurboA(Markup::Node node) -> void {
-  saveMemory(sufamiturboA.ram, node["game/memory(type=NVRAM)"], sufamiturboA.pathID);
+  saveMemory(sufamiturboA.ram, node["game/board/memory(type=RAM)"], sufamiturboA.pathID);
 }
 
 auto Cartridge::saveSufamiTurboB(Markup::Node node) -> void {
-  saveMemory(sufamiturboB.ram, node["game/memory(type=NVRAM)"], sufamiturboB.pathID);
+  saveMemory(sufamiturboB.ram, node["game/board/memory(type=RAM)"], sufamiturboB.pathID);
 }
 
 //
@@ -54,9 +52,9 @@ auto Cartridge::saveSuperFX(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveARMDSP(Markup::Node node) -> void {
-  if(!node["ram/volatile"]) {
-    if(auto name = node["ram/name"].text()) {
-      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
+  if(auto memory = game.memory(node["ram/name"].text())) {
+    if(memory->battery) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         for(auto n : range(16 * 1024)) fp->write(armdsp.programRAM[n]);
       }
     }
@@ -66,9 +64,9 @@ auto Cartridge::saveARMDSP(Markup::Node node) -> void {
 auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
   saveMemory(hitachidsp.ram, node["ram"]);
 
-  if(!node["dram/volatile"]) {
-    if(auto name = node["dram/name"].text()) {
-      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
+  if(auto memory = game.memory(node["dram/name"].text())) {
+    if(memory->battery) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         for(auto n : range(3 * 1024)) fp->write(hitachidsp.dataRAM[n]);
       }
     }
@@ -76,10 +74,10 @@ auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveNECDSP(Markup::Node node) -> void {
-  if(!node["dram/volatile"]) {
-    uint size = necdsp.revision == NECDSP::Revision::uPD7725 ? 256 : 2048;
-    if(auto name = node["dram/name"].text()) {
-      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
+  uint size = necdsp.revision == NECDSP::Revision::uPD7725 ? 256 : 2048;
+  if(auto memory = game.memory(node["dram/name"].text())) {
+    if(memory->battery) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         for(auto n : range(size)) fp->writel(necdsp.dataRAM[n], 2);
       }
     }
@@ -87,9 +85,9 @@ auto Cartridge::saveNECDSP(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
-  if(!node["ram/volatile"]) {
-    if(auto name = node["ram/name"].text()) {
-      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
+  if(auto memory = game.memory(node["ram/name"].text())) {
+    if(memory->battery) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         uint8 data[16] = {0};
         epsonrtc.save(data);
         fp->write(data, 16);
@@ -99,9 +97,9 @@ auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveSharpRTC(Markup::Node node) -> void {
-  if(!node["ram/volatile"]) {
-    if(auto name = node["ram/name"].text()) {
-      if(auto fp = platform->open(ID::SuperFamicom, name, File::Write)) {
+  if(auto memory = game.memory(node["ram/name"].text())) {
+    if(memory->battery) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         uint8 data[16] = {0};
         sharprtc.save(data);
         fp->write(data, 16);
@@ -124,12 +122,13 @@ auto Cartridge::saveOBC1(Markup::Node node) -> void {
 
 //
 
-auto Cartridge::saveMemory(MappedRAM& memory, Markup::Node node, maybe<uint> id) -> void {
+auto Cartridge::saveMemory(MappedRAM& ram, Markup::Node node, maybe<uint> id) -> void {
   if(!id) id = pathID();
-  if(!node || node["volatile"]) return;
-  auto name = node["name"].text();
-  auto size = node["size"].natural();
-  if(auto fp = platform->open(id(), name, File::Write)) {
-    fp->write(memory.data(), memory.size());
+  if(auto memory = game.memory(node["name"].text())) {
+    if(memory->type == "RAM" && !memory->battery) return;
+    if(memory->type == "RTC" && !memory->battery) return;
+    if(auto fp = platform->open(id(), memory->name(), File::Write)) {
+      fp->write(ram.data(), ram.size());
+    }
   }
 }

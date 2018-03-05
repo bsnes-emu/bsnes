@@ -72,7 +72,7 @@ auto MSU1::power() -> void {
 
 auto MSU1::dataOpen() -> void {
   dataFile.reset();
-  auto document = BML::unserialize(cartridge.information.manifest.cartridge);
+  auto document = Markup::Node();  //todo: fix this
   string name = document["board/msu1/rom/name"].text();
   if(!name) name = "msu1.rom";
   if(dataFile = platform->open(ID::SuperFamicom, name, File::Read)) {
@@ -82,7 +82,7 @@ auto MSU1::dataOpen() -> void {
 
 auto MSU1::audioOpen() -> void {
   audioFile.reset();
-  auto document = BML::unserialize(cartridge.information.manifest.cartridge);
+  auto document = Markup::Node();  //todo: fix this
   string name = {"track-", io.audioTrack, ".pcm"};
   for(auto track : document.find("board/msu1/track")) {
     if(track["number"].natural() != io.audioTrack) continue;
