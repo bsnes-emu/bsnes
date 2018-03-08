@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
@@ -115,6 +116,25 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 }
 
 static struct retro_rumble_interface rumble;
+
+static void extract_basename(char *buf, const char *path, size_t size)
+{
+   const char *base = strrchr(path, '/');
+   if (!base)
+      base = strrchr(path, '\\');
+   if (!base)
+      base = path;
+
+   if (*base == '\\' || *base == '/')
+      base++;
+
+   strncpy(buf, base, size - 1);
+   buf[size - 1] = '\0';
+
+   char *ext = strrchr(buf, '.');
+   if (ext)
+      *ext = '\0';
+}
 
 static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 {
@@ -821,11 +841,33 @@ bool retro_load_game(const struct retro_game_info *info)
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported\n");
 
     check_variables(emulated_devices == 2 ? true : false);
+
+    if (mode == MODE_SINGLE_GAME_DUAL)
+    {
+        char path[PATH_MAX];
+        char file[PATH_MAX];
+
+        extract_basename(file, retro_game_path, sizeof(file));
+        snprintf (path, sizeof(path), "%s%c%s.srm.2", retro_save_directory, slash, file);
+        log_cb(RETRO_LOG_INFO, "Loading battery for Game Boy 2 from: %s\n", path);
+        GB_load_battery(&gameboy[1], path);
+    }
+
     return true;
 }
 
 void retro_unload_game(void)
 {
+    if (mode == MODE_SINGLE_GAME_DUAL)
+    {
+        char path[PATH_MAX];
+        char file[PATH_MAX];
+
+        extract_basename(file, retro_game_path, sizeof(file));
+        snprintf (path, sizeof(path), "%s%c%s.srm.2", retro_save_directory, slash, file);
+        log_cb(RETRO_LOG_INFO, "Saving battery for Game Boy 2 to: %s\n", path);
+        GB_save_battery(&gameboy[1], path);
+    }
     for (int i = 0; i < emulated_devices; i++)
         GB_free(&gameboy[i]);
 }
