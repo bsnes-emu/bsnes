@@ -221,7 +221,8 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 static retro_environment_t environ_cb;
 
-static const struct retro_variable vars[] = {
+/* variables for single cart mode */
+static const struct retro_variable vars_single[] = {
     { "sameboy_dual", "Single cart dual mode (reload); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
@@ -229,7 +230,8 @@ static const struct retro_variable vars[] = {
     { NULL }
 };
 
-static const struct retro_variable vars_sameboy_dual[] = {
+/* variables for single cart dual gameboy mode */
+static const struct retro_variable vars_single_dual[] = {
     { "sameboy_dual", "Single cart dual mode (reload); disabled|enabled" },
     { "sameboy_link", "Link cable emulation; enabled|disabled" },
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
@@ -244,7 +246,8 @@ static const struct retro_variable vars_sameboy_dual[] = {
     { NULL }
 };
 
-static const struct retro_variable vars_link_dual[] = {
+/* variables for dual cart dual gameboy mode */
+static const struct retro_variable vars_dual[] = {
     { "sameboy_link", "Link cable emulation; enabled|disabled" },
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
@@ -793,13 +796,13 @@ void retro_run(void)
 
 bool retro_load_game(const struct retro_game_info *info)
 {
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_single);
     check_variables(false);
     if (sameboy_dual)
     {
         emulated_devices = 2;
         mode = MODE_SINGLE_GAME_DUAL;
-        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_sameboy_dual);
+        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_single_dual);
         check_variables(true);
     }
     else
@@ -842,6 +845,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
     check_variables(emulated_devices == 2 ? true : false);
 
+    /* hack: use upstream's file based I/O for Game Boy 2 battery in single cart mode */
     if (mode == MODE_SINGLE_GAME_DUAL)
     {
         char path[PATH_MAX];
@@ -858,6 +862,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
 void retro_unload_game(void)
 {
+    /* hack: use upstream's file based I/O for Game Boy 2 battery in single cart mode */
     if (mode == MODE_SINGLE_GAME_DUAL)
     {
         char path[PATH_MAX];
@@ -868,6 +873,7 @@ void retro_unload_game(void)
         log_cb(RETRO_LOG_INFO, "Saving battery for Game Boy 2 to: %s\n", path);
         GB_save_battery(&gameboy[1], path);
     }
+
     for (int i = 0; i < emulated_devices; i++)
         GB_free(&gameboy[i]);
 }
@@ -888,7 +894,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     else
         return false; /* all other types are unhandled for now */
 
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link_dual);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_dual);
     check_variables(true);
 
     frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
