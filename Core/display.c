@@ -607,22 +607,22 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     while (true) {
         /* Lines 0 - 143 */
         for (; gb->current_line < LINES; gb->current_line++) {
+            GB_SLEEP(gb, display, 6, 3);
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->oam_read_blocked = true;
             gb->oam_write_blocked = false;
             gb->ly_for_comparison = gb->current_line? -1 : gb->current_line;
-            GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 6, 3);
             
-            /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 1.
+            /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch? */
             if (gb->current_line != 0) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
-                GB_STAT_update(gb);
-                gb->io_registers[GB_IO_STAT] &= ~3;
-                search_oam(gb);
             }
+            GB_STAT_update(gb);
+            gb->io_registers[GB_IO_STAT] &= ~3;
+
+            search_oam(gb);
             GB_SLEEP(gb, display, 7, 1);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
@@ -826,12 +826,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->io_registers[GB_IO_LY] = 153;
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 14, 4);
+        GB_SLEEP(gb, display, 14, 6);
         
         gb->io_registers[GB_IO_LY] = 0;
         gb->ly_for_comparison = 153;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 15, 4);
+        GB_SLEEP(gb, display, 15, 2);
         
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
