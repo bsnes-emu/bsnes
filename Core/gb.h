@@ -419,7 +419,8 @@ struct GB_gameboy_internal_s {
             GB_FETCHER_MAX = GB_FETCHER_SLEEP,
         } fetcher_state:8;
         bool fetcher_divisor; // The fetcher runs at 2MHz
-        bool fifo_paused;
+        bool bg_fifo_paused;
+        bool oam_fifo_paused;
         bool in_window;
         uint8_t visible_objs[10];
         uint8_t n_visible_objs;

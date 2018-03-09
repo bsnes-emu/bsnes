@@ -473,11 +473,11 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
 
-    if (!gb->fifo_paused) {
+    if (!gb->bg_fifo_paused) {
         fifo_item = fifo_pop(&gb->bg_fifo);
     }
     
-    if (fifo_size(&gb->oam_fifo)) {
+    if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
         oam_fifo_item = fifo_pop(&gb->oam_fifo);
         if (oam_fifo_item->pixel) {
             draw_oam = true;
@@ -490,7 +490,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         gb->position_in_line++;
         return;
     }
-    if (gb->fifo_paused) return;
+    if (gb->bg_fifo_paused) return;
     
     /* Mixing */
     
@@ -622,7 +622,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_STAT_update(gb);
             gb->io_registers[GB_IO_STAT] &= ~3;
 
-            search_oam(gb);
             GB_SLEEP(gb, display, 7, 1);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
@@ -632,6 +631,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_STAT_update(gb);
             GB_SLEEP(gb, display, 8, MODE2_LENGTH - 4);
             
+            search_oam(gb);
             gb->vram_read_blocked = true;
             gb->vram_write_blocked = false;
             gb->oam_write_blocked = false;
@@ -656,7 +656,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* The actual rendering cycle */
             gb->fetcher_divisor = false;
             gb->fetcher_state = GB_FETCHER_GET_TILE;
-            gb->fifo_paused = true;
+            gb->bg_fifo_paused = true;
+            gb->oam_fifo_paused = false;
             gb->in_window = false;
             while (true) {
                 /* Handle objects */
@@ -691,7 +692,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     if (gb->cgb_mode) {
                         palette = object->flags & 0x7;
                     }
-#if 1
+                    
                     fifo_overlay_object_row(&gb->oam_fifo,
                                             gb->vram[line_address],
                                             gb->vram[line_address + 1],
@@ -699,7 +700,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                                             object->flags & 0x80,
                                             gb->cgb_mode? gb->visible_objs[gb->n_visible_objs - 1] : 0,
                                             object->flags & 0x20);
-#endif
+                    
                     gb->n_visible_objs--;
                 }
                 gb->fetching_objects = false;
@@ -712,7 +713,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->position_in_line + 7 == gb->io_registers[GB_IO_WX]) {
                     gb->in_window = true;
                     fifo_clear(&gb->bg_fifo);
-                    gb->fifo_paused =  true;
+                    gb->bg_fifo_paused = true;
+                    gb->oam_fifo_paused = true;
                     gb->fetcher_x = 0;
                     gb->fetcher_state = GB_FETCHER_GET_TILE;
                 }
@@ -765,7 +767,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 render_pixel_if_possible(gb);
                 if (push) {
                     fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
-                    gb->fifo_paused = false;
+                    gb->bg_fifo_paused = false;
+                    gb->oam_fifo_paused = false;
                 }
                 if (gb->position_in_line == 160) break;
                 gb->cycles_for_line++;
