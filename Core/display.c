@@ -610,13 +610,22 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7);
     GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7));
     
+    if (!gb->cgb_double_speed) {
+        gb->io_registers[GB_IO_STAT] &= ~3;
+        gb->oam_read_blocked = false;
+        gb->vram_read_blocked = false;
+        gb->oam_write_blocked = false;
+        gb->vram_write_blocked = false;
+    }
+    gb->cycles_for_line += 1;
+    GB_SLEEP(gb, display, 4, 1);
+    
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
     gb->vram_write_blocked = false;
-    gb->cycles_for_line += 1;
-    GB_SLEEP(gb, display, 4, 1);
+    
     GB_STAT_update(gb);
     /* Mode 0 is shorter in the very first line */
     GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
@@ -632,8 +641,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->ly_for_comparison = gb->current_line? -1 : gb->current_line;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
-             PPU glitch? */
-            if (gb->current_line != 0) {
+             PPU glitch? (Todo: and in double speed mode?) */
+            if (gb->current_line != 0 && gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
             }
