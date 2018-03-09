@@ -596,9 +596,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
     gb->vram_write_blocked = false;
-    gb->cycles_for_line = MODE2_LENGTH - 4;
+    gb->cycles_for_line = MODE2_LENGTH - 2;
     GB_STAT_update(gb);
-    GB_SLEEP(gb, display, 2, MODE2_LENGTH - 4);
+    GB_SLEEP(gb, display, 2, MODE2_LENGTH - 2);
     
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 3;
@@ -607,8 +607,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->oam_write_blocked = true;
     gb->vram_write_blocked = true;
     GB_STAT_update(gb);
-    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) + 2;
-    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) + 2);
+    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7);
+    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7));
     
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->oam_read_blocked = false;
@@ -668,8 +668,14 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             
-            gb->cycles_for_line += 5;
-            GB_SLEEP(gb, display, 10, 5);
+            {
+                uint8_t rendering_delay = 5;
+                if (gb->is_cgb) {
+                    rendering_delay = gb->current_line == 0? 2 : 6;
+                }
+                gb->cycles_for_line += rendering_delay;
+                GB_SLEEP(gb, display, 10, rendering_delay);
+            }
 
             /* The actual rendering cycle */
             gb->fetcher_divisor = false;
