@@ -24,20 +24,37 @@ static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
     return ret;
 }
 
-static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority)
+static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, bool flip_x)
 {
-    for (unsigned i = 8; i--;) {
-        fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
-            (lower >> 7) | ((upper >> 7) << 1),
-            palette,
-            0,
-            bg_priority,
-        };
-        lower <<= 1;
-        upper <<= 1;
-        
-        fifo->write_end++;
-        fifo->write_end &= 0xF;
+    if (!flip_x) {
+        for (unsigned i = 8; i--;) {
+            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+                (lower >> 7) | ((upper >> 7) << 1),
+                palette,
+                0,
+                bg_priority,
+            };
+            lower <<= 1;
+            upper <<= 1;
+            
+            fifo->write_end++;
+            fifo->write_end &= 0xF;
+        }
+    }
+    else {
+        for (unsigned i = 8; i--;) {
+            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+                (lower & 1) | ((upper & 1) << 1),
+                palette,
+                0,
+                bg_priority,
+            };
+            lower >>= 1;
+            upper >>= 1;
+            
+            fifo->write_end++;
+            fifo->write_end &= 0xF;
+        }
     }
 }
 
@@ -475,6 +492,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
 
     if (!gb->bg_fifo_paused) {
         fifo_item = fifo_pop(&gb->bg_fifo);
+        bg_priority = fifo_item->bg_priority;
     }
     
     if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
@@ -517,7 +535,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         if (!gb->cgb_mode) {
             pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
         }
-        gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[pixel];
+        gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
     }
     
     if (draw_oam) {
@@ -732,26 +750,41 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             gb->fetcher_y =
                                 gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
                             gb->current_tile = gb->vram[map + gb->fetcher_x + gb->fetcher_y / 8 * 32];
+                            if (gb->is_cgb) {
+                                /* TODO: The timing is wrong (two reads a the same time)*/
+                                gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + gb->fetcher_y / 8 * 32 + 0x2000];
+                            }
                             gb->fetcher_x++;
                             gb->fetcher_x &= 0x1f;
                         }
                         break;
                             
                         case GB_FETCHER_GET_TILE_DATA_LOWER: {
+                            uint8_t y_flip = 0;
                             if (gb->io_registers[GB_IO_LCDC] & 0x10) {
                                 gb->current_tile_address = gb->current_tile * 0x10;
                             }
                             else {
                                 gb->current_tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
                             }
+                            if (gb->current_tile_attributes & 8) {
+                                gb->current_tile_address += 0x2000;
+                            }
+                            if (gb->current_tile_attributes & 0x40) {
+                                y_flip = 0x7;
+                            }
                             gb->current_tile_data[0] =
-                            gb->vram[gb->current_tile_address + (gb->fetcher_y & 7) * 2];
+                            gb->vram[gb->current_tile_address + ((gb->fetcher_y & 7) ^ y_flip) * 2];
                         }
                         break;
                         
                         case GB_FETCHER_GET_TILE_DATA_HIGH: {
+                            uint8_t y_flip = 0;
+                            if (gb->current_tile_attributes & 0x40) {
+                                y_flip = 0x7;
+                            }
                             gb->current_tile_data[1] =
-                            gb->vram[gb->current_tile_address + (gb->fetcher_y & 7) * 2 + 1];
+                            gb->vram[gb->current_tile_address +  ((gb->fetcher_y & 7) ^ y_flip) * 2 + 1];
                         }
                         break;
                             
@@ -766,7 +799,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 
                 render_pixel_if_possible(gb);
                 if (push) {
-                    fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1], 0, false);
+                    fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
+                                     gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
                     gb->bg_fifo_paused = false;
                     gb->oam_fifo_paused = false;
                 }

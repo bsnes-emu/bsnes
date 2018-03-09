@@ -409,6 +409,7 @@ struct GB_gameboy_internal_s {
         uint8_t fetcher_y;
         uint16_t cycles_for_line;
         uint8_t current_tile;
+        uint8_t current_tile_attributes;
         uint16_t current_tile_address;
         uint8_t current_tile_data[2];
         enum {
