@@ -401,7 +401,6 @@ struct GB_gameboy_internal_s {
         bool oam_write_blocked;
         bool vram_write_blocked;
         bool window_disabled_while_active;
-        uint8_t effective_scy; // Todo: delete me!
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
