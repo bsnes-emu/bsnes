@@ -392,6 +392,11 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     gb->position_in_line++;
 }
 
+/* All verified CGB timings are based on CGB CPU E. CGB CPUs >= D are known to have
+   slightly different timings than CPUs <= C.
+ 
+   Todo: Add support to CPU C and older */
+
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     GB_object_t *objects = (GB_object_t *) &gb->oam;
@@ -419,6 +424,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 21);
         GB_STATE(gb, display, 22);
         GB_STATE(gb, display, 23);
+        GB_STATE(gb, display, 24);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -446,12 +452,20 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 3;
     gb->oam_read_blocked = true;
-    gb->vram_read_blocked = true;
+    gb->vram_read_blocked = !gb->is_cgb;
     gb->oam_write_blocked = true;
-    gb->vram_write_blocked = true;
+    gb->vram_write_blocked = !gb->is_cgb;
     GB_STAT_update(gb);
-    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7);
-    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7));
+    
+    gb->cycles_for_line += 2;
+    GB_SLEEP(gb, display, 24, 2);
+    gb->vram_read_blocked = true;
+    gb->vram_write_blocked = true;
+    
+    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2;
+    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2);
+    
+
     
     if (!gb->cgb_double_speed) {
         gb->io_registers[GB_IO_STAT] &= ~3;
@@ -477,11 +491,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     while (true) {
         /* Lines 0 - 143 */
         for (; gb->current_line < LINES; gb->current_line++) {
+            gb->oam_write_blocked = gb->is_cgb;
             GB_SLEEP(gb, display, 6, 3);
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->oam_read_blocked = true;
-            gb->oam_write_blocked = false;
-            gb->ly_for_comparison = gb->current_line? -1 : gb->current_line;
+            gb->ly_for_comparison = gb->current_line? (gb->is_cgb? gb->current_line - 1 : -1) : 0;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch? (Todo: and in double speed mode?) */
@@ -502,14 +516,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 8, MODE2_LENGTH - 4);
             
             search_oam(gb);
-            gb->vram_read_blocked = true;
+            gb->vram_read_blocked = !gb->is_cgb;
             gb->vram_write_blocked = false;
-            gb->oam_write_blocked = false;
+            gb->oam_write_blocked = gb->is_cgb;
             GB_STAT_update(gb);
             GB_SLEEP(gb, display, 9, 4);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
+            gb->vram_read_blocked = true;
             gb->vram_write_blocked = true;
             gb->oam_write_blocked = true;
             GB_STAT_update(gb);
@@ -684,7 +699,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* Lines 144 - 152 */
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->io_registers[GB_IO_LY] = gb->current_line;
-            gb->ly_for_comparison = -1;
+            if (!gb->is_cgb) {
+                gb->ly_for_comparison = -1;
+            }
             if (gb->is_cgb && gb->current_line == LINES) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
@@ -727,16 +744,23 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         
         /* Lines 153 */
         gb->io_registers[GB_IO_LY] = 153;
-        gb->ly_for_comparison = -1;
+        if (!gb->cgb_mode) {
+            gb->ly_for_comparison = gb->is_cgb? 153 : -1;
+        }
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 14, 6);
         
         gb->io_registers[GB_IO_LY] = 0;
-        gb->ly_for_comparison = 153;
+        gb->ly_for_comparison = gb->cgb_mode? 0 : 153;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 15, 2);
         
-        gb->ly_for_comparison = -1;
+        if (gb->cgb_mode) {
+            gb->ly_for_comparison = 0;
+        }
+        else if(!gb->is_cgb) {
+            gb->ly_for_comparison = -1;
+        }
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 16, 4);
         
