@@ -685,7 +685,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->ly_for_comparison = -1;
-            GB_STAT_update(gb);
+            if (gb->is_cgb && gb->current_line == LINES) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->io_registers[GB_IO_STAT] |= 2;
+                GB_STAT_update(gb);
+                gb->io_registers[GB_IO_STAT] &= ~3;
+            }
+            else {
+                GB_STAT_update(gb);
+            }
             GB_SLEEP(gb, display, 12, 4);
             gb->ly_for_comparison = gb->current_line;
             
