@@ -235,12 +235,9 @@ $(OBJ)/%.res: %.rc
 %.o: %.res
 	cvtres /OUT:"$@" $^
 
-# We must provide SDL2.dll with the Windows port. This is an AWFUL HACK to find it.
-SPACE :=
-SPACE +=
+# We must provide SDL2.dll with the Windows port.
 $(BIN)/SDL/SDL2.dll:
-	@$(eval POTENTIAL_MATCHES := $(subst @@@," ",$(patsubst %,%/SDL2.dll,$(subst ;,$(SPACE),$(subst $(SPACE),@@@,$(lib))))))
-	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
+	@$(eval MATCH := $(shell where $$LIB:SDL2.dll))
 	cp "$(MATCH)" $@
 
 # Tester
