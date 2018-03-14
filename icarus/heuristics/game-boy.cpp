@@ -238,9 +238,9 @@ auto GameBoy::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  label: ", Location::prefix(location), "\n");
-  output.append("  name: ", Location::prefix(location), "\n");
-  output.append("  board: ", mapper, "\n");
+  output.append("  label:  ", Location::prefix(location), "\n");
+  output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  board:  ", mapper, "\n");
   output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
 if(ram && ramSize)
   output.append(Memory{}.type("RAM").size(ramSize).category("Save").battery(battery).text());

@@ -57,12 +57,12 @@ auto SuperFamicom::manifest() const -> string {
 
   string output;
   output.append("game\n");
-  output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  label: ", label(), "\n");
-  output.append("  name: ", Location::prefix(location), "\n");
-  output.append("  region: ", region(), "\n");
+  output.append("  sha256:   ", Hash::SHA256(data).digest(), "\n");
+  output.append("  label:    ", label(), "\n");
+  output.append("  name:     ", Location::prefix(location), "\n");
+  output.append("  region:   ", region(), "\n");
   output.append("  revision: ", revision(), "\n");
-  output.append("  board: ", board(), "\n");
+  output.append("  board:    ", board(), "\n");
 
   auto board = this->board().split("-");
 
@@ -76,38 +76,38 @@ auto SuperFamicom::manifest() const -> string {
   }
 
   if(auto size = expansionRamSize()) {
-    output.append(Memory{}.type("RAM").size(size).category("Expansion").battery(battery()).text());
+    output.append(Memory{}.type("RAM").size(size).category("Save").battery(battery()).text());
   }
 
   if(0) {
   } else if(board(0) == "ARM") {
-    output.append(Memory{}.type("ROM").size(0x20000).manufacturer("SETA").part("ARM").category("Program").text());
-    output.append(Memory{}.type("ROM").size( 0x8000).manufacturer("SETA").part("ARM").category("Data").text());
-    output.append(Memory{}.type("RAM").size( 0x4000).manufacturer("SETA").part("ARM").category("Data").text());
+    output.append(Memory{}.type("ROM").size(0x20000).category("Program").manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
+    output.append(Memory{}.type("ROM").size( 0x8000).category("Data"   ).manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
+    output.append(Memory{}.type("RAM").size( 0x4000).category("Data"   ).manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
     output.append(Oscillator{}.frequency(21'440'000).text());
   } else if(board(0) == "BS" && board(1) == "MCC") {
     output.append(Memory{}.type("RAM").size(0x80000).category("Download").battery().text());
-    output.append(Memory{}.type("RTC").size(0x10).category("Time").text());
   } else if(board(0) == "HITACHI") {
-    output.append(Memory{}.type("ROM").size(0xc00).manufacturer("Hitachi").part("HG51BS169").category("Data").note(firmwareHITACHI()).text());
-    output.append(Memory{}.type("RAM").size(0xc00).manufacturer("Hitachi").part("HG51BS169").category("Data").note(firmwareHITACHI()).text());
+    output.append(Memory{}.type("ROM").size(0xc00).category("Data").manufacturer("Hitachi").model("HG51BS169").identity(firmwareHITACHI()).text());
+    output.append(Memory{}.type("RAM").size(0xc00).category("Data").manufacturer("Hitachi").model("HG51BS169").identity(firmwareHITACHI()).text());
     output.append(Oscillator{}.frequency(20'000'000).text());
   } else if(board(0) == "NEC") {
-    output.append(Memory{}.type("ROM").size(0x1800).manufacturer("NEC").part("uPD7725").category("Program").note(firmwareNEC()).text());
-    output.append(Memory{}.type("ROM").size( 0x800).manufacturer("NEC").part("uPD7725").category("Data").note(firmwareNEC()).text());
-    output.append(Memory{}.type("RAM").size( 0x200).manufacturer("NEC").part("uPD7725").category("Data").note(firmwareNEC()).text());
+    output.append(Memory{}.type("ROM").size(0x1800).category("Program").manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
+    output.append(Memory{}.type("ROM").size( 0x800).category("Data"   ).manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
+    output.append(Memory{}.type("RAM").size( 0x200).category("Data"   ).manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
     output.append(Oscillator{}.frequency(7'600'000).text());
   } else if(board(0) == "NECEX") {
-    output.append(Memory{}.type("ROM").size(0xc000).manufacturer("NEC").part("uPD96050").category("Program").note(firmwareNECEX()).text());
-    output.append(Memory{}.type("ROM").size(0x1000).manufacturer("NEC").part("uPD96050").category("Data").note(firmwareNECEX()).text());
-    output.append(Memory{}.type("RAM").size(0x1000).manufacturer("NEC").part("uPD96050").category("Data").note(firmwareNECEX()).text());
+    output.append(Memory{}.type("ROM").size(0xc000).category("Program").manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
+    output.append(Memory{}.type("ROM").size(0x1000).category("Data"   ).manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
+    output.append(Memory{}.type("RAM").size(0x1000).category("Data"   ).manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
     output.append(Oscillator{}.frequency(firmwareNECEX() == "ST010" ? 11'000'000 : 15'000'000).text());
   } else if(board(0) == "RTC") {
     output.append(Memory{}.type("RTC").size(0x10).category("Time").battery().text());
   } else if(board(0) == "SA1") {
     output.append(Memory{}.type("RAM").size(0x800).category("Internal").text());
   } else if(board(0) == "SGB") {
-    output.append(Memory{}.type("ROM").size(0x100).manufacturer("Nintendo").part("SGB").category("Boot").note(firmwareSGB()).text());
+    string model = firmwareSGB() == "SGB1" ? "DMG" : "MGB";
+    output.append(Memory{}.type("ROM").size(0x100).category("Boot").manufacturer("Nintendo").model(model).identity(firmwareSGB()).text());
   if(firmwareSGB() == "SGB2")
     output.append(Oscillator{}.frequency(20'971'520).text());
   } else if(board(0) == "SPC7110") {

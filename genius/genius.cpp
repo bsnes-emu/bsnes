@@ -127,17 +127,16 @@ auto ListWindow::loadDatabase(string location) -> void {
       if(object.name() == "memory") {
         component.type = Component::Type::Memory;
         component.memory.type = object["type"].text();
+        component.memory.battery = (bool)object["type/battery"];
         component.memory.size = object["size"].text();
         component.memory.category = object["category"].text();
         component.memory.manufacturer = object["manufacturer"].text();
-        component.memory.part = object["part"].text();
-        component.memory.note = object["note"].text();
-        component.memory.battery = (bool)object["type/battery"];
+        component.memory.model = object["model"].text();
+        component.memory.identity = object["identity"].text();
       }
       if(object.name() == "oscillator") {
         component.type = Component::Type::Oscillator;
         component.oscillator.frequency = object["frequency"].text();
-        component.oscillator.note = object["note"].text();
       }
       game.components.append(component);
     }
@@ -161,8 +160,8 @@ auto ListWindow::saveDatabase(string location) -> void {
   auto copy = games;
   copy.sort([](auto x, auto y) {
     return string::icompare(
-      {x.name, " ", x.region, " ", x.revision},
-      {y.name, " ", y.region, " ", y.revision}
+      {x.name, "\n", x.region, "\n", x.revision},
+      {y.name, "\n", y.region, "\n", y.revision}
     ) < 0;
   });
 
@@ -171,14 +170,14 @@ auto ListWindow::saveDatabase(string location) -> void {
 
   for(auto& game : copy) {
     fp.print("game\n");
-    fp.print("  sha256: ", game.sha256, "\n");
+    fp.print("  sha256:   ", game.sha256, "\n");
   if(game.label)
-    fp.print("  label: ", game.label, "\n");
-    fp.print("  name: ", game.name, "\n");
-    fp.print("  region: ", game.region, "\n");
+    fp.print("  label:    ", game.label, "\n");
+    fp.print("  name:     ", game.name, "\n");
+    fp.print("  region:   ", game.region, "\n");
     fp.print("  revision: ", game.revision, "\n");
   if(game.board)
-    fp.print("  board: ", game.board, "\n");
+    fp.print("  board:    ", game.board, "\n");
   else if(game.components)
     fp.print("  board\n");
     for(auto& component : game.components) {
@@ -191,17 +190,15 @@ auto ListWindow::saveDatabase(string location) -> void {
         fp.print("      category: ", component.memory.category, "\n");
       if(component.memory.manufacturer)
         fp.print("      manufacturer: ", component.memory.manufacturer, "\n");
-      if(component.memory.part)
-        fp.print("      part: ", component.memory.part, "\n");
-      if(component.memory.note)
-        fp.print("      note: ", component.memory.note, "\n");
+      if(component.memory.model)
+        fp.print("      model: ", component.memory.model, "\n");
+      if(component.memory.identity)
+        fp.print("      identity: ", component.memory.identity, "\n");
       }
 
       if(component.type == Component::Type::Oscillator) {
         fp.print("    oscillator\n");
         fp.print("      frequency: ", component.oscillator.frequency, "\n");
-      if(component.oscillator.note)
-        fp.print("      note: ", component.oscillator.note, "\n");
       }
     }
   if(game.note)
@@ -375,17 +372,15 @@ auto GameWindow::reloadList() -> void {
       item.append(TreeViewItem().setText({"Category: ", component.memory.category}));
     if(component.memory.manufacturer)
       item.append(TreeViewItem().setText({"Manufacturer: ", component.memory.manufacturer}));
-    if(component.memory.part)
-      item.append(TreeViewItem().setText({"Part: ", component.memory.part}));
-    if(component.memory.note)
-      item.append(TreeViewItem().setText({"Note: ", component.memory.note}));
+    if(component.memory.model)
+      item.append(TreeViewItem().setText({"Model: ", component.memory.model}));
+    if(component.memory.identity)
+      item.append(TreeViewItem().setText({"Identity: ", component.memory.identity}));
     }
 
     if(component.type == Component::Type::Oscillator) {
       item.setText({index, "Oscillator"});
       item.append(TreeViewItem().setText({"Frequency: ", component.oscillator.frequency}));
-    if(component.oscillator.note)
-      item.append(TreeViewItem().setText({"Note: ", component.oscillator.note}));
     }
 
     componentTree.append(item);
@@ -474,10 +469,10 @@ MemoryWindow::MemoryWindow() {
   categoryEdit.onChange([&] { modified = true, updateWindow(); });
   manufacturerLabel.setText("Manufacturer:").setAlignment(1.0);
   manufacturerEdit.onChange([&] { modified = true, updateWindow(); });
-  partLabel.setText("Part:").setAlignment(1.0);
-  partEdit.onChange([&] { modified = true, updateWindow(); });
-  noteLabel.setText("Note:").setAlignment(1.0);
-  noteEdit.onChange([&] { modified = true, updateWindow(); });
+  modelLabel.setText("Model:").setAlignment(1.0);
+  modelEdit.onChange([&] { modified = true, updateWindow(); });
+  identityLabel.setText("Identity:").setAlignment(1.0);
+  identityEdit.onChange([&] { modified = true, updateWindow(); });
   batteryOption.setText("Battery").onToggle([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
@@ -497,8 +492,8 @@ auto MemoryWindow::show(Memory memory) -> void {
   sizeEdit.setText(memory.size);
   categoryEdit.setText(memory.category);
   manufacturerEdit.setText(memory.manufacturer);
-  partEdit.setText(memory.part);
-  noteEdit.setText(memory.note);
+  modelEdit.setText(memory.model);
+  identityEdit.setText(memory.identity);
   batteryOption.setChecked(memory.battery);
 
   updateWindow();
@@ -513,8 +508,8 @@ auto MemoryWindow::accept() -> void {
   memory.size = sizeEdit.text().strip();
   memory.category = categoryEdit.text().strip();
   memory.manufacturer = manufacturerEdit.text().strip();
-  memory.part = partEdit.text().strip();
-  memory.note = noteEdit.text().strip();
+  memory.model = modelEdit.text().strip();
+  memory.identity = identityEdit.text().strip();
   memory.battery = batteryOption.checked() && (memory.type == "RAM" || memory.type == "RTC");
 
   Component component{Component::Type::Memory};
@@ -546,8 +541,8 @@ auto MemoryWindow::updateWindow() -> void {
   sizeEdit.setBackgroundColor(sizeEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   categoryEdit.setBackgroundColor(categoryEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   manufacturerEdit.setBackgroundColor(manufacturerEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  partEdit.setBackgroundColor(partEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  modelEdit.setBackgroundColor(modelEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  identityEdit.setBackgroundColor(identityEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   batteryOption.setEnabled(typeEdit.text().strip() == "RAM" || typeEdit.text().strip() == "RTC");
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Memory" : "Modify Memory Details"});
@@ -561,8 +556,6 @@ OscillatorWindow::OscillatorWindow() {
   layout.setMargin(5);
   frequencyLabel.setText("Frequency:").setAlignment(1.0);
   frequencyEdit.onChange([&] { modified = true, updateWindow(); });
-  noteLabel.setText("Note:").setAlignment(1.0);
-  noteEdit.onChange([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
 
@@ -578,7 +571,6 @@ auto OscillatorWindow::show(Oscillator oscillator) -> void {
   create = !oscillator.frequency;
 
   frequencyEdit.setText(oscillator.frequency);
-  noteEdit.setText(oscillator.note);
 
   updateWindow();
   setCentered(*gameWindow);
@@ -589,7 +581,6 @@ auto OscillatorWindow::show(Oscillator oscillator) -> void {
 
 auto OscillatorWindow::accept() -> void {
   oscillator.frequency = frequencyEdit.text().strip();
-  oscillator.note = noteEdit.text().strip();
 
   Component component{Component::Type::Oscillator};
   component.oscillator = oscillator;
@@ -617,7 +608,6 @@ auto OscillatorWindow::cancel() -> void {
 auto OscillatorWindow::updateWindow() -> void {
   bool valid = true;
   frequencyEdit.setBackgroundColor(frequencyEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
-  noteEdit.setBackgroundColor(noteEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Property" : "Modify Property Details"});
 }

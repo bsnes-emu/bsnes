@@ -1,16 +1,15 @@
 struct Memory {
   string type;
+  boolean battery;
   string size;
   string category;
   string manufacturer;
-  string part;
-  string note;
-  boolean battery;
+  string model;
+  string identity;
 };
 
 struct Oscillator {
   string frequency;
-  string note;
 };
 
 //variant meta-class
@@ -143,12 +142,12 @@ private:
     HorizontalLayout manufacturerLayout{&layout, Size{~0, 0}};
       Label manufacturerLabel{&manufacturerLayout, Size{80, 0}};
       LineEdit manufacturerEdit{&manufacturerLayout, Size{~0, 0}};
-    HorizontalLayout partLayout{&layout, Size{~0, 0}};
-      Label partLabel{&partLayout, Size{80, 0}};
-      LineEdit partEdit{&partLayout, Size{~0, 0}};
-    HorizontalLayout noteLayout{&layout, Size{~0, 0}};
-      Label noteLabel{&noteLayout, Size{80, 0}};
-      LineEdit noteEdit{&noteLayout, Size{~0, 0}};
+    HorizontalLayout modelLayout{&layout, Size{~0, 0}};
+      Label modelLabel{&modelLayout, Size{80, 0}};
+      LineEdit modelEdit{&modelLayout, Size{~0, 0}};
+    HorizontalLayout identityLayout{&layout, Size{~0, 0}};
+      Label identityLabel{&identityLayout, Size{80, 0}};
+      LineEdit identityEdit{&identityLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
       CheckLabel batteryOption{&controlLayout, Size{0, 0}};
@@ -172,9 +171,6 @@ private:
     HorizontalLayout frequencyLayout{&layout, Size{~0, 0}};
       Label frequencyLabel{&frequencyLayout, Size{60, 0}};
       LineEdit frequencyEdit{&frequencyLayout, Size{~0, 0}};
-    HorizontalLayout noteLayout{&layout, Size{~0, 0}};
-      Label noteLabel{&noteLayout, Size{60, 0}};
-      LineEdit noteEdit{&noteLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};

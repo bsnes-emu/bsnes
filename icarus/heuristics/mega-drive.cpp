@@ -71,8 +71,8 @@ auto MegaDrive::manifest() const -> string {
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
-  output.append("  label: ", Location::prefix(location), "\n");
-  output.append("  name: ", Location::prefix(location), "\n");
+  output.append("  label:  ", Location::prefix(location), "\n");
+  output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  region: ", regions.left(), "\n");
   output.append("  board\n");
   output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
