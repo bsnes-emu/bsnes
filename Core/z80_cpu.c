@@ -1367,14 +1367,14 @@ void GB_cpu_run(GB_gameboy_t *gb)
         return;
     }
     
-    if (gb->halted) {
+    if (gb->halted && !gb->is_cgb) {
         GB_advance_cycles(gb, 2);
     }
     
     uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
     
     if (gb->halted) {
-        GB_advance_cycles(gb, 2);
+        GB_advance_cycles(gb, gb->is_cgb? 4 : 2);
     }
 
     bool effecitve_ime = gb->ime;
