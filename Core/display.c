@@ -499,12 +499,14 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch? (Todo: and in double speed mode?) */
-            if (gb->current_line != 0 && gb->cgb_double_speed) {
+            if (gb->current_line != 0 && !gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
             }
             GB_STAT_update(gb);
-            gb->io_registers[GB_IO_STAT] &= ~3;
+            if (gb->current_line != 0) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+            }
 
             GB_SLEEP(gb, display, 7, 1);
             
@@ -538,7 +540,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             {
                 uint8_t rendering_delay = 5;
                 if (gb->is_cgb) {
-                    rendering_delay = gb->current_line == 0? 2 : 6;
+                    rendering_delay = 6;
                 }
                 gb->cycles_for_line += rendering_delay;
                 GB_SLEEP(gb, display, 10, rendering_delay);
@@ -767,8 +769,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->ly_for_comparison = 0;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 17, LINE_LENGTH - 12);
-        
-        gb->io_registers[GB_IO_STAT] &= ~3;
         
         /* Reset window rendering state */
         gb->wy_diff = 0;
