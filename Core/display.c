@@ -537,14 +537,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             
-            {
-                uint8_t rendering_delay = 5;
-                if (gb->is_cgb) {
-                    rendering_delay = 6;
-                }
-                gb->cycles_for_line += rendering_delay;
-                GB_SLEEP(gb, display, 10, rendering_delay);
-            }
+            gb->cycles_for_line += 5;
+            GB_SLEEP(gb, display, 10, 5);
 
             /* The actual rendering cycle */
             gb->fetcher_divisor = false;
