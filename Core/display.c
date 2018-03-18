@@ -266,11 +266,9 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->display_cycles = 0;
     /* When the LCD is disabled, state is constant */
     
-    /* When the LCD is off, LY is 0 and STAT mode is 0.
-     Todo: Verify the LY=LYC flag should be on. */
+    /* When the LCD is off, LY is 0 and STAT mode is 0.  */
     gb->io_registers[GB_IO_LY] = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
-    gb->io_registers[GB_IO_STAT] |= 4;
     if (gb->hdma_on_hblank) {
         gb->hdma_on_hblank = false;
         gb->hdma_on = false;
@@ -278,7 +276,6 @@ void GB_lcd_off(GB_gameboy_t *gb)
         /* Todo: is this correct? */
         gb->hdma_steps_left = 0xff;
     }
-    gb->stat_interrupt_line = false;
     
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
