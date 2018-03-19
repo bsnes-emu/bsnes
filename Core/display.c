@@ -422,6 +422,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 22);
         GB_STATE(gb, display, 23);
         GB_STATE(gb, display, 24);
+        GB_STATE(gb, display, 25);
+
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -679,12 +681,19 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->vram_read_blocked = false;
             gb->oam_write_blocked = false;
             gb->vram_write_blocked = false;
-            if (gb->hdma_on_hblank) {
-                gb->hdma_starting = true;
-            }
+            
             gb->cycles_for_line++;
             GB_SLEEP(gb, display, 22, 1);
             GB_STAT_update(gb);
+
+            /* Todo: Measure this value */
+            
+            gb->cycles_for_line += 16;
+            GB_SLEEP(gb, display, 25, 16);
+            
+            if (gb->hdma_on_hblank) {
+                gb->hdma_starting = true;
+            }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
         }
         
