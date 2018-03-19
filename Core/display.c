@@ -528,8 +528,7 @@ static void update_display_state(GB_gameboy_t *gb, uint8_t cycles)
             }
             else if (position_in_line == MODE2_LENGTH + MODE3_LENGTH + stat_delay + scx_delay + 16) {
                 if (gb->hdma_on_hblank) {
-                    gb->hdma_on = true;
-                    gb->hdma_cycles = 0;
+                    gb->hdma_starting = true;
                 }
             }
         }
