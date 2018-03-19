@@ -680,8 +680,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->oam_write_blocked = false;
             gb->vram_write_blocked = false;
             if (gb->hdma_on_hblank) {
-                gb->hdma_on = true;
-                gb->hdma_cycles = 0;
+                gb->hdma_starting = true;
             }
             gb->cycles_for_line++;
             GB_SLEEP(gb, display, 22, 1);
