@@ -354,7 +354,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
         if (gb->cgb_mode) {
-            bg_priority = true;
+            bg_priority = false;
         }
         else {
             bg_enabled = false;
