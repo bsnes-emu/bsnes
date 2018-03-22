@@ -940,13 +940,15 @@ bool retro_serialize(void *data, size_t size)
 
     void* save_data[2];
     size_t state_size[2];
+    size_t offset = 0;
 
     for (int i = 0; i < emulated_devices; i++)
     {
         state_size[i] = GB_get_save_state_size(&gameboy[i]);
         save_data[i] = (uint8_t*)malloc(state_size[i]);
         GB_save_state_to_buffer(&gameboy[i], (uint8_t*) save_data[i]);
-        memcpy(data + (state_size[i] * i), save_data[i], state_size[i]);
+        memcpy(data + offset, save_data[i], state_size[i]);
+        offset += state_size[i];
         free(save_data[i]);
     }
 
