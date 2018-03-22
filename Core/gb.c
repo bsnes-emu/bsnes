@@ -476,7 +476,6 @@ void GB_reset(GB_gameboy_t *gb)
         
         gb->is_cgb = true;
         gb->cgb_mode = true;
-        gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0x00;
     }
     else {
         gb->ram_size = 0x2000;
@@ -494,8 +493,10 @@ void GB_reset(GB_gameboy_t *gb)
             gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
                 gb->rgb_encode_callback(gb, 0, 0, 0);
         }
-        gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
     }
+    
+    /* These are not deterministic, but 00 (CGB) and FF (DMG) are the most common initial values by far */
+    gb->io_registers[GB_IO_DMA] = gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = gb->is_cgb? 0x00 : 0xFF;
     /* The serial interrupt always occur on the 0xF8th cycle of every 0x100 cycle since boot. */
     gb->serial_cycles = 0x100 - 0xF8;
     gb->io_registers[GB_IO_SC] = 0x7E;
