@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
@@ -81,7 +82,7 @@ static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
 static unsigned emulated_devices = 1;
-static unsigned pre_init = 1;
+static bool initialized = false;
 static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
 
@@ -115,6 +116,25 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 }
 
 static struct retro_rumble_interface rumble;
+
+static void extract_basename(char *buf, const char *path, size_t size)
+{
+   const char *base = strrchr(path, '/');
+   if (!base)
+      base = strrchr(path, '\\');
+   if (!base)
+      base = path;
+
+   if (*base == '\\' || *base == '/')
+      base++;
+
+   strncpy(buf, base, size - 1);
+   buf[size - 1] = '\0';
+
+   char *ext = strrchr(buf, '.');
+   if (ext)
+      *ext = '\0';
+}
 
 static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 {
@@ -201,40 +221,43 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 static retro_environment_t environ_cb;
 
-static const struct retro_variable vars[] = {
-    { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
-    { "sameboy_color_correction_mode", "Color Correction; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_high_pass_filter_mode", "High Pass Filter; off|accurate|remove dc offset" },
-    { "sameboy_model", "Emulated Model; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+/* variables for single cart mode */
+static const struct retro_variable vars_single[] = {
+    { "sameboy_dual", "Single cart dual mode (reload); disabled|enabled" },
+    { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
+    { "sameboy_model", "Emulated model (reload); Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { NULL }
 };
 
-static const struct retro_variable vars_sameboy_dual[] = {
-    { "sameboy_dual", "Dual Game Boy Mode (restart); disabled|enabled" },
-    { "sameboy_link", "Link Cable Emulation; enabled|disabled" },
+/* variables for single cart dual gameboy mode */
+static const struct retro_variable vars_single_dual[] = {
+    { "sameboy_dual", "Single cart dual mode (reload); disabled|enabled" },
+    { "sameboy_link", "Link cable emulation; enabled|disabled" },
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
-    { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
-    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for Game Boy #2; off|accurate|remove dc offset" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1 (reload); Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2 (reload); Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
+    { "sameboy_high_pass_filter_mode_2", "High-pass filter for Game Boy #2; off|accurate|remove dc offset" },
     { NULL }
 };
 
-static const struct retro_variable vars_link_dual[] = {
-    { "sameboy_link", "Link Cable Emulation; enabled|disabled" },
+/* variables for dual cart dual gameboy mode */
+static const struct retro_variable vars_dual[] = {
+    { "sameboy_link", "Link cable emulation; enabled|disabled" },
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
-    { "sameboy_screen_layout", "Screen Layout; top-down|left-right" },
+    { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated Model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_model_2", "Emulated Model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_color_correction_mode_1", "Color Correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_color_correction_mode_2", "Color Correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
-    { "sameboy_high_pass_filter_mode_1", "High Pass Filter for Game Boy #1; off|accurate|remove dc offset" },
-    { "sameboy_high_pass_filter_mode_2", "High Pass Filter for Game Boy #2; off|accurate|remove dc offset" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1 (reload); Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2 (reload); Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
+    { "sameboy_high_pass_filter_mode_2", "High-pass filter for Game Boy #2; off|accurate|remove dc offset" },
     { NULL }
 };
 
@@ -418,10 +441,6 @@ static void check_variables(bool link)
             else
                 new_model = MODEL_AUTO;
 
-            if (GB_is_inited(&gameboy[0]) && new_model != model[0]) {
-                model[0] = new_model;
-                init_for_current_model();
-            }
             model[0] = new_model;
         }
     }
@@ -492,11 +511,7 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else
                 new_model = MODEL_AUTO;
-            
-            if (GB_is_inited(&gameboy[0]) && new_model != model[0]) {
-                model[0] = new_model;
-                init_for_current_model();
-            }
+
             model[0] = new_model;
         }
 
@@ -513,11 +528,7 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else
                 new_model = MODEL_AUTO;
-            
-            if (GB_is_inited(&gameboy[1]) && new_model != model[1]) {
-                model[1] = new_model;
-                init_for_current_model();
-            }
+
             model[1] = new_model;
         }
 
@@ -715,9 +726,10 @@ void retro_reset(void)
 
 void retro_run(void)
 {
+
     bool updated = false;
 
-    if (pre_init)
+    if (!initialized)
         geometry_updated = false;
 
     if (geometry_updated) {
@@ -726,8 +738,6 @@ void retro_run(void)
         geometry_updated = false;
         environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
     }
-
-    pre_init = 0;
 
     if (!frame_buf)
         return;
@@ -769,17 +779,19 @@ void retro_run(void)
 
         video_cb(frame_buf_copy, VIDEO_WIDTH * emulated_devices, VIDEO_HEIGHT, VIDEO_WIDTH * emulated_devices * sizeof(uint32_t));
     }
+
+    initialized = true;
 }
 
 bool retro_load_game(const struct retro_game_info *info)
 {
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_single);
     check_variables(false);
     if (sameboy_dual)
     {
         emulated_devices = 2;
         mode = MODE_SINGLE_GAME_DUAL;
-        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_sameboy_dual);
+        environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_single_dual);
         check_variables(true);
     }
     else
@@ -821,11 +833,36 @@ bool retro_load_game(const struct retro_game_info *info)
         log_cb(RETRO_LOG_INFO, "Rumble environment not supported\n");
 
     check_variables(emulated_devices == 2 ? true : false);
+
+    /* hack: use upstream's file based I/O for Game Boy 2 battery in single cart mode */
+    if (mode == MODE_SINGLE_GAME_DUAL)
+    {
+        char path[PATH_MAX];
+        char file[PATH_MAX];
+
+        extract_basename(file, retro_game_path, sizeof(file));
+        snprintf (path, sizeof(path), "%s%c%s.srm.2", retro_save_directory, slash, file);
+        log_cb(RETRO_LOG_INFO, "Loading battery for Game Boy 2 from: %s\n", path);
+        GB_load_battery(&gameboy[1], path);
+    }
+
     return true;
 }
 
 void retro_unload_game(void)
 {
+    /* hack: use upstream's file based I/O for Game Boy 2 battery in single cart mode */
+    if (mode == MODE_SINGLE_GAME_DUAL)
+    {
+        char path[PATH_MAX];
+        char file[PATH_MAX];
+
+        extract_basename(file, retro_game_path, sizeof(file));
+        snprintf (path, sizeof(path), "%s%c%s.srm.2", retro_save_directory, slash, file);
+        log_cb(RETRO_LOG_INFO, "Saving battery for Game Boy 2 to: %s\n", path);
+        GB_save_battery(&gameboy[1], path);
+    }
+
     for (int i = 0; i < emulated_devices; i++)
         GB_free(&gameboy[i]);
 }
@@ -846,7 +883,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     else
         return false; /* all other types are unhandled for now */
 
-    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_link_dual);
+    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_dual);
     check_variables(true);
 
     frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
@@ -897,18 +934,21 @@ size_t retro_serialize_size(void)
 
 bool retro_serialize(void *data, size_t size)
 {
-    if (pre_init == 1)
+
+    if (!initialized)
         return false;
 
     void* save_data[2];
     size_t state_size[2];
+    size_t offset = 0;
 
     for (int i = 0; i < emulated_devices; i++)
     {
         state_size[i] = GB_get_save_state_size(&gameboy[i]);
         save_data[i] = (uint8_t*)malloc(state_size[i]);
         GB_save_state_to_buffer(&gameboy[i], (uint8_t*) save_data[i]);
-        memcpy(data + (state_size[i] * i), save_data[i], state_size[i]);
+        memcpy(data + offset, save_data[i], state_size[i]);
+        offset += state_size[i];
         free(save_data[i]);
     }
 
@@ -973,7 +1013,7 @@ void *retro_get_memory_data(unsigned type)
                 }
             }
             break;
-        case MODE_DUAL_GAME: /* todo: hook up other memory types */
+        case MODE_DUAL_GAME:
             {
                 switch (type)
                 {
@@ -986,6 +1026,18 @@ void *retro_get_memory_data(unsigned type)
                     case RETRO_MEMORY_GAMEBOY_2_SRAM:
                         if (gameboy[1].cartridge_type->has_battery && gameboy[1].mbc_ram_size != 0)
                             data = gameboy[1].mbc_ram;
+                        else
+                            data = NULL;
+                        break;
+                    case RETRO_MEMORY_GAMEBOY_1_RTC:
+                        if(gameboy[0].cartridge_type->has_battery)
+                            data = &gameboy[0].rtc_real;
+                        else
+                            data = NULL;
+                        break;
+                    case RETRO_MEMORY_GAMEBOY_2_RTC:
+                        if(gameboy[1].cartridge_type->has_battery)
+                            data = &gameboy[1].rtc_real;
                         else
                             data = NULL;
                         break;
@@ -1033,7 +1085,7 @@ size_t retro_get_memory_size(unsigned type)
                 }
             }
             break;
-        case MODE_DUAL_GAME: /* todo: hook up other memory types */
+        case MODE_DUAL_GAME:
             {
                 switch (type)
                 {
@@ -1049,8 +1101,16 @@ size_t retro_get_memory_size(unsigned type)
                         else
                             size = 0;
                         break;
+                    case RETRO_MEMORY_GAMEBOY_1_RTC:
+                        if(gameboy[0].cartridge_type->has_battery)
+                            size = sizeof (gameboy[0].rtc_real);
+                        break;
+                    case RETRO_MEMORY_GAMEBOY_2_RTC:
+                        if(gameboy[1].cartridge_type->has_battery)
+                            size = sizeof (gameboy[1].rtc_real);
+                        break;
                     default:
-                        break;;
+                        break;
                 }
             }
             break;

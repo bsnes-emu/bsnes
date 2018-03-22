@@ -31,7 +31,7 @@ static GB_bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
 
 static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (!gb->dma_steps_left || (gb->dma_cycles < 0 && !gb->is_dma_restarting)) return false;
+    if (!gb->dma_steps_left || (gb->dma_cycles < 0 && !gb->is_dma_restarting) || addr >= 0xFE00) return false;
     return bus_for_addr(gb, addr) == bus_for_addr(gb, gb->dma_current_src);
 }
 
@@ -174,6 +174,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_WX:
             case GB_IO_SC:
             case GB_IO_SB:
+            case GB_IO_DMA:
                 return gb->io_registers[addr & 0xFF];
             case GB_IO_TIMA:
                 if (gb->tima_reload_state == GB_TIMA_RELOADING) {
@@ -232,9 +233,6 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return ret;
             }
-            case GB_IO_DMA:
-                /* Todo: is this documented? */
-                return gb->is_cgb? 0x00 : 0xFF;
             case GB_IO_UNKNOWN2:
             case GB_IO_UNKNOWN3:
                 return gb->is_cgb? gb->io_registers[addr & 0xFF] : 0xFF;
@@ -516,21 +514,18 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DMA:
-                if (value <= 0xE0) {
-                    if (gb->dma_steps_left) {
-                        /* This is not correct emulation, since we're not really delaying the second DMA.
-                           One write that should have happened in the first DMA will not happen. However,
-                           since that byte will be overwritten by the second DMA before it can actually be
-                           read, it doesn't actually matter. */
-                        gb->is_dma_restarting = true;
-                    }
-                    gb->dma_cycles = -7;
-                    gb->dma_current_dest = 0;
-                    gb->dma_current_src = value << 8;
-                    gb->dma_steps_left = 0xa0;
+                if (gb->dma_steps_left) {
+                    /* This is not correct emulation, since we're not really delaying the second DMA.
+                       One write that should have happened in the first DMA will not happen. However,
+                       since that byte will be overwritten by the second DMA before it can actually be
+                       read, it doesn't actually matter. */
+                    gb->is_dma_restarting = true;
                 }
-                /* else { what? } */
-
+                gb->dma_cycles = -7;
+                gb->dma_current_dest = 0;
+                gb->dma_current_src = value << 8;
+                gb->dma_steps_left = 0xa0;
+                gb->io_registers[GB_IO_DMA] = value;
                 return;
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
@@ -708,7 +703,14 @@ void GB_dma_run(GB_gameboy_t *gb)
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
         gb->dma_steps_left--;
-        gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src);
+        if (gb->dma_current_src < 0xe000) {
+            gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src);
+        }
+        else {
+            /* Todo: Not correct on the CGB */
+            gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src & ~0x2000);
+        }
+        
         /* dma_current_src must be the correct value during GB_read_memory */
         gb->dma_current_src++;
         if (!gb->dma_steps_left) {
