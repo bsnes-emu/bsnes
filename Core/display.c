@@ -434,7 +434,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         return;
     }
     
-    GB_SLEEP(gb, display, 23, 1);
+    if (!gb->is_cgb) {
+        GB_SLEEP(gb, display, 23, 1);
+    }
 
     /* Handle the very first line 0 */
     gb->current_line = 0;
@@ -463,8 +465,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2;
     GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2);
-    
-
     
     if (!gb->cgb_double_speed) {
         gb->io_registers[GB_IO_STAT] &= ~3;
@@ -676,14 +676,22 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
             }
+            if (!gb->cgb_double_speed) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->oam_read_blocked = false;
+                gb->vram_read_blocked = false;
+                gb->oam_write_blocked = false;
+                gb->vram_write_blocked = false;
+            }
+            
+            gb->cycles_for_line++;
+            GB_SLEEP(gb, display, 22, 1);
+            
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->oam_read_blocked = false;
             gb->vram_read_blocked = false;
             gb->oam_write_blocked = false;
             gb->vram_write_blocked = false;
-            
-            gb->cycles_for_line++;
-            GB_SLEEP(gb, display, 22, 1);
             GB_STAT_update(gb);
 
             /* Todo: Measure this value */
