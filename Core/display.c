@@ -322,7 +322,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
         oam_fifo_item = fifo_pop(&gb->oam_fifo);
-        if (oam_fifo_item->pixel) {
+        if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
             draw_oam = true;
             bg_priority |= oam_fifo_item->bg_priority;
         }
@@ -355,9 +355,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     else {
         uint8_t pixel = fifo_item->pixel;
         if (pixel && bg_priority) {
-            draw_oam = false;
-        }
-        else if ((gb->io_registers[GB_IO_LCDC] & 2) == 0) {
             draw_oam = false;
         }
         if (!gb->cgb_mode) {
