@@ -486,7 +486,7 @@ static void ld_dhl_d8(GB_gameboy_t *gb, uint8_t opcode)
     GB_advance_cycles(gb, 5);
 }
 
-uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
+uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode, uint8_t cycles_after_read)
 {
     uint8_t src_register_id;
     uint8_t src_low;
@@ -497,7 +497,7 @@ uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
             return gb->registers[GB_REGISTER_AF] >> 8;
         }
         uint8_t ret = GB_read_memory(gb, gb->registers[GB_REGISTER_HL]);
-        GB_advance_cycles(gb, 4);
+        GB_advance_cycles(gb, cycles_after_read);
         return ret;
     }
     if (src_low) {
@@ -519,9 +519,9 @@ static void set_src_value(GB_gameboy_t *gb, uint8_t opcode, uint8_t value)
             gb->registers[GB_REGISTER_AF] |= value << 8;
         }
         else {
-            GB_advance_cycles(gb, 3);
-            GB_write_memory(gb, gb->registers[GB_REGISTER_HL], value);
             GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, gb->registers[GB_REGISTER_HL], value);
+            GB_advance_cycles(gb, 4);
         }
     }
     else {
@@ -578,7 +578,7 @@ static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] = (a + value) << 8;
     if ((uint8_t)(a + value) == 0) {
@@ -596,7 +596,7 @@ static void adc_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
     gb->registers[GB_REGISTER_AF] = (a + value + carry) << 8;
@@ -616,7 +616,7 @@ static void sub_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBSTRACT_FLAG;
     if (a == value) {
@@ -634,7 +634,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
     gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBSTRACT_FLAG;
@@ -654,7 +654,7 @@ static void and_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] = ((a & value) << 8) | GB_HALF_CARRY_FLAG;
     if ((a & value) == 0) {
@@ -666,7 +666,7 @@ static void xor_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] = (a ^ value) << 8;
     if ((a ^ value) == 0) {
@@ -678,7 +678,7 @@ static void or_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] = (a | value) << 8;
     if ((a | value) == 0) {
@@ -690,7 +690,7 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 4);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
@@ -1126,7 +1126,7 @@ static void rlc_r(GB_gameboy_t *gb, uint8_t opcode)
     bool carry;
     uint8_t value;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     carry = (value & 0x80) != 0;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     set_src_value(gb, opcode, (value << 1) | carry);
@@ -1143,7 +1143,7 @@ static void rrc_r(GB_gameboy_t *gb, uint8_t opcode)
     bool carry;
     uint8_t value;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     carry = (value & 0x01) != 0;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     value = (value >> 1) | (carry << 7);
@@ -1162,7 +1162,7 @@ static void rl_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     bool bit7;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
     bit7 = (value & 0x80) != 0;
 
@@ -1184,7 +1184,7 @@ static void rr_r(GB_gameboy_t *gb, uint8_t opcode)
     bool bit1;
 
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
     bit1 = (value & 0x1) != 0;
 
@@ -1204,7 +1204,7 @@ static void sla_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     bool carry;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     carry = (value & 0x80) != 0;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     set_src_value(gb, opcode, (value << 1));
@@ -1220,8 +1220,8 @@ static void sra_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t bit7;
     uint8_t value;
-    GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    GB_advance_cycles(gb, 3);
+    value = get_src_value(gb, opcode, 4);
     bit7 = value & 0x80;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     if (value & 1) {
@@ -1237,8 +1237,8 @@ static void sra_r(GB_gameboy_t *gb, uint8_t opcode)
 static void srl_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
-    GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    GB_advance_cycles(gb, 3);
+    value = get_src_value(gb, opcode, 4);
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     set_src_value(gb, opcode, (value >> 1));
     if (value & 1) {
@@ -1252,8 +1252,8 @@ static void srl_r(GB_gameboy_t *gb, uint8_t opcode)
 static void swap_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
-    GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    GB_advance_cycles(gb, 3);
+    value = get_src_value(gb, opcode, 4);
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     set_src_value(gb, opcode, (value >> 4) | (value << 4));
     if (!value) {
@@ -1266,7 +1266,7 @@ static void bit_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     uint8_t bit;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode);
+    value = get_src_value(gb, opcode, 3);
     bit = 1 << ((opcode >> 3) & 7);
     if ((opcode & 0xC0) == 0x40) { /* Bit */
         gb->registers[GB_REGISTER_AF] &= 0xFF00 | GB_CARRY_FLAG;
