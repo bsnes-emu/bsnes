@@ -289,37 +289,22 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->ly_for_comparison = 0;
 }
 
-static void search_oam(GB_gameboy_t *gb)
+static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 {
-    /*
-     We have very little means to test how the OAM search timing actually
-     works so we currently implement it atomically.
+    if (gb->n_visible_objs == 10) return;
 
-     This is enough for most cases except (All are TODOs):
-       - The OAM bug on the DMG (Not emulated at all)
-       - Changing object height via LCDC during mode 2
-          - What about changing during mode 3?
-       - Enabling and disabling sprites during mode 2
-         - Does this flag actually do anything in mode 2? Or only during mode 3?
-     */
-    
     /* This reverse sorts the visible objects by location and priority */
-    
     GB_object_t *objects = (GB_object_t *) &gb->oam;
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
-    gb->n_visible_objs = 0;
-    for (uint8_t i = 0; i < 40; i++) {
-        signed y = objects[i].y - 16;
-        if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
-            unsigned j = 0;
-            for (; j < gb->n_visible_objs; j++) {
-                if (objects[gb->visible_objs[j]].x <= objects[i].x) break;
-            }
-            memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
-            gb->visible_objs[j] = i;
-            gb->n_visible_objs++;
-            if (gb->n_visible_objs == 10) return;
+    signed y = objects[index].y - 16;
+    if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
+        unsigned j = 0;
+        for (; j < gb->n_visible_objs; j++) {
+            if (objects[gb->visible_objs[j]].x <= objects[index].x) break;
         }
+        memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
+        gb->visible_objs[j] = index;
+        gb->n_visible_objs++;
     }
 }
 
@@ -407,7 +392,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 6);
         GB_STATE(gb, display, 7);
         GB_STATE(gb, display, 8);
-        GB_STATE(gb, display, 9);
+        // GB_STATE(gb, display, 9);
         GB_STATE(gb, display, 10);
         GB_STATE(gb, display, 11);
         GB_STATE(gb, display, 12);
@@ -514,14 +499,18 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
             GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 8, MODE2_LENGTH - 4);
+            gb->n_visible_objs = 0;
             
-            search_oam(gb);
-            gb->vram_read_blocked = !gb->is_cgb;
-            gb->vram_write_blocked = false;
-            gb->oam_write_blocked = gb->is_cgb;
-            GB_STAT_update(gb);
-            GB_SLEEP(gb, display, 9, 4);
+            for (gb->oam_search_index = 0; gb->oam_search_index < 40; gb->oam_search_index++) {
+                add_object_from_index(gb, gb->oam_search_index);
+                GB_SLEEP(gb, display, 8, 2);
+                if (gb->oam_search_index == 37) {
+                    gb->vram_read_blocked = !gb->is_cgb;
+                    gb->vram_write_blocked = false;
+                    gb->oam_write_blocked = gb->is_cgb;
+                    GB_STAT_update(gb);
+                }
+            }
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;

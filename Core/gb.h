@@ -426,6 +426,7 @@ struct GB_gameboy_internal_s {
         uint8_t visible_objs[10];
         uint8_t n_visible_objs;
         bool fetching_objects;
+        uint8_t oam_search_index;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
