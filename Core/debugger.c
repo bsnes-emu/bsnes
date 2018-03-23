@@ -1480,8 +1480,8 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    LYC interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 64)? "Enabled" : "Disabled");
     
     
-    GB_log(gb, "\nCycles since frame start: %d\n", gb->display_cycles / 2);
-    GB_log(gb, "Current line: %d\n", gb->display_cycles / 456 / 2);
+    GB_log(gb, "\nCycles until next event: %d\n", -gb->display_cycles / 2);
+    GB_log(gb, "Current line: %d\n", gb->current_line);
     GB_log(gb, "LY: %d\n", gb->io_registers[GB_IO_LY]);
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
     GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
