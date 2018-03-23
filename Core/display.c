@@ -536,7 +536,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->in_window = false;
             while (true) {
                 /* Handle objects */
+                /* When the sprite enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
+                   On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
                 while (gb->n_visible_objs != 0 &&
+                       (gb->io_registers[GB_IO_LCDC] & 2 || gb->is_cgb) &&
                        objects[gb->visible_objs[gb->n_visible_objs - 1]].x == (uint8_t)(gb->position_in_line + 8)) {
                     
                     if (!gb->fetching_objects) {
