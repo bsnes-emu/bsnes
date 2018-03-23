@@ -287,6 +287,8 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->window_disabled_while_active = false;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
+    
+    gb->oam_search_index = 0;
 }
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
