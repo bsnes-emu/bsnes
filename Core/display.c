@@ -357,6 +357,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         if (pixel && bg_priority) {
             draw_oam = false;
         }
+        else if ((gb->io_registers[GB_IO_LCDC] & 2) == 0) {
+            draw_oam = false;
+        }
         if (!gb->cgb_mode) {
             pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
         }
@@ -537,7 +540,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             while (true) {
                 /* Handle objects */
                 while (gb->n_visible_objs != 0 &&
-                       (gb->io_registers[GB_IO_LCDC] & 2) != 0 &&
                        objects[gb->visible_objs[gb->n_visible_objs - 1]].x == (uint8_t)(gb->position_in_line + 8)) {
                     
                     if (!gb->fetching_objects) {
