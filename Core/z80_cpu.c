@@ -23,15 +23,24 @@ typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode);
  
  */
 
+static uint8_t bitwise_glitch(uint8_t a, uint8_t b, uint8_t c)
+{
+    return ((a ^ c) & (b ^ c)) ^ c;
+}
+
 static void trigger_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
 {
     if (gb->is_cgb) return;
     
     if (gb->registers[register_id] >= 0xFE00 && gb->registers[register_id] < 0xFF00) {
         if (gb->oam_search_index < 38 && gb->oam_search_index > 0) {
-            /* Todo: bytes 2-7 are copied from the previous 8 bytes, but bytes 0 and 1 behave differently
-               on real hardware*/
-            for (unsigned i = 0; i < 8; i++) {
+            gb->oam[gb->oam_search_index * 4 + 4] = bitwise_glitch(gb->oam[gb->oam_search_index * 4 + 4],
+                                                                   gb->oam[gb->oam_search_index * 4 - 4],
+                                                                   gb->oam[gb->oam_search_index * 4]);
+            gb->oam[gb->oam_search_index * 4 + 5] = bitwise_glitch(gb->oam[gb->oam_search_index * 4 + 5],
+                                                                   gb->oam[gb->oam_search_index * 4 - 3],
+                                                                   gb->oam[gb->oam_search_index * 4 + 1]);
+            for (unsigned i = 2; i < 8; i++) {
                 gb->oam[gb->oam_search_index * 4 + 4 + i] = gb->oam[gb->oam_search_index * 4 - 4 + i];
             }
         }
