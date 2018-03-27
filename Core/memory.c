@@ -39,7 +39,7 @@ static uint8_t bitwise_glitch_read(uint8_t a, uint8_t b, uint8_t c)
     return b | (a & c);
 }
 
-static uint8_t bitwise_glitch_pop(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+static uint8_t bitwise_glitch_read_increase(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
 {
     return (b & a) | (b & c) | (b & d) | (a & c & d);
 }
@@ -90,16 +90,16 @@ void GB_trigger_oam_bug_read_increase(GB_gameboy_t *gb, uint16_t address)
     
     if (address >= 0xFE00 && address < 0xFF00) {
         if (gb->accessed_oam_row != 0xff && gb->accessed_oam_row >= 0x20 && gb->accessed_oam_row < 0x98) {            
-            gb->oam[gb->accessed_oam_row - 0x8] = bitwise_glitch_pop(gb->oam[gb->accessed_oam_row - 0x10],
-                                                                     gb->oam[gb->accessed_oam_row - 0x08],
-                                                                     gb->oam[gb->accessed_oam_row       ],
-                                                                     gb->oam[gb->accessed_oam_row - 0x04]
-                                                                     );
-            gb->oam[gb->accessed_oam_row - 0x7] = bitwise_glitch_pop(gb->oam[gb->accessed_oam_row - 0x0f],
-                                                                     gb->oam[gb->accessed_oam_row - 0x07],
-                                                                     gb->oam[gb->accessed_oam_row + 0x01],
-                                                                     gb->oam[gb->accessed_oam_row - 0x03]
-                                                                     );
+            gb->oam[gb->accessed_oam_row - 0x8] = bitwise_glitch_read_increase(gb->oam[gb->accessed_oam_row - 0x10],
+                                                                               gb->oam[gb->accessed_oam_row - 0x08],
+                                                                               gb->oam[gb->accessed_oam_row       ],
+                                                                               gb->oam[gb->accessed_oam_row - 0x04]
+                                                                               );
+            gb->oam[gb->accessed_oam_row - 0x7] = bitwise_glitch_read_increase(gb->oam[gb->accessed_oam_row - 0x0f],
+                                                                               gb->oam[gb->accessed_oam_row - 0x07],
+                                                                               gb->oam[gb->accessed_oam_row + 0x01],
+                                                                               gb->oam[gb->accessed_oam_row - 0x03]
+                                                                               );
             for (unsigned i = 0; i < 8; i++) {
                 gb->oam[gb->accessed_oam_row + i] = gb->oam[gb->accessed_oam_row - 0x10 + i] = gb->oam[gb->accessed_oam_row - 0x08 + i];
             }
