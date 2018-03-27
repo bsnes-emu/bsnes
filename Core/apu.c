@@ -553,7 +553,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             unsigned index = reg == GB_IO_NR21? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].pulse_length = (0x40 - (value & 0x3f));
             if (!gb->apu.global_enable) {
-                gb->io_registers[reg] &= 0x3f;
+                value &= 0x3f;
             }
             break;
         }
