@@ -41,7 +41,7 @@ static uint8_t bitwise_glitch_read(uint8_t a, uint8_t b, uint8_t c)
 
 static uint8_t bitwise_glitch_read_increase(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
 {
-    return (b & a) | (b & c) | (b & d) | (a & c & d);
+    return (b & (a | c | d)) | (a & c & d);
 }
 
 void GB_trigger_oam_bug(GB_gameboy_t *gb, uint16_t address)
