@@ -29,6 +29,84 @@ static GB_bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
     return GB_BUS_INTERNAL;
 }
 
+static uint8_t bitwise_glitch(uint8_t a, uint8_t b, uint8_t c)
+{
+    return ((a ^ c) & (b ^ c)) ^ c;
+}
+
+static uint8_t bitwise_glitch_read(uint8_t a, uint8_t b, uint8_t c)
+{
+    return b | (a & c);
+}
+
+static uint8_t bitwise_glitch_pop(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+{
+    return (b & a) | (b & c) | (b & d) | (a & c & d);
+}
+
+void GB_trigger_oam_bug(GB_gameboy_t *gb, uint16_t address)
+{
+    if (gb->is_cgb) return;
+    
+    if (address >= 0xFE00 && address < 0xFF00) {
+        if (gb->accessed_oam_row != 0xff && gb->accessed_oam_row >= 8) {
+            gb->oam[gb->accessed_oam_row] = bitwise_glitch(gb->oam[gb->accessed_oam_row],
+                                                           gb->oam[gb->accessed_oam_row - 8],
+                                                           gb->oam[gb->accessed_oam_row - 4]);
+            gb->oam[gb->accessed_oam_row + 1] = bitwise_glitch(gb->oam[gb->accessed_oam_row + 1],
+                                                               gb->oam[gb->accessed_oam_row - 7],
+                                                               gb->oam[gb->accessed_oam_row - 3]);
+            for (unsigned i = 2; i < 8; i++) {
+                gb->oam[gb->accessed_oam_row + i] = gb->oam[gb->accessed_oam_row - 8 + i];
+            }
+        }
+    }
+}
+
+void GB_trigger_oam_bug_read(GB_gameboy_t *gb, uint16_t address)
+{
+    if (gb->is_cgb) return;
+    
+    if (address >= 0xFE00 && address < 0xFF00) {
+        if (gb->accessed_oam_row != 0xff && gb->accessed_oam_row >= 8) {
+            gb->oam[gb->accessed_oam_row - 8] =
+            gb->oam[gb->accessed_oam_row]     = bitwise_glitch_read(gb->oam[gb->accessed_oam_row],
+                                                                    gb->oam[gb->accessed_oam_row - 8],
+                                                                    gb->oam[gb->accessed_oam_row - 4]);
+            gb->oam[gb->accessed_oam_row - 7] =
+            gb->oam[gb->accessed_oam_row + 1] = bitwise_glitch_read(gb->oam[gb->accessed_oam_row + 1],
+                                                                    gb->oam[gb->accessed_oam_row - 7],
+                                                                    gb->oam[gb->accessed_oam_row - 3]);
+            for (unsigned i = 2; i < 8; i++) {
+                gb->oam[gb->accessed_oam_row + i] = gb->oam[gb->accessed_oam_row - 8 + i];
+            }
+        }
+    }
+}
+
+void GB_trigger_oam_bug_read_increase(GB_gameboy_t *gb, uint16_t address)
+{
+    if (gb->is_cgb) return;
+    
+    if (address >= 0xFE00 && address < 0xFF00) {
+        if (gb->accessed_oam_row != 0xff && gb->accessed_oam_row >= 0x20 && gb->accessed_oam_row < 0x98) {            
+            gb->oam[gb->accessed_oam_row - 0x8] = bitwise_glitch_pop(gb->oam[gb->accessed_oam_row - 0x10],
+                                                                     gb->oam[gb->accessed_oam_row - 0x08],
+                                                                     gb->oam[gb->accessed_oam_row       ],
+                                                                     gb->oam[gb->accessed_oam_row - 0x04]
+                                                                     );
+            gb->oam[gb->accessed_oam_row - 0x7] = bitwise_glitch_pop(gb->oam[gb->accessed_oam_row - 0x0f],
+                                                                     gb->oam[gb->accessed_oam_row - 0x07],
+                                                                     gb->oam[gb->accessed_oam_row + 0x01],
+                                                                     gb->oam[gb->accessed_oam_row - 0x03]
+                                                                     );
+            for (unsigned i = 0; i < 8; i++) {
+                gb->oam[gb->accessed_oam_row + i] = gb->oam[gb->accessed_oam_row - 0x10 + i] = gb->oam[gb->accessed_oam_row - 0x08 + i];
+            }
+        }
+    }
+}
+
 static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 {
     if (!gb->dma_steps_left || (gb->dma_cycles < 0 && !gb->is_dma_restarting) || addr >= 0xFE00) return false;
@@ -118,14 +196,54 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
         return gb->ram[addr & 0x0FFF];
     }
 
-    if (addr < 0xFEA0) {
-        if (gb->oam_read_blocked || (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
-            return 0xFF;
-        }
-        return gb->oam[addr & 0xFF];
-    }
-
     if (addr < 0xFF00) {
+        if (gb->oam_write_blocked) {
+            GB_trigger_oam_bug_read(gb, addr);
+            return 0xff;
+        }
+        
+        if ((gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
+            /* Todo: Does reading from OAM during DMA causes the OAM bug? */
+            return 0xff;
+        }
+        
+        if (gb->oam_read_blocked) {
+            if (!gb->is_cgb) {
+                if (addr < 0xFEA0) {
+                    if (gb->accessed_oam_row == 0) {
+                        gb->oam[(addr & 0xf8)] =
+                        gb->oam[0] = bitwise_glitch_read(gb->oam[0],
+                                                         gb->oam[(addr & 0xf8)],
+                                                         gb->oam[(addr & 0xfe)]);
+                        gb->oam[(addr & 0xf8) + 1] =
+                        gb->oam[1] = bitwise_glitch_read(gb->oam[1],
+                                                         gb->oam[(addr & 0xf8) + 1],
+                                                         gb->oam[(addr & 0xfe) | 1]);
+                        for (unsigned i = 2; i < 8; i++) {
+                            gb->oam[i] = gb->oam[(addr & 0xf8) + i];
+                        }
+                    }
+                    else if (gb->accessed_oam_row == 0xa0) {
+                        gb->oam[0x9e] = bitwise_glitch_read(gb->oam[0x9c],
+                                                            gb->oam[0x9e],
+                                                            gb->oam[(addr & 0xf8) | 6]);
+                        gb->oam[0x9f] = bitwise_glitch_read(gb->oam[0x9d],
+                                                            gb->oam[0x9f],
+                                                            gb->oam[(addr & 0xf8) | 7]);
+                        
+                        for (unsigned i = 0; i < 8; i++) {
+                            gb->oam[(addr & 0xf8) + i] = gb->oam[0x98 + i];
+                        }
+                    }
+                }
+            }
+            return 0xff;
+        }
+        
+        if (addr < 0xFEA0) {
+            return gb->oam[addr & 0xFF];
+        }
+        
         /* Unusable. CGB results are verified, but DMG results were tested on a SGB2 */
         /* Also, writes to this area are not emulated */
         if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) { /* Seems to be disabled in Modes 2 and 3 */
@@ -134,6 +252,10 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
         if (gb->is_cgb) {
             return (addr & 0xF0) | ((addr >> 4) & 0xF);
         }
+    }
+
+    if (addr < 0xFF00) {
+  
         return 0;
 
     }
@@ -398,16 +520,53 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
-    if (addr < 0xFEA0) {
-        if (gb->oam_write_blocked|| (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
+    if (addr < 0xFF00) {
+        if (gb->oam_write_blocked) {
+            GB_trigger_oam_bug(gb, addr);
             return;
         }
-        gb->oam[addr & 0xFF] = value;
-        return;
-    }
-
-    if (addr < 0xFF00) {
-        GB_log(gb, "Wrote %02x to %04x (Unused)\n", value, addr);
+        
+        if ((gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
+            /* Todo: Does writing to OAM during DMA causes the OAM bug? */
+            return;
+        }
+        
+        if (gb->is_cgb) {
+            if (addr < 0xFEA0) {
+                gb->oam[addr & 0xFF] = value;
+            }
+            return;
+        }
+        
+        if (addr < 0xFEA0) {
+            if (gb->accessed_oam_row == 0xa0) {
+                for (unsigned i = 0; i < 8; i++) {
+                    if ((i & 6)  != (addr & 6)) {
+                        gb->oam[(addr & 0xf8) + i] = gb->oam[0x98 + i];
+                    }
+                    else {
+                        gb->oam[(addr & 0xf8) + i] = bitwise_glitch(gb->oam[(addr & 0xf8) + i], gb->oam[0x9c], gb->oam[0x98 + i]);
+                    }
+                }
+            }
+            
+            gb->oam[addr & 0xFF] = value;
+            
+            if (gb->accessed_oam_row == 0) {
+                gb->oam[0] = bitwise_glitch(gb->oam[0],
+                                            gb->oam[(addr & 0xf8)],
+                                            gb->oam[(addr & 0xfe)]);
+                gb->oam[1] = bitwise_glitch(gb->oam[1],
+                                            gb->oam[(addr & 0xf8) + 1],
+                                            gb->oam[(addr & 0xfe) | 1]);
+                for (unsigned i = 2; i < 8; i++) {
+                    gb->oam[i] = gb->oam[(addr & 0xf8) + i];
+                }
+            }
+        }
+        else if (gb->accessed_oam_row == 0) {
+            gb->oam[addr & 0x7] = value;
+        }
         return;
     }
 

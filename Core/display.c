@@ -288,7 +288,7 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     
-    gb->oam_search_index = 0;
+    gb->accessed_oam_row = -1;
 }
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
@@ -478,6 +478,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* Lines 0 - 143 */
         for (; gb->current_line < LINES; gb->current_line++) {
             gb->oam_write_blocked = gb->is_cgb;
+            gb->accessed_oam_row = 0;
             GB_SLEEP(gb, display, 6, 3);
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->oam_read_blocked = true;
@@ -504,8 +505,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->n_visible_objs = 0;
             
             for (gb->oam_search_index = 0; gb->oam_search_index < 40; gb->oam_search_index++) {
-                add_object_from_index(gb, gb->oam_search_index);
+                if (gb->is_cgb) {
+                    add_object_from_index(gb, gb->oam_search_index);
+                    /* The CGB does not care about the accessed OAM row as there's no OAM bug*/
+                }
                 GB_SLEEP(gb, display, 8, 2);
+                if (!gb->is_cgb) {
+                    add_object_from_index(gb, gb->oam_search_index);
+                    gb->accessed_oam_row = (gb->oam_search_index & ~1) * 4 + 8;
+                }
                 if (gb->oam_search_index == 37) {
                     gb->vram_read_blocked = !gb->is_cgb;
                     gb->vram_write_blocked = false;
@@ -513,6 +521,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     GB_STAT_update(gb);
                 }
             }
+            gb->accessed_oam_row = -1;
             
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;

@@ -500,6 +500,8 @@ void GB_reset(GB_gameboy_t *gb)
     
     /* These are not deterministic, but 00 (CGB) and FF (DMG) are the most common initial values by far */
     gb->io_registers[GB_IO_DMA] = gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = gb->is_cgb? 0x00 : 0xFF;
+    
+    gb->accessed_oam_row = -1;
 
     gb->magic = (uintptr_t)'SAME';
 }
