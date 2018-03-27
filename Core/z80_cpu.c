@@ -1427,6 +1427,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     /* Run mode */
     else if(!gb->halted) {
+        GB_trigger_oam_bug_read_increase(gb, gb->pc); /* Todo: test T-cycle timing */
         gb->last_opcode_read = GB_read_memory(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;
