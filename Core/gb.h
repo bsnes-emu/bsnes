@@ -424,6 +424,7 @@ struct GB_gameboy_internal_s {
         bool oam_fifo_paused;
         bool in_window;
         uint8_t visible_objs[10];
+        uint8_t obj_comperators[10];
         uint8_t n_visible_objs;
         bool fetching_objects;
         uint8_t oam_search_index;

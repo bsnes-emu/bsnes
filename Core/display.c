@@ -302,10 +302,12 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (objects[gb->visible_objs[j]].x <= objects[index].x) break;
+            if (gb->obj_comperators[j] <= objects[index].x) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
+        memmove(gb->obj_comperators + j + 1, gb->obj_comperators + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
+        gb->obj_comperators[j] = objects[index].x;
         gb->n_visible_objs++;
     }
 }
@@ -551,7 +553,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
                 while (gb->n_visible_objs != 0 &&
                        (gb->io_registers[GB_IO_LCDC] & 2 || gb->is_cgb) &&
-                       objects[gb->visible_objs[gb->n_visible_objs - 1]].x == (uint8_t)(gb->position_in_line + 8)) {
+                       gb->obj_comperators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
                     if (!gb->fetching_objects) {
                         /* Penalty for interrupting the fetcher */
