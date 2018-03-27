@@ -447,9 +447,10 @@ int main(int argc, char **argv)
     want_aspec.freq = AUDIO_FREQUENCY;
     want_aspec.format = AUDIO_S16SYS;
     want_aspec.channels = 2;
-#if SDL_COMPILEDVERSION == 2005 && defined(__APPLE__)
+    printf("SDL version is %d\n", SDL_COMPILEDVERSION);
+#if SDL_COMPILEDVERSION >= 2005 && defined(__APPLE__)
     /* SDL 2.0.5 on macOS introduced a bug where certain combinations of buffer lengths and frequencies 
-       fail to produce audio correctly. This bug was fixed 2.0.6. */
+       fail to produce audio correctly. */
     want_aspec.samples = 2048;
 #else
     want_aspec.samples = 512;
