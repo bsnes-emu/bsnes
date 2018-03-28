@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <signal.h>
 #include <SDL2/SDL.h>
 #include <Core/gb.h>

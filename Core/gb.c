@@ -11,9 +11,10 @@
 #endif
 #include "gb.h"
 
-/* The libretro frontend does not link against rewind.c, so we provide empty weak alternatives to its functions */
-void __attribute__((weak)) GB_rewind_free(GB_gameboy_t *gb) { }
-void __attribute__((weak)) GB_rewind_push(GB_gameboy_t *gb) { }
+#ifdef DISABLE_REWIND
+#define GB_rewind_free(...)
+#define GB_rewind_push(...)
+#endif
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {

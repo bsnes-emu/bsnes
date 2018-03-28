@@ -106,6 +106,10 @@ COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
 endif
 
+ifeq ($(PLATFORM),windows32)
+CORE_SOURCES += $(shell ls Windows/*.c)
+endif
+
 CORE_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(CORE_SOURCES))
 COCOA_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(COCOA_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))

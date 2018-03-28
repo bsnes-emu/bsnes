@@ -16,13 +16,7 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/libretro/dmg_boot.c \
                $(CORE_DIR)/libretro/libretro.c
 
-ifeq ($(HAVE_DEBUGGER), 1)
-SOURCES_C +=  $(CORE_DIR)/Core/debugger.c \
-              $(CORE_DIR)/Core/z80_disassembler.c
-else
-CFLAGS += -DDISABLE_DEBUGGER
-endif
-CFLAGS += -DDISABLE_TIMEKEEPING
+CFLAGS += -DDISABLE_TIMEKEEPING -DDISABLE_REWIND -DDISABLE_DEBUGGER
 
 
 SOURCES_CXX :=	

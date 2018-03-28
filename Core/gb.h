@@ -2,7 +2,6 @@
 #define GB_h
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <time.h>
 
 #include "gb_struct_def.h"
