@@ -6,6 +6,7 @@
 PLATFORM := $(shell uname -s)
 ifneq ($(findstring MINGW,$(PLATFORM)),)
 PLATFORM := windows32
+USE_WINDRES := true
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -235,12 +236,18 @@ $(BIN)/SDL/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/r
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:console
 
+ifneq ($(USE_WINDRES),)
+$(OBJ)/%.o: %.rc
+	-@$(MKDIR) -p $(dir $@)
+	windres -DVERSION=\"$(VERSION)\" $^ $@
+else
 $(OBJ)/%.res: %.rc
 	-@$(MKDIR) -p $(dir $@)
 	rc /fo $@ /dVERSION=\"$(VERSION)\" $^ 
 
 %.o: %.res
 	cvtres /OUT:"$@" $^
+endif
 
 # We must provide SDL2.dll with the Windows port.
 $(BIN)/SDL/SDL2.dll:
