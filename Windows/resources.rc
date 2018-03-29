@@ -9,7 +9,7 @@ FILETYPE 0x1
             VALUE "CompanyName", "Lior Halphon"
             VALUE "FileDescription", "SameBoy"
             VALUE "FileVersion", VERSION
-            VALUE "LegalCopyright", "Copyright © 2015-2016 Lior Halphon"
+            VALUE "LegalCopyright", "Copyright Â© 2015-2018 Lior Halphon"
             VALUE "ProductName", "SameBoy"
             VALUE "ProductVersion", VERSION
             VALUE "WWW", "https://github.com/LIJI32/SameBoy"
