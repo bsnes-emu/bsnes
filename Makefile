@@ -239,7 +239,7 @@ $(BIN)/SDL/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/r
 ifneq ($(USE_WINDRES),)
 $(OBJ)/%.o: %.rc
 	-@$(MKDIR) -p $(dir $@)
-	windres -DVERSION=\"$(VERSION)\" $^ $@
+	windres --preprocessor cpp -DVERSION=\"$(VERSION)\" $^ $@
 else
 $(OBJ)/%.res: %.rc
 	-@$(MKDIR) -p $(dir $@)
