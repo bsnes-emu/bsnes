@@ -555,14 +555,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                        (gb->io_registers[GB_IO_LCDC] & 2 || gb->is_cgb) &&
                        gb->obj_comperators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
-                    if (!gb->fetching_objects) {
+                    if (gb->fetcher_stop_penalty == 0) {
                         /* Penalty for interrupting the fetcher */
-                        uint8_t penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state * 2 + gb->fetcher_divisor];
-                        gb->cycles_for_line += penalty;
-                        GB_SLEEP(gb, display, 19, penalty);
+                        gb->fetcher_stop_penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state * 2 + gb->fetcher_divisor];
                     }
                     
-                    gb->fetching_objects = true;
                     gb->cycles_for_line += 6;
                     GB_SLEEP(gb, display, 20, 6);
                     GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
@@ -593,8 +590,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     
                     gb->n_visible_objs--;
                 }
-                gb->fetching_objects = false;
-                
                 
                 /* Handle window */
                 /* Todo: Timing not verified by test ROM */
@@ -671,6 +666,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 
                 render_pixel_if_possible(gb);
                 if (push) {
+                    gb->cycles_for_line += gb->fetcher_stop_penalty;
+                    GB_SLEEP(gb, display, 19, gb->fetcher_stop_penalty);
+                    gb->fetcher_stop_penalty = 0;
+                    
                     fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                                      gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
                     gb->bg_fifo_paused = false;
