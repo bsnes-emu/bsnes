@@ -6,7 +6,7 @@
 typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode);
 
 /*
- About memroy timings:
+ About memory timings:
  
  Each M-cycle consists of 4 T-cycles. Every time the CPU accesses the memory it happens on the 1st T-cycle of an
  M-cycle. During that cycle, other things may happen, such the PPU drawing to the screen. Since we can't really run
