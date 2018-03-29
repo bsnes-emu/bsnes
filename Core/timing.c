@@ -1,6 +1,8 @@
 #include "gb.h"
 #ifdef _WIN32
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
+#endif
 #include <Windows.h>
 #else
 #include <sys/time.h>

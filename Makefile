@@ -4,6 +4,9 @@
 # Set target, configuration, version and destination folders
 
 PLATFORM := $(shell uname -s)
+ifneq ($(findstring MINGW,$(PLATFORM)),)
+PLATFORM := windows32
+endif
 
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
