@@ -2,6 +2,7 @@
 #include_next <stdio.h>
 #include <stdlib.h>
 
+#ifndef __MINGW32__
 #ifndef __LIBRETRO__
 static inline int vasprintf(char **str, const char *fmt, va_list args)
 {
@@ -15,6 +16,7 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
     }
     return ret;
 }
+#endif
 #endif
 
 /* This code is public domain -- Will Hartung 4/9/09 */
