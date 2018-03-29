@@ -1272,7 +1272,7 @@ static void bit_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     uint8_t bit;
     GB_advance_cycles(gb, 4);
-    value = get_src_value(gb, opcode, 3);
+    value = get_src_value(gb, opcode, (opcode & 0xC0) == 0x40? 4 : 3);
     bit = 1 << ((opcode >> 3) & 7);
     if ((opcode & 0xC0) == 0x40) { /* Bit */
         gb->registers[GB_REGISTER_AF] &= 0xFF00 | GB_CARRY_FLAG;

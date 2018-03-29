@@ -125,7 +125,7 @@ DoubleBitsAndWriteRow:
 WaitFrame:
     push hl
     ld hl, $FF0F
-  res 0, [hl]
+    res 0, [hl]
 .wait
     bit 0, [hl]
     jr z, .wait
