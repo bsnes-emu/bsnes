@@ -326,6 +326,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
         oam_fifo_item = fifo_pop(&gb->oam_fifo);
+        /* Todo: Verify access timings */
         if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
             draw_oam = true;
             bg_priority |= oam_fifo_item->bg_priority;
@@ -341,6 +342,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     /* Mixing */
     
+    /* Todo: Verify access timings */
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
         if (gb->cgb_mode) {
             bg_priority = false;
@@ -370,6 +372,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     if (draw_oam) {
         uint8_t pixel = oam_fifo_item->pixel;
         if (!gb->cgb_mode) {
+            /* Todo: Verify access timings */
             pixel = ((gb->io_registers[oam_fifo_item->palette? GB_IO_OBP1 : GB_IO_OBP0] >> (pixel << 1)) & 3);
         }
         gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
@@ -535,8 +538,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->cycles_for_line = MODE2_LENGTH + 4;
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
+            /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
+            gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
             
             gb->cycles_for_line += 5;
             GB_SLEEP(gb, display, 10, 5);
@@ -556,8 +561,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                        gb->obj_comperators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
                     if (gb->fetcher_stop_penalty == 0) {
+                        /* TODO: figure out why the penalty works this way and actual access timings */
                         /* Penalty for interrupting the fetcher */
                         gb->fetcher_stop_penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state * 2 + gb->fetcher_divisor];
+                        if (gb->obj_comperators[gb->n_visible_objs - 1] == 0) {
+                            gb->fetcher_stop_penalty += gb->extra_penalty_for_sprite_at_0;
+                        }
                     }
                     
                     gb->cycles_for_line += 6;
@@ -592,7 +601,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 }
                 
                 /* Handle window */
-                /* Todo: Timing not verified by test ROM */
+                /* Todo: Timing (Including penalty and access timings) not verified by test ROM */
                 if (!gb->in_window && window_enabled(gb) &&
                     gb->current_line >= gb->io_registers[GB_IO_WY] + gb->wy_diff &&
                     gb->position_in_line + 7 == gb->io_registers[GB_IO_WX]) {
@@ -608,6 +617,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     switch (gb->fetcher_state) {
                         case GB_FETCHER_GET_TILE: {
                             uint16_t map = 0x1800;
+                            
+                            /* Todo: Verify access timings */
                             if (gb->io_registers[GB_IO_LCDC] & 0x08 && !gb->in_window) {
                                 map = 0x1C00;
                             }
@@ -628,6 +639,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             
                         case GB_FETCHER_GET_TILE_DATA_LOWER: {
                             uint8_t y_flip = 0;
+                            
+                            /* Todo: Verify access timings */
                             if (gb->io_registers[GB_IO_LCDC] & 0x10) {
                                 gb->current_tile_address = gb->current_tile * 0x10;
                             }
