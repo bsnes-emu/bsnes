@@ -245,7 +245,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
     }
     
     switch (gb->io_registers[GB_IO_STAT] & 3) {
-        case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8); break;
+        case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8) && !gb->is_first_line_mode2; break;
         case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
         case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
     }
@@ -431,6 +431,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     }
 
     /* Handle the very first line 0 */
+    gb->is_first_line_mode2 = true;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -448,6 +449,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = !gb->is_cgb;
     gb->oam_write_blocked = true;
     gb->vram_write_blocked = !gb->is_cgb;
+    gb->is_first_line_mode2 = false;
     GB_STAT_update(gb);
     
     gb->cycles_for_line += 2;
@@ -727,7 +729,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             if (!gb->is_cgb) {
                 gb->ly_for_comparison = -1;
             }
-            if (gb->is_cgb && gb->current_line == LINES) {
+            if (gb->current_line == LINES) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 2;
                 GB_STAT_update(gb);

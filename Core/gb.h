@@ -429,6 +429,7 @@ struct GB_gameboy_internal_s {
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
         uint8_t extra_penalty_for_sprite_at_0;
+        bool is_first_line_mode2;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
