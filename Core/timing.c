@@ -145,7 +145,7 @@ static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
     }
     
     GB_set_internal_div_counter(gb, 0);
-    GB_SLEEP(gb, div, 1, 2);
+    GB_SLEEP(gb, div, 1, 3);
     while (true) {
         advance_tima_state_machine(gb);
         GB_set_internal_div_counter(gb, gb->div_counter + 4);
