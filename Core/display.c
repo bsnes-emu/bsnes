@@ -496,7 +496,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_STAT] |= 2;
             }
             GB_STAT_update(gb);
-            if (gb->current_line != 0) {
+            if (gb->current_line != 0 || !gb->is_cgb) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
             }
 
