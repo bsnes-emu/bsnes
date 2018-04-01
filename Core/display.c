@@ -230,12 +230,20 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
  
  */
 
+static void trigger_oam_interrupt(GB_gameboy_t *gb)
+{
+    if (!gb->stat_interrupt_line && gb->oam_interrupt_line) {
+        gb->io_registers[GB_IO_IF] |= 2;
+        gb->stat_interrupt_line = true;
+    }
+}
+
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
     
-    bool previous_interrupt_line = gb->stat_interrupt_line;
-    gb->stat_interrupt_line = false;
+    bool previous_interrupt_line = gb->stat_interrupt_line | gb->oam_interrupt_line;
+    gb->stat_interrupt_line = gb->oam_interrupt_line;
     /* Set LY=LYC bit */
     if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
         gb->io_registers[GB_IO_STAT] |= 4;
@@ -247,7 +255,9 @@ void GB_STAT_update(GB_gameboy_t *gb)
     switch (gb->io_registers[GB_IO_STAT] & 3) {
         case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8) && !gb->is_first_line_mode2; break;
         case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
-        case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
+        /* The OAM interrupt is handled differently, it reads the writable flags from STAT less frequenctly,
+            and is not based on the mode bits of STAT. */
+        // case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
     }
     
     /* User requested a LY=LYC interrupt and the LY=LYC bit is on */
@@ -255,7 +265,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
         gb->stat_interrupt_line = true;
     }
     
-    if (gb->stat_interrupt_line && ! previous_interrupt_line) {
+    if (gb->stat_interrupt_line && !previous_interrupt_line) {
         gb->io_registers[GB_IO_IF] |= 2;
     }
 }
@@ -494,9 +504,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch? (Todo: and in double speed mode?) */
             if (gb->current_line != 0 && !gb->cgb_double_speed) {
-                gb->io_registers[GB_IO_STAT] &= ~3;
-                gb->io_registers[GB_IO_STAT] |= 2;
+                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
             }
+            trigger_oam_interrupt(gb);
             GB_STAT_update(gb);
             if (gb->current_line != 0 || !gb->is_cgb) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
@@ -508,6 +518,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_STAT] |= 2;
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
+            if (gb->current_line == 0 || gb->cgb_double_speed) {
+                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
+            }
+            trigger_oam_interrupt(gb);
             GB_STAT_update(gb);
             gb->n_visible_objs = 0;
             
@@ -529,14 +543,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 }
             }
             gb->accessed_oam_row = -1;
-            
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
             gb->vram_read_blocked = true;
             gb->vram_write_blocked = true;
             gb->oam_write_blocked = true;
+            gb->oam_interrupt_line = false;
+            trigger_oam_interrupt(gb);
             GB_STAT_update(gb);
-            
+
             gb->cycles_for_line = MODE2_LENGTH + 4;
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
@@ -730,22 +745,20 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->ly_for_comparison = -1;
             }
             if (gb->current_line == LINES) {
-                gb->io_registers[GB_IO_STAT] &= ~3;
-                gb->io_registers[GB_IO_STAT] |= 2;
-                GB_STAT_update(gb);
-                gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
+                trigger_oam_interrupt(gb);
             }
-            else {
-                GB_STAT_update(gb);
-            }
+            GB_STAT_update(gb);
+            gb->oam_interrupt_line = false;
             GB_SLEEP(gb, display, 12, 4);
             gb->ly_for_comparison = gb->current_line;
             
             if (gb->current_line == LINES) {
-                /* Entering VBlank state triggers the OAM interrupt. In CGB, it happens 4 cycles earlier */
-                gb->io_registers[GB_IO_STAT] &= ~3;
-                gb->io_registers[GB_IO_STAT] |= 2;
+                /* Entering VBlank state triggers the OAM interrupt*/
+                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
+                trigger_oam_interrupt(gb);
                 GB_STAT_update(gb);
+                gb->oam_interrupt_line = false;
                 
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 1;
