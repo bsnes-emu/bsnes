@@ -238,6 +238,7 @@ static void trigger_oam_interrupt(GB_gameboy_t *gb)
     }
 }
 
+/* Todo: A proper test ROM of cases where both the PPU and the CPU write to IF in the same M-cycle is needed. */
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
