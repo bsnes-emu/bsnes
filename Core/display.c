@@ -518,9 +518,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->io_registers[GB_IO_STAT] |= 2;
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
-            if (gb->current_line == 0 || gb->cgb_double_speed) {
-                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
-            }
+            gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
             trigger_oam_interrupt(gb);
             GB_STAT_update(gb);
             gb->n_visible_objs = 0;
