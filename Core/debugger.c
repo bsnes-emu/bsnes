@@ -115,6 +115,9 @@ static inline void switch_banking_state(GB_gameboy_t *gb, uint16_t bank)
     if (gb->is_cgb) {
         gb->cgb_ram_bank = bank & 7;
         gb->cgb_vram_bank = bank & 1;
+        if (gb->cgb_ram_bank == 0) {
+            gb->cgb_ram_bank = 1;
+        }
     }
 }
 
@@ -1869,6 +1872,23 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
     }
     free(line);
     fclose(f);
+}
+
+void GB_debugger_clear_symbols(GB_gameboy_t *gb)
+{
+    for (int i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
+        if (gb->bank_symbols[i]) {
+            GB_map_free(gb->bank_symbols[i]);
+            gb->bank_symbols[i] = 0;
+        }
+    }
+    for (int i = sizeof(gb->reversed_symbol_map.buckets) / sizeof(gb->reversed_symbol_map.buckets[0]); i--;) {
+        while (gb->reversed_symbol_map.buckets[i]) {
+            GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
+            free(gb->reversed_symbol_map.buckets[i]);
+            gb->reversed_symbol_map.buckets[i] = next;
+        }
+    }
 }
 
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr)

@@ -144,18 +144,7 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
-    for (int i = 0x200; i--;) {
-        if (gb->bank_symbols[i]) {
-            GB_map_free(gb->bank_symbols[i]);
-        }
-    }
-    for (int i = 0x400; i--;) {
-        while (gb->reversed_symbol_map.buckets[i]) {
-            GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
-            free(gb->reversed_symbol_map.buckets[i]);
-            gb->reversed_symbol_map.buckets[i] = next;
-        }
-    }
+    GB_debugger_clear_symbols(gb);
     GB_rewind_free(gb);
     memset(gb, 0, sizeof(*gb));
 }

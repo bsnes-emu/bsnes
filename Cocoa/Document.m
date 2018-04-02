@@ -425,6 +425,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     NSString *rom_warnings = [self captureOutputForBlock:^{
         GB_load_rom(&gb, [self.fileName UTF8String]);
         GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+        GB_debugger_clear_symbols(&gb);
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
     }];
