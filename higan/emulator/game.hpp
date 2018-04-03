@@ -7,7 +7,7 @@ struct Game {
   struct Oscillator;
 
   inline auto load(string_view) -> void;
-  inline auto memory(string_view) -> maybe<Memory>;
+  inline auto memory(Markup::Node) -> maybe<Memory>;
   inline auto oscillator(natural = 0) -> maybe<Oscillator>;
 
   struct Memory {
@@ -19,7 +19,8 @@ struct Game {
     natural size;
     string category;
     string manufacturer;
-    string part;
+    string model;
+    string identity;
   };
 
   struct Oscillator {
@@ -56,7 +57,8 @@ auto Game::load(string_view text) -> void {
     memory.size = node["size"].natural();
     memory.category = node["category"].text();
     memory.manufacturer = node["manufacturer"].text();
-    memory.part = node["part"].text();
+    memory.model = node["model"].text();
+    memory.identity = node["identity"].text();
     memoryList.append(memory);
   }
 
@@ -67,9 +69,22 @@ auto Game::load(string_view text) -> void {
   }
 }
 
-auto Game::memory(string_view name) -> maybe<Memory> {
+auto Game::memory(Markup::Node node) -> maybe<Memory> {
+  if(!node) return nothing;
   for(auto& memory : memoryList) {
-    if(memory.name() == name) return memory;
+    auto type = node["type"].text();
+    auto size = node["size"].natural();
+    auto category = node["category"].text();
+    auto manufacturer = node["manufacturer"].text();
+    auto model = node["model"].text();
+    auto identity = node["identity"].text();
+    if(type && type != memory.type) continue;
+    if(size && size != memory.size) continue;
+    if(category && category != memory.category) continue;
+    if(manufacturer && manufacturer != memory.manufacturer) continue;
+    if(model && model != memory.model) continue;
+    if(identity && identity != memory.identity) continue;
+    return memory;
   }
   return nothing;
 }
@@ -80,7 +95,7 @@ auto Game::oscillator(natural index) -> maybe<Oscillator> {
 }
 
 auto Game::Memory::name() const -> string {
-  if(part) return string{part, ".", category, ".", type}.downcase();
+  if(manufacturer) return string{manufacturer, ".", category, ".", type}.downcase();
   return string{category, ".", type}.downcase();
 }
 

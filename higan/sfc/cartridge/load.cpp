@@ -59,8 +59,8 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
     }
   }
 
-  if(auto node = board["rom"]) loadROM(node);
-  if(auto node = board["ram"]) loadRAM(node);
+  if(auto node = board["memory(type=ROM)"]) loadROM(node);
+  if(auto node = board["memory(type=RAM)"]) loadRAM(node);
   if(auto node = board["icd"]) loadICD(node);
   if(auto node = board["mcc"]) loadMCC(node);
   if(auto node = board["bsmemory"]) loadBSMemoryPack(node);
@@ -223,17 +223,17 @@ auto Cartridge::loadSuperFX(Markup::Node node) -> void {
 auto Cartridge::loadARMDSP(Markup::Node node) -> void {
   has.ARMDSP = true;
 
-  if(auto memory = game.memory(node["prom/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=ROM,category=Program)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(128 * 1024)) armdsp.programROM[n] = fp->read();
     }
   }
-  if(auto memory = game.memory(node["drom/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range( 32 * 1024)) armdsp.dataROM[n] = fp->read();
     }
   }
-  if(auto memory = game.memory(node["ram/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       for(auto n : range( 16 * 1024)) armdsp.programRAM[n] = fp->read();
     }
@@ -255,12 +255,12 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   for(auto& word : hitachidsp.dataROM) word = 0x000000;
   for(auto& word : hitachidsp.dataRAM) word = 0x00;
 
-  if(auto memory = game.memory(node["drom/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(1 * 1024)) hitachidsp.dataROM[n] = fp->readl(3);
     }
   }
-  if(auto memory = game.memory(node["dram/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       for(auto n : range(3 * 1024)) hitachidsp.dataRAM[n] = fp->readl(1);
     }
@@ -290,17 +290,17 @@ auto Cartridge::loadNECDSP(Markup::Node node) -> void {
   if(necdsp.revision == NECDSP::Revision::uPD7725 ) memory::assign(size,  2048, 1024,  256);
   if(necdsp.revision == NECDSP::Revision::uPD96050) memory::assign(size, 16384, 2048, 2048);
 
-  if(auto memory = game.memory(node["prom/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=ROM,category=Program)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(size[0])) necdsp.programROM[n] = fp->readl(3);
     }
   }
-  if(auto memory = game.memory(node["drom/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(size[1])) necdsp.dataROM[n] = fp->readl(2);
     }
   }
-  if(auto memory = game.memory(node["dram/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=RAM,category=Data"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       for(auto n : range(size[2])) necdsp.dataRAM[n] = fp->readl(2);
     }
@@ -314,7 +314,7 @@ auto Cartridge::loadEpsonRTC(Markup::Node node) -> void {
   has.EpsonRTC = true;
 
   epsonrtc.initialize();
-  if(auto memory = game.memory(node["ram/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=RTC)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       uint8 data[16] = {0};
       for(auto& byte : data) byte = fp->read();
@@ -329,7 +329,7 @@ auto Cartridge::loadSharpRTC(Markup::Node node) -> void {
   has.SharpRTC = true;
 
   sharprtc.initialize();
-  if(auto memory = game.memory(node["ram/name"].text())) {
+  if(auto memory = game.memory(node["memory(type=RTC)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       uint8 data[16] = {0};
       for(auto& byte : data) byte = fp->read();
@@ -382,7 +382,7 @@ auto Cartridge::loadMSU1(Markup::Node node) -> void {
 
 auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, maybe<uint> id) -> void {
   if(!id) id = pathID();
-  if(auto memory = game.memory(node["name"].text())) {
+  if(auto memory = game.memory(node)) {
     ram.allocate(memory->size);
     if(memory->type == "RAM" && !memory->battery) return;
     if(memory->type == "RTC" && !memory->battery) return;

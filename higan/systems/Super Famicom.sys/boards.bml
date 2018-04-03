@@ -1,5 +1,5 @@
 database
-  revision: 2018-03-13
+  revision: 2018-04-03
 
 //Boards (Production)
 
@@ -533,292 +533,291 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-03-04
+  revision: 2018-04-03
 
 board: ARM-LOROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-6f,c0-ef:0000-7fff mask=0x8000
-  ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-ffff
-  armdsp frequency=21477272
+  armdsp
     map address=00-3f,80-bf:3800-38ff
-    prom
-    drom
-    ram
+    memory type=ROM category=Program manufacturer=ARM
+    memory type=ROM category=Data manufacturer=ARM
+    memory type=RAM category=Data manufacturer=ARM
+    oscillator
 
 board: BS-HIROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-1f,80-9f:8000-ffff
     map address=40-5f,c0-df:0000-ffff
-  ram
+  memory type=RAM category=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
   bsmemory
     map address=20-3f,a0-bf:8000-ffff
     map address=60-7d,e0-ff:0000-ffff
 
 board: BS-LOROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-1f:8000-ffff base=0x000000 mask=0x8000
     map address=20-3f:8000-ffff base=0x100000 mask=0x8000
     map address=80-9f:8000-ffff base=0x200000 mask=0x8000
     map address=a0-bf:8000-ffff base=0x100000 mask=0x8000
-  ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
   bsmemory
     map address=c0-ef:0000-ffff
 
 board: BS-MCC-RAM
-  ram
+  memory type=RAM category=Save
     map address=10-1f:5000-5fff mask=0xf000
   mcc
     map address=00-0f:5000
     map=mcu address=00-3f,80-bf:8000-ffff mask=0x408000
     map=mcu address=40-7d,c0-ff:0000-ffff
-    rom
-    ram
+    memory type=ROM category=Program
+    memory type=RAM category=Download
       map address=00-3f,80-bf:6000-7fff mask=0xe000
     bsmemory
 
 board: BS-SA1-RAM
   sa1
     map address=00-3f,80-bf:2200-23ff
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
-    bwram
+    memory type=RAM category=Bitmap
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
-    iram
+    memory type=RAM category=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
     bsmemory
 
 board: HIROM
-  rom name=program.rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
 
 board: HIROM-RAM
-  rom name=program.rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  ram name=save.ram
+  memory type=RAM category=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
 board: HIROMEX-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-3f:8000-ffff base=0x400000
     map address=40-7d:0000-ffff base=0x400000
     map address=80-bf:8000-ffff mask=0xc00000
     map address=c0-ff:0000-ffff mask=0xc00000
-  ram
+  memory type=RAM category=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
     map address=70-7d:0000-7fff
 
 board: HITACHI-LOROM
-  hitachidsp model=HG51B169 frequency=20000000
+  hitachidsp model=HG51BS169
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
     map address=70-77:0000-7fff
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
-    drom
-    dram
+    memory type=ROM category=Data manufacturer=Hitachi
+    memory type=RAM category=Data manufacturer=Hitachi
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
+    oscillator
 
 board: LOROM
-  rom name=program.rom
+  memory type=ROM category=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
 
 board: LOROM-RAM
-  rom name=program.rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram name=save.ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-ffff mask=0x8000
 
 board: LOROMEX-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
-  ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
 
 board: NEC-HIROM
-  rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  necdsp model=uPD7725 frequency=8000000
+  necdsp model=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
+    oscillator
 
 board: NEC-HIROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  ram
+  memory type=RAM category=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-  necdsp model=uPD7725 frequency=8000000
+  necdsp model=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
+    oscillator
 
 board: NEC-LOROM
-  rom
+  memory type=ROM category=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
-  necdsp model=uPD7725 frequency=8000000
+  necdsp model=uPD7725
     map address=30-3f,b0-bf:8000-ffff mask=0x3fff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
+    oscillator
 
 board: NEC-LOROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
-  ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-ffff
-  necdsp model=uPD7725 frequency=8000000
+  necdsp model=uPD7725
     map address=20-3f,a0-bf:8000-ffff mask=0x3fff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
+    oscillator
 
 board: NEC-LOROMEX-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
-  ram
+  memory type=RAM category=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  necdsp model=uPD7725 frequency=8000000
+  necdsp model=uPD7725
     map address=60-6f,e0-ef:0000-7fff mask=0x3fff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
+    oscillator
 
-board: NECEX-LOROM-BATTERY#11
-  rom
+board: NECEX-LOROM-BATTERY
+  memory type=ROM category=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050 frequency=11000000
+  necdsp model=uPD96050
     map address=60-67,e0-e7:0000-3fff
-    prom
-    drom
-    dram
+    memory type=ROM category=Program manufacturer=NEC
+    memory type=ROM category=Data manufacturer=NEC
+    memory type=RAM category=Data manufacturer=NEC
       map address=68-6f,e8-ef:0000-7fff mask=0x8000
-
-board: NECEX-LOROM-BATTERY#15
-  rom
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050 frequency=15000000
-    map address=60-67,e0-e7:0000-3fff
-    prom
-    drom
-    dram
-      map address=68-6f,e8-ef:0000-7fff mask=0x8000
+    oscillator
 
 board: OBC1-LOROM-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   obc1
     map address=00-3f,80-bf:6000-7fff mask=0xe000
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
-    ram
+    memory type=RAM category=Save
 
 board: RTC-HIROMEX-RAM
-  rom
+  memory type=ROM category=Program
     map address=00-3f:8000-ffff base=0x400000
     map address=40-7d:0000-ffff base=0x400000
     map address=80-bf:8000-ffff mask=0xc00000
     map address=c0-ff:0000-ffff mask=0xc00000
-  ram
+  memory type=RAM category=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
     map address=70-7d:0000-7fff
   sharprtc
     map address=00-3f,80-bf:2800-2801
-    ram
+    memory type=RTC manufacturer=Sharp
 
 board: SA1-RAM
   sa1
     map address=00-3f,80-bf:2200-23ff
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
-    bwram
+    memory type=RAM category=Bitmap
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
-    iram
+    memory type=RAM category=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SDD1
   sdd1
     map address=00-3f,80-bf:4800-480f
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
 
 board: SDD1-RAM
   sdd1
     map address=00-3f,80-bf:4800-480f
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
-    ram
+    memory type=RAM category=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
       map address=70-73:0000-ffff mask=0x8000
 
 board: SGB-LOROM
-  rom
+  memory type=ROM category=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
   icd revision=2
     map address=00-3f,80-bf:6000-67ff,7000-7fff
-    rom
+    memory type=ROM category=Boot manufacturer=Nintendo
+    oscillator
     gameboy
 
 board: SPC7110-RAM
   spc7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
-    map=mcu address=00-3f,80-bf:8000-ffff mask=0x800000
-    map=mcu address=c0-ff:0000-ffff mask=0xc00000
-    prom
-    drom
-    ram
+    map type=MCU address=00-3f,80-bf:8000-ffff mask=0x800000
+    map type=MCU address=c0-ff:0000-ffff mask=0xc00000
+    memory type=ROM category=Program
+    memory type=ROM category=Data
+    memory type=RAM category=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
 
 board: SPC7110-RTC-RAM
   spc7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
-    map=mcu address=00-3f,80-bf:8000-ffff mask=0x800000
-    map=mcu address=c0-ff:0000-ffff mask=0xc00000
-    prom
-    drom
-    ram
+    map type=MCU address=00-3f,80-bf:8000-ffff mask=0x800000
+    map type=MCU address=c0-ff:0000-ffff mask=0xc00000
+    memory type=ROM category=Program
+    memory type=ROM category=Data
+    memory type=RAM category=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
   epsonrtc
     map address=00-3f,80-bf:4800-4842
-    ram
+    memory type=RTC manufacturer=Epson
 
 board: ST-LOROM
-  rom
+  memory type=ROM category=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
   sufamiturbo
-    rom
+    memory type=ROM category=Program
       map address=20-3f,a0-bf:8000-ffff mask=0x8000
-    ram
+    memory type=RAM category=Save
       map address=60-6f,e0-ef:0000-ffff
   sufamiturbo
-    rom
+    memory type=ROM category=Program
       map address=40-5f,c0-df:0000-ffff mask=0x8000
-    ram
+    memory type=RAM category=Save
       map address=70-7d,f0-ff:0000-ffff
 
 board: SUPERFX-RAM
   superfx
     map address=00-3f,80-bf:3000-34ff
-    rom
+    memory type=ROM category=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
       map address=40-5f,c0-df:0000-ffff
-    ram
+    memory type=RAM category=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=70-71,f0-f1:0000-ffff
 
