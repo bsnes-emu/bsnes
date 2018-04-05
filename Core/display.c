@@ -366,11 +366,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         bg_enabled = true;
     }
     
-    if (!bg_enabled) {
-        gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
-    }
-    else {
-        uint8_t pixel = fifo_item->pixel;
+    {
+        uint8_t pixel = bg_enabled? fifo_item->pixel : 0;
         if (pixel && bg_priority) {
             draw_oam = false;
         }
