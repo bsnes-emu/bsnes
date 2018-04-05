@@ -658,7 +658,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             }
                             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
                             if (gb->is_cgb) {
-                                /* TODO: The timing is wrong (two reads a the same time)*/
+                                /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
+                                   This probably means the CGB has a 16-bit data bus for the VRAM. */
                                 gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + y / 8 * 32 + 0x2000];
                             }
                             gb->fetcher_x++;
