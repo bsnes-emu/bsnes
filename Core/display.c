@@ -654,6 +654,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             uint8_t y = fetcher_y(gb);
                             if (gb->is_cgb) {
                                 /* This value is cached on the CGB, so it cannot be used to mix tiles together */
+                                /* Todo: This is NOT true on CGB-B! This is likely the case for all CGBs prior to D.
+                                   Currently, SameBoy is emulating CGB-E, but if other revisions are added in the future
+                                   this should be taken care of*/
                                 gb->fetcher_y = y;
                             }
                             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
