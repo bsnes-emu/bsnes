@@ -576,6 +576,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
                 
                 while (gb->n_visible_objs != 0 &&
+                       (gb->position_in_line < 160 || gb->position_in_line >= (uint8_t)(-8)) &&
                        gb->obj_comperators[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
                     gb->n_visible_objs--;
                 }
