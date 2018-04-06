@@ -538,6 +538,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             return;
         }
         
+        /* Todo: This is writable, but glitchy, on CGB-B and CGB-D. */
         if (addr < 0xFEA0) {
             if (gb->accessed_oam_row == 0xa0) {
                 for (unsigned i = 0; i < 8; i++) {
