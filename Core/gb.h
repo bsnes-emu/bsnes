@@ -195,8 +195,9 @@ typedef struct {
     bool bg_priority; // For sprite FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
 } GB_fifo_item_t;
 
+#define GB_FIFO_LENGTH 16
 typedef struct {
-    GB_fifo_item_t fifo[16];
+    GB_fifo_item_t fifo[GB_FIFO_LENGTH];
     uint8_t read_end;
     uint8_t write_end;
 } GB_fifo_t;
@@ -430,6 +431,7 @@ struct GB_gameboy_internal_s {
         uint8_t extra_penalty_for_sprite_at_0;
         bool is_first_line_mode2;
         bool oam_interrupt_line;
+        bool ready_to_push;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

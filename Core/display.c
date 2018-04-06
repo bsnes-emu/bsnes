@@ -8,7 +8,7 @@
 
 static inline unsigned fifo_size(GB_fifo_t *fifo)
 {
-    return (fifo->write_end - fifo->read_end) & 0xF;
+    return (fifo->write_end - fifo->read_end) & (GB_FIFO_LENGTH - 1);
 }
 
 static void fifo_clear(GB_fifo_t *fifo)
@@ -20,7 +20,7 @@ static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
 {
     GB_fifo_item_t *ret = &fifo->fifo[fifo->read_end];
     fifo->read_end++;
-    fifo->read_end &= 0xF;
+    fifo->read_end &= (GB_FIFO_LENGTH - 1);
     return ret;
 }
 
@@ -38,7 +38,7 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             upper <<= 1;
             
             fifo->write_end++;
-            fifo->write_end &= 0xF;
+            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
     else {
@@ -53,7 +53,7 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             upper >>= 1;
             
             fifo->write_end++;
-            fifo->write_end &= 0xF;
+            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
 }
@@ -63,14 +63,14 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
     while (fifo_size(fifo) < 8) {
         fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {0,};
         fifo->write_end++;
-        fifo->write_end &= 0xF;
+        fifo->write_end &= (GB_FIFO_LENGTH - 1);
     }
     
     uint8_t flip_xor = flip_x? 0: 0x7;
     
     for (unsigned i = 8; i--;) {
         uint8_t pixel = (lower >> 7) | ((upper >> 7) << 1);
-        GB_fifo_item_t *target = &fifo->fifo[(fifo->read_end + (i ^ flip_xor)) & 0xF];
+        GB_fifo_item_t *target = &fifo->fifo[(fifo->read_end + (i ^ flip_xor)) & (GB_FIFO_LENGTH - 1)];
         if (pixel != 0 && (target->pixel == 0 || target->priority > priority)) {
             target->pixel = pixel;
             target->palette = palette;
@@ -329,7 +329,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     GB_fifo_item_t *oam_fifo_item = NULL;
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
-
+    
     if (!gb->bg_fifo_paused) {
         fifo_item = fifo_pop(&gb->bg_fifo);
         bg_priority = fifo_item->bg_priority;
@@ -556,6 +556,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->cycles_for_line = MODE2_LENGTH + 4;
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
+            /* Fill the FIFO with 8 pixels of "junk", it's going to be dropped anyway. */
+            fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
@@ -567,7 +569,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* The actual rendering cycle */
             gb->fetcher_divisor = false;
             gb->fetcher_state = GB_FETCHER_GET_TILE;
-            gb->bg_fifo_paused = true;
+            gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
             gb->in_window = false;
             while (true) {
@@ -636,7 +638,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->fetcher_x = 0;
                     gb->fetcher_state = GB_FETCHER_GET_TILE;
                 }
-                bool push = false;
+
                 if (gb->fetcher_divisor) {
                     
                     switch (gb->fetcher_state) {
@@ -720,8 +722,16 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         }
                         break;
                             
-                        case GB_FETCHER_SLEEP:
-                            push = true;
+                        case GB_FETCHER_SLEEP: {
+                            gb->cycles_for_line += gb->fetcher_stop_penalty;
+                            GB_SLEEP(gb, display, 19, gb->fetcher_stop_penalty);
+                            gb->fetcher_stop_penalty = 0;
+                            
+                            fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
+                                             gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
+                            gb->bg_fifo_paused = false;
+                            gb->oam_fifo_paused = false;
+                        }
                         break;
                     }
                     gb->fetcher_state++;
@@ -730,16 +740,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->fetcher_divisor ^= true;
                 
                 render_pixel_if_possible(gb);
-                if (push) {
-                    gb->cycles_for_line += gb->fetcher_stop_penalty;
-                    GB_SLEEP(gb, display, 19, gb->fetcher_stop_penalty);
-                    gb->fetcher_stop_penalty = 0;
-                    
-                    fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
-                                     gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
-                    gb->bg_fifo_paused = false;
-                    gb->oam_fifo_paused = false;
-                }
                 if (gb->position_in_line == 160) break;
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
