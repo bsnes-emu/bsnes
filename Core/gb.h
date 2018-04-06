@@ -411,14 +411,7 @@ struct GB_gameboy_internal_s {
         uint8_t current_tile;
         uint8_t current_tile_attributes;
         uint8_t current_tile_data[2];
-        enum {
-            GB_FETCHER_GET_TILE,
-            GB_FETCHER_GET_TILE_DATA_LOWER,
-            GB_FETCHER_GET_TILE_DATA_HIGH,
-            GB_FETCHER_SLEEP,
-            GB_FETCHER_MAX = GB_FETCHER_SLEEP,
-        } fetcher_state:8;
-        bool fetcher_divisor; // The fetcher runs at 2MHz
+        uint8_t fetcher_state;
         bool bg_fifo_paused;
         bool oam_fifo_paused;
         bool in_window;

@@ -399,6 +399,130 @@ static inline uint8_t fetcher_y(GB_gameboy_t *gb)
     return gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
 }
 
+static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
+{
+    typedef enum {
+        GB_FETCHER_GET_TILE,
+        GB_FETCHER_GET_TILE_DATA_LOWER,
+        GB_FETCHER_GET_TILE_DATA_HIGH,
+        GB_FETCHER_PUSH,
+        GB_FETCHER_SLEEP,
+    } fetcher_step_t;
+    
+    fetcher_step_t fetcher_state_machine [8] = {
+        GB_FETCHER_SLEEP,
+        GB_FETCHER_GET_TILE,
+        GB_FETCHER_SLEEP,
+        GB_FETCHER_GET_TILE_DATA_LOWER,
+        GB_FETCHER_SLEEP,
+        GB_FETCHER_GET_TILE_DATA_HIGH,
+        GB_FETCHER_SLEEP,
+        GB_FETCHER_PUSH,
+    };
+    
+    uint8_t delay = 0;
+    
+    switch (fetcher_state_machine[gb->fetcher_state]) {
+        case GB_FETCHER_GET_TILE: {
+            uint16_t map = 0x1800;
+            
+            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
+            if (gb->io_registers[GB_IO_LCDC] & 0x08 && !gb->in_window) {
+                map = 0x1C00;
+            }
+            else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
+                map = 0x1C00;
+            }
+            
+            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
+            uint8_t y = fetcher_y(gb);
+            if (gb->is_cgb) {
+                /* This value is cached on the CGB, so it cannot be used to mix tiles together */
+                /* Todo: This is NOT true on CGB-B! This is likely the case for all CGBs prior to D.
+                 Currently, SameBoy is emulating CGB-E, but if other revisions are added in the future
+                 this should be taken care of*/
+                gb->fetcher_y = y;
+            }
+            gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
+            if (gb->is_cgb) {
+                /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
+                 This probably means the CGB has a 16-bit data bus for the VRAM. */
+                gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + y / 8 * 32 + 0x2000];
+            }
+            gb->fetcher_x++;
+            gb->fetcher_x &= 0x1f;
+        }
+        break;
+            
+        case GB_FETCHER_GET_TILE_DATA_LOWER: {
+            uint8_t y_flip = 0;
+            uint16_t tile_address = 0;
+            uint8_t y = gb->is_cgb? gb->fetcher_y : fetcher_y(gb);
+            
+            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
+            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+                tile_address = gb->current_tile * 0x10;
+            }
+            else {
+                tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
+            }
+            if (gb->current_tile_attributes & 8) {
+                tile_address += 0x2000;
+            }
+            if (gb->current_tile_attributes & 0x40) {
+                y_flip = 0x7;
+            }
+            gb->current_tile_data[0] =
+            gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
+        }
+        break;
+            
+        case GB_FETCHER_GET_TILE_DATA_HIGH: {
+            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong.
+             Additionally, on the CGB mixing two tiles by changing the tileset bit
+             mid-fetching causes a glitched mixing of the two, in comparison to the
+             more logical DMG version. */
+            uint16_t tile_address = 0;
+            uint8_t y = gb->is_cgb? gb->fetcher_y : fetcher_y(gb);
+            
+            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+                tile_address = gb->current_tile * 0x10;
+            }
+            else {
+                tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
+            }
+            if (gb->current_tile_attributes & 8) {
+                tile_address += 0x2000;
+            }
+            uint8_t y_flip = 0;
+            if (gb->current_tile_attributes & 0x40) {
+                y_flip = 0x7;
+            }
+            gb->current_tile_data[1] =
+            gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
+        }
+        break;
+            
+        case GB_FETCHER_PUSH: {
+            
+            fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
+                             gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
+            gb->bg_fifo_paused = false;
+            gb->oam_fifo_paused = false;
+            delay = gb->fetcher_stop_penalty;
+            gb->fetcher_stop_penalty = 0;
+        }
+        break;
+            
+        case GB_FETCHER_SLEEP:
+        break;
+    }
+    
+    gb->fetcher_state++;
+    gb->fetcher_state &= 7;
+    return delay;
+}
+
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     GB_object_t *objects = (GB_object_t *) &gb->oam;
@@ -567,8 +691,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 10, 5);
 
             /* The actual rendering cycle */
-            gb->fetcher_divisor = false;
-            gb->fetcher_state = GB_FETCHER_GET_TILE;
+            gb->fetcher_state = 0;
             gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
             gb->in_window = false;
@@ -589,7 +712,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     if (gb->fetcher_stop_penalty == 0) {
                         /* TODO: figure out why the penalty works this way and actual access timings */
                         /* Penalty for interrupting the fetcher */
-                        gb->fetcher_stop_penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state * 2 + gb->fetcher_divisor];
+                        gb->fetcher_stop_penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state];
                         if (gb->obj_comperators[gb->n_visible_objs - 1] == 0) {
                             gb->fetcher_stop_penalty += gb->extra_penalty_for_sprite_at_0;
                         }
@@ -636,108 +759,14 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->bg_fifo_paused = true;
                     gb->oam_fifo_paused = true;
                     gb->fetcher_x = 0;
-                    gb->fetcher_state = GB_FETCHER_GET_TILE;
+                    gb->fetcher_state = 0;
                 }
-
-                if (gb->fetcher_divisor) {
-                    
-                    switch (gb->fetcher_state) {
-                        case GB_FETCHER_GET_TILE: {
-                            uint16_t map = 0x1800;
-                            
-                            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-                            if (gb->io_registers[GB_IO_LCDC] & 0x08 && !gb->in_window) {
-                                map = 0x1C00;
-                            }
-                            else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
-                                map = 0x1C00;
-                            }
-                            
-                            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-                            uint8_t y = fetcher_y(gb);
-                            if (gb->is_cgb) {
-                                /* This value is cached on the CGB, so it cannot be used to mix tiles together */
-                                /* Todo: This is NOT true on CGB-B! This is likely the case for all CGBs prior to D.
-                                   Currently, SameBoy is emulating CGB-E, but if other revisions are added in the future
-                                   this should be taken care of*/
-                                gb->fetcher_y = y;
-                            }
-                            gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
-                            if (gb->is_cgb) {
-                                /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
-                                   This probably means the CGB has a 16-bit data bus for the VRAM. */
-                                gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + y / 8 * 32 + 0x2000];
-                            }
-                            gb->fetcher_x++;
-                            gb->fetcher_x &= 0x1f;
-                        }
-                        break;
-                            
-                        case GB_FETCHER_GET_TILE_DATA_LOWER: {
-                            uint8_t y_flip = 0;
-                            uint16_t tile_address = 0;
-                            uint8_t y = gb->is_cgb? gb->fetcher_y : fetcher_y(gb);
-
-                            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-                            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
-                                tile_address = gb->current_tile * 0x10;
-                            }
-                            else {
-                                tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
-                            }
-                            if (gb->current_tile_attributes & 8) {
-                                tile_address += 0x2000;
-                            }
-                            if (gb->current_tile_attributes & 0x40) {
-                                y_flip = 0x7;
-                            }
-                            gb->current_tile_data[0] =
-                            gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
-                        }
-                        break;
-                        
-                        case GB_FETCHER_GET_TILE_DATA_HIGH: {
-                            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong.
-                               Additionally, on the CGB mixing two tiles by changing the tileset bit
-                               mid-fetching causes a glitched mixing of the two, in comparison to the
-                               more logical DMG version. */
-                            uint16_t tile_address = 0;
-                            uint8_t y = gb->is_cgb? gb->fetcher_y : fetcher_y(gb);
-                            
-                            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
-                                tile_address = gb->current_tile * 0x10;
-                            }
-                            else {
-                                tile_address =  (int8_t)gb->current_tile * 0x10 + 0x1000;
-                            }
-                            if (gb->current_tile_attributes & 8) {
-                                tile_address += 0x2000;
-                            }
-                            uint8_t y_flip = 0;
-                            if (gb->current_tile_attributes & 0x40) {
-                                y_flip = 0x7;
-                            }
-                            gb->current_tile_data[1] =
-                            gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
-                        }
-                        break;
-                            
-                        case GB_FETCHER_SLEEP: {
-                            gb->cycles_for_line += gb->fetcher_stop_penalty;
-                            GB_SLEEP(gb, display, 19, gb->fetcher_stop_penalty);
-                            gb->fetcher_stop_penalty = 0;
-                            
-                            fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
-                                             gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
-                            gb->bg_fifo_paused = false;
-                            gb->oam_fifo_paused = false;
-                        }
-                        break;
-                    }
-                    gb->fetcher_state++;
-                    gb->fetcher_state &= 3;
+                
+                {
+                    uint8_t fetcher_delay = advance_fetcher_state_machine(gb);
+                    gb->cycles_for_line += fetcher_delay;
+                    GB_SLEEP(gb, display, 19, fetcher_delay);
                 }
-                gb->fetcher_divisor ^= true;
                 
                 render_pixel_if_possible(gb);
                 if (gb->position_in_line == 160) break;
