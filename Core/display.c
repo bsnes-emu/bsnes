@@ -421,7 +421,6 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
     };
     
     uint8_t delay = 0;
-    
     switch (fetcher_state_machine[gb->fetcher_state]) {
         case GB_FETCHER_GET_TILE: {
             uint16_t map = 0x1800;
@@ -452,6 +451,7 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
             gb->fetcher_x++;
             gb->fetcher_x &= 0x1f;
         }
+        gb->fetcher_state++;
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER: {
@@ -475,6 +475,7 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
             gb->current_tile_data[0] =
             gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
         }
+        gb->fetcher_state++;
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH: {
@@ -501,24 +502,26 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
             gb->current_tile_data[1] =
             gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
         }
+        gb->fetcher_state++;
         break;
             
         case GB_FETCHER_PUSH: {
-            
+            if (fifo_size(&gb->bg_fifo) > 1) break;
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
             gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
-            delay = gb->fetcher_stop_penalty;
-            gb->fetcher_stop_penalty = 0;
+            gb->fetcher_state++;
         }
         break;
             
         case GB_FETCHER_SLEEP:
+        {
+            gb->fetcher_state++;
+        }
         break;
     }
     
-    gb->fetcher_state++;
     gb->fetcher_state &= 7;
     return delay;
 }
@@ -553,6 +556,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 24);
         GB_STATE(gb, display, 25);
         GB_STATE(gb, display, 26);
+        GB_STATE(gb, display, 27);
+        GB_STATE(gb, display, 28);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -709,12 +714,17 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                        (gb->io_registers[GB_IO_LCDC] & 2 || gb->is_cgb) &&
                        gb->obj_comperators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
-                    if (gb->fetcher_stop_penalty == 0) {
-                        /* TODO: figure out why the penalty works this way and actual access timings */
-                        /* Penalty for interrupting the fetcher */
-                        gb->fetcher_stop_penalty = (uint8_t[]){5, 4, 3, 2, 1, 0, 0, 0}[gb->fetcher_state];
+                    while (gb->fetcher_state < 5) {
+                        advance_fetcher_state_machine(gb);
+                        gb->cycles_for_line++;
+                        GB_SLEEP(gb, display, 27, 1);
+                    }
+                    
+                    if (gb->extra_penalty_for_sprite_at_0 != 0) {
                         if (gb->obj_comperators[gb->n_visible_objs - 1] == 0) {
-                            gb->fetcher_stop_penalty += gb->extra_penalty_for_sprite_at_0;
+                            gb->cycles_for_line += gb->extra_penalty_for_sprite_at_0;
+                            GB_SLEEP(gb, display, 28, gb->extra_penalty_for_sprite_at_0);
+                            gb->extra_penalty_for_sprite_at_0 = 0;
                         }
                     }
                     
