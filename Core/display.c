@@ -305,6 +305,11 @@ void GB_lcd_off(GB_gameboy_t *gb)
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 {
     if (gb->n_visible_objs == 10) return;
+    
+    /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
+    if (gb->dma_steps_left && (gb->dma_cycles >= 0 || gb->is_dma_restarting)) {
+        return;
+    }
 
     /* This reverse sorts the visible objects by location and priority */
     GB_object_t *objects = (GB_object_t *) &gb->oam;
@@ -729,7 +734,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     
                     gb->cycles_for_line += 6;
                     GB_SLEEP(gb, display, 20, 6);
+                    /* TODO: what does the PPU read if DMA is active? */
                     GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
+                    
                     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
                     uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
                     
