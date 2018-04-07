@@ -39,10 +39,8 @@ void GB_update_joyp(GB_gameboy_t *gb)
             break;
 
         case 0:
-            /* Todo: verifiy this is correct */
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i]) << i;
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i + 4]) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!(gb->keys[i] || gb->keys[i + 4])) << i;
             }
             break;
 
