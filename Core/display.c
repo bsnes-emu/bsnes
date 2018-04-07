@@ -399,7 +399,7 @@ static inline uint8_t fetcher_y(GB_gameboy_t *gb)
     return gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
 }
 
-static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
+static void advance_fetcher_state_machine(GB_gameboy_t *gb)
 {
     typedef enum {
         GB_FETCHER_GET_TILE,
@@ -420,7 +420,6 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_PUSH,
     };
     
-    uint8_t delay = 0;
     switch (fetcher_state_machine[gb->fetcher_state]) {
         case GB_FETCHER_GET_TILE: {
             uint16_t map = 0x1800;
@@ -523,7 +522,6 @@ static uint8_t advance_fetcher_state_machine(GB_gameboy_t *gb)
     }
     
     gb->fetcher_state &= 7;
-    return delay;
 }
 
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
@@ -548,7 +546,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 15);
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
-        GB_STATE(gb, display, 19);
+        // GB_STATE(gb, display, 19);
         GB_STATE(gb, display, 20);
         GB_STATE(gb, display, 21);
         GB_STATE(gb, display, 22);
@@ -720,6 +718,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         GB_SLEEP(gb, display, 27, 1);
                     }
                     
+                    /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
                     if (gb->extra_penalty_for_sprite_at_0 != 0) {
                         if (gb->obj_comperators[gb->n_visible_objs - 1] == 0) {
                             gb->cycles_for_line += gb->extra_penalty_for_sprite_at_0;
@@ -772,11 +771,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->fetcher_state = 0;
                 }
                 
-                {
-                    uint8_t fetcher_delay = advance_fetcher_state_machine(gb);
-                    gb->cycles_for_line += fetcher_delay;
-                    GB_SLEEP(gb, display, 19, fetcher_delay);
-                }
+                advance_fetcher_state_machine(gb);
                 
                 render_pixel_if_possible(gb);
                 if (gb->position_in_line == 160) break;
