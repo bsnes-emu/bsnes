@@ -505,7 +505,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         break;
             
         case GB_FETCHER_PUSH: {
-            if (fifo_size(&gb->bg_fifo) > 1) break;
+            if (fifo_size(&gb->bg_fifo) > 0) break;
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
             gb->bg_fifo_paused = false;
@@ -772,9 +772,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->fetcher_state = 0;
                 }
                 
-                advance_fetcher_state_machine(gb);
-                
                 render_pixel_if_possible(gb);
+                advance_fetcher_state_machine(gb);
+
                 if (gb->position_in_line == 160) break;
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
