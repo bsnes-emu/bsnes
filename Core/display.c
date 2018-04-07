@@ -84,19 +84,19 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
 
 
 /*
- Each line is 456 cycles, approximately:
+ Each line is 456 cycles. Without scrolling, sprites or a window::
  Mode 2 - 80  cycles / OAM Transfer
  Mode 3 - 172 cycles / Rendering
  Mode 0 - 204 cycles / HBlank
  
  Mode 1 is VBlank
- 
- Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
  */
 
+/* Todo: Clean up the glitched line 0 and get rid of these defines */
 #define MODE2_LENGTH (80)
 #define MODE3_LENGTH (172)
 #define MODE0_LENGTH (204)
+
 #define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
 #define LINES (144)
 #define WIDTH (160)
@@ -238,7 +238,7 @@ static void trigger_oam_interrupt(GB_gameboy_t *gb)
     }
 }
 
-/* Todo: A proper test ROM of cases where both the PPU and the CPU write to IF in the same M-cycle is needed. */
+/* Todo: When the CPU and PPU write to IF at the same T-cycle, the PPU write is ignored. */
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
@@ -438,7 +438,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 /* This value is cached on the CGB, so it cannot be used to mix tiles together */
                 /* Todo: This is NOT true on CGB-B! This is likely the case for all CGBs prior to D.
                  Currently, SameBoy is emulating CGB-E, but if other revisions are added in the future
-                 this should be taken care of*/
+                 this should be taken care of */
                 gb->fetcher_y = y;
             }
             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
@@ -479,8 +479,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
         case GB_FETCHER_GET_TILE_DATA_HIGH: {
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong.
-             Additionally, on the CGB mixing two tiles by changing the tileset bit
-             mid-fetching causes a glitched mixing of the two, in comparison to the
+             Additionally, on CGB-D and newer mixing two tiles by changing the tileset
+             bit mid-fetching causes a glitched mixing of the two, in comparison to the
              more logical DMG version. */
             uint16_t tile_address = 0;
             uint8_t y = gb->is_cgb? gb->fetcher_y : fetcher_y(gb);
@@ -736,6 +736,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     if (object->flags & 0x40) { /* Flip Y */
                         tile_y ^= height_16? 0xF : 7;
                     }
+                    /* Todo: I'm not 100% sure an access to OAM can't trigger the OAM bug while we're accessing this */
                     uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
                     
                     if (gb->cgb_mode && (object->flags & 0x8)) { /* Use VRAM bank 2 */
