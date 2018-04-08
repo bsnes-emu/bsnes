@@ -68,52 +68,51 @@ auto SuperFamicom::manifest() const -> string {
 
   if(auto size = romSize()) {
     if(board(0) == "SPC7110") size = 0x100000;
-    output.append(Memory{}.type("ROM").size(size).category("Program").text());
+    output.append(Memory{}.type("ROM").size(size).content("Program").text());
   }
 
   if(auto size = ramSize()) {
-    output.append(Memory{}.type("RAM").size(size).category("Save").battery(battery()).text());
+    output.append(Memory{}.type("RAM").size(size).content("Save").battery(battery()).text());
   }
 
   if(auto size = expansionRamSize()) {
-    output.append(Memory{}.type("RAM").size(size).category("Save").battery(battery()).text());
+    output.append(Memory{}.type("RAM").size(size).content("Save").battery(battery()).text());
   }
 
   if(0) {
   } else if(board(0) == "ARM") {
-    output.append(Memory{}.type("ROM").size(0x20000).category("Program").manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
-    output.append(Memory{}.type("ROM").size( 0x8000).category("Data"   ).manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
-    output.append(Memory{}.type("RAM").size( 0x4000).category("Data"   ).manufacturer("SETA").model("ARM6").identity(firmwareARM()).text());
+    output.append(Memory{}.type("ROM").size(0x20000).content("Program").manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
+    output.append(Memory{}.type("ROM").size( 0x8000).content("Data"   ).manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
+    output.append(Memory{}.type("RAM").size( 0x4000).content("Data"   ).manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
     output.append(Oscillator{}.frequency(21'440'000).text());
   } else if(board(0) == "BS" && board(1) == "MCC") {
-    output.append(Memory{}.type("RAM").size(0x80000).category("Download").battery().text());
+    output.append(Memory{}.type("RAM").size(0x80000).content("Download").battery().text());
   } else if(board(0) == "HITACHI") {
-    output.append(Memory{}.type("ROM").size(0xc00).category("Data").manufacturer("Hitachi").model("HG51BS169").identity(firmwareHITACHI()).text());
-    output.append(Memory{}.type("RAM").size(0xc00).category("Data").manufacturer("Hitachi").model("HG51BS169").identity(firmwareHITACHI()).text());
+    output.append(Memory{}.type("ROM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).text());
+    output.append(Memory{}.type("RAM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).text());
     output.append(Oscillator{}.frequency(20'000'000).text());
   } else if(board(0) == "NEC") {
-    output.append(Memory{}.type("ROM").size(0x1800).category("Program").manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
-    output.append(Memory{}.type("ROM").size( 0x800).category("Data"   ).manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
-    output.append(Memory{}.type("RAM").size( 0x200).category("Data"   ).manufacturer("NEC").model("uPD7725").identity(firmwareNEC()).text());
+    output.append(Memory{}.type("ROM").size(0x1800).content("Program").manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
+    output.append(Memory{}.type("ROM").size( 0x800).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
+    output.append(Memory{}.type("RAM").size( 0x200).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
     output.append(Oscillator{}.frequency(7'600'000).text());
   } else if(board(0) == "NECEX") {
-    output.append(Memory{}.type("ROM").size(0xc000).category("Program").manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
-    output.append(Memory{}.type("ROM").size(0x1000).category("Data"   ).manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
-    output.append(Memory{}.type("RAM").size(0x1000).category("Data"   ).manufacturer("NEC").model("uPD96050").identity(firmwareNECEX()).text());
+    output.append(Memory{}.type("ROM").size(0xc000).content("Program").manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
+    output.append(Memory{}.type("ROM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
+    output.append(Memory{}.type("RAM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
     output.append(Oscillator{}.frequency(firmwareNECEX() == "ST010" ? 11'000'000 : 15'000'000).text());
   } else if(board(0) == "RTC") {
-    output.append(Memory{}.type("RTC").size(0x10).category("Time").battery().text());
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").battery().text());
   } else if(board(0) == "SA1") {
-    output.append(Memory{}.type("RAM").size(0x800).category("Internal").text());
+    output.append(Memory{}.type("RAM").size(0x800).content("Internal").text());
   } else if(board(0) == "SGB") {
-    string model = firmwareSGB() == "SGB1" ? "DMG" : "MGB";
-    output.append(Memory{}.type("ROM").size(0x100).category("Boot").manufacturer("Nintendo").model(model).identity(firmwareSGB()).text());
+    output.append(Memory{}.type("ROM").size(0x100).content("Boot").manufacturer("Nintendo").architecture("LR35902").identifier(firmwareSGB()).text());
   if(firmwareSGB() == "SGB2")
     output.append(Oscillator{}.frequency(20'971'520).text());
   } else if(board(0) == "SPC7110") {
-    output.append(Memory{}.type("ROM").size(romSize() - 0x100000).category("Data").text());
+    output.append(Memory{}.type("ROM").size(romSize() - 0x100000).content("Data").text());
   if(board(1) == "RTC")
-    output.append(Memory{}.type("RTC").size(0x10).category("Time").battery().text());
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").battery().text());
   } else if(board(0) == "SUPERFX") {
   //todo: MARIO CHIP 1 uses CPU oscillator
     output.append(Oscillator{}.frequency(21'440'000).text());

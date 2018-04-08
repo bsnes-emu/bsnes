@@ -30,9 +30,9 @@ auto SufamiTurbo::manifest() const -> string {
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
 if(ramSize)
-  output.append(Memory{}.type("RAM").size(ramSize).category("Save").battery().text());
+  output.append(Memory{}.type("RAM").size(ramSize).content("Save").battery().text());
   return output;
 }
 

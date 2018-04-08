@@ -7,13 +7,13 @@ auto Memory::text() const -> string {
 if(_battery)
   output.append("        battery\n");
   output.append("      size: 0x", hex(_size), "\n");
-  output.append("      category: ", _category, "\n");
+  output.append("      content: ", _content, "\n");
 if(_manufacturer)
   output.append("      manufacturer: ", _manufacturer, "\n");
-if(_model)
-  output.append("      model: ", _model, "\n");
-if(_identity)
-  output.append("      identity: ", _identity, "\n");
+if(_architecture)
+  output.append("      architecture: ", _architecture, "\n");
+if(_identifier)
+  output.append("      identifier: ", _identifier, "\n");
   return output;
 }
 

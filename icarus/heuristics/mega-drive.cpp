@@ -75,9 +75,9 @@ auto MegaDrive::manifest() const -> string {
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  region: ", regions.left(), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
   if(ramSize && ramMode != "none") {
-    output.append(Memory{}.type("RAM").size(ramSize).category("Save").text());
+    output.append(Memory{}.type("RAM").size(ramSize).content("Save").text());
     output.append("      mode: ", ramMode, "\n");
     output.append("      offset: 0x", hex(ramFrom), "\n");
   }

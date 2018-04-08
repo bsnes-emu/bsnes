@@ -17,10 +17,10 @@ struct Game {
     string type;
     boolean battery;
     natural size;
-    string category;
+    string content;
     string manufacturer;
-    string model;
-    string identity;
+    string architecture;
+    string identifier;
   };
 
   struct Oscillator {
@@ -55,10 +55,10 @@ auto Game::load(string_view text) -> void {
     memory.type = node["type"].text();
     memory.battery = (bool)node["type/battery"];
     memory.size = node["size"].natural();
-    memory.category = node["category"].text();
+    memory.content = node["content"].text();
     memory.manufacturer = node["manufacturer"].text();
-    memory.model = node["model"].text();
-    memory.identity = node["identity"].text();
+    memory.architecture = node["architecture"].text();
+    memory.identifier = node["identifier"].text();
     memoryList.append(memory);
   }
 
@@ -74,16 +74,16 @@ auto Game::memory(Markup::Node node) -> maybe<Memory> {
   for(auto& memory : memoryList) {
     auto type = node["type"].text();
     auto size = node["size"].natural();
-    auto category = node["category"].text();
+    auto content = node["content"].text();
     auto manufacturer = node["manufacturer"].text();
-    auto model = node["model"].text();
-    auto identity = node["identity"].text();
+    auto architecture = node["architecture"].text();
+    auto identifier = node["identifier"].text();
     if(type && type != memory.type) continue;
     if(size && size != memory.size) continue;
-    if(category && category != memory.category) continue;
+    if(content && content != memory.content) continue;
     if(manufacturer && manufacturer != memory.manufacturer) continue;
-    if(model && model != memory.model) continue;
-    if(identity && identity != memory.identity) continue;
+    if(architecture && architecture != memory.architecture) continue;
+    if(identifier && identifier != memory.identifier) continue;
     return memory;
   }
   return nothing;
@@ -95,8 +95,8 @@ auto Game::oscillator(natural index) -> maybe<Oscillator> {
 }
 
 auto Game::Memory::name() const -> string {
-  if(manufacturer) return string{manufacturer, ".", category, ".", type}.downcase();
-  return string{category, ".", type}.downcase();
+  if(manufacturer) return string{manufacturer, ".", content, ".", type}.downcase();
+  return string{content, ".", type}.downcase();
 }
 
 }

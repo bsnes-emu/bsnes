@@ -129,10 +129,10 @@ auto ListWindow::loadDatabase(string location) -> void {
         component.memory.type = object["type"].text();
         component.memory.battery = (bool)object["type/battery"];
         component.memory.size = object["size"].text();
-        component.memory.category = object["category"].text();
+        component.memory.content = object["content"].text();
         component.memory.manufacturer = object["manufacturer"].text();
-        component.memory.model = object["model"].text();
-        component.memory.identity = object["identity"].text();
+        component.memory.architecture = object["architecture"].text();
+        component.memory.identifier = object["identifier"].text();
       }
       if(object.name() == "oscillator") {
         component.type = Component::Type::Oscillator;
@@ -187,13 +187,13 @@ auto ListWindow::saveDatabase(string location) -> void {
       if(component.memory.battery)
         fp.print("        battery\n");
         fp.print("      size: ", component.memory.size, "\n");
-        fp.print("      category: ", component.memory.category, "\n");
+        fp.print("      content: ", component.memory.content, "\n");
       if(component.memory.manufacturer)
         fp.print("      manufacturer: ", component.memory.manufacturer, "\n");
-      if(component.memory.model)
-        fp.print("      model: ", component.memory.model, "\n");
-      if(component.memory.identity)
-        fp.print("      identity: ", component.memory.identity, "\n");
+      if(component.memory.architecture)
+        fp.print("      architecture: ", component.memory.architecture, "\n");
+      if(component.memory.identifier)
+        fp.print("      identifier: ", component.memory.identifier, "\n");
       }
 
       if(component.type == Component::Type::Oscillator) {
@@ -369,13 +369,13 @@ auto GameWindow::reloadList() -> void {
       item.setText({index, "Memory"});
       item.append(TreeViewItem().setText({"Type: ", component.memory.type, component.memory.battery ? " + Battery" : ""}));
       item.append(TreeViewItem().setText({"Size: ", component.memory.size}));
-      item.append(TreeViewItem().setText({"Category: ", component.memory.category}));
+      item.append(TreeViewItem().setText({"Content: ", component.memory.content}));
     if(component.memory.manufacturer)
       item.append(TreeViewItem().setText({"Manufacturer: ", component.memory.manufacturer}));
-    if(component.memory.model)
-      item.append(TreeViewItem().setText({"Model: ", component.memory.model}));
-    if(component.memory.identity)
-      item.append(TreeViewItem().setText({"Identity: ", component.memory.identity}));
+    if(component.memory.architecture)
+      item.append(TreeViewItem().setText({"Architecture: ", component.memory.architecture}));
+    if(component.memory.identifier)
+      item.append(TreeViewItem().setText({"Identifier: ", component.memory.identifier}));
     }
 
     if(component.type == Component::Type::Oscillator) {
@@ -460,19 +460,19 @@ MemoryWindow::MemoryWindow() {
   typeEdit.onChange([&] { modified = true, updateWindow(); });
   sizeLabel.setText("Size:").setAlignment(1.0);
   sizeEdit.onChange([&] { modified = true, updateWindow(); });
-  categoryLabel.setText("Category:").setAlignment(1.0);
-  categoryEdit.append(ComboEditItem().setText("Program"));
-  categoryEdit.append(ComboEditItem().setText("Data"));
-  categoryEdit.append(ComboEditItem().setText("Character"));
-  categoryEdit.append(ComboEditItem().setText("Save"));
-  categoryEdit.append(ComboEditItem().setText("Time"));
-  categoryEdit.onChange([&] { modified = true, updateWindow(); });
+  contentLabel.setText("Content:").setAlignment(1.0);
+  contentEdit.append(ComboEditItem().setText("Program"));
+  contentEdit.append(ComboEditItem().setText("Data"));
+  contentEdit.append(ComboEditItem().setText("Character"));
+  contentEdit.append(ComboEditItem().setText("Save"));
+  contentEdit.append(ComboEditItem().setText("Time"));
+  contentEdit.onChange([&] { modified = true, updateWindow(); });
   manufacturerLabel.setText("Manufacturer:").setAlignment(1.0);
   manufacturerEdit.onChange([&] { modified = true, updateWindow(); });
-  modelLabel.setText("Model:").setAlignment(1.0);
-  modelEdit.onChange([&] { modified = true, updateWindow(); });
-  identityLabel.setText("Identity:").setAlignment(1.0);
-  identityEdit.onChange([&] { modified = true, updateWindow(); });
+  architectureLabel.setText("Architecture:").setAlignment(1.0);
+  architectureEdit.onChange([&] { modified = true, updateWindow(); });
+  identifierLabel.setText("Identifier:").setAlignment(1.0);
+  identifierEdit.onChange([&] { modified = true, updateWindow(); });
   batteryOption.setText("Battery").onToggle([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
@@ -490,10 +490,10 @@ auto MemoryWindow::show(Memory memory) -> void {
 
   typeEdit.setText(memory.type);
   sizeEdit.setText(memory.size);
-  categoryEdit.setText(memory.category);
+  contentEdit.setText(memory.content);
   manufacturerEdit.setText(memory.manufacturer);
-  modelEdit.setText(memory.model);
-  identityEdit.setText(memory.identity);
+  architectureEdit.setText(memory.architecture);
+  identifierEdit.setText(memory.identifier);
   batteryOption.setChecked(memory.battery);
 
   updateWindow();
@@ -506,10 +506,10 @@ auto MemoryWindow::show(Memory memory) -> void {
 auto MemoryWindow::accept() -> void {
   memory.type = typeEdit.text().strip();
   memory.size = sizeEdit.text().strip();
-  memory.category = categoryEdit.text().strip();
+  memory.content = contentEdit.text().strip();
   memory.manufacturer = manufacturerEdit.text().strip();
-  memory.model = modelEdit.text().strip();
-  memory.identity = identityEdit.text().strip();
+  memory.architecture = architectureEdit.text().strip();
+  memory.identifier = identifierEdit.text().strip();
   memory.battery = batteryOption.checked() && (memory.type == "RAM" || memory.type == "RTC");
 
   Component component{Component::Type::Memory};
@@ -539,10 +539,10 @@ auto MemoryWindow::updateWindow() -> void {
   bool valid = true;
   typeEdit.setBackgroundColor(typeEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   sizeEdit.setBackgroundColor(sizeEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
-  categoryEdit.setBackgroundColor(categoryEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
+  contentEdit.setBackgroundColor(contentEdit.text().strip() ? Color{} : (valid = false, Color{255, 224, 224}));
   manufacturerEdit.setBackgroundColor(manufacturerEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  modelEdit.setBackgroundColor(modelEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  identityEdit.setBackgroundColor(identityEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  architectureEdit.setBackgroundColor(architectureEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
+  identifierEdit.setBackgroundColor(identifierEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   batteryOption.setEnabled(typeEdit.text().strip() == "RAM" || typeEdit.text().strip() == "RTC");
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Memory" : "Modify Memory Details"});

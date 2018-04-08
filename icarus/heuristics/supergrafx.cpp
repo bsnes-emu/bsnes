@@ -24,7 +24,7 @@ auto SuperGrafx::manifest() const -> string {
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
   return output;
 }
 

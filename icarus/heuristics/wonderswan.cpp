@@ -47,11 +47,11 @@ auto WonderSwan::manifest() const -> string {
   output.append("  name:        ", Location::prefix(location), "\n");
   output.append("  orientation: ", !orientation ? "horizontal" : "vertical", "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
 if(ramType && ramSize)
-  output.append(Memory{}.type(ramType).size(ramSize).category("Save").battery(ramType == "RAM").text());
+  output.append(Memory{}.type(ramType).size(ramSize).content("Save").battery(ramType == "RAM").text());
 if(hasRTC)
-  output.append(Memory{}.type("RTC").size(0x10).category("Time").text());
+  output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
   return output;
 }
 

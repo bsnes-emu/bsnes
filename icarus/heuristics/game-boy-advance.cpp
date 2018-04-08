@@ -53,14 +53,14 @@ auto GameBoyAdvance::manifest() const -> string {
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).category("Program").text());
+  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
   if(!list);
-  else if(list.left().beginsWith("SRAM_V"    )) output.append(Memory{}.type("RAM"   ).size( 0x8000).category("Save").text());
-  else if(list.left().beginsWith("SRAM_F_V"  )) output.append(Memory{}.type("RAM"   ).size( 0x8000).category("Save").text());
-  else if(list.left().beginsWith("EEPROM_V"  )) output.append(Memory{}.type("EEPROM").size(    0x0).category("Save").text());
-  else if(list.left().beginsWith("FLASH_V"   )) output.append(Memory{}.type("Flash" ).size(0x10000).category("Save").text());
-  else if(list.left().beginsWith("FLASH512_V")) output.append(Memory{}.type("Flash" ).size(0x10000).category("Save").text());
-  else if(list.left().beginsWith("FLASH1M_V" )) output.append(Memory{}.type("Flash" ).size(0x20000).category("Save").text());
+  else if(list.left().beginsWith("SRAM_V"    )) output.append(Memory{}.type("RAM"   ).size( 0x8000).content("Save").text());
+  else if(list.left().beginsWith("SRAM_F_V"  )) output.append(Memory{}.type("RAM"   ).size( 0x8000).content("Save").text());
+  else if(list.left().beginsWith("EEPROM_V"  )) output.append(Memory{}.type("EEPROM").size(    0x0).content("Save").text());
+  else if(list.left().beginsWith("FLASH_V"   )) output.append(Memory{}.type("Flash" ).size(0x10000).content("Save").text());
+  else if(list.left().beginsWith("FLASH512_V")) output.append(Memory{}.type("Flash" ).size(0x10000).content("Save").text());
+  else if(list.left().beginsWith("FLASH1M_V" )) output.append(Memory{}.type("Flash" ).size(0x20000).content("Save").text());
   return output;
 }
 

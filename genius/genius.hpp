@@ -2,10 +2,10 @@ struct Memory {
   string type;
   boolean battery;
   string size;
-  string category;
+  string content;
   string manufacturer;
-  string model;
-  string identity;
+  string architecture;
+  string identifier;
 };
 
 struct Oscillator {
@@ -136,18 +136,18 @@ private:
       ComboEdit typeEdit{&infoLayout, Size{~0, 0}};
       Label sizeLabel{&infoLayout, Size{0, 0}};
       LineEdit sizeEdit{&infoLayout, Size{~0, 0}};
-    HorizontalLayout categoryLayout{&layout, Size{~0, 0}};
-      Label categoryLabel{&categoryLayout, Size{80, 0}};
-      ComboEdit categoryEdit{&categoryLayout, Size{~0, 0}};
+    HorizontalLayout contentLayout{&layout, Size{~0, 0}};
+      Label contentLabel{&contentLayout, Size{80, 0}};
+      ComboEdit contentEdit{&contentLayout, Size{~0, 0}};
     HorizontalLayout manufacturerLayout{&layout, Size{~0, 0}};
       Label manufacturerLabel{&manufacturerLayout, Size{80, 0}};
       LineEdit manufacturerEdit{&manufacturerLayout, Size{~0, 0}};
-    HorizontalLayout modelLayout{&layout, Size{~0, 0}};
-      Label modelLabel{&modelLayout, Size{80, 0}};
-      LineEdit modelEdit{&modelLayout, Size{~0, 0}};
-    HorizontalLayout identityLayout{&layout, Size{~0, 0}};
-      Label identityLabel{&identityLayout, Size{80, 0}};
-      LineEdit identityEdit{&identityLayout, Size{~0, 0}};
+    HorizontalLayout architectureLayout{&layout, Size{~0, 0}};
+      Label architectureLabel{&architectureLayout, Size{80, 0}};
+      LineEdit architectureEdit{&architectureLayout, Size{~0, 0}};
+    HorizontalLayout identifierLayout{&layout, Size{~0, 0}};
+      Label identifierLabel{&identifierLayout, Size{80, 0}};
+      LineEdit identifierEdit{&identifierLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
       CheckLabel batteryOption{&controlLayout, Size{0, 0}};

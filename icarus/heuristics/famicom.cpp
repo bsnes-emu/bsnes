@@ -161,11 +161,11 @@ auto Famicom::manifest() const -> string {
     break;
   }
 
-  if(prgrom) output.append(Memory{}.type("ROM").size(prgrom).category("Program").text());
-  if(prgram) output.append(Memory{}.type("RAM").size(prgram).category("Save").battery().text());
+  if(prgrom) output.append(Memory{}.type("ROM").size(prgrom).content("Program").text());
+  if(prgram) output.append(Memory{}.type("RAM").size(prgram).content("Save").battery().text());
 
-  if(chrrom) output.append(Memory{}.type("ROM").size(chrrom).category("Character").text());
-  if(chrram) output.append(Memory{}.type("RAM").size(chrram).category("Character").text());
+  if(chrrom) output.append(Memory{}.type("ROM").size(chrrom).content("Character").text());
+  if(chrram) output.append(Memory{}.type("RAM").size(chrram).content("Character").text());
 
   return output;
 }
