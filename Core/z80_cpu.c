@@ -1438,6 +1438,6 @@ void GB_cpu_run(GB_gameboy_t *gb)
     if (gb->hdma_starting) {
         gb->hdma_starting = false;
         gb->hdma_on = true;
-        gb->hdma_cycles = 0;
+        gb->hdma_cycles = -8;
     }
 }

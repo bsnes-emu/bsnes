@@ -280,7 +280,7 @@ struct GB_gameboy_internal_s {
         bool hdma_on;
         bool hdma_on_hblank;
         uint8_t hdma_steps_left;
-        uint16_t hdma_cycles; // in 8MHz units
+        int16_t hdma_cycles; // in 8MHz units
         uint16_t hdma_current_src, hdma_current_dest;
 
         uint8_t dma_steps_left;
