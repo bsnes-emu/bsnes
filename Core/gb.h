@@ -437,6 +437,8 @@ struct GB_gameboy_internal_s {
             GB_MBC1M_WIRING,
         } mbc1_wiring;
 
+        unsigned pending_cycles;
+               
         /* Various RAMs */
         uint8_t *ram;
         uint8_t *vram;
