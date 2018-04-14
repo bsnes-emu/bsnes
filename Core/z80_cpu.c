@@ -6,23 +6,42 @@
 
 typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode);
 
-/*
- About memory timings:
- 
- Each M-cycle consists of 4 T-cycles. Every time the CPU accesses the memory it happens on the 1st T-cycle of an
- M-cycle. During that cycle, other things may happen, such the PPU drawing to the screen. Since we can't really run
- things in parallel, we run non-CPU "activities" serially using advnace_cycles(...). This is normally not a problem,
- unless two entities (e.g. both the CPU and the PPU) read the same register at the same time (e.g. BGP). Since memory
- accesses happen for an enitre T-cycle, if someone reads a value while someone else changes it during in the same
- T-cycle, the read will return the new value. To correctly emulate this, a memory access T-cycle looks like this:
- 
- - Perform memory write (If needed)
- - Run everything else
- - Perform memory read (If needed)
- 
- This is equivalent to running the memory write 1 T-cycle before the memory read.
- 
- */
+typedef enum {
+    /* Default behavior. If the CPU writes while another component reads, it reads the old value */
+    GB_CONFLICT_READ_OLD,
+    /* If the CPU writes while another component reads, it reads the new value */
+    GB_CONFLICT_READ_NEW,
+    /* If the CPU writes while another component reads, it reads a bitwise OR between the new and old values */
+    GB_CONFLICT_READ_OR,
+    /* If the CPU and another component write at the same time, the CPU's value "wins"*/
+    GB_CONFLICT_WRITE_CPU,
+} GB_conflict_t;
+
+static const GB_conflict_t cgb_conflict_map[0x80] = {
+    [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    
+    /* Todo: most values not verified, and probably differ between revisions */
+};
+
+static const GB_conflict_t dmg_conflict_map[0x80] = {
+    [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    
+    /* Todo: these are GB_CONFLICT_READ_NEW on MGB/SGB2 */
+    [GB_IO_BGP] = GB_CONFLICT_READ_OR,
+    [GB_IO_OBP0] = GB_CONFLICT_READ_OR,
+    [GB_IO_OBP1] = GB_CONFLICT_READ_OR,
+
+    /* Todo: These were verified on an SGB2 */
+    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_STAT] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
+    
+    /* Todo: these were not verified at all */
+    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
+    [GB_IO_WX] = GB_CONFLICT_READ_NEW,
+    [GB_IO_LYC] = GB_CONFLICT_READ_NEW,
+};
 
 static uint8_t cycle_read(GB_gameboy_t *gb, uint16_t addr)
 {
@@ -48,10 +67,40 @@ static uint8_t cycle_read_inc_oam_bug(GB_gameboy_t *gb, uint16_t addr)
 static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     assert(gb->pending_cycles);
-    GB_advance_cycles(gb, gb->pending_cycles - 1);
-    GB_write_memory(gb, addr, value);
-    GB_advance_cycles(gb, 1);
-    gb->pending_cycles = 4;
+    GB_conflict_t conflict = GB_CONFLICT_READ_OLD;
+    if ((addr & 0xFF80) == 0xFF00) {
+        conflict = (gb->is_cgb? cgb_conflict_map : dmg_conflict_map)[addr & 0x7F];
+    }
+    switch (conflict) {
+        case GB_CONFLICT_READ_OLD:
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 4;
+            return;
+            
+        case GB_CONFLICT_READ_NEW:
+            GB_advance_cycles(gb, gb->pending_cycles - 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 5;
+            return;
+            
+        case GB_CONFLICT_READ_OR: {
+            GB_advance_cycles(gb, gb->pending_cycles - 1);
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_write_memory(gb, addr, value | old_value);
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 4;
+            return;
+            
+        case GB_CONFLICT_WRITE_CPU:
+            GB_advance_cycles(gb, gb->pending_cycles + 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 3;
+            return;
+        }
+        
+    }
 }
 
 static void cycle_no_access(GB_gameboy_t *gb)
