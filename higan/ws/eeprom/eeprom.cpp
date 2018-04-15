@@ -4,13 +4,8 @@ namespace WonderSwan {
 
 #include "serialization.cpp"
 
-auto EEPROM::name() const -> string { return _name; }
 auto EEPROM::data() -> uint16* { return _data; }
 auto EEPROM::size() const -> uint { return _size; }
-
-auto EEPROM::setName(string name) -> void {
-  _name = name;
-}
 
 auto EEPROM::setSize(uint size) -> void {
   _size = bit::round(size);

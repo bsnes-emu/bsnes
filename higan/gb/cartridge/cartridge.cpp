@@ -48,8 +48,7 @@ auto Cartridge::load() -> bool {
     information.manifest = fp->reads();
   } else return false;
 
-  //todo: temporary hack so (type=) node lookup works; replace with a proper game/memory parser
-  auto document = BML::unserialize(string{information.manifest}.replace("type: ", "type:"));
+  auto document = BML::unserialize(information.manifest);
   information.title = document["game/label"].text();
 
   auto mapperID = document["game/board"].text();
@@ -69,31 +68,29 @@ auto Cartridge::load() -> bool {
   accelerometer = (bool)document["game/board/accelerometer"];
   rumble = (bool)document["game/board/rumble"];
 
-  if(auto node = document["game/memory(type=ROM)"]) {
-    rom.size = max(0x4000, node["size"].natural());
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    rom.size = max(0x4000, (uint)memory.size);
     rom.data = (uint8*)memory::allocate(rom.size, 0xff);
-    if(auto name = node["name"].text()) {
-      if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-        fp->read(rom.data, min(rom.size, fp->size()));
-      }
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
+      fp->read(rom.data, min(rom.size, fp->size()));
     }
   }
 
-  if(auto node = document["game/memory(type=NVRAM)"]) {
-    ram.size = node["size"].natural();
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    ram.size = memory.size;
     ram.data = (uint8*)memory::allocate(ram.size, 0xff);
-    if(auto name = node["name"].text()) {
-      if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Optional)) {
         fp->read(ram.data, min(ram.size, fp->size()));
       }
     }
   }
 
-  if(auto node = document["game/memory(type=RTC)"]) {
-    rtc.size = node["size"].natural();
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RTC,content=Time)"]}) {
+    rtc.size = memory.size;
     rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
-    if(auto name = node["name"].text()) {
-      if(auto fp = platform->open(pathID(), name, File::Read, File::Optional)) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Optional)) {
         fp->read(rtc.data, min(rtc.size, fp->size()));
       }
     }
@@ -104,19 +101,19 @@ auto Cartridge::load() -> bool {
 }
 
 auto Cartridge::save() -> void {
-  auto document = BML::unserialize(string{information.manifest}.replace("type: ", "type:"));
+  auto document = BML::unserialize(information.manifest);
 
-  if(auto node = document["game/memory(type=NVRAM)"]) {
-    if(auto name = node["name"].text()) {
-      if(auto fp = platform->open(pathID(), name, File::Write)) {
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
         fp->write(ram.data, ram.size);
       }
     }
   }
 
-  if(auto node = document["game/memory(type=RTC)"]) {
-    if(auto name = node["name"].text()) {
-      if(auto fp = platform->open(pathID(), name, File::Write)) {
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RTC,content=Time)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
         fp->write(rtc.data, rtc.size);
       }
     }

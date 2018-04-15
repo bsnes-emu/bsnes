@@ -49,7 +49,7 @@ auto WonderSwan::manifest() const -> string {
   output.append("  board\n");
   output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
 if(ramType && ramSize)
-  output.append(Memory{}.type(ramType).size(ramSize).content("Save").battery(ramType == "RAM").text());
+  output.append(Memory{}.type(ramType).size(ramSize).content("Save").text());
 if(hasRTC)
   output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
   return output;

@@ -34,7 +34,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
     if(side(0)) {
       auto result = _find(side(0));
       if(result.size() == 0) return false;
-      data = result[0].value();
+      data = result[0].text();  //strips whitespace so rules can match without requiring it
     }
 
     switch(comparator) {

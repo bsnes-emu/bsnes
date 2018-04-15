@@ -4,8 +4,6 @@ auto Memory::text() const -> string {
   string output;
   output.append("    memory\n");
   output.append("      type: ", _type, "\n");
-if(_battery)
-  output.append("        battery\n");
   output.append("      size: 0x", hex(_size), "\n");
   output.append("      content: ", _content, "\n");
 if(_manufacturer)
@@ -14,6 +12,8 @@ if(_architecture)
   output.append("      architecture: ", _architecture, "\n");
 if(_identifier)
   output.append("      identifier: ", _identifier, "\n");
+if(_volatile)
+  output.append("      volatile\n");
   return output;
 }
 

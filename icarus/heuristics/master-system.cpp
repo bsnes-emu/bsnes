@@ -25,7 +25,7 @@ auto MasterSystem::manifest() const -> string {
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board\n");
   output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
-  output.append(Memory{}.type("RAM").size(0x8000).content("Save").battery().text());
+  output.append(Memory{}.type("RAM").size(0x8000).content("Save").text());
   return output;
 }
 

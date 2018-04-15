@@ -27,30 +27,24 @@ auto Cartridge::load() -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
-  information.title = document["information/title"].text();
+  information.title = document["game/label"].text();
 
-  if(auto node = document["board/rom"]) {
-    rom.size = node["size"].natural();
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    rom.size = memory.size;
     rom.mask = bit::round(rom.size) - 1;
-    if(rom.size) {
-      rom.data = new uint8[rom.mask + 1];
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-          fp->read(rom.data, rom.size);
-        }
-      }
+    rom.data = new uint8[rom.mask + 1];
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
+      fp->read(rom.data, rom.size);
     }
   }
 
-  if(auto node = document["board/ram"]) {
-    ram.size = node["size"].natural();
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    ram.size = memory.size;
     ram.mask = bit::round(ram.size) - 1;
-    if(ram.size) {
-      ram.data = new uint8[ram.mask + 1];
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read)) {
-          fp->read(ram.data, ram.size);
-        }
+    ram.data = new uint8[ram.mask + 1];
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
+        fp->read(ram.data, ram.size);
       }
     }
   }
@@ -61,9 +55,11 @@ auto Cartridge::load() -> bool {
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
-  if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Write)) {
-      fp->write(ram.data, ram.size);
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
+        fp->write(ram.data, ram.size);
+      }
     }
   }
 }

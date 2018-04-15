@@ -162,10 +162,10 @@ auto Famicom::manifest() const -> string {
   }
 
   if(prgrom) output.append(Memory{}.type("ROM").size(prgrom).content("Program").text());
-  if(prgram) output.append(Memory{}.type("RAM").size(prgram).content("Save").battery().text());
+  if(prgram) output.append(Memory{}.type("RAM").size(prgram).content("Save").text());
 
   if(chrrom) output.append(Memory{}.type("ROM").size(chrrom).content("Character").text());
-  if(chrram) output.append(Memory{}.type("RAM").size(chrram).content("Character").text());
+  if(chrram) output.append(Memory{}.type("RAM").size(chrram).content("Character").isVolatile().text());
 
   return output;
 }

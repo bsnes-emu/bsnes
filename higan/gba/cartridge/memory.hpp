@@ -46,6 +46,8 @@ struct EEPROM {
 struct FLASH {
   uint8* data;
   uint size;
+  string manufacturer;
+
   uint16 id;
 
   bool unlockhi;

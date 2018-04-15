@@ -39,7 +39,6 @@ struct Board {
 
   struct Information {
     string type;
-    bool battery;
   } information;
 
   Memory prgrom;

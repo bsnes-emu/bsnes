@@ -18,45 +18,40 @@ auto Cartridge::load() -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
-  information.title = document["information/title"].text();
+  information.title = document["game/label"].text();
 
   if(information.region == "Auto") {
-    if(auto region = document["board/region"].text()) {
+    if(auto region = document["game/region"].text()) {
       information.region = region.upcase();
     } else {
       information.region = "NTSC-J";
     }
   }
 
-  if(auto node = document["board/rom"]) {
-    rom.size = node["size"].natural() >> 1;
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    rom.size = memory.size >> 1;
     rom.mask = bit::round(rom.size) - 1;
-    if(rom.size) {
-      rom.data = new uint16[rom.mask + 1]();
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-          for(uint n : range(rom.size)) rom.data[n] = fp->readm(2);
-        }
-      }
+    rom.data = new uint16[rom.mask + 1]();
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
+      for(uint n : range(rom.size)) rom.data[n] = fp->readm(2);
     }
   }
 
-  if(auto node = document["board/ram"]) {
-    if(auto mode = node["mode"].text()) {
+  //todo: handle mode, offset in Emulator::Game::Memory
+  if(auto memory = document["game/board/memory(type=RAM,content=Save)"]) {
+    if(auto mode = memory["mode"].text()) {
       if(mode == "lo"  ) ram.bits = 0x00ff;
       if(mode == "hi"  ) ram.bits = 0xff00;
       if(mode == "word") ram.bits = 0xffff;
     }
-    ram.size = node["size"].natural() >> (ram.bits == 0xffff);
+    ram.size = memory["size"].natural() >> (ram.bits == 0xffff);
     ram.mask = bit::round(ram.size) - 1;
-    if(ram.size) {
-      ram.data = new uint16[ram.mask + 1]();
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read)) {
-          for(uint n : range(ram.size)) {
-            if(ram.bits != 0xffff) ram.data[n] = fp->readm(1) * 0x0101;
-            if(ram.bits == 0xffff) ram.data[n] = fp->readm(2);
-          }
+    ram.data = new uint16[ram.mask + 1]();
+    if(!(bool)memory["volatile"]) {
+      if(auto fp = platform->open(pathID(), "save.ram", File::Read)) {
+        for(uint n : range(ram.size)) {
+          if(ram.bits != 0xffff) ram.data[n] = fp->readm(1) * 0x0101;
+          if(ram.bits == 0xffff) ram.data[n] = fp->readm(2);
         }
       }
     }
@@ -68,11 +63,13 @@ auto Cartridge::load() -> bool {
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
-  if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = platform->open(pathID(), name, File::Write)) {
-      for(uint n : range(ram.size)) {
-        if(ram.bits != 0xffff) fp->writem(ram.data[n], 1);
-        if(ram.bits == 0xffff) fp->writem(ram.data[n], 2);
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
+        for(uint n : range(ram.size)) {
+          if(ram.bits != 0xffff) fp->writem(ram.data[n], 1);
+          if(ram.bits == 0xffff) fp->writem(ram.data[n], 2);
+        }
       }
     }
   }

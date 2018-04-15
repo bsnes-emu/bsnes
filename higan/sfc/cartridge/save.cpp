@@ -52,8 +52,8 @@ auto Cartridge::saveSuperFX(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveARMDSP(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
-    if(memory->battery) {
+  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
+    if(memory->nonVolatile) {
       if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         for(auto n : range(16 * 1024)) fp->write(armdsp.programRAM[n]);
       }
@@ -64,8 +64,8 @@ auto Cartridge::saveARMDSP(Markup::Node node) -> void {
 auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
   saveMemory(hitachidsp.ram, node["ram"]);
 
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
-    if(memory->battery) {
+  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
+    if(memory->nonVolatile) {
       if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         for(auto n : range(3 * 1024)) fp->write(hitachidsp.dataRAM[n]);
       }
@@ -75,9 +75,9 @@ auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
 
 auto Cartridge::saveNECDSP(Markup::Node node) -> void {
   uint size = necdsp.revision == NECDSP::Revision::uPD7725 ? 256 : 2048;
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
-    if(memory->battery) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
+  if(auto memory = Emulator::Game::Memory{node["memory(type=RAM,content=Data)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Write)) {
         for(auto n : range(size)) fp->writel(necdsp.dataRAM[n], 2);
       }
     }
@@ -85,8 +85,8 @@ auto Cartridge::saveNECDSP(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RTC)"])) {
-    if(memory->battery) {
+  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
+    if(memory->nonVolatile) {
       if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         uint8 data[16] = {0};
         epsonrtc.save(data);
@@ -97,8 +97,8 @@ auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveSharpRTC(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RTC)"])) {
-    if(memory->battery) {
+  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
+    if(memory->nonVolatile) {
       if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
         uint8 data[16] = {0};
         sharprtc.save(data);
@@ -125,8 +125,8 @@ auto Cartridge::saveOBC1(Markup::Node node) -> void {
 auto Cartridge::saveMemory(MappedRAM& ram, Markup::Node node, maybe<uint> id) -> void {
   if(!id) id = pathID();
   if(auto memory = game.memory(node)) {
-    if(memory->type == "RAM" && !memory->battery) return;
-    if(memory->type == "RTC" && !memory->battery) return;
+    if(memory->type == "RAM" && !memory->nonVolatile) return;
+    if(memory->type == "RTC" && !memory->nonVolatile) return;
     if(auto fp = platform->open(id(), memory->name(), File::Write)) {
       fp->write(ram.data(), ram.size());
     }

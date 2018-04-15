@@ -32,7 +32,7 @@ auto SufamiTurbo::manifest() const -> string {
   output.append("  board\n");
   output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
 if(ramSize)
-  output.append(Memory{}.type("RAM").size(ramSize).content("Save").battery().text());
+  output.append(Memory{}.type("RAM").size(ramSize).content("Save").text());
   return output;
 }
 

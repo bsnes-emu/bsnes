@@ -11,19 +11,23 @@ struct Game {
   inline auto oscillator(natural = 0) -> maybe<Oscillator>;
 
   struct Memory {
+    Memory() = default;
+    inline Memory(Markup::Node);
     explicit operator bool() const { return type; }
     inline auto name() const -> string;
 
     string type;
-    boolean battery;
     natural size;
     string content;
     string manufacturer;
     string architecture;
     string identifier;
+    boolean nonVolatile;
   };
 
   struct Oscillator {
+    Oscillator() = default;
+    inline Oscillator(Markup::Node);
     explicit operator bool() const { return frequency; }
 
     natural frequency;
@@ -51,21 +55,11 @@ auto Game::load(string_view text) -> void {
   board = document["game/board"].text();
 
   for(auto node : document.find("game/board/memory")) {
-    Memory memory;
-    memory.type = node["type"].text();
-    memory.battery = (bool)node["type/battery"];
-    memory.size = node["size"].natural();
-    memory.content = node["content"].text();
-    memory.manufacturer = node["manufacturer"].text();
-    memory.architecture = node["architecture"].text();
-    memory.identifier = node["identifier"].text();
-    memoryList.append(memory);
+    memoryList.append(Memory{node});
   }
 
   for(auto node : document.find("game/board/oscillator")) {
-    Oscillator oscillator;
-    oscillator.frequency = node["frequency"].natural();
-    oscillatorList.append(oscillator);
+    oscillatorList.append(Oscillator{node});
   }
 }
 
@@ -94,9 +88,23 @@ auto Game::oscillator(natural index) -> maybe<Oscillator> {
   return nothing;
 }
 
+Game::Memory::Memory(Markup::Node node) {
+  type = node["type"].text();
+  size = node["size"].natural();
+  content = node["content"].text();
+  manufacturer = node["manufacturer"].text();
+  architecture = node["architecture"].text();
+  identifier = node["identifier"].text();
+  nonVolatile = !(bool)node["volatile"];
+}
+
 auto Game::Memory::name() const -> string {
-  if(manufacturer) return string{manufacturer, ".", content, ".", type}.downcase();
+  if(architecture) return string{architecture, ".", content, ".", type}.downcase();
   return string{content, ".", type}.downcase();
+}
+
+Game::Oscillator::Oscillator(Markup::Node node) {
+  frequency = node["frequency"].natural();
 }
 
 }

@@ -24,17 +24,13 @@ auto Cartridge::load() -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
-  information.title = document["information/title"].text();
+  information.title = document["game/label"].text();
 
-  if(auto node = document["board/rom"]) {
-    rom.size = node["size"].natural();
-    if(rom.size) {
-      rom.data = new uint8[rom.size]();
-      if(auto name = node["name"].text()) {
-        if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
-          fp->read(rom.data, rom.size);
-        }
-      }
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    rom.size = memory.size;
+    rom.data = new uint8[rom.size]();
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
+      fp->read(rom.data, rom.size);
     }
   }
 

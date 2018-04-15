@@ -242,12 +242,14 @@ auto GameBoy::manifest() const -> string {
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board:  ", mapper, "\n");
   output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
-if(ram && ramSize)
-  output.append(Memory{}.type("RAM").size(ramSize).content("Save").battery(battery).text());
+if(ram && ramSize && battery)
+  output.append(Memory{}.type("RAM").size(ramSize).content("Save").text());
+if(ram && ramSize && !battery)
+  output.append(Memory{}.type("RAM").size(ramSize).content("Save").isVolatile().text());
 if(flash && flashSize)
   output.append(Memory{}.type("Flash").size(flashSize).content("Download").text());
 if(rtc && rtcSize)
-  output.append(Memory{}.type("RTC").size(rtcSize).content("Time").battery().text());
+  output.append(Memory{}.type("RTC").size(rtcSize).content("Time").text());
 if(accelerometer)
   output.append("    accelerometer\n");
 if(rumble)

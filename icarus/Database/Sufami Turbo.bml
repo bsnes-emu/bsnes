@@ -1,10 +1,10 @@
 database
-  revision: 2018-03-13
+  revision: 2018-04-15
 
 //Sufami Turbo (JPN)
 
 database
-  revision: 2018-02-12
+  revision: 2018-04-14
 
 game
   sha256:   f73bda08743565e0bd101632ebbac2d363d703a3ab39d23f49d95217cab29269
@@ -16,7 +16,7 @@ game
     memory
       type: ROM
       size: 0x100000
-      category: Program
+      content: Program
   note: Unlinkable
 
 game
@@ -29,7 +29,7 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
   note: Unlinkable
 
 game
@@ -42,7 +42,7 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
   note: Unlinkable
 
 game
@@ -55,7 +55,7 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
   note: Unlinkable
 
 game
@@ -68,12 +68,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x800
-      category: Save
+      content: Save
   note: Linkable: SFT-0103-JPN
 
 game
@@ -86,12 +85,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -104,12 +102,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -122,12 +119,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -140,12 +136,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -158,12 +153,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -176,12 +170,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x2000
-      category: Save
+      content: Save
   note: Linkable: SFT-0104-JPN, SFT-0105-JPN, SFT-0107-JPN, SFT-0108-JPN, SFT-0110-JPN, SFT-0111-JPN
 
 game
@@ -194,12 +187,11 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x800
-      category: Save
+      content: Save
   note: Linkable: SFT-0101-JPN, SFT-0102-JPN
 
 game
@@ -212,11 +204,10 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
     memory
       type: RAM
-        battery
       size: 0x800
-      category: Save
+      content: Save
   note: Linkable: SFT-0101-JPN, SFT-0102-JPN
 

@@ -63,7 +63,6 @@ ListWindow::ListWindow() {
   reloadList();
   updateWindow();
   setCentered();
-  setVisible();
 }
 
 auto ListWindow::quit() -> void {
@@ -127,12 +126,12 @@ auto ListWindow::loadDatabase(string location) -> void {
       if(object.name() == "memory") {
         component.type = Component::Type::Memory;
         component.memory.type = object["type"].text();
-        component.memory.battery = (bool)object["type/battery"];
         component.memory.size = object["size"].text();
         component.memory.content = object["content"].text();
         component.memory.manufacturer = object["manufacturer"].text();
         component.memory.architecture = object["architecture"].text();
         component.memory.identifier = object["identifier"].text();
+        component.memory.Volatile = (bool)object["volatile"];
       }
       if(object.name() == "oscillator") {
         component.type = Component::Type::Oscillator;
@@ -184,8 +183,6 @@ auto ListWindow::saveDatabase(string location) -> void {
       if(component.type == Component::Type::Memory) {
         fp.print("    memory\n");
         fp.print("      type: ", component.memory.type, "\n");
-      if(component.memory.battery)
-        fp.print("        battery\n");
         fp.print("      size: ", component.memory.size, "\n");
         fp.print("      content: ", component.memory.content, "\n");
       if(component.memory.manufacturer)
@@ -194,6 +191,8 @@ auto ListWindow::saveDatabase(string location) -> void {
         fp.print("      architecture: ", component.memory.architecture, "\n");
       if(component.memory.identifier)
         fp.print("      identifier: ", component.memory.identifier, "\n");
+      if(component.memory.Volatile)
+        fp.print("      volatile\n");
       }
 
       if(component.type == Component::Type::Oscillator) {
@@ -367,7 +366,7 @@ auto GameWindow::reloadList() -> void {
     string index = {"[", counter++, "] "};
     if(component.type == Component::Type::Memory) {
       item.setText({index, "Memory"});
-      item.append(TreeViewItem().setText({"Type: ", component.memory.type, component.memory.battery ? " + Battery" : ""}));
+      item.append(TreeViewItem().setText({"Type: ", component.memory.type}));
       item.append(TreeViewItem().setText({"Size: ", component.memory.size}));
       item.append(TreeViewItem().setText({"Content: ", component.memory.content}));
     if(component.memory.manufacturer)
@@ -376,6 +375,8 @@ auto GameWindow::reloadList() -> void {
       item.append(TreeViewItem().setText({"Architecture: ", component.memory.architecture}));
     if(component.memory.identifier)
       item.append(TreeViewItem().setText({"Identifier: ", component.memory.identifier}));
+    if(component.memory.Volatile)
+      item.append(TreeViewItem().setText({"Volatile"}));
     }
 
     if(component.type == Component::Type::Oscillator) {
@@ -473,7 +474,7 @@ MemoryWindow::MemoryWindow() {
   architectureEdit.onChange([&] { modified = true, updateWindow(); });
   identifierLabel.setText("Identifier:").setAlignment(1.0);
   identifierEdit.onChange([&] { modified = true, updateWindow(); });
-  batteryOption.setText("Battery").onToggle([&] { modified = true, updateWindow(); });
+  volatileOption.setText("Volatile").onToggle([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });
   cancelButton.setText("Cancel").onActivate([&] { cancel(); });
 
@@ -494,7 +495,7 @@ auto MemoryWindow::show(Memory memory) -> void {
   manufacturerEdit.setText(memory.manufacturer);
   architectureEdit.setText(memory.architecture);
   identifierEdit.setText(memory.identifier);
-  batteryOption.setChecked(memory.battery);
+  volatileOption.setChecked(memory.Volatile);
 
   updateWindow();
   setCentered(*gameWindow);
@@ -510,7 +511,7 @@ auto MemoryWindow::accept() -> void {
   memory.manufacturer = manufacturerEdit.text().strip();
   memory.architecture = architectureEdit.text().strip();
   memory.identifier = identifierEdit.text().strip();
-  memory.battery = batteryOption.checked() && (memory.type == "RAM" || memory.type == "RTC");
+  memory.Volatile = volatileOption.checked() && (memory.type == "RAM" || memory.type == "RTC");
 
   Component component{Component::Type::Memory};
   component.memory = memory;
@@ -543,7 +544,7 @@ auto MemoryWindow::updateWindow() -> void {
   manufacturerEdit.setBackgroundColor(manufacturerEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   architectureEdit.setBackgroundColor(architectureEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
   identifierEdit.setBackgroundColor(identifierEdit.text().strip() ? Color{} : (Color{255, 255, 240}));
-  batteryOption.setEnabled(typeEdit.text().strip() == "RAM" || typeEdit.text().strip() == "RTC");
+  volatileOption.setEnabled(typeEdit.text().strip() == "RAM" || typeEdit.text().strip() == "RTC");
   acceptButton.setEnabled(valid);
   setTitle({modified ? "*" : "", create ? "Add New Memory" : "Modify Memory Details"});
 }
@@ -615,11 +616,25 @@ auto OscillatorWindow::updateWindow() -> void {
 //
 
 #include <nall/main.hpp>
-auto nall::main(string_vector) -> void {
+auto nall::main(string_vector args) -> void {
   Application::setName("genius");
   new ListWindow;
   new GameWindow;
   new MemoryWindow;
   new OscillatorWindow;
+
+  //internal command used to synchronize all genius databases from an old format to a new format
+  //if enabled, use with extreme caution and make backups first
+/*if(args.size() == 3 && args[1] == "--sync") {
+    for(auto& filename : directory::contents(args[2], "*.bml")) {
+      if(filename.beginsWith("Boards")) continue;
+      print(filename, "\n");
+      listWindow->loadDatabase({args[2], filename});
+      listWindow->saveDatabase({args[2], filename});
+    }
+    return print("[Done]\n");
+  }*/
+
+  listWindow->setVisible();
   Application::run();
 }

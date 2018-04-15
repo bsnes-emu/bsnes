@@ -13,7 +13,7 @@ struct SuperFamicom {
   auto romSize() const -> uint;
   auto ramSize() const -> uint;
   auto expansionRamSize() const -> uint;
-  auto battery() const -> bool;
+  auto nonVolatile() const -> bool;
 
 private:
   auto size() const -> uint { return data.size(); }
@@ -72,29 +72,29 @@ auto SuperFamicom::manifest() const -> string {
   }
 
   if(auto size = ramSize()) {
-    output.append(Memory{}.type("RAM").size(size).content("Save").battery(battery()).text());
+    output.append(Memory{}.type("RAM").size(size).content("Save").text());
   }
 
   if(auto size = expansionRamSize()) {
-    output.append(Memory{}.type("RAM").size(size).content("Save").battery(battery()).text());
+    output.append(Memory{}.type("RAM").size(size).content("Save").text());
   }
 
   if(0) {
   } else if(board(0) == "ARM") {
     output.append(Memory{}.type("ROM").size(0x20000).content("Program").manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
     output.append(Memory{}.type("ROM").size( 0x8000).content("Data"   ).manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
-    output.append(Memory{}.type("RAM").size( 0x4000).content("Data"   ).manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
+    output.append(Memory{}.type("RAM").size( 0x4000).content("Data"   ).manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).isVolatile().text());
     output.append(Oscillator{}.frequency(21'440'000).text());
   } else if(board(0) == "BS" && board(1) == "MCC") {
-    output.append(Memory{}.type("RAM").size(0x80000).content("Download").battery().text());
+    output.append(Memory{}.type("RAM").size(0x80000).content("Download").text());
   } else if(board(0) == "HITACHI") {
     output.append(Memory{}.type("ROM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).text());
-    output.append(Memory{}.type("RAM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).text());
+    output.append(Memory{}.type("RAM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).isVolatile().text());
     output.append(Oscillator{}.frequency(20'000'000).text());
   } else if(board(0) == "NEC") {
     output.append(Memory{}.type("ROM").size(0x1800).content("Program").manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
     output.append(Memory{}.type("ROM").size( 0x800).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
-    output.append(Memory{}.type("RAM").size( 0x200).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
+    output.append(Memory{}.type("RAM").size( 0x200).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).isVolatile().text());
     output.append(Oscillator{}.frequency(7'600'000).text());
   } else if(board(0) == "NECEX") {
     output.append(Memory{}.type("ROM").size(0xc000).content("Program").manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
@@ -102,9 +102,9 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("RAM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
     output.append(Oscillator{}.frequency(firmwareNECEX() == "ST010" ? 11'000'000 : 15'000'000).text());
   } else if(board(0) == "RTC") {
-    output.append(Memory{}.type("RTC").size(0x10).content("Time").battery().text());
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
   } else if(board(0) == "SA1") {
-    output.append(Memory{}.type("RAM").size(0x800).content("Internal").text());
+    output.append(Memory{}.type("RAM").size(0x800).content("Internal").isVolatile().text());
   } else if(board(0) == "SGB") {
     output.append(Memory{}.type("ROM").size(0x100).content("Boot").manufacturer("Nintendo").architecture("LR35902").identifier(firmwareSGB()).text());
   if(firmwareSGB() == "SGB2")
@@ -112,7 +112,7 @@ auto SuperFamicom::manifest() const -> string {
   } else if(board(0) == "SPC7110") {
     output.append(Memory{}.type("ROM").size(romSize() - 0x100000).content("Data").text());
   if(board(1) == "RTC")
-    output.append(Memory{}.type("RTC").size(0x10).content("Time").battery().text());
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
   } else if(board(0) == "SUPERFX") {
   //todo: MARIO CHIP 1 uses CPU oscillator
     output.append(Oscillator{}.frequency(21'440'000).text());
@@ -411,7 +411,7 @@ auto SuperFamicom::expansionRamSize() const -> uint {
   return 0;
 }
 
-auto SuperFamicom::battery() const -> bool {
+auto SuperFamicom::nonVolatile() const -> bool {
   auto cartridgeTypeLo = data[headerAddress + 0x26] & 15;
   return cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5 || cartridgeTypeLo == 0x6;
 }

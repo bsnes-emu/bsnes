@@ -223,17 +223,23 @@ auto Cartridge::loadSuperFX(Markup::Node node) -> void {
 auto Cartridge::loadARMDSP(Markup::Node node) -> void {
   has.ARMDSP = true;
 
-  if(auto memory = game.memory(node["memory(type=ROM,category=Program)"])) {
+  if(auto oscillator = game.oscillator()) {
+    armdsp.Frequency = oscillator->frequency;
+  } else {
+    armdsp.Frequency = 21'440'000;
+  }
+
+  if(auto memory = game.memory(node["memory(type=ROM,content=Program)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(128 * 1024)) armdsp.programROM[n] = fp->read();
     }
   }
-  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
+  if(auto memory = game.memory(node["memory(type=ROM,content=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range( 32 * 1024)) armdsp.dataROM[n] = fp->read();
     }
   }
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
+  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       for(auto n : range( 16 * 1024)) armdsp.programRAM[n] = fp->read();
     }
@@ -245,8 +251,11 @@ auto Cartridge::loadARMDSP(Markup::Node node) -> void {
 auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   has.HitachiDSP = true;
 
-  hitachidsp.Frequency = node["frequency"].natural();
-  if(hitachidsp.Frequency == 0) hitachidsp.Frequency = 20'000'000;
+  if(auto oscillator = game.oscillator()) {
+    hitachidsp.Frequency = oscillator->frequency;
+  } else {
+    hitachidsp.Frequency = 20'000'000;
+  }
   hitachidsp.Roms = roms;  //1 or 2
 
   loadMemory(hitachidsp.rom, node["rom"], File::Required);
@@ -255,12 +264,12 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   for(auto& word : hitachidsp.dataROM) word = 0x000000;
   for(auto& word : hitachidsp.dataRAM) word = 0x00;
 
-  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
+  if(auto memory = game.memory(node["memory(type=ROM,content=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(1 * 1024)) hitachidsp.dataROM[n] = fp->readl(3);
     }
   }
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data)"])) {
+  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       for(auto n : range(3 * 1024)) hitachidsp.dataRAM[n] = fp->readl(1);
     }
@@ -275,8 +284,12 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
 auto Cartridge::loadNECDSP(Markup::Node node) -> void {
   has.NECDSP = true;
 
-  necdsp.Frequency = node["frequency"].natural();
-  if(necdsp.Frequency == 0) necdsp.Frequency = 8000000;
+  if(auto oscillator = game.oscillator()) {
+    necdsp.Frequency = oscillator->frequency;
+  } else {
+    necdsp.Frequency = 7'600'000;
+  }
+
   necdsp.revision
   = node["model"].text() == "uPD7725"  ? NECDSP::Revision::uPD7725
   : node["model"].text() == "uPD96050" ? NECDSP::Revision::uPD96050
@@ -290,18 +303,18 @@ auto Cartridge::loadNECDSP(Markup::Node node) -> void {
   if(necdsp.revision == NECDSP::Revision::uPD7725 ) memory::assign(size,  2048, 1024,  256);
   if(necdsp.revision == NECDSP::Revision::uPD96050) memory::assign(size, 16384, 2048, 2048);
 
-  if(auto memory = game.memory(node["memory(type=ROM,category=Program)"])) {
+  if(auto memory = game.memory(node["memory(type=ROM,content=Program)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
       for(auto n : range(size[0])) necdsp.programROM[n] = fp->readl(3);
     }
   }
-  if(auto memory = game.memory(node["memory(type=ROM,category=Data)"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
+  if(auto memory = Emulator::Game::Memory{node["memory(type=ROM,content=Data)"]}) {
+    if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Read, File::Required)) {
       for(auto n : range(size[1])) necdsp.dataROM[n] = fp->readl(2);
     }
   }
-  if(auto memory = game.memory(node["memory(type=RAM,category=Data"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
+  if(auto memory = Emulator::Game::Memory{node["memory(type=RAM,content=Data)"]}) {
+    if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Read)) {
       for(auto n : range(size[2])) necdsp.dataRAM[n] = fp->readl(2);
     }
   }
@@ -314,7 +327,7 @@ auto Cartridge::loadEpsonRTC(Markup::Node node) -> void {
   has.EpsonRTC = true;
 
   epsonrtc.initialize();
-  if(auto memory = game.memory(node["memory(type=RTC)"])) {
+  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       uint8 data[16] = {0};
       for(auto& byte : data) byte = fp->read();
@@ -329,7 +342,7 @@ auto Cartridge::loadSharpRTC(Markup::Node node) -> void {
   has.SharpRTC = true;
 
   sharprtc.initialize();
-  if(auto memory = game.memory(node["memory(type=RTC)"])) {
+  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
     if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
       uint8 data[16] = {0};
       for(auto& byte : data) byte = fp->read();
@@ -384,8 +397,8 @@ auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, may
   if(!id) id = pathID();
   if(auto memory = game.memory(node)) {
     ram.allocate(memory->size);
-    if(memory->type == "RAM" && !memory->battery) return;
-    if(memory->type == "RTC" && !memory->battery) return;
+    if(memory->type == "RAM" && !memory->nonVolatile) return;
+    if(memory->type == "RTC" && !memory->nonVolatile) return;
     if(auto fp = platform->open(id(), memory->name(), File::Read, required)) {
       fp->read(ram.data(), ram.size());
     }

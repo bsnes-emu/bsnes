@@ -21,63 +21,57 @@
 
 Board::Board(Markup::Node& document) {
   cartridge.board = this;
-  auto board = document["board"];
+  information.type = document["game/board"].text();
 
-  information.type = board["id"].text();
-  information.battery = (bool)board["prg/ram/name"];
-
-  auto prom = board["prg/rom"];
-  auto pram = board["prg/ram"];
-  auto crom = board["chr/rom"];
-  auto cram = board["chr/ram"];
-
-  prgrom.size = prom["size"].natural();
-  prgram.size = pram["size"].natural();
-  chrrom.size = crom["size"].natural();
-  chrram.size = cram["size"].natural();
-
-  if(prgrom.size) prgrom.data = new uint8_t[prgrom.size]();
-  if(prgram.size) prgram.data = new uint8_t[prgram.size]();
-  if(chrrom.size) chrrom.data = new uint8_t[chrrom.size]();
-  if(chrram.size) chrram.data = new uint8_t[chrram.size]();
-
-  if(prgrom.name = prom["name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), prgrom.name, File::Read, File::Required)) {
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    if(prgrom.size = memory.size) prgrom.data = new uint8_t[prgrom.size]();
+    if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Read, File::Required)) {
       fp->read(prgrom.data, min(prgrom.size, fp->size()));
     }
   }
-  if(prgram.name = pram["name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), prgram.name, File::Read)) {
-      fp->read(prgram.data, min(prgram.size, fp->size()));
-    }
-  }
-  if(chrrom.name = crom["name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), chrrom.name, File::Read, File::Required)) {
-      fp->read(chrrom.data, min(chrrom.size, fp->size()));
-    }
-  }
-  if(chrram.name = cram["name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), chrram.name, File::Read)) {
-      fp->read(chrram.data, min(chrram.size, fp->size()));
+
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(prgram.size = memory.size) prgram.data = new uint8_t[prgram.size](), prgram.writable = true;
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Read)) {
+        fp->read(prgram.data, min(prgram.size, fp->size()));
+      }
     }
   }
 
-  prgram.writable = true;
-  chrram.writable = true;
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Character)"]}) {
+    if(chrrom.size = memory.size) chrrom.data = new uint8_t[chrrom.size]();
+    if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Read, File::Required)) {
+      fp->read(chrrom.data, min(chrrom.size, fp->size()));
+    }
+  }
+
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Character)"]}) {
+    if(chrram.size = memory.size) chrram.data = new uint8_t[chrram.size](), chrram.writable = true;
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Read)) {
+        fp->read(chrram.data, min(chrram.size, fp->size()));
+      }
+    }
+  }
 }
 
 auto Board::save() -> void {
   auto document = BML::unserialize(cartridge.manifest());
 
-  if(auto name = document["board/prg/ram/name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), name, File::Write)) {
-      fp->write(prgram.data, prgram.size);
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Write)) {
+        fp->write(prgram.data, prgram.size);
+      }
     }
   }
 
-  if(auto name = document["board/chr/ram/name"].text()) {
-    if(auto fp = platform->open(cartridge.pathID(), name, File::Write)) {
-      fp->write(chrram.data, chrram.size);
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Character)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(cartridge.pathID(), memory.name(), File::Write)) {
+        fp->write(chrram.data, chrram.size);
+      }
     }
   }
 }
@@ -138,9 +132,9 @@ auto Board::serialize(serializer& s) -> void {
 
 auto Board::load(string manifest) -> Board* {
   auto document = BML::unserialize(manifest);
-  cartridge.information.title = document["information/title"].text();
+  cartridge.information.title = document["game/label"].text();
 
-  string type = document["board/id"].text();
+  string type = document["game/board"].text();
 
   if(type == "BANDAI-FCG"  ) return new BandaiFCG(document);
 

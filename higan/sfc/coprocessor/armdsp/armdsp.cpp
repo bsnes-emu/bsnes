@@ -89,7 +89,7 @@ auto ArmDSP::power() -> void {
 
 auto ArmDSP::reset() -> void {
   ARM7TDMI::power();
-  create(ArmDSP::Enter, 21'477'272);
+  create(ArmDSP::Enter, Frequency);
 
   bridge.ready = false;
   bridge.signal = false;

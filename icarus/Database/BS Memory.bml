@@ -1,10 +1,10 @@
 database
-  revision: 2018-03-13
+  revision: 2018-04-15
 
 //BS Memory (JPN)
 
 database
-  revision: 2018-02-12
+  revision: 2018-04-14
 
 game
   sha256:   80c34b50817d58820bc8c88d2d9fa462550b4a76372e19c6467cbfbc8cf5d9ef
@@ -16,7 +16,7 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
 
 game
   sha256:   859c7f7b4771d920a5bdb11f1d247ab6b43fb026594d1062f6f72d32cd340a0a
@@ -28,7 +28,7 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
 
 game
   sha256:   c92a15fdd9b0133f9ea69105d0230a3acd1cdeef98567462eca86ea02a959e4e
@@ -40,5 +40,5 @@ game
     memory
       type: ROM
       size: 0x80000
-      category: Program
+      content: Program
 

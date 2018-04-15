@@ -35,59 +35,62 @@ auto Cartridge::load() -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
-  information.title = document["information/title"].text();
+  information.title = document["game/label"].text();
 
   hasSRAM   = false;
   hasEEPROM = false;
   hasFLASH  = false;
 
-  if(auto node = document["board/rom"]) {
-    mrom.size = min(32 * 1024 * 1024, node["size"].natural());
-    if(auto fp = platform->open(pathID(), node["name"].text(), File::Read, File::Required)) {
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
+    mrom.size = min(32 * 1024 * 1024, (uint)memory.size);
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
       fp->read(mrom.data, mrom.size);
     }
   }
 
-  if(auto node = document["board/ram"]) {
-    if(node["type"].text() == "sram") {
-      hasSRAM = true;
-      sram.size = min(32 * 1024, node["size"].natural());
-      sram.mask = sram.size - 1;
-      for(auto n : range(sram.size)) sram.data[n] = 0xff;
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    hasSRAM = true;
+    sram.size = min(32 * 1024, (uint)memory.size);
+    sram.mask = sram.size - 1;
+    for(auto n : range(sram.size)) sram.data[n] = 0xff;
 
-      if(auto fp = platform->open(pathID(), node["name"].text(), File::Read)) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
         fp->read(sram.data, sram.size);
       }
     }
+  }
 
-    if(node["type"].text() == "eeprom") {
-      hasEEPROM = true;
-      eeprom.size = min(8 * 1024, node["size"].natural());
-      eeprom.bits = eeprom.size <= 512 ? 6 : 14;
-      if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
-      eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
-      eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
-      for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=EEPROM,content=Save)"]}) {
+    hasEEPROM = true;
+    eeprom.size = min(8 * 1024, (uint)memory.size);
+    eeprom.bits = eeprom.size <= 512 ? 6 : 14;
+    if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
+    eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
+    eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
+    for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
 
-      if(auto fp = platform->open(pathID(), node["name"].text(), File::Read)) {
-        fp->read(eeprom.data, eeprom.size);
-      }
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
+      fp->read(eeprom.data, eeprom.size);
     }
+  }
 
-    if(node["type"].text() == "flash") {
-      hasFLASH = true;
-      flash.id = node["id"].natural();
-      flash.size = min(128 * 1024, node["size"].natural());
-      for(auto n : range(flash.size)) flash.data[n] = 0xff;
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=Flash,content=Save)"]}) {
+    hasFLASH = true;
+    flash.size = min(128 * 1024, (uint)memory.size);
+    flash.manufacturer = memory.manufacturer;
+    for(auto n : range(flash.size)) flash.data[n] = 0xff;
 
-      //if flash ID not provided; guess that it's a Macronix chip
-      //this will not work for all games; in which case, the ID must be specified manually
-      if(!flash.id && flash.size ==  64 * 1024) flash.id = 0x1cc2;
-      if(!flash.id && flash.size == 128 * 1024) flash.id = 0x09c2;
+    flash.id = 0;
+    if(flash.manufacturer == "Atmel"     && flash.size ==  64 * 1024) flash.id = 0x3d1f;
+    if(flash.manufacturer == "Macronix"  && flash.size ==  64 * 1024) flash.id = 0x1cc2;
+    if(flash.manufacturer == "Macronix"  && flash.size == 128 * 1024) flash.id = 0x09c2;
+    if(flash.manufacturer == "Panasonic" && flash.size ==  64 * 1024) flash.id = 0x1b32;
+    if(flash.manufacturer == "Sanyo"     && flash.size == 128 * 1024) flash.id = 0x1362;
+    if(flash.manufacturer == "SST"       && flash.size ==  64 * 1024) flash.id = 0xd4bf;
 
-      if(auto fp = platform->open(pathID(), node["name"].text(), File::Read)) {
-        fp->read(flash.data, flash.size);
-      }
+    if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
+      fp->read(flash.data, flash.size);
     }
   }
 
@@ -97,11 +100,24 @@ auto Cartridge::load() -> bool {
 
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
-  if(auto node = document["board/ram"]) {
-    if(auto fp = platform->open(pathID(), node["name"].text(), File::Write)) {
-      if(node["type"].text() == "sram") fp->write(sram.data, sram.size);
-      if(node["type"].text() == "eeprom") fp->write(eeprom.data, eeprom.size);
-      if(node["type"].text() == "flash") fp->write(flash.data, flash.size);
+
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
+        fp->write(sram.data, sram.size);
+      }
+    }
+  }
+
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=EEPROM,content=Save)"]}) {
+    if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
+      fp->write(eeprom.data, eeprom.size);
+    }
+  }
+
+  if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=Flash,content=Save)"]}) {
+    if(auto fp = platform->open(pathID(), memory.name(), File::Write)) {
+      fp->write(flash.data, flash.size);
     }
   }
 }

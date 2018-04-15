@@ -14,7 +14,6 @@ struct EEPROM {
     Command = Status,
   };
 
-  auto name() const -> string;
   auto data() -> uint16*;
   auto size() const -> uint;
 
@@ -34,7 +33,6 @@ struct EEPROM {
 private:
   auto execute() -> void;
 
-  string _name;
   uint16 _data[1024];
   uint _size = 0;  //in words
 

@@ -1,11 +1,11 @@
 struct Memory {
   string type;
-  boolean battery;
   string size;
   string content;
   string manufacturer;
   string architecture;
   string identifier;
+  boolean Volatile;
 };
 
 struct Oscillator {
@@ -150,7 +150,7 @@ private:
       LineEdit identifierEdit{&identifierLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      CheckLabel batteryOption{&controlLayout, Size{0, 0}};
+      CheckLabel volatileOption{&controlLayout, Size{0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};
       Button cancelButton{&controlLayout, Size{80, 0}};
 };

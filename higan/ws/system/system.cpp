@@ -28,12 +28,11 @@ auto System::load(Emulator::Interface* interface, Model model) -> bool {
   //note: IPLROM is currently undumped; otherwise we'd load it here ...
 
   if(auto node = document["system/eeprom"]) {
-    eeprom.setName(node["name"].text());
     eeprom.setSize(node["size"].natural() / sizeof(uint16));
     eeprom.erase();
     //initialize user-data section
     for(uint addr = 0x0030; addr <= 0x003a; addr++) eeprom[addr] = 0x0000;
-    if(auto fp = platform->open(ID::System, eeprom.name(), File::Read)) {
+    if(auto fp = platform->open(ID::System, node["name"].text(), File::Read)) {
       fp->read(eeprom.data(), eeprom.size());
     }
   }
@@ -55,7 +54,6 @@ auto System::save() -> void {
 auto System::unload() -> void {
   if(!loaded()) return;
 
-  eeprom.setName("");
   eeprom.setSize(0);
 
   cartridge.unload();
