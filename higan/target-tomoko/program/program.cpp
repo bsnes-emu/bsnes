@@ -51,6 +51,7 @@ Program::Program(string_vector args) {
   settings.save();
 
   new InputManager;
+  new SystemProperties;
   new SettingsManager;
   new CheatDatabase;
   new ToolsManager;

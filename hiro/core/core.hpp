@@ -1144,6 +1144,7 @@ struct mComboEdit : mWidget {
   auto backgroundColor() const -> Color;
   auto doActivate() const -> void;
   auto doChange() const -> void;
+  auto editable() const -> bool;
   auto foregroundColor() const -> Color;
   auto item(uint position) const -> ComboEditItem;
   auto itemCount() const -> uint;
@@ -1153,6 +1154,7 @@ struct mComboEdit : mWidget {
   auto remove(sComboEditItem item) -> type&;
   auto reset() -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
+  auto setEditable(bool editable = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
   auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
   auto setText(const string& text = "") -> type&;
@@ -1161,6 +1163,7 @@ struct mComboEdit : mWidget {
 //private:
   struct State {
     Color backgroundColor;
+    bool editable = true;
     Color foregroundColor;
     vector<sComboEditItem> items;
     function<void ()> onActivate;

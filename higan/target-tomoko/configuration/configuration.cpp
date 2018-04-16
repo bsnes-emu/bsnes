@@ -59,6 +59,8 @@ Settings::Settings() {
   set("Emulation/AutoSaveMemory/Enable", true);
   set("Emulation/AutoSaveMemory/Interval", 30);
 
+  set("Systems", "");
+
   set("Crashed", false);
 }
 

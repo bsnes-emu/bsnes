@@ -8,8 +8,8 @@ using SharedNode = shared_pointer<ManagedNode>;
 
 struct ManagedNode {
   ManagedNode() = default;
-  explicit ManagedNode(const string& name) : _name(name) {}
-  explicit ManagedNode(const string& name, const string& value) : _name(name), _value(value) {}
+  ManagedNode(const string& name) : _name(name) {}
+  ManagedNode(const string& name, const string& value) : _name(name), _value(value) {}
 
   auto clone() const -> SharedNode {
     SharedNode clone{new ManagedNode(_name, _value)};
@@ -46,8 +46,8 @@ protected:
 struct Node {
   Node() : shared(new ManagedNode) {}
   Node(const SharedNode& source) : shared(source ? source : new ManagedNode) {}
-  explicit Node(const string& name) : shared(new ManagedNode(name)) {}
-  explicit Node(const string& name, const string& value) : shared(new ManagedNode(name, value)) {}
+  Node(const string& name) : shared(new ManagedNode(name)) {}
+  Node(const string& name, const string& value) : shared(new ManagedNode(name, value)) {}
 
   auto unique() const -> bool { return shared.unique(); }
   auto clone() const -> Node { return shared->clone(); }

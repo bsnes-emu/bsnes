@@ -6,42 +6,9 @@ unique_pointer<Presentation> presentation;
 Presentation::Presentation() {
   presentation = this;
 
-  libraryMenu.setText("Library");
-  string_vector manufacturers;
-  for(auto& emulator : program->emulators) {
-    if(!manufacturers.find(emulator->information.manufacturer)) {
-      manufacturers.append(emulator->information.manufacturer);
-    }
-  }
-  for(auto& manufacturer : manufacturers) {
-    Menu manufacturerMenu{&libraryMenu};
-    manufacturerMenu.setText(manufacturer);
-    for(auto& emulator : program->emulators) {
-      if(emulator->information.manufacturer != manufacturer) continue;
-      for(auto& medium : emulator->media) {
-        auto item = new MenuItem{&manufacturerMenu};
-        item->setText({medium.name, " ..."}).onActivate([=] {
-          program->loadMedium(*emulator, medium);
-        });
-      }
-    }
-  }
-  //add icarus menu options -- but only if icarus binary is present
-  if(execute("icarus", "--name").output.strip() == "icarus") {
-    libraryMenu.append(MenuSeparator());
-    libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
-      audio->clear();
-      if(auto location = execute("icarus", "--import")) {
-        program->mediumQueue.append(location.output.strip());
-        program->loadMedium();
-      }
-    }));
-    libraryMenu.append(MenuItem().setText("Import ROM Files ...").onActivate([&] {
-      invoke("icarus");
-    }));
-  }
+  libraryMenu.setText("System");
 
-  systemMenu.setText("System").setVisible(false);
+  systemMenu.setVisible(false);
   resetSystem.setText("Soft Reset").onActivate([&] { program->softReset(); });
   powerSystem.setText("Power Cycle").onActivate([&] { program->powerCycle(); });
   unloadSystem.setText("Unload").onActivate([&] { program->unloadMedium(); });
@@ -100,8 +67,9 @@ Presentation::Presentation() {
     statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeViewport();
   });
-  showVideoSettings.setText("Video ...").onActivate([&] { settingsManager->show(0); });
-  showAudioSettings.setText("Audio ...").onActivate([&] { settingsManager->show(1); });
+  showSystemSettings.setText("Systems ...").onActivate([&] { settingsManager->show(0); });
+  showVideoSettings.setText("Video ...").onActivate([&] { settingsManager->show(1); });
+  showAudioSettings.setText("Audio ...").onActivate([&] { settingsManager->show(2); });
   showInputSettings.setText("Input ...").onActivate([&] {
     if(emulator) {
       //default input panel to current core's input settings
@@ -113,10 +81,10 @@ Presentation::Presentation() {
         }
       }
     }
-    settingsManager->show(2);
+    settingsManager->show(3);
   });
-  showHotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsManager->show(3); });
-  showAdvancedSettings.setText("Advanced ...").onActivate([&] { settingsManager->show(4); });
+  showHotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsManager->show(4); });
+  showAdvancedSettings.setText("Advanced ...").onActivate([&] { settingsManager->show(5); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveQuickStateMenu.setText("Save Quick State");
@@ -333,6 +301,42 @@ auto Presentation::toggleFullScreen() -> void {
     statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
   }
   resizeViewport();
+}
+
+auto Presentation::loadSystems() -> void {
+  libraryMenu.reset();
+  for(auto system : settings.find("Systems/System")) {
+    if(system["Hidden"].boolean()) continue;
+    MenuItem item;
+    string boot = system["Boot"].text();
+    item.setText({system["Name"].text(), " ..."}).onActivate([=] {
+      bool booted = false;
+      for(auto& emulator : program->emulators) {
+        if(boot == emulator->information.name) {
+          program->loadMedium(*emulator, emulator->media(0));
+          booted = true;
+          break;
+        }
+      }
+      if(!booted && directory::exists(boot)) {
+        program->mediumQueue.append(boot);
+        program->loadMedium();
+      }
+    });
+    libraryMenu.append(item);
+  }
+
+  //add icarus menu option -- but only if icarus binary is present
+  if(execute("icarus", "--name").output.strip() == "icarus") {
+    libraryMenu.append(MenuSeparator());
+    libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
+      audio->clear();
+      if(auto location = execute("icarus", "--import")) {
+        program->mediumQueue.append(location.output.strip());
+        program->loadMedium();
+      }
+    }));
+  }
 }
 
 auto Presentation::loadShaders() -> void {

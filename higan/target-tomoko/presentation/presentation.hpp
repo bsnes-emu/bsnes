@@ -14,6 +14,7 @@ struct Presentation : Window {
   auto clearViewport() -> void;
   auto resizeViewport(bool resizeWindow = true) -> void;
   auto toggleFullScreen() -> void;
+  auto loadSystems() -> void;
   auto loadShaders() -> void;
 
   MenuBar menuBar{this};
@@ -45,6 +46,7 @@ struct Presentation : Window {
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
       MenuSeparator settingsSeparator{&settingsMenu};
+      MenuItem showSystemSettings{&settingsMenu};
       MenuItem showVideoSettings{&settingsMenu};
       MenuItem showAudioSettings{&settingsMenu};
       MenuItem showInputSettings{&settingsMenu};

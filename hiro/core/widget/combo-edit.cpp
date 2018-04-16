@@ -29,6 +29,10 @@ auto mComboEdit::doChange() const -> void {
   if(state.onChange) return state.onChange();
 }
 
+auto mComboEdit::editable() const -> bool {
+  return state.editable;
+}
+
 auto mComboEdit::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
@@ -78,6 +82,12 @@ auto mComboEdit::reset() -> type& {
 auto mComboEdit::setBackgroundColor(Color color) -> type& {
   state.backgroundColor = color;
   signal(setBackgroundColor, color);
+  return *this;
+}
+
+auto mComboEdit::setEditable(bool editable) -> type& {
+  state.editable = editable;
+  signal(setEditable, editable);
   return *this;
 }
 

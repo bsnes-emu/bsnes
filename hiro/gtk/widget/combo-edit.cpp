@@ -32,6 +32,7 @@ auto pComboEdit::construct() -> void {
   close(stdErr);
 
   setBackgroundColor(state().backgroundColor);
+  setEditable(state().editable);
   setForegroundColor(state().foregroundColor);
   for(auto& item : state().items) append(item);
 
@@ -84,6 +85,10 @@ auto pComboEdit::reset() -> void {
 auto pComboEdit::setBackgroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_base(gtk_bin_get_child(GTK_BIN(gtkComboBox)), GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+}
+
+auto pComboEdit::setEditable(bool editable) -> void {
+  gtk_editable_set_editable(GTK_EDITABLE(gtk_bin_get_child(GTK_BIN(gtkComboBox))), editable);
 }
 
 auto pComboEdit::setForegroundColor(Color color) -> void {

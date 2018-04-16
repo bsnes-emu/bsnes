@@ -1,3 +1,39 @@
+struct SystemProperties : Window {
+  SystemProperties();
+  auto append() -> void;
+  auto modify(Markup::Node) -> void;
+
+  VerticalLayout layout{this};
+    HorizontalLayout nameLayout{&layout, Size{~0, 0}};
+      Label nameLabel{&nameLayout, Size{40, 0}};
+      LineEdit nameEdit{&nameLayout, Size{~0, 0}};
+    HorizontalLayout bootLayout{&layout, Size{~0, 0}};
+      Label bootLabel{&bootLayout, Size{40, 0}};
+      ComboEdit bootEdit{&bootLayout, Size{~0, 0}};
+      Button bootBrowse{&bootLayout, Size{80, 0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Widget spacer{&controlLayout, Size{40, 0}};
+      CheckLabel hiddenOption{&controlLayout, Size{~0, 0}};
+      Button acceptButton{&controlLayout, Size{80, 0}};
+      Button cancelButton{&controlLayout, Size{80, 0}};
+};
+
+struct SystemSettings : TabFrameItem {
+  SystemSettings(TabFrame*);
+  auto reload() -> void;
+  auto acceptProperties() -> void;
+
+  VerticalLayout layout{this};
+    TableView systemList{&layout, Size{~0, ~0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Button upButton{&controlLayout, Size{0, 0}};
+      Button downButton{&controlLayout, Size{0, 0}};
+      Widget spacer{&controlLayout, Size{~0, 0}};
+      Button appendButton{&controlLayout, Size{80, 0}};
+      Button modifyButton{&controlLayout, Size{80, 0}};
+      Button removeButton{&controlLayout, Size{80, 0}};
+};
+
 struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
 
@@ -150,6 +186,7 @@ struct SettingsManager : Window {
 
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
+      SystemSettings systems{&panel};
       VideoSettings video{&panel};
       AudioSettings audio{&panel};
       InputSettings input{&panel};
@@ -161,4 +198,5 @@ struct SettingsManager : Window {
   auto show(uint setting) -> void;
 };
 
+extern unique_pointer<SystemProperties> systemProperties;
 extern unique_pointer<SettingsManager> settingsManager;

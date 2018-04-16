@@ -1,4 +1,9 @@
 #include "../tomoko.hpp"
+
+#include "system-properties.cpp"
+unique_pointer<SystemProperties> systemProperties;
+
+#include "systems.cpp"
 #include "video.cpp"
 #include "audio.cpp"
 #include "input.cpp"

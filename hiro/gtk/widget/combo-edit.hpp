@@ -10,6 +10,7 @@ struct pComboEdit : pWidget {
   auto remove(sComboEditItem item) -> void;
   auto reset() -> void;
   auto setBackgroundColor(Color color) -> void;
+  auto setEditable(bool editable) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setFont(const Font& font) -> void override;
   auto setText(const string& text) -> void;

@@ -57,8 +57,8 @@ auto System::load(Emulator::Interface* interface, Model model_, maybe<uint> syst
     } else return false;
 
     auto document = BML::unserialize(information.manifest);
-    if(auto name = document["game/memory[1]/name"].text()) {
-      if(auto fp = platform->open(systemID(), name, File::Read, File::Required)) {
+    if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Boot,architecture=LR35902)"]}) {
+      if(auto fp = platform->open(systemID(), memory.name(), File::Read, File::Required)) {
         fp->read(bootROM.sgb, 256);
       }
     }

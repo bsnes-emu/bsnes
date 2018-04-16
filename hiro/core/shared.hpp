@@ -342,6 +342,7 @@ struct ComboEdit : sComboEdit {
   auto backgroundColor() const { return self().backgroundColor(); }
   auto doActivate() const { return self().doActivate(); }
   auto doChange() const { return self().doChange(); }
+  auto editable() const { return self().editable(); }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto item(uint position) const { return self().item(position); }
   auto itemCount() const { return self().itemCount(); }
@@ -351,6 +352,7 @@ struct ComboEdit : sComboEdit {
   auto remove(sComboEditItem item) { return self().remove(item), *this; }
   auto reset() { return self().reset(), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
+  auto setEditable(bool editable = true) { return self().setEditable(editable), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }

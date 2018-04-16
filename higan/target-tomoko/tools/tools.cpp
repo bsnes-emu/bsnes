@@ -1,10 +1,12 @@
 #include "../tomoko.hpp"
+
 #include "cheat-database.cpp"
+unique_pointer<CheatDatabase> cheatDatabase;
+
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
 #include "manifest-viewer.cpp"
 #include "game-notes.cpp"
-unique_pointer<CheatDatabase> cheatDatabase;
 unique_pointer<ToolsManager> toolsManager;
 
 ToolsManager::ToolsManager() {
