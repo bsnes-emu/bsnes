@@ -6,7 +6,7 @@ unique_pointer<Presentation> presentation;
 Presentation::Presentation() {
   presentation = this;
 
-  libraryMenu.setText("System");
+  libraryMenu.setText("Systems");
 
   systemMenu.setVisible(false);
   resetSystem.setText("Soft Reset").onActivate([&] { program->softReset(); });
@@ -306,7 +306,7 @@ auto Presentation::toggleFullScreen() -> void {
 auto Presentation::loadSystems() -> void {
   libraryMenu.reset();
   for(auto system : settings.find("Systems/System")) {
-    if(system["Hidden"].boolean()) continue;
+    if(!system["Show"].boolean()) continue;
     MenuItem item;
     string boot = system["Boot"].text();
     item.setText({system["Name"].text(), " ..."}).onActivate([=] {
@@ -328,7 +328,7 @@ auto Presentation::loadSystems() -> void {
 
   //add icarus menu option -- but only if icarus binary is present
   if(execute("icarus", "--name").output.strip() == "icarus") {
-    libraryMenu.append(MenuSeparator());
+    if(libraryMenu.actionCount()) libraryMenu.append(MenuSeparator());
     libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {

@@ -9,14 +9,24 @@ SystemProperties::SystemProperties() {
     bootEdit.append(ComboEditItem().setText(emulator->information.name));
   }
   bootBrowse.setText("Browse ...").onActivate([&] {
-    if(auto location = BrowserDialog().setTitle("Select Boot Game").setPath(settings["Library/Location"].text()).selectFolder()) {
+    string filters = "Games|";
+    for(auto& emulator : program->emulators) {
+      for(auto& media : emulator->media) {
+        filters.append("*.", media.type, ":");
+      }
+    }
+    filters.trimRight(":", 1L);
+    if(auto location = BrowserDialog()
+    .setTitle("Select Boot Game")
+    .setPath(settings["Library/Location"].text())
+    .setFilters(filters)
+    .openFolder()) {
       bootEdit.setText(location);
     }
   });
-  hiddenOption.setText("Hidden");
   acceptButton.onActivate([&] {
     setVisible(false);
-    settingsManager->systems.acceptProperties();
+    settingsManager->systems.accept();
   });
   cancelButton.setText("Cancel").onActivate([&] {
     setVisible(false);
@@ -31,7 +41,6 @@ auto SystemProperties::append() -> void {
   setCentered(*settingsManager);
   nameEdit.setText("");
   bootEdit.setText("");
-  hiddenOption.setChecked(false);
   acceptButton.setText("Append");
   setFocused();
   setVisible();
@@ -42,7 +51,6 @@ auto SystemProperties::modify(Markup::Node system) -> void {
   setCentered(*settingsManager);
   nameEdit.setText(system["Name"].text());
   bootEdit.setText(system["Boot"].text());
-  hiddenOption.setChecked(system["Hidden"].boolean());
   acceptButton.setText("Modify");
   setFocused();
   setVisible();

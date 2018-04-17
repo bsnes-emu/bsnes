@@ -4,13 +4,15 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
 
   layout.setMargin(5);
   cheatList.append(TableViewHeader().setVisible()
+    .append(TableViewColumn())
     .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
     .append(TableViewColumn().setText("Code(s)"))
     .append(TableViewColumn().setText("Description").setExpandable())
   );
   for(auto slot : range(Slots)) {
     cheatList.append(TableViewItem()
-      .append(TableViewCell().setCheckable().setText(1 + slot))
+      .append(TableViewCell().setCheckable())
+      .append(TableViewCell().setText(1 + slot))
       .append(TableViewCell())
       .append(TableViewCell())
     );
@@ -62,12 +64,12 @@ auto CheatEditor::doRefresh() -> void {
       auto codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
       cheatList.item(slot).cell(0).setChecked(cheat.enabled);
-      cheatList.item(slot).cell(1).setText(codes[0]);
-      cheatList.item(slot).cell(2).setText(cheat.description).setForegroundColor({0, 0, 0});
+      cheatList.item(slot).cell(2).setText(codes[0]);
+      cheatList.item(slot).cell(3).setText(cheat.description).setForegroundColor({0, 0, 0});
     } else {
       cheatList.item(slot).cell(0).setChecked(false);
-      cheatList.item(slot).cell(1).setText("");
-      cheatList.item(slot).cell(2).setText("(empty)").setForegroundColor({128, 128, 128});
+      cheatList.item(slot).cell(2).setText("");
+      cheatList.item(slot).cell(3).setText("(empty)").setForegroundColor({128, 128, 128});
     }
   }
 

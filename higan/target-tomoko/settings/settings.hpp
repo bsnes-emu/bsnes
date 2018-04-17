@@ -12,8 +12,7 @@ struct SystemProperties : Window {
       ComboEdit bootEdit{&bootLayout, Size{~0, 0}};
       Button bootBrowse{&bootLayout, Size{80, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Widget spacer{&controlLayout, Size{40, 0}};
-      CheckLabel hiddenOption{&controlLayout, Size{~0, 0}};
+      Widget spacer{&controlLayout, Size{~0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};
       Button cancelButton{&controlLayout, Size{80, 0}};
 };
@@ -21,7 +20,12 @@ struct SystemProperties : Window {
 struct SystemSettings : TabFrameItem {
   SystemSettings(TabFrame*);
   auto reload() -> void;
-  auto acceptProperties() -> void;
+  auto toggle(TableViewCell) -> void;
+  auto moveUp() -> void;
+  auto moveDown() -> void;
+  auto modify() -> void;
+  auto remove() -> void;
+  auto accept() -> void;
 
   VerticalLayout layout{this};
     TableView systemList{&layout, Size{~0, ~0}};

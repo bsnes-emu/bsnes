@@ -153,7 +153,7 @@ auto pTableView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
   if(auto item = self().item(_row)) {
     if(auto cell = item->cell(_column)) {
       if(cell->state.checkable) {
-        width += 24;
+        width += 16 + (cell->state.icon || cell->state.text ? 4 : 0);
       }
       if(auto& icon = cell->state.icon) {
         width += icon.width() + 2;
