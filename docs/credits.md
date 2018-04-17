@@ -24,6 +24,7 @@ by the following individuals:
   - GIGO                  
   - Hendricks266          
   - hex_usr               
+  - ikari_01
   - jchadwick             
   - Jonas Quinn           
   - kode54                
