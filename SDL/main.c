@@ -202,6 +202,17 @@ static void handle_events(GB_gameboy_t *gb)
                             SDL_PauseAudio(SDL_GetAudioStatus() == SDL_AUDIO_PLAYING? true : false);
                         }
                         break;
+                    
+                    case SDL_SCANCODE_F:
+                        if (event.key.keysym.mod & MODIFIER) {
+                            if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
+                                SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                            }
+                            else { 
+                                SDL_SetWindowFullscreen(window, 0);
+                            }
+                        }
+                        break;
                         
                     default:
                         /* Save states */
