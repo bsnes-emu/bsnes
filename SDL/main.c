@@ -302,6 +302,7 @@ static bool handle_pending_command(void)
         }
             
         case GB_SDL_RESET_COMMAND:
+            GB_save_battery(&gb, battery_save_path_ptr);
             return true;
             
         case GB_SDL_NO_COMMAND:
