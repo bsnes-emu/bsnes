@@ -472,7 +472,7 @@ int main(int argc, char **argv)
     want_aspec.samples = 512;
 #endif
 
-#if SDL_COMPILEDVERSION > 2006 && defined(_WIN32)
+#if SDL_COMPILEDVERSION >= 2006 && defined(_WIN32)
     /* SDL 2.0.6 offers WASAPI support which allows for much lower audio buffer lengths which at least
        theoretically reduces lagging. */
     printf("SDL 2.0.6+ detected, reducing audio buffer to 32 samples\n");
