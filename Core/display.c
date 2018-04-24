@@ -859,25 +859,19 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 13, LINE_LENGTH - 4);
         }
         
+        /* TODO: Verified on SGB2 and CGB-E. Actual interrupt timings not tested. */
         /* Lines 153 */
         gb->io_registers[GB_IO_LY] = 153;
-        if (!gb->cgb_mode) {
-            gb->ly_for_comparison = gb->is_cgb? 153 : -1;
-        }
+        gb->ly_for_comparison = gb->is_cgb? 152 : -1;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 14, 6);
         
         gb->io_registers[GB_IO_LY] = 0;
-        gb->ly_for_comparison = gb->cgb_mode? 0 : 153;
+        gb->ly_for_comparison = gb->is_cgb? 0 : 153;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 15, 2);
         
-        if (gb->cgb_mode) {
-            gb->ly_for_comparison = 0;
-        }
-        else if(!gb->is_cgb) {
-            gb->ly_for_comparison = -1;
-        }
+        gb->ly_for_comparison = gb->is_cgb? 153 : -1;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 16, 4);
         
