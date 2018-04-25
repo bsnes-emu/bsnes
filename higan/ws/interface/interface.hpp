@@ -5,6 +5,7 @@ struct ID {
     System,
     WonderSwan,
     WonderSwanColor,
+    PocketChallengeV2,
   };
 
   struct Port { enum : uint {
@@ -57,6 +58,17 @@ struct WonderSwanColorInterface : Interface {
   using Emulator::Interface::load;
 
   WonderSwanColorInterface();
+
+  auto videoColors() -> uint32 override;
+  auto videoColor(uint32 color) -> uint64 override;
+
+  auto load(uint id) -> bool override;
+};
+
+struct PocketChallengeV2Interface : Interface {
+  using Emulator::Interface::load;
+
+  PocketChallengeV2Interface();
 
   auto videoColors() -> uint32 override;
   auto videoColor(uint32 color) -> uint64 override;

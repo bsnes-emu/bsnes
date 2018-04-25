@@ -51,7 +51,7 @@ auto CPU::power() -> void {
   bus.map(this, 0x00a0);
   bus.map(this, 0x00b0, 0x00b6);
 
-  if(!Model::WonderSwan()) {
+  if(Model::WonderSwanColor() || Model::SwanCrystal()) {
     bus.map(this, 0x0040, 0x0049);
     bus.map(this, 0x0062);
   }

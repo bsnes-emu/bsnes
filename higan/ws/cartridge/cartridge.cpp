@@ -56,6 +56,12 @@ auto Cartridge::load() -> bool {
     } else return false;
   }
 
+  if(Model::PocketChallengeV2()) {
+    if(auto loaded = platform->load(ID::PocketChallengeV2, "Pocket Challenge V2", "pc2")) {
+      information.pathID = loaded.pathID();
+    } else return false;
+  }
+
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;

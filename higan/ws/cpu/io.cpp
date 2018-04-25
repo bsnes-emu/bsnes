@@ -48,10 +48,10 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
   //HW_FLAGS
   if(addr == 0x00a0) {
-    bool color = !Model::WonderSwan();
+    bool color = Model::WonderSwanColor() || Model::SwanCrystal();
     return (
       1     << 0  //0 = BIOS mapped; 1 = cartridge mapped
-    | color << 1  //0 = WonderSwan; 1 = WonderSwan Color or SwanCrystal
+    | color << 1  //0 = WonderSwan or Pocket Challenge V2; 1 = WonderSwan Color or SwanCrystal
     | 1     << 2  //0 = 8-bit bus width; 1 = 16-bit bus width
     | 1     << 7  //1 = built-in self-test passed
     );
@@ -59,7 +59,7 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
   //INT_BASE
   if(addr == 0x00b0) return (
-    r.interruptBase | (Model::WonderSwan() ? 3 : 0)
+    r.interruptBase | (Model::WonderSwan() || Model::PocketChallengeV2() ? 3 : 0)
   );
 
   //SER_DATA
@@ -122,7 +122,7 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //INT_BASE
   if(addr == 0x00b0) {
-    r.interruptBase = Model::WonderSwan() ? data & ~7 : data & ~1;
+    r.interruptBase = Model::WonderSwan() || Model::PocketChallengeV2() ? data & ~7 : data & ~1;
   }
 
   //SER_DATA

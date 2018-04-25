@@ -44,6 +44,7 @@ Settings settings;
 #include "core/game-gear.cpp"
 #include "core/wonderswan.cpp"
 #include "core/wonderswan-color.cpp"
+#include "core/pocket-challenge-v2.cpp"
 #include "core/bs-memory.cpp"
 #include "core/sufami-turbo.cpp"
 
@@ -92,6 +93,7 @@ auto nall::main(string_vector args) -> void {
       "*.gg:"
       "*.ws:"
       "*.wsc:"
+      "*.pc2:"
       "*.bs:"
       "*.st:"
       "*.zip"

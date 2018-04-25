@@ -5,6 +5,7 @@ namespace WonderSwan {
 Settings settings;
 #include "wonderswan.cpp"
 #include "wonderswan-color.cpp"
+#include "pocket-challenge-v2.cpp"
 
 Interface::Interface() {
   Port hardwarePort{ID::Port::Hardware, "Hardware"};

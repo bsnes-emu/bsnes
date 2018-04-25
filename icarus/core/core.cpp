@@ -11,6 +11,7 @@ Icarus::Icarus() {
   Database::GameGear = BML::unserialize(string::read(locate("Database/Game Gear.bml")));
   Database::WonderSwan = BML::unserialize(string::read(locate("Database/WonderSwan.bml")));
   Database::WonderSwanColor = BML::unserialize(string::read(locate("Database/WonderSwan Color.bml")));
+  Database::PocketChallengeV2 = BML::unserialize(string::read(locate("Database/Pocket Challenge V2.bml")));
   Database::BSMemory = BML::unserialize(string::read(locate("Database/BS Memory.bml")));
   Database::SufamiTurbo = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")));
 }
@@ -50,6 +51,7 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".gg") return gameGearManifest(location);
   if(type == ".ws") return wonderSwanManifest(location);
   if(type == ".wsc") return wonderSwanColorManifest(location);
+  if(type == ".pc2") return pocketChallengeV2Manifest(location);
   if(type == ".bs") return bsMemoryManifest(location);
   if(type == ".st") return sufamiTurboManifest(location);
 
@@ -93,6 +95,7 @@ auto Icarus::import(string location) -> string {
   if(type == ".gg") return gameGearImport(buffer, location);
   if(type == ".ws") return wonderSwanImport(buffer, location);
   if(type == ".wsc") return wonderSwanColorImport(buffer, location);
+  if(type == ".pc2") return pocketChallengeV2Import(buffer, location);
   if(type == ".bs") return bsMemoryImport(buffer, location);
   if(type == ".st") return sufamiTurboImport(buffer, location);
 

@@ -1,5 +1,5 @@
 struct System : IO {
-  enum class Model : uint { WonderSwan, WonderSwanColor, SwanCrystal };
+  enum class Model : uint { WonderSwan, WonderSwanColor, SwanCrystal, PocketChallengeV2 };
 
   auto loaded() const -> bool { return _loaded; }
   auto model() const -> Model { return _model; }
@@ -67,3 +67,4 @@ extern System system;
 auto Model::WonderSwan() -> bool { return system.model() == System::Model::WonderSwan; }
 auto Model::WonderSwanColor() -> bool { return system.model() == System::Model::WonderSwanColor; }
 auto Model::SwanCrystal() -> bool { return system.model() == System::Model::SwanCrystal; }
+auto Model::PocketChallengeV2() -> bool { return system.model() == System::Model::PocketChallengeV2; }

@@ -6,7 +6,7 @@ unique_pointer<Presentation> presentation;
 Presentation::Presentation() {
   presentation = this;
 
-  libraryMenu.setText("Systems");
+  systemsMenu.setText("Systems");
 
   systemMenu.setVisible(false);
   resetSystem.setText("Soft Reset").onActivate([&] { program->softReset(); });
@@ -67,10 +67,10 @@ Presentation::Presentation() {
     statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeViewport();
   });
-  showSystemSettings.setText("Systems ...").onActivate([&] { settingsManager->show(0); });
-  showVideoSettings.setText("Video ...").onActivate([&] { settingsManager->show(1); });
-  showAudioSettings.setText("Audio ...").onActivate([&] { settingsManager->show(2); });
-  showInputSettings.setText("Input ...").onActivate([&] {
+  showSystemSettings.setIcon(Icon::Device::Storage).setText("Systems ...").onActivate([&] { settingsManager->show(0); });
+  showVideoSettings.setIcon(Icon::Device::Display).setText("Video ...").onActivate([&] { settingsManager->show(1); });
+  showAudioSettings.setIcon(Icon::Device::Speaker).setText("Audio ...").onActivate([&] { settingsManager->show(2); });
+  showInputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] {
     if(emulator) {
       //default input panel to current core's input settings
       for(auto item : settingsManager->input.emulatorList.items()) {
@@ -83,8 +83,8 @@ Presentation::Presentation() {
     }
     settingsManager->show(3);
   });
-  showHotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsManager->show(4); });
-  showAdvancedSettings.setText("Advanced ...").onActivate([&] { settingsManager->show(5); });
+  showHotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsManager->show(4); });
+  showAdvancedSettings.setIcon(Icon::Action::Settings).setText("Advanced ...").onActivate([&] { settingsManager->show(5); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveQuickStateMenu.setText("Save Quick State");
@@ -100,19 +100,19 @@ Presentation::Presentation() {
   loadSlot4.setText("Slot 4").onActivate([&] { program->loadState(4); });
   loadSlot5.setText("Slot 5").onActivate([&] { program->loadState(5); });
   pauseEmulation.setText("Pause Emulation").onToggle([&] { program->togglePause(); });
-  cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsManager->show(0); });
-  stateManager.setText("State Manager ...").onActivate([&] { toolsManager->show(1); });
-  manifestViewer.setText("Manifest Viewer ...").onActivate([&] { toolsManager->show(2); });
-  gameNotes.setText("Game Notes ...").onActivate([&] { toolsManager->show(3); });
+  cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsManager->show(0); });
+  stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsManager->show(1); });
+  manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsManager->show(2); });
+  gameNotes.setIcon(Icon::Emblem::Text).setText("Game Notes ...").onActivate([&] { toolsManager->show(3); });
 
   helpMenu.setText("Help");
-  documentation.setText("Documentation ...").onActivate([&] {
+  documentation.setIcon(Icon::Application::Browser).setText("Documentation ...").onActivate([&] {
     invoke("https://doc.byuu.org/higan/");
   });
-  credits.setText("Credits ...").onActivate([&] {
+  credits.setIcon(Icon::Application::Browser).setText("Credits ...").onActivate([&] {
     invoke("https://doc.byuu.org/higan/credits/");
   });
-  about.setText("About ...").onActivate([&] {
+  about.setIcon(Icon::Prompt::Question).setText("About ...").onActivate([&] {
     aboutWindow->setVisible().setFocused();
   });
 
@@ -304,32 +304,34 @@ auto Presentation::toggleFullScreen() -> void {
 }
 
 auto Presentation::loadSystems() -> void {
-  libraryMenu.reset();
+  systemsMenu.reset();
   for(auto system : settings.find("Systems/System")) {
-    if(!system["Show"].boolean()) continue;
+    if(!system["Visible"].boolean()) continue;
     MenuItem item;
-    string boot = system["Boot"].text();
-    item.setText({system["Name"].text(), " ..."}).onActivate([=] {
-      bool booted = false;
+    string name = system.text();
+    string filename = system["Load"].text();
+    string load = Location::base(filename).trimRight("/", 1L);
+    string alias = system["Alias"].text();
+    item
+    .setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage)
+    .setText({alias ? alias : load ? load : name, " ..."}).onActivate([=] {
       for(auto& emulator : program->emulators) {
-        if(boot == emulator->information.name) {
+        if(name == emulator->information.name) {
+          if(filename) program->mediumQueue.append(filename);
           program->loadMedium(*emulator, emulator->media(0));
-          booted = true;
           break;
         }
       }
-      if(!booted && directory::exists(boot)) {
-        program->mediumQueue.append(boot);
-        program->loadMedium();
-      }
     });
-    libraryMenu.append(item);
+    systemsMenu.append(item);
   }
 
   //add icarus menu option -- but only if icarus binary is present
   if(execute("icarus", "--name").output.strip() == "icarus") {
-    if(libraryMenu.actionCount()) libraryMenu.append(MenuSeparator());
-    libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
+    if(systemsMenu.actionCount()) systemsMenu.append(MenuSeparator());
+    systemsMenu.append(MenuItem()
+    .setIcon(Icon::Emblem::File)
+    .setText("Load ROM File ...").onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {
         program->mediumQueue.append(location.output.strip());

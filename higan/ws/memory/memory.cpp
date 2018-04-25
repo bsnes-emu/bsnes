@@ -10,7 +10,7 @@ auto InternalRAM::power() -> void {
 }
 
 auto InternalRAM::serialize(serializer& s) -> void {
-  s.array(memory, Model::WonderSwan() ? 0x4000 : 0x10000);
+  s.array(memory, Model::WonderSwan() || Model::PocketChallengeV2() ? 0x4000 : 0x10000);
 }
 
 auto InternalRAM::read(uint16 addr, uint size) -> uint32 {

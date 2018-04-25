@@ -96,6 +96,11 @@ struct Icarus {
   auto wonderSwanColorManifest(vector<uint8_t>& buffer, string location) -> string;
   auto wonderSwanColorImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //pocket-challenge-v2.cpp
+  auto pocketChallengeV2Manifest(string location) -> string;
+  auto pocketChallengeV2Manifest(vector<uint8_t>& buffer, string location) -> string;
+  auto pocketChallengeV2Import(vector<uint8_t>& buffer, string location) -> string;
+
   //bs-memory.cpp
   auto bsMemoryManifest(string location) -> string;
   auto bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -124,6 +129,7 @@ namespace Database {
   Markup::Node GameGear;
   Markup::Node WonderSwan;
   Markup::Node WonderSwanColor;
+  Markup::Node PocketChallengeV2;
   Markup::Node BSMemory;
   Markup::Node SufamiTurbo;
 };

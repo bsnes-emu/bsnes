@@ -110,6 +110,9 @@ auto ScanDialog::gamePakType(const string& type) -> bool {
   || type == ".gbc"
   || type == ".gba"
   || type == ".gg"
+  || type == ".ws"
+  || type == ".wsc"
+  || type == ".pc2"
   || type == ".bs"
   || type == ".st";
 }
@@ -126,6 +129,9 @@ auto ScanDialog::gameRomType(const string& type) -> bool {
   || type == ".gbc"
   || type == ".gba"
   || type == ".gg"
+  || type == ".ws"
+  || type == ".wsc"
+  || type == ".pc2"
   || type == ".bs"
   || type == ".st";
 }

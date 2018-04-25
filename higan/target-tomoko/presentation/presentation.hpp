@@ -18,7 +18,7 @@ struct Presentation : Window {
   auto loadShaders() -> void;
 
   MenuBar menuBar{this};
-    Menu libraryMenu{&menuBar};
+    Menu systemsMenu{&menuBar};
     Menu systemMenu{&menuBar};
       Menu inputPort1{&systemMenu};
       Menu inputPort2{&systemMenu};
@@ -74,6 +74,7 @@ struct Presentation : Window {
     Menu helpMenu{&menuBar};
       MenuItem documentation{&helpMenu};
       MenuItem credits{&helpMenu};
+      MenuSeparator helpMenuSeparator{&helpMenu};
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};

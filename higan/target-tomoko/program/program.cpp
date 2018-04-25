@@ -29,6 +29,7 @@ Program::Program(string_vector args) {
   emulators.append(new MasterSystem::GameGearInterface);
   emulators.append(new WonderSwan::WonderSwanInterface);
   emulators.append(new WonderSwan::WonderSwanColorInterface);
+  emulators.append(new WonderSwan::PocketChallengeV2Interface);
 
   new Presentation;
   presentation->setVisible();

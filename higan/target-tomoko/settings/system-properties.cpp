@@ -2,13 +2,13 @@ SystemProperties::SystemProperties() {
   systemProperties = this;
 
   layout.setMargin(5);
-  nameLabel.setText("Name:");
-  bootLabel.setText("Boot:");
-  bootEdit.setEditable(false);
+  systemLabel.setAlignment(1.0).setText("System:");
   for(auto& emulator : program->emulators) {
-    bootEdit.append(ComboEditItem().setText(emulator->information.name));
+    systemOption.append(ComboButtonItem().setText(emulator->information.name));
   }
-  bootBrowse.setText("Browse ...").onActivate([&] {
+  loadLabel.setAlignment(1.0).setText("Load:");
+  loadEdit.setEditable(false);
+  loadBrowse.setText("Browse ...").onActivate([&] {
     string filters = "Games|";
     for(auto& emulator : program->emulators) {
       for(auto& media : emulator->media) {
@@ -21,9 +21,10 @@ SystemProperties::SystemProperties() {
     .setPath(settings["Library/Location"].text())
     .setFilters(filters)
     .openFolder()) {
-      bootEdit.setText(location);
+      loadEdit.setText(location);
     }
   });
+  aliasLabel.setAlignment(1.0).setText("Alias:");
   acceptButton.onActivate([&] {
     setVisible(false);
     settingsManager->systems.accept();
@@ -39,20 +40,25 @@ SystemProperties::SystemProperties() {
 
 auto SystemProperties::append() -> void {
   setCentered(*settingsManager);
-  nameEdit.setText("");
-  bootEdit.setText("");
+  systemOption.item(0).setSelected();
+  loadEdit.setText("");
+  aliasEdit.setText("");
   acceptButton.setText("Append");
   setFocused();
   setVisible();
-  nameEdit.setFocused();
+  systemOption.setFocused();
 }
 
 auto SystemProperties::modify(Markup::Node system) -> void {
   setCentered(*settingsManager);
-  nameEdit.setText(system["Name"].text());
-  bootEdit.setText(system["Boot"].text());
+  systemOption.item(0).setSelected();
+  for(auto item : systemOption.items()) {
+    if(item.text() == system.text()) item.setSelected();
+  }
+  loadEdit.setText(system["Load"].text());
+  aliasEdit.setText(system["Alias"].text());
   acceptButton.setText("Modify");
   setFocused();
   setVisible();
-  nameEdit.setFocused();
+  systemOption.setFocused();
 }

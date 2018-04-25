@@ -32,9 +32,10 @@ namespace WonderSwan {
   };
 
   struct Model {
-    inline static auto WonderSwan() -> bool;       //SW-001 (ASWAN)
-    inline static auto WonderSwanColor() -> bool;  //WSC-001 (SPHINX)
-    inline static auto SwanCrystal() -> bool;      //SCT-001 (SPHINX2)
+    inline static auto WonderSwan() -> bool;         //SW-001 (ASWAN)
+    inline static auto WonderSwanColor() -> bool;    //WSC-001 (SPHINX)
+    inline static auto SwanCrystal() -> bool;        //SCT-001 (SPHINX2)
+    inline static auto PocketChallengeV2() -> bool;  //(ASWAN)
   };
 
   #include <ws/memory/memory.hpp>

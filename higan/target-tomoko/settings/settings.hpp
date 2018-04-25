@@ -4,13 +4,16 @@ struct SystemProperties : Window {
   auto modify(Markup::Node) -> void;
 
   VerticalLayout layout{this};
-    HorizontalLayout nameLayout{&layout, Size{~0, 0}};
-      Label nameLabel{&nameLayout, Size{40, 0}};
-      LineEdit nameEdit{&nameLayout, Size{~0, 0}};
-    HorizontalLayout bootLayout{&layout, Size{~0, 0}};
-      Label bootLabel{&bootLayout, Size{40, 0}};
-      ComboEdit bootEdit{&bootLayout, Size{~0, 0}};
-      Button bootBrowse{&bootLayout, Size{80, 0}};
+    HorizontalLayout systemLayout{&layout, Size{~0, 0}};
+      Label systemLabel{&systemLayout, Size{50, 0}};
+      ComboButton systemOption{&systemLayout, Size{~0, 0}};
+    HorizontalLayout loadLayout{&layout, Size{~0, 0}};
+      Label loadLabel{&loadLayout, Size{50, 0}};
+      LineEdit loadEdit{&loadLayout, Size{~0, 0}};
+      Button loadBrowse{&loadLayout, Size{80, 0}};
+    HorizontalLayout aliasLayout{&layout, Size{~0, 0}};
+      Label aliasLabel{&aliasLayout, Size{50, 0}};
+      LineEdit aliasEdit{&aliasLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};

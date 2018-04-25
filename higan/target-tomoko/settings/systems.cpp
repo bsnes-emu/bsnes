@@ -34,17 +34,20 @@ auto SystemSettings::reload() -> void {
   systemList.reset();
   systemList.append(TableViewHeader().setVisible()
     .append(TableViewColumn())
-    .append(TableViewColumn().setText("Name"))
-    .append(TableViewColumn().setText("Boot").setExpandable())
+    .append(TableViewColumn().setText("System").setExpandable())
   );
   for(auto system : settings.find("Systems/System")) {
-    string boot = Location::base(system["Boot"].text());
+    string name = system.text();
+    string load = Location::base(system["Load"].text()).trimRight("/", 1L);
+    string alias = system["Alias"].text();
     systemList.append(TableViewItem()
-      .append(TableViewCell().setCheckable().setChecked(system["Show"].boolean()))
-      .append(TableViewCell().setText(system["Name"].text()))
       .append(TableViewCell()
-        .setIcon(boot.endsWith("/") ? Icon::Emblem::Folder : Icon::Device::Storage)
-        .setText(string{boot}.trimRight("/", 1L))
+        .setCheckable()
+        .setChecked(system["Visible"].boolean())
+      )
+      .append(TableViewCell()
+        .setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage)
+        .setText(alias ? alias : load ? load : name)
       )
     );
   }
@@ -55,7 +58,7 @@ auto SystemSettings::reload() -> void {
 auto SystemSettings::toggle(TableViewCell cell) -> void {
   if(auto item = cell->parentTableViewItem()) {
     if(auto system = settings.find("Systems/System")[item->offset()]) {
-      system("Show").setValue(item->cell(0).checked());
+      system("Visible").setValue(item->cell(0).checked());
       presentation->loadSystems();
     }
   }
@@ -93,8 +96,8 @@ auto SystemSettings::remove() -> void {
   if(auto item = systemList.selected()) {
     if(auto system = settings.find("Systems/System")[item.offset()]) {
       if(MessageDialog().setParent(*settingsManager).setText({
-        "Are you sure you want to delete this system?\n\n"
-        "Name: ", system["Name"].text()
+        "Are you sure you want to delete this system?\n\n",
+        item.cell(1).text()
       }).question() == "Yes") {
         settings["Systems"].remove(system);
         reload();
@@ -105,16 +108,17 @@ auto SystemSettings::remove() -> void {
 
 auto SystemSettings::accept() -> void {
   if(systemProperties->acceptButton.text() == "Append") {
-    Markup::Node system{"System"};
-    system.append({"Name", systemProperties->nameEdit.text()});
-    system.append({"Boot", systemProperties->bootEdit.text()});
-    system.append({"Show", "true"});
+    Markup::Node system{"System", systemProperties->systemOption.selected().text()};
+    system.append({"Load", systemProperties->loadEdit.text()});
+    system.append({"Alias", systemProperties->aliasEdit.text()});
+    system.append({"Visible", "true"});
     settings["Systems"].append(system);
   } else if(systemProperties->acceptButton.text() == "Modify") {
     if(auto item = systemList.selected()) {
       if(auto system = settings.find("Systems/System")[item.offset()]) {
-        system("Name").setValue(systemProperties->nameEdit.text());
-        system("Boot").setValue(systemProperties->bootEdit.text());
+        system.setValue(systemProperties->systemOption.selected().text());
+        system("Load").setValue(systemProperties->loadEdit.text());
+        system("Alias").setValue(systemProperties->aliasEdit.text());
       }
     }
   }
