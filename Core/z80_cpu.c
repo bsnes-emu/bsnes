@@ -13,18 +13,20 @@ typedef enum {
     GB_CONFLICT_READ_NEW,
     /* If the CPU writes while another component reads, it reads a bitwise OR between the new and old values */
     GB_CONFLICT_READ_OR,
-    /* If the CPU and another component write at the same time, the CPU's value "wins"*/
+    /* If the CPU and another component write at the same time, the CPU's value "wins" */
     GB_CONFLICT_WRITE_CPU,
 } GB_conflict_t;
 
+/* Todo: How does double speed mode affect these? */
 static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
-    
+
     /* Todo: most values not verified, and probably differ between revisions */
 };
 
 static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     
     /* Todo: these are GB_CONFLICT_READ_NEW on MGB/SGB2 */
     [GB_IO_BGP] = GB_CONFLICT_READ_OR,
@@ -40,7 +42,6 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
     /* Todo: these were not verified at all */
     [GB_IO_WY] = GB_CONFLICT_READ_NEW,
     [GB_IO_WX] = GB_CONFLICT_READ_NEW,
-    [GB_IO_LYC] = GB_CONFLICT_READ_NEW,
 };
 
 static uint8_t cycle_read(GB_gameboy_t *gb, uint16_t addr)

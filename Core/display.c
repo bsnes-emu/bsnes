@@ -247,9 +247,13 @@ void GB_STAT_update(GB_gameboy_t *gb)
     gb->stat_interrupt_line = gb->oam_interrupt_line;
     /* Set LY=LYC bit */
     if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
+        gb->lyc_interrupt_line = true;
         gb->io_registers[GB_IO_STAT] |= 4;
     }
     else {
+        if (gb->ly_for_comparison != (uint16_t)-1) {
+            gb->lyc_interrupt_line = false;
+        }
         gb->io_registers[GB_IO_STAT] &= ~4;
     }
     
@@ -262,7 +266,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
     }
     
     /* User requested a LY=LYC interrupt and the LY=LYC bit is on */
-    if ((gb->io_registers[GB_IO_STAT] & 0x44) == 0x44) {
+    if ((gb->io_registers[GB_IO_STAT] & 0x40) && gb->lyc_interrupt_line) {
         gb->stat_interrupt_line = true;
     }
     

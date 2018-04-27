@@ -423,6 +423,7 @@ struct GB_gameboy_internal_s {
         uint8_t extra_penalty_for_sprite_at_0;
         bool is_first_line_mode2;
         bool oam_interrupt_line;
+        bool lyc_interrupt_line;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
