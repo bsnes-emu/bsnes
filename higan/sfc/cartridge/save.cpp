@@ -1,15 +1,15 @@
 auto Cartridge::saveCartridge(Markup::Node node) -> void {
-  if(auto node = board["memory(type=RAM)"]) saveRAM(node);
+  if(auto node = board["memory(type=RAM,content=Save)"]) saveRAM(node);
   if(auto node = board["mcc"]) saveMCC(node);
   if(auto node = board["event"]) saveEvent(node);
-  if(auto node = board["sa1"]) saveSA1(node);
-  if(auto node = board["superfx"]) saveSuperFX(node);
+  if(auto node = board["processor(architecture=W65C816S)"]) saveSA1(node);
+  if(auto node = board["processor(architecture=GSU)"]) saveSuperFX(node);
   if(auto node = board["armdsp"]) saveARMDSP(node);
-  if(auto node = board["hitachidsp"]) saveHitachiDSP(node);
+  if(auto node = board["processor(architecture=HG51BS169)"]) saveHitachiDSP(node);
   if(auto node = board["necdsp"]) saveNECDSP(node);
-  if(auto node = board["epsonrtc"]) saveEpsonRTC(node);
-  if(auto node = board["sharprtc"]) saveSharpRTC(node);
-  if(auto node = board["spc7110"]) saveSPC7110(node);
+  if(auto node = board["rtc(manufacturer=Epson)"]) saveEpsonRTC(node);
+  if(auto node = board["rtc(manufacturer=Sharp)"]) saveSharpRTC(node);
+  if(auto node = board["processor(identifier=SPC7110)"]) saveSPC7110(node);
   if(auto node = board["sdd1"]) saveSDD1(node);
   if(auto node = board["obc1"]) saveOBC1(node);
 }
@@ -42,13 +42,22 @@ auto Cartridge::saveEvent(Markup::Node node) -> void {
   saveMemory(event.ram, node["ram"]);
 }
 
+//processor(architecture=W65C816S)
 auto Cartridge::saveSA1(Markup::Node node) -> void {
-  saveMemory(sa1.bwram, node["bwram"]);
-  saveMemory(sa1.iram, node["iram"]);
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    saveMemory(sa1.bwram, memory);
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Internal)"]) {
+    saveMemory(sa1.iram, memory);
+  }
 }
 
+//processor(architecture=GSU)
 auto Cartridge::saveSuperFX(Markup::Node node) -> void {
-  saveMemory(superfx.ram, node["ram"]);
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    saveMemory(superfx.ram, memory);
+  }
 }
 
 auto Cartridge::saveARMDSP(Markup::Node node) -> void {
@@ -61,13 +70,20 @@ auto Cartridge::saveARMDSP(Markup::Node node) -> void {
   }
 }
 
+//processor(architecture=HG51BS169)
 auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
   saveMemory(hitachidsp.ram, node["ram"]);
 
-  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
-    if(memory->nonVolatile) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
-        for(auto n : range(3 * 1024)) fp->write(hitachidsp.dataRAM[n]);
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    saveMemory(hitachidsp.ram, memory);
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=HG51BS169)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          for(auto n : range(3 * 1024)) fp->write(hitachidsp.dataRAM[n]);
+        }
       }
     }
   }
@@ -84,32 +100,41 @@ auto Cartridge::saveNECDSP(Markup::Node node) -> void {
   }
 }
 
+//rtc(manufacturer=Epson)
 auto Cartridge::saveEpsonRTC(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
-    if(memory->nonVolatile) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
-        uint8 data[16] = {0};
-        epsonrtc.save(data);
-        fp->write(data, 16);
+  if(auto memory = node["memory(type=RTC,content=Time,manufacturer=Epson)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          uint8 data[16] = {0};
+          epsonrtc.save(data);
+          fp->write(data, 16);
+        }
       }
     }
   }
 }
 
+//rtc(manufacturer=Sharp)
 auto Cartridge::saveSharpRTC(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RTC,content=Time)"])) {
-    if(memory->nonVolatile) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
-        uint8 data[16] = {0};
-        sharprtc.save(data);
-        fp->write(data, 16);
+  if(auto memory = node["memory(type=RTC,content=Time,manufacturer=Sharp)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          uint8 data[16] = {0};
+          sharprtc.save(data);
+          fp->write(data, 16);
+        }
       }
     }
   }
 }
 
+//processor(identifier=SPC7110)
 auto Cartridge::saveSPC7110(Markup::Node node) -> void {
-  saveMemory(spc7110.ram, node["ram"]);
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    saveMemory(spc7110.ram, memory);
+  }
 }
 
 auto Cartridge::saveSDD1(Markup::Node node) -> void {

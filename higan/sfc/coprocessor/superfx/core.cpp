@@ -9,23 +9,22 @@ auto SuperFX::color(uint8 source) -> uint8 {
 }
 
 auto SuperFX::plot(uint8 x, uint8 y) -> void {
-  uint8 color = regs.colr;
-
-  if(regs.por.dither && regs.scmr.md != 3) {
-    if((x ^ y) & 1) color >>= 4;
-    color &= 0x0f;
-  }
-
   if(!regs.por.transparent) {
     if(regs.scmr.md == 3) {
       if(regs.por.freezehigh) {
-        if((color & 0x0f) == 0) return;
+        if((regs.colr & 0x0f) == 0) return;
       } else {
-        if(color == 0) return;
+        if(regs.colr == 0) return;
       }
     } else {
-      if((color & 0x0f) == 0) return;
+      if((regs.colr & 0x0f) == 0) return;
     }
+  }
+
+  uint8 color = regs.colr;
+  if(regs.por.dither && regs.scmr.md != 3) {
+    if((x ^ y) & 1) color >>= 4;
+    color &= 0x0f;
   }
 
   uint16 offset = (y << 5) + (x >> 3);

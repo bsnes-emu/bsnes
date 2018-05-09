@@ -342,7 +342,7 @@ auto Presentation::loadSystems() -> void {
 }
 
 auto Presentation::loadShaders() -> void {
-  auto pathname = locate("Video Shaders/");
+  auto pathname = locate("shaders/");
 
   if(settings["Video/Driver"].text() == "OpenGL") {
     for(auto shader : directory::folders(pathname, "*.shader")) {

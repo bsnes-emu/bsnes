@@ -19,10 +19,10 @@ private:
   auto size() const -> uint { return data.size(); }
   auto scoreHeader(uint address) -> uint;
   auto firmwareARM() const -> string;
+  auto firmwareEXNEC() const -> string;
+  auto firmwareGB() const -> string;
   auto firmwareHITACHI() const -> string;
   auto firmwareNEC() const -> string;
-  auto firmwareNECEX() const -> string;
-  auto firmwareSGB() const -> string;
 
   vector<uint8_t>& data;
   string location;
@@ -38,13 +38,16 @@ SuperFamicom::SuperFamicom(vector<uint8_t>& data, string location) : data(data),
 
   if(size() < 0x8000) return;  //ignore images too small to be valid
 
-  uint scoreLo = scoreHeader(  0x7fb0);
-  uint scoreHi = scoreHeader(  0xffb0);
-  uint scoreEx = scoreHeader(0x40ffb0);
-  if(scoreEx) scoreEx += 4;
+  uint LoROM   = scoreHeader(  0x7fb0);
+  uint HiROM   = scoreHeader(  0xffb0);
+  uint ExLoROM = scoreHeader(0x407fb0);
+  uint ExHiROM = scoreHeader(0x40ffb0);
+  if(ExLoROM) ExLoROM += 4;
+  if(ExHiROM) ExHiROM += 4;
 
-  if(scoreLo >= scoreHi && scoreLo >= scoreEx) headerAddress = 0x7fb0;
-  else if(scoreHi >= scoreEx) headerAddress = 0xffb0;
+  if(LoROM >= HiROM && LoROM >= ExLoROM && LoROM >= ExHiROM) headerAddress = 0x7fb0;
+  else if(HiROM >= ExLoROM && HiROM >= ExHiROM) headerAddress = 0xffb0;
+  else if(ExLoROM >= ExHiROM) headerAddress = 0x407fb0;
   else headerAddress = 0x40ffb0;
 }
 
@@ -64,7 +67,7 @@ auto SuperFamicom::manifest() const -> string {
   output.append("  revision: ", revision(), "\n");
   output.append("  board:    ", board(), "\n");
 
-  auto board = this->board().split("-");
+  auto board = this->board().trimRight("#A", 1L).trimRight("#B", 1L).split("-");
 
   if(auto size = romSize()) {
     if(board(0) == "SPC7110") size = 0x100000;
@@ -87,6 +90,18 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Oscillator{}.frequency(21'440'000).text());
   } else if(board(0) == "BS" && board(1) == "MCC") {
     output.append(Memory{}.type("RAM").size(0x80000).content("Download").text());
+  } else if(board(0) == "EXNEC") {
+    output.append(Memory{}.type("ROM").size(0xc000).content("Program").manufacturer("NEC").architecture("uPD96050").identifier(firmwareEXNEC()).text());
+    output.append(Memory{}.type("ROM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareEXNEC()).text());
+    output.append(Memory{}.type("RAM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareEXNEC()).text());
+    output.append(Oscillator{}.frequency(firmwareEXNEC() == "ST010" ? 11'000'000 : 15'000'000).text());
+  } else if(board(0) == "GB") {
+    output.append(Memory{}.type("ROM").size(0x100).content("Boot").manufacturer("Nintendo").architecture("LR35902").identifier(firmwareGB()).text());
+  if(firmwareGB() == "SGB2")
+    output.append(Oscillator{}.frequency(20'971'520).text());
+  } else if(board(0) == "GSU") {
+  //todo: MARIO CHIP 1 uses CPU oscillator
+    output.append(Oscillator{}.frequency(21'440'000).text());
   } else if(board(0) == "HITACHI") {
     output.append(Memory{}.type("ROM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).text());
     output.append(Memory{}.type("RAM").size(0xc00).content("Data").manufacturer("Hitachi").architecture("HG51BS169").identifier(firmwareHITACHI()).isVolatile().text());
@@ -96,26 +111,14 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("ROM").size( 0x800).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
     output.append(Memory{}.type("RAM").size( 0x200).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).isVolatile().text());
     output.append(Oscillator{}.frequency(7'600'000).text());
-  } else if(board(0) == "NECEX") {
-    output.append(Memory{}.type("ROM").size(0xc000).content("Program").manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
-    output.append(Memory{}.type("ROM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
-    output.append(Memory{}.type("RAM").size(0x1000).content("Data"   ).manufacturer("NEC").architecture("uPD96050").identifier(firmwareNECEX()).text());
-    output.append(Oscillator{}.frequency(firmwareNECEX() == "ST010" ? 11'000'000 : 15'000'000).text());
-  } else if(board(0) == "RTC") {
-    output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
   } else if(board(0) == "SA1") {
     output.append(Memory{}.type("RAM").size(0x800).content("Internal").isVolatile().text());
-  } else if(board(0) == "SGB") {
-    output.append(Memory{}.type("ROM").size(0x100).content("Boot").manufacturer("Nintendo").architecture("LR35902").identifier(firmwareSGB()).text());
-  if(firmwareSGB() == "SGB2")
-    output.append(Oscillator{}.frequency(20'971'520).text());
   } else if(board(0) == "SPC7110") {
     output.append(Memory{}.type("ROM").size(romSize() - 0x100000).content("Data").text());
-  if(board(1) == "RTC")
+  }
+
+  if(board.right() == "EPSONRTC" || board.right() == "SHARPRTC") {
     output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
-  } else if(board(0) == "SUPERFX") {
-  //todo: MARIO CHIP 1 uses CPU oscillator
-    output.append(Oscillator{}.frequency(21'440'000).text());
   }
 
   return output;
@@ -205,29 +208,34 @@ auto SuperFamicom::revision() const -> string {
   return revision ? revision : string{"1.", F};
 }
 
+//format: [slot]-[coprocessor]-[mapper]-[ram]-[rtc]
 auto SuperFamicom::board() const -> string {
-  auto mapMode = data[headerAddress + 0x25];
-  auto cartridgeType = data[headerAddress + 0x26];
-  auto cartridgeTypeLo = cartridgeType & 15;
-  auto cartridgeTypeHi = cartridgeType >> 4;
-  auto cartridgeSubType = data[headerAddress + 0x0f];
-
   string board;
+
+  auto mapMode          = data[headerAddress + 0x25];
+  auto cartridgeTypeLo  = data[headerAddress + 0x26] & 15;
+  auto cartridgeTypeHi  = data[headerAddress + 0x26] >> 4;
+  auto cartridgeSubType = data[headerAddress + 0x0f];
 
   string mode;
   if(mapMode == 0x20 || mapMode == 0x30) mode = "LOROM-";
   if(mapMode == 0x21 || mapMode == 0x31) mode = "HIROM-";
   if(mapMode == 0x22 || mapMode == 0x32) mode = "SDD1-";
   if(mapMode == 0x23 || mapMode == 0x33) mode = "SA1-";
-  if(mapMode == 0x25 || mapMode == 0x35) mode = "HIROMEX-";
+  if(mapMode == 0x25 || mapMode == 0x35) mode = "EXHIROM-";
   if(mapMode == 0x2a || mapMode == 0x3a) mode = "SPC7110-";
 
   //many games will store an extra title character, overwriting the map mode
+  //further, ExLoROM mode is unofficial, and lacks a mapping mode value
   if(!mode) {
     if(headerAddress ==   0x7fb0) mode = "LOROM-";
     if(headerAddress ==   0xffb0) mode = "HIROM-";
-    if(headerAddress == 0x40ffb0) mode = "HIROMEX-";
+    if(headerAddress == 0x407fb0) mode = "EXLOROM-";
+    if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
   }
+
+  bool epsonRTC = false;
+  bool sharpRTC = false;
 
          if(serial() == "A9PJ") {
   //Sufami Turbo (JPN)
@@ -237,37 +245,36 @@ auto SuperFamicom::board() const -> string {
     board.append("BS-MCC-");
   } else if(serial() == "042J") {
   //Super Game Boy 2
-    board.append("SGB-", mode);
-  } else if(serial().match("Z\?\?J")) {
+    board.append("GB-", mode);
+  } else if(serial().match("Z??J")) {
     board.append("BS-", mode);
   } else if(cartridgeTypeLo >= 0x3) {
     if(cartridgeTypeHi == 0x0) board.append("NEC-", mode);
-    if(cartridgeTypeHi == 0x1) board.append("SUPERFX-");
+    if(cartridgeTypeHi == 0x1) board.append("GSU-");
     if(cartridgeTypeHi == 0x2) board.append("OBC1-", mode);
     if(cartridgeTypeHi == 0x3) board.append("SA1-");
     if(cartridgeTypeHi == 0x4) board.append("SDD1-");
-    if(cartridgeTypeHi == 0x5) board.append("RTC-", mode);
-    if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x3) board.append("SGB-", mode);
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x5) board.append("SPC7110-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x00 && cartridgeTypeLo == 0x9) board.append("SPC7110-RTC-");
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) board.append("NECEX-", mode);
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) board.append("ARM-", mode);
-    if(cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) board.append("HITACHI-", mode);
+    if(cartridgeTypeHi == 0x5) board.append(mode), sharpRTC = true;
+    if(cartridgeTypeHi == 0xe && cartridgeTypeLo == 0x3) board.append("GB-", mode);
+    if(cartridgeTypeHi == 0xf && cartridgeTypeLo == 0x5 && cartridgeSubType == 0x00) board.append("SPC7110-");
+    if(cartridgeTypeHi == 0xf && cartridgeTypeLo == 0x9 && cartridgeSubType == 0x00) board.append("SPC7110-"), epsonRTC = true;
+    if(cartridgeTypeHi == 0xf                           && cartridgeSubType == 0x01) board.append("EXNEC-", mode);
+    if(cartridgeTypeHi == 0xf                           && cartridgeSubType == 0x02) board.append("ARM-", mode);
+    if(cartridgeTypeHi == 0xf                           && cartridgeSubType == 0x10) board.append("HITACHI-", mode);
   }
   if(!board) board.append(mode);
 
-  if(board.beginsWith("LOROM-") && romSize() > 0x200000 && ramSize()) board.replace("LOROM-", "LOROMEX-");
-  if(board.beginsWith("NEC-LOROM-") && romSize() > 0x100000) board.replace("NEC-LOROM-", "NEC-LOROMEX-");
+  if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");  //RAM without battery
+  if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("RAM-");  //RAM with battery
+  if(cartridgeTypeLo == 0x6);  //battery without RAM
 
-  if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");  //without battery
-  if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("RAM-");  //with battery
-  if(cartridgeTypeLo == 0x6) board.append("BATTERY-");  //without RAM
+  if(epsonRTC) board.append("EPSONRTC-");
+  if(sharpRTC) board.append("SHARPRTC-");
 
   board.trimRight("-", 1L);
 
-  //NEC uPD96050 frequency
-  if(board.beginsWith("NECEX-") && firmwareNECEX() == "st010") board.append("#11");  //11MHz (22MHz / 2)
-  if(board.beginsWith("NECEX-") && firmwareNECEX() == "st011") board.append("#15");  //15MHz
+  if(board.beginsWith(    "LOROM-RAM")) board.append(romSize() <= 0x200000 ? "#A" : "#B");
+  if(board.beginsWith("NEC-LOROM-RAM")) board.append(romSize() <= 0x100000 ? "#A" : "#B");
 
   return board;
 }
@@ -480,6 +487,19 @@ auto SuperFamicom::firmwareARM() const -> string {
   return "ST018";
 }
 
+auto SuperFamicom::firmwareEXNEC() const -> string {
+  if(label() == "EXHAUST HEAT2") return "ST010";
+  if(label() == "F1 ROC II") return "ST010";
+  if(label() == "2DAN MORITA SHOUGI") return "ST011";
+  return "ST010";
+}
+
+auto SuperFamicom::firmwareGB() const -> string {
+  if(label() == "Super GAMEBOY") return "SGB1";
+  if(label() == "Super GAMEBOY2") return "SGB2";
+  return "SGB1";
+}
+
 auto SuperFamicom::firmwareHITACHI() const -> string {
   return "Cx4";
 }
@@ -491,19 +511,6 @@ auto SuperFamicom::firmwareNEC() const -> string {
   if(label() == "PLANETS CHAMP TG3000") return "DSP4";
   if(label() == "TOP GEAR 3000") return "DSP4";
   return "DSP1B";
-}
-
-auto SuperFamicom::firmwareNECEX() const -> string {
-  if(label() == "EXHAUST HEAT2") return "ST010";
-  if(label() == "F1 ROC II") return "ST010";
-  if(label() == "2DAN MORITA SHOUGI") return "ST011";
-  return "ST010";
-}
-
-auto SuperFamicom::firmwareSGB() const -> string {
-  if(label() == "Super GAMEBOY") return "SGB1";
-  if(label() == "Super GAMEBOY2") return "SGB2";
-  return "SGB1";
 }
 
 }

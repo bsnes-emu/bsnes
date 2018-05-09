@@ -1,5 +1,5 @@
 database
-  revision: 2018-04-15
+  revision: 2018-05-06
 
 //Prototypes (JPN)
 
@@ -1818,7 +1818,7 @@ game
 //Super Nintendo (EUR)
 
 database
-  revision: 2018-04-14
+  revision: 2018-05-06
 
 game
   sha256:   ec3e81d628a293514e303b44e3b1ac03461ddd1da32764b10b7fab1e507602df
@@ -2513,7 +2513,7 @@ game
       size: 0xc00
       content: Data
       manufacturer: Hitachi
-      architecture: HS51BS169
+      architecture: HG51BS169
       identifier: Cx4
       volatile
     oscillator
@@ -2542,7 +2542,7 @@ game
       size: 0xc00
       content: Data
       manufacturer: Hitachi
-      architecture: HS51BS169
+      architecture: HG51BS169
       identifier: Cx4
       volatile
     oscillator
@@ -5733,7 +5733,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2018-04-14
+  revision: 2018-05-06
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -10293,7 +10293,7 @@ game
       size: 0xc00
       content: Data
       manufacturer: Hitachi
-      architecture: HS51BS169
+      architecture: HG51BS169
       identifier: Cx4
       volatile
     oscillator
@@ -10322,7 +10322,7 @@ game
       size: 0xc00
       content: Data
       manufacturer: Hitachi
-      architecture: HS51BS169
+      architecture: HG51BS169
       identifier: Cx4
       volatile
     oscillator

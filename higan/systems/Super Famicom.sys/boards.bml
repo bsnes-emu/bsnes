@@ -1,10 +1,10 @@
 database
-  revision: 2018-04-15
+  revision: 2018-05-08
 
 //Boards (Production)
 
 database
-  revision: 2018-04-10
+  revision: 2018-05-08
 
 board: BANDAI-PT-923
   memory type=ROM content=Program
@@ -63,36 +63,38 @@ board: BSC-1J5M-01
     map address=60-7d,e0-ff:0000-ffff
 
 board: BSC-1L3B-01
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
+      slot type=BSMemory
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
     memory type=RAM content=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
-    slot type=BSMemory
 
 board: BSC-1L5B-01
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
+      slot type=BSMemory
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
     memory type=RAM content=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
-    slot type=BSMemory
 
 board: SGB-R-10
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
-  icd revision=2
+  processor identifier=ICD revision=2
     map address=00-3f,80-bf:6000-67ff,7000-7fff
     memory type=ROM content=Boot architecture=LR35902
     slot type=GameBoy
@@ -147,7 +149,7 @@ board: SHVC-1A5M-(01,11,20)
 board: SHVC-1B0N-(02,03,10)
   memory type=ROM content=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=30-3f,b0-bf:8000-ffff mask=0x3fff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
@@ -159,7 +161,7 @@ board: SHVC-1B5B-02
     map address=00-1f,80-9f:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=20-3f,a0-bf:8000-ffff mask=0x3fff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
@@ -167,7 +169,7 @@ board: SHVC-1B5B-02
     oscillator
 
 board: SHVC-1C0N
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-1f,80-9f:8000-ffff mask=0x8000
@@ -175,7 +177,7 @@ board: SHVC-1C0N
       map address=60-7d,e0-ff:0000-ffff
 
 board: SHVC-1C0N5S-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-1f,80-9f:8000-ffff mask=0x8000
@@ -183,7 +185,7 @@ board: SHVC-1C0N5S-01
       map address=60-7d,e0-ff:0000-ffff
 
 board: SHVC-1CA0N5S-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
@@ -193,7 +195,7 @@ board: SHVC-1CA0N5S-01
       map address=70-71,f0-f1:0000-ffff
 
 board: SHVC-1CA0N6S-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
@@ -203,7 +205,7 @@ board: SHVC-1CA0N6S-01
       map address=70-71,f0-f1:0000-ffff
 
 board: SHVC-1CA6B-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
@@ -213,7 +215,7 @@ board: SHVC-1CA6B-01
       map address=70-71,f0-f1:0000-ffff
 
 board: SHVC-1CB0N7S-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f:8000-ffff mask=0x8000
@@ -223,7 +225,7 @@ board: SHVC-1CB0N7S-01
       map address=70-71:0000-ffff
 
 board: SHVC-1CB5B-20
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f:8000-ffff mask=0x8000
@@ -233,7 +235,7 @@ board: SHVC-1CB5B-20
       map address=70-71:0000-ffff
 
 board: SHVC-1CB7B-01
-  superfx
+  processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program
       map address=00-3f:8000-ffff mask=0x8000
@@ -243,11 +245,12 @@ board: SHVC-1CB7B-01
       map address=70-71:0000-ffff
 
 board: SHVC-1DC0N-01
-  hitachidsp model=HG51BS169
+  processor architecture=HG51BS169
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map address=70-77:0000-7fff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
+    memory type=RAM content=Save
+      map address=70-77:0000-7fff
     memory type=ROM content=Data architecture=HG51BS169
     memory type=RAM content=Data architecture=HG51BS169
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
@@ -256,7 +259,7 @@ board: SHVC-1DC0N-01
 board: SHVC-1DS0B-20
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050
+  processor architecture=uPD96050
     map address=60-67,e0-e7:0000-3fff
     memory type=ROM content=Program architecture=uPD96050
     memory type=ROM content=Data architecture=uPD96050
@@ -301,7 +304,7 @@ board: SHVC-1K0N-01
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
@@ -314,7 +317,7 @@ board: SHVC-1K1B-01
     map address=40-7d,c0-ff:0000-ffff
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
@@ -322,11 +325,12 @@ board: SHVC-1K1B-01
     oscillator
 
 board: SHVC-1L0N3S-01
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
@@ -334,11 +338,12 @@ board: SHVC-1L0N3S-01
       map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SHVC-1L3B-(02,11)
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
@@ -346,11 +351,12 @@ board: SHVC-1L3B-(02,11)
       map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SHVC-1L5B-(11,20)
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
@@ -358,11 +364,12 @@ board: SHVC-1L5B-(11,20)
       map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SHVC-1N0N-(01,10)
-  sdd1
+  processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
 
 board: SHVC-2A0N-01#A
   memory type=ROM content=Program
@@ -409,7 +416,7 @@ board: SHVC-2B3B-01
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=60-6f,e0-ef:0000-7fff mask=0x3fff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
@@ -417,11 +424,12 @@ board: SHVC-2B3B-01
     oscillator
 
 board: SHVC-2DC0N-01
-  hitachidsp model=HG51BS169
+  processor architecture=HG51BS169
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map address=70-77:0000-7fff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
+    memory type=RAM content=Save
+      map address=70-77:0000-7fff
     memory type=ROM content=Data architecture=HG51BS169
     memory type=RAM content=Data architecture=HG51BS169
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
@@ -430,7 +438,7 @@ board: SHVC-2DC0N-01
 board: SHVC-2E3M-01
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
-  obc1
+  processor identifier=OBC1
     map address=00-3f,80-bf:6000-7fff mask=0xe000
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
     memory type=RAM content=Save
@@ -488,7 +496,7 @@ board: SHVC-BJ1M-(10,20)
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
-board: SHVC-BJ3M-10
+board: SHVC-BJ3M-(10,20)
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
@@ -496,25 +504,27 @@ board: SHVC-BJ3M-10
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
 board: SHVC-LDH3C-01
-  spc7110
+  processor identifier=SPC7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
-    map=mcu address=00-3f,80-bf:8000-ffff mask=0x800000
-    map=mcu address=c0-ff:0000-ffff mask=0xc00000
-    memory type=ROM content=Program
-    memory type=ROM content=Data
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x800000
+      map address=c0-ff:0000-ffff mask=0xc00000
+      memory type=ROM content=Program
+      memory type=ROM content=Data
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
-  epsonrtc
+  rtc manufacturer=Epson
     map address=00-3f,80-bf:4840-4842
     memory type=RTC content=Time manufacturer=Epson
 
 board: SHVC-LN3B-01
-  sdd1
+  processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
       map address=70-73:0000-ffff
@@ -523,7 +533,7 @@ board: SHVC-SGB2-01
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
     map address=40-7d,c0-ff:0000-7fff mask=0x8000
-  icd revision=2
+  processor identifier=ICD revision=2
     map address=00-3f,80-bf:6000-67ff,7000-7fff
     memory type=ROM content=Boot architecture=LR35902
     oscillator
@@ -542,7 +552,7 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-04-08
+  revision: 2018-05-08
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -550,11 +560,11 @@ board: ARM-LOROM-RAM
     map address=40-6f,c0-ef:0000-7fff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff
-  armdsp
+  processor architecture=ARM6
     map address=00-3f,80-bf:3800-38ff
-    memory type=ROM content=Program manufacturer=SETA
-    memory type=ROM content=Data manufacturer=SETA
-    memory type=RAM content=Data manufacturer=SETA
+    memory type=ROM content=Program architecture=ARM6
+    memory type=ROM content=Data architecture=ARM6
+    memory type=RAM content=Data architecture=ARM6
     oscillator
 
 board: BS-HIROM-RAM
@@ -563,7 +573,7 @@ board: BS-HIROM-RAM
     map address=40-5f,c0-df:0000-ffff
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-  bsmemory
+  slot type=BSMemory
     map address=20-3f,a0-bf:8000-ffff
     map address=60-7d,e0-ff:0000-ffff
 
@@ -575,33 +585,89 @@ board: BS-LOROM-RAM
     map address=a0-bf:8000-ffff base=0x100000 mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  bsmemory
+  slot type=BSMemory
     map address=c0-ef:0000-ffff
 
 board: BS-MCC-RAM
   memory type=RAM content=Save
     map address=10-1f:5000-5fff mask=0xf000
-  mcc
+  processor identifier=MCC
     map address=00-0f:5000
-    map=mcu address=00-3f,80-bf:8000-ffff mask=0x408000
-    map=mcu address=40-7d,c0-ff:0000-ffff
-    memory type=ROM content=Program
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=40-7d,c0-ff:0000-ffff
+      memory type=ROM content=Program
+      slot type=BSMemory
     memory type=RAM content=Download
       map address=00-3f,80-bf:6000-7fff mask=0xe000
-    bsmemory
 
 board: BS-SA1-RAM
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
+      slot type=BSMemory
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
     memory type=RAM content=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
-    bsmemory
+
+board: EXHIROM-RAM
+  memory type=ROM content=Program
+    map address=00-3f:8000-ffff base=0x400000
+    map address=40-7d:0000-ffff base=0x400000
+    map address=80-bf:8000-ffff mask=0xc00000
+    map address=c0-ff:0000-ffff mask=0xc00000
+  memory type=RAM content=Save
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+    map address=70-7d:0000-7fff
+
+board: EXHIROM-RAM-SHARPRTC
+  memory type=ROM content=Program
+    map address=00-3f:8000-ffff base=0x400000
+    map address=40-7d:0000-ffff base=0x400000
+    map address=80-bf:8000-ffff mask=0xc00000
+    map address=c0-ff:0000-ffff mask=0xc00000
+  memory type=RAM content=Save
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+    map address=70-7d:0000-7fff
+  rtc manufacturer=Sharp
+    map address=00-3f,80-bf:2800-2801
+    memory type=RTC content=Time manufacturer=Sharp
+
+board: EXNEC-LOROM
+  memory type=ROM content=Program
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  processor architecture=uPD96050
+    map address=60-67,e0-e7:0000-3fff
+    memory type=ROM content=Program architecture=uPD96050
+    memory type=ROM content=Data architecture=uPD96050
+    memory type=RAM content=Data architecture=uPD96050
+      map address=68-6f,e8-ef:0000-7fff mask=0x8000
+    oscillator
+
+board: GB-LOROM
+  memory type=ROM content=Program
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  processor identifier=ICD revision=2
+    map address=00-3f,80-bf:6000-67ff,7000-7fff
+    memory type=ROM content=Boot architecture=LR35902
+    oscillator
+    slot type=GameBoy
+
+board: GSU-RAM
+  processor architecture=GSU
+    map address=00-3f,80-bf:3000-34ff
+    memory type=ROM content=Program
+      map address=00-3f,80-bf:8000-ffff mask=0x8000
+      map address=40-5f,c0-df:0000-ffff
+    memory type=RAM content=Save
+      map address=00-3f,80-bf:6000-7fff size=0x2000
+      map address=70-71,f0-f1:0000-ffff
 
 board: HIROM
   memory type=ROM content=Program
@@ -615,24 +681,15 @@ board: HIROM-RAM
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
 
-board: HIROMEX-RAM
-  memory type=ROM content=Program
-    map address=00-3f:8000-ffff base=0x400000
-    map address=40-7d:0000-ffff base=0x400000
-    map address=80-bf:8000-ffff mask=0xc00000
-    map address=c0-ff:0000-ffff mask=0xc00000
-  memory type=RAM content=Save
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-    map address=70-7d:0000-7fff
-
 board: HITACHI-LOROM
-  hitachidsp model=HG51BS169
+  processor architecture=HG51BS169
     map address=00-3f,80-bf:6c00-6fff,7c00-7fff
-    map address=70-77:0000-7fff
     memory type=ROM content=Program
       map address=00-3f,80-bf:8000-ffff mask=0x8000
-    memory type=ROM content=Data manufacturer=Hitachi
-    memory type=RAM content=Data manufacturer=Hitachi
+    memory type=RAM content=Save
+      map address=70-77:0000-7fff
+    memory type=ROM content=Data architecture=HG51BS169
+    memory type=RAM content=Data architecture=HG51BS169
       map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000
     oscillator
 
@@ -640,13 +697,13 @@ board: LOROM
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
 
-board: LOROM-RAM
+board: LOROM-RAM#A
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff mask=0x8000
 
-board: LOROMEX-RAM
+board: LOROM-RAM#B
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
   memory type=RAM content=Save
@@ -656,11 +713,11 @@ board: NEC-HIROM
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
     oscillator
 
 board: NEC-HIROM-RAM
@@ -669,85 +726,62 @@ board: NEC-HIROM-RAM
     map address=40-7d,c0-ff:0000-ffff
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=00-1f,80-9f:6000-7fff mask=0xfff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
     oscillator
 
 board: NEC-LOROM
   memory type=ROM content=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=30-3f,b0-bf:8000-ffff mask=0x3fff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
     oscillator
 
-board: NEC-LOROM-RAM
+board: NEC-LOROM-RAM#A
   memory type=ROM content=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=20-3f,a0-bf:8000-ffff mask=0x3fff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
     oscillator
 
-board: NEC-LOROMEX-RAM
+board: NEC-LOROM-RAM#B
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  necdsp model=uPD7725
+  processor architecture=uPD7725
     map address=60-6f,e0-ef:0000-7fff mask=0x3fff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
-    oscillator
-
-board: NECEX-LOROM-BATTERY
-  memory type=ROM content=Program
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  necdsp model=uPD96050
-    map address=60-67,e0-e7:0000-3fff
-    memory type=ROM content=Program manufacturer=NEC
-    memory type=ROM content=Data manufacturer=NEC
-    memory type=RAM content=Data manufacturer=NEC
-      map address=68-6f,e8-ef:0000-7fff mask=0x8000
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
     oscillator
 
 board: OBC1-LOROM-RAM
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
-  obc1
+  processor identifier=OBC1
     map address=00-3f,80-bf:6000-7fff mask=0xe000
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
     memory type=RAM content=Save
 
-board: RTC-HIROMEX-RAM
-  memory type=ROM content=Program
-    map address=00-3f:8000-ffff base=0x400000
-    map address=40-7d:0000-ffff base=0x400000
-    map address=80-bf:8000-ffff mask=0xc00000
-    map address=c0-ff:0000-ffff mask=0xc00000
-  memory type=RAM content=Save
-    map address=20-3f,a0-bf:6000-7fff mask=0xe000
-    map address=70-7d:0000-7fff
-  sharprtc
-    map address=00-3f,80-bf:2800-2801
-    memory type=RTC manufacturer=Sharp
-
 board: SA1-RAM
-  sa1
+  processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff mask=0x408000
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=40-4f:0000-ffff
@@ -755,78 +789,62 @@ board: SA1-RAM
       map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SDD1
-  sdd1
+  processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
 
 board: SDD1-RAM
-  sdd1
+  processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
-    memory type=ROM content=Program
+    mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
       map address=70-73:0000-ffff mask=0x8000
 
-board: SGB-LOROM
-  memory type=ROM content=Program
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-  icd revision=2
-    map address=00-3f,80-bf:6000-67ff,7000-7fff
-    memory type=ROM content=Boot manufacturer=Nintendo
-    oscillator
-    gameboy
-
 board: SPC7110-RAM
-  spc7110
+  processor identifier=SPC7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
-    map type=MCU address=00-3f,80-bf:8000-ffff mask=0x800000
-    map type=MCU address=c0-ff:0000-ffff mask=0xc00000
-    memory type=ROM content=Program
-    memory type=ROM content=Data
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x800000
+      map address=c0-ff:0000-ffff mask=0xc00000
+      memory type=ROM content=Program
+      memory type=ROM content=Data
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
 
-board: SPC7110-RTC-RAM
-  spc7110
+board: SPC7110-RAM-EPSONRTC
+  processor identifier=SPC7110
     map address=00-3f,80-bf:4800-483f
     map address=50,58:0000-ffff
-    map type=MCU address=00-3f,80-bf:8000-ffff mask=0x800000
-    map type=MCU address=c0-ff:0000-ffff mask=0xc00000
-    memory type=ROM content=Program
-    memory type=ROM content=Data
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x800000
+      map address=c0-ff:0000-ffff mask=0xc00000
+      memory type=ROM content=Program
+      memory type=ROM content=Data
     memory type=RAM content=Save
       map address=00-3f,80-bf:6000-7fff mask=0xe000
-  epsonrtc
+  rtc manufacturer=Epson
     map address=00-3f,80-bf:4800-4842
-    memory type=RTC manufacturer=Epson
+    memory type=RTC content=Time manufacturer=Epson
 
 board: ST-LOROM
   memory type=ROM content=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
-  sufamiturbo
+  slot type=SufamiTurbo
     rom
       map address=20-3f,a0-bf:8000-ffff mask=0x8000
     ram
       map address=60-6f,e0-ef:0000-ffff
-  sufamiturbo
+  slot type=SufamiTurbo
     rom
       map address=40-5f,c0-df:0000-ffff mask=0x8000
     ram
       map address=70-7d,f0-ff:0000-ffff
-
-board: SUPERFX-RAM
-  superfx
-    map address=00-3f,80-bf:3000-34ff
-    memory type=ROM content=Program
-      map address=00-3f,80-bf:8000-ffff mask=0x8000
-      map address=40-5f,c0-df:0000-ffff
-    memory type=RAM content=Save
-      map address=00-3f,80-bf:6000-7fff size=0x2000
-      map address=70-71,f0-f1:0000-ffff
 

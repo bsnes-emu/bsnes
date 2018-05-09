@@ -91,8 +91,9 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/applications/
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
+	mkdir -p $(prefix)/share/$(name)/systems/
 	cp out/$(name) $(prefix)/bin/$(name)
-	cp -R systems/* $(prefix)/share/$(name)/
+	cp -R systems/* $(prefix)/share/$(name)/systems/
 	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp data/$(name).png $(prefix)/share/icons/$(name).png
 endif

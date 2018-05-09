@@ -17,7 +17,7 @@ auto Program::loadMedium() -> void {
 auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void {
   unloadMedium();
 
-  mediumPaths.append(locate({medium.name, ".sys/"}));
+  mediumPaths.append(locate({"systems/", medium.name, ".sys/"}));
 
   Emulator::audio.reset(2, audio->frequency());
   inputManager->bind(emulator = &interface);
