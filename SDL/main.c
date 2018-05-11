@@ -10,9 +10,9 @@
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
-/* LIJI32 says: Windows (well, at least my VM) can't handle 96KHz sound well :(
+/* Windows (well, at least my VM) can't handle 96KHz sound well :( */
 
-   felsqualle says: For SDL 2.0.6+ using the WASAPI driver, the highest freq.
+/* felsqualle says: For SDL 2.0.6+ using the WASAPI driver, the highest freq.
    we can get is 48000. 96000 also works, but always has some faint crackling in
    the audio, no matter how high or low I set the buffer length...
    Not quite satisfied with that solution, because acc. to SDL2 docs,
@@ -31,7 +31,7 @@ static char *filename = NULL;
 static bool should_free_filename = false;
 static char *battery_save_path_ptr;
 
-SDL_AudioDeviceID deviceId;
+SDL_AudioDeviceID device_id;
 
 void set_filename(const char *new_filename, bool new_should_free)
 {
@@ -141,13 +141,13 @@ static void handle_events(GB_gameboy_t *gb)
                 }
                 
                 else {
-                    bool audio_playing = SDL_GetAudioDeviceStatus(deviceId) == SDL_AUDIO_PLAYING;
+                    bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
                     if (audio_playing) {
-                        SDL_PauseAudioDevice(deviceId, 1);
+                        SDL_PauseAudioDevice(device_id, 1);
                     }
                     run_gui(true);
                     if (!audio_playing) {
-                        SDL_PauseAudioDevice(deviceId, 0);
+                        SDL_PauseAudioDevice(device_id, 0);
                     }
                     GB_set_color_correction_mode(gb, configuration.color_correction_mode);
                     GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
@@ -169,13 +169,13 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {
                     case SDL_SCANCODE_ESCAPE: {
-                        bool audio_playing = SDL_GetAudioDeviceStatus(deviceId) == SDL_AUDIO_PLAYING;
+                        bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
                         if (audio_playing) {
-                            SDL_PauseAudioDevice(deviceId, 1);
+                            SDL_PauseAudioDevice(device_id, 1);
                         }
                         run_gui(true);
                         if (!audio_playing) {
-                            SDL_PauseAudioDevice(deviceId, 0);
+                            SDL_PauseAudioDevice(device_id, 0);
                         }
                         GB_set_color_correction_mode(gb, configuration.color_correction_mode);
                         GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
@@ -208,12 +208,13 @@ static void handle_events(GB_gameboy_t *gb)
                                 break;
                             }
 #endif
-                        bool audio_playing = SDL_GetAudioDeviceStatus(deviceId) == SDL_AUDIO_PLAYING;
-                        if (audio_playing) {
-                        SDL_PauseAudioDevice(deviceId, 1);
-                        }
-                        else if (!audio_playing) {
-                                SDL_PauseAudioDevice(deviceId, 0);
+                            bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
+                            if (audio_playing) {
+                                SDL_PauseAudioDevice(device_id, 1);
+                            }
+                            else if (!audio_playing) {
+                                SDL_PauseAudioDevice(device_id, 0);
+                            }
                         }
                     break;
                     
@@ -243,7 +244,6 @@ static void handle_events(GB_gameboy_t *gb)
                             }
                         }
                         break;
-                        }
                 }
             case SDL_KEYUP: // Fallthrough
                 if (event.key.keysym.scancode == configuration.keys[8]) {
@@ -475,7 +475,6 @@ int main(int argc, char **argv)
     want_aspec.freq = AUDIO_FREQUENCY;
     want_aspec.format = AUDIO_S16SYS;
     want_aspec.channels = 2;
-    printf("SDL version is %d\n", SDL_COMPILEDVERSION);
 #if SDL_COMPILEDVERSION >= 2005 && defined(__APPLE__)
     /* SDL 2.0.5 on macOS introduced a bug where certain combinations of buffer lengths and frequencies 
        fail to produce audio correctly. */
@@ -487,20 +486,18 @@ int main(int argc, char **argv)
 #if SDL_COMPILEDVERSION >= 2006 && defined(_WIN32)
     /* SDL 2.0.6 offers WASAPI support which allows for much lower audio buffer lengths which at least
        theoretically reduces lagging. */
-    printf("SDL 2.0.6+ detected, reducing audio buffer to 32 samples\n");
     want_aspec.samples = 32;
 #endif
 
 #if SDL_COMPILEDVERSION <= 2005 && defined(_WIN32)
     /* Since WASAPI audio was introduced in SDL 2.0.6, we have to lower the audio frequency
        to 44100 because otherwise we would get garbled audio output.*/
-    printf("Fallback: SDL 2.0.5 detected, lowering audio freqency to 44100\n");
     want_aspec.freq = 44100;
 #endif
 
     want_aspec.callback = audio_callback;
     want_aspec.userdata = &gb;
-    deviceId = SDL_OpenAudioDevice(0, 0, &want_aspec, &have_aspec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+    device_id = SDL_OpenAudioDevice(0, 0, &want_aspec, &have_aspec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
     
     /* Start Audio */
 
@@ -526,7 +523,7 @@ int main(int argc, char **argv)
     if (filename == NULL) {
         run_gui(false);
     }
-    SDL_PauseAudioDevice(deviceId, 0);
+    SDL_PauseAudioDevice(device_id, 0);
     run(); // Never returns
     return 0;
 }
