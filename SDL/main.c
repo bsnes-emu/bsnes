@@ -216,9 +216,9 @@ static void handle_events(GB_gameboy_t *gb)
                         
                     default:
                         /* Save states */
-                        if (event.key.keysym.scancode >= SDL_SCANCODE_0 && event.key.keysym.scancode <= SDL_SCANCODE_9) {
+                        if (event.key.keysym.scancode >= SDL_SCANCODE_1 && event.key.keysym.scancode <= SDL_SCANCODE_0) {
                             if (event.key.keysym.mod & MODIFIER) {
-                                command_parameter = event.key.keysym.scancode - SDL_SCANCODE_0;
+                                command_parameter = event.key.keysym.scancode - SDL_SCANCODE_1;
                                 
                                 if (event.key.keysym.mod & KMOD_SHIFT) {
                                     pending_command = GB_SDL_LOAD_STATE_COMMAND;
