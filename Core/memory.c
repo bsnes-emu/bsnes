@@ -595,8 +595,36 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[addr & 0xFF] = value;
                 return;
             case GB_IO_LYC:
+                
+                /* TODO: Probably completely wrong in double speed mode */
+                
+                /* TODO: This hack is disgusting */
+                if (gb->display_state == 29 && gb->is_cgb) {
+                    gb->ly_for_comparison = 153;
+                    GB_STAT_update(gb);
+                    gb->ly_for_comparison = 0;
+                }
+                
                 gb->io_registers[addr & 0xFF] = value;
-                GB_STAT_update(gb);
+                
+                /* These are the states when LY changes, let the display routine call GB_STAT_update for use
+                   so it correctly handles T-cycle accurate LYC writes */
+                if (!gb->is_cgb  || (
+                    gb->display_state != 6 &&
+                    gb->display_state != 26 &&
+                    gb->display_state != 15 &&
+                    gb->display_state != 16)) {
+                    
+                    /* More hacks to make LYC write conflicts work */
+                    if (gb->display_state == 14 && gb->is_cgb) {
+                        gb->ly_for_comparison = 153;
+                        GB_STAT_update(gb);
+                        gb->ly_for_comparison = -1;
+                    }
+                    else {
+                        GB_STAT_update(gb);
+                    }
+                }
                 return;
                 
             case GB_IO_TIMA:

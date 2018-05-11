@@ -20,6 +20,7 @@ typedef enum {
 /* Todo: How does double speed mode affect these? */
 static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
 
     /* Todo: most values not verified, and probably differ between revisions */
 };

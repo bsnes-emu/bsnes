@@ -246,15 +246,17 @@ void GB_STAT_update(GB_gameboy_t *gb)
     bool previous_interrupt_line = gb->stat_interrupt_line | gb->oam_interrupt_line;
     gb->stat_interrupt_line = gb->oam_interrupt_line;
     /* Set LY=LYC bit */
-    if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
-        gb->lyc_interrupt_line = true;
-        gb->io_registers[GB_IO_STAT] |= 4;
-    }
-    else {
-        if (gb->ly_for_comparison != (uint16_t)-1) {
-            gb->lyc_interrupt_line = false;
+    if (gb->ly_for_comparison != (uint16_t)-1 || !gb->is_cgb) {
+        if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
+            gb->lyc_interrupt_line = true;
+            gb->io_registers[GB_IO_STAT] |= 4;
         }
-        gb->io_registers[GB_IO_STAT] &= ~4;
+        else {
+            if (gb->ly_for_comparison != (uint16_t)-1) {
+                gb->lyc_interrupt_line = false;
+            }
+            gb->io_registers[GB_IO_STAT] &= ~4;
+        }
     }
     
     switch (gb->io_registers[GB_IO_STAT] & 3) {
@@ -565,6 +567,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 26);
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
+        GB_STATE(gb, display, 29);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -638,7 +641,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 6, 3);
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->oam_read_blocked = true;
-            gb->ly_for_comparison = gb->current_line? (gb->is_cgb? gb->current_line - 1 : -1) : 0;
+            gb->ly_for_comparison = gb->current_line? -1 : 0;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch? (Todo: and in double speed mode?) */
@@ -822,9 +825,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* Lines 144 - 152 */
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->io_registers[GB_IO_LY] = gb->current_line;
-            if (!gb->is_cgb) {
-                gb->ly_for_comparison = -1;
-            }
+            gb->ly_for_comparison = -1;
             GB_SLEEP(gb, display, 26, 2);
             if (gb->current_line == LINES) {
                 gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
@@ -866,22 +867,27 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* TODO: Verified on SGB2 and CGB-E. Actual interrupt timings not tested. */
         /* Lines 153 */
         gb->io_registers[GB_IO_LY] = 153;
-        gb->ly_for_comparison = gb->is_cgb? 152 : -1;
+        gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 14, 6);
+        GB_SLEEP(gb, display, 14, gb->is_cgb? 4: 6);
+        
+        if (!gb->is_cgb) {
+            gb->io_registers[GB_IO_LY] = 0;
+        }
+        gb->ly_for_comparison = 153;
+        GB_STAT_update(gb);
+        GB_SLEEP(gb, display, 15, gb->is_cgb? 4: 2);
         
         gb->io_registers[GB_IO_LY] = 0;
-        gb->ly_for_comparison = gb->is_cgb? 0 : 153;
-        GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 15, 2);
-        
         gb->ly_for_comparison = gb->is_cgb? 153 : -1;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 16, 4);
         
         gb->ly_for_comparison = 0;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 17, LINE_LENGTH - 12);
+        GB_SLEEP(gb, display, 29, 12); /* Writing to LYC during this period on a CGB has side effects */
+        GB_SLEEP(gb, display, 17, LINE_LENGTH - 24);
+        
         
         /* Reset window rendering state */
         gb->wy_diff = 0;
