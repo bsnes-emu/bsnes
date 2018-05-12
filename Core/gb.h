@@ -269,6 +269,7 @@ struct GB_gameboy_internal_s {
         bool boot_rom_finished;
         bool ime_toggle; /* ei has delayed a effect.*/
         bool halt_bug;
+        bool just_halted;
 
         /* Misc state */
         bool infrared_input;

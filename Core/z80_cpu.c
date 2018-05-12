@@ -750,12 +750,26 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
 
 static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
+    assert(gb->pending_cycles == 4);
+    gb->pending_cycles = 0;
+    GB_advance_cycles(gb, 1);
+    GB_advance_cycles(gb, 1);
+    GB_advance_cycles(gb, 1);
+    GB_advance_cycles(gb, 1);
+    
     gb->halted = true;
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
-    if (!gb->ime && (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0) {
-        gb->halted = false;
-        gb->halt_bug = true;
+    if (((gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0)) {
+        if (gb->ime) {
+            gb->halted = false;
+            gb->pc--;
+        }
+        else {
+            gb->halted = false;
+            gb->halt_bug = true;
+        }
     }
+    gb->just_halted = true;
 }
 
 static void pop_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -1321,15 +1335,16 @@ void GB_cpu_run(GB_gameboy_t *gb)
         return;
     }
     
-    if (gb->halted && !gb->is_cgb) {
+    if (gb->halted && !gb->is_cgb && !gb->just_halted) {
         GB_advance_cycles(gb, 2);
     }
     
     uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
     
     if (gb->halted) {
-        GB_advance_cycles(gb, gb->is_cgb? 4 : 2);
+        GB_advance_cycles(gb, (gb->is_cgb || gb->just_halted) ? 4 : 2);
     }
+    gb->just_halted = false;
 
     bool effecitve_ime = gb->ime;
     if (gb->ime_toggle) {
