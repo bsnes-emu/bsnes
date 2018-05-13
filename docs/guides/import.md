@@ -28,10 +28,7 @@ and it will be imported into the library and start playing.
 
 **Note:**
 If you want to import many games,
-run icarus directly,
-or choose "Import ROM Files ..."
-from the Library menu
-(which just runs icarus anyway).
+run icarus directly.
 See [the icarus documentation](../interface/icarus.md) for details.
 
 To play a game for a particular console from your library,

@@ -5,27 +5,31 @@ a status-bar across the bottom,
 and a large area in the middle that shows
 the running game's video output.
 
-The Library menu
+The Systems menu
 ----------------
 
-Manufacturer sub-menus
-allow you to play
-games you've already imported
-into higan's 
-[game library](../concepts/game-library.md).
+This menu lists the systems higan emulates,
+Choosing any system allows you to play
+games for that system that you've already imported
+into higan's [game library](../concepts/game-library.md).
 See [Importing and playing games](../guides/import.md).
+
+You can customise this menu
+in [higan's Systems settings](higan-settings.md#systems)
+to hide systems you don't care about,
+or add a specific cartridge for any supported system.
+This makes it more convenient
+to play games that involve mini-cartridges:
+for example, you can
+add the Sufami Turbo to the list
+and load *SD Ultra Battle*
+in two clicks instead of three.
     
 **Load ROM File ...**
 opens a [filesystem browser](common.md#the-filesystem-browser)
 allowing you to choose a single ROM file.
 It will be imported and immediately start playing.
 See [Importing and playing games](../guides/import.md).
-    
-**Import ROM Files ...**
-launches the icarus importing tool,
-allowing you to bulk-import many ROM files at once.
-See [the icarus documentation](icarus.md).
-    
 
 The console menu
 ---------------
@@ -187,6 +191,9 @@ at the bottom of the window.
 This option has no effect in fullscreen mode.
 See [The status bar](#the-status-bar) for more information.
 
+**Systems ...**
+opens [higan's Systems settings](higan-settings.md#systems).
+
 **Video ...**
 opens [higan's Video settings](higan-settings.md#video).
 
@@ -220,16 +227,26 @@ restores the emulated console to
 a state previously saved to one of the quick state slots.
 See [Save States](../concepts/save-states.md) for more information.
 
-**Cheat Editor**
+**Pause Emulation**
+pauses the emulated console
+until this menu-item is selected again.
+This can also be triggered by
+the [pause hotkey](higan-settings.md#hotkeys).
+
+**Cheat Editor ...**
 opens [the Cheat Editor tab](higan-tools.md#the-cheat-editor)
 of the Tools window.
 
-**State Manager**
+**State Manager ...**
 opens [the State Manager tab](higan-tools.md#the-state-manager)
 of the Tools window.
 
-**Manifest Viewer**
+**Manifest Viewer ...**
 opens [the Manifest Viewer tab](higan-tools.md#the-manifest-viewer)
+of the Tools window.
+
+**Game Notes ...**
+opens [the Game Notes tab](higan-tools.md#game-notes)
 of the Tools window.
 
 The Help menu
@@ -276,11 +293,13 @@ or you may have pressed the "turbo" [hotkey](higan-settings.md#hotkeys).
 
 The status bar displays "Paused"
 if you have pressed the "pause" [hotkey](higan-settings.md#hotkeys),
+selected "Pause Emulation" from [the Tools menu](#the-tools-menu),
 or if "When focus is lost: Pause Emulation" is ticked
 in [higan's Input settings](higan-settings.md#input)
 and the main higan window is not the foreground window.
 To resume emulation,
 make sure the main higan window is in the foreground,
+select "Pause Emulation" from the Tools menu again,
 and/or press the "pause" hotkey.
 
 The status bar briefly displays "Selected quick state slot X"

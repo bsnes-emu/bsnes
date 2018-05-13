@@ -8,6 +8,78 @@ or set once and never changed again.
 
 This window has a tab for each main category of options:
 
+Systems
+=======
+
+This tab configures the contents of
+[the Systems menu](higan.md#the-systems-menu),
+so you can make it easier to load the games you care about
+and hide things that get in the way.
+
+Each item in the list represents
+a single item in the Systems menu.
+If the box at the left is ticked,
+that item will be included in the menu,
+otherwise it will be hidden—but higan will remember its configuration
+in case you want to show it again.
+
+At the bottom left are
+![up-arrow](up.png) and ![down-arrow](down.png) buttons.
+These move the selected item
+upward or downward in the list.
+
+The **Append** button in the lower right
+adds a new item to the end of the list.
+It opens the [System Properties](#system-properties) dialog,
+so you can enter the details of the new item.
+If you don't want the new item to be at the end,
+you can use the up and down buttons
+in the lower left
+to move it to its intended location.
+
+The **Modify** button in the lower right
+opens the [System Properties](#system-properties) dialog
+for the selected item,
+so you can make changes.
+
+The **Remove** button in the lower right
+removes the selected item from the list entirely.
+Unlike hiding the item,
+this forgets whatever configuration the item had.
+
+System Properties
+-----------------
+
+This dialog appears when clicking "Append" or "Modify"
+in the [Systems](#systems) tab.
+It allows you to configure a new ("Append") or existing ("Modify") entry
+in the [Systems menu](higan.md#the-systems-menu).
+
+  - **System** controls which console will be emulated
+    when this menu-item is chosen.
+  - **Load** controls what game will be loaded
+    into the emulated console
+    when this menu-item is chosen.
+      - If left blank,
+        higan will open [a filesystem browser](common.md#the-filesystem-browser)
+        allowing you to pick a previously-imported game from
+        the [game library](../concepts/game-library.md).
+      - If you choose a particular game,
+        higan will immediately load it
+        when the menu-item is chosen.
+        If the game requires additional data
+        (for example, the Super Game Boy requires a Game Boy cartridge)
+        higan will prompt for it.
+  - **Alias** controls the name of this item,
+    as displayed in the Systems menu.
+  - **Append** (present in "Append" mode) closes the dialog
+    and adds a new item with this configuration
+    to the list.
+  - **Modify** (present in "Modify" mode) closes the dialog
+    and updates the configuration of
+    the item being modified.
+  - **Cancel** closes the dialog without making any changes.
+
 Video
 =====
 
@@ -308,7 +380,9 @@ instead of the emulated console.
   - **Increment Quick State** selects the next [Quick State][qstates] slot.
     The status bar will briefly display the new current slot number.
   - **Pause Emulation** pauses the emulated console
-    until the Pause Emulation hotkey is pressed a second time.
+    until the Pause Emulation hotkey is pressed a second time,
+    or "Pause Emulation" is chosen from
+    [the Tools menu](higan.md#the-tools-menu)..
   - **Fast Forward** disables audio and video synchronisation
     for as long as it's held down,
     so emulation proceeds as quickly as possible.
@@ -378,3 +452,16 @@ with the [Game Library](../concepts/game-library.md).
     to guess a manifest on the fly.
     See [Ignoring manifests](../concepts/manifests.md#ignoring-manifests)
     for details.
+    
+**Other**
+
+  - **Auto-Save Memory Periodically** makes higan write
+    [in-game saves](../concepts/save-states.md#save-states-versus-in-game-saves)
+    to disk during gameplay,
+    instead of only when higan exits.
+    This may cause stuttering,
+    but means that you haven't lost everything
+    if higan crashes,
+    or your computer loses power.
+      - Note that this does not include
+        [game notes](higan-tools.md#game-notes)

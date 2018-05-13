@@ -11,7 +11,7 @@ see the [Quick Start](qs.md) section of the documentation.
 About higan
 -----------
 
-As of v104,
+As of v107,
 higan has top-tier support for the following consoles:
 
   - Nintendo Super Famicom/Super Nintendo Entertainment System,
@@ -33,6 +33,7 @@ It also includes some level of support for these consoles:
   - NEC SuperGrafx
   - Bandai WonderSwan
   - Bandai WonderSwan Color
+  - Pocket Challenge v2
 
 **Note:** Some consoles were released under different names
 in different geographic regions.

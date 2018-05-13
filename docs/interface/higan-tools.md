@@ -6,7 +6,7 @@ one of the items at the bottom of
 The window has a tab for each tool:
 
 The Cheat Editor
-----------------
+================
 
 For some consoles,
 higan supports applying temporary changes to the code of a running game.
@@ -90,7 +90,7 @@ you can lock the time to 999 with these codes:
 `7e0f31=09+7e0f32=09+7e0f33=09`.
 
 The State Manager
------------------
+=================
 
 The State Manager allows you to create,
 load,
@@ -126,7 +126,7 @@ To clear all the slots at once,
 click "Reset" in the bottom-right corner.
 
 The Manifest Viewer
--------------------
+===================
 
 As described in
 [Game Manifests](../concepts/manifests.md),
@@ -135,3 +135,14 @@ describe how the various parts of a game cartridge
 are wired up together.
 The Manifest Viewer lets you examine
 the configuration higan is using for the loaded game.
+
+Game Notes
+==========
+
+The Game Notes tab
+is a place where you can write whatever you want
+about the running game.
+This information is automatically stored inside
+the [game folder](../concepts/game-folders.md)
+and loaded back into this tab
+every time the game is loaded.

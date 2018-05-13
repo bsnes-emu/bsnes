@@ -118,26 +118,22 @@ Installing a compiled build on Windows
  2. Assuming you built higan in `C:\higan-src`,
     copy `C:\higan-src\icarus\out\icarus.exe`
     into the new folder
- 3. Copy `C:\higan-src\icarus\Database` and its contents
+ 3. Copy `C:\higan-src\icarus\database` and its contents
     into the new folder
- 4. Copy `C:\higan-src\higan\out\higan.exe`
+ 4. Copy `C:\higan-src\icarus\firmware` and its contents
     into the new folder
- 5. Copy all the `*.sys` folders
-    in `C:\higan-src\higan\systems`
+ 5. Copy `C:\higan-src\higan\out\higan.exe`
     into the new folder
- 6. If the higan source includes a `shaders` folder,
-    make another new folder named `Video Shaders`
-    inside the new folder,
-    and copy all the `*.shader` folders
-    from `C:\higan-src\shaders\`
-    into the `Video Shaders` folder.
+ 6. Copy `C:\higan-src\higan\systems`
+    into the new folder
+ 7. If the higan source includes a `shaders` folder,
+    copy it into the new folder too.
 
 The new folder should now contain
 `icarus.exe`,
 `higan.exe`,
-a folder named `Database`,
-and half a dozen folders named after the systems higan emulates
-with `.sys` at the end.
+and folders named `database`, `firmware`, `systems`,
+and possibly `shaders`.
 This is what you would get by downloading an official build,
 as described under
 [Installing an official release on Windows][instwin]
