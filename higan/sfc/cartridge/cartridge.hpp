@@ -68,7 +68,6 @@ private:
   auto loadRAM(Markup::Node) -> void;
   auto loadICD(Markup::Node) -> void;
   auto loadMCC(Markup::Node) -> void;
-  auto loadBSMemoryPack(Markup::Node) -> void;
   auto loadSufamiTurbo(Markup::Node, bool slot) -> void;
   auto loadNSS(Markup::Node) -> void;
   auto loadEvent(Markup::Node) -> void;
@@ -76,7 +75,8 @@ private:
   auto loadSuperFX(Markup::Node) -> void;
   auto loadARMDSP(Markup::Node) -> void;
   auto loadHitachiDSP(Markup::Node, uint roms) -> void;
-  auto loadNECDSP(Markup::Node) -> void;
+  auto loaduPD7725(Markup::Node) -> void;
+  auto loaduPD96050(Markup::Node) -> void;
   auto loadEpsonRTC(Markup::Node) -> void;
   auto loadSharpRTC(Markup::Node) -> void;
   auto loadSPC7110(Markup::Node) -> void;
@@ -97,16 +97,15 @@ private:
 
   auto saveRAM(Markup::Node) -> void;
   auto saveMCC(Markup::Node) -> void;
-  auto saveEvent(Markup::Node) -> void;
   auto saveSA1(Markup::Node) -> void;
   auto saveSuperFX(Markup::Node) -> void;
   auto saveARMDSP(Markup::Node) -> void;
   auto saveHitachiDSP(Markup::Node) -> void;
-  auto saveNECDSP(Markup::Node) -> void;
+  auto saveuPD7725(Markup::Node) -> void;
+  auto saveuPD96050(Markup::Node) -> void;
   auto saveEpsonRTC(Markup::Node) -> void;
   auto saveSharpRTC(Markup::Node) -> void;
   auto saveSPC7110(Markup::Node) -> void;
-  auto saveSDD1(Markup::Node) -> void;
   auto saveOBC1(Markup::Node) -> void;
 
   auto saveMemory(MappedRAM&, Markup::Node, maybe<uint> = nothing) -> void;

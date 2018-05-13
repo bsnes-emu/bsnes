@@ -2,24 +2,20 @@ struct SDD1 {
   auto unload() -> void;
   auto power() -> void;
 
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto ioRead(uint24 addr, uint8 data) -> uint8;
+  auto ioWrite(uint24 addr, uint8 data) -> void;
 
   auto dmaRead(uint24 addr, uint8 data) -> uint8;
   auto dmaWrite(uint24 addr, uint8 data) -> void;
 
   auto mmcRead(uint24 addr) -> uint8;
 
-  auto mcuromRead(uint24 addr, uint8 data) -> uint8;
-  auto mcuromWrite(uint24 addr, uint8 data) -> void;
-
-  auto mcuramRead(uint24 addr, uint8 data) -> uint8;
-  auto mcuramWrite(uint24 addr, uint8 data) -> void;
+  auto mcuRead(uint24 addr, uint8 data) -> uint8;
+  auto mcuWrite(uint24 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 
   MappedRAM rom;
-  MappedRAM ram;
 
 private:
   uint8 r4800;  //hard enable

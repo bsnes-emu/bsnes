@@ -3,6 +3,7 @@
 //* Powerfest '94
 
 struct Event : Thread {
+  //event.cpp
   static auto Enter() -> void;
   auto main() -> void;
   auto unload() -> void;
@@ -14,10 +15,10 @@ struct Event : Thread {
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
   MappedRAM rom[4];
-  MappedRAM ram;
 
   enum class Board : uint { CampusChallenge92, Powerfest94 } board;
   uint timer;

@@ -43,10 +43,10 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
   auto document = BML::unserialize(manifest);
   for(auto rom : document.find("game/board/memory")) {
     if(rom["type"].text() != "ROM") continue;
-    auto name = string{rom["part"].text(), ".", rom["category"].text(), ".rom"}.trimLeft(".", 1L).downcase();
+    auto name = string{rom["architecture"].text(), ".", rom["content"].text(), ".rom"}.trimLeft(".", 1L).downcase();
     auto size = rom["size"].natural();
     if(size > buffer.size() - offset) {
-      auto name = string{rom["note"].text(), ".", rom["category"].text(), ".rom"}.trimLeft(".", 1L).downcase();
+      auto name = string{rom["identifier"].text(), ".", rom["content"].text(), ".rom"}.trimLeft(".", 1L).downcase();
       auto location = locate({"firmware/", name});
       if(location && file::size(location) == size) {
         write({target, name}, file::read(location));

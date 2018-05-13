@@ -9,12 +9,10 @@ SDD1 sdd1;
 
 auto SDD1::unload() -> void {
   rom.reset();
-  ram.reset();
 }
 
 auto SDD1::power() -> void {
   rom.writeProtect(true);
-  ram.writeProtect(false);
 
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::mcu_read()
@@ -34,7 +32,7 @@ auto SDD1::power() -> void {
   dmaReady = false;
 }
 
-auto SDD1::read(uint24 addr, uint8 data) -> uint8 {
+auto SDD1::ioRead(uint24 addr, uint8 data) -> uint8 {
   addr = 0x4800 | addr.bits(0,3);
 
   switch(addr) {
@@ -50,7 +48,7 @@ auto SDD1::read(uint24 addr, uint8 data) -> uint8 {
   return rom.read(addr);
 }
 
-auto SDD1::write(uint24 addr, uint8 data) -> void {
+auto SDD1::ioWrite(uint24 addr, uint8 data) -> void {
   addr = 0x4800 | addr.bits(0,3);
 
   switch(addr) {
@@ -91,7 +89,7 @@ auto SDD1::mmcRead(uint24 addr) -> uint8 {
 
 //map address=00-3f,80-bf:8000-ffff
 //map address=c0-ff:0000-ffff
-auto SDD1::mcuromRead(uint24 addr, uint8 data) -> uint8 {
+auto SDD1::mcuRead(uint24 addr, uint8 data) -> uint8 {
   //map address=00-3f,80-bf:8000-ffff
   if(!addr.bit(22)) {
     if(!addr.bit(23) && addr.bit(21) && r4805.bit(7)) addr.bit(21) = 0;  //20-3f:8000-ffff
@@ -130,17 +128,7 @@ auto SDD1::mcuromRead(uint24 addr, uint8 data) -> uint8 {
   return mmcRead(addr);
 }
 
-auto SDD1::mcuromWrite(uint24 addr, uint8 data) -> void {
-}
-
-//map address=00-3f,80-bf:6000-7fff mask=0xe000
-//map address=70-73:0000-ffff mask=0x8000
-auto SDD1::mcuramRead(uint24 addr, uint8 data) -> uint8 {
-  return ram.read(addr.bits(0,12), data);
-}
-
-auto SDD1::mcuramWrite(uint24 addr, uint8 data) -> void {
-  return ram.write(addr.bits(0,12), data);
+auto SDD1::mcuWrite(uint24 addr, uint8 data) -> void {
 }
 
 }

@@ -45,14 +45,17 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
     }
   }
 
-  if(board["bsmemory"] || board["mcc/bsmemory"] || board["sa1/bsmemory"]) {
+  if(board["slot(type=BSMemory)"]
+  || board["processor(identifier=MCC)/mcu/slot(type=BSMemory)"]
+  || board["processor(architecture=W65C816S)/mcu/slot(type=BSMemory)"]
+  ) {
     if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
       bsmemory.pathID = loaded.pathID();
       loadBSMemory();
     }
   }
 
-  if(board["sufamiturbo"]) {
+  if(board["slot(type=SufamiTurbo)"]) {
     if(auto loaded = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
       sufamiturboA.pathID = loaded.pathID();
       loadSufamiTurboA();
@@ -61,42 +64,55 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
 
   if(auto node = board["memory(type=ROM,content=Program)"]) loadROM(node);
   if(auto node = board["memory(type=RAM,content=Save)"]) loadRAM(node);
-  if(auto node = board["icd"]) loadICD(node);
-  if(auto node = board["mcc"]) loadMCC(node);
-  if(auto node = board["bsmemory"]) loadBSMemoryPack(node);
-  if(auto node = board.find("sufamiturbo")) if(node(0)) loadSufamiTurbo(node(0), 0);
-  if(auto node = board.find("sufamiturbo")) if(node(1)) loadSufamiTurbo(node(1), 1);
+  if(auto node = board["processor(identifier=ICD)"]) loadICD(node);
+  if(auto node = board["processor(identifier=MCC)"]) loadMCC(node);
+  if(auto node = board.find("slot(type=SufamiTurbo)")) if(node(0)) loadSufamiTurbo(node(0), 0);
+  if(auto node = board.find("slot(type=SufamiTurbo)")) if(node(1)) loadSufamiTurbo(node(1), 1);
   if(auto node = board["nss"]) loadNSS(node);
   if(auto node = board["event"]) loadEvent(node);
   if(auto node = board["processor(architecture=W65C816S)"]) loadSA1(node);
   if(auto node = board["processor(architecture=GSU)"]) loadSuperFX(node);
-  if(auto node = board["armdsp"]) loadARMDSP(node);
+  if(auto node = board["processor(architecture=ARM6)"]) loadARMDSP(node);
   if(auto node = board["processor(architecture=HG51BS169)"]) loadHitachiDSP(node, game.board.match("2DC*") ? 2 : 1);
-  if(auto node = board["necdsp"]) loadNECDSP(node);
+  if(auto node = board["processor(architecture=uPD7725)"]) loaduPD7725(node);
+  if(auto node = board["processor(architecture=uPD96050)"]) loaduPD96050(node);
   if(auto node = board["rtc(manufacturer=Epson)"]) loadEpsonRTC(node);
   if(auto node = board["rtc(manufacturer=Sharp)"]) loadSharpRTC(node);
   if(auto node = board["processor(identifier=SPC7110)"]) loadSPC7110(node);
-  if(auto node = board["sdd1"]) loadSDD1(node);
-  if(auto node = board["obc1"]) loadOBC1(node);
-  if(auto node = board["msu1"]) loadMSU1(node);
+  if(auto node = board["processor(identifier=SDD1)"]) loadSDD1(node);
+  if(auto node = board["processor(identifier=OBC1)"]) loadOBC1(node);
+  if(auto node = board["processor(identifier=MSU1)"]) loadMSU1(node);
 }
 
 auto Cartridge::loadGameBoy(Markup::Node node) -> void {
 }
 
 auto Cartridge::loadBSMemory(Markup::Node node) -> void {
-  if(node["game/board/memory/type"].text() == "ROM") {
+  has.BSMemorySlot = true;
+
+  if(auto memory = node["game/board/memory(type=ROM)"]) {
     bsmemory.readonly = true;
-    loadMemory(bsmemory.memory, node["game/board/memory(type=ROM)"], File::Required, bsmemory.pathID);
-  } else {
+    loadMemory(bsmemory.memory, memory, File::Required, bsmemory.pathID);
+  } else if(auto memory = node["game/board/memory(type=Flash)"]) {
     bsmemory.readonly = false;
-    loadMemory(bsmemory.memory, node["game/board/memory(type=Flash)"], File::Required, bsmemory.pathID);
+    loadMemory(bsmemory.memory, memory, File::Required, bsmemory.pathID);
+  }
+
+  for(auto map : node.find("map")) {
+    if(bsmemory.memory.size()) {
+      loadMap(map, bsmemory);
+    }
   }
 }
 
 auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
-  loadMemory(sufamiturboA.rom, node["game/board/memory(type=ROM)"], File::Required, sufamiturboA.pathID);
-  loadMemory(sufamiturboA.ram, node["game/board/memory(type=RAM)"], File::Optional, sufamiturboA.pathID);
+  if(auto memory = node["game/board/memory(type=ROM)"]) {
+    loadMemory(sufamiturboA.rom, memory, File::Required, sufamiturboA.pathID);
+  }
+
+  if(auto memory = node["game/board/memory(type=RAM)"]) {
+    loadMemory(sufamiturboA.ram, memory, File::Optional, sufamiturboA.pathID);
+  }
 
   if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
     sufamiturboB.pathID = loaded.pathID();
@@ -105,67 +121,86 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
 }
 
 auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
-  loadMemory(sufamiturboB.rom, node["game/board/memory(type=ROM)"], File::Required, sufamiturboB.pathID);
-  loadMemory(sufamiturboB.ram, node["game/board/memory(type=RAM)"], File::Optional, sufamiturboB.pathID);
+  if(auto memory = node["game/board/memory(type=ROM)"]) {
+    loadMemory(sufamiturboB.rom, memory, File::Required, sufamiturboB.pathID);
+  }
+
+  if(auto memory = node["game/board/memory(type=RAM)"]) {
+    loadMemory(sufamiturboB.ram, memory, File::Optional, sufamiturboB.pathID);
+  }
 }
 
 //
 
+//memory(type=ROM,content=Program)
 auto Cartridge::loadROM(Markup::Node node) -> void {
   loadMemory(rom, node, File::Required);
   for(auto leaf : node.find("map")) loadMap(leaf, rom);
 }
 
+//memory(type=RAM,content=Save)
 auto Cartridge::loadRAM(Markup::Node node) -> void {
   loadMemory(ram, node, File::Optional);
   for(auto leaf : node.find("map")) loadMap(leaf, ram);
 }
 
+//processor(identifier=ICD)
 auto Cartridge::loadICD(Markup::Node node) -> void {
   has.GameBoySlot = true;
   has.ICD = true;
+
   icd.Revision = node["revision"].natural();
-  icd.Frequency = node["frequency"].natural();
+  if(auto oscillator = game.oscillator()) {
+    icd.Frequency = oscillator->frequency;
+  } else {
+    icd.Frequency = 0;
+  }
 
   //Game Boy core loads data through ICD interface
-  for(auto leaf : node.find("map")) loadMap(leaf, {&ICD::readIO, &icd}, {&ICD::writeIO, &icd});
-}
-
-auto Cartridge::loadMCC(Markup::Node node) -> void {
-  has.BSMemorySlot = true;
-  has.MCC = true;
-
-  loadMemory(mcc.rom, node["rom"], File::Required);
-  loadMemory(mcc.ram, node["ram"], File::Optional);
-
-  for(auto leaf : node.find("map")) leaf.text() == "mcu"
-  ? loadMap(leaf, {&MCC::mcuRead, &mcc}, {&MCC::mcuWrite, &mcc})
-  : loadMap(leaf, {&MCC::read, &mcc}, {&MCC::write, &mcc});
-  for(auto leaf : node["ram"].find("map")) loadMap(leaf, mcc.ram);
-}
-
-auto Cartridge::loadBSMemoryPack(Markup::Node node) -> void {
-  has.BSMemorySlot = true;
-
-  for(auto leaf : node.find("map")) {
-    if(bsmemory.memory.size() == 0) continue;
-    loadMap(leaf, bsmemory);
+  for(auto map : node.find("map")) {
+    loadMap(map, {&ICD::readIO, &icd}, {&ICD::writeIO, &icd});
   }
 }
 
+//processor(identifier=MCC)
+auto Cartridge::loadMCC(Markup::Node node) -> void {
+  has.MCC = true;
+
+  for(auto map : node.find("map")) {
+    loadMap(map, {&MCC::read, &mcc}, {&MCC::write, &mcc});
+  }
+
+  if(auto mcu = node["mcu"]) {
+    for(auto map : mcu.find("map")) {
+      loadMap(map, {&MCC::mcuRead, &mcc}, {&MCC::mcuWrite, &mcc});
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
+      loadMemory(mcc.rom, memory, File::Required);
+    }
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Download)"]) {
+    loadMemory(mcc.ram, memory, File::Optional);
+    for(auto map : memory.find("map")) {
+      loadMap(map, mcc.ram);
+    }
+  }
+}
+
+//slot(type=SufamiTurbo)[0,1]
 auto Cartridge::loadSufamiTurbo(Markup::Node node, bool slot) -> void {
   has.SufamiTurboSlots = true;
 
-  for(auto leaf : node["rom"].find("map")) {
-    auto& cart = (slot == 0 ? sufamiturboA : sufamiturboB);
-    if(cart.rom.size() == 0) continue;
-    loadMap(leaf, cart.rom);
+  for(auto map : node.find("rom/map")) {
+    auto& cartridge = slot == 0 ? sufamiturboA : sufamiturboB;
+    if(cartridge.rom.size() == 0) continue;
+    loadMap(map, cartridge.rom);
   }
 
-  for(auto leaf : node["ram"].find("map")) {
-    auto& cart = (slot == 0 ? sufamiturboA : sufamiturboB);
-    if(cart.ram.size() == 0) continue;
-    loadMap(leaf, cart.ram);
+  for(auto map : node.find("ram/map")) {
+    auto& cartridge = slot == 0 ? sufamiturboA : sufamiturboB;
+    if(cartridge.ram.size() == 0) continue;
+    loadMap(map, cartridge.ram);
   }
 }
 
@@ -183,7 +218,6 @@ auto Cartridge::loadEvent(Markup::Node node) -> void {
   has.Event = true;
 
   for(uint n : range(4)) loadMemory(event.rom[n], roms[n], File::Required);
-  loadMemory(event.ram, node["ram"], File::Optional);
 
   event.board = Event::Board::CampusChallenge92;
   if(node.text() == "CC92") event.board = Event::Board::CampusChallenge92;
@@ -193,7 +227,6 @@ auto Cartridge::loadEvent(Markup::Node node) -> void {
   for(auto leaf : node.find("map")) leaf.text() == "mcu"
   ? loadMap(leaf, {&Event::mcuRead, &event}, {&Event::mcuWrite, &event})
   : loadMap(leaf, {&Event::read, &event}, {&Event::write, &event});
-  for(auto leaf : node["ram"].find("map")) loadMap(leaf, event.ram);
 }
 
 //processor(architecture=W65C816S)
@@ -251,8 +284,13 @@ auto Cartridge::loadSuperFX(Markup::Node node) -> void {
   }
 }
 
+//processor(architecture=ARM6)
 auto Cartridge::loadARMDSP(Markup::Node node) -> void {
   has.ARMDSP = true;
+
+  for(auto& word : armdsp.programROM) word = 0x00;
+  for(auto& word : armdsp.dataROM) word = 0x00;
+  for(auto& word : armdsp.programRAM) word = 0x00;
 
   if(auto oscillator = game.oscillator()) {
     armdsp.Frequency = oscillator->frequency;
@@ -260,23 +298,33 @@ auto Cartridge::loadARMDSP(Markup::Node node) -> void {
     armdsp.Frequency = 21'440'000;
   }
 
-  if(auto memory = game.memory(node["memory(type=ROM,content=Program)"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
-      for(auto n : range(128 * 1024)) armdsp.programROM[n] = fp->read();
-    }
+  for(auto map : node.find("map")) {
+    loadMap(map, {&ArmDSP::read, &armdsp}, {&ArmDSP::write, &armdsp});
   }
-  if(auto memory = game.memory(node["memory(type=ROM,content=Data)"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
-      for(auto n : range( 32 * 1024)) armdsp.dataROM[n] = fp->read();
-    }
-  }
-  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read)) {
-      for(auto n : range( 16 * 1024)) armdsp.programRAM[n] = fp->read();
+
+  if(auto memory = node["memory(type=ROM,content=Program,architecture=ARM6)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(128 * 1024)) armdsp.programROM[n] = fp->read();
+      }
     }
   }
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&ArmDSP::read, &armdsp}, {&ArmDSP::write, &armdsp});
+  if(auto memory = node["memory(type=ROM,content=Data,architecture=ARM6)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(32 * 1024)) armdsp.dataROM[n] = fp->read();
+      }
+    }
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=ARM6)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
+        for(auto n : range(16 * 1024)) armdsp.programRAM[n] = fp->read();
+      }
+    }
+  }
 }
 
 //processor(architecture=HG51BS169)
@@ -331,8 +379,14 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   }
 }
 
-auto Cartridge::loadNECDSP(Markup::Node node) -> void {
+//processor(architecture=uPD7725)
+auto Cartridge::loaduPD7725(Markup::Node node) -> void {
   has.NECDSP = true;
+  necdsp.revision = NECDSP::Revision::uPD7725;
+
+  for(auto& word : necdsp.programROM) word = 0x000000;
+  for(auto& word : necdsp.dataROM) word = 0x0000;
+  for(auto& word : necdsp.dataRAM) word = 0x0000;
 
   if(auto oscillator = game.oscillator()) {
     necdsp.Frequency = oscillator->frequency;
@@ -340,37 +394,83 @@ auto Cartridge::loadNECDSP(Markup::Node node) -> void {
     necdsp.Frequency = 7'600'000;
   }
 
-  necdsp.revision
-  = node["model"].text() == "uPD7725"  ? NECDSP::Revision::uPD7725
-  : node["model"].text() == "uPD96050" ? NECDSP::Revision::uPD96050
-  : NECDSP::Revision::uPD7725;
+  for(auto map : node.find("map")) {
+    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
+  }
+
+  if(auto memory = node["memory(type=ROM,content=Program,architecture=uPD7725)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(2048)) necdsp.programROM[n] = fp->readl(3);
+      }
+    }
+  }
+
+  if(auto memory = node["memory(type=ROM,content=Data,architecture=uPD7725)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(1024)) necdsp.dataROM[n] = fp->readl(2);
+      }
+    }
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD7725)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
+        for(auto n : range(256)) necdsp.dataRAM[n] = fp->readl(2);
+      }
+    }
+    for(auto map : memory.find("map")) {
+      loadMap(map, {&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
+    }
+  }
+}
+
+//processor(architecture=uPD96050)
+auto Cartridge::loaduPD96050(Markup::Node node) -> void {
+  has.NECDSP = true;
+  necdsp.revision = NECDSP::Revision::uPD96050;
 
   for(auto& word : necdsp.programROM) word = 0x000000;
   for(auto& word : necdsp.dataROM) word = 0x0000;
   for(auto& word : necdsp.dataRAM) word = 0x0000;
 
-  uint size[3] = {0};
-  if(necdsp.revision == NECDSP::Revision::uPD7725 ) memory::assign(size,  2048, 1024,  256);
-  if(necdsp.revision == NECDSP::Revision::uPD96050) memory::assign(size, 16384, 2048, 2048);
+  if(auto oscillator = game.oscillator()) {
+    necdsp.Frequency = oscillator->frequency;
+  } else {
+    necdsp.Frequency = 11'000'000;
+  }
 
-  if(auto memory = game.memory(node["memory(type=ROM,content=Program)"])) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Read, File::Required)) {
-      for(auto n : range(size[0])) necdsp.programROM[n] = fp->readl(3);
-    }
+  for(auto map : node.find("map")) {
+    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
   }
-  if(auto memory = Emulator::Game::Memory{node["memory(type=ROM,content=Data)"]}) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Read, File::Required)) {
-      for(auto n : range(size[1])) necdsp.dataROM[n] = fp->readl(2);
-    }
-  }
-  if(auto memory = Emulator::Game::Memory{node["memory(type=RAM,content=Data)"]}) {
-    if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Read)) {
-      for(auto n : range(size[2])) necdsp.dataRAM[n] = fp->readl(2);
+
+  if(auto memory = node["memory(type=ROM,content=Program,architecture=uPD96050)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(16384)) necdsp.programROM[n] = fp->readl(3);
+      }
     }
   }
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
-  for(auto leaf : node["dram"].find("map")) loadMap(leaf, {&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
+  if(auto memory = node["memory(type=ROM,content=Data,architecture=uPD96050)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+        for(auto n : range(2048)) necdsp.dataROM[n] = fp->readl(2);
+      }
+    }
+  }
+
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD96050)"]) {
+    if(auto file = game.memory(memory)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
+        for(auto n : range(2048)) necdsp.dataRAM[n] = fp->readl(2);
+      }
+    }
+    for(auto map : memory.find("map")) {
+      loadMap(map, {&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
+    }
+  }
 }
 
 //rtc(manufacturer=Epson)
@@ -443,29 +543,44 @@ auto Cartridge::loadSPC7110(Markup::Node node) -> void {
   }
 }
 
+//processor(identifier=SDD1)
 auto Cartridge::loadSDD1(Markup::Node node) -> void {
   has.SDD1 = true;
 
-  loadMemory(sdd1.rom, node["rom"], File::Required);
-  loadMemory(sdd1.ram, node["ram"], File::Optional);
+  for(auto map : node.find("map")) {
+    loadMap(map, {&SDD1::ioRead, &sdd1}, {&SDD1::ioWrite, &sdd1});
+  }
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&SDD1::read, &sdd1}, {&SDD1::write, &sdd1});
-  for(auto leaf : node["rom"].find("map")) loadMap(leaf, {&SDD1::mcuromRead, &sdd1}, {&SDD1::mcuromWrite, &sdd1});
-  for(auto leaf : node["ram"].find("map")) loadMap(leaf, {&SDD1::mcuramRead, &sdd1}, {&SDD1::mcuramWrite, &sdd1});
+  if(auto mcu = node["mcu"]) {
+    for(auto map : mcu.find("map")) {
+      loadMap(map, {&SDD1::mcuRead, &sdd1}, {&SDD1::mcuWrite, &sdd1});
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
+      loadMemory(sdd1.rom, memory, File::Required);
+    }
+  }
 }
 
+//processor(identifier=OBC1)
 auto Cartridge::loadOBC1(Markup::Node node) -> void {
   has.OBC1 = true;
 
-  loadMemory(obc1.ram, node["ram"], File::Optional);
+  for(auto map : node.find("map")) {
+    loadMap(map, {&OBC1::read, &obc1}, {&OBC1::write, &obc1});
+  }
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&OBC1::read, &obc1}, {&OBC1::write, &obc1});
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    loadMemory(obc1.ram, memory, File::Optional);
+  }
 }
 
+//processor(identifier=MSU1)
 auto Cartridge::loadMSU1(Markup::Node node) -> void {
   has.MSU1 = true;
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1});
+  for(auto map : node.find("map")) {
+    loadMap(map, {&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1});
+  }
 }
 
 //

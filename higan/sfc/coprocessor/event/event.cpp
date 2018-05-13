@@ -2,6 +2,7 @@
 
 namespace SuperFamicom {
 
+#include "serialization.cpp"
 Event event;
 
 auto Event::Enter() -> void {
@@ -33,7 +34,6 @@ auto Event::unload() -> void {
   rom[1].reset();
   rom[2].reset();
   rom[3].reset();
-  ram.reset();
 }
 
 auto Event::power() -> void {
@@ -43,9 +43,7 @@ auto Event::power() -> void {
   rom[1].writeProtect(true);
   rom[2].writeProtect(true);
   rom[3].writeProtect(true);
-  ram.writeProtect(false);
 
-  for(auto n : range(ram.size())) ram.write(n, 0x00);
   status = 0x00;
   select = 0x00;
   timerActive = false;
@@ -108,17 +106,6 @@ auto Event::write(uint24 addr, uint8 data) -> void {
       timerSecondsRemaining = timer;
     }
   }
-}
-
-auto Event::serialize(serializer& s) -> void {
-  Thread::serialize(s);
-  s.array(ram.data(), ram.size());
-  s.integer(status);
-  s.integer(select);
-  s.integer(timerActive);
-  s.integer(scoreActive);
-  s.integer(timerSecondsRemaining);
-  s.integer(scoreSecondsRemaining);
 }
 
 }

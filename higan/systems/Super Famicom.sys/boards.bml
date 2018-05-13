@@ -1,5 +1,5 @@
 database
-  revision: 2018-05-08
+  revision: 2018-05-12
 
 //Boards (Production)
 
@@ -552,7 +552,7 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-05-08
+  revision: 2018-05-12
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -797,15 +797,15 @@ board: SDD1
       memory type=ROM content=Program
 
 board: SDD1-RAM
+  memory type=RAM content=Save
+    map address=00-3f,80-bf:6000-7fff mask=0xe000
+    map address=70-73:0000-ffff mask=0x8000
   processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
     mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
       memory type=ROM content=Program
-    memory type=RAM content=Save
-      map address=00-3f,80-bf:6000-7fff mask=0xe000
-      map address=70-73:0000-ffff mask=0x8000
 
 board: SPC7110-RAM
   processor identifier=SPC7110

@@ -1,6 +1,4 @@
 auto SDD1::serialize(serializer& s) -> void {
-  s.array(ram.data(), ram.size());
-
   s.integer(r4800);
   s.integer(r4801);
   s.integer(r4804);

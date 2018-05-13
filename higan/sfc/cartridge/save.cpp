@@ -1,17 +1,16 @@
 auto Cartridge::saveCartridge(Markup::Node node) -> void {
   if(auto node = board["memory(type=RAM,content=Save)"]) saveRAM(node);
-  if(auto node = board["mcc"]) saveMCC(node);
-  if(auto node = board["event"]) saveEvent(node);
+  if(auto node = board["processor(identifier=MCC)"]) saveMCC(node);
   if(auto node = board["processor(architecture=W65C816S)"]) saveSA1(node);
   if(auto node = board["processor(architecture=GSU)"]) saveSuperFX(node);
-  if(auto node = board["armdsp"]) saveARMDSP(node);
+  if(auto node = board["processor(architecture=ARM6)"]) saveARMDSP(node);
   if(auto node = board["processor(architecture=HG51BS169)"]) saveHitachiDSP(node);
-  if(auto node = board["necdsp"]) saveNECDSP(node);
+  if(auto node = board["processor(architecture=uPD7725)"]) saveuPD7725(node);
+  if(auto node = board["processor(architecture=uPD96050)"]) saveuPD96050(node);
   if(auto node = board["rtc(manufacturer=Epson)"]) saveEpsonRTC(node);
   if(auto node = board["rtc(manufacturer=Sharp)"]) saveSharpRTC(node);
   if(auto node = board["processor(identifier=SPC7110)"]) saveSPC7110(node);
-  if(auto node = board["sdd1"]) saveSDD1(node);
-  if(auto node = board["obc1"]) saveOBC1(node);
+  if(auto node = board["processor(identifier=OBC1)"]) saveOBC1(node);
 }
 
 auto Cartridge::saveGameBoy(Markup::Node node) -> void {
@@ -30,16 +29,16 @@ auto Cartridge::saveSufamiTurboB(Markup::Node node) -> void {
 
 //
 
+//memory(type=RAM,content=Save)
 auto Cartridge::saveRAM(Markup::Node node) -> void {
   saveMemory(ram, node);
 }
 
+//processor(identifier=MCC)
 auto Cartridge::saveMCC(Markup::Node node) -> void {
-  saveMemory(mcc.ram, node["ram"]);
-}
-
-auto Cartridge::saveEvent(Markup::Node node) -> void {
-  saveMemory(event.ram, node["ram"]);
+  if(auto memory = node["memory(type=RAM,content=Download)"]) {
+    saveMemory(mcc.ram, memory);
+  }
 }
 
 //processor(architecture=W65C816S)
@@ -60,11 +59,14 @@ auto Cartridge::saveSuperFX(Markup::Node node) -> void {
   }
 }
 
+//processor(architecture=ARM6)
 auto Cartridge::saveARMDSP(Markup::Node node) -> void {
-  if(auto memory = game.memory(node["memory(type=RAM,content=Data)"])) {
-    if(memory->nonVolatile) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory->name(), File::Write)) {
-        for(auto n : range(16 * 1024)) fp->write(armdsp.programRAM[n]);
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=ARM6)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          for(auto n : range(16 * 1024)) fp->write(armdsp.programRAM[n]);
+        }
       }
     }
   }
@@ -89,12 +91,27 @@ auto Cartridge::saveHitachiDSP(Markup::Node node) -> void {
   }
 }
 
-auto Cartridge::saveNECDSP(Markup::Node node) -> void {
-  uint size = necdsp.revision == NECDSP::Revision::uPD7725 ? 256 : 2048;
-  if(auto memory = Emulator::Game::Memory{node["memory(type=RAM,content=Data)"]}) {
-    if(memory.nonVolatile) {
-      if(auto fp = platform->open(ID::SuperFamicom, memory.name(), File::Write)) {
-        for(auto n : range(size)) fp->writel(necdsp.dataRAM[n], 2);
+//processor(architecture=uPD7725)
+auto Cartridge::saveuPD7725(Markup::Node node) -> void {
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD7725)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          for(auto n : range(256)) fp->writel(necdsp.dataRAM[n], 2);
+        }
+      }
+    }
+  }
+}
+
+//processor(architecture=uPD96050)
+auto Cartridge::saveuPD96050(Markup::Node node) -> void {
+  if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD96050)"]) {
+    if(auto file = game.memory(memory)) {
+      if(file->nonVolatile) {
+        if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Write)) {
+          for(auto n : range(2 * 1024)) fp->writel(necdsp.dataRAM[n], 2);
+        }
       }
     }
   }
@@ -137,12 +154,11 @@ auto Cartridge::saveSPC7110(Markup::Node node) -> void {
   }
 }
 
-auto Cartridge::saveSDD1(Markup::Node node) -> void {
-  saveMemory(sdd1.ram, node["ram"]);
-}
-
+//processor(identifier=OBC1)
 auto Cartridge::saveOBC1(Markup::Node node) -> void {
-  saveMemory(obc1.ram, node["ram"]);
+  if(auto memory = node["memory(type=RAM,content=Save)"]) {
+    saveMemory(obc1.ram, memory);
+  }
 }
 
 //
