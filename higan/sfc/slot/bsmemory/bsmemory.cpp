@@ -2,6 +2,7 @@
 
 namespace SuperFamicom {
 
+#include "serialization.cpp"
 BSMemory bsmemory;
 
 auto BSMemory::load() -> void {

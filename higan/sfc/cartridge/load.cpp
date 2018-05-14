@@ -45,30 +45,14 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
     }
   }
 
-  if(board["slot(type=BSMemory)"]
-  || board["processor(identifier=MCC)/mcu/slot(type=BSMemory)"]
-  || board["processor(architecture=W65C816S)/mcu/slot(type=BSMemory)"]
-  ) {
-    if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
-      bsmemory.pathID = loaded.pathID();
-      loadBSMemory();
-    }
-  }
-
-  if(board["slot(type=SufamiTurbo)"]) {
-    if(auto loaded = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
-      sufamiturboA.pathID = loaded.pathID();
-      loadSufamiTurboA();
-    }
-  }
-
   if(auto node = board["memory(type=ROM,content=Program)"]) loadROM(node);
   if(auto node = board["memory(type=RAM,content=Save)"]) loadRAM(node);
   if(auto node = board["processor(identifier=ICD)"]) loadICD(node);
   if(auto node = board["processor(identifier=MCC)"]) loadMCC(node);
-  if(auto node = board.find("slot(type=SufamiTurbo)")) if(node(0)) loadSufamiTurbo(node(0), 0);
-  if(auto node = board.find("slot(type=SufamiTurbo)")) if(node(1)) loadSufamiTurbo(node(1), 1);
-  if(auto node = board["nss"]) loadNSS(node);
+  if(auto node = board["slot(type=BSMemory)"]) loadBSMemory(node);
+  if(auto node = board["slot(type=SufamiTurbo)[0]"]) loadSufamiTurboA(node);
+  if(auto node = board["slot(type=SufamiTurbo)[1]"]) loadSufamiTurboB(node);
+  if(auto node = board["dip"]) loadDIP(node);
   if(auto node = board["event"]) loadEvent(node);
   if(auto node = board["processor(architecture=W65C816S)"]) loadSA1(node);
   if(auto node = board["processor(architecture=GSU)"]) loadSuperFX(node);
@@ -84,53 +68,85 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   if(auto node = board["processor(identifier=MSU1)"]) loadMSU1(node);
 }
 
-auto Cartridge::loadGameBoy(Markup::Node node) -> void {
+auto Cartridge::loadCartridgeGameBoy(Markup::Node node) -> void {
 }
 
-auto Cartridge::loadBSMemory(Markup::Node node) -> void {
-  has.BSMemorySlot = true;
-
-  if(auto memory = node["game/board/memory(type=ROM)"]) {
-    bsmemory.readonly = true;
-    loadMemory(bsmemory.memory, memory, File::Required, bsmemory.pathID);
-  } else if(auto memory = node["game/board/memory(type=Flash)"]) {
-    bsmemory.readonly = false;
-    loadMemory(bsmemory.memory, memory, File::Required, bsmemory.pathID);
-  }
-
-  for(auto map : node.find("map")) {
-    if(bsmemory.memory.size()) {
-      loadMap(map, bsmemory);
+auto Cartridge::loadCartridgeBSMemory(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(content=Program)"]}) {
+    bsmemory.readonly = memory.type == "ROM";
+    bsmemory.memory.allocate(memory.size);
+    if(auto fp = platform->open(bsmemory.pathID, memory.name(), File::Read, File::Required)) {
+      fp->read(bsmemory.memory.data(), memory.size);
     }
   }
 }
 
-auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
-  if(auto memory = node["game/board/memory(type=ROM)"]) {
-    loadMemory(sufamiturboA.rom, memory, File::Required, sufamiturboA.pathID);
+auto Cartridge::loadCartridgeSufamiTurboA(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=ROM,content=Program)"]}) {
+    sufamiturboA.rom.allocate(memory.size);
+    if(auto fp = platform->open(sufamiturboA.pathID, memory.name(), File::Read, File::Required)) {
+      fp->read(sufamiturboA.rom.data(), memory.size);
+    }
   }
 
-  if(auto memory = node["game/board/memory(type=RAM)"]) {
-    loadMemory(sufamiturboA.ram, memory, File::Optional, sufamiturboA.pathID);
-  }
-
-  if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
-    sufamiturboB.pathID = loaded.pathID();
-    loadSufamiTurboB();
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=RAM,content=Save)"]}) {
+    sufamiturboA.ram.allocate(memory.size);
+    if(auto fp = platform->open(sufamiturboA.pathID, memory.name(), File::Read)) {
+      fp->read(sufamiturboA.ram.data(), memory.size);
+    }
   }
 }
 
-auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
-  if(auto memory = node["game/board/memory(type=ROM)"]) {
-    loadMemory(sufamiturboB.rom, memory, File::Required, sufamiturboB.pathID);
+auto Cartridge::loadCartridgeSufamiTurboB(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=ROM,content=Program)"]}) {
+    sufamiturboB.rom.allocate(memory.size);
+    if(auto fp = platform->open(sufamiturboB.pathID, memory.name(), File::Read, File::Required)) {
+      fp->read(sufamiturboB.rom.data(), memory.size);
+    }
   }
 
-  if(auto memory = node["game/board/memory(type=RAM)"]) {
-    loadMemory(sufamiturboB.ram, memory, File::Optional, sufamiturboB.pathID);
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=RAM,content=Save)"]}) {
+    sufamiturboB.ram.allocate(memory.size);
+    if(auto fp = platform->open(sufamiturboB.pathID, memory.name(), File::Read)) {
+      fp->read(sufamiturboB.ram.data(), memory.size);
+    }
   }
 }
 
 //
+
+auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required) -> void {
+  if(auto memory = game.memory(node)) {
+    ram.allocate(memory->size);
+    if(memory->type == "RAM" && !memory->nonVolatile) return;
+    if(memory->type == "RTC" && !memory->nonVolatile) return;
+    if(auto fp = platform->open(pathID(), memory->name(), File::Read, required)) {
+      fp->read(ram.data(), ram.size());
+    }
+  }
+}
+
+auto Cartridge::loadMap(Markup::Node map, SuperFamicom::Memory& memory) -> void {
+  auto addr = map["address"].text();
+  auto size = map["size"].natural();
+  auto base = map["base"].natural();
+  auto mask = map["mask"].natural();
+  if(size == 0) size = memory.size();
+  if(size == 0) return;
+  bus.map({&SuperFamicom::Memory::read, &memory}, {&SuperFamicom::Memory::write, &memory}, addr, size, base, mask);
+}
+
+auto Cartridge::loadMap(
+  Markup::Node map,
+  const function<uint8 (uint24, uint8)>& reader,
+  const function<void (uint24, uint8)>& writer
+) -> void {
+  auto addr = map["address"].text();
+  auto size = map["size"].natural();
+  auto base = map["base"].natural();
+  auto mask = map["mask"].natural();
+  bus.map(reader, writer, addr, size, base, mask);
+}
 
 //memory(type=ROM,content=Program)
 auto Cartridge::loadROM(Markup::Node node) -> void {
@@ -177,6 +193,9 @@ auto Cartridge::loadMCC(Markup::Node node) -> void {
     if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
       loadMemory(mcc.rom, memory, File::Required);
     }
+    if(auto slot = mcu["slot(type=BSMemory)"]) {
+      loadBSMemory(slot);
+    }
   }
 
   if(auto memory = node["memory(type=RAM,content=Download)"]) {
@@ -187,28 +206,63 @@ auto Cartridge::loadMCC(Markup::Node node) -> void {
   }
 }
 
-//slot(type=SufamiTurbo)[0,1]
-auto Cartridge::loadSufamiTurbo(Markup::Node node, bool slot) -> void {
-  has.SufamiTurboSlots = true;
+//slot(type=BSMemory)
+auto Cartridge::loadBSMemory(Markup::Node node) -> void {
+  has.BSMemorySlot = true;
 
-  for(auto map : node.find("rom/map")) {
-    auto& cartridge = slot == 0 ? sufamiturboA : sufamiturboB;
-    if(cartridge.rom.size() == 0) continue;
-    loadMap(map, cartridge.rom);
-  }
+  if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
+    bsmemory.pathID = loaded.pathID();
+    loadBSMemory();
 
-  for(auto map : node.find("ram/map")) {
-    auto& cartridge = slot == 0 ? sufamiturboA : sufamiturboB;
-    if(cartridge.ram.size() == 0) continue;
-    loadMap(map, cartridge.ram);
+    for(auto map : node.find("map")) {
+      loadMap(map, bsmemory);
+    }
   }
 }
 
-auto Cartridge::loadNSS(Markup::Node node) -> void {
-  has.NSSDIP = true;
-  nss.dip = platform->dipSettings(node);
+//slot(type=SufamiTurbo)[0]
+auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
+  has.SufamiTurboSlotA = true;
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&NSS::read, &nss}, {&NSS::write, &nss});
+  if(auto loaded = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
+    sufamiturboA.pathID = loaded.pathID();
+    loadSufamiTurboA();
+
+    for(auto map : node.find("rom/map")) {
+      loadMap(map, sufamiturboA.rom);
+    }
+
+    for(auto map : node.find("ram/map")) {
+      loadMap(map, sufamiturboA.ram);
+    }
+  }
+}
+
+//slot(type=SufamiTurbo)[1]
+auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
+  has.SufamiTurboSlotB = true;
+
+  if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
+    sufamiturboB.pathID = loaded.pathID();
+    loadSufamiTurboB();
+
+    for(auto map : node.find("rom/map")) {
+      loadMap(map, sufamiturboB.rom);
+    }
+
+    for(auto map : node.find("ram/map")) {
+      loadMap(map, sufamiturboB.ram);
+    }
+  }
+}
+
+auto Cartridge::loadDIP(Markup::Node node) -> void {
+  has.DIP = true;
+  dip.value = platform->dipSettings(node);
+
+  for(auto map : node.find("map")) {
+    loadMap(map, {&DIP::read, &dip}, {&DIP::write, &dip});
+  }
 }
 
 auto Cartridge::loadEvent(Markup::Node node) -> void {
@@ -243,6 +297,9 @@ auto Cartridge::loadSA1(Markup::Node node) -> void {
     }
     if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
       loadMemory(sa1.rom, memory, File::Required);
+    }
+    if(auto slot = mcu["slot(type=BSMemory)"]) {
+      loadBSMemory(slot);
     }
   }
 
@@ -581,40 +638,4 @@ auto Cartridge::loadMSU1(Markup::Node node) -> void {
   for(auto map : node.find("map")) {
     loadMap(map, {&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1});
   }
-}
-
-//
-
-auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, maybe<uint> id) -> void {
-  if(!id) id = pathID();
-  if(auto memory = game.memory(node)) {
-    ram.allocate(memory->size);
-    if(memory->type == "RAM" && !memory->nonVolatile) return;
-    if(memory->type == "RTC" && !memory->nonVolatile) return;
-    if(auto fp = platform->open(id(), memory->name(), File::Read, required)) {
-      fp->read(ram.data(), ram.size());
-    }
-  }
-}
-
-auto Cartridge::loadMap(Markup::Node map, SuperFamicom::Memory& memory) -> void {
-  auto addr = map["address"].text();
-  auto size = map["size"].natural();
-  auto base = map["base"].natural();
-  auto mask = map["mask"].natural();
-  if(size == 0) size = memory.size();
-  if(size == 0) return;
-  bus.map({&SuperFamicom::Memory::read, &memory}, {&SuperFamicom::Memory::write, &memory}, addr, size, base, mask);
-}
-
-auto Cartridge::loadMap(
-  Markup::Node map,
-  const function<uint8 (uint24, uint8)>& reader,
-  const function<void (uint24, uint8)>& writer
-) -> void {
-  auto addr = map["address"].text();
-  auto size = map["size"].natural();
-  auto base = map["base"].natural();
-  auto mask = map["mask"].natural();
-  bus.map(reader, writer, addr, size, base, mask);
 }

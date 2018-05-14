@@ -81,7 +81,8 @@ auto System::unload() -> void {
   if(cartridge.has.OBC1) obc1.unload();
   if(cartridge.has.MSU1) msu1.unload();
   if(cartridge.has.BSMemorySlot) bsmemory.unload();
-  if(cartridge.has.SufamiTurboSlots) sufamiturboA.unload(), sufamiturboB.unload();
+  if(cartridge.has.SufamiTurboSlotA) sufamiturboA.unload();
+  if(cartridge.has.SufamiTurboSlotB) sufamiturboB.unload();
 
   cartridge.unload();
   information.loaded = false;
@@ -106,7 +107,7 @@ auto System::power(bool reset) -> void {
 
   if(cartridge.has.ICD) icd.power();
   if(cartridge.has.MCC) mcc.power();
-  if(cartridge.has.NSSDIP) nss.power();
+  if(cartridge.has.DIP) dip.power();
   if(cartridge.has.Event) event.power();
   if(cartridge.has.SA1) sa1.power();
   if(cartridge.has.SuperFX) superfx.power();
@@ -120,7 +121,8 @@ auto System::power(bool reset) -> void {
   if(cartridge.has.OBC1) obc1.power();
   if(cartridge.has.MSU1) msu1.power();
   if(cartridge.has.BSMemorySlot) bsmemory.power();
-  if(cartridge.has.SufamiTurboSlots) sufamiturboA.power(), sufamiturboB.power();
+  if(cartridge.has.SufamiTurboSlotA) sufamiturboA.power();
+  if(cartridge.has.SufamiTurboSlotB) sufamiturboB.power();
 
   if(cartridge.has.ICD) cpu.coprocessors.append(&icd);
   if(cartridge.has.Event) cpu.coprocessors.append(&event);

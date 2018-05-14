@@ -56,10 +56,10 @@ auto Cartridge::load() -> bool {
   }
 
   //Sufami Turbo
-  else if(cartridge.has.SufamiTurboSlots) {
+  else if(cartridge.has.SufamiTurboSlotA || cartridge.has.SufamiTurboSlotB) {
     Hash::SHA256 sha;
-    sha.input(sufamiturboA.rom.data(), sufamiturboA.rom.size());
-    sha.input(sufamiturboB.rom.data(), sufamiturboB.rom.size());
+    if(cartridge.has.SufamiTurboSlotA) sha.input(sufamiturboA.rom.data(), sufamiturboA.rom.size());
+    if(cartridge.has.SufamiTurboSlotB) sha.input(sufamiturboB.rom.data(), sufamiturboB.rom.size());
     information.sha256 = sha.digest();
   }
 
@@ -97,7 +97,7 @@ auto Cartridge::loadGameBoy() -> bool {
   //invoked from ICD::load()
   information.sha256 = GameBoy::cartridge.sha256();
   slotGameBoy.load(GameBoy::cartridge.manifest());
-  loadGameBoy(slotGameBoy.document);
+  loadCartridgeGameBoy(slotGameBoy.document);
   return true;
   #endif
   return false;
@@ -107,7 +107,7 @@ auto Cartridge::loadBSMemory() -> bool {
   if(auto fp = platform->open(bsmemory.pathID, "manifest.bml", File::Read, File::Required)) {
     slotBSMemory.load(fp->reads());
   } else return false;
-  loadBSMemory(slotBSMemory.document);
+  loadCartridgeBSMemory(slotBSMemory.document);
   return true;
 }
 
@@ -115,7 +115,7 @@ auto Cartridge::loadSufamiTurboA() -> bool {
   if(auto fp = platform->open(sufamiturboA.pathID, "manifest.bml", File::Read, File::Required)) {
     slotSufamiTurboA.load(fp->reads());
   } else return false;
-  loadSufamiTurboA(slotSufamiTurboA.document);
+  loadCartridgeSufamiTurboA(slotSufamiTurboA.document);
   return true;
 }
 
@@ -123,21 +123,23 @@ auto Cartridge::loadSufamiTurboB() -> bool {
   if(auto fp = platform->open(sufamiturboB.pathID, "manifest.bml", File::Read, File::Required)) {
     slotSufamiTurboB.load(fp->reads());
   } else return false;
-  loadSufamiTurboB(slotSufamiTurboB.document);
+  loadCartridgeSufamiTurboB(slotSufamiTurboB.document);
   return true;
 }
 
 auto Cartridge::save() -> void {
   saveCartridge(game.document);
   if(has.GameBoySlot) {
-    saveGameBoy(slotGameBoy.document);
+    saveCartridgeGameBoy(slotGameBoy.document);
   }
   if(has.BSMemorySlot) {
-    saveBSMemory(slotBSMemory.document);
+    saveCartridgeBSMemory(slotBSMemory.document);
   }
-  if(has.SufamiTurboSlots) {
-    saveSufamiTurboA(slotSufamiTurboA.document);
-    saveSufamiTurboB(slotSufamiTurboB.document);
+  if(has.SufamiTurboSlotA) {
+    saveCartridgeSufamiTurboA(slotSufamiTurboA.document);
+  }
+  if(has.SufamiTurboSlotB) {
+    saveCartridgeSufamiTurboB(slotSufamiTurboB.document);
   }
 }
 

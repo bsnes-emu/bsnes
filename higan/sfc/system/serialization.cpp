@@ -52,6 +52,7 @@ auto System::serializeAll(serializer& s) -> void {
 
   if(cartridge.has.ICD) icd.serialize(s);
   if(cartridge.has.MCC) mcc.serialize(s);
+  if(cartridge.has.DIP) dip.serialize(s);
   if(cartridge.has.Event) event.serialize(s);
   if(cartridge.has.SA1) sa1.serialize(s);
   if(cartridge.has.SuperFX) superfx.serialize(s);
@@ -65,7 +66,9 @@ auto System::serializeAll(serializer& s) -> void {
   if(cartridge.has.OBC1) obc1.serialize(s);
   if(cartridge.has.MSU1) msu1.serialize(s);
 
-  if(cartridge.has.SufamiTurboSlots) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
+  if(cartridge.has.BSMemorySlot) bsmemory.serialize(s);
+  if(cartridge.has.SufamiTurboSlotA) sufamiturboA.serialize(s);
+  if(cartridge.has.SufamiTurboSlotB) sufamiturboB.serialize(s);
 
   controllerPort1.serialize(s);
   controllerPort2.serialize(s);

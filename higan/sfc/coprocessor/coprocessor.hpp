@@ -1,6 +1,6 @@
 #include <sfc/coprocessor/icd/icd.hpp>
 #include <sfc/coprocessor/mcc/mcc.hpp>
-#include <sfc/coprocessor/nss/nss.hpp>
+#include <sfc/coprocessor/dip/dip.hpp>
 #include <sfc/coprocessor/event/event.hpp>
 
 #include <sfc/coprocessor/sa1/sa1.hpp>

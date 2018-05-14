@@ -1,4 +1,5 @@
 struct BSMemory : Memory {
+  //bsmemory.cpp
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -6,6 +7,9 @@ struct BSMemory : Memory {
   auto size() const -> uint;
   auto read(uint24 addr, uint8) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
 
   uint pathID = 0;
   MappedRAM memory;

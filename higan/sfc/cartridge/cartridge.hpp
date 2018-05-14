@@ -23,7 +23,7 @@ struct Cartridge {
   struct Has {
     boolean ICD;
     boolean MCC;
-    boolean NSSDIP;
+    boolean DIP;
     boolean Event;
     boolean SA1;
     boolean SuperFX;
@@ -39,7 +39,8 @@ struct Cartridge {
 
     boolean GameBoySlot;
     boolean BSMemorySlot;
-    boolean SufamiTurboSlots;
+    boolean SufamiTurboSlotA;
+    boolean SufamiTurboSlotB;
   } has;
 
 private:
@@ -59,17 +60,23 @@ private:
   //load.cpp
   auto loadBoard(string) -> Markup::Node;
   auto loadCartridge(Markup::Node) -> void;
-  auto loadGameBoy(Markup::Node) -> void;
-  auto loadBSMemory(Markup::Node) -> void;
-  auto loadSufamiTurboA(Markup::Node) -> void;
-  auto loadSufamiTurboB(Markup::Node) -> void;
+  auto loadCartridgeGameBoy(Markup::Node) -> void;
+  auto loadCartridgeBSMemory(Markup::Node) -> void;
+  auto loadCartridgeSufamiTurboA(Markup::Node) -> void;
+  auto loadCartridgeSufamiTurboB(Markup::Node) -> void;
+
+  auto loadMemory(MappedRAM&, Markup::Node, bool required) -> void;
+  auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
+  auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
 
   auto loadROM(Markup::Node) -> void;
   auto loadRAM(Markup::Node) -> void;
   auto loadICD(Markup::Node) -> void;
   auto loadMCC(Markup::Node) -> void;
-  auto loadSufamiTurbo(Markup::Node, bool slot) -> void;
-  auto loadNSS(Markup::Node) -> void;
+  auto loadBSMemory(Markup::Node) -> void;
+  auto loadSufamiTurboA(Markup::Node) -> void;
+  auto loadSufamiTurboB(Markup::Node) -> void;
+  auto loadDIP(Markup::Node) -> void;
   auto loadEvent(Markup::Node) -> void;
   auto loadSA1(Markup::Node) -> void;
   auto loadSuperFX(Markup::Node) -> void;
@@ -84,16 +91,14 @@ private:
   auto loadOBC1(Markup::Node) -> void;
   auto loadMSU1(Markup::Node) -> void;
 
-  auto loadMemory(MappedRAM&, Markup::Node, bool required, maybe<uint> id = nothing) -> void;
-  auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
-  auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
-
   //save.cpp
   auto saveCartridge(Markup::Node) -> void;
-  auto saveGameBoy(Markup::Node) -> void;
-  auto saveBSMemory(Markup::Node) -> void;
-  auto saveSufamiTurboA(Markup::Node) -> void;
-  auto saveSufamiTurboB(Markup::Node) -> void;
+  auto saveCartridgeGameBoy(Markup::Node) -> void;
+  auto saveCartridgeBSMemory(Markup::Node) -> void;
+  auto saveCartridgeSufamiTurboA(Markup::Node) -> void;
+  auto saveCartridgeSufamiTurboB(Markup::Node) -> void;
+
+  auto saveMemory(MappedRAM&, Markup::Node) -> void;
 
   auto saveRAM(Markup::Node) -> void;
   auto saveMCC(Markup::Node) -> void;
@@ -107,8 +112,6 @@ private:
   auto saveSharpRTC(Markup::Node) -> void;
   auto saveSPC7110(Markup::Node) -> void;
   auto saveOBC1(Markup::Node) -> void;
-
-  auto saveMemory(MappedRAM&, Markup::Node, maybe<uint> = nothing) -> void;
 
   friend class Interface;
   friend class ICD;

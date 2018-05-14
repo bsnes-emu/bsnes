@@ -30,19 +30,29 @@ auto Icarus::famicomImport(vector<uint8_t>& buffer, string location) -> string {
   auto manifest = famicomManifest(buffer, location);
   if(!manifest) return failure("failed to parse ROM image");
 
-  auto document = BML::unserialize(manifest);
-  uint prgrom = document["game/memory[name=program.rom]"]["size"].natural();
-  uint chrrom = document["game/memory[name=character.rom]"]["size"].natural();
-
   if(!create(target)) return failure("library path unwritable");
   if(exists({source, name, ".sav"}) && !exists({target, "save.ram"})) {
     copy({source, name, ".sav"}, {target, "save.ram"});
   }
 
   if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
-  write({target, "ines.rom"}, &buffer[0], 16);
-  write({target, "program.rom"}, &buffer[16], prgrom);
-  if(!chrrom) return success(target);
-  write({target, "character.rom"}, &buffer[16 + prgrom], chrrom);
+  auto document = BML::unserialize(manifest);
+  uint offset = 0;
+  if(true) {
+    //todo: support images without iNES headers (via database lookup)
+    uint size = 16;
+    write({target, "ines.rom"}, &buffer[offset], size);
+    offset += size;
+  }
+  if(auto program = document["game/memory(type=ROM,content=Program)"]) {
+    uint size = program["size"].natural();
+    write({target, "program.rom"}, &buffer[offset], size);
+    offset += size;
+  }
+  if(auto character = document["game/memory(type=ROM,content=Character)"]) {
+    uint size = character["size"].natural();
+    write({target, "character.rom"}, &buffer[offset], size);
+    offset += size;
+  }
   return success(target);
 }

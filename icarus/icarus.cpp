@@ -78,7 +78,7 @@ auto nall::main(string_vector args) -> void {
 
   if(args.size() == 2 && args[1] == "--import") {
     if(string source = BrowserDialog()
-    .setTitle("Load ROM Image")
+    .setTitle("Load ROM File")
     .setPath(settings["icarus/Path"].text())
     .setFilters("ROM Files|"
       "*.fc:*.nes:"

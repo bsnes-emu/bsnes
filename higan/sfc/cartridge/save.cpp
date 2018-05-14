@@ -13,21 +13,48 @@ auto Cartridge::saveCartridge(Markup::Node node) -> void {
   if(auto node = board["processor(identifier=OBC1)"]) saveOBC1(node);
 }
 
-auto Cartridge::saveGameBoy(Markup::Node node) -> void {
+auto Cartridge::saveCartridgeGameBoy(Markup::Node node) -> void {
 }
 
-auto Cartridge::saveBSMemory(Markup::Node node) -> void {
+auto Cartridge::saveCartridgeBSMemory(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=Flash,content=Program)"]}) {
+    if(auto fp = platform->open(bsmemory.pathID, memory.name(), File::Write)) {
+      fp->write(bsmemory.memory.data(), memory.size);
+    }
+  }
 }
 
-auto Cartridge::saveSufamiTurboA(Markup::Node node) -> void {
-  saveMemory(sufamiturboA.ram, node["game/board/memory(type=RAM)"], sufamiturboA.pathID);
+auto Cartridge::saveCartridgeSufamiTurboA(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(sufamiturboA.pathID, memory.name(), File::Write)) {
+        fp->write(sufamiturboA.ram.data(), memory.size);
+      }
+    }
+  }
 }
 
-auto Cartridge::saveSufamiTurboB(Markup::Node node) -> void {
-  saveMemory(sufamiturboB.ram, node["game/board/memory(type=RAM)"], sufamiturboB.pathID);
+auto Cartridge::saveCartridgeSufamiTurboB(Markup::Node node) -> void {
+  if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=RAM,content=Save)"]}) {
+    if(memory.nonVolatile) {
+      if(auto fp = platform->open(sufamiturboB.pathID, memory.name(), File::Write)) {
+        fp->write(sufamiturboB.ram.data(), memory.size);
+      }
+    }
+  }
 }
 
 //
+
+auto Cartridge::saveMemory(MappedRAM& ram, Markup::Node node) -> void {
+  if(auto memory = game.memory(node)) {
+    if(memory->type == "RAM" && !memory->nonVolatile) return;
+    if(memory->type == "RTC" && !memory->nonVolatile) return;
+    if(auto fp = platform->open(pathID(), memory->name(), File::Write)) {
+      fp->write(ram.data(), ram.size());
+    }
+  }
+}
 
 //memory(type=RAM,content=Save)
 auto Cartridge::saveRAM(Markup::Node node) -> void {
@@ -158,18 +185,5 @@ auto Cartridge::saveSPC7110(Markup::Node node) -> void {
 auto Cartridge::saveOBC1(Markup::Node node) -> void {
   if(auto memory = node["memory(type=RAM,content=Save)"]) {
     saveMemory(obc1.ram, memory);
-  }
-}
-
-//
-
-auto Cartridge::saveMemory(MappedRAM& ram, Markup::Node node, maybe<uint> id) -> void {
-  if(!id) id = pathID();
-  if(auto memory = game.memory(node)) {
-    if(memory->type == "RAM" && !memory->nonVolatile) return;
-    if(memory->type == "RTC" && !memory->nonVolatile) return;
-    if(auto fp = platform->open(id(), memory->name(), File::Write)) {
-      fp->write(ram.data(), ram.size());
-    }
   }
 }
