@@ -28,21 +28,19 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
 static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
-    
+    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
+    [GB_IO_STAT] = GB_CONFLICT_READ_NEW,
+ 
     /* Todo: these are GB_CONFLICT_READ_NEW on MGB/SGB2 */
     [GB_IO_BGP] = GB_CONFLICT_READ_OR,
     [GB_IO_OBP0] = GB_CONFLICT_READ_OR,
     [GB_IO_OBP1] = GB_CONFLICT_READ_OR,
-
-    /* Todo: These were verified on an SGB2 */
-    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
-    [GB_IO_STAT] = GB_CONFLICT_READ_NEW,
-    [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
-    [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
     
     /* Todo: these were not verified at all */
     [GB_IO_WY] = GB_CONFLICT_READ_NEW,
     [GB_IO_WX] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
 
 static uint8_t cycle_read(GB_gameboy_t *gb, uint16_t addr)
@@ -87,12 +85,12 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             return;
             
         case GB_CONFLICT_READ_OR: {
-            GB_advance_cycles(gb, gb->pending_cycles - 1);
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_write_memory(gb, addr, value | old_value);
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
-            gb->pending_cycles = 4;
+            gb->pending_cycles = 5;
             return;
             
         case GB_CONFLICT_WRITE_CPU:
