@@ -83,6 +83,10 @@ just as it would if running interactively,
 and the full path to the ressulting game folder
 is printed to icarus' standard output.
 
+If the game cannot be imported correctly
+due to missing firmware,
+icarus prints no output.
+
 When run with the `--manifest` flag,
 `GAME` should be the path to a [game folder],
 such as a game previously imported into the [game library].
