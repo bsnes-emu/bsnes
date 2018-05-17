@@ -100,6 +100,13 @@ heuristics will always be needed as a fallback,
 but at least if the heuristics are wrong
 they can be overridden.
 
+If you are a homebrew author
+or have dumped a previously-unknown cartridge,
+and want to write a manifest yourself,
+you should read the [official manifest specification][manifest].
+
+[manifest]: https://doc.byuu.org/higan/manifests/
+
 Ignoring manifests
 ------------------
 
