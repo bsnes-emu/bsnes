@@ -23,7 +23,8 @@ open the [Systems menu],
 choose "Load ROM File ..."
 to open a [filesystem browser],
 choose the ROM file of the game you want to play,
-and it will be imported into the library and start playing.
+and it will be imported into the library
+and (if possible) start playing.
 
 **Note:**
 If you want to import many games,
@@ -31,7 +32,7 @@ run icarus directly.
 See [icarus] documentation for details.
 
 To play a game for a particular console from your library,
-open the Systems menu,
+open the [Systems menu],
 then choose the appropriate console menu item.
 A filesystem browser will appear
 listing all the games in the library
@@ -67,10 +68,10 @@ higan requires a copy of the co-processor firmware
 as well as the actual game data.
 Unfortunately,
 like games themselves,
-co-processor firmware cannot legally be distributed,
-so you'll need to obtain
-copies of the relevant firmware data
-yourself.
+most co-processor firmware cannot legally be distributed,
+so you'll need to
+obtain copies of the relevant firmware data
+for yourself.
 
 To import a game that requires co-processor firmware,
 the easiest approach is to drop the firmware files into
@@ -80,11 +81,11 @@ The directory should be beside the icarus executable,
 or it can be `%LOCALAPPDATA%\icarus\firmware` (on Windows)
 or `~/.local/share/icarus/firmware/` (on Linux).
 
-When icarus imports a game that requires firmware
-it tries to guess which firmware that game needs,
-but it does not always guess correctly.
+If the easy approach doesn't work for a particular game,
+it may be because icarus has incorrectly guessed
+which firmware that game needs.
 To ensure icarus uses specific firmware with a specific game,
-you must first combine the game data and the firmware into a single file.
+you must combine the game data and the firmware into a single file.
 For example,
 let's say you want to import *Super Bases Loaded 2* for the Super Famicom,
 which is stored in the file `sbl2.sfc`
@@ -108,7 +109,7 @@ cat dsp1.program.rom dsp1.data.rom >> sbl2.sfc
 
 **Note:**
 For co-processor chips with multiple firmware files,
-you must put the "program" file before the "data" file.
+always put the "program" file before the "data" file.
 
 Wikipedia [lists which Super Famicom games use which co-processors][wpec],
 although not all co-processors require separate firmware.
@@ -236,29 +237,25 @@ but fixes some bugs.
 Note that icarus' heuristics cannot distinguish between
 a game that uses the DSP1
 and one that uses the DSP1B,
-so if it cannot find your game in its manifest database,
+so if it cannot find your game in its database,
 it will assume it uses DSP1B.
 Many games work just as well with either variant,
 but *Pilotwings* requires the DSP1 firmware,
 while *Ballz 3D* requires the DSP1B.
 
-If you try to import a game
-using the "Import ROM Files ..." option
-in [the Library menu](../interface/higan.md#the-library-menu)
-(or using icarus directly)
-but it does not include the correct firmware data,
+If you try to import a game with icarus,
+but it cannot find the required firmware files,
 a window will appear saying
 "Import completed, but with 1 errors. View log?"
-(or however many games were lacking the correct firmware).
+(or however many games were lacking firmware).
 If you press "Yes",
 a new window will appear listing the games that couldn't be imported,
 and what problem was detected:
 
-> [sbl2.sfc] ROM image is missing DSP1 firmware data
+> [sbl2.sfc] ROM image is missing data: dsp1.program.rom; dsp1.data.rom
 
 If you try to import a game
-using the "Load ROM File ..." option
-in [the Library menu](../interface/higan.md#the-library-menu)
+using the "Load ROM File ..." option in the [Systems menu]
 but it does not include the correct firmware data,
 nothing will happen,
 and higan will just sit there
@@ -328,8 +325,7 @@ Rename the file and it should work beautifully.
 Playing a game that has a slot for a memory pak
 is just like playing a regular game,
 but after you have selected which game you want to play
-higan will open another
-[filesystem browser](../interface/common.md#the-filesystem-browser)
+higan will open another [filesystem browser]
 to let you pick which previously-imported memory pak
 you want to insert into the game.
 If you press "Cancel" at this point,
@@ -363,7 +359,7 @@ see [the BS-X Project](https://bsxproj.superfamicom.org/).
 Sufami Turbo games
 ------------------
 
-The [Sufami Turbo][wpst]
+The [Sufami Turbo]
 was a special cartridge released
 for the Super Famicom in Japan.
 The Sufami Turbo on its own does nothing,
@@ -399,8 +395,7 @@ Rename the file and it should work beautifully.
 
 To play a Sufami Turbo game,
 load the Sufami Turbo cartridge like any other game.
-higan will open another
-[filesystem browser](../interface/common.md#the-filesystem-browser)
+higan will open another [filesystem browser]
 to let you pick which previously-imported mini-cartridge
 you want to insert into slot A.
 If you press "Cancel" at this point,
@@ -416,7 +411,12 @@ to let you choose a mini-cartridge for slot B.
 If you press "Cancel" at this point,
 the Sufami Turbo cartridge will boot without anything in slot B.
 
-[wpst]: https://en.wikipedia.org/wiki/Sufami_Turbo
+If you play Sufami Turbo games regularly,
+you may want to add the Sufami Turbo base cartridge
+to the [Systems menu]
+so you don't have to tell higan where it is every time.
+
+[Sufami Turbo]: https://en.wikipedia.org/wiki/Sufami_Turbo
 
 Super Game Boy games
 --------------------
@@ -475,12 +475,16 @@ is just like [importing a regular game](#regular-games).
 
 To play a Game Boy game in Super Game Boy mode,
 load the Super Game Boy cartridge like any other game.
-higan will open another
-[filesystem browser](../interface/common.md#the-filesystem-browser)
+higan will open another [filesystem browser]
 to let you pick which previously-imported Game Boy game
 you want to insert into the Super Game Boy.
 If you press "Cancel" at this point,
 higan will crash, so don't do that.
+
+If you regularly play Game Boy games
+through the Super Game Boy,
+you may want to add it to the [Systems menu]
+so you don't have to tell higan where it is every time.
 
 **Note:**
 Only games for the original, black-and-white Game Boy
@@ -510,7 +514,7 @@ such as CD-quality music and full-motion video.
 
 Although the MSU-1 was invented for higan,
 it is now supported by other Super Famicom emulators too.
-The [SD2SNES][sd2snes] programmable cartridge
+The [SD2SNES] programmable cartridge
 even allows you to play MSU-1 games on a real console.
 There are a number of homebrew games
 that make use of the MSU-1,
@@ -548,7 +552,7 @@ To import an MSU-1 game:
 
  1. If you have a single, large file
     with the `.msu1` extension,
-    that is a pack for use with [Mercurial Magic][mermag],
+    that is a pack for use with [Mercurial Magic],
     which can automatically set up a game folder
     in the correct format.
     Go read Mercurial Magic's documentation
@@ -564,12 +568,11 @@ To import an MSU-1 game:
         there will probably be a patch file
         whose name ends in `.ips` or `.bps`.
         Get a copy of the correct version of the commercial game,
-        apply the patch with a tool like [Flips][flips],
+        apply the patch with a tool like [Flips],
         then import the patched file.
       - If there's "hardware" and "emulator" versions of the patch,
         see "One thing to be aware of..." above.
- 3. Find the game folder in
-    [the game library](../concepts/game-library.md)
+ 3. Find the game folder in the [game library]
     that icarus created when it imported the game.
  4. Copy the MSU-1 data file into the game folder.
       - This should be named `msu1.rom`
@@ -601,17 +604,17 @@ Once the game folder is set up,
 playing an MSU-1 game is just like
 [a regular game](#regular-games).
 
-[sd2snes]: https://sd2snes.de/
-[flips]: http://www.romhacking.net/utilities/1040/
+[SD2SNES]: https://sd2snes.de/
+[Flips]: http://www.romhacking.net/utilities/1040/
 [msu1vol]: http://blog.qwertymodo.com/2017/07/the-msu-1-volume-fiasco-explained.html
-[mermag]: https://github.com/hex-usr/Mercurial-Magic/
+[Mercurial Magic]: https://github.com/hex-usr/Mercurial-Magic/
 
 Patched games
 -------------
 
 The console emulation community
 has a long and vibrant history of game modding,
-or [ROM hacking][rhdn],
+or [ROM hacking],
 including fan-translations,
 new levels for existing games,
 and more.
@@ -620,7 +623,7 @@ would be copyright infringement,
 the changes are typically distributed as "patches",
 a file containing a list of modifications to make,
 that can be automatically applied by a "patcher" tool
-like [Flips][flips].
+like [Flips].
 
 higan does not support soft-patching,
 so if you want to play a patched game in higan,
@@ -630,7 +633,7 @@ creating a new, patched copy of the game.
 Then you can import and play the patched game just like
 [a regular game](#regular-games).
 
-[rhdn]: http://www.romhacking.net/
+[ROM hacking]: http://www.romhacking.net/
 
 Game Boy Advance games
 ----------------------
@@ -731,7 +734,10 @@ collect all the files mentioned above, then:
     create a `PowerFest '94.sfc` folder
     (the `.sfc` extension is important,
     but you can choose a different base name if you want).
- 3. Copy the various ROM files into the `PowerFest '94.sfc` folder.
+ 3. Copy `program.rom` and the `slot-*.rom` files
+    into the `PowerFest '94.sfc` folder.
+ 4. Copy the `dsp1.*.rom` files into the `PowerFest '94.sfc` folder,
+    but rename them to `upd7725.*.rom`.
 
 To play *PowerFest '94*,
 open the Library menu,
