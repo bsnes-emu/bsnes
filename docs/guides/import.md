@@ -1,7 +1,6 @@
 Before it can load a game,
 higan requires that all the game's data
-be stored correctly in
-[the Game Library](../concepts/game-library.md).
+be stored correctly in the [Game Library].
 For [regular games](#regular-games)
 this is simple,
 but some games require special treatment,
@@ -11,7 +10,7 @@ unusual hardware.
 Regular games
 -------------
 
-higan's importing tool, icarus, can import games
+higan's importing tool, [icarus], can import games
 in the most commonly-used formats
 for each supported console,
 and also those same formats inside `.zip` files
@@ -20,23 +19,19 @@ More advanced compression formats
 like RAR or 7-zip are not supported.
 
 To import a game,
-open [the Library menu](../interface/higan.md#the-library-menu),
+open the [Systems menu],
 choose "Load ROM File ..."
-to open [a filesystem browser](../interface/common.md#the-filesystem-browser),
+to open a [filesystem browser],
 choose the ROM file of the game you want to play,
 and it will be imported into the library and start playing.
 
 **Note:**
 If you want to import many games,
 run icarus directly.
-See [the icarus documentation](../interface/icarus.md) for details.
+See [icarus] documentation for details.
 
 To play a game for a particular console from your library,
-open the Library menu,
-pick the console manufacturer sub-menu
-(Nintendo for the Super Famicom,
-Bandai for the WonderSwan,
-etc.)
+open the Systems menu,
 then choose the appropriate console menu item.
 A filesystem browser will appear
 listing all the games in the library
@@ -79,11 +74,11 @@ yourself.
 
 To import a game that requires co-processor firmware,
 the easiest approach is to drop the firmware files into
-icarus' `Firmware` directory
+icarus' `firmware` directory
 before importing the game.
 The directory should be beside the icarus executable,
-or it can be `%LOCALAPPDATA%\icarus\Firmware` (on Windows)
-or `~/.local/share/icarus/Firmware/` (on Linux).
+or it can be `%LOCALAPPDATA%\icarus\firmware` (on Windows)
+or `~/.local/share/icarus/firmware/` (on Linux).
 
 When icarus imports a game that requires firmware
 it tries to guess which firmware that game needs,
@@ -276,7 +271,7 @@ you can play it just like any [regular game](#regular-games).
 Satellaview games
 -----------------
 
-The [Satellaview][wpbsx]
+The [Satellaview]
 was a satellite modem peripheral
 released for the Super Famicom in Japan.
 As well as the actual modem
@@ -290,7 +285,7 @@ This control cartridge was called
 which in English is
 *BS-X The Story of The Town Whose Name Was Stolen*.
 
-[wpbsx]: https://en.wikipedia.org/wiki/Satellaview
+[Satellaview]: https://en.wikipedia.org/wiki/Satellaview
 
 The control cartridge had a slot that accepted
 re-writable "memory paks",
@@ -309,8 +304,16 @@ containing extra content for specific games.
 Importing a game that has a slot for a memory pak
 is just like [importing a regular game](#regular-games).
 
-Importing a memory pak is like importing a regular game,
-but the name of the memory pak file *must* end in `.bs`
+To import a memory pak,
+you should use [icarus].
+You can use the "Load ROM File ..." menu item
+in the [Systems menu],
+but higan cannot actually load a memory pak directly,
+so once you choose a file to load
+it looks like nothing has happened.
+
+When importing a memory pak,
+the name of the memory pak file *must* end in `.bs`
 (if it's in a `.zip` file,
 that's OK,
 but the name *inside* the `.zip` file
@@ -373,8 +376,16 @@ from a game in slot B.
 Importing the Sufami Turbo cartridge
 is just like [importing a regular game](#regular-games).
 
-Importing a mini-cartridge is like importing a regular game,
-but the name of the mini-cartridge file *must* end in `.st`
+To import a mini-cartridge,
+you should use [icarus].
+You can use the "Load ROM File ..." menu item
+in the [Systems menu],
+but higan cannot actually load a mini-cartridge directly,
+so once you choose a file to load
+it looks like nothing has happened.
+
+When importing a mini-cartridge,
+the name of the file *must* end in `.st`
 (if it's in a `.zip` file,
 that's OK,
 but the name *inside* the `.zip` file
@@ -732,3 +743,8 @@ Select *PowerFest '94* from the list
 and click the Open button,
 or just double-click the game,
 and it will begin playing.
+
+[filesystem browser]: ../interface/common.md#the-filesystem-browser
+[Game Library]: ../concepts/game-library.md
+[icarus]: ../interface/icarus.md
+[Systems menu]: ../interface/higan.md#the-systems-menu
