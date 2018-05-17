@@ -44,12 +44,12 @@ auto Icarus::famicomImport(vector<uint8_t>& buffer, string location) -> string {
     write({target, "ines.rom"}, &buffer[offset], size);
     offset += size;
   }
-  if(auto program = document["game/memory(type=ROM,content=Program)"]) {
+  if(auto program = document["game/board/memory(type=ROM,content=Program)"]) {
     uint size = program["size"].natural();
     write({target, "program.rom"}, &buffer[offset], size);
     offset += size;
   }
-  if(auto character = document["game/memory(type=ROM,content=Character)"]) {
+  if(auto character = document["game/board/memory(type=ROM,content=Character)"]) {
     uint size = character["size"].natural();
     write({target, "character.rom"}, &buffer[offset], size);
     offset += size;

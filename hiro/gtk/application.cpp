@@ -43,18 +43,17 @@ auto pApplication::initialize() -> void {
   #endif
 
   //set WM_CLASS to Application::name()
-  if(Application::state.name) gdk_set_program_class(Application::state.name);
+  auto name = Application::state.name ? Application::state.name : string{"hiro"};
+  gdk_set_program_class(name);
 
   #if 1
   int argc = 1;
-  char* argv[] = {new char[5], nullptr};
-  strcpy(argv[0], "hiro");
+  char* argv[] = {name.get(), nullptr};
   #else
   //--g-fatal-warnings will force a trap on Gtk-CRITICAL errors
   //this allows gdb to perform a backtrace to find an error's origin point
   int argc = 2;
-  char* argv[] = {new char[5], new char[19], nullptr};
-  strcpy(argv[0], "hiro");
+  char* argv[] = {name.get(), new char[19], nullptr};
   strcpy(argv[1], "--g-fatal-warnings");
   #endif
   char** argvp = argv;

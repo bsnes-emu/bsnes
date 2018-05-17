@@ -44,6 +44,11 @@ auto Event::power() -> void {
   rom[2].writeProtect(true);
   rom[3].writeProtect(true);
 
+  //DIP switches 0-3 control the time: 3 minutes + 0-15 extra minutes
+  timer = (3 + dip.value.bits(0,3)) * 60;  //in seconds
+  //DIP switches 4-5 serve an unknown purpose
+  //DIP switches 6-7 are not connected
+
   status = 0x00;
   select = 0x00;
   timerActive = false;
@@ -66,7 +71,7 @@ auto Event::mcuRead(uint24 addr, uint8 data) -> uint8 {
     }
   }
 
-  if(board == Board::Powerfest94) {
+  if(board == Board::PowerFest94) {
     uint id = 0;
     if(select == 0x09) id = 1;
     if(select == 0x0c) id = 2;

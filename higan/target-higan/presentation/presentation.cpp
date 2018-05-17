@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 #include "about.cpp"
 unique_pointer<AboutWindow> aboutWindow;
 unique_pointer<Presentation> presentation;

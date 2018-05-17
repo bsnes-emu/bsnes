@@ -2,7 +2,7 @@ build := performance
 include ../nall/GNUmakefile
 
 binary := application
-target := tomoko
+target := higan
 objects := libco emulator audio video resource
 
 flags += -I. -I..

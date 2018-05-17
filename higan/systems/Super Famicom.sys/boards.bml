@@ -1,10 +1,10 @@
 database
-  revision: 2018-05-12
+  revision: 2018-05-16
 
 //Boards (Production)
 
 database
-  revision: 2018-05-08
+  revision: 2018-05-16
 
 board: BANDAI-PT-923
   memory type=ROM content=Program
@@ -19,6 +19,19 @@ board: BANDAI-PT-923
       map address=40-5f,c0-df:0000-ffff mask=0x8000
     ram
       map address=70-7d,f0-ff:0000-ffff
+
+board: BSC-1A5B9P-01
+  memory type=RAM content=Save
+    map address=10-17:5000-5fff mask=0xf000
+  processor identifier=MCC
+    map address=00-0f:5000-5fff
+    mcu
+      map address=00-3f,80-bf:8000-ffff
+      map address=40-7d,c0-ff:0000-ffff
+      map address=20-3f,a0-bf:6000-7fff
+      memory type=ROM content=Program
+      memory type=RAM content=Download
+      slot type=BSMemory
 
 board: BSC-1A5M-02
   memory type=ROM content=Program
@@ -519,15 +532,15 @@ board: SHVC-LDH3C-01
     memory type=RTC content=Time manufacturer=Epson
 
 board: SHVC-LN3B-01
+  memory type=RAM content=Save
+    map address=00-3f,80-bf:6000-7fff mask=0xe000
+    map address=70-73:0000-ffff
   processor identifier=SDD1
     map address=00-3f,80-bf:4800-480f
     mcu
       map address=00-3f,80-bf:8000-ffff
       map address=c0-ff:0000-ffff
       memory type=ROM content=Program
-    memory type=RAM content=Save
-      map address=00-3f,80-bf:6000-7fff mask=0xe000
-      map address=70-73:0000-ffff
 
 board: SHVC-SGB2-01
   memory type=ROM content=Program
@@ -552,7 +565,7 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-05-12
+  revision: 2018-05-16
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -590,16 +603,16 @@ board: BS-LOROM-RAM
 
 board: BS-MCC-RAM
   memory type=RAM content=Save
-    map address=10-1f:5000-5fff mask=0xf000
+    map address=10-17:5000-5fff mask=0xf000
   processor identifier=MCC
-    map address=00-0f:5000
+    map address=00-0f:5000-5fff
     mcu
-      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=00-3f,80-bf:8000-ffff
       map address=40-7d,c0-ff:0000-ffff
+      map address=20-3f,a0-bf:6000-7fff
       memory type=ROM content=Program
+      memory type=RAM content=Download
       slot type=BSMemory
-    memory type=RAM content=Download
-      map address=00-3f,80-bf:6000-7fff mask=0xe000
 
 board: BS-SA1-RAM
   processor architecture=W65C816S

@@ -53,7 +53,7 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   if(auto node = board["slot(type=SufamiTurbo)[0]"]) loadSufamiTurboA(node);
   if(auto node = board["slot(type=SufamiTurbo)[1]"]) loadSufamiTurboB(node);
   if(auto node = board["dip"]) loadDIP(node);
-  if(auto node = board["event"]) loadEvent(node);
+  if(auto node = board["processor(architecture=uPD78214)"]) loadEvent(node);
   if(auto node = board["processor(architecture=W65C816S)"]) loadSA1(node);
   if(auto node = board["processor(architecture=GSU)"]) loadSuperFX(node);
   if(auto node = board["processor(architecture=ARM6)"]) loadARMDSP(node);
@@ -193,15 +193,11 @@ auto Cartridge::loadMCC(Markup::Node node) -> void {
     if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
       loadMemory(mcc.rom, memory, File::Required);
     }
+    if(auto memory = mcu["memory(type=RAM,content=Download)"]) {
+      loadMemory(mcc.psram, memory, File::Optional);
+    }
     if(auto slot = mcu["slot(type=BSMemory)"]) {
       loadBSMemory(slot);
-    }
-  }
-
-  if(auto memory = node["memory(type=RAM,content=Download)"]) {
-    loadMemory(mcc.ram, memory, File::Optional);
-    for(auto map : memory.find("map")) {
-      loadMap(map, mcc.ram);
     }
   }
 }
@@ -256,6 +252,7 @@ auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
   }
 }
 
+//dip
 auto Cartridge::loadDIP(Markup::Node node) -> void {
   has.DIP = true;
   dip.value = platform->dipSettings(node);
@@ -265,22 +262,34 @@ auto Cartridge::loadDIP(Markup::Node node) -> void {
   }
 }
 
+//processor(architecture=uPD78214)
 auto Cartridge::loadEvent(Markup::Node node) -> void {
-  auto roms = node.find("rom");
-  if(roms.size() != 4) return;
-
   has.Event = true;
+  event.board = Event::Board::Unknown;
+  if(node["identifier"].text() == "Campus Challenge '92") event.board = Event::Board::CampusChallenge92;
+  if(node["identifier"].text() == "PowerFest '94") event.board = Event::Board::PowerFest94;
 
-  for(uint n : range(4)) loadMemory(event.rom[n], roms[n], File::Required);
+  for(auto map : node.find("map")) {
+    loadMap(map, {&Event::read, &event}, {&Event::write, &event});
+  }
 
-  event.board = Event::Board::CampusChallenge92;
-  if(node.text() == "CC92") event.board = Event::Board::CampusChallenge92;
-  if(node.text() == "PF94") event.board = Event::Board::Powerfest94;
-  event.timer = node["timer"].natural();
-
-  for(auto leaf : node.find("map")) leaf.text() == "mcu"
-  ? loadMap(leaf, {&Event::mcuRead, &event}, {&Event::mcuWrite, &event})
-  : loadMap(leaf, {&Event::read, &event}, {&Event::write, &event});
+  if(auto mcu = node["mcu"]) {
+    for(auto map : mcu.find("map")) {
+      loadMap(map, {&Event::mcuRead, &event}, {&Event::mcuWrite, &event});
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
+      loadMemory(event.rom[0], memory, File::Required);
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Level-1)"]) {
+      loadMemory(event.rom[1], memory, File::Required);
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Level-2)"]) {
+      loadMemory(event.rom[2], memory, File::Required);
+    }
+    if(auto memory = mcu["memory(type=ROM,content=Level-3)"]) {
+      loadMemory(event.rom[3], memory, File::Required);
+    }
+  }
 }
 
 //processor(architecture=W65C816S)

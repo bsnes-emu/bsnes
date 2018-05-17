@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 #include <fc/interface/interface.hpp>
 #include <sfc/interface/interface.hpp>
 #include <ms/interface/interface.hpp>

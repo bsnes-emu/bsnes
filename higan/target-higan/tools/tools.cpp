@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 
 #include "cheat-database.cpp"
 unique_pointer<CheatDatabase> cheatDatabase;

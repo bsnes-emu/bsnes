@@ -41,9 +41,10 @@ auto pApplication::syncX() -> void {
 auto pApplication::initialize() -> void {
   display = XOpenDisplay(0);
 
-  static int argc = 1;
-  static char* argv[] = {new char[8], nullptr};
-  strcpy(argv[0], "hiro");
+  auto name = Application::state.name ? Application::state.name : string{"hiro"};
+
+  int argc = 1;
+  char* argv[] = {name.get(), nullptr};
   char** argvp = argv;
 
   qtApplication = new QApplication(argc, argvp);

@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 #include "hotkeys.cpp"
 unique_pointer<InputManager> inputManager;
 

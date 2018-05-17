@@ -7,124 +7,254 @@ MCC mcc;
 
 auto MCC::unload() -> void {
   rom.reset();
-  ram.reset();
+  psram.reset();
 }
 
 auto MCC::power() -> void {
   rom.writeProtect(true);
-  ram.writeProtect(false);
+  psram.writeProtect(false);
 
-  for(auto n : range(16)) r[n] = 0x00;
-  r[0x07] = 0x80;
-  r[0x08] = 0x80;
-  commit();
+  irq.flag = 0;
+  irq.enable = 0;
+  w.mapping = 1;
+  w.psramEnableLo = 1;
+  w.psramEnableHi = 0;
+  w.psramMapping = 3;
+  w.romEnableLo = 1;
+  w.romEnableHi = 1;
+  w.exEnableLo = 1;
+  w.exEnableHi = 0;
+  w.exMapping = 1;
+  w.bsWritable = 0;
+  w.unknown = 0;
+  x.enable = 0;
+  x.value = 0b0011'1111;
+  memory::copy(&r, &w, sizeof(Registers));
 }
 
-auto MCC::memoryAccess(bool write, Memory& memory, uint24 addr, uint8 data) -> uint8 {
-  addr = bus.mirror(addr, memory.size());
-  if(!write) {
-    return memory.read(addr, data);
-  } else {
-    memory.write(addr, data);
-  }
-}
-
-//map address=00-3f,80-bf:8000-ffff mask=0x408000
-//map address=40-7d,c0-ff:0000-ffff
-auto MCC::mcuAccess(bool write, uint24 addr, uint8 data) -> uint8 {
-  if(addr < 0x400000) {
-    //note: manifest maps 00-3f,80-bf:8000-ffff mask=0x408000 => 00-3f:0000-ffff
-    //the intention is consistency in pre-decoding as much as possible
-    //however, the MCC code is intended to be rewritten; and is too convoluted
-    //so for right now, I'm simply transforming it back to its original state
-    //this is very wasteful; but will be addressed once things are rewritten
-    addr = ((addr & 0x200000) << 2) | ((addr & 0x1f8000) << 1) | 0x8000 | (addr & 0x7fff);
-  }
-
-  if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
-    if(r07 == 1) {
-      addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memoryAccess(write, rom, addr, data);
+auto MCC::read(uint24 address, uint8 data) -> uint8 {
+  if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
+    uint4 index = address.bits(16,19);
+    if(x.enable) return x.value.bit(index & 7);
+    switch(index) {
+    case  0: return irq.flag << 7;
+    case  1: return irq.enable << 7;
+    case  2: return r.mapping << 7;
+    case  3: return r.psramEnableLo << 7;
+    case  4: return r.psramEnableHi << 7;
+    case  5: return r.psramMapping.bit(0) << 7;
+    case  6: return r.psramMapping.bit(1) << 7;
+    case  7: return r.romEnableLo << 7;
+    case  8: return r.romEnableHi << 7;
+    case  9: return r.exEnableLo << 7;
+    case 10: return r.exEnableHi << 7;
+    case 11: return r.exMapping << 7;
+    case 12: return r.bsWritable << 7;
+    case 13: return r.unknown << 7;
+    case 14: return 0;  //commit (always zero)
+    case 15: return 0;  //x.enable (always zero)
     }
-  }
-
-  if((addr & 0xe08000) == 0x808000) {  //$80-9f:8000-ffff
-    if(r08 == 1) {
-      addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memoryAccess(write, rom, addr, data);
-    }
-  }
-
-  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    if(r05 == 0) return memoryAccess(write, ram, addr & 0x0fffff, data);
-  }
-
-  if((addr & 0xf00000) == 0x500000) {  //$50-5f:0000-ffff
-    if(r06 == 0) return memoryAccess(write, ram, addr & 0x0fffff, data);
-  }
-
-  if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    if(r03 == 1) return memoryAccess(write, ram, addr & 0x0fffff, data);
-  }
-
-  if((addr & 0xf80000) == 0x700000) {  //$70-77:0000-ffff
-    return memoryAccess(write, ram, addr & 0x07ffff, data);
-  }
-
-  if(((addr & 0x408000) == 0x008000)  //$00-3f,80-bf:8000-ffff
-  || ((addr & 0x400000) == 0x400000)  //$40-7f,c0-ff:0000-ffff
-  ) {
-    if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-    Memory& memory = (r01 == 0 ? (Memory&)bsmemory : (Memory&)ram);
-    return memoryAccess(write, memory, addr & 0x7fffff, data);
-  }
-
-  return 0x00;
-}
-
-auto MCC::mcuRead(uint24 addr, uint8 data) -> uint8 {
-  return mcuAccess(false, addr, data);
-}
-
-auto MCC::mcuWrite(uint24 addr, uint8 data) -> void {
-  mcuAccess(true, addr, data);
-}
-
-auto MCC::read(uint24 addr, uint8 data) -> uint8 {
-  if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
-    uint8 n = (addr >> 16) & 15;
-    return r[n];
   }
 
   return data;
 }
 
-auto MCC::write(uint24 addr, uint8 data) -> void {
-  if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
-    uint8 n = (addr >> 16) & 15;
-    r[n] = data;
-    if(n == 0x0e && data & 0x80) commit();
-    return;
+auto MCC::write(uint24 address, uint8 data) -> void {
+  if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
+    uint4 index = address.bits(16,19);
+    if(x.enable) return x.value.bit(index & 7) = data.bit(7), void();
+    switch(index) {
+    case  1: irq.enable = data.bit(7); break;
+    case  2: w.mapping = data.bit(7); break;
+    case  3: w.psramEnableLo = data.bit(7); break;
+    case  4: w.psramEnableHi = data.bit(7); break;
+    case  5: w.psramMapping.bit(0) = data.bit(7); break;
+    case  6: w.psramMapping.bit(1) = data.bit(7); break;
+    case  7: w.romEnableLo = data.bit(7); break;
+    case  8: w.romEnableHi = data.bit(7); break;
+    case  9: w.exEnableLo = data.bit(7); break;
+    case 10: w.exEnableHi = data.bit(7); break;
+    case 11: w.exMapping = data.bit(7); break;
+    case 12: w.bsWritable = data.bit(7); break;
+    case 13: w.unknown = data.bit(7); break;
+    case 14: if(data.bit(7)) memory::copy(&r, &w, sizeof(Registers)); break;
+    case 15: x.enable = data.bit(7); break;
+    }
   }
 }
 
-auto MCC::commit() -> void {
-  r00 = r[0x00] & 0x80;
-  r01 = r[0x01] & 0x80;
-  r02 = r[0x02] & 0x80;
-  r03 = r[0x03] & 0x80;
-  r04 = r[0x04] & 0x80;
-  r05 = r[0x05] & 0x80;
-  r06 = r[0x06] & 0x80;
-  r07 = r[0x07] & 0x80;
-  r08 = r[0x08] & 0x80;
-  r09 = r[0x09] & 0x80;
-  r0a = r[0x0a] & 0x80;
-  r0b = r[0x0b] & 0x80;
-  r0c = r[0x0c] & 0x80;
-  r0d = r[0x0d] & 0x80;
-  r0e = r[0x0e] & 0x80;
-  r0f = r[0x0f] & 0x80;
+auto MCC::mcuRead(uint24 address, uint8 data) -> uint8 {
+  return mcuAccess(0, address, data);
+}
+
+auto MCC::mcuWrite(uint24 address, uint8 data) -> void {
+  return mcuAccess(1, address, data), void();
+}
+
+auto MCC::mcuAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+  //[[ROM]]
+
+  if(r.romEnableLo) {
+    if((address & 0xc08000) == 0x008000) {  //00-3f:8000-ffff
+      return romAccess(mode, (address & 0x3f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(r.romEnableHi) {
+    if((address & 0xc08000) == 0x808000) {  //80-bf:8000-ffff
+      return romAccess(mode, (address & 0x3f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  //[[PSRAM]]
+
+  if(r.psramEnableLo && r.mapping == 0) {
+    if(((address & 0xf08000) == 0x008000 && r.psramMapping == 0)  //00-0f:8000-ffff
+    || ((address & 0xf08000) == 0x208000 && r.psramMapping == 1)  //20-2f:8000-ffff
+    || ((address & 0xf00000) == 0x400000 && r.psramMapping == 2)  //40-4f:0000-ffff
+    || ((address & 0xf00000) == 0x600000 && r.psramMapping == 3)  //60-6f:0000-ffff
+    ) {
+      return psramAccess(mode, (address & 0x0f0000) >> 1 | (address & 0x7fff), data);
+    }
+
+    if((address & 0xf08000) == 0x700000) {  //70-7d:0000-7fff
+      return psramAccess(mode, (address & 0x0f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(r.psramEnableHi && r.mapping == 0) {
+    if(((address & 0xf08000) == 0x808000 && r.psramMapping == 0)  //80-8f:8000-ffff
+    || ((address & 0xf08000) == 0xa08000 && r.psramMapping == 1)  //a0-af:8000-ffff
+    || ((address & 0xf00000) == 0xc00000 && r.psramMapping == 2)  //c0-cf:0000-ffff
+    || ((address & 0xf00000) == 0xe00000 && r.psramMapping == 3)  //e0-ef:0000-ffff
+    ) {
+      return psramAccess(mode, (address & 0x0f0000) >> 1 | (address & 0x7fff), data);
+    }
+
+    if((address & 0xf08000) == 0xf00000) {  //f0-ff:0000-7fff
+      return psramAccess(mode, (address & 0x0f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(r.psramEnableLo && r.mapping == 1) {
+    if(((address & 0xf88000) == 0x008000 && r.psramMapping == 0)  //00-07:8000-ffff
+    || ((address & 0xf88000) == 0x108000 && r.psramMapping == 1)  //10-17:8000-ffff
+    || ((address & 0xf88000) == 0x208000 && r.psramMapping == 2)  //20-27:8000-ffff
+    || ((address & 0xf88000) == 0x308000 && r.psramMapping == 3)  //30-37:8000-ffff
+    || ((address & 0xf80000) == 0x400000 && r.psramMapping == 0)  //40-47:0000-ffff
+    || ((address & 0xf80000) == 0x500000 && r.psramMapping == 1)  //50-57:0000-ffff
+    || ((address & 0xf80000) == 0x600000 && r.psramMapping == 2)  //60-67:0000-ffff
+    || ((address & 0xf80000) == 0x700000 && r.psramMapping == 3)  //70-77:0000-ffff
+    ) {
+      return psramAccess(mode, address & 0x07ffff, data);
+    }
+
+    if((address & 0xe0e000) == 0x206000) {  //20-3f:6000-7fff
+      return psramAccess(mode, (address & 0x3f0000) >> 3 | (address & 0x1fff), data);
+    }
+  }
+
+  if(r.psramEnableHi && r.mapping == 1) {
+    if(((address & 0xf88000) == 0x808000 && r.psramMapping == 0)  //80-87:8000-ffff
+    || ((address & 0xf88000) == 0x908000 && r.psramMapping == 1)  //90-97:8000-ffff
+    || ((address & 0xf88000) == 0xa08000 && r.psramMapping == 2)  //a0-a7:8000-ffff
+    || ((address & 0xf88000) == 0xb08000 && r.psramMapping == 3)  //b0-b7:8000-ffff
+    || ((address & 0xf80000) == 0xc00000 && r.psramMapping == 0)  //c0-c7:0000-ffff
+    || ((address & 0xf80000) == 0xd00000 && r.psramMapping == 1)  //d0-d7:0000-ffff
+    || ((address & 0xf80000) == 0xe00000 && r.psramMapping == 2)  //e0-e7:0000-ffff
+    || ((address & 0xf80000) == 0xf00000 && r.psramMapping == 3)  //f0-f7:0000-ffff
+    ) {
+      return psramAccess(mode, address & 0x07ffff, data);
+    }
+
+    if((address & 0xe0e000) == 0xa06000) {  //a0-bf:6000-7fff
+      return psramAccess(mode, (address & 0x3f0000) >> 3 | (address & 0x1fff), data);
+    }
+  }
+
+  //[[EXMEMORY]]
+
+  if(r.exEnableLo && r.mapping == 0) {
+    if(((address & 0xe08000) == 0x008000 && r.exMapping == 0)  //00-1f:8000-ffff
+    || ((address & 0xe00000) == 0x400000 && r.exMapping == 1)  //40-5f:0000-ffff
+    ) {
+      return exAccess(mode, (address & 0x1f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(r.exEnableLo && r.mapping == 1) {
+    if(((address & 0xf08000) == 0x008000 && r.exMapping == 0)  //00-0f:8000-ffff
+    || ((address & 0xf08000) == 0x208000 && r.exMapping == 1)  //20-2f:8000-ffff
+    || ((address & 0xf00000) == 0x400000 && r.exMapping == 0)  //40-4f:0000-ffff
+    || ((address & 0xf00000) == 0x600000 && r.exMapping == 1)  //60-6f:0000-ffff
+    ) {
+      return exAccess(mode, address & 0x0fffff, data);
+    }
+  }
+
+  if(r.exEnableHi && r.mapping == 0) {
+    if(((address & 0xe08000) == 0x808000 && r.exMapping == 0)  //80-9f:8000-ffff
+    || ((address & 0xe00000) == 0xc00000 && r.exMapping == 1)  //c0-df:0000-ffff
+    ) {
+      return exAccess(mode, (address & 0x1f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(r.exEnableHi && r.mapping == 1) {
+    if(((address & 0xf08000) == 0x808000 && r.exMapping == 0)  //80-8f:8000-ffff
+    || ((address & 0xf08000) == 0xa08000 && r.exMapping == 1)  //a0-af:8000-ffff
+    || ((address & 0xf00000) == 0xc00000 && r.exMapping == 0)  //c0-cf:0000-ffff
+    || ((address & 0xf00000) == 0xe00000 && r.exMapping == 1)  //e0-ef:0000-ffff
+    ) {
+      return exAccess(mode, address & 0x0fffff, data);
+    }
+  }
+
+  //[[BSMEMORY]]
+
+  if(bsmemory.memory.size() && r.mapping == 0) {
+    if(((address & 0x408000) == 0x008000)  //00-3f,80-bf:8000-ffff
+    || ((address & 0xc00000) == 0x400000)  //40-7d,c0-ff:0000-ffff
+    ) {
+      return bsAccess(mode, (address & 0x3f0000) >> 1 | (address & 0x7fff), data);
+    }
+  }
+
+  if(bsmemory.memory.size() && r.mapping == 1) {
+    if(((address & 0x408000) == 0x008000)  //00-3f,80-bf:8000-ffff
+    || ((address & 0xc00000) == 0x400000)  //40-7d,c0-ff:0000-ffff
+    ) {
+      return bsAccess(mode, address & 0x3fffff, data);
+    }
+  }
+
+  return data;
+}
+
+auto MCC::romAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+  address = bus.mirror(address, rom.size());
+  if(mode == 0) return rom.read(address);
+  return data;
+}
+
+//size: 0x80000
+auto MCC::psramAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+  address = bus.mirror(address, psram.size());
+  if(mode == 0) return psram.read(address);
+  return psram.write(address, data), data;
+}
+
+//size: 0x100000 (?)
+auto MCC::exAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+  //not physically present on BSC-1A5B9P-01
+  return data;
+}
+
+//size: 0x100000, 0x200000, 0x400000
+auto MCC::bsAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+  address = bus.mirror(address, bsmemory.memory.size());
+  if(mode == 0) return bsmemory.memory.read(address);
+  return bsmemory.memory.write(address, data), data;
 }
 
 }

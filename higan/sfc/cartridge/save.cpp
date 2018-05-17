@@ -63,8 +63,10 @@ auto Cartridge::saveRAM(Markup::Node node) -> void {
 
 //processor(identifier=MCC)
 auto Cartridge::saveMCC(Markup::Node node) -> void {
-  if(auto memory = node["memory(type=RAM,content=Download)"]) {
-    saveMemory(mcc.ram, memory);
+  if(auto mcu = node["mcu"]) {
+    if(auto memory = mcu["memory(type=RAM,content=Download)"]) {
+      saveMemory(mcc.psram, memory);
+    }
   }
 }
 

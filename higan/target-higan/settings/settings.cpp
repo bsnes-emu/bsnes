@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 
 #include "system-properties.cpp"
 unique_pointer<SystemProperties> systemProperties;

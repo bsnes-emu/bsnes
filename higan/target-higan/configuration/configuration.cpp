@@ -1,4 +1,4 @@
-#include "../tomoko.hpp"
+#include "../higan.hpp"
 Settings settings;
 
 Settings::Settings() {

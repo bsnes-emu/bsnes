@@ -7,7 +7,6 @@ SystemProperties::SystemProperties() {
     systemOption.append(ComboButtonItem().setText(emulator->information.name));
   }
   loadLabel.setAlignment(1.0).setText("Load:");
-  loadEdit.setEditable(false);
   loadBrowse.setText("Browse ...").onActivate([&] {
     string filters = "Games|";
     for(auto& emulator : program->emulators) {
@@ -22,6 +21,20 @@ SystemProperties::SystemProperties() {
     .setFilters(filters)
     .openFolder()) {
       loadEdit.setText(location);
+      //change system option to match the media selected
+      auto suffix = Location::suffix(location).trimLeft(".", 1L);
+      for(auto& emulator : program->emulators) {
+        for(auto& media : emulator->media) {
+          if(media.type == suffix) {
+            for(auto item : systemOption.items()) {
+              if(item.text() == emulator->information.name) {
+                item.setSelected();
+                return;
+              }
+            }
+          }
+        }
+      }
     }
   });
   aliasLabel.setAlignment(1.0).setText("Alias:");
