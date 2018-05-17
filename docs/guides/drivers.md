@@ -13,9 +13,9 @@ for video, audio and input,
 so you can find the one that works best for you.
 To see what drivers you're currently using,
 or to choose different ones,
-go to
-[the Advanced tab](../interface/higan-settings.md#advanced)
-of the Settings window.
+go to the [Advanced tab] of the Settings window.
+
+[Advanced tab]: ../interface/higan-settings.md#advanced
 
 Here are the most notable drivers
 for each platform

@@ -11,7 +11,7 @@ or any other visual effect.
 The available video shaders are listed in
 the "Video Shaders" sub-menu of the [Settings menu].
 Which shaders are available depends on
-the [video driver](drivers.md#video) higan is configured to use.
+the [video driver] higan is configured to use.
 Most drivers only support these shaders:
 
   - **None**
@@ -51,11 +51,12 @@ Where to get custom shaders
 
   - higan includes some simple example shaders.
     If your copy of higan did not come with shaders,
-    you can get them from
-    [the unofficial higan repository](https://gitlab.com/higan/higan/tree/master/shaders).
-  - [quark-shaders](https://github.com/hizzlekizzle/quark-shaders)
-    contains many high-quality shaders for use with higan.
+    you can get them from the [unofficial higan repository].
+  - [quark-shaders] contains many high-quality shaders for use with higan.
   - You can write your own.
+
+[unofficial higan repository]: https://gitlab.com/higan/higan/tree/master/shaders
+[quark-shaders]: https://github.com/hizzlekizzle/quark-shaders
 
 How to install custom shaders
 -----------------------------
@@ -79,10 +80,9 @@ and `settings.bml`.
     this is probably `~/.local/share/higan`
 
 Launch higan,
-open the Settings menu,
-and choose "Advanced ..."
-to open [the Advanced tab](../interface/higan-settings.md#advanced)
-of the Settings window.
+open the [Settings menu],
+and choose "Advanced ..." to open
+the [Advanced tab] of the Settings window.
 Under "Driver Selection",
 make sure "Video" is set to "OpenGL".
 If it wasn't already set that way,
@@ -214,3 +214,5 @@ than the Super Famicom or Mega Drive,
 and so it has the same problems with shaders as those consoles.
 
 [Settings menu]: ../interface/higan.md#the-settings-menu
+[video driver]: drivers.md#video
+[Advanced tab]: ../interface/higan-settings.md#advanced
