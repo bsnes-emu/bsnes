@@ -140,7 +140,11 @@ are placed in a `higan` sub-folder:
     All information present in
     [the Cheat Editor](../interface/higan-tools.md#the-cheat-editor)
     is stored here.
+  - `notes.txt`:
+    Everything entered in the [Game Notes] is stored here.
   - `states/quick/slot-*.bst`:
     All [Quick States](save-states.md#quick-states) are stored here.
   - `states/managed/slot-*.bst`:
     All [Manager States](save-states.md#manager-states) are stored here.
+
+[Game Notes]: ../interface/higan-tools.md#game-notes

@@ -9,8 +9,7 @@ reproduce the scanlines and blurring of the original display,
 or any other visual effect.
 
 The available video shaders are listed in
-the "Video Shaders" sub-menu of
-[the Settings menu](../interface/higan.md#the-settings-menu).
+the "Video Shaders" sub-menu of the [Settings menu].
 Which shaders are available depends on
 the [video driver](drivers.md#video) higan is configured to use.
 Most drivers only support these shaders:
@@ -68,11 +67,11 @@ it should contain a file named `manifest.bml`,
 and probably some `*.fs` or `*.vs` files.
 
 Place the shader folder inside
-the `Video Shaders` folder
+the `shaders` folder
 of your higan installation.
-If you don't have a `Video Shaders` folder,
-create it beside the `*.sys` folders
-like `Game Boy Advance.sys` and `Super Famicom.sys`.
+If you don't have a `shaders` folder,
+create it beside the `systems` folder
+and `settings.bml`.
 
   - On Windows,
     this is probably the folder containing `higan.exe`
@@ -213,3 +212,5 @@ The PC Engine does not support an interlaced mode,
 but its horizontal resolution is much more flexible
 than the Super Famicom or Mega Drive,
 and so it has the same problems with shaders as those consoles.
+
+[Settings menu]: ../interface/higan.md#the-settings-menu
