@@ -212,17 +212,17 @@ auto MCC::mcuAccess(bool mode, uint24 address, uint8 data) -> uint8 {
 
   //[[BSMEMORY]]
 
-  if(bsmemory.memory.size() && r.mapping == 0) {
+  if(bsmemory.size() && r.mapping == 0) {
     if(((address & 0x408000) == 0x008000)  //00-3f,80-bf:8000-ffff
-    || ((address & 0xc00000) == 0x400000)  //40-7d,c0-ff:0000-ffff
+    || ((address & 0x400000) == 0x400000)  //40-7d,c0-ff:0000-ffff
     ) {
       return bsAccess(mode, (address & 0x3f0000) >> 1 | (address & 0x7fff), data);
     }
   }
 
-  if(bsmemory.memory.size() && r.mapping == 1) {
+  if(bsmemory.size() && r.mapping == 1) {
     if(((address & 0x408000) == 0x008000)  //00-3f,80-bf:8000-ffff
-    || ((address & 0xc00000) == 0x400000)  //40-7d,c0-ff:0000-ffff
+    || ((address & 0x400000) == 0x400000)  //40-7d,c0-ff:0000-ffff
     ) {
       return bsAccess(mode, address & 0x3fffff, data);
     }
@@ -231,6 +231,7 @@ auto MCC::mcuAccess(bool mode, uint24 address, uint8 data) -> uint8 {
   return data;
 }
 
+//size: 0x100000
 auto MCC::romAccess(bool mode, uint24 address, uint8 data) -> uint8 {
   address = bus.mirror(address, rom.size());
   if(mode == 0) return rom.read(address);
@@ -252,9 +253,9 @@ auto MCC::exAccess(bool mode, uint24 address, uint8 data) -> uint8 {
 
 //size: 0x100000, 0x200000, 0x400000
 auto MCC::bsAccess(bool mode, uint24 address, uint8 data) -> uint8 {
-  address = bus.mirror(address, bsmemory.memory.size());
-  if(mode == 0) return bsmemory.memory.read(address);
-  return bsmemory.memory.write(address, data), data;
+  address = bus.mirror(address, bsmemory.size());
+  if(mode == 0) return bsmemory.read(address, data);
+  return bsmemory.write(address, data), data;
 }
 
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>org.byuu.bsnes</string>
+  <key>CFBundleDisplayName</key>
+  <string>bsnes</string>
+  <key>CFBundleExecutable</key>
+  <string>bsnes</string>
+  <key>CFBundleIconFile</key>
+  <string>bsnes.icns</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
+</dict>
+</plist>

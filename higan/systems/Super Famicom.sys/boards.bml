@@ -1,5 +1,5 @@
 database
-  revision: 2018-05-16
+  revision: 2018-05-17
 
 //Boards (Production)
 
@@ -627,6 +627,47 @@ board: BS-SA1-RAM
       map address=40-4f:0000-ffff
     memory type=RAM content=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
+
+board: EVENT-CC92
+  memory type=RAM content=Save
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  processor manufacturer=NEC architecture=uPD78214
+    identifier: Campus Challenge '92
+    map address=c0,e0:0000
+    mcu
+      map address=00-1f,80-9f:8000-ffff
+      memory type=ROM content=Program
+      memory type=ROM content=Level-1
+      memory type=ROM content=Level-2
+      memory type=ROM content=Level-3
+    dip
+  processor manufacturer=NEC architecture=uPD7725
+    map address=20-3f,a0-bf:8000-ffff mask=0x7fff
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
+    oscillator
+
+board: EVENT-PF94
+  memory type=RAM content=Save
+    map address=30-3f,b0-bf:6000-7fff mask=0xe000
+  processor manufacturer=NEC architecture=uPD78214
+    identifier: PowerFest '94
+    map address=10,20:6000
+    mcu
+      map address=00-3f,80-bf:8000-ffff
+      map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
+      memory type=ROM content=Level-1
+      memory type=ROM content=Level-2
+      memory type=ROM content=Level-3
+    dip
+  processor manufacturer=NEC architecture=uPD7725
+    map address=00-0f,80-8f:6000-7fff mask=0xfff
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
+    oscillator
 
 board: EXHIROM-RAM
   memory type=ROM content=Program

@@ -1,6 +1,8 @@
 auto Icarus::bsMemoryManifest(string location) -> string {
   vector<uint8_t> buffer;
+  //only one of these should exist
   concatenate(buffer, {location, "program.rom"});
+  concatenate(buffer, {location, "program.flash"});
   return bsMemoryManifest(buffer, location);
 }
 

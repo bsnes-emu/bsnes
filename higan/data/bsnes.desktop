@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=bsnes
+Comment=Emulator
+Exec=bsnes
+Icon=bsnes
+Terminal=false
+Type=Application
+Categories=Game;Emulator;

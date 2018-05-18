@@ -1,6 +1,7 @@
 namespace name=Resource
   namespace name=Logo
     binary name=higan file=logo/higan.png
+    binary name=bsnes file=logo/bsnes.png
   namespace name=Sprite
     binary name=CrosshairRed file=sprite/crosshair-red.png
     binary name=CrosshairGreen file=sprite/crosshair-green.png

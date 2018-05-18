@@ -1,5 +1,5 @@
 database
-  revision: 2018-05-06
+  revision: 2018-05-17
 
 //Prototypes (JPN)
 
@@ -125,7 +125,7 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2018-04-14
+  revision: 2018-05-17
 
 game
   sha256:   5c4e283efc338958b8dd45ebd6daf133a9eb280420a98e2e1df358ae0242c366
@@ -243,7 +243,7 @@ game
       size: 0x8000
       content: Save
     memory
-      type: PSRAM
+      type: RAM
       size: 0x80000
       content: Download
 

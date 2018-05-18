@@ -113,7 +113,7 @@ Presentation::Presentation() {
     invoke("https://doc.byuu.org/higan/credits/");
   });
   about.setIcon(Icon::Prompt::Question).setText("About ...").onActivate([&] {
-    aboutWindow->setVisible().setFocused();
+    aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
   statusBar.setFont(Font().setBold());
