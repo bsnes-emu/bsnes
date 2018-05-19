@@ -7,14 +7,10 @@ higan-linux-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev mkdocs
     - make -C genius
-    - make -C icarus
     - make -C higan target=higan
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
     - cp -a genius/out/genius higan-nightly/genius
-    - cp -a icarus/out/icarus higan-nightly/icarus
-    - cp -a icarus/database higan-nightly/
-    - cp -a icarus/firmware higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
     - cp -a higan/systems/ higan-nightly/
     - cp -a shaders higan-nightly/
@@ -27,12 +23,8 @@ higan-linux-x86_64-binaries:
 #bsnes-linux-x86_64-binaries:
 #  script:
 #    - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev libxv-dev libao-dev libopenal-dev libudev-dev
-#    - make -C icarus
 #    - make -C higan target=bsnes
 #    - mkdir bsnes-nightly
-#    - cp -a icarus/out/icarus bsnes-nightly/icarus
-#    - cp -a icarus/database bsnes-nightly/
-#    - cp -a icarus/firmware bsnes-nightly/
 #    - cp -a higan/out/bsnes bsnes-nightly/bsnes
 #    - cp -a higan/systems/ bsnes-nightly/
 #    - cp -a shaders bsnes-nightly/
@@ -78,12 +70,8 @@ higan-windows-x86_64-binaries:
 #    - sed -i -e 's/-lole32/& -static -lpthread/' nall/GNUmakefile
 #    # genius does not currently build on Windows due to lack of a combo edit control in hiro
 #    #- make -C genius platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
-#    - make -C icarus platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
 #    - make -C higan target=bsnes platform=windows compiler="x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++" windres="x86_64-w64-mingw32-windres"
 #    - mkdir bsnes-nightly
-#    - cp -a icarus/out/icarus bsnes-nightly/icarus.exe
-#    - cp -a icarus/database bsnes-nightly/
-#    - cp -a icarus/firmware bsnes-nightly/
 #    - cp -a higan/out/bsnes bsnes-nightly/bsnes.exe
 #    - cp -a higan/systems/ bsnes-nightly/
 #    - cp -a shaders bsnes-nightly/
