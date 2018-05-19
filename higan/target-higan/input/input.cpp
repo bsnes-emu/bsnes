@@ -189,6 +189,7 @@ auto InputMapping::displayName() -> string {
 
 InputManager::InputManager() {
   inputManager = this;
+  input->onChange({&InputManager::onChange, this});
   frequency = max(1u, settings["Input/Frequency"].natural());
 
   for(auto& emulator : program->emulators) {

@@ -56,8 +56,6 @@ auto Program::initializeInputDriver() -> void {
   input = Input::create(settings["Input/Driver"].text());
   input->setContext(presentation->viewport.handle());
 
-  input->onChange({&InputManager::onChange, &inputManager()});
-
   if(!input->ready()) {
     MessageDialog().setText("Failed to initialize input driver").warning();
     input = Input::create("None");

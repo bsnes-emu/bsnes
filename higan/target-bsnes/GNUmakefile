@@ -5,7 +5,7 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include processor/GNUmakefile
 
-ui_objects := ui-bsnes ui-program ui-presentation
+ui_objects := ui-bsnes ui-program ui-input ui-presentation ui-settings
 ui_objects += ruby hiro
 ui_objects += $(if $(call streq,$(platform),windows),ui-resource)
 
@@ -39,7 +39,9 @@ obj/hiro.o: ../hiro/hiro.cpp $(call rwildcard,../hiro/)
 
 obj/ui-bsnes.o: $(ui)/bsnes.cpp $(call rwildcard,$(ui)/)
 obj/ui-program.o: $(ui)/program/program.cpp $(call rwildcard,$(ui)/)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
+obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 
 obj/ui-resource.o:
 	$(windres) data/bsnes.rc obj/ui-resource.o

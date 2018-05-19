@@ -4,7 +4,7 @@ system name:Super Famicom
   smp
     rom name=ipl.rom size=64
   ppu1 version=1
-    ram name=video.ram size=0x8000 volatile
+    ram name=video.ram size=0x10000 volatile
     ram name=object.ram size=544 volatile
   ppu2 version=3
     ram name=palette.ram size=512 volatile
