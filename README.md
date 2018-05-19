@@ -43,6 +43,6 @@ Unofficial higan resources
     [the latest WIP version][wipdocs]
 
 
-[wipwin]: https://gitlab.com/higan/higan/-/jobs/artifacts/master/download?job=windows-x86_64-binaries
+[wipwin]: https://gitlab.com/higan/higan/-/jobs/artifacts/master/download?job=higan-windows-x86_64-binaries
 [stadocs]: https://higan.readthedocs.io/
 [wipdocs]: https://higan.readthedocs.io/en/latest/
