@@ -12,9 +12,9 @@ include ws/GNUmakefile
 include processor/GNUmakefile
 
 ui_objects := ui-higan ui-program ui-configuration ui-input
-ui_objects += ui-settings ui-tools ui-presentation
+ui_objects += ui-settings ui-tools ui-presentation ui-resource
 ui_objects += ruby hiro
-ui_objects += $(if $(call streq,$(platform),windows),ui-resource)
+ui_objects += $(if $(call streq,$(platform),windows),ui-windows)
 
 # platform
 ifeq ($(platform),windows)
@@ -61,8 +61,9 @@ obj/ui-library.o: $(ui)/library/library.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
+obj/ui-resource.o: $(ui)/resource/resource.cpp $(call rwildcard,$(ui)/)
 
-obj/ui-resource.o:
+obj/ui-windows.o:
 	$(windres) data/higan.rc obj/ui-resource.o
 
 # targets

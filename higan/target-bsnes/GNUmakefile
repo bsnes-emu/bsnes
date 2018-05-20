@@ -5,14 +5,23 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include processor/GNUmakefile
 
-ui_objects := ui-bsnes ui-program ui-input ui-presentation ui-settings
+ui_objects := ui-bsnes ui-program ui-input ui-presentation ui-settings ui-resource
 ui_objects += ruby hiro
-ui_objects += $(if $(call streq,$(platform),windows),ui-resource)
+ui_objects += $(if $(call streq,$(platform),windows),ui-windows)
 
 # platform
 ifeq ($(platform),windows)
+  ruby += video.wgl video.direct3d video.directdraw video.gdi
+  ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound
+  ruby += input.windows
 else ifeq ($(platform),macos)
+  ruby += video.cgl
+  ruby += audio.openal
+  ruby += input.quartz input.carbon
 else ifeq ($(platform),linux)
+  ruby += video.glx video.xvideo video.xshm video.sdl
+  ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
+  ruby += input.sdl input.xlib input.udev
 else ifeq ($(platform),bsd)
   ruby += video.glx video.xvideo video.xshm video.sdl
   ruby += audio.oss audio.openal
@@ -42,14 +51,21 @@ obj/ui-program.o: $(ui)/program/program.cpp $(call rwildcard,$(ui)/)
 obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
+obj/ui-resource.o: $(ui)/resource/resource.cpp $(call rwildcard,$(ui)/)
 
-obj/ui-resource.o:
+obj/ui-windows.o:
 	$(windres) data/bsnes.rc obj/ui-resource.o
 
 # targets
 build: $(objects)
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 ifeq ($(platform),macos)
+	rm -rf out/$(name).app
+	mkdir -p out/$(name).app/Contents/MacOS/
+	mkdir -p out/$(name).app/Contents/Resources/
+	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
+	cp data/$(name).plist out/$(name).app/Contents/Info.plist
+	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
 install:
@@ -57,6 +73,8 @@ ifeq ($(shell id -un),root)
 	$(error "make install should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
+	mkdir -p ~/Library/Application\ Support/$(name)/
+	cp -R out/$(name).app /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/applications/
@@ -72,6 +90,7 @@ ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
+	rm -rf /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
 	rm -f $(prefix)/bin/$(name)
 	rm -f $(prefix)/share/applications/$(name).desktop

@@ -11,6 +11,10 @@ struct SuperFamicom {
   auto label() const -> string;
   auto serial() const -> string;
   auto romSize() const -> uint;
+  auto programRomSize() const -> uint;
+  auto dataRomSize() const -> uint;
+  auto expansionRomSize() const -> uint;
+  auto firmwareRomSize() const -> uint;
   auto ramSize() const -> uint;
   auto expansionRamSize() const -> uint;
   auto nonVolatile() const -> bool;
@@ -403,6 +407,24 @@ auto SuperFamicom::romSize() const -> uint {
   if((size() &  0xffff) ==  0xd000) return size() -  0xd000;
   if((size() & 0x3ffff) == 0x28000) return size() - 0x28000;
   return size();
+}
+
+auto SuperFamicom::programRomSize() const -> uint {
+  if(board().beginsWith("SPC7110-")) return 0x100000;
+  return romSize();
+}
+
+auto SuperFamicom::dataRomSize() const -> uint {
+  if(board().beginsWith("SPC7110-")) return romSize() - 0x100000;
+  return 0;
+}
+
+auto SuperFamicom::expansionRomSize() const -> uint {
+  return 0;
+}
+
+auto SuperFamicom::firmwareRomSize() const -> uint {
+  return size() - romSize();
 }
 
 auto SuperFamicom::ramSize() const -> uint {

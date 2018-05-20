@@ -15,9 +15,17 @@ Settings::Settings() {
 
   set("Audio/Driver", Audio::safestDriver());
   set("Audio/Blocking", true);
+  set("Audio/Device", "");
+  set("Audio/Frequency", 48000.0);
+  set("Audio/Latency", 0);
   set("Audio/Mute", false);
 
   set("Input/Driver", Input::safestDriver());
+
+  set("Path/Recent/SuperNintendo", Path::user());
+  set("Path/Recent/GameBoy", Path::user());
+  set("Path/Recent/BSMemory", Path::user());
+  set("Path/Recent/SufamiTurbo", Path::user());
 
   set("Crashed", false);
 }

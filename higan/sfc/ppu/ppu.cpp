@@ -81,7 +81,7 @@ auto PPU::main() -> void {
 auto PPU::load(Markup::Node node) -> bool {
   ppu1.version = max(1, min(1, node["ppu1/version"].natural()));
   ppu2.version = max(1, min(3, node["ppu2/version"].natural()));
-  ppu.vram.mask = node["ppu1/ram/size"].natural() - 1;
+  ppu.vram.mask = node["ppu1/ram/size"].natural() / sizeof(uint16) - 1;
   if(ppu.vram.mask != 0xffff) ppu.vram.mask = 0x7fff;
   return true;
 }

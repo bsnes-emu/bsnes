@@ -15,5 +15,6 @@ extern unique_pointer<Emulator::Interface> emulator;
 #include "input/input.hpp"
 #include "presentation/presentation.hpp"
 #include "settings/settings.hpp"
+#include "resource/resource.hpp"
 
 auto locate(string name) -> string;

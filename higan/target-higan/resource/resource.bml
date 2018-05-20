@@ -1,0 +1,2 @@
+namespace name=Resource
+  binary name=Logo file=logo.png

@@ -1,12 +1,8 @@
 struct Program : Emulator::Platform {
   //program.cpp
-  Program(string_vector args);
+  Program(string_vector arguments);
   auto main() -> void;
   auto quit() -> void;
-
-  auto load(string location) -> void;
-  auto save() -> void;
-  auto unload() -> void;
 
   //interface.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
@@ -15,6 +11,12 @@ struct Program : Emulator::Platform {
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
 
+  //game.cpp
+  auto load(string location) -> void;
+  auto loadGameBoy(string location) -> void;
+  auto save() -> void;
+  auto unload() -> void;
+
   //utility.cpp
   auto initializeVideoDriver() -> void;
   auto initializeAudioDriver() -> void;
@@ -22,8 +24,22 @@ struct Program : Emulator::Platform {
 
 private:
   struct Context {
-    string gameROM;  //program.rom
-    string gameRAM;  //save.ram or upd96050.data.ram
+    struct Game {
+      string location;
+      string manifest;
+      Markup::Node document;
+      vector<uint8_t> program;
+      vector<uint8_t> data;
+      vector<uint8_t> expansion;
+      vector<uint8_t> firmware;
+    } game;
+
+    struct GameBoy {
+      string location;
+      string manifest;
+      Markup::Node document;
+      vector<uint8_t> program;
+    } gameBoy;
   } context;
 };
 

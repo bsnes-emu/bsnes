@@ -15,9 +15,19 @@ auto Program::initializeAudioDriver() -> void {
   audio->setContext(presentation->viewport.handle());
   audio->setExclusive(false);
   audio->setBlocking(settings["Audio/Blocking"].boolean());
+  if(!audio->availableDevices().find(settings["Audio/Device"].text())) {
+    settings["Audio/Device"].setValue(audio->availableDevices()(0));
+  }
+  audio->setDevice(settings["Audio/Device"].text());
+  if(!audio->availableFrequencies().find(settings["Audio/Frequency"].real())) {
+    settings["Audio/Frequency"].setValue(audio->availableFrequencies()(0));
+  }
+  audio->setFrequency(settings["Audio/Frequency"].real());
+  if(!audio->availableLatencies().find(settings["Audio/Latency"].natural())) {
+    settings["Audio/Latency"].setValue(audio->availableLatencies()(0));
+  }
+  audio->setLatency(settings["Audio/Latency"].natural());
   audio->setChannels(2);
-  audio->setFrequency(48000.0);
-  audio->setLatency(0);
   if(!audio->ready()) {
     MessageDialog().setText("Failed to initialize audio driver").warning();
     audio = Audio::create("None");

@@ -4,7 +4,7 @@ AboutWindow::AboutWindow() {
   setTitle("About bsnes ...");
   setBackgroundColor({255, 255, 240});
   layout.setMargin(10);
-  auto logo = image{Resource::Logo::bsnes};
+  auto logo = image{Resource::Logo};
   logo.alphaBlend(0xfffff0);
   canvas.setIcon(logo);
   informationLeft.setFont(Font().setBold()).setAlignment(1.0).setText({

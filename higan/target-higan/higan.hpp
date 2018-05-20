@@ -17,5 +17,6 @@ extern Emulator::Interface* emulator;
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"
 #include "presentation/presentation.hpp"
+#include "resource/resource.hpp"
 
 auto locate(string name) -> string;

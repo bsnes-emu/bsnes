@@ -9,10 +9,11 @@ Presentation::Presentation() {
   systemMenu.setText("System");
   load.setText("Load Game ...").onActivate([&] {
     BrowserDialog dialog;
-    dialog.setTitle("Load Game");
-    dialog.setPath({Path::user(), "bsnes/"});
-    dialog.setFilters({string{"SNES Games|*.sfc:*.smc"}});
+    dialog.setTitle("Load Super Nintendo");
+    dialog.setPath(settings["Path/Recent/SuperNintendo"].text());
+    dialog.setFilters({string{"Super Nintendo Games|*.sfc:*.smc"}});
     if(auto location = dialog.openFile()) {
+      settings["Path/Recent/SuperNintendo"].setValue(Location::path(location));
       program->load(location);
     }
   });
@@ -63,6 +64,12 @@ Presentation::Presentation() {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
+  viewport.setDroppable().onDrop([&](auto locations) {
+    if(!file::exists(locations(0))) return;
+    program->load(locations(0));
+    presentation->setFocused();
+  });
+
   onClose([&] {
     program->quit();
   });
@@ -72,9 +79,14 @@ Presentation::Presentation() {
   setSize({512, 480});
   setCentered();
 
+  #if defined(PLATFORM_WINDOWS)
+  Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
+  #endif
+
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
+  Application::Cocoa::onPreferences([&] { settingsWindow->setVisible().setFocused(); });
   Application::Cocoa::onQuit([&] { doClose(); });
   #endif
 }
