@@ -6,8 +6,7 @@ unique_pointer<InputManager> inputManager;
 auto InputMapping::bind() -> void {
   mappings.reset();
 
-  auto list = assignment.split(logic() == Logic::AND ? "&" : "|");
-  for(auto& item : list) {
+  for(auto& item : assignment.split(logic() == Logic::AND ? "&" : "|")) {
     auto token = item.split("/");
     if(token.size() < 3) continue;  //skip invalid mappings
 
@@ -102,6 +101,11 @@ auto InputMapping::bind(shared_pointer<HID::Device> device, uint group, uint inp
   return false;
 }
 
+auto InputMapping::unbind() -> void {
+  mappings.reset();
+  settings[path].setValue(assignment = "None");
+}
+
 auto InputMapping::poll() -> int16 {
   if(!mappings) return 0;
 
@@ -148,16 +152,9 @@ auto InputMapping::poll() -> int16 {
 }
 
 auto InputMapping::rumble(bool enable) -> void {
-  if(!mappings) return;
   for(auto& mapping : mappings) {
     ::input->rumble(mapping.device->id(), enable);
   }
-}
-
-auto InputMapping::unbind() -> void {
-  mappings.reset();
-  assignment = "None";
-  settings[path].setValue(assignment);
 }
 
 //create a human-readable string from mappings list for display in the user interface

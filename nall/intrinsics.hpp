@@ -7,7 +7,7 @@ namespace nall {
   enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
   enum class API : uint { Windows, Posix, Unknown };
   enum class DisplayServer : uint { Windows, Quartz, Xorg, Unknown };
-  enum class Processor : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
+  enum class Architecture : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
   enum class Endian : uint { LSB, MSB, Unknown };
   enum class Build : uint { Debug, Stable, Size, Release, Performance };
 
@@ -15,7 +15,7 @@ namespace nall {
   static inline constexpr auto platform() -> Platform;
   static inline constexpr auto api() -> API;
   static inline constexpr auto display() -> DisplayServer;
-  static inline constexpr auto processor() -> Processor;
+  static inline constexpr auto architecture() -> Architecture;
   static inline constexpr auto endian() -> Endian;
   static inline constexpr auto build() -> Build;
 }
@@ -112,29 +112,29 @@ namespace nall {
   #include <sys/endian.h>
 #endif
 
-/* Processor detection */
+/* Architecture detection */
 
 namespace nall {
 
 #if defined(__i386__) || defined(_M_IX86)
-  #define PROCESSOR_X86
-  constexpr auto processor() -> Processor { return Processor::x86; }
+  #define ARCHITECTURE_X86
+  constexpr auto architecture() -> Architecture { return Architecture::x86; }
 #elif defined(__amd64__) || defined(_M_AMD64)
-  #define PROCESSOR_AMD64
-  constexpr auto processor() -> Processor { return Processor::amd64; }
+  #define ARCHITECTURE_AMD64
+  constexpr auto architecture() -> Architecture { return Architecture::amd64; }
 #elif defined(__arm__)
-  #define PROCESSOR_ARM
-  constexpr auto processor() -> Processor { return Processor::ARM; }
+  #define ARCHITECTURE_ARM
+  constexpr auto architecture() -> Architecture { return Architecture::ARM; }
 #elif defined(__ppc64__) || defined(_ARCH_PPC64)
-  #define PROCESSOR_PPC64
-  constexpr auto processor() -> Processor { return Processor::PPC64; }
+  #define ARCHITECTURE_PPC64
+  constexpr auto architecture() -> Architecture { return Architecture::PPC64; }
 #elif defined(__ppc__) || defined(_ARCH_PPC) || defined(_M_PPC)
-  #define PROCESSOR_PPC32
-  constexpr auto processor() -> Processor { return Processor::PPC32; }
+  #define ARCHITECTURE_PPC32
+  constexpr auto architecture() -> Architecture { return Architecture::PPC32; }
 #else
-  #warning "unable to detect processor"
-  #define PROCESSOR_UNKNOWN
-  constexpr auto processor() -> Processor { return Processor::Unknown; }
+  #warning "unable to detect architecture"
+  #define ARCHITECTURE_UNKNOWN
+  constexpr auto architecture() -> Architecture { return Architecture::Unknown; }
 #endif
 
 }

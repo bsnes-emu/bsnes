@@ -3,27 +3,30 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Input");
 
   layout.setMargin(5);
-  focusLabel.setText("When Focus is Lost:");
-  pauseEmulation.setText("Pause Emulation").setChecked(settings["Input/FocusLoss/Pause"].boolean()).onToggle([&] {
-    settings["Input/FocusLoss/Pause"].setValue(pauseEmulation.checked());
-    allowInput.setEnabled(!pauseEmulation.checked());
-  }).doToggle();
-  allowInput.setText("Allow Input").setChecked(settings["Input/FocusLoss/AllowInput"].boolean()).onToggle([&] {
-    settings["Input/FocusLoss/AllowInput"].setValue(allowInput.checked());
+  defocusLabel.setText("When Focus is Lost:");
+  pauseEmulation.setText("Pause Emulation").onActivate([&] {
+    settings["Input/Defocus"].setValue("Pause");
   });
-  for(auto& emulator : inputManager->emulators) {
-    emulatorList.append(ComboButtonItem().setText(emulator.name));
-  }
-  emulatorList.onChange([&] { reloadPorts(); });
+  blockInput.setText("Block Input").onActivate([&] {
+    settings["Input/Defocus"].setValue("Block");
+  });
+  allowInput.setText("Allow Input").onActivate([&] {
+    settings["Input/Defocus"].setValue("Allow");
+  });
+  if(settings["Input/Defocus"].text() == "Pause") pauseEmulation.setChecked();
+  if(settings["Input/Defocus"].text() == "Block") blockInput.setChecked();
+  if(settings["Input/Defocus"].text() == "Allow") allowInput.setChecked();
+  portLabel.setText("Port:");
   portList.onChange([&] { reloadDevices(); });
+  deviceLabel.setText("Device:");
   deviceList.onChange([&] { reloadMappings(); });
   mappingList.onActivate([&] { assignMapping(); });
   mappingList.onChange([&] { updateControls(); });
-  assignMouse1.setVisible(false).onActivate([&] { assignMouseInput(0); });
-  assignMouse2.setVisible(false).onActivate([&] { assignMouseInput(1); });
-  assignMouse3.setVisible(false).onActivate([&] { assignMouseInput(2); });
+  assignMouse1.onActivate([&] { assignMouseInput(0); });
+  assignMouse2.onActivate([&] { assignMouseInput(1); });
+  assignMouse3.onActivate([&] { assignMouseInput(2); });
   resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsManager).question() == "Yes") {
+    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsWindow).question() == "Yes") {
       for(auto& mapping : activeDevice().mappings) mapping.unbind();
       refreshMappings();
     }
@@ -58,12 +61,8 @@ auto InputSettings::updateControls() -> void {
   }
 }
 
-auto InputSettings::activeEmulator() -> InputEmulator& {
-  return inputManager->emulators[emulatorList.selected().offset()];
-}
-
 auto InputSettings::activePort() -> InputPort& {
-  return activeEmulator().ports[portList.selected().offset()];
+  return inputManager->ports[portList.selected().offset()];
 }
 
 auto InputSettings::activeDevice() -> InputDevice& {
@@ -73,7 +72,8 @@ auto InputSettings::activeDevice() -> InputDevice& {
 
 auto InputSettings::reloadPorts() -> void {
   portList.reset();
-  for(auto& port : activeEmulator().ports) {
+  for(auto& port : inputManager->ports) {
+    if(port.name == "Expansion Port") continue;
     portList.append(ComboButtonItem().setText(port.name));
   }
   reloadDevices();
@@ -81,16 +81,17 @@ auto InputSettings::reloadPorts() -> void {
 
 auto InputSettings::reloadDevices() -> void {
   deviceList.reset();
-  for(auto n : range(activePort().devices)) {
-    auto& device = activePort().devices[n];
-    if(!device.mappings) continue;  //do not display devices that have no configurable inputs
-    deviceList.append(ComboButtonItem().setText(device.name).setProperty("index", n));
+  uint index = 0;
+  for(auto& device : activePort().devices) {
+    if(device.mappings) {  //only display devices that have configurable inputs
+      deviceList.append(ComboButtonItem().setText(device.name).setProperty("index", index));
+    }
+    index++;
   }
   reloadMappings();
 }
 
 auto InputSettings::reloadMappings() -> void {
-  eraseButton.setEnabled(false);
   mappingList.reset();
   mappingList.append(TableViewHeader().setVisible()
     .append(TableViewColumn().setText("Name"))
@@ -103,6 +104,7 @@ auto InputSettings::reloadMappings() -> void {
     );
   }
   refreshMappings();
+  updateControls();
 }
 
 auto InputSettings::refreshMappings() -> void {
@@ -117,17 +119,16 @@ auto InputSettings::assignMapping() -> void {
   inputManager->poll();  //clear any pending events first
 
   if(auto mapping = mappingList.selected()) {
-    activeMapping = &activeDevice().mappings[mapping.offset()];
-    settingsManager->layout.setEnabled(false);
-    settingsManager->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    activeMapping = activeDevice().mappings[mapping.offset()];
+    settingsWindow->layout.setEnabled(false);
+    settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
   }
 }
 
 auto InputSettings::assignMouseInput(uint id) -> void {
-  if(auto mouse = inputManager->findMouse()) {
-    if(auto mapping = mappingList.selected()) {
-      activeMapping = &activeDevice().mappings[mapping.offset()];
-
+  if(auto mapping = mappingList.selected()) {
+    activeMapping = activeDevice().mappings[mapping.offset()];
+    if(auto mouse = inputManager->findMouse()) {
       if(activeMapping->isDigital()) {
         return inputEvent(mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
       } else if(activeMapping->isAnalog()) {
@@ -142,13 +143,13 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
   if(device->isMouse() && !allowMouseInput) return;
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
-    activeMapping = nullptr;
-    settingsManager->statusBar.setText("Mapping assigned.");
+    activeMapping.reset();
+    settingsWindow->statusBar.setText("Mapping assigned.");
     refreshMappings();
     timer.onActivate([&] {
       timer.setEnabled(false);
-      settingsManager->statusBar.setText();
-      settingsManager->layout.setEnabled();
+      settingsWindow->statusBar.setText();
+      settingsWindow->layout.setEnabled();
     }).setInterval(200).setEnabled();
   }
 }

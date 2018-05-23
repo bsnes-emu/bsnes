@@ -2,9 +2,9 @@ struct InputMapping {
   auto bind() -> void;
   auto bind(string mapping) -> void;
   auto bind(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> bool;
+  auto unbind() -> void;
   auto poll() -> int16;
   auto rumble(bool enable) -> void;
-  auto unbind() -> void;
 
   auto isDigital() const -> bool { return type == 0; }
   auto isAnalog() const -> bool { return type == 1; }
@@ -20,6 +20,7 @@ struct InputMapping {
   enum class Logic : uint { AND, OR };
   enum class Qualifier : uint { None, Lo, Hi, Rumble };
   virtual auto logic() const -> Logic { return Logic::OR; }
+
   struct Mapping {
     shared_pointer<HID::Device> device;
     uint group = 0;

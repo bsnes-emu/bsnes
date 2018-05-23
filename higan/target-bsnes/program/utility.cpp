@@ -8,6 +8,7 @@ auto Program::initializeVideoDriver() -> void {
     video = Video::create("None");
   }
   presentation->clearViewport();
+  updateVideoShader();
 }
 
 auto Program::initializeAudioDriver() -> void {
@@ -35,10 +36,69 @@ auto Program::initializeAudioDriver() -> void {
 }
 
 auto Program::initializeInputDriver() -> void {
-  input = Input::create(settings["Input/Driver"].boolean());
+  input = Input::create(settings["Input/Driver"].text());
   input->setContext(presentation->viewport.handle());
   if(!input->ready()) {
     MessageDialog().setText("Failed to initialize input driver").warning();
     input = Input::create("None");
   }
+}
+
+auto Program::updateVideoShader() -> void {
+  if(settings["Video/Driver"].text() == "OpenGL"
+  && settings["Video/Shader"].text() != "None"
+  && settings["Video/Shader"].text() != "Blur"
+  ) {
+    video->setSmooth(false);
+    video->setShader(settings["Video/Shader"].text());
+  } else {
+    video->setSmooth(settings["Video/Shader"].text() == "Blur");
+    video->setShader("");
+  }
+}
+
+auto Program::connectDevices() -> void {
+  for(auto& port : emulator->ports) {
+    auto path = string{"Emulator/", port.name}.replace(" ", "");
+    auto name = settings(path).text();
+    for(auto& device : port.devices) {
+      if(device.name == name) {
+        emulator->connect(port.id, device.id);
+        break;
+      }
+    }
+  }
+}
+
+auto Program::showMessage(string text) -> void {
+  statusTime = chrono::timestamp();
+  statusMessage = text;
+}
+
+auto Program::updateMessage() -> void {
+  uint64 currentTime = chrono::timestamp();
+
+  string text;
+  if((currentTime - statusTime) <= 2) {
+    text = statusMessage;
+  } else if(!emulator->loaded()) {
+    text = "No game loaded";
+  } else if(presentation->pauseEmulation.checked()) {
+    text = "Paused";
+  } else if(!focused() && settingsWindow->input.pauseEmulation.checked()) {
+    text = "Paused";
+  } else {
+    text = statusText;
+  }
+
+  if(text != presentation->statusBar.text()) {
+    presentation->statusBar.setText(text);
+  }
+}
+
+auto Program::focused() -> bool {
+  //exclusive mode creates its own top-level window: presentation window will not have focus
+  if(video->exclusive()) return true;
+  if(presentation && presentation->focused()) return true;
+  return false;
 }

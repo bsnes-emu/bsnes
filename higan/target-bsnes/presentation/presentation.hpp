@@ -11,11 +11,20 @@ struct AboutWindow : Window {
 struct Presentation : Window {
   Presentation();
   auto clearViewport() -> void;
+  auto resizeViewport() -> void;
+  auto resizeWindow() -> void;
+  auto toggleFullscreenMode() -> void;
+  auto clearRecentGames() -> void;
+  auto updateRecentGames() -> void;
+  auto addRecentGame(string location) -> void;
+  auto updateShaders() -> void;
 
   MenuBar menuBar{this};
     Menu systemMenu{&menuBar};
-      MenuItem load{&systemMenu};
-      MenuItem reset{&systemMenu};
+      MenuItem loadGame{&systemMenu};
+      Menu loadRecentGame{&systemMenu};
+      MenuItem resetSystem{&systemMenu};
+      MenuItem unloadGame{&systemMenu};
       MenuSeparator portSeparator{&systemMenu};
       Menu controllerPort1{&systemMenu};
       Menu controllerPort2{&systemMenu};
@@ -28,19 +37,36 @@ struct Presentation : Window {
         MenuItem largeView{&viewMenu};
         MenuSeparator viewSeparator{&viewMenu};
         MenuCheckItem aspectCorrection{&viewMenu};
+        MenuCheckItem overscanCropping{&viewMenu};
         MenuCheckItem integralScaling{&viewMenu};
+      Menu shaderMenu{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
-      MenuSeparator muteSeparator{&settingsMenu};
-      MenuItem configuration{&settingsMenu};
+      MenuCheckItem showStatusBar{&settingsMenu};
+      MenuSeparator settingsSeparator{&settingsMenu};
+      MenuItem inputSettings{&settingsMenu};
+      MenuItem hotkeySettings{&settingsMenu};
+      MenuItem pathSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
+        MenuItem saveState1{&saveState};
+        MenuItem saveState2{&saveState};
+        MenuItem saveState3{&saveState};
+        MenuItem saveState4{&saveState};
+        MenuItem saveState5{&saveState};
       Menu loadState{&toolsMenu};
+        MenuItem loadState1{&loadState};
+        MenuItem loadState2{&loadState};
+        MenuItem loadState3{&loadState};
+        MenuItem loadState4{&loadState};
+        MenuItem loadState5{&loadState};
       MenuCheckItem pauseEmulation{&toolsMenu};
     Menu helpMenu{&menuBar};
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};
-    Viewport viewport{&layout, Geometry{0, 0, 512, 480}};
+    Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
+
+  StatusBar statusBar{this};
 };
 
 extern unique_pointer<AboutWindow> aboutWindow;

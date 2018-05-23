@@ -358,7 +358,6 @@ auto Presentation::loadShaders() -> void {
 
   if(settings["Video/Shader"].text() == "None") videoShaderNone.setChecked();
   if(settings["Video/Shader"].text() == "Blur") videoShaderBlur.setChecked();
-
   for(auto radioItem : videoShaders.objects<MenuRadioItem>()) {
     if(settings["Video/Shader"].text() == string{pathname, radioItem.text(), ".shader/"}) {
       radioItem.setChecked();

@@ -69,4 +69,8 @@ inline auto suffix(string_view self) -> string {
   return "";  //no suffix found
 }
 
+inline auto notsuffix(string_view self) -> string {
+  return {path(self), prefix(self)};
+}
+
 }}

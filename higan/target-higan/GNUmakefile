@@ -84,9 +84,10 @@ ifeq ($(shell id -un),root)
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
-	mkdir -p ~/Emulation/System/
+	mkdir -p ~/Library/Application\ Support/$(name)/systems/
+	mkdir -p ~/Emulation/
 	cp -R out/$(name).app /Applications/$(name).app
-	cp -R systems/* ~/Library/Application\ Support/$(name)/
+	cp -R systems/* ~/Library/Application\ Support/$(name)/systems/
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/applications/

@@ -1,63 +1,88 @@
-auto Program::load(string location) -> void {
-  if(!file::exists(location)) return;
+auto Program::load() -> void {
   unload();
 
-  //Heuristics::SuperFamicom() call will remove copier header from rom if present
-  auto rom = file::read(location);
-  auto heuristics = Heuristics::SuperFamicom(rom, location);
-  context.game.manifest = heuristics.manifest();
-  context.game.document = BML::unserialize(context.game.manifest);
-  context.game.location = location;
-
-  uint offset = 0;
-  if(auto size = heuristics.programRomSize()) {
-    context.game.program.resize(size);
-    memory::copy(&context.game.program[0], &rom[offset], size);
-    offset += size;
-  }
-  if(auto size = heuristics.dataRomSize()) {
-    context.game.data.resize(size);
-    memory::copy(&context.game.data[0], &rom[offset], size);
-    offset += size;
-  }
-  if(auto size = heuristics.expansionRomSize()) {
-    context.game.expansion.resize(size);
-    memory::copy(&context.game.expansion[0], &rom[offset], size);
-    offset += size;
-  }
-  if(auto size = heuristics.firmwareRomSize()) {
-    context.game.firmware.resize(size);
-    memory::copy(&context.game.firmware[0], &rom[offset], size);
-    offset += size;
-  }
-
-  auto type = Location::suffix(location).trimLeft(".", 1L);
   for(auto& media : emulator->media) {
-    if(media.type != type) continue;
+    if(media.type != "sfc") continue;
 
     Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
+      gameQueue = {};
+      connectDevices();
       emulator->power();
       presentation->setTitle(emulator->title());
-      presentation->reset.setEnabled(true);
+      presentation->resetSystem.setEnabled(true);
+      presentation->unloadGame.setEnabled(true);
       presentation->saveState.setEnabled(true);
       presentation->loadState.setEnabled(true);
+
+      string locations = superNintendo.location;
+      if(auto location = gameBoy.location) locations.append(":", location);
+      presentation->addRecentGame(locations);
     }
 
     break;
   }
 }
 
+auto Program::loadFile(string location) -> vector<uint8_t> {
+  if(Location::suffix(location) == ".zip") {
+    Decode::ZIP archive;
+    if(archive.open(location)) {
+      for(auto& file : archive.file) {
+        auto type = Location::suffix(file.name);
+        if(type == ".sfc" || type == ".smc" || type == ".gb" || type == ".gbc" || type == ".bs" || type == ".st") {
+          return archive.extract(file);
+        }
+      }
+    }
+  } else {
+    return file::read(location);
+  }
+}
+
+auto Program::loadSuperNintendo(string location) -> void {
+  auto rom = loadFile(location);
+  if(!rom) return;
+
+  //Heuristics::SuperFamicom() call will remove copier header from rom if present
+  auto heuristics = Heuristics::SuperFamicom(rom, location);
+  superNintendo.manifest = heuristics.manifest();
+  superNintendo.document = BML::unserialize(superNintendo.manifest);
+  superNintendo.location = location;
+
+  uint offset = 0;
+  if(auto size = heuristics.programRomSize()) {
+    superNintendo.program.resize(size);
+    memory::copy(&superNintendo.program[0], &rom[offset], size);
+    offset += size;
+  }
+  if(auto size = heuristics.dataRomSize()) {
+    superNintendo.data.resize(size);
+    memory::copy(&superNintendo.data[0], &rom[offset], size);
+    offset += size;
+  }
+  if(auto size = heuristics.expansionRomSize()) {
+    superNintendo.expansion.resize(size);
+    memory::copy(&superNintendo.expansion[0], &rom[offset], size);
+    offset += size;
+  }
+  if(auto size = heuristics.firmwareRomSize()) {
+    superNintendo.firmware.resize(size);
+    memory::copy(&superNintendo.firmware[0], &rom[offset], size);
+    offset += size;
+  }
+}
+
 auto Program::loadGameBoy(string location) -> void {
-  if(!file::exists(location)) return;
+  auto rom = loadFile(location);
+  if(!rom) return;
 
-  auto rom = file::read(location);
   auto heuristics = Heuristics::GameBoy(rom, location);
-  context.gameBoy.manifest = heuristics.manifest();
-  context.gameBoy.document = BML::unserialize(context.game.manifest);
-  context.gameBoy.location = location;
+  gameBoy.manifest = heuristics.manifest();
+  gameBoy.document = BML::unserialize(gameBoy.manifest);
+  gameBoy.location = location;
 
-  context.gameBoy.program = rom;
+  gameBoy.program = rom;
 }
 
 auto Program::save() -> void {
@@ -68,9 +93,14 @@ auto Program::save() -> void {
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
   emulator->unload();
-  context = {};
+  superNintendo = {};
+  gameBoy = {};
+  bsMemory = {};
+  sufamiTurbo[0] = {};
+  sufamiTurbo[1] = {};
   presentation->setTitle({"bsnes v", Emulator::Version});
-  presentation->reset.setEnabled(false);
+  presentation->resetSystem.setEnabled(false);
+  presentation->unloadGame.setEnabled(false);
   presentation->saveState.setEnabled(false);
   presentation->loadState.setEnabled(false);
   presentation->clearViewport();
