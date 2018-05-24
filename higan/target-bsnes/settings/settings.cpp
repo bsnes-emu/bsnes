@@ -34,6 +34,8 @@ Settings::Settings() {
   set("View/AspectCorrection", true);
   set("View/OverscanCropping", true);
   set("View/IntegralScaling", true);
+  set("View/BlurEmulation", true);
+  set("View/ColorEmulation", true);
 
   set("Path/Games", "");
   set("Path/Patches", "");

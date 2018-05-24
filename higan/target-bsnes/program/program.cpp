@@ -1,6 +1,7 @@
 #include "../bsnes.hpp"
 #include "interface.cpp"
 #include "game.cpp"
+#include "paths.cpp"
 #include "state.cpp"
 #include "utility.cpp"
 unique_pointer<Program> program;

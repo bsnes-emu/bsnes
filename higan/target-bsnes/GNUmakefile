@@ -19,11 +19,11 @@ else ifeq ($(platform),macos)
   ruby += audio.openal
   ruby += input.quartz input.carbon
 else ifeq ($(platform),linux)
-  ruby += video.glx video.xvideo video.xshm video.sdl
+  ruby += video.glx video.xvideo video.xshm
   ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.xlib input.udev
 else ifeq ($(platform),bsd)
-  ruby += video.glx video.xvideo video.xshm video.sdl
+  ruby += video.glx video.xvideo video.xshm
   ruby += audio.oss audio.openal
   ruby += input.sdl input.xlib
 endif
@@ -38,7 +38,7 @@ link += $(hirolink)
 
 # rules
 objects := $(ui_objects) $(objects)
-objects := $(patsubst %,obj/%.o,$(objects))
+objects := $(objects:%=obj/%.o)
 
 obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
 	$(compiler) $(rubyflags) -c $< -o $@
@@ -46,15 +46,15 @@ obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
 obj/hiro.o: ../hiro/hiro.cpp $(call rwildcard,../hiro/)
 	$(compiler) $(hiroflags) -c $< -o $@
 
-obj/ui-bsnes.o: $(ui)/bsnes.cpp $(call rwildcard,$(ui)/)
-obj/ui-program.o: $(ui)/program/program.cpp $(call rwildcard,$(ui)/)
-obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
-obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
-obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
-obj/ui-resource.o: $(ui)/resource/resource.cpp $(call rwildcard,$(ui)/)
+obj/ui-bsnes.o: $(ui)/bsnes.cpp
+obj/ui-program.o: $(ui)/program/program.cpp
+obj/ui-input.o: $(ui)/input/input.cpp
+obj/ui-presentation.o: $(ui)/presentation/presentation.cpp
+obj/ui-settings.o: $(ui)/settings/settings.cpp
+obj/ui-resource.o: $(ui)/resource/resource.cpp
 
 obj/ui-windows.o:
-	$(windres) data/bsnes.rc obj/ui-resource.o
+	$(windres) $(ui)/resource/bsnes.rc obj/ui-windows.o
 
 # targets
 build: $(objects)
@@ -64,8 +64,8 @@ ifeq ($(platform),macos)
 	mkdir -p out/$(name).app/Contents/MacOS/
 	mkdir -p out/$(name).app/Contents/Resources/
 	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
-	cp data/$(name).plist out/$(name).app/Contents/Info.plist
-	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
+	cp $(ui)/resource/$(name).plist out/$(name).app/Contents/Info.plist
+	sips -s format icns $(ui)/resource/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
 install:
@@ -81,8 +81,8 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
 	cp out/$(name) $(prefix)/bin/$(name)
-	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
-	cp data/$(name).png $(prefix)/share/icons/$(name).png
+	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
+	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
 endif
 
 uninstall:

@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_JOYPAD_XINPUT
-#define RUBY_INPUT_JOYPAD_XINPUT
+#pragma once
 
 //documented functionality
 #define oXInputGetState  "XInputGetState"
@@ -29,11 +28,11 @@ struct InputJoypadXInput {
 
   struct Joypad {
     shared_pointer<HID::Joypad> hid{new HID::Joypad};
-    unsigned id = 0;
+    uint id = 0;
   };
   vector<Joypad> joypads;
 
-  auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
+  auto assign(shared_pointer<HID::Joypad> hid, uint groupID, uint inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
     input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
@@ -116,10 +115,12 @@ struct InputJoypadXInput {
 
     //XInput supports a maximum of four controllers
     //add all four to devices list now. If they are not connected, they will not show up in poll() results
-    for(unsigned id = 0; id < 4; id++) {
+    for(auto id : range(4)) {
       Joypad jp;
       jp.id = id;
-      jp.hid->setID((uint64_t)(1 + id) << 32 | 0x045e << 16 | 0x028e << 0);  //Xbox 360 Player# + VendorID + ProductID
+      jp.hid->setVendorID(0x045e);
+      jp.hid->setProductID(0x028e);
+      jp.hid->setPathID(id);
       jp.hid->setRumble(true);
 
       jp.hid->axes().append("LeftThumbX");
@@ -158,5 +159,3 @@ struct InputJoypadXInput {
     libxinput = nullptr;
   }
 };
-
-#endif

@@ -89,6 +89,7 @@ endif
 # windows settings
 ifeq ($(platform),windows)
   link += -lws2_32 -lole32
+  link += $(if $(findstring $(compiler),g++),-static-libgcc -static-libstdc++)
   link += $(if $(findstring $(console),true),-mconsole,-mwindows)
   windres := windres
 endif

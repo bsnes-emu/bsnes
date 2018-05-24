@@ -5,6 +5,7 @@ auto Cartridge::loadBoard(string board) -> Markup::Node {
   if(board.beginsWith("MAXI-")) board.replace("MAXI-", "SHVC-", 1L);
   if(board.beginsWith("MJSC-")) board.replace("MJSC-", "SHVC-", 1L);
   if(board.beginsWith("EA-"  )) board.replace("EA-",   "SHVC-", 1L);
+  if(board.beginsWith("WEI-" )) board.replace("WEI-",  "SHVC-", 1L);
 
   if(auto fp = platform->open(ID::System, "boards.bml", File::Read, File::Required)) {
     auto document = BML::unserialize(fp->reads());
@@ -25,7 +26,8 @@ auto Cartridge::loadBoard(string board) -> Markup::Node {
 }
 
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
-  board = loadBoard(game.board);
+  board = node["board"];
+  if(!board) board = loadBoard(game.board);
 
   if(region() == "Auto") {
     auto region = game.region;

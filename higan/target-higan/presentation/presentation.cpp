@@ -119,6 +119,10 @@ Presentation::Presentation() {
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
 
+  image icon{Resource::Icon};
+  icon.alphaBlend(0xff000000);
+  canvas.setIcon(icon).setVisible(false);
+
   viewport.setDroppable().onDrop([&](auto locations) {
     if(!directory::exists(locations(0))) return;
     program->mediumQueue.append(locations(0));
@@ -139,7 +143,17 @@ Presentation::Presentation() {
   setCentered();
 
   #if defined(PLATFORM_WINDOWS)
-  Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
+  Application::Windows::onModalChange([](bool modal) {
+    if(modal && audio) audio->clear();
+  });
+  Application::Windows::onScreenSaver([]() -> bool {
+    if(emulator && emulator->loaded()) {
+      if(program->pause) return true;
+      if(!program->focused() && settingsManager->input.pauseEmulation.checked()) return true;
+      return false;
+    }
+    return true;
+  });
   #endif
 
   #if defined(PLATFORM_MACOS)
@@ -191,7 +205,22 @@ auto Presentation::updateEmulator() -> void {
   emulator->set("Scanline Emulation", scanlineEmulation.checked());
 }
 
+auto Presentation::showIcon() -> void {
+  Application::processEvents();
+  int width = geometry().width();
+  int height = geometry().height();
+  int x = width  - 128;
+  int y = height - 128;
+  if(x >= 0 && y >= 0) {
+    canvas.setVisible(true).setGeometry({x, y, 112, 112});
+  } else {
+    canvas.setVisible(false);
+  }
+  viewport.setGeometry({0, 0, 1, 1});
+}
+
 auto Presentation::clearViewport() -> void {
+  if(!emulator || !emulator->loaded()) showIcon();
   if(!video) return;
 
   uint32_t* output;
@@ -200,8 +229,8 @@ auto Presentation::clearViewport() -> void {
   uint height = viewport.geometry().height();
   if(video->lock(output, length, width, height)) {
     for(uint y : range(height)) {
-      auto dp = output + y * (length >> 2);
-      for(uint x : range(width)) *dp++ = 0xff000000;
+      auto line = output + y * (length >> 2);
+      for(uint x : range(width)) *line++ = 0xff000000;
     }
 
     video->unlock();
@@ -210,6 +239,8 @@ auto Presentation::clearViewport() -> void {
 }
 
 auto Presentation::resizeViewport(bool resizeWindow) -> void {
+  if(emulator && emulator->loaded()) canvas.setVisible(false);
+
   //clear video area before resizing to avoid seeing distorted video momentarily
   clearViewport();
 

@@ -20,6 +20,9 @@ struct Program : Emulator::Platform {
   auto save() -> void;
   auto unload() -> void;
 
+  //paths.cpp
+  auto path(string type, string location, string extension = "") -> string;
+
   //state.cpp
   auto loadState(uint slot) -> bool;
   auto saveState(uint slot) -> bool;

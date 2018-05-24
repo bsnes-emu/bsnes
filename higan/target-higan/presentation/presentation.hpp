@@ -11,6 +11,7 @@ struct AboutWindow : Window {
 struct Presentation : Window {
   Presentation();
   auto updateEmulator() -> void;
+  auto showIcon() -> void;
   auto clearViewport() -> void;
   auto resizeViewport(bool resizeWindow = true) -> void;
   auto toggleFullScreen() -> void;
@@ -78,6 +79,7 @@ struct Presentation : Window {
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};
+    Canvas canvas{&layout, Geometry{0, 0, 1, 1}};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
 
   StatusBar statusBar{this};

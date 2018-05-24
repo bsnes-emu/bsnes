@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_MOUSE_XLIB
-#define RUBY_INPUT_MOUSE_XLIB
+#pragma once
 
 struct InputMouseXlib {
   Input& input;
@@ -12,16 +11,16 @@ struct InputMouseXlib {
   Display* display = nullptr;
   Window rootWindow = 0;
   Cursor invisibleCursor = 0;
-  unsigned screenWidth = 0;
-  unsigned screenHeight = 0;
+  uint screenWidth = 0;
+  uint screenHeight = 0;
 
   struct Mouse {
     bool acquired = false;
-    signed numerator = 0;
-    signed denominator = 0;
-    signed threshold = 0;
-    unsigned relativeX = 0;
-    unsigned relativeY = 0;
+    int numerator = 0;
+    int denominator = 0;
+    int threshold = 0;
+    uint relativeX = 0;
+    uint relativeY = 0;
   } ms;
 
   auto acquired() -> bool {
@@ -57,7 +56,7 @@ struct InputMouseXlib {
     return true;
   }
 
-  auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
+  auto assign(uint groupID, uint inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
     input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
@@ -67,11 +66,11 @@ struct InputMouseXlib {
   auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
     Window rootReturn;
     Window childReturn;
-    signed rootXReturn = 0;
-    signed rootYReturn = 0;
-    signed windowXReturn = 0;
-    signed windowYReturn = 0;
-    unsigned maskReturn = 0;
+    int rootXReturn = 0;
+    int rootYReturn = 0;
+    int windowXReturn = 0;
+    int windowYReturn = 0;
+    uint maskReturn = 0;
     XQueryPointer(display, handle, &rootReturn, &childReturn, &rootXReturn, &rootYReturn, &windowXReturn, &windowYReturn, &maskReturn);
 
     if(acquired()) {
@@ -132,7 +131,9 @@ struct InputMouseXlib {
     ms.relativeX = 0;
     ms.relativeY = 0;
 
-    hid->setID(2);
+    hid->setVendorID(HID::Mouse::GenericVendorID);
+    hid->setProductID(HID::Mouse::GenericProductID);
+    hid->setPathID(0);
 
     hid->axes().append("X");
     hid->axes().append("Y");
@@ -158,5 +159,3 @@ struct InputMouseXlib {
     }
   }
 };
-
-#endif

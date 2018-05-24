@@ -37,10 +37,14 @@ private:
 struct Device : vector<Group> {
   Device(const string& name) : _name(name) {}
 
-  auto pathID() const -> uint32_t { return (uint32_t)(_id >> 32); }
-  auto deviceID() const -> uint32_t { return (uint32_t)(_id >> 0); }
-  auto vendorID() const -> uint16_t  { return (uint16_t)(_id >> 16); }
-  auto productID() const -> uint16_t { return (uint16_t)(_id >> 0); }
+  //id => {pathID}-{vendorID}-{productID}
+  auto pathID()    const -> uint32_t { return (uint32_t)(_id >> 32); }  //32-63
+  auto vendorID()  const -> uint16_t { return (uint16_t)(_id >> 16); }  //16-31
+  auto productID() const -> uint16_t { return (uint16_t)(_id >>  0); }  // 0-15
+
+  auto setPathID   (uint32_t pathID   ) -> void { _id = (uint64_t)pathID   << 32 | vendorID() << 16 | productID() << 0; }
+  auto setVendorID (uint16_t vendorID ) -> void { _id = (uint64_t)pathID() << 32 | vendorID   << 16 | productID() << 0; }
+  auto setProductID(uint16_t productID) -> void { _id = (uint64_t)pathID() << 32 | vendorID() << 16 | productID   << 0; }
 
   virtual auto isNull() const -> bool { return false; }
   virtual auto isKeyboard() const -> bool { return false; }
@@ -66,11 +70,14 @@ private:
 };
 
 struct Null : Device {
+  enum : uint16_t { GenericVendorID = 0x0000, GenericProductID = 0x0000 };
+
   Null() : Device("Null") {}
   auto isNull() const -> bool { return true; }
 };
 
 struct Keyboard : Device {
+  enum : uint16_t { GenericVendorID = 0x0000, GenericProductID = 0x0001 };
   enum GroupID : uint { Button };
 
   Keyboard() : Device("Keyboard") { append("Button"); }
@@ -79,6 +86,7 @@ struct Keyboard : Device {
 };
 
 struct Mouse : Device {
+  enum : uint16_t { GenericVendorID = 0x0000, GenericProductID = 0x0002 };
   enum GroupID : uint { Axis, Button };
 
   Mouse() : Device("Mouse") { append("Axis"), append("Button"); }
@@ -88,6 +96,7 @@ struct Mouse : Device {
 };
 
 struct Joypad : Device {
+  enum : uint16_t { GenericVendorID = 0x0000, GenericProductID = 0x0003 };
   enum GroupID : uint { Axis, Hat, Trigger, Button };
 
   Joypad() : Device("Joypad") { append("Axis"), append("Hat"), append("Trigger"), append("Button"); }

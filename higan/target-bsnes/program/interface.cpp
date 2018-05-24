@@ -119,38 +119,31 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   }
 
   if(id == 1 && name == "save.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".srm"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
   if(id == 1 && name == "download.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".psr"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".psr"), mode);
   }
 
   if(id == 1 && name == "time.rtc") {
-    string location = {Location::notsuffix(superNintendo.location), ".rtc"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".rtc"), mode);
   }
 
   if(id == 1 && name == "arm6.data.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".srm"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
   if(id == 1 && name == "hg51bs169.data.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".srm"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
   if(id == 1 && name == "upd7725.data.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".srm"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
   if(id == 1 && name == "upd96050.data.ram") {
-    string location = {Location::notsuffix(superNintendo.location), ".srm"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
   //Game Boy
@@ -164,13 +157,11 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   }
 
   if(id == 2 && name == "save.ram") {
-    string location = {Location::path(gameBoy.location), Location::prefix(gameBoy.location), ".sav"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", gameBoy.location, ".sav"), mode);
   }
 
   if(id == 2 && name == "time.rtc") {
-    string location = {Location::path(gameBoy.location), Location::prefix(gameBoy.location), ".rtc"};
-    return vfs::fs::file::open(location, mode);
+    return vfs::fs::file::open(path("Saves", gameBoy.location, ".sav"), mode);
   }
 
   return {};
@@ -183,7 +174,7 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     } else {
       BrowserDialog dialog;
       dialog.setTitle("Load Super Nintendo");
-      dialog.setPath(settings["Path/Recent/SuperNintendo"].text());
+      dialog.setPath(path("Games", settings["Path/Recent/SuperNintendo"].text()));
       dialog.setFilters({string{"Super Nintendo Games|*.sfc:*.smc:*.zip"}});
       superNintendo.location = dialog.openFile();
     }
@@ -200,7 +191,7 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     } else {
       BrowserDialog dialog;
       dialog.setTitle("Load Game Boy");
-      dialog.setPath(settings["Path/Recent/GameBoy"].text());
+      dialog.setPath(path("Games", settings["Path/Recent/GameBoy"].text()));
       dialog.setFilters({string{"Game Boy Games|*.gb:*.gbc:*.zip"}});
       gameBoy.location = dialog.openFile();
     }

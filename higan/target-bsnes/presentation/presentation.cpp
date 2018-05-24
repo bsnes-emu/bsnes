@@ -78,6 +78,14 @@ Presentation::Presentation() {
     settings["View/IntegralScaling"].setValue(integralScaling.checked());
     resizeViewport();
   });
+  blurEmulation.setText("Blur Emulation").setChecked(settings["View/BlurEmulation"].boolean()).onToggle([&] {
+    settings["View/BlurEmulation"].setValue(blurEmulation.checked());
+    emulator->set("Blur Emulation", blurEmulation.checked());
+  }).doToggle();
+  colorEmulation.setText("Color Emulation").setChecked(settings["View/ColorEmulation"].boolean()).onToggle([&] {
+    settings["View/ColorEmulation"].setValue(colorEmulation.checked());
+    emulator->set("Color Emulation", colorEmulation.checked());
+  }).doToggle();
   shaderMenu.setText("Shader");
   updateShaders();
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
@@ -86,6 +94,7 @@ Presentation::Presentation() {
   showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
     settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
     statusBar.setVisible(showStatusBar.checked());
+    if(visible()) resizeWindow();
   });
   inputSettings.setText("Input ...").onActivate([&] { settingsWindow->show(0); });
   hotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsWindow->show(1); });
@@ -113,6 +122,10 @@ Presentation::Presentation() {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
+  image icon{Resource::Icon};
+  icon.alphaBlend(0xff000000);
+  canvas.setIcon(icon).setVisible(false);
+
   viewport.setDroppable().onDrop([&](auto locations) {
     program->gameQueue = locations;
     program->load();
@@ -139,6 +152,14 @@ Presentation::Presentation() {
   Application::Windows::onModalChange([](bool modal) {
     if(modal && audio) audio->clear();
   });
+  Application::Windows::onScreenSaver([]() -> bool {
+    if(emulator->loaded()) {
+      if(pauseEmulation.checked()) return true;
+      if(!program->focused() && settingsWindow->input.pauseEmulation.checked()) return true;
+      return false;
+    }
+    return true;
+  });
   #endif
 
   #if defined(PLATFORM_MACOS)
@@ -149,8 +170,24 @@ Presentation::Presentation() {
   #endif
 }
 
+auto Presentation::showIcon() -> void {
+  Application::processEvents();
+  int width = geometry().width();
+  int height = geometry().height();
+  int x = width  - 144;
+  int y = height - 128;
+  if(x >= 0 && y >= 0) {
+    canvas.setVisible(true).setGeometry({x, y, 128, 128});
+  } else {
+    canvas.setVisible(false);
+  }
+  viewport.setGeometry({0, 0, 1, 1});
+}
+
 auto Presentation::clearViewport() -> void {
+  if(!emulator->loaded()) showIcon();
   if(!video) return;
+
   uint32_t* output;
   uint length;
   uint width = viewport.geometry().width();
@@ -166,6 +203,8 @@ auto Presentation::clearViewport() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
+  if(emulator->loaded()) canvas.setVisible(false);
+
   uint windowWidth = geometry().width();
   uint windowHeight = geometry().height();
 
@@ -235,19 +274,19 @@ auto Presentation::updateRecentGames() -> void {
     MenuItem item;
     if(auto game = settings[string{"Game/Recent/", 1 + index}].text()) {
       string displayName;
-      for(auto part : game.split(":")) {
+      auto games = game.split("|");
+      for(auto& part : games) {
         displayName.append(Location::prefix(part), " + ");
       }
       displayName.trimRight(" + ", 1L);
       item.setText(displayName).onActivate([=] {
-        program->gameQueue = game.split(":");
+        program->gameQueue = games;
         program->load();
       });
     } else {
       item.setText("<empty>").setEnabled(false);
     }
     loadRecentGame.append(item);
-    if(item.text() == "<empty>") item.setEnabled(false);  //todo: temporary hack; fix hiro/GTK!!
   }
   loadRecentGame.append(MenuSeparator());
   loadRecentGame.append(MenuItem().setText("Clear List").onActivate([&] {
@@ -267,12 +306,21 @@ auto Presentation::addRecentGame(string location) -> void {
   auto game4 = settings["Game/Recent/4"].text();
   auto game5 = settings["Game/Recent/5"].text();
 
-       if(game1 == location);
-  else if(game2 == location) swap(game1, game2);
-  else if(game3 == location) swap(game1, game3);
-  else if(game4 == location) swap(game1, game4);
-  else if(game5 == location) swap(game1, game5);
-  else {
+         if(game1 == location) {
+    game1 = location;
+  } else if(game2 == location) {
+    game2 = game1;
+    game1 = location;
+  } else if(game3 == location) {
+    game3 = game2;
+    game2 = game1;
+    game1 = location;
+  } else if(game4 == location) {
+    game4 = game3;
+    game3 = game2;
+    game2 = game1;
+    game1 = location;
+  } else {
     game5 = game4;
     game4 = game3;
     game3 = game2;

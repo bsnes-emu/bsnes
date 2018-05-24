@@ -14,9 +14,10 @@ auto Program::load() -> void {
       presentation->unloadGame.setEnabled(true);
       presentation->saveState.setEnabled(true);
       presentation->loadState.setEnabled(true);
+      presentation->resizeViewport();
 
       string locations = superNintendo.location;
-      if(auto location = gameBoy.location) locations.append(":", location);
+      if(auto location = gameBoy.location) locations.append("|", location);
       presentation->addRecentGame(locations);
     }
 

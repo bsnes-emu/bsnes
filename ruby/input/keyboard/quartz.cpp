@@ -1,3 +1,5 @@
+#pragma once
+
 struct InputKeyboardQuartz {
   Input& input;
   InputKeyboardQuartz(Input& input) : input(input) {}
@@ -140,7 +142,9 @@ struct InputKeyboardQuartz {
     keys.append({"Option", kVK_Option});
     keys.append({"Command", kVK_Command});
 
-    hid->setID(1);
+    hid->setVendorID(HID::Keyboard::GenericVendorID);
+    hid->setProductID(HID::Keyboard::GenericProductID);
+    hid->setPath(0);
     for(auto& key : keys) {
       hid->buttons().append(key.name);
     }

@@ -3,14 +3,20 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Input");
 
   layout.setMargin(5);
-  focusLabel.setText("When Focus is Lost:");
-  pauseEmulation.setText("Pause Emulation").setChecked(settings["Input/FocusLoss/Pause"].boolean()).onToggle([&] {
-    settings["Input/FocusLoss/Pause"].setValue(pauseEmulation.checked());
+  defocusLabel.setText("When Focus is Lost:");
+  pauseEmulation.setText("Pause Emulation").onActivate([&] {
+    settings["Input/Defocus"].setValue("Pause");
     allowInput.setEnabled(!pauseEmulation.checked());
-  }).doToggle();
-  allowInput.setText("Allow Input").setChecked(settings["Input/FocusLoss/AllowInput"].boolean()).onToggle([&] {
-    settings["Input/FocusLoss/AllowInput"].setValue(allowInput.checked());
   });
+  blockInput.setText("Block Input").onActivate([&] {
+    settings["Input/Defocus"].setValue("Block");
+  });
+  allowInput.setText("Allow Input").onActivate([&] {
+    settings["Input/Defocus"].setValue("Allow");
+  });
+  if(settings["Input/Defocus"].text() == "Pause") pauseEmulation.setChecked();
+  if(settings["Input/Defocus"].text() == "Block") blockInput.setChecked();
+  if(settings["Input/Defocus"].text() == "Allow") allowInput.setChecked();
   for(auto& emulator : inputManager->emulators) {
     emulatorList.append(ComboButtonItem().setText(emulator.name));
   }

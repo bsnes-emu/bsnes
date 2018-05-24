@@ -12,7 +12,6 @@ extern unique_pointer<Input> input;
 extern Emulator::Interface* emulator;
 
 #include "program/program.hpp"
-#include "configuration/configuration.hpp"
 #include "input/input.hpp"
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"

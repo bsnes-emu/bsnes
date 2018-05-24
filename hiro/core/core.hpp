@@ -389,7 +389,9 @@ struct Application {
 
   struct Windows {
     static auto doModalChange(bool modal) -> void;
+    static auto doScreenSaver() -> bool;
     static auto onModalChange(const function<void (bool)>& callback = {}) -> void;
+    static auto onScreenSaver(const function<bool ()>& callback = {}) -> void;
   };
 
   struct Cocoa {
@@ -413,6 +415,7 @@ struct Application {
 
     struct Windows {
       function<void (bool)> onModalChange;
+      function<bool ()> onScreenSaver;
     } windows;
 
     struct Cocoa {

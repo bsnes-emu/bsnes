@@ -259,6 +259,10 @@ static auto CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, 
   case WM_ERASEBKGND: if(pWindow->onEraseBackground()) return true; break;
   case WM_ENTERMENULOOP: case WM_ENTERSIZEMOVE: pWindow->onModalBegin(); return false;
   case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: pWindow->onModalEnd(); return false;
+  case WM_SYSCOMMAND:
+    if(wparam == SC_SCREENSAVE || wparam == SC_MONITORPOWER) {
+      if(!Application::Windows::doScreenSaver()) return 0;
+    }
   }
 
   return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);

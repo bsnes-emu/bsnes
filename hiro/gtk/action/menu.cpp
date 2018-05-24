@@ -20,6 +20,7 @@ auto pMenu::destruct() -> void {
 auto pMenu::append(sAction action) -> void {
   if(action->self()) {
     gtk_menu_shell_append(GTK_MENU_SHELL(gtkMenu), action->self()->widget);
+    action->self()->setEnabled(action->enabled(true));
     action->self()->setFont(action->font(true));
     action->self()->setVisible(action->visible());  //hidden parent will hide child; no need to inherit visibility
   }

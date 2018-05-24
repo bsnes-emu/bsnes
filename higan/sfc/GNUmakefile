@@ -12,41 +12,41 @@ objects += sfc-spc7110 sfc-sdd1
 objects += sfc-obc1 sfc-msu1
 objects += sfc-bsmemory sfc-sufamiturbo
 
-obj/sfc-interface.o:   sfc/interface/interface.cpp $(call rwildcard,sfc/interface)
-obj/sfc-system.o:      sfc/system/system.cpp $(call rwildcard,sfc/system/)
-obj/sfc-controller.o:  sfc/controller/controller.cpp $(call rwildcard,sfc/controller/)
-obj/sfc-cartridge.o:   sfc/cartridge/cartridge.cpp $(call rwildcard,sfc/cartridge/)
-obj/sfc-memory.o:      sfc/memory/memory.cpp $(call rwildcard,sfc/memory/)
+obj/sfc-interface.o:   sfc/interface/interface.cpp
+obj/sfc-system.o:      sfc/system/system.cpp
+obj/sfc-controller.o:  sfc/controller/controller.cpp
+obj/sfc-cartridge.o:   sfc/cartridge/cartridge.cpp
+obj/sfc-memory.o:      sfc/memory/memory.cpp
 
-obj/sfc-cpu.o:         sfc/cpu/cpu.cpp $(call rwildcard,sfc/cpu/)
-obj/sfc-smp.o:         sfc/smp/smp.cpp $(call rwildcard,sfc/smp/)
-obj/sfc-dsp.o:         sfc/dsp/dsp.cpp $(call rwildcard,sfc/dsp/)
-obj/sfc-ppu.o:         sfc/ppu/ppu.cpp $(call rwildcard,sfc/ppu/)
+obj/sfc-cpu.o:         sfc/cpu/cpu.cpp
+obj/sfc-smp.o:         sfc/smp/smp.cpp
+obj/sfc-dsp.o:         sfc/dsp/dsp.cpp
+obj/sfc-ppu.o:         sfc/ppu/ppu.cpp
 
-obj/sfc-expansion.o:   sfc/expansion/expansion.cpp $(call rwildcard,sfc/expansion/)
-obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp $(call rwildcard,sfc/expansion/satellaview/)
-obj/sfc-21fx.o:        sfc/expansion/21fx/21fx.cpp $(call rwildcard,sfc/expansion/21fx/)
+obj/sfc-expansion.o:   sfc/expansion/expansion.cpp
+obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp
+obj/sfc-21fx.o:        sfc/expansion/21fx/21fx.cpp
 
-obj/sfc-icd.o:         sfc/coprocessor/icd/icd.cpp $(call rwildcard,sfc/coprocessor/icd/)
-obj/sfc-mcc.o:         sfc/coprocessor/mcc/mcc.cpp $(call rwildcard,sfc/coprocessor/mcc/)
-obj/sfc-dip.o:         sfc/coprocessor/dip/dip.cpp $(call rwildcard,sfc/coprocessor/dip/)
-obj/sfc-event.o:       sfc/coprocessor/event/event.cpp $(call rwildcard,sfc/coprocessor/event/)
+obj/sfc-icd.o:         sfc/coprocessor/icd/icd.cpp
+obj/sfc-mcc.o:         sfc/coprocessor/mcc/mcc.cpp
+obj/sfc-dip.o:         sfc/coprocessor/dip/dip.cpp
+obj/sfc-event.o:       sfc/coprocessor/event/event.cpp
 
-obj/sfc-sa1.o:         sfc/coprocessor/sa1/sa1.cpp $(call rwildcard,sfc/coprocessor/sa1/)
-obj/sfc-superfx.o:     sfc/coprocessor/superfx/superfx.cpp $(call rwildcard,sfc/coprocessor/superfx/)
+obj/sfc-sa1.o:         sfc/coprocessor/sa1/sa1.cpp
+obj/sfc-superfx.o:     sfc/coprocessor/superfx/superfx.cpp
 
-obj/sfc-armdsp.o:      sfc/coprocessor/armdsp/armdsp.cpp $(call rwildcard,sfc/coprocessor/armdsp/)
-obj/sfc-hitachidsp.o:  sfc/coprocessor/hitachidsp/hitachidsp.cpp $(call rwildcard,sfc/coprocessor/hitachidsp/)
-obj/sfc-necdsp.o:      sfc/coprocessor/necdsp/necdsp.cpp $(call rwildcard,sfc/coprocessor/necdsp/)
+obj/sfc-armdsp.o:      sfc/coprocessor/armdsp/armdsp.cpp
+obj/sfc-hitachidsp.o:  sfc/coprocessor/hitachidsp/hitachidsp.cpp
+obj/sfc-necdsp.o:      sfc/coprocessor/necdsp/necdsp.cpp
 
-obj/sfc-epsonrtc.o:    sfc/coprocessor/epsonrtc/epsonrtc.cpp $(call rwildcard,sfc/coprocessor/epsonrtc/)
-obj/sfc-sharprtc.o:    sfc/coprocessor/sharprtc/sharprtc.cpp $(call rwildcard,sfc/coprocessor/sharprtc/)
+obj/sfc-epsonrtc.o:    sfc/coprocessor/epsonrtc/epsonrtc.cpp
+obj/sfc-sharprtc.o:    sfc/coprocessor/sharprtc/sharprtc.cpp
 
-obj/sfc-spc7110.o:     sfc/coprocessor/spc7110/spc7110.cpp $(call rwildcard,sfc/coprocessor/spc7110/)
-obj/sfc-sdd1.o:        sfc/coprocessor/sdd1/sdd1.cpp $(call rwildcard,sfc/coprocessor/sdd1/)
-obj/sfc-obc1.o:        sfc/coprocessor/obc1/obc1.cpp $(call rwildcard,sfc/coprocessor/obc1/)
+obj/sfc-spc7110.o:     sfc/coprocessor/spc7110/spc7110.cpp
+obj/sfc-sdd1.o:        sfc/coprocessor/sdd1/sdd1.cpp
+obj/sfc-obc1.o:        sfc/coprocessor/obc1/obc1.cpp
 
-obj/sfc-msu1.o:        sfc/coprocessor/msu1/msu1.cpp $(call rwildcard,sfc/coprocessor/msu1/)
+obj/sfc-msu1.o:        sfc/coprocessor/msu1/msu1.cpp
 
-obj/sfc-bsmemory.o:    sfc/slot/bsmemory/bsmemory.cpp $(call rwildcard,sfc/slot/bsmemory/)
-obj/sfc-sufamiturbo.o: sfc/slot/sufamiturbo/sufamiturbo.cpp $(call rwildcard,sfc/slot/sufamiturbo/)
+obj/sfc-bsmemory.o:    sfc/slot/bsmemory/bsmemory.cpp
+obj/sfc-sufamiturbo.o: sfc/slot/sufamiturbo/sufamiturbo.cpp

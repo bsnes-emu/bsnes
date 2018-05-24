@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_JOYPAD_UDEV
-#define RUBY_INPUT_JOYPAD_UDEV
+#pragma once
 
 struct InputJoypadUdev {
   Input& input;
@@ -265,8 +264,9 @@ private:
   }
 
   auto createJoypadHID(Joypad& jp) -> void {
-    uint64_t pathID = Hash::CRC32(jp.deviceName.data(), jp.deviceName.size()).value();
-    jp.hid->setID(pathID << 32 | jp.vendorID.hex() << 16 | jp.productID.hex() << 0);
+    jp.hid->setVendorID(jp.vendorID.hex());
+    jp.hid->setProductID(jp.productID.hex());
+    jp.hid->setPathID(Hash::CRC32(jp.deviceName.data(), jp.deviceName.size()).value());
 
     for(uint n : range(jp.axes.size())) jp.hid->axes().append(n);
     for(uint n : range(jp.hats.size())) jp.hid->hats().append(n);
@@ -284,5 +284,3 @@ private:
     }
   }
 };
-
-#endif

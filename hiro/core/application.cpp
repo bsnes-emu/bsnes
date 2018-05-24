@@ -66,8 +66,17 @@ auto Application::Windows::doModalChange(bool modal) -> void {
   if(state.windows.onModalChange) return state.windows.onModalChange(modal);
 }
 
+auto Application::Windows::doScreenSaver() -> bool {
+  if(state.windows.onScreenSaver) return state.windows.onScreenSaver();
+  return true;  //true = allow screen saver (default); false = suppress screen saver
+}
+
 auto Application::Windows::onModalChange(const function<void (bool)>& callback) -> void {
   state.windows.onModalChange = callback;
+}
+
+auto Application::Windows::onScreenSaver(const function<bool ()>& callback) -> void {
+  state.windows.onScreenSaver = callback;
 }
 
 //Cocoa

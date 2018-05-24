@@ -1,3 +1,5 @@
+#pragma once
+
 struct InputKeyboardCarbon {
   Input& input;
   InputKeyboardCarbon(Input& input) : input(input) {}
@@ -145,7 +147,9 @@ struct InputKeyboardCarbon {
     keys.append({0x3a, "Alt"});
     keys.append({0x37, "Super"});
 
-    hid->setID(1);
+    hid->setVendorID(HID::Keyboard::GenericVendorID);
+    hid->setProductID(HID::Keyboard::GenericProductID);
+    hid->setPathID(0);
     for(auto& key : keys) {
       hid->buttons().append(key.name);
     }

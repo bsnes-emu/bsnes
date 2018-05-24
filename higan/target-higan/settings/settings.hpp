@@ -1,3 +1,8 @@
+struct Settings : Markup::Node {
+  Settings();
+  auto save() -> void;
+};
+
 struct SystemProperties : Window {
   SystemProperties();
   auto append() -> void;
@@ -115,9 +120,11 @@ struct InputSettings : TabFrameItem {
 
   VerticalLayout layout{this};
     HorizontalLayout focusLayout{&layout, Size{~0, 0}};
-      Label focusLabel{&focusLayout, Size{0, 0}};
-      CheckLabel pauseEmulation{&focusLayout, Size{0, 0}};
-      CheckLabel allowInput{&focusLayout, Size{0, 0}};
+      Label defocusLabel{&focusLayout, Size{0, 0}};
+      RadioLabel pauseEmulation{&focusLayout, Size{0, 0}};
+      RadioLabel blockInput{&focusLayout, Size{0, 0}};
+      RadioLabel allowInput{&focusLayout, Size{0, 0}};
+      Group focusGroup{&pauseEmulation, &blockInput, &allowInput};
     HorizontalLayout selectionLayout{&layout, Size{~0, 0}};
       ComboButton emulatorList{&selectionLayout, Size{~0, 0}};
       ComboButton portList{&selectionLayout, Size{~0, 0}};
@@ -205,5 +212,6 @@ struct SettingsManager : Window {
   auto show(uint setting) -> void;
 };
 
+extern Settings settings;
 extern unique_pointer<SystemProperties> systemProperties;
 extern unique_pointer<SettingsManager> settingsManager;

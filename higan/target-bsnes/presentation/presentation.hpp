@@ -10,6 +10,7 @@ struct AboutWindow : Window {
 
 struct Presentation : Window {
   Presentation();
+  auto showIcon() -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;
@@ -39,6 +40,8 @@ struct Presentation : Window {
         MenuCheckItem aspectCorrection{&viewMenu};
         MenuCheckItem overscanCropping{&viewMenu};
         MenuCheckItem integralScaling{&viewMenu};
+        MenuCheckItem blurEmulation{&viewMenu};
+        MenuCheckItem colorEmulation{&viewMenu};
       Menu shaderMenu{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
@@ -64,6 +67,7 @@ struct Presentation : Window {
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};
+    Canvas canvas{&layout, Geometry{0, 0, 1, 1}};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
 
   StatusBar statusBar{this};

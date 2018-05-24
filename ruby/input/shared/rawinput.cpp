@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_SHARED_RAWINPUT
-#define RUBY_INPUT_SHARED_RAWINPUT
+#pragma once
 
 auto CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
@@ -14,7 +13,7 @@ struct RawInput {
   struct Device {
     HANDLE handle = nullptr;
     string path;
-    enum class Type : unsigned { Keyboard, Mouse, Joypad } type;
+    enum class Type : uint { Keyboard, Mouse, Joypad } type;
     uint16_t vendorID = 0;
     uint16_t productID = 0;
     bool isXInputDevice = false;
@@ -31,14 +30,14 @@ struct RawInput {
   auto scanDevices() -> void {
     devices.reset();
 
-    unsigned deviceCount = 0;
+    uint deviceCount = 0;
     GetRawInputDeviceList(NULL, &deviceCount, sizeof(RAWINPUTDEVICELIST));
     RAWINPUTDEVICELIST* list = new RAWINPUTDEVICELIST[deviceCount];
     GetRawInputDeviceList(list, &deviceCount, sizeof(RAWINPUTDEVICELIST));
 
-    for(unsigned n = 0; n < deviceCount; n++) {
+    for(auto n : range(deviceCount)) {
       wchar_t path[4096];
-      unsigned size = sizeof(path) - 1;
+      uint size = sizeof(path) - 1;
       GetRawInputDeviceInfo(list[n].hDevice, RIDI_DEVICENAME, &path, &size);
 
       RID_DEVICE_INFO info;
@@ -80,7 +79,7 @@ struct RawInput {
   auto windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
     if(msg != WM_INPUT) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-    unsigned size = 0;
+    uint size = 0;
     GetRawInputData((HRAWINPUT)lparam, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
     RAWINPUT* input = new RAWINPUT[size];
     GetRawInputData((HRAWINPUT)lparam, RID_INPUT, input, &size, sizeof(RAWINPUTHEADER));
@@ -154,5 +153,3 @@ auto WINAPI RawInputThreadProc(void*) -> DWORD {
 auto CALLBACK RawInputWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
   return rawinput.windowProc(hwnd, msg, wparam, lparam);
 }
-
-#endif

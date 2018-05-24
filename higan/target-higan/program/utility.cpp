@@ -120,8 +120,8 @@ auto Program::updateStatusText() -> void {
   if((currentTime - statusTime) <= 2) {
     text = statusMessage;
   } else if(!emulator || emulator->loaded() == false) {
-    text = "No cartridge loaded";
-  } else if(pause || (!presentation->focused() && settings["Input/FocusLoss/Pause"].boolean())) {
+    text = "No game loaded";
+  } else if(pause || (!focused() && settingsManager->input.pauseEmulation.checked())) {
     text = "Paused";
   } else {
     text = statusText;

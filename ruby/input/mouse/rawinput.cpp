@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_MOUSE_RAWINPUT
-#define RUBY_INPUT_MOUSE_RAWINPUT
+#pragma once
 
 struct InputMouseRawInput {
   Input& input;
@@ -11,9 +10,9 @@ struct InputMouseRawInput {
   struct Mouse {
     shared_pointer<HID::Mouse> hid{new HID::Mouse};
 
-    signed relativeX = 0;
-    signed relativeY = 0;
-    signed relativeZ = 0;
+    int relativeX = 0;
+    int relativeY = 0;
+    int relativeZ = 0;
     bool buttons[5] = {0};
   } ms;
 
@@ -68,7 +67,7 @@ struct InputMouseRawInput {
     if(input->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP  ) ms.buttons[4] = 0;
   }
 
-  auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
+  auto assign(uint groupID, uint inputID, int16_t value) -> void {
     auto& group = ms.hid->group(groupID);
     if(group.input(inputID).value() == value) return;
     input.doChange(ms.hid, groupID, inputID, group.input(inputID).value(), value);
@@ -99,7 +98,9 @@ struct InputMouseRawInput {
     if(!handle) return false;
     this->handle = handle;
 
-    ms.hid->setID(2);
+    ms.hid->setVendorID(HID::Mouse::GenericVendorID);
+    ms.hid->setProductID(HID::Mouse::GenericProductID);
+    ms.hid->setPathID(0);
 
     ms.hid->axes().append("X");
     ms.hid->axes().append("Y");
@@ -120,5 +121,3 @@ struct InputMouseRawInput {
     release();
   }
 };
-
-#endif

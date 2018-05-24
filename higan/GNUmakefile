@@ -39,9 +39,9 @@ endif
 compile = \
   $(strip \
     $(if $(filter %.c,$<), \
-      $(compiler) $(cflags) $(flags) $1 -c $< -o $@, \
+      $(compiler) $(cflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
       $(if $(filter %.cpp,$<), \
-        $(compiler) $(cppflags) $(flags) $1 -c $< -o $@ \
+        $(compiler) $(cppflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
       ) \
     ) \
   )
@@ -50,14 +50,15 @@ compile = \
 
 all: build;
 
-obj/libco.o: ../libco/libco.c $(call rwildcard,../libco)
-obj/emulator.o: emulator/emulator.cpp $(call rwildcard,emulator)
-obj/audio.o: audio/audio.cpp $(call rwildcard,audio)
-obj/video.o: video/video.cpp $(call rwildcard,video)
-obj/resource.o: resource/resource.cpp $(call rwildcard,resource)
+obj/libco.o: ../libco/libco.c
+obj/emulator.o: emulator/emulator.cpp
+obj/audio.o: audio/audio.cpp
+obj/video.o: video/video.cpp
+obj/resource.o: resource/resource.cpp
 
 ui := target-$(target)
 include $(ui)/GNUmakefile
+-include obj/*.d
 
 clean:
 	$(call rm,out/*)

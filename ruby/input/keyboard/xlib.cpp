@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_KEYBOARD_XLIB
-#define RUBY_INPUT_KEYBOARD_XLIB
+#pragma once
 
 struct InputKeyboardXlib {
   Input& input;
@@ -153,7 +152,9 @@ struct InputKeyboardXlib {
     keys.append({"RightSuper", XK_Super_R});
     keys.append({"Menu", XK_Menu});
 
-    hid->setID(1);
+    hid->setVendorID(HID::Keyboard::GenericVendorID);
+    hid->setProductID(HID::Keyboard::GenericProductID);
+    hid->setPathID(0);
 
     for(auto& key : keys) {
       hid->buttons().append(key.name);
@@ -170,5 +171,3 @@ struct InputKeyboardXlib {
     }
   }
 };
-
-#endif

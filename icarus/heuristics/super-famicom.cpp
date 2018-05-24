@@ -86,6 +86,11 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("RAM").size(size).content("Save").text());
   }
 
+  if(board(0) == "GSU" && !ramSize() && !expansionRamSize()) {
+    //Starfox / Starwing reports having no RAM; but all GSU boards contain expansion RAM
+    output.append(Memory{}.type("RAM").size(0x8000).content("Save").isVolatile().text());
+  }
+
   if(0) {
   } else if(board(0) == "ARM") {
     output.append(Memory{}.type("ROM").size(0x20000).content("Program").manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());

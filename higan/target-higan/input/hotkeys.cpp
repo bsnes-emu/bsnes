@@ -104,7 +104,7 @@ auto InputManager::appendHotkeys() -> void {
 }
 
 auto InputManager::pollHotkeys() -> void {
-  if(!program->focused() && !settings["Input/FocusLoss/AllowInput"].boolean()) return;
+  if(!program->focused()) return;
 
   for(auto& hotkey : hotkeys) {
     int16 state = hotkey->poll();

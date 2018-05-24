@@ -54,10 +54,6 @@ using namespace ruby;
   #include <ruby/video/glx2.cpp>
 #endif
 
-#if defined(VIDEO_SDL)
-  #include <ruby/video/sdl.cpp>
-#endif
-
 #if defined(VIDEO_WGL)
   #include <ruby/video/wgl.cpp>
 #endif
@@ -99,10 +95,6 @@ auto Video::create(const string& driver) -> Video* {
   if(driver == "OpenGL2") return new VideoGLX2;
   #endif
 
-  #if defined(VIDEO_SDL)
-  if(driver == "SDL") return new VideoSDL;
-  #endif
-
   #if defined(VIDEO_WGL)
   if(driver == "OpenGL") return new VideoWGL;
   #endif
@@ -137,8 +129,6 @@ auto Video::optimalDriver() -> string {
   return "XVideo";
   #elif defined(VIDEO_XSHM)
   return "XShm";
-  #elif defined(VIDEO_SDL)
-  return "SDL";
   #else
   return "None";
   #endif
@@ -157,8 +147,6 @@ auto Video::safestDriver() -> string {
   return "OpenGL";
   #elif defined(VIDEO_XSHM)
   return "XShm";
-  #elif defined(VIDEO_SDL)
-  return "SDL";
   #elif defined(VIDEO_XVIDEO)
   return "XVideo";
   #elif defined(VIDEO_GLX2)
@@ -207,10 +195,6 @@ auto Video::availableDrivers() -> string_vector {
 
   #if defined(VIDEO_XSHM)
   "XShm",
-  #endif
-
-  #if defined(VIDEO_SDL)
-  "SDL",
   #endif
 
   "None"};

@@ -1,5 +1,6 @@
 namespace name=Resource
-  binary name=Logo file="logo.png"
+  binary name=Icon file=icon.png
+  binary name=Logo file=logo.png
   namespace name=System
     binary name=Manifest file="../../systems/Super Famicom.sys/manifest.bml"
     binary name=Boards file="../../systems/Super Famicom.sys/boards.bml"

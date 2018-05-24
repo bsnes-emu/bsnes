@@ -1,5 +1,4 @@
-#ifndef RUBY_INPUT_KEYBOARD_RAWINPUT
-#define RUBY_INPUT_KEYBOARD_RAWINPUT
+#pragma once
 
 struct InputKeyboardRawInput {
   Input& input;
@@ -18,8 +17,8 @@ struct InputKeyboardRawInput {
   } kb;
 
   auto update(RAWINPUT* input) -> void {
-    unsigned code = input->data.keyboard.MakeCode;
-    unsigned flag = input->data.keyboard.Flags;
+    uint code = input->data.keyboard.MakeCode;
+    uint flag = input->data.keyboard.Flags;
 
     for(auto& key : keys) {
       if(key.code != code) continue;
@@ -27,7 +26,7 @@ struct InputKeyboardRawInput {
     }
   }
 
-  auto assign(unsigned inputID, bool value) -> void {
+  auto assign(uint inputID, bool value) -> void {
     auto& group = kb.hid->buttons();
     if(group.input(inputID).value() == value) return;
     input.doChange(kb.hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
@@ -35,7 +34,7 @@ struct InputKeyboardRawInput {
   }
 
   auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
-    for(unsigned n = 0; n < keys.size(); n++) assign(n, keys[n].value);
+    for(auto n : range(keys)) assign(n, keys[n].value);
     devices.append(kb.hid);
   }
 
@@ -164,7 +163,9 @@ struct InputKeyboardRawInput {
     keys.append({0x005c, 2, "RightSuper"});
     keys.append({0x005d, 2, "Menu"});
 
-    kb.hid->setID(1);
+    kb.hid->setVendorID(HID::Keyboard::GenericVendorID);
+    kb.hid->setProductID(HID::Keyboard::GenericProductID);
+    kb.hid->setPathID(0);
     for(auto& key : keys) kb.hid->buttons().append(key.name);
 
     return true;
@@ -174,5 +175,3 @@ struct InputKeyboardRawInput {
     rawinput.updateKeyboard.reset();
   }
 };
-
-#endif

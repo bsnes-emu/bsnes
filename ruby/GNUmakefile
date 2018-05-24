@@ -5,7 +5,7 @@ else
 endif
 
 rubyflags += $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
-rubyflags += $(if $(findstring .sdl,$(ruby)),$(shell sdl-config --cflags))
+rubyflags += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --cflags))
 
 rubylink =
 
@@ -24,10 +24,9 @@ rubylink += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
 rubylink += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)
 rubylink += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
 
+rubylink += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --libs))
 rubylink += $(if $(findstring input.udev,$(ruby)),-ludev)
 rubylink += $(if $(findstring input.windows,$(ruby)),-ldinput8 -ldxguid)
-
-rubylink += $(if $(findstring .sdl,$(ruby)),$(shell sdl-config --libs))
 
 ifeq ($(platform),windows)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
