@@ -99,6 +99,7 @@ Presentation::Presentation() {
   inputSettings.setText("Input ...").onActivate([&] { settingsWindow->show(0); });
   hotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsWindow->show(1); });
   pathSettings.setText("Paths ...").onActivate([&] { settingsWindow->show(2); });
+  advancedSettings.setText("Advanced ...").onActivate([&] { settingsWindow->show(3); });
 
   toolsMenu.setText("Tools");
   saveState.setText("Save State").setEnabled(false);
@@ -121,10 +122,6 @@ Presentation::Presentation() {
   about.setText("About ...").onActivate([&] {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
-
-  image icon{Resource::Icon};
-  icon.alphaBlend(0xff000000);
-  canvas.setIcon(icon).setVisible(false);
 
   viewport.setDroppable().onDrop([&](auto locations) {
     program->gameQueue = locations;
@@ -149,10 +146,10 @@ Presentation::Presentation() {
   setCentered();
 
   #if defined(PLATFORM_WINDOWS)
-  Application::Windows::onModalChange([](bool modal) {
+  Application::Windows::onModalChange([&](bool modal) {
     if(modal && audio) audio->clear();
   });
-  Application::Windows::onScreenSaver([]() -> bool {
+  Application::Windows::onScreenSaver([&]() -> bool {
     if(emulator->loaded()) {
       if(pauseEmulation.checked()) return true;
       if(!program->focused() && settingsWindow->input.pauseEmulation.checked()) return true;
@@ -170,23 +167,26 @@ Presentation::Presentation() {
   #endif
 }
 
-auto Presentation::showIcon() -> void {
-  Application::processEvents();
-  int width = geometry().width();
-  int height = geometry().height();
-  int x = width  - 144;
-  int y = height - 128;
-  if(x >= 0 && y >= 0) {
-    canvas.setVisible(true).setGeometry({x, y, 128, 128});
-  } else {
-    canvas.setVisible(false);
+auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
+  int ox = width  - 144;
+  int oy = height - 128;
+  if(ox >= 0 && oy >= 0) {
+    image icon{Resource::Icon};
+    icon.alphaBlend(0xff000000);
+    for(uint y : range(128)) {
+      auto target = output + (y + oy) * (length >> 2) + ox;
+      auto source = (uint32_t*)icon.data() + y * 128;
+      memory::copy(target, source, 128 * sizeof(uint32_t));
+    }
   }
-  viewport.setGeometry({0, 0, 1, 1});
 }
 
 auto Presentation::clearViewport() -> void {
-  if(!emulator->loaded()) showIcon();
   if(!video) return;
+
+  if(!emulator->loaded()) {
+    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+  }
 
   uint32_t* output;
   uint length;
@@ -197,16 +197,20 @@ auto Presentation::clearViewport() -> void {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
+    if(!emulator->loaded()) drawIcon(output, length, width, height);
     video->unlock();
     video->output();
   }
 }
 
 auto Presentation::resizeViewport() -> void {
-  if(emulator->loaded()) canvas.setVisible(false);
-
   uint windowWidth = geometry().width();
   uint windowHeight = geometry().height();
+
+  if(!emulator->loaded()) {
+    viewport.setGeometry({0, 0, windowWidth, windowHeight});
+    return clearViewport();
+  }
 
   double width = 224 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
   double height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
@@ -265,6 +269,9 @@ auto Presentation::toggleFullscreenMode() -> void {
     menuBar.setVisible(true);
     statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
   }
+  //hack: give window geometry time to update after toggling fullscreen and menu/status bars
+  usleep(20 * 1000);
+  Application::processEvents();
   resizeViewport();
 }
 

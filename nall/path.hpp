@@ -69,30 +69,13 @@ inline auto user() -> string {
   return result;
 }
 
-// /home/username/.config/
+// /home/username/.local/share/
+// ~/Library/Application Support/
 // c:/users/username/appdata/roaming/
-inline auto config() -> string {
+inline auto userData() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
-  string result = (const char*)utf8_t(path);
-  result.transform("\\", "/");
-  #elif defined(PLATFORM_MACOS)
-  string result = {Path::user(), "Library/Application Support/"};
-  #else
-  string result = {Path::user(), ".config/"};
-  #endif
-  if(!result) result = ".";
-  if(!result.endsWith("/")) result.append("/");
-  return result;
-}
-
-// /home/username/.local/share/
-// c:/users/username/appdata/local/
-inline auto local() -> string {
-  #if defined(PLATFORM_WINDOWS)
-  wchar_t path[PATH_MAX] = L"";
-  SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #elif defined(PLATFORM_MACOS)
@@ -108,7 +91,7 @@ inline auto local() -> string {
 // /usr/share
 // /Library/Application Support/
 // c:/ProgramData/
-inline auto shared() -> string {
+inline auto sharedData() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
@@ -126,7 +109,7 @@ inline auto shared() -> string {
 
 // /tmp
 // c:/users/username/AppData/Local/Temp/
-inline auto temp() -> string {
+inline auto temporary() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   GetTempPathW(PATH_MAX, path);

@@ -14,7 +14,10 @@ Program::Program(string_vector arguments) {
   presentation->setVisible();
 
   if(settings["Crashed"].boolean()) {
-    MessageDialog().setText("Driver crash detected. Hardware drivers have been disabled.").information();
+    MessageDialog(
+      "Driver crash detected. Hardware drivers have been disabled.\n"
+      "Please reconfigure drivers in the advanced settings panel."
+    ).setParent(*presentation).information();
     settings["Video/Driver"].setValue("None");
     settings["Audio/Driver"].setValue("None");
     settings["Input/Driver"].setValue("None");
@@ -24,8 +27,29 @@ Program::Program(string_vector arguments) {
   settings.save();
 
   initializeVideoDriver();
+  if(!video->ready()) {
+    MessageDialog({
+      "Error: failed to initialize ", settings["Video/Driver"].text(), " video driver."
+    }).setParent(*presentation).error();
+    settings["Video/Driver"].setValue("None");
+    initializeVideoDriver();
+  }
   initializeAudioDriver();
+  if(!audio->ready()) {
+    MessageDialog({
+      "Error: failed to initialize ", settings["Audio/Driver"].text(), " audio driver."
+    }).setParent(*presentation).error();
+    settings["Audio/Driver"].setValue("None");
+    initializeAudioDriver();
+  }
   initializeInputDriver();
+  if(!input->ready()) {
+    MessageDialog({
+      "Error: failed to initialize ", settings["Input/Driver"].text(), " input driver."
+    }).setParent(*presentation).error();
+    settings["Input/Driver"].setValue("None");
+    initializeInputDriver();
+  }
 
   settings["Crashed"].setValue(false);
   settings.save();

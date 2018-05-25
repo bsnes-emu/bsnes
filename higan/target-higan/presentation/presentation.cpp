@@ -143,10 +143,10 @@ Presentation::Presentation() {
   setCentered();
 
   #if defined(PLATFORM_WINDOWS)
-  Application::Windows::onModalChange([](bool modal) {
+  Application::Windows::onModalChange([&](bool modal) {
     if(modal && audio) audio->clear();
   });
-  Application::Windows::onScreenSaver([]() -> bool {
+  Application::Windows::onScreenSaver([&]() -> bool {
     if(emulator && emulator->loaded()) {
       if(program->pause) return true;
       if(!program->focused() && settingsManager->input.pauseEmulation.checked()) return true;
@@ -205,23 +205,26 @@ auto Presentation::updateEmulator() -> void {
   emulator->set("Scanline Emulation", scanlineEmulation.checked());
 }
 
-auto Presentation::showIcon() -> void {
-  Application::processEvents();
-  int width = geometry().width();
-  int height = geometry().height();
-  int x = width  - 128;
-  int y = height - 128;
-  if(x >= 0 && y >= 0) {
-    canvas.setVisible(true).setGeometry({x, y, 112, 112});
-  } else {
-    canvas.setVisible(false);
+auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
+  int ox = width  - 128;
+  int oy = height - 128;
+  if(ox >= 0 && oy >= 0) {
+    image icon{Resource::Icon};
+    icon.alphaBlend(0xff000000);
+    for(uint y : range(112)) {
+      auto target = output + (y + oy) * (length >> 2) + ox;
+      auto source = (uint32_t*)icon.data() + y * 112;
+      memory::copy(target, source, 112 * sizeof(uint32_t));
+    }
   }
-  viewport.setGeometry({0, 0, 1, 1});
 }
 
 auto Presentation::clearViewport() -> void {
-  if(!emulator || !emulator->loaded()) showIcon();
   if(!video) return;
+
+  if(!emulator || !emulator->loaded()) {
+    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+  }
 
   uint32_t* output;
   uint length = 0;
@@ -232,15 +235,13 @@ auto Presentation::clearViewport() -> void {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
-
+    if(!emulator || !emulator->loaded()) drawIcon(output, length, width, height);
     video->unlock();
     video->output();
   }
 }
 
 auto Presentation::resizeViewport(bool resizeWindow) -> void {
-  if(emulator && emulator->loaded()) canvas.setVisible(false);
-
   //clear video area before resizing to avoid seeing distorted video momentarily
   clearViewport();
 
@@ -306,10 +307,14 @@ auto Presentation::resizeViewport(bool resizeWindow) -> void {
     }
   }
 
-  viewport.setGeometry({
-    (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
-    emulatorWidth, emulatorHeight
-  });
+  if(emulator && emulator->loaded()) {
+    viewport.setGeometry({
+      (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
+      emulatorWidth, emulatorHeight
+    });
+  } else {
+    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+  }
 
   //clear video area again to ensure entire viewport area has been painted in
   clearViewport();
@@ -331,6 +336,9 @@ auto Presentation::toggleFullScreen() -> void {
     menuBar.setVisible(true);
     statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
   }
+  //hack: give window geometry time to update after toggling fullscreen and menu/status bars
+  usleep(20 * 1000);
+  Application::processEvents();
   resizeViewport();
 }
 

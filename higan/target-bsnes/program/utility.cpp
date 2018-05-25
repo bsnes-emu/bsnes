@@ -3,12 +3,11 @@ auto Program::initializeVideoDriver() -> void {
   video->setContext(presentation->viewport.handle());
   video->setExclusive(false);
   video->setBlocking(settings["Video/Blocking"].boolean());
-  if(!video->ready()) {
-    MessageDialog().setText("Failed to initialize video driver").warning();
-    video = Video::create("None");
+
+  if(video->ready()) {
+    presentation->clearViewport();
+    updateVideoShader();
   }
-  presentation->clearViewport();
-  updateVideoShader();
 }
 
 auto Program::initializeAudioDriver() -> void {
@@ -29,19 +28,11 @@ auto Program::initializeAudioDriver() -> void {
   }
   audio->setLatency(settings["Audio/Latency"].natural());
   audio->setChannels(2);
-  if(!audio->ready()) {
-    MessageDialog().setText("Failed to initialize audio driver").warning();
-    audio = Audio::create("None");
-  }
 }
 
 auto Program::initializeInputDriver() -> void {
   input = Input::create(settings["Input/Driver"].text());
   input->setContext(presentation->viewport.handle());
-  if(!input->ready()) {
-    MessageDialog().setText("Failed to initialize input driver").warning();
-    input = Input::create("None");
-  }
 }
 
 auto Program::updateVideoShader() -> void {

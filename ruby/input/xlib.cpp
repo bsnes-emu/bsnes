@@ -11,6 +11,16 @@ struct InputXlib : Input {
   InputXlib() : _keyboard(*this), _mouse(*this) { initialize(); }
   ~InputXlib() { terminate(); }
 
+  auto ready() -> bool { return _ready; }
+
+  auto context() -> uintptr { return _context; }
+
+  auto setContext(uintptr context) -> bool {
+    if(_context == context) return true;
+    _context = context;
+    return initialize();
+  }
+
   auto acquired() -> bool {
     return _mouse.acquired();
   }
@@ -37,6 +47,7 @@ struct InputXlib : Input {
 private:
   auto initialize() -> bool {
     terminate();
+    if(!_context) return false;
     if(!_keyboard.initialize()) return false;
     if(!_mouse.initialize(_context)) return false;
     return _ready = true;

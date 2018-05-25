@@ -4,7 +4,7 @@ namespace hiro {
 
 auto pStatusBar::construct() -> void {
   if(auto parent = _parent()) {
-    hwnd = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD | WS_DISABLED, 0, 0, 0, 0, parent->hwnd, nullptr, GetModuleHandle(0), 0);
+    hwnd = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, parent->hwnd, nullptr, GetModuleHandle(0), 0);
     SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
     setEnabled(self().enabled(true));
     setFont(self().font(true));

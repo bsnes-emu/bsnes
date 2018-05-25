@@ -62,12 +62,14 @@
 #include <nall/decode/base64.hpp>
 #include <nall/decode/bmp.hpp>
 #include <nall/decode/gzip.hpp>
+#include <nall/decode/html.hpp>
 #include <nall/decode/inflate.hpp>
 #include <nall/decode/png.hpp>
 #include <nall/decode/url.hpp>
 #include <nall/decode/zip.hpp>
 #include <nall/encode/base.hpp>
 #include <nall/encode/base64.hpp>
+#include <nall/encode/html.hpp>
 #include <nall/encode/url.hpp>
 #include <nall/hash/crc16.hpp>
 #include <nall/hash/crc32.hpp>

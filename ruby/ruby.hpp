@@ -5,18 +5,15 @@
 namespace ruby {
 
 struct Video {
-  static auto create(const nall::string& driver = "") -> Video*;
+  static auto create(nall::string driver = "") -> Video*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
-  struct Information {
-  };
-
   virtual ~Video() = default;
 
   virtual auto ready() -> bool { return true; }
-  virtual auto information() -> Information { return {}; }
+  virtual auto driver() -> nall::string { return _driver; }
 
   virtual auto exclusive() -> bool { return false; }
   virtual auto context() -> uintptr { return 0; }
@@ -36,10 +33,13 @@ struct Video {
   virtual auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
   virtual auto unlock() -> void {}
   virtual auto output() -> void {}
+
+private:
+  nall::string _driver;
 };
 
 struct Audio {
-  static auto create(const nall::string& driver = "") -> Audio*;
+  static auto create(nall::string driver = "") -> Audio*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
@@ -52,6 +52,8 @@ struct Audio {
   virtual auto availableChannels() -> nall::vector<uint> { return {2}; }
 
   virtual auto ready() -> bool { return true; }
+  virtual auto driver() -> nall::string { return _driver; }
+
   virtual auto exclusive() -> bool { return false; }
   virtual auto context() -> uintptr { return 0; }
   virtual auto device() -> nall::string { return "None"; }
@@ -70,21 +72,21 @@ struct Audio {
 
   virtual auto clear() -> void {}
   virtual auto output(const double samples[]) -> void {}
+
+private:
+  nall::string _driver;
 };
 
 struct Input {
-  static auto create(const nall::string& driver = "") -> Input*;
+  static auto create(nall::string driver = "") -> Input*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
   static auto availableDrivers() -> nall::string_vector;
 
-  struct Information {
-  };
-
   virtual ~Input() = default;
 
   virtual auto ready() -> bool { return true; }
-  virtual auto information() -> Information { return {}; }
+  virtual auto driver() -> nall::string { return _driver; }
 
   virtual auto context() -> uintptr { return 0; }
 
@@ -102,6 +104,7 @@ struct Input {
   }
 
 private:
+  nall::string _driver;
   nall::function<void (nall::shared_pointer<nall::HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue)> _onChange;
 };
 

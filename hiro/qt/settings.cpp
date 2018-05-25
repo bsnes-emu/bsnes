@@ -1,7 +1,7 @@
 namespace hiro {
 
 Settings::Settings() {
-  string path = {Path::local(), "hiro/"};
+  string path = {Path::userData(), "hiro/"};
   auto document = BML::unserialize(file::read({path, "qt.bml"}));
 
   auto get = [&](string_view name) {
@@ -17,7 +17,7 @@ Settings::Settings() {
 }
 
 Settings::~Settings() {
-  string path = {Path::local(), "hiro/"};
+  string path = {Path::userData(), "hiro/"};
   directory::create(path, 0755);
 
   Markup::Node document;

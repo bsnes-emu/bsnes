@@ -94,6 +94,25 @@ public:
       Button cheatsReset{&cheatsLayout, Size{80, 0}};
 };
 
+struct AdvancedSettings : TabFrameItem {
+  AdvancedSettings(TabFrame*);
+
+public:
+  VerticalLayout layout{this};
+    HorizontalLayout videoDriverLayout{&layout, Size{~0, 0}};
+      Label videoDriverLabel{&videoDriverLayout, Size{75, 0}};
+      ComboButton videoDriverOption{&videoDriverLayout, Size{~0, 0}};
+      Button videoDriverChange{&videoDriverLayout, Size{80, 0}};
+    HorizontalLayout audioDriverLayout{&layout, Size{~0, 0}};
+      Label audioDriverLabel{&audioDriverLayout, Size{75, 0}};
+      ComboButton audioDriverOption{&audioDriverLayout, Size{~0, 0}};
+      Button audioDriverChange{&audioDriverLayout, Size{80, 0}};
+    HorizontalLayout inputDriverLayout{&layout, Size{~0, 0}};
+      Label inputDriverLabel{&inputDriverLayout, Size{75, 0}};
+      ComboButton inputDriverOption{&inputDriverLayout, Size{~0, 0}};
+      Button inputDriverChange{&inputDriverLayout, Size{80, 0}};
+};
+
 struct SettingsWindow : Window {
   SettingsWindow();
   auto setVisible(bool visible = true) -> SettingsWindow&;
@@ -105,6 +124,7 @@ public:
       InputSettings input{&panel};
       HotkeySettings hotkeys{&panel};
       PathSettings paths{&panel};
+      AdvancedSettings advanced{&panel};
   StatusBar statusBar{this};
 };
 

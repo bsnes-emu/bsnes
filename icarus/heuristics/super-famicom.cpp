@@ -86,11 +86,6 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("RAM").size(size).content("Save").text());
   }
 
-  if(board(0) == "GSU" && !ramSize() && !expansionRamSize()) {
-    //Starfox / Starwing reports having no RAM; but all GSU boards contain expansion RAM
-    output.append(Memory{}.type("RAM").size(0x8000).content("Save").isVolatile().text());
-  }
-
   if(0) {
   } else if(board(0) == "ARM") {
     output.append(Memory{}.type("ROM").size(0x20000).content("Program").manufacturer("SETA").architecture("ARM6").identifier(firmwareARM()).text());
@@ -273,10 +268,7 @@ auto SuperFamicom::board() const -> string {
   }
   if(!board) board.append(mode);
 
-  if(cartridgeTypeLo == 0x1 || cartridgeTypeLo == 0x4) board.append("RAM-");  //RAM without battery
-  if(cartridgeTypeLo == 0x2 || cartridgeTypeLo == 0x5) board.append("RAM-");  //RAM with battery
-  if(cartridgeTypeLo == 0x6);  //battery without RAM
-
+  if(ramSize() || expansionRamSize()) board.append("RAM-");
   if(epsonRTC) board.append("EPSONRTC-");
   if(sharpRTC) board.append("SHARPRTC-");
 
@@ -439,9 +431,14 @@ auto SuperFamicom::ramSize() const -> uint {
 }
 
 auto SuperFamicom::expansionRamSize() const -> uint {
-  if(data[headerAddress + 0x2a] != 0x33) return 0;
-  auto ramSize = data[headerAddress + 0x0d] & 7;
-  if(ramSize) return 1024 << ramSize;
+  if(data[headerAddress + 0x2a] == 0x33) {
+    auto ramSize = data[headerAddress + 0x0d] & 7;
+    if(ramSize) return 1024 << ramSize;
+  }
+  if((data[headerAddress + 0x26] >> 4) == 1) {
+    //GSU: Starfox / Starwing lacks an extended header; but still has expansion RAM
+    return 0x8000;
+  }
   return 0;
 }
 

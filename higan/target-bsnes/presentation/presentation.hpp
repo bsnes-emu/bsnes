@@ -10,7 +10,7 @@ struct AboutWindow : Window {
 
 struct Presentation : Window {
   Presentation();
-  auto showIcon() -> void;
+  auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;
@@ -49,6 +49,7 @@ struct Presentation : Window {
       MenuItem inputSettings{&settingsMenu};
       MenuItem hotkeySettings{&settingsMenu};
       MenuItem pathSettings{&settingsMenu};
+      MenuItem advancedSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
         MenuItem saveState1{&saveState};
@@ -67,7 +68,6 @@ struct Presentation : Window {
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};
-    Canvas canvas{&layout, Geometry{0, 0, 1, 1}};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
 
   StatusBar statusBar{this};

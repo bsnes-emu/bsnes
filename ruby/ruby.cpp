@@ -68,46 +68,49 @@ using namespace ruby;
 
 namespace ruby {
 
-auto Video::create(const string& driver) -> Video* {
-  if(!driver) return create(optimalDriver());
+auto Video::create(string driver) -> Video* {
+  Video* video = nullptr;
+  if(!driver) driver = optimalDriver();
 
   #if defined(VIDEO_CGL)
-  if(driver == "OpenGL") return new VideoCGL;
+  if(driver == "OpenGL") video = new VideoCGL;
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  if(driver == "Direct3D") return new VideoDirect3D;
+  if(driver == "Direct3D") video = new VideoDirect3D;
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  if(driver == "DirectDraw") return new VideoDirectDraw;
+  if(driver == "DirectDraw") video = new VideoDirectDraw;
   #endif
 
   #if defined(VIDEO_GDI)
-  if(driver == "GDI") return new VideoGDI;
+  if(driver == "GDI") video = new VideoGDI;
   #endif
 
   #if defined(VIDEO_GLX)
-  if(driver == "OpenGL") return new VideoGLX;
+  if(driver == "OpenGL") video = new VideoGLX;
   #endif
 
   #if defined(VIDEO_GLX2)
-  if(driver == "OpenGL2") return new VideoGLX2;
+  if(driver == "OpenGL2") video = new VideoGLX2;
   #endif
 
   #if defined(VIDEO_WGL)
-  if(driver == "OpenGL") return new VideoWGL;
+  if(driver == "OpenGL") video = new VideoWGL;
   #endif
 
   #if defined(VIDEO_XSHM)
-  if(driver == "XShm") return new VideoXShm;
+  if(driver == "XShm") video = new VideoXShm;
   #endif
 
   #if defined(VIDEO_XVIDEO)
-  if(driver == "XVideo") return new VideoXVideo;
+  if(driver == "XVideo") video = new VideoXVideo;
   #endif
 
-  return new Video;
+  if(!video) driver = "None", video = new Video;
+  video->_driver = driver;
+  return video;
 }
 
 auto Video::optimalDriver() -> string {
@@ -246,50 +249,53 @@ auto Video::availableDrivers() -> string_vector {
 
 namespace ruby {
 
-auto Audio::create(const string& driver) -> Audio* {
-  if(!driver) return create(optimalDriver());
+auto Audio::create(string driver) -> Audio* {
+  Audio* audio = nullptr;
+  if(!driver) driver = optimalDriver();
 
   #if defined(AUDIO_ALSA)
-  if(driver == "ALSA") return new AudioALSA;
+  if(driver == "ALSA") audio = new AudioALSA;
   #endif
 
   #if defined(AUDIO_AO)
-  if(driver == "libao") return new AudioAO;
+  if(driver == "libao") audio = new AudioAO;
   #endif
 
   #if defined(AUDIO_ASIO)
-  if(driver == "ASIO") return new AudioASIO;
+  if(driver == "ASIO") audio = new AudioASIO;
   #endif
 
   #if defined(AUDIO_DIRECTSOUND)
-  if(driver == "DirectSound") return new AudioDirectSound;
+  if(driver == "DirectSound") audio = new AudioDirectSound;
   #endif
 
   #if defined(AUDIO_OPENAL)
-  if(driver == "OpenAL") return new AudioOpenAL;
+  if(driver == "OpenAL") audio = new AudioOpenAL;
   #endif
 
   #if defined(AUDIO_OSS)
-  if(driver == "OSS") return new AudioOSS;
+  if(driver == "OSS") audio = new AudioOSS;
   #endif
 
   #if defined(AUDIO_PULSEAUDIO)
-  if(driver == "PulseAudio") return new AudioPulseAudio;
+  if(driver == "PulseAudio") audio = new AudioPulseAudio;
   #endif
 
   #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  if(driver == "PulseAudioSimple") return new AudioPulseAudioSimple;
+  if(driver == "PulseAudioSimple") audio = new AudioPulseAudioSimple;
   #endif
 
   #if defined(AUDIO_WASAPI)
-  if(driver == "WASAPI") return new AudioWASAPI;
+  if(driver == "WASAPI") audio = new AudioWASAPI;
   #endif
 
   #if defined(AUDIO_XAUDIO2)
-  if(driver == "XAudio2") return new AudioXAudio2;
+  if(driver == "XAudio2") audio = new AudioXAudio2;
   #endif
 
-  return new Audio;
+  if(!audio) driver = "None", audio = new Audio;
+  audio->_driver = driver;
+  return audio;
 }
 
 auto Audio::optimalDriver() -> string {
@@ -420,34 +426,37 @@ auto Audio::availableDrivers() -> string_vector {
 
 namespace ruby {
 
-auto Input::create(const string& driver) -> Input* {
-  if(!driver) return create(optimalDriver());
+auto Input::create(string driver) -> Input* {
+  Input* input = nullptr;
+  if(!driver) driver = optimalDriver();
 
   #if defined(INPUT_WINDOWS)
-  if(driver == "Windows") return new InputWindows;
+  if(driver == "Windows") input = new InputWindows;
   #endif
 
   #if defined(INPUT_QUARTZ)
-  if(driver == "Quartz") return new InputQuartz;
+  if(driver == "Quartz") input = new InputQuartz;
   #endif
 
   #if defined(INPUT_CARBON)
-  if(driver == "Carbon") return new InputCarbon;
+  if(driver == "Carbon") input = new InputCarbon;
   #endif
 
   #if defined(INPUT_UDEV)
-  if(driver == "udev") return new InputUdev;
+  if(driver == "udev") input = new InputUdev;
   #endif
 
   #if defined(INPUT_SDL)
-  if(driver == "SDL") return new InputSDL;
+  if(driver == "SDL") input = new InputSDL;
   #endif
 
   #if defined(INPUT_XLIB)
-  if(driver == "Xlib") return new InputXlib;
+  if(driver == "Xlib") input = new InputXlib;
   #endif
 
-  return new Input;
+  if(!input) driver = "None", input = new Input;
+  input->_driver = driver;
+  return input;
 }
 
 auto Input::optimalDriver() -> string {

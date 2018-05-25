@@ -11,7 +11,7 @@ struct AboutWindow : Window {
 struct Presentation : Window {
   Presentation();
   auto updateEmulator() -> void;
-  auto showIcon() -> void;
+  auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport(bool resizeWindow = true) -> void;
   auto toggleFullScreen() -> void;

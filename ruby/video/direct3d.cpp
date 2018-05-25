@@ -66,6 +66,12 @@ struct VideoDirect3D : Video {
     if(!ready()) return false;
     if(_lost && !recover()) return false;
 
+    //if output size changed, driver must be re-initialized.
+    //failure to do so causes scaling issues on some video drivers.
+    RECT rectangle;
+    GetClientRect((HWND)_context, &rectangle);
+    if(_windowWidth != rectangle.right || _windowHeight != rectangle.bottom) initialize();
+
     if(width != _inputWidth || height != _inputHeight) {
       resize(_inputWidth = width, _inputHeight = height);
     }
@@ -90,13 +96,6 @@ struct VideoDirect3D : Video {
   auto output() -> void {
     if(!ready()) return;
     if(_lost && !recover()) return;
-
-    RECT rectangle;
-    GetClientRect((HWND)_context, &rectangle);
-
-    //if output size changed, driver must be re-initialized.
-    //failure to do so causes scaling issues on some video drivers.
-    if(_windowWidth != rectangle.right || _windowHeight != rectangle.bottom) initialize();
 
     _device->BeginScene();
     uint x = 0, y = 0;

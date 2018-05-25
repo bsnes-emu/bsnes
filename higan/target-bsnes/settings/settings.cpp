@@ -2,6 +2,7 @@
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"
+#include "advanced.cpp"
 Settings settings;
 unique_pointer<SettingsWindow> settingsWindow;
 
