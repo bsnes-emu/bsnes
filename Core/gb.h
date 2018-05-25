@@ -422,7 +422,7 @@ struct GB_gameboy_internal_s {
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
         uint8_t extra_penalty_for_sprite_at_0;
-        bool is_first_line_mode2;
+        bool mode_0_interrupt_disable;
         bool oam_interrupt_line;
         bool lyc_interrupt_line;
     );

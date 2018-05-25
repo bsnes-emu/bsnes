@@ -15,12 +15,15 @@ typedef enum {
     GB_CONFLICT_READ_OR,
     /* If the CPU and another component write at the same time, the CPU's value "wins" */
     GB_CONFLICT_WRITE_CPU,
+    /* Register specific values */
+    GB_CONFLICT_STAT_CGB,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
 static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
 
     /* Todo: most values not verified, and probably differ between revisions */
 };
@@ -92,14 +95,23 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
             return;
+        }
             
         case GB_CONFLICT_WRITE_CPU:
             GB_advance_cycles(gb, gb->pending_cycles + 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
             return;
+            
+        case GB_CONFLICT_STAT_CGB: {
+            /* The LYC bit behaves differently */
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, (old_value & 0x40) | (value & ~0x40));
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 3;
         }
-        
     }
 }
 

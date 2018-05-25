@@ -665,7 +665,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_STAT:
                 /* A DMG bug: http://www.devrs.com/gb/files/faqs.html#GBBugs */
-                if (!gb->is_cgb && !gb->stat_interrupt_line && !gb->is_first_line_mode2 &&
+                /* TODO: Confirm gb->mode_0_interrupt_disable usage */
+                if (!gb->is_cgb && !gb->stat_interrupt_line && !gb->mode_0_interrupt_disable &&
                     (gb->io_registers[GB_IO_STAT] & 0x3) < 2 && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     gb->io_registers[GB_IO_IF] |= 2;
                 }

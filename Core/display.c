@@ -84,7 +84,7 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
 
 
 /*
- Each line is 456 cycles. Without scrolling, sprites or a window::
+ Each line is 456 cycles. Without scrolling, sprites or a window:
  Mode 2 - 80  cycles / OAM Transfer
  Mode 3 - 172 cycles / Rendering
  Mode 0 - 204 cycles / HBlank
@@ -260,7 +260,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
     }
     
     switch (gb->io_registers[GB_IO_STAT] & 3) {
-        case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8) && !gb->is_first_line_mode2; break;
+        case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8) && !gb->mode_0_interrupt_disable; break;
         case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
         /* The OAM interrupt is handled differently, it reads the writable flags from STAT less frequenctly,
             and is not based on the mode bits of STAT. */
@@ -582,8 +582,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_SLEEP(gb, display, 23, 1);
     }
 
+    /* Todo: Merge this with the normal line routine */
     /* Handle the very first line 0 */
-    gb->is_first_line_mode2 = true;
+    gb->mode_0_interrupt_disable = true;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -601,7 +602,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = !gb->is_cgb;
     gb->oam_write_blocked = true;
     gb->vram_write_blocked = !gb->is_cgb;
-    gb->is_first_line_mode2 = false;
+    gb->mode_0_interrupt_disable = false;
     GB_STAT_update(gb);
     
     gb->cycles_for_line += 2;
@@ -632,6 +633,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     /* Mode 0 is shorter in the very first line */
     GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
     
+    gb->mode_0_interrupt_disable = true;
     gb->current_line = 1;
     while (true) {
         /* Lines 0 - 143 */
@@ -656,6 +658,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
             GB_SLEEP(gb, display, 7, 1);
             
+            gb->mode_0_interrupt_disable = false;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 2;
             gb->oam_write_blocked = true;
@@ -820,6 +823,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->hdma_starting = true;
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
+            gb->mode_0_interrupt_disable = true;
         }
         
         /* Lines 144 - 152 */
@@ -842,6 +846,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 1;
                 gb->io_registers[GB_IO_IF] |= 1;
+                gb->mode_0_interrupt_disable = false;
                 trigger_oam_interrupt(gb);
                 GB_STAT_update(gb);
                 gb->oam_interrupt_line = false;
