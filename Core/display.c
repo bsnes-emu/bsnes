@@ -610,6 +610,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
     
+    /* TODO: How does the window affect this line? */
     gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2;
     GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2);
     
