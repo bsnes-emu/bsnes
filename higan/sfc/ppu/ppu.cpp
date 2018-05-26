@@ -10,6 +10,7 @@ PPU ppu;
 #include "window/window.cpp"
 #include "screen/screen.cpp"
 #include "serialization.cpp"
+#include "counter/serialization.cpp"
 
 PPU::PPU() :
 bg1(Background::ID::BG1),

@@ -52,7 +52,11 @@ namespace SuperFamicom {
   #include <sfc/cpu/cpu.hpp>
   #include <sfc/smp/smp.hpp>
   #include <sfc/dsp/dsp.hpp>
+#if defined(PROFILE_ACCURATE)
   #include <sfc/ppu/ppu.hpp>
+#elif defined(PROFILE_FAST)
+  #include <sfc/ppu-fast/ppu.hpp>
+#endif
 
   #include <sfc/controller/controller.hpp>
   #include <sfc/expansion/expansion.hpp>

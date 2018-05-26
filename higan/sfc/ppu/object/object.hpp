@@ -1,6 +1,6 @@
 struct OAM {
-  auto read(uint10 addr) -> uint8;
-  auto write(uint10 addr, uint8 data) -> void;
+  auto read(uint10 address) -> uint8;
+  auto write(uint10 address, uint8 data) -> void;
 
   struct Object {
     alwaysinline auto width() const -> uint;

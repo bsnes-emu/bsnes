@@ -2,7 +2,7 @@ processors += wdc65816 spc700 arm7tdmi gsu hg51b upd96050
 
 objects += sfc-interface sfc-system sfc-controller
 objects += sfc-cartridge sfc-memory
-objects += sfc-cpu sfc-smp sfc-dsp sfc-ppu
+objects += sfc-cpu sfc-smp sfc-dsp $(if $(call streq,$(profile),accurate),sfc-ppu,sfc-ppu-fast)
 objects += sfc-expansion sfc-satellaview sfc-21fx
 objects += sfc-icd sfc-mcc sfc-dip sfc-event
 objects += sfc-sa1 sfc-superfx
@@ -22,6 +22,7 @@ obj/sfc-cpu.o:         sfc/cpu/cpu.cpp
 obj/sfc-smp.o:         sfc/smp/smp.cpp
 obj/sfc-dsp.o:         sfc/dsp/dsp.cpp
 obj/sfc-ppu.o:         sfc/ppu/ppu.cpp
+obj/sfc-ppu-fast.o:    sfc/ppu-fast/ppu.cpp
 
 obj/sfc-expansion.o:   sfc/expansion/expansion.cpp
 obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp

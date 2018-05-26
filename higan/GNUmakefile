@@ -3,9 +3,11 @@ include ../nall/GNUmakefile
 
 binary := application
 target := higan
+profile := accurate
 objects := libco emulator audio video resource
 
 flags += -I. -I..
+flags += $(if $(call streq,$(profile),accurate),-DPROFILE_ACCURATE,-DPROFILE_FAST)
 
 ifeq ($(platform),windows)
   ifeq ($(binary),application)
