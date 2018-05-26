@@ -17,6 +17,7 @@ typedef enum {
     GB_CONFLICT_WRITE_CPU,
     /* Register specific values */
     GB_CONFLICT_STAT_CGB,
+    GB_CONFLICT_STAT_DMG,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -33,7 +34,7 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
-    [GB_IO_STAT] = GB_CONFLICT_READ_NEW,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
  
     /* Todo: these are GB_CONFLICT_READ_NEW on MGB/SGB2 */
     [GB_IO_BGP] = GB_CONFLICT_READ_OR,
@@ -112,6 +113,15 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
         }
+        
+        /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle*/
+        case GB_CONFLICT_STAT_DMG:
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, 0xFF);
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 3;
+            return;
     }
 }
 
