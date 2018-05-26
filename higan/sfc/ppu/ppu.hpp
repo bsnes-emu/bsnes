@@ -1,7 +1,7 @@
 struct PPU : Thread, PPUcounter {
   alwaysinline auto interlace() const -> bool { return display.interlace; }
   alwaysinline auto overscan() const -> bool { return display.overscan; }
-  alwaysinline auto vdisp() const -> uint { return io.overscan ? 240 : 225; }
+  alwaysinline auto vdisp() const -> uint { return !io.overscan ? 225 : 240; }
 
   PPU();
   ~PPU();
@@ -136,10 +136,10 @@ private:
     uint16 vcounter;
   } io;
 
-  #include "background/background.hpp"
-  #include "object/object.hpp"
-  #include "window/window.hpp"
-  #include "screen/screen.hpp"
+  #include "background.hpp"
+  #include "object.hpp"
+  #include "window.hpp"
+  #include "screen.hpp"
 
   Background bg1;
   Background bg2;

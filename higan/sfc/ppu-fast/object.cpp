@@ -1,4 +1,13 @@
-auto PPU::readOAM(uint10 address) -> uint8 {
+auto PPU::Line::renderObject(PPU::IO::Object&) -> void {
+}
+
+auto PPU::oamAddressReset() -> void {
+}
+
+auto PPU::oamSetFirstObject() -> void {
+}
+
+auto PPU::readObject(uint10 address) -> uint8 {
   if(!address.bit(9)) {
     uint n = address >> 2;  //object#
     address &= 3;
@@ -27,7 +36,7 @@ auto PPU::readOAM(uint10 address) -> uint8 {
   }
 }
 
-auto PPU::writeOAM(uint10 address, uint8 data) -> void {
+auto PPU::writeObject(uint10 address, uint8 data) -> void {
   if(!address.bit(9)) {
     uint n = address >> 2;  //object#
     if(address == 0) { object[n].x.bits(0,7) = data; return; }

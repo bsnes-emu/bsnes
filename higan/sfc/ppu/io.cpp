@@ -11,14 +11,14 @@ auto PPU::addressVRAM() const -> uint16 {
 
 auto PPU::readVRAM() -> uint16 {
   if(!io.displayDisable && vcounter() < vdisp()) return 0x0000;
-  auto addr = addressVRAM();
-  return vram[addr];
+  auto address = addressVRAM();
+  return vram[address];
 }
 
 auto PPU::writeVRAM(bool byte, uint8 data) -> void {
   if(!io.displayDisable && vcounter() < vdisp()) return;
-  auto addr = addressVRAM();
-  vram[addr].byte(byte) = data;
+  auto address = addressVRAM();
+  vram[address].byte(byte) = data;
 }
 
 auto PPU::readOAM(uint10 addr) -> uint8 {
@@ -126,7 +126,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
     if(latch.hcounter++ == 0) {
       ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
     } else {
-      ppu2.mdr.bit (0  ) = io.hcounter.bit (  8);
+      ppu2.mdr.bit (0  ) = io.hcounter.bit (8  );
     }
     return ppu2.mdr;
   }
@@ -136,7 +136,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
     if(latch.vcounter++ == 0) {
       ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
     } else {
-      ppu2.mdr.bit (0  ) = io.vcounter.bit (  8);
+      ppu2.mdr.bit (0  ) = io.vcounter.bit (8  );
     }
     return ppu2.mdr;
   }
@@ -154,7 +154,6 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   case 0x213f: {
     latch.hcounter = 0;
     latch.vcounter = 0;
-
     ppu2.mdr.bits(0,3) = ppu2.version;
     ppu2.mdr.bit (  4) = Region::PAL();  //0 = NTSC, 1 = PAL
     if(!cpu.pio().bit(7)) {
@@ -195,7 +194,7 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //OAMADDL
   case 0x2102: {
-    io.oamBaseAddress = (io.oamBaseAddress & 0x0200) | (data << 1);
+    io.oamBaseAddress = (io.oamBaseAddress & 0x0200) | data << 1;
     obj.addressReset();
     return;
   }
@@ -203,16 +202,15 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
   //OAMADDH
   case 0x2103: {
     io.oamBaseAddress = data.bit(0) << 9 | (io.oamBaseAddress & 0x01fe);
-    io.oamPriority = data.bit(7);
+    io.oamPriority    = data.bit(7);
     obj.addressReset();
     return;
   }
 
   //OAMDATA
   case 0x2104: {
-    bool latchBit = io.oamAddress & 1;
+    uint1 latchBit = io.oamAddress.bit(0);
     uint10 address = io.oamAddress++;
-
     if(latchBit == 0) latch.oam = data;
     if(address.bit(9)) {
       writeOAM(address, data);
@@ -651,7 +649,7 @@ auto PPU::updateVideoMode() -> void {
       memory::assign(bg1.io.priority, 5,  8);
       memory::assign(bg2.io.priority, 4,  7);
       memory::assign(bg3.io.priority, 1, 10);
-      memory::assign(obj.io.priority, 2,  3, 6, 9);
+      memory::assign(obj.io.priority, 2,  3, 6,  9);
     } else {
       memory::assign(bg1.io.priority, 6,  9);
       memory::assign(bg2.io.priority, 5,  8);

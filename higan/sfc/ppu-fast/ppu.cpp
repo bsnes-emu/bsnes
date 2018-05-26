@@ -4,14 +4,20 @@ namespace SuperFamicom {
 
 PPU ppu;
 #include "io.cpp"
-#include "object.cpp"
 #include "line.cpp"
+#include "background.cpp"
+#include "object.cpp"
+#include "window.cpp"
 #include "serialization.cpp"
 #include <sfc/ppu/counter/serialization.cpp>
 
 PPU::PPU() {
+  ppu1.version = 1;
+  ppu2.version = 3;
+
   output = new uint32[512 * 512];
   output += 16 * 512;  //overscan offset
+
   for(uint y : range(240)) {
     lines[y].y = y;
     lines[y].outputLo = output + (y * 2 + 0) * 512;
@@ -36,7 +42,7 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::main() -> void {
   scanline();
-  uint y = vcounter();
+  uint y = PPUcounter::vcounter();
 
   step(512);
   if(y >= 1 && y <= vdisp()) {
@@ -45,16 +51,15 @@ auto PPU::main() -> void {
   }
 
   step(624);
-
-  step(lineclocks() - 512 - 624);
+  step(PPUcounter::lineclocks() - PPUcounter::hcounter());
 }
 
 auto PPU::scanline() -> void {
-  if(vcounter() == 0) {
+  if(PPUcounter::vcounter() == 0) {
     frame();
   }
 
-  if(vcounter() == 241) {
+  if(PPUcounter::vcounter() == 241) {
     #pragma omp parallel for
     for(uint y = 1; y < vdisp(); y++) {
       lines[y].render();

@@ -5,10 +5,10 @@ namespace SuperFamicom {
 PPU ppu;
 
 #include "io.cpp"
-#include "background/background.cpp"
-#include "object/object.cpp"
-#include "window/window.cpp"
-#include "screen/screen.cpp"
+#include "background.cpp"
+#include "object.cpp"
+#include "window.cpp"
+#include "screen.cpp"
 #include "serialization.cpp"
 #include "counter/serialization.cpp"
 
