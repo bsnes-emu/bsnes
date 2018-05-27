@@ -2,6 +2,7 @@
 #define apu_h
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "gb_struct_def.h"
 
 

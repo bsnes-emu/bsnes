@@ -1,6 +1,9 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include "utils.h"
 #include "gui.h"
 #include "font.h"
@@ -48,7 +51,8 @@ void render_texture(void *pixels,  void *previous)
 
 configuration_t configuration =
 {
-    .keys = {   SDL_SCANCODE_RIGHT,
+    .keys = {
+        SDL_SCANCODE_RIGHT,
         SDL_SCANCODE_LEFT,
         SDL_SCANCODE_UP,
         SDL_SCANCODE_DOWN,
