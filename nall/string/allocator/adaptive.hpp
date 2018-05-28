@@ -96,7 +96,7 @@ auto string::operator=(string&& source) -> type& {
 auto string::_allocate() -> void {
   char _temp[SSO];
   memory::copy(_temp, _text, SSO);
-  _data = (char*)memory::allocate(_capacity + 1 + sizeof(uint));
+  _data = memory::allocate<char>(_capacity + 1 + sizeof(uint));
   memory::copy(_data, _temp, SSO);
   _refs = (uint*)(_data + _capacity + 1);  //always aligned by 32 via reserve()
   *_refs = 1;
@@ -104,7 +104,7 @@ auto string::_allocate() -> void {
 
 //COW -> Unique
 auto string::_copy() -> void {
-  auto _temp = (char*)memory::allocate(_capacity + 1 + sizeof(uint));
+  auto _temp = memory::allocate<char>(_capacity + 1 + sizeof(uint));
   memory::copy(_temp, _data, _size = min(_capacity, _size));
   _temp[_size] = 0;
   --*_refs;
@@ -115,7 +115,7 @@ auto string::_copy() -> void {
 
 //COW -> Resize
 auto string::_resize() -> void {
-  _data = (char*)memory::resize(_data, _capacity + 1 + sizeof(uint));
+  _data = memory::resize<char>(_data, _capacity + 1 + sizeof(uint));
   _refs = (uint*)(_data + _capacity + 1);
   *_refs = 1;
 }

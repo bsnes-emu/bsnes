@@ -4,7 +4,7 @@ namespace SuperFamicom {
 
 Satellaview::Satellaview() {
   bus.map({&Satellaview::read, this}, {&Satellaview::write, this}, "00-3f,80-bf:2188-219f");
-  memory::fill(&regs, sizeof regs);
+  regs = {};
 }
 
 Satellaview::~Satellaview() {

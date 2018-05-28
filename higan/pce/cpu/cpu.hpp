@@ -36,11 +36,11 @@ private:
     auto poll() -> void;
 
   private:
-    bool   disableExternal;
-    bool   disableVDC;
-    bool   disableTimer;
+    bool   disableExternal = 0;
+    bool   disableVDC = 0;
+    bool   disableTimer = 0;
 
-    bool   pendingIRQ;
+    bool   pendingIRQ = 0;
     uint16 pendingVector;
 
     friend class CPU;
@@ -54,12 +54,12 @@ private:
     auto step(uint clocks) -> void;
 
   private:
-    bool  enable;
+    bool  enable = 0;
     uint7 latch;
     uint7 value;
-    uint  clock;
+    uint  clock = 0;
 
-    bool  line;
+    bool  line = 0;
 
     friend class CPU;
   } timer;

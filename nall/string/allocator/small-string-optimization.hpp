@@ -50,10 +50,10 @@ auto string::reserve(uint capacity) -> type& {
   if(_capacity < SSO) {
     char _temp[SSO];
     memory::copy(_temp, _text, SSO);
-    _data = (char*)memory::allocate(_capacity = capacity + 1);
+    _data = memory::allocate<char>(_capacity = capacity + 1);
     memory::copy(_data, _temp, SSO);
   } else {
-    _data = (char*)memory::resize(_data, _capacity = capacity + 1);
+    _data = memory::resize<char>(_data, _capacity = capacity + 1);
   }
   return *this;
 }
@@ -68,7 +68,7 @@ auto string::operator=(const string& source) -> type& {
   if(&source == this) return *this;
   reset();
   if(source._capacity >= SSO) {
-    _data = (char*)memory::allocate(source._capacity + 1);
+    _data = memory::allocate<char>(source._capacity + 1);
     _capacity = source._capacity;
     _size = source._size;
     memory::copy(_data, source._data, source._size + 1);

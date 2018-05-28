@@ -124,7 +124,7 @@ auto PPU::power() -> void {
   for(uint n = 0; n < 1024; n += 2) writePRAM(n, Half, 0x0000);
   for(uint n = 0; n < 1024; n += 2) writeOAM(n, Half, 0x0000);
 
-  memory::fill(&io, sizeof(IO));
+  io = {};
   for(auto& object : this->object) object = {};
   for(auto& param : this->objectParam) param = {};
 

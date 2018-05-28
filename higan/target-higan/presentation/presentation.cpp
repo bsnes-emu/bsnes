@@ -214,7 +214,7 @@ auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint heig
     for(uint y : range(112)) {
       auto target = output + (y + oy) * (length >> 2) + ox;
       auto source = (uint32_t*)icon.data() + y * 112;
-      memory::copy(target, source, 112 * sizeof(uint32_t));
+      memory::copy<uint32_t>(target, source, 112);
     }
   }
 }

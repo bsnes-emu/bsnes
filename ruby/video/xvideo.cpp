@@ -38,7 +38,7 @@ struct VideoXVideo : Video {
 
   auto clear() -> void {
     if(!ready()) return;
-    memory::fill(_buffer, _bufferWidth * _bufferHeight * sizeof(uint32_t));
+    memory::fill<uint32_t>(_buffer, _bufferWidth * _bufferHeight);
     //clear twice in case video is double buffered ...
     output();
     output();
@@ -335,7 +335,7 @@ private:
     uint32_t* output = (uint32_t*)_image->data;
 
     for(uint y : range(height)) {
-      memory::copy(output, input, width * 4);
+      memory::copy<uint32_t>(output, input, width);
       input += _bufferWidth;
       output += _bufferWidth;
     }

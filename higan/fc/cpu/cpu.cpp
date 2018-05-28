@@ -38,7 +38,7 @@ auto CPU::power(bool reset) -> void {
   r.pc.byte(0) = bus.read(0xfffc);
   r.pc.byte(1) = bus.read(0xfffd);
 
-  memory::fill(&io, sizeof(IO));
+  io = {};
   io.rdyLine = 1;
 }
 

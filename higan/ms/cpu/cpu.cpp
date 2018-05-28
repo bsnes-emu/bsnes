@@ -60,7 +60,7 @@ auto CPU::power() -> void {
 
   r.pc = 0x0000;  //reset vector address
 
-  memory::fill(&state, sizeof(State));
+  state = {};
 }
 
 }

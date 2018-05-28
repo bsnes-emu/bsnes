@@ -99,13 +99,13 @@ auto VDC::power() -> void {
   create(VDC::Enter, system.colorburst() * 6.0);
 
   memory::fill(&vram, sizeof(VRAM));
-  memory::fill(&satb, sizeof(SATB));
-  memory::fill(&timing, sizeof(Timing));
-  memory::fill(&irq, sizeof(IRQ));
-  memory::fill(&dma, sizeof(DMA));
-  memory::fill(&io, sizeof(IO));
-  memory::fill(&background, sizeof(Background));
-  memory::fill(&sprite, sizeof(Sprite));
+  satb = {};
+  timing = {};
+  irq = {};
+  dma = {};
+  io = {};
+  background = {};
+  sprite = {};
 
   dma.vdc = this;
   background.vdc = this;

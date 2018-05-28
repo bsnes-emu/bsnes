@@ -155,7 +155,7 @@ auto pCanvas::_rasterize() -> void {
   pixels.resize(width * height);
 
   if(auto& icon = state().icon) {
-    memory::copy(pixels.data(), icon.data(), width * height * sizeof(uint32_t));
+    memory::copy<uint32_t>(pixels.data(), icon.data(), width * height);
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
     image fill;

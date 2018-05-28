@@ -53,7 +53,7 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
     _bufferIndex = 0;
 
     _bufferOffset = 0;
-    if(_buffer) memory::fill(_buffer, _period * _bufferCount * sizeof(uint32_t));
+    if(_buffer) memory::fill<uint32_t>(_buffer, _period * _bufferCount);
 
     _sourceVoice->Start(0);
   }

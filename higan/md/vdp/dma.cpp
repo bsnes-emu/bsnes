@@ -47,5 +47,5 @@ auto VDP::DMA::copy() -> void {
 }
 
 auto VDP::DMA::power() -> void {
-  memory::fill(&io, sizeof(IO));
+  io = {};
 }

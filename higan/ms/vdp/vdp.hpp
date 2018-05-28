@@ -32,8 +32,8 @@ struct VDP : Thread {
     auto serialize(serializer&) -> void;
 
     struct State {
-      uint x;
-      uint y;
+      uint x = 0;
+      uint y = 0;
     } state;
 
     struct Output {
@@ -60,8 +60,8 @@ struct VDP : Thread {
     };
 
     struct State {
-      uint x;
-      uint y;
+      uint x = 0;
+      uint y = 0;
     } state;
 
     struct Output {
@@ -82,21 +82,21 @@ private:
   uint8 cram[0x40];  //MS = 0x20, GG = 0x40
 
   struct IO {
-    uint vcounter;  //vertical counter
-    uint hcounter;  //horizontal counter
-    uint lcounter;  //line counter
+    uint vcounter = 0;  //vertical counter
+    uint hcounter = 0;  //horizontal counter
+    uint lcounter = 0;  //line counter
 
     //interrupt flags
-    bool intLine;
-    bool intFrame;
+    bool intLine = 0;
+    bool intFrame = 0;
 
     //status flags
-    bool spriteOverflow;
-    bool spriteCollision;
+    bool spriteOverflow = 0;
+    bool spriteCollision = 0;
     uint5 fifthSprite;
 
     //latches
-    bool controlLatch;
+    bool controlLatch = 0;
     uint16 controlData;
     uint2 code;
     uint14 address;
@@ -104,22 +104,22 @@ private:
     uint8 vramLatch;
 
     //$00  mode control 1
-    bool externalSync;
-    bool extendedHeight;
-    bool mode4;
-    bool spriteShift;
-    bool lineInterrupts;
-    bool leftClip;
-    bool horizontalScrollLock;
-    bool verticalScrollLock;
+    bool externalSync = 0;
+    bool extendedHeight = 0;
+    bool mode4 = 0;
+    bool spriteShift = 0;
+    bool lineInterrupts = 0;
+    bool leftClip = 0;
+    bool horizontalScrollLock = 0;
+    bool verticalScrollLock = 0;
 
     //$01  mode control 2
-    bool spriteDouble;
-    bool spriteTile;
-    bool lines240;
-    bool lines224;
-    bool frameInterrupts;
-    bool displayEnable;
+    bool spriteDouble = 0;
+    bool spriteTile = 0;
+    bool lines240 = 0;
+    bool lines224 = 0;
+    bool frameInterrupts = 0;
+    bool displayEnable = 0;
 
     //$02  name table base address
     uint1 nameTableMask;

@@ -57,8 +57,8 @@ auto PPU::refresh() -> void {
 auto PPU::power(bool reset) -> void {
   create(PPU::Enter, system.frequency());
 
-  memory::fill(&io, sizeof(IO));
-  memory::fill(&latch, sizeof(Latches));
+  io = {};
+  latch = {};
   io.vramIncrement = 1;
 
   if(!reset) {

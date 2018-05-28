@@ -123,7 +123,7 @@ auto CPU::power() -> void {
   for(auto& n : wram) n = 0x00;
   for(auto& n : hram) n = 0x00;
 
-  memory::fill(&status, sizeof(Status));
+  status = {};
   status.dmaCompleted = true;
   status.wramBank = 1;
 }

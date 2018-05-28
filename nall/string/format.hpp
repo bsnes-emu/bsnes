@@ -7,7 +7,7 @@ namespace nall {
 
 auto string::format(const nall::string_format& params) -> type& {
   auto size = (int)this->size();
-  auto data = (char*)memory::allocate(size);
+  auto data = memory::allocate<char>(size);
   memory::copy(data, this->data(), size);
 
   int x = 0;

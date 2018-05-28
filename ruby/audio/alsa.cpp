@@ -91,7 +91,7 @@ struct AudioALSA : Audio {
         _offset--;
         output++;
       }
-      memory::move(_buffer, output, _offset * sizeof(uint32_t));
+      memory::move<uint32_t>(_buffer, output, _offset);
     }
   }
 

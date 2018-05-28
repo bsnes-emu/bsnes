@@ -38,9 +38,9 @@ struct PPU : Thread, IO {
   uint32 output[224 * 144];
 
   struct State {
-    bool field;
-    uint vclk;
-    uint hclk;
+    bool field = 0;
+    uint vclk = 0;
+    uint hclk = 0;
     Pixel pixel;
   } s;
 
@@ -73,11 +73,11 @@ struct PPU : Thread, IO {
 
     //latchSprites()
     uint32 sprite[32];
-    uint spriteCount;
+    uint spriteCount = 0;
 
     //latchOAM()
     uint32 oam[2][128];
-    uint oamCount;
+    uint oamCount = 0;
   } l;
 
   struct Registers {
@@ -145,7 +145,7 @@ struct PPU : Thread, IO {
     uint8 scrollTwoY;
 
     //$0014  LCD_CTRL
-    uint1 lcdEnable;
+    uint1 lcdEnable = 1;
     uint1 lcdContrast;  //WSC only
     uint6 lcdUnknown;
 
@@ -158,10 +158,10 @@ struct PPU : Thread, IO {
     uint1 iconAux3;
 
     //$0016  LCD_VTOTAL
-    uint8 vtotal;
+    uint8 vtotal = 158;
 
     //$0017  LCD_VBLANK
-    uint8 vblank;
+    uint8 vblank = 155;
 
     //$001c-001f  PALMONO_POOL
     uint4 pool[8];

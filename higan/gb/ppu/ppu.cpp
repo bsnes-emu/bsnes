@@ -151,7 +151,7 @@ auto PPU::power() -> void {
   for(auto& n : bgpd) n = 0x0000;
   for(auto& n : obpd) n = 0x0000;
 
-  memory::fill(&status, sizeof(Status));
+  status = {};
 
   for(auto& n : screen) n = 0;
 

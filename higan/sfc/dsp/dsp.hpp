@@ -54,66 +54,66 @@ private:
   struct State {
     uint8 regs[128];
 
-    int echoHistory[2][8];  //echo history keeps most recent 8 stereo samples
+    int echoHistory[2][8] = {};  //echo history keeps most recent 8 stereo samples
     uint3 echoHistoryOffset;
 
-    bool everyOtherSample;  //toggles every sample
-    int kon;                //KON value when last checked
-    int noise;
-    int counter;
-    int echoOffset;         //offset from ESA in echo buffer
-    int echoLength;         //number of bytes that echo_offset will stop at
+    bool everyOtherSample = 1;  //toggles every sample
+    int kon = 0;                //KON value when last checked
+    int noise = 0x4000;
+    int counter = 0;
+    int echoOffset = 0;         //offset from ESA in echo buffer
+    int echoLength = 0;         //number of bytes that echo_offset will stop at
 
     //hidden registers also written to when main register is written to
-    int konBuffer;
-    int endxBuffer;
-    int envxBuffer;
-    int outxBuffer;
+    int konBuffer = 0;
+    int endxBuffer = 0;
+    int envxBuffer = 0;
+    int outxBuffer = 0;
 
     //temporary state between clocks (prefixed with _)
 
     //read once per sample
-    int _pmon;
-    int _non;
-    int _eon;
-    int _dir;
-    int _koff;
+    int _pmon = 0;
+    int _non = 0;
+    int _eon = 0;
+    int _dir = 0;
+    int _koff = 0;
 
     //read a few clocks ahead before used
-    int _brrNextAddress;
-    int _adsr0;
-    int _brrHeader;
-    int _brrByte;
-    int _srcn;
-    int _esa;
-    int _echoDisabled;
+    int _brrNextAddress = 0;
+    int _adsr0 = 0;
+    int _brrHeader = 0;
+    int _brrByte = 0;
+    int _srcn = 0;
+    int _esa = 0;
+    int _echoDisabled = 0;
 
     //internal state that is recalculated every sample
-    int _dirAddress;
-    int _pitch;
-    int _output;
-    int _looped;
-    int _echoPointer;
+    int _dirAddress = 0;
+    int _pitch = 0;
+    int _output = 0;
+    int _looped = 0;
+    int _echoPointer = 0;
 
     //left/right sums
-    int _mainOut[2];
-    int _echoOut[2];
-    int _echoIn [2];
+    int _mainOut[2] = {};
+    int _echoOut[2] = {};
+    int _echoIn [2] = {};
   } state;
 
   struct Voice {
-    int buffer[12 * 3];  //12 decoded samples (mirrored for wrapping)
-    int bufferOffset;    //place in buffer where next samples will be decoded
-    int gaussianOffset;  //relative fractional position in sample (0x1000 = 1.0)
-    int brrAddress;      //address of current BRR block
-    int brrOffset;       //current decoding offset in BRR block
-    int vbit;            //bitmask for voice: 0x01 for voice 0, 0x02 for voice 1, etc
-    int vidx;            //voice channel register index: 0x00 for voice 0, 0x10 for voice 1, etc
-    int konDelay;        //KON delay/current setup phase
-    int envelopeMode;
-    int envelope;        //current envelope level
-    int hiddenEnvelope;  //used by GAIN mode 7, very obscure quirk
-    int _envxOut;
+    int buffer[12 * 3] = {};  //12 decoded samples (mirrored for wrapping)
+    int bufferOffset = 0;    //place in buffer where next samples will be decoded
+    int gaussianOffset = 0;  //relative fractional position in sample (0x1000 = 1.0)
+    int brrAddress = 0;      //address of current BRR block
+    int brrOffset = 1;       //current decoding offset in BRR block
+    int vbit = 0;            //bitmask for voice: 0x01 for voice 0, 0x02 for voice 1, etc
+    int vidx = 0;            //voice channel register index: 0x00 for voice 0, 0x10 for voice 1, etc
+    int konDelay = 0;        //KON delay/current setup phase
+    int envelopeMode = 0;
+    int envelope = 0;        //current envelope level
+    int hiddenEnvelope = 0;  //used by GAIN mode 7, very obscure quirk
+    int _envxOut = 0;
   } voice[8];
 
   //gaussian.cpp

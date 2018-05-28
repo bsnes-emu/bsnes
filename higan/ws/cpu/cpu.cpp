@@ -56,7 +56,7 @@ auto CPU::power() -> void {
     bus.map(this, 0x0062);
   }
 
-  memory::fill(&r, sizeof(Registers));
+  r = {};
 }
 
 }

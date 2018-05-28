@@ -27,7 +27,7 @@ auto MappedRAM::reset() -> void {
 auto MappedRAM::allocate(uint size) -> void {
   reset();
   _data = new uint8[_size = size];
-  memory::fill(_data, _size, 0xff);
+  memory::fill<uint8>(_data, _size, 0xff);
 }
 
 auto MappedRAM::writeProtect(bool writeProtect) -> void { _writeProtect = writeProtect; }

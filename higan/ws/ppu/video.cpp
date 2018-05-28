@@ -5,14 +5,14 @@ auto Video::refresh() -> void {
   auto& palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
 
   if(system.orientation() == 0) {
-    for(uint y = 0; y < 224; y++) {
+    for(uint y : range(224)) {
       auto target = output() + y * 224;
       if(y < 40 || y >= 184) {
-        memory::fill(target, 224 * sizeof(uint32));
+        memory::fill<uint32>(target, 224);
         continue;
       }
       auto source = ppu.output + (y - 40) * 224;
-      for(uint x = 0; x < 224; x++) {
+      for(uint x : range(224)) {
         auto color = palette[*source++];
         if(settings.blurEmulation) {
           auto a = color, b = *target;
@@ -25,12 +25,12 @@ auto Video::refresh() -> void {
   }
 
   if(system.orientation() == 1) {
-    for(uint y = 0; y < 224; y++) {
+    for(uint y : range(224)) {
       auto target = output() + y * 224;
-      memory::fill(target, 40 * sizeof(uint32));
-      memory::fill(target + 184, 40 * sizeof(uint32));
+      memory::fill<uint32>(target, 40);
+      memory::fill<uint32>(target + 184, 40);
       target += 40;
-      for(uint x = 0; x < 144; x++) {
+      for(uint x : range(144)) {
         auto source = ppu.output + x * 224 + (223 - y);
         auto color = palette[*source];
         if(settings.blurEmulation) {

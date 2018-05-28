@@ -95,13 +95,9 @@ auto PPU::power() -> void {
   bus.map(this, 0x00a4, 0x00ab);
 
   for(auto& n : output) n = 0;
-  memory::fill(&s, sizeof(State));
-  memory::fill(&l, sizeof(Latches));
-  memory::fill(&r, sizeof(Registers));
-
-  r.lcdEnable = 1;
-  r.vtotal = 158;
-  r.vblank = 155;
+  s = {};
+  l = {};
+  r = {};
 }
 
 }

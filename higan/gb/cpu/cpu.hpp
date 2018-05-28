@@ -38,18 +38,18 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     uint22 clock;
 
     //$ff00  JOYP
-    bool p15;
-    bool p14;
+    bool p15 = 0;
+    bool p14 = 0;
     uint8 joyp;
     uint8 mltReq;
 
     //$ff01  SB
     uint8 serialData;
-    uint serialBits;
+    uint serialBits = 0;
 
     //$ff02  SC
-    bool serialTransfer;
-    bool serialClock;
+    bool serialTransfer = 0;
+    bool serialClock = 0;
 
     //$ff04  DIV
     uint16 div;
@@ -61,19 +61,19 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     uint8 tma;
 
     //$ff07  TAC
-    bool timerEnable;
-    uint timerClock;
+    bool timerEnable = 0;
+    uint timerClock = 0;
 
     //$ff0f  IF
-    bool interruptRequestJoypad;
-    bool interruptRequestSerial;
-    bool interruptRequestTimer;
-    bool interruptRequestStat;
-    bool interruptRequestVblank;
+    bool interruptRequestJoypad = 0;
+    bool interruptRequestSerial = 0;
+    bool interruptRequestTimer = 0;
+    bool interruptRequestStat = 0;
+    bool interruptRequestVblank = 0;
 
     //$ff4d  KEY1
-    bool speedDouble;
-    bool speedSwitch;
+    bool speedDouble = 0;
+    bool speedSwitch = 0;
 
     //$ff51,$ff52  HDMA1,HDMA2
     uint16 dmaSource;
@@ -82,9 +82,9 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     uint16 dmaTarget;
 
     //$ff55  HDMA5
-    bool dmaMode;
+    bool dmaMode = 0;
     uint16 dmaLength;
-    bool dmaCompleted;
+    bool dmaCompleted = 0;
 
     //$ff6c  ???
     uint8 ff6c;
@@ -99,11 +99,11 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     uint8 ff75;
 
     //$ffff  IE
-    bool interruptEnableJoypad;
-    bool interruptEnableSerial;
-    bool interruptEnableTimer;
-    bool interruptEnableStat;
-    bool interruptEnableVblank;
+    bool interruptEnableJoypad = 0;
+    bool interruptEnableSerial = 0;
+    bool interruptEnableTimer = 0;
+    bool interruptEnableStat = 0;
+    bool interruptEnableVblank = 0;
   } status;
 
   uint8 wram[32768];  //GB=8192, GBC=32768

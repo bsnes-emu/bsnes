@@ -65,15 +65,15 @@ struct bpsmulti {
             bpslinear patch;
             patch.source({sourcePath, targetName});
             patch.target({targetPath, targetName});
-            patch.create({Path::temp(), "temp.bps"});
+            patch.create({Path::temporary(), "temp.bps"});
           } else {
             bpsdelta patch;
             patch.source({sourcePath, targetName});
             patch.target({targetPath, targetName});
-            patch.create({Path::temp(), "temp.bps"});
+            patch.create({Path::temporary(), "temp.bps"});
           }
 
-          auto buffer = file::read({Path::temp(), "temp.bps"});
+          auto buffer = file::read({Path::temporary(), "temp.bps"});
           writeNumber(buffer.size());
           for(auto &byte : buffer) write(byte);
         }

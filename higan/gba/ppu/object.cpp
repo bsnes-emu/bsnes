@@ -87,7 +87,7 @@ auto PPU::Objects::run(uint x, uint y) -> void {
 }
 
 auto PPU::Objects::power() -> void {
-  memory::fill(&io, sizeof(IO));
+  io = {};
   for(auto& pixel : buffer) pixel = {};
   output = {};
   mosaic = {};

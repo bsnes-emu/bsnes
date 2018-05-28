@@ -85,7 +85,7 @@ auto CPU::power(bool reset) -> void {
   M68K::power();
   create(CPU::Enter, system.frequency() / 7.0);
 
-  if(!reset) memory::fill(ram, sizeof ram);
+  if(!reset) memory::fill(ram, sizeof(ram));
 
   io = {};
   io.version = tmssEnable;

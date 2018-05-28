@@ -52,7 +52,7 @@ struct VideoGLX2 : Video {
 
   auto clear() -> void {
     if(!ready()) return;
-    memory::fill(_glBuffer, _glWidth * _glHeight * sizeof(uint32_t));
+    memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glFlush();

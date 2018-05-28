@@ -51,7 +51,7 @@ struct AudioDirectSound : Audio {
     _ringWrite = _rings - 1;
     _ringDistance = _rings - 1;
 
-    if(_buffer) memory::fill(_buffer, _period * _rings * 4);
+    if(_buffer) memory::fill<uint32_t>(_buffer, _period * _rings);
     _offset = 0;
 
     if(!_secondary) return;
@@ -61,7 +61,7 @@ struct AudioDirectSound : Audio {
     void* output;
     DWORD size;
     _secondary->Lock(0, _period * _rings * 4, &output, &size, 0, 0, 0);
-    memory::fill(output, size);
+    memory::fill<uint8_t>(output, size);
     _secondary->Unlock(output, size, 0, 0);
 
     _secondary->Play(0, 0, DSBPLAY_LOOPING);
@@ -102,7 +102,7 @@ struct AudioDirectSound : Audio {
     void* output;
     DWORD size;
     if(_secondary->Lock(_ringWrite * _period * 4, _period * 4, &output, &size, 0, 0, 0) == DS_OK) {
-      memory::copy(output, _buffer, _period * 4);
+      memory::copy<uint32_t>(output, _buffer, _period);
       _secondary->Unlock(output, size, 0, 0);
     }
   }

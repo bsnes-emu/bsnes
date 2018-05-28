@@ -39,13 +39,14 @@ struct PPU : Thread {
     uint8 mdr;
 
     uint1 field;
-    uint lx;
-    uint ly;
+    uint lx = 0;
+    uint ly = 0;
 
     uint8 busData;
 
-    union {
-      uint value;
+    union Union {
+      auto& operator=(const Union& u) { value = u.value; return *this; }
+      uint value = 0;
       NaturalBitField<uint, 0, 4> tileX;
       NaturalBitField<uint, 5, 9> tileY;
       NaturalBitField<uint,10,11> nametable;
@@ -59,28 +60,28 @@ struct PPU : Thread {
       NaturalBitField<uint,16,18> fineX;
     } v, t;
 
-    bool nmiHold;
-    bool nmiFlag;
+    bool nmiHold = 0;
+    bool nmiFlag = 0;
 
     //$2000
-    uint vramIncrement;
-    uint spriteAddress;
-    uint bgAddress;
-    uint spriteHeight;
-    bool masterSelect;
-    bool nmiEnable;
+    uint vramIncrement = 0;
+    uint spriteAddress = 0;
+    uint bgAddress = 0;
+    uint spriteHeight = 0;
+    bool masterSelect = 0;
+    bool nmiEnable = 0;
 
     //$2001
-    bool grayscale;
-    bool bgEdgeEnable;
-    bool spriteEdgeEnable;
-    bool bgEnable;
-    bool spriteEnable;
+    bool grayscale = 0;
+    bool bgEdgeEnable = 0;
+    bool spriteEdgeEnable = 0;
+    bool bgEnable = 0;
+    bool spriteEnable = 0;
     uint3 emphasis;
 
     //$2002
-    bool spriteOverflow;
-    bool spriteZeroHit;
+    bool spriteOverflow = 0;
+    bool spriteZeroHit = 0;
 
     //$2003
     uint8 oamAddress;
@@ -106,8 +107,8 @@ struct PPU : Thread {
     uint16 tiledataLo;
     uint16 tiledataHi;
 
-    uint oamIterator;
-    uint oamCounter;
+    uint oamIterator = 0;
+    uint oamCounter = 0;
 
     OAM oam[8];   //primary
     OAM soam[8];  //secondary

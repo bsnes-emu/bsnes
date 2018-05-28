@@ -65,5 +65,5 @@ auto PPU::Screen::blend(uint15 above, uint eva, uint15 below, uint evb) -> uint1
 }
 
 auto PPU::Screen::power() -> void {
-  memory::fill(&io, sizeof(IO));
+  io = {};
 }

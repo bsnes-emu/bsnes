@@ -18,7 +18,7 @@ auto NSMakeImage(image icon, uint scaleWidth = 0, uint scaleHeight = 0) -> NSIma
     bitmapFormat:NSAlphaNonpremultipliedBitmapFormat
     bytesPerRow:(4 * icon.width()) bitsPerPixel:32
   ] autorelease];
-  memory::copy([bitmap bitmapData], icon.data(), 4 * icon.width() * icon.height());
+  memory::copy<uint32_t>([bitmap bitmapData], icon.data(), icon.width() * icon.height());
   [cocoaImage addRepresentation:bitmap];
   return cocoaImage;
 }

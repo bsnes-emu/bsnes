@@ -70,7 +70,7 @@ auto Cartridge::load() -> bool {
 
   if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=ROM,content=Program)"]}) {
     rom.size = max(0x4000, (uint)memory.size);
-    rom.data = (uint8*)memory::allocate(rom.size, 0xff);
+    rom.data = memory::allocate<uint8>(rom.size, 0xff);
     if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
       fp->read(rom.data, min(rom.size, fp->size()));
     }
@@ -78,7 +78,7 @@ auto Cartridge::load() -> bool {
 
   if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RAM,content=Save)"]}) {
     ram.size = memory.size;
-    ram.data = (uint8*)memory::allocate(ram.size, 0xff);
+    ram.data = memory::allocate<uint8>(ram.size, 0xff);
     if(memory.nonVolatile) {
       if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Optional)) {
         fp->read(ram.data, min(ram.size, fp->size()));
@@ -88,7 +88,7 @@ auto Cartridge::load() -> bool {
 
   if(auto memory = Emulator::Game::Memory{document["game/board/memory(type=RTC,content=Time)"]}) {
     rtc.size = memory.size;
-    rtc.data = (uint8*)memory::allocate(rtc.size, 0xff);
+    rtc.data = memory::allocate<uint8>(rtc.size, 0xff);
     if(memory.nonVolatile) {
       if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Optional)) {
         fp->read(rtc.data, min(rtc.size, fp->size()));

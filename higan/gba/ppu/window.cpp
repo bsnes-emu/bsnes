@@ -11,6 +11,6 @@ auto PPU::Window::run(uint x, uint y) -> void {
 auto PPU::Window::power(uint id) -> void {
   this->id = id;
 
-  memory::fill(&io, sizeof(IO));
+  io = {};
   output = 0;
 }

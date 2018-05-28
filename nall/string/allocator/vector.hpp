@@ -39,7 +39,7 @@ auto string::reset() -> type& {
 auto string::reserve(uint capacity) -> type& {
   if(capacity > _capacity) {
     _capacity = bit::round(capacity + 1) - 1;
-    _data = (char*)memory::resize(_data, _capacity + 1);
+    _data = memory::resize<char>(_data, _capacity + 1);
     _data[_capacity] = 0;
   }
   return *this;
@@ -54,7 +54,7 @@ auto string::resize(uint size) -> type& {
 auto string::operator=(const string& source) -> type& {
   if(&source == this) return *this;
   reset();
-  _data = (char*)memory::allocate(source._size + 1);
+  _data = memory::allocate<char>(source._size + 1);
   _capacity = source._size;
   _size = source._size;
   memory::copy(_data, source.data(), source.size() + 1);

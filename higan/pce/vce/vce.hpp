@@ -29,14 +29,14 @@ private:
   } cram;
 
   struct Timing {
-    uint hclock;
-    uint vclock;
+    uint hclock = 0;
+    uint vclock = 0;
   } timing;
 
   struct IO {
-    uint clock;
-    bool extraLine;
-    bool grayscale;
+    uint clock = 4;
+    bool extraLine = 0;
+    bool grayscale = 0;
   } io;
 };
 

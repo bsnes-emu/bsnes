@@ -71,7 +71,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
     length >>= 2;
 
     for(auto y : range(height)) {
-      memory::copy(output + y * length, data + y * pitch, width * sizeof(uint32));
+      memory::copy<uint32>(output + y * length, data + y * pitch, width);
     }
 
     video->unlock();

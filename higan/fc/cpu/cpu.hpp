@@ -40,17 +40,17 @@ struct CPU : Processor::MOS6502, Thread {
   uint8 ram[0x800];
 
   struct IO {
-    bool interruptPending;
-    bool nmiPending;
-    bool nmiLine;
-    bool irqLine;
-    bool apuLine;
+    bool interruptPending = 0;
+    bool nmiPending = 0;
+    bool nmiLine = 0;
+    bool irqLine = 0;
+    bool apuLine = 0;
 
-    bool rdyLine;
-    bool rdyAddrValid;
+    bool rdyLine = 0;
+    bool rdyAddrValid = 0;
     uint16 rdyAddrValue;
 
-    bool oamdmaPending;
+    bool oamdmaPending = 0;
     uint8 oamdmaPage;
   } io;
 };

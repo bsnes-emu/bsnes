@@ -55,7 +55,7 @@ auto PSG::power() -> void {
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
   stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
-  memory::fill(&io, sizeof(IO));
+  io = {};
   for(auto C : range(6)) channel[C].power(C);
 
   double level = 32767.0 / 6.0 / 32.0;  //max volume / channels / steps

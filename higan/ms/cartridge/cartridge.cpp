@@ -72,7 +72,7 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
-  memory::fill(&mapper, sizeof(Mapper));
+  mapper = {};
   mapper.romPage0 = 0;
   mapper.romPage1 = 1;
   mapper.romPage2 = 2;

@@ -101,8 +101,8 @@ auto VDP::vblank() -> bool {
 auto VDP::power() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 5.0);
 
-  memory::fill(&buffer, sizeof(buffer));
-  memory::fill(&io, sizeof(IO));
+  memory::fill<uint32>(buffer, 256 * 264);
+  io = {};
 
   background.power();
   sprite.power();

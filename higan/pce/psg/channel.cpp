@@ -1,6 +1,6 @@
 auto PSG::Channel::power(uint id) -> void {
   this->id = id;
-  memory::fill(&io, sizeof(IO));
+  io = {};
 }
 
 auto PSG::Channel::run() -> void {

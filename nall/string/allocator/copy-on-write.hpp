@@ -70,7 +70,7 @@ auto string::operator=(string&& source) -> string& {
 }
 
 auto string::_allocate() -> char* {
-  auto _temp = (char*)memory::allocate(_capacity + 1 + sizeof(uint));
+  auto _temp = memory::allocate<char>(_capacity + 1 + sizeof(uint));
   *_temp = 0;
   _refs = (uint*)(_temp + _capacity + 1);  //this will always be aligned by 32 via reserve()
   *_refs = 1;
@@ -78,7 +78,7 @@ auto string::_allocate() -> char* {
 }
 
 auto string::_copy() -> char* {
-  auto _temp = (char*)memory::allocate(_capacity + 1 + sizeof(uint));
+  auto _temp = memory::allocate<char>(_capacity + 1 + sizeof(uint));
   memory::copy(_temp, _data, _size = min(_capacity, _size));
   _temp[_size] = 0;
   --*_refs;

@@ -61,10 +61,9 @@ auto VCE::power() -> void {
   create(VCE::Enter, system.colorburst() * 6.0);
 
   for(auto& pixel : buffer) pixel = 0;
-  memory::fill(&cram, sizeof(CRAM));
-  memory::fill(&timing, sizeof(Timing));
-  memory::fill(&io, sizeof(IO));
-  io.clock = 4;
+  cram = {};
+  timing = {};
+  io = {};
 }
 
 }

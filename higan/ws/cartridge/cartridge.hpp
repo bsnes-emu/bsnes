@@ -44,16 +44,16 @@ struct Cartridge : Thread, IO {
 
   struct Registers {
     //$00c0  BANK_ROM2
-    uint8 romBank2;
+    uint8 romBank2 = 0xff;
 
     //$00c1  BANK_SRAM
-    uint8 sramBank;
+    uint8 sramBank = 0xff;
 
     //$00c2  BANK_ROM0
-    uint8 romBank0;
+    uint8 romBank0 = 0xff;
 
     //$00c3  BANK_ROM1
-    uint8 romBank1;
+    uint8 romBank1 = 0xff;
 
     //$00cc  GPO_EN
     uint8 gpoEnable;

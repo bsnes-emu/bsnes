@@ -4,7 +4,7 @@ namespace nall {
 
 template<typename T> auto vector<T>::operator=(const vector<T>& source) -> vector<T>& {
   if(this == &source) return *this;
-  _pool = (T*)memory::allocate(sizeof(T) * source._size);
+  _pool = memory::allocate<T>(source._size);
   _size = source._size;
   _left = 0;
   _right = 0;

@@ -41,7 +41,7 @@ auto service::command(const string& name, const string& command) -> bool {
     }
     if(auto data = shared.acquire()) {
       if(command == "stop") print("[{0}] stopped\n", string_format{name});
-      memory::copy(data, command.data(), min(command.size(), 4096));
+      memory::copy(data, 4096, command.data(), command.size());
       shared.release();
     }
     if(command == "remove") {

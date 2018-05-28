@@ -63,6 +63,6 @@ auto VDP::Sprite::run() -> void {
 }
 
 auto VDP::Sprite::power() -> void {
-  memory::fill(&state, sizeof(State));
-  memory::fill(&output, sizeof(Output));
+  state = {};
+  output = {};
 }

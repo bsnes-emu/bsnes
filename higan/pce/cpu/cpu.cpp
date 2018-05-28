@@ -36,9 +36,9 @@ auto CPU::power() -> void {
   r.pc.byte(1) = read(0x00, 0x1fff);
 
   for(auto& byte : ram) byte = 0x00;
-  memory::fill(&irq, sizeof(IRQ));
-  memory::fill(&timer, sizeof(Timer));
-  memory::fill(&io, sizeof(IO));
+  irq = {};
+  timer = {};
+  io = {};
 }
 
 auto CPU::lastCycle() -> void {

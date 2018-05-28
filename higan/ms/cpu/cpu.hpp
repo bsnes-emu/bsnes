@@ -29,8 +29,8 @@ private:
   uint8 ram[8 * 1024];
 
   struct State {
-    bool nmiLine;
-    bool intLine;
+    bool nmiLine = 0;
+    bool intLine = 0;
   } state;
 };
 

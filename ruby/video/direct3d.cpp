@@ -215,7 +215,7 @@ private:
 
     LPDIRECT3DVERTEXBUFFER9* vertexPointer = nullptr;
     _vertexBuffer->Lock(0, sizeof(Vertex) * 4, (void**)&vertexPointer, 0);
-    memory::copy(vertexPointer, vertex, sizeof(Vertex) * 4);
+    memory::copy<Vertex>(vertexPointer, vertex, 4);
     _vertexBuffer->Unlock();
 
     _device->SetStreamSource(0, _vertexBuffer, 0, sizeof(Vertex));

@@ -156,7 +156,7 @@ auto pCanvas::_rasterize() -> void {
   auto buffer = (uint32_t*)gdk_pixbuf_get_pixels(surface);
 
   if(auto& icon = state().icon) {
-    memory::copy(buffer, state().icon.data(), width * height * sizeof(uint32_t));
+    memory::copy<uint32_t>(buffer, state().icon.data(), width * height);
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
     image fill;

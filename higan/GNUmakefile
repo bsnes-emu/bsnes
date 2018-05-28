@@ -11,7 +11,7 @@ flags += $(if $(call streq,$(profile),accurate),-DPROFILE_ACCURATE,-DPROFILE_FAS
 
 ifeq ($(platform),windows)
   ifeq ($(binary),application)
-    link += -mthreads -lpthread -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
+    link += -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
     link += -Wl,-enable-auto-import
     link += -Wl,-enable-runtime-pseudo-reloc
   else ifeq ($(binary),library)

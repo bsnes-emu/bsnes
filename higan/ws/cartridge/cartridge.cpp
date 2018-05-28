@@ -33,12 +33,7 @@ auto Cartridge::power() -> void {
   if(rtc.data) bus.map(this, 0x00ca, 0x00cb);
   bus.map(this, 0x00cc, 0x00cd);
 
-  memory::fill(&r, sizeof(Registers));
-
-  r.romBank0 = 0xff;
-  r.romBank1 = 0xff;
-  r.romBank2 = 0xff;
-  r.sramBank = 0xff;
+  r = {};
 }
 
 auto Cartridge::load() -> bool {
@@ -72,7 +67,7 @@ auto Cartridge::load() -> bool {
     rom.size = memory.size;
     rom.mask = bit::round(rom.size) - 1;
     rom.data = new uint8[rom.mask + 1];
-    memory::fill(rom.data, rom.mask + 1, 0xff);
+    memory::fill<uint8>(rom.data, rom.mask + 1, 0xff);
     if(auto fp = platform->open(pathID(), memory.name(), File::Read, File::Required)) {
       fp->read(rom.data, rom.size);
     }
@@ -82,7 +77,7 @@ auto Cartridge::load() -> bool {
     ram.size = memory.size;
     ram.mask = bit::round(ram.size) - 1;
     ram.data = new uint8[ram.mask + 1];
-    memory::fill(ram.data, ram.mask + 1, 0xff);
+    memory::fill<uint8>(ram.data, ram.mask + 1, 0xff);
     if(memory.nonVolatile) {
       if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
         fp->read(ram.data, ram.size);
@@ -102,7 +97,7 @@ auto Cartridge::load() -> bool {
     rtc.size = memory.size;
     rtc.mask = bit::round(rtc.size) - 1;
     rtc.data = new uint8[rtc.mask + 1];
-    memory::fill(rtc.data, rtc.mask + 1, 0x00);
+    memory::fill<uint8>(rtc.data, rtc.mask + 1, 0x00);
     if(memory.nonVolatile) {
       if(auto fp = platform->open(pathID(), memory.name(), File::Read)) {
         fp->read(rtc.data, rtc.size);

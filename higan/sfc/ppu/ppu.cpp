@@ -90,7 +90,7 @@ auto PPU::load(Markup::Node node) -> bool {
 auto PPU::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill(output, 512 * 480 * sizeof(uint32));
+  memory::fill<uint32>(output, 512 * 480);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};

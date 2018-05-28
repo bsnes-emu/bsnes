@@ -234,16 +234,9 @@ auto DSP::power(bool reset) -> void {
 
   if(!reset) random.array(apuram, sizeof(apuram));
 
-  memory::fill(&state, sizeof(State));
-  state.noise = 0x4000;
-  state.echoHistoryOffset = 0;
-  state.everyOtherSample = 1;
-  state.echoOffset = 0;
-  state.counter = 0;
-
+  state = {};
   for(auto n : range(8)) {
-    memory::fill(&voice[n], sizeof(Voice));
-    voice[n].brrOffset = 1;
+    voice[n] = {};
     voice[n].vbit = 1 << n;
     voice[n].vidx = n * 0x10;
   }

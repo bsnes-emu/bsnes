@@ -71,10 +71,10 @@ struct AudioASIO : Audio {
   auto clear() -> void {
     if(!ready()) return;
     for(uint n : range(_channels)) {
-      memory::fill(_channel[n].buffers[0], _latency * _sampleSize);
-      memory::fill(_channel[n].buffers[1], _latency * _sampleSize);
+      memory::fill<uint8_t>(_channel[n].buffers[0], _latency * _sampleSize);
+      memory::fill<uint8_t>(_channel[n].buffers[1], _latency * _sampleSize);
     }
-    memory::fill(_queue.samples, sizeof(_queue.samples));
+    memory::fill<uint8_t>(_queue.samples, sizeof(_queue.samples));
     _queue.read = 0;
     _queue.write = 0;
     _queue.count = 0;

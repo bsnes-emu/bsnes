@@ -56,20 +56,20 @@ private:
     uint9 verticalDisplayLength;
     uint8 verticalDisplayEnd;
 
-    bool  vpulse;
-    bool  hpulse;
+    bool  vpulse = 0;
+    bool  hpulse = 0;
 
-    uint  hclock;
-    uint  vclock;
+    uint  hclock = 0;
+    uint  vclock = 0;
 
-    uint  hoffset;
-    uint  voffset;
+    uint  hoffset = 0;
+    uint  voffset = 0;
 
-    uint  hstart;
-    uint  vstart;
+    uint  hstart = 0;
+    uint  vstart = 0;
 
-    uint  hlength;
-    uint  vlength;
+    uint  hlength = 0;
+    uint  vlength = 0;
   } timing;
 
   struct IRQ {
@@ -87,21 +87,21 @@ private:
     auto raise(Line) -> void;
     auto lower() -> void;
 
-    bool enableCollision;
-    bool enableOverflow;
-    bool enableLineCoincidence;
-    bool enableVblank;
-    bool enableTransferVRAM;
-    bool enableTransferSATB;
+    bool enableCollision = 0;
+    bool enableOverflow = 0;
+    bool enableLineCoincidence = 0;
+    bool enableVblank = 0;
+    bool enableTransferVRAM = 0;
+    bool enableTransferSATB = 0;
 
-    bool pendingCollision;
-    bool pendingOverflow;
-    bool pendingLineCoincidence;
-    bool pendingVblank;
-    bool pendingTransferVRAM;
-    bool pendingTransferSATB;
+    bool pendingCollision = 0;
+    bool pendingOverflow = 0;
+    bool pendingLineCoincidence = 0;
+    bool pendingVblank = 0;
+    bool pendingTransferVRAM = 0;
+    bool pendingTransferSATB = 0;
 
-    bool line;
+    bool line = 0;
   } irq;
 
   struct DMA {
@@ -113,17 +113,17 @@ private:
     auto satbStart() -> void;
     auto satbQueue() -> void;
 
-    bool   sourceIncrementMode;
-    bool   targetIncrementMode;
-    bool   satbRepeat;
+    bool   sourceIncrementMode = 0;
+    bool   targetIncrementMode = 0;
+    bool   satbRepeat = 0;
     uint16 source;
     uint16 target;
     uint16 length;
     uint16 satbSource;
 
-    bool   vramActive;
-    bool   satbActive;
-    bool   satbPending;
+    bool   vramActive = 0;
+    bool   satbActive = 0;
+    bool   satbPending = 0;
     uint16 satbOffset;
   } dma;
 
@@ -134,7 +134,7 @@ private:
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
-    bool   enable;
+    bool   enable = 0;
     uint10 hscroll;
     uint9  vscroll;
     uint9  vcounter;
@@ -155,26 +155,26 @@ private:
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
-    bool enable;
+    bool enable = 0;
 
     struct Object {
       uint10 y;
       uint10 x;
-      bool   mode;
+      bool   mode = 0;
       uint10 pattern;
       uint4  palette;
-      bool   priority;
-      uint   width;
-      bool   hflip;
-      uint   height;
-      bool   vflip;
-      bool   first;
+      bool   priority = 0;
+      uint   width = 0;
+      bool   hflip = 0;
+      uint   height = 0;
+      bool   vflip = 0;
+      bool   first = 0;
     };
     array<Object, 64> objects;
 
     uint4 color;
     uint4 palette;
-    bool priority;
+    bool priority = 0;
   } sprite;
 
   struct IO {
@@ -183,7 +183,7 @@ private:
     //$0005  CR (W)
     uint2  externalSync;
     uint2  displayOutput;
-    bool   dramRefresh;
+    bool   dramRefresh = 0;
 
     //$0006  RCR
     uint10 lineCoincidence;
@@ -191,7 +191,7 @@ private:
     //$0009  MWR
     uint2  vramAccess;
     uint2  spriteAccess;
-    bool   cgMode;
+    bool   cgMode = 0;
   } io;
 };
 

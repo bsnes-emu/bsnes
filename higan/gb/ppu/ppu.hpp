@@ -44,24 +44,24 @@ struct PPU : Thread, MMIO {
   function<auto () -> void> run;
 
   struct Status {
-    bool irq;  //STAT IRQ line
-    uint lx;
+    bool irq = 0;  //STAT IRQ line
+    uint lx = 0;
 
     //$ff40  LCDC
-    bool displayEnable;
-    bool windowTilemapSelect;
-    bool windowDisplayEnable;
-    bool bgTiledataSelect;
-    bool bgTilemapSelect;
-    bool obSize;
-    bool obEnable;
-    bool bgEnable;
+    bool displayEnable = 0;
+    bool windowTilemapSelect = 0;
+    bool windowDisplayEnable = 0;
+    bool bgTiledataSelect = 0;
+    bool bgTilemapSelect = 0;
+    bool obSize = 0;
+    bool obEnable = 0;
+    bool bgEnable = 0;
 
     //$ff41  STAT
-    bool interruptLYC;
-    bool interruptOAM;
-    bool interruptVblank;
-    bool interruptHblank;
+    bool interruptLYC = 0;
+    bool interruptOAM = 0;
+    bool interruptVblank = 0;
+    bool interruptHblank = 0;
     uint2 mode;
 
     //$ff42  SCY
@@ -77,8 +77,8 @@ struct PPU : Thread, MMIO {
     uint8 lyc;
 
     //$ff46  DMA
-    bool dmaActive;
-    uint dmaClock;
+    bool dmaActive = 0;
+    uint dmaClock = 0;
     uint8 dmaBank;
 
     //$ff4a  WY
@@ -88,14 +88,14 @@ struct PPU : Thread, MMIO {
     uint8 wx;
 
     //$ff4f  VBK
-    bool vramBank;
+    bool vramBank = 0;
 
     //$ff68  BGPI
-    bool bgpiIncrement;
+    bool bgpiIncrement = 0;
     uint6 bgpi;
 
     //$ff6a  OBPI
-    bool obpiIncrement;
+    bool obpiIncrement = 0;
     uint8 obpi;
   } status;
 
@@ -104,26 +104,26 @@ struct PPU : Thread, MMIO {
   struct Pixel {
     uint16 color;
     uint8 palette;
-    bool priority;
+    bool priority = 0;
   };
   Pixel bg;
   Pixel ob;
 
   struct Sprite {
-    uint x;
-    uint y;
-    uint tile;
-    uint attr;
-    uint data;
+    uint x = 0;
+    uint y = 0;
+    uint tile = 0;
+    uint attr = 0;
+    uint data = 0;
   };
   Sprite sprite[10];
-  uint sprites;
+  uint sprites = 0;
 
-  uint px;
+  uint px = 0;
 
   struct Background {
-    uint attr;
-    uint data;
+    uint attr = 0;
+    uint data = 0;
   };
   Background background;
   Background window;

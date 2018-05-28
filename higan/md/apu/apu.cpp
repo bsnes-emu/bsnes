@@ -58,7 +58,7 @@ auto APU::power(bool reset) -> void {
   bus->grant(false);
   create(APU::Enter, system.frequency() / 15.0);
 
-  if(!reset) memory::fill(ram, sizeof ram);
+  if(!reset) memory::fill(ram, sizeof(ram));
   state = {};
 }
 

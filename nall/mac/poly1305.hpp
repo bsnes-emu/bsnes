@@ -69,7 +69,7 @@ struct Poly1305 {
     r[0] = 0, r[1] = 0, r[2] = 0;
     h[0] = 0, h[1] = 0, h[2] = 0;
     pad[0] = 0, pad[1] = 0;
-    memory::fill(buffer, 16);
+    memory::fill(buffer, sizeof(buffer));
     offset = 0;
 
     return uint128_t(h1) << 64 | h0;
