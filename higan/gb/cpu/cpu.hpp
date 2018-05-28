@@ -84,13 +84,13 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     //$ff55  HDMA5
     bool dmaMode = 0;
     uint16 dmaLength;
-    bool dmaCompleted = 0;
+    bool dmaCompleted = 1;
 
     //$ff6c  ???
     uint8 ff6c;
 
     //$ff70  SVBK
-    uint3 wramBank;
+    uint3 wramBank = 1;
 
     //$ff72-$ff75  ???
     uint8 ff72;

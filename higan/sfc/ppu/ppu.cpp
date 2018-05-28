@@ -210,7 +210,7 @@ auto PPU::scanline() -> void {
   window.scanline();
   screen.scanline();
 
-  if(vcounter() == 241) {
+  if(vcounter() == 240) {
     scheduler.exit(Scheduler::Event::Frame);
   }
 }

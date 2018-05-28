@@ -46,7 +46,7 @@ struct CPU : Processor::MOS6502, Thread {
     bool irqLine = 0;
     bool apuLine = 0;
 
-    bool rdyLine = 0;
+    bool rdyLine = 1;
     bool rdyAddrValid = 0;
     uint16 rdyAddrValue;
 

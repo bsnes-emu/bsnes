@@ -26,6 +26,21 @@ auto PPU::writeVRAM(uint1 byte, uint8 data) -> void {
   if(!io.displayDisable && vcounter() < vdisp()) return;
   auto address = vramAddress();
   vram[address].byte(byte) = data;
+
+  auto word = vram[address];
+  auto line2bpp = tilecache[0] + (address.bits(3,14) << 6) + (address.bits(0,2) << 3);
+  auto line4bpp = tilecache[1] + (address.bits(4,14) << 6) + (address.bits(0,2) << 3);
+  auto line8bpp = tilecache[2] + (address.bits(5,14) << 6) + (address.bits(0,2) << 3);
+  uint plane4bpp = address.bit(3) << 1;
+  uint plane8bpp = address.bit(3) << 1 | address.bit(4) << 2;
+  for(uint x : range(8)) {
+    line2bpp[7 - x].bit(            0) = word.bit(x + 0);
+    line2bpp[7 - x].bit(            1) = word.bit(x + 8);
+    line4bpp[7 - x].bit(plane4bpp + 0) = word.bit(x + 0);
+    line4bpp[7 - x].bit(plane4bpp + 1) = word.bit(x + 8);
+    line8bpp[7 - x].bit(plane8bpp + 0) = word.bit(x + 0);
+    line8bpp[7 - x].bit(plane8bpp + 1) = word.bit(x + 8);
+  }
 }
 
 auto PPU::readOAM(uint10 address) -> uint8 {

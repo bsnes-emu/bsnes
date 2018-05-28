@@ -18,6 +18,10 @@ PPU::PPU() {
   output = new uint32[512 * 512];
   output += 16 * 512;  //overscan offset
 
+  tilecache[0] = new uint8[4096 * 8 * 8];
+  tilecache[1] = new uint8[2048 * 8 * 8];
+  tilecache[2] = new uint8[1024 * 8 * 8];
+
   for(uint y : range(240)) {
     lines[y].y = y;
     lines[y].outputLo = output + (y * 2 + 0) * 512;
@@ -28,6 +32,10 @@ PPU::PPU() {
 PPU::~PPU() {
   output -= 16 * 512;  //overscan offset
   delete[] output;
+
+  delete[] tilecache[0];
+  delete[] tilecache[1];
+  delete[] tilecache[2];
 }
 
 auto PPU::Enter() -> void {
@@ -59,9 +67,10 @@ auto PPU::scanline() -> void {
     frame();
   }
 
-  if(PPUcounter::vcounter() == 241) {
+  if(PPUcounter::vcounter() == 240) {
+    const uint limit = vdisp();
     #pragma omp parallel for
-    for(uint y = 1; y < vdisp(); y++) {
+    for(uint y = 1; y < limit; y++) {
       lines[y].render();
     }
     scheduler.exit(Scheduler::Event::Frame);

@@ -34,6 +34,7 @@ struct PPU : Thread, PPUcounter {
 
 public:
   uint32* output = nullptr;
+  uint8* tilecache[3] = {};  //bitplane -> bitmap tiledata
   uint16 vram[32 * 1024];
   uint16 cgram[256];
 
@@ -70,10 +71,9 @@ public:
   auto writeIO(uint24 address, uint8 data) -> void;
   auto updateVideoMode() -> void;
 
+  struct Source { enum : uint { BG1, BG2, BG3, BG4, OBJ1, OBJ2, COL }; };
   struct TileMode { enum : uint { BPP2, BPP4, BPP8, Mode7, Inactive }; };
-  struct TileSize { enum : uint { Size8x8, Size16x16 }; };
   struct ScreenMode { enum : uint { Above, Below }; };
-  struct ScreenSize { enum : uint { Size32x32, Size32x64, Size64x32, Size64x64 }; };
 
   struct IO {
     uint1  displayDisable;
@@ -197,17 +197,14 @@ public:
     uint1 size;
   } object[128];
 
-  //bitplane -> bitmap tile caches
-  uint8 vram2bpp[4096 * 8 * 8];
-  uint8 vram4bpp[2048 * 8 * 8];
-  uint8 vram8bpp[1024 * 8 * 8];
-
   struct Line {
     //line.cpp
     auto render() -> void;
+    alwaysinline auto plotAbove(uint x, uint source, uint priority, uint color) -> void;
+    alwaysinline auto plotBelow(uint x, uint source, uint priority, uint color) -> void;
 
     //background.cpp
-    auto renderBackground(PPU::IO::Background&) -> void;
+    auto renderBackground(PPU::IO::Background&, uint source) -> void;
 
     //object.cpp
     auto renderObject(PPU::IO::Object&) -> void;
@@ -222,6 +219,12 @@ public:
 
     uint15 cgram[256];
     IO io;
+
+    struct Screen {
+      uint source;
+      uint priority;
+      uint color;
+    } above[256], below[256];
   } lines[240];
 };
 

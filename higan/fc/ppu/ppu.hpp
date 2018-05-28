@@ -64,7 +64,7 @@ struct PPU : Thread {
     bool nmiFlag = 0;
 
     //$2000
-    uint vramIncrement = 0;
+    uint vramIncrement = 1;
     uint spriteAddress = 0;
     uint bgAddress = 0;
     uint spriteHeight = 0;

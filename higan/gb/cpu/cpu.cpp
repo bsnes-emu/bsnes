@@ -124,8 +124,6 @@ auto CPU::power() -> void {
   for(auto& n : hram) n = 0x00;
 
   status = {};
-  status.dmaCompleted = true;
-  status.wramBank = 1;
 }
 
 }

@@ -59,7 +59,6 @@ auto PPU::power(bool reset) -> void {
 
   io = {};
   latch = {};
-  io.vramIncrement = 1;
 
   if(!reset) {
     for(auto& data : ciram ) data = 0;

@@ -39,7 +39,6 @@ auto CPU::power(bool reset) -> void {
   r.pc.byte(1) = bus.read(0xfffd);
 
   io = {};
-  io.rdyLine = 1;
 }
 
 }
