@@ -58,8 +58,6 @@ higan-windows-x86_64-binaries:
 #bsnes-windows-x86_64-binaries:
 #  script:
 #    - apt-get update && apt-get -y install build-essential mingw-w64
-#    # genius does not currently build on Windows due to lack of a combo edit control in hiro
-#    #- make -C genius platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
 #    - make -C higan target=bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
 #    - mkdir bsnes-nightly
 #    - cp -a higan/out/bsnes bsnes-nightly/bsnes.exe
