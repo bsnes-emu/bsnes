@@ -34,13 +34,8 @@ higan-linux-x86_64-binaries:
 #      - bsnes-nightly/*
 
 higan-windows-x86_64-binaries:
-  # This is a normal Windows cross-compile process, except that
-  # nall::chrono tries to use clock_gettime on Windows even
-  # though it's a POSIX function, and for some weird reason mingw has
-  # clock_gettime() in the pthread library.
   script:
     - apt-get update && apt-get -y install build-essential mingw-w64 mkdocs
-    - sed -i -e 's/-lole32/& -static -lpthread/' nall/GNUmakefile
     # genius does not currently build on Windows due to lack of a combo edit control in hiro
     #- make -C genius platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - make -C icarus platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
@@ -61,13 +56,8 @@ higan-windows-x86_64-binaries:
       - higan-nightly/*
 
 #bsnes-windows-x86_64-binaries:
-#  # This is a normal Windows cross-compile process, except that
-#  # nall::chrono tries to use clock_gettime on Windows even
-#  # though it's a POSIX function, and for some weird reason mingw has
-#  # clock_gettime() in the pthread library.
 #  script:
 #    - apt-get update && apt-get -y install build-essential mingw-w64
-#    - sed -i -e 's/-lole32/& -static -lpthread/' nall/GNUmakefile
 #    # genius does not currently build on Windows due to lack of a combo edit control in hiro
 #    #- make -C genius platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
 #    - make -C higan target=bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
