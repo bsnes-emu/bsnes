@@ -123,7 +123,7 @@ auto PPU::Screen::above() -> uint16 {
 }
 
 auto PPU::Screen::blend(uint x, uint y) const -> uint15 {
-  if(!io.colorMode) {
+  if(!io.colorMode) {  //add
     if(!math.colorHalve) {
       uint sum = x + y;
       uint carry = (sum - ((x ^ y) & 0x0421)) & 0x8420;
@@ -131,7 +131,7 @@ auto PPU::Screen::blend(uint x, uint y) const -> uint15 {
     } else {
       return (x + y - ((x ^ y) & 0x0421)) >> 1;
     }
-  } else {
+  } else {  //sub
     uint diff = x - y + 0x8420;
     uint borrow = (diff - ((x ^ y) & 0x8420)) & 0x8420;
     if(!math.colorHalve) {
@@ -151,9 +151,9 @@ auto PPU::Screen::directColor(uint palette, uint tile) const -> uint15 {
   //palette = -------- BBGGGRRR
   //tile    = ---bgr-- --------
   //output  = 0BBb00GG Gg0RRRr0
-  return ((palette << 7) & 0x6000) + ((tile >> 0) & 0x1000)
-       + ((palette << 4) & 0x0380) + ((tile >> 5) & 0x0040)
-       + ((palette << 2) & 0x001c) + ((tile >> 9) & 0x0002);
+  return (palette << 7 & 0x6000) + (tile >> 0 & 0x1000)
+       + (palette << 4 & 0x0380) + (tile >> 5 & 0x0040)
+       + (palette << 2 & 0x001c) + (tile >> 9 & 0x0002);
 }
 
 auto PPU::Screen::fixedColor() const -> uint15 {

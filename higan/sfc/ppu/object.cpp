@@ -28,8 +28,8 @@ auto PPU::Object::scanline() -> void {
   if(t.y == ppu.vdisp() && !ppu.io.displayDisable) addressReset();
   if(t.y >= ppu.vdisp() - 1) return;
 
-  for(auto n : range(32)) oamItem[n].valid = false;  //default to invalid
-  for(auto n : range(34)) oamTile[n].valid = false;  //default to invalid
+  for(auto n : range(32)) oamItem[n].valid = false;
+  for(auto n : range(34)) oamTile[n].valid = false;
 
   for(auto n : range(128)) {
     uint7 sprite = io.firstSprite + n;
@@ -44,10 +44,10 @@ auto PPU::Object::scanline() -> void {
 }
 
 auto PPU::Object::onScanline(PPU::OAM::Object& sprite) -> bool {
-  if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
-  int height = sprite.height() >> io.interlace;
-  if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
-  if((sprite.y + height) >= 256 && t.y < ((sprite.y + height) & 255)) return true;
+  if(sprite.x > 256 && sprite.x + sprite.width() - 1 < 512) return false;
+  uint height = sprite.height() >> io.interlace;
+  if(t.y >= sprite.y && t.y < sprite.y + height) return true;
+  if(sprite.y + height >= 256 && t.y < (sprite.y + height & 255)) return true;
   return false;
 }
 
@@ -95,16 +95,16 @@ auto PPU::Object::tilefetch() -> void {
 
     uint tileWidth = sprite.width() >> 3;
     int x = sprite.x;
-    int y = (t.y - sprite.y) & 0xff;
+    int y = t.y - sprite.y & 0xff;
     if(io.interlace) y <<= 1;
 
     if(sprite.vflip) {
       if(sprite.width() == sprite.height()) {
-        y = (sprite.height() - 1) - y;
+        y = sprite.height() - 1 - y;
       } else if(y < sprite.width()) {
-        y = (sprite.width() - 1) - y;
+        y = sprite.width() - 1 - y;
       } else {
-        y = sprite.width() + ((sprite.width() - 1) - (y - sprite.width()));
+        y = sprite.width() + (sprite.width() - 1) - (y - sprite.width());
       }
     }
 
@@ -116,18 +116,13 @@ auto PPU::Object::tilefetch() -> void {
     y &= 255;
 
     uint16 tiledataAddress = io.tiledataAddress;
-    uint16 chrx = (sprite.character >> 0) & 15;
-    uint16 chry = (sprite.character >> 4) & 15;
-    if(sprite.nameselect) {
-      tiledataAddress += (256 * 16) + (io.nameselect << 12);
-    }
-    chry  += (y >> 3);
-    chry  &= 15;
-    chry <<= 4;
+    if(sprite.nameselect) tiledataAddress += 1 + io.nameselect << 12;
+    uint16 chrx =  sprite.character.bits(0,3);
+    uint16 chry = (sprite.character.bits(4,7) + (y >> 3) & 15) << 4;
 
     for(uint tx : range(tileWidth)) {
-      uint sx = (x + (tx << 3)) & 511;
-      if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
+      uint sx = x + (tx << 3) & 511;
+      if(x != 256 && sx >= 256 && sx + 7 < 512) continue;
       if(t.tileCount++ >= 34) break;
 
       uint n = t.tileCount - 1;
@@ -137,8 +132,8 @@ auto PPU::Object::tilefetch() -> void {
       oamTile[n].palette = 128 + (sprite.palette << 4);
       oamTile[n].hflip = sprite.hflip;
 
-      uint mx = !sprite.hflip ? tx : (tileWidth - 1) - tx;
-      uint pos = tiledataAddress + ((chry + ((chrx + mx) & 15)) << 4);
+      uint mx = !sprite.hflip ? tx : tileWidth - 1 - tx;
+      uint pos = tiledataAddress + ((chry + (chrx + mx & 15)) << 4);
       uint16 addr = (pos & 0xfff0) + (y & 7);
 
       oamTile[n].data.bits( 0,15) = ppu.vram[addr + 0];

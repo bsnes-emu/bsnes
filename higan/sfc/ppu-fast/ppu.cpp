@@ -6,6 +6,7 @@ PPU ppu;
 #include "io.cpp"
 #include "line.cpp"
 #include "background.cpp"
+#include "mode7.cpp"
 #include "object.cpp"
 #include "window.cpp"
 #include "serialization.cpp"
@@ -18,9 +19,9 @@ PPU::PPU() {
   output = new uint32[512 * 512];
   output += 16 * 512;  //overscan offset
 
-  tilecache[0] = new uint8[4096 * 8 * 8];
-  tilecache[1] = new uint8[2048 * 8 * 8];
-  tilecache[2] = new uint8[1024 * 8 * 8];
+  tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
+  tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
+  tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
 
   for(uint y : range(240)) {
     lines[y].y = y;
@@ -33,9 +34,9 @@ PPU::~PPU() {
   output -= 16 * 512;  //overscan offset
   delete[] output;
 
-  delete[] tilecache[0];
-  delete[] tilecache[1];
-  delete[] tilecache[2];
+  delete[] tilecache[TileMode::BPP2];
+  delete[] tilecache[TileMode::BPP4];
+  delete[] tilecache[TileMode::BPP8];
 }
 
 auto PPU::Enter() -> void {
@@ -50,24 +51,26 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::main() -> void {
   scanline();
-  uint y = PPUcounter::vcounter();
-
+  uint y = vcounter();
   step(512);
   if(y >= 1 && y <= vdisp()) {
     memory::copy(&lines[y].cgram, &cgram, sizeof(cgram));
     memory::copy(&lines[y].io, &io, sizeof(io));
+    //lines[y].render();
   }
-
-  step(624);
-  step(PPUcounter::lineclocks() - PPUcounter::hcounter());
+  step(lineclocks() - hcounter());
 }
 
 auto PPU::scanline() -> void {
-  if(PPUcounter::vcounter() == 0) {
+  if(vcounter() == 0) {
     frame();
   }
 
-  if(PPUcounter::vcounter() == 240) {
+  if(vcounter() == vdisp() && !io.displayDisable) {
+    oamAddressReset();
+  }
+
+  if(vcounter() == 240) {
     const uint limit = vdisp();
     #pragma omp parallel for
     for(uint y = 1; y < limit; y++) {
@@ -78,6 +81,8 @@ auto PPU::scanline() -> void {
 }
 
 auto PPU::frame() -> void {
+  io.obj.timeOver = false;
+  io.obj.rangeOver = false;
 }
 
 auto PPU::refresh() -> void {

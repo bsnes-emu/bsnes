@@ -5,13 +5,6 @@
 //* mid-frame OAM changes not supported
 
 struct PPU : Thread, PPUcounter {
-  //as a scanline-based renderer, PPU::PPUcounter values are not cycle-accurate
-  alwaysinline auto field() const -> bool { return cpu.field(); }
-  alwaysinline auto vcounter() const -> uint16 { return cpu.vcounter(); }
-  alwaysinline auto hcounter() const -> uint16 { return cpu.hcounter(); }
-  alwaysinline auto hdot() const -> uint16 { return cpu.hdot(); }
-  alwaysinline auto lineclocks() const -> uint16 { return cpu.lineclocks(); }
-
   alwaysinline auto interlace() const -> bool { return false; }
   alwaysinline auto overscan() const -> bool { return false; }
   alwaysinline auto vdisp() const -> uint { return !io.overscan ? 225 : 240; }
@@ -125,6 +118,9 @@ public:
     } window;
 
     struct Mode7 {
+      uint1  hflip;
+      uint1  vflip;
+      uint2  repeat;
       uint16 a;
       uint16 b;
       uint16 c;
@@ -139,7 +135,6 @@ public:
       WindowLayer window;
       uint1  aboveEnable;
       uint1  belowEnable;
-      uint1  colorEnable;
       uint1  mosaicEnable;
       uint15 tiledataAddress;
       uint15 screenAddress;
@@ -155,12 +150,11 @@ public:
       WindowLayer window;
       uint1  aboveEnable;
       uint1  belowEnable;
-      uint1  colorEnable;
       uint1  interlace;
       uint3  baseSize;
       uint2  nameselect;
       uint15 tiledataAddress;
-      uint7  firstObject;
+      uint7  first;
       uint1  rangeOver;
       uint1  timeOver;
       uint4  priority[4];
@@ -168,14 +162,12 @@ public:
 
     struct Color {
       WindowColor window;
-      uint1 colorEnable;
-      uint1 directColor;
-      uint1 blendMode;
-      uint1 colorHalve;
-      uint1 colorMode;
-      uint5 colorRed;
-      uint5 colorGreen;
-      uint5 colorBlue;
+      uint1  enable[7];
+      uint1  directColor;
+      uint1  blendMode;  //0 = fixed; 1 = pixel
+      uint1  halve;
+      uint1  mathMode;   //0 = add; 1 = sub
+      uint15 fixedColor;
     } col;
   } io;
 
@@ -195,23 +187,32 @@ public:
     uint2 priority;
     uint3 palette;
     uint1 size;
-  } object[128];
+  } objects[128];
 
   struct Line {
+    struct Pixel;
+
     //line.cpp
     auto render() -> void;
+    auto pixel(uint x, Pixel above, Pixel below) const -> uint15;
+    auto blend(uint x, uint y, bool halve) const -> uint15;
+    alwaysinline auto directColor(uint palette, uint tile) const -> uint15;
     alwaysinline auto plotAbove(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotBelow(uint x, uint source, uint priority, uint color) -> void;
 
     //background.cpp
     auto renderBackground(PPU::IO::Background&, uint source) -> void;
+    auto getTile(PPU::IO::Background&, uint hoffset, uint voffset) -> uint;
+
+    //mode7.cpp
+    auto renderMode7(PPU::IO::Background&, uint source) -> void;
 
     //object.cpp
     auto renderObject(PPU::IO::Object&) -> void;
 
     //window.cpp
-    auto renderWindow(PPU::IO::WindowLayer&) -> void;
-    auto renderWindow(PPU::IO::WindowColor&) -> void;
+    auto renderWindow(PPU::IO::WindowLayer&, bool, bool*) -> void;
+    auto renderWindow(PPU::IO::WindowColor&, uint, bool*) -> void;
 
     uint9 y;
     uint32* outputLo = nullptr;
@@ -220,11 +221,31 @@ public:
     uint15 cgram[256];
     IO io;
 
-    struct Screen {
+    struct ObjectItem {
+      uint1 valid;
+      uint7 index;
+      uint8 width;
+      uint8 height;
+    } items[32];
+
+    struct ObjectTile {
+      uint1  valid;
+      uint9  x;
+      uint8  y;
+      uint2  priority;
+      uint8  palette;
+      uint1  hflip;
+      uint11 number;
+    } tiles[34];
+
+    struct Pixel {
       uint source;
       uint priority;
       uint color;
     } above[256], below[256];
+
+    bool windowAbove[256];
+    bool windowBelow[256];
   } lines[240];
 };
 

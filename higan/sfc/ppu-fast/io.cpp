@@ -1,7 +1,6 @@
 auto PPU::latchCounters() -> void {
-  cpu.synchronize(ppu);
-  io.hcounter = hdot();
-  io.vcounter = vcounter();
+  io.hcounter = cpu.hdot();
+  io.vcounter = cpu.vcounter();
   latch.counters = 1;
 }
 
@@ -17,20 +16,20 @@ auto PPU::vramAddress() const -> uint15 {  //uint15 for 64K VRAM; uint16 for 128
 }
 
 auto PPU::readVRAM() -> uint16 {
-  if(!io.displayDisable && vcounter() < vdisp()) return 0x0000;
+  if(!io.displayDisable && cpu.vcounter() < vdisp()) return 0x0000;
   auto address = vramAddress();
   return vram[address];
 }
 
 auto PPU::writeVRAM(uint1 byte, uint8 data) -> void {
-  if(!io.displayDisable && vcounter() < vdisp()) return;
+  if(!io.displayDisable && cpu.vcounter() < vdisp()) return;
   auto address = vramAddress();
   vram[address].byte(byte) = data;
 
   auto word = vram[address];
-  auto line2bpp = tilecache[0] + (address.bits(3,14) << 6) + (address.bits(0,2) << 3);
-  auto line4bpp = tilecache[1] + (address.bits(4,14) << 6) + (address.bits(0,2) << 3);
-  auto line8bpp = tilecache[2] + (address.bits(5,14) << 6) + (address.bits(0,2) << 3);
+  auto line2bpp = tilecache[TileMode::BPP2] + (address.bits(3,14) << 6) + (address.bits(0,2) << 3);
+  auto line4bpp = tilecache[TileMode::BPP4] + (address.bits(4,14) << 6) + (address.bits(0,2) << 3);
+  auto line8bpp = tilecache[TileMode::BPP8] + (address.bits(5,14) << 6) + (address.bits(0,2) << 3);
   uint plane4bpp = address.bit(3) << 1;
   uint plane8bpp = address.bit(3) << 1 | address.bit(4) << 2;
   for(uint x : range(8)) {
@@ -44,27 +43,27 @@ auto PPU::writeVRAM(uint1 byte, uint8 data) -> void {
 }
 
 auto PPU::readOAM(uint10 address) -> uint8 {
-  if(!io.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
+  if(!io.displayDisable && cpu.vcounter() < vdisp()) address = latch.oamAddress;
   return readObject(address);
 }
 
 auto PPU::writeOAM(uint10 address, uint8 data) -> void {
-  if(!io.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
+  if(!io.displayDisable && cpu.vcounter() < vdisp()) address = latch.oamAddress;
   return writeObject(address, data);
 }
 
 auto PPU::readCGRAM(uint1 byte, uint8 address) -> uint8 {
   if(!io.displayDisable
-  && vcounter() > 0 && vcounter() < vdisp()
-  && hcounter() >= 88 && hcounter() < 1096
+  && cpu.vcounter() > 0 && cpu.vcounter() < vdisp()
+  && cpu.hcounter() >= 88 && cpu.hcounter() < 1096
   ) address = latch.cgramAddress;
   return cgram[address].byte(byte);
 }
 
 auto PPU::writeCGRAM(uint8 address, uint15 data) -> void {
   if(!io.displayDisable
-  && vcounter() > 0 && vcounter() < vdisp()
-  && hcounter() >= 88 && hcounter() < 1096
+  && cpu.vcounter() > 0 && cpu.vcounter() < vdisp()
+  && cpu.hcounter() >= 88 && cpu.hcounter() < 1096
   ) address = latch.cgramAddress;
   cgram[address] = data;
 }
@@ -187,7 +186,7 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
   switch((uint16)address) {
 
   case 0x2100: {  //INIDISP
-    if(io.displayDisable && vcounter() == vdisp()) oamAddressReset();
+    if(io.displayDisable && cpu.vcounter() == vdisp()) oamAddressReset();
     io.displayBrightness = data.bits(0,3);
     io.displayDisable    = data.bit (7);
     return;
@@ -373,6 +372,13 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
     return;
   }
 
+  case 0x211a: {  //M7SEL
+    io.mode7.hflip  = data.bit (0);
+    io.mode7.vflip  = data.bit (1);
+    io.mode7.repeat = data.bits(6,7);
+    return;
+  }
+
   case 0x211b: {  //M7A
     io.mode7.a = data << 8 | latch.mode7;
     latch.mode7 = data;
@@ -539,21 +545,22 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
   }
 
   case 0x2131: {  //CGADDSUB
-    io.bg1.colorEnable = data.bit(0);
-    io.bg2.colorEnable = data.bit(1);
-    io.bg3.colorEnable = data.bit(2);
-    io.bg4.colorEnable = data.bit(3);
-    io.obj.colorEnable = data.bit(4);
-    io.col.colorEnable = data.bit(5);
-    io.col.colorHalve  = data.bit(6);
-    io.col.colorMode   = data.bit(7);
+    io.col.enable[Source::BG1 ] = data.bit(0);
+    io.col.enable[Source::BG2 ] = data.bit(1);
+    io.col.enable[Source::BG3 ] = data.bit(2);
+    io.col.enable[Source::BG4 ] = data.bit(3);
+    io.col.enable[Source::OBJ1] = 0;
+    io.col.enable[Source::OBJ2] = data.bit(4);
+    io.col.enable[Source::COL ] = data.bit(5);
+    io.col.halve                = data.bit(6);
+    io.col.mathMode             = data.bit(7);
     return;
   }
 
   case 0x2132: {  //COLDATA
-    if(data.bit(5)) io.col.colorRed   = data.bits(0,4);
-    if(data.bit(6)) io.col.colorGreen = data.bits(0,4);
-    if(data.bit(7)) io.col.colorBlue  = data.bits(0,4);
+    if(data.bit(5)) io.col.fixedColor.bits( 0, 4) = data.bits(0,4);
+    if(data.bit(6)) io.col.fixedColor.bits( 5, 9) = data.bits(0,4);
+    if(data.bit(7)) io.col.fixedColor.bits(10,14) = data.bits(0,4);
     return;
   }
 
