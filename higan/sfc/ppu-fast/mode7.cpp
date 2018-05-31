@@ -1,5 +1,7 @@
 auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
-  int y = !io.mode7.vflip ? (int)this->y : 255 - y;
+  int Y = this->y - this->y % (1 + io.mosaicSize);
+  int y = !io.mode7.vflip ? Y : 255 - Y;
+
   int a = (int16)io.mode7.a;
   int b = (int16)io.mode7.b;
   int c = (int16)io.mode7.c;
@@ -23,7 +25,8 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
-  for(int x : range(256)) {
+  for(int X : range(256)) {
+    int x = !io.mode7.hflip ? X : 255 - X;
     int pixelX = originX + a * x >> 8;
     int pixelY = originY + c * x >> 8;
     int tileX = pixelX >> 3 & 127;
@@ -51,7 +54,7 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
       if(io.col.directColor) {
         mosaicColor = directColor(0, palette);
       } else {
-        mosaicColor = ppu.cgram[palette];
+        mosaicColor = cgram[palette];
       }
     }
     if(!mosaicPalette) continue;

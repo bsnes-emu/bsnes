@@ -63,7 +63,15 @@ auto PPU::main() -> void {
 
 auto PPU::scanline() -> void {
   if(vcounter() == 0) {
-    frame();
+    frame.interlace = io.interlace;
+    frame.overscan = io.overscan;
+    frame.hires = false;
+    io.obj.timeOver = false;
+    io.obj.rangeOver = false;
+  }
+
+  if(vcounter() > 0 && vcounter() < vdisp()) {
+    frame.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   }
 
   if(vcounter() == vdisp() && !io.displayDisable) {
@@ -80,17 +88,12 @@ auto PPU::scanline() -> void {
   }
 }
 
-auto PPU::frame() -> void {
-  io.obj.timeOver = false;
-  io.obj.rangeOver = false;
-}
-
 auto PPU::refresh() -> void {
   auto output = this->output;
   if(!overscan()) output -= 14 * 512;
-  auto pitch = 512;
-  auto width = 512;
-  auto height = 480;
+  auto pitch  = 512 << !interlace();
+  auto width  = 256 << hires();
+  auto height = 240 << interlace();
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
 

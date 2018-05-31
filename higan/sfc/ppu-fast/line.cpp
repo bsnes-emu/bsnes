@@ -16,27 +16,26 @@ auto PPU::Line::render() -> void {
   renderBackground(io.bg4, Source::BG4);
   renderObject(io.obj);
 
+  auto output = !ppu.interlace() || !ppu.field() ? outputLo : outputHi;
+  auto width = !ppu.hires() ? 256 : 512;
+  auto luma = io.displayBrightness << 15;
+
   if(io.displayDisable) {
-    for(uint x : range(512)) {
-      outputLo[x] = 0;
-      outputHi[x] = 0;
-    }
+    for(uint x : range(width)) output[x] = 0;
     return;
   }
 
   renderWindow(io.col.window, io.col.window.aboveMask, windowAbove);
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
-  if(!hires) for(uint x : range(256)) {
-    outputLo[x << 1 | 0] =
-    outputHi[x << 1 | 0] =
-    outputLo[x << 1 | 1] =
-    outputHi[x << 1 | 1] = io.displayBrightness << 15 | pixel(x, above[x], below[x]);
+  if(width == 256) for(uint x : range(width)) {
+    output[x] = luma | pixel(x, above[x], below[x]);
+  } else if(!hires) for(uint x : range(256)) {
+    output[x << 1 | 0] =
+    output[x << 1 | 1] = luma | pixel(x, above[x], below[x]);
   } else for(uint x : range(256)) {
-    outputLo[x << 1 | 0] =
-    outputHi[x << 1 | 0] = io.displayBrightness << 15 | pixel(x, below[x], above[x]);
-    outputLo[x << 1 | 1] =
-    outputHi[x << 1 | 1] = io.displayBrightness << 15 | pixel(x, above[x], below[x]);
+    output[x << 1 | 0] = luma | pixel(x, below[x], above[x]);
+    output[x << 1 | 1] = luma | pixel(x, above[x], below[x]);
   }
 }
 

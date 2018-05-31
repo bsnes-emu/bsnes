@@ -3,10 +3,12 @@
 //limitations:
 //* mid-scanline effects not support
 //* mid-frame OAM changes not supported
+//* range-time over flags not reported in real-time
 
 struct PPU : Thread, PPUcounter {
-  alwaysinline auto interlace() const -> bool { return false; }
-  alwaysinline auto overscan() const -> bool { return false; }
+  alwaysinline auto interlace() const -> bool { return frame.interlace; }
+  alwaysinline auto overscan() const -> bool { return frame.overscan; }
+  alwaysinline auto hires() const -> bool { return frame.hires; }
   alwaysinline auto vdisp() const -> uint { return !io.overscan ? 225 : 240; }
 
   //ppu.cpp
@@ -17,7 +19,6 @@ struct PPU : Thread, PPUcounter {
   alwaysinline auto step(uint clocks) -> void;
   auto main() -> void;
   auto scanline() -> void;
-  auto frame() -> void;
   auto refresh() -> void;
   auto load(Markup::Node) -> bool;
   auto power(bool reset) -> void;
@@ -170,6 +171,12 @@ public:
       uint15 fixedColor;
     } col;
   } io;
+
+  struct Frame {
+    uint1 interlace;
+    uint1 overscan;
+    uint1 hires;
+  } frame;
 
   //object.cpp
   auto oamAddressReset() -> void;

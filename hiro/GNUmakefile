@@ -26,7 +26,7 @@ ifeq ($(platform),macos)
 
   ifeq ($(hiro),cocoa)
     hiroflags = $(objcppflags) $(flags) -w -DHIRO_COCOA
-    hirolink = -framework Cocoa -framework Carbon
+    hirolink = -framework Cocoa -framework Carbon -framework Security
   endif
 endif
 

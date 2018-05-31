@@ -38,11 +38,11 @@
     [item setTarget:self];
     [rootMenu addItem:item];
 
-    string result = nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").output.strip();
-    if(result != "0") {
-      disableGatekeeperAutoRearm = [[[NSMenuItem alloc] initWithTitle:@"Disable Gatekeeper Auto-Rearm" action:@selector(menuDisableGatekeeperAutoRearm) keyEquivalent:@""] autorelease];
-      [disableGatekeeperAutoRearm setTarget:self];
-      [rootMenu addItem:disableGatekeeperAutoRearm];
+    string result = nall::execute("spctl", "--status").output.strip();
+    if(result != "assessments disabled") {
+      disableGatekeeper = [[[NSMenuItem alloc] initWithTitle:@"Disable Gatekeeper" action:@selector(menuDisableGatekeeper) keyEquivalent:@""] autorelease];
+      [disableGatekeeper setTarget:self];
+      [rootMenu addItem:disableGatekeeper];
     }
 
     [rootMenu addItem:[NSMenuItem separatorItem]];
@@ -139,18 +139,44 @@
   hiro::Application::Cocoa::doPreferences();
 }
 
--(void) menuDisableGatekeeperAutoRearm {
+//to hell with gatekeepers
+-(void) menuDisableGatekeeper {
   NSAlert* alert = [[[NSAlert alloc] init] autorelease];
-  [alert setMessageText:@"Disable Gatekeeper Auto-Rearm"];
+  [alert setMessageText:@"Disable Gatekeeper"];
 
-  nall::execute("sudo", "defaults", "write", "/Library/Preferences/com.apple.security", "GKAutoRearm", "-bool", "NO");
-  if(nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").output.strip() == "0") {
+  AuthorizationRef authorization;
+  OSStatus status = AuthorizationCreate(nullptr, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authorization);
+  if(status == errAuthorizationSuccess) {
+    AuthorizationItem items = {kAuthorizationRightExecute, 0, nullptr, 0};
+    AuthorizationRights rights = {1, &items};
+    status = AuthorizationCopyRights(authorization, &rights, nullptr,
+      kAuthorizationFlagDefaults
+    | kAuthorizationFlagInteractionAllowed
+    | kAuthorizationFlagPreAuthorize
+    | kAuthorizationFlagExtendRights, nullptr);
+    if(status == errAuthorizationSuccess) {
+      { char program[] = "/usr/sbin/spctl";
+        char arguments[] = {"--master-disable", nullptr};
+        FILE* pipe = nullptr;
+        AuthorizationExecuteWithPrivileges(authorization, program, kAuthorizationFlagDefaults, arguments, &pipe);
+      }
+      { char program[] = "/usr/bin/defaults";
+        char arguments[] = {"write /Library/Preferences/com.apple.security GKAutoRearm -bool NO"};
+        FILE* pipe = nullptr;
+        AuthorizationExecuteWithPrivileges(authorization, program, kAuthorizationFlagDefaults, arguments, &pipe);
+      }
+    }
+    AuthorizationFree(authorization, kAuthorizationFlagDefaults);
+  }
+
+  string result = nall::execute("spctl", "--status").output.strip();
+  if(result == "assessments disabled") {
     [alert setAlertStyle:NSInformationalAlertStyle];
-    [alert setInformativeText:@"Gatekeeper's automatic 30-day rearm behavior has been disabled successfully."];
-    [disableGatekeeperAutoRearm setHidden:YES];
+    [alert setInformativeText:@"Gatekeeper has been successfully disabled."];
+    [disableGatekeeper setHidden:YES];
   } else {
     [alert setAlertStyle:NSWarningAlertStyle];
-    [alert setInformativeText:@"Error: failed to disable Gatekeeper's automatic rearm behavior."];
+    [alert setInformativeText:@"Error: failed to disable Gatekeeper."];
   }
 
   [alert addButtonWithTitle:@"Ok"];

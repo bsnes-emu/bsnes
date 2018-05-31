@@ -1,9 +1,10 @@
 build := performance
+openmp := true
 include ../nall/GNUmakefile
 
 binary := application
-target := higan
-profile := accurate
+target := bsnes
+profile := fast
 objects := libco emulator audio video resource
 
 flags += -I. -I..
@@ -24,8 +25,6 @@ else ifeq ($(platform),macos)
     link += -dynamiclib
   endif
 else ifneq ($(filter $(platform),linux bsd),)
-  flags += -fopenmp
-  link += -fopenmp
   ifeq ($(binary),application)
     flags += -march=native
     link += -Wl,-export-dynamic

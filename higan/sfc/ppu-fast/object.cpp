@@ -91,8 +91,8 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
     }
   }
 
-  self.rangeOver |= itemCount > 32;
-  self.timeOver  |= tileCount > 34;
+  ppu.io.obj.rangeOver |= itemCount > 32;
+  ppu.io.obj.timeOver  |= tileCount > 34;
 
   for(uint n : range(34)) {
     const auto& tile = tiles[n];
@@ -107,7 +107,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
         if(uint color = tiledata[x ^ mirrorX]) {
           uint source = tile.palette < 192 ? Source::OBJ1 : Source::OBJ2;
           uint priority = self.priority[tile.priority];
-          color = ppu.cgram[tile.palette + color];
+          color = cgram[tile.palette + color];
           if(self.aboveEnable && !windowAbove[x]) plotAbove(tileX, source, priority, color);
           if(self.belowEnable && !windowBelow[x]) plotBelow(tileX, source, priority, color);
         }

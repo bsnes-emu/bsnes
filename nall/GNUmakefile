@@ -12,33 +12,30 @@ MAKEFLAGS := Rr
 
 # platform detection
 ifeq ($(platform),)
-  uname := $(shell uname -s)
+  uname := $(shell uname)
   ifeq ($(uname),)
     platform := windows
-    rm = del /q $(subst /,\,$1)
-    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else ifneq ($(findstring Windows,$(uname)),)
     platform := windows
-    rm = del /q $(subst /,\,$1)
-    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
-  else ifneq ($(findstring _NT,$(uname)),)
+  else ifneq ($(findstring NT,$(uname)),)
     platform := windows
-    rm = del /q $(subst /,\,$1)
-    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else ifneq ($(findstring Darwin,$(uname)),)
     platform := macos
-    rm = rm -f $1
-    rmdir = rm -rf $1
   else ifneq ($(findstring Linux,$(uname)),)
     platform := linux
-    rm = rm -f $1
-    rmdir = rm -rf $1
   else ifneq ($(findstring BSD,$(uname)),)
     platform := bsd
-    rm = rm -f $1
-    rmdir = rm -rf $1
   else
     $(error unknown platform, please specify manually.)
+  endif
+
+  # common commands
+  ifeq ($(uname),)
+    rm = del /q $(subst /,\,$1)
+    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
+  else
+    rm = rm -f $1
+    rmdir = rm -rf $1
   endif
 endif
 
@@ -76,6 +73,15 @@ else ifeq ($(build),release)
   flags += -O2 -DBUILD_RELEASE
 else ifeq ($(build),performance)
   flags += -O3 -DBUILD_PERFORMANCE
+endif
+
+# openmp support
+ifeq ($(openmp),true)
+  # macOS Xcode does not ship with OpenMP support
+  ifneq ($(platform),macos)
+    flags += -fopenmp
+    link += -fopenmp
+  endif
 endif
 
 # clang settings
