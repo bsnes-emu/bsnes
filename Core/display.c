@@ -651,8 +651,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->ly_for_comparison = gb->current_line? -1 : 0;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
-             PPU glitch? (Todo: and in double speed mode?) */
-            if (gb->current_line != 0 && !gb->cgb_double_speed) {
+             PPU glitch. */
+            if (gb->current_line != 0) {
                 gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
             }
             trigger_oam_interrupt(gb);
