@@ -535,6 +535,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
     gb->fetcher_state &= 7;
 }
 
+/*
+ TODO: It seems that the STAT register's mode bits are always "late" by 4 T-cycles.
+       The PPU logic can be greatly simplified if that delay is simply emulated.
+ */
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     GB_object_t *objects = (GB_object_t *) &gb->oam;
@@ -634,7 +638,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     /* Mode 0 is shorter in the very first line */
     GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
     
-    gb->mode_0_interrupt_disable = true;
+    gb->mode_0_interrupt_disable = !(gb->io_registers[GB_IO_STAT] & 0x20);
     gb->current_line = 1;
     while (true) {
         /* Lines 0 - 143 */
@@ -824,7 +828,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->hdma_starting = true;
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
-            gb->mode_0_interrupt_disable = true;
+            /* Todo: The last cycle of move 0 can't trigger an interrupt... unless OAM interrupt is requested?
+             This doesn't make too much sense. */
+            gb->mode_0_interrupt_disable = !(gb->io_registers[GB_IO_STAT] & 0x20);
         }
         
         /* Lines 144 - 152 */
