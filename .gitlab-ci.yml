@@ -26,7 +26,6 @@ bsnes-linux-x86_64-binaries:
     - make -C higan target=bsnes profile=fast
     - mkdir bsnes-nightly
     - cp -a higan/out/bsnes bsnes-nightly/bsnes
-    - cp -a higan/systems/ bsnes-nightly/
     - cp -a shaders bsnes-nightly/
     - cp -a GPLv3.txt bsnes-nightly/
   artifacts:
@@ -61,7 +60,6 @@ bsnes-windows-x86_64-binaries:
     - make -C higan target=bsnes profile=fast platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - mkdir bsnes-nightly
     - cp -a higan/out/bsnes bsnes-nightly/bsnes.exe
-    - cp -a higan/systems/ bsnes-nightly/
     - cp -a shaders bsnes-nightly/
     - cp -a GPLv3.txt bsnes-nightly/
   artifacts:
