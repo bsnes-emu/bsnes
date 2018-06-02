@@ -1,3 +1,17 @@
+uint PPU::Line::start = 0;
+uint PPU::Line::count = 0;
+
+auto PPU::Line::flush() -> void {
+  if(Line::count) {
+    #pragma omp parallel for
+    for(uint y = 0; y < Line::count; y++) {
+      ppu.lines[Line::start + y].render();
+    }
+    Line::start = 0;
+    Line::count = 0;
+  }
+}
+
 auto PPU::Line::render() -> void {
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
 
@@ -16,7 +30,8 @@ auto PPU::Line::render() -> void {
   renderBackground(io.bg4, Source::BG4);
   renderObject(io.obj);
 
-  auto output = !ppu.interlace() || !ppu.field() ? outputLo : outputHi;
+  auto output = ppu.output + y * 1024;
+  if(ppu.interlace() && ppu.field()) output += 512;
   auto width = !ppu.hires() ? 256 : 512;
   auto luma = io.displayBrightness << 15;
 
@@ -29,13 +44,14 @@ auto PPU::Line::render() -> void {
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
   if(width == 256) for(uint x : range(width)) {
-    output[x] = luma | pixel(x, above[x], below[x]);
+    *output++ = luma | pixel(x, above[x], below[x]);
   } else if(!hires) for(uint x : range(256)) {
-    output[x << 1 | 0] =
-    output[x << 1 | 1] = luma | pixel(x, above[x], below[x]);
+    auto color = luma | pixel(x, above[x], below[x]);
+    *output++ = color;
+    *output++ = color;
   } else for(uint x : range(256)) {
-    output[x << 1 | 0] = luma | pixel(x, below[x], above[x]);
-    output[x << 1 | 1] = luma | pixel(x, above[x], below[x]);
+    *output++ = luma | pixel(x, below[x], above[x]);
+    *output++ = luma | pixel(x, above[x], below[x]);
   }
 }
 
@@ -74,9 +90,9 @@ auto PPU::Line::directColor(uint palette, uint tile) const -> uint15 {
 }
 
 auto PPU::Line::plotAbove(uint x, uint source, uint priority, uint color) -> void {
-  if(priority >= above[x].priority) above[x] = {source, priority, color};
+  if(priority > above[x].priority) above[x] = {source, priority, color};
 }
 
 auto PPU::Line::plotBelow(uint x, uint source, uint priority, uint color) -> void {
-  if(priority >= below[x].priority) below[x] = {source, priority, color};
+  if(priority > below[x].priority) below[x] = {source, priority, color};
 }

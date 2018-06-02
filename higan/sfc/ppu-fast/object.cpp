@@ -9,8 +9,8 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
   uint itemCount = 0;
   uint tileCount = 0;
-  for(auto n : range(32)) items[n].valid = false;
-  for(auto n : range(34)) tiles[n].valid = false;
+  for(auto& item : items) item.valid = false;
+  for(auto& tile : tiles) tile.valid = false;
 
   for(auto n : range(128)) {
     ObjectItem item{true, self.first + n};
@@ -94,6 +94,9 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
   ppu.io.obj.rangeOver |= itemCount > 32;
   ppu.io.obj.timeOver  |= tileCount > 34;
 
+  uint8 palette[256];
+  uint8 priority[256];
+
   for(uint n : range(34)) {
     const auto& tile = tiles[n];
     if(!tile.valid) continue;
@@ -105,15 +108,19 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
       tileX &= 511;
       if(tileX < 256) {
         if(uint color = tiledata[x ^ mirrorX]) {
-          uint source = tile.palette < 192 ? Source::OBJ1 : Source::OBJ2;
-          uint priority = self.priority[tile.priority];
-          color = cgram[tile.palette + color];
-          if(self.aboveEnable && !windowAbove[x]) plotAbove(tileX, source, priority, color);
-          if(self.belowEnable && !windowBelow[x]) plotBelow(tileX, source, priority, color);
+          palette[tileX] = tile.palette + color;
+          priority[tileX] = self.priority[tile.priority];
         }
       }
       tileX++;
     }
+  }
+
+  for(uint x : range(256)) {
+    if(!priority[x]) continue;
+    uint source = palette[x] < 192 ? Source::OBJ1 : Source::OBJ2;
+    if(self.aboveEnable && !windowAbove[x]) plotAbove(x, source, priority[x], cgram[palette[x]]);
+    if(self.belowEnable && !windowBelow[x]) plotBelow(x, source, priority[x], cgram[palette[x]]);
   }
 }
 

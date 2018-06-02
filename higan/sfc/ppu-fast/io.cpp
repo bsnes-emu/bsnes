@@ -23,9 +23,13 @@ auto PPU::readVRAM() -> uint16 {
 
 auto PPU::writeVRAM(uint1 byte, uint8 data) -> void {
   if(!io.displayDisable && cpu.vcounter() < vdisp()) return;
+  Line::flush();
   auto address = vramAddress();
   vram[address].byte(byte) = data;
+  updateTiledata(address);
+}
 
+auto PPU::updateTiledata(uint15 address) -> void {
   auto word = vram[address];
   auto line2bpp = tilecache[TileMode::BPP2] + (address.bits(3,14) << 6) + (address.bits(0,2) << 3);
   auto line4bpp = tilecache[TileMode::BPP4] + (address.bits(4,14) << 6) + (address.bits(0,2) << 3);
@@ -48,6 +52,7 @@ auto PPU::readOAM(uint10 address) -> uint8 {
 }
 
 auto PPU::writeOAM(uint10 address, uint8 data) -> void {
+  Line::flush();
   if(!io.displayDisable && cpu.vcounter() < vdisp()) address = latch.oamAddress;
   return writeObject(address, data);
 }
@@ -78,22 +83,22 @@ auto PPU::readIO(uint24 address, uint8 data) -> uint8 {
   case 0x2116: case 0x2118: case 0x2119: case 0x211a:
   case 0x2124: case 0x2125: case 0x2126: case 0x2128:
   case 0x2129: case 0x212a: {
-    return ppu1.mdr;
+    return latch.ppu1.mdr;
   }
 
   case 0x2134: {  //MPYL
     uint24 result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
-    return ppu1.mdr = result.byte(0);
+    return latch.ppu1.mdr = result.byte(0);
   }
 
   case 0x2135: {  //MPYM
     uint24 result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
-    return ppu1.mdr = result.byte(1);
+    return latch.ppu1.mdr = result.byte(1);
   }
 
   case 0x2136: {  //MPYH
     uint24 result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
-    return ppu1.mdr = result.byte(2);
+    return latch.ppu1.mdr = result.byte(2);
   }
 
   case 0x2137: {  //SLHV
@@ -102,77 +107,77 @@ auto PPU::readIO(uint24 address, uint8 data) -> uint8 {
   }
 
   case 0x2138: {  //OAMDATAREAD
-    ppu1.mdr = readOAM(io.oamAddress++);
+    data = readOAM(io.oamAddress++);
     oamSetFirstObject();
-    return ppu1.mdr;
+    return latch.ppu1.mdr = data;
   }
 
   case 0x2139: {  //VMDATALREAD
-    ppu1.mdr = latch.vram.byte(0);
+    data = latch.vram.byte(0);
     if(io.vramIncrementMode == 0) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
     }
-    return ppu1.mdr;
+    return latch.ppu1.mdr = data;
   }
 
   case 0x213a: {  //VMDATAHREAD
-    ppu1.mdr = latch.vram.byte(1);
+    data = latch.vram.byte(1);
     if(io.vramIncrementMode == 1) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
     }
-    return ppu1.mdr;
+    return latch.ppu1.mdr = data;
   }
 
   case 0x213b: {  //CGDATAREAD
     if(io.cgramAddressLatch++ == 0) {
-      ppu2.mdr.bits(0,7) = readCGRAM(0, io.cgramAddress);
+      latch.ppu2.mdr.bits(0,7) = readCGRAM(0, io.cgramAddress);
     } else {
-      ppu2.mdr.bits(0,6) = readCGRAM(1, io.cgramAddress++);
+      latch.ppu2.mdr.bits(0,6) = readCGRAM(1, io.cgramAddress++);
     }
-    return ppu2.mdr;
+    return latch.ppu2.mdr;
   }
 
   case 0x213c: {  //OPHCT
     if(latch.hcounter++ == 0) {
-      ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
+      latch.ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
     } else {
-      ppu2.mdr.bit(0) = io.hcounter.bit(8);
+      latch.ppu2.mdr.bit(0) = io.hcounter.bit(8);
     }
-    return ppu2.mdr;
+    return latch.ppu2.mdr;
   }
 
   case 0x213d: {  //OPVCT
     if(latch.vcounter++ == 0) {
-      ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
+      latch.ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
     } else {
-      ppu2.mdr.bit(0) = io.vcounter.bit(8);
+      latch.ppu2.mdr.bit(0) = io.vcounter.bit(8);
     }
-    return ppu2.mdr;
+    return latch.ppu2.mdr;
   }
 
   case 0x213e: {  //STAT77
-    ppu1.mdr.bits(0,3) = ppu1.version;
-    ppu1.mdr.bit(5) = 0;
-    ppu1.mdr.bit(6) = io.obj.rangeOver;
-    ppu1.mdr.bit(7) = io.obj.timeOver;
-    return ppu1.mdr;
+    latch.ppu1.mdr.bits(0,3) = 1;  //PPU1 version
+    latch.ppu1.mdr.bit(5) = 0;
+    latch.ppu1.mdr.bit(6) = io.obj.rangeOver;
+    latch.ppu1.mdr.bit(7) = io.obj.timeOver;
+    return latch.ppu1.mdr;
   }
 
   case 0x213f: {  //STAT78
     latch.hcounter = 0;
     latch.vcounter = 0;
-    ppu2.mdr.bits(0,3) = ppu2.version;
-    ppu2.mdr.bit(4) = Region::PAL();  //0 = NTSC, 1 = PAL
+    latch.ppu2.mdr.bits(0,3) = 3;  //PPU2 version
+    latch.ppu2.mdr.bit(4) = Region::PAL();  //0 = NTSC, 1 = PAL
     if(!cpu.pio().bit(7)) {
-      ppu2.mdr.bit(6) = 1;
+      latch.ppu2.mdr.bit(6) = 1;
     } else {
-      ppu2.mdr.bit(6) = latch.counters;
+      latch.ppu2.mdr.bit(6) = latch.counters;
       latch.counters = 0;
     }
-    ppu2.mdr.bit(7) = field();
-    return ppu2.mdr;
+    latch.ppu2.mdr.bit(7) = field();
+    return latch.ppu2.mdr;
   }
 
   }
@@ -286,9 +291,9 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
     io.mode7.hoffset = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    io.bg1.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
-    latch.bgofsPPU1 = data;
-    latch.bgofsPPU2 = data;
+    io.bg1.hoffset = data << 8 | (latch.ppu1.bgofs & ~7) | (latch.ppu2.bgofs & 7);
+    latch.ppu1.bgofs = data;
+    latch.ppu2.bgofs = data;
     return;
   }
 
@@ -296,47 +301,47 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
     io.mode7.voffset = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    io.bg1.voffset = data << 8 | latch.bgofsPPU1;
-    latch.bgofsPPU1 = data;
+    io.bg1.voffset = data << 8 | latch.ppu1.bgofs;
+    latch.ppu1.bgofs = data;
     return;
   }
 
   case 0x210f: {  //BG2HOFS
-    io.bg2.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
-    latch.bgofsPPU1 = data;
-    latch.bgofsPPU2 = data;
+    io.bg2.hoffset = data << 8 | (latch.ppu1.bgofs & ~7) | (latch.ppu2.bgofs & 7);
+    latch.ppu1.bgofs = data;
+    latch.ppu2.bgofs = data;
     return;
   }
 
   case 0x2110: {  //BG2VOFS
-    io.bg2.voffset = data << 8 | latch.bgofsPPU1;
-    latch.bgofsPPU1 = data;
+    io.bg2.voffset = data << 8 | latch.ppu1.bgofs;
+    latch.ppu1.bgofs = data;
     return;
   }
 
   case 0x2111: {  //BG3HOFS
-    io.bg3.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
-    latch.bgofsPPU1 = data;
-    latch.bgofsPPU2 = data;
+    io.bg3.hoffset = data << 8 | (latch.ppu1.bgofs & ~7) | (latch.ppu2.bgofs & 7);
+    latch.ppu1.bgofs = data;
+    latch.ppu2.bgofs = data;
     return;
   }
 
   case 0x2112: {  //BG3VOFS
-    io.bg3.voffset = data << 8 | latch.bgofsPPU1;
-    latch.bgofsPPU1 = data;
+    io.bg3.voffset = data << 8 | latch.ppu1.bgofs;
+    latch.ppu1.bgofs = data;
     return;
   }
 
   case 0x2113: {  //BG4HOFS
-    io.bg4.hoffset = data << 8 | (latch.bgofsPPU1 & ~7) | (latch.bgofsPPU2 & 7);
-    latch.bgofsPPU1 = data;
-    latch.bgofsPPU2 = data;
+    io.bg4.hoffset = data << 8 | (latch.ppu1.bgofs & ~7) | (latch.ppu2.bgofs & 7);
+    latch.ppu1.bgofs = data;
+    latch.ppu2.bgofs = data;
     return;
   }
 
   case 0x2114: {  //BG4VOFS
-    io.bg4.voffset = data << 8 | latch.bgofsPPU1;
-    latch.bgofsPPU1 = data;
+    io.bg4.voffset = data << 8 | latch.ppu1.bgofs;
+    latch.ppu1.bgofs = data;
     return;
   }
 

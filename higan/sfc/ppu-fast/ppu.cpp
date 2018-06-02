@@ -13,9 +13,6 @@ PPU ppu;
 #include <sfc/ppu/counter/serialization.cpp>
 
 PPU::PPU() {
-  ppu1.version = 1;
-  ppu2.version = 3;
-
   output = new uint32[512 * 512];
   output += 16 * 512;  //overscan offset
 
@@ -25,18 +22,12 @@ PPU::PPU() {
 
   for(uint y : range(240)) {
     lines[y].y = y;
-    lines[y].outputLo = output + (y * 2 + 0) * 512;
-    lines[y].outputHi = output + (y * 2 + 1) * 512;
   }
 }
 
 PPU::~PPU() {
   output -= 16 * 512;  //overscan offset
   delete[] output;
-
-  delete[] tilecache[TileMode::BPP2];
-  delete[] tilecache[TileMode::BPP4];
-  delete[] tilecache[TileMode::BPP8];
 }
 
 auto PPU::Enter() -> void {
@@ -54,24 +45,25 @@ auto PPU::main() -> void {
   uint y = vcounter();
   step(512);
   if(y >= 1 && y <= vdisp()) {
-    memory::copy(&lines[y].cgram, &cgram, sizeof(cgram));
-    memory::copy(&lines[y].io, &io, sizeof(io));
-    //lines[y].render();
+    memcpy(&lines[y].io, &io, sizeof(io));
+    memcpy(&lines[y].cgram, &cgram, sizeof(cgram));
+    if(!Line::count) Line::start = y;
+    Line::count++;
   }
   step(lineclocks() - hcounter());
 }
 
 auto PPU::scanline() -> void {
   if(vcounter() == 0) {
-    frame.interlace = io.interlace;
-    frame.overscan = io.overscan;
-    frame.hires = false;
+    latch.interlace = io.interlace;
+    latch.overscan = io.overscan;
+    latch.hires = false;
     io.obj.timeOver = false;
     io.obj.rangeOver = false;
   }
 
   if(vcounter() > 0 && vcounter() < vdisp()) {
-    frame.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
+    latch.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   }
 
   if(vcounter() == vdisp() && !io.displayDisable) {
@@ -79,11 +71,7 @@ auto PPU::scanline() -> void {
   }
 
   if(vcounter() == 240) {
-    const uint limit = vdisp();
-    #pragma omp parallel for
-    for(uint y = 1; y < limit; y++) {
-      lines[y].render();
-    }
+    Line::flush();
     scheduler.exit(Scheduler::Event::Frame);
   }
 }
@@ -94,7 +82,9 @@ auto PPU::refresh() -> void {
   auto pitch  = 512 << !interlace();
   auto width  = 256 << hires();
   auto height = 240 << interlace();
+  if(!hires()) Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, false);
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
+  if(!hires()) Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation);
 }
 
 auto PPU::load(Markup::Node node) -> bool {
@@ -109,6 +99,21 @@ auto PPU::power(bool reset) -> void {
   function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
+
+  if(!reset) {
+    for(auto address : range(32768)) {
+      vram[address] = 0x0000;
+      updateTiledata(address);
+    }
+    for(auto& color : cgram) color = 0x0000;
+    for(auto& object : objects) object = {};
+  }
+
+  latch = {};
+  io = {};
+
+  Line::start = 0;
+  Line::count = 0;
 }
 
 }

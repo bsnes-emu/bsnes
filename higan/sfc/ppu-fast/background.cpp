@@ -27,7 +27,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
   uint hmask = (width << self.tileSize << self.screenSize.bit(0)) - 1;
   uint vmask = (width << self.tileSize << self.screenSize.bit(1)) - 1;
 
-  uint y = this->y - this->y % (1 + io.mosaicSize);
+  uint y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
   if(hires) {
     hscroll <<= 1;
     if(io.interlace) y = y << 1 | ppu.field();
@@ -72,20 +72,20 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
     uint tileNumber = getTile(self, hoffset, voffset);
     uint mirrorY = tileNumber & 0x8000 ? 7 : 0;
     uint mirrorX = tileNumber & 0x4000 ? 7 : 0;
-    uint tilePriority = tileNumber & 0x2000 ? self.priority[1] : self.priority[0];
+    uint tilePriority = self.priority[bool(tileNumber & 0x2000)];
     uint paletteNumber = tileNumber >> 10 & 7;
     uint paletteIndex = paletteBase + (paletteNumber << paletteShift) & 0xff;
 
-    if(tileWidth  == 4 && (hoffset & 8) - 1 != mirrorX) tileNumber +=  1;
-    if(tileHeight == 4 && (voffset & 8) - 1 != mirrorY) tileNumber += 16;
+    if(tileWidth  == 4 && (bool(hoffset & 8) ^ bool(mirrorX))) tileNumber +=  1;
+    if(tileHeight == 4 && (bool(voffset & 8) ^ bool(mirrorY))) tileNumber += 16;
     tileNumber = (tileNumber & 0x03ff) + tiledataIndex & tileMask;
 
     auto tiledata = ppu.tilecache[self.tileMode] + (tileNumber << 6);
-    tiledata += ((voffset & 7) ^ mirrorY) << 3;
+    tiledata += (voffset & 7 ^ mirrorY) << 3;
 
     for(uint tileX = 0; tileX < 8; tileX++, x++) {
       if(x & width) continue;  //x < 0 || x >= width
-      if(--mosaicCounter == 0) {
+      if(!self.mosaicEnable || --mosaicCounter == 0) {
         mosaicCounter = 1 + io.mosaicSize;
         mosaicPalette = tiledata[tileX ^ mirrorX];
         mosaicPriority = tilePriority;

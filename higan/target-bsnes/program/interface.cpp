@@ -211,8 +211,8 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
   pitch >>= 2;
   if(presentation->overscanCropping.checked()) {
-    data += 16 * pitch;
-    height -= 32;
+    if(height == 240) data +=  8 * pitch, height -= 16;
+    if(height == 480) data += 16 * pitch, height -= 32;
   }
 
   if(video->lock(output, length, width, height)) {
