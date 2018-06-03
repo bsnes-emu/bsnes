@@ -165,6 +165,21 @@ static void handle_events(GB_gameboy_t *gb)
                     GB_set_key_state(gb, GB_KEY_LEFT, event.jaxis.value < -0x4000);
                 }
             break;
+
+            case SDL_JOYHATMOTION:
+            {
+                uint8_t value = event.jhat.value;
+                int8_t updown =
+                    value == SDL_HAT_LEFTUP || value == SDL_HAT_UP || value == SDL_HAT_RIGHTUP ? -1 : (value == SDL_HAT_LEFTDOWN || value == SDL_HAT_DOWN || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
+                int8_t leftright =
+                    value == SDL_HAT_LEFTUP || value == SDL_HAT_LEFT || value == SDL_HAT_LEFTDOWN ? -1 : (value == SDL_HAT_RIGHTUP || value == SDL_HAT_RIGHT || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
+                
+                GB_set_key_state(gb, GB_KEY_LEFT, leftright == -1);
+                GB_set_key_state(gb, GB_KEY_RIGHT, leftright == 1);
+                GB_set_key_state(gb, GB_KEY_UP, updown == -1);
+                GB_set_key_state(gb, GB_KEY_DOWN, updown == 1);
+                break;
+           };
                 
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {
