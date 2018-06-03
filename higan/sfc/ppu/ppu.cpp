@@ -72,11 +72,9 @@ auto PPU::main() -> void {
 
     step(14);
     obj.tilefetch();
-  } else {
-    step(1052 + 14 + 136);
   }
 
-  step(lineclocks() - 28 - 1052 - 14 - 136);
+  step(lineclocks() - hcounter());
 }
 
 auto PPU::load(Markup::Node node) -> bool {
@@ -223,10 +221,11 @@ auto PPU::frame() -> void {
 
 auto PPU::refresh() -> void {
   auto output = this->output;
-  if(!overscan()) output -= 14 * 512;
+  if(!overscan()) output -= 12 * 512;
   auto pitch = 512;
   auto width = 512;
-  auto height = 480;
+  auto height = 478;
+  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation);
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
 

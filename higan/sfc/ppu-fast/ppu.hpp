@@ -263,7 +263,7 @@ public:
     auto render() -> void;
     auto pixel(uint x, Pixel above, Pixel below) const -> uint15;
     auto blend(uint x, uint y, bool halve) const -> uint15;
-    alwaysinline auto directColor(uint palette, uint tile) const -> uint15;
+    alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint15;
     alwaysinline auto plotAbove(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotBelow(uint x, uint source, uint priority, uint color) -> void;
 

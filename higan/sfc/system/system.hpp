@@ -14,10 +14,6 @@ struct System {
   auto unload() -> void;
   auto power(bool reset) -> void;
 
-  //video.cpp
-  auto configureVideoPalette() -> void;
-  auto configureVideoEffects() -> void;
-
   //serialization.cpp
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;

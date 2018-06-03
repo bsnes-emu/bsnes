@@ -146,6 +146,15 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
     return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
   }
 
+  if(id == 1 && name == "msu1/data.rom") {
+    return vfs::fs::file::open({Location::notsuffix(superNintendo.location), ".msu"}, mode);
+  }
+
+  if(id == 1 && name.match("msu1/track-*.pcm")) {
+    name.trimLeft("msu1/track-", 1L);
+    return vfs::fs::file::open({Location::notsuffix(superNintendo.location), name}, mode);
+  }
+
   //Game Boy
 
   if(id == 2 && name == "manifest.bml" && mode == vfs::file::mode::read) {
@@ -211,8 +220,8 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
   pitch >>= 2;
   if(presentation->overscanCropping.checked()) {
-    if(height == 240) data +=  8 * pitch, height -= 16;
-    if(height == 480) data += 16 * pitch, height -= 32;
+    if(height == 239) data +=  8 * pitch, height -= 16;
+    if(height == 478) data += 16 * pitch, height -= 32;
   }
 
   if(video->lock(output, length, width, height)) {

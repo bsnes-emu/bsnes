@@ -5,7 +5,8 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include processor/GNUmakefile
 
-ui_objects := ui-bsnes ui-program ui-input ui-presentation ui-settings ui-resource
+ui_objects := ui-bsnes ui-program ui-input ui-presentation
+ui_objects += ui-settings ui-tools ui-resource
 ui_objects += ruby hiro
 ui_objects += $(if $(call streq,$(platform),windows),ui-windows)
 
@@ -51,6 +52,7 @@ obj/ui-program.o: $(ui)/program/program.cpp
 obj/ui-input.o: $(ui)/input/input.cpp
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp
 obj/ui-settings.o: $(ui)/settings/settings.cpp
+obj/ui-tools.o: $(ui)/tools/tools.cpp
 obj/ui-resource.o: $(ui)/resource/resource.cpp
 
 obj/ui-windows.o:

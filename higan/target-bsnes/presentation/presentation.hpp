@@ -29,6 +29,7 @@ struct Presentation : Window {
       MenuSeparator portSeparator{&systemMenu};
       Menu controllerPort1{&systemMenu};
       Menu controllerPort2{&systemMenu};
+      Menu expansionPort{&systemMenu};
       MenuSeparator quitSeparator{&systemMenu};
       MenuItem quit{&systemMenu};
     Menu settingsMenu{&menuBar};
@@ -64,6 +65,8 @@ struct Presentation : Window {
         MenuItem loadState4{&loadState};
         MenuItem loadState5{&loadState};
       MenuCheckItem pauseEmulation{&toolsMenu};
+      MenuSeparator toolsSeparator{&toolsMenu};
+      MenuItem cheatEditor{&toolsMenu};
     Menu helpMenu{&menuBar};
       MenuItem about{&helpMenu};
 

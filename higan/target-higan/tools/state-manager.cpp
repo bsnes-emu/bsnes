@@ -70,7 +70,7 @@ auto StateManager::doRefresh() -> void {
       description.resize(description.length());
       stateList.item(slot).cell(1).setText(description).setForegroundColor({0, 0, 0});
     } else {
-      stateList.item(slot).cell(1).setText("(empty)").setForegroundColor({128, 128, 128});
+      stateList.item(slot).cell(1).setText("<empty>").setForegroundColor({128, 128, 128});
     }
   }
 }
@@ -105,7 +105,7 @@ auto StateManager::doSave() -> void {
 }
 
 auto StateManager::doReset() -> void {
-  if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == "Yes") {
+  if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all states?").question() == "Yes") {
     for(auto slot : range(Slots)) file::remove(program->stateName(1 + slot, true));
     doRefresh();
     doUpdateControls();

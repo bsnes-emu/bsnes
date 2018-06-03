@@ -3,7 +3,7 @@ uint PPU::Line::count = 0;
 
 auto PPU::Line::flush() -> void {
   if(Line::count) {
-    #pragma omp parallel for
+    #pragma omp parallel for if(Line::count >= 8)
     for(uint y = 0; y < Line::count; y++) {
       ppu.lines[Line::start + y].render();
     }
@@ -13,15 +13,21 @@ auto PPU::Line::flush() -> void {
 }
 
 auto PPU::Line::render() -> void {
-  bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
+  auto output = ppu.output + y * 1024;
+  if(ppu.interlace() && ppu.field()) output += 512;
+  auto width = !ppu.hires() ? 256 : 512;
 
-  if(!io.displayDisable) {
-    auto aboveColor = cgram[0];
-    auto belowColor = hires ? cgram[0] : io.col.fixedColor;
-    for(uint x : range(256)) {
-      above[x] = {Source::COL, 0, aboveColor};
-      below[x] = {Source::COL, 0, belowColor};
-    }
+  if(io.displayDisable) {
+    memory::fill<uint32>(output, width);
+    return;
+  }
+
+  bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
+  auto aboveColor = cgram[0];
+  auto belowColor = hires ? cgram[0] : io.col.fixedColor;
+  for(uint x : range(256)) {
+    above[x] = {Source::COL, 0, aboveColor};
+    below[x] = {Source::COL, 0, belowColor};
   }
 
   renderBackground(io.bg1, Source::BG1);
@@ -29,20 +35,10 @@ auto PPU::Line::render() -> void {
   renderBackground(io.bg3, Source::BG3);
   renderBackground(io.bg4, Source::BG4);
   renderObject(io.obj);
-
-  auto output = ppu.output + y * 1024;
-  if(ppu.interlace() && ppu.field()) output += 512;
-  auto width = !ppu.hires() ? 256 : 512;
-  auto luma = io.displayBrightness << 15;
-
-  if(io.displayDisable) {
-    for(uint x : range(width)) output[x] = 0;
-    return;
-  }
-
   renderWindow(io.col.window, io.col.window.aboveMask, windowAbove);
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
+  auto luma = io.displayBrightness << 15;
   if(width == 256) for(uint x : range(width)) {
     *output++ = luma | pixel(x, above[x], below[x]);
   } else if(!hires) for(uint x : range(256)) {
@@ -83,10 +79,13 @@ auto PPU::Line::blend(uint x, uint y, bool halve) const -> uint15 {
   }
 }
 
-auto PPU::Line::directColor(uint palette, uint tile) const -> uint15 {
-  return (palette << 7 & 0x6000) + (tile >> 0 & 0x1000)
-       + (palette << 4 & 0x0380) + (tile >> 5 & 0x0040)
-       + (palette << 2 & 0x001c) + (tile >> 9 & 0x0002);
+auto PPU::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint15 {
+  //paletteIndex = bgr
+  //paletteColor = BBGGGRRR
+  //output       = 0 BBb00 GGGg0 RRRr0
+  return (paletteColor << 2 & 0x001c) + (paletteIndex <<  1 & 0x0002)   //R
+       + (paletteColor << 4 & 0x0380) + (paletteIndex <<  5 & 0x0040)   //G
+       + (paletteColor << 7 & 0x6000) + (paletteIndex << 10 & 0x1000);  //B
 }
 
 auto PPU::Line::plotAbove(uint x, uint source, uint priority, uint color) -> void {

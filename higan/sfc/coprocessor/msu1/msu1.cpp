@@ -11,7 +11,7 @@ auto MSU1::Enter() -> void {
 }
 
 auto MSU1::main() -> void {
-  double left = 0.0;
+  double left  = 0.0;
   double right = 0.0;
 
   if(io.audioPlay) {
@@ -72,9 +72,7 @@ auto MSU1::power() -> void {
 
 auto MSU1::dataOpen() -> void {
   dataFile.reset();
-  auto document = Markup::Node();  //todo: fix this
-  string name = document["board/msu1/rom/name"].text();
-  if(!name) name = "msu1.rom";
+  string name = {"msu1/data.rom"};
   if(dataFile = platform->open(ID::SuperFamicom, name, File::Read)) {
     dataFile->seek(io.dataReadOffset);
   }
@@ -82,13 +80,7 @@ auto MSU1::dataOpen() -> void {
 
 auto MSU1::audioOpen() -> void {
   audioFile.reset();
-  auto document = Markup::Node();  //todo: fix this
-  string name = {"track-", io.audioTrack, ".pcm"};
-  for(auto track : document.find("board/msu1/track")) {
-    if(track["number"].natural() != io.audioTrack) continue;
-    name = track["name"].text();
-    break;
-  }
+  string name = {"msu1/track-", io.audioTrack, ".pcm"};
   if(audioFile = platform->open(ID::SuperFamicom, name, File::Read)) {
     if(audioFile->size() >= 8) {
       uint32 header = audioFile->readm(4);
@@ -164,7 +156,7 @@ auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
     if(io.audioError) break;
     io.audioPlay = data.bit(0);
     io.audioRepeat = data.bit(1);
-    bool audioResume = data.bit(2);
+    boolean audioResume = data.bit(2);
     if(!io.audioPlay && audioResume) {
       io.audioResumeTrack = io.audioTrack;
       io.audioResumeOffset = io.audioPlayOffset;

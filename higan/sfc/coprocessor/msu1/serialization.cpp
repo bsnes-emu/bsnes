@@ -13,11 +13,11 @@ auto MSU1::serialize(serializer& s) -> void {
   s.integer(io.audioResumeTrack);
   s.integer(io.audioResumeOffset);
 
-  s.integer(io.audioError);
-  s.integer(io.audioPlay);
-  s.integer(io.audioRepeat);
-  s.integer(io.audioBusy);
-  s.integer(io.dataBusy);
+  s.boolean(io.audioError);
+  s.boolean(io.audioPlay);
+  s.boolean(io.audioRepeat);
+  s.boolean(io.audioBusy);
+  s.boolean(io.dataBusy);
 
   dataOpen();
   audioOpen();

@@ -144,7 +144,7 @@ struct InputKeyboardQuartz {
 
     hid->setVendorID(HID::Keyboard::GenericVendorID);
     hid->setProductID(HID::Keyboard::GenericProductID);
-    hid->setPath(0);
+    hid->setPathID(0);
     for(auto& key : keys) {
       hid->buttons().append(key.name);
     }

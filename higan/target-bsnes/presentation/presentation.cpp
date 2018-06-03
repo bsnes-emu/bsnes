@@ -20,15 +20,18 @@ Presentation::Presentation() {
   });
   controllerPort1.setText("Controller Port 1");
   controllerPort2.setText("Controller Port 2");
+  expansionPort.setText("Expansion Port");
   for(auto& port : emulator->ports) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
     if(port.name == "Controller Port 2") menu = &controllerPort2;
+    if(port.name == "Expansion Port") menu = &expansionPort;
     if(!menu) continue;
 
     Group devices;
     for(auto& device : port.devices) {
-      if(device.name == "None") continue;
+      if(port.name != "Expansion Port" && device.name == "None") continue;
+      if(port.name == "Expansion Port" && device.name == "21fx") continue;
       MenuRadioItem item{menu};
       item.setText(device.name).onActivate([=] {
         auto path = string{"Emulator/", port.name}.replace(" ", "");
@@ -101,14 +104,14 @@ Presentation::Presentation() {
   pathSettings.setText("Paths ...").onActivate([&] { settingsWindow->show(2); });
   advancedSettings.setText("Advanced ...").onActivate([&] { settingsWindow->show(3); });
 
-  toolsMenu.setText("Tools");
-  saveState.setText("Save State").setEnabled(false);
+  toolsMenu.setText("Tools").setVisible(false);
+  saveState.setText("Save State");
   saveState1.setText("Slot 1").onActivate([&] { program->saveState(1); });
   saveState2.setText("Slot 2").onActivate([&] { program->saveState(2); });
   saveState3.setText("Slot 3").onActivate([&] { program->saveState(3); });
   saveState4.setText("Slot 4").onActivate([&] { program->saveState(4); });
   saveState5.setText("Slot 5").onActivate([&] { program->saveState(5); });
-  loadState.setText("Load State").setEnabled(false);
+  loadState.setText("Load State");
   loadState1.setText("Slot 1").onActivate([&] { program->loadState(1); });
   loadState2.setText("Slot 2").onActivate([&] { program->loadState(2); });
   loadState3.setText("Slot 3").onActivate([&] { program->loadState(3); });
@@ -117,6 +120,7 @@ Presentation::Presentation() {
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
   });
+  cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
 
   helpMenu.setText("Help");
   about.setText("About ...").onActivate([&] {
@@ -212,8 +216,8 @@ auto Presentation::resizeViewport() -> void {
     return clearViewport();
   }
 
-  double width = 224 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
-  double height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
+  uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
+  uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
 
   if(settings["View/IntegralScaling"].boolean()) {
     uint widthMultiplier = windowWidth / width;
@@ -226,8 +230,8 @@ auto Presentation::resizeViewport() -> void {
       viewportWidth, viewportHeight
     });
   } else {
-    double widthMultiplier = windowWidth / width;
-    double heightMultiplier = windowHeight / height;
+    double widthMultiplier = (double)windowWidth / width;
+    double heightMultiplier = (double)windowHeight / height;
     double multiplier = min(widthMultiplier, heightMultiplier);
     uint viewportWidth = width * multiplier;
     uint viewportHeight = height * multiplier;
@@ -241,8 +245,8 @@ auto Presentation::resizeViewport() -> void {
 }
 
 auto Presentation::resizeWindow() -> void {
-  double width = 224 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
-  double height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
+  uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
+  uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
 
   uint multiplier = 2;
   if(settings["View/Size"].text() == "Small" ) multiplier = 2;

@@ -67,7 +67,8 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   if(auto node = board["processor(identifier=SPC7110)"]) loadSPC7110(node);
   if(auto node = board["processor(identifier=SDD1)"]) loadSDD1(node);
   if(auto node = board["processor(identifier=OBC1)"]) loadOBC1(node);
-  if(auto node = board["processor(identifier=MSU1)"]) loadMSU1(node);
+
+  if(auto fp = platform->open(pathID(), "msu1/data.rom", File::Read)) loadMSU1();
 }
 
 auto Cartridge::loadCartridgeGameBoy(Markup::Node node) -> void {
@@ -642,11 +643,9 @@ auto Cartridge::loadOBC1(Markup::Node node) -> void {
   }
 }
 
-//processor(identifier=MSU1)
-auto Cartridge::loadMSU1(Markup::Node node) -> void {
+//file::exists("msu1/data.rom")
+auto Cartridge::loadMSU1() -> void {
   has.MSU1 = true;
 
-  for(auto map : node.find("map")) {
-    loadMap(map, {&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1});
-  }
+  bus.map({&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1}, "00-3f,80-bf:2000-2007");
 }

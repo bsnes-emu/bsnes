@@ -51,7 +51,7 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
       mosaicCounter = 1 + io.mosaicSize;
       mosaicPalette = palette;
       mosaicPriority = priority;
-      if(io.col.directColor) {
+      if(io.col.directColor && source == Source::BG1) {
         mosaicColor = directColor(0, palette);
       } else {
         mosaicColor = cgram[palette];

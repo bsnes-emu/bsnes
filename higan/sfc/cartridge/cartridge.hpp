@@ -89,7 +89,7 @@ private:
   auto loadSPC7110(Markup::Node) -> void;
   auto loadSDD1(Markup::Node) -> void;
   auto loadOBC1(Markup::Node) -> void;
-  auto loadMSU1(Markup::Node) -> void;
+  auto loadMSU1() -> void;
 
   //save.cpp
   auto saveCartridge(Markup::Node) -> void;

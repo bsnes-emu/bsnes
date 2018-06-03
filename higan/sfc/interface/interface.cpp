@@ -120,9 +120,9 @@ auto Interface::title() -> string {
 auto Interface::videoInformation() -> VideoInformation {
   VideoInformation vi;
   vi.width  = 256;
-  vi.height = 240;
+  vi.height = 239;
   vi.internalWidth  = 512;
-  vi.internalHeight = 480;
+  vi.internalHeight = 478;
   vi.aspectCorrection = 8.0 / 7.0;
   if(Region::NTSC()) vi.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
   if(Region::PAL())  vi.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
@@ -249,12 +249,11 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Blur Emulation" && value.is<bool>()) {
     settings.blurEmulation = value.get<bool>();
-    system.configureVideoEffects();
     return true;
   }
   if(name == "Color Emulation" && value.is<bool>()) {
     settings.colorEmulation = value.get<bool>();
-    system.configureVideoPalette();
+    Emulator::video.setPalette();
     return true;
   }
   if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;

@@ -56,6 +56,8 @@ Program::Program(string_vector arguments) {
 
   new InputManager;
   new SettingsWindow;
+  new CheatDatabase;
+  new ToolsWindow;
   new AboutWindow;
 
   arguments.takeLeft();  //ignore program location in argument parsing

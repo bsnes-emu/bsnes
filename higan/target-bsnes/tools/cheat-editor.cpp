@@ -9,7 +9,7 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
     .append(TableViewColumn().setText("Code(s)"))
     .append(TableViewColumn().setText("Description").setExpandable())
   );
-  for(auto slot : range(Slots)) {
+  for(uint slot : range(Slots)) {
     cheatList.append(TableViewItem()
       .append(TableViewCell().setCheckable())
       .append(TableViewCell().setText(1 + slot))
@@ -23,10 +23,10 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
     this->synchronizeCodes();
   });
   codeLabel.setText("Code(s):");
-  codeValue.onChange([&] { doModify(); });
+  codeValue.setEnabled(false).onChange([&] { doModify(); });
   descriptionLabel.setText("Description:");
-  descriptionValue.onChange([&] { doModify(); });
-  findCodesButton.setText("Find Codes ...").onActivate([&] { cheatDatabase->findCodes(); });
+  descriptionValue.setEnabled(false).onChange([&] { doModify(); });
+  findCodesButton.setText("Find Codes ...").onActivate([&] { cheatDatabase->findCheats(); });
   resetButton.setText("Reset").onActivate([&] { doReset(); });
   eraseButton.setText("Erase").onActivate([&] { doErase(); });
 
@@ -58,7 +58,7 @@ auto CheatEditor::doModify() -> void {
 }
 
 auto CheatEditor::doRefresh() -> void {
-  for(auto slot : range(Slots)) {
+  for(uint slot : range(Slots)) {
     auto& cheat = cheats[slot];
     if(cheat.code || cheat.description) {
       auto codes = cheat.code.split("+");
@@ -72,12 +72,11 @@ auto CheatEditor::doRefresh() -> void {
       cheatList.item(slot).cell(3).setText("<empty>").setForegroundColor({128, 128, 128});
     }
   }
-
   cheatList.resizeColumns();
 }
 
 auto CheatEditor::doReset(bool force) -> void {
-  if(force || MessageDialog().setParent(*toolsManager).setText("Permanently erase all cheats?").question() == "Yes") {
+  if(force || MessageDialog().setParent(*toolsWindow).setText("Permamently erase all cheats?").question() == "Yes") {
     for(auto& cheat : cheats) cheat = {};
     for(auto& item : cheatList.items()) item.cell(0).setChecked(false);
     doChangeSelected();
@@ -88,7 +87,6 @@ auto CheatEditor::doReset(bool force) -> void {
 
 auto CheatEditor::doErase() -> void {
   if(auto item = cheatList.selected()) {
-    auto& cheat = cheats[item.offset()];
     cheats[item.offset()] = {};
     codeValue.setText("");
     descriptionValue.setText("");
@@ -98,20 +96,15 @@ auto CheatEditor::doErase() -> void {
 }
 
 auto CheatEditor::synchronizeCodes() -> void {
-  if(!emulator) return;
-
   string_vector codes;
   for(auto& cheat : cheats) {
     if(!cheat.enabled || !cheat.code) continue;
     codes.append(cheat.code);
   }
-
   emulator->cheatSet(codes);
 }
 
-//returns true if code was added
-//returns false if there are no more free slots for additional codes
-auto CheatEditor::addCode(const string& code, const string& description, bool enabled) -> bool {
+auto CheatEditor::addCode(bool enabled, string code, string description) -> bool {
   for(auto& cheat : cheats) {
     if(cheat.code || cheat.description) continue;
     cheat.enabled = enabled;
@@ -119,37 +112,35 @@ auto CheatEditor::addCode(const string& code, const string& description, bool en
     cheat.description = description;
     return true;
   }
-
   return false;
 }
 
 auto CheatEditor::loadCheats() -> void {
   doReset(true);
-  auto contents = string::read({program->mediumPaths(1), "higan/cheats.bml"});
-  auto document = BML::unserialize(contents);
-  for(auto cheat : document["cartridge"].find("cheat")) {
-    if(!addCode(cheat["code"].text(), cheat["description"].text(), (bool)cheat["enabled"])) break;
+  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
+  auto document = BML::unserialize(string::read(location));
+  for(auto cheat : document.find("cheat")) {
+    if(!addCode((bool)cheat["enabled"], cheat["code"].text(), cheat["description"].text())) break;
   }
   doRefresh();
   synchronizeCodes();
 }
 
 auto CheatEditor::saveCheats() -> void {
-  if(!emulator) return;
-  string document = {"cartridge sha256:", emulator->sha256(), "\n"};
-  uint count = 0;
+  string document;
   for(auto& cheat : cheats) {
     if(!cheat.code && !cheat.description) continue;
-    document.append("  cheat", cheat.enabled ? " enabled" : "", "\n");
-    document.append("    description:", cheat.description, "\n");
-    document.append("    code:", cheat.code, "\n");
-    count++;
+    document.append("cheat\n");
+    document.append("  description: ", cheat.description, "\n");
+    document.append("  code: ", cheat.code, "\n");
+  if(cheat.enabled)
+    document.append("  enabled\n");
+    document.append("\n");
   }
-  if(count) {
-    directory::create({program->mediumPaths(1), "higan/"});
-    file::write({program->mediumPaths(1), "higan/cheats.bml"}, document);
+  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
+  if(document) {
+    file::write(location, document);
   } else {
-    file::remove({program->mediumPaths(1), "higan/cheats.bml"});
+    file::remove(location);
   }
-  doReset(true);
 }

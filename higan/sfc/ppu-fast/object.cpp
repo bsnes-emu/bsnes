@@ -1,5 +1,4 @@
 auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
-  if(io.displayDisable) return;
   if(!self.aboveEnable && !self.belowEnable) return;
 
   bool windowAbove[256];

@@ -1,5 +1,4 @@
 auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void {
-  if(io.displayDisable) return;
   if(!self.aboveEnable && !self.belowEnable) return;
   if(self.tileMode == TileMode::Mode7) return renderMode7(self, source);
   if(self.tileMode == TileMode::Inactive) return;

@@ -44,9 +44,13 @@ auto PPU::main() -> void {
   scanline();
   uint y = vcounter();
   step(512);
-  if(y >= 1 && y <= vdisp()) {
-    memcpy(&lines[y].io, &io, sizeof(io));
-    memcpy(&lines[y].cgram, &cgram, sizeof(cgram));
+  if(y >= 1 && y <= 239) {
+    if(io.displayDisable || y >= vdisp()) {
+      lines[y].io.displayDisable = true;
+    } else {
+      memcpy(&lines[y].io, &io, sizeof(io));
+      memcpy(&lines[y].cgram, &cgram, sizeof(cgram));
+    }
     if(!Line::count) Line::start = y;
     Line::count++;
   }
@@ -78,13 +82,12 @@ auto PPU::scanline() -> void {
 
 auto PPU::refresh() -> void {
   auto output = this->output;
-  if(!overscan()) output -= 14 * 512;
+  if(!overscan()) output -= 12 * 512;
   auto pitch  = 512 << !interlace();
   auto width  = 256 << hires();
-  auto height = 240 << interlace();
-  if(!hires()) Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, false);
+  auto height = 239 << interlace();
+  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation && hires());
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
-  if(!hires()) Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation);
 }
 
 auto PPU::load(Markup::Node node) -> bool {
@@ -94,7 +97,7 @@ auto PPU::load(Markup::Node node) -> bool {
 auto PPU::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint32>(output, 512 * 480);
+  memory::fill<uint32>(output, 512 * 478);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};

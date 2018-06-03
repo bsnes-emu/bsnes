@@ -12,9 +12,10 @@ auto Program::load() -> void {
       presentation->setTitle(emulator->title());
       presentation->resetSystem.setEnabled(true);
       presentation->unloadGame.setEnabled(true);
-      presentation->saveState.setEnabled(true);
-      presentation->loadState.setEnabled(true);
+      presentation->toolsMenu.setVisible(true);
+      presentation->pauseEmulation.setChecked(false);
       presentation->resizeViewport();
+      toolsWindow->cheatEditor.loadCheats();
 
       string locations = superNintendo.location;
       if(auto location = gameBoy.location) locations.append("|", location);
@@ -93,6 +94,8 @@ auto Program::save() -> void {
 
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
+  toolsWindow->cheatEditor.saveCheats();
+  toolsWindow->setVisible(false);
   emulator->unload();
   superNintendo = {};
   gameBoy = {};
@@ -102,7 +105,6 @@ auto Program::unload() -> void {
   presentation->setTitle({"bsnes v", Emulator::Version});
   presentation->resetSystem.setEnabled(false);
   presentation->unloadGame.setEnabled(false);
-  presentation->saveState.setEnabled(false);
-  presentation->loadState.setEnabled(false);
+  presentation->toolsMenu.setVisible(false);
   presentation->clearViewport();
 }

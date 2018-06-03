@@ -6,7 +6,6 @@ System system;
 Scheduler scheduler;
 Random random;
 Cheat cheat;
-#include "video.cpp"
 #include "serialization.cpp"
 
 auto System::run() -> void {
@@ -91,8 +90,7 @@ auto System::unload() -> void {
 auto System::power(bool reset) -> void {
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
-  configureVideoPalette();
-  configureVideoEffects();
+  Emulator::video.setPalette();
 
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
