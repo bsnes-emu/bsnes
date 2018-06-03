@@ -230,21 +230,12 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
  
  */
 
-static void trigger_oam_interrupt(GB_gameboy_t *gb)
-{
-    if (!gb->stat_interrupt_line && gb->oam_interrupt_line) {
-        gb->io_registers[GB_IO_IF] |= 2;
-        gb->stat_interrupt_line = true;
-    }
-}
-
 /* Todo: When the CPU and PPU write to IF at the same T-cycle, the PPU write is ignored. */
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
     
-    bool previous_interrupt_line = gb->stat_interrupt_line | gb->oam_interrupt_line;
-    gb->stat_interrupt_line = gb->oam_interrupt_line;
+    bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */
     if (gb->ly_for_comparison != (uint16_t)-1 || !gb->is_cgb) {
         if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
@@ -259,12 +250,11 @@ void GB_STAT_update(GB_gameboy_t *gb)
         }
     }
     
-    switch (gb->io_registers[GB_IO_STAT] & 3) {
-        case 0: gb->stat_interrupt_line = (gb->io_registers[GB_IO_STAT] & 8) && !gb->mode_0_interrupt_disable; break;
+    switch (gb->mode_for_interrupt) {
+        case 0: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 8; break;
         case 1: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x10; break;
-        /* The OAM interrupt is handled differently, it reads the writable flags from STAT less frequenctly,
-            and is not based on the mode bits of STAT. */
-        // case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
+        case 2: gb->stat_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20; break;
+        default: gb->stat_interrupt_line = false;
     }
     
     /* User requested a LY=LYC interrupt and the LY=LYC bit is on */
@@ -588,10 +578,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
     /* Todo: Merge this with the normal line routine */
     /* Handle the very first line 0 */
-    gb->mode_0_interrupt_disable = true;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
+    gb->mode_for_interrupt = -1;
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
@@ -602,11 +592,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 3;
+    gb->mode_for_interrupt = 3;
     gb->oam_read_blocked = true;
     gb->vram_read_blocked = !gb->is_cgb;
     gb->oam_write_blocked = true;
     gb->vram_write_blocked = !gb->is_cgb;
-    gb->mode_0_interrupt_disable = false;
     GB_STAT_update(gb);
     
     gb->cycles_for_line += 2;
@@ -620,6 +610,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     if (!gb->cgb_double_speed) {
         gb->io_registers[GB_IO_STAT] &= ~3;
+        gb->mode_for_interrupt = 0;
         gb->oam_read_blocked = false;
         gb->vram_read_blocked = false;
         gb->oam_write_blocked = false;
@@ -629,6 +620,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_SLEEP(gb, display, 4, 1);
     
     gb->io_registers[GB_IO_STAT] &= ~3;
+    gb->mode_for_interrupt = 0;
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
     gb->oam_write_blocked = false;
@@ -638,7 +630,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     /* Mode 0 is shorter in the very first line */
     GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
     
-    gb->mode_0_interrupt_disable = !(gb->io_registers[GB_IO_STAT] & 0x20);
+    gb->mode_for_interrupt = 2;
     gb->current_line = 1;
     while (true) {
         /* Lines 0 - 143 */
@@ -653,23 +645,23 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
              PPU glitch. */
             if (gb->current_line != 0) {
-                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
-            }
-            trigger_oam_interrupt(gb);
-            GB_STAT_update(gb);
-            if (gb->current_line != 0 || !gb->is_cgb) {
+                gb->mode_for_interrupt = 2;
                 gb->io_registers[GB_IO_STAT] &= ~3;
             }
+            else if (!gb->is_cgb) {
+                gb->io_registers[GB_IO_STAT] &= ~3;
+            }
+            GB_STAT_update(gb);
 
             GB_SLEEP(gb, display, 7, 1);
             
-            gb->mode_0_interrupt_disable = false;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 2;
+            gb->mode_for_interrupt = 2;
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
-            gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
-            trigger_oam_interrupt(gb);
+            GB_STAT_update(gb);
+            gb->mode_for_interrupt = -1;
             GB_STAT_update(gb);
             gb->n_visible_objs = 0;
             
@@ -693,11 +685,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->accessed_oam_row = -1;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
+            gb->mode_for_interrupt = 3;
             gb->vram_read_blocked = true;
             gb->vram_write_blocked = true;
             gb->oam_write_blocked = true;
-            gb->oam_interrupt_line = false;
-            trigger_oam_interrupt(gb);
             GB_STAT_update(gb);
 
             gb->cycles_for_line = MODE2_LENGTH + 4;
@@ -803,6 +794,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             if (!gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
+                gb->mode_for_interrupt = 0;
                 gb->oam_read_blocked = false;
                 gb->vram_read_blocked = false;
                 gb->oam_write_blocked = false;
@@ -813,6 +805,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 22, 1);
             
             gb->io_registers[GB_IO_STAT] &= ~3;
+            gb->mode_for_interrupt = 0;
             gb->oam_read_blocked = false;
             gb->vram_read_blocked = false;
             gb->oam_write_blocked = false;
@@ -828,9 +821,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->hdma_starting = true;
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
-            /* Todo: The last cycle of move 0 can't trigger an interrupt... unless OAM interrupt is requested?
-             This doesn't make too much sense. */
-            gb->mode_0_interrupt_disable = !(gb->io_registers[GB_IO_STAT] & 0x20);
+            gb->mode_for_interrupt = 2;
         }
         
         /* Lines 144 - 152 */
@@ -839,28 +830,21 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->ly_for_comparison = -1;
             GB_SLEEP(gb, display, 26, 2);
             if (gb->current_line == LINES) {
-                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
-                trigger_oam_interrupt(gb);
+                gb->mode_for_interrupt = 2;
             }
             GB_STAT_update(gb);
-            gb->oam_interrupt_line = false;
             GB_SLEEP(gb, display, 12, 2);
             gb->ly_for_comparison = gb->current_line;
             
             if (gb->current_line == LINES) {
                 /* Entering VBlank state triggers the OAM interrupt */
-                gb->oam_interrupt_line = gb->io_registers[GB_IO_STAT] & 0x20;
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->io_registers[GB_IO_STAT] |= 1;
                 gb->io_registers[GB_IO_IF] |= 1;
-                gb->mode_0_interrupt_disable = false;
-                trigger_oam_interrupt(gb);
+                gb->mode_for_interrupt = 2;
                 GB_STAT_update(gb);
-                gb->oam_interrupt_line = false;
-                
-                if (gb->io_registers[GB_IO_STAT] & 0x20) {
-                    gb->stat_interrupt_line = true;
-                }
+                gb->mode_for_interrupt = 1;
+                GB_STAT_update(gb);
                 
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     display_vblank(gb);
