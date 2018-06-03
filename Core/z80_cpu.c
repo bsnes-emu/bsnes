@@ -112,6 +112,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
+            return;
         }
         
         /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle*/
