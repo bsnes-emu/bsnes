@@ -72,7 +72,7 @@ libretro-test:
     # git refuses to even attempt a merge if you haven't told it who you are,
     # even if you use --no-commit. *sigh*
     - EMAIL=fake-email@example.com git merge origin/libretro
-    - make -C higan binary=library target=libretro
+    - make -C higan binary=library target=libretro profile=accuracy
     - mkdir libretro-nightly
     - cp -a higan/out/higan_sfc_libretro.so libretro-nightly/
     - cp -a GPLv3.txt libretro-nightly/
