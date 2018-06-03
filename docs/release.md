@@ -9,6 +9,7 @@ Release checklist
     version as 'stable' and under its tag name.
  5. Check out the `libretro` branch.
  6. Merge changes from master.
+ 7. Copy `target-bsnes/resource/resource.?pp` to the `target-libretro` folder.
  7. `git push` to make the new changes available.
  
  [rtd]: https://readthedocs.org/projects/higan/builds/
