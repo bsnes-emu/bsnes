@@ -13,21 +13,21 @@ PPU ppu;
 #include <sfc/ppu/counter/serialization.cpp>
 
 PPU::PPU() {
-  output = new uint32[512 * 512];
-  output += 16 * 512;  //overscan offset
-
+  output = new uint32[512 * 512] + 16 * 512;  //overscan offset
   tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
   tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
   tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
 
-  for(uint y : range(240)) {
+  for(uint y : range(lines.size())) {
     lines[y].y = y;
   }
 }
 
 PPU::~PPU() {
-  output -= 16 * 512;  //overscan offset
-  delete[] output;
+  delete[] (output - 16 * 512);  //overscan offset
+  delete[] tilecache[TileMode::BPP2];
+  delete[] tilecache[TileMode::BPP4];
+  delete[] tilecache[TileMode::BPP8];
 }
 
 auto PPU::Enter() -> void {

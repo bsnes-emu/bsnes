@@ -170,7 +170,7 @@ private:
       bool   vflip = 0;
       bool   first = 0;
     };
-    array<Object, 64> objects;
+    adaptive_array<Object, 64> objects;
 
     uint4 color;
     uint4 palette;

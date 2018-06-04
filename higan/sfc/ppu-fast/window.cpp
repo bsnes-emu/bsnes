@@ -1,6 +1,6 @@
-auto PPU::Line::renderWindow(PPU::IO::WindowLayer& self, bool enable, bool* output) -> void {
+auto PPU::Line::renderWindow(PPU::IO::WindowLayer& self, bool enable, array<bool[256]>& output) -> void {
   if(!enable || (!self.oneEnable && !self.twoEnable)) {
-    memory::fill<bool>(output, 256, 0);
+    output.fill(0);
     return;
   }
 
@@ -32,17 +32,17 @@ auto PPU::Line::renderWindow(PPU::IO::WindowLayer& self, bool enable, bool* outp
   }
 }
 
-auto PPU::Line::renderWindow(PPU::IO::WindowColor& self, uint mask, bool* output) -> void {
+auto PPU::Line::renderWindow(PPU::IO::WindowColor& self, uint mask, array<bool[256]>& output) -> void {
   bool set, clear;
   switch(mask) {
-  case 0: memory::fill<bool>(output, 256, 1); return;  //always
-  case 1: set = 1, clear = 0; break;                   //inside
-  case 2: set = 0, clear = 1; break;                   //outside
-  case 3: memory::fill<bool>(output, 256, 0); return;  //never
+  case 0: output.fill(1); return;     //always
+  case 1: set = 1, clear = 0; break;  //inside
+  case 2: set = 0, clear = 1; break;  //outside
+  case 3: output.fill(0); return;     //never
   }
 
   if(!self.oneEnable && !self.twoEnable) {
-    memory::fill<bool>(output, 256, clear);
+    output.fill(clear);
     return;
   }
 

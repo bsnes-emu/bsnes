@@ -35,9 +35,9 @@ public:
     //serialization.cpp
     auto serialize(serializer&) -> void;
 
-    uint1 interlace;
-    uint1 overscan;
-    uint1 hires;
+    uint1  interlace;
+    uint1  overscan;
+    uint1  hires;
 
     uint16 vram;
     uint8  oam;
@@ -153,7 +153,7 @@ public:
       uint16 hoffset;
       uint16 voffset;
       uint3  tileMode;
-      uint4  priority[2];
+      array<uint4[2]> priority;
     } bg1, bg2, bg3, bg4;
 
     struct Object {
@@ -170,7 +170,7 @@ public:
       uint7  first;
       uint1  rangeOver;
       uint1  timeOver;
-      uint4  priority[4];
+      array<uint4[4]> priority;
     } obj;
 
     struct Color {
@@ -178,7 +178,7 @@ public:
       auto serialize(serializer&) -> void;
 
       WindowColor window;
-      uint1  enable[7];
+      array<uint1[7]> enable;
       uint1  directColor;
       uint1  blendMode;  //0 = fixed; 1 = pixel
       uint1  halve;
@@ -249,13 +249,13 @@ public:
   Latch latch;
   IO io;
 
-  uint16 vram[32 * 1024];
-  uint15 cgram[256];
-  Object objects[128];
+  array<uint16[32 * 1024]> vram;
+  array<uint15[256]> cgram;
+  array<Object[128]> objects;
 
   //[unserialized]
-  uint32* output = nullptr;
-  uint8*  tilecache[3] = {};  //bitplane -> bitmap tiledata
+  uint32* output;
+  array<uint8*[3]> tilecache;  //bitplane -> bitmap tiledata
 
   struct Line {
     //line.cpp
@@ -278,28 +278,29 @@ public:
     auto renderObject(PPU::IO::Object&) -> void;
 
     //window.cpp
-    auto renderWindow(PPU::IO::WindowLayer&, bool, bool*) -> void;
-    auto renderWindow(PPU::IO::WindowColor&, uint, bool*) -> void;
+    auto renderWindow(PPU::IO::WindowLayer&, bool, array<bool[256]>&) -> void;
+    auto renderWindow(PPU::IO::WindowColor&, uint, array<bool[256]>&) -> void;
 
     //[unserialized]
     uint9 y;  //constant
 
     IO io;
-    uint15 cgram[256];
+    array<uint15[256]> cgram;
 
-    ObjectItem items[32];
-    ObjectTile tiles[34];
+    array<ObjectItem[32]> items;
+    array<ObjectTile[34]> tiles;
 
-    Pixel above[256];
-    Pixel below[256];
+    array<Pixel[256]> above;
+    array<Pixel[256]> below;
 
-    bool windowAbove[256];
-    bool windowBelow[256];
+    array<bool[256]> windowAbove;
+    array<bool[256]> windowBelow;
 
     //flush()
     static uint start;
     static uint count;
-  } lines[240];
+  };
+  array<Line[240]> lines;
 };
 
 extern PPU ppu;

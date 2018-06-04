@@ -234,6 +234,22 @@ template<> struct stringify<const string_view&> {
   const string_view& _view;
 };
 
+//pointers
+
+template<typename T> struct stringify<T*> {
+  stringify(const T* source) {
+    if(!source) {
+      memory::copy(_data, "(nullptr)", 10);
+    } else {
+      memory::copy(_data, "0x", 2);
+      fromNatural(_data + 2, (uintptr)source);
+    }
+  }
+  auto data() const -> const char* { return _data; }
+  auto size() const -> uint { return strlen(_data); }
+  char _data[256];
+};
+
 //
 
 template<typename T> auto make_string(T value) -> stringify<T> {

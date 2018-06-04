@@ -1,61 +1,130 @@
 #pragma once
+#define DEBUG
 
 #include <nall/range.hpp>
 
 namespace nall {
 
-template<typename T, uint Capacity>
-struct array {
-  auto capacity() const -> uint { return Capacity; }
-  auto size() const -> uint { return _size; }
+template<typename T> struct array;
 
-  auto reset() -> void {
-    for(uint n : range(_size)) _pool.t[n].~T();
-    _size = 0;
+//usage: int x[256] => array<int, 256>
+template<typename T, uint Size> struct array<T[Size]> {
+  array() = default;
+
+  array(const initializer_list<T>& source) {
+    uint index = 0;
+    for(auto& value : source) {
+      operator[](index++) = value;
+    }
   }
 
-  auto operator[](uint index) -> T& {
+  alwaysinline auto operator[](uint index) -> T& {
     #ifdef DEBUG
     struct out_of_bounds {};
-    if(index >= Capacity) throw out_of_bounds{};
+    if(index >= Size) throw out_of_bounds{};
     #endif
-    return _pool.t[index];
+    return values[index];
   }
 
-  auto operator[](uint index) const -> const T& {
+  alwaysinline auto operator[](uint index) const -> const T& {
     #ifdef DEBUG
     struct out_of_bounds {};
-    if(index >= Capacity) throw out_of_bounds{};
+    if(index >= Size) throw out_of_bounds{};
     #endif
-    return _pool.t[index];
+    return values[index];
   }
 
-  auto append() -> T& {
-    new(_pool.t + _size) T;
-    return _pool.t[_size++];
+  alwaysinline auto operator()(uint index, const T& fallback = {}) const -> const T& {
+    if(index >= Size) return fallback;
+    return values[index];
   }
 
-  auto append(const T& value) -> void {
-    new(_pool.t + _size++) T(value);
+  auto fill(const T& fill = {}) {
+    for(auto& value : values) value = fill;
   }
 
-  auto append(T&& value) -> void {
-    new(_pool.t + _size++) T(move(value));
-  }
+  auto data() -> T* { return values; }
+  auto data() const -> const T* { return values; }
+  auto size() const -> uint { return Size; }
 
-  auto begin() { return &_pool.t[0]; }
-  auto end() { return &_pool.t[_size]; }
+  auto begin() -> T* { return &values[0]; }
+  auto end() -> T* { return &values[Size]; }
 
-  auto begin() const { return &_pool.t[0]; }
-  auto end() const { return &_pool.t[_size]; }
+  auto begin() const -> const T* { return &values[0]; }
+  auto end() const -> const T* { return &values[Size]; }
 
 private:
-  union U {
-    U() {}
-    ~U() {}
-    T t[Capacity];
-  } _pool;
-  uint _size = 0;
+  T values[Size];
+};
+
+template<typename T> struct array_view;
+
+template<typename T, uint Size> struct array_view<T[Size]> {
+  array_view() = default;
+
+  template<uint Capacity>
+  array_view(array<T[Capacity]>& source, uint offset = 0) {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(offset + Size >= Capacity) throw out_of_bounds{};
+    #endif
+    values = &source.data()[offset];
+  }
+
+  template<uint Capacity>
+  array_view(T (&source)[Capacity], uint offset = 0) {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(offset + Size >= Capacity) throw out_of_bounds{};
+    #endif
+    values = &source[offset];
+  }
+
+  array_view(T* source, uint offset = 0) {
+    values = &source[offset];
+  }
+
+  explicit operator bool() const {
+    return values;
+  }
+
+  alwaysinline auto operator[](uint index) -> T& {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(index >= Size) throw out_of_bounds{};
+    #endif
+    return values[index];
+  }
+
+  alwaysinline auto operator[](uint index) const -> const T& {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(index >= Size) throw out_of_bounds{};
+    #endif
+    return values[index];
+  }
+
+  alwaysinline auto operator()(uint index, const T& fallback = {}) const -> const T& {
+    if(index >= Size) return fallback;
+    return values[index];
+  }
+
+  auto fill(const T& fill = {}) -> void {
+    for(uint index : range(Size)) values[index] = fill;
+  }
+
+  auto data() -> T* { return values; }
+  auto data() const -> const T* { return values; }
+  auto size() const -> uint { return Size; }
+
+  auto begin() -> T* { return &values[0]; }
+  auto end() -> T* { return &values[Size]; }
+
+  auto begin() const -> const T* { return &values[0]; }
+  auto end() const -> const T* { return &values[Size]; }
+
+private:
+  T* values = nullptr;
 };
 
 }

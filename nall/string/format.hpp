@@ -133,14 +133,4 @@ auto binary(uintmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto pointer(uintptr value, long precision) -> string {
-  if(value == 0) return "(nullptr)";
-  return {"0x", hex(value, precision)};
-}
-
-template<typename T> auto pointer(const T* value, long precision) -> string {
-  if(value == nullptr) return "(nullptr)";
-  return {"0x", hex((uintptr)value, precision)};
-}
-
 }

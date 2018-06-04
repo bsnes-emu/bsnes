@@ -13,6 +13,52 @@ public:
       Button addCheatsButton{&controlLayout, Size{100, 0}};
 };
 
+struct CheatWindow : Window {
+  CheatWindow();
+  auto show(TableViewItem item = {}) -> void;
+  auto doChange() -> void;
+  auto doAccept() -> void;
+
+public:
+  TableViewItem item;
+
+  VerticalLayout layout{this};
+    HorizontalLayout nameLayout{&layout, Size{~0, 0}};
+      Label nameLabel{&nameLayout, Size{40, 0}};
+      LineEdit nameValue{&nameLayout, Size{~0, 0}};
+    HorizontalLayout codeLayout{&layout, Size{~0, 0}};
+      Label codeLabel{&codeLayout, Size{40, 0}};
+      LineEdit codeValue{&codeLayout, Size{~0, 0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Widget spacer{&controlLayout, Size{40, 0}};
+      CheckLabel enabledOption{&controlLayout, Size{~0, 0}};
+      Button acceptButton{&controlLayout, Size{80, 0}};
+      Button cancelButton{&controlLayout, Size{80, 0}};
+};
+
+struct CheatEditor : TabFrameItem {
+  CheatEditor(TabFrame*);
+  auto swap(uint x, uint y) -> void;
+  auto synchronizeCodes() -> void;
+  auto addCheat(string name, string code, bool enabled = false) -> void;
+  auto loadCheats() -> void;
+  auto saveCheats() -> void;
+
+public:
+  VerticalLayout layout{this};
+    TableView cheatList{&layout, Size{~0, ~0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Button upButton{&controlLayout, Size{0, 0}};
+      Button downButton{&controlLayout, Size{0, 0}};
+      Button findCheatsButton{&controlLayout, Size{120, 0}};
+      Widget spacer{&controlLayout, Size{~0, 0}};
+      Button resetButton{&controlLayout, Size{80, 0}};
+      Button appendButton{&controlLayout, Size{80, 0}};
+      Button modifyButton{&controlLayout, Size{80, 0}};
+      Button removeButton{&controlLayout, Size{80, 0}};
+};
+
+/*
 struct CheatEditor : TabFrameItem {
   enum : uint { Slots = 128 };
 
@@ -49,6 +95,7 @@ public:
       Button resetButton{&controlLayout, Size{80, 0}};
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
+*/
 
 struct ToolsWindow : Window {
   ToolsWindow();
@@ -62,4 +109,5 @@ public:
 };
 
 extern unique_pointer<CheatDatabase> cheatDatabase;
+extern unique_pointer<CheatWindow> cheatWindow;
 extern unique_pointer<ToolsWindow> toolsWindow;

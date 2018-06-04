@@ -20,8 +20,8 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   int originX = (a * clip(hoffset - hcenter) & ~63) + (b * clip(voffset - vcenter) & ~63) + (b * y & ~63) + (hcenter << 8);
   int originY = (c * clip(hoffset - hcenter) & ~63) + (d * clip(voffset - vcenter) & ~63) + (d * y & ~63) + (vcenter << 8);
 
-  bool windowAbove[256];
-  bool windowBelow[256];
+  array<bool[256]> windowAbove;
+  array<bool[256]> windowBelow;
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 

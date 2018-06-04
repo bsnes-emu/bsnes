@@ -1,8 +1,8 @@
 auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
   if(!self.aboveEnable && !self.belowEnable) return;
 
-  bool windowAbove[256];
-  bool windowBelow[256];
+  array<bool[256]> windowAbove;
+  array<bool[256]> windowBelow;
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 

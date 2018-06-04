@@ -11,6 +11,7 @@
 //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
 //- floating-point usage is not portable across different implementations
 
+#include <nall/array.hpp>
 #include <nall/range.hpp>
 #include <nall/stdint.hpp>
 #include <nall/traits.hpp>
@@ -94,6 +95,10 @@ struct serializer {
   template<typename T> auto array(T array, uint size) -> serializer& {
     for(uint n : range(size)) operator()(array[n]);
     return *this;
+  }
+
+  template<typename T, uint Size> auto array(nall::array<T[Size]>& array) -> serializer& {
+    for(auto& value : array) operator()(value);
   }
 
   template<typename T> auto operator()(T& value, typename std::enable_if<has_serialize<T>::value>::type* = 0) -> serializer& { value.serialize(*this); return *this; }

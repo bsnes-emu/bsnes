@@ -140,8 +140,8 @@ struct VDP : Thread {
 
     Pixel output;
 
-    array<Object, 80> oam;
-    array<Object, 20> objects;
+    adaptive_array<Object, 80> oam;
+    adaptive_array<Object, 20> objects;
   };
   Sprite sprite;
 

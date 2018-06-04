@@ -3,8 +3,8 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
   if(self.tileMode == TileMode::Mode7) return renderMode7(self, source);
   if(self.tileMode == TileMode::Inactive) return;
 
-  bool windowAbove[256];
-  bool windowBelow[256];
+  array<bool[256]> windowAbove;
+  array<bool[256]> windowBelow;
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 

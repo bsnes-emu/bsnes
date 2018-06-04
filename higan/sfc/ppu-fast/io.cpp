@@ -589,11 +589,11 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::BPP2;
     io.bg3.tileMode = TileMode::BPP2;
     io.bg4.tileMode = TileMode::BPP2;
-    memory::assign(io.bg1.priority, 8, 11);
-    memory::assign(io.bg2.priority, 7, 10);
-    memory::assign(io.bg3.priority, 2,  5);
-    memory::assign(io.bg4.priority, 1,  4);
-    memory::assign(io.obj.priority, 3,  6, 9, 12);
+    io.bg1.priority = { 8, 11};
+    io.bg2.priority = { 7, 10};
+    io.bg3.priority = { 2,  5};
+    io.bg4.priority = { 1,  4};
+    io.obj.priority = { 3,  6, 9, 12};
     break;
 
   case 1:
@@ -602,15 +602,15 @@ auto PPU::updateVideoMode() -> void {
     io.bg3.tileMode = TileMode::BPP2;
     io.bg4.tileMode = TileMode::Inactive;
     if(io.bgPriority) {
-      memory::assign(io.bg1.priority, 5,  8);
-      memory::assign(io.bg2.priority, 4,  7);
-      memory::assign(io.bg3.priority, 1, 10);
-      memory::assign(io.obj.priority, 2,  3, 6,  9);
+      io.bg1.priority = { 5,  8};
+      io.bg2.priority = { 4,  7};
+      io.bg3.priority = { 1, 10};
+      io.obj.priority = { 2,  3, 6,  9};
     } else {
-      memory::assign(io.bg1.priority, 6,  9);
-      memory::assign(io.bg2.priority, 5,  8);
-      memory::assign(io.bg3.priority, 1,  3);
-      memory::assign(io.obj.priority, 2,  4, 7, 10);
+      io.bg1.priority = { 6,  9};
+      io.bg2.priority = { 5,  8};
+      io.bg3.priority = { 1,  3};
+      io.obj.priority = { 2,  4, 7, 10};
     }
     break;
 
@@ -619,9 +619,9 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::BPP4;
     io.bg3.tileMode = TileMode::Inactive;
     io.bg4.tileMode = TileMode::Inactive;
-    memory::assign(io.bg1.priority, 3, 7);
-    memory::assign(io.bg2.priority, 1, 5);
-    memory::assign(io.obj.priority, 2, 4, 6, 8);
+    io.bg1.priority = { 3, 7};
+    io.bg2.priority = { 1, 5};
+    io.obj.priority = { 2, 4, 6, 8};
     break;
 
   case 3:
@@ -629,9 +629,9 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::BPP4;
     io.bg3.tileMode = TileMode::Inactive;
     io.bg4.tileMode = TileMode::Inactive;
-    memory::assign(io.bg1.priority, 3, 7);
-    memory::assign(io.bg2.priority, 1, 5);
-    memory::assign(io.obj.priority, 2, 4, 6, 8);
+    io.bg1.priority = { 3, 7};
+    io.bg2.priority = { 1, 5};
+    io.obj.priority = { 2, 4, 6, 8};
     break;
 
   case 4:
@@ -639,9 +639,9 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::BPP2;
     io.bg3.tileMode = TileMode::Inactive;
     io.bg4.tileMode = TileMode::Inactive;
-    memory::assign(io.bg1.priority, 3, 7);
-    memory::assign(io.bg2.priority, 1, 5);
-    memory::assign(io.obj.priority, 2, 4, 6, 8);
+    io.bg1.priority = { 3, 7};
+    io.bg2.priority = { 1, 5};
+    io.obj.priority = { 2, 4, 6, 8};
     break;
 
   case 5:
@@ -649,9 +649,9 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::BPP2;
     io.bg3.tileMode = TileMode::Inactive;
     io.bg4.tileMode = TileMode::Inactive;
-    memory::assign(io.bg1.priority, 3, 7);
-    memory::assign(io.bg2.priority, 1, 5);
-    memory::assign(io.obj.priority, 2, 4, 6, 8);
+    io.bg1.priority = { 3, 7};
+    io.bg2.priority = { 1, 5};
+    io.obj.priority = { 2, 4, 6, 8};
     break;
 
   case 6:
@@ -659,8 +659,8 @@ auto PPU::updateVideoMode() -> void {
     io.bg2.tileMode = TileMode::Inactive;
     io.bg3.tileMode = TileMode::Inactive;
     io.bg4.tileMode = TileMode::Inactive;
-    memory::assign(io.bg1.priority, 2, 5);
-    memory::assign(io.obj.priority, 1, 3, 4, 6);
+    io.bg1.priority = { 2, 5};
+    io.obj.priority = { 1, 3, 4, 6};
     break;
 
   case 7:
@@ -669,16 +669,16 @@ auto PPU::updateVideoMode() -> void {
       io.bg2.tileMode = TileMode::Inactive;
       io.bg3.tileMode = TileMode::Inactive;
       io.bg4.tileMode = TileMode::Inactive;
-      memory::assign(io.bg1.priority, 2);
-      memory::assign(io.obj.priority, 1, 3, 4, 5);
+      io.bg1.priority = { 2};
+      io.obj.priority = { 1, 3, 4, 5};
     } else {
       io.bg1.tileMode = TileMode::Mode7;
       io.bg2.tileMode = TileMode::Mode7;
       io.bg3.tileMode = TileMode::Inactive;
       io.bg4.tileMode = TileMode::Inactive;
-      memory::assign(io.bg1.priority, 3);
-      memory::assign(io.bg2.priority, 1, 5);
-      memory::assign(io.obj.priority, 2, 4, 6, 7);
+      io.bg1.priority = { 3};
+      io.bg2.priority = { 1, 5};
+      io.obj.priority = { 2, 4, 6, 7};
     }
     break;
   }

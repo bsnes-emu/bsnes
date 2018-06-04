@@ -68,7 +68,7 @@ struct VDP : Thread {
       uint4 color;
     } output;
 
-    array<Object, 8> objects;
+    adaptive_array<Object, 8> objects;
   } sprite;
 
   //serialization.cpp
