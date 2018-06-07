@@ -58,15 +58,26 @@ struct Presentation : Window {
         MenuItem saveState3{&saveState};
         MenuItem saveState4{&saveState};
         MenuItem saveState5{&saveState};
+        MenuItem saveState6{&saveState};
+        MenuItem saveState7{&saveState};
+        MenuItem saveState8{&saveState};
+        MenuItem saveState9{&saveState};
       Menu loadState{&toolsMenu};
         MenuItem loadState1{&loadState};
         MenuItem loadState2{&loadState};
         MenuItem loadState3{&loadState};
         MenuItem loadState4{&loadState};
         MenuItem loadState5{&loadState};
+        MenuItem loadState6{&loadState};
+        MenuItem loadState7{&loadState};
+        MenuItem loadState8{&loadState};
+        MenuItem loadState9{&loadState};
+        MenuSeparator loadStateSeparator{&loadState};
+        MenuItem loadState0{&loadState};
       MenuCheckItem pauseEmulation{&toolsMenu};
       MenuSeparator toolsSeparator{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
+      MenuItem stateManager{&toolsMenu};
     Menu helpMenu{&menuBar};
       MenuItem about{&helpMenu};
 

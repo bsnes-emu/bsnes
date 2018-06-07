@@ -65,9 +65,13 @@ auto BrowserDialogWindow::accept() -> void {
     response.selected.append(string{state.path, name});
   }
 
-  if(state.action == "selectFolder" && batched) {
-    string name = batched.left()->cell(0)->text();
-    if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
+  if(state.action == "selectFolder") {
+    if(batched) {
+      string name = batched.left()->cell(0)->text();
+      if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
+    } else {
+      response.selected.append(state.path);
+    }
   }
 
   if(response.selected) window.setModal(false);

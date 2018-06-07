@@ -38,8 +38,8 @@ public:
       Button assignMouse2{&controlLayout, Size{100, 0}};
       Button assignMouse3{&controlLayout, Size{100, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button resetButton{&controlLayout, Size{80, 0}};
-      Button eraseButton{&controlLayout, Size{80, 0}};
+      Button assignButton{&controlLayout, Size{80, 0}};
+      Button clearButton{&controlLayout, Size{80, 0}};
 };
 
 struct HotkeySettings : TabFrameItem {
@@ -57,8 +57,8 @@ public:
     TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button resetButton{&controlLayout, Size{80, 0}};
-      Button eraseButton{&controlLayout, Size{80, 0}};
+      Button assignButton{&controlLayout, Size{80, 0}};
+      Button clearButton{&controlLayout, Size{80, 0}};
 };
 
 struct PathSettings : TabFrameItem {

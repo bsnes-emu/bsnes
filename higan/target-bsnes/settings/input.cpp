@@ -20,36 +20,35 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   portList.onChange([&] { reloadDevices(); });
   deviceLabel.setText("Device:");
   deviceList.onChange([&] { reloadMappings(); });
-  mappingList.onActivate([&] { assignMapping(); });
+  mappingList.setBatchable();
+  mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
   mappingList.onChange([&] { updateControls(); });
   assignMouse1.onActivate([&] { assignMouseInput(0); });
   assignMouse2.onActivate([&] { assignMouseInput(1); });
   assignMouse3.onActivate([&] { assignMouseInput(2); });
-  resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsWindow).question() == "Yes") {
-      for(auto& mapping : activeDevice().mappings) mapping.unbind();
-      refreshMappings();
-    }
+  assignButton.setText("Assign").onActivate([&] {
+    assignMapping();
   });
-  eraseButton.setText("Erase").onActivate([&] {
-    if(auto mapping = mappingList.selected()) {
+  clearButton.setText("Clear").onActivate([&] {
+    for(auto mapping : mappingList.batched()) {
       activeDevice().mappings[mapping.offset()].unbind();
-      refreshMappings();
     }
+    refreshMappings();
   });
 
   reloadPorts();
 }
 
 auto InputSettings::updateControls() -> void {
-  eraseButton.setEnabled((bool)mappingList.selected());
+  auto batched = mappingList.batched();
+  assignButton.setEnabled(batched.size() == 1);
+  clearButton.setEnabled(batched.size() >= 1);
   assignMouse1.setVisible(false);
   assignMouse2.setVisible(false);
   assignMouse3.setVisible(false);
 
-  if(auto mapping = mappingList.selected()) {
-    auto& input = activeDevice().mappings[mapping.offset()];
-
+  if(batched.size() == 1) {
+    auto& input = activeDevice().mappings[batched.left().offset()];
     if(input.isDigital()) {
       assignMouse1.setVisible().setText("Mouse Left");
       assignMouse2.setVisible().setText("Mouse Middle");
@@ -118,7 +117,7 @@ auto InputSettings::refreshMappings() -> void {
 auto InputSettings::assignMapping() -> void {
   inputManager->poll();  //clear any pending events first
 
-  if(auto mapping = mappingList.selected()) {
+  for(auto mapping : mappingList.batched()) {
     activeMapping = activeDevice().mappings[mapping.offset()];
     settingsWindow->layout.setEnabled(false);
     settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
@@ -150,6 +149,7 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
       timer.setEnabled(false);
       settingsWindow->statusBar.setText();
       settingsWindow->layout.setEnabled();
+      settingsWindow->doSize();
     }).setInterval(200).setEnabled();
   }
 }

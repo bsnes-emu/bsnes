@@ -10,20 +10,20 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Save State").onPress([&] {
-    program->saveState(stateSlot);
+    program->saveState({"Quick/Slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load State").onPress([&] {
-    program->loadState(stateSlot);
+    program->loadState({"Quick/Slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {
-    if(--stateSlot < 1) stateSlot = 5;
+    if(--stateSlot < 1) stateSlot = 9;
     program->showMessage({"Selected state slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Decrement State Slot").onPress([&] {
-    if(++stateSlot > 5) stateSlot = 1;
+    if(++stateSlot > 9) stateSlot = 1;
     program->showMessage({"Selected state slot ", stateSlot});
   }));
 

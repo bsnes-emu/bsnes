@@ -106,21 +106,31 @@ Presentation::Presentation() {
 
   toolsMenu.setText("Tools").setVisible(false);
   saveState.setText("Save State");
-  saveState1.setText("Slot 1").onActivate([&] { program->saveState(1); });
-  saveState2.setText("Slot 2").onActivate([&] { program->saveState(2); });
-  saveState3.setText("Slot 3").onActivate([&] { program->saveState(3); });
-  saveState4.setText("Slot 4").onActivate([&] { program->saveState(4); });
-  saveState5.setText("Slot 5").onActivate([&] { program->saveState(5); });
+  saveState1.setText("Slot 1").onActivate([&] { program->saveState("Quick/Slot 1"); });
+  saveState2.setText("Slot 2").onActivate([&] { program->saveState("Quick/Slot 2"); });
+  saveState3.setText("Slot 3").onActivate([&] { program->saveState("Quick/Slot 3"); });
+  saveState4.setText("Slot 4").onActivate([&] { program->saveState("Quick/Slot 4"); });
+  saveState5.setText("Slot 5").onActivate([&] { program->saveState("Quick/Slot 5"); });
+  saveState6.setText("Slot 6").onActivate([&] { program->saveState("Quick/Slot 6"); });
+  saveState7.setText("Slot 7").onActivate([&] { program->saveState("Quick/Slot 7"); });
+  saveState8.setText("Slot 8").onActivate([&] { program->saveState("Quick/Slot 8"); });
+  saveState9.setText("Slot 9").onActivate([&] { program->saveState("Quick/Slot 9"); });
   loadState.setText("Load State");
-  loadState1.setText("Slot 1").onActivate([&] { program->loadState(1); });
-  loadState2.setText("Slot 2").onActivate([&] { program->loadState(2); });
-  loadState3.setText("Slot 3").onActivate([&] { program->loadState(3); });
-  loadState4.setText("Slot 4").onActivate([&] { program->loadState(4); });
-  loadState5.setText("Slot 5").onActivate([&] { program->loadState(5); });
+  loadState1.setText("Slot 1").onActivate([&] { program->loadState("Quick/Slot 1"); });
+  loadState2.setText("Slot 2").onActivate([&] { program->loadState("Quick/Slot 2"); });
+  loadState3.setText("Slot 3").onActivate([&] { program->loadState("Quick/Slot 3"); });
+  loadState4.setText("Slot 4").onActivate([&] { program->loadState("Quick/Slot 4"); });
+  loadState5.setText("Slot 5").onActivate([&] { program->loadState("Quick/Slot 5"); });
+  loadState6.setText("Slot 6").onActivate([&] { program->loadState("Quick/Slot 6"); });
+  loadState7.setText("Slot 7").onActivate([&] { program->loadState("Quick/Slot 7"); });
+  loadState8.setText("Slot 8").onActivate([&] { program->loadState("Quick/Slot 8"); });
+  loadState9.setText("Slot 9").onActivate([&] { program->loadState("Quick/Slot 9"); });
+  loadState0.setText("Recovery Slot").onActivate([&] { program->loadState("Quick/Recovery Slot"); });
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
   });
   cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
+  stateManager.setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
 
   helpMenu.setText("Help");
   about.setText("About ...").onActivate([&] {

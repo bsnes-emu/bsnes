@@ -16,6 +16,7 @@ auto Program::load() -> void {
       presentation->pauseEmulation.setChecked(false);
       presentation->resizeViewport();
       toolsWindow->cheatEditor.loadCheats();
+      toolsWindow->stateManager.loadStates();
 
       string locations = superNintendo.location;
       if(auto location = gameBoy.location) locations.append("|", location);
@@ -96,6 +97,7 @@ auto Program::unload() -> void {
   if(!emulator->loaded()) return;
   toolsWindow->cheatEditor.saveCheats();
   toolsWindow->setVisible(false);
+  saveRecoveryState();
   emulator->unload();
   superNintendo = {};
   gameBoy = {};

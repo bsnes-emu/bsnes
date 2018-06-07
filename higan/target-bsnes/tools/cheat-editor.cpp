@@ -44,11 +44,10 @@ auto CheatDatabase::findCheats() -> void {
 auto CheatDatabase::addCheats() -> void {
   for(auto item : cheatList.items()) {
     if(item.checked()) {
-      toolsWindow->cheatEditor.addCheat(item.text(), item.property("code"));
+      toolsWindow->cheatEditor.addCheat({item.text(), item.property("code"), false});
     }
   }
   setVisible(false);
-  toolsWindow->cheatEditor.synchronizeCodes();
 }
 
 //
@@ -58,29 +57,30 @@ CheatWindow::CheatWindow() {
 
   layout.setMargin(5);
   nameLabel.setText("Name:");
+  nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
   codeLabel.setText("Code:");
+  codeValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   codeValue.onChange([&] { doChange(); });
-  enabledOption.setText("Enabled");
+  enableOption.setText("Enable");
   acceptButton.onActivate([&] { doAccept(); });
-  cancelButton.setText("Cancel");
+  cancelButton.setText("Cancel").onActivate([&] { setVisible(false); });
 
-  setSize({480, layout.minimumSize().height()});
+  setSize({400, layout.minimumSize().height()});
   setDismissable();
 }
 
-auto CheatWindow::show(TableViewItem item) -> void {
-  this->item = item;
-  nameValue.setText(item.cell(1).text());
-  codeValue.setText(item.property("code"));
-  enabledOption.setChecked(item.cell(0).checked());
+auto CheatWindow::show(Cheat cheat) -> void {
+  nameValue.setText(cheat.name);
+  codeValue.setText(cheat.code);
+  enableOption.setChecked(cheat.enable);
   doChange();
-  setTitle(!item ? "Add Cheat Code" : "Edit Cheat Code");
+  setTitle(!cheat.name ? "Add Cheat" : "Edit Cheat");
   setCentered(*toolsWindow);
   setVisible();
   setFocused();
   nameValue.setFocused();
-  acceptButton.setText(!item ? "Add" : "Edit");
+  acceptButton.setText(!cheat.name ? "Add" : "Edit");
 }
 
 auto CheatWindow::doChange() -> void {
@@ -91,12 +91,11 @@ auto CheatWindow::doChange() -> void {
 }
 
 auto CheatWindow::doAccept() -> void {
-  if(item) {
-    item.cell(0).setChecked(enabledOption.checked());
-    item.cell(1).setText(nameValue.text());
-    item.setProperty("code", codeValue.text());
+  Cheat cheat = {nameValue.text().strip(), codeValue.text().strip(), enableOption.checked()};
+  if(acceptButton.text() == "Add") {
+    toolsWindow->cheatEditor.addCheat(cheat);
   } else {
-    toolsWindow->cheatEditor.addCheat(nameValue.text(), codeValue.text(), enabledOption.checked());
+    toolsWindow->cheatEditor.editCheat(cheat);
   }
   setVisible(false);
 }
@@ -108,111 +107,108 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setText("Cheat Editor");
 
   layout.setMargin(5);
-  cheatList.onActivate([&] { modifyButton.doActivate(); });
+  cheatList.setBatchable();
+  cheatList.onActivate([&] {
+    editButton.doActivate();
+  });
   cheatList.onChange([&] {
-    auto selected = cheatList.selected();
-    upButton.setEnabled((bool)selected && selected.offset() != 0);
-    downButton.setEnabled((bool)selected && selected.offset() != cheatList.itemCount() - 1);
-    modifyButton.setEnabled((bool)selected);
-    removeButton.setEnabled((bool)selected);
+    auto batched = cheatList.batched();
+    editButton.setEnabled(batched.size() == 1);
+    removeButton.setEnabled(batched.size() >= 1);
   });
-  cheatList.onToggle([&](TableViewCell) { synchronizeCodes(); });
-  upButton.setIcon(Icon::Go::Up).onActivate([&] {
-    if(auto item = cheatList.selected()) {
-      swap(item.offset(), item.offset() - 1);
-    }
-  });
-  downButton.setIcon(Icon::Go::Down).onActivate([&] {
-    if(auto item = cheatList.selected()) {
-      swap(item.offset(), item.offset() + 1);
-    }
+  cheatList.onToggle([&](TableViewCell) {
+    synchronizeCodes();
   });
   findCheatsButton.setText("Find Cheats ...").onActivate([&] {
     cheatDatabase->findCheats();
   });
-  resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to permanently erase all cheat codes?").setParent(*toolsWindow).question() == "Yes") {
-      cheatList.reset().append(TableViewHeader()
-        .append(TableViewColumn())
-        .append(TableViewColumn().setExpandable())
-        .setVisible(false)
-      );
-      synchronizeCodes();
-    }
-  });
-  appendButton.setText("Add").onActivate([&] {
+  addButton.setText("Add").onActivate([&] {
     cheatWindow->show();
   });
-  modifyButton.setText("Edit").onActivate([&] {
+  editButton.setText("Edit").onActivate([&] {
     if(auto item = cheatList.selected()) {
-      cheatWindow->show(item);
+      cheatWindow->show(cheats[item.offset()]);
     }
   });
   removeButton.setText("Remove").onActivate([&] {
-    if(auto item = cheatList.selected()) {
-      cheatList.remove(item).doChange();
-    }
+    removeCheats();
   });
 
   //do not display "Find Cheats" button if there is no cheat database available
   if(!file::exists(locate("cheats.bml"))) findCheatsButton.setVisible(false);
 }
 
-auto CheatEditor::swap(uint x, uint y) -> void {
-  auto itemX = cheatList.item(x);
-  auto itemY = cheatList.item(y);
-  auto enabled = itemX.cell(0).checked();
-  auto name = itemX.cell(1).text();
-  auto code = itemX.property("code");
-  itemX.cell(0).setChecked(itemY.cell(0).checked());
-  itemX.cell(1).setText(itemY.cell(1).text());
-  itemX.setProperty("code", itemY.property("code"));
-  itemY.cell(0).setChecked(enabled);
-  itemY.cell(1).setText(name);
-  itemY.setProperty("code", code);
-  itemY.setSelected();
-  cheatList.doChange();
-}
-
-auto CheatEditor::synchronizeCodes() -> void {
-  string_vector codes;
-  for(auto item : cheatList.items()) {
-    if(item.cell(0).checked()) codes.append(item.property("code"));
-  }
-  emulator->cheatSet(codes);
-}
-
-auto CheatEditor::addCheat(string name, string code, bool enabled) -> void {
-  cheatList.append(TableViewItem()
-    .append(TableViewCell().setChecked(enabled))
-    .append(TableViewCell().setText(name))
-    .setProperty("code", code)
-  ).resizeColumns();
-}
-
-auto CheatEditor::loadCheats() -> void {
-  cheatList.reset().append(TableViewHeader()
+auto CheatEditor::refresh() -> void {
+  cheatList.reset();
+  cheatList.append(TableViewHeader().setVisible(false)
     .append(TableViewColumn())
     .append(TableViewColumn().setExpandable())
-    .setVisible(false)
   );
-  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
-  auto document = BML::unserialize(string::read(location));
-  for(auto cheat : document.find("cheat")) {
-    addCheat(cheat["name"].text(), cheat["code"].text(), (bool)cheat["enabled"]);
+  for(auto& cheat : cheats) {
+    cheatList.append(TableViewItem()
+      .append(TableViewCell().setCheckable().setChecked(cheat.enable))
+      .append(TableViewCell().setText(cheat.name))
+    );
+  }
+  cheatList.resizeColumns().doChange();
+}
+
+auto CheatEditor::addCheat(Cheat cheat) -> void {
+  cheats.append(cheat);
+  cheats.sort();
+  refresh();
+  for(uint index : range(cheats)) {
+    if(cheats[index] == cheat) { cheatList.item(index).setSelected(); break; }
   }
   cheatList.doChange();
   synchronizeCodes();
 }
 
+auto CheatEditor::editCheat(Cheat cheat) -> void {
+  if(auto item = cheatList.selected()) {
+    cheats[item.offset()] = cheat;
+    cheats.sort();
+    refresh();
+    for(uint index : range(cheats)) {
+      if(cheats[index] == cheat) { cheatList.item(index).setSelected(); break; }
+    }
+    cheatList.doChange();
+    synchronizeCodes();
+  }
+}
+
+auto CheatEditor::removeCheats() -> void {
+  if(auto batched = cheatList.batched()) {
+    if(MessageDialog("Are you sure you want to permanently remove the selected cheat(s)?")
+    .setParent(*toolsWindow).question() == "Yes") {
+      for(uint index : rrange(batched)) cheats.remove(batched[index].offset());
+      cheats.sort();
+      refresh();
+      synchronizeCodes();
+    }
+  }
+}
+
+auto CheatEditor::loadCheats() -> void {
+  cheats.reset();
+  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
+  auto document = BML::unserialize(string::read(location));
+  for(auto cheat : document.find("cheat")) {
+    cheats.append({cheat["name"].text(), cheat["code"].text(), (bool)cheat["enable"]});
+  }
+  cheats.sort();
+  refresh();
+  synchronizeCodes();
+}
+
 auto CheatEditor::saveCheats() -> void {
   string document;
-  for(auto item : cheatList.items()) {
+  for(auto cheat : cheats) {
     document.append("cheat\n");
-    document.append("  name: ", item.cell(1).text(), "\n");
-    document.append("  code: ", item.property("code"), "\n");
-  if(item.cell(0).checked())
-    document.append("  enabled\n");
+    document.append("  name: ", cheat.name, "\n");
+    document.append("  code: ", cheat.code, "\n");
+  if(cheat.enable)
+    document.append("  enable\n");
     document.append("\n");
   }
   auto location = program->path("Cheats", program->superNintendo.location, ".cht");
@@ -221,4 +217,12 @@ auto CheatEditor::saveCheats() -> void {
   } else {
     file::remove(location);
   }
+}
+
+auto CheatEditor::synchronizeCodes() -> void {
+  string_vector codes;
+  for(auto& cheat : cheats) {
+    if(cheat.enable) codes.append(cheat.code);
+  }
+  emulator->cheatSet(codes);
 }

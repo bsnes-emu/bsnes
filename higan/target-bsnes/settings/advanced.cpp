@@ -23,6 +23,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the video driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->initializeVideoDriver();
@@ -61,6 +62,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the audio driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->initializeAudioDriver();
@@ -99,6 +101,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the input driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->initializeInputDriver();

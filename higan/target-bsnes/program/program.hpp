@@ -24,8 +24,10 @@ struct Program : Emulator::Platform {
   auto path(string type, string location, string extension = "") -> string;
 
   //state.cpp
-  auto loadState(uint slot) -> bool;
-  auto saveState(uint slot) -> bool;
+  auto statePath() -> string;
+  auto loadState(string filename) -> bool;
+  auto saveState(string filename) -> bool;
+  auto saveRecoveryState() -> bool;
 
   //utility.cpp
   auto initializeVideoDriver() -> void;

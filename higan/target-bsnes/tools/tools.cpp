@@ -1,7 +1,9 @@
 #include "../bsnes.hpp"
 #include "cheat-editor.cpp"
+#include "state-manager.cpp"
 unique_pointer<CheatDatabase> cheatDatabase;
 unique_pointer<CheatWindow> cheatWindow;
+unique_pointer<StateWindow> stateWindow;
 unique_pointer<ToolsWindow> toolsWindow;
 
 ToolsWindow::ToolsWindow() {
@@ -16,6 +18,7 @@ ToolsWindow::ToolsWindow() {
 
   onSize([&] {
     cheatEditor.cheatList.resizeColumns();
+    stateManager.stateList.resizeColumns();
   });
 
   onClose([&] {
@@ -28,6 +31,7 @@ auto ToolsWindow::setVisible(bool visible) -> ToolsWindow& {
   if(!visible) {
     cheatDatabase->setVisible(false);
     cheatWindow->setVisible(false);
+    stateWindow->setVisible(false);
   }
   return *this;
 }

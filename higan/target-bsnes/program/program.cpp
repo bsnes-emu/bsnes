@@ -58,6 +58,7 @@ Program::Program(string_vector arguments) {
   new SettingsWindow;
   new CheatDatabase;
   new CheatWindow;
+  new StateWindow;
   new ToolsWindow;
   new AboutWindow;
 

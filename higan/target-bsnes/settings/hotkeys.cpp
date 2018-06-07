@@ -3,19 +3,23 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Hotkeys");
 
   layout.setMargin(5);
-  mappingList.onActivate([&] { assignMapping(); });
-  mappingList.onChange([&] { eraseButton.setEnabled((bool)mappingList.selected()); });
-  resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to erase all hotkey mappings?").setParent(*settingsWindow).question() == "Yes") {
-      for(auto& mapping : inputManager->hotkeys) mapping.unbind();
-      refreshMappings();
-    }
+  mappingList.setBatchable();
+  mappingList.onActivate([&] {
+    if(assignButton.enabled()) assignButton.doActivate();
   });
-  eraseButton.setText("Erase").onActivate([&] {
-    if(auto item = mappingList.selected()) {
+  mappingList.onChange([&] {
+    auto batched = mappingList.batched();
+    assignButton.setEnabled(batched.size() == 1);
+    clearButton.setEnabled(batched.size() >= 1);
+  });
+  assignButton.setText("Assign").onActivate([&] {
+    assignMapping();
+  });
+  clearButton.setText("Clear").onActivate([&] {
+    for(auto item : mappingList.batched()) {
       inputManager->hotkeys[item.offset()].unbind();
-      refreshMappings();
     }
+    refreshMappings();
   });
 
   reloadMappings();
@@ -67,6 +71,7 @@ auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, 
       timer.setEnabled(false);
       settingsWindow->statusBar.setText();
       settingsWindow->layout.setEnabled();
+      settingsWindow->doSize();
     }).setInterval(200).setEnabled();
   }
 }
