@@ -776,7 +776,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 /* Todo: Timing (Including penalty and access timings) not verified by test ROM */
                 if (!gb->in_window && window_enabled(gb) &&
                     gb->current_line >= gb->io_registers[GB_IO_WY] + gb->wy_diff &&
-                    gb->position_in_line + 7 == gb->io_registers[GB_IO_WX]) {
+                    (uint8_t)(gb->position_in_line + 7) == gb->io_registers[GB_IO_WX]) {
                     gb->in_window = true;
                     fifo_clear(&gb->bg_fifo);
                     gb->bg_fifo_paused = true;
