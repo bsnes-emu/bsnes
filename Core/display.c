@@ -230,7 +230,6 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
  
  */
 
-/* Todo: When the CPU and PPU write to IF at the same T-cycle, the PPU write is ignored. */
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
@@ -643,7 +642,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->ly_for_comparison = gb->current_line? -1 : 0;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
-             PPU glitch. */
+             PPU glitch? */
             if (gb->current_line != 0) {
                 gb->mode_for_interrupt = 2;
                 gb->io_registers[GB_IO_STAT] &= ~3;

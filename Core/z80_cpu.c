@@ -115,10 +115,19 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             return;
         }
         
-        /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle*/
+        /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle */
         case GB_CONFLICT_STAT_DMG:
             GB_advance_cycles(gb, gb->pending_cycles);
-            GB_write_memory(gb, addr, 0xFF);
+            /* State 7 is the edge between HBlank and OAM mode, and it behaves a bit weird.
+               The OAM interrupt seems to be blocked by HBlank interrupts in that case, despite
+               the timing not making much sense for that.
+               This is a hack to simulate this effect */
+            if (gb->display_state == 7 && (gb->io_registers[GB_IO_STAT] & 0x28) == 0x08) {
+                GB_write_memory(gb, addr, ~0x20);
+            }
+            else {
+                GB_write_memory(gb, addr, 0xFF);
+            }
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
