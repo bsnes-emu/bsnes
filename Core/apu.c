@@ -430,8 +430,8 @@ void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
     gb->apu.lf_div = 1;
-    /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode), the
-       first DIV/APU event is skipped. */
+    /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
+       the first DIV/APU event is skipped. */
     if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
         gb->apu.skip_div_event = true;
     }
