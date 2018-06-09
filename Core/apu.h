@@ -108,6 +108,8 @@ typedef struct
         
     } noise_channel;
     
+    bool skip_div_event;
+    
 } GB_apu_t;
 
 typedef enum {

@@ -181,6 +181,10 @@ static void nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
+    if (gb->apu.skip_div_event) {
+        gb->apu.skip_div_event = false;
+        return;
+    }
     gb->apu.div_divider++;
 
     if ((gb->apu.div_divider & 7) == 0) {
@@ -426,6 +430,11 @@ void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
     gb->apu.lf_div = 1;
+    /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode), the
+       first DIV/APU event is skipped. */
+    if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
+        gb->apu.skip_div_event = true;
+    }
 }
 
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
