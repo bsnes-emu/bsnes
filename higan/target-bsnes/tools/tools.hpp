@@ -100,8 +100,9 @@ public:
     TableView stateList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Button loadButton{&controlLayout, Size{80, 0}};
-      Widget spacer{&controlLayout, Size{~0, 0}};
       Button saveButton{&controlLayout, Size{80, 0}};
+      Widget spacer{&controlLayout, Size{~0, 0}};
+      Button addButton{&controlLayout, Size{80, 0}};
       Button editButton{&controlLayout, Size{80, 0}};
       Button removeButton{&controlLayout, Size{80, 0}};
 };

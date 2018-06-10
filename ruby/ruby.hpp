@@ -33,9 +33,16 @@ struct Video {
   virtual auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
   virtual auto unlock() -> void {}
   virtual auto output() -> void {}
+  virtual auto poll() -> void {}
+
+  auto onUpdate(const nall::function<void (uint, uint)>& callback) { _onUpdate = callback; }
+  auto doUpdate(uint width, uint height) -> void {
+    if(_onUpdate) return _onUpdate(width, height);
+  }
 
 private:
   nall::string _driver;
+  nall::function<void (uint, uint)> _onUpdate;
 };
 
 struct Audio {
@@ -100,7 +107,7 @@ struct Input {
 
   auto onChange(const nall::function<void (nall::shared_pointer<nall::HID::Device>, uint, uint, int16_t, int16_t)>& callback) { _onChange = callback; }
   auto doChange(nall::shared_pointer<nall::HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {
-    if(_onChange) _onChange(device, group, input, oldValue, newValue);
+    if(_onChange) return _onChange(device, group, input, oldValue, newValue);
   }
 
 private:

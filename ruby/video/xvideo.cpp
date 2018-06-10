@@ -91,6 +91,18 @@ struct VideoXVideo : Video {
       true);
   }
 
+  auto poll() -> void {
+    while(XPending(_display)) {
+      XEvent event;
+      XNextEvent(_display, &event);
+      if(event.type == Expose) {
+        XWindowAttributes attributes;
+        XGetWindowAttributes(_display, _window, &attributes);
+        doUpdate(attributes.width, attributes.height);
+      }
+    }
+  }
+
 private:
   auto initialize() -> bool {
     terminate();
@@ -148,11 +160,11 @@ private:
     XSetWindowAttributes attributes;
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
-    attributes.event_mask = StructureNotifyMask;
     _window = XCreateWindow(_display, /* parent = */ (Window)_context,
       /* x = */ 0, /* y = */ 0, window_attributes.width, window_attributes.height,
       /* border_width = */ 0, _depth, InputOutput, visualInfo->visual,
       CWColormap | CWBorderPixel | CWEventMask, &attributes);
+    XSelectInput(_display, _window, ExposureMask);
     XFree(visualInfo);
     XSetWindowBackground(_display, _window, /* color = */ 0);
     XMapWindow(_display, _window);

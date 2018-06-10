@@ -415,19 +415,19 @@ auto SA1::writeIO(uint24 addr, uint8 data) -> void {
 
   //(MAL) multiplicand / dividend low
   case 0x2251: {
-    mmio.ma = (mmio.ma & 0xff00) | data;
+    mmio.ma.byte(0) = data;
     return;
   }
 
   //(MAH) multiplicand / dividend high
   case 0x2252: {
-    mmio.ma = (data << 8) | (mmio.ma & 0x00ff);
+    mmio.ma.byte(1) = data;
     return;
   }
 
   //(MBL) multiplier / divisor low
   case 0x2253: {
-    mmio.mb = (mmio.mb & 0xff00) | data;
+    mmio.mb.byte(0) = data;
     return;
   }
 
@@ -435,21 +435,23 @@ auto SA1::writeIO(uint24 addr, uint8 data) -> void {
   //multiplication / cumulative sum only resets MB
   //division resets both MA and MB
   case 0x2254: {
-    mmio.mb = (data << 8) | (mmio.mb & 0x00ff);
+    mmio.mb.byte(1) = data;
 
     if(mmio.acm == 0) {
       if(mmio.md == 0) {
         //signed multiplication
-        mmio.mr = (int16)mmio.ma * (int16)mmio.mb;
+        mmio.mr = (uint32)((int16)mmio.ma * (int16)mmio.mb);
         mmio.mb = 0;
       } else {
         //unsigned division
         if(mmio.mb == 0) {
           mmio.mr = 0;
         } else {
-          int16  quotient  = (int16)mmio.ma / (uint16)mmio.mb;
-          uint16 remainder = (int16)mmio.ma % (uint16)mmio.mb;
-          mmio.mr = (remainder << 16) | quotient;
+          int16 dividend = mmio.ma;
+          uint16 divisor = mmio.mb;
+          uint16 remainder = dividend >= 0 ? dividend % divisor : (dividend % divisor + divisor) % divisor;
+          uint16 quotient = (dividend - remainder) / divisor;
+          mmio.mr = remainder << 16 | quotient;
         }
         mmio.ma = 0;
         mmio.mb = 0;
@@ -457,8 +459,8 @@ auto SA1::writeIO(uint24 addr, uint8 data) -> void {
     } else {
       //sigma (accumulative multiplication)
       mmio.mr += (int16)mmio.ma * (int16)mmio.mb;
-      mmio.overflow = (mmio.mr >= (1ULL << 40));
-      mmio.mr &= (1ULL << 40) - 1;
+      mmio.overflow = mmio.mr >> 40;
+      mmio.mr = (uint40)mmio.mr;
       mmio.mb = 0;
     }
     return;

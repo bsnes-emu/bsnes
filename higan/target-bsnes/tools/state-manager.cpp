@@ -75,6 +75,7 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   stateList.onChange([&] {
     auto batched = stateList.batched();
     loadButton.setEnabled(batched.size() == 1);
+    saveButton.setEnabled(batched.size() == 1);
     editButton.setEnabled(batched.size() == 1);
     removeButton.setEnabled(batched.size() >= 1);
   });
@@ -84,6 +85,11 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
     }
   });
   saveButton.setText("Save").onActivate([&] {
+    if(auto item = stateList.selected()) {
+      program->saveState(item.cell(0).text());
+    }
+  });
+  addButton.setText("Add").onActivate([&] {
     stateWindow->show();
   });
   editButton.setText("Edit").onActivate([&] {

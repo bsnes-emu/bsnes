@@ -111,6 +111,18 @@ struct VideoGLX2 : Video {
     if(_isDoubleBuffered) glXSwapBuffers(_display, _glXWindow);
   }
 
+  auto poll() -> void {
+    while(XPending(_display)) {
+      XEvent event;
+      XNextEvent(_display, &event);
+      if(event.type == Expose) {
+        XWindowAttributes attributes;
+        XGetWindowAttributes(_display, _window, &attributes);
+        doUpdate(attributes.width, attributes.height);
+      }
+    }
+  }
+
 private:
   auto initialize() -> bool {
     terminate();
@@ -147,6 +159,7 @@ private:
     attributes.border_pixel = 0;
     _window = XCreateWindow(_display, (Window)_context, 0, 0, windowAttributes.width, windowAttributes.height,
       0, vi->depth, InputOutput, vi->visual, CWColormap | CWBorderPixel, &attributes);
+    XSelectInput(_display, _window, ExposureMask);
     XSetWindowBackground(_display, _window, 0);
     XMapWindow(_display, _window);
     XFlush(_display);

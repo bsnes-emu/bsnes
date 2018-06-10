@@ -49,6 +49,8 @@ struct Presentation : Window {
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
       MenuSeparator settingsSeparator{&settingsMenu};
+      MenuItem videoSettings{&settingsMenu};
+      MenuItem audioSettings{&settingsMenu};
       MenuItem inputSettings{&settingsMenu};
       MenuItem hotkeySettings{&settingsMenu};
       MenuItem pathSettings{&settingsMenu};

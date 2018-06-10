@@ -34,7 +34,7 @@ auto HotkeySettings::reloadMappings() -> void {
   );
   for(auto& hotkey : inputManager->hotkeys) {
     mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(hotkey.name))
+      .append(TableViewCell().setText(hotkey.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))
       .append(TableViewCell())
     );
   }

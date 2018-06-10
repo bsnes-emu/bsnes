@@ -1,4 +1,6 @@
 #include "../bsnes.hpp"
+#include "video.cpp"
+#include "audio.cpp"
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"

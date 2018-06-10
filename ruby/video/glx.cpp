@@ -91,6 +91,18 @@ struct VideoGLX : Video, OpenGL {
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
   }
 
+  auto poll() -> void {
+    while(XPending(_display)) {
+      XEvent event;
+      XNextEvent(_display, &event);
+      if(event.type == Expose) {
+        XWindowAttributes attributes;
+        XGetWindowAttributes(_display, _window, &attributes);
+        doUpdate(attributes.width, attributes.height);
+      }
+    }
+  }
+
 private:
   auto initialize() -> bool {
     terminate();
@@ -136,6 +148,7 @@ private:
       /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
       CWColormap | CWBorderPixel, &attributes);
+    XSelectInput(_display, _window, ExposureMask);
     XSetWindowBackground(_display, _window, /* color = */ 0);
     XMapWindow(_display, _window);
     XFlush(_display);

@@ -13,6 +13,7 @@ struct pCanvas : pWidget {
   auto setIcon(const image& icon) -> void;
   auto update() -> void;
 
+  auto _onDraw(cairo_t* context) -> void;
   auto _onExpose(GdkEventExpose* event) -> void;
   auto _rasterize() -> void;
   auto _redraw() -> void;

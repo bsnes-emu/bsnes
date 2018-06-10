@@ -8,6 +8,10 @@ auto Program::initializeVideoDriver() -> void {
     presentation->clearViewport();
     updateVideoShader();
   }
+
+  video->onUpdate([&](uint width, uint height) {
+    if(!emulator->loaded()) presentation->clearViewport();
+  });
 }
 
 auto Program::initializeAudioDriver() -> void {

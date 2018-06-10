@@ -30,7 +30,6 @@ static auto Window_draw(GtkWidget* widget, cairo_t* context, pWindow* p) -> sign
 
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
-    cairo_destroy(context);
   }
   return false;
 }
@@ -39,7 +38,8 @@ static auto Window_draw(GtkWidget* widget, cairo_t* context, pWindow* p) -> sign
 static auto Window_expose(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
   if(auto color = p->state().backgroundColor) {
     cairo_t* context = gdk_cairo_create(gtk_widget_get_window(widget));
-    return Window_draw(widget, context, p);
+    Window_draw(widget, context, p);
+    cairo_destroy(context);
   }
   return false;
 }

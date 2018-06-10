@@ -3,8 +3,9 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Advanced");
 
   layout.setMargin(5);
+  driversLabel.setText("Drivers").setFont(Font().setBold());
 
-  videoDriverLabel.setText("Video Driver:");
+  videoDriverLabel.setText("Video:");
   for(auto& driver : Video::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
@@ -13,16 +14,13 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   }
   videoDriverOption.onChange([&] {
     auto item = videoDriverOption.selected();
-    videoDriverChange.setEnabled(video->driver() != item.text());
-  });
-  videoDriverChange.setText("Change").setEnabled(false).onActivate([&] {
-    auto item = videoDriverOption.selected();
     settings["Video/Driver"].setValue(item.text());
     if(!emulator->loaded() || item.text() == "None" || MessageDialog(
       "Warning: incompatible drivers may cause bsnes to crash.\n"
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the video driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->save();
       program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
@@ -39,11 +37,10 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       }
       settings["Crashed"].setValue(false);
       settings.save();
-      videoDriverChange.setEnabled(false);
     }
   });
 
-  audioDriverLabel.setText("Audio Driver:");
+  audioDriverLabel.setText("Audio:");
   for(auto& driver : Audio::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
@@ -52,16 +49,13 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   }
   audioDriverOption.onChange([&] {
     auto item = audioDriverOption.selected();
-    audioDriverChange.setEnabled(audio->driver() != item.text());
-  });
-  audioDriverChange.setText("Change").setEnabled(false).onActivate([&] {
-    auto item = audioDriverOption.selected();
     settings["Audio/Driver"].setValue(item.text());
     if(!emulator->loaded() || item.text() == "None" || MessageDialog(
       "Warning: incompatible drivers may cause bsnes to crash.\n"
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the audio driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->save();
       program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
@@ -78,11 +72,10 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       }
       settings["Crashed"].setValue(false);
       settings.save();
-      audioDriverChange.setEnabled(false);
     }
   });
 
-  inputDriverLabel.setText("Input Driver:");
+  inputDriverLabel.setText("Input:");
   for(auto& driver : Input::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
@@ -91,16 +84,13 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   }
   inputDriverOption.onChange([&] {
     auto item = inputDriverOption.selected();
-    inputDriverChange.setEnabled(input->driver() != item.text());
-  });
-  inputDriverChange.setText("Change").setEnabled(false).onActivate([&] {
-    auto item = inputDriverOption.selected();
     settings["Input/Driver"].setValue(item.text());
     if(!emulator->loaded() || item.text() == "None" || MessageDialog(
       "Warning: incompatible drivers may cause bsnes to crash.\n"
       "It is highly recommended you unload your game first to avoid data loss.\n"
       "Do you wish to proceed with the input driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
+      program->save();
       program->saveRecoveryState();
       settings["Crashed"].setValue(true);
       settings.save();
@@ -117,7 +107,6 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       }
       settings["Crashed"].setValue(false);
       settings.save();
-      inputDriverChange.setEnabled(false);
     }
   });
 }

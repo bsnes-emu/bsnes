@@ -3,6 +3,14 @@ struct Settings : Markup::Node {
   auto save() -> void;
 };
 
+struct VideoSettings : TabFrameItem {
+  VideoSettings(TabFrame*);
+};
+
+struct AudioSettings : TabFrameItem {
+  AudioSettings(TabFrame*);
+};
+
 struct InputSettings : TabFrameItem {
   InputSettings(TabFrame*);
   auto updateControls() -> void;
@@ -99,18 +107,14 @@ struct AdvancedSettings : TabFrameItem {
 
 public:
   VerticalLayout layout{this};
-    HorizontalLayout videoDriverLayout{&layout, Size{~0, 0}};
-      Label videoDriverLabel{&videoDriverLayout, Size{75, 0}};
-      ComboButton videoDriverOption{&videoDriverLayout, Size{~0, 0}};
-      Button videoDriverChange{&videoDriverLayout, Size{80, 0}};
-    HorizontalLayout audioDriverLayout{&layout, Size{~0, 0}};
-      Label audioDriverLabel{&audioDriverLayout, Size{75, 0}};
-      ComboButton audioDriverOption{&audioDriverLayout, Size{~0, 0}};
-      Button audioDriverChange{&audioDriverLayout, Size{80, 0}};
-    HorizontalLayout inputDriverLayout{&layout, Size{~0, 0}};
-      Label inputDriverLabel{&inputDriverLayout, Size{75, 0}};
-      ComboButton inputDriverOption{&inputDriverLayout, Size{~0, 0}};
-      Button inputDriverChange{&inputDriverLayout, Size{80, 0}};
+    Label driversLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout driverLayout{&layout, Size{~0, 0}};
+    Label videoDriverLabel{&driverLayout, Size{0, 0}};
+    ComboButton videoDriverOption{&driverLayout, Size{~0, 0}};
+    Label audioDriverLabel{&driverLayout, Size{0, 0}};
+    ComboButton audioDriverOption{&driverLayout, Size{~0, 0}};
+    Label inputDriverLabel{&driverLayout, Size{0, 0}};
+    ComboButton inputDriverOption{&driverLayout, Size{~0, 0}};
 };
 
 struct SettingsWindow : Window {
@@ -121,6 +125,8 @@ struct SettingsWindow : Window {
 public:
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
+      VideoSettings video{&panel};
+      AudioSettings audio{&panel};
       InputSettings input{&panel};
       HotkeySettings hotkeys{&panel};
       PathSettings paths{&panel};

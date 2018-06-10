@@ -88,12 +88,24 @@ struct VideoXShm : Video {
     XFlush(_display);
   }
 
+  auto poll() -> void override {
+    while(XPending(_display)) {
+      XEvent event;
+      XNextEvent(_display, &event);
+      if(event.type == Expose) {
+        XWindowAttributes attributes;
+        XGetWindowAttributes(_display, _window, &attributes);
+        doUpdate(attributes.width, attributes.height);
+      }
+    }
+  }
+
 private:
   auto initialize() -> bool {
     terminate();
     if(!_context) return false;
 
-    _display = XOpenDisplay(0);
+    _display = XOpenDisplay(nullptr);
     _screen = DefaultScreen(_display);
 
     XWindowAttributes getAttributes;
@@ -109,12 +121,12 @@ private:
 
     XSetWindowAttributes setAttributes = {};
     setAttributes.border_pixel = 0;
-    setAttributes.event_mask = ExposureMask;
     _window = XCreateWindow(_display, (Window)_context,
       0, 0, 256, 256, 0,
       getAttributes.depth, InputOutput, getAttributes.visual,
       CWBorderPixel, &setAttributes
     );
+    XSelectInput(_display, _window, ExposureMask);
     XSetWindowBackground(_display, _window, 0);
     XMapWindow(_display, _window);
     XFlush(_display);

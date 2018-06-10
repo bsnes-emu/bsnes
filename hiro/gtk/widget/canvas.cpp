@@ -10,6 +10,11 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pCanvas* p) -> void {
   p->self().doDrop(paths);
 }
 
+static auto Canvas_draw(GtkWidget* widget, cairo_t* context, pCanvas* p) -> signed {
+  p->_onDraw(context);
+  return true;
+}
+
 static auto Canvas_expose(GtkWidget* widget, GdkEventExpose* event, pCanvas* p) -> signed {
   p->_onExpose(event);
   return true;
@@ -59,7 +64,11 @@ auto pCanvas::construct() -> void {
   g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Canvas_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Canvas_mouseRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Canvas_drop), (gpointer)this);
+  #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(gtkWidget), "expose-event", G_CALLBACK(Canvas_expose), (gpointer)this);
+  #elif HIRO_GTK==3
+  g_signal_connect(G_OBJECT(gtkWidget), "draw", G_CALLBACK(Canvas_draw), (gpointer)this);
+  #endif
   g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Canvas_mouseLeave), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "motion-notify-event", G_CALLBACK(Canvas_mouseMove), (gpointer)this);
 
@@ -106,7 +115,36 @@ auto pCanvas::update() -> void {
   _redraw();
 }
 
+auto pCanvas::_onDraw(cairo_t* context) -> void {
+  #if HIRO_GTK==3
+  int sx = 0, sy = 0, dx = 0, dy = 0;
+  int width = surfaceWidth, height = surfaceHeight;
+  auto geometry = pSizable::state().geometry;
+
+  if(width <= geometry.width()) {
+    sx = 0;
+    dx = (geometry.width() - width) / 2;
+  } else {
+    sx = (width - geometry.width()) / 2;
+    dx = 0;
+  }
+
+  if(height <= geometry.height()) {
+    sy = 0;
+    dy = (geometry.height() - height) / 2;
+  } else {
+    sy = (height - geometry.height()) / 2;
+    dy = 0;
+  }
+
+  //TODO: support non-zero sx,sy
+  gdk_cairo_set_source_pixbuf(context, surface, dx, dy);
+  cairo_paint(context);
+  #endif
+}
+
 auto pCanvas::_onExpose(GdkEventExpose* expose) -> void {
+  #if HIRO_GTK==2
   if(surface == nullptr) return;
 
   int sx = 0, sy = 0, dx = 0, dy = 0;
@@ -132,10 +170,7 @@ auto pCanvas::_onExpose(GdkEventExpose* expose) -> void {
     height = geometry.height();
   }
 
-  #if HIRO_GTK==2
   gdk_draw_pixbuf(gtk_widget_get_window(gtkWidget), nullptr, surface, sx, sy, dx, dy, width, height, GDK_RGB_DITHER_NONE, 0, 0);
-  #elif HIRO_GTK==3
-  //TODO: use cairo here, but how? no examples show to use sx, sy
   #endif
 }
 

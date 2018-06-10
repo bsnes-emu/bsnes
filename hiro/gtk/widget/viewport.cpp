@@ -10,6 +10,10 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pViewport* p) -> void
   p->self().doDrop(paths);
 }
 
+static auto Viewport_draw(GtkWidget* widget, cairo_t* context, pViewport* p) -> signed {
+  return true;
+}
+
 static auto Viewport_expose(GtkWidget* widget, GdkEventExpose* event) -> signed {
   return true;
 }
@@ -59,7 +63,11 @@ auto pViewport::construct() -> void {
   g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Viewport_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Viewport_mouseRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Viewport_dropEvent), (gpointer)this);
+  #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(gtkWidget), "expose-event", G_CALLBACK(Viewport_expose), (gpointer)this);
+  #elif HIRO_GTK==3
+  g_signal_connect(G_OBJECT(gtkWidget), "draw", G_CALLBACK(Viewport_draw), (gpointer)this);
+  #endif
   g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Viewport_mouseLeave), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "motion-notify-event", G_CALLBACK(Viewport_mouseMove), (gpointer)this);
 

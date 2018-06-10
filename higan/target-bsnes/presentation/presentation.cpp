@@ -99,10 +99,12 @@ Presentation::Presentation() {
     statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeWindow();
   });
-  inputSettings.setText("Input ...").onActivate([&] { settingsWindow->show(0); });
-  hotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsWindow->show(1); });
-  pathSettings.setText("Paths ...").onActivate([&] { settingsWindow->show(2); });
-  advancedSettings.setText("Advanced ...").onActivate([&] { settingsWindow->show(3); });
+  videoSettings.setText("Video ...").onActivate([&] { settingsWindow->show(0); });
+  audioSettings.setText("Audio ...").onActivate([&] { settingsWindow->show(1); });
+  inputSettings.setText("Input ...").onActivate([&] { settingsWindow->show(2); });
+  hotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsWindow->show(3); });
+  pathSettings.setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
+  advancedSettings.setText("Advanced ...").onActivate([&] { settingsWindow->show(5); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveState.setText("Save State");
@@ -171,7 +173,7 @@ Presentation::Presentation() {
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
-  Application::Cocoa::onPreferences([&] { settingsWindow->show(0); });
+  Application::Cocoa::onPreferences([&] { settingsWindow->show(2); });
   Application::Cocoa::onQuit([&] { doClose(); });
   #endif
 }

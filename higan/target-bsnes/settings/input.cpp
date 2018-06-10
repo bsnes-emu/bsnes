@@ -98,7 +98,7 @@ auto InputSettings::reloadMappings() -> void {
   );
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(mapping.name))
+      .append(TableViewCell().setText(mapping.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))
       .append(TableViewCell())
     );
   }
@@ -111,6 +111,7 @@ auto InputSettings::refreshMappings() -> void {
   for(auto& mapping : activeDevice().mappings) {
     mappingList.item(index++).cell(1).setText(mapping.displayName());
   }
+  Application::processEvents();
   mappingList.resizeColumns();
 }
 
