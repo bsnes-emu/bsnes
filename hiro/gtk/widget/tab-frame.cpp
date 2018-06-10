@@ -65,7 +65,11 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
   lock();
   Tab tab;
   tab.child = gtk_fixed_new();
+  #if HIRO_GTK==2
   tab.container = gtk_hbox_new(false, 0);
+  #elif HIRO_GTK==3
+  tab.container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  #endif
   tab.image = gtk_image_new();
   tab.title = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(tab.title), 0.0, 0.5);
@@ -259,10 +263,14 @@ auto pTabFrame::_tabHeight() -> unsigned {
   signed height = 1;
 
   for(auto n : range(self().items())) {
-    height = max(height, tabs[n].image->allocation.height);
-    height = max(height, tabs[n].title->allocation.height);
+    GtkAllocation imageAllocation, titleAllocation, closeAllocation;
+    gtk_widget_get_allocation(tabs[n].image, &imageAllocation);
+    gtk_widget_get_allocation(tabs[n].title, &titleAllocation);
+    gtk_widget_get_allocation(tabs[n].close, &closeAllocation);
+    height = max(height, imageAllocation.height);
+    height = max(height, titleAllocation.height);
     if(!state().items[n]->closable()) continue;
-    height = max(height, tabs[n].close->allocation.height);
+    height = max(height, closeAllocation.height);
   }
 
   return height;
@@ -272,8 +280,12 @@ auto pTabFrame::_tabWidth() -> unsigned {
   signed width = 1;
 
   for(auto n : range(self().items())) {
-    width = max(width, tabs[n].image->allocation.width + tabs[n].title->allocation.width +
-      (state().items[n]->closable() ? tabs[n].close->allocation.width : 0)
+    GtkAllocation imageAllocation, titleAllocation, closeAllocation;
+    gtk_widget_get_allocation(tabs[n].image, &imageAllocation);
+    gtk_widget_get_allocation(tabs[n].title, &titleAllocation);
+    gtk_widget_get_allocation(tabs[n].close, &closeAllocation);
+    width = max(width, imageAllocation.width + titleAllocation.width +
+      (state().items[n]->closable() ? closeAllocation.width : 0)
     );
   }
 

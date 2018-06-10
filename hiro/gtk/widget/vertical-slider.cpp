@@ -10,7 +10,11 @@ static auto VerticalSlider_change(GtkRange* gtkRange, pVerticalSlider* p) -> voi
 }
 
 auto pVerticalSlider::construct() -> void {
+  #if HIRO_GTK==2
   gtkWidget = gtk_vscale_new_with_range(0, 100, 1);
+  #elif HIRO_GTK==3
+  gtkWidget = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100, 1);
+  #endif
   gtk_scale_set_draw_value(GTK_SCALE(gtkWidget), false);
 
   setLength(state().length);

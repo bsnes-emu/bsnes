@@ -26,7 +26,11 @@ static auto HexEdit_scroll(GtkRange* range, GtkScrollType scroll, double value, 
 }
 
 auto pHexEdit::construct() -> void {
+  #if HIRO_GTK==2
   gtkWidget = gtk_hbox_new(false, 0);
+  #elif HIRO_GTK==3
+  gtkWidget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  #endif
 
   container = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(container), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
@@ -37,7 +41,11 @@ auto pHexEdit::construct() -> void {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), GTK_WRAP_NONE);
   gtk_container_add(GTK_CONTAINER(container), subWidget);
 
-  scrollBar = gtk_vscrollbar_new((GtkAdjustment*)nullptr);
+  #if HIRO_GTK==2
+  scrollBar = gtk_vscrollbar_new(nullptr);
+  #elif HIRO_GTK==3
+  scrollBar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
+  #endif
   gtk_range_set_range(GTK_RANGE(scrollBar), 0, 255);
   gtk_range_set_increments(GTK_RANGE(scrollBar), 1, 16);
   gtk_widget_set_sensitive(scrollBar, false);
@@ -77,7 +85,7 @@ auto pHexEdit::destruct() -> void {
 }
 
 auto pHexEdit::focused() const -> bool {
-  return GTK_WIDGET_HAS_FOCUS(subWidget) || GTK_WIDGET_HAS_FOCUS(scrollBar);
+  return gtk_widget_has_focus(subWidget) || gtk_widget_has_focus(scrollBar);
 }
 
 auto pHexEdit::setAddress(unsigned address) -> void {
@@ -166,17 +174,17 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
   signed cursorY = position / lineWidth;
   signed cursorX = position % lineWidth;
 
-  if(scancode == GDK_Home) {
+  if(scancode == GDK_KEY_Home) {
     setCursorPosition(cursorY * lineWidth + 10);
     return true;
   }
 
-  if(scancode == GDK_End) {
+  if(scancode == GDK_KEY_End) {
     setCursorPosition(cursorY * lineWidth + 10 + (state().columns * 3 - 1));
     return true;
   }
 
-  if(scancode == GDK_Up) {
+  if(scancode == GDK_KEY_Up) {
     if(cursorY != 0) return false;
 
     signed newAddress = state().address - state().columns;
@@ -187,7 +195,7 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
     return true;
   }
 
-  if(scancode == GDK_Down) {
+  if(scancode == GDK_KEY_Down) {
     if(cursorY >= rows() - 1) return true;
     if(cursorY != state().rows - 1) return false;
 
@@ -199,7 +207,7 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
     return true;
   }
 
-  if(scancode == GDK_Page_Up) {
+  if(scancode == GDK_KEY_Page_Up) {
     signed newAddress = state().address - state().columns * state().rows;
     if(newAddress >= 0) {
       self().setAddress(newAddress);
@@ -210,7 +218,7 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
     return true;
   }
 
-  if(scancode == GDK_Page_Down) {
+  if(scancode == GDK_KEY_Page_Down) {
     signed newAddress = state().address + state().columns * state().rows;
     for(auto n : range(state().rows)) {
       if(newAddress + state().columns * state().rows - (state().columns - 1) <= state().length) {

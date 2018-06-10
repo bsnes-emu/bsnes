@@ -57,7 +57,7 @@ auto pTableView::append(sTableViewItem item) -> void {
 }
 
 auto pTableView::focused() const -> bool {
-  return GTK_WIDGET_HAS_FOCUS(gtkTreeView);
+  return gtk_widget_has_focus(GTK_WIDGET(gtkTreeView));
 }
 
 auto pTableView::remove(sTableViewHeader header) -> void {
@@ -82,7 +82,9 @@ auto pTableView::resizeColumns() -> void {
 
     signed maximumWidth = self().geometry().width() - 6;
     if(auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow)) {
-      if(gtk_widget_get_visible(scrollBar)) maximumWidth -= scrollBar->allocation.width;
+      GtkAllocation allocation;
+      gtk_widget_get_allocation(scrollBar, &allocation);
+      if(gtk_widget_get_visible(scrollBar)) maximumWidth -= allocation.width;
     }
 
     signed expandWidth = 0;

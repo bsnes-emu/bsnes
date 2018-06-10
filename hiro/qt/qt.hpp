@@ -1,4 +1,4 @@
-//moc-qt4 -i -o qt.moc qt.hpp
+//$(moc) -i -o qt.moc qt.hpp
 
 /*
   Qt requires moc in order to bind callbacks, which causes many complications.

@@ -107,8 +107,9 @@ private:
       return false;
     }
 
-    XSetWindowAttributes setAttributes = {0};
+    XSetWindowAttributes setAttributes = {};
     setAttributes.border_pixel = 0;
+    setAttributes.event_mask = ExposureMask;
     _window = XCreateWindow(_display, (Window)_context,
       0, 0, 256, 256, 0,
       getAttributes.depth, InputOutput, getAttributes.visual,

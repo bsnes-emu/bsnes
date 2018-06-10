@@ -86,7 +86,7 @@ endif
 
 # clang settings
 ifeq ($(findstring clang++,$(compiler)),clang++)
-  flags += -fno-strict-aliasing -fwrapv
+  flags += -fno-strict-aliasing -fwrapv -Wno-everything
 # gcc settings
 else ifeq ($(findstring g++,$(compiler)),g++)
   flags += -fno-strict-aliasing -fwrapv

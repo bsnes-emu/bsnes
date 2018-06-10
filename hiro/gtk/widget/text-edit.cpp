@@ -48,7 +48,7 @@ auto pTextEdit::destruct() -> void {
 }
 
 auto pTextEdit::focused() const -> bool {
-  return GTK_WIDGET_HAS_FOCUS(subWidget);
+  return gtk_widget_has_focus(subWidget);
 }
 
 auto pTextEdit::setBackgroundColor(Color color) -> void {

@@ -106,26 +106,21 @@ Presentation::Presentation() {
 
   toolsMenu.setText("Tools").setVisible(false);
   saveState.setText("Save State");
-  saveState1.setText("Slot 1").onActivate([&] { program->saveState("Quick/Slot 1"); });
-  saveState2.setText("Slot 2").onActivate([&] { program->saveState("Quick/Slot 2"); });
-  saveState3.setText("Slot 3").onActivate([&] { program->saveState("Quick/Slot 3"); });
-  saveState4.setText("Slot 4").onActivate([&] { program->saveState("Quick/Slot 4"); });
-  saveState5.setText("Slot 5").onActivate([&] { program->saveState("Quick/Slot 5"); });
-  saveState6.setText("Slot 6").onActivate([&] { program->saveState("Quick/Slot 6"); });
-  saveState7.setText("Slot 7").onActivate([&] { program->saveState("Quick/Slot 7"); });
-  saveState8.setText("Slot 8").onActivate([&] { program->saveState("Quick/Slot 8"); });
-  saveState9.setText("Slot 9").onActivate([&] { program->saveState("Quick/Slot 9"); });
+  for(uint index : range(QuickStates)) {
+    saveState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
+      program->saveState({"Quick/Slot ", 1 + index});
+    }));
+  }
   loadState.setText("Load State");
-  loadState1.setText("Slot 1").onActivate([&] { program->loadState("Quick/Slot 1"); });
-  loadState2.setText("Slot 2").onActivate([&] { program->loadState("Quick/Slot 2"); });
-  loadState3.setText("Slot 3").onActivate([&] { program->loadState("Quick/Slot 3"); });
-  loadState4.setText("Slot 4").onActivate([&] { program->loadState("Quick/Slot 4"); });
-  loadState5.setText("Slot 5").onActivate([&] { program->loadState("Quick/Slot 5"); });
-  loadState6.setText("Slot 6").onActivate([&] { program->loadState("Quick/Slot 6"); });
-  loadState7.setText("Slot 7").onActivate([&] { program->loadState("Quick/Slot 7"); });
-  loadState8.setText("Slot 8").onActivate([&] { program->loadState("Quick/Slot 8"); });
-  loadState9.setText("Slot 9").onActivate([&] { program->loadState("Quick/Slot 9"); });
-  loadState0.setText("Recovery Slot").onActivate([&] { program->loadState("Quick/Recovery Slot"); });
+  for(uint index : range(QuickStates)) {
+    loadState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
+      program->loadState({"Quick/Slot ", 1 + index});
+    }));
+  }
+  loadState.append(MenuSeparator());
+  loadState.append(MenuItem().setText("Recovery Slot").onActivate([&] {
+    program->loadState("Quick/Recovery Slot");
+  }));
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
   });
@@ -291,7 +286,7 @@ auto Presentation::toggleFullscreenMode() -> void {
 
 auto Presentation::updateRecentGames() -> void {
   loadRecentGame.reset();
-  for(auto index : range(5)) {
+  for(auto index : range(RecentGames)) {
     MenuItem item;
     if(auto game = settings[string{"Game/Recent/", 1 + index}].text()) {
       string displayName;
@@ -311,49 +306,25 @@ auto Presentation::updateRecentGames() -> void {
   }
   loadRecentGame.append(MenuSeparator());
   loadRecentGame.append(MenuItem().setText("Clear List").onActivate([&] {
-    settings("Game/Recent/1").setValue("");
-    settings("Game/Recent/2").setValue("");
-    settings("Game/Recent/3").setValue("");
-    settings("Game/Recent/4").setValue("");
-    settings("Game/Recent/5").setValue("");
+    for(auto index : range(RecentGames)) {
+      settings({"Game/Recent/", 1 + index}).setValue("");
+    }
     updateRecentGames();
   }));
 }
 
 auto Presentation::addRecentGame(string location) -> void {
-  auto game1 = settings["Game/Recent/1"].text();
-  auto game2 = settings["Game/Recent/2"].text();
-  auto game3 = settings["Game/Recent/3"].text();
-  auto game4 = settings["Game/Recent/4"].text();
-  auto game5 = settings["Game/Recent/5"].text();
-
-         if(game1 == location) {
-    game1 = location;
-  } else if(game2 == location) {
-    game2 = game1;
-    game1 = location;
-  } else if(game3 == location) {
-    game3 = game2;
-    game2 = game1;
-    game1 = location;
-  } else if(game4 == location) {
-    game4 = game3;
-    game3 = game2;
-    game2 = game1;
-    game1 = location;
-  } else {
-    game5 = game4;
-    game4 = game3;
-    game3 = game2;
-    game2 = game1;
-    game1 = location;
+  for(uint index : range(RecentGames + 1)) {
+    auto value = settings[{"Game/Recent/", 1 + index}].text();
+    if(!value || value == location) {
+      for(uint n : rrange(index + 1)) {
+        if(1 + n > RecentGames) continue;
+        settings({"Game/Recent/", 1 + n}).setValue(settings[{"Game/Recent/", n}].text());
+      }
+      break;
+    }
   }
-
-  settings("Game/Recent/1").setValue(game1);
-  settings("Game/Recent/2").setValue(game2);
-  settings("Game/Recent/3").setValue(game3);
-  settings("Game/Recent/4").setValue(game4);
-  settings("Game/Recent/5").setValue(game5);
+  settings("Game/Recent/1").setValue(location);
   updateRecentGames();
 }
 

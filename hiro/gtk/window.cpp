@@ -12,17 +12,16 @@ static auto Window_close(GtkWidget* widget, GdkEvent* event, pWindow* p) -> sign
   return true;
 }
 
-static auto Window_expose(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
+//GTK3 draw: called into by GTK2 expose-event
+static auto Window_draw(GtkWidget* widget, cairo_t* context, pWindow* p) -> signed {
   if(auto color = p->state().backgroundColor) {
-    cairo_t* context = gdk_cairo_create(widget->window);
-
     double red   = (double)color.red()   / 255.0;
     double green = (double)color.green() / 255.0;
     double blue  = (double)color.blue()  / 255.0;
     double alpha = (double)color.alpha() / 255.0;
 
     if(gdk_screen_is_composited(gdk_screen_get_default())
-    && gdk_screen_get_rgba_colormap(gdk_screen_get_default())
+    && gdk_screen_get_rgba_visual(gdk_screen_get_default())
     ) {
       cairo_set_source_rgba(context, red, green, blue, alpha);
     } else {
@@ -36,6 +35,15 @@ static auto Window_expose(GtkWidget* widget, GdkEvent* event, pWindow* p) -> sig
   return false;
 }
 
+//GTK2 expose-event
+static auto Window_expose(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
+  if(auto color = p->state().backgroundColor) {
+    cairo_t* context = gdk_cairo_create(gtk_widget_get_window(widget));
+    return Window_draw(widget, context, p);
+  }
+  return false;
+}
+
 static auto Window_configure(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
   if(!gtk_widget_get_realized(p->widget)) return false;
   if(!p->pObject::state().visible) return false;
@@ -43,7 +51,11 @@ static auto Window_configure(GtkWidget* widget, GdkEvent* event, pWindow* p) -> 
 
   GdkRectangle border, client;
   gdk_window_get_frame_extents(gdkWindow, &border);
+  #if HIRO_GTK==2
   gdk_window_get_geometry(gdkWindow, nullptr, nullptr, &client.width, &client.height, nullptr);
+  #elif HIRO_GTK==3
+  gdk_window_get_geometry(gdkWindow, nullptr, nullptr, &client.width, &client.height);
+  #endif
   gdk_window_get_origin(gdkWindow, &client.x, &client.y);
 
   if(!p->state().fullScreen) {
@@ -85,11 +97,19 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pWindow* p) -> void {
   p->self().doDrop(paths);
 }
 
+static auto Window_getPreferredWidth(GtkWidget* widget, int* minimalWidth, int* naturalWidth) -> void {
+  //TODO: get pWindow; use sizeRequest
+}
+
+static auto Window_getPreferredHeight(GtkWidget* widget, int* minimalHeight, int* naturalHeight) -> void {
+  //TODO: get pWindow; use sizeRequest
+}
+
 static auto Window_keyPress(GtkWidget* widget, GdkEventKey* event, pWindow* p) -> signed {
   if(auto key = pKeyboard::_translate(event->keyval)) {
     p->self().doKeyPress(key);
   }
-  if(p->state().dismissable && event->keyval == GDK_Escape) {
+  if(p->state().dismissable && event->keyval == GDK_KEY_Escape) {
     if(p->state().onClose) {
       p->self().doClose();
     } else {
@@ -147,14 +167,18 @@ auto pWindow::construct() -> void {
   else if(_setIcon("/usr/local/share/pixmaps/"));
   else if(_setIcon("/usr/share/pixmaps/"));
 
-  GdkColormap* colormap = gdk_screen_get_rgba_colormap(gdk_screen_get_default());
-  if(!colormap) colormap = gdk_screen_get_rgb_colormap(gdk_screen_get_default());
-  if(colormap) gtk_widget_set_colormap(widget, colormap);
+  auto visual = gdk_screen_get_rgba_visual(gdk_screen_get_default());
+  if(!visual) visual = gdk_screen_get_system_visual(gdk_screen_get_default());
+  if(visual) gtk_widget_set_visual(widget, visual);
 
   gtk_widget_set_app_paintable(widget, true);
   gtk_widget_add_events(widget, GDK_CONFIGURE);
 
+  #if HIRO_GTK==2
   menuContainer = gtk_vbox_new(false, 0);
+  #elif HIRO_GTK==3
+  menuContainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  #endif
   gtk_container_add(GTK_CONTAINER(widget), menuContainer);
   gtk_widget_show(menuContainer);
 
@@ -167,7 +191,11 @@ auto pWindow::construct() -> void {
 
   statusContainer = gtk_event_box_new();
   gtkStatus = gtk_statusbar_new();
+  #if HIRO_GTK==2
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(gtkStatus), true);
+  #elif HIRO_GTK==3
+  gtk_window_set_has_resize_grip(GTK_WINDOW(widget), true);
+  #endif
   gtk_container_add(GTK_CONTAINER(statusContainer), gtkStatus);
   gtk_box_pack_start(GTK_BOX(menuContainer), statusContainer, false, false, 0);
   gtk_widget_show(statusContainer);
@@ -179,13 +207,23 @@ auto pWindow::construct() -> void {
   setTitle(state().title);
 
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)this);
+  #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)this);
+  #elif HIRO_GTK==3
+  g_signal_connect(G_OBJECT(widget), "draw", G_CALLBACK(Window_draw), (gpointer)this);
+  #endif
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "drag-data-received", G_CALLBACK(Window_drop), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPress), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(formContainer), "size-allocate", G_CALLBACK(Window_sizeAllocate), (gpointer)this);
+  #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(formContainer), "size-request", G_CALLBACK(Window_sizeRequest), (gpointer)this);
+  #elif HIRO_GTK==3
+  auto widgetClass = GTK_WIDGET_GET_CLASS(formContainer);
+  widgetClass->get_preferred_width = Window_getPreferredWidth;
+  widgetClass->get_preferred_height = Window_getPreferredHeight;
+  #endif
 }
 
 auto pWindow::destruct() -> void {
@@ -316,7 +354,13 @@ auto pWindow::setModal(bool modal) -> void {
 
 auto pWindow::setResizable(bool resizable) -> void {
   gtk_window_set_resizable(GTK_WINDOW(widget), resizable);
+  #if HIRO_GTK==2
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(gtkStatus), resizable);
+  #elif HIRO_GTK==3
+  bool statusBarVisible = false;
+  if(auto statusBar = state().statusBar) statusBarVisible = statusBar->visible();
+  gtk_window_set_has_resize_grip(GTK_WINDOW(widget), resizable && statusBarVisible);
+  #endif
 }
 
 auto pWindow::setTitle(const string& title) -> void {
@@ -428,6 +472,7 @@ auto pWindow::_setStatusText(const string& text) -> void {
 
 auto pWindow::_setStatusVisible(bool visible) -> void {
   gtk_widget_set_visible(gtkStatus, visible);
+  setResizable(self().resizable());
 }
 
 auto pWindow::_statusHeight() const -> signed {

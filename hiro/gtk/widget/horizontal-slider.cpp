@@ -10,7 +10,11 @@ static auto HorizontalSlider_change(GtkRange* gtkRange, pHorizontalSlider* p) ->
 }
 
 auto pHorizontalSlider::construct() -> void {
+  #if HIRO_GTK==2
   gtkWidget = gtk_hscale_new_with_range(0, 100, 1);
+  #elif HIRO_GTK==3
+  gtkWidget = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  #endif
   gtk_scale_set_draw_value(GTK_SCALE(gtkWidget), false);
 
   setLength(state().length);

@@ -2,7 +2,11 @@ namespace hiro {
 
 Settings::Settings() {
   string path = {Path::userData(), "hiro/"};
-  auto document = BML::unserialize(file::read({path, "qt.bml"}));
+  #if HIRO_QT==4
+  auto document = BML::unserialize(file::read({path, "qt4.bml"}));
+  #elif HIRO_QT==5
+  auto document = BML::unserialize(file::read({path, "qt5.bml"}));
+  #endif
 
   auto get = [&](string_view name) {
     return document[name];
@@ -32,7 +36,11 @@ Settings::~Settings() {
   set("Geometry/MenuHeight", geometry.menuHeight);
   set("Geometry/StatusHeight", geometry.statusHeight);
 
-  file::write({path, "qt.bml"}, BML::serialize(document));
+  #if HIRO_QT==4
+  file::write({path, "qt4.bml"}, BML::serialize(document));
+  #elif HIRO_QT==5
+  file::write({path, "qt5.bml"}, BML::serialize(document));
+  #endif
 }
 
 }

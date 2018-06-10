@@ -7,7 +7,11 @@ auto pTableViewColumn::construct() -> void {
     auto handle = grandparent.data();
     unsigned offset = self().offset();
 
+    #if HIRO_GTK==2
     gtkHeader = gtk_hbox_new(false, 0);
+    #elif HIRO_GTK==3
+    gtkHeader = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    #endif
 
     gtkHeaderIcon = gtk_image_new();
     gtk_box_pack_start(GTK_BOX(gtkHeader), gtkHeaderIcon, false, false, 0);

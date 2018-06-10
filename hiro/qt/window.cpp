@@ -135,7 +135,11 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
 auto pWindow::setGeometry(Geometry geometry) -> void {
   lock();
   Application::processEvents();
+  #if HIRO_QT==4
   QApplication::syncX();
+  #elif HIRO_QT==5
+  QApplication::sync();
+  #endif
 
   setResizable(state().resizable);
   qtWindow->move(geometry.x() - frameMargin().x(), geometry.y() - frameMargin().y());

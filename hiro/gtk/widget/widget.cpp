@@ -20,7 +20,7 @@ auto pWidget::container(mWidget& widget) -> GtkWidget* {
 
 auto pWidget::focused() const -> bool {
   if(!gtkWidget) return false;
-  return GTK_WIDGET_HAS_FOCUS(gtkWidget);
+  return gtk_widget_has_focus(gtkWidget);
 }
 
 auto pWidget::setEnabled(bool enabled) -> void {
@@ -51,8 +51,10 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
       auto time = chrono::millisecond();
       while(chrono::millisecond() - time < 20) {
         gtk_main_iteration_do(false);
-        if(gtkWidget->allocation.width  != geometry.width ()) continue;
-        if(gtkWidget->allocation.height != geometry.height()) continue;
+        GtkAllocation allocation;
+        gtk_widget_get_allocation(gtkWidget, &allocation);
+        if(allocation.width  != geometry.width ()) continue;
+        if(allocation.height != geometry.height()) continue;
         break;
       }
       locked = false;

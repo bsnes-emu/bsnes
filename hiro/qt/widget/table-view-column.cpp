@@ -78,10 +78,18 @@ auto pTableViewColumn::_parent() -> maybe<pTableViewHeader&> {
 auto pTableViewColumn::_setState() -> void {
   if(auto header = _parent()) {
     if(auto parent = header->_parent()) {
+      #if HIRO_QT==4
       parent->qtTableView->header()->setResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
+      #elif HIRO_QT==5
+      parent->qtTableView->header()->setSectionResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
+      #endif
       bool clickable = false;
       for(auto& column : header->state().columns) clickable |= column->state.sortable;
+      #if HIRO_QT==4
       parent->qtTableView->header()->setClickable(clickable);
+      #elif HIRO_QT==5
+      parent->qtTableView->header()->setSectionsClickable(clickable);
+      #endif
       parent->qtTableView->headerItem()->setText(self().offset(), QString::fromUtf8(state().text));
       parent->qtTableView->setColumnHidden(self().offset(), !self().visible());
 

@@ -132,7 +132,11 @@ auto pCanvas::_onExpose(GdkEventExpose* expose) -> void {
     height = geometry.height();
   }
 
+  #if HIRO_GTK==2
   gdk_draw_pixbuf(gtk_widget_get_window(gtkWidget), nullptr, surface, sx, sy, dx, dy, width, height, GDK_RGB_DITHER_NONE, 0, 0);
+  #elif HIRO_GTK==3
+  //TODO: use cairo here, but how? no examples show to use sx, sy
+  #endif
 }
 
 auto pCanvas::_rasterize() -> void {

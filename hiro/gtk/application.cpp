@@ -50,7 +50,7 @@ auto pApplication::initialize() -> void {
   int argc = 1;
   char* argv[] = {name.get(), nullptr};
   #else
-  //--g-fatal-warnings will force a trap on Gtk-CRITICAL errors
+  //--g-fatal-warnings will force a trap on Gtk-CRITICAL and Gtk-WARNING messages
   //this allows gdb to perform a backtrace to find an error's origin point
   int argc = 2;
   char* argv[] = {name.get(), new char[19], nullptr};
@@ -75,6 +75,7 @@ auto pApplication::initialize() -> void {
   g_object_set(gtkSettings, "gtk-im-module", "gtk-im-context-simple", nullptr);
   #endif
 
+  #if HIRO_GTK==2
   gtk_rc_parse_string(R"(
     style "HiroWindow"
     {
@@ -99,6 +100,9 @@ auto pApplication::initialize() -> void {
     }
     widget_class "*.<GtkNotebook>.<GtkHBox>.<GtkButton>" style "HiroTabFrameCloseButton"
   )");
+  #elif HIRO_GTK==3
+  //TODO: is there any alternative here with GTK3?
+  #endif
 
   pKeyboard::initialize();
 }

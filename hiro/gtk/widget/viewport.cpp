@@ -10,6 +10,10 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pViewport* p) -> void
   p->self().doDrop(paths);
 }
 
+static auto Viewport_expose(GtkWidget* widget, GdkEventExpose* event) -> signed {
+  return true;
+}
+
 static auto Viewport_mouseLeave(GtkWidget* widget, GdkEventButton* event, pViewport* p) -> signed {
   p->self().doMouseLeave();
   return true;
@@ -41,7 +45,7 @@ static auto Viewport_mouseRelease(GtkWidget* widget, GdkEventButton* event, pVie
 auto pViewport::construct() -> void {
   gtkWidget = gtk_drawing_area_new();
   gtk_widget_add_events(gtkWidget,
-    GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
+    GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_EXPOSURE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
 
   GdkColor color;
   color.pixel = 0;
@@ -55,6 +59,7 @@ auto pViewport::construct() -> void {
   g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Viewport_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Viewport_mouseRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Viewport_dropEvent), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "expose-event", G_CALLBACK(Viewport_expose), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Viewport_mouseLeave), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "motion-notify-event", G_CALLBACK(Viewport_mouseMove), (gpointer)this);
 

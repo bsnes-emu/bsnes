@@ -2,7 +2,11 @@ namespace hiro {
 
 Settings::Settings() {
   string path = {Path::userData(), "hiro/"};
-  auto document = BML::unserialize(file::read({path, "gtk.bml"}));
+  #if HIRO_GTK==2
+  auto document = BML::unserialize(file::read({path, "gtk2.bml"}));
+  #elif HIRO_GTK==3
+  auto document = BML::unserialize(file::read({path, "gtk3.bml"}));
+  #endif
 
   auto get = [&](string_view name) {
     return document[name];
@@ -32,7 +36,11 @@ Settings::~Settings() {
   set("Geometry/MenuHeight", geometry.menuHeight);
   set("Geometry/StatusHeight", geometry.statusHeight);
 
-  file::write({path, "gtk.bml"}, BML::serialize(document));
+  #if HIRO_GTK==2
+  file::write({path, "gtk2.bml"}, BML::serialize(document));
+  #elif HIRO_GTK==3
+  file::write({path, "gtk3.bml"}, BML::serialize(document));
+  #endif
 }
 
 }

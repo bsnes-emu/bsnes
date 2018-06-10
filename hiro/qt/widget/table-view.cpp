@@ -8,7 +8,11 @@ auto pTableView::construct() -> void {
   qtTableView->setContextMenuPolicy(Qt::CustomContextMenu);
   qtTableView->setRootIsDecorated(false);
   qtTableView->setHeaderHidden(true);
+  #if HIRO_QT==4
   qtTableView->header()->setMovable(false);
+  #elif HIRO_QT==5
+  qtTableView->header()->setSectionsMovable(false);
+  #endif
 
   qtTableViewDelegate = new QtTableViewDelegate(*this);
   qtTableView->setItemDelegate(qtTableViewDelegate);
