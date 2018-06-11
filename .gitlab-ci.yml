@@ -7,7 +7,7 @@ higan-linux-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev mkdocs
     - make -C genius
-    - make -C higan target=higan profile=accuracy
+    - make -C higan target=higan
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
     - cp -a genius/out/genius higan-nightly/genius
@@ -23,7 +23,7 @@ higan-linux-x86_64-binaries:
 bsnes-linux-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
-    - make -C higan target=bsnes profile=fast
+    - make -C higan target=bsnes
     - mkdir bsnes-nightly
     - cp -a higan/out/bsnes bsnes-nightly/bsnes
     - cp -a shaders bsnes-nightly/
@@ -38,7 +38,7 @@ higan-windows-x86_64-binaries:
     # genius does not currently build on Windows due to lack of a combo edit control in hiro
     #- make -C genius platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - make -C icarus platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
-    - make -C higan target=higan profile=accuracy platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
+    - make -C higan target=higan platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
     #- cp -a genius/out/genius higan-nightly/genius.exe
@@ -57,7 +57,7 @@ higan-windows-x86_64-binaries:
 bsnes-windows-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential mingw-w64
-    - make -C higan target=bsnes profile=fast platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
+    - make -C higan target=bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - mkdir bsnes-nightly
     - cp -a higan/out/bsnes bsnes-nightly/bsnes.exe
     - cp -a shaders bsnes-nightly/
@@ -72,7 +72,7 @@ libretro-test:
     # git refuses to even attempt a merge if you haven't told it who you are,
     # even if you use --no-commit. *sigh*
     - EMAIL=fake-email@example.com git merge origin/libretro
-    - make -C higan binary=library target=libretro profile=accuracy
+    - make -C higan binary=library target=libretro
     - mkdir libretro-nightly
     - cp -a higan/out/higan_sfc_libretro.so libretro-nightly/
     - cp -a GPLv3.txt libretro-nightly/
