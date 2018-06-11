@@ -1,4 +1,4 @@
-#import "GBShader.h"
+#import "GBGLShader.h"
 #import <OpenGL/gl3.h>
 
 /*
@@ -16,7 +16,7 @@ void main(void) {\n\
 }\n\
 ";
 
-@implementation GBShader
+@implementation GBGLShader
 {
     GLuint resolution_uniform;
     GLuint texture_uniform;
