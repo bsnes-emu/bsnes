@@ -43,8 +43,8 @@ Settings::Settings() {
   set("Path/Games", "");
   set("Path/Patches", "");
   set("Path/Saves", "");
-  set("Path/States", "");
   set("Path/Cheats", "");
+  set("Path/States", "");
   set("Path/Recent/SuperNintendo", Path::user());
   set("Path/Recent/GameBoy", Path::user());
   set("Path/Recent/BSMemory", Path::user());
@@ -52,6 +52,8 @@ Settings::Settings() {
 
   set("UserInterface/ShowStatusBar", true);
 
+  set("Emulator/FastPPU", true);
+  set("Emulator/FastDSP", true);
   set("Emulator/AutoSaveMemory/Enable", true);
   set("Emulator/AutoSaveMemory/Interval", 30);
 

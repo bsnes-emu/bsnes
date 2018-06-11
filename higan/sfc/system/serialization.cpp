@@ -13,6 +13,9 @@ auto System::serialize() -> serializer {
   s.array(hash);
   s.array(description);
 
+  s.boolean(hacks.fastPPU);
+  s.boolean(hacks.fastDSP);
+
   serializeAll(s);
   return s;
 }
@@ -31,6 +34,12 @@ auto System::unserialize(serializer& s) -> bool {
   if(signature != 0x31545342) return false;
   if(string{version} != Emulator::SerializerVersion) return false;
 
+  s.boolean(hacks.fastPPU);
+  s.boolean(hacks.fastDSP);
+
+  settings.fastPPU = hacks.fastPPU;
+  settings.fastDSP = hacks.fastDSP;
+
   power(/* reset = */ false);
   serializeAll(s);
   return true;
@@ -42,9 +51,9 @@ auto System::serialize(serializer& s) -> void {
 }
 
 auto System::serializeAll(serializer& s) -> void {
+  system.serialize(s);
   random.serialize(s);
   cartridge.serialize(s);
-  system.serialize(s);
   cpu.serialize(s);
   smp.serialize(s);
   ppu.serialize(s);
@@ -90,6 +99,9 @@ auto System::serializeInit() -> void {
   s.array(version);
   s.array(hash);
   s.array(description);
+
+  s.boolean(hacks.fastPPU);
+  s.boolean(hacks.fastDSP);
 
   serializeAll(s);
   serializeSize = s.size();

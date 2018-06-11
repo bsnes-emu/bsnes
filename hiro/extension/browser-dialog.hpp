@@ -7,8 +7,9 @@ struct BrowserDialog {
 
   BrowserDialog();
   auto openFile() -> string;          //one existing file
-  auto openFiles() -> string_vector;  //any existing files or folders
+  auto openFiles() -> string_vector;  //any existing files
   auto openFolder() -> string;        //one existing folder
+  auto openObject() -> string;        //one existing file or folder
   auto option() -> string;
   auto saveFile() -> string;          //one file
   auto selected() -> string_vector;

@@ -22,17 +22,43 @@ auto Program::path(string type, string location, string extension) -> string {
     }
   }
 
-  if(type == "States") {
-    if(auto path = settings["Path/States"].text()) {
-      pathname = path;
-    }
-  }
-
   if(type == "Cheats") {
     if(auto path = settings["Path/Cheats"].text()) {
       pathname = path;
     }
   }
 
+  if(type == "States") {
+    if(auto path = settings["Path/States"].text()) {
+      pathname = path;
+    }
+  }
+
   return {pathname, prefix, suffix};
+}
+
+auto Program::gamePath() -> string {
+  if(!emulator->loaded()) return "";
+  if(gameBoy.location) return gameBoy.location;
+  return superNintendo.location;
+}
+
+auto Program::cheatPath() -> string {
+  if(!emulator->loaded()) return "";
+  auto location = gamePath();
+  if(location.endsWith("/")) {
+    return {location, "cheats.bml"};
+  } else {
+    return path("Cheats", location, ".cht");
+  }
+}
+
+auto Program::statePath() -> string {
+  if(!emulator->loaded()) return "";
+  auto location = gamePath();
+  if(location.endsWith("/")) {
+    return {location, "bsnes/states/"};
+  } else {
+    return path("States", location, ".bsz");
+  }
 }

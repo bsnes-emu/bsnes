@@ -192,18 +192,18 @@ auto DSP::main() -> void {
 }
 
 auto DSP::tick() -> void {
-  #if defined(PROFILE_ACCURATE)
-  step(3 * 8);
-  synchronize(smp);
-  #endif
+  if(!system.fastDSP()) {
+    step(3 * 8);
+    synchronize(smp);
+  }
 }
 
 auto DSP::sample(int16 left, int16 right) -> void {
   stream->sample(left / 32768.0, right / 32768.0);
-  #if defined(PROFILE_FAST)
-  step(32 * 3 * 8);
-  synchronize(smp);
-  #endif
+  if(system.fastDSP()) {
+    step(32 * 3 * 8);
+    synchronize(smp);
+  }
 }
 
 /* register interface for S-SMP $00f2,$00f3 */

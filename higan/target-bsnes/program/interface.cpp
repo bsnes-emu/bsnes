@@ -6,174 +6,47 @@
 #include <icarus/heuristics/sufami-turbo.cpp>
 
 auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
-  //System
+  vfs::shared::file result;
 
-  if(id == 0 && name == "manifest.bml" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(Resource::System::Manifest.data(), Resource::System::Manifest.size());
-  }
-
-  if(id == 0 && name == "boards.bml" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(Resource::System::Boards.data(), Resource::System::Boards.size());
-  }
-
-  if(id == 0 && name == "ipl.rom" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(Resource::System::IPLROM.data(), Resource::System::IPLROM.size());
-  }
-
-  //Super Famicom
-
-  if(id == 1 && name == "manifest.bml" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(superNintendo.manifest.data<uint8_t>(), superNintendo.manifest.size());
-  }
-
-  if(id == 1 && name == "program.rom" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(superNintendo.program.data(), superNintendo.program.size());
-  }
-
-  if(id == 1 && name == "data.rom" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(superNintendo.data.data(), superNintendo.data.size());
-  }
-
-  if(id == 1 && name == "expansion.rom" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(superNintendo.expansion.data(), superNintendo.expansion.size());
-  }
-
-  if(id == 1 && name == "arm6.program.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0x28000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0x00000], 0x20000);
+  if(id == 0) {  //System
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(Resource::System::Manifest.data(), Resource::System::Manifest.size());
     }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Program,architecture=ARM6)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
-      return vfs::fs::file::open(location, mode);
+
+    if(name == "boards.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(Resource::System::Boards.data(), Resource::System::Boards.size());
+    }
+
+    if(name == "ipl.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(Resource::System::IPLROM.data(), Resource::System::IPLROM.size());
     }
   }
 
-  if(id == 1 && name == "arm6.data.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0x28000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0x20000], 0x08000);
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Data,architecture=ARM6)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
-      return vfs::fs::file::open(location, mode);
-    }
-  }
-
-  if(id == 1 && name == "hg51bs169.data.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0xc00) {
-      return vfs::memory::file::open(superNintendo.firmware.data(), superNintendo.firmware.size());
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Data,architecture=HG51BS169)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
-      return vfs::fs::file::open(location, mode);
+  if(id == 1) {  //Super Famicom
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(superNintendo.manifest.data<uint8_t>(), superNintendo.manifest.size());
+    } else if(superNintendo.location.endsWith("/")) {
+      result = openPakSFC(name, mode);
+    } else {
+      result = openRomSFC(name, mode);
     }
   }
 
-  if(id == 1 && name == "lr35902.boot.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0x100) {
-      return vfs::memory::file::open(superNintendo.firmware.data(), superNintendo.firmware.size());
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Boot,architecture=LR35902)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".boot.rom"});
-      return vfs::fs::file::open(location, mode);
-    }
-  }
-
-  if(id == 1 && name == "upd7725.program.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0x2000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0x0000], 0x1800);
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Program,architecture=uPD7725)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
-      return vfs::fs::file::open(location, mode);
+  if(id == 2) {  //Game Boy
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(gameBoy.manifest.data<uint8_t>(), gameBoy.manifest.size());
+    } else if(gameBoy.location.endsWith("/")) {
+      result = openPakGB(name, mode);
+    } else {
+      result = openRomGB(name, mode);
     }
   }
 
-  if(id == 1 && name == "upd7725.data.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0x2000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0x1800], 0x0800);
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Data,architecture=uPD7725)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
-      return vfs::fs::file::open(location, mode);
-    }
+  if(!result && required) {
+    MessageDialog({"Error: missing required data: ", name}).setParent(*presentation).error();
   }
 
-  if(id == 1 && name == "upd96050.program.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0xd000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0x0000], 0xc000);
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Program,architecture=uPD96050)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
-      return vfs::fs::file::open(location, mode);
-    }
-  }
-
-  if(id == 1 && name == "upd96050.data.rom" && mode == vfs::file::mode::read) {
-    if(superNintendo.firmware.size() == 0xd000) {
-      return vfs::memory::file::open(&superNintendo.firmware.data()[0xc000], 0x1000);
-    }
-    if(auto memory = superNintendo.document["game/board/memory(type=ROM,content=Data,architecture=uPD96050)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
-      return vfs::fs::file::open(location, mode);
-    }
-  }
-
-  if(id == 1 && name == "save.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
-  }
-
-  if(id == 1 && name == "download.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".psr"), mode);
-  }
-
-  if(id == 1 && name == "time.rtc") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".rtc"), mode);
-  }
-
-  if(id == 1 && name == "arm6.data.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
-  }
-
-  if(id == 1 && name == "hg51bs169.data.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
-  }
-
-  if(id == 1 && name == "upd7725.data.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
-  }
-
-  if(id == 1 && name == "upd96050.data.ram") {
-    return vfs::fs::file::open(path("Saves", superNintendo.location, ".srm"), mode);
-  }
-
-  if(id == 1 && name == "msu1/data.rom") {
-    return vfs::fs::file::open({Location::notsuffix(superNintendo.location), ".msu"}, mode);
-  }
-
-  if(id == 1 && name.match("msu1/track-*.pcm")) {
-    name.trimLeft("msu1/track-", 1L);
-    return vfs::fs::file::open({Location::notsuffix(superNintendo.location), name}, mode);
-  }
-
-  //Game Boy
-
-  if(id == 2 && name == "manifest.bml" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(gameBoy.manifest.data<uint8_t>(), gameBoy.manifest.size());
-  }
-
-  if(id == 2 && name == "program.rom" && mode == vfs::file::mode::read) {
-    return vfs::memory::file::open(gameBoy.program.data(), gameBoy.program.size());
-  }
-
-  if(id == 2 && name == "save.ram") {
-    return vfs::fs::file::open(path("Saves", gameBoy.location, ".sav"), mode);
-  }
-
-  if(id == 2 && name == "time.rtc") {
-    return vfs::fs::file::open(path("Saves", gameBoy.location, ".sav"), mode);
-  }
-
-  return {};
+  return result;
 }
 
 auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
@@ -185,10 +58,10 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
       dialog.setTitle("Load Super Nintendo");
       dialog.setPath(path("Games", settings["Path/Recent/SuperNintendo"].text()));
       dialog.setFilters({string{"Super Nintendo Games|*.sfc:*.smc:*.zip"}});
-      superNintendo.location = dialog.openFile();
+      superNintendo.location = dialog.openObject();
     }
-    if(file::exists(superNintendo.location)) {
-      settings["Path/Recent/SuperNintendo"].setValue(Location::path(superNintendo.location));
+    if(inode::exists(superNintendo.location)) {
+      settings["Path/Recent/SuperNintendo"].setValue(Location::dir(superNintendo.location));
       loadSuperNintendo(superNintendo.location);
       return {id, ""};
     }
@@ -202,10 +75,10 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
       dialog.setTitle("Load Game Boy");
       dialog.setPath(path("Games", settings["Path/Recent/GameBoy"].text()));
       dialog.setFilters({string{"Game Boy Games|*.gb:*.gbc:*.zip"}});
-      gameBoy.location = dialog.openFile();
+      gameBoy.location = dialog.openObject();
     }
-    if(file::exists(gameBoy.location)) {
-      settings["Path/Recent/GameBoy"].setValue(Location::path(gameBoy.location));
+    if(inode::exists(gameBoy.location)) {
+      settings["Path/Recent/GameBoy"].setValue(Location::dir(gameBoy.location));
       loadGameBoy(gameBoy.location);
       return {id, ""};
     }
@@ -242,7 +115,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   current = chrono::timestamp();
   if(current != previous) {
     previous = current;
-    statusText = {"FPS: ", frameCounter};
+    statusText = {emulator->get("Mode").get<string>(), "FPS: ", frameCounter};
     frameCounter = 0;
   }
 }

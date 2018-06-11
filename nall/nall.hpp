@@ -72,6 +72,7 @@
 #include <nall/encode/base64.hpp>
 #include <nall/encode/html.hpp>
 #include <nall/encode/url.hpp>
+#include <nall/encode/zip.hpp>
 #include <nall/hash/crc16.hpp>
 #include <nall/hash/crc32.hpp>
 #include <nall/hash/crc64.hpp>

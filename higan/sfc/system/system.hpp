@@ -6,6 +6,9 @@ struct System {
   inline auto cpuFrequency() const -> double { return information.cpuFrequency; }
   inline auto apuFrequency() const -> double { return information.apuFrequency; }
 
+  inline auto fastPPU() const -> bool { return hacks.fastPPU; }
+  inline auto fastDSP() const -> bool { return hacks.fastDSP; }
+
   auto run() -> void;
   auto runToSave() -> void;
 
@@ -28,6 +31,11 @@ private:
     double cpuFrequency = Emulator::Constants::Colorburst::NTSC * 6.0;
     double apuFrequency = 32040.0 * 768.0;
   } information;
+
+  struct Hacks {
+    bool fastPPU = false;
+    bool fastDSP = false;
+  } hacks;
 
   uint serializeSize = 0;
 

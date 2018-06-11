@@ -20,11 +20,21 @@ struct Program : Emulator::Platform {
   auto save() -> void;
   auto unload() -> void;
 
+  //game-pak.cpp
+  auto openPakSFC(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakGB(string name, vfs::file::mode mode) -> vfs::shared::file;
+
+  //game-rom.cpp
+  auto openRomSFC(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomGB(string name, vfs::file::mode mode) -> vfs::shared::file;
+
   //paths.cpp
   auto path(string type, string location, string extension = "") -> string;
-
-  //state.cpp
+  auto gamePath() -> string;
+  auto cheatPath() -> string;
   auto statePath() -> string;
+
+  //states.cpp
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveRecoveryState() -> bool;
@@ -35,12 +45,14 @@ struct Program : Emulator::Platform {
   auto initializeInputDriver() -> void;
   auto updateVideoShader() -> void;
   auto connectDevices() -> void;
+  auto applyHacks() -> void;
   auto showMessage(string text) -> void;
   auto updateMessage() -> void;
   auto focused() -> bool;
 
 public:
   struct SuperNintendo {
+    string label;
     string location;
     string manifest;
     Markup::Node document;

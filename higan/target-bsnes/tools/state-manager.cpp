@@ -48,7 +48,7 @@ auto StateWindow::doChange() -> void {
     || c == '|') valid = false;
   }
   if(auto input = nameValue.property("input")) {
-    if(name != input && file::exists({program->statePath(), name, ".bst"})) valid = false;
+    if(name != input && file::exists({program->statePath(), "managed/", name, ".bst"})) valid = false;
   }
   nameValue.setBackgroundColor(valid ? Color{} : Color{255, 224, 224});
   acceptButton.setEnabled(valid);
@@ -81,12 +81,12 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   });
   loadButton.setText("Load").onActivate([&] {
     if(auto item = stateList.selected()) {
-      program->loadState(item.cell(0).text());
+      program->loadState({"managed/", item.cell(0).text()});
     }
   });
   saveButton.setText("Save").onActivate([&] {
     if(auto item = stateList.selected()) {
-      program->saveState(item.cell(0).text());
+      program->saveState({"managed/", item.cell(0).text()});
     }
   });
   addButton.setText("Add").onActivate([&] {
@@ -107,16 +107,33 @@ auto StateManager::loadStates() -> void {
   stateList.append(TableViewHeader().setVisible(false)
     .append(TableViewColumn().setExpandable())
   );
-  for(auto filename : directory::ifiles(program->statePath(), "*.bst")) {
-    stateList.append(TableViewItem()
-      .append(TableViewCell().setText(filename.trimRight(".bst", 1L)))
-    );
+  if(program->gamePath().endsWith("/")) {
+    for(auto filename : directory::ifiles({program->statePath(), "managed/"}, "*.bst")) {
+      stateList.append(TableViewItem()
+        .append(TableViewCell().setText(filename.trimRight(".bst", 1L)))
+      );
+    }
+  } else {
+    Decode::ZIP input;
+    if(input.open(program->statePath())) {
+      string_vector states;
+      for(auto& file : input.file) {
+        if(!file.name.match("managed/*.bst")) continue;
+        states.append(Location::prefix(file.name));
+      }
+      states.isort();
+      for(auto& state : states) {
+        stateList.append(TableViewItem()
+          .append(TableViewCell().setText(state))
+        );
+      }
+    }
   }
   stateList.resizeColumns().doChange();
 }
 
 auto StateManager::createState(string name) -> void {
-  program->saveState(name);
+  program->saveState({"managed/", name});
   loadStates();
   for(auto item : stateList.items()) {
     if(item.cell(0).text() == name) item.setSelected();
@@ -126,8 +143,8 @@ auto StateManager::createState(string name) -> void {
 
 auto StateManager::modifyState(string name) -> void {
   if(auto item = stateList.selected()) {
-    string from = {program->statePath(), item.cell(0).text(), ".bst"};
-    string to = {program->statePath(), name, ".bst"};
+    string from = {program->statePath(), "managed/", item.cell(0).text(), ".bst"};
+    string to = {program->statePath(), "managed/", name, ".bst"};
     if(from != to) {
       file::rename(from, to);
       loadStates();
@@ -144,7 +161,7 @@ auto StateManager::removeStates() -> void {
     if(MessageDialog("Are you sure you want to permanently remove the selected state(s)?")
     .setParent(*toolsWindow).question() == "Yes") {
       for(auto item : batched) {
-        string location = {program->statePath(), item.cell(0).text(), ".bst"};
+        string location = {program->statePath(), "managed/", item.cell(0).text(), ".bst"};
         file::remove(location);
       }
       loadStates();

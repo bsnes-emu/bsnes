@@ -233,6 +233,9 @@ auto Interface::cheatSet(const string_vector& list) -> void {
 }
 
 auto Interface::cap(const string& name) -> bool {
+  if(name == "Fast PPU") return true;
+  if(name == "Fast DSP") return true;
+  if(name == "Mode") return true;
   if(name == "Blur Emulation") return true;
   if(name == "Color Emulation") return true;
   if(name == "Scanline Emulation") return true;
@@ -240,6 +243,14 @@ auto Interface::cap(const string& name) -> bool {
 }
 
 auto Interface::get(const string& name) -> any {
+  if(name == "Mode") return string{
+    system.fastPPU() && system.fastDSP() ? "[Fast PPU+DSP] "
+  : system.fastPPU() ? "[Fast PPU] "
+  : system.fastDSP() ? "[Fast DSP] "
+  : ""
+  };
+  if(name == "Fast PPU") return settings.fastPPU;
+  if(name == "Fast DSP") return settings.fastDSP;
   if(name == "Blur Emulation") return settings.blurEmulation;
   if(name == "Color Emulation") return settings.colorEmulation;
   if(name == "Scanline Emulation") return settings.scanlineEmulation;
@@ -247,6 +258,14 @@ auto Interface::get(const string& name) -> any {
 }
 
 auto Interface::set(const string& name, const any& value) -> bool {
+  if(name == "Fast PPU" && value.is<bool>()) {
+    settings.fastPPU = value.get<bool>();
+    return true;
+  }
+  if(name == "Fast DSP" && value.is<bool>()) {
+    settings.fastDSP = value.get<bool>();
+    return true;
+  }
   if(name == "Blur Emulation" && value.is<bool>()) {
     settings.blurEmulation = value.get<bool>();
     return true;

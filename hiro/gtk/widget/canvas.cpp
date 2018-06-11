@@ -10,11 +10,13 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pCanvas* p) -> void {
   p->self().doDrop(paths);
 }
 
+//GTK3
 static auto Canvas_draw(GtkWidget* widget, cairo_t* context, pCanvas* p) -> signed {
   p->_onDraw(context);
   return true;
 }
 
+//GTK2
 static auto Canvas_expose(GtkWidget* widget, GdkEventExpose* event, pCanvas* p) -> signed {
   p->_onExpose(event);
   return true;
@@ -116,7 +118,8 @@ auto pCanvas::update() -> void {
 }
 
 auto pCanvas::_onDraw(cairo_t* context) -> void {
-  #if HIRO_GTK==3
+  if(!surface) return;
+
   int sx = 0, sy = 0, dx = 0, dy = 0;
   int width = surfaceWidth, height = surfaceHeight;
   auto geometry = pSizable::state().geometry;
@@ -137,41 +140,19 @@ auto pCanvas::_onDraw(cairo_t* context) -> void {
     dy = 0;
   }
 
-  //TODO: support non-zero sx,sy
-  gdk_cairo_set_source_pixbuf(context, surface, dx, dy);
+  cairo_set_source_rgba(context, 0.0, 0.0, 0.0, 0.0);
   cairo_paint(context);
-  #endif
+  gdk_cairo_set_source_pixbuf(context, surface, dx - sx, dy - sy);
+  cairo_rectangle(context, dx, dy, width, height);
+  cairo_paint(context);
 }
 
 auto pCanvas::_onExpose(GdkEventExpose* expose) -> void {
-  #if HIRO_GTK==2
-  if(surface == nullptr) return;
+  if(!surface) return;
 
-  int sx = 0, sy = 0, dx = 0, dy = 0;
-  int width = surfaceWidth;
-  int height = surfaceHeight;
-  auto geometry = pSizable::state().geometry;
-
-  if(width <= geometry.width()) {
-    sx = 0;
-    dx = (geometry.width() - width) / 2;
-  } else {
-    sx = (width - geometry.width()) / 2;
-    dx = 0;
-    width = geometry.width();
-  }
-
-  if(height <= geometry.height()) {
-    sy = 0;
-    dy = (geometry.height() - height) / 2;
-  } else {
-    sy = (height - geometry.height()) / 2;
-    dy = 0;
-    height = geometry.height();
-  }
-
-  gdk_draw_pixbuf(gtk_widget_get_window(gtkWidget), nullptr, surface, sx, sy, dx, dy, width, height, GDK_RGB_DITHER_NONE, 0, 0);
-  #endif
+  cairo_t* context = gdk_cairo_create(gtk_widget_get_window(gtkWidget));
+  _onDraw(context);
+  cairo_destroy(context);
 }
 
 auto pCanvas::_rasterize() -> void {

@@ -65,6 +65,18 @@ auto Program::connectDevices() -> void {
   }
 }
 
+auto Program::applyHacks() -> void {
+  bool fastPPU = settingsWindow->advanced.fastPPUOption.checked();
+  bool fastDSP = settingsWindow->advanced.fastDSPOption.checked();
+
+  auto label = superNintendo.label;
+  if(label == "AIR STRIKE PATROL" || label == "DESERT FIGHTER") fastPPU = false;
+  if(label == "KOUSHIEN_2") fastDSP = false;
+
+  emulator->set("Fast PPU", fastPPU);
+  emulator->set("Fast DSP", fastDSP);
+}
+
 auto Program::showMessage(string text) -> void {
   statusTime = chrono::timestamp();
   statusMessage = text;

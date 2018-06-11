@@ -191,7 +191,7 @@ auto CheatEditor::removeCheats() -> void {
 
 auto CheatEditor::loadCheats() -> void {
   cheats.reset();
-  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
+  auto location = program->cheatPath();
   auto document = BML::unserialize(string::read(location));
   for(auto cheat : document.find("cheat")) {
     cheats.append({cheat["name"].text(), cheat["code"].text(), (bool)cheat["enable"]});
@@ -211,7 +211,7 @@ auto CheatEditor::saveCheats() -> void {
     document.append("  enable\n");
     document.append("\n");
   }
-  auto location = program->path("Cheats", program->superNintendo.location, ".cht");
+  auto location = program->cheatPath();
   if(document) {
     file::write(location, document);
   } else {

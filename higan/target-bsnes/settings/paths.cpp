@@ -39,18 +39,6 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Path/Saves"].setValue("");
     refreshPaths();
   });
-  statesLabel.setText("States:");
-  statesPath.setEditable(false);
-  statesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/States"].setValue(location);
-      refreshPaths();
-    }
-  });
-  statesReset.setText("Reset").onActivate([&] {
-    settings["Path/States"].setValue("");
-    refreshPaths();
-  });
   cheatsLabel.setText("Cheats:");
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
@@ -61,6 +49,18 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   cheatsReset.setText("Reset").onActivate([&] {
     settings["Path/Cheats"].setValue("");
+    refreshPaths();
+  });
+  statesLabel.setText("States:");
+  statesPath.setEditable(false);
+  statesAssign.setText("Assign ...").onActivate([&] {
+    if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
+      settings["Path/States"].setValue(location);
+      refreshPaths();
+    }
+  });
+  statesReset.setText("Reset").onActivate([&] {
+    settings["Path/States"].setValue("");
     refreshPaths();
   });
 
@@ -83,14 +83,14 @@ auto PathSettings::refreshPaths() -> void {
   } else {
     savesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/States"].text()) {
-    statesPath.setText(location).setForegroundColor();
-  } else {
-    statesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
-  }
   if(auto location = settings["Path/Cheats"].text()) {
     cheatsPath.setText(location).setForegroundColor();
   } else {
     cheatsPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+  }
+  if(auto location = settings["Path/States"].text()) {
+    statesPath.setText(location).setForegroundColor();
+  } else {
+    statesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
   }
 }

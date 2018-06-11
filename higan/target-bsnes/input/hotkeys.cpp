@@ -10,11 +10,11 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Save State").onPress([&] {
-    program->saveState({"Quick/Slot ", stateSlot});
+    program->saveState({"quick/slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load State").onPress([&] {
-    program->loadState({"Quick/Slot ", stateSlot});
+    program->loadState({"quick/slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {

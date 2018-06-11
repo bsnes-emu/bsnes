@@ -13,7 +13,10 @@ Presentation::Presentation() {
   loadRecentGame.setText("Load Recent Game");
   updateRecentGames();
   resetSystem.setText("Reset System").setEnabled(false).onActivate([&] {
-    if(emulator->loaded()) emulator->reset();
+    if(emulator->loaded()) {
+      program->applyHacks();
+      emulator->reset();
+    }
   });
   unloadGame.setText("Unload Game").setEnabled(false).onActivate([&] {
     program->unload();
@@ -110,18 +113,18 @@ Presentation::Presentation() {
   saveState.setText("Save State");
   for(uint index : range(QuickStates)) {
     saveState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
-      program->saveState({"Quick/Slot ", 1 + index});
+      program->saveState({"quick/slot ", 1 + index});
     }));
   }
   loadState.setText("Load State");
   for(uint index : range(QuickStates)) {
     loadState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
-      program->loadState({"Quick/Slot ", 1 + index});
+      program->loadState({"quick/slot ", 1 + index});
     }));
   }
   loadState.append(MenuSeparator());
-  loadState.append(MenuItem().setText("Recovery Slot").onActivate([&] {
-    program->loadState("Quick/Recovery Slot");
+  loadState.append(MenuItem().setText("Recovery").onActivate([&] {
+    program->loadState("quick/recovery");
   }));
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
@@ -134,14 +137,15 @@ Presentation::Presentation() {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
-  viewport.setDroppable().onDrop([&](auto locations) {
+  viewport.setDroppable().onDrop([&](string_vector locations) {
     program->gameQueue = locations;
     program->load();
-    presentation->setFocused();
+    setFocused();
   });
 
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
+  program->updateMessage();
 
   onClose([&] {
     program->quit();

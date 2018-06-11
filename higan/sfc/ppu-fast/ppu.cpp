@@ -1,4 +1,6 @@
 #include <sfc/sfc.hpp>
+#define PPU PPUfast
+#define ppu ppufast
 
 namespace SuperFamicom {
 
@@ -10,7 +12,6 @@ PPU ppu;
 #include "object.cpp"
 #include "window.cpp"
 #include "serialization.cpp"
-#include <sfc/ppu/counter/serialization.cpp>
 
 PPU::PPU() {
   output = new uint32[512 * 512] + 16 * 512;  //overscan offset

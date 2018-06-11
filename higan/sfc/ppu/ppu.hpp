@@ -1,19 +1,28 @@
+#include <sfc/ppu-fast/ppu.hpp>
+
 struct PPU : Thread, PPUcounter {
-  alwaysinline auto interlace() const -> bool { return display.interlace; }
-  alwaysinline auto overscan() const -> bool { return display.overscan; }
-  alwaysinline auto vdisp() const -> uint { return !io.overscan ? 225 : 240; }
+  //ppu.cpp
+  alwaysinline auto interlace() const -> bool { if(system.fastPPU()) return ppufast.interlace(); return display.interlace; }
+  alwaysinline auto overscan() const -> bool { if(system.fastPPU()) return ppufast.overscan(); return display.overscan; }
+  alwaysinline auto vdisp() const -> uint { if(system.fastPPU()) return ppufast.vdisp(); return !io.overscan ? 225 : 240; }
 
   PPU();
   ~PPU();
-
-  alwaysinline auto step(uint clocks) -> void;
 
   static auto Enter() -> void;
   auto main() -> void;
   auto load(Markup::Node) -> bool;
   auto power(bool reset) -> void;
 
+  //io.cpp
+  auto latchCounters() -> void;
+
+  //serialization.cpp
   auto serialize(serializer&) -> void;
+
+private:
+  //ppu.cpp
+  alwaysinline auto step(uint clocks) -> void;
 
   //io.cpp
   alwaysinline auto addressVRAM() const -> uint16;
@@ -25,10 +34,8 @@ struct PPU : Thread, PPUcounter {
   alwaysinline auto writeCGRAM(uint8 addr, uint15 data) -> void;
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
-  auto latchCounters() -> void;
   auto updateVideoMode() -> void;
 
-private:
   struct VRAM {
     auto& operator[](uint addr) { return data[addr & mask]; }
     uint16 data[64 * 1024];

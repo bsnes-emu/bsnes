@@ -5,6 +5,9 @@
 //* vertical mosaic coordinates are not exact
 //* (hardware-mod) 128KB VRAM mode not supported
 
+#define PPU PPUfast
+#define ppu ppufast
+
 struct PPU : Thread, PPUcounter {
   alwaysinline auto interlace() const -> bool { return latch.interlace; }
   alwaysinline auto overscan() const -> bool { return latch.overscan; }
@@ -304,3 +307,6 @@ public:
 };
 
 extern PPU ppu;
+
+#undef PPU
+#undef ppu

@@ -8,6 +8,7 @@ auto Program::load() -> void {
     if(emulator->load(media.id)) {
       gameQueue = {};
       connectDevices();
+      applyHacks();
       emulator->power();
       presentation->setTitle(emulator->title());
       presentation->resetSystem.setEnabled(true);
@@ -44,11 +45,24 @@ auto Program::loadFile(string location) -> vector<uint8_t> {
 }
 
 auto Program::loadSuperNintendo(string location) -> void {
-  auto rom = loadFile(location);
-  if(!rom) return;
+  vector<uint8_t> rom;
+
+  //game pak
+  if(location.endsWith("/")) {
+    rom.append(file::read({location, "program.rom"  }));
+    rom.append(file::read({location, "data.rom"     }));
+    rom.append(file::read({location, "expansion.rom"}));
+    for(auto filename : directory::files(location, "*.boot.rom"   )) rom.append(file::read({location, filename}));
+    for(auto filename : directory::files(location, "*.program.rom")) rom.append(file::read({location, filename}));
+    for(auto filename : directory::files(location, "*.data.rom"   )) rom.append(file::read({location, filename}));
+  } else {
+    //game ROM
+    rom = loadFile(location);
+  }
 
   //Heuristics::SuperFamicom() call will remove copier header from rom if present
   auto heuristics = Heuristics::SuperFamicom(rom, location);
+  superNintendo.label = heuristics.label();
   superNintendo.manifest = heuristics.manifest();
   superNintendo.document = BML::unserialize(superNintendo.manifest);
   superNintendo.location = location;
@@ -77,8 +91,14 @@ auto Program::loadSuperNintendo(string location) -> void {
 }
 
 auto Program::loadGameBoy(string location) -> void {
-  auto rom = loadFile(location);
-  if(!rom) return;
+  vector<uint8_t> rom;
+
+  //game pak
+  if(location.endsWith("/")) {
+    rom.append(file::read({location, "program.rom"}));
+  } else {
+    rom = loadFile(location);
+  }
 
   auto heuristics = Heuristics::GameBoy(rom, location);
   gameBoy.manifest = heuristics.manifest();

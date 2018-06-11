@@ -45,7 +45,7 @@ struct Thread {
     s.integer(_clock);
   }
 
-protected:
+//protected:
   cothread_t _handle = nullptr;
   uintmax _frequency = 0;
   uintmax _scalar = 0;

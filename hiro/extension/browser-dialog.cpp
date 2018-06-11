@@ -36,28 +36,37 @@ private:
 auto BrowserDialogWindow::accept() -> void {
   auto batched = view.batched();
 
-  if(state.action == "openFile" && batched) {
-    string name = batched.left()->cell(0)->text();
+  if(state.action == "openFile" && batched.size() == 1) {
+    string name = batched[0].text();
     if(isFolder(name)) return setPath({state.path, name});
     response.selected.append(string{state.path, name});
   }
 
-  if(state.action == "openFiles") {
+  if(state.action == "openFiles" && batched) {
     for(auto item : batched) {
-      string name = item->cell(0)->text();
-      response.selected.append(string{state.path, name, isFolder(name) ? "/" : ""});
+      string name = item.text();
+      if(isFolder(name)) {
+        response.selected.reset();
+        return;
+      }
+      response.selected.append(string{state.path, name});
     }
   }
 
-  if(state.action == "openFolder" && batched) {
-    string name = batched.left()->cell(0)->text();
+  if(state.action == "openFolder" && batched.size() == 1) {
+    string name = batched[0].text();
     if(!isMatch(name)) return setPath({state.path, name});
     response.selected.append(string{state.path, name, "/"});
   }
 
+  if(state.action == "openObject" && batched.size() == 1) {
+    string name = batched[0].text();
+    if(!isMatch(name) && isFolder(name)) return setPath({state.path, name});
+    response.selected.append(string{state.path, name, isFolder(name) ? "/" : ""});
+  }
+
   if(state.action == "saveFile") {
     string name = fileName.text();
-    if(!name && batched) name = batched.left()->cell(0)->text();
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists. Overwrite it?").question() != "Yes") return;
@@ -66,11 +75,11 @@ auto BrowserDialogWindow::accept() -> void {
   }
 
   if(state.action == "selectFolder") {
-    if(batched) {
-      string name = batched.left()->cell(0)->text();
-      if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
-    } else {
+    if(!batched) {
       response.selected.append(state.path);
+    } else if(batched.size() == 1) {
+      string name = batched[0].text();
+      if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
     }
   }
 
@@ -79,16 +88,16 @@ auto BrowserDialogWindow::accept() -> void {
 
 //table view item double-clicked, or enter pressed on selected table view item
 auto BrowserDialogWindow::activate() -> void {
-  auto selectedItem = view.selected();
+  auto batched = view.batched();
 
-  if(state.action == "saveFile" && selectedItem) {
-    string name = selectedItem->cell(0)->text();
+  if(state.action == "saveFile" && batched.size() == 1) {
+    string name = batched[0].text();
     if(isFolder(name)) return setPath({state.path, name});
     fileName.setText(name);
   }
 
-  if(state.action == "selectFolder" && selectedItem) {
-    string name = selectedItem->cell(0)->text();
+  if(state.action == "selectFolder" && batched.size() == 1) {
+    string name = batched[0].text();
     if(isFolder(name)) return setPath({state.path, name});
   }
 
@@ -97,12 +106,30 @@ auto BrowserDialogWindow::activate() -> void {
 
 //table view item changed
 auto BrowserDialogWindow::change() -> void {
-  fileName.setText("");
+  auto batched = view.batched();
+  if(state.action == "openFile") {
+    acceptButton.setEnabled(batched.size() == 1);
+  }
+  if(state.action == "openFiles") {
+    bool enabled = true;
+    for(auto item : batched) enabled &= !isFolder(item.text());
+    if(batched.size() == 1 && isFolder(batched[0].text())) enabled = true;
+    acceptButton.setEnabled(enabled);
+  }
+  if(state.action == "openFolder") {
+    acceptButton.setEnabled(batched.size() == 1);
+  }
+  if(state.action == "openObject") {
+    acceptButton.setEnabled(batched.size() == 1);
+  }
   if(state.action == "saveFile") {
-    if(auto selectedItem = view.selected()) {
-      string name = selectedItem->cell(0)->text();
-      if(!isFolder(name)) fileName.setText(name);
+    if(batched.size() == 1) {
+      string name = batched[0].text();
+      if(!isFolder(name)) fileName.setText(name).doChange();
     }
+  }
+  if(state.action == "selectFolder") {
+    acceptButton.setEnabled(!batched || (batched.size() == 1 && isFolder(batched[0].text())));
   }
 }
 
@@ -138,11 +165,15 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
     optionList.append(ComboButtonItem().setText(option));
   }
   optionList.doChange();  //updates response.option to point to the default (first) option
-  fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); });
+  fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); }).onChange([&] {
+    auto name = fileName.text();
+    acceptButton.setEnabled(name && !isFolder(name));
+    fileName.setBackgroundColor(acceptButton.enabled() ? Color{} : Color{255, 224, 224});
+  });
   acceptButton.onActivate([&] { accept(); });
-  if(state.action == "openFile" || state.action == "openFiles" || state.action == "openFolder") acceptButton.setText("Open");
-  if(state.action == "saveFile") acceptButton.setText("Save");
-  if(state.action == "selectFolder") acceptButton.setText("Select");
+  if(state.action.beginsWith("open")) acceptButton.setText("Open");
+  if(state.action.beginsWith("save")) acceptButton.setText("Save");
+  if(state.action.beginsWith("select")) acceptButton.setText("Select");
   cancelButton.setText("Cancel").onActivate([&] { window.setModal(false); });
 
   if(!state.filters) state.filters.append("All|*");
@@ -170,26 +201,32 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   path.transform("\\", "/");
   if((path || Path::root() == "/") && !path.endsWith("/")) path.append("/");
   pathName.setText(state.path = path);
-
   view.reset();
-
   auto contents = directory::icontents(path);
-  bool folderMode = state.action == "openFolder";
 
   for(auto content : contents) {
-    if(!content.endsWith("/")) continue;
-    content.trimRight("/");
-    if(folderMode && isMatch(content)) continue;
-
+    bool isFolder = content.endsWith("/");
+    if(isFolder) {
+      content.trimRight("/", 1L);
+      if(state.action == "openFolder" || state.action == "openObject") {
+        if(isMatch(content)) continue;
+      }
+    } else {
+      continue;
+    }
     view.append(ListViewItem().setText(content).setIcon(Icon::Emblem::Folder));
   }
 
   for(auto content : contents) {
-    if(content.endsWith("/") != folderMode) continue;  //file mode shows files; folder mode shows folders
-    content.trimRight("/");
+    bool isFolder = content.endsWith("/");
+    if(isFolder) {
+      content.trimRight("/", 1L);
+      if(state.action != "openFolder" && state.action != "openObject") continue;
+    } else {
+      if(state.action == "openFolder") continue;
+    }
     if(!isMatch(content)) continue;
-
-    view.append(ListViewItem().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File));
+    view.append(ListViewItem().setText(content).setIcon(isFolder ? Icon::Action::Open : Icon::Emblem::File));
   }
 
   Application::processEvents();
@@ -219,6 +256,13 @@ auto BrowserDialog::openFiles() -> string_vector {
 auto BrowserDialog::openFolder() -> string {
   state.action = "openFolder";
   if(!state.title) state.title = "Open Folder";
+  if(auto result = _run()) return result.left();
+  return {};
+}
+
+auto BrowserDialog::openObject() -> string {
+  state.action = "openObject";
+  if(!state.title) state.title = "Open Object";
   if(auto result = _run()) return result.left();
   return {};
 }

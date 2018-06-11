@@ -1,8 +1,10 @@
 #include "../bsnes.hpp"
 #include "interface.cpp"
 #include "game.cpp"
+#include "game-pak.cpp"
+#include "game-rom.cpp"
 #include "paths.cpp"
-#include "state.cpp"
+#include "states.cpp"
 #include "utility.cpp"
 unique_pointer<Program> program;
 
@@ -66,7 +68,7 @@ Program::Program(string_vector arguments) {
   for(auto& argument : arguments) {
     if(argument == "--fullscreen") {
       presentation->toggleFullscreenMode();
-    } else if(file::exists(argument)) {
+    } else if(inode::exists(argument)) {
       gameQueue.append(argument);
     }
   }

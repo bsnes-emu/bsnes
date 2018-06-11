@@ -46,21 +46,17 @@ namespace SuperFamicom {
     static inline auto PAL() -> bool;
   };
 
+  #include <sfc/system/system.hpp>
   #include <sfc/memory/memory.hpp>
   #include <sfc/ppu/counter/counter.hpp>
 
   #include <sfc/cpu/cpu.hpp>
   #include <sfc/smp/smp.hpp>
   #include <sfc/dsp/dsp.hpp>
-#if defined(PROFILE_ACCURATE)
   #include <sfc/ppu/ppu.hpp>
-#elif defined(PROFILE_FAST)
-  #include <sfc/ppu-fast/ppu.hpp>
-#endif
 
   #include <sfc/controller/controller.hpp>
   #include <sfc/expansion/expansion.hpp>
-  #include <sfc/system/system.hpp>
   #include <sfc/coprocessor/coprocessor.hpp>
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>

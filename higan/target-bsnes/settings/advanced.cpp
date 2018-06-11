@@ -109,4 +109,12 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       settings.save();
     }
   });
+
+  emulatorLabel.setText("Emulator").setFont(Font().setBold());
+  fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/FastPPU"].boolean()).onToggle([&] {
+    settings["Emulator/FastPPU"].setValue(fastPPUOption.checked());
+  });
+  fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/FastDSP"].boolean()).onToggle([&] {
+    settings["Emulator/FastDSP"].setValue(fastDSPOption.checked());
+  });
 }

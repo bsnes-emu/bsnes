@@ -90,16 +90,16 @@ public:
       LineEdit savesPath{&savesLayout, Size{~0, 0}};
       Button savesAssign{&savesLayout, Size{80, 0}};
       Button savesReset{&savesLayout, Size{80, 0}};
-    HorizontalLayout statesLayout{&layout, Size{~0, 0}};
-      Label statesLabel{&statesLayout, Size{55, 0}};
-      LineEdit statesPath{&statesLayout, Size{~0, 0}};
-      Button statesAssign{&statesLayout, Size{80, 0}};
-      Button statesReset{&statesLayout, Size{80, 0}};
     HorizontalLayout cheatsLayout{&layout, Size{~0, 0}};
       Label cheatsLabel{&cheatsLayout, Size{55, 0}};
       LineEdit cheatsPath{&cheatsLayout, Size{~0, 0}};
       Button cheatsAssign{&cheatsLayout, Size{80, 0}};
       Button cheatsReset{&cheatsLayout, Size{80, 0}};
+    HorizontalLayout statesLayout{&layout, Size{~0, 0}};
+      Label statesLabel{&statesLayout, Size{55, 0}};
+      LineEdit statesPath{&statesLayout, Size{~0, 0}};
+      Button statesAssign{&statesLayout, Size{80, 0}};
+      Button statesReset{&statesLayout, Size{80, 0}};
 };
 
 struct AdvancedSettings : TabFrameItem {
@@ -115,6 +115,9 @@ public:
     ComboButton audioDriverOption{&driverLayout, Size{~0, 0}};
     Label inputDriverLabel{&driverLayout, Size{0, 0}};
     ComboButton inputDriverOption{&driverLayout, Size{~0, 0}};
+    Label emulatorLabel{&layout, Size{~0, 0}, 2};
+    CheckLabel fastPPUOption{&layout, Size{~0, 0}};
+    CheckLabel fastDSPOption{&layout, Size{~0, 0}};
 };
 
 struct SettingsWindow : Window {

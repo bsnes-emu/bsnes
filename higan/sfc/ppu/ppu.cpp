@@ -25,6 +25,10 @@ bg4(Background::ID::BG4) {
 }
 
 PPU::~PPU() {
+  if(system.fastPPU()) {
+    _handle = nullptr;
+  }
+
   output -= 16 * 512;
   delete[] output;
 }
@@ -78,6 +82,10 @@ auto PPU::main() -> void {
 }
 
 auto PPU::load(Markup::Node node) -> bool {
+  if(system.fastPPU()) {
+    return ppufast.load(node);
+  }
+
   ppu1.version = max(1, min(1, node["ppu1/version"].natural()));
   ppu2.version = max(1, min(3, node["ppu2/version"].natural()));
   ppu.vram.mask = node["ppu1/ram/size"].natural() / sizeof(uint16) - 1;
@@ -86,6 +94,12 @@ auto PPU::load(Markup::Node node) -> bool {
 }
 
 auto PPU::power(bool reset) -> void {
+  if(system.fastPPU()) {
+    ppufast.power(reset);
+    _handle = ppufast._handle;
+    return;
+  }
+
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint32>(output, 512 * 480);
@@ -220,6 +234,10 @@ auto PPU::frame() -> void {
 }
 
 auto PPU::refresh() -> void {
+  if(system.fastPPU()) {
+    return ppufast.refresh();
+  }
+
   auto output = this->output;
   if(!overscan()) output -= 12 * 512;
   auto pitch = 512;

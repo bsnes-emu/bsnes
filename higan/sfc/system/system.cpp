@@ -88,6 +88,9 @@ auto System::unload() -> void {
 }
 
 auto System::power(bool reset) -> void {
+  hacks.fastPPU = settings.fastPPU;
+  hacks.fastDSP = settings.fastDSP;
+
   Emulator::video.reset();
   Emulator::video.setInterface(interface);
   Emulator::video.setPalette();

@@ -1,4 +1,8 @@
 auto PPU::serialize(serializer& s) -> void {
+  if(system.fastPPU()) {
+    return ppufast.serialize(s);
+  }
+
   Thread::serialize(s);
   PPUcounter::serialize(s);
 

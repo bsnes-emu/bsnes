@@ -1,3 +1,14 @@
+auto PPU::latchCounters() -> void {
+  if(system.fastPPU()) {
+    return ppufast.latchCounters();
+  }
+
+  cpu.synchronize(ppu);
+  io.hcounter = hdot();
+  io.vcounter = vcounter();
+  latch.counters = 1;
+}
+
 auto PPU::addressVRAM() const -> uint16 {
   uint16 address = io.vramAddress;
   switch(io.vramMapping) {
@@ -617,13 +628,6 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
   }
 
   }
-}
-
-auto PPU::latchCounters() -> void {
-  cpu.synchronize(ppu);
-  io.hcounter = hdot();
-  io.vcounter = vcounter();
-  latch.counters = 1;
 }
 
 auto PPU::updateVideoMode() -> void {
