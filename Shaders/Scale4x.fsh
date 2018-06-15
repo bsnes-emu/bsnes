@@ -1,4 +1,4 @@
-vec4 scale2x(sampler2D image, vec2 position)
+vec4 scale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;
@@ -38,7 +38,7 @@ vec4 scale2x(sampler2D image, vec2 position)
     }
 }
 
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / (input_resolution * 2.);
@@ -47,15 +47,15 @@ vec4 scale(sampler2D image, vec2 position)
     // A B C
     // D E F
     // G H I
-    vec4 A = scale2x(image, position + vec2( -o.x,  o.y));
-    vec4 B = scale2x(image, position + vec2(    0,  o.y));
-    vec4 C = scale2x(image, position + vec2(  o.x,  o.y));
-    vec4 D = scale2x(image, position + vec2( -o.x,    0));
-    vec4 E = scale2x(image, position + vec2(    0,    0));
-    vec4 F = scale2x(image, position + vec2(  o.x,    0));
-    vec4 G = scale2x(image, position + vec2( -o.x, -o.y));
-    vec4 H = scale2x(image, position + vec2(    0, -o.y));
-    vec4 I = scale2x(image, position + vec2(  o.x, -o.y));
+    vec4 A = scale2x(image, position + vec2( -o.x,  o.y), input_resolution, output_resolution);
+    vec4 B = scale2x(image, position + vec2(    0,  o.y), input_resolution, output_resolution);
+    vec4 C = scale2x(image, position + vec2(  o.x,  o.y), input_resolution, output_resolution);
+    vec4 D = scale2x(image, position + vec2( -o.x,    0), input_resolution, output_resolution);
+    vec4 E = scale2x(image, position + vec2(    0,    0), input_resolution, output_resolution);
+    vec4 F = scale2x(image, position + vec2(  o.x,    0), input_resolution, output_resolution);
+    vec4 G = scale2x(image, position + vec2( -o.x, -o.y), input_resolution, output_resolution);
+    vec4 H = scale2x(image, position + vec2(    0, -o.y), input_resolution, output_resolution);
+    vec4 I = scale2x(image, position + vec2(  o.x, -o.y), input_resolution, output_resolution);
     vec2 p = position * input_resolution * 2.;
     // p = the position within a pixel [0...1]
     p = fract(p);

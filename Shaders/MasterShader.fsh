@@ -9,7 +9,6 @@ const vec2 input_resolution = vec2(160, 144);
 
 out vec4 frag_color;
 
-vec4 modified_frag_cord;
 #line 1
 {filter}
 
@@ -20,9 +19,10 @@ void main()
     position.y = 1 - position.y;
     
     if (mix_previous) {
-        frag_color = mix(scale(image, position), scale(previous_image, position), 0.5);
+        frag_color = mix(scale(image, position, input_resolution, output_resolution),
+                         scale(previous_image, position, input_resolution, output_resolution), 0.5);
     }
     else {
-        frag_color = scale(image, position);
+        frag_color = scale(image, position, input_resolution, output_resolution);
     }
 }

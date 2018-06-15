@@ -1,6 +1,6 @@
 /* Shader implementation of Scale2x is adapted from https://gist.github.com/singron/3161079 */
 
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;

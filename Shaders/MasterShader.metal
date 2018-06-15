@@ -3,7 +3,7 @@
 #include <metal_math>
 
 using namespace metal;
-const float4 input_resolution = float4(160, 144);
+constant float2 input_resolution = float2(160, 144);
 
 /* For GLSL compatibility */
 typedef float2 vec2;

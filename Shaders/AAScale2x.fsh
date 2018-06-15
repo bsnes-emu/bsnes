@@ -1,4 +1,4 @@
-vec4 scale2x(sampler2D image, vec2 position)
+vec4 scale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;
@@ -38,7 +38,7 @@ vec4 scale2x(sampler2D image, vec2 position)
     }
 }
 
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
-    return mix(texture(image, position), scale2x(image, position), 0.5);
+    return mix(texture(image, position), scale2x(image, position, input_resolution, output_resolution), 0.5);
 }

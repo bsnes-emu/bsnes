@@ -27,7 +27,7 @@ vec4 interp_3px(vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3)
     return (c1 * w1 + c2 * w2 + c3 * w3) / (w1 + w2 + w3);
 }
 
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;

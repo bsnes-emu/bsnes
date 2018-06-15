@@ -1,4 +1,4 @@
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     vec2 pixel = position * input_resolution - vec2(0.5, 0.5);
 

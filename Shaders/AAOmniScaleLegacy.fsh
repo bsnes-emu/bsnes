@@ -4,7 +4,7 @@ float quickDistance(vec4 a, vec4 b)
     return abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z);
 }
 
-vec4 omniScale(sampler2D image, vec2 position)
+vec4 omniScale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     vec2 pixel = position * input_resolution - vec2(0.5, 0.5);
 
@@ -104,15 +104,15 @@ vec4 omniScale(sampler2D image, vec2 position)
     return q22;
 }
 
-vec4 scale(sampler2D image, vec2 position)
+vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     vec2 pixel = vec2(1.0, 1.0) / output_resolution;
     // 4-pixel super sampling
 
-    vec4 q11 = omniScale(image, position + pixel * vec2(-0.25, -0.25));
-    vec4 q21 = omniScale(image, position + pixel * vec2(+0.25, -0.25));
-    vec4 q12 = omniScale(image, position + pixel * vec2(-0.25, +0.25));
-    vec4 q22 = omniScale(image, position + pixel * vec2(+0.25, +0.25));
+    vec4 q11 = omniScale(image, position + pixel * vec2(-0.25, -0.25), input_resolution, output_resolution);
+    vec4 q21 = omniScale(image, position + pixel * vec2(+0.25, -0.25), input_resolution, output_resolution);
+    vec4 q12 = omniScale(image, position + pixel * vec2(-0.25, +0.25), input_resolution, output_resolution);
+    vec4 q22 = omniScale(image, position + pixel * vec2(+0.25, +0.25), input_resolution, output_resolution);
 
     return (q11 + q21 + q12 + q22) / 4.0;
 }
