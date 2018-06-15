@@ -37,9 +37,14 @@ static inline float4 texture(texture2d<half> texture, float2 pos)
 }
 
 fragment float4 fragment_shader(rasterizer_data in [[stage_in]],
-                                texture2d<half> image [[ texture(0) ]])
+                                texture2d<half> image [[ texture(0) ]],
+                                texture2d<half> previous_image [[ texture(1) ]],
+                                constant bool *mix_previous [[ buffer(0) ]])
 {
     in.texcoords.y = 1 - in.texcoords.y;
+    if (*mix_previous) {
+        return mix(texture(image, in.texcoords), texture(previous_image, in.texcoords), 0.5);
+    }
     return texture(image, in.texcoords);
 }
 

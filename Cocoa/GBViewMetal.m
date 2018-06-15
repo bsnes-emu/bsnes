@@ -24,6 +24,7 @@ static const vector_float2 rect[] =
     id<MTLBuffer> vertices;
     id<MTLRenderPipelineState> pipeline_state;
     id<MTLCommandQueue> command_queue;
+    id<MTLBuffer> mix_previous_buffer;
 }
 
 - (void)createInternalView
@@ -46,6 +47,12 @@ static const vector_float2 rect[] =
                                    length:sizeof(rect)
                                   options:MTLResourceStorageModeShared];
 
+    
+    static const bool default_mix_value = false;
+    mix_previous_buffer = [device newBufferWithBytes:&default_mix_value
+                                              length:sizeof(default_mix_value)
+                                             options:MTLResourceStorageModeShared];
+    
     [self loadShader];
 }
 
@@ -93,12 +100,19 @@ static const vector_float2 rect[] =
                mipmapLevel:0
                  withBytes:[self currentBuffer]
                bytesPerRow:PITCH];
+    if ([self shouldBlendFrameWithPrevious]) {
+        [previous_texture replaceRegion:region
+                            mipmapLevel:0
+                              withBytes:[self previousBuffer]
+                            bytesPerRow:PITCH];
+    }
     
     MTLRenderPassDescriptor *render_pass_descriptor = view.currentRenderPassDescriptor;
     id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
 
     if(render_pass_descriptor != nil)
     {
+        *(bool *)[mix_previous_buffer contents] = [self shouldBlendFrameWithPrevious];
         id<MTLRenderCommandEncoder> render_encoder =
             [command_buffer renderCommandEncoderWithDescriptor:render_pass_descriptor];
         
@@ -113,8 +127,15 @@ static const vector_float2 rect[] =
                                  offset:0
                                 atIndex:0];
         
+        [render_encoder setFragmentBuffer:mix_previous_buffer
+                                   offset:0
+                                  atIndex:0];
+        
         [render_encoder setFragmentTexture:texture
                                   atIndex:0];
+        
+        [render_encoder setFragmentTexture:previous_texture
+                                   atIndex:1];
         
         [render_encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip
                           vertexStart:0
