@@ -3,6 +3,7 @@
 #include <metal_math>
 
 using namespace metal;
+const float4 input_resolution = float4(160, 144);
 
 /* For GLSL compatibility */
 typedef float2 vec2;
@@ -17,7 +18,6 @@ typedef struct {
 // Vertex Function
 vertex rasterizer_data vertex_shader(uint index [[ vertex_id ]],
                                      constant vector_float2 *vertices [[ buffer(0) ]])
-
 {
     rasterizer_data out;
 

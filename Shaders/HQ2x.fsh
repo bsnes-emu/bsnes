@@ -27,31 +27,30 @@ vec4 interp_3px(vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3)
     return (c1 * w1 + c2 * w2 + c3 * w3) / (w1 + w2 + w3);
 }
 
-vec4 scale(sampler2D image)
+vec4 scale(sampler2D image, vec2 position)
 {
     // o = offset, the width of a pixel
-    vec2 o = 1.0 / textureDimensions;
-    vec2 texCoord = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uResolution;
-
+    vec2 o = 1.0 / input_resolution;
+    
     /* We always calculate the top left pixel.  If we need a different pixel, we flip the image */
 
     // p = the position within a pixel [0...1]
-    vec2 p = fract(texCoord * textureDimensions);
+    vec2 p = fract(position * input_resolution);
 
     if (p.x > 0.5) o.x = -o.x;
     if (p.y > 0.5) o.y = -o.y;
 
 
 
-    vec4 w0 = texture(image, texCoord + vec2( -o.x, -o.y));
-    vec4 w1 = texture(image, texCoord + vec2(    0, -o.y));
-    vec4 w2 = texture(image, texCoord + vec2(  o.x, -o.y));
-    vec4 w3 = texture(image, texCoord + vec2( -o.x,    0));
-    vec4 w4 = texture(image, texCoord + vec2(    0,    0));
-    vec4 w5 = texture(image, texCoord + vec2(  o.x,    0));
-    vec4 w6 = texture(image, texCoord + vec2( -o.x,  o.y));
-    vec4 w7 = texture(image, texCoord + vec2(    0,  o.y));
-    vec4 w8 = texture(image, texCoord + vec2(  o.x,  o.y));
+    vec4 w0 = texture(image, position + vec2( -o.x, -o.y));
+    vec4 w1 = texture(image, position + vec2(    0, -o.y));
+    vec4 w2 = texture(image, position + vec2(  o.x, -o.y));
+    vec4 w3 = texture(image, position + vec2( -o.x,    0));
+    vec4 w4 = texture(image, position + vec2(    0,    0));
+    vec4 w5 = texture(image, position + vec2(  o.x,    0));
+    vec4 w6 = texture(image, position + vec2( -o.x,  o.y));
+    vec4 w7 = texture(image, position + vec2(    0,  o.y));
+    vec4 w8 = texture(image, position + vec2(  o.x,  o.y));
 
     int pattern = 0;
     if (is_different(w0, w4)) pattern |= 1;

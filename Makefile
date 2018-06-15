@@ -286,7 +286,7 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 	cp -f $^ $@
 
 $(BIN)/SDL/Shaders: Shaders
-	-@$(MKDIR) -p $(dir $@)
+	-@$(MKDIR) -p $@
 	cp -rf Shaders/*.fsh $@
 
 # Boot ROMs

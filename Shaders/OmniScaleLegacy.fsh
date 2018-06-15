@@ -4,16 +4,14 @@ float quickDistance(vec4 a, vec4 b)
     return abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z);
 }
 
-vec4 scale(sampler2D image)
+vec4 scale(sampler2D image, vec2 position)
 {
-    vec2 texCoord = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uResolution;
+    vec2 pixel = position * input_resolution - vec2(0.5, 0.5);
 
-    vec2 pixel = texCoord * textureDimensions - vec2(0.5, 0.5);
-
-    vec4 q11 = texture(image, (floor(pixel) + 0.5) / textureDimensions);
-    vec4 q12 = texture(image, (vec2(floor(pixel.x), ceil(pixel.y)) + 0.5) / textureDimensions);
-    vec4 q21 = texture(image, (vec2(ceil(pixel.x), floor(pixel.y)) + 0.5) / textureDimensions);
-    vec4 q22 = texture(image, (ceil(pixel) + 0.5) / textureDimensions);
+    vec4 q11 = texture(image, (floor(pixel) + 0.5) / input_resolution);
+    vec4 q12 = texture(image, (vec2(floor(pixel.x), ceil(pixel.y)) + 0.5) / input_resolution);
+    vec4 q21 = texture(image, (vec2(ceil(pixel.x), floor(pixel.y)) + 0.5) / input_resolution);
+    vec4 q22 = texture(image, (ceil(pixel) + 0.5) / input_resolution);
 
     vec2 pos = fract(pixel);
 
@@ -27,7 +25,7 @@ vec4 scale(sampler2D image)
         int diagonalBias = 0;
         for (float y = -1.0; y < 3.0; y++) {
             for (float x = -1.0; x < 3.0; x++) {
-                vec4 color = texture(image, (pixel + vec2(x, y)) / textureDimensions);
+                vec4 color = texture(image, (pixel + vec2(x, y)) / input_resolution);
                 if (color == q11) diagonalBias++;
                 if (color == q12) diagonalBias--;
             }
