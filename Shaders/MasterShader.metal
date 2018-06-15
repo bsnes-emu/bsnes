@@ -12,6 +12,7 @@ typedef float4 vec4;
 typedef texture2d<half> sampler2D;
 #define equal(x, y) all((x) == (y))
 #define inequal(x, y) any((x) != (y))
+#define STATIC static
 
 typedef struct {
     float4 position [[position]];

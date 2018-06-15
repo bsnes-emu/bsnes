@@ -8,7 +8,7 @@
  */
 
 /* We use the same colorspace as the HQ algorithms. */
-vec3 rgb_to_hq_colospace(vec4 rgb)
+STATIC vec3 rgb_to_hq_colospace(vec4 rgb)
 {
     return vec3( 0.250 * rgb.r + 0.250 * rgb.g + 0.250 * rgb.b,
                  0.250 * rgb.r - 0.000 * rgb.g - 0.250 * rgb.b,
@@ -16,7 +16,7 @@ vec3 rgb_to_hq_colospace(vec4 rgb)
 }
 
 
-bool is_different(vec4 a, vec4 b)
+STATIC bool is_different(vec4 a, vec4 b)
 {
     vec3 diff = abs(rgb_to_hq_colospace(a) - rgb_to_hq_colospace(b));
     return diff.x > 0.125 || diff.y > 0.027 || diff.z > 0.031;
@@ -24,7 +24,7 @@ bool is_different(vec4 a, vec4 b)
 
 #define P(m, r) ((pattern & (m)) == (r))
 
-vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
+STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;

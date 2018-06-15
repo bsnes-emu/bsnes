@@ -2,7 +2,7 @@
 #define COLOR_HIGH 1.0
 #define SCANLINE_DEPTH 0.1
 
-vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
+STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     vec2 pos = fract(position * input_resolution);
     vec2 sub_pos = fract(position * input_resolution * 6);

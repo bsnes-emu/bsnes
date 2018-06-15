@@ -9,6 +9,7 @@ const vec2 input_resolution = vec2(160, 144);
 
 #define equal(x, y) ((x) == (y))
 #define inequal(x, y) ((x) != (y))
+#define STATIC
 
 out vec4 frag_color;
 

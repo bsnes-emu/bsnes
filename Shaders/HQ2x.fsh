@@ -2,14 +2,14 @@
 
 /* The colorspace used by the HQnx filters is not really YUV, despite the algorithm description claims it is. It is
    also not normalized. Therefore, we shall call the colorspace used by HQnx "HQ Colorspace" to avoid confusion. */
-vec3 rgb_to_hq_colospace(vec4 rgb)
+STATIC vec3 rgb_to_hq_colospace(vec4 rgb)
 {
     return vec3( 0.250 * rgb.r + 0.250 * rgb.g + 0.250 * rgb.b,
                  0.250 * rgb.r - 0.000 * rgb.g - 0.250 * rgb.b,
                 -0.125 * rgb.r + 0.250 * rgb.g - 0.125 * rgb.b);
 }
 
-bool is_different(vec4 a, vec4 b)
+STATIC bool is_different(vec4 a, vec4 b)
 {
     vec3 diff = abs(rgb_to_hq_colospace(a) - rgb_to_hq_colospace(b));
     return diff.x > 0.188 || diff.y > 0.027 || diff.z > 0.031;
@@ -17,17 +17,17 @@ bool is_different(vec4 a, vec4 b)
 
 #define P(m, r) ((pattern & (m)) == (r))
 
-vec4 interp_2px(vec4 c1, float w1, vec4 c2, float w2)
+STATIC vec4 interp_2px(vec4 c1, float w1, vec4 c2, float w2)
 {
     return (c1 * w1 + c2 * w2) / (w1 + w2);
 }
 
-vec4 interp_3px(vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3)
+STATIC vec4 interp_3px(vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3)
 {
     return (c1 * w1 + c2 * w2 + c3 * w3) / (w1 + w2 + w3);
 }
 
-vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
+STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / input_resolution;
