@@ -36,10 +36,12 @@ static inline float4 texture(texture2d<half> texture, float2 pos)
     return float4(texture.sample(texture_sampler, pos));
 }
 
+
 fragment float4 fragment_shader(rasterizer_data in [[stage_in]],
                                 texture2d<half> image [[ texture(0) ]],
                                 texture2d<half> previous_image [[ texture(1) ]],
-                                constant bool *mix_previous [[ buffer(0) ]])
+                                constant bool *mix_previous [[ buffer(0) ]],
+                                constant float2 *output_resolution [[ buffer(1) ]])
 {
     in.texcoords.y = 1 - in.texcoords.y;
     if (*mix_previous) {

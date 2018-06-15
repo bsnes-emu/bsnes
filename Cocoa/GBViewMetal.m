@@ -25,6 +25,8 @@ static const vector_float2 rect[] =
     id<MTLRenderPipelineState> pipeline_state;
     id<MTLCommandQueue> command_queue;
     id<MTLBuffer> mix_previous_buffer;
+    id<MTLBuffer> output_resolution_buffer;
+    vector_float2 output_resolution;
 }
 
 - (void)createInternalView
@@ -46,12 +48,15 @@ static const vector_float2 rect[] =
     vertices = [device newBufferWithBytes:rect
                                    length:sizeof(rect)
                                   options:MTLResourceStorageModeShared];
-
     
     static const bool default_mix_value = false;
     mix_previous_buffer = [device newBufferWithBytes:&default_mix_value
                                               length:sizeof(default_mix_value)
                                              options:MTLResourceStorageModeShared];
+    
+    output_resolution_buffer = [device newBufferWithBytes:&default_mix_value
+                                                   length:sizeof(default_mix_value)
+                                                  options:MTLResourceStorageModeShared];
     
     [self loadShader];
 }
@@ -92,6 +97,7 @@ static const vector_float2 rect[] =
 
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
 {
+    output_resolution = (vector_float2){size.width, size.height};
 }
 
 - (void)drawInMTKView:(nonnull MTKView *)view
@@ -113,12 +119,14 @@ static const vector_float2 rect[] =
     if(render_pass_descriptor != nil)
     {
         *(bool *)[mix_previous_buffer contents] = [self shouldBlendFrameWithPrevious];
+        *(vector_float2 *)[output_resolution_buffer contents] = output_resolution;
+
         id<MTLRenderCommandEncoder> render_encoder =
             [command_buffer renderCommandEncoderWithDescriptor:render_pass_descriptor];
         
         [render_encoder setViewport:(MTLViewport){0.0, 0.0,
-            view.bounds.size.width * view.window.backingScaleFactor,
-            view.bounds.size.height * view.window.backingScaleFactor,
+            output_resolution.x,
+            output_resolution.y,
             -1.0, 1.0}];
         
         [render_encoder setRenderPipelineState:pipeline_state];
@@ -130,6 +138,10 @@ static const vector_float2 rect[] =
         [render_encoder setFragmentBuffer:mix_previous_buffer
                                    offset:0
                                   atIndex:0];
+        
+        [render_encoder setFragmentBuffer:output_resolution_buffer
+                                   offset:0
+                                  atIndex:1];
         
         [render_encoder setFragmentTexture:texture
                                   atIndex:0];
