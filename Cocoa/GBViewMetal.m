@@ -54,10 +54,11 @@ static const vector_float2 rect[] =
                                               length:sizeof(default_mix_value)
                                              options:MTLResourceStorageModeShared];
     
-    output_resolution_buffer = [device newBufferWithBytes:&default_mix_value
-                                                   length:sizeof(default_mix_value)
+    output_resolution_buffer = [device newBufferWithBytes:&output_resolution
+                                                   length:sizeof(output_resolution)
                                                   options:MTLResourceStorageModeShared];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loadShader) name:@"GBFilterChanged" object:nil];
     [self loadShader];
 }
 
@@ -69,11 +70,25 @@ static const vector_float2 rect[] =
                                                                                             inDirectory:@"Shaders"]
                                                         encoding:NSUTF8StringEncoding
                                                            error:nil];
+    
+    NSString *shader_name = [[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"];
+    NSString *scaler_source = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:shader_name
+                                                                                                 ofType:@"fsh"
+                                                                                            inDirectory:@"Shaders"]
+                                                        encoding:NSUTF8StringEncoding
+                                                           error:nil];
+    
+    shader_source = [shader_source stringByReplacingOccurrencesOfString:@"{filter}"
+                                                             withString:scaler_source];
+
     id<MTLLibrary> library = [device newLibraryWithSource:shader_source
                                                    options:nil
                                                      error:&error];
     if (error) {
         NSLog(@"Error: %@", error);
+        if (!library) {
+            return;
+        }
     }
     
     id<MTLFunction> vertex_function = [library newFunctionWithName:@"vertex_shader"];
@@ -90,6 +105,7 @@ static const vector_float2 rect[] =
                                                              error:&error];
     if (error)  {
         NSLog(@"Failed to created pipeline state, error %@", error);
+        return;
     }
     
     command_queue = [device newCommandQueue];

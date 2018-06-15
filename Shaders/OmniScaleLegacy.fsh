@@ -18,16 +18,16 @@ vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_re
     /* Special handling for diaonals */
     bool hasDownDiagonal = false;
     bool hasUpDiagonal = false;
-    if (q12 == q21 && q11 != q22) hasUpDiagonal = true;
-    else if (q12 != q21 && q11 == q22) hasDownDiagonal = true;
-    else if (q12 == q21 && q11 == q22) {
-        if (q11 == q12) return q11;
+    if (equal(q12, q21) && inequal(q11, q22)) hasUpDiagonal = true;
+    else if (inequal(q12, q21) && equal(q11, q22)) hasDownDiagonal = true;
+    else if (equal(q12, q21) && equal(q11, q22)) {
+        if (equal(q11, q12)) return q11;
         int diagonalBias = 0;
         for (float y = -1.0; y < 3.0; y++) {
             for (float x = -1.0; x < 3.0; x++) {
                 vec4 color = texture(image, (pixel + vec2(x, y)) / input_resolution);
-                if (color == q11) diagonalBias++;
-                if (color == q12) diagonalBias--;
+                if (equal(color, q11)) diagonalBias++;
+                if (equal(color, q12)) diagonalBias--;
             }
         }
         if (diagonalBias <= 0) {
@@ -89,15 +89,15 @@ vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_re
                          min(q12d,
                              q22d)));
 
-    if (q11d == best) {
+    if (equal(q11d, best)) {
         return q11;
     }
 
-    if (q21d == best) {
+    if (equal(q21d, best)) {
         return q21;
     }
 
-    if (q12d == best) {
+    if (equal(q12d, best)) {
         return q12;
     }
 

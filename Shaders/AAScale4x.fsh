@@ -21,18 +21,18 @@ vec4 scale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_
     if (p.x > .5) {
         if (p.y > .5) {
             // Top Right
-            return B == F && B != D && F != H ? F : E;
+            return equal(B, F) && inequal(B, D) && inequal(F, H) ? F : E;
         } else {
             // Bottom Right
-            return H == F && D != H && B != F ? F : E;
+            return equal(H, F) && inequal(D, H) && inequal(B, F) ? F : E;
         }
     } else {
         if (p.y > .5) {
             // Top Left
-            return D == B && B != F && D != H ? D : E;
+            return equal(D, B) && inequal(B, F) && inequal(D, H) ? D : E;
         } else {
             // Bottom Left
-            return D == H && D != B && H != F ? D : E;
+            return equal(D, H) && inequal(D, B) && inequal(H, F) ? D : E;
         }
     }
 }
@@ -67,18 +67,18 @@ vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_re
     if (p.x > .5) {
         if (p.y > .5) {
             // Top Right
-            R = B == F && B != D && F != H ? F : E;
+            R = equal(B, F) && inequal(B, D) && inequal(F, H) ? F : E;
         } else {
             // Bottom Right
-            R = H == F && D != H && B != F ? F : E;
+            R = equal(H, F) && inequal(D, H) && inequal(B, F) ? F : E;
         }
     } else {
         if (p.y > .5) {
             // Top Left
-            R = D == B && B != F && D != H ? D : E;
+            R = equal(D, B) && inequal(B, F) && inequal(D, H) ? D : E;
         } else {
             // Bottom Left
-            R = D == H && D != B && H != F ? D : E;
+            R = equal(D, H) && inequal(D, B) && inequal(H, F) ? D : E;
         }
     }
 
