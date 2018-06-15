@@ -29,6 +29,14 @@ static const vector_float2 rect[] =
     vector_float2 output_resolution;
 }
 
++ (bool)isSupported
+{
+    if (MTLCopyAllDevices) {
+        return [MTLCopyAllDevices() count];
+    }
+    return false;
+}
+
 - (void)createInternalView
 {
     MTKView *view = [[MTKView alloc] initWithFrame:self.frame device:(device = MTLCreateSystemDefaultDevice())];

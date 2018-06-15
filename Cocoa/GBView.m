@@ -26,7 +26,10 @@
 + (instancetype)allocWithZone:(struct _NSZone *)zone
 {
     if (self == [GBView class]) {
-        return [GBViewMetal allocWithZone: zone];
+        if ([GBViewMetal isSupported]) {
+            return [GBViewMetal allocWithZone: zone];
+        }
+        return [GBViewGL allocWithZone: zone];
     }
     return [super allocWithZone:zone];
 }
