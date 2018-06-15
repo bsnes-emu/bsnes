@@ -89,8 +89,10 @@ static const vector_float2 rect[] =
     shader_source = [shader_source stringByReplacingOccurrencesOfString:@"{filter}"
                                                              withString:scaler_source];
 
+    MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
+    options.fastMathEnabled = YES;
     id<MTLLibrary> library = [device newLibraryWithSource:shader_source
-                                                   options:nil
+                                                   options:options
                                                      error:&error];
     if (error) {
         NSLog(@"Error: %@", error);
