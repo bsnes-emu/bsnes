@@ -1,6 +1,7 @@
 #import <Carbon/Carbon.h>
 #import "GBView.h"
 #import "GBViewGL.h"
+#import "GBViewMetal.h"
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
 
@@ -19,16 +20,13 @@
 
 + (instancetype)alloc
 {
-    if (self == [GBView class]) {
-        return [GBViewGL alloc];
-    }
-    return [super alloc];
+    return [self allocWithZone:NULL];
 }
 
 + (instancetype)allocWithZone:(struct _NSZone *)zone
 {
     if (self == [GBView class]) {
-        return [GBViewGL allocWithZone: zone];
+        return [GBViewMetal allocWithZone: zone];
     }
     return [super allocWithZone:zone];
 }
