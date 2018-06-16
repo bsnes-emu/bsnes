@@ -468,7 +468,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
     };
 
     if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END && gb->apu.is_active[GB_WAVE]) {
-        if (!gb->is_cgb && !gb->apu.wave_channel.wave_form_just_read) {
+        if (!GB_is_cgb(gb) && !gb->apu.wave_channel.wave_form_just_read) {
             return 0xFF;
         }
         reg = GB_IO_WAV_START + gb->apu.wave_channel.current_sample_index / 2;
@@ -479,7 +479,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
-    if (!gb->apu.global_enable && reg != GB_IO_NR52 && (gb->is_cgb ||
+    if (!gb->apu.global_enable && reg != GB_IO_NR52 && (GB_is_cgb(gb) ||
                                                         (
                                                         reg != GB_IO_NR11 &&
                                                         reg != GB_IO_NR21 &&
@@ -491,7 +491,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
     }
 
     if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END && gb->apu.is_active[GB_WAVE]) {
-        if (!gb->is_cgb && !gb->apu.wave_channel.wave_form_just_read) {
+        if (!GB_is_cgb(gb) && !gb->apu.wave_channel.wave_form_just_read) {
             return;
         }
         reg = GB_IO_WAV_START + gb->apu.wave_channel.current_sample_index / 2;
@@ -533,7 +533,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.global_enable = false;
             }
             
-            if (!gb->is_cgb && (value & 0x80)) {
+            if (!GB_is_cgb(gb) && (value & 0x80)) {
                 GB_apu_write(gb, GB_IO_NR11, old_nrx1[0]);
                 GB_apu_write(gb, GB_IO_NR21, old_nrx1[1]);
                 GB_apu_write(gb, GB_IO_NR31, old_nrx1[2]);
@@ -694,7 +694,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if ((value & 0x80)) {
                 /* DMG bug: wave RAM gets corrupted if the channel is retriggerred 1 cycle before the APU
                             reads from it. */
-                if (!gb->is_cgb &&
+                if (!GB_is_cgb(gb) &&
                     gb->apu.is_active[GB_WAVE] &&
                     gb->apu.wave_channel.sample_countdown == 0 &&
                     gb->apu.wave_channel.enable) {

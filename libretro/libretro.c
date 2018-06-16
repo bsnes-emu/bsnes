@@ -52,6 +52,13 @@ enum model {
     MODEL_AUTO
 };
 
+static const GB_model_t libretro_to_internal_model[] =
+{
+    [MODEL_DMG] = GB_MODEL_DMG_B,
+    [MODEL_CGB] = GB_MODEL_CGB_E,
+    [MODEL_AGB] = GB_MODEL_AGB
+};
+
 enum screen_layout {
     LAYOUT_TOP_DOWN,
     LAYOUT_LEFT_RIGHT
@@ -317,15 +324,11 @@ static void init_for_current_model(void)
 
     for (i = 0; i < emulated_devices; i++)
     {
-        if (GB_is_inited(&gameboy[i]))
-            GB_switch_model_and_reset(&gameboy[i], effective_model[i] != MODEL_DMG);
-
-        else
-        {
-            if (effective_model[i] == MODEL_DMG)
-                GB_init(&gameboy[i]);
-            else
-                GB_init_cgb(&gameboy[i]);
+        if (GB_is_inited(&gameboy[i])) {
+            GB_switch_model_and_reset(&gameboy[i], libretro_to_internal_model[effective_model[i]]);
+        }
+        else {
+            GB_init(&gameboy[i], libretro_to_internal_model[effective_model[i]]);
         }
         const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[effective_model[i]];
         const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[effective_model[i]];

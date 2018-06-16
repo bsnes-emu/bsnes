@@ -77,7 +77,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     assert(gb->pending_cycles);
     GB_conflict_t conflict = GB_CONFLICT_READ_OLD;
     if ((addr & 0xFF80) == 0xFF00) {
-        conflict = (gb->is_cgb? cgb_conflict_map : dmg_conflict_map)[addr & 0x7F];
+        conflict = (GB_is_cgb(gb)? cgb_conflict_map : dmg_conflict_map)[addr & 0x7F];
     }
     switch (conflict) {
         case GB_CONFLICT_READ_OLD:
@@ -158,7 +158,7 @@ static void cycle_no_access(GB_gameboy_t *gb)
 
 static void cycle_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
 {
-    if (gb->is_cgb) {
+    if (GB_is_cgb(gb)) {
         /* Slight optimization */
         gb->pending_cycles += 4;
         return;
@@ -1381,14 +1381,14 @@ void GB_cpu_run(GB_gameboy_t *gb)
         return;
     }
     
-    if (gb->halted && !gb->is_cgb && !gb->just_halted) {
+    if (gb->halted && !GB_is_cgb(gb) && !gb->just_halted) {
         GB_advance_cycles(gb, 2);
     }
     
     uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
     
     if (gb->halted) {
-        GB_advance_cycles(gb, (gb->is_cgb || gb->just_halted) ? 4 : 2);
+        GB_advance_cycles(gb, (GB_is_cgb(gb) || gb->just_halted) ? 4 : 2);
     }
     gb->just_halted = false;
 

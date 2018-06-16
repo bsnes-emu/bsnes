@@ -18,6 +18,13 @@ enum model {
     MODEL_AGB,
 };
 
+static const GB_model_t cocoa_to_internal_model[] =
+{
+    [MODEL_DMG] = GB_MODEL_DMG_B,
+    [MODEL_CGB] = GB_MODEL_CGB_E,
+    [MODEL_AGB] = GB_MODEL_AGB
+};
+
 @interface Document ()
 {
     /* NSTextViews freeze the entire app if they're modified too often and too quickly.
@@ -137,21 +144,22 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) initDMG
 {
     current_model = MODEL_DMG;
-    GB_init(&gb);
+    GB_init(&gb, cocoa_to_internal_model[current_model]);
     [self initCommon];
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
 }
 
 - (void) initCGB
 {
-    GB_init_cgb(&gb);
     [self initCommon];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]) {
         current_model = MODEL_AGB;
+        GB_init(&gb, cocoa_to_internal_model[current_model]);
         GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"agb_boot" ofType:@"bin"] UTF8String]);
     }
     else {
         current_model = MODEL_CGB;
+        GB_init(&gb, cocoa_to_internal_model[current_model]);
         GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
     }
 }
@@ -250,7 +258,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     }
     else {
         current_model = (enum model)[sender tag];
-        GB_switch_model_and_reset(&gb, current_model != MODEL_DMG);
+        GB_switch_model_and_reset(&gb, cocoa_to_internal_model[current_model]);
         static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot"};
         GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:boot_names[current_model - 1] ofType:@"bin"] UTF8String]);
     }

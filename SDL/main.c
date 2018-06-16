@@ -26,12 +26,18 @@ static bool paused = false;
 static uint32_t pixel_buffer_1[160*144], pixel_buffer_2[160*144];
 static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
 
-
 static char *filename = NULL;
 static bool should_free_filename = false;
 static char *battery_save_path_ptr;
 
 SDL_AudioDeviceID device_id;
+
+static const GB_model_t sdl_to_internal_model[] =
+{
+    [MODEL_DMG] = GB_MODEL_DMG_B,
+    [MODEL_CGB] = GB_MODEL_CGB_E,
+    [MODEL_AGB] = GB_MODEL_AGB
+};
 
 void set_filename(const char *new_filename, bool new_should_free)
 {
@@ -364,15 +370,10 @@ static void run(void)
     pending_command = GB_SDL_NO_COMMAND;
 restart:
     if (GB_is_inited(&gb)) {
-        GB_switch_model_and_reset(&gb, configuration.model != MODEL_DMG);
+        GB_switch_model_and_reset(&gb, sdl_to_internal_model[configuration.model]);
     }
     else {
-        if (configuration.model == MODEL_DMG) {
-            GB_init(&gb);
-        }
-        else {
-            GB_init_cgb(&gb);
-        }
+        GB_init(&gb, sdl_to_internal_model[configuration.model]);
         
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
         GB_set_pixels_output(&gb, active_pixel_buffer);
@@ -454,7 +455,7 @@ int main(int argc, char **argv)
 
     signal(SIGINT, debugger_interrupt);
 
-    SDL_Init( SDL_INIT_EVERYTHING );
+    SDL_Init(SDL_INIT_EVERYTHING);
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -526,6 +527,9 @@ int main(int argc, char **argv)
     if (prefs_file) {
         fread(&configuration, 1, sizeof(configuration), prefs_file);
         fclose(prefs_file);
+    }
+    if (configuration.model >= MODEL_MAX) {
+        configuration.model = MODEL_CGB;
     }
     
     atexit(save_configuration);
