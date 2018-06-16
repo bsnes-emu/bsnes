@@ -906,15 +906,17 @@ void GB_dma_run(GB_gameboy_t *gb)
 void GB_hdma_run(GB_gameboy_t *gb)
 {
     if (!gb->hdma_on) return;
+
     while (gb->hdma_cycles >= 0x4) {
         gb->hdma_cycles -= 0x4;
 
         GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), GB_read_memory(gb, (gb->hdma_current_src++)));
         
         if ((gb->hdma_current_dest & 0xf) == 0) {
-            if(--gb->hdma_steps_left == 0){
+            if (--gb->hdma_steps_left == 0) {
                 gb->hdma_on = false;
                 gb->hdma_on_hblank = false;
+                gb->hdma_starting = false;
                 gb->io_registers[GB_IO_HDMA5] &= 0x7F;
                 break;
             }
