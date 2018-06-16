@@ -66,6 +66,7 @@ static const vector_float2 rect[] =
                                                    length:sizeof(output_resolution)
                                                   options:MTLResourceStorageModeShared];
     
+    output_resolution = (simd_float2){view.drawableSize.width, view.drawableSize.height};
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loadShader) name:@"GBFilterChanged" object:nil];
     [self loadShader];
 }
