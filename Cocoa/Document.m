@@ -278,7 +278,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (hex_controller) {
         /* Verify bank sanity, especially when switching models. */
         [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:0];
-        [self hexUpdateBank:self.memoryBankInput];
+        [self hexUpdateBank:self.memoryBankInput ignoreErrors:true];
     }
 }
 
@@ -911,7 +911,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     }
 }
 
-- (IBAction)hexUpdateBank:(NSControl *)sender
+- (void)hexUpdateBank:(NSControl *)sender ignoreErrors: (bool)ignore_errors
 {
     NSString *error = [self captureOutputForBlock:^{
         uint16_t addr, bank;
@@ -954,10 +954,15 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         [hex_controller reloadData];
     }];
     
-    if (error) {
+    if (error && !ignore_errors) {
         NSBeep();
         [GBWarningPopover popoverWithContents:error onView:sender];
     }
+}
+
+- (IBAction)hexUpdateBank:(NSControl *)sender
+{
+    [self hexUpdateBank:sender ignoreErrors:false];
 }
 
 - (IBAction)hexUpdateSpace:(NSPopUpButtonCell *)sender
