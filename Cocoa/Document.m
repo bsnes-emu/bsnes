@@ -141,17 +141,17 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return self;
 }
 
+/* Todo: Unify the 3 init functions */
 - (void) initDMG
 {
     current_model = MODEL_DMG;
     GB_init(&gb, cocoa_to_internal_model[current_model]);
-    [self initCommon];
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
+    [self initCommon];
 }
 
 - (void) initCGB
 {
-    [self initCommon];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]) {
         current_model = MODEL_AGB;
         GB_init(&gb, cocoa_to_internal_model[current_model]);
@@ -162,6 +162,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         GB_init(&gb, cocoa_to_internal_model[current_model]);
         GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
     }
+    [self initCommon];
 }
 
 - (void) initCommon
