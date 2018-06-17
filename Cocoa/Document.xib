@@ -50,16 +50,10 @@
                 <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView id="KTk-4M-J7t" customClass="GBBorderView">
+                    <view id="uqf-pe-VAF" customClass="GBView">
                         <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <view id="uqf-pe-VAF" customClass="GBView">
-                                <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            </view>
-                        </subviews>
-                    </customView>
+                    </view>
                 </subviews>
             </view>
             <connections>
