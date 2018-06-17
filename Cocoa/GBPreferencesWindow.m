@@ -132,7 +132,7 @@
 -(void)keyDown:(NSEvent *)theEvent
 {
     if (!is_button_being_modified) {
-        if (self.firstResponder != self.controlsTableView) {
+        if (self.firstResponder != self.controlsTableView && [theEvent type] != NSEventTypeFlagsChanged) {
             [super keyDown:theEvent];
         }
         return;
@@ -151,9 +151,6 @@
 {
     if (event.modifierFlags > previousModifiers) {
         [self keyDown:event];
-    }
-    else {
-        [self keyUp:event];
     }
     
     previousModifiers = event.modifierFlags;
