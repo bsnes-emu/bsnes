@@ -1075,7 +1075,7 @@ void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
     gb->io_registers[addr] = value;
     bool after = window_enabled(gb);
     
-    if (before != after && gb->current_line >= LINES) {
+    if (before != after && gb->current_line < LINES) {
         /* Window was disabled or enabled outside of vblank */
         if (gb->current_line >= gb->io_registers[GB_IO_WY]) {
             if (after) {
