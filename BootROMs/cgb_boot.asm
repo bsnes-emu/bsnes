@@ -10,6 +10,8 @@ Start:
     xor a
 ; Clear chosen input palette
     ldh [InputPalette], a
+; Clear title checksum
+    ldh [TitleChecksum], a
 ; Clear memory VRAM
     ld hl, $8000
     call ClearMemoryPage
@@ -723,39 +725,38 @@ Preboot:
     cpl
     ldh [$00], a
     call ClearVRAMViaHDMA
-
+    
+    ; Final values for CGB mode
+    ld de, $ff56
+    ld l, $0d
+    
     ld a, [$143]
     bit 7, a
-    jr nz, .cgbGame
 
-    call EmulateDMG
-
-.cgbGame
+    call z, EmulateDMG
+    ldh a, [TitleChecksum]
+    ld b, a
+    
     ldh [$4C], a ; One day, I will know what this switch does and how it differs from FF6C
     ldh a, [InputPalette]
     and a
     jr nz, .emulateDMGForCGBGame
 IF DEF(AGB)
     ; Set registers to match the original AGB-CGB boot
-    ld bc, $1100
-    push bc
-    pop af
+    ; AF = $1100, C = 0
+    xor a
+    ld c, a
+    add a, $11
     ld h, c
     ld b, 1
-    ld c, c
-    ld e, $08
-    ld l, $7c
 ELSE
     ; Set registers to match the original CGB boot
-    ld bc, $1180
-    push bc
-    pop af
-    ld c, 0
+    ; AF = $1180, C = 0
+    xor a
+    ld c, a
+    ld a, $11
     ld h, c
-    ld b, c
-    ld c, c
-    ld e, $08
-    ld l, $7c
+    ; B is set to the title checksum
 ENDC
     ret
 
@@ -788,25 +789,31 @@ EmulateDMG:
     call WaitFrame
     call LoadPalettesFromIndex
     ld a, 4
+    ; Set the final values for DMG mode
+    ld d, 0
+    ld e, $8
+    ld l, $7c
     ret
 
 GetPaletteIndex:
-    ld a, [$14B] ; Old Licensee
+    ld hl, $14B
+    ld a, [hl] ; Old Licensee
     cp $33
     jr z, .newLicensee
     cp 1 ; Nintendo
     jr nz, .notNintendo
     jr .doChecksum
 .newLicensee
-    ld a, [$144]
+    ld l, $44
+    ld a, [hli]
     cp "0"
     jr nz, .notNintendo
-    ld a, [$145]
+    ld a, [hl]
     cp "1"
     jr nz, .notNintendo
 
 .doChecksum
-    ld hl, $134
+    ld l, $34
     ld c, $10
     ld b, 0
 
@@ -848,6 +855,8 @@ GetPaletteIndex:
     ld a, l
     add PalettePerChecksum - TitleChecksums - 1; -1 since hl was incremented
     ld l, a
+    ld a, b
+    ldh [TitleChecksum], a
     ld a, [hl]
     ret
 
@@ -1140,6 +1149,8 @@ SECTION "ROMMax", ROM0[$900]
     ds 1
 
 SECTION "HRAM", HRAM[$FF80]
+TitleChecksum:
+    ds 1
 BgPalettes:
     ds 8 * 4 * 2
 InputPalette:
