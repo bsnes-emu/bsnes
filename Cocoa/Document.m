@@ -141,12 +141,27 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return self;
 }
 
+- (NSString *)bootROMPathForName:(NSString *)name
+{
+    NSURL *url = [[NSUserDefaults standardUserDefaults] URLForKey:@"GBBootROMsFolder"];
+    if (url) {
+        NSString *path = [url path];
+        path = [path stringByAppendingPathComponent:name];
+        path = [path stringByAppendingPathExtension:@"bin"];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+            return path;
+        }
+    }
+    
+    return [[NSBundle mainBundle] pathForResource:name ofType:@"bin"];
+}
+
 /* Todo: Unify the 3 init functions */
 - (void) initDMG
 {
     current_model = MODEL_DMG;
     GB_init(&gb, cocoa_to_internal_model[current_model]);
-    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:@"dmg_boot"] UTF8String]);
     [self initCommon];
 }
 
@@ -155,12 +170,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]) {
         current_model = MODEL_AGB;
         GB_init(&gb, cocoa_to_internal_model[current_model]);
-        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"agb_boot" ofType:@"bin"] UTF8String]);
+        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"agb_boot"] UTF8String]);
     }
     else {
         current_model = MODEL_CGB;
         GB_init(&gb, cocoa_to_internal_model[current_model]);
-        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
+        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"cgb_boot"] UTF8String]);
     }
     [self initCommon];
 }
@@ -254,14 +269,18 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     [self stop];
 
+    if ([sender tag] != MODEL_NONE) {
+        current_model = (enum model)[sender tag];
+    }
+    
+    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot"};
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
+
     if ([sender tag] == MODEL_NONE) {
         GB_reset(&gb);
     }
     else {
-        current_model = (enum model)[sender tag];
         GB_switch_model_and_reset(&gb, cocoa_to_internal_model[current_model]);
-        static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot"};
-        GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:boot_names[current_model - 1] ofType:@"bin"] UTF8String]);
     }
 
     if ([sender tag] != 0) {

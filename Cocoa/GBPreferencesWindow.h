@@ -10,4 +10,6 @@
 @property (strong) IBOutlet NSPopUpButton *rewindPopupButton;
 @property (strong) IBOutlet NSButton *configureJoypadButton;
 @property (strong) IBOutlet NSButton *skipButton;
+@property (strong) IBOutlet NSMenuItem *bootROMsFolderItem;
+@property (strong) IBOutlet NSPopUpButtonCell *bootROMsButton;
 @end

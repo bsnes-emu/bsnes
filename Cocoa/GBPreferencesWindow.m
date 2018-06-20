@@ -308,12 +308,57 @@
 - (void)awakeFromNib
 {
     [super awakeFromNib];
+    [self updateBootROMFolderButton];
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self.controlsTableView selector:@selector(reloadData) name:(NSString*)kTISNotifySelectedKeyboardInputSourceChanged object:nil];
 }
 
 - (void)dealloc
 {
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self.controlsTableView];
+}
+
+- (IBAction)selectOtherBootROMFolder:(id)sender
+{
+    NSOpenPanel *panel = [[NSOpenPanel alloc] init];
+    [panel setCanChooseDirectories:YES];
+    [panel setCanChooseFiles:NO];
+    [panel setPrompt:@"Select"];
+    [panel setDirectoryURL:[[NSUserDefaults standardUserDefaults] URLForKey:@"GBBootROMsFolder"]];
+    [panel beginSheetModalForWindow:self completionHandler:^(NSModalResponse result) {
+        if (result == NSModalResponseOK) {
+            NSURL *url = [[panel URLs] firstObject];
+            [[NSUserDefaults standardUserDefaults] setURL:url forKey:@"GBBootROMsFolder"];
+        }
+        [self updateBootROMFolderButton];
+    }];
+
+}
+
+- (void) updateBootROMFolderButton
+{
+    NSURL *url = [[NSUserDefaults standardUserDefaults] URLForKey:@"GBBootROMsFolder"];
+    BOOL is_dir = false;
+    [[NSFileManager defaultManager] fileExistsAtPath:[url path] isDirectory:&is_dir];
+    if (!is_dir) url = nil;
+    
+    if (url) {
+        [self.bootROMsFolderItem setTitle:[url lastPathComponent]];
+        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:[url path]];
+        [icon setSize:NSMakeSize(16, 16)];
+        [self.bootROMsFolderItem setHidden:NO];
+        [self.bootROMsFolderItem setImage:icon];
+        [self.bootROMsButton selectItemAtIndex:1];
+    }
+    else {
+        [self.bootROMsFolderItem setHidden:YES];
+        [self.bootROMsButton selectItemAtIndex:0];
+    }
+}
+
+- (IBAction)useBuiltinBootROMs:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setURL:nil forKey:@"GBBootROMsFolder"];
+    [self updateBootROMFolderButton];
 }
 
 @end
