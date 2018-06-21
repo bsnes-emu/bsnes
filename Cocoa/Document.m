@@ -27,11 +27,11 @@ static const GB_model_t cocoa_to_internal_model[] =
 
 @interface Document ()
 {
-    /* NSTextViews freeze the entire app if they're modified too often and too quickly.
-     We use this bool to tune down the write speed. Let me know if there's a more
-     reasonable alternative to this. */
-    unsigned long pendingLogLines;
-    bool tooMuchLogs;
+    
+    NSMutableAttributedString *pending_console_output;
+    NSRecursiveLock *console_output_lock;
+    NSTimer *console_output_timer;
+    
     bool fullScreen;
     bool in_sync_input;
     HFController *hex_controller;
@@ -137,6 +137,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (self) {
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
         debugger_input_queue = [[NSMutableArray alloc] init];
+        console_output_lock = [[NSRecursiveLock alloc] init];
     }
     return self;
 }
@@ -572,6 +573,30 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return rect;
 }
 
+- (void) appendPendingOutput
+{
+    [console_output_lock lock];
+    if (shouldClearSideView) {
+        shouldClearSideView = false;
+        [self.debuggerSideView setString:@""];
+    }
+    if (pending_console_output) {
+        NSTextView *textView = logToSideView? self.debuggerSideView : self.consoleOutput;
+        
+        [hex_controller reloadData];
+        [self reloadVRAMData: nil];
+        
+        [textView.textStorage appendAttributedString:pending_console_output];
+        [textView scrollToEndOfDocument:nil];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
+            [self.consoleWindow orderBack:nil];
+        }
+        pending_console_output = nil;
+}
+    [console_output_lock unlock];
+
+}
+
 - (void) log: (const char *) string withAttributes: (GB_log_attributes) attributes
 {
     NSString *nsstring = @(string); // For ref-counting
@@ -580,57 +605,45 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         return;
     }
     
-    NSTextView *textView = logToSideView? self.debuggerSideView : self.consoleOutput;
     
-    if (!logToSideView && pendingLogLines > 128) {
-        /* The ROM causes so many errors in such a short time, and we can't handle it. */
-        tooMuchLogs = true;
-        return;
+    NSFont *font = [NSFont userFixedPitchFontOfSize:12];
+    NSUnderlineStyle underline = NSUnderlineStyleNone;
+    if (attributes & GB_LOG_BOLD) {
+        font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
     }
-    pendingLogLines++;
+    
+    if (attributes &  GB_LOG_UNDERLINE_MASK) {
+        underline = (attributes &  GB_LOG_UNDERLINE_MASK) == GB_LOG_DASHED_UNDERLINE? NSUnderlinePatternDot | NSUnderlineStyleSingle : NSUnderlineStyleSingle;
+    }
+    
+    NSMutableParagraphStyle *paragraph_style = [[NSMutableParagraphStyle alloc] init];
+    [paragraph_style setLineSpacing:2];
+    NSMutableAttributedString *attributed =
+    [[NSMutableAttributedString alloc] initWithString:nsstring
+                                           attributes:@{NSFontAttributeName: font,
+                                                        NSForegroundColorAttributeName: [NSColor whiteColor],
+                                                        NSUnderlineStyleAttributeName: @(underline),
+                                                        NSParagraphStyleAttributeName: paragraph_style}];
+    
+    [console_output_lock lock];
+    if (!pending_console_output) {
+        pending_console_output = attributed;
+    }
+    else {
+        [pending_console_output appendAttributedString:attributed];
+    }
+    
+    if ([console_output_timer isValid]) {
+        console_output_timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)0.05 repeats:NO block:^(NSTimer * _Nonnull timer) {
+            [self appendPendingOutput];
+        }];
+        [[NSRunLoop mainRunLoop] addTimer:console_output_timer forMode:NSDefaultRunLoopMode];
+    }
+    
+    [console_output_lock unlock];
 
     /* Make sure mouse is not hidden while debugging */
     self.view.mouseHidingEnabled = NO;
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (shouldClearSideView) {
-            shouldClearSideView = false;
-            [self.debuggerSideView setString:@""];
-        }
-        [hex_controller reloadData];
-        [self reloadVRAMData: nil];
-
-        NSFont *font = [NSFont userFixedPitchFontOfSize:12];
-        NSUnderlineStyle underline = NSUnderlineStyleNone;
-        if (attributes & GB_LOG_BOLD) {
-            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
-        }
-
-        if (attributes &  GB_LOG_UNDERLINE_MASK) {
-            underline = (attributes &  GB_LOG_UNDERLINE_MASK) == GB_LOG_DASHED_UNDERLINE? NSUnderlinePatternDot | NSUnderlineStyleSingle : NSUnderlineStyleSingle;
-        }
-
-        NSMutableParagraphStyle *paragraph_style = [[NSMutableParagraphStyle alloc] init];
-        [paragraph_style setLineSpacing:2];
-        NSAttributedString *attributed =
-            [[NSAttributedString alloc] initWithString:nsstring
-                                            attributes:@{NSFontAttributeName: font,
-                                                         NSForegroundColorAttributeName: [NSColor whiteColor],
-                                                         NSUnderlineStyleAttributeName: @(underline),
-                                                         NSParagraphStyleAttributeName: paragraph_style}];
-        [textView.textStorage appendAttributedString:attributed];
-        if (pendingLogLines == 1) {
-            if (tooMuchLogs) {
-                tooMuchLogs = false;
-                [self log:"[...]\n"];
-            }
-            [textView scrollToEndOfDocument:nil];
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
-                [self.consoleWindow orderBack:nil];
-            }
-        }
-        pendingLogLines--;
-    });
 }
 
 - (IBAction)showConsoleWindow:(id)sender
@@ -674,8 +687,20 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (!GB_debugger_is_stopped(&gb)) {
         return;
     }
+    
+    if (![NSThread isMainThread]) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self updateSideView];
+        });
+        return;
+    }
+    
+    [console_output_lock lock];
     shouldClearSideView = true;
+    [self appendPendingOutput];
     logToSideView = true;
+    [console_output_lock unlock];
+    
     for (NSString *line in [self.debuggerSideViewInput.string componentsSeparatedByString:@"\n"]) {
         NSString *stripped = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         if ([stripped length]) {
@@ -686,7 +711,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             free(dupped);
         }
     }
+    
+    [console_output_lock lock];
+    [self appendPendingOutput];
     logToSideView = false;
+    [console_output_lock unlock];
 }
 
 - (char *) getDebuggerInput
