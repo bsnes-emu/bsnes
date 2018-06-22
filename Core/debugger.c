@@ -1514,8 +1514,25 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    LYC interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 64)? "Enabled" : "Disabled");
     
     
-    GB_log(gb, "\nCycles until next event: %d\n", -gb->display_cycles / 2);
-    GB_log(gb, "Current line: %d\n", gb->current_line);
+    
+    GB_log(gb, "\nCurrent line: %d\n", gb->current_line);
+    GB_log(gb, "Current state: ");
+    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+        GB_log(gb, "Off\n");
+    }
+    else if (gb->display_state == 7 || gb->display_state == 8) {
+        GB_log(gb, "Reading OAM data (%d/40)\n", gb->display_state == 8? gb->oam_search_index : 0);
+    }
+    else if (gb->display_state <= 3 || gb->display_state == 24) {
+        GB_log(gb, "Glitched line 0 (%d cycles to next event)\n", -gb->display_cycles / 2);
+    }
+    else if (gb->mode_for_interrupt == 3) {
+        signed pixel = gb->position_in_line > 160? (int8_t) gb->position_in_line : gb->position_in_line;
+        GB_log(gb, "Rendering pixel (%d/160)\n", pixel);
+    }
+    else {
+        GB_log(gb, "Sleeping (%d cycles to next event)\n", -gb->display_cycles / 2);
+    }
     GB_log(gb, "LY: %d\n", gb->io_registers[GB_IO_LY]);
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
     GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
