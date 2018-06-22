@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
 #include <SDL2/SDL.h>
 #include <Core/gb.h>
 #include "utils.h"
@@ -25,6 +26,8 @@ GB_gameboy_t gb;
 static bool paused = false;
 static uint32_t pixel_buffer_1[160*144], pixel_buffer_2[160*144];
 static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
+static bool underclock_down = false, rewind_down = false, do_rewind = false, rewind_paused = false, turbo_down = false;
+static double clock_mutliplier = 1.0;
 
 static char *filename = NULL;
 static bool should_free_filename = false;
@@ -143,7 +146,8 @@ static void handle_events(GB_gameboy_t *gb)
                     GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_JOYBUTTONDOWN);
                 }
                 else if (event.jbutton.button & 1) {
-                    GB_set_turbo_mode(gb, event.type == SDL_JOYBUTTONDOWN, false);
+                    turbo_down = event.type == SDL_JOYBUTTONDOWN;
+                    GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
                 
                 else {
@@ -152,9 +156,6 @@ static void handle_events(GB_gameboy_t *gb)
                         SDL_PauseAudioDevice(device_id, 1);
                     }
                     run_gui(true);
-                    if (!audio_playing) {
-                        SDL_PauseAudioDevice(device_id, 0);
-                    }
                     GB_set_color_correction_mode(gb, configuration.color_correction_mode);
                     GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
                 }
@@ -268,7 +269,18 @@ static void handle_events(GB_gameboy_t *gb)
                 }
             case SDL_KEYUP: // Fallthrough
                 if (event.key.keysym.scancode == configuration.keys[8]) {
-                    GB_set_turbo_mode(gb, event.type == SDL_KEYDOWN, false);
+                    turbo_down = event.type == SDL_KEYDOWN;
+                    GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
+                }
+                else if (event.key.keysym.scancode == configuration.keys_2[0]) {
+                    rewind_down = event.type == SDL_KEYDOWN;
+                    if (event.type == SDL_KEYUP) {
+                        rewind_paused = false;
+                    }
+                    GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
+                }
+                else if (event.key.keysym.scancode == configuration.keys_2[1]) {
+                    underclock_down = event.type == SDL_KEYDOWN;
                 }
                 else {
                     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
@@ -286,6 +298,14 @@ static void handle_events(GB_gameboy_t *gb)
 
 static void vblank(GB_gameboy_t *gb)
 {
+    if (underclock_down && clock_mutliplier > 0.5) {
+        clock_mutliplier -= 0.1;
+        GB_set_clock_multiplier(gb, clock_mutliplier);
+    }
+    else if (!underclock_down && clock_mutliplier < 1.0) {
+        clock_mutliplier += 0.1;
+        GB_set_clock_multiplier(gb, clock_mutliplier);
+    }
     if (configuration.blend_frames) {
         render_texture(active_pixel_buffer, previous_pixel_buffer);
         uint32_t *temp = active_pixel_buffer;
@@ -296,6 +316,7 @@ static void vblank(GB_gameboy_t *gb)
     else {
         render_texture(active_pixel_buffer, NULL);
     }
+    do_rewind = rewind_down;
     handle_events(gb);
 }
 
@@ -381,6 +402,7 @@ restart:
         GB_set_sample_rate(&gb, have_aspec.freq);
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
+        GB_set_rewind_length(&gb, configuration.rewind_length);
     }
     
     bool error = false;
@@ -410,11 +432,21 @@ restart:
     
     /* Run emulation */
     while (true) {
-        if (paused) {
+        if (paused || rewind_paused) {
             SDL_WaitEvent(NULL);
             handle_events(&gb);
         }
         else {
+            if (do_rewind) {
+                GB_rewind_pop(&gb);
+                if (turbo_down) {
+                    GB_rewind_pop(&gb);
+                }
+                if (!GB_rewind_pop(&gb)) {
+                    rewind_paused = true;
+                }
+                do_rewind = false;
+            }
             GB_run(&gb);
         }
         

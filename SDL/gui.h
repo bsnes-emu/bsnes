@@ -6,6 +6,7 @@
 #include <stdbool.h> 
 #include "shader.h"
 
+extern GB_gameboy_t gb;
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
@@ -51,6 +52,10 @@ typedef struct {
         MODEL_AGB,
         MODEL_MAX,
     } model;
+    
+    /* v0.11 */
+    uint32_t rewind_length;
+    SDL_Scancode keys_2[2]; /* Rewind and underclock */
 } configuration_t;
 
 extern configuration_t configuration;

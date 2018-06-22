@@ -62,10 +62,15 @@ configuration_t configuration =
         SDL_SCANCODE_RETURN,
         SDL_SCANCODE_SPACE
     },
+    .keys_2 = {
+        SDL_SCANCODE_TAB,
+        SDL_SCANCODE_LSHIFT,
+    },
     .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
     .blend_frames = true,
+    .rewind_length = 60 * 2,
     .model = MODEL_CGB
 };
 
@@ -282,8 +287,55 @@ const char *current_model_string(unsigned index)
         [configuration.model];
 }
 
+static const uint32_t rewind_lengths[] = {0, 10, 30, 60, 60 * 2, 60 * 5, 60 * 10};
+static const char *rewind_strings[] = {"Disabled",
+                                       "10 Seconds",
+                                       "30 Seconds",
+                                       "1 Minute",
+                                       "2 Minutes",
+                                       "5 Minutes",
+                                       "10 Minutes",
+};
+
+static void cycle_rewind(unsigned index)
+{
+    for (unsigned i = 0; i < sizeof(rewind_lengths) / sizeof(rewind_lengths[0]) - 1; i++) {
+        if (configuration.rewind_length == rewind_lengths[i]) {
+            configuration.rewind_length = rewind_lengths[i + 1];
+            GB_set_rewind_length(&gb, configuration.rewind_length);
+            return;
+        }
+    }
+    configuration.rewind_length = rewind_lengths[0];
+    GB_set_rewind_length(&gb, configuration.rewind_length);
+}
+
+static void cycle_rewind_backwards(unsigned index)
+{
+    for (unsigned i = 1; i < sizeof(rewind_lengths) / sizeof(rewind_lengths[0]); i++) {
+        if (configuration.rewind_length == rewind_lengths[i]) {
+            configuration.rewind_length = rewind_lengths[i - 1];
+            GB_set_rewind_length(&gb, configuration.rewind_length);
+            return;
+        }
+    }
+    configuration.rewind_length = rewind_lengths[sizeof(rewind_lengths) / sizeof(rewind_lengths[0]) - 1];
+    GB_set_rewind_length(&gb, configuration.rewind_length);
+}
+
+const char *current_rewind_string(unsigned index)
+{
+    for (unsigned i = 0; i < sizeof(rewind_lengths) / sizeof(rewind_lengths[0]); i++) {
+        if (configuration.rewind_length == rewind_lengths[i]) {
+            return rewind_strings[i];
+        }
+    }
+    return "Custom";
+}
+
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
+    {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -486,15 +538,14 @@ static void enter_audio_menu(unsigned index)
     current_menu = audio_menu;
     current_selection = 0;
 }
-static const char *key_name(unsigned index)
-{
-    return SDL_GetScancodeName(configuration.keys[index]);
-}
 
 static void modify_key(unsigned index)
 {
     gui_state = WAITING_FOR_KEY;
 }
+
+static void enter_controls_menu_2(unsigned index);
+static const char *key_name(unsigned index);
 
 static const struct menu_item controls_menu[] = {
     {"Right:", modify_key, key_name,},
@@ -505,14 +556,39 @@ static const struct menu_item controls_menu[] = {
     {"B:", modify_key, key_name,},
     {"Select:", modify_key, key_name,},
     {"Start:", modify_key, key_name,},
-    {"Turbo:", modify_key, key_name,},
+    {"Next Page", enter_controls_menu_2},
     {"Back", return_to_root_menu},
     {NULL,}
 };
 
+static const struct menu_item controls_menu_2[] = {
+    {"Turbo:", modify_key, key_name,},
+    {"Rewind:", modify_key, key_name,},
+    {"Slow-Motion:", modify_key, key_name,},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static const char *key_name(unsigned index)
+{
+    if (current_menu == controls_menu_2) {
+        if (index == 0) {
+            return SDL_GetScancodeName(configuration.keys[8]);
+        }
+        return SDL_GetScancodeName(configuration.keys_2[index - 1]);
+    }
+    return SDL_GetScancodeName(configuration.keys[index]);
+}
+
 static void enter_controls_menu(unsigned index)
 {
     current_menu = controls_menu;
+    current_selection = 0;
+}
+
+static void enter_controls_menu_2(unsigned index)
+{
+    current_menu = controls_menu_2;
     current_selection = 0;
 }
 
@@ -906,7 +982,17 @@ void run_gui(bool is_running)
                     should_render = true;
                 }
                 else if (gui_state == WAITING_FOR_KEY) {
-                    configuration.keys[current_selection] = event.key.keysym.scancode;
+                    if (current_menu == controls_menu_2) {
+                        if (current_selection == 0) {
+                            configuration.keys[8] = event.key.keysym.scancode;
+                        }
+                        else {
+                            configuration.keys_2[current_selection - 1] = event.key.keysym.scancode;
+                        }
+                    }
+                    else {
+                        configuration.keys[current_selection] = event.key.keysym.scancode;
+                    }
                     gui_state = SHOWING_MENU;
                     should_render = true;
                 }
