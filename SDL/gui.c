@@ -66,6 +66,24 @@ configuration_t configuration =
         SDL_SCANCODE_TAB,
         SDL_SCANCODE_LSHIFT,
     },
+    .joypad_configuration = {
+        13,
+        14,
+        11,
+        12,
+        0,
+        1,
+        9,
+        8,
+        10,
+        4,
+        -1,
+        5,
+    },
+    .joypad_axises = {
+        0,
+        1,
+    },
     .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
@@ -221,8 +239,8 @@ static enum {
     WAITING_FOR_JBUTTON,
 } gui_state;
 
-unsigned auto_detect_progress = 0;
-unsigned auto_detect_inputs[3];
+static unsigned joypad_configuration_progress = 0;
+static uint8_t joypad_axis_temp;
 
 static void item_exit(unsigned index)
 {
@@ -593,8 +611,9 @@ static void enter_controls_menu_2(unsigned index)
 }
 
 static unsigned joypad_index = 0;
-SDL_Joystick *joystick = NULL;
-SDL_GameController *controller = NULL;
+static SDL_Joystick *joystick = NULL;
+static SDL_GameController *controller = NULL;
+
 const char *current_joypad_name(unsigned index)
 {
     static char name[23] = {0,};
@@ -661,80 +680,16 @@ static void cycle_joypads_backwards(unsigned index)
     }
 }
 
-unsigned fix_joypad_axis(unsigned axis)
-{
-    if (controller) {
-        /* Convert to the mapping used by generic Xbox-style controllers */
-        for (SDL_GameControllerAxis i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++) {
-            if (SDL_GameControllerGetBindForAxis(controller, i).value.axis == axis) {
-                if (i == SDL_CONTROLLER_AXIS_LEFTX || i == SDL_CONTROLLER_AXIS_RIGHTX) return 0;
-                if (i == SDL_CONTROLLER_AXIS_LEFTY || i == SDL_CONTROLLER_AXIS_RIGHTY) return 1;
-                return i;
-            }
-        }
-        return -1;
-    }
-    
-    
-    if (configuration.div_joystick) {
-        axis >>= 1;
-    }
-    
-    return axis & 1;
-}
-
-unsigned fix_joypad_button(unsigned button)
-{
-    if (controller) {
-        /* Convert to the mapping used by generic Xbox-style controllers */
-        for (SDL_GameControllerButton i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++) {
-            if (SDL_GameControllerGetBindForButton(controller, i).value.button == button) {
-                if (i == SDL_CONTROLLER_BUTTON_START) {
-                    return 9;
-                }
-                if (i == 9) {
-                    return SDL_CONTROLLER_BUTTON_START;
-                }
-                
-                if (i == SDL_CONTROLLER_BUTTON_BACK) {
-                    return 8;
-                }
-                if (i == 8) {
-                    return SDL_CONTROLLER_BUTTON_BACK;
-                }
-                return i;
-            }
-        }
-        return -1;
-    }
-    
-    
-    if (configuration.div_joystick) {
-        button >>= 1;
-    }
-    
-    if (button < 4) {
-        if (configuration.swap_joysticks_bits_1_and_2) {
-            button = (int[]){0, 2, 1, 3}[button];
-        }
-        
-        if (configuration.flip_joystick_bit_1) {
-            button ^= 1;
-        }
-    }
-    
-    return button;
-}
-
 static void detect_joypad_layout(unsigned index)
 {
     gui_state = WAITING_FOR_JBUTTON;
-    auto_detect_progress = 0;
+    joypad_configuration_progress = 0;
+    joypad_axis_temp = -1;
 }
 
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
-    {"Detect layout", detect_joypad_layout},
+    {"Configure layout", detect_joypad_layout},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -744,6 +699,27 @@ static void enter_joypad_menu(unsigned index)
     current_menu = joypad_menu;
     current_selection = 0;
 }
+
+joypad_button_t get_joypad_button(uint8_t physical_button)
+{
+    for (unsigned i = 0; i < JOYPAD_BUTTONS_MAX; i++) {
+        if (configuration.joypad_configuration[i] == physical_button) {
+            return i;
+        }
+    }
+    return JOYPAD_BUTTONS_MAX;
+}
+
+joypad_axis_t get_joypad_axis(uint8_t physical_axis)
+{
+    for (unsigned i = 0; i < JOYPAD_AXISES_MAX; i++) {
+        if (configuration.joypad_axises[i] == physical_axis) {
+            return i;
+        }
+    }
+    return JOYPAD_AXISES_MAX;
+}
+
 
 extern void set_filename(const char *new_filename, bool new_should_free);
 void run_gui(bool is_running)
@@ -793,17 +769,17 @@ void run_gui(bool is_running)
             switch (event.type) {
                 case SDL_JOYBUTTONDOWN:
                     event.type = SDL_KEYDOWN;
-                    event.jbutton.button = fix_joypad_button(event.jbutton.button);
-                    if (event.jbutton.button < 4) {
-                        event.key.keysym.scancode = (event.jbutton.button & 1) ? SDL_SCANCODE_RETURN : SDL_SCANCODE_ESCAPE;
+                    joypad_button_t button = get_joypad_button(event.jbutton.button);
+                    if (button == JOYPAD_BUTTON_A) {
+                        event.key.keysym.scancode = SDL_SCANCODE_RETURN;
                     }
-                    else if (event.jbutton.button == 8 || event.jbutton.button == 9) {
+                    else if (button == JOYPAD_BUTTON_START || button == JOYPAD_BUTTON_B || button == JOYPAD_BUTTON_MENU) {
                         event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
                     }
-                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) event.key.keysym.scancode = SDL_SCANCODE_UP;
-                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) event.key.keysym.scancode = SDL_SCANCODE_DOWN;
-                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) event.key.keysym.scancode = SDL_SCANCODE_LEFT;
-                    else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
+                    else if (button == JOYPAD_BUTTON_UP) event.key.keysym.scancode = SDL_SCANCODE_UP;
+                    else if (button == JOYPAD_BUTTON_DOWN) event.key.keysym.scancode = SDL_SCANCODE_DOWN;
+                    else if (button == JOYPAD_BUTTON_LEFT) event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+                    else if (button == JOYPAD_BUTTON_RIGHT) event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
                     break;
 
                 case SDL_JOYHATMOTION: {
@@ -825,8 +801,9 @@ void run_gui(bool is_running)
                     
                 case SDL_JOYAXISMOTION: {
                     static bool axis_active[2] = {false, false};
-                    event.jaxis.axis = fix_joypad_axis(event.jaxis.axis);
-                    if (event.jaxis.axis == 1) {
+                    
+                    joypad_axis_t axis = get_joypad_axis(event.jaxis.axis);
+                    if (axis == JOYPAD_AXISES_Y) {
                         if (event.jaxis.value > 0x4000) {
                             if (!axis_active[1]) {
                                 event.type = SDL_KEYDOWN;
@@ -845,7 +822,7 @@ void run_gui(bool is_running)
                             axis_active[1] = false;
                         }
                     }
-                    else if (event.jaxis.axis == 0) {
+                    else if (axis == JOYPAD_AXISES_X) {
                         if (event.jaxis.value > 0x4000) {
                             if (!axis_active[0]) {
                                 event.type = SDL_KEYDOWN;
@@ -892,36 +869,54 @@ void run_gui(bool is_running)
             }
             case SDL_JOYBUTTONDOWN:
             {
-                if (gui_state == WAITING_FOR_JBUTTON) {
+                if (gui_state == WAITING_FOR_JBUTTON && joypad_configuration_progress != JOYPAD_BUTTONS_MAX) {
                     should_render = true;
-                    auto_detect_inputs[auto_detect_progress++] = event.jbutton.button;
-                    if (auto_detect_progress == 3) {
+                    configuration.joypad_configuration[joypad_configuration_progress++] = event.jbutton.button;
+                }
+                break;
+            }
+                
+            case SDL_JOYAXISMOTION: {
+                if (gui_state == WAITING_FOR_JBUTTON &&
+                    joypad_configuration_progress == JOYPAD_BUTTONS_MAX &&
+                    abs(event.jaxis.value) >= 0x4000) {
+                    if (joypad_axis_temp == (uint8_t)-1) {
+                        joypad_axis_temp = event.jaxis.axis;
+                    }
+                    else if (joypad_axis_temp != event.jaxis.axis) {
+                        if (joypad_axis_temp < event.jaxis.axis) {
+                            configuration.joypad_axises[JOYPAD_AXISES_X] = joypad_axis_temp;
+                            configuration.joypad_axises[JOYPAD_AXISES_Y] = event.jaxis.axis;
+                        }
+                        else {
+                            configuration.joypad_axises[JOYPAD_AXISES_Y] = joypad_axis_temp;
+                            configuration.joypad_axises[JOYPAD_AXISES_X] = event.jaxis.axis;
+                        }
+                        
                         gui_state = SHOWING_MENU;
-                        
-                        configuration.div_joystick =
-                            ((auto_detect_inputs[0] | auto_detect_inputs[1] | auto_detect_inputs[2]) & 1) == 0 &&
-                            auto_detect_inputs[0] > 9;
-                        
-                        if (configuration.div_joystick) {
-                            auto_detect_inputs[0] >>= 1;
-                            auto_detect_inputs[1] >>= 1;
-                            auto_detect_inputs[2] >>= 1;
-                        }
-                        
-                        configuration.swap_joysticks_bits_1_and_2 =
-                            (auto_detect_inputs[1] & 1) == (auto_detect_inputs[2] & 1);
-                        
-                        if (configuration.swap_joysticks_bits_1_and_2) {
-                            auto_detect_inputs[1] = (int[]){0, 2, 1, 3}[auto_detect_inputs[1]];
-                            auto_detect_inputs[2] = (int[]){0, 2, 1, 3}[auto_detect_inputs[2]];
-                        }
-                        
-                        configuration.flip_joystick_bit_1 = auto_detect_inputs[2] & 1;
+                        should_render = true;
                     }
                 }
+                break;
             }
+
             case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                if (event.key.keysym.scancode == SDL_SCANCODE_RETURN && gui_state == WAITING_FOR_JBUTTON) {
+                    should_render = true;
+                    if (joypad_configuration_progress != JOYPAD_BUTTONS_MAX) {
+                        configuration.joypad_configuration[joypad_configuration_progress] = -1;
+                    }
+                    else {
+                        configuration.joypad_axises[0] = -1;
+                        configuration.joypad_axises[1] = -1;
+                    }
+                    joypad_configuration_progress++;
+                    
+                    if (joypad_configuration_progress > JOYPAD_BUTTONS_MAX) {
+                        gui_state = SHOWING_MENU;
+                    }
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     if (is_running) {
                         return;
                     }
@@ -937,8 +932,7 @@ void run_gui(bool is_running)
                         should_render = true;
                     }
                 }
-                
-                if (gui_state == SHOWING_MENU) {
+                else if (gui_state == SHOWING_MENU) {
                     if (event.key.keysym.scancode == SDL_SCANCODE_DOWN && current_menu[current_selection + 1].string) {
                         current_selection++;
                         should_render = true;
@@ -1040,13 +1034,28 @@ void run_gui(bool is_running)
                     draw_text_centered(pixels, 68, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
                     break;
                 case WAITING_FOR_JBUTTON:
-                    draw_text_centered(pixels, 68, (const char *[])
-                                       {
-                                           "Press button for Start",
-                                           "Press button for A",
-                                           "Press button for B",
-                                       } [auto_detect_progress],
+                    draw_text_centered(pixels, 68,
+                                       joypad_configuration_progress != JOYPAD_BUTTONS_MAX ? "Press button for" : "Move the Analog Stick",
                                        gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    draw_text_centered(pixels, 80,
+                                      (const char *[])
+                                       {
+                                           "Right",
+                                           "Left",
+                                           "Up",
+                                           "Down",
+                                           "A",
+                                           "B",
+                                           "Select",
+                                           "Start",
+                                           "Open Menu",
+                                           "Turbo",
+                                           "Rewind",
+                                           "Slow-Motion",
+                                           "",
+                                       } [joypad_configuration_progress],
+                                       gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    draw_text_centered(pixels, 104, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
                     break;
             }
             

@@ -92,6 +92,20 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit)
     return captured_log;
 }
 
+static void open_menu(void)
+{
+    bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
+    if (audio_playing) {
+        SDL_PauseAudioDevice(device_id, 1);
+    }
+    run_gui(true);
+    if (audio_playing) {
+        SDL_PauseAudioDevice(device_id, 0);
+    }
+    GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+    GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
+}
+
 static void handle_events(GB_gameboy_t *gb)
 {
 #ifdef __APPLE__
@@ -121,56 +135,42 @@ static void handle_events(GB_gameboy_t *gb)
             }
                 
             case SDL_JOYBUTTONUP:
-            case SDL_JOYBUTTONDOWN:
-                event.jbutton.button = fix_joypad_button(event.jbutton.button);
-                if (event.jbutton.button < 4) {
-                    GB_set_key_state(gb, (event.jbutton.button & 1) ? GB_KEY_A : GB_KEY_B,
-                                     event.type == SDL_JOYBUTTONDOWN);
+            case SDL_JOYBUTTONDOWN: {
+                joypad_button_t button = get_joypad_button(event.jbutton.button);
+                if ((GB_key_t) button < GB_KEY_MAX) {
+                    GB_set_key_state(gb, (GB_key_t) button, event.type == SDL_JOYBUTTONDOWN);
                 }
-                else if (event.jbutton.button == 8) {
-                    GB_set_key_state(gb, GB_KEY_SELECT, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button == 9) {
-                    GB_set_key_state(gb, GB_KEY_START, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
-                    GB_set_key_state(gb, GB_KEY_UP, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
-                    GB_set_key_state(gb, GB_KEY_DOWN, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
-                    GB_set_key_state(gb, GB_KEY_LEFT, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
-                    GB_set_key_state(gb, GB_KEY_RIGHT, event.type == SDL_JOYBUTTONDOWN);
-                }
-                else if (event.jbutton.button & 1) {
+                else if (button == JOYPAD_BUTTON_TURBO) {
                     turbo_down = event.type == SDL_JOYBUTTONDOWN;
                     GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
-                
-                else {
-                    bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
-                    if (audio_playing) {
-                        SDL_PauseAudioDevice(device_id, 1);
-                    }
-                    run_gui(true);
-                    GB_set_color_correction_mode(gb, configuration.color_correction_mode);
-                    GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
+                else if (button == JOYPAD_BUTTON_SLOW_MOTION) {
+                    underclock_down = event.type == SDL_JOYBUTTONDOWN;
                 }
+                else if (button == JOYPAD_BUTTON_REWIND) {
+                    rewind_down = event.type == SDL_JOYBUTTONDOWN;
+                    if (event.type == SDL_JOYBUTTONUP) {
+                        rewind_paused = false;
+                    }
+                    GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
+                }
+                else if (button == JOYPAD_BUTTON_MENU && event.type == SDL_JOYBUTTONDOWN) {
+                    open_menu();
+                }
+            }
             break;
                 
-            case SDL_JOYAXISMOTION:
-                event.jaxis.axis = fix_joypad_axis(event.jaxis.axis);
-                if (event.jaxis.axis == 1) {
+            case SDL_JOYAXISMOTION: {
+                joypad_axis_t axis = get_joypad_axis(event.jaxis.axis);
+                if (axis == JOYPAD_AXISES_Y) {
                     GB_set_key_state(gb, GB_KEY_DOWN, event.jaxis.value > 0x4000);
                     GB_set_key_state(gb, GB_KEY_UP, event.jaxis.value < -0x4000);
                 }
-                else if (event.jaxis.axis == 0) {
+                else if (axis == JOYPAD_AXISES_X) {
                     GB_set_key_state(gb, GB_KEY_RIGHT, event.jaxis.value > 0x4000);
                     GB_set_key_state(gb, GB_KEY_LEFT, event.jaxis.value < -0x4000);
                 }
+            }
             break;
 
             case SDL_JOYHATMOTION:
@@ -191,16 +191,7 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {
                     case SDL_SCANCODE_ESCAPE: {
-                        bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
-                        if (audio_playing) {
-                            SDL_PauseAudioDevice(device_id, 1);
-                        }
-                        run_gui(true);
-                        if (!audio_playing) {
-                            SDL_PauseAudioDevice(device_id, 0);
-                        }
-                        GB_set_color_correction_mode(gb, configuration.color_correction_mode);
-                        GB_set_highpass_filter_mode(gb, configuration.highpass_mode);
+                        open_menu();
                         break;
                     }
                     case SDL_SCANCODE_C:
