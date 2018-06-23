@@ -1411,9 +1411,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 
 - (void) updateRewindLength
 {
-    if (GB_is_inited(&gb)) {
-        GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
-    }
+    [self performAtomicBlock:^{
+        if (GB_is_inited(&gb)) {
+            GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
+        }
+    }];
 }
 
 @end
