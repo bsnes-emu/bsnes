@@ -773,7 +773,7 @@ void run_gui(bool is_running)
                     if (button == JOYPAD_BUTTON_A) {
                         event.key.keysym.scancode = SDL_SCANCODE_RETURN;
                     }
-                    else if (button == JOYPAD_BUTTON_START || button == JOYPAD_BUTTON_B || button == JOYPAD_BUTTON_MENU) {
+                    else if (button == JOYPAD_BUTTON_MENU) {
                         event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
                     }
                     else if (button == JOYPAD_BUTTON_UP) event.key.keysym.scancode = SDL_SCANCODE_UP;
