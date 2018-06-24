@@ -15,12 +15,13 @@ struct mHorizontalLayout : mLayout {
   auto setFont(const Font& font = {}) -> type& override;
   auto setGeometry(Geometry geometry) -> type& override;
   auto setMargin(float margin = 0) -> type&;
+  auto setPadding(Geometry padding = {}) -> type&;
   auto setSpacing(float spacing = 5) -> type&;
   auto setVisible(bool visible = true) -> type&;
 
   struct Settings {
     float alignment = 0.5;
-    float margin = 0;
+    Geometry padding;
     float spacing = 5;
   } settings;
 

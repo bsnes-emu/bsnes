@@ -99,7 +99,11 @@ Presentation::Presentation() {
   });
   showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
     settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
-    statusBar.setVisible(showStatusBar.checked());
+    if(!showStatusBar.checked()) {
+      layout.remove(statusLayout);
+    } else {
+      layout.append(statusLayout, Size{~0, StatusHeight});
+    }
     if(visible()) resizeWindow();
   });
   videoSettings.setText("Video ...").onActivate([&] { settingsWindow->show(0); });
@@ -143,9 +147,21 @@ Presentation::Presentation() {
     setFocused();
   });
 
-  statusBar.setFont(Font().setBold());
-  statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
-  program->updateMessage();
+  if(!settings["UserInterface/ShowStatusBar"].boolean()) {
+    layout.remove(statusLayout);
+  }
+
+  statusLeft.setFont(Font().setBold());
+  statusLeft.setAlignment(0.0);
+  statusLeft.setBackgroundColor({ 32,  32,  32});
+  statusLeft.setForegroundColor({255, 255, 255});
+
+  statusRight.setFont(Font().setBold());
+  statusRight.setAlignment(1.0);
+  statusRight.setBackgroundColor({ 32,  32,  32});
+  statusRight.setForegroundColor({255, 255, 255});
+
+  program->updateStatus();
 
   onClose([&] {
     program->quit();
@@ -200,7 +216,7 @@ auto Presentation::clearViewport() -> void {
   if(!video) return;
 
   if(!emulator->loaded()) {
-    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+    viewportLayout.setPadding();
   }
 
   uint32_t* output;
@@ -219,38 +235,35 @@ auto Presentation::clearViewport() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
-  uint windowWidth = geometry().width();
-  uint windowHeight = geometry().height();
+  if(!emulator->loaded()) return clearViewport();
 
-  if(!emulator->loaded()) {
-    viewport.setGeometry({0, 0, windowWidth, windowHeight});
-    return clearViewport();
-  }
+  uint windowWidth = viewportLayout.geometry().width();
+  uint windowHeight = viewportLayout.geometry().height();
 
   uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
   uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
+  uint viewportWidth, viewportHeight;
 
   if(settings["View/IntegralScaling"].boolean()) {
     uint widthMultiplier = windowWidth / width;
     uint heightMultiplier = windowHeight / height;
     uint multiplier = min(widthMultiplier, heightMultiplier);
-    uint viewportWidth = width * multiplier;
-    uint viewportHeight = height * multiplier;
-    viewport.setGeometry({
-      (windowWidth - viewportWidth) / 2, (windowHeight - viewportHeight) / 2,
-      viewportWidth, viewportHeight
-    });
+    viewportWidth = width * multiplier;
+    viewportHeight = height * multiplier;
   } else {
     double widthMultiplier = (double)windowWidth / width;
     double heightMultiplier = (double)windowHeight / height;
     double multiplier = min(widthMultiplier, heightMultiplier);
-    uint viewportWidth = width * multiplier;
-    uint viewportHeight = height * multiplier;
-    viewport.setGeometry({
-      (windowWidth - viewportWidth) / 2, (windowHeight - viewportHeight) / 2,
-      viewportWidth, viewportHeight
-    });
+    viewportWidth = width * multiplier;
+    viewportHeight = height * multiplier;
   }
+
+  uint paddingWidth = (windowWidth - viewportWidth) / 2;
+  uint paddingHeight = (windowHeight - viewportHeight) / 2;
+  viewportLayout.setPadding({
+    paddingWidth / 2, paddingHeight / 2,
+    paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
+  });
 
   clearViewport();
 }
@@ -258,36 +271,40 @@ auto Presentation::resizeViewport() -> void {
 auto Presentation::resizeWindow() -> void {
   uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
   uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
+  uint statusHeight = settings["UserInterface/ShowStatusBar"].boolean() ? StatusHeight : 0;
 
   uint multiplier = 2;
   if(settings["View/Size"].text() == "Small" ) multiplier = 2;
   if(settings["View/Size"].text() == "Medium") multiplier = 3;
   if(settings["View/Size"].text() == "Large" ) multiplier = 4;
 
-  setSize({width * multiplier, height * multiplier});
+  setSize({width * multiplier, height * multiplier + statusHeight});
   resizeViewport();
 }
 
 auto Presentation::toggleFullscreenMode() -> void {
   if(!fullScreen()) {
-    statusBar.setVisible(false);
+    if(settings["UserInterface/ShowStatusBar"].boolean()) {
+      layout.remove(statusLayout);
+    }
     menuBar.setVisible(false);
     setFullScreen(true);
     video->setExclusive(settings["Video/Exclusive"].boolean());
     if(video->exclusive()) setVisible(false);
     if(!input->acquired()) input->acquire();
+    resizeViewport();
   } else {
     if(input->acquired()) input->release();
     if(video->exclusive()) setVisible(true);
     video->setExclusive(false);
     setFullScreen(false);
     menuBar.setVisible(true);
-    statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
+    if(settings["UserInterface/ShowStatusBar"].boolean()) {
+      layout.append(statusLayout, Size{~0, StatusHeight});
+    }
+    resizeWindow();
+    setCentered();
   }
-  //hack: give window geometry time to update after toggling fullscreen and menu/status bars
-  usleep(20 * 1000);
-  Application::processEvents();
-  resizeViewport();
 }
 
 auto Presentation::updateRecentGames() -> void {

@@ -2,7 +2,7 @@ struct AboutWindow : Window {
   AboutWindow();
 
   VerticalLayout layout{this};
-    Canvas canvas{&layout, Size{400, 86}, 0};
+    Canvas canvas{&layout, Size{400, 85}, 0};
     HorizontalLayout informationLayout{&layout, Size{~0, ~0}};
       Label informationLeft{&informationLayout, Size{~0, 0}, 3};
       Label informationRight{&informationLayout, Size{~0, 0}};
@@ -10,12 +10,14 @@ struct AboutWindow : Window {
 
 struct Presentation : Window {
   enum : uint { RecentGames = 9, QuickStates = 9 };
+  enum : uint { StatusHeight = 25 };
 
   Presentation();
   auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;
+  auto updateStatus() -> void;
   auto toggleFullscreenMode() -> void;
   auto clearRecentGames() -> void;
   auto updateRecentGames() -> void;
@@ -65,10 +67,12 @@ struct Presentation : Window {
     Menu helpMenu{&menuBar};
       MenuItem about{&helpMenu};
 
-  FixedLayout layout{this};
-    Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
-
-  StatusBar statusBar{this};
+  VerticalLayout layout{this};
+    HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
+      Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
+    HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
+      Label statusLeft{&statusLayout, Size{~0, ~0}, 0};
+      Label statusRight{&statusLayout, Size{80, ~0}, 0};
 };
 
 extern unique_pointer<AboutWindow> aboutWindow;

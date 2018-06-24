@@ -239,10 +239,10 @@ auto PPU::refresh() -> void {
   }
 
   auto output = this->output;
-  if(!overscan()) output -= 12 * 512;
+  if(!overscan()) output -= 14 * 512;
   auto pitch = 512;
   auto width = 512;
-  auto height = 478;
+  auto height = 480;
   Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation);
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }

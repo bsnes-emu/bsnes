@@ -38,7 +38,10 @@ auto mHorizontalLayout::minimumSize() const -> Size {
     height = max(height, child.height());
   }
 
-  return {settings.margin * 2 + width, settings.margin * 2 + height};
+  return {
+    settings.padding.x() + width  + settings.padding.width(),
+    settings.padding.y() + height + settings.padding.height()
+  };
 }
 
 auto mHorizontalLayout::remove(sSizable sizable) -> type& {
@@ -85,10 +88,10 @@ auto mHorizontalLayout::setGeometry(Geometry containerGeometry) -> type& {
   }
 
   Geometry geometry = containerGeometry;
-  geometry.setX     (geometry.x()      + settings.margin    );
-  geometry.setY     (geometry.y()      + settings.margin    );
-  geometry.setWidth (geometry.width()  - settings.margin * 2);
-  geometry.setHeight(geometry.height() - settings.margin * 2);
+  geometry.setX     (geometry.x()      + settings.padding.x());
+  geometry.setY     (geometry.y()      + settings.padding.y());
+  geometry.setWidth (geometry.width()  - settings.padding.x() - settings.padding.width());
+  geometry.setHeight(geometry.height() - settings.padding.y() - settings.padding.height());
 
   float minimumWidth = 0, maximumWidthCounter = 0;
   for(auto& child : properties) {
@@ -121,12 +124,19 @@ auto mHorizontalLayout::setGeometry(Geometry containerGeometry) -> type& {
 }
 
 auto mHorizontalLayout::setMargin(float margin) -> type& {
-  settings.margin = margin;
+  setPadding({margin, margin, margin, margin});
+  return *this;
+}
+
+auto mHorizontalLayout::setPadding(Geometry padding) -> type& {
+  settings.padding = padding;
+  setGeometry(geometry());
   return *this;
 }
 
 auto mHorizontalLayout::setSpacing(float spacing) -> type& {
   settings.spacing = spacing;
+  setGeometry(geometry());
   return *this;
 }
 

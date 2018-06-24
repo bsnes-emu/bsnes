@@ -10,9 +10,29 @@ auto mLabel::alignment() const -> Alignment {
   return state.alignment;
 }
 
+auto mLabel::backgroundColor() const -> Color {
+  return state.backgroundColor;
+}
+
+auto mLabel::foregroundColor() const -> Color {
+  return state.foregroundColor;
+}
+
 auto mLabel::setAlignment(Alignment alignment) -> type& {
   state.alignment = alignment;
   signal(setAlignment, alignment);
+  return *this;
+}
+
+auto mLabel::setBackgroundColor(Color color) -> type& {
+  state.backgroundColor = color;
+  signal(setBackgroundColor, color);
+  return *this;
+}
+
+auto mLabel::setForegroundColor(Color color) -> type& {
+  state.foregroundColor = color;
+  signal(setForegroundColor, color);
   return *this;
 }
 

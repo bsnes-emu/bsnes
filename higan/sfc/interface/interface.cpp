@@ -120,9 +120,9 @@ auto Interface::title() -> string {
 auto Interface::videoInformation() -> VideoInformation {
   VideoInformation vi;
   vi.width  = 256;
-  vi.height = 239;
+  vi.height = 240;
   vi.internalWidth  = 512;
-  vi.internalHeight = 478;
+  vi.internalHeight = 480;
   vi.aspectCorrection = 8.0 / 7.0;
   if(Region::NTSC()) vi.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
   if(Region::PAL())  vi.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);

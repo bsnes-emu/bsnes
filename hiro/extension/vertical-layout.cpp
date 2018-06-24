@@ -38,7 +38,10 @@ auto mVerticalLayout::minimumSize() const -> Size {
     if(&child != &properties.right()) height += child.spacing();
   }
 
-  return {settings.margin * 2 + width, settings.margin * 2 + height};
+  return {
+    settings.padding.x() + width  + settings.padding.width(),
+    settings.padding.y() + height + settings.padding.height()
+  };
 }
 
 auto mVerticalLayout::remove(sSizable sizable) -> type& {
@@ -85,10 +88,10 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   }
 
   Geometry geometry = containerGeometry;
-  geometry.setX     (geometry.x()      + settings.margin    );
-  geometry.setY     (geometry.y()      + settings.margin    );
-  geometry.setWidth (geometry.width()  - settings.margin * 2);
-  geometry.setHeight(geometry.height() - settings.margin * 2);
+  geometry.setX     (geometry.x()      + settings.padding.x());
+  geometry.setY     (geometry.y()      + settings.padding.y());
+  geometry.setWidth (geometry.width()  - settings.padding.x() - settings.padding.width());
+  geometry.setHeight(geometry.height() - settings.padding.y() - settings.padding.height());
 
   float minimumHeight = 0, maximumHeightCounter = 0;
   for(auto& child : properties) {
@@ -121,12 +124,19 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
 }
 
 auto mVerticalLayout::setMargin(float margin) -> type& {
-  settings.margin = margin;
+  setPadding({margin, margin, margin, margin});
+  return *this;
+}
+
+auto mVerticalLayout::setPadding(Geometry padding) -> type& {
+  settings.padding = padding;
+  setGeometry(geometry());
   return *this;
 }
 
 auto mVerticalLayout::setSpacing(float spacing) -> type& {
   settings.spacing = spacing;
+  setGeometry(geometry());
   return *this;
 }
 

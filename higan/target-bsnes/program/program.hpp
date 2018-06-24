@@ -47,7 +47,8 @@ struct Program : Emulator::Platform {
   auto connectDevices() -> void;
   auto applyHacks() -> void;
   auto showMessage(string text) -> void;
-  auto updateMessage() -> void;
+  auto showFrameRate(string text) -> void;
+  auto updateStatus() -> void;
   auto focused() -> bool;
 
 public:
@@ -79,9 +80,9 @@ public:
 
   uint64 autoSaveTime;
 
-  string statusText;
-  string statusMessage;
   uint64 statusTime;
+  string statusMessage;
+  string statusFrameRate;
 };
 
 extern unique_pointer<Program> program;

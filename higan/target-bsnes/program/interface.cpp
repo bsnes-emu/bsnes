@@ -93,8 +93,8 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
   pitch >>= 2;
   if(presentation->overscanCropping.checked()) {
-    if(height == 239) data +=  8 * pitch, height -= 16;
-    if(height == 478) data += 16 * pitch, height -= 32;
+    if(height == 240) data +=  8 * pitch, height -= 16;
+    if(height == 480) data += 16 * pitch, height -= 32;
   }
 
   if(video->lock(output, length, width, height)) {
@@ -115,7 +115,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   current = chrono::timestamp();
   if(current != previous) {
     previous = current;
-    statusText = {emulator->get("Mode").get<string>(), "FPS: ", frameCounter};
+    showFrameRate({frameCounter, " FPS"});
     frameCounter = 0;
   }
 }

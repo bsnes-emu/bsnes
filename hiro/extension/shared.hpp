@@ -13,11 +13,12 @@ using sHorizontalLayout = shared_pointer<mHorizontalLayout>;
 struct HorizontalLayout : sHorizontalLayout {
   DeclareSharedLayout(HorizontalLayout)
 
-  auto append(sSizable sizable, Size size, signed spacing = 5) { return self().append(sizable, size, spacing), *this; }
-  auto modify(sSizable sizable, Size size, signed spacing = 5) { return self().modify(sizable, size, spacing), *this; }
-  auto setAlignment(double alignment = 0.5) { return self().setAlignment(alignment), *this; }
-  auto setMargin(signed margin = 0) { return self().setMargin(margin), *this; }
-  auto setSpacing(signed spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto append(sSizable sizable, Size size, float spacing = 5) { return self().append(sizable, size, spacing), *this; }
+  auto modify(sSizable sizable, Size size, float spacing = 5) { return self().modify(sizable, size, spacing), *this; }
+  auto setAlignment(float alignment = 0.5) { return self().setAlignment(alignment), *this; }
+  auto setMargin(float margin = 0) { return self().setMargin(margin), *this; }
+  auto setPadding(Geometry padding = {}) { return self().setPadding(padding), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
 };
 #endif
 
@@ -26,11 +27,12 @@ using sVerticalLayout = shared_pointer<mVerticalLayout>;
 struct VerticalLayout : sVerticalLayout {
   DeclareSharedLayout(VerticalLayout)
 
-  auto append(sSizable sizable, Size size, signed spacing = 5) { return self().append(sizable, size, spacing), *this; }
-  auto modify(sSizable sizable, Size size, signed spacing = 5) { return self().modify(sizable, size, spacing), *this; }
-  auto setAlignment(double alignment = 0.0) { return self().setAlignment(alignment), *this; }
-  auto setMargin(signed margin = 0) { return self().setMargin(margin), *this; }
-  auto setSpacing(signed spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto append(sSizable sizable, Size size, float spacing = 5) { return self().append(sizable, size, spacing), *this; }
+  auto modify(sSizable sizable, Size size, float spacing = 5) { return self().modify(sizable, size, spacing), *this; }
+  auto setAlignment(float alignment = 0.0) { return self().setAlignment(alignment), *this; }
+  auto setMargin(float margin = 0) { return self().setMargin(margin), *this; }
+  auto setPadding(Geometry padding = {}) { return self().setPadding(padding), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
 };
 #endif
 

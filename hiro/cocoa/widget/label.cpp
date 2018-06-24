@@ -48,6 +48,14 @@ auto pLabel::setAlignment(Alignment alignment) -> void {
   }
 }
 
+auto pLabel::setBackgroundColor(Color color) -> void {
+  //todo
+}
+
+auto pLabel::setForegroundColor(Color color) -> void {
+  //todo
+}
+
 auto pLabel::setGeometry(Geometry geometry) -> void {
   //NSTextView does not support vertical text centering:
   //simulate this by adjusting the geometry placement (reduce height, move view down)

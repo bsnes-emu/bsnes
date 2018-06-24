@@ -72,6 +72,7 @@ auto Program::applyHacks() -> void {
   auto label = superNintendo.label;
   if(label == "AIR STRIKE PATROL" || label == "DESERT FIGHTER") fastPPU = false;
   if(label == "KOUSHIEN_2") fastDSP = false;
+  if(label == "RENDERING RANGER R2") fastDSP = false;
 
   emulator->set("Fast PPU", fastPPU);
   emulator->set("Fast DSP", fastDSP);
@@ -82,30 +83,39 @@ auto Program::showMessage(string text) -> void {
   statusMessage = text;
 }
 
-auto Program::updateMessage() -> void {
-  uint64 currentTime = chrono::timestamp();
+auto Program::showFrameRate(string text) -> void {
+  statusFrameRate = text;
+}
 
-  string text;
-  if((currentTime - statusTime) <= 2) {
-    text = statusMessage;
-  } else if(!emulator->loaded()) {
-    text = "No game loaded";
-  } else if(presentation->pauseEmulation.checked()) {
-    text = "Paused";
-  } else if(!focused() && settingsWindow->input.pauseEmulation.checked()) {
-    text = "Paused";
-  } else {
-    text = statusText;
+auto Program::updateStatus() -> void {
+  string message;
+  if(chrono::timestamp() - statusTime <= 2) {
+    message = statusMessage;
+  }
+  message.prepend("  ");
+  if(message != presentation->statusLeft.text()) {
+    presentation->statusLeft.setText(message);
   }
 
-  if(text != presentation->statusBar.text()) {
-    presentation->statusBar.setText(text);
+  string frameRate;
+  if(!emulator->loaded()) {
+    frameRate = "Unloaded";
+  } else if(presentation->pauseEmulation.checked()) {
+    frameRate = "Paused";
+  } else if(!focused() && settingsWindow->input.pauseEmulation.checked()) {
+    frameRate = "Paused";
+  } else {
+    frameRate = statusFrameRate;
+  }
+  frameRate.append("  ");
+  if(frameRate != presentation->statusRight.text()) {
+    presentation->statusRight.setText(frameRate);
   }
 }
 
 auto Program::focused() -> bool {
   //exclusive mode creates its own top-level window: presentation window will not have focus
-  if(video->exclusive()) return true;
+  if(video && video->exclusive()) return true;
   if(presentation && presentation->focused()) return true;
   return false;
 }

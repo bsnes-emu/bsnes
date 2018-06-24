@@ -78,7 +78,7 @@ Program::Program(string_vector arguments) {
 }
 
 auto Program::main() -> void {
-  updateMessage();
+  updateStatus();
   video->poll();
   inputManager->poll();
   inputManager->pollHotkeys();

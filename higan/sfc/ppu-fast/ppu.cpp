@@ -83,10 +83,10 @@ auto PPU::scanline() -> void {
 
 auto PPU::refresh() -> void {
   auto output = this->output;
-  if(!overscan()) output -= 12 * 512;
+  if(!overscan()) output -= 14 * 512;
   auto pitch  = 512 << !interlace();
   auto width  = 256 << hires();
-  auto height = 239 << interlace();
+  auto height = 240 << interlace();
   Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation && hires());
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
@@ -98,7 +98,7 @@ auto PPU::load(Markup::Node node) -> bool {
 auto PPU::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint32>(output, 512 * 478);
+  memory::fill<uint32>(output, 512 * 480);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};

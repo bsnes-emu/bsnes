@@ -497,7 +497,11 @@ struct Label : sLabel {
   using internalType = mLabel;
 
   auto alignment() const { return self().alignment(); }
+  auto backgroundColor() const { return self().backgroundColor(); }
+  auto foregroundColor() const { return self().foregroundColor(); }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
+  auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
 };
