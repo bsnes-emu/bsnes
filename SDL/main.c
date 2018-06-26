@@ -8,6 +8,7 @@
 #include "gui.h"
 #include "shader.h"
 
+
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
@@ -161,14 +162,41 @@ static void handle_events(GB_gameboy_t *gb)
             break;
                 
             case SDL_JOYAXISMOTION: {
+                static bool axis_active[2] = {false, false};
                 joypad_axis_t axis = get_joypad_axis(event.jaxis.axis);
-                if (axis == JOYPAD_AXISES_Y) {
-                    GB_set_key_state(gb, GB_KEY_DOWN, event.jaxis.value > 0x4000);
-                    GB_set_key_state(gb, GB_KEY_UP, event.jaxis.value < -0x4000);
+                if (axis == JOYPAD_AXISES_X) {
+                    if (event.jaxis.value > JOYSTICK_HIGH) {
+                        axis_active[0] = true;
+                        GB_set_key_state(gb, GB_KEY_RIGHT, true);
+                        GB_set_key_state(gb, GB_KEY_LEFT, false);
+                    }
+                    else if (event.jaxis.value < -JOYSTICK_HIGH) {
+                        axis_active[0] = true;
+                        GB_set_key_state(gb, GB_KEY_RIGHT, false);
+                        GB_set_key_state(gb, GB_KEY_LEFT, true);
+                    }
+                    else if (axis_active[0] && event.jaxis.value < JOYSTICK_LOW && event.jaxis.value > -JOYSTICK_LOW) {
+                        axis_active[0] = false;
+                        GB_set_key_state(gb, GB_KEY_RIGHT, false);
+                        GB_set_key_state(gb, GB_KEY_LEFT, false);
+                    }
                 }
-                else if (axis == JOYPAD_AXISES_X) {
-                    GB_set_key_state(gb, GB_KEY_RIGHT, event.jaxis.value > 0x4000);
-                    GB_set_key_state(gb, GB_KEY_LEFT, event.jaxis.value < -0x4000);
+                else if (axis == JOYPAD_AXISES_Y) {
+                    if (event.jaxis.value > JOYSTICK_HIGH) {
+                        axis_active[1] = true;
+                        GB_set_key_state(gb, GB_KEY_DOWN, true);
+                        GB_set_key_state(gb, GB_KEY_UP, false);
+                    }
+                    else if (event.jaxis.value < -JOYSTICK_HIGH) {
+                        axis_active[1] = true;
+                        GB_set_key_state(gb, GB_KEY_DOWN, false);
+                        GB_set_key_state(gb, GB_KEY_UP, true);
+                    }
+                    else if (axis_active[1] && event.jaxis.value < JOYSTICK_LOW && event.jaxis.value > -JOYSTICK_LOW) {
+                        axis_active[1] = false;
+                        GB_set_key_state(gb, GB_KEY_DOWN, false);
+                        GB_set_key_state(gb, GB_KEY_UP, false);
+                    }
                 }
             }
             break;

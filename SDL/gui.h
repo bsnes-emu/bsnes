@@ -6,6 +6,9 @@
 #include <stdbool.h> 
 #include "shader.h"
 
+#define JOYSTICK_HIGH 0x4000
+#define JOYSTICK_LOW 0x3800
+
 extern GB_gameboy_t gb;
 
 extern SDL_Window *window;

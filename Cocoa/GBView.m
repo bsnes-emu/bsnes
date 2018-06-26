@@ -5,6 +5,9 @@
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
 
+#define JOYSTICK_HIGH 0x4000
+#define JOYSTICK_LOW 0x3800
+
 @implementation GBView
 {
     uint32_t *image_buffers[3];
@@ -12,7 +15,7 @@
     BOOL mouse_hidden;
     NSTrackingArea *tracking_area;
     BOOL _mouseHidingEnabled;
-    bool enableAnalog;
+    bool axisActive[2];
     bool underclockKeyDown;
     double clockMultiplier;
     NSEventModifierFlags previousModifiers;
@@ -241,9 +244,6 @@
                     break;
                     
                 default:
-                    if (i < GB_KEY_A) {
-                        enableAnalog = false;
-                    }
                     GB_set_key_state(_gb, (GB_key_t)i, state);
                     break;
             }
@@ -258,18 +258,39 @@
     NSNumber *x_axis = [mapping objectForKey:@"XAxis"];
     NSNumber *y_axis = [mapping objectForKey:@"YAxis"];
     
-    if (value > 0x4000 ||  value < -0x4000) {
-        enableAnalog = true;
+    if (axis == [x_axis integerValue]) {
+        if (value > JOYSTICK_HIGH) {
+            axisActive[0] = true;
+            GB_set_key_state(_gb, GB_KEY_RIGHT, true);
+            GB_set_key_state(_gb, GB_KEY_LEFT, false);
+        }
+        else if (value < -JOYSTICK_HIGH) {
+            axisActive[0] = true;
+            GB_set_key_state(_gb, GB_KEY_RIGHT, false);
+            GB_set_key_state(_gb, GB_KEY_LEFT, true);
+        }
+        else if (axisActive[0] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
+            axisActive[0] = false;
+            GB_set_key_state(_gb, GB_KEY_RIGHT, false);
+            GB_set_key_state(_gb, GB_KEY_LEFT, false);
+        }
     }
-    if (!enableAnalog) return;
-    
-    if (x_axis && [x_axis integerValue] == axis) {
-        GB_set_key_state(_gb, GB_KEY_LEFT, value < -0x4000);
-        GB_set_key_state(_gb, GB_KEY_RIGHT, value > 0x4000);
-    }
-    else if (y_axis && [y_axis integerValue] == axis) {
-        GB_set_key_state(_gb, GB_KEY_UP, value < -0x4000);
-        GB_set_key_state(_gb, GB_KEY_DOWN, value > 0x4000);
+    else if (axis == [y_axis integerValue]) {
+        if (value > JOYSTICK_HIGH) {
+            axisActive[1] = true;
+            GB_set_key_state(_gb, GB_KEY_DOWN, true);
+            GB_set_key_state(_gb, GB_KEY_UP, false);
+        }
+        else if (value < -JOYSTICK_HIGH) {
+            axisActive[1] = true;
+            GB_set_key_state(_gb, GB_KEY_DOWN, false);
+            GB_set_key_state(_gb, GB_KEY_UP, true);
+        }
+        else if (axisActive[1] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
+            axisActive[1] = false;
+            GB_set_key_state(_gb, GB_KEY_DOWN, false);
+            GB_set_key_state(_gb, GB_KEY_UP, false);
+        }
     }
 }
 

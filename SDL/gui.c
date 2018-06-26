@@ -801,44 +801,36 @@ void run_gui(bool is_running)
                     
                 case SDL_JOYAXISMOTION: {
                     static bool axis_active[2] = {false, false};
-                    
                     joypad_axis_t axis = get_joypad_axis(event.jaxis.axis);
-                    if (axis == JOYPAD_AXISES_Y) {
-                        if (event.jaxis.value > 0x4000) {
-                            if (!axis_active[1]) {
-                                event.type = SDL_KEYDOWN;
-                                event.key.keysym.scancode = SDL_SCANCODE_DOWN;
-                            }
-                            axis_active[1] = true;
+                    if (axis == JOYPAD_AXISES_X) {
+                        if (!axis_active[0] && event.jaxis.value > JOYSTICK_HIGH) {
+                            axis_active[0] = true;
+                            event.type = SDL_KEYDOWN;
+                            event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
                         }
-                        else if (event.jaxis.value < -0x4000) {
-                            if (!axis_active[0]) {
-                                event.type = SDL_KEYDOWN;
-                                event.key.keysym.scancode = SDL_SCANCODE_UP;
-                            }
-                            axis_active[1] = true;
+                        else if (!axis_active[0] && event.jaxis.value < -JOYSTICK_HIGH) {
+                            axis_active[0] = true;
+                            event.type = SDL_KEYDOWN;
+                            event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+                            
                         }
-                        else {
-                            axis_active[1] = false;
+                        else if (axis_active[0] && event.jaxis.value < JOYSTICK_LOW && event.jaxis.value > -JOYSTICK_LOW) {
+                            axis_active[0] = false;
                         }
                     }
-                    else if (axis == JOYPAD_AXISES_X) {
-                        if (event.jaxis.value > 0x4000) {
-                            if (!axis_active[0]) {
-                                event.type = SDL_KEYDOWN;
-                                event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
-                            }
-                            axis_active[0] = true;
+                    else if (axis == JOYPAD_AXISES_Y) {
+                        if (!axis_active[1] && event.jaxis.value > JOYSTICK_HIGH) {
+                            axis_active[1] = true;
+                            event.type = SDL_KEYDOWN;
+                            event.key.keysym.scancode = SDL_SCANCODE_DOWN;
                         }
-                        else if (event.jaxis.value < -0x4000) {
-                            if (!axis_active[0]) {
-                                event.type = SDL_KEYDOWN;
-                                event.key.keysym.scancode = SDL_SCANCODE_LEFT;
-                            }
-                            axis_active[0] = true;
+                        else if (!axis_active[1] && event.jaxis.value < -JOYSTICK_HIGH) {
+                            axis_active[1] = true;
+                            event.type = SDL_KEYDOWN;
+                            event.key.keysym.scancode = SDL_SCANCODE_UP;
                         }
-                        else {
-                            axis_active[0] = false;
+                        else if (axis_active[1] && event.jaxis.value < JOYSTICK_LOW && event.jaxis.value > -JOYSTICK_LOW) {
+                            axis_active[1] = false;
                         }
                     }
                 }
