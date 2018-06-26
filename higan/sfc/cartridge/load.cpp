@@ -334,6 +334,12 @@ auto Cartridge::loadSA1(Markup::Node node) -> void {
 auto Cartridge::loadSuperFX(Markup::Node node) -> void {
   has.SuperFX = true;
 
+  if(auto oscillator = game.oscillator()) {
+    superfx.Frequency = oscillator->frequency;  //GSU-1, GSU-2
+  } else {
+    superfx.Frequency = system.cpuFrequency();  //MARIO CHIP 1
+  }
+
   for(auto map : node.find("map")) {
     loadMap(map, {&SuperFX::readIO, &superfx}, {&SuperFX::writeIO, &superfx});
   }

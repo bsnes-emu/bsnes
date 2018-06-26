@@ -1,6 +1,6 @@
 //SPC7110 decompressor
 //original implementation: neviksti
-//optimized implementation: cydrak
+//optimized implementation: talarubi
 
 struct Decompressor {
   SPC7110& spc7110;

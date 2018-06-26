@@ -59,6 +59,8 @@ struct SuperFX : Processor::GSU, Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
+  uint Frequency;
+
   CPUROM cpurom;
   CPURAM cpuram;
 

@@ -38,7 +38,7 @@ auto SuperFX::unload() -> void {
 
 auto SuperFX::power() -> void {
   GSU::power();
-  create(SuperFX::Enter, system.cpuFrequency());
+  create(SuperFX::Enter, Frequency);
 
   rom.writeProtect(true);
   ram.writeProtect(false);

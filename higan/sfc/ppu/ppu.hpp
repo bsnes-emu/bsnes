@@ -1,11 +1,9 @@
-#include <sfc/ppu-fast/ppu.hpp>
-
 struct PPU : Thread, PPUcounter {
-  //ppu.cpp
-  alwaysinline auto interlace() const -> bool { if(system.fastPPU()) return ppufast.interlace(); return display.interlace; }
-  alwaysinline auto overscan() const -> bool { if(system.fastPPU()) return ppufast.overscan(); return display.overscan; }
-  alwaysinline auto vdisp() const -> uint { if(system.fastPPU()) return ppufast.vdisp(); return !io.overscan ? 225 : 240; }
+  alwaysinline auto interlace() const -> bool { return display.interlace; }
+  alwaysinline auto overscan() const -> bool { return display.overscan; }
+  alwaysinline auto vdisp() const -> uint { return display.vdisp; }
 
+  //ppu.cpp
   PPU();
   ~PPU();
 
@@ -47,6 +45,7 @@ private:
   struct {
     bool interlace;
     bool overscan;
+    uint vdisp;
   } display;
 
   auto scanline() -> void;
@@ -161,6 +160,7 @@ private:
   friend class PPU::Window;
   friend class PPU::Screen;
   friend class System;
+  friend class PPUfast;
 };
 
 extern PPU ppu;

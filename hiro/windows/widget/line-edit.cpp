@@ -28,6 +28,7 @@ auto pLineEdit::minimumSize() const -> Size {
 auto pLineEdit::setBackgroundColor(Color color) -> void {
   if(backgroundBrush) { DeleteObject(backgroundBrush); backgroundBrush = 0; }
   backgroundBrush = CreateSolidBrush(color ? CreateRGB(color) : GetSysColor(COLOR_WINDOW));
+  InvalidateRect(hwnd, 0, true);
 }
 
 auto pLineEdit::setEditable(bool editable) -> void {

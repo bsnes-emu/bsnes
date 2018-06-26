@@ -9,10 +9,10 @@
 #define ppu ppufast
 
 struct PPU : Thread, PPUcounter {
-  alwaysinline auto interlace() const -> bool { return latch.interlace; }
-  alwaysinline auto overscan() const -> bool { return latch.overscan; }
-  alwaysinline auto hires() const -> bool { return latch.hires; }
-  alwaysinline auto vdisp() const -> uint { return !io.overscan ? 225 : 240; }
+  alwaysinline auto interlace() const -> bool;
+  alwaysinline auto overscan() const -> bool;
+  alwaysinline auto vdisp() const -> uint;
+  alwaysinline auto hires() const -> bool;
 
   //ppu.cpp
   PPU();
@@ -276,6 +276,7 @@ public:
 
     //mode7.cpp
     auto renderMode7(PPU::IO::Background&, uint source) -> void;
+    auto renderMode7Hires(PPU::IO::Background&, uint source) -> void;
 
     //object.cpp
     auto renderObject(PPU::IO::Object&) -> void;

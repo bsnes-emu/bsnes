@@ -45,7 +45,7 @@ static auto CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
 
   switch(msg) {
   case WM_GETDLGCODE: return DLGC_STATIC | DLGC_WANTCHARS;
-  case WM_ERASEBKGND: return true;
+  case WM_ERASEBKGND:
   case WM_PAINT: {
     PAINTSTRUCT ps;
     BeginPaint(hwnd, &ps);
@@ -96,7 +96,8 @@ static auto CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
     DeleteObject(hbmMemory);
     DeleteObject(hdcMemory);
     EndPaint(hwnd, &ps);
-    return false;
+
+    return msg == WM_ERASEBKGND;
   }
   }
 

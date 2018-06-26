@@ -24,11 +24,11 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 
   if(id == 1) {  //Super Famicom
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
-      result = vfs::memory::file::open(superNintendo.manifest.data<uint8_t>(), superNintendo.manifest.size());
-    } else if(superNintendo.location.endsWith("/")) {
-      result = openPakSFC(name, mode);
+      result = vfs::memory::file::open(superFamicom.manifest.data<uint8_t>(), superFamicom.manifest.size());
+    } else if(superFamicom.location.endsWith("/")) {
+      result = openPakSuperFamicom(name, mode);
     } else {
-      result = openRomSFC(name, mode);
+      result = openRomSuperFamicom(name, mode);
     }
   }
 
@@ -36,9 +36,39 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(gameBoy.manifest.data<uint8_t>(), gameBoy.manifest.size());
     } else if(gameBoy.location.endsWith("/")) {
-      result = openPakGB(name, mode);
+      result = openPakGameBoy(name, mode);
     } else {
-      result = openRomGB(name, mode);
+      result = openRomGameBoy(name, mode);
+    }
+  }
+
+  if(id == 3) {  //BS Memory
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(bsMemory.manifest.data<uint8_t>(), bsMemory.manifest.size());
+    } else if(bsMemory.location.endsWith("/")) {
+      result = openPakBSMemory(name, mode);
+    } else {
+      result = openRomBSMemory(name, mode);
+    }
+  }
+
+  if(id == 4) {  //Sufami Turbo - Slot A
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(sufamiTurboA.manifest.data<uint8_t>(), sufamiTurboA.manifest.size());
+    } else if(sufamiTurboA.location.endsWith("/")) {
+      result = openPakSufamiTurboA(name, mode);
+    } else {
+      result = openRomSufamiTurboA(name, mode);
+    }
+  }
+
+  if(id == 5) {  //Sufami Turbo - Slot B
+    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(sufamiTurboB.manifest.data<uint8_t>(), sufamiTurboB.manifest.size());
+    } else if(sufamiTurboB.location.endsWith("/")) {
+      result = openPakSufamiTurboB(name, mode);
+    } else {
+      result = openRomSufamiTurboB(name, mode);
     }
   }
 
@@ -50,20 +80,22 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 }
 
 auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
+  BrowserDialog dialog;
+  dialog.setOptions(options);
+
   if(id == 1 && name == "Super Famicom" && type == "sfc") {
     if(gameQueue) {
-      superNintendo.location = gameQueue.takeLeft();
+      superFamicom.location = gameQueue.takeLeft();
     } else {
-      BrowserDialog dialog;
-      dialog.setTitle("Load Super Nintendo");
-      dialog.setPath(path("Games", settings["Path/Recent/SuperNintendo"].text()));
-      dialog.setFilters({string{"Super Nintendo Games|*.sfc:*.smc:*.zip"}});
-      superNintendo.location = dialog.openObject();
+      dialog.setTitle("Load Super Famicom");
+      dialog.setPath(path("Games", settings["Path/Recent/SuperFamicom"].text()));
+      dialog.setFilters({string{"Super Famicom Games|*.sfc:*.smc:*.zip"}});
+      superFamicom.location = dialog.openObject();
     }
-    if(inode::exists(superNintendo.location)) {
-      settings["Path/Recent/SuperNintendo"].setValue(Location::dir(superNintendo.location));
-      loadSuperNintendo(superNintendo.location);
-      return {id, ""};
+    if(inode::exists(superFamicom.location)) {
+      settings["Path/Recent/SuperFamicom"].setValue(Location::dir(superFamicom.location));
+      loadSuperFamicom(superFamicom.location);
+      return {id, dialog.option()};
     }
   }
 
@@ -71,7 +103,6 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     if(gameQueue) {
       gameBoy.location = gameQueue.takeLeft();
     } else {
-      BrowserDialog dialog;
       dialog.setTitle("Load Game Boy");
       dialog.setPath(path("Games", settings["Path/Recent/GameBoy"].text()));
       dialog.setFilters({string{"Game Boy Games|*.gb:*.gbc:*.zip"}});
@@ -80,7 +111,55 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     if(inode::exists(gameBoy.location)) {
       settings["Path/Recent/GameBoy"].setValue(Location::dir(gameBoy.location));
       loadGameBoy(gameBoy.location);
-      return {id, ""};
+      return {id, dialog.option()};
+    }
+  }
+
+  if(id == 3 && name == "BS Memory" && type == "bs") {
+    if(gameQueue) {
+      bsMemory.location = gameQueue.takeLeft();
+    } else {
+      dialog.setTitle("Load BS Memory");
+      dialog.setPath(path("Games", settings["Path/Recent/BSMemory"].text()));
+      dialog.setFilters({string{"BS Memory Games|*.bs:*.zip"}});
+      bsMemory.location = dialog.openObject();
+    }
+    if(inode::exists(bsMemory.location)) {
+      settings["Path/Recent/BSMemory"].setValue(Location::dir(bsMemory.location));
+      loadBSMemory(bsMemory.location);
+      return {id, dialog.option()};
+    }
+  }
+
+  if(id == 4 && name == "Sufami Turbo" && type == "st") {
+    if(gameQueue) {
+      sufamiTurboA.location = gameQueue.takeLeft();
+    } else {
+      dialog.setTitle("Load Sufami Turbo - Slot A");
+      dialog.setPath(path("Games", settings["Path/Recent/SufamiTurboA"].text()));
+      dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
+      sufamiTurboA.location = dialog.openObject();
+    }
+    if(inode::exists(sufamiTurboA.location)) {
+      settings["Path/Recent/SufamiTurboA"].setValue(Location::dir(sufamiTurboA.location));
+      loadSufamiTurboA(sufamiTurboA.location);
+      return {id, dialog.option()};
+    }
+  }
+
+  if(id == 5 && name == "Sufami Turbo" && type == "st") {
+    if(gameQueue) {
+      sufamiTurboB.location = gameQueue.takeLeft();
+    } else {
+      dialog.setTitle("Load Sufami Turbo - Slot B");
+      dialog.setPath(path("Games", settings["Path/Recent/SufamiTurboB"].text()));
+      dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
+      sufamiTurboB.location = dialog.openObject();
+    }
+    if(inode::exists(sufamiTurboB.location)) {
+      settings["Path/Recent/SufamiTurboB"].setValue(Location::dir(sufamiTurboB.location));
+      loadSufamiTurboB(sufamiTurboB.location);
+      return {id, dialog.option()};
     }
   }
 

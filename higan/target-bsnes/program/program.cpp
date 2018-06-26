@@ -6,6 +6,8 @@
 #include "paths.cpp"
 #include "states.cpp"
 #include "utility.cpp"
+#include "patch.cpp"
+#include "hacks.cpp"
 unique_pointer<Program> program;
 
 Program::Program(string_vector arguments) {

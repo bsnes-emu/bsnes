@@ -45,15 +45,17 @@ Settings::Settings() {
   set("Path/Saves", "");
   set("Path/Cheats", "");
   set("Path/States", "");
-  set("Path/Recent/SuperNintendo", Path::user());
+  set("Path/Recent/SuperFamicom", Path::user());
   set("Path/Recent/GameBoy", Path::user());
   set("Path/Recent/BSMemory", Path::user());
-  set("Path/Recent/SufamiTurbo", Path::user());
+  set("Path/Recent/SufamiTurboA", Path::user());
+  set("Path/Recent/SufamiTurboB", Path::user());
 
   set("UserInterface/ShowStatusBar", true);
 
-  set("Emulator/FastPPU", true);
-  set("Emulator/FastDSP", true);
+  set("Emulator/Hack/FastPPU", true);
+  set("Emulator/Hack/FastDSP", true);
+  set("Emulator/Hack/FastSuperFX", "100%");
   set("Emulator/AutoSaveMemory/Enable", true);
   set("Emulator/AutoSaveMemory/Interval", 30);
 

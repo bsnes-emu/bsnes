@@ -26,7 +26,7 @@ bg4(Background::ID::BG4) {
 
 PPU::~PPU() {
   if(system.fastPPU()) {
-    _handle = nullptr;
+    setHandle(nullptr);
   }
 
   output -= 16 * 512;
@@ -96,8 +96,7 @@ auto PPU::load(Markup::Node node) -> bool {
 auto PPU::power(bool reset) -> void {
   if(system.fastPPU()) {
     ppufast.power(reset);
-    _handle = ppufast._handle;
-    return;
+    return setHandle(ppufast.handle());
   }
 
   create(Enter, system.cpuFrequency());
@@ -202,6 +201,7 @@ auto PPU::power(bool reset) -> void {
   window.power();
   screen.power();
 
+  updateVideoMode();
   frame();
 }
 

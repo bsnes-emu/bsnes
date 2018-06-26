@@ -1,4 +1,8 @@
 auto PPU::serialize(serializer& s) -> void {
+  s.integer(display.interlace);
+  s.integer(display.overscan);
+  s.integer(display.vdisp);
+
   if(system.fastPPU()) {
     return ppufast.serialize(s);
   }
@@ -14,9 +18,6 @@ auto PPU::serialize(serializer& s) -> void {
 
   s.integer(ppu2.version);
   s.integer(ppu2.mdr);
-
-  s.integer(display.interlace);
-  s.integer(display.overscan);
 
   s.integer(latch.vram);
   s.integer(latch.oam);

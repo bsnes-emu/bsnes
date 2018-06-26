@@ -28,6 +28,7 @@ auto pLabel::setAlignment(Alignment alignment) -> void {
 }
 
 auto pLabel::setBackgroundColor(Color color) -> void {
+  if(!color) color = self().parentWindow(true)->backgroundColor();
   if(color) {
     QPalette palette = qtLabel->palette();
     palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));

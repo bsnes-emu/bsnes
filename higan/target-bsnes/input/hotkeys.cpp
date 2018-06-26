@@ -40,7 +40,7 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Reset Emulation").onPress([] {
-    presentation->resetSystem.doActivate();
+    program->reset();
   }));
 
   hotkeys.append(InputHotkey("Quit Emulator").onPress([] {

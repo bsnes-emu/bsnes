@@ -15,6 +15,10 @@ struct Thread {
   inline auto scalar() const { return _scalar; }
   inline auto clock() const { return _clock; }
 
+  auto setHandle(cothread_t handle) -> void {
+    _handle = handle;
+  }
+
   auto setFrequency(double frequency) -> void {
     _frequency = frequency + 0.5;
     _scalar = Second / _frequency;
@@ -45,7 +49,7 @@ struct Thread {
     s.integer(_clock);
   }
 
-//protected:
+protected:
   cothread_t _handle = nullptr;
   uintmax _frequency = 0;
   uintmax _scalar = 0;

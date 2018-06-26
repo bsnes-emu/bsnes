@@ -115,9 +115,14 @@ public:
     ComboButton audioDriverOption{&driverLayout, Size{~0, 0}};
     Label inputDriverLabel{&driverLayout, Size{0, 0}};
     ComboButton inputDriverOption{&driverLayout, Size{~0, 0}};
-    Label emulatorLabel{&layout, Size{~0, 0}, 2};
+    Label hacksLabel{&layout, Size{~0, 0}, 2};
     CheckLabel fastPPUOption{&layout, Size{~0, 0}};
     CheckLabel fastDSPOption{&layout, Size{~0, 0}};
+    HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
+      Label superFXLabel{&superFXLayout, Size{0, 0}};
+      Label superFXValue{&superFXLayout, Size{50, 0}};
+      HorizontalSlider superFXClock{&superFXLayout, Size{~0, 0}};
+    Label hacksNote{&layout, Size{~0, 0}};
 };
 
 struct SettingsWindow : Window {

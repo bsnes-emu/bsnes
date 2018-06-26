@@ -583,6 +583,8 @@ auto PPU::writeIO(uint24 address, uint8 data) -> void {
 }
 
 auto PPU::updateVideoMode() -> void {
+  ppubase.display.vdisp = !io.overscan ? 225 : 240;
+
   switch(io.bgMode) {
   case 0:
     io.bg1.tileMode = TileMode::BPP2;

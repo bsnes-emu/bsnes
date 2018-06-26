@@ -1,8 +1,10 @@
 #include <sfc/sfc.hpp>
-#define PPU PPUfast
-#define ppu ppufast
 
 namespace SuperFamicom {
+
+PPU& ppubase = ppu;
+#define PPU PPUfast
+#define ppu ppufast
 
 PPU ppu;
 #include "io.cpp"
@@ -12,6 +14,11 @@ PPU ppu;
 #include "object.cpp"
 #include "window.cpp"
 #include "serialization.cpp"
+
+auto PPU::interlace() const -> bool { return ppubase.display.interlace; }
+auto PPU::overscan() const -> bool { return ppubase.display.overscan; }
+auto PPU::vdisp() const -> uint { return ppubase.display.vdisp; }
+auto PPU::hires() const -> bool { return latch.hires; }
 
 PPU::PPU() {
   output = new uint32[512 * 512] + 16 * 512;  //overscan offset
@@ -60,8 +67,8 @@ auto PPU::main() -> void {
 
 auto PPU::scanline() -> void {
   if(vcounter() == 0) {
-    latch.interlace = io.interlace;
-    latch.overscan = io.overscan;
+    ppubase.display.interlace = io.interlace;
+    ppubase.display.overscan = io.overscan;
     latch.hires = false;
     io.obj.timeOver = false;
     io.obj.rangeOver = false;
@@ -115,6 +122,7 @@ auto PPU::power(bool reset) -> void {
 
   latch = {};
   io = {};
+  updateVideoMode();
 
   Line::start = 0;
   Line::count = 0;

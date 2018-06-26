@@ -40,7 +40,7 @@ auto Program::path(string type, string location, string extension) -> string {
 auto Program::gamePath() -> string {
   if(!emulator->loaded()) return "";
   if(gameBoy.location) return gameBoy.location;
-  return superNintendo.location;
+  return superFamicom.location;
 }
 
 auto Program::cheatPath() -> string {

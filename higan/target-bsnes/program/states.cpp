@@ -70,11 +70,9 @@ auto Program::saveState(string filename) -> bool {
 }
 
 auto Program::saveRecoveryState() -> bool {
-  if(!emulator->loaded()) return false;
-  string location = {statePath(), "quick/recovery.bst"};
-  directory::create(Location::path(location));
-  serializer s = emulator->serialize();
-  if(!s.size()) return false;
-  if(!file::write(location, s.data(), s.size())) return false;
-  return true;
+  auto statusTime = this->statusTime;
+  auto statusMessage = this->statusMessage;
+  saveState("quick/recovery");
+  this->statusTime = statusTime;
+  this->statusMessage = statusMessage;
 }

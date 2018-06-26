@@ -15,18 +15,28 @@ struct Program : Emulator::Platform {
   //game.cpp
   auto load() -> void;
   auto loadFile(string location) -> vector<uint8_t>;
-  auto loadSuperNintendo(string location) -> void;
+  auto loadSuperFamicom(string location) -> void;
   auto loadGameBoy(string location) -> void;
+  auto loadBSMemory(string location) -> void;
+  auto loadSufamiTurboA(string location) -> void;
+  auto loadSufamiTurboB(string location) -> void;
   auto save() -> void;
+  auto reset() -> void;
   auto unload() -> void;
 
   //game-pak.cpp
-  auto openPakSFC(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openPakGB(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakGameBoy(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakBSMemory(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakSufamiTurboA(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakSufamiTurboB(string name, vfs::file::mode mode) -> vfs::shared::file;
 
   //game-rom.cpp
-  auto openRomSFC(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openRomGB(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomGameBoy(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomBSMemory(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomSufamiTurboA(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomSufamiTurboB(string name, vfs::file::mode mode) -> vfs::shared::file;
 
   //paths.cpp
   auto path(string type, string location, string extension = "") -> string;
@@ -45,14 +55,22 @@ struct Program : Emulator::Platform {
   auto initializeInputDriver() -> void;
   auto updateVideoShader() -> void;
   auto connectDevices() -> void;
-  auto applyHacks() -> void;
   auto showMessage(string text) -> void;
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;
   auto focused() -> bool;
 
+  //patch.cpp
+  auto appliedPatch() const -> bool;
+  auto applyPatchIPS(vector<uint8_t>& data, string location) -> bool;
+  auto applyPatchBPS(vector<uint8_t>& data, string location) -> bool;
+
+  //hacks.cpp
+  auto applyHacks() -> void;
+  auto applyHackOverclockSuperFX() -> void;
+
 public:
-  struct SuperNintendo {
+  struct SuperFamicom {
     string label;
     string location;
     string manifest;
@@ -61,20 +79,32 @@ public:
     vector<uint8_t> data;
     vector<uint8_t> expansion;
     vector<uint8_t> firmware;
-  } superNintendo;
+    boolean patched;
+  } superFamicom;
 
   struct GameBoy {
     string location;
     string manifest;
     Markup::Node document;
     vector<uint8_t> program;
+    boolean patched;
   } gameBoy;
 
   struct BSMemory {
+    string location;
+    string manifest;
+    Markup::Node document;
+    vector<uint8_t> program;
+    boolean patched;
   } bsMemory;
 
   struct SufamiTurbo {
-  } sufamiTurbo[2];
+    string location;
+    string manifest;
+    Markup::Node document;
+    vector<uint8_t> program;
+    boolean patched;
+  } sufamiTurboA, sufamiTurboB;
 
   string_vector gameQueue;
 

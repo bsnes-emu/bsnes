@@ -13,10 +13,7 @@ Presentation::Presentation() {
   loadRecentGame.setText("Load Recent Game");
   updateRecentGames();
   resetSystem.setText("Reset System").setEnabled(false).onActivate([&] {
-    if(emulator->loaded()) {
-      program->applyHacks();
-      emulator->reset();
-    }
+    program->reset();
   });
   unloadGame.setText("Unload Game").setEnabled(false).onActivate([&] {
     program->unload();
@@ -241,7 +238,7 @@ auto Presentation::resizeViewport() -> void {
   uint windowHeight = viewportLayout.geometry().height();
 
   uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
-  uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
+  uint height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
   uint viewportWidth, viewportHeight;
 
   if(settings["View/IntegralScaling"].boolean()) {
@@ -270,7 +267,7 @@ auto Presentation::resizeViewport() -> void {
 
 auto Presentation::resizeWindow() -> void {
   uint width = 256 * (settings["View/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
-  uint height = (settings["View/OverscanCropping"].boolean() ? 223.0 : 239.0);
+  uint height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
   uint statusHeight = settings["UserInterface/ShowStatusBar"].boolean() ? StatusHeight : 0;
 
   uint multiplier = 2;

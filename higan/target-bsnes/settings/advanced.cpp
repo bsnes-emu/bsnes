@@ -110,11 +110,18 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
     }
   });
 
-  emulatorLabel.setText("Emulator").setFont(Font().setBold());
-  fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/FastPPU"].boolean()).onToggle([&] {
-    settings["Emulator/FastPPU"].setValue(fastPPUOption.checked());
+  hacksLabel.setText("Emulator Hacks").setFont(Font().setBold());
+  fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/Hack/FastPPU"].boolean()).onToggle([&] {
+    settings["Emulator/Hack/FastPPU"].setValue(fastPPUOption.checked());
   });
-  fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/FastDSP"].boolean()).onToggle([&] {
-    settings["Emulator/FastDSP"].setValue(fastDSPOption.checked());
+  fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/Hack/FastDSP"].boolean()).onToggle([&] {
+    settings["Emulator/Hack/FastDSP"].setValue(fastDSPOption.checked());
   });
+  superFXLabel.setText("SuperFX Clock Speed:");
+  superFXValue.setAlignment(0.5);
+  superFXClock.setLength(71).setPosition((settings["Emulator/Hack/FastSuperFX"].natural() - 100) / 10).onChange([&] {
+    settings["Emulator/Hack/FastSuperFX"].setValue({superFXClock.position() * 10 + 100, "%"});
+    superFXValue.setText(settings["Emulator/Hack/FastSuperFX"].text());
+  }).doChange();
+  hacksNote.setFont(Font().setItalic()).setText("Note: hack setting changes do not take effect until after reloading games.");
 }

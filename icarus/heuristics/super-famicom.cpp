@@ -74,8 +74,17 @@ auto SuperFamicom::manifest() const -> string {
   auto board = this->board().trimRight("#A", 1L).trimRight("#B", 1L).split("-");
 
   if(auto size = romSize()) {
-    if(board(0) == "SPC7110") size = 0x100000;
-    output.append(Memory{}.type("ROM").size(size).content("Program").text());
+    if(board(0) == "SPC7110" && size > 0x100000) {
+      output.append(Memory{}.type("ROM").size(0x100000).content("Program").text());
+      output.append(Memory{}.type("ROM").size(size - 0x100000).content("Data").text());
+    } else if(board(0) == "EXSPC7110" && size == 0x700000) {
+      //Tengai Maykou Zero (fan translation)
+      output.append(Memory{}.type("ROM").size(0x100000).content("Program").text());
+      output.append(Memory{}.type("ROM").size(0x500000).content("Data").text());
+      output.append(Memory{}.type("ROM").size(0x100000).content("Expansion").text());
+    } else {
+      output.append(Memory{}.type("ROM").size(size).content("Program").text());
+    }
   }
 
   if(auto size = ramSize()) {
@@ -115,10 +124,8 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("ROM").size( 0x800).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).text());
     output.append(Memory{}.type("RAM").size( 0x200).content("Data"   ).manufacturer("NEC").architecture("uPD7725").identifier(firmwareNEC()).isVolatile().text());
     output.append(Oscillator{}.frequency(7'600'000).text());
-  } else if(board(0) == "SA1") {
+  } else if(board(0) == "SA1" || board(1) == "SA1") {  //SA1-* or BS-SA1-*
     output.append(Memory{}.type("RAM").size(0x800).content("Internal").isVolatile().text());
-  } else if(board(0) == "SPC7110") {
-    output.append(Memory{}.type("ROM").size(romSize() - 0x100000).content("Data").text());
   }
 
   if(board.right() == "EPSONRTC" || board.right() == "SHARPRTC") {
@@ -276,6 +283,9 @@ auto SuperFamicom::board() const -> string {
 
   if(board.beginsWith(    "LOROM-RAM")) board.append(romSize() <= 0x200000 ? "#A" : "#B");
   if(board.beginsWith("NEC-LOROM-RAM")) board.append(romSize() <= 0x100000 ? "#A" : "#B");
+
+  //Tengai Makyou Zero (fan translation)
+  if(board.beginsWith("SPC7110-") && data.size() == 0x700000) board.prepend("EX");
 
   return board;
 }

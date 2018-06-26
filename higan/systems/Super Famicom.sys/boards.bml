@@ -1,5 +1,5 @@
 database
-  revision: 2018-06-01
+  revision: 2018-06-25
 
 //Boards (Production)
 
@@ -565,7 +565,7 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-06-01
+  revision: 2018-06-25
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -702,6 +702,23 @@ board: EXNEC-LOROM
     memory type=RAM content=Data architecture=uPD96050
       map address=68-6f,e8-ef:0000-7fff mask=0x8000
     oscillator
+
+board: EXSPC7110-RAM-EPSONRTC
+  memory type=ROM content=Expansion
+    map address=40-4f:0000-ffff
+  processor identifier=SPC7110
+    map address=00-3f,80-bf:4800-483f
+    map address=50,58:0000-ffff
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x800000
+      map address=c0-ff:0000-ffff mask=0xc00000
+      memory type=ROM content=Program
+      memory type=ROM content=Data
+    memory type=RAM content=Save
+      map address=00-3f,80-bf:6000-7fff mask=0xe000
+  rtc manufacturer=Epson
+    map address=00-3f,80-bf:4840-4842
+    memory type=RTC content=Time manufacturer=Epson
 
 board: GB-LOROM
   memory type=ROM content=Program
