@@ -21,9 +21,6 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
     }
     refreshMappings();
   });
-
-  reloadMappings();
-  refreshMappings();
 }
 
 auto HotkeySettings::reloadMappings() -> void {
@@ -38,7 +35,8 @@ auto HotkeySettings::reloadMappings() -> void {
       .append(TableViewCell())
     );
   }
-  mappingList.resizeColumns();
+  refreshMappings();
+  mappingList.doChange();
 }
 
 auto HotkeySettings::refreshMappings() -> void {

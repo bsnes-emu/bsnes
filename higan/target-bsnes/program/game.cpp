@@ -7,9 +7,11 @@ auto Program::load() -> void {
     Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
       gameQueue = {};
-      connectDevices();
+      updateInputDevices();
       applyHacks();
       emulator->power();
+      updateVideoPalette();
+      updateAudioEffects();
       showMessage(!appliedPatch() ? "Game loaded" : "Game loaded and patch applied");
       presentation->setTitle(emulator->title());
       presentation->resetSystem.setEnabled(true);

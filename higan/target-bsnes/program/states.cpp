@@ -1,3 +1,23 @@
+auto Program::managedStates() -> string_vector {
+  if(!emulator->loaded()) return {};
+
+  if(gamePath().endsWith("/")) {
+    return directory::ifiles({statePath(), "managed/"}, "*.bst");
+  } else {
+    Decode::ZIP input;
+    if(input.open(statePath())) {
+      string_vector filenames;
+      for(auto& file : input.file) {
+        if(file.name.match("managed/*.bst")) filenames.append(file.name);
+      }
+      filenames.isort();
+      return filenames;
+    }
+  }
+
+  return {};
+}
+
 auto Program::loadState(string filename) -> bool {
   if(!emulator->loaded()) return false;
 
@@ -44,10 +64,7 @@ auto Program::saveState(string filename) -> bool {
   } else {
     string location = {filename, ".bst"};
 
-    struct State {
-      string name;
-      vector<uint8_t> memory;
-    };
+    struct State { string name; vector<uint8_t> memory; };
     vector<State> states;
 
     Decode::ZIP input;
@@ -75,4 +92,71 @@ auto Program::saveRecoveryState() -> bool {
   saveState("quick/recovery");
   this->statusTime = statusTime;
   this->statusMessage = statusMessage;
+}
+
+auto Program::removeState(string filename) -> bool {
+  if(!emulator->loaded()) return false;
+
+  if(gamePath().endsWith("/")) {
+    string location = {statePath(), filename, ".bst"};
+    return file::remove(location);
+  } else {
+    bool found = false;
+    string location = {filename, ".bst"};
+
+    struct State { string name; vector<uint8_t> memory; };
+    vector<State> states;
+
+    Decode::ZIP input;
+    if(input.open(statePath())) {
+      for(auto& file : input.file) {
+        if(file.name == location) { found = true; continue; }
+        states.append({file.name, input.extract(file)});
+      }
+    }
+
+    if(states) {
+      Encode::ZIP output{statePath()};
+      for(auto& state : states) {
+        output.append(state.name, state.memory.data(), state.memory.size());
+      }
+    } else {
+      //remove .bsz file if there are no states left in the archive
+      file::remove(statePath());
+    }
+
+    return found;
+  }
+}
+
+auto Program::renameState(string from, string to) -> bool {
+  if(!emulator->loaded()) return false;
+
+  if(gamePath().endsWith("/")) {
+    from = {statePath(), from, ".bst"};
+    to = {statePath(), to, ".bst."};
+    return file::rename(from, to);
+  } else {
+    bool found = false;
+    from = {from, ".bst"};
+    to = {to, ".bst"};
+
+    struct State { string name; vector<uint8_t> memory; };
+    vector<State> states;
+
+    Decode::ZIP input;
+    if(input.open(statePath())) {
+      for(auto& file : input.file) {
+        if(file.name == from) { found = true; file.name = to; }
+        states.append({file.name, input.extract(file)});
+      }
+    }
+
+    Encode::ZIP output{statePath()};
+    for(auto& state : states) {
+      output.append(state.name, state.memory.data(), state.memory.size());
+    }
+
+    return found;
+  }
 }

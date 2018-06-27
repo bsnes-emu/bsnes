@@ -176,6 +176,14 @@ auto InputMapping::displayName() -> string {
 
 InputManager::InputManager() {
   inputManager = this;
+}
+
+auto InputManager::initialize() -> void {
+  devices.reset();
+  ports.reset();
+  hotkeys.reset();
+
+  if(!input) return;
   input->onChange({&InputManager::onChange, this});
   frequency = max(1u, settings["Input/Frequency"].natural());
 
@@ -197,6 +205,7 @@ InputManager::InputManager() {
   }
 
   bindHotkeys();
+  poll();
 }
 
 auto InputManager::bind() -> void {

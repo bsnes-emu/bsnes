@@ -5,6 +5,9 @@
 #include "game-rom.cpp"
 #include "paths.cpp"
 #include "states.cpp"
+#include "video.cpp"
+#include "audio.cpp"
+#include "input.cpp"
 #include "utility.cpp"
 #include "patch.cpp"
 #include "hacks.cpp"
@@ -16,6 +19,14 @@ Program::Program(string_vector arguments) {
 
   new Presentation;
   presentation->setVisible();
+
+  new InputManager;
+  new SettingsWindow;
+  new CheatDatabase;
+  new CheatWindow;
+  new StateWindow;
+  new ToolsWindow;
+  new AboutWindow;
 
   if(settings["Crashed"].boolean()) {
     MessageDialog(
@@ -29,42 +40,11 @@ Program::Program(string_vector arguments) {
 
   settings["Crashed"].setValue(true);
   settings.save();
-
-  initializeVideoDriver();
-  if(!video->ready()) {
-    MessageDialog({
-      "Error: failed to initialize ", settings["Video/Driver"].text(), " video driver."
-    }).setParent(*presentation).error();
-    settings["Video/Driver"].setValue("None");
-    initializeVideoDriver();
-  }
-  initializeAudioDriver();
-  if(!audio->ready()) {
-    MessageDialog({
-      "Error: failed to initialize ", settings["Audio/Driver"].text(), " audio driver."
-    }).setParent(*presentation).error();
-    settings["Audio/Driver"].setValue("None");
-    initializeAudioDriver();
-  }
-  initializeInputDriver();
-  if(!input->ready()) {
-    MessageDialog({
-      "Error: failed to initialize ", settings["Input/Driver"].text(), " input driver."
-    }).setParent(*presentation).error();
-    settings["Input/Driver"].setValue("None");
-    initializeInputDriver();
-  }
-
+  updateVideoDriver();
+  updateAudioDriver();
+  updateInputDriver();
   settings["Crashed"].setValue(false);
   settings.save();
-
-  new InputManager;
-  new SettingsWindow;
-  new CheatDatabase;
-  new CheatWindow;
-  new StateWindow;
-  new ToolsWindow;
-  new AboutWindow;
 
   arguments.takeLeft();  //ignore program location in argument parsing
   for(auto& argument : arguments) {

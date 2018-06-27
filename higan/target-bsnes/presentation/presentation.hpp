@@ -46,11 +46,13 @@ struct Presentation : Window {
         MenuCheckItem overscanCropping{&viewMenu};
         MenuCheckItem integralScaling{&viewMenu};
         MenuCheckItem blurEmulation{&viewMenu};
-        MenuCheckItem colorEmulation{&viewMenu};
       Menu shaderMenu{&settingsMenu};
+      MenuSeparator settingsSeparatorA{&settingsMenu};
+      MenuCheckItem synchronizeVideo{&settingsMenu};
+      MenuCheckItem synchronizeAudio{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
-      MenuSeparator settingsSeparator{&settingsMenu};
+      MenuSeparator settingsSeparatorB{&settingsMenu};
       MenuItem videoSettings{&settingsMenu};
       MenuItem audioSettings{&settingsMenu};
       MenuItem inputSettings{&settingsMenu};

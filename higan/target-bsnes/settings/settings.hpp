@@ -5,10 +5,57 @@ struct Settings : Markup::Node {
 
 struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
+
+public:
+  VerticalLayout layout{this};
+    Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout luminanceLayout{&layout, Size{~0, 0}};
+      Label luminanceLabel{&luminanceLayout, Size{65, 0}};
+      Label luminanceValue{&luminanceLayout, Size{50, 0}};
+      HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
+    HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
+      Label saturationLabel{&saturationLayout, Size{65, 0}};
+      Label saturationValue{&saturationLayout, Size{50, 0}};
+      HorizontalSlider saturationSlider{&saturationLayout, Size{~0, 0}};
+    HorizontalLayout gammaLayout{&layout, Size{~0, 0}};
+      Label gammaLabel{&gammaLayout, Size{65, 0}};
+      Label gammaValue{&gammaLayout, Size{50, 0}};
+      HorizontalSlider gammaSlider{&gammaLayout, Size{~0, 0}};
+    Label fullscreenLabel{&layout, Size{~0, 0}, 2};
+    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
 };
 
 struct AudioSettings : TabFrameItem {
   AudioSettings(TabFrame*);
+  auto updateDevice() -> void;
+  auto updateFrequency() -> void;
+  auto updateLatency() -> void;
+
+public:
+  VerticalLayout layout{this};
+    Label driverLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout driverLayout{&layout, Size{~0, 0}};
+      Label deviceLabel{&driverLayout, Size{0, 0}};
+      ComboButton deviceList{&driverLayout, Size{~0, 0}};
+      Label frequencyLabel{&driverLayout, Size{0, 0}};
+      ComboButton frequencyList{&driverLayout, Size{80, 0}};
+      Label latencyLabel{&driverLayout, Size{0, 0}};
+      ComboButton latencyList{&driverLayout, Size{80, 0}};
+    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
+    Label effectsLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout skewLayout{&layout, Size{~0, 0}};
+      Label skewLabel{&skewLayout, Size{65, 0}};
+      Label skewValue{&skewLayout, Size{50, 0}};
+      HorizontalSlider skewSlider{&skewLayout, Size{~0, 0}};
+    HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
+      Label volumeLabel{&volumeLayout, Size{65, 0}};
+      Label volumeValue{&volumeLayout, Size{50, 0}};
+      HorizontalSlider volumeSlider{&volumeLayout, Size{~0, 0}};
+    HorizontalLayout balanceLayout{&layout, Size{~0, 0}};
+      Label balanceLabel{&balanceLayout, Size{65, 0}};
+      Label balanceValue{&balanceLayout, Size{50, 0}};
+      HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
+    CheckLabel reverb{&layout, Size{~0, 0}};
 };
 
 struct InputSettings : TabFrameItem {
@@ -104,6 +151,9 @@ public:
 
 struct AdvancedSettings : TabFrameItem {
   AdvancedSettings(TabFrame*);
+  auto updateVideoDriver() -> void;
+  auto updateAudioDriver() -> void;
+  auto updateInputDriver() -> void;
 
 public:
   VerticalLayout layout{this};

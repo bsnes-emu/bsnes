@@ -20,6 +20,9 @@ Settings::Settings() {
   set("Video/Exclusive", false);
   set("Video/Blocking", false);
   set("Video/Shader", "Blur");
+  set("Video/Luminance", "100%");
+  set("Video/Saturation", "100%");
+  set("Video/Gamma", "150%");
 
   set("Audio/Driver", Audio::safestDriver());
   set("Audio/Exclusive", false);
@@ -28,6 +31,10 @@ Settings::Settings() {
   set("Audio/Frequency", 48000.0);
   set("Audio/Latency", 0);
   set("Audio/Mute", false);
+  set("Audio/Skew", "0");
+  set("Audio/Volume", "100%");
+  set("Audio/Balance", "50%");
+  set("Audio/Reverb", false);
 
   set("Input/Driver", Input::safestDriver());
   set("Input/Frequency", 5);
@@ -38,7 +45,6 @@ Settings::Settings() {
   set("View/OverscanCropping", true);
   set("View/IntegralScaling", true);
   set("View/BlurEmulation", true);
-  set("View/ColorEmulation", true);
 
   set("Path/Games", "");
   set("Path/Patches", "");

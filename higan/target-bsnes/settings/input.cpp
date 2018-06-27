@@ -35,8 +35,6 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
     }
     refreshMappings();
   });
-
-  reloadPorts();
 }
 
 auto InputSettings::updateControls() -> void {

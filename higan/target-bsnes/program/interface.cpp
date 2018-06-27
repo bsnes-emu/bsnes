@@ -200,12 +200,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 }
 
 auto Program::audioSample(const double* samples, uint channels) -> void {
-  if(presentation->muteAudio.checked()) {
-    static const double mutedSamples[] = {0.0, 0.0};
-    audio->output(mutedSamples);
-  } else {
-    audio->output(samples);
-  }
+  audio->output(samples);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

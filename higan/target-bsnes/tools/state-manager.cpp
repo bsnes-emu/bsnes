@@ -107,27 +107,10 @@ auto StateManager::loadStates() -> void {
   stateList.append(TableViewHeader().setVisible(false)
     .append(TableViewColumn().setExpandable())
   );
-  if(program->gamePath().endsWith("/")) {
-    for(auto filename : directory::ifiles({program->statePath(), "managed/"}, "*.bst")) {
-      stateList.append(TableViewItem()
-        .append(TableViewCell().setText(filename.trimRight(".bst", 1L)))
-      );
-    }
-  } else {
-    Decode::ZIP input;
-    if(input.open(program->statePath())) {
-      string_vector states;
-      for(auto& file : input.file) {
-        if(!file.name.match("managed/*.bst")) continue;
-        states.append(Location::prefix(file.name));
-      }
-      states.isort();
-      for(auto& state : states) {
-        stateList.append(TableViewItem()
-          .append(TableViewCell().setText(state))
-        );
-      }
-    }
+  for(auto filename : program->managedStates()) {
+    stateList.append(TableViewItem()
+      .append(TableViewCell().setText(filename.trimRight(".bst", 1L)))
+    );
   }
   stateList.resizeColumns().doChange();
 }
@@ -143,10 +126,10 @@ auto StateManager::createState(string name) -> void {
 
 auto StateManager::modifyState(string name) -> void {
   if(auto item = stateList.selected()) {
-    string from = {program->statePath(), "managed/", item.cell(0).text(), ".bst"};
-    string to = {program->statePath(), "managed/", name, ".bst"};
+    string from = {"managed/", item.cell(0).text()};
+    string to = {"managed/", name};
     if(from != to) {
-      file::rename(from, to);
+      program->renameState(from, to);
       loadStates();
       for(auto item : stateList.items()) {
         if(item.cell(0).text() == name) item.setSelected();
@@ -161,8 +144,7 @@ auto StateManager::removeStates() -> void {
     if(MessageDialog("Are you sure you want to permanently remove the selected state(s)?")
     .setParent(*toolsWindow).question() == "Yes") {
       for(auto item : batched) {
-        string location = {program->statePath(), "managed/", item.cell(0).text(), ".bst"};
-        file::remove(location);
+        program->removeState({"managed/", item.cell(0).text()});
       }
       loadStates();
     }

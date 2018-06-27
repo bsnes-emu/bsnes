@@ -85,14 +85,19 @@ Presentation::Presentation() {
     settings["View/BlurEmulation"].setValue(blurEmulation.checked());
     emulator->set("Blur Emulation", blurEmulation.checked());
   }).doToggle();
-  colorEmulation.setText("Color Emulation").setChecked(settings["View/ColorEmulation"].boolean()).onToggle([&] {
-    settings["View/ColorEmulation"].setValue(colorEmulation.checked());
-    emulator->set("Color Emulation", colorEmulation.checked());
-  }).doToggle();
   shaderMenu.setText("Shader");
   updateShaders();
+  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Blocking"].boolean()).onToggle([&] {
+    settings["Video/Blocking"].setValue(synchronizeVideo.checked());
+    program->updateVideoBlocking();
+  });
+  synchronizeAudio.setText("Synchronize Audio").setChecked(settings["Audio/Blocking"].boolean()).onToggle([&] {
+    settings["Audio/Blocking"].setValue(synchronizeAudio.checked());
+    program->updateAudioBlocking();
+  });
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());
+    program->updateAudioEffects();
   });
   showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
     settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
@@ -196,6 +201,8 @@ Presentation::Presentation() {
 }
 
 auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
+  return;
+
   int ox = width  - 144;
   int oy = height - 128;
   if(ox >= 0 && oy >= 0) {

@@ -45,16 +45,33 @@ struct Program : Emulator::Platform {
   auto statePath() -> string;
 
   //states.cpp
+  auto managedStates() -> string_vector;
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveRecoveryState() -> bool;
+  auto removeState(string filename) -> bool;
+  auto renameState(string from, string to) -> bool;
+
+  //video.cpp
+  auto updateVideoDriver() -> void;
+  auto updateVideoBlocking() -> void;
+  auto updateVideoShader() -> void;
+  auto updateVideoPalette() -> void;
+
+  //audio.cpp
+  auto updateAudioDriver() -> void;
+  auto updateAudioExclusive() -> void;
+  auto updateAudioDevice() -> void;
+  auto updateAudioBlocking() -> void;
+  auto updateAudioFrequency() -> void;
+  auto updateAudioLatency() -> void;
+  auto updateAudioEffects() -> void;
+
+  //input.cpp
+  auto updateInputDriver() -> void;
+  auto updateInputDevices() -> void;
 
   //utility.cpp
-  auto initializeVideoDriver() -> void;
-  auto initializeAudioDriver() -> void;
-  auto initializeInputDriver() -> void;
-  auto updateVideoShader() -> void;
-  auto connectDevices() -> void;
   auto showMessage(string text) -> void;
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;
