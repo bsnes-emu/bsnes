@@ -18,13 +18,13 @@ static auto CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARA
   }
 
   if(msg == WM_ERASEBKGND) {
-    //background is erased during WM_PAINT to prevent flickering
+    if(auto self = canvas->self()) self->_paint();
     return true;
   }
 
   if(msg == WM_PAINT) {
     if(auto self = canvas->self()) self->_paint();
-    return true;
+    return false;
   }
 
   if(msg == WM_MOUSEMOVE) {
