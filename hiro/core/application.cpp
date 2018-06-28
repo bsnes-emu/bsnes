@@ -10,6 +10,10 @@ auto Application::font() -> Font {
   return state.font;
 }
 
+auto Application::modal() -> bool {
+  return state.modal > 0;
+}
+
 auto Application::name() -> string {
   return state.name;
 }

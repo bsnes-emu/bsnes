@@ -59,11 +59,15 @@ Settings::Settings() {
 
   set("UserInterface/ShowStatusBar", true);
 
-  set("Emulator/Hack/FastPPU", true);
-  set("Emulator/Hack/FastDSP", true);
-  set("Emulator/Hack/FastSuperFX", "100%");
+  set("Emulator/WarnOnUnverifiedGames", false);
   set("Emulator/AutoSaveMemory/Enable", true);
   set("Emulator/AutoSaveMemory/Interval", 30);
+  set("Emulator/AutoSaveStateOnUnload", false);
+  set("Emulator/AutoLoadStateOnLoad", false);
+  set("Emulator/Hack/FastPPU", true);
+  set("Emulator/Hack/FastPPU/NoSpriteLimit", false);
+  set("Emulator/Hack/FastDSP", true);
+  set("Emulator/Hack/FastSuperFX", "100%");
 
   set("Crashed", false);
 }

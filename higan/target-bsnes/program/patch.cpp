@@ -23,9 +23,9 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
         }
       }
     }
-    if(!patch) patch = file::read(locate(path("Patches", location, ".ips")));
+    if(!patch) patch = file::read(path("Patches", location, ".ips"));
   } else {
-    patch = file::read(locate(path("Patches", location, ".ips")));
+    patch = file::read(path("Patches", location, ".ips"));
   }
   if(!patch) return false;
 
@@ -101,9 +101,9 @@ auto Program::applyPatchBPS(vector<uint8_t>& input, string location) -> bool {
         }
       }
     }
-    if(!patch) patch = file::read(locate(path("Patches", location, ".bps")));
+    if(!patch) patch = file::read(path("Patches", location, ".bps"));
   } else {
-    patch = file::read(locate(path("Patches", location, ".bps")));
+    patch = file::read(path("Patches", location, ".bps"));
   }
   if(!patch) return false;
 

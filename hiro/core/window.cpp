@@ -248,6 +248,12 @@ auto mWindow::setGeometry(Geometry geometry) -> type& {
 auto mWindow::setModal(bool modal) -> type& {
   state.modal = modal;
   signal(setModal, modal);
+  if(modal) {
+    Application::state.modal++;
+  } else {
+    Application::state.modal--;
+    assert(Application::state.modal >= 0);
+  }
   return *this;
 }
 

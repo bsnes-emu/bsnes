@@ -7,20 +7,20 @@ Presentation::Presentation() {
   presentation = this;
 
   systemMenu.setText("System");
-  loadGame.setText("Load Game ...").onActivate([&] {
+  loadGame.setIcon(Icon::Action::Open).setText("Load Game ...").onActivate([&] {
     program->load();
   });
-  loadRecentGame.setText("Load Recent Game");
+  loadRecentGame.setIcon(Icon::Action::Open).setText("Load Recent Game");
   updateRecentGames();
-  resetSystem.setText("Reset System").setEnabled(false).onActivate([&] {
+  resetSystem.setIcon(Icon::Action::Refresh).setText("Reset System").setEnabled(false).onActivate([&] {
     program->reset();
   });
-  unloadGame.setText("Unload Game").setEnabled(false).onActivate([&] {
+  unloadGame.setIcon(Icon::Action::Remove).setText("Unload Game").setEnabled(false).onActivate([&] {
     program->unload();
   });
-  controllerPort1.setText("Controller Port 1");
-  controllerPort2.setText("Controller Port 2");
-  expansionPort.setText("Expansion Port");
+  controllerPort1.setIcon(Icon::Device::Joypad).setText("Controller Port 1");
+  controllerPort2.setIcon(Icon::Device::Joypad).setText("Controller Port 2");
+  expansionPort.setIcon(Icon::Device::Storage).setText("Expansion Port");
   for(auto& port : emulator->ports) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
@@ -53,22 +53,31 @@ Presentation::Presentation() {
       devices.objects<MenuRadioItem>()(0).doActivate();
     }
   }
-  quit.setText("Quit").onActivate([&] { program->quit(); });
+  quit.setIcon(Icon::Action::Quit).setText("Quit").onActivate([&] { program->quit(); });
 
   settingsMenu.setText("Settings");
-  viewMenu.setText("View");
-  smallView.setText("Small").onActivate([&] {
+  scaleMenu.setIcon(Icon::Emblem::Image).setText("View");
+  smallestScale.setText("Smallest (240p)").onActivate([&] {
+    settings["View/Size"].setValue("Smallest");
+    resizeWindow();
+  });
+  smallScale.setText("Small (480p)").onActivate([&] {
     settings["View/Size"].setValue("Small");
     resizeWindow();
   });
-  mediumView.setText("Medium").onActivate([&] {
+  mediumScale.setText("Medium (720p)").onActivate([&] {
     settings["View/Size"].setValue("Medium");
     resizeWindow();
   });
-  largeView.setText("Large").onActivate([&] {
+  largeScale.setText("Large (960p)").onActivate([&] {
     settings["View/Size"].setValue("Large");
     resizeWindow();
   });
+  largestScale.setText("Largest (1200p)").onActivate([&] {
+    settings["View/Size"].setValue("Largest");
+    resizeWindow();
+  });
+  outputMenu.setIcon(Icon::Emblem::Image).setText("Output");
   aspectCorrection.setText("Aspect Correction").setChecked(settings["View/AspectCorrection"].boolean()).onToggle([&] {
     settings["View/AspectCorrection"].setValue(aspectCorrection.checked());
     resizeWindow();
@@ -85,7 +94,7 @@ Presentation::Presentation() {
     settings["View/BlurEmulation"].setValue(blurEmulation.checked());
     emulator->set("Blur Emulation", blurEmulation.checked());
   }).doToggle();
-  shaderMenu.setText("Shader");
+  shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
   updateShaders();
   synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Blocking"].boolean()).onToggle([&] {
     settings["Video/Blocking"].setValue(synchronizeVideo.checked());
@@ -108,38 +117,47 @@ Presentation::Presentation() {
     }
     if(visible()) resizeWindow();
   });
-  videoSettings.setText("Video ...").onActivate([&] { settingsWindow->show(0); });
-  audioSettings.setText("Audio ...").onActivate([&] { settingsWindow->show(1); });
-  inputSettings.setText("Input ...").onActivate([&] { settingsWindow->show(2); });
-  hotkeySettings.setText("Hotkeys ...").onActivate([&] { settingsWindow->show(3); });
-  pathSettings.setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
-  advancedSettings.setText("Advanced ...").onActivate([&] { settingsWindow->show(5); });
+  videoSettings.setIcon(Icon::Device::Display).setText("Video ...").onActivate([&] { settingsWindow->show(0); });
+  audioSettings.setIcon(Icon::Device::Speaker).setText("Audio ...").onActivate([&] { settingsWindow->show(1); });
+  inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow->show(2); });
+  hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow->show(3); });
+  pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
+  advancedSettings.setIcon(Icon::Action::Settings).setText("Advanced ...").onActivate([&] { settingsWindow->show(5); });
 
   toolsMenu.setText("Tools").setVisible(false);
-  saveState.setText("Save State");
+  saveState.setIcon(Icon::Action::Save).setText("Save State");
   for(uint index : range(QuickStates)) {
     saveState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
       program->saveState({"quick/slot ", 1 + index});
     }));
   }
-  loadState.setText("Load State");
+  loadState.setIcon(Icon::Media::Play).setText("Load State");
   for(uint index : range(QuickStates)) {
     loadState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
       program->loadState({"quick/slot ", 1 + index});
     }));
   }
   loadState.append(MenuSeparator());
-  loadState.append(MenuItem().setText("Recovery").onActivate([&] {
+  loadState.append(MenuItem().setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
     program->loadState("quick/recovery");
   }));
+  speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
+  speedSlowest.setText("Slowest (50%)").setProperty("multiplier", "2.0").onActivate([&] { program->updateAudioFrequency(); });
+  speedSlow.setText("Slow (75%)").setProperty("multiplier", "1.333").onActivate([&] { program->updateAudioFrequency(); });
+  speedNormal.setText("Normal (100%)").setProperty("multiplier", "1.0").onActivate([&] { program->updateAudioFrequency(); });
+  speedFast.setText("Fast (150%)").setProperty("multiplier", "0.667").onActivate([&] { program->updateAudioFrequency(); });
+  speedFastest.setText("Fastest (200%)").setProperty("multiplier", "0.5").onActivate([&] { program->updateAudioFrequency(); });
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
   });
-  cheatEditor.setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
-  stateManager.setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
+  cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
+  stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
 
   helpMenu.setText("Help");
-  about.setText("About ...").onActivate([&] {
+  documentation.setIcon(Icon::Application::Browser).setText("Documentation ...").onActivate([&] {
+    invoke("https://doc.byuu.org/bsnes/");
+  });
+  about.setIcon(Icon::Prompt::Question).setText("About ...").onActivate([&] {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
@@ -153,15 +171,27 @@ Presentation::Presentation() {
     layout.remove(statusLayout);
   }
 
-  statusLeft.setFont(Font().setBold());
-  statusLeft.setAlignment(0.0);
-  statusLeft.setBackgroundColor({ 32,  32,  32});
-  statusLeft.setForegroundColor({255, 255, 255});
+  auto font = Font().setBold();
+  auto back = Color{ 32,  32,  32};
+  auto fore = Color{255, 255, 255};
 
-  statusRight.setFont(Font().setBold());
+  updateStatusIcon();
+
+  spacerIcon.setBackgroundColor(back).setForegroundColor(fore);
+
+  spacerLeft.setBackgroundColor(back).setForegroundColor(fore);
+
+  statusLeft.setFont(font);
+  statusLeft.setAlignment(0.0);
+  statusLeft.setBackgroundColor(back);
+  statusLeft.setForegroundColor(fore);
+
+  statusRight.setFont(font);
   statusRight.setAlignment(1.0);
-  statusRight.setBackgroundColor({ 32,  32,  32});
-  statusRight.setForegroundColor({255, 255, 255});
+  statusRight.setBackgroundColor(back);
+  statusRight.setForegroundColor(fore);
+
+  spacerRight.setBackgroundColor(back).setForegroundColor(fore);
 
   program->updateStatus();
 
@@ -200,6 +230,19 @@ Presentation::Presentation() {
   #endif
 }
 
+auto Presentation::updateStatusIcon() -> void {
+  image icon;
+  icon.allocate(16, StatusHeight);
+  icon.fill(0xff202020);
+
+  if(emulator->loaded()) {
+    image emblem{program->verified() ? Icon::Emblem::Program : Icon::Emblem::Binary};
+    icon.impose(image::blend::sourceAlpha, 0, (StatusHeight - 16) / 2, emblem, 0, 0, 16, 16);
+  }
+
+  statusIcon.setIcon(icon);
+}
+
 auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
   return;
 
@@ -225,8 +268,8 @@ auto Presentation::clearViewport() -> void {
 
   uint32_t* output;
   uint length;
-  uint width = viewport.geometry().width();
-  uint height = viewport.geometry().height();
+  uint width = 16;
+  uint height = 16;
   if(video->lock(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
@@ -262,8 +305,9 @@ auto Presentation::resizeViewport() -> void {
     viewportHeight = height * multiplier;
   }
 
-  uint paddingWidth = (windowWidth - viewportWidth) / 2;
-  uint paddingHeight = (windowHeight - viewportHeight) / 2;
+  //center viewport within viewportLayout by use of viewportLayout padding
+  uint paddingWidth = windowWidth - viewportWidth;
+  uint paddingHeight = windowHeight - viewportHeight;
   viewportLayout.setPadding({
     paddingWidth / 2, paddingHeight / 2,
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
@@ -278,9 +322,11 @@ auto Presentation::resizeWindow() -> void {
   uint statusHeight = settings["UserInterface/ShowStatusBar"].boolean() ? StatusHeight : 0;
 
   uint multiplier = 2;
-  if(settings["View/Size"].text() == "Small" ) multiplier = 2;
-  if(settings["View/Size"].text() == "Medium") multiplier = 3;
-  if(settings["View/Size"].text() == "Large" ) multiplier = 4;
+  if(settings["View/Size"].text() == "Smallest") multiplier = 1;
+  if(settings["View/Size"].text() == "Small"   ) multiplier = 2;
+  if(settings["View/Size"].text() == "Medium"  ) multiplier = 3;
+  if(settings["View/Size"].text() == "Large"   ) multiplier = 4;
+  if(settings["View/Size"].text() == "Largest" ) multiplier = 5;
 
   setSize({width * multiplier, height * multiplier + statusHeight});
   resizeViewport();
@@ -322,17 +368,20 @@ auto Presentation::updateRecentGames() -> void {
         displayName.append(Location::prefix(part), " + ");
       }
       displayName.trimRight(" + ", 1L);
-      item.setText(displayName).onActivate([=] {
+      item.setIcon(games(0).endsWith("/") ? Icon::Action::Open : Icon::Emblem::File);
+      item.setText(displayName);
+      item.onActivate([=] {
         program->gameQueue = games;
         program->load();
       });
     } else {
-      item.setText("<empty>").setEnabled(false);
+      item.setText("<empty>");
+      item.setEnabled(false);
     }
     loadRecentGame.append(item);
   }
   loadRecentGame.append(MenuSeparator());
-  loadRecentGame.append(MenuItem().setText("Clear List").onActivate([&] {
+  loadRecentGame.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Clear List").onActivate([&] {
     for(auto index : range(RecentGames)) {
       settings({"Game/Recent/", 1 + index}).setValue("");
     }

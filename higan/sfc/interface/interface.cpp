@@ -234,6 +234,7 @@ auto Interface::cheatSet(const string_vector& list) -> void {
 
 auto Interface::cap(const string& name) -> bool {
   if(name == "Fast PPU") return true;
+  if(name == "Fast PPU/No Sprite Limit") return true;
   if(name == "Fast DSP") return true;
   if(name == "Mode") return true;
   if(name == "Blur Emulation") return true;
@@ -250,6 +251,7 @@ auto Interface::get(const string& name) -> any {
   : ""
   };
   if(name == "Fast PPU") return settings.fastPPU;
+  if(name == "Fast PPU/No Sprite Limit") return settings.fastPPUNoSpriteLimit;
   if(name == "Fast DSP") return settings.fastDSP;
   if(name == "Blur Emulation") return settings.blurEmulation;
   if(name == "Color Emulation") return settings.colorEmulation;
@@ -260,6 +262,10 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Fast PPU" && value.is<bool>()) {
     settings.fastPPU = value.get<bool>();
+    return true;
+  }
+  if(name == "Fast PPU/No Sprite Limit" && value.is<bool>()) {
+    settings.fastPPUNoSpriteLimit = value.get<bool>();
     return true;
   }
   if(name == "Fast DSP" && value.is<bool>()) {
@@ -275,7 +281,10 @@ auto Interface::set(const string& name, const any& value) -> bool {
     Emulator::video.setPalette();
     return true;
   }
-  if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;
+  if(name == "Scanline Emulation" && value.is<bool>()) {
+    settings.scanlineEmulation = value.get<bool>();
+    return true;
+  }
   return false;
 }
 

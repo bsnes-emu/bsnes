@@ -23,6 +23,7 @@ struct Program : Emulator::Platform {
   auto save() -> void;
   auto reset() -> void;
   auto unload() -> void;
+  auto verified() const -> bool;
 
   //game-pak.cpp
   auto openPakSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file;
@@ -83,44 +84,39 @@ struct Program : Emulator::Platform {
   auto applyPatchBPS(vector<uint8_t>& data, string location) -> bool;
 
   //hacks.cpp
-  auto applyHacks() -> void;
-  auto applyHackOverclockSuperFX() -> void;
+  auto hackCompatibility() -> void;
+  auto hackPatchMemory(vector<uint8_t>& data) -> void;
+  auto hackOverclockSuperFX() -> void;
 
 public:
-  struct SuperFamicom {
-    string label;
+  struct Game {
+    explicit operator bool() const { return (bool)location; }
+
     string location;
     string manifest;
     Markup::Node document;
+    boolean patched;
+    boolean verified;
+  };
+
+  struct SuperFamicom : Game {
+    string label;
     vector<uint8_t> program;
     vector<uint8_t> data;
     vector<uint8_t> expansion;
     vector<uint8_t> firmware;
-    boolean patched;
   } superFamicom;
 
-  struct GameBoy {
-    string location;
-    string manifest;
-    Markup::Node document;
+  struct GameBoy : Game {
     vector<uint8_t> program;
-    boolean patched;
   } gameBoy;
 
-  struct BSMemory {
-    string location;
-    string manifest;
-    Markup::Node document;
+  struct BSMemory : Game {
     vector<uint8_t> program;
-    boolean patched;
   } bsMemory;
 
-  struct SufamiTurbo {
-    string location;
-    string manifest;
-    Markup::Node document;
+  struct SufamiTurbo : Game {
     vector<uint8_t> program;
-    boolean patched;
   } sufamiTurboA, sufamiTurboB;
 
   string_vector gameQueue;

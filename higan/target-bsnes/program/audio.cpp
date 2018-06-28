@@ -48,7 +48,11 @@ auto Program::updateAudioFrequency() -> void {
     settings["Audio/Frequency"].setValue(audio->availableFrequencies()(0));
   }
   audio->setFrequency(settings["Audio/Frequency"].real());
-  Emulator::audio.setFrequency(settings["Audio/Frequency"].real() + settings["Audio/Skew"].integer());
+  double frequency = settings["Audio/Frequency"].real() + settings["Audio/Skew"].integer();
+  for(auto item : presentation->speedGroup.objects<MenuRadioItem>()) {
+    if(item.checked()) frequency *= item.property("multiplier").real();
+  }
+  Emulator::audio.setFrequency(frequency);
   settingsWindow->audio.updateFrequency();
 }
 

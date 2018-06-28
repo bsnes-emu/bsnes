@@ -10,9 +10,10 @@ struct AboutWindow : Window {
 
 struct Presentation : Window {
   enum : uint { RecentGames = 9, QuickStates = 9 };
-  enum : uint { StatusHeight = 25 };
+  enum : uint { StatusHeight = 24 };
 
   Presentation();
+  auto updateStatusIcon() -> void;
   auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
@@ -37,15 +38,17 @@ struct Presentation : Window {
       MenuSeparator quitSeparator{&systemMenu};
       MenuItem quit{&systemMenu};
     Menu settingsMenu{&menuBar};
-      Menu viewMenu{&settingsMenu};
-        MenuItem smallView{&viewMenu};
-        MenuItem mediumView{&viewMenu};
-        MenuItem largeView{&viewMenu};
-        MenuSeparator viewSeparator{&viewMenu};
-        MenuCheckItem aspectCorrection{&viewMenu};
-        MenuCheckItem overscanCropping{&viewMenu};
-        MenuCheckItem integralScaling{&viewMenu};
-        MenuCheckItem blurEmulation{&viewMenu};
+      Menu scaleMenu{&settingsMenu};
+        MenuItem smallestScale{&scaleMenu};
+        MenuItem smallScale{&scaleMenu};
+        MenuItem mediumScale{&scaleMenu};
+        MenuItem largeScale{&scaleMenu};
+        MenuItem largestScale{&scaleMenu};
+      Menu outputMenu{&settingsMenu};
+        MenuCheckItem aspectCorrection{&outputMenu};
+        MenuCheckItem overscanCropping{&outputMenu};
+        MenuCheckItem integralScaling{&outputMenu};
+        MenuCheckItem blurEmulation{&outputMenu};
       Menu shaderMenu{&settingsMenu};
       MenuSeparator settingsSeparatorA{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
@@ -62,19 +65,33 @@ struct Presentation : Window {
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
       Menu loadState{&toolsMenu};
+      MenuSeparator toolsSeparatorA{&toolsMenu};
+      Menu speedMenu{&toolsMenu};
+        MenuRadioItem speedSlowest{&speedMenu};
+        MenuRadioItem speedSlow{&speedMenu};
+        MenuRadioItem speedNormal{&speedMenu};
+        MenuRadioItem speedFast{&speedMenu};
+        MenuRadioItem speedFastest{&speedMenu};
+        Group speedGroup{&speedSlowest, &speedSlow, &speedNormal, &speedFast, &speedFastest};
       MenuCheckItem pauseEmulation{&toolsMenu};
-      MenuSeparator toolsSeparator{&toolsMenu};
+      MenuSeparator toolsSeparatorB{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
     Menu helpMenu{&menuBar};
+      MenuItem documentation{&helpMenu};
+      MenuSeparator helpSeparator{&helpMenu};
       MenuItem about{&helpMenu};
 
   VerticalLayout layout{this};
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
       Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
     HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
+      Label spacerIcon{&statusLayout, Size{8, ~0}, 0};
+      Canvas statusIcon{&statusLayout, Size{16, ~0}, 0};
+      Label spacerLeft{&statusLayout, Size{4, ~0}, 0};
       Label statusLeft{&statusLayout, Size{~0, ~0}, 0};
       Label statusRight{&statusLayout, Size{80, ~0}, 0};
+      Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 
 extern unique_pointer<AboutWindow> aboutWindow;

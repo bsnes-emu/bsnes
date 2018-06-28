@@ -62,9 +62,36 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
     }
   });
 
+  optionsLabel.setText("Options").setFont(Font().setBold());
+  warnOnUnverifiedGames.setText("Warn when loading games that have not been verified").setChecked(settings["Emulator/WarnOnUnverifiedGames"].boolean()).onToggle([&] {
+    settings["Emulator/WarnOnUnverifiedGames"].setValue(warnOnUnverifiedGames.checked());
+  });
+  autoSaveMemory.setText("Auto-save memory periodically").setChecked(settings["Emulator/AutoSaveMemory/Enable"].boolean()).onToggle([&] {
+    settings["Emulator/AutoSaveMemory/Enable"].setValue(autoSaveMemory.checked());
+  });
+  autoSaveStateOnUnload.setText("Auto-save undo state when unloading games").setChecked(settings["Emulator/AutoSaveStateOnUnload"].boolean()).onToggle([&] {
+    settings["Emulator/AutoSaveStateOnUnload"].setValue(autoSaveStateOnUnload.checked());
+    if(!autoSaveStateOnUnload.checked()) {
+      autoLoadStateOnLoad.setEnabled(false).setChecked(false).doToggle();
+    } else {
+      autoLoadStateOnLoad.setEnabled(true);
+    }
+  }).doToggle();
+  autoLoadStateOnLoad.setText("Auto-resume on load").setChecked(settings["Emulator/AutoLoadStateOnLoad"].boolean()).onToggle([&] {
+    settings["Emulator/AutoLoadStateOnLoad"].setValue(autoLoadStateOnLoad.checked());
+  });
+
   hacksLabel.setText("Emulator Hacks").setFont(Font().setBold());
   fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/Hack/FastPPU"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastPPU"].setValue(fastPPUOption.checked());
+    if(!fastPPUOption.checked()) {
+      noSpriteLimit.setEnabled(false).setChecked(false).doToggle();
+    } else {
+      noSpriteLimit.setEnabled(true);
+    }
+  }).doToggle();
+  noSpriteLimit.setText("No sprite limit").setChecked(settings["Emulator/Hack/FastPPU/NoSpriteLimit"].boolean()).onToggle([&] {
+    settings["Emulator/Hack/FastPPU/NoSpriteLimit"].setValue(noSpriteLimit.checked());
   });
   fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/Hack/FastDSP"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastDSP"].setValue(fastDSPOption.checked());

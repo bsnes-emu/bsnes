@@ -4,7 +4,7 @@ namespace hiro {
 
 auto pLabel::construct() -> void {
   hwnd = CreateWindow(L"hiroLabel", L"",
-    WS_CHILD,
+    WS_CHILD | WS_CLIPSIBLINGS,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   pWidget::_setState();

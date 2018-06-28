@@ -165,8 +165,16 @@ public:
     ComboButton audioDriverOption{&driverLayout, Size{~0, 0}};
     Label inputDriverLabel{&driverLayout, Size{0, 0}};
     ComboButton inputDriverOption{&driverLayout, Size{~0, 0}};
+    Label optionsLabel{&layout, Size{~0, 0}, 2};
+    CheckLabel warnOnUnverifiedGames{&layout, Size{~0, 0}};
+    CheckLabel autoSaveMemory{&layout, Size{~0, 0}};
+    HorizontalLayout autoStateLayout{&layout, Size{~0, 0}};
+      CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
+      CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
     Label hacksLabel{&layout, Size{~0, 0}, 2};
-    CheckLabel fastPPUOption{&layout, Size{~0, 0}};
+    HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};
+      CheckLabel fastPPUOption{&fastPPULayout, Size{0, 0}};
+      CheckLabel noSpriteLimit{&fastPPULayout, Size{0, 0}};
     CheckLabel fastDSPOption{&layout, Size{~0, 0}};
     HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
       Label superFXLabel{&superFXLayout, Size{0, 0}};

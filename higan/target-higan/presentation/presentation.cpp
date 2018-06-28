@@ -206,6 +206,8 @@ auto Presentation::updateEmulator() -> void {
 }
 
 auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
+  return;
+
   int ox = width  - 128;
   int oy = height - 128;
   if(ox >= 0 && oy >= 0) {
@@ -228,8 +230,8 @@ auto Presentation::clearViewport() -> void {
 
   uint32_t* output;
   uint length = 0;
-  uint width = viewport.geometry().width();
-  uint height = viewport.geometry().height();
+  uint width = 16;
+  uint height = 16;
   if(video->lock(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);

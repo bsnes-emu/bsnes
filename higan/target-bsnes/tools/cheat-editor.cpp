@@ -116,8 +116,11 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
     editButton.setEnabled(batched.size() == 1);
     removeButton.setEnabled(batched.size() >= 1);
   });
-  cheatList.onToggle([&](TableViewCell) {
-    synchronizeCodes();
+  cheatList.onToggle([&](TableViewCell cell) {
+    if(auto item = cell->parentTableViewItem()) {
+      cheats[item->offset()].enable = cell.checked();
+      synchronizeCodes();
+    }
   });
   findCheatsButton.setText("Find Cheats ...").onActivate([&] {
     cheatDatabase->findCheats();

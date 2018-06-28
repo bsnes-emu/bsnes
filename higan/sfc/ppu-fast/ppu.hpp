@@ -259,6 +259,8 @@ public:
   //[unserialized]
   uint32* output;
   array<uint8*[3]> tilecache;  //bitplane -> bitmap tiledata
+  uint ItemLimit;
+  uint TileLimit;
 
   struct Line {
     //line.cpp
@@ -276,7 +278,6 @@ public:
 
     //mode7.cpp
     auto renderMode7(PPU::IO::Background&, uint source) -> void;
-    auto renderMode7Hires(PPU::IO::Background&, uint source) -> void;
 
     //object.cpp
     auto renderObject(PPU::IO::Object&) -> void;
@@ -291,8 +292,8 @@ public:
     IO io;
     array<uint15[256]> cgram;
 
-    array<ObjectItem[32]> items;
-    array<ObjectTile[34]> tiles;
+    array<ObjectItem[128]> items;  //32 on real hardware
+    array<ObjectTile[128]> tiles;  //34 on real hardware; 1024 max (128 * 64-width tiles)
 
     array<Pixel[256]> above;
     array<Pixel[256]> below;

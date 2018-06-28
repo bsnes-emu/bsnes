@@ -374,6 +374,7 @@ struct Application {
 
   static auto doMain() -> void;
   static auto font() -> Font;
+  static auto modal() -> bool;
   static auto name() -> string;
   static auto onMain(const function<void ()>& callback = {}) -> void;
   static auto run() -> void;
@@ -408,6 +409,7 @@ struct Application {
 //private:
   struct State {
     Font font;
+    int modal = 0;
     string name;
     function<void ()> onMain;
     bool quit = false;

@@ -5,6 +5,7 @@
 #include <icarus/heuristics/bs-memory.cpp>
 #include <icarus/heuristics/sufami-turbo.cpp>
 
+//ROM data is held in memory to support compressed archives, soft-patching, and game hacks
 auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
   vfs::shared::file result;
 
@@ -25,6 +26,12 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   if(id == 1) {  //Super Famicom
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(superFamicom.manifest.data<uint8_t>(), superFamicom.manifest.size());
+    } else if(name == "program.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(superFamicom.program.data(), superFamicom.program.size());
+    } else if(name == "data.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(superFamicom.data.data(), superFamicom.data.size());
+    } else if(name == "expansion.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(superFamicom.expansion.data(), superFamicom.expansion.size());
     } else if(superFamicom.location.endsWith("/")) {
       result = openPakSuperFamicom(name, mode);
     } else {
@@ -35,6 +42,8 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   if(id == 2) {  //Game Boy
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(gameBoy.manifest.data<uint8_t>(), gameBoy.manifest.size());
+    } else if(name == "program.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(gameBoy.program.data(), gameBoy.program.size());
     } else if(gameBoy.location.endsWith("/")) {
       result = openPakGameBoy(name, mode);
     } else {
@@ -45,6 +54,11 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   if(id == 3) {  //BS Memory
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(bsMemory.manifest.data<uint8_t>(), bsMemory.manifest.size());
+    } else if(name == "program.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
+    } else if(name == "program.flash") {
+      //writes are not flushed to disk in bsnes
+      result = vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
     } else if(bsMemory.location.endsWith("/")) {
       result = openPakBSMemory(name, mode);
     } else {
@@ -55,6 +69,8 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   if(id == 4) {  //Sufami Turbo - Slot A
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(sufamiTurboA.manifest.data<uint8_t>(), sufamiTurboA.manifest.size());
+    } else if(name == "program.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(sufamiTurboA.program.data(), sufamiTurboA.program.size());
     } else if(sufamiTurboA.location.endsWith("/")) {
       result = openPakSufamiTurboA(name, mode);
     } else {
@@ -65,6 +81,8 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   if(id == 5) {  //Sufami Turbo - Slot B
     if(name == "manifest.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(sufamiTurboB.manifest.data<uint8_t>(), sufamiTurboB.manifest.size());
+    } else if(name == "program.rom" && mode == vfs::file::mode::read) {
+      result = vfs::memory::file::open(sufamiTurboB.program.data(), sufamiTurboB.program.size());
     } else if(sufamiTurboB.location.endsWith("/")) {
       result = openPakSufamiTurboB(name, mode);
     } else {
@@ -73,7 +91,12 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   }
 
   if(!result && required) {
-    MessageDialog({"Error: missing required data: ", name}).setParent(*presentation).error();
+    if(MessageDialog({
+      "Error: missing required data: ", name, "\n\n",
+      "Would you like to view the online documentation for more information?"
+    }).setParent(*presentation).error({"Yes", "No"}) == "Yes") {
+      presentation->documentation.doActivate();
+    }
   }
 
   return result;

@@ -48,6 +48,7 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   }
 
   if(auto node = board["memory(type=ROM,content=Program)"]) loadROM(node);
+  if(auto node = board["memory(type=ROM,content=Expansion)"]) loadROM(node);  //todo: handle this better
   if(auto node = board["memory(type=RAM,content=Save)"]) loadRAM(node);
   if(auto node = board["processor(identifier=ICD)"]) loadICD(node);
   if(auto node = board["processor(identifier=MCC)"]) loadMCC(node);

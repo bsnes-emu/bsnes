@@ -8,8 +8,8 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
   uint itemCount = 0;
   uint tileCount = 0;
-  for(auto& item : items) item.valid = false;
-  for(auto& tile : tiles) tile.valid = false;
+  for(auto n : range(ppu.ItemLimit)) items[n].valid = false;
+  for(auto n : range(ppu.TileLimit)) tiles[n].valid = false;
 
   for(auto n : range(128)) {
     ObjectItem item{true, self.first + n};
@@ -33,12 +33,12 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
     if((y >= object.y && y < object.y + height)
     || (object.y + height >= 256 && y < (object.y + height & 255))
     ) {
-      if(itemCount++ >= 32) break;
+      if(itemCount++ >= ppu.ItemLimit) break;
       items[itemCount - 1] = item;
     }
   }
 
-  for(int n = 31; n >= 0; n--) {
+  for(int n : rrange(ppu.ItemLimit)) {
     const auto& item = items[n];
     if(!item.valid) continue;
 
@@ -85,18 +85,18 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
       uint address = tiledataAddress + ((characterY + (characterX + mirrorX & 15)) << 4);
       tile.number = address >> 4;
 
-      if(tileCount++ >= 34) break;
+      if(tileCount++ >= ppu.TileLimit) break;
       tiles[tileCount - 1] = tile;
     }
   }
 
-  ppu.io.obj.rangeOver |= itemCount > 32;
-  ppu.io.obj.timeOver  |= tileCount > 34;
+  ppu.io.obj.rangeOver |= itemCount > ppu.ItemLimit;
+  ppu.io.obj.timeOver  |= tileCount > ppu.TileLimit;
 
   uint8 palette[256];
   uint8 priority[256];
 
-  for(uint n : range(34)) {
+  for(uint n : range(ppu.TileLimit)) {
     const auto& tile = tiles[n];
     if(!tile.valid) continue;
 

@@ -124,6 +124,9 @@ auto PPU::power(bool reset) -> void {
   io = {};
   updateVideoMode();
 
+  ItemLimit = !settings.fastPPUNoSpriteLimit ? 32 : 128;
+  TileLimit = !settings.fastPPUNoSpriteLimit ? 34 : 128;
+
   Line::start = 0;
   Line::count = 0;
 }

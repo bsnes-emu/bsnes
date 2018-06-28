@@ -8,7 +8,7 @@ auto Program::managedStates() -> string_vector {
     if(input.open(statePath())) {
       string_vector filenames;
       for(auto& file : input.file) {
-        if(file.name.match("managed/*.bst")) filenames.append(file.name);
+        if(file.name.match("managed/*.bst")) filenames.append(file.name.trimLeft("managed/", 1L));
       }
       filenames.isort();
       return filenames;
@@ -75,6 +75,7 @@ auto Program::saveState(string filename) -> bool {
         states.append({file.name, input.extract(file)});
       }
     }
+    input.close();
 
     Encode::ZIP output{statePath()};
     for(auto& state : states) {
@@ -114,6 +115,7 @@ auto Program::removeState(string filename) -> bool {
         states.append({file.name, input.extract(file)});
       }
     }
+    input.close();
 
     if(states) {
       Encode::ZIP output{statePath()};
@@ -151,6 +153,7 @@ auto Program::renameState(string from, string to) -> bool {
         states.append({file.name, input.extract(file)});
       }
     }
+    input.close();
 
     Encode::ZIP output{statePath()};
     for(auto& state : states) {

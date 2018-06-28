@@ -7,17 +7,31 @@ auto Program::load() -> void {
     Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
       gameQueue = {};
+      if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
+        //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
+        //once MessageDialog functions, add an "Always" option
+        if(MessageWindow(
+          "Warning: this game image is unverified. Running it *may* be a security risk.\n\n"
+          "Do you wish to run the game anyway?"
+        ).setParent(*presentation).question() == MessageWindow::Response::No) {
+          emulator->unload();
+          return showMessage("Game loading cancelled");
+        }
+      }
       updateInputDevices();
-      applyHacks();
+      hackCompatibility();
       emulator->power();
-      updateVideoPalette();
-      updateAudioEffects();
+      if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {
+        program->loadState("quick/recovery");
+      }
       showMessage(!appliedPatch() ? "Game loaded" : "Game loaded and patch applied");
       presentation->setTitle(emulator->title());
       presentation->resetSystem.setEnabled(true);
       presentation->unloadGame.setEnabled(true);
       presentation->toolsMenu.setVisible(true);
+      presentation->speedNormal.setChecked();
       presentation->pauseEmulation.setChecked(false);
+      presentation->updateStatusIcon();
       presentation->resizeViewport();
       toolsWindow->cheatEditor.loadCheats();
       toolsWindow->stateManager.loadStates();
@@ -28,6 +42,10 @@ auto Program::load() -> void {
       if(auto location = sufamiTurboA.location) locations.append("|", location);
       if(auto location = sufamiTurboB.location) locations.append("|", location);
       presentation->addRecentGame(locations);
+
+      updateVideoPalette();
+      updateAudioEffects();
+      updateAudioFrequency();
     }
 
     break;
@@ -81,11 +99,13 @@ auto Program::loadSuperFamicom(string location) -> void {
   if(auto document = BML::unserialize(string::read(locate("database/Super Famicom.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      superFamicom.verified = true;
     }
   }
   superFamicom.label = heuristics.label();
   superFamicom.manifest = manifest ? manifest : heuristics.manifest();
-  applyHackOverclockSuperFX();
+  hackPatchMemory(rom);
+  hackOverclockSuperFX();
   superFamicom.document = BML::unserialize(superFamicom.manifest);
   superFamicom.location = location;
 
@@ -130,11 +150,13 @@ auto Program::loadGameBoy(string location) -> void {
   if(auto document = BML::unserialize(string::read(locate("database/Game Boy.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      gameBoy.verified = true;
     }
   }
   if(auto document = BML::unserialize(string::read(locate("database/Game Boy Color.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      gameBoy.verified = true;
     }
   }
   gameBoy.manifest = manifest ? manifest : heuristics.manifest();
@@ -163,6 +185,7 @@ auto Program::loadBSMemory(string location) -> void {
   if(auto document = BML::unserialize(string::read(locate("database/BS Memory.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      bsMemory.verified = true;
     }
   }
   bsMemory.manifest = manifest ? manifest : heuristics.manifest();
@@ -190,6 +213,7 @@ auto Program::loadSufamiTurboA(string location) -> void {
   if(auto document = BML::unserialize(string::read(locate("database/Sufami Turbo.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      sufamiTurboA.verified = true;
     }
   }
   sufamiTurboA.manifest = manifest ? manifest : heuristics.manifest();
@@ -217,6 +241,7 @@ auto Program::loadSufamiTurboB(string location) -> void {
   if(auto document = BML::unserialize(string::read(locate("database/Sufami Turbo.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      sufamiTurboB.verified = true;
     }
   }
   sufamiTurboB.manifest = manifest ? manifest : heuristics.manifest();
@@ -233,7 +258,7 @@ auto Program::save() -> void {
 
 auto Program::reset() -> void {
   if(!emulator->loaded()) return;
-  applyHacks();
+  hackCompatibility();
   emulator->reset();
   showMessage("Game reset");
 }
@@ -242,7 +267,9 @@ auto Program::unload() -> void {
   if(!emulator->loaded()) return;
   toolsWindow->cheatEditor.saveCheats();
   toolsWindow->setVisible(false);
-  saveRecoveryState();
+  if(settingsWindow->advanced.autoSaveStateOnUnload.checked()) {
+    saveRecoveryState();
+  }
   emulator->unload();
   showMessage("Game unloaded");
   superFamicom = {};
@@ -254,5 +281,17 @@ auto Program::unload() -> void {
   presentation->resetSystem.setEnabled(false);
   presentation->unloadGame.setEnabled(false);
   presentation->toolsMenu.setVisible(false);
+  presentation->updateStatusIcon();
   presentation->clearViewport();
+}
+
+//a game is considered verified if the game plus its slot(s) are found in the games database
+auto Program::verified() const -> bool {
+  if(!emulator->loaded()) return false;
+  if(superFamicom && !superFamicom.verified) return false;
+  if(gameBoy && !gameBoy.verified) return false;
+  if(bsMemory && !bsMemory.verified) return false;
+  if(sufamiTurboA && !sufamiTurboA.verified) return false;
+  if(sufamiTurboB && !sufamiTurboB.verified) return false;
+  return true;
 }

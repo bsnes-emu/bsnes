@@ -60,6 +60,8 @@ Program::Program(string_vector arguments) {
 }
 
 auto Program::main() -> void {
+  if(Application::modal()) return;
+
   updateStatus();
   video->poll();
   inputManager->poll();
@@ -75,7 +77,7 @@ auto Program::main() -> void {
   }
 
   emulator->run();
-  if(settings["Emulator/AutoSaveMemory/Enable"].boolean()) {
+  if(settingsWindow->advanced.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();
     if(currentTime - autoSaveTime >= settings["Emulator/AutoSaveMemory/Interval"].natural()) {
       autoSaveTime = currentTime;

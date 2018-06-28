@@ -152,8 +152,8 @@ auto Program::openRomBSMemory(string name, vfs::file::mode mode) -> vfs::shared:
     return vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
   }
 
-  if(name == "program.flash" && mode == vfs::file::mode::read) {
-    //write mode is not supported for ROM mode
+  if(name == "program.flash") {
+    //writes are not flushed to disk in bsnes
     return vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
   }
 

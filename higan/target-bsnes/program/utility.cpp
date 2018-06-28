@@ -12,7 +12,6 @@ auto Program::updateStatus() -> void {
   if(chrono::timestamp() - statusTime <= 2) {
     message = statusMessage;
   }
-  message.prepend("  ");
   if(message != presentation->statusLeft.text()) {
     presentation->statusLeft.setText(message);
   }
@@ -27,7 +26,6 @@ auto Program::updateStatus() -> void {
   } else {
     frameRate = statusFrameRate;
   }
-  frameRate.append("  ");
   if(frameRate != presentation->statusRight.text()) {
     presentation->statusRight.setText(frameRate);
   }
