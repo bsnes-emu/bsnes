@@ -443,11 +443,45 @@ void GB_set_user_data(GB_gameboy_t *gb, void *data)
     gb->user_data = data;
 }
 
+static void reset_ram(GB_gameboy_t *gb)
+{
+    switch (gb->model) {
+        case GB_MODEL_CGB_E:
+        default:
+            for (unsigned i = 0; i < gb->ram_size; i++) {
+                gb->ram[i] = (random() & 0xFF);
+            }
+            break;
+            
+        case GB_MODEL_DMG_B:
+            for (unsigned i = 0; i < gb->ram_size; i++) {
+                gb->ram[i] = (random() & 0xFF);
+                if (i & 0x100) {
+                    gb->ram[i] &= random();
+                }
+                else {
+                    gb->ram[i] |= random();
+                }
+            }
+            break;
+#if 0
+        /* Not emulated yet, for documentation only*/
+        case GB_MODEL_SGB2:
+            for (unsigned i = 0; i < gb->ram_size; i++) {
+                gb->ram[i] = 0x55;
+                gb->ram[i] ^= random() & random() & random();
+            }
+            break;
+#endif
+    }
+}
+
 void GB_reset(GB_gameboy_t *gb)
 {
     uint32_t mbc_ram_size = gb->mbc_ram_size;
-    bool cgb = GB_is_cgb(gb);
+    GB_model_t model = gb->model;
     memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
+    gb->model = model;
     gb->version = GB_STRUCT_VERSION;
     
     gb->mbc_rom_bank = 1;
@@ -455,18 +489,14 @@ void GB_reset(GB_gameboy_t *gb)
     gb->cgb_ram_bank = 1;
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->mbc_ram_size = mbc_ram_size;
-    if (cgb) {
+    if (GB_is_cgb(gb)) {
         gb->ram_size = 0x2000 * 8;
-        memset(gb->ram, 0, gb->ram_size);
         gb->vram_size = 0x2000 * 2;
         memset(gb->vram, 0, gb->vram_size);
-        
-        gb->model = GB_MODEL_CGB_E;
         gb->cgb_mode = true;
     }
     else {
         gb->ram_size = 0x2000;
-        memset(gb->ram, 0, gb->ram_size);
         gb->vram_size = 0x2000;
         memset(gb->vram, 0, gb->vram_size);
         
@@ -481,6 +511,8 @@ void GB_reset(GB_gameboy_t *gb)
                 gb->rgb_encode_callback(gb, 0, 0, 0);
         }
     }
+    reset_ram(gb);
+    
     /* The serial interrupt always occur on the 0xF7th cycle of every 0x100 cycle since boot. */
     gb->serial_cycles = 0x100-0xF7;
     gb->io_registers[GB_IO_SC] = 0x7E;
