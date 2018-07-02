@@ -27,6 +27,10 @@ auto InputManager::bindHotkeys() -> void {
     program->showMessage({"Selected state slot ", stateSlot});
   }));
 
+  hotkeys.append(InputHotkey("Capture Screenshot").onPress([] {
+    presentation->captureScreenshot.doActivate();
+  }));
+
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
     video->setBlocking(false);
     audio->setBlocking(false);

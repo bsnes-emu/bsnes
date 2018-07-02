@@ -76,6 +76,7 @@ auto PPU::scanline() -> void {
 
   if(vcounter() > 0 && vcounter() < vdisp()) {
     latch.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
+    latch.hires |= io.bgMode == 7 && settings.fastPPUHiresMode7;
   }
 
   if(vcounter() == vdisp() && !io.displayDisable) {
@@ -103,6 +104,7 @@ auto PPU::load(Markup::Node node) -> bool {
 }
 
 auto PPU::power(bool reset) -> void {
+//settings.fastPPUHiresMode7=false;
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint32>(output, 512 * 480);

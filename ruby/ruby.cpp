@@ -18,12 +18,10 @@ using namespace ruby;
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
 #elif defined(DISPLAY_QUARTZ)
-  #define Boolean CocoaBoolean
-  #define decimal CocoaDecimal
+  #include <nall/macos/guard.hpp>
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
-  #undef Boolean
-  #undef decimal
+  #include <nall/macos/guard.hpp>
 #elif defined(DISPLAY_WINDOWS)
   #include <windows.h>
 #endif

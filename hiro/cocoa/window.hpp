@@ -5,7 +5,7 @@
   hiro::mWindow* window;
   NSMenu* menuBar;
   NSMenu* rootMenu;
-  NSMenuItem* disableGatekeeperAutoRearm;
+  NSMenuItem* disableGatekeeper;
   NSTextField* statusBar;
 }
 -(id) initWith:(hiro::mWindow&)window;

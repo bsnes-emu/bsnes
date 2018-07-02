@@ -3,14 +3,14 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Input");
 
   layout.setMargin(5);
-  defocusLabel.setText("When Focus is Lost:");
-  pauseEmulation.setText("Pause Emulation").onActivate([&] {
+  defocusLabel.setText("When focus is lost:");
+  pauseEmulation.setText("Pause emulation").onActivate([&] {
     settings["Input/Defocus"].setValue("Pause");
   });
-  blockInput.setText("Block Input").onActivate([&] {
+  blockInput.setText("Block input").onActivate([&] {
     settings["Input/Defocus"].setValue("Block");
   });
-  allowInput.setText("Allow Input").onActivate([&] {
+  allowInput.setText("Allow input").onActivate([&] {
     settings["Input/Defocus"].setValue("Allow");
   });
   if(settings["Input/Defocus"].text() == "Pause") pauseEmulation.setChecked();

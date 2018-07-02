@@ -295,8 +295,8 @@ public:
     array<ObjectItem[128]> items;  //32 on real hardware
     array<ObjectTile[128]> tiles;  //34 on real hardware; 1024 max (128 * 64-width tiles)
 
-    array<Pixel[256]> above;
-    array<Pixel[256]> below;
+    array<Pixel[512]> above;  //256 on real hardware
+    array<Pixel[512]> below;  //512 for hires mode 7
 
     array<bool[256]> windowAbove;
     array<bool[256]> windowBelow;

@@ -26,7 +26,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
 
   effectsLabel.setFont(Font().setBold()).setText("Effects");
-  skewLabel.setText("Skew:");
+  skewLabel.setAlignment(1.0).setText("Skew:");
   skewValue.setAlignment(0.5);
   skewSlider.setLength(10001).setPosition(settings["Audio/Skew"].integer() + 5000).onChange([&] {
     string value = {skewSlider.position() > 5000 ? "+" : "", (int)skewSlider.position() - 5000};
@@ -34,7 +34,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     skewValue.setText(value);
     program->updateAudioFrequency();
   }).doChange();
-  volumeLabel.setText("Volume:");
+  volumeLabel.setAlignment(1.0).setText("Volume:");
   volumeValue.setAlignment(0.5);
   volumeSlider.setLength(201).setPosition(settings["Audio/Volume"].natural()).onChange([&] {
     string value = {volumeSlider.position(), "%"};
@@ -42,7 +42,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     volumeValue.setText(value);
     program->updateAudioEffects();
   }).doChange();
-  balanceLabel.setText("Balance:");
+  balanceLabel.setAlignment(1.0).setText("Balance:");
   balanceValue.setAlignment(0.5);
   balanceSlider.setLength(101).setPosition(settings["Audio/Balance"].natural()).onChange([&] {
     string value = {balanceSlider.position(), "%"};

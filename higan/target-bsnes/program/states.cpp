@@ -27,7 +27,7 @@ auto Program::loadState(string filename) -> bool {
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
     if(!file::exists(location)) return showMessage({"[", prefix, "] not found"}), false;
-    if(filename != "quick/recovery") saveRecoveryState();
+    if(filename != "quick/undo") saveUndoState();
     memory = file::read(location);
   } else {
     string location = {filename, ".bst"};
@@ -87,12 +87,13 @@ auto Program::saveState(string filename) -> bool {
   return showMessage({"Saved [", prefix, "]"}), true;
 }
 
-auto Program::saveRecoveryState() -> bool {
+auto Program::saveUndoState() -> bool {
   auto statusTime = this->statusTime;
   auto statusMessage = this->statusMessage;
-  saveState("quick/recovery");
+  auto result = saveState("quick/undo");
   this->statusTime = statusTime;
   this->statusMessage = statusMessage;
+  return result;
 }
 
 auto Program::removeState(string filename) -> bool {

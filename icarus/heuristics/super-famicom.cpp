@@ -128,8 +128,10 @@ auto SuperFamicom::manifest() const -> string {
     output.append(Memory{}.type("RAM").size(0x800).content("Internal").isVolatile().text());
   }
 
-  if(board.right() == "EPSONRTC" || board.right() == "SHARPRTC") {
-    output.append(Memory{}.type("RTC").size(0x10).content("Time").text());
+  if(board.right() == "EPSONRTC") {
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").manufacturer("Epson").text());
+  } else if(board.right() == "SHARPRTC") {
+    output.append(Memory{}.type("RTC").size(0x10).content("Time").manufacturer("Sharp").text());
   }
 
   return output;
@@ -418,15 +420,18 @@ auto SuperFamicom::romSize() const -> uint {
 
 auto SuperFamicom::programRomSize() const -> uint {
   if(board().beginsWith("SPC7110-")) return 0x100000;
+  if(board().beginsWith("EXSPC7110-")) return 0x100000;
   return romSize();
 }
 
 auto SuperFamicom::dataRomSize() const -> uint {
   if(board().beginsWith("SPC7110-")) return romSize() - 0x100000;
+  if(board().beginsWith("EXSPC7110-")) return 0x500000;
   return 0;
 }
 
 auto SuperFamicom::expansionRomSize() const -> uint {
+  if(board().beginsWith("EXSPC7110-")) return 0x100000;
   return 0;
 }
 

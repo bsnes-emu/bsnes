@@ -123,30 +123,35 @@ struct PathSettings : TabFrameItem {
 public:
   VerticalLayout layout{this};
     HorizontalLayout gamesLayout{&layout, Size{~0, 0}};
-      Label gamesLabel{&gamesLayout, Size{55, 0}};
+      Label gamesLabel{&gamesLayout, Size{80, 0}};
       LineEdit gamesPath{&gamesLayout, Size{~0, 0}};
       Button gamesAssign{&gamesLayout, Size{80, 0}};
       Button gamesReset{&gamesLayout, Size{80, 0}};
     HorizontalLayout patchesLayout{&layout, Size{~0, 0}};
-      Label patchesLabel{&patchesLayout, Size{55, 0}};
+      Label patchesLabel{&patchesLayout, Size{80, 0}};
       LineEdit patchesPath{&patchesLayout, Size{~0, 0}};
       Button patchesAssign{&patchesLayout, Size{80, 0}};
       Button patchesReset{&patchesLayout, Size{80, 0}};
     HorizontalLayout savesLayout{&layout, Size{~0, 0}};
-      Label savesLabel{&savesLayout, Size{55, 0}};
+      Label savesLabel{&savesLayout, Size{80, 0}};
       LineEdit savesPath{&savesLayout, Size{~0, 0}};
       Button savesAssign{&savesLayout, Size{80, 0}};
       Button savesReset{&savesLayout, Size{80, 0}};
     HorizontalLayout cheatsLayout{&layout, Size{~0, 0}};
-      Label cheatsLabel{&cheatsLayout, Size{55, 0}};
+      Label cheatsLabel{&cheatsLayout, Size{80, 0}};
       LineEdit cheatsPath{&cheatsLayout, Size{~0, 0}};
       Button cheatsAssign{&cheatsLayout, Size{80, 0}};
       Button cheatsReset{&cheatsLayout, Size{80, 0}};
     HorizontalLayout statesLayout{&layout, Size{~0, 0}};
-      Label statesLabel{&statesLayout, Size{55, 0}};
+      Label statesLabel{&statesLayout, Size{80, 0}};
       LineEdit statesPath{&statesLayout, Size{~0, 0}};
       Button statesAssign{&statesLayout, Size{80, 0}};
       Button statesReset{&statesLayout, Size{80, 0}};
+    HorizontalLayout screenshotsLayout{&layout, Size{~0, 0}};
+      Label screenshotsLabel{&screenshotsLayout, Size{80, 0}};
+      LineEdit screenshotsPath{&screenshotsLayout, Size{~0, 0}};
+      Button screenshotsAssign{&screenshotsLayout, Size{80, 0}};
+      Button screenshotsReset{&screenshotsLayout, Size{80, 0}};
 };
 
 struct AdvancedSettings : TabFrameItem {
@@ -175,6 +180,7 @@ public:
     HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};
       CheckLabel fastPPUOption{&fastPPULayout, Size{0, 0}};
       CheckLabel noSpriteLimit{&fastPPULayout, Size{0, 0}};
+      CheckLabel hiresMode7{&fastPPULayout, Size{0, 0}};
     CheckLabel fastDSPOption{&layout, Size{~0, 0}};
     HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
       Label superFXLabel{&superFXLayout, Size{0, 0}};

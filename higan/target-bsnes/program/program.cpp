@@ -67,10 +67,7 @@ auto Program::main() -> void {
   inputManager->poll();
   inputManager->pollHotkeys();
 
-  if(!emulator->loaded()
-  || presentation->pauseEmulation.checked()
-  || (!focused() && settingsWindow->input.pauseEmulation.checked())
-  ) {
+  if(paused()) {
     audio->clear();
     usleep(20 * 1000);
     return;

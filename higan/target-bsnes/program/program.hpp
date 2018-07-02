@@ -15,11 +15,11 @@ struct Program : Emulator::Platform {
   //game.cpp
   auto load() -> void;
   auto loadFile(string location) -> vector<uint8_t>;
-  auto loadSuperFamicom(string location) -> void;
-  auto loadGameBoy(string location) -> void;
-  auto loadBSMemory(string location) -> void;
-  auto loadSufamiTurboA(string location) -> void;
-  auto loadSufamiTurboB(string location) -> void;
+  auto loadSuperFamicom(string location) -> bool;
+  auto loadGameBoy(string location) -> bool;
+  auto loadBSMemory(string location) -> bool;
+  auto loadSufamiTurboA(string location) -> bool;
+  auto loadSufamiTurboB(string location) -> bool;
   auto save() -> void;
   auto reset() -> void;
   auto unload() -> void;
@@ -44,12 +44,13 @@ struct Program : Emulator::Platform {
   auto gamePath() -> string;
   auto cheatPath() -> string;
   auto statePath() -> string;
+  auto screenshotPath() -> string;
 
   //states.cpp
   auto managedStates() -> string_vector;
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
-  auto saveRecoveryState() -> bool;
+  auto saveUndoState() -> bool;
   auto removeState(string filename) -> bool;
   auto renameState(string from, string to) -> bool;
 
@@ -76,6 +77,7 @@ struct Program : Emulator::Platform {
   auto showMessage(string text) -> void;
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;
+  auto paused() -> bool;
   auto focused() -> bool;
 
   //patch.cpp
@@ -120,6 +122,7 @@ public:
   } sufamiTurboA, sufamiTurboB;
 
   string_vector gameQueue;
+  boolean captureScreenshot;
 
   uint64 autoSaveTime;
 

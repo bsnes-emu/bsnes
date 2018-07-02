@@ -15,7 +15,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "Do you wish to proceed with the video driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
       program->save();
-      program->saveRecoveryState();
+      program->saveUndoState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->updateVideoDriver();
@@ -34,7 +34,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "Do you wish to proceed with the audio driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
       program->save();
-      program->saveRecoveryState();
+      program->saveUndoState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->updateAudioDriver();
@@ -53,7 +53,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
       "Do you wish to proceed with the input driver change now anyway?"
     ).setParent(*settingsWindow).question() == "Yes") {
       program->save();
-      program->saveRecoveryState();
+      program->saveUndoState();
       settings["Crashed"].setValue(true);
       settings.save();
       program->updateInputDriver();
@@ -86,23 +86,29 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Emulator/Hack/FastPPU"].setValue(fastPPUOption.checked());
     if(!fastPPUOption.checked()) {
       noSpriteLimit.setEnabled(false).setChecked(false).doToggle();
+      hiresMode7.setEnabled(false).setChecked(false).doToggle();
     } else {
       noSpriteLimit.setEnabled(true);
+      hiresMode7.setEnabled(true);
     }
   }).doToggle();
   noSpriteLimit.setText("No sprite limit").setChecked(settings["Emulator/Hack/FastPPU/NoSpriteLimit"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastPPU/NoSpriteLimit"].setValue(noSpriteLimit.checked());
   });
+  hiresMode7.setText("Hires mode 7").setChecked(settings["Emulator/Hack/FastPPU/HiresMode7"].boolean()).onToggle([&] {
+    settings["Emulator/Hack/FastPPU/HiresMode7"].setValue(hiresMode7.checked());
+    emulator->set("Fast PPU/Hires Mode 7", hiresMode7.checked());
+  });
   fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/Hack/FastDSP"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastDSP"].setValue(fastDSPOption.checked());
   });
-  superFXLabel.setText("SuperFX Clock Speed:");
+  superFXLabel.setText("SuperFX clock speed:");
   superFXValue.setAlignment(0.5);
   superFXClock.setLength(71).setPosition((settings["Emulator/Hack/FastSuperFX"].natural() - 100) / 10).onChange([&] {
     settings["Emulator/Hack/FastSuperFX"].setValue({superFXClock.position() * 10 + 100, "%"});
     superFXValue.setText(settings["Emulator/Hack/FastSuperFX"].text());
   }).doChange();
-  hacksNote.setForegroundColor({224, 0, 0}).setText("Note: hack setting changes do not take effect until after reloading games.");
+  hacksNote.setForegroundColor({224, 0, 0}).setText("Note: some hack setting changes do not take effect until after reloading games.");
 }
 
 auto AdvancedSettings::updateVideoDriver() -> void {

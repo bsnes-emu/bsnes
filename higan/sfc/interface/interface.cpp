@@ -235,6 +235,7 @@ auto Interface::cheatSet(const string_vector& list) -> void {
 auto Interface::cap(const string& name) -> bool {
   if(name == "Fast PPU") return true;
   if(name == "Fast PPU/No Sprite Limit") return true;
+  if(name == "Fast PPU/Hires Mode 7") return true;
   if(name == "Fast DSP") return true;
   if(name == "Mode") return true;
   if(name == "Blur Emulation") return true;
@@ -244,14 +245,9 @@ auto Interface::cap(const string& name) -> bool {
 }
 
 auto Interface::get(const string& name) -> any {
-  if(name == "Mode") return string{
-    system.fastPPU() && system.fastDSP() ? "[Fast PPU+DSP] "
-  : system.fastPPU() ? "[Fast PPU] "
-  : system.fastDSP() ? "[Fast DSP] "
-  : ""
-  };
   if(name == "Fast PPU") return settings.fastPPU;
   if(name == "Fast PPU/No Sprite Limit") return settings.fastPPUNoSpriteLimit;
+  if(name == "Fast PPU/Hires Mode 7") return settings.fastPPUHiresMode7;
   if(name == "Fast DSP") return settings.fastDSP;
   if(name == "Blur Emulation") return settings.blurEmulation;
   if(name == "Color Emulation") return settings.colorEmulation;
@@ -266,6 +262,10 @@ auto Interface::set(const string& name, const any& value) -> bool {
   }
   if(name == "Fast PPU/No Sprite Limit" && value.is<bool>()) {
     settings.fastPPUNoSpriteLimit = value.get<bool>();
+    return true;
+  }
+  if(name == "Fast PPU/Hires Mode 7" && value.is<bool>()) {
+    settings.fastPPUHiresMode7 = value.get<bool>();
     return true;
   }
   if(name == "Fast DSP" && value.is<bool>()) {

@@ -139,7 +139,7 @@ Presentation::Presentation() {
   }
   loadState.append(MenuSeparator());
   loadState.append(MenuItem().setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
-    program->loadState("quick/recovery");
+    program->loadState("quick/undo");
   }));
   speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
   speedSlowest.setText("Slowest (50%)").setProperty("multiplier", "2.0").onActivate([&] { program->updateAudioFrequency(); });
@@ -150,8 +150,13 @@ Presentation::Presentation() {
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio->clear();
   });
+  captureScreenshot.setIcon(Icon::Emblem::Image).setText("Capture Screenshot").onActivate([&] {
+    if(program->paused()) program->showMessage("The next video frame will be captured");
+    program->captureScreenshot = true;
+  });
   cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
   stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
+  manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow->show(2); });
 
   helpMenu.setText("Help");
   documentation.setIcon(Icon::Application::Browser).setText("Documentation ...").onActivate([&] {

@@ -31,6 +31,13 @@ auto Program::updateStatus() -> void {
   }
 }
 
+auto Program::paused() -> bool {
+  if(!emulator->loaded()) return true;
+  if(presentation->pauseEmulation.checked()) return true;
+  if(!focused() && settingsWindow->input.pauseEmulation.checked()) return true;
+  return false;
+}
+
 auto Program::focused() -> bool {
   //exclusive mode creates its own top-level window: presentation window will not have focus
   if(video && video->exclusive()) return true;

@@ -69,6 +69,7 @@ struct Interface : Emulator::Interface {
 struct Settings {
   bool fastPPU = false;
   bool fastPPUNoSpriteLimit = false;
+  bool fastPPUHiresMode7 = false;
   bool fastDSP = false;
 
   bool blurEmulation = true;

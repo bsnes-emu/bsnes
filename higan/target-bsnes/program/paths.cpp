@@ -34,6 +34,12 @@ auto Program::path(string type, string location, string extension) -> string {
     }
   }
 
+  if(type == "Screenshots") {
+    if(auto path = settings["Path/Screenshots"].text()) {
+      pathname = path;
+    }
+  }
+
   return {pathname, prefix, suffix};
 }
 
@@ -61,4 +67,20 @@ auto Program::statePath() -> string {
   } else {
     return path("States", location, ".bsz");
   }
+}
+
+auto Program::screenshotPath() -> string {
+  if(!emulator->loaded()) return "";
+  auto location = gamePath();
+  if(location.endsWith("/")) {
+    directory::create({location, "bsnes/screenshots/"});
+    location = {location, "bsnes/screenshots/capture"};
+  } else {
+    location = path("Screenshots", location);
+  }
+  for(uint n : range(1, 999)) {
+    string filename = {location, ".", pad(n, 3, '0'), ".bmp"};
+    if(!file::exists(filename)) return filename;
+  }
+  return {location, ".000.bmp"};
 }

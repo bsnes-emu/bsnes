@@ -7,6 +7,7 @@ auto Program::load() -> void {
     Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
       gameQueue = {};
+      captureScreenshot = false;
       if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
         //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
         //once MessageDialog functions, add an "Always" option
@@ -22,9 +23,12 @@ auto Program::load() -> void {
       hackCompatibility();
       emulator->power();
       if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {
-        program->loadState("quick/recovery");
+        program->loadState("quick/undo");
       }
-      showMessage(!appliedPatch() ? "Game loaded" : "Game loaded and patch applied");
+      showMessage({
+        verified() ? "Verified" : "Unverified", " game loaded",
+        appliedPatch() ? " and patch applied" : ""
+      });
       presentation->setTitle(emulator->title());
       presentation->resetSystem.setEnabled(true);
       presentation->unloadGame.setEnabled(true);
@@ -35,6 +39,7 @@ auto Program::load() -> void {
       presentation->resizeViewport();
       toolsWindow->cheatEditor.loadCheats();
       toolsWindow->stateManager.loadStates();
+      toolsWindow->manifestViewer.loadManifest();
 
       string locations = superFamicom.location;
       if(auto location = gameBoy.location) locations.append("|", location);
@@ -63,12 +68,13 @@ auto Program::loadFile(string location) -> vector<uint8_t> {
         }
       }
     }
+    return {};
   } else {
     return file::read(location);
   }
 }
 
-auto Program::loadSuperFamicom(string location) -> void {
+auto Program::loadSuperFamicom(string location) -> bool {
   string manifest;
   vector<uint8_t> rom;
 
@@ -84,6 +90,7 @@ auto Program::loadSuperFamicom(string location) -> void {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);
   }
+  if(rom.size() < 0x8000) return false;
 
   //assume ROM and IPS agree on whether a copier header is present
   superFamicom.patched = applyPatchIPS(rom, location);
@@ -130,9 +137,11 @@ auto Program::loadSuperFamicom(string location) -> void {
     memory::copy(&superFamicom.firmware[0], &rom[offset], size);
     offset += size;
   }
+
+  return true;
 }
 
-auto Program::loadGameBoy(string location) -> void {
+auto Program::loadGameBoy(string location) -> bool {
   string manifest;
   vector<uint8_t> rom;
 
@@ -143,6 +152,7 @@ auto Program::loadGameBoy(string location) -> void {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);
   }
+  if(rom.size() < 0x4000) return false;
 
   gameBoy.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::GameBoy(rom, location);
@@ -164,9 +174,10 @@ auto Program::loadGameBoy(string location) -> void {
   gameBoy.location = location;
 
   gameBoy.program = rom;
+  return true;
 }
 
-auto Program::loadBSMemory(string location) -> void {
+auto Program::loadBSMemory(string location) -> bool {
   string manifest;
   vector<uint8_t> rom;
 
@@ -178,6 +189,7 @@ auto Program::loadBSMemory(string location) -> void {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);
   }
+  if(rom.size() < 0x8000) return false;
 
   bsMemory.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::BSMemory(rom, location);
@@ -193,9 +205,10 @@ auto Program::loadBSMemory(string location) -> void {
   bsMemory.location = location;
 
   bsMemory.program = rom;
+  return true;
 }
 
-auto Program::loadSufamiTurboA(string location) -> void {
+auto Program::loadSufamiTurboA(string location) -> bool {
   string manifest;
   vector<uint8_t> rom;
 
@@ -206,6 +219,7 @@ auto Program::loadSufamiTurboA(string location) -> void {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);
   }
+  if(rom.size() < 0x20000) return false;
 
   sufamiTurboA.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SufamiTurbo(rom, location);
@@ -221,9 +235,10 @@ auto Program::loadSufamiTurboA(string location) -> void {
   sufamiTurboA.location = location;
 
   sufamiTurboA.program = rom;
+  return true;
 }
 
-auto Program::loadSufamiTurboB(string location) -> void {
+auto Program::loadSufamiTurboB(string location) -> bool {
   string manifest;
   vector<uint8_t> rom;
 
@@ -234,6 +249,7 @@ auto Program::loadSufamiTurboB(string location) -> void {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);
   }
+  if(rom.size() < 0x20000) return false;
 
   sufamiTurboB.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SufamiTurbo(rom, location);
@@ -249,6 +265,7 @@ auto Program::loadSufamiTurboB(string location) -> void {
   sufamiTurboB.location = location;
 
   sufamiTurboB.program = rom;
+  return true;
 }
 
 auto Program::save() -> void {
@@ -268,7 +285,7 @@ auto Program::unload() -> void {
   toolsWindow->cheatEditor.saveCheats();
   toolsWindow->setVisible(false);
   if(settingsWindow->advanced.autoSaveStateOnUnload.checked()) {
-    saveRecoveryState();
+    saveUndoState();
   }
   emulator->unload();
   showMessage("Game unloaded");

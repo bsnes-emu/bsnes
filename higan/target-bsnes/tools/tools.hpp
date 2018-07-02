@@ -107,6 +107,18 @@ public:
       Button removeButton{&controlLayout, Size{80, 0}};
 };
 
+struct ManifestViewer : TabFrameItem {
+  ManifestViewer(TabFrame*);
+  auto loadManifest() -> void;
+
+public:
+  VerticalLayout layout{this};
+    TextEdit manifestView{&layout, Size{~0, ~0}};
+    HorizontalLayout verifiedLayout{&layout, Size{~0, 0}};
+      Canvas verifiedIcon{&verifiedLayout, Size{16, 16}};
+      Label verifiedLabel{&verifiedLayout, Size{~0, 0}};
+};
+
 struct ToolsWindow : Window {
   ToolsWindow();
   auto setVisible(bool visible = true) -> ToolsWindow&;
@@ -117,6 +129,7 @@ public:
     TabFrame panel{&layout, Size{~0, ~0}};
       CheatEditor cheatEditor{&panel};
       StateManager stateManager{&panel};
+      ManifestViewer manifestViewer{&panel};
 };
 
 extern unique_pointer<CheatDatabase> cheatDatabase;

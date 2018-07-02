@@ -74,9 +74,11 @@ struct Presentation : Window {
         MenuRadioItem speedFastest{&speedMenu};
         Group speedGroup{&speedSlowest, &speedSlow, &speedNormal, &speedFast, &speedFastest};
       MenuCheckItem pauseEmulation{&toolsMenu};
+      MenuItem captureScreenshot{&toolsMenu};
       MenuSeparator toolsSeparatorB{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
+      MenuItem manifestViewer{&toolsMenu};
     Menu helpMenu{&menuBar};
       MenuItem documentation{&helpMenu};
       MenuSeparator helpSeparator{&helpMenu};

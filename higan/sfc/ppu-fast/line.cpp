@@ -23,9 +23,10 @@ auto PPU::Line::render() -> void {
   }
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
+  bool hiresMode7 = io.bgMode == 7 && settings.fastPPUHiresMode7;
   auto aboveColor = cgram[0];
   auto belowColor = hires ? cgram[0] : io.col.fixedColor;
-  for(uint x : range(256)) {
+  for(uint x : range(256 << hiresMode7)) {
     above[x] = {Source::COL, 0, aboveColor};
     below[x] = {Source::COL, 0, belowColor};
   }
@@ -39,7 +40,11 @@ auto PPU::Line::render() -> void {
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
   auto luma = io.displayBrightness << 15;
-  if(width == 256) for(uint x : range(width)) {
+  if(hiresMode7) for(uint x : range(512)) {
+    auto Above = above[x >> 1].source >= Source::OBJ1 ? above[x >> 1] : above[x >> 1 | (x & 1 ? 256 : 0)];
+    auto Below = below[x >> 1].source >= Source::OBJ1 ? below[x >> 1] : below[x >> 1 | (x & 1 ? 256 : 0)];
+    *output++ = luma | pixel(x >> 1, Above, Below);
+  } else if(width == 256) for(uint x : range(256)) {
     *output++ = luma | pixel(x, above[x], below[x]);
   } else if(!hires) for(uint x : range(256)) {
     auto color = luma | pixel(x, above[x], below[x]);

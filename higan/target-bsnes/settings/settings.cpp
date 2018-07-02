@@ -51,6 +51,7 @@ Settings::Settings() {
   set("Path/Saves", "");
   set("Path/Cheats", "");
   set("Path/States", "");
+  set("Path/Screenshots", "");
   set("Path/Recent/SuperFamicom", Path::user());
   set("Path/Recent/GameBoy", Path::user());
   set("Path/Recent/BSMemory", Path::user());
@@ -66,6 +67,7 @@ Settings::Settings() {
   set("Emulator/AutoLoadStateOnLoad", false);
   set("Emulator/Hack/FastPPU", true);
   set("Emulator/Hack/FastPPU/NoSpriteLimit", false);
+  set("Emulator/Hack/FastPPU/HiresMode7", false);
   set("Emulator/Hack/FastDSP", true);
   set("Emulator/Hack/FastSuperFX", "100%");
 

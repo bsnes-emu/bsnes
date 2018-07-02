@@ -1,6 +1,7 @@
 #include "../bsnes.hpp"
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
+#include "manifest-viewer.cpp"
 unique_pointer<CheatDatabase> cheatDatabase;
 unique_pointer<CheatWindow> cheatWindow;
 unique_pointer<StateWindow> stateWindow;

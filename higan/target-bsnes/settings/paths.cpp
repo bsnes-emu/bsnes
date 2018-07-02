@@ -3,7 +3,8 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Paths");
 
   layout.setMargin(5);
-  gamesLabel.setText("Games:");
+
+  gamesLabel.setAlignment(1.0).setText("Games:");
   gamesPath.setEditable(false);
   gamesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -15,7 +16,8 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Path/Games"].setValue("");
     refreshPaths();
   });
-  patchesLabel.setText("Patches:");
+
+  patchesLabel.setAlignment(1.0).setText("Patches:");
   patchesPath.setEditable(false);
   patchesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -27,7 +29,8 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Path/Patches"].setValue("");
     refreshPaths();
   });
-  savesLabel.setText("Saves:");
+
+  savesLabel.setAlignment(1.0).setText("Saves:");
   savesPath.setEditable(false);
   savesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -39,7 +42,8 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Path/Saves"].setValue("");
     refreshPaths();
   });
-  cheatsLabel.setText("Cheats:");
+
+  cheatsLabel.setAlignment(1.0).setText("Cheats:");
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -51,7 +55,8 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     settings["Path/Cheats"].setValue("");
     refreshPaths();
   });
-  statesLabel.setText("States:");
+
+  statesLabel.setAlignment(1.0).setText("States:");
   statesPath.setEditable(false);
   statesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -61,6 +66,19 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   statesReset.setText("Reset").onActivate([&] {
     settings["Path/States"].setValue("");
+    refreshPaths();
+  });
+
+  screenshotsLabel.setAlignment(1.0).setText("Screenshots:");
+  screenshotsPath.setEditable(false);
+  screenshotsAssign.setText("Assign ...").onActivate([&] {
+    if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
+      settings["Path/Screenshots"].setValue(location);
+      refreshPaths();
+    }
+  });
+  screenshotsReset.setText("Reset").onActivate([&] {
+    settings["Path/Screenshots"].setValue("");
     refreshPaths();
   });
 
@@ -92,5 +110,10 @@ auto PathSettings::refreshPaths() -> void {
     statesPath.setText(location).setForegroundColor();
   } else {
     statesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+  }
+  if(auto location = settings["Path/Screenshots"].text()) {
+    screenshotsPath.setText(location).setForegroundColor();
+  } else {
+    screenshotsPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
   }
 }

@@ -1,6 +1,7 @@
 auto Program::hackCompatibility() -> void {
   bool fastPPU = settingsWindow->advanced.fastPPUOption.checked();
   bool fastPPUNoSpriteLimit = settingsWindow->advanced.noSpriteLimit.checked();
+  bool fastPPUHiresMode7 = settingsWindow->advanced.hiresMode7.checked();
   bool fastDSP = settingsWindow->advanced.fastDSPOption.checked();
 
   auto label = superFamicom.label;
@@ -10,6 +11,7 @@ auto Program::hackCompatibility() -> void {
 
   emulator->set("Fast PPU", fastPPU);
   emulator->set("Fast PPU/No Sprite Limit", fastPPUNoSpriteLimit);
+  emulator->set("Fast PPU/Hires Mode 7", fastPPUHiresMode7);
   emulator->set("Fast DSP", fastDSP);
 }
 

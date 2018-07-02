@@ -1,3 +1,4 @@
+#include <nall/encode/bmp.hpp>
 #include <icarus/heuristics/heuristics.hpp>
 #include <icarus/heuristics/heuristics.cpp>
 #include <icarus/heuristics/super-famicom.cpp>
@@ -117,8 +118,9 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     }
     if(inode::exists(superFamicom.location)) {
       settings["Path/Recent/SuperFamicom"].setValue(Location::dir(superFamicom.location));
-      loadSuperFamicom(superFamicom.location);
-      return {id, dialog.option()};
+      if(loadSuperFamicom(superFamicom.location)) {
+        return {id, dialog.option()};
+      }
     }
   }
 
@@ -133,8 +135,9 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     }
     if(inode::exists(gameBoy.location)) {
       settings["Path/Recent/GameBoy"].setValue(Location::dir(gameBoy.location));
-      loadGameBoy(gameBoy.location);
-      return {id, dialog.option()};
+      if(loadGameBoy(gameBoy.location)) {
+        return {id, dialog.option()};
+      }
     }
   }
 
@@ -149,8 +152,9 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     }
     if(inode::exists(bsMemory.location)) {
       settings["Path/Recent/BSMemory"].setValue(Location::dir(bsMemory.location));
-      loadBSMemory(bsMemory.location);
-      return {id, dialog.option()};
+      if(loadBSMemory(bsMemory.location)) {
+        return {id, dialog.option()};
+      }
     }
   }
 
@@ -165,8 +169,9 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     }
     if(inode::exists(sufamiTurboA.location)) {
       settings["Path/Recent/SufamiTurboA"].setValue(Location::dir(sufamiTurboA.location));
-      loadSufamiTurboA(sufamiTurboA.location);
-      return {id, dialog.option()};
+      if(loadSufamiTurboA(sufamiTurboA.location)) {
+        return {id, dialog.option()};
+      }
     }
   }
 
@@ -181,8 +186,9 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     }
     if(inode::exists(sufamiTurboB.location)) {
       settings["Path/Recent/SufamiTurboB"].setValue(Location::dir(sufamiTurboB.location));
-      loadSufamiTurboB(sufamiTurboB.location);
-      return {id, dialog.option()};
+      if(loadSufamiTurboB(sufamiTurboB.location)) {
+        return {id, dialog.option()};
+      }
     }
   }
 
@@ -197,6 +203,15 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   if(presentation->overscanCropping.checked()) {
     if(height == 240) data +=  8 * pitch, height -= 16;
     if(height == 480) data += 16 * pitch, height -= 32;
+  }
+
+  if(captureScreenshot) {
+    captureScreenshot = false;
+    if(auto filename = screenshotPath()) {
+      if(Encode::BMP::create(filename, (const uint32_t*)data, pitch << 2, width, height, false)) {
+        showMessage({"Captured screenshot [", Location::file(filename), "]"});
+      }
+    }
   }
 
   if(video->lock(output, length, width, height)) {

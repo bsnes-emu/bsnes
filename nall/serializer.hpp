@@ -99,6 +99,7 @@ struct serializer {
 
   template<typename T, uint Size> auto array(nall::array<T[Size]>& array) -> serializer& {
     for(auto& value : array) operator()(value);
+    return *this;
   }
 
   template<typename T> auto operator()(T& value, typename std::enable_if<has_serialize<T>::value>::type* = 0) -> serializer& { value.serialize(*this); return *this; }
