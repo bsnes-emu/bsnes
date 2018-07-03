@@ -236,7 +236,8 @@ void GB_STAT_update(GB_gameboy_t *gb)
     
     bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */
-    if (gb->ly_for_comparison != (uint16_t)-1 || !GB_is_cgb(gb)) {
+    /* TODO: This behavior might not be correct for CGB revisions other than C and E */
+    if (gb->ly_for_comparison != (uint16_t)-1 || gb->model <= GB_MODEL_CGB_C) {
         if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
             gb->lyc_interrupt_line = true;
             gb->io_registers[GB_IO_STAT] |= 4;
@@ -748,6 +749,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     if (object->flags & 0x40) { /* Flip Y */
                         tile_y ^= height_16? 0xF : 7;
                     }
+                    
                     /* Todo: I'm not 100% sure an access to OAM can't trigger the OAM bug while we're accessing this */
                     uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
                     
@@ -864,17 +866,17 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->io_registers[GB_IO_LY] = 153;
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 14, GB_is_cgb(gb)? 4: 6);
+        GB_SLEEP(gb, display, 14, (gb->model > GB_MODEL_CGB_C)? 4: 6);
         
         if (!GB_is_cgb(gb)) {
             gb->io_registers[GB_IO_LY] = 0;
         }
         gb->ly_for_comparison = 153;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 15, GB_is_cgb(gb)? 4: 2);
+        GB_SLEEP(gb, display, 15, (gb->model > GB_MODEL_CGB_C)? 4: 2);
         
         gb->io_registers[GB_IO_LY] = 0;
-        gb->ly_for_comparison = GB_is_cgb(gb)? 153 : -1;
+        gb->ly_for_comparison = (gb->model > GB_MODEL_CGB_C)? 153 : -1;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 16, 4);
         
