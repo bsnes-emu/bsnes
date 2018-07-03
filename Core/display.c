@@ -435,11 +435,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
-            if (GB_is_cgb(gb)) {
+            if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB, so it cannot be used to mix tiles together */
-                /* Todo: This is NOT true on CGB-B! This is likely the case for all CGBs prior to D.
-                 Currently, SameBoy is emulating CGB-E, but if other revisions are added in the future
-                 this should be taken care of */
                 gb->fetcher_y = y;
             }
             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
@@ -457,7 +454,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         case GB_FETCHER_GET_TILE_DATA_LOWER: {
             uint8_t y_flip = 0;
             uint16_t tile_address = 0;
-            uint8_t y = GB_is_cgb(gb)? gb->fetcher_y : fetcher_y(gb);
+            uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             if (gb->io_registers[GB_IO_LCDC] & 0x10) {
@@ -484,7 +481,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
              bit mid-fetching causes a glitched mixing of the two, in comparison to the
              more logical DMG version. */
             uint16_t tile_address = 0;
-            uint8_t y = GB_is_cgb(gb)? gb->fetcher_y : fetcher_y(gb);
+            uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
             if (gb->io_registers[GB_IO_LCDC] & 0x10) {
                 tile_address = gb->current_tile * 0x10;
