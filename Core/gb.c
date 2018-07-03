@@ -473,6 +473,21 @@ static void reset_ram(GB_gameboy_t *gb)
             }
             break;
 #endif
+        
+        case GB_MODEL_CGB_C:
+            for (unsigned i = 0; i < gb->ram_size; i++) {
+                if ((i & 0x808) == 0x800 || (i & 0x808) == 0x008) {
+                    gb->ram[i] = 0;
+                }
+                else {
+                    gb->ram[i] = (random() | random() | random() | random())  & 0xFF;
+                }
+            }
+            break;
+    }
+    
+    for (unsigned i = 0; i < sizeof(gb->extra_oam); i++) {
+        gb->extra_oam[i] = (random() & 0xFF);
     }
 }
 

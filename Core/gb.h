@@ -43,7 +43,7 @@ typedef enum {
     // GB_MODEL_CGB_0 = 0x200,
     // GB_MODEL_CGB_A = 0x201,
     // GB_MODEL_CGB_B = 0x202,
-    // GB_MODEL_CGB_C = 0x203,
+    GB_MODEL_CGB_C = 0x203,
     // GB_MODEL_CGB_D = 0x204,
     GB_MODEL_CGB_E = 0x205,
     GB_MODEL_AGB = 0x206,
@@ -301,6 +301,7 @@ struct GB_gameboy_internal_s {
         /* Misc state */
         bool infrared_input;
         GB_printer_t printer;
+        uint8_t extra_oam[0xff00 - 0xfea0];
     );
 
     /* DMA and HDMA */

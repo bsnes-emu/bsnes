@@ -244,13 +244,21 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             return gb->oam[addr & 0xFF];
         }
         
-        /* Unusable. CGB results are verified, but DMG results were tested on a SGB2 */
-        /* Also, writes to this area are not emulated */
-        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) { /* Seems to be disabled in Modes 2 and 3 */
+        if (gb->oam_read_blocked) {
             return 0xFF;
         }
-        if (GB_is_cgb(gb)) {
-            return (addr & 0xF0) | ((addr >> 4) & 0xF);
+        
+        switch (gb->model) {
+            case GB_MODEL_CGB_E:
+            case GB_MODEL_AGB:
+                return (addr & 0xF0) | ((addr >> 4) & 0xF);
+            
+            case GB_MODEL_CGB_C:
+                addr &= ~0x18;
+                return gb->extra_oam[addr - 0xfea0];
+                
+            default:
+                ;
         }
     }
 
@@ -535,10 +543,17 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             if (addr < 0xFEA0) {
                 gb->oam[addr & 0xFF] = value;
             }
+            switch (gb->model) {
+                case GB_MODEL_CGB_C:
+                    addr &= ~0x18;
+                    gb->extra_oam[addr - 0xfea0] = value;
+                    break;
+                default:
+                    break;
+            }
             return;
         }
         
-        /* Todo: This is writable, but glitchy, on CGB-B and CGB-D. */
         if (addr < 0xFEA0) {
             if (gb->accessed_oam_row == 0xa0) {
                 for (unsigned i = 0; i < 8; i++) {
