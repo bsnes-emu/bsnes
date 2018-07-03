@@ -117,6 +117,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             return;
         
         case GB_CONFLICT_STAT_CGB: {
+            /* Todo: Verify this with SCX adjustments */
             /* The LYC bit behaves differently */
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles);
