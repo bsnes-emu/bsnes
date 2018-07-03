@@ -436,7 +436,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
             if (gb->model > GB_MODEL_CGB_C) {
-                /* This value is cached on the CGB, so it cannot be used to mix tiles together */
+                /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
             }
             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
@@ -559,6 +559,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
+        GB_STATE(gb, display, 30);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -698,8 +699,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
             
-            gb->cycles_for_line += 5;
-            GB_SLEEP(gb, display, 10, 5);
+            uint8_t idle_cycles = 5;
+            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
+                idle_cycles = 4;
+            }
+            gb->cycles_for_line += idle_cycles;
+            GB_SLEEP(gb, display, 10, idle_cycles);
 
             /* The actual rendering cycle */
             gb->fetcher_state = 0;
@@ -790,6 +795,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
             }
+            
+            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
+                gb->cycles_for_line++;
+                GB_SLEEP(gb, display, 30, 1);
+            }
+            
             if (!gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->mode_for_interrupt = 0;
