@@ -365,7 +365,7 @@ void GB_apu_run(GB_gameboy_t *gb)
             
             /* Step LFSR */
             unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
-            // This formula is different on a GBA!
+            /* Todo: is this formula is different on a GBA? */
             bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
             gb->apu.noise_channel.lfsr >>= 1;
             
@@ -377,8 +377,17 @@ void GB_apu_run(GB_gameboy_t *gb)
                 gb->apu.noise_channel.lfsr &= ~high_bit_mask;
             }
             
+            gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+            if (gb->model == GB_MODEL_CGB_C) {
+                /* Todo: This was confirmed to happen on a CGB-C. This may or may not happen on pre-CGB models.
+                   Because this degrades audio quality, and testing this on a pre-CGB device requires audio records,
+                   I'll assume these devices are innocent until proven guilty. */
+                gb->apu.current_lfsr_sample &= gb->apu.previous_lfsr_sample;
+            }
+            gb->apu.previous_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+            
             update_sample(gb, GB_NOISE,
-                          (gb->apu.noise_channel.lfsr & 1) ?
+                          gb->apu.current_lfsr_sample ?
                           gb->apu.noise_channel.current_volume : 0,
                           0);
         }
@@ -776,7 +785,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             else if (gb->apu.is_active[GB_NOISE]){
                 nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
                 update_sample(gb, GB_NOISE,
-                              (gb->apu.noise_channel.lfsr & 1) ?
+                              gb->apu.current_lfsr_sample ?
                               gb->apu.noise_channel.current_volume : 0,
                               0);
             }
@@ -821,11 +830,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                  cases. */
                 if (gb->apu.is_active[GB_NOISE]) {
                     update_sample(gb, GB_NOISE,
-                                  (gb->apu.noise_channel.lfsr & 1) ?
+                                  gb->apu.current_lfsr_sample ?
                                   gb->apu.noise_channel.current_volume : 0,
                                   0);
                 }
                 gb->apu.noise_channel.lfsr = 0;
+                gb->apu.current_lfsr_sample = false;
                 gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
                 
                 if (!gb->apu.is_active[GB_NOISE] && (gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
