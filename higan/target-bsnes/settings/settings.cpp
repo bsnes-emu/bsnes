@@ -40,10 +40,10 @@ Settings::Settings() {
   set("Input/Frequency", 5);
   set("Input/Defocus", "Pause");
 
-  set("View/Size", "Small");
+  set("View/Multiplier", "2");
+  set("View/Output", "Scale");
   set("View/AspectCorrection", true);
   set("View/OverscanCropping", true);
-  set("View/IntegralScaling", true);
   set("View/BlurEmulation", true);
 
   set("Path/Games", "");
@@ -70,6 +70,7 @@ Settings::Settings() {
   set("Emulator/Hack/FastPPU/HiresMode7", false);
   set("Emulator/Hack/FastDSP", true);
   set("Emulator/Hack/FastSuperFX", "100%");
+  set("Emulator/Cheats/Enable", true);
 
   set("Crashed", false);
 }

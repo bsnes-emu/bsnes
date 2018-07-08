@@ -45,6 +45,8 @@ auto pDesktop::workspace() -> Geometry {
     gdk_screen_get_height(gdk_screen_get_default())
   };
   #endif
+
+  return {};
 }
 
 }

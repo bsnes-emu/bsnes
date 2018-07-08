@@ -33,11 +33,10 @@ auto pVerticalScrollBar::minimumSize() const -> Size {
 }
 
 auto pVerticalScrollBar::setLength(unsigned length) -> void {
-  lock();
+  auto lock = acquire();
   length += length == 0;
   gtk_range_set_range(GTK_RANGE(gtkWidget), 0, max(1u, length - 1));
   gtk_range_set_increments(GTK_RANGE(gtkWidget), 1, length >> 3);
-  unlock();
 }
 
 auto pVerticalScrollBar::setPosition(unsigned position) -> void {

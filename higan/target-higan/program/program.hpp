@@ -4,7 +4,7 @@ struct Program : Emulator::Platform {
   auto main() -> void;
   auto quit() -> void;
 
-  //interface.cpp
+  //platform.cpp
   auto path(uint id) -> string override;
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, string_vector options = {}) -> Emulator::Platform::Load override;

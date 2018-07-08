@@ -136,6 +136,27 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   unlock();
 }
 
+auto pWindow::setMaximized(bool maximized) -> void {
+  if(state().minimized) return;
+  lock();
+  ShowWindow(hwnd, maximized ? SW_MAXIMIZED : SW_SHOWNOACTIVATE);
+  unlock();
+}
+
+auto pWindow::setMaximumSize(Size size) -> void {
+  //todo
+}
+
+auto pWindow::setMinimized(bool minimized) -> void {
+  lock();
+  ShowWindow(hwnd, minimized ? SW_MINIMIZED : state().maximized ? SW_MAXIMIZED : SW_SHOWNOACTIVATE);
+  unlock();
+}
+
+auto pWindow::setMinimumSize(Size size) -> void {
+  //todo
+}
+
 auto pWindow::setModal(bool modality) -> void {
   if(modality) {
     _modalityUpdate();

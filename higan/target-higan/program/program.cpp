@@ -7,7 +7,7 @@
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
 #include <ws/interface/interface.hpp>
-#include "interface.cpp"
+#include "platform.cpp"
 #include "medium.cpp"
 #include "state.cpp"
 #include "utility.cpp"

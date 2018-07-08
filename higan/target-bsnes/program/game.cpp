@@ -7,7 +7,8 @@ auto Program::load() -> void {
     Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
       gameQueue = {};
-      captureScreenshot = false;
+      screenshot = {};
+      frameAdvance = false;
       if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
         //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
         //once MessageDialog functions, add an "Always" option

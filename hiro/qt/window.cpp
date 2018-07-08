@@ -154,6 +154,22 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   unlock();
 }
 
+auto pWindow::setMaximized(bool maximized) -> void {
+  //todo
+}
+
+auto pWindow::setMaximumSize(Size size) -> void {
+  //todo
+}
+
+auto pWindow::setMinimized(bool minimized) -> void {
+  //todo
+}
+
+auto pWindow::setMinimumSize(Size size) -> void {
+  //todo
+}
+
 auto pWindow::setModal(bool modal) -> void {
   if(modal) {
     //windowModality can only be enabled while window is invisible

@@ -31,6 +31,20 @@ auto Program::updateStatus() -> void {
   }
 }
 
+auto Program::captureScreenshot() -> bool {
+  if(emulator->loaded() && screenshot.data) {
+    if(auto filename = screenshotPath()) {
+      if(Encode::BMP::create(filename,
+        (const uint32_t*)screenshot.data, screenshot.pitch, screenshot.width, screenshot.height, false
+      )) {
+        showMessage({"Captured screenshot [", Location::file(filename), "]"});
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 auto Program::paused() -> bool {
   if(!emulator->loaded()) return true;
   if(presentation->pauseEmulation.checked()) return true;

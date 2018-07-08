@@ -1,5 +1,5 @@
 #include "../bsnes.hpp"
-#include "interface.cpp"
+#include "platform.cpp"
 #include "game.cpp"
 #include "game-pak.cpp"
 #include "game-rom.cpp"

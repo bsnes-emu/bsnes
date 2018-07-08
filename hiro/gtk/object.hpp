@@ -18,9 +18,17 @@ struct pObject {
   virtual auto setFont(const Font& font) -> void;
   virtual auto setVisible(bool visible) -> void;
 
-  auto locked() const -> bool { return locks != 0 || Application::state.quit; }
+  auto locked() const -> bool { return locks || Application::state.quit; }
   auto lock() -> void { ++locks; }
   auto unlock() -> void { --locks; }
+
+  struct Lock {
+    Lock(pObject& self) : self(self) { self.locks++; }
+    ~Lock() { self.locks--; }
+
+    pObject& self;
+  };
+  auto acquire() -> Lock { return {*this}; }
 
   mObject& reference;
   signed locks = 0;

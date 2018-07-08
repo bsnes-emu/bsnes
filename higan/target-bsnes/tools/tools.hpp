@@ -66,6 +66,7 @@ public:
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Button findCheatsButton{&controlLayout, Size{120, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
+      CheckLabel enableCheats{&controlLayout, Size{0, 0}};
       Button addButton{&controlLayout, Size{80, 0}};
       Button editButton{&controlLayout, Size{80, 0}};
       Button removeButton{&controlLayout, Size{80, 0}};

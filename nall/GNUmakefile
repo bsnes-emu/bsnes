@@ -31,11 +31,11 @@ ifeq ($(platform),)
 
   # common commands
   ifeq ($(uname),)
-    rm = del /q $(subst /,\,$1)
-    rmdir = del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
+    rm = $(info Deleting $1 ...) @del /q $(subst /,\,$1)
+    rmdir = $(info Deleting $1 ...) @del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else
-    rm = rm -f $1
-    rmdir = rm -rf $1
+    rm = $(info Deleting $1 ...) @rm -f $1
+    rmdir = $(info Deleting $1 ...) @rm -rf $1
   endif
 endif
 
@@ -73,6 +73,12 @@ else ifeq ($(build),release)
   flags += -O2 -DBUILD_RELEASE
 else ifeq ($(build),performance)
   flags += -O3 -DBUILD_PERFORMANCE
+endif
+
+# link-time optimization
+ifeq ($(lto),true)
+  flags += -fwhole-program -flto -fno-fat-lto-objects
+  link += -fwhole-program -flto=jobserver
 endif
 
 # openmp support
@@ -128,6 +134,15 @@ endif
 
 # paths
 prefix := $(HOME)/.local
+
+# targets
+all: default;
+
+information:
+	$(info Compiler Flags:)
+	$(foreach n,$(sort $(call unique,$(flags))),$(if $(filter-out -I%,$n),$(info $([space]) $n)))
+	$(info Linker Flags:)
+	$(foreach n,$(sort $(call unique,$(link))),$(if $(filter-out -l%,$n),$(info $([space]) $n)))
 
 # function rwildcard(directory, pattern)
 rwildcard = \

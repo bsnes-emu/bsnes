@@ -446,9 +446,10 @@ struct Monitor {
   Monitor() = delete;
 
   static auto count() -> uint;
-  static auto dpi(uint monitor) -> Position;
-  static auto geometry(uint monitor) -> Geometry;
+  static auto dpi(maybe<uint> monitor = nothing) -> Position;
+  static auto geometry(maybe<uint> monitor = nothing) -> Geometry;
   static auto primary() -> uint;
+  static auto workspace(maybe<uint> monitor = nothing) -> Geometry;
 };
 #endif
 
@@ -695,7 +696,11 @@ struct mWindow : mObject {
   auto fullScreen() const -> bool;
   auto geometry() const -> Geometry;
   auto layout() const -> Layout;
+  auto maximized() const -> bool;
+  auto maximumSize() const -> Size;
   auto menuBar() const -> MenuBar;
+  auto minimized() const -> bool;
+  auto minimumSize() const -> Size;
   auto modal() const -> bool;
   auto onClose(const function<void ()>& callback = {}) -> type&;
   auto onDrop(const function<void (string_vector)>& callback = {}) -> type&;
@@ -718,6 +723,10 @@ struct mWindow : mObject {
   auto setFrameSize(Size size) -> type&;
   auto setFullScreen(bool fullScreen = true) -> type&;
   auto setGeometry(Geometry geometry) -> type&;
+  auto setMaximized(bool maximized = true) -> type&;
+  auto setMaximumSize(Size size = {}) -> type&;
+  auto setMinimized(bool minimized = true) -> type&;
+  auto setMinimumSize(Size size = {}) -> type&;
   auto setModal(bool modal = true) -> type&;
   auto setPosition(Position position) -> type&;
   auto setResizable(bool resizable = true) -> type&;
@@ -734,6 +743,10 @@ struct mWindow : mObject {
     bool fullScreen = false;
     Geometry geometry = {128, 128, 256, 256};
     sLayout layout;
+    bool maximized = false;
+    Size maximumSize;
+    bool minimized = false;
+    Size minimumSize;
     sMenuBar menuBar;
     bool modal = false;
     function<void ()> onClose;

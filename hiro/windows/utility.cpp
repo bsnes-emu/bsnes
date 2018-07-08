@@ -339,23 +339,16 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     break;
   }
 
-  #if defined(Hiro_TableView)
-  case AppMessage::TableView_doPaint: {
-    if(auto tableView = (mTableView*)lparam) {
-      if(auto self = tableView->self()) InvalidateRect(self->hwnd, nullptr, true);
-    }
+  case WM_SIZE: {
+    bool maximized = IsZoomed(pWindow->hwnd);
+    bool minimized = IsIconic(pWindow->hwnd);
+
+    window->state.maximized = maximized;
+    window->state.minimized = minimized;
+
+    //todo: call Window::doSize() ?
     break;
   }
-
-  case AppMessage::TableView_onActivate: {
-    if(auto tableView = (mTableView*)lparam) tableView->doActivate();
-    break;
-  }
-
-  case AppMessage::TableView_onChange: {
-    if(auto tableView = (mTableView*)lparam) tableView->doChange();
-  }
-  #endif
 
   case WM_HSCROLL:
   case WM_VSCROLL: {
@@ -389,6 +382,24 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
 
     break;
   }
+
+  #if defined(Hiro_TableView)
+  case AppMessage::TableView_doPaint: {
+    if(auto tableView = (mTableView*)lparam) {
+      if(auto self = tableView->self()) InvalidateRect(self->hwnd, nullptr, true);
+    }
+    break;
+  }
+
+  case AppMessage::TableView_onActivate: {
+    if(auto tableView = (mTableView*)lparam) tableView->doActivate();
+    break;
+  }
+
+  case AppMessage::TableView_onChange: {
+    if(auto tableView = (mTableView*)lparam) tableView->doChange();
+  }
+  #endif
   }
 
   return windowProc(hwnd, msg, wparam, lparam);

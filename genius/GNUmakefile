@@ -9,8 +9,9 @@ objects := obj/hiro.o
 objects += obj/genius.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)
 
-all: $(objects)
-	$(strip $(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
+default: information $(objects)
+	$(info Linking out/$(name) ...)
+	+@$(strip $(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
@@ -21,13 +22,16 @@ ifeq ($(platform),macos)
 endif
 
 obj/hiro.o: ../hiro/hiro.cpp
-	$(compiler) $(hiroflags) -o obj/hiro.o -c ../hiro/hiro.cpp
+	$(info Compiling $< ...)
+	@$(compiler) $(hiroflags) -o obj/hiro.o -c ../hiro/hiro.cpp
 
 obj/genius.o: genius.cpp genius.hpp
-	$(compiler) $(cppflags) $(flags) -o obj/genius.o -c genius.cpp
+	$(info Compiling $< ...)
+	@$(compiler) $(cppflags) $(flags) -o obj/genius.o -c genius.cpp
 
-obj/resource.o:
-	$(windres) data/$(name).rc obj/resource.o
+obj/resource.o: data/$(name).rc
+	$(info Compiling $< ...)
+	@$(windres) data/$(name).rc obj/resource.o
 
 clean:
 ifeq ($(platform),macos)

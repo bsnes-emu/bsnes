@@ -21,6 +21,10 @@ struct pWindow : pObject {
   auto setFont(const Font& font) -> void override;
   auto setFullScreen(bool fullScreen) -> void;
   auto setGeometry(Geometry geometry) -> void;
+  auto setMaximized(bool maximized) -> void;
+  auto setMaximumSize(Size size) -> void;
+  auto setMinimized(bool minimized) -> void;
+  auto setMinimumSize(Size size) -> void;
   auto setModal(bool modal) -> void;
   auto setResizable(bool resizable) -> void;
   auto setTitle(string text) -> void;

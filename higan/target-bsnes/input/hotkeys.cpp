@@ -9,6 +9,13 @@ auto InputManager::bindHotkeys() -> void {
     input->acquired() ? input->release() : input->acquire();
   }));
 
+  hotkeys.append(InputHotkey("Toggle Cheat Codes").onPress([] {
+    toolsWindow->cheatEditor.enableCheats.setChecked(
+      !toolsWindow->cheatEditor.enableCheats.checked()
+    );
+    toolsWindow->cheatEditor.enableCheats.doToggle();
+  }));
+
   hotkeys.append(InputHotkey("Save State").onPress([&] {
     program->saveState({"quick/slot ", stateSlot});
   }));
@@ -28,7 +35,7 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Capture Screenshot").onPress([] {
-    presentation->captureScreenshot.doActivate();
+    program->captureScreenshot();
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
@@ -41,6 +48,10 @@ auto InputManager::bindHotkeys() -> void {
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {
     presentation->pauseEmulation.setChecked(!presentation->pauseEmulation.checked());
+  }));
+
+  hotkeys.append(InputHotkey("Frame Advance").onPress([] {
+    presentation->frameAdvance.doActivate();
   }));
 
   hotkeys.append(InputHotkey("Reset Emulation").onPress([] {

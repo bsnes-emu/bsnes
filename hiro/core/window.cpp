@@ -95,8 +95,24 @@ auto mWindow::layout() const -> Layout {
   return state.layout;
 }
 
+auto mWindow::maximized() const -> bool {
+  return state.maximized;
+}
+
+auto mWindow::maximumSize() const -> Size {
+  return state.maximumSize;
+}
+
 auto mWindow::menuBar() const -> MenuBar {
   return state.menuBar;
+}
+
+auto mWindow::minimized() const -> bool {
+  return state.minimized;
+}
+
+auto mWindow::minimumSize() const -> Size {
+  return state.minimumSize;
 }
 
 auto mWindow::modal() const -> bool {
@@ -242,6 +258,30 @@ auto mWindow::setGeometry(Geometry geometry) -> type& {
   if(auto& layout = state.layout) {
     layout->setGeometry(geometry.setPosition(0, 0));
   }
+  return *this;
+}
+
+auto mWindow::setMaximized(bool maximized) -> type& {
+  state.maximized = maximized;
+  signal(setMaximized, maximized);
+  return *this;
+}
+
+auto mWindow::setMaximumSize(Size size) -> type& {
+  state.maximumSize = size;
+  signal(setMaximumSize, size);
+  return *this;
+}
+
+auto mWindow::setMinimized(bool minimized) -> type& {
+  state.minimized = minimized;
+  signal(setMinimized, minimized);
+  return *this;
+}
+
+auto mWindow::setMinimumSize(Size size) -> type& {
+  state.minimumSize = size;
+  signal(setMinimumSize, size);
   return *this;
 }
 

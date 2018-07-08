@@ -38,16 +38,15 @@ endif
 compile = \
   $(strip \
     $(if $(filter %.c,$<), \
-      $(compiler) $(cflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
-      $(if $(filter %.cpp,$<), \
-        $(compiler) $(cppflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
-      ) \
-    ) \
+      $(compiler) $(cflags)   $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
+    $(if $(filter %.cpp,$<), \
+      $(compiler) $(cppflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
+    )) \
   )
 
-%.o: $<; $(call compile)
-
-all: build;
+%.o: $<
+	$(info Compiling $< ...)
+	@$(call compile)
 
 obj/libco.o: ../libco/libco.c
 obj/emulator.o: emulator/emulator.cpp

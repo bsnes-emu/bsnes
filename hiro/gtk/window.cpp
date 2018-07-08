@@ -128,6 +128,10 @@ static auto Window_keyRelease(GtkWidget* widget, GdkEventKey* event, pWindow* p)
 }
 
 static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pWindow* p) -> void {
+  //size-allocate is sent before window-state-event when maximizing a window
+  //this means Window::onSize() handler would have the old maximized state if we used the latter signal
+  p->_synchronizeState();
+
   //size-allocate sent from gtk_fixed_move(); detect if layout unchanged and return
   if(allocation->width == p->lastAllocation.width
   && allocation->height == p->lastAllocation.height) return;
@@ -151,6 +155,20 @@ static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pW
 static auto Window_sizeRequest(GtkWidget* widget, GtkRequisition* requisition, pWindow* p) -> void {
   requisition->width  = p->state().geometry.width();
   requisition->height = p->state().geometry.height();
+}
+
+static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) -> void {
+  p->_synchronizeState();
+
+/*if(event->type == GDK_WINDOW_STATE) {
+    auto windowStateEvent = (GdkEventWindowState*)event;
+    if(windowStateEvent->changed_mask & GDK_WINDOW_STATE_MAXIMIZED) {
+      p->state().maximized = windowStateEvent->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
+    }
+    if(windowStateEvent->changed_mask & GDK_WINDOW_STATE_ICONIFIED) {
+      p->state().minimized = windowStateEvent->new_window_state & GDK_WINDOW_STATE_ICONIFIED;
+    }
+  }*/
 }
 
 auto pWindow::construct() -> void {
@@ -204,6 +222,8 @@ auto pWindow::construct() -> void {
   setDroppable(state().droppable);
   setGeometry(state().geometry);
   setResizable(state().resizable);
+  setMaximized(state().maximized);
+  setMinimized(state().minimized);
   setTitle(state().title);
 
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)this);
@@ -224,6 +244,7 @@ auto pWindow::construct() -> void {
   widgetClass->get_preferred_width = Window_getPreferredWidth;
   widgetClass->get_preferred_height = Window_getPreferredHeight;
   #endif
+  g_signal_connect(G_OBJECT(widget), "window-state-event", G_CALLBACK(Window_stateEvent), (gpointer)this);
 }
 
 auto pWindow::destruct() -> void {
@@ -323,10 +344,8 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   Geometry margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x() - margin.x(), geometry.y() - margin.y());
 
-  GdkGeometry geom;
-  geom.min_width  = state().resizable ? 1 : state().geometry.width();
-  geom.min_height = state().resizable ? 1 : state().geometry.height();
-  gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
+  setMaximumSize(state().maximumSize);
+  setMinimumSize(state().minimumSize);
 
   gtk_widget_set_size_request(formContainer, geometry.width(), geometry.height());
   auto time1 = chrono::millisecond();
@@ -335,6 +354,42 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   gtk_window_resize(GTK_WINDOW(widget), geometry.width(), geometry.height() + _menuHeight() + _statusHeight());
   auto time2 = chrono::millisecond();
   while(chrono::millisecond() - time2 < 20) gtk_main_iteration_do(false);
+}
+
+auto pWindow::setMaximized(bool maximized) -> void {
+  auto lock = acquire();
+  if(maximized) {
+    gtk_window_maximize(GTK_WINDOW(widget));
+  } else {
+    gtk_window_unmaximize(GTK_WINDOW(widget));
+  }
+}
+
+auto pWindow::setMaximumSize(Size size) -> void {
+  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
+
+  GdkGeometry geometry;
+  geometry.max_width  = !state().resizable ? state().geometry.width()  : size.width()  ? size.width()  : 32767;
+  geometry.max_height = !state().resizable ? state().geometry.height() : size.height() ? size.height() : 32767;
+  gtk_window_set_geometry_hints(GTK_WINDOW(widget), nullptr, &geometry, GDK_HINT_MAX_SIZE);
+}
+
+auto pWindow::setMinimized(bool minimized) -> void {
+  auto lock = acquire();
+  if(minimized) {
+    gtk_window_iconify(GTK_WINDOW(widget));
+  } else {
+    gtk_window_deiconify(GTK_WINDOW(widget));
+  }
+}
+
+auto pWindow::setMinimumSize(Size size) -> void {
+  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
+
+  GdkGeometry geometry;
+  geometry.min_width  = !state().resizable ? state().geometry.width()  : size.width()  ? size.width()  : 1;
+  geometry.min_height = !state().resizable ? state().geometry.height() : size.height() ? size.height() : 1;
+  gtk_window_set_geometry_hints(GTK_WINDOW(widget), nullptr, &geometry, GDK_HINT_MIN_SIZE);
 }
 
 auto pWindow::setModal(bool modal) -> void {
@@ -477,6 +532,69 @@ auto pWindow::_setStatusVisible(bool visible) -> void {
 
 auto pWindow::_statusHeight() const -> signed {
   return gtk_widget_get_visible(gtkStatus) ? settings.geometry.statusHeight : 0;
+}
+
+//GTK doesn't add gtk_window_is_maximized() until 3.12;
+//and doesn't appear to have a companion gtk_window_is_(hidden,iconic,minimized);
+//so we have to do this the hard way
+auto pWindow::_synchronizeState() -> void {
+  if(!gtk_widget_get_realized(widget)) return;
+
+  #if defined(DISPLAY_WINDOWS)
+  auto window = GDK_WINDOW_HWND(gtk_widget_get_window(widget));
+
+  bool maximized = IsZoomed(window);
+  bool minimized = IsIconic(window);
+
+  bool doSize = false;
+  if(state().minimized != minimized) doSize = true;
+
+  state().maximized = maximized;
+  state().minimized = minimized;
+
+  if(doSize) self().doSize();
+  #endif
+
+  #if defined(DISPLAY_XORG)
+  auto display = XOpenDisplay(nullptr);
+  int screen = DefaultScreen(display);
+  auto window = GDK_WINDOW_XID(gtk_widget_get_window(widget));
+  XlibAtom wmState = XInternAtom(display, "_NET_WM_STATE", XlibTrue);
+  XlibAtom atom;
+  int format;
+  unsigned long items, after;
+  unsigned char* data = nullptr;
+  int result = XGetWindowProperty(
+    display, window, wmState, 0, LONG_MAX, XlibFalse, AnyPropertyType, &atom, &format, &items, &after, &data
+  );
+  auto atoms = (unsigned long*)data;
+  if(result == Success) {
+    bool maximizedHorizontal = false;
+    bool maximizedVertical = false;
+    bool minimized = false;
+
+    for(auto index : range(items)) {
+      auto memory = XGetAtomName(display, atoms[index]);
+      auto name = string{memory};
+      if(name == "_NET_WM_STATE_MAXIMIZED_HORZ") maximizedHorizontal = true;
+      if(name == "_NET_WM_STATE_MAXIMIZED_VERT") maximizedVertical = true;
+      if(name == "_NET_WM_STATE_HIDDEN") minimized = true;
+      XFree(memory);
+    }
+
+    bool doSize = false;
+    //maximize sends size-allocate, which triggers doSize()
+    if(state().minimized != minimized) doSize = true;
+
+    //windows do not act bizarrely when maximized in only one direction
+    //so for this reason, consider a window maximized only if it's in both directions
+    state().maximized = maximizedHorizontal && maximizedVertical;
+    state().minimized = minimized;
+
+    if(doSize) self().doSize();
+  }
+  XCloseDisplay(display);
+  #endif
 }
 
 }

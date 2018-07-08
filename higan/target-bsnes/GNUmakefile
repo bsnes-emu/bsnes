@@ -5,10 +5,11 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include processor/GNUmakefile
 
-ui_objects := ui-bsnes ui-program ui-input ui-presentation
-ui_objects += ui-settings ui-tools ui-resource
-ui_objects += ruby hiro
-ui_objects += $(if $(call streq,$(platform),windows),ui-windows)
+objects := ruby hiro $(objects)
+objects += ui-bsnes ui-program ui-input ui-presentation
+objects += ui-settings ui-tools ui-resource
+objects += $(if $(call streq,$(platform),windows),ui-windows)
+objects := $(objects:%=obj/%.o)
 
 # platform
 ifeq ($(platform),windows)
@@ -33,20 +34,19 @@ endif
 include ../ruby/GNUmakefile
 link += $(rubylink)
 
+obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
+	$(info Compiling $< ...)
+	@$(compiler) $(rubyflags) -c $< -o $@
+
 # hiro
 include ../hiro/GNUmakefile
 link += $(hirolink)
 
-# rules
-objects := $(ui_objects) $(objects)
-objects := $(objects:%=obj/%.o)
-
-obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
-	$(compiler) $(rubyflags) -c $< -o $@
-
 obj/hiro.o: ../hiro/hiro.cpp $(call rwildcard,../hiro/)
-	$(compiler) $(hiroflags) -c $< -o $@
+	$(info Compiling $< ...)
+	@$(compiler) $(hiroflags) -c $< -o $@
 
+# rules
 obj/ui-bsnes.o: $(ui)/bsnes.cpp
 obj/ui-program.o: $(ui)/program/program.cpp
 obj/ui-input.o: $(ui)/input/input.cpp
@@ -55,12 +55,14 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp
 obj/ui-tools.o: $(ui)/tools/tools.cpp
 obj/ui-resource.o: $(ui)/resource/resource.cpp
 
-obj/ui-windows.o:
-	$(windres) $(ui)/resource/bsnes.rc obj/ui-windows.o
+obj/ui-windows.o: $(ui)/resource/bsnes.rc
+	$(info Compiling $< ...)
+	@$(windres) $(ui)/resource/bsnes.rc obj/ui-windows.o
 
 # targets
-build: $(objects)
-	$(strip $(compiler) -o out/$(name) $(objects) $(link))
+default: information $(objects)
+	$(info Linking out/$(name) ...)
+	+@$(strip $(compiler) -o out/$(name) $(objects) $(link))
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/

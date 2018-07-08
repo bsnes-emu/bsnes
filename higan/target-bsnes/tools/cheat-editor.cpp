@@ -125,6 +125,15 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   findCheatsButton.setText("Find Cheats ...").onActivate([&] {
     cheatDatabase->findCheats();
   });
+  enableCheats.setText("Enable Cheats").setChecked(settings["Emulator/Cheats/Enable"].boolean()).onToggle([&] {
+    settings["Emulator/Cheats/Enable"].setValue(enableCheats.checked());
+    if(!enableCheats.checked()) {
+      program->showMessage("All cheat codes disabled");
+    } else {
+      program->showMessage("Active cheat codes enabled");
+    }
+    synchronizeCodes();
+  });
   addButton.setText("Add").onActivate([&] {
     cheatWindow->show();
   });
@@ -224,8 +233,10 @@ auto CheatEditor::saveCheats() -> void {
 
 auto CheatEditor::synchronizeCodes() -> void {
   string_vector codes;
-  for(auto& cheat : cheats) {
-    if(cheat.enable) codes.append(cheat.code);
+  if(enableCheats.checked()) {
+    for(auto& cheat : cheats) {
+      if(cheat.enable) codes.append(cheat.code);
+    }
   }
   emulator->cheatSet(codes);
 }

@@ -4,7 +4,7 @@ struct Program : Emulator::Platform {
   auto main() -> void;
   auto quit() -> void;
 
-  //interface.cpp
+  //platform.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, string_vector options = {}) -> Emulator::Platform::Load override;
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
@@ -77,6 +77,7 @@ struct Program : Emulator::Platform {
   auto showMessage(string text) -> void;
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;
+  auto captureScreenshot() -> bool;
   auto paused() -> bool;
   auto focused() -> bool;
 
@@ -122,7 +123,15 @@ public:
   } sufamiTurboA, sufamiTurboB;
 
   string_vector gameQueue;
-  boolean captureScreenshot;
+
+  struct Screenshot {
+    const uint32* data = nullptr;
+    uint pitch = 0;
+    uint width = 0;
+    uint height = 0;
+  } screenshot;
+
+  bool frameAdvance = false;
 
   uint64 autoSaveTime;
 

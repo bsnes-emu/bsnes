@@ -105,6 +105,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 
 auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
   BrowserDialog dialog;
+  dialog.setParent(*presentation);
   dialog.setOptions(options);
 
   if(id == 1 && name == "Super Famicom" && type == "sfc") {
@@ -205,14 +206,13 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
     if(height == 480) data += 16 * pitch, height -= 32;
   }
 
-  if(captureScreenshot) {
-    captureScreenshot = false;
-    if(auto filename = screenshotPath()) {
-      if(Encode::BMP::create(filename, (const uint32_t*)data, pitch << 2, width, height, false)) {
-        showMessage({"Captured screenshot [", Location::file(filename), "]"});
-      }
-    }
-  }
+  //this relies on the UI only running between Emulator::Scheduler::Event::Frame events
+  //this will always be the case; so we can avoid an unnecessary copy or one-frame delay here
+  //if the core were to exit between a frame event, the next frame might've been only partially rendered
+  screenshot.data = data;
+  screenshot.pitch = pitch << 2;
+  screenshot.width = width;
+  screenshot.height = height;
 
   if(video->lock(output, length, width, height)) {
     length >>= 2;
@@ -223,6 +223,11 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
     video->unlock();
     video->output();
+  }
+
+  if(frameAdvance) {
+    frameAdvance = false;
+    presentation->pauseEmulation.setChecked();
   }
 
   static uint frameCounter = 0;

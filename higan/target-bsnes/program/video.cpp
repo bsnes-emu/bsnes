@@ -23,6 +23,8 @@ auto Program::updateVideoDriver() -> void {
     settings["Video/Driver"].setValue("None");
     return updateVideoDriver();
   }
+
+  presentation->updateShaders();
 }
 
 auto Program::updateVideoBlocking() -> void {

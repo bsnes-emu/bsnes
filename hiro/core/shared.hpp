@@ -956,7 +956,11 @@ struct Window : sWindow {
   auto fullScreen() const { return self().fullScreen(); }
   auto geometry() const { return self().geometry(); }
   auto layout() const { return self().layout(); }
+  auto maximized() const { return self().maximized(); }
+  auto maximumSize() const { return self().maximumSize(); }
   auto menuBar() const { return self().menuBar(); }
+  auto minimized() const { return self().minimized(); }
+  auto minimumSize() const { return self().minimumSize(); }
   auto modal() const { return self().modal(); }
   auto onClose(const function<void ()>& callback = {}) { return self().onClose(callback), *this; }
   auto onDrop(const function<void (string_vector)>& callback = {}) { return self().onDrop(callback), *this; }
@@ -979,6 +983,10 @@ struct Window : sWindow {
   auto setFrameSize(Size size) { return self().setFrameSize(size), *this; }
   auto setFullScreen(bool fullScreen = true) { return self().setFullScreen(fullScreen), *this; }
   auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; }
+  auto setMaximized(bool maximized) { return self().setMaximized(maximized), *this; }
+  auto setMaximumSize(Size size = {}) { return self().setMaximumSize(size), *this; }
+  auto setMinimized(bool minimized) { return self().setMinimized(minimized), *this; }
+  auto setMinimumSize(Size size = {}) { return self().setMinimumSize(size), *this; }
   auto setModal(bool modal = true) { return self().setModal(modal), *this; }
   auto setPosition(Position position) { return self().setPosition(position), *this; }
   auto setResizable(bool resizable = true) { return self().setResizable(resizable), *this; }
