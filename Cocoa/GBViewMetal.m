@@ -71,13 +71,6 @@ static const vector_float2 rect[] =
     [self loadShader];
 }
 
-- (void)addSubview:(NSView *)view
-{
-    /* Fixes rounded corners */
-    [super addSubview:view];
-    [self setWantsLayer:YES];
-}
-
 - (void) loadShader
 {
     NSError *error = nil;

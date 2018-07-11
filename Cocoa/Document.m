@@ -333,9 +333,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     
     NSMutableParagraphStyle *paragraph_style = [[NSMutableParagraphStyle alloc] init];
     [paragraph_style setLineSpacing:2];
-    
-    self.mainWindow.backgroundColor = [NSColor blackColor];
-    
+        
     self.debuggerSideViewInput.font = [NSFont userFixedPitchFontOfSize:12];
     self.debuggerSideViewInput.textColor = [NSColor whiteColor];
     self.debuggerSideViewInput.defaultParagraphStyle = paragraph_style;

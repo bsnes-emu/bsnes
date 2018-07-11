@@ -732,12 +732,11 @@ Preboot:
     
     ld a, [$143]
     bit 7, a
-
     call z, EmulateDMG
+    ldh [$4C], a
     ldh a, [TitleChecksum]
     ld b, a
     
-    ldh [$4C], a ; One day, I will know what this switch does and how it differs from FF6C
     ldh a, [InputPalette]
     and a
     jr nz, .emulateDMGForCGBGame

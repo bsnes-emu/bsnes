@@ -426,6 +426,14 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
             dest[gb->apu_output.buffer_position + i] = output;
         }
         
+        if (gb->apu_output.buffer_position) {
+            if (gb->apu_output.buffer_size + (count - gb->apu_output.buffer_position) < count * 3) {
+                gb->apu_output.buffer_size += count - gb->apu_output.buffer_position;
+                gb->apu_output.buffer = realloc(gb->apu_output.buffer,
+                                                gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
+                gb->apu_output.stream_started = false;
+            }
+        }
         count = gb->apu_output.buffer_position;
     }
     memcpy(dest, gb->apu_output.buffer, count * sizeof(*gb->apu_output.buffer));
