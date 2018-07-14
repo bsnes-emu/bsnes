@@ -22,24 +22,22 @@
 
 #define GB_STRUCT_VERSION 13
 
-typedef enum {
 #ifdef GB_INTERNAL
-    GB_MODEL_FAMILY_MASK = 0xF00,
-    GB_MODEL_DMG_FAMILY = 0x000,
+#define GB_MODEL_FAMILY_MASK 0xF00
+#define GB_MODEL_DMG_FAMILY 0x000
+#define GB_MODEL_MGB_FAMILY 0x100
+#define GB_MODEL_CGB_FAMILY 0x200
 #endif
+
+typedef enum {
+
     // GB_MODEL_DMG_0 = 0x000,
     // GB_MODEL_DMG_A = 0x001,
     GB_MODEL_DMG_B = 0x002,
     // GB_MODEL_DMG_C = 0x003,
     // GB_MODEL_SGB = 0x004,
-#ifdef GB_INTERNAL
-    GB_MODEL_MGB_FAMILY = 0x100,
-#endif
     // GB_MODEL_MGB = 0x100,
     // GB_MODEL_SGB2 = 0x101,
-#ifdef GB_INTERNAL
-    GB_MODEL_CGB_FAMILY = 0x200,
-#endif
     // GB_MODEL_CGB_0 = 0x200,
     // GB_MODEL_CGB_A = 0x201,
     // GB_MODEL_CGB_B = 0x202,

@@ -381,7 +381,10 @@ void GB_apu_run(GB_gameboy_t *gb)
             if (gb->model == GB_MODEL_CGB_C) {
                 /* Todo: This was confirmed to happen on a CGB-C. This may or may not happen on pre-CGB models.
                    Because this degrades audio quality, and testing this on a pre-CGB device requires audio records,
-                   I'll assume these devices are innocent until proven guilty. */
+                   I'll assume these devices are innocent until proven guilty.
+                 
+                   Also happens on CGB-B, but not on CGB-D.
+                 */
                 gb->apu.current_lfsr_sample &= gb->apu.previous_lfsr_sample;
             }
             gb->apu.previous_lfsr_sample = gb->apu.noise_channel.lfsr & 1;

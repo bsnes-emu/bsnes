@@ -447,7 +447,7 @@ static void reset_ram(GB_gameboy_t *gb)
 {
     switch (gb->model) {
         case GB_MODEL_CGB_E:
-        default:
+        case GB_MODEL_AGB: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = (random() & 0xFF);
             }
