@@ -44,6 +44,10 @@ auto pTableViewColumn::setIcon(const image& icon) -> void {
   //unsupported
 }
 
+auto pTableViewColumn::setParent(mObject* parent, int offset) -> void {
+  if(auto header = _parent()) header->_setState();
+}
+
 auto pTableViewColumn::setResizable(bool resizable) -> void {
   _setState();
 }
@@ -78,6 +82,7 @@ auto pTableViewColumn::_parent() -> maybe<pTableViewHeader&> {
 auto pTableViewColumn::_setState() -> void {
   if(auto header = _parent()) {
     if(auto parent = header->_parent()) {
+      auto lock = parent->acquire();
       #if HIRO_QT==4
       parent->qtTableView->header()->setResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
       #elif HIRO_QT==5

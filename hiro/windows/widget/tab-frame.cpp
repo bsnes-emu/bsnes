@@ -45,7 +45,7 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
     if(item->selected()) self->setSelected();
   }
   _buildImageList();
-  _synchronizeLayout();
+  _synchronizeSizable();
 }
 
 auto pTabFrame::remove(sTabFrameItem item) -> void {
@@ -56,8 +56,8 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
 auto pTabFrame::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
   for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) self->setEnabled(sizable->enabled());
     }
   }
 }
@@ -69,8 +69,8 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
   geometry.setWidth(geometry.width() - 4);
   geometry.setHeight(geometry.height() - 23);
   for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      layout->setGeometry(geometry);
+    if(auto& sizable = item->state.sizable) {
+      sizable->setGeometry(geometry);
     }
   }
 }
@@ -82,8 +82,8 @@ auto pTabFrame::setNavigation(Navigation navigation) -> void {
 auto pTabFrame::setVisible(bool visible) -> void {
   pWidget::setVisible(visible);
   for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      if(auto self = layout->self()) self->setVisible(layout->visible(true));
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) self->setVisible(sizable->visible(true));
     }
   }
 }
@@ -97,7 +97,7 @@ auto pTabFrame::_buildImageList() -> void {
     ImageList_Append(imageList, item->state.icon, size);
   }
   TabCtrl_SetImageList(hwnd, imageList);
-  for(auto offset : range(state().items)) {
+  for(auto offset : range(state().items.size())) {
     TCITEM tcItem;
     tcItem.mask = TCIF_IMAGE;
     tcItem.iImage = state().items[offset]->state.icon ? offset : -1;
@@ -105,10 +105,10 @@ auto pTabFrame::_buildImageList() -> void {
   }
 }
 
-auto pTabFrame::_synchronizeLayout() -> void {
+auto pTabFrame::_synchronizeSizable() -> void {
   for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      layout->setVisible(item->selected());
+    if(auto& sizable = item->state.sizable) {
+      sizable->setVisible(item->selected());
     }
   }
 }
@@ -117,7 +117,7 @@ auto pTabFrame::onChange() -> void {
   unsigned selected = TabCtrl_GetCurSel(hwnd);
   for(auto& item : state().items) item->state.selected = false;
   if(auto item = self().item(selected)) item->state.selected = true;
-  _synchronizeLayout();
+  _synchronizeSizable();
   self().doChange();
 }
 

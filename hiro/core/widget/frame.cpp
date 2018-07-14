@@ -5,40 +5,36 @@ auto mFrame::allocate() -> pObject* {
 }
 
 auto mFrame::destruct() -> void {
-  if(auto& layout = state.layout) layout->destruct();
+  if(auto& sizable = state.sizable) sizable->destruct();
   mWidget::destruct();
 }
 
 //
 
-auto mFrame::append(sLayout layout) -> type& {
-  if(auto& layout = state.layout) remove(layout);
-  state.layout = layout;
-  layout->setParent(this, 0);
-  signal(append, layout);
+auto mFrame::append(sSizable sizable) -> type& {
+  if(auto& sizable = state.sizable) remove(sizable);
+  state.sizable = sizable;
+  sizable->setParent(this, 0);
+  signal(append, sizable);
   return *this;
 }
 
-auto mFrame::layout() const -> Layout {
-  return state.layout;
-}
-
-auto mFrame::remove(sLayout layout) -> type& {
-  signal(remove, layout);
-  layout->setParent();
-  state.layout.reset();
+auto mFrame::remove(sSizable sizable) -> type& {
+  signal(remove, sizable);
+  sizable->setParent();
+  state.sizable.reset();
   return *this;
 }
 
 auto mFrame::reset() -> type& {
-  if(auto& layout = state.layout) remove(layout);
+  if(auto& sizable = state.sizable) remove(sizable);
   return *this;
 }
 
-auto mFrame::setParent(mObject* object, signed offset) -> type& {
-  if(auto& layout = state.layout) layout->destruct();
+auto mFrame::setParent(mObject* object, int offset) -> type& {
+  if(auto& sizable = state.sizable) sizable->destruct();
   mObject::setParent(object, offset);
-  if(auto& layout = state.layout) layout->setParent(this, 0);
+  if(auto& sizable = state.sizable) sizable->setParent(this, 0);
   return *this;
 }
 
@@ -46,6 +42,10 @@ auto mFrame::setText(const string& text) -> type& {
   state.text = text;
   signal(setText, text);
   return *this;
+}
+
+auto mFrame::sizable() const -> Sizable {
+  return state.sizable;
 }
 
 auto mFrame::text() const -> string {

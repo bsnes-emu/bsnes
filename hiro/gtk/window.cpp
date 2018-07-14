@@ -8,7 +8,7 @@ static auto Window_close(GtkWidget* widget, GdkEvent* event, pWindow* p) -> sign
   } else {
     p->self().setVisible(false);
   }
-  if(p->state().modal && !p->pObject::state().visible) p->self().setModal(false);
+  if(p->self().modal() && !p->self().visible()) p->self().setModal(false);
   return true;
 }
 
@@ -30,62 +30,28 @@ static auto Window_draw(GtkWidget* widget, cairo_t* context, pWindow* p) -> sign
 
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
+  } else {
+    #if HIRO_GTK==3
+    auto style = gtk_widget_get_style_context(widget);
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+    gtk_render_background(style, context, 0, 0, allocation.width, allocation.height);
+    #endif
   }
+
   return false;
 }
 
 //GTK2 expose-event
 static auto Window_expose(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
-  if(auto color = p->state().backgroundColor) {
-    cairo_t* context = gdk_cairo_create(gtk_widget_get_window(widget));
-    Window_draw(widget, context, p);
-    cairo_destroy(context);
-  }
+  cairo_t* context = gdk_cairo_create(gtk_widget_get_window(widget));
+  Window_draw(widget, context, p);
+  cairo_destroy(context);
   return false;
 }
 
 static auto Window_configure(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
-  if(!gtk_widget_get_realized(p->widget)) return false;
-  if(!p->pObject::state().visible) return false;
-  GdkWindow* gdkWindow = gtk_widget_get_window(widget);
-
-  GdkRectangle border, client;
-  gdk_window_get_frame_extents(gdkWindow, &border);
-  #if HIRO_GTK==2
-  gdk_window_get_geometry(gdkWindow, nullptr, nullptr, &client.width, &client.height, nullptr);
-  #elif HIRO_GTK==3
-  gdk_window_get_geometry(gdkWindow, nullptr, nullptr, &client.width, &client.height);
-  #endif
-  gdk_window_get_origin(gdkWindow, &client.x, &client.y);
-
-  if(!p->state().fullScreen) {
-    //update geometry settings
-    settings.geometry.frameX = client.x - border.x;
-    settings.geometry.frameY = client.y - border.y;
-    settings.geometry.frameWidth = border.width - client.width;
-    settings.geometry.frameHeight = border.height - client.height;
-  }
-
-  Geometry geometry = {
-    client.x,
-    client.y + p->_menuHeight(),
-    client.width,
-    client.height - p->_menuHeight() - p->_statusHeight()
-  };
-
-  //move
-  if(geometry.x() != p->state().geometry.x() || geometry.y() != p->state().geometry.y()) {
-    if(!p->state().fullScreen) {
-      p->state().geometry.setPosition({geometry.x(), geometry.y()});
-    }
-    if(!p->locked()) p->self().doMove();
-  }
-
-  //size
-  if(geometry.width() != p->state().geometry.width() || geometry.height() != p->state().geometry.height()) {
-    p->onSizePending = true;
-  }
-
+  p->_synchronizeMargin();
   return false;
 }
 
@@ -98,11 +64,17 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pWindow* p) -> void {
 }
 
 static auto Window_getPreferredWidth(GtkWidget* widget, int* minimalWidth, int* naturalWidth) -> void {
-  //TODO: get pWindow; use sizeRequest
+  if(auto p = (pWindow*)g_object_get_data(G_OBJECT(widget), "hiro::window")) {
+    *minimalWidth = 1;
+    *naturalWidth = 1;  //p->state().geometry.width();
+  }
 }
 
 static auto Window_getPreferredHeight(GtkWidget* widget, int* minimalHeight, int* naturalHeight) -> void {
-  //TODO: get pWindow; use sizeRequest
+  if(auto p = (pWindow*)g_object_get_data(G_OBJECT(widget), "hiro::window")) {
+    *minimalHeight = 1;
+    *naturalHeight = p->state().geometry.height();
+  }
 }
 
 static auto Window_keyPress(GtkWidget* widget, GdkEventKey* event, pWindow* p) -> signed {
@@ -128,28 +100,10 @@ static auto Window_keyRelease(GtkWidget* widget, GdkEventKey* event, pWindow* p)
 }
 
 static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pWindow* p) -> void {
-  //size-allocate is sent before window-state-event when maximizing a window
-  //this means Window::onSize() handler would have the old maximized state if we used the latter signal
   p->_synchronizeState();
-
-  //size-allocate sent from gtk_fixed_move(); detect if layout unchanged and return
-  if(allocation->width == p->lastAllocation.width
-  && allocation->height == p->lastAllocation.height) return;
-
-  if(!p->state().fullScreen) {
-    p->state().geometry.setSize({allocation->width, allocation->height});
-  }
-
-  if(auto& layout = p->state().layout) {
-    layout->setGeometry(p->self().geometry().setPosition(0, 0));
-  }
-
-  if(!p->locked() && p->onSizePending) {
-    p->onSizePending = false;
-    p->self().doSize();
-  }
-
-  p->lastAllocation = *allocation;
+  p->_synchronizeGeometry();
+  p->_synchronizeMargin();
+  return;
 }
 
 static auto Window_sizeRequest(GtkWidget* widget, GtkRequisition* requisition, pWindow* p) -> void {
@@ -172,10 +126,6 @@ static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) ->
 }
 
 auto pWindow::construct() -> void {
-  lastAllocation.width  = 0;
-  lastAllocation.height = 0;
-  onSizePending = false;
-
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_resizable(GTK_WINDOW(widget), true);
 
@@ -245,19 +195,31 @@ auto pWindow::construct() -> void {
   widgetClass->get_preferred_height = Window_getPreferredHeight;
   #endif
   g_signal_connect(G_OBJECT(widget), "window-state-event", G_CALLBACK(Window_stateEvent), (gpointer)this);
+
+  g_object_set_data(G_OBJECT(widget), "hiro::window", (gpointer)this);
+  g_object_set_data(G_OBJECT(formContainer), "hiro::window", (gpointer)this);
+
+  pApplication::windows.append(this);
 }
 
 auto pWindow::destruct() -> void {
-  gtk_widget_destroy(widget);
-}
+  for(uint offset : range(pApplication::windows.size())) {
+    if(pApplication::windows[offset] == this) {
+      pApplication::windows.remove(offset);
+      break;
+    }
+  }
 
-auto pWindow::append(sLayout layout) -> void {
+  gtk_widget_destroy(widget);
 }
 
 auto pWindow::append(sMenuBar menuBar) -> void {
   _setMenuEnabled(menuBar->enabled(true));
   _setMenuFont(menuBar->font(true));
   _setMenuVisible(menuBar->visible(true));
+}
+
+auto pWindow::append(sSizable sizable) -> void {
 }
 
 auto pWindow::append(sStatusBar statusBar) -> void {
@@ -285,11 +247,11 @@ auto pWindow::frameMargin() const -> Geometry {
   };
 }
 
-auto pWindow::remove(sLayout layout) -> void {
-}
-
 auto pWindow::remove(sMenuBar menuBar) -> void {
   _setMenuVisible(false);
+}
+
+auto pWindow::remove(sSizable sizable) -> void {
 }
 
 auto pWindow::remove(sStatusBar statusBar) -> void {
@@ -317,10 +279,6 @@ auto pWindow::setEnabled(bool enabled) -> void {
   if(auto& statusBar = state().statusBar) {
     if(auto self = statusBar->self()) self->setEnabled(statusBar->enabled(true));
   }
-
-  if(auto& layout = state().layout) {
-    if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
-  }
 }
 
 auto pWindow::setFocused() -> void {
@@ -329,31 +287,28 @@ auto pWindow::setFocused() -> void {
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
   if(fullScreen) {
-    windowedGeometry = state().geometry;
     gtk_window_fullscreen(GTK_WINDOW(widget));
-    state().geometry = Monitor::geometry(Monitor::primary());
   } else {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
-    state().geometry = windowedGeometry;
   }
   auto time = chrono::millisecond();
-  while(chrono::millisecond() - time < 20) gtk_main_iteration_do(false);
+  while(chrono::millisecond() - time < 20) Application::processEvents();
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
-  Geometry margin = frameMargin();
+  auto margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x() - margin.x(), geometry.y() - margin.y());
 
   setMaximumSize(state().maximumSize);
   setMinimumSize(state().minimumSize);
 
-  gtk_widget_set_size_request(formContainer, geometry.width(), geometry.height());
   auto time1 = chrono::millisecond();
-  while(chrono::millisecond() - time1 < 20) gtk_main_iteration_do(false);
+  while(chrono::millisecond() - time1 < 20) Application::processEvents();
 
   gtk_window_resize(GTK_WINDOW(widget), geometry.width(), geometry.height() + _menuHeight() + _statusHeight());
+
   auto time2 = chrono::millisecond();
-  while(chrono::millisecond() - time2 < 20) gtk_main_iteration_do(false);
+  while(chrono::millisecond() - time2 < 20) Application::processEvents();
 }
 
 auto pWindow::setMaximized(bool maximized) -> void {
@@ -366,9 +321,9 @@ auto pWindow::setMaximized(bool maximized) -> void {
 }
 
 auto pWindow::setMaximumSize(Size size) -> void {
-  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
-
+  //TODO: this doesn't have any effect in GTK2 or GTK3
   GdkGeometry geometry;
+  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
   geometry.max_width  = !state().resizable ? state().geometry.width()  : size.width()  ? size.width()  : 32767;
   geometry.max_height = !state().resizable ? state().geometry.height() : size.height() ? size.height() : 32767;
   gtk_window_set_geometry_hints(GTK_WINDOW(widget), nullptr, &geometry, GDK_HINT_MAX_SIZE);
@@ -384,12 +339,13 @@ auto pWindow::setMinimized(bool minimized) -> void {
 }
 
 auto pWindow::setMinimumSize(Size size) -> void {
-  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
+  gtk_widget_set_size_request(formContainer, size.width(), size.height());  //for GTK3
 
   GdkGeometry geometry;
+  if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
   geometry.min_width  = !state().resizable ? state().geometry.width()  : size.width()  ? size.width()  : 1;
   geometry.min_height = !state().resizable ? state().geometry.height() : size.height() ? size.height() : 1;
-  gtk_window_set_geometry_hints(GTK_WINDOW(widget), nullptr, &geometry, GDK_HINT_MIN_SIZE);
+  gtk_window_set_geometry_hints(GTK_WINDOW(widget), nullptr, &geometry, GDK_HINT_MIN_SIZE);  //for GTK2
 }
 
 auto pWindow::setModal(bool modal) -> void {
@@ -424,57 +380,47 @@ auto pWindow::setTitle(const string& title) -> void {
 
 auto pWindow::setVisible(bool visible) -> void {
   gtk_widget_set_visible(widget, visible);
-
-  if(auto& menuBar = state().menuBar) {
-    if(menuBar->self()) menuBar->self()->setVisible(menuBar->visible(true));
-  }
-
-  if(auto& layout = state().layout) {
-    if(layout->self()) layout->self()->setVisible(layout->visible(true));
-  }
-
-  if(auto& statusBar = state().statusBar) {
-    if(statusBar->self()) statusBar->self()->setVisible(statusBar->visible(true));
-  }
-
-  //GTK+ returns invalid widget sizes below without this call
-  Application::processEvents();
-
-  if(visible) {
-    if(gtk_widget_get_visible(gtkMenu)) {
-      GtkAllocation allocation;
-      gtk_widget_get_allocation(gtkMenu, &allocation);
-      settings.geometry.menuHeight = allocation.height;
-    }
-
-    if(gtk_widget_get_visible(gtkStatus)) {
-      GtkAllocation allocation;
-      gtk_widget_get_allocation(gtkStatus, &allocation);
-      settings.geometry.statusHeight = allocation.height;
-    }
-  }
-
-  if(auto& layout = state().layout) {
-    layout->setGeometry(self().geometry().setPosition(0, 0));
-  }
+  _synchronizeMargin();
 }
 
 auto pWindow::_append(mWidget& widget) -> void {
-  if(!widget.self()) return;
-  if(auto parent = widget.parentWidget(true)) {
-    if(auto instance = parent->self()) widget.self()->gtkParent = instance->container(widget);
-  } else {
-    widget.self()->gtkParent = formContainer;
+  if(auto pWidget = widget.self()) {
+    if(auto parent = widget.parentWidget(true)) {
+      if(auto instance = parent->self()) {
+        pWidget->gtkParent = instance->container(widget);
+      }
+    } else {
+      pWidget->gtkParent = formContainer;
+    }
+    if(pWidget->gtkParent) {
+      gtk_fixed_put(GTK_FIXED(pWidget->gtkParent), pWidget->gtkWidget, 0, 0);
+    }
   }
-  gtk_fixed_put(GTK_FIXED(widget.self()->gtkParent), widget.self()->gtkWidget, 0, 0);
 }
 
 auto pWindow::_append(mMenu& menu) -> void {
-  if(menu.self()) gtk_menu_shell_append(GTK_MENU_SHELL(gtkMenu), menu.self()->widget);
+  if(auto pMenu = menu.self()) {
+    gtk_menu_shell_append(GTK_MENU_SHELL(gtkMenu), pMenu->widget);
+  }
 }
 
-auto pWindow::_menuHeight() const -> signed {
-  return gtk_widget_get_visible(gtkMenu) ? settings.geometry.menuHeight : 0;
+auto pWindow::_menuHeight() const -> int {
+  if(auto& menuBar = state().menuBar) {
+    if(menuBar->visible()) {
+      return settings.geometry.menuHeight + _menuTextHeight();
+    }
+  }
+  return 0;
+}
+
+auto pWindow::_menuTextHeight() const -> int {
+  int height = 0;
+  if(auto& menuBar = state().menuBar) {
+    for(auto& menu : menuBar->state.menus) {
+      height = max(height, menu->font(true).size(menu->text()).height());
+    }
+  }
+  return height;
 }
 
 auto pWindow::_setIcon(const string& pathname) -> bool {
@@ -530,14 +476,116 @@ auto pWindow::_setStatusVisible(bool visible) -> void {
   setResizable(self().resizable());
 }
 
-auto pWindow::_statusHeight() const -> signed {
-  return gtk_widget_get_visible(gtkStatus) ? settings.geometry.statusHeight : 0;
+auto pWindow::_statusHeight() const -> int {
+  if(auto& statusBar = state().statusBar) {
+    if(statusBar->visible()) {
+      return settings.geometry.statusHeight + _statusTextHeight();
+    }
+  }
+  return 0;
+}
+
+auto pWindow::_statusTextHeight() const -> int {
+  int height = 0;
+  if(auto& statusBar = state().statusBar) {
+    height = statusBar->font(true).size(statusBar->text()).height();
+  }
+  return height;
+}
+
+//GTK is absolutely hopeless with window sizing
+//it will send size-allocate events during resizing of widgets during size-allocate events
+//instead of fighting with configure-event and size-allocate, just poll the state instead
+auto pWindow::_synchronizeGeometry() -> void {
+  if(locked()) return;
+  auto lock = acquire();
+
+  if(!gtk_widget_get_realized(widget)) return;
+  if(!gtk_widget_get_visible(widget)) return;
+
+  GtkAllocation allocation;
+
+  gtk_widget_get_allocation(formContainer, &allocation);
+  if(allocation.width != lastSize.width || allocation.height != lastSize.height) {
+    auto size = self().geometry().size();
+    state().geometry.setSize({allocation.width, allocation.height});
+    if(auto& sizable = state().sizable) {
+      sizable->setGeometry(self().geometry().setPosition());
+    }
+    self().doSize();
+
+    //for GTK3: the window will not update after changing widget sizes until sending size-allocate
+    //size-allocate will also call _synchronizeMargin() which is also important for window sizing
+    //GtkAllocation is a typedef of GdkRectangle
+    GtkAllocation rectangle;
+    gtk_widget_get_allocation(widget, &rectangle);
+    g_signal_emit_by_name(G_OBJECT(widget), "size-allocate", &rectangle, (gpointer)this, nullptr);
+  }
+  lastSize = allocation;
+
+  gtk_widget_get_allocation(widget, &allocation);
+  if(allocation.x != lastMove.x || allocation.y != lastMove.y) {
+    state().geometry.setPosition({allocation.x, allocation.y});
+    self().doMove();
+  }
+  lastMove = allocation;
+}
+
+auto pWindow::_synchronizeMargin() -> void {
+  if(locked()) return;
+  auto lock = acquire();
+
+  if(!gtk_widget_get_realized(widget)) return;
+  if(!gtk_widget_get_visible(widget)) return;
+  if(state().fullScreen || state().maximized || state().minimized) return;
+
+  auto window = gtk_widget_get_window(widget);
+  GdkRectangle border, client;
+  gdk_window_get_frame_extents(window, &border);
+  gdk_window_get_origin(window, &client.x, &client.y);
+  #if HIRO_GTK==2
+  gdk_window_get_geometry(window, nullptr, nullptr, &client.width, &client.height, nullptr);
+  #elif HIRO_GTK==3
+  gdk_window_get_geometry(window, nullptr, nullptr, &client.width, &client.height);
+  #endif
+
+  settings.geometry.frameX = client.x - border.x;
+  settings.geometry.frameY = client.y - border.y;
+  settings.geometry.frameWidth  = border.width  - client.width;
+  settings.geometry.frameHeight = border.height - client.height;
+
+  if(gtk_widget_get_visible(gtkMenu)) {
+    GtkAllocation allocation;
+    auto time = chrono::millisecond();
+    while(chrono::millisecond() - time < 20) {
+      gtk_widget_get_allocation(gtkMenu, &allocation);
+      if(allocation.height > 1) {
+        settings.geometry.menuHeight = allocation.height - _menuTextHeight();
+        break;
+      }
+    }
+  }
+
+  if(gtk_widget_get_visible(gtkStatus)) {
+    GtkAllocation allocation;
+    auto time = chrono::millisecond();
+    while(chrono::millisecond() - time < 20) {
+      gtk_widget_get_allocation(gtkStatus, &allocation);
+      if(allocation.height > 1) {
+        settings.geometry.statusHeight = allocation.height - _statusTextHeight();
+        break;
+      }
+    }
+  }
 }
 
 //GTK doesn't add gtk_window_is_maximized() until 3.12;
 //and doesn't appear to have a companion gtk_window_is_(hidden,iconic,minimized);
 //so we have to do this the hard way
 auto pWindow::_synchronizeState() -> void {
+  if(locked()) return;
+  auto lock = acquire();
+
   if(!gtk_widget_get_realized(widget)) return;
 
   #if defined(DISPLAY_WINDOWS)

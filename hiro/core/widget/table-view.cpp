@@ -146,7 +146,7 @@ auto mTableView::remove(sTableViewItem item) -> type& {
 }
 
 auto mTableView::reset() -> type& {
-  for(auto n : rrange(state.items)) remove(state.items[n]);
+  while(state.items) remove(state.items.right());
   if(auto& header = state.header) remove(header);
   return *this;
 }
@@ -194,7 +194,7 @@ auto mTableView::setForegroundColor(Color color) -> type& {
 }
 
 auto mTableView::setParent(mObject* parent, signed offset) -> type& {
-  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  for(auto& item : reverse(state.items)) item->destruct();
   if(auto& header = state.header) header->destruct();
   mObject::setParent(parent, offset);
   if(auto& header = state.header) header->setParent(this, 0);

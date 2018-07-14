@@ -5,13 +5,11 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include processor/GNUmakefile
 
-objects := ruby hiro $(objects)
+objects := ruby hiro $(if $(call streq,$(platform),windows),hiro-resource) $(objects)
 objects += ui-bsnes ui-program ui-input ui-presentation
 objects += ui-settings ui-tools ui-resource
-objects += $(if $(call streq,$(platform),windows),ui-windows)
 objects := $(objects:%=obj/%.o)
 
-# platform
 ifeq ($(platform),windows)
   ruby += video.wgl video.direct3d video.directdraw video.gdi
   ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound
@@ -30,23 +28,13 @@ else ifeq ($(platform),bsd)
   ruby += input.sdl input.xlib
 endif
 
-# ruby
-include ../ruby/GNUmakefile
-link += $(rubylink)
+ruby.path := ../ruby
+include $(ruby.path)/GNUmakefile
 
-obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
-	$(info Compiling $< ...)
-	@$(compiler) $(rubyflags) -c $< -o $@
+hiro.path := ../hiro
+hiro.resource := $(ui)/resource/bsnes.rc
+include $(hiro.path)/GNUmakefile
 
-# hiro
-include ../hiro/GNUmakefile
-link += $(hirolink)
-
-obj/hiro.o: ../hiro/hiro.cpp $(call rwildcard,../hiro/)
-	$(info Compiling $< ...)
-	@$(compiler) $(hiroflags) -c $< -o $@
-
-# rules
 obj/ui-bsnes.o: $(ui)/bsnes.cpp
 obj/ui-program.o: $(ui)/program/program.cpp
 obj/ui-input.o: $(ui)/input/input.cpp
@@ -55,14 +43,10 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp
 obj/ui-tools.o: $(ui)/tools/tools.cpp
 obj/ui-resource.o: $(ui)/resource/resource.cpp
 
-obj/ui-windows.o: $(ui)/resource/bsnes.rc
-	$(info Compiling $< ...)
-	@$(windres) $(ui)/resource/bsnes.rc obj/ui-windows.o
-
 # targets
-default: information $(objects)
+all: $(objects)
 	$(info Linking out/$(name) ...)
-	+@$(strip $(compiler) -o out/$(name) $(objects) $(link))
+	+@$(strip $(compiler) -o out/$(name) $(objects) $(options) $(ruby.options) $(hiro.options))
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
@@ -84,7 +68,9 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/applications/
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
+	mkdir -p $(prefix)/share/$(name)/locales/
 	cp out/$(name) $(prefix)/bin/$(name)
+	cp $(ui)/resource/locales/* $(prefix)/share/$(name)/locales/
 	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
 endif

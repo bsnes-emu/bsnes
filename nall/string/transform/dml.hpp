@@ -75,7 +75,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
 
   //html
   else if(block.beginsWith("<html>\n") && settings.allowHTML) {
-    for(auto n : range(lines)) {
+    for(auto n : range(lines.size())) {
       if(n == 0 || !lines[n].beginsWith("  ")) continue;
       state.output.append(lines[n].trimLeft("  ", 1L), "\n");
     }

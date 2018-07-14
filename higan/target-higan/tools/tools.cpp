@@ -10,7 +10,7 @@ unique_pointer<ToolsManager> toolsManager;
 ToolsManager::ToolsManager() {
   toolsManager = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   setTitle("Tools");
   setSize({600, 405});

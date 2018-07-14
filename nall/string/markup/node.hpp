@@ -131,8 +131,3 @@ protected:
 };
 
 }}
-
-namespace nall {
-  inline auto range(const Markup::Node& value) { return range_t{0, (int)value.size(), 1}; }
-  inline auto rrange(const Markup::Node& value) { return range_t{(int)value.size() - 1, -1, -1}; }
-}

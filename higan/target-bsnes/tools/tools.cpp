@@ -10,7 +10,7 @@ unique_pointer<ToolsWindow> toolsWindow;
 ToolsWindow::ToolsWindow() {
   toolsWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   setTitle("Tools");
   setSize({600, 400});

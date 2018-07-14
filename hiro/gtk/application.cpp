@@ -2,18 +2,16 @@
 
 namespace hiro {
 
+vector<pWindow*> pApplication::windows;
+
 #if defined(DISPLAY_XORG)
 XlibDisplay* pApplication::display = nullptr;
 #endif
 
 auto pApplication::run() -> void {
-  if(Application::state.onMain) {
-    while(!Application::state.quit) {
-      Application::doMain();
-      processEvents();
-    }
-  } else {
-    gtk_main();
+  while(!Application::state.quit) {
+    Application::doMain();
+    processEvents();
   }
 }
 
@@ -23,6 +21,7 @@ auto pApplication::pendingEvents() -> bool {
 
 auto pApplication::processEvents() -> void {
   while(pendingEvents()) gtk_main_iteration_do(false);
+  for(auto& window : windows) window->_synchronizeGeometry();
 }
 
 auto pApplication::quit() -> void {
@@ -30,7 +29,7 @@ auto pApplication::quit() -> void {
   if(gtk_main_level()) gtk_main_quit();
 
   #if defined(DISPLAY_XORG)
-  //todo: Keyboard::poll() is being called after Application::quit();
+  //TODO: Keyboard::poll() is being called after Application::quit();
   //so if display is closed; this causes a segfault
   //XCloseDisplay(display);
   //display = nullptr;
@@ -46,15 +45,17 @@ auto pApplication::initialize() -> void {
   auto name = Application::state.name ? Application::state.name : string{"hiro"};
   gdk_set_program_class(name);
 
-  #if 1
+  #if defined(BUILD_DEBUG)
+  //force a trap on Gtk-CRITICAL and Gtk-WARNING messages
+  //this allows gdb to perform a backtrace to find an error's origin point
+  int argc = 3;
+  char* argv[] = {name.get(), new char[7], new char[19], nullptr};
+  strcpy(argv[1], "--sync");
+  strcpy(argv[2], "--g-fatal-warnings");
+  g_log_set_always_fatal(GLogLevelFlags(G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING));
+  #else
   int argc = 1;
   char* argv[] = {name.get(), nullptr};
-  #else
-  //--g-fatal-warnings will force a trap on Gtk-CRITICAL and Gtk-WARNING messages
-  //this allows gdb to perform a backtrace to find an error's origin point
-  int argc = 2;
-  char* argv[] = {name.get(), new char[19], nullptr};
-  strcpy(argv[1], "--g-fatal-warnings");
   #endif
   char** argvp = argv;
 

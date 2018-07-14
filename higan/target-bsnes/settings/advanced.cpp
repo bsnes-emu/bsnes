@@ -2,7 +2,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Action::Settings);
   setText("Advanced");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   driversLabel.setText("Drivers").setFont(Font().setBold());
 
   videoDriverLabel.setText("Video:");

@@ -44,18 +44,16 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
   if(geometry.width()  < 1) geometry.setWidth (1);
   if(geometry.height() < 1) geometry.setHeight(1);
   gtk_widget_set_size_request(gtkWidget, geometry.width(), geometry.height());
-  if(gtk_widget_get_realized(gtkWidget)) {
+  if(0 && gtk_widget_get_realized(gtkWidget)) {
     static bool locked = false;
     if(!locked) {
       locked = true;
       auto time = chrono::millisecond();
       while(chrono::millisecond() - time < 20) {
-        gtk_main_iteration_do(false);
         GtkAllocation allocation;
         gtk_widget_get_allocation(gtkWidget, &allocation);
-        if(allocation.width  != geometry.width ()) continue;
-        if(allocation.height != geometry.height()) continue;
-        break;
+        if(allocation.width == geometry.width() && allocation.height == geometry.height()) break;
+        gtk_main_iteration_do(false);
       }
       locked = false;
     }

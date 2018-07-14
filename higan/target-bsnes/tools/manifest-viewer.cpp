@@ -2,7 +2,7 @@ ManifestViewer::ManifestViewer(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Emblem::Text);
   setText("Manifest Viewer");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   manifestView.setEditable(false).setWordWrap(false).setFont(Font().setFamily(Font::Mono));
 }
 

@@ -1,149 +1,280 @@
 #if defined(Hiro_HorizontalLayout)
 
-auto mHorizontalLayout::append(sSizable sizable, Size size, float spacing) -> type& {
-  properties.append({size.width(), size.height(), spacing < 0 ? settings.spacing : spacing});
-  mLayout::append(sizable);
-  return *this;
+auto mHorizontalLayout::alignment() const -> maybe<float> {
+  return state.alignment;
 }
 
-auto mHorizontalLayout::modify(sSizable sizable, Size size, float spacing) -> type& {
-  if(sizable && this->sizable(sizable->offset()) == sizable) {
-    auto& properties = this->properties[sizable->offset()];
-    properties.setWidth(size.width());
-    properties.setHeight(size.height());
-    properties.setSpacing(spacing);
+auto mHorizontalLayout::append(sSizable sizable, Size size, float spacing) -> type& {
+  HorizontalLayoutCell cell;
+  cell->setSizable(sizable);
+  cell->setSize(size);
+  cell->setSpacing(spacing);
+  cell->setParent(this, cellCount());
+  state.cells.append(cell);
+  return synchronize();
+}
+
+auto mHorizontalLayout::cell(uint position) const -> HorizontalLayoutCell {
+  return state.cells(position, {});
+}
+
+auto mHorizontalLayout::cell(sSizable sizable) const -> HorizontalLayoutCell {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return cell;
   }
-  return *this;
+  return {};
+}
+
+auto mHorizontalLayout::cellCount() const -> uint {
+  return state.cells.size();
+}
+
+auto mHorizontalLayout::destruct() -> void {
+  for(auto& cell : state.cells) cell->destruct();
+  mSizable::destruct();
 }
 
 auto mHorizontalLayout::minimumSize() const -> Size {
-  float width = 0, height = 0;
-
-  for(auto n : range(sizableCount())) {
-    auto& child = properties[sizable(n)->offset()];
-    if(child.width() == Size::Minimum || child.width() == Size::Maximum) {
-      width += sizable(n)->minimumSize().width();
+  float width = 0;
+  for(auto index : range(cellCount())) {
+    auto cell = this->cell(index);
+    if(cell.size().width() == Size::Minimum || cell.size().width() == Size::Maximum) {
+      width += cell.sizable().minimumSize().width();
     } else {
-      width += child.width();
+      width += cell.size().width();
     }
-    if(&child != &properties.right()) width += child.spacing();
+    if(index != cellCount() - 1) width += cell.spacing();
   }
 
-  for(auto n : range(sizableCount())) {
-    auto& child = properties[sizable(n)->offset()];
-    if(child.height() == Size::Minimum || child.height() == Size::Maximum) {
-      height = max(height, sizable(n)->minimumSize().height());
+  float height = 0;
+  for(auto index : range(cellCount())) {
+    auto cell = this->cell(index);
+    if(cell.size().height() == Size::Minimum || cell.size().height() == Size::Maximum) {
+      height = max(height, cell.sizable().minimumSize().height());
       continue;
     }
-    height = max(height, child.height());
+    height = max(height, cell.size().height());
   }
 
   return {
-    settings.padding.x() + width  + settings.padding.width(),
-    settings.padding.y() + height + settings.padding.height()
+    padding().x() + width  + padding().width(),
+    padding().y() + height + padding().height()
   };
 }
 
-auto mHorizontalLayout::remove(sSizable sizable) -> type& {
-  properties.remove(sizable->offset());
-  mLayout::remove(sizable);
-  return *this;
+auto mHorizontalLayout::padding() const -> Geometry {
+  return state.padding;
+}
+
+auto mHorizontalLayout::remove(sHorizontalLayoutCell cell) -> type& {
+  if(cell->parent() != this) return *this;
+  auto offset = cell->offset();
+  cell->setParent();
+  state.cells.remove(offset);
+  for(uint n : range(offset, cellCount())) state.cells[n]->adjustOffset(-1);
+  return synchronize();
 }
 
 auto mHorizontalLayout::reset() -> type& {
-  mLayout::reset();
-  properties.reset();
-  return *this;
+  while(state.cells) remove(state.cells.right());
+  return synchronize();
 }
 
-auto mHorizontalLayout::setAlignment(float alignment) -> type& {
-  settings.alignment = max(0.0, min(1.0, alignment));
-  return *this;
+auto mHorizontalLayout::setAlignment(maybe<float> alignment) -> type& {
+  state.alignment = alignment;
+  return synchronize();
 }
 
 auto mHorizontalLayout::setEnabled(bool enabled) -> type& {
-  mLayout::setEnabled(enabled);
-  for(auto n : range(sizableCount())) {
-    sizable(n)->setEnabled(sizable(n)->enabled());
-  }
+  mSizable::setEnabled(enabled);
+  for(auto& cell : state.cells) cell.sizable().setEnabled(cell.sizable().enabled());
   return *this;
 }
 
 auto mHorizontalLayout::setFont(const Font& font) -> type& {
-  mLayout::setFont(font);
-  for(auto n : range(sizableCount())) {
-    sizable(n)->setFont(sizable(n)->font());
-  }
+  mSizable::setFont(font);
+  for(auto& cell : state.cells) cell.sizable().setFont(cell.sizable().font());
   return *this;
 }
 
-auto mHorizontalLayout::setGeometry(Geometry containerGeometry) -> type& {
-  mLayout::setGeometry(containerGeometry);
+auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
+  mSizable::setGeometry(geometry);
+  auto window = parentWindow(true);
+  if(!window || !window->visible()) return *this;
 
-  auto properties = this->properties;
-  for(auto n : range(sizableCount())) {
-    auto& child = properties[sizable(n)->offset()];
-    if(child.width()  == Size::Minimum) child.setWidth(sizable(n)->minimumSize().width());
-    if(child.height() == Size::Minimum) child.setHeight(sizable(n)->minimumSize().height());
+  geometry.setX(geometry.x() + padding().x());
+  geometry.setY(geometry.y() + padding().y());
+  geometry.setWidth (geometry.width()  - padding().x() - padding().width());
+  geometry.setHeight(geometry.height() - padding().y() - padding().height());
+
+  vector<float> widths;
+  widths.resize(cellCount());
+  uint maximumWidths = 0;
+  for(auto index : range(cellCount())) {
+    auto cell = this->cell(index);
+    float width = 0;
+    if(cell.size().width() == Size::Maximum) {
+      width = Size::Maximum;
+      maximumWidths++;
+    } else if(cell.size().width() == Size::Minimum) {
+      width = cell.sizable().minimumSize().width();
+    } else {
+      width = cell.size().width();
+    }
+    widths[index] = width;
   }
 
-  Geometry geometry = containerGeometry;
-  geometry.setX     (geometry.x()      + settings.padding.x());
-  geometry.setY     (geometry.y()      + settings.padding.y());
-  geometry.setWidth (geometry.width()  - settings.padding.x() - settings.padding.width());
-  geometry.setHeight(geometry.height() - settings.padding.y() - settings.padding.height());
-
-  float minimumWidth = 0, maximumWidthCounter = 0;
-  for(auto& child : properties) {
-    if(child.width() == Size::Maximum) maximumWidthCounter++;
-    if(child.width() != Size::Maximum) minimumWidth += child.width();
-    if(&child != &properties.right()) minimumWidth += child.spacing();
+  float fixedWidth = 0;
+  for(uint index : range(state.cells.size())) {
+    if(widths[index] != Size::Maximum) fixedWidth += widths[index];
+    if(index != cellCount() - 1) fixedWidth += cell(index).spacing();
   }
 
-  for(auto& child : properties) {
-    if(child.width()  == Size::Maximum) child.setWidth((geometry.width() - minimumWidth) / maximumWidthCounter);
-    if(child.height() == Size::Maximum) child.setHeight(geometry.height());
+  float maximumWidth = (geometry.width() - fixedWidth) / maximumWidths;
+  for(auto& width : widths) {
+    if(width == Size::Maximum) width = maximumWidth;
   }
 
-  float maximumHeight = 0;
-  for(auto& child : properties) maximumHeight = max(maximumHeight, child.height());
-
-  for(auto n : range(sizableCount())) {
-    auto& child = properties[sizable(n)->offset()];
-    float pivot = (maximumHeight - child.height()) * settings.alignment;
-    Geometry childGeometry = {geometry.x(), geometry.y() + pivot, child.width(), child.height()};
-    if(childGeometry.width()  < 1) childGeometry.setWidth (1);
-    if(childGeometry.height() < 1) childGeometry.setHeight(1);
-    sizable(n)->setGeometry(childGeometry);
-
-    geometry.setX    (geometry.x()     + child.width() + child.spacing());
-    geometry.setWidth(geometry.width() - child.width() + child.spacing());
+  float height = 0;
+  for(auto index : range(cellCount())) {
+    auto cell = this->cell(index);
+    if(cell.size().height() == Size::Maximum) {
+      height = geometry.height();
+      break;
+    } else if(cell.size().height() == Size::Minimum) {
+      height = max(height, cell.sizable().minimumSize().height());
+    } else {
+      height = max(height, cell.size().height());
+    }
   }
 
-  return *this;
-}
+  float geometryX = geometry.x();
+  float geometryY = geometry.y();
+  for(auto index : range(cellCount())) {
+    float geometryWidth  = widths[index];
+    float geometryHeight = height;
+    auto cell = this->cell(index);
+    auto alignment = cell.alignment();
+    if(!alignment) alignment = this->alignment();
+    if(!alignment) alignment = 0.5;
+    float cellWidth  = geometryWidth;
+    float cellHeight = cell.size().height();
+    if(cellHeight == Size::Minimum) cellHeight = cell.sizable()->minimumSize().height();
+    if(cellHeight == Size::Maximum) cellHeight = geometryHeight;
+    float cellX = geometryX;
+    float cellY = geometryY + alignment() * (geometryHeight - cellHeight);
+    cell.sizable().setGeometry({cellX, cellY, cellWidth, cellHeight});
+    geometryX += geometryWidth + cell.spacing();
+  }
 
-auto mHorizontalLayout::setMargin(float margin) -> type& {
-  setPadding({margin, margin, margin, margin});
   return *this;
 }
 
 auto mHorizontalLayout::setPadding(Geometry padding) -> type& {
-  settings.padding = padding;
-  setGeometry(geometry());
+  state.padding = padding;
+  return synchronize();
+}
+
+auto mHorizontalLayout::setParent(mObject* parent, int offset) -> type& {
+  for(auto& cell : reverse(state.cells)) cell->destruct();
+  mSizable::setParent(parent, offset);
+  for(auto& cell : state.cells) cell->setParent(this, cell->offset());
   return *this;
 }
 
 auto mHorizontalLayout::setSpacing(float spacing) -> type& {
-  settings.spacing = spacing;
+  state.spacing = spacing;
+  return synchronize();
+}
+
+auto mHorizontalLayout::setVisible(bool visible) -> type& {
+  mSizable::setVisible(visible);
+  for(auto& cell : state.cells) cell.sizable().setVisible(cell.sizable().visible());
+  return synchronize();
+}
+
+auto mHorizontalLayout::spacing() const -> float {
+  return state.spacing;
+}
+
+auto mHorizontalLayout::synchronize() -> type& {
   setGeometry(geometry());
   return *this;
 }
 
-auto mHorizontalLayout::setVisible(bool visible) -> type& {
-  mLayout::setVisible(visible);
-  for(auto n : range(sizableCount())) {
-    sizable(n)->setVisible(sizable(n)->visible());
+//
+
+auto mHorizontalLayoutCell::alignment() const -> maybe<float> {
+  return state.alignment;
+}
+
+auto mHorizontalLayoutCell::destruct() -> void {
+  if(auto& sizable = state.sizable) sizable->destruct();
+  mObject::destruct();
+}
+
+auto mHorizontalLayoutCell::setAlignment(maybe<float> alignment) -> type& {
+  state.alignment = alignment;
+  return synchronize();
+}
+
+auto mHorizontalLayoutCell::setEnabled(bool enabled) -> type& {
+  mObject::setEnabled(enabled);
+  state.sizable->setEnabled(state.sizable->enabled());
+  return *this;
+}
+
+auto mHorizontalLayoutCell::setFont(const Font& font) -> type& {
+  mObject::setFont(font);
+  state.sizable->setFont(state.sizable->font());
+  return *this;
+}
+
+auto mHorizontalLayoutCell::setParent(mObject* parent, int offset) -> type& {
+  state.sizable->destruct();
+  mObject::setParent(parent, offset);
+  state.sizable->setParent(this, 0);
+  return *this;
+}
+
+auto mHorizontalLayoutCell::setSizable(sSizable sizable) -> type& {
+  state.sizable = sizable;
+  return synchronize();
+}
+
+auto mHorizontalLayoutCell::setSize(Size size) -> type& {
+  state.size = size;
+  return synchronize();
+}
+
+auto mHorizontalLayoutCell::setSpacing(float spacing) -> type& {
+  state.spacing = spacing;
+  return synchronize();
+}
+
+auto mHorizontalLayoutCell::setVisible(bool visible) -> type& {
+  mObject::setVisible(visible);
+  state.sizable->setVisible(state.sizable->visible());
+  return *this;
+}
+
+auto mHorizontalLayoutCell::sizable() const -> Sizable {
+  return state.sizable;
+}
+
+auto mHorizontalLayoutCell::size() const -> Size {
+  return state.size;
+}
+
+auto mHorizontalLayoutCell::spacing() const -> float {
+  return state.spacing;
+}
+
+auto mHorizontalLayoutCell::synchronize() -> type& {
+  if(auto parent = this->parent()) {
+    if(auto horizontalLayout = dynamic_cast<mHorizontalLayout*>(parent)) {
+      horizontalLayout->synchronize();
+    }
   }
   return *this;
 }

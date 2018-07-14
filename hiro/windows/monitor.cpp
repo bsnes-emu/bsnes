@@ -1,5 +1,7 @@
 #if defined(Hiro_Monitor)
 
+//per-monitor API is only on Windows 10+
+
 namespace hiro {
 
 struct MonitorInfo {
@@ -47,6 +49,10 @@ auto pMonitor::primary() -> uint {
   MonitorInfo info;
   EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc, (LPARAM)&info);
   return info.primary;
+}
+
+auto pMonitor::workspace(uint monitor) -> Geometry {
+  return pDesktop::workspace();
 }
 
 }

@@ -16,7 +16,8 @@ auto mWidget::onSize(const function<void ()>& callback) -> type& {
 }
 
 auto mWidget::remove() -> type& {
-  if(auto layout = parentLayout()) layout->remove(layout->sizable(offset()));
+//TODO: how to implement this after removing mLayout?
+//if(auto layout = parentLayout()) layout->remove(layout->sizable(offset()));
   setParent();
   return *this;
 }

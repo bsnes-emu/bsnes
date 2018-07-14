@@ -50,14 +50,14 @@ template<typename T> auto vector<T>::append(T&& value) -> void {
 
 template<typename T> auto vector<T>::append(const vector<T>& values) -> void {
   reserveRight(size() + values.size());
-  for(uint n : range(values)) new(_pool + _size + n) T(values[n]);
+  for(uint n : range(values.size())) new(_pool + _size + n) T(values[n]);
   _right -= values.size();
   _size += values.size();
 }
 
 template<typename T> auto vector<T>::append(vector<T>&& values) -> void {
   reserveRight(size() + values.size());
-  for(uint n : range(values)) new(_pool + _size + n) T(move(values[n]));
+  for(uint n : range(values.size())) new(_pool + _size + n) T(move(values[n]));
   _right -= values.size();
   _size += values.size();
 }

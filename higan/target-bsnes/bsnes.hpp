@@ -11,6 +11,7 @@ extern unique_pointer<Input> input;
 #include <emulator/emulator.hpp>
 extern unique_pointer<Emulator::Interface> emulator;
 
+extern Locale ns;
 #include "program/program.hpp"
 #include "input/input.hpp"
 #include "presentation/presentation.hpp"

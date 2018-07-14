@@ -82,7 +82,7 @@ auto Settings::save() -> void {
 SettingsWindow::SettingsWindow() {
   settingsWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   statusBar.setFont(Font().setBold());
 
   setTitle("Settings");

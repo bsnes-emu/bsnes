@@ -76,9 +76,9 @@ struct Pair {
   template<typename T> auto operator< (const T& rhs) const -> bool { return Cast(*this) <  Cast(rhs); }
 
   explicit Pair(const vector<uint8_t>& value) : hi(0), lo(0) {
-    for(auto n : rrange(value)) {
+    for(auto n : reverse(value)) {
       operator<<=(8);
-      operator|=(value[n]);
+      operator|=(n);
     }
   }
 

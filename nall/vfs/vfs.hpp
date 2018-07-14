@@ -57,7 +57,7 @@ struct file {
   }
 
   auto writem(uintmax data, uint bytes) -> void {
-    for(auto n : rrange(bytes)) write(data >> n * 8);
+    for(auto n : reverse(range(bytes))) write(data >> n * 8);
   }
 
   auto writes(const string& s) -> void {

@@ -12,7 +12,7 @@ static auto TabFrame_change(GtkNotebook* notebook, GtkWidget* page, unsigned pos
 
 static auto TabFrame_close(GtkButton* button, pTabFrame* p) -> void {
   maybe<unsigned> position;
-  for(auto n : range(p->tabs)) {
+  for(auto n : range(p->tabs.size())) {
     if(button == (GtkButton*)p->tabs[n].close) {
       position = n;
       break;
@@ -29,7 +29,7 @@ static auto TabFrame_move(GtkNotebook* notebook, GtkWidget* page, unsigned moveT
   if(auto item = p->self().item(position)) item->state.selected = true;
 
   maybe<unsigned> moveFrom;
-  for(auto n : range(p->tabs)) {
+  for(auto n : range(p->tabs.size())) {
     if(page == p->tabs[n].child) {
       moveFrom = n;
       break;
@@ -109,13 +109,13 @@ auto pTabFrame::container(mWidget& widget) -> GtkWidget* {
   mObject* object = &widget;
   while(object) {
     if(object->parentTabFrameItem()) break;
-    if(auto layout = object->parentLayout()) { object = layout; continue; }
+    if(auto parent = object->parent()) { object = parent; continue; }
     break;
   }
 
-  unsigned position = 0;
+  uint position = 0;
   for(auto& item : state().items) {
-    if(item->state.layout.data() == object) return tabs[position].child;
+    if(item->state.sizable.data() == object) return tabs[position].child;
     position++;
   }
 
@@ -144,20 +144,13 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
   unlock();
 }
 
-auto pTabFrame::setEnabled(bool enabled) -> void {
-  for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      if(layout->self()) layout->self()->setEnabled(layout->enabled(true));
-    }
-  }
-  pWidget::setEnabled(enabled);
-}
-
 auto pTabFrame::setFont(const Font& font) -> void {
   for(auto n : range(tabs.size())) {
     pFont::setFont(tabs[n].title, font);
-    if(auto layout = state().items[n]->state.layout) {
-      if(layout->self()) layout->self()->setFont(layout->font(true));
+    if(auto sizable = state().items[n]->state.sizable) {
+      if(auto self = sizable->self()) {
+        self->setFont(sizable->font(true));
+      }
     }
   }
 }
@@ -174,7 +167,7 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
     geometry.setHeight(geometry.height() - 6);
   }
   for(auto& item : state().items) {
-    if(item->state.layout) item->state.layout->setGeometry(geometry);
+    if(item->state.sizable) item->state.sizable->setGeometry(geometry);
   }
 }
 
@@ -184,10 +177,6 @@ auto pTabFrame::setItemClosable(unsigned position, bool closable) -> void {
 
 auto pTabFrame::setItemIcon(unsigned position, const image& icon) -> void {
   _synchronizeTab(position);
-}
-
-auto pTabFrame::setItemLayout(unsigned position, shared_pointer<mLayout> layout) -> void {
-//if(layout->self()) layout->self()->setParent();
 }
 
 auto pTabFrame::setItemMovable(unsigned position, bool movable) -> void {
@@ -200,6 +189,10 @@ auto pTabFrame::setItemSelected(unsigned position) -> void {
   lock();
   gtk_notebook_set_current_page(GTK_NOTEBOOK(gtkWidget), position);
   unlock();
+}
+
+auto pTabFrame::setItemSizable(unsigned position, sSizable sizable) -> void {
+//if(layout->self()) layout->self()->setParent();
 }
 
 auto pTabFrame::setItemText(unsigned position, const string& text) -> void {
@@ -218,22 +211,11 @@ auto pTabFrame::setNavigation(Navigation navigation) -> void {
   setGeometry(self().geometry());
 }
 
-auto pTabFrame::setVisible(bool visible) -> void {
-  for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      if(layout->self()) {
-        layout->self()->setVisible(layout->visible(true));
-      }
-    }
-  }
-  pWidget::setVisible(visible);
-}
-
 auto pTabFrame::_synchronizeLayout() -> void {
   for(auto& item : state().items) {
-    if(auto layout = item->state.layout) {
-      if(auto self = layout->self()) {
-        self->setVisible(layout->visible(true) && item->selected());
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) {
+        self->setVisible(sizable->visible() && item->selected());
       }
     }
   }
@@ -262,7 +244,7 @@ auto pTabFrame::_synchronizeTab(unsigned position) -> void {
 auto pTabFrame::_tabHeight() -> unsigned {
   signed height = 1;
 
-  for(auto n : range(self().items())) {
+  for(auto n : range(self().itemCount())) {
     GtkAllocation imageAllocation, titleAllocation, closeAllocation;
     gtk_widget_get_allocation(tabs[n].image, &imageAllocation);
     gtk_widget_get_allocation(tabs[n].title, &titleAllocation);
@@ -279,7 +261,7 @@ auto pTabFrame::_tabHeight() -> unsigned {
 auto pTabFrame::_tabWidth() -> unsigned {
   signed width = 1;
 
-  for(auto n : range(self().items())) {
+  for(auto n : range(self().itemCount())) {
     GtkAllocation imageAllocation, titleAllocation, closeAllocation;
     gtk_widget_get_allocation(tabs[n].image, &imageAllocation);
     gtk_widget_get_allocation(tabs[n].title, &titleAllocation);

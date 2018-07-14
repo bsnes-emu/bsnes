@@ -39,7 +39,7 @@ private:
 
   inline auto scalarMultiply(uint256_t e, field b) const -> point {
     point p{1, 0}, q{b, 1};
-    for(uint n : rrange(255)) {
+    for(uint n : reverse(range(255))) {
       bool bit = e >> n & 1;
       cswap(bit, p.x, q.x);
       cswap(bit, p.z, q.z);

@@ -13,7 +13,6 @@ auto pTableViewHeader::append(sTableViewColumn column) -> void {
 }
 
 auto pTableViewHeader::remove(sTableViewColumn column) -> void {
-  _setState();
 }
 
 auto pTableViewHeader::setVisible(bool visible) -> void {
@@ -29,6 +28,7 @@ auto pTableViewHeader::_parent() -> maybe<pTableView&> {
 
 auto pTableViewHeader::_setState() -> void {
   if(auto parent = _parent()) {
+    auto lock = parent->acquire();
   //parent->qtTableView->setAlternatingRowColors(self().columnCount() >= 2);
     parent->qtTableView->setColumnCount(self().columnCount());
     parent->qtTableView->setHeaderHidden(!self().visible());

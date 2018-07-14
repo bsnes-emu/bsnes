@@ -144,7 +144,7 @@ auto mTreeViewItem::setIcon(const image& icon) -> type& {
 }
 
 auto mTreeViewItem::setParent(mObject* parent, signed offset) -> type& {
-  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  for(auto& item : reverse(state.items)) item->destruct();
   mObject::setParent(parent, offset);
   for(auto& item : state.items) item->setParent(this, item->offset());
 }

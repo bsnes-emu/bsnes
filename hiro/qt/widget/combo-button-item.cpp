@@ -40,6 +40,7 @@ auto pComboButtonItem::_parent() -> maybe<pComboButton&> {
 
 auto pComboButtonItem::_setState() -> void {
   if(auto parent = _parent()) {
+    auto lock = parent->acquire();
     parent->qtComboButton->setItemIcon(self().offset(), CreateIcon(state().icon));
     if(state().selected) parent->qtComboButton->setCurrentIndex(self().offset());
     parent->qtComboButton->setItemText(self().offset(), QString::fromUtf8(state().text));

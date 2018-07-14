@@ -1,4 +1,4 @@
-struct Program : Emulator::Platform {
+struct Program : Locale::Namespace, Emulator::Platform {
   //program.cpp
   Program(string_vector arguments);
   auto main() -> void;

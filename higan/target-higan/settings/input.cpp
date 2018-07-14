@@ -2,7 +2,7 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Joypad);
   setText("Input");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   defocusLabel.setText("When Focus is Lost:");
   pauseEmulation.setText("Pause Emulation").onActivate([&] {
     settings["Input/Defocus"].setValue("Pause");
@@ -87,7 +87,7 @@ auto InputSettings::reloadPorts() -> void {
 
 auto InputSettings::reloadDevices() -> void {
   deviceList.reset();
-  for(auto n : range(activePort().devices)) {
+  for(auto n : range(activePort().devices.size())) {
     auto& device = activePort().devices[n];
     if(!device.mappings) continue;  //do not display devices that have no configurable inputs
     deviceList.append(ComboButtonItem().setText(device.name).setProperty("index", n));

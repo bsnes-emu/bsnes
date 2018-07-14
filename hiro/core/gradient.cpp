@@ -9,7 +9,7 @@ Gradient::operator bool() const {
 
 auto Gradient::operator==(const Gradient& source) const -> bool {
   if(state.colors.size() != source.state.colors.size()) return false;
-  for(auto n : range(state.colors)) {
+  for(auto n : range(state.colors.size())) {
     if(state.colors[n] != source.state.colors[n]) return false;
   }
   return true;

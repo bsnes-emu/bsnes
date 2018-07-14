@@ -50,7 +50,7 @@ auto pTableViewCell::_parent() -> maybe<pTableViewItem&> {
 auto pTableViewCell::_setState() -> void {
   if(auto parent = _parent()) {
     if(auto grandparent = parent->_parent()) {
-      grandparent->lock();
+      auto lock = grandparent->acquire();
       parent->qtItem->setBackground(self().offset(), CreateBrush(self().backgroundColor(true)));
       if(state().checkable) {
         parent->qtItem->setCheckState(self().offset(), state().checked ? Qt::Checked : Qt::Unchecked);
@@ -63,7 +63,6 @@ auto pTableViewCell::_setState() -> void {
       parent->qtItem->setIcon(self().offset(), CreateIcon(state().icon));
       parent->qtItem->setText(self().offset(), QString::fromUtf8(state().text));
       parent->qtItem->setTextAlignment(self().offset(), CalculateAlignment(self().alignment(true)));
-      grandparent->unlock();
     }
   }
 }

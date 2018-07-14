@@ -6,7 +6,7 @@ namespace hiro {
   #include "fixed-layout.cpp"
   #include "horizontal-layout.cpp"
   #include "vertical-layout.cpp"
-  #include "list-view-item.cpp"
+  #include "table-layout.cpp"
   #include "list-view.cpp"
   #include "browser-dialog.cpp"
   #include "message-dialog.cpp"

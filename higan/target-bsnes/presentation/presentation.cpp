@@ -3,10 +3,10 @@
 unique_pointer<AboutWindow> aboutWindow;
 unique_pointer<Presentation> presentation;
 
-Presentation::Presentation() {
+Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
   presentation = this;
 
-  systemMenu.setText("System");
+  systemMenu.setText(tr("System"));
   loadGame.setIcon(Icon::Action::Open).setText("Load Game ...").onActivate([&] {
     program->load();
   });
@@ -55,7 +55,7 @@ Presentation::Presentation() {
   }
   quit.setIcon(Icon::Action::Quit).setText("Quit").onActivate([&] { program->quit(); });
 
-  settingsMenu.setText("Settings");
+  settingsMenu.setText(tr("Settings"));
   sizeMenu.setIcon(Icon::Emblem::Image).setText("Size");
   updateSizeMenu();
   outputMenu.setIcon(Icon::Emblem::Image).setText("Output");
@@ -115,7 +115,7 @@ Presentation::Presentation() {
   pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
   advancedSettings.setIcon(Icon::Action::Settings).setText("Advanced ...").onActivate([&] { settingsWindow->show(5); });
 
-  toolsMenu.setText("Tools").setVisible(false);
+  toolsMenu.setText(tr("Tools")).setVisible(false);
   saveState.setIcon(Icon::Action::Save).setText("Save State");
   for(uint index : range(QuickStates)) {
     saveState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
@@ -152,7 +152,7 @@ Presentation::Presentation() {
   stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
   manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow->show(2); });
 
-  helpMenu.setText("Help");
+  helpMenu.setText(tr("Help"));
   documentation.setIcon(Icon::Application::Browser).setText("Documentation ...").onActivate([&] {
     invoke("https://doc.byuu.org/bsnes/");
   });
@@ -469,7 +469,7 @@ auto Presentation::addRecentGame(string location) -> void {
   for(uint index : range(RecentGames + 1)) {
     auto value = settings[{"Game/Recent/", 1 + index}].text();
     if(!value || value == location) {
-      for(uint n : rrange(index + 1)) {
+      for(uint n : reverse(range(index + 1))) {
         if(1 + n > RecentGames) continue;
         settings({"Game/Recent/", 1 + n}).setValue(settings[{"Game/Recent/", n}].text());
       }

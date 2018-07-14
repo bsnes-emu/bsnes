@@ -50,12 +50,12 @@ auto Stream::pending() const -> bool {
 }
 
 auto Stream::read(double samples[]) -> uint {
-  for(auto c : range(channels)) samples[c] = channels[c].resampler.read();
+  for(auto c : range(channels.size())) samples[c] = channels[c].resampler.read();
   return channels.size();
 }
 
 auto Stream::write(const double samples[]) -> void {
-  for(auto c : range(channels)) {
+  for(auto c : range(channels.size())) {
     double sample = samples[c] + 1e-25;  //constant offset used to suppress denormals
     for(auto& filter : channels[c].filters) {
       switch(filter.order) {

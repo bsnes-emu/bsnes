@@ -51,7 +51,6 @@ Declare(MenuItem)
 Declare(MenuCheckItem)
 Declare(MenuRadioItem)
 Declare(Sizable)
-Declare(Layout)
 Declare(Widget)
 Declare(Button)
 Declare(Canvas)
@@ -98,7 +97,7 @@ struct Color {
   using type = Color;
 
   Color();
-  Color(signed red, signed green, signed blue, signed alpha = 255);
+  Color(int red, int green, int blue, int alpha = 255);
 
   explicit operator bool() const;
   auto operator==(const Color& source) const -> bool;
@@ -109,12 +108,12 @@ struct Color {
   auto green() const -> uint8_t;
   auto red() const -> uint8_t;
   auto reset() -> type&;
-  auto setAlpha(signed alpha) -> type&;
-  auto setBlue(signed blue) -> type&;
+  auto setAlpha(int alpha) -> type&;
+  auto setBlue(int blue) -> type&;
   auto setColor(Color color = {}) -> type&;
-  auto setColor(signed red, signed green, signed blue, signed alpha = 255) -> type&;
-  auto setGreen(signed green) -> type&;
-  auto setRed(signed red) -> type&;
+  auto setColor(int red, int green, int blue, int alpha = 255) -> type&;
+  auto setGreen(int green) -> type&;
+  auto setRed(int red) -> type&;
   auto value() const -> uint32_t;
 
 //private:
@@ -178,22 +177,22 @@ struct Alignment {
 struct Cursor {
   using type = Cursor;
 
-  Cursor(signed offset = 0, signed length = 0);
+  Cursor(int offset = 0, int length = 0);
 
   explicit operator bool() const;
   auto operator==(const Cursor& source) const -> bool;
   auto operator!=(const Cursor& source) const -> bool;
 
-  auto length() const -> signed;
-  auto offset() const -> signed;
-  auto setCursor(signed offset = 0, signed length = 0) -> type&;
-  auto setLength(signed length = 0) -> type&;
-  auto setOffset(signed offset = 0) -> type&;
+  auto length() const -> int;
+  auto offset() const -> int;
+  auto setCursor(int offset = 0, int length = 0) -> type&;
+  auto setLength(int length = 0) -> type&;
+  auto setOffset(int offset = 0) -> type&;
 
 //private:
   struct State {
-    signed offset;
-    signed length;
+    int offset;
+    int length;
   } state;
 };
 #endif
@@ -359,7 +358,7 @@ struct Hotkey {
 //private:
   struct State {
     bool active = false;
-    vector<unsigned> keys;
+    vector<uint> keys;
     function<void ()> onPress;
     function<void ()> onRelease;
     string sequence;
@@ -458,8 +457,8 @@ struct Keyboard {
   Keyboard() = delete;
 
   static auto append(Hotkey hotkey) -> void;
-  static auto hotkey(unsigned position) -> Hotkey;
-  static auto hotkeyCount() -> unsigned;
+  static auto hotkey(uint position) -> Hotkey;
+  static auto hotkeyCount() -> uint;
   static auto hotkeys() -> vector<Hotkey>;
   static auto poll() -> vector<bool>;
   static auto pressed(const string& key) -> bool;
@@ -478,7 +477,7 @@ struct Keyboard {
 
 #if defined(Hiro_Mouse)
 struct Mouse {
-  enum class Button : unsigned { Left, Middle, Right };
+  enum class Button : uint { Left, Middle, Right };
 
   Mouse() = delete;
 
@@ -512,8 +511,8 @@ struct BrowserWindow {
 
 #if defined(Hiro_MessageWindow)
 struct MessageWindow {
-  enum class Buttons : unsigned { Ok, OkCancel, YesNo, YesNoCancel };
-  enum class Response : unsigned { Ok, Cancel, Yes, No };
+  enum class Buttons : uint { Ok, OkCancel, YesNo, YesNoCancel };
+  enum class Response : uint { Ok, Cancel, Yes, No };
 
   using type = MessageWindow;
 
@@ -585,18 +584,17 @@ struct mObject {
   explicit operator bool() const;
 
   auto abstract() const -> bool;
-  auto adjustOffset(signed displacement) -> type&;
+  auto adjustOffset(int displacement) -> type&;
   auto enabled(bool recursive = false) const -> bool;
   virtual auto focused() const -> bool;
   auto font(bool recursive = false) const -> Font;
   virtual auto group() const -> Group;
-  auto offset() const -> signed;
+  auto offset() const -> int;
   auto parent() const -> mObject*;
   auto parentComboButton(bool recursive = false) const -> mComboButton*;
   auto parentComboEdit(bool recursive = false) const -> mComboEdit*;
   auto parentFrame(bool recursive = false) const -> mFrame*;
   auto parentIconView(bool recursive = false) const -> mIconView*;
-  auto parentLayout(bool recursive = false) const -> mLayout*;
   auto parentMenu(bool recursive = false) const -> mMenu*;
   auto parentMenuBar(bool recursive = false) const -> mMenuBar*;
   auto parentPopupMenu(bool recursive = false) const -> mPopupMenu*;
@@ -617,7 +615,7 @@ struct mObject {
   virtual auto setFocused() -> type&;
   virtual auto setFont(const Font& font = {}) -> type&;
   virtual auto setGroup(sGroup group = {}) -> type&;
-  virtual auto setParent(mObject* parent = nullptr, signed offset = -1) -> type&;
+  virtual auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
   virtual auto setProperty(const string& name, const string& value = "") -> type&;
   virtual auto setVisible(bool visible = true) -> type&;
   auto visible(bool recursive = false) const -> bool;
@@ -626,7 +624,7 @@ struct mObject {
   struct State {
     bool enabled = true;
     Font font;
-    signed offset = -1;
+    int offset = -1;
     mObject* parent = nullptr;
     set<Property> properties;
     bool visible = true;
@@ -646,8 +644,8 @@ struct mGroup : mObject {
   using mObject::remove;
 
   auto append(sObject object) -> type&;
-  auto object(unsigned offset) const -> Object;
-  auto objectCount() const -> unsigned;
+  auto object(uint offset) const -> Object;
+  auto objectCount() const -> uint;
   auto objects() const -> vector<Object>;
   auto remove(sObject object) -> type&;
 
@@ -663,13 +661,13 @@ struct mTimer : mObject {
   Declare(Timer)
 
   auto doActivate() const -> void;
-  auto interval() const -> unsigned;
+  auto interval() const -> uint;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
-  auto setInterval(unsigned interval = 0) -> type&;
+  auto setInterval(uint interval = 0) -> type&;
 
 //private:
   struct State {
-    unsigned interval = 0;
+    uint interval = 0;
     function<void ()> onActivate;
   } state;
 };
@@ -680,22 +678,23 @@ struct mWindow : mObject {
   Declare(Window)
   using mObject::remove;
 
-  auto append(sLayout layout) -> type&;
+  mWindow();
+
   auto append(sMenuBar menuBar) -> type&;
+  auto append(sSizable sizable) -> type&;
   auto append(sStatusBar statusBar) -> type&;
   auto backgroundColor() const -> Color;
   auto dismissable() const -> bool;
   auto doClose() const -> void;
   auto doDrop(string_vector) const -> void;
-  auto doKeyPress(signed) const -> void;
-  auto doKeyRelease(signed) const -> void;
+  auto doKeyPress(int) const -> void;
+  auto doKeyRelease(int) const -> void;
   auto doMove() const -> void;
   auto doSize() const -> void;
   auto droppable() const -> bool;
   auto frameGeometry() const -> Geometry;
   auto fullScreen() const -> bool;
   auto geometry() const -> Geometry;
-  auto layout() const -> Layout;
   auto maximized() const -> bool;
   auto maximumSize() const -> Size;
   auto menuBar() const -> MenuBar;
@@ -704,12 +703,12 @@ struct mWindow : mObject {
   auto modal() const -> bool;
   auto onClose(const function<void ()>& callback = {}) -> type&;
   auto onDrop(const function<void (string_vector)>& callback = {}) -> type&;
-  auto onKeyPress(const function<void (signed)>& callback = {}) -> type&;
-  auto onKeyRelease(const function<void (signed)>& callback = {}) -> type&;
+  auto onKeyPress(const function<void (int)>& callback = {}) -> type&;
+  auto onKeyRelease(const function<void (int)>& callback = {}) -> type&;
   auto onMove(const function<void ()>& callback = {}) -> type&;
   auto onSize(const function<void ()>& callback = {}) -> type&;
-  auto remove(sLayout layout) -> type&;
   auto remove(sMenuBar menuBar) -> type&;
+  auto remove(sSizable sizable) -> type&;
   auto remove(sStatusBar statusBar) -> type&;
   auto reset() -> type& override;
   auto resizable() const -> bool;
@@ -732,6 +731,8 @@ struct mWindow : mObject {
   auto setResizable(bool resizable = true) -> type&;
   auto setSize(Size size) -> type&;
   auto setTitle(const string& title = "") -> type&;
+  auto setVisible(bool visible = true) -> type&;
+  auto sizable() const -> Sizable;
   auto statusBar() const -> StatusBar;
   auto title() const -> string;
 
@@ -742,7 +743,6 @@ struct mWindow : mObject {
     bool droppable = false;
     bool fullScreen = false;
     Geometry geometry = {128, 128, 256, 256};
-    sLayout layout;
     bool maximized = false;
     Size maximumSize;
     bool minimized = false;
@@ -751,11 +751,12 @@ struct mWindow : mObject {
     bool modal = false;
     function<void ()> onClose;
     function<void (string_vector)> onDrop;
-    function<void (signed)> onKeyPress;
-    function<void (signed)> onKeyRelease;
+    function<void (int)> onKeyPress;
+    function<void (int)> onKeyRelease;
     function<void ()> onMove;
     function<void ()> onSize;
     bool resizable = true;
+    sSizable sizable;
     sStatusBar statusBar;
     string title;
   } state;
@@ -784,13 +785,13 @@ struct mMenuBar : mObject {
   Declare(MenuBar)
 
   auto append(sMenu menu) -> type&;
-  auto menu(unsigned position) const -> Menu;
-  auto menuCount() const -> unsigned;
+  auto menu(uint position) const -> Menu;
+  auto menuCount() const -> uint;
   auto menus() const -> vector<Menu>;
   auto remove() -> type& override;
   auto remove(sMenu menu) -> type&;
   auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
 
 //private:
   struct State {
@@ -806,13 +807,13 @@ struct mPopupMenu : mObject {
   Declare(PopupMenu)
   using mObject::remove;
 
-  auto action(unsigned position) const -> Action;
-  auto actionCount() const -> unsigned;
+  auto action(uint position) const -> Action;
+  auto actionCount() const -> uint;
   auto actions() const -> vector<Action>;
   auto append(sAction action) -> type&;
   auto remove(sAction action) -> type&;
   auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
   auto setVisible(bool visible = true) -> type& override;
 
 //private:
@@ -841,15 +842,15 @@ struct mMenu : mAction {
   Declare(Menu)
   using mObject::remove;
 
-  auto action(unsigned position) const -> Action;
-  auto actionCount() const -> unsigned;
+  auto action(uint position) const -> Action;
+  auto actionCount() const -> uint;
   auto actions() const -> vector<Action>;
   auto append(sAction action) -> type&;
   auto icon() const -> image;
   auto remove(sAction action) -> type&;
   auto reset() -> type&;
   auto setIcon(const image& icon = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
 
@@ -949,28 +950,6 @@ struct mSizable : mObject {
   struct State {
     Geometry geometry;
   } state;
-};
-#endif
-
-#if defined(Hiro_Layout)
-struct mLayout : mSizable {
-  Declare(Layout)
-
-  virtual auto append(sSizable sizable) -> type&;
-  virtual auto remove() -> type& override;
-  virtual auto remove(sSizable sizable) -> type&;
-  virtual auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
-  auto sizable(unsigned position) const -> Sizable;
-  auto sizableCount() const -> unsigned;
-  auto sizables() const -> vector<Sizable>;
-
-//private:
-  struct State {
-    vector<sSizable> sizables;
-  } state;
-
-  auto destruct() -> void override;
 };
 #endif
 
@@ -1113,14 +1092,14 @@ struct mComboButton : mWidget {
 
   auto append(sComboButtonItem item) -> type&;
   auto doChange() const -> void;
-  auto item(unsigned position) const -> ComboButtonItem;
-  auto itemCount() const -> unsigned;
+  auto item(uint position) const -> ComboButtonItem;
+  auto itemCount() const -> uint;
   auto items() const -> vector<ComboButtonItem>;
   auto onChange(const function<void ()>& callback = {}) -> type&;
   auto remove(sComboButtonItem item) -> type&;
   auto reset() -> type&;
   auto selected() const -> ComboButtonItem;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
 
 //private:
   struct State {
@@ -1241,17 +1220,17 @@ struct mFrame : mWidget {
   Declare(Frame)
   using mObject::remove;
 
-  auto append(sLayout layout) -> type&;
-  auto layout() const -> Layout;
-  auto remove(sLayout layout) -> type&;
+  auto append(sSizable sizable) -> type&;
+  auto remove(sSizable sizable) -> type&;
   auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
   auto setText(const string& text = "") -> type&;
+  auto sizable() const -> Sizable;
   auto text() const -> string;
 
 //private:
   struct State {
-    sLayout layout;
+    sSizable sizable;
     string text;
   } state;
 
@@ -1263,34 +1242,34 @@ struct mFrame : mWidget {
 struct mHexEdit : mWidget {
   Declare(HexEdit)
 
-  auto address() const -> unsigned;
+  auto address() const -> uint;
   auto backgroundColor() const -> Color;
-  auto columns() const -> unsigned;
-  auto doRead(unsigned offset) const -> uint8_t;
-  auto doWrite(unsigned offset, uint8_t data) const -> void;
+  auto columns() const -> uint;
+  auto doRead(uint offset) const -> uint8_t;
+  auto doWrite(uint offset, uint8_t data) const -> void;
   auto foregroundColor() const -> Color;
-  auto length() const -> unsigned;
-  auto onRead(const function<uint8_t (unsigned)>& callback = {}) -> type&;
-  auto onWrite(const function<void (unsigned, uint8_t)>& callback = {}) -> type&;
-  auto rows() const -> unsigned;
-  auto setAddress(unsigned address = 0) -> type&;
+  auto length() const -> uint;
+  auto onRead(const function<uint8_t (uint)>& callback = {}) -> type&;
+  auto onWrite(const function<void (uint, uint8_t)>& callback = {}) -> type&;
+  auto rows() const -> uint;
+  auto setAddress(uint address = 0) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
-  auto setColumns(unsigned columns = 16) -> type&;
+  auto setColumns(uint columns = 16) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setLength(unsigned length) -> type&;
-  auto setRows(unsigned rows = 16) -> type&;
+  auto setLength(uint length) -> type&;
+  auto setRows(uint rows = 16) -> type&;
   auto update() -> type&;
 
 //private:
   struct State {
-    unsigned address = 0;
+    uint address = 0;
     Color backgroundColor;
-    unsigned columns = 16;
+    uint columns = 16;
     Color foregroundColor;
-    unsigned length = 0;
-    function<uint8_t (unsigned)> onRead;
-    function<void (unsigned, uint8_t)> onWrite;
-    unsigned rows = 16;
+    uint length = 0;
+    function<uint8_t (uint)> onRead;
+    function<void (uint, uint8_t)> onWrite;
+    uint rows = 16;
   } state;
 };
 #endif
@@ -1300,17 +1279,17 @@ struct mHorizontalScrollBar : mWidget {
   Declare(HorizontalScrollBar)
 
   auto doChange() const -> void;
-  auto length() const -> unsigned;
+  auto length() const -> uint;
   auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto position() const -> unsigned;
-  auto setLength(unsigned length = 101) -> type&;
-  auto setPosition(unsigned position = 0) -> type&;
+  auto position() const -> uint;
+  auto setLength(uint length = 101) -> type&;
+  auto setPosition(uint position = 0) -> type&;
 
 //private:
   struct State {
-    unsigned length = 101;
+    uint length = 101;
     function<void ()> onChange;
-    unsigned position = 0;
+    uint position = 0;
   } state;
 };
 #endif
@@ -1320,17 +1299,17 @@ struct mHorizontalSlider : mWidget {
   Declare(HorizontalSlider)
 
   auto doChange() const -> void;
-  auto length() const -> unsigned;
+  auto length() const -> uint;
   auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto position() const -> unsigned;
-  auto setLength(unsigned length = 101) -> type&;
-  auto setPosition(unsigned position = 0) -> type&;
+  auto position() const -> uint;
+  auto setLength(uint length = 101) -> type&;
+  auto setPosition(uint position = 0) -> type&;
 
 //private:
   struct State {
-    unsigned length = 101;
+    uint length = 101;
     function<void ()> onChange;
-    unsigned position = 0;
+    uint position = 0;
   } state;
 };
 #endif
@@ -1349,8 +1328,8 @@ struct mIconView : mWidget {
   auto doContext() const -> void;
   auto flow() const -> Orientation;
   auto foregroundColor() const -> Color;
-  auto item(unsigned position) const -> IconViewItem;
-  auto itemCount() const -> unsigned;
+  auto item(uint position) const -> IconViewItem;
+  auto itemCount() const -> uint;
   auto items() const -> vector<IconViewItem>;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
@@ -1364,8 +1343,8 @@ struct mIconView : mWidget {
   auto setFlow(Orientation flow = Orientation::Vertical) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type&;
-  auto setParent(mObject* object = nullptr, signed offset = -1) -> type& override;
-  auto setSelected(const vector<signed>& selections) -> type&;
+  auto setParent(mObject* object = nullptr, int offset = -1) -> type& override;
+  auto setSelected(const vector<int>& selections) -> type&;
 
 //private:
   struct State {
@@ -1461,12 +1440,12 @@ struct mLineEdit : mWidget {
 struct mProgressBar : mWidget {
   Declare(ProgressBar)
 
-  auto position() const -> unsigned;
-  auto setPosition(unsigned position) -> type&;
+  auto position() const -> uint;
+  auto setPosition(uint position) -> type&;
 
 //private:
   struct State {
-    unsigned position = 0;
+    uint position = 0;
   } state;
 };
 #endif
@@ -1559,8 +1538,8 @@ struct mTabFrame : mWidget {
   auto doChange() const -> void;
   auto doClose(sTabFrameItem item) const -> void;
   auto doMove(sTabFrameItem from, sTabFrameItem to) const -> void;
-  auto item(unsigned position) const -> TabFrameItem;
-  auto itemCount() const -> unsigned;
+  auto item(uint position) const -> TabFrameItem;
+  auto itemCount() const -> uint;
   auto items() const -> vector<TabFrameItem>;
   auto navigation() const -> Navigation;
   auto onChange(const function<void ()>& callback = {}) -> type&;
@@ -1569,8 +1548,11 @@ struct mTabFrame : mWidget {
   auto remove(sTabFrameItem item) -> type&;
   auto reset() -> type&;
   auto selected() const -> TabFrameItem;
+  auto setEnabled(bool enabled = true) -> type& override;
+  auto setFont(const Font& font = {}) -> type& override;
   auto setNavigation(Navigation navigation = Navigation::Top) -> type&;
-  auto setParent(mObject* object = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* object = nullptr, int offset = -1) -> type& override;
+  auto setVisible(bool visible = true) -> type& override;
 
 //private:
   struct State {
@@ -1589,30 +1571,33 @@ struct mTabFrame : mWidget {
 struct mTabFrameItem : mObject {
   Declare(TabFrameItem)
 
-  auto append(sLayout layout) -> type&;
+  auto append(sSizable sizable) -> type&;
   auto closable() const -> bool;
   auto icon() const -> image;
-  auto layout() const -> Layout;
   auto movable() const -> bool;
   auto remove() -> type& override;
-  auto remove(sLayout layout) -> type&;
+  auto remove(sSizable sizable) -> type&;
   auto reset() -> type&;
   auto selected() const -> bool;
   auto setClosable(bool closable = true) -> type&;
+  auto setEnabled(bool enabled = true) -> type& override;
+  auto setFont(const Font& font = {}) -> type& override;
   auto setIcon(const image& icon = {}) -> type&;
   auto setMovable(bool movable = true) -> type&;
-  auto setParent(mObject* object = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* object = nullptr, int offset = -1) -> type& override;
   auto setSelected() -> type&;
   auto setText(const string& text = "") -> type&;
+  auto setVisible(bool visible = true) -> type& override;
+  auto sizable() const -> Sizable;
   auto text() const -> string;
 
 //private:
   struct State {
     bool closable = false;
     image icon;
-    sLayout layout;
     bool movable = false;
     bool selected = false;
+    sSizable sizable;
     string text;
   } state;
 
@@ -1640,8 +1625,8 @@ struct mTableView : mWidget {
   auto doToggle(sTableViewCell cell) const -> void;
   auto foregroundColor() const -> Color;
   auto header() const -> TableViewHeader;
-  auto item(unsigned position) const -> TableViewItem;
-  auto itemCount() const -> unsigned;
+  auto item(uint position) const -> TableViewItem;
+  auto itemCount() const -> uint;
   auto items() const -> vector<TableViewItem>;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
@@ -1659,11 +1644,11 @@ struct mTableView : mWidget {
   auto setBatchable(bool batchable = true) -> type&;
   auto setBordered(bool bordered = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
 
 //private:
   struct State {
-    unsigned activeColumn = 0;
+    uint activeColumn = 0;
     Alignment alignment;
     Color backgroundColor;
     bool batchable = false;
@@ -1688,18 +1673,20 @@ struct mTableViewHeader : mObject {
   Declare(TableViewHeader)
 
   auto append(sTableViewColumn column) -> type&;
-  auto column(unsigned position) const -> TableViewColumn;
-  auto columnCount() const -> unsigned;
+  auto column(uint position) const -> TableViewColumn;
+  auto columnCount() const -> uint;
   auto columns() const -> vector<TableViewColumn>;
   auto remove() -> type& override;
   auto remove(sTableViewColumn column) -> type&;
   auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
 
 //private:
   struct State {
     vector<sTableViewColumn> columns;
   } state;
+
+  auto destruct() -> void override;
 };
 #endif
 
@@ -1762,8 +1749,8 @@ struct mTableViewItem : mObject {
   auto alignment() const -> Alignment;
   auto append(sTableViewCell cell) -> type&;
   auto backgroundColor() const -> Color;
-  auto cell(unsigned position) const -> TableViewCell;
-  auto cellCount() const -> unsigned;
+  auto cell(uint position) const -> TableViewCell;
+  auto cellCount() const -> uint;
   auto cells() const -> vector<TableViewCell>;
   auto foregroundColor() const -> Color;
   auto remove() -> type& override;
@@ -1774,7 +1761,7 @@ struct mTableViewItem : mObject {
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setFocused() -> type& override;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
   auto setSelected(bool selected = true) -> type&;
 
 //private:
@@ -1785,6 +1772,8 @@ struct mTableViewItem : mObject {
     Color foregroundColor;
     bool selected = false;
   } state;
+
+  auto destruct() -> void override;
 };
 #endif
 
@@ -1869,7 +1858,7 @@ struct mTreeView : mWidget {
   auto doToggle(sTreeViewItem item) const -> void;
   auto foregroundColor() const -> Color;
   auto item(const string& path) const -> TreeViewItem;
-  auto itemCount() const -> unsigned;
+  auto itemCount() const -> uint;
   auto items() const -> vector<TreeViewItem>;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
@@ -1880,7 +1869,7 @@ struct mTreeView : mWidget {
   auto selected() const -> TreeViewItem;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type&;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
 
 //private:
   struct State {
@@ -1909,7 +1898,7 @@ struct mTreeViewItem : mObject {
   auto foregroundColor(bool recursive = false) const -> Color;
   auto icon() const -> image;
   auto item(const string& path) const -> TreeViewItem;
-  auto itemCount() const -> unsigned;
+  auto itemCount() const -> uint;
   auto items() const -> vector<TreeViewItem>;
   auto path() const -> string;
   auto remove() -> type& override;
@@ -1922,7 +1911,7 @@ struct mTreeViewItem : mObject {
   auto setFocused() -> type& override;
   auto setForegroundColor(Color color = {}) -> type&;
   auto setIcon(const image& icon = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type&;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
   auto setSelected() -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -1947,17 +1936,17 @@ struct mVerticalScrollBar : mWidget {
   Declare(VerticalScrollBar)
 
   auto doChange() const -> void;
-  auto length() const -> unsigned;
+  auto length() const -> uint;
   auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto position() const -> unsigned;
-  auto setLength(unsigned length = 101) -> type&;
-  auto setPosition(unsigned position = 0) -> type&;
+  auto position() const -> uint;
+  auto setLength(uint length = 101) -> type&;
+  auto setPosition(uint position = 0) -> type&;
 
 //private:
   struct State {
-    unsigned length = 101;
+    uint length = 101;
     function<void ()> onChange;
-    unsigned position = 0;
+    uint position = 0;
   } state;
 };
 #endif
@@ -1967,17 +1956,17 @@ struct mVerticalSlider : mWidget {
   Declare(VerticalSlider)
 
   auto doChange() const -> void;
-  auto length() const -> unsigned;
+  auto length() const -> uint;
   auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto position() const -> unsigned;
-  auto setLength(unsigned length = 101) -> type&;
-  auto setPosition(unsigned position = 0) -> type&;
+  auto position() const -> uint;
+  auto setLength(uint length = 101) -> type&;
+  auto setPosition(uint position = 0) -> type&;
 
 //private:
   struct State {
-    unsigned length = 101;
+    uint length = 101;
     function<void ()> onChange;
-    unsigned position = 0;
+    uint position = 0;
   } state;
 };
 #endif
@@ -2014,6 +2003,7 @@ struct mViewport : mWidget {
 
 #undef Declare
 
+#include "lock.hpp"
 #include "shared.hpp"
 
 }

@@ -48,11 +48,14 @@ auto pTableViewCell::_parent() -> maybe<pTableViewItem&> {
 auto pTableViewCell::_setState() -> void {
   if(auto parent = _parent()) {
     if(auto grandparent = _grandparent()) {
-      grandparent->lock();
-      gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 0, state().checked, -1);
-      gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 1, CreatePixbuf(state().icon), -1);
-      gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 2, state().text.data(), -1);
-      grandparent->unlock();
+      if(auto& tableViewHeader = grandparent->state().header) {
+        if(self().offset() < tableViewHeader->columnCount()) {
+          auto lock = grandparent->acquire();
+          gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 0, state().checked, -1);
+          gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 1, CreatePixbuf(state().icon), -1);
+          gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 2, state().text.data(), -1);
+        }
+      }
     }
   }
 }

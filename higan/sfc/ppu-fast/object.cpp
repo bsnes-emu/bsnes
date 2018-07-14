@@ -38,7 +38,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
     }
   }
 
-  for(int n : rrange(ppu.ItemLimit)) {
+  for(int n : reverse(range(ppu.ItemLimit))) {
     const auto& item = items[n];
     if(!item.valid) continue;
 

@@ -42,7 +42,7 @@ ListWindow::ListWindow() {
     }).information();
   });
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   gameList.onActivate([&] { modifyButton.doActivate(); });
   gameList.onChange([&] { updateWindow(); });
   appendButton.setText("Append").onActivate([&] {
@@ -249,7 +249,7 @@ auto ListWindow::removeGame() -> void {
 GameWindow::GameWindow() {
   gameWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   hashLabel.setText("SHA256:").setAlignment(1.0);
   hashEdit.setFont(Font().setFamily(Font::Mono)).onChange([&] { modified = true, updateWindow(); });
   regionLabel.setText("Region:").setAlignment(1.0);
@@ -451,7 +451,7 @@ auto GameWindow::removeComponent() -> void {
 MemoryWindow::MemoryWindow() {
   memoryWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   typeLabel.setText("Type:").setAlignment(1.0);
   typeEdit.append(ComboEditItem().setText("ROM"));
   typeEdit.append(ComboEditItem().setText("EEPROM"));
@@ -554,7 +554,7 @@ auto MemoryWindow::updateWindow() -> void {
 OscillatorWindow::OscillatorWindow() {
   oscillatorWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   frequencyLabel.setText("Frequency:").setAlignment(1.0);
   frequencyEdit.onChange([&] { modified = true, updateWindow(); });
   acceptButton.setText("Accept").onActivate([&] { accept(); });

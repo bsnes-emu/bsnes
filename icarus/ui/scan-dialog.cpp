@@ -2,7 +2,7 @@ ScanDialog::ScanDialog() {
   scanDialog = this;
 
   onClose(&Application::quit);
-  layout.setMargin(5);
+  layout.setPadding(5);
   pathEdit.onActivate([&] { refresh(); });
   refreshButton.setIcon(Icon::Action::Refresh).setBordered(false).onActivate([&] {
     pathEdit.setText(settings["icarus/Path"].text());

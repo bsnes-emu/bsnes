@@ -149,7 +149,7 @@ auto BrowserDialogWindow::isMatch(const string& name) -> bool {
 auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   response = {};
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
   pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
   pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(Path::user()); });

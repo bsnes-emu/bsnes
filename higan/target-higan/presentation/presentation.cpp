@@ -171,7 +171,7 @@ auto Presentation::updateEmulator() -> void {
   inputPort2.setVisible(false).reset();
   inputPort3.setVisible(false).reset();
 
-  for(auto n : range(emulator->ports)) {
+  for(auto n : range(emulator->ports.size())) {
     if(n >= 3) break;
     auto& port = emulator->ports[n];
     auto& menu = (n == 0 ? inputPort1 : n == 1 ? inputPort2 : inputPort3);

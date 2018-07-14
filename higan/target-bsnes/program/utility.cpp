@@ -18,11 +18,11 @@ auto Program::updateStatus() -> void {
 
   string frameRate;
   if(!emulator->loaded()) {
-    frameRate = "Unloaded";
+    frameRate = tr("Unloaded");
   } else if(presentation->pauseEmulation.checked()) {
-    frameRate = "Paused";
+    frameRate = tr("Paused");
   } else if(!focused() && settingsWindow->input.pauseEmulation.checked()) {
-    frameRate = "Paused";
+    frameRate = tr("Paused");
   } else {
     frameRate = statusFrameRate;
   }

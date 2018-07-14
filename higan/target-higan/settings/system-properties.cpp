@@ -1,7 +1,7 @@
 SystemProperties::SystemProperties() {
   systemProperties = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   systemLabel.setAlignment(1.0).setText("System:");
   for(auto& emulator : program->emulators) {
     systemOption.append(ComboButtonItem().setText(emulator->information.name));

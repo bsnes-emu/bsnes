@@ -9,18 +9,18 @@ struct VideoSettings : TabFrameItem {
 public:
   VerticalLayout layout{this};
     Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout luminanceLayout{&layout, Size{~0, 0}};
-      Label luminanceLabel{&luminanceLayout, Size{65, 0}};
-      Label luminanceValue{&luminanceLayout, Size{50, 0}};
-      HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
-    HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
-      Label saturationLabel{&saturationLayout, Size{65, 0}};
-      Label saturationValue{&saturationLayout, Size{50, 0}};
-      HorizontalSlider saturationSlider{&saturationLayout, Size{~0, 0}};
-    HorizontalLayout gammaLayout{&layout, Size{~0, 0}};
-      Label gammaLabel{&gammaLayout, Size{65, 0}};
-      Label gammaValue{&gammaLayout, Size{50, 0}};
-      HorizontalSlider gammaSlider{&gammaLayout, Size{~0, 0}};
+    TableLayout colorLayout{&layout, Size{~0, 0}};
+      Label luminanceLabel{&colorLayout, Size{0, 0}};
+      Label luminanceValue{&colorLayout, Size{50, 0}};
+      HorizontalSlider luminanceSlider{&colorLayout, Size{~0, 0}};
+    //
+      Label saturationLabel{&colorLayout, Size{0, 0}};
+      Label saturationValue{&colorLayout, Size{50, 0}};
+      HorizontalSlider saturationSlider{&colorLayout, Size{~0, 0}};
+    //
+      Label gammaLabel{&colorLayout, Size{0, 0}};
+      Label gammaValue{&colorLayout, Size{50, 0}};
+      HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
     Label fullscreenLabel{&layout, Size{~0, 0}, 2};
     CheckLabel exclusiveMode{&layout, Size{~0, 0}};
 };
@@ -43,18 +43,18 @@ public:
       ComboButton latencyList{&driverLayout, Size{80, 0}};
     CheckLabel exclusiveMode{&layout, Size{~0, 0}};
     Label effectsLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout skewLayout{&layout, Size{~0, 0}};
-      Label skewLabel{&skewLayout, Size{65, 0}};
-      Label skewValue{&skewLayout, Size{50, 0}};
-      HorizontalSlider skewSlider{&skewLayout, Size{~0, 0}};
-    HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
-      Label volumeLabel{&volumeLayout, Size{65, 0}};
-      Label volumeValue{&volumeLayout, Size{50, 0}};
-      HorizontalSlider volumeSlider{&volumeLayout, Size{~0, 0}};
-    HorizontalLayout balanceLayout{&layout, Size{~0, 0}};
-      Label balanceLabel{&balanceLayout, Size{65, 0}};
-      Label balanceValue{&balanceLayout, Size{50, 0}};
-      HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
+    TableLayout effectsLayout{&layout, Size{~0, 0}};
+      Label skewLabel{&effectsLayout, Size{0, 0}};
+      Label skewValue{&effectsLayout, Size{50, 0}};
+      HorizontalSlider skewSlider{&effectsLayout, Size{~0, 0}};
+    //
+      Label volumeLabel{&effectsLayout, Size{0, 0}};
+      Label volumeValue{&effectsLayout, Size{50, 0}};
+      HorizontalSlider volumeSlider{&effectsLayout, Size{~0, 0}};
+    //
+      Label balanceLabel{&effectsLayout, Size{0, 0}};
+      Label balanceValue{&effectsLayout, Size{50, 0}};
+      HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
     CheckLabel reverb{&layout, Size{~0, 0}};
 };
 
@@ -121,37 +121,36 @@ struct PathSettings : TabFrameItem {
   auto refreshPaths() -> void;
 
 public:
-  VerticalLayout layout{this};
-    HorizontalLayout gamesLayout{&layout, Size{~0, 0}};
-      Label gamesLabel{&gamesLayout, Size{80, 0}};
-      LineEdit gamesPath{&gamesLayout, Size{~0, 0}};
-      Button gamesAssign{&gamesLayout, Size{80, 0}};
-      Button gamesReset{&gamesLayout, Size{80, 0}};
-    HorizontalLayout patchesLayout{&layout, Size{~0, 0}};
-      Label patchesLabel{&patchesLayout, Size{80, 0}};
-      LineEdit patchesPath{&patchesLayout, Size{~0, 0}};
-      Button patchesAssign{&patchesLayout, Size{80, 0}};
-      Button patchesReset{&patchesLayout, Size{80, 0}};
-    HorizontalLayout savesLayout{&layout, Size{~0, 0}};
-      Label savesLabel{&savesLayout, Size{80, 0}};
-      LineEdit savesPath{&savesLayout, Size{~0, 0}};
-      Button savesAssign{&savesLayout, Size{80, 0}};
-      Button savesReset{&savesLayout, Size{80, 0}};
-    HorizontalLayout cheatsLayout{&layout, Size{~0, 0}};
-      Label cheatsLabel{&cheatsLayout, Size{80, 0}};
-      LineEdit cheatsPath{&cheatsLayout, Size{~0, 0}};
-      Button cheatsAssign{&cheatsLayout, Size{80, 0}};
-      Button cheatsReset{&cheatsLayout, Size{80, 0}};
-    HorizontalLayout statesLayout{&layout, Size{~0, 0}};
-      Label statesLabel{&statesLayout, Size{80, 0}};
-      LineEdit statesPath{&statesLayout, Size{~0, 0}};
-      Button statesAssign{&statesLayout, Size{80, 0}};
-      Button statesReset{&statesLayout, Size{80, 0}};
-    HorizontalLayout screenshotsLayout{&layout, Size{~0, 0}};
-      Label screenshotsLabel{&screenshotsLayout, Size{80, 0}};
-      LineEdit screenshotsPath{&screenshotsLayout, Size{~0, 0}};
-      Button screenshotsAssign{&screenshotsLayout, Size{80, 0}};
-      Button screenshotsReset{&screenshotsLayout, Size{80, 0}};
+  TableLayout layout{this};
+    Label gamesLabel{&layout, Size{0, 0}};
+    LineEdit gamesPath{&layout, Size{~0, 0}};
+    Button gamesAssign{&layout, Size{80, 0}};
+    Button gamesReset{&layout, Size{80, 0}};
+  //
+    Label patchesLabel{&layout, Size{0, 0}};
+    LineEdit patchesPath{&layout, Size{~0, 0}};
+    Button patchesAssign{&layout, Size{80, 0}};
+    Button patchesReset{&layout, Size{80, 0}};
+  //
+    Label savesLabel{&layout, Size{0, 0}};
+    LineEdit savesPath{&layout, Size{~0, 0}};
+    Button savesAssign{&layout, Size{80, 0}};
+    Button savesReset{&layout, Size{80, 0}};
+  //
+    Label cheatsLabel{&layout, Size{0, 0}};
+    LineEdit cheatsPath{&layout, Size{~0, 0}};
+    Button cheatsAssign{&layout, Size{80, 0}};
+    Button cheatsReset{&layout, Size{80, 0}};
+  //
+    Label statesLabel{&layout, Size{0, 0}};
+    LineEdit statesPath{&layout, Size{~0, 0}};
+    Button statesAssign{&layout, Size{80, 0}};
+    Button statesReset{&layout, Size{80, 0}};
+  //
+    Label screenshotsLabel{&layout, Size{0, 0}};
+    LineEdit screenshotsPath{&layout, Size{~0, 0}};
+    Button screenshotsAssign{&layout, Size{80, 0}};
+    Button screenshotsReset{&layout, Size{80, 0}};
 };
 
 struct AdvancedSettings : TabFrameItem {

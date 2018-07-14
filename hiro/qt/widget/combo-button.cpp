@@ -30,9 +30,8 @@ auto pComboButton::remove(sComboButtonItem item) -> void {
 }
 
 auto pComboButton::reset() -> void {
-  lock();
+  auto lock = acquire();
   while(qtComboButton->count()) qtComboButton->removeItem(0);
-  unlock();
 }
 
 auto QtComboButton::onChange(int offset) -> void {

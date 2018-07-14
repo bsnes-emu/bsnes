@@ -2,7 +2,7 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Joypad);
   setText("Input");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   defocusLabel.setText("When focus is lost:");
   pauseEmulation.setText("Pause emulation").onActivate([&] {
     settings["Input/Defocus"].setValue("Pause");

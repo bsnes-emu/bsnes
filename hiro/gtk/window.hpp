@@ -5,13 +5,13 @@ namespace hiro {
 struct pWindow : pObject {
   Declare(Window, Object)
 
-  auto append(sLayout layout) -> void;
   auto append(sMenuBar menuBar) -> void;
+  auto append(sSizable sizable) -> void;
   auto append(sStatusBar statusBar) -> void;
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
-  auto remove(sLayout layout) -> void;
   auto remove(sMenuBar menuBar) -> void;
+  auto remove(sSizable sizable) -> void;
   auto remove(sStatusBar statusBar) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setDismissable(bool dismissable) -> void;
@@ -31,7 +31,8 @@ struct pWindow : pObject {
 
   auto _append(mWidget& widget) -> void;
   auto _append(mMenu& menu) -> void;
-  auto _menuHeight() const -> signed;
+  auto _menuHeight() const -> int;
+  auto _menuTextHeight() const -> int;
   auto _setIcon(const string& basename) -> bool;
   auto _setMenuEnabled(bool enabled) -> void;
   auto _setMenuFont(const Font& font) -> void;
@@ -40,7 +41,10 @@ struct pWindow : pObject {
   auto _setStatusFont(const Font& font) -> void;
   auto _setStatusText(const string& text) -> void;
   auto _setStatusVisible(bool visible) -> void;
-  auto _statusHeight() const -> signed;
+  auto _statusHeight() const -> int;
+  auto _statusTextHeight() const -> int;
+  auto _synchronizeGeometry() -> void;
+  auto _synchronizeMargin() -> void;
   auto _synchronizeState() -> void;
 
   GtkWidget* widget = nullptr;
@@ -49,9 +53,8 @@ struct pWindow : pObject {
   GtkWidget* statusContainer = nullptr;
   GtkWidget* gtkMenu = nullptr;
   GtkWidget* gtkStatus = nullptr;
-  GtkAllocation lastAllocation = {0};
-  Geometry windowedGeometry{128, 128, 256, 256};
-  bool onSizePending = false;
+  GtkAllocation lastMove = {0};
+  GtkAllocation lastSize = {0};
 };
 
 }

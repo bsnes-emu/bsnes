@@ -17,7 +17,7 @@ struct CRC32 : Hash {
 
   auto output() const -> vector<uint8_t> {
     vector<uint8_t> result;
-    for(auto n : rrange(4)) result.append(~checksum >> n * 8);
+    for(auto n : reverse(range(4))) result.append(~checksum >> n * 8);
     return result;
   }
 

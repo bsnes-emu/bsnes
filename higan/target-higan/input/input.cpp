@@ -255,7 +255,7 @@ auto InputManager::poll() -> void {
   auto devices = input->poll();
   bool changed = devices.size() != this->devices.size();
   if(!changed) {
-    for(auto n : range(devices)) {
+    for(auto n : range(devices.size())) {
       changed = devices[n] != this->devices[n];
       if(changed) break;
     }

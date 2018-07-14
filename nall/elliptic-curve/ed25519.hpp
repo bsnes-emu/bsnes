@@ -135,7 +135,7 @@ private:
 
   inline auto scalarMultiply(uint512_t e, point q) const -> point {
     point p{0, 1, 1, 0}, c;
-    for(uint n : rrange(253)) {
+    for(uint n : reverse(range(253))) {
       p = edwardsDouble(p);
       c = edwardsAdd(p, q);
       bool bit = e >> n & 1;
@@ -149,7 +149,7 @@ private:
 
   inline auto scalarMultiplyB(uint512_t e) const -> point {
     point p{0, 1, 1, 0}, c;
-    for(uint n : rrange(253)) {
+    for(uint n : reverse(range(253))) {
       bool bit = e >> n & 1;
       c = edwardsAdd(p, Bscalar[n]);
       cmove(bit, p.x, c.x);

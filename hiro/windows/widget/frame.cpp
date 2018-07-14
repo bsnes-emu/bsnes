@@ -15,14 +15,14 @@ auto pFrame::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pFrame::append(sLayout layout) -> void {
+auto pFrame::append(sSizable sizable) -> void {
 }
 
-auto pFrame::remove(sLayout layout) -> void {
+auto pFrame::remove(sSizable sizable) -> void {
 }
 
 auto pFrame::setEnabled(bool enabled) -> void {
-  if(auto layout = state().layout) layout->setEnabled(layout->enabled());
+  if(auto& sizable = state().sizable) sizable->setEnabled(sizable->enabled());
   pWidget::setEnabled(enabled);
 }
 
@@ -35,9 +35,9 @@ auto pFrame::setGeometry(Geometry geometry) -> void {
     geometry.width(),
     geometry.height() + (empty ? size.height() / 2 : 0)
   });
-  if(auto layout = state().layout) {
+  if(auto& sizable = state().sizable) {
     if(empty) size.setHeight(1);
-    layout->setGeometry({
+    sizable->setGeometry({
       geometry.x() + 1,
       geometry.y() + size.height(),
       geometry.width() - 2,
@@ -51,7 +51,7 @@ auto pFrame::setText(const string& text) -> void {
 }
 
 auto pFrame::setVisible(bool visible) -> void {
-  if(auto layout = state().layout) layout->setVisible(layout->visible());
+  if(auto& sizable = state().sizable) sizable->setVisible(sizable->visible());
   pWidget::setVisible(visible);
 }
 

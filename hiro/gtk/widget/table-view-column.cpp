@@ -5,7 +5,7 @@ namespace hiro {
 auto pTableViewColumn::construct() -> void {
   if(auto grandparent = _grandparent()) {
     auto handle = grandparent.data();
-    unsigned offset = self().offset();
+    uint offset = self().offset();
 
     #if HIRO_GTK==2
     gtkHeader = gtk_hbox_new(false, 0);

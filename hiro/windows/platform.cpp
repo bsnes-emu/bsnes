@@ -26,7 +26,6 @@
 #include "action/menu-radio-item.cpp"
 
 #include "sizable.cpp"
-#include "layout.cpp"
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"

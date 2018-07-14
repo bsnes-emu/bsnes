@@ -2,9 +2,11 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Emblem::Folder);
   setText("Paths");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
+  layout.setSize({4, 6});
+  layout.column(0).setAlignment(1.0);
 
-  gamesLabel.setAlignment(1.0).setText("Games:");
+  gamesLabel.setText("Games:");
   gamesPath.setEditable(false);
   gamesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -17,7 +19,7 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     refreshPaths();
   });
 
-  patchesLabel.setAlignment(1.0).setText("Patches:");
+  patchesLabel.setText("Patches:");
   patchesPath.setEditable(false);
   patchesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -30,7 +32,7 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     refreshPaths();
   });
 
-  savesLabel.setAlignment(1.0).setText("Saves:");
+  savesLabel.setText("Saves:");
   savesPath.setEditable(false);
   savesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -43,7 +45,7 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     refreshPaths();
   });
 
-  cheatsLabel.setAlignment(1.0).setText("Cheats:");
+  cheatsLabel.setText("Cheats:");
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -56,7 +58,7 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     refreshPaths();
   });
 
-  statesLabel.setAlignment(1.0).setText("States:");
+  statesLabel.setText("States:");
   statesPath.setEditable(false);
   statesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
@@ -69,7 +71,7 @@ PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
     refreshPaths();
   });
 
-  screenshotsLabel.setAlignment(1.0).setText("Screenshots:");
+  screenshotsLabel.setText("Screenshots:");
   screenshotsPath.setEditable(false);
   screenshotsAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {

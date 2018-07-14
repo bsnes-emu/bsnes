@@ -13,7 +13,7 @@ auto pMenuBar::append(sMenu menu) -> void {
     parent->_append(*menu);
     if(menu->self()) {
       menu->self()->setFont(menu->font(true));
-      menu->self()->setVisible(menu->visible(true));
+      menu->self()->setVisible(menu->visible());
     }
   }
 }

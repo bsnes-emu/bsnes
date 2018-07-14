@@ -37,7 +37,7 @@ auto mGroup::objects() const -> vector<Object> {
 
 auto mGroup::remove(sObject object) -> type& {
   object->setGroup();
-  for(auto offset : range(state.objects)) {
+  for(auto offset : range(state.objects.size())) {
     if(auto shared = state.objects[offset].acquire()) {
       if(object == shared) {
         state.objects.remove(offset);

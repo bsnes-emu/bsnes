@@ -34,7 +34,7 @@ struct InputKeyboardRawInput {
   }
 
   auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
-    for(auto n : range(keys)) assign(n, keys[n].value);
+    for(auto n : range(keys.size())) assign(n, keys[n].value);
     devices.append(kb.hid);
   }
 

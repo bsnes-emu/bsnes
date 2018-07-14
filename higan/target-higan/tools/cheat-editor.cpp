@@ -2,7 +2,7 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Edit::Replace);
   setText("Cheat Editor");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   cheatList.append(TableViewHeader().setVisible()
     .append(TableViewColumn())
     .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))

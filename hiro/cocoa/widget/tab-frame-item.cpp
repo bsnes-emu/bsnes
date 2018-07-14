@@ -8,10 +8,10 @@ auto pTabFrameItem::construct() -> void {
 auto pTabFrameItem::destruct() -> void {
 }
 
-auto pTabFrameItem::append(sLayout layout) -> void {
+auto pTabFrameItem::append(sSizable sizable) -> void {
 }
 
-auto pTabFrameItem::remove(sLayout layout) -> void {
+auto pTabFrameItem::remove(sSizable sizable) -> void {
 }
 
 auto pTabFrameItem::setClosable(bool closable) -> void {

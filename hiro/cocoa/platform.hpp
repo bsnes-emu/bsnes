@@ -38,7 +38,6 @@ namespace hiro {
 #include "action/menu-radio-item.hpp"
 
 #include "sizable.hpp"
-#include "layout.hpp"
 
 #include "widget/widget.hpp"
 #include "widget/button.hpp"

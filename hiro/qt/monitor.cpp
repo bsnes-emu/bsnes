@@ -23,6 +23,11 @@ auto pMonitor::primary() -> uint {
   return QApplication::desktop()->primaryScreen();
 }
 
+auto pMonitor::workspace(uint monitor) -> Geometry {
+  //TODO: per-monitor?
+  return pDesktop::workspace();
+}
+
 }
 
 #endif

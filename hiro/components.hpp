@@ -47,7 +47,6 @@
 #define Hiro_MenuRadioItem
 
 #define Hiro_Sizable
-#define Hiro_Layout
 #define Hiro_Widget
 #define Hiro_Button
 #define Hiro_Canvas
@@ -94,6 +93,7 @@
 #define Hiro_FixedLayout
 #define Hiro_HorizontalLayout
 #define Hiro_VerticalLayout
+#define Hiro_TableLayout
 
 #if defined(Hiro_TableView)
   #define Hiro_ListView

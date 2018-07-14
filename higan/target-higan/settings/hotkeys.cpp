@@ -2,7 +2,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Keyboard);
   setText("Hotkeys");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   mappingList.onActivate([&] { assignMapping(); });
   mappingList.onChange([&] { eraseButton.setEnabled((bool)mappingList.selected()); });
   resetButton.setText("Reset").onActivate([&] {

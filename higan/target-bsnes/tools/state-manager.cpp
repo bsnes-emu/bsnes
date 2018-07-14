@@ -1,7 +1,7 @@
 StateWindow::StateWindow() {
   stateWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   nameLabel.setText("Name:");
   nameValue.onActivate([&] {
     if(acceptButton.enabled()) acceptButton.doActivate();
@@ -67,7 +67,7 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Application::FileManager);
   setText("State Manager");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   stateList.setBatchable();
   stateList.onActivate([&] {
     editButton.doActivate();

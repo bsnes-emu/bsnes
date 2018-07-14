@@ -13,7 +13,7 @@
 #include "hacks.cpp"
 unique_pointer<Program> program;
 
-Program::Program(string_vector arguments) {
+Program::Program(string_vector arguments) : Locale::Namespace(ns, "Program") {
   program = this;
   Emulator::platform = this;
 

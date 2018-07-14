@@ -6,12 +6,13 @@ auto pTableViewItem::construct() -> void {
 }
 
 auto pTableViewItem::destruct() -> void {
-  if(auto parent = _parent()) parent->lock();
-  if(qtItem) {
-    delete qtItem;
-    qtItem = nullptr;
+  if(auto parent = _parent()) {
+    auto lock = parent->acquire();
+    if(qtItem) {
+      delete qtItem;
+      qtItem = nullptr;
+    }
   }
-  if(auto parent = _parent()) parent->unlock();
 }
 
 auto pTableViewItem::append(sTableViewCell cell) -> void {
@@ -51,6 +52,7 @@ auto pTableViewItem::_parent() -> maybe<pTableView&> {
 
 auto pTableViewItem::_setState() -> void {
   if(auto parent = _parent()) {
+    parent->lock();
     qtItem->setSelected(state().selected);
     if(state().selected) {
       parent->qtTableView->setCurrentItem(qtItem);

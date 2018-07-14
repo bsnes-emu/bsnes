@@ -1,0 +1,40 @@
+locale
+  language: 日本語
+
+namespace: Program
+  map
+    input: Paused
+    value: ポーズ
+
+namespace: Presentation
+  map
+    input: System
+    value: システム
+  map
+    input: Settings
+    value: 設定
+  map
+    input: Tools
+    value: ツール
+  map
+    input: Help
+    value: ヘルプ
+
+namespace: About
+  map
+    input: About {0} ...
+    value: {0}について ...
+
+  map
+    input: Version:
+    value: バージョン:
+  map
+    input: Author:
+    value: 作者:
+  map
+    input: License:
+    value: ライセンス:
+  map
+    input: Website:
+    value: 公式サイト:
+

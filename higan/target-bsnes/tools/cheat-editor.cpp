@@ -1,7 +1,7 @@
 CheatDatabase::CheatDatabase() {
   cheatDatabase = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   selectAllButton.setText("Select All").onActivate([&] {
     for(auto item : cheatList.items()) item.setChecked(true);
   });
@@ -55,7 +55,7 @@ auto CheatDatabase::addCheats() -> void {
 CheatWindow::CheatWindow() {
   cheatWindow = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   nameLabel.setText("Name:");
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
@@ -106,7 +106,7 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Edit::Replace);
   setText("Cheat Editor");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   cheatList.setBatchable();
   cheatList.onActivate([&] {
     editButton.doActivate();
@@ -169,7 +169,7 @@ auto CheatEditor::addCheat(Cheat cheat) -> void {
   cheats.append(cheat);
   cheats.sort();
   refresh();
-  for(uint index : range(cheats)) {
+  for(uint index : range(cheats.size())) {
     if(cheats[index] == cheat) { cheatList.item(index).setSelected(); break; }
   }
   cheatList.doChange();
@@ -181,7 +181,7 @@ auto CheatEditor::editCheat(Cheat cheat) -> void {
     cheats[item.offset()] = cheat;
     cheats.sort();
     refresh();
-    for(uint index : range(cheats)) {
+    for(uint index : range(cheats.size())) {
       if(cheats[index] == cheat) { cheatList.item(index).setSelected(); break; }
     }
     cheatList.doChange();
@@ -193,7 +193,7 @@ auto CheatEditor::removeCheats() -> void {
   if(auto batched = cheatList.batched()) {
     if(MessageDialog("Are you sure you want to permanently remove the selected cheat(s)?")
     .setParent(*toolsWindow).question() == "Yes") {
-      for(uint index : rrange(batched)) cheats.remove(batched[index].offset());
+      for(auto& item : reverse(batched)) cheats.remove(item.offset());
       cheats.sort();
       refresh();
       synchronizeCodes();

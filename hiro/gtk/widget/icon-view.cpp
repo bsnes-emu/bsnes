@@ -43,7 +43,7 @@ auto pIconView::construct() -> void {
   setFlow(state().flow);
   setForegroundColor(state().foregroundColor);
   setOrientation(state().orientation);
-  for(auto position : range(self().items())) {
+  for(auto position : range(self().itemCount())) {
     auto& item = state().items[position];
     append(item);
   }

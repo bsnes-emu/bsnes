@@ -3,17 +3,17 @@
 namespace hiro {
 
 auto pTabFrameItem::construct() -> void {
-  if(auto layout = state().layout) layout->construct();
+  if(auto& sizable = state().sizable) sizable->construct();
 }
 
 auto pTabFrameItem::destruct() -> void {
-  if(auto layout = state().layout) layout->destruct();
+  if(auto& sizable = state().sizable) sizable->destruct();
 }
 
-auto pTabFrameItem::append(sLayout layout) -> void {
+auto pTabFrameItem::append(sSizable sizable) -> void {
 }
 
-auto pTabFrameItem::remove(sLayout layout) -> void {
+auto pTabFrameItem::remove(sSizable sizable) -> void {
 }
 
 auto pTabFrameItem::setClosable(bool closable) -> void {
@@ -46,9 +46,11 @@ auto pTabFrameItem::setText(const string& text) -> void {
   }
 }
 
-auto pTabFrameItem::_parent() -> pTabFrame* {
-  if(auto parent = self().parentTabFrame()) return parent->self();
-  return nullptr;
+auto pTabFrameItem::_parent() -> maybe<pTabFrame&> {
+  if(auto parent = self().parentTabFrame()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return {};
 }
 
 }

@@ -1,11 +1,13 @@
 build := performance
 openmp := true
-include ../nall/GNUmakefile
+
+nall.path := ../nall
+include $(nall.path)/GNUmakefile
 
 binary := application
 target := bsnes
 objects := libco emulator audio video resource
-
+object.path := obj
 flags += -I. -I..
 
 ifeq ($(platform),windows)
@@ -38,9 +40,9 @@ endif
 compile = \
   $(strip \
     $(if $(filter %.c,$<), \
-      $(compiler) $(cflags)   $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
+      $(compiler) $(flags.c)   $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
     $(if $(filter %.cpp,$<), \
-      $(compiler) $(cppflags) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
+      $(compiler) $(flags.cpp) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
     )) \
   )
 

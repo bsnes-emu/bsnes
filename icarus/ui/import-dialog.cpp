@@ -5,7 +5,7 @@ ImportDialog::ImportDialog() {
     stopButton.setEnabled(false).setText("Stopping ...");
     abort = true;
   });
-  layout.setMargin(5);
+  layout.setPadding(5);
   stopButton.setText("Stop").onActivate([&] { doClose(); });
 
   setTitle("icarus - Importing ...");

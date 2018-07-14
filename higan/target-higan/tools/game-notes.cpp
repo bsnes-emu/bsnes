@@ -2,7 +2,7 @@ GameNotes::GameNotes(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Emblem::Text);
   setText("Game Notes");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   notes.setWordWrap(false).setFont(Font().setFamily(Font::Mono));
 }
 

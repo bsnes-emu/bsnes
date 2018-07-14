@@ -30,7 +30,7 @@ auto pHorizontalSlider::destruct() -> void {
 }
 
 auto pHorizontalSlider::minimumSize() const -> Size {
-  return {0, 20};
+  return {3, 20};
 }
 
 auto pHorizontalSlider::setLength(unsigned length) -> void {

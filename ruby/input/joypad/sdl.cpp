@@ -23,7 +23,7 @@ struct InputJoypadSDL {
     SDL_JoystickUpdate();
 
     for(auto& jp : joypads) {
-      for(auto n : range(jp.hid->axes())) {
+      for(auto n : range(jp.hid->axes().size())) {
         assign(jp.hid, HID::Joypad::GroupID::Axis, n, (int16_t)SDL_JoystickGetAxis(jp.handle, n));
       }
 
@@ -33,7 +33,7 @@ struct InputJoypadSDL {
         assign(jp.hid, HID::Joypad::GroupID::Hat, n + 1, state & SDL_HAT_UP   ? -32767 : state & SDL_HAT_DOWN  ? +32767 : 0);
       }
 
-      for(auto n : range(jp.hid->buttons())) {
+      for(auto n : range(jp.hid->buttons().size())) {
         assign(jp.hid, HID::Joypad::GroupID::Button, n, (bool)SDL_JoystickGetButton(jp.handle, n));
       }
 

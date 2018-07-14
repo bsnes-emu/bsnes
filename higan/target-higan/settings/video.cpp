@@ -2,7 +2,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Display);
   setText("Video");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   colorAdjustmentLabel.setFont(Font().setBold()).setText("Color Adjustment");
   saturationLabel.setText("Saturation:");

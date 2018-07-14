@@ -1,47 +1,51 @@
 ifeq ($(platform),macos)
-  rubyflags = $(objcppflags) $(flags)
+  ruby.flags := $(flags.objcpp)
 else
-  rubyflags = $(cppflags) $(flags)
+  ruby.flags := $(flags.cpp)
 endif
 
-rubyflags += $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
-rubyflags += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --cflags))
+ruby.flags += $(foreach c,$(subst .,_,$(call strupper,$(ruby))),-D$c)
+ruby.flags += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --cflags))
 
-rubylink =
+ruby.options :=
 
-rubylink += $(if $(findstring video.cgl,$(ruby)),-framework OpenGL)
-rubylink += $(if $(findstring video.direct3d,$(ruby)),-ld3d9)
-rubylink += $(if $(findstring video.directdraw,$(ruby)),-lddraw)
-rubylink += $(if $(findstring video.glx,$(ruby)),-lGL)
-rubylink += $(if $(findstring video.wgl,$(ruby)),-lopengl32)
-rubylink += $(if $(findstring video.xvideo,$(ruby)),-lXv)
+ruby.options += $(if $(findstring video.cgl,$(ruby)),-framework OpenGL)
+ruby.options += $(if $(findstring video.direct3d,$(ruby)),-ld3d9)
+ruby.options += $(if $(findstring video.directdraw,$(ruby)),-lddraw)
+ruby.options += $(if $(findstring video.glx,$(ruby)),-lGL)
+ruby.options += $(if $(findstring video.wgl,$(ruby)),-lopengl32)
+ruby.options += $(if $(findstring video.xvideo,$(ruby)),-lXv)
 
-rubylink += $(if $(findstring audio.alsa,$(ruby)),-lasound)
-rubylink += $(if $(findstring audio.ao,$(ruby)),-lao)
-rubylink += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
-rubylink += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
-rubylink += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
-rubylink += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)
-rubylink += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
+ruby.options += $(if $(findstring audio.alsa,$(ruby)),-lasound)
+ruby.options += $(if $(findstring audio.ao,$(ruby)),-lao)
+ruby.options += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
+ruby.options += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
+ruby.options += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
+ruby.options += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)
+ruby.options += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
 
-rubylink += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --libs))
-rubylink += $(if $(findstring input.udev,$(ruby)),-ludev)
-rubylink += $(if $(findstring input.windows,$(ruby)),-ldinput8 -ldxguid)
+ruby.options += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --libs))
+ruby.options += $(if $(findstring input.udev,$(ruby)),-ludev)
+ruby.options += $(if $(findstring input.windows,$(ruby)),-ldinput8 -ldxguid)
 
 ifeq ($(platform),windows)
-  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
+  ruby.options += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
 endif
 
 ifeq ($(platform),macos)
-  rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
+  ruby.options += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 endif
 
 ifeq ($(platform),linux)
-  rubylink += -lX11 -lXext
-  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
+  ruby.options += -lX11 -lXext
+  ruby.options += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 endif
 
 ifeq ($(platform),bsd)
-  rubylink += -lX11 -lXext
-  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
+  ruby.options += -lX11 -lXext
+  ruby.options += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 endif
+
+$(object.path)/ruby.o: $(ruby.path)/ruby.cpp $(call rwildcard,$(ruby.path)) $(call rwildcard,$(nall.path))
+	$(info Compiling $< ...)
+	@$(compiler) $(ruby.flags) $(flags) -c $< -o $@

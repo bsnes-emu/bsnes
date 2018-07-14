@@ -6,8 +6,10 @@ auto mTableViewColumn::allocate() -> pObject* {
 
 //
 
+//TODO: active(), setActive() ... is this the best way to do this?
+
 auto mTableViewColumn::active() const -> bool {
-  if(auto tableView = parentTableView()) return tableView->state.activeColumn == offset();
+  if(auto tableView = parentTableView(true)) return tableView->state.activeColumn == offset();
   return false;
 }
 
@@ -40,7 +42,7 @@ auto mTableViewColumn::icon() const -> image {
 }
 
 auto mTableViewColumn::remove() -> type& {
-  if(auto tableView = parentTableViewHeader()) tableView->remove(*this);
+  if(auto tableViewHeader = parentTableViewHeader()) tableViewHeader->remove(*this);
   return *this;
 }
 
@@ -49,7 +51,7 @@ auto mTableViewColumn::resizable() const -> bool {
 }
 
 auto mTableViewColumn::setActive() -> type& {
-  if(auto tableView = parentTableView()) tableView->state.activeColumn = offset();
+  if(auto tableView = parentTableView(true)) tableView->state.activeColumn = offset();
   signal(setActive);
   return *this;
 }

@@ -184,6 +184,8 @@ auto pTableView::_columnWidth(unsigned _column) -> unsigned {
 }
 
 auto pTableView::_createModel() -> void {
+  auto lock = acquire();
+
   gtk_tree_view_set_model(gtkTreeView, nullptr);
   gtkListStore = nullptr;
   gtkTreeModel = nullptr;
@@ -204,6 +206,11 @@ auto pTableView::_createModel() -> void {
   gtkListStore = gtk_list_store_newv(types.size(), types.data());
   gtkTreeModel = GTK_TREE_MODEL(gtkListStore);
   gtk_tree_view_set_model(gtkTreeView, gtkTreeModel);
+
+//  for(auto& item : state().items) {
+//    gtk_list_store_append(gtkListStore, &item->self()->gtkIter);
+//    item->self()->_setState();
+//  }
 }
 
 auto pTableView::_doActivate() -> void {
@@ -385,7 +392,7 @@ auto pTableView::_updateSelected() -> void {
 
   bool identical = selected.size() == currentSelection.size();
   if(identical) {
-    for(auto n : range(selected)) {
+    for(auto n : range(selected.size())) {
       if(selected[n] != currentSelection[n]) {
         identical = false;
         break;
@@ -410,7 +417,7 @@ auto pTableView::_width(unsigned column) -> unsigned {
     unsigned width = 1;
     if(!header->column(column).visible()) return width;
     if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(state().items)) {
+    for(auto row : range(self().itemCount())) {
       width = max(width, _cellWidth(row, column));
     }
     return width;

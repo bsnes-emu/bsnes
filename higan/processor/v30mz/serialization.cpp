@@ -7,7 +7,7 @@ auto V30MZ::serialize(serializer& s) -> void {
   if(s.mode() == serializer::Save) {
     uint8 _prefixes[7] = {0};
     uint8 _prefixCount = prefixes.size();
-    for(auto n : range(prefixes)) _prefixes[n] = prefixes[n];
+    for(auto n : range(_prefixCount)) _prefixes[n] = prefixes[n];
     s.integer(_prefixCount);
     s.array(_prefixes);
   } else {
@@ -16,7 +16,7 @@ auto V30MZ::serialize(serializer& s) -> void {
     s.integer(_prefixCount);
     s.array(_prefixes);
     prefixes.resize(_prefixCount);
-    for(auto n : range(prefixes)) prefixes[n] = _prefixes[n];
+    for(auto n : range(_prefixCount)) prefixes[n] = _prefixes[n];
   }
 
   s.integer(modrm.mod);

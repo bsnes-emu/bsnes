@@ -11,8 +11,8 @@ struct Settings {
     int frameY = 24;
     int frameWidth = 8;
     int frameHeight = 28;
-    int menuHeight = 20;
-    int statusHeight = 20;
+    int menuHeight = 8;
+    int statusHeight = 4;
   } geometry;
 };
 

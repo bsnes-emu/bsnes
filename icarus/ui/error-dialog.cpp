@@ -2,7 +2,7 @@ ErrorDialog::ErrorDialog() {
   errorDialog = this;
 
   onClose([&] { setVisible(false); scanDialog->show(); });
-  layout.setMargin(5);
+  layout.setPadding(5);
   errorLog.setEditable(false);
   closeButton.setText("Close").onActivate([&] { doClose(); });
 

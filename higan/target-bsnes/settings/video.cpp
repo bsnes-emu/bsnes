@@ -2,10 +2,12 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Display);
   setText("Video");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   colorAdjustmentLabel.setFont(Font().setBold()).setText("Color Adjustment");
-  luminanceLabel.setAlignment(1.0).setText("Luminance:");
+  colorLayout.setSize({3, 3});
+  colorLayout.column(0).setAlignment(1.0);
+  luminanceLabel.setText("Luminance:");
   luminanceValue.setAlignment(0.5);
   luminanceSlider.setLength(101).setPosition(settings["Video/Luminance"].natural()).onChange([&] {
     string value = {luminanceSlider.position(), "%"};
@@ -13,7 +15,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     luminanceValue.setText(value);
     program->updateVideoPalette();
   }).doChange();
-  saturationLabel.setAlignment(1.0).setText("Saturation:");
+  saturationLabel.setText("Saturation:");
   saturationValue.setAlignment(0.5);
   saturationSlider.setLength(201).setPosition(settings["Video/Saturation"].natural()).onChange([&] {
     string value = {saturationSlider.position(), "%"};
@@ -21,7 +23,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     saturationValue.setText(value);
     program->updateVideoPalette();
   }).doChange();
-  gammaLabel.setAlignment(1.0).setText("Gamma:");
+  gammaLabel.setText("Gamma:");
   gammaValue.setAlignment(0.5);
   gammaSlider.setLength(101).setPosition(settings["Video/Gamma"].natural() - 100).onChange([&] {
     string value = {100 + gammaSlider.position(), "%"};

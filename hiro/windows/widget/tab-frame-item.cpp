@@ -8,15 +8,15 @@ auto pTabFrameItem::construct() -> void {
 auto pTabFrameItem::destruct() -> void {
 }
 
-auto pTabFrameItem::append(sLayout layout) -> void {
+auto pTabFrameItem::append(sSizable sizable) -> void {
   if(auto parent = _parent()) {
-    parent->_synchronizeLayout();
+    parent->_synchronizeSizable();
   }
 }
 
-auto pTabFrameItem::remove(sLayout layout) -> void {
+auto pTabFrameItem::remove(sSizable sizable) -> void {
   if(auto parent = _parent()) {
-    parent->_synchronizeLayout();
+    parent->_synchronizeSizable();
   }
 }
 
@@ -37,7 +37,7 @@ auto pTabFrameItem::setMovable(bool movable) -> void {
 auto pTabFrameItem::setSelected() -> void {
   if(auto parent = _parent()) {
     TabCtrl_SetCurSel(parent->hwnd, self().offset());
-    parent->_synchronizeLayout();
+    parent->_synchronizeSizable();
   }
 }
 

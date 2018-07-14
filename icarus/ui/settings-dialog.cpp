@@ -1,7 +1,7 @@
 SettingsDialog::SettingsDialog() {
   settingsDialog = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   locationLabel.setText("Library Location:");
   locationEdit.setEditable(false).setText(settings["Library/Location"].text());
   changeLocationButton.setText("Change ...").onActivate([&] {

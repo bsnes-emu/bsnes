@@ -101,7 +101,7 @@ auto Video::createSprite(uint width, uint height) -> shared_pointer<Sprite> {
 }
 
 auto Video::removeSprite(shared_pointer<Sprite> sprite) -> bool {
-  for(uint n : range(sprites)) {
+  for(uint n : range(sprites.size())) {
     if(sprite == sprites[n]) {
       sprites.remove(n);
       return true;

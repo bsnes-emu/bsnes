@@ -213,12 +213,12 @@ auto pWindow::destruct() -> void {
   }
 }
 
-auto pWindow::append(sLayout layout) -> void {
-  layout->setGeometry(self().geometry().setPosition(0, 0));
-  statusBarReposition();
+auto pWindow::append(sMenuBar menuBar) -> void {
 }
 
-auto pWindow::append(sMenuBar menuBar) -> void {
+auto pWindow::append(sSizable sizable) -> void {
+  layout->setGeometry(self().geometry().setPosition(0, 0));
+  statusBarReposition();
 }
 
 auto pWindow::append(sStatusBar statusBar) -> void {
@@ -241,13 +241,13 @@ auto pWindow::frameMargin() const -> Geometry {
   }
 }
 
-auto pWindow::remove(sLayout layout) -> void {
+auto pWindow::remove(sMenuBar menuBar) -> void {
+}
+
+auto pWindow::remove(sSizable sizable) -> void {
   @autoreleasepool {
     [[cocoaWindow contentView] setNeedsDisplay:YES];
   }
-}
-
-auto pWindow::remove(sMenuBar menuBar) -> void {
 }
 
 auto pWindow::remove(sStatusBar statusBar) -> void {

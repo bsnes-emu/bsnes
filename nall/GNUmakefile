@@ -39,18 +39,19 @@ ifeq ($(platform),)
   endif
 endif
 
-cflags := -x c -std=c11
-objcflags := -x objective-c -std=c11
-cppflags := -x c++ -std=c++14
-objcppflags := -x objective-c++ -std=c++14
-flags :=
-link :=
+flags.c      := -x c -std=c11
+flags.cpp    := -x c++ -std=c++14
+flags.objc   := -x objective-c -std=c11
+flags.objcpp := -x objective-c++ -std=c++14
+
+flags   :=
+options :=
 
 # compiler detection
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
-    cppflags := -x c++ -std=gnu++14
+    flags.cpp := -x c++ -std=gnu++14
   else ifeq ($(platform),macos)
     compiler := clang++
   else ifeq ($(platform),linux)
@@ -77,16 +78,16 @@ endif
 
 # link-time optimization
 ifeq ($(lto),true)
-  flags += -fwhole-program -flto -fno-fat-lto-objects
-  link += -fwhole-program -flto=jobserver
+  flags   += -fwhole-program -flto -fno-fat-lto-objects
+  options += -fwhole-program -flto=jobserver
 endif
 
 # openmp support
 ifeq ($(openmp),true)
   # macOS Xcode does not ship with OpenMP support
   ifneq ($(platform),macos)
-    flags += -fopenmp
-    link += -fopenmp
+    flags   += -fopenmp
+    options += -fopenmp
   endif
 endif
 
@@ -100,35 +101,35 @@ endif
 
 # windows settings
 ifeq ($(platform),windows)
-  link += -mthreads -lpthread -lws2_32 -lole32
-  link += $(if $(findstring g++,$(compiler)),-static -static-libgcc -static-libstdc++)
-  link += $(if $(findstring true,$(console)),-mconsole,-mwindows)
+  options += -mthreads -lpthread -lws2_32 -lole32
+  options += $(if $(findstring g++,$(compiler)),-static -static-libgcc -static-libstdc++)
+  options += $(if $(findstring true,$(console)),-mconsole,-mwindows)
   windres := windres
 endif
 
 # macos settings
 ifeq ($(platform),macos)
-  flags += -stdlib=libc++
-  link += -lc++ -lobjc
+  flags   += -stdlib=libc++
+  options += -lc++ -lobjc
 endif
 
 # linux settings
 ifeq ($(platform),linux)
-  link += -ldl
+  options += -ldl
 endif
 
 # bsd settings
 ifeq ($(platform),bsd)
-  flags += -I/usr/local/include
-  link += -Wl,-rpath=/usr/local/lib
-  link += -Wl,-rpath=/usr/local/lib/gcc49
+  flags   += -I/usr/local/include
+  options += -Wl,-rpath=/usr/local/lib
+  options += -Wl,-rpath=/usr/local/lib/gcc49
 endif
 
 # threading support
 ifeq ($(threaded),true)
   ifneq ($(filter $(platform),linux bsd),)
-    flags += -pthread
-    link += -pthread -lrt
+    flags   += -pthread
+    options += -pthread -lrt
   endif
 endif
 
@@ -136,13 +137,13 @@ endif
 prefix := $(HOME)/.local
 
 # targets
-all: default;
-
+default: all;
+verbose: information all;
 information:
 	$(info Compiler Flags:)
 	$(foreach n,$(sort $(call unique,$(flags))),$(if $(filter-out -I%,$n),$(info $([space]) $n)))
-	$(info Linker Flags:)
-	$(foreach n,$(sort $(call unique,$(link))),$(if $(filter-out -l%,$n),$(info $([space]) $n)))
+	$(info Linker Options:)
+	$(foreach n,$(sort $(call unique,$(options))),$(if $(filter-out -l%,$n),$(info $([space]) $n)))
 
 # function rwildcard(directory, pattern)
 rwildcard = \

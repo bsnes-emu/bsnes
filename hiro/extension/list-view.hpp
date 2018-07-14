@@ -1,8 +1,13 @@
 #if defined(Hiro_ListView)
 
 struct ListView;
+struct ListViewItem;
+
 struct mListView;
+struct mListViewItem;
+
 using sListView = shared_pointer<mListView>;
+using sListViewItem = shared_pointer<mListViewItem>;
 
 struct mListView : mTableView {
   using type = mListView;
@@ -28,6 +33,23 @@ struct mListView : mTableView {
     function<void ()> onChange;
     function<void (ListViewItem)> onToggle;
   } state;
+};
+
+struct mListViewItem : mTableViewItem {
+  using type = mListViewItem;
+  using mTableViewItem::append;
+  using mTableViewItem::remove;
+
+  mListViewItem();
+  auto checkable() const -> bool;
+  auto checked() const -> bool;
+  auto icon() const -> image;
+  auto reset() -> type&;
+  auto setCheckable(bool checkable) -> type&;
+  auto setChecked(bool checked) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
+  auto setText(const string& text) -> type&;
+  auto text() const -> string;
 };
 
 #endif

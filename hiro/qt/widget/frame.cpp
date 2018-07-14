@@ -22,23 +22,23 @@ auto pFrame::destruct() -> void {
   qtWidget = qtFrame = nullptr;
 }
 
-auto pFrame::append(sLayout layout) -> void {
+auto pFrame::append(sSizable sizable) -> void {
 }
 
-auto pFrame::remove(sLayout layout) -> void {
+auto pFrame::remove(sSizable sizable) -> void {
 }
 
 auto pFrame::setEnabled(bool enabled) -> void {
-  if(auto layout = state().layout) layout->setEnabled(layout->enabled(true));
+  if(auto& sizable = state().sizable) sizable->setEnabled(sizable->enabled());
   pWidget::setEnabled(enabled);
 }
 
 auto pFrame::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
-  if(auto layout = state().layout) {
+  if(auto& sizable = state().sizable) {
     auto size = pFont::size(qtFrame->font(), state().text);
     if(!state().text) size.setHeight(8);
-    layout->setGeometry({
+    sizable->setGeometry({
       4, size.height(),
       geometry.width() - 8,
       geometry.height() - size.height() - 4
@@ -51,7 +51,7 @@ auto pFrame::setText(const string& text) -> void {
 }
 
 auto pFrame::setVisible(bool visible) -> void {
-  if(auto layout = state().layout) layout->setVisible(layout->visible(true));
+  if(auto& sizable = state().sizable) sizable->setVisible(sizable->visible());
   pWidget::setVisible(visible);
 }
 

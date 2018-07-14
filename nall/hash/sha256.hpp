@@ -24,7 +24,7 @@ struct SHA256 : Hash {
     self.finish();
     vector<uint8_t> result;
     for(auto h : self.h) {
-      for(auto n : rrange(4)) result.append(h >> n * 8);
+      for(auto n : reverse(range(4))) result.append(h >> n * 8);
     }
     return result;
   }

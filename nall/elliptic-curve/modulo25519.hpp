@@ -186,7 +186,7 @@ struct Modulo25519 {
 
   inline auto expmod(uint256_t e) const -> type {
     type x = 1, y;
-    for(uint n : rrange(256)) {
+    for(uint n : reverse(range(256))) {
       x = x.square();
       y = operator*(x);
       cmove(e >> n & 1, x, y);

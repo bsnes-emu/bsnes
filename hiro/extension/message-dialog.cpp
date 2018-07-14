@@ -52,10 +52,10 @@ auto MessageDialog::_run() -> string {
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
         Widget controlSpacer{&controlLayout, Size{~0, 0}};
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   messageIcon.setIcon(state.icon);
   messageText.setText(state.text);
-  for(auto n : range(state.buttons)) {
+  for(auto n : range(state.buttons.size())) {
     Button button{&controlLayout, Size{80, 0}, 5};
     button.onActivate([&, n] { state.response = state.buttons[n]; window.setModal(false); });
     button.setText(state.buttons[n]);

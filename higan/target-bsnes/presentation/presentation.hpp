@@ -1,14 +1,23 @@
-struct AboutWindow : Window {
+struct AboutWindow : Locale::Namespace, Window {
   AboutWindow();
 
   VerticalLayout layout{this};
     Canvas canvas{&layout, Size{400, 85}, 0};
-    HorizontalLayout informationLayout{&layout, Size{~0, ~0}};
-      Label informationLeft{&informationLayout, Size{~0, 0}, 3};
-      Label informationRight{&informationLayout, Size{~0, 0}};
+    TableLayout tableLayout{&layout, Size{~0, 0}};
+      Label versionLabel{&tableLayout, Size{~0, 0}};
+      Label versionValue{&tableLayout, Size{~0, 0}};
+    //
+      Label authorLabel{&tableLayout, Size{~0, 0}};
+      Label authorValue{&tableLayout, Size{~0, 0}};
+    //
+      Label licenseLabel{&tableLayout, Size{~0, 0}};
+      Label licenseValue{&tableLayout, Size{~0, 0}};
+    //
+      Label websiteLabel{&tableLayout, Size{~0, 0}};
+      Label websiteValue{&tableLayout, Size{~0, 0}};
 };
 
-struct Presentation : Window {
+struct Presentation : Locale::Namespace, Window {
   enum : uint { RecentGames = 9, QuickStates = 9 };
   enum : uint { StatusHeight = 24 };
 

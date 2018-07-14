@@ -4,6 +4,11 @@ auto mTableViewItem::allocate() -> pObject* {
   return new pTableViewItem(*this);
 }
 
+auto mTableViewItem::destruct() -> void {
+  for(auto& cell : state.cells) cell->destruct();
+  mObject::destruct();
+}
+
 //
 
 auto mTableViewItem::alignment() const -> Alignment {
@@ -56,7 +61,7 @@ auto mTableViewItem::remove(sTableViewCell cell) -> type& {
 }
 
 auto mTableViewItem::reset() -> type& {
-  for(auto n : rrange(state.cells)) remove(state.cells[n]);
+  while(state.cells) remove(state.cells.right());
   return *this;
 }
 

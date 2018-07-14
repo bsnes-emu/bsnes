@@ -51,10 +51,10 @@ auto pWindow::destruct() -> void {
   delete qtWindow;
 }
 
-auto pWindow::append(sLayout layout) -> void {
+auto pWindow::append(sMenuBar menuBar) -> void {
 }
 
-auto pWindow::append(sMenuBar menuBar) -> void {
+auto pWindow::append(sSizable sizable) -> void {
 }
 
 auto pWindow::append(sStatusBar statusBar) -> void {
@@ -77,13 +77,13 @@ auto pWindow::frameMargin() const -> Geometry {
   };
 }
 
-auto pWindow::remove(sLayout layout) -> void {
-}
-
 auto pWindow::remove(sMenuBar menuBar) -> void {
   //QMenuBar::removeMenu() does not exist
   //qtMenu->clear();
   //for(auto& menu : window.state.menu) append(menu);
+}
+
+auto pWindow::remove(sSizable sizable) -> void {
 }
 
 auto pWindow::remove(sStatusBar statusBar) -> void {
@@ -219,12 +219,32 @@ auto pWindow::_append(mWidget& widget) -> void {
   }
 }
 
-auto pWindow::_menuHeight() const -> signed {
-  return qtMenuBar->isVisible() ? settings.geometry.menuHeight : 0;
+auto pWindow::_menuHeight() const -> uint {
+  if(!qtMenuBar->isVisible()) return 0;
+  return settings.geometry.menuHeight + _menuTextHeight();
 }
 
-auto pWindow::_statusHeight() const -> signed {
-  return qtStatusBar->isVisible() ? settings.geometry.statusHeight : 0;
+auto pWindow::_menuTextHeight() const -> uint {
+  uint height = 0;
+  if(auto& menuBar = state().menuBar) {
+    for(auto& menu : menuBar->state.menus) {
+      height = max(height, menu->font(true).size(menu->text()).height());
+    }
+  }
+  return height;
+}
+
+auto pWindow::_statusHeight() const -> uint {
+  if(!qtStatusBar->isVisible()) return 0;
+  return settings.geometry.statusHeight + _statusTextHeight();
+}
+
+auto pWindow::_statusTextHeight() const -> uint {
+  uint height = 0;
+  if(auto& statusBar = state().statusBar) {
+    height = statusBar->font(true).size(statusBar->text()).height();
+  }
+  return height;
 }
 
 auto pWindow::_updateFrameGeometry() -> void {
@@ -239,12 +259,12 @@ auto pWindow::_updateFrameGeometry() -> void {
 
   if(qtMenuBar->isVisible()) {
     pApplication::syncX();
-    settings.geometry.menuHeight = qtMenuBar->height();
+    settings.geometry.menuHeight = qtMenuBar->height() - _menuTextHeight();
   }
 
   if(qtStatusBar->isVisible()) {
     pApplication::syncX();
-    settings.geometry.statusHeight = qtStatusBar->height();
+    settings.geometry.statusHeight = qtStatusBar->height() - _statusTextHeight();
   }
 }
 
@@ -302,8 +322,8 @@ auto QtWindow::resizeEvent(QResizeEvent*) -> void {
     });
   }
 
-  if(auto& layout = p.state().layout) {
-    layout->setGeometry(p.self().geometry().setPosition(0, 0));
+  if(auto& sizable = p.state().sizable) {
+    sizable->setGeometry(p.self().geometry().setPosition());
   }
 
   if(!p.locked()) {
@@ -312,8 +332,8 @@ auto QtWindow::resizeEvent(QResizeEvent*) -> void {
 }
 
 auto QtWindow::sizeHint() const -> QSize {
-  unsigned width = p.state().geometry.width();
-  unsigned height = p.state().geometry.height();
+  uint width = p.state().geometry.width();
+  uint height = p.state().geometry.height();
   if(p.qtMenuBar->isVisible()) height += settings.geometry.menuHeight;
   if(p.qtStatusBar->isVisible()) height += settings.geometry.statusHeight;
   return QSize(width, height);

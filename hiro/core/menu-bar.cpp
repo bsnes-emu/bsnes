@@ -55,7 +55,7 @@ auto mMenuBar::reset() -> type& {
 }
 
 auto mMenuBar::setParent(mObject* parent, signed offset) -> type& {
-  for(auto n : rrange(state.menus)) state.menus[n]->destruct();
+  for(auto& menu : reverse(state.menus)) menu->destruct();
   mObject::setParent(parent, offset);
   for(auto& menu : state.menus) menu->setParent(this, menu->offset());
   return *this;

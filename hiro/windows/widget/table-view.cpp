@@ -428,7 +428,7 @@ auto pTableView::_width(unsigned column) -> unsigned {
     if(auto width = header->state.columns[column]->width()) return width;
     unsigned width = 1;
     if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(state().items)) {
+    for(auto row : range(state().items.size())) {
       width = max(width, _cellWidth(row, column));
     }
     return width;

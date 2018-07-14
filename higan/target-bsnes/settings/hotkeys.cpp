@@ -2,7 +2,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Keyboard);
   setText("Hotkeys");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   mappingList.setBatchable();
   mappingList.onActivate([&] {
     if(assignButton.enabled()) assignButton.doActivate();

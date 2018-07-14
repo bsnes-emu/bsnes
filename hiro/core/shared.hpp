@@ -43,15 +43,6 @@
   auto minimumSize() const { return self().minimumSize(); } \
   auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; } \
 
-#define DeclareSharedLayout(Name) \
-  DeclareSharedSizable(Name) \
-  auto append(sSizable sizable) { return self().append(sizable), *this; } \
-  auto remove(sSizable sizable) { return self().remove(sizable), *this; } \
-  auto reset() { return self().reset(), *this; } \
-  auto sizable(unsigned position) { return self().sizable(position); } \
-  auto sizableCount() const { return self().sizableCount(); } \
-  auto sizables() const { return self().sizables(); } \
-
 #define DeclareSharedWidget(Name) \
   DeclareSharedSizable(Name) \
   auto doSize() const { return self().doSize(); } \
@@ -191,13 +182,6 @@ struct MenuRadioItem : sMenuRadioItem {
 struct Sizable : sSizable {
   DeclareSharedSizable(Sizable)
   using internalType = mSizable;
-};
-#endif
-
-#if defined(Hiro_Layout)
-struct Layout : sLayout {
-  DeclareSharedLayout(Layout)
-  using internalType = mLayout;
 };
 #endif
 
@@ -382,11 +366,11 @@ struct Frame : sFrame {
   DeclareSharedWidget(Frame)
   using internalType = mFrame;
 
-  auto append(sLayout layout) { return self().append(layout), *this; }
-  auto layout() const { return self().layout(); }
-  auto remove(sLayout layout) { return self().remove(layout), *this; }
+  auto append(sSizable sizable) { return self().append(sizable), *this; }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto reset() { return self().reset(), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
+  auto sizable() const { return self().sizable(); }
   auto text() const { return self().text(); }
 };
 #endif
@@ -594,12 +578,11 @@ struct TabFrameItem : sTabFrameItem {
   DeclareSharedObject(TabFrameItem)
   using internalType = mTabFrameItem;
 
-  auto append(sLayout layout) { return self().append(layout), *this; }
+  auto append(sSizable sizable) { return self().append(sizable), *this; }
   auto closable() const { return self().closable(); }
   auto icon() const { return self().icon(); }
-  auto layout() const { return self().layout(); }
   auto movable() const { return self().movable(); }
-  auto remove(sLayout layout) { return self().remove(layout), *this; }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto reset() { return self().reset(), *this; }
   auto selected() const { return self().selected(); }
   auto setClosable(bool closable = true) { return self().setClosable(closable), *this; }
@@ -607,6 +590,7 @@ struct TabFrameItem : sTabFrameItem {
   auto setMovable(bool movable = true) { return self().setMovable(movable), *this; }
   auto setSelected() { return self().setSelected(), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
+  auto sizable() const { return self().sizable(); }
   auto text() const { return self().text(); }
 };
 #endif
@@ -940,8 +924,8 @@ struct Window : sWindow {
   DeclareSharedObject(Window)
   using internalType = mWindow;
 
-  auto append(sLayout layout) { return self().append(layout), *this; }
   auto append(sMenuBar menuBar) { return self().append(menuBar), *this; }
+  auto append(sSizable sizable) { return self().append(sizable), *this; }
   auto append(sStatusBar statusBar) { return self().append(statusBar), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
   auto dismissable() const { return self().dismissable(); }
@@ -955,7 +939,6 @@ struct Window : sWindow {
   auto frameGeometry() const { return self().frameGeometry(); }
   auto fullScreen() const { return self().fullScreen(); }
   auto geometry() const { return self().geometry(); }
-  auto layout() const { return self().layout(); }
   auto maximized() const { return self().maximized(); }
   auto maximumSize() const { return self().maximumSize(); }
   auto menuBar() const { return self().menuBar(); }
@@ -968,8 +951,8 @@ struct Window : sWindow {
   auto onKeyRelease(const function<void (signed)>& callback = {}) { return self().onKeyRelease(callback), *this; }
   auto onMove(const function<void ()>& callback = {}) { return self().onMove(callback), *this; }
   auto onSize(const function<void ()>& callback = {}) { return self().onSize(callback), *this; }
-  auto remove(sLayout layout) { return self().remove(layout), *this; }
   auto remove(sMenuBar menuBar) { return self().remove(menuBar), *this; }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto remove(sStatusBar statusBar) { return self().remove(statusBar), *this; }
   auto reset() { return self().reset(), *this; }
   auto resizable() const { return self().resizable(); }
@@ -992,6 +975,7 @@ struct Window : sWindow {
   auto setResizable(bool resizable = true) { return self().setResizable(resizable), *this; }
   auto setSize(Size size) { return self().setSize(size), *this; }
   auto setTitle(const string& title = "") { return self().setTitle(title), *this; }
+  auto sizable() const { return self().sizable(); }
   auto statusBar() const { return self().statusBar(); }
   auto title() const { return self().title(); }
 };

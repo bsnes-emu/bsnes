@@ -4,19 +4,17 @@ namespace hiro {
 
 auto pTableViewItem::construct() -> void {
   if(auto parent = _parent()) {
-    parent->lock();
+    auto lock = parent->acquire();
     gtk_list_store_append(parent->gtkListStore, &gtkIter);
     _setState();
-    parent->unlock();
   }
 }
 
 auto pTableViewItem::destruct() -> void {
   if(auto parent = _parent()) {
-    parent->lock();
+    auto lock = parent->acquire();
     gtk_list_store_remove(parent->gtkListStore, &gtkIter);
     parent->_updateSelected();
-    parent->unlock();
   }
 }
 
@@ -34,6 +32,7 @@ auto pTableViewItem::setBackgroundColor(Color color) -> void {
 
 auto pTableViewItem::setFocused() -> void {
   if(auto parent = _parent()) {
+    auto lock = parent->acquire();
     GtkTreePath* path = gtk_tree_path_new_from_string(string{self().offset()});
     gtk_tree_view_set_cursor(parent->gtkTreeView, path, nullptr, false);
     gtk_tree_view_scroll_to_cell(parent->gtkTreeView, path, nullptr, true, 0.5, 0.0);
@@ -57,7 +56,7 @@ auto pTableViewItem::_parent() -> maybe<pTableView&> {
 
 auto pTableViewItem::_setState() -> void {
   if(auto parent = _parent()) {
-    parent->lock();
+    auto lock = parent->acquire();
     if(state().selected) {
       gtk_tree_selection_select_iter(parent->gtkTreeSelection, &gtkIter);
     } else {
@@ -67,7 +66,6 @@ auto pTableViewItem::_setState() -> void {
     for(auto& cell : state().cells) {
       if(auto self = cell->self()) self->_setState();
     }
-    parent->unlock();
   }
 }
 

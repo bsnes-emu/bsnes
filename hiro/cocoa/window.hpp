@@ -30,13 +30,13 @@ namespace hiro {
 struct pWindow : pObject {
   Declare(Window, Object)
 
-  auto append(sLayout layout) -> void;
   auto append(sMenuBar menuBar) -> void;
+  auto append(sSizable sizable) -> void;
   auto append(sStatusBar statusBar) -> void;
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
-  auto remove(sLayout layout) -> void;
   auto remove(sMenuBar menuBar) -> void;
+  auto remove(sSizable sizable) -> void;
   auto remove(sStatusBar statusBar) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setDismissable(bool dismissable) -> void;

@@ -15,22 +15,22 @@ auto pTabFrameItem::construct() -> void {
 auto pTabFrameItem::destruct() -> void {
 }
 
-auto pTabFrameItem::append(sLayout layout) -> void {
+auto pTabFrameItem::append(sSizable sizable) -> void {
 }
 
-auto pTabFrameItem::remove(sLayout layout) -> void {
+auto pTabFrameItem::remove(sSizable sizable) -> void {
 }
 
 auto pTabFrameItem::setClosable(bool closable) -> void {
 }
 
 auto pTabFrameItem::setGeometry(Geometry geometry) -> void {
-  if(auto layout = state().layout) {
+  if(auto& sizable = state().sizable) {
     auto offset = qtTabFrameItem->geometry();
     geometry.setPosition({0, 0});
     geometry.setWidth(geometry.width() - (geometry.width() - offset.width()));
     geometry.setHeight(geometry.height() - (geometry.height() - offset.height()));
-    layout->setGeometry(geometry);
+    sizable->setGeometry(geometry);
   }
 }
 
@@ -65,14 +65,14 @@ auto pTabFrameItem::_setState() -> void {
     parent->qtTabFrame->setTabIcon(self().offset(), CreateIcon(state().icon));
     if(state().selected) parent->qtTabFrame->setCurrentIndex(self().offset());
     parent->qtTabFrame->setTabText(self().offset(), QString::fromUtf8(state().text));
-    if(auto layout = state().layout) {
+    if(auto& sizable = state().sizable) {
       auto geometry = parent->self().geometry();
       auto offset = qtTabFrameItem->geometry();
       geometry.setPosition({0, 0});
       geometry.setWidth(geometry.width() - (geometry.width() - offset.width()));
       geometry.setHeight(geometry.height() - (geometry.height() - offset.height()));
-      layout->setGeometry(geometry);
-      layout->setVisible(layout->visible(true));
+      sizable->setGeometry(geometry);
+      sizable->setVisible(sizable->visible(true));
     }
   }
 }

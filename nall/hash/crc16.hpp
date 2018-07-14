@@ -17,7 +17,7 @@ struct CRC16 : Hash {
 
   auto output() const -> vector<uint8_t> override {
     vector<uint8_t> result;
-    for(auto n : rrange(2)) result.append(~checksum >> n * 8);
+    for(auto n : reverse(range(2))) result.append(~checksum >> n * 8);
     return result;
   }
 

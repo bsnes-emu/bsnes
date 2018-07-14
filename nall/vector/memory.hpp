@@ -62,7 +62,7 @@ template<typename T> auto vector<T>::resizeLeft(uint size, const T& value) -> bo
   if(size > _size) {  //grow
     reserveLeft(size);
     _pool -= size - _size;
-    for(uint n : rrange(size - _size)) new(_pool + n) T(value);
+    for(uint n : reverse(range(size - _size))) new(_pool + n) T(value);
     _left -= size - _size;
     _size = size;
     return true;

@@ -2,7 +2,7 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Application::FileManager);
   setText("State Manager");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   stateList.append(TableViewHeader().setVisible()
     .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
     .append(TableViewColumn().setText("Description").setExpandable())

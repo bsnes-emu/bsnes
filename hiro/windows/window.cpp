@@ -2,8 +2,8 @@
 
 namespace hiro {
 
-static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
-static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
+static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
+static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
 
 auto pWindow::construct() -> void {
   hwnd = CreateWindow(L"hiroWindow", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
@@ -21,10 +21,10 @@ auto pWindow::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pWindow::append(sLayout layout) -> void {
+auto pWindow::append(sMenuBar menuBar) -> void {
 }
 
-auto pWindow::append(sMenuBar menuBar) -> void {
+auto pWindow::append(sSizable sizable) -> void {
 }
 
 auto pWindow::append(sStatusBar statusBar) -> void {
@@ -40,7 +40,7 @@ auto pWindow::frameMargin() const -> Geometry {
   RECT rc{0, 0, 640, 480};
   AdjustWindowRect(&rc, style, (bool)GetMenu(hwnd));
   signed statusHeight = 0;
-  if(auto statusBar = state().statusBar) {
+  if(auto& statusBar = state().statusBar) {
     if(auto self = statusBar->self()) {
       if(statusBar->visible()) {
         RECT src;
@@ -52,10 +52,10 @@ auto pWindow::frameMargin() const -> Geometry {
   return {abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480};
 }
 
-auto pWindow::remove(sLayout layout) -> void {
+auto pWindow::remove(sMenuBar menuBar) -> void {
 }
 
-auto pWindow::remove(sMenuBar menuBar) -> void {
+auto pWindow::remove(sSizable sizable) -> void {
 }
 
 auto pWindow::remove(sStatusBar statusBar) -> void {
@@ -75,8 +75,8 @@ auto pWindow::setDroppable(bool droppable) -> void {
 }
 
 auto pWindow::setEnabled(bool enabled) -> void {
-  if(auto layout = state().layout) {
-    if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
+  if(auto& sizable = state().sizable) {
+    if(auto self = sizable->self()) self->setEnabled(sizable->enabled(true));
   }
 }
 
@@ -86,8 +86,8 @@ auto pWindow::setFocused() -> void {
 }
 
 auto pWindow::setFont(const Font& font) -> void {
-  if(auto layout = state().layout) {
-    if(auto self = layout->self()) self->setFont(layout->font(true));
+  if(auto& sizable = state().sizable) {
+    if(auto self = sizable->self()) self->setFont(sizable->font(true));
   }
 }
 
@@ -125,13 +125,13 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
     geometry.width() + margin.width(), geometry.height() + margin.height(),
     SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
   );
-  if(auto statusBar = state().statusBar) {
+  if(auto& statusBar = state().statusBar) {
     if(auto self = statusBar->self()) {
       SetWindowPos(self->hwnd, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
     }
   }
-  if(auto layout = state().layout) {
-    layout->setGeometry(geometry.setPosition(0, 0));
+  if(auto& sizable = state().sizable) {
+    sizable->setGeometry(geometry.setPosition());
   }
   unlock();
 }
@@ -139,7 +139,7 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
 auto pWindow::setMaximized(bool maximized) -> void {
   if(state().minimized) return;
   lock();
-  ShowWindow(hwnd, maximized ? SW_MAXIMIZED : SW_SHOWNOACTIVATE);
+  ShowWindow(hwnd, maximized ? SW_MAXIMIZE : SW_SHOWNOACTIVATE);
   unlock();
 }
 
@@ -149,7 +149,7 @@ auto pWindow::setMaximumSize(Size size) -> void {
 
 auto pWindow::setMinimized(bool minimized) -> void {
   lock();
-  ShowWindow(hwnd, minimized ? SW_MINIMIZED : state().maximized ? SW_MAXIMIZED : SW_SHOWNOACTIVATE);
+  ShowWindow(hwnd, minimized ? SW_MINIMIZE : state().maximized ? SW_MAXIMIZE : SW_SHOWNOACTIVATE);
   unlock();
 }
 
@@ -187,8 +187,8 @@ auto pWindow::setVisible(bool visible) -> void {
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
   if(!visible) setModal(false);
 
-  if(auto layout = state().layout) {
-    if(auto self = layout->self()) self->setVisible(layout->visible(true));
+  if(auto& sizable = state().sizable) {
+    if(auto self = sizable->self()) self->setVisible(sizable->visible(true));
   }
   unlock();
 }
@@ -239,8 +239,8 @@ auto pWindow::onSize() -> void {
     }
   }
   state().geometry.setSize(_geometry().size());
-  if(auto layout = state().layout) {
-    layout->setGeometry(_geometry().setPosition(0, 0));
+  if(auto& sizable = state().sizable) {
+    sizable->setGeometry(_geometry().setPosition());
   }
   self().doSize();
 }

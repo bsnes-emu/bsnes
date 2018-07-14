@@ -8,7 +8,7 @@ struct pLayout;
 struct pWidget;
 
 struct AppMessage {
-  enum : unsigned {
+  enum : uint {
     None = WM_APP,
     TableView_doPaint,
     TableView_onActivate,
@@ -55,7 +55,6 @@ static vector<wObject> windows;
 #include "action/menu-radio-item.hpp"
 
 #include "sizable.hpp"
-#include "layout.hpp"
 
 #include "widget/widget.hpp"
 #include "widget/button.hpp"

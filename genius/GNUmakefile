@@ -1,17 +1,22 @@
-build := stable
-include ../nall/GNUmakefile
-include ../hiro/GNUmakefile
-
 name := genius
+build := stable
+
+nall.path := ../nall
+include $(nall.path)/GNUmakefile
+
+object.path := obj
 flags += -I..
 
-objects := obj/hiro.o
-objects += obj/genius.o
-objects += $(if $(call streq,$(platform),windows),obj/resource.o)
+hiro.path := ../hiro
+hiro.resource := data/$(name).rc
+include $(hiro.path)/GNUmakefile
 
-default: information $(objects)
+objects := obj/hiro.o $(if $(call streq,$(platform),windows),obj/hiro-resource.o)
+objects += obj/genius.o
+
+all: $(objects)
 	$(info Linking out/$(name) ...)
-	+@$(strip $(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
+	+@$(strip $(compiler) -o out/$(name) $(objects) $(options) $(hiro.options))
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
@@ -21,17 +26,9 @@ ifeq ($(platform),macos)
 	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
-obj/hiro.o: ../hiro/hiro.cpp
-	$(info Compiling $< ...)
-	@$(compiler) $(hiroflags) -o obj/hiro.o -c ../hiro/hiro.cpp
-
 obj/genius.o: genius.cpp genius.hpp
 	$(info Compiling $< ...)
-	@$(compiler) $(cppflags) $(flags) -o obj/genius.o -c genius.cpp
-
-obj/resource.o: data/$(name).rc
-	$(info Compiling $< ...)
-	@$(windres) data/$(name).rc obj/resource.o
+	@$(compiler) $(flags.cpp) $(flags) -o obj/genius.o -c genius.cpp
 
 clean:
 ifeq ($(platform),macos)

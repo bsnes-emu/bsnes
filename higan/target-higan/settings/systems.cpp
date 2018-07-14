@@ -2,7 +2,7 @@ SystemSettings::SystemSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Storage);
   setText("Systems");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   systemList.onActivate([&] {
     modifyButton.doActivate();

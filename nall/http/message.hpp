@@ -66,7 +66,7 @@ struct Variables {
   }
 
   auto remove(const string& name) -> void {
-    for(auto n : rrange(variables)) {
+    for(auto n : reverse(range(variables.size()))) {
       if(variables[n].shared->name.iequals(name)) variables.remove(n);
     }
   }

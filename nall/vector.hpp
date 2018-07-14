@@ -4,6 +4,7 @@
 
 #include <nall/bit.hpp>
 #include <nall/function.hpp>
+#include <nall/iterator.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
 #include <nall/range.hpp>
@@ -14,6 +15,8 @@ namespace nall {
 
 template<typename T> struct vector_iterator;
 template<typename T> struct vector_iterator_const;
+template<typename T> struct vector_iterator_reverse;
+template<typename T> struct vector_iterator_reverse_const;
 
 template<typename T>
 struct vector {
@@ -81,11 +84,17 @@ struct vector {
   auto take(uint offset) -> T;
 
   //iterator.hpp
-  auto begin() -> vector_iterator<T> { return vector_iterator<T>{*this, 0}; }
-  auto end() -> vector_iterator<T> { return vector_iterator<T>{*this, size()}; }
+  auto begin() -> iterator<T> { return {data(), 0}; }
+  auto end() -> iterator<T> { return {data(), size()}; }
 
-  auto begin() const -> vector_iterator_const<T> { return vector_iterator_const<T>{*this, 0}; }
-  auto end() const -> vector_iterator_const<T> { return vector_iterator_const<T>{*this, size()}; }
+  auto begin() const -> iterator_const<T> { return {data(), 0}; }
+  auto end() const -> iterator_const<T> { return {data(), size()}; }
+
+  auto rbegin() -> reverse_iterator<T> { return {data(), size() - 1}; }
+  auto rend() -> reverse_iterator<T> { return {data(), (uint)-1}; }
+
+  auto rbegin() const -> reverse_iterator_const<T> { return {data(), size() - 1}; }
+  auto rend() const -> reverse_iterator_const<T> { return {data(), (uint)-1}; }
 
   //utility.hpp
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
@@ -107,8 +116,3 @@ private:
 #include <nall/vector/modify.hpp>
 #include <nall/vector/iterator.hpp>
 #include <nall/vector/utility.hpp>
-
-namespace nall {
-  template<typename T> inline auto range(const vector<T>& value) { return range_t{0, (int)value.size(), 1}; }
-  template<typename T> inline auto rrange(const vector<T>& value) { return range_t{(int)value.size() - 1, -1, -1}; }
-}

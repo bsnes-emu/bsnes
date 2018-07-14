@@ -5,6 +5,7 @@ auto mComboEdit::allocate() -> pObject* {
 }
 
 auto mComboEdit::destruct() -> void {
+  for(auto& item : state.items) item->destruct();
   mWidget::destruct();
 }
 

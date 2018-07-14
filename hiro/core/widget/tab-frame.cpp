@@ -32,8 +32,7 @@ auto mTabFrame::doMove(sTabFrameItem from, sTabFrameItem to) const -> void {
 }
 
 auto mTabFrame::item(unsigned position) const -> TabFrameItem {
-  if(position < itemCount()) return state.items[position];
-  return {};
+  return state.items(position, {});
 }
 
 auto mTabFrame::itemCount() const -> unsigned {
@@ -88,16 +87,34 @@ auto mTabFrame::selected() const -> TabFrameItem {
   return {};
 }
 
+auto mTabFrame::setEnabled(bool enabled) -> type& {
+  mWidget::setEnabled(enabled);
+  for(auto& item : state.items) item->setEnabled(item->enabled());
+  return *this;
+}
+
+auto mTabFrame::setFont(const Font& font) -> type& {
+  mWidget::setFont(font);
+  for(auto& item : state.items) item->setFont(item->font());
+  return *this;
+}
+
 auto mTabFrame::setNavigation(Navigation navigation) -> type& {
   state.navigation = navigation;
   signal(setNavigation, navigation);
   return *this;
 }
 
-auto mTabFrame::setParent(mObject* parent, signed offset) -> type& {
-  for(auto n : rrange(state.items)) state.items[n]->destruct();
+auto mTabFrame::setParent(mObject* parent, int offset) -> type& {
+  for(auto& item : reverse(state.items)) item->destruct();
   mObject::setParent(parent, offset);
   for(auto& item : state.items) item->setParent(this, item->offset());
+  return *this;
+}
+
+auto mTabFrame::setVisible(bool visible) -> type& {
+  mWidget::setVisible(visible);
+  for(auto& item : state.items) item->setVisible(item->visible());
   return *this;
 }
 

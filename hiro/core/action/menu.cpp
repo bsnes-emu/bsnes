@@ -59,7 +59,7 @@ auto mMenu::setIcon(const image& icon) -> type& {
 }
 
 auto mMenu::setParent(mObject* parent, signed offset) -> type& {
-  for(auto n : rrange(state.actions)) state.actions[n]->destruct();
+  for(auto& action : reverse(state.actions)) action->destruct();
   mObject::setParent(parent, offset);
   for(auto& action : state.actions) action->setParent(this, action->offset());
   return *this;

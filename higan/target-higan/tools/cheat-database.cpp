@@ -1,7 +1,7 @@
 CheatDatabase::CheatDatabase() {
   cheatDatabase = this;
 
-  layout.setMargin(5);
+  layout.setPadding(5);
   selectAllButton.setText("Select All").onActivate([&] {
     for(auto& item : cheatList.items()) item.setChecked(true);
   });

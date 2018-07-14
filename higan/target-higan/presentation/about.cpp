@@ -3,7 +3,7 @@ AboutWindow::AboutWindow() {
 
   setTitle("About higan ...");
   setBackgroundColor({255, 255, 240});
-  layout.setMargin(10);
+  layout.setPadding(10);
   auto logo = image{Resource::Logo};
   logo.alphaBlend(0xfffff0);
   canvas.setIcon(logo);

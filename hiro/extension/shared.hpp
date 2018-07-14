@@ -1,38 +1,139 @@
 #if defined(Hiro_FixedLayout)
-using sFixedLayout = shared_pointer<mFixedLayout>;
+struct FixedLayoutCell : sFixedLayoutCell {
+  DeclareSharedObject(FixedLayoutCell)
+
+  auto geometry() const { return self().geometry(); }
+  auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; }
+  auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
+  auto sizable() const { return self().sizable(); }
+};
+
 struct FixedLayout : sFixedLayout {
-  DeclareSharedLayout(FixedLayout)
+  DeclareSharedSizable(FixedLayout)
 
   auto append(sSizable sizable, Geometry geometry) { return self().append(sizable, geometry), *this; }
-  auto modify(sSizable sizable, Geometry geometry) { return self().modify(sizable, geometry), *this; }
+  auto cell(uint position) const { return self().cell(position); }
+  auto cell(sSizable sizable) const { return self().cell(sizable); }
+  auto cellCount() const { return self().cellCount(); }
+  auto remove(sFixedLayoutCell cell) { return self().remove(cell), *this; }
+  auto reset() { return self().reset(), *this; }
 };
 #endif
 
 #if defined(Hiro_HorizontalLayout)
-using sHorizontalLayout = shared_pointer<mHorizontalLayout>;
-struct HorizontalLayout : sHorizontalLayout {
-  DeclareSharedLayout(HorizontalLayout)
+struct HorizontalLayoutCell : sHorizontalLayoutCell {
+  DeclareSharedObject(HorizontalLayoutCell)
 
+  auto alignment() const { return self().alignment(); }
+  auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
+  auto setSize(Size size) { return self().setSize(size), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto sizable() const { return self().sizable(); }
+  auto size() const { return self().size(); }
+  auto spacing() const { return self().spacing(); }
+};
+
+struct HorizontalLayout : sHorizontalLayout {
+  DeclareSharedSizable(HorizontalLayout)
+
+  auto alignment() const { return self().alignment(); }
   auto append(sSizable sizable, Size size, float spacing = 5) { return self().append(sizable, size, spacing), *this; }
-  auto modify(sSizable sizable, Size size, float spacing = 5) { return self().modify(sizable, size, spacing), *this; }
-  auto setAlignment(float alignment = 0.5) { return self().setAlignment(alignment), *this; }
-  auto setMargin(float margin = 0) { return self().setMargin(margin), *this; }
+  auto cell(uint position) const { return self().cell(position); }
+  auto cell(sSizable sizable) const { return self().cell(sizable); }
+  auto cellCount() const { return self().cellCount(); }
+  auto remove(sHorizontalLayoutCell cell) { return self().remove(cell), *this; }
+  auto reset() { return self().reset(), *this; }
+  auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setPadding(float padding) { return self().setPadding({padding, padding, padding, padding}), *this; }
   auto setPadding(Geometry padding = {}) { return self().setPadding(padding), *this; }
   auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
 };
 #endif
 
 #if defined(Hiro_VerticalLayout)
-using sVerticalLayout = shared_pointer<mVerticalLayout>;
-struct VerticalLayout : sVerticalLayout {
-  DeclareSharedLayout(VerticalLayout)
+struct VerticalLayoutCell : sVerticalLayoutCell {
+  DeclareSharedObject(VerticalLayoutCell)
 
+  auto alignment() const { return self().alignment(); }
+  auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
+  auto setSize(Size size) { return self().setSize(size), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto sizable() const { return self().sizable(); }
+  auto size() const { return self().size(); }
+  auto spacing() const { return self().spacing(); }
+};
+
+struct VerticalLayout : sVerticalLayout {
+  DeclareSharedSizable(VerticalLayout)
+
+  auto alignment() const { return self().alignment(); }
   auto append(sSizable sizable, Size size, float spacing = 5) { return self().append(sizable, size, spacing), *this; }
-  auto modify(sSizable sizable, Size size, float spacing = 5) { return self().modify(sizable, size, spacing), *this; }
-  auto setAlignment(float alignment = 0.0) { return self().setAlignment(alignment), *this; }
-  auto setMargin(float margin = 0) { return self().setMargin(margin), *this; }
+  auto cell(uint position) const { return self().cell(position); }
+  auto cell(sSizable sizable) const { return self().cell(sizable); }
+  auto cellCount() const { return self().cellCount(); }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
+  auto remove(sVerticalLayoutCell cell) { return self().remove(cell), *this; }
+  auto reset() { return self().reset(), *this; }
+  auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setPadding(float padding) { return self().setPadding({padding, padding, padding, padding}), *this; }
   auto setPadding(Geometry padding = {}) { return self().setPadding(padding), *this; }
   auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
+};
+#endif
+
+#if defined(Hiro_TableLayout)
+struct TableLayoutCell : sTableLayoutCell {
+  DeclareSharedObject(TableLayoutCell)
+
+  auto alignment() const { return self().alignment(); }
+  auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
+  auto setSize(Size size) { return self().setSize(size), *this; }
+  auto sizable() const { return self().sizable(); }
+  auto size() const { return self().size(); }
+};
+
+struct TableLayoutColumn : sTableLayoutColumn {
+  DeclareSharedObject(TableLayoutColumn)
+
+  auto alignment() const { return self().alignment(); }
+  auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto spacing() const { return self().spacing(); }
+};
+
+struct TableLayoutRow : sTableLayoutRow {
+  DeclareSharedObject(TableLayoutRow)
+
+  auto alignment() const { return self().alignment(); }
+  auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setSpacing(float spacing = 5) { return self().setSpacing(spacing), *this; }
+  auto spacing() const { return self().spacing(); }
+};
+
+struct TableLayout : sTableLayout {
+  DeclareSharedSizable(TableLayout)
+
+  auto alignment() const { return self().alignment(); }
+  auto append(sSizable sizable, Size size) { return self().append(sizable, size), *this; }
+  auto cell(uint position) const { return self().cell(position); }
+  auto cell(uint x, uint y) const { return self().cell(x, y); }
+  auto cell(sSizable sizable) const { return self().cell(sizable); }
+  auto cellCount() const { return self().cellCount(); }
+  auto column(uint position) const { return self().column(position); }
+  auto columnCount() const { return self().columnCount(); }
+  auto padding() const { return self().padding(); }
+  auto remove(sTableLayoutCell cell) { return self().remove(cell), *this; }
+  auto reset() { return self().reset(), *this; }
+  auto row(uint position) const { return self().row(position); }
+  auto rowCount() const { return self().rowCount(); }
+  auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
+  auto setPadding(float padding) { return self().setPadding({padding, padding, padding, padding}), *this; }
+  auto setPadding(Geometry padding = {}) { return self().setPadding(padding), *this; }
+  auto setSize(Size size) { return self().setSize(size), *this; }
+  auto size() const { return self().size(); }
 };
 #endif
 
@@ -56,9 +157,7 @@ struct ListViewItem : sListViewItem {
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
 };
-#endif
 
-#if defined(Hiro_ListView)
 struct ListView : sListView {
   DeclareSharedWidget(ListView)
 

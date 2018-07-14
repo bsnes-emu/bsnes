@@ -1,33 +1,35 @@
 #if defined(Hiro_Window)
 
+mWindow::mWindow() {
+  mObject::state.visible = false;
+}
+
 auto mWindow::allocate() -> pObject* {
   return new pWindow(*this);
 }
 
 auto mWindow::destruct() -> void {
-  if(auto& layout = state.layout) layout->destruct();
   if(auto& menuBar = state.menuBar) menuBar->destruct();
+  if(auto& sizable = state.sizable) sizable->destruct();
   if(auto& statusBar = state.statusBar) statusBar->destruct();
   mObject::destruct();
 }
 
 //
 
-auto mWindow::append(sLayout layout) -> type& {
-  if(auto& layout = state.layout) remove(layout);
-  state.layout = layout;
-  layout->setGeometry(geometry().setPosition(0, 0));
-  layout->setParent(this, 0);
-  layout->setGeometry(geometry().setPosition(0, 0));
-  signal(append, layout);
-  return *this;
-}
-
 auto mWindow::append(sMenuBar menuBar) -> type& {
   if(auto& menuBar = state.menuBar) remove(menuBar);
   menuBar->setParent(this, 0);
   state.menuBar = menuBar;
   signal(append, menuBar);
+  return *this;
+}
+
+auto mWindow::append(sSizable sizable) -> type& {
+  if(auto& sizable = state.sizable) remove(sizable);
+  state.sizable = sizable;
+  sizable->setParent(this, 0);
+  signal(append, sizable);
   return *this;
 }
 
@@ -91,10 +93,6 @@ auto mWindow::geometry() const -> Geometry {
   return state.geometry;
 }
 
-auto mWindow::layout() const -> Layout {
-  return state.layout;
-}
-
 auto mWindow::maximized() const -> bool {
   return state.maximized;
 }
@@ -149,18 +147,17 @@ auto mWindow::onSize(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mWindow::remove(sLayout layout) -> type& {
-  signal(remove, layout);
-  layout->setParent();
-  state.layout.reset();
+auto mWindow::remove(sMenuBar menuBar) -> type& {
+  signal(remove, menuBar);
+  menuBar->setParent();
+  state.menuBar.reset();
   return *this;
 }
 
-auto mWindow::remove(sMenuBar menuBar) -> type& {
-  signal(remove, menuBar);
-  menuBar->reset();
-  menuBar->setParent();
-  state.menuBar.reset();
+auto mWindow::remove(sSizable sizable) -> type& {
+  signal(remove, sizable);
+  sizable->setParent();
+  state.sizable.reset();
   return *this;
 }
 
@@ -172,8 +169,8 @@ auto mWindow::remove(sStatusBar statusBar) -> type& {
 }
 
 auto mWindow::reset() -> type& {
-  if(auto& layout = state.layout) remove(layout);
   if(auto& menuBar = state.menuBar) remove(menuBar);
+  if(auto& sizable = state.sizable) remove(sizable);
   if(auto& statusBar = state.statusBar) remove(statusBar);
   return *this;
 }
@@ -255,9 +252,7 @@ auto mWindow::setFullScreen(bool fullScreen) -> type& {
 auto mWindow::setGeometry(Geometry geometry) -> type& {
   state.geometry = geometry;
   signal(setGeometry, geometry);
-  if(auto& layout = state.layout) {
-    layout->setGeometry(geometry.setPosition(0, 0));
-  }
+  if(auto& sizable = state.sizable) sizable->setGeometry(sizable->geometry());
   return *this;
 }
 
@@ -321,6 +316,18 @@ auto mWindow::setTitle(const string& title) -> type& {
   state.title = title;
   signal(setTitle, title);
   return *this;
+}
+
+auto mWindow::setVisible(bool visible) -> type& {
+  mObject::setVisible(visible);
+  if(auto& menuBar = state.menuBar) menuBar->setVisible(menuBar->visible());
+  if(auto& sizable = state.sizable) sizable->setVisible(sizable->visible());
+  if(auto& statusBar = state.statusBar) statusBar->setVisible(statusBar->visible());
+  return *this;
+}
+
+auto mWindow::sizable() const -> Sizable {
+  return state.sizable;
 }
 
 auto mWindow::statusBar() const -> StatusBar {

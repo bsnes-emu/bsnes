@@ -4,6 +4,11 @@ auto mTableViewHeader::allocate() -> pObject* {
   return new pTableViewHeader(*this);
 }
 
+auto mTableViewHeader::destruct() -> void {
+  for(auto& column : state.columns) column->destruct();
+  mObject::destruct();
+}
+
 //
 
 auto mTableViewHeader::append(sTableViewColumn column) -> type& {
@@ -44,7 +49,7 @@ auto mTableViewHeader::remove(sTableViewColumn column) -> type& {
 }
 
 auto mTableViewHeader::reset() -> type& {
-  for(auto n : rrange(state.columns)) remove(state.columns[n]);
+  while(state.columns) remove(state.columns.right());
   return *this;
 }
 

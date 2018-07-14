@@ -26,7 +26,7 @@ auto mObject::destruct() -> void {
 
 //
 
-//used to test if returned items "exist" from eg Window::layout(), ListView::selected(), etc.
+//used to test if returned items "exist" from eg Window::sizable(), ListView::selected(), etc.
 mObject::operator bool() const {
   return parent() || !abstract();
 }
@@ -125,16 +125,6 @@ auto mObject::parentIconView(bool recursive) const -> mIconView* {
   if(auto iconView = dynamic_cast<mIconView*>(parent())) return iconView;
   if(recursive) {
     if(auto object = parent()) return object->parentIconView(true);
-  }
-  return nullptr;
-}
-#endif
-
-#if defined(Hiro_Layout)
-auto mObject::parentLayout(bool recursive) const -> mLayout* {
-  if(auto layout = dynamic_cast<mLayout*>(parent())) return layout;
-  if(recursive) {
-    if(auto object = parent()) return object->parentLayout(true);
   }
   return nullptr;
 }
@@ -308,7 +298,8 @@ auto mObject::setGroup(sGroup group) -> type& {
   return *this;
 }
 
-auto mObject::setParent(mObject* parent, signed offset) -> type& {
+auto mObject::setParent(mObject* parent, int offset) -> type& {
+  signal(setParent, parent, offset);
   destruct();
   state.parent = parent;
   state.offset = offset;

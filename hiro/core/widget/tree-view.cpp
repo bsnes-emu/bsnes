@@ -93,7 +93,7 @@ auto mTreeView::remove(sTreeViewItem item) -> type& {
 
 auto mTreeView::reset() -> type& {
   state.selectedPath.reset();
-  for(auto n : rrange(state.items)) remove(state.items[n]);
+  while(state.items) remove(state.items.right());
   return *this;
 }
 
@@ -114,7 +114,7 @@ auto mTreeView::setForegroundColor(Color color) -> type& {
 }
 
 auto mTreeView::setParent(mObject* object, signed offset) -> type& {
-  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  for(auto& item : reverse(state.items)) item->destruct();
   mObject::setParent(object, offset);
   for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;

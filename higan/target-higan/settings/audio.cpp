@@ -2,7 +2,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   setIcon(Icon::Device::Speaker);
   setText("Audio");
 
-  layout.setMargin(5);
+  layout.setPadding(5);
 
   driverLabel.setFont(Font().setBold()).setText("Driver");
 
