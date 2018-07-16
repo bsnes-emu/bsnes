@@ -32,6 +32,7 @@ auto pTableView::construct() -> void {
 }
 
 auto pTableView::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtTableViewDelegate;
   delete qtTableView;
   qtWidget = qtTableView = nullptr;
@@ -99,15 +100,13 @@ auto pTableView::setAlignment(Alignment alignment) -> void {
 }
 
 auto pTableView::setBackgroundColor(Color color) -> void {
-  if(color) {
-    QPalette palette = qtTableView->palette();
-    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
-    palette.setColor(QPalette::AlternateBase, QColor(max(0, (signed)color.red() - 17), max(0, (signed)color.green() - 17), max(0, (signed)color.blue() - 17)));
-    qtTableView->setPalette(palette);
-    qtTableView->setAutoFillBackground(true);
-  } else {
-    //todo: set default color
-  }
+  //note: QPalette::AlternateBase can be used for alternating row colors
+  static auto defaultColor = qtTableView->palette().color(QPalette::Base);
+
+  auto palette = qtTableView->palette();
+  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
+  qtTableView->setPalette(palette);
+  qtTableView->setAutoFillBackground((bool)color);
 }
 
 auto pTableView::setBatchable(bool batchable) -> void {
@@ -121,13 +120,12 @@ auto pTableView::setBordered(bool bordered) -> void {
 }
 
 auto pTableView::setForegroundColor(Color color) -> void {
-  if(color) {
-    QPalette palette = qtTableView->palette();
-    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
-    qtTableView->setPalette(palette);
-  } else {
-    //todo: set default color
-  }
+  static auto defaultColor = qtTableView->palette().color(QPalette::Text);
+
+  auto palette = qtTableView->palette();
+  palette.setColor(QPalette::Text, CreateColor(color, defaultColor));
+  qtTableView->setPalette(palette);
+  qtTableView->setAutoFillBackground((bool)color);
 }
 
 //called on resize/show events

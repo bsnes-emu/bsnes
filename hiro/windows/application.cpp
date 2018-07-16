@@ -131,6 +131,7 @@ auto pApplication::initialize() -> void {
   #endif
 
   pKeyboard::initialize();
+  pWindow::initialize();
 }
 
 static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> bool {

@@ -44,6 +44,8 @@ auto MessageDialog::warning(const string_vector& buttons) -> string {
 }
 
 auto MessageDialog::_run() -> string {
+  Application::Namespace tr{"MessageDialog"};
+
   Window window;
     VerticalLayout layout{&window};
       HorizontalLayout messageLayout{&layout, Size{~0, 0}, 5};
@@ -57,14 +59,17 @@ auto MessageDialog::_run() -> string {
   messageText.setText(state.text);
   for(auto n : range(state.buttons.size())) {
     Button button{&controlLayout, Size{80, 0}, 5};
-    button.onActivate([&, n] { state.response = state.buttons[n]; window.setModal(false); });
-    button.setText(state.buttons[n]);
+    button.onActivate([&, n] {
+      state.response = state.buttons[n];
+      window.setModal(false);
+    });
+    button.setText(tr(state.buttons[n]));
     button.setFocused();  //the last button will have effective focus
   }
 
-  signed widthMessage = 5 + 16 + 5 + Font().size(state.text).width() + 5;
-  signed widthButtons = 5 + state.buttons.size() * 85;
-  signed width = max(320, widthMessage, widthButtons);
+  int widthMessage = 5 + 16 + 5 + Font().size(state.text).width() + 5;
+  int widthButtons = 5 + state.buttons.size() * 85;
+  int width = max(320, widthMessage, widthButtons);
 
   window.onClose([&] { window.setModal(false); });
   window.setTitle(state.title);

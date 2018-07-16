@@ -11,6 +11,7 @@ auto pTabFrame::construct() -> void {
 }
 
 auto pTabFrame::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtTabFrame;
   qtWidget = qtTabFrame = nullptr;
 }

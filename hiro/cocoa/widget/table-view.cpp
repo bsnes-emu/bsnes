@@ -406,7 +406,7 @@ auto pTableView::_width(uint column) -> uint {
     uint width = 1;
     if(!header->column(column).visible()) return width;
     if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(state().items)) {
+    for(auto row : range(state().items.size())) {
       width = max(width, _cellWidth(row, column));
     }
     return width;

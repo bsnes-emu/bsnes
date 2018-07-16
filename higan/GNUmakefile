@@ -1,14 +1,11 @@
+target := bsnes
+binary := application
 build := performance
 openmp := true
+flags += -I. -I..
 
 nall.path := ../nall
 include $(nall.path)/GNUmakefile
-
-binary := application
-target := bsnes
-objects := libco emulator audio video resource
-object.path := obj
-flags += -I. -I..
 
 ifeq ($(platform),windows)
   ifeq ($(binary),application)
@@ -37,18 +34,7 @@ else
   $(error "unsupported platform")
 endif
 
-compile = \
-  $(strip \
-    $(if $(filter %.c,$<), \
-      $(compiler) $(flags.c)   $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d), \
-    $(if $(filter %.cpp,$<), \
-      $(compiler) $(flags.cpp) $(flags) $1 -c $< -o $@ -MMD -MP -MF $(@:.o=.d) \
-    )) \
-  )
-
-%.o: $<
-	$(info Compiling $< ...)
-	@$(call compile)
+objects := libco emulator audio video resource
 
 obj/libco.o: ../libco/libco.c
 obj/emulator.o: emulator/emulator.cpp
@@ -61,5 +47,5 @@ include $(ui)/GNUmakefile
 -include obj/*.d
 
 clean:
-	$(call rm,out/*)
-	$(call rm,obj/*)
+	$(call delete,out/*)
+	$(call delete,obj/*)

@@ -64,6 +64,11 @@ struct Locale {
     Namespace(Locale& _locale, string _namespace) : _locale(_locale), _namespace(_namespace) {}
 
     template<typename... P>
+    auto operator()(string input, P&&... p) const -> string {
+      return _locale(_namespace, input, forward<P>(p)...);
+    }
+
+    template<typename... P>
     auto tr(string input, P&&... p) const -> string {
       return _locale(_namespace, input, forward<P>(p)...);
     }

@@ -66,7 +66,7 @@ GtkSelectionData* data, unsigned type, unsigned timestamp, pWindow* p) -> void {
 static auto Window_getPreferredWidth(GtkWidget* widget, int* minimalWidth, int* naturalWidth) -> void {
   if(auto p = (pWindow*)g_object_get_data(G_OBJECT(widget), "hiro::window")) {
     *minimalWidth = 1;
-    *naturalWidth = 1;  //p->state().geometry.width();
+    *naturalWidth = p->state().geometry.width();
   }
 }
 
@@ -114,7 +114,7 @@ static auto Window_sizeRequest(GtkWidget* widget, GtkRequisition* requisition, p
 static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) -> void {
   p->_synchronizeState();
 
-/*if(event->type == GDK_WINDOW_STATE) {
+  if(event->type == GDK_WINDOW_STATE) {
     auto windowStateEvent = (GdkEventWindowState*)event;
     if(windowStateEvent->changed_mask & GDK_WINDOW_STATE_MAXIMIZED) {
       p->state().maximized = windowStateEvent->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
@@ -122,7 +122,7 @@ static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) ->
     if(windowStateEvent->changed_mask & GDK_WINDOW_STATE_ICONIFIED) {
       p->state().minimized = windowStateEvent->new_window_state & GDK_WINDOW_STATE_ICONIFIED;
     }
-  }*/
+  }
 }
 
 auto pWindow::construct() -> void {
@@ -191,7 +191,7 @@ auto pWindow::construct() -> void {
   g_signal_connect(G_OBJECT(formContainer), "size-request", G_CALLBACK(Window_sizeRequest), (gpointer)this);
   #elif HIRO_GTK==3
   auto widgetClass = GTK_WIDGET_GET_CLASS(formContainer);
-  widgetClass->get_preferred_width = Window_getPreferredWidth;
+  widgetClass->get_preferred_width  = Window_getPreferredWidth;
   widgetClass->get_preferred_height = Window_getPreferredHeight;
   #endif
   g_signal_connect(G_OBJECT(widget), "window-state-event", G_CALLBACK(Window_stateEvent), (gpointer)this);

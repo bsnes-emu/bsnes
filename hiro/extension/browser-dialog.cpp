@@ -1,6 +1,8 @@
 #if defined(Hiro_BrowserDialog)
 
 struct BrowserDialogWindow {
+  Application::Namespace tr{"BrowserDialog"};
+
   BrowserDialogWindow(BrowserDialog::State& state) : state(state) {}
   auto accept() -> void;
   auto activate() -> void;
@@ -171,10 +173,10 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
     fileName.setBackgroundColor(acceptButton.enabled() ? Color{} : Color{255, 224, 224});
   });
   acceptButton.onActivate([&] { accept(); });
-  if(state.action.beginsWith("open")) acceptButton.setText("Open");
-  if(state.action.beginsWith("save")) acceptButton.setText("Save");
-  if(state.action.beginsWith("select")) acceptButton.setText("Select");
-  cancelButton.setText("Cancel").onActivate([&] { window.setModal(false); });
+  if(state.action.beginsWith("open")) acceptButton.setText(tr("Open"));
+  if(state.action.beginsWith("save")) acceptButton.setText(tr("Save"));
+  if(state.action.beginsWith("select")) acceptButton.setText(tr("Select"));
+  cancelButton.setText(tr("Cancel")).onActivate([&] { window.setModal(false); });
 
   if(!state.filters) state.filters.append("All|*");
   for(auto& filter : state.filters) {

@@ -1,10 +1,3 @@
-namespace hiro {
-  struct pWindow;
-  struct pMenu;
-  struct pLayout;
-  struct pWidget;
-}
-
 #define Declare(Name, Base) \
   p##Name(m##Name& reference) : p##Base(reference) {} \
   auto self() const -> m##Name& { return (m##Name&)reference; } \

@@ -10,7 +10,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.p15);
   s.integer(status.p14);
   s.integer(status.joyp);
-  s.integer(status.mltReq);
 
   s.integer(status.serialData);
   s.integer(status.serialBits);

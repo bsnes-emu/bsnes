@@ -7,16 +7,24 @@ auto pTextEdit::construct() -> void {
   qtTextEdit->connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
 
   pWidget::construct();
+  setBackgroundColor(state().backgroundColor);
+  setForegroundColor(state().foregroundColor);
   _setState();
 }
 
 auto pTextEdit::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtTextEdit;
   qtWidget = qtTextEdit = nullptr;
 }
 
 auto pTextEdit::setBackgroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtTextEdit->palette().color(QPalette::Base);
+
+  auto palette = qtTextEdit->palette();
+  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
+  qtTextEdit->setPalette(palette);
+  qtTextEdit->setAutoFillBackground((bool)color);
 }
 
 auto pTextEdit::setCursor(Cursor cursor) -> void {
@@ -28,7 +36,11 @@ auto pTextEdit::setEditable(bool editable) -> void {
 }
 
 auto pTextEdit::setForegroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtTextEdit->palette().color(QPalette::Text);
+
+  auto palette = qtTextEdit->palette();
+  palette.setColor(QPalette::Text, CreateColor(color, defaultColor));
+  qtTextEdit->setPalette(palette);
 }
 
 auto pTextEdit::setText(const string& text) -> void {
@@ -44,14 +56,6 @@ auto pTextEdit::text() const -> string {
 }
 
 auto pTextEdit::_setState() -> void {
-  if(auto color = state().backgroundColor) {
-    QPalette palette = qtTextEdit->palette();
-    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
-    qtTextEdit->setPalette(palette);
-    qtTextEdit->setAutoFillBackground(true);
-  } else {
-    //todo
-  }
   QTextCursor cursor = qtTextEdit->textCursor();
   signed lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
   cursor.setPosition(max(0, min(lastCharacter, state().cursor.offset())));
@@ -61,13 +65,6 @@ auto pTextEdit::_setState() -> void {
     ? Qt::TextEditorInteraction
     : Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse
   );
-  if(auto color = state().foregroundColor) {
-    QPalette palette = qtTextEdit->palette();
-    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
-    qtTextEdit->setPalette(palette);
-  } else {
-    //todo
-  }
   qtTextEdit->setWordWrapMode(state().wordWrap ? QTextOption::WordWrap : QTextOption::NoWrap);
   qtTextEdit->setHorizontalScrollBarPolicy(state().wordWrap ? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAlwaysOn);
   qtTextEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);

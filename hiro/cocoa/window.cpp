@@ -217,7 +217,7 @@ auto pWindow::append(sMenuBar menuBar) -> void {
 }
 
 auto pWindow::append(sSizable sizable) -> void {
-  layout->setGeometry(self().geometry().setPosition(0, 0));
+  sizable->setGeometry(self().geometry().setPosition());
   statusBarReposition();
 }
 
@@ -320,8 +320,8 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
       display:YES
     ];
 
-    if(auto& layout = state().layout) {
-      layout->setGeometry(self().geometry().setPosition(0, 0));
+    if(auto& sizable = state().sizable) {
+      sizable->setGeometry(self().geometry().setPosition());
     }
 
     statusBarReposition();
@@ -402,8 +402,8 @@ auto pWindow::sizeEvent() -> void {
     }
   }
 
-  if(auto& layout = state().layout) {
-    layout->setGeometry(self().geometry().setPosition(0, 0));
+  if(auto& sizable = state().sizable) {
+    sizable->setGeometry(self().geometry().setPosition());
   }
 
   statusBarReposition();

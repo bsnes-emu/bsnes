@@ -1,22 +1,21 @@
 name := genius
 build := stable
+flags += -I..
 
 nall.path := ../nall
 include $(nall.path)/GNUmakefile
-
-object.path := obj
-flags += -I..
 
 hiro.path := ../hiro
 hiro.resource := data/$(name).rc
 include $(hiro.path)/GNUmakefile
 
-objects := obj/hiro.o $(if $(call streq,$(platform),windows),obj/hiro-resource.o)
-objects += obj/genius.o
+objects := obj/genius.o
 
-all: $(objects)
+obj/genius.o: genius.cpp
+
+all: $(hiro.objects) $(objects)
 	$(info Linking out/$(name) ...)
-	+@$(strip $(compiler) -o out/$(name) $(objects) $(options) $(hiro.options))
+	+@$(compiler) -o out/$(name) $(hiro.objects) $(objects) $(hiro.options) $(options)
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
@@ -26,16 +25,14 @@ ifeq ($(platform),macos)
 	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
-obj/genius.o: genius.cpp genius.hpp
-	$(info Compiling $< ...)
-	@$(compiler) $(flags.cpp) $(flags) -o obj/genius.o -c genius.cpp
+verbose: hiro.verbose nall.verbose all;
 
 clean:
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 endif
-	$(call rm,obj/*)
-	$(call rm,out/*)
+	$(call delete,obj/*)
+	$(call delete,out/*)
 
 install:
 ifeq ($(platform),macos)

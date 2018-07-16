@@ -3,24 +3,24 @@
 unique_pointer<AboutWindow> aboutWindow;
 unique_pointer<Presentation> presentation;
 
-Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
+Presentation::Presentation() {
   presentation = this;
 
   systemMenu.setText(tr("System"));
-  loadGame.setIcon(Icon::Action::Open).setText("Load Game ...").onActivate([&] {
+  loadGame.setIcon(Icon::Action::Open).setText({tr("Load Game"), " ..."}).onActivate([&] {
     program->load();
   });
-  loadRecentGame.setIcon(Icon::Action::Open).setText("Load Recent Game");
+  loadRecentGame.setIcon(Icon::Action::Open).setText(tr("Load Recent Game"));
   updateRecentGames();
-  resetSystem.setIcon(Icon::Action::Refresh).setText("Reset System").setEnabled(false).onActivate([&] {
+  resetSystem.setIcon(Icon::Action::Refresh).setText(tr("Reset System")).setEnabled(false).onActivate([&] {
     program->reset();
   });
-  unloadGame.setIcon(Icon::Action::Remove).setText("Unload Game").setEnabled(false).onActivate([&] {
+  unloadGame.setIcon(Icon::Action::Remove).setText(tr("Unload Game")).setEnabled(false).onActivate([&] {
     program->unload();
   });
-  controllerPort1.setIcon(Icon::Device::Joypad).setText("Controller Port 1");
-  controllerPort2.setIcon(Icon::Device::Joypad).setText("Controller Port 2");
-  expansionPort.setIcon(Icon::Device::Storage).setText("Expansion Port");
+  controllerPort1.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 1"));
+  controllerPort2.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 2"));
+  expansionPort.setIcon(Icon::Device::Storage).setText(tr("Expansion Port"));
   for(auto& port : emulator->ports) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
@@ -33,7 +33,7 @@ Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
       if(port.name != "Expansion Port" && device.name == "None") continue;
       if(port.name == "Expansion Port" && device.name == "21fx") continue;
       MenuRadioItem item{menu};
-      item.setText(device.name).onActivate([=] {
+      item.setText(tr(device.name)).onActivate([=] {
         auto path = string{"Emulator/", port.name}.replace(" ", "");
         settings(path).setValue(device.name);
         emulator->connect(port.id, device.id);
@@ -53,7 +53,7 @@ Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
       devices.objects<MenuRadioItem>()(0).doActivate();
     }
   }
-  quit.setIcon(Icon::Action::Quit).setText("Quit").onActivate([&] { program->quit(); });
+  quit.setIcon(Icon::Action::Quit).setText(tr("Quit")).onActivate([&] { program->quit(); });
 
   settingsMenu.setText(tr("Settings"));
   sizeMenu.setIcon(Icon::Emblem::Image).setText("Size");
@@ -132,6 +132,9 @@ Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
   loadState.append(MenuItem().setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
     program->loadState("quick/undo");
   }));
+  loadState.append(MenuItem().setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
+    program->loadState("quick/redo");
+  }));
   speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
   speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program->updateAudioFrequency(); });
   speedSlow.setText("75% (Slow)").setProperty("multiplier", "1.333").onActivate([&] { program->updateAudioFrequency(); });
@@ -153,10 +156,10 @@ Presentation::Presentation() : Locale::Namespace(ns, "Presentation") {
   manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow->show(2); });
 
   helpMenu.setText(tr("Help"));
-  documentation.setIcon(Icon::Application::Browser).setText("Documentation ...").onActivate([&] {
+  documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
     invoke("https://doc.byuu.org/bsnes/");
   });
-  about.setIcon(Icon::Prompt::Question).setText("About ...").onActivate([&] {
+  about.setIcon(Icon::Prompt::Question).setText({tr("About"), " ..."}).onActivate([&] {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
@@ -245,7 +248,7 @@ auto Presentation::updateStatusIcon() -> void {
 auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
   return;
 
-  int ox = width  - 144;
+  int ox = width - 144;
   int oy = height - 128;
   if(ox >= 0 && oy >= 0) {
     image icon{Resource::Icon};
@@ -259,11 +262,8 @@ auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint heig
 }
 
 auto Presentation::clearViewport() -> void {
-  if(!visible() && !video) return;
-
-  if(!emulator->loaded()) {
-    viewportLayout.setPadding();
-  }
+  if(!emulator->loaded()) viewportLayout.setPadding();
+  if(!visible() || !video) return;
 
   uint32_t* output;
   uint length;
@@ -288,7 +288,7 @@ auto Presentation::resizeViewport() -> void {
   uint height = (settings["View/OverscanCropping"].boolean() ? 224.0 : 240.0);
   uint viewportWidth, viewportHeight;
 
-  if(!fullScreen()) {
+  if(visible() && !fullScreen()) {
     uint widthMultiplier = windowWidth / width;
     uint heightMultiplier = windowHeight / height;
     uint multiplier = max(1, min(widthMultiplier, heightMultiplier));
@@ -300,8 +300,8 @@ auto Presentation::resizeViewport() -> void {
     }
   }
 
-  if(!visible() || !video) return;
   if(!emulator->loaded()) return clearViewport();
+  if(!video) return;
 
   if(settings["View/Output"].text() == "Center") {
     uint widthMultiplier = windowWidth / width;
@@ -450,14 +450,14 @@ auto Presentation::updateRecentGames() -> void {
         program->load();
       });
     } else {
-      item.setText("<empty>");
+      item.setText(tr("Empty"));
       item.setEnabled(false);
     }
     loadRecentGame.append(item);
   }
 
   loadRecentGame.append(MenuSeparator());
-  loadRecentGame.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Clear List").onActivate([&] {
+  loadRecentGame.append(MenuItem().setIcon(Icon::Edit::Clear).setText(tr("Clear List")).onActivate([&] {
     for(auto index : range(RecentGames)) {
       settings({"Game/Recent/", 1 + index}).setValue("");
     }

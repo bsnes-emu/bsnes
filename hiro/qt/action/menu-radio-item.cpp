@@ -23,6 +23,7 @@ auto pMenuRadioItem::construct() -> void {
 }
 
 auto pMenuRadioItem::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtMenuRadioItem;
   delete qtActionGroup;
   qtMenuRadioItem = nullptr;
@@ -47,6 +48,7 @@ auto pMenuRadioItem::setGroup(sGroup group) -> void {
       }
     }
   }
+  _setState();
 }
 
 auto pMenuRadioItem::setText(const string& text) -> void {

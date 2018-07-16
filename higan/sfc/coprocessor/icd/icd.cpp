@@ -91,7 +91,7 @@ auto ICD::reset() -> void {
   writeAddress = 0;
 
   packetSize = 0;
-  joypID = 3;
+  joypID = 0;
   joyp15Lock = 0;
   joyp14Lock = 0;
   pulseLock = true;

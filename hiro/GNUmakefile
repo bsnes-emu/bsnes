@@ -63,16 +63,24 @@ ifneq ($(filter $(platform),linux bsd),)
   endif
 endif
 
-$(object.path)/hiro.o: $(hiro.path)/hiro.cpp $(call rwildcard,$(hiro.path)) $(call rwildcard,$(nall.path))
-	$(if $(filter qt%,$(hiro)),$(info Compiling $(hiro.path)/qt/qt.moc ...))
-	$(if $(filter qt%,$(hiro)),@$(moc) -i -o $(hiro.path)/qt/qt.moc $(hiro.path)/qt/qt.hpp)
-	$(info Compiling $< ...)
-	@$(compiler) $(flags) $(hiro.flags) -c $< -o $@
-
 ifeq ($(hiro.resource),)
   hiro.resource := $(hiro.path)/windows/hiro.rc
 endif
 
+hiro.objects := \
+  $(object.path)/hiro-$(hiro).o \
+  $(if $(filter windows,$(hiro)),$(object.path)/hiro-resource.o)
+
+$(object.path)/hiro-$(hiro).o: $(hiro.path)/hiro.cpp
+	$(if $(filter qt%,$(hiro)),$(info Compiling $(hiro.path)/qt/qt.moc ...))
+	$(if $(filter qt%,$(hiro)),@$(moc) -i -o $(hiro.path)/qt/qt.moc $(hiro.path)/qt/qt.hpp)
+	$(info Compiling $< ...)
+	@$(compiler) $(hiro.flags) $(flags) $(flags.deps) -c $< -o $@
+
 $(object.path)/hiro-resource.o: $(hiro.resource)
-	$(if $(filter windows,$(hiro)),$(info Compiling $< ...))
-	$(if $(filter windows,$(hiro)),@$(windres) $< $@)
+	$(info Compiling $< ...)
+	@$(windres) $< $@
+
+hiro.verbose:
+	$(info hiro Target:)
+	$(info $([space]) $(hiro))

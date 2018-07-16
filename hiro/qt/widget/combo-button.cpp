@@ -10,6 +10,7 @@ auto pComboButton::construct() -> void {
 }
 
 auto pComboButton::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtComboButton;
   qtWidget = qtComboButton = nullptr;
 }

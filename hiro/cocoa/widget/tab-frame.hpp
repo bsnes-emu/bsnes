@@ -31,7 +31,7 @@ struct pTabFrame : pWidget {
   auto setNavigation(Navigation navigation) -> void;
   auto setVisible(bool visible) -> void override;
 
-  auto _synchronizeLayout() -> void;
+  auto _synchronizeSizable() -> void;
 
   CocoaTabFrame* cocoaTabFrame = nullptr;
   vector<CocoaTabFrameItem*> tabs;

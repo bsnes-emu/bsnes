@@ -157,8 +157,7 @@ auto pTabFrame::setFont(const Font& font) -> void {
 
 auto pTabFrame::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
-
-  geometry.setPosition(0, 0);
+  geometry.setPosition();
   if(state().navigation == Navigation::Top || state().navigation == Navigation::Bottom) {
     geometry.setWidth(geometry.width() - 6);
     geometry.setHeight(geometry.height() - (15 + _tabHeight()));

@@ -41,7 +41,6 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     bool p15 = 0;
     bool p14 = 0;
     uint8 joyp;
-    uint8 mltReq;
 
     //$ff01  SB
     uint8 serialData;

@@ -27,7 +27,7 @@ auto pTabFrameItem::setClosable(bool closable) -> void {
 auto pTabFrameItem::setGeometry(Geometry geometry) -> void {
   if(auto& sizable = state().sizable) {
     auto offset = qtTabFrameItem->geometry();
-    geometry.setPosition({0, 0});
+    geometry.setPosition();
     geometry.setWidth(geometry.width() - (geometry.width() - offset.width()));
     geometry.setHeight(geometry.height() - (geometry.height() - offset.height()));
     sizable->setGeometry(geometry);
@@ -72,7 +72,7 @@ auto pTabFrameItem::_setState() -> void {
       geometry.setWidth(geometry.width() - (geometry.width() - offset.width()));
       geometry.setHeight(geometry.height() - (geometry.height() - offset.height()));
       sizable->setGeometry(geometry);
-      sizable->setVisible(sizable->visible(true));
+      sizable->setVisible(sizable->visible());
     }
   }
 }

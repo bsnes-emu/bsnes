@@ -1,5 +1,3 @@
-#include "settings.hpp"
-
 #define Declare(Name, Base) \
   p##Name(m##Name& reference) : p##Base(reference) {} \
   auto self() const -> m##Name& { return (m##Name&)reference; } \
@@ -8,6 +6,7 @@
   auto destruct() -> void override; \
 
 #include "application.hpp"
+#include "settings.hpp"
 #include "font.hpp"
 #include "desktop.hpp"
 #include "monitor.hpp"

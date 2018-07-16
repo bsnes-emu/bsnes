@@ -5,6 +5,10 @@ namespace hiro {
 struct pWindow : pObject {
   Declare(Window, Object)
 
+  static auto initialize() -> void;
+
+  static uint minimumStatusHeight;
+
   auto append(sMenuBar menuBar) -> void;
   auto append(sSizable sizable) -> void;
   auto append(sStatusBar statusBar) -> void;
@@ -42,6 +46,7 @@ struct pWindow : pObject {
   auto _modalityCount() -> unsigned;
   auto _modalityDisabled() -> bool;
   auto _modalityUpdate() -> void;
+  auto _statusHeight() const -> int;
 
   HWND hwnd = nullptr;
   HFONT hstatusfont = nullptr;

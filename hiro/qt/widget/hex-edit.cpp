@@ -22,6 +22,8 @@ auto pHexEdit::construct() -> void {
   qtScrollBar->connect(qtScrollBar, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
 
   pWidget::construct();
+  setBackgroundColor(state().backgroundColor);
+  setForegroundColor(state().foregroundColor);
   _setState();
 }
 
@@ -39,7 +41,12 @@ auto pHexEdit::setAddress(unsigned address) -> void {
 }
 
 auto pHexEdit::setBackgroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtHexEdit->palette().color(QPalette::Base);
+
+  auto palette = qtHexEdit->palette();
+  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
+  qtHexEdit->setPalette(palette);
+  qtHexEdit->setAutoFillBackground((bool)color);
 }
 
 auto pHexEdit::setColumns(unsigned columns) -> void {
@@ -47,7 +54,11 @@ auto pHexEdit::setColumns(unsigned columns) -> void {
 }
 
 auto pHexEdit::setForegroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtHexEdit->palette().color(QPalette::Text);
+
+  auto palette = qtHexEdit->palette();
+  palette.setColor(QPalette::Text, color ? CreateColor(color) : defaultColor);
+  qtHexEdit->setPalette(palette);
 }
 
 auto pHexEdit::setLength(unsigned length) -> void {
@@ -242,29 +253,13 @@ auto pHexEdit::_scrollTo(signed position) -> void {
 }
 
 auto pHexEdit::_setState() -> void {
-  lock();
-  if(auto color = state().backgroundColor) {
-    QPalette palette = qtHexEdit->palette();
-    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
-    qtHexEdit->setPalette(palette);
-    qtHexEdit->setAutoFillBackground(true);
-  } else {
-    //todo
-  }
-  if(auto color = state().foregroundColor) {
-    QPalette palette = qtHexEdit->palette();
-    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
-    qtHexEdit->setPalette(palette);
-  } else {
-    //todo
-  }
+  auto lock = acquire();
   //add one if last row is not equal to column length (eg only part of the row is present)
   bool indivisible = state().columns == 0 || (state().length % state().columns) != 0;
   qtScrollBar->setRange(0, state().length / state().columns + indivisible - state().rows);
   qtScrollBar->setSliderPosition(state().address / state().columns);
   qtScrollBar->setPageStep(state().rows);
   update();
-  unlock();
 }
 
 auto QtHexEdit::keyPressEvent(QKeyEvent* event) -> void {

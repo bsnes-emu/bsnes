@@ -3,10 +3,8 @@ auto ICD::audioSample(const double* samples, uint channels) -> void {
 }
 
 auto ICD::inputPoll(uint port, uint device, uint id) -> int16 {
-  GameBoy::cpu.status.mltReq = joypID & mltReq;
-
-  uint data = 0x00;
-  switch(joypID & mltReq) {
+  uint8 data = 0x00;
+  switch(joypID) {
   case 0: data = ~r6004; break;
   case 1: data = ~r6005; break;
   case 2: data = ~r6006; break;
@@ -14,14 +12,14 @@ auto ICD::inputPoll(uint port, uint device, uint id) -> int16 {
   }
 
   switch((GameBoy::Input)id) {
-  case GameBoy::Input::Start:  return (bool)(data & 0x80);
-  case GameBoy::Input::Select: return (bool)(data & 0x40);
-  case GameBoy::Input::B:      return (bool)(data & 0x20);
-  case GameBoy::Input::A:      return (bool)(data & 0x10);
-  case GameBoy::Input::Down:   return (bool)(data & 0x08);
-  case GameBoy::Input::Up:     return (bool)(data & 0x04);
-  case GameBoy::Input::Left:   return (bool)(data & 0x02);
-  case GameBoy::Input::Right:  return (bool)(data & 0x01);
+  case GameBoy::Input::Right:  return data.bit(0);
+  case GameBoy::Input::Left:   return data.bit(1);
+  case GameBoy::Input::Up:     return data.bit(2);
+  case GameBoy::Input::Down:   return data.bit(3);
+  case GameBoy::Input::A:      return data.bit(4);
+  case GameBoy::Input::B:      return data.bit(5);
+  case GameBoy::Input::Select: return data.bit(6);
+  case GameBoy::Input::Start:  return data.bit(7);
   }
 
   return 0;

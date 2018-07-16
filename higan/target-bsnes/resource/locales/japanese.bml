@@ -1,7 +1,35 @@
 locale
   language: 日本語
 
+namespace: MessageDialog
+  map
+    input: Yes
+    value: はい
+  map
+    input: No
+    value: いいえ
+  map
+    input: Cancel
+    value: キャンセル
+
+namespace: BrowserDialog
+  map
+    input: Open
+    value: 開く
+  map
+    input: Save
+    value: 保存
+  map
+    input: Select
+    value: 選択
+  map
+    input: Cancel
+    value: キャンセル
+
 namespace: Program
+  map
+    input: Unloaded
+    value: アンロードされる
   map
     input: Paused
     value: ポーズ
@@ -11,6 +39,60 @@ namespace: Presentation
     input: System
     value: システム
   map
+    input: Load Game
+    value: ゲームを読み込み
+  map
+    input: Load Recent Game
+    value: 最新ゲームを読み込み
+  map
+    input: Empty
+    value: なし
+  map
+    input: Clear List
+    value: 全部を消す
+  map
+    input: Reset System
+    value: システムをリセット
+  map
+    input: Unload Game
+    value: ゲームをアンロード
+  map
+    input: Controller Port 1
+    value: コントローラポート1
+  map
+    input: Controller Port 2
+    value: コントローラポート2
+  map
+    input: Expansion Port
+    value: 拡張ポート
+  map
+    input: Gamepad
+    value: ゲームパッド
+  map
+    input: Mouse
+    value: マウス
+  map
+    input: Super Multitap
+    value: スーパーマルチタップ
+  map
+    input: Super Scope
+    value: スーパースコップ
+  map
+    input: Justifier
+    value: 1挺のジャスティファイアー
+  map
+    input: Justifiers
+    value: 2挺のジャスティファイアー
+  map
+    input: None
+    value: なし
+  map
+    input: Satellaview
+    value: サテラビュー
+  map
+    input: Quit
+    value: 終了
+  map
     input: Settings
     value: 設定
   map
@@ -19,22 +101,27 @@ namespace: Presentation
   map
     input: Help
     value: ヘルプ
+  map
+    input: Documentation
+    value: オンラインマニュアル
+  map
+    input: About
+    value: 情報
 
-namespace: About
+namespace: AboutWindow
   map
-    input: About {0} ...
-    value: {0}について ...
-
+    input: About {0}
+    value: {0}について
   map
-    input: Version:
-    value: バージョン:
+    input: Version
+    value: バージョン
   map
-    input: Author:
-    value: 作者:
+    input: Author
+    value: 作者
   map
-    input: License:
-    value: ライセンス:
+    input: License
+    value: ライセンス
   map
-    input: Website:
-    value: 公式サイト:
+    input: Website
+    value: 公式サイト
 

@@ -28,27 +28,20 @@ auto pLabel::setAlignment(Alignment alignment) -> void {
 }
 
 auto pLabel::setBackgroundColor(Color color) -> void {
-  if(!color) color = self().parentWindow(true)->backgroundColor();
-  if(color) {
-    QPalette palette = qtLabel->palette();
-    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
-    qtLabel->setBackgroundRole(QPalette::Base);
-    qtLabel->setPalette(palette);
-    qtLabel->setAutoFillBackground(true);
-  } else {
-    //todo
-  }
+  static auto defaultColor = qtLabel->palette().color(QPalette::Base);
+
+  auto palette = qtLabel->palette();
+  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
+  qtLabel->setPalette(palette);
+  qtLabel->setAutoFillBackground((bool)color);
 }
 
 auto pLabel::setForegroundColor(Color color) -> void {
-  if(color) {
-    QPalette palette = qtLabel->palette();
-    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
-    qtLabel->setForegroundRole(QPalette::Text);
-    qtLabel->setPalette(palette);
-  } else {
-    //todo
-  }
+  static auto defaultColor = qtLabel->palette().color(QPalette::Text);
+
+  auto palette = qtLabel->palette();
+  palette.setColor(QPalette::Text, CreateColor(color, defaultColor));
+  qtLabel->setPalette(palette);
 }
 
 auto pLabel::setText(const string& text) -> void {

@@ -10,9 +10,13 @@ auto ICD::lcdOutput(uint2 color) -> void {
   uint y = writeAddress / 160;
   uint x = writeAddress % 160;
   uint addr = writeBank * 512 + y * 2 + x / 8 * 16;
-  output[addr + 0] = (output[addr + 0] << 1) | (bool)(color & 1);
-  output[addr + 1] = (output[addr + 1] << 1) | (bool)(color & 2);
+  output[addr + 0] = (output[addr + 0] << 1) | color.bit(0);
+  output[addr + 1] = (output[addr + 1] << 1) | color.bit(1);
   writeAddress = (writeAddress + 1) % 1280;
+}
+
+auto ICD::joypRead() -> uint4 {
+  return 0xf - joypID;
 }
 
 auto ICD::joypWrite(bool p15, bool p14) -> void {
@@ -21,7 +25,11 @@ auto ICD::joypWrite(bool p15, bool p14) -> void {
     if(joyp15Lock == 0 && joyp14Lock == 0) {
       joyp15Lock = 1;
       joyp14Lock = 1;
-      joypID = (joypID + 1) & 3;
+      joypID++;
+      if(mltReq == 0) joypID &= 0;  //1-player mode
+      if(mltReq == 1) joypID &= 1;  //2-player mode
+      if(mltReq == 2) joypID &= 3;  //4-player mode (unverified; but the most likely behavior)
+      if(mltReq == 3) joypID &= 3;  //4-player mode
     }
   }
 
@@ -65,8 +73,7 @@ auto ICD::joypWrite(bool p15, bool p14) -> void {
     if(p15 == 1 && p14 == 0) {
       if((joypPacket[0] >> 3) == 0x11) {
         mltReq = joypPacket[1] & 3;
-        if(mltReq == 2) mltReq = 3;
-        joypID = 0;
+        joypID = 3;  //required: the next time P14==1 && P15==1; increment and start from ID=0 (Joypad 1)
       }
 
       if(packetSize < 64) packet[packetSize++] = joypPacket;

@@ -39,6 +39,7 @@ auto pFrame::setFont(const Font& font) -> void {
 }
 
 auto pFrame::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
   if(auto& sizable = state().sizable) {
     Size size = pFont::size(self().font(true), state().text);
     if(!state().text) size.setHeight(10);

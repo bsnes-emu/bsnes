@@ -8,7 +8,10 @@ auto pLineEdit::construct() -> void {
   qtLineEdit->connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
 
   pWidget::construct();
-  _setState();
+  setBackgroundColor(state().backgroundColor);
+  setEditable(state().editable);
+  setForegroundColor(state().foregroundColor);
+  setText(state().text);
 }
 
 auto pLineEdit::destruct() -> void {
@@ -22,38 +25,27 @@ auto pLineEdit::minimumSize() const -> Size {
 }
 
 auto pLineEdit::setBackgroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtLineEdit->palette().color(QPalette::Base);
+
+  auto palette = qtLineEdit->palette();
+  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
+  qtLineEdit->setPalette(palette);
+  qtLineEdit->setAutoFillBackground((bool)color);
 }
 
 auto pLineEdit::setEditable(bool editable) -> void {
-  _setState();
+  qtLineEdit->setReadOnly(!state().editable);
 }
 
 auto pLineEdit::setForegroundColor(Color color) -> void {
-  _setState();
+  static auto defaultColor = qtLineEdit->palette().color(QPalette::Text);
+
+  auto palette = qtLineEdit->palette();
+  palette.setColor(QPalette::Text, CreateColor(color, defaultColor));
+  qtLineEdit->setPalette(palette);
 }
 
 auto pLineEdit::setText(const string& text) -> void {
-  _setState();
-}
-
-auto pLineEdit::_setState() -> void {
-  if(auto color = state().backgroundColor) {
-    QPalette palette = qtLineEdit->palette();
-    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
-    qtLineEdit->setPalette(palette);
-    qtLineEdit->setAutoFillBackground(true);
-  } else {
-    //todo
-  }
-  qtLineEdit->setReadOnly(!state().editable);
-  if(auto color = state().foregroundColor) {
-    QPalette palette = qtLineEdit->palette();
-    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
-    qtLineEdit->setPalette(palette);
-  } else {
-    //todo
-  }
   qtLineEdit->setText(QString::fromUtf8(state().text));
 }
 

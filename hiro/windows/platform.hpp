@@ -1,12 +1,5 @@
 namespace hiro {
 
-struct pFont;
-struct pObject;
-struct pWindow;
-struct pMenu;
-struct pLayout;
-struct pWidget;
-
 struct AppMessage {
   enum : uint {
     None = WM_APP,

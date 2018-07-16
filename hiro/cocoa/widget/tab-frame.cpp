@@ -12,7 +12,7 @@
 }
 
 -(void) tabView:(NSTabView*)tabView didSelectTabViewItem:(NSTabViewItem*)tabViewItem {
-  tabFrame->self()->_synchronizeLayout();
+  tabFrame->self()->_synchronizeSizable();
   tabFrame->doChange();
 }
 
@@ -104,8 +104,8 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
 auto pTabFrame::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
   for(auto& item : state().items) {
-    if(auto& layout = item->state.layout) {
-      if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) self->setEnabled(sizable->enabled(true));
     }
   }
 }
@@ -113,8 +113,8 @@ auto pTabFrame::setEnabled(bool enabled) -> void {
 auto pTabFrame::setFont(const Font& font) -> void {
   pWidget::setFont(font);
   for(auto& item : state().items) {
-    if(auto& layout = item->state.layout) {
-      if(auto self = layout->self()) self->setFont(layout->font(true));
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) self->setFont(sizable->font(true));
     }
   }
 }
@@ -129,11 +129,11 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
     geometry.width() - 2, geometry.height() - 32
   });
   for(auto& item : state().items) {
-    if(auto& layout = item->state.layout) {
-      layout->setGeometry(geometry);
+    if(auto& sizable = item->state.sizable) {
+      sizable->setGeometry(geometry);
     }
   }
-  _synchronizeLayout();
+  _synchronizeSizable();
 }
 
 auto pTabFrame::setNavigation(Navigation navigation) -> void {
@@ -142,20 +142,20 @@ auto pTabFrame::setNavigation(Navigation navigation) -> void {
 auto pTabFrame::setVisible(bool visible) -> void {
   pWidget::setVisible(visible);
   for(auto& item : state().items) {
-    if(auto& layout = item->state.layout) {
-      if(auto self = layout->self()) self->setVisible(layout->visible(true));
+    if(auto& sizable = item->state.sizable) {
+      if(auto self = sizable->self()) self->setVisible(sizable->visible(true));
     }
   }
 }
 
-auto pTabFrame::_synchronizeLayout() -> void {
+auto pTabFrame::_synchronizeSizable() -> void {
   @autoreleasepool {
     NSTabViewItem* tabViewItem = [cocoaView selectedTabViewItem];
     int selected = tabViewItem ? [cocoaView indexOfTabViewItem:tabViewItem] : -1;
     for(auto& item : state().items) {
       item->state.selected = item->offset() == selected;
-      if(auto& layout = item->state.layout) {
-        if(auto self = layout->self()) self->setVisible(layout->visible(true) && item->selected());
+      if(auto& sizable = item->state.sizable) {
+        if(auto self = sizable->self()) self->setVisible(sizable->visible(true) && item->selected());
       }
     }
   }

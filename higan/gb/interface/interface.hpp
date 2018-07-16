@@ -72,6 +72,7 @@ struct SuperGameBoyInterface {
 
   virtual auto lcdScanline() -> void = 0;
   virtual auto lcdOutput(uint2 color) -> void = 0;
+  virtual auto joypRead() -> uint4 = 0;
   virtual auto joypWrite(bool p15, bool p14) -> void = 0;
 };
 

@@ -109,8 +109,6 @@ auto mVerticalLayout::setFont(const Font& font) -> type& {
 
 auto mVerticalLayout::setGeometry(Geometry geometry) -> type& {
   mSizable::setGeometry(geometry);
-  auto window = parentWindow(true);
-  if(!window || !window->visible()) return *this;
 
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());
@@ -269,7 +267,7 @@ auto mVerticalLayoutCell::setVisible(bool visible) -> type& {
 }
 
 auto mVerticalLayoutCell::sizable() const -> Sizable {
-  return state.sizable;
+  return state.sizable ? state.sizable : Sizable();
 }
 
 auto mVerticalLayoutCell::size() const -> Size {

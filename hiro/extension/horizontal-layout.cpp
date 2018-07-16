@@ -99,8 +99,6 @@ auto mHorizontalLayout::setFont(const Font& font) -> type& {
 
 auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
   mSizable::setGeometry(geometry);
-  auto window = parentWindow(true);
-  if(!window || !window->visible()) return *this;
 
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());
@@ -259,7 +257,7 @@ auto mHorizontalLayoutCell::setVisible(bool visible) -> type& {
 }
 
 auto mHorizontalLayoutCell::sizable() const -> Sizable {
-  return state.sizable;
+  return state.sizable ? state.sizable : Sizable();
 }
 
 auto mHorizontalLayoutCell::size() const -> Size {

@@ -1,3 +1,23 @@
+ifeq ($(ruby),)
+  ifeq ($(platform),windows)
+    ruby += video.wgl video.direct3d video.directdraw video.gdi
+    ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound
+    ruby += input.windows
+  else ifeq ($(platform),macos)
+    ruby += video.cgl
+    ruby += audio.openal
+    ruby += input.quartz input.carbon
+  else ifeq ($(platform),linux)
+    ruby += video.glx video.xvideo video.xshm
+    ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
+    ruby += input.sdl input.xlib input.udev
+  else ifeq ($(platform),bsd)
+    ruby += video.glx video.xvideo video.xshm
+    ruby += audio.oss audio.openal
+    ruby += input.sdl input.xlib
+  endif
+endif
+
 ifeq ($(platform),macos)
   ruby.flags := $(flags.objcpp)
 else
@@ -46,6 +66,12 @@ ifeq ($(platform),bsd)
   ruby.options += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 endif
 
-$(object.path)/ruby.o: $(ruby.path)/ruby.cpp $(call rwildcard,$(ruby.path)) $(call rwildcard,$(nall.path))
+ruby.objects := $(object.path)/ruby.o
+
+$(object.path)/ruby.o: $(ruby.path)/ruby.cpp
 	$(info Compiling $< ...)
-	@$(compiler) $(ruby.flags) $(flags) -c $< -o $@
+	@$(compiler) $(ruby.flags) $(flags) $(flags.deps) -c $< -o $@
+
+ruby.verbose:
+	$(info ruby Drivers:)
+	$(foreach n,$(ruby),$(info $([space]) $n))

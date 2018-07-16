@@ -1,4 +1,6 @@
-struct AboutWindow : Locale::Namespace, Window {
+struct AboutWindow : Window {
+  Application::Namespace tr{"AboutWindow"};
+
   AboutWindow();
 
   VerticalLayout layout{this};
@@ -17,7 +19,9 @@ struct AboutWindow : Locale::Namespace, Window {
       Label websiteValue{&tableLayout, Size{~0, 0}};
 };
 
-struct Presentation : Locale::Namespace, Window {
+struct Presentation : Window {
+  Application::Namespace tr{"Presentation"};
+
   enum : uint { RecentGames = 9, QuickStates = 9 };
   enum : uint { StatusHeight = 24 };
 
@@ -103,7 +107,7 @@ struct Presentation : Locale::Namespace, Window {
       Canvas statusIcon{&statusLayout, Size{16, ~0}, 0};
       Label spacerLeft{&statusLayout, Size{4, ~0}, 0};
       Label statusLeft{&statusLayout, Size{~0, ~0}, 0};
-      Label statusRight{&statusLayout, Size{80, ~0}, 0};
+      Label statusRight{&statusLayout, Size{100, ~0}, 0};
       Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 

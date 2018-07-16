@@ -5,6 +5,19 @@ namespace hiro {
 static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
 static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
 
+uint pWindow::minimumStatusHeight = 0;
+
+auto pWindow::initialize() -> void {
+  HWND hwnd = CreateWindow(L"hiroWindow", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
+  HWND hstatus = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, hwnd, nullptr, GetModuleHandle(0), 0);
+  SetWindowPos(hstatus, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
+  RECT rc;
+  GetWindowRect(hstatus, &rc);
+  minimumStatusHeight = rc.bottom - rc.top;
+  DestroyWindow(hstatus);
+  DestroyWindow(hwnd);
+}
+
 auto pWindow::construct() -> void {
   hwnd = CreateWindow(L"hiroWindow", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
@@ -35,21 +48,11 @@ auto pWindow::focused() const -> bool {
 }
 
 auto pWindow::frameMargin() const -> Geometry {
-  unsigned style = state().resizable ? ResizableStyle : FixedStyle;
-  if(state().fullScreen) style = 0;
   RECT rc{0, 0, 640, 480};
-  AdjustWindowRect(&rc, style, (bool)GetMenu(hwnd));
-  signed statusHeight = 0;
-  if(auto& statusBar = state().statusBar) {
-    if(auto self = statusBar->self()) {
-      if(statusBar->visible()) {
-        RECT src;
-        GetClientRect(self->hwnd, &src);
-        statusHeight = src.bottom - src.top;
-      }
-    }
-  }
-  return {abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480};
+  uint style = state().fullScreen ? 0 : state().resizable ? ResizableStyle : FixedStyle;
+  bool menuVisible = state().menuBar && state().menuBar->visible();
+  AdjustWindowRect(&rc, style, menuVisible);
+  return {abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + _statusHeight() - 480};
 }
 
 auto pWindow::remove(sMenuBar menuBar) -> void {
@@ -183,14 +186,9 @@ auto pWindow::setTitle(string text) -> void {
 }
 
 auto pWindow::setVisible(bool visible) -> void {
-  lock();
+  auto lock = acquire();
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
   if(!visible) setModal(false);
-
-  if(auto& sizable = state().sizable) {
-    if(auto self = sizable->self()) self->setVisible(sizable->visible(true));
-  }
-  unlock();
 }
 
 //
@@ -299,6 +297,18 @@ auto pWindow::_modalityUpdate() -> void {
       }
     }
   }
+}
+
+auto pWindow::_statusHeight() const -> int {
+  int height = 0;
+  if(auto& statusBar = state().statusBar) {
+    if(statusBar->visible()) {
+      auto& text = statusBar->state.text;
+      height = statusBar->font(true).size(text ? text : " ").height();
+      height = max(height, minimumStatusHeight);
+    }
+  }
+  return height;
 }
 
 }

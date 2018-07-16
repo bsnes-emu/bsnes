@@ -11,8 +11,6 @@ struct pLineEdit : pWidget {
   auto setForegroundColor(Color color) -> void;
   auto setText(const string& text) -> void;
 
-  auto _setState() -> void;
-
   QtLineEdit* qtLineEdit = nullptr;
 };
 

@@ -219,6 +219,20 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     break;
   }
 
+  case WM_GETMINMAXINFO: {
+    auto info = (LPMINMAXINFO)lparam;
+    auto frameMargin = pWindow->frameMargin();
+    if(auto minimumSize = window->state.minimumSize) {
+      info->ptMinTrackSize.x = minimumSize.width()  + frameMargin.width();
+      info->ptMinTrackSize.y = minimumSize.height() + frameMargin.height();
+    }
+    if(auto maximumSize = window->state.maximumSize) {
+      info->ptMaxTrackSize.x = maximumSize.width()  + frameMargin.width();
+      info->ptMaxTrackSize.y = maximumSize.height() + frameMargin.height();
+    }
+    break;
+  }
+
   case WM_MENUCOMMAND: {
     return Menu_windowProc(hwnd, msg, wparam, lparam);
   }

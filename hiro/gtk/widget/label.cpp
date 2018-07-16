@@ -2,6 +2,50 @@
 
 namespace hiro {
 
+static auto Label_draw(GtkWidget* widget, cairo_t* context, pLabel* p) -> int {
+  auto color = p->state().backgroundColor;
+  if(auto window = p->self().parentWindow(true)) {
+    if(!color) color = window->backgroundColor();
+  }
+
+  if(color) {
+    double red   = (double)color.red()   / 255.0;
+    double green = (double)color.green() / 255.0;
+    double blue  = (double)color.blue()  / 255.0;
+    double alpha = (double)color.alpha() / 255.0;
+
+    if(gdk_screen_is_composited(gdk_screen_get_default())
+    && gdk_screen_get_rgba_visual(gdk_screen_get_default())
+    ) {
+      cairo_set_source_rgba(context, red, green, blue, alpha);
+    } else {
+      cairo_set_source_rgb(context, red, green, blue);
+    }
+
+    cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(context);
+  } else {
+    #if HIRO_GTK==3
+    auto style = gtk_widget_get_style_context(widget);
+    if(auto tabFrame = p->self().parentTabFrame(true)) {
+      if(auto self = tabFrame->self()) style = gtk_widget_get_style_context(self->gtkWidget);
+    }
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+    gtk_render_background(style, context, 0, 0, allocation.width, allocation.height);
+    #endif
+  }
+
+  return false;
+}
+
+static auto Label_expose(GtkWidget* widget, GdkEvent* event, pLabel* p) -> int {
+  cairo_t* context = gdk_cairo_create(gtk_widget_get_window(widget));
+  Label_draw(widget, context, p);
+  cairo_destroy(context);
+  return false;
+}
+
 auto pLabel::construct() -> void {
   gtkWidget = gtk_event_box_new();
   subWidget = gtk_label_new("");
@@ -12,6 +56,12 @@ auto pLabel::construct() -> void {
   setBackgroundColor(state().backgroundColor);
   setForegroundColor(state().foregroundColor);
   setText(state().text);
+
+  #if HIRO_GTK==2
+  g_signal_connect(G_OBJECT(subWidget), "expose-event", G_CALLBACK(Label_expose), (gpointer)this);
+  #elif HIRO_GTK==3
+  g_signal_connect(G_OBJECT(subWidget), "draw", G_CALLBACK(Label_draw), (gpointer)this);
+  #endif
 
   pWidget::construct();
 }
@@ -36,9 +86,9 @@ auto pLabel::setAlignment(Alignment alignment) -> void {
 }
 
 auto pLabel::setBackgroundColor(Color color) -> void {
-  if(!color) color = self().parentWindow(true)->backgroundColor();
-  auto gdkColor = CreateColor(color);
-  gtk_widget_modify_bg(gtkWidget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+  //GTK3 will paint the wrong background color when a label is inside of a TabFrame
+  //this is caused by the GtkEventBox wrapper that is required to paint custom backgrounds
+  //handle background painting via "draw" or "expose-event" signals instead
 }
 
 auto pLabel::setForegroundColor(Color color) -> void {

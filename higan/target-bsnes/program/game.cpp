@@ -27,7 +27,7 @@ auto Program::load() -> void {
         program->loadState("quick/undo");
       }
       showMessage({
-        verified() ? "Verified" : "Unverified", " game loaded",
+        verified() ? "Verified game loaded" : "Game loaded",
         appliedPatch() ? " and patch applied" : ""
       });
       presentation->setTitle(emulator->title());

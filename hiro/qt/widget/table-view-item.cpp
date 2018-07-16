@@ -52,7 +52,7 @@ auto pTableViewItem::_parent() -> maybe<pTableView&> {
 
 auto pTableViewItem::_setState() -> void {
   if(auto parent = _parent()) {
-    parent->lock();
+    auto lock = parent->acquire();
     qtItem->setSelected(state().selected);
     if(state().selected) {
       parent->qtTableView->setCurrentItem(qtItem);

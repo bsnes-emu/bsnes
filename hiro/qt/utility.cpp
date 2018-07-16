@@ -15,6 +15,10 @@ static auto CreateBrush(Color color) -> QBrush {
   return color ? QColor(color.red(), color.green(), color.blue()) : QBrush();
 }
 
+static auto CreateColor(Color color, QColor fallback = {}) -> QColor {
+  return color ? QColor(color.red(), color.green(), color.blue()) : fallback;
+}
+
 static auto CreateIcon(const image& icon, bool scale = false) -> QIcon {
   if(!icon) return QIcon();
   auto qtBuffer = icon;

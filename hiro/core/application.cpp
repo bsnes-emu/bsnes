@@ -10,6 +10,10 @@ auto Application::font() -> Font {
   return state.font;
 }
 
+auto Application::locale() -> Locale& {
+  return state.locale;
+}
+
 auto Application::modal() -> bool {
   return state.modal > 0;
 }

@@ -24,6 +24,14 @@ auto InputManager::bindHotkeys() -> void {
     program->loadState({"quick/slot ", stateSlot});
   }));
 
+  hotkeys.append(InputHotkey("Load Undo State").onPress([&] {
+    program->loadState("quick/undo");
+  }));
+
+  hotkeys.append(InputHotkey("Load Redo State").onPress([&] {
+    program->loadState("quick/redo");
+  }));
+
   hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {
     if(--stateSlot < 1) stateSlot = 9;
     program->showMessage({"Selected state slot ", stateSlot});

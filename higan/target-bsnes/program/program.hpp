@@ -1,4 +1,6 @@
-struct Program : Locale::Namespace, Emulator::Platform {
+struct Program : Emulator::Platform {
+  Application::Namespace tr{"Program"};
+
   //program.cpp
   Program(string_vector arguments);
   auto main() -> void;
@@ -51,6 +53,7 @@ struct Program : Locale::Namespace, Emulator::Platform {
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveUndoState() -> bool;
+  auto saveRedoState() -> bool;
   auto removeState(string filename) -> bool;
   auto renameState(string from, string to) -> bool;
 

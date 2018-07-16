@@ -31,21 +31,19 @@ ifeq ($(platform),)
 
   # common commands
   ifeq ($(uname),)
-    rm = $(info Deleting $1 ...) @del /q $(subst /,\,$1)
-    rmdir = $(info Deleting $1 ...) @del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
+    delete  = $(info Deleting $1 ...) @del /q $(subst /,\,$1)
+    rdelete = $(info Deleting $1 ...) @del /s /q $(subst /,\,$1) && if exist $(subst /,\,$1) (rmdir /s /q $(subst /,\,$1))
   else
-    rm = $(info Deleting $1 ...) @rm -f $1
-    rmdir = $(info Deleting $1 ...) @rm -rf $1
+    delete  = $(info Deleting $1 ...) @rm -f $1
+    rdelete = $(info Deleting $1 ...) @rm -rf $1
   endif
 endif
 
-flags.c      := -x c -std=c11
-flags.cpp    := -x c++ -std=c++14
-flags.objc   := -x objective-c -std=c11
-flags.objcpp := -x objective-c++ -std=c++14
-
-flags   :=
-options :=
+flags.c      = -x c -std=c11
+flags.cpp    = -x c++ -std=c++14
+flags.objc   = -x objective-c -std=c11
+flags.objcpp = -x objective-c++ -std=c++14
+flags.deps   = -MMD -MP -MF $(@:.o=.d)
 
 # compiler detection
 ifeq ($(compiler),)
@@ -135,15 +133,30 @@ endif
 
 # paths
 prefix := $(HOME)/.local
+object.path := obj
 
-# targets
+# rules
 default: all;
-verbose: information all;
-information:
+
+nall.verbose:
 	$(info Compiler Flags:)
 	$(foreach n,$(sort $(call unique,$(flags))),$(if $(filter-out -I%,$n),$(info $([space]) $n)))
 	$(info Linker Options:)
 	$(foreach n,$(sort $(call unique,$(options))),$(if $(filter-out -l%,$n),$(info $([space]) $n)))
+
+%.o: $<
+	$(info Compiling $< ...)
+	@$(call compile)
+
+# function compile([arguments])
+compile = \
+  $(strip \
+    $(if $(filter %.c,$<), \
+      $(compiler) $(flags.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
+   ,$(if $(filter %.cpp,$<), \
+      $(compiler) $(flags.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
+    )) \
+  )
 
 # function rwildcard(directory, pattern)
 rwildcard = \

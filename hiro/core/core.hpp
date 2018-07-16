@@ -3,6 +3,7 @@
 #include <nall/directory.hpp>
 #include <nall/function.hpp>
 #include <nall/image.hpp>
+#include <nall/locale.hpp>
 #include <nall/maybe.hpp>
 #include <nall/path.hpp>
 #include <nall/range.hpp>
@@ -16,6 +17,7 @@
 
 using nall::function;
 using nall::image;
+using nall::Locale;
 using nall::maybe;
 using nall::nothing;
 using nall::set;
@@ -373,6 +375,7 @@ struct Application {
 
   static auto doMain() -> void;
   static auto font() -> Font;
+  static auto locale() -> Locale&;
   static auto modal() -> bool;
   static auto name() -> string;
   static auto onMain(const function<void ()>& callback = {}) -> void;
@@ -405,9 +408,14 @@ struct Application {
     static auto onQuit(const function<void ()>& callback = {}) -> void;
   };
 
+  struct Namespace : Locale::Namespace {
+    Namespace(const string& value) : Locale::Namespace(Application::locale(), value) {}
+  };
+
 //private:
   struct State {
     Font font;
+    Locale locale;
     int modal = 0;
     string name;
     function<void ()> onMain;

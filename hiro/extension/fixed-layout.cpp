@@ -129,7 +129,7 @@ auto mFixedLayoutCell::setVisible(bool visible) -> type& {
 }
 
 auto mFixedLayoutCell::sizable() const -> Sizable {
-  return state.sizable;
+  return state.sizable ? state.sizable : Sizable();
 }
 
 auto mFixedLayoutCell::synchronize() -> type& {

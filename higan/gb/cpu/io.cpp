@@ -29,7 +29,9 @@ auto CPU::joypPoll() -> void {
   }
 
   status.joyp = 0x0f;
-  if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mltReq;
+  if(status.p15 == 1 && status.p14 == 1 && Model::SuperGameBoy()) {
+    status.joyp = superGameBoy->joypRead();
+  }
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
   if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
   if(status.joyp != 0x0f) raise(Interrupt::Joypad);

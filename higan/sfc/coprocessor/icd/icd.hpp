@@ -18,6 +18,7 @@ struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   //interface.cpp
   auto lcdScanline() -> void override;
   auto lcdOutput(uint2 color) -> void override;
+  auto joypRead() -> uint4 override;
   auto joypWrite(bool p15, bool p14) -> void override;
 
   //io.cpp

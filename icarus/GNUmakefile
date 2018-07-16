@@ -1,22 +1,21 @@
 name := icarus
 build := performance
+flags += -I..
 
 nall.path := ../nall
 include $(nall.path)/GNUmakefile
-
-object.path := obj
-flags += -I..
 
 hiro.path := ../hiro
 hiro.resource := data/$(name).rc
 include $(hiro.path)/GNUmakefile
 
-objects += obj/hiro.o $(if $(call streq,$(platform),windows),obj/hiro-resource.o)
-objects += obj/icarus.o
+objects := obj/icarus.o
 
-all: $(objects)
+obj/icarus.o: icarus.cpp
+
+all: $(hiro.objects) $(objects)
 	$(info Linking out/$(name) ...)
-	+@$(strip $(compiler) -o out/$(name) $(objects) $(options) $(hiro.options))
+	+@$(compiler) -o out/$(name) $(hiro.objects) $(objects) $(hiro.options) $(options)
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
@@ -26,16 +25,14 @@ ifeq ($(platform),macos)
 	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
-obj/icarus.o: icarus.cpp $(call rwildcard,core/) $(call rwildcard,heuristics/) $(call rwildcard,ui/)
-	$(info Compiling $< ...)
-	@$(compiler) $(flags.cpp) $(flags) -o obj/icarus.o -c icarus.cpp
+verbose: hiro.verbose nall.verbose all;
 
 clean:
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 endif
-	$(call rm,obj/*)
-	$(call rm,out/*)
+	$(call delete,obj/*)
+	$(call delete,out/*)
 
 install:
 ifeq ($(platform),macos)

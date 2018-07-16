@@ -44,6 +44,7 @@ auto pWindow::construct() -> void {
 }
 
 auto pWindow::destruct() -> void {
+if(Application::state.quit) return;  //TODO: hack
   delete qtStatusBar;
   delete qtContainer;
   delete qtMenuBar;
@@ -90,14 +91,14 @@ auto pWindow::remove(sStatusBar statusBar) -> void {
 }
 
 auto pWindow::setBackgroundColor(Color color) -> void {
-  if(color) {
-    QPalette palette;
-    palette.setColor(QPalette::Background, QColor(color.red(), color.green(), color.blue() /*, color.alpha() */));
-    qtContainer->setPalette(palette);
-    qtContainer->setAutoFillBackground(true);
-    //translucency results are very unpleasant without a compositor; so disable for now
-    //qtWindow->setAttribute(Qt::WA_TranslucentBackground, color.alpha() != 255);
-  }
+  static auto defaultColor = qtContainer->palette().color(QPalette::Background);
+
+  auto palette = qtContainer->palette();
+  palette.setColor(QPalette::Background, CreateColor(color, defaultColor));
+  qtContainer->setPalette(palette);
+  qtContainer->setAutoFillBackground((bool)color);
+  //translucency results are very unpleasant without a compositor; so disable for now
+  //qtWindow->setAttribute(Qt::WA_TranslucentBackground, color && color.alpha() != 255);
 }
 
 auto pWindow::setDismissable(bool dismissable) -> void {
@@ -133,7 +134,7 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
-  lock();
+  auto lock = acquire();
   Application::processEvents();
   #if HIRO_QT==4
   QApplication::syncX();
@@ -145,13 +146,14 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   qtWindow->move(geometry.x() - frameMargin().x(), geometry.y() - frameMargin().y());
   //qtWindow->adjustSize() fails if larger than 2/3rds screen size
   qtWindow->resize(qtWindow->sizeHint());
+  qtContainer->setMinimumSize(1, 1);
   if(state().resizable) {
-    //required to allow shrinking window from default size
-    qtWindow->setMinimumSize(1, 1);
-    qtContainer->setMinimumSize(1, 1);
+    setMaximumSize(state().maximumSize);
+    setMinimumSize(state().minimumSize);
+  } else {
+    setMaximumSize(geometry.size());
+    setMinimumSize(geometry.size());
   }
-
-  unlock();
 }
 
 auto pWindow::setMaximized(bool maximized) -> void {
@@ -159,7 +161,14 @@ auto pWindow::setMaximized(bool maximized) -> void {
 }
 
 auto pWindow::setMaximumSize(Size size) -> void {
-  //todo
+  static auto maximumSize = qtWindow->maximumSize();
+
+  if(size) {
+    //once this is called, no matter what the size is, Qt will no longer allow the window to be maximized
+    qtWindow->setMaximumSize(size.width(), size.height() + _menuHeight() + _statusHeight());
+  } else {
+    qtWindow->setMaximumSize(maximumSize);
+  }
 }
 
 auto pWindow::setMinimized(bool minimized) -> void {
@@ -167,7 +176,7 @@ auto pWindow::setMinimized(bool minimized) -> void {
 }
 
 auto pWindow::setMinimumSize(Size size) -> void {
-  //todo
+  qtWindow->setMinimumSize(size.width(), size.height() + _menuHeight() + _statusHeight());
 }
 
 auto pWindow::setModal(bool modal) -> void {
@@ -200,7 +209,7 @@ auto pWindow::setResizable(bool resizable) -> void {
 }
 
 auto pWindow::setTitle(const string& text) -> void {
-  qtWindow->setWindowTitle(QString::fromUtf8(text));
+  qtWindow->setWindowTitle(text ? QString::fromUtf8(text) : " ");
 }
 
 auto pWindow::setVisible(bool visible) -> void {
@@ -220,8 +229,10 @@ auto pWindow::_append(mWidget& widget) -> void {
 }
 
 auto pWindow::_menuHeight() const -> uint {
-  if(!qtMenuBar->isVisible()) return 0;
-  return settings.geometry.menuHeight + _menuTextHeight();
+  if(auto& menuBar = state().menuBar) {
+    if(menuBar->visible()) return settings.geometry.menuHeight + _menuTextHeight();
+  }
+  return 0;
 }
 
 auto pWindow::_menuTextHeight() const -> uint {
@@ -235,8 +246,10 @@ auto pWindow::_menuTextHeight() const -> uint {
 }
 
 auto pWindow::_statusHeight() const -> uint {
-  if(!qtStatusBar->isVisible()) return 0;
-  return settings.geometry.statusHeight + _statusTextHeight();
+  if(auto& statusBar = state().statusBar) {
+    if(statusBar->visible()) return settings.geometry.statusHeight + _statusTextHeight();
+  }
+  return 0;
 }
 
 auto pWindow::_statusTextHeight() const -> uint {
@@ -314,7 +327,7 @@ auto QtWindow::keyReleaseEvent(QKeyEvent* event) -> void {
 //if(sym != Keyboard::Keycode::None && self.window.onKeyRelease) self.window.onKeyRelease(sym);
 }
 
-auto QtWindow::resizeEvent(QResizeEvent*) -> void {
+auto QtWindow::resizeEvent(QResizeEvent* event) -> void {
   if(!p.locked() && !p.state().fullScreen && p.qtWindow->isVisible()) {
     p.state().geometry.setSize({
       p.qtContainer->geometry().width(),
@@ -334,8 +347,8 @@ auto QtWindow::resizeEvent(QResizeEvent*) -> void {
 auto QtWindow::sizeHint() const -> QSize {
   uint width = p.state().geometry.width();
   uint height = p.state().geometry.height();
-  if(p.qtMenuBar->isVisible()) height += settings.geometry.menuHeight;
-  if(p.qtStatusBar->isVisible()) height += settings.geometry.statusHeight;
+  height += p._menuHeight();
+  height += p._statusHeight();
   return QSize(width, height);
 }
 

@@ -28,6 +28,7 @@ auto Program::loadState(string filename) -> bool {
     string location = {statePath(), filename, ".bst"};
     if(!file::exists(location)) return showMessage({"[", prefix, "] not found"}), false;
     if(filename != "quick/undo") saveUndoState();
+    if(filename == "quick/undo") saveRedoState();
     memory = file::read(location);
   } else {
     string location = {filename, ".bst"};
@@ -91,6 +92,15 @@ auto Program::saveUndoState() -> bool {
   auto statusTime = this->statusTime;
   auto statusMessage = this->statusMessage;
   auto result = saveState("quick/undo");
+  this->statusTime = statusTime;
+  this->statusMessage = statusMessage;
+  return result;
+}
+
+auto Program::saveRedoState() -> bool {
+  auto statusTime = this->statusTime;
+  auto statusMessage = this->statusMessage;
+  auto result = saveState("quick/redo");
   this->statusTime = statusTime;
   this->statusMessage = statusMessage;
   return result;
