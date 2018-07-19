@@ -8,8 +8,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(version);
   s.integer(clockCounter);
 
-  s.integer(status.interruptPending);
-
   s.integer(status.clockCount);
   s.integer(status.lineClocks);
 
@@ -18,26 +16,28 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.dramRefreshPosition);
   s.integer(status.dramRefreshed);
 
-  s.integer(status.hdmaInitPosition);
-  s.integer(status.hdmaInitTriggered);
+  s.integer(status.hdmaSetupPosition);
+  s.integer(status.hdmaSetupTriggered);
 
   s.integer(status.hdmaPosition);
   s.integer(status.hdmaTriggered);
 
-  s.integer(status.nmiValid);
-  s.integer(status.nmiLine);
-  s.integer(status.nmiTransition);
-  s.integer(status.nmiPending);
-  s.integer(status.nmiHold);
+  s.boolean(status.nmiValid);
+  s.boolean(status.nmiLine);
+  s.boolean(status.nmiTransition);
+  s.boolean(status.nmiPending);
+  s.boolean(status.nmiHold);
 
-  s.integer(status.irqValid);
-  s.integer(status.irqLine);
-  s.integer(status.irqTransition);
-  s.integer(status.irqPending);
-  s.integer(status.irqHold);
+  s.boolean(status.irqValid);
+  s.boolean(status.irqLine);
+  s.boolean(status.irqTransition);
+  s.boolean(status.irqPending);
+  s.boolean(status.irqHold);
 
   s.integer(status.powerPending);
   s.integer(status.resetPending);
+
+  s.integer(status.interruptPending);
 
   s.integer(status.dmaActive);
   s.integer(status.dmaClocks);
@@ -51,12 +51,11 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.integer(io.wramAddress);
 
-  s.integer(io.joypadStrobeLatch);
-
-  s.integer(io.nmiEnabled);
-  s.integer(io.hirqEnabled);
-  s.integer(io.virqEnabled);
-  s.integer(io.autoJoypadPoll);
+  s.boolean(io.hirqEnable);
+  s.boolean(io.virqEnable);
+  s.boolean(io.irqEnable);
+  s.boolean(io.nmiEnable);
+  s.boolean(io.autoJoypadPoll);
 
   s.integer(io.pio);
 
@@ -83,9 +82,9 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(alu.divctr);
   s.integer(alu.shift);
 
-  for(auto& channel : this->channel) {
-    s.integer(channel.dmaEnabled);
-    s.integer(channel.hdmaEnabled);
+  for(auto& channel : channels) {
+    s.integer(channel.dmaEnable);
+    s.integer(channel.hdmaEnable);
     s.integer(channel.direction);
     s.integer(channel.indirect);
     s.integer(channel.unused);
@@ -105,6 +104,6 @@ auto CPU::serialize(serializer& s) -> void {
   }
 
   s.integer(pipe.valid);
-  s.integer(pipe.addr);
+  s.integer(pipe.address);
   s.integer(pipe.data);
 }

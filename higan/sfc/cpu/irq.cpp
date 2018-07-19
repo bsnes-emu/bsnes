@@ -5,66 +5,38 @@
 //it is used to emulate hardware communication delay between opcode and interrupt units.
 auto CPU::pollInterrupts() -> void {
   //NMI hold
-  if(status.nmiHold) {
-    status.nmiHold = false;
-    if(io.nmiEnabled) status.nmiTransition = true;
-  }
+  if(status.nmiHold.lower() && io.nmiEnable) status.nmiTransition = true;
 
   //NMI test
-  bool nmiValid = vcounter(2) >= ppu.vdisp();
-  if(!status.nmiValid && nmiValid) {
-    //0->1 edge sensitive transition
-    status.nmiLine = true;
-    status.nmiHold = true;  //hold /NMI for four cycles
-  } else if(status.nmiValid && !nmiValid) {
-    //1->0 edge sensitive transition
-    status.nmiLine = false;
+  if(status.nmiValid.flip(vcounter(2) >= ppu.vdisp())) {
+    if(status.nmiLine = status.nmiValid) status.nmiHold = true;  //hold /NMI for four cycles
   }
-  status.nmiValid = nmiValid;
 
   //IRQ hold
   status.irqHold = false;
-  if(status.irqLine) {
-    if(io.virqEnabled || io.hirqEnabled) status.irqTransition = true;
-  }
+  if(status.irqLine && io.irqEnable) status.irqTransition = true;
 
   //IRQ test
-  bool irqValid = io.virqEnabled || io.hirqEnabled;
-  if(irqValid) {
-    if((io.virqEnabled && vcounter(10) != (io.virqPos))
-    || (io.hirqEnabled && hcounter(10) != (io.hirqPos + 1) * 4)
-    || (io.virqPos && vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
-    ) irqValid = false;
-  }
-  if(!status.irqValid && irqValid) {
-    //0->1 edge sensitive transition
-    status.irqLine = true;
-    status.irqHold = true;  //hold /IRQ for four cycles
-  }
-  status.irqValid = irqValid;
+  if(status.irqValid.raise(io.irqEnable
+  && (!io.virqEnable || vcounter(10) == io.virqPos)
+  && (!io.hirqEnable || hcounter(10) == io.hirqPos + 1 << 2)
+  )) status.irqLine = status.irqHold = true;  //hold /IRQ for four cycles
 }
 
 auto CPU::nmitimenUpdate(uint8 data) -> void {
-  bool nmiEnabled  = io.nmiEnabled;
-  bool virqEnabled = io.virqEnabled;
-  bool hirqEnabled = io.hirqEnabled;
-  io.nmiEnabled  = data & 0x80;
-  io.virqEnabled = data & 0x20;
-  io.hirqEnabled = data & 0x10;
+  io.hirqEnable = data.bit(4);
+  io.virqEnable = data.bit(5);
+  io.irqEnable = io.hirqEnable || io.virqEnable;
 
-  //0->1 edge sensitive transition
-  if(!nmiEnabled && io.nmiEnabled && status.nmiLine) {
-    status.nmiTransition = true;
-  }
-
-  //?->1 level sensitive transition
-  if(io.virqEnabled && !io.hirqEnabled && status.irqLine) {
+  if(io.virqEnable && !io.hirqEnable && status.irqLine) {
     status.irqTransition = true;
-  }
-
-  if(!io.virqEnabled && !io.hirqEnabled) {
+  } else if(!io.irqEnable) {
     status.irqLine = false;
     status.irqTransition = false;
+  }
+
+  if(io.nmiEnable.raise(data.bit(7)) && status.nmiLine) {
+    status.nmiTransition = true;
   }
 
   status.irqLock = true;

@@ -1,14 +1,14 @@
 //Sony CXP1100Q-1
 
 struct SMP : Processor::SPC700, Thread {
-  uint8 iplrom[64];
+  inline auto synchronizing() const -> bool override { return scheduler.synchronizing(); }
 
-  //smp.cpp
-  auto synchronizing() const -> bool override;
-
+  //io.cpp
   auto portRead(uint2 port) const -> uint8;
   auto portWrite(uint2 port, uint8 data) -> void;
 
+  //smp.cpp
+  static auto Enter() -> void;
   auto main() -> void;
   auto load(Markup::Node) -> bool;
   auto power(bool reset) -> void;
@@ -16,11 +16,13 @@ struct SMP : Processor::SPC700, Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
+  uint8 iplrom[64];
+
 private:
   struct IO {
     //timing
-    uint clockCounter;
-    uint dspCounter;
+    uint clockCounter = 0;
+    uint dspCounter = 0;
 
     //external
     uint8 apu0;
@@ -30,14 +32,14 @@ private:
 
     //$00f0
     uint1 timersDisable;
-    uint1 ramWritable;
+    uint1 ramWritable = true;
     uint1 ramDisable;
-    uint1 timersEnable;
+    uint1 timersEnable = true;
     uint2 externalWaitStates;
     uint2 internalWaitStates;
 
     //$00f1
-    bool iplromEnable;
+    uint1 iplromEnable = true;
 
     //$00f2
     uint8 dspAddr;
@@ -53,30 +55,30 @@ private:
     uint8 aux5;
   } io;
 
-  static auto Enter() -> void;
-
   //memory.cpp
-  auto ramRead(uint16 addr) -> uint8;
-  auto ramWrite(uint16 addr, uint8 data) -> void;
-
-  auto busRead(uint16 addr) -> uint8;
-  auto busWrite(uint16 addr, uint8 data) -> void;
+  inline auto readRAM(uint16 address) -> uint8;
+  inline auto writeRAM(uint16 address, uint8 data) -> void;
 
   auto idle() -> void override;
-  auto read(uint16 addr) -> uint8 override;
-  auto write(uint16 addr, uint8 data) -> void override;
+  auto read(uint16 address) -> uint8 override;
+  auto write(uint16 address, uint8 data) -> void override;
 
-  auto readDisassembler(uint16 addr) -> uint8 override;
+  auto readDisassembler(uint16 address) -> uint8 override;
+
+  //io.cpp
+  inline auto readIO(uint16 address) -> uint8;
+  inline auto writeIO(uint16 address, uint8 data) -> void;
 
   //timing.cpp
-  template<uint Frequency> struct Timer {
-    uint8 stage0;
-    uint8 stage1;
-    uint8 stage2;
-    uint4 stage3;
-    bool line;
-    bool enable;
-    uint8 target;
+  template<uint Frequency>
+  struct Timer {
+    uint8   stage0;
+    uint8   stage1;
+    uint8   stage2;
+    uint4   stage3;
+    boolean line;
+    boolean enable;
+    uint8   target;
 
     auto step(uint clocks) -> void;
     auto synchronizeStage1() -> void;

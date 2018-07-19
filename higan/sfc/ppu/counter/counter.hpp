@@ -14,36 +14,37 @@ struct PPUcounter {
   alwaysinline auto tick() -> void;
   alwaysinline auto tick(uint clocks) -> void;
 
+  alwaysinline auto interlace() const -> bool;
   alwaysinline auto field() const -> bool;
-  alwaysinline auto vcounter() const -> uint16;
-  alwaysinline auto hcounter() const -> uint16;
-  inline auto hdot() const -> uint16;
-  inline auto lineclocks() const -> uint16;
+  alwaysinline auto vcounter() const -> uint;
+  alwaysinline auto hcounter() const -> uint;
+  alwaysinline auto hdot() const -> uint;
+  alwaysinline auto lineclocks() const -> uint;
 
   alwaysinline auto field(uint offset) const -> bool;
-  alwaysinline auto vcounter(uint offset) const -> uint16;
-  alwaysinline auto hcounter(uint offset) const -> uint16;
+  alwaysinline auto vcounter(uint offset) const -> uint;
+  alwaysinline auto hcounter(uint offset) const -> uint;
 
   inline auto reset() -> void;
   auto serialize(serializer&) -> void;
 
-  function<auto () -> void> scanline;
+  function<void ()> scanline;
 
 private:
-  inline auto vcounterTick() -> void;
+  alwaysinline auto vcounterTick() -> void;
 
   struct {
-    bool interlace;
-    bool field;
-    uint16 vcounter;
-    uint16 hcounter;
+    bool interlace = 0;
+    bool field = 0;
+    uint vcounter = 0;
+    uint hcounter = 0;
+    uint lineclocks = 1364;
   } status;
 
   struct {
-    bool field[2048];
-    uint16 vcounter[2048];
-    uint16 hcounter[2048];
-
-    int32 index;
+    uint index = 0;
+    bool field[2048] = {};
+    uint vcounter[2048] = {};
+    uint hcounter[2048] = {};
   } history;
 };

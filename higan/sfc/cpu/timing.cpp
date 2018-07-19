@@ -39,9 +39,9 @@ auto CPU::scanline() -> void {
   for(auto coprocessor : coprocessors) synchronize(*coprocessor);
 
   if(vcounter() == 0) {
-    //HDMA init triggers once every frame
-    status.hdmaInitPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
-    status.hdmaInitTriggered = false;
+    //HDMA setup triggers once every frame
+    status.hdmaSetupPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
+    status.hdmaSetupTriggered = false;
 
     status.autoJoypadCounter = 0;
   }
@@ -88,12 +88,12 @@ auto CPU::dmaEdge() -> void {
   if(status.dmaActive) {
     if(status.hdmaPending) {
       status.hdmaPending = false;
-      if(hdmaEnabledChannels()) {
-        if(!dmaEnabledChannels()) {
+      if(hdmaEnable()) {
+        if(!dmaEnable()) {
           dmaStep(8 - dmaCounter());
         }
-        status.hdmaMode == 0 ? hdmaInit() : hdmaRun();
-        if(!dmaEnabledChannels()) {
+        status.hdmaMode == 0 ? hdmaSetup() : hdmaRun();
+        if(!dmaEnable()) {
           step(status.clockCount - (status.dmaClocks % status.clockCount));
           status.dmaActive = false;
         }
@@ -102,7 +102,7 @@ auto CPU::dmaEdge() -> void {
 
     if(status.dmaPending) {
       status.dmaPending = false;
-      if(dmaEnabledChannels()) {
+      if(dmaEnable()) {
         dmaStep(8 - dmaCounter());
         dmaRun();
         step(status.clockCount - (status.dmaClocks % status.clockCount));
@@ -111,10 +111,10 @@ auto CPU::dmaEdge() -> void {
     }
   }
 
-  if(!status.hdmaInitTriggered && hcounter() >= status.hdmaInitPosition) {
-    status.hdmaInitTriggered = true;
-    hdmaInitReset();
-    if(hdmaEnabledChannels()) {
+  if(!status.hdmaSetupTriggered && hcounter() >= status.hdmaSetupPosition) {
+    status.hdmaSetupTriggered = true;
+    hdmaReset();
+    if(hdmaEnable()) {
       status.hdmaPending = true;
       status.hdmaMode = 0;
     }
@@ -122,7 +122,7 @@ auto CPU::dmaEdge() -> void {
 
   if(!status.hdmaTriggered && hcounter() >= status.hdmaPosition) {
     status.hdmaTriggered = true;
-    if(hdmaActiveChannels()) {
+    if(hdmaActive()) {
       status.hdmaPending = true;
       status.hdmaMode = 1;
     }
@@ -177,8 +177,8 @@ auto CPU::joypadEdge() -> void {
 //trigger during certain events (immediately after DMA, writes to $4200, etc)
 auto CPU::lastCycle() -> void {
   if(!status.irqLock) {
-    status.nmiPending |= nmiTest();
-    status.irqPending |= irqTest();
+    if(nmiTest()) status.nmiPending = true;
+    if(irqTest()) status.irqPending = true;
     status.interruptPending = (status.nmiPending || status.irqPending);
   }
 }

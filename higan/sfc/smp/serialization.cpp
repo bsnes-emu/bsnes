@@ -33,23 +33,23 @@ auto SMP::serialize(serializer& s) -> void {
   s.integer(timer0.stage1);
   s.integer(timer0.stage2);
   s.integer(timer0.stage3);
-  s.integer(timer0.line);
-  s.integer(timer0.enable);
+  s.boolean(timer0.line);
+  s.boolean(timer0.enable);
   s.integer(timer0.target);
 
   s.integer(timer1.stage0);
   s.integer(timer1.stage1);
   s.integer(timer1.stage2);
   s.integer(timer1.stage3);
-  s.integer(timer1.line);
-  s.integer(timer1.enable);
+  s.boolean(timer1.line);
+  s.boolean(timer1.enable);
   s.integer(timer1.target);
 
   s.integer(timer2.stage0);
   s.integer(timer2.stage1);
   s.integer(timer2.stage2);
   s.integer(timer2.stage3);
-  s.integer(timer2.line);
-  s.integer(timer2.enable);
+  s.boolean(timer2.line);
+  s.boolean(timer2.enable);
   s.integer(timer2.target);
 }

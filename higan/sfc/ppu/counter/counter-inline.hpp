@@ -26,27 +26,27 @@ auto PPUcounter::tick(uint clocks) -> void {
 //internal
 auto PPUcounter::vcounterTick() -> void {
   if(++status.vcounter == 128) status.interlace = ppu.interlace();
-
-  if((Region::NTSC() && status.interlace == 0 && status.vcounter == 262)
-  || (Region::NTSC() && status.interlace == 1 && status.vcounter == 263)
-  || (Region::NTSC() && status.interlace == 1 && status.vcounter == 262 && status.field == 1)
-  || (Region::PAL()  && status.interlace == 0 && status.vcounter == 312)
-  || (Region::PAL()  && status.interlace == 1 && status.vcounter == 313)
-  || (Region::PAL()  && status.interlace == 1 && status.vcounter == 312 && status.field == 1)
-  ) {
+  if(vcounter() == (Region::NTSC() ? 262 : 312) + (interlace() && !field())) {
     status.vcounter = 0;
-    status.field = !status.field;
+    status.field ^= 1;
   }
+  status.lineclocks = 1364;
+  //NTSC and PAL scanlines rates would not match up with color clocks if every scanline were 1364 clocks
+  //to offset for this error, NTSC has one short scanline, and PAL has one long scanline
+  if(Region::NTSC() && interlace() == 0 && field() == 1 && vcounter() == 240) status.lineclocks -= 4;
+  if(Region::PAL()  && interlace() == 1 && field() == 1 && vcounter() == 311) status.lineclocks += 4;
   if(scanline) scanline();
 }
 
+auto PPUcounter::interlace() const -> bool { return status.interlace; }
 auto PPUcounter::field() const -> bool { return status.field; }
-auto PPUcounter::vcounter() const -> uint16 { return status.vcounter; }
-auto PPUcounter::hcounter() const -> uint16 { return status.hcounter; }
+auto PPUcounter::vcounter() const -> uint { return status.vcounter; }
+auto PPUcounter::hcounter() const -> uint { return status.hcounter; }
+auto PPUcounter::lineclocks() const -> uint { return status.lineclocks; }
 
 auto PPUcounter::field(uint offset) const -> bool { return history.field[(history.index - (offset >> 1)) & 2047]; }
-auto PPUcounter::vcounter(uint offset) const -> uint16 { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
-auto PPUcounter::hcounter(uint offset) const -> uint16 { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
+auto PPUcounter::vcounter(uint offset) const -> uint { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
+auto PPUcounter::hcounter(uint offset) const -> uint { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
 
 //one PPU dot = 4 CPU clocks
 //
@@ -57,29 +57,15 @@ auto PPUcounter::hcounter(uint offset) const -> uint16 { return history.hcounter
 //dot 323 range = {1292, 1294, 1296}
 //dot 327 range = {1310, 1312, 1314}
 
-auto PPUcounter::hdot() const -> uint16 {
-  if(Region::NTSC() && status.interlace == 0 && vcounter() == 240 && field() == 1) {
+auto PPUcounter::hdot() const -> uint {
+  if(lineclocks() == 1360) {
     return (hcounter() >> 2);
   } else {
     return (hcounter() - ((hcounter() > 1292) << 1) - ((hcounter() > 1310) << 1)) >> 2;
   }
 }
 
-auto PPUcounter::lineclocks() const -> uint16 {
-  if(Region::NTSC() && status.interlace == 0 && vcounter() == 240 && field() == 1) return 1360;
-  return 1364;
-}
-
 auto PPUcounter::reset() -> void {
-  status.interlace = 0;
-  status.field     = 0;
-  status.vcounter  = 0;
-  status.hcounter  = 0;
-  history.index    = 0;
-
-  for(auto n : range(2048)) {
-    history.field   [n] = 0;
-    history.vcounter[n] = 0;
-    history.hcounter[n] = 0;
-  }
+  status = {};
+  history = {};
 }

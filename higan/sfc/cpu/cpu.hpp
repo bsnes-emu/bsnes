@@ -1,41 +1,26 @@
 struct CPU : Processor::WDC65816, Thread, PPUcounter {
-  auto interruptPending() const -> bool override;
-  auto pio() const -> uint8;
-  auto joylatch() const -> bool;
-  auto synchronizing() const -> bool override;
+  inline auto interruptPending() const -> bool override { return status.interruptPending; }
+  inline auto pio() const -> uint8 { return io.pio; }
+  inline auto synchronizing() const -> bool override { return scheduler.synchronizing(); }
 
   //cpu.cpp
-  CPU();
-
   static auto Enter() -> void;
   auto main() -> void;
   auto load(Markup::Node) -> bool;
   auto power(bool reset) -> void;
 
   //dma.cpp
-  auto dmaStep(uint clocks) -> void;
-  auto dmaTransferValid(uint8 bbus, uint24 abus) -> bool;
-  auto dmaAddressValid(uint24 abus) -> bool;
-  auto dmaRead(uint24 abus) -> uint8;
-  auto dmaWrite(bool valid, uint addr = 0, uint8 data = 0) -> void;
-  auto dmaTransfer(bool direction, uint8 bbus, uint24 abus) -> void;
+  inline auto dmaEnable() -> bool;
+  inline auto hdmaEnable() -> bool;
+  inline auto hdmaActive() -> bool;
 
-  inline auto dmaAddressB(uint n, uint channel) -> uint8;
-  inline auto dmaAddress(uint n) -> uint24;
-  inline auto hdmaAddress(uint n) -> uint24;
-  inline auto hdmaIndirectAddress(uint n) -> uint24;
-
-  inline auto dmaEnabledChannels() -> uint;
-  inline auto hdmaActive(uint n) -> bool;
-  inline auto hdmaActiveAfter(uint s) -> bool;
-  inline auto hdmaEnabledChannels() -> uint;
-  inline auto hdmaActiveChannels() -> uint;
+  inline auto dmaStep(uint clocks) -> void;
+  inline auto dmaFlush() -> void;
 
   auto dmaRun() -> void;
-  auto hdmaUpdate(uint n) -> void;
+  auto hdmaReset() -> void;
+  auto hdmaSetup() -> void;
   auto hdmaRun() -> void;
-  auto hdmaInitReset() -> void;
-  auto hdmaInit() -> void;
 
   //memory.cpp
   auto idle() -> void override;
@@ -45,12 +30,14 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto readDisassembler(uint24 addr) -> uint8 override;
 
   //io.cpp
-  auto readAPU(uint24 addr, uint8 data) -> uint8;
-  auto readCPU(uint24 addr, uint8 data) -> uint8;
-  auto readDMA(uint24 addr, uint8 data) -> uint8;
-  auto writeAPU(uint24 addr, uint8 data) -> void;
-  auto writeCPU(uint24 addr, uint8 data) -> void;
-  auto writeDMA(uint24 addr, uint8 data) -> void;
+  auto readRAM(uint24 address, uint8 data) -> uint8;
+  auto readAPU(uint24 address, uint8 data) -> uint8;
+  auto readCPU(uint24 address, uint8 data) -> uint8;
+  auto readDMA(uint24 address, uint8 data) -> uint8;
+  auto writeRAM(uint24 address, uint8 data) -> void;
+  auto writeAPU(uint24 address, uint8 data) -> void;
+  auto writeCPU(uint24 address, uint8 data) -> void;
+  auto writeDMA(uint24 address, uint8 data) -> void;
 
   //timing.cpp
   inline auto dmaCounter() const -> uint;
@@ -87,81 +74,76 @@ private:
   uint clockCounter;
 
   struct Status {
-    bool interruptPending;
+    uint clockCount = 0;
+    uint lineClocks = 0;
 
-    uint clockCount;
-    uint lineClocks;
+    bool irqLock = false;
 
-    //timing
-    bool irqLock;
+    uint dramRefreshPosition = 0;
+    bool dramRefreshed = false;
 
-    uint dramRefreshPosition;
-    bool dramRefreshed;
+    uint hdmaSetupPosition = 0;
+    bool hdmaSetupTriggered = false;
 
-    uint hdmaInitPosition;
-    bool hdmaInitTriggered;
+    uint hdmaPosition = 0;
+    bool hdmaTriggered = false;
 
-    uint hdmaPosition;
-    bool hdmaTriggered;
+    boolean nmiValid;
+    boolean nmiLine;
+    boolean nmiTransition;
+    boolean nmiPending;
+    boolean nmiHold;
 
-    bool nmiValid;
-    bool nmiLine;
-    bool nmiTransition;
-    bool nmiPending;
-    bool nmiHold;
+    boolean irqValid;
+    boolean irqLine;
+    boolean irqTransition;
+    boolean irqPending;
+    boolean irqHold;
 
-    bool irqValid;
-    bool irqLine;
-    bool irqTransition;
-    bool irqPending;
-    bool irqHold;
+    bool powerPending = false;
+    bool resetPending = false;
 
-    bool powerPending;
-    bool resetPending;
+    bool interruptPending = false;
 
-    //DMA
-    bool dmaActive;
-    uint dmaClocks;
-    bool dmaPending;
-    bool hdmaPending;
-    bool hdmaMode;  //0 = init, 1 = run
+    bool dmaActive = false;
+    uint dmaClocks = 0;
+    bool dmaPending = false;
+    bool hdmaPending = false;
+    bool hdmaMode = 0;  //0 = init, 1 = run
 
-    //auto joypad polling
-    bool autoJoypadActive;
-    bool autoJoypadLatch;
-    uint autoJoypadCounter;
+    bool autoJoypadActive = false;
+    bool autoJoypadLatch = false;
+    uint autoJoypadCounter = 0;
   } status;
 
   struct IO {
     //$2181-$2183
     uint17 wramAddress;
 
-    //$4016-$4017
-    bool joypadStrobeLatch;
-
     //$4200
-    bool nmiEnabled;
-    bool hirqEnabled;
-    bool virqEnabled;
-    bool autoJoypadPoll;
+    boolean hirqEnable;
+    boolean virqEnable;
+    boolean irqEnable;
+    boolean nmiEnable;
+    boolean autoJoypadPoll;
 
     //$4201
-    uint8 pio;
+    uint8 pio = 0xff;
 
     //$4202-$4203
-    uint8 wrmpya;
-    uint8 wrmpyb;
+    uint8 wrmpya = 0xff;
+    uint8 wrmpyb = 0xff;
 
     //$4204-$4206
-    uint16 wrdiva;
-    uint8 wrdivb;
+    uint16 wrdiva = 0xffff;
+    uint8 wrdivb = 0xff;
 
     //$4207-$420a
-    uint9 hirqPos;
-    uint9 virqPos;
+    uint9 hirqPos = 0x1ff;
+    uint9 virqPos = 0x1ff;
 
     //$420d
-    uint romSpeed;
+    uint romSpeed = 8;
 
     //$4214-$4217
     uint16 rddiv;
@@ -175,34 +157,54 @@ private:
   } io;
 
   struct ALU {
-    uint mpyctr;
-    uint divctr;
-    uint shift;
+    uint mpyctr = 0;
+    uint divctr = 0;
+    uint shift = 0;
   } alu;
 
   struct Channel {
+    //dma.cpp
+    inline auto step(uint clocks) -> void;
+    inline auto edge() -> void;
+    inline auto valid(uint24 address) -> bool;
+    inline auto read(uint24 address, bool valid) -> uint8;
+    inline auto read(uint24 address) -> uint8;
+    inline auto flush() -> void;
+    inline auto write(uint24 address, uint8 data, bool valid) -> void;
+    inline auto write(uint24 address, uint8 data) -> void;
+    inline auto transfer(uint24 address, uint2 index) -> void;
+
+    inline auto dmaRun() -> void;
+    inline auto hdmaActive() -> bool;
+    inline auto hdmaFinished() -> bool;
+    inline auto hdmaReset() -> void;
+    inline auto hdmaSetup() -> void;
+    inline auto hdmaReload() -> void;
+    inline auto hdmaTransfer() -> void;
+    inline auto hdmaAdvance() -> void;
+
     //$420b
-    bool dmaEnabled;
+    uint1 dmaEnable;
 
     //$420c
-    bool hdmaEnabled;
+    uint1 hdmaEnable;
 
     //$43x0
-    bool direction;
-    bool indirect;
-    bool unused;
-    bool reverseTransfer;
-    bool fixedTransfer;
-    uint3 transferMode;
+    uint3 transferMode = 7;
+    uint1 fixedTransfer = 1;
+    uint1 reverseTransfer = 1;
+    uint1 unused = 1;
+    uint1 indirect = 1;
+    uint1 direction = 1;
 
     //$43x1
-    uint8 targetAddress;
+    uint8 targetAddress = 0xff;
 
     //$43x2-$43x3
-    uint16 sourceAddress;
+    uint16 sourceAddress = 0xffff;
 
     //$43x4
-    uint8 sourceBank;
+    uint8 sourceBank = 0xff;
 
     //$43x5-$43x6
     union {
@@ -211,28 +213,30 @@ private:
     };
 
     //$43x7
-    uint8 indirectBank;
+    uint8 indirectBank = 0xff;
 
     //$43x8-$43x9
-    uint16 hdmaAddress;
+    uint16 hdmaAddress = 0xffff;
 
     //$43xa
-    uint8 lineCounter;
+    uint8 lineCounter = 0xff;
 
     //$43xb/$43xf
-    uint8 unknown;
+    uint8 unknown = 0xff;
 
     //internal state
-    bool hdmaCompleted;
-    bool hdmaDoTransfer;
+    uint1 hdmaCompleted;
+    uint1 hdmaDoTransfer;
 
-    Channel() : transferSize(0) {}
-  } channel[8];
+    maybe<Channel&> next;
+
+    Channel() : transferSize(0xffff) {}
+  } channels[8];
 
   struct Pipe {
-    bool valid;
-    uint addr;
-    uint8 data;
+    uint1  valid;
+    uint24 address;
+    uint8  data;
   } pipe;
 };
 
