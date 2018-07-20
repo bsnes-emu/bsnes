@@ -465,7 +465,7 @@ static void reset_ram(GB_gameboy_t *gb)
             }
             break;
 #if 0
-        /* Not emulated yet, for documentation only*/
+        /* Not emulated yet, for documentation only */
         case GB_MODEL_SGB2:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = 0x55;
