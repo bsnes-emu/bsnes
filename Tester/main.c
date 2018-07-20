@@ -15,6 +15,12 @@
 
 #include <Core/gb.h>
 
+/* Disable all randomness during automatic tests */
+long random(void)
+{
+    return 0;
+}
+
 static bool running = false;
 static char *filename;
 static char *bmp_filename;
