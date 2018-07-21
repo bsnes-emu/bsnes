@@ -9,9 +9,6 @@ Presentation::Presentation() {
   systemsMenu.setText("Systems");
 
   systemMenu.setVisible(false);
-  resetSystem.setText("Soft Reset").onActivate([&] { program->softReset(); });
-  powerSystem.setText("Power Cycle").onActivate([&] { program->powerCycle(); });
-  unloadSystem.setText("Unload").onActivate([&] { program->unloadMedium(); });
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
@@ -165,44 +162,86 @@ Presentation::Presentation() {
   #endif
 }
 
-auto Presentation::updateEmulator() -> void {
+auto Presentation::updateEmulatorMenu() -> void {
   if(!emulator) return;
-  inputPort1.setVisible(false).reset();
-  inputPort2.setVisible(false).reset();
-  inputPort3.setVisible(false).reset();
 
-  for(auto n : range(emulator->ports.size())) {
-    if(n >= 3) break;
-    auto& port = emulator->ports[n];
-    auto& menu = (n == 0 ? inputPort1 : n == 1 ? inputPort2 : inputPort3);
+  systemMenu.reset();
+  for(auto& port : emulator->ports) {
+    Menu menu{&systemMenu};
+    menu.setProperty("portID", port.id);
     menu.setText(port.name);
+    if(port.name.beginsWith("Expansion") || port.name.beginsWith("Extension")) {
+      menu.setIcon(Icon::Device::Storage);
+    } else {
+      menu.setIcon(Icon::Device::Joypad);
+    }
+
+    auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
+    auto deviceName = settings(path).text();
+    auto deviceID = emulator->connected(port.id);
 
     Group devices;
     for(auto& device : port.devices) {
       MenuRadioItem item{&menu};
-      item.setText(device.name).onActivate([=] {
-        auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
-        settings[path].setValue(device.name);
+      item.setProperty("deviceID", device.id);
+      item.setText(device.name);
+      item.onActivate([=] {
+        settings(path).setValue(device.name);
         emulator->connect(port.id, device.id);
+        updateEmulatorDeviceSelections();
       });
       devices.append(item);
+
+      if(deviceName == device.name) item.doActivate();
+      if(!deviceName && deviceID == device.id) item.doActivate();
     }
-    if(devices.objectCount() > 1) {
-      auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
-      auto device = settings(path).text();
-      for(auto item : devices.objects<MenuRadioItem>()) {
-        if(item.text() == device) item.setChecked();
-      }
-      menu.setVisible();
+
+    if(devices.objectCount() == 0) {
+      menu.setVisible(false);
     }
   }
 
-  systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible() || inputPort3.visible());
-  resetSystem.setVisible(emulator->information.resettable);
+  if(systemMenu.actionCount()) {
+    systemMenu.append(MenuSeparator());
+  }
 
-  emulator->set("Blur Emulation", blurEmulation.checked());
-  emulator->set("Color Emulation", colorEmulation.checked());
-  emulator->set("Scanline Emulation", scanlineEmulation.checked());
+  if(emulator->information.resettable) {
+    systemMenu.append(MenuItem().setText("Soft Reset").setIcon(Icon::Action::Refresh).onActivate([&] {
+      program->softReset();
+    }));
+  }
+
+  systemMenu.append(MenuItem().setText("Power Cycle").setIcon(Icon::Action::Refresh).onActivate([&] {
+    program->powerCycle();
+  }));
+
+  systemMenu.append(MenuItem().setText("Unload").setIcon(Icon::Media::Eject).onActivate([&] {
+    program->unloadMedium();
+  }));
+
+  updateEmulatorDeviceSelections();
+}
+
+auto Presentation::updateEmulatorDeviceSelections() -> void {
+  if(!emulator) return;
+
+  for(auto& port : emulator->ports) {
+    for(auto& action : systemMenu->actions()) {
+      auto portID = action.property("portID");
+      if(portID && portID.natural() == port.id) {
+        if(auto menu = action.cast<Menu>()) {
+          auto deviceID = emulator->connected(port.id);
+          for(auto& action : menu.actions()) {
+            if(auto item = action.cast<MenuRadioItem>()) {
+              if(item.property("deviceID").natural() == deviceID) {
+                item.setChecked();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {

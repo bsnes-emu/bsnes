@@ -58,6 +58,7 @@ struct Interface {
   virtual auto unload() -> void {}
 
   //system interface
+  virtual auto connected(uint port) -> uint { return 0; }
   virtual auto connect(uint port, uint device) -> void {}
   virtual auto power() -> void {}
   virtual auto reset() -> void {}

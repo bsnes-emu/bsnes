@@ -94,20 +94,6 @@ auto Program::rotateDisplay() -> void {
   showMessage("Display rotated");
 }
 
-auto Program::connectDevices() -> void {
-  if(!emulator) return;
-  for(auto& port : emulator->ports) {
-    auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
-    auto name = settings(path).text();
-    for(auto& device : port.devices) {
-      if(device.name == name) {
-        emulator->connect(port.id, device.id);
-        break;
-      }
-    }
-  }
-}
-
 auto Program::showMessage(const string& text) -> void {
   statusTime = time(nullptr);
   statusMessage = text;

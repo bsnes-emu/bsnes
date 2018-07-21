@@ -21,38 +21,7 @@ Presentation::Presentation() {
   controllerPort1.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 1"));
   controllerPort2.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 2"));
   expansionPort.setIcon(Icon::Device::Storage).setText(tr("Expansion Port"));
-  for(auto& port : emulator->ports) {
-    Menu* menu = nullptr;
-    if(port.name == "Controller Port 1") menu = &controllerPort1;
-    if(port.name == "Controller Port 2") menu = &controllerPort2;
-    if(port.name == "Expansion Port") menu = &expansionPort;
-    if(!menu) continue;
-
-    Group devices;
-    for(auto& device : port.devices) {
-      if(port.name != "Expansion Port" && device.name == "None") continue;
-      if(port.name == "Expansion Port" && device.name == "21fx") continue;
-      MenuRadioItem item{menu};
-      item.setText(tr(device.name)).onActivate([=] {
-        auto path = string{"Emulator/", port.name}.replace(" ", "");
-        settings(path).setValue(device.name);
-        emulator->connect(port.id, device.id);
-      });
-      devices.append(item);
-    }
-    auto path = string{"Emulator/", port.name}.replace(" ", "");
-    auto device = settings(path).text();
-    bool found = false;
-    if(devices.objectCount() > 1) {
-      for(auto item : devices.objects<MenuRadioItem>()) {
-        if(item.text() == device) item.setChecked(), found = true;
-      }
-    }
-    //select the first device when a new settings file is being created
-    if(devices.objectCount() && !found) {
-      devices.objects<MenuRadioItem>()(0).doActivate();
-    }
-  }
+  updateDeviceMenu();
   quit.setIcon(Icon::Action::Quit).setText(tr("Quit")).onActivate([&] { program->quit(); });
 
   settingsMenu.setText(tr("Settings"));
@@ -369,6 +338,64 @@ auto Presentation::toggleFullscreenMode() -> void {
     }
     resizeWindow();
     setCentered();
+  }
+}
+
+auto Presentation::updateDeviceMenu() -> void {
+  controllerPort1.reset();
+  controllerPort2.reset();
+  expansionPort.reset();
+
+  for(auto& port : emulator->ports) {
+    Menu* menu = nullptr;
+    if(port.name == "Controller Port 1") menu = &controllerPort1;
+    if(port.name == "Controller Port 2") menu = &controllerPort2;
+    if(port.name == "Expansion Port") menu = &expansionPort;
+    if(!menu) continue;
+
+    auto path = string{"Emulator/", port.name}.replace(" ", "");
+    auto deviceName = settings(path).text();
+    auto deviceID = emulator->connected(port.id);
+
+    Group devices;
+    for(auto& device : port.devices) {
+      if(port.name == "Expansion Port" && device.name == "21fx") continue;
+
+      MenuRadioItem item{menu};
+      item.setProperty("deviceID", device.id);
+      item.setText(tr(device.name));
+      item.onActivate([=] {
+        settings(path).setValue(device.name);
+        emulator->connect(port.id, device.id);
+        updateDeviceSelections();
+      });
+      devices.append(item);
+
+      if(deviceName == device.name) item.doActivate();
+      if(!deviceName && deviceID == device.id) item.doActivate();
+    }
+  }
+
+  updateDeviceSelections();
+}
+
+auto Presentation::updateDeviceSelections() -> void {
+  for(auto& port : emulator->ports) {
+    Menu* menu = nullptr;
+    if(port.name == "Controller Port 1") menu = &controllerPort1;
+    if(port.name == "Controller Port 2") menu = &controllerPort2;
+    if(port.name == "Expansion Port") menu = &expansionPort;
+    if(!menu) continue;
+
+    auto deviceID = emulator->connected(port.id);
+    for(auto& action : menu->actions()) {
+      if(auto item = action.cast<MenuRadioItem>()) {
+        if(item.property("deviceID").natural() == deviceID) {
+          item.setChecked();
+          break;
+        }
+      }
+    }
   }
 }
 

@@ -33,6 +33,8 @@ struct Presentation : Window {
   auto resizeWindow() -> void;
   auto updateStatus() -> void;
   auto toggleFullscreenMode() -> void;
+  auto updateDeviceMenu() -> void;
+  auto updateDeviceSelections() -> void;
   auto updateSizeMenu() -> void;
   auto clearRecentGames() -> void;
   auto updateRecentGames() -> void;

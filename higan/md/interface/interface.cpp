@@ -116,6 +116,13 @@ auto Interface::unload() -> void {
   system.unload();
 }
 
+auto Interface::connected(uint port) -> uint {
+  if(port == ID::Port::Controller1) return settings.controllerPort1;
+  if(port == ID::Port::Controller2) return settings.controllerPort2;
+  if(port == ID::Port::Extension) return settings.extensionPort;
+  return 0;
+}
+
 auto Interface::connect(uint port, uint device) -> void {
   if(port == ID::Port::Controller1) controllerPort1.connect(settings.controllerPort1 = device);
   if(port == ID::Port::Controller2) controllerPort2.connect(settings.controllerPort2 = device);

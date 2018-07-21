@@ -32,6 +32,7 @@ struct Interface : Emulator::Interface {
   auto save() -> void override;
   auto unload() -> void override;
 
+  auto connected(uint port) -> uint override;
   auto connect(uint port, uint device) -> void override;
   auto power() -> void override;
   auto run() -> void override;
@@ -59,7 +60,7 @@ struct SuperGrafxInterface : Interface {
 };
 
 struct Settings {
-  uint controllerPort = 0;
+  uint controllerPort = ID::Device::Gamepad;
 };
 
 extern Settings settings;

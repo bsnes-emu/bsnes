@@ -18,7 +18,6 @@ auto Program::load() -> void {
           return showMessage("Game loading cancelled");
         }
       }
-      updateInputDevices();
       hackCompatibility();
       emulator->power();
       if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {

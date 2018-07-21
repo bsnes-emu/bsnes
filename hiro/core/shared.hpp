@@ -15,6 +15,12 @@
   template<typename T, typename... P> Name(T* parent, P&&... p) : Name() { \
     if(parent) (*parent)->append(*this, std::forward<P>(p)...); \
   } \
+  template<typename T> auto cast() -> T { \
+    if(auto pointer = dynamic_cast<typename T::internalType*>(data())) { \
+      if(auto shared = pointer->instance.acquire()) return T(shared); \
+    } \
+    return T(); \
+  } \
   auto enabled(bool recursive = false) const { return self().enabled(recursive); } \
   auto focused() const { return self().focused(); } \
   auto font(bool recursive = false) const { return self().font(recursive); } \
@@ -52,13 +58,6 @@
 struct Object : sObject {
   DeclareSharedObject(Object)
   using internalType = mObject;
-
-  template<typename T> auto cast() -> T {
-    if(auto pointer = dynamic_cast<typename T::internalType*>(data())) {
-      if(auto shared = pointer->instance.acquire()) return T(shared);
-    }
-    return T();
-  }
 };
 #endif
 

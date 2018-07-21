@@ -36,6 +36,7 @@ struct Interface : Emulator::Interface {
   auto save() -> void override;
   auto unload() -> void override;
 
+  auto connected(uint port) -> uint override;
   auto connect(uint port, uint device) -> void override;
   auto power() -> void override;
   auto reset() -> void override;
@@ -52,9 +53,9 @@ struct Interface : Emulator::Interface {
 };
 
 struct Settings {
-  uint controllerPort1 = 0;
-  uint controllerPort2 = 0;
-  uint extensionPort = 0;
+  uint controllerPort1 = ID::Device::ControlPad;
+  uint controllerPort2 = ID::Device::ControlPad;
+  uint extensionPort = ID::Device::None;
 };
 
 extern Settings settings;

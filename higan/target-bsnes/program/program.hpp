@@ -74,7 +74,6 @@ struct Program : Emulator::Platform {
 
   //input.cpp
   auto updateInputDriver() -> void;
-  auto updateInputDevices() -> void;
 
   //utility.cpp
   auto showMessage(string text) -> void;

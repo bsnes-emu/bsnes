@@ -15,16 +15,3 @@ auto Program::updateInputDriver() -> void {
     return updateInputDriver();
   }
 }
-
-auto Program::updateInputDevices() -> void {
-  for(auto& port : emulator->ports) {
-    auto path = string{"Emulator/", port.name}.replace(" ", "");
-    auto name = settings(path).text();
-    for(auto& device : port.devices) {
-      if(device.name == name) {
-        emulator->connect(port.id, device.id);
-        break;
-      }
-    }
-  }
-}

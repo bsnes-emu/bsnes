@@ -48,6 +48,7 @@ struct Interface : Emulator::Interface {
   auto save() -> void override;
   auto unload() -> void override;
 
+  auto connected(uint port) -> uint override;
   auto connect(uint port, uint device) -> void override;
   auto power() -> void override;
   auto reset() -> void override;
@@ -76,9 +77,9 @@ struct Settings {
   bool colorEmulation = true;
   bool scanlineEmulation = true;
 
-  uint controllerPort1 = 0;
-  uint controllerPort2 = 0;
-  uint expansionPort = 0;
+  uint controllerPort1 = ID::Device::Gamepad;
+  uint controllerPort2 = ID::Device::Gamepad;
+  uint expansionPort = ID::Device::None;
   bool random = true;
 };
 

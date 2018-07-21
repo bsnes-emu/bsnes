@@ -85,6 +85,7 @@ auto System::power() -> void {
     Emulator::video.reset(interface);
     Emulator::video.setPalette();
     Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
+
     Emulator::audio.reset(interface);
   }
 

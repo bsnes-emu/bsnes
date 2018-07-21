@@ -83,6 +83,11 @@ auto Interface::unload() -> void {
   system.unload();
 }
 
+auto Interface::connected(uint port) -> uint {
+  if(port == ID::Port::Controller) return settings.controllerPort;
+  return 0;
+}
+
 auto Interface::connect(uint port, uint device) -> void {
   if(port == ID::Port::Controller) controllerPort.connect(settings.controllerPort = device);
 }

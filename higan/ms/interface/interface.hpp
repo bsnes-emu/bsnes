@@ -31,7 +31,6 @@ struct Interface : Emulator::Interface {
   auto save() -> void override;
   auto unload() -> void override;
 
-  auto connect(uint port, uint device) -> void override {}
   auto power() -> void override;
   auto run() -> void override;
 

@@ -20,13 +20,16 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
   mediumPaths.append(locate({"systems/", medium.name, ".sys/"}));
 
   inputManager->bind(emulator = &interface);
+  presentation->updateEmulatorMenu();
   if(!emulator->load(medium.id)) {
     emulator = nullptr;
     mediumPaths.reset();
     return;
   }
-  connectDevices();
   emulator->power();
+  emulator->set("Blur Emulation", presentation->blurEmulation.checked());
+  emulator->set("Color Emulation", presentation->colorEmulation.checked());
+  emulator->set("Scanline Emulation", presentation->scanlineEmulation.checked());
   updateAudioDriver();
   updateAudioEffects();
 
@@ -34,7 +37,6 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
   presentation->setTitle(emulator->title());
   presentation->systemMenu.setText(medium.name).setVisible(true);
   presentation->toolsMenu.setVisible(true);
-  presentation->updateEmulator();
   toolsManager->cheatEditor.loadCheats();
   toolsManager->stateManager.doRefresh();
   toolsManager->manifestViewer.doRefresh();
