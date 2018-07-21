@@ -16,13 +16,28 @@ auto Stream::setFrequency(double inputFrequency, maybe<double> outputFrequency) 
   if(outputFrequency) this->outputFrequency = outputFrequency();
 
   for(auto& channel : channels) {
+    channel.nyquist.reset();
     channel.resampler.reset(this->inputFrequency, this->outputFrequency);
+  }
+
+  if(this->inputFrequency >= this->outputFrequency * 2) {
+    //add a low-pass filter to prevent aliasing during resampling
+    double cutoffFrequency = min(25000.0, this->outputFrequency / 2.0 - 2000.0);
+    for(auto& channel : channels) {
+      uint passes = 3;
+      for(uint pass : range(passes)) {
+        DSP::IIR::Biquad filter;
+        double q = DSP::IIR::Biquad::butterworth(passes * 2, pass);
+        filter.reset(DSP::IIR::Biquad::Type::LowPass, cutoffFrequency, this->inputFrequency, q);
+        channel.nyquist.append(filter);
+      }
+    }
   }
 }
 
 auto Stream::addFilter(Filter::Order order, Filter::Type type, double cutoffFrequency, uint passes) -> void {
   for(auto& channel : channels) {
-    for(auto pass : range(passes)) {
+    for(uint pass : range(passes)) {
       Filter filter{order};
 
       if(order == Filter::Order::First) {
@@ -62,6 +77,9 @@ auto Stream::write(const double samples[]) -> void {
       case Filter::Order::First: sample = filter.onePole.process(sample); break;
       case Filter::Order::Second: sample = filter.biquad.process(sample); break;
       }
+    }
+    for(auto& filter : channels[c].nyquist) {
+      sample = filter.process(sample);
     }
     channels[c].resampler.write(sample);
   }

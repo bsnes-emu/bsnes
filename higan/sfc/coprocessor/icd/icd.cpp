@@ -47,7 +47,6 @@ auto ICD::power() -> void {
   create(ICD::Enter, (Frequency ? Frequency : system.cpuFrequency()) / 5.0);
   stream = Emulator::audio.createStream(2, frequency() / 2.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
-  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   r6003 = 0x00;
   r6004 = 0xff;
@@ -91,7 +90,7 @@ auto ICD::reset() -> void {
   writeAddress = 0;
 
   packetSize = 0;
-  joypID = 0;
+  joypID = 3;
   joyp15Lock = 0;
   joyp14Lock = 0;
   pulseLock = true;

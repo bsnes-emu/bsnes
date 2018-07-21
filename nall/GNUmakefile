@@ -40,7 +40,9 @@ ifeq ($(platform),)
 endif
 
 flags.c      = -x c -std=c11
+flags.h      = -x c-header -std=c11
 flags.cpp    = -x c++ -std=c++14
+flags.hpp    = -x c++-header -std=c++14
 flags.objc   = -x objective-c -std=c11
 flags.objcpp = -x objective-c++ -std=c++14
 flags.deps   = -MMD -MP -MF $(@:.o=.d)
@@ -50,6 +52,7 @@ ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
     flags.cpp := -x c++ -std=gnu++14
+    flags.hpp := -x c++-header -std=gnu++14
   else ifeq ($(platform),macos)
     compiler := clang++
   else ifeq ($(platform),linux)
@@ -133,7 +136,10 @@ endif
 
 # paths
 prefix := $(HOME)/.local
-object.path := obj
+
+ifeq ($(object.path),)
+  object.path := obj
+endif
 
 # rules
 default: all;
@@ -155,7 +161,11 @@ compile = \
       $(compiler) $(flags.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
    ,$(if $(filter %.cpp,$<), \
       $(compiler) $(flags.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
-    )) \
+   ,$(if $(filter %.h,$<), \
+      $(compiler) $(flags.h)   $(flags) $1 -c $< -o $@ \
+   ,$(if $(filter %.hpp,$<), \
+      $(compiler) $(flags.hpp) $(flags) $1 -c $< -o $@ \
+    )))) \
   )
 
 # function rwildcard(directory, pattern)

@@ -131,19 +131,19 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Blur Emulation" && value.is<bool>()) {
     settings.blurEmulation = value.get<bool>();
-    system.configureVideoEffects();
+    Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
     return true;
   }
 
   if(name == "Color Emulation" && value.is<bool>()) {
     settings.colorEmulation = value.get<bool>();
-    system.configureVideoPalette();
+    Emulator::video.setPalette();
     return true;
   }
 
   if(name == "Rotate Display" && value.is<bool>()) {
     settings.rotateLeft = value.get<bool>();
-    system.configureVideoEffects();
+    Emulator::video.setEffect(Emulator::Video::Effect::RotateLeft, settings.rotateLeft);
     return true;
   }
 

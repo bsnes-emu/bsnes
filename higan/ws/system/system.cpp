@@ -6,7 +6,6 @@ System system;
 Scheduler scheduler;
 Cheat cheat;
 #include "io.cpp"
-#include "video.cpp"
 #include "serialization.cpp"
 
 auto System::init() -> void {
@@ -61,13 +60,12 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  Emulator::video.reset();
-  Emulator::video.setInterface(interface);
-  configureVideoPalette();
-  configureVideoEffects();
+  Emulator::video.reset(interface);
+  Emulator::video.setPalette();
+  Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
+  Emulator::video.setEffect(Emulator::Video::Effect::RotateLeft, settings.rotateLeft);
 
-  Emulator::audio.reset();
-  Emulator::audio.setInterface(interface);
+  Emulator::audio.reset(interface);
 
   scheduler.reset();
   bus.power();

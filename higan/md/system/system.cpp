@@ -62,12 +62,10 @@ auto System::unload() -> void {
 }
 
 auto System::power(bool reset) -> void {
-  Emulator::video.reset();
-  Emulator::video.setInterface(interface);
+  Emulator::video.reset(interface);
   Emulator::video.setPalette();
 
-  Emulator::audio.reset();
-  Emulator::audio.setInterface(interface);
+  Emulator::audio.reset(interface);
 
   scheduler.reset();
   cartridge.power();

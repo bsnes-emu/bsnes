@@ -257,14 +257,14 @@ auto pTableView::_doDataFunc(GtkTreeViewColumn* gtkColumn, GtkCellRenderer* rend
               pango_font_description_free(font);
               if(auto color = cell->foregroundColor(true)) {
                 auto gdkColor = CreateColor(color);
-                g_object_set(G_OBJECT(renderer), "foreground-gdk", &gdkColor, nullptr);
+                if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "foreground-gdk", &gdkColor, nullptr);
               } else {
                 g_object_set(G_OBJECT(renderer), "foreground-set", false, nullptr);
               }
             }
             if(auto color = cell->backgroundColor(true)) {
               auto gdkColor = CreateColor(color);
-              g_object_set(G_OBJECT(renderer), "cell-background-gdk", &gdkColor, nullptr);
+              if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "cell-background-gdk", &gdkColor, nullptr);
             } else {
               g_object_set(G_OBJECT(renderer), "cell-background-set", false, nullptr);
             }

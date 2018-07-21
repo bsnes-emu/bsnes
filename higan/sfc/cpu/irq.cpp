@@ -18,8 +18,9 @@ auto CPU::pollInterrupts() -> void {
 
   //IRQ test
   if(status.irqValid.raise(io.irqEnable
-  && (!io.virqEnable || vcounter(10) == io.virqPos)
-  && (!io.hirqEnable || hcounter(10) == io.hirqPos + 1 << 2)
+  && (!io.virqEnable || vcounter(10) == io.vtime)
+  && (!io.hirqEnable || hcounter(10) == io.htime)
+  && (vcounter(6) || hcounter(6))  //IRQs cannot trigger on last dot of fields
   )) status.irqLine = status.irqHold = true;  //hold /IRQ for four cycles
 }
 

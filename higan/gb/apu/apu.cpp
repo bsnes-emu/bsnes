@@ -56,7 +56,6 @@ auto APU::power() -> void {
   if(!Model::SuperGameBoy()) {
     stream = Emulator::audio.createStream(2, frequency());
     stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
-    stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
   }
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 

@@ -58,7 +58,6 @@ Settings::Settings() {
   set("Audio/Mute", false);
   set("Audio/Volume", 100);
   set("Audio/Balance", 50);
-  set("Audio/Reverb/Enable", false);
 
   set("Input/Driver", ruby::Input::safestDriver());
   set("Input/Frequency", 5);

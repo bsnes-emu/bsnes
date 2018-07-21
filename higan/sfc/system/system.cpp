@@ -91,12 +91,10 @@ auto System::power(bool reset) -> void {
   hacks.fastPPU = settings.fastPPU;
   hacks.fastDSP = settings.fastDSP;
 
-  Emulator::video.reset();
-  Emulator::video.setInterface(interface);
+  Emulator::video.reset(interface);
   Emulator::video.setPalette();
 
-  Emulator::audio.reset();
-  Emulator::audio.setInterface(interface);
+  Emulator::audio.reset(interface);
 
   random.entropy(Random::Entropy::Low);
 

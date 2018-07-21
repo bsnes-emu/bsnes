@@ -164,7 +164,6 @@ auto pWindow::setMaximumSize(Size size) -> void {
   static auto maximumSize = qtWindow->maximumSize();
 
   if(size) {
-    //once this is called, no matter what the size is, Qt will no longer allow the window to be maximized
     qtWindow->setMaximumSize(size.width(), size.height() + _menuHeight() + _statusHeight());
   } else {
     qtWindow->setMaximumSize(maximumSize);

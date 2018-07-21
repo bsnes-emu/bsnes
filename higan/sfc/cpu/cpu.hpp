@@ -139,8 +139,8 @@ private:
     uint8 wrdivb = 0xff;
 
     //$4207-$420a
-    uint9 hirqPos = 0x1ff;
-    uint9 virqPos = 0x1ff;
+    uint12 htime = 0x1ff + 1 << 2;
+    uint9  vtime = 0x1ff;
 
     //$420d
     uint romSpeed = 8;

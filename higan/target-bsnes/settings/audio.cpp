@@ -52,12 +52,6 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     balanceValue.setText(value);
     program->updateAudioEffects();
   }).doChange();
-  reverb.setText("Reverb").setChecked(settings["Audio/Reverb"].boolean()).onToggle([&] {
-    settings["Audio/Reverb"].setValue(reverb.checked());
-    program->updateAudioEffects();
-  });
-  //todo: does not work properly with Super Game Boy
-  reverb.setVisible(false);
 }
 
 auto AudioSettings::updateDevice() -> void {

@@ -109,7 +109,6 @@ struct AudioSettings : TabFrameItem {
       Label balanceLabel{&balanceLayout, Size{80, 0}};
       Label balanceValue{&balanceLayout, Size{50, 0}};
       HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
-    CheckLabel reverbEnable{&layout, Size{~0, 0}};
 
   auto updateDevice() -> void;
   auto updateEffects(bool initializing = false) -> void;

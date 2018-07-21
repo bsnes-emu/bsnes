@@ -5,30 +5,14 @@ namespace Emulator {
 #include "stream.cpp"
 Audio audio;
 
-auto Audio::reset(maybe<uint> channels_, maybe<double> frequency_) -> void {
-  interface = nullptr;
-
-  if(channels_) channels = channels_();
-  if(frequency_) frequency = frequency_();
-
-  streams.reset();
-  reverb.reset();
-
-  reverb.resize(channels);
-  for(auto c : range(channels)) {
-    reverb[c].resize(7);
-    reverb[c][0].resize(1229);
-    reverb[c][1].resize(1559);
-    reverb[c][2].resize(1907);
-    reverb[c][3].resize(4057);
-    reverb[c][4].resize(8117);
-    reverb[c][5].resize(8311);
-    reverb[c][6].resize(9931);
-  }
+Audio::~Audio() {
+  reset(nullptr);
 }
 
-auto Audio::setInterface(Interface* interface) -> void {
+auto Audio::reset(Interface* interface) -> void {
   this->interface = interface;
+  streams.reset();
+  channels = 0;
 }
 
 auto Audio::setFrequency(double frequency) -> void {
@@ -46,11 +30,8 @@ auto Audio::setBalance(double balance) -> void {
   this->balance = balance;
 }
 
-auto Audio::setReverb(bool enabled) -> void {
-  this->reverbEnable = enabled;
-}
-
 auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stream> {
+  this->channels = max(this->channels, channels);
   shared_pointer<Stream> stream = new Stream;
   stream->reset(channels, frequency, this->frequency);
   streams.append(stream);
@@ -67,7 +48,7 @@ auto Audio::process() -> void {
     for(auto& sample : samples) sample = 0.0;
 
     for(auto& stream : streams) {
-      double buffer[16];
+      double buffer[channels];
       uint length = stream->read(buffer), offset = 0;
 
       for(auto& sample : samples) {
@@ -78,13 +59,6 @@ auto Audio::process() -> void {
 
     for(auto c : range(channels)) {
       samples[c] = max(-1.0, min(+1.0, samples[c] * volume));
-
-      if(reverbEnable) {
-        samples[c] *= 0.125;
-        for(auto n : range(7)) samples[c] += 0.125 * reverb[c][n].last();
-        for(auto n : range(7)) reverb[c][n].write(samples[c]);
-        samples[c] *= 8.000;
-      }
     }
 
     if(channels == 2) {

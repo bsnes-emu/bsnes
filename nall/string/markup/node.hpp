@@ -63,6 +63,12 @@ struct Node {
   auto natural() const -> uintmax { return text().natural(); }
   auto real() const -> double { return text().real(); }
 
+  auto text(const string& fallback) const -> string { return bool(*this) ? text() : fallback; }
+  auto boolean(bool fallback) const -> bool { return bool(*this) ? boolean() : fallback; }
+  auto integer(intmax fallback) const -> intmax { return bool(*this) ? integer() : fallback; }
+  auto natural(uintmax fallback) const -> uintmax { return bool(*this) ? natural() : fallback; }
+  auto real(double fallback) const -> double { return bool(*this) ? real() : fallback; }
+
   auto setName(const string& name = "") -> Node& { shared->_name = name; return *this; }
   auto setValue(const string& value = "") -> Node& { shared->_value = value; return *this; }
 

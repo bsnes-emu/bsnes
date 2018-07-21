@@ -174,19 +174,23 @@ auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
     return;
 
   case 0x4207:  //HTIMEL
-    io.hirqPos.bits(0,7) = data;
+    io.htime = (io.htime >> 2) - 1;
+    io.htime.bits(0,7) = data;
+    io.htime = (io.htime + 1) << 2;
     return;
 
   case 0x4208:  //HTIMEH
-    io.hirqPos.bit(8) = data.bit(0);
+    io.htime = (io.htime >> 2) - 1;
+    io.htime.bit(8) = data.bit(0);
+    io.htime = (io.htime + 1) << 2;
     return;
 
   case 0x4209:  //VTIMEL
-    io.virqPos.bits(0,7) = data;
+    io.vtime.bits(0,7) = data;
     return;
 
   case 0x420a:  //VTIMEH
-    io.virqPos.bit(8) = data.bit(0);
+    io.vtime.bit(8) = data.bit(0);
     return;
 
   case 0x420b:  //DMAEN

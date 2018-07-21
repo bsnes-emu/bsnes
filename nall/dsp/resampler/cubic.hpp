@@ -1,26 +1,27 @@
 #pragma once
 
 #include <nall/queue.hpp>
+#include <nall/dsp/dsp.hpp>
 
 namespace nall { namespace DSP { namespace Resampler {
 
 struct Cubic {
-  inline auto reset(double inputFrequency, double outputFrequency, uint queueSize = 0) -> void;
+  inline auto reset(real inputFrequency, real outputFrequency, uint queueSize = 0) -> void;
   inline auto pending() const -> bool { return samples.pending(); }
-  inline auto read() -> double { return samples.read(); }
-  inline auto write(double sample) -> void;
+  inline auto read() -> real { return samples.read(); }
+  inline auto write(real sample) -> void;
 
 private:
-  double inputFrequency;
-  double outputFrequency;
+  real inputFrequency;
+  real outputFrequency;
 
-  double ratio;
-  double fraction;
-  double history[4];
-  queue<double> samples;
+  real ratio;
+  real fraction;
+  real history[4];
+  queue<real> samples;
 };
 
-auto Cubic::reset(double inputFrequency, double outputFrequency, uint queueSize) -> void {
+auto Cubic::reset(real inputFrequency, real outputFrequency, uint queueSize) -> void {
   this->inputFrequency = inputFrequency;
   this->outputFrequency = outputFrequency;
   if(!queueSize) queueSize = outputFrequency * 0.02;  //20ms
@@ -31,7 +32,7 @@ auto Cubic::reset(double inputFrequency, double outputFrequency, uint queueSize)
   samples.resize(queueSize);
 }
 
-auto Cubic::write(double sample) -> void {
+auto Cubic::write(real sample) -> void {
   auto& mu = fraction;
   auto& s = history;
 
@@ -41,10 +42,10 @@ auto Cubic::write(double sample) -> void {
   s[3] = sample;
 
   while(mu <= 1.0) {
-    double A = s[3] - s[2] - s[0] + s[1];
-    double B = s[0] - s[1] - A;
-    double C = s[2] - s[0];
-    double D = s[1];
+    real A = s[3] - s[2] - s[0] + s[1];
+    real B = s[0] - s[1] - A;
+    real C = s[2] - s[0];
+    real D = s[1];
 
     samples.write(A * mu * mu * mu + B * mu * mu + C * mu + D);
     mu += ratio;

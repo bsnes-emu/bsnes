@@ -27,10 +27,6 @@ struct System {
   auto run() -> void;
   auto runToSave() -> void;
 
-  //video.cpp
-  auto configureVideoPalette() -> void;
-  auto configureVideoEffects() -> void;
-
   //serialization.cpp
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;

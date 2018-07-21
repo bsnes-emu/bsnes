@@ -65,8 +65,8 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(io.wrdiva);
   s.integer(io.wrdivb);
 
-  s.integer(io.hirqPos);
-  s.integer(io.virqPos);
+  s.integer(io.htime);
+  s.integer(io.vtime);
 
   s.integer(io.romSpeed);
 

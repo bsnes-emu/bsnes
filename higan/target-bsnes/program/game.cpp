@@ -4,9 +4,7 @@ auto Program::load() -> void {
   for(auto& media : emulator->media) {
     if(media.type != "sfc") continue;
 
-    Emulator::audio.reset(2, audio->frequency());
     if(emulator->load(media.id)) {
-      gameQueue = {};
       screenshot = {};
       frameAdvance = false;
       if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
@@ -56,6 +54,8 @@ auto Program::load() -> void {
 
     break;
   }
+
+  gameQueue = {};
 }
 
 auto Program::loadFile(string location) -> vector<uint8_t> {

@@ -72,7 +72,4 @@ auto Program::updateAudioEffects() -> void {
 
   double balance = max(-1.0, min(+1.0, (settings["Audio/Balance"].integer() - 50) / 50.0));
   Emulator::audio.setBalance(balance);
-
-  bool reverb = settings["Audio/Reverb"].boolean();
-  Emulator::audio.setReverb(reverb);
 }

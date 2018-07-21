@@ -159,7 +159,6 @@ auto YM2612::power(bool reset) -> void {
   stream = Emulator::audio.createStream(2, frequency() / 144.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 2840.0);
-  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   io = {};
   lfo = {};

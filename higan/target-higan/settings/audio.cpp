@@ -48,8 +48,6 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   balanceValue.setAlignment(0.5);
   balanceSlider.setLength(101).setPosition(settings["Audio/Balance"].natural()).onChange([&] { updateEffects(); });
 
-  reverbEnable.setText("Reverb").setChecked(settings["Audio/Reverb/Enable"].boolean()).onToggle([&] { updateEffects(); });
-
   updateDevice();
   updateEffects(true);
 }
@@ -78,8 +76,6 @@ auto AudioSettings::updateEffects(bool initializing) -> void {
 
   settings["Audio/Balance"].setValue(balanceSlider.position());
   balanceValue.setText({balanceSlider.position(), "%"});
-
-  settings["Audio/Reverb/Enable"].setValue(reverbEnable.checked());
 
   if(!initializing) program->updateAudioEffects();
 }

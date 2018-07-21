@@ -6,11 +6,12 @@ namespace Emulator {
 Video video;
 
 Video::~Video() {
-  reset();
+  reset(nullptr);
 }
 
-auto Video::reset() -> void {
-  interface = nullptr;
+auto Video::reset(Interface* interface) -> void {
+  this->interface = interface;
+
   sprites.reset();
   delete buffer;
   buffer = nullptr;
@@ -23,10 +24,6 @@ auto Video::reset() -> void {
   effects.colorBleed = false;
   effects.interframeBlending = false;
   effects.rotateLeft = false;
-}
-
-auto Video::setInterface(Interface* interface) -> void {
-  this->interface = interface;
 }
 
 auto Video::setPalette() -> void {

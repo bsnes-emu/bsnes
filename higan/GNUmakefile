@@ -47,5 +47,5 @@ include $(ui)/GNUmakefile
 -include obj/*.d
 
 clean:
-	$(call delete,out/*)
 	$(call delete,obj/*)
+	$(call delete,out/*)

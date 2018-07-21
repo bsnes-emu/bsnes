@@ -78,7 +78,6 @@ auto APU::power() -> void {
   create(APU::Enter, system.frequency());
   stream = Emulator::audio.createStream(2, frequency() / 64.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
-  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   clock = 0;
   square1.power();

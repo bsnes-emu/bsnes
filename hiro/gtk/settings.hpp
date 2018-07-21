@@ -14,6 +14,11 @@ struct Settings {
     int menuHeight = 8;
     int statusHeight = 4;
   } geometry;
+
+  struct Theme {
+    bool actionIcons = true;
+    bool widgetColors = true;
+  } theme;
 };
 
 static Settings settings;

@@ -2,7 +2,6 @@
 
 namespace GameBoy {
 
-#include "video.cpp"
 #include "serialization.cpp"
 System system;
 Scheduler scheduler;
@@ -83,13 +82,10 @@ auto System::unload() -> void {
 
 auto System::power() -> void {
   if(model() != Model::SuperGameBoy) {
-    Emulator::video.reset();
-    Emulator::video.setInterface(interface);
-    configureVideoPalette();
-    configureVideoEffects();
-
-    Emulator::audio.reset();
-    Emulator::audio.setInterface(interface);
+    Emulator::video.reset(interface);
+    Emulator::video.setPalette();
+    Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
+    Emulator::audio.reset(interface);
   }
 
   scheduler.reset();

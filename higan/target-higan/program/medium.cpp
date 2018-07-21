@@ -19,17 +19,16 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
 
   mediumPaths.append(locate({"systems/", medium.name, ".sys/"}));
 
-  Emulator::audio.reset(2, audio->frequency());
   inputManager->bind(emulator = &interface);
   if(!emulator->load(medium.id)) {
     emulator = nullptr;
     mediumPaths.reset();
     return;
   }
-  updateAudioDriver();
-  updateAudioEffects();
   connectDevices();
   emulator->power();
+  updateAudioDriver();
+  updateAudioEffects();
 
   presentation->resizeViewport();
   presentation->setTitle(emulator->title());

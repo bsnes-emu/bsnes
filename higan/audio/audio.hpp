@@ -12,13 +12,12 @@ struct Filter;
 struct Stream;
 
 struct Audio {
-  auto reset(maybe<uint> channels = nothing, maybe<double> frequency = nothing) -> void;
-  auto setInterface(Interface* interface) -> void;
+  ~Audio();
+  auto reset(Interface* interface) -> void;
 
   auto setFrequency(double frequency) -> void;
   auto setVolume(double volume) -> void;
   auto setBalance(double balance) -> void;
-  auto setReverb(bool enabled) -> void;
 
   auto createStream(uint channels, double frequency) -> shared_pointer<Stream>;
 
@@ -29,13 +28,10 @@ private:
   vector<shared_pointer<Stream>> streams;
 
   uint channels = 0;
-  double frequency = 0.0;
+  double frequency = 48000.0;
 
   double volume = 1.0;
   double balance = 0.0;
-
-  bool reverbEnable = false;
-  vector<vector<queue<double>>> reverb;
 
   friend class Stream;
 };
@@ -68,6 +64,7 @@ struct Stream {
 private:
   struct Channel {
     vector<Filter> filters;
+    vector<DSP::IIR::Biquad> nyquist;
     DSP::Resampler::Cubic resampler;
   };
   vector<Channel> channels;

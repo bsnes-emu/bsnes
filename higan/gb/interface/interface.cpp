@@ -100,13 +100,15 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Blur Emulation" && value.is<bool>()) {
     settings.blurEmulation = value.get<bool>();
-    system.configureVideoEffects();
+    if(Model::SuperGameBoy()) return true;
+    Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
     return true;
   }
 
   if(name == "Color Emulation" && value.is<bool>()) {
     settings.colorEmulation = value.get<bool>();
-    system.configureVideoPalette();
+    if(Model::SuperGameBoy()) return true;
+    Emulator::video.setPalette();
     return true;
   }
 

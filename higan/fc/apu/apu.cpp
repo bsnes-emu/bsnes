@@ -77,7 +77,6 @@ auto APU::power(bool reset) -> void {
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 90.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 440.0);
   stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 14000.0);
-  stream->addFilter(Emulator::Filter::Order::Second, Emulator::Filter::Type::LowPass, 20000.0, 3);
 
   pulse[0].power();
   pulse[1].power();

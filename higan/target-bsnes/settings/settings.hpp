@@ -55,7 +55,6 @@ public:
       Label balanceLabel{&effectsLayout, Size{0, 0}};
       Label balanceValue{&effectsLayout, Size{50, 0}};
       HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
-    CheckLabel reverb{&layout, Size{~0, 0}};
 };
 
 struct InputSettings : TabFrameItem {
