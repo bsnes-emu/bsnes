@@ -464,54 +464,39 @@ static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void daa(GB_gameboy_t *gb, uint8_t opcode)
 {
-    /* This function is UGLY and UNREADABLE! But it passes Blargg's daa test! */
-    gb->registers[GB_REGISTER_AF] &= ~GB_ZERO_FLAG;
+    int16_t result = gb->registers[GB_REGISTER_AF] >> 8;
+
+    gb->registers[GB_REGISTER_AF] &= ~(0xFF00 | GB_ZERO_FLAG);
+
     if (gb->registers[GB_REGISTER_AF] & GB_SUBSTRACT_FLAG) {
         if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
-            gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
-            if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
-                gb->registers[GB_REGISTER_AF] += 0x9A00;
-            }
-            else {
-                gb->registers[GB_REGISTER_AF] += 0xFA00;
-            }
+            result = (result - 0x06) & 0xFF;
         }
-        else if(gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
-            gb->registers[GB_REGISTER_AF] += 0xA000;
+
+        if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
+            result -= 0x60;
         }
     }
     else {
-        if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
-            uint16_t number = gb->registers[GB_REGISTER_AF] >> 8;
-            if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
-                number += 0x100;
-            }
-            gb->registers[GB_REGISTER_AF] = 0;
-            number += 0x06;
-            if (number >= 0xa0) {
-                number -= 0xa0;
-                gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
-            }
-            gb->registers[GB_REGISTER_AF] |= number << 8;
+        if ((gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
+            result += 0x06;
         }
-        else {
-            uint16_t number = gb->registers[GB_REGISTER_AF] >> 8;
-            if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
-                number += 0x100;
-            }
-            if (number > 0x99) {
-                number += 0x60;
-            }
-            number = (number & 0x0F) + ((number & 0x0F) > 9 ? 6 : 0) + (number & 0xFF0);
-            gb->registers[GB_REGISTER_AF] = number << 8;
-            if (number & 0xFF00) {
-                gb->registers[GB_REGISTER_AF]  |= GB_CARRY_FLAG;
-            }
+
+        if ((gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) || result > 0x9F) {
+            result += 0x60;
         }
     }
-    if ((gb->registers[GB_REGISTER_AF] & 0xFF00) == 0) {
+
+    if ((result & 0xFF) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
     }
+
+    if ((result & 0x100) == 0x100) {
+        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+    }
+
+    gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
+    gb->registers[GB_REGISTER_AF] |= result << 8;
 }
 
 static void cpl(GB_gameboy_t *gb, uint8_t opcode)
