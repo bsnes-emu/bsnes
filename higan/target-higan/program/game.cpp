@@ -1,29 +1,28 @@
-auto Program::loadMedium() -> void {
-  if(!mediumQueue) return;
+auto Program::load() -> void {
+  if(!gameQueue) return;
 
-  string location = mediumQueue.left();
-  string type = Location::suffix(location).trimLeft(".", 1L);
+  string location = gameQueue.left();
+  string extension = Location::suffix(location).trimLeft(".", 1L);
 
   for(auto& emulator : emulators) {
-    for(auto& medium : emulator->media) {
-      if(medium.type != type) continue;
-      return loadMedium(*emulator, medium);
-    }
+    auto information = emulator->information();
+    if(information.extension == extension) return load(*emulator);
   }
 
-  mediumQueue.reset();
+  gameQueue.reset();
 }
 
-auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void {
-  unloadMedium();
+auto Program::load(Emulator::Interface& interface) -> void {
+  unload();
 
-  mediumPaths.append(locate({"systems/", medium.name, ".sys/"}));
+  auto information = interface.information();
+  gamePaths.append(locate({"systems/", information.name, ".sys/"}));
 
   inputManager->bind(emulator = &interface);
   presentation->updateEmulatorMenu();
-  if(!emulator->load(medium.id)) {
+  if(!emulator->load()) {
     emulator = nullptr;
-    mediumPaths.reset();
+    gamePaths.reset();
     return;
   }
   emulator->power();
@@ -35,7 +34,7 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
 
   presentation->resizeViewport();
   presentation->setTitle(emulator->title());
-  presentation->systemMenu.setText(medium.name).setVisible(true);
+  presentation->systemMenu.setText(information.name).setVisible(true);
   presentation->toolsMenu.setVisible(true);
   toolsManager->cheatEditor.loadCheats();
   toolsManager->stateManager.doRefresh();
@@ -43,7 +42,7 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
   toolsManager->gameNotes.loadNotes();
 }
 
-auto Program::unloadMedium() -> void {
+auto Program::unload() -> void {
   if(!emulator) return;
 
   presentation->clearViewport();
@@ -51,7 +50,7 @@ auto Program::unloadMedium() -> void {
   toolsManager->gameNotes.saveNotes();
   emulator->unload();
   emulator = nullptr;
-  mediumPaths.reset();
+  gamePaths.reset();
 
   presentation->resizeViewport();
   presentation->setTitle({"higan v", Emulator::Version});

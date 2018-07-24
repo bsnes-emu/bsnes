@@ -51,6 +51,10 @@ auto Application::scale(float value) -> float {
   return value * state.scale;
 }
 
+auto Application::screenSaver() -> bool {
+  return state.screenSaver;
+}
+
 auto Application::setFont(const Font& font) -> void {
   state.font = font;
 }
@@ -61,6 +65,11 @@ auto Application::setName(const string& name) -> void {
 
 auto Application::setScale(float scale) -> void {
   state.scale = scale;
+}
+
+auto Application::setScreenSaver(bool screenSaver) -> void {
+  state.screenSaver = screenSaver;
+  pApplication::setScreenSaver(screenSaver);
 }
 
 auto Application::unscale(float value) -> float {
@@ -74,17 +83,8 @@ auto Application::Windows::doModalChange(bool modal) -> void {
   if(state.windows.onModalChange) return state.windows.onModalChange(modal);
 }
 
-auto Application::Windows::doScreenSaver() -> bool {
-  if(state.windows.onScreenSaver) return state.windows.onScreenSaver();
-  return true;  //true = allow screen saver (default); false = suppress screen saver
-}
-
 auto Application::Windows::onModalChange(const function<void (bool)>& callback) -> void {
   state.windows.onModalChange = callback;
-}
-
-auto Application::Windows::onScreenSaver(const function<bool ()>& callback) -> void {
-  state.windows.onScreenSaver = callback;
 }
 
 //Cocoa

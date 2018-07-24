@@ -10,6 +10,7 @@ struct pWindow : pObject {
   auto append(sStatusBar statusBar) -> void;
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
+  auto handle() const -> uintptr;
   auto remove(sMenuBar menuBar) -> void;
   auto remove(sSizable sizable) -> void;
   auto remove(sStatusBar statusBar) -> void;
@@ -33,6 +34,7 @@ struct pWindow : pObject {
   auto _append(mMenu& menu) -> void;
   auto _menuHeight() const -> int;
   auto _menuTextHeight() const -> int;
+  auto _setScreenSaver(bool screenSaver) -> void;
   auto _setIcon(const string& basename) -> bool;
   auto _setMenuEnabled(bool enabled) -> void;
   auto _setMenuFont(const Font& font) -> void;
@@ -55,6 +57,7 @@ struct pWindow : pObject {
   GtkWidget* gtkStatus = nullptr;
   GtkAllocation lastMove = {0};
   GtkAllocation lastSize = {0};
+  bool screenSaver = true;
 };
 
 }

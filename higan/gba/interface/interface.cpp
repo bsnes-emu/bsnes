@@ -2,34 +2,15 @@
 
 namespace GameBoyAdvance {
 
+#define returns(T) T { return ([&] { struct With : T { With() {
+#define $ }}; return With(); })(); }
+
 Settings settings;
 
-Interface::Interface() {
-  information.manufacturer = "Nintendo";
-  information.name         = "Game Boy Advance";
-  information.overscan     = false;
-
-  media.append({ID::GameBoyAdvance, "Game Boy Advance", "gba"});
-
-  Port hardwarePort{ID::Port::Hardware, "Hardware"};
-
-  { Device device{ID::Device::Controls, "Controls"};
-    device.inputs.append({0, "Up"    });
-    device.inputs.append({0, "Down"  });
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    device.inputs.append({0, "B"     });
-    device.inputs.append({0, "A"     });
-    device.inputs.append({0, "L"     });
-    device.inputs.append({0, "R"     });
-    device.inputs.append({0, "Select"});
-    device.inputs.append({0, "Start" });
-    device.inputs.append({2, "Rumble"});
-    hardwarePort.devices.append(device);
-  }
-
-  ports.append(move(hardwarePort));
-}
+auto Interface::information() -> returns(Information) {
+  manufacturer = "Nintendo";
+  name         = "Game Boy Advance";
+}$
 
 auto Interface::manifest() -> string {
   return cartridge.manifest();
@@ -39,26 +20,22 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 240;
-  vi.height = 160;
-  vi.internalWidth  = 240;
-  vi.internalHeight = 160;
-  vi.aspectCorrection = 1.0;
-  vi.refreshRate = system.frequency() / (228.0 * 1232.0);
+auto Interface::display() -> returns(Display) {
+  type   = Display::Type::LCD;
+  colors = 1 << 15;
+  width  = 240;
+  height = 160;
+  internalWidth  = 240;
+  internalHeight = 160;
+  aspectCorrection = 1.0;
+  refreshRate = system.frequency() / (228.0 * 1232.0);
   if(settings.rotateLeft) {
-    swap(vi.width, vi.height);
-    swap(vi.internalWidth, vi.internalHeight);
+    swap(width, height);
+    swap(internalWidth, internalHeight);
   }
-  return vi;
-}
+}$
 
-auto Interface::videoColors() -> uint32 {
-  return 1 << 15;
-}
-
-auto Interface::videoColor(uint32 color) -> uint64 {
+auto Interface::color(uint32 color) -> uint64 {
   uint R = color.bits( 0, 4);
   uint G = color.bits( 5, 9);
   uint B = color.bits(10,14);
@@ -84,7 +61,7 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::load(uint id) -> bool {
+auto Interface::load() -> bool {
   return system.load(this);
 }
 
@@ -95,6 +72,38 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Hardware, "Hardware"}};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Hardware) return {
+    {ID::Device::Controls, "Controls"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::Controls) return {
+    {Type::Hat,     "Up"    },
+    {Type::Hat,     "Down"  },
+    {Type::Hat,     "Left"  },
+    {Type::Hat,     "Right" },
+    {Type::Button,  "B"     },
+    {Type::Button,  "A"     },
+    {Type::Trigger, "L"     },
+    {Type::Trigger, "R"     },
+    {Type::Control, "Select"},
+    {Type::Control, "Start" },
+    {Type::Rumble,  "Rumble"}
+  };
+
+  return {};
 }
 
 auto Interface::power() -> void {
@@ -149,5 +158,8 @@ auto Interface::set(const string& name, const any& value) -> bool {
 
   return false;
 }
+
+#undef returns
+#undef $
 
 }

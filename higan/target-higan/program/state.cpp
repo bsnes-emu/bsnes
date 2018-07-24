@@ -1,6 +1,6 @@
 auto Program::stateName(uint slot, bool managed) -> string {
   return {
-    mediumPaths(1), "higan/states/",
+    gamePaths(1), "higan/states/",
     managed ? "managed/" : "quick/",
     "slot-", slot, ".bst"
   };

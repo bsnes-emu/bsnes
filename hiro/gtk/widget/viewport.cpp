@@ -79,14 +79,16 @@ auto pViewport::destruct() -> void {
   gtkParent = nullptr;
 }
 
-auto pViewport::handle() const -> uintptr_t {
+auto pViewport::handle() const -> uintptr {
   #if defined(DISPLAY_WINDOWS)
-  return (uintptr_t)GDK_WINDOW_HWND(gtk_widget_get_window(gtkWidget));
+  return (uintptr)GDK_WINDOW_HWND(gtk_widget_get_window(gtkWidget));
   #endif
 
   #if defined(DISPLAY_XORG)
   return GDK_WINDOW_XID(gtk_widget_get_window(gtkWidget));
   #endif
+
+  return (uintptr)nullptr;
 }
 
 auto pViewport::setDroppable(bool droppable) -> void {

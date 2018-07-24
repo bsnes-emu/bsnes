@@ -82,6 +82,10 @@ auto pApplication::quit() -> void {
   }
 }
 
+auto pApplication::setScreenSaver(bool screenSaver) -> void {
+  //TODO: not implemented
+}
+
 auto pApplication::initialize() -> void {
   @autoreleasepool {
     [NSApplication sharedApplication];

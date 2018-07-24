@@ -6,6 +6,7 @@ vector<pWindow*> pApplication::windows;
 
 #if defined(DISPLAY_XORG)
 XlibDisplay* pApplication::display = nullptr;
+bool pApplication::xdgScreenSaver = false;
 #endif
 
 auto pApplication::run() -> void {
@@ -29,16 +30,21 @@ auto pApplication::quit() -> void {
   if(gtk_main_level()) gtk_main_quit();
 
   #if defined(DISPLAY_XORG)
-  //TODO: Keyboard::poll() is being called after Application::quit();
-  //so if display is closed; this causes a segfault
-  //XCloseDisplay(display);
-  //display = nullptr;
+  XCloseDisplay(display);
+  display = nullptr;
+  #endif
+}
+
+auto pApplication::setScreenSaver(bool screenSaver) -> void {
+  #if defined(DISPLAY_XORG)
+  for(auto& window : windows) window->_setScreenSaver(screenSaver);
   #endif
 }
 
 auto pApplication::initialize() -> void {
   #if defined(DISPLAY_XORG)
   display = XOpenDisplay(nullptr);
+  xdgScreenSaver = (bool)execute("xdg-screensaver", "--version").output.find("xdg-screensaver");
   #endif
 
   //set WM_CLASS to Application::name()

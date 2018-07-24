@@ -3,42 +3,24 @@
 namespace Emulator {
 
 struct Interface {
+  //information
   struct Information {
     string manufacturer;
     string name;
-    bool overscan = false;
+    string extension;
     bool resettable = false;
-  } information;
-
-  struct Medium {
-    uint id;
-    string name;
-    string type;  //extension
   };
-  vector<Medium> media;
-
-  struct Device {
-    uint id;
-    string name;
-    struct Input {
-      uint type;  //0 = digital, 1 = analog (relative), 2 = rumble
-      string name;
-    };
-    vector<Input> inputs;
-  };
-
-  struct Port {
-    uint id;
-    string name;
-    vector<Device> devices;
-  };
-  vector<Port> ports;
-
-  //information
+  virtual auto information() -> Information = 0;
   virtual auto manifest() -> string = 0;
   virtual auto title() -> string = 0;
 
-  struct VideoInformation {
+  struct Display {
+    struct Type { enum : uint {
+      CRT,
+      LCD,
+    };};
+    uint type = 0;
+    uint colors = 0;
     uint width = 0;
     uint height = 0;
     uint internalWidth = 0;
@@ -46,23 +28,48 @@ struct Interface {
     double aspectCorrection = 0;
     double refreshRate = 0;
   };
-  virtual auto videoInformation() -> VideoInformation = 0;
-  virtual auto videoColors() -> uint32 = 0;
-  virtual auto videoColor(uint32 color) -> uint64 = 0;
+  virtual auto display() -> Display = 0;
+  virtual auto color(uint32 color) -> uint64 = 0;
 
-  //media interface
-  virtual auto loaded() -> bool { return false; }
+  //game interface
+  virtual auto loaded() -> bool = 0;
   virtual auto sha256() -> string { return ""; }
-  virtual auto load(uint id) -> bool { return false; }
-  virtual auto save() -> void {}
-  virtual auto unload() -> void {}
+  virtual auto load() -> bool = 0;
+  virtual auto save() -> void = 0;
+  virtual auto unload() -> void = 0;
 
   //system interface
+  struct Port {
+    uint id;
+    string name;
+  };
+  virtual auto ports() -> vector<Port> = 0;
+
+  struct Device {
+    uint id;
+    string name;
+  };
+  virtual auto devices(uint port) -> vector<Device> = 0;
+
+  struct Input {
+    struct Type { enum : uint {
+      Hat,
+      Button,
+      Trigger,
+      Control,
+      Axis,
+      Rumble,
+    };};
+    uint type;
+    string name;
+  };
+  virtual auto inputs(uint device) -> vector<Input> = 0;
+
   virtual auto connected(uint port) -> uint { return 0; }
   virtual auto connect(uint port, uint device) -> void {}
-  virtual auto power() -> void {}
+  virtual auto power() -> void = 0;
   virtual auto reset() -> void {}
-  virtual auto run() -> void {}
+  virtual auto run() -> void = 0;
 
   //time functions
   virtual auto rtc() -> bool { return false; }

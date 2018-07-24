@@ -18,19 +18,22 @@ struct ID {
 struct Interface : Emulator::Interface {
   using Emulator::Interface::load;
 
-  Interface();
+  auto information() -> Information override;
 
   auto manifest() -> string override;
   auto title() -> string override;
 
-  auto videoInformation() -> VideoInformation override;
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto display() -> Display override;
+  auto color(uint32 color) -> uint64 override;
 
   auto loaded() -> bool override;
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
+
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
 
   auto power() -> void override;
   auto run() -> void override;

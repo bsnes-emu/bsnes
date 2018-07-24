@@ -122,8 +122,8 @@ Presentation::Presentation() {
 
   viewport.setDroppable().onDrop([&](auto locations) {
     if(!directory::exists(locations(0))) return;
-    program->mediumQueue.append(locations(0));
-    program->loadMedium();
+    program->gameQueue.append(locations(0));
+    program->load();
   });
 
   onSize([&] {
@@ -143,14 +143,6 @@ Presentation::Presentation() {
   Application::Windows::onModalChange([&](bool modal) {
     if(modal && audio) audio->clear();
   });
-  Application::Windows::onScreenSaver([&]() -> bool {
-    if(emulator && emulator->loaded()) {
-      if(program->pause) return true;
-      if(!program->focused() && settingsManager->input.pauseEmulation.checked()) return true;
-      return false;
-    }
-    return true;
-  });
   #endif
 
   #if defined(PLATFORM_MACOS)
@@ -164,9 +156,10 @@ Presentation::Presentation() {
 
 auto Presentation::updateEmulatorMenu() -> void {
   if(!emulator) return;
+  auto information = emulator->information();
 
   systemMenu.reset();
-  for(auto& port : emulator->ports) {
+  for(auto& port : emulator->ports()) {
     Menu menu{&systemMenu};
     menu.setProperty("portID", port.id);
     menu.setText(port.name);
@@ -176,12 +169,12 @@ auto Presentation::updateEmulatorMenu() -> void {
       menu.setIcon(Icon::Device::Joypad);
     }
 
-    auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
+    auto path = string{information.name, "/", port.name}.replace(" ", "");
     auto deviceName = settings(path).text();
     auto deviceID = emulator->connected(port.id);
 
     Group devices;
-    for(auto& device : port.devices) {
+    for(auto& device : emulator->devices(port.id)) {
       MenuRadioItem item{&menu};
       item.setProperty("deviceID", device.id);
       item.setText(device.name);
@@ -205,7 +198,7 @@ auto Presentation::updateEmulatorMenu() -> void {
     systemMenu.append(MenuSeparator());
   }
 
-  if(emulator->information.resettable) {
+  if(information.resettable) {
     systemMenu.append(MenuItem().setText("Soft Reset").setIcon(Icon::Action::Refresh).onActivate([&] {
       program->softReset();
     }));
@@ -216,7 +209,7 @@ auto Presentation::updateEmulatorMenu() -> void {
   }));
 
   systemMenu.append(MenuItem().setText("Unload").setIcon(Icon::Media::Eject).onActivate([&] {
-    program->unloadMedium();
+    program->unload();
   }));
 
   updateEmulatorDeviceSelections();
@@ -225,7 +218,7 @@ auto Presentation::updateEmulatorMenu() -> void {
 auto Presentation::updateEmulatorDeviceSelections() -> void {
   if(!emulator) return;
 
-  for(auto& port : emulator->ports) {
+  for(auto& port : emulator->ports()) {
     for(auto& action : systemMenu->actions()) {
       auto portID = action.property("portID");
       if(portID && portID.natural() == port.id) {
@@ -293,11 +286,11 @@ auto Presentation::resizeViewport(bool resizeWindow) -> void {
   double emulatorHeight = 240;
   double aspectCorrection = 1.0;
   if(emulator) {
-    auto information = emulator->videoInformation();
-    emulatorWidth = information.width;
-    emulatorHeight = information.height;
-    aspectCorrection = information.aspectCorrection;
-    if(emulator->information.overscan) {
+    auto display = emulator->display();
+    emulatorWidth = display.width;
+    emulatorHeight = display.height;
+    aspectCorrection = display.aspectCorrection;
+    if(display.type == Emulator::Interface::Display::Type::CRT) {
       uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
       uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
       emulatorWidth -= overscanHorizontal * 2;
@@ -387,37 +380,38 @@ auto Presentation::loadSystems() -> void {
   systemsMenu.reset();
   for(auto system : settings.find("Systems/System")) {
     if(!system["Visible"].boolean()) continue;
-    MenuItem item;
+    MenuItem item{&systemsMenu};
     string name = system.text();
     string filename = system["Load"].text();
     string load = Location::base(filename).trimRight("/", 1L);
     string alias = system["Alias"].text();
-    item
-    .setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage)
-    .setText({alias ? alias : load ? load : name, " ..."}).onActivate([=] {
+    item.setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage);
+    item.setText({alias ? alias : load ? load : name, " ..."});
+    item.onActivate([=] {
       for(auto& emulator : program->emulators) {
-        if(name == emulator->information.name) {
-          if(filename) program->mediumQueue.append(filename);
-          program->loadMedium(*emulator, emulator->media(0));
+        auto information = emulator->information();
+        if(name == information.name) {
+          if(filename) program->gameQueue.append(filename);
+          program->load(*emulator);
           break;
         }
       }
     });
-    systemsMenu.append(item);
   }
 
   //add icarus menu option -- but only if icarus binary is present
   if(execute("icarus", "--name").output.strip() == "icarus") {
     if(systemsMenu.actionCount()) systemsMenu.append(MenuSeparator());
-    systemsMenu.append(MenuItem()
-    .setIcon(Icon::Emblem::File)
-    .setText("Load ROM File ...").onActivate([&] {
+    MenuItem item{&systemsMenu};
+    item.setIcon(Icon::Emblem::File);
+    item.setText("Load ROM File ...");
+    item.onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {
-        program->mediumQueue.append(location.output.strip());
-        program->loadMedium();
+        program->gameQueue.append(location.output.strip());
+        program->load();
       }
-    }));
+    });
   }
 }
 

@@ -183,14 +183,6 @@ Presentation::Presentation() {
   Application::Windows::onModalChange([&](bool modal) {
     if(modal && audio) audio->clear();
   });
-  Application::Windows::onScreenSaver([&]() -> bool {
-    if(emulator->loaded()) {
-      if(pauseEmulation.checked()) return true;
-      if(!program->focused() && settingsWindow->input.pauseEmulation.checked()) return true;
-      return false;
-    }
-    return true;
-  });
   #endif
 
   #if defined(PLATFORM_MACOS)
@@ -346,7 +338,7 @@ auto Presentation::updateDeviceMenu() -> void {
   controllerPort2.reset();
   expansionPort.reset();
 
-  for(auto& port : emulator->ports) {
+  for(auto& port : emulator->ports()) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
     if(port.name == "Controller Port 2") menu = &controllerPort2;
@@ -358,7 +350,7 @@ auto Presentation::updateDeviceMenu() -> void {
     auto deviceID = emulator->connected(port.id);
 
     Group devices;
-    for(auto& device : port.devices) {
+    for(auto& device : emulator->devices(port.id)) {
       if(port.name == "Expansion Port" && device.name == "21fx") continue;
 
       MenuRadioItem item{menu};
@@ -380,7 +372,7 @@ auto Presentation::updateDeviceMenu() -> void {
 }
 
 auto Presentation::updateDeviceSelections() -> void {
-  for(auto& port : emulator->ports) {
+  for(auto& port : emulator->ports()) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
     if(port.name == "Controller Port 2") menu = &controllerPort2;

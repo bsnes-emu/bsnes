@@ -99,6 +99,10 @@ static auto Window_keyRelease(GtkWidget* widget, GdkEventKey* event, pWindow* p)
   return false;
 }
 
+static auto Window_realize(GtkWidget* widget, pWindow* p) -> void {
+  p->_setScreenSaver(Application::screenSaver());
+}
+
 static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pWindow* p) -> void {
   p->_synchronizeState();
   p->_synchronizeGeometry();
@@ -123,6 +127,10 @@ static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) ->
       p->state().minimized = windowStateEvent->new_window_state & GDK_WINDOW_STATE_ICONIFIED;
     }
   }
+}
+
+static auto Window_unrealize(GtkWidget* widget, pWindow* p) -> void {
+  p->_setScreenSaver(true);
 }
 
 auto pWindow::construct() -> void {
@@ -186,6 +194,7 @@ auto pWindow::construct() -> void {
   g_signal_connect(G_OBJECT(widget), "drag-data-received", G_CALLBACK(Window_drop), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPress), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyRelease), (gpointer)this);
+  g_signal_connect(G_OBJECT(widget), "realize", G_CALLBACK(Window_realize), (gpointer)this);
   g_signal_connect(G_OBJECT(formContainer), "size-allocate", G_CALLBACK(Window_sizeAllocate), (gpointer)this);
   #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(formContainer), "size-request", G_CALLBACK(Window_sizeRequest), (gpointer)this);
@@ -194,6 +203,7 @@ auto pWindow::construct() -> void {
   widgetClass->get_preferred_width  = Window_getPreferredWidth;
   widgetClass->get_preferred_height = Window_getPreferredHeight;
   #endif
+  g_signal_connect(G_OBJECT(widget), "unrealize", G_CALLBACK(Window_unrealize), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "window-state-event", G_CALLBACK(Window_stateEvent), (gpointer)this);
 
   g_object_set_data(G_OBJECT(widget), "hiro::window", (gpointer)this);
@@ -245,6 +255,18 @@ auto pWindow::frameMargin() const -> Geometry {
     settings.geometry.frameWidth,
     settings.geometry.frameHeight + _menuHeight() + _statusHeight()
   };
+}
+
+auto pWindow::handle() const -> uintptr {
+  #if defined(DISPLAY_WINDOWS)
+  return (uintptr)GDK_WINDOW_HWND(gtk_widget_get_window(widget));
+  #endif
+
+  #if defined(DISPLAY_XORG)
+  return GDK_WINDOW_XID(gtk_widget_get_window(widget));
+  #endif
+
+  return (uintptr)nullptr;
 }
 
 auto pWindow::remove(sMenuBar menuBar) -> void {
@@ -456,6 +478,19 @@ auto pWindow::_setMenuFont(const Font& font) -> void {
 
 auto pWindow::_setMenuVisible(bool visible) -> void {
   gtk_widget_set_visible(gtkMenu, visible);
+}
+
+auto pWindow::_setScreenSaver(bool screenSaver) -> void {
+  if(!gtk_widget_get_realized(widget)) return;
+
+  #if defined(DISPLAY_XORG)
+  if(pApplication::xdgScreenSaver) {
+    if(this->screenSaver != screenSaver) {
+      this->screenSaver = screenSaver;
+      execute("xdg-screensaver", screenSaver ? "resume" : "suspend", string{"0x", hex(handle())});
+    }
+  }
+  #endif
 }
 
 auto pWindow::_setStatusEnabled(bool enabled) -> void {

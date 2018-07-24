@@ -28,6 +28,10 @@ auto pApplication::quit() -> void {
   qtApplication = nullptr;  //note: deleting QApplication will crash libQtGui
 }
 
+auto pApplication::setScreenSaver(bool screenSaver) -> void {
+  //TODO: not implemented
+}
+
 //this is sadly necessary for things like determining window frame geometry
 //obviously, it is used as sparingly as possible
 auto pApplication::syncX() -> void {

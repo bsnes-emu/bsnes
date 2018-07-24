@@ -2,112 +2,17 @@
 
 namespace SuperFamicom {
 
+#define returns(T) T { return ([&] { struct With : T { With() {
+#define $ }}; return With(); })(); }
+
 Settings settings;
 
-Interface::Interface() {
-  information.manufacturer = "Nintendo";
-  information.name         = "Super Famicom";
-  information.overscan     = true;
-  information.resettable   = true;
-
-  media.append({ID::SuperFamicom, "Super Famicom", "sfc"});
-
-  Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
-  Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
-  Port expansionPort{ID::Port::Expansion, "Expansion Port"};
-
-  { Device device{ID::Device::None, "None"};
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-    expansionPort.devices.append(device);
-  }
-
-  { Device device{ID::Device::Gamepad, "Gamepad"};
-    device.inputs.append({0, "Up"    });
-    device.inputs.append({0, "Down"  });
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    device.inputs.append({0, "B"     });
-    device.inputs.append({0, "A"     });
-    device.inputs.append({0, "Y"     });
-    device.inputs.append({0, "X"     });
-    device.inputs.append({0, "L"     });
-    device.inputs.append({0, "R"     });
-    device.inputs.append({0, "Select"});
-    device.inputs.append({0, "Start" });
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Mouse, "Mouse"};
-    device.inputs.append({1, "X-axis"});
-    device.inputs.append({1, "Y-axis"});
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::SuperMultitap, "Super Multitap"};
-    for(uint p = 2; p <= 5; p++) {
-      device.inputs.append({0, {"Port ", p, " - ", "Up"    }});
-      device.inputs.append({0, {"Port ", p, " - ", "Down"  }});
-      device.inputs.append({0, {"Port ", p, " - ", "Left"  }});
-      device.inputs.append({0, {"Port ", p, " - ", "Right" }});
-      device.inputs.append({0, {"Port ", p, " - ", "B"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "A"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "Y"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "X"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "L"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "R"     }});
-      device.inputs.append({0, {"Port ", p, " - ", "Select"}});
-      device.inputs.append({0, {"Port ", p, " - ", "Start" }});
-    }
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::SuperScope, "Super Scope"};
-    device.inputs.append({1, "X-axis" });
-    device.inputs.append({1, "Y-axis" });
-    device.inputs.append({0, "Trigger"});
-    device.inputs.append({0, "Cursor" });
-    device.inputs.append({0, "Turbo"  });
-    device.inputs.append({0, "Pause"  });
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Justifier, "Justifier"};
-    device.inputs.append({1, "X-axis" });
-    device.inputs.append({1, "Y-axis" });
-    device.inputs.append({0, "Trigger"});
-    device.inputs.append({0, "Start"  });
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Justifiers, "Justifiers"};
-    device.inputs.append({1, "Port 1 - X-axis" });
-    device.inputs.append({1, "Port 1 - Y-axis" });
-    device.inputs.append({0, "Port 1 - Trigger"});
-    device.inputs.append({0, "Port 1 - Start"  });
-    device.inputs.append({1, "Port 2 - X-axis" });
-    device.inputs.append({1, "Port 2 - Y-axis" });
-    device.inputs.append({0, "Port 2 - Trigger"});
-    device.inputs.append({0, "Port 2 - Start"  });
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Satellaview, "Satellaview"};
-    expansionPort.devices.append(device);
-  }
-
-  { Device device{ID::Device::S21FX, "21fx"};
-    expansionPort.devices.append(device);
-  }
-
-  ports.append(move(controllerPort1));
-  ports.append(move(controllerPort2));
-  ports.append(move(expansionPort));
-}
+auto Interface::information() -> returns(Information) {
+  manufacturer = "Nintendo";
+  name         = "Super Famicom";
+  extension    = "sfc";
+  resettable   = true;
+}$
 
 auto Interface::manifest() -> string {
   return cartridge.manifest();
@@ -117,23 +22,19 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 256;
-  vi.height = 240;
-  vi.internalWidth  = 512;
-  vi.internalHeight = 480;
-  vi.aspectCorrection = 8.0 / 7.0;
-  if(Region::NTSC()) vi.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
-  if(Region::PAL())  vi.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
-  return vi;
-}
+auto Interface::display() -> returns(Display) {
+  type   = Display::Type::CRT;
+  colors = 1 << 19;
+  width  = 256;
+  height = 240;
+  internalWidth  = 512;
+  internalHeight = 480;
+  aspectCorrection = 8.0 / 7.0;
+  if(Region::NTSC()) refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
+  if(Region::PAL())  refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
+}$
 
-auto Interface::videoColors() -> uint32 {
-  return 1 << 19;
-}
-
-auto Interface::videoColor(uint32 color) -> uint64 {
+auto Interface::color(uint32 color) -> uint64 {
   uint r = color.bits( 0, 4);
   uint g = color.bits( 5, 9);
   uint b = color.bits(10,14);
@@ -169,12 +70,8 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::load(uint id) -> bool {
-  if(id == ID::SuperFamicom) return system.load(this);
-  if(id == ID::BSMemory) return cartridge.loadBSMemory();
-  if(id == ID::SufamiTurboA) return cartridge.loadSufamiTurboA();
-  if(id == ID::SufamiTurboB) return cartridge.loadSufamiTurboB();
-  return false;
+auto Interface::load() -> bool {
+  return system.load(this);
 }
 
 auto Interface::save() -> void {
@@ -184,6 +81,121 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Controller1, "Controller Port 1"},
+  {ID::Port::Controller2, "Controller Port 2"},
+  {ID::Port::Expansion,   "Expansion Port"   }};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Controller1) return {
+    {ID::Device::None,    "None"   },
+    {ID::Device::Gamepad, "Gamepad"},
+    {ID::Device::Mouse,   "Mouse"  }
+  };
+
+  if(port == ID::Port::Controller2) return {
+    {ID::Device::None,          "None"          },
+    {ID::Device::Gamepad,       "Gamepad"       },
+    {ID::Device::Mouse,         "Mouse"         },
+    {ID::Device::SuperMultitap, "Super Multitap"},
+    {ID::Device::SuperScope,    "Super Scope"   },
+    {ID::Device::Justifier,     "Justifier"     },
+    {ID::Device::Justifiers,    "Justifiers"    }
+  };
+
+  if(port == ID::Port::Expansion) return {
+    {ID::Device::None,        "None"       },
+    {ID::Device::Satellaview, "Satellaview"},
+    {ID::Device::S21FX,       "21fx"       }
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::None) return {
+  };
+
+  if(device == ID::Device::Gamepad) return {
+    {Type::Hat,     "Up"    },
+    {Type::Hat,     "Down"  },
+    {Type::Hat,     "Left"  },
+    {Type::Hat,     "Right" },
+    {Type::Button,  "B"     },
+    {Type::Button,  "A"     },
+    {Type::Button,  "Y"     },
+    {Type::Button,  "X"     },
+    {Type::Trigger, "L"     },
+    {Type::Trigger, "R"     },
+    {Type::Control, "Select"},
+    {Type::Control, "Start" }
+  };
+
+  if(device == ID::Device::Mouse) return {
+    {Type::Axis,   "X-axis"},
+    {Type::Axis,   "Y-axis"},
+    {Type::Button, "Left"  },
+    {Type::Button, "Right" }
+  };
+
+  if(device == ID::Device::SuperMultitap) {
+    vector<Input> inputs;
+    for(uint p = 2; p <= 5; p++) inputs.append({
+      {Type::Hat,     {"Port ", p, " - ", "Up"    }},
+      {Type::Hat,     {"Port ", p, " - ", "Down"  }},
+      {Type::Hat,     {"Port ", p, " - ", "Left"  }},
+      {Type::Hat,     {"Port ", p, " - ", "Right" }},
+      {Type::Button,  {"Port ", p, " - ", "B"     }},
+      {Type::Button,  {"Port ", p, " - ", "A"     }},
+      {Type::Button,  {"Port ", p, " - ", "Y"     }},
+      {Type::Button,  {"Port ", p, " - ", "X"     }},
+      {Type::Trigger, {"Port ", p, " - ", "L"     }},
+      {Type::Trigger, {"Port ", p, " - ", "R"     }},
+      {Type::Control, {"Port ", p, " - ", "Select"}},
+      {Type::Control, {"Port ", p, " - ", "Start" }}
+    });
+    return inputs;
+  }
+
+  if(device == ID::Device::SuperScope) return {
+    {Type::Axis,    "X-axis" },
+    {Type::Axis,    "Y-axis" },
+    {Type::Control, "Trigger"},
+    {Type::Control, "Cursor" },
+    {Type::Control, "Turbo"  },
+    {Type::Control, "Pause"  }
+  };
+
+  if(device == ID::Device::Justifier) return {
+    {Type::Axis,    "X-axis" },
+    {Type::Axis,    "Y-axis" },
+    {Type::Control, "Trigger"},
+    {Type::Control, "Start"  }
+  };
+
+  if(device == ID::Device::Justifiers) return {
+    {Type::Axis,    "Port 1 - X-axis" },
+    {Type::Axis,    "Port 1 - Y-axis" },
+    {Type::Control, "Port 1 - Trigger"},
+    {Type::Control, "Port 1 - Start"  },
+    {Type::Axis,    "Port 2 - X-axis" },
+    {Type::Axis,    "Port 2 - Y-axis" },
+    {Type::Control, "Port 2 - Trigger"},
+    {Type::Control, "Port 2 - Start"  }
+  };
+
+  if(device == ID::Device::Satellaview) return {
+  };
+
+  if(device == ID::Device::S21FX) return {
+  };
+
+  return {};
 }
 
 auto Interface::connected(uint port) -> uint {
@@ -294,5 +306,8 @@ auto Interface::set(const string& name, const any& value) -> bool {
   }
   return false;
 }
+
+#undef returns
+#undef $
 
 }

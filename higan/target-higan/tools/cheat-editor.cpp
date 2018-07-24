@@ -125,7 +125,7 @@ auto CheatEditor::addCode(const string& code, const string& description, bool en
 
 auto CheatEditor::loadCheats() -> void {
   doReset(true);
-  auto contents = string::read({program->mediumPaths(1), "higan/cheats.bml"});
+  auto contents = string::read({program->gamePaths(1), "higan/cheats.bml"});
   auto document = BML::unserialize(contents);
   for(auto cheat : document["cartridge"].find("cheat")) {
     if(!addCode(cheat["code"].text(), cheat["description"].text(), (bool)cheat["enabled"])) break;
@@ -146,10 +146,10 @@ auto CheatEditor::saveCheats() -> void {
     count++;
   }
   if(count) {
-    directory::create({program->mediumPaths(1), "higan/"});
-    file::write({program->mediumPaths(1), "higan/cheats.bml"}, document);
+    directory::create({program->gamePaths(1), "higan/"});
+    file::write({program->gamePaths(1), "higan/cheats.bml"}, document);
   } else {
-    file::remove({program->mediumPaths(1), "higan/cheats.bml"});
+    file::remove({program->gamePaths(1), "higan/cheats.bml"});
   }
   doReset(true);
 }

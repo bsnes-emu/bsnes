@@ -27,6 +27,7 @@ auto nall::main(string_vector arguments) -> void {
     }
   }
   Application::setName("bsnes");
+  Application::setScreenSaver(false);
   Application::locale().scan(locate("locales/"));
   Application::locale().select(locale);
   emulator = new SuperFamicom::Interface;

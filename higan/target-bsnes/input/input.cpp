@@ -187,11 +187,11 @@ auto InputManager::initialize() -> void {
   input->onChange({&InputManager::onChange, this});
   frequency = max(1u, settings["Input/Frequency"].natural());
 
-  for(auto& port : emulator->ports) {
+  for(auto& port : emulator->ports()) {
     InputPort inputPort{port.id, port.name};
-    for(auto& device : port.devices) {
+    for(auto& device : emulator->devices(port.id)) {
       InputDevice inputDevice{device.id, device.name};
-      for(auto& input : device.inputs) {
+      for(auto& input : emulator->inputs(device.id)) {
         InputMapping inputMapping;
         inputMapping.name = input.name;
         inputMapping.type = input.type;

@@ -1,60 +1,52 @@
 auto Program::load() -> void {
   unload();
-
-  for(auto& media : emulator->media) {
-    if(media.type != "sfc") continue;
-
-    if(emulator->load(media.id)) {
-      screenshot = {};
-      frameAdvance = false;
-      if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
-        //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
-        //once MessageDialog functions, add an "Always" option
-        if(MessageWindow(
-          "Warning: this game image is unverified. Running it *may* be a security risk.\n\n"
-          "Do you wish to run the game anyway?"
-        ).setParent(*presentation).question() == MessageWindow::Response::No) {
-          emulator->unload();
-          return showMessage("Game loading cancelled");
-        }
-      }
-      hackCompatibility();
-      emulator->power();
-      if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {
-        program->loadState("quick/undo");
-      }
-      showMessage({
-        verified() ? "Verified game loaded" : "Game loaded",
-        appliedPatch() ? " and patch applied" : ""
-      });
-      presentation->setTitle(emulator->title());
-      presentation->resetSystem.setEnabled(true);
-      presentation->unloadGame.setEnabled(true);
-      presentation->toolsMenu.setVisible(true);
-      presentation->speedNormal.setChecked();
-      presentation->pauseEmulation.setChecked(false);
-      presentation->updateStatusIcon();
-      presentation->resizeViewport();
-      toolsWindow->cheatEditor.loadCheats();
-      toolsWindow->stateManager.loadStates();
-      toolsWindow->manifestViewer.loadManifest();
-
-      string locations = superFamicom.location;
-      if(auto location = gameBoy.location) locations.append("|", location);
-      if(auto location = bsMemory.location) locations.append("|", location);
-      if(auto location = sufamiTurboA.location) locations.append("|", location);
-      if(auto location = sufamiTurboB.location) locations.append("|", location);
-      presentation->addRecentGame(locations);
-
-      updateVideoPalette();
-      updateAudioEffects();
-      updateAudioFrequency();
-    }
-
-    break;
-  }
+  if(!emulator->load()) return;
 
   gameQueue = {};
+  screenshot = {};
+  frameAdvance = false;
+  if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
+    //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
+    //once MessageDialog functions, add an "Always" option
+    if(MessageWindow(
+      "Warning: this game image is unverified. Running it *may* be a security risk.\n\n"
+      "Do you wish to run the game anyway?"
+    ).setParent(*presentation).question() == MessageWindow::Response::No) {
+      emulator->unload();
+      return showMessage("Game loading cancelled");
+    }
+  }
+  hackCompatibility();
+  emulator->power();
+  if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {
+    program->loadState("quick/undo");
+  }
+  showMessage({
+    verified() ? "Verified game loaded" : "Game loaded",
+    appliedPatch() ? " and patch applied" : ""
+  });
+  presentation->setTitle(emulator->title());
+  presentation->resetSystem.setEnabled(true);
+  presentation->unloadGame.setEnabled(true);
+  presentation->toolsMenu.setVisible(true);
+  presentation->speedNormal.setChecked();
+  presentation->pauseEmulation.setChecked(false);
+  presentation->updateStatusIcon();
+  presentation->resizeViewport();
+  toolsWindow->cheatEditor.loadCheats();
+  toolsWindow->stateManager.loadStates();
+  toolsWindow->manifestViewer.loadManifest();
+
+  string locations = superFamicom.location;
+  if(auto location = gameBoy.location) locations.append("|", location);
+  if(auto location = bsMemory.location) locations.append("|", location);
+  if(auto location = sufamiTurboA.location) locations.append("|", location);
+  if(auto location = sufamiTurboB.location) locations.append("|", location);
+  presentation->addRecentGame(locations);
+
+  updateVideoPalette();
+  updateAudioEffects();
+  updateAudioFrequency();
 }
 
 auto Program::loadFile(string location) -> vector<uint8_t> {

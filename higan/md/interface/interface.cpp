@@ -2,60 +2,16 @@
 
 namespace MegaDrive {
 
+#define returns(T) T { return ([&] { struct With : T { With() {
+#define $ }}; return With(); })(); }
+
 Settings settings;
 
-Interface::Interface() {
-  information.manufacturer = "Sega";
-  information.name         = "Mega Drive";
-  information.overscan     = true;
-  information.resettable   = true;
-
-  media.append({ID::MegaDrive, "Mega Drive", "md"});
-
-  Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
-  Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
-  Port extensionPort{ID::Port::Extension, "Extension Port"};
-
-  { Device device{ID::Device::None, "None"};
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-    extensionPort.devices.append(device);
-  }
-
-  { Device device{ID::Device::ControlPad, "Control Pad"};
-    device.inputs.append({0, "Up"   });
-    device.inputs.append({0, "Down" });
-    device.inputs.append({0, "Left" });
-    device.inputs.append({0, "Right"});
-    device.inputs.append({0, "A"    });
-    device.inputs.append({0, "B"    });
-    device.inputs.append({0, "C"    });
-    device.inputs.append({0, "Start"});
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::FightingPad, "Fighting Pad"};
-    device.inputs.append({0, "Up"   });
-    device.inputs.append({0, "Down" });
-    device.inputs.append({0, "Left" });
-    device.inputs.append({0, "Right"});
-    device.inputs.append({0, "A"    });
-    device.inputs.append({0, "B"    });
-    device.inputs.append({0, "C"    });
-    device.inputs.append({0, "X"    });
-    device.inputs.append({0, "Y"    });
-    device.inputs.append({0, "Z"    });
-    device.inputs.append({0, "Mode" });
-    device.inputs.append({0, "Start"});
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  ports.append(move(controllerPort1));
-  ports.append(move(controllerPort2));
-  ports.append(move(extensionPort));
-}
+auto Interface::information() -> returns(Information) {
+  manufacturer = "Sega";
+  name         = "Mega Drive";
+  resettable   = true;
+}$
 
 auto Interface::manifest() -> string {
   return cartridge.manifest();
@@ -65,22 +21,18 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 320;
-  vi.height = 240;
-  vi.internalWidth  = 1280;
-  vi.internalHeight =  480;
-  vi.aspectCorrection = 1.0;
-  vi.refreshRate = (system.frequency() / 2.0) / (vdp.frameHeight() * 1710.0);
-  return vi;
-}
+auto Interface::display() -> returns(Display) {
+  type   = Display::Type::CRT;
+  colors = 3 * (1 << 9);
+  width  = 320;
+  height = 240;
+  internalWidth  = 1280;
+  internalHeight =  480;
+  aspectCorrection = 1.0;
+  refreshRate = (system.frequency() / 2.0) / (vdp.frameHeight() * 1710.0);
+}$
 
-auto Interface::videoColors() -> uint32 {
-  return 3 * (1 << 9);
-}
-
-auto Interface::videoColor(uint32 color) -> uint64 {
+auto Interface::color(uint32 color) -> uint64 {
   uint R = color.bits(0, 2);
   uint G = color.bits(3, 5);
   uint B = color.bits(6, 8);
@@ -103,7 +55,7 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::load(uint id) -> bool {
+auto Interface::load() -> bool {
   return system.load(this);
 }
 
@@ -114,6 +66,67 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Controller1, "Controller Port 1"},
+  {ID::Port::Controller2, "Controller Port 2"},
+  {ID::Port::Extension,   "Extension Port"   }};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Controller1) return {
+    {ID::Device::None,        "None"        },
+    {ID::Device::ControlPad,  "Control Pad" },
+    {ID::Device::FightingPad, "Fighting Pad"}
+  };
+
+  if(port == ID::Port::Controller2) return {
+    {ID::Device::None,        "None"        },
+    {ID::Device::ControlPad,  "Control Pad" },
+    {ID::Device::FightingPad, "Fighting Pad"}
+  };
+
+  if(port == ID::Port::Extension) return {
+    {ID::Device::None, "None"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::None) return {
+  };
+
+  if(device == ID::Device::ControlPad) return {
+    {Type::Hat,     "Up"   },
+    {Type::Hat,     "Down" },
+    {Type::Hat,     "Left" },
+    {Type::Hat,     "Right"},
+    {Type::Button,  "A"    },
+    {Type::Button,  "B"    },
+    {Type::Button,  "C"    },
+    {Type::Control, "Start"}
+  };
+
+  if(device == ID::Device::FightingPad) return {
+    {Type::Hat,     "Up"   },
+    {Type::Hat,     "Down" },
+    {Type::Hat,     "Left" },
+    {Type::Hat,     "Right"},
+    {Type::Button,  "A"    },
+    {Type::Button,  "B"    },
+    {Type::Button,  "C"    },
+    {Type::Button,  "X"    },
+    {Type::Button,  "Y"    },
+    {Type::Button,  "Z"    },
+    {Type::Control, "Mode" },
+    {Type::Control, "Start"}
+  };
+
+  return {};
 }
 
 auto Interface::connected(uint port) -> uint {
@@ -165,5 +178,8 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   return false;
 }
+
+#undef returns
+#undef $
 
 }

@@ -2,40 +2,16 @@
 
 namespace Famicom {
 
+#define returns(T) T { return ([&] { struct With : T { With() {
+#define $ }}; return With(); })(); }
+
 Settings settings;
 
-Interface::Interface() {
-  information.manufacturer = "Nintendo";
-  information.name         = "Famicom";
-  information.overscan     = true;
-  information.resettable   = true;
-
-  media.append({ID::Famicom, "Famicom", "fc"});
-
-  Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
-  Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
-
-  { Device device{ID::Device::None, "None"};
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Gamepad, "Gamepad"};
-    device.inputs.append({0, "Up"    });
-    device.inputs.append({0, "Down"  });
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    device.inputs.append({0, "B"     });
-    device.inputs.append({0, "A"     });
-    device.inputs.append({0, "Select"});
-    device.inputs.append({0, "Start" });
-    controllerPort1.devices.append(device);
-    controllerPort2.devices.append(device);
-  }
-
-  ports.append(move(controllerPort1));
-  ports.append(move(controllerPort2));
-}
+auto Interface::information() -> returns(Information) {
+  manufacturer = "Nintendo";
+  name         = "Famicom";
+  resettable   = true;
+}$
 
 auto Interface::manifest() -> string {
   return cartridge.manifest();
@@ -45,22 +21,18 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 256;
-  vi.height = 240;
-  vi.internalWidth  = 256;
-  vi.internalHeight = 240;
-  vi.aspectCorrection = 8.0 / 7.0;
-  vi.refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
-  return vi;
-}
+auto Interface::display() -> returns(Display) {
+  type   = Display::Type::CRT;
+  colors = 1 << 9;
+  width  = 256;
+  height = 240;
+  internalWidth  = 256;
+  internalHeight = 240;
+  aspectCorrection = 8.0 / 7.0;
+  refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
+}$
 
-auto Interface::videoColors() -> uint32 {
-  return 1 << 9;
-}
-
-auto Interface::videoColor(uint32 n) -> uint64 {
+auto Interface::color(uint32 n) -> uint64 {
   double saturation = 2.0;
   double hue = 0.0;
   double contrast = 1.0;
@@ -119,7 +91,7 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::load(uint id) -> bool {
+auto Interface::load() -> bool {
   return system.load(this);
 }
 
@@ -130,6 +102,50 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Controller1, "Controller Port 1"},
+  {ID::Port::Controller2, "Controller Port 2"},
+  {ID::Port::Expansion,   "Expansion Port"   }};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Controller1) return {
+    {ID::Device::None,    "None"   },
+    {ID::Device::Gamepad, "Gamepad"}
+  };
+
+  if(port == ID::Port::Controller2) return {
+    {ID::Device::None,    "None"   },
+    {ID::Device::Gamepad, "Gamepad"}
+  };
+
+  if(port == ID::Port::Expansion) return {
+    {ID::Device::None, "None"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::None) return {
+  };
+
+  if(device == ID::Device::Gamepad) return {
+    {Type::Hat,     "Up"    },
+    {Type::Hat,     "Down"  },
+    {Type::Hat,     "Left"  },
+    {Type::Hat,     "Right" },
+    {Type::Button,  "B"     },
+    {Type::Button,  "A"     },
+    {Type::Control, "Select"},
+    {Type::Control, "Start" }
+  };
+
+  return {};
 }
 
 auto Interface::connected(uint port) -> uint {
@@ -190,5 +206,8 @@ auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;
   return false;
 }
+
+#undef returns
+#undef $
 
 }

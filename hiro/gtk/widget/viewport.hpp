@@ -5,7 +5,7 @@ namespace hiro {
 struct pViewport : pWidget {
   Declare(Viewport, Widget)
 
-  auto handle() const -> uintptr_t;
+  auto handle() const -> uintptr;
   auto setDroppable(bool droppable) -> void;
 };
 

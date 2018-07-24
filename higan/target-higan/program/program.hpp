@@ -15,10 +15,10 @@ struct Program : Emulator::Platform {
   auto dipSettings(Markup::Node node) -> uint override;
   auto notify(string text) -> void override;
 
-  //medium.cpp
-  auto loadMedium() -> void;
-  auto loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void;
-  auto unloadMedium() -> void;
+  //game.cpp
+  auto load() -> void;
+  auto load(Emulator::Interface& interface) -> void;
+  auto unload() -> void;
 
   //state.cpp
   auto stateName(uint slot, bool managed = false) -> string;
@@ -47,8 +47,8 @@ struct Program : Emulator::Platform {
 
   vector<Emulator::Interface*> emulators;
 
-  vector<string> mediumQueue;  //for command-line and drag-and-drop loading
-  vector<string> mediumPaths;  //for keeping track of loaded folder locations
+  vector<string> gameQueue;  //for command-line and drag-and-drop loading
+  vector<string> gamePaths;  //for keeping track of loaded folder locations
 
   time_t autoSaveTime = 0;  //for automatically saving RAM periodically
 

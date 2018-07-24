@@ -6,9 +6,16 @@ struct InputMapping {
   auto poll() -> int16;
   auto rumble(bool enable) -> void;
 
-  auto isDigital() const -> bool { return type == 0; }
-  auto isAnalog() const -> bool { return type == 1; }
-  auto isRumble() const -> bool { return type == 2; }
+  using Type = Emulator::Interface::Input::Type;
+  auto isDigital() const -> bool {
+    return type == Type::Hat || type == Type::Button || type == Type::Trigger || type == Type::Control;
+  }
+  auto isAnalog() const -> bool {
+    return type == Type::Axis;
+  }
+  auto isRumble() const -> bool {
+    return type == Type::Rumble;
+  }
 
   auto displayName() -> string;
 

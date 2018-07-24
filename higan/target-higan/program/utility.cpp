@@ -63,8 +63,7 @@ auto Program::initializeInputDriver() -> void {
 }
 
 auto Program::softReset() -> void {
-  if(!emulator) return;
-  if(!emulator->information.resettable) return;
+  if(!emulator || !emulator->information().resettable) return;
   emulator->reset();
   showMessage("System has been soft reset");
 }

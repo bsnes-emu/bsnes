@@ -54,6 +54,9 @@ auto pApplication::quit() -> void {
   PostQuitMessage(0);
 }
 
+auto pApplication::setScreenSaver(bool screenSaver) -> void {
+}
+
 auto pApplication::initialize() -> void {
   CoInitialize(0);
   InitCommonControls();
@@ -262,7 +265,7 @@ static auto CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, 
   case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: pWindow->onModalEnd(); return false;
   case WM_SYSCOMMAND:
     if(wparam == SC_SCREENSAVE || wparam == SC_MONITORPOWER) {
-      if(!Application::Windows::doScreenSaver()) return 0;
+      if(!Application::screenSaver()) return 0;
     }
   }
 

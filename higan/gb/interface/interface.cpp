@@ -2,31 +2,13 @@
 
 namespace GameBoy {
 
+#define returns(T) T { return ([&] { struct With : T { With() {
+#define $ }}; return With(); })(); }
+
 SuperGameBoyInterface* superGameBoy = nullptr;
 Settings settings;
 #include "game-boy.cpp"
 #include "game-boy-color.cpp"
-
-Interface::Interface() {
-  Port hardwarePort{ID::Port::Hardware, "Hardware"};
-
-  { Device device{ID::Device::Controls, "Controls"};
-    device.inputs.append({0, "Up"    });
-    device.inputs.append({0, "Down"  });
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    device.inputs.append({0, "B"     });
-    device.inputs.append({0, "A"     });
-    device.inputs.append({0, "Select"});
-    device.inputs.append({0, "Start" });
-    device.inputs.append({1, "X-axis"});
-    device.inputs.append({1, "Y-axis"});
-    device.inputs.append({2, "Rumble"});
-    hardwarePort.devices.append(device);
-  }
-
-  ports.append(move(hardwarePort));
-}
 
 auto Interface::manifest() -> string {
   return cartridge.manifest();
@@ -36,16 +18,16 @@ auto Interface::title() -> string {
   return cartridge.title();
 }
 
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 160;
-  vi.height = 144;
-  vi.internalWidth  = 160;
-  vi.internalHeight = 144;
-  vi.aspectCorrection = 1.0;
-  vi.refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
-  return vi;
-}
+auto Interface::display() -> returns(Display) {
+  type   = Display::Type::LCD;
+  colors = Model::GameBoyColor() ? 1 << 15 : 1 << 2;
+  width  = 160;
+  height = 144;
+  internalWidth  = 160;
+  internalHeight = 144;
+  aspectCorrection = 1.0;
+  refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
+}$
 
 auto Interface::loaded() -> bool {
   return system.loaded();
@@ -62,6 +44,38 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Hardware, "Hardware"}};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Hardware) return {
+    {ID::Device::Controls, "Controls"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::Controls) return {
+    {Type::Hat,     "Up"    },
+    {Type::Hat,     "Down"  },
+    {Type::Hat,     "Left"  },
+    {Type::Hat,     "Right" },
+    {Type::Button,  "B"     },
+    {Type::Button,  "A"     },
+    {Type::Control, "Select"},
+    {Type::Control, "Start" },
+    {Type::Axis,    "X-axis"},
+    {Type::Axis,    "Y-axis"},
+    {Type::Rumble,  "Rumble"}
+  };
+
+  return {};
 }
 
 auto Interface::power() -> void {
@@ -114,5 +128,8 @@ auto Interface::set(const string& name, const any& value) -> bool {
 
   return false;
 }
+
+#undef returns
+#undef $
 
 }

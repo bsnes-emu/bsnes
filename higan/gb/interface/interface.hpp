@@ -18,18 +18,20 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  Interface();
-
   auto manifest() -> string override;
   auto title() -> string override;
 
-  auto videoInformation() -> VideoInformation override;
+  auto display() -> Display override;
 
   auto loaded() -> bool override;
   auto sha256() -> string override;
 
   auto save() -> void override;
   auto unload() -> void override;
+
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
 
   auto power() -> void override;
   auto run() -> void override;
@@ -47,23 +49,21 @@ struct Interface : Emulator::Interface {
 struct GameBoyInterface : Interface {
   using Emulator::Interface::load;
 
-  GameBoyInterface();
+  auto information() -> Information override;
 
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto color(uint32 color) -> uint64 override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct GameBoyColorInterface : Interface {
   using Emulator::Interface::load;
 
-  GameBoyColorInterface();
+  auto information() -> Information override;
 
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto color(uint32 color) -> uint64 override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct SuperGameBoyInterface {

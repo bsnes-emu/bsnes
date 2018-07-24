@@ -1,5 +1,5 @@
 auto Program::path(uint id) -> string {
-  return mediumPaths(id);
+  return gamePaths(id);
 }
 
 auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
@@ -25,8 +25,8 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 
 auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
   string location, option;
-  if(mediumQueue) {
-    auto entry = mediumQueue.takeLeft().split("|", 1L);
+  if(gameQueue) {
+    auto entry = gameQueue.takeLeft().split("|", 1L);
     location = entry.right();
     if(entry.size() == 1) option = options(0);
     if(entry.size() == 2) option = entry.left();
@@ -41,12 +41,12 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
     option = dialog.option();
   }
   if(!directory::exists(location)) {
-    mediumQueue.reset();
+    gameQueue.reset();
     return {};
   }
 
-  uint pathID = mediumPaths.size();
-  mediumPaths.append(location);
+  uint pathID = gamePaths.size();
+  gamePaths.append(location);
   return {pathID, option};
 }
 
@@ -56,12 +56,12 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 
   pitch >>= 2;
 
-  if(emulator->information.overscan) {
+  auto display = emulator->display();
+  if(display.type == Emulator::Interface::Display::Type::CRT) {
     uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
     uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
-    auto information = emulator->videoInformation();
-    overscanHorizontal *= information.internalWidth / information.width;
-    overscanVertical *= information.internalHeight / information.height;
+    overscanHorizontal *= display.internalWidth / display.width;
+    overscanVertical *= display.internalHeight / display.height;
     data += overscanVertical * pitch + overscanHorizontal;
     width -= overscanHorizontal * 2;
     height -= overscanVertical * 2;

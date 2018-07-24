@@ -1,4 +1,4 @@
-target := bsnes
+target := higan
 binary := application
 build := performance
 openmp := true

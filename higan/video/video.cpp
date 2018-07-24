@@ -30,10 +30,10 @@ auto Video::setPalette() -> void {
   if(!interface) return;
 
   delete palette;
-  colors = interface->videoColors();
+  colors = interface->display().colors;
   palette = new uint32[colors];
   for(auto index : range(colors)) {
-    uint64 color = interface->videoColor(index);
+    uint64 color = interface->color(index);
     uint16 b = color.bits( 0,15);
     uint16 g = color.bits(16,31);
     uint16 r = color.bits(32,47);

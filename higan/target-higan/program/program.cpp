@@ -1,14 +1,14 @@
 #include "../higan.hpp"
 #include <fc/interface/interface.hpp>
 #include <sfc/interface/interface.hpp>
-#include <ms/interface/interface.hpp>
+//#include <ms/interface/interface.hpp>
 #include <md/interface/interface.hpp>
-#include <pce/interface/interface.hpp>
+//#include <pce/interface/interface.hpp>
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
-#include <ws/interface/interface.hpp>
+//#include <ws/interface/interface.hpp>
 #include "platform.cpp"
-#include "medium.cpp"
+#include "game.cpp"
 #include "state.cpp"
 #include "utility.cpp"
 unique_pointer<Program> program;
@@ -19,17 +19,17 @@ Program::Program(string_vector args) {
   Emulator::platform = this;
   emulators.append(new Famicom::Interface);
   emulators.append(new SuperFamicom::Interface);
-  emulators.append(new MasterSystem::MasterSystemInterface);
+//  emulators.append(new MasterSystem::MasterSystemInterface);
   emulators.append(new MegaDrive::Interface);
-  emulators.append(new PCEngine::PCEngineInterface);
-  emulators.append(new PCEngine::SuperGrafxInterface);
+//  emulators.append(new PCEngine::PCEngineInterface);
+//  emulators.append(new PCEngine::SuperGrafxInterface);
   emulators.append(new GameBoy::GameBoyInterface);
   emulators.append(new GameBoy::GameBoyColorInterface);
   emulators.append(new GameBoyAdvance::Interface);
-  emulators.append(new MasterSystem::GameGearInterface);
-  emulators.append(new WonderSwan::WonderSwanInterface);
-  emulators.append(new WonderSwan::WonderSwanColorInterface);
-  emulators.append(new WonderSwan::PocketChallengeV2Interface);
+//  emulators.append(new MasterSystem::GameGearInterface);
+//  emulators.append(new WonderSwan::WonderSwanInterface);
+//  emulators.append(new WonderSwan::WonderSwanColorInterface);
+//  emulators.append(new WonderSwan::PocketChallengeV2Interface);
 
   new Presentation;
   presentation->setVisible();
@@ -68,14 +68,14 @@ Program::Program(string_vector args) {
       presentation->toggleFullScreen();
     } else if(directory::exists(argument.split("|", 1L).right())) {
       if(!argument.transform("\\", "/").endsWith("/")) argument.append("/");
-      mediumQueue.append(argument);
+      gameQueue.append(argument);
     } else if(file::exists(argument)) {
       if(auto result = execute("icarus", "--import", argument)) {
-        mediumQueue.append(result.output.strip());
+        gameQueue.append(result.output.strip());
       }
     }
   }
-  loadMedium();
+  if(gameQueue) load();
 
   Application::onMain({&Program::main, this});
 }
@@ -107,7 +107,7 @@ auto Program::main() -> void {
 
 auto Program::quit() -> void {
   hasQuit = true;
-  unloadMedium();
+  unload();
   settings.save();
   inputManager->quit();
   video.reset();

@@ -4,15 +4,13 @@ SystemProperties::SystemProperties() {
   layout.setPadding(5);
   systemLabel.setAlignment(1.0).setText("System:");
   for(auto& emulator : program->emulators) {
-    systemOption.append(ComboButtonItem().setText(emulator->information.name));
+    systemOption.append(ComboButtonItem().setText(emulator->information().name));
   }
   loadLabel.setAlignment(1.0).setText("Load:");
   loadBrowse.setText("Browse ...").onActivate([&] {
     string filters = "Games|";
     for(auto& emulator : program->emulators) {
-      for(auto& media : emulator->media) {
-        filters.append("*.", media.type, ":");
-      }
+      filters.append("*.", emulator->information().extension, ":");
     }
     filters.trimRight(":", 1L);
     if(auto location = BrowserDialog()
@@ -21,17 +19,13 @@ SystemProperties::SystemProperties() {
     .setFilters(filters)
     .openFolder()) {
       loadEdit.setText(location);
-      //change system option to match the media selected
-      auto suffix = Location::suffix(location).trimLeft(".", 1L);
+      //change system option to match the game selected
+      auto extension = Location::suffix(location).trimLeft(".", 1L);
       for(auto& emulator : program->emulators) {
-        for(auto& media : emulator->media) {
-          if(media.type == suffix) {
-            for(auto item : systemOption.items()) {
-              if(item.text() == emulator->information.name) {
-                item.setSelected();
-                return;
-              }
-            }
+        auto information = emulator->information();
+        if(information.extension == extension) {
+          for(auto item : systemOption.items()) {
+            if(item.text() == information.name) return item.setSelected(), void();
           }
         }
       }

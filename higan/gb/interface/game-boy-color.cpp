@@ -1,16 +1,10 @@
-GameBoyColorInterface::GameBoyColorInterface() {
-  information.manufacturer = "Nintendo";
-  information.name         = "Game Boy Color";
-  information.overscan     = false;
+auto GameBoyColorInterface::information() -> returns(Information) {
+  manufacturer = "Nintendo";
+  name         = "Game Boy Color";
+  extension    = "gbc";
+}$
 
-  media.append({ID::GameBoyColor, "Game Boy Color", "gbc"});
-}
-
-auto GameBoyColorInterface::videoColors() -> uint32 {
-  return 1 << 15;
-}
-
-auto GameBoyColorInterface::videoColor(uint32 color) -> uint64 {
+auto GameBoyColorInterface::color(uint32 color) -> uint64 {
   uint r = color.bits( 0, 4);
   uint g = color.bits( 5, 9);
   uint b = color.bits(10,14);
@@ -31,7 +25,6 @@ auto GameBoyColorInterface::videoColor(uint32 color) -> uint64 {
   return R << 32 | G << 16 | B << 0;
 }
 
-auto GameBoyColorInterface::load(uint id) -> bool {
-  if(id == ID::GameBoyColor) return system.load(this, System::Model::GameBoyColor);
-  return false;
+auto GameBoyColorInterface::load() -> bool {
+  return system.load(this, System::Model::GameBoyColor);
 }
