@@ -17,8 +17,8 @@ struct AudioOSS : Audio {
   AudioOSS() { initialize(); }
   ~AudioOSS() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    string_vector devices;
+  auto availableDevices() -> vector<string> {
+    vector<string> devices;
     devices.append("/dev/dsp");
     for(auto& device : directory::files("/dev/", "dsp?*")) devices.append(string{"/dev/", device});
     return devices;

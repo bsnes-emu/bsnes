@@ -16,7 +16,7 @@
 #include <processor/upd96050/upd96050.hpp>
 #include <processor/wdc65816/wdc65816.hpp>
 
-#if defined(SFC_SUPERGAMEBOY)
+#if defined(CORE_GB)
   #include <gb/gb.hpp>
 #endif
 

@@ -1,3 +1,5 @@
+#if defined(CORE_MS)
+
 namespace MasterSystem {
 
 struct ID {
@@ -22,12 +24,10 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  Interface();
-
-  auto manifest() -> string override;
-  auto title() -> string override;
-
   auto loaded() -> bool override;
+  auto hashes() -> vector<string> override;
+  auto manifests() -> vector<string> override;
+  auto titles() -> vector<string> override;
   auto save() -> void override;
   auto unload() -> void override;
 
@@ -37,7 +37,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const string_vector&) -> void override;
+  auto cheats(const vector<string>& list) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
@@ -45,36 +45,41 @@ struct Interface : Emulator::Interface {
 };
 
 struct MasterSystemInterface : Interface {
-  using Emulator::Interface::load;
+  auto information() -> Information override;
 
-  MasterSystemInterface();
+  auto displays() -> vector<Display> override;
+  auto color(uint32 color) -> uint64 override;
 
-  auto videoInformation() -> VideoInformation override;
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 
+  auto connected(uint port) -> uint override;
   auto connect(uint port, uint device) -> void override;
 };
 
 struct GameGearInterface : Interface {
-  using Emulator::Interface::load;
+  auto information() -> Information override;
 
-  GameGearInterface();
+  auto displays() -> vector<Display> override;
+  auto color(uint32 color) -> uint64 override;
 
-  auto videoInformation() -> VideoInformation override;
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct Settings {
-  uint controllerPort1 = 0;
-  uint controllerPort2 = 0;
+  uint controllerPort1 = ID::Device::Gamepad;
+  uint controllerPort2 = ID::Device::Gamepad;
 };
 
 extern Settings settings;
 
 }
+
+#endif

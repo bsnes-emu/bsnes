@@ -2,7 +2,7 @@
 
 namespace hiro {
 
-static auto BrowserWindow_addFilters(GtkWidget* dialog, string_vector filters) -> void {
+static auto BrowserWindow_addFilters(GtkWidget* dialog, vector<string> filters) -> void {
   for(auto& filter : filters) {
     GtkFileFilter* gtkFilter = gtk_file_filter_new();
     gtk_file_filter_set_name(gtkFilter, filter);

@@ -211,7 +211,7 @@ auto Cartridge::loadBSMemory(Markup::Node node) -> void {
   has.BSMemorySlot = true;
 
   if(auto loaded = platform->load(ID::BSMemory, "BS Memory", "bs")) {
-    bsmemory.pathID = loaded.pathID();
+    bsmemory.pathID = loaded.pathID;
     loadBSMemory();
 
     for(auto map : node.find("map")) {
@@ -225,7 +225,7 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   has.SufamiTurboSlotA = true;
 
   if(auto loaded = platform->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
-    sufamiturboA.pathID = loaded.pathID();
+    sufamiturboA.pathID = loaded.pathID;
     loadSufamiTurboA();
 
     for(auto map : node.find("rom/map")) {
@@ -243,7 +243,7 @@ auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
   has.SufamiTurboSlotB = true;
 
   if(auto loaded = platform->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
-    sufamiturboB.pathID = loaded.pathID();
+    sufamiturboB.pathID = loaded.pathID;
     loadSufamiTurboB();
 
     for(auto map : node.find("rom/map")) {

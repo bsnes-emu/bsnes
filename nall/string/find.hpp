@@ -2,7 +2,7 @@
 
 namespace nall {
 
-template<bool Insensitive, bool Quoted> auto string::_find(int offset, string_view source) const -> maybe<uint> {
+template<bool Insensitive, bool Quoted> auto string::_find(int offset, view<string> source) const -> maybe<uint> {
   if(source.size() == 0) return nothing;
 
   auto p = data();
@@ -15,12 +15,12 @@ template<bool Insensitive, bool Quoted> auto string::_find(int offset, string_vi
   return nothing;
 }
 
-auto string::find(string_view source) const -> maybe<uint> { return _find<0, 0>(0, source); }
-auto string::ifind(string_view source) const -> maybe<uint> { return _find<1, 0>(0, source); }
-auto string::qfind(string_view source) const -> maybe<uint> { return _find<0, 1>(0, source); }
-auto string::iqfind(string_view source) const -> maybe<uint> { return _find<1, 1>(0, source); }
+auto string::find(view<string> source) const -> maybe<uint> { return _find<0, 0>(0, source); }
+auto string::ifind(view<string> source) const -> maybe<uint> { return _find<1, 0>(0, source); }
+auto string::qfind(view<string> source) const -> maybe<uint> { return _find<0, 1>(0, source); }
+auto string::iqfind(view<string> source) const -> maybe<uint> { return _find<1, 1>(0, source); }
 
-auto string::findFrom(int offset, string_view source) const -> maybe<uint> { return _find<0, 0>(offset, source); }
-auto string::ifindFrom(int offset, string_view source) const -> maybe<uint> { return _find<1, 0>(offset, source); }
+auto string::findFrom(int offset, view<string> source) const -> maybe<uint> { return _find<0, 0>(offset, source); }
+auto string::ifindFrom(int offset, view<string> source) const -> maybe<uint> { return _find<1, 0>(offset, source); }
 
 }

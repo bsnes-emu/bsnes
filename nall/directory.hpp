@@ -22,19 +22,19 @@ struct directory : inode {
   static auto remove(const string& pathname) -> bool;  //recursive
   static auto exists(const string& pathname) -> bool;
 
-  static auto folders(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto folders(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname, pattern);
     folders.sort();
     return folders;
   }
 
-  static auto files(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto files(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto files = directory::ufiles(pathname, pattern);
     files.sort();
     return files;
   }
 
-  static auto contents(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto contents(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
     auto files = directory::ufiles(pathname, pattern);
     folders.sort();
@@ -43,19 +43,19 @@ struct directory : inode {
     return folders;
   }
 
-  static auto ifolders(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto ifolders(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = ufolders(pathname, pattern);
     folders.isort();
     return folders;
   }
 
-  static auto ifiles(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto ifiles(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto files = ufiles(pathname, pattern);
     files.isort();
     return files;
   }
 
-  static auto icontents(const string& pathname, const string& pattern = "*") -> string_vector {
+  static auto icontents(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
     auto files = directory::ufiles(pathname, pattern);
     folders.isort();
@@ -66,8 +66,8 @@ struct directory : inode {
 
 private:
   //internal functions; these return unsorted lists
-  static auto ufolders(const string& pathname, const string& pattern = "*") -> string_vector;
-  static auto ufiles(const string& pathname, const string& pattern = "*") -> string_vector;
+  static auto ufolders(const string& pathname, const string& pattern = "*") -> vector<string>;
+  static auto ufiles(const string& pathname, const string& pattern = "*") -> vector<string>;
 };
 
 #if defined(PLATFORM_WINDOWS)
@@ -100,7 +100,7 @@ private:
     return (result & FILE_ATTRIBUTE_DIRECTORY);
   }
 
-  inline auto directory::ufolders(const string& pathname, const string& pattern) -> string_vector {
+  inline auto directory::ufolders(const string& pathname, const string& pattern) -> vector<string> {
     if(!pathname) {
       //special root pseudo-folder (return list of drives)
       wchar_t drives[PATH_MAX] = {0};
@@ -113,7 +113,7 @@ private:
       return string{(const char*)utf8_t(drives)}.replace("\\", "/").split(";");
     }
 
-    string_vector list;
+    vector<string> list;
     string path = pathname;
     path.transform("/", "\\");
     if(!path.endsWith("\\")) path.append("\\");
@@ -142,10 +142,10 @@ private:
     return list;
   }
 
-  inline auto directory::ufiles(const string& pathname, const string& pattern) -> string_vector {
+  inline auto directory::ufiles(const string& pathname, const string& pattern) -> vector<string> {
     if(!pathname) return {};
 
-    string_vector list;
+    vector<string> list;
     string path = pathname;
     path.transform("/", "\\");
     if(!path.endsWith("\\")) path.append("\\");
@@ -207,10 +207,10 @@ private:
     return S_ISDIR(data.st_mode);
   }
 
-  inline auto directory::ufolders(const string& pathname, const string& pattern) -> string_vector {
-    if(!pathname) return string_vector{"/"};
+  inline auto directory::ufolders(const string& pathname, const string& pattern) -> vector<string> {
+    if(!pathname) return vector<string>{"/"};
 
-    string_vector list;
+    vector<string> list;
     DIR* dp;
     struct dirent* ep;
     dp = opendir(pathname);
@@ -228,10 +228,10 @@ private:
     return list;
   }
 
-  inline auto directory::ufiles(const string& pathname, const string& pattern) -> string_vector {
+  inline auto directory::ufiles(const string& pathname, const string& pattern) -> vector<string> {
     if(!pathname) return {};
 
-    string_vector list;
+    vector<string> list;
     DIR* dp;
     struct dirent* ep;
     dp = opendir(pathname);

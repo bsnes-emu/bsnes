@@ -46,7 +46,7 @@ auto MegaDrive::manifest() const -> string {
   if(ramMode != "none") ramSize = bit::round(min(0x20000, ramSize));
   if(ramMode == "none") ramSize = 0;
 
-  string_vector regions;
+  vector<string> regions;
   string region = slice((const char*)&data[0x1f0], 0, 16).trimRight(" ");
   if(!regions) {
     if(region == "JAPAN" ) regions.append("NTSC-J");
@@ -68,6 +68,16 @@ auto MegaDrive::manifest() const -> string {
     regions.append("NTSC-J");
   }
 
+  string domesticName;
+  domesticName.resize(48);
+  memory::copy(domesticName.get(), &data[0x0120], domesticName.size());
+  domesticName.strip();
+
+  string internationalName;
+  internationalName.resize(48);
+  memory::copy(internationalName.get(), &data[0x0150], internationalName.size());
+  internationalName.strip();
+
   string output;
   output.append("game\n");
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
@@ -75,7 +85,12 @@ auto MegaDrive::manifest() const -> string {
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  region: ", regions.left(), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
+  if(domesticName == "SONIC & KNUCKLES") {
+    output.append(Memory{}.type("ROM").size(0x200000).content("Program").text());
+    output.append(Memory{}.type("ROM").size( 0x40000).content("Patch").text());
+  } else {
+    output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
+  }
   if(ramSize && ramMode != "none") {
     output.append(Memory{}.type("RAM").size(ramSize).content("Save").text());
     output.append("      mode: ", ramMode, "\n");

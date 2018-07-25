@@ -17,7 +17,7 @@ CheatDatabase::CheatDatabase() {
 
 auto CheatDatabase::findCodes() -> void {
   if(!emulator) return;
-  auto sha256 = emulator->sha256();
+  auto sha256 = emulator->hashes().left();
 
   auto contents = string::read(locate("cheats.bml"));
   auto document = BML::unserialize(contents);

@@ -1,15 +1,4 @@
 name := higan
-flags += -DSFC_SUPERGAMEBOY
-
-include fc/GNUmakefile
-include sfc/GNUmakefile
-#include ms/GNUmakefile
-include md/GNUmakefile
-#include pce/GNUmakefile
-include gb/GNUmakefile
-include gba/GNUmakefile
-#include ws/GNUmakefile
-include processor/GNUmakefile
 
 hiro.path := ../hiro
 hiro.resource := $(ui)/resource/higan.rc

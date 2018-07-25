@@ -96,6 +96,7 @@ struct VRC7 : Chip {
     case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
     case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
     }
+    unreachable;
   }
 
   auto power() -> void {

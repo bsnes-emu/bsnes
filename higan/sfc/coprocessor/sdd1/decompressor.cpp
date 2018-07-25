@@ -253,6 +253,8 @@ auto SDD1::Decompressor::OL::decompress() -> uint8 {
     }
     return r1;
   }
+
+  return 0;  //unreachable?
 }
 
 //core

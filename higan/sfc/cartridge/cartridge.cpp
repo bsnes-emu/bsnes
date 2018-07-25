@@ -7,23 +7,34 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-auto Cartridge::manifest() const -> string {
-  string manifest = BML::serialize(game.document);
-  manifest.append("\n", BML::serialize(board));
-  if(slotGameBoy.document) manifest.append("\n", BML::serialize(slotGameBoy.document));
-  if(slotBSMemory.document) manifest.append("\n", BML::serialize(slotBSMemory.document));
-  if(slotSufamiTurboA.document) manifest.append("\n", BML::serialize(slotSufamiTurboA.document));
-  if(slotSufamiTurboB.document) manifest.append("\n", BML::serialize(slotSufamiTurboB.document));
-  return manifest;
+auto Cartridge::hashes() const -> vector<string> {
+  vector<string> hashes;
+  hashes.append(game.sha256);
+  if(slotGameBoy.sha256) hashes.append(slotGameBoy.sha256);
+  if(slotBSMemory.sha256) hashes.append(slotBSMemory.sha256);
+  if(slotSufamiTurboA.sha256) hashes.append(slotSufamiTurboA.sha256);
+  if(slotSufamiTurboB.sha256) hashes.append(slotSufamiTurboB.sha256);
+  return hashes;
 }
 
-auto Cartridge::title() const -> string {
-  auto label = game.label;
-  if(slotGameBoy.label) label.append(" + ", slotGameBoy.label);
-  if(slotBSMemory.label) label.append(" + ", slotBSMemory.label);
-  if(slotSufamiTurboA.label) label.append(" + ", slotSufamiTurboA.label);
-  if(slotSufamiTurboB.label) label.append(" + ", slotSufamiTurboB.label);
-  return label;
+auto Cartridge::manifests() const -> vector<string> {
+  vector<string> manifests;
+  manifests.append(string{BML::serialize(game.document), "\n", BML::serialize(board)});
+  if(slotGameBoy.document) manifests.append(BML::serialize(slotGameBoy.document));
+  if(slotBSMemory.document) manifests.append(BML::serialize(slotBSMemory.document));
+  if(slotSufamiTurboA.document) manifests.append(BML::serialize(slotSufamiTurboA.document));
+  if(slotSufamiTurboB.document) manifests.append(BML::serialize(slotSufamiTurboB.document));
+  return manifests;
+}
+
+auto Cartridge::titles() const -> vector<string> {
+  vector<string> titles;
+  titles.append(game.label);
+  if(slotGameBoy.label) titles.append(slotGameBoy.label);
+  if(slotBSMemory.label) titles.append(slotBSMemory.label);
+  if(slotSufamiTurboA.label) titles.append(slotSufamiTurboA.label);
+  if(slotSufamiTurboB.label) titles.append(slotSufamiTurboB.label);
+  return titles;
 }
 
 auto Cartridge::load() -> bool {
@@ -36,8 +47,8 @@ auto Cartridge::load() -> bool {
   slotSufamiTurboB = {};
 
   if(auto loaded = platform->load(ID::SuperFamicom, "Super Famicom", "sfc", {"Auto", "NTSC", "PAL"})) {
-    information.pathID = loaded.pathID();
-    information.region = loaded.option();
+    information.pathID = loaded.pathID;
+    information.region = loaded.option;
   } else return false;
 
   if(auto fp = platform->open(ID::SuperFamicom, "manifest.bml", File::Read, File::Required)) {
@@ -93,9 +104,9 @@ auto Cartridge::load() -> bool {
 }
 
 auto Cartridge::loadGameBoy() -> bool {
-  #if defined(SFC_SUPERGAMEBOY)
+  #if defined(CORE_GB)
   //invoked from ICD::load()
-  information.sha256 = GameBoy::cartridge.sha256();
+  information.sha256 = GameBoy::cartridge.hash();
   slotGameBoy.load(GameBoy::cartridge.manifest());
   loadCartridgeGameBoy(slotGameBoy.document);
   return true;

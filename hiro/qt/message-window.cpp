@@ -27,6 +27,7 @@ static auto MessageWindow_response(MessageWindow::Buttons buttons, QMessageBox::
 }
 
 auto pMessageWindow::error(MessageWindow::State& state) -> MessageWindow::Response {
+  return {};
 //  return MessageWindow_response(
 //    state.buttons, QMessageBox::critical(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
 //    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
@@ -34,6 +35,7 @@ auto pMessageWindow::error(MessageWindow::State& state) -> MessageWindow::Respon
 }
 
 auto pMessageWindow::information(MessageWindow::State& state) -> MessageWindow::Response {
+  return {};
 //  return MessageWindow_response(
 //    state.buttons, QMessageBox::information(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
 //    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
@@ -41,6 +43,7 @@ auto pMessageWindow::information(MessageWindow::State& state) -> MessageWindow::
 }
 
 auto pMessageWindow::question(MessageWindow::State& state) -> MessageWindow::Response {
+  return {};
 //  return MessageWindow_response(
 //    state.buttons, QMessageBox::question(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
 //    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
@@ -48,6 +51,7 @@ auto pMessageWindow::question(MessageWindow::State& state) -> MessageWindow::Res
 }
 
 auto pMessageWindow::warning(MessageWindow::State& state) -> MessageWindow::Response {
+  return {};
 //  return MessageWindow_response(
 //    state.buttons, QMessageBox::warning(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
 //    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))

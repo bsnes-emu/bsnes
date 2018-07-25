@@ -20,7 +20,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
       return false;
     }
 
-    string_vector side;
+    vector<string> side;
     switch(comparator) {
     case Comparator::EQ: side = rule.split ("=", 1L); break;
     case Comparator::NE: side = rule.split("!=", 1L); break;

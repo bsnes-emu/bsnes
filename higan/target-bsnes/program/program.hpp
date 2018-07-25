@@ -2,14 +2,14 @@ struct Program : Emulator::Platform {
   Application::Namespace tr{"Program"};
 
   //program.cpp
-  Program(string_vector arguments);
+  Program(vector<string> arguments);
   auto main() -> void;
   auto quit() -> void;
 
   //platform.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
-  auto load(uint id, string name, string type, string_vector options = {}) -> Emulator::Platform::Load override;
-  auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
+  auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
+  auto videoRefresh(uint display, const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
@@ -49,7 +49,7 @@ struct Program : Emulator::Platform {
   auto screenshotPath() -> string;
 
   //states.cpp
-  auto managedStates() -> string_vector;
+  auto managedStates() -> vector<string>;
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveUndoState() -> bool;
@@ -124,7 +124,7 @@ public:
     vector<uint8_t> program;
   } sufamiTurboA, sufamiTurboB;
 
-  string_vector gameQueue;
+  vector<string> gameQueue;
 
   struct Screenshot {
     const uint32* data = nullptr;

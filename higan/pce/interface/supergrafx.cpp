@@ -1,11 +1,11 @@
-SuperGrafxInterface::SuperGrafxInterface() {
+auto SuperGrafxInterface::information() -> Information {
+  Information information;
   information.manufacturer = "NEC";
   information.name         = "SuperGrafx";
-
-  media.append({ID::SuperGrafx, "SuperGrafx", "sg"});
+  information.extension    = "sg";
+  return information;
 }
 
-auto SuperGrafxInterface::load(uint id) -> bool {
-  if(id == ID::SuperGrafx) return system.load(this, System::Model::SuperGrafx);
-  return false;
+auto SuperGrafxInterface::load() -> bool {
+  return system.load(this, System::Model::SuperGrafx);
 }

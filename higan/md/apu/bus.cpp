@@ -11,6 +11,8 @@ auto APU::read(uint16 addr) -> uint8 {
   if((addr & 0x8000) == 0x8000) {
     return cartridge.read(io.bank << 15 | (addr & 0x7ffe)).byte(!addr.bit(0));
   }
+
+  return 0x00;
 }
 
 auto APU::write(uint16 addr, uint8 data) -> void {

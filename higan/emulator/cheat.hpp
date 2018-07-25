@@ -17,11 +17,11 @@ struct Cheat {
     codes.reset();
   }
 
-  auto append(uint addr, uint data, maybe<uint> comp = nothing) -> void {
+  auto append(uint addr, uint data, maybe<uint> comp = {}) -> void {
     codes.append({addr, data, comp});
   }
 
-  auto assign(const string_vector& list) -> void {
+  auto assign(const vector<string>& list) -> void {
     reset();
     for(auto& entry : list) {
       for(auto code : entry.split("+")) {

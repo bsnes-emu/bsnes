@@ -22,6 +22,7 @@ struct BandaiFCG : Board {
     case 2: return 0x0000 | (addr & 0x03ff);
     case 3: return 0x0400 | (addr & 0x03ff);
     }
+    unreachable;
   }
 
   auto readPRG(uint addr) -> uint8 {

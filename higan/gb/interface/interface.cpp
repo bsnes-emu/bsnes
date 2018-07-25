@@ -2,39 +2,38 @@
 
 namespace GameBoy {
 
-#define returns(T) T { return ([&] { struct With : T { With() {
-#define $ }}; return With(); })(); }
-
 SuperGameBoyInterface* superGameBoy = nullptr;
 Settings settings;
 #include "game-boy.cpp"
 #include "game-boy-color.cpp"
 
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::LCD;
+  display.colors = Model::GameBoyColor() ? 1 << 15 : 1 << 2;
+  display.width  = 160;
+  display.height = 144;
+  display.internalWidth  = 160;
+  display.internalHeight = 144;
+  display.aspectCorrection = 1.0;
+  display.refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
+  return {display};
 }
-
-auto Interface::title() -> string {
-  return cartridge.title();
-}
-
-auto Interface::display() -> returns(Display) {
-  type   = Display::Type::LCD;
-  colors = Model::GameBoyColor() ? 1 << 15 : 1 << 2;
-  width  = 160;
-  height = 144;
-  internalWidth  = 160;
-  internalHeight = 144;
-  aspectCorrection = 1.0;
-  refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
-}$
 
 auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::sha256() -> string {
-  return cartridge.sha256();
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::save() -> void {
@@ -95,7 +94,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 
@@ -128,8 +127,5 @@ auto Interface::set(const string& name, const any& value) -> bool {
 
   return false;
 }
-
-#undef returns
-#undef $
 
 }

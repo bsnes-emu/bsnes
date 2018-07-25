@@ -1,8 +1,10 @@
-auto GameBoyInterface::information() -> returns(Information) {
-  manufacturer = "Nintendo";
-  name         = "Game Boy";
-  extension    = "gb";
-}$
+auto GameBoyInterface::information() -> Information {
+  Information information;
+  information.manufacturer = "Nintendo";
+  information.name         = "Game Boy";
+  information.extension    = "gb";
+  return information;
+}
 
 auto GameBoyInterface::color(uint32 color) -> uint64 {
   if(!settings.colorEmulation) {

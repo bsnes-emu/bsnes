@@ -58,25 +58,25 @@ Icarus icarus;
 #include "ui/error-dialog.cpp"
 
 #include <nall/main.hpp>
-auto nall::main(string_vector args) -> void {
+auto nall::main(vector<string> arguments) -> void {
   Application::setName("icarus");
 
-  if(args.size() == 2 && args[1] == "--name") {
+  if(arguments.size() == 2 && arguments[1] == "--name") {
     return print("icarus");
   }
 
-  if(args.size() == 3 && args[1] == "--manifest" && directory::exists(args[2])) {
-    return print(icarus.manifest(args[2]));
+  if(arguments.size() == 3 && arguments[1] == "--manifest" && directory::exists(arguments[2])) {
+    return print(icarus.manifest(arguments[2]));
   }
 
-  if(args.size() == 3 && args[1] == "--import" && file::exists(args[2])) {
-    if(string target = icarus.import(args[2])) {
+  if(arguments.size() == 3 && arguments[1] == "--import" && file::exists(arguments[2])) {
+    if(string target = icarus.import(arguments[2])) {
       return print(target, "\n");
     }
     return;
   }
 
-  if(args.size() == 2 && args[1] == "--import") {
+  if(arguments.size() == 2 && arguments[1] == "--import") {
     if(string source = BrowserDialog()
     .setTitle("Load ROM File")
     .setPath(settings["icarus/Path"].text())

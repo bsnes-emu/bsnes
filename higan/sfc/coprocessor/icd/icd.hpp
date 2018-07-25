@@ -1,4 +1,4 @@
-#if defined(SFC_SUPERGAMEBOY)
+#if defined(CORE_GB)
 
 struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   shared_pointer<Emulator::Stream> stream;

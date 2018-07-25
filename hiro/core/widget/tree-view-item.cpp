@@ -147,6 +147,7 @@ auto mTreeViewItem::setParent(mObject* parent, signed offset) -> type& {
   for(auto& item : reverse(state.items)) item->destruct();
   mObject::setParent(parent, offset);
   for(auto& item : state.items) item->setParent(this, item->offset());
+  return *this;
 }
 
 auto mTreeViewItem::setSelected() -> type& {

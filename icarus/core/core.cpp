@@ -20,7 +20,7 @@ auto Icarus::error() const -> string {
   return errorMessage;
 }
 
-auto Icarus::missing() const -> string_vector {
+auto Icarus::missing() const -> vector<string> {
   return missingFiles;
 }
 

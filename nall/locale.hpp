@@ -21,8 +21,8 @@ struct Locale {
     }
   }
 
-  auto available() const -> string_vector {
-    string_vector result;
+  auto available() const -> vector<string> {
+    vector<string> result;
     for(auto& dictionary : dictionaries) {
       result.append(dictionary.language);
     }
@@ -34,14 +34,15 @@ struct Locale {
     for(auto& dictionary : dictionaries) {
       if(dictionary.language == language) {
         selected = dictionary;
-        break;
+        return true;
       }
     }
+    return false;
   }
 
   template<typename... P>
   auto operator()(string ns, string input, P&&... p) const -> string {
-    string_vector arguments{forward<P>(p)...};
+    vector<string> arguments{forward<P>(p)...};
     if(selected) {
       for(auto node : selected().document) {
         if(node.name() == "namespace" && node.text() == ns) {

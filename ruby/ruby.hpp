@@ -8,7 +8,7 @@ struct Video {
   static auto create(nall::string driver = "") -> Video*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
-  static auto availableDrivers() -> nall::string_vector;
+  static auto availableDrivers() -> nall::vector<nall::string>;
 
   virtual ~Video() = default;
 
@@ -49,11 +49,11 @@ struct Audio {
   static auto create(nall::string driver = "") -> Audio*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
-  static auto availableDrivers() -> nall::string_vector;
+  static auto availableDrivers() -> nall::vector<nall::string>;
 
   virtual ~Audio() = default;
 
-  virtual auto availableDevices() -> nall::string_vector { return {"Default"}; }
+  virtual auto availableDevices() -> nall::vector<nall::string> { return {"Default"}; }
   virtual auto availableFrequencies() -> nall::vector<double> { return {44100.0}; }
   virtual auto availableLatencies() -> nall::vector<uint> { return {0}; }
   virtual auto availableChannels() -> nall::vector<uint> { return {2}; }
@@ -88,7 +88,7 @@ struct Input {
   static auto create(nall::string driver = "") -> Input*;
   static auto optimalDriver() -> nall::string;
   static auto safestDriver() -> nall::string;
-  static auto availableDrivers() -> nall::string_vector;
+  static auto availableDrivers() -> nall::vector<nall::string>;
 
   virtual ~Input() = default;
 

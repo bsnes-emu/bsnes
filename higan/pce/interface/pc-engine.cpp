@@ -1,11 +1,11 @@
-PCEngineInterface::PCEngineInterface() {
+auto PCEngineInterface::information() -> Information {
+  Information information;
   information.manufacturer = "NEC";
   information.name         = "PC Engine";
-
-  media.append({ID::PCEngine, "PC Engine", "pce"});
+  information.extension    = "pce";
+  return information;
 }
 
-auto PCEngineInterface::load(uint id) -> bool {
-  if(id == ID::PCEngine) return system.load(this, System::Model::PCEngine);
-  return false;
+auto PCEngineInterface::load() -> bool {
+  return system.load(this, System::Model::PCEngine);
 }

@@ -27,7 +27,7 @@ struct Icarus {
   Icarus();
 
   auto error() const -> string;
-  auto missing() const -> string_vector;
+  auto missing() const -> vector<string>;
   auto success(string location) -> string;
   auto failure(string message) -> string;
 
@@ -113,7 +113,7 @@ struct Icarus {
 
 private:
   string errorMessage;
-  string_vector missingFiles;
+  vector<string> missingFiles;
 };
 
 namespace Database {

@@ -1,9 +1,4 @@
 name := bsnes
-flags += -DSFC_SUPERGAMEBOY
-
-include sfc/GNUmakefile
-include gb/GNUmakefile
-include processor/GNUmakefile
 
 hiro.path := ../hiro
 hiro.resource := $(ui)/resource/bsnes.rc

@@ -220,18 +220,18 @@ template<> struct stringify<const string&> {
   const string& _text;
 };
 
-template<> struct stringify<string_view> {
-  stringify(const string_view& source) : _view(source) {}
+template<> struct stringify<view<string>> {
+  stringify(const view<string>& source) : _view(source) {}
   auto data() const -> const char* { return _view.data(); }
   auto size() const -> uint { return _view.size(); }
-  const string_view& _view;
+  const view<string>& _view;
 };
 
-template<> struct stringify<const string_view&> {
-  stringify(const string_view& source) : _view(source) {}
+template<> struct stringify<const view<string>&> {
+  stringify(const view<string>& source) : _view(source) {}
   auto data() const -> const char* { return _view.data(); }
   auto size() const -> uint { return _view.size(); }
-  const string_view& _view;
+  const view<string>& _view;
 };
 
 //pointers

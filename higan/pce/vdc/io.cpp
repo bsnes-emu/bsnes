@@ -25,6 +25,8 @@ auto VDC::read(uint2 addr) -> uint8 {
       return data;
     }
   }
+
+  return 0x00;
 }
 
 auto VDC::write(uint2 addr, uint8 data) -> void {

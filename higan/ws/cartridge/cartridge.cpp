@@ -41,19 +41,19 @@ auto Cartridge::load() -> bool {
 
   if(Model::WonderSwan()) {
     if(auto loaded = platform->load(ID::WonderSwan, "WonderSwan", "ws")) {
-      information.pathID = loaded.pathID();
+      information.pathID = loaded.pathID;
     } else return false;
   }
 
   if(Model::WonderSwanColor() || Model::SwanCrystal()) {
     if(auto loaded = platform->load(ID::WonderSwanColor, "WonderSwan Color", "wsc")) {
-      information.pathID = loaded.pathID();
+      information.pathID = loaded.pathID;
     } else return false;
   }
 
   if(Model::PocketChallengeV2()) {
     if(auto loaded = platform->load(ID::PocketChallengeV2, "Pocket Challenge V2", "pc2")) {
-      information.pathID = loaded.pathID();
+      information.pathID = loaded.pathID;
     } else return false;
   }
 

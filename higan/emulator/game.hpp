@@ -6,7 +6,7 @@ struct Game {
   struct Memory;
   struct Oscillator;
 
-  inline auto load(string_view) -> void;
+  inline auto load(view<string>) -> void;
   inline auto memory(Markup::Node) -> maybe<Memory>;
   inline auto oscillator(natural = 0) -> maybe<Oscillator>;
 
@@ -44,7 +44,7 @@ struct Game {
   vector<Oscillator> oscillatorList;
 };
 
-auto Game::load(string_view text) -> void {
+auto Game::load(view<string> text) -> void {
   document = BML::unserialize(text);
 
   sha256 = document["game/sha256"].text();

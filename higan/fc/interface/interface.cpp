@@ -2,35 +2,29 @@
 
 namespace Famicom {
 
-#define returns(T) T { return ([&] { struct With : T { With() {
-#define $ }}; return With(); })(); }
-
 Settings settings;
 
-auto Interface::information() -> returns(Information) {
-  manufacturer = "Nintendo";
-  name         = "Famicom";
-  resettable   = true;
-}$
-
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
+auto Interface::information() -> Information {
+  Information information;
+  information.manufacturer = "Nintendo";
+  information.name         = "Famicom";
+  information.extension    = "fc";
+  information.resettable   = true;
+  return information;
 }
 
-auto Interface::title() -> string {
-  return cartridge.title();
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::CRT;
+  display.colors = 1 << 9;
+  display.width  = 256;
+  display.height = 240;
+  display.internalWidth  = 256;
+  display.internalHeight = 240;
+  display.aspectCorrection = 8.0 / 7.0;
+  display.refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
+  return {display};
 }
-
-auto Interface::display() -> returns(Display) {
-  type   = Display::Type::CRT;
-  colors = 1 << 9;
-  width  = 256;
-  height = 240;
-  internalWidth  = 256;
-  internalHeight = 240;
-  aspectCorrection = 8.0 / 7.0;
-  refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
-}$
 
 auto Interface::color(uint32 n) -> uint64 {
   double saturation = 2.0;
@@ -87,8 +81,16 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::sha256() -> string {
-  return cartridge.sha256();
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::load() -> bool {
@@ -181,7 +183,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 
@@ -206,8 +208,5 @@ auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;
   return false;
 }
-
-#undef returns
-#undef $
 
 }

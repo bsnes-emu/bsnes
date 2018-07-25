@@ -85,8 +85,8 @@ auto EpsonRTC::power() -> void {
   holdtick = 0;
 }
 
-auto EpsonRTC::sync() -> void {
-  time_t systime = time(0);
+auto EpsonRTC::synchronize(uint64 timestamp) -> void {
+  time_t systime = timestamp;
   tm* timeinfo = localtime(&systime);
 
   uint second = min(59, timeinfo->tm_sec);

@@ -2,38 +2,32 @@
 
 namespace GameBoyAdvance {
 
-#define returns(T) T { return ([&] { struct With : T { With() {
-#define $ }}; return With(); })(); }
-
 Settings settings;
 
-auto Interface::information() -> returns(Information) {
-  manufacturer = "Nintendo";
-  name         = "Game Boy Advance";
-}$
-
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
+auto Interface::information() -> Information {
+  Information information;
+  information.manufacturer = "Nintendo";
+  information.name         = "Game Boy Advance";
+  information.extension    = "gba";
+  return information;
 }
 
-auto Interface::title() -> string {
-  return cartridge.title();
-}
-
-auto Interface::display() -> returns(Display) {
-  type   = Display::Type::LCD;
-  colors = 1 << 15;
-  width  = 240;
-  height = 160;
-  internalWidth  = 240;
-  internalHeight = 160;
-  aspectCorrection = 1.0;
-  refreshRate = system.frequency() / (228.0 * 1232.0);
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::LCD;
+  display.colors = 1 << 15;
+  display.width  = 240;
+  display.height = 160;
+  display.internalWidth  = 240;
+  display.internalHeight = 160;
+  display.aspectCorrection = 1.0;
+  display.refreshRate = system.frequency() / (228.0 * 1232.0);
   if(settings.rotateLeft) {
-    swap(width, height);
-    swap(internalWidth, internalHeight);
+    swap(display.width, display.height);
+    swap(display.internalWidth, display.internalHeight);
   }
-}$
+  return {display};
+}
 
 auto Interface::color(uint32 color) -> uint64 {
   uint R = color.bits( 0, 4);
@@ -59,6 +53,18 @@ auto Interface::color(uint32 color) -> uint64 {
 
 auto Interface::loaded() -> bool {
   return system.loaded();
+}
+
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::load() -> bool {
@@ -158,8 +164,5 @@ auto Interface::set(const string& name, const any& value) -> bool {
 
   return false;
 }
-
-#undef returns
-#undef $
 
 }

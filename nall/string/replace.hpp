@@ -3,7 +3,7 @@
 namespace nall {
 
 template<bool Insensitive, bool Quoted>
-auto string::_replace(string_view from, string_view to, long limit) -> string& {
+auto string::_replace(view<string> from, view<string> to, long limit) -> string& {
   if(limit <= 0 || from.size() == 0) return *this;
 
   int size = this->size();
@@ -86,9 +86,9 @@ auto string::_replace(string_view from, string_view to, long limit) -> string& {
   return *this;
 }
 
-auto string::replace(string_view from, string_view to, long limit) -> string& { return _replace<0, 0>(from, to, limit); }
-auto string::ireplace(string_view from, string_view to, long limit) -> string& { return _replace<1, 0>(from, to, limit); }
-auto string::qreplace(string_view from, string_view to, long limit) -> string& { return _replace<0, 1>(from, to, limit); }
-auto string::iqreplace(string_view from, string_view to, long limit) -> string& { return _replace<1, 1>(from, to, limit); }
+auto string::replace(view<string> from, view<string> to, long limit) -> string& { return _replace<0, 0>(from, to, limit); }
+auto string::ireplace(view<string> from, view<string> to, long limit) -> string& { return _replace<1, 0>(from, to, limit); }
+auto string::qreplace(view<string> from, view<string> to, long limit) -> string& { return _replace<0, 1>(from, to, limit); }
+auto string::iqreplace(view<string> from, view<string> to, long limit) -> string& { return _replace<1, 1>(from, to, limit); }
 
 };

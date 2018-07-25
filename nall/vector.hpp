@@ -19,13 +19,15 @@ template<typename T> struct vector_iterator_reverse;
 template<typename T> struct vector_iterator_reverse_const;
 
 template<typename T>
-struct vector {
+struct vector_base {
+  using type = vector_base;
+
   //core.hpp
-  vector() = default;
-  vector(const initializer_list<T>& values);
-  vector(const vector& source);
-  vector(vector&& source);
-  ~vector();
+  vector_base() = default;
+  vector_base(const initializer_list<T>& values);
+  vector_base(const type& source);
+  vector_base(type&& source);
+  ~vector_base();
 
   explicit operator bool() const;
   auto capacity() const -> uint;
@@ -34,8 +36,12 @@ struct vector {
   auto data() const -> const T*;
 
   //assign.hpp
-  auto operator=(const vector& source) -> vector&;
-  auto operator=(vector&& source) -> vector&;
+  auto operator=(const type& source) -> type&;
+  auto operator=(type&& source) -> type&;
+
+  //compare.hpp
+  auto operator==(const type& source) const -> bool;
+  auto operator!=(const type& source) const -> bool;
 
   //memory.hpp
   auto reset() -> void;
@@ -65,13 +71,13 @@ struct vector {
   //modify.hpp
   auto prepend(const T& value) -> void;
   auto prepend(T&& value) -> void;
-  auto prepend(const vector<T>& values) -> void;
-  auto prepend(vector<T>&& values) -> void;
+  auto prepend(const type& values) -> void;
+  auto prepend(type&& values) -> void;
 
   auto append(const T& value) -> void;
   auto append(T&& value) -> void;
-  auto append(const vector<T>& values) -> void;
-  auto append(vector<T>&& values) -> void;
+  auto append(const type& values) -> void;
+  auto append(type&& values) -> void;
 
   auto insert(uint offset, const T& value) -> void;
 
@@ -109,10 +115,19 @@ private:
 
 }
 
+#define vector vector_base
 #include <nall/vector/core.hpp>
 #include <nall/vector/assign.hpp>
+#include <nall/vector/compare.hpp>
 #include <nall/vector/memory.hpp>
 #include <nall/vector/access.hpp>
 #include <nall/vector/modify.hpp>
 #include <nall/vector/iterator.hpp>
 #include <nall/vector/utility.hpp>
+#undef vector
+
+namespace nall {
+  template<typename T> struct vector : vector_base<T> {
+    using vector_base<T>::vector_base;
+  };
+}

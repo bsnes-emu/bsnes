@@ -4,7 +4,7 @@ namespace SuperFamicom {
 
 ICD icd;
 
-#if defined(SFC_SUPERGAMEBOY)
+#if defined(CORE_GB)
 
 #include "platform.cpp"
 #include "interface.cpp"

@@ -7,56 +7,93 @@ Settings settings;
 #include "wonderswan-color.cpp"
 #include "pocket-challenge-v2.cpp"
 
-Interface::Interface() {
-  Port hardwarePort{ID::Port::Hardware, "Hardware"};
-
-  { Device device{ID::Device::Controls, "Controls"};
-    device.inputs.append({0, "Y1"});
-    device.inputs.append({0, "Y2"});
-    device.inputs.append({0, "Y3"});
-    device.inputs.append({0, "Y4"});
-    device.inputs.append({0, "X1"});
-    device.inputs.append({0, "X2"});
-    device.inputs.append({0, "X3"});
-    device.inputs.append({0, "X4"});
-    device.inputs.append({0, "B"});
-    device.inputs.append({0, "A"});
-    device.inputs.append({0, "Start"});
-    hardwarePort.devices.append(device);
-  }
-
-  ports.append(move(hardwarePort));
-}
-
-auto Interface::manifest() -> string {
-  return cartridge.information.manifest;
-}
-
-auto Interface::title() -> string {
-  return cartridge.information.title;
-}
-
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 224;
-  vi.height = 144;
-  vi.internalWidth  = 224;
-  vi.internalHeight = 144;
-  vi.aspectCorrection = 1.0;
-  vi.refreshRate = 3'072'000.0 / (159.0 * 256.0);
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type = Display::Type::LCD;
+  display.colors    = 1 << 12;
+  display.width  = 224;
+  display.height = 144;
+  display.internalWidth  = 224;
+  display.internalHeight = 144;
+  display.aspectCorrection = 1.0;
+  display.refreshRate = 3'072'000.0 / (159.0 * 256.0);
   if(settings.rotateLeft) {
-    swap(vi.width, vi.height);
-    swap(vi.internalWidth, vi.internalHeight);
+    swap(display.width, display.height);
+    swap(display.internalWidth, display.internalHeight);
   }
-  return vi;
+  return {display};
+}
+
+//todo: the WonderSwan and PocketChallengeV2 interfaces should be generating grayscale shades
+//instead, the PPU is currently selecting grayscale shades from the WonderSwanColor palette
+
+auto Interface::color(uint32 color) -> uint64 {
+  uint b = color.bits(0, 3);
+  uint g = color.bits(4, 7);
+  uint r = color.bits(8,11);
+
+  uint64_t R = image::normalize(r, 4, 16);
+  uint64_t G = image::normalize(g, 4, 16);
+  uint64_t B = image::normalize(b, 4, 16);
+
+  if(settings.colorEmulation) {
+    R = (r * 26 + g *  4 + b *  2);
+    G = (         g * 24 + b *  8);
+    B = (r *  6 + g *  4 + b * 22);
+    R = image::normalize(min(480, R), 9, 16);
+    G = image::normalize(min(480, G), 9, 16);
+    B = image::normalize(min(480, B), 9, 16);
+  }
+
+  return R << 32 | G << 16 | B << 0;
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Hardware, "Hardware"}};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Hardware) return {
+    {ID::Device::Controls, "Controls"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::Controls) return {
+    {Type::Hat,     "Y1"   },
+    {Type::Hat,     "Y2"   },
+    {Type::Hat,     "Y3"   },
+    {Type::Hat,     "Y4"   },
+    {Type::Hat,     "X1"   },
+    {Type::Hat,     "X2"   },
+    {Type::Hat,     "X3"   },
+    {Type::Hat,     "X4"   },
+    {Type::Button,  "B"    },
+    {Type::Button,  "A"    },
+    {Type::Control, "Start"}
+  };
+
+  return {};
 }
 
 auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::sha256() -> string {
-  return cartridge.information.sha256;
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::save() -> void {
@@ -85,7 +122,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 

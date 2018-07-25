@@ -132,7 +132,7 @@ Presentation::Presentation() {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
-  viewport.setDroppable().onDrop([&](string_vector locations) {
+  viewport.setDroppable().onDrop([&](vector<string> locations) {
     program->gameQueue = locations;
     program->load();
     setFocused();

@@ -101,6 +101,8 @@ auto PPU::readOAM(uint mode, uint32 addr) -> uint32 {
     }
 
   }
+
+  unreachable;
 }
 
 auto PPU::writeOAM(uint mode, uint32 addr, uint32 word) -> void {

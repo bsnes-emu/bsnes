@@ -2,37 +2,30 @@
 
 namespace SuperFamicom {
 
-#define returns(T) T { return ([&] { struct With : T { With() {
-#define $ }}; return With(); })(); }
-
 Settings settings;
 
-auto Interface::information() -> returns(Information) {
-  manufacturer = "Nintendo";
-  name         = "Super Famicom";
-  extension    = "sfc";
-  resettable   = true;
-}$
-
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
+auto Interface::information() -> Information {
+  Information information;
+  information.manufacturer = "Nintendo";
+  information.name         = "Super Famicom";
+  information.extension    = "sfc";
+  information.resettable   = true;
+  return information;
 }
 
-auto Interface::title() -> string {
-  return cartridge.title();
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::CRT;
+  display.colors = 1 << 19;
+  display.width  = 256;
+  display.height = 240;
+  display.internalWidth  = 512;
+  display.internalHeight = 480;
+  display.aspectCorrection = 8.0 / 7.0;
+  if(Region::NTSC()) display.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
+  if(Region::PAL())  display.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
+  return {display};
 }
-
-auto Interface::display() -> returns(Display) {
-  type   = Display::Type::CRT;
-  colors = 1 << 19;
-  width  = 256;
-  height = 240;
-  internalWidth  = 512;
-  internalHeight = 480;
-  aspectCorrection = 8.0 / 7.0;
-  if(Region::NTSC()) refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
-  if(Region::PAL())  refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
-}$
 
 auto Interface::color(uint32 color) -> uint64 {
   uint r = color.bits( 0, 4);
@@ -66,8 +59,16 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::sha256() -> string {
-  return cartridge.sha256();
+auto Interface::hashes() -> vector<string> {
+  return cartridge.hashes();
+}
+
+auto Interface::manifests() -> vector<string> {
+  return cartridge.manifests();
+}
+
+auto Interface::titles() -> vector<string> {
+  return cartridge.titles();
 }
 
 auto Interface::load() -> bool {
@@ -229,9 +230,10 @@ auto Interface::rtc() -> bool {
   return false;
 }
 
-auto Interface::rtcSynchronize() -> void {
-  if(cartridge.has.EpsonRTC) epsonrtc.sync();
-  if(cartridge.has.SharpRTC) sharprtc.sync();
+auto Interface::synchronize(uint64 timestamp) -> void {
+  if(!timestamp) timestamp = chrono::timestamp();
+  if(cartridge.has.EpsonRTC) epsonrtc.synchronize(timestamp);
+  if(cartridge.has.SharpRTC) sharprtc.synchronize(timestamp);
 }
 
 auto Interface::serialize() -> serializer {
@@ -243,9 +245,9 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.reset();
-  #if defined(SFC_SUPERGAMEBOY)
+  #if defined(CORE_GB)
   if(cartridge.has.ICD) return GameBoy::cheat.assign(list);
   #endif
   cheat.assign(list);
@@ -306,8 +308,5 @@ auto Interface::set(const string& name, const any& value) -> bool {
   }
   return false;
 }
-
-#undef returns
-#undef $
 
 }

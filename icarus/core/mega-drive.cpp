@@ -1,6 +1,7 @@
 auto Icarus::megaDriveManifest(string location) -> string {
   vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
+  concatenate(buffer, {location, "patch.rom"  });
   return megaDriveManifest(buffer, location);
 }
 
@@ -34,6 +35,18 @@ auto Icarus::megaDriveImport(vector<uint8_t>& buffer, string location) -> string
   }
 
   if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
-  write({target, "program.rom"}, buffer);
+  uint offset = 0;
+  auto document = BML::unserialize(manifest);
+  for(auto rom : document.find("game/board/memory(type=ROM)")) {
+    auto name = string{rom["content"].text(), ".rom"}.downcase();
+    auto size = rom["size"].natural();
+    if(size > buffer.size() - offset) {
+      missingFiles.append(name);
+      continue;
+    }
+    write({target, name}, buffer.data() + offset, size);
+    offset += size;
+  }
+  if(missingFiles) return failure({"ROM image is missing data: ", missingFiles.merge("; ")});
   return success(target);
 }

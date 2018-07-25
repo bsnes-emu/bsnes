@@ -30,7 +30,7 @@ private:
 
   BrowserDialog::State& state;
   BrowserDialog::Response response;
-  vector<string_vector> filters;
+  vector<vector<string>> filters;
 };
 
 //accept button clicked, or enter pressed on file name line edit
@@ -248,7 +248,7 @@ auto BrowserDialog::openFile() -> string {
   return {};
 }
 
-auto BrowserDialog::openFiles() -> string_vector {
+auto BrowserDialog::openFiles() -> vector<string> {
   state.action = "openFiles";
   if(!state.title) state.title = "Open Files";
   if(auto result = _run()) return result;
@@ -280,7 +280,7 @@ auto BrowserDialog::saveFile() -> string {
   return {};
 }
 
-auto BrowserDialog::selected() -> string_vector {
+auto BrowserDialog::selected() -> vector<string> {
   return response.selected;
 }
 
@@ -291,12 +291,12 @@ auto BrowserDialog::selectFolder() -> string {
   return {};
 }
 
-auto BrowserDialog::setFilters(const string_vector& filters) -> type& {
+auto BrowserDialog::setFilters(const vector<string>& filters) -> type& {
   state.filters = filters;
   return *this;
 }
 
-auto BrowserDialog::setOptions(const string_vector& options) -> type& {
+auto BrowserDialog::setOptions(const vector<string>& options) -> type& {
   state.options = options;
   return *this;
 }
@@ -316,7 +316,7 @@ auto BrowserDialog::setTitle(const string& title) -> type& {
   return *this;
 }
 
-auto BrowserDialog::_run() -> string_vector {
+auto BrowserDialog::_run() -> vector<string> {
   if(!state.path) state.path = Path::user();
   response = BrowserDialogWindow(state).run();
   return response.selected;

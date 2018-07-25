@@ -53,7 +53,7 @@ auto mWindow::doClose() const -> void {
   if(state.onClose) return state.onClose();
 }
 
-auto mWindow::doDrop(string_vector names) const -> void {
+auto mWindow::doDrop(vector<string> names) const -> void {
   if(state.onDrop) return state.onDrop(names);
 }
 
@@ -122,7 +122,7 @@ auto mWindow::onClose(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mWindow::onDrop(const function<void (string_vector)>& callback) -> type& {
+auto mWindow::onDrop(const function<void (vector<string>)>& callback) -> type& {
   state.onDrop = callback;
   return *this;
 }
@@ -282,13 +282,13 @@ auto mWindow::setMinimumSize(Size size) -> type& {
 
 auto mWindow::setModal(bool modal) -> type& {
   state.modal = modal;
-  signal(setModal, modal);
   if(modal) {
     Application::state.modal++;
   } else {
     Application::state.modal--;
     assert(Application::state.modal >= 0);
   }
+  signal(setModal, modal);
   return *this;
 }
 

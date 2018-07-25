@@ -20,26 +20,32 @@
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
+#include <nall/view.hpp>
 
 namespace nall {
 
 struct string;
-struct string_view;
-struct string_vector;
 struct string_format;
 
-struct string_view {
-  inline string_view();
-  inline string_view(const string_view& source);
-  inline string_view(string_view&& source);
-  inline string_view(const char* data);
-  inline string_view(const char* data, uint size);
-  inline string_view(const string& source);
-  template<typename... P> inline string_view(P&&... p);
-  inline ~string_view();
+//temporary compatibility shim
+using string_vector = vector<string>;
+using string_view = view<string>;
 
-  inline auto operator=(const string_view& source) -> string_view&;
-  inline auto operator=(string_view&& source) -> string_view&;
+template<> struct view<string> {
+  using type = view<string>;
+
+  //view.hpp
+  inline view();
+  inline view(const view& source);
+  inline view(view&& source);
+  inline view(const char* data);
+  inline view(const char* data, uint size);
+  inline view(const string& source);
+  template<typename... P> inline view(P&&... p);
+  inline ~view();
+
+  inline auto operator=(const view& source) -> view&;
+  inline auto operator=(view&& source) -> view&;
 
   inline operator const char*() const;
   inline auto data() const -> const char*;
@@ -50,6 +56,8 @@ protected:
   const char* _data;
   mutable int _size;
 };
+
+//using string_view = view<string>;
 
 #define NALL_STRING_ALLOCATOR_ADAPTIVE
 //#define NALL_STRING_ALLOCATOR_COPY_ON_WRITE
@@ -69,10 +77,10 @@ inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> str
 
 //match.hpp
 inline auto tokenize(const char* s, const char* p) -> bool;
-inline auto tokenize(string_vector& list, const char* s, const char* p) -> bool;
+inline auto tokenize(vector<string>& list, const char* s, const char* p) -> bool;
 
 //utility.hpp
-inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
+inline auto slice(view<string> self, int offset = 0, int length = -1) -> string;
 template<typename T> inline auto fromInteger(char* result, T value) -> char*;
 template<typename T> inline auto fromNatural(char* result, T value) -> char*;
 template<typename T> inline auto fromReal(char* str, T value) -> uint;
@@ -150,12 +158,12 @@ public:
   auto operator==(const char* source) const -> bool { return strcmp(data(), source) == 0; }
   auto operator!=(const char* source) const -> bool { return strcmp(data(), source) != 0; }
 
-  auto operator==(string_view source) const -> bool { return compare(source) == 0; }
-  auto operator!=(string_view source) const -> bool { return compare(source) != 0; }
-  auto operator< (string_view source) const -> bool { return compare(source) <  0; }
-  auto operator<=(string_view source) const -> bool { return compare(source) <= 0; }
-  auto operator> (string_view source) const -> bool { return compare(source) >  0; }
-  auto operator>=(string_view source) const -> bool { return compare(source) >= 0; }
+  auto operator==(view<string> source) const -> bool { return compare(source) == 0; }
+  auto operator!=(view<string> source) const -> bool { return compare(source) != 0; }
+  auto operator< (view<string> source) const -> bool { return compare(source) <  0; }
+  auto operator<=(view<string> source) const -> bool { return compare(source) <= 0; }
+  auto operator> (view<string> source) const -> bool { return compare(source) >  0; }
+  auto operator>=(view<string> source) const -> bool { return compare(source) >= 0; }
 
   string(const string& source) : string() { operator=(source); }
   string(string&& source) : string() { operator=(move(source)); }
@@ -186,15 +194,15 @@ public:
   inline auto length() const -> uint;
 
   //find.hpp
-  template<bool, bool> inline auto _find(int, string_view) const -> maybe<uint>;
+  template<bool, bool> inline auto _find(int, view<string>) const -> maybe<uint>;
 
-  inline auto find(string_view source) const -> maybe<uint>;
-  inline auto ifind(string_view source) const -> maybe<uint>;
-  inline auto qfind(string_view source) const -> maybe<uint>;
-  inline auto iqfind(string_view source) const -> maybe<uint>;
+  inline auto find(view<string> source) const -> maybe<uint>;
+  inline auto ifind(view<string> source) const -> maybe<uint>;
+  inline auto qfind(view<string> source) const -> maybe<uint>;
+  inline auto iqfind(view<string> source) const -> maybe<uint>;
 
-  inline auto findFrom(int offset, string_view source) const -> maybe<uint>;
-  inline auto ifindFrom(int offset, string_view source) const -> maybe<uint>;
+  inline auto findFrom(int offset, view<string> source) const -> maybe<uint>;
+  inline auto ifindFrom(int offset, view<string> source) const -> maybe<uint>;
 
   //format.hpp
   inline auto format(const nall::string_format& params) -> type&;
@@ -202,20 +210,20 @@ public:
   //compare.hpp
   template<bool> inline static auto _compare(const char*, uint, const char*, uint) -> int;
 
-  inline static auto compare(string_view, string_view) -> int;
-  inline static auto icompare(string_view, string_view) -> int;
+  inline static auto compare(view<string>, view<string>) -> int;
+  inline static auto icompare(view<string>, view<string>) -> int;
 
-  inline auto compare(string_view source) const -> int;
-  inline auto icompare(string_view source) const -> int;
+  inline auto compare(view<string> source) const -> int;
+  inline auto icompare(view<string> source) const -> int;
 
-  inline auto equals(string_view source) const -> bool;
-  inline auto iequals(string_view source) const -> bool;
+  inline auto equals(view<string> source) const -> bool;
+  inline auto iequals(view<string> source) const -> bool;
 
-  inline auto beginsWith(string_view source) const -> bool;
-  inline auto ibeginsWith(string_view source) const -> bool;
+  inline auto beginsWith(view<string> source) const -> bool;
+  inline auto ibeginsWith(view<string> source) const -> bool;
 
-  inline auto endsWith(string_view source) const -> bool;
-  inline auto iendsWith(string_view source) const -> bool;
+  inline auto endsWith(view<string> source) const -> bool;
+  inline auto iendsWith(view<string> source) const -> bool;
 
   //convert.hpp
   inline auto downcase() -> type&;
@@ -224,41 +232,41 @@ public:
   inline auto qdowncase() -> type&;
   inline auto qupcase() -> type&;
 
-  inline auto transform(string_view from, string_view to) -> type&;
+  inline auto transform(view<string> from, view<string>to) -> type&;
 
   //match.hpp
-  inline auto match(string_view source) const -> bool;
-  inline auto imatch(string_view source) const -> bool;
+  inline auto match(view<string> source) const -> bool;
+  inline auto imatch(view<string> source) const -> bool;
 
   //replace.hpp
-  template<bool, bool> inline auto _replace(string_view, string_view, long) -> type&;
-  inline auto replace(string_view from, string_view to, long limit = LONG_MAX) -> type&;
-  inline auto ireplace(string_view from, string_view to, long limit = LONG_MAX) -> type&;
-  inline auto qreplace(string_view from, string_view to, long limit = LONG_MAX) -> type&;
-  inline auto iqreplace(string_view from, string_view to, long limit = LONG_MAX) -> type&;
+  template<bool, bool> inline auto _replace(view<string>, view<string>, long) -> type&;
+  inline auto replace(view<string> from, view<string> to, long limit = LONG_MAX) -> type&;
+  inline auto ireplace(view<string> from, view<string> to, long limit = LONG_MAX) -> type&;
+  inline auto qreplace(view<string> from, view<string> to, long limit = LONG_MAX) -> type&;
+  inline auto iqreplace(view<string> from, view<string> to, long limit = LONG_MAX) -> type&;
 
   //split.hpp
-  inline auto split(string_view key, long limit = LONG_MAX) const -> string_vector;
-  inline auto isplit(string_view key, long limit = LONG_MAX) const -> string_vector;
-  inline auto qsplit(string_view key, long limit = LONG_MAX) const -> string_vector;
-  inline auto iqsplit(string_view key, long limit = LONG_MAX) const -> string_vector;
+  inline auto split(view<string> key, long limit = LONG_MAX) const -> vector<string>;
+  inline auto isplit(view<string> key, long limit = LONG_MAX) const -> vector<string>;
+  inline auto qsplit(view<string> key, long limit = LONG_MAX) const -> vector<string>;
+  inline auto iqsplit(view<string> key, long limit = LONG_MAX) const -> vector<string>;
 
   //trim.hpp
-  inline auto trim(string_view lhs, string_view rhs, long limit = LONG_MAX) -> type&;
-  inline auto trimLeft(string_view lhs, long limit = LONG_MAX) -> type&;
-  inline auto trimRight(string_view rhs, long limit = LONG_MAX) -> type&;
+  inline auto trim(view<string> lhs, view<string> rhs, long limit = LONG_MAX) -> type&;
+  inline auto trimLeft(view<string> lhs, long limit = LONG_MAX) -> type&;
+  inline auto trimRight(view<string> rhs, long limit = LONG_MAX) -> type&;
 
-  inline auto itrim(string_view lhs, string_view rhs, long limit = LONG_MAX) -> type&;
-  inline auto itrimLeft(string_view lhs, long limit = LONG_MAX) -> type&;
-  inline auto itrimRight(string_view rhs, long limit = LONG_MAX) -> type&;
+  inline auto itrim(view<string> lhs, view<string> rhs, long limit = LONG_MAX) -> type&;
+  inline auto itrimLeft(view<string> lhs, long limit = LONG_MAX) -> type&;
+  inline auto itrimRight(view<string> rhs, long limit = LONG_MAX) -> type&;
 
   inline auto strip() -> type&;
   inline auto stripLeft() -> type&;
   inline auto stripRight() -> type&;
 
   //utility.hpp
-  inline static auto read(string_view filename) -> string;
-  inline static auto repeat(string_view pattern, uint times) -> string;
+  inline static auto read(view<string> filename) -> string;
+  inline static auto repeat(view<string> pattern, uint times) -> string;
   inline auto fill(char fill = ' ') -> type&;
   inline auto hash() const -> uint;
   inline auto remove(uint offset, uint length) -> type&;
@@ -266,35 +274,32 @@ public:
   inline auto size(int length, char fill = ' ') -> type&;
 };
 
-struct string_vector : vector<string> {
-  using type = string_vector;
+template<> struct vector<string> : vector_base<string> {
+  using type = vector<string>;
+  using vector_base<string>::vector_base;
 
-  string_vector(const string_vector& source) { vector::operator=(source); }
-  string_vector(string_vector& source) { vector::operator=(source); }
-  string_vector(string_vector&& source) { vector::operator=(move(source)); }
-  template<typename... P> string_vector(P&&... p) { append(forward<P>(p)...); }
+  vector(const vector& source) { vector_base::operator=(source); }
+  vector(vector& source) { vector_base::operator=(source); }
+  vector(vector&& source) { vector_base::operator=(move(source)); }
+  template<typename... P> vector(P&&... p) { append(forward<P>(p)...); }
+
+  inline auto operator=(const vector& source) -> type& { return vector_base::operator=(source), *this; }
+  inline auto operator=(vector& source) -> type& { return vector_base::operator=(source), *this; }
+  inline auto operator=(vector&& source) -> type& { return vector_base::operator=(move(source)), *this; }
 
   //list.hpp
-  inline auto operator==(const string_vector&) const -> bool;
-  inline auto operator!=(const string_vector&) const -> bool;
-
-  inline auto operator=(const string_vector& source) -> type& { return vector::operator=(source), *this; }
-  inline auto operator=(string_vector& source) -> type& { return vector::operator=(source), *this; }
-  inline auto operator=(string_vector&& source) -> type& { return vector::operator=(move(source)), *this; }
-
-  inline auto isort() -> type&;
-
   template<typename... P> inline auto append(const string&, P&&...) -> type&;
   inline auto append() -> type&;
 
-  inline auto find(string_view source) const -> maybe<uint>;
-  inline auto ifind(string_view source) const -> maybe<uint>;
-  inline auto match(string_view pattern) const -> string_vector;
-  inline auto merge(string_view separator) const -> string;
+  inline auto isort() -> type&;
+  inline auto find(view<string> source) const -> maybe<uint>;
+  inline auto ifind(view<string> source) const -> maybe<uint>;
+  inline auto match(view<string> pattern) const -> vector<string>;
+  inline auto merge(view<string> separator) const -> string;
   inline auto strip() -> type&;
 
   //split.hpp
-  template<bool, bool> inline auto _split(string_view, string_view, long) -> type&;
+  template<bool, bool> inline auto _split(view<string>, view<string>, long) -> type&;
 };
 
 struct string_format : vector<string> {
@@ -315,12 +320,12 @@ struct string_format : vector<string> {
 #include <nall/string/core.hpp>
 #include <nall/string/find.hpp>
 #include <nall/string/format.hpp>
-#include <nall/string/list.hpp>
 #include <nall/string/match.hpp>
 #include <nall/string/replace.hpp>
 #include <nall/string/split.hpp>
 #include <nall/string/trim.hpp>
 #include <nall/string/utility.hpp>
+#include <nall/string/vector.hpp>
 #include <nall/string/eval/node.hpp>
 #include <nall/string/eval/literal.hpp>
 #include <nall/string/eval/parser.hpp>

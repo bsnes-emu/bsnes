@@ -242,6 +242,7 @@ auto SA1::bitmapRead(uint addr, uint8 data) -> uint8 {
     case 3: return (bwram.read(addr) >> 6) & 3;
     }
   }
+  unreachable;
 }
 
 auto SA1::bitmapWrite(uint addr, uint8 data) -> void {

@@ -6,19 +6,20 @@ Settings settings;
 #include "master-system.cpp"
 #include "game-gear.cpp"
 
-Interface::Interface() {
-}
-
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
-}
-
-auto Interface::title() -> string {
-  return cartridge.title();
-}
-
 auto Interface::loaded() -> bool {
   return system.loaded();
+}
+
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::save() -> void {
@@ -47,7 +48,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 

@@ -17,8 +17,8 @@ auto Cartridge::main() -> void {
 
 auto Cartridge::load() -> bool {
   if(auto loaded = platform->load(ID::Famicom, "Famicom", "fc", {"NTSC-J", "NTSC-U", "PAL"})) {
-    information.pathID = loaded.pathID();
-    information.region = loaded.option();
+    information.pathID = loaded.pathID;
+    information.region = loaded.option;
   } else return false;
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {

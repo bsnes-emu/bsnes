@@ -118,6 +118,8 @@ auto SuperScope::data() -> uint2 {
   case 6: return offscreen;
   case 7: return 0;  //noise (1 = yes)
   }
+
+  unreachable;
 }
 
 auto SuperScope::latch(bool data) -> void {

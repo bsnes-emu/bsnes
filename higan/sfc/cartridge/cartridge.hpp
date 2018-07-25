@@ -1,9 +1,10 @@
 struct Cartridge {
   auto pathID() const -> uint { return information.pathID; }
   auto region() const -> string { return information.region; }
-  auto sha256() const -> string { return information.sha256; }
-  auto manifest() const -> string;
-  auto title() const -> string;
+
+  auto hashes() const -> vector<string>;
+  auto manifests() const -> vector<string>;
+  auto titles() const -> vector<string>;
 
   auto load() -> bool;
   auto save() -> void;

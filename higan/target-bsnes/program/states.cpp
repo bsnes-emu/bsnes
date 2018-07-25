@@ -1,4 +1,4 @@
-auto Program::managedStates() -> string_vector {
+auto Program::managedStates() -> vector<string> {
   if(!emulator->loaded()) return {};
 
   if(gamePath().endsWith("/")) {
@@ -6,7 +6,7 @@ auto Program::managedStates() -> string_vector {
   } else {
     Decode::ZIP input;
     if(input.open(statePath())) {
-      string_vector filenames;
+      vector<string> filenames;
       for(auto& file : input.file) {
         if(file.name.match("managed/*.bst")) filenames.append(file.name.trimLeft("managed/", 1L));
       }

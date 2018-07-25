@@ -33,7 +33,7 @@ auto Program::load(Emulator::Interface& interface) -> void {
   updateAudioEffects();
 
   presentation->resizeViewport();
-  presentation->setTitle(emulator->title());
+  presentation->setTitle(emulator->titles().merge(" + "));
   presentation->systemMenu.setText(information.name).setVisible(true);
   presentation->toolsMenu.setVisible(true);
   toolsManager->cheatEditor.loadCheats();

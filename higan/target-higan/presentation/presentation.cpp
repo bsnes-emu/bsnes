@@ -286,7 +286,7 @@ auto Presentation::resizeViewport(bool resizeWindow) -> void {
   double emulatorHeight = 240;
   double aspectCorrection = 1.0;
   if(emulator) {
-    auto display = emulator->display();
+    auto display = emulator->displays()[0];
     emulatorWidth = display.width;
     emulatorHeight = display.height;
     aspectCorrection = display.aspectCorrection;

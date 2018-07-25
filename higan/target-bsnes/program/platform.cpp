@@ -103,7 +103,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   return result;
 }
 
-auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
+auto Program::load(uint id, string name, string type, vector<string> options) -> Emulator::Platform::Load {
   BrowserDialog dialog;
   dialog.setParent(*presentation);
   dialog.setOptions(options);
@@ -196,7 +196,7 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
   return {};
 }
 
-auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
+auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32_t* output;
   uint length;
 

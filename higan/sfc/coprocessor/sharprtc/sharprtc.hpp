@@ -1,10 +1,12 @@
 struct SharpRTC : Thread {
+  using Thread::synchronize;
+
   static auto Enter() -> void;
   auto main() -> void;
 
   auto initialize() -> void;
   auto power() -> void;
-  auto sync() -> void;
+  auto synchronize(uint64 timestamp) -> void;
 
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;

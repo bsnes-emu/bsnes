@@ -20,7 +20,7 @@ GameBoyAdvance::operator bool() const {
 auto GameBoyAdvance::manifest() const -> string {
   if(!operator bool()) return {};
 
-  string_vector identifiers = {
+  vector<string> identifiers = {
     "SRAM_V",
     "SRAM_F_V",
     "EEPROM_V",
@@ -29,7 +29,7 @@ auto GameBoyAdvance::manifest() const -> string {
     "FLASH1M_V",
   };
 
-  string_vector list;
+  vector<string> list;
   for(auto& identifier : identifiers) {
     for(int n : range(data.size() - 16)) {
       if(!memory::compare(&data[n], identifier.data(), identifier.size())) {

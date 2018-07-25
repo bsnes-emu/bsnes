@@ -37,6 +37,7 @@ auto APU::Noise::read(uint addr) const -> uint8 {
   case 3: return (divisor << 0) | (narrowlfsr << 3) | (frequency << 4);
   case 4: return (counter << 6);
   }
+  return 0;
 }
 
 auto APU::Noise::write(uint addr, uint8 byte) -> void {

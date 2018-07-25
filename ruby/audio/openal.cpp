@@ -10,8 +10,8 @@ struct AudioOpenAL : Audio {
   AudioOpenAL() { initialize(); }
   ~AudioOpenAL() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    string_vector devices;
+  auto availableDevices() -> vector<string> {
+    vector<string> devices;
     for(auto& device : queryDevices()) devices.append(device);
     return devices;
   }
@@ -163,8 +163,8 @@ private:
     _buffer = nullptr;
   }
 
-  auto queryDevices() -> string_vector {
-    string_vector result;
+  auto queryDevices() -> vector<string> {
+    vector<string> result;
 
     const char* list = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     if(!list) return result;

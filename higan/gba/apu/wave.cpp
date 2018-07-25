@@ -25,6 +25,7 @@ auto APU::Wave::read(uint addr) const -> uint8 {
   case 3: return 0;
   case 4: return (counter << 6);
   }
+  return 0;
 }
 
 auto APU::Wave::write(uint addr, uint8 byte) -> void {

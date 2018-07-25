@@ -71,7 +71,7 @@ auto SuperFamicom::manifest() const -> string {
   output.append("  revision: ", revision(), "\n");
   output.append("  board:    ", board(), "\n");
 
-  auto board = this->board().trimRight("#A", 1L).trimRight("#B", 1L).split("-");
+  auto board = this->board().trimRight("#A", 1L).split("-");
 
   if(auto size = romSize()) {
     if(board(0) == "SPC7110" && size > 0x100000) {
@@ -283,8 +283,8 @@ auto SuperFamicom::board() const -> string {
 
   board.trimRight("-", 1L);
 
-  if(board.beginsWith(    "LOROM-RAM")) board.append(romSize() <= 0x200000 ? "#A" : "#B");
-  if(board.beginsWith("NEC-LOROM-RAM")) board.append(romSize() <= 0x100000 ? "#A" : "#B");
+  if(board.beginsWith(    "LOROM-RAM") && romSize() <= 0x200000) board.append("#A");
+  if(board.beginsWith("NEC-LOROM-RAM") && romSize() <= 0x100000) board.append("#A");
 
   //Tengai Makyou Zero (fan translation)
   if(board.beginsWith("SPC7110-") && data.size() == 0x700000) board.prepend("EX");

@@ -27,7 +27,7 @@ auto Cartridge::load() -> bool {
   information = Information();
 
   if(auto loaded = platform->load(ID::GameBoyAdvance, "Game Boy Advance", "gba")) {
-    information.pathID = loaded.pathID();
+    information.pathID = loaded.pathID;
   } else return false;
 
   if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {

@@ -19,7 +19,7 @@ auto locate(string name) -> string {
 }
 
 #include <nall/main.hpp>
-auto nall::main(string_vector arguments) -> void {
+auto nall::main(vector<string> arguments) -> void {
   string locale;  // = "日本語";
   for(auto argument : arguments) {
     if(argument.beginsWith("--locale=")) {

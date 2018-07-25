@@ -34,6 +34,7 @@ struct MMC1 : Chip {
     case 2: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
     case 3: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
     }
+    unreachable;
   }
 
   auto writeIO(uint addr, uint8 data) -> void {

@@ -10,6 +10,11 @@ auto Application::font() -> Font {
   return state.font;
 }
 
+auto Application::kill() -> void {
+  quit();
+  exit(EXIT_SUCCESS);
+}
+
 auto Application::locale() -> Locale& {
   return state.locale;
 }

@@ -14,7 +14,7 @@ auto ManifestViewer::loadManifest() -> void {
     return;
   }
 
-  manifestView.setText(emulator->manifest());
+  manifestView.setText(emulator->manifests().merge("\n"));
   verifiedIcon.setIcon(program->verified() ? Icon::Emblem::Program : Icon::Emblem::Binary);
   verifiedLabel.setText(program->verified() ? "Verified" : "Unverified");
 }

@@ -1,3 +1,5 @@
+#if defined(CORE_FC)
+
 namespace Famicom {
 
 struct ID {
@@ -19,18 +21,15 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  using Emulator::Interface::load;
-
   auto information() -> Information override;
 
-  auto manifest() -> string override;
-  auto title() -> string override;
-
-  auto display() -> Display override;
+  auto displays() -> vector<Display> override;
   auto color(uint32 color) -> uint64 override;
 
   auto loaded() -> bool override;
-  auto sha256() -> string override;
+  auto hashes() -> vector<string> override;
+  auto manifests() -> vector<string> override;
+  auto titles() -> vector<string> override;
   auto load() -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
@@ -48,7 +47,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const string_vector&) -> void override;
+  auto cheats(const vector<string>&) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
@@ -67,3 +66,5 @@ struct Settings {
 extern Settings settings;
 
 }
+
+#endif

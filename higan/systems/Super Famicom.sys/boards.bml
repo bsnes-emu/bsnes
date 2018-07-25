@@ -1,5 +1,5 @@
 database
-  revision: 2018-06-25
+  revision: 2018-07-25
 
 //Boards (Production)
 
@@ -565,7 +565,7 @@ board: SHVC-YJ0N-01
 //Boards (Generic)
 
 database
-  revision: 2018-06-25
+  revision: 2018-07-25
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -768,17 +768,17 @@ board: LOROM
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
 
+board: LOROM-RAM
+  memory type=ROM content=Program
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  memory type=RAM content=Save
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+
 board: LOROM-RAM#A
   memory type=ROM content=Program
     map address=00-3f,80-bf:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff mask=0x8000
-
-board: LOROM-RAM#B
-  memory type=ROM content=Program
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-  memory type=RAM content=Save
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
 
 board: NEC-HIROM
   memory type=ROM content=Program
@@ -814,6 +814,18 @@ board: NEC-LOROM
     memory type=RAM content=Data architecture=uPD7725
     oscillator
 
+board: NEC-LOROM-RAM
+  memory type=ROM content=Program
+    map address=00-3f,80-bf:8000-ffff mask=0x8000
+  memory type=RAM content=Save
+    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  processor architecture=uPD7725
+    map address=60-6f,e0-ef:0000-7fff mask=0x3fff
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
+    oscillator
+
 board: NEC-LOROM-RAM#A
   memory type=ROM content=Program
     map address=00-1f,80-9f:8000-ffff mask=0x8000
@@ -821,18 +833,6 @@ board: NEC-LOROM-RAM#A
     map address=70-7d,f0-ff:0000-ffff
   processor architecture=uPD7725
     map address=20-3f,a0-bf:8000-ffff mask=0x3fff
-    memory type=ROM content=Program architecture=uPD7725
-    memory type=ROM content=Data architecture=uPD7725
-    memory type=RAM content=Data architecture=uPD7725
-    oscillator
-
-board: NEC-LOROM-RAM#B
-  memory type=ROM content=Program
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
-  memory type=RAM content=Save
-    map address=70-7d,f0-ff:0000-7fff mask=0x8000
-  processor architecture=uPD7725
-    map address=60-6f,e0-ef:0000-7fff mask=0x3fff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
     memory type=RAM content=Data architecture=uPD7725

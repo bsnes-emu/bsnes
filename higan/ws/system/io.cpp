@@ -17,6 +17,8 @@ auto System::portRead(uint16 addr) -> uint8 {
 
   //IEEP_CMD
   if(addr == 0x00be) return eeprom.read(EEPROM::Status);
+
+  return 0x00;
 }
 
 auto System::portWrite(uint16 addr, uint8 data) -> void {

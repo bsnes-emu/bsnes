@@ -115,6 +115,7 @@ struct VRC6 : Chip {
     if((addr & 0xc000) == 0x8000) return (prgBank[0] << 14) | (addr & 0x3fff);
     if((addr & 0xe000) == 0xc000) return (prgBank[1] << 13) | (addr & 0x1fff);
     if((addr & 0xe000) == 0xe000) return (      0xff << 13) | (addr & 0x1fff);
+    return 0x00;
   }
 
   auto addrCHR(uint addr) const -> uint {
@@ -129,6 +130,7 @@ struct VRC6 : Chip {
     case 2: return 0x0000 | (addr & 0x03ff);                  //one-screen mirroring (first)
     case 3: return 0x0400 | (addr & 0x03ff);                  //one-screen mirroring (second)
     }
+    unreachable;
   }
 
   auto readRAM(uint addr) -> uint8 {

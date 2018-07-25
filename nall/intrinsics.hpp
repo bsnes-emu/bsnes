@@ -28,10 +28,10 @@ namespace nall {
   #define COMPILER_CLANG
   constexpr auto compiler() -> Compiler { return Compiler::Clang; }
 
+  #pragma clang diagnostic warning "-Wreturn-type"
   #pragma clang diagnostic ignored "-Wunknown-pragmas"
   #pragma clang diagnostic ignored "-Wempty-body"
   #pragma clang diagnostic ignored "-Wparentheses"
-  #pragma clang diagnostic ignored "-Wreturn-type"
   #pragma clang diagnostic ignored "-Wswitch"
   #pragma clang diagnostic ignored "-Wswitch-bool"
   #pragma clang diagnostic ignored "-Wtautological-compare"
@@ -44,6 +44,7 @@ namespace nall {
   #define COMPILER_GCC
   constexpr auto compiler() -> Compiler { return Compiler::GCC; }
 
+  #pragma GCC diagnostic warning "-Wreturn-type"
   #pragma GCC diagnostic ignored "-Wunknown-pragmas"
   #pragma GCC diagnostic ignored "-Wpragmas"
   #pragma GCC diagnostic ignored "-Wswitch-bool"

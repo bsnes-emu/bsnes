@@ -2,7 +2,7 @@
 
 namespace nall {
 
-auto string::read(string_view filename) -> string {
+auto string::read(view<string> filename) -> string {
   #if !defined(_WIN32)
   FILE* fp = fopen(filename, "rb");
   #else
@@ -22,7 +22,7 @@ auto string::read(string_view filename) -> string {
   return fclose(fp), result;
 }
 
-auto string::repeat(string_view pattern, uint times) -> string {
+auto string::repeat(view<string> pattern, uint times) -> string {
   string result;
   while(times--) result.append(pattern.data());
   return result;
@@ -82,7 +82,7 @@ auto string::size(int length, char fill) -> string& {
   return *this;
 }
 
-auto slice(string_view self, int offset, int length) -> string {
+auto slice(view<string> self, int offset, int length) -> string {
   string result;
   if(offset < 0) offset = self.size() - abs(offset);
   if(offset >= 0 && offset < self.size()) {

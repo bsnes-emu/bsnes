@@ -11,14 +11,14 @@ auto Cartridge::load() -> bool {
 
   if(Model::MasterSystem()) {
     if(auto loaded = platform->load(ID::MasterSystem, "Master System", "ms", {"NTSC", "PAL"})) {
-      information.pathID = loaded.pathID();
-      information.region = loaded.option();
+      information.pathID = loaded.pathID;
+      information.region = loaded.option;
     } else return false;
   }
 
   if(Model::GameGear()) {
     if(auto loaded = platform->load(ID::GameGear, "Game Gear", "gg", {"NTSC"})) {
-      information.pathID = loaded.pathID();
+      information.pathID = loaded.pathID;
     } else return false;
   }
 

@@ -69,6 +69,7 @@ auto APU::Sequencer::read(uint addr) const -> uint8 {
   | (masterenable       << 7)
   );
   }
+  return 0;
 }
 
 auto APU::Sequencer::write(uint addr, uint8 byte) -> void {

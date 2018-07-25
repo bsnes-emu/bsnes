@@ -1,35 +1,62 @@
 #include "../higan.hpp"
 #include <fc/interface/interface.hpp>
 #include <sfc/interface/interface.hpp>
-//#include <ms/interface/interface.hpp>
+#include <ms/interface/interface.hpp>
 #include <md/interface/interface.hpp>
-//#include <pce/interface/interface.hpp>
+#include <pce/interface/interface.hpp>
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
-//#include <ws/interface/interface.hpp>
+#include <ws/interface/interface.hpp>
 #include "platform.cpp"
 #include "game.cpp"
 #include "state.cpp"
 #include "utility.cpp"
 unique_pointer<Program> program;
 
-Program::Program(string_vector args) {
+Program::Program(vector<string> arguments) {
   program = this;
 
   Emulator::platform = this;
+
+#ifdef CORE_FC
   emulators.append(new Famicom::Interface);
+#endif
+#ifdef CORE_SFC
   emulators.append(new SuperFamicom::Interface);
-//  emulators.append(new MasterSystem::MasterSystemInterface);
+#endif
+#ifdef CORE_MS
+  emulators.append(new MasterSystem::MasterSystemInterface);
+#endif
+#ifdef CORE_MD
   emulators.append(new MegaDrive::Interface);
-//  emulators.append(new PCEngine::PCEngineInterface);
-//  emulators.append(new PCEngine::SuperGrafxInterface);
+#endif
+#ifdef CORE_PCE
+  emulators.append(new PCEngine::PCEngineInterface);
+#endif
+#ifdef CORE_PCE
+  emulators.append(new PCEngine::SuperGrafxInterface);
+#endif
+#ifdef CORE_GB
   emulators.append(new GameBoy::GameBoyInterface);
+#endif
+#ifdef CORE_GB
   emulators.append(new GameBoy::GameBoyColorInterface);
+#endif
+#ifdef CORE_GBA
   emulators.append(new GameBoyAdvance::Interface);
-//  emulators.append(new MasterSystem::GameGearInterface);
-//  emulators.append(new WonderSwan::WonderSwanInterface);
-//  emulators.append(new WonderSwan::WonderSwanColorInterface);
-//  emulators.append(new WonderSwan::PocketChallengeV2Interface);
+#endif
+#ifdef CORE_MS
+  emulators.append(new MasterSystem::GameGearInterface);
+#endif
+#ifdef CORE_WS
+  emulators.append(new WonderSwan::WonderSwanInterface);
+#endif
+#ifdef CORE_WS
+  emulators.append(new WonderSwan::WonderSwanColorInterface);
+#endif
+#ifdef CORE_WS
+  emulators.append(new WonderSwan::PocketChallengeV2Interface);
+#endif
 
   new Presentation;
   presentation->setVisible();
@@ -62,8 +89,8 @@ Program::Program(string_vector args) {
   updateAudioDriver();
   updateAudioEffects();
 
-  args.takeLeft();  //ignore program location in argument parsing
-  for(auto& argument : args) {
+  arguments.takeLeft();  //ignore program location in argument parsing
+  for(auto& argument : arguments) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
     } else if(directory::exists(argument.split("|", 1L).right())) {
@@ -113,5 +140,5 @@ auto Program::quit() -> void {
   video.reset();
   audio.reset();
   input.reset();
-  Application::quit();
+  Application::kill();
 }

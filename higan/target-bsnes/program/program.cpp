@@ -13,7 +13,7 @@
 #include "hacks.cpp"
 unique_pointer<Program> program;
 
-Program::Program(string_vector arguments) {
+Program::Program(vector<string> arguments) {
   program = this;
   Emulator::platform = this;
 
@@ -89,5 +89,5 @@ auto Program::quit() -> void {
   video.reset();
   audio.reset();
   input.reset();
-  Application::quit();
+  Application::kill();
 }

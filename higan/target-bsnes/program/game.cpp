@@ -6,14 +6,17 @@ auto Program::load() -> void {
   screenshot = {};
   frameAdvance = false;
   if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
-    //todo: MessageDialog crashes with GTK+; unsure the reason why this happens
-    //once MessageDialog functions, add an "Always" option
-    if(MessageWindow(
-      "Warning: this game image is unverified. Running it *may* be a security risk.\n\n"
+    auto response = MessageDialog(
+      "Warning: this game image is unverified.\n"
+      "Running it *may* be a security risk.\n\n"
       "Do you wish to run the game anyway?"
-    ).setParent(*presentation).question() == MessageWindow::Response::No) {
+    ).setParent(*presentation).question({"Always", "Yes", "No"});
+    if(response == "No") {
       emulator->unload();
       return showMessage("Game loading cancelled");
+    }
+    if(response == "Always") {
+      settingsWindow->advanced.warnOnUnverifiedGames.setChecked(false).doToggle();
     }
   }
   hackCompatibility();
@@ -25,7 +28,7 @@ auto Program::load() -> void {
     verified() ? "Verified game loaded" : "Game loaded",
     appliedPatch() ? " and patch applied" : ""
   });
-  presentation->setTitle(emulator->title());
+  presentation->setTitle(emulator->titles().merge(" + "));
   presentation->resetSystem.setEnabled(true);
   presentation->unloadGame.setEnabled(true);
   presentation->toolsMenu.setVisible(true);
@@ -38,10 +41,10 @@ auto Program::load() -> void {
   toolsWindow->manifestViewer.loadManifest();
 
   string locations = superFamicom.location;
-  if(auto location = gameBoy.location) locations.append("|", location);
-  if(auto location = bsMemory.location) locations.append("|", location);
-  if(auto location = sufamiTurboA.location) locations.append("|", location);
-  if(auto location = sufamiTurboB.location) locations.append("|", location);
+  if(auto& location = gameBoy.location) locations.append("|", location);
+  if(auto& location = bsMemory.location) locations.append("|", location);
+  if(auto& location = sufamiTurboA.location) locations.append("|", location);
+  if(auto& location = sufamiTurboB.location) locations.append("|", location);
   presentation->addRecentGame(locations);
 
   updateVideoPalette();
@@ -75,9 +78,9 @@ auto Program::loadSuperFamicom(string location) -> bool {
     rom.append(file::read({location, "program.rom"}));
     rom.append(file::read({location, "data.rom"}));
     rom.append(file::read({location, "expansion.rom"}));
-    for(auto filename : directory::files(location, "*.boot.rom"   )) rom.append(file::read({location, filename}));
-    for(auto filename : directory::files(location, "*.program.rom")) rom.append(file::read({location, filename}));
-    for(auto filename : directory::files(location, "*.data.rom"   )) rom.append(file::read({location, filename}));
+    for(auto& filename : directory::files(location, "*.boot.rom"   )) rom.append(file::read({location, filename}));
+    for(auto& filename : directory::files(location, "*.program.rom")) rom.append(file::read({location, filename}));
+    for(auto& filename : directory::files(location, "*.data.rom"   )) rom.append(file::read({location, filename}));
   } else {
     manifest = file::read({Location::notsuffix(location), ".bml"});
     rom = loadFile(location);

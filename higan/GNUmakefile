@@ -1,4 +1,4 @@
-target := higan
+target := bsnes
 binary := application
 build := performance
 openmp := true
@@ -42,6 +42,49 @@ obj/audio.o: audio/audio.cpp
 obj/video.o: video/video.cpp
 obj/resource.o: resource/resource.cpp
 
+ifeq ($(target),higan)
+  cores := fc sfc ms md pce gb gba ws
+endif
+
+ifeq ($(target),bsnes)
+  cores := sfc gb
+endif
+
+ifneq ($(filter $(cores),fc),)
+  include fc/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),sfc),)
+  include sfc/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),ms),)
+  include ms/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),md),)
+  include md/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),pce),)
+  include pce/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),gb),)
+  include gb/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),gba),)
+  include gba/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),ws),)
+  include ws/GNUmakefile
+endif
+
+include processor/GNUmakefile
+
+flags += $(foreach c,$(call strupper,$(cores)),-DCORE_$c)
 ui := target-$(target)
 include $(ui)/GNUmakefile
 -include obj/*.d

@@ -13,7 +13,7 @@ ImportDialog::ImportDialog() {
   setCentered();
 }
 
-auto ImportDialog::run(string_vector locations) -> void {
+auto ImportDialog::run(vector<string> locations) -> void {
   abort = false;
   errors.reset();
   unsigned position = 0;

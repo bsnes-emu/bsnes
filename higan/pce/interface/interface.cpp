@@ -7,54 +7,20 @@ Settings settings;
 #include "pc-engine.cpp"
 #include "supergrafx.cpp"
 
-Interface::Interface() {
-  information.overscan = true;
-
-  Port controllerPort{ID::Port::Controller, "Controller Port"};
-
-  { Device device{ID::Device::None, "None"};
-    controllerPort.devices.append(device);
-  }
-
-  { Device device{ID::Device::Gamepad, "Gamepad"};
-    device.inputs.append({0, "Up"});
-    device.inputs.append({0, "Down"});
-    device.inputs.append({0, "Left"});
-    device.inputs.append({0, "Right"});
-    device.inputs.append({0, "II"});
-    device.inputs.append({0, "I"});
-    device.inputs.append({0, "Select"});
-    device.inputs.append({0, "Run"});
-    controllerPort.devices.append(device);
-  }
-
-  ports.append(move(controllerPort));
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::CRT;
+  display.colors = 1 << 9;
+  display.width  = 280;
+  display.height = 240;
+  display.internalWidth  = 1120;
+  display.internalHeight =  240;
+  display.aspectCorrection = 8.0 / 7.0;
+  display.refreshRate = (system.colorburst() * 6.0) / (262.0 * 1365.0);
+  return {display};
 }
 
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
-}
-
-auto Interface::title() -> string {
-  return cartridge.title();
-}
-
-auto Interface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 280;
-  vi.height = 240;
-  vi.internalWidth  = 1120;
-  vi.internalHeight =  240;
-  vi.aspectCorrection = 8.0 / 7.0;
-  vi.refreshRate = (system.colorburst() * 6.0) / (262.0 * 1365.0);
-  return vi;
-}
-
-auto Interface::videoColors() -> uint32 {
-  return 1 << 9;
-}
-
-auto Interface::videoColor(uint32 color) -> uint64 {
+auto Interface::color(uint32 color) -> uint64 {
   uint3 B = color.bits(0,2);
   uint3 R = color.bits(3,5);
   uint3 G = color.bits(6,8);
@@ -70,8 +36,16 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::sha256() -> string {
-  return cartridge.sha256();
+auto Interface::hashes() -> vector<string> {
+  return {cartridge.hash()};
+}
+
+auto Interface::manifests() -> vector<string> {
+  return {cartridge.manifest()};
+}
+
+auto Interface::titles() -> vector<string> {
+  return {cartridge.title()};
 }
 
 auto Interface::save() -> void {
@@ -81,6 +55,35 @@ auto Interface::save() -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::ports() -> vector<Port> { return {
+  {ID::Port::Controller, "Controller"}};
+}
+
+auto Interface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Controller) return {
+    {ID::Device::Gamepad, "Gamepad"}
+  };
+
+  return {};
+}
+
+auto Interface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::Gamepad) return {
+    {Type::Hat,     "Up"    },
+    {Type::Hat,     "Down"  },
+    {Type::Hat,     "Left"  },
+    {Type::Hat,     "Right" },
+    {Type::Button,  "II"    },
+    {Type::Button,  "I"     },
+    {Type::Control, "Select"},
+    {Type::Control, "Run"   }
+  };
+
+  return {};
 }
 
 auto Interface::connected(uint port) -> uint {
@@ -109,7 +112,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 

@@ -123,6 +123,8 @@ auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
   case 0x2006: return 'U';
   case 0x2007: return '1';
   }
+
+  unreachable;
 }
 
 auto MSU1::writeIO(uint24 addr, uint8 data) -> void {

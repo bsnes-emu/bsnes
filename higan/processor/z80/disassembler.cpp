@@ -48,7 +48,7 @@ auto Z80::disassemble(uint16 pc) -> string {
   return s;
 }
 
-#define op(id, name, ...) case id: return {name, " ", string_vector{__VA_ARGS__}.merge(",")};
+#define op(id, name, ...) case id: return {name, " ", vector<string>{__VA_ARGS__}.merge(",")};
 
 #define N   string{"$", hex(byte(), 2L)}
 #define IN  string{"(", N, ")"}

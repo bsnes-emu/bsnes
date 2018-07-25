@@ -41,8 +41,7 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
   if(settings["icarus/CreateManifests"].boolean()) write({target, "manifest.bml"}, manifest);
   uint offset = 0;
   auto document = BML::unserialize(manifest);
-  for(auto rom : document.find("game/board/memory")) {
-    if(rom["type"].text() != "ROM") continue;
+  for(auto rom : document.find("game/board/memory(type=ROM)")) {
     auto name = string{rom["architecture"].text(), ".", rom["content"].text(), ".rom"}.trimLeft(".", 1L).downcase();
     auto size = rom["size"].natural();
     if(size > buffer.size() - offset) {

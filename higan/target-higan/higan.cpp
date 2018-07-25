@@ -13,9 +13,9 @@ auto locate(string name) -> string {
 }
 
 #include <nall/main.hpp>
-auto nall::main(string_vector args) -> void {
+auto nall::main(vector<string> arguments) -> void {
   Application::setName("higan");
   Application::setScreenSaver(false);
-  new Program(args);
+  new Program(arguments);
   Application::run();
 }

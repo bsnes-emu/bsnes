@@ -8,5 +8,5 @@ ManifestViewer::ManifestViewer(TabFrame* parent) : TabFrameItem(parent) {
 
 auto ManifestViewer::doRefresh() -> void {
   manifestView.setText("");
-  if(emulator) manifestView.setText(emulator->manifest());
+  if(emulator) manifestView.setText(emulator->manifests().merge("\n"));
 }

@@ -83,6 +83,8 @@ struct MMC5 : Chip {
     case 0x5205: return (multiplier * multiplicand) >> 0;
     case 0x5206: return (multiplier * multiplicand) >> 8;
     }
+
+    return 0x00;
   }
 
   auto writePRG(uint addr, uint8 data) -> void {
@@ -215,6 +217,8 @@ struct MMC5 : Chip {
       auto bank = chrSpriteBank[(addr / 0x0400)];
       return (bank * 0x0400) + (addr & 0x03ff);
     }
+
+    unreachable;
   }
 
   auto chrBGAddr(uint addr) -> uint {
@@ -239,6 +243,8 @@ struct MMC5 : Chip {
       auto bank = chrBGBank[(addr / 0x0400)];
       return (bank * 0x0400) + (addr & 0x03ff);
     }
+
+    unreachable;
   }
 
   auto chrVSAddr(uint addr) -> uint {
@@ -274,6 +280,7 @@ struct MMC5 : Chip {
     case 2: return exramMode < 2 ? exram[addr & 0x03ff] : (uint8)0x00;
     case 3: return (hcounter & 2) == 0 ? fillmodeTile : fillmodeColor;
     }
+    unreachable;
   }
 
   auto readCHR(uint addr) -> uint8 {

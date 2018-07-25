@@ -23,7 +23,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   return {};
 }
 
-auto Program::load(uint id, string name, string type, string_vector options) -> Emulator::Platform::Load {
+auto Program::load(uint id, string name, string type, vector<string> options) -> Emulator::Platform::Load {
   string location, option;
   if(gameQueue) {
     auto entry = gameQueue.takeLeft().split("|", 1L);
@@ -50,13 +50,13 @@ auto Program::load(uint id, string name, string type, string_vector options) -> 
   return {pathID, option};
 }
 
-auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
+auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32_t* output;
   uint length;
 
   pitch >>= 2;
 
-  auto display = emulator->display();
+  auto display = emulator->displays()[displayID];
   if(display.type == Emulator::Interface::Display::Type::CRT) {
     uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
     uint overscanVertical = settings["Video/Overscan/Vertical"].natural();

@@ -61,6 +61,7 @@
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
+#include <nall/view.hpp>
 #include <nall/decode/base.hpp>
 #include <nall/decode/base64.hpp>
 #include <nall/decode/bmp.hpp>

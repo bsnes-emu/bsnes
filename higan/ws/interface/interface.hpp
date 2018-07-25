@@ -1,3 +1,5 @@
+#if defined(CORE_WS)
+
 namespace WonderSwan {
 
 struct ID {
@@ -18,15 +20,17 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  Interface();
+  auto displays() -> vector<Display> override;
+  auto color(uint32 color) -> uint64 override;
 
-  auto manifest() -> string override;
-  auto title() -> string override;
-
-  auto videoInformation() -> VideoInformation override;
+  auto ports() -> vector<Port> override;
+  auto devices(uint ports) -> vector<Device> override;
+  auto inputs(uint devices) -> vector<Input> override;
 
   auto loaded() -> bool override;
-  auto sha256() -> string override;
+  auto hashes() -> vector<string> override;
+  auto manifests() -> vector<string> override;
+  auto titles() -> vector<string> override;
   auto save() -> void override;
   auto unload() -> void override;
 
@@ -36,7 +40,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const string_vector&) -> void override;
+  auto cheats(const vector<string>& list) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
@@ -44,36 +48,21 @@ struct Interface : Emulator::Interface {
 };
 
 struct WonderSwanInterface : Interface {
-  using Emulator::Interface::load;
+  auto information() -> Information override;
 
-  WonderSwanInterface();
-
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
-
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct WonderSwanColorInterface : Interface {
-  using Emulator::Interface::load;
+  auto information() -> Information override;
 
-  WonderSwanColorInterface();
-
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
-
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct PocketChallengeV2Interface : Interface {
-  using Emulator::Interface::load;
+  auto information() -> Information override;
 
-  PocketChallengeV2Interface();
-
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
-
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct Settings {
@@ -85,3 +74,5 @@ struct Settings {
 extern Settings settings;
 
 }
+
+#endif

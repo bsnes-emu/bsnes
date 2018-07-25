@@ -3,6 +3,7 @@
 namespace hiro {
 
 auto pBrowserWindow::directory(BrowserWindow::State& state) -> string {
+  return {};
 /*
   QString directory = QFileDialog::getExistingDirectory(
     state.parent ? state.parent->p.qtWindow : nullptr,
@@ -16,6 +17,7 @@ auto pBrowserWindow::directory(BrowserWindow::State& state) -> string {
 }
 
 auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
+  return {};
 /*
   string filters = state.filters.merge(";;");
 
@@ -38,6 +40,7 @@ auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
 }
 
 auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
+  return {};
 /*
   string filters = state.filters.merge(";;");
 

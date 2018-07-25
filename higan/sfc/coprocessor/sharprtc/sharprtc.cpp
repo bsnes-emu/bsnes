@@ -35,8 +35,8 @@ auto SharpRTC::power() -> void {
   index = -1;
 }
 
-auto SharpRTC::sync() -> void {
-  time_t systime = time(0);
+auto SharpRTC::synchronize(uint64 timestamp) -> void {
+  time_t systime = timestamp;
   tm* timeinfo = localtime(&systime);
 
   second = min(59, timeinfo->tm_sec);

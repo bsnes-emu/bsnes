@@ -1,42 +1,25 @@
-GameGearInterface::GameGearInterface() {
+auto GameGearInterface::information() -> Information {
+  Information information;
   information.manufacturer = "Sega";
   information.name         = "Game Gear";
-  information.overscan     = false;
-
-  media.append({ID::GameGear, "Game Gear", "gg"});
-
-  Port hardware{ID::Port::Hardware, "Hardware"};
-
-  { Device device{ID::Device::GameGearControls, "Controls"};
-    device.inputs.append({0, "Up"});
-    device.inputs.append({0, "Down"});
-    device.inputs.append({0, "Left"});
-    device.inputs.append({0, "Right"});
-    device.inputs.append({0, "1"});
-    device.inputs.append({0, "2"});
-    device.inputs.append({0, "Start"});
-    hardware.devices.append(device);
-  }
-
-  ports.append(move(hardware));
+  information.extension    = "gg";
+  return information;
 }
 
-auto GameGearInterface::videoInformation() -> VideoInformation {
-  VideoInformation vi;
-  vi.width  = 160;
-  vi.height = 144;
-  vi.internalWidth  = 160;
-  vi.internalHeight = 144;
-  vi.aspectCorrection = 1.0;
-  vi.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
-  return vi;
+auto GameGearInterface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::LCD;
+  display.colors = 1 << 12;
+  display.width  = 160;
+  display.height = 144;
+  display.internalWidth  = 160;
+  display.internalHeight = 144;
+  display.aspectCorrection = 1.0;
+  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
+  return {display};
 }
 
-auto GameGearInterface::videoColors() -> uint32 {
-  return 1 << 12;
-}
-
-auto GameGearInterface::videoColor(uint32 color) -> uint64 {
+auto GameGearInterface::color(uint32 color) -> uint64 {
   uint4 B = color >> 8;
   uint4 G = color >> 4;
   uint4 R = color >> 0;
@@ -48,7 +31,34 @@ auto GameGearInterface::videoColor(uint32 color) -> uint64 {
   return r << 32 | g << 16 | b << 0;
 }
 
-auto GameGearInterface::load(uint id) -> bool {
-  if(id == ID::GameGear) return system.load(this, System::Model::GameGear);
-  return false;
+auto GameGearInterface::ports() -> vector<Port> { return {
+  {ID::Port::Hardware, "Hardware"}};
+}
+
+auto GameGearInterface::devices(uint port) -> vector<Device> {
+  if(port == ID::Port::Hardware) return {
+    {ID::Device::GameGearControls, "Controls"}
+  };
+
+  return {};
+}
+
+auto GameGearInterface::inputs(uint device) -> vector<Input> {
+  using Type = Input::Type;
+
+  if(device == ID::Device::GameGearControls) return {
+    {Type::Hat,     "Up"   },
+    {Type::Hat,     "Down" },
+    {Type::Hat,     "Left" },
+    {Type::Hat,     "Right"},
+    {Type::Button,  "1"    },
+    {Type::Button,  "2"    },
+    {Type::Control, "Start"}
+  };
+
+  return {};
+}
+
+auto GameGearInterface::load() -> bool {
+  return system.load(this, System::Model::GameGear);
 }

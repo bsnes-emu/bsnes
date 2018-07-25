@@ -151,6 +151,7 @@ struct Sunsoft5B : Board {
     case 2: return 0x0000 | (addr & 0x03ff);  //first
     case 3: return 0x0400 | (addr & 0x03ff);  //second
     }
+    unreachable;
   }
 
   auto readCHR(uint addr) -> uint8 {

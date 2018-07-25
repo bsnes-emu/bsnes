@@ -1,8 +1,10 @@
-auto GameBoyColorInterface::information() -> returns(Information) {
-  manufacturer = "Nintendo";
-  name         = "Game Boy Color";
-  extension    = "gbc";
-}$
+auto GameBoyColorInterface::information() -> Information {
+  Information information;
+  information.manufacturer = "Nintendo";
+  information.name         = "Game Boy Color";
+  information.extension    = "gbc";
+  return information;
+}
 
 auto GameBoyColorInterface::color(uint32 color) -> uint64 {
   uint r = color.bits( 0, 4);

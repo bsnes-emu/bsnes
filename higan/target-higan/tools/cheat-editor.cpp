@@ -100,13 +100,13 @@ auto CheatEditor::doErase() -> void {
 auto CheatEditor::synchronizeCodes() -> void {
   if(!emulator) return;
 
-  string_vector codes;
+  vector<string> codes;
   for(auto& cheat : cheats) {
     if(!cheat.enabled || !cheat.code) continue;
     codes.append(cheat.code);
   }
 
-  emulator->cheatSet(codes);
+  emulator->cheats(codes);
 }
 
 //returns true if code was added
@@ -136,7 +136,7 @@ auto CheatEditor::loadCheats() -> void {
 
 auto CheatEditor::saveCheats() -> void {
   if(!emulator) return;
-  string document = {"cartridge sha256:", emulator->sha256(), "\n"};
+  string document = {"cartridge sha256:", emulator->hashes().left(), "\n"};
   uint count = 0;
   for(auto& cheat : cheats) {
     if(!cheat.code && !cheat.description) continue;

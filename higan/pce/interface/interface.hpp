@@ -1,3 +1,5 @@
+#if defined(CORE_PCE)
+
 namespace PCEngine {
 
 struct ID {
@@ -18,19 +20,19 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  Interface();
-
-  auto manifest() -> string override;
-  auto title() -> string override;
-
-  auto videoInformation() -> VideoInformation override;
-  auto videoColors() -> uint32 override;
-  auto videoColor(uint32 color) -> uint64 override;
+  auto displays() -> vector<Display> override;
+  auto color(uint32 color) -> uint64 override;
 
   auto loaded() -> bool override;
-  auto sha256() -> string override;
+  auto hashes() -> vector<string> override;
+  auto manifests() -> vector<string> override;
+  auto titles() -> vector<string> override;
   auto save() -> void override;
   auto unload() -> void override;
+
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
 
   auto connected(uint port) -> uint override;
   auto connect(uint port, uint device) -> void override;
@@ -40,7 +42,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const string_vector&) -> void override;
+  auto cheats(const vector<string>& list) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
@@ -48,15 +50,15 @@ struct Interface : Emulator::Interface {
 };
 
 struct PCEngineInterface : Interface {
-  PCEngineInterface();
+  auto information() -> Information override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct SuperGrafxInterface : Interface {
-  SuperGrafxInterface();
+  auto information() -> Information override;
 
-  auto load(uint id) -> bool override;
+  auto load() -> bool override;
 };
 
 struct Settings {
@@ -66,3 +68,5 @@ struct Settings {
 extern Settings settings;
 
 }
+
+#endif

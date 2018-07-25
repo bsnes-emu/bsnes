@@ -2,7 +2,7 @@ struct Cartridge {
   #include "memory.hpp"
 
   auto pathID() const -> uint { return information.pathID; }
-  auto sha256() const -> string { return information.sha256; }
+  auto hash() const -> string { return information.sha256; }
   auto manifest() const -> string { return information.manifest; }
   auto title() const -> string { return information.title; }
 

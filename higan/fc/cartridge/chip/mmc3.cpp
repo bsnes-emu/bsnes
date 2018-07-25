@@ -35,6 +35,7 @@ struct MMC3 : Chip {
     case 3:
       return (0x3f << 13) | (addr & 0x1fff);
     }
+    unreachable;
   }
 
   auto addrCHR(uint addr) const -> uint {
@@ -53,11 +54,13 @@ struct MMC3 : Chip {
       if(addr <= 0x17ff) return (chrBank[0] << 10) | (addr & 0x07ff);
       if(addr <= 0x1fff) return (chrBank[1] << 10) | (addr & 0x07ff);
     }
+    return 0;
   }
 
   auto addrCIRAM(uint addr) const -> uint {
     if(mirror == 0) return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
     if(mirror == 1) return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
+    unreachable;
   }
 
   auto readRAM(uint addr) -> uint8 {

@@ -2,35 +2,29 @@
 
 namespace MegaDrive {
 
-#define returns(T) T { return ([&] { struct With : T { With() {
-#define $ }}; return With(); })(); }
-
 Settings settings;
 
-auto Interface::information() -> returns(Information) {
-  manufacturer = "Sega";
-  name         = "Mega Drive";
-  resettable   = true;
-}$
-
-auto Interface::manifest() -> string {
-  return cartridge.manifest();
+auto Interface::information() -> Information {
+  Information information;
+  information.manufacturer = "Sega";
+  information.name         = "Mega Drive";
+  information.extension    = "md";
+  information.resettable   = true;
+  return information;
 }
 
-auto Interface::title() -> string {
-  return cartridge.title();
+auto Interface::displays() -> vector<Display> {
+  Display display;
+  display.type   = Display::Type::CRT;
+  display.colors = 3 * (1 << 9);
+  display.width  = 320;
+  display.height = 240;
+  display.internalWidth  = 1280;
+  display.internalHeight =  480;
+  display.aspectCorrection = 1.0;
+  display.refreshRate = (system.frequency() / 2.0) / (vdp.frameHeight() * 1710.0);
+  return {display};
 }
-
-auto Interface::display() -> returns(Display) {
-  type   = Display::Type::CRT;
-  colors = 3 * (1 << 9);
-  width  = 320;
-  height = 240;
-  internalWidth  = 1280;
-  internalHeight =  480;
-  aspectCorrection = 1.0;
-  refreshRate = (system.frequency() / 2.0) / (vdp.frameHeight() * 1710.0);
-}$
 
 auto Interface::color(uint32 color) -> uint64 {
   uint R = color.bits(0, 2);
@@ -53,6 +47,18 @@ auto Interface::color(uint32 color) -> uint64 {
 
 auto Interface::loaded() -> bool {
   return system.loaded();
+}
+
+auto Interface::hashes() -> vector<string> {
+  return cartridge.hashes();
+}
+
+auto Interface::manifests() -> vector<string> {
+  return cartridge.manifests();
+}
+
+auto Interface::titles() -> vector<string> {
+  return cartridge.titles();
 }
 
 auto Interface::load() -> bool {
@@ -163,7 +169,7 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const string_vector& list) -> void {
+auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 
@@ -178,8 +184,5 @@ auto Interface::get(const string& name) -> any {
 auto Interface::set(const string& name, const any& value) -> bool {
   return false;
 }
-
-#undef returns
-#undef $
 
 }

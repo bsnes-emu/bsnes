@@ -1,3 +1,5 @@
+#if defined(CORE_GBA)
+
 namespace GameBoyAdvance {
 
 struct ID {
@@ -16,17 +18,15 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  using Emulator::Interface::load;
-
   auto information() -> Information override;
 
-  auto manifest() -> string override;
-  auto title() -> string override;
-
-  auto display() -> Display override;
+  auto displays() -> vector<Display> override;
   auto color(uint32 color) -> uint64 override;
 
   auto loaded() -> bool override;
+  auto hashes() -> vector<string> override;
+  auto manifests() -> vector<string> override;
+  auto titles() -> vector<string> override;
   auto load() -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
@@ -55,3 +55,5 @@ struct Settings {
 extern Settings settings;
 
 }
+
+#endif

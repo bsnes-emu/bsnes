@@ -18,7 +18,7 @@ CheatDatabase::CheatDatabase() {
 }
 
 auto CheatDatabase::findCheats() -> void {
-  auto sha256 = emulator->sha256();
+  auto sha256 = emulator->hashes()[0];
 
   auto document = BML::unserialize(string::read(locate("cheats.bml")));
   for(auto game : document.find("cartridge")) {
@@ -232,11 +232,11 @@ auto CheatEditor::saveCheats() -> void {
 }
 
 auto CheatEditor::synchronizeCodes() -> void {
-  string_vector codes;
+  vector<string> codes;
   if(enableCheats.checked()) {
     for(auto& cheat : cheats) {
       if(cheat.enable) codes.append(cheat.code);
     }
   }
-  emulator->cheatSet(codes);
+  emulator->cheats(codes);
 }

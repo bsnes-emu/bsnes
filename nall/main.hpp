@@ -4,7 +4,7 @@
 #include <nall/string.hpp>
 
 namespace nall {
-  auto main(string_vector arguments) -> void;
+  auto main(vector<string> arguments) -> void;
 
   auto main(int argc, char** argv) -> int {
     #if defined(PLATFORM_WINDOWS)
@@ -17,7 +17,7 @@ namespace nall {
     utf8_args(argc, argv);
     #endif
 
-    string_vector arguments;
+    vector<string> arguments;
     for(auto n : range(argc)) {
       string argument = argv[n];
 
