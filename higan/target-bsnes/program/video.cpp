@@ -45,7 +45,7 @@ auto Program::updateVideoShader() -> void {
 }
 
 auto Program::updateVideoPalette() -> void {
-  emulator->set("Color Emulation", false);
+  emulator->configure("video/colorEmulation", false);
   double luminance = settings["Video/Luminance"].natural() / 100.0;
   double saturation = settings["Video/Saturation"].natural() / 100.0;
   double gamma = settings["Video/Gamma"].natural() / 100.0;

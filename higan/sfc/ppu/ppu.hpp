@@ -9,7 +9,7 @@ struct PPU : Thread, PPUcounter {
 
   static auto Enter() -> void;
   auto main() -> void;
-  auto load(Markup::Node) -> bool;
+  auto load() -> bool;
   auto power(bool reset) -> void;
 
   //io.cpp

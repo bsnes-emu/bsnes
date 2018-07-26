@@ -44,8 +44,8 @@ auto CPU::main() -> void {
   instruction();
 }
 
-auto CPU::load(Markup::Node node) -> bool {
-  version = node["cpu/version"].natural();
+auto CPU::load() -> bool {
+  version = configuration.system.cpu.version;
   if(version < 1) version = 1;
   if(version > 2) version = 2;
   return true;

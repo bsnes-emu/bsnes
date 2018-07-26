@@ -53,7 +53,7 @@ Presentation::Presentation() {
   });
   blurEmulation.setText("Blur Emulation").setChecked(settings["View/BlurEmulation"].boolean()).onToggle([&] {
     settings["View/BlurEmulation"].setValue(blurEmulation.checked());
-    emulator->set("Blur Emulation", blurEmulation.checked());
+    emulator->configure("video/blurEmulation", blurEmulation.checked());
   }).doToggle();
   shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
   synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Blocking"].boolean()).onToggle([&] {

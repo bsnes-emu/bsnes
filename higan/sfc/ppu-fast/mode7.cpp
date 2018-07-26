@@ -25,7 +25,7 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
-  if(!settings.fastPPUHiresMode7) {
+  if(!configuration.hacks.ppuFast.hiresMode7) {
     for(int X : range(256)) {
       int x = !io.mode7.hflip ? X : 255 - X;
       int pixelX = originX + a * x >> 8;

@@ -81,15 +81,15 @@ auto PPU::main() -> void {
   step(lineclocks() - hcounter());
 }
 
-auto PPU::load(Markup::Node node) -> bool {
+auto PPU::load() -> bool {
   if(system.fastPPU()) {
-    return ppufast.load(node);
+    return ppufast.load();
   }
 
-  ppu1.version = max(1, min(1, node["ppu1/version"].natural()));
-  ppu2.version = max(1, min(3, node["ppu2/version"].natural()));
-  ppu.vram.mask = node["ppu1/ram/size"].natural() / sizeof(uint16) - 1;
-  if(ppu.vram.mask != 0xffff) ppu.vram.mask = 0x7fff;
+  ppu1.version = max(1, min(1, configuration.system.ppu1.version));
+  ppu2.version = max(1, min(3, configuration.system.ppu2.version));
+  vram.mask = configuration.system.ppu1.vram.size / sizeof(uint16) - 1;
+  if(vram.mask != 0xffff) vram.mask = 0x7fff;
   return true;
 }
 
@@ -243,7 +243,7 @@ auto PPU::refresh() -> void {
   auto pitch = 512;
   auto width = 512;
   auto height = 480;
-  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation);
+  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation);
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
 

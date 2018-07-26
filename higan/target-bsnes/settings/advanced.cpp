@@ -97,7 +97,6 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   hiresMode7.setText("Hires mode 7").setChecked(settings["Emulator/Hack/FastPPU/HiresMode7"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastPPU/HiresMode7"].setValue(hiresMode7.checked());
-    emulator->set("Fast PPU/Hires Mode 7", hiresMode7.checked());
   });
   fastDSPOption.setText("Fast DSP").setChecked(settings["Emulator/Hack/FastDSP"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastDSP"].setValue(fastDSPOption.checked());
@@ -139,4 +138,11 @@ auto AdvancedSettings::updateInputDriver() -> void {
     inputDriverOption.append(item);
     if(input && input->driver() == driver) item.setSelected();
   }
+}
+
+auto AdvancedSettings::updateConfiguration() -> void {
+  emulator->configure("hacks/ppuFast/enable", fastPPUOption.checked());
+  emulator->configure("hacks/ppuFast/noSpriteLimit", noSpriteLimit.checked());
+  emulator->configure("hacks/ppuFast/hiresMode7", hiresMode7.checked());
+  emulator->configure("hacks/dspFast/enable", fastDSPOption.checked());
 }

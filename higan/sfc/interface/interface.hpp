@@ -64,21 +64,15 @@ struct Interface : Emulator::Interface {
 
   auto cheats(const vector<string>&) -> void override;
 
-  auto cap(const string& name) -> bool override;
-  auto get(const string& name) -> any override;
-  auto set(const string& name, const any& value) -> bool override;
+  auto configuration() -> string override;
+  auto configuration(string name) -> string override;
+  auto configure(string configuration) -> bool override;
+  auto configure(string name, string value) -> bool override;
 };
 
+#include "configuration.hpp"
+
 struct Settings {
-  bool fastPPU = false;
-  bool fastPPUNoSpriteLimit = false;
-  bool fastPPUHiresMode7 = false;
-  bool fastDSP = false;
-
-  bool blurEmulation = true;
-  bool colorEmulation = true;
-  bool scanlineEmulation = true;
-
   uint controllerPort1 = ID::Device::Gamepad;
   uint controllerPort2 = ID::Device::Gamepad;
   uint expansionPort = ID::Device::None;

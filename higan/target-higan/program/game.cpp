@@ -19,6 +19,14 @@ auto Program::load(Emulator::Interface& interface) -> void {
   gamePaths.append(locate({"systems/", information.name, ".sys/"}));
 
   inputManager->bind(emulator = &interface);
+
+  if(auto configuration = string::read({gamePaths[0], "configuration.bml"})) {
+    emulator->configure(configuration);
+  }
+  if(auto configuration = emulator->configuration()) {
+    file::write({gamePaths[0], "configuration.bml"}, configuration);
+  }
+
   presentation->updateEmulatorMenu();
   if(!emulator->load()) {
     emulator = nullptr;

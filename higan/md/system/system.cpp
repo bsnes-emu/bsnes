@@ -4,6 +4,7 @@ namespace MegaDrive {
 
 System system;
 Scheduler scheduler;
+Random random;
 Cheat cheat;
 #include "serialization.cpp"
 
@@ -66,6 +67,8 @@ auto System::power(bool reset) -> void {
   Emulator::video.setPalette();
 
   Emulator::audio.reset(interface);
+
+  random.entropy(Random::Entropy::High);
 
   scheduler.reset();
   cartridge.power();

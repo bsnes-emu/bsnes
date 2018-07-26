@@ -34,7 +34,6 @@ Settings::Settings() {
   set("Audio/Skew", "0");
   set("Audio/Volume", "100%");
   set("Audio/Balance", "50%");
-  set("Audio/Reverb", false);
 
   set("Input/Driver", Input::safestDriver());
   set("Input/Frequency", 5);

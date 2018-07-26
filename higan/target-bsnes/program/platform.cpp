@@ -11,10 +11,6 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   vfs::shared::file result;
 
   if(id == 0) {  //System
-    if(name == "manifest.bml" && mode == vfs::file::mode::read) {
-      result = vfs::memory::file::open(Resource::System::Manifest.data(), Resource::System::Manifest.size());
-    }
-
     if(name == "boards.bml" && mode == vfs::file::mode::read) {
       result = vfs::memory::file::open(Resource::System::Boards.data(), Resource::System::Boards.size());
     }

@@ -32,11 +32,9 @@ auto System::unserialize(serializer& s) -> bool {
   s.boolean(hacks.fastPPU);
   s.boolean(hacks.fastDSP);
 
-  settings.fastPPU = hacks.fastPPU;
-  settings.fastDSP = hacks.fastDSP;
-
   power(/* reset = */ false);
   serializeAll(s);
+  serializeInit();  //hacks.fastPPU setting changes serializeSize
   return true;
 }
 

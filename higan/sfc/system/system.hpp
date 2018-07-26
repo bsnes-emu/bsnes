@@ -25,7 +25,6 @@ private:
   Emulator::Interface* interface = nullptr;
 
   struct Information {
-    string manifest;
     bool loaded = false;
     Region region = Region::NTSC;
     double cpuFrequency = Emulator::Constants::Colorburst::NTSC * 6.0;

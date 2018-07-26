@@ -23,7 +23,7 @@ auto PPU::Line::render() -> void {
   }
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-  bool hiresMode7 = io.bgMode == 7 && settings.fastPPUHiresMode7;
+  bool hiresMode7 = io.bgMode == 7 && configuration.hacks.ppuFast.hiresMode7;
   auto aboveColor = cgram[0];
   auto belowColor = hires ? cgram[0] : io.col.fixedColor;
   for(uint x : range(256 << hiresMode7)) {

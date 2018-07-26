@@ -76,7 +76,7 @@ auto PPU::scanline() -> void {
 
   if(vcounter() > 0 && vcounter() < vdisp()) {
     latch.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-    latch.hires |= io.bgMode == 7 && settings.fastPPUHiresMode7;
+    latch.hires |= io.bgMode == 7 && configuration.hacks.ppuFast.hiresMode7;
   }
 
   if(vcounter() == vdisp() && !io.displayDisable) {
@@ -95,16 +95,15 @@ auto PPU::refresh() -> void {
   auto pitch  = 512 << !interlace();
   auto width  = 256 << hires();
   auto height = 240 << interlace();
-  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, settings.blurEmulation && hires());
+  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation && hires());
   Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
 
-auto PPU::load(Markup::Node node) -> bool {
+auto PPU::load() -> bool {
   return true;
 }
 
 auto PPU::power(bool reset) -> void {
-//settings.fastPPUHiresMode7=false;
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint32>(output, 512 * 480);
@@ -126,8 +125,8 @@ auto PPU::power(bool reset) -> void {
   io = {};
   updateVideoMode();
 
-  ItemLimit = !settings.fastPPUNoSpriteLimit ? 32 : 128;
-  TileLimit = !settings.fastPPUNoSpriteLimit ? 34 : 128;
+  ItemLimit = !configuration.hacks.ppuFast.noSpriteLimit ? 32 : 128;
+  TileLimit = !configuration.hacks.ppuFast.noSpriteLimit ? 34 : 128;
 
   Line::start = 0;
   Line::count = 0;

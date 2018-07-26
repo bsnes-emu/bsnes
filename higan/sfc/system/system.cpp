@@ -23,19 +23,14 @@ auto System::runToSave() -> void {
 
 auto System::load(Emulator::Interface* interface) -> bool {
   information = {};
-
-  if(auto fp = platform->open(ID::System, "manifest.bml", File::Read, File::Required)) {
-    information.manifest = fp->reads();
-  } else return false;
-
-  auto document = BML::unserialize(information.manifest);
-  auto system = document["system"];
+  hacks.fastPPU = configuration.hacks.ppuFast.enable;
+  hacks.fastDSP = configuration.hacks.dspFast.enable;
 
   bus.reset();
-  if(!cpu.load(system)) return false;
-  if(!smp.load(system)) return false;
-  if(!ppu.load(system)) return false;
-  if(!dsp.load(system)) return false;
+  if(!cpu.load()) return false;
+  if(!smp.load()) return false;
+  if(!ppu.load()) return false;
+  if(!dsp.load()) return false;
   if(!cartridge.load()) return false;
 
   if(cartridge.region() == "NTSC") {
@@ -88,9 +83,6 @@ auto System::unload() -> void {
 }
 
 auto System::power(bool reset) -> void {
-  hacks.fastPPU = settings.fastPPU;
-  hacks.fastDSP = settings.fastDSP;
-
   Emulator::video.reset(interface);
   Emulator::video.setPalette();
 

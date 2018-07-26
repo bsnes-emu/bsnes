@@ -10,7 +10,7 @@ struct SMP : Processor::SPC700, Thread {
   //smp.cpp
   static auto Enter() -> void;
   auto main() -> void;
-  auto load(Markup::Node) -> bool;
+  auto load() -> bool;
   auto power(bool reset) -> void;
 
   //serialization.cpp

@@ -1,5 +1,10 @@
 auto Program::load() -> void {
   unload();
+
+  if(auto configuration = string::read(locate("configuration.bml"))) {
+    emulator->configure(configuration);
+    settingsWindow->advanced.updateConfiguration();
+  }
   if(!emulator->load()) return;
 
   gameQueue = {};
@@ -281,6 +286,9 @@ auto Program::unload() -> void {
   toolsWindow->setVisible(false);
   if(settingsWindow->advanced.autoSaveStateOnUnload.checked()) {
     saveUndoState();
+  }
+  if(auto configuration = emulator->configuration()) {
+    file::write(locate("configuration.bml"), configuration);
   }
   emulator->unload();
   showMessage("Game unloaded");

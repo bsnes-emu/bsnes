@@ -87,6 +87,12 @@ struct Interface {
   //cheat functions
   virtual auto cheats(const vector<string>& = {}) -> void {}
 
+  //configuration
+  virtual auto configuration() -> string { return {}; }
+  virtual auto configuration(string name) -> string { return {}; }
+  virtual auto configure(string configuration = "") -> bool { return false; }
+  virtual auto configure(string name, string value) -> bool { return false; }
+
   //settings
   virtual auto cap(const string& name) -> bool { return false; }
   virtual auto get(const string& name) -> any { return {}; }

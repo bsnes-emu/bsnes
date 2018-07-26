@@ -1,4 +1,7 @@
 auto Cartridge::serialize(serializer& s) -> void {
-  if(game.ram.size) s.array(game.ram.data, game.ram.size);
-  if(lockOn.ram.size) s.array(lockOn.ram.data, lockOn.ram.size);
+  if(ram.size) s.array(ram.data, ram.size);
+  s.integer(ramEnable);
+  s.integer(ramWritable);
+  s.array(romBank);
+  if(slot) slot->serialize(s);
 }

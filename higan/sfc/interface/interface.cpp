@@ -3,6 +3,7 @@
 namespace SuperFamicom {
 
 Settings settings;
+#include "configuration.cpp"
 
 auto Interface::information() -> Information {
   Information information;
@@ -40,7 +41,7 @@ auto Interface::color(uint32 color) -> uint64 {
   uint64 G = L * image::normalize(g, 5, 16);
   uint64 B = L * image::normalize(b, 5, 16);
 
-  if(settings.colorEmulation) {
+  if(SuperFamicom::configuration.video.colorEmulation) {
     static const uint8 gammaRamp[32] = {
       0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
       0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
@@ -253,60 +254,20 @@ auto Interface::cheats(const vector<string>& list) -> void {
   cheat.assign(list);
 }
 
-auto Interface::cap(const string& name) -> bool {
-  if(name == "Fast PPU") return true;
-  if(name == "Fast PPU/No Sprite Limit") return true;
-  if(name == "Fast PPU/Hires Mode 7") return true;
-  if(name == "Fast DSP") return true;
-  if(name == "Mode") return true;
-  if(name == "Blur Emulation") return true;
-  if(name == "Color Emulation") return true;
-  if(name == "Scanline Emulation") return true;
-  return false;
+auto Interface::configuration() -> string {
+  return SuperFamicom::configuration.read();
 }
 
-auto Interface::get(const string& name) -> any {
-  if(name == "Fast PPU") return settings.fastPPU;
-  if(name == "Fast PPU/No Sprite Limit") return settings.fastPPUNoSpriteLimit;
-  if(name == "Fast PPU/Hires Mode 7") return settings.fastPPUHiresMode7;
-  if(name == "Fast DSP") return settings.fastDSP;
-  if(name == "Blur Emulation") return settings.blurEmulation;
-  if(name == "Color Emulation") return settings.colorEmulation;
-  if(name == "Scanline Emulation") return settings.scanlineEmulation;
-  return {};
+auto Interface::configuration(string name) -> string {
+  return SuperFamicom::configuration.read(name);
 }
 
-auto Interface::set(const string& name, const any& value) -> bool {
-  if(name == "Fast PPU" && value.is<bool>()) {
-    settings.fastPPU = value.get<bool>();
-    return true;
-  }
-  if(name == "Fast PPU/No Sprite Limit" && value.is<bool>()) {
-    settings.fastPPUNoSpriteLimit = value.get<bool>();
-    return true;
-  }
-  if(name == "Fast PPU/Hires Mode 7" && value.is<bool>()) {
-    settings.fastPPUHiresMode7 = value.get<bool>();
-    return true;
-  }
-  if(name == "Fast DSP" && value.is<bool>()) {
-    settings.fastDSP = value.get<bool>();
-    return true;
-  }
-  if(name == "Blur Emulation" && value.is<bool>()) {
-    settings.blurEmulation = value.get<bool>();
-    return true;
-  }
-  if(name == "Color Emulation" && value.is<bool>()) {
-    settings.colorEmulation = value.get<bool>();
-    Emulator::video.setPalette();
-    return true;
-  }
-  if(name == "Scanline Emulation" && value.is<bool>()) {
-    settings.scanlineEmulation = value.get<bool>();
-    return true;
-  }
-  return false;
+auto Interface::configure(string configuration) -> bool {
+  return SuperFamicom::configuration.write(configuration);
+}
+
+auto Interface::configure(string name, string value) -> bool {
+  return SuperFamicom::configuration.write(name, value);
 }
 
 }

@@ -6,7 +6,7 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   //cpu.cpp
   static auto Enter() -> void;
   auto main() -> void;
-  auto load(Markup::Node) -> bool;
+  auto load() -> bool;
   auto power(bool reset) -> void;
 
   //dma.cpp

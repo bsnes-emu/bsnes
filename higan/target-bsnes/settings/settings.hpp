@@ -157,6 +157,7 @@ struct AdvancedSettings : TabFrameItem {
   auto updateVideoDriver() -> void;
   auto updateAudioDriver() -> void;
   auto updateInputDriver() -> void;
+  auto updateConfiguration() -> void;
 
 public:
   VerticalLayout layout{this};

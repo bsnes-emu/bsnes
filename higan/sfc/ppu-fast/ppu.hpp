@@ -23,7 +23,7 @@ struct PPU : Thread, PPUcounter {
   auto main() -> void;
   auto scanline() -> void;
   auto refresh() -> void;
-  auto load(Markup::Node) -> bool;
+  auto load() -> bool;
   auto power(bool reset) -> void;
 
   //serialization.cpp

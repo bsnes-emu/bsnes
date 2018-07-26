@@ -5,144 +5,145 @@ namespace MegaDrive {
 Cartridge cartridge;
 #include "serialization.cpp"
 
-auto Cartridge::region() const -> string {
-  return game.region;
-}
-
 auto Cartridge::hashes() const -> vector<string> {
   vector<string> hashes;
-  hashes.append(game.hash);
-  if(lockOn.hash) hashes.append(lockOn.hash);
+  hashes.append(information.hash);
+  if(slot) for(auto& hash : slot->hashes()) hashes.append(hash);
   return hashes;
 }
 
 auto Cartridge::manifests() const -> vector<string> {
   vector<string> manifests;
-  manifests.append(game.manifest);
-  if(lockOn.manifest) manifests.append(lockOn.manifest);
+  manifests.append(information.manifest);
+  if(slot) for(auto& manifest : slot->manifests()) manifests.append(manifest);
   return manifests;
 }
 
 auto Cartridge::titles() const -> vector<string> {
   vector<string> titles;
-  titles.append(game.title);
-  if(lockOn.title) titles.append(lockOn.title);
+  titles.append(information.title);
+  if(slot) for(auto& title : slot->titles()) titles.append(title);
   return titles;
 }
 
 auto Cartridge::load() -> bool {
-  game = {};
-  lockOn = {};
-  read.reset();
-  write.reset();
+  unload();
 
-  if(!loadGame()) {
-    game = {};
-    return false;
+  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md", {"Auto", "NTSC-J", "NTSC-U", "PAL"})) {
+    information.pathID = loaded.pathID;
+    information.region = loaded.option;
+  } else return false;
+
+  if(auto fp = platform->open(pathID(), "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
+
+  information.document = BML::unserialize(information.manifest);
+  information.hash = information.document["game/sha256"].text();
+  information.title = information.document["game/label"].text();
+
+  if(!loadROM(rom, information.document["game/board/memory(type=ROM,content=Program)"])) {
+    return unload(), false;
   }
 
-  read = {&Cartridge::readGame, this};
-  write = {&Cartridge::writeGame, this};
+  if(!loadROM(patch, information.document["game/board/memory(type=ROM,content=Patch)"])) {
+    patch.reset();
+  }
 
-  if(game.patch.size) {
+  if(!loadRAM(ram, information.document["game/board/memory(type=RAM,content=Save)"])) {
+    ram.reset();
+  }
+
+  if(information.region == "Auto") {
+    if(auto region = information.document["game/region"].text()) {
+      information.region = region.upcase();
+    } else {
+      information.region = "NTSC-J";
+    }
+  }
+
+  read = {&Cartridge::readLinear, this};
+  write = {&Cartridge::writeLinear, this};
+
+  if(rom.size > 0x200000) {
+    read = {&Cartridge::readBanked, this};
+    write = {&Cartridge::writeBanked, this};
+  }
+
+  if(patch) {
+    slot = new Cartridge{depth + 1};
+    if(!slot->load()) slot.reset();
     read = {&Cartridge::readLockOn, this};
     write = {&Cartridge::writeLockOn, this};
-    if(!loadLockOn()) lockOn = {};
+  }
+
+  if(rom.data[0x120>>1]==0x4761 || rom.data[0x120>>1]==0x6147) {
+    slot = new Cartridge{depth + 1};
+    if(!slot->load()) slot.reset();
+    read = {&Cartridge::readGameGenie, this};
+    write = {&Cartridge::writeGameGenie, this};
+  }
+
+  //easter egg: power draw increases with each successively stacked cartridge
+  //simulate increasing address/data line errors as stacking increases
+  if(depth >= 3) {
+    auto reader = read;
+    auto writer = write;
+    auto scramble = [=](uint32 value) -> uint32 {
+      uint chance = max(1, (1 << 19) >> depth) - 1;
+      if((random() & chance) == 0) value ^= 1 << (random() & 31);
+      return value;
+    };
+    read = [=](uint22 address) -> uint16 {
+      return scramble(reader(scramble(address)));
+    };
+    write = [=](uint22 address, uint16 data) -> void {
+      writer(scramble(address), scramble(data));
+    };
   }
 
   return true;
 }
 
-auto Cartridge::loadGame() -> bool {
-  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md", {"Auto", "NTSC-J", "NTSC-U", "PAL"})) {
-    game.pathID = loaded.pathID;
-    game.region = loaded.option;
-  } else return false;
-
-  if(auto fp = platform->open(game.pathID, "manifest.bml", File::Read, File::Required)) {
-    game.manifest = fp->reads();
-  } else return false;
-
-  game.document = BML::unserialize(game.manifest);
-  game.hash = game.document["game/sha256"].text();
-  game.title = game.document["game/label"].text();
-
-  if(!loadROM(game.rom, game.pathID, game.document["game/board/memory(type=ROM,content=Program)"])) {
-    game.rom.reset();
-    return false;
-  }
-
-  if(!loadROM(game.patch, game.pathID, game.document["game/board/memory(type=ROM,content=Patch)"])) {
-    game.patch.reset();
-  }
-
-  if(!loadRAM(game.ram, game.pathID, game.document["game/board/memory(type=RAM,content=Save)"])) {
-    game.ram.reset();
-  }
-
-  if(game.region == "Auto") {
-    if(auto region = game.document["game/region"].text()) {
-      game.region = region.upcase();
-    } else {
-      game.region = "NTSC-J";
-    }
-  }
-
-  return true;
+auto Cartridge::save() -> void {
+  saveRAM(ram, information.document["game/board/memory(type=RAM,content=Save)"]);
+  if(slot) slot->save();
 }
 
-auto Cartridge::loadLockOn() -> bool {
-  if(auto loaded = platform->load(ID::MegaDrive, "Mega Drive", "md")) {
-    lockOn.pathID = loaded.pathID;
-  } else return false;
-
-  if(auto fp = platform->open(lockOn.pathID, "manifest.bml", File::Read, File::Required)) {
-    lockOn.manifest = fp->reads();
-  } else return false;
-
-  lockOn.document = BML::unserialize(lockOn.manifest);
-  lockOn.hash = lockOn.document["game/sha256"].text();
-  lockOn.title = lockOn.document["game/label"].text();
-
-  if(!loadROM(lockOn.rom, lockOn.pathID, lockOn.document["game/board/memory(type=ROM,content=Program)"])) {
-    lockOn.rom.reset();
-    return false;
-  }
-
-  if(!loadRAM(lockOn.ram, lockOn.pathID, lockOn.document["game/board/memory(type=RAM,content=Save)"])) {
-    lockOn.ram.reset();
-  }
-
-  if(lockOn.rom.size >= 0x200) {
-    string name;
-    name.resize(48);
-    for(uint n : range(24)) {
-      name.get()[n * 2 + 0] = lockOn.rom.data[0x120 / 2 + n].byte(1);
-      name.get()[n * 2 + 1] = lockOn.rom.data[0x120 / 2 + n].byte(0);
-    }
-    name.strip();
-    while(name.find("  ")) name.replace("  ", " ");
-    lockOn.patch = name == "SONIC THE HEDGEHOG 2";
-  }
-
-  return true;
+auto Cartridge::unload() -> void {
+  rom.reset();
+  patch.reset();
+  ram.reset();
+  read.reset();
+  write.reset();
+  if(slot) slot->unload();
+  slot.reset();
 }
 
-auto Cartridge::loadROM(Memory& rom, uint pathID, Markup::Node memory) -> bool {
+auto Cartridge::power() -> void {
+  ramEnable = 1;
+  ramWritable = 1;
+  for(uint n : range(8)) romBank[n] = n;
+  gameGenie = {};
+}
+
+//
+
+auto Cartridge::loadROM(Memory& rom, Markup::Node memory) -> bool {
   if(!memory) return false;
 
   auto name = string{memory["content"].text(), ".", memory["type"].text()}.downcase();
   rom.size = memory["size"].natural() >> 1;
   rom.mask = bit::round(rom.size) - 1;
   rom.data = new uint16[rom.mask + 1]();
-  if(auto fp = platform->open(pathID, name, File::Read, File::Required)) {
+  if(auto fp = platform->open(pathID(), name, File::Read, File::Required)) {
     for(uint n : range(rom.size)) rom.data[n] = fp->readm(2);
   } else return false;
 
   return true;
 }
 
-auto Cartridge::loadRAM(Memory& ram, uint pathID, Markup::Node memory) -> bool {
+auto Cartridge::loadRAM(Memory& ram, Markup::Node memory) -> bool {
   if(!memory) return false;
 
   auto name = string{memory["content"].text(), ".", memory["type"].text()}.downcase();
@@ -155,7 +156,7 @@ auto Cartridge::loadRAM(Memory& ram, uint pathID, Markup::Node memory) -> bool {
   ram.mask = bit::round(ram.size) - 1;
   ram.data = new uint16[ram.mask + 1]();
   if(!(bool)memory["volatile"]) {
-    if(auto fp = platform->open(pathID, name, File::Read)) {
+    if(auto fp = platform->open(pathID(), name, File::Read)) {
       for(uint n : range(ram.size)) {
         if(ram.bits != 0xffff) ram.data[n] = fp->readm(1) * 0x0101;
         if(ram.bits == 0xffff) ram.data[n] = fp->readm(2);
@@ -166,17 +167,12 @@ auto Cartridge::loadRAM(Memory& ram, uint pathID, Markup::Node memory) -> bool {
   return true;
 }
 
-auto Cartridge::save() -> void {
-  saveRAM(game.ram, game.pathID, game.document["game/board/memory(type=RAM,content=Save)"]);
-  saveRAM(lockOn.ram, lockOn.pathID, lockOn.document["game/board/memory(type=RAM,content=Save)"]);
-}
-
-auto Cartridge::saveRAM(Memory& ram, uint pathID, Markup::Node memory) -> bool {
+auto Cartridge::saveRAM(Memory& ram, Markup::Node memory) -> bool {
   if(!memory) return false;
   if((bool)memory["volatile"]) return true;
 
   auto name = string{memory["content"].text(), ".", memory["type"].text()}.downcase();
-  if(auto fp = platform->open(pathID, name, File::Write)) {
+  if(auto fp = platform->open(pathID(), name, File::Write)) {
     for(uint n : range(ram.size)) {
       if(ram.bits != 0xffff) fp->writem(ram.data[n], 1);
       if(ram.bits == 0xffff) fp->writem(ram.data[n], 2);
@@ -186,91 +182,98 @@ auto Cartridge::saveRAM(Memory& ram, uint pathID, Markup::Node memory) -> bool {
   return true;
 }
 
-auto Cartridge::unload() -> void {
-  game.rom.reset();
-  game.patch.reset();
-  game.ram.reset();
-  game = {};
-
-  lockOn.rom.reset();
-  lockOn.ram.reset();
-  lockOn = {};
-}
-
-auto Cartridge::power() -> void {
-  ramEnable = 1;
-  ramWritable = 1;
-  for(auto n : range(8)) bank[n] = n;
-}
-
 //
 
 auto Cartridge::readIO(uint24 address) -> uint16 {
+  if(slot) slot->readIO(address);
   return 0x0000;
 }
 
 auto Cartridge::writeIO(uint24 address, uint16 data) -> void {
   if(address == 0xa130f1) ramEnable = data.bit(0), ramWritable = data.bit(1);
-  if(address == 0xa130f3) bank[1] = data;
-  if(address == 0xa130f5) bank[2] = data;
-  if(address == 0xa130f7) bank[3] = data;
-  if(address == 0xa130f9) bank[4] = data;
-  if(address == 0xa130fb) bank[5] = data;
-  if(address == 0xa130fd) bank[6] = data;
-  if(address == 0xa130ff) bank[7] = data;
+  if(address == 0xa130f3) romBank[1] = data;
+  if(address == 0xa130f5) romBank[2] = data;
+  if(address == 0xa130f7) romBank[3] = data;
+  if(address == 0xa130f9) romBank[4] = data;
+  if(address == 0xa130fb) romBank[5] = data;
+  if(address == 0xa130fd) romBank[6] = data;
+  if(address == 0xa130ff) romBank[7] = data;
+  if(slot) slot->writeIO(address, data);
 }
 
 //
 
-auto Cartridge::readGame(uint24 address) -> uint16 {
-  if(address >= 0x200000 && game.ram.size && ramEnable) {
-    return game.ram.data[address >> 1 & game.ram.mask];
-  } else {
-    address = bank[address.bits(19,21)] << 19 | address.bits(0,18);
-    return game.rom.data[address >> 1 & game.rom.mask];
-  }
+auto Cartridge::readLinear(uint22 address) -> uint16 {
+  if(ramEnable && ram && address >= 0x200000) return ram.read(address);
+  return rom.read(address);
 }
 
-auto Cartridge::writeGame(uint24 address, uint16 data) -> void {
-  //emulating RAM write protect bit breaks some commercial software
-  if(address >= 0x200000 && game.ram.size && ramEnable /* && ramWritable */) {
-    if(game.ram.bits == 0x00ff) data = data.byte(0) * 0x0101;
-    if(game.ram.bits == 0xff00) data = data.byte(1) * 0x0101;
-    game.ram.data[address >> 1 & game.ram.mask] = data;
+auto Cartridge::writeLinear(uint22 address, uint16 data) -> void {
+  //emulating ramWritable will break commercial software:
+  //it does not appear that many (any?) games actually connect $a130f1.d1 to /WE;
+  //hence RAM ends up always being writable, and many games fail to set d1=1
+  if(ramEnable && ram && address >= 0x200000) return ram.write(address, data);
+}
+
+//
+
+auto Cartridge::readBanked(uint22 address) -> uint16 {
+  address = romBank[address.bits(19,21)] << 19 | address.bits(0,18);
+  return rom.read(address);
+}
+
+auto Cartridge::writeBanked(uint22 address, uint16 data) -> void {
+}
+
+//
+
+auto Cartridge::readLockOn(uint22 address) -> uint16 {
+  if(address < 0x200000) return rom.read(address);
+  if(ramEnable && address >= 0x300000) return patch.read(address);
+  if(slot) return slot->read(address);
+  return 0x0000;
+}
+
+auto Cartridge::writeLockOn(uint22 address, uint16 data) -> void {
+  if(slot) return slot->write(address, data);
+}
+
+//
+
+auto Cartridge::readGameGenie(uint22 address) -> uint16 {
+  if(gameGenie.enable) {
+    for(auto& code : gameGenie.codes) {
+      if(code.enable && code.address == address) return code.data;
+    }
+    if(slot) return slot->read(address);
+  }
+
+  return rom.read(address);
+}
+
+auto Cartridge::writeGameGenie(uint22 address, uint16 data) -> void {
+  if(gameGenie.enable) {
+    if(slot) return slot->write(address, data);
+  }
+
+  if(address == 0x02 && data == 0x0001) {
+    gameGenie.enable = true;
+  }
+
+  if(address >= 0x04 && address <= 0x20 && !address.bit(0)) {
+    address = address - 0x04 >> 1;
+    auto& code = gameGenie.codes[address / 3];
+    if(address % 3 == 0) code.address.bits(16,23) = data.byte(0);
+    if(address % 3 == 1) code.address.bits( 0,15) = data;
+    if(address % 3 == 2) code.data = data, code.enable = true;
   }
 }
 
 //
 
-auto Cartridge::readLockOn(uint24 address) -> uint16 {
-  if(address >= 0x200000 && lockOn.ram.size && ramEnable) {
-    return lockOn.ram.data[address >> 1 & lockOn.ram.mask];
-  }
-
-  if(address >= 0x300000 && lockOn.patch) {
-    return game.patch.data[address >> 1 & game.patch.mask];
-  }
-
-  if(address >= 0x200000 && lockOn.rom.data) {
-    return lockOn.rom.data[address >> 1 & lockOn.rom.mask];
-  }
-
-  if(address >= 0x200000) {
-    return 0x00;
-  }
-
-  return game.rom.data[address >> 1 & game.rom.mask];
+Cartridge::Memory::operator bool() const {
+  return size;
 }
-
-auto Cartridge::writeLockOn(uint24 address, uint16 data) -> void {
-  if(address >= 0x200000 && lockOn.ram.size && ramEnable) {
-    if(lockOn.ram.bits == 0x00ff) data = data.byte(0) * 0x0101;
-    if(lockOn.ram.bits == 0xff00) data = data.byte(1) * 0x0101;
-    lockOn.ram.data[address >> 1 & lockOn.ram.mask] = data;
-  }
-}
-
-//
 
 auto Cartridge::Memory::reset() -> void {
   delete[] data;
@@ -278,6 +281,18 @@ auto Cartridge::Memory::reset() -> void {
   size = 0;
   mask = 0;
   bits = 0;
+}
+
+auto Cartridge::Memory::read(uint24 address) -> uint16 {
+  if(!size) return 0x0000;
+  return data[address >> 1 & mask];
+}
+
+auto Cartridge::Memory::write(uint24 address, uint16 word) -> void {
+  if(!size) return;
+  if(bits == 0x00ff) word.byte(1) = word.byte(0);
+  if(bits == 0xff00) word.byte(0) = word.byte(1);
+  data[address >> 1 & mask] = word;
 }
 
 }

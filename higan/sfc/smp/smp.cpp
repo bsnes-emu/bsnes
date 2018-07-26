@@ -18,12 +18,10 @@ auto SMP::main() -> void {
   instruction();
 }
 
-auto SMP::load(Markup::Node node) -> bool {
-  if(auto name = node["smp/rom/name"].text()) {
-    if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
-      fp->read(iplrom, 64);
-      return true;
-    }
+auto SMP::load() -> bool {
+  if(auto fp = platform->open(ID::System, "ipl.rom", File::Read, File::Required)) {
+    fp->read(iplrom, 64);
+    return true;
   }
   return false;
 }

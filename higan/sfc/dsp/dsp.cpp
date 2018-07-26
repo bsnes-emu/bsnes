@@ -234,7 +234,7 @@ auto DSP::write(uint8 addr, uint8 data) -> void {
 
 /* initialization */
 
-auto DSP::load(Markup::Node node) -> bool {
+auto DSP::load() -> bool {
   return true;
 }
 
