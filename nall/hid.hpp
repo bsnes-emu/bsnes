@@ -1,5 +1,10 @@
 #pragma once
 
+#include <nall/maybe.hpp>
+#include <nall/range.hpp>
+#include <nall/string.hpp>
+#include <nall/vector.hpp>
+
 namespace nall { namespace HID {
 
 struct Input {

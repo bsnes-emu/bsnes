@@ -487,7 +487,7 @@ auto pWindow::_setScreenSaver(bool screenSaver) -> void {
   if(pApplication::xdgScreenSaver) {
     if(this->screenSaver != screenSaver) {
       this->screenSaver = screenSaver;
-      execute("xdg-screensaver", screenSaver ? "resume" : "suspend", string{"0x", hex(handle())});
+      invoke("xdg-screensaver", screenSaver ? "resume" : "suspend", string{"0x", hex(handle())});
     }
   }
   #endif

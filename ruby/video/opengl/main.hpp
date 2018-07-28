@@ -1,4 +1,4 @@
-auto OpenGL::shader(const string& pathname) -> void {
+auto OpenGL::setShader(const string& pathname) -> void {
   for(auto& program : programs) program.release();
   programs.reset();
 
@@ -196,13 +196,13 @@ auto OpenGL::initialize() -> bool {
   OpenGLSurface::allocate();
   glrLinkProgram(program);
 
-  shader("");
+  setShader("");
   return initialized = true;
 }
 
 auto OpenGL::terminate() -> void {
   if(!initialized) return;
-  shader("");  //release shader resources (eg frame[] history)
+  setShader("");  //release shader resources (eg frame[] history)
   OpenGLSurface::release();
   if(buffer) { delete[] buffer; buffer = nullptr; }
   initialized = false;

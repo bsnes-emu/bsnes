@@ -11,36 +11,37 @@ struct InputXlib : Input {
   InputXlib() : _keyboard(*this), _mouse(*this) { initialize(); }
   ~InputXlib() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "Xlib"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
+  auto hasContext() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == this->context()) return true;
+    if(!Input::setContext(context)) return false;
     return initialize();
   }
 
-  auto acquired() -> bool {
+  auto acquired() -> bool override {
     return _mouse.acquired();
   }
 
-  auto acquire() -> bool {
+  auto acquire() -> bool override {
     return _mouse.acquire();
   }
 
-  auto release() -> bool {
+  auto release() -> bool override {
     return _mouse.release();
   }
 
-  auto poll() -> vector<shared_pointer<HID::Device>> {
+  auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
     _keyboard.poll(devices);
     _mouse.poll(devices);
     return devices;
   }
 
-  auto rumble(uint64_t id, bool enable) -> bool {
+  auto rumble(uint64_t id, bool enable) -> bool override {
     return false;
   }
 
@@ -60,7 +61,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
 
   InputKeyboardXlib _keyboard;
   InputMouseXlib _mouse;

@@ -65,7 +65,7 @@ struct OpenGLProgram : OpenGLSurface {
 };
 
 struct OpenGL : OpenGLProgram {
-  auto shader(const string& pathname) -> void;
+  auto setShader(const string& pathname) -> void;
   auto allocateHistory(uint size) -> void;
   auto clear() -> void;
   auto lock(uint32_t*& data, uint& pitch) -> bool;

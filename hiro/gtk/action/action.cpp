@@ -21,12 +21,8 @@ auto pAction::setVisible(bool visible) -> void {
 }
 
 //GTK+ uses _ for mnemonics, __ for _
-//transform so that & is used for mnemonics, && for &
 auto pAction::_mnemonic(string text) -> string {
-  text.transform("&_", "\x01\x02");
-  text.replace("\x01\x01", "&");
-  text.transform("\x01", "_");
-  text.replace("\x02", "__");
+  text.replace("_", "__");
   return text;
 }
 

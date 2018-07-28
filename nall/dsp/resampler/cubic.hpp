@@ -7,8 +7,9 @@ namespace nall { namespace DSP { namespace Resampler {
 
 struct Cubic {
   inline auto reset(real inputFrequency, real outputFrequency, uint queueSize = 0) -> void;
-  inline auto pending() const -> bool { return samples.pending(); }
-  inline auto read() -> real { return samples.read(); }
+  inline auto setInputFrequency(real inputFrequency) -> void;
+  inline auto pending() const -> bool;
+  inline auto read() -> real;
   inline auto write(real sample) -> void;
 
 private:
@@ -30,6 +31,19 @@ auto Cubic::reset(real inputFrequency, real outputFrequency, uint queueSize) -> 
   fraction = 0.0;
   for(auto& sample: history) sample = 0.0;
   samples.resize(queueSize);
+}
+
+auto Cubic::setInputFrequency(real inputFrequency) -> void {
+  this->inputFrequency = inputFrequency;
+  ratio = inputFrequency / outputFrequency;
+}
+
+auto Cubic::pending() const -> bool {
+  return samples.pending();
+}
+
+auto Cubic::read() -> real {
+  return samples.read();
 }
 
 auto Cubic::write(real sample) -> void {

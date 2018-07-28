@@ -19,10 +19,15 @@ auto Program::updateAudioDriver() -> void {
 
 auto Program::updateAudioExclusive() -> void {
   if(!audio) return;
-  audio->clear();
-  audio->setExclusive(settings["Audio/Exclusive"].boolean());
-  updateAudioFrequency();
-  updateAudioLatency();
+  if(audio->hasExclusive()) {
+    audio->setExclusive(settings["Audio/Exclusive"].boolean());
+    settingsWindow->audio.exclusiveMode.setEnabled(true).setChecked(settings["Audio/Exclusive"].boolean());
+    audio->clear();
+    updateAudioFrequency();
+    updateAudioLatency();
+  } else {
+    settingsWindow->audio.exclusiveMode.setEnabled(false).setChecked(false);
+  }
 }
 
 auto Program::updateAudioDevice() -> void {

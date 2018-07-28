@@ -12,23 +12,25 @@ struct VideoXShm : Video {
   VideoXShm() { initialize(); }
   ~VideoXShm() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "XShm"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
-  auto smooth() -> bool { return _smooth; }
+  auto hasContext() -> bool override { return true; }
+  auto hasSmooth() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == this->context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setSmooth(bool smooth) -> bool {
-    _smooth = smooth;
+  auto setSmooth(bool smooth) -> bool override {
+    if(smooth == this->smooth()) return true;
+    if(!Video::setSmooth(smooth)) return false;
     return true;
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     auto dp = _inputBuffer;
     uint length = _inputWidth * _inputHeight;
@@ -36,7 +38,7 @@ struct VideoXShm : Video {
     output();
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(!_inputBuffer || _inputWidth != width || _inputHeight != height) {
       if(_inputBuffer) delete[] _inputBuffer;
@@ -50,11 +52,11 @@ struct VideoXShm : Video {
     return true;
   }
 
-  auto unlock() -> void {
+  auto unlock() -> void override {
     if(!ready()) return;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
     size();
 
@@ -190,8 +192,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
-  bool _smooth = true;
 
   uint32_t* _inputBuffer = nullptr;
   uint _inputWidth = 0;

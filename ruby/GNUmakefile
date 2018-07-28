@@ -12,7 +12,7 @@ ifeq ($(ruby),)
     ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
     ruby += input.sdl input.xlib input.udev
   else ifeq ($(platform),bsd)
-    ruby += video.glx video.xvideo video.xshm
+    ruby += video.glx video.glx2 video.xvideo video.xshm
     ruby += audio.oss audio.openal
     ruby += input.sdl input.xlib
   endif
@@ -68,7 +68,7 @@ endif
 
 ruby.objects := $(object.path)/ruby.o
 
-$(object.path)/ruby.o: $(ruby.path)/ruby.cpp
+$(object.path)/ruby.o: $(ruby.path)/ruby.cpp $(call rwildcard,$(ruby.path))
 	$(info Compiling $< ...)
 	@$(compiler) $(ruby.flags) $(flags) $(flags.deps) -c $< -o $@
 

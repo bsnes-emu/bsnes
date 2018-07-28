@@ -25,32 +25,40 @@ struct VideoGLX2 : Video {
   VideoGLX2() { initialize(); }
   ~VideoGLX2() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "OpenGL2"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
-  auto blocking() -> bool { return _blocking; }
-  auto smooth() -> bool { return _smooth; }
+  auto hasContext() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFlush() -> bool override { return true; }
+  auto hasSmooth() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == this->context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
-    if(_ready && glXSwapInterval) glXSwapInterval(_blocking);
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == this->blocking()) return true;
+    if(!Video::setBlocking(blocking)) return false;
+    if(ready() && glXSwapInterval) glXSwapInterval(_blocking);
     return true;
   }
 
-  auto setSmooth(bool smooth) -> bool {
-    if(_smooth == smooth) return true;
-    _smooth = smooth;
+  auto setFlush(bool flush) -> bool override {
+    if(flush == this->flush()) return true;
+    if(!Video::setFlush(flush)) return false;
     return true;
   }
 
-  auto clear() -> void {
+  auto setSmooth(bool smooth) -> bool override {
+    if(smooth == this->smooth()) return true;
+    if(!Video::setSmooth(smooth)) return false;
+    return true;
+  }
+
+  auto clear() -> void override {
     if(!ready()) return;
     memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -59,18 +67,18 @@ struct VideoGLX2 : Video {
     if(_isDoubleBuffered) glXSwapBuffers(_display, _glXWindow);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(width != _width || height != _height) resize(width, height);
     pitch = _glWidth * sizeof(uint32_t);
     return data = _glBuffer;
   }
 
-  auto unlock() -> void {
+  auto unlock() -> void override {
     if(!ready()) return;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
 
     XWindowAttributes parent, child;
@@ -109,9 +117,10 @@ struct VideoGLX2 : Video {
     glFlush();
 
     if(_isDoubleBuffered) glXSwapBuffers(_display, _glXWindow);
+    if(flush()) glFinish();
   }
 
-  auto poll() -> void {
+  auto poll() -> void override {
     while(XPending(_display)) {
       XEvent event;
       XNextEvent(_display, &event);
@@ -154,7 +163,7 @@ private:
 
     auto vi = glXGetVisualFromFBConfig(_display, fbConfig[0]);
     _colormap = XCreateColormap(_display, RootWindow(_display, vi->screen), vi->visual, AllocNone);
-    XSetWindowAttributes attributes;
+    XSetWindowAttributes attributes = {};
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
     _window = XCreateWindow(_display, (Window)_context, 0, 0, windowAttributes.width, windowAttributes.height,
@@ -250,9 +259,6 @@ private:
   auto (*glXSwapInterval)(int) -> int = nullptr;
 
   bool _ready = false;
-  uintptr _context = 0;
-  bool _blocking = false;
-  bool _smooth = true;
 
   Display* _display = nullptr;
   int _screen = 0;

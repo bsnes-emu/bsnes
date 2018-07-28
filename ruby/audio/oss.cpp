@@ -17,68 +17,97 @@ struct AudioOSS : Audio {
   AudioOSS() { initialize(); }
   ~AudioOSS() { terminate(); }
 
-  auto availableDevices() -> vector<string> {
+  auto driver() -> string override {
+    return "OSS";
+  }
+
+  auto ready() -> bool override {
+    return _fd >= 0;
+  }
+
+  auto availableDevices() -> vector<string> override {
     vector<string> devices;
     devices.append("/dev/dsp");
     for(auto& device : directory::files("/dev/", "dsp?*")) devices.append(string{"/dev/", device});
     return devices;
   }
 
-  auto availableFrequencies() -> vector<double> {
-    return {44100.0, 48000.0, 96000.0};
-  }
-
-  auto availableLatencies() -> vector<uint> {
-    return {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  }
-
-  auto availableChannels() -> vector<uint> {
+  auto availableChannels() -> vector<uint> override {
     return {1, 2};
   }
 
-  auto ready() -> bool { return _ready; }
-  auto device() -> string { return _device; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return _latency; }
+  auto availableFrequencies() -> vector<double> override {
+    return {44100.0, 48000.0, 96000.0};
+  }
 
-  auto setDevice(string device) -> bool {
-    if(_device == device) return true;
-    _device = device;
+  auto availableLatencies() -> vector<uint> override {
+    return {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  }
+
+  auto hasDevice() -> bool override { return true; }
+  auto hasDynamic() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto setDevice(string device) -> bool override {
+    if(device == this->device()) return true;
+    if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
-    updateBlocking();
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == this->blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
+    return updateBlocking();
+  }
+
+  auto setDynamic(bool dynamic) -> bool override {
+    if(dynamic == this->dynamic()) return true;
+    if(!Audio::setDynamic(dynamic)) return false;
     return true;
   }
 
-  auto setChannels(uint channels) -> bool {
-    if(_channels == channels) return true;
-    _channels = channels;
+  auto setChannels(uint channels) -> bool override {
+    if(channels == this->channels()) return true;
+    if(!Audio::setChannels(channels)) return false;
     return initialize();
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == this->frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == this->latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto output(const double samples[]) -> void {
+  auto level() -> double override {
+    audio_buf_info info;
+    ioctl(_fd, SNDCTL_DSP_GETOSPACE, &info);
+    return (double)(_bufferSize - info.bytes) / _bufferSize;
+  }
+
+  auto output(const double samples[]) -> void override {
     if(!ready()) return;
-    for(auto n : range(_channels)) {
-      auto sample = (uint16_t)sclamp<16>(samples[n] * 32767.0);
-      auto unused = write(_fd, &sample, 2);
+
+    if(!_dynamic) {
+      for(uint n : range(channels())) {
+        sample(sclamp<16>(samples[n] * 32767.0));
+      }
+    } else {
+      Audio::outputDynamic(samples);
+      while(pending()) {
+        for(auto& resampler : _resamplers) {
+          auto sample = (uint16_t)sclamp<16>(resampler.read() * 32767.0);
+          auto unused = write(_fd, &sample, 2);
+        }
+      }
     }
   }
 
@@ -87,8 +116,9 @@ private:
     terminate();
 
     if(!availableDevices().find(_device)) {
-      _device = availableDevices().left();
+      Audio::setDevice(availableDevices().left());
     }
+    Audio::setChannels(channels());
 
     _fd = open(_device, O_WRONLY, O_NONBLOCK);
     if(_fd < 0) return false;
@@ -103,33 +133,41 @@ private:
     ioctl(_fd, SNDCTL_DSP_SETFMT, &_format);
     int frequency = _frequency;
     ioctl(_fd, SNDCTL_DSP_SPEED, &frequency);
-
     updateBlocking();
-    return _ready = true;
+    audio_buf_info info;
+    ioctl(_fd, SNDCTL_DSP_GETOSPACE, &info);
+    _bufferSize = info.bytes;
+
+    return true;
   }
 
   auto terminate() -> void {
-    _ready = false;
-    if(_fd < 0) return;
+    if(!ready()) return;
     close(_fd);
     _fd = -1;
   }
 
-  auto updateBlocking() -> void {
-    if(!_ready) return;
+  auto updateBlocking() -> bool {
+    if(!ready()) return false;
     auto flags = fcntl(_fd, F_GETFL);
-    if(flags < 0) return;
+    if(flags < 0) return false;
     _blocking ? flags &=~ O_NONBLOCK : flags |= O_NONBLOCK;
     fcntl(_fd, F_SETFL, flags);
+    return true;
   }
 
-  bool _ready = false;
-  string _device;
-  bool _blocking = true;
-  uint _channels = 2;
-  double _frequency = 48000.0;
-  uint _latency = 2;
+  auto sample(uint16_t sample) -> void {
+    _outputBuffer[_outputOffset++] = sample;
+    if(_outputOffset >= sizeof(_outputBuffer) / sizeof(uint16_t)) {
+      write(_fd, &_outputBuffer, sizeof(_outputBuffer));
+      _outputOffset = 0;
+    }
+  }
 
   int _fd = -1;
   int _format = AFMT_S16_LE;
+  int _bufferSize = 1;
+
+  uint _outputOffset = 0;
+  uint16_t _outputBuffer[256];
 };

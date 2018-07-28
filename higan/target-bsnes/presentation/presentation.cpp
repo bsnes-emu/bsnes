@@ -393,7 +393,7 @@ auto Presentation::updateDeviceSelections() -> void {
 
 //generate a list of size multipliers
 auto Presentation::updateSizeMenu() -> void {
-  assert(sizeMenu.actions() == 0);  //should only be called once
+  assert(sizeMenu.actionCount() == 0);  //should only be called once
 
   //determine the largest multiplier that can be used by the largest monitor found
   uint height = 1;

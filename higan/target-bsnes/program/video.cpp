@@ -1,7 +1,7 @@
 auto Program::updateVideoDriver() -> void {
   video = Video::create(settings["Video/Driver"].text());
   video->setContext(presentation->viewport.handle());
-  video->setExclusive(false);
+  updateVideoExclusive();
   updateVideoBlocking();
   updateVideoShader();
 
@@ -25,6 +25,15 @@ auto Program::updateVideoDriver() -> void {
   }
 
   presentation->updateShaders();
+}
+
+auto Program::updateVideoExclusive() -> void {
+  video->setExclusive(false);
+  if(video->hasExclusive()) {
+    settingsWindow->video.exclusiveMode.setEnabled(true).setChecked(settings["Video/Exclusive"].boolean());
+  } else {
+    settingsWindow->video.exclusiveMode.setEnabled(false).setChecked(false);
+  }
 }
 
 auto Program::updateVideoBlocking() -> void {

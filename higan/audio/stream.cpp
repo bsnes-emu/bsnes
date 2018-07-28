@@ -65,7 +65,7 @@ auto Stream::pending() const -> bool {
 }
 
 auto Stream::read(double samples[]) -> uint {
-  for(auto c : range(channels.size())) samples[c] = channels[c].resampler.read();
+  for(uint c : range(channels.size())) samples[c] = channels[c].resampler.read();
   return channels.size();
 }
 

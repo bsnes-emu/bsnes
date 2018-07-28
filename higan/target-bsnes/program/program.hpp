@@ -58,6 +58,7 @@ struct Program : Emulator::Platform {
   auto renameState(string from, string to) -> bool;
 
   //video.cpp
+  auto updateVideoExclusive() -> void;
   auto updateVideoDriver() -> void;
   auto updateVideoBlocking() -> void;
   auto updateVideoShader() -> void;

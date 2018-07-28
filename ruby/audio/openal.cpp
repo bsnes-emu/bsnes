@@ -10,57 +10,70 @@ struct AudioOpenAL : Audio {
   AudioOpenAL() { initialize(); }
   ~AudioOpenAL() { terminate(); }
 
-  auto availableDevices() -> vector<string> {
+  auto driver() -> string override {
+    return "OpenAL";
+  }
+
+  auto ready() -> bool override {
+    return _ready;
+  }
+
+  auto availableDevices() -> vector<string> override {
     vector<string> devices;
     for(auto& device : queryDevices()) devices.append(device);
     return devices;
   }
 
-  auto availableFrequencies() -> vector<double> {
-    return {44100.0, 48000.0, 96000.0};
-  }
-
-  auto availableLatencies() -> vector<uint> {
-    return {20, 40, 60, 80, 100};
-  }
-
-  auto availableChannels() -> vector<uint> {
+  auto availableChannels() -> vector<uint> override {
     return {2};
   }
 
-  auto ready() -> bool { return _ready; }
-  auto device() -> string { return _device; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return (double)_frequency; }
-  auto latency() -> uint { return _latency; }
+  auto availableFrequencies() -> vector<double> override {
+    return {44100.0, 48000.0, 96000.0};
+  }
 
-  auto setDevice(string device) -> bool {
-    if(_device == device) return true;
-    _device = device;
+  auto availableLatencies() -> vector<uint> override {
+    return {20, 40, 60, 80, 100};
+  }
+
+  auto hasDevice() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto setDevice(string device) -> bool override {
+    if(device == this->device()) return true;
+    if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == this->blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == (uint)frequency) return true;
-    _frequency = (uint)frequency;
+  auto setChannels(uint channels) -> bool override {
+    if(channels == this->channels()) return true;
+    if(!Audio::setChannels(channels)) return false;
+    return true;
+  }
+
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == this->frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
-    if(_ready) updateLatency();
+  auto setLatency(uint latency) -> bool override {
+    if(latency == this->latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
+    if(ready()) updateLatency();
     return true;
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     _buffer[_bufferLength]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_bufferLength] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     if(++_bufferLength < _bufferSize) return;
@@ -184,11 +197,6 @@ private:
   }
 
   bool _ready = false;
-  string _device;
-  bool _blocking = true;
-  uint _channels = 2;
-  uint _frequency = 48000;
-  uint _latency = 20;
 
   ALCdevice* _openAL = nullptr;
   ALCcontext* _context = nullptr;

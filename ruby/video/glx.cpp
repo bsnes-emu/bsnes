@@ -11,67 +11,88 @@ struct VideoGLX : Video, OpenGL {
   VideoGLX() { initialize(); }
   ~VideoGLX() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "OpenGL"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
-  auto blocking() -> bool { return _blocking; }
-  auto depth() -> uint { return _depth; }
-  auto smooth() -> bool { return _smooth; }
-  auto shader() -> string { return _shader; }
+  auto availableFormats() -> vector<string> override {
+    return {"R8G8B8", "R10G10B10"};
+  }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto hasContext() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFlush() -> bool override { return true; }
+  auto hasFormat() -> bool override { return true; }
+  auto hasSmooth() -> bool override { return true; }
+  auto hasShader() -> bool override { return true; }
+
+  auto setContext(uintptr context) -> bool override {
+    if(context == Video::context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Video::blocking()) return true;
+    if(!Video::setBlocking(blocking)) return false;
     if(glXSwapInterval) glXSwapInterval(_blocking);
     return true;
   }
 
-  auto setDepth(uint depth) -> bool {
-    if(_depth == depth) return true;
-    switch(depth) {
-    case 24: _depth = depth; OpenGL::inputFormat = GL_RGBA8; return true;
-    case 30: _depth = depth; OpenGL::inputFormat = GL_RGB10_A2; return true;
-    default: return false;
+  auto setFlush(bool flush) -> bool override {
+    if(flush == Video::flush()) return true;
+    if(!Video::setFlush(flush)) return false;
+    return true;
+  }
+
+  auto setFormat(string format) -> bool override {
+    if(format == Video::format()) return true;
+    if(!Video::setFormat(format)) return false;
+
+    if(format == "R8G8B8") {
+      OpenGL::inputFormat = GL_RGBA8;
+      return true;
     }
+
+    if(format == "R10G10B10") {
+      OpenGL::inputFormat = GL_RGB10_A2;
+      return true;
+    }
+
+    return false;
   }
 
-  auto setSmooth(bool smooth) -> bool {
-    if(_smooth == smooth) return true;
-    _smooth = smooth;
-    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+  auto setSmooth(bool smooth) -> bool override {
+    if(smooth == Video::smooth()) return true;
+    if(!Video::setSmooth(smooth)) return false;
+    if(!shader()) OpenGL::filter = smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto setShader(string shader) -> bool {
-    if(_shader == shader) return true;
-    OpenGL::shader(_shader = shader);
-    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+  auto setShader(string shader) -> bool override {
+    if(shader == Video::shader()) return true;
+    if(!Video::setShader(shader)) return false;
+    OpenGL::setShader(shader);
+    if(!shader) OpenGL::filter = smooth() ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     OpenGL::clear();
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
-  auto unlock() -> void {
+  auto unlock() -> void override {
     if(!ready()) return;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
 
     //we must ensure that the child window is the same size as the parent window.
@@ -89,9 +110,10 @@ struct VideoGLX : Video, OpenGL {
     OpenGL::outputHeight = parent.height;
     OpenGL::output();
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
+    if(flush()) glFinish();
   }
 
-  auto poll() -> void {
+  auto poll() -> void override {
     while(XPending(_display)) {
       XEvent event;
       XNextEvent(_display, &event);
@@ -118,15 +140,19 @@ private:
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
 
+    int redDepth   = Video::format() == "R10G10B10" ? 10 : 8;
+    int greenDepth = Video::format() == "R10G10B10" ? 10 : 8;
+    int blueDepth  = Video::format() == "R10G10B10" ? 10 : 8;
+
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
     int attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
-      GLX_RED_SIZE, (int)(_depth / 3),
-      GLX_GREEN_SIZE, (int)(_depth / 3) + (int)(_depth % 3),
-      GLX_BLUE_SIZE, (int)(_depth / 3),
+      GLX_RED_SIZE, redDepth,
+      GLX_GREEN_SIZE, greenDepth,
+      GLX_BLUE_SIZE, blueDepth,
       None
     };
 
@@ -141,7 +167,7 @@ private:
     //it is not possible to change the Visual of an already realized (created) window.
     //therefore a new child window, using the same GLX Visual, must be created and binded to it.
     _colormap = XCreateColormap(_display, RootWindow(_display, vi->screen), vi->visual, AllocNone);
-    XSetWindowAttributes attributes;
+    XSetWindowAttributes attributes = {};
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
     _window = XCreateWindow(_display, /* parent = */ (Window)_context,
@@ -230,11 +256,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
-  bool _blocking = false;
-  uint _depth = 24;
-  bool _smooth = true;
-  string _shader;
 
   auto (*glXSwapInterval)(int) -> int = nullptr;
 
