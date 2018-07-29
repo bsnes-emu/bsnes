@@ -4,19 +4,20 @@ struct InputCarbon : Input {
   InputCarbon() : _keyboard(*this) { initialize(); }
   ~InputCarbon() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "Carbon"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto acquired() -> bool { return false; }
-  auto acquire() -> bool { return false; }
-  auto release() -> bool { return false; }
+  auto acquired() -> bool override { return false; }
+  auto acquire() -> bool override { return false; }
+  auto release() -> bool override { return false; }
 
-  auto poll() -> vector<shared_pointer<HID::Device>> {
+  auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
     _keyboard.poll(devices);
     return devices;
   }
 
-  auto rumble(uint64 id, bool enable) -> bool {
+  auto rumble(uint64_t id, bool enable) -> bool override {
     return false;
   }
 

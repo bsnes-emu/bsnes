@@ -269,6 +269,12 @@ auto pWindow::handle() const -> uintptr {
   return (uintptr)nullptr;
 }
 
+auto pWindow::monitor() const -> uint {
+  if(!gtk_widget_get_realized(widget)) return 0;
+  auto window = gtk_widget_get_window(widget);
+  return gdk_screen_get_monitor_at_window(gdk_screen_get_default(), window);
+}
+
 auto pWindow::remove(sMenuBar menuBar) -> void {
   _setMenuVisible(false);
 }
@@ -558,7 +564,9 @@ auto pWindow::_synchronizeGeometry() -> void {
   }
   lastSize = allocation;
 
-  gtk_widget_get_allocation(widget, &allocation);
+  auto gdkWindow = gtk_widget_get_window(widget);
+  gdk_window_get_origin(gdkWindow, &allocation.x, &allocation.y);
+  allocation.y += _menuHeight();
   if(allocation.x != lastMove.x || allocation.y != lastMove.y) {
     state().geometry.setPosition({allocation.x, allocation.y});
     self().doMove();

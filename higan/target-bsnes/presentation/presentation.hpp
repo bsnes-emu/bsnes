@@ -36,6 +36,7 @@ struct Presentation : Window {
   auto updateDeviceMenu() -> void;
   auto updateDeviceSelections() -> void;
   auto updateSizeMenu() -> void;
+  auto updateStateMenus() -> void;
   auto clearRecentGames() -> void;
   auto updateRecentGames() -> void;
   auto addRecentGame(string location) -> void;
@@ -67,8 +68,6 @@ struct Presentation : Window {
         MenuCheckItem blurEmulation{&outputMenu};
       Menu shaderMenu{&settingsMenu};
       MenuSeparator settingsSeparatorA{&settingsMenu};
-      MenuCheckItem synchronizeVideo{&settingsMenu};
-      MenuCheckItem synchronizeAudio{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
       MenuSeparator settingsSeparatorB{&settingsMenu};
@@ -77,7 +76,8 @@ struct Presentation : Window {
       MenuItem inputSettings{&settingsMenu};
       MenuItem hotkeySettings{&settingsMenu};
       MenuItem pathSettings{&settingsMenu};
-      MenuItem advancedSettings{&settingsMenu};
+      MenuItem configurationSettings{&settingsMenu};
+      MenuItem driverSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
       Menu loadState{&toolsMenu};

@@ -117,6 +117,10 @@ auto mWindow::modal() const -> bool {
   return state.modal;
 }
 
+auto mWindow::monitor() const -> uint {
+  return signal(monitor);
+}
+
 auto mWindow::onClose(const function<void ()>& callback) -> type& {
   state.onClose = callback;
   return *this;
@@ -183,8 +187,8 @@ auto mWindow::setAlignment(Alignment alignment) -> type& {
   if(!alignment) alignment = {0.0, 0.0};
   auto workspace = Desktop::workspace();
   auto geometry = frameGeometry();
-  signed left = alignment.horizontal() * (workspace.width() - geometry.width());
-  signed top = alignment.vertical() * (workspace.height() - geometry.height());
+  int left = alignment.horizontal() * (workspace.width() - geometry.width());
+  int top = alignment.vertical() * (workspace.height() - geometry.height());
   setFramePosition({left, top});
   return *this;
 }
@@ -196,12 +200,17 @@ auto mWindow::setBackgroundColor(Color color) -> type& {
 }
 
 auto mWindow::setCentered(sWindow parent) -> type& {
-  Geometry workspace = parent ? parent->frameGeometry() : Desktop::workspace();
+  Geometry workspace = Desktop::workspace();
+  Geometry parentGeometry = parent ? parent->frameGeometry() : workspace;
   Geometry geometry = frameGeometry();
-  signed x = workspace.x();
-  signed y = workspace.y();
-  if(workspace.width() > geometry.width()) x += (workspace.width() - geometry.width()) / 2;
-  if(workspace.height() > geometry.height()) y += (workspace.height() - geometry.height()) / 2;
+  //center the window to its parent window ...
+  int x = parentGeometry.x() + (parentGeometry.width()  - geometry.width())  / 2;
+  int y = parentGeometry.y() + (parentGeometry.height() - geometry.height()) / 2;
+  //try and keep the window onscreen ...
+  if(x + geometry.width()  > workspace.width())  x = workspace.width()  - geometry.width();
+  if(y + geometry.height() > workspace.height()) y = workspace.height() - geometry.height();
+  if(x < workspace.x()) x = workspace.x();
+  if(y < workspace.y()) y = workspace.y();
   return setFrameGeometry({x, y, geometry.width(), geometry.height()});
 }
 

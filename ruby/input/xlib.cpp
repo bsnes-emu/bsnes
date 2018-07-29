@@ -17,7 +17,7 @@ struct InputXlib : Input {
   auto hasContext() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == this->context()) return true;
+    if(context == Input::context()) return true;
     if(!Input::setContext(context)) return false;
     return initialize();
   }

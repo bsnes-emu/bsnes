@@ -68,6 +68,12 @@ struct vector_base {
   alwaysinline auto right() -> T&;
   alwaysinline auto right() const -> const T&;
 
+  alwaysinline auto first() -> T& { return left(); }
+  alwaysinline auto first() const -> const T& { return left(); }
+
+  alwaysinline auto last() -> T& { return right(); }
+  alwaysinline auto last() const -> const T& { return right(); }
+
   //modify.hpp
   auto prepend(const T& value) -> void;
   auto prepend(T&& value) -> void;

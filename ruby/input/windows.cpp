@@ -12,29 +12,30 @@ struct InputWindows : Input {
   InputWindows() : _keyboard(*this), _mouse(*this), _joypadXInput(*this), _joypadDirectInput(*this) { initialize(); }
   ~InputWindows() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "Windows"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
+  auto hasContext() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Input::context()) return true;
+    if(!Input::setContext(context)) return false;
     return initialize();
   }
 
-  auto acquired() -> bool {
+  auto acquired() -> bool override {
     return _mouse.acquired();
   }
 
-  auto acquire() -> bool {
+  auto acquire() -> bool override {
     return _mouse.acquire();
   }
 
-  auto release() -> bool {
+  auto release() -> bool override {
     return _mouse.release();
   }
 
-  auto poll() -> vector<shared_pointer<HID::Device>> {
+  auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
     _keyboard.poll(devices);
     _mouse.poll(devices);
@@ -43,7 +44,7 @@ struct InputWindows : Input {
     return devices;
   }
 
-  auto rumble(uint64_t id, bool enable) -> bool {
+  auto rumble(uint64_t id, bool enable) -> bool override {
     if(_joypadXInput.rumble(id, enable)) return true;
     if(_joypadDirectInput.rumble(id, enable)) return true;
     return false;
@@ -91,7 +92,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
 
   InputKeyboardRawInput _keyboard;
   InputMouseRawInput _mouse;

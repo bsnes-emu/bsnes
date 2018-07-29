@@ -8,8 +8,6 @@
   #include "../gtk/header.hpp"
 #elif defined(HIRO_COCOA)
   #include "../cocoa/header.hpp"
-#elif defined(HIRO_REFERENCE)
-  #include "../reference/header.hpp"
 #endif
 
 #include "core.hpp"
@@ -23,8 +21,6 @@ using namespace nall;
   #include "../gtk/platform.cpp"
 #elif defined(HIRO_COCOA)
   #include "../cocoa/platform.cpp"
-#elif defined(HIRO_REFERENCE)
-  #include "../reference/platform.cpp"
 #endif
 
 #define signal(function, ...) \

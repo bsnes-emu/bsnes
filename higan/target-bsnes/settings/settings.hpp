@@ -21,27 +21,13 @@ public:
       Label gammaLabel{&colorLayout, Size{0, 0}};
       Label gammaValue{&colorLayout, Size{50, 0}};
       HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
-    Label fullscreenLabel{&layout, Size{~0, 0}, 2};
-    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
 };
 
 struct AudioSettings : TabFrameItem {
   AudioSettings(TabFrame*);
-  auto updateDevice() -> void;
-  auto updateFrequency() -> void;
-  auto updateLatency() -> void;
 
 public:
   VerticalLayout layout{this};
-    Label driverLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout driverLayout{&layout, Size{~0, 0}};
-      Label deviceLabel{&driverLayout, Size{0, 0}};
-      ComboButton deviceList{&driverLayout, Size{~0, 0}};
-      Label frequencyLabel{&driverLayout, Size{0, 0}};
-      ComboButton frequencyList{&driverLayout, Size{80, 0}};
-      Label latencyLabel{&driverLayout, Size{0, 0}};
-      ComboButton latencyList{&driverLayout, Size{80, 0}};
-    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
     Label effectsLabel{&layout, Size{~0, 0}, 2};
     TableLayout effectsLayout{&layout, Size{~0, 0}};
       Label skewLabel{&effectsLayout, Size{0, 0}};
@@ -67,6 +53,7 @@ struct InputSettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
+  auto cancelMapping() -> void;
   auto assignMouseInput(uint id) -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
@@ -75,17 +62,13 @@ public:
   Timer timer;
 
   VerticalLayout layout{this};
-    HorizontalLayout defocusLayout{&layout, Size{~0, 0}};
-      Label defocusLabel{&defocusLayout, Size{0, 0}};
-      RadioLabel pauseEmulation{&defocusLayout, Size{0, 0}};
-      RadioLabel blockInput{&defocusLayout, Size{0, 0}};
-      RadioLabel allowInput{&defocusLayout, Size{0, 0}};
-      Group defocusGroup{&pauseEmulation, &blockInput, &allowInput};
     HorizontalLayout selectionLayout{&layout, Size{~0, 0}};
       Label portLabel{&selectionLayout, Size{0, 0}};
       ComboButton portList{&selectionLayout, Size{~0, 0}};
       Label deviceLabel{&selectionLayout, Size{0, 0}};
       ComboButton deviceList{&selectionLayout, Size{~0, 0}};
+      Label turboLabel{&selectionLayout, Size{0, 0}};
+      ComboButton turboList{&selectionLayout, Size{0, 0}};
     TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Button assignMouse1{&controlLayout, Size{100, 0}};
@@ -101,6 +84,7 @@ struct HotkeySettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
+  auto cancelMapping() -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
 
 public:
@@ -152,29 +136,25 @@ public:
     Button screenshotsReset{&layout, Size{80, 0}};
 };
 
-struct AdvancedSettings : TabFrameItem {
-  AdvancedSettings(TabFrame*);
-  auto updateVideoDriver() -> void;
-  auto updateAudioDriver() -> void;
-  auto updateInputDriver() -> void;
+struct ConfigurationSettings : TabFrameItem {
+  ConfigurationSettings(TabFrame*);
   auto updateConfiguration() -> void;
 
 public:
   VerticalLayout layout{this};
-    Label driversLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout driverLayout{&layout, Size{~0, 0}};
-    Label videoDriverLabel{&driverLayout, Size{0, 0}};
-    ComboButton videoDriverOption{&driverLayout, Size{~0, 0}};
-    Label audioDriverLabel{&driverLayout, Size{0, 0}};
-    ComboButton audioDriverOption{&driverLayout, Size{~0, 0}};
-    Label inputDriverLabel{&driverLayout, Size{0, 0}};
-    ComboButton inputDriverOption{&driverLayout, Size{~0, 0}};
     Label optionsLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout inputFocusLayout{&layout, Size{~0, 0}};
+      Label inputFocusLabel{&inputFocusLayout, Size{0, 0}};
+      RadioLabel pauseEmulation{&inputFocusLayout, Size{0, 0}};
+      RadioLabel blockInput{&inputFocusLayout, Size{0, 0}};
+      RadioLabel allowInput{&inputFocusLayout, Size{0, 0}};
+      Group inputFocusGroup{&pauseEmulation, &blockInput, &allowInput};
     CheckLabel warnOnUnverifiedGames{&layout, Size{~0, 0}};
     CheckLabel autoSaveMemory{&layout, Size{~0, 0}};
     HorizontalLayout autoStateLayout{&layout, Size{~0, 0}};
       CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
       CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
+    CheckLabel suppressScreenSaver{&layout, Size{~0, 0}};
     Label hacksLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};
       CheckLabel fastPPUOption{&fastPPULayout, Size{0, 0}};
@@ -186,6 +166,66 @@ public:
       Label superFXValue{&superFXLayout, Size{50, 0}};
       HorizontalSlider superFXClock{&superFXLayout, Size{~0, 0}};
     Label hacksNote{&layout, Size{~0, 0}};
+};
+
+struct DriverSettings : TabFrameItem {
+  DriverSettings(TabFrame*);
+  auto videoDriverChanged() -> void;
+  auto videoDriverChange() -> void;
+  auto videoFormatChanged() -> void;
+  auto videoFormatChange() -> void;
+  auto audioDriverChanged() -> void;
+  auto audioDriverChange() -> void;
+  auto audioDeviceChanged() -> void;
+  auto audioDeviceChange() -> void;
+  auto audioFrequencyChanged() -> void;
+  auto audioFrequencyChange() -> void;
+  auto audioLatencyChanged() -> void;
+  auto audioLatencyChange() -> void;
+  auto inputDriverChanged() -> void;
+  auto inputDriverChange() -> void;
+
+public:
+  VerticalLayout layout{this};
+    Label videoLabel{&layout, Size{~0, 0}, 2};
+    TableLayout videoLayout{&layout, Size{~0, 0}};
+      Label videoDriverLabel{&videoLayout, Size{0, 0}};
+      HorizontalLayout videoDriverLayout{&videoLayout, Size{~0, 0}};
+        ComboButton videoDriverOption{&videoDriverLayout, Size{0, 0}};
+        Button videoDriverUpdate{&videoDriverLayout, Size{0, 0}};
+        Label videoDriverActive{&videoDriverLayout, Size{0, 0}};
+      Label videoFormatLabel{&videoLayout, Size{0, 0}};
+      HorizontalLayout videoPropertyLayout{&videoLayout, Size{~0, 0}};
+        ComboButton videoFormatOption{&videoPropertyLayout, Size{0, 0}};
+    HorizontalLayout videoToggleLayout{&layout, Size{~0, 0}};
+      CheckLabel videoExclusiveToggle{&videoToggleLayout, Size{0, 0}};
+      CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
+      CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
+    Label audioLabel{&layout, Size{~0, 0}, 2};
+    TableLayout audioLayout{&layout, Size{~0, 0}};
+      Label audioDriverLabel{&audioLayout, Size{0, 0}};
+      HorizontalLayout audioDriverLayout{&audioLayout, Size{~0, 0}};
+        ComboButton audioDriverOption{&audioDriverLayout, Size{0, 0}};
+        Button audioDriverUpdate{&audioDriverLayout, Size{0, 0}};
+        Label audioDriverActive{&audioDriverLayout, Size{0, 0}};
+      Label audioDeviceLabel{&audioLayout, Size{0, 0}};
+      HorizontalLayout audioPropertyLayout{&audioLayout, Size{~0, 0}};
+        ComboButton audioDeviceOption{&audioPropertyLayout, Size{0, 0}};
+        Label audioFrequencyLabel{&audioPropertyLayout, Size{0, 0}};
+        ComboButton audioFrequencyOption{&audioPropertyLayout, Size{0, 0}};
+        Label audioLatencyLabel{&audioPropertyLayout, Size{0, 0}};
+        ComboButton audioLatencyOption{&audioPropertyLayout, Size{0, 0}};
+    HorizontalLayout audioToggleLayout{&layout, Size{~0, 0}};
+      CheckLabel audioExclusiveToggle{&audioToggleLayout, Size{0, 0}};
+      CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
+      CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
+    Label inputLabel{&layout, Size{~0, 0}, 2};
+    TableLayout inputLayout{&layout, Size{~0, 0}};
+      Label inputDriverLabel{&inputLayout, Size{0, 0}};
+      HorizontalLayout inputDriverLayout{&inputLayout, Size{~0, 0}};
+        ComboButton inputDriverOption{&inputDriverLayout, Size{0, 0}};
+        Button inputDriverUpdate{&inputDriverLayout, Size{0, 0}};
+        Label inputDriverActive{&inputDriverLayout, Size{0, 0}};
 };
 
 struct SettingsWindow : Window {
@@ -201,7 +241,8 @@ public:
       InputSettings input{&panel};
       HotkeySettings hotkeys{&panel};
       PathSettings paths{&panel};
-      AdvancedSettings advanced{&panel};
+      ConfigurationSettings configuration{&panel};
+      DriverSettings drivers{&panel};
   StatusBar statusBar{this};
 };
 

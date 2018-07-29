@@ -17,13 +17,15 @@ struct AudioOSS : Audio {
   AudioOSS() { initialize(); }
   ~AudioOSS() { terminate(); }
 
-  auto driver() -> string override {
-    return "OSS";
-  }
+  auto driver() -> string override { return "OSS"; }
+  auto ready() -> bool override { return _fd >= 0; }
 
-  auto ready() -> bool override {
-    return _fd >= 0;
-  }
+  auto hasDevice() -> bool override { return true; }
+  auto hasDynamic() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
 
   auto availableDevices() -> vector<string> override {
     vector<string> devices;
@@ -31,6 +33,10 @@ struct AudioOSS : Audio {
     for(auto& device : directory::files("/dev/", "dsp?*")) devices.append(string{"/dev/", device});
     return devices;
   }
+
+  auto defaultChannels() -> uint override { return 2; }
+  auto defaultFrequency() -> double override { return 48000.0; }
+  auto defaultLatency() -> uint override { return 3; }
 
   auto availableChannels() -> vector<uint> override {
     return {1, 2};
@@ -44,45 +50,38 @@ struct AudioOSS : Audio {
     return {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   }
 
-  auto hasDevice() -> bool override { return true; }
-  auto hasDynamic() -> bool override { return true; }
-  auto hasBlocking() -> bool override { return true; }
-  auto hasChannels() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
-
   auto setDevice(string device) -> bool override {
-    if(device == this->device()) return true;
+    if(device == Audio::device()) return true;
     if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == this->blocking()) return true;
+    if(blocking == Audio::blocking()) return true;
     if(!Audio::setBlocking(blocking)) return false;
     return updateBlocking();
   }
 
   auto setDynamic(bool dynamic) -> bool override {
-    if(dynamic == this->dynamic()) return true;
+    if(dynamic == Audio::dynamic()) return true;
     if(!Audio::setDynamic(dynamic)) return false;
     return true;
   }
 
   auto setChannels(uint channels) -> bool override {
-    if(channels == this->channels()) return true;
+    if(channels == Audio::channels()) return true;
     if(!Audio::setChannels(channels)) return false;
     return initialize();
   }
 
   auto setFrequency(double frequency) -> bool override {
-    if(frequency == this->frequency()) return true;
+    if(frequency == Audio::frequency()) return true;
     if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
   auto setLatency(uint latency) -> bool override {
-    if(latency == this->latency()) return true;
+    if(latency == Audio::latency()) return true;
     if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
@@ -169,5 +168,5 @@ private:
   int _bufferSize = 1;
 
   uint _outputOffset = 0;
-  uint16_t _outputBuffer[256];
+  uint16_t _outputBuffer[64];
 };

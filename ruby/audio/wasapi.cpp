@@ -10,61 +10,58 @@ struct AudioWASAPI : Audio {
   AudioWASAPI() { initialize(); }
   ~AudioWASAPI() { terminate(); }
 
-  auto availableDevices() -> string_vector {
+  auto driver() -> string override { return "WASAPI"; }
+  auto ready() -> bool override { return _ready; }
+
+  auto hasExclusive() -> bool override { return true; }
+  auto hasDevice() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto availableDevices() -> vector<string> override {
     return _devices;
   }
 
-  auto availableFrequencies() -> vector<double> {
-    return {(double)_frequency};
+  auto availableFrequencies() -> vector<double> override {
+    return {_frequency};
   }
 
-  auto availableLatencies() -> vector<uint> {
+  auto availableLatencies() -> vector<uint> override {
     return {0, 20, 40, 60, 80, 100};
   }
 
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto exclusive() -> bool { return _exclusive; }
-  auto device() -> string { return _device; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return (double)_frequency; }
-  auto latency() -> uint { return _latency; }
-
-  auto setExclusive(bool exclusive) -> bool {
-    if(_exclusive == exclusive) return true;
-    _exclusive = exclusive;
+  auto setExclusive(bool exclusive) -> bool override {
+    if(exclusive == Audio::exclusive()) return true;
+    if(!Audio::setExclusive(exclusive)) return false;
     return initialize();
   }
 
-  auto setDevice(string device) -> bool {
-    if(_device == device) return true;
-    _device = device;
+  auto setDevice(string device) -> bool override {
+    if(device == Audio::device()) return true;
+    if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Audio::blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == Audio::latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     _queue.read = 0;
     _queue.write = 0;
@@ -74,7 +71,7 @@ struct AudioWASAPI : Audio {
     _audioClient->Start();
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     if(!ready()) return;
 
     for(uint n : range(_channels)) {
@@ -227,12 +224,6 @@ private:
   }
 
   bool _ready = false;
-  bool _exclusive = false;
-  string _device;
-  bool _blocking = true;
-  uint _channels = 2;
-  uint _frequency = 48000;
-  uint _latency = 20;
 
   uint _mode = 0;
   uint _precision = 0;
@@ -245,7 +236,7 @@ private:
   } _queue;
 
   IMMDeviceEnumerator* _enumerator = nullptr;
-  string_vector _devices;
+  vector<string> _devices;
   IMMDevice* _audioDevice = nullptr;
   IAudioClient* _audioClient = nullptr;
   IAudioRenderClient* _renderClient = nullptr;

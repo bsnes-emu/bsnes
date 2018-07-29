@@ -68,10 +68,7 @@ auto mVerticalLayout::padding() const -> Geometry {
 
 auto mVerticalLayout::remove(sSizable sizable) -> type& {
   for(auto& cell : state.cells) {
-    if(cell->state.sizable == sizable) {
-      remove(cell);
-      break;
-    }
+    if(cell->state.sizable == sizable) return remove(cell);
   }
   return *this;
 }

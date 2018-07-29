@@ -944,6 +944,7 @@ struct Window : sWindow {
   auto minimized() const { return self().minimized(); }
   auto minimumSize() const { return self().minimumSize(); }
   auto modal() const { return self().modal(); }
+  auto monitor() const { return self().monitor(); }
   auto onClose(const function<void ()>& callback = {}) { return self().onClose(callback), *this; }
   auto onDrop(const function<void (vector<string>)>& callback = {}) { return self().onDrop(callback), *this; }
   auto onKeyPress(const function<void (signed)>& callback = {}) { return self().onKeyPress(callback), *this; }

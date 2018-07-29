@@ -1,8 +1,8 @@
 auto Program::hackCompatibility() -> void {
-  bool fastPPU = settingsWindow->advanced.fastPPUOption.checked();
-  bool fastPPUNoSpriteLimit = settingsWindow->advanced.noSpriteLimit.checked();
-  bool fastPPUHiresMode7 = settingsWindow->advanced.hiresMode7.checked();
-  bool fastDSP = settingsWindow->advanced.fastDSPOption.checked();
+  bool fastPPU = settingsWindow->configuration.fastPPUOption.checked();
+  bool fastPPUNoSpriteLimit = settingsWindow->configuration.noSpriteLimit.checked();
+  bool fastPPUHiresMode7 = settingsWindow->configuration.hiresMode7.checked();
+  bool fastDSP = settingsWindow->configuration.fastDSPOption.checked();
 
   auto label = superFamicom.label;
   if(label == "AIR STRIKE PATROL" || label == "DESERT FIGHTER") fastPPU = false;
@@ -33,7 +33,7 @@ auto Program::hackPatchMemory(vector<uint8_t>& data) -> void {
 auto Program::hackOverclockSuperFX() -> void {
   //todo: implement a better way of detecting SuperFX games
   //todo: apply multiplier changes on reset, not just on game load?
-  double multiplier = settingsWindow->advanced.superFXValue.text().natural() / 100.0;
+  double multiplier = settingsWindow->configuration.superFXValue.text().natural() / 100.0;
   if(multiplier == 1.0) return;
 
   auto label = superFamicom.label;

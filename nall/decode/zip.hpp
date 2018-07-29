@@ -15,6 +15,7 @@ struct ZIP {
     uint csize;
     uint cmode;  //0 = uncompressed, 8 = deflate
     uint crc32;
+    time_t timestamp;
   };
 
   ~ZIP() {
@@ -59,6 +60,18 @@ struct ZIP {
       file.crc32 = read(directory + 16, 4);
       file.csize = read(directory + 20, 4);
       file.size  = read(directory + 24, 4);
+
+      uint16_t dosTime = read(directory + 12, 2);
+      uint16_t dosDate = read(directory + 14, 2);
+      tm info = {};
+      info.tm_sec  = (dosTime >>  0 &  31) << 1;
+      info.tm_min  = (dosTime >>  5 &  63);
+      info.tm_hour = (dosTime >> 11 &  31);
+      info.tm_mday = (dosDate >>  0 &  31);
+      info.tm_mon  = (dosDate >>  5 &  15) - 1;
+      info.tm_year = (dosDate >>  9 & 127) + 80;
+      info.tm_isdst = -1;
+      file.timestamp = mktime(&info);
 
       uint namelength = read(directory + 28, 2);
       uint extralength = read(directory + 30, 2);

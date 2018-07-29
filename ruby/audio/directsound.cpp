@@ -4,47 +4,40 @@ struct AudioDirectSound : Audio {
   AudioDirectSound() { initialize(); }
   ~AudioDirectSound() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    return {"Default"};
-  }
+  auto driver() -> string override { return "DirectSound"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto availableFrequencies() -> vector<double> {
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto availableFrequencies() -> vector<double> override {
     return {44100.0, 48000.0, 96000.0};
   }
 
-  auto availableLatencies() -> vector<uint> {
+  auto availableLatencies() -> vector<uint> override {
     return {40, 60, 80, 100};
   }
 
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return _latency; }
-
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Audio::blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == Audio::latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
 
     _ringRead = 0;
@@ -67,7 +60,7 @@ struct AudioDirectSound : Audio {
     _secondary->Play(0, 0, DSBPLAY_LOOPING);
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     if(!ready()) return;
 
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
@@ -159,10 +152,6 @@ private:
   }
 
   bool _ready = false;
-  bool _blocking = true;
-  uint _channels = 2;
-  double _frequency = 48000.0;
-  uint _latency = 40;
 
   LPDIRECTSOUND _interface = nullptr;
   LPDIRECTSOUNDBUFFER _primary = nullptr;

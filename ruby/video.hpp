@@ -9,8 +9,6 @@ struct Video {
   virtual auto driver() -> string { return "None"; }
   virtual auto ready() -> bool { return true; }
 
-  virtual auto availableFormats() -> vector<string> { return {"Default"}; }
-
   virtual auto hasExclusive() -> bool { return false; }
   virtual auto hasContext() -> bool { return false; }
   virtual auto hasBlocking() -> bool { return false; }
@@ -18,6 +16,10 @@ struct Video {
   virtual auto hasFormat() -> bool { return false; }
   virtual auto hasSmooth() -> bool { return false; }
   virtual auto hasShader() -> bool { return false; }
+
+  virtual auto availableFormats() -> vector<string> { return {"Default"}; }
+
+  virtual auto defaultFormat() -> string { return availableFormats().first(); }
 
   virtual auto exclusive() -> bool { return _exclusive; }
   virtual auto context() -> uintptr { return _context; }
@@ -36,8 +38,8 @@ struct Video {
   virtual auto setShader(string shader) -> bool;
 
   virtual auto clear() -> void {}
-  virtual auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
-  virtual auto unlock() -> void {}
+  virtual auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
+  virtual auto release() -> void {}
   virtual auto output() -> void {}
   virtual auto poll() -> void {}
 

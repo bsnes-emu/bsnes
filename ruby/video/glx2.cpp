@@ -31,29 +31,51 @@ struct VideoGLX2 : Video {
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
+  auto hasFormat() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
 
+  auto availableFormats() -> vector<string> override {
+    return {"RGB24", "RGB30"};
+  }
+
   auto setContext(uintptr context) -> bool override {
-    if(context == this->context()) return true;
+    if(context == Video::context()) return true;
     if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == this->blocking()) return true;
+    if(blocking == Video::blocking()) return true;
     if(!Video::setBlocking(blocking)) return false;
-    if(ready() && glXSwapInterval) glXSwapInterval(_blocking);
+    if(glXSwapInterval) glXSwapInterval(blocking);
     return true;
   }
 
   auto setFlush(bool flush) -> bool override {
-    if(flush == this->flush()) return true;
+    if(flush == Video::flush()) return true;
     if(!Video::setFlush(flush)) return false;
     return true;
   }
 
+  auto setFormat(string format) -> bool override {
+    if(format == Video::format()) return true;
+    if(!Video::setFormat(format)) return false;
+
+    if(format == "RGB24") {
+      _glFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
+      return initialize();
+    }
+
+    if(format == "RGB30") {
+      _glFormat = GL_UNSIGNED_INT_2_10_10_10_REV;
+      return initialize();
+    }
+
+    return false;
+  }
+
   auto setSmooth(bool smooth) -> bool override {
-    if(smooth == this->smooth()) return true;
+    if(smooth == Video::smooth()) return true;
     if(!Video::setSmooth(smooth)) return false;
     return true;
   }
@@ -67,14 +89,14 @@ struct VideoGLX2 : Video {
     if(_isDoubleBuffered) glXSwapBuffers(_display, _glXWindow);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(width != _width || height != _height) resize(width, height);
     pitch = _glWidth * sizeof(uint32_t);
     return data = _glBuffer;
   }
 
-  auto unlock() -> void override {
+  auto release() -> void override {
     if(!ready()) return;
   }
 
@@ -101,7 +123,7 @@ struct VideoGLX2 : Video {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glPixelStorei(GL_UNPACK_ROW_LENGTH, _glWidth);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, _glBuffer);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_BGRA, _glFormat, _glBuffer);
 
     double w = (double)_width / (double)_glWidth;
     double h = (double)_height / (double)_glHeight;
@@ -147,13 +169,17 @@ private:
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
 
+    int redDepth   = Video::format() == "RGB30" ? 10 : 8;
+    int greenDepth = Video::format() == "RGB30" ? 10 : 8;
+    int blueDepth  = Video::format() == "RGB30" ? 10 : 8;
+
     int attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
-      GLX_RED_SIZE, 8,
-      GLX_GREEN_SIZE, 8,
-      GLX_BLUE_SIZE, 8,
+      GLX_RED_SIZE, redDepth,
+      GLX_GREEN_SIZE, greenDepth,
+      GLX_BLUE_SIZE, blueDepth,
       None
     };
 
@@ -253,7 +279,7 @@ private:
 
     glBindTexture(GL_TEXTURE_2D, _glTexture);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, _glWidth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _glWidth, _glHeight, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, _glBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _glWidth, _glHeight, 0, GL_BGRA, _glFormat, _glBuffer);
   }
 
   auto (*glXSwapInterval)(int) -> int = nullptr;
@@ -277,4 +303,5 @@ private:
   uint32_t* _glBuffer = nullptr;
   uint _glWidth = 0;
   uint _glHeight = 0;
+  uint _glFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
 };

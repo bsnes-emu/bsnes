@@ -3,14 +3,14 @@ auto Program::load() -> void {
 
   if(auto configuration = string::read(locate("configuration.bml"))) {
     emulator->configure(configuration);
-    settingsWindow->advanced.updateConfiguration();
+    settingsWindow->configuration.updateConfiguration();
   }
   if(!emulator->load()) return;
 
   gameQueue = {};
   screenshot = {};
   frameAdvance = false;
-  if(!verified() && settingsWindow->advanced.warnOnUnverifiedGames.checked()) {
+  if(!verified() && settingsWindow->configuration.warnOnUnverifiedGames.checked()) {
     auto response = MessageDialog(
       "Warning: this game image is unverified.\n"
       "Running it *may* be a security risk.\n\n"
@@ -21,12 +21,12 @@ auto Program::load() -> void {
       return showMessage("Game loading cancelled");
     }
     if(response == "Always") {
-      settingsWindow->advanced.warnOnUnverifiedGames.setChecked(false).doToggle();
+      settingsWindow->configuration.warnOnUnverifiedGames.setChecked(false).doToggle();
     }
   }
   hackCompatibility();
   emulator->power();
-  if(settingsWindow->advanced.autoLoadStateOnLoad.checked()) {
+  if(settingsWindow->configuration.autoLoadStateOnLoad.checked()) {
     program->loadState("quick/undo");
   }
   showMessage({
@@ -37,6 +37,7 @@ auto Program::load() -> void {
   presentation->resetSystem.setEnabled(true);
   presentation->unloadGame.setEnabled(true);
   presentation->toolsMenu.setVisible(true);
+  presentation->updateStateMenus();
   presentation->speedNormal.setChecked();
   presentation->pauseEmulation.setChecked(false);
   presentation->updateStatusIcon();
@@ -284,7 +285,7 @@ auto Program::unload() -> void {
   if(!emulator->loaded()) return;
   toolsWindow->cheatEditor.saveCheats();
   toolsWindow->setVisible(false);
-  if(settingsWindow->advanced.autoSaveStateOnUnload.checked()) {
+  if(settingsWindow->configuration.autoSaveStateOnUnload.checked()) {
     saveUndoState();
   }
   if(auto configuration = emulator->configuration()) {

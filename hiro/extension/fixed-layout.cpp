@@ -38,6 +38,13 @@ auto mFixedLayout::minimumSize() const -> Size {
   return {width, height};
 }
 
+auto mFixedLayout::remove(sSizable sizable) -> type& {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return remove(cell);
+  }
+  return *this;
+}
+
 auto mFixedLayout::remove(sFixedLayoutCell cell) -> type& {
   if(cell->parent() != this) return *this;
   auto offset = cell->offset();

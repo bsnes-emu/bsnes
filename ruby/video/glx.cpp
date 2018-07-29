@@ -14,16 +14,16 @@ struct VideoGLX : Video, OpenGL {
   auto driver() -> string override { return "OpenGL"; }
   auto ready() -> bool override { return _ready; }
 
-  auto availableFormats() -> vector<string> override {
-    return {"R8G8B8", "R10G10B10"};
-  }
-
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
   auto hasFormat() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
+
+  auto availableFormats() -> vector<string> override {
+    return {"RGB24", "RGB30"};
+  }
 
   auto setContext(uintptr context) -> bool override {
     if(context == Video::context()) return true;
@@ -34,7 +34,7 @@ struct VideoGLX : Video, OpenGL {
   auto setBlocking(bool blocking) -> bool override {
     if(blocking == Video::blocking()) return true;
     if(!Video::setBlocking(blocking)) return false;
-    if(glXSwapInterval) glXSwapInterval(_blocking);
+    if(glXSwapInterval) glXSwapInterval(blocking);
     return true;
   }
 
@@ -48,12 +48,12 @@ struct VideoGLX : Video, OpenGL {
     if(format == Video::format()) return true;
     if(!Video::setFormat(format)) return false;
 
-    if(format == "R8G8B8") {
+    if(format == "RGB24") {
       OpenGL::inputFormat = GL_RGBA8;
       return true;
     }
 
-    if(format == "R10G10B10") {
+    if(format == "RGB30") {
       OpenGL::inputFormat = GL_RGB10_A2;
       return true;
     }
@@ -82,13 +82,13 @@ struct VideoGLX : Video, OpenGL {
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
-  auto unlock() -> void override {
+  auto release() -> void override {
     if(!ready()) return;
   }
 
@@ -140,9 +140,9 @@ private:
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
 
-    int redDepth   = Video::format() == "R10G10B10" ? 10 : 8;
-    int greenDepth = Video::format() == "R10G10B10" ? 10 : 8;
-    int blueDepth  = Video::format() == "R10G10B10" ? 10 : 8;
+    int redDepth   = Video::format() == "RGB30" ? 10 : 8;
+    int greenDepth = Video::format() == "RGB30" ? 10 : 8;
+    int blueDepth  = Video::format() == "RGB30" ? 10 : 8;
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute

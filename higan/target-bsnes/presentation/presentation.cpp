@@ -56,14 +56,6 @@ Presentation::Presentation() {
     emulator->configure("video/blurEmulation", blurEmulation.checked());
   }).doToggle();
   shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
-  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Blocking"].boolean()).onToggle([&] {
-    settings["Video/Blocking"].setValue(synchronizeVideo.checked());
-    program->updateVideoBlocking();
-  });
-  synchronizeAudio.setText("Synchronize Audio").setChecked(settings["Audio/Blocking"].boolean()).onToggle([&] {
-    settings["Audio/Blocking"].setValue(synchronizeAudio.checked());
-    program->updateAudioBlocking();
-  });
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());
     program->updateAudioEffects();
@@ -82,27 +74,46 @@ Presentation::Presentation() {
   inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow->show(2); });
   hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow->show(3); });
   pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
-  advancedSettings.setIcon(Icon::Action::Settings).setText("Advanced ...").onActivate([&] { settingsWindow->show(5); });
+  configurationSettings.setIcon(Icon::Action::Settings).setText("Configuration ...").onActivate([&] { settingsWindow->show(5); });
+  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow->show(6); });
 
   toolsMenu.setText(tr("Tools")).setVisible(false);
   saveState.setIcon(Icon::Action::Save).setText("Save State");
   for(uint index : range(QuickStates)) {
-    saveState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
-      program->saveState({"quick/slot ", 1 + index});
-    }));
+    MenuItem item{&saveState};
+    item.setProperty("name", {"quick/slot ", 1 + index});
+    item.setProperty("title", {"Slot ", 1 + index});
+    item.setText({"Slot ", 1 + index});
+    item.onActivate([=] { program->saveState({"quick/slot ", 1 + index}); });
   }
   loadState.setIcon(Icon::Media::Play).setText("Load State");
   for(uint index : range(QuickStates)) {
-    loadState.append(MenuItem().setText({"Slot ", 1 + index}).onActivate([=] {
-      program->loadState({"quick/slot ", 1 + index});
-    }));
+    MenuItem item{&loadState};
+    item.setProperty("name", {"quick/slot ", 1 + index});
+    item.setProperty("title", {"Slot ", 1 + index});
+    item.setText({"Slot ", 1 + index});
+    item.onActivate([=] { program->loadState({"quick/slot ", 1 + index}); });
   }
   loadState.append(MenuSeparator());
-  loadState.append(MenuItem().setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
+  loadState.append(MenuItem()
+  .setProperty("name", "quick/undo")
+  .setProperty("title", "Undo Last Save")
+  .setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
     program->loadState("quick/undo");
   }));
-  loadState.append(MenuItem().setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
+  loadState.append(MenuItem()
+  .setProperty("name", "quick/redo")
+  .setProperty("title", "Redo Last Undo")
+  .setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
     program->loadState("quick/redo");
+  }));
+  loadState.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Remove All States").onActivate([&] {
+    if(MessageDialog("Are you sure you want to permanently remove all quick states for this game?").setParent(*this).question() == "Yes") {
+      for(uint index : range(QuickStates)) program->removeState({"quick/slot ", 1 + index});
+      program->removeState("quick/undo");
+      program->removeState("quick/redo");
+      updateStateMenus();
+    }
   }));
   speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
   speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program->updateAudioFrequency(); });
@@ -230,13 +241,13 @@ auto Presentation::clearViewport() -> void {
   uint length;
   uint width = 16;
   uint height = 16;
-  if(video->lock(output, length, width, height)) {
+  if(video->acquire(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
     if(!emulator->loaded()) drawIcon(output, length, width, height);
-    video->unlock();
+    video->release();
     video->output();
   }
 }
@@ -338,6 +349,7 @@ auto Presentation::updateDeviceMenu() -> void {
   controllerPort2.reset();
   expansionPort.reset();
 
+  auto information = emulator->information();
   for(auto& port : emulator->ports()) {
     Menu* menu = nullptr;
     if(port.name == "Controller Port 1") menu = &controllerPort1;
@@ -345,7 +357,7 @@ auto Presentation::updateDeviceMenu() -> void {
     if(port.name == "Expansion Port") menu = &expansionPort;
     if(!menu) continue;
 
-    auto path = string{"Emulator/", port.name}.replace(" ", "");
+    auto path = string{information.name, "/", port.name}.replace(" ", "");
     auto deviceName = settings(path).text();
     auto deviceID = emulator->connected(port.id);
 
@@ -427,6 +439,38 @@ auto Presentation::updateSizeMenu() -> void {
   }));
 }
 
+auto Presentation::updateStateMenus() -> void {
+  auto states = program->availableStates("quick/");
+
+  for(auto& action : saveState.actions()) {
+    if(auto item = action.cast<MenuItem>()) {
+      if(auto name = item.property("name")) {
+        if(states.find(name)) {
+          auto timestamp = program->stateTimestamp(item.property("name"));
+          item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
+        } else {
+          item.setText({item.property("title"), " [Empty]"});
+        }
+      }
+    }
+  }
+
+  for(auto& action : loadState.actions()) {
+    if(auto item = action.cast<MenuItem>()) {
+      if(auto name = item.property("name")) {
+        if(states.find(name)) {
+          auto timestamp = program->stateTimestamp(item.property("name"));
+          item.setEnabled(true);
+          item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
+        } else {
+          item.setEnabled(false);
+          item.setText({item.property("title"), " [Empty]"});
+        }
+      }
+    }
+  }
+}
+
 auto Presentation::updateRecentGames() -> void {
   loadRecentGame.reset();
 
@@ -469,7 +513,7 @@ auto Presentation::updateRecentGames() -> void {
         program->load();
       });
     } else {
-      item.setText(tr("Empty"));
+      item.setText({"[", tr("Empty"), "]"});
       item.setEnabled(false);
     }
     loadRecentGame.append(item);

@@ -27,10 +27,6 @@ namespace nall {
 struct string;
 struct string_format;
 
-//temporary compatibility shim
-using string_vector = vector<string>;
-using string_view = view<string>;
-
 template<> struct view<string> {
   using type = view<string>;
 
@@ -56,8 +52,6 @@ protected:
   const char* _data;
   mutable int _size;
 };
-
-//using string_view = view<string>;
 
 #define NALL_STRING_ALLOCATOR_ADAPTIVE
 //#define NALL_STRING_ALLOCATOR_COPY_ON_WRITE

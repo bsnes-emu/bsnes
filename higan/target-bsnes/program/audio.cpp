@@ -1,56 +1,56 @@
-auto Program::updateAudioDriver() -> void {
+auto Program::updateAudioDriver(Window parent) -> void {
+  auto changed = (bool)audio;
   audio = Audio::create(settings["Audio/Driver"].text());
   audio->setContext(presentation->viewport.handle());
   audio->setChannels(2);
+  if(changed) {
+    settings["Audio/Device"].setValue(audio->defaultDevice());
+    settings["Audio/Frequency"].setValue(audio->defaultFrequency());
+    settings["Audio/Latency"].setValue(audio->defaultLatency());
+  }
   updateAudioExclusive();
   updateAudioDevice();
   updateAudioBlocking();
-
-  settingsWindow->advanced.updateAudioDriver();
+  updateAudioDynamic();
 
   if(!audio->ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings["Audio/Driver"].text(), "] audio driver."
-    }).error();
+    }).setParent(parent).error();
     settings["Audio/Driver"].setValue("None");
-    return updateAudioDriver();
+    return updateAudioDriver(parent);
   }
 }
 
 auto Program::updateAudioExclusive() -> void {
-  if(!audio) return;
-  if(audio->hasExclusive()) {
-    audio->setExclusive(settings["Audio/Exclusive"].boolean());
-    settingsWindow->audio.exclusiveMode.setEnabled(true).setChecked(settings["Audio/Exclusive"].boolean());
-    audio->clear();
-    updateAudioFrequency();
-    updateAudioLatency();
-  } else {
-    settingsWindow->audio.exclusiveMode.setEnabled(false).setChecked(false);
-  }
+  audio->setExclusive(settings["Audio/Exclusive"].boolean());
+  updateAudioFrequency();
+  updateAudioLatency();
 }
 
 auto Program::updateAudioDevice() -> void {
-  if(!audio) return;
   audio->clear();
   if(!audio->availableDevices().find(settings["Audio/Device"].text())) {
-    settings["Audio/Device"].setValue(audio->availableDevices()(0));
+    settings["Audio/Device"].setValue(audio->defaultDevice());
   }
   audio->setDevice(settings["Audio/Device"].text());
   updateAudioFrequency();
   updateAudioLatency();
-  settingsWindow->audio.updateDevice();
 }
 
 auto Program::updateAudioBlocking() -> void {
+  audio->clear();
   audio->setBlocking(settings["Audio/Blocking"].boolean());
 }
 
+auto Program::updateAudioDynamic() -> void {
+  audio->setDynamic(settings["Audio/Dynamic"].boolean());
+}
+
 auto Program::updateAudioFrequency() -> void {
-  if(!audio) return;
   audio->clear();
   if(!audio->availableFrequencies().find(settings["Audio/Frequency"].real())) {
-    settings["Audio/Frequency"].setValue(audio->availableFrequencies()(0));
+    settings["Audio/Frequency"].setValue(audio->defaultFrequency());
   }
   audio->setFrequency(settings["Audio/Frequency"].real());
   double frequency = settings["Audio/Frequency"].real() + settings["Audio/Skew"].integer();
@@ -58,17 +58,14 @@ auto Program::updateAudioFrequency() -> void {
     if(item.checked()) frequency *= item.property("multiplier").real();
   }
   Emulator::audio.setFrequency(frequency);
-  settingsWindow->audio.updateFrequency();
 }
 
 auto Program::updateAudioLatency() -> void {
-  if(!audio) return;
   audio->clear();
   if(!audio->availableLatencies().find(settings["Audio/Latency"].natural())) {
-    settings["Audio/Latency"].setValue(audio->availableLatencies()(0));
+    settings["Audio/Latency"].setValue(audio->defaultLatency());
   }
   audio->setLatency(settings["Audio/Latency"].natural());
-  settingsWindow->audio.updateLatency();
 }
 
 auto Program::updateAudioEffects() -> void {

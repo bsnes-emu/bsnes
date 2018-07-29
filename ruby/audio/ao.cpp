@@ -4,41 +4,29 @@ struct AudioAO : Audio {
   AudioAO() { initialize(); }
   ~AudioAO() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    return {"Default"};
-  }
+  auto driver() -> string override { return "libao"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto availableFrequencies() -> vector<double> {
+  auto hasFrequencies() -> bool override { return true; }
+
+  auto availableFrequencies() -> vector<double> override {
     return {44100.0, 48000.0, 96000.0};
   }
 
-  auto availableLatencies() -> vector<uint> {
-    return {100};
-  }
-
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto blocking() -> bool { return true; }
-  auto channels() -> uint { return 2; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return 100; }
-
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     uint32_t sample = 0;
     sample |= (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     sample |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     ao_play(_interface, (char*)&sample, 4);
   }
 
+private:
   auto initialize() -> bool {
     terminate();
 
@@ -56,10 +44,10 @@ struct AudioAO : Audio {
 
     ao_info* information = ao_driver_info(driverID);
     if(!information) return false;
-    _device = information->short_name;
+    string device = information->short_name;
 
     ao_option* options = nullptr;
-    if(_device == "alsa") {
+    if(device == "alsa") {
       ao_append_option(&options, "buffer_time", "100000");  //100ms latency (default was 500ms)
     }
 
@@ -79,8 +67,6 @@ struct AudioAO : Audio {
   }
 
   bool _ready = false;
-  string _device = "Default";
-  double _frequency = 48000.0;
 
   ao_device* _interface = nullptr;
 };

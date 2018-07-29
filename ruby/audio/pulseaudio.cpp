@@ -4,47 +4,40 @@ struct AudioPulseAudio : Audio {
   AudioPulseAudio() { initialize(); }
   ~AudioPulseAudio() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    return {"Default"};
-  }
+  auto driver() -> string override { return "PulseAudio"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto availableFrequencies() -> vector<double> {
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto availableFrequencies() -> vector<double> override {
     return {44100.0, 48000.0, 96000.0};
   }
 
-  auto availableLatencies() -> vector<uint> {
+  auto availableLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
 
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return 2; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return _latency; }
-
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Audio::blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == Audio::latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     pa_stream_begin_write(_stream, (void**)&_buffer, &_period);
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
@@ -140,9 +133,6 @@ private:
   }
 
   bool _ready = false;
-  bool _blocking = true;
-  double _frequency = 48000.0;
-  uint _latency = 40;
 
   uint32_t* _buffer = nullptr;
   size_t _period = 0;

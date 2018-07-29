@@ -4,7 +4,8 @@
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"
-#include "advanced.cpp"
+#include "configuration.cpp"
+#include "drivers.cpp"
 Settings settings;
 unique_pointer<SettingsWindow> settingsWindow;
 
@@ -19,6 +20,8 @@ Settings::Settings() {
   set("Video/Driver", Video::safestDriver());
   set("Video/Exclusive", false);
   set("Video/Blocking", false);
+  set("Video/Flush", false);
+  set("Video/Format", "Default");
   set("Video/Shader", "Blur");
   set("Video/Luminance", "100%");
   set("Video/Saturation", "100%");
@@ -26,9 +29,10 @@ Settings::Settings() {
 
   set("Audio/Driver", Audio::safestDriver());
   set("Audio/Exclusive", false);
-  set("Audio/Blocking", true);
   set("Audio/Device", "");
-  set("Audio/Frequency", 48000.0);
+  set("Audio/Blocking", true);
+  set("Audio/Dynamic", false);
+  set("Audio/Frequency", "48000hz");
   set("Audio/Latency", 0);
   set("Audio/Mute", false);
   set("Audio/Skew", "0");
@@ -38,6 +42,7 @@ Settings::Settings() {
   set("Input/Driver", Input::safestDriver());
   set("Input/Frequency", 5);
   set("Input/Defocus", "Pause");
+  set("Input/Turbo/Frequency", 4);
 
   set("View/Multiplier", "2");
   set("View/Output", "Scale");
@@ -58,6 +63,7 @@ Settings::Settings() {
   set("Path/Recent/SufamiTurboB", Path::user());
 
   set("UserInterface/ShowStatusBar", true);
+  set("UserInterface/SuppressScreenSaver", true);
 
   set("Emulator/WarnOnUnverifiedGames", false);
   set("Emulator/AutoSaveMemory/Enable", true);
@@ -92,6 +98,12 @@ SettingsWindow::SettingsWindow() {
   onSize([&] {
     input.mappingList.resizeColumns();
     hotkeys.mappingList.resizeColumns();
+  });
+
+  onClose([&] {
+    if(input.activeMapping) input.cancelMapping();
+    if(hotkeys.activeMapping) hotkeys.cancelMapping();
+    setVisible(false);
   });
 }
 

@@ -11,6 +11,7 @@ struct pWindow : pObject {
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
   auto handle() const -> uintptr;
+  auto monitor() const -> uint;
   auto remove(sMenuBar menuBar) -> void;
   auto remove(sSizable sizable) -> void;
   auto remove(sStatusBar statusBar) -> void;

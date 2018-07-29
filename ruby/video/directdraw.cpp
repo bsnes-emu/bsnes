@@ -5,24 +5,25 @@ struct VideoDirectDraw : Video {
   VideoDirectDraw() { initialize(); }
   ~VideoDirectDraw() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "DirectDraw"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
-  auto blocking() -> bool { return _blocking; }
+  auto hasContext() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Video::context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Video::blocking()) return true;
+    if(!Video::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     DDBLTFX fx = {};
     fx.dwSize = sizeof(DDBLTFX);
@@ -31,7 +32,7 @@ struct VideoDirectDraw : Video {
     _raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(width != _width || height != _height) resize(_width = width, _height = height);
     DDSURFACEDESC2 description = {};
@@ -44,12 +45,12 @@ struct VideoDirectDraw : Video {
     return data = (uint32_t*)description.lpSurface;
   }
 
-  auto unlock() -> void {
+  auto release() -> void override {
     if(!ready()) return;
     _raster->Unlock(0);
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
     if(_blocking) while(true) {
       BOOL vblank;
@@ -152,8 +153,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
-  bool _blocking = false;
 
   uint _width = 0;
   uint _height = 0;

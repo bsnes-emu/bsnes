@@ -17,7 +17,7 @@ using uint32 = Natural<32>;
 using uint64 = Natural<64>;
 
 struct FX {
-  auto open(string_vector& args) -> bool;
+  auto open(vector<string>& arguments) -> bool;
   auto close() -> void;
   auto readable() -> bool;
   auto read() -> uint8_t;
@@ -35,12 +35,12 @@ struct FX {
   serial device;
 };
 
-auto FX::open(string_vector& args) -> bool {
+auto FX::open(vector<string>& arguments) -> bool {
   //device name override support
   string name;
-  for(uint n : range(args)) {
-    if(args[n].beginsWith("--device=")) {
-      name = args.take(n).trimLeft("--device=", 1L);
+  for(uint n : range(arguments)) {
+    if(arguments[n].beginsWith("--device=")) {
+      name = arguments.take(n).trimLeft("--device=", 1L);
       break;
     }
   }

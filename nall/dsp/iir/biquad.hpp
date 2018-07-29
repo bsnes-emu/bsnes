@@ -17,22 +17,22 @@ struct Biquad {
     HighShelf,
   };
 
-  inline auto reset(Type type, real cutoffFrequency, real samplingFrequency, real quality, real gain = 0.0) -> void;
-  inline auto process(real in) -> real;  //normalized sample (-1.0 to +1.0)
+  inline auto reset(Type type, double cutoffFrequency, double samplingFrequency, double quality, double gain = 0.0) -> void;
+  inline auto process(double in) -> double;  //normalized sample (-1.0 to +1.0)
 
-  inline static auto butterworth(uint order, uint phase) -> real;
+  inline static auto butterworth(uint order, uint phase) -> double;
 
 private:
   Type type;
-  real cutoffFrequency;
-  real samplingFrequency;
-  real quality;             //frequency response quality
-  real gain;                //peak gain
-  real a0, a1, a2, b1, b2;  //coefficients
-  real z1, z2;              //second-order IIR
+  double cutoffFrequency;
+  double samplingFrequency;
+  double quality;             //frequency response quality
+  double gain;                //peak gain
+  double a0, a1, a2, b1, b2;  //coefficients
+  double z1, z2;              //second-order IIR
 };
 
-auto Biquad::reset(Type type, real cutoffFrequency, real samplingFrequency, real quality, real gain) -> void {
+auto Biquad::reset(Type type, double cutoffFrequency, double samplingFrequency, double quality, double gain) -> void {
   this->type = type;
   this->cutoffFrequency = cutoffFrequency;
   this->samplingFrequency = samplingFrequency;
@@ -42,10 +42,10 @@ auto Biquad::reset(Type type, real cutoffFrequency, real samplingFrequency, real
   z1 = 0.0;
   z2 = 0.0;
 
-  real v = pow(10, fabs(gain) / 20.0);
-  real k = tan(Math::Pi * cutoffFrequency / samplingFrequency);
-  real q = quality;
-  real n = 0.0;
+  double v = pow(10, fabs(gain) / 20.0);
+  double k = tan(Math::Pi * cutoffFrequency / samplingFrequency);
+  double q = quality;
+  double n = 0.0;
 
   switch(type) {
 
@@ -142,15 +142,15 @@ auto Biquad::reset(Type type, real cutoffFrequency, real samplingFrequency, real
   }
 }
 
-auto Biquad::process(real in) -> real {
-  real out = in * a0 + z1;
+auto Biquad::process(double in) -> double {
+  double out = in * a0 + z1;
   z1 = in * a1 + z2 - b1 * out;
   z2 = in * a2 - b2 * out;
   return out;
 }
 
 //compute Q values for N-order butterworth filtering
-auto Biquad::butterworth(uint order, uint phase) -> real {
+auto Biquad::butterworth(uint order, uint phase) -> double {
   return -0.5 / cos(Math::Pi * (phase + order + 0.5) / order);
 }
 

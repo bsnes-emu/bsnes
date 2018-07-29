@@ -7,57 +7,66 @@ struct VideoWGL : Video, OpenGL {
   VideoWGL() { initialize(); }
   ~VideoWGL() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "OpenGL"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
-  auto blocking() -> bool { return _blocking; }
-  auto smooth() -> bool { return _smooth; }
-  auto shader() -> string { return _shader; }
+  auto hasContext() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFlush() -> bool override { return true; }
+  auto hasSmooth() -> bool override { return true; }
+  auto hasShader() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Video::context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
-    if(wglSwapInterval) wglSwapInterval(_blocking);
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Video::blocking()) return true;
+    if(!Video::setBlocking(blocking)) return false;
+    if(wglSwapInterval) wglSwapInterval(blocking);
     return true;
   }
 
-  auto setSmooth(bool smooth) -> bool {
-    if(_smooth == smooth) return true;
-    _smooth = smooth;
-    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+  auto setFlush(bool flush) -> bool override {
+    if(flush == Video::flush()) return true;
+    if(!Video::setFlush(flush)) return false;
     return true;
   }
 
-  auto setShader(string shader) -> bool {
-    if(_shader == shader) return true;
-    OpenGL::shader(_shader = shader);
-    if(!_shader) OpenGL::filter = _smooth ? GL_LINEAR : GL_NEAREST;
+  auto setSmooth(bool smooth) -> bool override {
+    if(smooth == Video::smooth()) return true;
+    if(!Video::setSmooth(smooth)) return false;
+    if(!shader()) OpenGL::filter = smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto clear() -> void {
+  auto setShader(string shader) -> bool override {
+    if(shader == Video::shader()) return true;
+    if(!Video::setShader(shader)) return false;
+    OpenGL::setShader(shader);
+    if(!shader) OpenGL::filter = smooth() ? GL_LINEAR : GL_NEAREST;
+    return true;
+  }
+
+  auto clear() -> void override {
     if(!ready()) return;
     OpenGL::clear();
     SwapBuffers(_display);
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
-  auto unlock() -> void {
+  auto release() -> void override {
     if(!ready()) return;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
     RECT rectangle;
     GetClientRect((HWND)_context, &rectangle);
@@ -65,6 +74,7 @@ struct VideoWGL : Video, OpenGL {
     OpenGL::outputHeight = rectangle.bottom - rectangle.top;
     OpenGL::output();
     SwapBuffers(_display);
+    if(flush()) glFinish();
   }
 
 private:
@@ -120,10 +130,6 @@ private:
   auto (APIENTRY* wglSwapInterval)(int) -> BOOL = nullptr;
 
   bool _ready = false;
-  uintptr _context = 0;
-  bool _blocking = false;
-  bool _smooth = true;
-  string _shader;
 
   HDC _display = nullptr;
   HGLRC _wglContext = nullptr;

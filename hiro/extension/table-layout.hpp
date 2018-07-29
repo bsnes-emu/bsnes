@@ -29,6 +29,7 @@ struct mTableLayout : mSizable {
   auto columnCount() const -> uint;
   auto minimumSize() const -> Size override;
   auto padding() const -> Geometry;
+  auto remove(sSizable sizable) -> type&;
   auto remove(sTableLayoutCell cell) -> type&;
   auto reset() -> type&;
   auto row(uint position) const -> TableLayoutRow;

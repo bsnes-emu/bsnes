@@ -54,7 +54,16 @@ auto HotkeySettings::assignMapping() -> void {
     activeMapping = inputManager->hotkeys[item.offset()];
     settingsWindow->layout.setEnabled(false);
     settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    settingsWindow->setDismissable(false);
   }
+}
+
+auto HotkeySettings::cancelMapping() -> void {
+  activeMapping.reset();
+  settingsWindow->statusBar.setText();
+  settingsWindow->layout.setEnabled();
+  settingsWindow->doSize();
+  settingsWindow->setDismissable(true);
 }
 
 auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void {
@@ -67,9 +76,7 @@ auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, 
     refreshMappings();
     timer.onActivate([&] {
       timer.setEnabled(false);
-      settingsWindow->statusBar.setText();
-      settingsWindow->layout.setEnabled();
-      settingsWindow->doSize();
+      cancelMapping();
     }).setInterval(200).setEnabled();
   }
 }

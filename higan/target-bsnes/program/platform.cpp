@@ -210,16 +210,18 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   screenshot.width = width;
   screenshot.height = height;
 
-  if(video->lock(output, length, width, height)) {
+  if(video->acquire(output, length, width, height)) {
     length >>= 2;
 
     for(auto y : range(height)) {
       memory::copy<uint32>(output + y * length, data + y * pitch, width);
     }
 
-    video->unlock();
+    video->release();
     video->output();
   }
+
+  inputManager->frame();
 
   if(frameAdvance) {
     frameAdvance = false;
@@ -243,7 +245,7 @@ auto Program::audioSample(const double* samples, uint channels) -> void {
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
-  if(focused() || settingsWindow->input.allowInput().checked()) {
+  if(focused() || settingsWindow->configuration.allowInput().checked()) {
     inputManager->poll();
     if(auto mapping = inputManager->mapping(port, device, input)) {
       return mapping->poll();
@@ -253,7 +255,7 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
-  if(focused() || settingsWindow->input.allowInput().checked() || !enable) {
+  if(focused() || settingsWindow->configuration.allowInput().checked() || !enable) {
     if(auto mapping = inputManager->mapping(port, device, input)) {
       return mapping->rumble(enable);
     }

@@ -3,23 +3,22 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Input");
 
   layout.setPadding(5);
-  defocusLabel.setText("When focus is lost:");
-  pauseEmulation.setText("Pause emulation").onActivate([&] {
-    settings["Input/Defocus"].setValue("Pause");
-  });
-  blockInput.setText("Block input").onActivate([&] {
-    settings["Input/Defocus"].setValue("Block");
-  });
-  allowInput.setText("Allow input").onActivate([&] {
-    settings["Input/Defocus"].setValue("Allow");
-  });
-  if(settings["Input/Defocus"].text() == "Pause") pauseEmulation.setChecked();
-  if(settings["Input/Defocus"].text() == "Block") blockInput.setChecked();
-  if(settings["Input/Defocus"].text() == "Allow") allowInput.setChecked();
   portLabel.setText("Port:");
   portList.onChange([&] { reloadDevices(); });
   deviceLabel.setText("Device:");
   deviceList.onChange([&] { reloadMappings(); });
+  turboLabel.setText("Turbo rate:");
+  for(uint frequency : range(1, 9)) {
+    ComboButtonItem item{&turboList};
+    item.setText(frequency);
+    if(frequency == settings["Input/Turbo/Frequency"].natural()) item.setSelected();
+  }
+  turboList.onChange([&] {
+    uint frequency = turboList.selected().text().natural();
+    settings["Input/Turbo/Frequency"].setValue(frequency);
+    inputManager->turboCounter = 0;
+    inputManager->turboFrequency = frequency;
+  });
   mappingList.setBatchable();
   mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
   mappingList.onChange([&] { updateControls(); });
@@ -120,7 +119,16 @@ auto InputSettings::assignMapping() -> void {
     activeMapping = activeDevice().mappings[mapping.offset()];
     settingsWindow->layout.setEnabled(false);
     settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    settingsWindow->setDismissable(false);
   }
+}
+
+auto InputSettings::cancelMapping() -> void {
+  activeMapping.reset();
+  settingsWindow->statusBar.setText();
+  settingsWindow->layout.setEnabled();
+  settingsWindow->doSize();
+  settingsWindow->setDismissable(true);
 }
 
 auto InputSettings::assignMouseInput(uint id) -> void {
@@ -146,9 +154,7 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
     refreshMappings();
     timer.onActivate([&] {
       timer.setEnabled(false);
-      settingsWindow->statusBar.setText();
-      settingsWindow->layout.setEnabled();
-      settingsWindow->doSize();
+      cancelMapping();
     }).setInterval(200).setEnabled();
   }
 }

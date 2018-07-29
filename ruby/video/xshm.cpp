@@ -18,6 +18,14 @@ struct VideoXShm : Video {
   auto hasContext() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
 
+  auto availableFormats() -> vector<string> { return {"RGB24"}; }
+
+  auto exclusive() -> bool override { return false; }
+  auto blocking() -> bool override { return false; }
+  auto flush() -> bool override { return false; }
+  auto format() -> string override { return "RGB24"; }
+  auto shader() -> string override { return ""; }
+
   auto setContext(uintptr context) -> bool override {
     if(context == this->context()) return true;
     if(!Video::setContext(context)) return false;
@@ -38,7 +46,7 @@ struct VideoXShm : Video {
     output();
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(!_inputBuffer || _inputWidth != width || _inputHeight != height) {
       if(_inputBuffer) delete[] _inputBuffer;
@@ -52,7 +60,7 @@ struct VideoXShm : Video {
     return true;
   }
 
-  auto unlock() -> void override {
+  auto release() -> void override {
     if(!ready()) return;
   }
 

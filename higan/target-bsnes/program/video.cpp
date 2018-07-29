@@ -1,8 +1,14 @@
-auto Program::updateVideoDriver() -> void {
+auto Program::updateVideoDriver(Window parent) -> void {
+  auto changed = (bool)video;
   video = Video::create(settings["Video/Driver"].text());
   video->setContext(presentation->viewport.handle());
+  if(changed) {
+    settings["Video/Format"].setValue(video->defaultFormat());
+  }
   updateVideoExclusive();
   updateVideoBlocking();
+  updateVideoFlush();
+  updateVideoFormat();
   updateVideoShader();
 
   if(video->ready()) {
@@ -14,30 +20,35 @@ auto Program::updateVideoDriver() -> void {
     if(!emulator->loaded()) presentation->clearViewport();
   });
 
-  settingsWindow->advanced.updateVideoDriver();
-
   if(!video->ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings["Video/Driver"].text(), "] video driver."
-    }).error();
+    }).setParent(parent).error();
     settings["Video/Driver"].setValue("None");
-    return updateVideoDriver();
+    return updateVideoDriver(parent);
   }
 
   presentation->updateShaders();
 }
 
 auto Program::updateVideoExclusive() -> void {
+  //only enabled in fullscreen mode via Presentation::toggleFullScreen()
   video->setExclusive(false);
-  if(video->hasExclusive()) {
-    settingsWindow->video.exclusiveMode.setEnabled(true).setChecked(settings["Video/Exclusive"].boolean());
-  } else {
-    settingsWindow->video.exclusiveMode.setEnabled(false).setChecked(false);
-  }
 }
 
 auto Program::updateVideoBlocking() -> void {
   video->setBlocking(settings["Video/Blocking"].boolean());
+}
+
+auto Program::updateVideoFlush() -> void {
+  video->setFlush(settings["Video/Flush"].boolean());
+}
+
+auto Program::updateVideoFormat() -> void {
+  if(!video->availableFormats().find(settings["Video/Format"].text())) {
+    settings["Video/Format"].setValue(video->defaultFormat());
+  }
+  video->setFormat(settings["Video/Format"].text());
 }
 
 auto Program::updateVideoShader() -> void {

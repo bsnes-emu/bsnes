@@ -70,6 +70,9 @@ auto Input::create(string driver) -> Input* {
   #endif
 
   if(!input) input = new Input;
+
+  input->_context = input->context();
+
   return input;
 }
 

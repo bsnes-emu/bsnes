@@ -79,8 +79,8 @@ struct registry {
     return SHDeleteValueW(rootKey, utf16_t(path), utf16_t(node)) == ERROR_SUCCESS;
   }
 
-  static auto contents(const string& name) -> string_vector {
-    string_vector result;
+  static auto contents(const string& name) -> vector<string> {
+    vector<string> result;
     auto part = name.split("\\");
     HKEY handle, rootKey = root(part.takeLeft());
     part.removeRight();

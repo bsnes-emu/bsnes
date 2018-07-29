@@ -15,6 +15,7 @@ struct FixedLayout : sFixedLayout {
   auto cell(uint position) const { return self().cell(position); }
   auto cell(sSizable sizable) const { return self().cell(sizable); }
   auto cellCount() const { return self().cellCount(); }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto remove(sFixedLayoutCell cell) { return self().remove(cell), *this; }
   auto reset() { return self().reset(), *this; }
 };
@@ -42,6 +43,7 @@ struct HorizontalLayout : sHorizontalLayout {
   auto cell(uint position) const { return self().cell(position); }
   auto cell(sSizable sizable) const { return self().cell(sizable); }
   auto cellCount() const { return self().cellCount(); }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto remove(sHorizontalLayoutCell cell) { return self().remove(cell), *this; }
   auto reset() { return self().reset(), *this; }
   auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
@@ -125,6 +127,7 @@ struct TableLayout : sTableLayout {
   auto column(uint position) const { return self().column(position); }
   auto columnCount() const { return self().columnCount(); }
   auto padding() const { return self().padding(); }
+  auto remove(sSizable sizable) { return self().remove(sizable), *this; }
   auto remove(sTableLayoutCell cell) { return self().remove(cell), *this; }
   auto reset() { return self().reset(), *this; }
   auto row(uint position) const { return self().row(position); }

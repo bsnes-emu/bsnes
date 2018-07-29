@@ -241,6 +241,11 @@ auto pWindow::frameMargin() const -> Geometry {
   }
 }
 
+auto pWindow::monitor() const -> uint {
+  //TODO
+  return 0;
+}
+
 auto pWindow::remove(sMenuBar menuBar) -> void {
 }
 

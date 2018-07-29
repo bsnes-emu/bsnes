@@ -13,13 +13,13 @@ struct VideoXVideo : Video {
   auto driver() -> string override { return "XVideo"; }
   auto ready() -> bool override { return _ready; }
 
-  auto availableFormats() -> vector<string> override {
-    return _formatNames;
-  }
-
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFormat() -> bool override { return true; }
+
+  auto availableFormats() -> vector<string> override {
+    return _formatNames;
+  }
 
   auto setContext(uintptr context) -> bool override {
     if(context == Video::context()) return true;
@@ -56,14 +56,14 @@ struct VideoXVideo : Video {
     output();
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(width != _width || height != _height) resize(_width = width, _height = height);
     pitch = _bufferWidth * 4;
     return data = _buffer;
   }
 
-  auto unlock() -> void override {
+  auto release() -> void override {
     if(!ready()) return;
   }
 
@@ -87,14 +87,14 @@ struct VideoXVideo : Video {
     XGetWindowAttributes(_display, _window, &target);
 
     auto& name = _formatName;
-    if(name == "RGB32") renderRGB32(_width, _height);
-    if(name == "RGB24") renderRGB24(_width, _height);
-    if(name == "RGB16") renderRGB16(_width, _height);
-    if(name == "RGB15") renderRGB15(_width, _height);
-    if(name == "UYVY" ) renderUYVY (_width, _height);
-    if(name == "YUY2" ) renderYUY2 (_width, _height);
-    if(name == "YV12" ) renderYV12 (_width, _height);
-    if(name == "I420" ) renderI420 (_width, _height);
+    if(name == "RGB24" ) renderRGB24 (_width, _height);
+    if(name == "RGB24P") renderRGB24P(_width, _height);
+    if(name == "RGB16" ) renderRGB16 (_width, _height);
+    if(name == "RGB15" ) renderRGB15 (_width, _height);
+    if(name == "UYVY"  ) renderUYVY  (_width, _height);
+    if(name == "YUY2"  ) renderYUY2  (_width, _height);
+    if(name == "YV12"  ) renderYV12  (_width, _height);
+    if(name == "I420"  ) renderI420  (_width, _height);
 
     XvShmPutImage(_display, _port, _window, _gc, _image,
       0, 0, _width, _height,
@@ -275,8 +275,8 @@ private:
         for(uint n : range(4)) if(char c = order[n]) components.append(c);
 
         if(type == XvRGB) {
-          if(sort == 0 && depth == 32) ids.append(id), names.append("RGB32");
-          if(sort == 1 && depth == 24) ids.append(id), names.append("RGB24");
+          if(sort == 0 && depth == 32) ids.append(id), names.append("RGB24");
+          if(sort == 1 && depth == 24) ids.append(id), names.append("RGB24P");
           if(sort == 2 && depth <= 16 && redMask == 0xf800) ids.append(id), names.append("RGB16");
           if(sort == 3 && depth <= 16 && redMask == 0x7c00) ids.append(id), names.append("RGB15");
         }
@@ -326,7 +326,7 @@ private:
     _buffer = new uint32_t[_bufferWidth * _bufferHeight];
   }
 
-  auto renderRGB32(uint width, uint height) -> void {
+  auto renderRGB24(uint width, uint height) -> void {
     for(uint y : range(height)) {
       auto input = (const uint32_t*)_buffer + y * width;
       auto output = (uint32_t*)_image->data + y * (_image->pitches[0] >> 2);
@@ -338,7 +338,7 @@ private:
     }
   }
 
-  auto renderRGB24(uint width, uint height) -> void {
+  auto renderRGB24P(uint width, uint height) -> void {
     for(uint y : range(height)) {
       auto input = (const uint32_t*)_buffer + y * width;
       auto output = (uint8_t*)_image->data + y * _image->pitches[0];

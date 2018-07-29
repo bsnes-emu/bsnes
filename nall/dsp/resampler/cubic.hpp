@@ -6,23 +6,23 @@
 namespace nall { namespace DSP { namespace Resampler {
 
 struct Cubic {
-  inline auto reset(real inputFrequency, real outputFrequency, uint queueSize = 0) -> void;
-  inline auto setInputFrequency(real inputFrequency) -> void;
+  inline auto reset(double inputFrequency, double outputFrequency, uint queueSize = 0) -> void;
+  inline auto setInputFrequency(double inputFrequency) -> void;
   inline auto pending() const -> bool;
-  inline auto read() -> real;
-  inline auto write(real sample) -> void;
+  inline auto read() -> double;
+  inline auto write(double sample) -> void;
 
 private:
-  real inputFrequency;
-  real outputFrequency;
+  double inputFrequency;
+  double outputFrequency;
 
-  real ratio;
-  real fraction;
-  real history[4];
-  queue<real> samples;
+  double ratio;
+  double fraction;
+  double history[4];
+  queue<double> samples;
 };
 
-auto Cubic::reset(real inputFrequency, real outputFrequency, uint queueSize) -> void {
+auto Cubic::reset(double inputFrequency, double outputFrequency, uint queueSize) -> void {
   this->inputFrequency = inputFrequency;
   this->outputFrequency = outputFrequency;
   if(!queueSize) queueSize = outputFrequency * 0.02;  //20ms
@@ -33,7 +33,7 @@ auto Cubic::reset(real inputFrequency, real outputFrequency, uint queueSize) -> 
   samples.resize(queueSize);
 }
 
-auto Cubic::setInputFrequency(real inputFrequency) -> void {
+auto Cubic::setInputFrequency(double inputFrequency) -> void {
   this->inputFrequency = inputFrequency;
   ratio = inputFrequency / outputFrequency;
 }
@@ -42,11 +42,11 @@ auto Cubic::pending() const -> bool {
   return samples.pending();
 }
 
-auto Cubic::read() -> real {
+auto Cubic::read() -> double {
   return samples.read();
 }
 
-auto Cubic::write(real sample) -> void {
+auto Cubic::write(double sample) -> void {
   auto& mu = fraction;
   auto& s = history;
 
@@ -56,10 +56,10 @@ auto Cubic::write(real sample) -> void {
   s[3] = sample;
 
   while(mu <= 1.0) {
-    real A = s[3] - s[2] - s[0] + s[1];
-    real B = s[0] - s[1] - A;
-    real C = s[2] - s[0];
-    real D = s[1];
+    double A = s[3] - s[2] - s[0] + s[1];
+    double B = s[0] - s[1] - A;
+    double C = s[2] - s[0];
+    double D = s[1];
 
     samples.write(A * mu * mu * mu + B * mu * mu + C * mu + D);
     mu += ratio;

@@ -18,6 +18,11 @@ struct InputMapping {
     return type == Type::Rumble;
   }
 
+  uint portID = 0;
+  uint deviceID = 0;
+  uint inputID = 0;
+  maybe<uint> turboID;
+
   string path;  //configuration file key path
   string name;  //input name (human readable)
   uint type = 0;
@@ -34,6 +39,8 @@ struct InputMapping {
     Qualifier qualifier = Qualifier::None;
   };
   vector<Mapping> mappings;
+
+  uint3 turboCounter = 0;
 };
 
 struct InputHotkey : InputMapping {
@@ -64,6 +71,7 @@ struct InputManager {
   auto initialize() -> void;
   auto bind() -> void;
   auto poll() -> void;
+  auto frame() -> void;
   auto onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void;
   auto mapping(uint port, uint device, uint input) -> maybe<InputMapping&>;
   auto findMouse() -> shared_pointer<HID::Device>;
@@ -79,6 +87,9 @@ public:
 
   uint64 lastPoll;   //time in milliseconds since last call to poll()
   uint64 frequency;  //minimum time in milliseconds before poll() can be called again
+
+  uint turboCounter = 0;
+  uint turboFrequency = 0;
 };
 
 extern unique_pointer<InputManager> inputManager;

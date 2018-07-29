@@ -50,13 +50,10 @@ template<uint Frequency> auto SMP::Timer<Frequency>::step(uint clocks) -> void {
 }
 
 template<uint Frequency> auto SMP::Timer<Frequency>::synchronizeStage1() -> void {
-  bool newLine = stage1;
-  if(!smp.io.timersEnable) newLine = false;
-  if(smp.io.timersDisable) newLine = false;
-
-  bool oldLine = line;
-  line = newLine;
-  if(oldLine != 1 || newLine != 0) return;  //only pulse on 1->0 transition
+  bool level = stage1;
+  if(!smp.io.timersEnable) level = false;
+  if(smp.io.timersDisable) level = false;
+  if(!line.lower(level)) return;  //only pulse on 1->0 transition
 
   //stage 2 increment
   if(!enable) return;

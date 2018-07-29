@@ -102,6 +102,12 @@ auto InputMapping::unbind() -> void {
 }
 
 auto InputMapping::poll() -> int16 {
+  if(turboID) {
+    auto& mapping = inputManager->ports[portID].devices[deviceID].mappings[turboID()];
+    auto result = mapping.poll();
+    if(result) return inputManager->turboCounter >= inputManager->turboFrequency;
+  }
+
   int16 result;
 
   for(auto& mapping : mappings) {
@@ -185,23 +191,53 @@ auto InputManager::initialize() -> void {
 
   if(!input) return;
   input->onChange({&InputManager::onChange, this});
+
+  lastPoll = chrono::millisecond();
   frequency = max(1u, settings["Input/Frequency"].natural());
 
-  for(auto& port : emulator->ports()) {
+  turboCounter = 0;
+  turboFrequency = max(1, settings["Input/Turbo/Frequency"].natural());
+
+  auto information = emulator->information();
+  auto ports = emulator->ports();
+  for(uint portID : range(ports.size())) {
+    auto& port = ports[portID];
     InputPort inputPort{port.id, port.name};
-    for(auto& device : emulator->devices(port.id)) {
+    auto devices = emulator->devices(port.id);
+    for(uint deviceID : range(devices.size())) {
+      auto& device = devices[deviceID];
       InputDevice inputDevice{device.id, device.name};
-      for(auto& input : emulator->inputs(device.id)) {
+      auto inputs = emulator->inputs(device.id);
+      for(uint inputID : range(inputs.size())) {
+        auto& input = inputs[inputID];
         InputMapping inputMapping;
+        inputMapping.portID = portID;
+        inputMapping.deviceID = deviceID;
+        inputMapping.inputID = inputID;
         inputMapping.name = input.name;
         inputMapping.type = input.type;
-        inputMapping.path = string{"Emulator/", inputPort.name, "/", inputDevice.name, "/", inputMapping.name}.replace(" ", "");
+        inputMapping.path = string{information.name, "/", inputPort.name, "/", inputDevice.name, "/", inputMapping.name}.replace(" ", "");
         inputMapping.assignment = settings(inputMapping.path).text();
         inputDevice.mappings.append(inputMapping);
       }
+      for(uint inputID : range(inputs.size())) {
+        auto& input = inputs[inputID];
+        if(input.type != InputMapping::Type::Button && input.type != InputMapping::Type::Trigger) continue;
+        uint turboID = inputDevice.mappings.size();
+        InputMapping inputMapping;
+        inputMapping.portID = portID;
+        inputMapping.deviceID = deviceID;
+        inputMapping.inputID = turboID;
+        inputMapping.name = string{"Turbo ", input.name};
+        inputMapping.type = input.type;
+        inputMapping.path = string{information.name, "/", inputPort.name, "/", inputDevice.name, "/", inputMapping.name}.replace(" ", "");
+        inputMapping.assignment = settings(inputMapping.path).text();
+        inputDevice.mappings.append(inputMapping);
+        inputDevice.mappings[inputID].turboID = turboID;
+      }
       inputPort.devices.append(inputDevice);
     }
-    ports.append(inputPort);
+    this->ports.append(inputPort);
   }
 
   bindHotkeys();
@@ -240,6 +276,10 @@ auto InputManager::poll() -> void {
     this->devices = devices;
     bind();
   }
+}
+
+auto InputManager::frame() -> void {
+  if(++turboCounter >= turboFrequency * 2) turboCounter = 0;
 }
 
 auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {

@@ -5,17 +5,31 @@ struct AudioASIO : Audio {
   AudioASIO() { self = this; initialize(); }
   ~AudioASIO() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    string_vector devices;
+  auto driver() -> string override { return "ASIO"; }
+  auto ready() -> bool override { return _ready; }
+
+  auto hasContext() -> bool override { return true; }
+  auto hasDevice() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto availableDevices() -> vector<string> override {
+    vector<string> devices;
     for(auto& device : _devices) devices.append(device.name);
     return devices;
   }
 
-  auto availableFrequencies() -> vector<double> {
+  auto availableChannels() -> vector<uint> override {
+    return {1, 2};
+  }
+
+  auto availableFrequencies() -> vector<double> override {
     return {_frequency};
   }
 
-  auto availableLatencies() -> vector<uint> {
+  auto availableLatencies() -> vector<uint> override {
     vector<uint> latencies;
     uint latencyList[] = {64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 6144};  //factors of 6144
     for(auto& latency : latencyList) {
@@ -26,49 +40,37 @@ struct AudioASIO : Audio {
     return latencies;
   }
 
-  auto availableChannels() -> vector<uint> {
-    return {1, 2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto context() -> uintptr { return _context; }
-  auto device() -> string { return _device; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return _latency; }
-
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Audio::context()) return true;
+    if(!Audio::setContext(context)) return false;
     return initialize();
   }
 
-  auto setDevice(string device) -> bool {
-    if(_device == device) return true;
-    _device = device;
+  auto setDevice(string device) -> bool override {
+    if(device == Audio::device()) return true;
+    if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Audio::blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return initialize();
   }
 
-  auto setChannels(uint channels) -> bool {
-    if(_channels == channels) return true;
-    _channels = channels;
+  auto setChannels(uint channels) -> bool override {
+    if(channels == Audio::channels()) return true;
+    if(!Audio::setChannels(channels)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == Audio::latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     for(uint n : range(_channels)) {
       memory::fill<uint8_t>(_channel[n].buffers[0], _latency * _sampleSize);
@@ -80,7 +82,7 @@ struct AudioASIO : Audio {
     _queue.count = 0;
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     if(!ready()) return;
     if(_blocking) {
       while(_queue.count >= _latency);
@@ -251,12 +253,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
-  string _device;
-  bool _blocking = true;
-  uint _channels = 2;
-  double _frequency = 48000.0;
-  uint _latency = 0;
 
   struct Queue {
     double samples[65536][8];

@@ -5,35 +5,22 @@ struct AudioPulseAudioSimple : Audio {
   AudioPulseAudioSimple() { initialize(); }
   ~AudioPulseAudioSimple() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    return {"Default"};
-  }
+  auto driver() -> string override { return "PulseAudioSimple"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto availableFrequencies() -> vector<double> {
+  auto hasFrequency() -> bool override { return true; }
+
+  auto availableFrequencies() -> vector<double> override {
     return {44100.0, 48000.0, 96000.0};
   }
 
-  auto availableLatencies() -> vector<uint> {
-    return {40};
-  }
-
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto blocking() -> bool { return true; }
-  auto channels() -> uint { return 2; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return 40; }
-
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     if(!ready()) return;
 
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
@@ -90,7 +77,6 @@ private:
   }
 
   bool _ready = false;
-  double _frequency = 48000.0;
 
   pa_simple* _interface = nullptr;
 

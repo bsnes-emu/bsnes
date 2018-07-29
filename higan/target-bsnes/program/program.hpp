@@ -49,7 +49,8 @@ struct Program : Emulator::Platform {
   auto screenshotPath() -> string;
 
   //states.cpp
-  auto managedStates() -> vector<string>;
+  auto availableStates(string type) -> vector<string>;
+  auto stateTimestamp(string filename) -> uint64_t;
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveUndoState() -> bool;
@@ -58,23 +59,26 @@ struct Program : Emulator::Platform {
   auto renameState(string from, string to) -> bool;
 
   //video.cpp
+  auto updateVideoDriver(Window parent) -> void;
   auto updateVideoExclusive() -> void;
-  auto updateVideoDriver() -> void;
   auto updateVideoBlocking() -> void;
+  auto updateVideoFlush() -> void;
+  auto updateVideoFormat() -> void;
   auto updateVideoShader() -> void;
   auto updateVideoPalette() -> void;
 
   //audio.cpp
-  auto updateAudioDriver() -> void;
+  auto updateAudioDriver(Window parent) -> void;
   auto updateAudioExclusive() -> void;
   auto updateAudioDevice() -> void;
   auto updateAudioBlocking() -> void;
+  auto updateAudioDynamic() -> void;
   auto updateAudioFrequency() -> void;
   auto updateAudioLatency() -> void;
   auto updateAudioEffects() -> void;
 
   //input.cpp
-  auto updateInputDriver() -> void;
+  auto updateInputDriver(Window parent) -> void;
 
   //utility.cpp
   auto showMessage(string text) -> void;

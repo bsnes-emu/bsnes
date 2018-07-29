@@ -40,11 +40,15 @@ Program::Program(vector<string> arguments) {
 
   settings["Crashed"].setValue(true);
   settings.save();
-  updateVideoDriver();
-  updateAudioDriver();
-  updateInputDriver();
+  updateVideoDriver(*presentation);
+  updateAudioDriver(*presentation);
+  updateInputDriver(*presentation);
   settings["Crashed"].setValue(false);
   settings.save();
+
+  settingsWindow->drivers.videoDriverChanged();
+  settingsWindow->drivers.audioDriverChanged();
+  settingsWindow->drivers.inputDriverChanged();
 
   arguments.takeLeft();  //ignore program location in argument parsing
   for(auto& argument : arguments) {
@@ -74,7 +78,7 @@ auto Program::main() -> void {
   }
 
   emulator->run();
-  if(settingsWindow->advanced.autoSaveMemory.checked()) {
+  if(settingsWindow->configuration.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();
     if(currentTime - autoSaveTime >= settings["Emulator/AutoSaveMemory/Interval"].natural()) {
       autoSaveTime = currentTime;

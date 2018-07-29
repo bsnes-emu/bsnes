@@ -18,6 +18,7 @@ struct mFixedLayout : mSizable {
   auto cell(sSizable sizable) const -> FixedLayoutCell;
   auto cellCount() const -> uint;
   auto minimumSize() const -> Size override;
+  auto remove(sSizable sizable) -> type&;
   auto remove(sFixedLayoutCell cell) -> type&;
   auto reset() -> type& override;
   auto setEnabled(bool enabled) -> type& override;

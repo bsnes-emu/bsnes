@@ -9,11 +9,6 @@ struct Audio {
   virtual auto driver() -> string { return "None"; }
   virtual auto ready() -> bool { return true; }
 
-  virtual auto availableDevices() -> vector<string> { return {"Default"}; }
-  virtual auto availableChannels() -> vector<uint> { return {2}; }
-  virtual auto availableFrequencies() -> vector<double> { return {48000.0}; }
-  virtual auto availableLatencies() -> vector<uint> { return {0}; }
-
   virtual auto hasExclusive() -> bool { return false; }
   virtual auto hasContext() -> bool { return false; }
   virtual auto hasDevice() -> bool { return false; }
@@ -22,6 +17,16 @@ struct Audio {
   virtual auto hasChannels() -> bool { return false; }
   virtual auto hasFrequency() -> bool { return false; }
   virtual auto hasLatency() -> bool { return false; }
+
+  virtual auto availableDevices() -> vector<string> { return {"Default"}; }
+  virtual auto availableChannels() -> vector<uint> { return {2}; }
+  virtual auto availableFrequencies() -> vector<double> { return {48000.0}; }
+  virtual auto availableLatencies() -> vector<uint> { return {0}; }
+
+  virtual auto defaultDevice() -> string { return availableDevices().first(); }
+  virtual auto defaultChannels() -> uint { return availableChannels().first(); }
+  virtual auto defaultFrequency() -> double { return availableFrequencies().first(); }
+  virtual auto defaultLatency() -> uint { return availableLatencies().first(); }
 
   virtual auto exclusive() -> bool { return _exclusive; }
   virtual auto context() -> uintptr { return _context; }

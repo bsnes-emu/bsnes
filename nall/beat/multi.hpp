@@ -28,7 +28,7 @@ struct bpsmulti {
     writeNumber(metadata.length());
     writeString(metadata);
 
-    string_vector sourceList, targetList;
+    vector<string> sourceList, targetList;
     ls(sourceList, sourcePath, sourcePath);
     ls(targetList, targetPath, targetPath);
 
@@ -156,7 +156,7 @@ protected:
   Hash::CRC32 checksum;
 
   //create() functions
-  auto ls(string_vector& list, const string& path, const string& basepath) -> void {
+  auto ls(vector<string>& list, const string& path, const string& basepath) -> void {
     auto paths = directory::folders(path);
     for(auto& pathname : paths) {
       list.append(string{path, pathname}.trimLeft(basepath, 1L));

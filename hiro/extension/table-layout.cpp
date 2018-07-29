@@ -93,6 +93,13 @@ auto mTableLayout::padding() const -> Geometry {
   return state.padding;
 }
 
+auto mTableLayout::remove(sSizable sizable) -> type& {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return remove(cell);
+  }
+  return *this;
+}
+
 auto mTableLayout::remove(sTableLayoutCell cell) -> type& {
   if(cell->parent() != this) return *this;
   auto offset = cell->offset();

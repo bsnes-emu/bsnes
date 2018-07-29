@@ -10,13 +10,14 @@ struct AudioOpenAL : Audio {
   AudioOpenAL() { initialize(); }
   ~AudioOpenAL() { terminate(); }
 
-  auto driver() -> string override {
-    return "OpenAL";
-  }
+  auto driver() -> string override { return "OpenAL"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto ready() -> bool override {
-    return _ready;
-  }
+  auto hasDevice() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
 
   auto availableDevices() -> vector<string> override {
     vector<string> devices;
@@ -35,12 +36,6 @@ struct AudioOpenAL : Audio {
   auto availableLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
-
-  auto hasDevice() -> bool override { return true; }
-  auto hasBlocking() -> bool override { return true; }
-  auto hasChannels() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
   auto setDevice(string device) -> bool override {
     if(device == this->device()) return true;

@@ -55,6 +55,11 @@ auto pWindow::frameMargin() const -> Geometry {
   return {abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + _statusHeight() - 480};
 }
 
+auto pWindow::monitor() const -> uint {
+  //TODO
+  return 0;
+}
+
 auto pWindow::remove(sMenuBar menuBar) -> void {
 }
 

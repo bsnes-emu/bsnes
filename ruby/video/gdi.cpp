@@ -2,21 +2,22 @@ struct VideoGDI : Video {
   VideoGDI() { initialize(); }
   ~VideoGDI() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "GDI"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto context() -> uintptr { return _context; }
+  auto hasContext() -> bool override { return true; }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Video::context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
 
     if(!_buffer || _width != width || _height != height) {
@@ -48,11 +49,11 @@ struct VideoGDI : Video {
     return data = _buffer;
   }
 
-  auto unlock() -> void {
+  auto release() -> void override {
     if(!ready()) return;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
 
     RECT rc;
@@ -82,7 +83,6 @@ private:
   }
 
   bool _ready = false;
-  uintptr _context = 0;
 
   uint32_t* _buffer = nullptr;
   uint _width = 0;

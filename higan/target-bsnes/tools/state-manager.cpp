@@ -81,12 +81,15 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   });
   loadButton.setText("Load").onActivate([&] {
     if(auto item = stateList.selected()) {
-      program->loadState({"managed/", item.cell(0).text()});
+      string filename = {"managed/", item.cell(0).text()};
+      program->loadState(filename);
     }
   });
   saveButton.setText("Save").onActivate([&] {
     if(auto item = stateList.selected()) {
-      program->saveState({"managed/", item.cell(0).text()});
+      string filename = {"managed/", item.cell(0).text()};
+      program->saveState(filename);
+      item.cell(1).setText(chrono::local::datetime(program->stateTimestamp(filename)));
     }
   });
   addButton.setText("Add").onActivate([&] {
@@ -104,12 +107,14 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
 
 auto StateManager::loadStates() -> void {
   stateList.reset();
-  stateList.append(TableViewHeader().setVisible(false)
-    .append(TableViewColumn().setExpandable())
+  stateList.append(TableViewHeader()
+    .append(TableViewColumn().setText("Name").setExpandable())
+    .append(TableViewColumn().setText("Date").setForegroundColor({160, 160, 160}))
   );
-  for(auto filename : program->managedStates()) {
+  for(auto& filename : program->availableStates("managed/")) {
     stateList.append(TableViewItem()
-      .append(TableViewCell().setText(filename.trimRight(".bst", 1L)))
+      .append(TableViewCell().setText(string{filename}.trimLeft("managed/", 1L)))
+      .append(TableViewCell().setText(chrono::local::datetime(program->stateTimestamp(filename))))
     );
   }
   stateList.resizeColumns().doChange();
@@ -118,7 +123,7 @@ auto StateManager::loadStates() -> void {
 auto StateManager::createState(string name) -> void {
   program->saveState({"managed/", name});
   loadStates();
-  for(auto item : stateList.items()) {
+  for(auto& item : stateList.items()) {
     if(item.cell(0).text() == name) item.setSelected();
   }
   stateList.doChange();
@@ -131,7 +136,7 @@ auto StateManager::modifyState(string name) -> void {
     if(from != to) {
       program->renameState(from, to);
       loadStates();
-      for(auto item : stateList.items()) {
+      for(auto& item : stateList.items()) {
         if(item.cell(0).text() == name) item.setSelected();
       }
       stateList.doChange();
@@ -143,7 +148,7 @@ auto StateManager::removeStates() -> void {
   if(auto batched = stateList.batched()) {
     if(MessageDialog("Are you sure you want to permanently remove the selected state(s)?")
     .setParent(*toolsWindow).question() == "Yes") {
-      for(auto item : batched) {
+      for(auto& item : batched) {
         program->removeState({"managed/", item.cell(0).text()});
       }
       loadStates();

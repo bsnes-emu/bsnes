@@ -371,18 +371,7 @@ struct Hotkey {
 
 #include "application.hpp"
 #include "desktop.hpp"
-
-#if defined(Hiro_Monitor)
-struct Monitor {
-  Monitor() = delete;
-
-  static auto count() -> uint;
-  static auto dpi(maybe<uint> monitor = nothing) -> Position;
-  static auto geometry(maybe<uint> monitor = nothing) -> Geometry;
-  static auto primary() -> uint;
-  static auto workspace(maybe<uint> monitor = nothing) -> Geometry;
-};
-#endif
+#include "monitor.hpp"
 
 #if defined(Hiro_Keyboard)
 struct Keyboard {
@@ -504,71 +493,7 @@ private:
   } \
   virtual auto allocate() -> pObject*; \
 
-#if defined(Hiro_Object)
-struct mObject {
-  Declare(Object)
-
-  mObject();
-  virtual ~mObject();
-  mObject(const mObject&) = delete;
-  mObject& operator=(const mObject&) = delete;
-
-  explicit operator bool() const;
-
-  auto abstract() const -> bool;
-  auto adjustOffset(int displacement) -> type&;
-  auto enabled(bool recursive = false) const -> bool;
-  virtual auto focused() const -> bool;
-  auto font(bool recursive = false) const -> Font;
-  virtual auto group() const -> Group;
-  auto offset() const -> int;
-  auto parent() const -> mObject*;
-  auto parentComboButton(bool recursive = false) const -> mComboButton*;
-  auto parentComboEdit(bool recursive = false) const -> mComboEdit*;
-  auto parentFrame(bool recursive = false) const -> mFrame*;
-  auto parentIconView(bool recursive = false) const -> mIconView*;
-  auto parentMenu(bool recursive = false) const -> mMenu*;
-  auto parentMenuBar(bool recursive = false) const -> mMenuBar*;
-  auto parentPopupMenu(bool recursive = false) const -> mPopupMenu*;
-  auto parentSizable(bool recursive = false) const -> mSizable*;
-  auto parentTabFrame(bool recursive = false) const -> mTabFrame*;
-  auto parentTabFrameItem(bool recursive = false) const -> mTabFrameItem*;
-  auto parentTableView(bool recursive = false) const -> mTableView*;
-  auto parentTableViewHeader(bool recursive = false) const -> mTableViewHeader*;
-  auto parentTableViewItem(bool recursive = false) const -> mTableViewItem*;
-  auto parentTreeView(bool recursive = false) const -> mTreeView*;
-  auto parentTreeViewItem(bool recursive = false) const -> mTreeViewItem*;
-  auto parentWidget(bool recursive = false) const -> mWidget*;
-  auto parentWindow(bool recursive = false) const -> mWindow*;
-  auto property(const string& name) const -> string;
-  virtual auto remove() -> type&;
-  virtual auto reset() -> type&;
-  virtual auto setEnabled(bool enabled = true) -> type&;
-  virtual auto setFocused() -> type&;
-  virtual auto setFont(const Font& font = {}) -> type&;
-  virtual auto setGroup(sGroup group = {}) -> type&;
-  virtual auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
-  virtual auto setProperty(const string& name, const string& value = "") -> type&;
-  virtual auto setVisible(bool visible = true) -> type&;
-  auto visible(bool recursive = false) const -> bool;
-
-//private:
-  struct State {
-    bool enabled = true;
-    Font font;
-    int offset = -1;
-    mObject* parent = nullptr;
-    set<Property> properties;
-    bool visible = true;
-  } state;
-
-  wObject instance;
-  pObject* delegate = nullptr;
-
-  virtual auto construct() -> void;
-  virtual auto destruct() -> void;
-};
-#endif
+#include "object.hpp"
 
 #if defined(Hiro_Group)
 struct mGroup : mObject {
@@ -605,97 +530,7 @@ struct mTimer : mObject {
 };
 #endif
 
-#if defined(Hiro_Window)
-struct mWindow : mObject {
-  Declare(Window)
-  using mObject::remove;
-
-  mWindow();
-
-  auto append(sMenuBar menuBar) -> type&;
-  auto append(sSizable sizable) -> type&;
-  auto append(sStatusBar statusBar) -> type&;
-  auto backgroundColor() const -> Color;
-  auto dismissable() const -> bool;
-  auto doClose() const -> void;
-  auto doDrop(vector<string>) const -> void;
-  auto doKeyPress(int) const -> void;
-  auto doKeyRelease(int) const -> void;
-  auto doMove() const -> void;
-  auto doSize() const -> void;
-  auto droppable() const -> bool;
-  auto frameGeometry() const -> Geometry;
-  auto fullScreen() const -> bool;
-  auto geometry() const -> Geometry;
-  auto maximized() const -> bool;
-  auto maximumSize() const -> Size;
-  auto menuBar() const -> MenuBar;
-  auto minimized() const -> bool;
-  auto minimumSize() const -> Size;
-  auto modal() const -> bool;
-  auto onClose(const function<void ()>& callback = {}) -> type&;
-  auto onDrop(const function<void (vector<string>)>& callback = {}) -> type&;
-  auto onKeyPress(const function<void (int)>& callback = {}) -> type&;
-  auto onKeyRelease(const function<void (int)>& callback = {}) -> type&;
-  auto onMove(const function<void ()>& callback = {}) -> type&;
-  auto onSize(const function<void ()>& callback = {}) -> type&;
-  auto remove(sMenuBar menuBar) -> type&;
-  auto remove(sSizable sizable) -> type&;
-  auto remove(sStatusBar statusBar) -> type&;
-  auto reset() -> type& override;
-  auto resizable() const -> bool;
-  auto setAlignment(Alignment alignment) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCentered(sWindow parent = {}) -> type&;
-  auto setDismissable(bool dismissable = true) -> type&;
-  auto setDroppable(bool droppable = true) -> type&;
-  auto setFrameGeometry(Geometry geometry) -> type&;
-  auto setFramePosition(Position position) -> type&;
-  auto setFrameSize(Size size) -> type&;
-  auto setFullScreen(bool fullScreen = true) -> type&;
-  auto setGeometry(Geometry geometry) -> type&;
-  auto setMaximized(bool maximized = true) -> type&;
-  auto setMaximumSize(Size size = {}) -> type&;
-  auto setMinimized(bool minimized = true) -> type&;
-  auto setMinimumSize(Size size = {}) -> type&;
-  auto setModal(bool modal = true) -> type&;
-  auto setPosition(Position position) -> type&;
-  auto setResizable(bool resizable = true) -> type&;
-  auto setSize(Size size) -> type&;
-  auto setTitle(const string& title = "") -> type&;
-  auto setVisible(bool visible = true) -> type&;
-  auto sizable() const -> Sizable;
-  auto statusBar() const -> StatusBar;
-  auto title() const -> string;
-
-//private:
-  struct State {
-    Color backgroundColor;
-    bool dismissable = false;
-    bool droppable = false;
-    bool fullScreen = false;
-    Geometry geometry = {128, 128, 256, 256};
-    bool maximized = false;
-    Size maximumSize;
-    bool minimized = false;
-    Size minimumSize;
-    sMenuBar menuBar;
-    bool modal = false;
-    function<void ()> onClose;
-    function<void (vector<string>)> onDrop;
-    function<void (int)> onKeyPress;
-    function<void (int)> onKeyRelease;
-    function<void ()> onMove;
-    function<void ()> onSize;
-    bool resizable = true;
-    sSizable sizable;
-    sStatusBar statusBar;
-    string title;
-  } state;
-
-  auto destruct() -> void;
-};
-#endif
+#include "window.hpp"
 
 #if defined(Hiro_StatusBar)
 struct mStatusBar : mObject {

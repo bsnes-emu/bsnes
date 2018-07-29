@@ -20,6 +20,7 @@ struct mHorizontalLayout : mSizable {
   auto cellCount() const -> uint;
   auto minimumSize() const -> Size override;
   auto padding() const -> Geometry;
+  auto remove(sSizable sizable) -> type&;
   auto remove(sHorizontalLayoutCell cell) -> type&;
   auto reset() -> type& override;
   auto setAlignment(maybe<float> alignment) -> type&;

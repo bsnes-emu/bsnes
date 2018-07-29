@@ -11,37 +11,40 @@ struct VideoDirect3D : Video {
   VideoDirect3D() { initialize(); }
   ~VideoDirect3D() { terminate(); }
 
-  auto ready() -> bool { return _ready; }
+  auto driver() -> string override { return "Direct3D"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto exclusive() -> bool { return _exclusive; }
-  auto context() -> uintptr { return _context; }
-  auto blocking() -> bool { return _blocking; }
-  auto smooth() -> bool { return _smooth; }
+  auto hasExclusive() -> bool override { return true; }
+  auto hasContext() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasSmooth() -> bool override { return true; }
 
-  auto setExclusive(bool exclusive) -> bool {
-    if(_exclusive == exclusive) return true;
-    _exclusive = exclusive;
+  auto setExclusive(bool exclusive) -> bool override {
+    if(exclusive == Video::exclusive()) return true;
+    if(!Video::setExclusive(exclusive)) return false;
     return initialize();
   }
 
-  auto setContext(uintptr context) -> bool {
-    if(_context == context) return true;
-    _context = context;
+  auto setContext(uintptr context) -> bool override {
+    if(context == Video::context()) return true;
+    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
-  auto setBlocking(bool blocking) -> bool {
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Video::blocking()) return true;
+    if(!Video::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setSmooth(bool smooth) -> bool {
-    _smooth = smooth;
-    if(_ready) updateFilter();
+  auto setSmooth(bool smooth) -> bool override {
+    if(smooth == Video::smooth()) return true;
+    if(!Video::setSmooth(smooth)) return false;
+    if(ready()) updateFilter();
     return true;
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!ready()) return;
     if(_lost && !recover()) return;
 
@@ -62,7 +65,7 @@ struct VideoDirect3D : Video {
     }
   }
 
-  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
+  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(!ready()) return false;
     if(_lost && !recover()) return false;
 
@@ -86,14 +89,14 @@ struct VideoDirect3D : Video {
     return data = (uint32_t*)lockedRectangle.pBits;
   }
 
-  auto unlock() -> void {
+  auto release() -> void override {
     if(!ready()) return;
     _surface->UnlockRect();
     _surface->Release();
     _surface = nullptr;
   }
 
-  auto output() -> void {
+  auto output() -> void override {
     if(!ready()) return;
     if(_lost && !recover()) return;
 
@@ -327,12 +330,7 @@ private:
     float u, v;          //texture coordinates
   };
 
-  bool _exclusive = false;
   bool _ready = false;
-  uintptr _context = 0;
-  bool _blocking = false;
-  bool _smooth = true;
-
   uintptr _exclusiveContext = 0;
 
   LPDIRECT3D9 _instance = nullptr;

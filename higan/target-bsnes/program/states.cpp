@@ -1,21 +1,45 @@
-auto Program::managedStates() -> vector<string> {
-  if(!emulator->loaded()) return {};
+auto Program::availableStates(string type) -> vector<string> {
+  vector<string> result;
+  if(!emulator->loaded()) return result;
 
   if(gamePath().endsWith("/")) {
-    return directory::ifiles({statePath(), "managed/"}, "*.bst");
+    for(auto& file : directory::ifiles({statePath(), type}, "*.bst")) {
+      result.append({type, file.trimRight(".bst", 1L)});
+    }
   } else {
     Decode::ZIP input;
     if(input.open(statePath())) {
       vector<string> filenames;
       for(auto& file : input.file) {
-        if(file.name.match("managed/*.bst")) filenames.append(file.name.trimLeft("managed/", 1L));
+        if(file.name.match({type, "*.bst"})) result.append(file.name.trimRight(".bst", 1L));
       }
-      filenames.isort();
-      return filenames;
     }
   }
 
-  return {};
+  result.isort();
+  return result;
+}
+
+auto Program::stateTimestamp(string filename) -> uint64_t {
+  auto timestamp = chrono::timestamp();
+  if(!emulator->loaded()) return timestamp;
+
+  if(gamePath().endsWith("/")) {
+    string location = {statePath(), filename, ".bst"};
+    timestamp = file::timestamp(location, file::time::modify);
+  } else {
+    string location = {filename, ".bst"};
+    Decode::ZIP input;
+    if(input.open(statePath())) {
+      for(auto& file : input.file) {
+        if(file.name != location) continue;
+        timestamp = file.timestamp;
+        break;
+      }
+    }
+  }
+
+  return timestamp;
 }
 
 auto Program::loadState(string filename) -> bool {
@@ -26,9 +50,6 @@ auto Program::loadState(string filename) -> bool {
 
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
-    if(!file::exists(location)) return showMessage({"[", prefix, "] not found"}), false;
-    if(filename != "quick/undo") saveUndoState();
-    if(filename == "quick/undo") saveRedoState();
     memory = file::read(location);
   } else {
     string location = {filename, ".bst"};
@@ -43,6 +64,8 @@ auto Program::loadState(string filename) -> bool {
   }
 
   if(memory) {
+    if(filename != "quick/undo") saveUndoState();
+    if(filename == "quick/undo") saveRedoState();
     serializer s{memory.data(), memory.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
     return showMessage({"Loaded [", prefix, "]"}), true;
@@ -65,7 +88,7 @@ auto Program::saveState(string filename) -> bool {
   } else {
     string location = {filename, ".bst"};
 
-    struct State { string name; vector<uint8_t> memory; };
+    struct State { string name; time_t timestamp; vector<uint8_t> memory; };
     vector<State> states;
 
     Decode::ZIP input;
@@ -73,18 +96,19 @@ auto Program::saveState(string filename) -> bool {
       for(auto& file : input.file) {
         if(!file.name.endsWith(".bst")) continue;
         if(file.name == location) continue;
-        states.append({file.name, input.extract(file)});
+        states.append({file.name, file.timestamp, input.extract(file)});
       }
     }
     input.close();
 
     Encode::ZIP output{statePath()};
     for(auto& state : states) {
-      output.append(state.name, state.memory.data(), state.memory.size());
+      output.append(state.name, state.memory.data(), state.memory.size(), state.timestamp);
     }
     output.append(location, s.data(), s.size());
   }
 
+  if(filename.beginsWith("quick/")) presentation->updateStateMenus();
   return showMessage({"Saved [", prefix, "]"}), true;
 }
 
@@ -116,14 +140,14 @@ auto Program::removeState(string filename) -> bool {
     bool found = false;
     string location = {filename, ".bst"};
 
-    struct State { string name; vector<uint8_t> memory; };
+    struct State { string name; time_t timestamp; vector<uint8_t> memory; };
     vector<State> states;
 
     Decode::ZIP input;
     if(input.open(statePath())) {
       for(auto& file : input.file) {
         if(file.name == location) { found = true; continue; }
-        states.append({file.name, input.extract(file)});
+        states.append({file.name, file.timestamp, input.extract(file)});
       }
     }
     input.close();
@@ -131,7 +155,7 @@ auto Program::removeState(string filename) -> bool {
     if(states) {
       Encode::ZIP output{statePath()};
       for(auto& state : states) {
-        output.append(state.name, state.memory.data(), state.memory.size());
+        output.append(state.name, state.memory.data(), state.memory.size(), state.timestamp);
       }
     } else {
       //remove .bsz file if there are no states left in the archive
@@ -154,21 +178,21 @@ auto Program::renameState(string from, string to) -> bool {
     from = {from, ".bst"};
     to = {to, ".bst"};
 
-    struct State { string name; vector<uint8_t> memory; };
+    struct State { string name; time_t timestamp; vector<uint8_t> memory; };
     vector<State> states;
 
     Decode::ZIP input;
     if(input.open(statePath())) {
       for(auto& file : input.file) {
         if(file.name == from) { found = true; file.name = to; }
-        states.append({file.name, input.extract(file)});
+        states.append({file.name, file.timestamp, input.extract(file)});
       }
     }
     input.close();
 
     Encode::ZIP output{statePath()};
     for(auto& state : states) {
-      output.append(state.name, state.memory.data(), state.memory.size());
+      output.append(state.name, state.memory.data(), state.memory.size(), state.timestamp);
     }
 
     return found;

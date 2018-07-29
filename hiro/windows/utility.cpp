@@ -38,11 +38,11 @@ static auto CreateRGB(const Color& color) -> COLORREF {
   return RGB(color.red(), color.green(), color.blue());
 }
 
-static auto DropPaths(WPARAM wparam) -> string_vector {
+static auto DropPaths(WPARAM wparam) -> vector<string> {
   auto dropList = HDROP(wparam);
   auto fileCount = DragQueryFile(dropList, ~0u, nullptr, 0);
 
-  string_vector paths;
+  vector<string> paths;
   for(auto n : range(fileCount)) {
     auto length = DragQueryFile(dropList, n, nullptr, 0);
     auto buffer = new wchar_t[length + 1];

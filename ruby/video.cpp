@@ -124,6 +124,15 @@ auto Video::create(string driver) -> Video* {
   #endif
 
   if(!video) video = new Video;
+
+  video->_exclusive = video->exclusive();
+  video->_context = video->context();
+  video->_blocking = video->blocking();
+  video->_flush = video->flush();
+  video->_format = video->defaultFormat();
+  video->_smooth = video->smooth();
+  video->_shader = video->shader();
+
   return video;
 }
 

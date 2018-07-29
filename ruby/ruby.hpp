@@ -13,6 +13,7 @@
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 #include <nall/dsp/resampler/cubic.hpp>
+#include <nall/hash/crc32.hpp>
 
 using nall::function;
 using nall::shared_pointer;

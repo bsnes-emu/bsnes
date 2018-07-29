@@ -5,47 +5,40 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
   AudioXAudio2() { initialize(); }
   ~AudioXAudio2() { terminate(); }
 
-  auto availableDevices() -> string_vector {
-    return {"Default"};
-  }
+  auto driver() -> string override { return "XAudio2"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto availableFrequencies() -> vector<double> {
+  auto hasBlocking() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
+
+  auto availableFrequencies() -> vector<double> override {
     return {44100.0, 48000.0, 96000.0};
   }
 
-  auto availableLatencies() -> vector<uint> {
+  auto availableLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
 
-  auto availableChannels() -> vector<uint> {
-    return {2};
-  }
-
-  auto ready() -> bool { return _ready; }
-  auto blocking() -> bool { return _blocking; }
-  auto channels() -> uint { return _channels; }
-  auto frequency() -> double { return _frequency; }
-  auto latency() -> uint { return _latency; }
-
-  auto setBlocking(bool blocking) -> bool {
-    if(_blocking == blocking) return true;
-    _blocking = blocking;
+  auto setBlocking(bool blocking) -> bool override {
+    if(blocking == Audio::blocking()) return true;
+    if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setFrequency(double frequency) -> bool {
-    if(_frequency == frequency) return true;
-    _frequency = frequency;
+  auto setFrequency(double frequency) -> bool override {
+    if(frequency == Audio::frequency()) return true;
+    if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
-  auto setLatency(uint latency) -> bool {
-    if(_latency == latency) return true;
-    _latency = latency;
+  auto setLatency(uint latency) -> bool override {
+    if(latency == Audio::latency()) return true;
+    if(!Audio::setLatency(latency)) return false;
     return initialize();
   }
 
-  auto clear() -> void {
+  auto clear() -> void override {
     if(!_sourceVoice) return;
     _sourceVoice->Stop(0);
     _sourceVoice->FlushSourceBuffers();  //calls OnBufferEnd for all currently submitted buffers
@@ -58,7 +51,7 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
     _sourceVoice->Start(0);
   }
 
-  auto output(const double samples[]) -> void {
+  auto output(const double samples[]) -> void override {
     _buffer[_bufferIndex * _period + _bufferOffset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_bufferIndex * _period + _bufferOffset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     if(++_bufferOffset < _period) return;
@@ -151,10 +144,6 @@ private:
   }
 
   bool _ready = false;
-  bool _blocking = true;
-  uint _channels = 2;
-  double _frequency = 48000.0;
-  uint _latency = 80;
 
   uint32_t* _buffer = nullptr;
   uint _period = 0;

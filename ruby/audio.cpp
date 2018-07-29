@@ -150,6 +150,16 @@ auto Audio::create(string driver) -> Audio* {
   #endif
 
   if(!audio) audio = new Audio;
+
+  audio->_exclusive = audio->exclusive();
+  audio->_context = audio->context();
+  audio->_device = audio->defaultDevice();
+  audio->_blocking = audio->blocking();
+  audio->_dynamic = audio->dynamic();
+  audio->_channels = audio->defaultChannels();
+  audio->_frequency = audio->defaultFrequency();
+  audio->_latency = audio->defaultLatency();
+
   return audio;
 }
 

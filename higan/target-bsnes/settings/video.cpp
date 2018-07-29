@@ -31,9 +31,4 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     gammaValue.setText(value);
     program->updateVideoPalette();
   }).doChange();
-
-  fullscreenLabel.setFont(Font().setBold()).setText("Fullscreen");
-  exclusiveMode.setText("Exclusive mode").setChecked(settings["Video/Exclusive"].boolean()).onToggle([&] {
-    settings["Video/Exclusive"].setValue(exclusiveMode.checked());
-  });
 }

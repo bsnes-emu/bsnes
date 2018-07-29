@@ -68,8 +68,7 @@ auto mObject::enabled(bool recursive) const -> bool {
 }
 
 auto mObject::focused() const -> bool {
-  if(signal(focused)) return true;
-  return false;
+  return signal(focused);
 }
 
 auto mObject::font(bool recursive) const -> Font {

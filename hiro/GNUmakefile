@@ -1,8 +1,3 @@
-ifeq ($(platform),)
-  hiro.flags   = $(flags.cpp) -DHIRO_REFERENCE
-  hiro.options =
-endif
-
 ifeq ($(platform),windows)
   ifeq ($(hiro),)
     hiro := windows

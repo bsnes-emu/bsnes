@@ -4,13 +4,14 @@ struct AudioALSA : Audio {
   AudioALSA() { initialize(); }
   ~AudioALSA() { terminate(); }
 
-  auto driver() -> string override {
-    return "ALSA";
-  }
+  auto driver() -> string override { return "ALSA"; }
+  auto ready() -> bool override { return _ready; }
 
-  auto ready() -> bool override {
-    return _ready;
-  }
+  auto hasDevice() -> bool override { return true; }
+  auto hasBlocking() -> bool override { return true; }
+  auto hasChannels() -> bool override { return true; }
+  auto hasFrequency() -> bool override { return true; }
+  auto hasLatency() -> bool override { return true; }
 
   auto availableDevices() -> vector<string> override {
     return queryDevices();
@@ -28,40 +29,40 @@ struct AudioALSA : Audio {
     return {20, 40, 60, 80, 100};
   }
 
-  auto hasDevice() -> bool override { return true; }
-  auto hasBlocking() -> bool override { return true; }
-  auto hasChannels() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
-
   auto setDevice(string device) -> bool override {
-    if(device == this->device()) return true;
+    if(device == Audio::device()) return true;
     if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == this->blocking()) return true;
+    if(blocking == Audio::blocking()) return true;
     if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
   auto setChannels(uint channels) -> bool override {
-    if(channels == this->channels()) return true;
+    if(channels == Audio::channels()) return true;
     if(!Audio::setChannels(channels)) return false;
     return true;
   }
 
   auto setFrequency(double frequency) -> bool override {
-    if(frequency == this->frequency()) return true;
+    if(frequency == Audio::frequency()) return true;
     if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
   auto setLatency(uint latency) -> bool override {
-    if(latency == this->latency()) return true;
+    if(latency == Audio::latency()) return true;
     if(!Audio::setLatency(latency)) return false;
     return initialize();
+  }
+
+  auto level() -> double override {
+    snd_pcm_sframes_t available = snd_pcm_avail_update(_interface);
+    if(available < 0) return 0.5;
+    return (double)(_bufferSize - available) / _bufferSize;
   }
 
   auto output(const double samples[]) -> void override {
@@ -69,7 +70,7 @@ struct AudioALSA : Audio {
 
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
-    if(++_offset < _periodSize) return;
+    _offset++;
 
     snd_pcm_sframes_t available;
     do {
@@ -118,7 +119,7 @@ private:
 
     uint rate = (uint)_frequency;
     uint bufferTime = _latency * 1000;
-    uint periodTime = _latency * 1000 / 4;
+    uint periodTime = _latency * 1000 / 8;
 
     snd_pcm_hw_params_t* hardwareParameters;
     snd_pcm_hw_params_alloca(&hardwareParameters);
@@ -138,9 +139,7 @@ private:
     snd_pcm_sw_params_t* softwareParameters;
     snd_pcm_sw_params_alloca(&softwareParameters);
     if(snd_pcm_sw_params_current(_interface, softwareParameters) < 0) return terminate(), false;
-    if(snd_pcm_sw_params_set_start_threshold(_interface, softwareParameters,
-      (_bufferSize / _periodSize) * _periodSize) < 0
-    ) return terminate(), false;
+    if(snd_pcm_sw_params_set_start_threshold(_interface, softwareParameters, _bufferSize / 2) < 0) return terminate(), false;
     if(snd_pcm_sw_params(_interface, softwareParameters) < 0) return terminate(), false;
 
     _buffer = new uint32_t[_periodSize]();
@@ -163,8 +162,8 @@ private:
     }
   }
 
-  auto queryDevices() -> string_vector {
-    string_vector devices;
+  auto queryDevices() -> vector<string> {
+    vector<string> devices;
 
     char** list;
     if(snd_device_name_hint(-1, "pcm", (void***)&list) == 0) {
