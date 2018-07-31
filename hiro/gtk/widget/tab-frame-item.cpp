@@ -3,6 +3,7 @@
 namespace hiro {
 
 auto pTabFrameItem::construct() -> void {
+  if(auto parent = _parent()) parent->_append();
   if(auto& sizable = state().sizable) sizable->construct();
 }
 

@@ -3,14 +3,14 @@ auto Program::load() -> void {
 
   if(auto configuration = string::read(locate("configuration.bml"))) {
     emulator->configure(configuration);
-    settingsWindow->configuration.updateConfiguration();
+    emulatorSettings.updateConfiguration();
   }
   if(!emulator->load()) return;
 
   gameQueue = {};
   screenshot = {};
   frameAdvance = false;
-  if(!verified() && settingsWindow->configuration.warnOnUnverifiedGames.checked()) {
+  if(!verified() && emulatorSettings.warnOnUnverifiedGames.checked()) {
     auto response = MessageDialog(
       "Warning: this game image is unverified.\n"
       "Running it *may* be a security risk.\n\n"
@@ -21,37 +21,37 @@ auto Program::load() -> void {
       return showMessage("Game loading cancelled");
     }
     if(response == "Always") {
-      settingsWindow->configuration.warnOnUnverifiedGames.setChecked(false).doToggle();
+      emulatorSettings.warnOnUnverifiedGames.setChecked(false).doToggle();
     }
   }
   hackCompatibility();
   emulator->power();
-  if(settingsWindow->configuration.autoLoadStateOnLoad.checked()) {
-    program->loadState("quick/undo");
+  if(emulatorSettings.autoLoadStateOnLoad.checked()) {
+    program.loadState("quick/undo");
   }
   showMessage({
     verified() ? "Verified game loaded" : "Game loaded",
     appliedPatch() ? " and patch applied" : ""
   });
-  presentation->setTitle(emulator->titles().merge(" + "));
-  presentation->resetSystem.setEnabled(true);
-  presentation->unloadGame.setEnabled(true);
-  presentation->toolsMenu.setVisible(true);
-  presentation->updateStateMenus();
-  presentation->speedNormal.setChecked();
-  presentation->pauseEmulation.setChecked(false);
-  presentation->updateStatusIcon();
-  presentation->resizeViewport();
-  toolsWindow->cheatEditor.loadCheats();
-  toolsWindow->stateManager.loadStates();
-  toolsWindow->manifestViewer.loadManifest();
+  presentation.setTitle(emulator->titles().merge(" + "));
+  presentation.resetSystem.setEnabled(true);
+  presentation.unloadGame.setEnabled(true);
+  presentation.toolsMenu.setVisible(true);
+  presentation.updateStateMenus();
+  presentation.speedNormal.setChecked();
+  presentation.pauseEmulation.setChecked(false);
+  presentation.updateStatusIcon();
+  presentation.resizeViewport();
+  cheatEditor.loadCheats();
+  stateManager.loadStates();
+  manifestViewer.loadManifest();
 
   string locations = superFamicom.location;
   if(auto& location = gameBoy.location) locations.append("|", location);
   if(auto& location = bsMemory.location) locations.append("|", location);
   if(auto& location = sufamiTurboA.location) locations.append("|", location);
   if(auto& location = sufamiTurboB.location) locations.append("|", location);
-  presentation->addRecentGame(locations);
+  presentation.addRecentGame(locations);
 
   updateVideoPalette();
   updateAudioEffects();
@@ -283,9 +283,9 @@ auto Program::reset() -> void {
 
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
-  toolsWindow->cheatEditor.saveCheats();
-  toolsWindow->setVisible(false);
-  if(settingsWindow->configuration.autoSaveStateOnUnload.checked()) {
+  cheatEditor.saveCheats();
+  toolsWindow.setVisible(false);
+  if(emulatorSettings.autoSaveStateOnUnload.checked()) {
     saveUndoState();
   }
   if(auto configuration = emulator->configuration()) {
@@ -298,12 +298,12 @@ auto Program::unload() -> void {
   bsMemory = {};
   sufamiTurboA = {};
   sufamiTurboB = {};
-  presentation->setTitle({"bsnes v", Emulator::Version});
-  presentation->resetSystem.setEnabled(false);
-  presentation->unloadGame.setEnabled(false);
-  presentation->toolsMenu.setVisible(false);
-  presentation->updateStatusIcon();
-  presentation->clearViewport();
+  presentation.setTitle({"bsnes v", Emulator::Version});
+  presentation.resetSystem.setEnabled(false);
+  presentation.unloadGame.setEnabled(false);
+  presentation.toolsMenu.setVisible(false);
+  presentation.updateStatusIcon();
+  presentation.clearViewport();
 }
 
 //a game is considered verified if the game plus its slot(s) are found in the games database

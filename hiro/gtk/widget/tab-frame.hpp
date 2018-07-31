@@ -18,6 +18,7 @@ struct pTabFrame : pWidget {
   auto setItemText(unsigned position, const string& text) -> void;
   auto setNavigation(Navigation navigation) -> void;
 
+  auto _append() -> void;
   auto _synchronizeLayout() -> void;
   auto _synchronizeTab(unsigned position) -> void;
   auto _tabHeight() -> unsigned;

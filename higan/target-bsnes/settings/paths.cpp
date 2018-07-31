@@ -1,4 +1,4 @@
-PathSettings::PathSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto PathSettings::create() -> void {
   setIcon(Icon::Emblem::Folder);
   setText("Paths");
 

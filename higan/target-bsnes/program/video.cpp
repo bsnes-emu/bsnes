@@ -1,7 +1,7 @@
 auto Program::updateVideoDriver(Window parent) -> void {
   auto changed = (bool)video;
   video.create(settings["Video/Driver"].text());
-  video.setContext(presentation->viewport.handle());
+  video.setContext(presentation.viewport.handle());
   if(changed) {
     settings["Video/Format"].setValue(video.format());
   }
@@ -12,12 +12,12 @@ auto Program::updateVideoDriver(Window parent) -> void {
   updateVideoShader();
 
   if(video.ready()) {
-    presentation->clearViewport();
+    presentation.clearViewport();
     updateVideoShader();
   }
 
   video.onUpdate([&](uint width, uint height) {
-    if(!emulator->loaded()) presentation->clearViewport();
+    if(!emulator->loaded()) presentation.clearViewport();
   });
 
   if(!video.ready()) {
@@ -28,7 +28,7 @@ auto Program::updateVideoDriver(Window parent) -> void {
     return updateVideoDriver(parent);
   }
 
-  presentation->updateShaders();
+  presentation.updateShaders();
 }
 
 auto Program::updateVideoExclusive() -> void {

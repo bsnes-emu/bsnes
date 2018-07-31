@@ -1,6 +1,4 @@
-CheatDatabase::CheatDatabase() {
-  cheatDatabase = this;
-
+auto CheatDatabase::create() -> void {
   layout.setPadding(5);
   selectAllButton.setText("Select All").onActivate([&] {
     for(auto item : cheatList.items()) item.setChecked(true);
@@ -44,7 +42,7 @@ auto CheatDatabase::findCheats() -> void {
 auto CheatDatabase::addCheats() -> void {
   for(auto item : cheatList.items()) {
     if(item.checked()) {
-      toolsWindow->cheatEditor.addCheat({item.text(), item.property("code"), false});
+      cheatEditor.addCheat({item.text(), item.property("code"), false});
     }
   }
   setVisible(false);
@@ -52,9 +50,7 @@ auto CheatDatabase::addCheats() -> void {
 
 //
 
-CheatWindow::CheatWindow() {
-  cheatWindow = this;
-
+auto CheatWindow::create() -> void {
   layout.setPadding(5);
   nameLabel.setText("Name:");
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
@@ -93,16 +89,16 @@ auto CheatWindow::doChange() -> void {
 auto CheatWindow::doAccept() -> void {
   Cheat cheat = {nameValue.text().strip(), codeValue.text().strip(), enableOption.checked()};
   if(acceptButton.text() == "Add") {
-    toolsWindow->cheatEditor.addCheat(cheat);
+    cheatEditor.addCheat(cheat);
   } else {
-    toolsWindow->cheatEditor.editCheat(cheat);
+    cheatEditor.editCheat(cheat);
   }
   setVisible(false);
 }
 
 //
 
-CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
+auto CheatEditor::create() -> void {
   setIcon(Icon::Edit::Replace);
   setText("Cheat Editor");
 
@@ -123,23 +119,23 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
     }
   });
   findCheatsButton.setText("Find Cheats ...").onActivate([&] {
-    cheatDatabase->findCheats();
+    cheatDatabase.findCheats();
   });
   enableCheats.setText("Enable Cheats").setChecked(settings["Emulator/Cheats/Enable"].boolean()).onToggle([&] {
     settings["Emulator/Cheats/Enable"].setValue(enableCheats.checked());
     if(!enableCheats.checked()) {
-      program->showMessage("All cheat codes disabled");
+      program.showMessage("All cheat codes disabled");
     } else {
-      program->showMessage("Active cheat codes enabled");
+      program.showMessage("Active cheat codes enabled");
     }
     synchronizeCodes();
   });
   addButton.setText("Add").onActivate([&] {
-    cheatWindow->show();
+    cheatWindow.show();
   });
   editButton.setText("Edit").onActivate([&] {
     if(auto item = cheatList.selected()) {
-      cheatWindow->show(cheats[item.offset()]);
+      cheatWindow.show(cheats[item.offset()]);
     }
   });
   removeButton.setText("Remove").onActivate([&] {
@@ -203,7 +199,7 @@ auto CheatEditor::removeCheats() -> void {
 
 auto CheatEditor::loadCheats() -> void {
   cheats.reset();
-  auto location = program->cheatPath();
+  auto location = program.cheatPath();
   auto document = BML::unserialize(string::read(location));
   for(auto cheat : document.find("cheat")) {
     cheats.append({cheat["name"].text(), cheat["code"].text(), (bool)cheat["enable"]});
@@ -223,7 +219,7 @@ auto CheatEditor::saveCheats() -> void {
     document.append("  enable\n");
     document.append("\n");
   }
-  auto location = program->cheatPath();
+  auto location = program.cheatPath();
   if(document) {
     file::write(location, document);
   } else {

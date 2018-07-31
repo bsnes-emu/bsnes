@@ -32,7 +32,7 @@ struct VideoGLX2 : VideoDriver {
     return initialize();
   }
 
-  auto driverName() -> string override { return "OpenGL2"; }
+  auto driver() -> string override { return "OpenGL2"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }

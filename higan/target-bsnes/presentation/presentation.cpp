@@ -1,28 +1,26 @@
 #include "../bsnes.hpp"
 #include "about.cpp"
 AboutWindow aboutWindow;
-unique_pointer<Presentation> presentation;
+Presentation presentation;
 
-Presentation::Presentation() {
-  presentation = this;
-
+auto Presentation::create() -> void {
   systemMenu.setText(tr("System"));
   loadGame.setIcon(Icon::Action::Open).setText({tr("Load Game"), " ..."}).onActivate([&] {
-    program->load();
+    program.load();
   });
   loadRecentGame.setIcon(Icon::Action::Open).setText(tr("Load Recent Game"));
   updateRecentGames();
   resetSystem.setIcon(Icon::Action::Refresh).setText(tr("Reset System")).setEnabled(false).onActivate([&] {
-    program->reset();
+    program.reset();
   });
   unloadGame.setIcon(Icon::Action::Remove).setText(tr("Unload Game")).setEnabled(false).onActivate([&] {
-    program->unload();
+    program.unload();
   });
   controllerPort1.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 1"));
   controllerPort2.setIcon(Icon::Device::Joypad).setText(tr("Controller Port 2"));
   expansionPort.setIcon(Icon::Device::Storage).setText(tr("Expansion Port"));
   updateDeviceMenu();
-  quit.setIcon(Icon::Action::Quit).setText(tr("Quit")).onActivate([&] { program->quit(); });
+  quit.setIcon(Icon::Action::Quit).setText(tr("Quit")).onActivate([&] { program.quit(); });
 
   settingsMenu.setText(tr("Settings"));
   sizeMenu.setIcon(Icon::Emblem::Image).setText("Size");
@@ -58,7 +56,7 @@ Presentation::Presentation() {
   shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());
-    program->updateAudioEffects();
+    program.updateAudioEffects();
   });
   showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
     settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
@@ -69,13 +67,13 @@ Presentation::Presentation() {
     }
     if(visible()) resizeWindow();
   });
-  videoSettings.setIcon(Icon::Device::Display).setText("Video ...").onActivate([&] { settingsWindow->show(0); });
-  audioSettings.setIcon(Icon::Device::Speaker).setText("Audio ...").onActivate([&] { settingsWindow->show(1); });
-  inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow->show(2); });
-  hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow->show(3); });
-  pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow->show(4); });
-  configurationSettings.setIcon(Icon::Action::Settings).setText("Configuration ...").onActivate([&] { settingsWindow->show(5); });
-  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow->show(6); });
+  videoSettings.setIcon(Icon::Device::Display).setText("Video ...").onActivate([&] { settingsWindow.show(0); });
+  audioSettings.setIcon(Icon::Device::Speaker).setText("Audio ...").onActivate([&] { settingsWindow.show(1); });
+  inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow.show(2); });
+  hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow.show(3); });
+  pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow.show(4); });
+  emulatorSettings.setIcon(Icon::Action::Settings).setText("Emulator ...").onActivate([&] { settingsWindow.show(5); });
+  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(6); });
 
   toolsMenu.setText(tr("Tools")).setVisible(false);
   saveState.setIcon(Icon::Action::Save).setText("Save State");
@@ -84,7 +82,7 @@ Presentation::Presentation() {
     item.setProperty("name", {"quick/slot ", 1 + index});
     item.setProperty("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
-    item.onActivate([=] { program->saveState({"quick/slot ", 1 + index}); });
+    item.onActivate([=] { program.saveState({"quick/slot ", 1 + index}); });
   }
   loadState.setIcon(Icon::Media::Play).setText("Load State");
   for(uint index : range(QuickStates)) {
@@ -92,48 +90,48 @@ Presentation::Presentation() {
     item.setProperty("name", {"quick/slot ", 1 + index});
     item.setProperty("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
-    item.onActivate([=] { program->loadState({"quick/slot ", 1 + index}); });
+    item.onActivate([=] { program.loadState({"quick/slot ", 1 + index}); });
   }
   loadState.append(MenuSeparator());
   loadState.append(MenuItem()
   .setProperty("name", "quick/undo")
   .setProperty("title", "Undo Last Save")
   .setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
-    program->loadState("quick/undo");
+    program.loadState("quick/undo");
   }));
   loadState.append(MenuItem()
   .setProperty("name", "quick/redo")
   .setProperty("title", "Redo Last Undo")
   .setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
-    program->loadState("quick/redo");
+    program.loadState("quick/redo");
   }));
   loadState.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Remove All States").onActivate([&] {
     if(MessageDialog("Are you sure you want to permanently remove all quick states for this game?").setParent(*this).question() == "Yes") {
-      for(uint index : range(QuickStates)) program->removeState({"quick/slot ", 1 + index});
-      program->removeState("quick/undo");
-      program->removeState("quick/redo");
+      for(uint index : range(QuickStates)) program.removeState({"quick/slot ", 1 + index});
+      program.removeState("quick/undo");
+      program.removeState("quick/redo");
       updateStateMenus();
     }
   }));
   speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
-  speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program->updateAudioFrequency(); });
-  speedSlow.setText("75% (Slow)").setProperty("multiplier", "1.333").onActivate([&] { program->updateAudioFrequency(); });
-  speedNormal.setText("100% (Normal)").setProperty("multiplier", "1.0").onActivate([&] { program->updateAudioFrequency(); });
-  speedFast.setText("150% (Fast)").setProperty("multiplier", "0.667").onActivate([&] { program->updateAudioFrequency(); });
-  speedFastest.setText("200% (Fastest)").setProperty("multiplier", "0.5").onActivate([&] { program->updateAudioFrequency(); });
+  speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program.updateAudioFrequency(); });
+  speedSlow.setText("75% (Slow)").setProperty("multiplier", "1.333").onActivate([&] { program.updateAudioFrequency(); });
+  speedNormal.setText("100% (Normal)").setProperty("multiplier", "1.0").onActivate([&] { program.updateAudioFrequency(); });
+  speedFast.setText("150% (Fast)").setProperty("multiplier", "0.667").onActivate([&] { program.updateAudioFrequency(); });
+  speedFastest.setText("200% (Fastest)").setProperty("multiplier", "0.5").onActivate([&] { program.updateAudioFrequency(); });
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio.clear();
   });
   frameAdvance.setIcon(Icon::Media::Next).setText("Frame Advance").onActivate([&] {
     pauseEmulation.setChecked(false);
-    program->frameAdvance = true;
+    program.frameAdvance = true;
   });
   captureScreenshot.setIcon(Icon::Emblem::Image).setText("Capture Screenshot").onActivate([&] {
-    program->captureScreenshot();
+    program.captureScreenshot();
   });
-  cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsWindow->show(0); });
-  stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow->show(1); });
-  manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow->show(2); });
+  cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsWindow.show(0); });
+  stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow.show(1); });
+  manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow.show(2); });
 
   helpMenu.setText(tr("Help"));
   documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
@@ -144,8 +142,8 @@ Presentation::Presentation() {
   });
 
   viewport.setDroppable().onDrop([&](vector<string> locations) {
-    program->gameQueue = locations;
-    program->load();
+    program.gameQueue = locations;
+    program.load();
     setFocused();
   });
 
@@ -175,10 +173,10 @@ Presentation::Presentation() {
 
   spacerRight.setBackgroundColor(back).setForegroundColor(fore);
 
-  program->updateStatus();
+  program.updateStatus();
 
   onClose([&] {
-    program->quit();
+    program.quit();
   });
 
   onSize([&] {
@@ -199,7 +197,7 @@ Presentation::Presentation() {
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
-  Application::Cocoa::onPreferences([&] { settingsWindow->show(2); });
+  Application::Cocoa::onPreferences([&] { settingsWindow.show(2); });
   Application::Cocoa::onQuit([&] { doClose(); });
   #endif
 }
@@ -210,7 +208,7 @@ auto Presentation::updateStatusIcon() -> void {
   icon.fill(0xff202020);
 
   if(emulator->loaded()) {
-    image emblem{program->verified() ? Icon::Emblem::Program : Icon::Emblem::Binary};
+    image emblem{program.verified() ? Icon::Emblem::Program : Icon::Emblem::Binary};
     icon.impose(image::blend::sourceAlpha, 0, (StatusHeight - 16) / 2, emblem, 0, 0, 16, 16);
   }
 
@@ -440,13 +438,13 @@ auto Presentation::updateSizeMenu() -> void {
 }
 
 auto Presentation::updateStateMenus() -> void {
-  auto states = program->availableStates("quick/");
+  auto states = program.availableStates("quick/");
 
   for(auto& action : saveState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
       if(auto name = item.property("name")) {
         if(states.find(name)) {
-          auto timestamp = program->stateTimestamp(item.property("name"));
+          auto timestamp = program.stateTimestamp(item.property("name"));
           item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
         } else {
           item.setText({item.property("title"), " [Empty]"});
@@ -459,7 +457,7 @@ auto Presentation::updateStateMenus() -> void {
     if(auto item = action.cast<MenuItem>()) {
       if(auto name = item.property("name")) {
         if(states.find(name)) {
-          auto timestamp = program->stateTimestamp(item.property("name"));
+          auto timestamp = program.stateTimestamp(item.property("name"));
           item.setEnabled(true);
           item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
         } else {
@@ -509,8 +507,8 @@ auto Presentation::updateRecentGames() -> void {
       item.setIcon(games(0).endsWith("/") ? Icon::Action::Open : Icon::Emblem::File);
       item.setText(displayName);
       item.onActivate([=] {
-        program->gameQueue = games;
-        program->load();
+        program.gameQueue = games;
+        program.load();
       });
     } else {
       item.setText({"[", tr("Empty"), "]"});
@@ -551,14 +549,14 @@ auto Presentation::updateShaders() -> void {
   MenuRadioItem none{&shaderMenu};
   none.setText("None").onActivate([&] {
     settings["Video/Shader"].setValue("None");
-    program->updateVideoShader();
+    program.updateVideoShader();
   });
   shaders.append(none);
 
   MenuRadioItem blur{&shaderMenu};
   blur.setText("Blur").onActivate([&] {
     settings["Video/Shader"].setValue("Blur");
-    program->updateVideoShader();
+    program.updateVideoShader();
   });
   shaders.append(blur);
 
@@ -570,7 +568,7 @@ auto Presentation::updateShaders() -> void {
       MenuRadioItem item{&shaderMenu};
       item.setText(string{shader}.trimRight(".shader/", 1L)).onActivate([=] {
         settings["Video/Shader"].setValue({location, shader});
-        program->updateVideoShader();
+        program.updateVideoShader();
       });
       shaders.append(item);
     }

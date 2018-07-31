@@ -1,13 +1,13 @@
 auto Program::updateInputDriver(Window parent) -> void {
   auto changed = (bool)input;
   input.create(settings["Input/Driver"].text());
-  input.setContext(presentation->viewport.handle());
+  input.setContext(presentation.viewport.handle());
   if(changed) {
   }
 
-  inputManager->initialize();
-  settingsWindow->input.reloadPorts();
-  settingsWindow->hotkeys.reloadMappings();
+  inputManager.initialize();
+  inputSettings.reloadPorts();
+  hotkeySettings.reloadMappings();
 
   if(!input.ready()) {
     MessageDialog({

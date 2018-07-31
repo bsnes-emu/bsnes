@@ -4,7 +4,7 @@ struct Settings : Markup::Node {
 };
 
 struct VideoSettings : TabFrameItem {
-  VideoSettings(TabFrame*);
+  auto create() -> void;
 
 public:
   VerticalLayout layout{this};
@@ -24,7 +24,7 @@ public:
 };
 
 struct AudioSettings : TabFrameItem {
-  AudioSettings(TabFrame*);
+  auto create() -> void;
 
 public:
   VerticalLayout layout{this};
@@ -44,7 +44,7 @@ public:
 };
 
 struct InputSettings : TabFrameItem {
-  InputSettings(TabFrame*);
+  auto create() -> void;
   auto updateControls() -> void;
   auto activePort() -> InputPort&;
   auto activeDevice() -> InputDevice&;
@@ -80,7 +80,7 @@ public:
 };
 
 struct HotkeySettings : TabFrameItem {
-  HotkeySettings(TabFrame*);
+  auto create() -> void;
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
@@ -100,7 +100,7 @@ public:
 };
 
 struct PathSettings : TabFrameItem {
-  PathSettings(TabFrame*);
+  auto create() -> void;
   auto refreshPaths() -> void;
 
 public:
@@ -136,8 +136,8 @@ public:
     Button screenshotsReset{&layout, Size{80, 0}};
 };
 
-struct ConfigurationSettings : TabFrameItem {
-  ConfigurationSettings(TabFrame*);
+struct EmulatorSettings : TabFrameItem {
+  auto create() -> void;
   auto updateConfiguration() -> void;
 
 public:
@@ -155,6 +155,7 @@ public:
       CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
       CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
     CheckLabel suppressScreenSaver{&layout, Size{~0, 0}};
+    Widget optionsSpacer{&layout, Size{~0, 10}};
     Label hacksLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};
       CheckLabel fastPPUOption{&fastPPULayout, Size{0, 0}};
@@ -169,7 +170,7 @@ public:
 };
 
 struct DriverSettings : TabFrameItem {
-  DriverSettings(TabFrame*);
+  auto create() -> void;
   auto videoDriverChanged() -> void;
   auto videoDriverChange() -> void;
   auto videoFormatChanged() -> void;
@@ -201,6 +202,7 @@ public:
       CheckLabel videoExclusiveToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
+    Widget videoSpacer{&layout, Size{~0, 10}};
     Label audioLabel{&layout, Size{~0, 0}, 2};
     TableLayout audioLayout{&layout, Size{~0, 0}};
       Label audioDriverLabel{&audioLayout, Size{0, 0}};
@@ -219,6 +221,7 @@ public:
       CheckLabel audioExclusiveToggle{&audioToggleLayout, Size{0, 0}};
       CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
       CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
+    Widget audioSpacer{&layout, Size{~0, 10}};
     Label inputLabel{&layout, Size{~0, 0}, 2};
     TableLayout inputLayout{&layout, Size{~0, 0}};
       Label inputDriverLabel{&inputLayout, Size{0, 0}};
@@ -229,22 +232,22 @@ public:
 };
 
 struct SettingsWindow : Window {
-  SettingsWindow();
+  auto create() -> void;
   auto setVisible(bool visible = true) -> SettingsWindow&;
   auto show(uint index) -> void;
 
 public:
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
-      VideoSettings video{&panel};
-      AudioSettings audio{&panel};
-      InputSettings input{&panel};
-      HotkeySettings hotkeys{&panel};
-      PathSettings paths{&panel};
-      ConfigurationSettings configuration{&panel};
-      DriverSettings drivers{&panel};
   StatusBar statusBar{this};
 };
 
 extern Settings settings;
-extern unique_pointer<SettingsWindow> settingsWindow;
+extern VideoSettings videoSettings;
+extern AudioSettings audioSettings;
+extern InputSettings inputSettings;
+extern HotkeySettings hotkeySettings;
+extern PathSettings pathSettings;
+extern EmulatorSettings emulatorSettings;
+extern DriverSettings driverSettings;
+extern SettingsWindow settingsWindow;

@@ -40,7 +40,7 @@ auto mMenuBar::remove() -> type& {
 
 auto mMenuBar::remove(sMenu menu) -> type& {
   signed offset = menu->offset();
-  signal(remove, *menu);
+  signal(remove, menu);
   state.menus.remove(offset);
   for(auto n : range(offset, menuCount())) {
     state.menus[n]->adjustOffset(-1);

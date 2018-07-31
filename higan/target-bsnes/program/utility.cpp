@@ -12,22 +12,22 @@ auto Program::updateStatus() -> void {
   if(chrono::timestamp() - statusTime <= 2) {
     message = statusMessage;
   }
-  if(message != presentation->statusLeft.text()) {
-    presentation->statusLeft.setText(message);
+  if(message != presentation.statusLeft.text()) {
+    presentation.statusLeft.setText(message);
   }
 
   string frameRate;
   if(!emulator->loaded()) {
     frameRate = tr("Unloaded");
-  } else if(presentation->pauseEmulation.checked()) {
+  } else if(presentation.pauseEmulation.checked()) {
     frameRate = tr("Paused");
-  } else if(!focused() && settingsWindow->configuration.pauseEmulation.checked()) {
+  } else if(!focused() && emulatorSettings.pauseEmulation.checked()) {
     frameRate = tr("Paused");
   } else {
     frameRate = statusFrameRate;
   }
-  if(frameRate != presentation->statusRight.text()) {
-    presentation->statusRight.setText(frameRate);
+  if(frameRate != presentation.statusRight.text()) {
+    presentation.statusRight.setText(frameRate);
   }
 }
 
@@ -47,14 +47,14 @@ auto Program::captureScreenshot() -> bool {
 
 auto Program::paused() -> bool {
   if(!emulator->loaded()) return true;
-  if(presentation->pauseEmulation.checked()) return true;
-  if(!focused() && settingsWindow->configuration.pauseEmulation.checked()) return true;
+  if(presentation.pauseEmulation.checked()) return true;
+  if(!focused() && emulatorSettings.pauseEmulation.checked()) return true;
   return false;
 }
 
 auto Program::focused() -> bool {
   //exclusive mode creates its own top-level window: presentation window will not have focus
   if(video && video.exclusive()) return true;
-  if(presentation && presentation->focused()) return true;
+  if(presentation.focused()) return true;
   return false;
 }

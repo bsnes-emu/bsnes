@@ -28,7 +28,7 @@ struct AudioOSS : AudioDriver {
     return initialize();
   }
 
-  auto driverName() -> string override { return "OSS"; }
+  auto driver() -> string override { return "OSS"; }
   auto ready() -> bool override { return _fd >= 0; }
 
   auto hasBlocking() -> bool override { return true; }

@@ -1,4 +1,4 @@
-InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto InputSettings::create() -> void {
   setIcon(Icon::Device::Joypad);
   setText("Input");
 
@@ -16,8 +16,8 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   turboList.onChange([&] {
     uint frequency = turboList.selected().text().natural();
     settings["Input/Turbo/Frequency"].setValue(frequency);
-    inputManager->turboCounter = 0;
-    inputManager->turboFrequency = frequency;
+    inputManager.turboCounter = 0;
+    inputManager.turboFrequency = frequency;
   });
   mappingList.setBatchable();
   mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
@@ -58,7 +58,7 @@ auto InputSettings::updateControls() -> void {
 }
 
 auto InputSettings::activePort() -> InputPort& {
-  return inputManager->ports[portList.selected().offset()];
+  return inputManager.ports[portList.selected().offset()];
 }
 
 auto InputSettings::activeDevice() -> InputDevice& {
@@ -68,7 +68,7 @@ auto InputSettings::activeDevice() -> InputDevice& {
 
 auto InputSettings::reloadPorts() -> void {
   portList.reset();
-  for(auto& port : inputManager->ports) {
+  for(auto& port : inputManager.ports) {
     if(port.name == "Expansion Port") continue;
     portList.append(ComboButtonItem().setText(port.name));
   }
@@ -113,28 +113,28 @@ auto InputSettings::refreshMappings() -> void {
 }
 
 auto InputSettings::assignMapping() -> void {
-  inputManager->poll();  //clear any pending events first
+  inputManager.poll();  //clear any pending events first
 
   for(auto mapping : mappingList.batched()) {
     activeMapping = activeDevice().mappings[mapping.offset()];
-    settingsWindow->layout.setEnabled(false);
-    settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
-    settingsWindow->setDismissable(false);
+    settingsWindow.layout.setEnabled(false);
+    settingsWindow.statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    settingsWindow.setDismissable(false);
   }
 }
 
 auto InputSettings::cancelMapping() -> void {
   activeMapping.reset();
-  settingsWindow->statusBar.setText();
-  settingsWindow->layout.setEnabled();
-  settingsWindow->doSize();
-  settingsWindow->setDismissable(true);
+  settingsWindow.statusBar.setText();
+  settingsWindow.layout.setEnabled();
+  settingsWindow.doSize();
+  settingsWindow.setDismissable(true);
 }
 
 auto InputSettings::assignMouseInput(uint id) -> void {
   if(auto mapping = mappingList.selected()) {
     activeMapping = activeDevice().mappings[mapping.offset()];
-    if(auto mouse = inputManager->findMouse()) {
+    if(auto mouse = inputManager.findMouse()) {
       if(activeMapping->isDigital()) {
         return inputEvent(mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
       } else if(activeMapping->isAnalog()) {
@@ -150,7 +150,7 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping.reset();
-    settingsWindow->statusBar.setText("Mapping assigned.");
+    settingsWindow.statusBar.setText("Mapping assigned.");
     refreshMappings();
     timer.onActivate([&] {
       timer.setEnabled(false);

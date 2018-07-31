@@ -1,7 +1,7 @@
 auto Program::updateAudioDriver(Window parent) -> void {
   auto changed = (bool)audio;
   audio.create(settings["Audio/Driver"].text());
-  audio.setContext(presentation->viewport.handle());
+  audio.setContext(presentation.viewport.handle());
   audio.setChannels(2);
   if(changed) {
     settings["Audio/Device"].setValue(audio.device());
@@ -54,7 +54,7 @@ auto Program::updateAudioFrequency() -> void {
   }
   audio.setFrequency(settings["Audio/Frequency"].real());
   double frequency = settings["Audio/Frequency"].real() + settings["Audio/Skew"].integer();
-  for(auto item : presentation->speedGroup.objects<MenuRadioItem>()) {
+  for(auto item : presentation.speedGroup.objects<MenuRadioItem>()) {
     if(item.checked()) frequency *= item.property("multiplier").real();
   }
   Emulator::audio.setFrequency(frequency);

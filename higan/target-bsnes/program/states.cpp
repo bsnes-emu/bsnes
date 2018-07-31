@@ -108,7 +108,7 @@ auto Program::saveState(string filename) -> bool {
     output.append(location, s.data(), s.size());
   }
 
-  if(filename.beginsWith("quick/")) presentation->updateStateMenus();
+  if(filename.beginsWith("quick/")) presentation.updateStateMenus();
   return showMessage({"Saved [", prefix, "]"}), true;
 }
 

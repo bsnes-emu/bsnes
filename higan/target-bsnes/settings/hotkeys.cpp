@@ -1,4 +1,4 @@
-HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
+auto HotkeySettings::create() -> void {
   setIcon(Icon::Device::Keyboard);
   setText("Hotkeys");
 
@@ -17,7 +17,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   clearButton.setText("Clear").onActivate([&] {
     for(auto item : mappingList.batched()) {
-      inputManager->hotkeys[item.offset()].unbind();
+      inputManager.hotkeys[item.offset()].unbind();
     }
     refreshMappings();
   });
@@ -29,7 +29,7 @@ auto HotkeySettings::reloadMappings() -> void {
     .append(TableViewColumn().setText("Name"))
     .append(TableViewColumn().setText("Mapping").setExpandable())
   );
-  for(auto& hotkey : inputManager->hotkeys) {
+  for(auto& hotkey : inputManager.hotkeys) {
     mappingList.append(TableViewItem()
       .append(TableViewCell().setText(hotkey.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))
       .append(TableViewCell())
@@ -41,29 +41,29 @@ auto HotkeySettings::reloadMappings() -> void {
 
 auto HotkeySettings::refreshMappings() -> void {
   uint index = 0;
-  for(auto& hotkey : inputManager->hotkeys) {
+  for(auto& hotkey : inputManager.hotkeys) {
     mappingList.item(index++).cell(1).setText(hotkey.displayName());
   }
   mappingList.resizeColumns();
 }
 
 auto HotkeySettings::assignMapping() -> void {
-  inputManager->poll();  //clear any pending events first
+  inputManager.poll();  //clear any pending events first
 
   if(auto item = mappingList.selected()) {
-    activeMapping = inputManager->hotkeys[item.offset()];
-    settingsWindow->layout.setEnabled(false);
-    settingsWindow->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
-    settingsWindow->setDismissable(false);
+    activeMapping = inputManager.hotkeys[item.offset()];
+    settingsWindow.layout.setEnabled(false);
+    settingsWindow.statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    settingsWindow.setDismissable(false);
   }
 }
 
 auto HotkeySettings::cancelMapping() -> void {
   activeMapping.reset();
-  settingsWindow->statusBar.setText();
-  settingsWindow->layout.setEnabled();
-  settingsWindow->doSize();
-  settingsWindow->setDismissable(true);
+  settingsWindow.statusBar.setText();
+  settingsWindow.layout.setEnabled();
+  settingsWindow.doSize();
+  settingsWindow.setDismissable(true);
 }
 
 auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void {
@@ -72,7 +72,7 @@ auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, 
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping.reset();
-    settingsWindow->statusBar.setText("Mapping assigned.");
+    settingsWindow.statusBar.setText("Mapping assigned.");
     refreshMappings();
     timer.onActivate([&] {
       timer.setEnabled(false);

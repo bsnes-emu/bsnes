@@ -37,74 +37,74 @@
 namespace ruby {
 
 auto Video::setExclusive(bool exclusive) -> bool {
-  if(driver->exclusive == exclusive) return true;
-  if(!driver->hasExclusive()) return false;
-  if(!driver->setExclusive(driver->exclusive = exclusive)) return false;
+  if(instance->exclusive == exclusive) return true;
+  if(!instance->hasExclusive()) return false;
+  if(!instance->setExclusive(instance->exclusive = exclusive)) return false;
   return true;
 }
 
 auto Video::setContext(uintptr context) -> bool {
-  if(driver->context == context) return true;
-  if(!driver->hasContext()) return false;
-  if(!driver->setContext(driver->context = context)) return false;
+  if(instance->context == context) return true;
+  if(!instance->hasContext()) return false;
+  if(!instance->setContext(instance->context = context)) return false;
   return true;
 }
 
 auto Video::setBlocking(bool blocking) -> bool {
-  if(driver->blocking == blocking) return true;
-  if(!driver->hasBlocking()) return false;
-  if(!driver->setBlocking(driver->blocking = blocking)) return false;
+  if(instance->blocking == blocking) return true;
+  if(!instance->hasBlocking()) return false;
+  if(!instance->setBlocking(instance->blocking = blocking)) return false;
   return true;
 }
 
 auto Video::setFlush(bool flush) -> bool {
-  if(driver->flush == flush) return true;
-  if(!driver->hasFlush()) return false;
-  if(!driver->setFlush(driver->flush = flush)) return false;
+  if(instance->flush == flush) return true;
+  if(!instance->hasFlush()) return false;
+  if(!instance->setFlush(instance->flush = flush)) return false;
   return true;
 }
 
 auto Video::setFormat(string format) -> bool {
-  if(driver->format == format) return true;
-  if(!driver->hasFormat(format)) return false;
-  if(!driver->setFormat(driver->format = format)) return false;
+  if(instance->format == format) return true;
+  if(!instance->hasFormat(format)) return false;
+  if(!instance->setFormat(instance->format = format)) return false;
   return true;
 }
 
 auto Video::setSmooth(bool smooth) -> bool {
-  if(driver->smooth == smooth) return true;
-  if(!driver->hasSmooth()) return false;
-  if(!driver->setSmooth(driver->smooth = smooth)) return false;
+  if(instance->smooth == smooth) return true;
+  if(!instance->hasSmooth()) return false;
+  if(!instance->setSmooth(instance->smooth = smooth)) return false;
   return true;
 }
 
 auto Video::setShader(string shader) -> bool {
-  if(driver->shader == shader) return true;
-  if(!driver->hasShader()) return false;
-  if(!driver->setShader(driver->shader = shader)) return false;
+  if(instance->shader == shader) return true;
+  if(!instance->hasShader()) return false;
+  if(!instance->setShader(instance->shader = shader)) return false;
   return true;
 }
 
 //
 
 auto Video::clear() -> void {
-  return driver->clear();
+  return instance->clear();
 }
 
 auto Video::acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-  return driver->acquire(data, pitch, width, height);
+  return instance->acquire(data, pitch, width, height);
 }
 
 auto Video::release() -> void {
-  return driver->release();
+  return instance->release();
 }
 
 auto Video::output() -> void {
-  return driver->output();
+  return instance->output();
 }
 
 auto Video::poll() -> void {
-  return driver->poll();
+  return instance->poll();
 }
 
 //
@@ -120,48 +120,48 @@ auto Video::doUpdate(uint width, uint height) -> void {
 //
 
 auto Video::create(string driver) -> bool {
-  reset();
+  self.instance.reset();
   if(!driver) driver = optimalDriver();
 
   #if defined(VIDEO_CGL)
-  if(driver == "OpenGL") self.driver = new VideoCGL(*this);
+  if(driver == "OpenGL") self.instance = new VideoCGL(*this);
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  if(driver == "Direct3D") self.driver = new VideoDirect3D(*this);
+  if(driver == "Direct3D") self.instance = new VideoDirect3D(*this);
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  if(driver == "DirectDraw") self.driver = new VideoDirectDraw(*this);
+  if(driver == "DirectDraw") self.instance = new VideoDirectDraw(*this);
   #endif
 
   #if defined(VIDEO_GDI)
-  if(driver == "GDI") self.driver = new VideoGDI(*this);
+  if(driver == "GDI") self.instance = new VideoGDI(*this);
   #endif
 
   #if defined(VIDEO_GLX)
-  if(driver == "OpenGL") self.driver = new VideoGLX(*this);
+  if(driver == "OpenGL") self.instance = new VideoGLX(*this);
   #endif
 
   #if defined(VIDEO_GLX2)
-  if(driver == "OpenGL2") self.driver = new VideoGLX2(*this);
+  if(driver == "OpenGL2") self.instance = new VideoGLX2(*this);
   #endif
 
   #if defined(VIDEO_WGL)
-  if(driver == "OpenGL") self.driver = new VideoWGL(*this);
+  if(driver == "OpenGL") self.instance = new VideoWGL(*this);
   #endif
 
   #if defined(VIDEO_XSHM)
-  if(driver == "XShm") self.driver = new VideoXShm(*this);
+  if(driver == "XShm") self.instance = new VideoXShm(*this);
   #endif
 
   #if defined(VIDEO_XVIDEO)
-  if(driver == "XVideo") self.driver = new VideoXVideo(*this);
+  if(driver == "XVideo") self.instance = new VideoXVideo(*this);
   #endif
 
-  if(!self.driver) self.driver = new VideoDriver(*this);
+  if(!self.instance) self.instance = new VideoDriver(*this);
 
-  return self.driver->create();
+  return self.instance->create();
 }
 
 auto Video::hasDrivers() -> vector<string> {

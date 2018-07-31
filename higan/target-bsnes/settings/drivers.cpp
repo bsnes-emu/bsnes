@@ -1,4 +1,4 @@
-DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto DriverSettings::create() -> void {
   setIcon(Icon::Place::Settings);
   setText("Drivers");
 
@@ -8,29 +8,29 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
   videoLayout.setSize({2, 2});
   videoDriverLabel.setText("Driver:");
   videoDriverOption.onChange([&] {
-    videoDriverUpdate.setEnabled(videoDriverOption.selected().text() != video.driverName());
+    videoDriverUpdate.setEnabled(videoDriverOption.selected().text() != video.driver());
   });
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
   videoExclusiveToggle.setText("Exclusive fullscreen").onToggle([&] {
     settings["Video/Exclusive"].setValue(videoExclusiveToggle.checked());
-    program->updateVideoExclusive();
+    program.updateVideoExclusive();
   });
   videoBlockingToggle.setText("Synchronize").onToggle([&] {
     settings["Video/Blocking"].setValue(videoBlockingToggle.checked());
-    program->updateVideoBlocking();
+    program.updateVideoBlocking();
   });
   videoFlushToggle.setText("GPU sync").onToggle([&] {
     settings["Video/Flush"].setValue(videoFlushToggle.checked());
-    program->updateVideoFlush();
+    program.updateVideoFlush();
   });
 
   audioLabel.setText("Audio").setFont(Font().setBold());
   audioLayout.setSize({2, 2});
   audioDriverLabel.setText("Driver:");
   audioDriverOption.onChange([&] {
-    audioDriverUpdate.setEnabled(audioDriverOption.selected().text() != audio.driverName());
+    audioDriverUpdate.setEnabled(audioDriverOption.selected().text() != audio.driver());
   });
   audioDriverUpdate.setText("Change").onActivate([&] { audioDriverChange(); });
   audioDeviceLabel.setText("Device:");
@@ -41,29 +41,29 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
   audioLatencyOption.onChange([&] { audioLatencyChange(); });
   audioExclusiveToggle.setText("Exclusive").onToggle([&] {
     settings["Audio/Exclusive"].setValue(audioExclusiveToggle.checked());
-    program->updateAudioExclusive();
+    program.updateAudioExclusive();
   });
   audioBlockingToggle.setText("Synchronize").onToggle([&] {
     settings["Audio/Blocking"].setValue(audioBlockingToggle.checked());
-    program->updateAudioBlocking();
+    program.updateAudioBlocking();
   });
   audioDynamicToggle.setText("Dynamic rate").onToggle([&] {
     settings["Audio/Dynamic"].setValue(audioDynamicToggle.checked());
-    program->updateAudioDynamic();
+    program.updateAudioDynamic();
   });
 
   inputLabel.setText("Input").setFont(Font().setBold());
   inputLayout.setSize({2, 1});
   inputDriverLabel.setText("Driver:");
   inputDriverOption.onChange([&] {
-    inputDriverUpdate.setEnabled(inputDriverOption.selected().text() != input.driverName());
+    inputDriverUpdate.setEnabled(inputDriverOption.selected().text() != input.driver());
   });
   inputDriverUpdate.setText("Change").onActivate([&] { inputDriverChange(); });
 
-  //hide video format for simplicity, as it's not very useful just yet ...
-  videoLayout.setSize({2, 1});
-  videoLayout.remove(videoFormatLabel);
-  videoLayout.remove(videoPropertyLayout);
+  //this will hide the video format setting for simplicity, as it's not very useful just yet ...
+  //videoLayout.setSize({2, 1});
+  //videoLayout.remove(videoFormatLabel);
+  //videoLayout.remove(videoPropertyLayout);
 }
 
 //
@@ -73,9 +73,9 @@ auto DriverSettings::videoDriverChanged() -> void {
   for(auto& driver : video.hasDrivers()) {
     ComboButtonItem item{&videoDriverOption};
     item.setText(driver);
-    if(driver == video.driverName()) item.setSelected();
+    if(driver == video.driver()) item.setSelected();
   }
-  videoDriverActive.setText({"Active driver: ", video.driverName()});
+  videoDriverActive.setText({"Active driver: ", video.driver()});
   videoDriverOption.doChange();
   videoFormatChanged();
   videoExclusiveToggle.setChecked(video.exclusive()).setEnabled(video.hasExclusive());
@@ -92,11 +92,11 @@ auto DriverSettings::videoDriverChange() -> void {
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the video driver change now anyway?"
   ).setParent(*settingsWindow).question() == "Yes") {
-    program->save();
-    program->saveUndoState();
+    program.save();
+    program.saveUndoState();
     settings["Crashed"].setValue(true);
     settings.save();
-    program->updateVideoDriver(*settingsWindow);
+    program.updateVideoDriver(settingsWindow);
     settings["Crashed"].setValue(false);
     settings.save();
     videoDriverChanged();
@@ -127,9 +127,9 @@ auto DriverSettings::audioDriverChanged() -> void {
   for(auto& driver : audio.hasDrivers()) {
     ComboButtonItem item{&audioDriverOption};
     item.setText(driver);
-    if(driver == audio.driverName()) item.setSelected();
+    if(driver == audio.driver()) item.setSelected();
   }
-  audioDriverActive.setText({"Active driver: ", audio.driverName()});
+  audioDriverActive.setText({"Active driver: ", audio.driver()});
   audioDriverOption.doChange();
   audioDeviceChanged();
   audioFrequencyChanged();
@@ -148,11 +148,11 @@ auto DriverSettings::audioDriverChange() -> void {
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the audio driver change now anyway?"
   ).setParent(*settingsWindow).question() == "Yes") {
-    program->save();
-    program->saveUndoState();
+    program.save();
+    program.saveUndoState();
     settings["Crashed"].setValue(true);
     settings.save();
-    program->updateAudioDriver(*settingsWindow);
+    program.updateAudioDriver(settingsWindow);
     settings["Crashed"].setValue(false);
     settings.save();
     audioDriverChanged();
@@ -173,7 +173,7 @@ auto DriverSettings::audioDeviceChanged() -> void {
 auto DriverSettings::audioDeviceChange() -> void {
   auto item = audioDeviceOption.selected();
   settings["Audio/Device"].setValue(item.text());
-  program->updateAudioDevice();
+  program.updateAudioDevice();
   audioFrequencyChanged();
   audioLatencyChanged();
 }
@@ -192,7 +192,7 @@ auto DriverSettings::audioFrequencyChanged() -> void {
 auto DriverSettings::audioFrequencyChange() -> void {
   auto item = audioFrequencyOption.selected();
   settings["Audio/Frequency"].setValue(item.text());
-  program->updateAudioFrequency();
+  program.updateAudioFrequency();
 }
 
 auto DriverSettings::audioLatencyChanged() -> void {
@@ -209,7 +209,7 @@ auto DriverSettings::audioLatencyChanged() -> void {
 auto DriverSettings::audioLatencyChange() -> void {
   auto item = audioLatencyOption.selected();
   settings["Audio/Latency"].setValue(item.text());
-  program->updateAudioLatency();
+  program.updateAudioLatency();
 }
 
 //
@@ -219,9 +219,9 @@ auto DriverSettings::inputDriverChanged() -> void {
   for(auto& driver : input.hasDrivers()) {
     ComboButtonItem item{&inputDriverOption};
     item.setText(driver);
-    if(driver == input.driverName()) item.setSelected();
+    if(driver == input.driver()) item.setSelected();
   }
-  inputDriverActive.setText({"Active driver: ", input.driverName()});
+  inputDriverActive.setText({"Active driver: ", input.driver()});
   inputDriverOption.doChange();
   layout.setGeometry(layout.geometry());
 }
@@ -234,11 +234,11 @@ auto DriverSettings::inputDriverChange() -> void {
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the input driver change now anyway?"
   ).setParent(*settingsWindow).question() == "Yes") {
-    program->save();
-    program->saveUndoState();
+    program.save();
+    program.saveUndoState();
     settings["Crashed"].setValue(true);
     settings.save();
-    program->updateInputDriver(*settingsWindow);
+    program.updateInputDriver(settingsWindow);
     settings["Crashed"].setValue(false);
     settings.save();
     inputDriverChanged();

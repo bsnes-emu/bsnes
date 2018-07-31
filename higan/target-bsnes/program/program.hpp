@@ -2,7 +2,7 @@ struct Program : Emulator::Platform {
   Application::Namespace tr{"Program"};
 
   //program.cpp
-  Program(vector<string> arguments);
+  auto create(vector<string> arguments) -> void;
   auto main() -> void;
   auto quit() -> void;
 
@@ -147,4 +147,4 @@ public:
   string statusFrameRate;
 };
 
-extern unique_pointer<Program> program;
+extern Program program;

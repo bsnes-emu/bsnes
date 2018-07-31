@@ -16,7 +16,6 @@ struct pObject : mLock {
   virtual auto setFocused() -> void;
   virtual auto setFont(const Font& font) -> void;
   virtual auto setGroup(sGroup group) -> void;
-  virtual auto setParent(mObject* parent, int offset) -> void;
   virtual auto setVisible(bool visible) -> void;
 
   mObject& reference;

@@ -20,11 +20,11 @@ struct AboutWindow : Window {
 
 struct Presentation : Window {
   Application::Namespace tr{"Presentation"};
+  auto create() -> void;
 
   enum : uint { RecentGames = 9, QuickStates = 9 };
   enum : uint { StatusHeight = 24 };
 
-  Presentation();
   auto updateStatusIcon() -> void;
   auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
@@ -75,7 +75,7 @@ struct Presentation : Window {
       MenuItem inputSettings{&settingsMenu};
       MenuItem hotkeySettings{&settingsMenu};
       MenuItem pathSettings{&settingsMenu};
-      MenuItem configurationSettings{&settingsMenu};
+      MenuItem emulatorSettings{&settingsMenu};
       MenuItem driverSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
@@ -113,4 +113,4 @@ struct Presentation : Window {
 };
 
 extern AboutWindow aboutWindow;
-extern unique_pointer<Presentation> presentation;
+extern Presentation presentation;

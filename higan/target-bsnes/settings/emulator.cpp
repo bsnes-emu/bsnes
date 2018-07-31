@@ -1,6 +1,6 @@
-ConfigurationSettings::ConfigurationSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto EmulatorSettings::create() -> void {
   setIcon(Icon::Action::Settings);
-  setText("Configuration");
+  setText("Emulator");
 
   layout.setPadding(5);
 
@@ -40,7 +40,7 @@ ConfigurationSettings::ConfigurationSettings(TabFrame* parent) : TabFrameItem(pa
     Application::setScreenSaver(!suppressScreenSaver.checked());
   });
 
-  hacksLabel.setText("Emulator Hacks").setFont(Font().setBold());
+  hacksLabel.setText("Hacks").setFont(Font().setBold());
   fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/Hack/FastPPU"].boolean()).onToggle([&] {
     settings["Emulator/Hack/FastPPU"].setValue(fastPPUOption.checked());
     if(!fastPPUOption.checked()) {
@@ -69,7 +69,7 @@ ConfigurationSettings::ConfigurationSettings(TabFrame* parent) : TabFrameItem(pa
   hacksNote.setForegroundColor({224, 0, 0}).setText("Note: some hack setting changes do not take effect until after reloading games.");
 }
 
-auto ConfigurationSettings::updateConfiguration() -> void {
+auto EmulatorSettings::updateConfiguration() -> void {
   emulator->configure("hacks/ppuFast/enable", fastPPUOption.checked());
   emulator->configure("hacks/ppuFast/noSpriteLimit", noSpriteLimit.checked());
   emulator->configure("hacks/ppuFast/hiresMode7", hiresMode7.checked());

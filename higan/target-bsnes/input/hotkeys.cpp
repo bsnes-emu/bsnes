@@ -2,7 +2,7 @@ auto InputManager::bindHotkeys() -> void {
   static int stateSlot = 1;
 
   hotkeys.append(InputHotkey("Toggle Fullscreen Mode").onPress([] {
-    presentation->toggleFullscreenMode();
+    presentation.toggleFullscreenMode();
   }));
 
   hotkeys.append(InputHotkey("Toggle Mouse Capture").onPress([] {
@@ -10,40 +10,37 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Toggle Cheat Codes").onPress([] {
-    toolsWindow->cheatEditor.enableCheats.setChecked(
-      !toolsWindow->cheatEditor.enableCheats.checked()
-    );
-    toolsWindow->cheatEditor.enableCheats.doToggle();
+    cheatEditor.enableCheats.setChecked(!cheatEditor.enableCheats.checked()).doToggle();
   }));
 
   hotkeys.append(InputHotkey("Save State").onPress([&] {
-    program->saveState({"quick/slot ", stateSlot});
+    program.saveState({"quick/slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load State").onPress([&] {
-    program->loadState({"quick/slot ", stateSlot});
+    program.loadState({"quick/slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load Undo State").onPress([&] {
-    program->loadState("quick/undo");
+    program.loadState("quick/undo");
   }));
 
   hotkeys.append(InputHotkey("Load Redo State").onPress([&] {
-    program->loadState("quick/redo");
+    program.loadState("quick/redo");
   }));
 
   hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {
     if(--stateSlot < 1) stateSlot = 9;
-    program->showMessage({"Selected state slot ", stateSlot});
+    program.showMessage({"Selected state slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Decrement State Slot").onPress([&] {
     if(++stateSlot > 9) stateSlot = 1;
-    program->showMessage({"Selected state slot ", stateSlot});
+    program.showMessage({"Selected state slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Capture Screenshot").onPress([] {
-    program->captureScreenshot();
+    program.captureScreenshot();
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
@@ -55,19 +52,19 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {
-    presentation->pauseEmulation.setChecked(!presentation->pauseEmulation.checked());
+    presentation.pauseEmulation.setChecked(!presentation.pauseEmulation.checked());
   }));
 
   hotkeys.append(InputHotkey("Frame Advance").onPress([] {
-    presentation->frameAdvance.doActivate();
+    presentation.frameAdvance.doActivate();
   }));
 
   hotkeys.append(InputHotkey("Reset Emulation").onPress([] {
-    program->reset();
+    program.reset();
   }));
 
   hotkeys.append(InputHotkey("Quit Emulator").onPress([] {
-    program->quit();
+    program.quit();
   }));
 
   for(auto& hotkey : hotkeys) {
@@ -78,7 +75,7 @@ auto InputManager::bindHotkeys() -> void {
 }
 
 auto InputManager::pollHotkeys() -> void {
-  if(!program->focused()) return;
+  if(!program.focused()) return;
 
   for(auto& hotkey : hotkeys) {
     auto state = hotkey.poll();

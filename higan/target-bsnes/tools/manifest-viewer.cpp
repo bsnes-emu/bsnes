@@ -1,4 +1,4 @@
-ManifestViewer::ManifestViewer(TabFrame* parent) : TabFrameItem(parent) {
+auto ManifestViewer::create() -> void {
   setIcon(Icon::Emblem::Text);
   setText("Manifest Viewer");
 
@@ -15,6 +15,6 @@ auto ManifestViewer::loadManifest() -> void {
   }
 
   manifestView.setText(emulator->manifests().merge("\n"));
-  verifiedIcon.setIcon(program->verified() ? Icon::Emblem::Program : Icon::Emblem::Binary);
-  verifiedLabel.setText(program->verified() ? "Verified" : "Unverified");
+  verifiedIcon.setIcon(program.verified() ? Icon::Emblem::Program : Icon::Emblem::Binary);
+  verifiedLabel.setText(program.verified() ? "Verified" : "Unverified");
 }

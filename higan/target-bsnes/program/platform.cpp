@@ -92,7 +92,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
       "Error: missing required data: ", name, "\n\n",
       "Would you like to view the online documentation for more information?"
     }).setParent(*presentation).error({"Yes", "No"}) == "Yes") {
-      presentation->documentation.doActivate();
+      presentation.documentation.doActivate();
     }
   }
 
@@ -197,7 +197,7 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   uint length;
 
   pitch >>= 2;
-  if(presentation->overscanCropping.checked()) {
+  if(presentation.overscanCropping.checked()) {
     if(height == 240) data +=  8 * pitch, height -= 16;
     if(height == 480) data += 16 * pitch, height -= 32;
   }
@@ -221,11 +221,11 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
     video.output();
   }
 
-  inputManager->frame();
+  inputManager.frame();
 
   if(frameAdvance) {
     frameAdvance = false;
-    presentation->pauseEmulation.setChecked();
+    presentation.pauseEmulation.setChecked();
   }
 
   static uint frameCounter = 0;
@@ -245,9 +245,9 @@ auto Program::audioSample(const double* samples, uint channels) -> void {
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
-  if(focused() || settingsWindow->configuration.allowInput().checked()) {
-    inputManager->poll();
-    if(auto mapping = inputManager->mapping(port, device, input)) {
+  if(focused() || emulatorSettings.allowInput().checked()) {
+    inputManager.poll();
+    if(auto mapping = inputManager.mapping(port, device, input)) {
       return mapping->poll();
     }
   }
@@ -255,8 +255,8 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
-  if(focused() || settingsWindow->configuration.allowInput().checked() || !enable) {
-    if(auto mapping = inputManager->mapping(port, device, input)) {
+  if(focused() || emulatorSettings.allowInput().checked() || !enable) {
+    if(auto mapping = inputManager.mapping(port, device, input)) {
       return mapping->rumble(enable);
     }
   }

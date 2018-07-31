@@ -18,7 +18,7 @@ struct VideoXShm : VideoDriver {
     return initialize();
   }
 
-  auto driverName() -> string override { return "XShm"; }
+  auto driver() -> string override { return "XShm"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }

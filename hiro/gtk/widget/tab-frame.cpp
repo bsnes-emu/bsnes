@@ -63,36 +63,6 @@ auto pTabFrame::destruct() -> void {
 
 auto pTabFrame::append(sTabFrameItem item) -> void {
   lock();
-  Tab tab;
-  tab.child = gtk_fixed_new();
-  #if HIRO_GTK==2
-  tab.container = gtk_hbox_new(false, 0);
-  #elif HIRO_GTK==3
-  tab.container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  #endif
-  tab.image = gtk_image_new();
-  tab.title = gtk_label_new("");
-  gtk_misc_set_alignment(GTK_MISC(tab.title), 0.0, 0.5);
-  tab.close = gtk_button_new_with_label("\u00d7");  //Unicode multiplication sign (looks better than 'X')
-  gtk_button_set_focus_on_click(GTK_BUTTON(tab.close), false);
-  gtk_button_set_relief(GTK_BUTTON(tab.close), GTK_RELIEF_NONE);
-  pFont::setFont(tab.close, Font("sans", 9).setBold());
-  auto color = CreateColor({255, 0, 0});
-  gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(tab.close)), GTK_STATE_PRELIGHT, &color);
-  tabs.append(tab);
-
-  gtk_widget_show(tab.child);
-  gtk_widget_show(tab.container);
-  gtk_widget_show(tab.image);
-  gtk_widget_show(tab.title);
-  gtk_widget_show(tab.close);
-  gtk_box_pack_start(GTK_BOX(tab.container), tab.image, false, false, 0);
-  gtk_box_pack_start(GTK_BOX(tab.container), tab.title, true, true, 0);
-  gtk_box_pack_start(GTK_BOX(tab.container), tab.close, false, false, 0);
-
-  g_signal_connect(G_OBJECT(tab.close), "clicked", G_CALLBACK(TabFrame_close), (gpointer)this);
-  gtk_notebook_append_page(GTK_NOTEBOOK(gtkWidget), tab.child, tab.container);
-
   setFont(self().font(true));
   setItemMovable(item->offset(), item->movable());
   if(item->selected()) setItemSelected(item->offset());
@@ -208,6 +178,42 @@ auto pTabFrame::setNavigation(Navigation navigation) -> void {
   }
   gtk_notebook_set_tab_pos(GTK_NOTEBOOK(gtkWidget), type);
   setGeometry(self().geometry());
+}
+
+//called by pTabFrameItem::construct(), before pTabFrame::append()
+//tab needs to be created early, so that pTabFrameItem child widgets calling pWidget::container() can find the tab
+auto pTabFrame::_append() -> void {
+  lock();
+  Tab tab;
+  tab.child = gtk_fixed_new();
+  #if HIRO_GTK==2
+  tab.container = gtk_hbox_new(false, 0);
+  #elif HIRO_GTK==3
+  tab.container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  #endif
+  tab.image = gtk_image_new();
+  tab.title = gtk_label_new("");
+  gtk_misc_set_alignment(GTK_MISC(tab.title), 0.0, 0.5);
+  tab.close = gtk_button_new_with_label("\u00d7");  //Unicode multiplication sign (looks better than 'X')
+  gtk_button_set_focus_on_click(GTK_BUTTON(tab.close), false);
+  gtk_button_set_relief(GTK_BUTTON(tab.close), GTK_RELIEF_NONE);
+  pFont::setFont(tab.close, Font("sans", 9).setBold());
+  auto color = CreateColor({255, 0, 0});
+  gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(tab.close)), GTK_STATE_PRELIGHT, &color);
+  tabs.append(tab);
+
+  gtk_widget_show(tab.child);
+  gtk_widget_show(tab.container);
+  gtk_widget_show(tab.image);
+  gtk_widget_show(tab.title);
+  gtk_widget_show(tab.close);
+  gtk_box_pack_start(GTK_BOX(tab.container), tab.image, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(tab.container), tab.title, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(tab.container), tab.close, false, false, 0);
+
+  g_signal_connect(G_OBJECT(tab.close), "clicked", G_CALLBACK(TabFrame_close), (gpointer)this);
+  gtk_notebook_append_page(GTK_NOTEBOOK(gtkWidget), tab.child, tab.container);
+  unlock();
 }
 
 auto pTabFrame::_synchronizeLayout() -> void {

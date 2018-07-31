@@ -298,7 +298,6 @@ auto mObject::setGroup(sGroup group) -> type& {
 }
 
 auto mObject::setParent(mObject* parent, int offset) -> type& {
-  signal(setParent, parent, offset);
   destruct();
   state.parent = parent;
   state.offset = offset;

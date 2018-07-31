@@ -16,7 +16,7 @@ struct InputSDL : InputDriver {
     return initialize();
   }
 
-  auto driverName() -> string override { return "SDL"; }
+  auto driver() -> string override { return "SDL"; }
   auto ready() -> bool override { return isReady; }
 
   auto hasContext() -> bool override { return true; }

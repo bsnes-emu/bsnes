@@ -1,4 +1,4 @@
-AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto AudioSettings::create() -> void {
   setIcon(Icon::Device::Speaker);
   setText("Audio");
 
@@ -13,7 +13,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {skewSlider.position() > 5000 ? "+" : "", (int)skewSlider.position() - 5000};
     settings["Audio/Skew"].setValue(value);
     skewValue.setText(value);
-    if(audio) program->updateAudioFrequency();
+    program.updateAudioFrequency();
   }).doChange();
   volumeLabel.setText("Volume:");
   volumeValue.setAlignment(0.5);
@@ -21,7 +21,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {volumeSlider.position(), "%"};
     settings["Audio/Volume"].setValue(value);
     volumeValue.setText(value);
-    if(audio) program->updateAudioEffects();
+    program.updateAudioEffects();
   }).doChange();
   balanceLabel.setText("Balance:");
   balanceValue.setAlignment(0.5);
@@ -29,6 +29,6 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {balanceSlider.position(), "%"};
     settings["Audio/Balance"].setValue(value);
     balanceValue.setText(value);
-    if(audio) program->updateAudioEffects();
+    program.updateAudioEffects();
   }).doChange();
 }

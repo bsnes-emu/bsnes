@@ -13,7 +13,7 @@ struct Cheat {
 };
 
 struct CheatDatabase : Window {
-  CheatDatabase();
+  auto create() -> void;
   auto findCheats() -> void;
   auto addCheats() -> void;
 
@@ -28,7 +28,7 @@ public:
 };
 
 struct CheatWindow : Window {
-  CheatWindow();
+  auto create() -> void;
   auto show(Cheat cheat = {}) -> void;
   auto doChange() -> void;
   auto doAccept() -> void;
@@ -49,7 +49,7 @@ public:
 };
 
 struct CheatEditor : TabFrameItem {
-  CheatEditor(TabFrame*);
+  auto create() -> void;
   auto refresh() -> void;
   auto addCheat(Cheat cheat) -> void;
   auto editCheat(Cheat cheat) -> void;
@@ -73,7 +73,7 @@ public:
 };
 
 struct StateWindow : Window {
-  StateWindow();
+  auto create() -> void;
   auto show(string name = {}) -> void;
   auto doChange() -> void;
   auto doAccept() -> void;
@@ -90,7 +90,7 @@ public:
 };
 
 struct StateManager : TabFrameItem {
-  StateManager(TabFrame*);
+  auto create() -> void;
   auto loadStates() -> void;
   auto createState(string name) -> void;
   auto modifyState(string name) -> void;
@@ -109,7 +109,7 @@ public:
 };
 
 struct ManifestViewer : TabFrameItem {
-  ManifestViewer(TabFrame*);
+  auto create() -> void;
   auto loadManifest() -> void;
 
 public:
@@ -121,19 +121,19 @@ public:
 };
 
 struct ToolsWindow : Window {
-  ToolsWindow();
+  auto create() -> void;
   auto setVisible(bool visible = true) -> ToolsWindow&;
   auto show(uint index) -> void;
 
 public:
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
-      CheatEditor cheatEditor{&panel};
-      StateManager stateManager{&panel};
-      ManifestViewer manifestViewer{&panel};
 };
 
-extern unique_pointer<CheatDatabase> cheatDatabase;
-extern unique_pointer<CheatWindow> cheatWindow;
-extern unique_pointer<StateWindow> stateWindow;
-extern unique_pointer<ToolsWindow> toolsWindow;
+extern CheatDatabase cheatDatabase;
+extern CheatWindow cheatWindow;
+extern CheatEditor cheatEditor;
+extern StateWindow stateWindow;
+extern StateManager stateManager;
+extern ManifestViewer manifestViewer;
+extern ToolsWindow toolsWindow;

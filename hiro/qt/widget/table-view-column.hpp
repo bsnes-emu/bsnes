@@ -14,7 +14,6 @@ struct pTableViewColumn : pObject {
   auto setForegroundColor(Color color) -> void;
   auto setHorizontalAlignment(double alignment) -> void;
   auto setIcon(const image& icon) -> void;
-  auto setParent(mObject* parent, int offset) -> void override;
   auto setResizable(bool resizable) -> void;
   auto setSortable(bool sortable) -> void;
   auto setText(const string& text) -> void;

@@ -25,32 +25,32 @@
 namespace ruby {
 
 auto Input::setContext(uintptr context) -> bool {
-  if(driver->context == context) return true;
-  if(!driver->hasContext()) return false;
-  if(!driver->setContext(driver->context = context)) return false;
+  if(instance->context == context) return true;
+  if(!instance->hasContext()) return false;
+  if(!instance->setContext(instance->context = context)) return false;
   return true;
 }
 
 //
 
 auto Input::acquired() -> bool {
-  return driver->acquired();
+  return instance->acquired();
 }
 
 auto Input::acquire() -> bool {
-  return driver->acquire();
+  return instance->acquire();
 }
 
 auto Input::release() -> bool {
-  return driver->release();
+  return instance->release();
 }
 
 auto Input::poll() -> vector<shared_pointer<nall::HID::Device>> {
-  return driver->poll();
+  return instance->poll();
 }
 
 auto Input::rumble(uint64_t id, bool enable) -> bool {
-  return driver->rumble(id, enable);
+  return instance->rumble(id, enable);
 }
 
 //
@@ -66,36 +66,36 @@ auto Input::doChange(shared_pointer<HID::Device> device, uint group, uint input,
 //
 
 auto Input::create(string driver) -> bool {
-  reset();
+  self.instance.reset();
   if(!driver) driver = optimalDriver();
 
   #if defined(INPUT_WINDOWS)
-  if(driver == "Windows") self.driver = new InputWindows(*this);
+  if(driver == "Windows") self.instance = new InputWindows(*this);
   #endif
 
   #if defined(INPUT_QUARTZ)
-  if(driver == "Quartz") self.driver = new InputQuartz(*this);
+  if(driver == "Quartz") self.instance = new InputQuartz(*this);
   #endif
 
   #if defined(INPUT_CARBON)
-  if(driver == "Carbon") self.driver = new InputCarbon(*this);
+  if(driver == "Carbon") self.instance = new InputCarbon(*this);
   #endif
 
   #if defined(INPUT_UDEV)
-  if(driver == "udev") self.driver = new InputUdev(*this);
+  if(driver == "udev") self.instance = new InputUdev(*this);
   #endif
 
   #if defined(INPUT_SDL)
-  if(driver == "SDL") self.driver = new InputSDL(*this);
+  if(driver == "SDL") self.instance = new InputSDL(*this);
   #endif
 
   #if defined(INPUT_XLIB)
-  if(driver == "Xlib") self.driver = new InputXlib(*this);
+  if(driver == "Xlib") self.instance = new InputXlib(*this);
   #endif
 
-  if(!self.driver) self.driver = new InputDriver(*this);
+  if(!self.instance) self.instance = new InputDriver(*this);
 
-  return self.driver->create();
+  return self.instance->create();
 }
 
 auto Input::hasDrivers() -> vector<string> {

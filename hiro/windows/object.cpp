@@ -33,9 +33,6 @@ auto pObject::setFont(const Font& font) -> void {
 auto pObject::setGroup(sGroup group) -> void {
 }
 
-auto pObject::setParent(mObject* parent, int offset) -> void {
-}
-
 auto pObject::setVisible(bool visible) -> void {
 }
 

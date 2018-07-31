@@ -34,6 +34,6 @@ auto nall::main(vector<string> arguments) -> void {
   Application::locale().scan(locate("locales/"));
   Application::locale().select(locale);
   emulator = new SuperFamicom::Interface;
-  new Program(arguments);
+  program.create(arguments);
   Application::run();
 }

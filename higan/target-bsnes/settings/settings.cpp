@@ -4,10 +4,17 @@
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"
-#include "configuration.cpp"
+#include "emulator.cpp"
 #include "drivers.cpp"
 Settings settings;
-unique_pointer<SettingsWindow> settingsWindow;
+VideoSettings videoSettings;
+AudioSettings audioSettings;
+InputSettings inputSettings;
+HotkeySettings hotkeySettings;
+PathSettings pathSettings;
+EmulatorSettings emulatorSettings;
+DriverSettings driverSettings;
+SettingsWindow settingsWindow;
 
 Settings::Settings() {
   Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml"))));
@@ -84,10 +91,15 @@ auto Settings::save() -> void {
   file::write(locate("settings.bml"), BML::serialize(*this));
 }
 
-SettingsWindow::SettingsWindow() {
-  settingsWindow = this;
-
+auto SettingsWindow::create() -> void {
   layout.setPadding(5);
+  panel.append(videoSettings);
+  panel.append(audioSettings);
+  panel.append(inputSettings);
+  panel.append(hotkeySettings);
+  panel.append(pathSettings);
+  panel.append(emulatorSettings);
+  panel.append(driverSettings);
   statusBar.setFont(Font().setBold());
 
   setTitle("Settings");
@@ -96,21 +108,21 @@ SettingsWindow::SettingsWindow() {
   setDismissable();
 
   onSize([&] {
-    input.mappingList.resizeColumns();
-    hotkeys.mappingList.resizeColumns();
+    inputSettings.mappingList.resizeColumns();
+    hotkeySettings.mappingList.resizeColumns();
   });
 
   onClose([&] {
-    if(input.activeMapping) input.cancelMapping();
-    if(hotkeys.activeMapping) hotkeys.cancelMapping();
+    if(inputSettings.activeMapping) inputSettings.cancelMapping();
+    if(hotkeySettings.activeMapping) hotkeySettings.cancelMapping();
     setVisible(false);
   });
 }
 
 auto SettingsWindow::setVisible(bool visible) -> SettingsWindow& {
   if(visible) {
-    input.refreshMappings();
-    hotkeys.refreshMappings();
+    inputSettings.refreshMappings();
+    hotkeySettings.refreshMappings();
   }
   return Window::setVisible(visible), *this;
 }

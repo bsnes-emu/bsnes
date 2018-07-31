@@ -5,7 +5,7 @@ struct AudioDriver {
   virtual ~AudioDriver() = default;
 
   virtual auto create() -> bool { return true; }
-  virtual auto driverName() -> string { return "None"; }
+  virtual auto driver() -> string { return "None"; }
   virtual auto ready() -> bool { return true; }
 
   virtual auto hasExclusive() -> bool { return false; }
@@ -55,35 +55,35 @@ struct Audio {
   static auto optimalDriver() -> string;
   static auto safestDriver() -> string;
 
-  Audio() : self(*this) {}
-  explicit operator bool() const { return (bool)driver; }
-  auto reset() -> void { driver.reset(); }
+  Audio() : self(*this) { reset(); }
+  explicit operator bool() { return instance->driver() != "None"; }
+  auto reset() -> void { instance = new AudioDriver(*this); }
   auto create(string driver = "") -> bool;
-  auto driverName() -> string { return driver->driverName(); }
-  auto ready() -> bool { return driver->ready(); }
+  auto driver() -> string { return instance->driver(); }
+  auto ready() -> bool { return instance->ready(); }
 
-  auto hasExclusive() -> bool { return driver->hasExclusive(); }
-  auto hasContext() -> bool { return driver->hasContext(); }
-  auto hasDevices() -> vector<string> { return driver->hasDevices(); }
-  auto hasBlocking() -> bool { return driver->hasBlocking(); }
-  auto hasDynamic() -> bool { return driver->hasDynamic(); }
-  auto hasChannels() -> vector<uint> { return driver->hasChannels(); }
-  auto hasFrequencies() -> vector<uint> { return driver->hasFrequencies(); }
-  auto hasLatencies() -> vector<uint> { return driver->hasLatencies(); }
+  auto hasExclusive() -> bool { return instance->hasExclusive(); }
+  auto hasContext() -> bool { return instance->hasContext(); }
+  auto hasDevices() -> vector<string> { return instance->hasDevices(); }
+  auto hasBlocking() -> bool { return instance->hasBlocking(); }
+  auto hasDynamic() -> bool { return instance->hasDynamic(); }
+  auto hasChannels() -> vector<uint> { return instance->hasChannels(); }
+  auto hasFrequencies() -> vector<uint> { return instance->hasFrequencies(); }
+  auto hasLatencies() -> vector<uint> { return instance->hasLatencies(); }
 
-  auto hasDevice(string device) -> bool { return driver->hasDevice(device); }
-  auto hasChannels(uint channels) -> bool { return driver->hasChannels(channels); }
-  auto hasFrequency(uint frequency) -> bool { return driver->hasFrequency(frequency); }
-  auto hasLatency(uint latency) -> bool { return driver->hasLatency(latency); }
+  auto hasDevice(string device) -> bool { return instance->hasDevice(device); }
+  auto hasChannels(uint channels) -> bool { return instance->hasChannels(channels); }
+  auto hasFrequency(uint frequency) -> bool { return instance->hasFrequency(frequency); }
+  auto hasLatency(uint latency) -> bool { return instance->hasLatency(latency); }
 
-  auto exclusive() -> bool { return driver->exclusive; }
-  auto context() -> uintptr { return driver->context; }
-  auto device() -> string { return driver->device; }
-  auto blocking() -> bool { return driver->blocking; }
-  auto dynamic() -> bool { return driver->dynamic; }
-  auto channels() -> uint { return driver->channels; }
-  auto frequency() -> uint { return driver->frequency; }
-  auto latency() -> uint { return driver->latency; }
+  auto exclusive() -> bool { return instance->exclusive; }
+  auto context() -> uintptr { return instance->context; }
+  auto device() -> string { return instance->device; }
+  auto blocking() -> bool { return instance->blocking; }
+  auto dynamic() -> bool { return instance->dynamic; }
+  auto channels() -> uint { return instance->channels; }
+  auto frequency() -> uint { return instance->frequency; }
+  auto latency() -> uint { return instance->latency; }
 
   auto setExclusive(bool exclusive) -> bool;
   auto setContext(uintptr context) -> bool;
@@ -100,6 +100,6 @@ struct Audio {
 
 protected:
   Audio& self;
-  unique_pointer<AudioDriver> driver;
+  unique_pointer<AudioDriver> instance;
   vector<nall::DSP::Resampler::Cubic> resamplers;
 };

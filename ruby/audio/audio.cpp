@@ -41,144 +41,144 @@
 namespace ruby {
 
 auto Audio::setExclusive(bool exclusive) -> bool {
-  if(driver->exclusive == exclusive) return true;
-  if(!driver->hasExclusive()) return false;
-  if(!driver->setExclusive(driver->exclusive = exclusive)) return false;
+  if(instance->exclusive == exclusive) return true;
+  if(!instance->hasExclusive()) return false;
+  if(!instance->setExclusive(instance->exclusive = exclusive)) return false;
   return true;
 }
 
 auto Audio::setContext(uintptr context) -> bool {
-  if(driver->context == context) return true;
-  if(!driver->hasContext()) return false;
-  if(!driver->setContext(driver->context = context)) return false;
+  if(instance->context == context) return true;
+  if(!instance->hasContext()) return false;
+  if(!instance->setContext(instance->context = context)) return false;
   return true;
 }
 
 auto Audio::setDevice(string device) -> bool {
-  if(driver->device == device) return true;
-  if(!driver->hasDevice(device)) return false;
-  if(!driver->setDevice(driver->device = device)) return false;
+  if(instance->device == device) return true;
+  if(!instance->hasDevice(device)) return false;
+  if(!instance->setDevice(instance->device = device)) return false;
   return true;
 }
 
 auto Audio::setBlocking(bool blocking) -> bool {
-  if(driver->blocking == blocking) return true;
-  if(!driver->hasBlocking()) return false;
-  if(!driver->setBlocking(driver->blocking = blocking)) return false;
-  for(auto& resampler : resamplers) resampler.reset(driver->frequency);
+  if(instance->blocking == blocking) return true;
+  if(!instance->hasBlocking()) return false;
+  if(!instance->setBlocking(instance->blocking = blocking)) return false;
+  for(auto& resampler : resamplers) resampler.reset(instance->frequency);
   return true;
 }
 
 auto Audio::setDynamic(bool dynamic) -> bool {
-  if(driver->dynamic == dynamic) return true;
-  if(!driver->hasDynamic()) return false;
-  if(!driver->setDynamic(driver->dynamic = dynamic)) return false;
+  if(instance->dynamic == dynamic) return true;
+  if(!instance->hasDynamic()) return false;
+  if(!instance->setDynamic(instance->dynamic = dynamic)) return false;
   return true;
 }
 
 auto Audio::setChannels(uint channels) -> bool {
-  if(driver->channels == channels) return true;
-  if(!driver->hasChannels(channels)) return false;
-  if(!driver->setChannels(driver->channels = channels)) return false;
+  if(instance->channels == channels) return true;
+  if(!instance->hasChannels(channels)) return false;
+  if(!instance->setChannels(instance->channels = channels)) return false;
   resamplers.reset();
   resamplers.resize(channels);
-  for(auto& resampler : resamplers) resampler.reset(driver->frequency);
+  for(auto& resampler : resamplers) resampler.reset(instance->frequency);
   return true;
 }
 
 auto Audio::setFrequency(uint frequency) -> bool {
-  if(driver->frequency == frequency) return true;
-  if(!driver->hasFrequency(frequency)) return false;
-  if(!driver->setFrequency(driver->frequency = frequency)) return false;
-  for(auto& resampler : resamplers) resampler.reset(driver->frequency);
+  if(instance->frequency == frequency) return true;
+  if(!instance->hasFrequency(frequency)) return false;
+  if(!instance->setFrequency(instance->frequency = frequency)) return false;
+  for(auto& resampler : resamplers) resampler.reset(instance->frequency);
   return true;
 }
 
 auto Audio::setLatency(uint latency) -> bool {
-  if(driver->latency == latency) return true;
-  if(!driver->hasLatency(latency)) return false;
-  if(!driver->setLatency(driver->latency = latency)) return false;
+  if(instance->latency == latency) return true;
+  if(!instance->hasLatency(latency)) return false;
+  if(!instance->setLatency(instance->latency = latency)) return false;
   return true;
 }
 
 //
 
 auto Audio::clear() -> void {
-  for(auto& resampler : resamplers) resampler.reset(driver->frequency);
-  return driver->clear();
+  for(auto& resampler : resamplers) resampler.reset(instance->frequency);
+  return instance->clear();
 }
 
 auto Audio::level() -> double {
-  return driver->level();
+  return instance->level();
 }
 
 auto Audio::output(const double samples[]) -> void {
-  if(!driver->dynamic) return driver->output(samples);
+  if(!instance->dynamic) return instance->output(samples);
 
   auto maxDelta = 0.005;
-  double fillLevel = driver->level();
-  double dynamicFrequency = ((1.0 - maxDelta) + 2.0 * fillLevel * maxDelta) * driver->frequency;
+  double fillLevel = instance->level();
+  double dynamicFrequency = ((1.0 - maxDelta) + 2.0 * fillLevel * maxDelta) * instance->frequency;
   for(auto& resampler : resamplers) {
     resampler.setInputFrequency(dynamicFrequency);
     resampler.write(*samples++);
   }
 
   while(resamplers.first().pending()) {
-    double samples[driver->channels];
-    for(uint n : range(driver->channels)) samples[n] = resamplers[n].read();
-    driver->output(samples);
+    double samples[instance->channels];
+    for(uint n : range(instance->channels)) samples[n] = resamplers[n].read();
+    instance->output(samples);
   }
 }
 
 //
 
 auto Audio::create(string driver) -> bool {
-  reset();
+  self.instance.reset();
   if(!driver) driver = optimalDriver();
 
   #if defined(AUDIO_ALSA)
-  if(driver == "ALSA") self.driver = new AudioALSA(*this);
+  if(driver == "ALSA") self.instance = new AudioALSA(*this);
   #endif
 
   #if defined(AUDIO_AO)
-  if(driver == "libao") self.driver = new AudioAO(*this);
+  if(driver == "libao") self.instance = new AudioAO(*this);
   #endif
 
   #if defined(AUDIO_ASIO)
-  if(driver == "ASIO") self.driver = new AudioASIO(*this);
+  if(driver == "ASIO") self.instance = new AudioASIO(*this);
   #endif
 
   #if defined(AUDIO_DIRECTSOUND)
-  if(driver == "DirectSound") self.driver = new AudioDirectSound(*this);
+  if(driver == "DirectSound") self.instance = new AudioDirectSound(*this);
   #endif
 
   #if defined(AUDIO_OPENAL)
-  if(driver == "OpenAL") self.driver = new AudioOpenAL(*this);
+  if(driver == "OpenAL") self.instance = new AudioOpenAL(*this);
   #endif
 
   #if defined(AUDIO_OSS)
-  if(driver == "OSS") self.driver = new AudioOSS(*this);
+  if(driver == "OSS") self.instance = new AudioOSS(*this);
   #endif
 
   #if defined(AUDIO_PULSEAUDIO)
-  if(driver == "PulseAudio") self.driver = new AudioPulseAudio(*this);
+  if(driver == "PulseAudio") self.instance = new AudioPulseAudio(*this);
   #endif
 
   #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  if(driver == "PulseAudioSimple") self.driver = new AudioPulseAudioSimple(*this);
+  if(driver == "PulseAudioSimple") self.instance = new AudioPulseAudioSimple(*this);
   #endif
 
   #if defined(AUDIO_WASAPI)
-  if(driver == "WASAPI") self.driver = new AudioWASAPI(*this);
+  if(driver == "WASAPI") self.instance = new AudioWASAPI(*this);
   #endif
 
   #if defined(AUDIO_XAUDIO2)
-  if(driver == "XAudio2") self.driver = new AudioXAudio2(*this);
+  if(driver == "XAudio2") self.instance = new AudioXAudio2(*this);
   #endif
 
-  if(!self.driver) self.driver = new AudioDriver(*this);
+  if(!self.instance) self.instance = new AudioDriver(*this);
 
-  return self.driver->create();
+  return self.instance->create();
 }
 
 auto Audio::hasDrivers() -> vector<string> {

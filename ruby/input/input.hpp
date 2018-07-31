@@ -5,7 +5,7 @@ struct InputDriver {
   virtual ~InputDriver() = default;
 
   virtual auto create() -> bool { return true; }
-  virtual auto driverName() -> string { return "None"; }
+  virtual auto driver() -> string { return "None"; }
   virtual auto ready() -> bool { return true; }
 
   virtual auto hasContext() -> bool { return false; }
@@ -31,16 +31,16 @@ struct Input {
   static auto optimalDriver() -> string;
   static auto safestDriver() -> string;
 
-  Input() : self(*this) {}
-  explicit operator bool() const { return (bool)driver; }
-  auto reset() -> void { driver.reset(); }
+  Input() : self(*this) { reset(); }
+  explicit operator bool() { return instance->driver() != "None"; }
+  auto reset() -> void { instance = new InputDriver(*this); }
   auto create(string driver = "") -> bool;
-  auto driverName() -> string { return driver->driverName(); }
-  auto ready() -> bool { return driver->ready(); }
+  auto driver() -> string { return instance->driver(); }
+  auto ready() -> bool { return instance->ready(); }
 
-  auto hasContext() -> bool { return driver->hasContext(); }
+  auto hasContext() -> bool { return instance->hasContext(); }
 
-  auto context() -> uintptr { return driver->context; }
+  auto context() -> uintptr { return instance->context; }
 
   auto setContext(uintptr context) -> bool;
 
@@ -55,6 +55,6 @@ struct Input {
 
 protected:
   Input& self;
-  unique_pointer<InputDriver> driver;
+  unique_pointer<InputDriver> instance;
   function<void (shared_pointer<nall::HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue)> change;
 };

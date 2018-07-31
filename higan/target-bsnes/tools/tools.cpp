@@ -2,15 +2,19 @@
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
 #include "manifest-viewer.cpp"
-unique_pointer<CheatDatabase> cheatDatabase;
-unique_pointer<CheatWindow> cheatWindow;
-unique_pointer<StateWindow> stateWindow;
-unique_pointer<ToolsWindow> toolsWindow;
+CheatDatabase cheatDatabase;
+CheatWindow cheatWindow;
+CheatEditor cheatEditor;
+StateWindow stateWindow;
+StateManager stateManager;
+ManifestViewer manifestViewer;
+ToolsWindow toolsWindow;
 
-ToolsWindow::ToolsWindow() {
-  toolsWindow = this;
-
+auto ToolsWindow::create() -> void {
   layout.setPadding(5);
+  panel.append(cheatEditor);
+  panel.append(stateManager);
+  panel.append(manifestViewer);
 
   setTitle("Tools");
   setSize({600, 400});
@@ -30,15 +34,15 @@ ToolsWindow::ToolsWindow() {
 auto ToolsWindow::setVisible(bool visible) -> ToolsWindow& {
   Window::setVisible(visible);
   if(!visible) {
-    cheatDatabase->setVisible(false);
-    cheatWindow->setVisible(false);
-    stateWindow->setVisible(false);
+    cheatDatabase.setVisible(false);
+    cheatWindow.setVisible(false);
+    stateWindow.setVisible(false);
   }
   return *this;
 }
 
 auto ToolsWindow::show(uint index) -> void {
-  panel.item(index)->setSelected();
+  panel.item(index).setSelected();
   setVisible();
   setFocused();
   doSize();

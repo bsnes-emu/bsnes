@@ -29,7 +29,7 @@ auto mMenu::actions() const -> vector<Action> {
 auto mMenu::append(sAction action) -> type& {
   state.actions.append(action);
   action->setParent(this, actionCount() - 1);
-  signal(append, *action);
+  signal(append, action);
   return *this;
 }
 
@@ -38,7 +38,7 @@ auto mMenu::icon() const -> image {
 }
 
 auto mMenu::remove(sAction action) -> type& {
-  signal(remove, *action);
+  signal(remove, action);
   state.actions.remove(action->offset());
   for(auto n : range(action->offset(), actionCount())) {
     state.actions[n]->adjustOffset(-1);

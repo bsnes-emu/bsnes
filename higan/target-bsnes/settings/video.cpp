@@ -1,4 +1,4 @@
-VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
+auto VideoSettings::create() -> void {
   setIcon(Icon::Device::Display);
   setText("Video");
 
@@ -13,7 +13,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {luminanceSlider.position(), "%"};
     settings["Video/Luminance"].setValue(value);
     luminanceValue.setText(value);
-    program->updateVideoPalette();
+    program.updateVideoPalette();
   }).doChange();
   saturationLabel.setText("Saturation:");
   saturationValue.setAlignment(0.5);
@@ -21,7 +21,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {saturationSlider.position(), "%"};
     settings["Video/Saturation"].setValue(value);
     saturationValue.setText(value);
-    program->updateVideoPalette();
+    program.updateVideoPalette();
   }).doChange();
   gammaLabel.setText("Gamma:");
   gammaValue.setAlignment(0.5);
@@ -29,6 +29,6 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
     string value = {100 + gammaSlider.position(), "%"};
     settings["Video/Gamma"].setValue(value);
     gammaValue.setText(value);
-    program->updateVideoPalette();
+    program.updateVideoPalette();
   }).doChange();
 }

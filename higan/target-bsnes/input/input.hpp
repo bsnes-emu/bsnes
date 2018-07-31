@@ -67,7 +67,6 @@ struct InputPort {
 };
 
 struct InputManager {
-  InputManager();
   auto initialize() -> void;
   auto bind() -> void;
   auto poll() -> void;
@@ -92,4 +91,4 @@ public:
   uint turboFrequency = 0;
 };
 
-extern unique_pointer<InputManager> inputManager;
+extern InputManager inputManager;

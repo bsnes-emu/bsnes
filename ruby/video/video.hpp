@@ -5,7 +5,7 @@ struct VideoDriver {
   virtual ~VideoDriver() = default;
 
   virtual auto create() -> bool { return true; }
-  virtual auto driverName() -> string { return "None"; }
+  virtual auto driver() -> string { return "None"; }
   virtual auto ready() -> bool { return true; }
 
   virtual auto hasExclusive() -> bool { return false; }
@@ -51,30 +51,30 @@ struct Video {
   static auto optimalDriver() -> string;
   static auto safestDriver() -> string;
 
-  Video() : self(*this) {}
-  explicit operator bool() const { return (bool)driver; }
-  auto reset() -> void { driver.reset(); }
+  Video() : self(*this) { reset(); }
+  explicit operator bool() { return instance->driver() != "None"; }
+  auto reset() -> void { instance = new VideoDriver(*this); }
   auto create(string driver = "") -> bool;
-  auto driverName() -> string { return driver->driverName(); }
-  auto ready() -> bool { return driver->ready(); }
+  auto driver() -> string { return instance->driver(); }
+  auto ready() -> bool { return instance->ready(); }
 
-  auto hasExclusive() -> bool { return driver->hasExclusive(); }
-  auto hasContext() -> bool { return driver->hasContext(); }
-  auto hasBlocking() -> bool { return driver->hasBlocking(); }
-  auto hasFlush() -> bool { return driver->hasFlush(); }
-  auto hasFormats() -> vector<string> { return driver->hasFormats(); }
-  auto hasSmooth() -> bool { return driver->hasSmooth(); }
-  auto hasShader() -> bool { return driver->hasShader(); }
+  auto hasExclusive() -> bool { return instance->hasExclusive(); }
+  auto hasContext() -> bool { return instance->hasContext(); }
+  auto hasBlocking() -> bool { return instance->hasBlocking(); }
+  auto hasFlush() -> bool { return instance->hasFlush(); }
+  auto hasFormats() -> vector<string> { return instance->hasFormats(); }
+  auto hasSmooth() -> bool { return instance->hasSmooth(); }
+  auto hasShader() -> bool { return instance->hasShader(); }
 
-  auto hasFormat(string format) -> bool { return driver->hasFormat(format); }
+  auto hasFormat(string format) -> bool { return instance->hasFormat(format); }
 
-  auto exclusive() -> bool { return driver->exclusive; }
-  auto context() -> uintptr { return driver->context; }
-  auto blocking() -> bool { return driver->blocking; }
-  auto flush() -> bool { return driver->flush; }
-  auto format() -> string { return driver->format; }
-  auto smooth() -> bool { return driver->smooth; }
-  auto shader() -> string { return driver->shader; }
+  auto exclusive() -> bool { return instance->exclusive; }
+  auto context() -> uintptr { return instance->context; }
+  auto blocking() -> bool { return instance->blocking; }
+  auto flush() -> bool { return instance->flush; }
+  auto format() -> string { return instance->format; }
+  auto smooth() -> bool { return instance->smooth; }
+  auto shader() -> string { return instance->shader; }
 
   auto setExclusive(bool exclusive) -> bool;
   auto setContext(uintptr context) -> bool;
@@ -95,6 +95,6 @@ struct Video {
 
 protected:
   Video& self;
-  unique_pointer<VideoDriver> driver;
+  unique_pointer<VideoDriver> instance;
   function<void (uint, uint)> update;
 };

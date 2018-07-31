@@ -27,9 +27,6 @@ auto pObject::setFocused() -> void {
 auto pObject::setFont(const Font& font) -> void {
 }
 
-auto pObject::setParent(mObject* parent, int offset) -> void {
-}
-
 auto pObject::setVisible(bool visible) -> void {
 }
 

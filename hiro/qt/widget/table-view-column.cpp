@@ -3,6 +3,7 @@
 namespace hiro {
 
 auto pTableViewColumn::construct() -> void {
+  if(auto header = _parent()) header->_setState();
 }
 
 auto pTableViewColumn::destruct() -> void {
@@ -42,10 +43,6 @@ auto pTableViewColumn::setHorizontalAlignment(double alignment) -> void {
 
 auto pTableViewColumn::setIcon(const image& icon) -> void {
   //unsupported
-}
-
-auto pTableViewColumn::setParent(mObject* parent, int offset) -> void {
-  if(auto header = _parent()) header->_setState();
 }
 
 auto pTableViewColumn::setResizable(bool resizable) -> void {

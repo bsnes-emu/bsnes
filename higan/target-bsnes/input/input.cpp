@@ -1,6 +1,6 @@
 #include "../bsnes.hpp"
 #include "hotkeys.cpp"
-unique_pointer<InputManager> inputManager;
+InputManager inputManager;
 
 auto InputMapping::bind() -> void {
   mappings.reset();
@@ -15,7 +15,7 @@ auto InputMapping::bind() -> void {
     string qualifier = token(3, "None");
 
     Mapping mapping;
-    for(auto& device : inputManager->devices) {
+    for(auto& device : inputManager.devices) {
       if(id != device->id()) continue;
 
       mapping.device = device;
@@ -103,9 +103,9 @@ auto InputMapping::unbind() -> void {
 
 auto InputMapping::poll() -> int16 {
   if(turboID) {
-    auto& mapping = inputManager->ports[portID].devices[deviceID].mappings[turboID()];
+    auto& mapping = inputManager.ports[portID].devices[deviceID].mappings[turboID()];
     auto result = mapping.poll();
-    if(result) return inputManager->turboCounter >= inputManager->turboFrequency;
+    if(result) return inputManager.turboCounter >= inputManager.turboFrequency;
   }
 
   int16 result;
@@ -180,16 +180,11 @@ auto InputMapping::displayName() -> string {
 
 //
 
-InputManager::InputManager() {
-  inputManager = this;
-}
-
 auto InputManager::initialize() -> void {
   devices.reset();
   ports.reset();
   hotkeys.reset();
 
-  if(!input) return;
   input.onChange({&InputManager::onChange, this});
 
   lastPoll = chrono::millisecond();
@@ -283,9 +278,9 @@ auto InputManager::frame() -> void {
 }
 
 auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {
-  if(settingsWindow->focused()) {
-    settingsWindow->input.inputEvent(device, group, input, oldValue, newValue);
-    settingsWindow->hotkeys.inputEvent(device, group, input, oldValue, newValue);
+  if(settingsWindow.focused()) {
+    inputSettings.inputEvent(device, group, input, oldValue, newValue);
+    hotkeySettings.inputEvent(device, group, input, oldValue, newValue);
   }
 }
 

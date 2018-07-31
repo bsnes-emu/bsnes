@@ -11,22 +11,31 @@
 #include "utility.cpp"
 #include "patch.cpp"
 #include "hacks.cpp"
-unique_pointer<Program> program;
+Program program;
 
-Program::Program(vector<string> arguments) {
-  program = this;
+auto Program::create(vector<string> arguments) -> void {
   Emulator::platform = this;
 
-  new Presentation;
-  presentation->setVisible();
-
-  new InputManager;
-  new SettingsWindow;
-  new CheatDatabase;
-  new CheatWindow;
-  new StateWindow;
-  new ToolsWindow;
   aboutWindow.create();
+  presentation.create();
+  presentation.setVisible();
+
+  videoSettings.create();
+  audioSettings.create();
+  inputSettings.create();
+  hotkeySettings.create();
+  pathSettings.create();
+  emulatorSettings.create();
+  driverSettings.create();
+  settingsWindow.create();
+
+  cheatDatabase.create();
+  cheatWindow.create();
+  cheatEditor.create();
+  stateWindow.create();
+  stateManager.create();
+  manifestViewer.create();
+  toolsWindow.create();
 
   if(settings["Crashed"].boolean()) {
     MessageDialog(
@@ -40,20 +49,20 @@ Program::Program(vector<string> arguments) {
 
   settings["Crashed"].setValue(true);
   settings.save();
-  updateVideoDriver(*presentation);
-  updateAudioDriver(*presentation);
-  updateInputDriver(*presentation);
+  updateVideoDriver(presentation);
+  updateAudioDriver(presentation);
+  updateInputDriver(presentation);
   settings["Crashed"].setValue(false);
   settings.save();
 
-  settingsWindow->drivers.videoDriverChanged();
-  settingsWindow->drivers.audioDriverChanged();
-  settingsWindow->drivers.inputDriverChanged();
+  driverSettings.videoDriverChanged();
+  driverSettings.audioDriverChanged();
+  driverSettings.inputDriverChanged();
 
   arguments.takeLeft();  //ignore program location in argument parsing
   for(auto& argument : arguments) {
     if(argument == "--fullscreen") {
-      presentation->toggleFullscreenMode();
+      presentation.toggleFullscreenMode();
     } else if(inode::exists(argument)) {
       gameQueue.append(argument);
     }
@@ -68,8 +77,8 @@ auto Program::main() -> void {
 
   updateStatus();
   video.poll();
-  inputManager->poll();
-  inputManager->pollHotkeys();
+  inputManager.poll();
+  inputManager.pollHotkeys();
 
   if(paused()) {
     audio.clear();
@@ -78,7 +87,7 @@ auto Program::main() -> void {
   }
 
   emulator->run();
-  if(settingsWindow->configuration.autoSaveMemory.checked()) {
+  if(emulatorSettings.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();
     if(currentTime - autoSaveTime >= settings["Emulator/AutoSaveMemory/Interval"].natural()) {
       autoSaveTime = currentTime;
