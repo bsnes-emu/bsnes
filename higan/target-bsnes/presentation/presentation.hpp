@@ -1,7 +1,6 @@
 struct AboutWindow : Window {
   Application::Namespace tr{"AboutWindow"};
-
-  AboutWindow();
+  auto create() -> void;
 
   VerticalLayout layout{this};
     Canvas canvas{&layout, Size{400, 85}, 0};
@@ -113,5 +112,5 @@ struct Presentation : Window {
       Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 
-extern unique_pointer<AboutWindow> aboutWindow;
+extern AboutWindow aboutWindow;
 extern unique_pointer<Presentation> presentation;

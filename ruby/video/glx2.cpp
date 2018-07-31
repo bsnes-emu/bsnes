@@ -21,46 +21,36 @@
   #error "ruby::OpenGL2: unsupported platform"
 #endif
 
-struct VideoGLX2 : Video {
-  VideoGLX2() { initialize(); }
+struct VideoGLX2 : VideoDriver {
+  VideoGLX2& self;
+
+  VideoGLX2(Video& super) : VideoDriver(super), self(*this) {}
   ~VideoGLX2() { terminate(); }
 
-  auto driver() -> string override { return "OpenGL2"; }
+  auto create() -> bool {
+    super.setFormat("RGB24");
+    return initialize();
+  }
+
+  auto driverName() -> string override { return "OpenGL2"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
-  auto hasFormat() -> bool override { return true; }
+  auto hasFormats() -> vector<string> override { return {"RGB24"}; }
   auto hasSmooth() -> bool override { return true; }
 
-  auto availableFormats() -> vector<string> override {
-    return {"RGB24", "RGB30"};
-  }
-
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
     if(glXSwapInterval) glXSwapInterval(blocking);
     return true;
   }
 
-  auto setFlush(bool flush) -> bool override {
-    if(flush == Video::flush()) return true;
-    if(!Video::setFlush(flush)) return false;
-    return true;
-  }
-
   auto setFormat(string format) -> bool override {
-    if(format == Video::format()) return true;
-    if(!Video::setFormat(format)) return false;
-
     if(format == "RGB24") {
       _glFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
       return initialize();
@@ -74,12 +64,6 @@ struct VideoGLX2 : Video {
     return false;
   }
 
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == Video::smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    return true;
-  }
-
   auto clear() -> void override {
     if(!ready()) return;
     memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
@@ -90,21 +74,17 @@ struct VideoGLX2 : Video {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     if(width != _width || height != _height) resize(width, height);
     pitch = _glWidth * sizeof(uint32_t);
     return data = _glBuffer;
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
-
     XWindowAttributes parent, child;
-    XGetWindowAttributes(_display, (Window)_context, &parent);
+    XGetWindowAttributes(_display, (Window)self.context, &parent);
     XGetWindowAttributes(_display, _window, &child);
     if(child.width != parent.width || child.height != parent.height) {
       XResizeWindow(_display, _window, parent.width, parent.height);
@@ -112,8 +92,8 @@ struct VideoGLX2 : Video {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _smooth ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _smooth ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, self.smooth ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, self.smooth ? GL_LINEAR : GL_NEAREST);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -139,7 +119,7 @@ struct VideoGLX2 : Video {
     glFlush();
 
     if(_isDoubleBuffered) glXSwapBuffers(_display, _glXWindow);
-    if(flush()) glFinish();
+    if(self.flush) glFinish();
   }
 
   auto poll() -> void override {
@@ -149,7 +129,7 @@ struct VideoGLX2 : Video {
       if(event.type == Expose) {
         XWindowAttributes attributes;
         XGetWindowAttributes(_display, _window, &attributes);
-        doUpdate(attributes.width, attributes.height);
+        super.doUpdate(attributes.width, attributes.height);
       }
     }
   }
@@ -157,9 +137,9 @@ struct VideoGLX2 : Video {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
-    _display = XOpenDisplay(0);
+    _display = XOpenDisplay(nullptr);
     _screen = DefaultScreen(_display);
 
     int versionMajor = 0, versionMinor = 0;
@@ -167,11 +147,11 @@ private:
     if(versionMajor < 1 || (versionMajor == 1 && versionMinor < 2)) return false;
 
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
 
-    int redDepth   = Video::format() == "RGB30" ? 10 : 8;
-    int greenDepth = Video::format() == "RGB30" ? 10 : 8;
-    int blueDepth  = Video::format() == "RGB30" ? 10 : 8;
+    int redDepth   = self.format == "RGB30" ? 10 : 8;
+    int greenDepth = self.format == "RGB30" ? 10 : 8;
+    int blueDepth  = self.format == "RGB30" ? 10 : 8;
 
     int attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
@@ -192,7 +172,7 @@ private:
     XSetWindowAttributes attributes = {};
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
-    _window = XCreateWindow(_display, (Window)_context, 0, 0, windowAttributes.width, windowAttributes.height,
+    _window = XCreateWindow(_display, (Window)self.context, 0, 0, windowAttributes.width, windowAttributes.height,
       0, vi->depth, InputOutput, vi->visual, CWColormap | CWBorderPixel, &attributes);
     XSelectInput(_display, _window, ExposureMask);
     XSetWindowBackground(_display, _window, 0);
@@ -210,7 +190,7 @@ private:
     if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
     if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
 
-    if(glXSwapInterval) glXSwapInterval(_blocking);
+    if(glXSwapInterval) glXSwapInterval(self.blocking);
 
     int value = 0;
     glXGetConfig(_display, vi, GLX_DOUBLEBUFFER, &value);

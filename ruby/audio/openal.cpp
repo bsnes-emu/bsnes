@@ -7,8 +7,17 @@
 #endif
 
 struct AudioOpenAL : Audio {
-  AudioOpenAL() { initialize(); }
-  ~AudioOpenAL() { terminate(); }
+  AudioOpenAL() {
+    Audio::setDevice(availableDevices().first());
+    Audio::setChannels(2);
+    Audio::setFrequency(48000.0);
+    Audio::setLatency(20);
+    initialize();
+  }
+
+  ~AudioOpenAL() {
+    terminate();
+  }
 
   auto driver() -> string override { return "OpenAL"; }
   auto ready() -> bool override { return _ready; }
@@ -21,7 +30,12 @@ struct AudioOpenAL : Audio {
 
   auto availableDevices() -> vector<string> override {
     vector<string> devices;
-    for(auto& device : queryDevices()) devices.append(device);
+    if(const char* list = alcGetString(nullptr, ALC_DEVICE_SPECIFIER)) {
+      while(list && *list) {
+        result.append(list);
+        list += strlen(list) + 1;
+      }
+    }
     return devices;
   }
 
@@ -37,38 +51,35 @@ struct AudioOpenAL : Audio {
     return {20, 40, 60, 80, 100};
   }
 
+  auto context() -> uintptr override { return 0; }
+  auto dynamic() -> bool override { return false; }
+
   auto setDevice(string device) -> bool override {
-    if(device == this->device()) return true;
+    if(device == Audio::device()) return true;
     if(!Audio::setDevice(device)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == this->blocking()) return true;
+    if(blocking == Audio::blocking()) return true;
     if(!Audio::setBlocking(blocking)) return false;
     return true;
   }
 
-  auto setChannels(uint channels) -> bool override {
-    if(channels == this->channels()) return true;
-    if(!Audio::setChannels(channels)) return false;
-    return true;
-  }
-
   auto setFrequency(double frequency) -> bool override {
-    if(frequency == this->frequency()) return true;
+    if(frequency == Audio::frequency()) return true;
     if(!Audio::setFrequency(frequency)) return false;
     return initialize();
   }
 
   auto setLatency(uint latency) -> bool override {
-    if(latency == this->latency()) return true;
+    if(latency == Audio::latency()) return true;
     if(!Audio::setLatency(latency)) return false;
     if(ready()) updateLatency();
     return true;
   }
 
-  auto output(const double samples[]) -> void override {
+  auto write(const double samples[]) -> void override {
     _buffer[_bufferLength]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_bufferLength] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     if(++_bufferLength < _bufferSize) return;
@@ -169,20 +180,6 @@ private:
 
     delete[] _buffer;
     _buffer = nullptr;
-  }
-
-  auto queryDevices() -> vector<string> {
-    vector<string> result;
-
-    const char* list = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
-    if(!list) return result;
-
-    while(list && *list) {
-      result.append(list);
-      list += strlen(list) + 1;
-    }
-
-    return result;
   }
 
   auto updateLatency() -> void {

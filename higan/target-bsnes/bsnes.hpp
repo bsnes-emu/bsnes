@@ -4,9 +4,9 @@
 using namespace nall;
 using namespace ruby;
 using namespace hiro;
-extern unique_pointer<Video> video;
-extern unique_pointer<Audio> audio;
-extern unique_pointer<Input> input;
+extern Video video;
+extern Audio audio;
+extern Input input;
 
 #include <emulator/emulator.hpp>
 extern unique_pointer<Emulator::Interface> emulator;

@@ -54,7 +54,7 @@ auto Program::paused() -> bool {
 
 auto Program::focused() -> bool {
   //exclusive mode creates its own top-level window: presentation window will not have focus
-  if(video && video->exclusive()) return true;
+  if(video && video.exclusive()) return true;
   if(presentation && presentation->focused()) return true;
   return false;
 }

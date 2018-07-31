@@ -1,9 +1,9 @@
 auto Program::updateVideoDriver(Window parent) -> void {
   auto changed = (bool)video;
-  video = Video::create(settings["Video/Driver"].text());
-  video->setContext(presentation->viewport.handle());
+  video.create(settings["Video/Driver"].text());
+  video.setContext(presentation->viewport.handle());
   if(changed) {
-    settings["Video/Format"].setValue(video->defaultFormat());
+    settings["Video/Format"].setValue(video.format());
   }
   updateVideoExclusive();
   updateVideoBlocking();
@@ -11,16 +11,16 @@ auto Program::updateVideoDriver(Window parent) -> void {
   updateVideoFormat();
   updateVideoShader();
 
-  if(video->ready()) {
+  if(video.ready()) {
     presentation->clearViewport();
     updateVideoShader();
   }
 
-  video->onUpdate([&](uint width, uint height) {
+  video.onUpdate([&](uint width, uint height) {
     if(!emulator->loaded()) presentation->clearViewport();
   });
 
-  if(!video->ready()) {
+  if(!video.ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings["Video/Driver"].text(), "] video driver."
     }).setParent(parent).error();
@@ -33,22 +33,22 @@ auto Program::updateVideoDriver(Window parent) -> void {
 
 auto Program::updateVideoExclusive() -> void {
   //only enabled in fullscreen mode via Presentation::toggleFullScreen()
-  video->setExclusive(false);
+  video.setExclusive(false);
 }
 
 auto Program::updateVideoBlocking() -> void {
-  video->setBlocking(settings["Video/Blocking"].boolean());
+  video.setBlocking(settings["Video/Blocking"].boolean());
 }
 
 auto Program::updateVideoFlush() -> void {
-  video->setFlush(settings["Video/Flush"].boolean());
+  video.setFlush(settings["Video/Flush"].boolean());
 }
 
 auto Program::updateVideoFormat() -> void {
-  if(!video->availableFormats().find(settings["Video/Format"].text())) {
-    settings["Video/Format"].setValue(video->defaultFormat());
+  if(!video.hasFormat(settings["Video/Format"].text())) {
+    settings["Video/Format"].setValue(video.format());
   }
-  video->setFormat(settings["Video/Format"].text());
+  video.setFormat(settings["Video/Format"].text());
 }
 
 auto Program::updateVideoShader() -> void {
@@ -56,11 +56,11 @@ auto Program::updateVideoShader() -> void {
   && settings["Video/Shader"].text() != "None"
   && settings["Video/Shader"].text() != "Blur"
   ) {
-    video->setSmooth(false);
-    video->setShader(settings["Video/Shader"].text());
+    video.setSmooth(false);
+    video.setShader(settings["Video/Shader"].text());
   } else {
-    video->setSmooth(settings["Video/Shader"].text() == "Blur");
-    video->setShader("");
+    video.setSmooth(settings["Video/Shader"].text() == "Blur");
+    video.setShader("");
   }
 }
 

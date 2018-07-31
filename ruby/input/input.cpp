@@ -25,55 +25,107 @@
 namespace ruby {
 
 auto Input::setContext(uintptr context) -> bool {
-  _context = context;
+  if(driver->context == context) return true;
+  if(!driver->hasContext()) return false;
+  if(!driver->setContext(driver->context = context)) return false;
   return true;
 }
 
+//
+
+auto Input::acquired() -> bool {
+  return driver->acquired();
+}
+
+auto Input::acquire() -> bool {
+  return driver->acquire();
+}
+
+auto Input::release() -> bool {
+  return driver->release();
+}
+
+auto Input::poll() -> vector<shared_pointer<nall::HID::Device>> {
+  return driver->poll();
+}
+
+auto Input::rumble(uint64_t id, bool enable) -> bool {
+  return driver->rumble(id, enable);
+}
+
+//
+
 auto Input::onChange(const function<void (shared_pointer<HID::Device>, uint, uint, int16_t, int16_t)>& onChange) -> void {
-  _onChange = onChange;
+  change = onChange;
 }
 
 auto Input::doChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {
-  if(_onChange) _onChange(device, group, input, oldValue, newValue);
+  if(change) change(device, group, input, oldValue, newValue);
 }
 
-//protected functions
+//
 
-//static functions
-
-auto Input::create(string driver) -> Input* {
-  Input* input = nullptr;
+auto Input::create(string driver) -> bool {
+  reset();
   if(!driver) driver = optimalDriver();
 
   #if defined(INPUT_WINDOWS)
-  if(driver == "Windows") input = new InputWindows;
+  if(driver == "Windows") self.driver = new InputWindows(*this);
   #endif
 
   #if defined(INPUT_QUARTZ)
-  if(driver == "Quartz") input = new InputQuartz;
+  if(driver == "Quartz") self.driver = new InputQuartz(*this);
   #endif
 
   #if defined(INPUT_CARBON)
-  if(driver == "Carbon") input = new InputCarbon;
+  if(driver == "Carbon") self.driver = new InputCarbon(*this);
   #endif
 
   #if defined(INPUT_UDEV)
-  if(driver == "udev") input = new InputUdev;
+  if(driver == "udev") self.driver = new InputUdev(*this);
   #endif
 
   #if defined(INPUT_SDL)
-  if(driver == "SDL") input = new InputSDL;
+  if(driver == "SDL") self.driver = new InputSDL(*this);
   #endif
 
   #if defined(INPUT_XLIB)
-  if(driver == "Xlib") input = new InputXlib;
+  if(driver == "Xlib") self.driver = new InputXlib(*this);
   #endif
 
-  if(!input) input = new Input;
+  if(!self.driver) self.driver = new InputDriver(*this);
 
-  input->_context = input->context();
+  return self.driver->create();
+}
 
-  return input;
+auto Input::hasDrivers() -> vector<string> {
+  return {
+
+  #if defined(INPUT_WINDOWS)
+  "Windows",
+  #endif
+
+  #if defined(INPUT_QUARTZ)
+  "Quartz",
+  #endif
+
+  #if defined(INPUT_CARBON)
+  "Carbon",
+  #endif
+
+  #if defined(INPUT_UDEV)
+  "udev",
+  #endif
+
+  #if defined(INPUT_SDL)
+  "SDL",
+  #endif
+
+  #if defined(INPUT_XLIB)
+  "Xlib",
+  #endif
+
+  "None"};
 }
 
 auto Input::optimalDriver() -> string {
@@ -110,36 +162,6 @@ auto Input::safestDriver() -> string {
   #else
   return "none";
   #endif
-}
-
-auto Input::availableDrivers() -> vector<string> {
-  return {
-
-  #if defined(INPUT_WINDOWS)
-  "Windows",
-  #endif
-
-  #if defined(INPUT_QUARTZ)
-  "Quartz",
-  #endif
-
-  #if defined(INPUT_CARBON)
-  "Carbon",
-  #endif
-
-  #if defined(INPUT_UDEV)
-  "udev",
-  #endif
-
-  #if defined(INPUT_SDL)
-  "SDL",
-  #endif
-
-  #if defined(INPUT_XLIB)
-  "Xlib",
-  #endif
-
-  "None"};
 }
 
 }

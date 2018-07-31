@@ -210,15 +210,15 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   screenshot.width = width;
   screenshot.height = height;
 
-  if(video->acquire(output, length, width, height)) {
+  if(video.acquire(output, length, width, height)) {
     length >>= 2;
 
     for(auto y : range(height)) {
       memory::copy<uint32>(output + y * length, data + y * pitch, width);
     }
 
-    video->release();
-    video->output();
+    video.release();
+    video.output();
   }
 
   inputManager->frame();
@@ -241,7 +241,7 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
 }
 
 auto Program::audioSample(const double* samples, uint channels) -> void {
-  audio->output(samples);
+  audio.output(samples);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

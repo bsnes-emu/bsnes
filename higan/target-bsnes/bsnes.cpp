@@ -1,8 +1,8 @@
 #include "bsnes.hpp"
 #include <sfc/interface/interface.hpp>
-unique_pointer<Video> video;
-unique_pointer<Audio> audio;
-unique_pointer<Input> input;
+Video video;
+Audio audio;
+Input input;
 unique_pointer<Emulator::Interface> emulator;
 
 auto locate(string name) -> string {
@@ -18,6 +18,10 @@ auto locate(string name) -> string {
   return {Path::userData(), "bsnes/", name};
 }
 
+auto hiro::initialize() -> void {
+  Application::setName("bsnes");
+}
+
 #include <nall/main.hpp>
 auto nall::main(vector<string> arguments) -> void {
   string locale;  // = "日本語";
@@ -26,7 +30,6 @@ auto nall::main(vector<string> arguments) -> void {
       locale = argument.trimLeft("--locale=", 1L);
     }
   }
-  Application::setName("bsnes");
   Application::setScreenSaver(!settings["UserInterface/SuppressScreenSaver"].boolean());
   Application::locale().scan(locate("locales/"));
   Application::locale().select(locale);

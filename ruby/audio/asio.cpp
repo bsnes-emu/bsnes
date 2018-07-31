@@ -1,3 +1,4 @@
+#include <nall/windows/registry.hpp>
 #include "asio.hpp"
 
 struct AudioASIO : Audio {

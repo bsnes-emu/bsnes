@@ -26,7 +26,7 @@ Program::Program(vector<string> arguments) {
   new CheatWindow;
   new StateWindow;
   new ToolsWindow;
-  new AboutWindow;
+  aboutWindow.create();
 
   if(settings["Crashed"].boolean()) {
     MessageDialog(
@@ -67,12 +67,12 @@ auto Program::main() -> void {
   if(Application::modal()) return;
 
   updateStatus();
-  video->poll();
+  video.poll();
   inputManager->poll();
   inputManager->pollHotkeys();
 
   if(paused()) {
-    audio->clear();
+    audio.clear();
     usleep(20 * 1000);
     return;
   }

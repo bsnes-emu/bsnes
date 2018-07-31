@@ -6,7 +6,7 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Toggle Mouse Capture").onPress([] {
-    input->acquired() ? input->release() : input->acquire();
+    input.acquired() ? input.release() : input.acquire();
   }));
 
   hotkeys.append(InputHotkey("Toggle Cheat Codes").onPress([] {
@@ -47,11 +47,11 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
-    video->setBlocking(false);
-    audio->setBlocking(false);
+    video.setBlocking(false);
+    audio.setBlocking(false);
   }).onRelease([] {
-    video->setBlocking(settings["Video/Blocking"].boolean());
-    audio->setBlocking(settings["Audio/Blocking"].boolean());
+    video.setBlocking(settings["Video/Blocking"].boolean());
+    audio.setBlocking(settings["Audio/Blocking"].boolean());
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {

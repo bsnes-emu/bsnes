@@ -615,9 +615,12 @@ auto OscillatorWindow::updateWindow() -> void {
 
 //
 
-#include <nall/main.hpp>
-auto nall::main(string_vector args) -> void {
+auto hiro::initialize() -> void {
   Application::setName("genius");
+}
+
+#include <nall/main.hpp>
+auto nall::main(vector<string> arguments) -> void {
   new ListWindow;
   new GameWindow;
   new MemoryWindow;
@@ -625,12 +628,12 @@ auto nall::main(string_vector args) -> void {
 
   //internal command used to synchronize all genius databases from an old format to a new format
   //if enabled, use with extreme caution and make backups first
-/*if(args.size() == 3 && args[1] == "--sync") {
-    for(auto& filename : directory::contents(args[2], "*.bml")) {
+/*if(arguments.size() == 3 && arguments[1] == "--sync") {
+    for(auto& filename : directory::contents(arguments[2], "*.bml")) {
       if(filename.beginsWith("Boards")) continue;
       print(filename, "\n");
-      listWindow->loadDatabase({args[2], filename});
-      listWindow->saveDatabase({args[2], filename});
+      listWindow->loadDatabase({arguments[2], filename});
+      listWindow->saveDatabase({arguments[2], filename});
     }
     return print("[Done]\n");
   }*/

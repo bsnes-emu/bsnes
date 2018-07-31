@@ -57,10 +57,12 @@ Icarus icarus;
 #include "ui/import-dialog.cpp"
 #include "ui/error-dialog.cpp"
 
+auto hiro::initialize() -> void {
+  Application::setName("icarus");
+}
+
 #include <nall/main.hpp>
 auto nall::main(vector<string> arguments) -> void {
-  Application::setName("icarus");
-
   if(arguments.size() == 2 && arguments[1] == "--name") {
     return print("icarus");
   }

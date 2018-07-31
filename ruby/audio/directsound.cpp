@@ -1,8 +1,15 @@
 #include <dsound.h>
 
 struct AudioDirectSound : Audio {
-  AudioDirectSound() { initialize(); }
-  ~AudioDirectSound() { terminate(); }
+  AudioDirectSound() {
+    Audio::setFrequency(48000.0);
+    Audio::setLatency(40);
+    initialize();
+  }
+
+  ~AudioDirectSound() {
+    terminate();
+  }
 
   auto driver() -> string override { return "DirectSound"; }
   auto ready() -> bool override { return _ready; }
@@ -18,6 +25,9 @@ struct AudioDirectSound : Audio {
   auto availableLatencies() -> vector<uint> override {
     return {40, 60, 80, 100};
   }
+
+  auto defaultFrequency() -> double override { return 48000.0; }
+  auto defaultLatency() -> uint override { return 40; }
 
   auto setBlocking(bool blocking) -> bool override {
     if(blocking == Audio::blocking()) return true;

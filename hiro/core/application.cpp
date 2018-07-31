@@ -134,6 +134,7 @@ auto Application::initialize() -> void {
   static bool initialized = false;
   if(initialized == false) {
     initialized = true;
+    hiro::initialize();
     return pApplication::initialize();
   }
 }

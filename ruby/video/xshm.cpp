@@ -8,38 +8,28 @@
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
-struct VideoXShm : Video {
-  VideoXShm() { initialize(); }
+struct VideoXShm : VideoDriver {
+  VideoXShm& self;
+
+  VideoXShm(Video& super) : VideoDriver(super), self(*this) {}
   ~VideoXShm() { terminate(); }
 
-  auto driver() -> string override { return "XShm"; }
+  auto create() -> bool {
+    return initialize();
+  }
+
+  auto driverName() -> string override { return "XShm"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
 
-  auto availableFormats() -> vector<string> { return {"RGB24"}; }
+  auto hasFormats() -> vector<string> override { return {"RGB24"}; }
 
-  auto exclusive() -> bool override { return false; }
-  auto blocking() -> bool override { return false; }
-  auto flush() -> bool override { return false; }
-  auto format() -> string override { return "RGB24"; }
-  auto shader() -> string override { return ""; }
-
-  auto setContext(uintptr context) -> bool override {
-    if(context == this->context()) return true;
-    if(!Video::setContext(context)) return false;
-    return initialize();
-  }
-
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == this->smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    return true;
-  }
+  auto setContext(uintptr context) -> bool override { return initialize(); }
+  auto setSmooth(bool smooth) -> bool override { return true; }
 
   auto clear() -> void override {
-    if(!ready()) return;
     auto dp = _inputBuffer;
     uint length = _inputWidth * _inputHeight;
     while(length--) *dp++ = 255u << 24;
@@ -47,7 +37,6 @@ struct VideoXShm : Video {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     if(!_inputBuffer || _inputWidth != width || _inputHeight != height) {
       if(_inputBuffer) delete[] _inputBuffer;
       _inputWidth = width;
@@ -61,11 +50,9 @@ struct VideoXShm : Video {
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
     size();
 
     float xratio = (float)_inputWidth / (float)_outputWidth;
@@ -79,7 +66,7 @@ struct VideoXShm : Video {
       uint32_t* sp = _inputBuffer + (uint)ystep * _inputWidth;
       uint32_t* dp = _outputBuffer + y * _outputWidth;
 
-      if(!_smooth) {
+      if(!self.smooth) {
         for(uint x = 0; x < _outputWidth; x++) {
           *dp++ = 255u << 24 | sp[(uint)xstep];
           xstep += xratio;
@@ -105,7 +92,7 @@ struct VideoXShm : Video {
       if(event.type == Expose) {
         XWindowAttributes attributes;
         XGetWindowAttributes(_display, _window, &attributes);
-        doUpdate(attributes.width, attributes.height);
+        super.doUpdate(attributes.width, attributes.height);
       }
     }
   }
@@ -113,13 +100,13 @@ struct VideoXShm : Video {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     _display = XOpenDisplay(nullptr);
     _screen = DefaultScreen(_display);
 
     XWindowAttributes getAttributes;
-    XGetWindowAttributes(_display, (Window)_context, &getAttributes);
+    XGetWindowAttributes(_display, (Window)self.context, &getAttributes);
     _depth = getAttributes.depth;
     _visual = getAttributes.visual;
     //driver only supports 32-bit pixels
@@ -131,7 +118,7 @@ private:
 
     XSetWindowAttributes setAttributes = {};
     setAttributes.border_pixel = 0;
-    _window = XCreateWindow(_display, (Window)_context,
+    _window = XCreateWindow(_display, (Window)self.context,
       0, 0, 256, 256, 0,
       getAttributes.depth, InputOutput, getAttributes.visual,
       CWBorderPixel, &setAttributes
@@ -160,7 +147,7 @@ private:
 
   auto size() -> bool {
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
 
     if(_outputBuffer && _outputWidth == windowAttributes.width && _outputHeight == windowAttributes.height) return true;
     _outputWidth = windowAttributes.width;

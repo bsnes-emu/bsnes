@@ -24,6 +24,6 @@ using namespace ruby;
   #include <windows.h>
 #endif
 
-#include "video.cpp"
-#include "audio.cpp"
-#include "input.cpp"
+#include <ruby/video/video.cpp>
+#include <ruby/audio/audio.cpp>
+#include <ruby/input/input.cpp>

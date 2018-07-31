@@ -1,6 +1,6 @@
 #include "../bsnes.hpp"
 #include "about.cpp"
-unique_pointer<AboutWindow> aboutWindow;
+AboutWindow aboutWindow;
 unique_pointer<Presentation> presentation;
 
 Presentation::Presentation() {
@@ -122,7 +122,7 @@ Presentation::Presentation() {
   speedFast.setText("150% (Fast)").setProperty("multiplier", "0.667").onActivate([&] { program->updateAudioFrequency(); });
   speedFastest.setText("200% (Fastest)").setProperty("multiplier", "0.5").onActivate([&] { program->updateAudioFrequency(); });
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
-    if(pauseEmulation.checked()) audio->clear();
+    if(pauseEmulation.checked()) audio.clear();
   });
   frameAdvance.setIcon(Icon::Media::Next).setText("Frame Advance").onActivate([&] {
     pauseEmulation.setChecked(false);
@@ -140,7 +140,7 @@ Presentation::Presentation() {
     invoke("https://doc.byuu.org/bsnes/");
   });
   about.setIcon(Icon::Prompt::Question).setText({tr("About"), " ..."}).onActivate([&] {
-    aboutWindow->setCentered(*this).setVisible().setFocused();
+    aboutWindow.setCentered(*this).setVisible().setFocused();
   });
 
   viewport.setDroppable().onDrop([&](vector<string> locations) {
@@ -241,14 +241,14 @@ auto Presentation::clearViewport() -> void {
   uint length;
   uint width = 16;
   uint height = 16;
-  if(video->acquire(output, length, width, height)) {
+  if(video.acquire(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
     if(!emulator->loaded()) drawIcon(output, length, width, height);
-    video->release();
-    video->output();
+    video.release();
+    video.output();
   }
 }
 
@@ -326,14 +326,14 @@ auto Presentation::toggleFullscreenMode() -> void {
     }
     menuBar.setVisible(false);
     setFullScreen(true);
-    video->setExclusive(settings["Video/Exclusive"].boolean());
-    if(video->exclusive()) setVisible(false);
-    if(!input->acquired()) input->acquire();
+    video.setExclusive(settings["Video/Exclusive"].boolean());
+    if(video.exclusive()) setVisible(false);
+    if(!input.acquired()) input.acquire();
     resizeViewport();
   } else {
-    if(input->acquired()) input->release();
-    if(video->exclusive()) setVisible(true);
-    video->setExclusive(false);
+    if(input.acquired()) input.release();
+    if(video.exclusive()) setVisible(true);
+    video.setExclusive(false);
     setFullScreen(false);
     menuBar.setVisible(true);
     if(settings["UserInterface/ShowStatusBar"].boolean()) {

@@ -1,6 +1,4 @@
-AboutWindow::AboutWindow() {
-  aboutWindow = this;
-
+auto AboutWindow::create() -> void {
   setTitle({tr("About {0}", "bsnes"), " ..."});
   setBackgroundColor({255, 255, 240});
   layout.setPadding(10);

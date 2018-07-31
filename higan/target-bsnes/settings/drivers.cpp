@@ -8,7 +8,7 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
   videoLayout.setSize({2, 2});
   videoDriverLabel.setText("Driver:");
   videoDriverOption.onChange([&] {
-    videoDriverUpdate.setEnabled(videoDriverOption.selected().text() != video->driver());
+    videoDriverUpdate.setEnabled(videoDriverOption.selected().text() != video.driverName());
   });
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
@@ -30,7 +30,7 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
   audioLayout.setSize({2, 2});
   audioDriverLabel.setText("Driver:");
   audioDriverOption.onChange([&] {
-    audioDriverUpdate.setEnabled(audioDriverOption.selected().text() != audio->driver());
+    audioDriverUpdate.setEnabled(audioDriverOption.selected().text() != audio.driverName());
   });
   audioDriverUpdate.setText("Change").onActivate([&] { audioDriverChange(); });
   audioDeviceLabel.setText("Device:");
@@ -56,7 +56,7 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
   inputLayout.setSize({2, 1});
   inputDriverLabel.setText("Driver:");
   inputDriverOption.onChange([&] {
-    inputDriverUpdate.setEnabled(inputDriverOption.selected().text() != input->driver());
+    inputDriverUpdate.setEnabled(inputDriverOption.selected().text() != input.driverName());
   });
   inputDriverUpdate.setText("Change").onActivate([&] { inputDriverChange(); });
 
@@ -70,17 +70,17 @@ DriverSettings::DriverSettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto DriverSettings::videoDriverChanged() -> void {
   videoDriverOption.reset();
-  for(auto& driver : video->availableDrivers()) {
+  for(auto& driver : video.hasDrivers()) {
     ComboButtonItem item{&videoDriverOption};
     item.setText(driver);
-    if(driver == video->driver()) item.setSelected();
+    if(driver == video.driverName()) item.setSelected();
   }
-  videoDriverActive.setText({"Active driver: ", video->driver()});
+  videoDriverActive.setText({"Active driver: ", video.driverName()});
   videoDriverOption.doChange();
   videoFormatChanged();
-  videoExclusiveToggle.setChecked(video->exclusive()).setEnabled(video->hasExclusive());
-  videoBlockingToggle.setChecked(video->blocking()).setEnabled(video->hasBlocking());
-  videoFlushToggle.setChecked(video->flush()).setEnabled(video->hasFlush());
+  videoExclusiveToggle.setChecked(video.exclusive()).setEnabled(video.hasExclusive());
+  videoBlockingToggle.setChecked(video.blocking()).setEnabled(video.hasBlocking());
+  videoFlushToggle.setChecked(video.flush()).setEnabled(video.hasFlush());
   layout.setGeometry(layout.geometry());
 }
 
@@ -105,38 +105,38 @@ auto DriverSettings::videoDriverChange() -> void {
 
 auto DriverSettings::videoFormatChanged() -> void {
   videoFormatOption.reset();
-  for(auto& format : video->availableFormats()) {
+  for(auto& format : video.hasFormats()) {
     ComboButtonItem item{&videoFormatOption};
     item.setText(format);
-    if(format == video->format()) item.setSelected();
+    if(format == video.format()) item.setSelected();
   }
-  videoFormatOption.setEnabled(video->hasFormat());
+//videoFormatOption.setEnabled(video.hasFormat());
   layout.setGeometry(layout.geometry());
 }
 
 auto DriverSettings::videoFormatChange() -> void {
   auto item = videoFormatOption.selected();
   settings["Video/Format"].setValue(item.text());
-  video->setFormat(item.text());
+  video.setFormat(item.text());
 }
 
 //
 
 auto DriverSettings::audioDriverChanged() -> void {
   audioDriverOption.reset();
-  for(auto& driver : audio->availableDrivers()) {
+  for(auto& driver : audio.hasDrivers()) {
     ComboButtonItem item{&audioDriverOption};
     item.setText(driver);
-    if(driver == audio->driver()) item.setSelected();
+    if(driver == audio.driverName()) item.setSelected();
   }
-  audioDriverActive.setText({"Active driver: ", audio->driver()});
+  audioDriverActive.setText({"Active driver: ", audio.driverName()});
   audioDriverOption.doChange();
   audioDeviceChanged();
   audioFrequencyChanged();
   audioLatencyChanged();
-  audioExclusiveToggle.setChecked(audio->exclusive()).setEnabled(audio->hasExclusive());
-  audioBlockingToggle.setChecked(audio->blocking()).setEnabled(audio->hasBlocking());
-  audioDynamicToggle.setChecked(audio->dynamic()).setEnabled(audio->hasDynamic());
+  audioExclusiveToggle.setChecked(audio.exclusive()).setEnabled(audio.hasExclusive());
+  audioBlockingToggle.setChecked(audio.blocking()).setEnabled(audio.hasBlocking());
+  audioDynamicToggle.setChecked(audio.dynamic()).setEnabled(audio.hasDynamic());
   layout.setGeometry(layout.geometry());
 }
 
@@ -161,12 +161,12 @@ auto DriverSettings::audioDriverChange() -> void {
 
 auto DriverSettings::audioDeviceChanged() -> void {
   audioDeviceOption.reset();
-  for(auto& device : audio->availableDevices()) {
+  for(auto& device : audio.hasDevices()) {
     ComboButtonItem item{&audioDeviceOption};
     item.setText(device);
-    if(device == audio->device()) item.setSelected();
+    if(device == audio.device()) item.setSelected();
   }
-  audioDeviceOption.setEnabled(audio->hasDevice());
+//audioDeviceOption.setEnabled(audio->hasDevice());
   layout.setGeometry(layout.geometry());
 }
 
@@ -180,12 +180,12 @@ auto DriverSettings::audioDeviceChange() -> void {
 
 auto DriverSettings::audioFrequencyChanged() -> void {
   audioFrequencyOption.reset();
-  for(auto& frequency : audio->availableFrequencies()) {
+  for(auto& frequency : audio.hasFrequencies()) {
     ComboButtonItem item{&audioFrequencyOption};
     item.setText({(uint)frequency, "hz"});
-    if(frequency == audio->frequency()) item.setSelected();
+    if(frequency == audio.frequency()) item.setSelected();
   }
-  audioFrequencyOption.setEnabled(audio->hasFrequency());
+//audioFrequencyOption.setEnabled(audio->hasFrequency());
   layout.setGeometry(layout.geometry());
 }
 
@@ -197,12 +197,12 @@ auto DriverSettings::audioFrequencyChange() -> void {
 
 auto DriverSettings::audioLatencyChanged() -> void {
   audioLatencyOption.reset();
-  for(auto& latency : audio->availableLatencies()) {
+  for(auto& latency : audio.hasLatencies()) {
     ComboButtonItem item{&audioLatencyOption};
     item.setText(latency);
-    if(latency == audio->latency()) item.setSelected();
+    if(latency == audio.latency()) item.setSelected();
   }
-  audioLatencyOption.setEnabled(audio->hasLatency());
+//audioLatencyOption.setEnabled(audio->hasLatency());
   layout.setGeometry(layout.geometry());
 }
 
@@ -216,12 +216,12 @@ auto DriverSettings::audioLatencyChange() -> void {
 
 auto DriverSettings::inputDriverChanged() -> void {
   inputDriverOption.reset();
-  for(auto& driver : input->availableDrivers()) {
+  for(auto& driver : input.hasDrivers()) {
     ComboButtonItem item{&inputDriverOption};
     item.setText(driver);
-    if(driver == input->driver()) item.setSelected();
+    if(driver == input.driverName()) item.setSelected();
   }
-  inputDriverActive.setText({"Active driver: ", input->driver()});
+  inputDriverActive.setText({"Active driver: ", input.driverName()});
   inputDriverOption.doChange();
   layout.setGeometry(layout.geometry());
 }

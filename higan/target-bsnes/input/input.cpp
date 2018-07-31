@@ -150,7 +150,7 @@ auto InputMapping::poll() -> int16 {
 
 auto InputMapping::rumble(bool enable) -> void {
   for(auto& mapping : mappings) {
-    ::input->rumble(mapping.device->id(), enable);
+    input.rumble(mapping.device->id(), enable);
   }
 }
 
@@ -190,7 +190,7 @@ auto InputManager::initialize() -> void {
   hotkeys.reset();
 
   if(!input) return;
-  input->onChange({&InputManager::onChange, this});
+  input.onChange({&InputManager::onChange, this});
 
   lastPoll = chrono::millisecond();
   frequency = max(1u, settings["Input/Frequency"].natural());
@@ -264,7 +264,7 @@ auto InputManager::poll() -> void {
   if(thisPoll - lastPoll < frequency) return;
   lastPoll = thisPoll;
 
-  auto devices = input->poll();
+  auto devices = input.poll();
   bool changed = devices.size() != this->devices.size();
   if(!changed) {
     for(auto n : range(devices.size())) {

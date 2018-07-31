@@ -6,7 +6,7 @@
 namespace nall { namespace DSP { namespace Resampler {
 
 struct Cubic {
-  inline auto reset(double inputFrequency, double outputFrequency, uint queueSize = 0) -> void;
+  inline auto reset(double inputFrequency, double outputFrequency = 0, uint queueSize = 0) -> void;
   inline auto setInputFrequency(double inputFrequency) -> void;
   inline auto pending() const -> bool;
   inline auto read() -> double;
@@ -24,13 +24,12 @@ private:
 
 auto Cubic::reset(double inputFrequency, double outputFrequency, uint queueSize) -> void {
   this->inputFrequency = inputFrequency;
-  this->outputFrequency = outputFrequency;
-  if(!queueSize) queueSize = outputFrequency * 0.02;  //20ms
+  this->outputFrequency = outputFrequency ? outputFrequency : this->inputFrequency;
 
   ratio = inputFrequency / outputFrequency;
   fraction = 0.0;
-  for(auto& sample: history) sample = 0.0;
-  samples.resize(queueSize);
+  for(auto& sample : history) sample = 0.0;
+  samples.resize(queueSize ? queueSize : this->outputFrequency * 0.02);  //default to 20ms max queue size
 }
 
 auto Cubic::setInputFrequency(double inputFrequency) -> void {

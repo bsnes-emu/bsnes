@@ -2,26 +2,23 @@
 
 //simple circular ring buffer
 
+#include <nall/range.hpp>
+#include <nall/serializer.hpp>
+
 namespace nall {
 
 template<typename T>
 struct queue {
   queue() = default;
-
-  queue(const queue& source) {
-    operator=(source);
-  }
-
-  queue(queue&& source) {
-    operator=(move(source));
-  }
+  queue(const queue& source) { operator=(source); }
+  queue(queue&& source) { operator=(move(source)); }
 
   auto operator=(const queue& source) -> queue& {
     if(this == &source) return *this;
     reset();
     _size = source._size;
     _data = new T[_size];
-    for(auto n : range(_size)) _data[n] = source._data[n];
+    for(uint n : range(_size)) _data[n] = source._data[n];
     _read = source._read;
     _write = source._write;
     return *this;
@@ -42,21 +39,14 @@ struct queue {
     reset();
   }
 
-  explicit operator bool() const {
-    return _size;
-  }
+  explicit operator bool() const { return _size; }
+  template<typename U = T> auto size() const -> uint { return _size * sizeof(T) / sizeof(U); }
+  auto empty() const -> bool { return _read == _write; }
+  auto pending() const -> bool { return _read != _write; }
+  auto full() const -> bool { return _write == _size; }
 
-  auto size() const -> uint {
-    return _size;
-  }
-
-  auto data() -> T* {
-    return _data;
-  }
-
-  auto data() const -> const T* {
-    return _data;
-  }
+  auto data() -> T* { return _data; }
+  auto data() const -> const T* { return _data; }
 
   auto reset() {
     delete[] _data;
@@ -70,26 +60,29 @@ struct queue {
     reset();
     _size = size;
     _data = new T[_size];
-    for(auto n : range(_size)) _data[n] = value;
+    for(uint n : range(_size)) _data[n] = value;
   }
 
-  auto pending() const -> bool {
-    return _read != _write;
+  auto flush() -> void {
+    _read = 0;
+    _write = 0;
   }
 
   auto read() -> T {
-    T result = _data[_read];
-    if(++_read >= _size) _read = 0;
-    return result;
-  }
-
-  auto last() const -> T {
-    return _data[_write];
+    if(_read >= _size) _read = 0;
+    return _data[_read++];
   }
 
   auto write(const T& value) -> void {
-    _data[_write] = value;
-    if(++_write >= _size) _write = 0;
+    if(_write >= _size) _write = 0;
+    _data[_write++] = value;
+  }
+
+  auto serialize(serializer& s) -> void {
+    s.array(_data, _size);
+    s.integer(_size);
+    s.integer(_read);
+    s.integer(_write);
   }
 
 private:
