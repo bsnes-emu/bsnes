@@ -13,8 +13,8 @@ struct AudioDriver {
   virtual auto hasDevices() -> vector<string> { return {"Default"}; }
   virtual auto hasBlocking() -> bool { return false; }
   virtual auto hasDynamic() -> bool { return false; }
-  virtual auto hasChannels() -> vector<uint> { return {0}; }
-  virtual auto hasFrequencies() -> vector<uint> { return {0}; }
+  virtual auto hasChannels() -> vector<uint> { return {2}; }
+  virtual auto hasFrequencies() -> vector<uint> { return {48000}; }
   virtual auto hasLatencies() -> vector<uint> { return {0}; }
 
   auto hasDevice(string device) -> bool { return (bool)hasDevices().find(device); }
@@ -44,8 +44,8 @@ protected:
   string device = "Default";
   bool blocking = false;
   bool dynamic = false;
-  uint channels = 0;
-  uint frequency = 0;
+  uint channels = 2;
+  uint frequency = 48000;
   uint latency = 0;
 };
 

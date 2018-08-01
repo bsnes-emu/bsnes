@@ -17,8 +17,6 @@ auto pComboButton::construct() -> void {
   gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(gtkWidget), gtkCellText, true);
   gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(gtkWidget), gtkCellText, "text", 1, nullptr);
 
-  for(auto& item : state().items) append(item);
-
   g_signal_connect(G_OBJECT(gtkWidget), "changed", G_CALLBACK(ComboButton_change), (gpointer)this);
 
   pWidget::construct();
@@ -29,15 +27,6 @@ auto pComboButton::destruct() -> void {
 }
 
 auto pComboButton::append(sComboButtonItem item) -> void {
-  lock();
-  if(auto self = item->self()) {
-    gtk_list_store_append(gtkListStore, &self->gtkIter);
-    self->setIcon(item->state.icon);
-    if(item->state.selected) self->setSelected();
-    self->setText(item->state.text);
-  }
-  if(gtk_combo_box_get_active(gtkComboBox) < 0) item->setSelected();
-  unlock();
 }
 
 auto pComboButton::minimumSize() const -> Size {
@@ -73,6 +62,18 @@ auto pComboButton::setFont(const Font& font) -> void {
   pWidget::setFont(font);
   auto fontDescription = pFont::create(font);
   g_object_set(G_OBJECT(gtkCellText), "font-desc", fontDescription, nullptr);
+}
+
+auto pComboButton::_append(sComboButtonItem item) -> void {
+  lock();
+  if(auto self = item->self()) {
+    gtk_list_store_append(gtkListStore, &self->gtkIter);
+    self->setIcon(item->state.icon);
+    if(item->state.selected) self->setSelected();
+    self->setText(item->state.text);
+  }
+  if(gtk_combo_box_get_active(gtkComboBox) < 0) item->setSelected();
+  unlock();
 }
 
 auto pComboButton::_updateSelected() -> void {

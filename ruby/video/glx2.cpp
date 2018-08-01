@@ -22,9 +22,7 @@
 #endif
 
 struct VideoGLX2 : VideoDriver {
-  VideoGLX2& self;
-
-  VideoGLX2(Video& super) : VideoDriver(super), self(*this) {}
+  VideoGLX2(Video& super) : VideoDriver(super) {}
   ~VideoGLX2() { terminate(); }
 
   auto create() -> bool {
@@ -262,7 +260,7 @@ private:
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _glWidth, _glHeight, 0, GL_BGRA, _glFormat, _glBuffer);
   }
 
-  auto (*glXSwapInterval)(int) -> int = nullptr;
+  VideoGLX2& self = *this;
 
   bool _ready = false;
 
@@ -284,4 +282,6 @@ private:
   uint _glWidth = 0;
   uint _glHeight = 0;
   uint _glFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
+
+  auto (*glXSwapInterval)(int) -> int = nullptr;
 };

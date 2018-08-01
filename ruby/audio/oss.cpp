@@ -14,12 +14,10 @@
 #endif
 
 struct AudioOSS : AudioDriver {
-  AudioOSS& self;
-
-  AudioOSS(Audio& super) : AudioDriver(super), self(*this) {}
+  AudioOSS(Audio& super) : AudioDriver(super) {}
   ~AudioOSS() { terminate(); }
 
-  auto create() -> bool {
+  auto create() -> bool override {
     super.setDevice("/dev/dsp");
     super.setChannels(2);
     super.setFrequency(48000);
@@ -119,6 +117,8 @@ private:
     fcntl(_fd, F_SETFL, flags);
     return true;
   }
+
+  AudioOSS& self = *this;
 
   int _fd = -1;
   int _format = AFMT_S16_LE;

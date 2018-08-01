@@ -103,6 +103,9 @@ struct Presentation : Window {
   VerticalLayout layout{this};
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
       Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
+      VerticalLayout iconLayout{&viewportLayout, Size{0, ~0}};
+        Widget iconSpacer{&iconLayout, Size{144, ~0}};
+        Canvas iconCanvas{&iconLayout, Size{128, 128}, 0};
     HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
       Label spacerIcon{&statusLayout, Size{8, ~0}, 0};
       Canvas statusIcon{&statusLayout, Size{16, ~0}, 0};

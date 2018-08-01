@@ -14,8 +14,8 @@ ifeq ($(ruby),)
   else ifeq ($(platform),bsd)
 #    ruby += video.glx video.glx2 video.xvideo video.xshm
     ruby += video.glx2 video.xshm
-    ruby += audio.oss #audio.openal
-    ruby += input.sdl #input.xlib
+    ruby += audio.oss audio.openal
+    ruby += input.sdl input.xlib
   endif
 endif
 

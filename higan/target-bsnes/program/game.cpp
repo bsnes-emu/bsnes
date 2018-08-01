@@ -41,6 +41,7 @@ auto Program::load() -> void {
   presentation.speedNormal.setChecked();
   presentation.pauseEmulation.setChecked(false);
   presentation.updateStatusIcon();
+  presentation.viewportLayout.remove(presentation.iconLayout);
   presentation.resizeViewport();
   cheatEditor.loadCheats();
   stateManager.loadStates();
@@ -304,6 +305,7 @@ auto Program::unload() -> void {
   presentation.toolsMenu.setVisible(false);
   presentation.updateStatusIcon();
   presentation.clearViewport();
+  presentation.viewportLayout.append(presentation.iconLayout, Size{0, ~0});
 }
 
 //a game is considered verified if the game plus its slot(s) are found in the games database

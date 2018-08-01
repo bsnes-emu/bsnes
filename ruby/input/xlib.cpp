@@ -7,37 +7,29 @@
 #include "keyboard/xlib.cpp"
 #include "mouse/xlib.cpp"
 
-struct InputXlib : Input {
-  InputXlib() : _keyboard(*this), _mouse(*this) { initialize(); }
+struct InputXlib : InputDriver {
+  InputXlib(Input& super) : InputDriver(super), keyboard(super), mouse(super) {}
   ~InputXlib() { terminate(); }
 
-  auto driver() -> string override { return "Xlib"; }
-  auto ready() -> bool override { return _ready; }
-
-  auto hasContext() -> bool override { return true; }
-
-  auto setContext(uintptr context) -> bool override {
-    if(context == Input::context()) return true;
-    if(!Input::setContext(context)) return false;
+  auto create() -> bool override {
     return initialize();
   }
 
-  auto acquired() -> bool override {
-    return _mouse.acquired();
-  }
+  auto driver() -> string override { return "Xlib"; }
+  auto ready() -> bool override { return isReady; }
 
-  auto acquire() -> bool override {
-    return _mouse.acquire();
-  }
+  auto hasContext() -> bool override { return true; }
 
-  auto release() -> bool override {
-    return _mouse.release();
-  }
+  auto setContext(uintptr context) -> bool override { return initialize(); }
+
+  auto acquired() -> bool override { return mouse.acquired(); }
+  auto acquire() -> bool override { return mouse.acquire(); }
+  auto release() -> bool override { return mouse.release(); }
 
   auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
-    _keyboard.poll(devices);
-    _mouse.poll(devices);
+    keyboard.poll(devices);
+    mouse.poll(devices);
     return devices;
   }
 
@@ -48,20 +40,20 @@ struct InputXlib : Input {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
-    if(!_keyboard.initialize()) return false;
-    if(!_mouse.initialize(_context)) return false;
-    return _ready = true;
+    if(!self.context) return false;
+    if(!keyboard.initialize()) return false;
+    if(!mouse.initialize(self.context)) return false;
+    return isReady = true;
   }
 
   auto terminate() -> void {
-    _ready = false;
-    _keyboard.terminate();
-    _mouse.terminate();
+    isReady = false;
+    keyboard.terminate();
+    mouse.terminate();
   }
 
-  bool _ready = false;
-
-  InputKeyboardXlib _keyboard;
-  InputMouseXlib _mouse;
+  InputXlib& self = *this;
+  bool isReady = false;
+  InputKeyboardXlib keyboard;
+  InputMouseXlib mouse;
 };

@@ -147,6 +147,11 @@ auto Presentation::create() -> void {
     setFocused();
   });
 
+  iconLayout.setAlignment(0.0);
+  image icon{Resource::Icon};
+  icon.alphaBlend(0x000000);
+  iconCanvas.setIcon(icon);
+
   if(!settings["UserInterface/ShowStatusBar"].boolean()) {
     layout.remove(statusLayout);
   }

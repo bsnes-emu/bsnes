@@ -5,6 +5,10 @@ auto mHorizontalLayout::alignment() const -> maybe<float> {
 }
 
 auto mHorizontalLayout::append(sSizable sizable, Size size, float spacing) -> type& {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return *this;
+  }
+
   HorizontalLayoutCell cell;
   cell->setSizable(sizable);
   cell->setSize(size);
@@ -106,6 +110,7 @@ auto mHorizontalLayout::setFont(const Font& font) -> type& {
 
 auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
   mSizable::setGeometry(geometry);
+  if(!visible(true)) return *this;
 
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());

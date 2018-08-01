@@ -11,6 +11,7 @@ struct pComboButton : pWidget {
   auto reset() -> void;
   auto setFont(const Font& font) -> void override;
 
+  auto _append(sComboButtonItem item) -> void;
   auto _updateSelected() -> void;
 
   GtkListStore* gtkListStore = nullptr;

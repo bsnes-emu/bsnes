@@ -3,6 +3,7 @@
 namespace hiro {
 
 auto pComboButtonItem::construct() -> void {
+  if(auto parent = _parent()) parent->_append(self());
 }
 
 auto pComboButtonItem::destruct() -> void {
@@ -29,9 +30,11 @@ auto pComboButtonItem::setText(const string& text) -> void {
   }
 }
 
-auto pComboButtonItem::_parent() -> pComboButton* {
-  if(auto parent = self().parentComboButton()) return parent->self();
-  return nullptr;
+auto pComboButtonItem::_parent() -> maybe<pComboButton&> {
+  if(auto parent = self().parentComboButton()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return {};
 }
 
 }

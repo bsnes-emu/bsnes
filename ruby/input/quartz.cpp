@@ -1,11 +1,15 @@
 #include "keyboard/quartz.cpp"
 
-struct InputQuartz : Input {
-  InputQuartz() : _keyboard(*this) { initialize(); }
+struct InputQuartz : InputDriver {
+  InputQuartz(Input& super) : InputDriver(super), keyboard(super) {}
   ~InputQuartz() { terminate(); }
 
+  auto create() -> bool override {
+    return initialize();
+  }
+
   auto driver() -> string override { return "Quartz"; }
-  auto ready() -> bool override { return _ready; }
+  auto ready() -> bool override { return isReady; }
 
   auto acquired() -> bool override { return false; }
   auto acquire() -> bool override { return false; }
@@ -13,7 +17,7 @@ struct InputQuartz : Input {
 
   auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
-    _keyboard.poll(devices);
+    keyboard.poll(devices);
     return devices;
   }
 
@@ -24,16 +28,16 @@ struct InputQuartz : Input {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_keyboard.initialize()) return false;
+    if(!keyboard.initialize()) return false;
     return _ready = true;
   }
 
   auto terminate() -> void {
-    _ready = false;
-    _keyboard.terminate();
+    isReady = false;
+    keyboard.terminate();
   }
 
-  bool _ready = false;
-
-  InputKeyboardQuartz _keyboard;
+  InputQuartz& self = *this;
+  bool isReady = false;
+  InputKeyboardQuartz keyboard;
 };

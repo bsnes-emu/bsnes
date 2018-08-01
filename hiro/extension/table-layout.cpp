@@ -5,6 +5,10 @@ auto mTableLayout::alignment() const -> Alignment {
 }
 
 auto mTableLayout::append(sSizable sizable, Size size) -> type& {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return *this;
+  }
+
   TableLayoutCell cell;
   cell->setSizable(sizable);
   cell->setSize(size);
@@ -141,6 +145,7 @@ auto mTableLayout::setFont(const Font& font) -> type& {
 
 auto mTableLayout::setGeometry(Geometry geometry) -> type& {
   mSizable::setGeometry(geometry);
+  if(!visible(true)) return *this;
 
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());

@@ -1,6 +1,10 @@
 #if defined(Hiro_FixedLayout)
 
 auto mFixedLayout::append(sSizable sizable, Geometry geometry) -> type& {
+  for(auto& cell : state.cells) {
+    if(cell->state.sizable == sizable) return *this;
+  }
+
   FixedLayoutCell cell;
   cell->setSizable(sizable);
   cell->setGeometry(geometry);

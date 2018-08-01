@@ -12,65 +12,57 @@
 #include "mouse/xlib.cpp"
 #include "joypad/udev.cpp"
 
-struct InputUdev : Input {
-  InputUdev() : _keyboard(*this), _mouse(*this), _joypad(*this) { initialize(); }
+struct InputUdev : InputDriver {
+  InputUdev(Input& super) : InputDriver(super), keyboard(super), mouse(super), joypad(super) {}
   ~InputUdev() { terminate(); }
 
-  auto driver() -> string override { return "udev"; }
-  auto ready() -> bool { return _ready; }
-
-  auto hasContext() -> bool override { return true; }
-
-  auto setContext(uintptr context) -> bool override {
-    if(context == Input::context()) return true;
-    if(!Input::setContext(context)) return false;
+  auto create() -> bool override {
     return initialize();
   }
 
-  auto acquired() -> bool override {
-    return _mouse.acquired();
-  }
+  auto driver() -> string override { return "udev"; }
+  auto ready() -> bool { return isReady; }
 
-  auto acquire() -> bool override {
-    return _mouse.acquire();
-  }
+  auto hasContext() -> bool override { return true; }
 
-  auto release() -> bool override {
-    return _mouse.release();
-  }
+  auto setContext(uintptr context) -> bool override { return initialize(); }
+
+  auto acquired() -> bool override { return mouse.acquired(); }
+  auto acquire() -> bool override { return mouse.acquire(); }
+  auto release() -> bool override { return mouse.release(); }
 
   auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
-    _keyboard.poll(devices);
-    _mouse.poll(devices);
-    _joypad.poll(devices);
+    keyboard.poll(devices);
+    mouse.poll(devices);
+    joypad.poll(devices);
     return devices;
   }
 
   auto rumble(uint64_t id, bool enable) -> bool override {
-    return _joypad.rumble(id, enable);
+    return joypad.rumble(id, enable);
   }
 
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
-    if(!_keyboard.initialize()) return false;
-    if(!_mouse.initialize(_context)) return false;
-    if(!_joypad.initialize()) return false;
-    return _ready = true;
+    if(!self.context) return false;
+    if(!keyboard.initialize()) return false;
+    if(!mouse.initialize(self.context)) return false;
+    if(!joypad.initialize()) return false;
+    return isReady = true;
   }
 
   auto terminate() -> void {
-    _ready = false;
-    _keyboard.terminate();
-    _mouse.terminate();
-    _joypad.terminate();
+    isReady = false;
+    keyboard.terminate();
+    mouse.terminate();
+    joypad.terminate();
   }
 
-  bool _ready = false;
-
-  InputKeyboardXlib _keyboard;
-  InputMouseXlib _mouse;
-  InputJoypadUdev _joypad;
+  InputUdev& self = *this;
+  bool isReady = false;
+  InputKeyboardXlib keyboard;
+  InputMouseXlib mouse;
+  InputJoypadUdev joypad;
 };

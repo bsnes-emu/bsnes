@@ -9,7 +9,7 @@ struct pComboButtonItem : pObject {
   auto setSelected() -> void;
   auto setText(const string& text) -> void;
 
-  auto _parent() -> pComboButton*;
+  auto _parent() -> maybe<pComboButton&>;
 
   GtkTreeIter gtkIter;
 };

@@ -1,11 +1,15 @@
 #include "keyboard/carbon.cpp"
 
-struct InputCarbon : Input {
-  InputCarbon() : _keyboard(*this) { initialize(); }
+struct InputCarbon : InputDriver {
+  InputCarbon(Input& super) : InputDriver(super), keyboard(super) {}
   ~InputCarbon() { terminate(); }
 
+  auto create() -> bool override {
+    return initialize();
+  }
+
   auto driver() -> string override { return "Carbon"; }
-  auto ready() -> bool override { return _ready; }
+  auto ready() -> bool override { return isReady; }
 
   auto acquired() -> bool override { return false; }
   auto acquire() -> bool override { return false; }
@@ -13,7 +17,7 @@ struct InputCarbon : Input {
 
   auto poll() -> vector<shared_pointer<HID::Device>> override {
     vector<shared_pointer<HID::Device>> devices;
-    _keyboard.poll(devices);
+    keyboard.poll(devices);
     return devices;
   }
 
@@ -24,16 +28,16 @@ struct InputCarbon : Input {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_keyboard.initialize()) return false;
-    return _ready = true;
+    if(!keyboard.initialize()) return false;
+    return isReady = true;
   }
 
   auto terminate() -> void {
-    _ready = false;
-    _keyboard.terminate();
+    isReady = false;
+    keyboard.terminate();
   }
 
-  bool _ready = false;
-
-  InputKeyboardCarbon _keyboard;
+  InputCarbon& self = *this;
+  bool isReady = false;
+  InputKeyboardCarbon keyboard;
 };
