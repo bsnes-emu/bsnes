@@ -217,12 +217,12 @@ here's the firmware files you'll need:
             <th scope="row" rowspan="2">ST018</th>
             <td><code>st018.data.rom</code></td>
             <td>32768</td>
-            <td><code>b5377d1bebe8adc507a024b6e2b9b8fdf4877e451da84fbad05dff4e4a70311e</code></td>
+            <td><code>c67032238b7182696cb80cf41b61bacda91adb2120b5370bea20c9dbf5cc79b8</code></td>
         </tr>
         <tr>
             <td><code>st018.program.rom</code></td>
             <td>131072</td>
-            <td><code>d90a5cda380e81cb9ba11a9da7539b173c49b31bedc7a3ac9c3c8b3f97e89e14</code></td>
+            <td><code>6cceff3c6945bb2672040066d218efcd2f31492f3f5c28916c8e53435c2c887e</code></td>
         </tr>
     </tbody>
 </table>
