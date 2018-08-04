@@ -1,7 +1,7 @@
 higan, the multi-system emulator
 ================================
 
-higan emulates a number of classic 2D video-game consoles,
+higan emulates a number of 2D video-game consoles,
 allowing you to play classic games on a modern general-purpose computer.
 
 To get started with higan right away,
