@@ -42,7 +42,7 @@ auto mTableViewColumn::icon() const -> image {
 }
 
 auto mTableViewColumn::remove() -> type& {
-  if(auto tableViewHeader = parentTableViewHeader()) tableViewHeader->remove(*this);
+  if(auto tableView = parentTableView()) tableView->remove(*this);
   return *this;
 }
 
@@ -105,9 +105,15 @@ auto mTableViewColumn::setResizable(bool resizable) -> type& {
   return *this;
 }
 
-auto mTableViewColumn::setSortable(bool sortable) -> type& {
-  state.sortable = sortable;
-  signal(setSortable, sortable);
+auto mTableViewColumn::setSorting(Sort sorting) -> type& {
+  if(auto tableView = parentTableView()) {
+    for(auto& column : tableView->state.columns) {
+      column->state.sorting = Sort::None;
+      signalex(column, setSorting, Sort::None);
+    }
+  }
+  state.sorting = sorting;
+  signal(setSorting, sorting);
   return *this;
 }
 
@@ -136,8 +142,8 @@ auto mTableViewColumn::setWidth(float width) -> type& {
   return *this;
 }
 
-auto mTableViewColumn::sortable() const -> bool {
-  return state.sortable;
+auto mTableViewColumn::sorting() const -> Sort {
+  return state.sorting;
 }
 
 auto mTableViewColumn::text() const -> string {

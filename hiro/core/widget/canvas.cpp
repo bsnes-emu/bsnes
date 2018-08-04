@@ -73,6 +73,8 @@ auto mCanvas::onMouseRelease(const function<void (Mouse::Button)>& callback) -> 
 
 auto mCanvas::setColor(Color color) -> type& {
   state.color = color;
+  state.gradient = {};
+  state.icon = {};
   signal(setColor, color);
   return *this;
 }
@@ -84,12 +86,16 @@ auto mCanvas::setDroppable(bool droppable) -> type& {
 }
 
 auto mCanvas::setGradient(Gradient gradient) -> type& {
+  state.color = {};
   state.gradient = gradient;
+  state.icon = {};
   signal(setGradient, gradient);
   return *this;
 }
 
 auto mCanvas::setIcon(const image& icon) -> type& {
+  state.color = {};
+  state.gradient = {};
   state.icon = icon;
   signal(setIcon, icon);
   return *this;

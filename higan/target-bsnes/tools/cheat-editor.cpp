@@ -55,20 +55,21 @@ auto CheatWindow::create() -> void {
   nameLabel.setText("Name:");
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
+  codeLayout.setAlignment(0.0);
   codeLabel.setText("Code:");
-  codeValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
+  codeValue.setFont(Font().setFamily(Font::Mono));
   codeValue.onChange([&] { doChange(); });
   enableOption.setText("Enable");
   acceptButton.onActivate([&] { doAccept(); });
   cancelButton.setText("Cancel").onActivate([&] { setVisible(false); });
 
-  setSize({400, layout.minimumSize().height()});
+  setSize({400, layout.minimumSize().height() + 100});
   setDismissable();
 }
 
 auto CheatWindow::show(Cheat cheat) -> void {
   nameValue.setText(cheat.name);
-  codeValue.setText(cheat.code);
+  codeValue.setText(cheat.code.split("+").strip().merge("\n"));
   enableOption.setChecked(cheat.enable);
   doChange();
   setTitle(!cheat.name ? "Add Cheat" : "Edit Cheat");
@@ -87,7 +88,7 @@ auto CheatWindow::doChange() -> void {
 }
 
 auto CheatWindow::doAccept() -> void {
-  Cheat cheat = {nameValue.text().strip(), codeValue.text().strip(), enableOption.checked()};
+  Cheat cheat = {nameValue.text().strip(), codeValue.text().split("\n").strip().merge("+"), enableOption.checked()};
   if(acceptButton.text() == "Add") {
     cheatEditor.addCheat(cheat);
   } else {
@@ -148,10 +149,8 @@ auto CheatEditor::create() -> void {
 
 auto CheatEditor::refresh() -> void {
   cheatList.reset();
-  cheatList.append(TableViewHeader().setVisible(false)
-    .append(TableViewColumn())
-    .append(TableViewColumn().setExpandable())
-  );
+  cheatList.append(TableViewColumn());
+  cheatList.append(TableViewColumn().setExpandable());
   for(auto& cheat : cheats) {
     cheatList.append(TableViewItem()
       .append(TableViewCell().setCheckable().setChecked(cheat.enable))

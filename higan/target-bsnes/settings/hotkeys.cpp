@@ -4,6 +4,7 @@ auto HotkeySettings::create() -> void {
 
   layout.setPadding(5);
   mappingList.setBatchable();
+  mappingList.setHeadered();
   mappingList.onActivate([&] {
     if(assignButton.enabled()) assignButton.doActivate();
   });
@@ -25,10 +26,8 @@ auto HotkeySettings::create() -> void {
 
 auto HotkeySettings::reloadMappings() -> void {
   mappingList.reset();
-  mappingList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn().setText("Name"))
-    .append(TableViewColumn().setText("Mapping").setExpandable())
-  );
+  mappingList.append(TableViewColumn().setText("Name"));
+  mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
   for(auto& hotkey : inputManager.hotkeys) {
     mappingList.append(TableViewItem()
       .append(TableViewCell().setText(hotkey.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))

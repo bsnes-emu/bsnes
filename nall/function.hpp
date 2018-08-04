@@ -7,6 +7,8 @@ namespace nall {
 template<typename T> struct function;
 
 template<typename R, typename... P> struct function<auto (P...) -> R> {
+  using cast = auto (*)(P...) -> R;
+
   //value = true if auto L::operator()(P...) -> R exists
   template<typename L> struct is_compatible {
     template<typename T> static auto exists(T*) -> const typename is_same<R, decltype(declval<T>().operator()(declval<P>()...))>::type;
@@ -16,11 +18,11 @@ template<typename R, typename... P> struct function<auto (P...) -> R> {
 
   function() {}
   function(const function& source) { operator=(source); }
-  function(void* function) { if(function) callback = new global((auto (*)(P...) -> R)function); }
   function(auto (*function)(P...) -> R) { callback = new global(function); }
   template<typename C> function(auto (C::*function)(P...) -> R, C* object) { callback = new member<C>(function, object); }
   template<typename C> function(auto (C::*function)(P...) const -> R, C* object) { callback = new member<C>((auto (C::*)(P...) -> R)function, object); }
   template<typename L, typename = enable_if_t<is_compatible<L>::value>> function(const L& object) { callback = new lambda<L>(object); }
+  explicit function(void* function) { if(function) callback = new global((auto (*)(P...) -> R)function); }
   ~function() { if(callback) delete callback; }
 
   explicit operator bool() const { return callback; }
@@ -32,6 +34,12 @@ template<typename R, typename... P> struct function<auto (P...) -> R> {
       if(callback) { delete callback; callback = nullptr; }
       if(source.callback) callback = source.callback->copy();
     }
+    return *this;
+  }
+
+  auto operator=(void* source) -> function& {
+    if(callback) { delete callback; callback = nullptr; }
+    callback = new global((auto (*)(P...) -> R)source);
     return *this;
   }
 

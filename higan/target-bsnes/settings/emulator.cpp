@@ -39,6 +39,7 @@ auto EmulatorSettings::create() -> void {
     settings["UserInterface/SuppressScreenSaver"].setValue(suppressScreenSaver.checked());
     Application::setScreenSaver(!suppressScreenSaver.checked());
   });
+  optionsSpacer.setColor({192, 192, 192});
 
   hacksLabel.setText("Hacks").setFont(Font().setBold());
   fastPPUOption.setText("Fast PPU").setChecked(settings["Emulator/Hack/FastPPU"].boolean()).onToggle([&] {

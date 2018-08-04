@@ -6,7 +6,7 @@ auto mTableView::allocate() -> pObject* {
 
 auto mTableView::destruct() -> void {
   for(auto& item : state.items) item->destruct();
-  if(auto& header = state.header) header->destruct();
+  for(auto& column : state.columns) column->destruct();
   mWidget::destruct();
 }
 
@@ -16,11 +16,10 @@ auto mTableView::alignment() const -> Alignment {
   return state.alignment;
 }
 
-auto mTableView::append(sTableViewHeader header) -> type& {
-  if(auto& header = state.header) remove(header);
-  state.header = header;
-  header->setParent(this, 0);
-  signal(append, header);
+auto mTableView::append(sTableViewColumn column) -> type& {
+  state.columns.append(column);
+  column->setParent(this, columnCount() - 1);
+  signal(append, column);
   return *this;
 }
 
@@ -51,6 +50,21 @@ auto mTableView::bordered() const -> bool {
   return state.bordered;
 }
 
+auto mTableView::column(uint position) const -> TableViewColumn {
+  if(position < columnCount()) return state.columns[position];
+  return {};
+}
+
+auto mTableView::columnCount() const -> uint {
+  return state.columns.size();
+}
+
+auto mTableView::columns() const -> vector<TableViewColumn> {
+  vector<TableViewColumn> columns;
+  for(auto& column : columns) columns.append(column);
+  return columns;
+}
+
 auto mTableView::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
@@ -79,8 +93,8 @@ auto mTableView::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mTableView::header() const -> TableViewHeader {
-  return state.header;
+auto mTableView::headered() const -> bool {
+  return state.headered;
 }
 
 auto mTableView::item(unsigned position) const -> TableViewItem {
@@ -128,17 +142,20 @@ auto mTableView::onToggle(const function<void (TableViewCell)>& callback) -> typ
   return *this;
 }
 
-auto mTableView::remove(sTableViewHeader header) -> type& {
-  signal(remove, header);
-  header->setParent();
-  state.header.reset();
+auto mTableView::remove(sTableViewColumn column) -> type& {
+  signal(remove, column);
+  state.columns.remove(column->offset());
+  for(uint n : range(column->offset(), columnCount())) {
+    state.columns[n]->adjustOffset(-1);
+  }
+  column->setParent();
   return *this;
 }
 
 auto mTableView::remove(sTableViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(item->offset(), itemCount())) {
+  for(uint n : range(item->offset(), itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   item->setParent();
@@ -146,8 +163,8 @@ auto mTableView::remove(sTableViewItem item) -> type& {
 }
 
 auto mTableView::reset() -> type& {
-  while(state.items) remove(state.items.right());
-  if(auto& header = state.header) remove(header);
+  while(state.items) remove(state.items.last());
+  while(state.columns) remove(state.columns.last());
   return *this;
 }
 
@@ -193,13 +210,51 @@ auto mTableView::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
+auto mTableView::setHeadered(bool headered) -> type& {
+  state.headered = headered;
+  signal(setHeadered, headered);
+  return *this;
+}
+
 auto mTableView::setParent(mObject* parent, signed offset) -> type& {
   for(auto& item : reverse(state.items)) item->destruct();
-  if(auto& header = state.header) header->destruct();
+  for(auto& column : reverse(state.columns)) column->destruct();
   mObject::setParent(parent, offset);
-  if(auto& header = state.header) header->setParent(this, 0);
+  for(auto& column : state.columns) column->setParent(this, column->offset());
   for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;
+}
+
+auto mTableView::setSortable(bool sortable) -> type& {
+  state.sortable = sortable;
+  signal(setSortable, sortable);
+  return *this;
+}
+
+auto mTableView::sort() -> type& {
+  Sort sorting = Sort::None;
+  uint offset = 0;
+  for(auto& column : state.columns) {
+    if(column->sorting() == Sort::None) continue;
+    sorting = column->sorting();
+    offset = column->offset();
+    break;
+  }
+  auto sorted = state.items;
+  sorted.sort([&](auto& lhs, auto& rhs) {
+    string x = offset < lhs->cellCount() ? lhs->state.cells[offset]->state.text : "";
+    string y = offset < rhs->cellCount() ? rhs->state.cells[offset]->state.text : "";
+    if(sorting == Sort::Ascending ) return string::icompare(x, y) < 0;
+    if(sorting == Sort::Descending) return string::icompare(y, x) < 0;
+    return false;  //unreachable
+  });
+  while(state.items) remove(state.items.last());
+  for(auto& item : sorted) append(item);
+  return *this;
+}
+
+auto mTableView::sortable() const -> bool {
+  return state.sortable;
 }
 
 #endif

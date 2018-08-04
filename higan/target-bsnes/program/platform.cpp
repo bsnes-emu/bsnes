@@ -196,19 +196,19 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   uint32_t* output;
   uint length;
 
+  //this relies on the UI only running between Emulator::Scheduler::Event::Frame events
+  //this will always be the case; so we can avoid an unnecessary copy or one-frame delay here
+  //if the core were to exit between a frame event, the next frame might've been only partially rendered
+  screenshot.data = data;
+  screenshot.pitch = pitch;
+  screenshot.width = width;
+  screenshot.height = height;
+
   pitch >>= 2;
   if(presentation.overscanCropping.checked()) {
     if(height == 240) data +=  8 * pitch, height -= 16;
     if(height == 480) data += 16 * pitch, height -= 32;
   }
-
-  //this relies on the UI only running between Emulator::Scheduler::Event::Frame events
-  //this will always be the case; so we can avoid an unnecessary copy or one-frame delay here
-  //if the core were to exit between a frame event, the next frame might've been only partially rendered
-  screenshot.data = data;
-  screenshot.pitch = pitch << 2;
-  screenshot.width = width;
-  screenshot.height = height;
 
   if(video.acquire(output, length, width, height)) {
     length >>= 2;

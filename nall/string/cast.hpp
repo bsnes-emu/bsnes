@@ -234,6 +234,20 @@ template<> struct stringify<const view<string>&> {
   const view<string>& _view;
 };
 
+template<> struct stringify<string_pascal> {
+  stringify(const string_pascal& source) : _text(source) {}
+  auto data() const -> const char* { return _text.data(); }
+  auto size() const -> uint { return _text.size(); }
+  const string_pascal& _text;
+};
+
+template<> struct stringify<const string_pascal&> {
+  stringify(const string_pascal& source) : _text(source) {}
+  auto data() const -> const char* { return _text.data(); }
+  auto size() const -> uint { return _text.size(); }
+  const string_pascal& _text;
+};
+
 //pointers
 
 template<typename T> struct stringify<T*> {

@@ -1,53 +1,42 @@
-auto Program::availableStates(string type) -> vector<string> {
-  vector<string> result;
+const uint Program::State::Signature = 0x5a22'0000;
+
+auto Program::availableStates(string type) -> vector<State> {
+  vector<State> result;
   if(!emulator->loaded()) return result;
 
   if(gamePath().endsWith("/")) {
     for(auto& file : directory::ifiles({statePath(), type}, "*.bst")) {
-      result.append({type, file.trimRight(".bst", 1L)});
+      auto timestamp = file::timestamp({statePath(), type, file}, file::time::modify);
+      result.append({{type, file.trimRight(".bst", 1L)}, timestamp});
     }
   } else {
     Decode::ZIP input;
     if(input.open(statePath())) {
-      vector<string> filenames;
       for(auto& file : input.file) {
-        if(file.name.match({type, "*.bst"})) result.append(file.name.trimRight(".bst", 1L));
+        if(!file.name.match({type, "*.bst"})) continue;
+        result.append({file.name.trimRight(".bst", 1L), (uint64_t)file.timestamp});
       }
     }
   }
 
-  result.isort();
   return result;
 }
 
-auto Program::stateTimestamp(string filename) -> uint64_t {
-  auto timestamp = chrono::timestamp();
-  if(!emulator->loaded()) return timestamp;
-
-  if(gamePath().endsWith("/")) {
-    string location = {statePath(), filename, ".bst"};
-    timestamp = file::timestamp(location, file::time::modify);
-  } else {
-    string location = {filename, ".bst"};
-    Decode::ZIP input;
-    if(input.open(statePath())) {
-      for(auto& file : input.file) {
-        if(file.name != location) continue;
-        timestamp = file.timestamp;
-        break;
-      }
-    }
-  }
-
-  return timestamp;
-}
-
-auto Program::loadState(string filename) -> bool {
+auto Program::hasState(string filename) -> bool {
   if(!emulator->loaded()) return false;
 
-  string prefix = Location::file(filename);
-  vector<uint8_t> memory;
+  if(gamePath().endsWith("/")) {
+    return file::exists({statePath(), filename, ".bst"});
+  } else {
+    auto type = string{filename.split("/").first(), "/"};
+    return (bool)availableStates(type).find([&](auto& state) { return state.name == filename; });
+  }
+}
 
+auto Program::loadStateData(string filename) -> vector<uint8_t> {
+  if(!emulator->loaded()) return {};
+
+  vector<uint8_t> memory;
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
     memory = file::read(location);
@@ -63,10 +52,18 @@ auto Program::loadState(string filename) -> bool {
     }
   }
 
-  if(memory) {
+  if(memory.size() < 3 * sizeof(uint)) return {};  //too small to be a valid state file
+  if(memory::readl<sizeof(uint)>(memory.data()) != State::Signature) return {};  //wrong format or version
+  return memory;
+}
+
+auto Program::loadState(string filename) -> bool {
+  string prefix = Location::file(filename);
+  if(auto memory = loadStateData(filename)) {
     if(filename != "quick/undo") saveUndoState();
     if(filename == "quick/undo") saveRedoState();
-    serializer s{memory.data(), memory.size()};
+    auto serializerRLE = Decode::RLE<uint8_t>(memory.data() + 3 * sizeof(uint));
+    serializer s{serializerRLE.data(), serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
     return showMessage({"Loaded [", prefix, "]"}), true;
   } else {
@@ -76,15 +73,32 @@ auto Program::loadState(string filename) -> bool {
 
 auto Program::saveState(string filename) -> bool {
   if(!emulator->loaded()) return false;
-
   string prefix = Location::file(filename);
+
   serializer s = emulator->serialize();
   if(!s.size()) return showMessage({"Failed to save [", prefix, "]"}), false;
+  auto serializerRLE = Encode::RLE<uint8_t>(s.data(), s.size());
+
+  image preview;
+  preview.allocate(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
+  if(preview.width() != 256 || preview.height() != 240) preview.scale(256, 240, true);
+  preview.transform(0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f);
+  auto previewRLE = Encode::RLE<uint16_t>(preview.data(), preview.size());
+
+  vector<uint8_t> saveState;
+  saveState.resize(3 * sizeof(uint));
+  memory::writel<sizeof(uint)>(saveState.data() + 0 * sizeof(uint), State::Signature);
+  memory::writel<sizeof(uint)>(saveState.data() + 1 * sizeof(uint), serializerRLE.size());
+  memory::writel<sizeof(uint)>(saveState.data() + 2 * sizeof(uint), previewRLE.size());
+  saveState.append(serializerRLE);
+  saveState.append(previewRLE);
 
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
     directory::create(Location::path(location));
-    if(!file::write(location, s.data(), s.size())) return showMessage({"Unable to write [", prefix, "] to disk"}), false;
+    if(!file::write(location, saveState.data(), saveState.size())) {
+      return showMessage({"Unable to write [", prefix, "] to disk"}), false;
+    }
   } else {
     string location = {filename, ".bst"};
 
@@ -105,10 +119,11 @@ auto Program::saveState(string filename) -> bool {
     for(auto& state : states) {
       output.append(state.name, state.memory.data(), state.memory.size(), state.timestamp);
     }
-    output.append(location, s.data(), s.size());
+    output.append(location, saveState.data(), saveState.size());
   }
 
   if(filename.beginsWith("quick/")) presentation.updateStateMenus();
+  stateManager.stateEvent(filename);
   return showMessage({"Saved [", prefix, "]"}), true;
 }
 
@@ -132,10 +147,11 @@ auto Program::saveRedoState() -> bool {
 
 auto Program::removeState(string filename) -> bool {
   if(!emulator->loaded()) return false;
+  bool result = false;
 
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
-    return file::remove(location);
+    result = file::remove(location);
   } else {
     bool found = false;
     string location = {filename, ".bst"};
@@ -162,21 +178,28 @@ auto Program::removeState(string filename) -> bool {
       file::remove(statePath());
     }
 
-    return found;
+    result = found;
   }
+
+  if(result) {
+    presentation.updateStateMenus();
+    stateManager.stateEvent(filename);
+  }
+  return result;
 }
 
-auto Program::renameState(string from, string to) -> bool {
+auto Program::renameState(string from_, string to_) -> bool {
   if(!emulator->loaded()) return false;
+  bool result = false;
 
   if(gamePath().endsWith("/")) {
-    from = {statePath(), from, ".bst"};
-    to = {statePath(), to, ".bst."};
-    return file::rename(from, to);
+    string from = {statePath(), from_, ".bst"};
+    string to = {statePath(), to_, ".bst"};
+    result = file::rename(from, to);
   } else {
     bool found = false;
-    from = {from, ".bst"};
-    to = {to, ".bst"};
+    string from = {from_, ".bst"};
+    string to = {to_, ".bst"};
 
     struct State { string name; time_t timestamp; vector<uint8_t> memory; };
     vector<State> states;
@@ -195,6 +218,11 @@ auto Program::renameState(string from, string to) -> bool {
       output.append(state.name, state.memory.data(), state.memory.size(), state.timestamp);
     }
 
-    return found;
+    result = found;
   }
+
+  if(result) {
+    stateManager.stateEvent(to_);
+  }
+  return result;
 }

@@ -17,7 +17,7 @@ DriverSettings driverSettings;
 SettingsWindow settingsWindow;
 
 Settings::Settings() {
-  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml"))));
+  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml")), " "));
 
   auto set = [&](string name, string value) {
     //create node and set to default value only if it does not already exist
@@ -88,7 +88,7 @@ Settings::Settings() {
 }
 
 auto Settings::save() -> void {
-  file::write(locate("settings.bml"), BML::serialize(*this));
+  file::write(locate("settings.bml"), BML::serialize(*this, " "));
 }
 
 auto SettingsWindow::create() -> void {
@@ -123,13 +123,14 @@ auto SettingsWindow::setVisible(bool visible) -> SettingsWindow& {
   if(visible) {
     inputSettings.refreshMappings();
     hotkeySettings.refreshMappings();
+    Application::processEvents();
+    doSize();
   }
   return Window::setVisible(visible), *this;
 }
 
 auto SettingsWindow::show(uint index) -> void {
-  panel.item(index)->setSelected();
+  panel.item(index).setSelected();
   setVisible();
   setFocused();
-  doSize();
 }

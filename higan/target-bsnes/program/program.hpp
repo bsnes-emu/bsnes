@@ -49,8 +49,14 @@ struct Program : Emulator::Platform {
   auto screenshotPath() -> string;
 
   //states.cpp
-  auto availableStates(string type) -> vector<string>;
-  auto stateTimestamp(string filename) -> uint64_t;
+  struct State {
+    string name;
+    uint64_t date;
+    static const uint Signature;
+  };
+  auto availableStates(string type) -> vector<State>;
+  auto hasState(string filename) -> bool;
+  auto loadStateData(string filename) -> vector<uint8_t>;
   auto loadState(string filename) -> bool;
   auto saveState(string filename) -> bool;
   auto saveUndoState() -> bool;

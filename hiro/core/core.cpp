@@ -26,6 +26,9 @@ using namespace nall;
 #define signal(function, ...) \
   (delegate ? self()->function(__VA_ARGS__) : decltype(self()->function(__VA_ARGS__))())
 
+#define signalex(object, function, ...) \
+  (object->delegate ? object->self()->function(__VA_ARGS__) : decltype(object->self()->function(__VA_ARGS__))())
+
 namespace hiro {
   #include "color.cpp"
   #include "gradient.cpp"
@@ -90,7 +93,6 @@ namespace hiro {
   #include "widget/tab-frame.cpp"
   #include "widget/tab-frame-item.cpp"
   #include "widget/table-view.cpp"
-  #include "widget/table-view-header.cpp"
   #include "widget/table-view-column.cpp"
   #include "widget/table-view-item.cpp"
   #include "widget/table-view-cell.cpp"
@@ -103,3 +105,4 @@ namespace hiro {
 }
 
 #undef signal
+#undef signalex

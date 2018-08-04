@@ -73,14 +73,14 @@ auto Program::screenshotPath() -> string {
   if(!emulator->loaded()) return "";
   auto location = gamePath();
   if(location.endsWith("/")) {
-    directory::create({location, "bsnes/screenshots/"});
-    location = {location, "bsnes/screenshots/capture"};
+    location = {location, "bsnes/screenshots/"};
+    directory::create(location);
   } else {
-    location = path("Screenshots", location);
+    location = {path("Screenshots", location), "-"};
   }
-  for(uint n : range(1, 999)) {
-    string filename = {location, ".", pad(n, 3, '0'), ".bmp"};
+  for(uint n : range(1, 1000)) {
+    string filename = {location, pad(n, 3, '0'), ".bmp"};
     if(!file::exists(filename)) return filename;
   }
-  return {location, ".000.bmp"};
+  return {location, "000.bmp"};
 }

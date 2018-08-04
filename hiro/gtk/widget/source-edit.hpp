@@ -6,8 +6,10 @@ struct pSourceEdit : pWidget {
   Declare(SourceEdit, Widget)
 
   auto setCursor(Cursor cursor) -> void;
+  auto setEditable(bool editable) -> void;
   auto setFocused() -> void override;
   auto setText(const string& text) -> void;
+  auto setWordWrap(bool wordWrap) -> void;
   auto text() const -> string;
 
   GtkScrolledWindow* gtkScrolledWindow = nullptr;

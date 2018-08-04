@@ -2,6 +2,15 @@
 
 namespace nall {
 
+auto string::contains(view<string> characters) const -> maybe<uint> {
+  for(uint x : range(size())) {
+    for(char y : characters) {
+      if(operator[](x) == y) return x;
+    }
+  }
+  return nothing;
+}
+
 template<bool Insensitive, bool Quoted> auto string::_find(int offset, view<string> source) const -> maybe<uint> {
   if(source.size() == 0) return nothing;
 

@@ -15,20 +15,19 @@ struct pTableViewColumn : pObject {
   auto setHorizontalAlignment(double) -> void {}
   auto setIcon(const image& icon) -> void;
   auto setResizable(bool resizable) -> void;
-  auto setSortable(bool sortable) -> void;
+  auto setSorting(Sort sorting) -> void;
   auto setText(const string& text) -> void;
   auto setVerticalAlignment(double) -> void {}
   auto setVisible(bool visible) -> void override;
   auto setWidth(signed width) -> void;
 
-  auto _grandparent() -> maybe<pTableView&>;
-  auto _parent() -> maybe<pTableViewHeader&>;
-  auto _setState() -> void;
+  auto _parent() -> maybe<pTableView&>;
 
   GtkTreeViewColumn* gtkColumn = nullptr;
   GtkWidget* gtkHeader = nullptr;
   GtkWidget* gtkHeaderIcon = nullptr;
   GtkWidget* gtkHeaderText = nullptr;
+  GtkWidget* gtkHeaderSort = nullptr;
   GtkCellRenderer* gtkCellToggle = nullptr;
   GtkCellRenderer* gtkCellIcon = nullptr;
   GtkCellRenderer* gtkCellText = nullptr;

@@ -110,7 +110,10 @@ struct vector_base {
 
   //utility.hpp
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
+  auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint>;
   auto find(const T& value) const -> maybe<uint>;
+  auto foreach(const function<void (const T&)>& callback) -> void;
+  auto foreach(const function<void (uint, const T&)>& callback) -> void;
 
 private:
   T* _pool = nullptr;  //pointer to first initialized element in pool

@@ -14,7 +14,7 @@ mListView::mListView() {
       }
     }
   });
-  append(TableViewHeader().setVisible(false).append(TableViewColumn().setExpandable()));
+  append(TableViewColumn().setExpandable());
 }
 
 auto mListView::batched() const -> vector<ListViewItem> {
@@ -64,7 +64,7 @@ auto mListView::onToggle(const function<void (ListViewItem)>& callback) -> type&
 
 auto mListView::reset() -> type& {
   mTableView::reset();
-  append(TableViewHeader().setVisible(false).append(TableViewColumn().setExpandable()));
+  append(TableViewColumn().setExpandable());
   return *this;
 }
 

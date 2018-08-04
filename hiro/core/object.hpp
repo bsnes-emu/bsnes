@@ -28,7 +28,6 @@ struct mObject {
   auto parentTabFrame(bool recursive = false) const -> mTabFrame*;
   auto parentTabFrameItem(bool recursive = false) const -> mTabFrameItem*;
   auto parentTableView(bool recursive = false) const -> mTableView*;
-  auto parentTableViewHeader(bool recursive = false) const -> mTableViewHeader*;
   auto parentTableViewItem(bool recursive = false) const -> mTableViewItem*;
   auto parentTreeView(bool recursive = false) const -> mTreeView*;
   auto parentTreeViewItem(bool recursive = false) const -> mTreeViewItem*;
@@ -47,17 +46,19 @@ struct mObject {
   auto visible(bool recursive = false) const -> bool;
 
 //private:
+//sizeof(mObject) == 72
   struct State {
-    bool enabled = true;
-    Font font;
-    int offset = -1;
-    mObject* parent = nullptr;
-    set<Property> properties;
-    bool visible = true;
+    Font font;                  //16
+    set<Property> properties;   //16
+    mObject* parent = nullptr;  // 8
+    int offset = -1;            // 4
+    char enabled = true;        // 1+
+    char visible = true;        // 1=4
   } state;
 
-  wObject instance;
-  pObject* delegate = nullptr;
+  wObject instance;             // 8
+  pObject* delegate = nullptr;  // 8
+  //vtable                      // 8
 
   virtual auto construct() -> void;
   virtual auto destruct() -> void;

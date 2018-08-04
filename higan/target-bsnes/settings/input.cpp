@@ -20,6 +20,7 @@ auto InputSettings::create() -> void {
     inputManager.turboFrequency = frequency;
   });
   mappingList.setBatchable();
+  mappingList.setHeadered();
   mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
   mappingList.onChange([&] { updateControls(); });
   assignMouse1.onActivate([&] { assignMouseInput(0); });
@@ -89,10 +90,8 @@ auto InputSettings::reloadDevices() -> void {
 
 auto InputSettings::reloadMappings() -> void {
   mappingList.reset();
-  mappingList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn().setText("Name"))
-    .append(TableViewColumn().setText("Mapping").setExpandable())
-  );
+  mappingList.append(TableViewColumn().setText("Name"));
+  mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(TableViewItem()
       .append(TableViewCell().setText(mapping.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))

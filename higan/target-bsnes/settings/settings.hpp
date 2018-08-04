@@ -155,7 +155,7 @@ public:
       CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
       CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
     CheckLabel suppressScreenSaver{&layout, Size{~0, 0}};
-    Widget optionsSpacer{&layout, Size{~0, 10}};
+    Canvas optionsSpacer{&layout, Size{~0, 1}};
     Label hacksLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};
       CheckLabel fastPPUOption{&fastPPULayout, Size{0, 0}};
@@ -202,7 +202,7 @@ public:
       CheckLabel videoExclusiveToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
-    Widget videoSpacer{&layout, Size{~0, 10}};
+    Canvas videoSpacer{&layout, Size{~0, 1}};
     Label audioLabel{&layout, Size{~0, 0}, 2};
     TableLayout audioLayout{&layout, Size{~0, 0}};
       Label audioDriverLabel{&audioLayout, Size{0, 0}};
@@ -221,7 +221,7 @@ public:
       CheckLabel audioExclusiveToggle{&audioToggleLayout, Size{0, 0}};
       CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
       CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
-    Widget audioSpacer{&layout, Size{~0, 10}};
+    Canvas audioSpacer{&layout, Size{~0, 1}};
     Label inputLabel{&layout, Size{~0, 0}, 2};
     TableLayout inputLayout{&layout, Size{~0, 0}};
       Label inputDriverLabel{&inputLayout, Size{0, 0}};

@@ -3,8 +3,8 @@
 namespace hiro {
 
 auto pTableViewColumn::construct() -> void {
-  if(auto grandparent = _grandparent()) {
-    auto handle = grandparent.data();
+  if(auto parent = _parent()) {
+    auto handle = parent.data();
     uint offset = self().offset();
 
     #if HIRO_GTK==2
@@ -16,8 +16,11 @@ auto pTableViewColumn::construct() -> void {
     gtkHeaderIcon = gtk_image_new();
     gtk_box_pack_start(GTK_BOX(gtkHeader), gtkHeaderIcon, false, false, 0);
 
-    gtkHeaderText = gtk_label_new(state().text);
+    gtkHeaderText = gtk_label_new("");
     gtk_box_pack_start(GTK_BOX(gtkHeader), gtkHeaderText, true, false, 2);
+
+    gtkHeaderSort = gtk_label_new("");
+    gtk_box_pack_start(GTK_BOX(gtkHeader), gtkHeaderSort, false, false, 0);
 
     gtkColumn = gtk_tree_view_column_new();
     gtk_tree_view_column_set_sizing(gtkColumn, GTK_TREE_VIEW_COLUMN_FIXED);
@@ -43,24 +46,34 @@ auto pTableViewColumn::construct() -> void {
     g_signal_connect(G_OBJECT(gtkCellText), "edited", G_CALLBACK(TableView_edit), (gpointer)handle);
     g_signal_connect(G_OBJECT(gtkCellToggle), "toggled", G_CALLBACK(TableView_toggle), (gpointer)handle);
 
-    gtk_tree_view_append_column(grandparent->gtkTreeView, gtkColumn);
+    gtk_tree_view_append_column(parent->gtkTreeView, gtkColumn);
     gtk_widget_show_all(gtkHeader);
-    grandparent->_createModel();
+    parent->_createModel();
 
-    _setState();
+    gtk_tree_view_column_set_clickable(gtkColumn, parent->state().sortable);
+
+    if(state().active) setActive();
+    setEditable(state().editable);
+    setIcon(state().icon);
+    setResizable(state().resizable);
+    setSorting(state().sorting);
+    setText(state().text);
+    setVisible(state().visible);
   }
 }
 
 auto pTableViewColumn::destruct() -> void {
-  if(auto grandparent = _grandparent()) {
-    gtk_tree_view_remove_column(grandparent->gtkTreeView, gtkColumn);
+  if(auto parent = _parent()) {
+    gtk_tree_view_remove_column(parent->gtkTreeView, gtkColumn);
     gtkColumn = nullptr;
-    grandparent->_createModel();
+    parent->_createModel();
   }
 }
 
 auto pTableViewColumn::setActive() -> void {
-  _setState();
+  if(auto parent = _parent()) {
+    gtk_tree_view_set_search_column(parent->gtkTreeView, 3 * self().offset() + 2);
+  }
 }
 
 auto pTableViewColumn::setAlignment(Alignment alignment) -> void {
@@ -74,8 +87,8 @@ auto pTableViewColumn::setEditable(bool editable) -> void {
 }
 
 auto pTableViewColumn::setExpandable(bool expandable) -> void {
-  if(auto grandparent = _grandparent()) {
-    grandparent->resizeColumns();
+  if(auto parent = _parent()) {
+    parent->resizeColumns();
   }
 }
 
@@ -94,47 +107,35 @@ auto pTableViewColumn::setIcon(const image& icon) -> void {
 }
 
 auto pTableViewColumn::setResizable(bool resizable) -> void {
-  _setState();
+  gtk_tree_view_column_set_resizable(gtkColumn, resizable);
 }
 
-auto pTableViewColumn::setSortable(bool sortable) -> void {
-  _setState();
+auto pTableViewColumn::setSorting(Sort sorting) -> void {
+  string text;
+  if(sorting == Sort::Ascending ) text = "\u25b4";
+  if(sorting == Sort::Descending) text = "\u25be";
+  gtk_label_set_text(GTK_LABEL(gtkHeaderSort), text);
 }
 
 auto pTableViewColumn::setText(const string& text) -> void {
-  _setState();
+  gtk_label_set_text(GTK_LABEL(gtkHeaderText), text);
 }
 
 auto pTableViewColumn::setVisible(bool visible) -> void {
-  _setState();
+  gtk_tree_view_column_set_visible(gtkColumn, visible);
 }
 
 auto pTableViewColumn::setWidth(signed width) -> void {
-  if(auto grandparent = _grandparent()) {
-    grandparent->resizeColumns();
+  if(auto parent = _parent()) {
+    parent->resizeColumns();
   }
 }
 
-auto pTableViewColumn::_grandparent() -> maybe<pTableView&> {
-  if(auto parent = _parent()) return parent->_parent();
-  return nothing;
-}
-
-auto pTableViewColumn::_parent() -> maybe<pTableViewHeader&> {
-  if(auto parent = self().parentTableViewHeader()) {
+auto pTableViewColumn::_parent() -> maybe<pTableView&> {
+  if(auto parent = self().parentTableView()) {
     if(auto self = parent->self()) return *self;
   }
-  return nothing;
-}
-
-auto pTableViewColumn::_setState() -> void {
-  if(auto grandparent = _grandparent()) {
-    gtk_tree_view_set_search_column(grandparent->gtkTreeView, 3 * self().offset() + 2);
-    gtk_tree_view_column_set_resizable(gtkColumn, state().resizable);
-    gtk_tree_view_column_set_clickable(gtkColumn, state().sortable);
-    gtk_label_set_text(GTK_LABEL(gtkHeaderText), state().text);
-    gtk_tree_view_column_set_visible(gtkColumn, self().visible());
-  }
+  return {};
 }
 
 }

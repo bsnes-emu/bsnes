@@ -40,7 +40,7 @@ protected:
     p += length;
   }
 
-  auto parseData(const char*& p) -> void {
+  auto parseData(const char*& p, view<string> spacing) -> void {
     if(*p == '=' && *(p + 1) == '\"') {
       uint length = 2;
       while(p[length] && p[length] != '\n' && p[length] != '\"') length++;
@@ -56,13 +56,13 @@ protected:
     } else if(*p == ':') {
       uint length = 1;
       while(p[length] && p[length] != '\n') length++;
-      _value = {slice(p, 1, length - 1), "\n"};
+      _value = {slice(p, 1, length - 1).trimLeft(spacing, 1L), "\n"};
       p += length;
     }
   }
 
   //read all attributes for a node
-  auto parseAttributes(const char*& p) -> void {
+  auto parseAttributes(const char*& p, view<string> spacing) -> void {
     while(*p && *p != '\n') {
       if(*p != ' ') throw "Invalid node name";
       while(*p == ' ') p++;  //skip excess spaces
@@ -73,31 +73,31 @@ protected:
       while(valid(p[length])) length++;
       if(length == 0) throw "Invalid attribute name";
       node->_name = slice(p, 0, length);
-      node->parseData(p += length);
+      node->parseData(p += length, spacing);
       node->_value.trimRight("\n", 1L);
       _children.append(node);
     }
   }
 
   //read a node and all of its child nodes
-  auto parseNode(const vector<string>& text, uint& y) -> void {
+  auto parseNode(const vector<string>& text, uint& y, view<string> spacing) -> void {
     const char* p = text[y++];
     _metadata = parseDepth(p);
     parseName(p);
-    parseData(p);
-    parseAttributes(p);
+    parseData(p, spacing);
+    parseAttributes(p, spacing);
 
     while(y < text.size()) {
       uint depth = readDepth(text[y]);
       if(depth <= _metadata) break;
 
       if(text[y][depth] == ':') {
-        _value.append(slice(text[y++], depth + 1), "\n");
+        _value.append(slice(text[y++], depth + 1).trimLeft(spacing, 1L), "\n");
         continue;
       }
 
       SharedNode node(new ManagedNode);
-      node->parseNode(text, y);
+      node->parseNode(text, y, spacing);
       _children.append(node);
     }
 
@@ -105,7 +105,7 @@ protected:
   }
 
   //read top-level nodes
-  auto parse(string document) -> void {
+  auto parse(string document, view<string> spacing) -> void {
     //in order to simplify the parsing logic; we do an initial pass to normalize the data
     //the below code will turn '\r\n' into '\n'; skip empty lines; and skip comment lines
     char* p = document.get(), *output = p;
@@ -134,37 +134,37 @@ protected:
     uint y = 0;
     while(y < text.size()) {
       SharedNode node(new ManagedNode);
-      node->parseNode(text, y);
+      node->parseNode(text, y, spacing);
       if(node->_metadata > 0) throw "Root nodes cannot be indented";
       _children.append(node);
     }
   }
 
-  friend auto unserialize(const string&) -> Markup::Node;
+  friend auto unserialize(const string&, view<string>) -> Markup::Node;
 };
 
-inline auto unserialize(const string& markup) -> Markup::Node {
+inline auto unserialize(const string& markup, view<string> spacing = {}) -> Markup::Node {
   SharedNode node(new ManagedNode);
   try {
-    node->parse(markup);
+    node->parse(markup, spacing);
   } catch(const char* error) {
     node.reset();
   }
   return (Markup::SharedNode&)node;
 }
 
-inline auto serialize(const Markup::Node& node, uint depth = 0) -> string {
+inline auto serialize(const Markup::Node& node, view<string> spacing = {}, uint depth = 0) -> string {
   if(!node.name()) {
     string result;
     for(auto leaf : node) {
-      result.append(serialize(leaf, depth));
+      result.append(serialize(leaf, spacing, depth));
     }
     return result;
   }
 
   string padding;
   padding.resize(depth * 2);
-  for(auto& byte : padding) byte = ' ';
+  padding.fill(' ');
 
   vector<string> lines;
   if(auto value = node.value()) lines = value.split("\n");
@@ -172,16 +172,16 @@ inline auto serialize(const Markup::Node& node, uint depth = 0) -> string {
   string result;
   result.append(padding);
   result.append(node.name());
-  if(lines.size() == 1) result.append(":", lines[0]);
+  if(lines.size() == 1) result.append(":", spacing, lines[0]);
   result.append("\n");
   if(lines.size() > 1) {
     padding.append("  ");
     for(auto& line : lines) {
-      result.append(padding, ":", line, "\n");
+      result.append(padding, ":", spacing, line, "\n");
     }
   }
   for(auto leaf : node) {
-    result.append(serialize(leaf, depth + 1));
+    result.append(serialize(leaf, spacing, depth + 1));
   }
   return result;
 }

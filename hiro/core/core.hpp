@@ -25,6 +25,7 @@ using nall::set;
 using nall::shared_pointer;
 using nall::shared_pointer_weak;
 using nall::string;
+using nall::string_pascal;
 using nall::vector;
 
 namespace hiro {
@@ -95,6 +96,7 @@ Declare(Viewport)
 
 enum class Orientation : uint { Horizontal, Vertical };
 enum class Navigation : uint { Top, Bottom, Left, Right };
+enum class Sort : uint { None, Ascending, Descending };
 
 #if defined(Hiro_Color)
 struct Color {
@@ -305,40 +307,7 @@ struct Geometry {
 };
 #endif
 
-#if defined(Hiro_Font)
-struct Font {
-  using type = Font;
-
-  Font(const string& family = "", float size = 0);
-
-  explicit operator bool() const;
-  auto operator==(const Font& source) const -> bool;
-  auto operator!=(const Font& source) const -> bool;
-
-  auto bold() const -> bool;
-  auto family() const -> string;
-  auto italic() const -> bool;
-  auto reset() -> type&;
-  auto setBold(bool bold = true) -> type&;
-  auto setFamily(const string& family = "") -> type&;
-  auto setItalic(bool italic = true) -> type&;
-  auto setSize(float size = 0) -> type&;
-  auto size() const -> float;
-  auto size(const string& text) const -> Size;
-
-  static const string Sans;
-  static const string Serif;
-  static const string Mono;
-
-//private:
-  struct State {
-    string family;
-    float size;
-    bool bold;
-    bool italic;
-  } state;
-};
-#endif
+#include "font.hpp"
 
 #if defined(Hiro_Hotkey)
 struct Hotkey {
@@ -707,35 +676,9 @@ struct mMenuRadioItem : mAction {
 };
 #endif
 
-#if defined(Hiro_Sizable)
-struct mSizable : mObject {
-  Declare(Sizable)
+#include "sizable.hpp"
 
-  auto geometry() const -> Geometry;
-  virtual auto minimumSize() const -> Size;
-  virtual auto setGeometry(Geometry geometry) -> type&;
-
-//private:
-  struct State {
-    Geometry geometry;
-  } state;
-};
-#endif
-
-#if defined(Hiro_Widget)
-struct mWidget : mSizable {
-  Declare(Widget)
-
-  auto doSize() const -> void;
-  auto onSize(const function<void ()>& callback = {}) -> type&;
-  auto remove() -> type& override;
-
-//private:
-  struct State {
-    function<void ()> onSize;
-  } state;
-};
-#endif
+#include "widget/widget.hpp"
 
 #if defined(Hiro_Button)
 struct mButton : mWidget {
@@ -1274,28 +1217,7 @@ struct mRadioLabel : mWidget {
 };
 #endif
 
-#if defined(Hiro_SourceEdit)
-struct mSourceEdit : mWidget {
-  Declare(SourceEdit)
-
-  auto cursor() const -> Cursor;
-  auto doChange() const -> void;
-  auto doMove() const -> void;
-  auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onMove(const function<void ()>& callback = {}) -> type&;
-  auto setCursor(Cursor cursor = {}) -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto text() const -> string;
-
-//private:
-  struct State {
-    Cursor cursor;
-    function<void ()> onChange;
-    function<void ()> onMove;
-    string text;
-  } state;
-};
-#endif
+#include "widget/source-edit.hpp"
 
 #if defined(Hiro_TabFrame)
 struct mTabFrame : mWidget {
@@ -1374,210 +1296,10 @@ struct mTabFrameItem : mObject {
 };
 #endif
 
-#if defined(Hiro_TableView)
-struct mTableView : mWidget {
-  Declare(TableView)
-  using mObject::remove;
-
-  auto alignment() const -> Alignment;
-  auto append(sTableViewHeader column) -> type&;
-  auto append(sTableViewItem item) -> type&;
-  auto backgroundColor() const -> Color;
-  auto batchable() const -> bool;
-  auto batched() const -> vector<TableViewItem>;
-  auto bordered() const -> bool;
-  auto doActivate() const -> void;
-  auto doChange() const -> void;
-  auto doContext() const -> void;
-  auto doEdit(sTableViewCell cell) const -> void;
-  auto doSort(sTableViewColumn column) const -> void;
-  auto doToggle(sTableViewCell cell) const -> void;
-  auto foregroundColor() const -> Color;
-  auto header() const -> TableViewHeader;
-  auto item(uint position) const -> TableViewItem;
-  auto itemCount() const -> uint;
-  auto items() const -> vector<TableViewItem>;
-  auto onActivate(const function<void ()>& callback = {}) -> type&;
-  auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onContext(const function<void ()>& callback = {}) -> type&;
-  auto onEdit(const function<void (TableViewCell)>& callback = {}) -> type&;
-  auto onSort(const function<void (TableViewColumn)>& callback = {}) -> type&;
-  auto onToggle(const function<void (TableViewCell)>& callback = {}) -> type&;
-  auto remove(sTableViewHeader column) -> type&;
-  auto remove(sTableViewItem item) -> type&;
-  auto reset() -> type&;
-  auto resizeColumns() -> type&;
-  auto selected() const -> TableViewItem;
-  auto setAlignment(Alignment alignment = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setBatchable(bool batchable = true) -> type&;
-  auto setBordered(bool bordered = true) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
-
-//private:
-  struct State {
-    uint activeColumn = 0;
-    Alignment alignment;
-    Color backgroundColor;
-    bool batchable = false;
-    bool bordered = false;
-    Color foregroundColor;
-    sTableViewHeader header;
-    vector<sTableViewItem> items;
-    function<void ()> onActivate;
-    function<void ()> onChange;
-    function<void ()> onContext;
-    function<void (TableViewCell)> onEdit;
-    function<void (TableViewColumn)> onSort;
-    function<void (TableViewCell)> onToggle;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
-#if defined(Hiro_TableView)
-struct mTableViewHeader : mObject {
-  Declare(TableViewHeader)
-
-  auto append(sTableViewColumn column) -> type&;
-  auto column(uint position) const -> TableViewColumn;
-  auto columnCount() const -> uint;
-  auto columns() const -> vector<TableViewColumn>;
-  auto remove() -> type& override;
-  auto remove(sTableViewColumn column) -> type&;
-  auto reset() -> type&;
-  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
-
-//private:
-  struct State {
-    vector<sTableViewColumn> columns;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
-#if defined(Hiro_TableView)
-struct mTableViewColumn : mObject {
-  Declare(TableViewColumn)
-
-  auto active() const -> bool;
-  auto alignment() const -> Alignment;
-  auto backgroundColor() const -> Color;
-  auto editable() const -> bool;
-  auto expandable() const -> bool;
-  auto foregroundColor() const -> Color;
-  auto horizontalAlignment() const -> float;
-  auto icon() const -> image;
-  auto remove() -> type& override;
-  auto resizable() const -> bool;
-  auto setActive() -> type&;
-  auto setAlignment(Alignment alignment = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setEditable(bool editable = true) -> type&;
-  auto setExpandable(bool expandable = true) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setHorizontalAlignment(float alignment = 0.0) -> type&;
-  auto setIcon(const image& icon = {}) -> type&;
-  auto setResizable(bool resizable = true) -> type&;
-  auto setSortable(bool sortable = true) -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto setVerticalAlignment(float alignment = 0.5) -> type&;
-  auto setVisible(bool visible = true) -> type&;
-  auto setWidth(float width = 0) -> type&;
-  auto sortable() const -> bool;
-  auto text() const -> string;
-  auto verticalAlignment() const -> float;
-  auto width() const -> float;
-
-//private:
-  struct State {
-    Alignment alignment;
-    Color backgroundColor;
-    bool editable = false;
-    bool expandable = false;
-    Color foregroundColor;
-    float horizontalAlignment = 0.0;
-    image icon;
-    bool resizable = true;
-    bool sortable = false;
-    string text;
-    float verticalAlignment = 0.5;
-    bool visible = true;
-    float width = 0;
-  } state;
-};
-#endif
-
-#if defined(Hiro_TableView)
-struct mTableViewItem : mObject {
-  Declare(TableViewItem)
-
-  auto alignment() const -> Alignment;
-  auto append(sTableViewCell cell) -> type&;
-  auto backgroundColor() const -> Color;
-  auto cell(uint position) const -> TableViewCell;
-  auto cellCount() const -> uint;
-  auto cells() const -> vector<TableViewCell>;
-  auto foregroundColor() const -> Color;
-  auto remove() -> type& override;
-  auto remove(sTableViewCell cell) -> type&;
-  auto reset() -> type&;
-  auto selected() const -> bool;
-  auto setAlignment(Alignment alignment = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setFocused() -> type& override;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
-  auto setSelected(bool selected = true) -> type&;
-
-//private:
-  struct State {
-    Alignment alignment;
-    Color backgroundColor;
-    vector<sTableViewCell> cells;
-    Color foregroundColor;
-    bool selected = false;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
-#if defined(Hiro_TableView)
-struct mTableViewCell : mObject {
-  Declare(TableViewCell)
-
-  auto alignment(bool recursive = false) const -> Alignment;
-  auto backgroundColor(bool recursive = false) const -> Color;
-  auto checkable() const -> bool;
-  auto checked() const -> bool;
-  auto font(bool recursive = false) const -> Font;
-  auto foregroundColor(bool recursive = false) const -> Color;
-  auto icon() const -> image;
-  auto setAlignment(Alignment alignment = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCheckable(bool checkable = true) -> type&;
-  auto setChecked(bool checked = true) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setIcon(const image& icon = {}) -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto text() const -> string;
-
-//private:
-  struct State {
-    Alignment alignment;
-    Color backgroundColor;
-    bool checkable = false;
-    bool checked = false;
-    Color foregroundColor;
-    image icon;
-    string text;
-  } state;
-};
-#endif
+#include "widget/table-view.hpp"
+#include "widget/table-view-column.hpp"
+#include "widget/table-view-item.hpp"
+#include "widget/table-view-cell.hpp"
 
 #if defined(Hiro_TextEdit)
 struct mTextEdit : mWidget {

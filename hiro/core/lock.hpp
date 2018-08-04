@@ -50,3 +50,5 @@ struct mLock {
 
   mutable int locks = 0;
 };
+
+using Lock = mLock;

@@ -54,7 +54,9 @@ auto pSourceEdit::construct() -> void {
   gtk_container_add(gtkContainer, gtkWidgetSourceView);
   gtk_widget_show(gtkWidgetSourceView);
 
+  setEditable(state().editable);
   setText(state().text);
+  setWordWrap(state().wordWrap);
 
   g_signal_connect(G_OBJECT(gtkSourceBuffer), "changed", G_CALLBACK(SourceEdit_change), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkSourceBuffer), "notify::cursor-position", G_CALLBACK(SourceEdit_move), (gpointer)this);
@@ -80,6 +82,10 @@ auto pSourceEdit::setCursor(Cursor cursor) -> void {
   auto mark = gtk_text_buffer_get_mark(gtkTextBuffer, "insert");
   gtk_text_view_scroll_mark_onscreen(gtkTextView, mark);
   unlock();
+}
+
+auto pSourceEdit::setEditable(bool editable) -> void {
+  gtk_text_view_set_editable(gtkTextView, editable);
 }
 
 auto pSourceEdit::setFocused() -> void {
@@ -126,6 +132,11 @@ auto pSourceEdit::setText(const string& text) -> void {
   lock();
   gtk_text_buffer_set_text(gtkTextBuffer, text, -1);
   unlock();
+}
+
+auto pSourceEdit::setWordWrap(bool wordWrap) -> void {
+  gtk_text_view_set_wrap_mode(gtkTextView, wordWrap ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
+  gtk_scrolled_window_set_policy(gtkScrolledWindow, wordWrap ? GTK_POLICY_NEVER : GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
 }
 
 auto pSourceEdit::text() const -> string {

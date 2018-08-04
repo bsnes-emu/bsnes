@@ -200,16 +200,6 @@ auto mObject::parentTableView(bool recursive) const -> mTableView* {
 #endif
 
 #if defined(Hiro_TableView)
-auto mObject::parentTableViewHeader(bool recursive) const -> mTableViewHeader* {
-  if(auto tableViewHeader = dynamic_cast<mTableViewHeader*>(parent())) return tableViewHeader;
-  if(recursive) {
-    if(auto object = parent()) return object->parentTableViewHeader(true);
-  }
-  return nullptr;
-}
-#endif
-
-#if defined(Hiro_TableView)
 auto mObject::parentTableViewItem(bool recursive) const -> mTableViewItem* {
   if(auto tableViewItem = dynamic_cast<mTableViewItem*>(parent())) return tableViewItem;
   if(recursive) {

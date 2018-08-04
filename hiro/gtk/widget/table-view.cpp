@@ -34,6 +34,8 @@ auto pTableView::construct() -> void {
   setBordered(state().bordered);
   setFont(self().font(true));
   setForegroundColor(state().foregroundColor);
+  setHeadered(state().headered);
+  setSortable(state().sortable);
 
   g_signal_connect(G_OBJECT(gtkTreeView), "button-press-event", G_CALLBACK(TableView_buttonEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "button-release-event", G_CALLBACK(TableView_buttonEvent), (gpointer)this);
@@ -50,7 +52,7 @@ auto pTableView::destruct() -> void {
   gtk_widget_destroy(gtkWidget);
 }
 
-auto pTableView::append(sTableViewHeader header) -> void {
+auto pTableView::append(sTableViewColumn column) -> void {
 }
 
 auto pTableView::append(sTableViewItem item) -> void {
@@ -60,48 +62,44 @@ auto pTableView::focused() const -> bool {
   return gtk_widget_has_focus(GTK_WIDGET(gtkTreeView));
 }
 
-auto pTableView::remove(sTableViewHeader header) -> void {
+auto pTableView::remove(sTableViewColumn column) -> void {
 }
 
 auto pTableView::remove(sTableViewItem item) -> void {
 }
 
 auto pTableView::resizeColumns() -> void {
-  lock();
+  auto lock = acquire();
 
-  if(auto& header = state().header) {
-    vector<signed> widths;
-    signed minimumWidth = 0;
-    signed expandable = 0;
-    for(auto column : range(header->columnCount())) {
-      signed width = _width(column);
-      widths.append(width);
-      minimumWidth += width;
-      if(header->column(column).expandable()) expandable++;
-    }
-
-    signed maximumWidth = self().geometry().width() - 6;
-    if(auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow)) {
-      GtkAllocation allocation;
-      gtk_widget_get_allocation(scrollBar, &allocation);
-      if(gtk_widget_get_visible(scrollBar)) maximumWidth -= allocation.width;
-    }
-
-    signed expandWidth = 0;
-    if(expandable && maximumWidth > minimumWidth) {
-      expandWidth = (maximumWidth - minimumWidth) / expandable;
-    }
-
-    for(auto column : range(header->columnCount())) {
-      if(auto self = header->state.columns[column]->self()) {
-        signed width = widths[column];
-        if(self->state().expandable) width += expandWidth;
-        gtk_tree_view_column_set_fixed_width(self->gtkColumn, width);
-      }
-    }
+  vector<signed> widths;
+  signed minimumWidth = 0;
+  signed expandable = 0;
+  for(uint position : range(self().columnCount())) {
+    signed width = _width(position);
+    widths.append(width);
+    minimumWidth += width;
+    if(self().column(position).expandable()) expandable++;
   }
 
-  unlock();
+  signed maximumWidth = self().geometry().width() - 6;
+  if(auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow)) {
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(scrollBar, &allocation);
+    if(gtk_widget_get_visible(scrollBar)) maximumWidth -= allocation.width;
+  }
+
+  signed expandWidth = 0;
+  if(expandable && maximumWidth > minimumWidth) {
+    expandWidth = (maximumWidth - minimumWidth) / expandable;
+  }
+
+  for(uint position : range(self().columnCount())) {
+    if(auto column = self().column(position)->self()) {
+      signed width = widths[position];
+      if(column->state().expandable) width += expandWidth;
+      gtk_tree_view_column_set_fixed_width(column->gtkColumn, width);
+    }
+  }
 }
 
 auto pTableView::setAlignment(Alignment alignment) -> void {
@@ -131,9 +129,6 @@ auto pTableView::setFocused() -> void {
 }
 
 auto pTableView::setFont(const Font& font) -> void {
-  if(auto& header = state().header) {
-    if(auto self = header->self()) self->_setState();
-  }
 }
 
 auto pTableView::setForegroundColor(Color color) -> void {
@@ -143,10 +138,18 @@ auto pTableView::setForegroundColor(Color color) -> void {
 
 auto pTableView::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(column->state.expandable) return resizeColumns();
-    }
+  for(auto& column : state().columns) {
+    if(column->expandable()) return resizeColumns();
+  }
+}
+
+auto pTableView::setHeadered(bool headered) -> void {
+  gtk_tree_view_set_headers_visible(gtkTreeView, headered);
+}
+
+auto pTableView::setSortable(bool sortable) -> void {
+  for(auto& column : state().columns) {
+    if(auto self = column->self()) gtk_tree_view_column_set_clickable(self->gtkColumn, sortable);
   }
 }
 
@@ -170,14 +173,15 @@ auto pTableView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
 
 auto pTableView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 8;
-  if(auto& header = state().header) {
-    if(auto column = header->column(_column)) {
-      if(auto& icon = column->state.icon) {
-        width += icon.width() + 2;
-      }
-      if(auto& text = column->state.text) {
-        width += pFont::size(column->font(true), text).width();
-      }
+  if(auto column = self().column(_column)) {
+    if(auto& icon = column->state.icon) {
+      width += icon.width() + 2;
+    }
+    if(auto& text = column->state.text) {
+      width += pFont::size(column->font(true), text).width();
+    }
+    if(column->state.sorting != Sort::None) {
+      width += 20;
     }
   }
   return width;
@@ -191,14 +195,12 @@ auto pTableView::_createModel() -> void {
   gtkTreeModel = nullptr;
 
   vector<GType> types;
-  if(auto& header = state().header) {
-    for(auto column : header->state.columns) {
-      if(auto self = column->self()) {
-        if(!self->gtkColumn) continue;  //may not have been created yet; or recently destroyed
-        types.append(G_TYPE_BOOLEAN);
-        types.append(GDK_TYPE_PIXBUF);
-        types.append(G_TYPE_STRING);
-      }
+  for(auto& column : state().columns) {
+    if(auto self = column->self()) {
+      if(!self->gtkColumn) continue;  //may not have been created yet; or recently destroyed
+      types.append(G_TYPE_BOOLEAN);
+      types.append(GDK_TYPE_PIXBUF);
+      types.append(G_TYPE_STRING);
     }
   }
   if(!types) return;  //no columns available
@@ -230,44 +232,42 @@ auto pTableView::_doDataFunc(GtkTreeViewColumn* gtkColumn, GtkCellRenderer* rend
   auto row = toNatural(path);
   g_free(path);
 
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(auto p = column->self()) {
-        if(renderer != GTK_CELL_RENDERER(p->gtkCellToggle)
-        && renderer != GTK_CELL_RENDERER(p->gtkCellIcon)
-        && renderer != GTK_CELL_RENDERER(p->gtkCellText)
-        ) continue;
-        if(auto item = self().item(row)) {
-          if(auto cell = item->cell(column->offset())) {
-            if(renderer == GTK_CELL_RENDERER(p->gtkCellToggle)) {
-              gtk_cell_renderer_set_visible(renderer, cell->state.checkable);
-            } else if(renderer == GTK_CELL_RENDERER(p->gtkCellText)) {
-              auto alignment = cell->alignment(true);
-              if(!alignment) alignment = {0.0, 0.5};
-            //note: below line will center column header text; but causes strange glitches
-            //(specifically, windows fail to respond to the close button ... some kind of heap corruption inside GTK+)
-            //gtk_tree_view_column_set_alignment(gtkColumn, alignment.horizontal());
-              gtk_cell_renderer_set_alignment(renderer, alignment.horizontal(), alignment.vertical());
-              auto pangoAlignment = PANGO_ALIGN_CENTER;
-              if(alignment.horizontal() < 0.333) pangoAlignment = PANGO_ALIGN_LEFT;
-              if(alignment.horizontal() > 0.666) pangoAlignment = PANGO_ALIGN_RIGHT;
-              g_object_set(G_OBJECT(renderer), "alignment", pangoAlignment, nullptr);
-              auto font = pFont::create(cell->font(true));
-              g_object_set(G_OBJECT(renderer), "font-desc", font, nullptr);
-              pango_font_description_free(font);
-              if(auto color = cell->foregroundColor(true)) {
-                auto gdkColor = CreateColor(color);
-                if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "foreground-gdk", &gdkColor, nullptr);
-              } else {
-                g_object_set(G_OBJECT(renderer), "foreground-set", false, nullptr);
-              }
-            }
-            if(auto color = cell->backgroundColor(true)) {
+  for(auto& column : state().columns) {
+    if(auto p = column->self()) {
+      if(renderer != GTK_CELL_RENDERER(p->gtkCellToggle)
+      && renderer != GTK_CELL_RENDERER(p->gtkCellIcon)
+      && renderer != GTK_CELL_RENDERER(p->gtkCellText)
+      ) continue;
+      if(auto item = self().item(row)) {
+        if(auto cell = item->cell(column->offset())) {
+          if(renderer == GTK_CELL_RENDERER(p->gtkCellToggle)) {
+            gtk_cell_renderer_set_visible(renderer, cell->state.checkable);
+          } else if(renderer == GTK_CELL_RENDERER(p->gtkCellText)) {
+            auto alignment = cell->alignment(true);
+            if(!alignment) alignment = {0.0, 0.5};
+          //note: below line will center column header text; but causes strange glitches
+          //(specifically, windows fail to respond to the close button ... some kind of heap corruption inside GTK+)
+          //gtk_tree_view_column_set_alignment(gtkColumn, alignment.horizontal());
+            gtk_cell_renderer_set_alignment(renderer, alignment.horizontal(), alignment.vertical());
+            auto pangoAlignment = PANGO_ALIGN_CENTER;
+            if(alignment.horizontal() < 0.333) pangoAlignment = PANGO_ALIGN_LEFT;
+            if(alignment.horizontal() > 0.666) pangoAlignment = PANGO_ALIGN_RIGHT;
+            g_object_set(G_OBJECT(renderer), "alignment", pangoAlignment, nullptr);
+            auto font = pFont::create(cell->font(true));
+            g_object_set(G_OBJECT(renderer), "font-desc", font, nullptr);
+            pango_font_description_free(font);
+            if(auto color = cell->foregroundColor(true)) {
               auto gdkColor = CreateColor(color);
-              if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "cell-background-gdk", &gdkColor, nullptr);
+              if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "foreground-gdk", &gdkColor, nullptr);
             } else {
-              g_object_set(G_OBJECT(renderer), "cell-background-set", false, nullptr);
+              g_object_set(G_OBJECT(renderer), "foreground-set", false, nullptr);
             }
+          }
+          if(auto color = cell->backgroundColor(true)) {
+            auto gdkColor = CreateColor(color);
+            if(settings.theme.widgetColors) g_object_set(G_OBJECT(renderer), "cell-background-gdk", &gdkColor, nullptr);
+          } else {
+            g_object_set(G_OBJECT(renderer), "cell-background-set", false, nullptr);
           }
         }
       }
@@ -276,19 +276,17 @@ auto pTableView::_doDataFunc(GtkTreeViewColumn* gtkColumn, GtkCellRenderer* rend
 }
 
 auto pTableView::_doEdit(GtkCellRendererText* gtkCellRendererText, const char* path, const char* text) -> void {
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(auto delegate = column->self()) {
-        if(gtkCellRendererText == GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
-          auto row = toNatural(path);
-          if(auto item = self().item(row)) {
-            if(auto cell = item->cell(column->offset())) {
-              if(string{text} != cell->state.text) {
-                cell->setText(text);
-                if(!locked()) self().doEdit(cell);
-              }
-              return;
+  for(auto& column : state().columns) {
+    if(auto delegate = column->self()) {
+      if(gtkCellRendererText == GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
+        auto row = toNatural(path);
+        if(auto item = self().item(row)) {
+          if(auto cell = item->cell(column->offset())) {
+            if(string{text} != cell->state.text) {
+              cell->setText(text);
+              if(!locked()) self().doEdit(cell);
             }
+            return;
           }
         }
       }
@@ -326,13 +324,11 @@ auto pTableView::_doEvent(GdkEventButton* event) -> signed {
 }
 
 auto pTableView::_doHeaderActivate(GtkTreeViewColumn* gtkTreeViewColumn) -> void {
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(auto delegate = column->self()) {
-        if(gtkTreeViewColumn == delegate->gtkColumn) {
-          if(!locked()) self().doSort(column);
-          return;
-        }
+  for(auto& column : state().columns) {
+    if(auto delegate = column->self()) {
+      if(gtkTreeViewColumn == delegate->gtkColumn) {
+        if(!locked()) self().doSort(column);
+        return;
       }
     }
   }
@@ -348,17 +344,15 @@ auto pTableView::_doMouseMove() -> signed {
 }
 
 auto pTableView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const char* path) -> void {
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(auto delegate = column->self()) {
-        if(gtkCellRendererToggle == GTK_CELL_RENDERER_TOGGLE(delegate->gtkCellToggle)) {
-          auto row = toNatural(path);
-          if(auto item = self().item(row)) {
-            if(auto cell = item->cell(column->offset())) {
-              cell->setChecked(!cell->checked());
-              if(!locked()) self().doToggle(cell);
-              return;
-            }
+  for(auto& column : state().columns) {
+    if(auto delegate = column->self()) {
+      if(gtkCellRendererToggle == GTK_CELL_RENDERER_TOGGLE(delegate->gtkCellToggle)) {
+        auto row = toNatural(path);
+        if(auto item = self().item(row)) {
+          if(auto cell = item->cell(column->offset())) {
+            cell->setChecked(!cell->checked());
+            if(!locked()) self().doToggle(cell);
+            return;
           }
         }
       }
@@ -412,17 +406,14 @@ auto pTableView::_updateSelected() -> void {
 }
 
 auto pTableView::_width(unsigned column) -> unsigned {
-  if(auto& header = state().header) {
-    if(auto width = header->column(column).width()) return width;
-    unsigned width = 1;
-    if(!header->column(column).visible()) return width;
-    if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(self().itemCount())) {
-      width = max(width, _cellWidth(row, column));
-    }
-    return width;
+  if(auto width = self().column(column).width()) return width;
+  unsigned width = 1;
+  if(!self().column(column).visible()) return width;
+  if(self().headered()) width = max(width, _columnWidth(column));
+  for(auto row : range(self().itemCount())) {
+    width = max(width, _cellWidth(row, column));
   }
-  return 1;
+  return width;
 }
 
 }

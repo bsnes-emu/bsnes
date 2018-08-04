@@ -25,6 +25,7 @@ auto DriverSettings::create() -> void {
     settings["Video/Flush"].setValue(videoFlushToggle.checked());
     program.updateVideoFlush();
   });
+  videoSpacer.setColor({192, 192, 192});
 
   audioLabel.setText("Audio").setFont(Font().setBold());
   audioLayout.setSize({2, 2});
@@ -51,6 +52,7 @@ auto DriverSettings::create() -> void {
     settings["Audio/Dynamic"].setValue(audioDynamicToggle.checked());
     program.updateAudioDynamic();
   });
+  audioSpacer.setColor({192, 192, 192});
 
   inputLabel.setText("Input").setFont(Font().setBold());
   inputLayout.setSize({2, 1});

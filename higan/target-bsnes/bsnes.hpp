@@ -11,6 +11,9 @@ extern Input input;
 #include <emulator/emulator.hpp>
 extern unique_pointer<Emulator::Interface> emulator;
 
+#include <nall/encode/rle.hpp>
+#include <nall/decode/rle.hpp>
+
 #include "program/program.hpp"
 #include "input/input.hpp"
 #include "presentation/presentation.hpp"

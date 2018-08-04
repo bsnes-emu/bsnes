@@ -34,9 +34,24 @@ auto Program::updateStatus() -> void {
 auto Program::captureScreenshot() -> bool {
   if(emulator->loaded() && screenshot.data) {
     if(auto filename = screenshotPath()) {
-      if(Encode::BMP::create(filename,
-        (const uint32_t*)screenshot.data, screenshot.pitch, screenshot.width, screenshot.height, false
-      )) {
+      image capture;
+      capture.allocate(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
+
+      //normalize pixel aspect ratio to 1:1
+      if(capture.width() == 512 && capture.height() == 240) capture.scale(512, 480, false);  //hires
+      if(capture.width() == 256 && capture.height() == 480) capture.scale(512, 480, false);  //interlace
+
+      auto data = capture.data();
+      auto pitch = capture.pitch();
+      auto width = capture.width();
+      auto height = capture.height();
+
+      if(presentation.overscanCropping.checked()) {
+        if(height == 240) data +=  8 * pitch, height -= 16;
+        if(height == 480) data += 16 * pitch, height -= 32;
+      }
+
+      if(Encode::BMP::create(filename, data, width << 2, width, height, /* alpha = */ false)) {
         showMessage({"Captured screenshot [", Location::file(filename), "]"});
         return true;
       }

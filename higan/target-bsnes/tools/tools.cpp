@@ -15,9 +15,14 @@ auto ToolsWindow::create() -> void {
   panel.append(cheatEditor);
   panel.append(stateManager);
   panel.append(manifestViewer);
+  panel.onChange([&] {
+    uint offset = panel.selected().offset();
+    if(offset != 0) cheatDatabase.setVisible(false), cheatWindow.setVisible(false);
+    if(offset != 1) stateWindow.setVisible(false);
+  });
 
   setTitle("Tools");
-  setSize({600, 400});
+  setSize({720, 480});
   setAlignment({1.0, 1.0});
   setDismissable();
 
@@ -37,6 +42,9 @@ auto ToolsWindow::setVisible(bool visible) -> ToolsWindow& {
     cheatDatabase.setVisible(false);
     cheatWindow.setVisible(false);
     stateWindow.setVisible(false);
+  } else {
+    Application::processEvents();
+    doSize();
   }
   return *this;
 }
@@ -45,5 +53,4 @@ auto ToolsWindow::show(uint index) -> void {
   panel.item(index).setSelected();
   setVisible();
   setFocused();
-  doSize();
 }

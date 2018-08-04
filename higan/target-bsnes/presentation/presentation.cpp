@@ -448,9 +448,8 @@ auto Presentation::updateStateMenus() -> void {
   for(auto& action : saveState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
       if(auto name = item.property("name")) {
-        if(states.find(name)) {
-          auto timestamp = program.stateTimestamp(item.property("name"));
-          item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
+        if(auto offset = states.find([&](auto& state) { return state.name == name; })) {
+          item.setText({item.property("title"), " [", chrono::local::datetime(states[*offset].date), "]"});
         } else {
           item.setText({item.property("title"), " [Empty]"});
         }
@@ -461,10 +460,9 @@ auto Presentation::updateStateMenus() -> void {
   for(auto& action : loadState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
       if(auto name = item.property("name")) {
-        if(states.find(name)) {
-          auto timestamp = program.stateTimestamp(item.property("name"));
+        if(auto offset = states.find([&](auto& state) { return state.name == name; })) {
           item.setEnabled(true);
-          item.setText({item.property("title"), " [", chrono::local::datetime(timestamp), "]"});
+          item.setText({item.property("title"), " [", chrono::local::datetime(states[*offset].date), "]"});
         } else {
           item.setEnabled(false);
           item.setText({item.property("title"), " [Empty]"});

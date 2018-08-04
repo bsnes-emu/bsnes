@@ -47,6 +47,9 @@ template<> struct view<string> {
   inline auto data() const -> const char*;
   inline auto size() const -> uint;
 
+  inline auto begin() const { return &_data[0]; }
+  inline auto end() const { return &_data[size()]; }
+
 protected:
   string* _string;
   const char* _data;
@@ -188,6 +191,8 @@ public:
   inline auto length() const -> uint;
 
   //find.hpp
+  inline auto contains(view<string> characters) const -> maybe<uint>;
+
   template<bool, bool> inline auto _find(int, view<string>) const -> maybe<uint>;
 
   inline auto find(view<string> source) const -> maybe<uint>;
@@ -307,6 +312,8 @@ struct string_format : vector<string> {
 }
 
 #include <nall/string/view.hpp>
+#include <nall/string/pascal.hpp>
+
 #include <nall/string/atoi.hpp>
 #include <nall/string/cast.hpp>
 #include <nall/string/compare.hpp>
@@ -320,13 +327,16 @@ struct string_format : vector<string> {
 #include <nall/string/trim.hpp>
 #include <nall/string/utility.hpp>
 #include <nall/string/vector.hpp>
+
 #include <nall/string/eval/node.hpp>
 #include <nall/string/eval/literal.hpp>
 #include <nall/string/eval/parser.hpp>
 #include <nall/string/eval/evaluator.hpp>
+
 #include <nall/string/markup/node.hpp>
 #include <nall/string/markup/find.hpp>
 #include <nall/string/markup/bml.hpp>
 #include <nall/string/markup/xml.hpp>
+
 #include <nall/string/transform/cml.hpp>
 #include <nall/string/transform/dml.hpp>

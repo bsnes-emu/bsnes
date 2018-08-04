@@ -160,4 +160,14 @@ auto image::allocate(unsigned width, unsigned height, unsigned stride) -> uint8_
   return data;
 }
 
+//assumes image and data are in the same format; pitch is adapted to image
+auto image::allocate(const void* data, uint pitch, uint width, uint height) -> void {
+  allocate(width, height);
+  for(uint y : range(height)) {
+    auto input = (const uint8_t*)data + y * pitch;
+    auto output = (uint8_t*)_data + y * this->pitch();
+    memory::copy(output, input, width * stride());
+  }
+}
+
 }

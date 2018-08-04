@@ -3,7 +3,7 @@
 namespace nall { namespace Encode {
 
 struct BMP {
-  static auto create(const string& filename, const uint32_t* data, uint pitch, uint width, uint height, bool alpha) -> bool {
+  static auto create(const string& filename, const void* data, uint pitch, uint width, uint height, bool alpha) -> bool {
     file fp{filename, file::mode::write};
     if(!fp) return false;
 
@@ -35,7 +35,7 @@ struct BMP {
 
     pitch >>= 2;
     for(auto y : range(height)) {
-      const uint32_t* p = data + y * pitch;
+      auto p = (const uint32_t*)data + y * pitch;
       for(auto x : range(width)) fp.writel(*p++, bytesPerPixel);
       if(paddingLength) fp.writel(0, paddingLength);
     }
