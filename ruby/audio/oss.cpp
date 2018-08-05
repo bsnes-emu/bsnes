@@ -14,6 +14,7 @@
 #endif
 
 struct AudioOSS : AudioDriver {
+  AudioOSS& self = *this;
   AudioOSS(Audio& super) : AudioDriver(super) {}
   ~AudioOSS() { terminate(); }
 
@@ -117,8 +118,6 @@ private:
     fcntl(_fd, F_SETFL, flags);
     return true;
   }
-
-  AudioOSS& self = *this;
 
   int _fd = -1;
   int _format = AFMT_S16_LE;

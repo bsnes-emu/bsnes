@@ -8,6 +8,7 @@
 #include "mouse/xlib.cpp"
 
 struct InputXlib : InputDriver {
+  InputXlib& self = *this;
   InputXlib(Input& super) : InputDriver(super), keyboard(super), mouse(super) {}
   ~InputXlib() { terminate(); }
 
@@ -52,7 +53,6 @@ private:
     mouse.terminate();
   }
 
-  InputXlib& self = *this;
   bool isReady = false;
   InputKeyboardXlib keyboard;
   InputMouseXlib mouse;

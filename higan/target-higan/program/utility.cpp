@@ -1,41 +1,44 @@
 auto Program::initializeVideoDriver() -> void {
-  if(!Video::availableDrivers().find(settings["Video/Driver"].text())) {
-    settings["Video/Driver"].setValue("None");
+  if(!Video::hasDrivers().find(settings["Video/Driver"].text())) {
+    settings["Video/Driver"].setValue(Video::safestDriver());
   }
-  video = Video::create(settings["Video/Driver"].text());
+  video = new Video;
+  video->create(settings["Video/Driver"].text());
   video->setContext(presentation->viewport.handle());
 
   video->setBlocking(settings["Video/Synchronize"].boolean());
 
   if(!video->ready()) {
     MessageDialog().setText("Failed to initialize video driver").warning();
-    video = Video::create("None");
+    video = new Video;
+    video->create("None");
   }
 
   presentation->clearViewport();
 }
 
 auto Program::initializeAudioDriver() -> void {
-  if(!Audio::availableDrivers().find(settings["Audio/Driver"].text())) {
+  if(!Audio::hasDrivers().find(settings["Audio/Driver"].text())) {
     settings["Audio/Driver"].setValue("None");
   }
-  audio = Audio::create(settings["Audio/Driver"].text());
+  audio = new Audio;
+  audio->create(settings["Audio/Driver"].text());
   audio->setContext(presentation->viewport.handle());
 
-  if(!audio->availableDevices().find(settings["Audio/Device"].text())) {
-    settings["Audio/Device"].setValue(audio->availableDevices()(0));
+  if(!audio->hasDevices().find(settings["Audio/Device"].text())) {
+    settings["Audio/Device"].setValue(audio->device());
   }
   audio->setDevice(settings["Audio/Device"].text());
 
-  if(!audio->availableFrequencies().find(settings["Audio/Frequency"].real())) {
-    settings["Audio/Frequency"].setValue(audio->availableFrequencies()(0));
+  if(!audio->hasFrequencies().find(settings["Audio/Frequency"].natural())) {
+    settings["Audio/Frequency"].setValue(audio->frequency());
   }
-  audio->setFrequency(settings["Audio/Frequency"].real());
+  audio->setFrequency(settings["Audio/Frequency"].natural());
 
-  if(!audio->availableLatencies().find(settings["Audio/Latency"].natural())) {
-    settings["Audio/Latency"].setValue(audio->availableLatencies()(0));
+  if(!audio->hasLatencies().find(settings["Audio/Latency"].natural())) {
+    settings["Audio/Latency"].setValue(audio->latency());
   }
-  audio->setLatency(settings["Audio/Latency"].real());
+  audio->setLatency(settings["Audio/Latency"].natural());
 
   audio->setChannels(2);
   audio->setExclusive(settings["Audio/Exclusive"].boolean());
@@ -43,22 +46,25 @@ auto Program::initializeAudioDriver() -> void {
 
   if(!audio->ready()) {
     MessageDialog().setText("Failed to initialize audio driver").warning();
-    audio = Audio::create("None");
+    audio = new Audio;
+    audio->create("None");
   }
 
   Emulator::audio.setFrequency(settings["Audio/Frequency"].real());
 }
 
 auto Program::initializeInputDriver() -> void {
-  if(!Input::availableDrivers().find(settings["Input/Driver"].text())) {
+  if(!Input::hasDrivers().find(settings["Input/Driver"].text())) {
     settings["Input/Driver"].setValue("None");
   }
-  input = Input::create(settings["Input/Driver"].text());
+  input = new Input;
+  input->create(settings["Input/Driver"].text());
   input->setContext(presentation->viewport.handle());
 
   if(!input->ready()) {
     MessageDialog().setText("Failed to initialize input driver").warning();
-    input = Input::create("None");
+    input = new Input;
+    input->create("None");
   }
 }
 

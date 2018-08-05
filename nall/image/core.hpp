@@ -24,18 +24,17 @@ image::image(const string& filename) {
   load(filename);
 }
 
-image::image(const vector<uint8_t>& buffer) {
-  auto data = buffer.data();
-  auto size = buffer.size();
-  if(0);
+image::image(const void* data_, uint size) {
+  auto data = (const uint8_t*)data_;
+  if(size < 4);
   else if(data[0] == 'B' && data[1] == 'M') loadBMP(data, size);
   else if(data[1] == 'P' && data[2] == 'N' && data[3] == 'G') loadPNG(data, size);
 }
 
-image::image(const uint8_t* data, unsigned size) {
-  if(0);
-  else if(data[0] == 'B' && data[1] == 'M') loadBMP(data, size);
-  else if(data[1] == 'P' && data[2] == 'N' && data[3] == 'G') loadPNG(data, size);
+image::image(const vector<uint8_t>& buffer) : image(buffer.data(), buffer.size()) {
+}
+
+template<typename Type, uint Size> image::image(Type (&Name)[Size]) : image(Name, Size) {
 }
 
 image::image() {

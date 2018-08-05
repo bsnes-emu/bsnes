@@ -10,7 +10,7 @@ bool pApplication::xdgScreenSaver = false;
 #endif
 
 auto pApplication::run() -> void {
-  while(!Application::state.quit) {
+  while(!Application::state().quit) {
     Application::doMain();
     processEvents();
   }
@@ -48,7 +48,7 @@ auto pApplication::initialize() -> void {
   #endif
 
   //set WM_CLASS to Application::name()
-  auto name = Application::state.name ? Application::state.name : string{"hiro"};
+  auto name = Application::state().name ? Application::state().name : string{"hiro"};
   gdk_set_program_class(name);
 
   #if defined(BUILD_DEBUG)

@@ -34,7 +34,7 @@ auto ManifestViewer::loadManifest() -> void {
     if(offset == 1 && program.bsMemory) verified = program.bsMemory.verified;
     if(offset == 1 && program.sufamiTurboA) verified = program.sufamiTurboA.verified;
     if(offset == 2 && program.sufamiTurboB) verified = program.sufamiTurboB.verified;
-    item.setIcon(verified ? Icon::Emblem::Program : Icon::Emblem::Binary);
+    item.setIcon(verified ? (image)Icon::Emblem::Program : (image)Icon::Emblem::Binary);
   }
   manifestOption.doChange();
 }
@@ -49,6 +49,6 @@ auto ManifestViewer::selectManifest() -> void {
   if(offset == 1 && program.bsMemory) location = program.bsMemory.location;
   if(offset == 1 && program.sufamiTurboA) location = program.sufamiTurboA.location;
   if(offset == 2 && program.sufamiTurboB) location = program.sufamiTurboB.location;
-  typeIcon.setIcon(location.endsWith("/") ? Icon::Action::Open : Icon::Emblem::File);
+  typeIcon.setIcon(location.endsWith("/") ? (image)Icon::Action::Open : (image)Icon::Emblem::File);
   nameLabel.setText(location.trimRight("/", 1L));
 }

@@ -14,6 +14,7 @@ auto pRadioLabel::construct() -> void {
   gtkToggleButton = GTK_TOGGLE_BUTTON(gtkWidget);
   gtkRadioButton = GTK_RADIO_BUTTON(gtkWidget);
 
+  setGroup(state().group);
   setText(state().text);
 
   g_signal_connect(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(RadioLabel_activate), (gpointer)this);
@@ -31,9 +32,8 @@ auto pRadioLabel::minimumSize() const -> Size {
 }
 
 auto pRadioLabel::setChecked() -> void {
-  lock();
+  auto lock = acquire();
   gtk_toggle_button_set_active(gtkToggleButton, true);
-  unlock();
 }
 
 auto pRadioLabel::setGroup(sGroup group) -> void {
@@ -42,7 +42,7 @@ auto pRadioLabel::setGroup(sGroup group) -> void {
     if(auto object = weak.acquire()) {
       if(auto radioLabel = dynamic_cast<mRadioLabel*>(object.data())) {
         if(auto self = radioLabel->self()) {
-          self->lock();
+          auto lock = self->acquire();
           gtk_radio_button_set_group(self->gtkRadioButton, nullptr);
           if(!gtkRadioButton) {
             gtkRadioButton = self->gtkRadioButton;
@@ -51,7 +51,6 @@ auto pRadioLabel::setGroup(sGroup group) -> void {
             gtk_radio_button_set_group(self->gtkRadioButton, gtk_radio_button_get_group(*gtkRadioButton));
             gtk_toggle_button_set_active(self->gtkToggleButton, radioLabel->state.checked = false);
           }
-          self->unlock();
         }
       }
     }

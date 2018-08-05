@@ -13,6 +13,7 @@
 #include "joypad/udev.cpp"
 
 struct InputUdev : InputDriver {
+  InputUdev& self = *this;
   InputUdev(Input& super) : InputDriver(super), keyboard(super), mouse(super), joypad(super) {}
   ~InputUdev() { terminate(); }
 
@@ -60,7 +61,6 @@ private:
     joypad.terminate();
   }
 
-  InputUdev& self = *this;
   bool isReady = false;
   InputKeyboardXlib keyboard;
   InputMouseXlib mouse;

@@ -3,7 +3,7 @@
 namespace hiro {
 
 auto pKeyboard::poll() -> vector<bool> {
-  if(Application::state.quit) return {};
+  if(Application::state().quit) return {};
 
   vector<bool> result;
   char state[256];

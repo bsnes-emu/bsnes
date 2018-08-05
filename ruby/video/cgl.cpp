@@ -11,9 +11,14 @@ struct VideoCGL;
 -(void) reshape;
 @end
 
-struct VideoCGL : Video, OpenGL {
-  VideoCGL() { initialize(); }
+struct VideoCGL : VideoDriver, OpenGL {
+  VideoCGL& self = *this;
+  VideoCGL(Video& super) : VideoDriver(super) {}
   ~VideoCGL() { terminate(); }
+
+  auto create() -> bool override {
+    return initialize();
+  }
 
   auto driver() -> string override { return "OpenGL"; }
   auto ready() -> bool override { return _ready; }
@@ -25,14 +30,10 @@ struct VideoCGL : Video, OpenGL {
   auto hasShader() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
     if(!view) return true;
     @autoreleasepool {
       [[view openGLContext] makeCurrentContext];
@@ -43,28 +44,21 @@ struct VideoCGL : Video, OpenGL {
   }
 
   auto setFlush(bool flush) -> bool override {
-    if(flush == Video::flush()) return true;
-    if(!Video::setFlush(flush)) return false;
     return true;
   }
 
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == Video::smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    if(!shader()) OpenGL::filter = smooth ? GL_LINEAR : GL_NEAREST;
+  auto setSmooth(bool) -> bool override {
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto setShader(string shader) -> bool override {
-    if(shader == Video::shader()) return true;
-    if(!Video::setShader(shader)) return false;
-    OpenGL::setShader(shader);
-    if(!shader) OpenGL::filter = smooth() ? GL_LINEAR : GL_NEAREST;
+  auto setShader(string) -> bool override {
+    OpenGL::setShader(self.shader);
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     @autoreleasepool {
       [view lockFocus];
       OpenGL::clear();
@@ -74,17 +68,14 @@ struct VideoCGL : Video, OpenGL {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
         auto area = [view convertRectToBacking:[view bounds]];
@@ -92,7 +83,7 @@ struct VideoCGL : Video, OpenGL {
         OpenGL::outputHeight = area.size.height;
         OpenGL::output();
         [[view openGLContext] flushBuffer];
-        if(flush()) glFinish();
+        if(self.flush) glFinish();
         [view unlockFocus];
       }
     }
@@ -101,7 +92,7 @@ struct VideoCGL : Video, OpenGL {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     @autoreleasepool {
       NSOpenGLPixelFormatAttribute attributeList[] = {
@@ -112,7 +103,7 @@ private:
         0
       };
 
-      auto context = (NSView*)_context;
+      auto context = (NSView*)self.context;
       auto size = [context frame].size;
       auto format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attributeList] autorelease];
       auto openGLContext = [[[NSOpenGLContext alloc] initWithFormat:format shareContext:nil] autorelease];
@@ -129,7 +120,7 @@ private:
 
       OpenGL::initialize();
 
-      int blocking = _blocking;
+      int blocking = self.blocking;
       [[view openGLContext] setValues:&blocking forParameter:NSOpenGLCPSwapInterval];
 
       [view unlockFocus];

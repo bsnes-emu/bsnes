@@ -7,9 +7,14 @@ static LRESULT CALLBACK VideoDirect3D_WindowProcedure(HWND hwnd, UINT msg, WPARA
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-struct VideoDirect3D : Video {
-  VideoDirect3D() { initialize(); }
+struct VideoDirect3D : VideoDriver {
+  VideoDirect3D& self = *this;
+  VideoDirect3D(Video& super) : VideoDriver(super) {}
   ~VideoDirect3D() { terminate(); }
+
+  auto create() -> bool override {
+    return initialize();
+  }
 
   auto driver() -> string override { return "Direct3D"; }
   auto ready() -> bool override { return _ready; }
@@ -19,30 +24,10 @@ struct VideoDirect3D : Video {
   auto hasBlocking() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
 
-  auto setExclusive(bool exclusive) -> bool override {
-    if(exclusive == Video::exclusive()) return true;
-    if(!Video::setExclusive(exclusive)) return false;
-    return initialize();
-  }
-
-  auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
-    return initialize();
-  }
-
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == Video::smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    if(ready()) updateFilter();
-    return true;
-  }
+  auto setExclusive(bool exclusive) -> bool override { return initialize(); }
+  auto setContext(uintptr context) -> bool override { return initialize(); }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setSmooth(bool smooth) -> bool override { return updateFilter(); }
 
   auto clear() -> void override {
     if(!ready()) return;
@@ -66,7 +51,6 @@ struct VideoDirect3D : Video {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     if(_lost && !recover()) return false;
 
     //if output size changed, driver must be re-initialized.
@@ -90,14 +74,12 @@ struct VideoDirect3D : Video {
   }
 
   auto release() -> void override {
-    if(!ready()) return;
     _surface->UnlockRect();
     _surface->Release();
     _surface = nullptr;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
     if(_lost && !recover()) return;
 
     _device->BeginScene();
@@ -183,13 +165,14 @@ private:
       (D3DPOOL)_texturePool, &_texture, nullptr);
   }
 
-  auto updateFilter() -> void {
-    if(!_device) return;
-    if(_lost && !recover()) return;
+  auto updateFilter() -> bool {
+    if(!_device) return false;
+    if(_lost && !recover()) return false;
 
     auto filter = !_smooth ? D3DTEXF_POINT : D3DTEXF_LINEAR;
     _device->SetSamplerState(0, D3DSAMP_MINFILTER, filter);
     _device->SetSamplerState(0, D3DSAMP_MAGFILTER, filter);
+    return true;
   }
 
   //(x,y) screen coordinates, in pixels

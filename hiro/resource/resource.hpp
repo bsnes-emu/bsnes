@@ -1,103 +1,103 @@
 namespace Icon {
 namespace Action {
-extern const nall::vector<uint8_t> Add;
-extern const nall::vector<uint8_t> Attach;
-extern const nall::vector<uint8_t> Bookmark;
-extern const nall::vector<uint8_t> FullScreen;
-extern const nall::vector<uint8_t> Mute;
-extern const nall::vector<uint8_t> New;
-extern const nall::vector<uint8_t> Open;
-extern const nall::vector<uint8_t> Properties;
-extern const nall::vector<uint8_t> Quit;
-extern const nall::vector<uint8_t> Refresh;
-extern const nall::vector<uint8_t> Remove;
-extern const nall::vector<uint8_t> Save;
-extern const nall::vector<uint8_t> Search;
-extern const nall::vector<uint8_t> Settings;
-extern const nall::vector<uint8_t> Stop;
+extern const unsigned char Add[323];
+extern const unsigned char Attach[649];
+extern const unsigned char Bookmark[686];
+extern const unsigned char FullScreen[650];
+extern const unsigned char Mute[632];
+extern const unsigned char New[477];
+extern const unsigned char Open[672];
+extern const unsigned char Properties[464];
+extern const unsigned char Quit[799];
+extern const unsigned char Refresh[912];
+extern const unsigned char Remove[247];
+extern const unsigned char Save[911];
+extern const unsigned char Search[935];
+extern const unsigned char Settings[611];
+extern const unsigned char Stop[820];
 }
 namespace Application {
-extern const nall::vector<uint8_t> Browser;
-extern const nall::vector<uint8_t> Calculator;
-extern const nall::vector<uint8_t> Calendar;
-extern const nall::vector<uint8_t> Chat;
-extern const nall::vector<uint8_t> FileManager;
-extern const nall::vector<uint8_t> Mail;
-extern const nall::vector<uint8_t> Monitor;
-extern const nall::vector<uint8_t> Terminal;
-extern const nall::vector<uint8_t> TextEditor;
+extern const unsigned char Browser[928];
+extern const unsigned char Calculator[686];
+extern const unsigned char Calendar[603];
+extern const unsigned char Chat[422];
+extern const unsigned char FileManager[378];
+extern const unsigned char Mail[550];
+extern const unsigned char Monitor[611];
+extern const unsigned char Terminal[668];
+extern const unsigned char TextEditor[574];
 }
 namespace Device {
-extern const nall::vector<uint8_t> Clock;
-extern const nall::vector<uint8_t> Display;
-extern const nall::vector<uint8_t> Joypad;
-extern const nall::vector<uint8_t> Keyboard;
-extern const nall::vector<uint8_t> Microphone;
-extern const nall::vector<uint8_t> Mouse;
-extern const nall::vector<uint8_t> Network;
-extern const nall::vector<uint8_t> Optical;
-extern const nall::vector<uint8_t> Printer;
-extern const nall::vector<uint8_t> Speaker;
-extern const nall::vector<uint8_t> Storage;
+extern const unsigned char Clock[897];
+extern const unsigned char Display[662];
+extern const unsigned char Joypad[812];
+extern const unsigned char Keyboard[587];
+extern const unsigned char Microphone[703];
+extern const unsigned char Mouse[720];
+extern const unsigned char Network[408];
+extern const unsigned char Optical[720];
+extern const unsigned char Printer[481];
+extern const unsigned char Speaker[592];
+extern const unsigned char Storage[603];
 }
 namespace Edit {
-extern const nall::vector<uint8_t> Clear;
-extern const nall::vector<uint8_t> Copy;
-extern const nall::vector<uint8_t> Cut;
-extern const nall::vector<uint8_t> Delete;
-extern const nall::vector<uint8_t> Find;
-extern const nall::vector<uint8_t> Paste;
-extern const nall::vector<uint8_t> Redo;
-extern const nall::vector<uint8_t> Replace;
-extern const nall::vector<uint8_t> Undo;
+extern const unsigned char Clear[773];
+extern const unsigned char Copy[498];
+extern const unsigned char Cut[807];
+extern const unsigned char Delete[680];
+extern const unsigned char Find[617];
+extern const unsigned char Paste[561];
+extern const unsigned char Redo[591];
+extern const unsigned char Replace[776];
+extern const unsigned char Undo[650];
 }
 namespace Emblem {
-extern const nall::vector<uint8_t> Archive;
-extern const nall::vector<uint8_t> Audio;
-extern const nall::vector<uint8_t> Binary;
-extern const nall::vector<uint8_t> File;
-extern const nall::vector<uint8_t> Folder;
-extern const nall::vector<uint8_t> Font;
-extern const nall::vector<uint8_t> Image;
-extern const nall::vector<uint8_t> Markup;
-extern const nall::vector<uint8_t> Program;
-extern const nall::vector<uint8_t> Script;
-extern const nall::vector<uint8_t> Text;
-extern const nall::vector<uint8_t> Video;
+extern const unsigned char Archive[540];
+extern const unsigned char Audio[688];
+extern const unsigned char Binary[560];
+extern const unsigned char File[741];
+extern const unsigned char Folder[581];
+extern const unsigned char Font[627];
+extern const unsigned char Image[558];
+extern const unsigned char Markup[709];
+extern const unsigned char Program[609];
+extern const unsigned char Script[516];
+extern const unsigned char Text[333];
+extern const unsigned char Video[592];
 }
 namespace Go {
-extern const nall::vector<uint8_t> Down;
-extern const nall::vector<uint8_t> Home;
-extern const nall::vector<uint8_t> Left;
-extern const nall::vector<uint8_t> Right;
-extern const nall::vector<uint8_t> Up;
+extern const unsigned char Down[683];
+extern const unsigned char Home[606];
+extern const unsigned char Left[655];
+extern const unsigned char Right[676];
+extern const unsigned char Up[652];
 }
 namespace Media {
-extern const nall::vector<uint8_t> Back;
-extern const nall::vector<uint8_t> Eject;
-extern const nall::vector<uint8_t> Flash;
-extern const nall::vector<uint8_t> Floppy;
-extern const nall::vector<uint8_t> Next;
-extern const nall::vector<uint8_t> Optical;
-extern const nall::vector<uint8_t> Pause;
-extern const nall::vector<uint8_t> Play;
-extern const nall::vector<uint8_t> Record;
-extern const nall::vector<uint8_t> Rewind;
-extern const nall::vector<uint8_t> Skip;
-extern const nall::vector<uint8_t> Stop;
+extern const unsigned char Back[770];
+extern const unsigned char Eject[628];
+extern const unsigned char Flash[607];
+extern const unsigned char Floppy[561];
+extern const unsigned char Next[771];
+extern const unsigned char Optical[931];
+extern const unsigned char Pause[464];
+extern const unsigned char Play[660];
+extern const unsigned char Record[653];
+extern const unsigned char Rewind[764];
+extern const unsigned char Skip[782];
+extern const unsigned char Stop[429];
 }
 namespace Place {
-extern const nall::vector<uint8_t> Bookmarks;
-extern const nall::vector<uint8_t> Desktop;
-extern const nall::vector<uint8_t> Home;
-extern const nall::vector<uint8_t> Server;
-extern const nall::vector<uint8_t> Settings;
-extern const nall::vector<uint8_t> Share;
+extern const unsigned char Bookmarks[753];
+extern const unsigned char Desktop[722];
+extern const unsigned char Home[679];
+extern const unsigned char Server[642];
+extern const unsigned char Settings[629];
+extern const unsigned char Share[697];
 }
 namespace Prompt {
-extern const nall::vector<uint8_t> Error;
-extern const nall::vector<uint8_t> Information;
-extern const nall::vector<uint8_t> Question;
-extern const nall::vector<uint8_t> Warning;
+extern const unsigned char Error[653];
+extern const unsigned char Information[863];
+extern const unsigned char Question[932];
+extern const unsigned char Warning[603];
 }
 }

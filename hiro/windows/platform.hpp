@@ -68,7 +68,6 @@ static vector<wObject> windows;
 #include "widget/tab-frame.hpp"
 #include "widget/tab-frame-item.hpp"
 #include "widget/table-view.hpp"
-#include "widget/table-view-header.hpp"
 #include "widget/table-view-column.hpp"
 #include "widget/table-view-item.hpp"
 #include "widget/table-view-cell.hpp"

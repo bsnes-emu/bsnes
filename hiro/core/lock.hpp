@@ -2,12 +2,10 @@
 
 //shared functionality used for pObject on all platforms
 
-struct mLock {
+struct Lock {
   struct Handle {
-    Handle(const mLock* self) : self(self) {
-      if(self) {
-        ++self->locks;
-      }
+    Handle(const Lock* self) : self(self) {
+      if(self) ++self->locks;
     }
 
     ~Handle() {
@@ -23,11 +21,11 @@ struct mLock {
       return false;
     }
 
-    const mLock* self = nullptr;
+    const Lock* self = nullptr;
   };
 
   auto acquired() const -> bool {
-    return locks || Application::state.quit;
+    return locks || Application::state().quit;
   }
 
   auto acquire() const -> Handle {
@@ -50,5 +48,3 @@ struct mLock {
 
   mutable int locks = 0;
 };
-
-using Lock = mLock;

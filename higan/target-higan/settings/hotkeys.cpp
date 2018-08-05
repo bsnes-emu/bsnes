@@ -3,6 +3,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Hotkeys");
 
   layout.setPadding(5);
+  mappingList.setHeadered();
   mappingList.onActivate([&] { assignMapping(); });
   mappingList.onChange([&] { eraseButton.setEnabled((bool)mappingList.selected()); });
   resetButton.setText("Reset").onActivate([&] {
@@ -24,15 +25,12 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto HotkeySettings::reloadMappings() -> void {
   mappingList.reset();
-  mappingList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn().setText("Name"))
-    .append(TableViewColumn().setText("Mapping").setExpandable())
-  );
+  mappingList.append(TableViewColumn().setText("Name"));
+  mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
   for(auto& hotkey : inputManager->hotkeys) {
-    mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(hotkey->name))
-      .append(TableViewCell())
-    );
+    TableViewItem item{&mappingList};
+    item.append(TableViewCell().setText(hotkey->name));
+    item.append(TableViewCell());
   }
   mappingList.resizeColumns();
 }

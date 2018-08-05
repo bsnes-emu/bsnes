@@ -3,15 +3,13 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   setText("State Manager");
 
   layout.setPadding(5);
-  stateList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
-    .append(TableViewColumn().setText("Description").setExpandable())
-  );
+  stateList.setHeadered();
+  stateList.append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0));
+  stateList.append(TableViewColumn().setText("Description").setExpandable());
   for(auto slot : range(Slots)) {
-    stateList.append(TableViewItem()
-      .append(TableViewCell().setText(1 + slot))
-      .append(TableViewCell())
-    );
+    TableViewItem item{&stateList};
+    item.append(TableViewCell().setText(1 + slot));
+    item.append(TableViewCell());
   }
   stateList.onActivate([&] { doLoad(); });
   stateList.onChange([&] { doChangeSelected(); });

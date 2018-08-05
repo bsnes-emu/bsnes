@@ -7,6 +7,7 @@
 #include "joypad/sdl.cpp"
 
 struct InputSDL : InputDriver {
+  InputSDL& self = *this;
   InputSDL(Input& super) : InputDriver(super), keyboard(super), mouse(super), joypad(super) {}
   ~InputSDL() { terminate(); }
 
@@ -54,7 +55,6 @@ private:
     joypad.terminate();
   }
 
-  InputSDL& self = *this;
   bool isReady = false;
   InputKeyboardXlib keyboard;
   InputMouseXlib mouse;

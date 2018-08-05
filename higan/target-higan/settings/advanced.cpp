@@ -7,26 +7,23 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   driverLabel.setText("Driver Selection").setFont(Font().setBold());
   videoLabel.setText("Video:");
   videoDriver.onChange([&] { settings["Video/Driver"].setValue(videoDriver.selected().text()); });
-  for(auto& driver : Video::availableDrivers()) {
-    ComboButtonItem item;
+  for(auto& driver : Video::hasDrivers()) {
+    ComboButtonItem item{&videoDriver};
     item.setText(driver);
-    videoDriver.append(item);
     if(settings["Video/Driver"].text() == driver) item.setSelected();
   }
   audioLabel.setText("Audio:");
   audioDriver.onChange([&] { settings["Audio/Driver"].setValue(audioDriver.selected().text()); });
-  for(auto& driver : Audio::availableDrivers()) {
-    ComboButtonItem item;
+  for(auto& driver : Audio::hasDrivers()) {
+    ComboButtonItem item{&audioDriver};
     item.setText(driver);
-    audioDriver.append(item);
     if(settings["Audio/Driver"].text() == driver) item.setSelected();
   }
   inputLabel.setText("Input:");
   inputDriver.onChange([&] { settings["Input/Driver"].setValue(inputDriver.selected().text()); });
-  for(auto& driver : Input::availableDrivers()) {
-    ComboButtonItem item;
+  for(auto& driver : Input::hasDrivers()) {
+    ComboButtonItem item{&inputDriver};
     item.setText(driver);
-    inputDriver.append(item);
     if(settings["Input/Driver"].text() == driver) item.setSelected();
   }
 

@@ -65,7 +65,8 @@ struct Application {
       function<void ()> onQuit;
     } cocoa;
   };
-  static State state;
+
   static auto initialize() -> void;
+  static auto state() -> State&;
 };
 #endif

@@ -1,6 +1,7 @@
 #include "keyboard/quartz.cpp"
 
 struct InputQuartz : InputDriver {
+  InputQuartz& self = *this;
   InputQuartz(Input& super) : InputDriver(super), keyboard(super) {}
   ~InputQuartz() { terminate(); }
 
@@ -37,7 +38,6 @@ private:
     keyboard.terminate();
   }
 
-  InputQuartz& self = *this;
   bool isReady = false;
   InputKeyboardQuartz keyboard;
 };

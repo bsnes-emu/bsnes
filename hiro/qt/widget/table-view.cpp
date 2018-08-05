@@ -27,24 +27,21 @@ auto pTableView::construct() -> void {
   setBatchable(state().batchable);
   setBordered(state().bordered);
   setForegroundColor(state().foregroundColor);
+  setHeadered(state().headered);
+  setSortable(state().sortable);
 
   pWidget::construct();
 }
 
 auto pTableView::destruct() -> void {
-if(Application::state.quit) return;  //TODO: hack
+if(Application::state().quit) return;  //TODO: hack
   delete qtTableViewDelegate;
   delete qtTableView;
   qtWidget = qtTableView = nullptr;
   qtTableViewDelegate = nullptr;
 }
 
-auto pTableView::append(sTableViewHeader header) -> void {
-  lock();
-  if(auto self = header->self()) {
-    self->_setState();
-  }
-  unlock();
+auto pTableView::append(sTableViewColumn column) -> void {
 }
 
 auto pTableView::append(sTableViewItem item) -> void {
@@ -56,44 +53,40 @@ auto pTableView::append(sTableViewItem item) -> void {
   unlock();
 }
 
-auto pTableView::remove(sTableViewHeader header) -> void {
+auto pTableView::remove(sTableViewColumn column) -> void {
 }
 
 auto pTableView::remove(sTableViewItem item) -> void {
 }
 
 auto pTableView::resizeColumns() -> void {
-  lock();
+  auto lock = acquire();
 
-  if(auto& header = state().header) {
-    vector<signed> widths;
-    signed minimumWidth = 0;
-    signed expandable = 0;
-    for(auto column : range(header->columnCount())) {
-      signed width = _width(column);
-      widths.append(width);
-      minimumWidth += width;
-      if(header->column(column).expandable()) expandable++;
-    }
-
-    signed maximumWidth = self().geometry().width() - 6;
-    if(auto scrollBar = qtTableView->verticalScrollBar()) {
-      if(scrollBar->isVisible()) maximumWidth -= scrollBar->geometry().width();
-    }
-
-    signed expandWidth = 0;
-    if(expandable && maximumWidth > minimumWidth) {
-      expandWidth = (maximumWidth - minimumWidth) / expandable;
-    }
-
-    for(auto column : range(header->columnCount())) {
-      signed width = widths[column];
-      if(header->column(column).expandable()) width += expandWidth;
-      qtTableView->setColumnWidth(column, width);
-    }
+  vector<signed> widths;
+  signed minimumWidth = 0;
+  signed expandable = 0;
+  for(auto column : range(self().columnCount())) {
+    signed width = _width(column);
+    widths.append(width);
+    minimumWidth += width;
+    if(self().column(column).expandable()) expandable++;
   }
 
-  unlock();
+  signed maximumWidth = self().geometry().width() - 6;
+  if(auto scrollBar = qtTableView->verticalScrollBar()) {
+    if(scrollBar->isVisible()) maximumWidth -= scrollBar->geometry().width();
+  }
+
+  signed expandWidth = 0;
+  if(expandable && maximumWidth > minimumWidth) {
+    expandWidth = (maximumWidth - minimumWidth) / expandable;
+  }
+
+  for(auto column : range(self().columnCount())) {
+    signed width = widths[column];
+    if(self().column(column).expandable()) width += expandWidth;
+    qtTableView->setColumnWidth(column, width);
+  }
 }
 
 auto pTableView::setAlignment(Alignment alignment) -> void {
@@ -128,40 +121,48 @@ auto pTableView::setForegroundColor(Color color) -> void {
   qtTableView->setAutoFillBackground((bool)color);
 }
 
+auto pTableView::setHeadered(bool headered) -> void {
+  qtTableView->setHeaderHidden(!headered);
+}
+
+auto pTableView::setSortable(bool sortable) -> void {
+  #if HIRO_QT==4
+  qtTableView->header()->setClickable(sortable);
+  #elif HIRO_QT==5
+  qtTableView->header()->setSectionsClickable(sortable);
+  #endif
+}
+
 //called on resize/show events
 auto pTableView::_onSize() -> void {
   //resize columns only if at least one column is expandable
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(column->expandable()) return resizeColumns();
-    }
+  for(auto& column : state().columns) {
+    if(column->expandable()) return resizeColumns();
   }
 }
 
 auto pTableView::_width(unsigned column) -> unsigned {
-  if(auto& header = state().header) {
-    if(auto width = header->column(column).width()) return width;
-    unsigned width = 1;
-    if(!header->column(column).visible()) return width;
-    if(header->visible()) width = max(width, _widthOfColumn(column));
-    for(auto row : range(state().items.size())) {
-      width = max(width, _widthOfCell(row, column));
-    }
-    return width;
+  if(auto width = self().column(column).width()) return width;
+  unsigned width = 1;
+  if(!self().column(column).visible()) return width;
+  if(state().headered) width = max(width, _widthOfColumn(column));
+  for(auto row : range(state().items.size())) {
+    width = max(width, _widthOfCell(row, column));
   }
-  return 1;
+  return width;
 }
 
 auto pTableView::_widthOfColumn(unsigned _column) -> unsigned {
   unsigned width = 8;
-  if(auto& header = state().header) {
-    if(auto column = header->column(_column)) {
-      if(auto& icon = column->state.icon) {
-        width += icon.width() + 4;
-      }
-      if(auto& text = column->state.text) {
-        width += pFont::size(column->font(true), text).width();
-      }
+  if(auto column = self().column(_column)) {
+    if(auto& icon = column->state.icon) {
+      width += icon.width() + 4;
+    }
+    if(auto& text = column->state.text) {
+      width += pFont::size(column->font(true), text).width();
+    }
+    if(column->state.sorting != Sort::None) {
+      width += 12;
     }
   }
   return width;
@@ -204,10 +205,8 @@ auto QtTableView::onContext() -> void {
 }
 
 auto QtTableView::onSort(int columnNumber) -> void {
-  if(auto& header = p.state().header) {
-    if(auto column = header->column(columnNumber)) {
-      if(!p.locked() && column.sortable()) p.self().doSort(column);
-    }
+  if(auto column = p.self().column(columnNumber)) {
+    if(!p.locked() && p.state().sortable) p.self().doSort(column);
   }
 }
 

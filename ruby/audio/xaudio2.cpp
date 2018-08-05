@@ -1,42 +1,33 @@
 #include "xaudio2.hpp"
 #include <windows.h>
 
-struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
-  AudioXAudio2() { initialize(); }
+struct AudioXAudio2 : AudioDriver, public IXAudio2VoiceCallback {
+  AudioXAudio2& self = *this;
+  AudioXAudio2(Audio& super) : AudioDriver(super) {}
   ~AudioXAudio2() { terminate(); }
+
+  auto create() -> bool override {
+    super.setFrequency(48000);
+    super.setLatency(40);
+    return initialize();
+  }
 
   auto driver() -> string override { return "XAudio2"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
 
-  auto availableLatencies() -> vector<uint> override {
+  auto hasLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
 
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto clear() -> void override {
     if(!_sourceVoice) return;
@@ -58,7 +49,7 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
     _bufferOffset = 0;
 
     if(_bufferQueue == _bufferCount - 1) {
-      if(_blocking) {
+      if(self.blocking) {
         //wait until there is at least one other free buffer for the next sample
         while(_bufferQueue == _bufferCount - 1);
       } else {  //we need one free buffer for the next sample, so ignore the current contents
@@ -75,7 +66,7 @@ private:
     terminate();
 
     _bufferCount = 8;
-    _period = _frequency * _latency / _bufferCount / 1000.0 + 0.5;
+    _period = self.frequency * self.latency / _bufferCount / 1000.0 + 0.5;
     _buffer = new uint32_t[_period * _bufferCount];
     _bufferOffset = 0;
     _bufferIndex = 0;
@@ -94,12 +85,12 @@ private:
       if(deviceDetails.Role & DefaultGameDevice) deviceID = deviceIndex;
     }
 
-    if(FAILED(_interface->CreateMasteringVoice(&_masterVoice, _channels, (uint)_frequency, 0, deviceID, nullptr))) return terminate(), false;
+    if(FAILED(_interface->CreateMasteringVoice(&_masterVoice, _channels, self.frequency, 0, deviceID, nullptr))) return terminate(), false;
 
     WAVEFORMATEX waveFormat;
     waveFormat.wFormatTag = WAVE_FORMAT_PCM;
     waveFormat.nChannels = _channels;
-    waveFormat.nSamplesPerSec = (uint)_frequency;
+    waveFormat.nSamplesPerSec = self.frequency;
     waveFormat.nBlockAlign = 4;
     waveFormat.wBitsPerSample = 16;
     waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;

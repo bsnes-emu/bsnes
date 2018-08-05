@@ -60,8 +60,8 @@ auto Program::loadStateData(string filename) -> vector<uint8_t> {
 auto Program::loadState(string filename) -> bool {
   string prefix = Location::file(filename);
   if(auto memory = loadStateData(filename)) {
-    if(filename != "quick/undo") saveUndoState();
-    if(filename == "quick/undo") saveRedoState();
+    if(filename != "Quick/Undo") saveUndoState();
+    if(filename == "Quick/Undo") saveRedoState();
     auto serializerRLE = Decode::RLE<uint8_t>(memory.data() + 3 * sizeof(uint));
     serializer s{serializerRLE.data(), serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
@@ -122,7 +122,7 @@ auto Program::saveState(string filename) -> bool {
     output.append(location, saveState.data(), saveState.size());
   }
 
-  if(filename.beginsWith("quick/")) presentation.updateStateMenus();
+  if(filename.beginsWith("Quick/")) presentation.updateStateMenus();
   stateManager.stateEvent(filename);
   return showMessage({"Saved [", prefix, "]"}), true;
 }
@@ -130,7 +130,7 @@ auto Program::saveState(string filename) -> bool {
 auto Program::saveUndoState() -> bool {
   auto statusTime = this->statusTime;
   auto statusMessage = this->statusMessage;
-  auto result = saveState("quick/undo");
+  auto result = saveState("Quick/Undo");
   this->statusTime = statusTime;
   this->statusMessage = statusMessage;
   return result;
@@ -139,7 +139,7 @@ auto Program::saveUndoState() -> bool {
 auto Program::saveRedoState() -> bool {
   auto statusTime = this->statusTime;
   auto statusMessage = this->statusMessage;
-  auto result = saveState("quick/redo");
+  auto result = saveState("Quick/Redo");
   this->statusTime = statusTime;
   this->statusMessage = statusMessage;
   return result;

@@ -170,7 +170,7 @@ auto pWindow::setModal(bool modality) -> void {
     _modalityUpdate();
     while(state().modal) {
       Application::processEvents();
-      if(Application::state.onMain) {
+      if(Application::state().onMain) {
         Application::doMain();
       } else {
         usleep(20 * 1000);
@@ -193,6 +193,9 @@ auto pWindow::setTitle(string text) -> void {
 auto pWindow::setVisible(bool visible) -> void {
   auto lock = acquire();
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
+  if(auto& sizable = state().sizable) {
+    sizable->setGeometry(self().geometry().setPosition());
+  }
   if(!visible) setModal(false);
 }
 

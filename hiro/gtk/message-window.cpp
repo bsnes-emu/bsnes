@@ -9,7 +9,7 @@ static auto Message(MessageWindow::State& state, GtkMessageType messageStyle) ->
   );
 
   if(state.title) gtk_window_set_title(GTK_WINDOW(dialog), state.title);
-  else if(Application::state.name) gtk_window_set_title(GTK_WINDOW(dialog), Application::state.name);
+  else if(Application::state().name) gtk_window_set_title(GTK_WINDOW(dialog), Application::state().name);
 
   switch(state.buttons) {
   case MessageWindow::Buttons::Ok:

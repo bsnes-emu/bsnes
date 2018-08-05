@@ -12,8 +12,7 @@ ifeq ($(ruby),)
     ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
     ruby += input.sdl input.xlib input.udev
   else ifeq ($(platform),bsd)
-#    ruby += video.glx video.glx2 video.xvideo video.xshm
-    ruby += video.glx2 video.xshm
+    ruby += video.glx video.glx2 video.xvideo video.xshm
     ruby += audio.oss audio.openal
     ruby += input.sdl input.xlib
   endif
@@ -39,7 +38,7 @@ ruby.options += $(if $(findstring video.xvideo,$(ruby)),-lXv)
 
 ruby.options += $(if $(findstring audio.alsa,$(ruby)),-lasound)
 ruby.options += $(if $(findstring audio.ao,$(ruby)),-lao)
-ruby.options += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
+ruby.options += $(if $(findstring audio.directsound,$(ruby)),-ldsound -luuid)
 ruby.options += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
 ruby.options += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
 ruby.options += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)

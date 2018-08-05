@@ -12,11 +12,11 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 
   if(id == 0) {  //System
     if(name == "boards.bml" && mode == vfs::file::mode::read) {
-      result = vfs::memory::file::open(Resource::System::Boards.data(), Resource::System::Boards.size());
+      result = vfs::memory::file::open(Resource::System::Boards, sizeof(Resource::System::Boards));
     }
 
     if(name == "ipl.rom" && mode == vfs::file::mode::read) {
-      result = vfs::memory::file::open(Resource::System::IPLROM.data(), Resource::System::IPLROM.size());
+      result = vfs::memory::file::open(Resource::System::IPLROM, sizeof(Resource::System::IPLROM));
     }
   }
 

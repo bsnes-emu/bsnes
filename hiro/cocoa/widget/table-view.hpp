@@ -46,9 +46,9 @@ namespace hiro {
 struct pTableView : pWidget {
   Declare(TableView, Widget)
 
-  auto append(sTableViewHeader header) -> void;
+  auto append(sTableViewColumn column) -> void;
   auto append(sTableViewItem item) -> void;
-  auto remove(sTableViewHeader header) -> void;
+  auto remove(sTableViewColumn column) -> void;
   auto remove(sTableViewItem item) -> void;
   auto resizeColumns() -> void;
   auto setAlignment(Alignment alignment) -> void;
@@ -58,6 +58,8 @@ struct pTableView : pWidget {
   auto setEnabled(bool enabled) -> void override;
   auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
+  auto setHeadered(bool headered) -> void;
+  auto setSortable(bool sortable) -> void;
 
   auto _cellWidth(uint row, uint column) -> uint;
   auto _columnWidth(uint column) -> uint;

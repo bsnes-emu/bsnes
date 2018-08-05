@@ -1,6 +1,7 @@
 #include "keyboard/carbon.cpp"
 
 struct InputCarbon : InputDriver {
+  InputCarbon& self = *this;
   InputCarbon(Input& super) : InputDriver(super), keyboard(super) {}
   ~InputCarbon() { terminate(); }
 
@@ -37,7 +38,6 @@ private:
     keyboard.terminate();
   }
 
-  InputCarbon& self = *this;
   bool isReady = false;
   InputKeyboardCarbon keyboard;
 };

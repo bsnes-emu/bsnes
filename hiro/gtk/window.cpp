@@ -138,7 +138,7 @@ auto pWindow::construct() -> void {
   gtk_window_set_resizable(GTK_WINDOW(widget), true);
 
   //if program was given a name, try and set the window taskbar icon from one of the pixmaps folders
-  if(!Application::state.name);
+  if(!Application::state().name);
   else if(_setIcon({Path::user(), ".local/share/icons/"}));
   else if(_setIcon("/usr/local/share/pixmaps/"));
   else if(_setIcon("/usr/share/pixmaps/"));
@@ -379,8 +379,8 @@ auto pWindow::setMinimumSize(Size size) -> void {
 auto pWindow::setModal(bool modal) -> void {
   if(modal) {
     gtk_window_set_modal(GTK_WINDOW(widget), true);
-    while(!Application::state.quit && state().modal) {
-      if(Application::state.onMain) {
+    while(!Application::state().quit && state().modal) {
+      if(Application::state().onMain) {
         Application::doMain();
       } else {
         usleep(20 * 1000);
@@ -454,13 +454,13 @@ auto pWindow::_menuTextHeight() const -> int {
 auto pWindow::_setIcon(const string& pathname) -> bool {
   string filename;
 
-  filename = {pathname, Application::state.name, ".svg"};
+  filename = {pathname, Application::state().name, ".svg"};
   if(file::exists(filename)) {
     gtk_window_set_icon_from_file(GTK_WINDOW(widget), filename, nullptr);
     return true;
   }
 
-  filename = {pathname, Application::state.name, ".png"};
+  filename = {pathname, Application::state().name, ".png"};
   if(file::exists(filename)) {
     //maximum image size GTK+ supports is 256x256; scale image down if necessary to prevent error
     image icon(filename);

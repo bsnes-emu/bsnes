@@ -1,8 +1,8 @@
 namespace Resource {
-extern const nall::vector<uint8_t> Icon;
-extern const nall::vector<uint8_t> Logo;
+extern const unsigned char Icon[3463];
+extern const unsigned char Logo[23467];
 namespace System {
-extern const nall::vector<uint8_t> Boards;
-extern const nall::vector<uint8_t> IPLROM;
+extern const char Boards[30183];
+extern const unsigned char IPLROM[64];
 }
 }

@@ -1,7 +1,7 @@
 namespace Resource {
 namespace Sprite {
-extern const nall::vector<uint8_t> CrosshairRed;
-extern const nall::vector<uint8_t> CrosshairGreen;
-extern const nall::vector<uint8_t> CrosshairBlue;
+extern const unsigned char CrosshairRed[342];
+extern const unsigned char CrosshairGreen[329];
+extern const unsigned char CrosshairBlue[332];
 }
 }

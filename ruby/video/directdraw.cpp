@@ -1,9 +1,14 @@
 #include <ddraw.h>
 #undef interface
 
-struct VideoDirectDraw : Video {
-  VideoDirectDraw() { initialize(); }
+struct VideoDirectDraw : VideoDriver {
+  VideoDirectDraw& self = *this;
+  VideoDirectDraw(Video& super) : VideoDriver(super) {}
   ~VideoDirectDraw() { terminate(); }
+
+  auto create() -> bool override {
+    return initialize();
+  }
 
   auto driver() -> string override { return "DirectDraw"; }
   auto ready() -> bool override { return _ready; }
@@ -12,19 +17,14 @@ struct VideoDirectDraw : Video {
   auto hasBlocking() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
     return true;
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     DDBLTFX fx = {};
     fx.dwSize = sizeof(DDBLTFX);
     fx.dwFillColor = 0x00000000;
@@ -33,7 +33,6 @@ struct VideoDirectDraw : Video {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     if(width != _width || height != _height) resize(_width = width, _height = height);
     DDSURFACEDESC2 description = {};
     description.dwSize = sizeof(DDSURFACEDESC2);
@@ -46,13 +45,11 @@ struct VideoDirectDraw : Video {
   }
 
   auto release() -> void override {
-    if(!ready()) return;
     _raster->Unlock(0);
   }
 
   auto output() -> void override {
-    if(!ready()) return;
-    if(_blocking) while(true) {
+    if(self.blocking) while(true) {
       BOOL vblank;
       _interface->GetVerticalBlankStatus(&vblank);
       if(vblank) break;
@@ -62,10 +59,10 @@ struct VideoDirectDraw : Video {
     SetRect(&source, 0, 0, _width, _height);
 
     POINT point = {0, 0};
-    ClientToScreen((HWND)_context, &point);
+    ClientToScreen((HWND)self.context, &point);
 
     RECT target;
-    GetClientRect((HWND)_context, &target);
+    GetClientRect((HWND)self.context, &target);
     OffsetRect(&target, point.x, point.y);
 
     if(_screen->Blt(&target, _raster, &source, DDBLT_WAIT, 0) == DDERR_SURFACELOST) {
@@ -77,14 +74,14 @@ struct VideoDirectDraw : Video {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     LPDIRECTDRAW interface = nullptr;
     DirectDrawCreate(0, &interface, 0);
     interface->QueryInterface(IID_IDirectDraw7, (void**)&_interface);
     interface->Release();
 
-    _interface->SetCooperativeLevel((HWND)_context, DDSCL_NORMAL);
+    _interface->SetCooperativeLevel((HWND)self.context, DDSCL_NORMAL);
 
     DDSURFACEDESC2 description = {};
     description.dwSize = sizeof(DDSURFACEDESC2);
@@ -93,7 +90,7 @@ private:
     _interface->CreateSurface(&description, &_screen, 0);
 
     _interface->CreateClipper(0, &_clipper, 0);
-    _clipper->SetHWnd(0, (HWND)_context);
+    _clipper->SetHWnd(0, (HWND)self.context);
     _screen->SetClipper(_clipper);
 
     _raster = nullptr;

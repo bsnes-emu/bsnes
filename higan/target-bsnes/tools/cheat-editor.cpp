@@ -56,7 +56,7 @@ auto CheatWindow::create() -> void {
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
   codeLayout.setAlignment(0.0);
-  codeLabel.setText("Code:");
+  codeLabel.setText("Code(s):");
   codeValue.setFont(Font().setFamily(Font::Mono));
   codeValue.onChange([&] { doChange(); });
   enableOption.setText("Enable");

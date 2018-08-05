@@ -3,7 +3,18 @@
 namespace hiro {
 
 auto pTableViewColumn::construct() -> void {
-  if(auto header = _parent()) header->_setState();
+  if(auto parent = _parent()) {
+    auto lock = parent->acquire();
+  //parent->qtTableView->setAlternatingRowColors(parent->self().columnCount() >= 2);
+    parent->qtTableView->setColumnCount(parent->self().columnCount());
+    for(auto& column : parent->state().columns) {
+      if(auto delegate = column->self()) {
+        delegate->setIcon(delegate->state().icon);
+        delegate->setText(delegate->state().text);  //also handles setSorting();
+        delegate->_setState();
+      }
+    }
+  }
 }
 
 auto pTableViewColumn::destruct() -> void {
@@ -42,19 +53,31 @@ auto pTableViewColumn::setHorizontalAlignment(double alignment) -> void {
 }
 
 auto pTableViewColumn::setIcon(const image& icon) -> void {
-  //unsupported
+  if(auto parent = _parent()) {
+    parent->qtTableView->headerItem()->setIcon(self().offset(), CreateIcon(icon));
+  }
 }
 
 auto pTableViewColumn::setResizable(bool resizable) -> void {
   _setState();
 }
 
-auto pTableViewColumn::setSortable(bool sortable) -> void {
-  _setState();
+auto pTableViewColumn::setSorting(Sort) -> void {
+  if(auto parent = _parent()) {
+    string label = state().text;
+    if(state().sorting == Sort::Ascending ) label.append(" \u25b4");
+    if(state().sorting == Sort::Descending) label.append(" \u25be");
+    parent->qtTableView->headerItem()->setText(self().offset(), QString::fromUtf8(label));
+  }
 }
 
-auto pTableViewColumn::setText(const string& text) -> void {
-  _setState();
+auto pTableViewColumn::setText(const string&) -> void {
+  if(auto parent = _parent()) {
+    string label = state().text;
+    if(state().sorting == Sort::Ascending ) label.append(" \u25b4");
+    if(state().sorting == Sort::Descending) label.append(" \u25be");
+    parent->qtTableView->headerItem()->setText(self().offset(), QString::fromUtf8(label));
+  }
 }
 
 auto pTableViewColumn::setVerticalAlignment(double alignment) -> void {
@@ -69,36 +92,26 @@ auto pTableViewColumn::setWidth(signed width) -> void {
   _setState();
 }
 
-auto pTableViewColumn::_parent() -> maybe<pTableViewHeader&> {
-  if(auto parent = self().parentTableViewHeader()) {
+auto pTableViewColumn::_parent() -> maybe<pTableView&> {
+  if(auto parent = self().parentTableView()) {
     if(auto delegate = parent->self()) return *delegate;
   }
-  return nothing;
+  return {};
 }
 
 auto pTableViewColumn::_setState() -> void {
-  if(auto header = _parent()) {
-    if(auto parent = header->_parent()) {
-      auto lock = parent->acquire();
-      #if HIRO_QT==4
-      parent->qtTableView->header()->setResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
-      #elif HIRO_QT==5
-      parent->qtTableView->header()->setSectionResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
-      #endif
-      bool clickable = false;
-      for(auto& column : header->state().columns) clickable |= column->state.sortable;
-      #if HIRO_QT==4
-      parent->qtTableView->header()->setClickable(clickable);
-      #elif HIRO_QT==5
-      parent->qtTableView->header()->setSectionsClickable(clickable);
-      #endif
-      parent->qtTableView->headerItem()->setText(self().offset(), QString::fromUtf8(state().text));
-      parent->qtTableView->setColumnHidden(self().offset(), !self().visible());
+  if(auto parent = _parent()) {
+    auto lock = parent->acquire();
+    #if HIRO_QT==4
+    parent->qtTableView->header()->setResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
+    #elif HIRO_QT==5
+    parent->qtTableView->header()->setSectionResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
+    #endif
+    parent->qtTableView->setColumnHidden(self().offset(), !self().visible());
 
-      for(auto& item : parent->state().items) {
-        if(auto cell = item->cell(self().offset())) {
-          if(auto self = cell->self()) self->_setState();
-        }
+    for(auto& item : parent->state().items) {
+      if(auto cell = item->cell(self().offset())) {
+        if(auto self = cell->self()) self->_setState();
       }
     }
   }

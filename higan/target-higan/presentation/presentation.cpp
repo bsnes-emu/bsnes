@@ -264,13 +264,13 @@ auto Presentation::clearViewport() -> void {
   uint length = 0;
   uint width = 16;
   uint height = 16;
-  if(video->lock(output, length, width, height)) {
+  if(video->acquire(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
     if(!emulator || !emulator->loaded()) drawIcon(output, length, width, height);
-    video->unlock();
+    video->release();
     video->output();
   }
 }
@@ -385,7 +385,7 @@ auto Presentation::loadSystems() -> void {
     string filename = system["Load"].text();
     string load = Location::base(filename).trimRight("/", 1L);
     string alias = system["Alias"].text();
-    item.setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage);
+    item.setIcon(load ? (image)Icon::Emblem::Folder : (image)Icon::Device::Storage);
     item.setText({alias ? alias : load ? load : name, " ..."});
     item.onActivate([=] {
       for(auto& emulator : program->emulators) {

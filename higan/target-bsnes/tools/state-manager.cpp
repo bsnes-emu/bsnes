@@ -60,8 +60,8 @@ auto StateManager::create() -> void {
     stateList.sort();
   });
   categoryLabel.setText("Category:");
-  categoryOption.append(ComboButtonItem().setText("Managed States").setProperty("type", "managed/"));
-  categoryOption.append(ComboButtonItem().setText("Quick States").setProperty("type", "quick/"));
+  categoryOption.append(ComboButtonItem().setText("Managed States").setProperty("type", "Managed/"));
+  categoryOption.append(ComboButtonItem().setText("Quick States").setProperty("type", "Quick/"));
   categoryOption.onChange([&] { loadStates(); });
   statePreviewSeparator.setColor({192, 192, 192});
   statePreviewLabel.setFont(Font().setBold()).setText("Preview");
@@ -142,8 +142,8 @@ auto StateManager::updateSelection() -> void {
   loadButton.setEnabled(batched.size() == 1);
   saveButton.setEnabled(batched.size() == 1);
   editButton.setEnabled(batched.size() == 1);
-  addButton.setVisible(type() != "quick/");
-  editButton.setVisible(type() != "quick/");
+  addButton.setVisible(type() != "Quick/");
+  editButton.setVisible(type() != "Quick/");
   removeButton.setEnabled(batched.size() >= 1);
 
   statePreview.setColor({0, 0, 0});

@@ -1,24 +1,25 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-struct AudioPulseAudioSimple : Audio {
-  AudioPulseAudioSimple() { initialize(); }
+struct AudioPulseAudioSimple : AudioDriver {
+  AudioPulseAudioSimple& self = *this;
+  AudioPulseAudioSimple(Audio& super) : AudioDriver(super) {}
   ~AudioPulseAudioSimple() { terminate(); }
+
+  auto create() -> bool override {
+    super.setBlocking(true);
+    super.setFrequency(48000);
+    return initialize();
+  }
 
   auto driver() -> string override { return "PulseAudioSimple"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasFrequency() -> bool override { return true; }
-
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
 
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
 
   auto output(const double samples[]) -> void override {
     if(!ready()) return;
@@ -39,7 +40,7 @@ private:
     pa_sample_spec specification;
     specification.format = PA_SAMPLE_S16LE;
     specification.channels = 2;
-    specification.rate = (uint)_frequency;
+    specification.rate = self.frequency;
 
     int error = 0;
     _interface = pa_simple_new(

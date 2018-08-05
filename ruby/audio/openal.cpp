@@ -7,6 +7,7 @@
 #endif
 
 struct AudioOpenAL : AudioDriver {
+  AudioOpenAL& self = *this;
   AudioOpenAL(Audio& driver) : AudioDriver(super) {}
   ~AudioOpenAL() { terminate(); }
 
@@ -160,8 +161,6 @@ private:
     _buffer = new uint32_t[_bufferSize]();
     return true;
   }
-
-  AudioOpenAL& self = *this;
 
   bool _ready = false;
 

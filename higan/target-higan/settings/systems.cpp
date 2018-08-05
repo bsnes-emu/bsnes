@@ -32,10 +32,8 @@ SystemSettings::SystemSettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto SystemSettings::reload() -> void {
   systemList.reset();
-  systemList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn())
-    .append(TableViewColumn().setText("System").setExpandable())
-  );
+  systemList.append(TableViewColumn());
+  systemList.append(TableViewColumn().setText("System").setExpandable());
   for(auto system : settings.find("Systems/System")) {
     string name = system.text();
     string load = Location::base(system["Load"].text()).trimRight("/", 1L);
@@ -46,7 +44,7 @@ auto SystemSettings::reload() -> void {
         .setChecked(system["Visible"].boolean())
       )
       .append(TableViewCell()
-        .setIcon(load ? Icon::Emblem::Folder : Icon::Device::Storage)
+        .setIcon(load ? (image)Icon::Emblem::Folder : (image)Icon::Device::Storage)
         .setText(alias ? alias : load ? load : name)
       )
     );

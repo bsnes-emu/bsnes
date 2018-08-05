@@ -2,7 +2,7 @@
 
 namespace hiro {
 
-struct pObject : mLock {
+struct pObject : Lock {
   pObject(mObject& reference) : reference(reference) {}
   virtual ~pObject() {}
   auto self() const -> mObject& { return (mObject&)reference; }

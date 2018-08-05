@@ -1,41 +1,32 @@
 #include <pulse/pulseaudio.h>
 
 struct AudioPulseAudio : Audio {
-  AudioPulseAudio() { initialize(); }
+  AudioPulseAudio& self = *this;
+  AudioPulseAudio(Audio& super) : AudioDriver(super) {}
   ~AudioPulseAudio() { terminate(); }
+
+  auto create() -> bool override {
+    super.setFrequency(48000);
+    super.setLatency(40);
+    return initialize();
+  }
 
   auto driver() -> string override { return "PulseAudio"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
 
-  auto availableLatencies() -> vector<uint> override {
+  auto hasLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
 
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setFrequency(double frequency) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto output(const double samples[]) -> void override {
     pa_stream_begin_write(_stream, (void**)&_buffer, &_period);
@@ -80,12 +71,12 @@ private:
 
     _specification.format = PA_SAMPLE_S16LE;
     _specification.channels = 2;
-    _specification.rate = (uint)_frequency;
+    _specification.rate = self.frequency;
     _stream = pa_stream_new(_context, "audio", &_specification, nullptr);
 
     pa_buffer_attr bufferAttributes;
     bufferAttributes.maxlength = -1;
-    bufferAttributes.tlength = pa_usec_to_bytes(_latency * PA_USEC_PER_MSEC, &_specification);
+    bufferAttributes.tlength = pa_usec_to_bytes(self.latency * PA_USEC_PER_MSEC, &_specification);
     bufferAttributes.prebuf = -1;
     bufferAttributes.minreq = -1;
     bufferAttributes.fragsize = -1;

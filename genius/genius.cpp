@@ -43,6 +43,7 @@ ListWindow::ListWindow() {
   });
 
   layout.setPadding(5);
+  gameList.setHeadered();
   gameList.onActivate([&] { modifyButton.doActivate(); });
   gameList.onChange([&] { updateWindow(); });
   appendButton.setText("Append").onActivate([&] {
@@ -75,19 +76,16 @@ auto ListWindow::quit() -> void {
 
 auto ListWindow::reloadList() -> void {
   gameList.reset();
-  gameList.append(TableViewHeader()
-    .append(TableViewColumn().setText("Name").setExpandable())
-    .append(TableViewColumn().setText("Region"))
-    .append(TableViewColumn().setText("Revision"))
-    .append(TableViewColumn().setText("Board"))
-  );
+  gameList.append(TableViewColumn().setText("Name").setExpandable());
+  gameList.append(TableViewColumn().setText("Region"));
+  gameList.append(TableViewColumn().setText("Revision"));
+  gameList.append(TableViewColumn().setText("Board"));
   for(auto& game : games) {
-    gameList.append(TableViewItem()
-      .append(TableViewCell().setText(game.name))
-      .append(TableViewCell().setText(game.region))
-      .append(TableViewCell().setText(game.revision))
-      .append(TableViewCell().setText(game.board))
-    );
+    TableViewItem item{&gameList};
+    item.append(TableViewCell().setText(game.name));
+    item.append(TableViewCell().setText(game.region));
+    item.append(TableViewCell().setText(game.revision));
+    item.append(TableViewCell().setText(game.board));
   }
   Application::processEvents();
   gameList.resizeColumns();

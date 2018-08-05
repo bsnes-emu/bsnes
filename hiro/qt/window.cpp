@@ -7,7 +7,7 @@ auto pWindow::construct() -> void {
   qtWindow->setWindowTitle(" ");
 
   //if program was given a name, try and set the window taskbar icon to a matching pixmap image
-  if(auto name = Application::state.name) {
+  if(auto name = Application::state().name) {
     if(file::exists({Path::user(), ".local/share/icons/", name, ".png"})) {
       qtWindow->setWindowIcon(QIcon(QString::fromUtf8(string{Path::user(), ".local/share/icons/", name, ".png"})));
     } else if(file::exists({"/usr/local/share/pixmaps/", name, ".png"})) {
@@ -44,7 +44,7 @@ auto pWindow::construct() -> void {
 }
 
 auto pWindow::destruct() -> void {
-if(Application::state.quit) return;  //TODO: hack
+if(Application::state().quit) return;  //TODO: hack
   delete qtStatusBar;
   delete qtContainer;
   delete qtMenuBar;
@@ -189,8 +189,8 @@ auto pWindow::setModal(bool modal) -> void {
     setVisible(false);
     qtWindow->setWindowModality(Qt::ApplicationModal);
     setVisible(true);
-    while(!Application::state.quit && state().modal) {
-      if(Application::state.onMain) {
+    while(!Application::state().quit && state().modal) {
+      if(Application::state().onMain) {
         Application::doMain();
       } else {
         usleep(20 * 1000);
@@ -217,13 +217,12 @@ auto pWindow::setTitle(const string& text) -> void {
 }
 
 auto pWindow::setVisible(bool visible) -> void {
-  lock();
+  auto lock = acquire();
   qtWindow->setVisible(visible);
   if(visible) {
     _updateFrameGeometry();
     setGeometry(state().geometry);
   }
-  unlock();
 }
 
 auto pWindow::_append(mWidget& widget) -> void {

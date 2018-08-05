@@ -9,6 +9,7 @@
 #include "joypad/directinput.cpp"
 
 struct InputWindows : InputDriver {
+  InputWindows& self = *this;
   InputWindows(Input& driver) : InputDriver(super), keyboard(super), mouse(super), joypadXInput(super), joypadDirectInput(super) {}
   ~InputWindows() { terminate(); }
 
@@ -63,8 +64,8 @@ private:
     if(!directInputContext) return false;
 
     if(!keyboard.initialize()) return false;
-    if(!mouse.initialize(_context)) return false;
-    bool xinputAvailable = _joypadXInput.initialize();
+    if(!mouse.initialize(self.context)) return false;
+    bool xinputAvailable = joypadXInput.initialize();
     if(!joypadDirectInput.initialize(self.context, directInputContext, xinputAvailable)) return false;
     return isReady = true;
   }
@@ -83,7 +84,6 @@ private:
     }
   }
 
-  InputWindows& self = *this;
   bool isReady = false;
   InputKeyboardRawInput keyboard;
   InputMouseRawInput mouse;

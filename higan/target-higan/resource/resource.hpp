@@ -1,4 +1,4 @@
 namespace Resource {
-extern const nall::vector<uint8_t> Icon;
-extern const nall::vector<uint8_t> Logo;
+extern const unsigned char Icon[3088];
+extern const unsigned char Logo[25128];
 }

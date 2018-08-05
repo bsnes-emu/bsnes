@@ -267,6 +267,8 @@ auto pTableView::construct() -> void {
     setBordered(state().bordered);
     setFont(self().font(true));
     setForegroundColor(state().foregroundColor);
+    setHeadered(state().headered);
+    setSortable(state().sortable);
   }
 }
 
@@ -277,12 +279,10 @@ auto pTableView::destruct() -> void {
   }
 }
 
-auto pTableView::append(sTableViewHeader header) -> void {
+auto pTableView::append(sTableViewColumn column) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
     resizeColumns();
-
-    header->setVisible(header->visible());
   }
 }
 
@@ -292,7 +292,7 @@ auto pTableView::append(sTableViewItem item) -> void {
   }
 }
 
-auto pTableView::remove(sTableViewHeader header) -> void {
+auto pTableView::remove(sTableViewColumn column) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
     resizeColumns();
@@ -307,30 +307,28 @@ auto pTableView::remove(sTableViewItem item) -> void {
 
 auto pTableView::resizeColumns() -> void {
   @autoreleasepool {
-    if(auto& header = state().header) {
-      vector<int> widths;
-      int minimumWidth = 0;
-      int expandable = 0;
-      for(auto column : range(header->columnCount())) {
-        int width = _width(column);
-        widths.append(width);
-        minimumWidth += width;
-        if(header->column(column).expandable()) expandable++;
-      }
+    vector<int> widths;
+    int minimumWidth = 0;
+    int expandable = 0;
+    for(uint column : range(self().columnCount())) {
+      int width = _width(column);
+      widths.append(width);
+      minimumWidth += width;
+      if(state().columns[column]->expandable()) expandable++;
+    }
 
-      int maximumWidth = self().geometry().width() - 18;  //include margin for vertical scroll bar
-      int expandWidth = 0;
-      if(expandable && maximumWidth > minimumWidth) {
-        expandWidth = (maximumWidth - minimumWidth) / expandable;
-      }
+    int maximumWidth = self().geometry().width() - 18;  //include margin for vertical scroll bar
+    int expandWidth = 0;
+    if(expandable && maximumWidth > minimumWidth) {
+      expandWidth = (maximumWidth - minimumWidth) / expandable;
+    }
 
-      for(auto column : range(header->columnCount())) {
-        if(auto self = header->state.columns[column]->self()) {
-          int width = widths[column];
-          if(self->state().expandable) width += expandWidth;
-          NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
-          [tableColumn setWidth:width];
-        }
+    for(uint column : range(self().columnCount())) {
+      if(auto self = state().columns[column]->self()) {
+        int width = widths[column];
+        if(self->state().expandable) width += expandWidth;
+        NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
+        [tableColumn setWidth:width];
       }
     }
   }
@@ -367,6 +365,17 @@ auto pTableView::setFont(const Font& font) -> void {
 auto pTableView::setForegroundColor(Color color) -> void {
 }
 
+auto pTableView::setHeadered(bool headered) -> void {
+  @autoreleasepool {
+    if(headered == state().headered) return;
+    if(headered) {
+      [[pTableView->cocoaView content] setHeaderView:[[[NSTableHeaderView alloc] init] autorelease]];
+    } else {
+      [[pTableView->cocoaView content] setHeaderView:nil];
+    }
+  }
+}
+
 auto pTableView::_cellWidth(uint row, uint column) -> uint {
   uint width = 8;
   if(auto pTableViewItem = self().item(row)) {
@@ -387,57 +396,32 @@ auto pTableView::_cellWidth(uint row, uint column) -> uint {
 
 auto pTableView::_columnWidth(uint column) -> uint {
   uint width = 8;
-  if(auto& header = state().header) {
-    if(auto pTableViewColumn = header->column(column)) {
-      if(auto& icon = pTableViewColumn->state.icon) {
-        width += icon.width() + 2;
-      }
-      if(auto& text = pTableViewColumn->state.text) {
-        width += pFont::size(pTableViewColumn->font(true), text).width();
-      }
+  if(auto column = self().column(column)) {
+    if(auto& icon = column->state.icon) {
+      width += icon.width() + 2;
+    }
+    if(auto& text = column->state.text) {
+      width += pFont::size(column->font(true), text).width();
+    }
+    if(column->state.sorting != Sort::None) {
+      width += 16;
     }
   }
   return width;
 }
 
 auto pTableView::_width(uint column) -> uint {
-  if(auto& header = state().header) {
-    if(auto width = header->column(column).width()) return width;
-    uint width = 1;
-    if(!header->column(column).visible()) return width;
-    if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(state().items.size())) {
-      width = max(width, _cellWidth(row, column));
-    }
-    return width;
+  if(auto width = self().column(column).width()) return width;
+  uint width = 1;
+  if(!self().column(column).visible()) return width;
+  if(state().headered) width = max(width, _columnWidth(column));
+  for(auto row : range(state().items.size())) {
+    width = max(width, _cellWidth(row, column));
   }
-  return 1;
+  return width;
 }
 
 /*
-auto pTableView::autoSizeColumns() -> void {
-  @autoreleasepool {
-    if(tableView.state.checkable) {
-      NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:@"check"];
-      [tableColumn setWidth:20.0];
-    }
-
-    unsigned height = [[cocoaView content] rowHeight];
-    for(unsigned column = 0; column < max(1u, tableView.state.headerText.size()); column++) {
-      NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
-      unsigned minimumWidth = pFont::size([[tableColumn headerCell] font], tableView.state.headerText(column)).width + 4;
-      for(unsigned row = 0; row < tableView.state.text.size(); row++) {
-        unsigned width = pFont::size([cocoaView font], tableView.state.text(row)(column)).width + 2;
-        if(tableView.state.image(row)(height)) width += height + 2;
-        if(width > minimumWidth) minimumWidth = width;
-      }
-      [tableColumn setWidth:minimumWidth];
-    }
-
-    [[cocoaView content] sizeLastColumnToFit];
-  }
-}
-
 auto pTableView::setSelected(bool selected) -> void {
   @autoreleasepool {
     if(selected == false) {

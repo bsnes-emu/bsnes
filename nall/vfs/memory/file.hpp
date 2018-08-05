@@ -5,9 +5,9 @@ namespace nall { namespace vfs { namespace memory {
 struct file : vfs::file {
   ~file() { delete[] _data; }
 
-  static auto open(const uint8_t* data, uintmax size) -> vfs::shared::file {
+  static auto open(const void* data, uintmax size) -> vfs::shared::file {
     auto instance = shared_pointer<file>{new file};
-    instance->_open(data, size);
+    instance->_open((const uint8_t*)data, size);
     return instance;
   }
 

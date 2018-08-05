@@ -15,13 +15,13 @@ struct pTableViewColumn : pObject {
   auto setHorizontalAlignment(double alignment) -> void;
   auto setIcon(const image& icon) -> void;
   auto setResizable(bool resizable) -> void;
-  auto setSortable(bool sortable) -> void;
+  auto setSorting(Sort sorting) -> void;
   auto setText(const string& text) -> void;
   auto setVerticalAlignment(double alignment) -> void;
   auto setVisible(bool visible) -> void;
   auto setWidth(signed width) -> void;
 
-  auto _parent() -> maybe<pTableViewHeader&>;
+  auto _parent() -> maybe<pTableView&>;
   auto _setState() -> void;
 };
 

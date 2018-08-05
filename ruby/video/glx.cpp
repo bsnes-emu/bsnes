@@ -7,9 +7,15 @@ auto VideoGLX_X11ErrorHandler(Display*, XErrorEvent*) -> int {
   return 0;  //suppress errors
 }
 
-struct VideoGLX : Video, OpenGL {
-  VideoGLX() { initialize(); }
+struct VideoGLX : VideoDriver, OpenGL {
+  VideoGLX& self = *this;
+  VideoGLX(Video& super) : VideoDriver(super) {}
   ~VideoGLX() { terminate(); }
+
+  auto create() -> bool override {
+    super.setFormat("RGB24");
+    return initialize();
+  }
 
   auto driver() -> string override { return "OpenGL"; }
   auto ready() -> bool override { return _ready; }
@@ -17,37 +23,27 @@ struct VideoGLX : Video, OpenGL {
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
-  auto hasFormat() -> bool override { return true; }
   auto hasSmooth() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
-  auto availableFormats() -> vector<string> override {
-    return {"RGB24", "RGB30"};
+  auto hasFormats() -> vector<string> override {
+    return {"RGB24"};  //"RGB30"
   }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
     if(glXSwapInterval) glXSwapInterval(blocking);
     return true;
   }
 
   auto setFlush(bool flush) -> bool override {
-    if(flush == Video::flush()) return true;
-    if(!Video::setFlush(flush)) return false;
     return true;
   }
 
   auto setFormat(string format) -> bool override {
-    if(format == Video::format()) return true;
-    if(!Video::setFormat(format)) return false;
-
     if(format == "RGB24") {
       OpenGL::inputFormat = GL_RGBA8;
       return true;
@@ -61,46 +57,37 @@ struct VideoGLX : Video, OpenGL {
     return false;
   }
 
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == Video::smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    if(!shader()) OpenGL::filter = smooth ? GL_LINEAR : GL_NEAREST;
+  auto setSmooth(bool) -> bool override {
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto setShader(string shader) -> bool override {
-    if(shader == Video::shader()) return true;
-    if(!Video::setShader(shader)) return false;
-    OpenGL::setShader(shader);
-    if(!shader) OpenGL::filter = smooth() ? GL_LINEAR : GL_NEAREST;
+  auto setShader(string) -> bool override {
+    OpenGL::setShader(self.shader);
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     OpenGL::clear();
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
-
     //we must ensure that the child window is the same size as the parent window.
     //unfortunately, we cannot hook the parent window resize event notification,
     //as we did not create the parent window, nor have any knowledge of the toolkit used.
     //therefore, inelegant as it may be, we query each window size and resize as needed.
     XWindowAttributes parent, child;
-    XGetWindowAttributes(_display, (Window)_context, &parent);
+    XGetWindowAttributes(_display, (Window)self.context, &parent);
     XGetWindowAttributes(_display, (Window)_window, &child);
     if(child.width != parent.width || child.height != parent.height) {
       XResizeWindow(_display, _window, parent.width, parent.height);
@@ -110,7 +97,7 @@ struct VideoGLX : Video, OpenGL {
     OpenGL::outputHeight = parent.height;
     OpenGL::output();
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
-    if(flush()) glFinish();
+    if(self.flush) glFinish();
   }
 
   auto poll() -> void override {
@@ -120,7 +107,7 @@ struct VideoGLX : Video, OpenGL {
       if(event.type == Expose) {
         XWindowAttributes attributes;
         XGetWindowAttributes(_display, _window, &attributes);
-        doUpdate(attributes.width, attributes.height);
+        super.doUpdate(attributes.width, attributes.height);
       }
     }
   }
@@ -128,7 +115,7 @@ struct VideoGLX : Video, OpenGL {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     _display = XOpenDisplay(nullptr);
     _screen = DefaultScreen(_display);
@@ -138,11 +125,11 @@ private:
     if(_versionMajor < 1 || (_versionMajor == 1 && _versionMinor < 2)) return false;
 
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
 
-    int redDepth   = Video::format() == "RGB30" ? 10 : 8;
-    int greenDepth = Video::format() == "RGB30" ? 10 : 8;
-    int blueDepth  = Video::format() == "RGB30" ? 10 : 8;
+    int redDepth   = VideoDriver::format == "RGB30" ? 10 : 8;
+    int greenDepth = VideoDriver::format == "RGB30" ? 10 : 8;
+    int blueDepth  = VideoDriver::format == "RGB30" ? 10 : 8;
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
@@ -162,7 +149,7 @@ private:
 
     XVisualInfo* vi = glXGetVisualFromFBConfig(_display, fbConfig[0]);
 
-    //(Window)_context has already been realized, most likely with DefaultVisual.
+    //(Window)self.context has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
     //it is not possible to change the Visual of an already realized (created) window.
     //therefore a new child window, using the same GLX Visual, must be created and binded to it.
@@ -170,7 +157,7 @@ private:
     XSetWindowAttributes attributes = {};
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
-    _window = XCreateWindow(_display, /* parent = */ (Window)_context,
+    _window = XCreateWindow(_display, /* parent = */ (Window)self.context,
       /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
       CWColormap | CWBorderPixel, &attributes);
@@ -219,7 +206,7 @@ private:
       return false;
     }
 
-    if(glXSwapInterval) glXSwapInterval(_blocking);
+    if(glXSwapInterval) glXSwapInterval(self.blocking);
 
     //read attributes of frame buffer for later use, as requested attributes from above are not always granted
     int value = 0;

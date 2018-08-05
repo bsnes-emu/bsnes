@@ -3,9 +3,14 @@
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 
-struct VideoWGL : Video, OpenGL {
-  VideoWGL() { initialize(); }
+struct VideoWGL : VideoDriver, OpenGL {
+  VideoWGL& self = *this;
+  VideoWGL(Video& super) : VideoDriver(super) {}
   ~VideoWGL() { terminate(); }
+
+  auto create() -> bool override {
+    return initialize();
+  }
 
   auto driver() -> string override { return "OpenGL"; }
   auto ready() -> bool override { return _ready; }
@@ -17,70 +22,56 @@ struct VideoWGL : Video, OpenGL {
   auto hasShader() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
     if(wglSwapInterval) wglSwapInterval(blocking);
     return true;
   }
 
   auto setFlush(bool flush) -> bool override {
-    if(flush == Video::flush()) return true;
-    if(!Video::setFlush(flush)) return false;
     return true;
   }
 
-  auto setSmooth(bool smooth) -> bool override {
-    if(smooth == Video::smooth()) return true;
-    if(!Video::setSmooth(smooth)) return false;
-    if(!shader()) OpenGL::filter = smooth ? GL_LINEAR : GL_NEAREST;
+  auto setSmooth(bool) -> bool override {
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
-  auto setShader(string shader) -> bool override {
-    if(shader == Video::shader()) return true;
-    if(!Video::setShader(shader)) return false;
-    OpenGL::setShader(shader);
-    if(!shader) OpenGL::filter = smooth() ? GL_LINEAR : GL_NEAREST;
+  auto setShader(string) -> bool override {
+    OpenGL::setShader(self.shader);
+    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     OpenGL::clear();
     SwapBuffers(_display);
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
     RECT rectangle;
-    GetClientRect((HWND)_context, &rectangle);
+    GetClientRect((HWND)self.context, &rectangle);
     OpenGL::outputWidth = rectangle.right - rectangle.left;
     OpenGL::outputHeight = rectangle.bottom - rectangle.top;
     OpenGL::output();
     SwapBuffers(_display);
-    if(flush()) glFinish();
+    if(self.flush) glFinish();
   }
 
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     PIXELFORMATDESCRIPTOR descriptor = {};
     descriptor.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -88,7 +79,7 @@ private:
     descriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     descriptor.iPixelType = PFD_TYPE_RGBA;
 
-    _display = GetDC((HWND)_context);
+    _display = GetDC((HWND)self.context);
     GLuint pixelFormat = ChoosePixelFormat(_display, &descriptor);
     SetPixelFormat(_display, pixelFormat, &descriptor);
 
@@ -112,7 +103,7 @@ private:
       }
     }
 
-    if(wglSwapInterval) wglSwapInterval(_blocking);
+    if(wglSwapInterval) wglSwapInterval(self.blocking);
     return _ready = OpenGL::initialize();
   }
 

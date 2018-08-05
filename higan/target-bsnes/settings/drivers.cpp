@@ -20,6 +20,7 @@ auto DriverSettings::create() -> void {
   videoBlockingToggle.setText("Synchronize").onToggle([&] {
     settings["Video/Blocking"].setValue(videoBlockingToggle.checked());
     program.updateVideoBlocking();
+    presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
   videoFlushToggle.setText("GPU sync").onToggle([&] {
     settings["Video/Flush"].setValue(videoFlushToggle.checked());
@@ -47,6 +48,7 @@ auto DriverSettings::create() -> void {
   audioBlockingToggle.setText("Synchronize").onToggle([&] {
     settings["Audio/Blocking"].setValue(audioBlockingToggle.checked());
     program.updateAudioBlocking();
+    presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
   audioDynamicToggle.setText("Dynamic rate").onToggle([&] {
     settings["Audio/Dynamic"].setValue(audioDynamicToggle.checked());

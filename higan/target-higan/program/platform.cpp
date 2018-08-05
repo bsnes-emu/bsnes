@@ -67,14 +67,14 @@ auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint 
     height -= overscanVertical * 2;
   }
 
-  if(video->lock(output, length, width, height)) {
+  if(video->acquire(output, length, width, height)) {
     length >>= 2;
 
     for(auto y : range(height)) {
       memory::copy<uint32>(output + y * length, data + y * pitch, width);
     }
 
-    video->unlock();
+    video->release();
     video->output();
   }
 

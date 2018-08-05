@@ -16,10 +16,11 @@ Program program;
 auto Program::create(vector<string> arguments) -> void {
   Emulator::platform = this;
 
-  aboutWindow.create();
   presentation.create();
   presentation.setVisible();
+  aboutWindow.create();
 
+  settingsWindow.create();
   videoSettings.create();
   audioSettings.create();
   inputSettings.create();
@@ -27,15 +28,14 @@ auto Program::create(vector<string> arguments) -> void {
   pathSettings.create();
   emulatorSettings.create();
   driverSettings.create();
-  settingsWindow.create();
 
+  toolsWindow.create();
   cheatDatabase.create();
   cheatWindow.create();
   cheatEditor.create();
   stateWindow.create();
   stateManager.create();
   manifestViewer.create();
-  toolsWindow.create();
 
   if(settings["Crashed"].boolean()) {
     MessageDialog(

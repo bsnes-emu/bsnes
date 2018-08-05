@@ -25,6 +25,7 @@ auto pTextEdit::destruct() -> void {
 auto pTextEdit::setBackgroundColor(Color color) -> void {
   if(backgroundBrush) { DeleteObject(backgroundBrush); backgroundBrush = 0; }
   backgroundBrush = CreateSolidBrush(color ? CreateRGB(color) : GetSysColor(COLOR_WINDOW));
+  InvalidateRect(hwnd, 0, true);
 }
 
 auto pTextEdit::setCursor(Cursor cursor) -> void {
@@ -40,14 +41,14 @@ auto pTextEdit::setEditable(bool editable) -> void {
 }
 
 auto pTextEdit::setForegroundColor(Color color) -> void {
+  InvalidateRect(hwnd, 0, true);
 }
 
 auto pTextEdit::setText(string text) -> void {
-  lock();
+  auto lock = acquire();
   text.replace("\r", "");
   text.replace("\n", "\r\n");
   SetWindowText(hwnd, utf16_t(text));
-  unlock();
 }
 
 auto pTextEdit::setWordWrap(bool wordWrap) -> void {

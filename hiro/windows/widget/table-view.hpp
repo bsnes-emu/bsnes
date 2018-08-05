@@ -5,9 +5,9 @@ namespace hiro {
 struct pTableView : pWidget {
   Declare(TableView, Widget)
 
-  auto append(sTableViewHeader header) -> void;
+  auto append(sTableViewColumn column) -> void;
   auto append(sTableViewItem item) -> void;
-  auto remove(sTableViewHeader header) -> void;
+  auto remove(sTableViewColumn column) -> void;
   auto remove(sTableViewItem item) -> void;
   auto resizeColumns() -> void;
   auto setAlignment(Alignment alignment) -> void;
@@ -16,6 +16,8 @@ struct pTableView : pWidget {
   auto setBordered(bool bordered) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setGeometry(Geometry geometry) -> void override;
+  auto setHeadered(bool headered) -> void;
+  auto setSortable(bool sortable) -> void;
 
   auto onActivate(LPARAM lparam) -> void;
   auto onChange(LPARAM lparam) -> void;
@@ -30,7 +32,6 @@ struct pTableView : pWidget {
   auto _font(unsigned row, unsigned column) -> Font;
   auto _foregroundColor(unsigned row, unsigned column) -> Color;
   auto _setIcons() -> void;
-  auto _setSortable() -> void;
   auto _width(unsigned column) -> unsigned;
 
   WindowProc windowProc = nullptr;

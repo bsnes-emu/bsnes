@@ -79,41 +79,42 @@ auto Presentation::create() -> void {
   saveState.setIcon(Icon::Action::Save).setText("Save State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&saveState};
-    item.setProperty("name", {"quick/slot ", 1 + index});
+    item.setProperty("name", {"Quick/Slot ", 1 + index});
     item.setProperty("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
-    item.onActivate([=] { program.saveState({"quick/slot ", 1 + index}); });
+    item.onActivate([=] { program.saveState({"Quick/Slot ", 1 + index}); });
   }
   loadState.setIcon(Icon::Media::Play).setText("Load State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&loadState};
-    item.setProperty("name", {"quick/slot ", 1 + index});
+    item.setProperty("name", {"Quick/Slot ", 1 + index});
     item.setProperty("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
-    item.onActivate([=] { program.loadState({"quick/slot ", 1 + index}); });
+    item.onActivate([=] { program.loadState({"Quick/Slot ", 1 + index}); });
   }
   loadState.append(MenuSeparator());
   loadState.append(MenuItem()
-  .setProperty("name", "quick/undo")
+  .setProperty("name", "Quick/Undo")
   .setProperty("title", "Undo Last Save")
   .setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
-    program.loadState("quick/undo");
+    program.loadState("Quick/Undo");
   }));
   loadState.append(MenuItem()
-  .setProperty("name", "quick/redo")
+  .setProperty("name", "Quick/Redo")
   .setProperty("title", "Redo Last Undo")
   .setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
-    program.loadState("quick/redo");
+    program.loadState("Quick/Redo");
   }));
   loadState.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Remove All States").onActivate([&] {
     if(MessageDialog("Are you sure you want to permanently remove all quick states for this game?").setParent(*this).question() == "Yes") {
-      for(uint index : range(QuickStates)) program.removeState({"quick/slot ", 1 + index});
-      program.removeState("quick/undo");
-      program.removeState("quick/redo");
-      updateStateMenus();
+      for(uint index : range(QuickStates)) program.removeState({"Quick/Slot ", 1 + index});
+      program.removeState("Quick/Undo");
+      program.removeState("Quick/Redo");
     }
   }));
-  speedMenu.setIcon(Icon::Device::Clock).setText("Speed");
+  speedMenu.setIcon(Icon::Device::Clock).setText("Speed").setEnabled(
+    !settings["Video/Blocking"].boolean() && settings["Audio/Blocking"].boolean()
+  );
   speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program.updateAudioFrequency(); });
   speedSlow.setText("75% (Slow)").setProperty("multiplier", "1.333").onActivate([&] { program.updateAudioFrequency(); });
   speedNormal.setText("100% (Normal)").setProperty("multiplier", "1.0").onActivate([&] { program.updateAudioFrequency(); });
@@ -195,7 +196,7 @@ auto Presentation::create() -> void {
 
   #if defined(PLATFORM_WINDOWS)
   Application::Windows::onModalChange([&](bool modal) {
-    if(modal && audio) audio->clear();
+    if(modal) audio.clear();
   });
   #endif
 
@@ -443,7 +444,7 @@ auto Presentation::updateSizeMenu() -> void {
 }
 
 auto Presentation::updateStateMenus() -> void {
-  auto states = program.availableStates("quick/");
+  auto states = program.availableStates("Quick/");
 
   for(auto& action : saveState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
@@ -507,7 +508,7 @@ auto Presentation::updateRecentGames() -> void {
         displayName.append(Location::prefix(part), " + ");
       }
       displayName.trimRight(" + ", 1L);
-      item.setIcon(games(0).endsWith("/") ? Icon::Action::Open : Icon::Emblem::File);
+      item.setIcon(games(0).endsWith("/") ? (image)Icon::Action::Open : (image)Icon::Emblem::File);
       item.setText(displayName);
       item.onActivate([=] {
         program.gameQueue = games;

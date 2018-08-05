@@ -8,8 +8,8 @@ static auto CALLBACK Application_windowProc(HWND, UINT, WPARAM, LPARAM) -> LRESU
 
 auto pApplication::run() -> void {
   MSG msg;
-  if(Application::state.onMain) {
-    while(!Application::state.quit) {
+  if(Application::state().onMain) {
+    while(!Application::state().quit) {
       Application::doMain();
       processEvents();
     }
@@ -243,7 +243,7 @@ case WM_GETMINMAXINFO: {
 */
 
 static auto CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(Application::state.quit) return DefWindowProc(hwnd, msg, wparam, lparam);
+  if(Application::state().quit) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);

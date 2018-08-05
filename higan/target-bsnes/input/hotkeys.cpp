@@ -14,19 +14,19 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Save State").onPress([&] {
-    program.saveState({"quick/slot ", stateSlot});
+    program.saveState({"Quick/Slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load State").onPress([&] {
-    program.loadState({"quick/slot ", stateSlot});
+    program.loadState({"Quick/Slot ", stateSlot});
   }));
 
   hotkeys.append(InputHotkey("Load Undo State").onPress([&] {
-    program.loadState("quick/undo");
+    program.loadState("Quick/Undo");
   }));
 
   hotkeys.append(InputHotkey("Load Redo State").onPress([&] {
-    program.loadState("quick/redo");
+    program.loadState("Quick/Redo");
   }));
 
   hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {

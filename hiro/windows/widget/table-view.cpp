@@ -35,8 +35,9 @@ auto pTableView::construct() -> void {
   setBackgroundColor(state().backgroundColor);
   setBatchable(state().batchable);
   setBordered(state().bordered);
+  setHeadered(state().headered);
+  setSortable(state().sortable);
   _setIcons();
-  _setSortable();
   resizeColumns();
 }
 
@@ -45,61 +46,53 @@ auto pTableView::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pTableView::append(sTableViewHeader header) -> void {
+auto pTableView::append(sTableViewColumn column) -> void {
   resizeColumns();
 }
 
 auto pTableView::append(sTableViewItem item) -> void {
 }
 
-auto pTableView::remove(sTableViewHeader header) -> void {
-  LVCOLUMN lvColumn{LVCF_WIDTH};
-  while(ListView_GetColumn(hwnd, 0, &lvColumn)) {
-    ListView_DeleteColumn(hwnd, 0);
-  }
+auto pTableView::remove(sTableViewColumn column) -> void {
 }
 
 auto pTableView::remove(sTableViewItem item) -> void {
 }
 
 auto pTableView::resizeColumns() -> void {
-  lock();
+  auto lock = acquire();
 
-  if(auto& header = state().header) {
-    vector<signed> widths;
-    signed minimumWidth = 0;
-    signed expandable = 0;
-    for(auto column : range(header->columnCount())) {
-      signed width = _width(column);
-      widths.append(width);
-      minimumWidth += width;
-      if(header->column(column).expandable()) expandable++;
-    }
+  vector<signed> widths;
+  signed minimumWidth = 0;
+  signed expandable = 0;
+  for(auto column : range(self().columnCount())) {
+    signed width = _width(column);
+    widths.append(width);
+    minimumWidth += width;
+    if(state().columns[column]->expandable()) expandable++;
+  }
 
-    signed maximumWidth = self().geometry().width() - 4;
-    SCROLLBARINFO sbInfo{sizeof(SCROLLBARINFO)};
-    if(GetScrollBarInfo(hwnd, OBJID_VSCROLL, &sbInfo)) {
-      if(!(sbInfo.rgstate[0] & STATE_SYSTEM_INVISIBLE)) {
-        maximumWidth -= sbInfo.rcScrollBar.right - sbInfo.rcScrollBar.left;
-      }
-    }
-
-    signed expandWidth = 0;
-    if(expandable && maximumWidth > minimumWidth) {
-      expandWidth = (maximumWidth - minimumWidth) / expandable;
-    }
-
-    for(auto column : range(header->columnCount())) {
-      if(auto self = header->state.columns[column]->self()) {
-        signed width = widths[column];
-        if(self->state().expandable) width += expandWidth;
-        self->_width = width;
-        self->_setState();
-      }
+  signed maximumWidth = self().geometry().width() - 4;
+  SCROLLBARINFO sbInfo{sizeof(SCROLLBARINFO)};
+  if(GetScrollBarInfo(hwnd, OBJID_VSCROLL, &sbInfo)) {
+    if(!(sbInfo.rgstate[0] & STATE_SYSTEM_INVISIBLE)) {
+      maximumWidth -= sbInfo.rcScrollBar.right - sbInfo.rcScrollBar.left;
     }
   }
 
-  unlock();
+  signed expandWidth = 0;
+  if(expandable && maximumWidth > minimumWidth) {
+    expandWidth = (maximumWidth - minimumWidth) / expandable;
+  }
+
+  for(auto column : range(self().columnCount())) {
+    if(auto self = state().columns[column]->self()) {
+      signed width = widths[column];
+      if(self->state().expandable) width += expandWidth;
+      self->_width = width;
+      self->_setState();
+    }
+  }
 }
 
 auto pTableView::setAlignment(Alignment alignment) -> void {
@@ -125,10 +118,8 @@ auto pTableView::setForegroundColor(Color color) -> void {
 
 auto pTableView::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(column->state.expandable) return resizeColumns();
-    }
+  for(auto& column : state().columns) {
+    if(column->state.expandable) return resizeColumns();
   }
 }
 
@@ -179,9 +170,7 @@ auto pTableView::onCustomDraw(LPARAM lparam) -> LRESULT {
     HDC hdc = lvcd->nmcd.hdc;
     HDC hdcSource = CreateCompatibleDC(hdc);
     unsigned row = lvcd->nmcd.dwItemSpec;
-    auto& header = state().header;
-    if(!header) break;
-    for(auto column : range(header->columnCount())) {
+    for(auto column : range(self().columnCount())) {
       RECT rc, rcLabel;
       ListView_GetSubItemRect(hwnd, row, column, LVIR_BOUNDS, &rc);
       ListView_GetSubItemRect(hwnd, row, column, LVIR_LABEL, &rcLabel);
@@ -278,10 +267,8 @@ auto pTableView::onCustomDraw(LPARAM lparam) -> LRESULT {
 
 auto pTableView::onSort(LPARAM lparam) -> void {
   auto nmlistview = (LPNMLISTVIEW)lparam;
-  if(auto& header = state().header) {
-    if(auto column = header->column(nmlistview->iSubItem)) {
-      if(column->sortable()) self().doSort(column);
-    }
+  if(auto column = self().column(nmlistview->iSubItem)) {
+    if(state().sortable) self().doSort(column);
   }
 }
 
@@ -301,6 +288,19 @@ auto pTableView::onToggle(LPARAM lparam) -> void {
   }
 }
 
+auto pTableView::setHeadered(bool headered) -> void {
+  auto style = GetWindowLong(hwnd, GWL_STYLE);
+  headered ? style &=~ LVS_NOCOLUMNHEADER : style |= LVS_NOCOLUMNHEADER;
+  SetWindowLong(hwnd, GWL_STYLE, style);
+}
+
+auto pTableView::setSortable(bool sortable) -> void {
+  //note: this won't change the visual style: WC_LISTVIEW caches this in CreateWindow
+  auto style = GetWindowLong(hwnd, GWL_STYLE);
+  sortable ? style &=~ LVS_NOSORTHEADER : style |= LVS_NOSORTHEADER;
+  SetWindowLong(hwnd, GWL_STYLE, style);
+}
+
 auto pTableView::_backgroundColor(unsigned _row, unsigned _column) -> Color {
   if(auto item = self().item(_row)) {
     if(auto cell = item->cell(_column)) {
@@ -308,11 +308,11 @@ auto pTableView::_backgroundColor(unsigned _row, unsigned _column) -> Color {
     }
     if(auto color = item->backgroundColor()) return color;
   }
-//  if(auto column = self().column(_column)) {
-//    if(auto color = column->backgroundColor()) return color;
-//  }
+//if(auto column = self().column(_column)) {
+//  if(auto color = column->backgroundColor()) return color;
+//}
   if(auto color = self().backgroundColor()) return color;
-//  if(state().columns.size() >= 2 && _row % 2) return {240, 240, 240};
+//if(state().columns.size() >= 2 && _row % 2) return {240, 240, 240};
   return {255, 255, 255};
 }
 
@@ -336,14 +336,15 @@ auto pTableView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
 
 auto pTableView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 12;
-  if(auto header = state().header) {
-    if(auto column = header->column(_column)) {
-      if(auto& icon = column->state.icon) {
-        width += 16 + 12;  //yes; icon spacing in column headers is excessive
-      }
-      if(auto& text = column->state.text) {
-        width += pFont::size(self().font(true), text).width();
-      }
+  if(auto column = self().column(_column)) {
+    if(auto& icon = column->state.icon) {
+      width += 16 + 12;  //yes; icon spacing in column headers is excessive
+    }
+    if(auto& text = column->state.text) {
+      width += pFont::size(self().font(true), text).width();
+    }
+    if(column->state.sorting != Sort::None) {
+      width += 12;
     }
   }
   return width;
@@ -356,9 +357,9 @@ auto pTableView::_font(unsigned _row, unsigned _column) -> Font {
     }
     if(auto font = item->font()) return font;
   }
-//  if(auto column = self().column(_column)) {
-//    if(auto font = column->font()) return font;
-//  }
+//if(auto column = self().column(_column)) {
+//  if(auto font = column->font()) return font;
+//}
   if(auto font = self().font(true)) return font;
   return {};
 }
@@ -370,9 +371,9 @@ auto pTableView::_foregroundColor(unsigned _row, unsigned _column) -> Color {
     }
     if(auto color = item->foregroundColor()) return color;
   }
-//  if(auto column = self().column(_column)) {
-//    if(auto color = column->foregroundColor()) return color;
-//  }
+//if(auto column = self().column(_column)) {
+//  if(auto color = column->foregroundColor()) return color;
+//}
   if(auto color = self().foregroundColor()) return color;
   return {0, 0, 0};
 }
@@ -383,21 +384,19 @@ auto pTableView::_setIcons() -> void {
   imageList = ImageList_Create(16, 16, ILC_COLOR32, 1, 0);
   ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
 
-  if(auto& header = state().header) {
-    for(auto column : range(header->columnCount())) {
-      image icon;
-      if(auto& sourceIcon = header->state.columns[column]->state.icon) {
-        icon.allocate(sourceIcon.width(), sourceIcon.height());
-        memory::copy(icon.data(), sourceIcon.data(), icon.size());
-        icon.scale(16, 16);
-      } else {
-        icon.allocate(16, 16);
-        icon.fill(0x00ffffff);
-      }
-      auto bitmap = CreateBitmap(icon);
-      ImageList_Add(imageList, bitmap, nullptr);
-      DeleteObject(bitmap);
+  for(auto column : range(self().columnCount())) {
+    image icon;
+    if(auto& sourceIcon = state().columns[column]->state.icon) {
+      icon.allocate(sourceIcon.width(), sourceIcon.height());
+      memory::copy(icon.data(), sourceIcon.data(), icon.size());
+      icon.scale(16, 16);
+    } else {
+      icon.allocate(16, 16);
+      icon.fill(0x00ffffff);
     }
+    auto bitmap = CreateBitmap(icon);
+    ImageList_Add(imageList, bitmap, nullptr);
+    DeleteObject(bitmap);
   }
 
   //empty icon used for ListViewItems (drawn manually via onCustomDraw)
@@ -409,31 +408,14 @@ auto pTableView::_setIcons() -> void {
   DeleteObject(bitmap);
 }
 
-auto pTableView::_setSortable() -> void {
-  bool sortable = false;
-  if(auto& header = state().header) {
-    for(auto& column : header->state.columns) {
-      if(column->sortable()) sortable = true;
-    }
-  }
-
-  //note: this won't change the visual style: WC_LISTVIEW caches this in CreateWindow
-  auto style = GetWindowLong(hwnd, GWL_STYLE);
-  !sortable ? style |= LVS_NOSORTHEADER : style &=~ LVS_NOSORTHEADER;
-  SetWindowLong(hwnd, GWL_STYLE, style);
-}
-
 auto pTableView::_width(unsigned column) -> unsigned {
-  if(auto& header = state().header) {
-    if(auto width = header->state.columns[column]->width()) return width;
-    unsigned width = 1;
-    if(header->visible()) width = max(width, _columnWidth(column));
-    for(auto row : range(state().items.size())) {
-      width = max(width, _cellWidth(row, column));
-    }
-    return width;
+  if(auto width = self().column(column).width()) return width;
+  unsigned width = 1;
+  if(state().headered) width = max(width, _columnWidth(column));
+  for(auto row : range(state().items.size())) {
+    width = max(width, _cellWidth(row, column));
   }
-  return 1;
+  return width;
 }
 
 }

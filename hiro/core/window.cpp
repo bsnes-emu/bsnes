@@ -292,10 +292,10 @@ auto mWindow::setMinimumSize(Size size) -> type& {
 auto mWindow::setModal(bool modal) -> type& {
   state.modal = modal;
   if(modal) {
-    Application::state.modal++;
+    Application::state().modal++;
   } else {
-    Application::state.modal--;
-    assert(Application::state.modal >= 0);
+    Application::state().modal--;
+    assert(Application::state().modal >= 0);
   }
   signal(setModal, modal);
   return *this;

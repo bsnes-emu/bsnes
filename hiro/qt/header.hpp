@@ -3,6 +3,8 @@
 #if HIRO_QT==5
 #include <QtWidgets>
 #endif
+#undef foreach
+
 #include <nall/xorg/guard.hpp>
 #define XK_MISCELLANY
 #define XK_LATIN1

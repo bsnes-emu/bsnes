@@ -41,7 +41,6 @@
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
 #include "widget/table-view.cpp"
-#include "widget/table-view-header.cpp"
 #include "widget/table-view-column.cpp"
 #include "widget/table-view-item.cpp"
 #include "widget/table-view-cell.cpp"

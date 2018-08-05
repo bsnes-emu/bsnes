@@ -4,20 +4,20 @@
 
 -(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender {
   using hiro::Application;
-  if(Application::state.cocoa.onQuit) Application::Cocoa::doQuit();
+  if(Application::state().cocoa.onQuit) Application::Cocoa::doQuit();
   else Application::quit();
   return NSTerminateCancel;
 }
 
 -(BOOL) applicationShouldHandleReopen:(NSApplication*)application hasVisibleWindows:(BOOL)flag {
   using hiro::Application;
-  if(Application::state.cocoa.onActivate) Application::Cocoa::doActivate();
+  if(Application::state().cocoa.onActivate) Application::Cocoa::doActivate();
   return NO;
 }
 
 -(void) run:(NSTimer*)timer {
   using hiro::Application;
-  if(Application::state.onMain) Application::doMain();
+  if(Application::state().onMain) Application::doMain();
 }
 
 -(void) updateInDock:(NSTimer*)timer {
@@ -40,7 +40,7 @@ namespace hiro {
 auto pApplication::run() -> void {
 //applicationTimer = [NSTimer scheduledTimerWithTimeInterval:0.1667 target:cocoaDelegate selector:@selector(updateInDock:) userInfo:nil repeats:YES];
 
-  if(Application::state.onMain) {
+  if(Application::state().onMain) {
     applicationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0 target:cocoaDelegate selector:@selector(run:) userInfo:nil repeats:YES];
 
     //below line is needed to run application during window resize; however it has a large performance penalty on the resize smoothness
@@ -63,7 +63,7 @@ auto pApplication::pendingEvents() -> bool {
 
 auto pApplication::processEvents() -> void {
   @autoreleasepool {
-    while(!Application::state.quit) {
+    while(!Application::state().quit) {
       NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
       if(event == nil) break;
       [event retain];

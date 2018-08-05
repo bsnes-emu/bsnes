@@ -6,36 +6,35 @@
 
 extern "C" auto XvShmCreateImage(Display*, XvPortID, int, char*, int, int, XShmSegmentInfo*) -> XvImage*;
 
-struct VideoXVideo : Video {
-  VideoXVideo() { initialize(); }
+struct VideoXVideo : VideoDriver {
+  VideoXVideo& self = *this;
+  VideoXVideo(Video& super) : VideoDriver(super) {}
   ~VideoXVideo() { terminate(); }
+
+  auto create() -> bool override {
+    return initialize();
+  }
 
   auto driver() -> string override { return "XVideo"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
-  auto hasFormat() -> bool override { return true; }
 
-  auto availableFormats() -> vector<string> override {
+  auto hasFormats() -> vector<string> override {
     return _formatNames;
   }
 
   auto setContext(uintptr context) -> bool override {
-    if(context == Video::context()) return true;
-    if(!Video::setContext(context)) return false;
     return initialize();
   }
 
   auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Video::blocking()) return true;
-    if(!Video::setBlocking(blocking)) return false;
-
     bool result = false;
     Display* display = XOpenDisplay(nullptr);
     Atom atom = XInternAtom(display, "XV_SYNC_TO_VBLANK", true);
     if(atom != None && _port >= 0) {
-      XvSetPortAttribute(display, _port, atom, _blocking);
+      XvSetPortAttribute(display, _port, atom, self.blocking);
       result = true;
     }
     XCloseDisplay(display);
@@ -43,13 +42,10 @@ struct VideoXVideo : Video {
   }
 
   auto setFormat(string format) -> bool override {
-    if(format == Video::format()) return true;
-    if(!Video::setFormat(format)) return false;
     return initialize();
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     memory::fill<uint32_t>(_buffer, _bufferWidth * _bufferHeight);
     //clear twice in case video is double buffered ...
     output();
@@ -57,19 +53,15 @@ struct VideoXVideo : Video {
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
-    if(!ready()) return false;
     if(width != _width || height != _height) resize(_width = width, _height = height);
     pitch = _bufferWidth * 4;
     return data = _buffer;
   }
 
   auto release() -> void override {
-    if(!ready()) return;
   }
 
   auto output() -> void override {
-    if(!ready()) return;
-
     XWindowAttributes target;
     XGetWindowAttributes(_display, _window, &target);
 
@@ -78,7 +70,7 @@ struct VideoXVideo : Video {
     //as we did not create the parent window, nor have any knowledge of the toolkit used.
     //therefore, query each window size and resize as needed.
     XWindowAttributes parent;
-    XGetWindowAttributes(_display, (Window)_context, &parent);
+    XGetWindowAttributes(_display, (Window)self.context, &parent);
     if(target.width != parent.width || target.height != parent.height) {
       XResizeWindow(_display, _window, parent.width, parent.height);
     }
@@ -109,7 +101,7 @@ struct VideoXVideo : Video {
       if(event.type == Expose) {
         XWindowAttributes attributes;
         XGetWindowAttributes(_display, _window, &attributes);
-        doUpdate(attributes.width, attributes.height);
+        super.doUpdate(attributes.width, attributes.height);
       }
     }
   }
@@ -117,7 +109,7 @@ struct VideoXVideo : Video {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
     _display = XOpenDisplay(nullptr);
 
@@ -154,7 +146,7 @@ private:
     //this is so that even if parent window visual depth doesn't match Xv visual
     //(common with composited windows), Xv can still render to child window.
     XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)_context, &windowAttributes);
+    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
 
     XVisualInfo visualTemplate;
     visualTemplate.visualid = visualID;
@@ -169,11 +161,11 @@ private:
       return false;
     }
 
-    _colormap = XCreateColormap(_display, (Window)_context, visualInfo->visual, AllocNone);
+    _colormap = XCreateColormap(_display, (Window)self.context, visualInfo->visual, AllocNone);
     XSetWindowAttributes attributes = {};
     attributes.colormap = _colormap;
     attributes.border_pixel = 0;
-    _window = XCreateWindow(_display, /* parent = */ (Window)_context,
+    _window = XCreateWindow(_display, /* parent = */ (Window)self.context,
       /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
       /* border_width = */ 0, depth, InputOutput, visualInfo->visual,
       CWColormap | CWBorderPixel | CWEventMask, &attributes);
@@ -200,13 +192,13 @@ private:
       print("XVideo: unable to find a supported image format.\n");
       return false;
     }
-    if(auto match = _formatNames.find(Video::format())) {
+    if(auto match = _formatNames.find(self.format)) {
       _formatID = _formatIDs[match()];
       _formatName = _formatNames[match()];
     } else {
       _formatID = _formatIDs[0];
       _formatName = _formatNames[0];
-      Video::setFormat(_formatName);
+      self.format = _formatName;
     }
 
     _ready = true;

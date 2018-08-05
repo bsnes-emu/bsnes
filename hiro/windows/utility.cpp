@@ -148,7 +148,7 @@ static auto CALLBACK Menu_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 }
 
 static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(Application::state.quit) return DefWindowProc(hwnd, msg, wparam, lparam);
+  if(Application::state().quit) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);

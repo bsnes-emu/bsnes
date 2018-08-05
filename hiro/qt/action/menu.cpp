@@ -23,7 +23,7 @@ auto pMenu::construct() -> void {
 }
 
 auto pMenu::destruct() -> void {
-if(Application::state.quit) return;  //TODO: hack
+if(Application::state().quit) return;  //TODO: hack
   delete qtMenu;
   qtMenu = nullptr;
 }

@@ -1,51 +1,33 @@
 #include <dsound.h>
 
-struct AudioDirectSound : Audio {
-  AudioDirectSound() {
-    Audio::setFrequency(48000.0);
-    Audio::setLatency(40);
-    initialize();
-  }
+struct AudioDirectSound : AudioDriver {
+  AudioDirectSound& self = *this;
+  AudioDirectSound(Audio& super) : AudioDriver(super) {}
+  ~AudioDirectSound() { terminate(); }
 
-  ~AudioDirectSound() {
-    terminate();
+  auto create() -> bool override {
+    super.setChannels(2);
+    super.setFrequency(48000);
+    super.setLatency(40);
+    return initialize();
   }
 
   auto driver() -> string override { return "DirectSound"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
 
-  auto availableLatencies() -> vector<uint> override {
+  auto hasLatencies() -> vector<uint> override {
     return {40, 60, 80, 100};
   }
 
-  auto defaultFrequency() -> double override { return 48000.0; }
-  auto defaultLatency() -> uint override { return 40; }
-
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto clear() -> void override {
     if(!ready()) return;
@@ -78,7 +60,7 @@ struct AudioDirectSound : Audio {
     if(++_offset < _period) return;
     _offset = 0;
 
-    if(_blocking) {
+    if(self.blocking) {
       //wait until playback buffer has an empty ring to write new audio data to
       while(_ringDistance >= _rings - 1) {
         DWORD position;
@@ -115,7 +97,7 @@ private:
     terminate();
 
     _rings = 8;
-    _period = _frequency * _latency / _rings / 1000.0 + 0.5;
+    _period = self.frequency * self.latency / _rings / 1000.0 + 0.5;
     _buffer = new uint32_t[_period * _rings];
     _offset = 0;
 
@@ -131,8 +113,8 @@ private:
 
     WAVEFORMATEX waveFormat = {};
     waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-    waveFormat.nChannels = _channels;
-    waveFormat.nSamplesPerSec = (uint)_frequency;
+    waveFormat.nChannels = self.channels;
+    waveFormat.nSamplesPerSec = self.frequency;
     waveFormat.wBitsPerSample = 16;
     waveFormat.nBlockAlign = waveFormat.nChannels * waveFormat.wBitsPerSample / 8;
     waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
@@ -145,7 +127,7 @@ private:
     secondaryDescription.guid3DAlgorithm = GUID_NULL;
     secondaryDescription.lpwfxFormat = &waveFormat;
     _interface->CreateSoundBuffer(&secondaryDescription, &_secondary, 0);
-    _secondary->SetFrequency((uint)_frequency);
+    _secondary->SetFrequency(self.frequency);
     _secondary->SetCurrentPosition(0);
 
     _ready = true;

@@ -2,80 +2,70 @@
 #include "asio.hpp"
 
 struct AudioASIO : Audio {
-  static AudioASIO* self;
-  AudioASIO() { self = this; initialize(); }
+  static AudioASIO* instance;
+  AudioASIO& self = *this;
+  AudioASIO(Audio& super) : AudioDriver(super) { instance = this; }
   ~AudioASIO() { terminate(); }
+
+  auto create() -> bool override {
+    super.setDevice(hasDevices().first());
+    super.setChannels(2);
+    super.setFrequency(48000);
+    super.setLatency(2048);
+    return initialize();
+  }
 
   auto driver() -> string override { return "ASIO"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
-  auto hasDevice() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
-  auto hasChannels() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableDevices() -> vector<string> override {
+  auto hasDevices() -> vector<string> override {
+    self.devices.reset();
+    for(auto candidate : registry::contents("HKLM\\SOFTWARE\\ASIO\\")) {
+      if(auto classID = registry::read({"HKLM\\SOFTWARE\\ASIO\\", candidate, "CLSID"})) {
+        self.devices.append({candidate.trimRight("\\", 1L), classID});
+      }
+    }
+
     vector<string> devices;
-    for(auto& device : _devices) devices.append(device.name);
+    for(auto& device : self.devices) devices.append(device.name);
     return devices;
   }
 
-  auto availableChannels() -> vector<uint> override {
+  auto hasChannels() -> vector<uint> override {
     return {1, 2};
   }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {_frequency};
+  auto hasFrequencies() -> vector<uint> override {
+    return {self.frequency};
   }
 
-  auto availableLatencies() -> vector<uint> override {
+  auto hasLatencies() -> vector<uint> override {
     vector<uint> latencies;
     uint latencyList[] = {64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 6144};  //factors of 6144
     for(auto& latency : latencyList) {
-      if(latency < _active.minimumBufferSize) continue;
-      if(latency > _active.maximumBufferSize) continue;
+      if(self.activeDevice) {
+        if(latency < self.activeDevice.minimumBufferSize) continue;
+        if(latency > self.activeDevice.maximumBufferSize) continue;
+      }
       latencies.append(latency);
     }
     return latencies;
   }
 
-  auto setContext(uintptr context) -> bool override {
-    if(context == Audio::context()) return true;
-    if(!Audio::setContext(context)) return false;
-    return initialize();
-  }
-
-  auto setDevice(string device) -> bool override {
-    if(device == Audio::device()) return true;
-    if(!Audio::setDevice(device)) return false;
-    return initialize();
-  }
-
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return initialize();
-  }
-
-  auto setChannels(uint channels) -> bool override {
-    if(channels == Audio::channels()) return true;
-    if(!Audio::setChannels(channels)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setContext(uintptr context) -> bool override { return initialize(); }
+  auto setDevice(string device) -> bool override { return initialize(); }
+  auto setBlocking(bool blocking) -> bool override { return initialize(); }
+  auto setChannels(uint channels) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto clear() -> void override {
     if(!ready()) return;
-    for(uint n : range(_channels)) {
-      memory::fill<uint8_t>(_channel[n].buffers[0], _latency * _sampleSize);
-      memory::fill<uint8_t>(_channel[n].buffers[1], _latency * _sampleSize);
+    for(uint n : range(self.channels)) {
+      memory::fill<uint8_t>(_channel[n].buffers[0], self.latency * _sampleSize);
+      memory::fill<uint8_t>(_channel[n].buffers[1], self.latency * _sampleSize);
     }
     memory::fill<uint8_t>(_queue.samples, sizeof(_queue.samples));
     _queue.read = 0;
@@ -85,10 +75,10 @@ struct AudioASIO : Audio {
 
   auto output(const double samples[]) -> void override {
     if(!ready()) return;
-    if(_blocking) {
-      while(_queue.count >= _latency);
+    if(self.blocking) {
+      while(_queue.count >= self.latency);
     }
-    for(uint n : range(_channels)) {
+    for(uint n : range(self.channels)) {
       _queue.samples[_queue.write][n] = samples[n];
     }
     _queue.write++;
@@ -99,39 +89,40 @@ private:
   auto initialize() -> bool {
     terminate();
 
-    //enumerate available ASIO drivers from the registry
-    for(auto candidate : registry::contents("HKLM\\SOFTWARE\\ASIO\\")) {
-      if(auto classID = registry::read({"HKLM\\SOFTWARE\\ASIO\\", candidate, "CLSID"})) {
-        _devices.append({candidate.trimRight("\\", 1L), classID});
-        if(candidate == _device) _active = _devices.right();
+    hasDevices();  //this call populates self.devices
+    if(!self.devices) return false;
+
+    self.activeDevice = {};
+    for(auto& device : self.devices) {
+      if(self.device == device.name) {
+        self.activeDevice = device;
+        break;
       }
     }
-    if(!_devices) return false;
-
-    if(!_active.name) {
-      _active = _devices.left();
-      _device = _active.name;
+    if(!self.activeDevice) {
+      self.activeDevice = self.devices.first();
+      self.device = self.activeDevice.name;
     }
 
     CLSID classID;
-    if(CLSIDFromString((LPOLESTR)utf16_t(_active.classID), (LPCLSID)&classID) != S_OK) return false;
+    if(CLSIDFromString((LPOLESTR)utf16_t(self.activeDevice.classID), (LPCLSID)&classID) != S_OK) return false;
     if(CoCreateInstance(classID, 0, CLSCTX_INPROC_SERVER, classID, (void**)&_asio) != S_OK) return false;
 
-    if(!_asio->init((void*)_context)) return false;
-    if(_asio->getSampleRate(&_active.sampleRate) != ASE_OK) return false;
-    if(_asio->getChannels(&_active.inputChannels, &_active.outputChannels) != ASE_OK) return false;
+    if(!_asio->init((void*)self.context)) return false;
+    if(_asio->getSampleRate(&self.activeDevice.sampleRate) != ASE_OK) return false;
+    if(_asio->getChannels(&self.activeDevice.inputChannels, &self.activeDevice.outputChannels) != ASE_OK) return false;
     if(_asio->getBufferSize(
-      &_active.minimumBufferSize,
-      &_active.maximumBufferSize,
-      &_active.preferredBufferSize,
-      &_active.granularity
+      &self.activeDevice.minimumBufferSize,
+      &self.activeDevice.maximumBufferSize,
+      &self.activeDevice.preferredBufferSize,
+      &self.activeDevice.granularity
     ) != ASE_OK) return false;
 
-    _frequency = _active.sampleRate;
-    _latency = _latency < _active.minimumBufferSize ? _active.minimumBufferSize : _latency;
-    _latency = _latency > _active.maximumBufferSize ? _active.maximumBufferSize : _latency;
+    self.frequency = self.activeDevice.sampleRate;
+    self.latency = self.latency < self.activeDevice.minimumBufferSize ? self.activeDevice.minimumBufferSize : self.latency;
+    self.latency = self.latency > self.activeDevice.maximumBufferSize ? self.activeDevice.maximumBufferSize : self.latency;
 
-    for(auto n : range(_channels)) {
+    for(uint n : range(self.channels)) {
       _channel[n].isInput = false;
       _channel[n].channelNum = n;
       _channel[n].buffers[0] = nullptr;
@@ -142,8 +133,8 @@ private:
     callbacks.sampleRateDidChange = &AudioASIO::_sampleRateDidChange;
     callbacks.asioMessage = &AudioASIO::_asioMessage;
     callbacks.bufferSwitchTimeInfo = &AudioASIO::_bufferSwitchTimeInfo;
-    if(_asio->createBuffers(_channel, _channels, _latency, &callbacks) != ASE_OK) return false;
-    if(_asio->getLatencies(&_active.inputLatency, &_active.outputLatency) != ASE_OK) return false;
+    if(_asio->createBuffers(_channel, self.channels, self.latency, &callbacks) != ASE_OK) return false;
+    if(_asio->getLatencies(&self.activeDevice.inputLatency, &self.activeDevice.outputLatency) != ASE_OK) return false;
 
     //assume for the sake of sanity that all buffers use the same sample format ...
     ASIOChannelInfo channelInformation = {};
@@ -167,8 +158,7 @@ private:
 
   auto terminate() -> void {
     _ready = false;
-    _devices.reset();
-    _active = {};
+    self.activeDevice = {};
     if(_asio) {
       _asio->stop();
       _asio->disposeBuffers();
@@ -179,33 +169,33 @@ private:
 
 private:
   static auto _bufferSwitch(long doubleBufferInput, ASIOBool directProcess) -> void {
-    return self->bufferSwitch(doubleBufferInput, directProcess);
+    return instance->bufferSwitch(doubleBufferInput, directProcess);
   }
 
   static auto _sampleRateDidChange(ASIOSampleRate sampleRate) -> void {
-    return self->sampleRateDidChange(sampleRate);
+    return instance->sampleRateDidChange(sampleRate);
   }
 
   static auto _asioMessage(long selector, long value, void* message, double* optional) -> long {
-    return self->asioMessage(selector, value, message, optional);
+    return instance->asioMessage(selector, value, message, optional);
   }
 
   static auto _bufferSwitchTimeInfo(ASIOTime* parameters, long doubleBufferIndex, ASIOBool directProcess) -> ASIOTime* {
-    return self->bufferSwitchTimeInfo(parameters, doubleBufferIndex, directProcess);
+    return instance->bufferSwitchTimeInfo(parameters, doubleBufferIndex, directProcess);
   }
 
   auto bufferSwitch(long doubleBufferInput, ASIOBool directProcess) -> void {
-    for(uint sampleIndex : range(_latency)) {
+    for(uint sampleIndex : range(self.latency)) {
       double samples[8] = {0};
       if(_queue.count) {
-        for(uint n : range(_channels)) {
+        for(uint n : range(self.channels)) {
           samples[n] = _queue.samples[_queue.read][n];
         }
         _queue.read++;
         _queue.count--;
       }
 
-      for(uint n : range(_channels)) {
+      for(uint n : range(self.channels)) {
         auto buffer = (uint8_t*)_channel[n].buffers[doubleBufferInput];
         buffer += sampleIndex * _sampleSize;
 
@@ -263,6 +253,8 @@ private:
   };
 
   struct Device {
+    explicit operator bool() const { return name; }
+
     string name;
     string classID;
 
@@ -278,12 +270,12 @@ private:
   };
 
   Queue _queue;
-  vector<Device> _devices;
-  Device _active;
+  vector<Device> devices;
+  Device activeDevice;
   IASIO* _asio = nullptr;
   ASIOBufferInfo _channel[8];
   long _sampleFormat;
   long _sampleSize;
 };
 
-AudioASIO* AudioASIO::self = nullptr;
+AudioASIO* AudioASIO::instance = nullptr;

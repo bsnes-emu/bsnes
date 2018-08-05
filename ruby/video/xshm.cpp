@@ -9,10 +9,11 @@
 #include <X11/extensions/XShm.h>
 
 struct VideoXShm : VideoDriver {
+  VideoXShm& self = *this;
   VideoXShm(Video& super) : VideoDriver(super) {}
   ~VideoXShm() { terminate(); }
 
-  auto create() -> bool {
+  auto create() -> bool override {
     return initialize();
   }
 
@@ -183,8 +184,6 @@ private:
     uint8_t cb = ab * (1.0 - mu) + bb * mu;
     return cr << 16 | cg << 8 | cb << 0;
   }
-
-  VideoXShm& self = *this;
 
   bool _ready = false;
 

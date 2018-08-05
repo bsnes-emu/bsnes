@@ -27,7 +27,7 @@ auto Program::load() -> void {
   hackCompatibility();
   emulator->power();
   if(emulatorSettings.autoLoadStateOnLoad.checked()) {
-    program.loadState("quick/undo");
+    program.loadState("Quick/Undo");
   }
   showMessage({
     verified() ? "Verified game loaded" : "Game loaded",

@@ -228,7 +228,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
       if(state.action == "openFolder") continue;
     }
     if(!isMatch(content)) continue;
-    view.append(ListViewItem().setText(content).setIcon(isFolder ? Icon::Action::Open : Icon::Emblem::File));
+    view.append(ListViewItem().setText(content).setIcon(isFolder ? (image)Icon::Action::Open : (image)Icon::Emblem::File));
   }
 
   Application::processEvents();

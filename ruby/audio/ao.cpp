@@ -1,23 +1,28 @@
 #include <ao/ao.h>
 
-struct AudioAO : Audio {
-  AudioAO() { initialize(); }
+struct AudioAO : AudioDriver {
+  AudioAO& self = *this;
+  AudioAO(Audio& super) : AudioDriver(super) {}
   ~AudioAO() { terminate(); }
+
+  auto create() -> bool override {
+    super.setChannels(2);
+    super.setFrequency(48000);
+    return initialize();
+  }
 
   auto driver() -> string override { return "libao"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasFrequencies() -> bool override { return true; }
-
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasChannels() -> vector<uint> override {
+    return {2};
   }
 
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
+
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
 
   auto output(const double samples[]) -> void override {
     uint32_t sample = 0;
@@ -38,7 +43,7 @@ private:
     ao_sample_format format;
     format.bits = 16;
     format.channels = 2;
-    format.rate = (uint)_frequency;
+    format.rate = self.frequency;
     format.byte_format = AO_FMT_LITTLE;
     format.matrix = nullptr;
 

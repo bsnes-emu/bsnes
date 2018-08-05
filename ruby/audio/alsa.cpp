@@ -1,63 +1,58 @@
 #include <alsa/asoundlib.h>
 
-struct AudioALSA : Audio {
-  AudioALSA() { initialize(); }
+struct AudioALSA : AudioDriver {
+  AudioALSA& self = *this;
+  AudioALSA(Audio& super) : AudioDriver(super) {}
   ~AudioALSA() { terminate(); }
+
+  auto create() -> bool override {
+    super.setDevice(hasDevices().first());
+    super.setChannels(2);
+    super.setFrequency(48000);
+    super.setLatency(20);
+    return initialize();
+  }
 
   auto driver() -> string override { return "ALSA"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasDevice() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
-  auto hasChannels() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableDevices() -> vector<string> override {
-    return queryDevices();
+  auto hasDevices() -> vector<string> override {
+    vector<string> devices;
+
+    char** list;
+    if(snd_device_name_hint(-1, "pcm", (void***)&list) == 0) {
+      uint index = 0;
+      while(list[index]) {
+        char* deviceName = snd_device_name_get_hint(list[index], "NAME");
+        if(deviceName) devices.append(deviceName);
+        free(deviceName);
+        index++;
+      }
+    }
+
+    snd_device_name_free_hint((void**)list);
+    return devices;
   }
 
-  auto availableChannels() -> vector<uint> override {
+  auto hasChannels() -> vector<uint> override {
     return {2};
   }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {44100.0, 48000.0, 96000.0};
+  auto hasFrequencies() -> vector<uint> override {
+    return {44100, 48000, 96000};
   }
 
-  auto availableLatencies() -> vector<uint> override {
+  auto hasLatencies() -> vector<uint> override {
     return {20, 40, 60, 80, 100};
   }
 
-  auto setDevice(string device) -> bool override {
-    if(device == Audio::device()) return true;
-    if(!Audio::setDevice(device)) return false;
-    return initialize();
-  }
-
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setChannels(uint channels) -> bool override {
-    if(channels == Audio::channels()) return true;
-    if(!Audio::setChannels(channels)) return false;
-    return true;
-  }
-
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setDevice(string device) -> bool override { return initialize(); }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setChannels(uint channels) -> bool override { return true; }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto level() -> double override {
     snd_pcm_sframes_t available = snd_pcm_avail_update(_interface);
@@ -66,8 +61,6 @@ struct AudioALSA : Audio {
   }
 
   auto output(const double samples[]) -> void override {
-    if(!ready()) return;
-
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
     _offset++;
@@ -77,7 +70,7 @@ struct AudioALSA : Audio {
       available = snd_pcm_avail_update(_interface);
       if(available < 0) snd_pcm_recover(_interface, available, 1);
       if(available < _offset) {
-        if(!_blocking) {
+        if(!self.blocking) {
           _offset = 0;
           return;
         }
@@ -113,13 +106,12 @@ private:
   auto initialize() -> bool {
     terminate();
 
-    string device = "default";
-    if(queryDevices().find(_device)) device = _device;
-    if(snd_pcm_open(&_interface, device, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) return terminate(), false;
+    if(!hasDevices().find(self.device)) self.device = hasDevices().first();
+    if(snd_pcm_open(&_interface, self.device, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) return terminate(), false;
 
-    uint rate = (uint)_frequency;
-    uint bufferTime = _latency * 1000;
-    uint periodTime = _latency * 1000 / 8;
+    uint rate = self.frequency;
+    uint bufferTime = self.latency * 1000;
+    uint periodTime = self.latency * 1000 / 8;
 
     snd_pcm_hw_params_t* hardwareParameters;
     snd_pcm_hw_params_alloca(&hardwareParameters);
@@ -160,24 +152,6 @@ private:
       delete[] _buffer;
       _buffer = nullptr;
     }
-  }
-
-  auto queryDevices() -> vector<string> {
-    vector<string> devices;
-
-    char** list;
-    if(snd_device_name_hint(-1, "pcm", (void***)&list) == 0) {
-      uint index = 0;
-      while(list[index]) {
-        char* deviceName = snd_device_name_get_hint(list[index], "NAME");
-        if(deviceName) devices.append(deviceName);
-        free(deviceName);
-        index++;
-      }
-    }
-
-    snd_device_name_free_hint((void**)list);
-    return devices;
   }
 
   bool _ready = false;

@@ -12,10 +12,13 @@ auto locate(string name) -> string {
   return {Path::userData(), "higan/", name};
 }
 
-#include <nall/main.hpp>
-auto nall::main(vector<string> arguments) -> void {
+auto hiro::initialize() -> void {
   Application::setName("higan");
   Application::setScreenSaver(false);
+}
+
+#include <nall/main.hpp>
+auto nall::main(vector<string> arguments) -> void {
   new Program(arguments);
   Application::run();
 }

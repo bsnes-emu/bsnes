@@ -6,63 +6,45 @@
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
-struct AudioWASAPI : Audio {
-  AudioWASAPI() { initialize(); }
+struct AudioWASAPI : AudioDriver {
+  AudioWASAPI& self = *this;
+  AudioWASAPI(Audio& super) : AudioDriver(super) {}
   ~AudioWASAPI() { terminate(); }
+
+  auto create() -> bool override {
+    super.setLatency(40);
+    return initialize();
+  }
 
   auto driver() -> string override { return "WASAPI"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasExclusive() -> bool override { return true; }
-  auto hasDevice() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
-  auto hasFrequency() -> bool override { return true; }
-  auto hasLatency() -> bool override { return true; }
 
-  auto availableDevices() -> vector<string> override {
+  auto hasDevices() -> vector<string> override {
     return _devices;
   }
 
-  auto availableFrequencies() -> vector<double> override {
-    return {_frequency};
+  auto hasChannels() -> vector<uint> override {
+    return {self.channels};
+  }
+
+  auto hasFrequencies() -> vector<uint> override {
+    return {self.frequency};
   }
 
   auto availableLatencies() -> vector<uint> override {
     return {0, 20, 40, 60, 80, 100};
   }
 
-  auto setExclusive(bool exclusive) -> bool override {
-    if(exclusive == Audio::exclusive()) return true;
-    if(!Audio::setExclusive(exclusive)) return false;
-    return initialize();
-  }
-
-  auto setDevice(string device) -> bool override {
-    if(device == Audio::device()) return true;
-    if(!Audio::setDevice(device)) return false;
-    return initialize();
-  }
-
-  auto setBlocking(bool blocking) -> bool override {
-    if(blocking == Audio::blocking()) return true;
-    if(!Audio::setBlocking(blocking)) return false;
-    return true;
-  }
-
-  auto setFrequency(double frequency) -> bool override {
-    if(frequency == Audio::frequency()) return true;
-    if(!Audio::setFrequency(frequency)) return false;
-    return initialize();
-  }
-
-  auto setLatency(uint latency) -> bool override {
-    if(latency == Audio::latency()) return true;
-    if(!Audio::setLatency(latency)) return false;
-    return initialize();
-  }
+  auto setExclusive(bool exclusive) -> bool override { return initialize(); }
+  auto setDevice(string device) -> bool override { return initialize(); }
+  auto setBlocking(bool blocking) -> bool override { return true; }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto clear() -> void override {
-    if(!ready()) return;
     _queue.read = 0;
     _queue.write = 0;
     _queue.count = 0;
@@ -72,8 +54,6 @@ struct AudioWASAPI : Audio {
   }
 
   auto output(const double samples[]) -> void override {
-    if(!ready()) return;
-
     for(uint n : range(_channels)) {
       _queue.samples[_queue.write][n] = samples[n];
     }
@@ -81,7 +61,7 @@ struct AudioWASAPI : Audio {
     _queue.count++;
 
     if(_queue.count >= _bufferSize) {
-      if(WaitForSingleObject(_eventHandle, _blocking ? INFINITE : 0) == WAIT_OBJECT_0) {
+      if(WaitForSingleObject(_eventHandle, self.blocking ? INFINITE : 0) == WAIT_OBJECT_0) {
         write();
       }
     }
@@ -131,7 +111,7 @@ private:
       waveFormat = *(WAVEFORMATEXTENSIBLE*)propVariant.blob.pBlobData;
       propertyStore->Release();
       if(_audioClient->GetDevicePeriod(nullptr, &_devicePeriod) != S_OK) return false;
-      auto latency = max(_devicePeriod, (REFERENCE_TIME)_latency * 10'000);  //1ms to 100ns units
+      auto latency = max(_devicePeriod, (REFERENCE_TIME)self.latency * 10'000);  //1ms to 100ns units
       auto result = _audioClient->Initialize(AUDCLNT_SHAREMODE_EXCLUSIVE, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, latency, latency, &waveFormat.Format, nullptr);
       if(result == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         if(_audioClient->GetBufferSize(&_bufferSize) != S_OK) return false;
@@ -149,7 +129,7 @@ private:
       waveFormat = *(WAVEFORMATEXTENSIBLE*)waveFormatEx;
       CoTaskMemFree(waveFormatEx);
       if(_audioClient->GetDevicePeriod(&_devicePeriod, nullptr)) return false;
-      auto latency = max(_devicePeriod, (REFERENCE_TIME)_latency * 10'000);  //1ms to 100ns units
+      auto latency = max(_devicePeriod, (REFERENCE_TIME)self.latency * 10'000);  //1ms to 100ns units
       if(_audioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, latency, 0, &waveFormat.Format, nullptr) != S_OK) return false;
     }
 
@@ -158,8 +138,8 @@ private:
     if(_audioClient->GetService(IID_IAudioRenderClient, (void**)&_renderClient) != S_OK) return false;
     if(_audioClient->GetBufferSize(&_bufferSize) != S_OK) return false;
 
-    _channels = waveFormat.Format.nChannels;
-    _frequency = waveFormat.Format.nSamplesPerSec;
+    self.channels = waveFormat.Format.nChannels;
+    self.frequency = waveFormat.Format.nSamplesPerSec;
     _mode = waveFormat.SubFormat.Data1;
     _precision = waveFormat.Format.wBitsPerSample;
 

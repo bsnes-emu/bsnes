@@ -13,7 +13,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
     updateDevice();
   });
 
-  for(auto& device : audio->availableDevices()) {
+  for(auto& device : audio->hasDevices()) {
     deviceList.append(ComboButtonItem().setText(device));
     if(device == settings["Audio/Device"].text()) {
       deviceList.item(deviceList.itemCount() - 1).setSelected();
@@ -54,15 +54,15 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto AudioSettings::updateDevice() -> void {
   frequencyList.reset();
-  for(auto& frequency : audio->availableFrequencies()) {
-    frequencyList.append(ComboButtonItem().setText((uint)frequency));
-    if(frequency == settings["Audio/Frequency"].real()) {
+  for(auto& frequency : audio->hasFrequencies()) {
+    frequencyList.append(ComboButtonItem().setText(frequency));
+    if(frequency == settings["Audio/Frequency"].natural()) {
       frequencyList.item(frequencyList.itemCount() - 1).setSelected();
     }
   }
 
   latencyList.reset();
-  for(auto& latency : audio->availableLatencies()) {
+  for(auto& latency : audio->hasLatencies()) {
     latencyList.append(ComboButtonItem().setText(latency));
     if(latency == settings["Audio/Latency"].natural()) {
       latencyList.item(latencyList.itemCount() - 1).setSelected();

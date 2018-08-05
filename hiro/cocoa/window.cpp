@@ -17,7 +17,8 @@
     NSBundle* bundle = [NSBundle mainBundle];
     NSDictionary* dictionary = [bundle infoDictionary];
     NSString* applicationName = [dictionary objectForKey:@"CFBundleDisplayName"];
-    if(applicationName == nil) applicationName = [NSString stringWithUTF8String:hiro::Application::state.name];
+    string hiroName = hiro::Application::state().name ? hiro::Application::state().name : string{"hiro"};
+    if(applicationName == nil) applicationName = [NSString stringWithUTF8String:hiroName];
 
     menuBar = [[NSMenu alloc] init];
 

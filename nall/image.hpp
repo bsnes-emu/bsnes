@@ -46,8 +46,9 @@ struct image {
   inline image(image&& source);
   inline image(bool endian, uint depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask);
   inline image(const string& filename);
+  inline image(const void* data, uint size);
   inline image(const vector<uint8_t>& buffer);
-  inline image(const uint8_t* data, uint size);
+  template<typename Type, uint Size> inline image(Type (&Name)[Size]);
   inline image();
   inline ~image();
 

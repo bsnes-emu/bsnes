@@ -3,19 +3,17 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setText("Cheat Editor");
 
   layout.setPadding(5);
-  cheatList.append(TableViewHeader().setVisible()
-    .append(TableViewColumn())
-    .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
-    .append(TableViewColumn().setText("Code(s)"))
-    .append(TableViewColumn().setText("Description").setExpandable())
-  );
+  cheatList.setHeadered();
+  cheatList.append(TableViewColumn());
+  cheatList.append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0));
+  cheatList.append(TableViewColumn().setText("Code(s)"));
+  cheatList.append(TableViewColumn().setText("Description").setExpandable());
   for(auto slot : range(Slots)) {
-    cheatList.append(TableViewItem()
-      .append(TableViewCell().setCheckable())
-      .append(TableViewCell().setText(1 + slot))
-      .append(TableViewCell())
-      .append(TableViewCell())
-    );
+    TableViewItem item{&cheatList};
+    item.append(TableViewCell().setCheckable());
+    item.append(TableViewCell().setText(1 + slot));
+    item.append(TableViewCell());
+    item.append(TableViewCell());
   }
   cheatList.onChange([&] { doChangeSelected(); });
   cheatList.onToggle([&](auto cell) {

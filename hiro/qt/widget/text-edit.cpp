@@ -13,7 +13,7 @@ auto pTextEdit::construct() -> void {
 }
 
 auto pTextEdit::destruct() -> void {
-if(Application::state.quit) return;  //TODO: hack
+if(Application::state().quit) return;  //TODO: hack
   delete qtTextEdit;
   qtWidget = qtTextEdit = nullptr;
 }

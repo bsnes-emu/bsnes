@@ -22,6 +22,7 @@
 #endif
 
 struct VideoGLX2 : VideoDriver {
+  VideoGLX2& self = *this;
   VideoGLX2(Video& super) : VideoDriver(super) {}
   ~VideoGLX2() { terminate(); }
 
@@ -259,8 +260,6 @@ private:
     glPixelStorei(GL_UNPACK_ROW_LENGTH, _glWidth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _glWidth, _glHeight, 0, GL_BGRA, _glFormat, _glBuffer);
   }
-
-  VideoGLX2& self = *this;
 
   bool _ready = false;
 

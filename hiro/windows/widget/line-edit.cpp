@@ -36,12 +36,12 @@ auto pLineEdit::setEditable(bool editable) -> void {
 }
 
 auto pLineEdit::setForegroundColor(Color color) -> void {
+  InvalidateRect(hwnd, 0, true);
 }
 
 auto pLineEdit::setText(const string& text) -> void {
-  lock();
+  auto lock = acquire();
   SetWindowText(hwnd, utf16_t(text));
-  unlock();
 }
 
 auto pLineEdit::onChange() -> void {

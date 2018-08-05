@@ -5,8 +5,8 @@ namespace hiro {
 XlibDisplay* pApplication::display = nullptr;
 
 auto pApplication::run() -> void {
-  if(Application::state.onMain) {
-    while(!Application::state.quit) {
+  if(Application::state().onMain) {
+    while(!Application::state().quit) {
       Application::doMain();
       processEvents();
     }
@@ -53,7 +53,7 @@ auto pApplication::initialize() -> void {
 
   display = XOpenDisplay(0);
 
-  auto name = Application::state.name ? Application::state.name : string{"hiro"};
+  static auto name = Application::state().name ? Application::state().name : string{"hiro"};
 
   //QApplication stores references to argc;
   //and will access them after pApplication::initialize() returns

@@ -77,7 +77,7 @@ auto SuperScope::data() -> uint2 {
     bool newturbo = platform->inputPoll(port, ID::Device::SuperScope, Turbo);
     if(newturbo && !oldturbo) {
       turbo = !turbo;  //toggle state
-      sprite->setPixels(turbo ? Resource::Sprite::CrosshairRed : Resource::Sprite::CrosshairGreen);
+      sprite->setPixels(turbo ? (image)Resource::Sprite::CrosshairRed : (image)Resource::Sprite::CrosshairGreen);
     }
     oldturbo = newturbo;
 
