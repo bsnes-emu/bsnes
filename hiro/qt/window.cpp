@@ -168,6 +168,7 @@ auto pWindow::setMaximized(bool maximized) -> void {
 auto pWindow::setMaximumSize(Size size) -> void {
   static auto maximumSize = qtWindow->maximumSize();
 
+  if(!state().resizable) size = state().geometry.size();
   if(size) {
     qtWindow->setMaximumSize(size.width(), size.height() + _menuHeight() + _statusHeight());
   } else {
@@ -180,6 +181,7 @@ auto pWindow::setMinimized(bool minimized) -> void {
 }
 
 auto pWindow::setMinimumSize(Size size) -> void {
+  if(!state().resizable) size = state().geometry.size();
   qtWindow->setMinimumSize(size.width(), size.height() + _menuHeight() + _statusHeight());
 }
 
@@ -204,12 +206,15 @@ auto pWindow::setModal(bool modal) -> void {
 auto pWindow::setResizable(bool resizable) -> void {
   if(resizable) {
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    qtContainer->setMinimumSize(state().geometry.width(), state().geometry.height());
+  //qtContainer->setMinimumSize(state().geometry.width(), state().geometry.height());
   } else {
     qtLayout->setSizeConstraint(QLayout::SetFixedSize);
-    qtContainer->setFixedSize(state().geometry.width(), state().geometry.height());
+  //qtContainer->setFixedSize(state().geometry.width(), state().geometry.height());
   }
   qtStatusBar->setSizeGripEnabled(resizable);
+
+  setMaximumSize(state().maximumSize);
+  setMinimumSize(state().minimumSize);
 }
 
 auto pWindow::setTitle(const string& text) -> void {

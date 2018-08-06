@@ -1,6 +1,6 @@
 #include <pulse/pulseaudio.h>
 
-struct AudioPulseAudio : Audio {
+struct AudioPulseAudio : AudioDriver {
   AudioPulseAudio& self = *this;
   AudioPulseAudio(Audio& super) : AudioDriver(super) {}
   ~AudioPulseAudio() { terminate(); }

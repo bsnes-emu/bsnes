@@ -8,10 +8,11 @@ struct pLabel : pWidget {
   auto minimumSize() const -> Size override;
   auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;
+  auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
   auto setText(const string& text) -> void;
 
-  QLabel* qtLabel = nullptr;
+  QtLabel* qtLabel = nullptr;
 };
 
 }

@@ -56,7 +56,7 @@ struct VideoDirect3D : VideoDriver {
     //if output size changed, driver must be re-initialized.
     //failure to do so causes scaling issues on some video drivers.
     RECT rectangle;
-    GetClientRect((HWND)_context, &rectangle);
+    GetClientRect((HWND)self.context, &rectangle);
     if(_windowWidth != rectangle.right || _windowHeight != rectangle.bottom) initialize();
 
     if(width != _inputWidth || height != _inputHeight) {
@@ -84,7 +84,7 @@ struct VideoDirect3D : VideoDriver {
 
     _device->BeginScene();
     uint x = 0, y = 0;
-    if(_exclusive) {
+    if(self.exclusive) {
       //center output in exclusive mode fullscreen window
       x = (_monitorWidth - _windowWidth) / 2;
       y = (_monitorHeight - _windowHeight) / 2;
@@ -94,7 +94,7 @@ struct VideoDirect3D : VideoDriver {
     _device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
     _device->EndScene();
 
-    if(_blocking) {
+    if(self.blocking) {
       D3DRASTER_STATUS status;
       while(true) {  //wait for a previous vblank to finish, if necessary
         _device->GetRasterStatus(0, &status);
@@ -169,7 +169,7 @@ private:
     if(!_device) return false;
     if(_lost && !recover()) return false;
 
-    auto filter = !_smooth ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+    auto filter = !self.smooth ? D3DTEXF_POINT : D3DTEXF_LINEAR;
     _device->SetSamplerState(0, D3DSAMP_MINFILTER, filter);
     _device->SetSamplerState(0, D3DSAMP_MAGFILTER, filter);
     return true;
@@ -209,9 +209,9 @@ private:
 
   auto initialize() -> bool {
     terminate();
-    if(!_context) return false;
+    if(!self.context) return false;
 
-    HMONITOR monitor = MonitorFromWindow((HWND)_context, MONITOR_DEFAULTTOPRIMARY);
+    HMONITOR monitor = MonitorFromWindow((HWND)self.context, MONITOR_DEFAULTTOPRIMARY);
     MONITORINFOEX information = {};
     information.cbSize = sizeof(MONITORINFOEX);
     GetMonitorInfo(monitor, &information);
@@ -236,7 +236,7 @@ private:
       nullptr, nullptr, GetModuleHandle(0), nullptr);
 
     RECT rectangle;
-    GetClientRect((HWND)_context, &rectangle);
+    GetClientRect((HWND)self.context, &rectangle);
     _windowWidth = rectangle.right;
     _windowHeight = rectangle.bottom;
 
@@ -253,15 +253,15 @@ private:
     _presentation.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
     _presentation.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
-    if(!_exclusive) {
-      _presentation.hDeviceWindow = (HWND)_context;
+    if(!self.exclusive) {
+      _presentation.hDeviceWindow = (HWND)self.context;
       _presentation.Windowed = true;
       _presentation.BackBufferFormat = D3DFMT_UNKNOWN;
       _presentation.BackBufferWidth = 0;
       _presentation.BackBufferHeight = 0;
 
       ShowWindow((HWND)_exclusiveContext, SW_HIDE);
-      if(_instance->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, (HWND)_context,
+      if(_instance->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, (HWND)self.context,
         D3DCREATE_FPU_PRESERVE | D3DCREATE_SOFTWARE_VERTEXPROCESSING, &_presentation, &_device) != D3D_OK) {
         return false;
       }

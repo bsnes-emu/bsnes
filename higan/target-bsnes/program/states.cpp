@@ -79,11 +79,15 @@ auto Program::saveState(string filename) -> bool {
   if(!s.size()) return showMessage({"Failed to save [", prefix, "]"}), false;
   auto serializerRLE = Encode::RLE<uint8_t>(s.data(), s.size());
 
-  image preview;
-  preview.allocate(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
-  if(preview.width() != 256 || preview.height() != 240) preview.scale(256, 240, true);
-  preview.transform(0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f);
-  auto previewRLE = Encode::RLE<uint16_t>(preview.data(), preview.size());
+  vector<uint8_t> previewRLE;
+  //this can be null if a state is captured before the first frame of video output after power/reset
+  if(screenshot.data) {
+    image preview;
+    preview.copy(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
+    if(preview.width() != 256 || preview.height() != 240) preview.scale(256, 240, true);
+    preview.transform(0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f);
+    previewRLE = Encode::RLE<uint16_t>(preview.data(), preview.size() / sizeof(uint16_t));
+  }
 
   vector<uint8_t> saveState;
   saveState.resize(3 * sizeof(uint));

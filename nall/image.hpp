@@ -64,8 +64,8 @@ struct image {
 
   inline auto free() -> void;
   inline auto load(const string& filename) -> bool;
+  inline auto copy(const void* data, uint pitch, uint width, uint height) -> void;
   inline auto allocate(uint width, uint height) -> void;
-  inline auto allocate(const void* data, uint pitch, uint width, uint height) -> void;
 
   //fill.hpp
   inline auto fill(uint64_t color = 0) -> void;

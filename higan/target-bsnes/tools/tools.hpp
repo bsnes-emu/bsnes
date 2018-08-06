@@ -35,15 +35,14 @@ struct CheatWindow : Window {
 
 public:
   VerticalLayout layout{this};
-    HorizontalLayout nameLayout{&layout, Size{~0, 0}};
-      Label nameLabel{&nameLayout, Size{40, 0}};
-      LineEdit nameValue{&nameLayout, Size{~0, 0}};
-    HorizontalLayout codeLayout{&layout, Size{~0, ~0}};
-      Label codeLabel{&codeLayout, Size{40, 0}};
-      TextEdit codeValue{&codeLayout, Size{~0, ~0}};
+    TableLayout tableLayout{&layout, Size{~0, ~0}};
+      Label nameLabel{&tableLayout, Size{0, 0}};
+      LineEdit nameValue{&tableLayout, Size{~0, 0}};
+      Label codeLabel{&tableLayout, Size{0, 0}};
+      TextEdit codeValue{&tableLayout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Widget spacer{&controlLayout, Size{40, 0}};
-      CheckLabel enableOption{&controlLayout, Size{~0, 0}};
+      Widget controlSpacer{&controlLayout, Size{~0, 0}};
+      CheckLabel enableOption{&controlLayout, Size{0, 0}};
       Button acceptButton{&controlLayout, Size{80, 0}};
       Button cancelButton{&controlLayout, Size{80, 0}};
 };

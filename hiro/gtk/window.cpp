@@ -349,6 +349,8 @@ auto pWindow::setMaximized(bool maximized) -> void {
 }
 
 auto pWindow::setMaximumSize(Size size) -> void {
+  if(!state().resizable) size = state().geometry.size();
+
   //TODO: this doesn't have any effect in GTK2 or GTK3
   GdkGeometry geometry;
   if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
@@ -367,8 +369,12 @@ auto pWindow::setMinimized(bool minimized) -> void {
 }
 
 auto pWindow::setMinimumSize(Size size) -> void {
-  gtk_widget_set_size_request(formContainer, size.width(), size.height());  //for GTK3
+  if(!state().resizable) size = state().geometry.size();
 
+  //for GTK3
+  gtk_widget_set_size_request(formContainer, size.width(), size.height());
+
+  //for GTK2
   GdkGeometry geometry;
   if(size.height()) size.setHeight(size.height() + _menuHeight() + _statusHeight());
   geometry.min_width  = !state().resizable ? state().geometry.width()  : size.width()  ? size.width()  : 1;
@@ -400,6 +406,9 @@ auto pWindow::setResizable(bool resizable) -> void {
   if(auto statusBar = state().statusBar) statusBarVisible = statusBar->visible();
   gtk_window_set_has_resize_grip(GTK_WINDOW(widget), resizable && statusBarVisible);
   #endif
+
+  setMaximumSize(state().maximumSize);
+  setMinimumSize(state().minimumSize);
 }
 
 auto pWindow::setTitle(const string& title) -> void {

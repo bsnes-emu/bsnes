@@ -214,27 +214,11 @@ auto Presentation::updateStatusIcon() -> void {
   icon.fill(0xff202020);
 
   if(emulator->loaded()) {
-    image emblem{program.verified() ? Icon::Emblem::Program : Icon::Emblem::Binary};
+    image emblem{program.verified() ? (image)Icon::Emblem::Program : (image)Icon::Emblem::Binary};
     icon.impose(image::blend::sourceAlpha, 0, (StatusHeight - 16) / 2, emblem, 0, 0, 16, 16);
   }
 
   statusIcon.setIcon(icon);
-}
-
-auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
-  return;
-
-  int ox = width - 144;
-  int oy = height - 128;
-  if(ox >= 0 && oy >= 0) {
-    image icon{Resource::Icon};
-    icon.alphaBlend(0xff000000);
-    for(uint y : range(128)) {
-      auto target = output + (y + oy) * (length >> 2) + ox;
-      auto source = (uint32_t*)icon.data() + y * 128;
-      memory::copy<uint32_t>(target, source, 128);
-    }
-  }
 }
 
 auto Presentation::clearViewport() -> void {
@@ -250,7 +234,6 @@ auto Presentation::clearViewport() -> void {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
-    if(!emulator->loaded()) drawIcon(output, length, width, height);
     video.release();
     video.output();
   }

@@ -149,13 +149,19 @@ auto StateManager::updateSelection() -> void {
   statePreview.setColor({0, 0, 0});
   if(batched.size() == 1) {
     if(auto saveState = program.loadStateData(batched.first().property("name"))) {
-      uint skip = memory::readl<sizeof(uint)>(saveState.data() + sizeof(uint));
-      uint seek = 3 * sizeof(uint) + skip;
-      auto preview = Decode::RLE<uint16_t>(saveState.data() + seek, max(seek, saveState.size()) - seek);
-      image icon{0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f};
-      icon.allocate(preview.data(), 256 * sizeof(uint16_t), 256, 240);
-      icon.transform();
-      statePreview.setIcon(icon);
+      if(saveState.size() >= 3 * sizeof(uint)) {
+        uint signature  = memory::readl<sizeof(uint)>(saveState.data() + 0 * sizeof(uint));
+        uint serializer = memory::readl<sizeof(uint)>(saveState.data() + 1 * sizeof(uint));
+        uint preview    = memory::readl<sizeof(uint)>(saveState.data() + 2 * sizeof(uint));
+        if(signature == Program::State::Signature && preview) {
+          uint offset = 3 * sizeof(uint) + serializer;
+          auto preview = Decode::RLE<uint16_t>(saveState.data() + offset, max(offset, saveState.size()) - offset);
+          image icon{0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f};
+          icon.copy(preview.data(), 256 * sizeof(uint16_t), 256, 240);
+          icon.transform();
+          statePreview.setIcon(icon);
+        }
+      }
     }
   }
 }

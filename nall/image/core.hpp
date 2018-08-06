@@ -142,6 +142,16 @@ auto image::load(const string& filename) -> bool {
   return false;
 }
 
+//assumes image and data are in the same format; pitch is adapted to image
+auto image::copy(const void* data, uint pitch, uint width, uint height) -> void {
+  allocate(width, height);
+  for(uint y : range(height)) {
+    auto input = (const uint8_t*)data + y * pitch;
+    auto output = (uint8_t*)_data + y * this->pitch();
+    memory::copy(output, input, width * stride());
+  }
+}
+
 auto image::allocate(unsigned width, unsigned height) -> void {
   if(_data && _width == width && _height == height) return;
   free();
@@ -150,6 +160,7 @@ auto image::allocate(unsigned width, unsigned height) -> void {
   _data = allocate(_width, _height, stride());
 }
 
+//private
 auto image::allocate(unsigned width, unsigned height, unsigned stride) -> uint8_t* {
   //allocate 1x1 larger than requested; so that linear interpolation does not require bounds-checking
   unsigned size = width * height * stride;
@@ -157,16 +168,6 @@ auto image::allocate(unsigned width, unsigned height, unsigned stride) -> uint8_
   auto data = new uint8_t[size + padding];
   memory::fill(data + size, padding);
   return data;
-}
-
-//assumes image and data are in the same format; pitch is adapted to image
-auto image::allocate(const void* data, uint pitch, uint width, uint height) -> void {
-  allocate(width, height);
-  for(uint y : range(height)) {
-    auto input = (const uint8_t*)data + y * pitch;
-    auto output = (uint8_t*)_data + y * this->pitch();
-    memory::copy(output, input, width * stride());
-  }
 }
 
 }

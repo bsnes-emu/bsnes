@@ -184,6 +184,16 @@ public slots:
 };
 #endif
 
+#if defined(Hiro_Label)
+struct QtLabel : public QWidget {
+  Q_OBJECT
+public:
+  QtLabel(pLabel& p) : p(p) {}
+  auto paintEvent(QPaintEvent*) -> void;
+  pLabel& p;
+};
+#endif
+
 #if defined(Hiro_LineEdit)
 struct QtLineEdit : public QLineEdit {
   Q_OBJECT

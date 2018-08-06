@@ -35,7 +35,7 @@ auto Program::captureScreenshot() -> bool {
   if(emulator->loaded() && screenshot.data) {
     if(auto filename = screenshotPath()) {
       image capture;
-      capture.allocate(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
+      capture.copy(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
 
       //normalize pixel aspect ratio to 1:1
       if(capture.width() == 512 && capture.height() == 240) capture.scale(512, 480, false);  //hires

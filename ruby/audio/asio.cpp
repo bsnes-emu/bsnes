@@ -1,7 +1,7 @@
 #include <nall/windows/registry.hpp>
 #include "asio.hpp"
 
-struct AudioASIO : Audio {
+struct AudioASIO : AudioDriver {
   static AudioASIO* instance;
   AudioASIO& self = *this;
   AudioASIO(Audio& super) : AudioDriver(super) { instance = this; }

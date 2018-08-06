@@ -12,7 +12,6 @@ struct Presentation : Window {
   Presentation();
   auto updateEmulatorMenu() -> void;
   auto updateEmulatorDeviceSelections() -> void;
-  auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport(bool resizeWindow = true) -> void;
   auto toggleFullScreen() -> void;
@@ -79,9 +78,13 @@ struct Presentation : Window {
       MenuSeparator helpMenuSeparator{&helpMenu};
       MenuItem about{&helpMenu};
 
-  FixedLayout layout{this};
-    Canvas canvas{&layout, Geometry{0, 0, 1, 1}};
-    Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
+  VerticalLayout layout{this};
+    HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
+      Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
+      VerticalLayout iconLayout{&viewportLayout, Size{0, ~0}, 0};
+        Widget iconBefore{&iconLayout, Size{128, ~0}, 0};
+        Canvas iconCanvas{&iconLayout, Size{112, 112}, 0};
+        Widget iconAfter{&iconLayout, Size{128, 8}, 0};
 
   StatusBar statusBar{this};
 };

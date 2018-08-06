@@ -116,15 +116,16 @@ Presentation::Presentation() {
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
 
-  image icon{Resource::Icon};
-  icon.alphaBlend(0xff000000);
-  canvas.setIcon(icon).setVisible(false);
-
-  viewport.setDroppable().onDrop([&](auto locations) {
-    if(!directory::exists(locations(0))) return;
-    program->gameQueue.append(locations(0));
+  viewport.setDroppable().onDrop([&](vector<string> locations) {
+    if(!locations || !directory::exists(locations.first())) return;
+    program->gameQueue.append(locations.first());
     program->load();
   });
+
+  iconLayout.setAlignment(0.0);
+  image icon{Resource::Icon};
+  icon.alphaBlend(0x000000);
+  iconCanvas.setIcon(icon);
 
   onSize([&] {
     resizeViewport(false);
@@ -237,22 +238,6 @@ auto Presentation::updateEmulatorDeviceSelections() -> void {
   }
 }
 
-auto Presentation::drawIcon(uint32_t* output, uint length, uint width, uint height) -> void {
-  return;
-
-  int ox = width  - 128;
-  int oy = height - 128;
-  if(ox >= 0 && oy >= 0) {
-    image icon{Resource::Icon};
-    icon.alphaBlend(0xff000000);
-    for(uint y : range(112)) {
-      auto target = output + (y + oy) * (length >> 2) + ox;
-      auto source = (uint32_t*)icon.data() + y * 112;
-      memory::copy<uint32_t>(target, source, 112);
-    }
-  }
-}
-
 auto Presentation::clearViewport() -> void {
   if(!video) return;
 
@@ -269,7 +254,6 @@ auto Presentation::clearViewport() -> void {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;
     }
-    if(!emulator || !emulator->loaded()) drawIcon(output, length, width, height);
     video->release();
     video->output();
   }

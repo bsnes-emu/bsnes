@@ -54,9 +54,6 @@ auto pWidget::setFont(const Font& font) -> void {
 
 auto pWidget::setGeometry(Geometry geometry) -> void {
   if(!qtWidget) return;
-//  Position displacement = GetDisplacement(&widget);
-//  geometry.x -= displacement.x;
-//  geometry.y -= displacement.y;
   qtWidget->setGeometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
   self().doSize();
 }
@@ -65,12 +62,6 @@ auto pWidget::setVisible(bool visible) -> void {
   if(!qtWidget) return;
   qtWidget->setVisible(visible);
 }
-
-//pWidget::constructor() called before p{Derived}::constructor(); ergo qtWidget is not yet valid
-//pWidget::synchronizeState() is called to finish construction of p{Derived}::constructor()
-//void pWidget::synchronizeState() {
-//  setFont(widget.font());
-//}
 
 }
 

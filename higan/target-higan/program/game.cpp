@@ -40,6 +40,7 @@ auto Program::load(Emulator::Interface& interface) -> void {
   updateAudioDriver();
   updateAudioEffects();
 
+  presentation->viewportLayout.remove(presentation->iconLayout);
   presentation->resizeViewport();
   presentation->setTitle(emulator->titles().merge(" + "));
   presentation->systemMenu.setText(information.name).setVisible(true);
@@ -60,6 +61,7 @@ auto Program::unload() -> void {
   emulator = nullptr;
   gamePaths.reset();
 
+  presentation->viewportLayout.append(presentation->iconLayout, Size{0, ~0});
   presentation->resizeViewport();
   presentation->setTitle({"higan v", Emulator::Version});
   presentation->systemMenu.setVisible(false);

@@ -3,13 +3,10 @@
 namespace hiro {
 
 auto pLabel::construct() -> void {
-  qtWidget = qtLabel = new QLabel;
+  qtWidget = qtLabel = new QtLabel(*this);
 
   pWidget::construct();
-  setAlignment(state().alignment);
-  setBackgroundColor(state().backgroundColor);
-  setForegroundColor(state().foregroundColor);
-  setText(state().text);
+  qtLabel->update();
 }
 
 auto pLabel::destruct() -> void {
@@ -23,29 +20,40 @@ auto pLabel::minimumSize() const -> Size {
 }
 
 auto pLabel::setAlignment(Alignment alignment) -> void {
-  if(!alignment) alignment = {0.0, 0.5};
-  qtLabel->setAlignment((Qt::Alignment)CalculateAlignment(alignment));
+  qtLabel->update();
 }
 
 auto pLabel::setBackgroundColor(Color color) -> void {
-  static auto defaultColor = qtLabel->palette().color(QPalette::Base);
+  qtLabel->update();
+}
 
-  auto palette = qtLabel->palette();
-  palette.setColor(QPalette::Base, CreateColor(color, defaultColor));
-  qtLabel->setPalette(palette);
-  qtLabel->setAutoFillBackground((bool)color);
+auto pLabel::setFont(const Font& font) -> void {
+  pWidget::setFont(font);
+  qtLabel->update();
 }
 
 auto pLabel::setForegroundColor(Color color) -> void {
-  static auto defaultColor = qtLabel->palette().color(QPalette::Text);
-
-  auto palette = qtLabel->palette();
-  palette.setColor(QPalette::Text, CreateColor(color, defaultColor));
-  qtLabel->setPalette(palette);
+  qtLabel->update();
 }
 
 auto pLabel::setText(const string& text) -> void {
-  qtLabel->setText(QString::fromUtf8(text));
+  qtLabel->update();
+}
+
+//QLabel ignores QPalette ... so we have to implement our own Label class atop QWidget ...
+auto QtLabel::paintEvent(QPaintEvent* event) -> void {
+  QPainter painter(p.qtLabel);
+  if(auto& color = p.state().backgroundColor) {
+    painter.fillRect(event->rect(), CreateColor(color));
+  }
+  if(auto& text = p.state().text) {
+    if(auto& color = p.state().foregroundColor) {
+      QPen pen(CreateColor(color));
+      painter.setPen(pen);
+    }
+    auto alignment = p.state().alignment ? p.state().alignment : Alignment{0.0, 0.5};
+    painter.drawText(event->rect(), CalculateAlignment(alignment), QString::fromUtf8(text));
+  }
 }
 
 }

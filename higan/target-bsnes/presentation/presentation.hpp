@@ -26,7 +26,6 @@ struct Presentation : Window {
   enum : uint { StatusHeight = 24 };
 
   auto updateStatusIcon() -> void;
-  auto drawIcon(uint32_t* output, uint length, uint width, uint height) -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;
@@ -103,8 +102,8 @@ struct Presentation : Window {
   VerticalLayout layout{this};
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
       Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
-      VerticalLayout iconLayout{&viewportLayout, Size{0, ~0}};
-        Widget iconSpacer{&iconLayout, Size{144, ~0}};
+      VerticalLayout iconLayout{&viewportLayout, Size{0, ~0}, 0};
+        Widget iconSpacer{&iconLayout, Size{144, ~0}, 0};
         Canvas iconCanvas{&iconLayout, Size{128, 128}, 0};
     HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
       Label spacerIcon{&statusLayout, Size{8, ~0}, 0};

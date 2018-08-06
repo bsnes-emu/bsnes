@@ -52,10 +52,12 @@ auto CheatDatabase::addCheats() -> void {
 
 auto CheatWindow::create() -> void {
   layout.setPadding(5);
+  tableLayout.setSize({2, 2});
+  tableLayout.cell(0).setAlignment({1.0, 0.5});
+  tableLayout.cell(2).setAlignment({1.0, 0.0});
   nameLabel.setText("Name:");
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
-  codeLayout.setAlignment(0.0);
   codeLabel.setText("Code(s):");
   codeValue.setFont(Font().setFamily(Font::Mono));
   codeValue.onChange([&] { doChange(); });

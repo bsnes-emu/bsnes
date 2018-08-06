@@ -205,20 +205,6 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     break;
   }
 
-  case WM_DRAWITEM: {
-    auto drawItem = (LPDRAWITEMSTRUCT)lparam;
-    auto object = (mObject*)GetWindowLongPtr((HWND)drawItem->hwndItem, GWLP_USERDATA);
-    if(!object) break;
-
-    #if defined(Hiro_TabFrame)
-    if(auto tabFrame = dynamic_cast<mTabFrame*>(object)) {
-      return tabFrame->self()->onDrawItem(lparam), true;
-    }
-    #endif
-
-    break;
-  }
-
   case WM_GETMINMAXINFO: {
     auto info = (LPMINMAXINFO)lparam;
     auto frameMargin = pWindow->frameMargin();

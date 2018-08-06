@@ -105,43 +105,26 @@ auto pTabFrame::_buildImageList() -> void {
   }
 }
 
+//hide all TabFrameItems, and then display the selected TabFrameItem
 auto pTabFrame::_synchronizeSizable() -> void {
   for(auto& item : state().items) {
-    if(auto& sizable = item->state.sizable) {
-      sizable->setVisible(item->selected());
-    }
+    if(auto& sizable = item->state.sizable) sizable->setVisible(false);
+  }
+  //without this call, widgets from the previous tab will remain visible
+  //alongside widgets from the newly selected tab for about one frame ...
+  Application::processEvents();
+  uint selected = TabCtrl_GetCurSel(hwnd);
+  if(auto item = self().item(selected)) {
+    if(auto& sizable = item->state.sizable) sizable->setVisible(true);
   }
 }
 
 auto pTabFrame::onChange() -> void {
-  unsigned selected = TabCtrl_GetCurSel(hwnd);
+  uint selected = TabCtrl_GetCurSel(hwnd);
   for(auto& item : state().items) item->state.selected = false;
   if(auto item = self().item(selected)) item->state.selected = true;
   _synchronizeSizable();
   self().doChange();
-}
-
-//called only if TCS_OWNERDRAWFIXED style is used
-//this style disables XP/Vista theming of the TabFrame
-auto pTabFrame::onDrawItem(LPARAM lparam) -> void {
-/*
-  auto item = (LPDRAWITEMSTRUCT)lparam;
-  FillRect(item->hDC, &item->rcItem, GetSysColorBrush(COLOR_3DFACE));
-  SetBkMode(item->hDC, TRANSPARENT);
-  SetTextColor(item->hDC, GetSysColor(COLOR_BTNTEXT));
-
-  unsigned selection = item->itemID;
-  if(selection < tabFrame.state.text.size()) {
-    string text = tabFrame.state.text[selection];
-    Size size = pFont::size(hfont, text);
-    unsigned width = item->rcItem.right - item->rcItem.left + 1;
-    if(tabFrame.state.image[selection]) {
-      width += size.height + 2;
-      ImageList_Draw(imageList, selection, item->hDC, item->rcItem.left + (width - size.width) / 2 - (size.height + 3), item->rcItem.top + 2, ILD_NORMAL);
-    }
-    TextOut(item->hDC, item->rcItem.left + (width - size.width) / 2, item->rcItem.top + 2, utf16_t(text), text.size());
-  }
-*/
 }
 
 }

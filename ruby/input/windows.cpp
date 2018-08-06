@@ -10,7 +10,7 @@
 
 struct InputWindows : InputDriver {
   InputWindows& self = *this;
-  InputWindows(Input& driver) : InputDriver(super), keyboard(super), mouse(super), joypadXInput(super), joypadDirectInput(super) {}
+  InputWindows(Input& super) : InputDriver(super), keyboard(super), mouse(super), joypadXInput(super), joypadDirectInput(super) {}
   ~InputWindows() { terminate(); }
 
   auto create() -> bool override {
@@ -48,6 +48,7 @@ private:
     terminate();
     if(!self.context) return false;
 
+    //TODO: this won't work if Input is recreated post-initialization; nor will it work with multiple Input instances
     if(!rawinput.initialized) {
       rawinput.initialized = true;
       rawinput.mutex = CreateMutex(nullptr, false, nullptr);

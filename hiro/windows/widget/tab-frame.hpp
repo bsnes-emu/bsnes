@@ -13,7 +13,6 @@ struct pTabFrame : pWidget {
   auto setVisible(bool visible) -> void override;
 
   auto onChange() -> void;
-  auto onDrawItem(LPARAM lparam) -> void;
 
   auto _buildImageList() -> void;
   auto _synchronizeSizable() -> void;

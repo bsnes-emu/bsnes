@@ -7,6 +7,7 @@ struct AudioXAudio2 : AudioDriver, public IXAudio2VoiceCallback {
   ~AudioXAudio2() { terminate(); }
 
   auto create() -> bool override {
+    super.setChannels(2);
     super.setFrequency(48000);
     super.setLatency(40);
     return initialize();
@@ -85,11 +86,11 @@ private:
       if(deviceDetails.Role & DefaultGameDevice) deviceID = deviceIndex;
     }
 
-    if(FAILED(_interface->CreateMasteringVoice(&_masterVoice, _channels, self.frequency, 0, deviceID, nullptr))) return terminate(), false;
+    if(FAILED(_interface->CreateMasteringVoice(&_masterVoice, self.channels, self.frequency, 0, deviceID, nullptr))) return terminate(), false;
 
     WAVEFORMATEX waveFormat;
     waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-    waveFormat.nChannels = _channels;
+    waveFormat.nChannels = self.channels;
     waveFormat.nSamplesPerSec = self.frequency;
     waveFormat.nBlockAlign = 4;
     waveFormat.wBitsPerSample = 16;
