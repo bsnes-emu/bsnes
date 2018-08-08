@@ -269,7 +269,7 @@ auto pWindow::_statusTextHeight() const -> uint {
 }
 
 auto pWindow::_updateFrameGeometry() -> void {
-  pApplication::syncX();
+  pApplication::synchronize();
   QRect border = qtWindow->frameGeometry();
   QRect client = qtWindow->geometry();
 
@@ -279,12 +279,12 @@ auto pWindow::_updateFrameGeometry() -> void {
   settings.geometry.frameHeight = border.height() - client.height();
 
   if(qtMenuBar->isVisible()) {
-    pApplication::syncX();
+    pApplication::synchronize();
     settings.geometry.menuHeight = qtMenuBar->height() - _menuTextHeight();
   }
 
   if(qtStatusBar->isVisible()) {
-    pApplication::syncX();
+    pApplication::synchronize();
     settings.geometry.statusHeight = qtStatusBar->height() - _statusTextHeight();
   }
 }

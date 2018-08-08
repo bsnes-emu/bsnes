@@ -16,79 +16,98 @@ EmulatorSettings emulatorSettings;
 DriverSettings driverSettings;
 SettingsWindow settingsWindow;
 
-Settings::Settings() {
+auto Settings::load() -> void {
   Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml")), " "));
-
-  auto set = [&](string name, string value) {
-    //create node and set to default value only if it does not already exist
-    if(!operator[](name)) operator()(name).setValue(value);
-  };
-
-  set("Video/Driver", Video::safestDriver());
-  set("Video/Exclusive", false);
-  set("Video/Blocking", false);
-  set("Video/Flush", false);
-  set("Video/Format", "Default");
-  set("Video/Shader", "Blur");
-  set("Video/Luminance", "100%");
-  set("Video/Saturation", "100%");
-  set("Video/Gamma", "150%");
-
-  set("Audio/Driver", Audio::safestDriver());
-  set("Audio/Exclusive", false);
-  set("Audio/Device", "");
-  set("Audio/Blocking", true);
-  set("Audio/Dynamic", false);
-  set("Audio/Frequency", "48000hz");
-  set("Audio/Latency", 0);
-  set("Audio/Mute", false);
-  set("Audio/Skew", "0");
-  set("Audio/Volume", "100%");
-  set("Audio/Balance", "50%");
-
-  set("Input/Driver", Input::safestDriver());
-  set("Input/Frequency", 5);
-  set("Input/Defocus", "Pause");
-  set("Input/Turbo/Frequency", 4);
-
-  set("View/Multiplier", "2");
-  set("View/Output", "Scale");
-  set("View/AspectCorrection", true);
-  set("View/OverscanCropping", true);
-  set("View/BlurEmulation", true);
-
-  set("Path/Games", "");
-  set("Path/Patches", "");
-  set("Path/Saves", "");
-  set("Path/Cheats", "");
-  set("Path/States", "");
-  set("Path/Screenshots", "");
-  set("Path/Recent/SuperFamicom", Path::user());
-  set("Path/Recent/GameBoy", Path::user());
-  set("Path/Recent/BSMemory", Path::user());
-  set("Path/Recent/SufamiTurboA", Path::user());
-  set("Path/Recent/SufamiTurboB", Path::user());
-
-  set("UserInterface/ShowStatusBar", true);
-  set("UserInterface/SuppressScreenSaver", true);
-
-  set("Emulator/WarnOnUnverifiedGames", false);
-  set("Emulator/AutoSaveMemory/Enable", true);
-  set("Emulator/AutoSaveMemory/Interval", 30);
-  set("Emulator/AutoSaveStateOnUnload", false);
-  set("Emulator/AutoLoadStateOnLoad", false);
-  set("Emulator/Hack/FastPPU", true);
-  set("Emulator/Hack/FastPPU/NoSpriteLimit", false);
-  set("Emulator/Hack/FastPPU/HiresMode7", false);
-  set("Emulator/Hack/FastDSP", true);
-  set("Emulator/Hack/FastSuperFX", "100%");
-  set("Emulator/Cheats/Enable", true);
-
-  set("Crashed", false);
+  process(true);
+  file::write(locate("settings.bml"), BML::serialize(*this, " "));
 }
 
 auto Settings::save() -> void {
+  process(false);
   file::write(locate("settings.bml"), BML::serialize(*this, " "));
+}
+
+auto Settings::process(bool load) -> void {
+  if(load) {
+    //initialize non-static default settings
+    video.driver = ruby::Video::safestDriver();
+    audio.driver = ruby::Audio::safestDriver();
+    input.driver = ruby::Input::safestDriver();
+  }
+
+  #define bind(type, path, name) \
+    if(load) { \
+      if(auto node = operator[](path)) name = node.type(); \
+    } else { \
+      operator()(path).setValue(name); \
+    } \
+
+  bind(text,    "Video/Driver",    video.driver);
+  bind(boolean, "Video/Exclusive", video.exclusive);
+  bind(boolean, "Video/Blocking",  video.blocking);
+  bind(boolean, "Video/Flush",     video.flush);
+  bind(text,    "Video/Format",    video.format);
+  bind(text,    "Video/Shader",    video.shader);
+
+  bind(natural, "Video/Luminance",  video.luminance);
+  bind(natural, "Video/Saturation", video.saturation);
+  bind(natural, "Video/Gamma",      video.gamma);
+
+  bind(text,    "Video/Output",           video.output);
+  bind(natural, "Video/Multiplier",       video.multiplier);
+  bind(boolean, "Video/AspectCorrection", video.aspectCorrection);
+  bind(boolean, "Video/Overscan",         video.overscan);
+  bind(boolean, "Video/Blur",             video.blur);
+
+  bind(text,    "Audio/Driver",    audio.driver);
+  bind(boolean, "Audio/Exclusive", audio.exclusive);
+  bind(text,    "Audio/Device",    audio.device);
+  bind(boolean, "Audio/Blocking",  audio.blocking);
+  bind(boolean, "Audio/Dynamic",   audio.dynamic);
+  bind(natural, "Audio/Frequency", audio.frequency);
+  bind(natural, "Audio/Latency",   audio.latency);
+
+  bind(boolean, "Audio/Mute",    audio.mute);
+  bind(integer, "Audio/Skew",    audio.skew);
+  bind(natural, "Audio/Volume",  audio.volume);
+  bind(natural, "Audio/Balance", audio.balance);
+
+  bind(text,    "Input/Driver",          input.driver);
+  bind(natural, "Input/Frequency",       input.frequency);
+  bind(text,    "Input/Defocus",         input.defocus);
+  bind(natural, "Input/Turbo/Frequency", input.turbo.frequency);
+
+  bind(text,    "Path/Games",       path.games);
+  bind(text,    "Path/Patches",     path.patches);
+  bind(text,    "Path/Saves",       path.saves);
+  bind(text,    "Path/Cheats",      path.cheats);
+  bind(text,    "Path/States",      path.states);
+  bind(text,    "Path/Screenshots", path.screenshots);
+
+  bind(text,    "Path/Recent/SuperFamicom", path.recent.superFamicom);
+  bind(text,    "Path/Recent/GameBoy",      path.recent.gameBoy);
+  bind(text,    "Path/Recent/BSMemory",     path.recent.bsMemory);
+  bind(text,    "Path/Recent/SufamiTurboA", path.recent.sufamiTurboA);
+  bind(text,    "Path/Recent/SufamiTurboB", path.recent.sufamiTurboB);
+
+  bind(boolean, "Emulator/WarnOnUnverifiedGames",      emulator.warnOnUnverifiedGames);
+  bind(boolean, "Emulator/AutoSaveMemory/Enable",      emulator.autoSaveMemory.enable);
+  bind(natural, "Emulator/AutoSaveMemory/Interval",    emulator.autoSaveMemory.interval);
+  bind(boolean, "Emulator/AutoSaveStateOnUnload",      emulator.autoSaveStateOnUnload);
+  bind(boolean, "Emulator/AutoLoadStateOnLoad",        emulator.autoLoadStateOnLoad);
+  bind(boolean, "Emulator/Hack/FastPPU/Enable",        emulator.hack.fastPPU.enable);
+  bind(boolean, "Emulator/Hack/FastPPU/NoSpriteLimit", emulator.hack.fastPPU.noSpriteLimit);
+  bind(boolean, "Emulator/Hack/FastPPU/HiresMode7",    emulator.hack.fastPPU.hiresMode7);
+  bind(boolean, "Emulator/Hack/FastDSP/Enable",        emulator.hack.fastDSP.enable);
+  bind(natural, "Emulator/Hack/FastSuperFX",           emulator.hack.fastSuperFX);
+  bind(boolean, "Emulator/Cheats/Enable",              emulator.cheats.enable);
+
+  bind(boolean, "General/StatusBar",   general.statusBar);
+  bind(boolean, "General/ScreenSaver", general.screenSaver);
+  bind(boolean, "General/ToolTips",    general.toolTips);
+  bind(boolean, "General/Crashed",     general.crashed);
+
+  #undef bind
 }
 
 auto SettingsWindow::create() -> void {
@@ -107,11 +126,6 @@ auto SettingsWindow::create() -> void {
   setAlignment({0.0, 1.0});
   setDismissable();
 
-  onSize([&] {
-    inputSettings.mappingList.resizeColumns();
-    hotkeySettings.mappingList.resizeColumns();
-  });
-
   onClose([&] {
     if(inputSettings.activeMapping) inputSettings.cancelMapping();
     if(hotkeySettings.activeMapping) hotkeySettings.cancelMapping();
@@ -124,7 +138,6 @@ auto SettingsWindow::setVisible(bool visible) -> SettingsWindow& {
     inputSettings.refreshMappings();
     hotkeySettings.refreshMappings();
     Application::processEvents();
-    doSize();
   }
   return Window::setVisible(visible), *this;
 }

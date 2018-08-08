@@ -52,14 +52,16 @@
 
 #define DeclareSharedSizable(Name) \
   DeclareSharedObject(Name) \
+  auto doSize() const { return self().doSize(); } \
   auto geometry() const { return self().geometry(); } \
   auto minimumSize() const { return self().minimumSize(); } \
+  auto onSize(const function<void ()>& callback = {}) { return self().onSize(callback), *this; } \
   auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; } \
 
 #define DeclareSharedWidget(Name) \
   DeclareSharedSizable(Name) \
-  auto doSize() const { return self().doSize(); } \
-  auto onSize(const function<void ()>& callback = {}) { return self().onSize(callback), *this; } \
+  auto setToolTip(const string& toolTip = "") { return self().setToolTip(toolTip), *this; } \
+  auto toolTip() const { return self().toolTip(); } \
 
 #if defined(Hiro_Object)
 struct Object : sObject {
@@ -75,9 +77,6 @@ struct Group : sGroup {
   auto append(sObject object) -> type& { return self().append(object), *this; }
   auto object(unsigned position) const { return self().object(position); }
   auto objectCount() const { return self().objectCount(); }
-//auto objects() const { return self().objects(); }
-  auto remove(sObject object) -> type& { return self().remove(object), *this; }
-
   template<typename T = Object> auto objects() const -> vector<T> {
     vector<T> objects;
     for(auto object : self().objects()) {
@@ -85,6 +84,7 @@ struct Group : sGroup {
     }
     return objects;
   }
+  auto remove(sObject object) -> type& { return self().remove(object), *this; }
 
 private:
   auto _append() {}

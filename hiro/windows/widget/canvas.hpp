@@ -13,6 +13,10 @@ struct pCanvas : pWidget {
   auto setIcon(const image& icon) -> void;
   auto update() -> void;
 
+  auto doMouseLeave() -> void override;
+  auto doMouseMove(int x, int y) -> void override;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
+
   auto _paint() -> void;
   auto _rasterize() -> void;
   auto _redraw() -> void;

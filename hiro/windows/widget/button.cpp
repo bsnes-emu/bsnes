@@ -2,49 +2,12 @@
 
 namespace hiro {
 
-static auto Button_paintProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam,
-  bool bordered, bool checked, bool enabled, const Font& font, const image& icon, Orientation orientation, const string& text
-) -> LRESULT {
-  if(msg == WM_PAINT) {
-    PAINTSTRUCT ps;
-    BeginPaint(hwnd, &ps);
-    auto state = Button_GetState(hwnd);
-    Button_CustomDraw(hwnd, ps, bordered, checked, enabled, state, font, icon, orientation, text);
-    EndPaint(hwnd, &ps);
-  }
-  return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
-//BUTTON cannot draw borderless buttons on its own
-//BS_OWNERDRAW will send WM_DRAWITEM; but will disable hot-tracking notifications
-//to gain hot-tracking plus borderless buttons; BUTTON is superclassed and WM_PAINT is hijacked
-//note: letting hiro paint bordered buttons will lose the fade animations on Vista+;
-//however, it will allow placing icons immediately next to text (original forces icon left alignment)
-static auto CALLBACK Button_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
-    if(auto button = dynamic_cast<mButton*>(object)) {
-      if(auto self = button->self()) {
-        if(msg == WM_ERASEBKGND) return DefWindowProc(hwnd, msg, wparam, lparam);
-        if(msg == WM_PAINT) return Button_paintProc(hwnd, msg, wparam, lparam,
-          button->state.bordered, false, button->enabled(true), button->font(true),
-          button->state.icon, button->state.orientation, button->state.text
-        );
-        return self->windowProc(hwnd, msg, wparam, lparam);
-      }
-    }
-  }
-  return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
 auto pButton::construct() -> void {
   hwnd = CreateWindow(
     L"BUTTON", L"", WS_CHILD | WS_TABSTOP,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)Button_windowProc);
-  pWidget::_setState();
+  pWidget::construct();
   _setState();
 }
 
@@ -99,9 +62,34 @@ auto pButton::setVisible(bool visible) -> void {
   _setState();
 }
 
+//
+
 auto pButton::onActivate() -> void {
   self().doActivate();
 }
+
+//BUTTON cannot draw borderless buttons on its own
+//BS_OWNERDRAW will send WM_DRAWITEM; but will disable hot-tracking notifications
+//to gain hot-tracking plus borderless buttons; BUTTON is superclassed and WM_PAINT is hijacked
+//note: letting hiro paint bordered buttons will lose the fade animations on Vista+;
+//however, it will allow placing icons immediately next to text (original forces icon left alignment)
+auto pButton::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_PAINT) {
+    PAINTSTRUCT ps;
+    BeginPaint(hwnd, &ps);
+    auto buttonState = Button_GetState(hwnd);
+    Button_CustomDraw(hwnd, ps,
+      state().bordered, false, self().enabled(true), buttonState,
+      self().font(true), state().icon, state().orientation, state().text
+    );
+    EndPaint(hwnd, &ps);
+    return false;
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
+}
+
+//
 
 auto pButton::_setState() -> void {
   InvalidateRect(hwnd, 0, false);

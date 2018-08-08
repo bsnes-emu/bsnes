@@ -47,8 +47,8 @@ auto InputManager::bindHotkeys() -> void {
     video.setBlocking(false);
     audio.setBlocking(false);
   }).onRelease([] {
-    video.setBlocking(settings["Video/Blocking"].boolean());
-    audio.setBlocking(settings["Audio/Blocking"].boolean());
+    video.setBlocking(settings.video.blocking);
+    audio.setBlocking(settings.audio.blocking);
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {

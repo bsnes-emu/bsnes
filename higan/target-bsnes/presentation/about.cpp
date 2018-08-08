@@ -14,7 +14,7 @@ auto AboutWindow::create() -> void {
   versionLabel.setText({tr("Version"), ":"}).setAlignment(1.0);
   versionValue.setText(Emulator::Version);
   authorLabel.setText({tr("Author"), ":"}).setAlignment(1.0);
-  authorValue.setText(Emulator::Author);
+  authorValue.setText(Emulator::Author).setToolTip("ビュウ");
   licenseLabel.setText({tr("License"), ":"}).setAlignment(1.0);
   licenseValue.setText(Emulator::License);
   websiteLabel.setText({tr("Website"), ":"}).setAlignment(1.0);

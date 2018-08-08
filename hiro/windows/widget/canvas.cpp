@@ -2,64 +2,9 @@
 
 namespace hiro {
 
-static auto CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto canvas = dynamic_cast<mCanvas*>(object);
-  if(!canvas) return DefWindowProc(hwnd, msg, wparam, lparam);
-
-  if(msg == WM_DROPFILES) {
-    if(auto paths = DropPaths(wparam)) canvas->doDrop(paths);
-    return false;
-  }
-
-  if(msg == WM_GETDLGCODE) {
-    return DLGC_STATIC | DLGC_WANTCHARS;
-  }
-
-  if(msg == WM_ERASEBKGND) {
-    if(auto self = canvas->self()) self->_paint();
-    return true;
-  }
-
-  if(msg == WM_PAINT) {
-    if(auto self = canvas->self()) self->_paint();
-    return false;
-  }
-
-  if(msg == WM_MOUSEMOVE) {
-    TRACKMOUSEEVENT tracker{sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd};
-    TrackMouseEvent(&tracker);
-    canvas->doMouseMove({(int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam)});
-  }
-
-  if(msg == WM_MOUSELEAVE) {
-    canvas->doMouseLeave();
-  }
-
-  if(msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN) {
-    switch(msg) {
-    case WM_LBUTTONDOWN: canvas->doMousePress(Mouse::Button::Left); break;
-    case WM_MBUTTONDOWN: canvas->doMousePress(Mouse::Button::Middle); break;
-    case WM_RBUTTONDOWN: canvas->doMousePress(Mouse::Button::Right); break;
-    }
-  }
-
-  if(msg == WM_LBUTTONUP || msg == WM_MBUTTONUP || msg == WM_RBUTTONUP) {
-    switch(msg) {
-    case WM_LBUTTONUP: canvas->doMouseRelease(Mouse::Button::Left); break;
-    case WM_MBUTTONUP: canvas->doMouseRelease(Mouse::Button::Middle); break;
-    case WM_RBUTTONUP: canvas->doMouseRelease(Mouse::Button::Right); break;
-    }
-  }
-
-  return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
 auto pCanvas::construct() -> void {
-  hwnd = CreateWindow(L"hiroCanvas", L"", WS_CHILD, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  hwnd = CreateWindow(L"hiroWidget", L"", WS_CHILD, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  pWidget::construct();
   setDroppable(state().droppable);
   update();
 }
@@ -99,31 +44,101 @@ auto pCanvas::update() -> void {
   _redraw();
 }
 
+//
+
+auto pCanvas::doMouseLeave() -> void {
+  return self().doMouseLeave();
+}
+
+auto pCanvas::doMouseMove(int x, int y) -> void {
+  return self().doMouseMove({x, y});
+}
+
+auto pCanvas::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_DROPFILES) {
+    if(auto paths = DropPaths(wparam)) self().doDrop(paths);
+    return false;
+  }
+
+  if(msg == WM_GETDLGCODE) {
+    return DLGC_STATIC | DLGC_WANTCHARS;
+  }
+
+  if(msg == WM_ERASEBKGND || msg == WM_PAINT) {
+    _paint();
+    return msg == WM_ERASEBKGND;
+  }
+
+  if(msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN) {
+    switch(msg) {
+    case WM_LBUTTONDOWN: self().doMousePress(Mouse::Button::Left); break;
+    case WM_MBUTTONDOWN: self().doMousePress(Mouse::Button::Middle); break;
+    case WM_RBUTTONDOWN: self().doMousePress(Mouse::Button::Right); break;
+    }
+  }
+
+  if(msg == WM_LBUTTONUP || msg == WM_MBUTTONUP || msg == WM_RBUTTONUP) {
+    switch(msg) {
+    case WM_LBUTTONUP: self().doMouseRelease(Mouse::Button::Left); break;
+    case WM_MBUTTONUP: self().doMouseRelease(Mouse::Button::Middle); break;
+    case WM_RBUTTONUP: self().doMouseRelease(Mouse::Button::Right); break;
+    }
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
+}
+
+//
+
 auto pCanvas::_paint() -> void {
   PAINTSTRUCT ps;
   BeginPaint(hwnd, &ps);
 
+  int sx = 0, sy = 0, dx = 0, dy = 0;
+  int width = this->width;
+  int height = this->height;
+  auto geometry = self().geometry();
+
+  if(width <= geometry.width()) {
+    sx = 0;
+    dx = (geometry.width() - width) / 2;
+  } else {
+    sx = (width - geometry.width()) / 2;
+    dx = 0;
+    width = geometry.width();
+  }
+
+  if(height <= geometry.height()) {
+    sy = 0;
+    dy = (geometry.height() - height) / 2;
+  } else {
+    sy = (height - geometry.height()) / 2;
+    dy = 0;
+    height = geometry.height();
+  }
+
   HDC hdc = CreateCompatibleDC(ps.hdc);
-  BITMAPINFO bmi;
-  memset(&bmi, 0, sizeof(BITMAPINFO));
+  BITMAPINFO bmi{};
   bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
   bmi.bmiHeader.biPlanes = 1;
   bmi.bmiHeader.biBitCount = 32;
   bmi.bmiHeader.biCompression = BI_RGB;
   bmi.bmiHeader.biWidth = width;
   bmi.bmiHeader.biHeight = -height;  //GDI stores bitmaps upside now; negative height flips bitmap
-  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32_t);
+  bmi.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
   void* bits = nullptr;
   HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
   if(bits) {
-    auto source = (const uint8_t*)pixels.data();
-    auto target = (uint8_t*)bits;
-    for(auto n : range(width * height)) {
-      target[0] = (source[0] * source[3]) / 255;
-      target[1] = (source[1] * source[3]) / 255;
-      target[2] = (source[2] * source[3]) / 255;
-      target[3] = (source[3]);
-      source += 4, target += 4;
+    for(uint y : range(height)) {
+      auto source = (const uint8_t*)pixels.data() + (sy + y) * this->width * sizeof(uint32_t) + sx * sizeof(uint32_t);
+      auto target = (uint8_t*)bits + y * width * sizeof(uint32_t);
+      for(uint x : range(width)) {
+        target[0] = (source[0] * source[3]) / 255;
+        target[1] = (source[1] * source[3]) / 255;
+        target[2] = (source[2] * source[3]) / 255;
+        target[3] = (source[3]);
+        source += 4, target += 4;
+      }
     }
   }
   SelectObject(hdc, bitmap);
@@ -133,7 +148,7 @@ auto pCanvas::_paint() -> void {
   DrawThemeParentBackground(hwnd, ps.hdc, &rc);
 
   BLENDFUNCTION bf{AC_SRC_OVER, 0, (BYTE)255, AC_SRC_ALPHA};
-  AlphaBlend(ps.hdc, 0, 0, width, height, hdc, 0, 0, width, height, bf);
+  AlphaBlend(ps.hdc, dx, dy, width, height, hdc, 0, 0, width, height, bf);
 
   DeleteObject(bitmap);
   DeleteDC(hdc);

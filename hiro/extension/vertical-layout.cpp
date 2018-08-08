@@ -166,7 +166,7 @@ auto mVerticalLayout::setGeometry(Geometry geometry) -> type& {
     auto cell = this->cell(index);
     auto alignment = cell.alignment();
     if(!alignment) alignment = this->alignment();
-    if(!alignment) alignment = 0.5;
+    if(!alignment) alignment = 0.0;
     float cellWidth  = cell.size().width();
     float cellHeight = geometryHeight;
     if(cellWidth == Size::Minimum) cellWidth = cell.sizable()->minimumSize().width();

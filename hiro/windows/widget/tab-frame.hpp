@@ -17,7 +17,6 @@ struct pTabFrame : pWidget {
   auto _buildImageList() -> void;
   auto _synchronizeSizable() -> void;
 
-  WindowProc windowProc = nullptr;
   HIMAGELIST imageList = nullptr;
 };
 

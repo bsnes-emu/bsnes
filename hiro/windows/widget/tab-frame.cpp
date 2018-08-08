@@ -3,14 +3,11 @@
 namespace hiro {
 
 static auto CALLBACK TabFrame_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
-    if(auto tabFrame = dynamic_cast<mTabFrame*>(object)) {
-      if(auto self = tabFrame->self()) {
-        return Shared_windowProc(self->windowProc, hwnd, msg, wparam, lparam);
-      }
+  if(auto tabFrame = (mTabFrame*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
+    if(auto self = tabFrame->self()) {
+      return Shared_windowProc(self->defaultWindowProc, hwnd, msg, wparam, lparam);
     }
   }
-
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
@@ -19,10 +16,8 @@ auto pTabFrame::construct() -> void {
     WC_TABCONTROL, L"", WS_CHILD | WS_TABSTOP,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  pWidget::construct();
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)TabFrame_windowProc);
-  pWidget::_setState();
   for(auto& item : state().items) append(item);
 }
 
@@ -87,6 +82,8 @@ auto pTabFrame::setVisible(bool visible) -> void {
     }
   }
 }
+
+//
 
 auto pTabFrame::_buildImageList() -> void {
   unsigned size = pFont::size(hfont, " ").height();

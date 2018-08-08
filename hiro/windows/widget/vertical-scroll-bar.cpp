@@ -7,8 +7,7 @@ auto pVerticalScrollBar::construct() -> void {
     L"SCROLLBAR", L"", WS_CHILD | SBS_VERT,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setLength(state().length);
   setPosition(state().position);
 }

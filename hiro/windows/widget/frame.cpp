@@ -6,8 +6,7 @@ auto pFrame::construct() -> void {
   hwnd = CreateWindow(L"BUTTON", L"",
     WS_CHILD | BS_GROUPBOX,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setText(state().text);
 }
 

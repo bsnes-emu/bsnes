@@ -27,4 +27,11 @@ struct Oscillator {
   natural _frequency;
 };
 
+struct Slot {
+  auto& type(string type) { _type = type; return *this; }
+  auto text() const -> string;
+
+  string _type;
+};
+
 }

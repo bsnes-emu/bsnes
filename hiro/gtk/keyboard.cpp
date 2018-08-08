@@ -8,7 +8,7 @@ auto pKeyboard::poll() -> vector<bool> {
   vector<bool> result;
   char state[256];
   #if defined(DISPLAY_XORG)
-  XQueryKeymap(pApplication::display, state);
+  XQueryKeymap(pApplication::state().display, state);
   #endif
   for(auto& code : settings.keycodes) {
     result.append(_pressed(state, code));
@@ -19,7 +19,7 @@ auto pKeyboard::poll() -> vector<bool> {
 auto pKeyboard::pressed(unsigned code) -> bool {
   char state[256];
   #if defined(DISPLAY_XORG)
-  XQueryKeymap(pApplication::display, state);
+  XQueryKeymap(pApplication::state().display, state);
   #endif
   return _pressed(state, code);
 }
@@ -226,8 +226,8 @@ auto pKeyboard::_translate(unsigned code) -> signed {
 auto pKeyboard::initialize() -> void {
   auto append = [](unsigned lo, unsigned hi = 0) {
     #if defined(DISPLAY_XORG)
-    lo = lo ? (uint8_t)XKeysymToKeycode(pApplication::display, lo) : 0;
-    hi = hi ? (uint8_t)XKeysymToKeycode(pApplication::display, hi) : 0;
+    lo = lo ? (uint8_t)XKeysymToKeycode(pApplication::state().display, lo) : 0;
+    hi = hi ? (uint8_t)XKeysymToKeycode(pApplication::state().display, hi) : 0;
     #endif
     settings.keycodes.append(lo | (hi << 8));
   };

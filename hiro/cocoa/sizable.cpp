@@ -13,6 +13,7 @@ auto pSizable::minimumSize() const -> Size {
 }
 
 auto pSizable::setGeometry(Geometry geometry) -> void {
+  self().doSize();
 }
 
 }

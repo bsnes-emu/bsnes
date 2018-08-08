@@ -9,11 +9,15 @@ struct AboutWindow : Window {
 };
 
 struct Presentation : Window {
+  enum : uint { StatusHeight = 24 };
+
   Presentation();
   auto updateEmulatorMenu() -> void;
   auto updateEmulatorDeviceSelections() -> void;
+  auto updateSizeMenu() -> void;
   auto clearViewport() -> void;
-  auto resizeViewport(bool resizeWindow = true) -> void;
+  auto resizeViewport() -> void;
+  auto resizeWindow() -> void;
   auto toggleFullScreen() -> void;
   auto loadSystems() -> void;
   auto loadShaders() -> void;
@@ -29,10 +33,17 @@ struct Presentation : Window {
       MenuItem powerSystem{&systemMenu};
       MenuItem unloadSystem{&systemMenu};
     Menu settingsMenu{&menuBar};
-      Menu videoScaleMenu{&settingsMenu};
-        MenuItem videoScaleSmall{&videoScaleMenu};
-        MenuItem videoScaleMedium{&videoScaleMenu};
-        MenuItem videoScaleLarge{&videoScaleMenu};
+      Menu sizeMenu{&settingsMenu};
+      Group sizeGroup;
+      Menu outputMenu{&settingsMenu};
+        MenuRadioItem centerViewport{&outputMenu};
+        MenuRadioItem scaleViewport{&outputMenu};
+        MenuRadioItem stretchViewport{&outputMenu};
+        Group outputGroup{&centerViewport, &scaleViewport, &stretchViewport};
+        MenuSeparator outputSeparator{&outputMenu};
+        MenuCheckItem adaptiveSizing{&outputMenu};
+        MenuCheckItem aspectCorrection{&outputMenu};
+        MenuCheckItem showOverscanArea{&outputMenu};
       Menu videoEmulationMenu{&settingsMenu};
         MenuCheckItem blurEmulation{&videoEmulationMenu};
         MenuCheckItem colorEmulation{&videoEmulationMenu};
@@ -85,8 +96,11 @@ struct Presentation : Window {
         Widget iconBefore{&iconLayout, Size{128, ~0}, 0};
         Canvas iconCanvas{&iconLayout, Size{112, 112}, 0};
         Widget iconAfter{&iconLayout, Size{128, 8}, 0};
-
-  StatusBar statusBar{this};
+    HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
+      Label spacerLeft{&statusLayout, Size{8, ~0}, 0};
+      Label statusMessage{&statusLayout, Size{~0, ~0}, 0};
+      Label statusInfo{&statusLayout, Size{100, ~0}, 0};
+      Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 
 extern unique_pointer<AboutWindow> aboutWindow;

@@ -7,31 +7,37 @@ static const uint Windows7     = 0x0601;
 
 static auto Button_CustomDraw(HWND, PAINTSTRUCT&, bool, bool, bool, unsigned, const Font&, const image&, Orientation, const string&) -> void;
 
-static auto OsVersion() -> unsigned {
+static auto OsVersion() -> uint {
   OSVERSIONINFO versionInfo{0};
   versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
   GetVersionEx(&versionInfo);
   return (versionInfo.dwMajorVersion << 8) + (versionInfo.dwMajorVersion << 0);
 }
 
+static auto CreateBitmap(HDC hdc, uint width, uint height, uint32_t*& data) -> HBITMAP {
+  BITMAPINFO info{};
+  info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+  info.bmiHeader.biWidth = width;
+  info.bmiHeader.biHeight = -(int)height;  //bitmaps are stored upside down unless we negate height
+  info.bmiHeader.biPlanes = 1;
+  info.bmiHeader.biBitCount = 32;
+  info.bmiHeader.biCompression = BI_RGB;
+  info.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
+  void* bits = nullptr;
+  auto bitmap = CreateDIBSection(hdc, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+  data = (uint32_t*)bits;
+  return bitmap;
+}
+
 static auto CreateBitmap(image icon) -> HBITMAP {
   icon.alphaMultiply();  //Windows AlphaBlend() requires premultiplied image data
   icon.transform();
-  HDC hdc = GetDC(0);
-  BITMAPINFO bitmapInfo;
-  memset(&bitmapInfo, 0, sizeof(BITMAPINFO));
-  bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  bitmapInfo.bmiHeader.biWidth = icon.width();
-  bitmapInfo.bmiHeader.biHeight = -(signed)icon.height();  //bitmaps are stored upside down unless we negate height
-  bitmapInfo.bmiHeader.biPlanes = 1;
-  bitmapInfo.bmiHeader.biBitCount = 32;
-  bitmapInfo.bmiHeader.biCompression = BI_RGB;
-  bitmapInfo.bmiHeader.biSizeImage = icon.size();
-  void* bits = nullptr;
-  HBITMAP hbitmap = CreateDIBSection(hdc, &bitmapInfo, DIB_RGB_COLORS, &bits, NULL, 0);
-  if(bits) memory::copy(bits, icon.data(), icon.size());
-  ReleaseDC(0, hdc);
-  return hbitmap;
+  uint32_t* data = nullptr;
+  auto hdc = GetDC(nullptr);
+  auto bitmap = CreateBitmap(hdc, icon.width(), icon.height(), data);
+  memory::copy(data, icon.data(), icon.size());
+  ReleaseDC(nullptr, hdc);
+  return bitmap;
 }
 
 static auto CreateRGB(const Color& color) -> COLORREF {
@@ -60,9 +66,21 @@ static auto DropPaths(WPARAM wparam) -> vector<string> {
   return paths;
 }
 
+static auto WINAPI EnumVisibleChildWindowsProc(HWND hwnd, LPARAM lparam) -> BOOL {
+  auto children = (vector<HWND>*)lparam;
+  if(IsWindowVisible(hwnd)) children->append(hwnd);
+  return true;
+}
+
+static auto EnumVisibleChildWindows(HWND hwnd) -> vector<HWND> {
+  vector<HWND> children;
+  EnumChildWindows(hwnd, EnumVisibleChildWindowsProc, (LPARAM)&children);
+  return children;
+}
+
 static auto GetWindowZOrder(HWND hwnd) -> unsigned {
-  unsigned z = 0;
-  for(HWND next = hwnd; next != NULL; next = GetWindow(next, GW_HWNDPREV)) z++;
+  uint z = 0;
+  for(HWND next = hwnd; next != nullptr; next = GetWindow(next, GW_HWNDPREV)) z++;
   return z;
 }
 
@@ -109,6 +127,10 @@ static auto ScrollEvent(HWND hwnd, WPARAM wparam) -> unsigned {
   //Windows may clamp position to scrollbar range
   GetScrollInfo(hwnd, SB_CTL, &info);
   return info.nPos;
+}
+
+static auto CALLBACK Default_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
 //separate because PopupMenu HWND does not contain GWLP_USERDATA pointing at Window needed for Shared_windowProc
@@ -383,6 +405,47 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     break;
   }
 
+  //catch mouse events over disabled windows
+  case WM_MOUSEMOVE:
+  case WM_MOUSELEAVE:
+  case WM_MOUSEHOVER: {
+    POINT p{};
+    GetCursorPos(&p);
+    ScreenToClient(hwnd, &p);
+    for(auto window : EnumVisibleChildWindows(hwnd)) {
+      if(auto widget = (mWidget*)GetWindowLongPtr(window, GWLP_USERDATA)) {
+        auto geometry = widget->geometry();
+        if(p.x <  geometry.x()) continue;
+        if(p.y <  geometry.y()) continue;
+        if(p.x >= geometry.x() + geometry.width ()) continue;
+        if(p.y >= geometry.y() + geometry.height()) continue;
+
+        if(msg == WM_MOUSEMOVE) {
+          TRACKMOUSEEVENT event{sizeof(TRACKMOUSEEVENT)};
+          event.hwndTrack = hwnd;
+          event.dwFlags = TME_LEAVE | TME_HOVER;
+          event.dwHoverTime = 1500;
+          TrackMouseEvent(&event);
+          POINT p{};
+          GetCursorPos(&p);
+          widget->self()->doMouseMove(p.x, p.y);
+          if(auto toolTip = pApplication::state().toolTip) {
+            toolTip->windowProc(hwnd, msg, wparam, lparam);
+          }
+        }
+
+        if(msg == WM_MOUSELEAVE) {
+          widget->self()->doMouseLeave();
+        }
+
+        if(msg == WM_MOUSEHOVER) {
+          widget->self()->doMouseHover();
+        }
+      }
+    }
+    break;
+  }
+
   #if defined(Hiro_TableView)
   case AppMessage::TableView_doPaint: {
     if(auto tableView = (mTableView*)lparam) {
@@ -402,7 +465,7 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   #endif
   }
 
-  return windowProc(hwnd, msg, wparam, lparam);
+  return CallWindowProc(windowProc, hwnd, msg, wparam, lparam);
 }
 
 }

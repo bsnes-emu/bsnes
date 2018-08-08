@@ -13,6 +13,9 @@ auto HotkeySettings::create() -> void {
     assignButton.setEnabled(batched.size() == 1);
     clearButton.setEnabled(batched.size() >= 1);
   });
+  mappingList.onSize([&] {
+    mappingList.resizeColumns();
+  });
   assignButton.setText("Assign").onActivate([&] {
     assignMapping();
   });

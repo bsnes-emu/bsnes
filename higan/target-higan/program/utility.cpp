@@ -105,21 +105,24 @@ auto Program::showMessage(const string& text) -> void {
 }
 
 auto Program::updateStatusText() -> void {
-  time_t currentTime = time(nullptr);
-
-  string text;
-  if((currentTime - statusTime) <= 2) {
-    text = statusMessage;
-  } else if(!emulator || emulator->loaded() == false) {
-    text = "No game loaded";
-  } else if(pause || (!focused() && settingsManager->input.pauseEmulation.checked())) {
-    text = "Paused";
-  } else {
-    text = statusText;
+  string message;
+  if(chrono::timestamp() - statusTime <= 2) {
+    message = statusMessage;
+  }
+  if(message != presentation->statusMessage.text()) {
+    presentation->statusMessage.setText(message);
   }
 
-  if(text != presentation->statusBar.text()) {
-    presentation->statusBar.setText(text);
+  string info;
+  if(!emulator || !emulator->loaded()) {
+    info = "Unloaded";
+  } else if(pause || (!focused() && settingsManager->input.pauseEmulation.checked())) {
+    info = "Paused";
+  } else {
+    info = statusInfo;
+  }
+  if(info != presentation->statusInfo.text()) {
+    presentation->statusInfo.setText(info);
   }
 }
 

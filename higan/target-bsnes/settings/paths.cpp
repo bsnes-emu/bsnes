@@ -10,12 +10,12 @@ auto PathSettings::create() -> void {
   gamesPath.setEditable(false);
   gamesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/Games"].setValue(location);
+      settings.path.games = location;
       refreshPaths();
     }
   });
   gamesReset.setText("Reset").onActivate([&] {
-    settings["Path/Games"].setValue("");
+    settings.path.games = "";
     refreshPaths();
   });
 
@@ -23,12 +23,12 @@ auto PathSettings::create() -> void {
   patchesPath.setEditable(false);
   patchesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/Patches"].setValue(location);
+      settings.path.patches = location;
       refreshPaths();
     }
   });
   patchesReset.setText("Reset").onActivate([&] {
-    settings["Path/Patches"].setValue("");
+    settings.path.patches = "";
     refreshPaths();
   });
 
@@ -36,12 +36,12 @@ auto PathSettings::create() -> void {
   savesPath.setEditable(false);
   savesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/Saves"].setValue(location);
+      settings.path.saves = location;
       refreshPaths();
     }
   });
   savesReset.setText("Reset").onActivate([&] {
-    settings["Path/Saves"].setValue("");
+    settings.path.saves = "";
     refreshPaths();
   });
 
@@ -49,12 +49,12 @@ auto PathSettings::create() -> void {
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/Cheats"].setValue(location);
+      settings.path.cheats = location;
       refreshPaths();
     }
   });
   cheatsReset.setText("Reset").onActivate([&] {
-    settings["Path/Cheats"].setValue("");
+    settings.path.cheats = "";
     refreshPaths();
   });
 
@@ -62,12 +62,12 @@ auto PathSettings::create() -> void {
   statesPath.setEditable(false);
   statesAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/States"].setValue(location);
+      settings.path.states = location;
       refreshPaths();
     }
   });
   statesReset.setText("Reset").onActivate([&] {
-    settings["Path/States"].setValue("");
+    settings.path.states = "";
     refreshPaths();
   });
 
@@ -75,12 +75,12 @@ auto PathSettings::create() -> void {
   screenshotsPath.setEditable(false);
   screenshotsAssign.setText("Assign ...").onActivate([&] {
     if(auto location = BrowserDialog().setParent(*settingsWindow).selectFolder()) {
-      settings["Path/Screenshots"].setValue(location);
+      settings.path.screenshots = location;
       refreshPaths();
     }
   });
   screenshotsReset.setText("Reset").onActivate([&] {
-    settings["Path/Screenshots"].setValue("");
+    settings.path.screenshots = "";
     refreshPaths();
   });
 
@@ -88,34 +88,34 @@ auto PathSettings::create() -> void {
 }
 
 auto PathSettings::refreshPaths() -> void {
-  if(auto location = settings["Path/Games"].text()) {
+  if(auto location = settings.path.games) {
     gamesPath.setText(location).setForegroundColor();
   } else {
-    gamesPath.setText("<last recently used>").setForegroundColor({128, 128, 128});
+    gamesPath.setText("(last recently used)").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/Patches"].text()) {
+  if(auto location = settings.path.patches) {
     patchesPath.setText(location).setForegroundColor();
   } else {
-    patchesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+    patchesPath.setText("(same as loaded game)").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/Saves"].text()) {
+  if(auto location = settings.path.saves) {
     savesPath.setText(location).setForegroundColor();
   } else {
-    savesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+    savesPath.setText("(same as loaded game)").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/Cheats"].text()) {
+  if(auto location = settings.path.cheats) {
     cheatsPath.setText(location).setForegroundColor();
   } else {
-    cheatsPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+    cheatsPath.setText("(same as loaded game)").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/States"].text()) {
+  if(auto location = settings.path.states) {
     statesPath.setText(location).setForegroundColor();
   } else {
-    statesPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+    statesPath.setText("(same as loaded game)").setForegroundColor({128, 128, 128});
   }
-  if(auto location = settings["Path/Screenshots"].text()) {
+  if(auto location = settings.path.screenshots) {
     screenshotsPath.setText(location).setForegroundColor();
   } else {
-    screenshotsPath.setText("<same as loaded game>").setForegroundColor({128, 128, 128});
+    screenshotsPath.setText("(same as loaded game)").setForegroundColor({128, 128, 128});
   }
 }

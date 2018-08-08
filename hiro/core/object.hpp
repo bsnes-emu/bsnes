@@ -46,9 +46,9 @@ struct mObject {
   auto visible(bool recursive = false) const -> bool;
 
 //private:
-//sizeof(mObject) == 72
+//sizeof(mObject) == 88
   struct State {
-    Font font;                  //16
+    Font font;                  //32
     set<Property> properties;   //16
     mObject* parent = nullptr;  // 8
     int offset = -1;            // 4

@@ -13,17 +13,33 @@ auto DriverSettings::create() -> void {
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
-  videoExclusiveToggle.setText("Exclusive fullscreen").onToggle([&] {
-    settings["Video/Exclusive"].setValue(videoExclusiveToggle.checked());
+  videoExclusiveToggle.setText("Exclusive").setToolTip(
+    "(Direct3D only)\n\n"
+    "Acquires exclusive access to the display in fullscreen mode.\n"
+    "Eliminates compositing issues such as video stuttering."
+  ).onToggle([&] {
+    settings.video.exclusive = videoExclusiveToggle.checked();
     program.updateVideoExclusive();
   });
-  videoBlockingToggle.setText("Synchronize").onToggle([&] {
-    settings["Video/Blocking"].setValue(videoBlockingToggle.checked());
+  videoBlockingToggle.setText("Synchronize").setToolTip(
+    "Waits for the video card to be ready before rendering frames.\n"
+    "Eliminates dropped or duplicated frames; but can distort audio.\n\n"
+    "With this option, it's recommended to disable audio sync,\n"
+    "and enable dynamic rate control. Or alternatively, adjust the\n"
+    "audio skew option to reduce buffer under/overflows."
+  ).onToggle([&] {
+    settings.video.blocking = videoBlockingToggle.checked();
     program.updateVideoBlocking();
     presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
-  videoFlushToggle.setText("GPU sync").onToggle([&] {
-    settings["Video/Flush"].setValue(videoFlushToggle.checked());
+  videoFlushToggle.setText("GPU sync").setToolTip({
+    "(OpenGL only)\n\n"
+    "Causes the GPU to wait until frames are fully rendered.\n"
+    "In the best case, this can remove up to one frame of input lag.\n"
+    "However, it incurs a roughly 20% performance penalty.\n\n"
+    "You should disable this option unless you find it necessary."
+  }).onToggle([&] {
+    settings.video.flush = videoFlushToggle.checked();
     program.updateVideoFlush();
   });
   videoSpacer.setColor({192, 192, 192});
@@ -41,17 +57,34 @@ auto DriverSettings::create() -> void {
   audioFrequencyOption.onChange([&] { audioFrequencyChange(); });
   audioLatencyLabel.setText("Latency:");
   audioLatencyOption.onChange([&] { audioLatencyChange(); });
-  audioExclusiveToggle.setText("Exclusive").onToggle([&] {
-    settings["Audio/Exclusive"].setValue(audioExclusiveToggle.checked());
+  audioExclusiveToggle.setText("Exclusive").setToolTip(
+    "(ASIO, WASAPI only)\n\n"
+    "Acquires exclusive control of the sound card device.\n"
+    "This can significantly reduce audio latency.\n"
+    "However, it will block sounds from all other applications."
+  ).onToggle([&] {
+    settings.audio.exclusive = audioExclusiveToggle.checked();
     program.updateAudioExclusive();
   });
-  audioBlockingToggle.setText("Synchronize").onToggle([&] {
-    settings["Audio/Blocking"].setValue(audioBlockingToggle.checked());
+  audioBlockingToggle.setText("Synchronize").setToolTip(
+    "Waits for the audio card to be ready before outputting samples.\n"
+    "Eliminates audio distortio; but can distort video.\n\n"
+    "With this option, it's recommended to disable video sync.\n"
+    "For best results, use this with an adaptive sync monitor."
+  ).onToggle([&] {
+    settings.audio.blocking = audioBlockingToggle.checked();
     program.updateAudioBlocking();
     presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
-  audioDynamicToggle.setText("Dynamic rate").onToggle([&] {
-    settings["Audio/Dynamic"].setValue(audioDynamicToggle.checked());
+  audioDynamicToggle.setText("Dynamic rate").setToolTip(
+    "(OSS only)\n\n"
+    "Dynamically adjusts the audio frequency by tiny amounts.\n"
+    "Use this with video sync enabled, and audio sync disabled.\n\n"
+    "This can produce perfectly smooth video and clean audio,\n"
+    "but only if your monitor refresh rate is set correctly:\n"
+    "60hz for NTSC games, and 50hz for PAL games."
+  ).onToggle([&] {
+    settings.audio.dynamic = audioDynamicToggle.checked();
     program.updateAudioDynamic();
   });
   audioSpacer.setColor({192, 192, 192});
@@ -90,7 +123,7 @@ auto DriverSettings::videoDriverChanged() -> void {
 
 auto DriverSettings::videoDriverChange() -> void {
   auto item = videoDriverOption.selected();
-  settings["Video/Driver"].setValue(item.text());
+  settings.video.driver = item.text();
   if(!emulator->loaded() || item.text() == "None" || MessageDialog(
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
@@ -98,10 +131,10 @@ auto DriverSettings::videoDriverChange() -> void {
   ).setParent(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
-    settings["Crashed"].setValue(true);
+    settings.general.crashed = true;
     settings.save();
     program.updateVideoDriver(settingsWindow);
-    settings["Crashed"].setValue(false);
+    settings.general.crashed = false;
     settings.save();
     videoDriverChanged();
   }
@@ -120,7 +153,7 @@ auto DriverSettings::videoFormatChanged() -> void {
 
 auto DriverSettings::videoFormatChange() -> void {
   auto item = videoFormatOption.selected();
-  settings["Video/Format"].setValue(item.text());
+  settings.video.format = item.text();
   video.setFormat(item.text());
 }
 
@@ -146,7 +179,7 @@ auto DriverSettings::audioDriverChanged() -> void {
 
 auto DriverSettings::audioDriverChange() -> void {
   auto item = audioDriverOption.selected();
-  settings["Audio/Driver"].setValue(item.text());
+  settings.audio.driver = item.text();
   if(!emulator->loaded() || item.text() == "None" || MessageDialog(
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
@@ -154,10 +187,10 @@ auto DriverSettings::audioDriverChange() -> void {
   ).setParent(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
-    settings["Crashed"].setValue(true);
+    settings.general.crashed = true;
     settings.save();
     program.updateAudioDriver(settingsWindow);
-    settings["Crashed"].setValue(false);
+    settings.general.crashed = false;
     settings.save();
     audioDriverChanged();
   }
@@ -176,7 +209,7 @@ auto DriverSettings::audioDeviceChanged() -> void {
 
 auto DriverSettings::audioDeviceChange() -> void {
   auto item = audioDeviceOption.selected();
-  settings["Audio/Device"].setValue(item.text());
+  settings.audio.device = item.text();
   program.updateAudioDevice();
   audioFrequencyChanged();
   audioLatencyChanged();
@@ -186,7 +219,7 @@ auto DriverSettings::audioFrequencyChanged() -> void {
   audioFrequencyOption.reset();
   for(auto& frequency : audio.hasFrequencies()) {
     ComboButtonItem item{&audioFrequencyOption};
-    item.setText({(uint)frequency, "hz"});
+    item.setText({frequency, "hz"});
     if(frequency == audio.frequency()) item.setSelected();
   }
 //audioFrequencyOption.setEnabled(audio->hasFrequency());
@@ -195,7 +228,7 @@ auto DriverSettings::audioFrequencyChanged() -> void {
 
 auto DriverSettings::audioFrequencyChange() -> void {
   auto item = audioFrequencyOption.selected();
-  settings["Audio/Frequency"].setValue(item.text());
+  settings.audio.frequency = item.text().natural();
   program.updateAudioFrequency();
 }
 
@@ -212,7 +245,7 @@ auto DriverSettings::audioLatencyChanged() -> void {
 
 auto DriverSettings::audioLatencyChange() -> void {
   auto item = audioLatencyOption.selected();
-  settings["Audio/Latency"].setValue(item.text());
+  settings.audio.latency = item.text().natural();
   program.updateAudioLatency();
 }
 
@@ -232,7 +265,7 @@ auto DriverSettings::inputDriverChanged() -> void {
 
 auto DriverSettings::inputDriverChange() -> void {
   auto item = inputDriverOption.selected();
-  settings["Input/Driver"].setValue(item.text());
+  settings.input.driver = item.text();
   if(!emulator->loaded() || item.text() == "None" || MessageDialog(
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
@@ -240,10 +273,10 @@ auto DriverSettings::inputDriverChange() -> void {
   ).setParent(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
-    settings["Crashed"].setValue(true);
+    settings.general.crashed = true;
     settings.save();
     program.updateInputDriver(settingsWindow);
-    settings["Crashed"].setValue(false);
+    settings.general.crashed = false;
     settings.save();
     inputDriverChanged();
   }

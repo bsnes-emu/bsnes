@@ -37,22 +37,22 @@ auto Program::create(vector<string> arguments) -> void {
   stateManager.create();
   manifestViewer.create();
 
-  if(settings["Crashed"].boolean()) {
+  if(settings.general.crashed) {
     MessageDialog(
       "Driver crash detected. Hardware drivers have been disabled.\n"
       "Please reconfigure drivers in the advanced settings panel."
     ).setParent(*presentation).information();
-    settings["Video/Driver"].setValue("None");
-    settings["Audio/Driver"].setValue("None");
-    settings["Input/Driver"].setValue("None");
+    settings.video.driver = "None";
+    settings.audio.driver = "None";
+    settings.input.driver = "None";
   }
 
-  settings["Crashed"].setValue(true);
+  settings.general.crashed = true;
   settings.save();
   updateVideoDriver(presentation);
   updateAudioDriver(presentation);
   updateInputDriver(presentation);
-  settings["Crashed"].setValue(false);
+  settings.general.crashed = false;
   settings.save();
 
   driverSettings.videoDriverChanged();
@@ -89,7 +89,7 @@ auto Program::main() -> void {
   emulator->run();
   if(emulatorSettings.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();
-    if(currentTime - autoSaveTime >= settings["Emulator/AutoSaveMemory/Interval"].natural()) {
+    if(currentTime - autoSaveTime >= settings.emulator.autoSaveMemory.interval) {
       autoSaveTime = currentTime;
       emulator->save();
     }

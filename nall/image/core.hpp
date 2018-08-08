@@ -34,7 +34,7 @@ image::image(const void* data_, uint size) {
 image::image(const vector<uint8_t>& buffer) : image(buffer.data(), buffer.size()) {
 }
 
-template<typename Type, uint Size> image::image(Type (&Name)[Size]) : image(Name, Size) {
+template<uint Size> image::image(const uint8_t (&Name)[Size]) : image(Name, Size) {
 }
 
 image::image() {

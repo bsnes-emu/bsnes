@@ -34,6 +34,9 @@ struct Configuration {
       bool enable = false;
     } dspFast;
   } hacks;
+
+private:
+  auto process(Markup::Node document, bool load) -> void;
 };
 
 extern Configuration configuration;

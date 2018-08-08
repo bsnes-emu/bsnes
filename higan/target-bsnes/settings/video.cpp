@@ -9,25 +9,25 @@ auto VideoSettings::create() -> void {
   colorLayout.column(0).setAlignment(1.0);
   luminanceLabel.setText("Luminance:");
   luminanceValue.setAlignment(0.5);
-  luminanceSlider.setLength(101).setPosition(settings["Video/Luminance"].natural()).onChange([&] {
+  luminanceSlider.setLength(101).setPosition(settings.video.luminance).onChange([&] {
     string value = {luminanceSlider.position(), "%"};
-    settings["Video/Luminance"].setValue(value);
+    settings.video.luminance = value.natural();
     luminanceValue.setText(value);
     program.updateVideoPalette();
   }).doChange();
   saturationLabel.setText("Saturation:");
   saturationValue.setAlignment(0.5);
-  saturationSlider.setLength(201).setPosition(settings["Video/Saturation"].natural()).onChange([&] {
+  saturationSlider.setLength(201).setPosition(settings.video.saturation).onChange([&] {
     string value = {saturationSlider.position(), "%"};
-    settings["Video/Saturation"].setValue(value);
+    settings.video.saturation = value.natural();
     saturationValue.setText(value);
     program.updateVideoPalette();
   }).doChange();
   gammaLabel.setText("Gamma:");
   gammaValue.setAlignment(0.5);
-  gammaSlider.setLength(101).setPosition(settings["Video/Gamma"].natural() - 100).onChange([&] {
+  gammaSlider.setLength(101).setPosition(settings.video.gamma - 100).onChange([&] {
     string value = {100 + gammaSlider.position(), "%"};
-    settings["Video/Gamma"].setValue(value);
+    settings.video.gamma = value.natural();
     gammaValue.setText(value);
     program.updateVideoPalette();
   }).doChange();

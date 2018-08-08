@@ -26,11 +26,6 @@ auto ToolsWindow::create() -> void {
   setAlignment({1.0, 1.0});
   setDismissable();
 
-  onSize([&] {
-    cheatEditor.cheatList.resizeColumns();
-    stateManager.stateList.resizeColumns();
-  });
-
   onClose([&] {
     setVisible(false);
   });
@@ -44,7 +39,6 @@ auto ToolsWindow::setVisible(bool visible) -> ToolsWindow& {
     stateWindow.setVisible(false);
   } else {
     Application::processEvents();
-    doSize();
   }
   return *this;
 }

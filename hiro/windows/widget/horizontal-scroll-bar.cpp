@@ -7,8 +7,7 @@ auto pHorizontalScrollBar::construct() -> void {
     L"SCROLLBAR", L"", WS_CHILD | WS_TABSTOP | SBS_HORZ,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setLength(state().length);
   setPosition(state().position);
 }

@@ -16,10 +16,9 @@ struct pCheckButton : pWidget {
   auto setVisible(bool visible) -> void override;
 
   auto onToggle() -> void;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
 
   auto _setState() -> void;
-
-  WindowProc windowProc = nullptr;
 };
 
 }

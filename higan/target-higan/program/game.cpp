@@ -41,7 +41,11 @@ auto Program::load(Emulator::Interface& interface) -> void {
   updateAudioEffects();
 
   presentation->viewportLayout.remove(presentation->iconLayout);
-  presentation->resizeViewport();
+  if(settings["View/Adaptive"].boolean()) {
+    presentation->resizeWindow();
+  } else {
+    presentation->resizeViewport();
+  }
   presentation->setTitle(emulator->titles().merge(" + "));
   presentation->systemMenu.setText(information.name).setVisible(true);
   presentation->toolsMenu.setVisible(true);
@@ -62,7 +66,11 @@ auto Program::unload() -> void {
   gamePaths.reset();
 
   presentation->viewportLayout.append(presentation->iconLayout, Size{0, ~0});
-  presentation->resizeViewport();
+  if(settings["View/Adaptive"].boolean()) {
+    presentation->resizeWindow();
+  } else {
+    presentation->resizeViewport();
+  }
   presentation->setTitle({"higan v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
   presentation->toolsMenu.setVisible(false);

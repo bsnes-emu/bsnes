@@ -24,13 +24,15 @@ auto hiro::initialize() -> void {
 
 #include <nall/main.hpp>
 auto nall::main(vector<string> arguments) -> void {
+  Application::setScreenSaver(settings.general.screenSaver);
+  Application::setToolTips(settings.general.toolTips);
+
   string locale;  // = "日本語";
   for(auto argument : arguments) {
     if(argument.beginsWith("--locale=")) {
       locale = argument.trimLeft("--locale=", 1L);
     }
   }
-  Application::setScreenSaver(!settings["UserInterface/SuppressScreenSaver"].boolean());
   Application::locale().scan(locate("locales/"));
   Application::locale().select(locale);
   emulator = new SuperFamicom::Interface;

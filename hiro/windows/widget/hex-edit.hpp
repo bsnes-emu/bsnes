@@ -18,8 +18,8 @@ struct pHexEdit : pWidget {
   auto rowsScrollable() -> signed;
   auto scrollPosition() -> signed;
   auto scrollTo(signed position) -> void;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
 
-  WindowProc windowProc = nullptr;
   HWND scrollBar = nullptr;
   HBRUSH backgroundBrush = nullptr;
 };

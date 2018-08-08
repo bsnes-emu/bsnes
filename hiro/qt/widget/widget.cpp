@@ -25,7 +25,9 @@ auto pWidget::construct() -> void {
     qtWidget->setParent(container);
   }
 
+  setEnabled(self().enabled(true));
   setFont(self().font(true));
+  setToolTip(self().toolTip());
   setVisible(self().visible(true));
 }
 
@@ -55,7 +57,12 @@ auto pWidget::setFont(const Font& font) -> void {
 auto pWidget::setGeometry(Geometry geometry) -> void {
   if(!qtWidget) return;
   qtWidget->setGeometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
-  self().doSize();
+  pSizable::setGeometry(geometry);
+}
+
+auto pWidget::setToolTip(const string& toolTip) -> void {
+  if(!qtWidget) return;
+  qtWidget->setToolTip(QString::fromUtf8(toolTip));
 }
 
 auto pWidget::setVisible(bool visible) -> void {

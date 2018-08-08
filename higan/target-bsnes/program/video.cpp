@@ -1,9 +1,9 @@
 auto Program::updateVideoDriver(Window parent) -> void {
   auto changed = (bool)video;
-  video.create(settings["Video/Driver"].text());
+  video.create(settings.video.driver);
   video.setContext(presentation.viewport.handle());
   if(changed) {
-    settings["Video/Format"].setValue(video.format());
+    settings.video.format = video.format();
   }
   updateVideoExclusive();
   updateVideoBlocking();
@@ -22,9 +22,9 @@ auto Program::updateVideoDriver(Window parent) -> void {
 
   if(!video.ready()) {
     MessageDialog({
-      "Error: failed to initialize [", settings["Video/Driver"].text(), "] video driver."
+      "Error: failed to initialize [", settings.video.driver, "] video driver."
     }).setParent(parent).error();
-    settings["Video/Driver"].setValue("None");
+    settings.video.driver = "None";
     return updateVideoDriver(parent);
   }
 
@@ -37,40 +37,37 @@ auto Program::updateVideoExclusive() -> void {
 }
 
 auto Program::updateVideoBlocking() -> void {
-  video.setBlocking(settings["Video/Blocking"].boolean());
+  video.setBlocking(settings.video.blocking);
 }
 
 auto Program::updateVideoFlush() -> void {
-  video.setFlush(settings["Video/Flush"].boolean());
+  video.setFlush(settings.video.flush);
 }
 
 auto Program::updateVideoFormat() -> void {
-  if(!video.hasFormat(settings["Video/Format"].text())) {
-    settings["Video/Format"].setValue(video.format());
+  if(!video.hasFormat(settings.video.format)) {
+    settings.video.format = video.format();
   }
-  video.setFormat(settings["Video/Format"].text());
+  video.setFormat(settings.video.format);
 }
 
 auto Program::updateVideoShader() -> void {
-  if(settings["Video/Driver"].text() == "OpenGL"
-  && settings["Video/Shader"].text() != "None"
-  && settings["Video/Shader"].text() != "Blur"
+  if(settings.video.driver == "OpenGL"
+  && settings.video.shader != "None"
+  && settings.video.shader != "Blur"
   ) {
     video.setSmooth(false);
-    video.setShader(settings["Video/Shader"].text());
+    video.setShader(settings.video.shader);
   } else {
-    video.setSmooth(settings["Video/Shader"].text() == "Blur");
+    video.setSmooth(settings.video.shader == "Blur");
     video.setShader("");
   }
 }
 
 auto Program::updateVideoPalette() -> void {
-  emulator->configure("video/colorEmulation", false);
-  double luminance = settings["Video/Luminance"].natural() / 100.0;
-  double saturation = settings["Video/Saturation"].natural() / 100.0;
-  double gamma = settings["Video/Gamma"].natural() / 100.0;
-  Emulator::video.setLuminance(luminance);
-  Emulator::video.setSaturation(saturation);
-  Emulator::video.setGamma(gamma);
+  emulator->configure("Video/ColorEmulation", false);
+  Emulator::video.setLuminance(settings.video.luminance / 100.0);
+  Emulator::video.setSaturation(settings.video.saturation / 100.0);
+  Emulator::video.setGamma(settings.video.gamma / 100.0);
   Emulator::video.setPalette();
 }

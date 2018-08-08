@@ -8,7 +8,7 @@ auto pRadioLabel::construct() -> void {
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setGroup(state().group);
   setText(state().text);
 }

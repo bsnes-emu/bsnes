@@ -109,12 +109,12 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       superFamicom.location = gameQueue.takeLeft();
     } else {
       dialog.setTitle("Load Super Famicom");
-      dialog.setPath(path("Games", settings["Path/Recent/SuperFamicom"].text()));
+      dialog.setPath(path("Games", settings.path.recent.superFamicom));
       dialog.setFilters({string{"Super Famicom Games|*.sfc:*.smc:*.zip"}});
       superFamicom.location = dialog.openObject();
     }
     if(inode::exists(superFamicom.location)) {
-      settings["Path/Recent/SuperFamicom"].setValue(Location::dir(superFamicom.location));
+      settings.path.recent.superFamicom = Location::dir(superFamicom.location);
       if(loadSuperFamicom(superFamicom.location)) {
         return {id, dialog.option()};
       }
@@ -126,12 +126,12 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       gameBoy.location = gameQueue.takeLeft();
     } else {
       dialog.setTitle("Load Game Boy");
-      dialog.setPath(path("Games", settings["Path/Recent/GameBoy"].text()));
+      dialog.setPath(path("Games", settings.path.recent.gameBoy));
       dialog.setFilters({string{"Game Boy Games|*.gb:*.gbc:*.zip"}});
       gameBoy.location = dialog.openObject();
     }
     if(inode::exists(gameBoy.location)) {
-      settings["Path/Recent/GameBoy"].setValue(Location::dir(gameBoy.location));
+      settings.path.recent.gameBoy = Location::dir(gameBoy.location);
       if(loadGameBoy(gameBoy.location)) {
         return {id, dialog.option()};
       }
@@ -143,12 +143,12 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       bsMemory.location = gameQueue.takeLeft();
     } else {
       dialog.setTitle("Load BS Memory");
-      dialog.setPath(path("Games", settings["Path/Recent/BSMemory"].text()));
+      dialog.setPath(path("Games", settings.path.recent.bsMemory));
       dialog.setFilters({string{"BS Memory Games|*.bs:*.zip"}});
       bsMemory.location = dialog.openObject();
     }
     if(inode::exists(bsMemory.location)) {
-      settings["Path/Recent/BSMemory"].setValue(Location::dir(bsMemory.location));
+      settings.path.recent.bsMemory = Location::dir(bsMemory.location);
       if(loadBSMemory(bsMemory.location)) {
         return {id, dialog.option()};
       }
@@ -160,12 +160,12 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       sufamiTurboA.location = gameQueue.takeLeft();
     } else {
       dialog.setTitle("Load Sufami Turbo - Slot A");
-      dialog.setPath(path("Games", settings["Path/Recent/SufamiTurboA"].text()));
+      dialog.setPath(path("Games", settings.path.recent.sufamiTurboA));
       dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
       sufamiTurboA.location = dialog.openObject();
     }
     if(inode::exists(sufamiTurboA.location)) {
-      settings["Path/Recent/SufamiTurboA"].setValue(Location::dir(sufamiTurboA.location));
+      settings.path.recent.sufamiTurboA = Location::dir(sufamiTurboA.location);
       if(loadSufamiTurboA(sufamiTurboA.location)) {
         return {id, dialog.option()};
       }
@@ -177,12 +177,12 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       sufamiTurboB.location = gameQueue.takeLeft();
     } else {
       dialog.setTitle("Load Sufami Turbo - Slot B");
-      dialog.setPath(path("Games", settings["Path/Recent/SufamiTurboB"].text()));
+      dialog.setPath(path("Games", settings.path.recent.sufamiTurboB));
       dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
       sufamiTurboB.location = dialog.openObject();
     }
     if(inode::exists(sufamiTurboB.location)) {
-      settings["Path/Recent/SufamiTurboB"].setValue(Location::dir(sufamiTurboB.location));
+      settings.path.recent.sufamiTurboB = Location::dir(sufamiTurboB.location);
       if(loadSufamiTurboB(sufamiTurboB.location)) {
         return {id, dialog.option()};
       }
@@ -205,7 +205,7 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   screenshot.height = height;
 
   pitch >>= 2;
-  if(presentation.overscanCropping.checked()) {
+  if(!presentation.showOverscanArea.checked()) {
     if(height == 240) data +=  8 * pitch, height -= 16;
     if(height == 480) data += 16 * pitch, height -= 32;
   }

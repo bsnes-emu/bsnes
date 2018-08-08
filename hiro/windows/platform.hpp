@@ -49,6 +49,8 @@ static vector<wObject> windows;
 
 #include "sizable.hpp"
 
+#include "tool-tip.hpp"
+
 #include "widget/widget.hpp"
 #include "widget/button.hpp"
 #include "widget/canvas.hpp"

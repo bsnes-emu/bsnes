@@ -50,11 +50,11 @@ struct Program : Emulator::Platform {
   vector<string> gameQueue;  //for command-line and drag-and-drop loading
   vector<string> gamePaths;  //for keeping track of loaded folder locations
 
-  time_t autoSaveTime = 0;  //for automatically saving RAM periodically
+  uint64 autoSaveTime = 0;  //for automatically saving RAM periodically
 
-  string statusText;
+  uint64 statusTime = 0;  //for status message timeout after two seconds
   string statusMessage;
-  time_t statusTime = 0;
+  string statusInfo;
 };
 
 extern unique_pointer<Program> program;

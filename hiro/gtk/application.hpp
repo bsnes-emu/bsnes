@@ -11,12 +11,17 @@ struct pApplication {
 
   static auto initialize() -> void;
 
-  static vector<pWindow*> windows;
+  struct State {
+    vector<pWindow*> windows;
 
-  #if defined(DISPLAY_XORG)
-  static XlibDisplay* display;
-  static bool xdgScreenSaver;
-  #endif
+    #if defined(DISPLAY_XORG)
+    XlibDisplay* display = nullptr;
+    XlibWindow screenSaverWindow = 0;
+    bool screenSaverXDG = false;
+    #endif
+  };
+
+  static auto state() -> State&;
 };
 
 }

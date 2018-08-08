@@ -11,7 +11,13 @@ struct pWidget : pSizable {
   auto setFocused() -> void;
   auto setFont(const Font& font) -> void override;
   virtual auto setGeometry(Geometry geometry) -> void;
+  auto setToolTip(const string& toolTip) -> void;
   auto setVisible(bool visible) -> void override;
+
+  virtual auto doMouseHover() -> void;
+  virtual auto doMouseLeave() -> void;
+  virtual auto doMouseMove(int x, int y) -> void;
+  virtual auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT>;
 
   auto _parentHandle() -> HWND;
   auto _parentWidget() -> maybe<pWidget&>;
@@ -19,8 +25,10 @@ struct pWidget : pSizable {
   auto _setState() -> void;
 
   bool abstract = false;
-  HWND hwnd = 0;
-  HFONT hfont = 0;
+  WindowProc defaultWindowProc = nullptr;
+  HWND hwnd = nullptr;
+  HFONT hfont = nullptr;
+  unique_pointer<pToolTip> toolTip;
 };
 
 }

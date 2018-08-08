@@ -2,14 +2,14 @@
 struct mWidget : mSizable {
   Declare(Widget)
 
-  auto doSize() const -> void;
-  auto onSize(const function<void ()>& callback = {}) -> type&;
   auto remove() -> type& override;
+  auto setToolTip(const string& toolTip = "") -> type&;
+  auto toolTip() const -> string;
 
 //private:
-//sizeof(mWidget) == 8
+//sizeof(mWidget) == 32
   struct State {
-    function<void ()> onSize;
+    string toolTip;
   } state;
 };
 #endif

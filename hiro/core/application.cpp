@@ -72,13 +72,21 @@ auto Application::setScale(float scale) -> void {
 
 auto Application::setScreenSaver(bool screenSaver) -> void {
   state().screenSaver = screenSaver;
-  pApplication::setScreenSaver(screenSaver);
+  if(state().initialized) pApplication::setScreenSaver(screenSaver);
+}
+
+auto Application::setToolTips(bool toolTips) -> void {
+  state().toolTips = toolTips;
 }
 
 //this ensures Application::state is initialized prior to use
 auto Application::state() -> State& {
   static State state;
   return state;
+}
+
+auto Application::toolTips() -> bool {
+  return state().toolTips;
 }
 
 auto Application::unscale(float value) -> float {
@@ -135,11 +143,11 @@ auto Application::Cocoa::onQuit(const function<void ()>& callback) -> void {
 //========
 
 auto Application::initialize() -> void {
-  static bool initialized = false;
-  if(initialized == false) {
-    initialized = true;
+  if(!state().initialized) {
     hiro::initialize();
-    return pApplication::initialize();
+    pApplication::initialize();
+    state().initialized = true;
+    pApplication::setScreenSaver(state().screenSaver);
   }
 }
 

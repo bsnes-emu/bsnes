@@ -25,7 +25,7 @@ struct AudioPulseAudio : AudioDriver {
   }
 
   auto setBlocking(bool blocking) -> bool override { return true; }
-  auto setFrequency(double frequency) -> bool override { return initialize(); }
+  auto setFrequency(uint frequency) -> bool override { return initialize(); }
   auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto output(const double samples[]) -> void override {
@@ -43,7 +43,7 @@ struct AudioPulseAudio : AudioDriver {
       }
       uint length = pa_stream_writable_size(_stream);
       if(length >= _offset * pa_frame_size(&_specification)) break;
-      if(!_blocking) {
+      if(!self.blocking) {
         _offset = 0;
         return;
       }

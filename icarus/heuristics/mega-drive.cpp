@@ -85,9 +85,13 @@ auto MegaDrive::manifest() const -> string {
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  region: ", regions.left(), "\n");
   output.append("  board\n");
-  if(domesticName == "SONIC & KNUCKLES") {
+  if(domesticName == "Game Genie") {
+    output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
+    output.append(Slot{}.type("MegaDrive").text());
+  } else if(domesticName == "SONIC & KNUCKLES") {
     output.append(Memory{}.type("ROM").size(0x200000).content("Program").text());
     output.append(Memory{}.type("ROM").size( 0x40000).content("Patch").text());
+    output.append(Slot{}.type("MegaDrive").text());
   } else {
     output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
   }

@@ -46,7 +46,7 @@ auto Program::captureScreenshot() -> bool {
       auto width = capture.width();
       auto height = capture.height();
 
-      if(presentation.overscanCropping.checked()) {
+      if(!presentation.showOverscanArea.checked()) {
         if(height == 240) data +=  8 * pitch, height -= 16;
         if(height == 480) data += 16 * pitch, height -= 32;
       }

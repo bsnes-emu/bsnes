@@ -188,10 +188,10 @@ auto InputManager::initialize() -> void {
   input.onChange({&InputManager::onChange, this});
 
   lastPoll = chrono::millisecond();
-  frequency = max(1u, settings["Input/Frequency"].natural());
+  frequency = max(1u, settings.input.frequency);
 
   turboCounter = 0;
-  turboFrequency = max(1, settings["Input/Turbo/Frequency"].natural());
+  turboFrequency = max(1, settings.input.turbo.frequency);
 
   auto information = emulator->information();
   auto ports = emulator->ports();

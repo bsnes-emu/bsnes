@@ -70,18 +70,17 @@ auto Cartridge::load() -> bool {
     write = {&Cartridge::writeBanked, this};
   }
 
-  if(patch) {
+  if(information.document["game/board/slot(type=MegaDrive)"]) {
     slot = new Cartridge{depth + 1};
     if(!slot->load()) slot.reset();
-    read = {&Cartridge::readLockOn, this};
-    write = {&Cartridge::writeLockOn, this};
-  }
 
-  if(rom.data[0x120>>1]==0x4761 || rom.data[0x120>>1]==0x6147) {
-    slot = new Cartridge{depth + 1};
-    if(!slot->load()) slot.reset();
-    read = {&Cartridge::readGameGenie, this};
-    write = {&Cartridge::writeGameGenie, this};
+    if(patch) {
+      read = {&Cartridge::readLockOn, this};
+      write = {&Cartridge::writeLockOn, this};
+    } else {
+      read = {&Cartridge::readGameGenie, this};
+      write = {&Cartridge::writeGameGenie, this};
+    }
   }
 
   //easter egg: power draw increases with each successively stacked cartridge

@@ -10,9 +10,17 @@ struct pApplication {
   static auto setScreenSaver(bool screenSaver) -> void;
 
   static auto initialize() -> void;
-  static auto syncX() -> void;
+  static auto synchronize() -> void;
 
-  static XlibDisplay* display;
+  struct State {
+    #if defined(DISPLAY_XORG)
+    XlibDisplay* display = nullptr;
+    XlibWindow screenSaverWindow = 0;
+    bool screenSaverXDG = false;
+    #endif
+  };
+
+  static auto state() -> State&;
 };
 
 static QApplication* qtApplication = nullptr;

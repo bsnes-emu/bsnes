@@ -13,6 +13,7 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/traits.hpp>
+#include <nall/unique-pointer.hpp>
 #include <nall/utility.hpp>
 #include <nall/vector.hpp>
 
@@ -25,7 +26,7 @@ using nall::set;
 using nall::shared_pointer;
 using nall::shared_pointer_weak;
 using nall::string;
-using nall::string_pascal;
+using nall::unique_pointer;
 using nall::vector;
 
 namespace hiro {
@@ -1218,84 +1219,8 @@ struct mRadioLabel : mWidget {
 #endif
 
 #include "widget/source-edit.hpp"
-
-#if defined(Hiro_TabFrame)
-struct mTabFrame : mWidget {
-  Declare(TabFrame)
-  using mObject::remove;
-  friend class mTabFrameItem;
-
-  auto append(sTabFrameItem item) -> type&;
-  auto doChange() const -> void;
-  auto doClose(sTabFrameItem item) const -> void;
-  auto doMove(sTabFrameItem from, sTabFrameItem to) const -> void;
-  auto item(uint position) const -> TabFrameItem;
-  auto itemCount() const -> uint;
-  auto items() const -> vector<TabFrameItem>;
-  auto navigation() const -> Navigation;
-  auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onClose(const function<void (TabFrameItem)>& callback = {}) -> type&;
-  auto onMove(const function<void (TabFrameItem, TabFrameItem)>& callback = {}) -> type&;
-  auto remove(sTabFrameItem item) -> type&;
-  auto reset() -> type&;
-  auto selected() const -> TabFrameItem;
-  auto setEnabled(bool enabled = true) -> type& override;
-  auto setFont(const Font& font = {}) -> type& override;
-  auto setNavigation(Navigation navigation = Navigation::Top) -> type&;
-  auto setParent(mObject* object = nullptr, int offset = -1) -> type& override;
-  auto setVisible(bool visible = true) -> type& override;
-
-//private:
-  struct State {
-    vector<sTabFrameItem> items;
-    Navigation navigation = Navigation::Top;
-    function<void ()> onChange;
-    function<void (TabFrameItem)> onClose;
-    function<void (TabFrameItem, TabFrameItem)> onMove;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
-#if defined(Hiro_TabFrame)
-struct mTabFrameItem : mObject {
-  Declare(TabFrameItem)
-
-  auto append(sSizable sizable) -> type&;
-  auto closable() const -> bool;
-  auto icon() const -> image;
-  auto movable() const -> bool;
-  auto remove() -> type& override;
-  auto remove(sSizable sizable) -> type&;
-  auto reset() -> type&;
-  auto selected() const -> bool;
-  auto setClosable(bool closable = true) -> type&;
-  auto setEnabled(bool enabled = true) -> type& override;
-  auto setFont(const Font& font = {}) -> type& override;
-  auto setIcon(const image& icon = {}) -> type&;
-  auto setMovable(bool movable = true) -> type&;
-  auto setParent(mObject* object = nullptr, int offset = -1) -> type& override;
-  auto setSelected() -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto setVisible(bool visible = true) -> type& override;
-  auto sizable() const -> Sizable;
-  auto text() const -> string;
-
-//private:
-  struct State {
-    bool closable = false;
-    image icon;
-    bool movable = false;
-    bool selected = false;
-    sSizable sizable;
-    string text;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
+#include "widget/tab-frame.hpp"
+#include "widget/tab-frame-item.hpp"
 #include "widget/table-view.hpp"
 #include "widget/table-view-column.hpp"
 #include "widget/table-view-item.hpp"

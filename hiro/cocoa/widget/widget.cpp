@@ -14,6 +14,7 @@ auto pWidget::construct() -> void {
       if(auto p = window->self()) p->_append(self());
       setEnabled(self().enabled(true));
       setFont(self().font(true));
+      setToolTip(self().toolTip());
       setVisible(self().visible(true));
     }
   }
@@ -62,7 +63,11 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
     [cocoaView setFrame:NSMakeRect(geometry.x(), windowHeight - geometry.y() - geometry.height(), geometry.width(), geometry.height())];
     [[cocoaView superview] setNeedsDisplay:YES];
   }
-  self().doSize();
+  pSizable::setGeometry(geometry);
+}
+
+auto pWidget::setToolTip(const string& toolTip) -> void {
+  //TODO
 }
 
 auto pWidget::setVisible(bool visible) -> void {

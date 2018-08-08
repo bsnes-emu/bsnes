@@ -56,15 +56,17 @@ auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint 
 
   pitch >>= 2;
 
-  auto display = emulator->displays()[displayID];
-  if(display.type == Emulator::Interface::Display::Type::CRT) {
-    uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
-    uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
-    overscanHorizontal *= display.internalWidth / display.width;
-    overscanVertical *= display.internalHeight / display.height;
-    data += overscanVertical * pitch + overscanHorizontal;
-    width -= overscanHorizontal * 2;
-    height -= overscanVertical * 2;
+  if(!settings["View/Overscan"].boolean()) {
+    auto display = emulator->displays()[displayID];
+    if(display.type == Emulator::Interface::Display::Type::CRT) {
+      uint overscanHorizontal = settings["View/Overscan/Horizontal"].natural();
+      uint overscanVertical = settings["View/Overscan/Vertical"].natural();
+      overscanHorizontal *= display.internalWidth / display.width;
+      overscanVertical *= display.internalHeight / display.height;
+      data += overscanVertical * pitch + overscanHorizontal;
+      width -= overscanHorizontal * 2;
+      height -= overscanVertical * 2;
+    }
   }
 
   if(video->acquire(output, length, width, height)) {
@@ -85,7 +87,7 @@ auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint 
   current = chrono::timestamp();
   if(current != previous) {
     previous = current;
-    statusText = {"FPS: ", frameCounter};
+    statusInfo = {frameCounter, " FPS"};
     frameCounter = 0;
   }
 }

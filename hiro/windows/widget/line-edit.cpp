@@ -8,8 +8,7 @@ auto pLineEdit::construct() -> void {
     WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setBackgroundColor(state().backgroundColor);
   setEditable(state().editable);
   setText(state().text);

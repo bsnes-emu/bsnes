@@ -6,7 +6,9 @@ auto pWidget::construct() -> void {
   if(!gtkWidget) return;
   if(auto window = self().parentWindow(true)) {
     if(window->self()) window->self()->_append(self());
+    setEnabled(self().enabled(true));
     setFont(self().font(true));
+    setToolTip(self().toolTip());
     setVisible(self().visible(true));
   }
 }
@@ -58,7 +60,11 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
       locked = false;
     }
   }
-  self().doSize();
+  pSizable::setGeometry(geometry);
+}
+
+auto pWidget::setToolTip(const string& toolTip) -> void {
+  gtk_widget_set_tooltip_text(gtkWidget, toolTip);
 }
 
 auto pWidget::setVisible(bool visible) -> void {

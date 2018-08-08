@@ -25,6 +25,7 @@ struct pTableView : pWidget {
   auto onCustomDraw(LPARAM lparam) -> LRESULT;
   auto onSort(LPARAM lparam) -> void;
   auto onToggle(LPARAM lparam) -> void;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
 
   auto _backgroundColor(unsigned row, unsigned column) -> Color;
   auto _cellWidth(unsigned row, unsigned column) -> unsigned;
@@ -34,7 +35,6 @@ struct pTableView : pWidget {
   auto _setIcons() -> void;
   auto _width(unsigned column) -> unsigned;
 
-  WindowProc windowProc = nullptr;
   HIMAGELIST imageList = 0;
   vector<image> icons;
 };

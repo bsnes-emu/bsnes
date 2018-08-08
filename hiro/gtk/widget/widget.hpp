@@ -11,6 +11,7 @@ struct pWidget : pSizable {
   auto setFocused() -> void override;
   auto setFont(const Font& font) -> void override;
   auto setGeometry(Geometry geometry) -> void override;
+  auto setToolTip(const string& toolTip) -> void;
   auto setVisible(bool visible) -> void override;
 
   GtkWidget* gtkWidget = nullptr;

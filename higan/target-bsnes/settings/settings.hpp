@@ -1,12 +1,106 @@
 struct Settings : Markup::Node {
-  Settings();
+  Settings() { load(); }
+  ~Settings() { save(); }
+
+  auto load() -> void;
   auto save() -> void;
+  auto process(bool load) -> void;
+
+  struct Video {
+    string driver;
+    bool exclusive = false;
+    bool blocking = false;
+    bool flush = false;
+    string format = "Default";
+    string shader = "Blur";
+
+    uint luminance = 100;
+    uint saturation = 100;
+    uint gamma = 150;
+
+    string output = "Scale";
+    uint multiplier = 2;
+    bool aspectCorrection = true;
+    bool overscan = false;
+    bool blur = false;
+  } video;
+
+  struct Audio {
+    string driver;
+    bool exclusive = false;
+    string device;
+    bool blocking = true;
+    bool dynamic = false;
+    uint frequency = 48000;
+    uint latency = 0;
+
+    bool mute = false;
+    int skew = 0;
+    uint volume = 100;
+    uint balance = 50;
+  } audio;
+
+  struct Input {
+    string driver;
+    uint frequency = 5;
+    string defocus = "Pause";
+    struct Turbo {
+      uint frequency = 4;
+    } turbo;
+  } input;
+
+  struct Path {
+    string games;
+    string patches;
+    string saves;
+    string cheats;
+    string states;
+    string screenshots;
+    struct Recent {
+      string superFamicom;
+      string gameBoy;
+      string bsMemory;
+      string sufamiTurboA;
+      string sufamiTurboB;
+    } recent;
+  } path;
+
+  struct Emulator {
+    bool warnOnUnverifiedGames = false;
+    struct AutoSaveMemory {
+      bool enable = true;
+      uint interval = 30;
+    } autoSaveMemory;
+    bool autoSaveStateOnUnload = false;
+    bool autoLoadStateOnLoad = false;
+    struct Hack {
+      struct FastPPU {
+        bool enable = true;
+        bool noSpriteLimit = false;
+        bool hiresMode7 = false;
+      } fastPPU;
+      struct FastDSP {
+        bool enable = true;
+      } fastDSP;
+      uint fastSuperFX = 100;
+    } hack;
+    struct Cheats {
+      bool enable = true;
+    } cheats;
+  } emulator;
+
+  struct General {
+    bool statusBar = true;
+    bool screenSaver = false;
+    bool toolTips = true;
+    bool crashed = false;
+  } general;
 };
 
 struct VideoSettings : TabFrameItem {
   auto create() -> void;
 
-public:
+private:
   VerticalLayout layout{this};
     Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
     TableLayout colorLayout{&layout, Size{~0, 0}};
@@ -26,7 +120,7 @@ public:
 struct AudioSettings : TabFrameItem {
   auto create() -> void;
 
-public:
+private:
   VerticalLayout layout{this};
     Label effectsLabel{&layout, Size{~0, 0}, 2};
     TableLayout effectsLayout{&layout, Size{~0, 0}};
@@ -57,8 +151,9 @@ struct InputSettings : TabFrameItem {
   auto assignMouseInput(uint id) -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
-public:
   maybe<InputMapping&> activeMapping;
+
+private:
   Timer timer;
 
   VerticalLayout layout{this};
@@ -87,8 +182,9 @@ struct HotkeySettings : TabFrameItem {
   auto cancelMapping() -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
 
-public:
   maybe<InputMapping&> activeMapping;
+
+private:
   Timer timer;
 
   VerticalLayout layout{this};
@@ -154,7 +250,6 @@ public:
     HorizontalLayout autoStateLayout{&layout, Size{~0, 0}};
       CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
       CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
-    CheckLabel suppressScreenSaver{&layout, Size{~0, 0}};
     Canvas optionsSpacer{&layout, Size{~0, 1}};
     Label hacksLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout fastPPULayout{&layout, Size{~0, 0}};

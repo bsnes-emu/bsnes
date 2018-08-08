@@ -8,8 +8,7 @@ auto pCheckLabel::construct() -> void {
     WS_CHILD | WS_TABSTOP | BS_CHECKBOX,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   setChecked(state().checked);
   setText(state().text);
 }

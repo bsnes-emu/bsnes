@@ -2,30 +2,11 @@
 
 namespace hiro {
 
-static auto CALLBACK RadioButton_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
-    if(auto button = dynamic_cast<mRadioButton*>(object)) {
-      if(auto self = button->self()) {
-        if(msg == WM_ERASEBKGND) return DefWindowProc(hwnd, msg, wparam, lparam);
-        if(msg == WM_PAINT) return Button_paintProc(hwnd, msg, wparam, lparam,
-          button->state.bordered, button->state.checked, button->enabled(true), button->font(true),
-          button->state.icon, button->state.orientation, button->state.text
-        );
-        return self->windowProc(hwnd, msg, wparam, lparam);
-      }
-    }
-  }
-  return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
 auto pRadioButton::construct() -> void {
   hwnd = CreateWindow(L"BUTTON", L"",
     WS_CHILD | WS_TABSTOP | BS_CHECKBOX | BS_PUSHLIKE,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)RadioButton_windowProc);
-  pWidget::_setState();
+  pWidget::construct();
   setGroup(state().group);
   _setState();
 }
@@ -111,11 +92,31 @@ auto pRadioButton::setVisible(bool visible) -> void {
   _setState();
 }
 
+//
+
 auto pRadioButton::onActivate() -> void {
   if(state().checked) return;
   self().setChecked();
   self().doActivate();
 }
+
+auto pRadioButton::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_PAINT) {
+    PAINTSTRUCT ps;
+    BeginPaint(hwnd, &ps);
+    auto buttonState = Button_GetState(hwnd);
+    Button_CustomDraw(hwnd, ps,
+      state().bordered, state().checked, self().enabled(true), buttonState,
+      self().font(true), state().icon, state().orientation, state().text
+    );
+    EndPaint(hwnd, &ps);
+    return false;
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
+}
+
+//
 
 auto pRadioButton::_setState() -> void {
   InvalidateRect(hwnd, 0, false);

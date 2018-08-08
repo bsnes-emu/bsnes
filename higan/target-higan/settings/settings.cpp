@@ -11,19 +11,18 @@ unique_pointer<SettingsManager> settingsManager;
 unique_pointer<SystemProperties> systemProperties;
 
 Settings::Settings() {
-  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml"))));
+  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml")), " "));
 
   auto set = [&](const string& name, const string& value) {
     //create node and set to default value only if it does not already exist
     if(!operator[](name)) operator()(name).setValue(value);
   };
 
-  set("UserInterface/ShowStatusBar", true);
-
   set("Library/Location", {Path::user(), "Emulation/"});
   set("Library/IgnoreManifests", false);
 
   set("Video/Driver", ruby::Video::safestDriver());
+  set("Video/Exclusive", false);
   set("Video/Synchronize", false);
   set("Video/Shader", "Blur");
   set("Video/BlurEmulation", true);
@@ -33,21 +32,6 @@ Settings::Settings() {
   set("Video/Saturation", 100);
   set("Video/Gamma", 100);
   set("Video/Luminance", 100);
-
-  set("Video/Overscan/Horizontal", 0);
-  set("Video/Overscan/Vertical", 0);
-
-  set("Video/Windowed/AspectCorrection", true);
-  set("Video/Windowed/IntegralScaling", true);
-  set("Video/Windowed/Adaptive", true);
-  set("Video/Windowed/Scale", "Small");
-  set("Video/Windowed/Scale/Small", "640x480");
-  set("Video/Windowed/Scale/Medium", "960x720");
-  set("Video/Windowed/Scale/Large", "1280x960");
-
-  set("Video/Fullscreen/AspectCorrection", true);
-  set("Video/Fullscreen/IntegralScaling", true);
-  set("Video/Fullscreen/Exclusive", false);
 
   set("Audio/Driver", ruby::Audio::safestDriver());
   set("Audio/Device", "");
@@ -63,6 +47,15 @@ Settings::Settings() {
   set("Input/Frequency", 5);
   set("Input/Defocus", "Pause");
 
+  set("View/Multiplier", "2");
+  set("View/Output", "Scale");
+  set("View/Adaptive", false);
+  set("View/AspectCorrection", true);
+  set("View/Overscan", true);
+  set("View/Overscan/Horizontal", 0);
+  set("View/Overscan/Vertical", 8);
+  set("View/StatusBar", true);
+
   set("Emulation/AutoSaveMemory/Enable", true);
   set("Emulation/AutoSaveMemory/Interval", 30);
 
@@ -72,7 +65,7 @@ Settings::Settings() {
 }
 
 auto Settings::save() -> void {
-  file::write(locate("settings.bml"), BML::serialize(*this));
+  file::write(locate("settings.bml"), BML::serialize(*this, " "));
 }
 
 //

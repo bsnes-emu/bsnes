@@ -5,39 +5,27 @@ auto Program::path(string type, string location, string extension) -> string {
   auto suffix = extension;
 
   if(type == "Games") {
-    if(auto path = settings["Path/Games"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.games) pathname = path;
   }
 
   if(type == "Patches") {
-    if(auto path = settings["Path/Patches"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.patches) pathname = path;
   }
 
   if(type == "Saves") {
-    if(auto path = settings["Path/Saves"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.saves) pathname = path;
   }
 
   if(type == "Cheats") {
-    if(auto path = settings["Path/Cheats"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.cheats) pathname = path;
   }
 
   if(type == "States") {
-    if(auto path = settings["Path/States"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.states) pathname = path;
   }
 
   if(type == "Screenshots") {
-    if(auto path = settings["Path/Screenshots"].text()) {
-      pathname = path;
-    }
+    if(auto path = settings.path.screenshots) pathname = path;
   }
 
   return {pathname, prefix, suffix};

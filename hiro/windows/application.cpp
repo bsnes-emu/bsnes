@@ -61,7 +61,7 @@ auto pApplication::initialize() -> void {
   CoInitialize(0);
   InitCommonControls();
 
-  WNDCLASS wc;
+  WNDCLASS wc{};
 
   #if defined(Hiro_Window)
   wc.cbClsExtra = 0;
@@ -91,43 +91,29 @@ auto pApplication::initialize() -> void {
   RegisterClass(&wc);
   #endif
 
-  #if defined(Hiro_Canvas)
+  #if defined(Hiro_Widget)
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
   wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Canvas_windowProc;
-  wc.lpszClassName = L"hiroCanvas";
+  wc.lpfnWndProc = ToolTip_windowProc;
+  wc.lpszClassName = L"hiroToolTip";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
   #endif
 
-  #if defined(Hiro_Label)
+  #if defined(Hiro_Widget)
   wc.cbClsExtra = 0;
   wc.cbWndExtra = 0;
   wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(0, IDI_APPLICATION);
   wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Label_windowProc;
-  wc.lpszClassName = L"hiroLabel";
-  wc.lpszMenuName = 0;
-  wc.style = CS_HREDRAW | CS_VREDRAW;
-  RegisterClass(&wc);
-  #endif
-
-  #if defined(Hiro_Viewport)
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-  wc.hCursor = LoadCursor(0, IDC_ARROW);
-  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
-  wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Viewport_windowProc;
-  wc.lpszClassName = L"hiroViewport";
+  wc.lpfnWndProc = Default_windowProc;
+  wc.lpszClassName = L"hiroWidget";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);
@@ -135,6 +121,11 @@ auto pApplication::initialize() -> void {
 
   pKeyboard::initialize();
   pWindow::initialize();
+}
+
+auto pApplication::state() -> State& {
+  static State state;
+  return state;
 }
 
 static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> bool {

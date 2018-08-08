@@ -27,6 +27,8 @@
 
 #include "sizable.cpp"
 
+#include "tool-tip.cpp"
+
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
 #include "widget/canvas.cpp"

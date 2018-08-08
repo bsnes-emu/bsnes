@@ -107,6 +107,8 @@ auto CheatEditor::create() -> void {
 
   layout.setPadding(5);
   cheatList.setBatchable();
+  cheatList.setHeadered();
+  cheatList.setSortable();
   cheatList.onActivate([&] {
     editButton.doActivate();
   });
@@ -121,11 +123,22 @@ auto CheatEditor::create() -> void {
       synchronizeCodes();
     }
   });
+  cheatList.onSort([&](TableViewColumn column) {
+    column.setSorting(column.sorting() == Sort::Ascending ? Sort::Descending : Sort::Ascending);
+  //cheatList.sort();
+  });
+  cheatList.onSize([&] {
+    cheatList.resizeColumns();
+  });
   findCheatsButton.setText("Find Cheats ...").onActivate([&] {
     cheatDatabase.findCheats();
   });
-  enableCheats.setText("Enable Cheats").setChecked(settings["Emulator/Cheats/Enable"].boolean()).onToggle([&] {
-    settings["Emulator/Cheats/Enable"].setValue(enableCheats.checked());
+  enableCheats.setText("Enable Cheats").setToolTip(
+    "Master enable for all cheat codes.\n"
+    "When unchecked, no cheat codes will be active.\n\n"
+    "Use this to bypass game areas that have problems with cheats."
+  ).setChecked(settings.emulator.cheats.enable).onToggle([&] {
+    settings.emulator.cheats.enable = enableCheats.checked();
     if(!enableCheats.checked()) {
       program.showMessage("All cheat codes disabled");
     } else {
@@ -152,12 +165,11 @@ auto CheatEditor::create() -> void {
 auto CheatEditor::refresh() -> void {
   cheatList.reset();
   cheatList.append(TableViewColumn());
-  cheatList.append(TableViewColumn().setExpandable());
+  cheatList.append(TableViewColumn().setText("Name").setSorting(Sort::Ascending).setExpandable());
   for(auto& cheat : cheats) {
-    cheatList.append(TableViewItem()
-      .append(TableViewCell().setCheckable().setChecked(cheat.enable))
-      .append(TableViewCell().setText(cheat.name))
-    );
+    TableViewItem item{&cheatList};
+    item.append(TableViewCell().setCheckable().setChecked(cheat.enable));
+    item.append(TableViewCell().setText(cheat.name));
   }
   cheatList.resizeColumns().doChange();
 }

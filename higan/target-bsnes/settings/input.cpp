@@ -7,15 +7,17 @@ auto InputSettings::create() -> void {
   portList.onChange([&] { reloadDevices(); });
   deviceLabel.setText("Device:");
   deviceList.onChange([&] { reloadMappings(); });
-  turboLabel.setText("Turbo rate:");
+  turboLabel.setText("Turbo rate:").setToolTip(
+    "The number of frames to wait between toggling turbo buttons."
+  );
   for(uint frequency : range(1, 9)) {
     ComboButtonItem item{&turboList};
     item.setText(frequency);
-    if(frequency == settings["Input/Turbo/Frequency"].natural()) item.setSelected();
+    if(frequency == settings.input.turbo.frequency) item.setSelected();
   }
-  turboList.onChange([&] {
+  turboList.setToolTip(turboLabel.toolTip()).onChange([&] {
     uint frequency = turboList.selected().text().natural();
-    settings["Input/Turbo/Frequency"].setValue(frequency);
+    settings.input.turbo.frequency = frequency;
     inputManager.turboCounter = 0;
     inputManager.turboFrequency = frequency;
   });
@@ -23,6 +25,7 @@ auto InputSettings::create() -> void {
   mappingList.setHeadered();
   mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
   mappingList.onChange([&] { updateControls(); });
+  mappingList.onSize([&] { mappingList.resizeColumns(); });
   assignMouse1.onActivate([&] { assignMouseInput(0); });
   assignMouse2.onActivate([&] { assignMouseInput(1); });
   assignMouse3.onActivate([&] { assignMouseInput(2); });

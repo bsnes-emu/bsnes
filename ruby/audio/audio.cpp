@@ -77,12 +77,14 @@ auto Audio::setDynamic(bool dynamic) -> bool {
 }
 
 auto Audio::setChannels(uint channels) -> bool {
+  if(resamplers.size() != channels) {
+    resamplers.reset();
+    resamplers.resize(channels);
+    for(auto& resampler : resamplers) resampler.reset(instance->frequency);
+  }
   if(instance->channels == channels) return true;
   if(!instance->hasChannels(channels)) return false;
   if(!instance->setChannels(instance->channels = channels)) return false;
-  resamplers.reset();
-  resamplers.resize(channels);
-  for(auto& resampler : resamplers) resampler.reset(instance->frequency);
   return true;
 }
 

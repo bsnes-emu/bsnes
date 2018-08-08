@@ -2,13 +2,6 @@
 
 namespace hiro {
 
-vector<pWindow*> pApplication::windows;
-
-#if defined(DISPLAY_XORG)
-XlibDisplay* pApplication::display = nullptr;
-bool pApplication::xdgScreenSaver = false;
-#endif
-
 auto pApplication::run() -> void {
   while(!Application::state().quit) {
     Application::doMain();
@@ -22,7 +15,7 @@ auto pApplication::pendingEvents() -> bool {
 
 auto pApplication::processEvents() -> void {
   while(pendingEvents()) gtk_main_iteration_do(false);
-  for(auto& window : windows) window->_synchronizeGeometry();
+  for(auto& window : state().windows) window->_synchronizeGeometry();
 }
 
 auto pApplication::quit() -> void {
@@ -30,21 +23,54 @@ auto pApplication::quit() -> void {
   if(gtk_main_level()) gtk_main_quit();
 
   #if defined(DISPLAY_XORG)
-  XCloseDisplay(display);
-  display = nullptr;
+  if(state().display) {
+    if(state().screenSaverXDG && state().screenSaverWindow) {
+      //this needs to run synchronously, so that XUnmapWindow() won't happen before xdg-screensaver is finished
+      execute("xdg-screensaver", "resume", string{"0x", hex(state().screenSaverWindow)});
+      XUnmapWindow(state().display, state().screenSaverWindow);
+      state().screenSaverWindow = 0;
+    }
+    XCloseDisplay(state().display);
+    state().display = nullptr;
+  }
   #endif
 }
 
 auto pApplication::setScreenSaver(bool screenSaver) -> void {
   #if defined(DISPLAY_XORG)
-  for(auto& window : windows) window->_setScreenSaver(screenSaver);
+  if(state().screenSaverXDG && state().screenSaverWindow) {
+    invoke("xdg-screensaver", screenSaver ? "resume" : "suspend", string{"0x", hex(state().screenSaverWindow)});
+  }
   #endif
+}
+
+auto pApplication::state() -> State& {
+  static State state;
+  return state;
 }
 
 auto pApplication::initialize() -> void {
   #if defined(DISPLAY_XORG)
-  display = XOpenDisplay(nullptr);
-  xdgScreenSaver = (bool)execute("xdg-screensaver", "--version").output.find("xdg-screensaver");
+  state().display = XOpenDisplay(nullptr);
+  state().screenSaverXDG = (bool)execute("xdg-screensaver", "--version").output.find("xdg-screensaver");
+
+  if(state().screenSaverXDG) {
+    auto screen = DefaultScreen(state().display);
+    auto rootWindow = RootWindow(state().display, screen);
+    XSetWindowAttributes attributes{};
+    attributes.background_pixel = BlackPixel(state().display, screen);
+    attributes.border_pixel = 0;
+    attributes.override_redirect = true;
+    state().screenSaverWindow = XCreateWindow(state().display, rootWindow,
+      0, 0, 1, 1, 0, DefaultDepth(state().display, screen),
+      InputOutput, DefaultVisual(state().display, screen),
+      CWBackPixel | CWBorderPixel | CWOverrideRedirect, &attributes
+    );
+  //note: hopefully xdg-screensaver does not require the window to be mapped ...
+  //if it does, we're in trouble: a small 1x1 black pixel window will be visible in said case
+    XMapWindow(state().display, state().screenSaverWindow);
+    XFlush(state().display);
+  }
   #endif
 
   //set WM_CLASS to Application::name()

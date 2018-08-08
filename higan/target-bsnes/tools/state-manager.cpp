@@ -59,6 +59,9 @@ auto StateManager::create() -> void {
     column.setSorting(column.sorting() == Sort::Ascending ? Sort::Descending : Sort::Ascending);
     stateList.sort();
   });
+  stateList.onSize([&] {
+    stateList.resizeColumns();
+  });
   categoryLabel.setText("Category:");
   categoryOption.append(ComboButtonItem().setText("Managed States").setProperty("type", "Managed/"));
   categoryOption.append(ComboButtonItem().setText("Quick States").setProperty("type", "Quick/"));

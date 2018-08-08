@@ -11,20 +11,37 @@ Presentation::Presentation() {
   systemMenu.setVisible(false);
 
   settingsMenu.setText("Settings");
-  videoScaleMenu.setText("Video Scale");
-  videoScaleSmall.setText("Small").onActivate([&] {
-    settings["Video/Windowed/Scale"].setValue("Small");
+  sizeMenu.setText("Size");
+  updateSizeMenu();
+  outputMenu.setText("Output");
+  centerViewport.setText("Center").onActivate([&] {
+    settings["View/Output"].setValue("Center");
     resizeViewport();
   });
-  videoScaleMedium.setText("Medium").onActivate([&] {
-    settings["Video/Windowed/Scale"].setValue("Medium");
+  scaleViewport.setText("Scale").onActivate([&] {
+    settings["View/Output"].setValue("Scale");
     resizeViewport();
   });
-  videoScaleLarge.setText("Large").onActivate([&] {
-    settings["Video/Windowed/Scale"].setValue("Large");
+  stretchViewport.setText("Stretch").onActivate([&] {
+    settings["View/Output"].setValue("Stretch");
     resizeViewport();
   });
-  videoEmulationMenu.setText("Video Emulation");
+  if(settings["View/Output"].text() == "Center") centerViewport.setChecked();
+  if(settings["View/Output"].text() == "Scale") scaleViewport.setChecked();
+  if(settings["View/Output"].text() == "Stretch") stretchViewport.setChecked();
+  adaptiveSizing.setText("Adaptive Sizing").setChecked(settings["View/Adaptive"].boolean()).onToggle([&] {
+    settings["View/Adaptive"].setValue(adaptiveSizing.checked());
+    resizeWindow();
+  });
+  aspectCorrection.setText("Aspect Correction").setChecked(settings["View/AspectCorrection"].boolean()).onToggle([&] {
+    settings["View/AspectCorrection"].setValue(aspectCorrection.checked());
+    resizeWindow();
+  });
+  showOverscanArea.setText("Show Overscan Area").setChecked(settings["View/Overscan"].boolean()).onToggle([&] {
+    settings["View/Overscan"].setValue(showOverscanArea.checked());
+    resizeWindow();
+  });
+  videoEmulationMenu.setText("Emulation");
   blurEmulation.setText("Blurring").setChecked(settings["Video/BlurEmulation"].boolean()).onToggle([&] {
     settings["Video/BlurEmulation"].setValue(blurEmulation.checked());
     if(emulator) emulator->set("Blur Emulation", blurEmulation.checked());
@@ -37,7 +54,7 @@ Presentation::Presentation() {
     settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
     if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });
-  videoShaderMenu.setText("Video Shader");
+  videoShaderMenu.setText("Shader");
   videoShaderNone.setText("None").onActivate([&] {
     settings["Video/Shader"].setValue("None");
     program->updateVideoShader();
@@ -59,10 +76,14 @@ Presentation::Presentation() {
     settings["Audio/Mute"].setValue(muteAudio.checked());
     program->updateAudioEffects();
   });
-  showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
-    settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
-    statusBar.setVisible(showStatusBar.checked());
-    if(visible()) resizeViewport();
+  showStatusBar.setText("Show Status Bar").setChecked(settings["View/StatusBar"].boolean()).onToggle([&] {
+    settings["View/StatusBar"].setValue(showStatusBar.checked());
+    if(!showStatusBar.checked()) {
+      layout.remove(statusLayout);
+    } else {
+      layout.append(statusLayout, Size{~0, StatusHeight});
+    }
+    if(visible()) resizeWindow();
   });
   showSystemSettings.setIcon(Icon::Device::Storage).setText("Systems ...").onActivate([&] { settingsManager->show(0); });
   showVideoSettings.setIcon(Icon::Device::Display).setText("Video ...").onActivate([&] { settingsManager->show(1); });
@@ -113,9 +134,6 @@ Presentation::Presentation() {
     aboutWindow->setCentered(*this).setVisible().setFocused();
   });
 
-  statusBar.setFont(Font().setBold());
-  statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
-
   viewport.setDroppable().onDrop([&](vector<string> locations) {
     if(!locations || !directory::exists(locations.first())) return;
     program->gameQueue.append(locations.first());
@@ -127,17 +145,42 @@ Presentation::Presentation() {
   icon.alphaBlend(0x000000);
   iconCanvas.setIcon(icon);
 
+  if(!settings["View/StatusBar"].boolean()) {
+    layout.remove(statusLayout);
+  }
+
+  auto font = Font().setBold();
+  auto back = Color{ 32,  32,  32};
+  auto fore = Color{255, 255, 255};
+
+  spacerLeft.setBackgroundColor(back);
+
+  statusMessage.setFont(font);
+  statusMessage.setAlignment(0.0);
+  statusMessage.setBackgroundColor(back);
+  statusMessage.setForegroundColor(fore);
+
+  statusInfo.setFont(font);
+  statusInfo.setAlignment(1.0);
+  statusInfo.setBackgroundColor(back);
+  statusInfo.setForegroundColor(fore);
+  statusInfo.setText("Unloaded");
+
+  spacerRight.setBackgroundColor(back);
+
   onSize([&] {
-    resizeViewport(false);
+    resizeViewport();
   });
 
   onClose([&] {
     program->quit();
   });
 
+  settings["View/Multiplier"].setValue(2);
+
   setTitle({"higan v", Emulator::Version});
   setBackgroundColor({0, 0, 0});
-  resizeViewport();
+  resizeWindow();
   setCentered();
 
   #if defined(PLATFORM_WINDOWS)
@@ -238,12 +281,45 @@ auto Presentation::updateEmulatorDeviceSelections() -> void {
   }
 }
 
-auto Presentation::clearViewport() -> void {
-  if(!video) return;
+auto Presentation::updateSizeMenu() -> void {
+  assert(sizeMenu.actionCount() == 0);  //should only be called once
 
-  if(!emulator || !emulator->loaded()) {
-    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+  //determine the largest multiplier that can be used by the largest monitor found
+  uint height = 1;
+  for(uint monitor : range(Monitor::count())) {
+    height = max(height, Monitor::workspace(monitor).height());
   }
+
+  uint multipliers = max(1, height / 240);
+  for(uint multiplier : range(1, multipliers + 1)) {
+    MenuRadioItem item{&sizeMenu};
+    item.setProperty("multiplier", multiplier);
+    item.setText({multiplier, "x (", 240 * multiplier, "p)"});
+    item.onActivate([=] {
+      settings["View/Multiplier"].setValue(multiplier);
+      resizeWindow();
+    });
+    sizeGroup.append(item);
+  }
+
+  for(auto item : sizeGroup.objects<MenuRadioItem>()) {
+    if(settings["View/Multiplier"].natural() == item.property("multiplier").natural()) {
+      item.setChecked();
+    }
+  }
+
+  sizeMenu.append(MenuSeparator());
+  sizeMenu.append(MenuItem().setIcon(Icon::Action::Remove).setText("Shrink Window To Size").onActivate([&] {
+    resizeWindow();
+  }));
+  sizeMenu.append(MenuItem().setIcon(Icon::Place::Settings).setText("Center Window").onActivate([&] {
+    setCentered();
+  }));
+}
+
+auto Presentation::clearViewport() -> void {
+  if(!emulator || !emulator->loaded()) viewportLayout.setPadding();
+  if(!visible() || !video) return;
 
   uint32_t* output;
   uint length = 0;
@@ -259,105 +335,126 @@ auto Presentation::clearViewport() -> void {
   }
 }
 
-auto Presentation::resizeViewport(bool resizeWindow) -> void {
-  //clear video area before resizing to avoid seeing distorted video momentarily
-  clearViewport();
+auto Presentation::resizeViewport() -> void {
+  uint layoutWidth = viewportLayout.geometry().width();
+  uint layoutHeight = viewportLayout.geometry().height();
 
-  uint viewportWidth = geometry().width();
-  uint viewportHeight = geometry().height();
+  uint width = 320;
+  uint height = 240;
 
-  double emulatorWidth = 320;
-  double emulatorHeight = 240;
-  double aspectCorrection = 1.0;
   if(emulator) {
-    auto display = emulator->displays()[0];
-    emulatorWidth = display.width;
-    emulatorHeight = display.height;
-    aspectCorrection = display.aspectCorrection;
-    if(display.type == Emulator::Interface::Display::Type::CRT) {
-      uint overscanHorizontal = settings["Video/Overscan/Horizontal"].natural();
-      uint overscanVertical = settings["Video/Overscan/Vertical"].natural();
-      emulatorWidth -= overscanHorizontal * 2;
-      emulatorHeight -= overscanVertical * 2;
+    auto display = emulator->displays().first();
+    width = display.width;
+    height = display.height;
+    if(settings["View/AspectCorrection"].boolean()) width *= display.aspectCorrection;
+    if(!settings["View/Overscan"].boolean()) {
+      if(display.type == Emulator::Interface::Display::Type::CRT) {
+        uint overscanHorizontal = settings["View/Overscan/Horizontal"].natural();
+        uint overscanVertical = settings["View/Overscan/Vertical"].natural();
+        width -= overscanHorizontal * 2;
+        height -= overscanVertical * 2;
+      }
     }
   }
 
-  if(!fullScreen()) {
-    if(settings["Video/Windowed/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
-
-    if(resizeWindow) {
-      string viewportScale = "640x480";
-      if(settings["Video/Windowed/Scale"].text() == "Small") viewportScale = settings["Video/Windowed/Scale/Small"].text();
-      if(settings["Video/Windowed/Scale"].text() == "Medium") viewportScale = settings["Video/Windowed/Scale/Medium"].text();
-      if(settings["Video/Windowed/Scale"].text() == "Large") viewportScale = settings["Video/Windowed/Scale/Large"].text();
-      auto resolution = viewportScale.isplit("x", 1L);
-      viewportWidth = resolution(0).natural();
-      viewportHeight = resolution(1).natural();
-    }
-
-    if(settings["Video/Windowed/Adaptive"].boolean() && resizeWindow) {
-      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-      emulatorWidth *= multiplier;
-      emulatorHeight *= multiplier;
-      setSize({viewportWidth = emulatorWidth, viewportHeight = emulatorHeight});
-    } else if(settings["Video/Windowed/IntegralScaling"].boolean()) {
-      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-      emulatorWidth *= multiplier;
-      emulatorHeight *= multiplier;
-      if(resizeWindow) setSize({viewportWidth, viewportHeight});
-    } else {
-      double multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-      emulatorWidth *= multiplier;
-      emulatorHeight *= multiplier;
-      if(resizeWindow) setSize({viewportWidth, viewportHeight});
-    }
-  } else {
-    if(settings["Video/Fullscreen/AspectCorrection"].boolean()) emulatorWidth *= aspectCorrection;
-
-    if(settings["Video/Fullscreen/IntegralScaling"].boolean()) {
-      uint multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-      emulatorWidth *= multiplier;
-      emulatorHeight *= multiplier;
-    } else {
-      double multiplier = min(viewportWidth / emulatorWidth, viewportHeight / emulatorHeight);
-      emulatorWidth *= multiplier;
-      emulatorHeight *= multiplier;
+  if(visible() && !fullScreen()) {
+    uint widthMultiplier = layoutWidth / width;
+    uint heightMultiplier = layoutHeight / height;
+    uint multiplier = max(1, min(widthMultiplier, heightMultiplier));
+    settings["View/Multiplier"].setValue(multiplier);
+    for(auto item : sizeGroup.objects<MenuRadioItem>()) {
+      if(auto property = item.property("multiplier")) {
+        if(property.natural() == multiplier) item.setChecked();
+      }
     }
   }
 
-  if(emulator && emulator->loaded()) {
-    viewport.setGeometry({
-      (viewportWidth - emulatorWidth) / 2, (viewportHeight - emulatorHeight) / 2,
-      emulatorWidth, emulatorHeight
-    });
-  } else {
-    viewport.setGeometry({0, 0, geometry().width(), geometry().height()});
+  if(!emulator || !emulator->loaded()) return clearViewport();
+  if(!video) return;
+
+  uint viewportWidth;
+  uint viewportHeight;
+  if(settings["View/Output"].text() == "Center") {
+    uint widthMultiplier = layoutWidth / width;
+    uint heightMultiplier = layoutHeight / height;
+    uint multiplier = min(widthMultiplier, heightMultiplier);
+    viewportWidth = width * multiplier;
+    viewportHeight = height * multiplier;
+  } else if(settings["View/Output"].text() == "Scale") {
+    double widthMultiplier = (double)layoutWidth / width;
+    double heightMultiplier = (double)layoutHeight / height;
+    double multiplier = min(widthMultiplier, heightMultiplier);
+    viewportWidth = width * multiplier;
+    viewportHeight = height * multiplier;
+  } else if(settings["View/Output"].text() == "Stretch" || 1) {
+    viewportWidth = layoutWidth;
+    viewportHeight = layoutHeight;
   }
 
-  //clear video area again to ensure entire viewport area has been painted in
+  //center viewport within viewportLayout by use of viewportLayout padding
+  uint paddingWidth = layoutWidth - viewportWidth;
+  uint paddingHeight = layoutHeight - viewportHeight;
+  viewportLayout.setPadding({
+    paddingWidth / 2, paddingHeight / 2,
+    paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
+  });
+
   clearViewport();
+}
+
+auto Presentation::resizeWindow() -> void {
+  if(fullScreen()) return;
+  if(maximized()) setMaximized(false);
+
+  uint width = 320;
+  uint height = 240;
+  uint multiplier = max(1, settings["View/Multiplier"].natural());
+  uint statusHeight = settings["View/StatusBar"].boolean() ? StatusHeight : 0;
+
+  if(emulator) {
+    auto display = emulator->displays().first();
+    width = display.width;
+    height = display.height;
+    if(settings["View/AspectCorrection"].boolean()) width *= display.aspectCorrection;
+    if(!settings["View/Overscan"].boolean()) {
+      if(display.type == Emulator::Interface::Display::Type::CRT) {
+        uint overscanHorizontal = settings["View/Overscan/Horizontal"].natural();
+        uint overscanVertical = settings["View/Overscan/Vertical"].natural();
+        width -= overscanHorizontal * 2;
+        height -= overscanVertical * 2;
+      }
+    }
+  }
+
+  setMinimumSize({width, height + statusHeight});
+  setSize({width * multiplier, height * multiplier + statusHeight});
+  layout.setGeometry(layout.geometry());
+  resizeViewport();
 }
 
 auto Presentation::toggleFullScreen() -> void {
   if(!fullScreen()) {
-    statusBar.setVisible(false);
+    if(settings["View/StatusBar"].boolean()) {
+      layout.remove(statusLayout);
+    }
     menuBar.setVisible(false);
     setFullScreen(true);
-    video->setExclusive(settings["Video/Fullscreen/Exclusive"].boolean());
+    video->setExclusive(settings["Video/Exclusive"].boolean());
     if(video->exclusive()) setVisible(false);
     if(!input->acquired()) input->acquire();
+    resizeViewport();
   } else {
     if(input->acquired()) input->release();
     if(video->exclusive()) setVisible(true);
     video->setExclusive(false);
     setFullScreen(false);
     menuBar.setVisible(true);
-    statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
+    if(settings["View/StatusBar"].boolean()) {
+      layout.append(statusLayout, Size{~0, StatusHeight});
+    }
+    resizeWindow();
+    setCentered();
   }
-  //hack: give window geometry time to update after toggling fullscreen and menu/status bars
-  usleep(20 * 1000);
-  Application::processEvents();
-  resizeViewport();
 }
 
 auto Presentation::loadSystems() -> void {

@@ -62,7 +62,7 @@ struct Presentation : Window {
         Group outputGroup{&centerViewport, &scaleViewport, &stretchViewport};
         MenuSeparator outputSeparator{&outputMenu};
         MenuCheckItem aspectCorrection{&outputMenu};
-        MenuCheckItem overscanCropping{&outputMenu};
+        MenuCheckItem showOverscanArea{&outputMenu};
         MenuCheckItem blurEmulation{&outputMenu};
       Menu shaderMenu{&settingsMenu};
       MenuSeparator settingsSeparatorA{&settingsMenu};

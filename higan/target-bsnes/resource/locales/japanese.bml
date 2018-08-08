@@ -45,7 +45,7 @@ namespace: Presentation
     input: Load Recent Game
     value: 最新ゲームを読み込み
   map
-    input: Empty
+    input: empty
     value: なし
   map
     input: Clear List

@@ -20,6 +20,8 @@ struct Application {
   static auto setName(const string& name = "") -> void;
   static auto setScale(float scale = 1.0) -> void;
   static auto setScreenSaver(bool screenSaver = true) -> void;
+  static auto setToolTips(bool toolTips = true) -> void;
+  static auto toolTips() -> bool;
   static auto unscale(float value) -> float;
 
   struct Windows {
@@ -45,6 +47,7 @@ struct Application {
 //private:
   struct State {
     Font font;
+    bool initialized = false;
     Locale locale;
     int modal = 0;
     string name;
@@ -52,6 +55,7 @@ struct Application {
     bool quit = false;
     float scale = 1.0;
     bool screenSaver = true;
+    bool toolTips = true;
 
     struct Windows {
       function<void (bool)> onModalChange;

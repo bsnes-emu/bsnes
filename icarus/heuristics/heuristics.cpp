@@ -24,4 +24,11 @@ auto Oscillator::text() const -> string {
   return output;
 }
 
+auto Slot::text() const -> string {
+  string output;
+  output.append("    slot\n");
+  output.append("      type: ", _type, "\n");
+  return output;
+}
+
 }

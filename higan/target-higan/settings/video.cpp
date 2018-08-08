@@ -15,26 +15,21 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   luminanceValue.setAlignment(0.5);
   luminanceSlider.setLength(101).setPosition(settings["Video/Luminance"].natural()).onChange([&] { updateColor(); });
 
-  overscanMaskLabel.setFont(Font().setBold()).setText("Overscan Mask");
+  overscanMaskLabel.setFont(Font().setBold()).setText("Overscan Area");
   horizontalMaskLabel.setText("Horizontal:");
   horizontalMaskValue.setAlignment(0.5);
-  horizontalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Horizontal"].natural()).onChange([&] { updateViewport(); });
+  horizontalMaskSlider.setLength(25).setPosition(settings["View/Overscan/Horizontal"].natural()).onChange([&] { updateOverscan(); });
   verticalMaskLabel.setText("Vertical:");
   verticalMaskValue.setAlignment(0.5);
-  verticalMaskSlider.setLength(25).setPosition(settings["Video/Overscan/Vertical"].natural()).onChange([&] { updateViewport(); });
+  verticalMaskSlider.setLength(25).setPosition(settings["View/Overscan/Vertical"].natural()).onChange([&] { updateOverscan(); });
 
-  windowedModeLabel.setFont(Font().setBold()).setText("Windowed Mode");
-  windowedModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Windowed/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
-  windowedModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Windowed/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
-  windowedModeAdaptive.setText("Adaptive sizing").setChecked(settings["Video/Windowed/Adaptive"].boolean()).onToggle([&] { updateViewport(); });
-
-  fullscreenModeLabel.setFont(Font().setBold()).setText("Fullscreen Mode");
-  fullscreenModeAspectCorrection.setText("Aspect correction").setChecked(settings["Video/Fullscreen/AspectCorrection"].boolean()).onToggle([&] { updateViewport(); });
-  fullscreenModeIntegralScaling.setText("Integral scaling").setChecked(settings["Video/Fullscreen/IntegralScaling"].boolean()).onToggle([&] { updateViewport(); });
-  fullscreenModeExclusive.setText("Exclusive mode").setChecked(settings["Video/Fullscreen/Exclusive"].boolean()).onToggle([&] { updateViewport(); });
+  fullscreenLabel.setFont(Font().setBold()).setText("Fullscreen");
+  fullscreenExclusive.setText("Exclusive mode").setChecked(settings["Video/Exclusive"].boolean()).onToggle([&] {
+    settings["Video/Exclusive"].setValue(fullscreenExclusive.checked());
+  });
 
   updateColor(true);
-  updateViewport(true);
+  updateOverscan(true);
 }
 
 auto VideoSettings::updateColor(bool initializing) -> void {
@@ -48,20 +43,16 @@ auto VideoSettings::updateColor(bool initializing) -> void {
   if(!initializing) program->updateVideoPalette();
 }
 
-auto VideoSettings::updateViewport(bool initializing) -> void {
-  bool wasAdaptive = settings["Video/Windowed/Adaptive"].boolean();
-  bool isAdaptive = windowedModeAdaptive.checked();
-
-  settings["Video/Overscan/Horizontal"].setValue(horizontalMaskSlider.position());
-  settings["Video/Overscan/Vertical"].setValue(verticalMaskSlider.position());
-  settings["Video/Windowed/AspectCorrection"].setValue(windowedModeAspectCorrection.checked());
-  settings["Video/Windowed/IntegralScaling"].setValue(windowedModeIntegralScaling.checked());
-  settings["Video/Windowed/Adaptive"].setValue(windowedModeAdaptive.checked());
-  settings["Video/Fullscreen/AspectCorrection"].setValue(fullscreenModeAspectCorrection.checked());
-  settings["Video/Fullscreen/IntegralScaling"].setValue(fullscreenModeIntegralScaling.checked());
-  settings["Video/Fullscreen/Exclusive"].setValue(fullscreenModeExclusive.checked());
+auto VideoSettings::updateOverscan(bool initializing) -> void {
+  settings["View/Overscan/Horizontal"].setValue(horizontalMaskSlider.position());
+  settings["View/Overscan/Vertical"].setValue(verticalMaskSlider.position());
   horizontalMaskValue.setText({horizontalMaskSlider.position()});
   verticalMaskValue.setText({verticalMaskSlider.position()});
 
-  if(!initializing) presentation->resizeViewport(isAdaptive || wasAdaptive != isAdaptive);
+  if(initializing || settings["View/Overscan"].boolean()) return;
+  if(settings["View/Adaptive"].boolean()) {
+    presentation->resizeWindow();
+  } else {
+    presentation->resizeViewport();
+  }
 }

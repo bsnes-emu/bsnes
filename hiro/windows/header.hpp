@@ -80,3 +80,11 @@
 #if !defined(TBS_TRANSPARENTBKGND)
   #define TBS_TRANSPARENTBKGND 0x1000
 #endif
+
+#if !defined(TTP_STANDARD)
+  #define TTP_STANDARD 1
+#endif
+
+#if !defined(TTSS_NORMAL)
+  #define TTSS_NORMAL 1
+#endif

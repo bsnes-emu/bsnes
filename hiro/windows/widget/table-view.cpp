@@ -2,36 +2,14 @@
 
 namespace hiro {
 
-static auto CALLBACK TableView_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
-    if(auto tableView = dynamic_cast<mTableView*>(object)) {
-      if(auto self = tableView->self()) {
-        if(!tableView->enabled(true)) {
-          if(msg == WM_KEYDOWN || msg == WM_KEYUP || msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP) {
-            //WC_LISTVIEW responds to key messages even when its HWND is disabled
-            //the control should be inactive when disabled; so we intercept the messages here
-            return false;
-          }
-        }
-        return self->windowProc(hwnd, msg, wparam, lparam);
-      }
-    }
-  }
-
-  return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
 auto pTableView::construct() -> void {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE | LVS_EX_DOUBLEBUFFER, WC_LISTVIEW, L"",
     WS_CHILD | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)&TableView_windowProc);
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES);
-  pWidget::_setState();
+  pWidget::construct();
   setBackgroundColor(state().backgroundColor);
   setBatchable(state().batchable);
   setBordered(state().bordered);
@@ -300,6 +278,22 @@ auto pTableView::setSortable(bool sortable) -> void {
   sortable ? style &=~ LVS_NOSORTHEADER : style |= LVS_NOSORTHEADER;
   SetWindowLong(hwnd, GWL_STYLE, style);
 }
+
+//
+
+auto pTableView::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_KEYDOWN || msg == WM_KEYUP || msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP) {
+    if(!self().enabled(true)) {
+      //WC_LISTVIEW responds to key messages even when its HWND is disabled
+      //the control should be inactive when disabled; so we intercept the messages here
+      return false;
+    }
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
+}
+
+//
 
 auto pTableView::_backgroundColor(unsigned _row, unsigned _column) -> Color {
   if(auto item = self().item(_row)) {

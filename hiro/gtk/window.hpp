@@ -35,7 +35,6 @@ struct pWindow : pObject {
   auto _append(mMenu& menu) -> void;
   auto _menuHeight() const -> int;
   auto _menuTextHeight() const -> int;
-  auto _setScreenSaver(bool screenSaver) -> void;
   auto _setIcon(const string& basename) -> bool;
   auto _setMenuEnabled(bool enabled) -> void;
   auto _setMenuFont(const Font& font) -> void;

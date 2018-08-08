@@ -69,11 +69,12 @@ struct AudioOSS : AudioDriver {
   }
 
   auto output(const double samples[]) -> void override {
-    if(!ready()) return;
-
     for(uint n : range(self.channels)) {
       buffer.write(sclamp<16>(samples[n] * 32767.0));
-      if(buffer.full()) write(_fd, buffer.data(), buffer.size<uint8_t>());
+      if(buffer.full()) {
+        write(_fd, buffer.data(), buffer.capacity<uint8_t>());
+        buffer.flush();
+      }
     }
   }
 

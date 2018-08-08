@@ -100,7 +100,6 @@ static auto Window_keyRelease(GtkWidget* widget, GdkEventKey* event, pWindow* p)
 }
 
 static auto Window_realize(GtkWidget* widget, pWindow* p) -> void {
-  p->_setScreenSaver(Application::screenSaver());
 }
 
 static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pWindow* p) -> void {
@@ -130,7 +129,6 @@ static auto Window_stateEvent(GtkWidget* widget, GdkEvent* event, pWindow* p) ->
 }
 
 static auto Window_unrealize(GtkWidget* widget, pWindow* p) -> void {
-  p->_setScreenSaver(true);
 }
 
 auto pWindow::construct() -> void {
@@ -209,13 +207,13 @@ auto pWindow::construct() -> void {
   g_object_set_data(G_OBJECT(widget), "hiro::window", (gpointer)this);
   g_object_set_data(G_OBJECT(formContainer), "hiro::window", (gpointer)this);
 
-  pApplication::windows.append(this);
+  pApplication::state().windows.append(this);
 }
 
 auto pWindow::destruct() -> void {
-  for(uint offset : range(pApplication::windows.size())) {
-    if(pApplication::windows[offset] == this) {
-      pApplication::windows.remove(offset);
+  for(uint offset : range(pApplication::state().windows.size())) {
+    if(pApplication::state().windows[offset] == this) {
+      pApplication::state().windows.remove(offset);
       break;
     }
   }
@@ -493,19 +491,6 @@ auto pWindow::_setMenuFont(const Font& font) -> void {
 
 auto pWindow::_setMenuVisible(bool visible) -> void {
   gtk_widget_set_visible(gtkMenu, visible);
-}
-
-auto pWindow::_setScreenSaver(bool screenSaver) -> void {
-  if(!gtk_widget_get_realized(widget)) return;
-
-  #if defined(DISPLAY_XORG)
-  if(pApplication::xdgScreenSaver) {
-    if(this->screenSaver != screenSaver) {
-      this->screenSaver = screenSaver;
-      invoke("xdg-screensaver", screenSaver ? "resume" : "suspend", string{"0x", hex(handle())});
-    }
-  }
-  #endif
 }
 
 auto pWindow::_setStatusEnabled(bool enabled) -> void {

@@ -2,77 +2,20 @@
 
 namespace hiro {
 
-static auto CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto hexEdit = dynamic_cast<mHexEdit*>(object);
-  if(!hexEdit) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto self = hexEdit->self();
-  if(!self) return DefWindowProc(hwnd, msg, wparam, lparam);
-
-  switch(msg) {
-  case WM_KEYDOWN:
-    if(self->keyPress(wparam)) return 0;
-    break;
-
-  case WM_MOUSEWHEEL: {
-    signed offset = -((int16_t)HIWORD(wparam) / WHEEL_DELTA);
-    self->scrollTo(self->scrollPosition() + offset);
-    return true;
-  }
-
-  case WM_SIZE: {
-    RECT rc;
-    GetClientRect(self->hwnd, &rc);
-    SetWindowPos(self->scrollBar, HWND_TOP, rc.right - 18, 0, 18, rc.bottom, SWP_SHOWWINDOW);
-    break;
-  }
-
-  case WM_VSCROLL: {
-    SCROLLINFO info{sizeof(SCROLLINFO)};
-    info.fMask = SIF_ALL;
-    GetScrollInfo((HWND)lparam, SB_CTL, &info);
-    switch(LOWORD(wparam)) {
-    case SB_LEFT: info.nPos = info.nMin; break;
-    case SB_RIGHT: info.nPos = info.nMax; break;
-    case SB_LINELEFT: info.nPos--; break;
-    case SB_LINERIGHT: info.nPos++; break;
-    case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
-    case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
-    case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
-    }
-
-    info.fMask = SIF_POS;
-    SetScrollInfo((HWND)lparam, SB_CTL, &info, TRUE);
-    GetScrollInfo((HWND)lparam, SB_CTL, &info);  //get clamped position
-
-    self->scrollTo(info.nPos);
-    return true;
-  }
-  }
-
-  return self->windowProc(hwnd, msg, wparam, lparam);
-}
-
 auto pHexEdit::construct() -> void {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
     WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-
   scrollBar = CreateWindowEx(
     0, L"SCROLLBAR", L"",
     WS_VISIBLE | WS_CHILD | SBS_VERT,
     0, 0, 0, 0, hwnd, nullptr, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(scrollBar, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::construct();
 
-  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
-
-  pWidget::_setState();
   setAddress(state().address);
   setBackgroundColor(state().backgroundColor);
   setLength(state().length);
@@ -149,7 +92,7 @@ auto pHexEdit::update() -> void {
   Edit_SetSel(hwnd, LOWORD(cursorPosition), HIWORD(cursorPosition));
 }
 
-bool pHexEdit::keyPress(unsigned scancode) {
+auto pHexEdit::keyPress(unsigned scancode) -> bool {
   if(!state().onRead) return false;
 
   signed position = LOWORD(Edit_GetSel(hwnd));
@@ -234,23 +177,65 @@ bool pHexEdit::keyPress(unsigned scancode) {
   return true;
 }
 
-signed pHexEdit::rows() {
+auto pHexEdit::rows() -> int {
   return (max(1u, state().length) + state().columns - 1) / state().columns;
 }
 
-signed pHexEdit::rowsScrollable() {
+auto pHexEdit::rowsScrollable() -> int {
   return max(0u, rows() - state().rows);
 }
 
-signed pHexEdit::scrollPosition() {
+auto pHexEdit::scrollPosition() -> int {
   return state().address / state().columns;
 }
 
-void pHexEdit::scrollTo(signed position) {
+auto pHexEdit::scrollTo(signed position) -> void {
   if(position > rowsScrollable()) position = rowsScrollable();
   if(position < 0) position = 0;
   if(position == scrollPosition()) return;
   self().setAddress(position * state().columns);
+}
+
+auto pHexEdit::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_KEYDOWN) {
+    if(keyPress(wparam)) return 0;
+  }
+
+  if(msg == WM_MOUSEWHEEL) {
+    int offset = -((int16_t)HIWORD(wparam) / WHEEL_DELTA);
+    scrollTo(scrollPosition() + offset);
+    return true;
+  }
+
+  if(msg == WM_SIZE) {
+    RECT rc;
+    GetClientRect(hwnd, &rc);
+    SetWindowPos(scrollBar, HWND_TOP, rc.right - 18, 0, 18, rc.bottom, SWP_SHOWWINDOW);
+  }
+
+  if(msg == WM_VSCROLL) {
+    SCROLLINFO info{sizeof(SCROLLINFO)};
+    info.fMask = SIF_ALL;
+    GetScrollInfo((HWND)lparam, SB_CTL, &info);
+    switch(LOWORD(wparam)) {
+    case SB_LEFT: info.nPos = info.nMin; break;
+    case SB_RIGHT: info.nPos = info.nMax; break;
+    case SB_LINELEFT: info.nPos--; break;
+    case SB_LINERIGHT: info.nPos++; break;
+    case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
+    case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
+    case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
+    }
+
+    info.fMask = SIF_POS;
+    SetScrollInfo((HWND)lparam, SB_CTL, &info, TRUE);
+    GetScrollInfo((HWND)lparam, SB_CTL, &info);  //get clamped position
+
+    scrollTo(info.nPos);
+    return true;
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
 }
 
 }

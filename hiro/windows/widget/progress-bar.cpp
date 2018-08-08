@@ -6,8 +6,7 @@ auto pProgressBar::construct() -> void {
   hwnd = CreateWindow(PROGRESS_CLASS, L"",
     WS_CHILD | PBS_SMOOTH,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
-  pWidget::_setState();
+  pWidget::construct();
   SendMessage(hwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessage(hwnd, PBM_SETSTEP, MAKEWPARAM(1, 0), 0);
   setPosition(state().position);

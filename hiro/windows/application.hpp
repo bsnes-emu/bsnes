@@ -10,6 +10,11 @@ struct pApplication {
   static auto setScreenSaver(bool screenSaver) -> void;
 
   static auto initialize() -> void;
+
+  struct State {
+    pToolTip* toolTip = nullptr;  //active toolTip
+  };
+  static auto state() -> State&;
 };
 
 }
