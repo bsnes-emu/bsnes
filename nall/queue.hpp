@@ -12,16 +12,17 @@ struct queue {
   queue() = default;
   queue(const queue& source) { operator=(source); }
   queue(queue&& source) { operator=(move(source)); }
+  ~queue() { reset(); }
 
   auto operator=(const queue& source) -> queue& {
     if(this == &source) return *this;
-    reset();
+    delete[] _data;
+    _data = new T[source._capacity];
     _capacity = source._capacity;
     _size = source._size;
-    _data = new T[_capacity];
-    for(uint n : range(_capacity)) _data[n] = source._data[n];
     _read = source._read;
     _write = source._write;
+    for(uint n : range(_capacity)) _data[n] = source._data[n];
     return *this;
   }
 
@@ -35,10 +36,6 @@ struct queue {
     source._data = nullptr;
     source.reset();
     return *this;
-  }
-
-  ~queue() {
-    reset();
   }
 
   template<typename U = T> auto capacity() const -> uint { return _capacity * sizeof(T) / sizeof(U); }
@@ -62,9 +59,12 @@ struct queue {
   }
 
   auto resize(uint capacity, const T& value = {}) -> void {
-    reset();
+    delete[] _data;
+    _data = new T[capacity];
     _capacity = capacity;
-    _data = new T[_capacity];
+    _size = 0;
+    _read = 0;
+    _write = 0;
     for(uint n : range(_capacity)) _data[n] = value;
   }
 
@@ -72,6 +72,13 @@ struct queue {
     _size = 0;
     _read = 0;
     _write = 0;
+  }
+
+  auto fill(const T& value = {}) -> void {
+    _size = 0;
+    _read = 0;
+    _write = 0;
+    for(uint n : range(_capacity)) _data[n] = value;
   }
 
   auto read() -> T {

@@ -1,6 +1,8 @@
 struct Audio;
 
 struct AudioDriver {
+  enum class Format : uint { none, int16, int32, float32, float64 };
+
   AudioDriver(Audio& super) : super(super) {}
   virtual ~AudioDriver() = default;
 

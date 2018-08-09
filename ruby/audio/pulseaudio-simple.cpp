@@ -12,7 +12,7 @@ struct AudioPulseAudioSimple : AudioDriver {
     return initialize();
   }
 
-  auto driver() -> string override { return "PulseAudioSimple"; }
+  auto driver() -> string override { return "PulseAudio Simple"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasFrequencies() -> vector<uint> override {

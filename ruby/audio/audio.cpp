@@ -27,7 +27,7 @@
 #endif
 
 #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  #include <ruby/audio/pulseaudiosimple.cpp>
+  #include <ruby/audio/pulseaudio-simple.cpp>
 #endif
 
 #if defined(AUDIO_WASAPI)
@@ -151,7 +151,7 @@ auto Audio::create(string driver) -> bool {
   #endif
 
   #if defined(AUDIO_DIRECTSOUND)
-  if(driver == "DirectSound") self.instance = new AudioDirectSound(*this);
+  if(driver == "DirectSound 7.0") self.instance = new AudioDirectSound(*this);
   #endif
 
   #if defined(AUDIO_OPENAL)
@@ -167,7 +167,7 @@ auto Audio::create(string driver) -> bool {
   #endif
 
   #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  if(driver == "PulseAudioSimple") self.instance = new AudioPulseAudioSimple(*this);
+  if(driver == "PulseAudio Simple") self.instance = new AudioPulseAudioSimple(*this);
   #endif
 
   #if defined(AUDIO_WASAPI)
@@ -175,7 +175,7 @@ auto Audio::create(string driver) -> bool {
   #endif
 
   #if defined(AUDIO_XAUDIO2)
-  if(driver == "XAudio2") self.instance = new AudioXAudio2(*this);
+  if(driver == "XAudio 2.1") self.instance = new AudioXAudio2(*this);
   #endif
 
   if(!self.instance) self.instance = new AudioDriver(*this);
@@ -195,11 +195,11 @@ auto Audio::hasDrivers() -> vector<string> {
   #endif
 
   #if defined(AUDIO_XAUDIO2)
-  "XAudio2",
+  "XAudio 2.1",
   #endif
 
   #if defined(AUDIO_DIRECTSOUND)
-  "DirectSound",
+  "DirectSound 7.0",
   #endif
 
   #if defined(AUDIO_ALSA)
@@ -219,7 +219,7 @@ auto Audio::hasDrivers() -> vector<string> {
   #endif
 
   #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  "PulseAudioSimple",
+  "PulseAudio Simple",
   #endif
 
   #if defined(AUDIO_AO)
@@ -235,9 +235,9 @@ auto Audio::optimalDriver() -> string {
   #elif defined(AUDIO_WASAPI)
   return "WASAPI";
   #elif defined(AUDIO_XAUDIO2)
-  return "XAudio2";
+  return "XAudio 2.1";
   #elif defined(AUDIO_DIRECTSOUND)
-  return "DirectSound";
+  return "DirectSound 7.0";
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OSS)
@@ -247,7 +247,7 @@ auto Audio::optimalDriver() -> string {
   #elif defined(AUDIO_PULSEAUDIO)
   return "PulseAudio";
   #elif defined(AUDIO_PULSEAUDIOSIMPLE)
-  return "PulseAudioSimple";
+  return "PulseAudio Simple";
   #elif defined(AUDIO_AO)
   return "libao";
   #else
@@ -257,11 +257,11 @@ auto Audio::optimalDriver() -> string {
 
 auto Audio::safestDriver() -> string {
   #if defined(AUDIO_DIRECTSOUND)
-  return "DirectSound";
+  return "DirectSound 7.0";
   #elif defined(AUDIO_WASAPI)
   return "WASAPI";
   #elif defined(AUDIO_XAUDIO2)
-  return "XAudio2";
+  return "XAudio 2.1";
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OSS)
@@ -271,7 +271,7 @@ auto Audio::safestDriver() -> string {
   #elif defined(AUDIO_PULSEAUDIO)
   return "PulseAudio";
   #elif defined(AUDIO_PULSEAUDIOSIMPLE)
-  return "PulseAudioSimple";
+  return "PulseAudio Simple";
   #elif defined(AUDIO_AO)
   return "libao";
   #elif defined(AUDIO_ASIO)

@@ -16,7 +16,7 @@ struct VideoDirect3D : VideoDriver {
     return initialize();
   }
 
-  auto driver() -> string override { return "Direct3D"; }
+  auto driver() -> string override { return "Direct3D 9.0"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasExclusive() -> bool override { return true; }

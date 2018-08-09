@@ -12,7 +12,7 @@ struct AudioDirectSound : AudioDriver {
     return initialize();
   }
 
-  auto driver() -> string override { return "DirectSound"; }
+  auto driver() -> string override { return "DirectSound 7.0"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }

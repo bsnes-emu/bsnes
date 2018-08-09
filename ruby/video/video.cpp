@@ -124,15 +124,15 @@ auto Video::create(string driver) -> bool {
   if(!driver) driver = optimalDriver();
 
   #if defined(VIDEO_CGL)
-  if(driver == "OpenGL") self.instance = new VideoCGL(*this);
+  if(driver == "OpenGL 3.2") self.instance = new VideoCGL(*this);
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  if(driver == "Direct3D") self.instance = new VideoDirect3D(*this);
+  if(driver == "Direct3D 9.0") self.instance = new VideoDirect3D(*this);
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  if(driver == "DirectDraw") self.instance = new VideoDirectDraw(*this);
+  if(driver == "DirectDraw 7.0") self.instance = new VideoDirectDraw(*this);
   #endif
 
   #if defined(VIDEO_GDI)
@@ -140,15 +140,15 @@ auto Video::create(string driver) -> bool {
   #endif
 
   #if defined(VIDEO_GLX)
-  if(driver == "OpenGL") self.instance = new VideoGLX(*this);
+  if(driver == "OpenGL 3.2") self.instance = new VideoGLX(*this);
   #endif
 
   #if defined(VIDEO_GLX2)
-  if(driver == "OpenGL2") self.instance = new VideoGLX2(*this);
+  if(driver == "OpenGL 2.0") self.instance = new VideoGLX2(*this);
   #endif
 
   #if defined(VIDEO_WGL)
-  if(driver == "OpenGL") self.instance = new VideoWGL(*this);
+  if(driver == "OpenGL 3.2") self.instance = new VideoWGL(*this);
   #endif
 
   #if defined(VIDEO_XSHM)
@@ -168,15 +168,15 @@ auto Video::hasDrivers() -> vector<string> {
   return {
 
   #if defined(VIDEO_WGL)
-  "OpenGL",
+  "OpenGL 3.2",
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  "Direct3D",
+  "Direct3D 9.0",
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  "DirectDraw",
+  "DirectDraw 7.0",
   #endif
 
   #if defined(VIDEO_GDI)
@@ -184,15 +184,15 @@ auto Video::hasDrivers() -> vector<string> {
   #endif
 
   #if defined(VIDEO_CGL)
-  "OpenGL",
+  "OpenGL 3.2",
   #endif
 
   #if defined(VIDEO_GLX)
-  "OpenGL",
+  "OpenGL 3.2",
   #endif
 
   #if defined(VIDEO_GLX2)
-  "OpenGL2",
+  "OpenGL 2.0",
   #endif
 
   #if defined(VIDEO_XVIDEO)
@@ -208,19 +208,19 @@ auto Video::hasDrivers() -> vector<string> {
 
 auto Video::optimalDriver() -> string {
   #if defined(VIDEO_WGL)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #elif defined(VIDEO_DIRECT3D)
-  return "Direct3D";
+  return "Direct3D 9.0";
   #elif defined(VIDEO_DIRECTDRAW)
-  return "DirectDraw";
+  return "DirectDraw 7.0";
   #elif defined(VIDEO_GDI)
   return "GDI";
   #elif defined(VIDEO_CGL)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #elif defined(VIDEO_GLX)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #elif defined(VIDEO_GLX2)
-  return "OpenGL2";
+  return "OpenGL 2.0";
   #elif defined(VIDEO_XVIDEO)
   return "XVideo";
   #elif defined(VIDEO_XSHM)
@@ -232,23 +232,23 @@ auto Video::optimalDriver() -> string {
 
 auto Video::safestDriver() -> string {
   #if defined(VIDEO_DIRECT3D)
-  return "Direct3D";
+  return "Direct3D 9.0";
   #elif defined(VIDEO_WGL)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #elif defined(VIDEO_DIRECTDRAW)
-  return "DirectDraw";
+  return "DirectDraw 7.0";
   #elif defined(VIDEO_GDI)
   return "GDI";
   #elif defined(VIDEO_CGL)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #elif defined(VIDEO_XSHM)
   return "XShm";
   #elif defined(VIDEO_XVIDEO)
   return "XVideo";
   #elif defined(VIDEO_GLX2)
-  return "OpenGL2";
+  return "OpenGL 2.0";
   #elif defined(VIDEO_GLX)
-  return "OpenGL";
+  return "OpenGL 3.2";
   #else
   return "None";
   #endif

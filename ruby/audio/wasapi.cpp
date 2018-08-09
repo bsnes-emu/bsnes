@@ -8,19 +8,17 @@
 
 struct AudioWASAPI : AudioDriver {
   AudioWASAPI& self = *this;
-  AudioWASAPI(Audio& super) : AudioDriver(super) { enumerate(); }
-  ~AudioWASAPI() { terminate(); }
+  AudioWASAPI(Audio& super) : AudioDriver(super) { construct(); }
+  ~AudioWASAPI() { destruct(); }
 
   auto create() -> bool override {
-    IMMDevice* defaultDevice = nullptr;
-    if(self.enumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice) != S_OK) return false;
-    for(auto& device : self.devices) {
-      if(device.device != defaultDevice) continue;
-      super.setDevice(device.name);
-      super.setLatency(40);
-      return initialize();
-    }
-    return false;
+    super.setExclusive(false);
+    super.setDevice(hasDevices().first());
+    super.setBlocking(false);
+    super.setChannels(2);
+    super.setFrequency(48000);
+    super.setLatency(40);
+    return initialize();
   }
 
   auto driver() -> string override { return "WASAPI"; }
@@ -77,41 +75,83 @@ struct AudioWASAPI : AudioDriver {
   }
 
 private:
-  auto enumerate() -> bool {
+  struct Device {
+    string id;
+    string name;
+  };
+  vector<Device> devices;
+
+  auto construct() -> bool {
     if(CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator, (void**)&self.enumerator) != S_OK) return false;
+
+    IMMDevice* defaultDeviceContext = nullptr;
+    if(self.enumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDeviceContext) != S_OK) return false;
+
+    Device defaultDevice;
+    LPWSTR defaultDeviceString = nullptr;
+    defaultDeviceContext->GetId(&defaultDeviceString);
+    defaultDevice.id = (const char*)utf8_t(defaultDeviceString);
+    CoTaskMemFree(defaultDeviceString);
 
     IMMDeviceCollection* deviceCollection = nullptr;
     if(self.enumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection) != S_OK) return false;
+
     uint deviceCount = 0;
     if(deviceCollection->GetCount(&deviceCount) != S_OK) return false;
+
     for(uint deviceIndex : range(deviceCount)) {
-      IMMDevice* device = nullptr;
-      if(deviceCollection->Item(deviceIndex, &device) != S_OK) continue;
+      IMMDevice* deviceContext = nullptr;
+      if(deviceCollection->Item(deviceIndex, &deviceContext) != S_OK) continue;
+
+      Device device;
+      LPWSTR deviceString = nullptr;
+      deviceContext->GetId(&deviceString);
+      device.id = (const char*)utf8_t(deviceString);
+      CoTaskMemFree(deviceString);
+
       IPropertyStore* propertyStore = nullptr;
-      device->OpenPropertyStore(STGM_READ, &propertyStore);
+      deviceContext->OpenPropertyStore(STGM_READ, &propertyStore);
       PROPVARIANT propVariant;
       propertyStore->GetValue(PKEY_Device_FriendlyName, &propVariant);
-      Device item;
-      item.name = (const char*)utf8_t(propVariant.pwszVal);
-      item.device = device;
-      self.devices.append(item);
+      device.name = (const char*)utf8_t(propVariant.pwszVal);
       propertyStore->Release();
+
+      if(device.id == defaultDevice.id) {
+        self.devices.prepend(device);
+      } else {
+        self.devices.append(device);
+      }
     }
+
     deviceCollection->Release();
     return true;
   }
 
+  auto destruct() -> void {
+    terminate();
+
+    if(self.enumerator) {
+      self.enumerator->Release();
+      self.enumerator = nullptr;
+    }
+  }
+
   auto initialize() -> bool {
     terminate();
+
+    string deviceID;
     if(auto index = self.devices.find([&](auto& device) { return device.name == self.device; })) {
-      self.audioDevice = self.devices[*index].device;
+      deviceID = self.devices[*index].id;
     } else {
       return false;
     }
 
+    utf16_t deviceString(deviceID);
+    if(self.enumerator->GetDevice(deviceString, &self.audioDevice) != S_OK) return false;
+
     if(self.audioDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&self.audioClient) != S_OK) return false;
 
-    WAVEFORMATEXTENSIBLE waveFormat = {};
+    WAVEFORMATEXTENSIBLE waveFormat{};
     if(self.exclusive) {
       IPropertyStore* propertyStore = nullptr;
       if(self.audioDevice->OpenPropertyStore(STGM_READ, &propertyStore) != S_OK) return false;
@@ -152,9 +192,8 @@ private:
     self.mode = waveFormat.SubFormat.Data1;
     self.precision = waveFormat.Format.wBitsPerSample;
 
-    self.isReady = true;
     clear();
-    return true;
+    return self.isReady = true;
   }
 
   auto terminate() -> void {
@@ -216,11 +255,6 @@ private:
   uint mode = 0;
   uint precision = 0;
 
-  struct Device {
-    string name;
-    IMMDevice* device;
-  };
-
   struct Queue {
     double samples[65536][8];
     uint16_t read;
@@ -229,7 +263,6 @@ private:
   } queue;
 
   IMMDeviceEnumerator* enumerator = nullptr;
-  vector<Device> devices;
   IMMDevice* audioDevice = nullptr;
   IAudioClient* audioClient = nullptr;
   IAudioRenderClient* renderClient = nullptr;

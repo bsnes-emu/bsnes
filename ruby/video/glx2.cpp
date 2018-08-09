@@ -31,7 +31,7 @@ struct VideoGLX2 : VideoDriver {
     return initialize();
   }
 
-  auto driver() -> string override { return "OpenGL2"; }
+  auto driver() -> string override { return "OpenGL 2.0"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
@@ -64,7 +64,6 @@ struct VideoGLX2 : VideoDriver {
   }
 
   auto clear() -> void override {
-    if(!ready()) return;
     memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);

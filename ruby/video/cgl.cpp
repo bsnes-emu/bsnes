@@ -20,7 +20,7 @@ struct VideoCGL : VideoDriver, OpenGL {
     return initialize();
   }
 
-  auto driver() -> string override { return "OpenGL"; }
+  auto driver() -> string override { return "OpenGL 3.2"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }

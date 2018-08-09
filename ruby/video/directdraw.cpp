@@ -10,7 +10,7 @@ struct VideoDirectDraw : VideoDriver {
     return initialize();
   }
 
-  auto driver() -> string override { return "DirectDraw"; }
+  auto driver() -> string override { return "DirectDraw 7.0"; }
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
