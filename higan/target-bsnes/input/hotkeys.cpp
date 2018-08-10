@@ -75,7 +75,7 @@ auto InputManager::bindHotkeys() -> void {
 }
 
 auto InputManager::pollHotkeys() -> void {
-  if(!program.focused()) return;
+  if(Application::modal() || !program.focused()) return;
 
   for(auto& hotkey : hotkeys) {
     auto state = hotkey.poll();

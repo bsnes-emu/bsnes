@@ -2,12 +2,32 @@
 
 namespace hiro {
 
+static auto CALLBACK Window_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  if(Application::state().quit) return DefWindowProc(hwnd, msg, wparam, lparam);
+
+  if(auto window = (mWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
+    if(auto self = window->self()) {
+      if(self->_modalityDisabled()) {
+        return DefWindowProc(hwnd, msg, wparam, lparam);
+      }
+      if(auto result = self->windowProc(hwnd, msg, wparam, lparam)) {
+        return result();
+      }
+    }
+  }
+
+  return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);
+}
+
 static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
 static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
 
 uint pWindow::minimumStatusHeight = 0;
 
 auto pWindow::initialize() -> void {
+  pApplication::state().modalTimer.setInterval(1);
+  pApplication::state().modalTimer.onActivate([] { Application::doMain(); });
+
   HWND hwnd = CreateWindow(L"hiroWindow", L"", ResizableStyle, 128, 128, 256, 256, 0, 0, GetModuleHandle(0), 0);
   HWND hstatus = CreateWindow(STATUSCLASSNAME, L"", WS_CHILD, 0, 0, 0, 0, hwnd, nullptr, GetModuleHandle(0), 0);
   SetWindowPos(hstatus, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
@@ -100,8 +120,8 @@ auto pWindow::setFont(const Font& font) -> void {
 }
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
+  auto lock = acquire();
   auto style = GetWindowLongPtr(hwnd, GWL_STYLE) & WS_VISIBLE;
-  lock();
   if(fullScreen) {
     windowedGeometry = self().geometry();
     HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
@@ -121,11 +141,10 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
     SetWindowLongPtr(hwnd, GWL_STYLE, style | (state().resizable ? ResizableStyle : FixedStyle));
     self().setGeometry(windowedGeometry);
   }
-  unlock();
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
-  lock();
+  auto lock = acquire();
   Geometry margin = frameMargin();
   SetWindowPos(
     hwnd, nullptr,
@@ -141,42 +160,38 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   if(auto& sizable = state().sizable) {
     sizable->setGeometry(geometry.setPosition());
   }
-  unlock();
 }
 
 auto pWindow::setMaximized(bool maximized) -> void {
   if(state().minimized) return;
-  lock();
+  auto lock = acquire();
   ShowWindow(hwnd, maximized ? SW_MAXIMIZE : SW_SHOWNOACTIVATE);
-  unlock();
 }
 
 auto pWindow::setMaximumSize(Size size) -> void {
-  //todo
 }
 
 auto pWindow::setMinimized(bool minimized) -> void {
-  lock();
+  auto lock = acquire();
   ShowWindow(hwnd, minimized ? SW_MINIMIZE : state().maximized ? SW_MAXIMIZE : SW_SHOWNOACTIVATE);
-  unlock();
 }
 
 auto pWindow::setMinimumSize(Size size) -> void {
-  //todo
 }
 
+//never call this directly: use Window::setModal() instead
+//this function does not confirm the modality has actually changed before adjusting modalCount
 auto pWindow::setModal(bool modality) -> void {
   if(modality) {
+    modalIncrement();
     _modalityUpdate();
     while(state().modal) {
       Application::processEvents();
-      if(Application::state().onMain) {
-        Application::doMain();
-      } else {
-        usleep(20 * 1000);
-      }
+      if(!Application::state().onMain) usleep(20 * 1000);
     }
     _modalityUpdate();
+  } else {
+    modalDecrement();
   }
 }
 
@@ -196,59 +211,81 @@ auto pWindow::setVisible(bool visible) -> void {
   if(auto& sizable = state().sizable) {
     sizable->setGeometry(self().geometry().setPosition());
   }
-  if(!visible) setModal(false);
+  if(!visible) self().setModal(false);
 }
 
 //
 
-auto pWindow::onClose() -> void {
-  if(state().onClose) self().doClose();
-  else self().setVisible(false);
-  if(state().modal && !self().visible()) self().setModal(false);
+auto pWindow::modalIncrement() -> void {
+  if(pApplication::state().modalCount++ == 0) {
+    pApplication::state().modalTimer.setEnabled(true);
+  }
 }
 
-auto pWindow::onDrop(WPARAM wparam) -> void {
-  auto paths = DropPaths(wparam);
-  if(paths) self().doDrop(paths);
+auto pWindow::modalDecrement() -> void {
+  if(--pApplication::state().modalCount == 0) {
+    pApplication::state().modalTimer.setEnabled(false);
+  }
 }
 
-auto pWindow::onEraseBackground() -> bool {
-  if(hbrush == 0) return false;
-  RECT rc;
-  GetClientRect(hwnd, &rc);
-  PAINTSTRUCT ps;
-  BeginPaint(hwnd, &ps);
-  FillRect(ps.hdc, &rc, hbrush);
-  EndPaint(hwnd, &ps);
-  return true;
-}
+auto pWindow::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_CLOSE || (msg == WM_KEYDOWN && wparam == VK_ESCAPE && state().dismissable)) {
+    if(state().onClose) self().doClose();
+    else self().setVisible(false);
+    if(state().modal && !self().visible()) self().setModal(false);
+    return true;
+  }
 
-auto pWindow::onModalBegin() -> void {
-  Application::Windows::doModalChange(true);
-}
+  if(msg == WM_MOVE && !locked()) {
+    state().geometry.setPosition(_geometry().position());
+    self().doMove();
+  }
 
-auto pWindow::onModalEnd() -> void {
-  Application::Windows::doModalChange(false);
-}
+  if(msg == WM_SIZE && !locked()) {
+    if(auto statusBar = state().statusBar) {
+      if(auto self = statusBar->self()) {
+        SetWindowPos(self->hwnd, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
+      }
+    }
+    state().geometry.setSize(_geometry().size());
+    if(auto& sizable = state().sizable) {
+      sizable->setGeometry(_geometry().setPosition());
+    }
+    self().doSize();
+  }
 
-auto pWindow::onMove() -> void {
-  if(locked()) return;
-  state().geometry.setPosition(_geometry().position());
-  self().doMove();
-}
+  if(msg == WM_DROPFILES) {
+    if(auto paths = DropPaths(wparam)) self().doDrop(paths);
+    return false;
+  }
 
-auto pWindow::onSize() -> void {
-  if(locked()) return;
-  if(auto statusBar = state().statusBar) {
-    if(auto self = statusBar->self()) {
-      SetWindowPos(self->hwnd, nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED);
+  if(msg == WM_ERASEBKGND && hbrush) {
+    RECT rc;
+    GetClientRect(hwnd, &rc);
+    PAINTSTRUCT ps;
+    BeginPaint(hwnd, &ps);
+    FillRect(ps.hdc, &rc, hbrush);
+    EndPaint(hwnd, &ps);
+    return true;
+  }
+
+  if(msg == WM_ENTERMENULOOP || msg == WM_ENTERSIZEMOVE) {
+    modalIncrement();
+    return false;
+  }
+
+  if(msg == WM_EXITMENULOOP || msg == WM_EXITSIZEMOVE) {
+    modalDecrement();
+    return false;
+  }
+
+  if(msg == WM_SYSCOMMAND) {
+    if(wparam == SC_SCREENSAVE || wparam == SC_MONITORPOWER) {
+      if(!Application::screenSaver()) return 0;
     }
   }
-  state().geometry.setSize(_geometry().size());
-  if(auto& sizable = state().sizable) {
-    sizable->setGeometry(_geometry().setPosition());
-  }
-  self().doSize();
+
+  return {};
 }
 
 //
@@ -258,7 +295,7 @@ auto pWindow::_geometry() -> Geometry {
 
   RECT rc;
   if(IsIconic(hwnd)) {
-    //GetWindowRect returns -32000(x),-32000(y) when window is minimized
+    //GetWindowRect returns x=-32000,y=-32000 when window is minimized
     WINDOWPLACEMENT wp;
     GetWindowPlacement(hwnd, &wp);
     rc = wp.rcNormalPosition;

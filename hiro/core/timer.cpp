@@ -1,5 +1,9 @@
 #if defined(Hiro_Timer)
 
+mTimer::mTimer() {
+  mObject::state.enabled = false;
+}
+
 auto mTimer::allocate() -> pObject* {
   return new pTimer(*this);
 }

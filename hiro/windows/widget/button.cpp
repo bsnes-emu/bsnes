@@ -74,6 +74,11 @@ auto pButton::onActivate() -> void {
 //note: letting hiro paint bordered buttons will lose the fade animations on Vista+;
 //however, it will allow placing icons immediately next to text (original forces icon left alignment)
 auto pButton::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_KEYDOWN) {
+    //very useful for MessageDialog
+    self().doActivate();
+  }
+
   if(msg == WM_PAINT) {
     PAINTSTRUCT ps;
     BeginPaint(hwnd, &ps);

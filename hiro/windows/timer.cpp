@@ -1,5 +1,8 @@
 #if defined(Hiro_Timer)
 
+//timeBeginPeriod(1) + timeSetEvent does not seem any more performant than SetTimer
+//it also seems buggier, and requires libwinmm
+
 namespace hiro {
 
 static vector<pTimer*> timers;
@@ -16,20 +19,22 @@ auto pTimer::construct() -> void {
 }
 
 auto pTimer::destruct() -> void {
+  setEnabled(false);
+  if(auto index = timers.find(this)) timers.remove(*index);
 }
 
 auto pTimer::setEnabled(bool enabled) -> void {
   if(htimer) {
-    KillTimer(NULL, htimer);
+    KillTimer(nullptr, htimer);
     htimer = 0;
   }
 
   if(enabled == true) {
-    htimer = SetTimer(NULL, 0u, state().interval, Timer_timeoutProc);
+    htimer = SetTimer(nullptr, 0, state().interval, Timer_timeoutProc);
   }
 }
 
-auto pTimer::setInterval(unsigned interval) -> void {
+auto pTimer::setInterval(uint interval) -> void {
   //destroy and recreate timer if interval changed
   setEnabled(self().enabled(true));
 }

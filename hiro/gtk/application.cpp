@@ -2,6 +2,10 @@
 
 namespace hiro {
 
+auto pApplication::modal() -> bool {
+  return Application::state().modal > 0;
+}
+
 auto pApplication::run() -> void {
   while(!Application::state().quit) {
     Application::doMain();

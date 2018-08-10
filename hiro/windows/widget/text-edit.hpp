@@ -14,6 +14,7 @@ struct pTextEdit : pWidget {
   auto text() const -> string;
 
   auto onChange() -> void;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
 
   HBRUSH backgroundBrush = nullptr;
 };

@@ -37,6 +37,10 @@ NSTimer* applicationTimer = nullptr;
 
 namespace hiro {
 
+auto pApplication::modal() -> bool {
+  return Application::state().modal > 0;
+}
+
 auto pApplication::run() -> void {
 //applicationTimer = [NSTimer scheduledTimerWithTimeInterval:0.1667 target:cocoaDelegate selector:@selector(updateInDock:) userInfo:nil repeats:YES];
 

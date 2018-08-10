@@ -466,42 +466,8 @@ private:
   virtual auto allocate() -> pObject*; \
 
 #include "object.hpp"
-
-#if defined(Hiro_Group)
-struct mGroup : mObject {
-  Declare(Group)
-  using mObject::remove;
-
-  auto append(sObject object) -> type&;
-  auto object(uint offset) const -> Object;
-  auto objectCount() const -> uint;
-  auto objects() const -> vector<Object>;
-  auto remove(sObject object) -> type&;
-
-//private:
-  struct State {
-    vector<wObject> objects;
-  } state;
-};
-#endif
-
-#if defined(Hiro_Timer)
-struct mTimer : mObject {
-  Declare(Timer)
-
-  auto doActivate() const -> void;
-  auto interval() const -> uint;
-  auto onActivate(const function<void ()>& callback = {}) -> type&;
-  auto setInterval(uint interval = 0) -> type&;
-
-//private:
-  struct State {
-    uint interval = 0;
-    function<void ()> onActivate;
-  } state;
-};
-#endif
-
+#include "group.hpp"
+#include "timer.hpp"
 #include "window.hpp"
 
 #if defined(Hiro_StatusBar)

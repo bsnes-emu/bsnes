@@ -11,6 +11,9 @@ auto Program::load() -> void {
   screenshot = {};
   frameAdvance = false;
   if(!verified() && emulatorSettings.warnOnUnverifiedGames.checked()) {
+    //Emulator::loaded() is true at this point:
+    //prevent Program::main() from calling Emulator::run() during this dialog window
+    auto lock = acquire();
     auto response = MessageDialog(
       "Warning: this game image is unverified.\n"
       "Running it *may* be a security risk.\n\n"

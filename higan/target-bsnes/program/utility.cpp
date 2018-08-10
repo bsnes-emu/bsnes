@@ -60,7 +60,8 @@ auto Program::captureScreenshot() -> bool {
   return false;
 }
 
-auto Program::paused() -> bool {
+auto Program::inactive() -> bool {
+  if(locked()) return true;
   if(!emulator->loaded()) return true;
   if(presentation.pauseEmulation.checked()) return true;
   if(!focused() && emulatorSettings.pauseEmulation.checked()) return true;

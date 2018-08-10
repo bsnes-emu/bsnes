@@ -12,6 +12,7 @@ struct pLineEdit : pWidget {
   auto setText(const string& text) -> void;
 
   auto onChange() -> void;
+  auto windowProc(HWND, UINT, WPARAM, LPARAM) -> maybe<LRESULT> override;
 
   auto _text() -> string;
 

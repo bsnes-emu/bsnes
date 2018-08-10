@@ -8,13 +8,13 @@ auto DriverSettings::create() -> void {
   videoLayout.setSize({2, 2});
   videoDriverLabel.setText("Driver:");
   videoDriverOption.onChange([&] {
-    videoDriverUpdate.setEnabled(videoDriverOption.selected().text() != video.driver());
+    videoDriverUpdate.setText(videoDriverOption.selected().text() != video.driver() ? "Change" : "Reload");
   });
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
   videoExclusiveToggle.setText("Exclusive").setToolTip(
-    "(Direct3D only)\n\n"
+    "(Direct3D driver only)\n\n"
     "Acquires exclusive access to the display in fullscreen mode.\n"
     "Eliminates compositing issues such as video stuttering."
   ).onToggle([&] {
@@ -33,7 +33,7 @@ auto DriverSettings::create() -> void {
     presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
   videoFlushToggle.setText("GPU sync").setToolTip({
-    "(OpenGL only)\n\n"
+    "(OpenGL driver only)\n\n"
     "Causes the GPU to wait until frames are fully rendered.\n"
     "In the best case, this can remove up to one frame of input lag.\n"
     "However, it incurs a roughly 20% performance penalty.\n\n"
@@ -48,7 +48,7 @@ auto DriverSettings::create() -> void {
   audioLayout.setSize({2, 2});
   audioDriverLabel.setText("Driver:");
   audioDriverOption.onChange([&] {
-    audioDriverUpdate.setEnabled(audioDriverOption.selected().text() != audio.driver());
+    audioDriverUpdate.setText(audioDriverOption.selected().text() != audio.driver() ? "Change" : "Reload");
   });
   audioDriverUpdate.setText("Change").onActivate([&] { audioDriverChange(); });
   audioDeviceLabel.setText("Device:");
@@ -58,7 +58,7 @@ auto DriverSettings::create() -> void {
   audioLatencyLabel.setText("Latency:");
   audioLatencyOption.onChange([&] { audioLatencyChange(); });
   audioExclusiveToggle.setText("Exclusive").setToolTip(
-    "(ASIO, WASAPI only)\n\n"
+    "(ASIO, WASAPI drivers only)\n\n"
     "Acquires exclusive control of the sound card device.\n"
     "This can significantly reduce audio latency.\n"
     "However, it will block sounds from all other applications."
@@ -77,7 +77,7 @@ auto DriverSettings::create() -> void {
     presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
   audioDynamicToggle.setText("Dynamic rate").setToolTip(
-    "(OSS only)\n\n"
+    "(OSS, XAudio drivers only)\n\n"
     "Dynamically adjusts the audio frequency by tiny amounts.\n"
     "Use this with video sync enabled, and audio sync disabled.\n\n"
     "This can produce perfectly smooth video and clean audio,\n"
@@ -93,9 +93,13 @@ auto DriverSettings::create() -> void {
   inputLayout.setSize({2, 1});
   inputDriverLabel.setText("Driver:");
   inputDriverOption.onChange([&] {
-    inputDriverUpdate.setEnabled(inputDriverOption.selected().text() != input.driver());
+    inputDriverUpdate.setText(inputDriverOption.selected().text() != input.driver() ? "Change" : "Reload");
   });
-  inputDriverUpdate.setText("Change").onActivate([&] { inputDriverChange(); });
+  inputDriverUpdate.setText("Change").setToolTip(
+    "A driver reload can be used to detect hotplugged devices.\n"
+    "This is useful for APIs that lack auto-hotplug support,\n"
+    "such as DirectInput and SDL."
+  ).onActivate([&] { inputDriverChange(); });
 
   //this will hide the video format setting for simplicity, as it's not very useful just yet ...
   //videoLayout.setSize({2, 1});

@@ -187,7 +187,7 @@ auto InputManager::initialize() -> void {
 
   input.onChange({&InputManager::onChange, this});
 
-  lastPoll = chrono::millisecond();
+  lastPoll = 0;  //force a poll event immediately
   frequency = max(1u, settings.input.frequency);
 
   turboCounter = 0;
@@ -254,6 +254,8 @@ auto InputManager::bind() -> void {
 }
 
 auto InputManager::poll() -> void {
+  if(Application::modal()) return;
+
   //polling actual hardware devices is time-consuming; skip if poll was called too recently
   auto thisPoll = chrono::millisecond();
   if(thisPoll - lastPoll < frequency) return;

@@ -39,14 +39,15 @@ auto pViewport::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) ->
   }
 
   if(msg == WM_ERASEBKGND) {
-    PAINTSTRUCT ps;
+  //this will cause flickering during window resize
+  /*PAINTSTRUCT ps;
     BeginPaint(hwnd, &ps);
     auto brush = CreateSolidBrush(RGB(0, 0, 0));
     RECT rc{};
     GetClientRect(hwnd, &rc);
     FillRect(ps.hdc, &rc, brush);
     DeleteObject(brush);
-    EndPaint(hwnd, &ps);
+    EndPaint(hwnd, &ps);*/
     return true;
   }
 

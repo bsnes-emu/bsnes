@@ -1,6 +1,8 @@
 namespace hiro {
 
 struct pToolTip {
+  enum : uint { Delay = 1000, Timeout = 10000 };
+
   pToolTip(const string& text);
   ~pToolTip();
 

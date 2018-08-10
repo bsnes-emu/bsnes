@@ -3,6 +3,7 @@
 namespace hiro {
 
 struct pApplication {
+  static auto modal() -> bool;
   static auto run() -> void;
   static auto pendingEvents() -> bool;
   static auto processEvents() -> void;
@@ -12,6 +13,8 @@ struct pApplication {
   static auto initialize() -> void;
 
   struct State {
+    int modalCount = 0;           //number of modal loops
+    Timer modalTimer;             //to run Application during modal events
     pToolTip* toolTip = nullptr;  //active toolTip
   };
   static auto state() -> State&;

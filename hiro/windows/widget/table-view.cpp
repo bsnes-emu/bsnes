@@ -288,6 +288,13 @@ auto pTableView::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -
       //the control should be inactive when disabled; so we intercept the messages here
       return false;
     }
+
+    if(msg == WM_KEYDOWN && wparam == VK_RETURN) {
+      if(self().selected()) {
+        //returning true generates LVN_ITEMACTIVATE message
+        return true;
+      }
+    }
   }
 
   return pWidget::windowProc(hwnd, msg, wparam, lparam);

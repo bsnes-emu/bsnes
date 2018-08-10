@@ -4,7 +4,11 @@ namespace hiro {
 
 static auto Application_keyboardProc(HWND, UINT, WPARAM, LPARAM) -> bool;
 static auto Application_processDialogMessage(MSG&) -> void;
-static auto CALLBACK Application_windowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
+static auto CALLBACK Window_windowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
+
+auto pApplication::modal() -> bool {
+  return state().modalCount > 0;
+}
 
 auto pApplication::run() -> void {
   MSG msg;
@@ -70,7 +74,7 @@ auto pApplication::initialize() -> void {
   wc.hCursor = LoadCursor(0, IDC_ARROW);
   wc.hIcon = LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(2));
   wc.hInstance = GetModuleHandle(0);
-  wc.lpfnWndProc = Application_windowProc;
+  wc.lpfnWndProc = Window_windowProc;
   wc.lpszClassName = L"hiroWindow";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -151,8 +155,9 @@ static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
             window->doKeyRelease(code);
           }
         }
-        if(window->state.dismissable && msg == WM_KEYDOWN && wparam == VK_ESCAPE) {
-          self->onClose();
+        //TODO: does this really need to be hooked here?
+        if(msg == WM_KEYDOWN && wparam == VK_ESCAPE && window->state.dismissable) {
+          if(auto result = self->windowProc(self->hwnd, WM_CLOSE, wparam, lparam)) return result();
         }
       }
     }
@@ -165,102 +170,19 @@ static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
   }
 
   if(msg == WM_KEYDOWN) {
-    if(0);
-
-    #if defined(Hiro_TableView)
-    else if(auto tableView = dynamic_cast<mTableView*>(object)) {
-      if(wparam == VK_RETURN) {
-        if(tableView->selected()) return true;  //returning true generates LVN_ITEMACTIVATE message
-      }
-    }
-    #endif
-
-    #if defined(Hiro_LineEdit)
-    else if(auto lineEdit = dynamic_cast<mLineEdit*>(object)) {
-      if(wparam == VK_RETURN) {
-        lineEdit->doActivate();
-      }
-    }
-    #endif
-
-    #if defined(Hiro_TextEdit)
-    else if(auto textEdit = dynamic_cast<mTextEdit*>(object)) {
-      if(wparam == 'A' && GetKeyState(VK_CONTROL) < 0) {
-        //Ctrl+A = select all text
-        //note: this is not a standard accelerator on Windows
-        Edit_SetSel(textEdit->self()->hwnd, 0, ~0);
-        return true;
-      } else if(wparam == 'V' && GetKeyState(VK_CONTROL) < 0) {
-        //Ctrl+V = paste text
-        //note: this formats Unix (LF) and OS9 (CR) line-endings to Windows (CR+LF) line-endings
-        //this is necessary as the EDIT control only supports Windows line-endings
-        OpenClipboard(hwnd);
-        if(auto handle = GetClipboardData(CF_UNICODETEXT)) {
-          if(auto text = (wchar_t*)GlobalLock(handle)) {
-            string data = (const char*)utf8_t(text);
-            data.replace("\r\n", "\n");
-            data.replace("\r", "\n");
-            data.replace("\n", "\r\n");
-            GlobalUnlock(handle);
-            utf16_t output(data);
-            if(auto resource = GlobalAlloc(GMEM_MOVEABLE, (wcslen(output) + 1) * sizeof(wchar_t))) {
-              if(auto write = (wchar_t*)GlobalLock(resource)) {
-                wcscpy(write, output);
-                GlobalUnlock(write);
-                if(SetClipboardData(CF_UNICODETEXT, resource) == NULL) {
-                  GlobalFree(resource);
-                }
-              }
-            }
-          }
+    //TODO: does this really need to be hooked here?
+    #if defined(Hiro_Widget)
+    if(auto widget = dynamic_cast<mWidget*>(object)) {
+      if(auto self = widget->self()) {
+        if(auto result = self->windowProc(self->hwnd, msg, wparam, lparam)) {
+          return result();
         }
-        CloseClipboard();
       }
     }
     #endif
   }
 
   return false;
-}
-
-/*
-case WM_GETMINMAXINFO: {
-  MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-  mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
-  mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
-  return TRUE;
-  break;
-}
-*/
-
-static auto CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
-  if(Application::state().quit) return DefWindowProc(hwnd, msg, wparam, lparam);
-
-  auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto window = dynamic_cast<mWindow*>(object);
-  if(!window) window = object->parentWindow(true);
-  if(!window) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto pWindow = window->self();
-  if(!pWindow) return DefWindowProc(hwnd, msg, wparam, lparam);
-
-  if(pWindow->_modalityDisabled()) return DefWindowProc(hwnd, msg, wparam, lparam);
-
-  switch(msg) {
-  case WM_CLOSE: pWindow->onClose(); return true;
-  case WM_MOVE: pWindow->onMove(); break;
-  case WM_SIZE: pWindow->onSize(); break;
-  case WM_DROPFILES: pWindow->onDrop(wparam); return false;
-  case WM_ERASEBKGND: if(pWindow->onEraseBackground()) return true; break;
-  case WM_ENTERMENULOOP: case WM_ENTERSIZEMOVE: pWindow->onModalBegin(); return false;
-  case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: pWindow->onModalEnd(); return false;
-  case WM_SYSCOMMAND:
-    if(wparam == SC_SCREENSAVE || wparam == SC_MONITORPOWER) {
-      if(!Application::screenSaver()) return 0;
-    }
-  }
-
-  return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);
 }
 
 }

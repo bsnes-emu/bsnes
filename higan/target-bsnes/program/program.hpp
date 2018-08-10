@@ -1,4 +1,4 @@
-struct Program : Emulator::Platform {
+struct Program : Lock, Emulator::Platform {
   Application::Namespace tr{"Program"};
 
   //program.cpp
@@ -91,7 +91,7 @@ struct Program : Emulator::Platform {
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;
   auto captureScreenshot() -> bool;
-  auto paused() -> bool;
+  auto inactive() -> bool;
   auto focused() -> bool;
 
   //patch.cpp

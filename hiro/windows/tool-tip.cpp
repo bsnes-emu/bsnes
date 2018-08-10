@@ -22,7 +22,7 @@ pToolTip::pToolTip(const string& toolTipText) {
   tracking.x = -1;
   tracking.y = -1;
 
-  timeout.setInterval(5000);
+  timeout.setInterval(Timeout);
   timeout.onActivate([&] { hide(); });
 }
 

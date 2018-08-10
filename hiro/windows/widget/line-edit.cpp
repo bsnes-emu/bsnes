@@ -43,10 +43,22 @@ auto pLineEdit::setText(const string& text) -> void {
   SetWindowText(hwnd, utf16_t(text));
 }
 
+//
+
 auto pLineEdit::onChange() -> void {
   state().text = _text();
   if(!locked()) self().doChange();
 }
+
+auto pLineEdit::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_KEYDOWN) {
+    self().doActivate();
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
+}
+
+//
 
 auto pLineEdit::_text() -> string {
   unsigned length = GetWindowTextLength(hwnd);

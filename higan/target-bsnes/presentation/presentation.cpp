@@ -190,12 +190,6 @@ auto Presentation::create() -> void {
   resizeWindow();
   setCentered();
 
-  #if defined(PLATFORM_WINDOWS)
-  Application::Windows::onModalChange([&](bool modal) {
-    if(modal) audio.clear();
-  });
-  #endif
-
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
@@ -283,7 +277,7 @@ auto Presentation::resizeViewport() -> void {
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
   });
 
-  clearViewport();
+//clearViewport();
 }
 
 auto Presentation::resizeWindow() -> void {

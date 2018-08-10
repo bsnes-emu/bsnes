@@ -73,16 +73,14 @@ auto Program::create(vector<string> arguments) -> void {
 }
 
 auto Program::main() -> void {
-  if(Application::modal()) return;
-
   updateStatus();
   video.poll();
   inputManager.poll();
   inputManager.pollHotkeys();
 
-  if(paused()) {
+  if(inactive()) {
     audio.clear();
-    usleep(20 * 1000);
+    if(!Application::modal()) usleep(20 * 1000);
     return;
   }
 

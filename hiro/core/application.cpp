@@ -18,7 +18,7 @@ auto Application::locale() -> Locale& {
 }
 
 auto Application::modal() -> bool {
-  return state().modal > 0;
+  return pApplication::modal();
 }
 
 auto Application::name() -> string {
@@ -93,17 +93,6 @@ auto Application::unscale(float value) -> float {
   return value * (1.0 / state().scale);
 }
 
-//Windows
-//=======
-
-auto Application::Windows::doModalChange(bool modal) -> void {
-  if(state().windows.onModalChange) return state().windows.onModalChange(modal);
-}
-
-auto Application::Windows::onModalChange(const function<void (bool)>& callback) -> void {
-  state().windows.onModalChange = callback;
-}
-
 //Cocoa
 //=====
 
@@ -144,9 +133,9 @@ auto Application::Cocoa::onQuit(const function<void ()>& callback) -> void {
 
 auto Application::initialize() -> void {
   if(!state().initialized) {
+    state().initialized = true;
     hiro::initialize();
     pApplication::initialize();
-    state().initialized = true;
     pApplication::setScreenSaver(state().screenSaver);
   }
 }

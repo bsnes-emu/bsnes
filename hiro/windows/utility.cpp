@@ -424,7 +424,7 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
           TRACKMOUSEEVENT event{sizeof(TRACKMOUSEEVENT)};
           event.hwndTrack = hwnd;
           event.dwFlags = TME_LEAVE | TME_HOVER;
-          event.dwHoverTime = 1500;
+          event.dwHoverTime = pToolTip::Delay;
           TrackMouseEvent(&event);
           POINT p{};
           GetCursorPos(&p);

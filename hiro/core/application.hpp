@@ -24,11 +24,6 @@ struct Application {
   static auto toolTips() -> bool;
   static auto unscale(float value) -> float;
 
-  struct Windows {
-    static auto doModalChange(bool modal) -> void;
-    static auto onModalChange(const function<void (bool)>& callback = {}) -> void;
-  };
-
   struct Cocoa {
     static auto doAbout() -> void;
     static auto doActivate() -> void;
@@ -56,11 +51,6 @@ struct Application {
     float scale = 1.0;
     bool screenSaver = true;
     bool toolTips = true;
-
-    struct Windows {
-      function<void (bool)> onModalChange;
-      function<bool ()> onScreenSaver;
-    } windows;
 
     struct Cocoa {
       function<void ()> onAbout;

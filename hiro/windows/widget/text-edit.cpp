@@ -66,8 +66,48 @@ auto pTextEdit::text() const -> string {
   return text;
 }
 
+//
+
 auto pTextEdit::onChange() -> void {
   if(!locked()) self().doChange();
+}
+
+auto pTextEdit::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_KEYDOWN) {
+    if(wparam == 'A' && GetKeyState(VK_CONTROL) < 0) {
+      //Ctrl+A = select all text
+      //note: this is not a standard accelerator on Windows
+      Edit_SetSel(hwnd, 0, ~0);
+      return true;
+    } else if(wparam == 'V' && GetKeyState(VK_CONTROL) < 0) {
+      //Ctrl+V = paste text
+      //note: this formats Unix (LF) and OS9 (CR) line-endings to Windows (CR+LF) line-endings
+      //this is necessary as the EDIT control only supports Windows line-endings
+      OpenClipboard(hwnd);
+      if(auto handle = GetClipboardData(CF_UNICODETEXT)) {
+        if(auto text = (wchar_t*)GlobalLock(handle)) {
+          string data = (const char*)utf8_t(text);
+          data.replace("\r\n", "\n");
+          data.replace("\r", "\n");
+          data.replace("\n", "\r\n");
+          GlobalUnlock(handle);
+          utf16_t output(data);
+          if(auto resource = GlobalAlloc(GMEM_MOVEABLE, (wcslen(output) + 1) * sizeof(wchar_t))) {
+            if(auto write = (wchar_t*)GlobalLock(resource)) {
+              wcscpy(write, output);
+              GlobalUnlock(write);
+              if(SetClipboardData(CF_UNICODETEXT, resource) == nullptr) {
+                GlobalFree(resource);
+              }
+            }
+          }
+        }
+      }
+      CloseClipboard();
+    }
+  }
+
+  return pWidget::windowProc(hwnd, msg, wparam, lparam);
 }
 
 }
