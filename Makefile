@@ -9,6 +9,10 @@ PLATFORM := windows32
 USE_WINDRES := true
 endif
 
+ifneq ($(findstring MSYS,$(PLATFORM)),)
+PLATFORM := windows32
+endif
+
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
 else
