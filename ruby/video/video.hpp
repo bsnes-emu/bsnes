@@ -13,7 +13,6 @@ struct VideoDriver {
   virtual auto hasBlocking() -> bool { return false; }
   virtual auto hasFlush() -> bool { return false; }
   virtual auto hasFormats() -> vector<string> { return {"RGB24"}; }
-  virtual auto hasSmooth() -> bool { return false; }
   virtual auto hasShader() -> bool { return false; }
 
   auto hasFormat(string format) -> bool { return (bool)hasFormats().find(format); }
@@ -23,9 +22,9 @@ struct VideoDriver {
   virtual auto setBlocking(bool blocking) -> bool { return true; }
   virtual auto setFlush(bool flush) -> bool { return true; }
   virtual auto setFormat(string format) -> bool { return true; }
-  virtual auto setSmooth(bool smooth) -> bool { return true; }
   virtual auto setShader(string shader) -> bool { return true; }
 
+  virtual auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool { return true; }
   virtual auto clear() -> void {}
   virtual auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool { return false; }
   virtual auto release() -> void {}
@@ -41,8 +40,12 @@ protected:
   bool blocking = false;
   bool flush = false;
   string format = "RGB24";
-  bool smooth = false;
-  string shader = "";
+  string shader = "Blur";
+
+  uint width = 0;
+  uint height = 0;
+  double inputFrequency = 0.0;
+  double outputFrequency = 0.0;
 };
 
 struct Video {
@@ -63,7 +66,6 @@ struct Video {
   auto hasBlocking() -> bool { return instance->hasBlocking(); }
   auto hasFlush() -> bool { return instance->hasFlush(); }
   auto hasFormats() -> vector<string> { return instance->hasFormats(); }
-  auto hasSmooth() -> bool { return instance->hasSmooth(); }
   auto hasShader() -> bool { return instance->hasShader(); }
 
   auto hasFormat(string format) -> bool { return instance->hasFormat(format); }
@@ -73,7 +75,6 @@ struct Video {
   auto blocking() -> bool { return instance->blocking; }
   auto flush() -> bool { return instance->flush; }
   auto format() -> string { return instance->format; }
-  auto smooth() -> bool { return instance->smooth; }
   auto shader() -> string { return instance->shader; }
 
   auto setExclusive(bool exclusive) -> bool;
@@ -81,9 +82,9 @@ struct Video {
   auto setBlocking(bool blocking) -> bool;
   auto setFlush(bool flush) -> bool;
   auto setFormat(string format) -> bool;
-  auto setSmooth(bool smooth) -> bool;
   auto setShader(string shader) -> bool;
 
+  auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool;
   auto clear() -> void;
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool;
   auto release() -> void;

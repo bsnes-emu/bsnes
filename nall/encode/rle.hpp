@@ -2,49 +2,62 @@
 
 namespace nall { namespace Encode {
 
-template<typename T> inline auto RLE(const void* data_, uint size, uint minimum = 0) -> vector<uint8_t> {
-  if(!minimum) minimum = max(1, 4 / sizeof(T));
-  vector<uint8_t> result;
+template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
+inline auto RLE(const void* data, uint64_t size) -> vector<uint8_t> {
+  vector<uint8_t> output;
+  for(uint byte : range(8)) output.append(size >> byte * 8);
 
-  auto data = (const T*)data_;
+  auto input = (const uint8_t*)data;
   uint base = 0;
   uint skip = 0;
 
-  for(uint byte : range(sizeof(uint))) result.append(size * sizeof(T) >> byte * 8);
-
-  auto read = [&](uint offset) -> T {
-    if(offset >= size) return {};
-    return data[offset];
+  auto load = [&](uint offset) -> uint8_t {
+    if(offset >= size) return 0x00;
+    return input[offset];
   };
 
-  auto write = [&](T value) -> void {
-    for(uint byte : range(sizeof(T))) result.append(value >> byte * 8);
+  auto read = [&](uint offset) -> uint64_t {
+    uint64_t value = 0;
+    for(uint byte : range(S)) value |= load(offset + byte) << byte * 8;
+    return value;
   };
 
-  auto flush = [&]() -> void {
-    result.append(skip - 1);
-    do { write(read(base++)); } while(--skip);
+  auto write = [&](uint64_t value) -> void {
+    for(uint byte : range(S)) output.append(value >> byte * 8);
   };
 
-  while(base + skip < size) {
+  auto flush = [&] {
+    output.append(skip - 1);
+    do {
+      write(read(base));
+      base += S;
+    } while(--skip);
+  };
+
+  while(base + S * skip < size) {
     uint same = 1;
-    for(uint offset = base + skip + 1; offset < size; offset++) {
-      if(read(offset) != read(base + skip)) break;
-      if(++same == 127 + minimum) break;
+    for(uint offset = base + S * (skip + 1); offset < size; offset += S) {
+      if(read(offset) != read(base + S * skip)) break;
+      if(++same == 127 + M) break;
     }
 
-    if(same < minimum) {
+    if(same < M) {
       if(++skip == 128) flush();
     } else {
       if(skip) flush();
-      result.append(128 | same - minimum);
+      output.append(128 | same - M);
       write(read(base));
-      base += same;
+      base += S * same;
     }
   }
   if(skip) flush();
 
-  return result;
+  return output;
+}
+
+template<uint S = 1, uint M = 4 / S, typename T>
+inline auto RLE(const vector<T>& buffer) -> vector<uint8_t> {
+  return move(RLE<S, M>(buffer.data(), buffer.size() * sizeof(T)));
 }
 
 }}

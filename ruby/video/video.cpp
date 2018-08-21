@@ -71,13 +71,6 @@ auto Video::setFormat(string format) -> bool {
   return true;
 }
 
-auto Video::setSmooth(bool smooth) -> bool {
-  if(instance->smooth == smooth) return true;
-  if(!instance->hasSmooth()) return false;
-  if(!instance->setSmooth(instance->smooth = smooth)) return false;
-  return true;
-}
-
 auto Video::setShader(string shader) -> bool {
   if(instance->shader == shader) return true;
   if(!instance->hasShader()) return false;
@@ -86,6 +79,14 @@ auto Video::setShader(string shader) -> bool {
 }
 
 //
+
+auto Video::configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool {
+  instance->width = width;
+  instance->height = height;
+  instance->inputFrequency = inputFrequency;
+  instance->outputFrequency = outputFrequency;
+  return instance->configure(width, height, inputFrequency, outputFrequency);
+}
 
 auto Video::clear() -> void {
   return instance->clear();

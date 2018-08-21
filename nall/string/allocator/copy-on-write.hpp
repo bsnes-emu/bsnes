@@ -5,17 +5,19 @@ namespace nall {
 string::string() : _data(nullptr), _refs(nullptr), _capacity(0), _size(0) {
 }
 
-auto string::get() -> char* {
+template<typename T>
+auto string::get() -> T* {
   static char _null[] = "";
-  if(!_data) return _null;
+  if(!_data) return (T*)_null;
   if(*_refs > 1) _data = _copy();  //make unique for write operations
-  return _data;
+  return (T*)_data;
 }
 
-auto string::data() const -> const char* {
+template<typename T>
+auto string::data() const -> const T* {
   static const char _null[] = "";
-  if(!_data) return _null;
-  return _data;
+  if(!_data) return (const T*)_null;
+  return (const T*)_data;
 }
 
 auto string::reset() -> type& {

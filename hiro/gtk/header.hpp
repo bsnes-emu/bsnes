@@ -1,10 +1,4 @@
 #if defined(DISPLAY_WINDOWS)
-  #define UNICODE
-  #define WINVER 0x0601
-  #define _WIN32_WINNT WINVER
-  #define _WIN32_IE WINVER
-  #define __MSVCRT_VERSION__ WINVER
-  #define NOMINMAX
   #define TBS_TRANSPARENTBKGND 0x1000
 
   #include <nall/windows/guard.hpp>

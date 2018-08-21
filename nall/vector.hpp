@@ -5,10 +5,11 @@
 #include <nall/bit.hpp>
 #include <nall/function.hpp>
 #include <nall/iterator.hpp>
+#include <nall/literals.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
+#include <nall/merge-sort.hpp>
 #include <nall/range.hpp>
-#include <nall/sort.hpp>
 #include <nall/traits.hpp>
 
 namespace nall {
@@ -24,16 +25,18 @@ struct vector_base {
 
   //core.hpp
   vector_base() = default;
+  vector_base(Literal::Capacity capacity);
+  vector_base(Literal::Size size);
   vector_base(const initializer_list<T>& values);
   vector_base(const type& source);
   vector_base(type&& source);
   ~vector_base();
 
   explicit operator bool() const;
-  auto capacity() const -> uint;
-  auto size() const -> uint;
-  auto data() -> T*;
-  auto data() const -> const T*;
+  template<typename Cast = T> auto capacity() const -> uint;
+  template<typename Cast = T> auto size() const -> uint;
+  template<typename Cast = T> auto data(uint offset = 0) -> Cast*;
+  template<typename Cast = T> auto data(uint offset = 0) const -> const Cast*;
 
   //assign.hpp
   auto operator=(const type& source) -> type&;
@@ -112,6 +115,7 @@ struct vector_base {
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
   auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint>;
   auto find(const T& value) const -> maybe<uint>;
+  auto findSorted(const T& value) const -> maybe<uint>;
   auto foreach(const function<void (const T&)>& callback) -> void;
   auto foreach(const function<void (uint, const T&)>& callback) -> void;
 

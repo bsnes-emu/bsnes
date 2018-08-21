@@ -23,7 +23,6 @@ struct VideoGLX : VideoDriver, OpenGL {
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
-  auto hasSmooth() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
   auto hasFormats() -> vector<string> override {
@@ -57,14 +56,8 @@ struct VideoGLX : VideoDriver, OpenGL {
     return false;
   }
 
-  auto setSmooth(bool) -> bool override {
-    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
-    return true;
-  }
-
-  auto setShader(string) -> bool override {
-    OpenGL::setShader(self.shader);
-    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
+  auto setShader(string shader) -> bool override {
+    OpenGL::setShader(shader);
     return true;
   }
 
@@ -214,7 +207,7 @@ private:
     _doubleBuffer = value;
     _isDirect = glXIsDirect(_display, _glXContext);
 
-    return _ready = OpenGL::initialize();
+    return _ready = OpenGL::initialize(self.shader);
   }
 
   auto terminate() -> void {

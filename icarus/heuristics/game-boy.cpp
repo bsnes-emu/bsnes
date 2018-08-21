@@ -33,15 +33,17 @@ auto GameBoy::manifest() const -> string {
   bool black = (read(0x0143) & 0xc0) == 0x80;  //cartridge works in DMG+CGB mode
   bool clear = (read(0x0143) & 0xc0) == 0xc0;  //cartridge works in CGB mode only
 
-  bool flash = false;
-  bool battery = false;
   bool ram = false;
+  bool battery = false;
+  bool eeprom = false;
+  bool flash = false;
   bool rtc = false;
   bool accelerometer = false;
   bool rumble = false;
 
   uint romSize = 0;
   uint ramSize = 0;
+  uint eepromSize = 0;
   uint flashSize = 0;
   uint rtcSize = 0;
 
@@ -176,7 +178,7 @@ auto GameBoy::manifest() const -> string {
   case 0x22:
     mapper = "MBC7";
     battery = true;
-    ram = true;
+    eeprom = true;
     accelerometer = true;
     rumble = true;
     break;
@@ -204,6 +206,27 @@ auto GameBoy::manifest() const -> string {
 
   }
 
+  //Game Boy: title = $0134-0143
+  //Game Boy Color (early games): title = $0134-0142; model = $0143
+  //Game Boy Color (later games): title = $0134-013e; serial = $013f-0142; model = $0143
+  string title;
+  for(uint n : range(black || clear ? 15 : 16)) {
+    char byte = read(0x0134 + n);
+    if(byte < 0x20 || byte > 0x7e) byte = ' ';
+    title.append(byte);
+  }
+
+  string serial = title.slice(-4);
+  if(!black && !clear) serial = "";
+  for(auto& byte : serial) {
+    if(byte >= 'A' && byte <= 'Z') continue;
+    //invalid serial
+    serial = "";
+    break;
+  }
+  title.trimRight(serial, 1L);  //remove the serial from the title, if it exists
+  title.strip();  //remove any excess whitespace from the title
+
   switch(read(0x0148)) { default:
   case 0x00: romSize =   2 * 16 * 1024; break;
   case 0x01: romSize =   4 * 16 * 1024; break;
@@ -227,10 +250,20 @@ auto GameBoy::manifest() const -> string {
 
   if(mapper == "MBC2" && ram) ramSize = 256;
   if(mapper == "MBC6" && ram) ramSize =  32 * 1024;
-  if(mapper == "MBC7" && ram) ramSize = 256;
   if(mapper == "TAMA" && ram) ramSize =  32;
 
   if(mapper == "MBC6" && flash) flashSize = 1024 * 1024;
+
+  //Game Boy header does not specify EEPROM size: detect via game title instead
+  //Command Master:        EEPROM = 512 bytes
+  //Kirby Tilt 'n' Tumble: EEPROM = 256 bytes
+  //Korokoro Kirby:        EEPROM = 256 bytes
+  if(mapper == "MBC7" && eeprom) {
+    eepromSize = 256;  //fallback guess; supported values are 128, 256, 512
+    if(title == "CMASTER"     && serial == "KCEJ") eepromSize = 512;
+    if(title == "KIRBY TNT"   && serial == "KTNE") eepromSize = 256;
+    if(title == "KORO2 KIRBY" && serial == "KKKJ") eepromSize = 256;
+  }
 
   if(mapper == "MBC3" && rtc) rtcSize = 13;
   if(mapper == "TAMA" && rtc) rtcSize = 21;
@@ -240,12 +273,17 @@ auto GameBoy::manifest() const -> string {
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  title:  ", title, "\n");
+if(serial)
+  output.append("  serial: ", serial, "\n");
   output.append("  board:  ", mapper, "\n");
   output.append(Memory{}.type("ROM").size(data.size()).content("Program").text());
 if(ram && ramSize && battery)
   output.append(Memory{}.type("RAM").size(ramSize).content("Save").text());
 if(ram && ramSize && !battery)
   output.append(Memory{}.type("RAM").size(ramSize).content("Save").isVolatile().text());
+if(eeprom && eepromSize)
+  output.append(Memory{}.type("EEPROM").size(eepromSize).content("Save").text());
 if(flash && flashSize)
   output.append(Memory{}.type("Flash").size(flashSize).content("Download").text());
 if(rtc && rtcSize)

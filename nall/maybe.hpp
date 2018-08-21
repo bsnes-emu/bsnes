@@ -4,6 +4,7 @@ namespace nall {
 
 struct nothing_t {};
 static nothing_t nothing;
+struct else_t {};
 
 template<typename T>
 struct maybe {

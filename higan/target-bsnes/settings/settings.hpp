@@ -1,10 +1,9 @@
 struct Settings : Markup::Node {
-  Settings() { load(); }
-  ~Settings() { save(); }
-
   auto load() -> void;
   auto save() -> void;
   auto process(bool load) -> void;
+
+  string location;
 
   struct Video {
     string driver;

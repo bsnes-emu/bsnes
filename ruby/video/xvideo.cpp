@@ -12,6 +12,7 @@ struct VideoXVideo : VideoDriver {
   ~VideoXVideo() { terminate(); }
 
   auto create() -> bool override {
+    super.setShader("Blur");
     return initialize();
   }
 

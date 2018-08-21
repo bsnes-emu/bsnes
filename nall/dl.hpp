@@ -9,7 +9,6 @@
 #include <nall/utility.hpp>
 
 #if defined(PLATFORM_WINDOWS)
-  #include <windows.h>
   #include <nall/windows/utf8.hpp>
 #else
   #include <dlfcn.h>

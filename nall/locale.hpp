@@ -29,10 +29,10 @@ struct Locale {
     return result;
   }
 
-  auto select(string language) -> bool {
+  auto select(string option) -> bool {
     selected.reset();
     for(auto& dictionary : dictionaries) {
-      if(dictionary.language == language) {
+      if(option == Location::prefix(dictionary.location) || option == dictionary.language) {
         selected = dictionary;
         return true;
       }

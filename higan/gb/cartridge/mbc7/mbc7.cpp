@@ -1,3 +1,18 @@
+#include "eeprom.cpp"
+#include "serialization.cpp"
+
+auto Cartridge::MBC7::load(Markup::Node document) -> void {
+  eeprom.load(document);
+}
+
+auto Cartridge::MBC7::save(Markup::Node document) -> void {
+  eeprom.save(document);
+}
+
+auto Cartridge::MBC7::main() -> void {
+  eeprom.main();
+}
+
 auto Cartridge::MBC7::read(uint16 address) -> uint8 {
   if((address & 0xc000) == 0x0000) {  //$0000-3fff
     return cartridge.rom.read(address.bits(0,13));
@@ -17,7 +32,7 @@ auto Cartridge::MBC7::read(uint16 address) -> uint8 {
     case 5: return io.accelerometer.y.bits(8,15);
     case 6: return 0x00;  //z?
     case 7: return 0xff;  //z?
-    case 8: return 0xff;
+    case 8: return eeprom.readIO();
     }
 
     return 0xff;
@@ -48,25 +63,24 @@ auto Cartridge::MBC7::write(uint16 address, uint8 data) -> void {
     if(!io.ram.enable[0] || !io.ram.enable[1]) return;
 
     switch(address.bits(4,7)) {
-
     case 0: {
       if(data != 0x55) break;
-      io.accelerometer.x = 0x8000;
-      io.accelerometer.y = 0x8000;
+      io.accelerometer.x = Center;
+      io.accelerometer.y = Center;
       break;
     }
 
     case 1: {
       if(data != 0xaa) break;
-      io.accelerometer.x = 0x8000 + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 8);
-      io.accelerometer.y = 0x8000 + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 9);
+      io.accelerometer.x = Center + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 8);
+      io.accelerometer.y = Center + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 9);
       break;
     }
 
     case 8: {
+      eeprom.writeIO(data);
       break;
     }
-
     }
 
     return;
@@ -74,13 +88,6 @@ auto Cartridge::MBC7::write(uint16 address, uint8 data) -> void {
 }
 
 auto Cartridge::MBC7::power() -> void {
+  eeprom.power();
   io = {};
-}
-
-auto Cartridge::MBC7::serialize(serializer& s) -> void {
-  s.integer(io.rom.bank);
-  s.integer(io.ram.enable[0]);
-  s.integer(io.ram.enable[1]);
-  s.integer(io.accelerometer.x);
-  s.integer(io.accelerometer.y);
 }

@@ -15,6 +15,7 @@ auto System::runToSave() -> void {
   scheduler.synchronize(cpu);
   scheduler.synchronize(ppu);
   scheduler.synchronize(apu);
+  scheduler.synchronize(cartridge);
 }
 
 auto System::init() -> void {

@@ -2,7 +2,7 @@ struct Program : Lock, Emulator::Platform {
   Application::Namespace tr{"Program"};
 
   //program.cpp
-  auto create(vector<string> arguments) -> void;
+  auto create() -> void;
   auto main() -> void;
   auto quit() -> void;
 
@@ -108,6 +108,7 @@ public:
   struct Game {
     explicit operator bool() const { return (bool)location; }
 
+    string option;
     string location;
     string manifest;
     Markup::Node document;

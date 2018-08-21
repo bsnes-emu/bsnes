@@ -3,6 +3,7 @@
 #pragma once
 
 #include <nall/range.hpp>
+#include <nall/traits.hpp>
 
 namespace nall {
 

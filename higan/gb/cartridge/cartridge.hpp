@@ -1,9 +1,10 @@
-struct Cartridge : MMIO {
+struct Cartridge : Thread, MMIO {
   auto pathID() const -> uint { return information.pathID; }
   auto hash() const -> string { return information.sha256; }
   auto manifest() const -> string { return information.manifest; }
   auto title() const -> string { return information.title; }
 
+  static auto Enter() -> void;
   auto load() -> bool;
   auto save() -> void;
   auto unload() -> void;
@@ -11,6 +12,8 @@ struct Cartridge : MMIO {
   auto readIO(uint16 address) -> uint8;
   auto writeIO(uint16 address, uint8 data) -> void;
 
+  auto main() -> void;
+  auto step(uint clocks) -> void;
   auto power() -> void;
   auto second() -> void;
 
@@ -35,6 +38,9 @@ struct Cartridge : MMIO {
 
 private:
   struct Mapper {
+    virtual auto load(Markup::Node document) -> void {}
+    virtual auto save(Markup::Node document) -> void {}
+    virtual auto main() -> void;
     virtual auto second() -> void {}
     virtual auto read(uint16 address) -> uint8 = 0;
     virtual auto write(uint16 address, uint8 data) -> void = 0;

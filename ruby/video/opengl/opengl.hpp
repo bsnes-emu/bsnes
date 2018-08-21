@@ -70,7 +70,7 @@ struct OpenGL : OpenGLProgram {
   auto clear() -> void;
   auto lock(uint32_t*& data, uint& pitch) -> bool;
   auto output() -> void;
-  auto initialize() -> bool;
+  auto initialize(const string& shader) -> bool;
   auto terminate() -> void;
 
   vector<OpenGLProgram> programs;

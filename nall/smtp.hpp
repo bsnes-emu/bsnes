@@ -4,7 +4,7 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 
-#if !defined(_WIN32)
+#if !defined(PLATFORM_WINDOWS)
   #include <sys/types.h>
   #include <sys/socket.h>
   #include <netinet/in.h>
@@ -12,7 +12,6 @@
 #else
   #include <winsock2.h>
   #include <ws2tcpip.h>
-  #include <windows.h>
 #endif
 
 namespace nall {

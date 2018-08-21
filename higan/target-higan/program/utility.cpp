@@ -14,6 +14,7 @@ auto Program::initializeVideoDriver() -> void {
     video->create("None");
   }
 
+  presentation->configureViewport();
   presentation->clearViewport();
 }
 
@@ -137,17 +138,7 @@ auto Program::updateVideoPalette() -> void {
 }
 
 auto Program::updateVideoShader() -> void {
-  if(settings["Video/Driver"].text() == "OpenGL"
-  && settings["Video/Shader"].text() != "None"
-  && settings["Video/Shader"].text() != "Blur"
-  && directory::exists(settings["Video/Shader"].text())
-  ) {
-    video->setSmooth(false);
-    video->setShader(settings["Video/Shader"].text());
-  } else {
-    video->setSmooth(settings["Video/Shader"].text() == "Blur");
-    video->setShader("");
-  }
+  video->setShader(settings["Video/Shader"].text());
 }
 
 auto Program::updateAudioDriver() -> void {

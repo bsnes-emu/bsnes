@@ -84,7 +84,7 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
   return true;
 }
 
-#include <nall/beat/patch.hpp>
+#include <nall/beat/single/apply.hpp>
 
 auto Program::applyPatchBPS(vector<uint8_t>& input, string location) -> bool {
   vector<uint8_t> patch;
@@ -107,22 +107,16 @@ auto Program::applyPatchBPS(vector<uint8_t>& input, string location) -> bool {
   }
   if(!patch) return false;
 
-  bpspatch beat;
-  beat.modify(patch.data(), patch.size());
-  beat.source(input.data(), input.size());
-  vector<uint8_t> output;
-  output.resize(beat.size());
-  beat.target(output.data(), output.size());
-  auto result = beat.apply();
-
-  if(result == bpspatch::result::success) {
-    input = output;
+  string manifest;
+  string result;
+  if(auto output = Beat::Single::apply(input.data(), input.size(), patch.data(), patch.size(), manifest, result)) {
+    input = move(*output);
     return true;
   }
 
-  MessageDialog(
-    "Error: patch checksum failure.\n\n"
+  MessageDialog({
+    result, "\n\n",
     "Please ensure you are using the correct (headerless) ROM for this patch."
-  ).setParent(*presentation).error();
+  }).setParent(*presentation).error();
   return false;
 }

@@ -2,12 +2,11 @@
 
 #include <nall/file.hpp>
 #include <nall/stdint.hpp>
-#include <nall/windows/utf8.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
-#if defined(_WIN32)
-  #include <windows.h>
+#if defined(PLATFORM_WINDOWS)
+  #include <nall/windows/utf8.hpp>
 #else
   #include <fcntl.h>
   #include <unistd.h>

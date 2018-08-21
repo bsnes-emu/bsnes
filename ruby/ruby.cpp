@@ -21,7 +21,7 @@ using namespace ruby;
   #include <Carbon/Carbon.h>
   #include <nall/macos/guard.hpp>
 #elif defined(DISPLAY_WINDOWS)
-  #include <windows.h>
+  #include <mmsystem.h>
 #endif
 
 #include <ruby/video/video.cpp>

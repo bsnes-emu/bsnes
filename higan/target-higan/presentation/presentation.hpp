@@ -15,6 +15,7 @@ struct Presentation : Window {
   auto updateEmulatorMenu() -> void;
   auto updateEmulatorDeviceSelections() -> void;
   auto updateSizeMenu() -> void;
+  auto configureViewport() -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;

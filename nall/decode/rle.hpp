@@ -2,45 +2,46 @@
 
 namespace nall { namespace Decode {
 
-template<typename T> inline auto RLE(const uint8_t* data, uint remaining = ~0, uint minimum = 0) -> vector<T> {
-  if(!minimum) minimum = max(1, 4 / sizeof(T));
-  vector<T> result;
+template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
+inline auto RLE(const void* data, uint remaining = ~0) -> vector<uint8_t> {
+  vector<uint8_t> output;
+
+  auto input = (const uint8_t*)data;
 
   auto load = [&]() -> uint8_t {
     if(!remaining) return 0x00;
-    return --remaining, *data++;
+    return --remaining, *input++;
   };
 
   uint base = 0;
-  uint size = 0;
-  for(uint byte : range(sizeof(uint))) size |= load() << byte * 8;
-  size /= sizeof(T);
-  result.resize(size);
+  uint64_t size = 0;
+  for(uint byte : range(8)) size |= load() << byte * 8;
+  output.resize(size);
 
-  auto read = [&]() -> T {
-    T value = 0;
-    for(uint byte : range(sizeof(T))) value |= load() << byte * 8;
+  auto read = [&]() -> uint64_t {
+    uint64_t value = 0;
+    for(uint byte : range(S)) value |= load() << byte * 8;
     return value;
   };
 
-  auto write = [&](T value) -> void {
+  auto write = [&](uint64_t value) -> void {
     if(base >= size) return;
-    result[base++] = value;
+    for(uint byte : range(S)) output[base++] = value >> byte * 8;
   };
 
   while(base < size) {
-    auto byte = *data++;
+    auto byte = load();
     if(byte < 128) {
       byte++;
       while(byte--) write(read());
     } else {
       auto value = read();
-      byte = (byte & 127) + minimum;
+      byte = (byte & 127) + M;
       while(byte--) write(value);
     }
   }
 
-  return result;
+  return output;
 }
 
 }}

@@ -18,7 +18,6 @@ struct VideoWGL : VideoDriver, OpenGL {
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
-  auto hasSmooth() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
@@ -34,14 +33,8 @@ struct VideoWGL : VideoDriver, OpenGL {
     return true;
   }
 
-  auto setSmooth(bool) -> bool override {
-    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
-    return true;
-  }
-
-  auto setShader(string) -> bool override {
+  auto setShader(string shader) -> bool override {
     OpenGL::setShader(self.shader);
-    if(!self.shader) OpenGL::filter = self.smooth ? GL_LINEAR : GL_NEAREST;
     return true;
   }
 
@@ -104,7 +97,7 @@ private:
     }
 
     if(wglSwapInterval) wglSwapInterval(self.blocking);
-    return _ready = OpenGL::initialize();
+    return _ready = OpenGL::initialize(self.shader);
   }
 
   auto terminate() -> void {

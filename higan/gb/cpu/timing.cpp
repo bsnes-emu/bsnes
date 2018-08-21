@@ -19,6 +19,7 @@ auto CPU::step(uint clocks) -> void {
     Thread::step(1);
     synchronize(ppu);
     synchronize(apu);
+    synchronize(cartridge);
   }
 
   if(Model::SuperGameBoy()) {

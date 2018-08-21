@@ -24,18 +24,31 @@ auto hiro::initialize() -> void {
 
 #include <nall/main.hpp>
 auto nall::main(vector<string> arguments) -> void {
-  Application::setScreenSaver(settings.general.screenSaver);
-  Application::setToolTips(settings.general.toolTips);
+  settings.location = locate("settings.bml");
 
-  string locale;  // = "日本語";
+  arguments.takeLeft();  //ignore program location in argument parsing
   for(auto argument : arguments) {
-    if(argument.beginsWith("--locale=")) {
-      locale = argument.trimLeft("--locale=", 1L);
+    if(argument == "--fullscreen") {
+      presentation.startFullScreen = true;
+    } else if(argument.beginsWith("--locale=")) {
+      Application::locale().scan(locate("locales/"));
+      Application::locale().select(argument.trimLeft("--locale=", 1L));
+    } else if(argument.beginsWith("--settings=")) {
+      settings.location = argument.trimLeft("--settings=", 1L);
+    } else if(inode::exists(argument)) {
+      //game without option
+      program.gameQueue.append({";", argument});
+    } else if(argument.find(";")) {
+      //game with option
+      auto game = argument.split(";", 1L);
+      if(inode::exists(game.last())) program.gameQueue.append(argument);
     }
   }
-  Application::locale().scan(locate("locales/"));
-  Application::locale().select(locale);
+
+  settings.load();
+  Application::setScreenSaver(settings.general.screenSaver);
+  Application::setToolTips(settings.general.toolTips);
   emulator = new SuperFamicom::Interface;
-  program.create(arguments);
+  program.create();
   Application::run();
 }

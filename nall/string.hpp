@@ -56,6 +56,9 @@ protected:
   mutable int _size;
 };
 
+//adaptive (SSO + COW) is by far the best choice, the others exist solely to:
+//1) demonstrate the performance benefit of combining SSO + COW
+//2) rule out allocator bugs by trying different allocators when needed
 #define NALL_STRING_ALLOCATOR_ADAPTIVE
 //#define NALL_STRING_ALLOCATOR_COPY_ON_WRITE
 //#define NALL_STRING_ALLOCATOR_SMALL_STRING_OPTIMIZATION
@@ -128,6 +131,8 @@ public:
   inline string();
   template<typename T = char> inline auto get() -> T*;
   template<typename T = char> inline auto data() const -> const T*;
+  template<typename T = char> auto size() const -> uint { return _size / sizeof(T); }
+  template<typename T = char> auto capacity() const -> uint { return _capacity / sizeof(T); }
   inline auto reset() -> type&;
   inline auto reserve(uint) -> type&;
   inline auto resize(uint) -> type&;
@@ -141,9 +146,6 @@ public:
 
   explicit operator bool() const { return _size; }
   operator const char*() const { return (const char*)data(); }
-
-  auto size() const -> uint { return _size; }
-  auto capacity() const -> uint { return _capacity; }
 
   auto operator==(const string& source) const -> bool {
     return size() == source.size() && memory::compare(data(), source.data(), size()) == 0;
@@ -271,6 +273,7 @@ public:
   inline auto remove(uint offset, uint length) -> type&;
   inline auto reverse() -> type&;
   inline auto size(int length, char fill = ' ') -> type&;
+  inline auto slice(int offset = 0, int length = -1) -> string;
 };
 
 template<> struct vector<string> : vector_base<string> {
@@ -286,7 +289,7 @@ template<> struct vector<string> : vector_base<string> {
   inline auto operator=(vector& source) -> type& { return vector_base::operator=(source), *this; }
   inline auto operator=(vector&& source) -> type& { return vector_base::operator=(move(source)), *this; }
 
-  //list.hpp
+  //vector.hpp
   template<typename... P> inline auto append(const string&, P&&...) -> type&;
   inline auto append() -> type&;
 

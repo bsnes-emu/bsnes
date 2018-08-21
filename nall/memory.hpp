@@ -61,15 +61,16 @@ auto free(void* target) -> void {
 }
 
 template<typename T> auto compare(const void* target, uint capacity, const void* source, uint size) -> int {
-  auto t = (int8_t*)target;
-  auto s = (int8_t*)source;
+  auto t = (uint8_t*)target;
+  auto s = (uint8_t*)source;
   auto l = min(capacity, size) * sizeof(T);
   while(l--) {
     auto x = *t++;
     auto y = *s++;
     if(x != y) return x - y;
   }
-  return 0;
+  if(capacity == size) return 0;
+  return -(capacity < size);
 }
 
 template<typename T> auto compare(const void* target, const void* source, uint size) -> int {
@@ -77,8 +78,8 @@ template<typename T> auto compare(const void* target, const void* source, uint s
 }
 
 template<typename T> auto icompare(const void* target, uint capacity, const void* source, uint size) -> int {
-  auto t = (int8_t*)target;
-  auto s = (int8_t*)source;
+  auto t = (uint8_t*)target;
+  auto s = (uint8_t*)source;
   auto l = min(capacity, size) * sizeof(T);
   while(l--) {
     auto x = *t++;
@@ -87,7 +88,7 @@ template<typename T> auto icompare(const void* target, uint capacity, const void
     if(y - 'A' < 26) y += 32;
     if(x != y) return x - y;
   }
-  return 0;
+  return -(capacity < size);
 }
 
 template<typename T> auto icompare(const void* target, const void* source, uint size) -> int {

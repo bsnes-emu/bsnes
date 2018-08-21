@@ -17,14 +17,14 @@ DriverSettings driverSettings;
 SettingsWindow settingsWindow;
 
 auto Settings::load() -> void {
-  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml")), " "));
+  Markup::Node::operator=(BML::unserialize(string::read(location), " "));
   process(true);
   file::write(locate("settings.bml"), BML::serialize(*this, " "));
 }
 
 auto Settings::save() -> void {
   process(false);
-  file::write(locate("settings.bml"), BML::serialize(*this, " "));
+  file::write(location ? location : locate("settings.bml"), BML::serialize(*this, " "));
 }
 
 auto Settings::process(bool load) -> void {

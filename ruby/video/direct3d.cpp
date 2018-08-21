@@ -22,12 +22,12 @@ struct VideoDirect3D : VideoDriver {
   auto hasExclusive() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
-  auto hasSmooth() -> bool override { return true; }
+  auto hasShader() -> bool override { return true; }
 
   auto setExclusive(bool exclusive) -> bool override { return initialize(); }
   auto setContext(uintptr context) -> bool override { return initialize(); }
   auto setBlocking(bool blocking) -> bool override { return true; }
-  auto setSmooth(bool smooth) -> bool override { return updateFilter(); }
+  auto setShader(string shader) -> bool override { return updateFilter(); }
 
   auto clear() -> void override {
     if(!ready()) return;
@@ -169,7 +169,7 @@ private:
     if(!_device) return false;
     if(_lost && !recover()) return false;
 
-    auto filter = !self.smooth ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+    auto filter = self.shader == "Blur" ? D3DTEXF_LINEAR : D3DTEXF_POINT;
     _device->SetSamplerState(0, D3DSAMP_MINFILTER, filter);
     _device->SetSamplerState(0, D3DSAMP_MAGFILTER, filter);
     return true;

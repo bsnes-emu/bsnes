@@ -41,6 +41,7 @@
 #include <nall/matrix.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
+#include <nall/merge-sort.hpp>
 #include <nall/path.hpp>
 #include <nall/pointer.hpp>
 #include <nall/primitives.hpp>
@@ -53,7 +54,6 @@
 #include <nall/set.hpp>
 #include <nall/shared-pointer.hpp>
 #include <nall/simd.hpp>
-#include <nall/sort.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/thread.hpp>

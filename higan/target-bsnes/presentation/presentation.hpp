@@ -26,6 +26,7 @@ struct Presentation : Window {
   enum : uint { StatusHeight = 24 };
 
   auto updateStatusIcon() -> void;
+  auto configureViewport() -> void;
   auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto resizeWindow() -> void;
@@ -39,6 +40,8 @@ struct Presentation : Window {
   auto updateRecentGames() -> void;
   auto addRecentGame(string location) -> void;
   auto updateShaders() -> void;
+
+  bool startFullScreen = false;
 
   MenuBar menuBar{this};
     Menu systemMenu{&menuBar};

@@ -72,17 +72,18 @@ struct file : inode, varint {
     return S_ISREG(data.st_mode) ? data.st_size : 0u;
   }
 
-  static auto read(const string& filename) -> vector<uint8_t> {
+  static auto read(const string& filename, uint reserve = 0) -> vector<uint8_t> {
     vector<uint8_t> memory;
     file fp;
     if(fp.open(filename, mode::read)) {
+      memory.reserve(fp.size() + reserve);
       memory.resize(fp.size());
       fp.read(memory.data(), memory.size());
     }
     return memory;
   }
 
-  static auto read(const string& filename, uint8_t* data, uint size) -> bool {
+  static auto read(const string& filename, void* data, uint size) -> bool {
     file fp;
     if(fp.open(filename, mode::read) == false) return false;
     fp.read(data, size);
@@ -91,14 +92,14 @@ struct file : inode, varint {
   }
 
   static auto write(const string& filename, const string& text) -> bool {
-    return write(filename, (const uint8_t*)text.data(), text.size());
+    return write(filename, text.data(), text.size());
   }
 
   static auto write(const string& filename, const vector<uint8_t>& buffer) -> bool {
     return write(filename, buffer.data(), buffer.size());
   }
 
-  static auto write(const string& filename, const uint8_t* data, uint size) -> bool {
+  static auto write(const string& filename, const void* data, uint size) -> bool {
     file fp;
     if(fp.open(filename, mode::write) == false) return false;
     fp.write(data, size);
@@ -151,8 +152,9 @@ struct file : inode, varint {
     return result;
   }
 
-  auto read(uint8_t* buffer, uint length) -> void {
-    while(length--) *buffer++ = read();
+  auto read(void* data, uint size) -> void {
+    auto output = (uint8_t*)data;
+    while(size--) *output++ = read();
   }
 
   auto write(uint8_t data) -> void {
@@ -181,8 +183,9 @@ struct file : inode, varint {
     for(auto byte : s) write(byte);
   }
 
-  auto write(const uint8_t* buffer, uint length) -> void {
-    while(length--) write(*buffer++);
+  auto write(const void* data, uint size) -> void {
+    auto input = (const uint8_t*)data;
+    while(size--) write(*input++);
   }
 
   template<typename... Args> auto print(Args... args) -> void {

@@ -1,15 +1,9 @@
-#define UNICODE
-#define WINVER 0x0601
-#define _WIN32_WINNT WINVER
-#define _WIN32_IE WINVER
-#define __MSVCRT_VERSION__ WINVER
-#define NOMINMAX
-
 #include <nall/windows/guard.hpp>
 #include <winsock2.h>
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#include <commdlg.h>
 #include <uxtheme.h>
 #include <io.h>
 #include <shlobj.h>

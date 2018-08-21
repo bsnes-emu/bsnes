@@ -95,6 +95,10 @@ auto slice(view<string> self, int offset, int length) -> string {
   return result;
 }
 
+auto string::slice(int offset, int length) -> string {
+  return nall::slice(*this, offset, length);
+}
+
 template<typename T> auto fromInteger(char* result, T value) -> char* {
   bool negative = value < 0;
   if(!negative) value = -value;  //negate positive integers to support eg INT_MIN

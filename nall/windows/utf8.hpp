@@ -1,24 +1,5 @@
 #pragma once
 
-//UTF-8 <> UTF-16 conversion
-//used only for Win32; every other OS uses UTF-8 internally
-
-#if defined(_WIN32)
-
-#undef  UNICODE
-#define UNICODE
-#undef  NOMINMAX
-#define NOMINMAX
-
-#include <nall/windows/guard.hpp>
-#include <winsock2.h>
-#include <windows.h>
-#include <nall/windows/guard.hpp>
-
-#if !defined(PATH_MAX)
-  #define PATH_MAX 260
-#endif
-
 using uint = unsigned;
 
 namespace nall {
@@ -94,7 +75,7 @@ namespace nall {
     uint length = 0;
   };
 
-  inline auto utf8_args(int& argc, char**& argv) -> void {
+  inline auto utf8_arguments(int& argc, char**& argv) -> void {
     wchar_t** wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
     argv = new char*[argc + 1]();
     for(uint i = 0; i < argc; i++) {
@@ -103,5 +84,3 @@ namespace nall {
     }
   }
 }
-
-#endif  //if defined(_WIN32)

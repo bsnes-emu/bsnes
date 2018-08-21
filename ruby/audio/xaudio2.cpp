@@ -1,5 +1,4 @@
 #include "xaudio2.hpp"
-#include <windows.h>
 #undef interface
 
 struct AudioXAudio2 : AudioDriver, public IXAudio2VoiceCallback {

@@ -106,85 +106,100 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
 
   if(id == 1 && name == "Super Famicom" && type == "sfc") {
     if(gameQueue) {
-      superFamicom.location = gameQueue.takeLeft();
+      auto game = gameQueue.takeLeft().split(";", 1L);
+      superFamicom.option = game(0);
+      superFamicom.location = game(1);
     } else {
       dialog.setTitle("Load Super Famicom");
       dialog.setPath(path("Games", settings.path.recent.superFamicom));
       dialog.setFilters({string{"Super Famicom Games|*.sfc:*.smc:*.zip"}});
       superFamicom.location = dialog.openObject();
+      superFamicom.option = dialog.option();
     }
     if(inode::exists(superFamicom.location)) {
       settings.path.recent.superFamicom = Location::dir(superFamicom.location);
       if(loadSuperFamicom(superFamicom.location)) {
-        return {id, dialog.option()};
+        return {id, superFamicom.option};
       }
     }
   }
 
   if(id == 2 && name == "Game Boy" && type == "gb") {
     if(gameQueue) {
-      gameBoy.location = gameQueue.takeLeft();
+      auto game = gameQueue.takeLeft().split(";", 1L);
+      gameBoy.option = game(0);
+      gameBoy.location = game(1);
     } else {
       dialog.setTitle("Load Game Boy");
       dialog.setPath(path("Games", settings.path.recent.gameBoy));
       dialog.setFilters({string{"Game Boy Games|*.gb:*.gbc:*.zip"}});
       gameBoy.location = dialog.openObject();
+      gameBoy.option = dialog.option();
     }
     if(inode::exists(gameBoy.location)) {
       settings.path.recent.gameBoy = Location::dir(gameBoy.location);
       if(loadGameBoy(gameBoy.location)) {
-        return {id, dialog.option()};
+        return {id, gameBoy.option};
       }
     }
   }
 
   if(id == 3 && name == "BS Memory" && type == "bs") {
     if(gameQueue) {
-      bsMemory.location = gameQueue.takeLeft();
+      auto game = gameQueue.takeLeft().split(";", 1L);
+      bsMemory.option = game(0);
+      bsMemory.location = game(1);
     } else {
       dialog.setTitle("Load BS Memory");
       dialog.setPath(path("Games", settings.path.recent.bsMemory));
       dialog.setFilters({string{"BS Memory Games|*.bs:*.zip"}});
       bsMemory.location = dialog.openObject();
+      bsMemory.option = dialog.option();
     }
     if(inode::exists(bsMemory.location)) {
       settings.path.recent.bsMemory = Location::dir(bsMemory.location);
       if(loadBSMemory(bsMemory.location)) {
-        return {id, dialog.option()};
+        return {id, bsMemory.option};
       }
     }
   }
 
   if(id == 4 && name == "Sufami Turbo" && type == "st") {
     if(gameQueue) {
-      sufamiTurboA.location = gameQueue.takeLeft();
+      auto game = gameQueue.takeLeft().split(";", 1L);
+      sufamiTurboA.option = game(0);
+      sufamiTurboA.location = game(1);
     } else {
       dialog.setTitle("Load Sufami Turbo - Slot A");
       dialog.setPath(path("Games", settings.path.recent.sufamiTurboA));
       dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
       sufamiTurboA.location = dialog.openObject();
+      sufamiTurboA.option = dialog.option();
     }
     if(inode::exists(sufamiTurboA.location)) {
       settings.path.recent.sufamiTurboA = Location::dir(sufamiTurboA.location);
       if(loadSufamiTurboA(sufamiTurboA.location)) {
-        return {id, dialog.option()};
+        return {id, sufamiTurboA.option};
       }
     }
   }
 
   if(id == 5 && name == "Sufami Turbo" && type == "st") {
     if(gameQueue) {
-      sufamiTurboB.location = gameQueue.takeLeft();
+      auto game = gameQueue.takeLeft().split(";", 1L);
+      sufamiTurboB.option = game(0);
+      sufamiTurboB.location = game(1);
     } else {
       dialog.setTitle("Load Sufami Turbo - Slot B");
       dialog.setPath(path("Games", settings.path.recent.sufamiTurboB));
       dialog.setFilters({string{"Sufami Turbo Games|*.st:*.zip"}});
       sufamiTurboB.location = dialog.openObject();
+      sufamiTurboB.option = dialog.option();
     }
     if(inode::exists(sufamiTurboB.location)) {
       settings.path.recent.sufamiTurboB = Location::dir(sufamiTurboB.location);
       if(loadSufamiTurboB(sufamiTurboB.location)) {
-        return {id, dialog.option()};
+        return {id, sufamiTurboB.option};
       }
     }
   }

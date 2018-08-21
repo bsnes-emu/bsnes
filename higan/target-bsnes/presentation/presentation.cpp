@@ -189,6 +189,7 @@ auto Presentation::create() -> void {
   setBackgroundColor({0, 0, 0});
   resizeWindow();
   setCentered();
+  setFullScreen(startFullScreen);
 
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });
@@ -211,8 +212,17 @@ auto Presentation::updateStatusIcon() -> void {
   statusIcon.setIcon(icon);
 }
 
+auto Presentation::configureViewport() -> void {
+  uint width = viewport.geometry().width();
+  uint height = viewport.geometry().height();
+  video.configure(width, height, 60, 60);
+}
+
 auto Presentation::clearViewport() -> void {
-  if(!emulator->loaded()) viewportLayout.setPadding();
+  if(!emulator->loaded()) {
+    viewportLayout.setPadding();
+    configureViewport();
+  }
   if(!visible() || !video) return;
 
   uint32_t* output;
@@ -277,7 +287,7 @@ auto Presentation::resizeViewport() -> void {
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
   });
 
-//clearViewport();
+  configureViewport();
 }
 
 auto Presentation::resizeWindow() -> void {
@@ -449,7 +459,7 @@ auto Presentation::updateRecentGames() -> void {
     bool missing = false;
     if(games) {
       for(auto& game : games.split("|")) {
-        if(!inode::exists(game)) missing = true;
+        if(!inode::exists(game.split(";").last())) missing = true;
       }
     }
     if(missing) {
@@ -467,12 +477,12 @@ auto Presentation::updateRecentGames() -> void {
 
   //update list
   for(auto index : range(RecentGames)) {
-    MenuItem item;
+    MenuItem item{&loadRecentGame};
     if(auto game = settings[{"Game/Recent/", 1 + index}].text()) {
       string displayName;
       auto games = game.split("|");
-      for(auto& part : games) {
-        displayName.append(Location::prefix(part), " + ");
+      for(auto& game : games) {
+        displayName.append(Location::prefix(game.split(";", 1L).last()), " + ");
       }
       displayName.trimRight(" + ", 1L);
       item.setIcon(games(0).endsWith("/") ? (image)Icon::Action::Open : (image)Icon::Emblem::File);
@@ -485,7 +495,6 @@ auto Presentation::updateRecentGames() -> void {
       item.setText({"(", tr("empty"), ")"});
       item.setEnabled(false);
     }
-    loadRecentGame.append(item);
   }
 
   loadRecentGame.append(MenuSeparator());
@@ -514,6 +523,8 @@ auto Presentation::addRecentGame(string location) -> void {
 
 auto Presentation::updateShaders() -> void {
   shaderMenu.reset();
+  shaderMenu.setEnabled(video.hasShader());
+  if(!video.hasShader()) return;
 
   Group shaders;
 
@@ -533,7 +544,7 @@ auto Presentation::updateShaders() -> void {
 
   auto location = locate("shaders/");
 
-  if(settings.video.driver == "OpenGL") {
+  if(settings.video.driver == "OpenGL 3.2") {
     for(auto shader : directory::folders(location, "*.shader")) {
       if(shaders.objectCount() == 2) shaderMenu.append(MenuSeparator());
       MenuRadioItem item{&shaderMenu};

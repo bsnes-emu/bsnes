@@ -50,12 +50,13 @@ auto Program::load() -> void {
   stateManager.loadStates();
   manifestViewer.loadManifest();
 
-  string locations = superFamicom.location;
-  if(auto& location = gameBoy.location) locations.append("|", location);
-  if(auto& location = bsMemory.location) locations.append("|", location);
-  if(auto& location = sufamiTurboA.location) locations.append("|", location);
-  if(auto& location = sufamiTurboB.location) locations.append("|", location);
-  presentation.addRecentGame(locations);
+  string games;
+  if(auto& game = superFamicom) games.append(game.option, ";", game.location, "|");
+  if(auto& game = gameBoy     ) games.append(game.option, ";", game.location, "|");
+  if(auto& game = bsMemory    ) games.append(game.option, ";", game.location, "|");
+  if(auto& game = sufamiTurboA) games.append(game.option, ";", game.location, "|");
+  if(auto& game = sufamiTurboB) games.append(game.option, ";", game.location, "|");
+  presentation.addRecentGame(games.trimRight("|", 1L));
 
   updateVideoPalette();
   updateAudioEffects();

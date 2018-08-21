@@ -38,7 +38,7 @@ struct VideoGLX2 : VideoDriver {
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
   auto hasFormats() -> vector<string> override { return {"RGB24"}; }
-  auto hasSmooth() -> bool override { return true; }
+  auto hasShader() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
     return initialize();
@@ -63,6 +63,15 @@ struct VideoGLX2 : VideoDriver {
     return false;
   }
 
+  auto setShader(string shader) -> bool override {
+    return true;
+  }
+
+  auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool override {
+    XResizeWindow(_display, _window, width, height);
+    return true;
+  }
+
   auto clear() -> void override {
     memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -81,22 +90,15 @@ struct VideoGLX2 : VideoDriver {
   }
 
   auto output() -> void override {
-    XWindowAttributes parent, child;
-    XGetWindowAttributes(_display, (Window)self.context, &parent);
-    XGetWindowAttributes(_display, _window, &child);
-    if(child.width != parent.width || child.height != parent.height) {
-      XResizeWindow(_display, _window, parent.width, parent.height);
-    }
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, self.smooth ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, self.smooth ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, self.shader == "Blur" ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, self.shader == "Blur" ? GL_LINEAR : GL_NEAREST);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, parent.width, 0, parent.height, -1.0, 1.0);
-    glViewport(0, 0, parent.width, parent.height);
+    glOrtho(0, self.width, 0, self.height, -1.0, 1.0);
+    glViewport(0, 0, self.width, self.height);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -105,8 +107,8 @@ struct VideoGLX2 : VideoDriver {
 
     double w = (double)_width / (double)_glWidth;
     double h = (double)_height / (double)_glHeight;
-    int u = parent.width;
-    int v = parent.height;
+    int u = self.width;
+    int v = self.height;
 
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2f(0, 0); glVertex3i(0, v, 0);
@@ -261,6 +263,7 @@ private:
   }
 
   bool _ready = false;
+  bool blur = false;
 
   Display* _display = nullptr;
   int _screen = 0;

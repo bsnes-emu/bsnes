@@ -12,6 +12,7 @@ auto Program::updateVideoDriver(Window parent) -> void {
   updateVideoShader();
 
   if(video.ready()) {
+    presentation.configureViewport();
     presentation.clearViewport();
     updateVideoShader();
   }
@@ -52,16 +53,7 @@ auto Program::updateVideoFormat() -> void {
 }
 
 auto Program::updateVideoShader() -> void {
-  if(settings.video.driver == "OpenGL"
-  && settings.video.shader != "None"
-  && settings.video.shader != "Blur"
-  ) {
-    video.setSmooth(false);
-    video.setShader(settings.video.shader);
-  } else {
-    video.setSmooth(settings.video.shader == "Blur");
-    video.setShader("");
-  }
+  video.setShader(settings.video.shader);
 }
 
 auto Program::updateVideoPalette() -> void {

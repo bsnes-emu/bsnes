@@ -1,10 +1,12 @@
 #pragma once
 
-namespace nall {
+namespace nall { namespace Matrix {
 
-namespace Matrix {
-
-template<typename T> inline auto Multiply(T* output, const T* xdata, uint xrows, uint xcols, const T* ydata, uint yrows, uint ycols) -> void {
+template<typename T> inline auto Multiply(
+T* output,
+const T* xdata, uint xrows, uint xcols,
+const T* ydata, uint yrows, uint ycols
+) -> void {
   if(xcols != yrows) return;
 
   for(uint y : range(xrows)) {
@@ -18,13 +20,14 @@ template<typename T> inline auto Multiply(T* output, const T* xdata, uint xrows,
   }
 }
 
-template<typename T> inline auto Multiply(const T* xdata, uint xrows, uint xcols, const T* ydata, uint yrows, uint ycols) -> vector<T> {
+template<typename T> inline auto Multiply(
+const T* xdata, uint xrows, uint xcols,
+const T* ydata, uint yrows, uint ycols
+) -> vector<T> {
   vector<T> output;
   output.resize(xrows * ycols);
   Multiply(output.data(), xdata, xrows, xcols, ydata, yrows, ycols);
   return output;
 }
 
-}
-
-}
+}}

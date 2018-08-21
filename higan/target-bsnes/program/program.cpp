@@ -13,7 +13,7 @@
 #include "hacks.cpp"
 Program program;
 
-auto Program::create(vector<string> arguments) -> void {
+auto Program::create() -> void {
   Emulator::platform = this;
 
   presentation.create();
@@ -58,15 +58,6 @@ auto Program::create(vector<string> arguments) -> void {
   driverSettings.videoDriverChanged();
   driverSettings.audioDriverChanged();
   driverSettings.inputDriverChanged();
-
-  arguments.takeLeft();  //ignore program location in argument parsing
-  for(auto& argument : arguments) {
-    if(argument == "--fullscreen") {
-      presentation.toggleFullscreenMode();
-    } else if(inode::exists(argument)) {
-      gameQueue.append(argument);
-    }
-  }
 
   if(gameQueue) load();
   Application::onMain({&Program::main, this});

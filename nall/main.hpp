@@ -14,7 +14,7 @@ namespace nall {
     _setmode(_fileno(stdin), O_BINARY);
     _setmode(_fileno(stdout), O_BINARY);
     _setmode(_fileno(stderr), O_BINARY);
-    utf8_args(argc, argv);
+    utf8_arguments(argc, argv);
     #endif
 
     vector<string> arguments;

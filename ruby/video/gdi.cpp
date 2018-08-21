@@ -4,6 +4,7 @@ struct VideoGDI : VideoDriver {
   ~VideoGDI() { terminate(); }
 
   auto create() -> bool override {
+    super.setShader("None");
     return initialize();
   }
 

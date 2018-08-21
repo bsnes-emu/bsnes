@@ -21,12 +21,29 @@ struct VideoXShm : VideoDriver {
   auto ready() -> bool override { return _ready; }
 
   auto hasContext() -> bool override { return true; }
-  auto hasSmooth() -> bool override { return true; }
+  auto hasShader() -> bool override { return true; }
 
   auto hasFormats() -> vector<string> override { return {"RGB24"}; }
 
   auto setContext(uintptr context) -> bool override { return initialize(); }
-  auto setSmooth(bool smooth) -> bool override { return true; }
+  auto setShader(string shader) -> bool override { return true; }
+
+  auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool override {
+    _outputWidth = width;
+    _outputHeight = height;
+    XResizeWindow(_display, _window, _outputWidth, _outputHeight);
+    free();
+
+    _shmInfo.shmid = shmget(IPC_PRIVATE, _outputWidth * _outputHeight * sizeof(uint32_t), IPC_CREAT | 0777);
+    if(_shmInfo.shmid < 0) return false;
+
+    _shmInfo.shmaddr = (char*)shmat(_shmInfo.shmid, 0, 0);
+    _shmInfo.readOnly = False;
+    XShmAttach(_display, &_shmInfo);
+    _outputBuffer = (uint32_t*)_shmInfo.shmaddr;
+    _image = XShmCreateImage(_display, _visual, _depth, ZPixmap, _shmInfo.shmaddr, &_shmInfo, _outputWidth, _outputHeight);
+    return true;
+  }
 
   auto clear() -> void override {
     auto dp = _inputBuffer;
@@ -65,7 +82,7 @@ struct VideoXShm : VideoDriver {
       uint32_t* sp = _inputBuffer + (uint)ystep * _inputWidth;
       uint32_t* dp = _outputBuffer + y * _outputWidth;
 
-      if(!self.smooth) {
+      if(self.shader != "Blur") {
         for(uint x = 0; x < _outputWidth; x++) {
           *dp++ = 255u << 24 | sp[(uint)xstep];
           xstep += xratio;
@@ -145,23 +162,6 @@ private:
   }
 
   auto size() -> bool {
-    XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
-
-    if(_outputBuffer && _outputWidth == windowAttributes.width && _outputHeight == windowAttributes.height) return true;
-    _outputWidth = windowAttributes.width;
-    _outputHeight = windowAttributes.height;
-    XResizeWindow(_display, _window, _outputWidth, _outputHeight);
-    free();
-
-    _shmInfo.shmid = shmget(IPC_PRIVATE, _outputWidth * _outputHeight * sizeof(uint32_t), IPC_CREAT | 0777);
-    if(_shmInfo.shmid < 0) return false;
-
-    _shmInfo.shmaddr = (char*)shmat(_shmInfo.shmid, 0, 0);
-    _shmInfo.readOnly = False;
-    XShmAttach(_display, &_shmInfo);
-    _outputBuffer = (uint32_t*)_shmInfo.shmaddr;
-    _image = XShmCreateImage(_display, _visual, _depth, ZPixmap, _shmInfo.shmaddr, &_shmInfo, _outputWidth, _outputHeight);
 
     return true;
   }

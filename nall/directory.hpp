@@ -3,7 +3,7 @@
 #include <nall/file.hpp>
 #include <nall/inode.hpp>
 #include <nall/intrinsics.hpp>
-#include <nall/sort.hpp>
+#include <nall/merge-sort.hpp>
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 
@@ -169,7 +169,7 @@ private:
     return list;
   }
 #else
-  inline auto directory_is_folder(DIR* dp, struct dirent* ep) -> bool {
+  inline auto directoryIsFolder(DIR* dp, struct dirent* ep) -> bool {
     if(ep->d_type == DT_DIR) return true;
     if(ep->d_type == DT_LNK || ep->d_type == DT_UNKNOWN) {
       //symbolic links must be resolved to determine type
@@ -218,7 +218,7 @@ private:
       while(ep = readdir(dp)) {
         if(!strcmp(ep->d_name, ".")) continue;
         if(!strcmp(ep->d_name, "..")) continue;
-        if(!directory_is_folder(dp, ep)) continue;
+        if(!directoryIsFolder(dp, ep)) continue;
         string name{ep->d_name};
         if(name.match(pattern)) list.append(std::move(name));
       }
@@ -239,7 +239,7 @@ private:
       while(ep = readdir(dp)) {
         if(!strcmp(ep->d_name, ".")) continue;
         if(!strcmp(ep->d_name, "..")) continue;
-        if(directory_is_folder(dp, ep)) continue;
+        if(directoryIsFolder(dp, ep)) continue;
         string name{ep->d_name};
         if(name.match(pattern)) list.append(std::move(name));
       }

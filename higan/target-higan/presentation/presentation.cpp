@@ -317,8 +317,17 @@ auto Presentation::updateSizeMenu() -> void {
   }));
 }
 
+auto Presentation::configureViewport() -> void {
+  uint width = viewport.geometry().width();
+  uint height = viewport.geometry().height();
+  if(video) video->configure(width, height, 60, 60);
+}
+
 auto Presentation::clearViewport() -> void {
-  if(!emulator || !emulator->loaded()) viewportLayout.setPadding();
+  if(!emulator || !emulator->loaded()) {
+    viewportLayout.setPadding();
+    configureViewport();
+  }
   if(!visible() || !video) return;
 
   uint32_t* output;
@@ -399,7 +408,7 @@ auto Presentation::resizeViewport() -> void {
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
   });
 
-  clearViewport();
+  configureViewport();
 }
 
 auto Presentation::resizeWindow() -> void {
@@ -499,7 +508,7 @@ auto Presentation::loadSystems() -> void {
 auto Presentation::loadShaders() -> void {
   auto pathname = locate("shaders/");
 
-  if(settings["Video/Driver"].text() == "OpenGL") {
+  if(settings["Video/Driver"].text() == "OpenGL 3.2") {
     for(auto shader : directory::folders(pathname, "*.shader")) {
       if(videoShaders.objectCount() == 2) videoShaderMenu.append(MenuSeparator());
       MenuRadioItem item{&videoShaderMenu};

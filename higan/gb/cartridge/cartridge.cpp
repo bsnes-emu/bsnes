@@ -17,6 +17,19 @@ Cartridge cartridge;
 #include "tama/tama.cpp"
 #include "serialization.cpp"
 
+auto Cartridge::Enter() -> void {
+  while(true) scheduler.synchronize(), cartridge.main();
+}
+
+auto Cartridge::main() -> void {
+  mapper->main();
+}
+
+auto Cartridge::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
+}
+
 auto Cartridge::load() -> bool {
   information = {};
   rom = {};
@@ -97,6 +110,7 @@ auto Cartridge::load() -> bool {
   }
 
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
+  mapper->load(document);
   return true;
 }
 
@@ -118,6 +132,8 @@ auto Cartridge::save() -> void {
       }
     }
   }
+
+  mapper->save(document);
 }
 
 auto Cartridge::unload() -> void {
@@ -154,6 +170,8 @@ auto Cartridge::writeIO(uint16 addr, uint8 data) -> void {
 }
 
 auto Cartridge::power() -> void {
+  create(Enter, 4 * 1024 * 1024);
+
   for(uint n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
   for(uint n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = this;
   bus.mmio[0xff50] = this;
@@ -177,6 +195,12 @@ auto Cartridge::Memory::write(uint address, uint8 byte) -> void {
   if(!size) return;
   if(address >= size) address %= size;
   data[address] = byte;
+}
+
+//
+
+auto Cartridge::Mapper::main() -> void {
+  cartridge.step(cartridge.frequency());
 }
 
 }

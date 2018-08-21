@@ -11,7 +11,11 @@ auto OpenGL::setShader(const string& pathname) -> void {
   relativeWidth = 0, relativeHeight = 0;
 
   uint historySize = 0;
-  if(pathname) {
+  if(pathname == "None") {
+    filter = GL_NEAREST;
+  } else if(pathname == "Blur") {
+    filter = GL_LINEAR;
+  } else if(directory::exists(pathname)) {
     auto document = BML::unserialize(file::read({pathname, "manifest.bml"}));
 
     for(auto node : document["settings"]) {
@@ -180,7 +184,7 @@ auto OpenGL::output() -> void {
   }
 }
 
-auto OpenGL::initialize() -> bool {
+auto OpenGL::initialize(const string& shader) -> bool {
   if(!OpenGLBind()) return false;
 
   glDisable(GL_BLEND);
@@ -196,7 +200,7 @@ auto OpenGL::initialize() -> bool {
   OpenGLSurface::allocate();
   glrLinkProgram(program);
 
-  setShader("");
+  setShader(shader);
   return initialized = true;
 }
 

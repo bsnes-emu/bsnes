@@ -26,14 +26,16 @@ string::string() {
   _size = 0;
 }
 
-auto string::get() -> char* {
-  if(_capacity < SSO) return _text;
-  return _data;
+template<typename T>
+auto string::get() -> T* {
+  if(_capacity < SSO) return (T*)_text;
+  return (T*)_data;
 }
 
-auto string::data() const -> const char* {
-  if(_capacity < SSO) return _text;
-  return _data;
+template<typename T>
+auto string::data() const -> const T* {
+  if(_capacity < SSO) return (const T*)_text;
+  return (const T*)_data;
 }
 
 auto string::reset() -> type& {

@@ -8,11 +8,16 @@ namespace Math {
 }
 
 #if defined(PLATFORM_WINDOWS)
-  //minimum version needed for _wstat64, AI_ADDRCONFIG, etc
-  #undef  _WIN32_WINNT
-  #define _WIN32_WINNT 0x0601
-  #undef  __MSVCRT_VERSION__
-  #define __MSVCRT_VERSION__ _WIN32_WINNT
+  #include <nall/windows/guard.hpp>
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #include <windows.h>
+  #include <direct.h>
+  #include <io.h>
+  #include <wchar.h>
+  #include <shlobj.h>
+  #include <shellapi.h>
+  #include <nall/windows/guard.hpp>
   #include <nall/windows/utf8.hpp>
 #endif
 
@@ -35,14 +40,7 @@ namespace Math {
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(PLATFORM_WINDOWS)
-  #include <io.h>
-  #include <direct.h>
-  #include <shlobj.h>
-  #include <wchar.h>
-  #include <winsock2.h>
-  #include <ws2tcpip.h>
-#else
+#if !defined(PLATFORM_WINDOWS)
   #include <dlfcn.h>
   #include <unistd.h>
   #include <pwd.h>

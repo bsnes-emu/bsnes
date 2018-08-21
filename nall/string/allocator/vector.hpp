@@ -19,14 +19,16 @@ cons:
 
 namespace nall {
 
-auto string::get() -> char* {
+template<typename T>
+auto string::get() -> T* {
   if(_capacity == 0) reserve(1);
-  return _data;
+  return (T*)_data;
 }
 
-auto string::data() const -> const char* {
-  if(_capacity == 0) return "";
-  return _data;
+template<typename T>
+auto string::data() const -> const T* {
+  if(_capacity == 0) return (const T*)"";
+  return (const T*)_data;
 }
 
 auto string::reset() -> type& {
