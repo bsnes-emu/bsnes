@@ -109,7 +109,7 @@ auto Cartridge::load() -> bool {
     }
   }
 
-  information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
+  information.sha256 = Hash::SHA256({rom.data, rom.size}).digest();
   mapper->load(document);
   return true;
 }

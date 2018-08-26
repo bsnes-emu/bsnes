@@ -72,8 +72,8 @@ auto Cartridge::MBC7::write(uint16 address, uint8 data) -> void {
 
     case 1: {
       if(data != 0xaa) break;
-      io.accelerometer.x = Center + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 8);
-      io.accelerometer.y = Center + platform->inputPoll(ID::Port::Hardware, ID::Device::Controls, 9);
+      io.accelerometer.x = Center - platform->inputPoll(ID::Port::Cartridge, ID::Device::MBC7, 0);
+      io.accelerometer.y = Center + platform->inputPoll(ID::Port::Cartridge, ID::Device::MBC7, 1);
       break;
     }
 

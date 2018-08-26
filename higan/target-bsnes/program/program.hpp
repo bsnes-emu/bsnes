@@ -117,7 +117,7 @@ public:
   };
 
   struct SuperFamicom : Game {
-    string label;
+    string title;
     vector<uint8_t> program;
     vector<uint8_t> data;
     vector<uint8_t> expansion;

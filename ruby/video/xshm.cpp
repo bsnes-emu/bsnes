@@ -10,8 +10,8 @@
 
 struct VideoXShm : VideoDriver {
   VideoXShm& self = *this;
-  VideoXShm(Video& super) : VideoDriver(super) {}
-  ~VideoXShm() { terminate(); }
+  VideoXShm(Video& super) : VideoDriver(super) { construct(); }
+  ~VideoXShm() { destruct(); }
 
   auto create() -> bool override {
     return initialize();
@@ -29,6 +29,8 @@ struct VideoXShm : VideoDriver {
   auto setShader(string shader) -> bool override { return true; }
 
   auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool override {
+    if(width == _outputWidth && height == _outputHeight) return true;
+
     _outputWidth = width;
     _outputHeight = height;
     XResizeWindow(_display, _window, _outputWidth, _outputHeight);
@@ -42,7 +44,7 @@ struct VideoXShm : VideoDriver {
     XShmAttach(_display, &_shmInfo);
     _outputBuffer = (uint32_t*)_shmInfo.shmaddr;
     _image = XShmCreateImage(_display, _visual, _depth, ZPixmap, _shmInfo.shmaddr, &_shmInfo, _outputWidth, _outputHeight);
-    return true;
+    return (bool)_image;
   }
 
   auto clear() -> void override {
@@ -69,8 +71,6 @@ struct VideoXShm : VideoDriver {
   }
 
   auto output() -> void override {
-    size();
-
     float xratio = (float)_inputWidth / (float)_outputWidth;
     float yratio = (float)_inputHeight / (float)_outputHeight;
 
@@ -106,7 +106,7 @@ struct VideoXShm : VideoDriver {
       XEvent event;
       XNextEvent(_display, &event);
       if(event.type == Expose) {
-        XWindowAttributes attributes;
+        XWindowAttributes attributes{};
         XGetWindowAttributes(_display, _window, &attributes);
         super.doUpdate(attributes.width, attributes.height);
       }
@@ -114,14 +114,21 @@ struct VideoXShm : VideoDriver {
   }
 
 private:
+  auto construct() -> void {
+    _display = XOpenDisplay(nullptr);
+    _screen = DefaultScreen(_display);
+    XSetErrorHandler(errorHandler);
+  }
+
+  auto destruct() -> void {
+    XCloseDisplay(_display);
+  }
+
   auto initialize() -> bool {
     terminate();
     if(!self.context) return false;
 
-    _display = XOpenDisplay(nullptr);
-    _screen = DefaultScreen(_display);
-
-    XWindowAttributes getAttributes;
+    XWindowAttributes getAttributes{};
     XGetWindowAttributes(_display, (Window)self.context, &getAttributes);
     _depth = getAttributes.depth;
     _visual = getAttributes.visual;
@@ -149,21 +156,11 @@ private:
       XNextEvent(_display, &event);
     }
 
-    if(!size()) return false;
     return _ready = true;
   }
 
   auto terminate() -> void {
     free();
-    if(_display) {
-      XCloseDisplay(_display);
-      _display = nullptr;
-    }
-  }
-
-  auto size() -> bool {
-
-    return true;
   }
 
   auto free() -> void {
@@ -183,6 +180,12 @@ private:
     uint8_t cg = ag * (1.0 - mu) + bg * mu;
     uint8_t cb = ab * (1.0 - mu) + bb * mu;
     return cr << 16 | cg << 8 | cb << 0;
+  }
+
+  static auto errorHandler(Display* display, XErrorEvent* event) -> int {
+    //catch occasional BadAccess errors during window resize events
+    //currently, I'm unsure of the cause, but they're certainly not fatal
+    return 0;
   }
 
   bool _ready = false;

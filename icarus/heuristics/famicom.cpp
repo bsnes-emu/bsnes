@@ -34,7 +34,7 @@ auto Famicom::manifest() const -> string {
 
   string output;
   output.append("game\n");
-  output.append("  sha256: ", Hash::SHA256(&data[16], data.size() - 16).digest(), "\n");
+  output.append("  sha256: ", Hash::SHA256({&data[16], data.size() - 16}).digest(), "\n");
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
 

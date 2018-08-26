@@ -30,7 +30,7 @@ private:
   auto initialize() -> bool {
     terminate();
     if(!keyboard.initialize()) return false;
-    return _ready = true;
+    return isReady = true;
   }
 
   auto terminate() -> void {

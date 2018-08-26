@@ -2,6 +2,7 @@
 
 #include <new>
 
+#include <nall/array-view.hpp>
 #include <nall/bit.hpp>
 #include <nall/function.hpp>
 #include <nall/iterator.hpp>
@@ -11,13 +12,9 @@
 #include <nall/merge-sort.hpp>
 #include <nall/range.hpp>
 #include <nall/traits.hpp>
+#include <nall/view.hpp>
 
 namespace nall {
-
-template<typename T> struct vector_iterator;
-template<typename T> struct vector_iterator_const;
-template<typename T> struct vector_iterator_reverse;
-template<typename T> struct vector_iterator_reverse_const;
 
 template<typename T>
 struct vector_base {
@@ -33,10 +30,11 @@ struct vector_base {
   ~vector_base();
 
   explicit operator bool() const;
+  operator array_view<T>() const;
   template<typename Cast = T> auto capacity() const -> uint;
   template<typename Cast = T> auto size() const -> uint;
-  template<typename Cast = T> auto data(uint offset = 0) -> Cast*;
-  template<typename Cast = T> auto data(uint offset = 0) const -> const Cast*;
+  template<typename Cast = T> auto data() -> Cast*;
+  template<typename Cast = T> auto data() const -> const Cast*;
 
   //assign.hpp
   auto operator=(const type& source) -> type&;
@@ -48,11 +46,16 @@ struct vector_base {
 
   //memory.hpp
   auto reset() -> void;
+  auto acquire(const T* data, uint size, uint capacity = 0) -> void;
   auto release() -> T*;
 
   auto reserveLeft(uint capacity) -> bool;
   auto reserveRight(uint capacity) -> bool;
   auto reserve(uint capacity) -> bool { return reserveRight(capacity); }
+
+  auto reallocateLeft(uint size) -> bool;
+  auto reallocateRight(uint size) -> bool;
+  auto reallocate(uint size) -> bool { return reallocateRight(size); }
 
   auto resizeLeft(uint size, const T& value = T()) -> bool;
   auto resizeRight(uint size, const T& value = T()) -> bool;
@@ -66,15 +69,13 @@ struct vector_base {
   alwaysinline auto operator()(uint offset, const T& value) const -> const T&;
 
   alwaysinline auto left() -> T&;
-  alwaysinline auto left() const -> const T&;
-
-  alwaysinline auto right() -> T&;
-  alwaysinline auto right() const -> const T&;
-
   alwaysinline auto first() -> T& { return left(); }
+  alwaysinline auto left() const -> const T&;
   alwaysinline auto first() const -> const T& { return left(); }
 
+  alwaysinline auto right() -> T&;
   alwaysinline auto last() -> T& { return right(); }
+  alwaysinline auto right() const -> const T&;
   alwaysinline auto last() const -> const T& { return right(); }
 
   //modify.hpp
@@ -91,11 +92,15 @@ struct vector_base {
   auto insert(uint offset, const T& value) -> void;
 
   auto removeLeft(uint length = 1) -> void;
+  auto removeFirst(uint length = 1) -> void { return removeLeft(length); }
   auto removeRight(uint length = 1) -> void;
+  auto removeLast(uint length = 1) -> void { return removeRight(length); }
   auto remove(uint offset, uint length = 1) -> void;
 
   auto takeLeft() -> T;
+  auto takeFirst() -> T { return move(takeLeft()); }
   auto takeRight() -> T;
+  auto takeLast() -> T { return move(takeRight()); }
   auto take(uint offset) -> T;
 
   //iterator.hpp
@@ -112,6 +117,7 @@ struct vector_base {
   auto rend() const -> reverse_iterator_const<T> { return {data(), (uint)-1}; }
 
   //utility.hpp
+  auto fill(const T& value = {}) -> void;
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
   auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint>;
   auto find(const T& value) const -> maybe<uint>;

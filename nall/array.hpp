@@ -1,6 +1,8 @@
 #pragma once
 
+#include <nall/array-view.hpp>
 #include <nall/range.hpp>
+#include <nall/view.hpp>
 
 namespace nall {
 
@@ -15,6 +17,10 @@ template<typename T, uint Size> struct array<T[Size]> {
     for(auto& value : source) {
       operator[](index++) = value;
     }
+  }
+
+  operator array_view<T>() const {
+    return {data(), size()};
   }
 
   alwaysinline auto operator[](uint index) -> T& {

@@ -30,7 +30,6 @@ struct VideoDirect3D : VideoDriver {
   auto setShader(string shader) -> bool override { return updateFilter(); }
 
   auto clear() -> void override {
-    if(!ready()) return;
     if(_lost && !recover()) return;
 
     D3DSURFACE_DESC surfaceDescription;
@@ -38,7 +37,10 @@ struct VideoDirect3D : VideoDriver {
     _texture->GetSurfaceLevel(0, &_surface);
 
     if(_surface) {
-      _device->ColorFill(_surface, 0, D3DCOLOR_XRGB(0x00, 0x00, 0x00));
+      D3DLOCKED_RECT lockedRectangle;
+      _surface->LockRect(&lockedRectangle, 0, D3DLOCK_NOSYSLOCK | D3DLOCK_DISCARD);
+      memory::fill(lockedRectangle.pBits, lockedRectangle.Pitch * surfaceDescription.Height);
+      _surface->UnlockRect();
       _surface->Release();
       _surface = nullptr;
     }

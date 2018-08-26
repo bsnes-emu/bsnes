@@ -2,10 +2,9 @@
 
 namespace nall { namespace Encode {
 
-inline auto Huffman(const void* data, uint size) -> vector<uint8_t> {
-  auto input = (const uint8_t*)data;
+inline auto Huffman(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
-  for(uint byte : range(8)) output.append(size >> byte * 8);
+  for(uint byte : range(8)) output.append(input.size() >> byte * 8);
 
   struct Node {
     uint frequency = 0;
@@ -14,7 +13,7 @@ inline auto Huffman(const void* data, uint size) -> vector<uint8_t> {
     uint rhs = 0;
   };
   array<Node[512]> nodes;
-  for(uint offset : range(size)) nodes[input[offset]].frequency++;
+  for(uint offset : range(input.size())) nodes[input[offset]].frequency++;
 
   uint count = 0;
   for(uint offset : range(511)) {
@@ -61,8 +60,8 @@ inline auto Huffman(const void* data, uint size) -> vector<uint8_t> {
     for(uint index : reverse(range(9))) write(nodes[256 + offset].rhs >> index & 1);
   }
 
-  for(uint offset : range(size)) {
-    uint node = input[offset], length = 0;
+  for(uint byte : input) {
+    uint node = byte, length = 0;
     uint256_t sequence = 0;
     //traversing the array produces the bitstream in reverse order
     do {
@@ -80,11 +79,6 @@ inline auto Huffman(const void* data, uint size) -> vector<uint8_t> {
   while(bits) write(0);
 
   return output;
-}
-
-template<typename T>
-inline auto Huffman(const vector<T>& buffer) -> vector<uint8_t> {
-  return move(Huffman(buffer.data(), buffer.size() * sizeof(T)));
 }
 
 }}

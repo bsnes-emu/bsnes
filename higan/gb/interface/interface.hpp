@@ -12,10 +12,13 @@ struct ID {
 
   struct Port { enum : uint {
     Hardware,
+    Cartridge,
   };};
 
   struct Device { enum : uint {
     Controls,
+    MBC5,
+    MBC7,
   };};
 };
 

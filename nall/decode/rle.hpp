@@ -3,14 +3,11 @@
 namespace nall { namespace Decode {
 
 template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
-inline auto RLE(const void* data, uint remaining = ~0) -> vector<uint8_t> {
+inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
 
-  auto input = (const uint8_t*)data;
-
   auto load = [&]() -> uint8_t {
-    if(!remaining) return 0x00;
-    return --remaining, *input++;
+    return input ? *input++ : 0;
   };
 
   uint base = 0;

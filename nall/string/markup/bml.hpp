@@ -40,7 +40,7 @@ protected:
     p += length;
   }
 
-  auto parseData(const char*& p, view<string> spacing) -> void {
+  auto parseData(const char*& p, string_view spacing) -> void {
     if(*p == '=' && *(p + 1) == '\"') {
       uint length = 2;
       while(p[length] && p[length] != '\n' && p[length] != '\"') length++;
@@ -62,7 +62,7 @@ protected:
   }
 
   //read all attributes for a node
-  auto parseAttributes(const char*& p, view<string> spacing) -> void {
+  auto parseAttributes(const char*& p, string_view spacing) -> void {
     while(*p && *p != '\n') {
       if(*p != ' ') throw "Invalid node name";
       while(*p == ' ') p++;  //skip excess spaces
@@ -80,7 +80,7 @@ protected:
   }
 
   //read a node and all of its child nodes
-  auto parseNode(const vector<string>& text, uint& y, view<string> spacing) -> void {
+  auto parseNode(const vector<string>& text, uint& y, string_view spacing) -> void {
     const char* p = text[y++];
     _metadata = parseDepth(p);
     parseName(p);
@@ -105,7 +105,7 @@ protected:
   }
 
   //read top-level nodes
-  auto parse(string document, view<string> spacing) -> void {
+  auto parse(string document, string_view spacing) -> void {
     //in order to simplify the parsing logic; we do an initial pass to normalize the data
     //the below code will turn '\r\n' into '\n'; skip empty lines; and skip comment lines
     char* p = document.get(), *output = p;
@@ -140,10 +140,10 @@ protected:
     }
   }
 
-  friend auto unserialize(const string&, view<string>) -> Markup::Node;
+  friend auto unserialize(const string&, string_view) -> Markup::Node;
 };
 
-inline auto unserialize(const string& markup, view<string> spacing = {}) -> Markup::Node {
+inline auto unserialize(const string& markup, string_view spacing = {}) -> Markup::Node {
   SharedNode node(new ManagedNode);
   try {
     node->parse(markup, spacing);
@@ -153,7 +153,7 @@ inline auto unserialize(const string& markup, view<string> spacing = {}) -> Mark
   return (Markup::SharedNode&)node;
 }
 
-inline auto serialize(const Markup::Node& node, view<string> spacing = {}, uint depth = 0) -> string {
+inline auto serialize(const Markup::Node& node, string_view spacing = {}, uint depth = 0) -> string {
   if(!node.name()) {
     string result;
     for(auto leaf : node) {

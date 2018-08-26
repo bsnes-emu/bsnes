@@ -54,11 +54,11 @@ struct string_pascal {
     return *this;
   }
 
-  auto operator==(view<string> source) const -> bool {
+  auto operator==(string_view source) const -> bool {
     return size() == source.size() && memory::compare(data(), source.data(), size()) == 0;
   }
 
-  auto operator!=(view<string> source) const -> bool {
+  auto operator!=(string_view source) const -> bool {
     return size() != source.size() || memory::compare(data(), source.data(), size()) != 0;
   }
 

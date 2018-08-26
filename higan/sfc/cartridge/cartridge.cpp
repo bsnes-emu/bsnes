@@ -63,7 +63,7 @@ auto Cartridge::load() -> bool {
 
   //BS Memory
   else if(cartridge.has.MCC && cartridge.has.BSMemorySlot) {
-    information.sha256 = Hash::SHA256(bsmemory.memory.data(), bsmemory.memory.size()).digest();
+    information.sha256 = Hash::SHA256({bsmemory.memory.data(), bsmemory.memory.size()}).digest();
   }
 
   //Sufami Turbo

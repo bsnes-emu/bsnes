@@ -5,7 +5,12 @@
 namespace nall { namespace Hash {
 
 struct CRC64 : Hash {
-  nallHash(CRC64)
+  using Hash::input;
+
+  CRC64(array_view<uint8_t> buffer = {}) {
+    reset();
+    input(buffer);
+  }
 
   auto reset() -> void override {
     checksum = ~0;

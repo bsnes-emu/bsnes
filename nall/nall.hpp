@@ -17,6 +17,7 @@
 #include <nall/any.hpp>
 #include <nall/arithmetic.hpp>
 #include <nall/array.hpp>
+#include <nall/array-view.hpp>
 #include <nall/atoi.hpp>
 #include <nall/bit.hpp>
 #include <nall/bit-field.hpp>

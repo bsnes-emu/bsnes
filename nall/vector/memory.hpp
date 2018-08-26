@@ -2,6 +2,9 @@
 
 namespace nall {
 
+//nall::vector acts internally as a deque (double-ended queue)
+//it does this because it's essentially free to do so, only costing an extra integer in sizeof(vector)
+
 template<typename T> auto vector<T>::reset() -> void {
   if(!_pool) return;
 
@@ -14,6 +17,18 @@ template<typename T> auto vector<T>::reset() -> void {
   _right = 0;
 }
 
+//acquire ownership of allocated memory
+
+template<typename T> auto vector<T>::acquire(const T* data, uint size, uint capacity) -> void {
+  reset();
+  _pool = data;
+  _size = size;
+  _left = 0;
+  _right = capacity ? capacity : size;
+}
+
+//release ownership of allocated memory
+
 template<typename T> auto vector<T>::release() -> T* {
   auto pool = _pool;
   _pool = nullptr;
@@ -22,6 +37,11 @@ template<typename T> auto vector<T>::release() -> T* {
   _right = 0;
   return pool;
 }
+
+//reserve allocates memory for objects, but does not initialize them
+//when the vector desired size is known, this can be used to avoid growing the capacity dynamically
+//reserve will not actually shrink the capacity, only expand it
+//shrinking the capacity would destroy objects, and break amortized growth with reallocate and resize
 
 template<typename T> auto vector<T>::reserveLeft(uint capacity) -> bool {
   if(_size + _left >= capacity) return false;
@@ -50,6 +70,43 @@ template<typename T> auto vector<T>::reserveRight(uint capacity) -> bool {
 
   return true;
 }
+
+//reallocation is meant for POD types, to avoid the overhead of initialization
+//do not use with non-POD types, or they will not be properly constructed or destructed
+
+template<typename T> auto vector<T>::reallocateLeft(uint size) -> bool {
+  if(size < _size) {  //shrink
+    _pool += _size - size;
+    _left += _size - size;
+    _size = size;
+    return true;
+  }
+  if(size > _size) {  //grow
+    reserveLeft(size);
+    _pool -= size - _size;
+    _left -= size - _size;
+    _size = size;
+    return true;
+  }
+  return false;
+}
+
+template<typename T> auto vector<T>::reallocateRight(uint size) -> bool {
+  if(size < _size) {  //shrink
+    _right += _size - size;
+    _size = size;
+    return true;
+  }
+  if(size > _size) {  //grow
+    reserveRight(size);
+    _right -= size - _size;
+    _size = size;
+    return true;
+  }
+  return false;
+}
+
+//resize is meant for non-POD types, and will properly construct objects
 
 template<typename T> auto vector<T>::resizeLeft(uint size, const T& value) -> bool {
   if(size < _size) {  //shrink

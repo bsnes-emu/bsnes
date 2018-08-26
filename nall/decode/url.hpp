@@ -3,7 +3,7 @@
 namespace nall { namespace Decode {
 
 //returns empty string on malformed content
-inline auto URL(const string& input) -> string {
+inline auto URL(string_view input) -> string {
   string output;
   for(uint n = 0; n < input.size();) {
     char c = input[n];

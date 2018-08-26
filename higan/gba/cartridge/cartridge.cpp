@@ -94,7 +94,7 @@ auto Cartridge::load() -> bool {
     }
   }
 
-  information.sha256 = Hash::SHA256(mrom.data, mrom.size).digest();
+  information.sha256 = Hash::SHA256({mrom.data, mrom.size}).digest();
   return true;
 }
 

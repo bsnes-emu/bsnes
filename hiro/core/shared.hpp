@@ -20,10 +20,10 @@
     if(parent) (*parent)->append(*this, std::forward<P>(p)...); \
   } \
   template<typename T> auto is() -> bool { \
-    return dynamic_cast<typename T::internalType*>(data()); \
+    return dynamic_cast<typename T::internalType*>(s##Name::data()); \
   } \
   template<typename T> auto cast() -> T { \
-    if(auto pointer = dynamic_cast<typename T::internalType*>(data())) { \
+    if(auto pointer = dynamic_cast<typename T::internalType*>(s##Name::data())) { \
       if(auto shared = pointer->instance.acquire()) return T(shared); \
     } \
     return T(); \

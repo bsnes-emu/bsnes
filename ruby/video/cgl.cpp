@@ -36,7 +36,7 @@ struct VideoCGL : VideoDriver, OpenGL {
     if(!view) return true;
     @autoreleasepool {
       [[view openGLContext] makeCurrentContext];
-      int blocking = _blocking;
+      int blocking = self.blocking;
       [[view openGLContext] setValues:&blocking forParameter:NSOpenGLCPSwapInterval];
     }
     return true;

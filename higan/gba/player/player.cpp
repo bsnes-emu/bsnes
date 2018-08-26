@@ -42,7 +42,7 @@ auto Player::power() -> void {
 
 auto Player::frame() -> void {
   //todo: this is not a very performant way of detecting the GBP logo ...
-  uint32 hash = Hash::CRC32(ppu.output, 240 * 160 * sizeof(uint32)).value();
+  uint32 hash = Hash::CRC32({ppu.output, 240 * 160 * sizeof(uint32)}).value();
   status.logoDetected = (hash == 0x7776eb55);
 
   if(status.logoDetected) {

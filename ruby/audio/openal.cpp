@@ -8,7 +8,7 @@
 
 struct AudioOpenAL : AudioDriver {
   AudioOpenAL& self = *this;
-  AudioOpenAL(Audio& driver) : AudioDriver(super) {}
+  AudioOpenAL(Audio& super) : AudioDriver(super) {}
   ~AudioOpenAL() { terminate(); }
 
   auto create() -> bool override {

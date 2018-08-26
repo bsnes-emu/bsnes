@@ -4,10 +4,10 @@ auto Program::hackCompatibility() -> void {
   bool fastPPUHiresMode7 = emulatorSettings.hiresMode7.checked();
   bool fastDSP = emulatorSettings.fastDSPOption.checked();
 
-  auto label = superFamicom.label;
-  if(label == "AIR STRIKE PATROL" || label == "DESERT FIGHTER") fastPPU = false;
-  if(label == "KOUSHIEN_2") fastDSP = false;
-  if(label == "RENDERING RANGER R2") fastDSP = false;
+  auto title = superFamicom.title;
+  if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
+  if(title == "KOUSHIEN_2") fastDSP = false;
+  if(title == "RENDERING RANGER R2") fastDSP = false;
 
   //todo: update to new emulator->configuration API
   emulator->set("Fast PPU", fastPPU);
@@ -17,9 +17,9 @@ auto Program::hackCompatibility() -> void {
 }
 
 auto Program::hackPatchMemory(vector<uint8_t>& data) -> void {
-  auto label = superFamicom.label;
+  auto title = superFamicom.title;
 
-  if(label == "Satellaview BS-X" && data.size() >= 0x100000) {
+  if(title == "Satellaview BS-X" && data.size() >= 0x100000) {
     //BS-X: Sore wa Namae o Nusumareta Machi no Monogatari (JPN) (1.1)
     //disable limited play check for BS Memory flash cartridges
     //benefit: allow locked out BS Memory flash games to play without manual header patching
@@ -37,8 +37,8 @@ auto Program::hackOverclockSuperFX() -> void {
   double multiplier = emulatorSettings.superFXValue.text().natural() / 100.0;
   if(multiplier == 1.0) return;
 
-  auto label = superFamicom.label;
-  if(label == "NIDAN MORITASHOGI2") return;  //ST018 uses same clock speed as SuperFX
+  auto title = superFamicom.title;
+  if(title == "NIDAN MORITASHOGI2") return;  //ST018 uses same clock speed as SuperFX
 
   auto document = BML::unserialize(superFamicom.manifest);
 
@@ -53,7 +53,7 @@ auto Program::hackOverclockSuperFX() -> void {
 
   //MARIO CHIP 1 uses CPU oscillator; force it to use its own crystal to overclock it
   bool marioChip1 = false;
-  if(label == "STAR FOX" || label == "STAR WING") marioChip1 = true;
+  if(title == "STAR FOX" || title == "STAR WING") marioChip1 = true;
   if(marioChip1) {
     document("game/board/oscillator/frequency").setValue(uint(21440000 * multiplier));
     superFamicom.manifest = BML::serialize(document);

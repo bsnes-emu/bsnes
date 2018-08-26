@@ -2,13 +2,13 @@
 
 namespace nall {
 
-auto string::trim(view<string> lhs, view<string> rhs, long limit) -> string& {
+auto string::trim(string_view lhs, string_view rhs, long limit) -> string& {
   trimRight(rhs, limit);
   trimLeft(lhs, limit);
   return *this;
 }
 
-auto string::trimLeft(view<string> lhs, long limit) -> string& {
+auto string::trimLeft(string_view lhs, long limit) -> string& {
   if(lhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
@@ -22,7 +22,7 @@ auto string::trimLeft(view<string> lhs, long limit) -> string& {
   return *this;
 }
 
-auto string::trimRight(view<string> rhs, long limit) -> string& {
+auto string::trimRight(string_view rhs, long limit) -> string& {
   if(rhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
@@ -36,13 +36,13 @@ auto string::trimRight(view<string> rhs, long limit) -> string& {
   return *this;
 }
 
-auto string::itrim(view<string> lhs, view<string> rhs, long limit) -> string& {
+auto string::itrim(string_view lhs, string_view rhs, long limit) -> string& {
   itrimRight(rhs, limit);
   itrimLeft(lhs, limit);
   return *this;
 }
 
-auto string::itrimLeft(view<string> lhs, long limit) -> string& {
+auto string::itrimLeft(string_view lhs, long limit) -> string& {
   if(lhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
@@ -56,7 +56,7 @@ auto string::itrimLeft(view<string> lhs, long limit) -> string& {
   return *this;
 }
 
-auto string::itrimRight(view<string> rhs, long limit) -> string& {
+auto string::itrimRight(string_view rhs, long limit) -> string& {
   if(rhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {

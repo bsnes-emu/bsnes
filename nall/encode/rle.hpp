@@ -3,17 +3,15 @@
 namespace nall { namespace Encode {
 
 template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
-inline auto RLE(const void* data, uint64_t size) -> vector<uint8_t> {
+inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
-  for(uint byte : range(8)) output.append(size >> byte * 8);
+  for(uint byte : range(8)) output.append(input.size() >> byte * 8);
 
-  auto input = (const uint8_t*)data;
   uint base = 0;
   uint skip = 0;
 
   auto load = [&](uint offset) -> uint8_t {
-    if(offset >= size) return 0x00;
-    return input[offset];
+    return input(offset);
   };
 
   auto read = [&](uint offset) -> uint64_t {
@@ -34,9 +32,9 @@ inline auto RLE(const void* data, uint64_t size) -> vector<uint8_t> {
     } while(--skip);
   };
 
-  while(base + S * skip < size) {
+  while(base + S * skip < input.size()) {
     uint same = 1;
-    for(uint offset = base + S * (skip + 1); offset < size; offset += S) {
+    for(uint offset = base + S * (skip + 1); offset < input.size(); offset += S) {
       if(read(offset) != read(base + S * skip)) break;
       if(++same == 127 + M) break;
     }
@@ -53,11 +51,6 @@ inline auto RLE(const void* data, uint64_t size) -> vector<uint8_t> {
   if(skip) flush();
 
   return output;
-}
-
-template<uint S = 1, uint M = 4 / S, typename T>
-inline auto RLE(const vector<T>& buffer) -> vector<uint8_t> {
-  return move(RLE<S, M>(buffer.data(), buffer.size() * sizeof(T)));
 }
 
 }}

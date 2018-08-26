@@ -20,6 +20,10 @@ struct Hash {
   virtual auto input(uint8_t data) -> void = 0;
   virtual auto output() const -> vector<uint8_t> = 0;
 
+  auto input(array_view<uint8_t> data) -> void {
+    for(auto byte : data) input(byte);
+  }
+
   auto input(const void* data, uint64_t size) -> void {
     auto p = (const uint8_t*)data;
     while(size--) input(*p++);

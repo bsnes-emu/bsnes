@@ -415,6 +415,7 @@ auto pWindow::setTitle(const string& title) -> void {
 
 auto pWindow::setVisible(bool visible) -> void {
   gtk_widget_set_visible(widget, visible);
+  _synchronizeGeometry();
   _synchronizeMargin();
 }
 

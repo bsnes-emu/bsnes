@@ -108,14 +108,16 @@ auto Program::applyPatchBPS(vector<uint8_t>& input, string location) -> bool {
   if(!patch) return false;
 
   string manifest;
-  string result;
-  if(auto output = Beat::Single::apply(input.data(), input.size(), patch.data(), patch.size(), manifest, result)) {
-    input = move(*output);
-    return true;
+  string error;
+  if(auto output = Beat::Single::apply(input, patch, manifest, error)) {
+    if(!error) {
+      input = move(*output);
+      return true;
+    }
   }
 
   MessageDialog({
-    result, "\n\n",
+    error, "\n\n",
     "Please ensure you are using the correct (headerless) ROM for this patch."
   }).setParent(*presentation).error();
   return false;

@@ -25,7 +25,6 @@ inline auto LZSA(const void* data) -> vector<uint8_t> {
 
   auto flags = Decode::Huffman(load());
   auto literals = Decode::Huffman(load());
-//auto literals = Decode::BWT(Decode::Huffman(load()));
   auto lengths = Decode::Huffman(load());
   auto offsets = Decode::Huffman(load());
 

@@ -2,6 +2,10 @@
 
 namespace nall {
 
+template<typename T> auto vector<T>::fill(const T& value) -> void {
+  for(uint n : range(size())) _pool[n] = value;
+}
+
 template<typename T> auto vector<T>::sort(const function<bool (const T& lhs, const T& rhs)>& comparator) -> void {
   nall::sort(_pool, _size, comparator);
 }

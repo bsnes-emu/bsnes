@@ -19,21 +19,21 @@ auto vector<string>::isort() -> type& {
   return *this;
 }
 
-auto vector<string>::find(view<string> source) const -> maybe<uint> {
+auto vector<string>::find(string_view source) const -> maybe<uint> {
   for(uint n = 0; n < size(); n++) {
     if(operator[](n).equals(source)) return n;
   }
   return {};
 }
 
-auto vector<string>::ifind(view<string> source) const -> maybe<uint> {
+auto vector<string>::ifind(string_view source) const -> maybe<uint> {
   for(uint n = 0; n < size(); n++) {
     if(operator[](n).iequals(source)) return n;
   }
   return {};
 }
 
-auto vector<string>::match(view<string> pattern) const -> vector<string> {
+auto vector<string>::match(string_view pattern) const -> vector<string> {
   vector<string> result;
   for(uint n = 0; n < size(); n++) {
     if(operator[](n).match(pattern)) result.append(operator[](n));
@@ -41,7 +41,7 @@ auto vector<string>::match(view<string> pattern) const -> vector<string> {
   return result;
 }
 
-auto vector<string>::merge(view<string> separator) const -> string {
+auto vector<string>::merge(string_view separator) const -> string {
   string output;
   for(uint n = 0; n < size(); n++) {
     output.append(operator[](n));

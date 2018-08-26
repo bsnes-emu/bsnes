@@ -46,12 +46,18 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::ports() -> vector<Port> { return {
-  {ID::Port::Hardware, "Hardware"}};
+  {ID::Port::Hardware, "Hardware"},
+  {ID::Port::Cartridge, "Cartridge"}};
 }
 
 auto Interface::devices(uint port) -> vector<Device> {
   if(port == ID::Port::Hardware) return {
     {ID::Device::Controls, "Controls"}
+  };
+
+  if(port == ID::Port::Cartridge) return {
+    {ID::Device::MBC5, "MBC5"},
+    {ID::Device::MBC7, "MBC7"}
   };
 
   return {};
@@ -68,10 +74,16 @@ auto Interface::inputs(uint device) -> vector<Input> {
     {Type::Button,  "B"     },
     {Type::Button,  "A"     },
     {Type::Control, "Select"},
-    {Type::Control, "Start" },
-    {Type::Axis,    "X-axis"},
-    {Type::Axis,    "Y-axis"},
-    {Type::Rumble,  "Rumble"}
+    {Type::Control, "Start" }
+  };
+
+  if(device == ID::Device::MBC5) return {
+    {Type::Rumble, "Rumble"}
+  };
+
+  if(device == ID::Device::MBC7) return {
+    {Type::Axis, "Accelerometer - X-axis"},
+    {Type::Axis, "Accelerometer - Y-axis"}
   };
 
   return {};

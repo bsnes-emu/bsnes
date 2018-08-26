@@ -107,7 +107,7 @@ auto Cartridge::load() -> bool {
 
   information.title = document["game/label"].text();
   information.orientation = document["game/orientation"].text() == "vertical";
-  information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
+  information.sha256 = Hash::SHA256({rom.data, rom.size}).digest();
   return true;
 }
 

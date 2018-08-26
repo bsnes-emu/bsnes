@@ -138,6 +138,8 @@ Presentation::Presentation() {
     if(!locations || !directory::exists(locations.first())) return;
     program->gameQueue.append(locations.first());
     program->load();
+  }).onSize([&] {
+    configureViewport();
   });
 
   iconLayout.setAlignment(0.0);
@@ -182,12 +184,6 @@ Presentation::Presentation() {
   setBackgroundColor({0, 0, 0});
   resizeWindow();
   setCentered();
-
-  #if defined(PLATFORM_WINDOWS)
-  Application::Windows::onModalChange([&](bool modal) {
-    if(modal && audio) audio->clear();
-  });
-  #endif
 
   #if defined(PLATFORM_MACOS)
   about.setVisible(false);
@@ -324,10 +320,7 @@ auto Presentation::configureViewport() -> void {
 }
 
 auto Presentation::clearViewport() -> void {
-  if(!emulator || !emulator->loaded()) {
-    viewportLayout.setPadding();
-    configureViewport();
-  }
+  if(!emulator || !emulator->loaded()) viewportLayout.setPadding();
   if(!visible() || !video) return;
 
   uint32_t* output;
@@ -407,8 +400,6 @@ auto Presentation::resizeViewport() -> void {
     paddingWidth / 2, paddingHeight / 2,
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
   });
-
-  configureViewport();
 }
 
 auto Presentation::resizeWindow() -> void {

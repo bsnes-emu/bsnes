@@ -18,7 +18,7 @@ struct ZIP {
   auto append(string filename, const uint8_t* data = nullptr, uint size = 0u, time_t timestamp = 0) -> void {
     filename.transform("\\", "/");
     if(!timestamp) timestamp = this->timestamp;
-    uint32_t checksum = Hash::CRC32(data, size).digest().hex();
+    uint32_t checksum = Hash::CRC32({data, size}).digest().hex();
     directory.append({filename, timestamp, checksum, size, fp.offset()});
 
     fp.writel(0x04034b50, 4);         //signature

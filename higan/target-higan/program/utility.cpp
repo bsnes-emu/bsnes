@@ -14,6 +14,10 @@ auto Program::initializeVideoDriver() -> void {
     video->create("None");
   }
 
+  video->onUpdate([&](uint width, uint height) {
+    if(!emulator || !emulator->loaded()) presentation->clearViewport();
+  });
+
   presentation->configureViewport();
   presentation->clearViewport();
 }

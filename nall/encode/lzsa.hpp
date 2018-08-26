@@ -8,22 +8,12 @@
 
 namespace nall { namespace Encode {
 
-inline auto LZSA(const void* data, uint64_t size) -> vector<uint8_t> {
+inline auto LZSA(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
-  for(uint byte : range(8)) output.append(size >> byte * 8);
+  for(uint byte : range(8)) output.append(input.size() >> byte * 8);
 
-  auto input = (const uint8_t*)data;
+  auto suffixArray = SuffixArray(input).lpf();
   uint index = 0;
-
-  auto buffers = new int[size * 4];
-  auto suffixes = &buffers[0 * size];
-  auto phi = &buffers[1 * size];
-  auto lengths = &buffers[2 * size];
-  auto offsets = &buffers[3 * size];
-  suffix_array(suffixes, input, size);
-  suffix_array_phi(phi, suffixes, size);
-  suffix_array_lps(lengths, offsets, phi, input, size);
-
   vector<uint8_t> flags;
   vector<uint8_t> literals;
   vector<uint8_t> stringLengths;
@@ -55,13 +45,13 @@ inline auto LZSA(const void* data, uint64_t size) -> vector<uint8_t> {
     stringOffsets.append(offset >> 24);
   };
 
-  while(index < size) {
-    int length = lengths[index];
-    int offset = offsets[index];
+  while(index < input.size()) {
+    int length, offset;
+    suffixArray.previous(length, offset, index);
 
     for(uint ahead = 1; ahead <= 2; ahead++) {
-      int aheadLength = lengths[index + ahead];
-      int aheadOffset = offsets[index + ahead];
+      int aheadLength, aheadOffset;
+      suffixArray.previous(aheadLength, aheadOffset, index + ahead);
       if(aheadLength > length && aheadOffset >= 0) {
         length = 0;
         break;
@@ -87,11 +77,9 @@ inline auto LZSA(const void* data, uint64_t size) -> vector<uint8_t> {
 
   save(Encode::Huffman(flags));
   save(Encode::Huffman(literals));
-//save(Encode::Huffman(Encode::BWT(literals)));
   save(Encode::Huffman(stringLengths));
   save(Encode::Huffman(stringOffsets));
 
-  delete[] buffers;
   return output;
 }
 

@@ -6,14 +6,14 @@ struct Game {
   struct Memory;
   struct Oscillator;
 
-  inline auto load(view<string>) -> void;
+  inline auto load(string_view) -> void;
   inline auto memory(Markup::Node) -> maybe<Memory>;
   inline auto oscillator(natural = 0) -> maybe<Oscillator>;
 
   struct Memory {
     Memory() = default;
     inline Memory(Markup::Node);
-    explicit operator bool() const { return type; }
+    explicit operator bool() const { return (bool)type; }
     inline auto name() const -> string;
 
     string type;
@@ -44,7 +44,7 @@ struct Game {
   vector<Oscillator> oscillatorList;
 };
 
-auto Game::load(view<string> text) -> void {
+auto Game::load(string_view text) -> void {
   document = BML::unserialize(text);
 
   sha256 = document["game/sha256"].text();

@@ -6,8 +6,7 @@
 
 namespace nall { namespace Decode {
 
-inline auto BWT(const void* data) -> vector<uint8_t> {
-  auto input = (const uint8_t*)data;
+inline auto BWT(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
 
   uint size = 0;
@@ -17,14 +16,11 @@ inline auto BWT(const void* data) -> vector<uint8_t> {
   uint I = 0;
   for(uint byte : range(8)) I |= *input++ << byte * 8;
 
-  auto suffixes = new int[size];
-  suffix_array(suffixes, input, size);
+  auto suffixes = SuffixArray(input);
 
   auto L = input;
   auto F = new uint8_t[size];
-  for(uint byte : range(size)) F[byte] = L[suffixes[byte]];
-
-  delete[] suffixes;
+  for(uint offset : range(size)) F[offset] = L[suffixes[offset + 1]];
 
   uint64_t K[256] = {};
   auto C = new int[size];
@@ -46,11 +42,6 @@ inline auto BWT(const void* data) -> vector<uint8_t> {
   }
 
   return output;
-}
-
-template<typename T>
-inline auto BWT(const vector<T>& buffer) -> vector<uint8_t> {
-  return move(BWT(buffer.data()));
 }
 
 }}

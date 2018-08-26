@@ -5,7 +5,12 @@
 namespace nall { namespace Hash {
 
 struct SHA384 : Hash {
-  nallHash(SHA384)
+  using Hash::input;
+
+  SHA384(array_view<uint8_t> buffer = {}) {
+    reset();
+    input(buffer);
+  }
 
   auto reset() -> void override {
     for(auto& n : queue) n = 0;

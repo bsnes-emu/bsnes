@@ -115,7 +115,7 @@ auto Program::loadSuperFamicom(string location) -> bool {
       superFamicom.verified = true;
     }
   }
-  superFamicom.label = heuristics.label();
+  superFamicom.title = heuristics.title();
   superFamicom.manifest = manifest ? manifest : heuristics.manifest();
   hackPatchMemory(rom);
   hackOverclockSuperFX();

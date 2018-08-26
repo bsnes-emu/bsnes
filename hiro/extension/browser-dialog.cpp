@@ -193,6 +193,8 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   window.setDismissable();
   window.setVisible();
   view.setFocused();
+  Application::processEvents();
+  view->resizeColumns();
   window.setModal();
   window.setVisible(false);
 

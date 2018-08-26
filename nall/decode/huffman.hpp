@@ -2,8 +2,7 @@
 
 namespace nall { namespace Decode {
 
-inline auto Huffman(const void* data) -> vector<uint8_t> {
-  auto input = (const uint8_t*)data;
+inline auto Huffman(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
 
   uint size = 0;
@@ -32,11 +31,6 @@ inline auto Huffman(const void* data) -> vector<uint8_t> {
   }
 
   return output;
-}
-
-template<typename T>
-inline auto Huffman(const vector<T>& buffer) -> vector<uint8_t> {
-  return move(Huffman(buffer.data()));
 }
 
 }}

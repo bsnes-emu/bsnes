@@ -71,11 +71,15 @@ auto MegaDrive::manifest() const -> string {
   string domesticName;
   domesticName.resize(48);
   memory::copy(domesticName.get(), &data[0x0120], domesticName.size());
+  for(auto& c : domesticName) if(c < 0x20 || c > 0x7e) c = ' ';
+  while(domesticName.find("  ")) domesticName.replace("  ", " ");
   domesticName.strip();
 
   string internationalName;
   internationalName.resize(48);
   memory::copy(internationalName.get(), &data[0x0150], internationalName.size());
+  for(auto& c : internationalName) if(c < 0x20 || c > 0x7e) c = ' ';
+  while(internationalName.find("  ")) internationalName.replace("  ", " ");
   internationalName.strip();
 
   string output;
@@ -83,6 +87,7 @@ auto MegaDrive::manifest() const -> string {
   output.append("  sha256: ", Hash::SHA256(data).digest(), "\n");
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
+  output.append("  title:  ", domesticName, "\n");
   output.append("  region: ", regions.left(), "\n");
   output.append("  board\n");
   if(domesticName == "Game Genie") {

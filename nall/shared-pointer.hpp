@@ -11,7 +11,7 @@ template<typename T> struct shared_pointer;
 
 struct shared_pointer_manager {
   void* pointer = nullptr;
-  function<auto (void*) -> void> deleter;
+  function<void (void*)> deleter;
   uint strong = 0;
   uint weak = 0;
 
@@ -41,7 +41,9 @@ struct shared_pointer {
 
   shared_pointer(T* source, const function<void (T*)>& deleter) {
     operator=(source);
-    manager->deleter = [=](void* p) { deleter((T*)p); };
+    manager->deleter = function<void (void*)>([=](void* p) {
+      deleter((T*)p);
+    });
   }
 
   shared_pointer(const shared_pointer& source) {

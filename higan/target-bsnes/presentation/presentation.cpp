@@ -144,6 +144,8 @@ auto Presentation::create() -> void {
     program.gameQueue = locations;
     program.load();
     setFocused();
+  }).onSize([&] {
+    configureViewport();
   });
 
   iconLayout.setAlignment(0.0);
@@ -219,10 +221,7 @@ auto Presentation::configureViewport() -> void {
 }
 
 auto Presentation::clearViewport() -> void {
-  if(!emulator->loaded()) {
-    viewportLayout.setPadding();
-    configureViewport();
-  }
+  if(!emulator->loaded()) viewportLayout.setPadding();
   if(!visible() || !video) return;
 
   uint32_t* output;
@@ -286,8 +285,6 @@ auto Presentation::resizeViewport() -> void {
     paddingWidth / 2, paddingHeight / 2,
     paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
   });
-
-  configureViewport();
 }
 
 auto Presentation::resizeWindow() -> void {

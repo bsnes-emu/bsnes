@@ -89,12 +89,11 @@ Program::Program(vector<string> arguments) {
   updateAudioDriver();
   updateAudioEffects();
 
-  arguments.takeLeft();  //ignore program location in argument parsing
+  arguments.takeFirst();  //ignore program location in argument parsing
   for(auto& argument : arguments) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
     } else if(directory::exists(argument.split("|", 1L).right())) {
-      if(!argument.transform("\\", "/").endsWith("/")) argument.append("/");
       gameQueue.append(argument);
     } else if(file::exists(argument)) {
       if(auto result = execute("icarus", "--import", argument)) {
@@ -109,6 +108,7 @@ Program::Program(vector<string> arguments) {
 
 auto Program::main() -> void {
   updateStatusText();
+  video->poll();
   inputManager->poll();
   inputManager->pollHotkeys();
 

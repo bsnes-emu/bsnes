@@ -1,18 +1,14 @@
 #pragma once
 
-#include <nall/encode/dictionary.hpp>
+#include <nall/suffix-array.hpp>
 
 namespace nall { namespace Beat { namespace Single {
 
-inline auto create(
-  const uint8_t* sourceData, uint64_t sourceSize,
-  const uint8_t* targetData, uint64_t targetSize,
-  const string& manifest = {}
-) -> maybe<vector<uint8_t>> {
-  vector<uint8_t> beatData;
+inline auto create(array_view<uint8_t> source, array_view<uint8_t> target, string_view manifest = {}) -> vector<uint8_t> {
+  vector<uint8_t> beat;
 
   auto write = [&](uint8_t data) {
-    beatData.append(data);
+    beat.append(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -26,18 +22,11 @@ inline auto create(
   };
 
   write('B'), write('P'), write('S'), write('1');
-  encode(sourceSize), encode(targetSize), encode(manifest.size());
+  encode(source.size()), encode(target.size()), encode(manifest.size());
   for(auto& byte : manifest) write(byte);
 
-  auto read = [&](const uint8_t* data, uint size, uint offset) -> uint {
-    if(offset + 3 >= size) return 0;
-    return data[offset + 0] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3] << 0;
-  };
-
-  Encode::Dictionary sourceDictionary(sourceData, sourceSize);
-  Encode::Dictionary targetDictionary(targetData, targetSize);
-  sourceDictionary.scan();
-  targetDictionary.scan();
+  auto sourceArray = SuffixArray(source).lrcp();
+  auto targetArray = SuffixArray(target).lpf();
 
   enum : uint { SourceRead, TargetRead, SourceCopy, TargetCopy };
   uint outputOffset = 0, sourceRelativeOffset = 0, targetRelativeOffset = 0;
@@ -47,46 +36,30 @@ inline auto create(
     if(!targetReadLength) return;
     encode(TargetRead | ((targetReadLength - 1) << 2));
     uint offset = outputOffset - targetReadLength;
-    while(targetReadLength) write(targetData[offset++]), targetReadLength--;
+    while(targetReadLength) write(target[offset++]), targetReadLength--;
   };
 
-  uint longestSize = max(sourceSize, targetSize);
-  while(outputOffset < targetSize) {
+  uint longestSize = max(source.size(), target.size());
+  while(outputOffset < target.size()) {
     uint mode = TargetRead, longestLength = 3, longestOffset = 0;
-    uint prefix = read(targetData, targetSize, outputOffset), lower, upper;
+    int length = 0, offset = outputOffset;
 
-    uint length = 0, offset = outputOffset;
-    while(offset < longestOffset) {
-      if(sourceData[offset] != targetData[offset]) break;
+    while(offset < longestSize) {
+      if(source[offset] != target[offset]) break;
       length++, offset++;
     }
     if(length > longestLength) {
       mode = SourceRead, longestLength = length;
     }
 
-    sourceDictionary.find(prefix, lower, upper);
-    for(uint index = lower; index <= upper; index++) {
-      uint length = 0, sourceOffset = sourceDictionary[index], targetOffset = outputOffset;
-      while(sourceOffset < sourceSize && targetOffset < targetSize) {
-        if(sourceData[sourceOffset++] != targetData[targetOffset++]) break;
-        length++;
-      }
-      if(length > longestLength) {
-        mode = SourceCopy, longestLength = length, longestOffset = sourceDictionary[index];
-      }
+    sourceArray.find(length, offset, {target.data() + outputOffset, target.size() - outputOffset});
+    if(length > longestLength) {
+      mode = SourceCopy, longestLength = length, longestOffset = offset;
     }
 
-    targetDictionary.find(prefix, lower, upper);
-    for(uint index = lower; index <= upper; index++) {
-      uint length = 0, sourceOffset = targetDictionary[index], targetOffset = outputOffset;
-      if(sourceOffset >= outputOffset) continue;
-      while(targetOffset < targetSize) {
-        if(targetData[sourceOffset++] != targetData[targetOffset++]) break;
-        length++;
-      }
-      if(length > longestLength) {
-        mode = TargetCopy, longestLength = length, longestOffset = targetDictionary[index];
-      }
+    targetArray.previous(length, offset, outputOffset);
+    if(length > longestLength) {
+      mode = TargetCopy, longestLength = length, longestOffset = offset;
     }
 
     if(mode == TargetRead) {
@@ -110,14 +83,14 @@ inline auto create(
   }
   flush();
 
-  auto sourceHash = Hash::CRC32(sourceData, sourceSize);
+  auto sourceHash = Hash::CRC32(source);
   for(uint shift : range(0, 32, 8)) write(sourceHash.value() >> shift);
-  auto targetHash = Hash::CRC32(targetData, targetSize);
+  auto targetHash = Hash::CRC32(target);
   for(uint shift : range(0, 32, 8)) write(targetHash.value() >> shift);
-  auto beatHash = Hash::CRC32(beatData);
+  auto beatHash = Hash::CRC32(beat);
   for(uint shift : range(0, 32, 8)) write(beatHash.value() >> shift);
 
-  return beatData;
+  return beat;
 }
 
 }}}

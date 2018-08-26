@@ -2,7 +2,7 @@
 
 namespace nall {
 
-auto string::contains(view<string> characters) const -> maybe<uint> {
+auto string::contains(string_view characters) const -> maybe<uint> {
   for(uint x : range(size())) {
     for(char y : characters) {
       if(operator[](x) == y) return x;
@@ -11,7 +11,7 @@ auto string::contains(view<string> characters) const -> maybe<uint> {
   return nothing;
 }
 
-template<bool Insensitive, bool Quoted> auto string::_find(int offset, view<string> source) const -> maybe<uint> {
+template<bool Insensitive, bool Quoted> auto string::_find(int offset, string_view source) const -> maybe<uint> {
   if(source.size() == 0) return nothing;
 
   auto p = data();
@@ -24,12 +24,12 @@ template<bool Insensitive, bool Quoted> auto string::_find(int offset, view<stri
   return nothing;
 }
 
-auto string::find(view<string> source) const -> maybe<uint> { return _find<0, 0>(0, source); }
-auto string::ifind(view<string> source) const -> maybe<uint> { return _find<1, 0>(0, source); }
-auto string::qfind(view<string> source) const -> maybe<uint> { return _find<0, 1>(0, source); }
-auto string::iqfind(view<string> source) const -> maybe<uint> { return _find<1, 1>(0, source); }
+auto string::find(string_view source) const -> maybe<uint> { return _find<0, 0>(0, source); }
+auto string::ifind(string_view source) const -> maybe<uint> { return _find<1, 0>(0, source); }
+auto string::qfind(string_view source) const -> maybe<uint> { return _find<0, 1>(0, source); }
+auto string::iqfind(string_view source) const -> maybe<uint> { return _find<1, 1>(0, source); }
 
-auto string::findFrom(int offset, view<string> source) const -> maybe<uint> { return _find<0, 0>(offset, source); }
-auto string::ifindFrom(int offset, view<string> source) const -> maybe<uint> { return _find<1, 0>(offset, source); }
+auto string::findFrom(int offset, string_view source) const -> maybe<uint> { return _find<0, 0>(offset, source); }
+auto string::ifindFrom(int offset, string_view source) const -> maybe<uint> { return _find<1, 0>(offset, source); }
 
 }

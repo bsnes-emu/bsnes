@@ -117,7 +117,7 @@ struct file : inode, varint {
 
   static auto sha256(const string& filename) -> string {
     auto buffer = read(filename);
-    return Hash::SHA256(buffer.data(), buffer.size()).digest();
+    return Hash::SHA256(buffer).digest();
   }
 
   auto read() -> uint8_t {

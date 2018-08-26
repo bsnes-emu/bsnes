@@ -60,22 +60,20 @@
     [content removeTableColumn:[[content tableColumns] lastObject]];
   }
 
-  if(auto tableViewHeader = tableView->state.header) {
-    for(auto& tableViewColumn : tableViewHeader->state.columns) {
-      auto column = tableViewColumn->offset();
+  for(auto& tableViewColumn : tableView->state.columns) {
+    auto column = tableViewColumn->offset();
 
-      NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
-      NSTableHeaderCell* headerCell = [[NSTableHeaderCell alloc] initTextCell:[NSString stringWithUTF8String:tableViewColumn->state.text]];
-      CocoaTableViewCell* dataCell = [[CocoaTableViewCell alloc] initWith:*tableView];
+    NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
+    NSTableHeaderCell* headerCell = [[NSTableHeaderCell alloc] initTextCell:[NSString stringWithUTF8String:tableViewColumn->state.text]];
+    CocoaTableViewCell* dataCell = [[CocoaTableViewCell alloc] initWith:*tableView];
 
-      [dataCell setEditable:NO];
+    [dataCell setEditable:NO];
 
-      [tableColumn setResizingMask:NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask];
-      [tableColumn setHeaderCell:headerCell];
-      [tableColumn setDataCell:dataCell];
+    [tableColumn setResizingMask:NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask];
+    [tableColumn setHeaderCell:headerCell];
+    [tableColumn setDataCell:dataCell];
 
-      [content addTableColumn:tableColumn];
-    }
+    [content addTableColumn:tableColumn];
   }
 }
 
@@ -369,11 +367,15 @@ auto pTableView::setHeadered(bool headered) -> void {
   @autoreleasepool {
     if(headered == state().headered) return;
     if(headered) {
-      [[pTableView->cocoaView content] setHeaderView:[[[NSTableHeaderView alloc] init] autorelease]];
+      [[cocoaView content] setHeaderView:[[[NSTableHeaderView alloc] init] autorelease]];
     } else {
-      [[pTableView->cocoaView content] setHeaderView:nil];
+      [[cocoaView content] setHeaderView:nil];
     }
   }
+}
+
+auto pTableView::setSortable(bool sortable) -> void {
+  //TODO
 }
 
 auto pTableView::_cellWidth(uint row, uint column) -> uint {
@@ -394,9 +396,9 @@ auto pTableView::_cellWidth(uint row, uint column) -> uint {
   return width;
 }
 
-auto pTableView::_columnWidth(uint column) -> uint {
+auto pTableView::_columnWidth(uint column_) -> uint {
   uint width = 8;
-  if(auto column = self().column(column)) {
+  if(auto column = self().column(column_)) {
     if(auto& icon = column->state.icon) {
       width += icon.width() + 2;
     }

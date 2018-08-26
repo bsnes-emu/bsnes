@@ -8,7 +8,7 @@ struct SuperFamicom {
   auto region() const -> string;
   auto revision() const -> string;
   auto board() const -> string;
-  auto label() const -> string;
+  auto title() const -> string;
   auto serial() const -> string;
   auto romSize() const -> uint;
   auto programRomSize() const -> uint;
@@ -67,6 +67,7 @@ auto SuperFamicom::manifest() const -> string {
   output.append("  sha256:   ", Hash::SHA256(data).digest(), "\n");
   output.append("  label:    ", Location::prefix(location), "\n");
   output.append("  name:     ", Location::prefix(location), "\n");
+  output.append("  title:    ", title(), "\n");
   output.append("  region:   ", region(), "\n");
   output.append("  revision: ", revision(), "\n");
   output.append("  board:    ", board(), "\n");
@@ -292,7 +293,7 @@ auto SuperFamicom::board() const -> string {
   return board;
 }
 
-auto SuperFamicom::label() const -> string {
+auto SuperFamicom::title() const -> string {
   string label;
 
   for(uint n = 0; n < 0x15; n++) {
@@ -527,15 +528,15 @@ auto SuperFamicom::firmwareARM() const -> string {
 }
 
 auto SuperFamicom::firmwareEXNEC() const -> string {
-  if(label() == "EXHAUST HEAT2") return "ST010";
-  if(label() == "F1 ROC II") return "ST010";
-  if(label() == "2DAN MORITA SHOUGI") return "ST011";
+  if(title() == "EXHAUST HEAT2") return "ST010";
+  if(title() == "F1 ROC II") return "ST010";
+  if(title() == "2DAN MORITA SHOUGI") return "ST011";
   return "ST010";
 }
 
 auto SuperFamicom::firmwareGB() const -> string {
-  if(label() == "Super GAMEBOY") return "SGB1";
-  if(label() == "Super GAMEBOY2") return "SGB2";
+  if(title() == "Super GAMEBOY") return "SGB1";
+  if(title() == "Super GAMEBOY2") return "SGB2";
   return "SGB1";
 }
 
@@ -544,11 +545,11 @@ auto SuperFamicom::firmwareHITACHI() const -> string {
 }
 
 auto SuperFamicom::firmwareNEC() const -> string {
-  if(label() == "PILOTWINGS") return "DSP1";
-  if(label() == "DUNGEON MASTER") return "DSP2";
-  if(label() == "SDガンダムGX") return "DSP3";
-  if(label() == "PLANETS CHAMP TG3000") return "DSP4";
-  if(label() == "TOP GEAR 3000") return "DSP4";
+  if(title() == "PILOTWINGS") return "DSP1";
+  if(title() == "DUNGEON MASTER") return "DSP2";
+  if(title() == "SDガンダムGX") return "DSP3";
+  if(title() == "PLANETS CHAMP TG3000") return "DSP4";
+  if(title() == "TOP GEAR 3000") return "DSP4";
   return "DSP1B";
 }
 

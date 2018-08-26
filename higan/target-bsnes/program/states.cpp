@@ -62,7 +62,7 @@ auto Program::loadState(string filename) -> bool {
   if(auto memory = loadStateData(filename)) {
     if(filename != "Quick/Undo") saveUndoState();
     if(filename == "Quick/Undo") saveRedoState();
-    auto serializerRLE = Decode::RLE<1>(memory.data() + 3 * sizeof(uint));
+    auto serializerRLE = Decode::RLE<1>({memory.data() + 3 * sizeof(uint), memory.size() - 3 * sizeof(uint)});
     serializer s{serializerRLE.data(), serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
     return showMessage({"Loaded [", prefix, "]"}), true;
@@ -77,7 +77,7 @@ auto Program::saveState(string filename) -> bool {
 
   serializer s = emulator->serialize();
   if(!s.size()) return showMessage({"Failed to save [", prefix, "]"}), false;
-  auto serializerRLE = Encode::RLE<1>(s.data(), s.size());
+  auto serializerRLE = Encode::RLE<1>({s.data(), s.size()});
 
   vector<uint8_t> previewRLE;
   //this can be null if a state is captured before the first frame of video output after power/reset
@@ -86,7 +86,7 @@ auto Program::saveState(string filename) -> bool {
     preview.copy(screenshot.data, screenshot.pitch, screenshot.width, screenshot.height);
     if(preview.width() != 256 || preview.height() != 240) preview.scale(256, 240, true);
     preview.transform(0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f);
-    previewRLE = Encode::RLE<2>(preview.data(), preview.size() / sizeof(uint16_t));
+    previewRLE = Encode::RLE<2>({preview.data(), preview.size()});
   }
 
   vector<uint8_t> saveState;

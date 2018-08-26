@@ -76,7 +76,7 @@ auto pTableViewColumn::setWidth(signed width) -> void {
 }
 
 auto pTableViewColumn::_parent() -> maybe<pTableView&> {
-  if(auto parent = self().parentTableViewHeader()) {
+  if(auto parent = self().parentTableView()) {
     if(auto self = parent->self()) return *self;
   }
   return {};
