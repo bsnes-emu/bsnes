@@ -8,6 +8,8 @@ namespace Processor {
 
 struct WDC65816 {
   virtual auto idle() -> void = 0;
+  virtual auto idleBranch() -> void {}
+  virtual auto idleJump() -> void {}
   virtual auto read(uint24 addr) -> uint8 = 0;
   virtual auto write(uint24 addr, uint8 data) -> void = 0;
   virtual auto lastCycle() -> void = 0;
@@ -24,7 +26,7 @@ struct WDC65816 {
   inline auto idleIRQ() -> void;
   inline auto idle2() -> void;
   inline auto idle4(uint16 x, uint16 y) -> void;
-  inline auto idle6(uint16 addr) -> void;
+  inline auto idle6(uint16 address) -> void;
   inline auto fetch() -> uint8;
   inline auto pull() -> uint8;
          auto push(uint8 data) -> void;
@@ -250,6 +252,8 @@ struct WDC65816 {
     bool irq = false;  //IRQ pin (0 = low, 1 = trigger)
     bool wai = false;  //raised during wai, cleared after interrupt triggered
     bool stp = false;  //raised during stp, never cleared
+    bool rwb = false;  //read/write pin
+    uint24 mar;        //memory address register
     uint8 mdr;         //memory data register
     uint16 vector;     //interrupt vector address
   } r;

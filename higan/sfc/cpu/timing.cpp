@@ -16,6 +16,7 @@ auto CPU::step(uint clocks) -> void {
 
   if(!status.dramRefreshed && hcounter() >= status.dramRefreshPosition) {
     status.dramRefreshed = true;
+    r.rwb = 0;
     for(auto _ : range(5)) {
       step(8);
       aluEdge();
@@ -23,9 +24,12 @@ auto CPU::step(uint clocks) -> void {
   }
 
   #if defined(DEBUGGER)
-  synchronizeSMP();
-  synchronizePPU();
-  synchronizeCoprocessors();
+  synchronize(smp);
+  synchronize(ppu);
+  #endif
+
+  #if defined(DEBUGGER) || defined(ACCURATE_SA1)
+  for(auto coprocessor : coprocessors) synchronize(*coprocessor);
   #endif
 }
 

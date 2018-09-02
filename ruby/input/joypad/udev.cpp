@@ -266,7 +266,7 @@ private:
   auto createJoypadHID(Joypad& jp) -> void {
     jp.hid->setVendorID(jp.vendorID.hex());
     jp.hid->setProductID(jp.productID.hex());
-    jp.hid->setPathID(Hash::CRC32(jp.deviceName.data(), jp.deviceName.size()).value());
+    jp.hid->setPathID(Hash::CRC32(jp.deviceName).value());
 
     for(uint n : range(jp.axes.size())) jp.hid->axes().append(n);
     for(uint n : range(jp.hats.size())) jp.hid->hats().append(n);

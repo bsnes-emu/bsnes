@@ -1,5 +1,9 @@
 //ROM / RAM access from the S-CPU
 
+auto SuperFX::CPUROM::data() -> uint8* {
+  return superfx.rom.data();
+}
+
 auto SuperFX::CPUROM::size() const -> uint {
   return superfx.rom.size();
 }
@@ -17,6 +21,10 @@ auto SuperFX::CPUROM::read(uint24 addr, uint8 data) -> uint8 {
 
 auto SuperFX::CPUROM::write(uint24 addr, uint8 data) -> void {
   superfx.rom.write(addr, data);
+}
+
+auto SuperFX::CPURAM::data() -> uint8* {
+  return superfx.ram.data();
 }
 
 auto SuperFX::CPURAM::size() const -> uint {

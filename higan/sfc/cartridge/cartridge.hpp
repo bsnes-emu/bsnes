@@ -66,7 +66,7 @@ private:
   auto loadCartridgeSufamiTurboA(Markup::Node) -> void;
   auto loadCartridgeSufamiTurboB(Markup::Node) -> void;
 
-  auto loadMemory(MappedRAM&, Markup::Node, bool required) -> void;
+  auto loadMemory(Memory&, Markup::Node, bool required) -> void;
   auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
   auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
 
@@ -99,7 +99,7 @@ private:
   auto saveCartridgeSufamiTurboA(Markup::Node) -> void;
   auto saveCartridgeSufamiTurboB(Markup::Node) -> void;
 
-  auto saveMemory(MappedRAM&, Markup::Node) -> void;
+  auto saveMemory(Memory&, Markup::Node) -> void;
 
   auto saveRAM(Markup::Node) -> void;
   auto saveMCC(Markup::Node) -> void;

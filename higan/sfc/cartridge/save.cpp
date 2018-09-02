@@ -46,7 +46,7 @@ auto Cartridge::saveCartridgeSufamiTurboB(Markup::Node node) -> void {
 
 //
 
-auto Cartridge::saveMemory(MappedRAM& ram, Markup::Node node) -> void {
+auto Cartridge::saveMemory(Memory& ram, Markup::Node node) -> void {
   if(auto memory = game.memory(node)) {
     if(memory->type == "RAM" && !memory->nonVolatile) return;
     if(memory->type == "RTC" && !memory->nonVolatile) return;

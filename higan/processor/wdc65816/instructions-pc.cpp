@@ -7,20 +7,24 @@ L   fetch();
     idle6(absolute);
 L   idle();
     aa(PC) = absolute;
+    idleBranch();
   }
 }
 
 auto WDC65816::instructionBranchLong() -> void {
   uint16 displacement = fetch();
   hi(displacement) = fetch();
+  uint16 absolute = PC + (int16)displacement;
 L idle();
-  aa(PC) = PC + (int16)displacement;
+  aa(PC) = absolute;
+  idleBranch();
 }
 
 auto WDC65816::instructionJumpShort() -> void {
   uint16 data = fetch();
 L hi(data) = fetch();
   aa(PC) = data;
+  idleJump();
 }
 
 auto WDC65816::instructionJumpLong() -> void {
@@ -28,6 +32,7 @@ auto WDC65816::instructionJumpLong() -> void {
   hi(data) = fetch();
 L db(data) = fetch();
   PC = data;
+  idleJump();
 }
 
 auto WDC65816::instructionJumpIndirect() -> void {
@@ -36,6 +41,7 @@ auto WDC65816::instructionJumpIndirect() -> void {
   uint16 data = read(uint16(absolute + 0));
 L hi(data) = read(uint16(absolute + 1));
   aa(PC) = data;
+  idleJump();
 }
 
 auto WDC65816::instructionJumpIndexedIndirect() -> void {
@@ -45,6 +51,7 @@ auto WDC65816::instructionJumpIndexedIndirect() -> void {
   uint16 data = read(db(PC) << 16 | uint16(absolute + X + 0));
 L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
   aa(PC) = data;
+  idleJump();
 }
 
 auto WDC65816::instructionJumpIndirectLong() -> void {
@@ -54,6 +61,7 @@ auto WDC65816::instructionJumpIndirectLong() -> void {
   hi(data) = read(uint16(absolute + 1));
 L db(data) = read(uint16(absolute + 2));
   PC = data;
+  idleJump();
 }
 
 auto WDC65816::instructionCallShort() -> void {
@@ -64,6 +72,7 @@ auto WDC65816::instructionCallShort() -> void {
   push(hi(PC));
 L push(lo(PC));
   aa(PC) = data;
+  idleJump();
 }
 
 auto WDC65816::instructionCallLong() -> void {
@@ -77,6 +86,7 @@ auto WDC65816::instructionCallLong() -> void {
 L pushN(lo(PC));
   PC = data;
 E hi(S) = 0x01;
+  idleJump();
 }
 
 auto WDC65816::instructionCallIndexedIndirect() -> void {
@@ -89,6 +99,7 @@ auto WDC65816::instructionCallIndexedIndirect() -> void {
 L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
   aa(PC) = data;
 E hi(S) = 0x01;
+  idleJump();
 }
 
 auto WDC65816::instructionReturnInterrupt() -> void {
@@ -104,6 +115,7 @@ E XF = 1, MF = 1;
     hi(PC) = pull();
   L db(PC) = pull();
   }
+  idleJump();
 }
 
 auto WDC65816::instructionReturnShort() -> void {
@@ -114,6 +126,7 @@ auto WDC65816::instructionReturnShort() -> void {
 L idle();
   aa(PC) = data;
   aa(PC)++;
+  idleJump();
 }
 
 auto WDC65816::instructionReturnLong() -> void {
@@ -125,4 +138,5 @@ L db(data) = pullN();
   PC = data;
   aa(PC)++;
 E hi(S) = 0x01;
+  idleJump();
 }

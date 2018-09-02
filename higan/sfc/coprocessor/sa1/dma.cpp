@@ -1,45 +1,32 @@
-//====================
 //direct data transfer
-//====================
-
 auto SA1::dmaNormal() -> void {
   while(mmio.dtc--) {
     uint8 data = r.mdr;
-    uint32 dsa = mmio.dsa++;
-    uint32 dda = mmio.dda++;
+    uint24 source = mmio.dsa++;
+    uint16 target = mmio.dda++;
 
-    //source and destination cannot be the same
-    if(mmio.sd == DMA::SourceBWRAM && mmio.dd == DMA::DestBWRAM) continue;
-    if(mmio.sd == DMA::SourceIRAM  && mmio.dd == DMA::DestIRAM ) continue;
-
-    switch(mmio.sd) {
-    case DMA::SourceROM:
-      if((dsa & 0x408000) == 0x008000 || (dsa & 0xc00000) == 0xc00000) {
-        data = busRead(dsa, data);
-      }
-      break;
-
-    case DMA::SourceBWRAM:
-      if((dsa & 0x40e000) == 0x006000 || (dsa & 0xf00000) == 0x400000) {
-        data = busRead(dsa, data);
-      }
-      break;
-
-    case DMA::SourceIRAM:
-      data = iram.read(dsa & 0x07ff);
-      break;
+    if(mmio.sd == DMA::SourceROM && mmio.dd == DMA::DestBWRAM) {
+      step(bwram.conflict() ? 8 : 4);
+      data = rom.readSA1(source, data);
+      bwram.write(target, data);
     }
 
-    switch(mmio.dd) {
-    case DMA::DestBWRAM:
-      if((dda & 0x40e000) == 0x006000 || (dda & 0xf00000) == 0x400000) {
-        busWrite(dda, data);
-      }
-      break;
+    if(mmio.sd == DMA::SourceROM && mmio.dd == DMA::DestIRAM) {
+      step(iram.conflict() ? 6 : 4);
+      data = rom.readSA1(source, data);
+      iram.write(target, data);
+    }
 
-    case DMA::DestIRAM:
-      iram.write(dda & 0x07ff, data);
-      break;
+    if(mmio.sd == DMA::SourceBWRAM && mmio.dd == DMA::DestIRAM) {
+      step(bwram.conflict() ? 8 : iram.conflict() ? 6 : 4);
+      data = bwram.read(source, data);
+      iram.write(target, data);
+    }
+
+    if(mmio.sd == DMA::SourceIRAM && mmio.dd == DMA::DestBWRAM) {
+      step(bwram.conflict() ? 8 : iram.conflict() ? 6 : 4);
+      data = iram.read(source, data);
+      bwram.write(target, data);
     }
   }
 
@@ -47,17 +34,9 @@ auto SA1::dmaNormal() -> void {
   if(mmio.dma_irqen) mmio.dma_irqcl = 0;
 }
 
-//((byte & 6) << 3) + (byte & 1) explanation:
-//transforms a byte index (0-7) into a planar index:
-//result[] = {  0,  1, 16, 17, 32, 33, 48, 49 };
-//works for 2bpp, 4bpp and 8bpp modes
-
-//===========================
 //type-1 character conversion
-//===========================
-
 auto SA1::dmaCC1() -> void {
-  cpubwram.dma = true;
+  bwram.dma = true;
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
     mmio.chdma_irqcl = 0;
@@ -65,6 +44,12 @@ auto SA1::dmaCC1() -> void {
   }
 }
 
+//((byte & 6) << 3) + (byte & 1) explanation:
+//transforms a byte index (0-7) into a planar index:
+//result[] = {0, 1, 16, 17, 32, 33, 48, 49};
+//works for 2bpp, 4bpp and 8bpp modes
+
+//type-1 character conversion
 auto SA1::dmaCC1Read(uint addr) -> uint8 {
   //16 bytes/char (2bpp); 32 bytes/char (4bpp); 64 bytes/char (8bpp)
   uint charmask = (1 << (6 - mmio.dmacb)) - 1;
@@ -88,16 +73,16 @@ auto SA1::dmaCC1Read(uint addr) -> uint8 {
 
       uint8 out[] = {0, 0, 0, 0, 0, 0, 0, 0};
       for(auto x : range(8)) {
-        out[0] |= (data & 1) << (7 - x); data >>= 1;
-        out[1] |= (data & 1) << (7 - x); data >>= 1;
+        out[0] |= (data & 1) << 7 - x; data >>= 1;
+        out[1] |= (data & 1) << 7 - x; data >>= 1;
         if(mmio.dmacb == 2) continue;
-        out[2] |= (data & 1) << (7 - x); data >>= 1;
-        out[3] |= (data & 1) << (7 - x); data >>= 1;
+        out[2] |= (data & 1) << 7 - x; data >>= 1;
+        out[3] |= (data & 1) << 7 - x; data >>= 1;
         if(mmio.dmacb == 1) continue;
-        out[4] |= (data & 1) << (7 - x); data >>= 1;
-        out[5] |= (data & 1) << (7 - x); data >>= 1;
-        out[6] |= (data & 1) << (7 - x); data >>= 1;
-        out[7] |= (data & 1) << (7 - x); data >>= 1;
+        out[4] |= (data & 1) << 7 - x; data >>= 1;
+        out[5] |= (data & 1) << 7 - x; data >>= 1;
+        out[6] |= (data & 1) << 7 - x; data >>= 1;
+        out[7] |= (data & 1) << 7 - x; data >>= 1;
       }
 
       for(auto byte : range(bpp)) {
@@ -110,10 +95,7 @@ auto SA1::dmaCC1Read(uint addr) -> uint8 {
   return iram.read((mmio.dda + (addr & charmask)) & 0x07ff);
 }
 
-//===========================
 //type-2 character conversion
-//===========================
-
 auto SA1::dmaCC2() -> void {
   //select register file index (0-7 or 8-15)
   const uint8* brf = &mmio.brf[(dma.line & 1) << 3];

@@ -23,8 +23,8 @@ auto WDC65816::idle4(uint16 x, uint16 y) -> void {
   if(!XF || hi(x) != hi(y)) idle();
 }
 
-auto WDC65816::idle6(uint16 addr) -> void {
-  if(EF && hi(PC) != hi(addr)) idle();
+auto WDC65816::idle6(uint16 address) -> void {
+  if(EF && hi(PC) != hi(address)) idle();
 }
 
 auto WDC65816::fetch() -> uint8 {

@@ -115,11 +115,3 @@ namespace Math {
 #else
   #define unreachable throw
 #endif
-
-#if defined(COMPILER_GCC) && __GNUC__ == 4 && __GNUC_MINOR__ <= 7
-  //GCC 4.7.x has a bug (#54849) when specifying override with a trailing return type:
-  //auto function() -> return_type override;  //this is the syntax that the C++11 standard requires
-  //auto function() override -> return_type;  //this is the syntax that GCC 4.7.x requires
-  //in order to compile code correctly with both compilers, we disable the override keyword for GCC
-  #define override
-#endif

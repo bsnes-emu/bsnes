@@ -10,15 +10,17 @@ struct SuperFX : Processor::GSU, Thread {
 
   //bus.cpp
   struct CPUROM : Memory {
-    auto size() const -> uint;
-    auto read(uint24, uint8) -> uint8;
-    auto write(uint24, uint8) -> void;
+    auto data() -> uint8* override;
+    auto size() const -> uint override;
+    auto read(uint24, uint8) -> uint8 override;
+    auto write(uint24, uint8) -> void override;
   };
 
   struct CPURAM : Memory {
-    auto size() const -> uint;
-    auto read(uint24, uint8) -> uint8;
-    auto write(uint24, uint8) -> void;
+    auto data() -> uint8* override;
+    auto size() const -> uint override;
+    auto read(uint24, uint8) -> uint8 override;
+    auto write(uint24, uint8) -> void override;
   };
 
   //core.cpp

@@ -119,7 +119,7 @@ auto Cartridge::loadCartridgeSufamiTurboB(Markup::Node node) -> void {
 
 //
 
-auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required) -> void {
+auto Cartridge::loadMemory(Memory& ram, Markup::Node node, bool required) -> void {
   if(auto memory = game.memory(node)) {
     ram.allocate(memory->size);
     if(memory->type == "RAM" && !memory->nonVolatile) return;
@@ -306,7 +306,7 @@ auto Cartridge::loadSA1(Markup::Node node) -> void {
 
   if(auto mcu = node["mcu"]) {
     for(auto map : mcu.find("map")) {
-      loadMap(map, {&SA1::mmcromRead, &sa1}, {&SA1::mmcromWrite, &sa1});
+      loadMap(map, {&SA1::ROM::readCPU, &sa1.rom}, {&SA1::ROM::writeCPU, &sa1.rom});
     }
     if(auto memory = mcu["memory(type=ROM,content=Program)"]) {
       loadMemory(sa1.rom, memory, File::Required);
@@ -319,14 +319,14 @@ auto Cartridge::loadSA1(Markup::Node node) -> void {
   if(auto memory = node["memory(type=RAM,content=Save)"]) {
     loadMemory(sa1.bwram, memory, File::Optional);
     for(auto map : memory.find("map")) {
-      loadMap(map, {&SA1::mmcbwramRead, &sa1}, {&SA1::mmcbwramWrite, &sa1});
+      loadMap(map, {&SA1::BWRAM::readCPU, &sa1.bwram}, {&SA1::BWRAM::writeCPU, &sa1.bwram});
     }
   }
 
   if(auto memory = node["memory(type=RAM,content=Internal)"]) {
     loadMemory(sa1.iram, memory, File::Optional);
     for(auto map : memory.find("map")) {
-      loadMap(map, sa1.cpuiram);
+      loadMap(map, {&SA1::IRAM::readCPU, &sa1.iram}, {&SA1::IRAM::writeCPU, &sa1.iram});
     }
   }
 }

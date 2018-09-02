@@ -138,7 +138,7 @@ struct InputJoypadDirectInput {
     property.diph.dwHow = DIPH_DEVICE;
     device->GetProperty(DIPROP_GUIDANDPATH, &property.diph);
     string devicePath = (const char*)utf8_t(property.wszPath);
-    jp.pathID = Hash::CRC32(devicePath.data(), devicePath.size()).value();
+    jp.pathID = Hash::CRC32(devicePath).value();
     jp.hid->setVendorID(jp.vendorID);
     jp.hid->setProductID(jp.productID);
     jp.hid->setPathID(jp.pathID);

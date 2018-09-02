@@ -1,5 +1,10 @@
 #pragma once
 
+//required bytes: ceil(bits / log2(base))
+//base57 => 128=22, 256=44, 512=88
+//base62 => 128=22, 256=43, 512=86
+//base64 => 128=22, 256=43, 512=86
+
 #include <nall/arithmetic.hpp>
 
 namespace nall { namespace Encode {

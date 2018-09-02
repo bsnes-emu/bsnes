@@ -67,3 +67,12 @@
 #undef PairBits
 #undef TypeBits
 #undef HalfBits
+
+namespace nall {
+  //TODO: these types are for expressing smaller bit ranges in class interfaces
+  //for instance, XChaCha20 taking a 192-bit nonce
+  //however, they still allow more bits than expressed ...
+  //some sort of wrapper needs to be devised to ensure these sizes are masked and wrap appropriately
+
+  using uint192_t = uint256_t;
+}

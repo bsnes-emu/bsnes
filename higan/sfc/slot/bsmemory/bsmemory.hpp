@@ -4,9 +4,10 @@ struct BSMemory : Memory {
   auto unload() -> void;
   auto power() -> void;
 
-  auto size() const -> uint;
-  auto read(uint24 addr, uint8) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto data() -> uint8* override;
+  auto size() const -> uint override;
+  auto read(uint24 addr, uint8 data) -> uint8 override;
+  auto write(uint24 addr, uint8 data) -> void override;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

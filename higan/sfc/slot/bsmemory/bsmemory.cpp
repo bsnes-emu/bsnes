@@ -24,6 +24,10 @@ auto BSMemory::power() -> void {
   memory.writeProtect(!regs.writeEnable);
 }
 
+auto BSMemory::data() -> uint8* {
+  return memory.data();
+}
+
 auto BSMemory::size() const -> uint {
   return memory.size();
 }

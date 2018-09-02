@@ -147,7 +147,9 @@ public:
 
   explicit operator bool() const { return _size; }
   operator const char*() const { return (const char*)data(); }
+  operator array_span<char>() { return {(char*)get(), size()}; }
   operator array_view<char>() const { return {(const char*)data(), size()}; }
+  operator array_span<uint8_t>() { return {(uint8_t*)get(), size()}; }
   operator array_view<uint8_t>() const { return {(const uint8_t*)data(), size()}; }
 
   auto operator==(const string& source) const -> bool {

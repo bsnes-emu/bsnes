@@ -67,8 +67,8 @@ auto APU::power() -> void {
   phase = 0;
   cycle = 0;
 
-  LinearFeedbackShiftRegisterGenerator r;
-  for(auto& n : wave.pattern) n = r();
+  PRNG prng;
+  for(auto& n : wave.pattern) n = prng.random();
 }
 
 auto APU::readIO(uint16 addr) -> uint8 {

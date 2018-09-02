@@ -54,9 +54,9 @@ auto SA1::readIO(uint24 addr, uint8) -> uint8 {
   //(VDPL) variable-length data read port low
   case 0x230c: {
     uint24 data;
-    data.byte(0) = vbrRead(mmio.va + 0);
-    data.byte(1) = vbrRead(mmio.va + 1);
-    data.byte(2) = vbrRead(mmio.va + 2);
+    data.byte(0) = readVBR(mmio.va + 0);
+    data.byte(1) = readVBR(mmio.va + 1);
+    data.byte(2) = readVBR(mmio.va + 2);
     data >>= mmio.vbit;
 
     return data >> 0;
@@ -65,9 +65,9 @@ auto SA1::readIO(uint24 addr, uint8) -> uint8 {
   //(VDPH) variable-length data read port high
   case 0x230d: {
     uint24 data;
-    data.byte(0) = vbrRead(mmio.va + 0);
-    data.byte(1) = vbrRead(mmio.va + 1);
-    data.byte(2) = vbrRead(mmio.va + 2);
+    data.byte(0) = readVBR(mmio.va + 0);
+    data.byte(1) = readVBR(mmio.va + 1);
+    data.byte(2) = readVBR(mmio.va + 2);
     data >>= mmio.vbit;
 
     if(mmio.hl == 1) {
@@ -82,7 +82,7 @@ auto SA1::readIO(uint24 addr, uint8) -> uint8 {
 
   //(VC) version code register
   case 0x230e: {
-    return 0x01;  //true value unknown
+    return 0x23;  //RF5A123
   }
 
   }
@@ -333,7 +333,7 @@ auto SA1::writeIO(uint24 addr, uint8 data) -> void {
     mmio.dmasize = (data >> 2) & 7;
     mmio.dmacb   = (data & 0x03);
 
-    if(mmio.chdend) cpubwram.dma = false;
+    if(mmio.chdend) bwram.dma = false;
     if(mmio.dmasize > 5) mmio.dmasize = 5;
     if(mmio.dmacb   > 2) mmio.dmacb   = 2;
     return;

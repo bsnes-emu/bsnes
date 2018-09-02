@@ -1,5 +1,12 @@
 struct Memory {
-  virtual inline auto size() const -> uint;
+  inline explicit operator bool() const { return size() > 0; }
+
+  virtual auto reset() -> void {}
+  virtual auto allocate(uint) -> void {}
+
+  virtual auto data() -> uint8* = 0;
+  virtual auto size() const -> uint = 0;
+
   virtual auto read(uint24 addr, uint8 data = 0) -> uint8 = 0;
   virtual auto write(uint24 addr, uint8 data) -> void = 0;
 };
@@ -16,7 +23,7 @@ struct StaticRAM : Memory {
   inline auto operator[](uint24 addr) -> uint8&;
   inline auto operator[](uint24 addr) const -> const uint8&;
 
-private:
+protected:
   uint8* _data = nullptr;
   uint _size = 0;
 };
@@ -33,7 +40,7 @@ struct MappedRAM : Memory {
   inline auto write(uint24 addr, uint8 data) -> void;
   inline auto operator[](uint24 addr) const -> const uint8&;
 
-private:
+protected:
   uint8* _data = nullptr;
   uint _size = 0;
   bool _writeProtect = false;

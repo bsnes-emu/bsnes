@@ -31,6 +31,10 @@ template<typename T> vector<T>::operator bool() const {
   return _size;
 }
 
+template<typename T> vector<T>::operator array_span<T>() {
+  return {data(), size()};
+}
+
 template<typename T> vector<T>::operator array_view<T>() const {
   return {data(), size()};
 }

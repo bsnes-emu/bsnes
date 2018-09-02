@@ -2,6 +2,7 @@
 
 #include <new>
 
+#include <nall/array-span.hpp>
 #include <nall/array-view.hpp>
 #include <nall/bit.hpp>
 #include <nall/function.hpp>
@@ -30,6 +31,7 @@ struct vector_base {
   ~vector_base();
 
   explicit operator bool() const;
+  operator array_span<T>();
   operator array_view<T>() const;
   template<typename Cast = T> auto capacity() const -> uint;
   template<typename Cast = T> auto size() const -> uint;
@@ -125,7 +127,7 @@ struct vector_base {
   auto foreach(const function<void (const T&)>& callback) -> void;
   auto foreach(const function<void (uint, const T&)>& callback) -> void;
 
-private:
+protected:
   T* _pool = nullptr;  //pointer to first initialized element in pool
   uint _size = 0;      //number of initialized elements in pool
   uint _left = 0;      //number of allocated elements free on the left of pool
@@ -150,3 +152,5 @@ namespace nall {
     using vector_base<T>::vector_base;
   };
 }
+
+#include <nall/vector/specialization/uint8_t.hpp>

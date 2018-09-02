@@ -26,11 +26,23 @@ template<typename T, typename U> alwaysinline auto ror(const T& lhs, const U& rh
 #if INTMAX_BITS >= 128
 inline auto operator"" _u128(const char* s) -> uint128_t {
   uint128_t p = 0;
-  while(*s) {
-    auto c = *s++;
-    if(c == '\'') continue;
-    if(c < '0' || c > '9') break;
-    p = (p << 3) + (p << 1) + (c - '0');
+  if(s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+    s += 2;
+    while(*s) {
+      auto c = *s++;
+      if(c == '\'');
+      else if(c >= '0' && c <= '9') p = (p << 4) + (c - '0');
+      else if(c >= 'a' && c <= 'f') p = (p << 4) + (c - 'a' + 10);
+      else if(c >= 'A' && c <= 'F') p = (p << 4) + (c - 'A' + 10);
+      else break;
+    }
+  } else {
+    while(*s) {
+      auto c = *s++;
+      if(c == '\'');
+      else if(c >= '0' && c <= '9') p = (p << 3) + (p << 1) + (c - '0');
+      else break;
+    }
   }
   return p;
 }

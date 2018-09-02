@@ -1,7 +1,3 @@
-//Memory
-
-auto Memory::size() const -> uint { return 0; }
-
 //StaticRAM
 
 StaticRAM::StaticRAM(uint size) : _size(size) { _data = new uint8[_size]; }

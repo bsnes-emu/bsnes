@@ -4,6 +4,7 @@ auto SA1::serialize(serializer& s) -> void {
 
   s.array(iram.data(), iram.size());
   s.array(bwram.data(), bwram.size());
+  s.integer(bwram.dma);
 
   //sa1.hpp
   s.integer(status.counter);
@@ -13,11 +14,6 @@ auto SA1::serialize(serializer& s) -> void {
   s.integer(status.scanlines);
   s.integer(status.vcounter);
   s.integer(status.hcounter);
-
-  //bus/bus.hpp
-  s.array(iram.data(), iram.size());
-
-  s.integer(cpubwram.dma);
 
   //dma/dma.hpp
   s.integer(dma.line);

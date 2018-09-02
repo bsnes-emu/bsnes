@@ -9,7 +9,7 @@
 namespace nall {
 
 struct inode {
-  enum class time : uint { access, modify };
+  enum class time : uint { create, modify, access };
 
   static auto exists(const string& name) -> bool {
     return access(name, F_OK) == 0;
@@ -27,31 +27,55 @@ struct inode {
     return access(name, X_OK) == 0;
   }
 
+  static auto mode(const string& name) -> uint {
+    struct stat data{};
+    stat(name, &data);
+    return data.st_mode;
+  }
+
   static auto uid(const string& name) -> uint {
-    struct stat data{0};
+    struct stat data{};
     stat(name, &data);
     return data.st_uid;
   }
 
   static auto gid(const string& name) -> uint {
-    struct stat data{0};
+    struct stat data{};
     stat(name, &data);
     return data.st_gid;
   }
 
-  static auto mode(const string& name) -> uint {
-    struct stat data{0};
-    stat(name, &data);
-    return data.st_mode;
+  #if !defined(PLATFORM_WINDOWS)
+  static auto user(const string& name) -> string {
+    struct passwd* pw = getpwuid(uid(name));
+    if(pw && pw->pw_name) return pw->pw_name;
+    return {};
   }
 
+  static auto group(const string& name) -> string {
+    struct group* gr = getgrgid(gid(name));
+    if(gr && gr->gr_name) return gr->gr_name;
+    return {};
+  }
+  #endif
+
   static auto timestamp(const string& name, time mode = time::modify) -> uint64_t {
-    struct stat data = {0};
+    struct stat data{};
     stat(name, &data);
-    switch(mode) { default:
-    case time::access: return data.st_atime;
+    switch(mode) {
+    #if defined(PLATFORM_WINDOWS)
+    case time::create: return data.st_ctime;
+    #else
+    //st_birthtime may return -1 or st_atime if it is not supported
+    //the best that can be done in this case is to return st_mtime if it's older
+    case time::create: return min((uint)data.st_birthtime, (uint)data.st_mtime);
+    #endif
     case time::modify: return data.st_mtime;
+    //for performance reasons, last access time is usually not enabled on various filesystems
+    //ensure that the last access time is not older than the last modify time (eg for NTFS)
+    case time::access: return max((uint)data.st_atime, data.st_mtime);
     }
+    return 0;
   }
 
   //returns true if 'name' already exists

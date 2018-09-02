@@ -2,7 +2,9 @@
 
 namespace SuperFamicom {
 
-#include "bus.cpp"
+#include "rom.cpp"
+#include "bwram.cpp"
+#include "iram.cpp"
 #include "dma.cpp"
 #include "memory.cpp"
 #include "io.cpp"
@@ -19,8 +21,7 @@ auto SA1::main() -> void {
 
   if(mmio.sa1_rdyb || mmio.sa1_resb) {
     //SA-1 co-processor is asleep
-    tick();
-    synchronize(cpu);
+    step(2);
     return;
   }
 
@@ -81,23 +82,23 @@ auto SA1::synchronizing() const -> bool {
   return scheduler.synchronizing();
 }
 
-auto SA1::tick() -> void {
-  step(2);
-  if(++status.counter == 0) synchronize(cpu);
+auto SA1::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
 
   //adjust counters:
   //note that internally, status counters are in clocks;
   //whereas MMIO register counters are in dots (4 clocks = 1 dot)
   if(mmio.hvselb == 0) {
     //HV timer
-    status.hcounter += 2;
-    if(status.hcounter >= 1364) {
-      status.hcounter = 0;
+    status.hcounter += clocks;
+    while(status.hcounter >= 1364) {
+      status.hcounter -= 1364;
       if(++status.vcounter >= status.scanlines) status.vcounter = 0;
     }
   } else {
     //linear timer
-    status.hcounter += 2;
+    status.hcounter += clocks;
     status.vcounter += (status.hcounter >> 11);
     status.hcounter &= 0x07ff;
     status.vcounter &= 0x01ff;
@@ -106,9 +107,9 @@ auto SA1::tick() -> void {
   //test counters for timer IRQ
   switch((mmio.ven << 1) + (mmio.hen << 0)) {
   case 0: break;
-  case 1: if(status.hcounter == (mmio.hcnt << 2)) triggerIRQ(); break;
+  case 1: if(status.hcounter == mmio.hcnt << 2) triggerIRQ(); break;
   case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) triggerIRQ(); break;
-  case 3: if(status.vcounter == mmio.vcnt && status.hcounter == (mmio.hcnt << 2)) triggerIRQ(); break;
+  case 3: if(status.vcounter == mmio.vcnt && status.hcounter == mmio.hcnt << 2) triggerIRQ(); break;
   }
 }
 
@@ -131,7 +132,7 @@ auto SA1::power() -> void {
   bwram.writeProtect(false);
   iram.writeProtect(false);
 
-  cpubwram.dma = false;
+  bwram.dma = false;
   for(auto addr : range(iram.size())) {
     iram.write(addr, 0x00);
   }

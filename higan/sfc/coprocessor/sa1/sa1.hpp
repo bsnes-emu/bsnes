@@ -1,8 +1,10 @@
+//Super Accelerator 1
+
 struct SA1 : Processor::WDC65816, Thread {
   //sa1.cpp
   static auto Enter() -> void;
   auto main() -> void;
-  auto tick() -> void;
+  auto step(uint clocks) -> void;
   auto interrupt() -> void override;
 
   alwaysinline auto triggerIRQ() -> void;
@@ -12,20 +14,6 @@ struct SA1 : Processor::WDC65816, Thread {
 
   auto unload() -> void;
   auto power() -> void;
-
-  //bus.cpp
-  struct CPUIRAM : Memory {
-    auto size() const -> uint;
-    alwaysinline auto read(uint24, uint8 = 0) -> uint8;
-    alwaysinline auto write(uint24, uint8) -> void;
-  };
-
-  struct CPUBWRAM : Memory {
-    auto size() const -> uint;
-    alwaysinline auto read(uint24, uint8 = 0) -> uint8;
-    alwaysinline auto write(uint24, uint8) -> void;
-    bool dma;
-  };
 
   //dma.cpp
   struct DMA {
@@ -41,25 +29,16 @@ struct SA1 : Processor::WDC65816, Thread {
   auto dmaCC2() -> void;
 
   //memory.cpp
-  auto busRead(uint24 addr, uint8 data) -> uint8;
-  auto busWrite(uint24 addr, uint8 data) -> void;
-  auto vbrRead(uint24 addr, uint8 data = 0) -> uint8;
+  alwaysinline auto conflictROM() const -> bool;
+  alwaysinline auto conflictBWRAM() const -> bool;
+  alwaysinline auto conflictIRAM() const -> bool;
 
   alwaysinline auto idle() -> void override;
+  alwaysinline auto idleJump() -> void override;
+  alwaysinline auto idleBranch() -> void override;
   alwaysinline auto read(uint24 addr) -> uint8 override;
   alwaysinline auto write(uint24 addr, uint8 data) -> void override;
-
-  auto mmcromRead(uint24 addr, uint8 data) -> uint8;
-  auto mmcromWrite(uint24 addr, uint8 data) -> void;
-
-  auto mmcbwramRead(uint24 addr, uint8 data) -> uint8;
-  auto mmcbwramWrite(uint24 addr, uint8 data) -> void;
-
-  auto mmcSA1Read(uint addr, uint8 data) -> uint8;
-  auto mmcSA1Write(uint addr, uint8 data) -> void;
-
-  auto bitmapRead(uint addr, uint8 data) -> uint8;
-  auto bitmapWrite(uint addr, uint8 data) -> void;
+  auto readVBR(uint24 addr, uint8 data = 0) -> uint8;
 
   //io.cpp
   auto readIO(uint24 addr, uint8 data) -> uint8;
@@ -68,12 +47,55 @@ struct SA1 : Processor::WDC65816, Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  MappedRAM rom;
-  MappedRAM iram;
-  MappedRAM bwram;
+  struct ROM : MappedRAM {
+    //rom.cpp
+    alwaysinline auto conflict() const -> bool;
 
-  CPUIRAM cpuiram;
-  CPUBWRAM cpubwram;
+    alwaysinline auto read(uint24 address, uint8 data = 0) -> uint8 override;
+    alwaysinline auto write(uint24 address, uint8 data) -> void override;
+
+    auto readCPU(uint24 address, uint8 data = 0) -> uint8;
+    auto writeCPU(uint24 address, uint8 data) -> void;
+
+    auto readSA1(uint24 address, uint8 data = 0) -> uint8;
+    auto writeSA1(uint24 address, uint8 data) -> void;
+  } rom;
+
+  struct BWRAM : MappedRAM {
+    //bwram.cpp
+    alwaysinline auto conflict() const -> bool;
+
+    alwaysinline auto read(uint24 address, uint8 data = 0) -> uint8 override;
+    alwaysinline auto write(uint24 address, uint8 data) -> void override;
+
+    auto readCPU(uint24 address, uint8 data = 0) -> uint8;
+    auto writeCPU(uint24 address, uint8 data) -> void;
+
+    auto readSA1(uint24 address, uint8 data = 0) -> uint8;
+    auto writeSA1(uint24 address, uint8 data) -> void;
+
+    auto readLinear(uint24 address, uint8 data = 0) -> uint8;
+    auto writeLinear(uint24 address, uint8 data) -> void;
+
+    auto readBitmap(uint20 address, uint8 data = 0) -> uint8;
+    auto writeBitmap(uint20 address, uint8 data) -> void;
+
+    bool dma;
+  } bwram;
+
+  struct IRAM : MappedRAM {
+    //iram.cpp
+    alwaysinline auto conflict() const -> bool;
+
+    alwaysinline auto read(uint24 address, uint8 data = 0) -> uint8 override;
+    alwaysinline auto write(uint24 address, uint8 data) -> void override;
+
+    auto readCPU(uint24 address, uint8 data) -> uint8;
+    auto writeCPU(uint24 address, uint8 data) -> void;
+
+    auto readSA1(uint24 address, uint8 data = 0) -> uint8;
+    auto writeSA1(uint24 address, uint8 data) -> void;
+  } iram;
 
 private:
   DMA dma;

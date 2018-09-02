@@ -20,6 +20,8 @@
   #include <gb/gb.hpp>
 #endif
 
+//#define ACCURATE_SA1
+
 namespace SuperFamicom {
   #define platform Emulator::platform
   namespace File = Emulator::File;

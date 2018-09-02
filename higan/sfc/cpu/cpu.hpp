@@ -166,12 +166,14 @@ private:
     //dma.cpp
     inline auto step(uint clocks) -> void;
     inline auto edge() -> void;
-    inline auto valid(uint24 address) -> bool;
-    inline auto read(uint24 address, bool valid) -> uint8;
-    inline auto read(uint24 address) -> uint8;
+    inline auto validA(uint24 address) -> bool;
+    inline auto readA(uint24 address) -> uint8;
+    inline auto readA(uint24 address, bool valid) -> uint8;
+    inline auto readB(uint8 address, bool valid) -> uint8;
     inline auto flush() -> void;
-    inline auto write(uint24 address, uint8 data, bool valid) -> void;
-    inline auto write(uint24 address, uint8 data) -> void;
+    inline auto writeA(uint24 address, uint8 data) -> void;
+    inline auto writeA(uint24 address, uint8 data, bool valid) -> void;
+    inline auto writeB(uint8 address, uint8 data, bool valid) -> void;
     inline auto transfer(uint24 address, uint2 index) -> void;
 
     inline auto dmaRun() -> void;
