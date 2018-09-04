@@ -98,8 +98,6 @@ auto Cartridge::load() -> bool {
     information.sha256 = sha.digest();
   }
 
-  rom.writeProtect(true);
-  ram.writeProtect(false);
   return true;
 }
 

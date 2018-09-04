@@ -30,7 +30,7 @@ struct Event : Thread {
   auto serialize(serializer&) -> void;
 
 public:
-  MappedRAM rom[4];
+  ReadableMemory rom[4];
 
   enum class Board : uint { Unknown, CampusChallenge92, PowerFest94 } board;
   uint timer;

@@ -13,7 +13,7 @@ struct BSMemory : Memory {
   auto serialize(serializer&) -> void;
 
   uint pathID = 0;
-  MappedRAM memory;
+  ProtectableMemory memory;
   bool readonly;
 
 private:

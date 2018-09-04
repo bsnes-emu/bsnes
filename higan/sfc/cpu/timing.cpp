@@ -23,14 +23,8 @@ auto CPU::step(uint clocks) -> void {
     }
   }
 
-  #if defined(DEBUGGER)
-  synchronize(smp);
-  synchronize(ppu);
-  #endif
-
-  #if defined(DEBUGGER) || defined(ACCURATE_SA1)
+  if(configuration.hacks.coprocessors.delayedSync) return;
   for(auto coprocessor : coprocessors) synchronize(*coprocessor);
-  #endif
 }
 
 //called by ppu.tick() when Hcounter=0
@@ -94,10 +88,12 @@ auto CPU::dmaEdge() -> void {
       status.hdmaPending = false;
       if(hdmaEnable()) {
         if(!dmaEnable()) {
+          r.rwb = 0;
           dmaStep(8 - dmaCounter());
         }
         status.hdmaMode == 0 ? hdmaSetup() : hdmaRun();
         if(!dmaEnable()) {
+          r.rwb = 0;  //unverified
           step(status.clockCount - (status.dmaClocks % status.clockCount));
           status.dmaActive = false;
         }
@@ -107,8 +103,10 @@ auto CPU::dmaEdge() -> void {
     if(status.dmaPending) {
       status.dmaPending = false;
       if(dmaEnable()) {
+        r.rwb = 0;
         dmaStep(8 - dmaCounter());
         dmaRun();
+        r.rwb = 0;  //unverified
         step(status.clockCount - (status.dmaClocks % status.clockCount));
         status.dmaActive = false;
       }

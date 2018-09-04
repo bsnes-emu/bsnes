@@ -1,6 +1,6 @@
 struct SuperFX : Processor::GSU, Thread {
-  MappedRAM rom;
-  MappedRAM ram;
+  ReadableMemory rom;
+  WritableMemory ram;
 
   //superfx.cpp
   static auto Enter() -> void;

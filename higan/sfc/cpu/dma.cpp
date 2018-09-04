@@ -1,3 +1,18 @@
+/* DMA timing:
+   The general idea is that DMA moves values between the A-bus and B-bus in parallel.
+   Obviously, a write can't happen at the same time as a read, as the read needs 8 cycles to complete.
+   My theory is that the accesses are staggered, like so:
+
+   Cycle 0: read 0
+   Cycle 1: read 1, write 0
+   Cycle 2: read 2, write 1
+   ...
+   Cycle n: read n, write n-1
+   Cycle n+1: write n
+
+   The staggered writes are implemented below using the pipe/flush concept.
+*/
+
 auto CPU::dmaEnable() -> bool {
   for(auto& channel : channels) if(channel.dmaEnable) return true;
   return false;
@@ -24,10 +39,15 @@ auto CPU::dmaFlush() -> void {
   bus.write(pipe.address, pipe.data);
 }
 
-auto CPU::dmaRun() -> void {
-  r.rwb = 0;
+auto CPU::dmaWrite() -> void {
+  r.rwb = pipe.valid;
+  r.mar = pipe.address;
   dmaStep(8);
   dmaFlush();
+}
+
+auto CPU::dmaRun() -> void {
+  dmaWrite();
   dmaEdge();
   for(auto& channel : channels) channel.dmaRun();
   dmaFlush();
@@ -39,18 +59,14 @@ auto CPU::hdmaReset() -> void {
 }
 
 auto CPU::hdmaSetup() -> void {
-  r.rwb = 0;
-  dmaStep(8);
-  dmaFlush();
+  dmaWrite();
   for(auto& channel : channels) channel.hdmaSetup();
   dmaFlush();
   status.irqLock = true;
 }
 
 auto CPU::hdmaRun() -> void {
-  r.rwb = 0;
-  dmaStep(8);
-  dmaFlush();
+  dmaWrite();
   for(auto& channel : channels) channel.hdmaTransfer();
   for(auto& channel : channels) channel.hdmaAdvance();
   dmaFlush();
@@ -59,13 +75,10 @@ auto CPU::hdmaRun() -> void {
 
 //
 
-auto CPU::Channel::step(uint clocks) -> void {
-  return cpu.dmaStep(clocks);
-}
-
-auto CPU::Channel::edge() -> void {
-  return cpu.dmaEdge();
-}
+auto CPU::Channel::step(uint clocks) -> void { return cpu.dmaStep(clocks); }
+auto CPU::Channel::edge() -> void { return cpu.dmaEdge(); }
+auto CPU::Channel::flush() -> void { return cpu.dmaFlush(); }
+auto CPU::Channel::write() -> void { return cpu.dmaWrite(); }
 
 auto CPU::Channel::validA(uint24 address) -> bool {
   //A-bus cannot access the B-bus or CPU I/O registers
@@ -94,10 +107,6 @@ auto CPU::Channel::readB(uint8 address, bool valid) -> uint8 {
   step(4);
   flush();
   return cpu.r.mdr;
-}
-
-auto CPU::Channel::flush() -> void {
-  return cpu.dmaFlush();
 }
 
 auto CPU::Channel::writeA(uint24 address, uint8 data) -> void {
@@ -148,9 +157,7 @@ auto CPU::Channel::dmaRun() -> void {
     edge();
   } while(dmaEnable && --transferSize);
 
-  cpu.r.rwb = 0;
-  step(8);
-  flush();
+  write();
   edge();
   dmaEnable = false;
 }

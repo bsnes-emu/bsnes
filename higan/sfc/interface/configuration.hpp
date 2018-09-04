@@ -33,6 +33,9 @@ struct Configuration {
     struct DSPFast {
       bool enable = false;
     } dspFast;
+    struct Coprocessors {
+      bool delayedSync = false;
+    } coprocessors;
   } hacks;
 
 private:

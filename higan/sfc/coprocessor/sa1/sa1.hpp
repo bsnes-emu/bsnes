@@ -47,7 +47,7 @@ struct SA1 : Processor::WDC65816, Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  struct ROM : MappedRAM {
+  struct ROM : ReadableMemory {
     //rom.cpp
     alwaysinline auto conflict() const -> bool;
 
@@ -61,7 +61,7 @@ struct SA1 : Processor::WDC65816, Thread {
     auto writeSA1(uint24 address, uint8 data) -> void;
   } rom;
 
-  struct BWRAM : MappedRAM {
+  struct BWRAM : WritableMemory {
     //bwram.cpp
     alwaysinline auto conflict() const -> bool;
 
@@ -83,7 +83,7 @@ struct SA1 : Processor::WDC65816, Thread {
     bool dma;
   } bwram;
 
-  struct IRAM : MappedRAM {
+  struct IRAM : WritableMemory {
     //iram.cpp
     alwaysinline auto conflict() const -> bool;
 

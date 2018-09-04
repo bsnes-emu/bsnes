@@ -10,19 +10,15 @@ auto HitachiDSP::Enter() -> void {
   while(true) scheduler.synchronize(), hitachidsp.main();
 }
 
-auto HitachiDSP::main() -> void {
-  if(mmio.dma) {
-    for(auto n : range(mmio.dmaLength)) {
-      write(mmio.dmaTarget + n, read(mmio.dmaSource + n));
-      step(2);
-      synchronize(cpu);
-    }
-    mmio.dma = false;
-  }
-
-  exec(mmio.programOffset);
-  step(1);
+auto HitachiDSP::step(uint clocks) -> void {
+  HG51B::step(clocks);
+  Thread::step(clocks);
   synchronize(cpu);
+}
+
+auto HitachiDSP::halt() -> void {
+  HG51B::halt();
+  if(io.irq == 0) r.i = 1, cpu.r.irq = 1;
 }
 
 auto HitachiDSP::unload() -> void {
@@ -33,23 +29,6 @@ auto HitachiDSP::unload() -> void {
 auto HitachiDSP::power() -> void {
   HG51B::power();
   create(HitachiDSP::Enter, Frequency);
-
-  rom.writeProtect(true);
-  ram.writeProtect(false);
-
-  mmio.dma = false;
-
-  mmio.dmaSource = 0x000000;
-  mmio.dmaLength = 0x0000;
-  mmio.dmaTarget = 0x000000;
-  mmio.r1f48 = 0x00;
-  mmio.programOffset = 0x000000;
-  mmio.r1f4c = 0x00;
-  mmio.pageNumber = 0x0000;
-  mmio.programCounter = 0x00;
-  mmio.r1f50 = 0x33;
-  mmio.r1f51 = 0x00;
-  mmio.r1f52 = 0x01;
 }
 
 }

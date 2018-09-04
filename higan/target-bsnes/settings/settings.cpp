@@ -90,17 +90,18 @@ auto Settings::process(bool load) -> void {
   bind(text,    "Path/Recent/SufamiTurboA", path.recent.sufamiTurboA);
   bind(text,    "Path/Recent/SufamiTurboB", path.recent.sufamiTurboB);
 
-  bind(boolean, "Emulator/WarnOnUnverifiedGames",      emulator.warnOnUnverifiedGames);
-  bind(boolean, "Emulator/AutoSaveMemory/Enable",      emulator.autoSaveMemory.enable);
-  bind(natural, "Emulator/AutoSaveMemory/Interval",    emulator.autoSaveMemory.interval);
-  bind(boolean, "Emulator/AutoSaveStateOnUnload",      emulator.autoSaveStateOnUnload);
-  bind(boolean, "Emulator/AutoLoadStateOnLoad",        emulator.autoLoadStateOnLoad);
-  bind(boolean, "Emulator/Hack/FastPPU/Enable",        emulator.hack.fastPPU.enable);
-  bind(boolean, "Emulator/Hack/FastPPU/NoSpriteLimit", emulator.hack.fastPPU.noSpriteLimit);
-  bind(boolean, "Emulator/Hack/FastPPU/HiresMode7",    emulator.hack.fastPPU.hiresMode7);
-  bind(boolean, "Emulator/Hack/FastDSP/Enable",        emulator.hack.fastDSP.enable);
-  bind(natural, "Emulator/Hack/FastSuperFX",           emulator.hack.fastSuperFX);
-  bind(boolean, "Emulator/Cheats/Enable",              emulator.cheats.enable);
+  bind(boolean, "Emulator/WarnOnUnverifiedGames",         emulator.warnOnUnverifiedGames);
+  bind(boolean, "Emulator/AutoSaveMemory/Enable",         emulator.autoSaveMemory.enable);
+  bind(natural, "Emulator/AutoSaveMemory/Interval",       emulator.autoSaveMemory.interval);
+  bind(boolean, "Emulator/AutoSaveStateOnUnload",         emulator.autoSaveStateOnUnload);
+  bind(boolean, "Emulator/AutoLoadStateOnLoad",           emulator.autoLoadStateOnLoad);
+  bind(boolean, "Emulator/Hack/FastPPU/Enable",           emulator.hack.fastPPU.enable);
+  bind(boolean, "Emulator/Hack/FastPPU/NoSpriteLimit",    emulator.hack.fastPPU.noSpriteLimit);
+  bind(boolean, "Emulator/Hack/FastPPU/HiresMode7",       emulator.hack.fastPPU.hiresMode7);
+  bind(boolean, "Emulator/Hack/FastDSP/Enable",           emulator.hack.fastDSP.enable);
+  bind(boolean, "Emulator/Hack/Coprocessors/DelayedSync", emulator.hack.coprocessors.delayedSync);
+  bind(natural, "Emulator/Hack/FastSuperFX",              emulator.hack.fastSuperFX);
+  bind(boolean, "Emulator/Cheats/Enable",                 emulator.cheats.enable);
 
   bind(boolean, "General/StatusBar",   general.statusBar);
   bind(boolean, "General/ScreenSaver", general.screenSaver);

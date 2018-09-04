@@ -14,14 +14,14 @@ auto BSMemory::unload() -> void {
 }
 
 auto BSMemory::power() -> void {
-  regs.command   = 0;
+  regs.command = 0;
   regs.writeOld = 0x00;
   regs.writeNew = 0x00;
 
   regs.flashEnable = false;
   regs.readEnable  = false;
   regs.writeEnable = false;
-  memory.writeProtect(!regs.writeEnable);
+  memory.writable(regs.writeEnable);
 }
 
 auto BSMemory::data() -> uint8* {
@@ -117,7 +117,7 @@ auto BSMemory::write(uint24 addr, uint8 data) -> void {
       regs.writeEnable = false;
     }
 
-    memory.writeProtect(!regs.writeEnable);
+    memory.writable(regs.writeEnable);
   }
 }
 

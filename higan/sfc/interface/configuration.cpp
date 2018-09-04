@@ -20,6 +20,7 @@ auto Configuration::process(Markup::Node document, bool load) -> void {
   bind(boolean, "Hacks/FastPPU/NoSpriteLimit", hacks.ppuFast.noSpriteLimit);
   bind(boolean, "Hacks/FastPPU/HiresMode7", hacks.ppuFast.hiresMode7);
   bind(boolean, "Hacks/FastDSP/Enable", hacks.dspFast.enable);
+  bind(boolean, "Hacks/Coprocessors/DelayedSync", hacks.coprocessors.delayedSync);
 
   #undef bind
 }

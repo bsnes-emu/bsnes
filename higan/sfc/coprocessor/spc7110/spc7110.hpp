@@ -52,9 +52,9 @@ struct SPC7110 : Thread {
   auto aluMultiply() -> void;
   auto aluDivide() -> void;
 
-  MappedRAM prom;  //program ROM
-  MappedRAM drom;  //data ROM
-  MappedRAM ram;
+  ReadableMemory prom;  //program ROM
+  ReadableMemory drom;  //data ROM
+  WritableMemory ram;
 
 private:
   //decompression unit

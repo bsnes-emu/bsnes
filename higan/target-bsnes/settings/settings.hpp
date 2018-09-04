@@ -81,6 +81,9 @@ struct Settings : Markup::Node {
       struct FastDSP {
         bool enable = true;
       } fastDSP;
+      struct Coprocessors {
+        bool delayedSync = true;
+      } coprocessors;
       uint fastSuperFX = 100;
     } hack;
     struct Cheats {
@@ -256,6 +259,7 @@ public:
       CheckLabel noSpriteLimit{&fastPPULayout, Size{0, 0}};
       CheckLabel hiresMode7{&fastPPULayout, Size{0, 0}};
     CheckLabel fastDSPOption{&layout, Size{~0, 0}};
+    CheckLabel coprocessorsDelayedSyncOption{&layout, Size{~0, 0}};
     HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
       Label superFXLabel{&superFXLayout, Size{0, 0}};
       Label superFXValue{&superFXLayout, Size{50, 0}};

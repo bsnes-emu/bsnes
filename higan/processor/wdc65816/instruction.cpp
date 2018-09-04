@@ -10,6 +10,7 @@ N push(db(PC));
   lo(PC) = read(r.vector + 0);
   hi(PC) = read(r.vector + 1);
   db(PC) = 0x00;
+  idleJump();
 }
 
 //both the accumulator and index registers can independently be in either 8-bit or 16-bit mode.

@@ -7,7 +7,7 @@ struct OBC1 {
 
   auto serialize(serializer&) -> void;
 
-  MappedRAM ram;
+  WritableMemory ram;
 
 private:
   auto ramRead(uint addr) -> uint8;

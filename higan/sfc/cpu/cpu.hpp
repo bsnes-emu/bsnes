@@ -16,6 +16,7 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
 
   inline auto dmaStep(uint clocks) -> void;
   inline auto dmaFlush() -> void;
+  inline auto dmaWrite() -> void;
 
   auto dmaRun() -> void;
   auto hdmaReset() -> void;
@@ -166,11 +167,13 @@ private:
     //dma.cpp
     inline auto step(uint clocks) -> void;
     inline auto edge() -> void;
+    inline auto flush() -> void;
+    inline auto write() -> void;
+
     inline auto validA(uint24 address) -> bool;
     inline auto readA(uint24 address) -> uint8;
     inline auto readA(uint24 address, bool valid) -> uint8;
     inline auto readB(uint8 address, bool valid) -> uint8;
-    inline auto flush() -> void;
     inline auto writeA(uint24 address, uint8 data) -> void;
     inline auto writeA(uint24 address, uint8 data, bool valid) -> void;
     inline auto writeB(uint8 address, uint8 data, bool valid) -> void;

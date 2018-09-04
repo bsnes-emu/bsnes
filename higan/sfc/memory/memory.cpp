@@ -30,10 +30,10 @@ auto Bus::map(
   const function<uint8 (uint24, uint8)>& read,
   const function<void (uint24, uint8)>& write,
   const string& addr, uint size, uint base, uint mask
-) -> void {
+) -> uint {
   uint id = 1;
   while(counter[id]) {
-    if(++id >= 256) return print("SFC error: bus map exhausted\n");
+    if(++id >= 256) return print("SFC error: bus map exhausted\n"), 0;
   }
 
   reader[id] = read;
@@ -68,6 +68,8 @@ auto Bus::map(
       }
     }
   }
+
+  return id;
 }
 
 auto Bus::unmap(const string& addr) -> void {

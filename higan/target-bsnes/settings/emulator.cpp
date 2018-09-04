@@ -57,6 +57,9 @@ auto EmulatorSettings::create() -> void {
   fastDSPOption.setText("Fast DSP").setChecked(settings.emulator.hack.fastDSP.enable).onToggle([&] {
     settings.emulator.hack.fastDSP.enable = fastDSPOption.checked();
   });
+  coprocessorsDelayedSyncOption.setText("Fast coprocessors (delayed sync)").setChecked(settings.emulator.hack.coprocessors.delayedSync).onToggle([&] {
+    settings.emulator.hack.coprocessors.delayedSync = coprocessorsDelayedSyncOption.checked();
+  });
   superFXLabel.setText("SuperFX clock speed:");
   superFXValue.setAlignment(0.5);
   superFXClock.setLength(71).setPosition((settings.emulator.hack.fastSuperFX - 100) / 10).onChange([&] {
@@ -71,4 +74,5 @@ auto EmulatorSettings::updateConfiguration() -> void {
   emulator->configure("Hacks/FastPPU/NoSpriteLimit", noSpriteLimit.checked());
   emulator->configure("Hacks/FastPPU/HiresMode7", hiresMode7.checked());
   emulator->configure("Hacks/FastDSP/Enable", fastDSPOption.checked());
+  emulator->configure("Hacks/Coprocessor/DelayedSync", coprocessorsDelayedSyncOption.checked());
 }

@@ -130,26 +130,27 @@ auto Cartridge::loadMemory(Memory& ram, Markup::Node node, bool required) -> voi
   }
 }
 
-auto Cartridge::loadMap(Markup::Node map, SuperFamicom::Memory& memory) -> void {
+template<typename T>  //T = ReadableMemory, WritableMemory, ProtectableMemory
+auto Cartridge::loadMap(Markup::Node map, T& memory) -> uint {
   auto addr = map["address"].text();
   auto size = map["size"].natural();
   auto base = map["base"].natural();
   auto mask = map["mask"].natural();
   if(size == 0) size = memory.size();
-  if(size == 0) return;
-  bus.map({&SuperFamicom::Memory::read, &memory}, {&SuperFamicom::Memory::write, &memory}, addr, size, base, mask);
+  if(size == 0) return print("loadMap(): size=0\n"), 0;  //does this ever actually occur?
+  return bus.map({&T::read, &memory}, {&T::write, &memory}, addr, size, base, mask);
 }
 
 auto Cartridge::loadMap(
   Markup::Node map,
   const function<uint8 (uint24, uint8)>& reader,
   const function<void (uint24, uint8)>& writer
-) -> void {
+) -> uint {
   auto addr = map["address"].text();
   auto size = map["size"].natural();
   auto base = map["base"].natural();
   auto mask = map["mask"].natural();
-  bus.map(reader, writer, addr, size, base, mask);
+  return bus.map(reader, writer, addr, size, base, mask);
 }
 
 //memory(type=ROM,content=Program)
@@ -416,22 +417,23 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
     hitachidsp.Frequency = 20'000'000;
   }
   hitachidsp.Roms = roms;  //1 or 2
+  hitachidsp.Mapping = 0;  //0 or 1
 
   for(auto map : node.find("map")) {
-    loadMap(map, {&HitachiDSP::dspRead, &hitachidsp}, {&HitachiDSP::dspWrite, &hitachidsp});
+    loadMap(map, {&HitachiDSP::readIO, &hitachidsp}, {&HitachiDSP::writeIO, &hitachidsp});
   }
 
   if(auto memory = node["memory(type=ROM,content=Program)"]) {
     loadMemory(hitachidsp.rom, memory, File::Required);
     for(auto map : memory.find("map")) {
-      loadMap(map, {&HitachiDSP::romRead, &hitachidsp}, {&HitachiDSP::romWrite, &hitachidsp});
+      loadMap(map, {&HitachiDSP::readROM, &hitachidsp}, {&HitachiDSP::writeROM, &hitachidsp});
     }
   }
 
   if(auto memory = node["memory(type=RAM,content=Save)"]) {
     loadMemory(hitachidsp.ram, memory, File::Optional);
     for(auto map : memory.find("map")) {
-      loadMap(map, {&HitachiDSP::ramRead, &hitachidsp}, {&HitachiDSP::ramWrite, &hitachidsp});
+      loadMap(map, {&HitachiDSP::readRAM, &hitachidsp}, {&HitachiDSP::writeRAM, &hitachidsp});
     }
   }
 
@@ -450,7 +452,7 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
       }
     }
     for(auto map : memory.find("map")) {
-      loadMap(map, {&HitachiDSP::dramRead, &hitachidsp}, {&HitachiDSP::dramWrite, &hitachidsp});
+      loadMap(map, {&HitachiDSP::readDRAM, &hitachidsp}, {&HitachiDSP::writeDRAM, &hitachidsp});
     }
   }
 }

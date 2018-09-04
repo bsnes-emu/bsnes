@@ -2,8 +2,8 @@
 //Custom logic chip inside the BS-X Satellaview base cartridge
 
 struct MCC {
-  MappedRAM rom;
-  MappedRAM psram;
+  ReadableMemory rom;
+  WritableMemory psram;
 
   //mcc.cpp
   auto unload() -> void;

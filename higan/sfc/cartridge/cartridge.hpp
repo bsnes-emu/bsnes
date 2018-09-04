@@ -12,8 +12,8 @@ struct Cartridge {
 
   auto serialize(serializer&) -> void;
 
-  MappedRAM rom;
-  MappedRAM ram;
+  ReadableMemory rom;
+  WritableMemory ram;
 
   struct Information {
     uint pathID = 0;
@@ -67,8 +67,8 @@ private:
   auto loadCartridgeSufamiTurboB(Markup::Node) -> void;
 
   auto loadMemory(Memory&, Markup::Node, bool required) -> void;
-  auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
-  auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
+  template<typename T> auto loadMap(Markup::Node, T&) -> uint;
+  auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> uint;
 
   auto loadROM(Markup::Node) -> void;
   auto loadRAM(Markup::Node) -> void;

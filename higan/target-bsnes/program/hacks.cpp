@@ -3,17 +3,18 @@ auto Program::hackCompatibility() -> void {
   bool fastPPUNoSpriteLimit = emulatorSettings.noSpriteLimit.checked();
   bool fastPPUHiresMode7 = emulatorSettings.hiresMode7.checked();
   bool fastDSP = emulatorSettings.fastDSPOption.checked();
+  bool coprocessorsDelayedSync = emulatorSettings.coprocessorsDelayedSyncOption.checked();
 
   auto title = superFamicom.title;
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
   if(title == "KOUSHIEN_2") fastDSP = false;
   if(title == "RENDERING RANGER R2") fastDSP = false;
 
-  //todo: update to new emulator->configuration API
-  emulator->set("Fast PPU", fastPPU);
-  emulator->set("Fast PPU/No Sprite Limit", fastPPUNoSpriteLimit);
-  emulator->set("Fast PPU/Hires Mode 7", fastPPUHiresMode7);
-  emulator->set("Fast DSP", fastDSP);
+  emulator->configure("Hacks/FastPPU/Enable", fastPPU);
+  emulator->configure("Hacks/FastPPU/NoSpriteLimit", fastPPUNoSpriteLimit);
+  emulator->configure("Hacks/FastPPU/HiresMode7", fastPPUHiresMode7);
+  emulator->configure("Hacks/FastDSP/Enable", fastDSP);
+  emulator->configure("Hacks/Coprocessors/DelayedSync", coprocessorsDelayedSync);
 }
 
 auto Program::hackPatchMemory(vector<uint8_t>& data) -> void {

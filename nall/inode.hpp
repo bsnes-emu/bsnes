@@ -64,11 +64,16 @@ struct inode {
     stat(name, &data);
     switch(mode) {
     #if defined(PLATFORM_WINDOWS)
+    //on Windows, the last status change time (ctime) holds the file creation time instead
     case time::create: return data.st_ctime;
-    #else
-    //st_birthtime may return -1 or st_atime if it is not supported
+    #elif defined(PLATFORM_BSD) || defined(PLATFORM_MACOS)
+    //st_birthtime may return -1 or st_atime if it is not supported by the file system
     //the best that can be done in this case is to return st_mtime if it's older
     case time::create: return min((uint)data.st_birthtime, (uint)data.st_mtime);
+    #else
+    //Linux simply doesn't support file creation time at all
+    //this is also our fallback case for unsupported operating systems
+    case time::create: return data.st_mtime;
     #endif
     case time::modify: return data.st_mtime;
     //for performance reasons, last access time is usually not enabled on various filesystems

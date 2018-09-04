@@ -15,7 +15,7 @@ struct SDD1 {
 
   auto serialize(serializer&) -> void;
 
-  MappedRAM rom;
+  ReadableMemory rom;
 
 private:
   uint8 r4800;  //hard enable

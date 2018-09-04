@@ -11,9 +11,6 @@ auto MCC::unload() -> void {
 }
 
 auto MCC::power() -> void {
-  rom.writeProtect(true);
-  psram.writeProtect(false);
-
   irq.flag = 0;
   irq.enable = 0;
   w.mapping = 1;

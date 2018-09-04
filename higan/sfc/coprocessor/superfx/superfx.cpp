@@ -40,9 +40,6 @@ auto SuperFX::power() -> void {
   GSU::power();
   create(SuperFX::Enter, Frequency);
 
-  rom.writeProtect(true);
-  ram.writeProtect(false);
-
   romMask = rom.size() - 1;
   ramMask = ram.size() - 1;
 

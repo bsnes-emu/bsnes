@@ -4,8 +4,8 @@ struct SufamiTurboCartridge {
   auto serialize(serializer&) -> void;
 
   uint pathID = 0;
-  MappedRAM rom;
-  MappedRAM ram;
+  ReadableMemory rom;
+  WritableMemory ram;
 };
 
 extern SufamiTurboCartridge sufamiturboA;
