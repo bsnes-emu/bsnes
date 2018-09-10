@@ -252,7 +252,6 @@ struct WDC65816 {
     bool irq = false;  //IRQ pin (0 = low, 1 = trigger)
     bool wai = false;  //raised during wai, cleared after interrupt triggered
     bool stp = false;  //raised during stp, never cleared
-    bool rwb = false;  //read/write pin
     uint24 mar;        //memory address register
     uint8 mdr;         //memory data register
     uint16 vector;     //interrupt vector address

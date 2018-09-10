@@ -1,8 +1,3 @@
-#ifdef _WIN32
-  #include <initguid.h>
-  #include <cguid.h>
-#endif
-
 #include <ruby/ruby.hpp>
 using namespace nall;
 using namespace ruby;
@@ -21,6 +16,7 @@ using namespace ruby;
   #include <Carbon/Carbon.h>
   #include <nall/macos/guard.hpp>
 #elif defined(DISPLAY_WINDOWS)
+  #define far
   #include <mmsystem.h>
 #endif
 

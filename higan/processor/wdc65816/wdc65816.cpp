@@ -54,9 +54,9 @@ auto WDC65816::power() -> void {
   P  = 0x34;
   EF = 1;
 
+  r.irq = false;
   r.wai = false;
   r.stp = false;
-  r.rwb = false;
   r.mar = 0x000000;
   r.mdr = 0x00;
   r.vector = 0xfffc;  //reset vector address

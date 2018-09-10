@@ -1,18 +1,3 @@
-/* DMA timing:
-   The general idea is that DMA moves values between the A-bus and B-bus in parallel.
-   Obviously, a write can't happen at the same time as a read, as the read needs 8 cycles to complete.
-   My theory is that the accesses are staggered, like so:
-
-   Cycle 0: read 0
-   Cycle 1: read 1, write 0
-   Cycle 2: read 2, write 1
-   ...
-   Cycle n: read n, write n-1
-   Cycle n+1: write n
-
-   The staggered writes are implemented below using the pipe/flush concept.
-*/
-
 auto CPU::dmaEnable() -> bool {
   for(auto& channel : channels) if(channel.dmaEnable) return true;
   return false;
@@ -28,29 +13,10 @@ auto CPU::hdmaActive() -> bool {
   return false;
 }
 
-auto CPU::dmaStep(uint clocks) -> void {
-  status.dmaClocks += clocks;
-  step(clocks);
-}
-
-auto CPU::dmaFlush() -> void {
-  if(!pipe.valid) return;
-  pipe.valid = false;
-  bus.write(pipe.address, pipe.data);
-}
-
-auto CPU::dmaWrite() -> void {
-  r.rwb = pipe.valid;
-  r.mar = pipe.address;
-  dmaStep(8);
-  dmaFlush();
-}
-
 auto CPU::dmaRun() -> void {
-  dmaWrite();
+  step(8);
   dmaEdge();
   for(auto& channel : channels) channel.dmaRun();
-  dmaFlush();
   status.irqLock = true;
 }
 
@@ -59,26 +25,22 @@ auto CPU::hdmaReset() -> void {
 }
 
 auto CPU::hdmaSetup() -> void {
-  dmaWrite();
+  step(8);
   for(auto& channel : channels) channel.hdmaSetup();
-  dmaFlush();
   status.irqLock = true;
 }
 
 auto CPU::hdmaRun() -> void {
-  dmaWrite();
+  step(8);
   for(auto& channel : channels) channel.hdmaTransfer();
   for(auto& channel : channels) channel.hdmaAdvance();
-  dmaFlush();
   status.irqLock = true;
 }
 
 //
 
-auto CPU::Channel::step(uint clocks) -> void { return cpu.dmaStep(clocks); }
+auto CPU::Channel::step(uint clocks) -> void { return cpu.step(clocks); }
 auto CPU::Channel::edge() -> void { return cpu.dmaEdge(); }
-auto CPU::Channel::flush() -> void { return cpu.dmaFlush(); }
-auto CPU::Channel::write() -> void { return cpu.dmaWrite(); }
 
 auto CPU::Channel::validA(uint24 address) -> bool {
   //A-bus cannot access the B-bus or CPU I/O registers
@@ -90,14 +52,9 @@ auto CPU::Channel::validA(uint24 address) -> bool {
 }
 
 auto CPU::Channel::readA(uint24 address) -> uint8 {
-  return readA(address, validA(address));
-}
-
-auto CPU::Channel::readA(uint24 address, bool valid) -> uint8 {
   step(4);
-  cpu.r.mdr = valid ? bus.read(address, cpu.r.mdr) : (uint8)0x00;
+  cpu.r.mdr = validA(address) ? bus.read(address, cpu.r.mdr) : (uint8)0x00;
   step(4);
-  flush();
   return cpu.r.mdr;
 }
 
@@ -105,24 +62,15 @@ auto CPU::Channel::readB(uint8 address, bool valid) -> uint8 {
   step(4);
   cpu.r.mdr = valid ? bus.read(0x2100 | address, cpu.r.mdr) : (uint8)0x00;
   step(4);
-  flush();
   return cpu.r.mdr;
 }
 
 auto CPU::Channel::writeA(uint24 address, uint8 data) -> void {
-  return writeA(address, data, validA(address));
-}
-
-auto CPU::Channel::writeA(uint24 address, uint8 data, bool valid) -> void {
-  cpu.pipe.valid = valid;
-  cpu.pipe.address = address;
-  cpu.pipe.data = data;
+  if(validA(address)) bus.write(address, data);
 }
 
 auto CPU::Channel::writeB(uint8 address, uint8 data, bool valid) -> void {
-  cpu.pipe.valid = valid;
-  cpu.pipe.address = 0x2100 | address;
-  cpu.pipe.data = data;
+  if(valid) bus.write(0x2100 | address, data);
 }
 
 auto CPU::Channel::transfer(uint24 addressA, uint2 index) -> void {
@@ -134,9 +82,8 @@ auto CPU::Channel::transfer(uint24 addressA, uint2 index) -> void {
   }
 
   //transfers from WRAM to WRAM are invalid
-  bool valid = addressB != 0x2180 || ((addressA & 0xfe0000) != 0x7e0000 && (addressA & 0x40e000) != 0x0000);
+  bool valid = addressB != 0x80 || ((addressA & 0xfe0000) != 0x7e0000 && (addressA & 0x40e000) != 0x0000);
 
-  cpu.r.rwb = 1;
   cpu.r.mar = addressA;
   if(direction == 0) {
     auto data = readA(addressA);
@@ -150,6 +97,9 @@ auto CPU::Channel::transfer(uint24 addressA, uint2 index) -> void {
 auto CPU::Channel::dmaRun() -> void {
   if(!dmaEnable) return;
 
+  step(8);
+  edge();
+
   uint2 index = 0;
   do {
     transfer(sourceBank << 16 | sourceAddress, index++);
@@ -157,8 +107,6 @@ auto CPU::Channel::dmaRun() -> void {
     edge();
   } while(dmaEnable && --transferSize);
 
-  write();
-  edge();
   dmaEnable = false;
 }
 
@@ -191,7 +139,6 @@ auto CPU::Channel::hdmaSetup() -> void {
 }
 
 auto CPU::Channel::hdmaReload() -> void {
-  cpu.r.rwb = 1;
   auto data = readA(cpu.r.mar = sourceBank << 16 | hdmaAddress);
 
   if((uint7)lineCounter == 0) {
@@ -202,12 +149,10 @@ auto CPU::Channel::hdmaReload() -> void {
     hdmaDoTransfer = !hdmaCompleted;
 
     if(indirect) {
-      cpu.r.rwb = 1;
       data = readA(cpu.r.mar = sourceBank << 16 | hdmaAddress++);
       indirectAddress = data << 8 | 0x00;  //todo: should 0x00 be indirectAddress >> 8 ?
       if(hdmaCompleted && hdmaFinished()) return;
 
-      cpu.r.rwb = 1;
       data = readA(cpu.r.mar = sourceBank << 16 | hdmaAddress++);
       indirectAddress = data << 8 | indirectAddress >> 8;
     }

@@ -141,7 +141,7 @@ auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> vfs::shared::
   }
 
   if(name == "time.rtc") {
-    return vfs::fs::file::open(path("Saves", gameBoy.location, ".sav"), mode);
+    return vfs::fs::file::open(path("Saves", gameBoy.location, ".rtc"), mode);
   }
 
   return {};

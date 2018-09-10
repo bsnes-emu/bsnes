@@ -1,6 +1,7 @@
 struct CPU : Processor::WDC65816, Thread, PPUcounter {
   inline auto interruptPending() const -> bool override { return status.interruptPending; }
   inline auto pio() const -> uint8 { return io.pio; }
+  inline auto refresh() const -> bool { return status.dramRefresh == 1; }
   inline auto synchronizing() const -> bool override { return scheduler.synchronizing(); }
 
   //cpu.cpp
@@ -14,10 +15,6 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   inline auto hdmaEnable() -> bool;
   inline auto hdmaActive() -> bool;
 
-  inline auto dmaStep(uint clocks) -> void;
-  inline auto dmaFlush() -> void;
-  inline auto dmaWrite() -> void;
-
   auto dmaRun() -> void;
   auto hdmaReset() -> void;
   auto hdmaSetup() -> void;
@@ -27,7 +24,7 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto idle() -> void override;
   auto read(uint24 addr) -> uint8 override;
   auto write(uint24 addr, uint8 data) -> void override;
-  alwaysinline auto speed(uint24 addr) const -> uint;
+  alwaysinline auto wait(uint24 addr) const -> uint;
   auto readDisassembler(uint24 addr) -> uint8 override;
 
   //io.cpp
@@ -41,6 +38,7 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto writeDMA(uint24 address, uint8 data) -> void;
 
   //timing.cpp
+  inline auto dmaClocks() const -> uint;
   inline auto dmaCounter() const -> uint;
   inline auto joypadCounter() const -> uint;
 
@@ -72,7 +70,11 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
 
 private:
   uint version = 2;  //allowed: 1, 2
-  uint clockCounter;
+
+  struct Counter {
+    uint cpu = 0;
+    uint dma = 0;
+  } counter;
 
   struct Status {
     uint clockCount = 0;
@@ -81,7 +83,7 @@ private:
     bool irqLock = false;
 
     uint dramRefreshPosition = 0;
-    bool dramRefreshed = false;
+    uint dramRefresh = 0;  //0 = not refreshed; 1 = refresh active; 2 = refresh inactive
 
     uint hdmaSetupPosition = 0;
     bool hdmaSetupTriggered = false;
@@ -107,7 +109,6 @@ private:
     bool interruptPending = false;
 
     bool dmaActive = false;
-    uint dmaClocks = 0;
     bool dmaPending = false;
     bool hdmaPending = false;
     bool hdmaMode = 0;  //0 = init, 1 = run
@@ -167,15 +168,11 @@ private:
     //dma.cpp
     inline auto step(uint clocks) -> void;
     inline auto edge() -> void;
-    inline auto flush() -> void;
-    inline auto write() -> void;
 
     inline auto validA(uint24 address) -> bool;
     inline auto readA(uint24 address) -> uint8;
-    inline auto readA(uint24 address, bool valid) -> uint8;
     inline auto readB(uint8 address, bool valid) -> uint8;
     inline auto writeA(uint24 address, uint8 data) -> void;
-    inline auto writeA(uint24 address, uint8 data, bool valid) -> void;
     inline auto writeB(uint8 address, uint8 data, bool valid) -> void;
     inline auto transfer(uint24 address, uint2 index) -> void;
 
@@ -237,12 +234,6 @@ private:
 
     Channel() : transferSize(0xffff) {}
   } channels[8];
-
-  struct Pipe {
-    uint1  valid;
-    uint24 address;
-    uint8  data;
-  } pipe;
 };
 
 extern CPU cpu;

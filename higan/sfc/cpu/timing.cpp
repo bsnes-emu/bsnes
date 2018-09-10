@@ -1,11 +1,27 @@
-auto CPU::dmaCounter() const -> uint { return clockCounter & 7; }
-auto CPU::joypadCounter() const -> uint { return clockCounter & 255; }
+//the number of clock cycles that have elapsed since (H)DMA began
+auto CPU::dmaClocks() const -> uint {
+  if(counter.cpu >= counter.dma) {
+    return counter.cpu - counter.dma;
+  } else {
+    return 0 - counter.cpu + counter.dma;
+  }
+}
+
+//DMA clock divider
+auto CPU::dmaCounter() const -> uint {
+  return counter.cpu & 7;
+}
+
+//joypad auto-poll clock divider
+auto CPU::joypadCounter() const -> uint {
+  return counter.cpu & 255;
+}
 
 auto CPU::step(uint clocks) -> void {
   status.irqLock = false;
   uint ticks = clocks >> 1;
   while(ticks--) {
-    clockCounter += 2;
+    counter.cpu += 2;
     tick();
     if(hcounter() & 2) pollInterrupts();
     if(joypadCounter() == 0) joypadEdge();
@@ -14,13 +30,14 @@ auto CPU::step(uint clocks) -> void {
   Thread::step(clocks);
   for(auto peripheral : peripherals) synchronize(*peripheral);
 
-  if(!status.dramRefreshed && hcounter() >= status.dramRefreshPosition) {
-    status.dramRefreshed = true;
-    r.rwb = 0;
-    for(auto _ : range(5)) {
-      step(8);
-      aluEdge();
-    }
+  if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {
+    //note: pattern should technically be 5-3, 5-3, 5-3, 5-3, 5-3 per logic analyzer
+    //result averages out the same as no coprocessor polls refresh() at > frequency()/2
+    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
+    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
+    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
+    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
+    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
   }
 
   if(configuration.hacks.coprocessors.delayedSync) return;
@@ -46,7 +63,7 @@ auto CPU::scanline() -> void {
 
   //DRAM refresh occurs once every scanline
   if(version == 2) status.dramRefreshPosition = 530 + 8 - dmaCounter();
-  status.dramRefreshed = false;
+  status.dramRefresh = 0;
 
   //HDMA triggers once every visible scanline
   if(vcounter() < ppu.vdisp()) {
@@ -88,13 +105,12 @@ auto CPU::dmaEdge() -> void {
       status.hdmaPending = false;
       if(hdmaEnable()) {
         if(!dmaEnable()) {
-          r.rwb = 0;
-          dmaStep(8 - dmaCounter());
+          counter.dma = counter.cpu;
+          step(8 - dmaCounter());
         }
         status.hdmaMode == 0 ? hdmaSetup() : hdmaRun();
         if(!dmaEnable()) {
-          r.rwb = 0;  //unverified
-          step(status.clockCount - (status.dmaClocks % status.clockCount));
+          step(status.clockCount - dmaClocks() % status.clockCount);
           status.dmaActive = false;
         }
       }
@@ -103,11 +119,10 @@ auto CPU::dmaEdge() -> void {
     if(status.dmaPending) {
       status.dmaPending = false;
       if(dmaEnable()) {
-        r.rwb = 0;
-        dmaStep(8 - dmaCounter());
+        counter.dma = counter.cpu;
+        step(8 - dmaCounter());
         dmaRun();
-        r.rwb = 0;  //unverified
-        step(status.clockCount - (status.dmaClocks % status.clockCount));
+        step(status.clockCount - dmaClocks() % status.clockCount);
         status.dmaActive = false;
       }
     }
@@ -132,7 +147,6 @@ auto CPU::dmaEdge() -> void {
 
   if(!status.dmaActive) {
     if(status.dmaPending || status.hdmaPending) {
-      status.dmaClocks = 0;
       status.dmaActive = true;
     }
   }

@@ -6,7 +6,9 @@ auto CPU::serialize(serializer& s) -> void {
   s.array(wram);
 
   s.integer(version);
-  s.integer(clockCounter);
+
+  s.integer(counter.cpu);
+  s.integer(counter.dma);
 
   s.integer(status.clockCount);
   s.integer(status.lineClocks);
@@ -14,7 +16,7 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.irqLock);
 
   s.integer(status.dramRefreshPosition);
-  s.integer(status.dramRefreshed);
+  s.integer(status.dramRefresh);
 
   s.integer(status.hdmaSetupPosition);
   s.integer(status.hdmaSetupTriggered);
@@ -40,7 +42,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.interruptPending);
 
   s.integer(status.dmaActive);
-  s.integer(status.dmaClocks);
   s.integer(status.dmaPending);
   s.integer(status.hdmaPending);
   s.integer(status.hdmaMode);
@@ -102,8 +103,4 @@ auto CPU::serialize(serializer& s) -> void {
     s.integer(channel.hdmaCompleted);
     s.integer(channel.hdmaDoTransfer);
   }
-
-  s.integer(pipe.valid);
-  s.integer(pipe.address);
-  s.integer(pipe.data);
 }

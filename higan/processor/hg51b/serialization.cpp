@@ -3,23 +3,23 @@ auto HG51B::serialize(serializer& s) -> void {
   s.array(programRAM[1]);
   s.array(dataRAM);
 
-  s.integer(r.p);
   s.integer(r.pb);
   s.integer(r.pc);
 
   s.boolean(r.n);
   s.boolean(r.z);
   s.boolean(r.c);
+  s.boolean(r.v);
   s.boolean(r.i);
 
   s.integer(r.a);
-  s.integer(r.acch);
-  s.integer(r.accl);
-  s.integer(r.busData);
-  s.integer(r.romData);
-  s.integer(r.ramData);
-  s.integer(r.busAddress);
-  s.integer(r.ramAddress);
+  s.integer(r.p);
+  s.integer(r.mul);
+  s.integer(r.mdr);
+  s.integer(r.rom);
+  s.integer(r.ram);
+  s.integer(r.mar);
+  s.integer(r.dpr);
   s.array(r.gpr);
 
   s.integer(io.lock);
@@ -54,5 +54,4 @@ auto HG51B::serialize(serializer& s) -> void {
   s.integer(io.bus.address);
 
   s.array(stack);
-  s.integer(opcode);
 }

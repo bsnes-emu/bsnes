@@ -302,7 +302,7 @@ auto Cartridge::loadSA1(Markup::Node node) -> void {
   has.SA1 = true;
 
   for(auto map : node.find("map")) {
-    loadMap(map, {&SA1::readIO, &sa1}, {&SA1::writeIO, &sa1});
+    loadMap(map, {&SA1::readIOCPU, &sa1}, {&SA1::writeIOCPU, &sa1});
   }
 
   if(auto mcu = node["mcu"]) {

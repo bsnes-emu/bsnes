@@ -9,6 +9,8 @@ namespace Math {
 
 #if defined(PLATFORM_WINDOWS)
   #include <nall/windows/guard.hpp>
+  #include <initguid.h>
+  #include <cguid.h>
   #include <winsock2.h>
   #include <ws2tcpip.h>
   #include <windows.h>

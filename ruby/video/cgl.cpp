@@ -111,7 +111,7 @@ private:
 
       [view lockFocus];
 
-      OpenGL::initialize();
+      OpenGL::initialize(self.shader);
 
       int blocking = self.blocking;
       [[view openGLContext] setValues:&blocking forParameter:NSOpenGLCPSwapInterval];

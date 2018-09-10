@@ -1,7 +1,6 @@
 auto SA1::BWRAM::conflict() const -> bool {
   if(configuration.hacks.coprocessors.delayedSync) return false;
 
-  if(!cpu.r.rwb) return false;
   if((cpu.r.mar & 0x40e000) == 0x006000) return true;  //00-3f,80-bf:6000-7fff
   if((cpu.r.mar & 0xf00000) == 0x400000) return true;  //40-4f:0000-ffff
   return false;

@@ -1,10 +1,10 @@
-//Super Accelerator 1
+//Super Accelerator (SA-1)
 
 struct SA1 : Processor::WDC65816, Thread {
   //sa1.cpp
   static auto Enter() -> void;
   auto main() -> void;
-  auto step(uint clocks) -> void;
+  auto step() -> void;
   auto interrupt() -> void override;
 
   alwaysinline auto triggerIRQ() -> void;
@@ -36,13 +36,17 @@ struct SA1 : Processor::WDC65816, Thread {
   alwaysinline auto idle() -> void override;
   alwaysinline auto idleJump() -> void override;
   alwaysinline auto idleBranch() -> void override;
-  alwaysinline auto read(uint24 addr) -> uint8 override;
-  alwaysinline auto write(uint24 addr, uint8 data) -> void override;
-  auto readVBR(uint24 addr, uint8 data = 0) -> uint8;
+  alwaysinline auto read(uint24 address) -> uint8 override;
+  alwaysinline auto write(uint24 address, uint8 data) -> void override;
+  auto readVBR(uint24 address, uint8 data = 0) -> uint8;
+  auto readDisassembler(uint24 address) -> uint8 override;
 
   //io.cpp
-  auto readIO(uint24 addr, uint8 data) -> uint8;
-  auto writeIO(uint24 addr, uint8 data) -> void;
+  auto readIOCPU(uint24 address, uint8 data) -> uint8;
+  auto readIOSA1(uint24 address, uint8 data) -> uint8;
+  auto writeIOCPU(uint24 address, uint8 data) -> void;
+  auto writeIOSA1(uint24 address, uint8 data) -> void;
+  auto writeIOShared(uint24 address, uint8 data) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

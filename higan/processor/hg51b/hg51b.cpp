@@ -4,6 +4,7 @@
 namespace Processor {
 
 #include "registers.cpp"
+#include "instruction.cpp"
 #include "instructions.cpp"
 #include "serialization.cpp"
 
@@ -24,7 +25,7 @@ auto HG51B::wait(uint24 address) -> uint {
 auto HG51B::main() -> void {
   if(io.lock) return step(1);
   if(io.suspend.enable) return suspend();
-  if(io.cache.enable) return cache();
+  if(io.cache.enable) return cache(), void();
   if(io.dma.enable) return dma();
   if(io.halt) return step(1);
   return execute();
@@ -37,55 +38,56 @@ auto HG51B::step(uint clocks) -> void {
     } else {
       io.bus.enable = 0;
       io.bus.pending = 0;
-      if(io.bus.reading) io.bus.reading = 0, r.busData = read(io.bus.address);
-      if(io.bus.writing) io.bus.writing = 0, write(io.bus.address, r.busData);
+      if(io.bus.reading) io.bus.reading = 0, r.mdr = read(io.bus.address);
+      if(io.bus.writing) io.bus.writing = 0, write(io.bus.address, r.mdr);
     }
   }
 }
 
 auto HG51B::execute() -> void {
-  uint24 address = io.cache.base + r.pb * 512;
-  if(io.cache.address[io.cache.page] != address) {
-    io.cache.page ^= 1;
-    if(io.cache.address[io.cache.page] != address) {
-      if(io.cache.lock[io.cache.page]) {
-        io.cache.page ^= 1;
-        if(io.cache.lock[io.cache.page]) return halt();
-      }
-      cache();
-    }
-  }
-
-  opcode = programRAM[io.cache.page][r.pc];
+  if(!cache()) return halt();
+  auto opcode = programRAM[io.cache.page][r.pc];
   advance();
-
   step(1);
-  instruction();
+  instructionTable[opcode]();
 }
 
 auto HG51B::advance() -> void {
   if(++r.pc == 0) {
     if(io.cache.page == 1) return halt();
     io.cache.page = 1;
+    if(io.cache.lock[io.cache.page]) return halt();
     r.pb = r.p;
+    if(!cache()) return halt();
   }
 }
 
 auto HG51B::suspend() -> void {
   if(!io.suspend.duration) return step(1);  //indefinite
   step(io.suspend.duration);
-  io.suspend.enable = 0;
   io.suspend.duration = 0;
+  io.suspend.enable = 0;
 }
 
-auto HG51B::cache() -> void {
+auto HG51B::cache() -> bool {
   uint24 address = io.cache.base + r.pb * 512;
+
+  //try to use the current page ...
+  if(io.cache.address[io.cache.page] == address) return io.cache.enable = 0, true;
+  //if it's not valid, try to use the other page ...
+  io.cache.page ^= 1;
+  if(io.cache.address[io.cache.page] == address) return io.cache.enable = 0, true;
+  //if it's not valid, try to load into the other page ...
+  if(io.cache.lock[io.cache.page]) io.cache.page ^= 1;
+  //if it's locked, try to load into the first page ...
+  if(io.cache.lock[io.cache.page]) return io.cache.enable = 0, false;
+
   io.cache.address[io.cache.page] = address;
   for(uint offset : range(256)) {
     step(wait(address)); programRAM[io.cache.page][offset].byte(0) = read(address++);
     step(wait(address)); programRAM[io.cache.page][offset].byte(1) = read(address++);
   }
-  io.cache.enable = 0;
+  return io.cache.enable = 0, true;
 }
 
 auto HG51B::dma() -> void {

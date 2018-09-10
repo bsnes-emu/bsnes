@@ -1,7 +1,6 @@
 auto SA1::ROM::conflict() const -> bool {
   if(configuration.hacks.coprocessors.delayedSync) return false;
 
-  if(!cpu.r.rwb) return false;
   if((cpu.r.mar & 0x408000) == 0x008000) return true;  //00-3f,80-bf:8000-ffff
   if((cpu.r.mar & 0xc00000) == 0xc00000) return true;  //c0-ff:0000-ffff
   return false;
@@ -55,7 +54,7 @@ auto SA1::ROM::readCPU(uint24 address, uint8 data) -> uint8 {
     return read(sa1.mmio.fb << 20 | address & 0x0fffff);
   }
 
-  return 0x00;
+  return data;  //unreachable
 }
 
 auto SA1::ROM::writeCPU(uint24 address, uint8 data) -> void {
@@ -69,8 +68,4 @@ auto SA1::ROM::readSA1(uint24 address, uint8 data) -> uint8 {
 }
 
 auto SA1::ROM::writeSA1(uint24 address, uint8 data) -> void {
-  if((address & 0x408000) == 0x008000) {
-    address = (address & 0x800000) >> 2 | (address & 0x3f0000) >> 1 | address & 0x007fff;
-  }
-  return writeCPU(address, data);
 }

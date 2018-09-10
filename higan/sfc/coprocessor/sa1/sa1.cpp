@@ -21,7 +21,7 @@ auto SA1::main() -> void {
 
   if(mmio.sa1_rdyb || mmio.sa1_resb) {
     //SA-1 co-processor is asleep
-    step(2);
+    step();
     return;
   }
 
@@ -31,6 +31,7 @@ auto SA1::main() -> void {
     return;
   }
 
+//print(disassemble(), "\n");
   instruction();
 }
 
@@ -82,8 +83,8 @@ auto SA1::synchronizing() const -> bool {
   return scheduler.synchronizing();
 }
 
-auto SA1::step(uint clocks) -> void {
-  Thread::step(clocks);
+auto SA1::step() -> void {
+  Thread::step(2);
   synchronize(cpu);
 
   //adjust counters:
@@ -91,21 +92,23 @@ auto SA1::step(uint clocks) -> void {
   //whereas MMIO register counters are in dots (4 clocks = 1 dot)
   if(mmio.hvselb == 0) {
     //HV timer
-    status.hcounter += clocks;
-    while(status.hcounter >= 1364) {
-      status.hcounter -= 1364;
-      if(++status.vcounter >= status.scanlines) status.vcounter = 0;
+    status.hcounter += 2;
+    if(status.hcounter >= 1364) {
+      status.hcounter = 0;
+      if(++status.vcounter >= status.scanlines) {
+        status.vcounter = 0;
+      }
     }
   } else {
     //linear timer
-    status.hcounter += clocks;
-    status.vcounter += (status.hcounter >> 11);
+    status.hcounter += 2;
+    status.vcounter += status.hcounter >> 11;
     status.hcounter &= 0x07ff;
     status.vcounter &= 0x01ff;
   }
 
   //test counters for timer IRQ
-  switch((mmio.ven << 1) + (mmio.hen << 0)) {
+  switch(mmio.hen << 0 | mmio.ven << 1) {
   case 0: break;
   case 1: if(status.hcounter == mmio.hcnt << 2) triggerIRQ(); break;
   case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) triggerIRQ(); break;
@@ -129,8 +132,8 @@ auto SA1::power() -> void {
   create(SA1::Enter, system.cpuFrequency());
 
   bwram.dma = false;
-  for(auto addr : range(iram.size())) {
-    iram.write(addr, 0x00);
+  for(uint address : range(iram.size())) {
+    iram.write(address, 0x00);
   }
 
   status.counter = 0;

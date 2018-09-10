@@ -1,26 +1,28 @@
 auto HG51B::readRegister(uint7 address) -> uint24 {
   switch(address) {
-  case 0x00: return r.a;
-  case 0x01: return r.acch;
-  case 0x02: return r.accl;
-  case 0x03: return r.busData;
-  case 0x08: return r.romData;
-  case 0x0c: return r.ramData;
-  case 0x13: return r.busAddress;
-  case 0x1c: return r.ramAddress;
+  case 0x01: return r.mul.bits(24,47);
+  case 0x02: return r.mul.bits( 0,23);
+  case 0x03: return r.mdr;
+  case 0x08: return r.rom;
+  case 0x0c: return r.ram;
+  case 0x13: return r.mar;
+  case 0x1c: return r.dpr;
   case 0x20: return r.pc;
+  case 0x28: return r.p;
   case 0x2e:
     io.bus.enable  = 1;
     io.bus.reading = 1;
     io.bus.pending = 1 + io.wait.rom;
-    io.bus.address = r.busAddress;
+    io.bus.address = r.mar;
     return 0x000000;
   case 0x2f:
     io.bus.enable  = 1;
     io.bus.reading = 1;
     io.bus.pending = 1 + io.wait.ram;
-    io.bus.address = r.busAddress;
+    io.bus.address = r.mar;
     return 0x000000;
+
+  //constant registers
   case 0x50: return 0x000000;
   case 0x51: return 0xffffff;
   case 0x52: return 0x00ff00;
@@ -37,6 +39,8 @@ auto HG51B::readRegister(uint7 address) -> uint24 {
   case 0x5d: return 0xfeffff;
   case 0x5e: return 0x000100;
   case 0x5f: return 0x00feff;
+
+  //general purpose registers
   case 0x60: case 0x70: return r.gpr[ 0];
   case 0x61: case 0x71: return r.gpr[ 1];
   case 0x62: case 0x72: return r.gpr[ 2];
@@ -54,32 +58,34 @@ auto HG51B::readRegister(uint7 address) -> uint24 {
   case 0x6e: case 0x7e: return r.gpr[14];
   case 0x6f: case 0x7f: return r.gpr[15];
   }
-  return 0x000000;
+
+  return 0x000000;  //verified
 }
 
 auto HG51B::writeRegister(uint7 address, uint24 data) -> void {
   switch(address) {
-  case 0x00: r.a = data; return;
-  case 0x01: r.acch = data; return;
-  case 0x02: r.accl = data; return;
-  case 0x03: r.busData = data; return;
-  case 0x08: r.romData = data; return;
-  case 0x0c: r.ramData = data; return;
-  case 0x13: r.busAddress = data; return;
-  case 0x1c: r.ramAddress = data; return;
+  case 0x01: r.mul.bits(24,47) = data; return;
+  case 0x02: r.mul.bits( 0,23) = data; return;
+  case 0x03: r.mdr = data; return;
+  case 0x08: r.rom = data; return;
+  case 0x0c: r.ram = data; return;
+  case 0x13: r.mar = data; return;
+  case 0x1c: r.dpr = data; return;
   case 0x20: r.pc = data; return;
+  case 0x28: r.p = data; return;
   case 0x2e:
     io.bus.enable  = 1;
     io.bus.writing = 1;
     io.bus.pending = 1 + io.wait.rom;
-    io.bus.address = r.busAddress;
+    io.bus.address = r.mar;
     return;
   case 0x2f:
     io.bus.enable  = 1;
     io.bus.writing = 1;
     io.bus.pending = 1 + io.wait.ram;
-    io.bus.address = r.busAddress;
+    io.bus.address = r.mar;
     return;
+
   case 0x60: case 0x70: r.gpr[ 0] = data; return;
   case 0x61: case 0x71: r.gpr[ 1] = data; return;
   case 0x62: case 0x72: r.gpr[ 2] = data; return;

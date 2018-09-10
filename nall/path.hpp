@@ -69,6 +69,12 @@ inline auto user() -> string {
   return result;
 }
 
+// /home/username/Desktop/
+// c:/users/username/Desktop/
+inline auto desktop(string_view name = {}) -> string {
+  return {user(), "Desktop/", name};
+}
+
 // /home/username/.local/share/
 // ~/Library/Application Support/
 // c:/users/username/appdata/roaming/

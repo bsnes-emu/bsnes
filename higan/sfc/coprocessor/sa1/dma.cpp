@@ -6,25 +6,36 @@ auto SA1::dmaNormal() -> void {
     uint16 target = mmio.dda++;
 
     if(mmio.sd == DMA::SourceROM && mmio.dd == DMA::DestBWRAM) {
-      step(bwram.conflict() ? 8 : 4);
+      step();
+      step();
+      if(bwram.conflict()) step();
+      if(bwram.conflict()) step();
       data = rom.readSA1(source, data);
       bwram.write(target, data);
     }
 
     if(mmio.sd == DMA::SourceROM && mmio.dd == DMA::DestIRAM) {
-      step(iram.conflict() ? 6 : 4);
+      step();
+      if(iram.conflict() || rom.conflict()) step();
+      if(iram.conflict()) step();
       data = rom.readSA1(source, data);
       iram.write(target, data);
     }
 
     if(mmio.sd == DMA::SourceBWRAM && mmio.dd == DMA::DestIRAM) {
-      step(bwram.conflict() ? 8 : iram.conflict() ? 6 : 4);
+      step();
+      step();
+      if(bwram.conflict() || iram.conflict()) step();
+      if(bwram.conflict()) step();
       data = bwram.read(source, data);
       iram.write(target, data);
     }
 
     if(mmio.sd == DMA::SourceIRAM && mmio.dd == DMA::DestBWRAM) {
-      step(bwram.conflict() ? 8 : iram.conflict() ? 6 : 4);
+      step();
+      step();
+      if(bwram.conflict() || iram.conflict()) step();
+      if(bwram.conflict()) step();
       data = iram.read(source, data);
       bwram.write(target, data);
     }

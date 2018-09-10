@@ -85,9 +85,9 @@ auto CPU::power(bool reset) -> void {
     if(n != 7) channels[n].next = channels[n + 1];
   }
 
+  counter = {};
   io = {};
   alu = {};
-  pipe = {};
 
   status = {};
   status.lineClocks = lineclocks();
@@ -97,8 +97,6 @@ auto CPU::power(bool reset) -> void {
   status.powerPending = reset == 0;
   status.resetPending = reset == 1;
   status.interruptPending = true;
-
-  clockCounter = 0;
 }
 
 }

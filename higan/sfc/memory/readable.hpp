@@ -2,6 +2,7 @@ struct ReadableMemory : Memory {
   inline auto reset() -> void override {
     delete[] self.data;
     self.data = nullptr;
+    self.size = 0;
   }
 
   inline auto allocate(uint size, uint8 fill = 0xff) -> void override {

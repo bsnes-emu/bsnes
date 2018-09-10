@@ -1,8 +1,7 @@
 auto SA1::IRAM::conflict() const -> bool {
   if(configuration.hacks.coprocessors.delayedSync) return false;
 
-  if(!cpu.r.rwb) return false;
-  if((cpu.r.mar & 0x40f800) == 0x003000) return true;  //00-3f,80-bf:3000-37ff
+  if((cpu.r.mar & 0x40f800) == 0x003000) return cpu.refresh() == 0;  //00-3f,80-bf:3000-37ff
   return false;
 }
 
