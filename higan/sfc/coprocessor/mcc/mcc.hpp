@@ -8,6 +8,7 @@ struct MCC {
   //mcc.cpp
   auto unload() -> void;
   auto power() -> void;
+  auto commit() -> void;
 
   auto read(uint24 address, uint8 data) -> uint8;
   auto write(uint24 address, uint8 data) -> void;
@@ -40,8 +41,8 @@ private:
     uint1 exEnableLo;     //bit  9
     uint1 exEnableHi;     //bit 10
     uint1 exMapping;      //bit 11
-    uint1 bsWritable;     //bit 12
-    uint1 unknown;        //bit 13
+    uint1 bsQueryable;    //bit 12
+    uint1 bsFlashable;    //bit 13
   } r, w;
 
   //bit 14 (commit)

@@ -15,14 +15,18 @@ auto Cartridge::MBC7::EEPROM::serialize(serializer& s) -> void {
   s.boolean(clock);
   s.boolean(writable);
   s.integer(busy);
-  command.serialize(s);
-  address.serialize(s);
   input.serialize(s);
   output.serialize(s);
 }
 
-auto Cartridge::MBC7::EEPROM::ShiftRegister::serialize(serializer& s) -> void {
+auto Cartridge::MBC7::EEPROM::InputShiftRegister::serialize(serializer& s) -> void {
   s.integer(value);
   s.integer(count);
-  s.integer(length);
+  s.integer(addressLength);
+  s.integer(dataLength);
+}
+
+auto Cartridge::MBC7::EEPROM::OutputShiftRegister::serialize(serializer& s) -> void {
+  s.integer(value);
+  s.integer(count);
 }

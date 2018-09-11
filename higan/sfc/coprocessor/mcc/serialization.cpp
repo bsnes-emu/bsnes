@@ -11,8 +11,8 @@ auto MCC::serialize(serializer& s) -> void {
   s.integer(r.exEnableLo);
   s.integer(r.exEnableHi);
   s.integer(r.exMapping);
-  s.integer(r.bsWritable);
-  s.integer(r.unknown);
+  s.integer(r.bsQueryable);
+  s.integer(r.bsFlashable);
   s.integer(w.mapping);
   s.integer(w.psramEnableLo);
   s.integer(w.psramEnableHi);
@@ -22,8 +22,8 @@ auto MCC::serialize(serializer& s) -> void {
   s.integer(w.exEnableLo);
   s.integer(w.exEnableHi);
   s.integer(w.exMapping);
-  s.integer(w.bsWritable);
-  s.integer(w.unknown);
+  s.integer(w.bsQueryable);
+  s.integer(w.bsFlashable);
   s.integer(x.enable);
   s.integer(x.value);
 }

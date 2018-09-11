@@ -6,7 +6,8 @@ namespace SuperFamicom {
 BSMemory bsmemory;
 
 auto BSMemory::load() -> void {
-  if(!memory.size()) memory.allocate(1024 * 1024);
+  queryable(true);
+  flashable(true);
 }
 
 auto BSMemory::unload() -> void {
@@ -14,14 +15,8 @@ auto BSMemory::unload() -> void {
 }
 
 auto BSMemory::power() -> void {
-  regs.command = 0;
-  regs.writeOld = 0x00;
-  regs.writeNew = 0x00;
-
-  regs.flashEnable = false;
-  regs.readEnable  = false;
-  regs.writeEnable = false;
-  memory.writable(regs.writeEnable);
+  memory.writable(false);
+  io = {};
 }
 
 auto BSMemory::data() -> uint8* {
@@ -32,92 +27,71 @@ auto BSMemory::size() const -> uint {
   return memory.size();
 }
 
-auto BSMemory::read(uint24 addr, uint8 data) -> uint8 {
-  if(readonly) {
-    return memory.read(bus.mirror(addr, memory.size()), data);
+auto BSMemory::read(uint24 address, uint8 data) -> uint8 {
+  if(!size()) return data;
+  address = bus.mirror(address, size());
+  if(!pin.queryable) return memory.read(address, data);
+
+  if(io.mode == 0x70) {
+    return 0x80;
   }
 
-  if(addr == 0x0002) {
-    if(regs.flashEnable) return 0x80;
+  if(io.mode == 0x71) {
+    if((uint16)address == 0x0002) return 0x80;
+    if((uint16)address == 0x0004) return 0x87;
+    if((uint16)address == 0x0006) return 0x00;  //unknown purpose (not always zero)
+    return 0x00;
   }
 
-  if(addr == 0x5555) {
-    if(regs.flashEnable) return 0x80;
+  if(io.mode == 0x75) {
+    if((uint8)address == 0x00) return 0x4d;  //'M' (memory)
+    if((uint8)address == 0x02) return 0x50;  //'P' (pack)
+    if((uint8)address == 0x04) return 0x04;  //unknown purpose
+    if((uint8)address == 0x06) return Type << 4 | (uint4)log2(size() >> 10);
+    return random();  //not actually random, but not ROM data either, yet varies per cartridge
   }
 
-  if(regs.readEnable && addr >= 0xff00 && addr <= 0xff13) {
-    //read flash cartridge vendor information
-    switch(addr - 0xff00) {
-    case 0x00: return 0x4d;
-    case 0x01: return 0x00;
-    case 0x02: return 0x50;
-    case 0x03: return 0x00;
-    case 0x04: return 0x00;
-    case 0x05: return 0x00;
-    case 0x06: return 0x2a;  //0x2a = 8mbit, 0x2b = 16mbit (not known to exist, though BIOS recognizes ID)
-    case 0x07: return 0x00;
-    default:   return 0x00;
-    }
-  }
-
-  return memory.read(bus.mirror(addr, memory.size()), data);
+  return memory.read(address, data);
 }
 
-auto BSMemory::write(uint24 addr, uint8 data) -> void {
-  if(readonly) {
+auto BSMemory::write(uint24 address, uint8 data) -> void {
+  if(!size() || !pin.queryable) return;
+  address = bus.mirror(address, size());
+
+  //write byte
+  if(io.mode == 0x10 || io.mode == 0x40) {
+    if(!pin.flashable) return;
+    memory.writable(true);
+    memory.write(address, memory.read(address) & data);  //writes can only clear bits
+    memory.writable(false);
+    io.mode = 0x70;
     return;
   }
 
-  if((addr & 0xff0000) == 0) {
-    regs.writeOld = regs.writeNew;
-    regs.writeNew = data;
-
-    if(regs.writeEnable && regs.writeOld == regs.writeNew) {
-      return memory.write(addr, data);
-    }
-  } else {
-    if(regs.writeEnable) {
-      return memory.write(addr, data);
-    }
+  //erase 64KB page
+  if(io.mode == 0x20) {
+    //completes even if !pin.flashable
+    memory.writable(true);
+    for(uint offset : range(1 << 16)) memory.write(address & 0xff0000 | offset, 0xff);
+    memory.writable(false);
+    io.mode = 0x70;
+    return;
   }
 
-  if(addr == 0x0000) {
-    regs.command <<= 8;
-    regs.command  |= data;
+  //erase all pages
+  if(io.mode == 0xa7) {
+    //completes even if !pin.flashable
+    if(Type == 3) return;  //Type 3 doesn't support this command
 
-    if((regs.command & 0xffff) == 0x38d0) {
-      regs.flashEnable = true;
-      regs.readEnable  = true;
-    }
+    memory.writable(true);
+    for(uint offset : range(size())) memory.write(offset, 0xff);
+    memory.writable(false);
+    io.mode = 0x70;
+    return;
   }
 
-  if(addr == 0x2aaa) {
-    regs.command <<= 8;
-    regs.command  |= data;
-  }
-
-  if(addr == 0x5555) {
-    regs.command <<= 8;
-    regs.command  |= data;
-
-    if((regs.command & 0xffffff) == 0xaa5570) {
-      regs.writeEnable = false;
-    }
-
-    if((regs.command & 0xffffff) == 0xaa55a0) {
-      regs.writeOld = 0x00;
-      regs.writeNew = 0x00;
-      regs.flashEnable = true;
-      regs.writeEnable = true;
-    }
-
-    if((regs.command & 0xffffff) == 0xaa55f0) {
-      regs.flashEnable = false;
-      regs.readEnable  = false;
-      regs.writeEnable = false;
-    }
-
-    memory.writable(regs.writeEnable);
+  if((uint16)address == 0x0000) {
+    io.mode = data;
   }
 }
 

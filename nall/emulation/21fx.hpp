@@ -17,7 +17,7 @@ using uint32 = Natural<32>;
 using uint64 = Natural<64>;
 
 struct FX {
-  auto open(vector<string>& arguments) -> bool;
+  auto open(vector<string> arguments) -> bool;
   auto close() -> void;
   auto readable() -> bool;
   auto read() -> uint8_t;
@@ -35,12 +35,12 @@ struct FX {
   serial device;
 };
 
-auto FX::open(vector<string>& arguments) -> bool {
+auto FX::open(vector<string> arguments) -> bool {
   //device name override support
   string name;
-  for(uint n : range(arguments)) {
-    if(arguments[n].beginsWith("--device=")) {
-      name = arguments.take(n).trimLeft("--device=", 1L);
+  for(auto argument : arguments) {
+    if(argument.beginsWith("--device=")) {
+      name = argument.trimLeft("--device=", 1L);
       break;
     }
   }
@@ -54,7 +54,7 @@ auto FX::open(vector<string>& arguments) -> bool {
   while(true) {
     while(readable()) read();
     auto iplrom = read(0x2184, 122);
-    auto sha256 = Hash::SHA256(iplrom.data(), iplrom.size()).digest();
+    auto sha256 = Hash::SHA256(iplrom).digest();
     if(sha256 == "41b79712a4a2d16d39894ae1b38cde5c41dad22eadc560df631d39f13df1e4b9") break;
   }
 

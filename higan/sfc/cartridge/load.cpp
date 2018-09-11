@@ -77,7 +77,7 @@ auto Cartridge::loadCartridgeGameBoy(Markup::Node node) -> void {
 
 auto Cartridge::loadCartridgeBSMemory(Markup::Node node) -> void {
   if(auto memory = Emulator::Game::Memory{node["game/board/memory(content=Program)"]}) {
-    bsmemory.readonly = memory.type == "ROM";
+    bsmemory.ROM = memory.type == "ROM";
     bsmemory.memory.allocate(memory.size);
     if(auto fp = platform->open(bsmemory.pathID, memory.name(), File::Read, File::Required)) {
       fp->read(bsmemory.memory.data(), memory.size);

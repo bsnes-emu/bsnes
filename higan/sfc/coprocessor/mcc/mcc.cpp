@@ -22,11 +22,17 @@ auto MCC::power() -> void {
   w.exEnableLo = 1;
   w.exEnableHi = 0;
   w.exMapping = 1;
-  w.bsWritable = 0;
-  w.unknown = 0;
+  w.bsQueryable = 0;
+  w.bsFlashable = 0;
   x.enable = 0;
-  x.value = 0b0011'1111;
-  memory::copy(&r, &w, sizeof(Registers));
+  x.value = 0b00111111;
+  commit();
+}
+
+auto MCC::commit() -> void {
+  r = w;  //memory::copy(&r, &w, sizeof(Registers));
+  bsmemory.queryable(r.bsQueryable);
+  bsmemory.flashable(r.bsFlashable);
 }
 
 auto MCC::read(uint24 address, uint8 data) -> uint8 {
@@ -46,8 +52,8 @@ auto MCC::read(uint24 address, uint8 data) -> uint8 {
     case  9: return r.exEnableLo << 7;
     case 10: return r.exEnableHi << 7;
     case 11: return r.exMapping << 7;
-    case 12: return r.bsWritable << 7;
-    case 13: return r.unknown << 7;
+    case 12: return r.bsQueryable << 7;
+    case 13: return r.bsFlashable << 7;
     case 14: return 0;  //commit (always zero)
     case 15: return 0;  //x.enable (always zero)
     }
@@ -72,9 +78,9 @@ auto MCC::write(uint24 address, uint8 data) -> void {
     case  9: w.exEnableLo = data.bit(7); break;
     case 10: w.exEnableHi = data.bit(7); break;
     case 11: w.exMapping = data.bit(7); break;
-    case 12: w.bsWritable = data.bit(7); break;
-    case 13: w.unknown = data.bit(7); break;
-    case 14: if(data.bit(7)) memory::copy(&r, &w, sizeof(Registers)); break;
+    case 12: w.bsQueryable = data.bit(7); break;
+    case 13: w.bsFlashable = data.bit(7); break;
+    case 14: if(data.bit(7)) commit(); break;
     case 15: x.enable = data.bit(7); break;
     }
   }

@@ -28,13 +28,13 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "106.62";
+  static const string Version = "106.63";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org/";
 
   //incremented only when serialization format changes
-  static const string SerializerVersion = "106.44";
+  static const string SerializerVersion = "106.63";
 
   namespace Constants {
     namespace Colorburst {
