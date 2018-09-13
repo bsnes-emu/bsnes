@@ -32,25 +32,21 @@ private:
   } irq;
 
   struct Registers {
-    uint1 mapping;        //bit  2 (0 = ignore A15; 1 = use A15)
-    uint1 psramEnableLo;  //bit  3
-    uint1 psramEnableHi;  //bit  4
-    uint2 psramMapping;   //bits 5-6
-    uint1 romEnableLo;    //bit  7
-    uint1 romEnableHi;    //bit  8
-    uint1 exEnableLo;     //bit  9
-    uint1 exEnableHi;     //bit 10
-    uint1 exMapping;      //bit 11
-    uint1 bsQueryable;    //bit 12
-    uint1 bsFlashable;    //bit 13
+    uint1 mapping;             //bit  2 (0 = ignore A15; 1 = use A15)
+    uint1 psramEnableLo;       //bit  3
+    uint1 psramEnableHi;       //bit  4
+    uint2 psramMapping;        //bits 5-6
+    uint1 romEnableLo;         //bit  7
+    uint1 romEnableHi;         //bit  8
+    uint1 exEnableLo;          //bit  9
+    uint1 exEnableHi;          //bit 10
+    uint1 exMapping;           //bit 11
+    uint1 internallyWritable;  //bit 12 (1 = MCC allows writes to BS Memory Cassette)
+    uint1 externallyWritable;  //bit 13 (1 = BS Memory Cassette allows writes to flash memory)
   } r, w;
 
-  //bit 14 (commit)
-
-  struct ExtendedRegisters {
-    uint1 enable;  //bit  15
-    uint8 value;   //bits 24-31
-  } x;
+  //bit 14 = commit
+  //bit 15 = unknown (test register interface?)
 };
 
 extern MCC mcc;

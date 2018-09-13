@@ -126,6 +126,7 @@ auto System::power(bool reset) -> void {
   if(cartridge.has.SharpRTC) cpu.coprocessors.append(&sharprtc);
   if(cartridge.has.SPC7110) cpu.coprocessors.append(&spc7110);
   if(cartridge.has.MSU1) cpu.coprocessors.append(&msu1);
+  if(cartridge.has.BSMemorySlot) cpu.coprocessors.append(&bsmemory);
 
   scheduler.primary(cpu);
 

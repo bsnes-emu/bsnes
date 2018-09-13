@@ -22,23 +22,19 @@ auto MCC::power() -> void {
   w.exEnableLo = 1;
   w.exEnableHi = 0;
   w.exMapping = 1;
-  w.bsQueryable = 0;
-  w.bsFlashable = 0;
-  x.enable = 0;
-  x.value = 0b00111111;
+  w.internallyWritable = 0;
+  w.externallyWritable = 0;
   commit();
 }
 
 auto MCC::commit() -> void {
-  r = w;  //memory::copy(&r, &w, sizeof(Registers));
-  bsmemory.queryable(r.bsQueryable);
-  bsmemory.flashable(r.bsFlashable);
+  r = w;
+  bsmemory.writable(r.externallyWritable);
 }
 
 auto MCC::read(uint24 address, uint8 data) -> uint8 {
   if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
     uint4 index = address.bits(16,19);
-    if(x.enable) return x.value.bit(index & 7);
     switch(index) {
     case  0: return irq.flag << 7;
     case  1: return irq.enable << 7;
@@ -52,10 +48,10 @@ auto MCC::read(uint24 address, uint8 data) -> uint8 {
     case  9: return r.exEnableLo << 7;
     case 10: return r.exEnableHi << 7;
     case 11: return r.exMapping << 7;
-    case 12: return r.bsQueryable << 7;
-    case 13: return r.bsFlashable << 7;
+    case 12: return r.internallyWritable << 7;
+    case 13: return r.externallyWritable << 7;
     case 14: return 0;  //commit (always zero)
-    case 15: return 0;  //x.enable (always zero)
+    case 15: return 0;  //unknown (always zero)
     }
   }
 
@@ -65,7 +61,6 @@ auto MCC::read(uint24 address, uint8 data) -> uint8 {
 auto MCC::write(uint24 address, uint8 data) -> void {
   if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
     uint4 index = address.bits(16,19);
-    if(x.enable) return x.value.bit(index & 7) = data.bit(7), void();
     switch(index) {
     case  1: irq.enable = data.bit(7); break;
     case  2: w.mapping = data.bit(7); break;
@@ -78,10 +73,9 @@ auto MCC::write(uint24 address, uint8 data) -> void {
     case  9: w.exEnableLo = data.bit(7); break;
     case 10: w.exEnableHi = data.bit(7); break;
     case 11: w.exMapping = data.bit(7); break;
-    case 12: w.bsQueryable = data.bit(7); break;
-    case 13: w.bsFlashable = data.bit(7); break;
+    case 12: w.internallyWritable = data.bit(7); break;
+    case 13: w.externallyWritable = data.bit(7); break;
     case 14: if(data.bit(7)) commit(); break;
-    case 15: x.enable = data.bit(7); break;
     }
   }
 }
@@ -258,6 +252,7 @@ auto MCC::exAccess(bool mode, uint24 address, uint8 data) -> uint8 {
 auto MCC::bsAccess(bool mode, uint24 address, uint8 data) -> uint8 {
   address = bus.mirror(address, bsmemory.size());
   if(mode == 0) return bsmemory.read(address, data);
+  if(!r.internallyWritable) return data;
   return bsmemory.write(address, data), data;
 }
 

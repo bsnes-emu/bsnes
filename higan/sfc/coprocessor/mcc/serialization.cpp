@@ -1,7 +1,9 @@
 auto MCC::serialize(serializer& s) -> void {
   s.array(psram.data(), psram.size());
+
   s.integer(irq.flag);
   s.integer(irq.enable);
+
   s.integer(r.mapping);
   s.integer(r.psramEnableLo);
   s.integer(r.psramEnableHi);
@@ -11,8 +13,9 @@ auto MCC::serialize(serializer& s) -> void {
   s.integer(r.exEnableLo);
   s.integer(r.exEnableHi);
   s.integer(r.exMapping);
-  s.integer(r.bsQueryable);
-  s.integer(r.bsFlashable);
+  s.integer(r.internallyWritable);
+  s.integer(r.externallyWritable);
+
   s.integer(w.mapping);
   s.integer(w.psramEnableLo);
   s.integer(w.psramEnableHi);
@@ -22,8 +25,6 @@ auto MCC::serialize(serializer& s) -> void {
   s.integer(w.exEnableLo);
   s.integer(w.exEnableHi);
   s.integer(w.exMapping);
-  s.integer(w.bsQueryable);
-  s.integer(w.bsFlashable);
-  s.integer(x.enable);
-  s.integer(x.value);
+  s.integer(w.internallyWritable);
+  s.integer(w.externallyWritable);
 }
