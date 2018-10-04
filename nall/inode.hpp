@@ -11,6 +11,10 @@ namespace nall {
 struct inode {
   enum class time : uint { create, modify, access };
 
+  inode() = delete;
+  inode(const inode&) = delete;
+  auto operator=(const inode&) -> inode& = delete;
+
   static auto exists(const string& name) -> bool {
     return access(name, F_OK) == 0;
   }
@@ -45,19 +49,21 @@ struct inode {
     return data.st_gid;
   }
 
-  #if !defined(PLATFORM_WINDOWS)
-  static auto user(const string& name) -> string {
+  static auto owner(const string& name) -> string {
+    #if !defined(PLATFORM_WINDOWS)
     struct passwd* pw = getpwuid(uid(name));
     if(pw && pw->pw_name) return pw->pw_name;
+    #endif
     return {};
   }
 
   static auto group(const string& name) -> string {
+    #if !defined(PLATFORM_WINDOWS)
     struct group* gr = getgrgid(gid(name));
     if(gr && gr->gr_name) return gr->gr_name;
+    #endif
     return {};
   }
-  #endif
 
   static auto timestamp(const string& name, time mode = time::modify) -> uint64_t {
     struct stat data{};
@@ -81,6 +87,41 @@ struct inode {
     case time::access: return max((uint)data.st_atime, data.st_mtime);
     }
     return 0;
+  }
+
+  static auto setMode(const string& name, uint mode) -> bool {
+    #if !defined(PLATFORM_WINDOWS)
+    return chmod(name, mode) == 0;
+    #else
+    return _wchmod(utf16_t(name), (mode & 0400 ? _S_IREAD : 0) | (mode & 0200 ? _S_IWRITE : 0)) == 0;
+    #endif
+  }
+
+  static auto setOwner(const string& name, const string& owner) -> bool {
+    #if !defined(PLATFORM_WINDOWS)
+    struct passwd* pwd = getpwnam(owner);
+    if(!pwd) return false;
+    return chown(name, pwd->pw_uid, inode::gid(name)) == 0;
+    #else
+    return true;
+    #endif
+  }
+
+  static auto setGroup(const string& name, const string& group) -> bool {
+    #if !defined(PLATFORM_WINDOWS)
+    struct group* grp = getgrnam(group);
+    if(!grp) return false;
+    return chown(name, inode::uid(name), grp->gr_gid) == 0;
+    #else
+    return true;
+    #endif
+  }
+
+  static auto setTimestamp(const string& name, uint64_t value, time mode = time::modify) -> bool {
+    struct utimbuf timeBuffer;
+    timeBuffer.modtime = mode == time::modify ? value : inode::timestamp(name, time::modify);
+    timeBuffer.actime  = mode == time::access ? value : inode::timestamp(name, time::access);
+    return utime(name, &timeBuffer) == 0;
   }
 
   //returns true if 'name' already exists

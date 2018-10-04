@@ -62,23 +62,23 @@ auto hiro::initialize() -> void {
 }
 
 #include <nall/main.hpp>
-auto nall::main(vector<string> arguments) -> void {
-  if(arguments.size() == 2 && arguments[1] == "--name") {
+auto nall::main(Arguments arguments) -> void {
+  if(arguments.size() == 1 && arguments[0] == "--name") {
     return print("icarus");
   }
 
-  if(arguments.size() == 3 && arguments[1] == "--manifest" && directory::exists(arguments[2])) {
-    return print(icarus.manifest(arguments[2]));
+  if(arguments.size() == 2 && arguments[0] == "--manifest" && directory::exists(arguments[1])) {
+    return print(icarus.manifest(arguments[1]));
   }
 
-  if(arguments.size() == 3 && arguments[1] == "--import" && file::exists(arguments[2])) {
-    if(string target = icarus.import(arguments[2])) {
+  if(arguments.size() == 2 && arguments[0] == "--import" && file::exists(arguments[1])) {
+    if(string target = icarus.import(arguments[1])) {
       return print(target, "\n");
     }
     return;
   }
 
-  if(arguments.size() == 2 && arguments[1] == "--import") {
+  if(arguments.size() == 1 && arguments[0] == "--import") {
     if(string source = BrowserDialog()
     .setTitle("Load ROM File")
     .setPath(settings["icarus/Path"].text())

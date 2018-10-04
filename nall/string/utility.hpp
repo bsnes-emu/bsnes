@@ -18,7 +18,7 @@ auto string::read(string_view filename) -> string {
 
   rewind(fp);
   result.resize(filesize);
-  auto unused = fread(result.get(), 1, filesize, fp);
+  (void)fread(result.get(), 1, filesize, fp);
   return fclose(fp), result;
 }
 

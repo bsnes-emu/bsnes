@@ -19,7 +19,7 @@ struct ZIP {
     filename.transform("\\", "/");
     if(!timestamp) timestamp = this->timestamp;
     uint32_t checksum = Hash::CRC32({data, size}).digest().hex();
-    directory.append({filename, timestamp, checksum, size, fp.offset()});
+    directory.append({filename, timestamp, checksum, size, (uint32_t)fp.offset()});
 
     fp.writel(0x04034b50, 4);         //signature
     fp.writel(0x0014, 2);             //minimum version (2.0)
@@ -34,7 +34,7 @@ struct ZIP {
     fp.writel(0x0000, 2);             //extra field length
     fp.print(filename);               //file name
 
-    fp.write(data, size);             //file data
+    fp.write({data, size});           //file data
   }
 
   ~ZIP() {
@@ -86,7 +86,7 @@ protected:
     return ((info->tm_year - 80) << 9) | ((1 + info->tm_mon) << 5) + (info->tm_mday);
   }
 
-  file fp;
+  file_buffer fp;
   time_t timestamp;
   struct entry_t {
     string filename;

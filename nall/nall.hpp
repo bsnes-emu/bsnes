@@ -15,6 +15,7 @@
 
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
+//#include <nall/arguments.hpp>
 #include <nall/arithmetic.hpp>
 #include <nall/array.hpp>
 #include <nall/array-span.hpp>
@@ -28,7 +29,8 @@
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
-#include <nall/filemap.hpp>
+#include <nall/file-buffer.hpp>
+#include <nall/file-map.hpp>
 #include <nall/function.hpp>
 #include <nall/hashset.hpp>
 #include <nall/hid.hpp>
@@ -58,6 +60,7 @@
 #include <nall/simd.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
+#include <nall/terminal.hpp>
 #include <nall/thread.hpp>
 #include <nall/traits.hpp>
 #include <nall/unique-pointer.hpp>
@@ -65,6 +68,7 @@
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
 #include <nall/view.hpp>
+#include <nall/arguments.hpp>  //todo: compilation errors when included earlier
 #include <nall/decode/base.hpp>
 #include <nall/decode/base64.hpp>
 #include <nall/decode/bmp.hpp>

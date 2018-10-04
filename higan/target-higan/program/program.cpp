@@ -13,7 +13,7 @@
 #include "utility.cpp"
 unique_pointer<Program> program;
 
-Program::Program(vector<string> arguments) {
+Program::Program(Arguments arguments) {
   program = this;
 
   Emulator::platform = this;
@@ -89,8 +89,7 @@ Program::Program(vector<string> arguments) {
   updateAudioDriver();
   updateAudioEffects();
 
-  arguments.takeFirst();  //ignore program location in argument parsing
-  for(auto& argument : arguments) {
+  for(auto argument : arguments) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
     } else if(directory::exists(argument.split("|", 1L).right())) {

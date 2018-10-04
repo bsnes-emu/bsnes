@@ -234,6 +234,20 @@ template<> struct stringify<const string_view&> {
   const string_view& _view;
 };
 
+template<> struct stringify<array_view<uint8_t>> {
+  stringify(const array_view<uint8_t>& source) : _view(source) {}
+  auto data() const -> const char* { return _view.data<const char>(); }
+  auto size() const -> uint { return _view.size(); }
+  const array_view<uint8_t>& _view;
+};
+
+template<> struct stringify<const array_view<uint8_t>&> {
+  stringify(const array_view<uint8_t>& source) : _view(source) {}
+  auto data() const -> const char* { return _view.data<const char>(); }
+  auto size() const -> uint { return _view.size(); }
+  const array_view<uint8_t>& _view;
+};
+
 template<> struct stringify<string_pascal> {
   stringify(const string_pascal& source) : _text(source) {}
   auto data() const -> const char* { return _text.data(); }
@@ -250,6 +264,7 @@ template<> struct stringify<const string_pascal&> {
 
 //pointers
 
+//note: T = char* is matched by stringify<string_view>
 template<typename T> struct stringify<T*> {
   stringify(const T* source) {
     if(!source) {

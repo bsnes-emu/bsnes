@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <nall/filemap.hpp>
+#include <nall/file-map.hpp>
 #include <nall/interpolation.hpp>
 #include <nall/stdint.hpp>
 #include <nall/decode/bmp.hpp>

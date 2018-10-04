@@ -67,7 +67,7 @@ auto APU::power() -> void {
   phase = 0;
   cycle = 0;
 
-  PRNG prng;
+  PRNG::PCG prng;
   for(auto& n : wave.pattern) n = prng.random();
 }
 

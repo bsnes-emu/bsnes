@@ -1,6 +1,6 @@
 struct Program : Emulator::Platform {
   //program.cpp
-  Program(vector<string> arguments);
+  Program(Arguments arguments);
   auto main() -> void;
   auto quit() -> void;
 

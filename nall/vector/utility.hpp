@@ -10,6 +10,12 @@ template<typename T> auto vector<T>::sort(const function<bool (const T& lhs, con
   nall::sort(_pool, _size, comparator);
 }
 
+template<typename T> auto vector<T>::reverse() -> void {
+  vector<T> reversed;
+  for(uint n : range(size())) reversed.prepend(_pool[n]);
+  operator=(move(reversed));
+}
+
 template<typename T> auto vector<T>::find(const function<bool (const T& lhs)>& comparator) -> maybe<uint> {
   for(uint n : range(size())) if(comparator(_pool[n])) return n;
   return nothing;

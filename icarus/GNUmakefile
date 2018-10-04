@@ -42,13 +42,13 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/applications/
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
-	mkdir -p $(prefix)/share/$(name)/database/
-	mkdir -p $(prefix)/share/$(name)/firmware/
+	mkdir -p $(prefix)/share/$(name)/Database/
+	mkdir -p $(prefix)/share/$(name)/Firmware/
 	cp out/$(name) $(prefix)/bin/$(name)
 	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp data/$(name).png $(prefix)/share/icons/$(name).png
-	cp -R database/* $(prefix)/share/$(name)/database/
-	cp -R firmware/* $(prefix)/share/$(name)/firmware/
+	cp -R Database/* $(prefix)/share/$(name)/Database/
+	cp -R Firmware/* $(prefix)/share/$(name)/Firmware/
 endif
 
 uninstall:

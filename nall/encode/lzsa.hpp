@@ -49,14 +49,14 @@ inline auto LZSA(array_view<uint8_t> input) -> vector<uint8_t> {
     int length, offset;
     suffixArray.previous(length, offset, index);
 
-    for(uint ahead = 1; ahead <= 2; ahead++) {
+/*  for(uint ahead = 1; ahead <= 2; ahead++) {
       int aheadLength, aheadOffset;
       suffixArray.previous(aheadLength, aheadOffset, index + ahead);
       if(aheadLength > length && aheadOffset >= 0) {
         length = 0;
         break;
       }
-    }
+    } */
 
     if(length < 6 || offset < 0) {
       flagWrite(0);

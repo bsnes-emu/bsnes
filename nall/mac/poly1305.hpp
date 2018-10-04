@@ -5,6 +5,12 @@
 namespace nall { namespace MAC {
 
 struct Poly1305 {
+  auto authenticate(array_view<uint8_t> memory, uint256_t nonce) -> uint128_t {
+    initialize(nonce);
+    process(memory.data(), memory.size());
+    return finish();
+  }
+
   auto initialize(uint256_t key) -> void {
     uint64_t t0 = key >>  0;
     uint64_t t1 = key >> 64;

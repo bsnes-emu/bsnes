@@ -20,6 +20,8 @@ struct Pair {
   explicit operator bool() const { return hi | lo; }
   template<typename T> operator T() const { T value; _get(*this, value); return value; }
 
+  auto operator+() const -> Pair { return *this; }
+  auto operator-() const -> Pair { return Pair(0) - *this; }
   auto operator~() const -> Pair { return {~hi, ~lo}; }
   auto operator!() const -> bool { return !(hi || lo); }
 
@@ -75,13 +77,6 @@ struct Pair {
   template<typename T> auto operator> (const T& rhs) const -> bool { return Cast(*this) >  Cast(rhs); }
   template<typename T> auto operator< (const T& rhs) const -> bool { return Cast(*this) <  Cast(rhs); }
 
-  explicit Pair(const vector<uint8_t>& value) : hi(0), lo(0) {
-    for(auto n : reverse(value)) {
-      operator<<=(8);
-      operator|=(n);
-    }
-  }
-
 private:
   Type lo;
   Type hi;
@@ -96,6 +91,10 @@ private:
   friend auto div(const Pair&, const Pair&, Pair&, Pair&) -> void;
   template<typename T> friend auto shl(const Pair&, const T&) -> Pair;
   template<typename T> friend auto shr(const Pair&, const T&) -> Pair;
+};
+
+template<> struct ArithmeticNatural<PairBits> {
+  using type = Pair;
 };
 
 #define ConcatenateUDL(Size) _u##Size
@@ -332,29 +331,6 @@ template<> struct stringify<Pair> {
   char _data[1 + sizeof(Pair) * 3];
   uint _size;
 };
-
-inline auto to_vector(Pair value) -> vector<uint8_t> {
-  vector<uint8_t> result;
-  result.resize(PairBits / 8);
-  for(auto& byte : result) {
-    byte = value;
-    value >>= 8;
-  }
-  return result;
-}
-
-#if 0
-inline auto hex(const Pair& value, long precision = 0, char padchar = '0') -> string {
-  string text;
-  if(!upper(value)) {
-    text.append(hex(lower(value)));
-  } else {
-    text.append(hex(upper(value)));
-    text.append(hex(lower(value), TypeBits / 4, '0'));
-  }
-  return pad(text, precision, padchar);
-}
-#endif
 
 }
 

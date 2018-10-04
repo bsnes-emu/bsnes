@@ -100,7 +100,7 @@ auto Program::saveState(string filename) -> bool {
   if(gamePath().endsWith("/")) {
     string location = {statePath(), filename, ".bst"};
     directory::create(Location::path(location));
-    if(!file::write(location, saveState.data(), saveState.size())) {
+    if(!file::write(location, saveState)) {
       return showMessage({"Unable to write [", prefix, "] to disk"}), false;
     }
   } else {

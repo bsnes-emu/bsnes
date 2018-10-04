@@ -6,7 +6,7 @@ namespace nall { namespace Path {
 
 inline auto active() -> string {
   char path[PATH_MAX] = "";
-  auto unused = getcwd(path, PATH_MAX);
+  (void)getcwd(path, PATH_MAX);
   string result = path;
   if(!result) result = ".";
   result.transform("\\", "/");

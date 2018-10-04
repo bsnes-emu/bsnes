@@ -54,7 +54,7 @@ auto BSMemory::load() -> bool {
   for(auto& byte : page.buffer[1]) byte = random();
 
   for(auto& block : blocks) {
-    block.erased = 0;
+    block.erased = 1;
     block.locked = 1;
   }
 

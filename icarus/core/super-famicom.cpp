@@ -46,7 +46,7 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, string location) -> str
     auto size = rom["size"].natural();
     if(size > buffer.size() - offset) {
       auto firmware = string{rom["identifier"].text(), ".", rom["content"].text(), ".rom"}.trimLeft(".", 1L).downcase();
-      auto location = locate({"firmware/", firmware});
+      auto location = locate({"Firmware/", firmware});
       if(location && file::size(location) == size) {
         write({target, name}, file::read(location));
       } else {

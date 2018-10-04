@@ -20,7 +20,7 @@ struct file : vfs::file {
   }
 
   auto seek(intmax offset_, index index_) -> void override {
-    _fp.seek(offset_, (nall::file::index)index_);
+    _fp.seek(offset_, (uint)index_);
   }
 
   auto read() -> uint8_t override {
@@ -41,11 +41,11 @@ private:
   auto operator=(const file&) -> file& = delete;
 
   auto _open(string location_, mode mode_) -> bool {
-    if(!_fp.open(location_, (nall::file::mode)mode_)) return false;
+    if(!_fp.open(location_, (uint)mode_)) return false;
     return true;
   }
 
-  nall::file _fp;
+  file_buffer _fp;
 };
 
 }}}

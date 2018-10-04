@@ -2,14 +2,6 @@
 
 namespace nall {
 
-template<typename T> vector<T>::vector(Literal::Capacity capacity) {
-  reserve(capacity.value);
-}
-
-template<typename T> vector<T>::vector(Literal::Size size) {
-  resize(size.value);
-}
-
 template<typename T> vector<T>::vector(const initializer_list<T>& values) {
   reserveRight(values.size());
   for(auto& value : values) append(value);

@@ -4,10 +4,8 @@
 
 namespace nall { namespace Decode {
 
-inline auto LZSA(const void* data) -> vector<uint8_t> {
+inline auto LZSA(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
-
-  auto input = (const uint8_t*)data;
   uint index = 0;
 
   uint size = 0;

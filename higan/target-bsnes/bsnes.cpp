@@ -23,10 +23,9 @@ auto hiro::initialize() -> void {
 }
 
 #include <nall/main.hpp>
-auto nall::main(vector<string> arguments) -> void {
+auto nall::main(Arguments arguments) -> void {
   settings.location = locate("settings.bml");
 
-  arguments.takeLeft();  //ignore program location in argument parsing
   for(auto argument : arguments) {
     if(argument == "--fullscreen") {
       presentation.startFullScreen = true;

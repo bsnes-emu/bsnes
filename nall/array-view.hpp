@@ -29,7 +29,7 @@ template<typename T> struct array_view {
   inline operator const T*() const {
     #ifdef DEBUG
     struct out_of_bounds {};
-    if(_size <= 0) throw out_of_bounds{};
+    if(_size < 0) throw out_of_bounds{};
     #endif
     return _data;
   }
@@ -72,16 +72,28 @@ template<typename T> struct array_view {
     return value;
   }
 
+  auto view(uint offset, uint length) const -> type {
+    #ifdef DEBUG
+    struct out_of_bounds {};
+    if(offset + length >= _size) throw out_of_bounds{};
+    #endif
+    return {_data + offset, length};
+  }
+
   //array_view<uint8_t> specializations
   template<typename U> auto readl(U& value, uint size) -> U;
   template<typename U> auto readm(U& value, uint size) -> U;
   template<typename U> auto readvn(U& value, uint size) -> U;
   template<typename U> auto readvi(U& value, uint size) -> U;
 
+  template<typename U> auto readl(U& value, uint offset, uint size) -> U { return view(offset, size).readl(value, size); }
+
   template<typename U = uint64_t> auto readl(uint size) -> U { U value; return readl(value, size); }
   template<typename U = uint64_t> auto readm(uint size) -> U { U value; return readm(value, size); }
   template<typename U = uint64_t> auto readvn(uint size) -> U { U value; return readvn(value, size); }
   template<typename U =  int64_t> auto readvi(uint size) -> U { U value; return readvi(value, size); }
+
+  template<typename U = uint64_t> auto readl(uint offset, uint size) -> U { U value; return readl(value, offset, size); }
 
 protected:
   const T* _data;
@@ -92,13 +104,13 @@ protected:
 
 template<> template<typename U> inline auto array_view<uint8_t>::readl(U& value, uint size) -> U {
   value = 0;
-  for(uint byte : range(size)) value |= read() << byte * 8;
+  for(uint byte : range(size)) value |= (U)read() << byte * 8;
   return value;
 }
 
 template<> template<typename U> inline auto array_view<uint8_t>::readm(U& value, uint size) -> U {
   value = 0;
-  for(uint byte : reverse(range(size))) value |= read() << byte * 8;
+  for(uint byte : reverse(range(size))) value |= (U)read() << byte * 8;
   return value;
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <nall/stdint.hpp>
 
 //pull all type traits used by nall from std namespace into nall namespace
 //this removes the requirement to prefix type traits with std:: within nall
@@ -28,4 +29,11 @@ namespace nall {
   using std::remove_reference;
   using std::swap;
   using std::true_type;
+}
+
+namespace std {
+  #if INTMAX_BITS >= 128
+  template<> struct is_signed<int128_t> : true_type {};
+  template<> struct is_unsigned<uint128_t> : true_type {};
+  #endif
 }

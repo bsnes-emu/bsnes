@@ -1,5 +1,5 @@
 database
-  revision: 2018-05-17
+  revision: 2018-09-20
 
 //Prototypes (JPN)
 
@@ -125,7 +125,7 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2018-05-17
+  revision: 2018-09-20
 
 game
   sha256:   5c4e283efc338958b8dd45ebd6daf133a9eb280420a98e2e1df358ae0242c366
@@ -1003,6 +1003,18 @@ game
   note: Custom wiring on PCB
 
 game
+  sha256:   76f80cdf704a0e1daf1af5bbf564e427b425a5ee42329417de6f29219fe63e5f
+  label:    ロックマンエックス
+  name:     Rockman X
+  region:   SHVC-RX
+  revision: SHVC-RX-1
+  board:    SHVC-2A0N-11
+    memory
+      type: ROM
+      size: 0x180000
+      content: Program
+
+game
   sha256:   6dfc016c571a16e5d42045060b1a88b6f3da5831e05b33c22035e1d990deccf3
   label:    ロマンシング サ・ガ3 体験版サンプルROM
   name:     Romancing SaGa 3 - Taikenban Sample ROM
@@ -1311,6 +1323,22 @@ game
   name:     Super Mahjong Taikai
   region:   SHVC-IQ
   revision: SHVC-IQ-1
+  board:    SHVC-1A3B-13
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   b3204162def67b0dc40097344074e9b660ed296e5b5e22e778f373f0b985645b
+  label:    スーパー麻雀大会
+  name:     Super Mahjong Taikai
+  region:   SHVC-IQ
+  revision: SHVC-IQ-2
   board:    SHVC-1A3B-13
     memory
       type: ROM
@@ -5733,7 +5761,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2018-05-06
+  revision: 2018-09-20
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -7537,6 +7565,22 @@ game
       volatile
     oscillator
       frequency: 21440000
+
+game
+  sha256:   fa8cacf5bbfc39ee6bbaa557adf89133d60d42f6cf9e1db30d5a36a469f74d15
+  label:    Donkey Kong Country
+  name:     Donkey Kong Country
+  region:   SNS-8X-USA
+  revision: SNS-8X-0
+  board:    SHVC-1J1M-11
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
 
 game
   sha256:   df2644d435330192a13768cc1f79c5aa3084a64217a5250c6dd4ffdbe2175be4
@@ -10271,6 +10315,18 @@ game
       content: Program
 
 game
+  sha256:   b8f70a6e7fb93819f79693578887e2c11e196bdf1ac6ddc7cb924b1ad0be2d32
+  label:    Mega Man X
+  name:     Mega Man X
+  region:   SNS-RX-USA
+  revision: SNS-RX-1
+  board:    MAXI-1A0N-30
+    memory
+      type: ROM
+      size: 0x180000
+      content: Program
+
+game
   sha256:   da484f2a636b8d692840f40e5468e992c5f2af26d365c69fbc12ef2923588d23
   label:    Mega Man X2
   name:     Mega Man X2
@@ -12981,6 +13037,23 @@ game
       volatile
 
 game
+  sha256:   82e39dfbb3e4fe5c28044e80878392070c618b298dd5a267e5ea53c8f72cc548
+  label:    Star Fox
+  name:     Star Fox
+  region:   SNS-FO-USA
+  revision: SNS-FO-2
+  board:    SHVC-1C0N
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x8000
+      content: Save
+      volatile
+
+game
   sha256:   2c0bac12a7866fad1cb306da768a201c12f2520332df1ef51cba1576db21ff06
   label:    Star Fox: Super Weekend
   name:     Star Fox - Super Weekend
@@ -13691,6 +13764,46 @@ game
       frequency: 7600000
 
 game
+  sha256:   76d293e5a772eb2f326e173eac62ca323873b1f329f9b935a97ba86974e1fcd5
+  label:    Super Mario Kart
+  name:     Super Mario Kart
+  region:   SNS-MK-USA
+  revision: SNS-MK-0
+  board:    SHVC-1K1X-10
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+    memory
+      type: ROM
+      size: 0x1800
+      content: Program
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1B
+    memory
+      type: ROM
+      size: 0x800
+      content: Data
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1B
+    memory
+      type: RAM
+      size: 0x200
+      content: Data
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1B
+      volatile
+    oscillator
+      frequency: 7600000
+
+game
   sha256:   740646f3535bfb365ca44e70d46ab433467b142bd84010393070bd0b141af853
   label:    Super Mario RPG: Legend of the Seven Stars
   name:     Super Mario RPG - Legend of the Seven Stars
@@ -13726,6 +13839,24 @@ game
       type: RAM
       size: 0x800
       content: Save
+
+game
+  sha256:   9b4957466798bbdb5b43a450bbb60b2591ae81d95b891430f62d53ca62e8bc7b
+  label:    Super Mario World 2: Yoshi's Island
+  name:     Super Mario World 2 - Yoshi's Island
+  region:   SNS-YI-USA
+  revision: SNS-YI-0
+  board:    SHVC-1CB5B-01
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: RAM
+      size: 0x8000
+      content: Save
+    oscillator
+      frequency: 21440000
 
 game
   sha256:   bd763c1a56365c244be92e6cffefd318780a2a19eda7d5baf1c6d5bd6c1b3e06

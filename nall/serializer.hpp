@@ -31,6 +31,10 @@ struct has_serialize {
 struct serializer {
   enum Mode : uint { Load, Save, Size };
 
+  explicit operator bool() const {
+    return _size;
+  }
+
   auto mode() const -> Mode {
     return _mode;
   }

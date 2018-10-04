@@ -123,7 +123,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
     return vfs::fs::file::open({Location::notsuffix(superFamicom.location), ".msu"}, mode);
   }
 
-  if(name.match("msu1/track-*.pcm")) {
+  if(name.match("msu1/track*.pcm")) {
     name.trimLeft("msu1/track", 1L);
     return vfs::fs::file::open({Location::notsuffix(superFamicom.location), name}, mode);
   }

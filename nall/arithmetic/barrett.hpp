@@ -2,20 +2,27 @@
 
 namespace nall {
 
-struct BarrettReduction {
-  BarrettReduction(uint256_t modulo) : modulo(modulo), factor((1_u1024 << 512) / modulo) {}
+template<uint Bits> struct BarrettReduction {
+  using type = typename ArithmeticNatural<1 * Bits>::type;
+  using pair = typename ArithmeticNatural<2 * Bits>::type;
 
-  //return = value % modulo
-  inline auto operator()(uint512_t value) const -> uint256_t {
-    uint512_t hi, lo;
-    nall::mul(value, factor, hi, lo);
-    uint512_t remainder = value - hi * modulo;
+  explicit BarrettReduction(type modulo) : modulo(modulo), factor(pair(1) + -pair(modulo) / modulo) {}
+
+  //return => value % modulo
+  inline auto operator()(pair value) const -> type {
+    pair hi, lo;
+    mul(value, factor, hi, lo);
+    pair remainder = value - hi * modulo;
     return remainder < modulo ? remainder : remainder - modulo;
   }
 
 private:
-  const uint512_t modulo;
-  const uint512_t factor;
+  const pair modulo;
+  const pair factor;
 };
+
+template<typename T, uint Bits> auto operator%(T value, const BarrettReduction<Bits>& modulo) {
+  return modulo(value);
+}
 
 }

@@ -12,7 +12,7 @@ struct Icarus {
   }
 
   virtual auto write(const string& filename, const uint8_t* data, uint size) -> bool {
-    return file::write(filename, data, size);
+    return file::write(filename, {data, size});
   }
 
   auto write(const string& filename, const vector<uint8_t>& buffer) -> bool {

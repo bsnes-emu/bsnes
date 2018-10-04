@@ -3,50 +3,52 @@
 #if defined(EC_REFERENCE)
   #include <nall/elliptic-curve/modulo25519-reference.hpp>
 #else
-  #include <nall/elliptic-curve/modulo25519.hpp>
+  #include <nall/elliptic-curve/modulo25519-optimized.hpp>
 #endif
 
 namespace nall { namespace EllipticCurve {
 
 struct Curve25519 {
   auto sharedKey(uint256_t secretKey, uint256_t basepoint = 9) const -> uint256_t {
-    secretKey &= ((0_u256 - 1) >> 2) - 7;
-    secretKey |= 1_u256 << 254;
-    basepoint &= (0_u256 - 1) >> 1;
+    secretKey &= (1_u256 << 254) - 8;
+    secretKey |= (1_u256 << 254);
+    basepoint &= ~0_u256 >> 1;
 
-    point p = scalarMultiply(secretKey, modP(basepoint));
-    return p.x * p.z.reciprocal();
+    point p = scalarMultiply(basepoint % P, secretKey);
+    field k = p.x * reciprocal(p.z);
+    return k();
   }
 
 private:
   using field = Modulo25519;
   struct point { field x, z; };
-
-  inline auto montgomeryAdd(point p, point q, field b) const -> point {
-    return {
-      (p.x * q.x - p.z * q.z).square(),
-      (p.x * q.z - p.z * q.x).square() * b
-    };
-  }
+  const BarrettReduction<256> P = BarrettReduction<256>{EllipticCurve::P};
 
   inline auto montgomeryDouble(point p) const -> point {
-    field a = (p.x + p.z).square();
-    field b = (p.x - p.z).square();
+    field a = square(p.x + p.z);
+    field b = square(p.x - p.z);
     field c = a - b;
     field d = a + c * 121665;
     return {a * b, c * d};
   }
 
-  inline auto scalarMultiply(uint256_t e, field b) const -> point {
+  inline auto montgomeryAdd(point p, point q, field b) const -> point {
+    return {
+      square(p.x * q.x - p.z * q.z),
+      square(p.x * q.z - p.z * q.x) * b
+    };
+  }
+
+  inline auto scalarMultiply(field b, uint256_t exponent) const -> point {
     point p{1, 0}, q{b, 1};
-    for(uint n : reverse(range(255))) {
-      bool bit = e >> n & 1;
-      cswap(bit, p.x, q.x);
-      cswap(bit, p.z, q.z);
+    for(uint bit : reverse(range(255))) {
+      bool condition = exponent >> bit & 1;
+      cswap(condition, p.x, q.x);
+      cswap(condition, p.z, q.z);
       q = montgomeryAdd(p, q, b);
       p = montgomeryDouble(p);
-      cswap(bit, p.x, q.x);
-      cswap(bit, p.z, q.z);
+      cswap(condition, p.x, q.x);
+      cswap(condition, p.z, q.z);
     }
     return p;
   }

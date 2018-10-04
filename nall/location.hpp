@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nall/string.hpp>
+
 namespace nall { namespace Location {
 
 // (/parent/child.type/)

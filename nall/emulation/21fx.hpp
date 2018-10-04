@@ -17,7 +17,7 @@ using uint32 = Natural<32>;
 using uint64 = Natural<64>;
 
 struct FX {
-  auto open(vector<string> arguments) -> bool;
+  auto open(Arguments& arguments) -> bool;
   auto close() -> void;
   auto readable() -> bool;
   auto read() -> uint8_t;
@@ -35,16 +35,10 @@ struct FX {
   serial device;
 };
 
-auto FX::open(vector<string> arguments) -> bool {
+auto FX::open(Arguments& arguments) -> bool {
   //device name override support
   string name;
-  for(auto argument : arguments) {
-    if(argument.beginsWith("--device=")) {
-      name = argument.trimLeft("--device=", 1L);
-      break;
-    }
-  }
-
+  arguments.take("--device", name);
   if(!device.open(name)) {
     print("[21fx] error: unable to open hardware device\n");
     return false;

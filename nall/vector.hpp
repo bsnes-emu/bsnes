@@ -7,7 +7,6 @@
 #include <nall/bit.hpp>
 #include <nall/function.hpp>
 #include <nall/iterator.hpp>
-#include <nall/literals.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
 #include <nall/merge-sort.hpp>
@@ -23,8 +22,6 @@ struct vector_base {
 
   //core.hpp
   vector_base() = default;
-  vector_base(Literal::Capacity capacity);
-  vector_base(Literal::Size size);
   vector_base(const initializer_list<T>& values);
   vector_base(const type& source);
   vector_base(type&& source);
@@ -121,6 +118,7 @@ struct vector_base {
   //utility.hpp
   auto fill(const T& value = {}) -> void;
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
+  auto reverse() -> void;
   auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint>;
   auto find(const T& value) const -> maybe<uint>;
   auto findSorted(const T& value) const -> maybe<uint>;

@@ -11,9 +11,9 @@ auto Program::loadState(uint slot, bool managed) -> bool {
   string type = managed ? "managed" : "quick";
   auto location = stateName(slot, managed);
   auto memory = file::read(location);
-  if(memory.size() == 0) return showMessage({"Slot ", slot, " ", type, " state does not exist"}), false;
+  if(!memory) return showMessage({"Slot ", slot, " ", type, " state does not exist"}), false;
   serializer s(memory.data(), memory.size());
-  if(emulator->unserialize(s) == false) return showMessage({"Slot ", slot, " ", type, " state incompatible"}), false;
+  if(!emulator->unserialize(s)) return showMessage({"Slot ", slot, " ", type, " state incompatible"}), false;
   return showMessage({"Loaded ", type, " state from slot ", slot}), true;
 }
 
@@ -22,10 +22,8 @@ auto Program::saveState(uint slot, bool managed) -> bool {
   string type = managed ? "managed" : "quick";
   auto location = stateName(slot, managed);
   serializer s = emulator->serialize();
-  if(s.size() == 0) return showMessage({"Failed to save ", type, " state to slot ", slot}), false;
+  if(!s) return showMessage({"Failed to save ", type, " state to slot ", slot}), false;
   directory::create(Location::path(location));
-  if(file::write(location, s.data(), s.size()) == false) {
-    return showMessage({"Unable to write ", type, " state to slot ", slot}), false;
-  }
+  if(!file::write(location, {s.data(), s.size()})) return showMessage({"Unable to write ", type, " state to slot ", slot}), false;
   return showMessage({"Saved ", type, " state to slot ", slot}), true;
 }

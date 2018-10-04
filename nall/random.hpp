@@ -54,8 +54,10 @@ protected:
   }
 };
 
+namespace PRNG {
+
 //Galois linear feedback shift register using CRC64 polynomials
-struct PRNG_LFSR : RNG<PRNG_LFSR> {
+struct LFSR : RNG<LFSR> {
   auto seed(maybe<uint64_t> seed = {}) -> void {
     lfsr = seed ? seed() : (uint64_t)randomSeed();
     for(uint n : range(8)) read();  //hide the CRC64 polynomial from initial output
@@ -73,10 +75,10 @@ private:
   static const uint64_t crc64 = 0xc96c'5795'd787'0f42;
   uint64_t lfsr = crc64;
 
-  friend class RNG<PRNG_LFSR>;
+  friend class RNG<LFSR>;
 };
 
-struct PRNG_PCG : RNG<PRNG_PCG> {
+struct PCG : RNG<PCG> {
   auto seed(maybe<uint32_t> seed = {}, maybe<uint32_t> sequence = {}) -> void {
     if(!seed) seed = (uint32_t)randomSeed();
     if(!sequence) sequence = 0;
@@ -105,12 +107,16 @@ private:
   uint64_t state = 0;
   uint64_t increment = 0;
 
-  friend class RNG<PRNG_PCG>;
+  friend class RNG<PCG>;
 };
 
+}
+
+namespace CSPRNG {
+
 //XChaCha20 cryptographically secure pseudo-random number generator
-struct CSPRNG_XChaCha20 : RNG<CSPRNG_XChaCha20> {
-  CSPRNG_XChaCha20() { seed(); }
+struct XChaCha20 : RNG<XChaCha20> {
+  XChaCha20() { seed(); }
 
   auto seed(maybe<uint256_t> key = {}, maybe<uint192_t> nonce = {}) -> void {
     //the randomness comes from the key; the nonce just adds a bit of added entropy
@@ -130,16 +136,15 @@ private:
   Cipher::XChaCha20 context{0, 0};
   uint counter = 0;
 
-  friend class RNG<CSPRNG_XChaCha20>;
+  friend class RNG<XChaCha20>;
 };
+
+}
 
 //
 
-using PRNG = PRNG_PCG;
-using CSPRNG = CSPRNG_XChaCha20;
-
 template<typename T = uint64_t> inline auto random() -> T {
-  static PRNG_PCG pcg;  //note: unseeded
+  static PRNG::PCG pcg;  //note: unseeded
   return pcg.random<T>();
 }
 

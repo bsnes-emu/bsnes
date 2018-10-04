@@ -39,10 +39,13 @@ ifeq ($(platform),)
   endif
 endif
 
+compiler.c      = $(compiler) -x c -std=c11
+compiler.cpp    = $(compiler) -x c++ -std=c++14
+compiler.objc   = $(compiler) -x objective-c -std=c11
+compiler.objcpp = $(compiler) -x objective-c++ -std=c++14
+
 flags.c      = -x c -std=c11
-flags.h      = -x c-header -std=c11
 flags.cpp    = -x c++ -std=c++14
-flags.hpp    = -x c++-header -std=c++14
 flags.objc   = -x objective-c -std=c11
 flags.objcpp = -x objective-c++ -std=c++14
 flags.deps   = -MMD -MP -MF $(@:.o=.d)
@@ -51,8 +54,8 @@ flags.deps   = -MMD -MP -MF $(@:.o=.d)
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
-    flags.cpp := -x c++ -std=gnu++14
-    flags.hpp := -x c++-header -std=gnu++14
+    compiler.cpp = $(compiler) -x c++ -std=gnu++14
+    flags.cpp = -x c++ -std=gnu++14
   else ifeq ($(platform),macos)
     compiler := clang++
   else ifeq ($(platform),linux)
@@ -158,14 +161,10 @@ nall.verbose:
 compile = \
   $(strip \
     $(if $(filter %.c,$<), \
-      $(compiler) $(flags.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
+      $(compiler.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
    ,$(if $(filter %.cpp,$<), \
-      $(compiler) $(flags.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
-   ,$(if $(filter %.h,$<), \
-      $(compiler) $(flags.h)   $(flags) $1 -c $< -o $@ \
-   ,$(if $(filter %.hpp,$<), \
-      $(compiler) $(flags.hpp) $(flags) $1 -c $< -o $@ \
-    )))) \
+      $(compiler.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
+    )) \
   )
 
 # function rwildcard(directory, pattern)

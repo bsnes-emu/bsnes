@@ -18,7 +18,7 @@ auto hiro::initialize() -> void {
 }
 
 #include <nall/main.hpp>
-auto nall::main(vector<string> arguments) -> void {
+auto nall::main(Arguments arguments) -> void {
   new Program(arguments);
   Application::run();
 }

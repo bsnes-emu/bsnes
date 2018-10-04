@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nall/file.hpp>
+#include <nall/function.hpp>
 #include <nall/inode.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/merge-sort.hpp>
@@ -18,6 +19,8 @@
 namespace nall {
 
 struct directory : inode {
+  directory() = delete;
+
   static auto create(const string& pathname, uint permissions = 0755) -> bool;  //recursive
   static auto remove(const string& pathname) -> bool;  //recursive
   static auto exists(const string& pathname) -> bool;
@@ -62,6 +65,84 @@ struct directory : inode {
     files.isort();
     for(auto& file : files) folders.append(file);
     return folders;
+  }
+
+  static auto rcontents(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> contents;
+    function<void (const string&, const string&, const string&)>
+    recurse = [&](const string& basename, const string& pathname, const string& pattern) {
+      for(auto& folder : directory::ufolders(pathname)) {
+        contents.append(string{pathname, folder}.trimLeft(basename, 1L));
+        recurse(basename, {pathname, folder}, pattern);
+      }
+      for(auto& file : directory::ufiles(pathname, pattern)) {
+        contents.append(string{pathname, file}.trimLeft(basename, 1L));
+      }
+    };
+    for(auto& folder : directory::ufolders(pathname)) {
+      contents.append(folder);
+      recurse(pathname, {pathname, folder}, pattern);
+    }
+    for(auto& file : directory::ufiles(pathname, pattern)) {
+      contents.append(file);
+    }
+    contents.sort();
+    return contents;
+  }
+
+  static auto ircontents(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> contents;
+    function<void (const string&, const string&, const string&)>
+    recurse = [&](const string& basename, const string& pathname, const string& pattern) {
+      for(auto& folder : directory::ufolders(pathname)) {
+        contents.append(string{pathname, folder}.trimLeft(basename, 1L));
+        recurse(basename, {pathname, folder}, pattern);
+      }
+      for(auto& file : directory::ufiles(pathname, pattern)) {
+        contents.append(string{pathname, file}.trimLeft(basename, 1L));
+      }
+    };
+    for(auto& folder : directory::ufolders(pathname)) {
+      contents.append(folder);
+      recurse(pathname, {pathname, folder}, pattern);
+    }
+    for(auto& file : directory::ufiles(pathname, pattern)) {
+      contents.append(file);
+    }
+    contents.isort();
+    return contents;
+  }
+
+  static auto rfolders(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> folders;
+    for(auto& folder : rcontents(pathname, pattern)) {
+      if(directory::exists({pathname, folder})) folders.append(folder);
+    }
+    return folders;
+  }
+
+  static auto irfolders(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> folders;
+    for(auto& folder : ircontents(pathname, pattern)) {
+      if(directory::exists({pathname, folder})) folders.append(folder);
+    }
+    return folders;
+  }
+
+  static auto rfiles(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> files;
+    for(auto& file : rcontents(pathname, pattern)) {
+      if(file::exists({pathname, file})) files.append(file);
+    }
+    return files;
+  }
+
+  static auto irfiles(const string& pathname, const string& pattern = "*") -> vector<string> {
+    vector<string> files;
+    for(auto& file : ircontents(pathname, pattern)) {
+      if(file::exists({pathname, file})) files.append(file);
+    }
+    return files;
   }
 
 private:

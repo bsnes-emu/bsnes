@@ -55,3 +55,5 @@ else ifneq ($(filter $(platform),linux bsd),)
 	rm -f $(prefix)/share/applications/$(name).desktop
 	rm -f $(prefix)/share/icons/$(name).png
 endif
+
+-include obj/*.d

@@ -148,7 +148,7 @@ auto ListWindow::loadDatabase(string location) -> void {
 }
 
 auto ListWindow::saveDatabase(string location) -> void {
-  file fp{location, file::mode::write};
+  auto fp = file::open(location, file::mode::write);
   if(!fp) return MessageDialog().setParent(*this).setText({
     "Error: failed to write file.\n\n",
     "Name: ", location
@@ -618,23 +618,11 @@ auto hiro::initialize() -> void {
 }
 
 #include <nall/main.hpp>
-auto nall::main(vector<string> arguments) -> void {
+auto nall::main(Arguments) -> void {
   new ListWindow;
   new GameWindow;
   new MemoryWindow;
   new OscillatorWindow;
-
-  //internal command used to synchronize all genius databases from an old format to a new format
-  //if enabled, use with extreme caution and make backups first
-/*if(arguments.size() == 3 && arguments[1] == "--sync") {
-    for(auto& filename : directory::contents(arguments[2], "*.bml")) {
-      if(filename.beginsWith("Boards")) continue;
-      print(filename, "\n");
-      listWindow->loadDatabase({arguments[2], filename});
-      listWindow->saveDatabase({arguments[2], filename});
-    }
-    return print("[Done]\n");
-  }*/
 
   listWindow->setVisible();
   Application::run();

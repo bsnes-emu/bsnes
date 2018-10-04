@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nall/filemap.hpp>
+#include <nall/file-map.hpp>
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 #include <nall/decode/inflate.hpp>
@@ -24,7 +24,7 @@ struct ZIP {
 
   auto open(const string& filename) -> bool {
     close();
-    if(fm.open(filename, filemap::mode::read) == false) return false;
+    if(fm.open(filename, file::mode::read) == false) return false;
     if(open(fm.data(), fm.size()) == false) {
       fm.close();
       return false;
@@ -115,11 +115,11 @@ struct ZIP {
   }
 
   auto close() -> void {
-    if(fm.open()) fm.close();
+    if(fm) fm.close();
   }
 
 protected:
-  filemap fm;
+  file_map fm;
   const uint8_t* filedata;
   uint filesize;
 

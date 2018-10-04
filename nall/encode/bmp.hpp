@@ -4,7 +4,7 @@ namespace nall { namespace Encode {
 
 struct BMP {
   static auto create(const string& filename, const void* data, uint pitch, uint width, uint height, bool alpha) -> bool {
-    file fp{filename, file::mode::write};
+    auto fp = file::open(filename, file::mode::write);
     if(!fp) return false;
 
     uint bitsPerPixel  = alpha ? 32 : 24;

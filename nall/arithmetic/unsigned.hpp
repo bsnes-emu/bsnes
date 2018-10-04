@@ -2,25 +2,35 @@
 
 namespace nall {
 
-template<typename T, enable_if_t<is_unsigned<T>::value>> alwaysinline auto upper(T value) -> T {
+template<typename T, enable_if_t<is_unsigned<T>::value>>
+inline auto upper(T value) -> T {
   return value >> sizeof(T) * 4;
 }
 
-template<typename T, enable_if_t<is_unsigned<T>::value>> alwaysinline auto lower(T value) -> T {
-  static const T Mask = T(0) - 1 >> sizeof(T) * 4;
+template<typename T, enable_if_t<is_unsigned<T>::value>>
+inline auto lower(T value) -> T {
+  static const T Mask = ~T(0) >> sizeof(T) * 4;
   return value & Mask;
 }
 
-alwaysinline auto square(uintmax value) -> uintmax {
+template<typename T, typename U, enable_if_t<is_unsigned<T>::value>, enable_if_t<is_unsigned<U>::value>>
+inline auto mul(T lhs, U rhs) -> uintmax {
+  return lhs * rhs;
+}
+
+template<typename T, enable_if_t<is_unsigned<T>::value>>
+inline auto square(T value) -> uintmax {
   return value * value;
 }
 
-template<typename T, typename U> alwaysinline auto rol(const T& lhs, const U& rhs, enable_if_t<is_unsigned<T>::value>* = 0) -> T {
-  return lhs << rhs | lhs >> (sizeof(T) * 8 - rhs);
+template<typename T, typename U>
+inline auto rol(T lhs, U rhs, enable_if_t<is_unsigned<T>::value>* = 0) -> T {
+  return lhs << rhs | lhs >> sizeof(T) * 8 - rhs;
 }
 
-template<typename T, typename U> alwaysinline auto ror(const T& lhs, const U& rhs, enable_if_t<is_unsigned<T>::value>* = 0) -> T {
-  return lhs >> rhs | lhs << (sizeof(T) * 8 - rhs);
+template<typename T, typename U>
+inline auto ror(T lhs, U rhs, enable_if_t<is_unsigned<T>::value>* = 0) -> T {
+  return lhs >> rhs | lhs << sizeof(T) * 8 - rhs;
 }
 
 #if INTMAX_BITS >= 128

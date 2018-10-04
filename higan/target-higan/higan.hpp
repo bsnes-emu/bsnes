@@ -1,3 +1,6 @@
+#include <nall/nall.hpp>
+using namespace nall;
+
 #include <ruby/ruby.hpp>
 using namespace ruby;
 extern unique_pointer<Video> video;
