@@ -42,6 +42,7 @@ static const vector_float2 rect[] =
     MTKView *view = [[MTKView alloc] initWithFrame:self.frame device:(device = MTLCreateSystemDefaultDevice())];
     view.delegate = self;
     self.internalView = view;
+    view.paused = YES;
     
     MTLTextureDescriptor *texture_descriptor = [[MTLTextureDescriptor alloc] init];
     
@@ -125,10 +126,14 @@ static const vector_float2 rect[] =
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
 {
     output_resolution = (vector_float2){size.width, size.height};
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [(MTKView *)self.internalView draw];
+    });
 }
 
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
+    if (!(view.window.occlusionState & NSWindowOcclusionStateVisible)) return;
     [texture replaceRegion:region
                mipmapLevel:0
                  withBytes:[self currentBuffer]
@@ -188,4 +193,13 @@ static const vector_float2 rect[] =
     
     [command_buffer commit];
 }
+
+- (void)flip
+{
+    [super flip];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [(MTKView *)self.internalView draw];
+    });
+}
+
 @end

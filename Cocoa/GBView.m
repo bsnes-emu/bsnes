@@ -140,9 +140,6 @@
         GB_set_clock_multiplier(_gb, clockMultiplier);
     }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self setNeedsDisplay:YES];
-    });
 }
 
 - (uint32_t *) pixels

@@ -23,4 +23,12 @@
     ((GBOpenGLView *)self.internalView).openGLContext = context;
 }
 
+- (void)flip
+{
+    [super flip];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self setNeedsDisplay:YES];
+    });
+}
+
 @end
