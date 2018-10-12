@@ -236,7 +236,7 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
             return VALUE_16(*lvalue.register_address >> 8);
     }
 
-    return VALUE_16(*lvalue.register_address);
+    return VALUE_16(0);
 }
 
 static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
