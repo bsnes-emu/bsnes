@@ -226,15 +226,15 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
             return VALUE_16(GB_read_memory(gb, lvalue.memory_address.value) |
                             (GB_read_memory(gb, lvalue.memory_address.value + 1) * 0x100));
 
-
-        case LVALUE_REG16:
-            return VALUE_16(*lvalue.register_address);
-
         case LVALUE_REG_L:
             return VALUE_16(*lvalue.register_address & 0x00FF);
 
         case LVALUE_REG_H:
             return VALUE_16(*lvalue.register_address >> 8);
+
+        case LVALUE_REG16:
+        default:
+            return VALUE_16(*lvalue.register_address);
     }
 }
 
