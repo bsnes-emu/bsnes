@@ -34,8 +34,6 @@ OBJ := build/obj
 BOOTROMS_DIR ?= $(BIN)/BootROMs
 
 # Set tools
-
-CC := clang
 ifeq ($(PLATFORM),windows32)
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
