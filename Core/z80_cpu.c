@@ -338,7 +338,7 @@ static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
 
-    if ( ((unsigned long) hl) + ((unsigned long) rr) & 0x10000) {
+    if ( ((unsigned long) hl + (unsigned long) rr) & 0x10000) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
