@@ -35,7 +35,11 @@ BOOTROMS_DIR ?= $(BIN)/BootROMs
 
 # Set tools
 
+# Use clang if it's available.
+ifneq (, $(shell which clang))
 CC := clang
+endif
+
 ifeq ($(PLATFORM),windows32)
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
