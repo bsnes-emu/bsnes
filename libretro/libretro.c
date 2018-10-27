@@ -351,7 +351,7 @@ static void init_for_current_model(unsigned id)
             set_link_cable_state(true);
     }
 
-    struct retro_memory_descriptor descs[7];
+    struct retro_memory_descriptor descs[8];
     size_t size;
     uint16_t bank;
 
@@ -370,7 +370,7 @@ static void init_for_current_model(unsigned id)
 
     descs[2].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_RAM, &size, &bank);
     descs[2].start = 0xC000;
-    descs[2].len   = 0x2000;
+    descs[2].len   = 0x1000;
 
     descs[3].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
     descs[3].start = 0xA000;
@@ -388,6 +388,10 @@ static void init_for_current_model(unsigned id)
     descs[6].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
     descs[6].start = 0xFE00;
     descs[6].len   = 0x00A0;
+    
+    descs[7].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_RAM, &size, &bank) + 0x1000;
+    descs[7].start = 0xD000;
+    descs[7].len   = 0x1000;
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
