@@ -11,6 +11,8 @@
 #include <direct.h>
 #include <windows.h>
 #define snprintf _snprintf
+#else
+#include <sys/wait.h>
 #endif
 
 #include <Core/gb.h>
