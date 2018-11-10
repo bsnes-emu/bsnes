@@ -444,8 +444,11 @@ static void check_variables(bool link)
             else
                 new_model = MODEL_AUTO;
 
-            model[0] = new_model;
-            init_for_current_model(0);
+            if (new_model != model[0])
+            {
+                model[0] = new_model;
+                init_for_current_model(0);
+            }
         }
     }
     else
