@@ -488,14 +488,28 @@ static void save_configuration(void)
     }
 }
 
+static bool get_arg_flag(const char *flag, int *argc, char **argv)
+{
+    for (unsigned i = 1; i < *argc; i++) {
+        if (strcmp(argv[i], flag) == 0) {
+            (*argc)--;
+            argv[i] = argv[*argc];
+            return true;
+        }
+    }
+    return false;
+}
+
 int main(int argc, char **argv)
 {
 #define str(x) #x
 #define xstr(x) str(x)
     fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
+    
+    bool fullscreen = get_arg_flag("--fullscreen", &argc, argv);
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [rom]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [--fullscreen] [rom]\n", argv[0]);
         exit(1);
     }
     
@@ -514,6 +528,10 @@ int main(int argc, char **argv)
     window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               160 * 2, 144 * 2, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_SetWindowMinimumSize(window, 160, 144);
+    
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    }
     
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     
