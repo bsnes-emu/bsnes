@@ -721,8 +721,7 @@ joypad_axis_t get_joypad_axis(uint8_t physical_axis)
 }
 
 
-extern void set_filename(const char *new_filename, bool new_should_free);
-void run_gui(bool is_running)
+void connect_joypad(void)
 {
     if (joystick && !SDL_NumJoysticks()) {
         if (controller) {
@@ -743,6 +742,13 @@ void run_gui(bool is_running)
             joystick = SDL_JoystickOpen(0);
         }
     }
+}
+
+extern void set_filename(const char *new_filename, bool new_should_free);
+void run_gui(bool is_running)
+{
+    connect_joypad();
+    
     /* Draw the background screen */
     static SDL_Surface *converted_background = NULL;
     if (!converted_background) {

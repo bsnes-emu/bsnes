@@ -616,6 +616,9 @@ int main(int argc, char **argv)
     if (filename == NULL) {
         run_gui(false);
     }
+    else {
+        connect_joypad();
+    }
     SDL_PauseAudioDevice(device_id, 0);
     run(); // Never returns
     return 0;
