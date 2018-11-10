@@ -12,7 +12,7 @@
    They are known to be incorrect (Some analog test ROM sound different),
    but are good enough approximations to fix Cannon Fodder's terrible audio.
    It also varies by model. */
-#define DAC_DECAY_SPEED (1000000)
+#define DAC_DECAY_SPEED 50000
 #define DAC_ATTACK_SPEED 1000
 
 
