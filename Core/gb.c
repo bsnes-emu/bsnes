@@ -506,7 +506,12 @@ bool GB_is_inited(GB_gameboy_t *gb)
 
 bool GB_is_cgb(GB_gameboy_t *gb)
 {
-    return ((gb->model) & GB_MODEL_FAMILY_MASK) == GB_MODEL_CGB_FAMILY;
+    return (gb->model & GB_MODEL_FAMILY_MASK) == GB_MODEL_CGB_FAMILY;
+}
+
+bool GB_is_sgb(GB_gameboy_t *gb)
+{
+    return (gb->model & ~GB_MODEL_PAL_BIT) == GB_MODEL_SGB || gb->model == GB_MODEL_SGB2;
 }
 
 void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip)
@@ -541,6 +546,8 @@ static void reset_ram(GB_gameboy_t *gb)
             break;
             
         case GB_MODEL_DMG_B:
+        case GB_MODEL_SGB_NTSC: /* Unverified*/
+        case GB_MODEL_SGB_PAL: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = (random() & 0xFF);
                 if (i & 0x100) {
@@ -551,15 +558,13 @@ static void reset_ram(GB_gameboy_t *gb)
                 }
             }
             break;
-#if 0
-        /* Not emulated yet, for documentation only */
+            
         case GB_MODEL_SGB2:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = 0x55;
                 gb->ram[i] ^= random() & random() & random();
             }
             break;
-#endif
         
         case GB_MODEL_CGB_C:
             for (unsigned i = 0; i < gb->ram_size; i++) {
@@ -729,5 +734,11 @@ void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 {
+    if (gb->model == GB_MODEL_SGB_NTSC) {
+        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
+    }
+    if (gb->model == GB_MODEL_SGB_PAL) {
+        return SGB_PAL_FREQUENCY * gb->clock_multiplier;
+    }
     return CPU_FREQUENCY * gb->clock_multiplier;
 }

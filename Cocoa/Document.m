@@ -16,13 +16,15 @@ enum model {
     MODEL_DMG,
     MODEL_CGB,
     MODEL_AGB,
+    MODEL_SGB,
 };
 
 static const GB_model_t cocoa_to_internal_model[] =
 {
     [MODEL_DMG] = GB_MODEL_DMG_B,
     [MODEL_CGB] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB
+    [MODEL_AGB] = GB_MODEL_AGB,
+    [MODEL_SGB] = GB_MODEL_SGB,
 };
 
 @interface Document ()
@@ -157,12 +159,20 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return [[NSBundle mainBundle] pathForResource:name ofType:@"bin"];
 }
 
-/* Todo: Unify the 3 init functions */
+/* Todo: Unify the 4 init functions */
 - (void) initDMG
 {
     current_model = MODEL_DMG;
     GB_init(&gb, cocoa_to_internal_model[current_model]);
     GB_load_boot_rom(&gb, [[self bootROMPathForName:@"dmg_boot"] UTF8String]);
+    [self initCommon];
+}
+
+- (void) initSGB
+{
+    current_model = MODEL_SGB;
+    GB_init(&gb, cocoa_to_internal_model[current_model]);
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:@"sgb_boot"] UTF8String]);
     [self initCommon];
 }
 
@@ -274,7 +284,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         current_model = (enum model)[sender tag];
     }
     
-    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot"};
+    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
     GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
 
     if ([sender tag] == MODEL_NONE) {
@@ -287,7 +297,8 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_DMG forKey:@"EmulateDMG"];
-        [[NSUserDefaults standardUserDefaults] setBool:current_model== MODEL_AGB forKey:@"EmulateAGB"];
+        [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_SGB forKey:@"EmulateSGB"];
+        [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_AGB forKey:@"EmulateAGB"];
     }
     
     /* Reload the ROM, SAV and SYM files */
@@ -381,6 +392,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
         [self initDMG];
+    }
+    else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateSGB"]) {
+        [self initSGB];
     }
     else {
         [self initCGB];

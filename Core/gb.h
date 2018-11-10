@@ -19,6 +19,7 @@
 #include "rewind.h"
 #include "z80_cpu.h"
 #include "symbol_hash.h"
+#include "sgb.h"
 
 #define GB_STRUCT_VERSION 13
 
@@ -27,6 +28,7 @@
 #define GB_MODEL_DMG_FAMILY 0x000
 #define GB_MODEL_MGB_FAMILY 0x100
 #define GB_MODEL_CGB_FAMILY 0x200
+#define GB_MODEL_PAL_BIT 0x1000
 #endif
 
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -48,15 +50,18 @@ typedef union {
     uint8_t data[5];
 } GB_rtc_time_t;
 
+
 typedef enum {
 
     // GB_MODEL_DMG_0 = 0x000,
     // GB_MODEL_DMG_A = 0x001,
     GB_MODEL_DMG_B = 0x002,
     // GB_MODEL_DMG_C = 0x003,
-    // GB_MODEL_SGB = 0x004,
+    GB_MODEL_SGB = 0x004,
+    GB_MODEL_SGB_NTSC = GB_MODEL_SGB,
+    GB_MODEL_SGB_PAL = 0x1004,
     // GB_MODEL_MGB = 0x100,
-    // GB_MODEL_SGB2 = 0x101,
+    GB_MODEL_SGB2 = 0x101,
     // GB_MODEL_CGB_0 = 0x200,
     // GB_MODEL_CGB_A = 0x201,
     // GB_MODEL_CGB_B = 0x202,
@@ -203,6 +208,8 @@ typedef enum {
 #ifdef GB_INTERNAL
 #define LCDC_PERIOD 70224
 #define CPU_FREQUENCY 0x400000
+#define SGB_NTSC_FREQUENCY (21477272 / 5)
+#define SGB_PAL_FREQUENCY (21281370 / 5)
 #define DIV_CYCLES (0x100)
 #define INTERNAL_DIV_CYCLES (0x40000)
 
@@ -459,6 +466,14 @@ struct GB_gameboy_internal_s {
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
     );
+    
+    /* Super Game Boy state, only dumped/loaded for relevant models */
+    GB_SECTION(sgb,
+        uint8_t sgb_command[16];
+        uint8_t sgb_command_write_index;
+        bool sgb_ready_for_pulse;
+        bool sgb_ready_for_write;
+    );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
     /* This data is reserved on reset and must come last in the struct */
@@ -584,6 +599,7 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 void GB_init(GB_gameboy_t *gb, GB_model_t model);
 bool GB_is_inited(GB_gameboy_t *gb);
 bool GB_is_cgb(GB_gameboy_t *gb);
+bool GB_is_sgb(GB_gameboy_t *gb);
 GB_model_t GB_get_model(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
