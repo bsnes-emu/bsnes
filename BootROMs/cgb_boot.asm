@@ -1,7 +1,5 @@
 ; Sameboy CGB bootstrap ROM
 ; Todo: use friendly names for HW registers instead of magic numbers
-; Todo: add support for games that assume DMG boot logo (Such as X), like the
-;       original boot ROM.
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
@@ -142,11 +140,22 @@ Start:
     ld hl, BgPalettes
     xor a
 .expandPalettesLoop:
+IF !DEF(FAST)
     cpl
+ENDC
     ; One white
     ldi [hl], a
     ldi [hl], a
 
+IF DEF(FAST)
+    ; 3 more whites
+    ldi [hl], a
+    ldi [hl], a
+    ldi [hl], a
+    ldi [hl], a
+    ldi [hl], a
+    ldi [hl], a
+ELSE    
     ; The actual color
     ld a, [de]
     inc de
@@ -161,6 +170,7 @@ Start:
     ldi [hl], a
     ldi [hl], a
     ldi [hl], a
+ENDC
 
     dec c
     jr nz, .expandPalettesLoop
@@ -174,6 +184,7 @@ Start:
     ld a, $91
     ldh [$40], a
 
+IF !DEF(FAST)
     call DoIntroAnimation
 
 ; Wait ~0.75 seconds
@@ -199,6 +210,10 @@ Start:
     ld hl, WaitLoopCounter
     dec [hl]
     jr nz, .waitLoop
+ELSE
+    ld a, $c1
+    call PlaySound
+ENDC
     call Preboot
 
 ; Will be filled with NOPs
@@ -716,8 +731,9 @@ DoIntroAnimation:
     ret
 
 Preboot:
-
+IF !DEF(FAST)
     call FadeOut
+ENDC
     call ClearVRAMViaHDMA
     ; Select the first bank
     xor a
