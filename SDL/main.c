@@ -426,7 +426,7 @@ restart:
     bool error = false;
     start_capturing_logs();
     const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin"};
-    error = GB_load_boot_rom(&gb, executable_relative_path(boot_roms[configuration.model]));
+    error = GB_load_boot_rom(&gb, resource_path(boot_roms[configuration.model]));
     end_capturing_logs(true, error);
     
     start_capturing_logs();
@@ -442,7 +442,7 @@ restart:
     GB_load_battery(&gb, battery_save_path);
     
     /* Configure symbols */
-    GB_debugger_load_symbol_file(&gb, executable_relative_path("registers.sym"));
+    GB_debugger_load_symbol_file(&gb, resource_path("registers.sym"));
     
     char symbols_path[path_length + 5];
     replace_extension(filename, path_length, symbols_path, ".sym");

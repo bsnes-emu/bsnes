@@ -33,6 +33,10 @@ BIN := build/bin
 OBJ := build/obj
 BOOTROMS_DIR ?= $(BIN)/BootROMs
 
+ifdef DATA_DIR
+CFLAGS += -DDATA_DIR="\"$(DATA_DIR)\""
+endif
+
 # Set tools
 
 # Use clang if it's available.

@@ -78,7 +78,7 @@ bool init_shader_with_name(shader_t *shader, const char *name)
     static signed long filter_token_location = 0;
     
     if (!master_shader_code[0]) {
-        FILE *master_shader_f = fopen(executable_relative_path("Shaders/MasterShader.fsh"), "r");
+        FILE *master_shader_f = fopen(resource_path("Shaders/MasterShader.fsh"), "r");
         if (!master_shader_f) return false;
         fread(master_shader_code, 1, sizeof(master_shader_code) - 1, master_shader_f);
         fclose(master_shader_f);
@@ -92,7 +92,7 @@ bool init_shader_with_name(shader_t *shader, const char *name)
     char shader_path[1024];
     sprintf(shader_path, "Shaders/%s.fsh", name);
     
-    FILE *shader_f = fopen(executable_relative_path(shader_path), "r");
+    FILE *shader_f = fopen(resource_path(shader_path), "r");
     if (!shader_f) return false;
     memset(shader_code, 0, sizeof(shader_code));
     fread(shader_code, 1, sizeof(shader_code) - 1, shader_f);

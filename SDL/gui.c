@@ -746,7 +746,7 @@ void run_gui(bool is_running)
     /* Draw the background screen */
     static SDL_Surface *converted_background = NULL;
     if (!converted_background) {
-        SDL_Surface *background = SDL_LoadBMP(executable_relative_path("background.bmp"));
+        SDL_Surface *background = SDL_LoadBMP(resource_path("background.bmp"));
         SDL_SetPaletteColors(background->format->palette, gui_palette, 0, 4);
         converted_background = SDL_ConvertSurface(background, pixel_format, 0);
         SDL_LockSurface(converted_background);
