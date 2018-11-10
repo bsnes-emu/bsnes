@@ -559,25 +559,31 @@ int main(int argc, char **argv)
     want_aspec.freq = AUDIO_FREQUENCY;
     want_aspec.format = AUDIO_S16SYS;
     want_aspec.channels = 2;
-#if SDL_COMPILEDVERSION >= 2005 && defined(__APPLE__)
-    /* SDL 2.0.5 on macOS introduced a bug where certain combinations of buffer lengths and frequencies 
-       fail to produce audio correctly. */
-    want_aspec.samples = 2048;
-#else
     want_aspec.samples = 512;
+    
+    SDL_version _sdl_version;
+    SDL_GetVersion(&_sdl_version);
+    unsigned sdl_version = _sdl_version.major * 1000 + _sdl_version.minor * 100 + _sdl_version.patch;
+    
+#ifndef _WIN32
+    /* SDL 2.0.5 on macOS and Linux introduced a bug where certain combinations of buffer lengths and frequencies
+       fail to produce audio correctly. */
+    if (sdl_version >= 2005) {
+        want_aspec.samples = 2048;
+    }
+#else
+    if (sdl_version >= 2006) {
+        /* SDL 2.0.6 offers WASAPI support which allows for much lower audio buffer lengths which at least
+         theoretically reduces lagging. */
+        want_aspec.samples = 32;
+    }
+    else {
+        /* Since WASAPI audio was introduced in SDL 2.0.6, we have to lower the audio frequency
+         to 44100 because otherwise we would get garbled audio output.*/
+        want_aspec.freq = 44100;
+    }
 #endif
-
-#if SDL_COMPILEDVERSION >= 2006 && defined(_WIN32)
-    /* SDL 2.0.6 offers WASAPI support which allows for much lower audio buffer lengths which at least
-       theoretically reduces lagging. */
-    want_aspec.samples = 32;
-#endif
-
-#if SDL_COMPILEDVERSION <= 2005 && defined(_WIN32)
-    /* Since WASAPI audio was introduced in SDL 2.0.6, we have to lower the audio frequency
-       to 44100 because otherwise we would get garbled audio output.*/
-    want_aspec.freq = 44100;
-#endif
+    
 
     want_aspec.callback = audio_callback;
     want_aspec.userdata = &gb;
