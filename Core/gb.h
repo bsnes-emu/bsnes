@@ -473,6 +473,7 @@ struct GB_gameboy_internal_s {
         uint8_t sgb_command_write_index;
         bool sgb_ready_for_pulse;
         bool sgb_ready_for_write;
+        bool sgb_disable_commands;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

@@ -1,8 +1,42 @@
 #include "sgb.h"
 
+static void command_ready(GB_gameboy_t *gb)
+{
+    /* SGB header commands are used to send the contents of the header to the SNES CPU.
+       A header command looks like this:
+       Command ID: 0b1111xxx1, where xxx is the packet index. (e.g. F1 for [0x104, 0x112), F3 for [0x112, 0x120))
+       Checksum: Simple one byte sum for the following content bytes
+       0xE content bytes. The last command, FB, is padded with zeros, so information past the header is not sent. */
+    
+    if (gb->sgb_command[0] >= 0xF0) {
+        uint8_t checksum = 0;
+        for (unsigned i = 2; i < 0x10; i++) {
+            checksum += gb->sgb_command[i];
+        }
+        if (checksum != gb->sgb_command[1]) {
+            GB_log(gb, "Failed checksum for SGB header command, disabling SGB features\n");
+            gb->sgb_disable_commands = true;
+            return;
+        }
+    }
+    if (gb->sgb_command[0] == 0xf9) {
+        if (gb->sgb_command[0xc] != 3) { // SGB Flag
+            GB_log(gb, "SGB flag is not 0x03, disabling SGB features\n");
+            gb->sgb_disable_commands = true;
+        }
+    }
+    else if (gb->sgb_command[0] == 0xfb) {
+        if (gb->sgb_command[0x3] != 0x33) { // Old licensee code
+            GB_log(gb, "Old licensee code is not 0x33, disabling SGB features\n");
+            gb->sgb_disable_commands = true;
+        }
+    }
+}
+
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
 {
     if (!GB_is_sgb(gb)) return;
+    if (gb->sgb_disable_commands) return;
     switch ((value >> 4) & 3 ) {
         case 3:
             gb->sgb_ready_for_pulse = true;
@@ -11,11 +45,7 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
         case 2: // Zero
             if (!gb->sgb_ready_for_pulse || !gb->sgb_ready_for_write) return;
             if (gb->sgb_command_write_index >= sizeof(gb->sgb_command) * 8) {
-                GB_log(gb, "Got SGB command: ");
-                for (unsigned i = 0; i < 16; i++) {
-                    GB_log(gb, "%02x ", gb->sgb_command[i]);
-                }
-                GB_log(gb, "\n");
+                command_ready(gb);
                 gb->sgb_ready_for_pulse = false;
                 gb->sgb_ready_for_write = false;
             }
