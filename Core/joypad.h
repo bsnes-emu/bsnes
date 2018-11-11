@@ -16,6 +16,7 @@ typedef enum {
 } GB_key_t;
 
 void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed);
+void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned player, bool pressed);
 
 #ifdef GB_INTERNAL
 void GB_update_joyp(GB_gameboy_t *gb);

@@ -474,6 +474,8 @@ struct GB_gameboy_internal_s {
         bool sgb_ready_for_pulse;
         bool sgb_ready_for_write;
         bool sgb_disable_commands;
+        /* Multiplayer Input */
+        uint8_t sgb_player_count, sgb_current_player;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
@@ -500,7 +502,7 @@ struct GB_gameboy_internal_s {
         uint32_t background_palettes_rgb[0x20];
         uint32_t sprite_palettes_rgb[0x20];
         GB_color_correction_mode_t color_correction_mode;
-        bool keys[GB_KEY_MAX];
+        bool keys[4][GB_KEY_MAX];
                
         /* Timing */
         uint64_t last_sync;

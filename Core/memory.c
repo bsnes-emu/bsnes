@@ -730,10 +730,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_JOYP:
+                GB_sgb_write(gb, value);
                 gb->io_registers[GB_IO_JOYP] &= 0x0F;
                 gb->io_registers[GB_IO_JOYP] |= value & 0xF0;
                 GB_update_joyp(gb);
-                GB_sgb_write(gb, value);
                 return;
 
             case GB_IO_BIOS:

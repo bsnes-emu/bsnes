@@ -1,5 +1,9 @@
 #include "sgb.h"
 
+enum {
+    MLT_REQ = 0x11,
+};
+
 static void command_ready(GB_gameboy_t *gb)
 {
     /* SGB header commands are used to send the contents of the header to the SNES CPU.
@@ -31,13 +35,21 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb_disable_commands = true;
         }
     }
+    
+    switch (gb->sgb_command[0] >> 3) {
+        case MLT_REQ:
+            gb->sgb_player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb_command[1] & 3];
+            gb->sgb_current_player = gb->sgb_player_count - 1;
+            break;
+    }
 }
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
 {
     if (!GB_is_sgb(gb)) return;
     if (gb->sgb_disable_commands) return;
-    switch ((value >> 4) & 3 ) {
+    
+    switch ((value >> 4) & 3) {
         case 3:
             gb->sgb_ready_for_pulse = true;
             break;
@@ -73,6 +85,10 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
             gb->sgb_ready_for_write = true;
             gb->sgb_command_write_index = 0;
             memset(gb->sgb_command, 0, sizeof(gb->sgb_command));
+            if (gb->sgb_player_count > 1 && (value & 0x30) != (gb->io_registers[GB_IO_JOYP] & 0x30)) {
+                gb->sgb_current_player++;
+                gb->sgb_current_player &= gb->sgb_player_count - 1;
+            }
             break;
             
         default:

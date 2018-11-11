@@ -640,6 +640,8 @@ void GB_reset(GB_gameboy_t *gb)
     
     gb->accessed_oam_row = -1;
     
+    gb->sgb_player_count = 1;
+    
     /* Todo: Ugly, fixme, see comment in the timer state machine */
     gb->div_state = 3;
 
