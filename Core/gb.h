@@ -469,10 +469,11 @@ struct GB_gameboy_internal_s {
     
     /* Super Game Boy state, only dumped/loaded for relevant models */
     GB_SECTION(sgb,
-        uint8_t sgb_command[16];
-        uint8_t sgb_command_write_index;
+        uint8_t sgb_command[16 * 7];
+        uint16_t sgb_command_write_index;
         bool sgb_ready_for_pulse;
         bool sgb_ready_for_write;
+        bool sgb_ready_for_stop;
         bool sgb_disable_commands;
         /* Multiplayer Input */
         uint8_t sgb_player_count, sgb_current_player;
