@@ -139,6 +139,9 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
+    if (gb->sgb_screen_buffer) {
+        free(gb->sgb_screen_buffer);
+    }
 #ifndef DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
 #endif
@@ -642,6 +645,18 @@ void GB_reset(GB_gameboy_t *gb)
     
     gb->sgb_player_count = 1;
     
+    if (GB_is_sgb(gb)) {
+        if (!gb->sgb_screen_buffer) {
+            gb->sgb_screen_buffer = malloc(160 * 144);
+        }
+    }
+    else {
+        if (gb->sgb_screen_buffer) {
+            free(gb->sgb_screen_buffer);
+            gb->sgb_screen_buffer = NULL;
+        }
+    }
+    
     /* Todo: Ugly, fixme, see comment in the timer state machine */
     gb->div_state = 3;
 
@@ -743,4 +758,14 @@ uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
         return SGB_PAL_FREQUENCY * gb->clock_multiplier;
     }
     return CPU_FREQUENCY * gb->clock_multiplier;
+}
+
+size_t GB_get_screen_width(GB_gameboy_t *gb)
+{
+    return (gb && GB_is_sgb(gb))? 256 : 160;
+}
+
+size_t GB_get_screen_height(GB_gameboy_t *gb)
+{
+    return (gb && GB_is_sgb(gb))? 224 : 144;
 }

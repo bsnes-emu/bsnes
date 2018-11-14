@@ -225,8 +225,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) run
 {
     running = true;
-    GB_set_pixels_output(&gb, self.view.pixels);
     self.view.gb = &gb;
+    [self.view screenSizeChanged];
+    GB_set_pixels_output(&gb, self.view.pixels);
     GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         GB_apu_copy_buffer(&gb, buffer, nFrames);
@@ -565,21 +566,24 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (fullScreen) {
         return newFrame;
     }
+    size_t width  = GB_get_screen_width(&gb),
+           height = GB_get_screen_height(&gb);
+    
     NSRect rect = window.contentView.frame;
 
     int titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
-    int step = 160 / [[window screen] backingScaleFactor];
+    int step = width / [[window screen] backingScaleFactor];
 
     rect.size.width = floor(rect.size.width / step) * step + step;
-    rect.size.height = rect.size.width / 10 * 9 + titlebarSize;
+    rect.size.height = rect.size.width * height / width + titlebarSize;
 
     if (rect.size.width > newFrame.size.width) {
-        rect.size.width = 160;
-        rect.size.height = 144 + titlebarSize;
+        rect.size.width = width;
+        rect.size.height = height + titlebarSize;
     }
     else if (rect.size.height > newFrame.size.height) {
-        rect.size.width = 160;
-        rect.size.height = 144 + titlebarSize;
+        rect.size.width = width;
+        rect.size.height = height + titlebarSize;
     }
 
     rect.origin = window.frame.origin;

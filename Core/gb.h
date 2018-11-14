@@ -475,6 +475,9 @@ struct GB_gameboy_internal_s {
         bool sgb_ready_for_write;
         bool sgb_ready_for_stop;
         bool sgb_disable_commands;
+               
+        /* Screen buffer */
+        uint8_t *sgb_screen_buffer;
         /* Multiplayer Input */
         uint8_t sgb_player_count, sgb_current_player;
     );
@@ -677,5 +680,8 @@ void GB_disconnect_serial(GB_gameboy_t *gb);
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb);
 #endif
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier);
-    
+
+size_t GB_get_screen_width(GB_gameboy_t *gb);
+size_t GB_get_screen_height(GB_gameboy_t *gb);
+
 #endif /* GB_h */

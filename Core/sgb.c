@@ -127,3 +127,29 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
             break;
     }
 }
+
+void GB_sgb_render(GB_gameboy_t *gb)
+{
+    if (!gb->screen || !gb->rgb_encode_callback) return;
+    
+    uint32_t border = gb->rgb_encode_callback(gb, 0x9c, 0x9c, 0xa5);
+    uint32_t colors[] = {
+        gb->rgb_encode_callback(gb, 0xf7, 0xe7, 0xc6),
+        gb->rgb_encode_callback(gb, 0xd6, 0x8e, 0x49),
+        gb->rgb_encode_callback(gb, 0xa6, 0x37, 0x25),
+        gb->rgb_encode_callback(gb, 0x33, 0x1e, 0x50)
+    };
+    
+    for (unsigned i = 0; i < 256 * 224; i++) {
+        gb->screen[i] = border;
+    }
+    
+    uint32_t *output = &gb->screen[48 + 39 * 256];
+    uint8_t *input = gb->sgb_screen_buffer;
+    for (unsigned y = 0; y < 144; y++) {
+        for (unsigned x = 0; x < 160; x++) {
+            *(output++) = colors[*(input++) & 3];
+        }
+        output += 256 - 160;
+    }
+}

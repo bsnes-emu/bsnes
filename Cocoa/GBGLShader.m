@@ -79,19 +79,19 @@ void main(void) {\n\
     return self;
 }
 
-- (void) renderBitmap: (void *)bitmap previous:(void*) previous inSize:(NSSize)size scale: (double) scale
+- (void) renderBitmap: (void *)bitmap previous:(void*) previous sized:(NSSize)srcSize inSize:(NSSize)dstSize scale: (double) scale
 {
     glUseProgram(program);
-    glUniform2f(resolution_uniform, size.width * scale, size.height * scale);
+    glUniform2f(resolution_uniform, dstSize.width * scale, dstSize.height * scale);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 160, 144, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcSize.width, srcSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
     glUniform1i(texture_uniform, 0);
     glUniform1i(mix_previous_uniform, previous != NULL);
     if (previous) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, previous_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 160, 144, 0, GL_RGBA, GL_UNSIGNED_BYTE, previous);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcSize.width, srcSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, previous);
         glUniform1i(previous_texture_uniform, 1);
     }
     glBindFragDataLocation(program, 0, "frag_color");

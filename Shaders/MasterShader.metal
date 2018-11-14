@@ -3,7 +3,6 @@
 #include <metal_math>
 
 using namespace metal;
-constant float2 input_resolution = float2(160, 144);
 
 /* For GLSL compatibility */
 typedef float2 vec2;
@@ -49,6 +48,8 @@ fragment float4 fragment_shader(rasterizer_data in [[stage_in]],
                                 constant bool *mix_previous [[ buffer(0) ]],
                                 constant float2 *output_resolution [[ buffer(1) ]])
 {
+    float2 input_resolution = float2(image.get_width(), image.get_height());
+
     in.texcoords.y = 1 - in.texcoords.y;
     if (*mix_previous) {
         return mix(scale(image, in.texcoords, input_resolution, *output_resolution),

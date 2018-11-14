@@ -44,9 +44,8 @@
 
 - (void) _init
 {
-    image_buffers[0] = malloc(160 * 144 * 4);
-    image_buffers[1] = malloc(160 * 144 * 4);
-    image_buffers[2] = malloc(160 * 144 * 4);
+    [self screenSizeChanged];
+    
     _shouldBlendFrameWithPrevious = 1;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
@@ -58,6 +57,24 @@
     [self createInternalView];
     [self addSubview:self.internalView];
     self.internalView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+}
+
+- (void)screenSizeChanged
+{
+    if (!_gb) return;
+    if (image_buffers[0]) free(image_buffers[0]);
+    if (image_buffers[1]) free(image_buffers[1]);
+    if (image_buffers[2]) free(image_buffers[2]);
+    
+    size_t buffer_size = sizeof(image_buffers[0][0]) * GB_get_screen_width(_gb) * GB_get_screen_height(_gb);
+    
+    image_buffers[0] = malloc(buffer_size);
+    image_buffers[1] = malloc(buffer_size);
+    image_buffers[2] = malloc(buffer_size);
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self setFrame:self.superview.frame];
+    });
 }
 
 - (void) ratioKeepingChanged
@@ -112,14 +129,16 @@
     frame = self.superview.frame;
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]) {
         double ratio = frame.size.width / frame.size.height;
-        if (ratio >= 160.0/144.0) {
-            double new_width = round(frame.size.height / 144.0 * 160.0);
+        double width = GB_get_screen_width(_gb);
+        double height = GB_get_screen_height(_gb);
+        if (ratio >= width / height) {
+            double new_width = round(frame.size.height / height * width);
             frame.origin.x = floor((frame.size.width - new_width) / 2);
             frame.size.width = new_width;
             frame.origin.y = 0;
         }
         else {
-            double new_height = round(frame.size.width / 160.0 * 144.0);
+            double new_height = round(frame.size.width / width * height);
             frame.origin.y = floor((frame.size.height - new_height) / 2);
             frame.size.height = new_height;
             frame.origin.x = 0;

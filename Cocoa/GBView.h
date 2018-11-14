@@ -13,4 +13,5 @@
 - (void) createInternalView;
 - (uint32_t *)currentBuffer;
 - (uint32_t *)previousBuffer;
+- (void)screenSizeChanged;
 @end
