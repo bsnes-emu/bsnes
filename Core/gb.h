@@ -52,7 +52,6 @@ typedef union {
 
 
 typedef enum {
-
     // GB_MODEL_DMG_0 = 0x000,
     // GB_MODEL_DMG_A = 0x001,
     GB_MODEL_DMG_B = 0x002,
@@ -466,21 +465,6 @@ struct GB_gameboy_internal_s {
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
     );
-    
-    /* Super Game Boy state, only dumped/loaded for relevant models */
-    GB_SECTION(sgb,
-        uint8_t sgb_command[16 * 7];
-        uint16_t sgb_command_write_index;
-        bool sgb_ready_for_pulse;
-        bool sgb_ready_for_write;
-        bool sgb_ready_for_stop;
-        bool sgb_disable_commands;
-               
-        /* Screen buffer */
-        uint8_t *sgb_screen_buffer;
-        /* Multiplayer Input */
-        uint8_t sgb_player_count, sgb_current_player;
-    );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
     /* This data is reserved on reset and must come last in the struct */
@@ -577,6 +561,9 @@ struct GB_gameboy_internal_s {
             unsigned pos;
         } *rewind_sequences; // lasts about 4 seconds
         size_t rewind_pos;
+               
+        /* SGB - saved and allocated optionally */
+        GB_sgb_t *sgb;
 
         /* Misc */
         bool turbo;

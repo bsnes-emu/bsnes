@@ -36,6 +36,10 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
     if (!DUMP_SECTION(gb, f, rtc       )) goto error;
     if (!DUMP_SECTION(gb, f, video     )) goto error;
     
+    if (GB_is_sgb(gb)) {
+        if (!dump_section(f, gb->sgb, sizeof(*gb->sgb))) goto error;
+    }
+    
     
     if (fwrite(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
         goto error;
@@ -69,6 +73,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + GB_SECTION_SIZE(apu       ) + sizeof(uint32_t)
     + GB_SECTION_SIZE(rtc       ) + sizeof(uint32_t)
     + GB_SECTION_SIZE(video     ) + sizeof(uint32_t)
+    + (GB_is_sgb(gb)? sizeof(*gb->sgb) + sizeof(uint32_t) : 0)
     + gb->mbc_ram_size
     + gb->ram_size
     + gb->vram_size;
@@ -99,6 +104,10 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
     DUMP_SECTION(gb, buffer, apu       );
     DUMP_SECTION(gb, buffer, rtc       );
     DUMP_SECTION(gb, buffer, video     );
+    
+    if (GB_is_sgb(gb)) {
+        buffer_dump_section(&buffer, gb->sgb, sizeof(*gb->sgb));
+    }
     
     
     buffer_write(gb->mbc_ram, gb->mbc_ram_size, &buffer);
@@ -133,27 +142,32 @@ static bool read_section(FILE *f, void *dest, uint32_t size)
 static bool verify_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
 {
     if (gb->magic != save->magic) {
-        GB_log(gb, "File is not a save state, or is from an incompatible operating system.\n");
+        GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
         return false;
     }
     
     if (gb->version != save->version) {
-        GB_log(gb, "Save state is for a different version of SameBoy.\n");
+        GB_log(gb, "The save state is for a different version of SameBoy.\n");
         return false;
     }
     
     if (gb->mbc_ram_size < save->mbc_ram_size) {
-        GB_log(gb, "Save state has non-matching MBC RAM size.\n");
+        GB_log(gb, "The save state has non-matching MBC RAM size.\n");
         return false;
     }
     
     if (gb->ram_size != save->ram_size) {
-        GB_log(gb, "Save state has non-matching RAM size. Try changing emulated model.\n");
+        GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
         return false;
     }
     
     if (gb->vram_size != save->vram_size) {
-        GB_log(gb, "Save state has non-matching VRAM size. Try changing emulated model.\n");
+        GB_log(gb, "The save state has non-matching VRAM size. Try changing the emulated model.\n");
+        return false;
+    }
+    
+    if (GB_is_sgb(gb) != GB_is_sgb(save)) {
+        GB_log(gb, "The save state is %sfor a Super Game Boy. Try changing the emulated model.\n", GB_is_sgb(save)? "" : "not ");
         return false;
     }
     
@@ -188,6 +202,10 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     if (!verify_state_compatibility(gb, &save)) {
         errno = -1;
         goto error;
+    }
+    
+    if (GB_is_sgb(gb)) {
+        if (!read_section(f, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
@@ -287,6 +305,10 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     
     if (!verify_state_compatibility(gb, &save)) {
         return -1;
+    }
+    
+    if (GB_is_sgb(gb)) {
+        if (!buffer_read_section(&buffer, &length, gb->sgb, sizeof(*gb->sgb))) return -1;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);

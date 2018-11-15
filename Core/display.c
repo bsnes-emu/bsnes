@@ -132,10 +132,10 @@ static void display_vblank(GB_gameboy_t *gb)
     
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
-        if (gb->sgb_screen_buffer) {
+        if (gb->sgb) {
             uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ? 0 : 0xFF;
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
-                gb ->sgb_screen_buffer[i] = color;
+                gb->sgb->screen_buffer[i] = color;
             }
         }
         else {
@@ -386,8 +386,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         if (!gb->cgb_mode) {
             pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
         }
-        if (gb->sgb_screen_buffer) {
-            gb->sgb_screen_buffer[gb->position_in_line + gb->current_line * WIDTH] = pixel;
+        if (gb->sgb) {
+            gb->sgb->screen_buffer[gb->position_in_line + gb->current_line * WIDTH] = pixel;
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
@@ -400,8 +400,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             /* Todo: Verify access timings */
             pixel = ((gb->io_registers[oam_fifo_item->palette? GB_IO_OBP1 : GB_IO_OBP0] >> (pixel << 1)) & 3);
         }
-        if (gb->sgb_screen_buffer) {
-            gb->sgb_screen_buffer[gb->position_in_line + gb->current_line * WIDTH] =pixel;
+        if (gb->sgb) {
+            gb->sgb->screen_buffer[gb->position_in_line + gb->current_line * WIDTH] =pixel;
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];

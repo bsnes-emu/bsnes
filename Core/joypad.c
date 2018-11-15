@@ -11,10 +11,11 @@ void GB_update_joyp(GB_gameboy_t *gb)
     previous_state = gb->io_registers[GB_IO_JOYP] & 0xF;
     key_selection = (gb->io_registers[GB_IO_JOYP] >> 4) & 3;
     gb->io_registers[GB_IO_JOYP] &= 0xF0;
+    uint8_t current_player = gb->sgb? gb->sgb->current_player : 0;
     switch (key_selection) {
         case 3:
-            if (gb->sgb_player_count > 1) {
-                gb->io_registers[GB_IO_JOYP] |= 0xF - gb->sgb_current_player;
+            if (gb->sgb && gb->sgb->player_count > 1) {
+                gb->io_registers[GB_IO_JOYP] |= 0xF - current_player;
             }
             else {
                 /* Nothing is wired, all up */
@@ -25,7 +26,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
         case 2:
             /* Direction keys */
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[gb->sgb_current_player][i]) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[current_player][i]) << i;
             }
             /* Forbid pressing two opposing keys, this breaks a lot of games; even if it's somewhat possible. */
             if (!(gb->io_registers[GB_IO_JOYP] & 1)) {
@@ -39,13 +40,13 @@ void GB_update_joyp(GB_gameboy_t *gb)
         case 1:
             /* Other keys */
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[gb->sgb_current_player][i + 4]) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[current_player][i + 4]) << i;
             }
             break;
 
         case 0:
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!(gb->keys[gb->sgb_current_player][i] || gb->keys[gb->sgb_current_player][i + 4])) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!(gb->keys[current_player][i] || gb->keys[current_player][i + 4])) << i;
             }
             break;
 

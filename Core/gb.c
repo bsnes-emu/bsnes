@@ -139,8 +139,8 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
-    if (gb->sgb_screen_buffer) {
-        free(gb->sgb_screen_buffer);
+    if (gb->sgb) {
+        free(gb->sgb);
     }
 #ifndef DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
@@ -643,17 +643,18 @@ void GB_reset(GB_gameboy_t *gb)
     
     gb->accessed_oam_row = -1;
     
-    gb->sgb_player_count = 1;
     
     if (GB_is_sgb(gb)) {
-        if (!gb->sgb_screen_buffer) {
-            gb->sgb_screen_buffer = malloc(160 * 144);
+        if (!gb->sgb) {
+            gb->sgb = malloc(sizeof(*gb->sgb));
         }
+        gb->sgb->player_count = 1;
+
     }
     else {
-        if (gb->sgb_screen_buffer) {
-            free(gb->sgb_screen_buffer);
-            gb->sgb_screen_buffer = NULL;
+        if (gb->sgb) {
+            free(gb->sgb);
+            gb->sgb = NULL;
         }
     }
     
