@@ -26,14 +26,17 @@ typedef struct {
     /* Border */
     uint8_t vram_transfer_countdown;
     bool tile_transfer, tile_transfer_high, data_transfer;
-    uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
-    union {
-        struct {
-            uint16_t map[32 * 32];
-            uint16_t border_palette[16 * 4];
+    struct {
+        uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
+        union {
+            struct {
+                uint16_t map[32 * 32];
+                uint16_t palette[16 * 4];
+            };
+            uint16_t raw_data[0x440];
         };
-        uint16_t raw_pct_data[0x440];
-    };
+    } border, pending_border;
+    uint8_t border_animation;
 
 } GB_sgb_t;
 

@@ -170,6 +170,23 @@ static uint32_t convert_rgb15(GB_gameboy_t *gb, uint16_t color)
     return gb->rgb_encode_callback(gb, r, g, b);
 }
 
+static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_t fade)
+{
+    uint8_t r = ((color) & 0x1F) - fade;
+    uint8_t g = ((color >> 5) & 0x1F) - fade;
+    uint8_t b = ((color >> 10) & 0x1F) - fade;
+    
+    if (r >= 0x20) r = 0;
+    if (g >= 0x20) g = 0;
+    if (b >= 0x20) b = 0;
+    
+    r = scale_channel(r);
+    g = scale_channel(g);
+    b = scale_channel(b);
+    
+    return gb->rgb_encode_callback(gb, r, g, b);
+}
+
 void GB_sgb_render(GB_gameboy_t *gb)
 {
     if (!gb->screen || !gb->rgb_encode_callback) return;
@@ -180,11 +197,6 @@ void GB_sgb_render(GB_gameboy_t *gb)
         gb->rgb_encode_callback(gb, 0xa6, 0x37, 0x25),
         gb->rgb_encode_callback(gb, 0x33, 0x1e, 0x50)
     };
-    
-    uint32_t border_colors[16 * 4];
-    for (unsigned i = 0; i < 16 * 4; i++) {
-        border_colors[i] = convert_rgb15(gb, gb->sgb->border_palette[i]);
-    }
     
     switch ((mask_mode_t) gb->sgb->mask_mode) {
         case MASK_DISABLED:
@@ -209,7 +221,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
             if (gb->sgb->tile_transfer) {
-                uint8_t *base = &gb->sgb->tiles[gb->sgb->tile_transfer_high? 0x80 * 8 * 8 : 0];
+                uint8_t *base = &gb->sgb->pending_border.tiles[gb->sgb->tile_transfer_high? 0x80 * 8 * 8 : 0];
                 for (unsigned tile = 0; tile < 0x80; tile++) {
                     unsigned tile_x = (tile % 10) * 16;
                     unsigned tile_y = (tile / 10) * 8;
@@ -228,13 +240,14 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     unsigned tile_y = (tile / 20) * 8;
                     for (unsigned y = 0; y < 0x8; y++) {
                         static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
-                        uint16_t *data = &gb->sgb->raw_pct_data[tile * 8 + y];
+                        uint16_t *data = &gb->sgb->pending_border.raw_data[tile * 8 + y];
                         *data = 0;
                         for (unsigned x = 0; x < 8; x++) {
                             *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                         }
                     }
                 }
+                gb->sgb->border_animation = 64;
             }
         }
     }
@@ -248,19 +261,42 @@ void GB_sgb_render(GB_gameboy_t *gb)
         output += 256 - 160;
     }
     
+    uint32_t border_colors[16 * 4];
+    if (gb->sgb->border_animation == 0) {
+        for (unsigned i = 0; i < 16 * 4; i++) {
+            border_colors[i] = convert_rgb15(gb, gb->sgb->border.palette[i]);
+        }
+    }
+    else if (gb->sgb->border_animation > 32) {
+        gb->sgb->border_animation--;
+        for (unsigned i = 0; i < 16 * 4; i++) {
+            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], 64 - gb->sgb->border_animation);
+        }
+    }
+    else {
+        gb->sgb->border_animation--;
+        for (unsigned i = 0; i < 16 * 4; i++) {
+            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], gb->sgb->border_animation);
+        }
+    }
+    
+    if (gb->sgb->border_animation == 32) {
+        memcpy(&gb->sgb->border, &gb->sgb->pending_border, sizeof(gb->sgb->border));
+    }
+    
     for (unsigned tile_y = 0; tile_y < 28; tile_y++) {
         for (unsigned tile_x = 0; tile_x < 32; tile_x++) {
             bool gb_area = false;
             if (tile_x >= 6 && tile_x < 26 && tile_y >= 5 && tile_y < 23) {
                 gb_area = true;
             }
-            uint16_t tile = gb->sgb->map[tile_x + tile_y * 32];
+            uint16_t tile = gb->sgb->border.map[tile_x + tile_y * 32];
             uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
             uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
             uint8_t palette = (tile >> 10) & 3;
             for (unsigned y = 0; y < 8; y++) {
                 for (unsigned x = 0; x < 8; x++) {
-                    uint8_t color = gb->sgb->tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
+                    uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
                     if (color == 0 && gb_area) continue;
                     gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] =
                     border_colors[palette * 16 + color];
@@ -944,15 +980,15 @@ void GB_sgb_load_default_border(GB_gameboy_t *gb)
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
     
-    memcpy(gb->sgb->map, tilemap, sizeof(tilemap));
-    memcpy(gb->sgb->border_palette, palette, sizeof(palette));
+    memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
+    memcpy(gb->sgb->border.palette, palette, sizeof(palette));
     
     
     /* Expend tileset */
     for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
         for (unsigned y = 0; y < 8; y++) {
             for (unsigned x = 0; x < 8; x++) {
-                gb->sgb->tiles[tile * 8 * 8 + y * 8 + x] =
+                gb->sgb->border.tiles[tile * 8 * 8 + y * 8 + x] =
                     (tiles[tile * 32 + y * 2 +  0] & (1 << (7 ^ x)) ? 1 : 0) |
                     (tiles[tile * 32 + y * 2 +  1] & (1 << (7 ^ x)) ? 2 : 0) |
                     (tiles[tile * 32 + y * 2 + 16] & (1 << (7 ^ x)) ? 4 : 0) |
