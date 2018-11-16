@@ -650,6 +650,7 @@ void GB_reset(GB_gameboy_t *gb)
         }
         memset(gb->sgb, 0, sizeof(*gb->sgb));
         gb->sgb->player_count = 1;
+        GB_sgb_load_default_border(gb);
 
     }
     else {

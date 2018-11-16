@@ -39,6 +39,7 @@ typedef struct {
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 void GB_sgb_render(GB_gameboy_t *gb);
+void GB_sgb_load_default_border(GB_gameboy_t *gb);
 
 #endif
 
