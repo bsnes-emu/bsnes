@@ -12,6 +12,8 @@ enum {
     MLT_REQ  = 0x11,
     CHR_TRN  = 0x13,
     PCT_TRN  = 0x14,
+    ATTR_TRN = 0x15,
+    ATTR_SET = 0x16,
     MASK_EN  = 0x17,
 };
 
@@ -21,6 +23,14 @@ typedef enum {
     MASK_COLOR_3,
     MASK_COLOR_0,
 } mask_mode_t;
+
+typedef enum {
+    TRANSFER_LOW_TILES,
+    TRANSFER_HIGH_TILES,
+    TRANSFER_BORDER_DATA,
+    TRANSFER_PALETTES,
+    TRANSFER_ATTRIBUTES,
+} transfer_dest_t;
 
 #define SGB_PACKET_SIZE 16
 static inline void pal_command(GB_gameboy_t *gb, unsigned first, unsigned second)
@@ -35,6 +45,19 @@ static inline void pal_command(GB_gameboy_t *gb, unsigned first, unsigned second
     
     for (unsigned i = 0; i < 3; i++) {
         gb->sgb->effective_palettes[second * 4 + i + 1] = gb->sgb->command[9 + i * 2] | (gb->sgb->command[10 + i * 2] << 8);
+    }
+}
+
+static inline void load_attribute_file(GB_gameboy_t *gb, unsigned file_index)
+{
+    if (file_index > 0x2C) return;
+    uint8_t *output = gb->sgb->attribute_map;
+    for (unsigned i = 0; i < 90; i++) {
+        uint8_t byte = gb->sgb->attribute_files[file_index * 90 + i];
+        for (unsigned j = 4; j--;) {
+            *(output++) = byte >> 6;
+            byte <<= 2;
+        }
     }
 }
 
@@ -149,15 +172,17 @@ static void command_ready(GB_gameboy_t *gb)
                    &gb->sgb->ram_palettes[4 * (gb->sgb->command[7] + (gb->sgb->command[8] & 1) * 0x100)],
                    8);
             
+            if (gb->sgb->command[9] & 0x80) {
+                load_attribute_file(gb, gb->sgb->command[9] & 0x3F);
+            }
+            
             if (gb->sgb->command[9] & 0x40) {
                 gb->sgb->mask_mode = MASK_DISABLED;
             }
             break;
         case PAL_TRN:
             gb->sgb->vram_transfer_countdown = 2;
-            gb->sgb->tile_transfer = false;
-            gb->sgb->data_transfer = true;
-            gb->sgb->palette_transfer = true;
+            gb->sgb->transfer_dest = TRANSFER_PALETTES;
             break;
         case DATA_SND:
             // Not supported, but used by almost all SGB games for hot patching, so let's mute the warning for this
@@ -166,28 +191,40 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
             gb->sgb->current_player = gb->sgb->player_count - 1;
             break;
-        case MASK_EN:
-            gb->sgb->mask_mode = gb->sgb->command[1] & 3;
-            break;
         case CHR_TRN:
             gb->sgb->vram_transfer_countdown = 2;
-            gb->sgb->tile_transfer = true;
-            gb->sgb->data_transfer = false;
-            gb->sgb->tile_transfer_high = gb->sgb->command[1] & 1;
+            gb->sgb->transfer_dest = (gb->sgb->command[1] & 1)? TRANSFER_HIGH_TILES : TRANSFER_LOW_TILES;
             break;
         case PCT_TRN:
             gb->sgb->vram_transfer_countdown = 2;
-            gb->sgb->tile_transfer = false;
-            gb->sgb->data_transfer = true;
-            gb->sgb->palette_transfer = false;
+            gb->sgb->transfer_dest = TRANSFER_BORDER_DATA;
+            break;
+        case ATTR_TRN:
+            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->transfer_dest = TRANSFER_ATTRIBUTES;
+            break;
+        case ATTR_SET:
+            load_attribute_file(gb, gb->sgb->command[0] & 0x3F);
+            
+            if (gb->sgb->command[0] & 0x40) {
+                gb->sgb->mask_mode = MASK_DISABLED;
+            }
+            break;
+        case MASK_EN:
+            gb->sgb->mask_mode = gb->sgb->command[1] & 3;
             break;
         default:
+            if ((gb->sgb->command[0] >> 3) == 8 &&
+                (gb->sgb->command[1] & ~0x80) == 0  &&
+                (gb->sgb->command[2] & ~0x80) == 0) {
+                /* Mute/dummy sound commands, ignore this command as it's used by many games at startup */
+                break;
+            }
             GB_log(gb, "Unimplemented SGB command %x: ", gb->sgb->command[0] >> 3);
             for (unsigned i = 0; i < gb->sgb->command_write_index / 8; i++) {
                 GB_log(gb, "%02x ", gb->sgb->command[i]);
             }
             GB_log(gb, "\n");
-            ;
     }
 }
 
@@ -323,8 +360,8 @@ void GB_sgb_render(GB_gameboy_t *gb)
     
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
-            if (gb->sgb->tile_transfer) {
-                uint8_t *base = &gb->sgb->pending_border.tiles[gb->sgb->tile_transfer_high? 0x80 * 8 * 8 : 0];
+            if (gb->sgb->transfer_dest == TRANSFER_LOW_TILES || gb->sgb->transfer_dest == TRANSFER_HIGH_TILES) {
+                uint8_t *base = &gb->sgb->pending_border.tiles[gb->sgb->transfer_dest == TRANSFER_HIGH_TILES ? 0x80 * 8 * 8 : 0];
                 for (unsigned tile = 0; tile < 0x80; tile++) {
                     unsigned tile_x = (tile % 10) * 16;
                     unsigned tile_y = (tile / 10) * 8;
@@ -337,9 +374,27 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 }
                 
             }
-            else if (gb->sgb->data_transfer) {
-                unsigned size = gb->sgb->palette_transfer? 0x100 : 0x88;
-                uint16_t *data = gb->sgb->palette_transfer? gb->sgb->ram_palettes : gb->sgb->pending_border.raw_data;
+            else {
+                unsigned size = 0;
+                uint16_t *data = NULL;
+                
+                switch (gb->sgb->transfer_dest) {
+                    case TRANSFER_PALETTES:
+                        size = 0x100;
+                        data = gb->sgb->ram_palettes;
+                        break;
+                    case TRANSFER_BORDER_DATA:
+                        size = 0x88;
+                        data = gb->sgb->pending_border.raw_data;
+                        break;
+                    case TRANSFER_ATTRIBUTES:
+                        size = 0xFE;
+                        data = (uint16_t *)gb->sgb->attribute_files;
+                        break;
+                    default:
+                        return; // Corrupt state?
+                }
+                
                 for (unsigned tile = 0; tile < size; tile++) {
                     unsigned tile_x = (tile % 20) * 8;
                     unsigned tile_y = (tile / 20) * 8;
@@ -349,10 +404,15 @@ void GB_sgb_render(GB_gameboy_t *gb)
                         for (unsigned x = 0; x < 8; x++) {
                             *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                         }
+#ifdef GB_BIG_ENDIAN
+                        if (gb->sgb->transfer_dest == TRANSFER_ATTRIBUTES) {
+                            *data = __builtin_bswap16(*data);
+                        }
+#endif
                         data++;
                     }
                 }
-                if (!gb->sgb->palette_transfer) {
+                if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
                     gb->sgb->border_animation = 64;
                 }
             }

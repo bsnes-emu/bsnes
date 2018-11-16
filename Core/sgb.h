@@ -25,8 +25,7 @@ struct GB_sgb_s {
     uint8_t mask_mode;
     
     /* Data Transfer */
-    uint8_t vram_transfer_countdown;
-    bool tile_transfer, tile_transfer_high, data_transfer, palette_transfer;
+    uint8_t vram_transfer_countdown, transfer_dest;
     
     /* Border */
     struct {
@@ -45,6 +44,7 @@ struct GB_sgb_s {
     uint16_t effective_palettes[4 * 4];
     uint16_t ram_palettes[4 * 512];
     uint8_t attribute_map[20 * 18];
+    uint8_t attribute_files[0xFE0];
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
