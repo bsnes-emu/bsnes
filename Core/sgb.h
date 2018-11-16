@@ -4,8 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct GB_sgb_s GB_sgb_t;
 #ifdef GB_INTERNAL
-typedef struct {
+struct GB_sgb_s {
     uint8_t command[16 * 7];
     uint16_t command_write_index;
     bool ready_for_pulse;
@@ -38,7 +39,7 @@ typedef struct {
     } border, pending_border;
     uint8_t border_animation;
 
-} GB_sgb_t;
+};
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 void GB_sgb_render(GB_gameboy_t *gb);
