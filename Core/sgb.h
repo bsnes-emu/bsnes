@@ -24,9 +24,11 @@ struct GB_sgb_s {
     /* Mask */
     uint8_t mask_mode;
     
-    /* Border */
+    /* Data Transfer */
     uint8_t vram_transfer_countdown;
-    bool tile_transfer, tile_transfer_high, data_transfer;
+    bool tile_transfer, tile_transfer_high, data_transfer, palette_transfer;
+    
+    /* Border */
     struct {
         uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
         union {
@@ -38,12 +40,15 @@ struct GB_sgb_s {
         };
     } border, pending_border;
     uint8_t border_animation;
-
+    
+    /* Colorization */
+    uint16_t effective_palettes[4 * 4];
+    uint16_t ram_palettes[4 * 512];
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 void GB_sgb_render(GB_gameboy_t *gb);
-void GB_sgb_load_default_border(GB_gameboy_t *gb);
+void GB_sgb_load_default_data(GB_gameboy_t *gb);
 
 #endif
 

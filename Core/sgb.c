@@ -1,10 +1,17 @@
 #include "gb.h"
 
 enum {
-    MLT_REQ = 0x11,
-    CHR_TRN = 0x13,
-    PCT_TRN = 0x14,
-    MASK_EN = 0x17,
+    PAL01    = 0x00,
+    PAL23    = 0x01,
+    PAL03    = 0x02,
+    PAL12    = 0x03,
+    PAL_SET  = 0x0A,
+    PAL_TRN  = 0x0B,
+    DATA_SND = 0x0f,
+    MLT_REQ  = 0x11,
+    CHR_TRN  = 0x13,
+    PCT_TRN  = 0x14,
+    MASK_EN  = 0x17,
 };
 
 typedef enum {
@@ -15,6 +22,20 @@ typedef enum {
 } mask_mode_t;
 
 #define SGB_PACKET_SIZE 16
+static inline void pal_command(GB_gameboy_t *gb, unsigned first, unsigned second)
+{
+    gb->sgb->effective_palettes[0] = gb->sgb->effective_palettes[4] =
+        gb->sgb->effective_palettes[8] = gb->sgb->effective_palettes[12] =
+        gb->sgb->command[1] | (gb->sgb->command[2] << 8);
+    
+    for (unsigned i = 0; i < 3; i++) {
+        gb->sgb->effective_palettes[first * 4 + i + 1] = gb->sgb->command[3 + i * 2] | (gb->sgb->command[4 + i * 2] << 8);
+    }
+    
+    for (unsigned i = 0; i < 3; i++) {
+        gb->sgb->effective_palettes[second * 4 + i + 1] = gb->sgb->command[9 + i * 2] | (gb->sgb->command[10 + i * 2] << 8);
+    }
+}
 
 static void command_ready(GB_gameboy_t *gb)
 {
@@ -50,8 +71,46 @@ static void command_ready(GB_gameboy_t *gb)
         return;
     }
     
-
     switch (gb->sgb->command[0] >> 3) {
+        case PAL01:
+            pal_command(gb, 0, 1);
+            break;
+        case PAL23:
+            pal_command(gb, 2, 3);
+            break;
+        case PAL03:
+            pal_command(gb, 0, 3);
+            break;
+        case PAL12:
+            pal_command(gb, 1, 2);
+            break;
+        case PAL_SET:
+            memcpy(&gb->sgb->effective_palettes[0],
+                   &gb->sgb->ram_palettes[4 * (gb->sgb->command[1] + (gb->sgb->command[2] & 1) * 0x100)],
+                   8);
+            memcpy(&gb->sgb->effective_palettes[4],
+                   &gb->sgb->ram_palettes[4 * (gb->sgb->command[3] + (gb->sgb->command[4] & 1) * 0x100)],
+                   8);
+            memcpy(&gb->sgb->effective_palettes[8],
+                   &gb->sgb->ram_palettes[4 * (gb->sgb->command[5] + (gb->sgb->command[6] & 1) * 0x100)],
+                   8);
+            memcpy(&gb->sgb->effective_palettes[12],
+                   &gb->sgb->ram_palettes[4 * (gb->sgb->command[7] + (gb->sgb->command[8] & 1) * 0x100)],
+                   8);
+            
+            if (gb->sgb->command[9] & 0x40) {
+                gb->sgb->mask_mode = MASK_DISABLED;
+            }
+            break;
+        case PAL_TRN:
+            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->tile_transfer = false;
+            gb->sgb->data_transfer = true;
+            gb->sgb->palette_transfer = true;
+            break;
+        case DATA_SND:
+            // Not supported, but used by almost all SGB games for hot patching, so let's mute the warning for this
+            break;
         case MLT_REQ:
             gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
             gb->sgb->current_player = gb->sgb->player_count - 1;
@@ -69,6 +128,7 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb->vram_transfer_countdown = 2;
             gb->sgb->tile_transfer = false;
             gb->sgb->data_transfer = true;
+            gb->sgb->palette_transfer = false;
             break;
         default:
             GB_log(gb, "Unimplemented SGB command %x: ", gb->sgb->command[0] >> 3);
@@ -77,7 +137,6 @@ static void command_ready(GB_gameboy_t *gb)
             }
             GB_log(gb, "\n");
             ;
-
     }
 }
 
@@ -192,10 +251,10 @@ void GB_sgb_render(GB_gameboy_t *gb)
     if (!gb->screen || !gb->rgb_encode_callback) return;
     
     uint32_t colors[] = {
-        gb->rgb_encode_callback(gb, 0xf7, 0xe7, 0xc6),
-        gb->rgb_encode_callback(gb, 0xd6, 0x8e, 0x49),
-        gb->rgb_encode_callback(gb, 0xa6, 0x37, 0x25),
-        gb->rgb_encode_callback(gb, 0x33, 0x1e, 0x50)
+        convert_rgb15(gb, gb->sgb->effective_palettes[0]),
+        convert_rgb15(gb, gb->sgb->effective_palettes[1]),
+        convert_rgb15(gb, gb->sgb->effective_palettes[2]),
+        convert_rgb15(gb, gb->sgb->effective_palettes[3]),
     };
     
     switch ((mask_mode_t) gb->sgb->mask_mode) {
@@ -235,19 +294,23 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 
             }
             else if (gb->sgb->data_transfer) {
-                for (unsigned tile = 0; tile < 0x88; tile++) {
+                unsigned size = gb->sgb->palette_transfer? 0x100 : 0x88;
+                uint16_t *data = gb->sgb->palette_transfer? gb->sgb->ram_palettes : gb->sgb->pending_border.raw_data;
+                for (unsigned tile = 0; tile < size; tile++) {
                     unsigned tile_x = (tile % 20) * 8;
                     unsigned tile_y = (tile / 20) * 8;
                     for (unsigned y = 0; y < 0x8; y++) {
                         static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
-                        uint16_t *data = &gb->sgb->pending_border.raw_data[tile * 8 + y];
                         *data = 0;
                         for (unsigned x = 0; x < 8; x++) {
                             *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                         }
+                        data++;
                     }
                 }
-                gb->sgb->border_animation = 64;
+                if (!gb->sgb->palette_transfer) {
+                    gb->sgb->border_animation = 64;
+                }
             }
         }
     }
@@ -298,22 +361,20 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 for (unsigned x = 0; x < 8; x++) {
                     uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
                     if (color == 0 && gb_area) continue;
-                    gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] =
-                    border_colors[palette * 16 + color];
+                    gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = border_colors[palette * 16 + color];
                 }
             }
         }
     }
 }
 
-void GB_sgb_load_default_border(GB_gameboy_t *gb)
+void GB_sgb_load_default_data(GB_gameboy_t *gb)
 {
     
 #include "sgb_border.inc"
     
     memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
     memcpy(gb->sgb->border.palette, palette, sizeof(palette));
-    
     
     /* Expend tileset */
     for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
@@ -327,4 +388,9 @@ void GB_sgb_load_default_border(GB_gameboy_t *gb)
             }
         }
     }
+    
+    gb->sgb->effective_palettes[0] = 0x639E;
+    gb->sgb->effective_palettes[1] = 0x263A;
+    gb->sgb->effective_palettes[2] = 0x10D4;
+    gb->sgb->effective_palettes[3] = 0x2866;
 }
