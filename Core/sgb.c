@@ -2,7 +2,15 @@
 
 enum {
     MLT_REQ = 0x11,
+    MASK_EN = 0x17,
 };
+
+typedef enum {
+    MASK_DISABLED,
+    MASK_FREEZE,
+    MASK_COLOR_3,
+    MASK_COLOR_0,
+} mask_mode_t;
 
 #define SGB_PACKET_SIZE 16
 
@@ -45,6 +53,9 @@ static void command_ready(GB_gameboy_t *gb)
         case MLT_REQ:
             gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
             gb->sgb->current_player = gb->sgb->player_count - 1;
+            break;
+        case MASK_EN:
+            gb->sgb->mask_mode = gb->sgb->command[1] & 3;
             break;
         default:
             GB_log(gb, "Unimplemented SGB command %x: ", gb->sgb->command[0] >> 3);
@@ -144,8 +155,28 @@ void GB_sgb_render(GB_gameboy_t *gb)
         gb->screen[i] = border;
     }
     
+    switch ((mask_mode_t) gb->sgb->mask_mode) {
+        case MASK_DISABLED:
+            memcpy(gb->sgb->effective_screen_buffer,
+                   gb->sgb->screen_buffer,
+                   sizeof(gb->sgb->effective_screen_buffer));
+            break;
+        case MASK_FREEZE:
+            break;
+        
+        case MASK_COLOR_3:
+            memset(gb->sgb->effective_screen_buffer,
+                   3,
+                   sizeof(gb->sgb->effective_screen_buffer));
+            break;
+        case MASK_COLOR_0:
+            memset(gb->sgb->effective_screen_buffer,
+                   0,
+                   sizeof(gb->sgb->effective_screen_buffer));
+    }
+    
     uint32_t *output = &gb->screen[48 + 39 * 256];
-    uint8_t *input = gb->sgb->screen_buffer;
+    uint8_t *input = gb->sgb->effective_screen_buffer;
     for (unsigned y = 0; y < 144; y++) {
         for (unsigned x = 0; x < 160; x++) {
             *(output++) = colors[*(input++) & 3];

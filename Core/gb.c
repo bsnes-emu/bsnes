@@ -648,6 +648,7 @@ void GB_reset(GB_gameboy_t *gb)
         if (!gb->sgb) {
             gb->sgb = malloc(sizeof(*gb->sgb));
         }
+        memset(gb->sgb, 0, sizeof(*gb->sgb));
         gb->sgb->player_count = 1;
 
     }

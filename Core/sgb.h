@@ -14,9 +14,14 @@ typedef struct {
     bool disable_commands;
     
     /* Screen buffer */
-    uint8_t screen_buffer[160 * 144];
+    uint8_t screen_buffer[160 * 144]; // Live image from the Game Boy
+    uint8_t effective_screen_buffer[160 * 144]; // Image actually rendered to the screen
+    
     /* Multiplayer Input */
     uint8_t player_count, current_player;
+    
+    /* Mask */
+    uint8_t mask_mode;
 } GB_sgb_t;
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
