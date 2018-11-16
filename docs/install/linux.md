@@ -24,7 +24,7 @@ for the following libraries:
   - Mesa
   - gtksourceview 2.x
   - Cairo
-  - SDL 1.2
+  - SDL 2.0
   - libXv
   - libAO
   - OpenAL
@@ -35,7 +35,7 @@ On a Debian-derived Linux distribution
 you can install everything you need with a command like:
 
     sudo apt-get install build-essential libgtk2.0-dev libpulse-dev \
-        mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl1.2-dev \
+        mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev \
         libxv-dev libao-dev libopenal-dev libudev-dev
 
 Once you have all the dependencies installed,
@@ -53,7 +53,7 @@ being installed system-wide.
  3. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 4. Type `make -C higan` and press Enter
+ 4. Type `make -C higan target=higan` and press Enter
     to build the main higan executable
  5. Type `make -C icarus` and press Enter
     to build the icarus import tool
@@ -68,7 +68,7 @@ as described in the previous section:
  2. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 3. Type `make -C higan install` and press Enter
+ 3. Type `make -C higan target=higan install` and press Enter
     to install higan and its supporting files
  4. Type `make -C icarus install` and press Enter
     to install icarus and its game database
@@ -123,7 +123,7 @@ as installed by the above instructions:
  2. Type `cd ~/higan-src`
     (or wherever you put the higan source)
     and press Enter
- 3. Type `make -C higan uninstall` and press Enter
+ 3. Type `make -C higan target=higan uninstall` and press Enter
  4. Type `make -C icarus uninstall` and press Enter
 
 To remove higan's configuration,

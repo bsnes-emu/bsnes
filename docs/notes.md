@@ -29,8 +29,8 @@ you may be comparing it
 to a Mega Drive calibrated to a different scale
 (or to an emulator tweaked to match such a Mega Drive).
 
-[vol]: https://board.byuu.org/viewtopic.php?p=42482#p42482
-[va6]: https://board.byuu.org/viewtopic.php?p=42195#p42195
+[vol]: https://helmet.kafuka.org/byuubackup2/viewtopic.php@f=4&t=1235&start=140.html#p42482
+[va6]: https://helmet.kafuka.org/byuubackup2/viewtopic.php@f=4&t=1235&start=130.html#p42195
 
 Playing Game Boy Color games in Game Boy mode
 ---------------------------------------------
@@ -128,19 +128,23 @@ Rumble compatibility for Game Boy (Color)
 
 The Game Boy and Game Boy Color did not natively support
 any kind of rumble or force-feedback system,
-but some game cartridges (such as Pokémon Pinball)
+but some game cartridges (such as *Pokémon Pinball*)
 included a rumble motor within the cartridge itself.
+Such cartridges generally used the "MBC5" memory mapper chip.
 
-Because higan does not currently support
-game-specific controller features,
-to experience the rumble effect in higan
-you'll need to configure the console:
+To experience the rumble effect in higan,
+you'll need to configure the MBC5 "controller"
+connected to the "cartridge" port:
 
   - Open
     [higan's Input settings](interface/higan-settings.md#input)
   - In the list of consoles,
     select Game Boy, or Game Boy Color
     depending on which console you want to use to play the game
+  - In the list of ports,
+    select "Cartridge"
+  - In the list of controllers,
+    select "MBC5"
   - In the list of inputs,
     double-click "Rumble"
     or select it and press Enter

@@ -2,14 +2,14 @@ Most of the consoles higan emulates
 were designed for low resolution NTSC televisions,
 and their video output is chunky and blocky
 by today's standards.
-Video shaders customise how a console's video output
+Video shaders customise how the emulated console's video output
 is drawn to the computer screen,
 and can clean up and smooth out the original video,
 reproduce the scanlines and blurring of the original display,
 or any other visual effect.
 
 The available video shaders are listed in
-the "Video Shaders" sub-menu of the [Settings menu].
+the "Shader" sub-menu of the [Settings menu].
 Which shaders are available depends on
 the [video driver] higan is configured to use.
 Most drivers only support these shaders:
@@ -19,7 +19,8 @@ Most drivers only support these shaders:
     the colour of the single nearest console pixel,
     sometimes called "nearest neighbour" scaling.
     This produces unnaturally crisp and blocky images.
-      - If you use [aspect correction or non-integral scaling][ac],
+      - If you enable Scale, Stretch, or Aspect Correction modes
+        in the Output sub-menu of the [Settings menu],
         neighbouring console pixels may be drawn
         with a different number of computer pixels due to rounding errors,
         causing a distracting rippling effect.
@@ -29,8 +30,6 @@ Most drivers only support these shaders:
     of the four nearest console pixels,
     sometimes called "bilinear" scaling.
     This produces unnaturally blurry images.
-
-[ac]: ../interface/higan-settings.md#video
 
 In addition to those,
 the OpenGL driver also supports custom shaders.
@@ -90,7 +89,7 @@ you'll need to restart higan
 for the change to take effect.
 
 Open the Settings menu again,
-choose the "Video Shader" sub-menu,
+choose the "Shader" sub-menu,
 and now the shaders you installed
 should be listed at the bottom of the menu.
 

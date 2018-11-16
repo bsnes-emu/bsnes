@@ -64,17 +64,17 @@ by the time you read this,
 and it may contain errors or omissions.
 If you find something that's wrong,
 or you have a suggestion,
-post a message on the official higan forum.
+post a message on the unofficial forum.
 
 Official higan resources
 ------------------------
 
   - [Official homepage](https://byuu.org/emulation/higan/)
-  - [Official forum](https://board.byuu.org/viewforum.php?f=4)
 
 Unofficial higan resources
 --------------------------
 
+  - [Unofficial forum](https://helmet.kafuka.org/bboard/)
   - [Source code repository](https://gitlab.com/higan/higan/)
     archives official higan releases
     and WIP snapshots
@@ -85,12 +85,12 @@ Unofficial higan resources
     or smarter algorithms for scaling up to modern PC resolutions.
     See [Using video shaders][shaders] below for details.
   - [Mercurial Magic](https://github.com/hex-usr/Mercurial-Magic/)
-    is a tool for converting MSU-1 games and mods into a format
+    is a tool for converting MSU1 games and mods into a format
     higan can use.
-    See [Importing MSU-1 games][msu1] for details.
+    See [Importing MSU1 games][msu1] for details.
 
 [shaders]: guides/shaders.md
-[msu1]: guides/import.md#msu-1-games
+[msu1]: guides/import.md#msu1-games
 
 There are also other projects
 based on current or older versions of higan,
@@ -113,7 +113,7 @@ that you might want to check out.
     is a fork of bsnes v094
     adapted to work as a
     [libretro](https://www.libretro.com/) emulation core.
-  - [nSide](https://github.com/hex-usr/nSide)
+  - [nSide](https://gitlab.com/hex-usr/nSide)
     is a fork of higan that greatly enhances
     its NES emulation support,
     and adds minor features to the other cores too.

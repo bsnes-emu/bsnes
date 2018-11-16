@@ -29,7 +29,7 @@ and (if possible) start playing.
 **Note:**
 If you want to import many games,
 run icarus directly.
-See [icarus] documentation for details.
+See the [icarus] documentation for details.
 
 To play a game for a particular console from your library,
 open the [Systems menu],
@@ -75,11 +75,11 @@ for yourself.
 
 To import a game that requires co-processor firmware,
 the easiest approach is to drop the firmware files into
-icarus' `firmware` directory
+icarus' `Firmware` directory
 before importing the game.
 The directory should be beside the icarus executable,
-or it can be `%LOCALAPPDATA%\icarus\firmware` (on Windows)
-or `~/.local/share/icarus/firmware/` (on Linux).
+or it can be `%LOCALAPPDATA%\icarus\Firmware` (on Windows)
+or `~/.local/share/icarus/Firmware/` (on Linux).
 
 If the easy approach doesn't work for a particular game,
 it may be because icarus has incorrectly guessed
@@ -131,13 +131,13 @@ here's the firmware files you'll need:
     </thead>
     <tbody>
         <tr>
-            <th scope="row">CX4</th>
+            <th scope="row">CX4<br><sup>See Note 1</sup></th>
             <td><code>cx4.data.rom</code></td>
             <td>3072</td>
             <td><code>ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18</code></td>
         </tr>
         <tr>
-            <th scope="row" rowspan=2>DSP1/1A<br><sup>See Note 1</sup></th>
+            <th scope="row" rowspan=2>DSP1/1A<br><sup>See Note 2</sup></th>
             <td><code>dsp1.data.rom</code></td>
             <td>2048</td>
             <td><code>0b5da6533e55852ee8fc397977ec5576c5b9f1fb2e05656d8f87123a121b076e</code></td>
@@ -148,7 +148,7 @@ here's the firmware files you'll need:
             <td><code>269584b347a22953a2989494c850a7c1c027f4ca5add517a60e0c7d8833d0fac</code></td>
         </tr>
         <tr>
-            <th scope="row" rowspan=2>DSP1B<br><sup>See Note 2</sup></th>
+            <th scope="row" rowspan=2>DSP1B<br><sup>See Note 3</sup></th>
             <td><code>dsp1b.data.rom</code></td>
             <td>2048</td>
             <td><code>8546cbac530830446bb8a277f6b139d4ad64d650bdbac7e4e150e2f095665049</code></td>
@@ -228,10 +228,15 @@ here's the firmware files you'll need:
 </table>
 
 **Note 1:**
+The CX4 firmware is shipped with higan,
+because it just contains mathematical tables
+and not a copyrightable program.
+
+**Note 2:**
 The DSP1 and DSP1A are physically different,
 but the firmware inside is identical.
 
-**Note 2:**
+**Note 3:**
 The DSP1B is very similar to the DSP1A,
 but fixes some bugs.
 Note that icarus' heuristics cannot distinguish between
@@ -259,7 +264,7 @@ using the "Load ROM File ..." option in the [Systems menu]
 but it does not include the correct firmware data,
 nothing will happen,
 and higan will just sit there
-with "No cartridge loaded" in
+with "Unloaded" in
 [the status bar](../interface/higan.md#the-status-bar).
 
 Once a game with co-processor firmware is imported,
@@ -441,7 +446,14 @@ including the timing change.
 
 Because the Super Game Boy cartridge includes
 the original Game Boy hardware,
-it needs a boot ROM:
+it needs a boot ROM.
+icarus includes these files
+and can reliably decide when to use them,
+so importing either Super Game Boy cartridge
+is just like [importing a regular game](#regular-games).
+
+In case you need to check the Super Game Boy boot roms,
+here are their details:
 
 <table>
     <thead>
@@ -468,11 +480,6 @@ it needs a boot ROM:
     </tbody>
 </table>
 
-icarus includes these files
-and can reliably decide when to use them,
-so importing either Super Game Boy cartridge
-is just like [importing a regular game](#regular-games).
-
 To play a Game Boy game in Super Game Boy mode,
 load the Super Game Boy cartridge like any other game.
 higan will open another [filesystem browser]
@@ -497,14 +504,14 @@ for details.
 
 [blackcarts]: ../notes.md#playing-game-boy-color-games-in-game-boy-mode
 
-MSU-1 games
------------
+MSU1 games
+----------
 
-The MSU-1 is a fictional expansion chip
+The MSU1 is a fictional expansion chip
 invented by higan's author byuu,
 designed to allow the Super Famicom
 to stream data and audio.
-Although the MSU-1 is not specific
+Although the MSU1 is not specific
 to any particular storage medium,
 it gives the Super Famicom similar capabilities
 to CD-based add-ons
@@ -512,32 +519,32 @@ like the Mega Drive's Mega CD
 and the PC Engine's CD-ROM²,
 such as CD-quality music and full-motion video.
 
-Although the MSU-1 was invented for higan,
+Although the MSU1 was invented for higan,
 it is now supported by other Super Famicom emulators too.
 The [SD2SNES] programmable cartridge
-even allows you to play MSU-1 games on a real console.
+even allows you to play MSU1 games on a real console.
 There are a number of homebrew games
-that make use of the MSU-1,
+that make use of the MSU1,
 and also mods for commercial Super Famicom games
 that add higher-quality music and sometimes video.
 
 One thing to be aware of
-when importing an MSU-1 game
+when importing an MSU1 game
 is that early firmware versions of the SD2SNES
-had a bug that caused MSU-1 music to play too quietly.
+had a bug that caused MSU1 music to play too quietly.
 Skipping over [the full details][msu1vol],
 the short version is this:
 
   - If offered the choice between "boosted" or non-boosted audio,
     you want the non-boosted version.
-  - If an MSU-1 mod for a commercial game offers
+  - If an MSU1 mod for a commercial game offers
     "emulator" and "hardware" versions of the patch file,
     it means the audio tracks are already boosted.
   - Some
     [third](https://www.zeldix.net/t1265-#18320)
     [parties](https://www.zeldix.net/t1339-#19818)
     have created replacement, non-boosted audio tracks
-    for the most popular MSU-1 mods.
+    for the most popular MSU1 mods.
     If the mod you want to play has a replacement pack,
     use it with the "hardware" version of the patch.
   - Even without access to non-boosted audio tracks,
@@ -548,7 +555,7 @@ the short version is this:
     distorting and clipping,
     in which case try the "emulator" patch.
 
-To import an MSU-1 game:
+To import an MSU1 game:
 
  1. If you have a single, large file
     with the `.msu1` extension,
@@ -560,11 +567,11 @@ To import an MSU-1 game:
  2. Otherwise,
     import the Super Famicom ROM with icarus,
     [like a regular game](#regular-games).
-      - If this is a homebrew game with MSU-1 support,
+      - If this is a homebrew game with MSU1 support,
         there will probably be an ordinary ROM
         whose name ends in `.sfc`,
         which is the file you want to import.
-      - If this is a commercial game modded for MSU-1 support,
+      - If this is a commercial game modded for MSU1 support,
         there will probably be a patch file
         whose name ends in `.ips` or `.bps`.
         Get a copy of the correct version of the commercial game,
@@ -574,14 +581,17 @@ To import an MSU-1 game:
         see "One thing to be aware of..." above.
  3. Find the game folder in the [game library]
     that icarus created when it imported the game.
- 4. Copy the MSU-1 data file into the game folder.
-      - This should be named `msu1.rom`
+ 4. Inside the game folder,
+    create a new folder named `msu1`.
+ 5. Copy the MSU1 data file into the new `msu1` folder.
+      - This should be named `data.rom`
       - If there's no file by that name,
-        look for a file with a `.msu` extension
+        look for a file named `msu1.rom`,
+        or a file with a `.msu` extension,
         and rename it to `msu1.rom`.
       - If there's no file ending in `.msu` either,
         create an empty file named `msu1.rom`.
- 5. Copy the audio tracks into the game folder.
+ 6. Copy the audio tracks into the game folder.
       - If you have to choose between two sets of audio files,
         see "One thing to be aware of..." above.
       - These should be named
@@ -601,13 +611,13 @@ To import an MSU-1 game:
         this game probably just doesn't use the audio-playback feature.
 
 Once the game folder is set up,
-playing an MSU-1 game is just like
+playing an MSU1 game is just like
 [a regular game](#regular-games).
 
 [SD2SNES]: https://sd2snes.de/
 [Flips]: http://www.romhacking.net/utilities/1040/
 [msu1vol]: http://blog.qwertymodo.com/2017/07/the-msu-1-volume-fiasco-explained.html
-[Mercurial Magic]: https://github.com/hex-usr/Mercurial-Magic/
+[Mercurial Magic]: https://github.com/qwertymodo/Mercurial-Magic
 
 Patched games
 -------------
@@ -652,7 +662,7 @@ GBA games can be imported and played just like
 
 Note that some GBA games
 have trouble with
-[in-game saves](../notes#in-game-saves-and-the-game-boy-advance).
+[in-game saves](../notes.md#in-game-saves-and-the-game-boy-advance).
 
 PowerFest '94
 -------------
@@ -670,85 +680,15 @@ switch between them after a specific time,
 extract a score,
 and display the combined total at the end.
 
-icarus cannot automatically import
-dumps of the PowerFest '94 ROMs,
-but if you have the files,
-you can import them manually.
+Previous versions of higan
+could emulate the PowerFest '94 cartridge,
+but changes to higan's manifest system in v107
+prevent PowerFest '94 from working in that version.
+Support will likely be re-added in a future version,
+but in the mean time you can use higan v106
+and follow [that version's import instructions][pf94v106].
 
-You will need the following files:
-
-<table>
-    <thead>
-        <tr>
-            <th>Part</th>
-            <th>Filename</th>
-            <th>Size (bytes)</th>
-            <th>SHA256</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th scope="row">Scoring</th>
-            <td><code>program.rom</code></td>
-            <td>262144</td>
-            <td><code>2fc9dca305ce3fb2f1a476567de500d50c174fbfbabd32b1b91c3ea6a731b4a1</code></td>
-        </tr>
-        <tr>
-            <th scope="row">Super Mario Bros. - The Lost Levels</th>
-            <td><code>slot-1.rom</code></td>
-            <td>524288</td>
-            <td><code>7fd86113c5f95f794d65807bb75ab91c93c914670c27fc813ffa2ca20a48705e</code></td>
-        </tr>
-        <tr>
-            <th scope="row">Super Mario Kart</th>
-            <td><code>slot-2.rom</code></td>
-            <td>524288</td>
-            <td><code>19eb77affbf8dd068f5d79a3cf80a2084fd73237cd1ae4e47192b4422449e64a</code></td>
-        </tr>
-        <tr>
-            <th scope="row">Ken Griffey Jr. Presents Major League Baseball</th>
-            <td><code>slot-3.rom</code></td>
-            <td>1048576</td>
-            <td><code>d47bc9f9a6289c4f2e7f6bf74095f6ed36b1043a761e3e729ac9af2fc39ae062</code></td>
-        </tr>
-   </tbody>
-</table>
-
-You will also need
-the usual `dsp1.program.rom` and `dsp1.data.rom`
-[co-processor firmware](#games-with-co-processor-firmware) files.
-
-**Note:** the versions of
-*Super Mario Kart*
-and *Ken Griffey Jr...*
-in *PowerFest '94*
-are not the same as the stand-alone versions of those games.
-
-To "import" *PowerFest '94*,
-collect all the files mentioned above, then:
-
- 1. Inside [the game library](../concepts/game-library.md),
-    create the `Super Famicom` folder
-    (if it does not already exist).
- 2. Inside the `Super Famicom` folder,
-    create a `PowerFest '94.sfc` folder
-    (the `.sfc` extension is important,
-    but you can choose a different base name if you want).
- 3. Copy `program.rom` and the `slot-*.rom` files
-    into the `PowerFest '94.sfc` folder.
- 4. Copy the `dsp1.*.rom` files into the `PowerFest '94.sfc` folder,
-    but rename them to `upd7725.*.rom`.
-
-To play *PowerFest '94*,
-open the Library menu,
-pick the Nintendo sub-menu,
-then choose the Super Famicom sub-menu item
-to open a filesystem browser listing
-all the Super Famicom games in the library.
-Select *PowerFest '94* from the list
-and click the Open button,
-or just double-click the game,
-and it will begin playing.
+[pf94v106]: https://higan.readthedocs.io/en/v106/guides/import/#powerfest-94
 
 [filesystem browser]: ../interface/common.md#the-filesystem-browser
 [Game Library]: ../concepts/game-library.md

@@ -27,11 +27,11 @@ Official higan resources
 ------------------------
 
   - [Official homepage](https://byuu.org/emulation/higan/)
-  - [Official forum](https://board.byuu.org/viewforum.php?f=4)
 
 Unofficial higan resources
 --------------------------
 
+  - [Unofficial forum](https://helmet.kafuka.org/bboard/)
   - Documentation for
     [the current stable version][stadocs]
   - [Source code repository](https://gitlab.com/higan/higan/)

@@ -4,8 +4,8 @@ is the folder where all the
 When [icarus](../interface/icarus.md) imports a game,
 it creates or updates
 the corresponding game folder in the game library.
-When you use the console sub-menu items
-in [higan's Library menu](../interface/higan.md#the-library-menu),
+When you use the items in
+[higan's Systems menu](../interface/higan.md#the-systems-menu),
 higan shows you the games for that console
 that are already in the library.
 

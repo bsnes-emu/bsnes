@@ -228,10 +228,13 @@ A: Try Settings -> Video -> Exclusive mode, then switch to fullscreen. This
 Online Resources
 ----------------
 
-Official homepage + forum:
+Official homepage:
 
    https://byuu.org/emulation/higan
-   https://board.byuu.org/viewforum.php?f=4
+
+Unofficial forum:
+
+   https://helmet.kafuka.org/bboard/
 
 Unoffical source code repository + documentation:
 

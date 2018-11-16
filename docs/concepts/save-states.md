@@ -119,7 +119,7 @@ Manager states
 --------------
 
 higan's
-[State Manager](../interface/higan-tools.md#the-state-manager)
+[State Manager](../interface/higan-tools.md#state-manager)
 allows you to create over a hundred save states,
 and add a helpful description to each one.
 

@@ -11,5 +11,5 @@ Release checklist
  6. Merge changes from master.
  7. Copy `target-bsnes/resource/resource.?pp` to the `target-libretro` folder.
  7. `git push` to make the new changes available.
- 
- [rtd]: https://readthedocs.org/projects/higan/builds/
+
+[rtd]: https://readthedocs.org/projects/higan/builds/

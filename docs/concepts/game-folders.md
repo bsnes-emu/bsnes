@@ -53,7 +53,7 @@ higan can use a larger number of files per game.
 For example,
 higan's low-level emulation of Super Famicom co-processors
 often requires [separate firmware files][firmware].
-higan's [MSU-1 feature][msu1]
+higan's [MSU1 feature][msu1]
 supports up to 99 audio tracks per game,
 and higan supports up to 133 save-states per game.
 Thus,
@@ -70,7 +70,7 @@ like save-states and the cheat database
 to be kept separate from the game's actual data,
 by putting it in a sub-folder.
 
-[msu1]: ../guides/import.md#msu-1-games
+[msu1]: ../guides/import.md#msu1-games
 [firmware]: ../guides/import.md#games-with-co-processor-firmware
 
 For a more detailed motivation for game folders,
@@ -128,17 +128,21 @@ to all emulators that support them:
     will create this file.
   - `*.data.rom`, `*.program.rom`:
     Files named like this are usually [co-processor firmware][firmware].
-  - `msu1.rom`:
-    Holds streamable data for [the MSU-1][msu1].
+
+Files used by higan's [MSU1 extension][msu1]
+are in the `msu1` sub-folder:
+
+  - `data.rom`:
+    Holds data that the MSU1 can stream.
   - `track-*.pcm`:
-    Holds streamable audio for [the MSU-1][msu1].
+    Holds audio that the MSU1 can stream.
 
 Files that are only useful to higan specifically
 are placed in a `higan` sub-folder:
 
   - `cheats.bml`:
     All information present in
-    [the Cheat Editor](../interface/higan-tools.md#the-cheat-editor)
+    the [Cheat Editor](../interface/higan-tools.md#cheat-editor)
     is stored here.
   - `notes.txt`:
     Everything entered in the [Game Notes] is stored here.

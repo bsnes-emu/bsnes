@@ -59,5 +59,5 @@ apologies to anyone we've missed!
 
 For more information,
 see the [credits thread](
-https://board.byuu.org/viewtopic.php?f=4&t=1631&p=41575#p41575)
-on the official forums.
+https://helmet.kafuka.org/byuubackup2/viewtopic.php@f=4&t=1631.html)
+on the archive of the official forums.

@@ -57,7 +57,8 @@ higan will prompt for one.
 `SUBGAME2` is ignored.
 
 When `GAME` refers to
-the [Super Game Boy](../guides/import.md#super-game-boy-games),
+the [Super Game Boy](../guides/import.md#super-game-boy-games)
+or Super Game Boy 2,
 `SUBGAME1` should be
 the path to a game folder or ROM file
 representing a Game Boy game to insert into the slot.

@@ -62,7 +62,7 @@ The icarus Settings dialog contains the following settings:
 Command line
 ------------
 
-icarus can be launched with any of the following command-line arguments:
+icarus can be launched in any of the following ways:
 
 > icarus
 >

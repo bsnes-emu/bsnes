@@ -51,7 +51,7 @@ Load a game
 -----------
 
 From
-[the Library menu](interface/higan.md#the-library-menu),
+[the Systems menu](interface/higan.md#the-systems-menu),
 choose "Load ROM File ..."
 to open [a filesystem browser](interface/common.md#the-filesystem-browser),
 and choose the game you want to play.
@@ -63,7 +63,7 @@ In the future,
 if you want to play this game again,
 you can choose "Load ROM File ..." as you did before,
 or you can choose the appropriate console name
-from the Library menu,
+from the Systems menu,
 which will list all the games for that console
 in the Game Library.
 

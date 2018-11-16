@@ -3,10 +3,10 @@ appears when you choose
 one of the items at the bottom of
 [the Tools menu](higan.md#the-tools-menu).
 
-The window has a tab for each tool:
+The window has a tab for each tool.
 
-The Cheat Editor
-================
+Cheat Editor
+============
 
 For some consoles,
 higan supports applying temporary changes to the code of a running game.
@@ -89,8 +89,8 @@ in Super Mario World,
 you can lock the time to 999 with these codes:
 `7e0f31=09+7e0f32=09+7e0f33=09`.
 
-The State Manager
-=================
+State Manager
+=============
 
 The State Manager allows you to create,
 load,
@@ -125,8 +125,8 @@ and click "Erase" in the bottom-right corner.
 To clear all the slots at once,
 click "Reset" in the bottom-right corner.
 
-The Manifest Viewer
-===================
+Manifest Viewer
+===============
 
 As described in
 [Game Manifests](../concepts/manifests.md),

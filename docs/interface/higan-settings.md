@@ -6,7 +6,7 @@ and contains less-frequently-modified settings.
 Most of these can be safely ignored,
 or set once and never changed again.
 
-This window has a tab for each main category of options:
+This window has a tab for each main category of options.
 
 Systems
 =======
@@ -92,9 +92,9 @@ settings adjust the colour and brightness
 of the emulated console's video output:
 
   - **Saturation** adjusts the vibrancy of colours displayed,
-    where 0% makes things pure grey,
+    where 0% makes things black-and-white,
     100% is normal,
-    and 200% is garishly brightly coloured.
+    and 200% is garishly exaggerated colour.
   - **Gamma** adjusts how bright mid-range colours are
     compared to the brightest colours,
     where 100% is normal,
@@ -102,20 +102,23 @@ of the emulated console's video output:
     This is in addition to
     any adjustment applied by
     the "Colors" option
-    in the "Video Emulation" sub-menu
+    in the "Emulation" sub-menu
     of the [Settings menu](higan.md#the-settings-menu).
   - **Luminance** adjusts the overall brightness,
     where 100% is normal,
     and 0% is totally black.
 
-**Overscan Mask**
-removes parts of
-the video output that would have been hidden
-by the bezel around the edge of
-a standard-definition television screen.
-Some games (particularly on the Famicom)
-displayed random glitchy output in this area,
-which can be distracting.
+**Overscan Area**
+controls what parts of the video output are hidden
+when "Show Overscan Area" is disabled
+in the "Output" sub-menu of
+the [Settings menu](higan.md#the-settings-menu).
+On a standard-definition television,
+the outermost edges of the emulated console's video output
+would have been hidden by the bezel,
+so some games (particularly on the Famicom)
+allowed random glitchy output to appear there,
+assuming it wouldn't be visible.
 
   - **Horizontal**
     removes pixels from the left and right of the video output.
@@ -130,41 +133,7 @@ whether the Super Famicom is in
 lo-res (256px) or hi-res (512px)
 mode.
 
-**Windowed Mode**
-settings apply when higan is running
-in a normal window.
-
-  - **Aspect Correction**
-    stretches the image to match the aspect ratio
-    produced by the original console hardware,
-    but can cause a "ripple" effect
-    during horizontal scrolling
-    due to rounding errors.
-    [Video shaders](../guides/shaders.md)
-    can reduce this effect.
-  - **Integral Scaling**
-    makes higan draw the emulated video output
-    at a whole-number multiple of the original size,
-    rather than completely filling the available space.
-    This means that every game pixel
-    uses the same number of computer pixels,
-    and avoids graphics looking chunky and uneven.
-    Note that Aspect Correction
-    is applied after integral scaling,
-    so some unevenness may be visible
-    even with this option enabled.
-  - **Adaptive Sizing**
-    automatically resizes the higan window
-    to fit snugly around the emulated video output
-    whenever it changes size
-    (because the user loaded a game for a different console,
-    chose a different option from
-    the [Video Scale sub-menu](higan.md#the-settings-menu),
-    toggled Aspect Correction, etc.)
-    When disabled,
-    higan generally respects manual resizing.
-
-**Fullscreen Mode**
+**Fullscreen**
 settings apply
 when higan is running fullscreen,
 because it was started with the `--fullscreen`
@@ -172,10 +141,6 @@ because it was started with the `--fullscreen`
 or because the user pressed
 the Toggle Fullscreen [hotkey](higan-settings.md#hotkeys).
 
-  - **Aspect Correction**
-    behaves the same way as in Windowed mode above.
-  - **Integral Scaling**
-    behaves the same way as in Windowed mode above.
   - **Exclusive Mode**
     requests exclusive access
     to the computer's video output
@@ -185,7 +150,7 @@ the Toggle Fullscreen [hotkey](higan-settings.md#hotkeys).
     from drawing anything,
     and may also temporarily disable any kind of compositing,
     reducing video latency.
-    As of v104,
+    As of v107,
     only the Direct3D video driver is capable of exclusive mode;
     with other drivers this option does nothing.
 
@@ -236,52 +201,52 @@ before it is sent to your computer's speakers.
     where 0% means only the left speaker produces sound,
     50% means both speakers produce sound equally,
     and 100% means only the right speaker produces sound.
-  - **Reverb** adds a slight reverberation effect
-    to the emulated console's audio output,
-    as though you were playing the game in a tunnel or small room.
 
 Input
 =====
 
-This tab controls which PC inputs
-are mapped to which emulated controllers.
+This tab controls
+how higan handles input for the emulated consoles.
+
+**When focus is lost**
+controls what happens when a game is loaded,
+but higan is not the current foreground window.
+
+  - **Pause Emulation** automatically pauses emulation.
+  - **Block Input** allows emulation to keep running,
+    but higan will ignore all configured button presses.
+    If you're using the keyboard to emulate a controller,
+    this prevents typing in other applications
+    from messing with higan,
+    but music will keep playing.
+  - **Allow Input** allows emulation to continue as normal.
+    This allows somebody to play higan with a controller
+    in one window,
+    while somebody else types into another application
+    in another window.
+
+The rest of this tab configures
+the mapping from PC inputs to emulated controllers.
 The exact PC inputs that can be mapped
 depend on [the input driver](../guides/drivers.md#input).
 
-General input settings:
+To choose which of the possible controllers to configure:
 
-  - **Pause Emulation** automatically pauses emulation
-    when the main higan window
-    is not the current foreground window.
-  - **Allow Input** can be ticked
-    when "Pause Emulation" is *not* ticked,
-    and allows configured inputs to keep affecting higan
-    even when higan is running in the background.
-    This is particularly relevant if
-    you configure your PC keyboard to control higan:
-    if you tick this box,
-    and switch to a different application
-    leaving higan running in the background,
-    typing in that other application may affect
-    the emulated game running in higan
-    even though you can't see it!
+  - The first drop-down list controls
+    which console's ports appear in the second list.
+  - The second drop-down list controls
+    which port's compatible controllers appear in the third list.
+  - The third drop-down list controls
+    which controller's inputs are shown
+    in the mapping list below.
 
-Choosing which of the possible controllers to configure:
+Note that some consoles only allow particular controllers
+to be used in a particular port.
+For example,
+the Super Scope controller for the Super Famicom
+only works in Controller Port 2.
 
-  - The console selector chooses which console's inputs
-    to display in the mapping list below.
-  - The port selector chooses which port of the selected console
-    to display in the mapping list below.
-  - The controller selector chooses which controller
-    associated with the given console and port
-    to display in the mapping list below.
-    Note that some consoles only allow particular controllers
-    to be used in a particular port.
-    For example,
-    the Super Scope controller for the Super Famicom
-    only works in Controller Port 2.
-
-Configuring the selected controller:
+To configure the selected controller:
 
   - The mapping list includes
     every button and axis on the selected controller,
@@ -332,6 +297,13 @@ then click one of the
 or "Mouse Y-axis"
 buttons in the bottom-left of the window.
 
+**Note:**
+To use an controller axis mapped to a mouse axis,
+higan will need to be in fullscreen mode,
+or you'll need to press
+the key mapped to "Toggle Mouse Capture"
+on the [Hotkeys tab](#hotkeys).
+
 If you start mapping a button or axis,
 but decide you don't want to,
 you can press Escape
@@ -339,10 +311,25 @@ to exit the "Press a key or button to map..." mode
 without actually mapping anything.
 
 **Note:**
-Consoles in the Game Boy family include
+The Game Boy and Game Boy Color consoles
+have a "Cartridge" port with controllers
+that are not really controllers:
+
+  - The "MBC5" controller is automatically used for
+    games whose cartridge includes the MBC5 memory-mapper
+    and a rumble motor,
+    like *Pokémon Pinball*.
+    See [Rumble Compatibility for Game Boy (Color)][gbcrumble]
+    for details.
+  - The "MBC7" controller is automatically used for
+    games whose cartridge includes the MBC7 memory-mapper
+    and an accelerometer,
+    like *Kirby Tilt 'n' Tumble*.
+
+**Note:**
+The Game Boy Advance console includes
 a Rumble "input" which is really more of an output.
-See [Rumble Compatibility for Game Boy (Color)][gbcrumble]
-and [Rumble Compatibility for Game Boy Advance][gbarumble]
+See [Rumble Compatibility for Game Boy Advance][gbarumble]
 for details.
 
 [gbcrumble]: ../notes.md#rumble-compatibility-for-game-boy-color
@@ -360,12 +347,12 @@ Hotkeys
 
 This tab is like "Inputs" above,
 except it contains controls for higan itself
-instead of the emulated console.
+instead of for the emulated console.
 
   - **Toggle Fullscreen** puts higan into fullscreen mode,
     where the menu and status bar are hidden,
     and the emulated console's video output
-    is enlarged to cover the entire screen.
+    can cover the entire screen.
     Toggling fullscreen also automatically captures the mouse.
   - **Toggle Mouse Capture** hides the usual mouse-cursor,
     and captures the mouse so it cannot leave the higan window.
@@ -440,8 +427,7 @@ for help choosing which drivers you should use.
 configures how higan interacts
 with the [Game Library](../concepts/game-library.md).
 
-  - **Location** selects where higan
-    looks for games to load.
+  - **Location** tells higan where to look for games to load.
     See [Moving the Game Library](../concepts/game-library.md#moving-the-game-library)
     for more information.
   - **Ignore Manifests** makes higan ignore
@@ -452,7 +438,7 @@ with the [Game Library](../concepts/game-library.md).
     to guess a manifest on the fly.
     See [Ignoring manifests](../concepts/manifests.md#ignoring-manifests)
     for details.
-    
+
 **Other**
 
   - **Auto-Save Memory Periodically** makes higan write

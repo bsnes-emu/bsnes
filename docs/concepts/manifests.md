@@ -9,7 +9,7 @@ and to the console itself.
 If you load a game into higan,
 you can look at the game's manifest
 by opening [the Tools menu](../interface/higan.md#the-tools-menu)
-and choosing [Manifest Viewer](../interface/higan-tools.md#the-manifest-viewer).
+and choosing [Manifest Viewer](../interface/higan-tools.md#manifest-viewer).
 
 Why manifests?
 --------------
@@ -17,7 +17,7 @@ Why manifests?
 For most consoles,
 a manifest isn't strictly necessary:
 the raw game data provides enough clues
-for emulators to guess the circuit board configuration,
+for emulators to guess the correct circuit board configuration,
 or at least
 to guess a *reasonable* configuration.
 However,

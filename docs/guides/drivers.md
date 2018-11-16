@@ -5,12 +5,12 @@ playing audio,
 and accepting input from game controllers.
 Or rather,
 there are many standards,
-and different ones work best
+and different ones work better
 on different computers.
 Therefore,
 higan comes with "drivers"
 for video, audio and input,
-so you can find the one that works best for you.
+so you can find the one that works best for your computer.
 To see what drivers you're currently using,
 or to choose different ones,
 go to the [Advanced tab] of the Settings window.

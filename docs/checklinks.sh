@@ -8,5 +8,5 @@ checklink \
 	--summary \
 	--broken \
 	--location=http://127.0.0.1:8000/ \
-	--exclude 'github.com|board.byuu.org' \
+	--exclude 'github.com|board.byuu.org|helmet.kafuka.org' \
 	http://127.0.0.1:8000/

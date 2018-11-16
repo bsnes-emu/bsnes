@@ -51,37 +51,57 @@ or by clicking the download button on the right-hand side of the web-page
 and choosing an archive format.
 
 You will need a C++ compiler to compile higan.
-We recommend installing [TDM64-GCC][tdm],
-preferably the latest version
-but anything newer than 4.9 should be fine.
+We recommend installing the latest version of [MinGW-W64].
 higan does not support building with clang++
 (Clang is still not quite there yet for Windows)
 nor Microsoft Visual C++
 (last we checked, it didn't support all the C++ features higan uses).
 
-**Note:** Make sure you get TDM64-GCC,
-not TDM-GCC.
-When compiled in x86 (32-bit) mode,
-higan may crash at startup
-because gcc targeting x86 does not support
-Windows' structured exception handling (SEH).
-Also,
-historically in x86 mode
-gcc has miscompiled a part of the NES emulation core.
-See the higan forum
-[for](https://board.byuu.org/viewtopic.php?p=41977#p41977)
-[details](https://board.byuu.org/viewtopic.php?p=42253#p42253).
+[MinGW-W64]: https://mingw-w64.org/
 
-Once you've installed the compiler,
-open a command-prompt window,
+MinGW-W64 is available in a number of variants,
+and the installer should ask you which you want.
+
+  - **Version:**
+    Version 8.1.0 is known to work,
+    later versions may work too.
+  - **Architecture:**
+    You *must* choose "x86_64", not "i686".
+    When built with an i686 compiler,
+    higan may crash at startup
+    because gcc targeting x86 does not support
+    Windows' structured exception handling (SEH).
+    Also,
+    historically in x86 mode
+    gcc has miscompiled a part of the NES emulation core.
+    See the archive of the official forum
+    [for](https://helmet.kafuka.org/byuubackup2/viewtopic.php@f=4&t=1636&start=20.html#p41977)
+    [details](https://helmet.kafuka.org/byuubackup2/viewtopic.php@f=4&t=1636&start=30.html#p42253).
+  - **Threads:**
+    Both options should work,
+    but higan is developed with the "posix" model.
+  - **Exception:**
+    You *must* choose "seh",
+    or higan may crash at startup.
+    If "seh" is not an option,
+    make sure "Architecture" is set to "x86_64".
+  - **Build Revision:**
+    Choose the largest number, whatever it is.
+
+When the compiler is installed,
+it adds a "Run terminal" shortcut to the Start menu
+which opens a command-prompt
+with all the compiler tools available.
+
+To verify that the compiler is installed correctly,
+launch the "Run Terminal" shortcut,
 type `g++ --version`
-then press Enter
-to check it's installed correctly.
+then press Enter.
 You should see a message like
 
 ```text
-g++ 1.2.3 20010101
-Copyright (C) 2001 Free Software Foundation, Inc.
+g++ (x86_64-posix-seh-rev0, Built by MinGW-W64 project) 8.1.0
+Copyright (C) 2018 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
@@ -91,11 +111,11 @@ and the corresponding dates.
 If you see an error message like
 "'g++' is not recognized as an internal or external command,
 operable program or batch file",
-you may need to add the compiler's "bin" folder
-to your computer's `%PATH%`.
+make sure you're using the "Run terminal" shortcut,
+or otherwise have MinGW-W64's "bin" directory in your `%PATH%`.
 See the compiler's documentation for help with that.
 
-Once mingw is installed and available from the command prompt:
+Once the compiler is installed:
 
  1. Put the higan source code in some convenient location,
     like `C:\higan-src`
@@ -105,10 +125,8 @@ Once mingw is installed and available from the command prompt:
     and press Enter
  4. Type `mingw32-make -C icarus` and press Enter
     to build the icarus import tool
- 5. Type `mingw32-make -C higan` and press Enter
+ 5. Type `mingw32-make -C higan target=higan` and press Enter
     to build the main higan executable
-
-[tdm]: http://tdm-gcc.tdragon.net/download
 
 Installing a compiled build on Windows
 --------------------------------------
@@ -118,9 +136,9 @@ Installing a compiled build on Windows
  2. Assuming you built higan in `C:\higan-src`,
     copy `C:\higan-src\icarus\out\icarus.exe`
     into the new folder
- 3. Copy `C:\higan-src\icarus\database` and its contents
+ 3. Copy `C:\higan-src\icarus\Database` and its contents
     into the new folder
- 4. Copy `C:\higan-src\icarus\firmware` and its contents
+ 4. Copy `C:\higan-src\icarus\Firmware` and its contents
     into the new folder
  5. Copy `C:\higan-src\higan\out\higan.exe`
     into the new folder
@@ -132,7 +150,7 @@ Installing a compiled build on Windows
 The new folder should now contain
 `icarus.exe`,
 `higan.exe`,
-and folders named `database`, `firmware`, `systems`,
+and folders named `Database`, `Firmware`, `systems`,
 and possibly `shaders`.
 This is what you would get by downloading an official build,
 as described under

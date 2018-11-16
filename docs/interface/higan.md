@@ -8,8 +8,8 @@ the running game's video output.
 The Systems menu
 ----------------
 
-This menu lists the systems higan emulates,
-Choosing any system allows you to play
+This menu lists the systems higan emulates.
+Choosing any system from this menu allows you to play
 games for that system that you've already imported
 into higan's [game library](../concepts/game-library.md).
 See [Importing and playing games](../guides/import.md).
@@ -24,7 +24,7 @@ for example, you can
 add the Sufami Turbo to the list
 and load *SD Ultra Battle*
 in two clicks instead of three.
-    
+
 **Load ROM File ...**
 opens a [filesystem browser](common.md#the-filesystem-browser)
 allowing you to choose a single ROM file.
@@ -39,8 +39,7 @@ The console menu does not appear
 until a game is loaded.
 Also,
 it's not named "console",
-it's named for the kind of console
-the loaded game runs on.
+it's named for the console that runs the loaded game.
 For example,
 when playing a Game Boy game,
 you will have a "Game Boy" menu.
@@ -49,7 +48,6 @@ The console menu contains commands relevant
 to the particular console being emulated.
 All consoles will have some of the following items,
 but few consoles have all of them.
-
 
 **Controller Port 1**
 allows you
@@ -80,7 +78,21 @@ This menu appears for the Famicom,
 even though the Famicom did not support alternate controllers,
 because the Famicom emulation core also emulates the NES,
 which did.
-    
+
+**Controller**
+is like "Controller Port 1"
+for consoles that only have one controller port.
+
+**Hardware**
+appears for consoles with buttons on the main unit,
+like the Game Boy,
+or Master System.
+It only allows the built-in controls to be used.
+
+**Cartridge**
+appears for the Game Boy and Game Boy Colour.
+The options inside it do nothing.
+
 **Expansion Port**
 allows you
 to connect different emulated devices
@@ -94,6 +106,9 @@ to control a physical Super Famicom (or SNES).
 This option allows the same program
 to control the emulated SNES,
 for development or testing.
+
+**Extension Port**
+is the name the Sega Mega Drive used for its expansion port.
 
 **Soft Reset**
 restarts the emulated console's CPU
@@ -124,7 +139,7 @@ as though the emulated console were switched off and on again.
 stops the current game,
 as though the emulated console were switched off.
 You can load a new game
-from [the Library menu](#the-library-menu).
+from [the Systems menu](#the-systems-menu).
 
 [21fx]: https://github.com/defparam/21FX
 
@@ -134,13 +149,83 @@ The Settings menu
 The Settings menu allows you to configure things
 that aren't specific to any particular console.
 
-
-**Video Scale** determines the size
+**Size**
+determines the size
 of the emulated console's video output
 when higan is running in windowed mode
 (as opposed to fullscreen).
+The menu-items that indicate particular sizes
+are only approximate, since
+aspect correction can be applied,
+different consoles have different native image sizes,
+and some consoles can change the size of their output image dynamically.
 
-**Video Emulation** applies various effects
+  - **1x (240p)**
+    resizes the higan window
+    so that each pixel of the emulated console's video output
+    is drawn as a single pixel on the computer screen.
+  - **2x (480p)**
+    resizes the higan window
+    so that each pixel of the emulated console's video output
+    is drawn as a 2×2 block of pixels on the computer screen.
+  - **3x (720p)**
+    resizes the higan window
+    so that each pixel of the emulated console's video output
+    is drawn as a 3×3 block of pixels on the computer screen.
+  - **Shrink Window To Size**
+    resizes the higan window to fit the emulated console's video output
+    at its current scale,
+    so there's no black padding between the image and the window border
+    (some padding may remain
+    if "Show Overscan Area" is enabled
+    in the Output menu).
+  - **Center Window**
+    moves the higan window to the centre of the computer screen.
+
+**Output**
+controls how higan draws the emulated console's video output
+into the space available,
+in both windowed and fullscreen modes.
+
+  - **Center**
+    draws the emulated video
+    at the largest integer multiple of the native size that will fit,
+    centered in the space available.
+    This gives the most crisp output,
+    but often has black borders.
+  - **Scale**
+    draws the emulated video
+    at the largest size that will fit,
+    and which preserves the image's aspect ratio.
+    This strikes a balance between
+    displaying the video output as it was intended,
+    and eliminating black borders.
+  - **Stretch**
+    draws the emulated video
+    to cover the entire available output area,
+    even if that distorts the image.
+    This completely eliminates black borders,
+    but can look very weird.
+  - **Adaptive Sizing**
+    allows higan to resize its window
+    when the emulated console changes the resolution
+    of its video output.
+    This can avoid black borders,
+    but the window resizing itself might be even more distracting.
+  - **Aspect Correction**
+    horizontally stretches the emulated video output
+    to match the aspect ratio produced by the original console.
+    It can make the output look more "lumpy",
+    but is a more accurate representation
+    of the original console's output.
+  - **Show Overscan Area**
+    controls whether the area defined by
+    the "Overscan Area" sliders in
+    the [Video settings](higan-settings.md#video)
+    is clipped from the emulated video output
+    or shown.
+
+**Emulation** applies various effects
 to the emulated console's video output
 to reproduce some behaviours
 that aren't technically part of the console itself:
@@ -165,8 +250,8 @@ that aren't technically part of the console itself:
     used by the Super Famicom,
     the dim, washed out colours of the original Game Boy Advance,
     and the pea-green display of the original Game Boy.
-    
-**Video Shader** controls
+
+**Shader** controls
 how the low-resolution video output of the emulated console
 is scaled up to suit modern high-resolution displays.
 [Using video shaders](../guides/shaders.md)
@@ -234,15 +319,15 @@ This can also be triggered by
 the [pause hotkey](higan-settings.md#hotkeys).
 
 **Cheat Editor ...**
-opens [the Cheat Editor tab](higan-tools.md#the-cheat-editor)
+opens the [Cheat Editor tab](higan-tools.md#cheat-editor)
 of the Tools window.
 
 **State Manager ...**
-opens [the State Manager tab](higan-tools.md#the-state-manager)
+opens the [State Manager tab](higan-tools.md#state-manager)
 of the Tools window.
 
 **Manifest Viewer ...**
-opens [the Manifest Viewer tab](higan-tools.md#the-manifest-viewer)
+opens the [Manifest Viewer tab](higan-tools.md#manifest-viewer)
 of the Tools window.
 
 **Game Notes ...**
@@ -275,7 +360,7 @@ at the bottom of the main higan window,
 while "Show Status Bar" is ticked in [the Settings menu](#the-settings-menu).
 
 Before any game is loaded,
-the status bar displays "No cartridge loaded".
+the status bar displays "Unloaded".
 
 When a game is loaded and running,
 the status bar displays the current emulation speed
@@ -319,7 +404,7 @@ sub-menu that has not had a save-state saved to it,
 or when you press the "Load Quick State" hotkey
 while the current Quick State slot has not had a save-state saved to it,
 
-The status bar briefly displays "Power cycled"
+The status bar briefly displays "System has been power cycled"
 when you choose "Power Cycle" from [the console menu](#the-console-menu),
 or press the "Power Cycle" hotkey.
 
