@@ -5,6 +5,7 @@ enum {
     PAL23    = 0x01,
     PAL03    = 0x02,
     PAL12    = 0x03,
+    ATTR_BLK = 0x04,
     PAL_SET  = 0x0A,
     PAL_TRN  = 0x0B,
     DATA_SND = 0x0f,
@@ -84,6 +85,56 @@ static void command_ready(GB_gameboy_t *gb)
         case PAL12:
             pal_command(gb, 1, 2);
             break;
+        case ATTR_BLK: {
+            struct {
+                uint8_t count;
+                struct {
+                    uint8_t control;
+                    uint8_t palettes;
+                    uint8_t left, top, right, bottom;
+                } data[];
+            } *command = (void *)(gb->sgb->command + 1);
+            if (command->count > 0x12) return;
+            
+            for (unsigned i = 0; i < command->count; i++) {
+                bool inside  = command->data[i].control & 1;
+                bool middle  = command->data[i].control & 2;
+                bool outside = command->data[i].control & 4;
+                uint8_t inside_palette = command->data[i].palettes & 0x3;
+                uint8_t middle_palette = (command->data[i].palettes >> 2) & 0x3;
+                uint8_t outside_palette = (command->data[i].palettes >> 4) & 0x3;
+                
+                if (inside && !middle && !outside) {
+                    middle = true;
+                    middle_palette = inside_palette;
+                }
+                else if (outside && !middle && !inside) {
+                    middle = true;
+                    middle_palette = outside_palette;
+                }
+                
+                for (unsigned y = 0; y < 18; y++) {
+                    for (unsigned x = 0; x < 20; x++) {
+                        if (x < command->data[i].left || x > command->data[i].right ||
+                            y < command->data[i].top  || y > command->data[i].bottom)  {
+                            if (outside) {
+                                gb->sgb->attribute_map[x + 20 * y] = outside_palette;
+                            }
+                        }
+                        else if (x > command->data[i].left && x < command->data[i].right &&
+                                 y > command->data[i].top  && y < command->data[i].bottom)  {
+                            if (inside) {
+                                gb->sgb->attribute_map[x + 20 * y] = inside_palette;
+                            }
+                        }
+                        else if(middle) {
+                            gb->sgb->attribute_map[x + 20 * y] = middle_palette;
+                        }
+                    }
+                }
+            }
+            break;
+        }
         case PAL_SET:
             memcpy(&gb->sgb->effective_palettes[0],
                    &gb->sgb->ram_palettes[4 * (gb->sgb->command[1] + (gb->sgb->command[2] & 1) * 0x100)],
@@ -250,13 +301,6 @@ void GB_sgb_render(GB_gameboy_t *gb)
 {
     if (!gb->screen || !gb->rgb_encode_callback) return;
     
-    uint32_t colors[] = {
-        convert_rgb15(gb, gb->sgb->effective_palettes[0]),
-        convert_rgb15(gb, gb->sgb->effective_palettes[1]),
-        convert_rgb15(gb, gb->sgb->effective_palettes[2]),
-        convert_rgb15(gb, gb->sgb->effective_palettes[3]),
-    };
-    
     switch ((mask_mode_t) gb->sgb->mask_mode) {
         case MASK_DISABLED:
             memcpy(gb->sgb->effective_screen_buffer,
@@ -315,11 +359,17 @@ void GB_sgb_render(GB_gameboy_t *gb)
         }
     }
     
+    uint32_t colors[4 * 4];
+    for (unsigned i = 0; i < 4 * 4; i++) {
+        colors[i] = convert_rgb15(gb, gb->sgb->effective_palettes[i]);
+    }
+    
     uint32_t *output = &gb->screen[48 + 40 * 256];
     uint8_t *input = gb->sgb->effective_screen_buffer;
     for (unsigned y = 0; y < 144; y++) {
         for (unsigned x = 0; x < 160; x++) {
-            *(output++) = colors[*(input++) & 3];
+            uint8_t palette = gb->sgb->attribute_map[x / 8 + y / 8 * 20] & 3;
+            *(output++) = colors[(*(input++) & 3) + palette * 4];
         }
         output += 256 - 160;
     }

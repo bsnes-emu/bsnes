@@ -44,6 +44,7 @@ struct GB_sgb_s {
     /* Colorization */
     uint16_t effective_palettes[4 * 4];
     uint16_t ram_palettes[4 * 512];
+    uint8_t attribute_map[20 * 18];
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
