@@ -393,6 +393,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
         }
     }
     
+    
     if (gb->sgb->border_animation == 32) {
         memcpy(&gb->sgb->border, &gb->sgb->pending_border, sizeof(gb->sgb->border));
     }
@@ -410,8 +411,13 @@ void GB_sgb_render(GB_gameboy_t *gb)
             for (unsigned y = 0; y < 8; y++) {
                 for (unsigned x = 0; x < 8; x++) {
                     uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
-                    if (color == 0 && gb_area) continue;
-                    gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = border_colors[palette * 16 + color];
+                    if (color == 0) {
+                        if (gb_area) continue;
+                        gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = colors[0];
+                    }
+                    else {
+                        gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = border_colors[color + palette * 16];
+                    }
                 }
             }
         }
