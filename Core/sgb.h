@@ -22,6 +22,19 @@ typedef struct {
     
     /* Mask */
     uint8_t mask_mode;
+    
+    /* Border */
+    uint8_t vram_transfer_countdown;
+    bool tile_transfer, tile_transfer_high, data_transfer;
+    uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
+    union {
+        struct {
+            uint16_t map[32 * 32];
+            uint16_t border_palette[16 * 4];
+        };
+        uint16_t raw_pct_data[0x440];
+    };
+
 } GB_sgb_t;
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);

@@ -123,7 +123,12 @@ static bool window_enabled(GB_gameboy_t *gb)
 static void display_vblank(GB_gameboy_t *gb)
 {  
     gb->vblank_just_occured = true;
-
+    
+    /* TODO: Slow in trubo mode! */
+    if (GB_is_sgb(gb)) {
+        GB_sgb_render(gb);
+    }
+    
     if (gb->turbo) {
         if (GB_timing_sync_turbo(gb)) {
             return;
@@ -133,7 +138,7 @@ static void display_vblank(GB_gameboy_t *gb)
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
-            uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ? 0 : 0xFF;
+            uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ? 0x3 : 0x0;
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
                 gb->sgb->screen_buffer[i] = color;
             }
@@ -148,9 +153,6 @@ static void display_vblank(GB_gameboy_t *gb)
         }
     }
 
-    if (GB_is_sgb(gb)) {
-        GB_sgb_render(gb);
-    }
     gb->vblank_callback(gb);
     GB_timing_sync(gb);
 }
