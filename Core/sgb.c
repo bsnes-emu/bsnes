@@ -69,7 +69,6 @@ static void command_ready(GB_gameboy_t *gb)
        Checksum: Simple one byte sum for the following content bytes
        0xE content bytes. The last command, FB, is padded with zeros, so information past the header is not sent. */
     
-    
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
         uint8_t checksum = 0;
         for (unsigned i = 2; i < 0x10; i++) {
@@ -285,9 +284,15 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
         
         case 0:
             if (!gb->sgb->ready_for_pulse) return;
-            gb->sgb->ready_for_pulse = false;
             gb->sgb->ready_for_write = true;
             gb->sgb->ready_for_pulse = false;
+            if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) != 0 ||
+                gb->sgb->command_write_index == 0 ||
+                gb->sgb->ready_for_stop) {
+                gb->sgb->command_write_index = 0;
+                memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
+                gb->sgb->ready_for_stop = false;
+            }
             if (gb->sgb->player_count > 1 && (value & 0x30) != (gb->io_registers[GB_IO_JOYP] & 0x30)) {
                 gb->sgb->current_player++;
                 gb->sgb->current_player &= gb->sgb->player_count - 1;
