@@ -29,6 +29,7 @@
                     @"Bilinear",
                     @"SmoothBilinear",
                     @"LCD",
+                    @"CRT",
                     @"Scale2x",
                     @"Scale4x",
                     @"AAScale2x",

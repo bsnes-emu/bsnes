@@ -46,6 +46,7 @@
                                     <menuItem title="Bilinear (Blurry)" id="iDe-si-atu"/>
                                     <menuItem title="Smooth Bilinear (Less blurry)" id="1jN-pO-1iD"/>
                                     <menuItem title="LCD Display" id="b8u-LZ-UQf"/>
+                                    <menuItem title="CRT Display" id="FT9-FT-RZu"/>
                                     <menuItem title="Scale2x" id="C1I-L2-Up1"/>
                                     <menuItem title="Scale4x" id="uWA-Zp-JY9"/>
                                     <menuItem title="Anti-aliased Scale2x" id="iP6-DJ-CVH"/>

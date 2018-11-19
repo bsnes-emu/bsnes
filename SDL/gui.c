@@ -427,6 +427,7 @@ struct shader_name {
     {"Bilinear", "Bilinear"},
     {"SmoothBilinear", "Smooth Bilinear"},
     {"LCD", "LCD Display"},
+    {"CRT", "CRT Display"},
     {"Scale2x", "Scale2x"},
     {"Scale4x", "Scale4x"},
     {"AAScale2x", "Anti-aliased Scale2x"},
