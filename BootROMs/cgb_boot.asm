@@ -429,8 +429,11 @@ Dups4thLetterArray:
 
 PaletteCombinations:
 palette_comb: MACRO ; Obj0, Obj1, Bg
-    db \1 * 8, \2 * 8, \3 *8
-    ENDM
+    db (\1) * 8, (\2) * 8, (\3) *8
+ENDM
+raw_palette_comb: MACRO ; Obj0, Obj1, Bg
+    db (\1) * 2, (\2) * 2, (\3) * 2
+ENDM
     palette_comb 4, 4, 29
     palette_comb 18, 18, 18
     palette_comb 20, 20, 20
@@ -453,7 +456,7 @@ palette_comb: MACRO ; Obj0, Obj1, Bg
     palette_comb 4, 4, 18
     palette_comb 4, 4, 20
     palette_comb 19, 19, 9
-    palette_comb 3, 3, 11
+    raw_palette_comb 4 * 4 - 1, 4 * 4 - 1, 11 * 4
     palette_comb 17, 17, 2
     palette_comb 4, 4, 2
     palette_comb 4, 4, 3
@@ -465,8 +468,8 @@ palette_comb: MACRO ; Obj0, Obj1, Bg
     palette_comb 24, 22, 24
     palette_comb 16, 22, 8
     palette_comb 17, 4, 13
-    palette_comb 27, 0, 14
-    palette_comb 27, 4, 15
+    raw_palette_comb 28 * 4 - 1, 0 * 4, 14 * 4
+    raw_palette_comb 28 * 4 - 1, 4 * 4, 15 * 4
     palette_comb 19, 22, 9
     palette_comb 16, 28, 10
     palette_comb 4, 23, 28
