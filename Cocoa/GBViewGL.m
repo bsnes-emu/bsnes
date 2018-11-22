@@ -27,6 +27,7 @@
 {
     [super flip];
     dispatch_async(dispatch_get_main_queue(), ^{
+        [self.internalView setNeedsDisplay:YES];
         [self setNeedsDisplay:YES];
     });
 }
