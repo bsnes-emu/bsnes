@@ -510,6 +510,16 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
         }
     }
     
+    if (gb->model != GB_MODEL_SGB2) {
+        /* Delete the "2" */
+        gb->sgb->border.map[25 * 32 + 25] = gb->sgb->border.map[25 * 32 + 26] =
+        gb->sgb->border.map[26 * 32 + 25] = gb->sgb->border.map[26 * 32 + 26] =
+        gb->sgb->border.map[27 * 32 + 25] = gb->sgb->border.map[27 * 32 + 26] =
+        gb->sgb->border.map[0];
+        
+        /* Re-center */
+        memmove(&gb->sgb->border.map[25 * 32 + 1], &gb->sgb->border.map[25 * 32], (32 * 3 - 1) * sizeof(gb->sgb->border.map[0]));
+    }
     gb->sgb->effective_palettes[0] = 0x639E;
     gb->sgb->effective_palettes[1] = 0x263A;
     gb->sgb->effective_palettes[2] = 0x10D4;
