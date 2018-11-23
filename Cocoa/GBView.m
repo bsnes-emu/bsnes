@@ -43,9 +43,7 @@
 }
 
 - (void) _init
-{
-    [self screenSizeChanged];
-    
+{    
     _shouldBlendFrameWithPrevious = 1;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
@@ -61,7 +59,6 @@
 
 - (void)screenSizeChanged
 {
-    if (!_gb) return;
     if (image_buffers[0]) free(image_buffers[0]);
     if (image_buffers[1]) free(image_buffers[1]);
     if (image_buffers[2]) free(image_buffers[2]);
@@ -127,7 +124,7 @@
 - (void)setFrame:(NSRect)frame
 {
     frame = self.superview.frame;
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]) {
+    if (_gb && ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]) {
         double ratio = frame.size.width / frame.size.height;
         double width = GB_get_screen_width(_gb);
         double height = GB_get_screen_height(_gb);

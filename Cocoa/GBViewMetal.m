@@ -31,7 +31,6 @@ static const vector_float2 rect[] =
 - (void) allocateTextures
 {
     if (!device) return;
-    if (!self.gb) return;
     
     MTLTextureDescriptor *texture_descriptor = [[MTLTextureDescriptor alloc] init];
     
@@ -45,20 +44,12 @@ static const vector_float2 rect[] =
 
 }
 
-- (void)screenSizeChanged
-{
-    [super screenSizeChanged];
-    [self allocateTextures];
-}
-
 - (void)createInternalView
 {
     MTKView *view = [[MTKView alloc] initWithFrame:self.frame device:(device = MTLCreateSystemDefaultDevice())];
     view.delegate = self;
     self.internalView = view;
     view.paused = YES;
-    
-    [self allocateTextures];
     
     vertices = [device newBufferWithBytes:rect
                                    length:sizeof(rect)
@@ -140,6 +131,10 @@ static const vector_float2 rect[] =
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
     if (!(view.window.occlusionState & NSWindowOcclusionStateVisible)) return;
+    if (texture.width  != GB_get_screen_width(self.gb) ||
+        texture.height != GB_get_screen_height(self.gb)) {
+        [self allocateTextures];
+    }
     
     MTLRegion region = {
         {0, 0, 0},         // MTLOrigin

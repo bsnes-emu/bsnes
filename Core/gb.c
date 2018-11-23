@@ -765,10 +765,10 @@ uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 
 size_t GB_get_screen_width(GB_gameboy_t *gb)
 {
-    return (gb && GB_is_sgb(gb))? 256 : 160;
+    return GB_is_sgb(gb)? 256 : 160;
 }
 
 size_t GB_get_screen_height(GB_gameboy_t *gb)
 {
-    return (gb && GB_is_sgb(gb))? 224 : 144;
+    return GB_is_sgb(gb)? 224 : 144;
 }

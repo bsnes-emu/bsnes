@@ -159,40 +159,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return [[NSBundle mainBundle] pathForResource:name ofType:@"bin"];
 }
 
-/* Todo: Unify the 4 init functions */
-- (void) initDMG
-{
-    current_model = MODEL_DMG;
-    GB_init(&gb, cocoa_to_internal_model[current_model]);
-    GB_load_boot_rom(&gb, [[self bootROMPathForName:@"dmg_boot"] UTF8String]);
-    [self initCommon];
-}
-
-- (void) initSGB
-{
-    current_model = MODEL_SGB;
-    GB_init(&gb, cocoa_to_internal_model[current_model]);
-    GB_load_boot_rom(&gb, [[self bootROMPathForName:@"sgb_boot"] UTF8String]);
-    [self initCommon];
-}
-
-- (void) initCGB
-{
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]) {
-        current_model = MODEL_AGB;
-        GB_init(&gb, cocoa_to_internal_model[current_model]);
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"agb_boot"] UTF8String]);
-    }
-    else {
-        current_model = MODEL_CGB;
-        GB_init(&gb, cocoa_to_internal_model[current_model]);
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"cgb_boot"] UTF8String]);
-    }
-    [self initCommon];
-}
-
 - (void) initCommon
 {
+    GB_init(&gb, cocoa_to_internal_model[current_model]);
     GB_set_user_data(&gb, (__bridge void *)(self));
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
@@ -204,7 +173,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
     GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
     GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
-    [self loadROM];
 }
 
 - (void) vblank
@@ -225,8 +193,6 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) run
 {
     running = true;
-    self.view.gb = &gb;
-    [self.view screenSizeChanged];
     GB_set_pixels_output(&gb, self.view.pixels);
     GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
@@ -277,22 +243,31 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_debugger_set_disabled(&gb, false);
 }
 
+- (void) loadBootROM
+{
+    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
+}
+
 - (IBAction)reset:(id)sender
 {
     [self stop];
-
+    size_t old_width = GB_get_screen_width(&gb);
+    [self loadBootROM];
+    
     if ([sender tag] != MODEL_NONE) {
         current_model = (enum model)[sender tag];
     }
     
-    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
-    GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
-
     if ([sender tag] == MODEL_NONE) {
         GB_reset(&gb);
     }
     else {
         GB_switch_model_and_reset(&gb, cocoa_to_internal_model[current_model]);
+    }
+    
+    if (old_width != GB_get_screen_width(&gb)) {
+        [self.view screenSizeChanged];
     }
 
     if ([sender tag] != 0) {
@@ -392,16 +367,20 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
                                                object:nil];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
-        [self initDMG];
+        current_model = MODEL_DMG;
     }
     else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateSGB"]) {
-        [self initSGB];
+        current_model = MODEL_SGB;
     }
     else {
-        [self initCGB];
+        current_model = [[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]? MODEL_AGB : MODEL_CGB;
     }
     
-    [self start];
+    [self initCommon];
+    self.view.gb = &gb;
+    [self.view screenSizeChanged];
+    [self loadROM];
+    [self reset:nil];
 
 }
 
