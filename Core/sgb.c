@@ -23,7 +23,7 @@ enum {
 typedef enum {
     MASK_DISABLED,
     MASK_FREEZE,
-    MASK_COLOR_3,
+    MASK_BLACK,
     MASK_COLOR_0,
 } mask_mode_t;
 
@@ -404,24 +404,10 @@ void GB_sgb_render(GB_gameboy_t *gb)
 
     if (!gb->screen || !gb->rgb_encode_callback) return;
     
-    switch ((mask_mode_t) gb->sgb->mask_mode) {
-        case MASK_DISABLED:
-            memcpy(gb->sgb->effective_screen_buffer,
-                   gb->sgb->screen_buffer,
-                   sizeof(gb->sgb->effective_screen_buffer));
-            break;
-        case MASK_FREEZE:
-            break;
-        
-        case MASK_COLOR_3:
-            memset(gb->sgb->effective_screen_buffer,
-                   3,
-                   sizeof(gb->sgb->effective_screen_buffer));
-            break;
-        case MASK_COLOR_0:
-            memset(gb->sgb->effective_screen_buffer,
-                   0,
-                   sizeof(gb->sgb->effective_screen_buffer));
+    if (gb->sgb->mask_mode != MASK_FREEZE) {
+        memcpy(gb->sgb->effective_screen_buffer,
+               gb->sgb->screen_buffer,
+               sizeof(gb->sgb->effective_screen_buffer));
     }
     
     if (gb->sgb->vram_transfer_countdown) {
@@ -496,12 +482,39 @@ void GB_sgb_render(GB_gameboy_t *gb)
     else {
         uint32_t *output = &gb->screen[48 + 40 * 256];
         uint8_t *input = gb->sgb->effective_screen_buffer;
-        for (unsigned y = 0; y < 144; y++) {
-            for (unsigned x = 0; x < 160; x++) {
-                uint8_t palette = gb->sgb->attribute_map[x / 8 + y / 8 * 20] & 3;
-                *(output++) = colors[(*(input++) & 3) + palette * 4];
+        switch ((mask_mode_t) gb->sgb->mask_mode) {
+            case MASK_DISABLED:
+            case MASK_FREEZE: {
+                for (unsigned y = 0; y < 144; y++) {
+                    for (unsigned x = 0; x < 160; x++) {
+                        uint8_t palette = gb->sgb->attribute_map[x / 8 + y / 8 * 20] & 3;
+                        *(output++) = colors[(*(input++) & 3) + palette * 4];
+                    }
+                    output += 256 - 160;
+                }
+                break;
             }
-            output += 256 - 160;
+            case MASK_BLACK:
+            {
+                uint32_t black = convert_rgb15(gb, 0);
+                for (unsigned y = 0; y < 144; y++) {
+                    for (unsigned x = 0; x < 160; x++) {
+                        *(output++) = black;
+                    }
+                    output += 256 - 160;
+                }
+                break;
+            }
+            case MASK_COLOR_0:
+            {
+                for (unsigned y = 0; y < 144; y++) {
+                    for (unsigned x = 0; x < 160; x++) {
+                        *(output++) = colors[0];
+                    }
+                    output += 256 - 160;
+                }
+                break;
+            }
         }
     }
     
