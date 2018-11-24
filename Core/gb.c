@@ -351,6 +351,18 @@ exit:
 
 uint8_t GB_run(GB_gameboy_t *gb)
 {
+    if (gb->sgb && gb->sgb->intro_animation < 140) {
+        /* On the SGB, the GB is halted after finishing the boot ROM.
+           Then, after the boot animation is almost done, it's reset.
+           Since the SGB HLE does not perform any header validity checks,
+           we just halt the CPU (with hacky code) until the correct time.
+           This ensures the Nintendo logo doesn't flash on screen, and
+           the game does "run in background" while the animation is playing. */
+        GB_display_run(gb, 228);
+        gb->cycles_since_last_sync += 228;
+        return 228;
+    }
+    
     GB_debugger_run(gb);
     gb->cycles_since_run = 0;
     GB_cpu_run(gb);
