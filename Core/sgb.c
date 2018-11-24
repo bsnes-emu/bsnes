@@ -174,6 +174,9 @@ static void command_ready(GB_gameboy_t *gb)
                    &gb->sgb->ram_palettes[4 * (gb->sgb->command[7] + (gb->sgb->command[8] & 1) * 0x100)],
                    8);
             
+            gb->sgb->effective_palettes[12] = gb->sgb->effective_palettes[8] =
+            gb->sgb->effective_palettes[4] = gb->sgb->effective_palettes[0];
+            
             if (gb->sgb->command[9] & 0x80) {
                 load_attribute_file(gb, gb->sgb->command[9] & 0x3F);
             }
