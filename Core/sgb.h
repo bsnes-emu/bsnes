@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 typedef struct GB_sgb_s GB_sgb_t;
+
 #ifdef GB_INTERNAL
 struct GB_sgb_s {
     uint8_t command[16 * 7];
@@ -45,11 +46,15 @@ struct GB_sgb_s {
     uint16_t ram_palettes[4 * 512];
     uint8_t attribute_map[20 * 18];
     uint8_t attribute_files[0xFE0];
+    
+    /* Intro */
+    uint16_t intro_animation;
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 void GB_sgb_render(GB_gameboy_t *gb);
 void GB_sgb_load_default_data(GB_gameboy_t *gb);
+bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count);
 
 #endif
 

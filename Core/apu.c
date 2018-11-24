@@ -465,6 +465,9 @@ void GB_apu_run(GB_gameboy_t *gb)
 
 void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
 {
+    if (gb->sgb) {
+        if (GB_sgb_render_jingle(gb, dest, count)) return;
+    }
     gb->apu_output.copy_in_progress = true;
 
     if (!gb->apu_output.stream_started) {

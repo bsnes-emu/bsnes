@@ -564,6 +564,9 @@ struct GB_gameboy_internal_s {
                
         /* SGB - saved and allocated optionally */
         GB_sgb_t *sgb;
+        
+        double sgb_intro_jingle_phases[7];
+        double sgb_intro_sweep_phase;
 
         /* Misc */
         bool turbo;
