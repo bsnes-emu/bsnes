@@ -17,6 +17,8 @@
     NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
     NSEventModifierFlags previousModifiers;
+    
+    NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
 }
 
 + (NSArray *)filterList
@@ -360,6 +362,61 @@
 {
     [[NSUserDefaults standardUserDefaults] setURL:nil forKey:@"GBBootROMsFolder"];
     [self updateBootROMFolderButton];
+}
+
+- (void)setDmgPopupButton:(NSPopUpButton *)dmgPopupButton
+{
+    _dmgPopupButton = dmgPopupButton;
+    [_dmgPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDMGModel"]];
+}
+
+- (NSPopUpButton *)dmgPopupButton
+{
+    return _dmgPopupButton;
+}
+
+- (void)setSgbPopupButton:(NSPopUpButton *)sgbPopupButton
+{
+    _sgbPopupButton = sgbPopupButton;
+    [_sgbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]];
+}
+
+- (NSPopUpButton *)sgbPopupButton
+{
+    return _sgbPopupButton;
+}
+
+- (void)setCgbPopupButton:(NSPopUpButton *)cgbPopupButton
+{
+    _cgbPopupButton = cgbPopupButton;
+    [_cgbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]];
+}
+
+- (NSPopUpButton *)cgbPopupButton
+{
+    return _cgbPopupButton;
+}
+
+- (IBAction)dmgModelChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
+                                              forKey:@"GBDMGModel"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBDMGModelChanged" object:nil];
+
+}
+
+- (IBAction)sgbModelChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
+                                              forKey:@"GBSGBModel"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBSGBModelChanged" object:nil];
+}
+
+- (IBAction)cgbModelChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
+                                              forKey:@"GBCGBModel"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBCGBModelChanged" object:nil];
 }
 
 @end

@@ -12,4 +12,9 @@
 @property (strong) IBOutlet NSButton *skipButton;
 @property (strong) IBOutlet NSMenuItem *bootROMsFolderItem;
 @property (strong) IBOutlet NSPopUpButtonCell *bootROMsButton;
+
+@property (weak) IBOutlet NSPopUpButton *dmgPopupButton;
+@property (weak) IBOutlet NSPopUpButton *sgbPopupButton;
+@property (weak) IBOutlet NSPopUpButton *cgbPopupButton;
+
 @end

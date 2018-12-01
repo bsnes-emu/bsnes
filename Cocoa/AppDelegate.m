@@ -35,7 +35,11 @@
                                                               @"GBFilter": @"NearestNeighbor",
                                                               @"GBColorCorrection": @(GB_COLOR_CORRECTION_EMULATE_HARDWARE),
                                                               @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET),
-                                                              @"GBRewindLength": @(10)
+                                                              @"GBRewindLength": @(10),
+                                                              
+                                                              @"GBDMGModel": @(GB_MODEL_DMG_B),
+                                                              @"GBCGBModel": @(GB_MODEL_CGB_E),
+                                                              @"GBSGBModel": @(GB_MODEL_SGB2),
                                                               }];
 }
 

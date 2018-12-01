@@ -19,14 +19,6 @@ enum model {
     MODEL_SGB,
 };
 
-static const GB_model_t cocoa_to_internal_model[] =
-{
-    [MODEL_DMG] = GB_MODEL_DMG_B,
-    [MODEL_CGB] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB,
-    [MODEL_SGB] = GB_MODEL_SGB,
-};
-
 @interface Document ()
 {
     
@@ -62,6 +54,7 @@ static const GB_model_t cocoa_to_internal_model[] =
     enum model current_model;
     
     bool rewind;
+    bool modelsChanging;
 }
 
 @property GBAudioClient *audioClient;
@@ -159,9 +152,27 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     return [[NSBundle mainBundle] pathForResource:name ofType:@"bin"];
 }
 
+- (GB_model_t)internalModel
+{
+    switch (current_model) {
+        case MODEL_DMG:
+            return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDMGModel"];
+            
+        case MODEL_NONE:
+        case MODEL_CGB:
+            return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"];
+            
+        case MODEL_SGB:
+            return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"];
+        
+        case MODEL_AGB:
+            return GB_MODEL_AGB;
+    }
+}
+
 - (void) initCommon
 {
-    GB_init(&gb, cocoa_to_internal_model[current_model]);
+    GB_init(&gb, [self internalModel]);
     GB_set_user_data(&gb, (__bridge void *)(self));
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
@@ -253,17 +264,18 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 {
     [self stop];
     size_t old_width = GB_get_screen_width(&gb);
-    [self loadBootROM];
     
     if ([sender tag] != MODEL_NONE) {
         current_model = (enum model)[sender tag];
     }
     
-    if ([sender tag] == MODEL_NONE) {
+    [self loadBootROM];
+    
+    if (!modelsChanging && [sender tag] == MODEL_NONE) {
         GB_reset(&gb);
     }
     else {
-        GB_switch_model_and_reset(&gb, cocoa_to_internal_model[current_model]);
+        GB_switch_model_and_reset(&gb, [self internalModel]);
     }
     
     if (old_width != GB_get_screen_width(&gb)) {
@@ -364,6 +376,21 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateRewindLength)
                                                  name:@"GBRewindLengthChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dmgModelChanged)
+                                                 name:@"GBDMGModelChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(sgbModelChanged)
+                                                 name:@"GBSGBModelChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(cgbModelChanged)
+                                                 name:@"GBCGBModelChanged"
                                                object:nil];
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
@@ -1414,6 +1441,33 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
             GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
         }
     }];
+}
+
+- (void)dmgModelChanged
+{
+    modelsChanging = true;
+    if (current_model == MODEL_DMG) {
+        [self reset:nil];
+    }
+    modelsChanging = false;
+}
+
+- (void)sgbModelChanged
+{
+    modelsChanging = true;
+    if (current_model == MODEL_SGB) {
+        [self reset:nil];
+    }
+    modelsChanging = false;
+}
+
+- (void)cgbModelChanged
+{
+    modelsChanging = true;
+    if (current_model == MODEL_CGB) {
+        [self reset:nil];
+    }
+    modelsChanging = false;
 }
 
 - (void)setFileURL:(NSURL *)fileURL
