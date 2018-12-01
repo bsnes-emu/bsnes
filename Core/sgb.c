@@ -1,7 +1,7 @@
 #include "gb.h"
 #include <math.h>
 
-#define INTRO_ANIMATION_LENGTH 180
+#define INTRO_ANIMATION_LENGTH 200
 
 enum {
     PAL01    = 0x00,
@@ -353,11 +353,11 @@ static void render_boot_animation (GB_gameboy_t *gb)
     uint8_t *input = animation_logo;
     unsigned fade_blue = 0;
     unsigned fade_red = 0;
-    if (gb->sgb->intro_animation < 32) {
+    if (gb->sgb->intro_animation < 80 - 32) {
         fade_blue = 32;
     }
-    else if (gb->sgb->intro_animation < 64) {
-        fade_blue = 64 - gb->sgb->intro_animation;
+    else if (gb->sgb->intro_animation < 80) {
+        fade_blue = 80 - gb->sgb->intro_animation;
     }
     else if (gb->sgb->intro_animation > INTRO_ANIMATION_LENGTH - 32) {
         fade_red = fade_blue = gb->sgb->intro_animation - INTRO_ANIMATION_LENGTH + 32;
@@ -620,9 +620,13 @@ static double fm_sweep(double phase)
 {
     double ret = 0;
     for (unsigned i = 0; i < 8; i++) {
-        ret += fm_synth((phase) * pow(1.17, i)) * (8 - i) / 36;
+        ret += sin((phase * M_PI * 2 + sin(phase * M_PI * 8) / 4) * pow(1.25, i)) * (8 - i) / 36;
     }
     return ret;
+}
+static double random_double(void)
+{
+    return ((random() % 0x10001) - 0x8000) / (double) 0x8000;
 }
 
 bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
@@ -637,9 +641,23 @@ bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
         1567.98, // G6
     };
     
+    if (gb->sgb->intro_animation < 0) {
+        for (unsigned i = 0; i < count; i++) {
+            dest->left = dest->right = 0;
+            dest++;
+        }
+        return true;
+    }
+    
     if (gb->sgb->intro_animation >= INTRO_ANIMATION_LENGTH) return false;
     
-    signed jingle_stage = (gb->sgb->intro_animation - 60) / 3;
+    signed jingle_stage = (gb->sgb->intro_animation - 64) / 3;
+    double sweep_cutoff_ratio = 2000.0 * pow(2, gb->sgb->intro_animation / 20.0) / gb->apu_output.sample_rate;
+    double sweep_phase_shift = 1000.0 * pow(2, gb->sgb->intro_animation / 40.0) / gb->apu_output.sample_rate;
+    if (sweep_cutoff_ratio > 1) {
+        sweep_cutoff_ratio = 1;
+    }
+    
     for (unsigned i = 0; i < count; i++) {
         double sample = 0;
         for (signed f = 0; f < 7 && f < jingle_stage; f++) {
@@ -652,8 +670,12 @@ bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
         }
         
         if (gb->sgb->intro_animation < 120) {
-            sample += fm_sweep(gb->sgb_intro_sweep_phase) / 2.0 * pow((120 - gb->sgb->intro_animation) / 120.0, 2);
-            gb->sgb_intro_sweep_phase += (1000.0 * pow(2, gb->sgb->intro_animation / 40.0)) / gb->apu_output.sample_rate;
+            double next = fm_sweep(gb->sgb_intro_sweep_phase) * 0.3 + random_double() * 0.7;
+            gb->sgb_intro_sweep_phase += sweep_phase_shift;
+
+            gb->sgb_intro_sweep_previous_sample = next * (sweep_cutoff_ratio) +
+                                                  gb->sgb_intro_sweep_previous_sample * (1 - sweep_cutoff_ratio);
+            sample += gb->sgb_intro_sweep_previous_sample * pow((120 - gb->sgb->intro_animation) / 120.0, 2) * 0.8;
         }
         
         dest->left = dest->right = sample * 0x7000;

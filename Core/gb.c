@@ -663,6 +663,8 @@ void GB_reset(GB_gameboy_t *gb)
         memset(gb->sgb, 0, sizeof(*gb->sgb));
         memset(gb->sgb_intro_jingle_phases, 0, sizeof(gb->sgb_intro_jingle_phases));
         gb->sgb_intro_sweep_phase = 0;
+        gb->sgb_intro_sweep_previous_sample = 0;
+        gb->sgb->intro_animation = -10;
         
         gb->sgb->player_count = 1;
         GB_sgb_load_default_data(gb);

@@ -567,6 +567,7 @@ struct GB_gameboy_internal_s {
         
         double sgb_intro_jingle_phases[7];
         double sgb_intro_sweep_phase;
+        double sgb_intro_sweep_previous_sample;
 
         /* Misc */
         bool turbo;

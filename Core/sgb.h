@@ -48,7 +48,7 @@ struct GB_sgb_s {
     uint8_t attribute_files[0xFE0];
     
     /* Intro */
-    uint16_t intro_animation;
+    int16_t intro_animation;
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
