@@ -173,7 +173,7 @@ $(OBJ)/%.m.o: %.m
 # Cocoa Port
 
 $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
-                    $(shell ls Cocoa/*.icns) \
+                    $(shell ls Cocoa/*.icns Cocoa/*.png) \
                     Cocoa/License.html \
                     Cocoa/Info.plist \
                     Misc/registers.sym \
@@ -185,7 +185,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     $(BIN)/SameBoy.qlgenerator \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
-	cp Cocoa/*.icns Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
+	cp Cocoa/*.icns Cocoa/*.png Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
 	cp Cocoa/License.html $(BIN)/SameBoy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders

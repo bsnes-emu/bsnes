@@ -6,6 +6,7 @@
 @implementation AppDelegate
 {
     NSWindow *preferences_window;
+    NSArray<NSView *> *preferences_tabs;
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
@@ -44,10 +45,24 @@
     [defaults setBool:![defaults boolForKey:@"DeveloperMode"] forKey:@"DeveloperMode"];
 }
 
+- (IBAction)switchPreferencesTab:(id)sender
+{
+    for (NSView *view in preferences_tabs) {
+        [view removeFromSuperview];
+    }
+    NSView *tab = preferences_tabs[[sender tag]];
+    NSRect old = [_preferencesWindow frame];
+    NSRect new = [_preferencesWindow frameRectForContentRect:tab.frame];
+    new.origin.x = old.origin.x;
+    new.origin.y = old.origin.y + (old.size.height - new.size.height);
+    [_preferencesWindow setFrame:new display:YES animate:_preferencesWindow.visible];
+    [_preferencesWindow.contentView addSubview:tab];
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem *)anItem
 {
     if ([anItem action] == @selector(toggleDeveloperMode:)) {
-        [(NSMenuItem*)anItem setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]];
+        [(NSMenuItem *)anItem setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]];
     }
 
     return true;
@@ -58,6 +73,11 @@
     NSArray *objects;
     if (!_preferencesWindow) {
         [[NSBundle mainBundle] loadNibNamed:@"Preferences" owner:self topLevelObjects:&objects];
+        NSToolbarItem *first_toolbar_item = [_preferencesWindow.toolbar.items firstObject];
+        _preferencesWindow.toolbar.selectedItemIdentifier = [first_toolbar_item itemIdentifier];
+        preferences_tabs = @[self.emulationTab, self.graphicsTab, self.audioTab, self.controlsTab];
+        [self switchPreferencesTab:first_toolbar_item];
+        [_preferencesWindow center];
     }
     [_preferencesWindow makeKeyAndOrderFront:self];
 }
