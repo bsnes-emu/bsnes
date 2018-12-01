@@ -138,7 +138,11 @@ Start:
     ldh [$47], a
     
 ; Set registers to match the original SGB boot
+IF DEF(SGB2)
+    ld a, $FF
+ELSE
     ld a, 1
+ENDC
     ld hl, $c060
     
 ; Boot the game

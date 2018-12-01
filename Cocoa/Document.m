@@ -257,7 +257,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
 - (void) loadBootROM
 {
     static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
-    GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
+    if ([self internalModel] == GB_MODEL_SGB2) {
+        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"sgb2_boot"] UTF8String]);
+    }
+    else {
+        GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
+    }
 }
 
 - (IBAction)reset:(id)sender
