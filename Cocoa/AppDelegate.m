@@ -13,8 +13,8 @@
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (unsigned i = 0; i < GBButtonCount; i++) {
-        if ([[defaults objectForKey:button_to_preference_name(i)] isKindOfClass:[NSString class]]) {
-            [defaults removeObjectForKey:button_to_preference_name(i)];
+        if ([[defaults objectForKey:button_to_preference_name(i, 0)] isKindOfClass:[NSString class]]) {
+            [defaults removeObjectForKey:button_to_preference_name(i, 0)];
         }
     }
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{

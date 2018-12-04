@@ -13,13 +13,17 @@ typedef enum : NSUInteger {
     GBTurbo,
     GBRewind,
     GBUnderclock,
-    GBButtonCount
+    GBButtonCount,
+    GBGameBoyButtonCount = GBStart + 1,
 } GBButton;
 
 extern NSString const *GBButtonNames[GBButtonCount];
 
-static inline NSString *button_to_preference_name(GBButton button)
+static inline NSString *button_to_preference_name(GBButton button, unsigned player)
 {
+    if (player) {
+        return [NSString stringWithFormat:@"GBPlayer%d%@", player + 1, GBButtonNames[button]];
+    }
     return [NSString stringWithFormat:@"GB%@", GBButtonNames[button]];
 }
 

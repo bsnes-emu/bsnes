@@ -103,7 +103,10 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return GBButtonCount;
+    if (self.playerListButton.selectedTag == 0) {
+        return GBButtonCount;
+    }
+    return GBGameBoyButtonCount;
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -115,17 +118,23 @@
     if (is_button_being_modified && button_being_modified == row) {
         return @"Select a new key...";
     }
+    
+    NSNumber *key = [[NSUserDefaults standardUserDefaults] valueForKey:button_to_preference_name(row, self.playerListButton.selectedTag)];
+    if (key) {
+        return [NSString displayStringForKeyCode: [key unsignedIntegerValue]];
+    }
 
-    return [NSString displayStringForKeyCode:[[NSUserDefaults standardUserDefaults] integerForKey:
-                                                button_to_preference_name(row)]];
+    return @"";
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
+
     dispatch_async(dispatch_get_main_queue(), ^{
         is_button_being_modified = true;
         button_being_modified = row;
         tableView.enabled = NO;
+        self.playerListButton.enabled = NO;
         [tableView reloadData];
         [self makeFirstResponder:self];
     });
@@ -144,8 +153,9 @@
     is_button_being_modified = false;
 
     [[NSUserDefaults standardUserDefaults] setInteger:theEvent.keyCode
-                                              forKey:button_to_preference_name(button_being_modified)];
+                                              forKey:button_to_preference_name(button_being_modified, self.playerListButton.selectedTag)];
     self.controlsTableView.enabled = YES;
+    self.playerListButton.enabled = YES;
     [self.controlsTableView reloadData];
     [self makeFirstResponder:self.controlsTableView];
 }
@@ -417,6 +427,11 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBCGBModel"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBCGBModelChanged" object:nil];
+}
+
+- (IBAction)reloadButtonsData:(id)sender
+{
+    [self.controlsTableView reloadData];
 }
 
 @end

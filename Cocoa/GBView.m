@@ -169,26 +169,32 @@
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    for (GBButton i = 0; i < GBButtonCount; i++) {
-        if ([defaults integerForKey:button_to_preference_name(i)] == keyCode) {
-            handled = true;
-            switch (i) {
-                case GBTurbo:
-                    GB_set_turbo_mode(_gb, true, self.isRewinding);
-                    break;
-                    
-                case GBRewind:
-                    self.isRewinding = true;
-                    GB_set_turbo_mode(_gb, false, false);
-                    break;
-                
-                case GBUnderclock:
-                    underclockKeyDown = true;
-                    break;
-                    
-                default:
-                    GB_set_key_state(_gb, (GB_key_t)i, true);
-                    break;
+    unsigned player_count = GB_is_sgb(_gb)? 4: 1;
+    for (unsigned player = 0; player < player_count; player++) {
+        for (GBButton button = 0; button < GBButtonCount; button++) {
+            NSNumber *key = [defaults valueForKey:button_to_preference_name(button, player)];
+            if (!key) continue;
+
+            if (key.unsignedShortValue == keyCode) {
+                handled = true;
+                switch (button) {
+                    case GBTurbo:
+                        GB_set_turbo_mode(_gb, true, self.isRewinding);
+                        break;
+                        
+                    case GBRewind:
+                        self.isRewinding = true;
+                        GB_set_turbo_mode(_gb, false, false);
+                        break;
+                        
+                    case GBUnderclock:
+                        underclockKeyDown = true;
+                        break;
+                        
+                    default:
+                        GB_set_key_state_for_player(_gb, (GB_key_t)button, player, true);
+                        break;
+                }
             }
         }
     }
@@ -204,29 +210,34 @@
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    for (GBButton i = 0; i < GBButtonCount; i++) {
-        if ([defaults integerForKey:button_to_preference_name(i)] == keyCode) {
-            handled = true;
-            switch (i) {
-                case GBTurbo:
-                    GB_set_turbo_mode(_gb, false, false);
-                    break;
-                    
-                case GBRewind:
-                    self.isRewinding = false;
-                    break;
-                
-                case GBUnderclock:
-                    underclockKeyDown = false;
-                    break;
-
-                default:
-                    GB_set_key_state(_gb, (GB_key_t)i, false);
-                    break;
+    unsigned player_count = GB_is_sgb(_gb)? 4: 1;
+    for (unsigned player = 0; player < player_count; player++) {
+        for (GBButton button = 0; button < GBButtonCount; button++) {
+            NSNumber *key = [defaults valueForKey:button_to_preference_name(button, player)];
+            if (!key) continue;
+            
+            if (key.unsignedShortValue == keyCode) {
+                handled = true;
+                switch (button) {
+                    case GBTurbo:
+                        GB_set_turbo_mode(_gb, false, false);
+                        break;
+                        
+                    case GBRewind:
+                        self.isRewinding = false;
+                        break;
+                        
+                    case GBUnderclock:
+                        underclockKeyDown = false;
+                        break;
+                        
+                    default:
+                        GB_set_key_state_for_player(_gb, (GB_key_t)button, player, false);
+                        break;
+                }
             }
         }
     }
-
     if (!handled && [theEvent type] != NSEventTypeFlagsChanged) {
         [super keyUp:theEvent];
     }
