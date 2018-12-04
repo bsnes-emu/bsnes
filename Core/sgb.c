@@ -84,13 +84,11 @@ static void command_ready(GB_gameboy_t *gb)
         }
         if (gb->sgb->command[0] == 0xf9) {
             if (gb->sgb->command[0xc] != 3) { // SGB Flag
-                GB_log(gb, "SGB flag is not 0x03, disabling SGB features\n");
                 gb->sgb->disable_commands = true;
             }
         }
         else if (gb->sgb->command[0] == 0xfb) {
             if (gb->sgb->command[0x3] != 0x33) { // Old licensee code
-                GB_log(gb, "Old licensee code is not 0x33, disabling SGB features\n");
                 gb->sgb->disable_commands = true;
             }
         }
@@ -247,6 +245,11 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     switch ((value >> 4) & 3) {
         case 3:
             gb->sgb->ready_for_pulse = true;
+            /* TODO: This is the logic used by BGB which *should* work for most/all games, but a proper test ROM is needed */
+            if (gb->sgb->player_count > 1 && (gb->io_registers[GB_IO_JOYP] & 0x30) == 0x10) {
+                gb->sgb->current_player++;
+                gb->sgb->current_player &= gb->sgb->player_count - 1;
+            }
             break;
             
         case 2: // Zero
@@ -298,10 +301,6 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
                 gb->sgb->command_write_index = 0;
                 memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
                 gb->sgb->ready_for_stop = false;
-            }
-            if (gb->sgb->player_count > 1 && (value & 0x30) != (gb->io_registers[GB_IO_JOYP] & 0x30)) {
-                gb->sgb->current_player++;
-                gb->sgb->current_player &= gb->sgb->player_count - 1;
             }
             break;
             

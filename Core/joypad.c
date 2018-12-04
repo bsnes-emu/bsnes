@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "gb.h"
 #include <assert.h>
 
