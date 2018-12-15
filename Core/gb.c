@@ -789,3 +789,8 @@ size_t GB_get_screen_height(GB_gameboy_t *gb)
 {
     return GB_is_sgb(gb)? 224 : 144;
 }
+
+unsigned GB_get_player_count(GB_gameboy_t *gb)
+{
+    return GB_is_sgb(gb)? gb->sgb->player_count : 1;
+}

@@ -675,4 +675,6 @@ void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier);
 size_t GB_get_screen_width(GB_gameboy_t *gb);
 size_t GB_get_screen_height(GB_gameboy_t *gb);
 
+unsigned GB_get_player_count(GB_gameboy_t *gb);
+
 #endif /* GB_h */

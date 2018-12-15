@@ -169,7 +169,7 @@
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    unsigned player_count = GB_is_sgb(_gb)? 4: 1;
+    unsigned player_count = GB_get_player_count(_gb);
     for (unsigned player = 0; player < player_count; player++) {
         for (GBButton button = 0; button < GBButtonCount; button++) {
             NSNumber *key = [defaults valueForKey:button_to_preference_name(button, player)];
@@ -210,7 +210,7 @@
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    unsigned player_count = GB_is_sgb(_gb)? 4: 1;
+    unsigned player_count = GB_get_player_count(_gb);
     for (unsigned player = 0; player < player_count; player++) {
         for (GBButton button = 0; button < GBButtonCount; button++) {
             NSNumber *key = [defaults valueForKey:button_to_preference_name(button, player)];
@@ -245,31 +245,42 @@
 
 - (void) joystick:(NSString *)joystick_name button: (unsigned)button changedState: (bool) state
 {
+    unsigned player_count = GB_get_player_count(_gb);
+
     UpdateSystemActivity(UsrActivity);
-    NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
-    
-    for (GBButton i = 0; i < GBButtonCount; i++) {
-        NSNumber *mapped_button = [mapping objectForKey:GBButtonNames[i]];
-        if (mapped_button && [mapped_button integerValue] == button) {
-            switch (i) {
-                case GBTurbo:
-                    GB_set_turbo_mode(_gb, state, state && self.isRewinding);
-                    break;
+    for (unsigned player = 0; player < player_count; player++) {
+        NSString *preferred_joypad = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"]
+                                      objectForKey:[NSString stringWithFormat:@"%u", player]];
+        if (player_count != 1 && // Single player, accpet inputs from all joypads
+            !(player == 0 && !preferred_joypad) && // Multiplayer, but player 1 has no joypad configured, so it takes inputs from all joypads
+            ![preferred_joypad isEqualToString:joystick_name]) {
+            continue;
+        }
+        NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
+        
+        for (GBButton i = 0; i < GBButtonCount; i++) {
+            NSNumber *mapped_button = [mapping objectForKey:GBButtonNames[i]];
+            if (mapped_button && [mapped_button integerValue] == button) {
+                switch (i) {
+                    case GBTurbo:
+                        GB_set_turbo_mode(_gb, state, state && self.isRewinding);
+                        break;
+                        
+                    case GBRewind:
+                        self.isRewinding = state;
+                        if (state) {
+                            GB_set_turbo_mode(_gb, false, false);
+                        }
+                        break;
                     
-                case GBRewind:
-                    self.isRewinding = state;
-                    if (state) {
-                        GB_set_turbo_mode(_gb, false, false);
-                    }
-                    break;
-                
-                case GBUnderclock:
-                    underclockKeyDown = state;
-                    break;
-                    
-                default:
-                    GB_set_key_state(_gb, (GB_key_t)i, state);
-                    break;
+                    case GBUnderclock:
+                        underclockKeyDown = state;
+                        break;
+                        
+                    default:
+                        GB_set_key_state_for_player(_gb, (GB_key_t)i, player, state);
+                        break;
+                }
             }
         }
     }
@@ -277,43 +288,55 @@
 
 - (void) joystick:(NSString *)joystick_name axis: (unsigned)axis movedTo: (signed) value
 {
+    unsigned player_count = GB_get_player_count(_gb);
+
     UpdateSystemActivity(UsrActivity);
-    NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
-    NSNumber *x_axis = [mapping objectForKey:@"XAxis"];
-    NSNumber *y_axis = [mapping objectForKey:@"YAxis"];
-    
-    if (axis == [x_axis integerValue]) {
-        if (value > JOYSTICK_HIGH) {
-            axisActive[0] = true;
-            GB_set_key_state(_gb, GB_KEY_RIGHT, true);
-            GB_set_key_state(_gb, GB_KEY_LEFT, false);
+    for (unsigned player = 0; player < player_count; player++) {
+        NSString *preferred_joypad = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"]
+                                      objectForKey:[NSString stringWithFormat:@"%u", player]];
+        if (player_count != 1 && // Single player, accpet inputs from all joypads
+            !(player == 0 && !preferred_joypad) && // Multiplayer, but player 1 has no joypad configured, so it takes inputs from all joypads
+            ![preferred_joypad isEqualToString:joystick_name]) {
+            continue;
         }
-        else if (value < -JOYSTICK_HIGH) {
-            axisActive[0] = true;
-            GB_set_key_state(_gb, GB_KEY_RIGHT, false);
-            GB_set_key_state(_gb, GB_KEY_LEFT, true);
+        
+        NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"][joystick_name];
+        NSNumber *x_axis = [mapping objectForKey:@"XAxis"];
+        NSNumber *y_axis = [mapping objectForKey:@"YAxis"];
+        
+        if (axis == [x_axis integerValue]) {
+            if (value > JOYSTICK_HIGH) {
+                axisActive[0] = true;
+                GB_set_key_state_for_player(_gb, GB_KEY_RIGHT, player, true);
+                GB_set_key_state_for_player(_gb, GB_KEY_LEFT, player, false);
+            }
+            else if (value < -JOYSTICK_HIGH) {
+                axisActive[0] = true;
+                GB_set_key_state_for_player(_gb, GB_KEY_RIGHT, player, false);
+                GB_set_key_state_for_player(_gb, GB_KEY_LEFT, player, true);
+            }
+            else if (axisActive[0] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
+                axisActive[0] = false;
+                GB_set_key_state_for_player(_gb, GB_KEY_RIGHT, player, false);
+                GB_set_key_state_for_player(_gb, GB_KEY_LEFT, player, false);
+            }
         }
-        else if (axisActive[0] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
-            axisActive[0] = false;
-            GB_set_key_state(_gb, GB_KEY_RIGHT, false);
-            GB_set_key_state(_gb, GB_KEY_LEFT, false);
-        }
-    }
-    else if (axis == [y_axis integerValue]) {
-        if (value > JOYSTICK_HIGH) {
-            axisActive[1] = true;
-            GB_set_key_state(_gb, GB_KEY_DOWN, true);
-            GB_set_key_state(_gb, GB_KEY_UP, false);
-        }
-        else if (value < -JOYSTICK_HIGH) {
-            axisActive[1] = true;
-            GB_set_key_state(_gb, GB_KEY_DOWN, false);
-            GB_set_key_state(_gb, GB_KEY_UP, true);
-        }
-        else if (axisActive[1] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
-            axisActive[1] = false;
-            GB_set_key_state(_gb, GB_KEY_DOWN, false);
-            GB_set_key_state(_gb, GB_KEY_UP, false);
+        else if (axis == [y_axis integerValue]) {
+            if (value > JOYSTICK_HIGH) {
+                axisActive[1] = true;
+                GB_set_key_state_for_player(_gb, GB_KEY_DOWN, player, true);
+                GB_set_key_state_for_player(_gb, GB_KEY_UP, player, false);
+            }
+            else if (value < -JOYSTICK_HIGH) {
+                axisActive[1] = true;
+                GB_set_key_state_for_player(_gb, GB_KEY_DOWN, player, false);
+                GB_set_key_state_for_player(_gb, GB_KEY_UP, player, true);
+            }
+            else if (axisActive[1] && value < JOYSTICK_LOW && value > -JOYSTICK_LOW) {
+                axisActive[1] = false;
+                GB_set_key_state_for_player(_gb, GB_KEY_DOWN, player, false);
+                GB_set_key_state_for_player(_gb, GB_KEY_UP, player, false);
+            }
         }
     }
 }

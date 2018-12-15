@@ -19,6 +19,7 @@
     NSEventModifierFlags previousModifiers;
     
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
+    NSPopUpButton *_preferredJoypadButton;
 }
 
 + (NSArray *)filterList
@@ -264,6 +265,7 @@
     
     all_mappings[joystick_name] = mapping;
     [[NSUserDefaults standardUserDefaults] setObject:all_mappings forKey:@"GBJoypadMappings"];
+    [self refreshJoypadMenu:nil];
     [self advanceConfigurationStateMachine];
 }
 
@@ -434,4 +436,51 @@
     [self.controlsTableView reloadData];
 }
 
+- (void)setPreferredJoypadButton:(NSPopUpButton *)preferredJoypadButton
+{
+    _preferredJoypadButton = preferredJoypadButton;
+    [self refreshJoypadMenu:nil];
+}
+
+- (NSPopUpButton *)preferredJoypadButton
+{
+    return _preferredJoypadButton;
+}
+
+- (IBAction)refreshJoypadMenu:(id)sender
+{
+    NSArray *joypads = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] allKeys];
+    for (NSString *joypad in joypads) {
+        if ([self.preferredJoypadButton indexOfItemWithTitle:joypad] == -1) {
+            [self.preferredJoypadButton addItemWithTitle:joypad];
+        }
+    }
+    
+    NSString *player_string = [NSString stringWithFormat: @"%ld", (long)self.playerListButton.selectedTag];
+    NSString *selected_joypad = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"][player_string];
+    if (selected_joypad && [self.preferredJoypadButton indexOfItemWithTitle:selected_joypad] != -1) {
+        [self.preferredJoypadButton selectItemWithTitle:selected_joypad];
+    }
+    else {
+        [self.preferredJoypadButton selectItemWithTitle:@"None"];
+    }
+    [self.controlsTableView reloadData];
+}
+
+- (IBAction)changeDefaultJoypad:(id)sender
+{
+    NSMutableDictionary *default_joypads = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"] mutableCopy];
+    if (!default_joypads) {
+        default_joypads = [[NSMutableDictionary alloc] init];
+    }
+
+    NSString *player_string = [NSString stringWithFormat: @"%ld", self.playerListButton.selectedTag];
+    if ([[sender titleOfSelectedItem] isEqualToString:@"None"]) {
+        [default_joypads removeObjectForKey:player_string];
+    }
+    else {
+        default_joypads[player_string] = [sender titleOfSelectedItem];
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:default_joypads forKey:@"GBDefaultJoypads"];
+}
 @end
