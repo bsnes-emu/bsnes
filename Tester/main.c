@@ -69,28 +69,28 @@ static void vblank(GB_gameboy_t *gb)
                  push_a_twice? frames / 4:
                  frames) % combo_length + (start_is_bad? 20 : 0) ) {
             case 0:
-                gb->keys[push_right? 0 : 7] = true; // Start (Or right) down
+                gb->keys[0][push_right? 0 : 7] = true; // Start (Or right) down
                 break;
             case 10:
-                gb->keys[push_right? 0 : 7] = false; // Start (Or right) up
+                gb->keys[0][push_right? 0 : 7] = false; // Start (Or right) up
                 break;
             case 20:
-                gb->keys[b_is_confirm? 5: 4] = true; // A down (or B)
+                gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
                 break;
             case 30:
-                gb->keys[b_is_confirm? 5: 4] = false; // A up (or B)
+                gb->keys[0][b_is_confirm? 5: 4] = false; // A up (or B)
                 break;
             case 40:
                 if (push_a_twice) {
-                    gb->keys[b_is_confirm? 5: 4] = true; // A down (or B)
+                    gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
                 }
                 else if (gb->boot_rom_finished) {
-                    gb->keys[3] = true; // D-Pad Down down
+                    gb->keys[0][3] = true; // D-Pad Down down
                 }
                 break;
             case 50:
-                gb->keys[b_is_confirm? 5: 4] = false; // A down (or B)
-                gb->keys[3] = false; // D-Pad Down up
+                gb->keys[0][b_is_confirm? 5: 4] = false; // A down (or B)
+                gb->keys[0][3] = false; // D-Pad Down up
                 break;
         }
     }
