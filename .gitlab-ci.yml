@@ -12,7 +12,7 @@ higan-linux-x86_64-binaries:
     - LC_ALL=C.UTF-8 mkdocs build
     - mkdir higan-nightly
     - cp -a genius/out/genius higan-nightly/genius
-    - cp -a icarus/out/icarushigan-nightly/icarus
+    - cp -a icarus/out/icarus higan-nightly/icarus
     - cp -a icarus/Database higan-nightly/
     - cp -a icarus/Firmware higan-nightly/
     - cp -a higan/out/higan higan-nightly/higan
