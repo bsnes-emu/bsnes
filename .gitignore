@@ -1,3 +1,4 @@
-higan/profile/WonderSwan.sys/internal.ram
-higan/profile/WonderSwan Color.sys/internal.ram
+higan/systems/WonderSwan.sys/internal.ram
+higan/systems/WonderSwan Color.sys/internal.ram
+higan/systems/Super Famicom.sys/configuration.bml
 docs_build/
