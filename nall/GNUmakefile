@@ -40,28 +40,28 @@ ifeq ($(platform),)
 endif
 
 compiler.c      = $(compiler) -x c -std=c11
-compiler.cpp    = $(compiler) -x c++ -std=c++14
+compiler.cpp    = $(compiler) -x c++ -std=c++17
 compiler.objc   = $(compiler) -x objective-c -std=c11
-compiler.objcpp = $(compiler) -x objective-c++ -std=c++14
+compiler.objcpp = $(compiler) -x objective-c++ -std=c++17
 
 flags.c      = -x c -std=c11
-flags.cpp    = -x c++ -std=c++14
+flags.cpp    = -x c++ -std=c++17
 flags.objc   = -x objective-c -std=c11
-flags.objcpp = -x objective-c++ -std=c++14
+flags.objcpp = -x objective-c++ -std=c++17
 flags.deps   = -MMD -MP -MF $(@:.o=.d)
 
 # compiler detection
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
-    compiler.cpp = $(compiler) -x c++ -std=gnu++14
-    flags.cpp = -x c++ -std=gnu++14
+    compiler.cpp = $(compiler) -x c++ -std=gnu++17
+    flags.cpp = -x c++ -std=gnu++17
   else ifeq ($(platform),macos)
     compiler := clang++
   else ifeq ($(platform),linux)
     compiler := g++
   else ifeq ($(platform),bsd)
-    compiler := g++49
+    compiler := g++8
   else
     compiler := g++
   endif
@@ -126,7 +126,8 @@ endif
 ifeq ($(platform),bsd)
   flags   += -I/usr/local/include
   options += -Wl,-rpath=/usr/local/lib
-  options += -Wl,-rpath=/usr/local/lib/gcc49
+  options += -Wl,-rpath=/usr/local/lib/gcc8
+  options += -lstdc++ -lm
 endif
 
 # threading support

@@ -125,7 +125,7 @@ auto Cartridge::loadMemory(Memory& ram, Markup::Node node, bool required) -> voi
     if(memory->type == "RAM" && !memory->nonVolatile) return;
     if(memory->type == "RTC" && !memory->nonVolatile) return;
     if(auto fp = platform->open(pathID(), memory->name(), File::Read, required)) {
-      fp->read(ram.data(), ram.size());
+      fp->read(ram.data(), min(fp->size(), ram.size()));
     }
   }
 }

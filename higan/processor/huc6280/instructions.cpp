@@ -139,7 +139,8 @@ L io();
 }
 
 auto HuC6280::instructionImmediate(fp alu, uint8& data) -> void {
-L data = ALU(operand());
+L io();
+  data = ALU(operand());
 }
 
 auto HuC6280::instructionImplied(fp alu, uint8& data) -> void {

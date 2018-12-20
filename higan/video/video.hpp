@@ -17,6 +17,7 @@ struct Video {
   auto reset(Interface* interface) -> void;
 
   auto setPalette() -> void;
+  auto setDepth(uint depth) -> void;
   auto setSaturation(double saturation) -> void;
   auto setGamma(double gamma) -> void;
   auto setLuminance(double luminance) -> void;
@@ -40,6 +41,7 @@ private:
   uint height = 0;
   uint colors = 0;
 
+  uint depth = 24;
   double saturation = 1.0;
   double gamma = 1.0;
   double luminance = 1.0;

@@ -15,6 +15,11 @@
   #include <sys/types.h>
 #endif
 
+#if !defined(MAP_NORESERVE)
+  //not supported on FreeBSD; flag removed in 11.0
+  #define MAP_NORESERVE 0
+#endif
+
 namespace nall {
 
 struct file_map {
@@ -39,7 +44,7 @@ struct file_map {
 //auto close() -> void;
 
 private:
-  bool _open = false;
+  bool _open = false;  //zero-byte files return _data = nullptr, _size = 0
   uint8_t* _data = nullptr;
   uint64_t _size = 0;
 
@@ -66,6 +71,9 @@ public:
   }
 
   auto open(const string& filename, uint mode_) -> bool {
+    close();
+    if(file::exists(filename) && file::size(filename) == 0) return _open = true;
+
     int desiredAccess, creationDisposition, protection, mapAccess;
 
     switch(mode_) {
@@ -111,7 +119,7 @@ public:
     }
 
     _data = (uint8_t*)MapViewOfFile(_map, mapAccess, 0, 0, _size);
-    return _open = _data;
+    return _open = true;
   }
 
   auto close() -> void {
@@ -154,6 +162,8 @@ public:
 
   auto open(const string& filename, uint mode_) -> bool {
     close();
+    if(file::exists(filename) && file::size(filename) == 0) return _open = true;
+
     int openFlags = 0;
     int mmapFlags = 0;
 
@@ -192,7 +202,7 @@ public:
       return false;
     }
 
-    return _open = _data;
+    return _open = true;
   }
 
   auto close() -> void {

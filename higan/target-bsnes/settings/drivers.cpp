@@ -153,12 +153,13 @@ auto DriverSettings::videoFormatChanged() -> void {
   }
 //videoFormatOption.setEnabled(video.hasFormat());
   layout.setGeometry(layout.geometry());
+  videoFormatChange();
 }
 
 auto DriverSettings::videoFormatChange() -> void {
   auto item = videoFormatOption.selected();
   settings.video.format = item.text();
-  video.setFormat(item.text());
+  program.updateVideoFormat();
 }
 
 //

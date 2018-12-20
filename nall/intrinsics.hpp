@@ -7,7 +7,7 @@ namespace nall {
   enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
   enum class API : uint { Windows, Posix, Unknown };
   enum class DisplayServer : uint { Windows, Quartz, Xorg, Unknown };
-  enum class Architecture : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
+  enum class Architecture : uint { x86, amd64, ARM32, ARM64, PPC32, PPC64, Unknown };
   enum class Endian : uint { LSB, MSB, Unknown };
   enum class Build : uint { Debug, Stable, Size, Release, Performance };
 
@@ -123,9 +123,12 @@ namespace nall {
 #elif defined(__amd64__) || defined(_M_AMD64)
   #define ARCHITECTURE_AMD64
   constexpr auto architecture() -> Architecture { return Architecture::amd64; }
+#elif defined(__aarch64__)
+  #define ARCHITECTURE_ARM64
+  constexpr auto architecture() -> Architecture { return Architecture::ARM64; }
 #elif defined(__arm__)
-  #define ARCHITECTURE_ARM
-  constexpr auto architecture() -> Architecture { return Architecture::ARM; }
+  #define ARCHITECTURE_ARM32
+  constexpr auto architecture() -> Architecture { return Architecture::ARM32; }
 #elif defined(__ppc64__) || defined(_ARCH_PPC64)
   #define ARCHITECTURE_PPC64
   constexpr auto architecture() -> Architecture { return Architecture::PPC64; }

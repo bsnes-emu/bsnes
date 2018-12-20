@@ -26,7 +26,7 @@ struct VideoGLX : VideoDriver, OpenGL {
   auto hasShader() -> bool override { return true; }
 
   auto hasFormats() -> vector<string> override {
-    return {"RGB24"};  //"RGB30"
+    return {"RGB24"};  //"RGB30" is currently broken; use OpenGL 2.0 driver instead
   }
 
   auto setContext(uintptr context) -> bool override {

@@ -1,4 +1,5 @@
 auto SPC7110::serialize(serializer& s) -> void {
+  Thread::serialize(s);
   s.array(ram.data(), ram.size());
 
   s.integer(r4801);

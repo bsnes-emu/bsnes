@@ -224,6 +224,9 @@ auto Presentation::clearViewport() -> void {
   if(!emulator->loaded()) viewportLayout.setPadding();
   if(!visible() || !video) return;
 
+  uint32_t opaqueBlack = 0xff000000;
+  if(settings.video.format == "RGB30") opaqueBlack = 0xc0000000;
+
   uint32_t* output;
   uint length;
   uint width = 16;
@@ -231,7 +234,7 @@ auto Presentation::clearViewport() -> void {
   if(video.acquire(output, length, width, height)) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
-      for(uint x : range(width)) *line++ = 0xff000000;
+      for(uint x : range(width)) *line++ = opaqueBlack;
     }
     video.release();
     video.output();

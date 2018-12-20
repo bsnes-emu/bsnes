@@ -60,9 +60,15 @@ auto Video::setPalette() -> void {
       b = uclamp<16>(b * luminance);
     }
 
-    //convert color from 16-bits/channel to 8-bits/channel; force alpha to 1.0
-    palette[index] = a.byte(1) << 24 | r.byte(1) << 16 | g.byte(1) << 8 | b.byte(1) << 0;
+    switch(depth) {
+    case 24: palette[index] = r >> 8 << 16 | g >> 8 <<  8 | b >> 8 << 0; break;
+    case 30: palette[index] = r >> 6 << 20 | g >> 6 << 10 | b >> 6 << 0; break;
+    }
   }
+}
+
+auto Video::setDepth(uint depth) -> void {
+  this->depth = depth;
 }
 
 auto Video::setSaturation(double saturation) -> void {
@@ -130,21 +136,23 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
         *target++ = color;
       }
     } else {
+      uint32 mask = depth == 30 ? 0x40100401 : 0x01010101;
       for(uint x : range(width)) {
         auto a = *target;
         auto b = palette[*source++];
-        *target++ = (a + b - ((a ^ b) & 0x01010101)) >> 1;
+        *target++ = (a + b - ((a ^ b) & mask)) >> 1;
       }
     }
   }
 
   if(effects.colorBleed) {
+    uint32 mask = depth == 30 ? 0x40100401 : 0x01010101;
     for(uint y : range(height)) {
       auto target = output + y * width;
       for(uint x : range(width)) {
         auto a = target[x];
         auto b = target[x + (x != width - 1)];
-        target[x] = (a + b - ((a ^ b) & 0x01010101)) >> 1;
+        target[x] = (a + b - ((a ^ b) & mask)) >> 1;
       }
     }
   }
@@ -164,6 +172,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
   for(auto& sprite : sprites) {
     if(!sprite->visible) continue;
 
+    uint32 opaqueAlpha = depth == 30 ? 0xc0000000 : 0xff000000;
     for(int y : range(sprite->height)) {
       for(int x : range(sprite->width)) {
         int pixelY = sprite->y + y;
@@ -173,7 +182,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
         if(pixelX < 0 || pixelX >= width) continue;
 
         auto pixel = sprite->pixels[y * sprite->width + x];
-        if(pixel) output[pixelY * width + pixelX] = 0xff000000 | pixel;
+        if(pixel) output[pixelY * width + pixelX] = opaqueAlpha | pixel;
       }
     }
   }

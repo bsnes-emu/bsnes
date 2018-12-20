@@ -50,6 +50,8 @@ auto Program::updateVideoFormat() -> void {
     settings.video.format = video.format();
   }
   video.setFormat(settings.video.format);
+  Emulator::video.setDepth(settings.video.format == "RGB30" ? 30 : 24);
+  Emulator::video.setPalette();
 }
 
 auto Program::updateVideoShader() -> void {

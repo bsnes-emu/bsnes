@@ -37,7 +37,7 @@ struct VideoGLX2 : VideoDriver {
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
-  auto hasFormats() -> vector<string> override { return {"RGB24"}; }
+  auto hasFormats() -> vector<string> override { return {"RGB24", "RGB30"}; }
   auto hasShader() -> bool override { return true; }
 
   auto setContext(uintptr context) -> bool override {
