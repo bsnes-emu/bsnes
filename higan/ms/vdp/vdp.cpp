@@ -26,16 +26,14 @@ auto VDP::main() -> void {
     io.intFrame = 1;
   }
 
-  background.scanline();
-  sprite.scanline();
-
   //684 clocks/scanline
   uint y = io.vcounter;
+  sprite.setup(y);
   if(y < vlines()) {
     uint32* screen = buffer + (24 + y) * 256;
     for(uint x : range(256)) {
-      background.run();
-      sprite.run();
+      background.run(x, y);
+      sprite.run(x, y);
       step(2);
 
       uint12 color = palette(16 | io.backdropColor);
@@ -74,6 +72,12 @@ auto VDP::step(uint clocks) -> void {
 }
 
 auto VDP::refresh() -> void {
+  if(Model::SG1000() || Model::SC3000()) {
+    uint32* screen = buffer;
+    screen += 24 * 256;
+    Emulator::video.refresh(screen, 256 * sizeof(uint32), 256, 192);
+  }
+
   if(Model::MasterSystem()) {
     //center the video output vertically in the viewport
     uint32* screen = buffer;
@@ -89,9 +93,11 @@ auto VDP::refresh() -> void {
 }
 
 auto VDP::vlines() -> uint {
-  if(io.lines240) return 240;
-  if(io.lines224) return 224;
-  return 192;
+  switch(io.mode) {
+  default:     return 192;
+  case 0b1011: return 224;
+  case 0b1110: return 240;
+  }
 }
 
 auto VDP::vblank() -> bool {
@@ -109,14 +115,15 @@ auto VDP::power() -> void {
 }
 
 auto VDP::palette(uint5 index) -> uint12 {
-  if(Model::MasterSystem()) {
-    return cram[index];
-  }
-
-  if(Model::GameGear()) {
-    return cram[index * 2 + 0] << 0 | cram[index * 2 + 1] << 8;
-  }
-
+  if(Model::SG1000() || Model::SC3000()) return index.bits(0,3);
+  //Master System and Game Gear approximate TMS9918A colors by converting to RGB6 palette colors
+  static uint6 palette[16] = {
+    0x00, 0x00, 0x08, 0x0c, 0x10, 0x30, 0x01, 0x3c,
+    0x02, 0x03, 0x05, 0x0f, 0x04, 0x33, 0x15, 0x3f,
+  };
+  if(!io.mode.bit(3)) return palette[index.bits(0,3)];
+  if(Model::MasterSystem()) return cram[index];
+  if(Model::GameGear()) return cram[index * 2 + 0] << 0 | cram[index * 2 + 1] << 8;
   return 0;
 }
 

@@ -68,7 +68,8 @@ auto APU::step(uint clocks) -> void {
 auto APU::power() -> void {
   create(APU::Enter, 3'072'000);
   stream = Emulator::audio.createStream(2, frequency());
-  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 20.0);
+  stream->addHighPassFilter(20.0, Emulator::Filter::Order::First);
+  stream->addDCRemovalFilter();
 
   bus.map(this, 0x004a, 0x004c);
   bus.map(this, 0x004e, 0x0050);

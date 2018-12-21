@@ -1,5 +1,5 @@
 struct System {
-  enum class Model : uint { MasterSystem, GameGear };
+  enum class Model : uint { SG1000, SC3000, MasterSystem, GameGear };
   enum class Region : uint { NTSC, PAL };
 
   auto loaded() const -> bool { return information.loaded; }
@@ -38,6 +38,8 @@ private:
 
 extern System system;
 
+auto Model::SG1000() -> bool { return system.model() == System::Model::SG1000; }
+auto Model::SC3000() -> bool { return system.model() == System::Model::SC3000; }
 auto Model::MasterSystem() -> bool { return system.model() == System::Model::MasterSystem; }
 auto Model::GameGear() -> bool { return system.model() == System::Model::GameGear; }
 

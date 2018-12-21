@@ -9,6 +9,20 @@ Cartridge cartridge;
 auto Cartridge::load() -> bool {
   information = {};
 
+  if(Model::SG1000()) {
+    if(auto loaded = platform->load(ID::SG1000, "SG-1000", "sg1000", {"NTSC", "PAL"})) {
+      information.pathID = loaded.pathID;
+      information.region = loaded.option;
+    } else return false;
+  }
+
+  if(Model::SC3000()) {
+    if(auto loaded = platform->load(ID::SC3000, "SC-3000", "sc3000", {"NTSC", "PAL"})) {
+      information.pathID = loaded.pathID;
+      information.region = loaded.option;
+    } else return false;
+  }
+
   if(Model::MasterSystem()) {
     if(auto loaded = platform->load(ID::MasterSystem, "Master System", "ms", {"NTSC", "PAL"})) {
       information.pathID = loaded.pathID;

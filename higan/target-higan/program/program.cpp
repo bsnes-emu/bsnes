@@ -25,6 +25,12 @@ Program::Program(Arguments arguments) {
   emulators.append(new SuperFamicom::Interface);
 #endif
 #ifdef CORE_MS
+  emulators.append(new MasterSystem::SG1000Interface);
+#endif
+#ifdef CORE_MS
+  emulators.append(new MasterSystem::SC3000Interface);
+#endif
+#ifdef CORE_MS
   emulators.append(new MasterSystem::MasterSystemInterface);
 #endif
 #ifdef CORE_MD

@@ -42,6 +42,16 @@ auto CPU::in(uint8 addr) -> uint8 {
   }
 
   case 3: {
+    if(Model::SG1000() || Model::SC3000()) {
+      auto port1 = controllerPort1.device->readData();
+      auto port2 = controllerPort2.device->readData();
+      if(addr.bit(0) == 0) {
+        return port1.bits(0,5) << 0 | port2.bits(0,1) << 6;
+      } else {
+        return port2.bits(2,5) << 0 | 1 << 4 | 1 << 5 | port1.bit(6) << 6 | port2.bit(6) << 7;
+      }
+    }
+
     if(Model::MasterSystem()) {
       bool reset = !platform->inputPoll(ID::Port::Hardware, ID::Device::MasterSystemControls, 0);
       auto port1 = controllerPort1.device->readData();

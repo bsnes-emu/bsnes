@@ -1,4 +1,4 @@
-//TI TMS9918A (derivative)
+//Texas Instruments TMS9918A (derivative)
 
 struct VDP : Thread {
   static auto Enter() -> void;
@@ -23,18 +23,15 @@ struct VDP : Thread {
 
   //background.cpp
   struct Background {
-    auto scanline() -> void;
-    auto run() -> void;
+    auto run(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics1(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics2(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics3(uint8 hoffset, uint9 voffset, uint vlines) -> void;
 
     auto power() -> void;
 
     //serialization.cpp
     auto serialize(serializer&) -> void;
-
-    struct State {
-      uint x = 0;
-      uint y = 0;
-    } state;
 
     struct Output {
       uint4 color;
@@ -45,8 +42,11 @@ struct VDP : Thread {
 
   //sprite.cpp
   struct Sprite {
-    auto scanline() -> void;
-    auto run() -> void;
+    auto setup(uint9 voffset) -> void;
+    auto run(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics1(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics2(uint8 hoffset, uint9 voffset) -> void;
+    auto graphics3(uint8 hoffset, uint9 voffset, uint vlines) -> void;
 
     auto power() -> void;
 
@@ -57,18 +57,15 @@ struct VDP : Thread {
       uint8 x;
       uint8 y;
       uint8 pattern;
+      uint4 color;
     };
-
-    struct State {
-      uint x = 0;
-      uint y = 0;
-    } state;
 
     struct Output {
       uint4 color;
     } output;
 
-    adaptive_array<Object, 8> objects;
+    array<Object[8]> objects;
+    uint objectsValid;
   } sprite;
 
   //serialization.cpp
@@ -79,7 +76,7 @@ private:
 
   uint32 buffer[256 * 264];
   uint8 vram[0x4000];
-  uint8 cram[0x40];  //MS = 0x20, GG = 0x40
+  uint8 cram[0x40];  //SG + MS = 0x20, GG = 0x40
 
   struct IO {
     uint vcounter = 0;  //vertical counter
@@ -105,8 +102,6 @@ private:
 
     //$00  mode control 1
     bool externalSync = 0;
-    bool extendedHeight = 0;
-    bool mode4 = 0;
     bool spriteShift = 0;
     bool lineInterrupts = 0;
     bool leftClip = 0;
@@ -116,28 +111,26 @@ private:
     //$01  mode control 2
     bool spriteDouble = 0;
     bool spriteTile = 0;
-    bool lines240 = 0;
-    bool lines224 = 0;
     bool frameInterrupts = 0;
     bool displayEnable = 0;
 
+    //$00 + $01
+    uint4 mode;
+
     //$02  name table base address
-    uint1 nameTableMask;
-    uint3 nameTableAddress;
+    uint4 nameTableAddress;
 
     //$03  color table base address
     uint8 colorTableAddress;
 
     //$04  pattern table base address
-    uint8 patternTableAddress;
+    uint3 patternTableAddress;
 
     //$05  sprite attribute table base address
-    uint1 spriteAttributeTableMask;
-    uint6 spriteAttributeTableAddress;
+    uint7 spriteAttributeTableAddress;
 
     //$06  sprite pattern table base address
-    uint2 spritePatternTableMask;
-    uint1 spritePatternTableAddress;
+    uint3 spritePatternTableAddress;
 
     //$07  backdrop color
     uint4 backdropColor;

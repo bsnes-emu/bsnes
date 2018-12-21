@@ -32,7 +32,7 @@ auto Controller::main() -> void {
 auto ControllerPort::connect(uint deviceID) -> void {
   delete device;
   if(!system.loaded()) return;
-  if(!Model::MasterSystem()) return;
+  if(Model::GameGear()) return;
 
   switch(deviceID) { default:
   case ID::Device::None: device = new Controller(port); break;

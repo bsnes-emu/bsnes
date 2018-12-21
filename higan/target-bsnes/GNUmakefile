@@ -33,7 +33,7 @@ endif
 
 verbose: hiro.verbose ruby.verbose nall.verbose all;
 
-install:
+install: all
 ifeq ($(shell id -un),root)
 	$(error "make install should not be run as root")
 else ifeq ($(platform),windows)

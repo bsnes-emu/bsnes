@@ -21,8 +21,6 @@ auto VDP::serialize(serializer& s) -> void {
   s.integer(io.address);
   s.integer(io.vramLatch);
   s.integer(io.externalSync);
-  s.integer(io.extendedHeight);
-  s.integer(io.mode4);
   s.integer(io.spriteShift);
   s.integer(io.lineInterrupts);
   s.integer(io.leftClip);
@@ -30,17 +28,13 @@ auto VDP::serialize(serializer& s) -> void {
   s.integer(io.verticalScrollLock);
   s.integer(io.spriteDouble);
   s.integer(io.spriteTile);
-  s.integer(io.lines240);
-  s.integer(io.lines224);
   s.integer(io.frameInterrupts);
   s.integer(io.displayEnable);
-  s.integer(io.nameTableMask);
+  s.integer(io.mode);
   s.integer(io.nameTableAddress);
   s.integer(io.colorTableAddress);
   s.integer(io.patternTableAddress);
-  s.integer(io.spriteAttributeTableMask);
   s.integer(io.spriteAttributeTableAddress);
-  s.integer(io.spritePatternTableMask);
   s.integer(io.spritePatternTableAddress);
   s.integer(io.backdropColor);
   s.integer(io.hscroll);
@@ -49,16 +43,18 @@ auto VDP::serialize(serializer& s) -> void {
 }
 
 auto VDP::Background::serialize(serializer& s) -> void {
-  s.integer(state.x);
-  s.integer(state.y);
   s.integer(output.color);
   s.integer(output.palette);
   s.integer(output.priority);
 }
 
 auto VDP::Sprite::serialize(serializer& s) -> void {
-  s.integer(state.x);
-  s.integer(state.y);
   s.integer(output.color);
-  //todo: array<Object, 8> is not serializable
+  for(auto& object : objects) {
+    s.integer(object.x);
+    s.integer(object.y);
+    s.integer(object.pattern);
+    s.integer(object.color);
+  }
+  s.integer(objectsValid);
 }

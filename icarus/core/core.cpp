@@ -1,10 +1,13 @@
 Icarus::Icarus() {
   Database::Famicom = BML::unserialize(string::read(locate("Database/Famicom.bml")));
   Database::SuperFamicom = BML::unserialize(string::read(locate("Database/Super Famicom.bml")));
+  Database::SG1000 = BML::unserialize(string::read(locate("Database/SG-1000.bml")));
+  Database::SC3000 = BML::unserialize(string::read(locate("Database/SC-3000.bml")));
   Database::MasterSystem = BML::unserialize(string::read(locate("Database/Master System.bml")));
   Database::MegaDrive = BML::unserialize(string::read(locate("Database/Mega Drive.bml")));
   Database::PCEngine = BML::unserialize(string::read(locate("Database/PC Engine.bml")));
   Database::SuperGrafx = BML::unserialize(string::read(locate("Database/SuperGrafx.bml")));
+  Database::MSX = BML::unserialize(string::read(locate("Database/MSX.bml")));
   Database::GameBoy = BML::unserialize(string::read(locate("Database/Game Boy.bml")));
   Database::GameBoyColor = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")));
   Database::GameBoyAdvance = BML::unserialize(string::read(locate("Database/Game Boy Advance.bml")));
@@ -41,10 +44,13 @@ auto Icarus::manifest(string location) -> string {
   auto type = Location::suffix(location).downcase();
   if(type == ".fc") return famicomManifest(location);
   if(type == ".sfc") return superFamicomManifest(location);
+  if(type == ".sg1000") return sg1000Manifest(location);
+  if(type == ".sc3000") return sc3000Manifest(location);
   if(type == ".ms") return masterSystemManifest(location);
   if(type == ".md") return megaDriveManifest(location);
   if(type == ".pce") return pcEngineManifest(location);
-  if(type == ".sg") return superGrafxManifest(location);
+  if(type == ".sgx") return superGrafxManifest(location);
+  if(type == ".msx") return msxManifest(location);
   if(type == ".gb") return gameBoyManifest(location);
   if(type == ".gbc") return gameBoyColorManifest(location);
   if(type == ".gba") return gameBoyAdvanceManifest(location);
@@ -85,10 +91,13 @@ auto Icarus::import(string location) -> string {
 
   if(type == ".fc" || type == ".nes") return famicomImport(buffer, location);
   if(type == ".sfc" || type == ".smc") return superFamicomImport(buffer, location);
+  if(type == ".sg1000" || type == ".sg") return sg1000Import(buffer, location);
+  if(type == ".sc3000" || type == ".sc") return sc3000Import(buffer, location);
   if(type == ".ms" || type == ".sms") return masterSystemImport(buffer, location);
   if(type == ".md" || type == ".smd" || type == ".gen") return megaDriveImport(buffer, location);
   if(type == ".pce") return pcEngineImport(buffer, location);
-  if(type == ".sg" || type == ".sgx") return superGrafxImport(buffer, location);
+  if(type == ".sgx") return superGrafxImport(buffer, location);
+  if(type == ".msx") return msxImport(buffer, location);
   if(type == ".gb") return gameBoyImport(buffer, location);
   if(type == ".gbc") return gameBoyColorImport(buffer, location);
   if(type == ".gba") return gameBoyAdvanceImport(buffer, location);

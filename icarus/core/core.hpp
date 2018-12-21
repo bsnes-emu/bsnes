@@ -46,6 +46,16 @@ struct Icarus {
   auto superFamicomManifest(vector<uint8_t>& buffer, string location) -> string;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //sg-1000.cpp
+  auto sg1000Manifest(string location) -> string;
+  auto sg1000Manifest(vector<uint8_t>& buffer, string location) -> string;
+  auto sg1000Import(vector<uint8_t>& buffer, string location) -> string;
+
+  //sc-3000.cpp
+  auto sc3000Manifest(string location) -> string;
+  auto sc3000Manifest(vector<uint8_t>& buffer, string location) -> string;
+  auto sc3000Import(vector<uint8_t>& buffer, string location) -> string;
+
   //master-system.cpp
   auto masterSystemManifest(string location) -> string;
   auto masterSystemManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -65,6 +75,11 @@ struct Icarus {
   auto superGrafxManifest(string location) -> string;
   auto superGrafxManifest(vector<uint8_t>& buffer, string location) -> string;
   auto superGrafxImport(vector<uint8_t>& buffer, string location) -> string;
+
+  //msx.cpp
+  auto msxManifest(string location) -> string;
+  auto msxManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto msxImport(vector<uint8_t>& buffer, string location) -> string;
 
   //game-boy.cpp
   auto gameBoyManifest(string location) -> string;
@@ -119,10 +134,13 @@ private:
 namespace Database {
   Markup::Node Famicom;
   Markup::Node SuperFamicom;
+  Markup::Node SG1000;
+  Markup::Node SC3000;
   Markup::Node MasterSystem;
   Markup::Node MegaDrive;
   Markup::Node PCEngine;
   Markup::Node SuperGrafx;
+  Markup::Node MSX;
   Markup::Node GameBoy;
   Markup::Node GameBoyColor;
   Markup::Node GameBoyAdvance;

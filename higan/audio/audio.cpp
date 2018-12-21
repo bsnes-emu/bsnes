@@ -39,7 +39,7 @@ auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stre
 }
 
 auto Audio::process() -> void {
-  while(true) {
+  while(streams) {
     for(auto& stream : streams) {
       if(!stream->pending()) return;
     }

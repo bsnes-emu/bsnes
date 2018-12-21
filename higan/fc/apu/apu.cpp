@@ -74,9 +74,10 @@ auto APU::setSample(int16 sample) -> void {
 auto APU::power(bool reset) -> void {
   create(APU::Enter, system.frequency());
   stream = Emulator::audio.createStream(1, frequency() / rate());
-  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 90.0);
-  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::HighPass, 440.0);
-  stream->addFilter(Emulator::Filter::Order::First, Emulator::Filter::Type::LowPass, 14000.0);
+  stream->addHighPassFilter(   90.0, Emulator::Filter::Order::First);
+  stream->addHighPassFilter(  440.0, Emulator::Filter::Order::First);
+  stream->addLowPassFilter (14000.0, Emulator::Filter::Order::First);
+  stream->addDCRemovalFilter();
 
   pulse[0].power();
   pulse[1].power();

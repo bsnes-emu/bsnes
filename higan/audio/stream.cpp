@@ -1,14 +1,12 @@
-auto Stream::reset(uint channels_, double inputFrequency, double outputFrequency) -> void {
-  this->inputFrequency = inputFrequency;
-  this->outputFrequency = outputFrequency;
-
+auto Stream::reset(uint channelCount, double inputFrequency, double outputFrequency) -> void {
   channels.reset();
-  channels.resize(channels_);
+  channels.resize(channelCount);
 
   for(auto& channel : channels) {
     channel.filters.reset();
-    channel.resampler.reset(inputFrequency, outputFrequency);
   }
+
+  setFrequency(inputFrequency, outputFrequency);
 }
 
 auto Stream::setFrequency(double inputFrequency, maybe<double> outputFrequency) -> void {
@@ -35,27 +33,46 @@ auto Stream::setFrequency(double inputFrequency, maybe<double> outputFrequency) 
   }
 }
 
-auto Stream::addFilter(Filter::Order order, Filter::Type type, double cutoffFrequency, uint passes) -> void {
+auto Stream::addDCRemovalFilter() -> void {
+  return;  //todo: test to ensure this is desirable before enabling
+  for(auto& channel : channels) {
+    Filter filter{Filter::Mode::DCRemoval, Filter::Type::None, Filter::Order::None};
+    channel.filters.append(filter);
+  }
+}
+
+auto Stream::addLowPassFilter(double cutoffFrequency, Filter::Order order, uint passes) -> void {
   for(auto& channel : channels) {
     for(uint pass : range(passes)) {
-      Filter filter{order};
-
       if(order == Filter::Order::First) {
-        DSP::IIR::OnePole::Type _type;
-        if(type == Filter::Type::LowPass) _type = DSP::IIR::OnePole::Type::LowPass;
-        if(type == Filter::Type::HighPass) _type = DSP::IIR::OnePole::Type::HighPass;
-        filter.onePole.reset(_type, cutoffFrequency, inputFrequency);
+        Filter filter{Filter::Mode::OnePole, Filter::Type::LowPass, Filter::Order::First};
+        filter.onePole.reset(DSP::IIR::OnePole::Type::LowPass, cutoffFrequency, inputFrequency);
+        channel.filters.append(filter);
       }
-
       if(order == Filter::Order::Second) {
-        DSP::IIR::Biquad::Type _type;
-        if(type == Filter::Type::LowPass) _type = DSP::IIR::Biquad::Type::LowPass;
-        if(type == Filter::Type::HighPass) _type = DSP::IIR::Biquad::Type::HighPass;
+        Filter filter{Filter::Mode::Biquad, Filter::Type::LowPass, Filter::Order::Second};
         double q = DSP::IIR::Biquad::butterworth(passes * 2, pass);
-        filter.biquad.reset(_type, cutoffFrequency, inputFrequency, q);
+        filter.biquad.reset(DSP::IIR::Biquad::Type::LowPass, cutoffFrequency, inputFrequency, q);
+        channel.filters.append(filter);
       }
+    }
+  }
+}
 
-      channel.filters.append(filter);
+auto Stream::addHighPassFilter(double cutoffFrequency, Filter::Order order, uint passes) -> void {
+  for(auto& channel : channels) {
+    for(uint pass : range(passes)) {
+      if(order == Filter::Order::First) {
+        Filter filter{Filter::Mode::OnePole, Filter::Type::HighPass, Filter::Order::First};
+        filter.onePole.reset(DSP::IIR::OnePole::Type::HighPass, cutoffFrequency, inputFrequency);
+        channel.filters.append(filter);
+      }
+      if(order == Filter::Order::Second) {
+        Filter filter{Filter::Mode::Biquad, Filter::Type::HighPass, Filter::Order::Second};
+        double q = DSP::IIR::Biquad::butterworth(passes * 2, pass);
+        filter.biquad.reset(DSP::IIR::Biquad::Type::HighPass, cutoffFrequency, inputFrequency, q);
+        channel.filters.append(filter);
+      }
     }
   }
 }
@@ -73,9 +90,10 @@ auto Stream::write(const double samples[]) -> void {
   for(auto c : range(channels.size())) {
     double sample = samples[c] + 1e-25;  //constant offset used to suppress denormals
     for(auto& filter : channels[c].filters) {
-      switch(filter.order) {
-      case Filter::Order::First: sample = filter.onePole.process(sample); break;
-      case Filter::Order::Second: sample = filter.biquad.process(sample); break;
+      switch(filter.mode) {
+      case Filter::Mode::DCRemoval: sample = filter.dcRemoval.process(sample); break;
+      case Filter::Mode::OnePole: sample = filter.onePole.process(sample); break;
+      case Filter::Mode::Biquad: sample = filter.biquad.process(sample); break;
       }
     }
     for(auto& filter : channels[c].nyquist) {

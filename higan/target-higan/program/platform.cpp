@@ -93,7 +93,12 @@ auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint 
 }
 
 auto Program::audioSample(const double* samples, uint channels) -> void {
-  audio->output(samples);
+  if(channels == 1) {
+    double stereo[] = {samples[0], samples[0]};
+    audio->output(stereo);
+  } else {
+    audio->output(samples);
+  }
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

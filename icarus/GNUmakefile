@@ -34,7 +34,7 @@ endif
 	$(call delete,obj/*)
 	$(call delete,out/*)
 
-install:
+install: all
 ifeq ($(platform),macos)
 	cp -R out/$(name).app /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)

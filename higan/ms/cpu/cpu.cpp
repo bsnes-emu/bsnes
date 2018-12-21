@@ -37,6 +37,13 @@ auto CPU::synchronizing() const -> bool {
 
 //called once per frame
 auto CPU::pollPause() -> void {
+  if(Model::SG1000() || Model::SC3000()) {
+    static bool pause = 0;
+    bool state = platform->inputPoll(ID::Port::Hardware, ID::Device::SG1000Controls, 0);
+    if(!pause && state) setNMI(1);
+    pause = state;
+  }
+
   if(Model::MasterSystem()) {
     static bool pause = 0;
     bool state = platform->inputPoll(ID::Port::Hardware, ID::Device::MasterSystemControls, 1);

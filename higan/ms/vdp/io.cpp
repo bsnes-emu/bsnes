@@ -1,16 +1,9 @@
 auto VDP::vcounter() -> uint8 {
-  if(io.lines240) {
-    //NTSC 256x240
-    return io.vcounter;
-  } else if(io.lines224) {
-    //NTSC 256x224
-    return io.vcounter <= 234 ? io.vcounter : io.vcounter - 6;
-  } else {
-    //NTSC 256x192
-    return io.vcounter <= 218 ? io.vcounter : io.vcounter - 6;
+  switch(io.mode) {
+  default:     return io.vcounter <= 218 ? io.vcounter : io.vcounter - 6;  //256x192
+  case 0b1011: return io.vcounter <= 234 ? io.vcounter : io.vcounter - 6;  //256x224
+  case 0b1110: return io.vcounter;  //256x240
   }
-
-  unreachable;
 }
 
 auto VDP::hcounter() -> uint8 {
@@ -51,9 +44,8 @@ auto VDP::data(uint8 data) -> void {
     vram[io.address++] = data;
   } else {
     uint mask = 0;
-    if(Model::MasterSystem()) mask = 0x1f;
-    if(Model::GameGear()) mask = 0x3f;
-    cram[io.address++ & mask] = data;
+    if(Model::MasterSystem()) cram[io.address++ & 0x1f] = data;
+    if(Model::GameGear())     cram[io.address++ & 0x3f] = data;
   }
 }
 
@@ -83,8 +75,8 @@ auto VDP::registerWrite(uint4 addr, uint8 data) -> void {
   //mode control 1
   case 0x0: {
     io.externalSync = data.bit(0);
-    io.extendedHeight = data.bit(1);
-    io.mode4 = data.bit(2);
+    io.mode.bit(1) = data.bit(1);
+    io.mode.bit(3) = data.bit(2) & !Model::SG1000() & !Model::SC3000();
     io.spriteShift = data.bit(3);
     io.lineInterrupts = data.bit(4);
     io.leftClip = data.bit(5);
@@ -97,8 +89,8 @@ auto VDP::registerWrite(uint4 addr, uint8 data) -> void {
   case 0x1: {
     io.spriteDouble = data.bit(0);
     io.spriteTile = data.bit(1);
-    io.lines240 = data.bit(3);
-    io.lines224 = data.bit(4);
+    io.mode.bit(2) = data.bit(3);
+    io.mode.bit(0) = data.bit(4);
     io.frameInterrupts = data.bit(5);
     io.displayEnable = data.bit(6);
     return;
@@ -106,8 +98,7 @@ auto VDP::registerWrite(uint4 addr, uint8 data) -> void {
 
   //name table base address
   case 0x2: {
-    io.nameTableMask = data.bit(0);
-    io.nameTableAddress = data.bits(1,3);
+    io.nameTableAddress = data.bits(0,3);
     return;
   }
 
@@ -119,21 +110,19 @@ auto VDP::registerWrite(uint4 addr, uint8 data) -> void {
 
   //pattern table base address
   case 0x4: {
-    io.patternTableAddress = data.bits(0,7);
+    io.patternTableAddress = data.bits(0,2);
     return;
   }
 
   //sprite attribute table base address
   case 0x5: {
-    io.spriteAttributeTableMask = data.bit(0);
-    io.spriteAttributeTableAddress = data.bits(1,6);
+    io.spriteAttributeTableAddress = data.bits(0,6);
     return;
   }
 
   //sprite pattern table base address
   case 0x6: {
-    io.spritePatternTableMask = data.bits(0,1);
-    io.spritePatternTableAddress = data.bit(2);
+    io.spritePatternTableAddress = data.bits(0,2);
     return;
   }
 

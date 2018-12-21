@@ -50,7 +50,7 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
-  if(MasterSystem::Model::MasterSystem()) {
+  if(!MasterSystem::Model::GameGear()) {
     cpu.peripherals.reset();
     controllerPort1.unload();
     controllerPort2.unload();
@@ -71,7 +71,7 @@ auto System::power() -> void {
   psg.power();
   scheduler.primary(cpu);
 
-  if(MasterSystem::Model::MasterSystem()) {
+  if(!MasterSystem::Model::GameGear()) {
     controllerPort1.power(ID::Port::Controller1);
     controllerPort2.power(ID::Port::Controller2);
 
