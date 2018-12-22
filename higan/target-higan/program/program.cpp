@@ -4,9 +4,11 @@
 #include <ms/interface/interface.hpp>
 #include <md/interface/interface.hpp>
 #include <pce/interface/interface.hpp>
+#include <msx/interface/interface.hpp>
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
 #include <ws/interface/interface.hpp>
+#include <ngp/interface/interface.hpp>
 #include "platform.cpp"
 #include "game.cpp"
 #include "state.cpp"
@@ -42,6 +44,12 @@ Program::Program(Arguments arguments) {
 #ifdef CORE_PCE
   emulators.append(new PCEngine::SuperGrafxInterface);
 #endif
+#ifdef CORE_MS
+  emulators.append(new MasterSystem::ColecoVisionInterface);
+#endif
+#ifdef CORE_MSX
+  emulators.append(new MSX::Interface);
+#endif
 #ifdef CORE_GB
   emulators.append(new GameBoy::GameBoyInterface);
 #endif
@@ -62,6 +70,12 @@ Program::Program(Arguments arguments) {
 #endif
 #ifdef CORE_WS
   emulators.append(new WonderSwan::PocketChallengeV2Interface);
+#endif
+#ifdef CORE_NGP
+  emulators.append(new NeoGeoPocket::NeoGeoPocketInterface);
+#endif
+#ifdef CORE_NGP
+  emulators.append(new NeoGeoPocket::NeoGeoPocketColorInterface);
 #endif
 
   new Presentation;

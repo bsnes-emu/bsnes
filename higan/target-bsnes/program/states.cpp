@@ -63,7 +63,7 @@ auto Program::loadState(string filename) -> bool {
     if(filename != "Quick/Undo") saveUndoState();
     if(filename == "Quick/Undo") saveRedoState();
     auto serializerRLE = Decode::RLE<1>({memory.data() + 3 * sizeof(uint), memory.size() - 3 * sizeof(uint)});
-    serializer s{serializerRLE.data(), serializerRLE.size()};
+    serializer s{serializerRLE.data(), (uint)serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
     return showMessage({"Loaded [", prefix, "]"}), true;
   } else {

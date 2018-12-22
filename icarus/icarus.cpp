@@ -25,11 +25,14 @@ Settings settings;
 #include "heuristics/mega-drive.cpp"
 #include "heuristics/pc-engine.cpp"
 #include "heuristics/supergrafx.cpp"
+#include "heuristics/colecovision.cpp"
 #include "heuristics/msx.cpp"
 #include "heuristics/game-boy.cpp"
 #include "heuristics/game-boy-advance.cpp"
 #include "heuristics/game-gear.cpp"
 #include "heuristics/wonderswan.cpp"
+#include "heuristics/neo-geo-pocket.cpp"
+#include "heuristics/neo-geo-pocket-color.cpp"
 #include "heuristics/bs-memory.cpp"
 #include "heuristics/sufami-turbo.cpp"
 
@@ -43,6 +46,7 @@ Settings settings;
 #include "core/mega-drive.cpp"
 #include "core/pc-engine.cpp"
 #include "core/supergrafx.cpp"
+#include "core/colecovision.cpp"
 #include "core/msx.cpp"
 #include "core/game-boy.cpp"
 #include "core/game-boy-color.cpp"
@@ -50,6 +54,8 @@ Settings settings;
 #include "core/game-gear.cpp"
 #include "core/wonderswan.cpp"
 #include "core/wonderswan-color.cpp"
+#include "core/neo-geo-pocket.cpp"
+#include "core/neo-geo-pocket-color.cpp"
 #include "core/pocket-challenge-v2.cpp"
 #include "core/bs-memory.cpp"
 #include "core/sufami-turbo.cpp"
@@ -97,6 +103,7 @@ auto nall::main(Arguments arguments) -> void {
       "*.md:*.smd:*.gen:"
       "*.pce:"
       "*.sgx:"
+      "*.cv:*.col:"
       "*.msx:"
       "*.gb:"
       "*.gbc:"
@@ -105,6 +112,8 @@ auto nall::main(Arguments arguments) -> void {
       "*.ws:"
       "*.wsc:"
       "*.pc2:"
+      "*.ngp:"
+      "*.ngpc:*.ngc:"
       "*.bs:"
       "*.st:"
       "*.zip"
@@ -121,22 +130,24 @@ auto nall::main(Arguments arguments) -> void {
   new SettingsDialog;
   new ImportDialog;
   new ErrorDialog;
-  #if defined(PLATFORM_MACOS)
-  Application::Cocoa::onAbout([&] {
-    MessageDialog().setTitle("About icarus").setText({
-      "icarus\n\n"
-      "Author: byuu\n"
-      "License: GPLv3\n"
-      "Website: https://byuu.org/\n"
-    }).information();
-  });
-  Application::Cocoa::onPreferences([&] {
-    scanDialog->settingsButton.doActivate();
-  });
-  Application::Cocoa::onQuit([&] {
-    Application::quit();
-  });
-  #endif
+
+  if constexpr(platform() == Platform::MacOS) {
+    Application::Cocoa::onAbout([&] {
+      MessageDialog().setTitle("About icarus").setText({
+        "icarus\n\n"
+        "Author: byuu\n"
+        "License: GPLv3\n"
+        "Website: https://byuu.org/\n"
+      }).information();
+    });
+    Application::Cocoa::onPreferences([&] {
+      scanDialog->settingsButton.doActivate();
+    });
+    Application::Cocoa::onQuit([&] {
+      Application::quit();
+    });
+  }
+
   scanDialog->show();
   Application::run();
   settings.save();

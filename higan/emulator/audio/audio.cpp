@@ -1,5 +1,3 @@
-#include <emulator/emulator.hpp>
-
 namespace Emulator {
 
 #include "stream.cpp"

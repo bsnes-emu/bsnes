@@ -38,10 +38,10 @@ auto VDP::Background::graphics1(uint8 hoffset, uint9 voffset) -> void {
 
   uint8 color = vdp.vram[colorAddress];
   uint3 index = hoffset ^ 7;
-  if(vdp.vram[patternAddress].bit(index)) {
-    output.color = color.bits(4,7);
-  } else {
+  if(!vdp.vram[patternAddress].bit(index)) {
     output.color = color.bits(0,3);
+  } else {
+    output.color = color.bits(4,7);
   }
 }
 
@@ -67,12 +67,12 @@ auto VDP::Background::graphics2(uint8 hoffset, uint9 voffset) -> void {
   colorAddress.bit(13) = vdp.io.colorTableAddress.bit(7);
 
   uint8 colorMask = vdp.io.colorTableAddress.bits(0,6) << 1 | 1;
-  uint8 color = vdp.vram[colorAddress] & colorMask;
+  uint8 color = vdp.vram[colorAddress];
   uint3 index = hoffset ^ 7;
-  if(vdp.vram[patternAddress].bit(index)) {
-    output.color = color.bits(4,7);
-  } else {
+  if(!vdp.vram[patternAddress].bit(index)) {
     output.color = color.bits(0,3);
+  } else {
+    output.color = color.bits(4,7);
   }
 }
 

@@ -76,7 +76,7 @@ auto VDP::registerWrite(uint4 addr, uint8 data) -> void {
   case 0x0: {
     io.externalSync = data.bit(0);
     io.mode.bit(1) = data.bit(1);
-    io.mode.bit(3) = data.bit(2) & !Model::SG1000() & !Model::SC3000();
+    io.mode.bit(3) = data.bit(2) & !Model::ColecoVision() && !Model::SG1000() & !Model::SC3000();
     io.spriteShift = data.bit(3);
     io.lineInterrupts = data.bit(4);
     io.leftClip = data.bit(5);

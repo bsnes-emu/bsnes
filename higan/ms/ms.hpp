@@ -6,6 +6,7 @@
 #include <emulator/emulator.hpp>
 #include <emulator/thread.hpp>
 #include <emulator/scheduler.hpp>
+#include <emulator/memory.hpp>
 #include <emulator/cheat.hpp>
 
 #include <processor/z80/z80.hpp>
@@ -30,6 +31,7 @@ namespace MasterSystem {
   };
 
   struct Model {
+    inline static auto ColecoVision() -> bool;
     inline static auto SG1000() -> bool;
     inline static auto SC3000() -> bool;
     inline static auto MasterSystem() -> bool;

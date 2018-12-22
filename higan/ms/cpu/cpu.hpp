@@ -11,14 +11,27 @@ struct CPU : Processor::Z80, Processor::Z80::Bus, Thread {
   auto setNMI(bool value) -> void;
   auto setINT(bool value) -> void;
 
+  auto read(uint16 address) -> uint8 override;
+  auto write(uint16 address, uint8 data) -> void override;
+
+  auto in(uint8 address) -> uint8 override;
+  auto out(uint8 address, uint8 data) -> void override;
+
   auto power() -> void;
 
-  //bus.cpp
-  auto read(uint16 addr) -> uint8 override;
-  auto write(uint16 addr, uint8 data) -> void override;
+  //coleco.cpp
+  auto readColeco(uint16 address) -> uint8;
+  auto writeColeco(uint16 address, uint8 data) -> void;
 
-  auto in(uint8 addr) -> uint8 override;
-  auto out(uint8 addr, uint8 data) -> void override;
+  auto inColeco(uint8 address) -> uint8;
+  auto outColeco(uint8 address, uint8 data) -> void;
+
+  //sega.cpp
+  auto readSega(uint16 address) -> uint8;
+  auto writeSega(uint16 address, uint8 data) -> void;
+
+  auto inSega(uint8 address) -> uint8;
+  auto outSega(uint8 address, uint8 data) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -26,12 +39,18 @@ struct CPU : Processor::Z80, Processor::Z80::Bus, Thread {
   vector<Thread*> peripherals;
 
 private:
-  uint8 ram[8 * 1024];
+  Emulator::WritableMemory<uint8> ram;
+  Emulator::WritableMemory<uint8> expansion;
 
   struct State {
     bool nmiLine = 0;
     bool intLine = 0;
   } state;
+
+  struct Coleco {
+    uint1 replaceBIOS;
+    uint1 replaceRAM;
+  } coleco;
 };
 
 extern CPU cpu;

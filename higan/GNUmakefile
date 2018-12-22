@@ -34,16 +34,13 @@ else
   $(error "unsupported platform")
 endif
 
-objects := libco emulator audio video resource
+objects := libco emulator
 
 obj/libco.o: ../libco/libco.c
 obj/emulator.o: emulator/emulator.cpp
-obj/audio.o: audio/audio.cpp
-obj/video.o: video/video.cpp
-obj/resource.o: resource/resource.cpp
 
 ifeq ($(target),higan)
-  cores := fc sfc ms md pce gb gba ws
+  cores := fc sfc ms md pce msx gb gba ws ngp
 endif
 
 ifeq ($(target),bsnes)
@@ -70,6 +67,10 @@ ifneq ($(filter $(cores),pce),)
   include pce/GNUmakefile
 endif
 
+ifneq ($(filter $(cores),msx),)
+  include msx/GNUmakefile
+endif
+
 ifneq ($(filter $(cores),gb),)
   include gb/GNUmakefile
 endif
@@ -80,6 +81,10 @@ endif
 
 ifneq ($(filter $(cores),ws),)
   include ws/GNUmakefile
+endif
+
+ifneq ($(filter $(cores),ngp),)
+  include ngp/GNUmakefile
 endif
 
 include processor/GNUmakefile

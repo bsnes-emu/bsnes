@@ -5,6 +5,7 @@ namespace MasterSystem {
 struct ID {
   enum : uint {
     System,
+    ColecoVision,
     SG1000,
     SC3000,
     MasterSystem,
@@ -23,6 +24,7 @@ struct ID {
     SC3000Controls,
     MasterSystemControls,
     GameGearControls,
+    NumberPad,
     Gamepad,
   };};
 };
@@ -46,6 +48,22 @@ struct Interface : Emulator::Interface {
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
   auto set(const string& name, const any& value) -> bool override;
+};
+
+struct ColecoVisionInterface : Interface {
+  auto information() -> Information override;
+
+  auto displays() -> vector<Display> override;
+  auto color(uint32 color) -> uint64 override;
+
+  auto ports() -> vector<Port> override;
+  auto devices(uint port) -> vector<Device> override;
+  auto inputs(uint device) -> vector<Input> override;
+
+  auto load() -> bool override;
+
+  auto connected(uint port) -> uint override;
+  auto connect(uint port, uint device) -> void override;
 };
 
 struct SG1000Interface : Interface {

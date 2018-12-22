@@ -1,8 +1,8 @@
 Gamepad::Gamepad(uint port) : Controller(port) {
 }
 
-auto Gamepad::readData() -> uint7 {
-  uint7 data = 0x7f;
+auto Gamepad::readData() -> uint8 {
+  uint8 data = 0xff;
   data.bit(0) = !platform->inputPoll(port, ID::Device::Gamepad, Up);
   data.bit(1) = !platform->inputPoll(port, ID::Device::Gamepad, Down);
   data.bit(2) = !platform->inputPoll(port, ID::Device::Gamepad, Left);

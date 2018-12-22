@@ -1,27 +1,22 @@
-auto CPU::read(uint16 addr) -> uint8 {
-  uint8 data;
-
-  if(auto result = cartridge.read(addr)) {
+auto CPU::readSega(uint16 address) -> uint8 {
+  uint8 data = 0xff;
+  if(auto result = cartridge.read(address)) {
     data = result();
-  } else if(addr >= 0xc000) {
-    data = ram[addr & 0x1fff];
+  } else if(address >= 0xc000) {
+    data = ram.read(address);
   }
-
-  if(auto result = cheat.find(addr, data)) {
-    data = result();
-  }
-
+  if(auto result = cheat.find(address, data)) data = result();
   return data;
 }
 
-auto CPU::write(uint16 addr, uint8 data) -> void {
-  if(cartridge.write(addr, data)) {
-  } else if(addr >= 0xc000) {
-    ram[addr & 0x1fff] = data;
+auto CPU::writeSega(uint16 address, uint8 data) -> void {
+  if(cartridge.write(address, data)) {
+  } else if(address >= 0xc000) {
+    ram.write(address, data);
   }
 }
 
-auto CPU::in(uint8 addr) -> uint8 {
+auto CPU::inSega(uint8 addr) -> uint8 {
   switch(addr >> 6) {
 
   case 0: {
@@ -87,7 +82,7 @@ auto CPU::in(uint8 addr) -> uint8 {
   return 0xff;
 }
 
-auto CPU::out(uint8 addr, uint8 data) -> void {
+auto CPU::outSega(uint8 addr, uint8 data) -> void {
   if(addr == 0x06) {
     if(Model::GameGear()) return psg.balance(data);
   }

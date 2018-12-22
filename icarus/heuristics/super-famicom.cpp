@@ -254,7 +254,7 @@ auto SuperFamicom::board() const -> string {
          if(serial() == "A9PJ") {
   //Sufami Turbo (JPN)
     board.append("ST-", mode);
-  } else if(serial() == "ZSBJ") {
+  } else if(serial() == "ZBSJ") {
   //BS-X: Sore wa Namae o Nusumareta Machi no Monogatari (JPN)
     board.append("BS-MCC-");
   } else if(serial() == "042J") {

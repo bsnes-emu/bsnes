@@ -76,6 +76,11 @@ struct Icarus {
   auto superGrafxManifest(vector<uint8_t>& buffer, string location) -> string;
   auto superGrafxImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //colecovision.cpp
+  auto colecoVisionManifest(string location) -> string;
+  auto colecoVisionManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto colecoVisionImport(vector<uint8_t>& buffer, string location) -> string;
+
   //msx.cpp
   auto msxManifest(string location) -> string;
   auto msxManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -116,6 +121,16 @@ struct Icarus {
   auto pocketChallengeV2Manifest(vector<uint8_t>& buffer, string location) -> string;
   auto pocketChallengeV2Import(vector<uint8_t>& buffer, string location) -> string;
 
+  //neo-geo-pocket.cpp
+  auto neoGeoPocketManifest(string location) -> string;
+  auto neoGeoPocketManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto neoGeoPocketImport(vector<uint8_t>& buffer, string location) -> string;
+
+  //neo-geo-pocket-color.cpp
+  auto neoGeoPocketColorManifest(string location) -> string;
+  auto neoGeoPocketColorManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto neoGeoPocketColorImport(vector<uint8_t>& buffer, string location) -> string;
+
   //bs-memory.cpp
   auto bsMemoryManifest(string location) -> string;
   auto bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -140,6 +155,7 @@ namespace Database {
   Markup::Node MegaDrive;
   Markup::Node PCEngine;
   Markup::Node SuperGrafx;
+  Markup::Node ColecoVision;
   Markup::Node MSX;
   Markup::Node GameBoy;
   Markup::Node GameBoyColor;
@@ -148,6 +164,8 @@ namespace Database {
   Markup::Node WonderSwan;
   Markup::Node WonderSwanColor;
   Markup::Node PocketChallengeV2;
+  Markup::Node NeoGeoPocket;
+  Markup::Node NeoGeoPocketColor;
   Markup::Node BSMemory;
   Markup::Node SufamiTurbo;
 };

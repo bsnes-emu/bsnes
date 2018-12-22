@@ -72,7 +72,7 @@ auto VDP::step(uint clocks) -> void {
 }
 
 auto VDP::refresh() -> void {
-  if(Model::SG1000() || Model::SC3000()) {
+  if(Model::ColecoVision() || Model::SG1000() || Model::SC3000()) {
     uint32* screen = buffer;
     screen += 24 * 256;
     Emulator::video.refresh(screen, 256 * sizeof(uint32), 256, 192);
@@ -108,6 +108,8 @@ auto VDP::power() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 5.0);
 
   memory::fill<uint32>(buffer, 256 * 264);
+  for(auto& byte : vram) byte = 0x00;
+  for(auto& byte : cram) byte = 0x00;
   io = {};
 
   background.power();
@@ -115,7 +117,7 @@ auto VDP::power() -> void {
 }
 
 auto VDP::palette(uint5 index) -> uint12 {
-  if(Model::SG1000() || Model::SC3000()) return index.bits(0,3);
+  if(Model::ColecoVision() || Model::SG1000() || Model::SC3000()) return index.bits(0,3);
   //Master System and Game Gear approximate TMS9918A colors by converting to RGB6 palette colors
   static uint6 palette[16] = {
     0x00, 0x00, 0x08, 0x0c, 0x10, 0x30, 0x01, 0x3c,

@@ -3,7 +3,8 @@
 namespace MasterSystem {
 
 CPU cpu;
-#include "bus.cpp"
+#include "coleco.cpp"
+#include "sega.cpp"
 #include "serialization.cpp"
 
 auto CPU::Enter() -> void {
@@ -60,14 +61,36 @@ auto CPU::setINT(bool value) -> void {
   state.intLine = value;
 }
 
+auto CPU::read(uint16 address) -> uint8 {
+  return Model::ColecoVision() ? readColeco(address) : readSega(address);
+}
+
+auto CPU::write(uint16 address, uint8 data) -> void {
+  return Model::ColecoVision() ? writeColeco(address, data) : writeSega(address, data);
+}
+
+auto CPU::in(uint8 address) -> uint8 {
+  return Model::ColecoVision() ? inColeco(address) : inSega(address);
+}
+
+auto CPU::out(uint8 address, uint8 data) -> void {
+  return Model::ColecoVision() ? outColeco(address, data) : outSega(address, data);
+}
+
 auto CPU::power() -> void {
   Z80::bus = this;
   Z80::power();
   create(CPU::Enter, system.colorburst());
 
-  r.pc = 0x0000;  //reset vector address
+  if(Model::ColecoVision()) ram.allocate(0x0400), expansion.allocate(0x1000);
+  if(Model::SG1000())       ram.allocate(0x0400);
+  if(Model::SC3000())       ram.allocate(0x0800);
+  if(Model::MasterSystem()) ram.allocate(0x2000);
+  if(Model::GameGear())     ram.allocate(0x2000);
 
+  r.pc = 0x0000;  //reset vector address
   state = {};
+  coleco = {};
 }
 
 }

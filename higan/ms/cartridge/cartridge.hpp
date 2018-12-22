@@ -18,7 +18,7 @@ struct Cartridge {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-private:
+//private:
   struct Information {
     uint pathID = 0;
     string region;

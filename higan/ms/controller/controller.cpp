@@ -4,6 +4,7 @@ namespace MasterSystem {
 
 ControllerPort controllerPort1;
 ControllerPort controllerPort2;
+#include "numberpad/numberpad.cpp"
 #include "gamepad/gamepad.cpp"
 
 Controller::Controller(uint port) : port(port) {
@@ -36,6 +37,7 @@ auto ControllerPort::connect(uint deviceID) -> void {
 
   switch(deviceID) { default:
   case ID::Device::None: device = new Controller(port); break;
+  case ID::Device::NumberPad: device = new NumberPad(port); break;
   case ID::Device::Gamepad: device = new Gamepad(port); break;
   }
 

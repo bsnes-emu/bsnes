@@ -16,6 +16,11 @@
 
 namespace nall {
 
+template<typename T> struct vector_iterator;
+template<typename T> struct vector_iterator_const;
+template<typename T> struct vector_reverse_iterator;
+template<typename T> struct vector_reverse_iterator_const;
+
 template<typename T>
 struct vector_base {
   using type = vector_base;
@@ -30,8 +35,8 @@ struct vector_base {
   explicit operator bool() const;
   operator array_span<T>();
   operator array_view<T>() const;
-  template<typename Cast = T> auto capacity() const -> uint;
-  template<typename Cast = T> auto size() const -> uint;
+  template<typename Cast = T> auto capacity() const -> uint64_t;
+  template<typename Cast = T> auto size() const -> uint64_t;
   template<typename Cast = T> auto data() -> Cast*;
   template<typename Cast = T> auto data() const -> const Cast*;
 
@@ -45,27 +50,27 @@ struct vector_base {
 
   //memory.hpp
   auto reset() -> void;
-  auto acquire(const T* data, uint size, uint capacity = 0) -> void;
+  auto acquire(const T* data, uint64_t size, uint64_t capacity = 0) -> void;
   auto release() -> T*;
 
-  auto reserveLeft(uint capacity) -> bool;
-  auto reserveRight(uint capacity) -> bool;
-  auto reserve(uint capacity) -> bool { return reserveRight(capacity); }
+  auto reserveLeft(uint64_t capacity) -> bool;
+  auto reserveRight(uint64_t capacity) -> bool;
+  auto reserve(uint64_t capacity) -> bool { return reserveRight(capacity); }
 
-  auto reallocateLeft(uint size) -> bool;
-  auto reallocateRight(uint size) -> bool;
-  auto reallocate(uint size) -> bool { return reallocateRight(size); }
+  auto reallocateLeft(uint64_t size) -> bool;
+  auto reallocateRight(uint64_t size) -> bool;
+  auto reallocate(uint64_t size) -> bool { return reallocateRight(size); }
 
-  auto resizeLeft(uint size, const T& value = T()) -> bool;
-  auto resizeRight(uint size, const T& value = T()) -> bool;
-  auto resize(uint size, const T& value = T()) -> bool { return resizeRight(size, value); }
+  auto resizeLeft(uint64_t size, const T& value = T()) -> bool;
+  auto resizeRight(uint64_t size, const T& value = T()) -> bool;
+  auto resize(uint64_t size, const T& value = T()) -> bool { return resizeRight(size, value); }
 
   //access.hpp
-  alwaysinline auto operator[](uint offset) -> T&;
-  alwaysinline auto operator[](uint offset) const -> const T&;
+  alwaysinline auto operator[](uint64_t offset) -> T&;
+  alwaysinline auto operator[](uint64_t offset) const -> const T&;
 
-  alwaysinline auto operator()(uint offset) -> T&;
-  alwaysinline auto operator()(uint offset, const T& value) const -> const T&;
+  alwaysinline auto operator()(uint64_t offset) -> T&;
+  alwaysinline auto operator()(uint64_t offset, const T& value) const -> const T&;
 
   alwaysinline auto left() -> T&;
   alwaysinline auto first() -> T& { return left(); }
@@ -88,19 +93,19 @@ struct vector_base {
   auto append(const type& values) -> void;
   auto append(type&& values) -> void;
 
-  auto insert(uint offset, const T& value) -> void;
+  auto insert(uint64_t offset, const T& value) -> void;
 
-  auto removeLeft(uint length = 1) -> void;
-  auto removeFirst(uint length = 1) -> void { return removeLeft(length); }
-  auto removeRight(uint length = 1) -> void;
-  auto removeLast(uint length = 1) -> void { return removeRight(length); }
-  auto remove(uint offset, uint length = 1) -> void;
+  auto removeLeft(uint64_t length = 1) -> void;
+  auto removeFirst(uint64_t length = 1) -> void { return removeLeft(length); }
+  auto removeRight(uint64_t length = 1) -> void;
+  auto removeLast(uint64_t length = 1) -> void { return removeRight(length); }
+  auto remove(uint64_t offset, uint64_t length = 1) -> void;
 
   auto takeLeft() -> T;
   auto takeFirst() -> T { return move(takeLeft()); }
   auto takeRight() -> T;
   auto takeLast() -> T { return move(takeRight()); }
-  auto take(uint offset) -> T;
+  auto take(uint64_t offset) -> T;
 
   //iterator.hpp
   auto begin() -> iterator<T> { return {data(), 0}; }
@@ -110,26 +115,26 @@ struct vector_base {
   auto end() const -> iterator_const<T> { return {data(), size()}; }
 
   auto rbegin() -> reverse_iterator<T> { return {data(), size() - 1}; }
-  auto rend() -> reverse_iterator<T> { return {data(), (uint)-1}; }
+  auto rend() -> reverse_iterator<T> { return {data(), (uint64_t)-1}; }
 
   auto rbegin() const -> reverse_iterator_const<T> { return {data(), size() - 1}; }
-  auto rend() const -> reverse_iterator_const<T> { return {data(), (uint)-1}; }
+  auto rend() const -> reverse_iterator_const<T> { return {data(), (uint64_t)-1}; }
 
   //utility.hpp
   auto fill(const T& value = {}) -> void;
   auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
   auto reverse() -> void;
-  auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint>;
-  auto find(const T& value) const -> maybe<uint>;
-  auto findSorted(const T& value) const -> maybe<uint>;
+  auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint64_t>;
+  auto find(const T& value) const -> maybe<uint64_t>;
+  auto findSorted(const T& value) const -> maybe<uint64_t>;
   auto foreach(const function<void (const T&)>& callback) -> void;
   auto foreach(const function<void (uint, const T&)>& callback) -> void;
 
 protected:
-  T* _pool = nullptr;  //pointer to first initialized element in pool
-  uint _size = 0;      //number of initialized elements in pool
-  uint _left = 0;      //number of allocated elements free on the left of pool
-  uint _right = 0;     //number of allocated elements free on the right of pool
+  T* _pool = nullptr;   //pointer to first initialized element in pool
+  uint64_t _size = 0;   //number of initialized elements in pool
+  uint64_t _left = 0;   //number of allocated elements free on the left of pool
+  uint64_t _right = 0;  //number of allocated elements free on the right of pool
 };
 
 }

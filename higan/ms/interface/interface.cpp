@@ -3,6 +3,7 @@
 namespace MasterSystem {
 
 Settings settings;
+#include "colecovision.cpp"
 #include "sg-1000.cpp"
 #include "sc-3000.cpp"
 #include "master-system.cpp"

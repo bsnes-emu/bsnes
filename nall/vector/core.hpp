@@ -31,11 +31,11 @@ template<typename T> vector<T>::operator array_view<T>() const {
   return {data(), size()};
 }
 
-template<typename T> template<typename Cast> auto vector<T>::capacity() const -> uint {
+template<typename T> template<typename Cast> auto vector<T>::capacity() const -> uint64_t {
   return (_left + _size + _right) * sizeof(T) / sizeof(Cast);
 }
 
-template<typename T> template<typename Cast> auto vector<T>::size() const -> uint {
+template<typename T> template<typename Cast> auto vector<T>::size() const -> uint64_t {
   return _size * sizeof(T) / sizeof(Cast);
 }
 

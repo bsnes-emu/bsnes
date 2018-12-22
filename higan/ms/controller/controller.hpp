@@ -5,7 +5,8 @@ struct Controller : Thread {
   static auto Enter() -> void;
   auto main() -> void;
 
-  virtual auto readData() -> uint7 { return 0x7f; }
+  virtual auto readData() -> uint8 { return 0xff; }
+  virtual auto writeData(uint8 data) -> void {}
 
   const uint port;
 };
@@ -24,4 +25,5 @@ struct ControllerPort {
 extern ControllerPort controllerPort1;
 extern ControllerPort controllerPort2;
 
+#include "numberpad/numberpad.hpp"
 #include "gamepad/gamepad.hpp"

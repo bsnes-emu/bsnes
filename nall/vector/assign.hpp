@@ -8,7 +8,7 @@ template<typename T> auto vector<T>::operator=(const vector<T>& source) -> vecto
   _size = source._size;
   _left = 0;
   _right = 0;
-  for(uint n : range(_size)) new(_pool + n) T(source._pool[n]);
+  for(uint64_t n : range(_size)) new(_pool + n) T(source._pool[n]);
   return *this;
 }
 

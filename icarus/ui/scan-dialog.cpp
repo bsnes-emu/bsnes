@@ -116,6 +116,8 @@ auto ScanDialog::gamePakType(const string& type) -> bool {
   || type == ".ws"
   || type == ".wsc"
   || type == ".pc2"
+  || type == ".ngp"
+  || type == ".ngpc"
   || type == ".bs"
   || type == ".st";
 }
@@ -138,6 +140,8 @@ auto ScanDialog::gameRomType(const string& type) -> bool {
   || type == ".ws"
   || type == ".wsc"
   || type == ".pc2"
+  || type == ".ngp"
+  || type == ".ngpc" || type == ".ngc"
   || type == ".bs"
   || type == ".st";
 }

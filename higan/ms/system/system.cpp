@@ -29,6 +29,13 @@ auto System::load(Emulator::Interface* interface, Model model) -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
+
+  if(MasterSystem::Model::ColecoVision()) {
+    if(auto fp = platform->open(ID::System, "bios.rom", File::Read, File::Required)) {
+      fp->read(bios, 0x2000);
+    } else return false;
+  }
+
   if(!cartridge.load()) return false;
 
   if(cartridge.region() == "NTSC") {

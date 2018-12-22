@@ -7,6 +7,7 @@ Icarus::Icarus() {
   Database::MegaDrive = BML::unserialize(string::read(locate("Database/Mega Drive.bml")));
   Database::PCEngine = BML::unserialize(string::read(locate("Database/PC Engine.bml")));
   Database::SuperGrafx = BML::unserialize(string::read(locate("Database/SuperGrafx.bml")));
+  Database::ColecoVision = BML::unserialize(string::read(locate("Database/ColecoVision.bml")));
   Database::MSX = BML::unserialize(string::read(locate("Database/MSX.bml")));
   Database::GameBoy = BML::unserialize(string::read(locate("Database/Game Boy.bml")));
   Database::GameBoyColor = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")));
@@ -15,6 +16,8 @@ Icarus::Icarus() {
   Database::WonderSwan = BML::unserialize(string::read(locate("Database/WonderSwan.bml")));
   Database::WonderSwanColor = BML::unserialize(string::read(locate("Database/WonderSwan Color.bml")));
   Database::PocketChallengeV2 = BML::unserialize(string::read(locate("Database/Pocket Challenge V2.bml")));
+  Database::NeoGeoPocket = BML::unserialize(string::read(locate("Database/Neo Geo Pocket.bml")));
+  Database::NeoGeoPocketColor = BML::unserialize(string::read(locate("Database/Neo Geo Pocket Color.bml")));
   Database::BSMemory = BML::unserialize(string::read(locate("Database/BS Memory.bml")));
   Database::SufamiTurbo = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")));
 }
@@ -50,6 +53,7 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".md") return megaDriveManifest(location);
   if(type == ".pce") return pcEngineManifest(location);
   if(type == ".sgx") return superGrafxManifest(location);
+  if(type == ".cv") return colecoVisionManifest(location);
   if(type == ".msx") return msxManifest(location);
   if(type == ".gb") return gameBoyManifest(location);
   if(type == ".gbc") return gameBoyColorManifest(location);
@@ -58,6 +62,8 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".ws") return wonderSwanManifest(location);
   if(type == ".wsc") return wonderSwanColorManifest(location);
   if(type == ".pc2") return pocketChallengeV2Manifest(location);
+  if(type == ".ngp") return neoGeoPocketManifest(location);
+  if(type == ".ngpc") return neoGeoPocketColorManifest(location);
   if(type == ".bs") return bsMemoryManifest(location);
   if(type == ".st") return sufamiTurboManifest(location);
 
@@ -97,6 +103,7 @@ auto Icarus::import(string location) -> string {
   if(type == ".md" || type == ".smd" || type == ".gen") return megaDriveImport(buffer, location);
   if(type == ".pce") return pcEngineImport(buffer, location);
   if(type == ".sgx") return superGrafxImport(buffer, location);
+  if(type == ".cv" || type == ".col") return colecoVisionImport(buffer, location);
   if(type == ".msx") return msxImport(buffer, location);
   if(type == ".gb") return gameBoyImport(buffer, location);
   if(type == ".gbc") return gameBoyColorImport(buffer, location);
@@ -105,6 +112,8 @@ auto Icarus::import(string location) -> string {
   if(type == ".ws") return wonderSwanImport(buffer, location);
   if(type == ".wsc") return wonderSwanColorImport(buffer, location);
   if(type == ".pc2") return pocketChallengeV2Import(buffer, location);
+  if(type == ".ngp") return neoGeoPocketImport(buffer, location);
+  if(type == ".ngpc" || type == ".ngc") return neoGeoPocketColorImport(buffer, location);
   if(type == ".bs") return bsMemoryImport(buffer, location);
   if(type == ".st") return sufamiTurboImport(buffer, location);
 

@@ -41,7 +41,7 @@ auto System::load(Emulator::Interface* interface) -> bool {
   if(auto name = document["system/cpu/rom/name"].text()) {
     if(auto fp = platform->open(ID::System, name, File::Read, File::Required)) {
       fp->read(bios.data, bios.size);
-    }
+    } else return false;
   }
 
   if(!cartridge.load()) return false;

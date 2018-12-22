@@ -20,15 +20,15 @@
 #include <nall/hash/sha256.hpp>
 using namespace nall;
 
-#include "types.hpp"
 #include <libco/libco.h>
-#include <audio/audio.hpp>
-#include <video/video.hpp>
-#include <resource/resource.hpp>
+#include <emulator/types.hpp>
+#include <emulator/audio/audio.hpp>
+#include <emulator/video/video.hpp>
+#include <emulator/resource/resource.hpp>
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "106.67";
+  static const string Version = "106.68";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org/";

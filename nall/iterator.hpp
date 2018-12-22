@@ -3,53 +3,53 @@
 namespace nall {
 
 template<typename T> struct iterator {
-  iterator(T* self, uint offset) : self(self), offset(offset) {}
+  iterator(T* self, uint64_t offset) : self(self), offset(offset) {}
   auto operator*() -> T& { return self[offset]; }
   auto operator!=(const iterator& source) const -> bool { return offset != source.offset; }
   auto operator++() -> iterator& { return offset++, *this; }
 
 private:
   T* self;
-  uint offset;
+  uint64_t offset;
 };
 
 template<typename T> struct iterator_const {
-  iterator_const(const T* self, uint offset) : self(self), offset(offset) {}
+  iterator_const(const T* self, uint64_t offset) : self(self), offset(offset) {}
   auto operator*() -> const T& { return self[offset]; }
   auto operator!=(const iterator_const& source) const -> bool { return offset != source.offset; }
   auto operator++() -> iterator_const& { return offset++, *this; }
 
 private:
   const T* self;
-  uint offset;
+  uint64_t offset;
 };
 
 template<typename T> struct reverse_iterator {
-  reverse_iterator(T* self, uint offset) : self(self), offset(offset) {}
+  reverse_iterator(T* self, uint64_t offset) : self(self), offset(offset) {}
   auto operator*() -> T& { return self[offset]; }
   auto operator!=(const reverse_iterator& source) const -> bool { return offset != source.offset; }
   auto operator++() -> reverse_iterator& { return offset--, *this; }
 
 private:
   T* self;
-  uint offset;
+  uint64_t offset;
 };
 
 template<typename T> struct reverse_iterator_const {
-  reverse_iterator_const(const T* self, uint offset) : self(self), offset(offset) {}
+  reverse_iterator_const(const T* self, uint64_t offset) : self(self), offset(offset) {}
   auto operator*() -> const T& { return self[offset]; }
   auto operator!=(const reverse_iterator_const& source) const -> bool { return offset != source.offset; }
   auto operator++() -> reverse_iterator_const& { return offset--, *this; }
 
 private:
   const T* self;
-  uint offset;
+  uint64_t offset;
 };
 
 //std::rbegin(), std::rend() is missing from GCC 4.9; which I still target
 
-template<typename T, uint Size> auto rbegin(T (&array)[Size]) { return reverse_iterator<T>{array, Size - 1}; }
-template<typename T, uint Size> auto rend(T (&array)[Size]) { return reverse_iterator<T>{array, (uint)-1}; }
+template<typename T, uint64_t Size> auto rbegin(T (&array)[Size]) { return reverse_iterator<T>{array, Size - 1}; }
+template<typename T, uint64_t Size> auto rend(T (&array)[Size]) { return reverse_iterator<T>{array, (uint64_t)-1}; }
 
 template<typename T> auto rbegin(T& self) { return self.rbegin(); }
 template<typename T> auto rend(T& self) { return self.rend(); }

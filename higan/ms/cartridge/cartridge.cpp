@@ -9,6 +9,13 @@ Cartridge cartridge;
 auto Cartridge::load() -> bool {
   information = {};
 
+  if(Model::ColecoVision()) {
+    if(auto loaded = platform->load(ID::ColecoVision, "ColecoVision", "cv", {"NTSC", "PAL"})) {
+      information.pathID = loaded.pathID;
+      information.region = loaded.option;
+    } else return false;
+  }
+
   if(Model::SG1000()) {
     if(auto loaded = platform->load(ID::SG1000, "SG-1000", "sg1000", {"NTSC", "PAL"})) {
       information.pathID = loaded.pathID;
