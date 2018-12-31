@@ -69,6 +69,7 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
 static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
 {
     GB_sample_t output = {0,0};
+    #pragma unroll
     for (unsigned i = GB_N_CHANNELS; i--;) {
         double multiplier = CH_STEP;
         if (!is_DAC_enabled(gb, i)) {
@@ -125,6 +126,7 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
             unsigned mask = gb->io_registers[GB_IO_NR51];
             unsigned left_volume = 0;
             unsigned right_volume = 0;
+            #pragma unroll
             for (unsigned i = GB_N_CHANNELS; i--;) {
                 if (gb->apu.is_active[i]) {
                     if (mask & 1) {
@@ -372,6 +374,7 @@ void GB_apu_run(GB_gameboy_t *gb)
         }
     }
     
+    #pragma unroll
     for (unsigned i = GB_SQUARE_2 + 1; i--;) {
         if (gb->apu.is_active[i]) {
             uint8_t cycles_left = cycles;
