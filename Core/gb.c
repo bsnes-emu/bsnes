@@ -638,6 +638,8 @@ void GB_reset(GB_gameboy_t *gb)
     /* Todo: Ugly, fixme, see comment in the timer state machine */
     gb->div_state = 3;
 
+    GB_apu_update_cycles_per_sample(gb);
+    
     gb->magic = (uintptr_t)'SAME';
 }
 
@@ -725,6 +727,7 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 {
     gb->clock_multiplier = multiplier;
+    GB_apu_update_cycles_per_sample(gb);
 }
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
