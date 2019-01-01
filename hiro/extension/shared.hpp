@@ -26,6 +26,7 @@ struct HorizontalLayoutCell : sHorizontalLayoutCell {
   DeclareSharedObject(HorizontalLayoutCell)
 
   auto alignment() const { return self().alignment(); }
+  auto collapsible() const { return self().collapsible(); }
   auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
   auto setSize(Size size) { return self().setSize(size), *this; }
@@ -58,6 +59,7 @@ struct VerticalLayoutCell : sVerticalLayoutCell {
   DeclareSharedObject(VerticalLayoutCell)
 
   auto alignment() const { return self().alignment(); }
+  auto collapsible() const { return self().collapsible(); }
   auto setAlignment(maybe<float> alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setSizable(sSizable sizable) { return self().setSizable(sizable), *this; }
   auto setSize(Size size) { return self().setSize(size), *this; }

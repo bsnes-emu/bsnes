@@ -10,4 +10,5 @@ namespace hiro {
   #include "list-view.cpp"
   #include "browser-dialog.cpp"
   #include "message-dialog.cpp"
+  #include "about-dialog.cpp"
 }

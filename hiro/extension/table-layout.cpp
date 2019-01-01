@@ -143,10 +143,10 @@ auto mTableLayout::setFont(const Font& font) -> type& {
   return *this;
 }
 
-auto mTableLayout::setGeometry(Geometry geometry) -> type& {
-  mSizable::setGeometry(geometry);
-  if(!visible(true)) return *this;
+auto mTableLayout::setGeometry(Geometry requestedGeometry) -> type& {
+  if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
 
+  auto geometry = requestedGeometry;
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());
   geometry.setWidth (geometry.width()  - padding().x() - padding().width());
@@ -250,6 +250,7 @@ auto mTableLayout::setGeometry(Geometry geometry) -> type& {
     geometryY += heights[y] + row.spacing();
   }
 
+  mSizable::setGeometry(requestedGeometry);
   return *this;
 }
 

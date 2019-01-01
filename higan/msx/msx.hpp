@@ -1,7 +1,7 @@
 #pragma once
 
 //license: GPLv3
-//started: ...
+//started: 2018-12-28
 
 #include <emulator/emulator.hpp>
 #include <emulator/thread.hpp>
@@ -42,6 +42,11 @@ namespace MSX {
   };
 
   #include <msx/system/system.hpp>
+  #include <msx/cartridge/cartridge.hpp>
+
+  #include <msx/cpu/cpu.hpp>
+  #include <msx/vdp/vdp.hpp>
+  #include <msx/psg/psg.hpp>
 }
 
 #include <msx/interface/interface.hpp>

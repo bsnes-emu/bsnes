@@ -40,19 +40,23 @@ auto mHorizontalLayout::destruct() -> void {
 
 auto mHorizontalLayout::minimumSize() const -> Size {
   float width = 0;
+  float spacing = 0;
   for(auto index : range(cellCount())) {
     auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     if(cell.size().width() == Size::Minimum || cell.size().width() == Size::Maximum) {
       width += cell.sizable().minimumSize().width();
     } else {
       width += cell.size().width();
     }
-    if(index != cellCount() - 1) width += cell.spacing();
+    width += spacing;
+    spacing = cell.spacing();
   }
 
   float height = 0;
   for(auto index : range(cellCount())) {
     auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     if(cell.size().height() == Size::Minimum || cell.size().height() == Size::Maximum) {
       height = max(height, cell.sizable().minimumSize().height());
       continue;
@@ -108,10 +112,10 @@ auto mHorizontalLayout::setFont(const Font& font) -> type& {
   return *this;
 }
 
-auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
-  mSizable::setGeometry(geometry);
-  if(!visible(true)) return *this;
+auto mHorizontalLayout::setGeometry(Geometry requestedGeometry) -> type& {
+  if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
 
+  auto geometry = requestedGeometry;
   geometry.setX(geometry.x() + padding().x());
   geometry.setY(geometry.y() + padding().y());
   geometry.setWidth (geometry.width()  - padding().x() - padding().width());
@@ -120,8 +124,9 @@ auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
   vector<float> widths;
   widths.resize(cellCount());
   uint maximumWidths = 0;
-  for(auto index : range(cellCount())) {
+  for(uint index : range(cellCount())) {
     auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     float width = 0;
     if(cell.size().width() == Size::Maximum) {
       width = Size::Maximum;
@@ -135,9 +140,13 @@ auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
   }
 
   float fixedWidth = 0;
-  for(uint index : range(state.cells.size())) {
+  float spacing = 0;
+  for(uint index : range(cellCount())) {
+    auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     if(widths[index] != Size::Maximum) fixedWidth += widths[index];
-    if(index != cellCount() - 1) fixedWidth += cell(index).spacing();
+    fixedWidth += spacing;
+    spacing = cell.spacing();
   }
 
   float maximumWidth = (geometry.width() - fixedWidth) / maximumWidths;
@@ -146,8 +155,9 @@ auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
   }
 
   float height = 0;
-  for(auto index : range(cellCount())) {
+  for(uint index : range(cellCount())) {
     auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     if(cell.size().height() == Size::Maximum) {
       height = geometry.height();
       break;
@@ -160,10 +170,11 @@ auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
 
   float geometryX = geometry.x();
   float geometryY = geometry.y();
-  for(auto index : range(cellCount())) {
+  for(uint index : range(cellCount())) {
+    auto cell = this->cell(index);
+    if(cell.collapsible()) continue;
     float geometryWidth  = widths[index];
     float geometryHeight = height;
-    auto cell = this->cell(index);
     auto alignment = cell.alignment();
     if(!alignment) alignment = this->alignment();
     if(!alignment) alignment = 0.5;
@@ -177,6 +188,7 @@ auto mHorizontalLayout::setGeometry(Geometry geometry) -> type& {
     geometryX += geometryWidth + cell.spacing();
   }
 
+  mSizable::setGeometry(requestedGeometry);
   return *this;
 }
 
@@ -216,6 +228,11 @@ auto mHorizontalLayout::synchronize() -> type& {
 
 auto mHorizontalLayoutCell::alignment() const -> maybe<float> {
   return state.alignment;
+}
+
+auto mHorizontalLayoutCell::collapsible() const -> bool {
+  if(state.sizable) return state.sizable->collapsible() && !state.sizable->visible();
+  return false;
 }
 
 auto mHorizontalLayoutCell::destruct() -> void {

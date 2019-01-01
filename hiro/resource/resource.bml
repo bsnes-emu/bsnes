@@ -3,6 +3,7 @@ namespace name=Icon
     binary name=Add file=icon/action/add.png
     binary name=Attach file=icon/action/attach.png
     binary name=Bookmark file=icon/action/bookmark.png
+    binary name=Close file=icon/action/close.png
     binary name=FullScreen file=icon/action/full-screen.png
     binary name=Mute file=icon/action/mute.png
     binary name=New file=icon/action/new.png
@@ -53,6 +54,7 @@ namespace name=Icon
     binary name=Binary file=icon/emblem/binary.png
     binary name=File file=icon/emblem/file.png
     binary name=Folder file=icon/emblem/folder.png
+    binary name=FolderOpen file=icon/emblem/folder-open.png
     binary name=Font file=icon/emblem/font.png
     binary name=Image file=icon/emblem/image.png
     binary name=Markup file=icon/emblem/markup.png

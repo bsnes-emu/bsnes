@@ -46,6 +46,24 @@ static auto Label_expose(GtkWidget* widget, GdkEvent* event, pLabel* p) -> int {
   return false;
 }
 
+static auto Label_mousePress(GtkWidget* widget, GdkEventButton* event, pLabel* p) -> int {
+  switch(event->button) {
+  case 1: p->self().doMousePress(Mouse::Button::Left); break;
+  case 2: p->self().doMousePress(Mouse::Button::Middle); break;
+  case 3: p->self().doMousePress(Mouse::Button::Right); break;
+  }
+  return true;
+}
+
+static auto Label_mouseRelease(GtkWidget* widget, GdkEventButton* event, pLabel* p) -> int {
+  switch(event->button) {
+  case 1: p->self().doMouseRelease(Mouse::Button::Left); break;
+  case 2: p->self().doMouseRelease(Mouse::Button::Middle); break;
+  case 3: p->self().doMouseRelease(Mouse::Button::Right); break;
+  }
+  return true;
+}
+
 auto pLabel::construct() -> void {
   gtkWidget = gtk_event_box_new();
   subWidget = gtk_label_new("");
@@ -57,6 +75,8 @@ auto pLabel::construct() -> void {
   setForegroundColor(state().foregroundColor);
   setText(state().text);
 
+  g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Label_mousePress), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Label_mouseRelease), (gpointer)this);
   #if HIRO_GTK==2
   g_signal_connect(G_OBJECT(subWidget), "expose-event", G_CALLBACK(Label_expose), (gpointer)this);
   #elif HIRO_GTK==3

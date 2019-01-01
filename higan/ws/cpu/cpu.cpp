@@ -14,6 +14,7 @@ auto CPU::Enter() -> void {
 
 auto CPU::main() -> void {
   poll();
+//static uint c=0;if(auto d = disassemble()) if(++c<60) print(d, "\n");
   exec();
 }
 

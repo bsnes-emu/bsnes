@@ -1,387 +1,455 @@
-using format = string_format;
+auto V30MZ::disassemble() -> string {
+  return disassemble(r.cs, r.ip);
+}
 
-//todo: this is horribly broken in many cases; needs a total rewrite
-auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> string {
-  string s;
-  uint20 ea = cs * 16 + ip;
-  vector<uint8> bytesRead;
+auto V30MZ::disassemble(uint16 cs, uint16 ip) -> string {
+  //hack: prefixes execute as separate instructions; combine them instead
+  static uint32 suppress = 0xffffffff;
+  if((cs << 16 | ip) == suppress) return {};
 
-  auto fetch = [&](bool inc = true) -> uint8 {
-    uint8 data = read(cs * 16 + ip);
-    if(inc) ip++, bytesRead.append(data);
-    return data;
+  string output, repeat, prefix;
+  output.append(hex(r.cs * 16 + r.ip, 5L), "  ");
+
+  auto read = [&](uint offset) -> uint8 {
+    return V30MZ::read(Byte, cs, ip + offset);
   };
-  auto readByte = [&]() -> string {
-    uint8 byte = fetch();
-    return {"$", hex(byte, 2L)};
+
+  auto modRM = [&](uint offset = 1) -> uint {
+    auto modRM = read(offset++);
+    if((modRM & 0xc0) == 0x40) offset += 1;
+    if((modRM & 0xc0) == 0x80) offset += 2;
+    return offset;
   };
-  auto readWord = [&]() -> string {
-    uint16 word = fetch(); word |= fetch() << 8;
-    return {"$", hex(word, 4L)};
+
+  auto instruction = [&](string_view name) -> string {
+    if(name.size() >= 7) return name;
+    return pad(name, -7);
   };
-  auto readByteSigned = [&]() -> string {
-    uint8 byte = fetch();
-    return {"$", byte & 0x80 ? "-" : "+", hex(byte & 0x80 ? uint8(256 - byte) : byte, 2L)};
+
+  auto segment = [&](string_view name) -> string {
+    if(prefix) return {prefix, ":"};
+    return {name, ":"};
   };
-  auto readRelativeByte = [&]() -> string {
-    uint8 byte = fetch();
-    return {"$", hex(ip + (int8)byte, 4L)};
+
+  auto repeatable = [&](string_view opcode) -> string {
+    if(repeat) return {pad(string{repeat, ":"}, -7), opcode};
+    return {opcode};
   };
-  auto readRelativeWord = [&]() -> string {
-    uint16 word = fetch(); word |= fetch() << 8;
-    return {"$", hex(ip + (int16)word, 4L)};
-  };
-  auto readIndirectByte = [&]() -> string {
-    return {"[", readWord(), "]"};
-  };
-  auto readIndirectWord = [&]() -> string {
-    return {"{", readWord(), "}"};
-  };
-  auto readRegByte = [&](bool inc = true) -> string {
-    uint8 modRM = fetch(inc);
-    static const string reg[] = {"al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"};
-    return reg[(uint3)(modRM >> 3)];
-  };
-  auto readRegWord = [&](bool inc = true) -> string {
-    uint8 modRM = fetch(inc);
-    static const string reg[] = {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"};
-    return reg[(uint3)(modRM >> 3)];
-  };
-  auto readSeg = [&](bool inc = true) -> string {
-    uint8 modRM = fetch(inc);
+
+  auto segmentRegister = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
     static const string seg[] = {"es", "cs", "ss", "ds"};
-    return seg[(uint2)(modRM >> 3)];
+    return {seg[modRM >> 3 & 2]};
   };
-  auto readMemByte = [&](bool inc = true) -> string {
-    uint8 modRM = fetch(inc);
+
+  auto readByte = [&](uint offset) -> string {
+    return hex(read(offset), 2L);
+  };
+
+  auto immediateByte = [&](uint offset = 1) -> string {
+    return {"0x", readByte(offset)};
+  };
+
+  auto immediateWord = [&](uint offset = 1) -> string {
+    return {"0x", readByte(offset + 1), readByte(offset + 0)};
+  };
+
+  auto immediateLong = [&](uint offset = 1) -> string {
+    return {"0x", readByte(offset + 3), readByte(offset + 2), ":",
+            "0x", readByte(offset + 1), readByte(offset + 0)};
+  };
+
+  auto indirectByte = [&](uint offset = 1) -> string {
+    return {"[", immediateByte(), "]"};
+  };
+
+  auto indirectWord = [&](uint offset = 1) -> string {
+    return {"[", immediateWord(), "]"};
+  };
+
+  auto relativeByte = [&](uint offset = 1) -> string {
+    int8 displacement = read(offset);
+    return {"cs:0x", hex(ip + offset + 1 + displacement, 4L)};
+  };
+
+  auto relativeWord = [&](uint offset = 1) -> string {
+    int16 displacement = read(offset + 1) << 8 | read(offset + 0) << 0;
+    return {"cs:0x", hex(ip + offset + 2 + displacement, 4L)};
+  };
+
+  auto adjustByte = [&](uint offset = 2) -> string {
+    int8 displacement = read(offset);
+    if(displacement >= 0) return {"+0x", hex(displacement, 2L)};
+    return {"-0x", hex(abs(displacement), 2L)};
+  };
+
+  auto adjustWord = [&](uint offset = 2) -> string {
+    int16 displacement = read(offset + 1) << 8 | read(offset + 0) << 0;
+    if(displacement >= 0) return {"+0x", hex(displacement, 4L)};
+    return {"-0x", hex(abs(displacement), 2L)};
+  };
+
+  auto registerByte = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
     static const string reg[] = {"al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"};
-    if(modRM >= 0xc0) return reg[(uint3)modRM];
-    if((modRM & 0xc7) == 0x06) return {"[", readWord(), "]"};
-    static const string mem[] = {"bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"};
-    if((modRM & 0xc0) == 0x40) return {"[", mem[(uint3)modRM], "+", readByte(), "]"};
-    if((modRM & 0xc0) == 0x80) return {"[", mem[(uint3)modRM], "+", readWord(), "]"};
-    return {"[", mem[(uint3)modRM], "]"};
+    return reg[modRM >> 3 & 7];
   };
-  auto readMemWord = [&](bool inc = true) -> string {
-    uint8 modRM = fetch(inc);
+
+  auto registerWord = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
     static const string reg[] = {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"};
-    if(modRM >= 0xc0) return reg[(uint3)modRM];
-    if((modRM & 0xc7) == 0x06) return {"{", readWord(), "}"};
+    return reg[modRM >> 3 & 7];
+  };
+
+  auto memoryByte = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    if(modRM >= 0xc0) return registerByte(modRM & 7);
+    if((modRM & 0xc7) == 0x06) return {"byte[", segment("ds"), immediateByte(), "]"};
+    static const string seg[] = {"ds", "ds", "ss", "ss", "ds", "ds", "ss", "ds"};
     static const string mem[] = {"bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"};
-    if((modRM & 0xc0) == 0x40) return {"{", mem[(uint3)modRM], "+", readByte(), "}"};
-    if((modRM & 0xc0) == 0x80) return {"{", mem[(uint3)modRM], "+", readWord(), "}"};
-    return {"{", mem[(uint3)modRM], "}"};
-  };
-  auto readGroup = [&](uint group) -> string {
-    uint8 modRM = fetch(false);
-    static const string opcode[4][8] = {
-      {"add ", "or  ", "adc ", "sbb ", "and ", "sub ", "xor ", "cmp "},
-      {"rol ", "ror ", "rcl ", "rcr ", "shl ", "shr ", "sal ", "sar "},
-      {"test", "??? ", "not ", "neg ", "mul ", "imul", "div ", "idiv"},
-      {"inc ", "dec ", "??? ", "??? ", "??? ", "??? ", "??? ", "??? "},
-    };
-    return opcode[group - 1][(uint3)(modRM >> 3)];
+    if((modRM & 0xc0) == 0x40) return {"byte[", segment(seg[modRM & 7]), mem[modRM & 7], "+", adjustByte(), "]"};
+    if((modRM & 0xc0) == 0x80) return {"byte[", segment(seg[modRM & 7]), mem[modRM & 7], "+", adjustWord(), "]"};
+    return {"byte[", segment(seg[modRM & 7]), mem[modRM & 7], "]"};
   };
 
-  auto opcode = fetch();
+  auto memoryWord = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    if(modRM >= 0xc0) return registerWord(modRM & 7);
+    if((modRM & 0xc7) == 0x06) return {"word[", segment("ds"), immediateWord(), "]"};
+    static const string seg[] = {"ds", "ds", "ss", "ss", "ds", "ds", "ss", "ds"};
+    static const string mem[] = {"bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"};
+    if((modRM & 0xc0) == 0x40) return {"word[", segment(seg[modRM & 7]), mem[modRM & 7], adjustByte(), "]"};
+    if((modRM & 0xc0) == 0x80) return {"word[", segment(seg[modRM & 7]), mem[modRM & 7], adjustWord(), "]"};
+    return {"word[", segment(seg[modRM & 7]), mem[modRM & 7], "]"};
+  };
+
+  auto group1 = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    static const string opcode[] = {"add", "or", "adc", "sbb", "and", "sub", "xor", "cmp"};
+    return opcode[modRM >> 3 & 7];
+  };
+
+  auto group2 = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    static const string opcode[] = {"rol", "ror", "rcl", "rcr", "shl", "shr", "sal", "sar"};
+    return opcode[modRM >> 3 & 7];
+  };
+
+  auto group3 = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    static const string opcode[] = {"test", "test", "not", "neg", "mul", "imul", "div", "idiv"};
+    return opcode[modRM >> 3 & 7];
+  };
+
+  auto group4 = [&](uint offset = 1) -> string {
+    auto modRM = read(offset);
+    static const string opcode[] = {"inc", "dec", "call", "callf", "jmp", "jmpf", "push", "push"};
+    return opcode[modRM >> 3 & 7];
+  };
+
+  #define op(id, name, ...) case id: \
+    output.append(instruction(name), vector<string>{__VA_ARGS__}.merge(",")); \
+    break
+
+  auto opcode = read(0);
+  for(uint index : range(7)) {
+    if(opcode == 0x26) { prefix = "es";    ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    if(opcode == 0x2e) { prefix = "cs";    ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    if(opcode == 0x36) { prefix = "ss";    ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    if(opcode == 0x3e) { prefix = "ds";    ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    if(opcode == 0xf2) { repeat = "repnz"; ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    if(opcode == 0xf3) { repeat = "repz";  ip++; opcode = read(0); suppress = cs << 16 | ip; continue; }
+    break;
+  }
+
   switch(opcode) {
-  case 0x00: s = {"add    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x01: s = {"add    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x02: s = {"add    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x03: s = {"add    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x04: s = {"add    al,{0}", format{readByte()}}; break;
-  case 0x05: s = {"add    ax,{0}", format{readWord()}}; break;
-  case 0x06: s = {"push   es"}; break;
-  case 0x07: s = {"pop    es"}; break;
-  case 0x08: s = {"or     {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x09: s = {"or     {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x0a: s = {"or     {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x0b: s = {"or     {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x0c: s = {"or     al,{0}", format{readByte()}}; break;
-  case 0x0d: s = {"or     ax,{0}", format{readWord()}}; break;
-  case 0x0e: s = {"push   cs"}; break;
-//case 0x0f:
-  case 0x10: s = {"adc    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x11: s = {"adc    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x12: s = {"adc    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x13: s = {"adc    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x14: s = {"adc    al,{0}", format{readByte()}}; break;
-  case 0x15: s = {"adc    ax,{0}", format{readWord()}}; break;
-  case 0x16: s = {"push   ss"}; break;
-  case 0x17: s = {"pop    ss"}; break;
-  case 0x18: s = {"sbb    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x19: s = {"sbb    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x1a: s = {"sbb    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x1b: s = {"sbb    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x1c: s = {"sbb    al,{0}", format{readByte()}}; break;
-  case 0x1d: s = {"sbb    ax,{0}", format{readWord()}}; break;
-  case 0x1e: s = {"push   ds"}; break;
-  case 0x1f: s = {"pop    ds"}; break;
-  case 0x20: s = {"and    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x21: s = {"and    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x22: s = {"and    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x23: s = {"and    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x24: s = {"and    al,{0}", format{readByte()}}; break;
-  case 0x25: s = {"and    ax,{0}", format{readWord()}}; break;
-  case 0x26: s = {"es:    "}; break;
-  case 0x27: s = {"daa    "}; break;
-  case 0x28: s = {"sub    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x29: s = {"sub    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x2a: s = {"sub    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x2b: s = {"sub    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x2c: s = {"sub    al,{0}", format{readByte()}}; break;
-  case 0x2d: s = {"sub    ax,{0}", format{readWord()}}; break;
-  case 0x2e: s = {"cs:    "}; break;
-  case 0x2f: s = {"das    "}; break;
-  case 0x30: s = {"xor    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x31: s = {"xor    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x32: s = {"xor    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x33: s = {"xor    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x34: s = {"xor    al,{0}", format{readByte()}}; break;
-  case 0x35: s = {"xor    ax,{0}", format{readWord()}}; break;
-  case 0x36: s = {"ss:    "}; break;
-  case 0x37: s = {"aaa    "}; break;
-  case 0x38: s = {"cmp    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x39: s = {"cmp    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x3a: s = {"cmp    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x3b: s = {"cmp    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x3c: s = {"cmp    al,{0}", format{readByte()}}; break;
-  case 0x3d: s = {"cmp    ax,{0}", format{readWord()}}; break;
-  case 0x3e: s = {"ds:    "}; break;
-  case 0x3f: s = {"aas    "}; break;
-  case 0x40: s = {"inc    ax"}; break;
-  case 0x41: s = {"inc    cx"}; break;
-  case 0x42: s = {"inc    dx"}; break;
-  case 0x43: s = {"inc    bx"}; break;
-  case 0x44: s = {"inc    sp"}; break;
-  case 0x45: s = {"inc    bp"}; break;
-  case 0x46: s = {"inc    si"}; break;
-  case 0x47: s = {"inc    di"}; break;
-  case 0x48: s = {"dec    ax"}; break;
-  case 0x49: s = {"dec    cx"}; break;
-  case 0x4a: s = {"dec    dx"}; break;
-  case 0x4b: s = {"dec    bx"}; break;
-  case 0x4c: s = {"dec    sp"}; break;
-  case 0x4d: s = {"dec    bp"}; break;
-  case 0x4e: s = {"dec    si"}; break;
-  case 0x4f: s = {"dec    di"}; break;
-  case 0x50: s = {"push   ax"}; break;
-  case 0x51: s = {"push   cx"}; break;
-  case 0x52: s = {"push   dx"}; break;
-  case 0x53: s = {"push   bx"}; break;
-  case 0x54: s = {"push   sp"}; break;
-  case 0x55: s = {"push   bp"}; break;
-  case 0x56: s = {"push   si"}; break;
-  case 0x57: s = {"push   di"}; break;
-  case 0x58: s = {"pop    ax"}; break;
-  case 0x59: s = {"pop    cx"}; break;
-  case 0x5a: s = {"pop    dx"}; break;
-  case 0x5b: s = {"pop    bx"}; break;
-  case 0x5c: s = {"pop    sp"}; break;
-  case 0x5d: s = {"pop    bp"}; break;
-  case 0x5e: s = {"pop    si"}; break;
-  case 0x5f: s = {"pop    di"}; break;
-  case 0x60: s = {"pusha  "}; break;
-  case 0x61: s = {"popa   "}; break;
-  case 0x62: s = {"bound  {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-//case 0x63:
-//case 0x64:
-//case 0x65:
-//case 0x66:
-//case 0x67:
-  case 0x68: s = {"push   {0}", format{readWord()}}; break;
-  case 0x69: s = {"imul   {0},{1},{2}", format{readRegWord(0), readMemWord(), readWord()}}; break;
-  case 0x6a: s = {"push   {0}", format{readByteSigned()}}; break;
-  case 0x6b: s = {"imul   {0},{1},{2}", format{readRegWord(0), readMemWord(), readByteSigned()}}; break;
-  case 0x6c: s = {"insb   "}; break;
-  case 0x6d: s = {"insw   "}; break;
-  case 0x6e: s = {"outsb  "}; break;
-  case 0x6f: s = {"outsw  "}; break;
-  case 0x70: s = {"jo     {0}", format{readRelativeByte()}}; break;
-  case 0x71: s = {"jno    {0}", format{readRelativeByte()}}; break;
-  case 0x72: s = {"jc     {0}", format{readRelativeByte()}}; break;
-  case 0x73: s = {"jnc    {0}", format{readRelativeByte()}}; break;
-  case 0x74: s = {"jz     {0}", format{readRelativeByte()}}; break;
-  case 0x75: s = {"jnz    {0}", format{readRelativeByte()}}; break;
-  case 0x76: s = {"jcz    {0}", format{readRelativeByte()}}; break;
-  case 0x77: s = {"jncz   {0}", format{readRelativeByte()}}; break;
-  case 0x78: s = {"js     {0}", format{readRelativeByte()}}; break;
-  case 0x79: s = {"jns    {0}", format{readRelativeByte()}}; break;
-  case 0x7a: s = {"jp     {0}", format{readRelativeByte()}}; break;
-  case 0x7b: s = {"jnp    {0}", format{readRelativeByte()}}; break;
-  case 0x7c: s = {"jl     {0}", format{readRelativeByte()}}; break;
-  case 0x7d: s = {"jnl    {0}", format{readRelativeByte()}}; break;
-  case 0x7e: s = {"jle    {0}", format{readRelativeByte()}}; break;
-  case 0x7f: s = {"jnle   {0}", format{readRelativeByte()}}; break;
-  case 0x80: s =  {"{0}   {1},{2}", format{readGroup(1), readMemByte(), readByte()}}; break;
-  case 0x81: s =  {"{0}   {1},{2}", format{readGroup(1), readMemWord(), readWord()}}; break;
-  case 0x82: s =  {"{0}   {1},{2}", format{readGroup(1), readMemByte(), readByteSigned()}}; break;
-  case 0x83: s =  {"{0}   {1},{2}", format{readGroup(1), readMemWord(), readByteSigned()}}; break;
-  case 0x84: s = {"test   {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x85: s = {"test   {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x86: s = {"xchg   {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x87: s = {"xchg   {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x88: s = {"mov    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
-  case 0x89: s = {"mov    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
-  case 0x8a: s = {"mov    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
-  case 0x8b: s = {"mov    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x8c: s = {"mov    {0},{1}", format{readMemWord(0), readSeg()}}; break;
-  case 0x8d: s = {"lea    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
-  case 0x8e: s = {"mov    {0},{1}", format{readSeg(0), readMemWord()}}; break;
-  case 0x8f: s = {"pop    {0}", format{readMemWord()}}; break;
-  case 0x90: s = {"nop    "}; break;
-  case 0x91: s = {"xchg   ax,cx"}; break;
-  case 0x92: s = {"xchg   ax,dx"}; break;
-  case 0x93: s = {"xchg   ax,bx"}; break;
-  case 0x94: s = {"xchg   ax,sp"}; break;
-  case 0x95: s = {"xchg   ax,bp"}; break;
-  case 0x96: s = {"xchg   ax,si"}; break;
-  case 0x97: s = {"xchg   ax,di"}; break;
-  case 0x98: s = {"cbw    "}; break;
-  case 0x99: s = {"cwd    "}; break;
-  case 0x9a: s = {"call   {1}:{0}", format{readWord(), readWord()}}; break;
-  case 0x9b: s = {"wait   "}; break;
-  case 0x9c: s = {"pushf  "}; break;
-  case 0x9d: s = {"popf   "}; break;
-  case 0x9e: s = {"sahf   "}; break;
-  case 0x9f: s = {"lahf   "}; break;
-  case 0xa0: s = {"mov    al,{0}", format{readIndirectByte()}}; break;
-  case 0xa1: s = {"mov    ax,{0}", format{readIndirectWord()}}; break;
-  case 0xa2: s = {"mov    {0},al", format{readIndirectByte()}}; break;
-  case 0xa3: s = {"mov    {0},ax", format{readIndirectWord()}}; break;
-  case 0xa4: s = {"movsb  "}; break;
-  case 0xa5: s = {"movsw  "}; break;
-  case 0xa6: s = {"cmpsb  "}; break;
-  case 0xa7: s = {"cmpsw  "}; break;
-  case 0xa8: s = {"test   al,{0}", format{readByte()}}; break;
-  case 0xa9: s = {"test   ax,{0}", format{readWord()}}; break;
-  case 0xaa: s = {"stosb  "}; break;
-  case 0xab: s = {"stosw  "}; break;
-  case 0xac: s = {"lodsb  "}; break;
-  case 0xad: s = {"lodsw  "}; break;
-  case 0xae: s = {"scasb  "}; break;
-  case 0xaf: s = {"scasw  "}; break;
-  case 0xb0: s = {"mov    al,{0}", format{readByte()}}; break;
-  case 0xb1: s = {"mov    cl,{0}", format{readByte()}}; break;
-  case 0xb2: s = {"mov    dl,{0}", format{readByte()}}; break;
-  case 0xb3: s = {"mov    bl,{0}", format{readByte()}}; break;
-  case 0xb4: s = {"mov    ah,{0}", format{readByte()}}; break;
-  case 0xb5: s = {"mov    ch,{0}", format{readByte()}}; break;
-  case 0xb6: s = {"mov    dh,{0}", format{readByte()}}; break;
-  case 0xb7: s = {"mov    bh,{0}", format{readByte()}}; break;
-  case 0xb8: s = {"mov    ax,{0}", format{readWord()}}; break;
-  case 0xb9: s = {"mov    cx,{0}", format{readWord()}}; break;
-  case 0xba: s = {"mov    dx,{0}", format{readWord()}}; break;
-  case 0xbb: s = {"mov    bx,{0}", format{readWord()}}; break;
-  case 0xbc: s = {"mov    sp,{0}", format{readWord()}}; break;
-  case 0xbd: s = {"mov    bp,{0}", format{readWord()}}; break;
-  case 0xbe: s = {"mov    si,{0}", format{readWord()}}; break;
-  case 0xbf: s = {"mov    di,{0}", format{readWord()}}; break;
-  case 0xc0: s =  {"{0}   {1},{2}", format{readGroup(2), readMemByte(), readByte()}}; break;
-  case 0xc1: s =  {"{0}   {1},{2}", format{readGroup(2), readMemWord(), readByte()}}; break;
-  case 0xc2: s = {"ret    {0}", format{readWord()}}; break;
-  case 0xc3: s = {"ret    "}; break;
-  case 0xc4: s = {"les    {0}", format{readMemWord()}}; break;
-  case 0xc5: s = {"lds    {0}", format{readMemWord()}}; break;
-  case 0xc6: s = {"mov    {0},{1}", format{readMemByte(), readByte()}}; break;
-  case 0xc7: s = {"mov    {0},{1}", format{readMemWord(), readWord()}}; break;
-  case 0xc8: s = {"enter  {0},{1}", format{readWord(), readByte()}}; break;
-  case 0xc9: s = {"leave  "}; break;
-  case 0xca: s = {"retf   {0}", format{readWord()}}; break;
-  case 0xcb: s = {"retf   "}; break;
-  case 0xcc: s = {"int3   "}; break;
-  case 0xcd: s = {"int    ", format{readByte()}}; break;
-  case 0xce: s = {"into   "}; break;
-  case 0xcf: s = {"iret   "}; break;
-  case 0xd0: s =  {"{0}   {1},1", format{readGroup(2), readMemByte()}}; break;
-  case 0xd1: s =  {"{0}   {1},1", format{readGroup(2), readMemWord()}}; break;
-  case 0xd2: s =  {"{0}   {1},cl", format{readGroup(2), readMemByte()}}; break;
-  case 0xd3: s =  {"{0}   {1},cl", format{readGroup(2), readMemWord()}}; break;
-  case 0xd4: s = {"aam    {0}", format{readByte()}}; break;
-  case 0xd5: s = {"aad    {0}", format{readByte()}}; break;
-//case 0xd6:
-  case 0xd7: s = {"xlat   "}; break;
-//case 0xd8:
-//case 0xd9:
-//case 0xda:
-//case 0xdb:
-//case 0xdc:
-//case 0xdd:
-//case 0xde:
-//case 0xdf:
-  case 0xe0: s = {"loopnz "}; break;
-  case 0xe1: s = {"loopz  "}; break;
-  case 0xe2: s = {"loop   "}; break;
-  case 0xe3: s = {"jcxz   {0}", format{readRelativeByte()}}; break;
-  case 0xe4: s = {"in     al,{0}", format{readByte()}}; break;
-  case 0xe5: s = {"in     ax,{0}", format{readByte()}}; break;
-  case 0xe6: s = {"out    {0},al", format{readByte()}}; break;
-  case 0xe7: s = {"out    {0},ax", format{readByte()}}; break;
-  case 0xe8: s = {"call   {0}", format{readRelativeWord()}}; break;
-  case 0xe9: s = {"jmp    {0}", format{readRelativeWord()}}; break;
-  case 0xea: s = {"jmp    {1}:{0}", format{readWord(), readWord()}}; break;
-  case 0xeb: s = {"jmp    {0}", format{readRelativeByte()}}; break;
-  case 0xec: s = {"in     al,dx"}; break;
-  case 0xed: s = {"in     ax,dx"}; break;
-  case 0xee: s = {"out    dx,al"}; break;
-  case 0xef: s = {"out    dx,ax"}; break;
-  case 0xf0: s = {"lock:  "}; break;
-//case 0xf1:
-  case 0xf2: s = {"repnz: "}; break;
-  case 0xf3: s = {"repz:  "}; break;
-  case 0xf4: s = {"hlt    "}; break;
-  case 0xf5: s = {"cmc    "}; break;
-  case 0xf6: s =  {"{0}   {1},{2}", format{readGroup(3), readMemByte(), readByte()}}; break;
-  case 0xf7: s =  {"{0}   {1},{2}", format{readGroup(3), readMemWord(), readWord()}}; break;
-  case 0xf8: s = {"clc    "}; break;
-  case 0xf9: s = {"stc    "}; break;
-  case 0xfa: s = {"cli    "}; break;
-  case 0xfb: s = {"sti    "}; break;
-  case 0xfc: s = {"cld    "}; break;
-  case 0xfd: s = {"std    "}; break;
-  case 0xfe: s =  {"{0}   {1},{2}", format{readGroup(4), readMemByte(), readByte()}}; break;
-  case 0xff: s =  {"{0}   {1},{2}", format{readGroup(4), readMemWord(), readWord()}}; break;
-  default:   s = {"???    {0}", format{hex(opcode, 2L)}}; break;
-  }
-  while(s.size() < 24) s.append(" ");
-
-  string l;
-  if(registers) {
-    l = {
-      " ax:", hex(r.ax, 4L),
-      " bx:", hex(r.bx, 4L),
-      " cx:", hex(r.cx, 4L),
-      " dx:", hex(r.dx, 4L),
-      " si:", hex(r.si, 4L),
-      " di:", hex(r.di, 4L),
-      " bp:", hex(r.bp, 4L),
-      " sp:", hex(r.sp, 4L),
-      " ip:", hex(r.ip, 4L),
-      " cs:", hex(r.cs, 4L),
-      " ds:", hex(r.ds, 4L),
-      " es:", hex(r.es, 4L),
-      " ss:", hex(r.ss, 4L), " ",
-      r.f.m ? "M" : "m",
-      r.f.v ? "V" : "v",
-      r.f.d ? "D" : "d",
-      r.f.i ? "I" : "i",
-      r.f.b ? "B" : "b",
-      r.f.s ? "S" : "s",
-      r.f.z ? "Z" : "z",
-      r.f.h ? "H" : "h",
-      r.f.p ? "P" : "p",
-      r.f.c ? "C" : "c"
-    };
+  op(0x00, "add", memoryByte(), registerByte());
+  op(0x01, "add", memoryWord(), registerWord());
+  op(0x02, "add", registerByte(), memoryByte());
+  op(0x03, "add", registerWord(), memoryWord());
+  op(0x04, "add", "al", immediateByte());
+  op(0x05, "add", "ax", immediateWord());
+  op(0x06, "push", "es");
+  op(0x07, "pop", "es");
+  op(0x08, "or", memoryByte(), registerByte());
+  op(0x09, "or", memoryWord(), registerWord());
+  op(0x0a, "or", registerByte(), memoryByte());
+  op(0x0b, "or", registerWord(), memoryWord());
+  op(0x0c, "or", "al", immediateByte());
+  op(0x0d, "or", "ax", immediateWord());
+  op(0x0e, "push", "cx");
+  op(0x0f, "pop", "cs");
+  op(0x10, "adc", memoryByte(), registerByte());
+  op(0x11, "adc", memoryWord(), registerWord());
+  op(0x12, "adc", registerByte(), memoryByte());
+  op(0x13, "adc", registerWord(), memoryWord());
+  op(0x14, "adc", "al", immediateByte());
+  op(0x15, "adc", "ax", immediateWord());
+  op(0x16, "push", "ss");
+  op(0x17, "pop", "ss");
+  op(0x18, "sbb", memoryByte(), registerByte());
+  op(0x19, "sbb", memoryWord(), registerWord());
+  op(0x1a, "sbb", registerByte(), memoryByte());
+  op(0x1b, "sbb", registerWord(), memoryWord());
+  op(0x1c, "sbb", "al", immediateByte());
+  op(0x1d, "sbb", "ax", immediateWord());
+  op(0x1e, "push", "ds");
+  op(0x1f, "pop", "ds");
+  op(0x20, "and", memoryByte(), registerByte());
+  op(0x21, "and", memoryWord(), registerWord());
+  op(0x22, "and", registerByte(), memoryByte());
+  op(0x23, "and", registerWord(), memoryWord());
+  op(0x24, "and", "al", immediateByte());
+  op(0x25, "and", "ax", immediateWord());
+  op(0x26, "es:");
+  op(0x27, "daa");
+  op(0x28, "sub", memoryByte(), registerByte());
+  op(0x29, "sub", memoryWord(), registerWord());
+  op(0x2a, "sub", registerByte(), memoryByte());
+  op(0x2b, "sub", registerWord(), memoryWord());
+  op(0x2c, "sub", "al", immediateByte());
+  op(0x2d, "sub", "ax", immediateWord());
+  op(0x2e, "cs:");
+  op(0x2f, "das");
+  op(0x30, "xor", memoryByte(), registerByte());
+  op(0x31, "xor", memoryWord(), registerWord());
+  op(0x32, "xor", registerByte(), memoryByte());
+  op(0x33, "xor", registerWord(), memoryWord());
+  op(0x34, "xor", "al", immediateByte());
+  op(0x35, "xor", "ax", immediateWord());
+  op(0x36, "ss:");
+  op(0x37, "aaa");
+  op(0x38, "cmp", memoryByte(), registerByte());
+  op(0x39, "cmp", memoryWord(), registerWord());
+  op(0x3a, "cmp", registerByte(), memoryByte());
+  op(0x3b, "cmp", registerWord(), memoryWord());
+  op(0x3c, "cmp", "al", immediateByte());
+  op(0x3d, "cmp", "ax", immediateWord());
+  op(0x3e, "ds:");
+  op(0x3f, "aas");
+  op(0x40, "inc", "ax");
+  op(0x41, "inc", "cx");
+  op(0x42, "inc", "dx");
+  op(0x43, "inc", "bx");
+  op(0x44, "inc", "sp");
+  op(0x45, "inc", "bp");
+  op(0x46, "inc", "si");
+  op(0x47, "inc", "di");
+  op(0x48, "dec", "ax");
+  op(0x49, "dec", "cx");
+  op(0x4a, "dec", "dx");
+  op(0x4b, "dec", "bx");
+  op(0x4c, "dec", "sp");
+  op(0x4d, "dec", "bp");
+  op(0x4e, "dec", "si");
+  op(0x4f, "dec", "di");
+  op(0x50, "push", "ax");
+  op(0x51, "push", "cx");
+  op(0x52, "push", "dx");
+  op(0x53, "push", "bx");
+  op(0x54, "push", "sp");
+  op(0x55, "push", "bp");
+  op(0x56, "push", "si");
+  op(0x57, "push", "di");
+  op(0x58, "pop", "ax");
+  op(0x59, "pop", "cx");
+  op(0x5a, "pop", "dx");
+  op(0x5b, "pop", "bx");
+  op(0x5c, "pop", "sp");
+  op(0x5d, "pop", "bp");
+  op(0x5e, "pop", "si");
+  op(0x5f, "pop", "di");
+  op(0x60, "pusha");
+  op(0x61, "popa");
+  op(0x62, "bound", registerWord(), memoryWord());
+//op(0x63);
+//op(0x64);
+//op(0x65);
+//op(0x66);
+//op(0x67);
+  op(0x68, "push", immediateWord());
+  op(0x69, "imul", registerWord(), memoryWord(), immediateWord(modRM()));
+  op(0x6a, "push", adjustByte(1));
+  op(0x6b, "imul", registerWord(), memoryWord(), adjustByte(modRM()));
+  op(0x6c, repeatable("insb"));
+  op(0x6d, repeatable("insw"));
+  op(0x6e, repeatable("outsb"));
+  op(0x6f, repeatable("outsw"));
+  op(0x70, "jo", relativeByte());
+  op(0x71, "jno", relativeByte());
+  op(0x72, "jb", relativeByte());
+  op(0x73, "jnb", relativeByte());
+  op(0x74, "jz", relativeByte());
+  op(0x75, "jnz", relativeByte());
+  op(0x76, "jbe", relativeByte());
+  op(0x77, "ja", relativeByte());
+  op(0x78, "js", relativeByte());
+  op(0x79, "jns", relativeByte());
+  op(0x7a, "jpe", relativeByte());
+  op(0x7b, "jpo", relativeByte());
+  op(0x7c, "jl", relativeByte());
+  op(0x7d, "jge", relativeByte());
+  op(0x7e, "jle", relativeByte());
+  op(0x7f, "jg", relativeByte());
+  op(0x80, group1(), memoryByte(), immediateByte(modRM()));
+  op(0x81, group1(), memoryWord(), immediateWord(modRM()));
+  op(0x82, group1(), memoryByte(), adjustByte(modRM()));
+  op(0x83, group1(), memoryWord(), adjustByte(modRM()));
+  op(0x84, "test", memoryByte(), registerByte());
+  op(0x85, "test", memoryWord(), registerWord());
+  op(0x86, "xchg", memoryByte(), registerByte());
+  op(0x87, "xchg", memoryWord(), registerWord());
+  op(0x88, "mov", memoryByte(), registerByte());
+  op(0x89, "mov", memoryWord(), registerWord());
+  op(0x8a, "mov", registerByte(), memoryByte());
+  op(0x8b, "mov", registerWord(), memoryWord());
+  op(0x8c, "mov", memoryWord(), segmentRegister());
+  op(0x8d, "lea", registerWord(), memoryWord());
+  op(0x8e, "mov", segmentRegister(), memoryWord());
+  op(0x8f, "pop", memoryWord());
+  op(0x90, "nop");
+  op(0x91, "xchg", "ax", "cx");
+  op(0x92, "xchg", "ax", "dx");
+  op(0x93, "xchg", "ax", "bx");
+  op(0x94, "xchg", "ax", "sp");
+  op(0x95, "xchg", "ax", "bp");
+  op(0x96, "xchg", "ax", "si");
+  op(0x97, "xchg", "ax", "di");
+  op(0x98, "cbw");
+  op(0x99, "cwd");
+  op(0x9a, "call", immediateLong());
+  op(0x9b, "wait");
+  op(0x9c, "pushf");
+  op(0x9d, "popf");
+  op(0x9e, "sahf");
+  op(0x9f, "lahf");
+  op(0xa0, "mov", "al", indirectByte());
+  op(0xa1, "mov", "ax", indirectWord());
+  op(0xa2, "mov", indirectByte(), "al");
+  op(0xa3, "mov", indirectWord(), "ax");
+  op(0xa4, repeatable("movsb"));
+  op(0xa5, repeatable("movsw"));
+  op(0xa6, repeatable("cmpsb"));
+  op(0xa7, repeatable("cmpsw"));
+  op(0xa8, "test", immediateByte());
+  op(0xa9, "test", immediateWord());
+  op(0xaa, repeatable("stosb"));
+  op(0xab, repeatable("stosw"));
+  op(0xac, repeatable("lodsb"));
+  op(0xad, repeatable("lodsw"));
+  op(0xae, repeatable("scasb"));
+  op(0xaf, repeatable("scasw"));
+  op(0xb0, "mov", "al", immediateByte());
+  op(0xb1, "mov", "cl", immediateByte());
+  op(0xb2, "mov", "dl", immediateByte());
+  op(0xb3, "mov", "bl", immediateByte());
+  op(0xb4, "mov", "ah", immediateByte());
+  op(0xb5, "mov", "ch", immediateByte());
+  op(0xb6, "mov", "dh", immediateByte());
+  op(0xb7, "mov", "bh", immediateByte());
+  op(0xb8, "mov", "ax", immediateWord());
+  op(0xb9, "mov", "cx", immediateWord());
+  op(0xba, "mov", "dx", immediateWord());
+  op(0xbb, "mov", "bx", immediateWord());
+  op(0xbc, "mov", "sp", immediateWord());
+  op(0xbd, "mov", "bp", immediateWord());
+  op(0xbe, "mov", "si", immediateWord());
+  op(0xbf, "mov", "di", immediateWord());
+  op(0xc0, group2(), memoryByte(), immediateByte(modRM()));
+  op(0xc1, group2(), memoryWord(), immediateByte(modRM()));
+  op(0xc2, "ret", immediateWord());
+  op(0xc3, "ret");
+  op(0xc4, "les", memoryWord());
+  op(0xc5, "lds", memoryWord());
+  op(0xc6, "mov", memoryByte(), immediateByte(modRM()));
+  op(0xc7, "mov", memoryWord(), immediateWord(modRM()));
+  op(0xc8, "enter", immediateWord(), immediateByte(3));
+  op(0xc9, "leave");
+  op(0xca, "retf", immediateWord());
+  op(0xcb, "retf");
+  op(0xcc, "int", "0x3");
+  op(0xcd, "int", immediateByte());
+  op(0xce, "into");
+  op(0xcf, "iret");
+  op(0xd0, group2(), memoryByte(), "1");
+  op(0xd1, group2(), memoryWord(), "1");
+  op(0xd2, group2(), memoryByte(), "cl");
+  op(0xd3, group2(), memoryWord(), "cl");
+  op(0xd4, "aam", immediateByte());
+  op(0xd5, "aad", immediateByte());
+  op(0xd6, "xlat");  //undocumented mirror
+  op(0xd7, "xlat");
+//op(0xd8);
+//op(0xd9);
+//op(0xda);
+//op(0xdb);
+//op(0xdc);
+//op(0xdd);
+//op(0xde);
+//op(0xdf);
+  op(0xe0, "loopnz");
+  op(0xe1, "loopz");
+  op(0xe2, "loop");
+  op(0xe3, "jcxz", relativeByte());
+  op(0xe4, "in", "al", immediateByte());
+  op(0xe5, "in", "ax", immediateWord());
+  op(0xe6, "out", immediateByte(), "al");
+  op(0xe7, "out", immediateWord(), "ax");
+  op(0xe8, "call", relativeWord());
+  op(0xe9, "jmp", relativeWord());
+  op(0xea, "jmp", immediateLong());
+  op(0xeb, "jmp", relativeByte());
+  op(0xec, "in", "al", "dx");
+  op(0xed, "in", "ax", "dx");
+  op(0xee, "out", "dx", "al");
+  op(0xef, "out", "dx", "ax");
+  op(0xf0, "lock:");
+//op(0xf1);
+  op(0xf2, "repnz:");
+  op(0xf3, "repz:");
+  op(0xf4, "hlt");
+  op(0xf5, "cmc");
+  op(0xf6, group3(), memoryByte(), immediateByte(modRM()));
+  op(0xf7, group3(), memoryWord(), immediateWord(modRM()));
+  op(0xf8, "clc");
+  op(0xf9, "stc");
+  op(0xfa, "cli");
+  op(0xfb, "sti");
+  op(0xfc, "cld");
+  op(0xfd, "std");
+  op(0xfe, group4(), memoryByte(), immediateByte(modRM()));
+  op(0xff, group4(), memoryWord(), immediateWord(modRM()));
+  default: output.append("??? ", hex(read(0), 2L)); break;
   }
 
-  string b;
-  if(bytes) {
-    b = "  ";
-    while(bytesRead) {
-      b.append(hex(bytesRead.takeLeft(), 2L), " ");
-    }
-    b.stripRight();
-  }
+  #undef op
 
-  return {hex(ea, 5L), "  ", s, l, b};
+  output.size(-48);  //todo: determine the minimum value that will never clip here
+  output.append(" ",
+    " ax:", hex(r.ax, 4L),
+    " bx:", hex(r.bx, 4L),
+    " cx:", hex(r.cx, 4L),
+    " dx:", hex(r.dx, 4L),
+    " si:", hex(r.si, 4L),
+    " di:", hex(r.di, 4L),
+    " bp:", hex(r.bp, 4L),
+    " sp:", hex(r.sp, 4L),
+    " ip:", hex(r.ip, 4L),
+    " cs:", hex(r.cs, 4L),
+    " ds:", hex(r.ds, 4L),
+    " es:", hex(r.es, 4L),
+    " ss:", hex(r.ss, 4L), " ",
+    r.f.m ? "M" : "m",
+    r.f.v ? "V" : "v",
+    r.f.d ? "D" : "d",
+    r.f.i ? "I" : "i",
+    r.f.b ? "B" : "b",
+    r.f.s ? "S" : "s",
+    r.f.z ? "Z" : "z",
+    r.f.h ? "H" : "h",
+    r.f.p ? "P" : "p",
+    r.f.c ? "C" : "c"
+  );
+
+  return output;
 }

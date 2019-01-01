@@ -40,6 +40,22 @@ auto pLabel::setText(const string& text) -> void {
   qtLabel->update();
 }
 
+auto QtLabel::mousePressEvent(QMouseEvent* event) -> void {
+  switch(event->button()) {
+  case Qt::LeftButton: p.self().doMousePress(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMousePress(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMousePress(Mouse::Button::Right); break;
+  }
+}
+
+auto QtLabel::mouseReleaseEvent(QMouseEvent* event) -> void {
+  switch(event->button()) {
+  case Qt::LeftButton: p.self().doMouseRelease(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMouseRelease(Mouse::Button::Right); break;
+  }
+}
+
 //QLabel ignores QPalette ... so we have to implement our own Label class atop QWidget ...
 auto QtLabel::paintEvent(QPaintEvent* event) -> void {
   QPainter painter(p.qtLabel);

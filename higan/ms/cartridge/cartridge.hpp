@@ -27,18 +27,8 @@ struct Cartridge {
     string title;
   } information;
 
-  struct Memory {
-    uint8* data = nullptr;
-    uint size = 0;
-    uint mask = 0;
-
-    static auto mirror(uint addr, uint size) -> uint;
-    auto read(uint addr) -> uint8;
-    auto write(uint addr, uint8 data) -> void;
-  };
-
-  Memory rom;
-  Memory ram;
+  Emulator::Memory::Readable<uint8> rom;
+  Emulator::Memory::Writable<uint8> ram;
 
   struct Mapper {
     //$fffc

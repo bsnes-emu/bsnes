@@ -8,6 +8,8 @@ namespace hiro {
 static vector<pTimer*> timers;
 
 static auto CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) -> void {
+  if(Application::state().quit) return;
+
   for(auto& timer : timers) {
     if(timer->htimer == timerID) return timer->self().doActivate();
   }

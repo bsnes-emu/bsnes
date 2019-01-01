@@ -14,7 +14,7 @@ auto Cartridge::read(uint16 addr) -> maybe<uint8> {
   }
 
   case 2: {
-    if(mapper.ramEnablePage2) {
+    if(ram && mapper.ramEnablePage2) {
       return ram.read(mapper.ramPage2 << 14 | addr);
     }
 
@@ -22,7 +22,7 @@ auto Cartridge::read(uint16 addr) -> maybe<uint8> {
   }
 
   case 3: {
-    if(mapper.ramEnablePage3) {
+    if(ram && mapper.ramEnablePage3) {
       return ram.read(addr);
     }
 
@@ -69,7 +69,7 @@ auto Cartridge::write(uint16 addr, uint8 data) -> bool {
   }
 
   case 2: {
-    if(mapper.ramEnablePage2) {
+    if(ram && mapper.ramEnablePage2) {
       ram.write(mapper.ramPage2 << 14 | addr, data);
       return true;
     }
@@ -78,7 +78,7 @@ auto Cartridge::write(uint16 addr, uint8 data) -> bool {
   }
 
   case 3: {
-    if(mapper.ramEnablePage3) {
+    if(ram && mapper.ramEnablePage3) {
       ram.write(addr, data);
       return true;
     }

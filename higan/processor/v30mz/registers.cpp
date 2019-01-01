@@ -1,7 +1,7 @@
 auto V30MZ::repeat() -> uint8 {
   for(auto prefix : prefixes) {
-    if(prefix == RepeatWhileZero) return prefix;
-    if(prefix == RepeatWhileNotZero) return prefix;
+    if(prefix == RepeatWhileZeroLo) return prefix;
+    if(prefix == RepeatWhileZeroHi) return prefix;
   }
   return {};
 }

@@ -47,7 +47,7 @@ auto V30MZ::instruction() -> void {
   op(0x0c, OrAccImm, Byte)
   op(0x0d, OrAccImm, Word)
   op(0x0e, PushReg, r.cs)
-//op(0x0f, ...)  //pop cs
+  op(0x0f, PopReg, r.cs)
   op(0x10, AdcMemReg, Byte)
   op(0x11, AdcMemReg, Word)
   op(0x12, AdcRegMem, Byte)
@@ -132,10 +132,10 @@ auto V30MZ::instruction() -> void {
   op(0x61, PopAll)
   op(0x62, Bound)
 //op(0x63, ...)
-//op(0x64, ...)
-//op(0x65, ...)
-//op(0x66, ...)
-//op(0x67, ...)
+//op(0x64, ...)  repnc
+//op(0x65, ...)  repc
+//op(0x66, ...)  fpo2
+//op(0x67, ...)  fpo2
   op(0x68, PushImm, Word)
   op(0x69, MultiplySignedRegMemImm, Word)
   op(0x6a, PushImm, Byte)
@@ -246,8 +246,8 @@ auto V30MZ::instruction() -> void {
   op(0xd3, Group2MemImm, Word, (uint8)r.cl)
   op(0xd4, AdjustAfterMultiply)
   op(0xd5, AdjustAfterDivide)
-//op(0xd6, ...)
-  op(0xd7, Translate)
+  op(0xd6, Translate)  //xlat (undocumented mirror)
+  op(0xd7, Translate)  //xlat
 //op(0xd8, ...)  //fpo1
 //op(0xd9, ...)  //fpo1
 //op(0xda, ...)  //fpo1
@@ -274,8 +274,8 @@ auto V30MZ::instruction() -> void {
   op(0xef, OutDX, Word)
   op(0xf0, Lock)
 //op(0xf1, ...)
-  op(0xf2, Repeat, 0)  //repnz
-  op(0xf3, Repeat, 1)  //repz
+  op(0xf2, Repeat)  //repnz
+  op(0xf3, Repeat)  //repz
   op(0xf4, Halt)
   op(0xf5, ComplementCarry)
   op(0xf6, Group3MemImm, Byte)

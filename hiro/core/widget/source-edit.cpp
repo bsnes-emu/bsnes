@@ -7,7 +7,7 @@ auto mSourceEdit::allocate() -> pObject* {
 //
 
 auto mSourceEdit::cursor() const -> Cursor {
-  return state.cursor;
+  return signal(cursor);
 }
 
 auto mSourceEdit::doChange() const -> void {
@@ -22,6 +22,14 @@ auto mSourceEdit::editable() const -> bool {
   return state.editable;
 }
 
+auto mSourceEdit::language() const -> string {
+  return state.language;
+}
+
+auto mSourceEdit::numbered() const -> bool {
+  return state.numbered;
+}
+
 auto mSourceEdit::onChange(const function<void ()>& callback) -> type& {
   state.onChange = callback;
   return *this;
@@ -32,8 +40,11 @@ auto mSourceEdit::onMove(const function<void ()>& callback) -> type& {
   return *this;
 }
 
+auto mSourceEdit::scheme() const -> string {
+  return state.scheme;
+}
+
 auto mSourceEdit::setCursor(Cursor cursor) -> type& {
-  state.cursor = cursor;
   signal(setCursor, cursor);
   return *this;
 }
@@ -41,6 +52,24 @@ auto mSourceEdit::setCursor(Cursor cursor) -> type& {
 auto mSourceEdit::setEditable(bool editable) -> type& {
   state.editable = editable;
   signal(setEditable, editable);
+  return *this;
+}
+
+auto mSourceEdit::setLanguage(const string& language) -> type& {
+  state.language = language;
+  signal(setLanguage, language);
+  return *this;
+}
+
+auto mSourceEdit::setNumbered(bool numbered) -> type& {
+  state.numbered = numbered;
+  signal(setNumbered, numbered);
+  return *this;
+}
+
+auto mSourceEdit::setScheme(const string& scheme) -> type& {
+  state.scheme = scheme;
+  signal(setScheme, scheme);
   return *this;
 }
 

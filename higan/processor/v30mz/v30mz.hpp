@@ -1,4 +1,44 @@
-//NEC V30MZ
+//NEC V30MZ (reduced functionality NEC V30 for embedded use)
+
+//V30 missing instructions:
+//  0f 10,11,18,19  test1
+//  0f 12,13,1a,1b  clr1
+//  0f 14,15,1c,1d  set1
+//  0f 16,17,1e,1f  not1
+//  0f 20           add4s
+//  0f 22           sub4s
+//  0f 26           cmp4s
+//  0f 28           rol4
+//  0f 2a           ror4
+//  0f 31,39        ins
+//  0f 33,3b        ext
+//  0f ff           brkem (8080 emulation mode) [retem, calln]
+//  64              repnc
+//  65              repc
+//  66,67           fpo2
+//  d8-df           fpo1
+
+//x86 variant instructions:
+//  8f c0-c7  pop reg [CPU bug: pops from stack; fails to set register]
+//  d4 xx     aam [ignores the immediate; always uses (base) 10]
+//  d5 xx     aad [ignores the immediate; always uses (base) 10]
+//  d6        xlat (mirror of d7) [this is salc on x86 CPUs]
+//  f1        ??? [this is int 0x1 on x86 CPUs; said to be a two-byte NOP on V20; unknown on V30/V30MZ]
+//  ff f8-ff  push (mirror of ff f0-f7)
+
+//x86 unemulated variation:
+//  after interrupts, NEC V20/V30 CPUs resume string instructions with prefixes intact. unlike x86 CPUs
+//  I need more information on this behavior in order to emulate it ...
+//  also, the opcode f1 behavior is not currently known
+
+//V30 opcode prefix functionality:
+//  there is a seven-level stack for opcode prefixes. once full, older prefixes are pushed off the stack
+
+//other notes:
+//  0f     pop cs (not nop) [on the V20; the V30 uses this for instruction extensions; unsure on the V30MZ]
+//  8e xx  mov cs,modRM (works as expected; able to set CS)
+
+//I currently emulate opcode 0f as pop cs, although it's unknown if that is correct.
 
 #pragma once
 
@@ -13,8 +53,8 @@ struct V30MZ {
     SegmentOverrideSS  = 0x36,
     SegmentOverrideDS  = 0x3e,
     Lock               = 0xf0,
-    RepeatWhileNotZero = 0xf2,
-    RepeatWhileZero    = 0xf3,
+    RepeatWhileZeroLo  = 0xf2,
+    RepeatWhileZeroHi  = 0xf3,
   };
 
   virtual auto wait(uint clocks = 1) -> void = 0;
@@ -169,7 +209,7 @@ struct V30MZ {
 
   //instructions-misc.cpp
   auto instructionSegment(uint16) -> void;
-  auto instructionRepeat(bool) -> void;
+  auto instructionRepeat() -> void;
   auto instructionLock() -> void;
   auto instructionWait() -> void;
   auto instructionHalt() -> void;
@@ -209,7 +249,8 @@ struct V30MZ {
   auto serialize(serializer&) -> void;
 
   //disassembler.cpp
-  auto disassemble(uint16 cs, uint16 ip, bool registers = true, bool bytes = true) -> string;
+  auto disassemble() -> string;
+  auto disassemble(uint16 cs, uint16 ip) -> string;
 
   struct State {
     bool halt;    //set to true for hlt instruction; blocks execution until next interrupt

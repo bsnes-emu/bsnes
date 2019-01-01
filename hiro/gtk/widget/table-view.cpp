@@ -294,30 +294,40 @@ auto pTableView::_doEdit(GtkCellRendererText* gtkCellRendererText, const char* p
   }
 }
 
-auto pTableView::_doEvent(GdkEventButton* event) -> signed {
-  GtkTreePath* path = nullptr;
-  gtk_tree_view_get_path_at_pos(gtkTreeView, event->x, event->y, &path, nullptr, nullptr, nullptr);
+auto pTableView::_doEvent(GdkEventButton* gdkEvent) -> signed {
+  if(gdkEvent->type == GDK_BUTTON_PRESS) {
+    //detect when the empty space of the GtkTreeView is clicked; and clear the selection
+    GtkTreePath* gtkPath = nullptr;
+    gtk_tree_view_get_path_at_pos(gtkTreeView, gdkEvent->x, gdkEvent->y, &gtkPath, nullptr, nullptr, nullptr);
+    if(!gtkPath) {
+      //the first time a GtkTreeView widget is clicked, even if the empty space of the widget is clicked,
+      //a "changed" signal will be sent after the "button-press-event", to activate the first item in the tree
+      //this is undesirable, so set a flag to undo the next selection change during the "changed" signal
+      suppressChange = true;
+      if(gtk_tree_selection_count_selected_rows(gtkTreeSelection) > 0) {
+        gtk_tree_selection_unselect_all(gtkTreeSelection);
+        for(auto& item : state().items) item->setSelected(false);
+        self().doChange();
+        return true;
+      }
+    }
 
-  if(event->type == GDK_BUTTON_PRESS) {
-    //when clicking in empty space below the last table view item; GTK+ does not deselect all items;
-    //below code enables this functionality, to match behavior with all other UI toolkits (and because it's very convenient to have)
-    if(path == nullptr && gtk_tree_selection_count_selected_rows(gtkTreeSelection) > 0) {
-      for(auto& item : state().items) item->setSelected(false);
-      self().doChange();
-      return true;
+    if(gdkEvent->button == 3) {
+      //multi-selection mode:
+      //if multiple items are selected, and one item is right-clicked on (for a context menu), GTK clears selection on all other items
+      //block this behavior so that onContext() handler can work on more than one selected item at a time
+      if(gtkPath && gtk_tree_selection_path_is_selected(gtkTreeSelection, gtkPath)) return true;
     }
   }
 
-  if(event->type == GDK_BUTTON_PRESS && event->button == 3) {
-    //this check prevents the loss of selection on other items if the item under the mouse cursor is currently selected
-    if(path && gtk_tree_selection_path_is_selected(gtkTreeSelection, path)) return true;
-  }
-
-  if(event->type == GDK_BUTTON_RELEASE && event->button == 3) {
-    //handle action during right-click release; as button-press-event is sent prior to selection update
-    //without this, the callback handler would see the previous selection state instead
-    self().doContext();
-    return false;
+  if(gdkEvent->type == GDK_BUTTON_RELEASE) {
+    suppressChange = false;
+    if(gdkEvent->button == 3) {
+      //handle action during right-click release; as button-press-event is sent prior to selection update
+      //without this, the callback handler would see the previous selection state instead
+      self().doContext();
+      return false;
+    }
   }
 
   return false;
@@ -365,6 +375,12 @@ auto pTableView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const c
 //this prevents firing an onChange event when the actual selection has not changed
 //this is particularly important for the motion-notify-event binding
 auto pTableView::_updateSelected() -> void {
+  if(suppressChange) {
+    suppressChange = false;
+    gtk_tree_selection_unselect_all(gtkTreeSelection);
+    return;
+  }
+
   vector<unsigned> selected;
 
   GList* list = gtk_tree_selection_get_selected_rows(gtkTreeSelection, &gtkTreeModel);

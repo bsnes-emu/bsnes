@@ -39,8 +39,8 @@ struct CPU : Processor::Z80, Processor::Z80::Bus, Thread {
   vector<Thread*> peripherals;
 
 private:
-  Emulator::WritableMemory<uint8> ram;
-  Emulator::WritableMemory<uint8> expansion;
+  Emulator::Memory::Writable<uint8> ram;
+  Emulator::Memory::Writable<uint8> expansion;
 
   struct State {
     bool nmiLine = 0;

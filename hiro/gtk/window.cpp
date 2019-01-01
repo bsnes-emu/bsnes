@@ -329,7 +329,9 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   setMinimumSize(state().minimumSize);
 
   auto time1 = chrono::millisecond();
-  while(chrono::millisecond() - time1 < 20) Application::processEvents();
+  while(chrono::millisecond() - time1 < 20) {
+    Application::processEvents();
+  }
 
   gtk_window_resize(GTK_WINDOW(widget), geometry.width(), geometry.height() + _menuHeight() + _statusHeight());
 
@@ -627,7 +629,7 @@ auto pWindow::_synchronizeState() -> void {
   if(!gtk_widget_get_realized(widget)) return;
 
   #if defined(DISPLAY_WINDOWS)
-  auto window = GDK_WINDOW_HWND(gtk_widget_get_window(widget));
+  auto window = (HWND)GDK_WINDOW_HWND(gtk_widget_get_window(widget));
 
   bool maximized = IsZoomed(window);
   bool minimized = IsIconic(window);

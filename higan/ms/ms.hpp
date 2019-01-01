@@ -6,7 +6,6 @@
 #include <emulator/emulator.hpp>
 #include <emulator/thread.hpp>
 #include <emulator/scheduler.hpp>
-#include <emulator/memory.hpp>
 #include <emulator/cheat.hpp>
 
 #include <processor/z80/z80.hpp>

@@ -32,7 +32,8 @@ auto V30MZ::instructionAdjustAfterMultiply() -> void {
   wait(16);
   auto imm = fetch();
   if(imm == 0) return interrupt(0);
-  r.ah = r.al / imm;
+  //NEC CPUs do not honor the immediate and always use (base) 10
+  r.ah = r.al / 10;
   r.al %= imm;
   r.f.p = parity(r.al);
   r.f.s = r.ax & 0x8000;
@@ -42,7 +43,8 @@ auto V30MZ::instructionAdjustAfterMultiply() -> void {
 auto V30MZ::instructionAdjustAfterDivide() -> void {
   wait(5);
   auto imm = fetch();
-  r.al += r.ah * imm;
+  //NEC CPUs do not honor the immediate and always use (base) 10
+  r.al += r.ah * 10;
   r.ah = 0;
   r.f.p = parity(r.al);
   r.f.s = r.ax & 0x8000;

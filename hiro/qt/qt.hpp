@@ -189,6 +189,8 @@ struct QtLabel : public QWidget {
   Q_OBJECT
 public:
   QtLabel(pLabel& p) : p(p) {}
+  auto mousePressEvent(QMouseEvent*) -> void;
+  auto mouseReleaseEvent(QMouseEvent*) -> void;
   auto paintEvent(QPaintEvent*) -> void;
   pLabel& p;
 };

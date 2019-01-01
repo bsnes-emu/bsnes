@@ -72,6 +72,14 @@ auto Color::setRed(signed red) -> type& {
   return *this;
 }
 
+auto Color::setValue(uint32_t value) -> type& {
+  state.alpha = value >> 24 & 255;
+  state.red   = value >> 16 & 255;
+  state.green = value >>  8 & 255;
+  state.blue  = value >>  0 & 255;
+  return *this;
+}
+
 auto Color::value() const -> uint32_t {
   return state.alpha << 24 | state.red << 16 | state.green << 8 | state.blue << 0;
 }

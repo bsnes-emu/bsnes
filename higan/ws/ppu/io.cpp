@@ -15,7 +15,8 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   );
 
   //LINE_CUR
-  if(addr == 0x0002) return s.vclk;
+  //todo: unknown if this is vtime or vtime%(vtotal+1)
+  if(addr == 0x0002) return s.vtime;
 
   //LINE_CMP
   if(addr == 0x0003) return r.lineCompare;
@@ -93,8 +94,8 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   //LCD_VTOTAL
   if(addr == 0x0016) return r.vtotal;
 
-  //LCD_VBLANK
-  if(addr == 0x0017) return r.vblank;
+  //LCD_VSYNC
+  if(addr == 0x0017) return r.vsync;
 
   //PALMONO_POOL
   if(addr >= 0x001c && addr <= 0x001f) return (
@@ -232,8 +233,8 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
   //LCD_VTOTAL
   if(addr == 0x0016) r.vtotal = data;
 
-  //LCD_VBLANK
-  if(addr == 0x0017) r.vblank = data;
+  //LCD_VSYNC
+  if(addr == 0x0017) r.vsync = data;
 
   //PALMONO_POOL
   if(addr >= 0x001c && addr <= 0x001f) {

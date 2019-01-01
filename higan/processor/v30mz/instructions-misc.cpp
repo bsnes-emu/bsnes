@@ -5,7 +5,7 @@ auto V30MZ::instructionSegment(uint16 segment) -> void {
   state.poll = false;
 }
 
-auto V30MZ::instructionRepeat(bool flag) -> void {
+auto V30MZ::instructionRepeat() -> void {
   if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   wait(4);

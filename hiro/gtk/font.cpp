@@ -16,7 +16,8 @@ auto pFont::size(PangoFontDescription* font, const string& text) -> Size {
   pango_layout_set_text(layout, text, -1);
   int width = 0, height = 0;
   pango_layout_get_pixel_size(layout, &width, &height);
-  g_object_unref((gpointer)layout);
+  g_object_unref(layout);
+  g_object_unref(context);
   return {width, height};
 }
 
@@ -29,7 +30,7 @@ auto pFont::family(const string& family) -> string {
   #elif defined(DISPLAY_XORG)
   if(family == Font::Sans ) return "Sans";
   if(family == Font::Serif) return "Serif";
-  if(family == Font::Mono ) return "Liberation Mono";
+  if(family == Font::Mono ) return "Monospace";
   return family ? family : "Sans";
   #else
   return family;

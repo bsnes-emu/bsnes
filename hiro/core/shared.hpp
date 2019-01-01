@@ -52,10 +52,12 @@
 
 #define DeclareSharedSizable(Name) \
   DeclareSharedObject(Name) \
+  auto collapsible() const { return self().collapsible(); } \
   auto doSize() const { return self().doSize(); } \
   auto geometry() const { return self().geometry(); } \
   auto minimumSize() const { return self().minimumSize(); } \
   auto onSize(const function<void ()>& callback = {}) { return self().onSize(callback), *this; } \
+  auto setCollapsible(bool collapsible = true) { return self().setCollapsible(collapsible), *this; } \
   auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; } \
 
 #define DeclareSharedWidget(Name) \
@@ -461,7 +463,11 @@ struct Label : sLabel {
 
   auto alignment() const { return self().alignment(); }
   auto backgroundColor() const { return self().backgroundColor(); }
+  auto doMousePress(Mouse::Button button) const { return self().doMousePress(button); }
+  auto doMouseRelease(Mouse::Button button) const { return self().doMouseRelease(button); }
   auto foregroundColor() const { return self().foregroundColor(); }
+  auto onMousePress(const function<void (Mouse::Button)>& callback = {}) { return self().onMousePress(callback), *this; }
+  auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) { return self().onMouseRelease(callback), *this; }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
@@ -540,10 +546,16 @@ struct SourceEdit : sSourceEdit {
   auto doChange() const { return self().doChange(); }
   auto doMove() const { return self().doMove(); }
   auto editable() const { return self().editable(); }
+  auto language() const { return self().language(); }
+  auto numbered() const { return self().numbered(); }
   auto onChange(const function<void ()>& callback = {}) { return self().onChange(callback), *this; }
   auto onMove(const function<void ()>& callback = {}) { return self().onMove(callback), *this; }
+  auto scheme() const { return self().scheme(); }
   auto setCursor(Cursor cursor = {}) { return self().setCursor(cursor), *this; }
   auto setEditable(bool editable = true) { return self().setEditable(editable), *this; }
+  auto setLanguage(const string& language = "") { return self().setLanguage(language), *this; }
+  auto setNumbered(bool numbered = true) { return self().setNumbered(numbered), *this; }
+  auto setScheme(const string& scheme = "") { return self().setScheme(scheme), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto setWordWrap(bool wordWrap = true) { return self().setWordWrap(wordWrap), *this; }
   auto text() const { return self().text(); }
@@ -749,6 +761,7 @@ struct TreeViewItem : sTreeViewItem {
   auto backgroundColor() const { return self().backgroundColor(); }
   auto checkable() const { return self().checkable(); }
   auto checked() const { return self().checked(); }
+  auto expanded() const { return self().expanded(); }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto icon() const { return self().icon(); }
   auto item(const string& path) const { return self().item(path); }

@@ -10,6 +10,9 @@ auto pApplication::run() -> void {
   while(!Application::state().quit) {
     Application::doMain();
     processEvents();
+    //avoid spinlooping the thread when there is no main loop ...
+    //when there is one, Application::onMain() is expected to sleep when possible instead
+    if(!Application::state().onMain) usleep(2000);
   }
 }
 
@@ -18,7 +21,13 @@ auto pApplication::pendingEvents() -> bool {
 }
 
 auto pApplication::processEvents() -> void {
-  while(pendingEvents()) gtk_main_iteration_do(false);
+  //GTK can sometimes return gtk_pending_events() == true forever,
+  //no matter how many times gtk_main_iteration_do() is called.
+  //implement a timeout to prevent hiro from hanging forever in this case.
+  auto time = chrono::millisecond();
+  while(pendingEvents() && chrono::millisecond() - time < 50) {
+    gtk_main_iteration_do(false);
+  }
   for(auto& window : state().windows) window->_synchronizeGeometry();
 }
 

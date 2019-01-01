@@ -40,8 +40,8 @@ auto V30MZ::instructionGroup3MemImm(Size size) -> void {
   modRM();
   auto mem = getMem(size);
   switch(modrm.reg) {
-  case 0: AND(size, mem, fetch(size)); break;
-  case 1: warning("[V30MZ] GRP3.1"); break;
+  case 0: AND(size, mem, fetch(size)); break;  //test
+  case 1: AND(size, mem, fetch(size)); break;  //test (undocumented mirror)
   case 2: wait(2); setMem(size, NOT(size, mem)); break;
   case 3: wait(2); setMem(size, NEG(size, mem)); break;
   case 4: wait(2); setAcc(size * 2, MUL(size, getAcc(size), mem)); break;
@@ -54,46 +54,42 @@ auto V30MZ::instructionGroup3MemImm(Size size) -> void {
 auto V30MZ::instructionGroup4MemImm(Size size) -> void {
   modRM();
   switch(modrm.reg) {
-  case 0:
+  case 0:  //inc
     wait(2);
     setMem(size, INC(size, getMem(size)));
     break;
-  case 1:
+  case 1:  //dec
     wait(2);
     setMem(size, DEC(size, getMem(size)));
     break;
-  case 2:
-    if(size == Byte) { warning("[V30MZ] GRP4.2"); break; }
+  case 2:  //call
     wait(5);
     push(r.ip);
     r.ip = getMem(Word);
     break;
-  case 3:
-    if(size == Byte) { warning("[V30MZ] GRP4.3"); break; }
+  case 3:  //callf
     wait(11);
     push(r.cs);
     push(r.ip);
     r.ip = getMem(Word, 0);
     r.cs = getMem(Word, 2);
     break;
-  case 4:
-    if(size == Byte) { warning("[V30MZ] GRP4.4"); break; }
+  case 4:  //jmp
     wait(4);
     r.ip = getMem(Word);
     break;
-  case 5:
-    if(size == Byte) { warning("[V30MZ] GRP4.5"); break; }
+  case 5:  //jmpf
     wait(9);
     r.ip = getMem(Word, 0);
     r.cs = getMem(Word, 2);
     break;
-  case 6:
-    if(size == Byte) { warning("[V30MZ] GRP4.6"); break; }
+  case 6:  //push
     wait(1);
     push(getMem(Word));
     break;
-  case 7:
-    warning("[V30MZ] GRP4.7");
+  case 7:  //push (undocumented mirror)
+    wait(1);
+    push(getMem(Word));
     break;
   }
 }

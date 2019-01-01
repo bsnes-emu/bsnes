@@ -5,12 +5,35 @@ struct System {
   auto loaded() const -> bool { return information.loaded; }
   auto model() const -> Model { return information.model; }
   auto region() const -> Region { return information.region; }
+  auto colorburst() const -> double { return information.colorburst; }
+
+  //system.cpp
+  auto run() -> void;
+  auto runToSave() -> void;
+
+  auto load(Emulator::Interface*, Model) -> bool;
+  auto save() -> void;
+  auto unload() -> void;
+
+  auto power() -> void;
+
+  //serialization.cpp
+  auto serializeInit() -> void;
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+  auto serializeAll(serializer&) -> void;
+  auto serialize(serializer&) -> void;
+
+private:
+  Emulator::Interface* interface = nullptr;
 
   struct Information {
-    string manifest;
     bool loaded = false;
     Model model = Model::MSX;
     Region region = Region::NTSC;
+    double colorburst = Emulator::Constants::Colorburst::NTSC;
+    string manifest;
+    uint serializeSize = 0;
   } information;
 };
 

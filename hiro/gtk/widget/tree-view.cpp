@@ -25,6 +25,8 @@ auto pTreeView::construct() -> void {
   gtkTreeView = GTK_TREE_VIEW(gtkWidgetChild);
   gtkTreeSelection = gtk_tree_view_get_selection(gtkTreeView);
   gtk_tree_view_set_headers_visible(gtkTreeView, false);
+  gtk_tree_view_set_show_expanders(gtkTreeView, false);
+  gtk_tree_view_set_level_indentation(gtkTreeView, 20);
   gtk_container_add(GTK_CONTAINER(gtkWidget), gtkWidgetChild);
   gtk_widget_show(gtkWidgetChild);
 
@@ -58,10 +60,19 @@ auto pTreeView::construct() -> void {
   g_signal_connect(G_OBJECT(gtkTreeSelection), "changed", G_CALLBACK(TreeView_change), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkCellToggle), "toggled", G_CALLBACK(TreeView_toggle), (gpointer)this);
 
+  //Ctrl+F triggers a small popup window at the bottom of the GtkTreeView, which clears the currently selected item(s)
+  //this is undesirable for amethyst, which uses the active item to display a document to edit, and binds Ctrl+F to a document find function
+  //for now, disable GtkTreeView's interactive search: longer term, more thought will need to go into if this is ever desirable or not
+  //gtk_tree_view_set_enable_search(gtkTreeView, false) does not work
+  //gtk_tree_view_set_search_column(gtkTreeView, -1) does not work
+  gtkEntry = (GtkEntry*)gtk_entry_new();
+  gtk_tree_view_set_search_entry(gtkTreeView, gtkEntry);
+
   pWidget::construct();
 }
 
 auto pTreeView::destruct() -> void {
+  gtk_widget_destroy(GTK_WIDGET(gtkEntry));
   gtk_widget_destroy(gtkWidgetChild);
   gtk_widget_destroy(gtkWidget);
 }
@@ -105,24 +116,39 @@ auto pTreeView::_activatePath(GtkTreePath* gtkPath) -> void {
 }
 
 auto pTreeView::_buttonEvent(GdkEventButton* gdkEvent) -> signed {
-  GtkTreePath* gtkPath = nullptr;
-  gtk_tree_view_get_path_at_pos(gtkTreeView, gdkEvent->x, gdkEvent->y, &gtkPath, nullptr, nullptr, nullptr);
-
   if(gdkEvent->type == GDK_BUTTON_PRESS) {
     //detect when the empty space of the GtkTreeView is clicked; and clear the selection
-    if(gtkPath == nullptr && gtk_tree_selection_count_selected_rows(gtkTreeSelection) > 0) {
-      gtk_tree_selection_unselect_all(gtkTreeSelection);
-      state().selectedPath.reset();
-      self().doChange();
-      return true;
+    GtkTreePath* gtkPath = nullptr;
+    gtk_tree_view_get_path_at_pos(gtkTreeView, gdkEvent->x, gdkEvent->y, &gtkPath, nullptr, nullptr, nullptr);
+    if(!gtkPath) {
+      //the first time a GtkTreeView widget is clicked, even if the empty space of the widget is clicked,
+      //a "changed" signal will be sent after the "button-press-event", to activate the first item in the tree
+      //this is undesirable, so set a flag to undo the next selection change during the "changed" signal
+      suppressChange = true;
+      if(gtk_tree_selection_count_selected_rows(gtkTreeSelection) > 0) {
+        gtk_tree_selection_unselect_all(gtkTreeSelection);
+        state().selectedPath.reset();
+        self().doChange();
+        return true;
+      }
+    }
+
+    if(gdkEvent->button == 3) {
+      //multi-selection mode: (not implemented in TreeView yet ... but code is here anyway for future use)
+      //if multiple items are selected, and one item is right-clicked on (for a context menu), GTK clears selection on all other items
+      //block this behavior so that onContext() handler can work on more than one selected item at a time
+      if(gtkPath && gtk_tree_selection_path_is_selected(gtkTreeSelection, gtkPath)) return true;
     }
   }
 
-  if(gdkEvent->type == GDK_BUTTON_RELEASE && gdkEvent->button == 3) {
-    //handle right-click context menu
-    //have to detect on button release instead of press; as GTK+ does not update new selection prior to press event
-    self().doContext();
-    return false;
+  if(gdkEvent->type == GDK_BUTTON_RELEASE) {
+    suppressChange = false;
+    if(gdkEvent->button == 3) {
+      //handle action during right-click release; as button-press-event is sent prior to selection update
+      //without this, the callback handler would see the previous selection state instead
+      self().doContext();
+      return false;
+    }
   }
 
   return false;
@@ -173,6 +199,12 @@ auto pTreeView::_togglePath(string path) -> void {
 }
 
 auto pTreeView::_updateSelected() -> void {
+  if(suppressChange) {
+    suppressChange = false;
+    gtk_tree_selection_unselect_all(gtkTreeSelection);
+    return;
+  }
+
   GtkTreeIter iter;
   if(gtk_tree_selection_get_selected(gtkTreeSelection, &gtkTreeModel, &iter)) {
     char* gtkPath = gtk_tree_model_get_string_from_iter(gtkTreeModel, &iter);

@@ -39,6 +39,10 @@ auto mTreeViewItem::checked() const -> bool {
   return state.checked;
 }
 
+auto mTreeViewItem::expanded() const -> bool {
+  return state.expanded;
+}
+
 auto mTreeViewItem::foregroundColor(bool recursive) const -> Color {
   if(auto color = state.foregroundColor) return color;
   if(recursive) {
@@ -122,6 +126,7 @@ auto mTreeViewItem::setChecked(bool checked) -> type& {
 }
 
 auto mTreeViewItem::setExpanded(bool expanded) -> type& {
+  state.expanded = expanded;
   signal(setExpanded, expanded);
   return *this;
 }

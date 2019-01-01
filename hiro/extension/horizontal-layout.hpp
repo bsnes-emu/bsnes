@@ -49,6 +49,7 @@ struct mHorizontalLayoutCell : mObject {
   using type = mHorizontalLayoutCell;
 
   auto alignment() const -> maybe<float>;
+  auto collapsible() const -> bool;
   auto setAlignment(maybe<float> alignment) -> type&;
   auto setEnabled(bool enabled) -> type& override;
   auto setFont(const Font& font) -> type& override;

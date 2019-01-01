@@ -44,6 +44,7 @@ struct pTableView : pWidget {
   GtkListStore* gtkListStore = nullptr;
   GtkTreeModel* gtkTreeModel = nullptr;
   vector<uint> currentSelection;
+  bool suppressChange = false;
 };
 
 }

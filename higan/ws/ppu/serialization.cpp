@@ -2,8 +2,7 @@ auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.integer(this->s.field);
-  s.integer(this->s.vclk);
-  s.integer(this->s.hclk);
+  s.integer(this->s.vtime);
   s.integer((uint&)this->s.pixel.source);
   s.integer(this->s.pixel.color);
 
@@ -70,7 +69,7 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(r.iconAux2);
   s.integer(r.iconAux3);
   s.integer(r.vtotal);
-  s.integer(r.vblank);
+  s.integer(r.vsync);
   s.array(r.pool);
   for(uint n : range(16)) s.array(r.palette[n].color);
   s.integer(r.htimerEnable);

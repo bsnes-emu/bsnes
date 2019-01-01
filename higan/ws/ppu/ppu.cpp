@@ -13,22 +13,24 @@ auto PPU::Enter() -> void {
 }
 
 auto PPU::main() -> void {
-  if(s.vclk == 142) {
+  if(s.vtime == 142) {
     latchOAM();
   }
 
-  if(s.vclk < 144) {
+  if(s.vtime < 144) {
+    uint y = s.vtime % (r.vtotal + 1);
+    auto output = this->output + y * 224;
     latchRegisters();
-    latchSprites();
-    for(auto x : range(224)) {
+    latchSprites(y);
+    for(uint x : range(224)) {
       s.pixel = {Pixel::Source::Back, 0x000};
       if(r.lcdEnable) {
         renderBack();
-        if(l.screenOneEnable) renderScreenOne();
-        if(l.screenTwoEnable) renderScreenTwo();
-        if(l.spriteEnable) renderSprite();
+        if(l.screenOneEnable) renderScreenOne(x, y);
+        if(l.screenTwoEnable) renderScreenTwo(x, y);
+        if(l.spriteEnable) renderSprite(x, y);
       }
-      output[s.vclk * 224 + x] = s.pixel.color;
+      *output++ = s.pixel.color;
       step(1);
     }
     step(32);
@@ -48,13 +50,14 @@ auto PPU::main() -> void {
   }
 }
 
+//vtotal+1 = scanlines per frame
+//vtotal<143 inhibits vblank and repeats the screen image until vtime=144
+//todo: unknown how votal<143 interferes with line compare interrupts
 auto PPU::scanline() -> void {
-  s.hclk = 0;
-  if(++s.vclk == 159) frame();
-  if(s.vclk == r.lineCompare) {
-    cpu.raise(CPU::Interrupt::LineCompare);
-  }
-  if(s.vclk == 144) {
+  s.vtime++;
+  if(s.vtime >= max(144, r.vtotal + 1)) return frame();
+  if(s.vtime == r.lineCompare) cpu.raise(CPU::Interrupt::LineCompare);
+  if(s.vtime == 144) {
     cpu.raise(CPU::Interrupt::Vblank);
     if(r.vtimerEnable && r.vtimerCounter < r.vtimerFrequency) {
       if(++r.vtimerCounter == r.vtimerFrequency) {
@@ -71,7 +74,7 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   s.field = !s.field;
-  s.vclk = 0;
+  s.vtime = 0;
   scheduler.exit(Scheduler::Event::Frame);
 }
 
@@ -80,8 +83,6 @@ auto PPU::refresh() -> void {
 }
 
 auto PPU::step(uint clocks) -> void {
-  s.hclk += clocks;
-
   Thread::step(clocks);
   synchronize(cpu);
 }

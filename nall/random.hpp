@@ -7,10 +7,12 @@
 #include <nall/stdint.hpp>
 #include <nall/cipher/chacha20.hpp>
 
-#if defined(PLATFORM_LINUX)
+#if defined(PLATFORM_LINUX) && __has_include(<sys/random.h>)
   #include <sys/random.h>
-#elif defined(PLATFORM_WINDOWS)
+#elif defined(PLATFORM_WINDOWS) && __has_include(<wincrypt.h>)
   #include <wincrypt.h>
+#else
+  #include <stdio.h>
 #endif
 
 namespace nall {
@@ -37,18 +39,21 @@ protected:
     uint256_t seed = 0;
     #if defined(PLATFORM_BSD) || defined(PLATFORM_MACOS)
     for(uint n : range(8)) seed = seed << 32 | (uint32_t)arc4random();
-    #elif defined(PLATFORM_LINUX)
+    #elif defined(PLATFORM_LINUX) && __has_include(<sys/random.h>)
     getrandom(&seed, 32, GRND_NONBLOCK);
-    #elif defined(PLATFORM_WINDOWS)
+    #elif defined(PLATFORM_WINDOWS) && __has_include(<wincrypt.h>)
     HCRYPTPROV provider;
     if(CryptAcquireContext(&provider, nullptr, MS_STRONG_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
       CryptGenRandom(provider, 32, (BYTE*)&seed);
       CryptReleaseContext(provider, 0);
     }
     #else
-    //it's ... better than nothing ...
     srand(time(nullptr));
     for(uint n : range(32)) seed = seed << 8 | (uint8_t)rand();
+    if(auto fp = fopen("/dev/urandom", "rb")) {
+      fread(&seed, 32, 1, fp);
+      fclose(fp);
+    }
     #endif
     return seed;
   }

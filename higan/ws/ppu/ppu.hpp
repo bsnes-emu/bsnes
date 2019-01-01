@@ -13,7 +13,7 @@ struct PPU : Thread, IO {
 
   //latch.cpp
   auto latchRegisters() -> void;
-  auto latchSprites() -> void;
+  auto latchSprites(uint8 y) -> void;
   auto latchOAM() -> void;
 
   //render.cpp
@@ -21,9 +21,9 @@ struct PPU : Thread, IO {
   auto renderTransparent(bool palette, uint4 color) -> bool;
   auto renderPalette(uint4 palette, uint4 color) -> uint12;
   auto renderBack() -> void;
-  auto renderScreenOne() -> void;
-  auto renderScreenTwo() -> void;
-  auto renderSprite() -> void;
+  auto renderScreenOne(uint8 x, uint8 y) -> void;
+  auto renderScreenTwo(uint8 x, uint8 y) -> void;
+  auto renderSprite(uint8 x, uint8 y) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -38,9 +38,8 @@ struct PPU : Thread, IO {
   uint32 output[224 * 144];
 
   struct State {
-    bool field = 0;
-    uint vclk = 0;
-    uint hclk = 0;
+    uint1 field = 0;
+    uint8 vtime = 0;
     Pixel pixel;
   } s;
 
@@ -160,8 +159,8 @@ struct PPU : Thread, IO {
     //$0016  LCD_VTOTAL
     uint8 vtotal = 158;
 
-    //$0017  LCD_VBLANK
-    uint8 vblank = 155;
+    //$0017  LCD_VSYNC
+    uint8 vsync = 155;
 
     //$001c-001f  PALMONO_POOL
     uint4 pool[8];

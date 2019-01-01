@@ -105,7 +105,7 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //DMA_CTRL
   if(addr == 0x0048) {
-    r.dmaMode   = data.bit(0);
+    r.dmaMode   = data.bit(6);
     r.dmaEnable = data.bit(7);
     if(r.dmaEnable) dmaTransfer();
   }

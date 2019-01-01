@@ -106,3 +106,7 @@
 #if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_ListView) && defined(Hiro_MessageDialog)
   #define Hiro_BrowserDialog
 #endif
+
+#if defined(Hiro_Label)
+  #define Hiro_AboutDialog
+#endif

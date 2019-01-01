@@ -25,6 +25,7 @@ auto pTimer::setInterval(unsigned interval) -> void {
 }
 
 auto QtTimer::onActivate() -> void {
+  if(Application::state().quit) return;
   p.self().doActivate();
 }
 

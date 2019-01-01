@@ -17,7 +17,6 @@ namespace Processor {
 #include "instructions-move.cpp"
 #include "instructions-string.cpp"
 #include "serialization.cpp"
-#include "disassembler.cpp"
 
 auto V30MZ::warning(string text) -> void {
 //print(text, "\n");
@@ -53,5 +52,8 @@ auto V30MZ::exec() -> void {
   instruction();
   if(!state.prefix) prefixes.reset();
 }
+
+#undef bits
+#include "disassembler.cpp"
 
 }

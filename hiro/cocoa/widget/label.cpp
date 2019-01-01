@@ -1,5 +1,9 @@
 #if defined(Hiro_Label)
 
+//todo:
+//* Label::onButtonPress()
+//* Label::onButtonRelease()
+
 @implementation CocoaLabel : NSTextView
 
 -(id) initWith:(hiro::mLabel&)labelReference {

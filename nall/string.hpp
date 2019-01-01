@@ -80,6 +80,9 @@ inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> str
 inline auto tokenize(const char* s, const char* p) -> bool;
 inline auto tokenize(vector<string>& list, const char* s, const char* p) -> bool;
 
+//utf8.hpp
+inline auto characters(string_view self, int offset = 0, int length = -1) -> uint;
+
 //utility.hpp
 inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
 template<typename T> inline auto fromInteger(char* result, T value) -> char*;
@@ -210,6 +213,12 @@ public:
   inline auto findFrom(int offset, string_view source) const -> maybe<uint>;
   inline auto ifindFrom(int offset, string_view source) const -> maybe<uint>;
 
+  inline auto findNext(int offset, string_view source) const -> maybe<uint>;
+  inline auto ifindNext(int offset, string_view source) const -> maybe<uint>;
+
+  inline auto findPrevious(int offset, string_view source) const -> maybe<uint>;
+  inline auto ifindPrevious(int offset, string_view source) const -> maybe<uint>;
+
   //format.hpp
   inline auto format(const nall::string_format& params) -> type&;
 
@@ -269,6 +278,9 @@ public:
   inline auto strip() -> type&;
   inline auto stripLeft() -> type&;
   inline auto stripRight() -> type&;
+
+  //utf8.hpp
+  inline auto characters(int offset = 0, int length = -1) const -> uint;
 
   //utility.hpp
   inline static auto read(string_view filename) -> string;
@@ -333,6 +345,7 @@ struct string_format : vector<string> {
 #include <nall/string/replace.hpp>
 #include <nall/string/split.hpp>
 #include <nall/string/trim.hpp>
+#include <nall/string/utf8.hpp>
 #include <nall/string/utility.hpp>
 #include <nall/string/vector.hpp>
 

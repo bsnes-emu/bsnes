@@ -3,6 +3,7 @@ namespace Action {
 extern const unsigned char Add[323];
 extern const unsigned char Attach[649];
 extern const unsigned char Bookmark[686];
+extern const unsigned char Close[586];
 extern const unsigned char FullScreen[650];
 extern const unsigned char Mute[632];
 extern const unsigned char New[477];
@@ -57,6 +58,7 @@ extern const unsigned char Audio[688];
 extern const unsigned char Binary[560];
 extern const unsigned char File[741];
 extern const unsigned char Folder[581];
+extern const unsigned char FolderOpen[625];
 extern const unsigned char Font[627];
 extern const unsigned char Image[558];
 extern const unsigned char Markup[709];

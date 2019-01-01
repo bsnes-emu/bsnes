@@ -121,6 +121,7 @@ struct Color {
   auto setColor(int red, int green, int blue, int alpha = 255) -> type&;
   auto setGreen(int green) -> type&;
   auto setRed(int red) -> type&;
+  auto setValue(uint32_t value) -> type&;
   auto value() const -> uint32_t;
 
 //private:
@@ -180,29 +181,7 @@ struct Alignment {
 };
 #endif
 
-#if defined(Hiro_Cursor)
-struct Cursor {
-  using type = Cursor;
-
-  Cursor(int offset = 0, int length = 0);
-
-  explicit operator bool() const;
-  auto operator==(const Cursor& source) const -> bool;
-  auto operator!=(const Cursor& source) const -> bool;
-
-  auto length() const -> int;
-  auto offset() const -> int;
-  auto setCursor(int offset = 0, int length = 0) -> type&;
-  auto setLength(int length = 0) -> type&;
-  auto setOffset(int offset = 0) -> type&;
-
-//private:
-  struct State {
-    int offset;
-    int length;
-  } state;
-};
-#endif
+#include "cursor.hpp"
 
 #if defined(Hiro_Position)
 struct Position {
@@ -1063,28 +1042,7 @@ struct mIconViewItem : mObject {
 };
 #endif
 
-#if defined(Hiro_Label)
-struct mLabel : mWidget {
-  Declare(Label)
-
-  auto alignment() const -> Alignment;
-  auto backgroundColor() const -> Color;
-  auto foregroundColor() const -> Color;
-  auto setAlignment(Alignment alignment = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto text() const -> string;
-
-//private:
-  struct State {
-    Alignment alignment;
-    Color backgroundColor;
-    Color foregroundColor;
-    string text;
-  } state;
-};
-#endif
+#include "widget/label.hpp"
 
 #if defined(Hiro_LineEdit)
 struct mLineEdit : mWidget {
@@ -1227,91 +1185,8 @@ struct mTextEdit : mWidget {
 };
 #endif
 
-#if defined(Hiro_TreeView)
-struct mTreeView : mWidget {
-  Declare(TreeView)
-  using mObject::remove;
-
-  auto append(sTreeViewItem item) -> type&;
-  auto backgroundColor() const -> Color;
-  auto doActivate() const -> void;
-  auto doChange() const -> void;
-  auto doContext() const -> void;
-  auto doToggle(sTreeViewItem item) const -> void;
-  auto foregroundColor() const -> Color;
-  auto item(const string& path) const -> TreeViewItem;
-  auto itemCount() const -> uint;
-  auto items() const -> vector<TreeViewItem>;
-  auto onActivate(const function<void ()>& callback = {}) -> type&;
-  auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onContext(const function<void ()>& callback = {}) -> type&;
-  auto onToggle(const function<void (sTreeViewItem)>& callback = {}) -> type&;
-  auto remove(sTreeViewItem item) -> type&;
-  auto reset() -> type&;
-  auto selected() const -> TreeViewItem;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
-
-//private:
-  struct State {
-    Color backgroundColor;
-    Color foregroundColor;
-    vector<sTreeViewItem> items;
-    function<void ()> onActivate;
-    function<void ()> onChange;
-    function<void ()> onContext;
-    function<void (sTreeViewItem)> onToggle;
-    string selectedPath;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
-
-#if defined(Hiro_TreeView)
-struct mTreeViewItem : mObject {
-  Declare(TreeViewItem)
-
-  auto append(sTreeViewItem item) -> type&;
-  auto backgroundColor(bool recursive = false) const -> Color;
-  auto checkable() const -> bool;
-  auto checked() const -> bool;
-  auto foregroundColor(bool recursive = false) const -> Color;
-  auto icon() const -> image;
-  auto item(const string& path) const -> TreeViewItem;
-  auto itemCount() const -> uint;
-  auto items() const -> vector<TreeViewItem>;
-  auto path() const -> string;
-  auto remove() -> type& override;
-  auto remove(sTreeViewItem item) -> type&;
-  auto selected() const -> bool;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCheckable(bool checkable = true) -> type&;
-  auto setChecked(bool checked = true) -> type&;
-  auto setExpanded(bool expanded = true) -> type&;
-  auto setFocused() -> type& override;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setIcon(const image& icon = {}) -> type&;
-  auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
-  auto setSelected() -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto text() const -> string;
-
-//private:
-  struct State {
-    Color backgroundColor;
-    bool checkable = false;
-    bool checked = false;
-    Color foregroundColor;
-    image icon;
-    vector<sTreeViewItem> items;
-    string text;
-  } state;
-
-  auto destruct() -> void override;
-};
-#endif
+#include "widget/tree-view.hpp"
+#include "widget/tree-view-item.hpp"
 
 #if defined(Hiro_VerticalScrollBar)
 struct mVerticalScrollBar : mWidget {

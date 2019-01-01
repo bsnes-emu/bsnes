@@ -51,8 +51,8 @@ auto V30MZ::instructionCompareString(Size size) -> void {
     SUB(size, x, y);
 
     if(!repeat() || !--r.cx) return;
-    if(repeat() == RepeatWhileZero && r.f.z == 0) return;
-    if(repeat() == RepeatWhileNotZero && r.f.z == 1) return;
+    if(repeat() == RepeatWhileZeroLo && r.f.z == 1) return;
+    if(repeat() == RepeatWhileZeroHi && r.f.z == 0) return;
 
     state.prefix = true;
     r.ip--;
@@ -94,8 +94,8 @@ auto V30MZ::instructionScanString(Size size) -> void {
     SUB(size, x, y);
 
     if(!repeat() || !--r.cx) return;
-    if(repeat() == RepeatWhileZero && r.f.z == 0) return;
-    if(repeat() == RepeatWhileNotZero && r.f.z == 1) return;
+    if(repeat() == RepeatWhileZeroLo && r.f.z == 1) return;
+    if(repeat() == RepeatWhileZeroHi && r.f.z == 0) return;
 
     state.prefix = true;
     r.ip--;

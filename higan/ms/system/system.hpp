@@ -7,6 +7,7 @@ struct System {
   auto region() const -> Region { return information.region; }
   auto colorburst() const -> double { return information.colorburst; }
 
+  //system.cpp
   auto run() -> void;
   auto runToSave() -> void;
 

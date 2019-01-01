@@ -8,4 +8,5 @@ namespace hiro {
   #include "shared.hpp"
   #include "browser-dialog.hpp"
   #include "message-dialog.hpp"
+  #include "about-dialog.hpp"
 }

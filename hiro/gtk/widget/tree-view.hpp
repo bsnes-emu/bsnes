@@ -27,6 +27,8 @@ struct pTreeView : pWidget {
   GtkCellRenderer* gtkCellToggle = nullptr;
   GtkCellRenderer* gtkCellPixbuf = nullptr;
   GtkCellRenderer* gtkCellText = nullptr;
+  GtkEntry* gtkEntry = nullptr;
+  bool suppressChange = false;
 };
 
 }
