@@ -1,7 +1,7 @@
 # NOTE: This file is not part of the official higan source, it's been added
 # to help build WIP binaries with minimal fuss.
 
-image: debian:stable
+image: ubuntu:latest
 
 higan-linux-x86_64-binaries:
   script:
