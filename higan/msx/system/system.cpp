@@ -29,6 +29,13 @@ auto System::load(Emulator::Interface* interface, Model model) -> bool {
 
   auto document = BML::unserialize(information.manifest);
 
+  if(auto memory = document["system/memory(type=ROM,content=BIOS)"]) {
+    bios.allocate(memory["size"].natural());
+    if(auto fp = platform->open(ID::System, "bios.rom", File::Read, File::Required)) {
+      bios.load(fp);
+    } else return false;
+  } else return false;
+
   if(!cartridge.load()) return false;
 
   if(cartridge.region() == "NTSC") {

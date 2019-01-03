@@ -57,13 +57,8 @@ auto VDP::Background::graphics2(uint8 hoffset, uint9 voffset) -> void {
   patternAddress.bits(3,10) = pattern;
   if(voffset >=  64 && voffset <= 127) patternAddress.bit(11) = vdp.io.patternTableAddress.bit(0);
   if(voffset >= 128 && voffset <= 191) patternAddress.bit(12) = vdp.io.patternTableAddress.bit(1);
+  uint14 colorAddress = patternAddress;
   patternAddress.bit(13) = vdp.io.patternTableAddress.bit(2);
-
-  uint14 colorAddress;
-  colorAddress.bits(0, 2) = voffset.bits(0,2);
-  colorAddress.bits(3,10) = pattern;
-  if(voffset >=  64 && voffset <= 127) colorAddress.bit(11) = vdp.io.patternTableAddress.bit(0);
-  if(voffset >= 128 && voffset <= 191) colorAddress.bit(12) = vdp.io.patternTableAddress.bit(1);
   colorAddress.bit(13) = vdp.io.colorTableAddress.bit(7);
 
   uint8 colorMask = vdp.io.colorTableAddress.bits(0,6) << 1 | 1;

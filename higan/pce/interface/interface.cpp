@@ -7,7 +7,7 @@ Settings settings;
 #include "pc-engine.cpp"
 #include "supergrafx.cpp"
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::CRT;
   display.colors = 1 << 9;
@@ -17,7 +17,7 @@ auto Interface::displays() -> vector<Display> {
   display.internalHeight =  240;
   display.aspectCorrection = 8.0 / 7.0;
   display.refreshRate = (system.colorburst() * 6.0) / (262.0 * 1365.0);
-  return {display};
+  return display;
 }
 
 auto Interface::color(uint32 color) -> uint64 {

@@ -25,7 +25,7 @@ struct ID {
 struct Interface : Emulator::Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto loaded() -> bool override;

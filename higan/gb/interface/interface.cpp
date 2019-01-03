@@ -7,7 +7,7 @@ Settings settings;
 #include "game-boy.cpp"
 #include "game-boy-color.cpp"
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::LCD;
   display.colors = Model::GameBoyColor() ? 1 << 15 : 1 << 2;
@@ -17,7 +17,7 @@ auto Interface::displays() -> vector<Display> {
   display.internalHeight = 144;
   display.aspectCorrection = 1.0;
   display.refreshRate = (4.0 * 1024.0 * 1024.0) / (154.0 * 456.0);
-  return {display};
+  return display;
 }
 
 auto Interface::loaded() -> bool {

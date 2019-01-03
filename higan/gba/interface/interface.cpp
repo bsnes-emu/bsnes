@@ -12,7 +12,7 @@ auto Interface::information() -> Information {
   return information;
 }
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::LCD;
   display.colors = 1 << 15;
@@ -26,7 +26,7 @@ auto Interface::displays() -> vector<Display> {
     swap(display.width, display.height);
     swap(display.internalWidth, display.internalHeight);
   }
-  return {display};
+  return display;
 }
 
 auto Interface::color(uint32 color) -> uint64 {

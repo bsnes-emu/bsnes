@@ -1,6 +1,4 @@
 #include "../bsnes.hpp"
-#include "about.cpp"
-AboutWindow aboutWindow;
 Presentation presentation;
 
 auto Presentation::create() -> void {
@@ -137,7 +135,14 @@ auto Presentation::create() -> void {
     invoke("https://doc.byuu.org/bsnes/");
   });
   about.setIcon(Icon::Prompt::Question).setText({tr("About"), " ..."}).onActivate([&] {
-    aboutWindow.setCentered(*this).setVisible().setFocused();
+    AboutDialog()
+    .setLogo(Resource::Logo)
+    .setVersion(Emulator::Version)
+    .setAuthor("byuu")
+    .setLicense("GPLv3")
+    .setWebsite("https://byuu.org/")
+    .setParent(*this)
+    .show();
   });
 
   viewport.setDroppable().onDrop([&](vector<string> locations) {

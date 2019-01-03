@@ -14,7 +14,7 @@ auto Interface::information() -> Information {
   return information;
 }
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::CRT;
   display.colors = 1 << 19;
@@ -25,7 +25,7 @@ auto Interface::displays() -> vector<Display> {
   display.aspectCorrection = 8.0 / 7.0;
   if(Region::NTSC()) display.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
   if(Region::PAL())  display.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
-  return {display};
+  return display;
 }
 
 auto Interface::color(uint32 color) -> uint64 {

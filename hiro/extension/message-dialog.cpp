@@ -49,7 +49,9 @@ auto MessageDialog::_run() -> string {
   Window window;
     VerticalLayout layout{&window};
       HorizontalLayout messageLayout{&layout, Size{~0, 0}, 5};
-        Canvas messageIcon{&messageLayout, Size{16, 16}, 5};
+        VerticalLayout messageIconLayout{&messageLayout, Size{16, ~0}, 5};
+          Canvas messageIcon{&messageIconLayout, Size{16, 16}, 0};
+          Widget messageIconSpacer{&messageIconLayout, Size{16, ~0}};
         Label messageText{&messageLayout, Size{~0, 0}};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
         Widget controlSpacer{&controlLayout, Size{~0, 0}};

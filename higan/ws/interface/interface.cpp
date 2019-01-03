@@ -7,7 +7,7 @@ Settings settings;
 #include "wonderswan-color.cpp"
 #include "pocket-challenge-v2.cpp"
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type = Display::Type::LCD;
   display.colors    = 1 << 12;
@@ -21,7 +21,7 @@ auto Interface::displays() -> vector<Display> {
     swap(display.width, display.height);
     swap(display.internalWidth, display.internalHeight);
   }
-  return {display};
+  return display;
 }
 
 //todo: the WonderSwan and PocketChallengeV2 interfaces should be generating grayscale shades

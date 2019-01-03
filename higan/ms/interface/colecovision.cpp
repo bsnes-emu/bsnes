@@ -6,7 +6,7 @@ auto ColecoVisionInterface::information() -> Information {
   return information;
 }
 
-auto ColecoVisionInterface::displays() -> vector<Display> {
+auto ColecoVisionInterface::display() -> Display {
   Display display;
   display.type = Display::Type::CRT;
   display.colors = 1 << 4;
@@ -17,7 +17,7 @@ auto ColecoVisionInterface::displays() -> vector<Display> {
   display.aspectCorrection = 1.0;
   if(Region::NTSC()) display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
   if(Region::PAL())  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (312.0 * 684.0);
-  return {display};
+  return display;
 }
 
 auto ColecoVisionInterface::color(uint32 color) -> uint64 {

@@ -58,4 +58,11 @@ auto Cartridge::unload() -> void {
 auto Cartridge::power() -> void {
 }
 
+auto Cartridge::read(uint16 address) -> uint8 {
+  return rom.read(address);
+}
+
+auto Cartridge::write(uint16 address, uint8 data) -> void {
+}
+
 }

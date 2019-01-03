@@ -50,14 +50,14 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
   return {pathID, option};
 }
 
-auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint width, uint height) -> void {
+auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32_t* output;
   uint length;
 
   pitch >>= 2;
 
   if(!settings["View/Overscan"].boolean()) {
-    auto display = emulator->displays()[displayID];
+    auto display = emulator->display();
     if(display.type == Emulator::Interface::Display::Type::CRT) {
       uint overscanHorizontal = settings["View/Overscan/Horizontal"].natural();
       uint overscanVertical = settings["View/Overscan/Vertical"].natural();
@@ -92,7 +92,7 @@ auto Program::videoRefresh(uint displayID, const uint32* data, uint pitch, uint 
   }
 }
 
-auto Program::audioSample(const double* samples, uint channels) -> void {
+auto Program::audioFrame(const double* samples, uint channels) -> void {
   if(channels == 1) {
     double stereo[] = {samples[0], samples[0]};
     audio->output(stereo);

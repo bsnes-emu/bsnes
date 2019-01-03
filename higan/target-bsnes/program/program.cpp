@@ -18,7 +18,6 @@ auto Program::create() -> void {
 
   presentation.create();
   presentation.setVisible();
-  aboutWindow.create();
 
   settingsWindow.create();
   videoSettings.create();

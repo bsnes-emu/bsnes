@@ -28,7 +28,7 @@ auto Video::setPalette() -> void {
   if(!interface) return;
 
   delete palette;
-  colors = interface->displays()[0].colors;
+  colors = interface->display().colors;
   palette = new uint32[colors];
   for(auto index : range(colors)) {
     uint64 color = interface->color(index);
@@ -185,7 +185,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
     }
   }
 
-  platform->videoRefresh(0, output, width * sizeof(uint32), width, height);
+  platform->videoFrame(output, width * sizeof(uint32), width, height);
 }
 
 }

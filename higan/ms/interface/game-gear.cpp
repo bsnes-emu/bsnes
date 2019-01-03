@@ -6,7 +6,7 @@ auto GameGearInterface::information() -> Information {
   return information;
 }
 
-auto GameGearInterface::displays() -> vector<Display> {
+auto GameGearInterface::display() -> Display {
   Display display;
   display.type   = Display::Type::LCD;
   display.colors = 1 << 12;
@@ -16,7 +16,7 @@ auto GameGearInterface::displays() -> vector<Display> {
   display.internalHeight = 144;
   display.aspectCorrection = 1.0;
   display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
-  return {display};
+  return display;
 }
 
 auto GameGearInterface::color(uint32 color) -> uint64 {

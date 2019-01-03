@@ -13,7 +13,7 @@ auto Interface::information() -> Information {
   return information;
 }
 
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::CRT;
   display.colors = 1 << 9;
@@ -23,7 +23,7 @@ auto Interface::displays() -> vector<Display> {
   display.internalHeight = 240;
   display.aspectCorrection = 8.0 / 7.0;
   display.refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
-  return {display};
+  return display;
 }
 
 auto Interface::color(uint32 n) -> uint64 {

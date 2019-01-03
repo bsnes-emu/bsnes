@@ -23,7 +23,7 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
 
   auto loaded() -> bool override;
   auto hashes() -> vector<string> override;

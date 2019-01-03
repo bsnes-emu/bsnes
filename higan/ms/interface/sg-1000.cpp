@@ -6,7 +6,7 @@ auto SG1000Interface::information() -> Information {
   return information;
 }
 
-auto SG1000Interface::displays() -> vector<Display> {
+auto SG1000Interface::display() -> Display {
   Display display;
   display.type = Display::Type::CRT;
   display.colors = 1 << 4;
@@ -17,7 +17,7 @@ auto SG1000Interface::displays() -> vector<Display> {
   display.aspectCorrection = 1.0;
   if(Region::NTSC()) display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
   if(Region::PAL())  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (312.0 * 684.0);
-  return {display};
+  return display;
 }
 
 auto SG1000Interface::color(uint32 color) -> uint64 {

@@ -53,7 +53,7 @@ struct Interface : Emulator::Interface {
 struct ColecoVisionInterface : Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto ports() -> vector<Port> override;
@@ -69,7 +69,7 @@ struct ColecoVisionInterface : Interface {
 struct SG1000Interface : Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto ports() -> vector<Port> override;
@@ -85,7 +85,7 @@ struct SG1000Interface : Interface {
 struct SC3000Interface : Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto ports() -> vector<Port> override;
@@ -101,7 +101,7 @@ struct SC3000Interface : Interface {
 struct MasterSystemInterface : Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto ports() -> vector<Port> override;
@@ -117,7 +117,7 @@ struct MasterSystemInterface : Interface {
 struct GameGearInterface : Interface {
   auto information() -> Information override;
 
-  auto displays() -> vector<Display> override;
+  auto display() -> Display override;
   auto color(uint32 color) -> uint64 override;
 
   auto ports() -> vector<Port> override;

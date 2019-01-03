@@ -1,13 +1,3 @@
-struct AboutWindow : Window {
-  AboutWindow();
-
-  VerticalLayout layout{this};
-    Canvas canvas{&layout, Size{399, 95}, 15};
-    HorizontalLayout informationLayout{&layout, Size{~0, 0}};
-      Label informationLeft{&informationLayout, Size{~0, 0}, 3};
-      Label informationRight{&informationLayout, Size{~0, 0}};
-};
-
 struct Presentation : Window {
   enum : uint { StatusHeight = 24 };
 
@@ -104,5 +94,4 @@ struct Presentation : Window {
       Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 
-extern unique_pointer<AboutWindow> aboutWindow;
 extern unique_pointer<Presentation> presentation;

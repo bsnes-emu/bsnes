@@ -207,7 +207,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
   return {};
 }
 
-auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint width, uint height) -> void {
+auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32_t* output;
   uint length;
 
@@ -255,7 +255,7 @@ auto Program::videoRefresh(uint display, const uint32* data, uint pitch, uint wi
   }
 }
 
-auto Program::audioSample(const double* samples, uint channels) -> void {
+auto Program::audioFrame(const double* samples, uint channels) -> void {
   audio.output(samples);
 }
 

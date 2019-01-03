@@ -103,7 +103,6 @@ Program::Program(Arguments arguments) {
   new SettingsManager;
   new CheatDatabase;
   new ToolsManager;
-  new AboutWindow;
 
   updateVideoShader();
   updateAudioDriver();

@@ -64,7 +64,7 @@ auto Audio::process() -> void {
       if(balance > 0.0) samples[0] *= 1.0 - balance;
     }
 
-    platform->audioSample(samples, channels);
+    platform->audioFrame(samples, channels);
   }
 }
 

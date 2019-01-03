@@ -6,6 +6,7 @@ struct CPU : Processor::Z80, Processor::Z80::Bus, Thread {
   auto synchronizing() const -> bool override;
 
   auto power() -> void;
+  auto setIRQ(bool) -> void;
 
   //memory.cpp
   auto read(uint16 address) -> uint8 override;
@@ -16,6 +17,14 @@ struct CPU : Processor::Z80, Processor::Z80::Bus, Thread {
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
+
+private:
+  Emulator::Memory::Writable<uint8> ram;
+
+  struct IO {
+    uint1 irqLine;
+    uint2 slot[4];
+  } io;
 };
 
 extern CPU cpu;

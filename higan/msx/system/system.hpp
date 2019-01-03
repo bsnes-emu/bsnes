@@ -24,6 +24,8 @@ struct System {
   auto serializeAll(serializer&) -> void;
   auto serialize(serializer&) -> void;
 
+  Emulator::Memory::Readable<uint8> bios;
+
 private:
   Emulator::Interface* interface = nullptr;
 

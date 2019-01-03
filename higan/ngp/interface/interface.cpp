@@ -6,7 +6,7 @@ namespace NeoGeoPocket {
 #include "neo-geo-pocket-color.cpp"
 
 //todo: add correct values
-auto Interface::displays() -> vector<Display> {
+auto Interface::display() -> Display {
   Display display;
   display.type   = Display::Type::LCD;
   display.colors = 1;
@@ -16,7 +16,7 @@ auto Interface::displays() -> vector<Display> {
   display.internalHeight = 240;
   display.aspectCorrection = 1.0;
   display.refreshRate = 60.0;
-  return {display};
+  return display;
 }
 
 auto Interface::color(uint32 color) -> uint64 {

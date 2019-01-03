@@ -54,7 +54,7 @@ struct Interface {
   //information
   virtual auto information() -> Information { return {}; }
 
-  virtual auto displays() -> vector<Display> { return {}; }
+  virtual auto display() -> Display { return {}; }
   virtual auto color(uint32 color) -> uint64 { return 0; }
 
   //game interface

@@ -1,6 +1,4 @@
 #include "../higan.hpp"
-#include "about.cpp"
-unique_pointer<AboutWindow> aboutWindow;
 unique_pointer<Presentation> presentation;
 
 Presentation::Presentation() {
@@ -131,7 +129,14 @@ Presentation::Presentation() {
     invoke("https://doc.byuu.org/higan/credits/");
   });
   about.setIcon(Icon::Prompt::Question).setText("About ...").onActivate([&] {
-    aboutWindow->setCentered(*this).setVisible().setFocused();
+    AboutDialog()
+    .setLogo(Resource::Logo)
+    .setVersion(Emulator::Version)
+    .setAuthor("byuu")
+    .setLicense("GPLv3")
+    .setWebsite("https://byuu.org/")
+    .setParent(*this)
+    .show();
   });
 
   viewport.setDroppable().onDrop([&](vector<string> locations) {
@@ -345,7 +350,7 @@ auto Presentation::resizeViewport() -> void {
   uint height = 240;
 
   if(emulator) {
-    auto display = emulator->displays().first();
+    auto display = emulator->display();
     width = display.width;
     height = display.height;
     if(settings["View/AspectCorrection"].boolean()) width *= display.aspectCorrection;
@@ -412,7 +417,7 @@ auto Presentation::resizeWindow() -> void {
   uint statusHeight = settings["View/StatusBar"].boolean() ? StatusHeight : 0;
 
   if(emulator) {
-    auto display = emulator->displays().first();
+    auto display = emulator->display();
     width = display.width;
     height = display.height;
     if(settings["View/AspectCorrection"].boolean()) width *= display.aspectCorrection;

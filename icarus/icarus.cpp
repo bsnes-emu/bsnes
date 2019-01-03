@@ -131,22 +131,22 @@ auto nall::main(Arguments arguments) -> void {
   new ImportDialog;
   new ErrorDialog;
 
-  if constexpr(platform() == Platform::MacOS) {
-    Application::Cocoa::onAbout([&] {
-      MessageDialog().setTitle("About icarus").setText({
-        "icarus\n\n"
-        "Author: byuu\n"
-        "License: GPLv3\n"
-        "Website: https://byuu.org/\n"
-      }).information();
-    });
-    Application::Cocoa::onPreferences([&] {
-      scanDialog->settingsButton.doActivate();
-    });
-    Application::Cocoa::onQuit([&] {
-      Application::quit();
-    });
-  }
+  #if defined(PLATFORM_MACOS)
+  Application::Cocoa::onAbout([&] {
+    MessageDialog().setTitle("About icarus").setText({
+      "icarus\n\n"
+      "Author: byuu\n"
+      "License: GPLv3\n"
+      "Website: https://byuu.org/\n"
+    }).information();
+  });
+  Application::Cocoa::onPreferences([&] {
+    scanDialog->settingsButton.doActivate();
+  });
+  Application::Cocoa::onQuit([&] {
+    Application::quit();
+  });
+  #endif
 
   scanDialog->show();
   Application::run();
