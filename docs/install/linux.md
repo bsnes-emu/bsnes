@@ -12,7 +12,7 @@ using the Git source-code management tool,
 or by clicking the download button on the right-hand side of the web-page
 and choosing an archive format.
 
-You will also need GCC 4.9 or higher,
+You will also need GCC 7 or higher,
 including the C and C++ compiler,
 GNU Make,
 and development files

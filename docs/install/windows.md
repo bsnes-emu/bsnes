@@ -50,7 +50,7 @@ using the Git source-code management tool,
 or by clicking the download button on the right-hand side of the web-page
 and choosing an archive format.
 
-You will need a C++ compiler to compile higan.
+You will need a C++ compiler that supports C++17 to compile higan.
 We recommend installing the latest version of [MinGW-W64].
 higan does not support building with clang++
 (Clang is still not quite there yet for Windows)
