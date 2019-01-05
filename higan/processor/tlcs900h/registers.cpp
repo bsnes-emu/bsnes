@@ -1,11 +1,11 @@
-#define PC r.pc.l.l0
+#define PC   r.pc.l.l0
 
-#define CF r.sr.f.c
-#define NF r.sr.f.n
-#define VF r.sr.f.v
-#define HF r.sr.f.h
-#define ZF r.sr.f.z
-#define SF r.sr.f.s
+#define CF   r.sr.f.c
+#define NF   r.sr.f.n
+#define VF   r.sr.f.v
+#define HF   r.sr.f.h
+#define ZF   r.sr.f.z
+#define SF   r.sr.f.s
 
 #define RFP  r.sr.rfp
 #define RFPP r.sr.rfpp
@@ -14,74 +14,74 @@
 #define a RFP
 #define p RFPP
 
-template<> auto TLCS900H::map<Byte>(Register register) -> maybe<uint8&> {
+template<> auto TLCS900H::map<Byte>(Register register) -> maybe<Byte&> {
   switch(register.value) {
   #define r(id, name) case id: return r.name;
-  r(RA0, xwa[0].b.b0) r(RW0, xwa[0].b.b1) r(QA0, xwa[0].b.b2) r(QW0, xwa[0].b.b3)
-  r(RC0, xbc[0].b.b0) r(RB0, xbc[0].b.b1) r(QC0, xbc[0].b.b2) r(QB0, xbc[0].b.b3)
-  r(RE0, xde[0].b.b0) r(RD0, xde[0].b.b1) r(QE0, xde[0].b.b2) r(QD0, xde[0].b.b3)
-  r(RL0, xhl[0].b.b0) r(RH0, xhl[0].b.b1) r(QL0, xhl[0].b.b2) r(QH0, xhl[0].b.b3)
-  r(RA1, xwa[1].b.b0) r(RW1, xwa[1].b.b1) r(QA1, xwa[1].b.b2) r(QW1, xwa[1].b.b3)
-  r(RC1, xbc[1].b.b0) r(RB1, xbc[1].b.b1) r(QC1, xbc[1].b.b2) r(QB1, xbc[1].b.b3)
-  r(RE1, xde[1].b.b0) r(RD1, xde[1].b.b1) r(QE1, xde[1].b.b2) r(QD1, xde[1].b.b3)
-  r(RL1, xhl[1].b.b0) r(RH1, xhl[1].b.b1) r(QL1, xhl[1].b.b2) r(QH1, xhl[1].b.b3)
-  r(RA2, xwa[2].b.b0) r(RW2, xwa[2].b.b1) r(QA2, xwa[2].b.b2) r(QW2, xwa[2].b.b3)
-  r(RC2, xbc[2].b.b0) r(RB2, xbc[2].b.b1) r(QC2, xbc[2].b.b2) r(QB2, xbc[2].b.b3)
-  r(RE2, xde[2].b.b0) r(RD2, xde[2].b.b1) r(QE2, xde[2].b.b2) r(QD2, xde[2].b.b3)
-  r(RL2, xhl[2].b.b0) r(RH2, xhl[2].b.b1) r(QL2, xhl[2].b.b2) r(QH2, xhl[2].b.b3)
-  r(RA3, xwa[3].b.b0) r(RW3, xwa[3].b.b1) r(QA3, xwa[3].b.b2) r(QW3, xwa[3].b.b3)
-  r(RC3, xbc[3].b.b0) r(RB3, xbc[3].b.b1) r(QC3, xbc[3].b.b2) r(QB3, xbc[3].b.b3)
-  r(RE3, xde[3].b.b0) r(RD3, xde[3].b.b1) r(QE3, xde[3].b.b2) r(QD3, xde[3].b.b3)
-  r(RL3, xhl[3].b.b0) r(RH3, xhl[3].b.b1) r(QL3, xhl[3].b.b2) r(QH3, xhl[3].b.b3)
-  r( AP, xwa[p].b.b0) r( WP, xwa[p].b.b1) r(QAP, xwa[p].b.b2) r(QWP, xwa[p].b.b3)
-  r( CP, xbc[p].b.b0) r( BP, xbc[p].b.b1) r(QCP, xbc[p].b.b2) r(QBP, xbc[p].b.b3)
-  r( EP, xde[p].b.b0) r( DP, xde[p].b.b1) r(QEP, xde[p].b.b2) r(QDP, xde[p].b.b3)
-  r( LP, xhl[p].b.b0) r( HP, xhl[p].b.b1) r(QLP, xhl[p].b.b2) r(QHP, xhl[p].b.b3)
-  r( A,  xwa[a].b.b0) r( W,  xwa[a].b.b1) r(QA,  xwa[a].b.b2) r(QW,  xwa[a].b.b3)
-  r( C,  xbc[a].b.b0) r( B,  xbc[a].b.b1) r(QC,  xbc[a].b.b2) r(QB,  xbc[a].b.b3)
-  r( E,  xde[a].b.b0) r( D,  xde[a].b.b1) r(QE,  xde[a].b.b2) r(QD,  xde[a].b.b3)
-  r( L,  xhl[a].b.b0) r( H,  xhl[a].b.b1) r(QL,  xhl[a].b.b2) r(QH,  xhl[a].b.b3)
-  r(IXL, xix.b.b0) r(IXH, xix.b.b1) r(QIXL, xix.b.b2) r(QIXH, xix.b.b3)
-  r(IYL, xiy.b.b0) r(IYH, xiy.b.b1) r(QIYL, xiy.b.b2) r(QIYH, xiy.b.b3)
-  r(IZL, xiz.b.b0) r(IZH, xiz.b.b1) r(QIZL, xiz.b.b2) r(QIZH, xiz.b.b3)
-  r(SPL, xsp.b.b0) r(SPH, xsp.b.b1) r(QSPL, xsp.b.b2) r(QSPH, xsp.b.b3)
+  r(0x00, xwa[0].b.b0) r(0x01, xwa[0].b.b1) r(0x02, xwa[0].b.b2) r(0x03, xwa[0].b.b3)
+  r(0x04, xbc[0].b.b0) r(0x05, xbc[0].b.b1) r(0x06, xbc[0].b.b2) r(0x07, xbc[0].b.b3)
+  r(0x08, xde[0].b.b0) r(0x09, xde[0].b.b1) r(0x0a, xde[0].b.b2) r(0x0b, xde[0].b.b3)
+  r(0x0c, xhl[0].b.b0) r(0x0d, xhl[0].b.b1) r(0x0e, xhl[0].b.b2) r(0x0f, xhl[0].b.b3)
+  r(0x10, xwa[1].b.b0) r(0x11, xwa[1].b.b1) r(0x12, xwa[1].b.b2) r(0x13, xwa[1].b.b3)
+  r(0x14, xbc[1].b.b0) r(0x15, xbc[1].b.b1) r(0x16, xbc[1].b.b2) r(0x17, xbc[1].b.b3)
+  r(0x18, xde[1].b.b0) r(0x19, xde[1].b.b1) r(0x1a, xde[1].b.b2) r(0x1b, xde[1].b.b3)
+  r(0x1c, xhl[1].b.b0) r(0x1d, xhl[1].b.b1) r(0x1e, xhl[1].b.b2) r(0x1f, xhl[1].b.b3)
+  r(0x20, xwa[2].b.b0) r(0x21, xwa[2].b.b1) r(0x22, xwa[2].b.b2) r(0x23, xwa[2].b.b3)
+  r(0x24, xbc[2].b.b0) r(0x25, xbc[2].b.b1) r(0x26, xbc[2].b.b2) r(0x27, xbc[2].b.b3)
+  r(0x28, xde[2].b.b0) r(0x29, xde[2].b.b1) r(0x2a, xde[2].b.b2) r(0x2b, xde[2].b.b3)
+  r(0x2c, xhl[2].b.b0) r(0x2d, xhl[2].b.b1) r(0x2e, xhl[2].b.b2) r(0x2f, xhl[2].b.b3)
+  r(0x30, xwa[3].b.b0) r(0x31, xwa[3].b.b1) r(0x32, xwa[3].b.b2) r(0x33, xwa[3].b.b3)
+  r(0x34, xbc[3].b.b0) r(0x35, xbc[3].b.b1) r(0x36, xbc[3].b.b2) r(0x37, xbc[3].b.b3)
+  r(0x38, xde[3].b.b0) r(0x39, xde[3].b.b1) r(0x3a, xde[3].b.b2) r(0x3b, xde[3].b.b3)
+  r(0x3c, xhl[3].b.b0) r(0x3d, xhl[3].b.b1) r(0x3e, xhl[3].b.b2) r(0x3f, xhl[3].b.b3)
+  r(0xd0, xwa[p].b.b0) r(0xd1, xwa[p].b.b1) r(0xd2, xwa[p].b.b2) r(0xd3, xwa[p].b.b3)
+  r(0xd4, xbc[p].b.b0) r(0xd5, xbc[p].b.b1) r(0xd6, xbc[p].b.b2) r(0xd7, xbc[p].b.b3)
+  r(0xd8, xde[p].b.b0) r(0xd9, xde[p].b.b1) r(0xda, xde[p].b.b2) r(0xdb, xde[p].b.b3)
+  r(0xdc, xhl[p].b.b0) r(0xdd, xhl[p].b.b1) r(0xde, xhl[p].b.b2) r(0xdf, xhl[p].b.b3)
+  r(0xe0, xwa[a].b.b0) r(0xe1, xwa[a].b.b1) r(0xe2, xwa[a].b.b2) r(0xe3, xwa[a].b.b3)
+  r(0xe4, xbc[a].b.b0) r(0xe5, xbc[a].b.b1) r(0xe6, xbc[a].b.b2) r(0xe7, xbc[a].b.b3)
+  r(0xe8, xde[a].b.b0) r(0xe9, xde[a].b.b1) r(0xea, xde[a].b.b2) r(0xeb, xde[a].b.b3)
+  r(0xec, xhl[a].b.b0) r(0xed, xhl[a].b.b1) r(0xee, xhl[a].b.b2) r(0xef, xhl[a].b.b3)
+  r(0xf0, xix   .b.b0) r(0xf1, xix   .b.b1) r(0xf2, xix   .b.b2) r(0xf3, xix   .b.b3)
+  r(0xf4, xiy   .b.b0) r(0xf5, xiy   .b.b1) r(0xf6, xiy   .b.b2) r(0xf7, xiy   .b.b3)
+  r(0xf8, xiz   .b.b0) r(0xf9, xiz   .b.b1) r(0xfa, xiz   .b.b2) r(0xfb, xiz   .b.b3)
+  r(0xfc, xsp   .b.b0) r(0xfd, xsp   .b.b1) r(0xfe, xsp   .b.b2) r(0xff, xsp   .b.b3)
   #undef r
   }
   return nothing;
 }
 
-template<> auto TLCS900H::map<Word>(Register register) -> maybe<uint16&> {
-  switch(register.value) {
+template<> auto TLCS900H::map<Word>(Register register) -> maybe<Word&> {
+  switch(register.value & ~1) {
   #define r(id, name) case id: return r.name;
-  r(RWA0, xwa[0].w.w0) r(QWA0, xwa[0].w.w1) r(RBC0, xbc[0].w.w0) r(QBC0, xbc[0].w.w1)
-  r(RDE0, xde[0].w.w0) r(QDE0, xde[0].w.w1) r(RHL0, xhl[0].w.w0) r(QHL0, xhl[0].w.w1)
-  r(RWA1, xwa[1].w.w0) r(QWA1, xwa[1].w.w1) r(RBC1, xbc[1].w.w0) r(QBC1, xbc[1].w.w1)
-  r(RDE1, xde[1].w.w0) r(QDE1, xde[1].w.w1) r(RHL1, xhl[1].w.w0) r(QHL1, xhl[1].w.w1)
-  r(RWA2, xwa[2].w.w0) r(QWA2, xwa[2].w.w1) r(RBC2, xbc[2].w.w0) r(QBC2, xbc[2].w.w1)
-  r(RDE2, xde[2].w.w0) r(QDE2, xde[2].w.w1) r(RHL2, xhl[2].w.w0) r(QHL2, xhl[2].w.w1)
-  r(RWA3, xwa[3].w.w0) r(QWA3, xwa[3].w.w1) r(RBC3, xbc[3].w.w0) r(QBC3, xbc[3].w.w1)
-  r(RDE3, xde[3].w.w0) r(QDE3, xde[3].w.w1) r(RHL3, xhl[3].w.w0) r(QHL3, xhl[3].w.w1)
-  r( WAP, xwa[p].w.w0) r(QWAP, xwa[p].w.w1) r( BCP, xbc[p].w.w0) r(QBCP, xbc[p].w.w1)
-  r( DEP, xde[p].w.w0) r(QDEP, xde[p].w.w1) r( HLP, xhl[p].w.w0) r(QHLP, xhl[p].w.w1)
-  r( WA,  xwa[p].w.w0) r(QWA, xwa[p].w.w1) r( BC,  xbc[p].w.w0) r(QBC, xbc[p].w.w1)
-  r( DE,  xde[p].w.w0) r(QDE, xde[p].w.w1) r( HL,  xhl[p].w.w0) r(QHL, xhl[p].w.w1)
-  r(IX, xix.w.w0) r(QIX, xix.w.w1) r(IY, xiy.w.w0) r(QIY, xiy.w.w1)
-  r(IZ, xiz.w.w0) r(QIZ, xiz.w.w1) r(SP, xsp.w.w0) r(QSP, xsp.w.w0)
+  r(0x00, xwa[0].w.w0) r(0x02, xwa[0].w.w1) r(0x04, xbc[0].w.w0) r(0x06, xbc[0].w.w1)
+  r(0x08, xde[0].w.w0) r(0x0a, xde[0].w.w1) r(0x0c, xhl[0].w.w0) r(0x0e, xhl[0].w.w1)
+  r(0x10, xwa[1].w.w0) r(0x12, xwa[1].w.w1) r(0x14, xbc[1].w.w0) r(0x16, xbc[1].w.w1)
+  r(0x18, xde[1].w.w0) r(0x1a, xde[1].w.w1) r(0x1c, xhl[1].w.w0) r(0x1e, xhl[1].w.w1)
+  r(0x20, xwa[2].w.w0) r(0x22, xwa[2].w.w1) r(0x24, xbc[2].w.w0) r(0x26, xbc[2].w.w1)
+  r(0x28, xde[2].w.w0) r(0x2a, xde[2].w.w1) r(0x2c, xhl[2].w.w0) r(0x2e, xhl[2].w.w1)
+  r(0x30, xwa[3].w.w0) r(0x32, xwa[3].w.w1) r(0x34, xbc[3].w.w0) r(0x36, xbc[3].w.w1)
+  r(0x38, xde[3].w.w0) r(0x3a, xde[3].w.w1) r(0x3c, xhl[3].w.w0) r(0x3e, xhl[3].w.w1)
+  r(0xd0, xwa[p].w.w0) r(0xd2, xwa[p].w.w1) r(0xd4, xbc[p].w.w0) r(0xd6, xbc[p].w.w1)
+  r(0xd8, xde[p].w.w0) r(0xda, xde[p].w.w1) r(0xdc, xhl[p].w.w0) r(0xde, xhl[p].w.w1)
+  r(0xe0, xwa[p].w.w0) r(0xe2, xwa[p].w.w1) r(0xe4, xbc[p].w.w0) r(0xe6, xbc[p].w.w1)
+  r(0xe8, xde[p].w.w0) r(0xea, xde[p].w.w1) r(0xec, xhl[p].w.w0) r(0xee, xhl[p].w.w1)
+  r(0xf0, xix   .w.w0) r(0xf2, xix   .w.w1) r(0xf4, xiy   .w.w0) r(0xf6, xiy   .w.w1)
+  r(0xf8, xiz   .w.w0) r(0xfa, xiz   .w.w1) r(0xfc, xsp   .w.w0) r(0xfe, xsp   .w.w0)
   #undef r
   }
   return nothing;
 }
 
-template<> auto TLCS900H::map<Long>(Register register) -> maybe<uint32&> {
-  switch(register.value) {
+template<> auto TLCS900H::map<Long>(Register register) -> maybe<Long&> {
+  switch(register.value & ~3) {
   #define r(id, name) case id: return r.name;
-  r(XWA0, xwa[0].l.l0) r(XBC0, xbc[0].l.l0) r(XDE0, xde[0].l.l0) r(XHL0, xhl[0].l.l0)
-  r(XWA1, xwa[1].l.l0) r(XBC1, xbc[1].l.l0) r(XDE1, xde[1].l.l0) r(XHL1, xhl[1].l.l0)
-  r(XWA2, xwa[2].l.l0) r(XBC2, xbc[2].l.l0) r(XDE2, xde[2].l.l0) r(XHL2, xhl[2].l.l0)
-  r(XWA3, xwa[3].l.l0) r(XBC3, xbc[3].l.l0) r(XDE3, xde[3].l.l0) r(XHL3, xhl[3].l.l0)
-  r(XWAP, xwa[p].l.l0) r(XBCP, xbc[p].l.l0) r(XDEP, xde[p].l.l0) r(XHLP, xhl[p].l.l0)
-  r(XWA,  xwa[a].l.l0) r(XBC,  xbc[a].l.l0) r(XDE,  xde[a].l.l0) r(XHL,  xhl[a].l.l0)
-  r(XIX,  xix.l.l0) r(XIY,  xiy.l.l0) r(XIZ,  xiz.l.l0) r(XSP,  xsp.l.l0)
+  r(0x00, xwa[0].l.l0) r(0x04, xbc[0].l.l0) r(0x08, xde[0].l.l0) r(0x0c, xhl[0].l.l0)
+  r(0x10, xwa[1].l.l0) r(0x14, xbc[1].l.l0) r(0x18, xde[1].l.l0) r(0x1c, xhl[1].l.l0)
+  r(0x20, xwa[2].l.l0) r(0x24, xbc[2].l.l0) r(0x28, xde[2].l.l0) r(0x2c, xhl[2].l.l0)
+  r(0x30, xwa[3].l.l0) r(0x34, xbc[3].l.l0) r(0x38, xde[3].l.l0) r(0x3c, xhl[3].l.l0)
+  r(0xd0, xwa[p].l.l0) r(0xd4, xbc[p].l.l0) r(0xd8, xde[p].l.l0) r(0xdc, xhl[p].l.l0)
+  r(0xe0, xwa[a].l.l0) r(0xe4, xbc[a].l.l0) r(0xe8, xde[a].l.l0) r(0xec, xhl[a].l.l0)
+  r(0xf0, xix   .l.l0) r(0xf4, xiy   .l.l0) r(0xf8, xiz   .l.l0) r(0xfc, xsp   .l.l0)
   #undef r
   }
   return nothing;
@@ -90,26 +90,64 @@ template<> auto TLCS900H::map<Long>(Register register) -> maybe<uint32&> {
 #undef a
 #undef p
 
-template<> auto TLCS900H::read<Byte>(Register register) -> uint8 {
+template<> auto TLCS900H::read<Byte>(Register register) -> Byte {
   return map<Byte>(register)(0);
 }
 
-template<> auto TLCS900H::read<Word>(Register register) -> uint16 {
+template<> auto TLCS900H::read<Word>(Register register) -> Word {
   return map<Word>(register)(0);
 }
 
-template<> auto TLCS900H::read<Long>(Register register) -> uint32 {
+template<> auto TLCS900H::read<Long>(Register register) -> Long {
   return map<Long>(register)(0);
 }
 
-template<> auto TLCS900H::write<Byte>(Register register, uint8 data) -> void {
+template<> auto TLCS900H::write<Byte>(Register register, Byte data) -> void {
   if(auto r = map<Byte>(register)) r() = data;
 }
 
-template<> auto TLCS900H::write<Word>(Register register, uint16 data) -> void {
+template<> auto TLCS900H::write<Word>(Register register, Word data) -> void {
   if(auto r = map<Word>(register)) r() = data;
 }
 
-template<> auto TLCS900H::write<Long>(Register register, uint32 data) -> void {
-  if(auto r = map<Word>(register)) r() = data;
+template<> auto TLCS900H::write<Long>(Register register, Long data) -> void {
+  if(auto r = map<Long>(register)) r() = data;
+}
+
+//
+
+//todo: this is pretty hacky ... the templates pass by-value, but we need to modify the status register
+//since there's only one, we ignore the parameter and access the underlying register directly instead
+
+template<> auto TLCS900H::read<Word>(StatusRegister) -> Word {
+  return r.sr.f.c << 0 | r.sr.f.n << 1 | r.sr.f.v << 2 | r.sr.f.h << 4 | r.sr.f.z << 6 | r.sr.f.s << 7
+       | r.sr.rfp << 8 | 1 << 11 | r.sr.iff << 12 | 1 << 15;
+}
+
+template<> auto TLCS900H::write<Word>(StatusRegister, Word data) -> void {
+  r.sr.f.c = data.bit(0);
+  r.sr.f.n = data.bit(1);
+  r.sr.f.v = data.bit(2);
+  r.sr.f.h = data.bit(4);
+  r.sr.f.z = data.bit(6);
+  r.sr.f.s = data.bit(7);
+  r.sr.rfp = data.bits(8,9);
+  r.sr.iff = data.bits(12,14);
+
+  r.sr.rfpp = r.sr.rfp - 1;
+}
+
+//todo: the same thing for the flag register
+
+template<> auto TLCS900H::read<Byte>(FlagRegister) -> Byte {
+  return r.sr.f.c << 0 | r.sr.f.n << 1 | r.sr.f.v << 2 | r.sr.f.h << 4 | r.sr.f.z << 6 | r.sr.f.s << 7;
+}
+
+template<> auto TLCS900H::write<Byte>(FlagRegister, Byte data) -> void {
+  r.sr.f.c = data.bit(0);
+  r.sr.f.n = data.bit(1);
+  r.sr.f.v = data.bit(2);
+  r.sr.f.h = data.bit(4);
+  r.sr.f.z = data.bit(6);
+  r.sr.f.s = data.bit(7);
 }

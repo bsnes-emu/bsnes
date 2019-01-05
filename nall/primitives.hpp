@@ -36,6 +36,8 @@ template<uint Bits> struct Natural {
 
   enum : type { Mask = ~0ull >> (64 - Bits) };
 
+  static inline constexpr auto bits() -> uint { return Bits; }
+
   inline Natural() : data(0) {}
   template<typename T> inline Natural(const T& value) { set(value); }
 
@@ -101,6 +103,10 @@ template<uint Bits> struct Natural {
     const type Hi;
   };
 
+  inline auto zero() const -> bool { return data == 0; }
+  inline auto positive() const -> bool { return (data >> bits() - 1) == 0; }
+  inline auto negative() const -> bool { return (data >> bits() - 1) == 1; }
+
   inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
@@ -139,6 +145,8 @@ template<uint Bits> struct Integer {
   using utype = typename Natural<Bits>::type;
 
   enum : utype { Mask = ~0ull >> (64 - Bits), Sign = 1ull << (Bits - 1) };
+
+  static inline constexpr auto bits() -> uint { return Bits; }
 
   inline Integer() : data(0) {}
   template<typename T> inline Integer(const T& value) { set(value); }
@@ -205,6 +213,10 @@ template<uint Bits> struct Integer {
     const uint Hi;
   };
 
+  inline auto zero() const -> bool { return data == 0; }
+  inline auto positive() const -> bool { return data >= 0; }
+  inline auto negative() const -> bool { return data <  0; }
+
   inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
@@ -238,6 +250,8 @@ template<uint Bits> struct Real {
     typename conditional<Bits == 32, float32_t,
     typename conditional<Bits == 64, float64_t,
     void>::type>::type;
+
+  static inline constexpr auto bits() -> uint { return Bits; }
 
   inline Real() : data(0.0) {}
   template<typename T> inline Real(const T& value) : data((type)value) {}

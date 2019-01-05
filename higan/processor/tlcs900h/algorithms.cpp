@@ -1,32 +1,77 @@
-template<> auto TLCS900H::algorithmAdd<Byte>(uint8 target, uint8 source, uint1 carry) -> uint8 {
+template<> auto TLCS900H::parity(Byte data) const -> bool {
+  data ^= data >> 4;
+  data ^= data >> 2;
+  data ^= data >> 1;
+  return !(data & 1);
+}
+
+template<> auto TLCS900H::parity(Word data) const -> bool {
+  data ^= data >> 8;
+  data ^= data >> 4;
+  data ^= data >> 2;
+  data ^= data >> 1;
+  return !(data & 1);
+}
+
+template<> auto TLCS900H::parity(Long data) const -> bool {
+  return Undefined;
+}
+
+//
+
+template<typename Size> auto TLCS900H::algorithmAdd(Size target, Size source, uint1 carry) -> Size {
   uint64 result = target + source + carry;
-  CF = result.bit(8);
+  CF = result.bit(Size::bits());
   NF = 0;
-  VF = uint8(~(target ^ source) & (target ^ result)).bit(7);
-  HF = uint8(target ^ source ^ result).bit(4);
-  ZF = uint8(result) == 0;
-  SF = result.bit(7);
+  VF = Size(~(target ^ source) & (target ^ result)).negative();
+  HF = Size(target ^ source ^ result).bit(4);
+  if constexpr(isLong<Size>()) HF = Undefined;
+  ZF = Size(result).zero();
+  SF = result.negative();
   return result;
 }
 
-template<> auto TLCS900H::algorithmAdd<Word>(uint16 target, uint16 source, uint1 carry) -> uint16 {
-  uint64 result = target + source + carry;
-  CF = result.bit(16);
+template<typename Size> auto TLCS900H::algorithmAnd(Size target, Size source) -> Size {
+  Size result = target & source;
+  CF = 0;
   NF = 0;
-  VF = uint16(~(target ^ source) & (target ^ result)).bit(15);
-  HF = uint16(target ^ source ^ result).bit(4);
-  ZF = uint16(result) == 0;
-  SF = result.bit(15);
+  VF = parity(result);
+  HF = 1;
+  ZF = result.zero();
+  SF = result.negative();
   return result;
 }
 
-template<> auto TLCS900H::algorithmAdd<Long>(uint32 target, uint32 source, uint1 carry) -> uint32 {
-  uint64 result = target + source + carry;
-  CF = result.bit(32);
+template<typename Size> auto TLCS900H::algorithmOr(Size target, Size source) -> Size {
+  Size result = target | source;
+  CF = 0;
   NF = 0;
-  VF = uint32(~(target ^ source) & (target ^ result)).bit(31);
-  HF = undefined;
-  ZF = uint32(result) == 0;
-  SF = result.bit(31);
+  VF = parity(result);
+  HF = 0;
+  ZF = result.zero();
+  SF = result.negative();
+  return result;
+}
+
+template<typename Size> auto TLCS900H::algorithmSubtract(Size target, Size source, uint1 carry) -> Size {
+  uint64 result = target - source - carry;
+  CF = result.bit(Size::bits());
+  NF = 1;
+  VF = Size((target ^ source) & (target ^ result)).negative();
+  HF = Size(target ^ source ^ result).bit(4);
+  if constexpr(isLong<Size>()) HF = Undefined;
+  ZF = Size(result).zero();
+  SF = result.negative();
+  return result;
+}
+
+template<typename Size> auto TLCS900H::algorithmXor(Size target, Size source) -> Size {
+  Size result = target ^ source;
+  CF = 0;
+  NF = 0;
+  VF = parity(result);
+  HF = 0;
+  ZF = result.zero();
+  SF = result.negative();
   return result;
 }

@@ -1,5 +1,12 @@
 //Toshiba TLCS900/H
 
+/* open questions:
+ *
+ * what happens when a prohibited instruction operand size is used? (eg adc.l (memory),#immediate)
+ * what happens when %11 is used for pre-decrement and post-increment addressing?
+ * what happens when using 8-bit register indexing and d0 is set (Word) or d1/d0 is set (Long)?
+ */
+
 #pragma once
 
 namespace Processor {
@@ -12,43 +19,6 @@ struct TLCS900H {
   struct Register  { Byte value; };
   struct Memory    { Long value; };
   struct Immediate { Long value; };
-
-  virtual auto read(uint32 address) -> uint8 = 0;
-  virtual auto write(uint32 address, uint8 data) -> void = 0;
-
-  template<typename Size> auto read(Immediate immediate) -> Size { return immediate.value; }
-
-  //tlcs900h.cpp
-  auto power() -> void;
-
-  //registers.cpp
-  template<typename Size> auto map(Register register) -> maybe<Size&>;
-  template<typename Size> auto read(Register) -> Size;
-  template<typename Size> auto write(Register, Size data) -> void;
-
-  //memory.cpp
-  template<typename Size = Byte> auto fetch() -> Size;
-  template<typename Size> auto read(Memory memory) -> Size;
-  template<typename Size> auto write(Memory memory, Size data) -> void;
-
-  //algorithms.cpp
-  template<typename Size> auto algorithmAdd(Size target, Size source, uint1 carry = 0) -> Size;
-
-  //instruction.cpp
-  auto instruction() -> void;
-  template<typename Size> auto instructionRegister(Register input) -> void;
-  template<typename Size> auto instructionSourceMemory(Memory input) -> void;
-  auto instructionTargetMemory(Memory input) -> void;
-
-  //instructions.cpp
-  template<typename Size, typename Target, typename Source> auto instructionAdd(Target target, Source source) -> void;
-  template<typename Size, typename Target, typename Source> auto instructionAddCarry(Target target, Source source) -> void;
-  auto instructionComplementCarry() -> void;
-  auto instructionNoOperation() -> void;
-  auto instructionSoftwareInterrupt(Immediate interrupt) -> void;
-
-  //serialization.cpp
-  auto serialize(serializer&) -> void;
 
   struct DataRegister {
     union {
@@ -75,6 +45,67 @@ struct TLCS900H {
     FlagRegister fp;
   };
 
+  virtual auto read(uint32 address) -> uint8 = 0;
+  virtual auto write(uint32 address, uint8 data) -> void = 0;
+
+  template<typename Size> auto read(Immediate immediate) -> Size { return immediate.value; }
+
+  //tlcs900h.cpp
+  auto power() -> void;
+
+  //registers.cpp
+  template<typename Size> auto map(Register register) -> maybe<Size&>;
+  template<typename Size> auto read(Register) -> Size;
+  template<typename Size> auto write(Register, Size data) -> void;
+  template<typename Size> auto read(StatusRegister) -> Size;
+  template<typename Size> auto write(StatusRegister, Size) -> void;
+  template<typename Size> auto read(FlagRegister) -> Size;
+  template<typename Size> auto write(FlagRegister, Size) -> void;
+
+  //memory.cpp
+  template<typename Size = Byte> auto fetch() -> Size;
+  template<typename Size> auto push(Size) -> void;
+  template<typename Size> auto pop() -> Size;
+  template<typename Size> auto read(Memory memory) -> Size;
+  template<typename Size> auto write(Memory memory, Size data) -> void;
+
+  //conditions.cpp
+  auto condition(uint4 code) -> bool;
+
+  //algorithms.cpp
+  template<typename Size> auto parity(Size) const -> bool;
+  template<typename Size> auto algorithmAdd(Size target, Size source, uint1 carry = 0) -> Size;
+  template<typename Size> auto algorithmAnd(Size target, Size source) -> Size;
+  template<typename Size> auto algorithmOr(Size target, Size source) -> Size;
+  template<typename Size> auto algorithmSubtract(Size target, Size source, uint1 carry = 0) -> Size;
+  template<typename Size> auto algorithmXor(Size target, Size source) -> Size;
+
+  //instruction.cpp
+  template<typename Size> auto registerLookup(uint3 code) -> Register;
+
+  auto instruction() -> void;
+  template<typename Size> auto instructionRegister(Register) -> void;
+  template<typename Size> auto instructionSourceMemory(Memory) -> void;
+  auto instructionTargetMemory(Memory) -> void;
+
+  //instructions.cpp
+  template<typename Size, typename Target, typename Source> auto instructionAdd(Target target, Source source) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionAddCarry(Target target, Source source) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionAnd(Target target, Source source) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionCompare(Target target, Source source) -> void;
+  auto instructionComplementCarry() -> void;
+  auto instructionNoOperation() -> void;
+  template<typename Size, typename Target, typename Source> auto instructionOr(Target target, Source source) -> void;
+  template<typename Size, typename Target> auto instructionPop(Target target) -> void;
+  template<typename Size, typename Source> auto instructionPush(Source source) -> void;
+  auto instructionSoftwareInterrupt(Immediate interrupt) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionSubtract(Target target, Source source) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionSubtractCarry(Target target, Source source) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionXor(Target target, Source source) -> void;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct Registers {
     DataRegister  xwa[4];
     DataRegister  xbc[4];
@@ -88,37 +119,34 @@ struct TLCS900H {
     StatusRegister sr;
   } r;
 
-  enum : uint {
-    RA0, RW0, QA0, QW0, RC0, RB0, QC0, QB0, RE0, RD0, QE0, QD0, RL0, RH0, QL0, QH0,
-    RA1, RW1, QA1, QW1, RC1, RB1, QC1, QB1, RE1, RD1, QE1, QD1, RL1, RH1, QL1, QH1,
-    RA2, RW2, QA2, QW2, RC2, RB2, QC2, QB2, RE2, RD2, QE2, QD2, RL2, RH2, QL2, QH2,
-    RA3, RW3, QA3, QW3, RC3, RB3, QC3, QB3, RE3, RD3, QE3, QD3, RL3, RH3, QL3, QH3, SPC = 0xcf,  //AP = 0xd0
-     AP,  WP, QAP, QWP,  CP,  BP, QCP, QBP,  EP,  DP, QEP, QDP,  LP,  HP, QLP, QHP,
-     A,   W,  QA,  QW,   C,   B,  QC,  QB,   E,   D,  QE,  QD,   L,   H,  QL,  QH,
-    IXL, IXH, QIXL,QIXH,IYL, IYH, QIYL,QIYH,IZL, IZH, QIZL,QIZH,SPL, SPH, QSPL,QSPH,
-  };
+  static inline const Register A{0xe0};
+  static inline const Register W{0xe1};
+  static inline const Register C{0xe4};
+  static inline const Register B{0xe5};
+  static inline const Register E{0xe8};
+  static inline const Register D{0xe9};
+  static inline const Register L{0xec};
+  static inline const Register H{0xed};
 
-  enum : uint {
-    RWA0 = 0x00, QWA0 = 0x02, RBC0 = 0x04, QBC0 = 0x06, RDE0 = 0x08, QDE0 = 0x0a, RHL0 = 0x0c, QHL0 = 0x0e,
-    RWA1 = 0x10, QWA1 = 0x12, RBC1 = 0x14, QBC1 = 0x16, RDE1 = 0x18, QDE1 = 0x1a, RHL1 = 0x1c, QHL1 = 0x1e,
-    RWA2 = 0x20, QWA2 = 0x22, RBC2 = 0x24, QBC2 = 0x26, RDE2 = 0x28, QDE2 = 0x2a, RHL2 = 0x2c, QHL2 = 0x2e,
-    RWA3 = 0x30, QWA3 = 0x32, RBC3 = 0x34, QBC3 = 0x36, RDE3 = 0x38, QDE3 = 0x3a, RHL3 = 0x3c, QHL3 = 0x3e,
-     WAP = 0xd0, QWAP = 0xd2,  BCP = 0xd4, QBCP = 0xd6,  DEP = 0xd8, QDEP = 0xda,  HLP = 0xdc, QHLP = 0xde,
-     WA  = 0xe0,  QWA = 0xe2,   BC = 0xe4,  QBC = 0xe6,   DE = 0xe8,  QDE = 0xea,   HL = 0xec,  QHL = 0xee,
-     IX  = 0xf0,  QIX = 0xf2,   IY = 0xf4,  QIY = 0xf6,   IZ = 0xf8,  QIZ = 0xfa,   SP = 0xfc,  QSP = 0xfe,
-  };
+  static inline const Register WA{0xe0};
+  static inline const Register BC{0xe4};
+  static inline const Register DE{0xe8};
+  static inline const Register HL{0xec};
+  static inline const Register IX{0xf0};
+  static inline const Register IY{0xf4};
+  static inline const Register IZ{0xf8};
+  static inline const Register SP{0xfc};
 
-  enum : uint {
-    XWA0 = 0x00, XBC0 = 0x04, XDE0 = 0x08, XHL0 = 0x0c,
-    XWA1 = 0x10, XBC1 = 0x14, XDE1 = 0x18, XHL1 = 0x1c,
-    XWA2 = 0x20, XBC2 = 0x24, XDE2 = 0x28, XHL2 = 0x2c,
-    XWA3 = 0x30, XBC3 = 0x34, XDE3 = 0x38, XHL3 = 0x3c,
-    XWAP = 0xd0, XBCP = 0xd4, XDEP = 0xd8, XHLP = 0xdc,
-    XWA  = 0xe0,  XBC = 0xe4,  XDE = 0xe8,  XHL = 0xec,
-    XIX  = 0xf0,  XIY = 0xf4,  XIZ = 0xf8,  XSP = 0xfc,
-  };
+  static inline const Register XWA{0xe0};
+  static inline const Register XBC{0xe4};
+  static inline const Register XDE{0xe8};
+  static inline const Register XHL{0xec};
+  static inline const Register XIX{0xf0};
+  static inline const Register XIY{0xf4};
+  static inline const Register XIZ{0xf8};
+  static inline const Register XSP{0xfc};
 
-  const uint1 undefined = 0;
+  static inline const uint1 Undefined = 0;
 };
 
 }
