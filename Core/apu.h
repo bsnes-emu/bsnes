@@ -140,6 +140,7 @@ typedef struct {
     volatile bool lock;
     
     double sample_cycles; // In 8 MHz units
+    double cycles_per_sample;
     
     // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
     unsigned cycles_since_render;
@@ -164,6 +165,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 void GB_apu_div_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
+void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */

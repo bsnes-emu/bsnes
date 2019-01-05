@@ -193,7 +193,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (addr < 0xFE00) {
-        return gb->ram[addr & 0x0FFF];
+        return read_banked_ram(gb, addr);
     }
 
     if (addr < 0xFF00) {
@@ -412,7 +412,7 @@ static GB_read_function_t * const read_map[] =
     read_vram,        read_vram,                                    /* 8XXX, 9XXX */
     read_mbc_ram,     read_mbc_ram,                                 /* AXXX, BXXX */
     read_ram,         read_banked_ram,                              /* CXXX, DXXX */
-    read_high_memory, read_high_memory,                             /* EXXX FXXX */
+    read_ram,         read_high_memory,                             /* EXXX FXXX */
 };
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
@@ -540,7 +540,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (addr < 0xFE00) {
         GB_log(gb, "Wrote %02x to %04x (RAM Mirror)\n", value, addr);
-        gb->ram[addr & 0x0FFF] = value;
+        write_banked_ram(gb, addr, value);
         return;
     }
 
@@ -913,7 +913,7 @@ static GB_write_function_t * const write_map[] =
     write_vram,        write_vram,                             /* 8XXX, 9XXX */
     write_mbc_ram,     write_mbc_ram,                          /* AXXX, BXXX */
     write_ram,         write_banked_ram,                       /* CXXX, DXXX */
-    write_high_memory, write_high_memory,                      /* EXXX FXXX */
+    write_ram,         write_high_memory,                     /* EXXX FXXX */
 };
 
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)

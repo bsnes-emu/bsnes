@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #endif
 
-static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
+static const unsigned int GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
 
 #ifndef DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
@@ -108,11 +108,6 @@ static void advance_tima_state_machine(GB_gameboy_t *gb)
     }
 }
 
-static bool counter_overflow_check(uint32_t old, uint32_t new, uint32_t max)
-{
-    return (old & (max >> 1)) && !(new & (max >> 1));
-}
-
 static void increase_tima(GB_gameboy_t *gb)
 {
     gb->io_registers[GB_IO_TIMA]++;
@@ -126,13 +121,13 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
     value &= INTERNAL_DIV_CYCLES - 1;
-    if ((gb->io_registers[GB_IO_TAC] & 4) &&
-        counter_overflow_check(gb->div_counter, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
+    uint32_t triggers = gb->div_counter & ~value;
+    if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & GB_TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
     }
     
     /* TODO: Can switching to double speed mode trigger an event? */
-    if (counter_overflow_check(gb->div_counter, value, gb->cgb_double_speed? 0x4000 : 0x2000)) {
+    if (triggers & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
         GB_apu_run(gb);
         GB_apu_div_event(gb);
     }
@@ -221,13 +216,13 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
     /* Glitch only happens when old_tac is enabled. */
     if (!(old_tac & 4)) return;
 
-    unsigned int old_clocks = GB_TAC_RATIOS[old_tac & 3];
-    unsigned int new_clocks = GB_TAC_RATIOS[new_tac & 3];
+    unsigned int old_clocks = GB_TAC_TRIGGER_BITS[old_tac & 3];
+    unsigned int new_clocks = GB_TAC_TRIGGER_BITS[new_tac & 3];
 
     /* The bit used for overflow testing must have been 1 */
-    if (gb->div_counter & (old_clocks >> 1)) {
+    if (gb->div_counter & old_clocks) {
         /* And now either the timer must be disabled, or the new bit used for overflow testing be 0. */
-        if (!(new_tac & 4) || gb->div_counter & (new_clocks >> 1)) {
+        if (!(new_tac & 4) || gb->div_counter & new_clocks) {
             increase_tima(gb);
         }
     }
