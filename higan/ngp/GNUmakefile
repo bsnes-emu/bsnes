@@ -1,4 +1,4 @@
-processors += z80
+processors += tlcs900h z80
 
 objects += ngp-interface ngp-system
 

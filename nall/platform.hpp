@@ -1,5 +1,7 @@
 #pragma once
 
+#define register $register
+
 #include <nall/intrinsics.hpp>
 
 namespace Math {
