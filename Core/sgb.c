@@ -9,9 +9,11 @@ enum {
     PAL03    = 0x02,
     PAL12    = 0x03,
     ATTR_BLK = 0x04,
+    ATTR_LIN = 0x05,
+    ATTR_DIV = 0x06,
     PAL_SET  = 0x0A,
     PAL_TRN  = 0x0B,
-    DATA_SND = 0x0f,
+    DATA_SND = 0x0F,
     MLT_REQ  = 0x11,
     CHR_TRN  = 0x13,
     PCT_TRN  = 0x14,
@@ -136,6 +138,11 @@ static void command_ready(GB_gameboy_t *gb)
                     middle_palette = outside_palette;
                 }
                 
+                command->data[i].left &= 0x1F;
+                command->data[i].top &= 0x1F;
+                command->data[i].right &= 0x1F;
+                command->data[i].bottom &= 0x1F;
+                
                 for (unsigned y = 0; y < 18; y++) {
                     for (unsigned x = 0; x < 20; x++) {
                         if (x < command->data[i].left || x > command->data[i].right ||
@@ -156,6 +163,56 @@ static void command_ready(GB_gameboy_t *gb)
                     }
                 }
             }
+            break;
+        }
+        case ATTR_LIN: {
+            struct {
+                uint8_t count;
+                uint8_t data[];
+            } *command = (void *)(gb->sgb->command + 1);
+            if (command->count > sizeof(gb->sgb->command) - 2) return;
+            
+            for (unsigned i = 0; i < command->count; i++) {
+                bool horizontal = command->data[i] & 0x80;
+                uint8_t palette = (command->data[i] >> 5) & 0x3;
+                uint8_t line = (command->data[i]) & 0x1F;
+                
+                if (horizontal) {
+                    if (line > 18) continue;
+                    for (unsigned x = 0; x < 20; x++) {
+                        gb->sgb->attribute_map[x + 20 * line] = palette;
+                    }
+                }
+                else {
+                    if (line > 20) continue;
+                    for (unsigned y = 0; y < 18; y++) {
+                        gb->sgb->attribute_map[line + 20 * y] = palette;
+                    }
+                }
+            }
+            break;
+        }
+        case ATTR_DIV: {
+            uint8_t high_palette = gb->sgb->command[1] & 3;
+            uint8_t low_palette = (gb->sgb->command[1] >> 2) & 3;
+            uint8_t middle_palette = (gb->sgb->command[1] >> 4) & 3;
+            bool horizontal = gb->sgb->command[1] & 0x40;
+            uint8_t line = gb->sgb->command[2] & 0x1F;
+            
+            for (unsigned y = 0; y < 18; y++) {
+                for (unsigned x = 0; x < 20; x++) {
+                    if ((horizontal? y : x) < line) {
+                        gb->sgb->attribute_map[x + 20 * y] = low_palette;
+                    }
+                    else if ((horizontal? y : x) == line) {
+                        gb->sgb->attribute_map[x + 20 * y] = middle_palette;
+                    }
+                    else {
+                        gb->sgb->attribute_map[x + 20 * y] = high_palette;
+                    }
+                }
+            }
+
             break;
         }
         case PAL_SET:
