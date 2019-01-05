@@ -286,7 +286,13 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     if (old_width != GB_get_screen_width(&gb)) {
         [self.view screenSizeChanged];
     }
-
+    
+    self.mainWindow.contentMinSize = NSMakeSize(GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    if (self.mainWindow.contentView.bounds.size.width < GB_get_screen_width(&gb) ||
+        self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
+        [self.mainWindow zoom:nil];
+    }
+    
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_DMG forKey:@"EmulateDMG"];
