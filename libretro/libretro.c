@@ -35,6 +35,10 @@ static const char slash = '/';
 #define VIDEO_HEIGHT 144
 #define VIDEO_PIXELS (VIDEO_WIDTH * VIDEO_HEIGHT)
 
+#define SGB_VIDEO_WIDTH 256
+#define SGB_VIDEO_HEIGHT 224
+#define SGB_VIDEO_PIXELS (SGB_VIDEO_WIDTH * SGB_VIDEO_HEIGHT)
+
 #define RETRO_MEMORY_GAMEBOY_1_SRAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
 #define RETRO_MEMORY_GAMEBOY_1_RTC ((2 << 8) | RETRO_MEMORY_RTC)
 #define RETRO_MEMORY_GAMEBOY_2_SRAM ((3 << 8) | RETRO_MEMORY_SAVE_RAM)
@@ -248,8 +252,8 @@ static const struct retro_variable vars_single_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy|Super Game Boy 2" },
-    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy|Super Game Boy 2" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -263,8 +267,8 @@ static const struct retro_variable vars_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy 2" },
-    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy 2" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
     { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -342,7 +346,8 @@ static void init_for_current_model(unsigned id)
     if (GB_load_boot_rom(&gameboy[i], buf))
         GB_load_boot_rom_from_buffer(&gameboy[i], boot_code, boot_length);
     GB_set_user_data(&gameboy[i], (void*)NULL);
-    GB_set_pixels_output(&gameboy[i],(unsigned int*)(frame_buf + i * VIDEO_PIXELS));
+
+    GB_set_pixels_output(&gameboy[i],(unsigned int*)(frame_buf + i * ((model[i] == MODEL_SGB || model[i] == MODEL_SGB2) ? SGB_VIDEO_PIXELS : VIDEO_PIXELS)));
     GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
     GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
 
@@ -447,11 +452,14 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else if (strcmp(var.value, "Super Game Boy") == 0)
                 new_model = MODEL_SGB;
+            else if (strcmp(var.value, "Super Game Boy 2") == 0)
+                new_model = MODEL_SGB2;
             else
                 new_model = MODEL_AUTO;
 
             if (new_model != model[0])
             {
+                geometry_updated = true;
                 model[0] = new_model;
                 init_for_current_model(0);
             }
@@ -524,6 +532,8 @@ static void check_variables(bool link)
                 new_model = MODEL_AGB;
             else if (strcmp(var.value, "Super Game Boy") == 0)
                 new_model = MODEL_SGB;
+            else if (strcmp(var.value, "Super Game Boy 2") == 0)
+                new_model = MODEL_SGB2;
             else
                 new_model = MODEL_AUTO;
 
@@ -546,6 +556,8 @@ static void check_variables(bool link)
             else if (strcmp(var.value, "Game Boy Advance") == 0)
                 new_model = MODEL_AGB;
             else if (strcmp(var.value, "Super Game Boy") == 0)
+                new_model = MODEL_SGB;
+            else if (strcmp(var.value, "Super Game Boy 2") == 0)
                 new_model = MODEL_SGB;
             else
                 new_model = MODEL_AUTO;
@@ -689,22 +701,41 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
     struct retro_game_geometry geom;
     struct retro_system_timing timing = { FRAME_RATE, AUDIO_FREQUENCY };
 
-    if (screen_layout == LAYOUT_TOP_DOWN) {
-        geom.base_width = VIDEO_WIDTH;
-        geom.base_height = VIDEO_HEIGHT * emulated_devices;
-        geom.aspect_ratio = (double)VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
-    }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
-        geom.base_width = VIDEO_WIDTH * emulated_devices;
-        geom.base_height = VIDEO_HEIGHT;
-        geom.aspect_ratio = ((double)VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
+    if (sameboy_dual)
+    {
+        if (screen_layout == LAYOUT_TOP_DOWN) {
+            geom.base_width = VIDEO_WIDTH;
+            geom.base_height = VIDEO_HEIGHT * emulated_devices;
+            geom.aspect_ratio = (double)VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
+        }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+            geom.base_width = VIDEO_WIDTH * emulated_devices;
+            geom.base_height = VIDEO_HEIGHT;
+            geom.aspect_ratio = ((double)VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
+        }
+    }
+    else
+    {
+        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)
+        {
+            geom.base_width = SGB_VIDEO_WIDTH;
+            geom.base_height = SGB_VIDEO_HEIGHT;
+            geom.aspect_ratio = (double)SGB_VIDEO_WIDTH / SGB_VIDEO_HEIGHT;
+        }
+        else
+        {
+            geom.base_width = VIDEO_WIDTH;
+            geom.base_height = VIDEO_HEIGHT;
+            geom.aspect_ratio = (double)VIDEO_WIDTH / VIDEO_HEIGHT;
+        }
     }
 
-    geom.max_width = VIDEO_WIDTH * emulated_devices;
-    geom.max_height = VIDEO_HEIGHT * emulated_devices;
+    geom.max_width = SGB_VIDEO_WIDTH * emulated_devices;
+    geom.max_height = SGB_VIDEO_HEIGHT * emulated_devices;
 
     info->geometry = geom;
     info->timing   = timing;
 }
+
 
 void retro_set_environment(retro_environment_t cb)
 {
@@ -745,7 +776,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 void retro_reset(void)
 {
     for (int i = 0; i < emulated_devices; i++)
-       GB_reset(&gameboy[i]);
+        GB_reset(&gameboy[i]);
 
 }
 
@@ -760,8 +791,8 @@ void retro_run(void)
     if (geometry_updated) {
         struct retro_system_av_info info;
         retro_get_system_av_info(&info);
-        geometry_updated = false;
         environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
+        geometry_updated = false;
     }
 
     if (!frame_buf)
@@ -772,7 +803,7 @@ void retro_run(void)
 
     GB_update_keys_status(&gameboy[0], 0);
     if (emulated_devices == 2)
-      GB_update_keys_status(&gameboy[1], 1);
+        GB_update_keys_status(&gameboy[1], 1);
 
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
@@ -788,22 +819,36 @@ void retro_run(void)
         }
     }
     else
-        GB_run_frame(&gameboy[0]);
+    {
+        int x = GB_run_frame(&gameboy[0]);
+        log_cb(RETRO_LOG_DEBUG, "%d\n", x);
+    }
 
-    if (screen_layout == LAYOUT_TOP_DOWN) {
-        video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
-    }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
-        /* use slow memcpy method for now */
-        for (int index = 0; index < emulated_devices; index++) {
-            for (int y = 0; y < VIDEO_HEIGHT; y++) {
-                for (int x = 0; x < VIDEO_WIDTH; x++) {
-                    frame_buf_copy[VIDEO_WIDTH * emulated_devices * y + (x + VIDEO_WIDTH * index)] = frame_buf[VIDEO_WIDTH * (y + VIDEO_HEIGHT * index) + x];
+    if (sameboy_dual)
+    {
+        if (screen_layout == LAYOUT_TOP_DOWN) {
+            video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
+        }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+            /* use slow memcpy method for now */
+            for (int index = 0; index < emulated_devices; index++) {
+                for (int y = 0; y < VIDEO_HEIGHT; y++) {
+                    for (int x = 0; x < VIDEO_WIDTH; x++) {
+                        frame_buf_copy[VIDEO_WIDTH * emulated_devices * y + (x + VIDEO_WIDTH * index)] = frame_buf[VIDEO_WIDTH * (y + VIDEO_HEIGHT * index) + x];
+                    }
                 }
             }
-        }
 
-        video_cb(frame_buf_copy, VIDEO_WIDTH * emulated_devices, VIDEO_HEIGHT, VIDEO_WIDTH * emulated_devices * sizeof(uint32_t));
+            video_cb(frame_buf_copy, VIDEO_WIDTH * emulated_devices, VIDEO_HEIGHT, VIDEO_WIDTH * emulated_devices * sizeof(uint32_t));
+        }
     }
+    else
+    {
+        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)
+            video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+        else
+            video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
+    }
+
 
     initialized = true;
 }
@@ -823,11 +868,8 @@ bool retro_load_game(const struct retro_game_info *info)
     else
         mode = MODE_SINGLE_GAME;
 
-    frame_buf = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-    frame_buf_copy = (uint32_t*)malloc(emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-
-    memset(frame_buf, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
-    memset(frame_buf_copy, 0, emulated_devices * VIDEO_PIXELS * sizeof(uint32_t));
+    frame_buf = (uint32_t*)malloc(SGB_VIDEO_PIXELS* emulated_devices * sizeof(uint32_t));
+    memset(frame_buf, 0, SGB_VIDEO_PIXELS * emulated_devices * sizeof(uint32_t));
 
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
