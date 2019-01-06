@@ -49,6 +49,8 @@ enum model {
     MODEL_DMG,
     MODEL_CGB,
     MODEL_AGB,
+    MODEL_SGB,
+    MODEL_SGB2,
     MODEL_AUTO
 };
 
@@ -56,7 +58,9 @@ static const GB_model_t libretro_to_internal_model[] =
 {
     [MODEL_DMG] = GB_MODEL_DMG_B,
     [MODEL_CGB] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB
+    [MODEL_AGB] = GB_MODEL_AGB,
+    [MODEL_SGB] = GB_MODEL_SGB,
+    [MODEL_SGB2] = GB_MODEL_SGB2
 };
 
 enum screen_layout {
@@ -109,8 +113,8 @@ char retro_game_path[4096];
 
 GB_gameboy_t gameboy[2];
 
-extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[];
-extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length;
+extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[], sgb_boot[], sgb2_boot[];
+extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length, sgb_boot_length, sgb2_boot_length;
 bool vblank1_occurred = false, vblank2_occurred = false;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
@@ -233,7 +237,7 @@ static const struct retro_variable vars_single[] = {
     { "sameboy_dual", "Single cart dual mode (reload); disabled|enabled" },
     { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
-    { "sameboy_model", "Emulated model; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model", "Emulated model; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy|Super Game Boy 2" },
     { NULL }
 };
 
@@ -244,8 +248,8 @@ static const struct retro_variable vars_single_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy|Super Game Boy 2" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy|Super Game Boy 2" },
     { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -259,8 +263,8 @@ static const struct retro_variable vars_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
-    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy 2" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2; Game Boy Color|Game Boy Advance|Auto|Game Boy|Super Game Boy 2" },
     { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
@@ -327,9 +331,9 @@ static void init_for_current_model(unsigned id)
     else {
         GB_init(&gameboy[i], libretro_to_internal_model[effective_model]);
     }
-    const char *model_name = (const char *[]){"dmg", "cgb", "agb"}[effective_model];
-    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot}[effective_model];
-    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length}[effective_model];
+    const char *model_name = (const char *[]){"dmg", "cgb", "agb", "sgb", "sgb2"}[effective_model];
+    const unsigned char *boot_code = (const unsigned char *[]){dmg_boot, cgb_boot, agb_boot, sgb_boot, sgb2_boot}[effective_model];
+    unsigned boot_length = (unsigned []){dmg_boot_length, cgb_boot_length, agb_boot_length, sgb_boot_length, sgb2_boot_length}[effective_model];
 
     char buf[256];
     snprintf(buf, sizeof(buf), "%s%c%s_boot.bin", retro_system_directory, slash, model_name);
@@ -441,6 +445,8 @@ static void check_variables(bool link)
                 new_model = MODEL_CGB;
             else if (strcmp(var.value, "Game Boy Advance") == 0)
                 new_model = MODEL_AGB;
+            else if (strcmp(var.value, "Super Game Boy") == 0)
+                new_model = MODEL_SGB;
             else
                 new_model = MODEL_AUTO;
 
@@ -516,6 +522,8 @@ static void check_variables(bool link)
                 new_model = MODEL_CGB;
             else if (strcmp(var.value, "Game Boy Advance") == 0)
                 new_model = MODEL_AGB;
+            else if (strcmp(var.value, "Super Game Boy") == 0)
+                new_model = MODEL_SGB;
             else
                 new_model = MODEL_AUTO;
 
@@ -537,6 +545,8 @@ static void check_variables(bool link)
                 new_model = MODEL_CGB;
             else if (strcmp(var.value, "Game Boy Advance") == 0)
                 new_model = MODEL_AGB;
+            else if (strcmp(var.value, "Super Game Boy") == 0)
+                new_model = MODEL_SGB;
             else
                 new_model = MODEL_AUTO;
 
