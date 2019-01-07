@@ -1,24 +1,29 @@
-template<> auto TLCS900H::fetch<uint8>() -> uint8 {
+template<> auto TLCS900H::fetch<Byte>() -> Byte {
   return 0x00;
 }
 
-template<> auto TLCS900H::fetch<uint16>() -> uint16 {
-  uint16 data = fetch<uint8>();
-  return data | fetch<uint8>() << 8;
+template<> auto TLCS900H::fetch<Word>() -> Word {
+  uint16 data = fetch<Byte>();
+  return data | fetch<Byte>() << 8;
 }
 
 template<> auto TLCS900H::fetch<uint24>() -> uint24 {
-  uint24 data  = fetch<uint8>();
-         data |= fetch<uint8>() << 8;
-  return data |= fetch<uint8>() << 16;
+  uint24 data  = fetch<Byte>();
+         data |= fetch<Byte>() << 8;
+  return data |= fetch<Byte>() << 16;
 }
 
-template<> auto TLCS900H::fetch<uint32>() -> uint32 {
-  uint32 data  = fetch<uint8>();
-         data |= fetch<uint8>() << 8;
-         data |= fetch<uint8>() << 16;
-  return data |= fetch<uint8>() << 24;
+template<> auto TLCS900H::fetch<Long>() -> Long {
+  uint32 data  = fetch<Byte>();
+         data |= fetch<Byte>() << 8;
+         data |= fetch<Byte>() << 16;
+  return data |= fetch<Byte>() << 24;
 }
+
+template<> auto TLCS900H::fetch< int8>() ->  int8 { return ( int8)fetch< uint8>(); }
+template<> auto TLCS900H::fetch<int16>() -> int16 { return (int16)fetch<uint16>(); }
+template<> auto TLCS900H::fetch<int24>() -> int24 { return (int24)fetch<uint24>(); }
+template<> auto TLCS900H::fetch<int32>() -> int32 { return (int32)fetch<uint32>(); }
 
 //
 

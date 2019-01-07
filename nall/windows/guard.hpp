@@ -26,8 +26,9 @@
 #undef NALL_WINDOWS_GUARD_HPP
 
 #undef boolean
-#undef far
 #undef interface
+
+#undef far
 #undef near
 
 #endif

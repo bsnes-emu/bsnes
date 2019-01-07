@@ -1,7 +1,5 @@
 #pragma once
 
-#define register $register
-
 #include <nall/intrinsics.hpp>
 
 namespace Math {
@@ -120,3 +118,5 @@ namespace Math {
 #else
   #define unreachable throw
 #endif
+
+#define register $register

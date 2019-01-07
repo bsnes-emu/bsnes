@@ -28,6 +28,24 @@ auto TLCS900H::instructionComplementCarry() -> void {
   CF = !CF;
 }
 
+template<typename Size, typename Source> auto TLCS900H::instructionJump(Source source) -> void {
+  PC = read(source);
+}
+
+template<typename Size, typename Source> auto TLCS900H::instructionJump(uint4 code, Source source) -> void {
+  auto address = read(source);
+  if(condition(code)) PC = address;
+}
+
+template<typename Size> auto TLCS900H::instructionJumpRelative(uint4 code, Size displacement) -> void {
+  if(condition(code)) PC += displacement;
+}
+
+template<typename Size, typename Target, typename Source>
+auto TLCS900H::instructionLoad(Target target, Source source) -> void {
+  write(target, read(source));
+}
+
 auto TLCS900H::instructionNoOperation() -> void {
 }
 
@@ -46,7 +64,8 @@ auto TLCS900H::instructionPush(Source source) -> void {
   push(read(source));
 }
 
-auto TLCS900H::instructionSoftwareInterrupt(Immediate interrupt) -> void {
+auto TLCS900H::instructionSoftwareInterrupt(uint3 interrupt) -> void {
+  //TODO
 }
 
 template<typename Size, typename Target, typename Source>

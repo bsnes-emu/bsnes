@@ -12,7 +12,7 @@
 namespace Processor {
 
 struct TLCS900H {
-  using Byte = uint8;
+  using Byte =  uint8;
   using Word = uint16;
   using Long = uint32;
 
@@ -94,11 +94,15 @@ struct TLCS900H {
   template<typename Size, typename Target, typename Source> auto instructionAnd(Target target, Source source) -> void;
   template<typename Size, typename Target, typename Source> auto instructionCompare(Target target, Source source) -> void;
   auto instructionComplementCarry() -> void;
+  template<typename Size, typename Source> auto instructionJump(Source) -> void;
+  template<typename Size, typename Source> auto instructionJump(uint4 code, Source) -> void;
+  template<typename Size> auto instructionJumpRelative(uint4 code, Size displacement) -> void;
+  template<typename Size, typename Target, typename Source> auto instructionLoad(Target target, Source source) -> void;
   auto instructionNoOperation() -> void;
   template<typename Size, typename Target, typename Source> auto instructionOr(Target target, Source source) -> void;
   template<typename Size, typename Target> auto instructionPop(Target target) -> void;
   template<typename Size, typename Source> auto instructionPush(Source source) -> void;
-  auto instructionSoftwareInterrupt(Immediate interrupt) -> void;
+  auto instructionSoftwareInterrupt(uint3 interrupt) -> void;
   template<typename Size, typename Target, typename Source> auto instructionSubtract(Target target, Source source) -> void;
   template<typename Size, typename Target, typename Source> auto instructionSubtractCarry(Target target, Source source) -> void;
   template<typename Size, typename Target, typename Source> auto instructionXor(Target target, Source source) -> void;
