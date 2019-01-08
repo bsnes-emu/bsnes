@@ -1,90 +1,108 @@
-#define read read<Size>
-#define write write<Size>
-#define push push<Size>
-#define pop pop<Size>
-#define algorithm(name, ...) algorithm##name<Size>(__VA_ARGS__)
-
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionAdd(Target target, Source source) -> void {
-  write(target, algorithm(Add, read(target), read(source)));
+  store(target, algorithmAdd(load(target), load(source)));
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionAddCarry(Target target, Source source) -> void {
-  write(target, algorithm(Add, read(target), read(source), CF));
+  store(target, algorithmAdd(load(target), load(source), carry()));
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionAnd(Target target, Source source) -> void {
-  write(target, algorithm(And, read(target), read(source)));
+  store(target, algorithmAnd(load(target), load(source)));
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Source>
+auto TLCS900H::instructionCall(uint4 code, Source source) -> void {
+  auto address = load(source);
+  if(condition(code)) push(PC), store(PC, address);
+}
+
+template<typename Target, typename Source>
 auto TLCS900H::instructionCompare(Target target, Source source) -> void {
-  algorithm(Subtract, read(target), read(source));
+  algorithmSubtract(load(target), load(source));
 }
 
 auto TLCS900H::instructionComplementCarry() -> void {
-  CF = !CF;
+  setCarry(!carry());
 }
 
-template<typename Size, typename Source> auto TLCS900H::instructionJump(Source source) -> void {
-  PC = read(source);
+template<typename Target, typename Source>
+auto TLCS900H::instructionExchange(Target target, Source source) -> void {
+  auto data = load(target);
+  store(target, load(source));
+  store(source, data);
 }
 
-template<typename Size, typename Source> auto TLCS900H::instructionJump(uint4 code, Source source) -> void {
-  auto address = read(source);
-  if(condition(code)) PC = address;
+auto TLCS900H::instructionHalt() -> void {
+  setHalted(true);
 }
 
-template<typename Size> auto TLCS900H::instructionJumpRelative(uint4 code, Size displacement) -> void {
-  if(condition(code)) PC += displacement;
+template<typename Source>
+auto TLCS900H::instructionJump(uint4 code, Source source) -> void {
+  auto address = load(source);
+  if(condition(code)) store(PC, address);
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Source>
+auto TLCS900H::instructionJumpRelative(uint4 code, Source displacement) -> void {
+  if(condition(code)) store(PC, load(PC) + load(displacement));
+}
+
+template<typename Target, typename Source>
 auto TLCS900H::instructionLoad(Target target, Source source) -> void {
-  write(target, read(source));
+  store(target, load(source));
 }
 
 auto TLCS900H::instructionNoOperation() -> void {
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionOr(Target target, Source source) -> void {
-  write(target, algorithm(Or, read(target), read(source)));
+  store(target, algorithmOr(load(target), load(source)));
 }
 
-template<typename Size, typename Target>
+template<typename Target>
 auto TLCS900H::instructionPop(Target target) -> void {
-  write(target, pop());
+  pop(target);
 }
 
-template<typename Size, typename Source>
+template<typename Source>
 auto TLCS900H::instructionPush(Source source) -> void {
-  push(read(source));
+  push(source);
+}
+
+auto TLCS900H::instructionReturnInterrupt() -> void {
+  pop(SR);
+  pop(PC);
+  //TODO: decrement INTNEST here
+}
+
+template<typename Target>
+auto TLCS900H::instructionSetConditionCode(uint4 code, Target target) -> void {
+  store(target, condition(code));
+}
+
+auto TLCS900H::instructionSetInterruptFlags(uint3 flags) -> void {
+  setIFF(flags);
 }
 
 auto TLCS900H::instructionSoftwareInterrupt(uint3 interrupt) -> void {
   //TODO
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionSubtract(Target target, Source source) -> void {
-  write(target, algorithm(Subtract, read(target), read(source)));
+  store(target, algorithmSubtract(load(target), load(source)));
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionSubtractCarry(Target target, Source source) -> void {
-  write(target, algorithm(Subtract, read(target), read(source), CF));
+  store(target, algorithmSubtract(load(target), load(source), carry()));
 }
 
-template<typename Size, typename Target, typename Source>
+template<typename Target, typename Source>
 auto TLCS900H::instructionXor(Target target, Source source) -> void {
-  write(target, algorithm(Xor, read(target), read(source)));
+  store(target, algorithmXor(load(target), load(source)));
 }
-
-#undef read
-#undef write
-#undef push
-#undef pop
-#undef algorithm

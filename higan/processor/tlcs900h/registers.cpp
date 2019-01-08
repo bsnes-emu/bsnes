@@ -1,21 +1,8 @@
-#define PC   r.pc.l.l0
+#define a r.rfp
+#define p r.rfpp
 
-#define CF   r.sr.f.c
-#define NF   r.sr.f.n
-#define VF   r.sr.f.v
-#define HF   r.sr.f.h
-#define ZF   r.sr.f.z
-#define SF   r.sr.f.s
-
-#define RFP  r.sr.rfp
-#define RFPP r.sr.rfpp
-#define IFF  r.sr.iff
-
-#define a RFP
-#define p RFPP
-
-template<> auto TLCS900H::map<Byte>(Register register) -> maybe<Byte&> {
-  switch(register.value) {
+template<> auto TLCS900H::map(Register<uint8> register) -> maybe<uint8&> {
+  switch(register.id) {
   #define r(id, name) case id: return r.name;
   r(0x00, xwa[0].b.b0) r(0x01, xwa[0].b.b1) r(0x02, xwa[0].b.b2) r(0x03, xwa[0].b.b3)
   r(0x04, xbc[0].b.b0) r(0x05, xbc[0].b.b1) r(0x06, xbc[0].b.b2) r(0x07, xbc[0].b.b3)
@@ -50,8 +37,8 @@ template<> auto TLCS900H::map<Byte>(Register register) -> maybe<Byte&> {
   return nothing;
 }
 
-template<> auto TLCS900H::map<Word>(Register register) -> maybe<Word&> {
-  switch(register.value & ~1) {
+template<> auto TLCS900H::map(Register<uint16> register) -> maybe<uint16&> {
+  switch(register.id & ~1) {
   #define r(id, name) case id: return r.name;
   r(0x00, xwa[0].w.w0) r(0x02, xwa[0].w.w1) r(0x04, xbc[0].w.w0) r(0x06, xbc[0].w.w1)
   r(0x08, xde[0].w.w0) r(0x0a, xde[0].w.w1) r(0x0c, xhl[0].w.w0) r(0x0e, xhl[0].w.w1)
@@ -72,8 +59,8 @@ template<> auto TLCS900H::map<Word>(Register register) -> maybe<Word&> {
   return nothing;
 }
 
-template<> auto TLCS900H::map<Long>(Register register) -> maybe<Long&> {
-  switch(register.value & ~3) {
+template<> auto TLCS900H::map(Register<uint32> register) -> maybe<uint32&> {
+  switch(register.id & ~3) {
   #define r(id, name) case id: return r.name;
   r(0x00, xwa[0].l.l0) r(0x04, xbc[0].l.l0) r(0x08, xde[0].l.l0) r(0x0c, xhl[0].l.l0)
   r(0x10, xwa[1].l.l0) r(0x14, xbc[1].l.l0) r(0x18, xde[1].l.l0) r(0x1c, xhl[1].l.l0)
@@ -90,64 +77,38 @@ template<> auto TLCS900H::map<Long>(Register register) -> maybe<Long&> {
 #undef a
 #undef p
 
-template<> auto TLCS900H::read<Byte>(Register register) -> Byte {
-  return map<Byte>(register)(0);
+template<> auto TLCS900H::load< uint8>(Register< uint8> register) ->  uint8 { return map(register)(Undefined); }
+template<> auto TLCS900H::load<uint16>(Register<uint16> register) -> uint16 { return map(register)(Undefined); }
+template<> auto TLCS900H::load<uint32>(Register<uint32> register) -> uint32 { return map(register)(Undefined); }
+
+template<> auto TLCS900H::store< uint8>(Register< uint8> register, uint32 data) -> void { if(auto r = map(register)) r() = data; }
+template<> auto TLCS900H::store<uint16>(Register<uint16> register, uint32 data) -> void { if(auto r = map(register)) r() = data; }
+template<> auto TLCS900H::store<uint32>(Register<uint32> register, uint32 data) -> void { if(auto r = map(register)) r() = data; }
+
+auto TLCS900H::load(FlagRegister f) -> uint8 {
+  switch(f.id) {
+  case 0: return r.c  << 0 | r.n  << 1 | r.v  << 2 | r.h  << 4 | r.z  << 6 | r.s  << 7;
+  case 1: return r.cp << 0 | r.np << 1 | r.vp << 2 | r.hp << 4 | r.zp << 6 | r.sp << 7;
+  } unreachable;
 }
 
-template<> auto TLCS900H::read<Word>(Register register) -> Word {
-  return map<Word>(register)(0);
+auto TLCS900H::store(FlagRegister f, uint8 data) -> void {
+  switch(f.id) {
+  case 0: r.c  = data.bit(0); r.n  = data.bit(1); r.v  = data.bit(2); r.h  = data.bit(4); r.z  = data.bit(6); r.s  = data.bit(7); return;
+  case 1: r.cp = data.bit(0); r.np = data.bit(1); r.vp = data.bit(2); r.hp = data.bit(4); r.zp = data.bit(6); r.sp = data.bit(7); return;
+  } unreachable;
 }
 
-template<> auto TLCS900H::read<Long>(Register register) -> Long {
-  return map<Long>(register)(0);
+auto TLCS900H::load(StatusRegister) -> uint16 {
+  return load(F) | r.rfp << 8 | 1 << 11 | r.iff << 12 | 1 << 15;
 }
 
-template<> auto TLCS900H::write<Byte>(Register register, Byte data) -> void {
-  if(auto r = map<Byte>(register)) r() = data;
+auto TLCS900H::store(StatusRegister, uint16 data) -> void {
+  store(F, data);
+  r.rfp = data.bits( 8, 9);
+  r.iff = data.bits(12,14);
+  r.rfpp = r.rfp - 1;
 }
 
-template<> auto TLCS900H::write<Word>(Register register, Word data) -> void {
-  if(auto r = map<Word>(register)) r() = data;
-}
-
-template<> auto TLCS900H::write<Long>(Register register, Long data) -> void {
-  if(auto r = map<Long>(register)) r() = data;
-}
-
-//
-
-//todo: this is pretty hacky ... the templates pass by-value, but we need to modify the status register
-//since there's only one, we ignore the parameter and access the underlying register directly instead
-
-template<> auto TLCS900H::read<Word>(StatusRegister) -> Word {
-  return r.sr.f.c << 0 | r.sr.f.n << 1 | r.sr.f.v << 2 | r.sr.f.h << 4 | r.sr.f.z << 6 | r.sr.f.s << 7
-       | r.sr.rfp << 8 | 1 << 11 | r.sr.iff << 12 | 1 << 15;
-}
-
-template<> auto TLCS900H::write<Word>(StatusRegister, Word data) -> void {
-  r.sr.f.c = data.bit(0);
-  r.sr.f.n = data.bit(1);
-  r.sr.f.v = data.bit(2);
-  r.sr.f.h = data.bit(4);
-  r.sr.f.z = data.bit(6);
-  r.sr.f.s = data.bit(7);
-  r.sr.rfp = data.bits(8,9);
-  r.sr.iff = data.bits(12,14);
-
-  r.sr.rfpp = r.sr.rfp - 1;
-}
-
-//todo: the same thing for the flag register
-
-template<> auto TLCS900H::read<Byte>(FlagRegister) -> Byte {
-  return r.sr.f.c << 0 | r.sr.f.n << 1 | r.sr.f.v << 2 | r.sr.f.h << 4 | r.sr.f.z << 6 | r.sr.f.s << 7;
-}
-
-template<> auto TLCS900H::write<Byte>(FlagRegister, Byte data) -> void {
-  r.sr.f.c = data.bit(0);
-  r.sr.f.n = data.bit(1);
-  r.sr.f.v = data.bit(2);
-  r.sr.f.h = data.bit(4);
-  r.sr.f.z = data.bit(6);
-  r.sr.f.s = data.bit(7);
-}
+auto TLCS900H::load(ProgramCounter) -> uint32 { return r.pc.l.l0; }
+auto TLCS900H::store(ProgramCounter, uint32 data) -> void { r.pc.l.l0 = data; }

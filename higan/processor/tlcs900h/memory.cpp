@@ -1,23 +1,23 @@
-template<> auto TLCS900H::fetch<Byte>() -> Byte {
-  return 0x00;
+template<> auto TLCS900H::fetch< uint8>() ->  uint8 {
+  return rand();
 }
 
-template<> auto TLCS900H::fetch<Word>() -> Word {
-  uint16 data = fetch<Byte>();
-  return data | fetch<Byte>() << 8;
+template<> auto TLCS900H::fetch<uint16>() -> uint16 {
+  uint16 data = fetch<uint8>();
+  return data | fetch<uint8>() << 8;
 }
 
 template<> auto TLCS900H::fetch<uint24>() -> uint24 {
-  uint24 data  = fetch<Byte>();
-         data |= fetch<Byte>() << 8;
-  return data |= fetch<Byte>() << 16;
+  uint24 data  = fetch<uint8>();
+         data |= fetch<uint8>() << 8;
+  return data |= fetch<uint8>() << 16;
 }
 
-template<> auto TLCS900H::fetch<Long>() -> Long {
-  uint32 data  = fetch<Byte>();
-         data |= fetch<Byte>() << 8;
-         data |= fetch<Byte>() << 16;
-  return data |= fetch<Byte>() << 24;
+template<> auto TLCS900H::fetch<uint32>() -> uint32 {
+  uint32 data  = fetch<uint8>();
+         data |= fetch<uint8>() << 8;
+         data |= fetch<uint8>() << 16;
+  return data |= fetch<uint8>() << 24;
 }
 
 template<> auto TLCS900H::fetch< int8>() ->  int8 { return ( int8)fetch< uint8>(); }
@@ -29,78 +29,55 @@ template<> auto TLCS900H::fetch<int32>() -> int32 { return (int32)fetch<uint32>(
 
 #define XSP r.xsp.l.l0
 
-template<> auto TLCS900H::push<Byte>(Byte data) -> void {
-  write(--XSP, data);
+template<typename T> auto TLCS900H::pop(T data) -> void {
+  auto value = typename T::type();
+  if constexpr(T::bits >=  8) value.byte(0) = read(XSP++);
+  if constexpr(T::bits >= 16) value.byte(1) = read(XSP++);
+  if constexpr(T::bits >= 24) value.byte(2) = read(XSP++);
+  if constexpr(T::bits >= 32) value.byte(3) = read(XSP++);
+  store(data, value);
 }
 
-template<> auto TLCS900H::push<Word>(Word data) -> void {
-  write(--XSP, data >> 0);
-  write(--XSP, data >> 8);
-}
-
-template<> auto TLCS900H::push<Long>(Long data) -> void {
-  write(--XSP, data >>  0);
-  write(--XSP, data >>  8);
-  write(--XSP, data >> 16);
-  write(--XSP, data >> 24);
-}
-
-//
-
-template<> auto TLCS900H::pop<Byte>() -> Byte {
-  return read(XSP++);
-}
-
-template<> auto TLCS900H::pop<Word>() -> Word {
-  uint16 data = read(XSP++) << 0;
-  return data | read(XSP++) << 8;
-}
-
-template<> auto TLCS900H::pop<Long>() -> Long {
-  uint32 data  = read(XSP++) <<  0;
-         data |= read(XSP++) <<  8;
-         data |= read(XSP++) << 16;
-  return data |= read(XSP++) << 24;
+template<typename T> auto TLCS900H::push(T data) -> void {
+  auto value = load(data);
+  if constexpr(T::bits >=  8) write(--XSP, value >>  0);
+  if constexpr(T::bits >= 16) write(--XSP, value >>  8);
+  if constexpr(T::bits >= 24) write(--XSP, value >> 16);
+  if constexpr(T::bits >= 32) write(--XSP, value >> 24);
 }
 
 #undef XSP
 
 //
 
-template<> auto TLCS900H::read<Byte>(Memory memory) -> uint8 {
-  uint32 address = memory.value;
-  return read(address);
+template<> auto TLCS900H::load(Memory< uint8> memory) ->  uint8 {
+  return read(memory.address);
 }
 
-template<> auto TLCS900H::read<Word>(Memory memory) -> uint16 {
-  uint32 address = memory.value;
-  uint16 data = read(address + 0) << 0;
-  return data | read(address + 1) << 8;
+template<> auto TLCS900H::load(Memory<uint16> memory) -> uint16 {
+  uint16 data = read(memory.address + 0) << 0;
+  return data | read(memory.address + 1) << 8;
 }
 
-template<> auto TLCS900H::read<Long>(Memory memory) -> uint32 {
-  uint32 address = memory.value;
-  uint32 data  = read(address + 0) <<  0;
-         data |= read(address + 1) <<  8;
-         data |= read(address + 2) << 16;
-  return data |= read(address + 3) << 24;
+template<> auto TLCS900H::load(Memory<uint32> memory) -> uint32 {
+  uint32 data  = read(memory.address + 0) <<  0;
+         data |= read(memory.address + 1) <<  8;
+         data |= read(memory.address + 2) << 16;
+  return data |= read(memory.address + 3) << 24;
 }
 
-template<> auto TLCS900H::write<Byte>(Memory memory, uint8 data) -> void {
-  uint32 address = memory.value;
-  write(address + 0, data >> 0);
+template<> auto TLCS900H::store(Memory< uint8> memory, uint32 data) -> void {
+  write(memory.address, data);
 }
 
-template<> auto TLCS900H::write<Word>(Memory memory, uint16 data) -> void {
-  uint32 address = memory.value;
-  write(address + 0, data >> 0);
-  write(address + 1, data >> 8);
+template<> auto TLCS900H::store(Memory<uint16> memory, uint32 data) -> void {
+  write(memory.address + 0, data >> 0);
+  write(memory.address + 1, data >> 8);
 }
 
-template<> auto TLCS900H::write<Long>(Memory memory, uint32 data) -> void {
-  uint32 address = memory.value;
-  write(address + 0, data >>  0);
-  write(address + 1, data >>  8);
-  write(address + 2, data >> 16);
-  write(address + 3, data >> 24);
+template<> auto TLCS900H::store(Memory<uint32> memory, uint32 data) -> void {
+  write(memory.address + 0, data >>  0);
+  write(memory.address + 1, data >>  8);
+  write(memory.address + 2, data >> 16);
+  write(memory.address + 3, data >> 24);
 }
