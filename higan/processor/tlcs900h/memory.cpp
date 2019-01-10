@@ -25,6 +25,10 @@ template<> auto TLCS900H::fetch<int16>() -> int16 { return (int16)fetch<uint16>(
 template<> auto TLCS900H::fetch<int24>() -> int24 { return (int24)fetch<uint24>(); }
 template<> auto TLCS900H::fetch<int32>() -> int32 { return (int32)fetch<uint32>(); }
 
+template<typename T> auto TLCS900H::fetchRegister() -> Register<T> { return Register<T>{fetch<uint8>()}; }
+template<typename T, typename U> auto TLCS900H::fetchMemory() -> Memory<T> { return Memory<T>{fetch<U>()}; }
+template<typename T> auto TLCS900H::fetchImmediate() -> Immediate<T> { return Immediate<T>{fetch<T>()}; }
+
 //
 
 #define XSP r.xsp.l.l0
@@ -65,6 +69,10 @@ template<> auto TLCS900H::load(Memory<uint32> memory) -> uint32 {
          data |= read(memory.address + 2) << 16;
   return data |= read(memory.address + 3) << 24;
 }
+
+template<> auto TLCS900H::load(Memory< int8> memory) ->  int8 { return  (int8)load< uint8>(Memory< uint8>{memory.address}); }
+template<> auto TLCS900H::load(Memory<int16> memory) -> int16 { return (int16)load<uint16>(Memory<uint16>{memory.address}); }
+template<> auto TLCS900H::load(Memory<int32> memory) -> int32 { return (int32)load<uint32>(Memory<uint32>{memory.address}); }
 
 template<> auto TLCS900H::store(Memory< uint8> memory, uint32 data) -> void {
   write(memory.address, data);

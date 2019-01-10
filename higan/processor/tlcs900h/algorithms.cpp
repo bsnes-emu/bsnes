@@ -21,57 +21,57 @@ template<> auto TLCS900H::parity<uint32>(uint32 data) const -> bool {
 
 template<typename T> auto TLCS900H::algorithmAdd(T target, T source, uint1 carry) -> T {
   uint64 result = target + source + carry;
-  setCarry(result.bit(T::bits()));
-  setNegative(0);
-  setOverflow(T(~(target ^ source) & (target ^ result)).negative());
-  setHalfCarry(T(target ^ source ^ result).bit(4));
-  if constexpr(is_same<T, uint32>::value) setHalfCarry(Undefined);
-  setZero(T(result).zero());
-  setSign(result.negative());
+  CF = result.bit(T::bits());
+  NF = 0;
+  VF = T(~(target ^ source) & (target ^ result)).negative();
+  HF = T(target ^ source ^ result).bit(4);
+  if constexpr(is_same<T, uint32>::value) HF = Undefined;
+  ZF = T(result).zero();
+  SF = result.negative();
   return result;
 }
 
 template<typename T> auto TLCS900H::algorithmAnd(T target, T source) -> T {
   T result = target & source;
-  setCarry(0);
-  setNegative(0);
-  setParity(parity(result));
-  setHalfCarry(1);
-  setZero(result.zero());
-  setSign(result.negative());
+  CF = 0;
+  NF = 0;
+  PF = parity(result);
+  HF = 1;
+  ZF = result.zero();
+  SF = result.negative();
   return result;
 }
 
 template<typename T> auto TLCS900H::algorithmOr(T target, T source) -> T {
   T result = target | source;
-  setCarry(0);
-  setNegative(0);
-  setParity(parity(result));
-  setHalfCarry(0);
-  setZero(result.zero());
-  setSign(result.negative());
+  CF = 0;
+  NF = 0;
+  PF = parity(result);
+  HF = 0;
+  ZF = result.zero();
+  SF = result.negative();
   return result;
 }
 
 template<typename T> auto TLCS900H::algorithmSubtract(T target, T source, uint1 carry) -> T {
   uint64 result = target - source - carry;
-  setCarry(result.bit(T::bits()));
-  setNegative(1);
-  setOverflow(T((target ^ source) & (target ^ result)).negative());
-  setHalfCarry(T(target ^ source ^ result).bit(4));
-  if constexpr(is_same<T, uint32>::value) setHalfCarry(Undefined);
-  setZero(T(result).zero());
-  setSign(result.negative());
+  CF = result.bit(T::bits());
+  NF = 1;
+  VF = T((target ^ source) & (target ^ result)).negative();
+  HF = T(target ^ source ^ result).bit(4);
+  if constexpr(is_same<T, uint32>::value) HF = Undefined;
+  ZF = T(result).zero();
+  SF = result.negative();
   return result;
 }
 
 template<typename T> auto TLCS900H::algorithmXor(T target, T source) -> T {
   T result = target ^ source;
-  setCarry(0);
-  setNegative(0);
-  setParity(parity(result));
-  setHalfCarry(0);
-  setZero(result.zero());
-  setSign(result.negative());
+  CF = 0;
+  NF = 0;
+  PF = parity(result);
+  HF = 0;
+  ZF = result.zero();
+  SF = result.negative();
   return result;
 }

@@ -1,5 +1,5 @@
-#define a r.rfp
-#define p r.rfpp
+#define a RFP
+#define p RFP - 1 & 3
 
 template<> auto TLCS900H::map(Register<uint8> register) -> maybe<uint8&> {
   switch(register.id) {
@@ -85,6 +85,10 @@ template<> auto TLCS900H::store< uint8>(Register< uint8> register, uint32 data) 
 template<> auto TLCS900H::store<uint16>(Register<uint16> register, uint32 data) -> void { if(auto r = map(register)) r() = data; }
 template<> auto TLCS900H::store<uint32>(Register<uint32> register, uint32 data) -> void { if(auto r = map(register)) r() = data; }
 
+auto TLCS900H::expand(Register< uint8> register) const -> Register<uint16> { return {register.id & ~1}; }
+auto TLCS900H::expand(Register<uint16> register) const -> Register<uint32> { return {register.id & ~3}; }
+auto TLCS900H::expand(Register<uint32> register) const -> Register<uint32> { return {Undefined}; }
+
 auto TLCS900H::load(FlagRegister f) -> uint8 {
   switch(f.id) {
   case 0: return r.c  << 0 | r.n  << 1 | r.v  << 2 | r.h  << 4 | r.z  << 6 | r.s  << 7;
@@ -107,7 +111,6 @@ auto TLCS900H::store(StatusRegister, uint16 data) -> void {
   store(F, data);
   r.rfp = data.bits( 8, 9);
   r.iff = data.bits(12,14);
-  r.rfpp = r.rfp - 1;
 }
 
 auto TLCS900H::load(ProgramCounter) -> uint32 { return r.pc.l.l0; }
