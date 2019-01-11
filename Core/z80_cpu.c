@@ -1356,8 +1356,6 @@ static GB_opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
-    gb->vblank_just_occured = false;
-
     if (gb->hdma_on) {
         GB_advance_cycles(gb, 4);
         return;

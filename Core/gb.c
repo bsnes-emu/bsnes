@@ -351,6 +351,8 @@ exit:
 
 uint8_t GB_run(GB_gameboy_t *gb)
 {
+    gb->vblank_just_occured = false;
+
     if (gb->sgb && gb->sgb->intro_animation < 140) {
         /* On the SGB, the GB is halted after finishing the boot ROM.
            Then, after the boot animation is almost done, it's reset.
