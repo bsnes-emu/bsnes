@@ -17,7 +17,7 @@
 #include "printer.h"
 #include "timing.h"
 #include "rewind.h"
-#include "z80_cpu.h"
+#include "sm83_cpu.h"
 #include "symbol_hash.h"
 #include "sgb.h"
 
