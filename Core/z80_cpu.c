@@ -72,6 +72,21 @@ static uint8_t cycle_read_inc_oam_bug(GB_gameboy_t *gb, uint16_t addr)
     return ret;
 }
 
+/* A special case for IF during ISR, returns the old value of IF. */
+/* TODO: Verify the timing, it might be wrong in cases where, in the same M cycle, IF
+   is both read be the CPU, modified by the ISR, and modified by an actual interrupt.
+   If this timing proves incorrect, the ISR emulation must be updated so IF reads are
+   timed correctly. */
+static uint8_t cycle_write_if(GB_gameboy_t *gb, uint8_t value)
+{
+    assert(gb->pending_cycles);
+    GB_advance_cycles(gb, gb->pending_cycles);
+    uint8_t old = (gb->io_registers[GB_IO_IF]) & 0x1F;
+    GB_write_memory(gb, 0xFF00 + GB_IO_IF, value);
+    gb->pending_cycles = 4;
+    return old;
+}
+
 static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     assert(gb->pending_cycles);
@@ -1399,8 +1414,15 @@ void GB_cpu_run(GB_gameboy_t *gb)
         
         cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) >> 8);
         interrupt_queue = gb->interrupt_enable;
-        cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
-        interrupt_queue &= (gb->io_registers[GB_IO_IF]) & 0x1F;
+        
+        if (gb->registers[GB_REGISTER_SP] == GB_IO_IF + 0xFF00 + 1) {
+            gb->registers[GB_REGISTER_SP]--;
+            interrupt_queue &= cycle_write_if(gb, (gb->pc) & 0xFF);
+        }
+        else {
+            cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+            interrupt_queue &= (gb->io_registers[GB_IO_IF]) & 0x1F;
+        }
         
         if (interrupt_queue) {
             uint8_t interrupt_bit = 0;
