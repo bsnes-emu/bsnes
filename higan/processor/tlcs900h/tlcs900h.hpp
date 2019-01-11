@@ -20,45 +20,13 @@ struct TLCS900H {
 
   TLCS900H();
 
-  struct FlagRegister {
-    using type = uint8;
-    enum : uint { bits = 8 };
-    uint1 id;
-  };
-
-  struct StatusRegister {
-    using type = uint16;
-    enum : uint { bits = 16 };
-  };
-
-  struct ProgramCounter {
-    using type = uint32;
-    enum : uint { bits = 32 };
-  };
-
-  template<typename T> struct ControlRegister {
-    using type = T;
-    enum : uint { bits = 8 * sizeof(T) };
-    uint8 id;
-  };
-
-  template<typename T> struct Register {
-    using type = T;
-    enum : uint { bits = 8 * sizeof(T) };
-    uint8 id;
-  };
-
-  template<typename T> struct Memory {
-    using type = T;
-    enum : uint { bits = 8 * sizeof(T) };
-    T address;
-  };
-
-  template<typename T> struct Immediate {
-    using type = T;
-    enum : uint { bits = 8 * sizeof(T) };
-    T constant;
-  };
+  struct FlagRegister   { using type =  uint8; enum : uint { bits =  8 }; uint1 id; };
+  struct StatusRegister { using type = uint16; enum : uint { bits = 16 }; };
+  struct ProgramCounter { using type = uint32; enum : uint { bits = 32 }; };
+  template<typename T> struct ControlRegister { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint8 id; };
+  template<typename T> struct Register        { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint8 id; };
+  template<typename T> struct Memory          { using type = T; enum : uint { bits = 8 * sizeof(T) }; T address; };
+  template<typename T> struct Immediate       { using type = T; enum : uint { bits = 8 * sizeof(T) }; T constant; };
 
   template<typename T> auto load(Immediate<T> immediate) const -> T { return immediate.constant; }
 
@@ -66,22 +34,23 @@ struct TLCS900H {
   auto power() -> void;
 
   //registers.cpp
-  template<typename T> auto map(Register<T>) -> maybe<T&>;
-  template<typename T> auto load(Register<T>) -> T;
+  template<typename T> auto map(Register<T>) const -> maybe<T&>;
+  template<typename T> auto load(Register<T>) const -> T;
   template<typename T> auto store(Register<T>, uint32) -> void;
   auto expand(Register< uint8>) const -> Register<uint16>;
   auto expand(Register<uint16>) const -> Register<uint32>;
-  auto expand(Register<uint32>) const -> Register<uint32>;
-  auto load(FlagRegister) -> uint8;
+  auto shrink(Register<uint32>) const -> Register<uint16>;
+  auto shrink(Register<uint16>) const -> Register< uint8>;
+  auto load(FlagRegister) const -> uint8;
   auto store(FlagRegister, uint8) -> void;
-  auto load(StatusRegister) -> uint16;
+  auto load(StatusRegister) const -> uint16;
   auto store(StatusRegister, uint16) -> void;
-  auto load(ProgramCounter) -> uint32;
+  auto load(ProgramCounter) const -> uint32;
   auto store(ProgramCounter, uint32) -> void;
 
   //control-registers.cpp
-  template<typename T> auto map(ControlRegister<T>) -> maybe<T&>;
-  template<typename T> auto load(ControlRegister<T>) -> T;
+  template<typename T> auto map(ControlRegister<T>) const -> maybe<T&>;
+  template<typename T> auto load(ControlRegister<T>) const -> T;
   template<typename T> auto store(ControlRegister<T>, uint32) -> void;
 
   //memory.cpp
@@ -101,6 +70,8 @@ struct TLCS900H {
   template<typename T> auto parity(T) const -> bool;
   template<typename T> auto algorithmAdd(T target, T source, uint1 carry = 0) -> T;
   template<typename T> auto algorithmAnd(T target, T source) -> T;
+  template<typename T> auto algorithmDecrement(T target, T source) -> T;
+  template<typename T> auto algorithmIncrement(T target, T source) -> T;
   template<typename T> auto algorithmOr(T target, T source) -> T;
   template<typename T> auto algorithmSubtract(T target, T source, uint1 carry = 0) -> T;
   template<typename T> auto algorithmXor(T target, T source) -> T;
@@ -118,19 +89,24 @@ struct TLCS900H {
   auto instructionTargetMemory(uint32 address) -> void;
 
   //instructions.cpp
-  template<typename Target> auto toSigned(Target) -> int32;
-
   template<typename Target, typename Source> auto instructionAdd(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionAddCarry(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionAnd(Target, Source) -> void;
+  auto instructionBitSearch1Backward(Register<uint16>) -> void;
+  auto instructionBitSearch1Forward(Register<uint16>) -> void;
   template<typename Source> auto instructionCall(uint4 code, Source) -> void;
   template<typename Source> auto instructionCallRelative(Source) -> void;
   template<typename Target, typename Source> auto instructionCompare(Target, Source) -> void;
   template<typename Target> auto instructionComplement(Target) -> void;
+  auto instructionDecimalAdjustAccumulator(Register<uint8>) -> void;
+  template<typename Target, typename Source> auto instructionDecrement(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionDivide(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionDivideSigned(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionExchange(Target, Source) -> void;
+  template<typename Target> auto instructionExtendSign(Target) -> void;
+  template<typename Target> auto instructionExtendZero(Target) -> void;
   auto instructionHalt() -> void;
+  template<typename Target, typename Source> auto instructionIncrement(Target, Source) -> void;
   template<typename Source> auto instructionJump(uint4 code, Source) -> void;
   template<typename Source> auto instructionJumpRelative(uint4 code, Source) -> void;
   template<typename Target, typename Source> auto instructionLoad(Target, Source) -> void;

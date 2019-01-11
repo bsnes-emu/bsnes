@@ -20,13 +20,13 @@ template<> auto TLCS900H::parity<uint32>(uint32 data) const -> bool {
 //
 
 template<typename T> auto TLCS900H::algorithmAdd(T target, T source, uint1 carry) -> T {
-  uint64 result = target + source + carry;
-  CF = result.bit(T::bits());
+  T result = target + source + carry;
+  CF = result < target || result == target && carry;
   NF = 0;
-  VF = T(~(target ^ source) & (target ^ result)).negative();
+  VF = T((target ^ result) & (source ^ result)).negative();
   HF = T(target ^ source ^ result).bit(4);
-  if constexpr(is_same<T, uint32>::value) HF = Undefined;
-  ZF = T(result).zero();
+  if constexpr(T::bits() == 32) HF = Undefined;
+  ZF = result.zero();
   SF = result.negative();
   return result;
 }
@@ -42,6 +42,30 @@ template<typename T> auto TLCS900H::algorithmAnd(T target, T source) -> T {
   return result;
 }
 
+template<typename T> auto TLCS900H::algorithmDecrement(T target, T source) -> T {
+  T result = target - source;
+  if constexpr(T::bits() == 8) {
+    NF = 1;
+    VF = T((target ^ source) & (target ^ result)).negative();
+    HF = T(target ^ source ^ result).bit(4);
+    ZF = result.zero();
+    SF = result.negative();
+  }
+  return result;
+}
+
+template<typename T> auto TLCS900H::algorithmIncrement(T target, T source) -> T {
+  T result = target + source;
+  if constexpr(T::bits() == 8) {
+    NF = 0;
+    VF = T((target ^ result) & (source ^ result)).negative();
+    HF = T(target ^ source ^ result).bit(4);
+    ZF = result.zero();
+    SF = result.negative();
+  }
+  return result;
+}
+
 template<typename T> auto TLCS900H::algorithmOr(T target, T source) -> T {
   T result = target | source;
   CF = 0;
@@ -54,13 +78,13 @@ template<typename T> auto TLCS900H::algorithmOr(T target, T source) -> T {
 }
 
 template<typename T> auto TLCS900H::algorithmSubtract(T target, T source, uint1 carry) -> T {
-  uint64 result = target - source - carry;
-  CF = result.bit(T::bits());
+  T result = target - source - carry;
+  CF = result > target || result == target && carry;
   NF = 1;
   VF = T((target ^ source) & (target ^ result)).negative();
   HF = T(target ^ source ^ result).bit(4);
-  if constexpr(is_same<T, uint32>::value) HF = Undefined;
-  ZF = T(result).zero();
+  if constexpr(T::bits() == 32) HF = Undefined;
+  ZF = result.zero();
   SF = result.negative();
   return result;
 }

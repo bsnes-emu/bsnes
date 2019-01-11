@@ -1,4 +1,4 @@
-template<> auto TLCS900H::map(ControlRegister<uint8> register) -> maybe<uint8&> {
+template<> auto TLCS900H::map(ControlRegister<uint8> register) const -> maybe<uint8&> {
   switch(register.id) {
   #define r(id, name) case id: return r.name;
   r(0x00, dmas[0].b.b0) r(0x01, dmas[0].b.b1) r(0x02, dmas[0].b.b2) r(0x03, dmas[0].b.b3)
@@ -19,7 +19,7 @@ template<> auto TLCS900H::map(ControlRegister<uint8> register) -> maybe<uint8&> 
   return nothing;
 }
 
-template<> auto TLCS900H::map(ControlRegister<uint16> register) -> maybe<uint16&> {
+template<> auto TLCS900H::map(ControlRegister<uint16> register) const -> maybe<uint16&> {
   switch(register.id & ~1) {
   #define r(id, name) case id: return r.name;
   r(0x00, dmas[0].w.w0) r(0x02, dmas[0].w.w1)
@@ -40,7 +40,7 @@ template<> auto TLCS900H::map(ControlRegister<uint16> register) -> maybe<uint16&
   return nothing;
 }
 
-template<> auto TLCS900H::map(ControlRegister<uint32> register) -> maybe<uint32&> {
+template<> auto TLCS900H::map(ControlRegister<uint32> register) const -> maybe<uint32&> {
   switch(register.id & ~1) {
   #define r(id, name) case id: return r.name;
   r(0x00, dmas[0].l.l0)
@@ -61,9 +61,9 @@ template<> auto TLCS900H::map(ControlRegister<uint32> register) -> maybe<uint32&
   return nothing;
 }
 
-template<> auto TLCS900H::load< uint8>(ControlRegister< uint8> register) ->  uint8 { return map(register)(Undefined); }
-template<> auto TLCS900H::load<uint16>(ControlRegister<uint16> register) -> uint16 { return map(register)(Undefined); }
-template<> auto TLCS900H::load<uint32>(ControlRegister<uint32> register) -> uint32 { return map(register)(Undefined); }
+template<> auto TLCS900H::load< uint8>(ControlRegister< uint8> register) const ->  uint8 { return map(register)(Undefined); }
+template<> auto TLCS900H::load<uint16>(ControlRegister<uint16> register) const -> uint16 { return map(register)(Undefined); }
+template<> auto TLCS900H::load<uint32>(ControlRegister<uint32> register) const -> uint32 { return map(register)(Undefined); }
 
 template<> auto TLCS900H::store<uint8>(ControlRegister<uint8> register, uint32 data) -> void {
   if(auto r = map(register)) r() = data;

@@ -282,18 +282,36 @@ auto TLCS900H::instructionRegister(R register) -> void {
     if constexpr(bits == 32) return (void)Undefined;
     return instructionNegate(register);
   case 0x08:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiply(register, fetchImmediate<T>());
+    if constexpr(bits != 32) return instructionMultiply(register, fetchImmediate<T>());
+    return (void)Undefined;
   case 0x09:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiplySigned(register, fetchImmediate<T>());
+    if constexpr(bits != 32) return instructionMultiplySigned(register, fetchImmediate<T>());
+    return (void)Undefined;
   case 0x0a:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivide(register, fetchImmediate<T>());
+    if constexpr(bits != 32) return instructionDivide(register, fetchImmediate<T>());
+    return (void)Undefined;
   case 0x0b:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivideSigned(register, fetchImmediate<T>());
+    if constexpr(bits != 32) return instructionDivideSigned(register, fetchImmediate<T>());
+    return (void)Undefined;
+//case 0x0c: LINK r,dd
+//case 0x0d: UNLK r
+  case 0x0e:
+    if constexpr(bits == 16) return instructionBitSearch1Forward(register);
+    return (void)Undefined;
+  case 0x0f:
+    if constexpr(bits == 16) return instructionBitSearch1Backward(register);
+    return (void)Undefined;
+  case 0x10:
+    if constexpr(bits == 8) return instructionDecimalAdjustAccumulator(register);
+    return (void)Undefined;
   case 0x11: return (void)Undefined;
+  case 0x12:
+    if constexpr(bits != 8) return instructionExtendZero(register);
+    return (void)Undefined;
+  case 0x13:
+    if constexpr(bits != 8) return instructionExtendSign(register);
+    return (void)Undefined;
+//case 0x14: PAA r
   case 0x15: return (void)Undefined;
   case 0x16:
     if constexpr(bits == 16) return instructionMirror(register);
@@ -303,6 +321,7 @@ auto TLCS900H::instructionRegister(R register) -> void {
     if constexpr(bits == 16) return instructionMultiplyAdd(register);
     return (void)Undefined;
   case 0x1a: case 0x1b: return (void)Undefined;
+//case 0x1c: DJNZ r,d
   case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
   case 0x25: case 0x26: case 0x27: return (void)Undefined;
   case 0x2d: return (void)Undefined;
@@ -312,21 +331,21 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0x3b: return (void)Undefined;
   case 0x3f: return (void)Undefined;
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiply(toRegister3<T>(data), register);
+    if constexpr(bits != 32) return instructionMultiply(toRegister3<T>(data), register);
+    return (void)Undefined;
   case 0x48: case 0x49: case 0x4a: case 0x4b: case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiplySigned(toRegister3<T>(data), register);
+    if constexpr(bits != 32) return instructionMultiplySigned(toRegister3<T>(data), register);
+    return (void)Undefined;
   case 0x50: case 0x51: case 0x52: case 0x53: case 0x54: case 0x55: case 0x56: case 0x57:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivide(toRegister3<T>(data), register);
+    if constexpr(bits != 32) return instructionDivide(toRegister3<T>(data), register);
+    return (void)Undefined;
   case 0x58: case 0x59: case 0x5a: case 0x5b: case 0x5c: case 0x5d: case 0x5e: case 0x5f:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivideSigned(toRegister3<T>(data), register);
+    if constexpr(bits != 32) return instructionDivideSigned(toRegister3<T>(data), register);
+    return (void)Undefined;
   case 0x60: case 0x61: case 0x62: case 0x63: case 0x64: case 0x65: case 0x66: case 0x67:
-    return instructionAdd(register, toImmediate3<T>(data));
+    return instructionIncrement(register, toImmediate<T>((uint3)data));
   case 0x68: case 0x69: case 0x6a: case 0x6b: case 0x6c: case 0x6d: case 0x6e: case 0x6f:
-    return instructionSubtract(register, toImmediate3<T>(data));
+    return instructionDecrement(register, toImmediate<T>((uint3)data));
   case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77:
   case 0x78: case 0x79: case 0x7a: case 0x7b: case 0x7c: case 0x7d: case 0x7e: case 0x7f:
     if constexpr(bits == 32) return (void)Undefined;
@@ -418,21 +437,21 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
     if constexpr(bits == 32) return (void)Undefined;
     return instructionCompare(memory, fetchImmediate<T>());
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiply(toRegister3<T>(data), memory);
+    if constexpr(bits != 32) return instructionMultiply(toRegister3<T>(data), memory);
+    return (void)Undefined;
   case 0x48: case 0x49: case 0x4a: case 0x4b: case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionMultiplySigned(toRegister3<T>(data), memory);
+    if constexpr(bits != 32) return instructionMultiplySigned(toRegister3<T>(data), memory);
+    return (void)Undefined;
   case 0x50: case 0x51: case 0x52: case 0x53: case 0x54: case 0x55: case 0x56: case 0x57:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivide(toRegister3<T>(data), memory);
+    if constexpr(bits != 32) return instructionDivide(toRegister3<T>(data), memory);
+    return (void)Undefined;
   case 0x58: case 0x59: case 0x5a: case 0x5b: case 0x5c: case 0x5d: case 0x5e: case 0x5f:
-    if constexpr(bits == 32) return (void)Undefined;
-    return instructionDivideSigned(toRegister3<T>(data), memory);
+    if constexpr(bits != 32) return instructionDivideSigned(toRegister3<T>(data), memory);
+    return (void)Undefined;
   case 0x60: case 0x61: case 0x62: case 0x63: case 0x64: case 0x65: case 0x66: case 0x67:
-    return instructionAdd(memory, toImmediate3<T>(data));
+    return instructionIncrement(memory, toImmediate<T>((uint3)data));
   case 0x68: case 0x69: case 0x6a: case 0x6b: case 0x6c: case 0x6d: case 0x6e: case 0x6f:
-    return instructionSubtract(memory, toImmediate3<T>(data));
+    return instructionDecrement(memory, toImmediate<T>((uint3)data));
   case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77: return (void)Undefined;
   case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: case 0x86: case 0x87:
     return instructionAdd(toRegister3<T>(data), memory);

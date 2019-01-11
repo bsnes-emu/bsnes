@@ -1,11 +1,3 @@
-template<typename Target>
-auto TLCS900H::toSigned(Target target) -> int32 {
-  if constexpr(Target::bits() ==  8) return  (int8)target;
-  if constexpr(Target::bits() == 16) return (int16)target;
-  if constexpr(Target::bits() == 32) return (int32)target;
-  return Undefined;
-}
-
 template<typename Target, typename Source>
 auto TLCS900H::instructionAdd(Target target, Source source) -> void {
   store(target, algorithmAdd(load(target), load(source)));
@@ -19,6 +11,22 @@ auto TLCS900H::instructionAddCarry(Target target, Source source) -> void {
 template<typename Target, typename Source>
 auto TLCS900H::instructionAnd(Target target, Source source) -> void {
   store(target, algorithmAnd(load(target), load(source)));
+}
+
+auto TLCS900H::instructionBitSearch1Backward(Register<uint16> register) -> void {
+  auto value = load(register);
+  for(uint index : reverse(range(16))) {
+    if(value.bit(index)) return VF = 1, store(A, index);
+  }
+  VF = 0;
+}
+
+auto TLCS900H::instructionBitSearch1Forward(Register<uint16> register) -> void {
+  auto value = load(register);
+  for(uint index : range(16)) {
+    if(value.bit(index)) return VF = 1, store(A, index);
+  }
+  VF = 0;
 }
 
 template<typename Source>
@@ -45,16 +53,46 @@ auto TLCS900H::instructionComplement(Target target) -> void {
   HF = 1;
 }
 
+auto TLCS900H::instructionDecimalAdjustAccumulator(Register<uint8> register) -> void {
+  auto value = load(register);
+  if(CF || (uint8)value > 0x99) value += NF ? -0x60 : 0x60, CF = 1;
+  if(HF || (uint4)value > 0x09) value += NF ? -0x06 : 0x06;
+  PF = parity(value);
+  HF = uint8(value ^ load(register)).bit(4);
+  ZF = value.zero();
+  SF = value.negative();
+  store(register, value);
+}
+
+template<typename Target, typename Source>
+auto TLCS900H::instructionDecrement(Target target, Source source) -> void {
+  auto immediate = load(source);
+  if(!immediate) immediate = 8;
+  store(target, algorithmDecrement(load(target), immediate));
+}
+
 template<typename Target, typename Source>
 auto TLCS900H::instructionDivide(Target target, Source source) -> void {
-  //TODO: division by zero
-  store(expand(target), load(target) / load(source));
+  using T = typename Target::type;
+  using E = Natural<2 * T::bits()>;
+  auto dividend  = load(expand(target));
+  auto divisor   = load(source);
+  auto quotient  = divisor ? E(dividend / divisor) : E(T(~(dividend >> T::bits())));
+  auto remainder = divisor ? E(dividend % divisor) : E(T(dividend));
+  store(expand(target), T(remainder) << T::bits() | T(quotient));
+  VF = !divisor || remainder >> T::bits();
 }
 
 template<typename Target, typename Source>
 auto TLCS900H::instructionDivideSigned(Target target, Source source) -> void {
-  //TODO: division by zero
-  store(expand(target), toSigned(load(target)) / toSigned(load(source)));
+  using T = typename Target::type;
+  using E = Natural<2 * T::bits()>;
+  auto dividend  = load(expand(target)).integer();
+  auto divisor   = load(source).integer();
+  auto quotient  = divisor ? E(dividend / divisor) : E(T(~(dividend >> T::bits())));
+  auto remainder = divisor ? E(dividend % divisor) : E(T(dividend));
+  store(expand(target), T(remainder) << T::bits() | T(quotient));
+  VF = !divisor || remainder >> T::bits();
 }
 
 template<typename Target, typename Source>
@@ -64,8 +102,25 @@ auto TLCS900H::instructionExchange(Target target, Source source) -> void {
   store(source, data);
 }
 
+template<typename Target>
+auto TLCS900H::instructionExtendSign(Target target) -> void {
+  store(target, load(shrink(target)).integer());
+}
+
+template<typename Target>
+auto TLCS900H::instructionExtendZero(Target target) -> void {
+  store(target, load(shrink(target)));
+}
+
 auto TLCS900H::instructionHalt() -> void {
   setHalted(true);
+}
+
+template<typename Target, typename Source>
+auto TLCS900H::instructionIncrement(Target target, Source source) -> void {
+  auto immediate = load(source);
+  if(!immediate) immediate = 8;
+  store(target, algorithmIncrement(load(target), immediate));
 }
 
 template<typename Source>
@@ -85,6 +140,7 @@ auto TLCS900H::instructionLoad(Target target, Source source) -> void {
 }
 
 //reverse all bits in a 16-bit register
+//note: an 8-bit lookup table is faster (when in L1/L2 cache), but much more code
 auto TLCS900H::instructionMirror(Register<uint16> register) -> void {
   auto data = load(register);
   uint8 lo = (data.byte(0) * 0x80200802ull & 0x884422110ull) * 0x101010101ull >> 32;
@@ -114,7 +170,7 @@ auto TLCS900H::instructionMultiplyAdd(Register<uint16> register) -> void {
 
 template<typename Target, typename Source>
 auto TLCS900H::instructionMultiplySigned(Target target, Source source) -> void {
-  store(expand(target), toSigned(load(target)) * toSigned(load(source)));
+  store(expand(target), load(target).integer() * load(source).integer());
 }
 
 template<typename Target>

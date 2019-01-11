@@ -5,6 +5,10 @@
 
 namespace nall {
 
+struct Boolean;
+template<uint Bits> struct Natural;
+template<uint Bits> struct Integer;
+
 struct Boolean {
   inline Boolean() : data(false) {}
   template<typename T> inline Boolean(const T& value) : data(value) {}
@@ -127,6 +131,8 @@ template<uint Bits> struct Natural {
     return data & m;
   }
 
+  inline auto integer() const -> Integer<Bits>;
+
 private:
   auto set(type value) -> void {
     data = value & Mask;
@@ -237,6 +243,8 @@ template<uint Bits> struct Integer {
     return ((data & m) ^ b) - b;
   }
 
+  inline auto natural() const -> Natural<Bits>;
+
 private:
   auto set(type value) -> void {
     data = ((value & Mask) ^ Sign) - Sign;
@@ -244,6 +252,16 @@ private:
 
   type data;
 };
+
+//cast an unsigned type to a signed type with the same number of bits
+template<uint Bits> auto Natural<Bits>::integer() const -> Integer<Bits> {
+  return Integer<Bits>(*this);
+}
+
+//cast a signed type to an unsigned type with the same number of bits
+template<uint Bits> auto Integer<Bits>::natural() const -> Natural<Bits> {
+  return Natural<Bits>(*this);
+}
 
 template<uint Bits> struct Real {
   using type =
