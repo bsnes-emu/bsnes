@@ -403,6 +403,7 @@ struct GB_gameboy_internal_s {
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
         uint16_t serial_cycles;
         uint16_t serial_length;
+        uint8_t double_speed_alignment;
     );
 
     /* APU */

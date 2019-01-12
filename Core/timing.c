@@ -191,8 +191,9 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     if (!gb->cgb_double_speed) {
         cycles <<= 1;
     }
-
+    
     // Not affected by speed boost
+    gb->double_speed_alignment += cycles;
     gb->hdma_cycles += cycles;
     gb->apu_output.sample_cycles += cycles;
     gb->cycles_since_ir_change += cycles;

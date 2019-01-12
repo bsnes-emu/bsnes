@@ -211,14 +211,27 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode)
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
-        /* Make sure we don't leave display_cycles not divisble by 8 in single speed mode */
-        if (gb->display_cycles % 8 == 4) {
-            cycle_no_access(gb);
-        }
+        flush_pending_cycles(gb);
+        bool needs_alignment = false;
         
-        /* Todo: the switch is not instant. We should emulate this. */
+        GB_advance_cycles(gb, 0x4);
+        /* Make sure we keep the CPU ticks aligned correctly when returning from double speed mode */
+        if (gb->double_speed_alignment & 7) {
+            GB_advance_cycles(gb, 0x4);
+            needs_alignment = true;
+        }
+
         gb->cgb_double_speed ^= true;
         gb->io_registers[GB_IO_KEY1] = 0;
+        
+        for (unsigned i = 0x800; i--;) {
+            GB_advance_cycles(gb, 0x40);
+        }
+        
+        if (!needs_alignment) {
+            GB_advance_cycles(gb, 0x4);
+        }
+        
     }
     else {
         gb->stopped = true;
