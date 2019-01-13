@@ -165,7 +165,7 @@ auto PPU::Background::run(bool screen) -> void {
   uint8 color = getTileColor();
   Pixel pixel;
   pixel.priority = priority;
-  pixel.palette = color ? paletteIndex + color : 0;
+  pixel.palette = color ? uint(paletteIndex + color) : 0;
   pixel.tile = tile;
 
   if(x == 0) {

@@ -21,10 +21,12 @@ template<> auto TLCS900H::parity<uint32>(uint32 data) const -> bool {
 
 template<typename T> auto TLCS900H::algorithmAdd(T target, T source, uint1 carry) -> T {
   T result = target + source + carry;
-  CF = result < target || result == target && carry;
+  T carries = target ^ source ^ result;
+  T overflow = (target ^ result) & (source ^ result);
+  CF = T(carries ^ overflow).negative();
   NF = 0;
-  VF = T((target ^ result) & (source ^ result)).negative();
-  HF = T(target ^ source ^ result).bit(4);
+  VF = overflow.negative();
+  HF = carries.bit(4);
   if constexpr(T::bits() == 32) HF = Undefined;
   ZF = result.zero();
   SF = result.negative();
@@ -79,10 +81,12 @@ template<typename T> auto TLCS900H::algorithmOr(T target, T source) -> T {
 
 template<typename T> auto TLCS900H::algorithmSubtract(T target, T source, uint1 carry) -> T {
   T result = target - source - carry;
-  CF = result > target || result == target && carry;
+  T carries = target ^ source ^ result;
+  T overflow = (target ^ result) & (source ^ target);
+  CF = T(carries ^ overflow).negative();
   NF = 1;
-  VF = T((target ^ source) & (target ^ result)).negative();
-  HF = T(target ^ source ^ result).bit(4);
+  VF = overflow.negative();
+  HF = carries.bit(4);
   if constexpr(T::bits() == 32) HF = Undefined;
   ZF = result.zero();
   SF = result.negative();

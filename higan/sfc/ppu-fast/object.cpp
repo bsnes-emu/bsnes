@@ -129,7 +129,7 @@ auto PPU::oamAddressReset() -> void {
 }
 
 auto PPU::oamSetFirstObject() -> void {
-  io.obj.first = !io.oamPriority ? 0 : io.oamAddress >> 2;
+  io.obj.first = !io.oamPriority ? 0 : uint(io.oamAddress >> 2);
 }
 
 auto PPU::readObject(uint10 address) -> uint8 {

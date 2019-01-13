@@ -63,14 +63,14 @@ struct M68K {
 
   //registers.cpp
   struct DataRegister {
-    explicit DataRegister(uint number_) : number(number_) {}
+    explicit DataRegister(uint64 number_) : number(number_) {}
     uint3 number;
   };
   template<uint Size = Long> auto read(DataRegister reg) -> uint32;
   template<uint Size = Long> auto write(DataRegister reg, uint32 data) -> void;
 
   struct AddressRegister {
-    explicit AddressRegister(uint number_) : number(number_) {}
+    explicit AddressRegister(uint64 number_) : number(number_) {}
     uint3 number;
   };
   template<uint Size = Long> auto read(AddressRegister reg) -> uint32;

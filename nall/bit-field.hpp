@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nall/primitives.hpp>
+
 namespace nall {
 
 template<typename Type, uint Bit> struct BooleanBitField {
@@ -55,7 +57,7 @@ template<typename Type, uint Lo, uint Hi> struct NaturalBitField {
   inline operator utype() const { return get(); }
 
   inline auto& operator=(const NaturalBitField& value) { return set(value.data); }
-  template<typename T> inline auto& operator=(const T& value) { return set(value << lo); }
+  template<typename T> inline auto& operator=(T value) { return set(value << lo); }
 
   inline auto operator++(int) { utype value = get(); set(data + (1 << lo)); return value; }
   inline auto operator--(int) { utype value = get(); set(data - (1 << lo)); return value; }

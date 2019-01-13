@@ -32,13 +32,13 @@ auto WDC65816::fetch() -> uint8 {
 }
 
 auto WDC65816::pull() -> uint8 {
-  EF ? lo(S)++ : S++;
+  EF ? (void)lo(S)++ : (void)S++;
   return read(S);
 }
 
 auto WDC65816::push(uint8 data) -> void {
   write(S, data);
-  EF ? lo(S)-- : S--;
+  EF ? (void)lo(S)-- : (void)S--;
 }
 
 auto WDC65816::pullN() -> uint8 {

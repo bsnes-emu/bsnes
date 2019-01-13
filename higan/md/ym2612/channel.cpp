@@ -27,7 +27,7 @@ auto YM2612::Channel::Operator::trigger(bool state) -> void {
 }
 
 auto YM2612::Channel::Operator::runEnvelope() -> void {
-  uint sustain = envelope.sustainLevel < 15 ? envelope.sustainLevel << 5 : 0x3f0;
+  uint sustain = ternary(envelope.sustainLevel < 15, envelope.sustainLevel << 5, 0x3f0);
   if(ym2612.envelope.clock & (1 << envelope.divider) - 1) return;
 
   uint value = ym2612.envelope.clock >> envelope.divider;
@@ -121,7 +121,7 @@ auto YM2612::Channel::Operator::updatePhase() -> void {
 
   phase.delta = pitch.value + (pm >> 10 - msb) << 6 >> 7 - octave.value;
   phase.delta = (!detune.bit(2) ? phase.delta + tuning : phase.delta - tuning) & 0x1ffff;
-  phase.delta = (multiple ? phase.delta * multiple : phase.delta >> 1) & 0xfffff;
+  phase.delta = ternary(multiple, phase.delta * multiple, phase.delta >> 1) & 0xfffff;
 }
 
 auto YM2612::Channel::Operator::updateLevel() -> void {

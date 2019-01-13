@@ -13,8 +13,8 @@ auto ARM7TDMI::ADD(uint32 source, uint32 modify, bool carry) -> uint32 {
 auto ARM7TDMI::ASR(uint32 source, uint8 shift) -> uint32 {
   carry = cpsr().c;
   if(shift == 0) return source;
-  carry = shift > 32 ? source & 1 << 31 : source & 1 << shift - 1;
-  source = shift > 31 ? (int32)source >> 31 : (int32)source >> shift;
+  carry = ternary(shift > 32, source & 1 << 31, source & 1 << shift - 1);
+  source = ternary(shift > 31, (int32)source >> 31, (int32)source >> shift);
   return source;
 }
 
@@ -30,16 +30,16 @@ auto ARM7TDMI::BIT(uint32 result) -> uint32 {
 auto ARM7TDMI::LSL(uint32 source, uint8 shift) -> uint32 {
   carry = cpsr().c;
   if(shift == 0) return source;
-  carry = shift > 32 ? 0 : source & 1 << 32 - shift;
-  source = shift > 31 ? 0 : source << shift;
+  carry = ternary(shift > 32, 0, source & 1 << 32 - shift);
+  source = ternary(shift > 31, 0, source << shift);
   return source;
 }
 
 auto ARM7TDMI::LSR(uint32 source, uint8 shift) -> uint32 {
   carry = cpsr().c;
   if(shift == 0) return source;
-  carry = shift > 32 ? 0 : source & 1 << shift - 1;
-  source = shift > 31 ? 0 : source >> shift;
+  carry = ternary(shift > 32, 0, source & 1 << shift - 1);
+  source = ternary(shift > 31, 0, source >> shift);
   return source;
 }
 

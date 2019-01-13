@@ -18,7 +18,7 @@ auto SPC7110::dcuBeginTransfer() -> void {
   decompressor->initialize(dcuMode, dcuAddress);
   decompressor->decode();
 
-  uint seek = r480b & 2 ? r4805 | r4806 << 8 : 0;
+  uint seek = ternary(r480b & 2, r4805 | r4806 << 8, 0);
   while(seek--) decompressor->decode();
 
   r480c |= 0x80;

@@ -437,7 +437,7 @@ auto SA1::writeIOSA1(uint24 address, uint8 data) -> void {
         } else {
           int16 dividend = mmio.ma;
           uint16 divisor = mmio.mb;
-          uint16 remainder = dividend >= 0 ? dividend % divisor : (dividend % divisor + divisor) % divisor;
+          uint16 remainder = dividend >= 0 ? uint16(dividend % divisor) : uint16((dividend % divisor + divisor) % divisor);
           uint16 quotient = (dividend - remainder) / divisor;
           mmio.mr = remainder << 16 | quotient;
         }

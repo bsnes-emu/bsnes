@@ -8,12 +8,12 @@ auto PPU::Objects::scanline(uint y) -> void {
     if(object.affine == 0 && object.affineSize == 1) continue;  //hidden
     if(py >= object.height << object.affineSize) continue;  //offscreen
 
-    uint rowSize = io.mapping == 0 ? 32 >> object.colors : object.width >> 3;
+    uint rowSize = ternary(io.mapping == 0, 32 >> object.colors, object.width >> 3);
     uint baseAddress = object.character << 5;
 
     if(object.mosaic && io.mosaicHeight) {
       int mosaicY = (y / (1 + io.mosaicHeight)) * (1 + io.mosaicHeight);
-      py = object.y >= 160 || mosaicY - object.y >= 0 ? mosaicY - object.y : 0;
+      py = object.y >= 160 || mosaicY - object.y >= 0 ? uint(mosaicY - object.y) : 0;
     }
 
     int16 pa = ppu.objectParam[object.affineParam].pa;

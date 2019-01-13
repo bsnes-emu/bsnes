@@ -33,7 +33,7 @@ auto Interface::color(uint32 n) -> uint64 {
   double brightness = 1.0;
   double gamma = settings.colorEmulation ? 1.8 : 2.2;
 
-  int color = (n & 0x0f), level = color < 0xe ? (n >> 4) & 3 : 1;
+  int color = (n & 0x0f), level = color < 0xe ? int(n >> 4 & 3) : 1;
 
   static const double black = 0.518, white = 1.962, attenuation = 0.746;
   static const double levels[8] = {

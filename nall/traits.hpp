@@ -14,12 +14,14 @@ namespace nall {
   using std::enable_if;
   using std::enable_if_t;
   using std::false_type;
+  using std::is_floating_point;
   using std::forward;
   using std::initializer_list;
   using std::is_array;
   using std::is_base_of;
   using std::is_function;
   using std::is_integral;
+  using std::is_integral_v;
   using std::is_same;
   using std::is_signed;
   using std::is_unsigned;

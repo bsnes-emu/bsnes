@@ -221,7 +221,7 @@ auto GSU::instructionAND_BIC(uint n) -> void {
 //$80-8f(alt3) umult #N
 auto GSU::instructionMULT_UMULT(uint n) -> void {
   if(!regs.sfr.alt2) n = regs.r[n];
-  regs.dr() = (!regs.sfr.alt1 ? ((int8)regs.sr() * (int8)n) : ((uint8)regs.sr() * (uint8)n));
+  regs.dr() = (!regs.sfr.alt1 ? uint16((int8)regs.sr() * (int8)n) : uint16((uint8)regs.sr() * (uint8)n));
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();

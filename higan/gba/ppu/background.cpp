@@ -104,7 +104,7 @@ auto PPU::Background::affine(uint x, uint y) -> void {
   }
 
   uint screenSize = 16 << io.screenSize;
-  uint screenWrap = (1 << (io.affineWrap ? 7 + io.screenSize : 20)) - 1;
+  uint screenWrap = (1 << ternary(io.affineWrap, 7 + io.screenSize, 20)) - 1;
 
   uint cx = (fx >> 8) & screenWrap;
   uint cy = (fy >> 8) & screenWrap;
@@ -148,7 +148,7 @@ auto PPU::Background::bitmap(uint x, uint y) -> void {
   uint height = io.mode == 5 ? 128 : 160;
   uint mode   = depth ? Half : Byte;
 
-  uint baseAddress = io.mode == 3 ? 0 : 0xa000 * io.frame;
+  uint baseAddress = ternary(io.mode == 3, 0, 0xa000 * io.frame);
 
   uint px = fx >> 8;
   uint py = fy >> 8;

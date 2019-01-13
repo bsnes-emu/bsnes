@@ -6,7 +6,7 @@ auto PPU::Object::addressReset() -> void {
 }
 
 auto PPU::Object::setFirstSprite() -> void {
-  io.firstSprite = !ppu.io.oamPriority ? 0 : ppu.io.oamAddress >> 2;
+  io.firstSprite = !ppu.io.oamPriority ? 0 : uint(ppu.io.oamAddress >> 2);
 }
 
 auto PPU::Object::frame() -> void {
