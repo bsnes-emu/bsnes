@@ -515,8 +515,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return;
 
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
-        /* RTC read */
-        gb->rtc_latched.data[gb->mbc_ram_bank - 8] = gb->rtc_real.data[gb->mbc_ram_bank - 8] = value; /* Todo: does it really write both? */
+        gb->rtc_latched.data[gb->mbc_ram_bank - 8] = gb->rtc_real.data[gb->mbc_ram_bank - 8] = value;
     }
 
     if (!gb->mbc_ram) {
