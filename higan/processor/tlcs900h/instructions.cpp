@@ -13,6 +13,21 @@ auto TLCS900H::instructionAnd(Target target, Source source) -> void {
   store(target, algorithmAnd(load(target), load(source)));
 }
 
+template<typename Source, typename Offset>
+auto TLCS900H::instructionAndCarry(Source source, Offset offset) -> void {
+  if constexpr(Source::bits == 8 && is_same_v<Offset, Register<uint8>>) { if(load(offset).bit(3)) return (void)Undefined; }
+  CF &= load(source).bit(load(offset) & Source::bits - 1);
+}
+
+template<typename Source, typename Offset>
+auto TLCS900H::instructionBit(Source source, Offset offset) -> void {
+  NF = 0;
+  VF = Undefined;
+  HF = 1;
+  ZF = !load(source).bit(load(offset) & Source::bits - 1);
+  SF = Undefined;
+}
+
 auto TLCS900H::instructionBitSearch1Backward(Register<uint16> register) -> void {
   auto value = load(register);
   for(uint index : reverse(range(16))) {
@@ -41,6 +56,13 @@ auto TLCS900H::instructionCallRelative(Source displacement) -> void {
   store(PC, load(PC) + load(displacement));
 }
 
+template<typename Target, typename Offset>
+auto TLCS900H::instructionChange(Target target, Offset offset) -> void {
+  auto result = load(target);
+  result.bit(load(offset) & Target::bits - 1) ^= 1;
+  store(target, result);
+}
+
 template<typename Target, typename Source>
 auto TLCS900H::instructionCompare(Target target, Source source) -> void {
   algorithmSubtract(load(target), load(source));
@@ -59,8 +81,8 @@ auto TLCS900H::instructionDecimalAdjustAccumulator(Register<uint8> register) -> 
   if(HF || (uint4)value > 0x09) value += NF ? -0x06 : 0x06;
   PF = parity(value);
   HF = uint8(value ^ load(register)).bit(4);
-  ZF = value.zero();
-  SF = value.negative();
+  ZF = value == 0;
+  SF = value.bit(-1);
   store(register, value);
 }
 
@@ -139,6 +161,12 @@ auto TLCS900H::instructionLoad(Target target, Source source) -> void {
   store(target, load(source));
 }
 
+template<typename Source, typename Offset>
+auto TLCS900H::instructionLoadCarry(Source source, Offset offset) -> void {
+  if constexpr(Source::bits == 8 && is_same_v<Offset, Register<uint8>>) { if(load(offset).bit(3)) return (void)Undefined; }
+  CF = load(source).bit(load(offset) & Source::bits - 1);
+}
+
 //reverse all bits in a 16-bit register
 //note: an 8-bit lookup table is faster (when in L1/L2 cache), but much more code
 auto TLCS900H::instructionMirror(Register<uint16> register) -> void {
@@ -163,9 +191,9 @@ auto TLCS900H::instructionMultiplyAdd(Register<uint16> register) -> void {
   store(XHL, load(XHL) - 2);
 
   auto result = load(expand(register));
-  VF = uint32(~(target ^ source) & (target ^ result)).negative();
-  ZF = result.zero();
-  SF = result.negative();
+  VF = uint32((target ^ result) & (source ^ result)).bit(-1);
+  ZF = result == 0;
+  SF = result.bit(-1);
 }
 
 template<typename Target, typename Source>
@@ -186,6 +214,12 @@ auto TLCS900H::instructionOr(Target target, Source source) -> void {
   store(target, algorithmOr(load(target), load(source)));
 }
 
+template<typename Source, typename Offset>
+auto TLCS900H::instructionOrCarry(Source source, Offset offset) -> void {
+  if constexpr(Source::bits == 8 && is_same_v<Offset, Register<uint8>>) { if(load(offset).bit(3)) return (void)Undefined; }
+  CF |= load(source).bit(load(offset) & Source::bits - 1);
+}
+
 template<typename Target>
 auto TLCS900H::instructionPop(Target target) -> void {
   pop(target);
@@ -194,6 +228,13 @@ auto TLCS900H::instructionPop(Target target) -> void {
 template<typename Source>
 auto TLCS900H::instructionPush(Source source) -> void {
   push(source);
+}
+
+template<typename Target, typename Offset>
+auto TLCS900H::instructionReset(Target target, Offset offset) -> void {
+  auto result = load(target);
+  result.bit(load(offset) & Target::bits - 1) = 0;
+  store(target, result);
 }
 
 auto TLCS900H::instructionReturn(uint4 code) -> void {
@@ -210,6 +251,59 @@ auto TLCS900H::instructionReturnInterrupt() -> void {
   pop(SR);
   pop(PC);
   store(INTNEST, load(INTNEST) - 1);
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionRotateLeft(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    uint cf = result.bit(-1);
+    result = result << 1 | CF;
+    CF = cf;
+  }
+  store(target, algorithmRotated(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionRotateLeftWithoutCarry(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(-1);
+    result = result << 1 | CF;
+  }
+  store(target, algorithmRotated(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionRotateRight(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    uint cf = result.bit(0);
+    result = CF << Target::bits - 1 | result >> 1;
+    CF = cf;
+  }
+  store(target, algorithmRotated(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionRotateRightWithoutCarry(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(0);
+    result = CF << Target::bits - 1 | result >> 1;
+  }
+  store(target, algorithmRotated(result));
+}
+
+template<typename Target, typename Offset>
+auto TLCS900H::instructionSet(Target target, Offset offset) -> void {
+  auto result = load(target);
+  result.bit(load(offset) & Target::bits - 1) = 1;
+  store(target, result);
 }
 
 template<typename Target>
@@ -229,6 +323,59 @@ auto TLCS900H::instructionSetRegisterFilePointer(uint2 value) -> void {
   RFP = value;
 }
 
+template<typename Target, typename Amount>
+auto TLCS900H::instructionShiftLeftArithmetic(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(-1);
+    result = result << 1;
+  }
+  store(target, algorithmShifted(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionShiftLeftLogical(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(-1);
+    result = result << 1;
+  }
+  store(target, algorithmShifted(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionShiftRightArithmetic(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(0);
+    result = result >> 1;
+    result.bit(-1) = result.bit(-2);
+  }
+  store(target, algorithmShifted(result));
+}
+
+template<typename Target, typename Amount>
+auto TLCS900H::instructionShiftRightLogical(Target target, Amount amount) -> void {
+  auto result = load(target);
+  uint count = (uint4)load(amount);
+  for(uint n : range(if(count, 16))) {
+    CF = result.bit(0);
+    result = result >> 1;
+  }
+  store(target, algorithmShifted(result));
+}
+
+template<typename Target, typename Offset>
+auto TLCS900H::instructionStoreCarry(Target target, Offset offset) -> void {
+  if constexpr(Target::bits == 8) { if(load(offset).bit(3)) return; }  //unlike other *CF instructions, STCF behavior is defined
+  auto result = load(target);
+  result.bit(load(offset)) = CF;
+  store(target, result);
+}
+
 auto TLCS900H::instructionSoftwareInterrupt(uint3 interrupt) -> void {
   //TODO
 }
@@ -238,12 +385,31 @@ auto TLCS900H::instructionSubtract(Target target, Source source) -> void {
   store(target, algorithmSubtract(load(target), load(source)));
 }
 
+//note: the TLCS900/H manual states this is subtract-with-carry, but it isn't
 template<typename Target, typename Source>
-auto TLCS900H::instructionSubtractCarry(Target target, Source source) -> void {
+auto TLCS900H::instructionSubtractBorrow(Target target, Source source) -> void {
   store(target, algorithmSubtract(load(target), load(source), CF));
+}
+
+template<typename Target, typename Offset>
+auto TLCS900H::instructionTestSet(Target target, Offset offset) -> void {
+  auto result = load(target);
+  NF = 0;
+  VF = Undefined;
+  HF = 1;
+  ZF = result.bit(load(offset) & Target::bits - 1);
+  SF = Undefined;
+  result.bit(load(offset) & Target::bits - 1) = 1;
+  store(target, result);
 }
 
 template<typename Target, typename Source>
 auto TLCS900H::instructionXor(Target target, Source source) -> void {
   store(target, algorithmXor(load(target), load(source)));
+}
+
+template<typename Source, typename Offset>
+auto TLCS900H::instructionXorCarry(Source source, Offset offset) -> void {
+  if constexpr(Source::bits == 8 && is_same_v<Offset, Register<uint8>>) { if(load(offset).bit(3)) return (void)Undefined; }
+  CF ^= load(source).bit(load(offset) & Source::bits - 1);
 }

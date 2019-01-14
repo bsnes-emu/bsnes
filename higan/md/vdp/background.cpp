@@ -70,7 +70,7 @@ auto VDP::Background::run(uint x, uint y) -> void {
 
   uint16 tileData = vdp.vram.read(tileAddress);
   uint4 color = tileData >> (((pixelX & 3) ^ 3) << 2);
-  output.color = ternary(color, tileAttributes.bits(13,14) << 4 | color, 0);
+  output.color = if(color, tileAttributes.bits(13,14) << 4 | color, 0);
   output.priority = tileAttributes.bit(15);
 }
 

@@ -570,7 +570,7 @@ auto SPC700::instructionTestSetBitsAbsolute(bool set) -> void {
   ZF = (A - data) == 0;
   NF = (A - data) & 0x80;
   read(address);
-  write(address, ternary(set, data | A, data & ~A));
+  write(address, if(set, data | A, data & ~A));
 }
 
 auto SPC700::instructionTransfer(uint8& from, uint8& to) -> void {

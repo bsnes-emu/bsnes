@@ -8,7 +8,7 @@ auto PPU::Objects::scanline(uint y) -> void {
     if(object.affine == 0 && object.affineSize == 1) continue;  //hidden
     if(py >= object.height << object.affineSize) continue;  //offscreen
 
-    uint rowSize = ternary(io.mapping == 0, 32 >> object.colors, object.width >> 3);
+    uint rowSize = if(io.mapping == 0, 32 >> object.colors, object.width >> 3);
     uint baseAddress = object.character << 5;
 
     if(object.mosaic && io.mosaicHeight) {

@@ -26,7 +26,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
   uint hmask = (width << self.tileSize << self.screenSize.bit(0)) - 1;
   uint vmask = (width << self.tileSize << self.screenSize.bit(1)) - 1;
 
-  uint y = this->y - ternary(self.mosaicEnable, this->y % (1 + io.mosaicSize), 0);
+  uint y = this->y - if(self.mosaicEnable, this->y % (1 + io.mosaicSize), 0);
   if(hires) {
     hscroll <<= 1;
     if(io.interlace) y = y << 1 | ppu.field();

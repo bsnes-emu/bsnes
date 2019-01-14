@@ -15,6 +15,7 @@ namespace nall {
   using std::enable_if_t;
   using std::false_type;
   using std::is_floating_point;
+  using std::is_floating_point_v;
   using std::forward;
   using std::initializer_list;
   using std::is_array;
@@ -23,8 +24,11 @@ namespace nall {
   using std::is_integral;
   using std::is_integral_v;
   using std::is_same;
+  using std::is_same_v;
   using std::is_signed;
+  using std::is_signed_v;
   using std::is_unsigned;
+  using std::is_unsigned_v;
   using std::move;
   using std::nullptr_t;
   using std::remove_extent;

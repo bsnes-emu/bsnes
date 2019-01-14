@@ -1,4 +1,5 @@
 #include <md/md.hpp>
+#include <nall/inline-if.hpp>
 
 namespace MegaDrive {
 

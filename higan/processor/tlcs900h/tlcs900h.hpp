@@ -8,6 +8,7 @@
  * what happens during an LDX instruction when the three padding bytes aren't all 0x00?
  * what value is read back from a non-existent 8-bit register ID? (eg 0x40-0xcf)
  * many instructions are undefined, some are marked as dummy instructions ... what do each do?
+ * what happens when using (AND,OR,XOR,LD)CF (byte)source,A with A.bit(3) set?
  */
 
 #pragma once
@@ -73,6 +74,8 @@ struct TLCS900H {
   template<typename T> auto algorithmDecrement(T target, T source) -> T;
   template<typename T> auto algorithmIncrement(T target, T source) -> T;
   template<typename T> auto algorithmOr(T target, T source) -> T;
+  template<typename T> auto algorithmRotated(T result) -> T;
+  template<typename T> auto algorithmShifted(T result) -> T;
   template<typename T> auto algorithmSubtract(T target, T source, uint1 carry = 0) -> T;
   template<typename T> auto algorithmXor(T target, T source) -> T;
 
@@ -92,10 +95,13 @@ struct TLCS900H {
   template<typename Target, typename Source> auto instructionAdd(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionAddCarry(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionAnd(Target, Source) -> void;
+  template<typename Source, typename Offset> auto instructionAndCarry(Source, Offset) -> void;
+  template<typename Source, typename Offset> auto instructionBit(Source, Offset) -> void;
   auto instructionBitSearch1Backward(Register<uint16>) -> void;
   auto instructionBitSearch1Forward(Register<uint16>) -> void;
   template<typename Source> auto instructionCall(uint4 code, Source) -> void;
   template<typename Source> auto instructionCallRelative(Source) -> void;
+  template<typename Target, typename Offset> auto instructionChange(Target, Offset) -> void;
   template<typename Target, typename Source> auto instructionCompare(Target, Source) -> void;
   template<typename Target> auto instructionComplement(Target) -> void;
   auto instructionDecimalAdjustAccumulator(Register<uint8>) -> void;
@@ -110,6 +116,7 @@ struct TLCS900H {
   template<typename Source> auto instructionJump(uint4 code, Source) -> void;
   template<typename Source> auto instructionJumpRelative(uint4 code, Source) -> void;
   template<typename Target, typename Source> auto instructionLoad(Target, Source) -> void;
+  template<typename Source, typename Offset> auto instructionLoadCarry(Source, Offset) -> void;
   auto instructionMirror(Register<uint16>) -> void;
   template<typename Target, typename Source> auto instructionMultiply(Target, Source) -> void;
   auto instructionMultiplyAdd(Register<uint16>) -> void;
@@ -117,19 +124,33 @@ struct TLCS900H {
   template<typename Target> auto instructionNegate(Target) -> void;
   auto instructionNoOperation() -> void;
   template<typename Target, typename Source> auto instructionOr(Target, Source) -> void;
+  template<typename Source, typename Offset> auto instructionOrCarry(Source, Offset) -> void;
   template<typename Target> auto instructionPop(Target) -> void;
   template<typename Source> auto instructionPush(Source) -> void;
+  template<typename Target, typename Offset> auto instructionReset(Target, Offset) -> void;
   auto instructionReturn(uint4 code) -> void;
   template<typename Source> auto instructionReturnDeallocate(Source) -> void;
   auto instructionReturnInterrupt() -> void;
+  template<typename Target, typename Amount> auto instructionRotateLeft(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionRotateLeftWithoutCarry(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionRotateRight(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionRotateRightWithoutCarry(Target, Amount) -> void;
+  template<typename Target, typename Offset> auto instructionSet(Target, Offset) -> void;
   template<typename Target> auto instructionSetConditionCode(uint4 code, Target) -> void;
   auto instructionSetFlag(uint1& flag, uint1 value) -> void;
   auto instructionSetInterruptFlipFlop(uint3 value) -> void;
   auto instructionSetRegisterFilePointer(uint2 value) -> void;
+  template<typename Target, typename Amount> auto instructionShiftLeftArithmetic(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionShiftLeftLogical(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionShiftRightArithmetic(Target, Amount) -> void;
+  template<typename Target, typename Amount> auto instructionShiftRightLogical(Target, Amount) -> void;
+  template<typename Target, typename Offset> auto instructionStoreCarry(Target, Offset) -> void;
   auto instructionSoftwareInterrupt(uint3 interrupt) -> void;
   template<typename Target, typename Source> auto instructionSubtract(Target, Source) -> void;
-  template<typename Target, typename Source> auto instructionSubtractCarry(Target, Source) -> void;
+  template<typename Target, typename Source> auto instructionSubtractBorrow(Target, Source) -> void;
+  template<typename Target, typename Offset> auto instructionTestSet(Target, Offset) -> void;
   template<typename Target, typename Source> auto instructionXor(Target, Source) -> void;
+  template<typename Source, typename Offset> auto instructionXorCarry(Source, Offset) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

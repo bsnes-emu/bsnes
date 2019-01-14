@@ -2,8 +2,8 @@
 
 namespace nall {
 
-template<int RequestedPrecision> struct Natural {
-  enum : uint { Precision = RequestedPrecision < 1 ? 1 : RequestedPrecision > 64 ? 64 : RequestedPrecision };
+template<int Requested> struct Natural {
+  enum : uint { Precision = Requested < 1 ? 1 : Requested > 64 ? 64 : Requested };
   static inline constexpr auto bits() -> uint { return Precision; }
   using type =
     typename conditional<bits() <=  8,  uint8_t,
@@ -16,7 +16,6 @@ template<int RequestedPrecision> struct Natural {
   inline Natural() : data(0) {}
   template<typename T> inline Natural(const T& value) { data = mask(value); }
 
-  explicit inline operator bool() const { return (bool)data; }
   inline operator type() const { return data; }
 
   inline auto operator++(int) { auto value = *this; data = mask(data + 1); return value; }
@@ -46,33 +45,28 @@ template<int RequestedPrecision> struct Natural {
   #undef lhs
   #undef rhs
 
-  inline auto serialize(serializer& s) { s(data); }
+  inline auto bits(int lo, int hi) -> BitRange<Requested> { return {(type&)data, lo, hi}; }
+  inline auto bit(int index) -> BitRange<Requested> { return {(type&)data, index, index}; }
+  inline auto byte(int index) -> BitRange<Requested> { return {(type&)data, index * 8 + 0, index * 8 + 7}; }
 
-  inline auto zero() const -> bool { return data == 0; }
-  inline auto positive() const -> bool { return data >> bits() - 1 == 0; }
-  inline auto negative() const -> bool { return data >> bits() - 1 == 1; }
+  inline auto bits(int lo, int hi) const -> const BitRange<Requested> { return {(type&)data, lo, hi}; }
+  inline auto bit(int index) const -> const BitRange<Requested> { return {(type&)data, index, index}; }
+  inline auto byte(int index) const -> const BitRange<Requested> { return {(type&)data, index * 8 + 0, index * 8 + 7}; }
 
-  inline auto bits(uint lo, uint hi) -> BitRange<RequestedPrecision> { return {(type&)data, lo, hi}; }
-  inline auto bit(uint index) -> BitRange<RequestedPrecision> { return {(type&)data, index, index}; }
-  inline auto byte(uint index) -> BitRange<RequestedPrecision> { return {(type&)data, index * 8 + 0, index * 8 + 7}; }
-
-  inline auto bits(uint lo, uint hi) const -> const BitRange<RequestedPrecision> { return {(type&)data, lo, hi}; }
-  inline auto bit(uint index) const -> const BitRange<RequestedPrecision> { return {(type&)data, index, index}; }
-  inline auto byte(uint index) const -> const BitRange<RequestedPrecision> { return {(type&)data, index * 8 + 0, index * 8 + 7}; }
-
-  inline auto clamp(uint bits) -> uintmax {
+  inline auto clamp(uint bits) -> type {
     const uintmax b = 1ull << (bits - 1);
     const uintmax m = b * 2 - 1;
     return data < m ? data : m;
   }
 
-  inline auto clip(uint bits) -> uintmax {
+  inline auto clip(uint bits) -> type {
     const uintmax b = 1ull << (bits - 1);
     const uintmax m = b * 2 - 1;
     return data & m;
   }
 
-  inline auto integer() const -> Integer<RequestedPrecision>;
+  inline auto serialize(serializer& s) { s(data); }
+  inline auto integer() const -> Integer<Requested>;
 
 private:
   inline auto mask(type value) const -> type {

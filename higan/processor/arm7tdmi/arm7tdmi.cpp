@@ -1,4 +1,5 @@
 #include <processor/processor.hpp>
+#include <nall/inline-if.hpp>
 #include "arm7tdmi.hpp"
 
 namespace Processor {

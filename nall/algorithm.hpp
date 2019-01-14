@@ -23,8 +23,8 @@ template<typename T, typename U, typename... P> auto max(const T& t, const U& u,
   return t > u ? max(t, forward<P>(p)...) : max(u, forward<P>(p)...);
 }
 
-template<typename T, typename U> auto ternary(bool test, const T& lhs, const U& rhs) -> T {
-  return test ? lhs : (T)rhs;
-}
+//template<typename T, typename U> auto ternary(bool test, const T& lhs, const U& rhs) -> T {
+//  return test ? lhs : (T)rhs;
+//}
 
 }}

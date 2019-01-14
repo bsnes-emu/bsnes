@@ -323,12 +323,63 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0x1a: case 0x1b: return (void)Undefined;
 //case 0x1c: DJNZ r,d
   case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
+  case 0x20:
+    if constexpr(bits != 32) return instructionAndCarry(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x21:
+    if constexpr(bits != 32) return instructionOrCarry(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x22:
+    if constexpr(bits != 32) return instructionXorCarry(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x23:
+    if constexpr(bits != 32) return instructionLoadCarry(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x24:
+    if constexpr(bits != 32) return instructionStoreCarry(register, fetchImmediate<uint8>());
+    return (void)Undefined;
   case 0x25: case 0x26: case 0x27: return (void)Undefined;
+  case 0x28:
+    if constexpr(bits != 32) return instructionAndCarry(register, A);
+    return (void)Undefined;
+  case 0x29:
+    if constexpr(bits != 32) return instructionOrCarry(register, A);
+    return (void)Undefined;
+  case 0x2a:
+    if constexpr(bits != 32) return instructionXorCarry(register, A);
+    return (void)Undefined;
+  case 0x2b:
+    if constexpr(bits != 32) return instructionLoadCarry(register, A);
+    return (void)Undefined;
+  case 0x2c:
+    if constexpr(bits != 32) return instructionStoreCarry(register, A);
+    return (void)Undefined;
   case 0x2d: return (void)Undefined;
   case 0x2e: return instructionLoad(toControlRegister<T>(data), register);
   case 0x2f: return instructionLoad(register, toControlRegister<T>(data));
+  case 0x30:
+    if constexpr(bits != 32) return instructionReset(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x31:
+    if constexpr(bits != 32) return instructionSet(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x32:
+    if constexpr(bits != 32) return instructionChange(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x33:
+    if constexpr(bits != 32) return instructionBit(register, fetchImmediate<uint8>());
+    return (void)Undefined;
+  case 0x34:
+    if constexpr(bits != 32) return instructionTestSet(register, fetchImmediate<uint8>());
+    return (void)Undefined;
   case 0x35: case 0x36: case 0x37: return (void)Undefined;
+//case 0x38: MINC1 #,r
+//case 0x39: MINC2 #,r
+//case 0x3a: MINC4 #,r
   case 0x3b: return (void)Undefined;
+//case 0x3c: MDEC1 #,r
+//case 0x3d: MDEC2 #,r
+//case 0x3e: MDEC4 #,r
   case 0x3f: return (void)Undefined;
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
     if constexpr(bits != 32) return instructionMultiply(toRegister3<T>(data), register);
@@ -363,7 +414,7 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0xa8: case 0xa9: case 0xaa: case 0xab: case 0xac: case 0xad: case 0xae: case 0xaf:
     return instructionLoad(register, toImmediate<T>((uint3)data));
   case 0xb0: case 0xb1: case 0xb2: case 0xb3: case 0xb4: case 0xb5: case 0xb6: case 0xb7:
-    return instructionSubtractCarry(toRegister3<T>(data), register);
+    return instructionSubtractBorrow(toRegister3<T>(data), register);
   case 0xb8: case 0xb9: case 0xba: case 0xbb: case 0xbc: case 0xbd: case 0xbe: case 0xbf:
     if constexpr(bits == 32) return (void)Undefined;
     return instructionExchange(toRegister3<T>(data), register);
@@ -372,7 +423,7 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0xc8: return instructionAdd(register, fetchImmediate<T>());
   case 0xc9: return instructionAddCarry(register, fetchImmediate<T>());
   case 0xca: return instructionSubtract(register, fetchImmediate<T>());
-  case 0xcb: return instructionSubtractCarry(register, fetchImmediate<T>());
+  case 0xcb: return instructionSubtractBorrow(register, fetchImmediate<T>());
   case 0xcc: return instructionAnd(register, fetchImmediate<T>());
   case 0xcd: return instructionXor(register, fetchImmediate<T>());
   case 0xce: return instructionOr(register, fetchImmediate<T>());
@@ -383,8 +434,24 @@ auto TLCS900H::instructionRegister(R register) -> void {
     return instructionCompare(register, toImmediate<T>((uint3)data));
   case 0xe0: case 0xe1: case 0xe2: case 0xe3: case 0xe4: case 0xe5: case 0xe6: case 0xe7:
     return instructionOr(toRegister3<T>(data), register);
+  case 0xe8: return instructionRotateLeftWithoutCarry(register, fetchImmediate<uint8>());
+  case 0xe9: return instructionRotateRightWithoutCarry(register, fetchImmediate<uint8>());
+  case 0xea: return instructionRotateLeft(register, fetchImmediate<uint8>());
+  case 0xeb: return instructionRotateRight(register, fetchImmediate<uint8>());
+  case 0xec: return instructionShiftLeftArithmetic(register, fetchImmediate<uint8>());
+  case 0xed: return instructionShiftRightArithmetic(register, fetchImmediate<uint8>());
+  case 0xee: return instructionShiftLeftLogical(register, fetchImmediate<uint8>());
+  case 0xef: return instructionShiftRightLogical(register, fetchImmediate<uint8>());
   case 0xf0: case 0xf1: case 0xf2: case 0xf3: case 0xf4: case 0xf5: case 0xf6: case 0xf7:
     return instructionCompare(toRegister3<T>(data), register);
+  case 0xf8: return instructionRotateLeftWithoutCarry(register, A);
+  case 0xf9: return instructionRotateRightWithoutCarry(register, A);
+  case 0xfa: return instructionRotateLeft(register, A);
+  case 0xfb: return instructionRotateRight(register, A);
+  case 0xfc: return instructionShiftLeftArithmetic(register, A);
+  case 0xfd: return instructionShiftRightArithmetic(register, A);
+  case 0xfe: return instructionShiftLeftLogical(register, A);
+  case 0xff: return instructionShiftRightLogical(register, A);
   }
 }
 
@@ -400,7 +467,17 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
     if constexpr(bits == 32) return (void)Undefined;
     return instructionPush(memory);
   case 0x05: return (void)Undefined;
+//case 0x06: RLD A,(mem)
+//case 0x07: RRD A,(mem)
   case 0x08: case 0x09: case 0x0a: case 0x0b: case 0x0c: case 0x0d: case 0x0e: case 0x0f: return (void)Undefined;
+//case 0x10: LDI
+//case 0x11: LDIR
+//case 0x12: LDIR
+//case 0x13: LDDR
+//case 0x14: CPI
+//case 0x15: CPIR
+//case 0x16: CPD
+//case 0x17: CPDR
   case 0x18: return (void)Undefined;
   case 0x19:
     if constexpr(bits == 32) return (void)Undefined;
@@ -423,7 +500,7 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
     return instructionSubtract(memory, fetchImmediate<T>());
   case 0x3b:
     if constexpr(bits == 32) return (void)Undefined;
-    return instructionSubtractCarry(memory, fetchImmediate<T>());
+    return instructionSubtractBorrow(memory, fetchImmediate<T>());
   case 0x3c:
     if constexpr(bits == 32) return (void)Undefined;
     return instructionAnd(memory, fetchImmediate<T>());
@@ -453,6 +530,30 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
   case 0x68: case 0x69: case 0x6a: case 0x6b: case 0x6c: case 0x6d: case 0x6e: case 0x6f:
     return instructionDecrement(memory, toImmediate<T>((uint3)data));
   case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77: return (void)Undefined;
+  case 0x78:
+    if constexpr(bits != 32) return instructionRotateLeftWithoutCarry(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x79:
+    if constexpr(bits != 32) return instructionRotateRightWithoutCarry(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7a:
+    if constexpr(bits != 32) return instructionRotateLeft(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7b:
+    if constexpr(bits != 32) return instructionRotateRight(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7c:
+    if constexpr(bits != 32) return instructionShiftLeftArithmetic(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7d:
+    if constexpr(bits != 32) return instructionShiftRightArithmetic(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7e:
+    if constexpr(bits != 32) return instructionShiftLeftLogical(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
+  case 0x7f:
+    if constexpr(bits != 32) return instructionShiftRightLogical(memory, toImmediate<uint4>(1));
+    return (void)Undefined;
   case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: case 0x86: case 0x87:
     return instructionAdd(toRegister3<T>(data), memory);
   case 0x88: case 0x89: case 0x8a: case 0x8b: case 0x8c: case 0x8d: case 0x8e: case 0x8f:
@@ -466,9 +567,9 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
   case 0xa8: case 0xa9: case 0xaa: case 0xab: case 0xac: case 0xad: case 0xae: case 0xaf:
     return instructionSubtract(memory, toRegister3<T>(data));
   case 0xb0: case 0xb1: case 0xb2: case 0xb3: case 0xb4: case 0xb5: case 0xb6: case 0xb7:
-    return instructionSubtractCarry(toRegister3<T>(data), memory);
+    return instructionSubtractBorrow(toRegister3<T>(data), memory);
   case 0xb8: case 0xb9: case 0xba: case 0xbb: case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-    return instructionSubtractCarry(memory, toRegister3<T>(data));
+    return instructionSubtractBorrow(memory, toRegister3<T>(data));
   case 0xc0: case 0xc1: case 0xc2: case 0xc3: case 0xc4: case 0xc5: case 0xc6: case 0xc7:
     return instructionAnd(toRegister3<T>(data), memory);
   case 0xc8: case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf:
@@ -509,6 +610,11 @@ auto TLCS900H::instructionTargetMemory(uint32 address) -> void {
   case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c: case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
   case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25: case 0x26: case 0x27:
     return instructionLoad(toRegister3<uint16>(data), toMemory<uint16>(address));
+  case 0x28: return instructionAndCarry(toMemory<uint8>(address), A);
+  case 0x29: return instructionOrCarry(toMemory<uint8>(address), A);
+  case 0x2a: return instructionXorCarry(toMemory<uint8>(address), A);
+  case 0x2b: return instructionLoadCarry(toMemory<uint8>(address), A);
+  case 0x2c: return instructionStoreCarry(toMemory<uint8>(address), A);
   case 0x2d: case 0x2e: case 0x2f: return (void)Undefined;
   case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37:
     return instructionLoad(toRegister3<uint32>(data), toMemory<uint32>(address));
@@ -524,6 +630,26 @@ auto TLCS900H::instructionTargetMemory(uint32 address) -> void {
   case 0x68: case 0x69: case 0x6a: case 0x6b: case 0x6c: case 0x6d: case 0x6e: case 0x6f: return (void)Undefined;
   case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77: return (void)Undefined;
   case 0x78: case 0x79: case 0x7a: case 0x7b: case 0x7c: case 0x7d: case 0x7e: case 0x7f: return (void)Undefined;
+  case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: case 0x86: case 0x87:
+    return instructionAndCarry(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0x88: case 0x89: case 0x8a: case 0x8b: case 0x8c: case 0x8d: case 0x8e: case 0x8f:
+    return instructionOrCarry(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95: case 0x96: case 0x97:
+    return instructionXorCarry(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0x98: case 0x99: case 0x9a: case 0x9b: case 0x9c: case 0x9d: case 0x9e: case 0x9f:
+    return instructionLoadCarry(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xa0: case 0xa1: case 0xa2: case 0xa3: case 0xa4: case 0xa5: case 0xa6: case 0xa7:
+    return instructionStoreCarry(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xa8: case 0xa9: case 0xaa: case 0xab: case 0xac: case 0xad: case 0xae: case 0xaf:
+    return instructionTestSet(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xb0: case 0xb1: case 0xb2: case 0xb3: case 0xb4: case 0xb5: case 0xb6: case 0xb7:
+    return instructionReset(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xb8: case 0xb9: case 0xba: case 0xbb: case 0xbc: case 0xbd: case 0xbe: case 0xbf:
+    return instructionSet(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xc0: case 0xc1: case 0xc2: case 0xc3: case 0xc4: case 0xc5: case 0xc6: case 0xc7:
+    return instructionChange(toMemory<uint8>(address), toImmediate<uint3>(data));
+  case 0xc8: case 0xc9: case 0xca: case 0xcb: case 0xcc: case 0xcd: case 0xce: case 0xcf:
+    return instructionBit(toMemory<uint8>(address), toImmediate<uint3>(data));
   case 0xd0: case 0xd1: case 0xd2: case 0xd3: case 0xd4: case 0xd5: case 0xd6: case 0xd7:
   case 0xd8: case 0xd9: case 0xda: case 0xdb: case 0xdc: case 0xdd: case 0xde: case 0xdf:
     return instructionJump((uint4)data, toMemory<uint32>(address));
