@@ -357,6 +357,10 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 if (!gb->cgb_mode && gb->boot_rom_finished) {
                     return 0xFF;
                 }
+                /* TODO: Verify actual access timing */
+                if (gb->vram_read_blocked) {
+                    return 0xFF;
+                }
                 uint8_t index_reg = (addr & 0xFF) - 1;
                 return ((addr & 0xFF) == GB_IO_BGPD?
                        gb->background_palettes_data :
@@ -786,6 +790,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (!gb->cgb_mode && gb->boot_rom_finished) {
                     /* Todo: Due to the behavior of a broken Game & Watch Gallery 2 ROM on a real CGB. A proper test ROM
                        is required. */
+                    return;
+                }
+                /* TODO: Verify actual access timing */
+                if (gb->vram_write_blocked) {
                     return;
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
