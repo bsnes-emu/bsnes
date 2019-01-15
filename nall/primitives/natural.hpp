@@ -14,8 +14,10 @@ template<int Requested> struct Natural {
   static inline constexpr auto mask() -> type { return ~0ull >> 64 - bits(); }
 
   inline Natural() : data(0) {}
+  template<int Bits> inline Natural(Natural<Bits> value) { data = mask(value); }
   template<typename T> inline Natural(const T& value) { data = mask(value); }
 
+  explicit inline operator bool() const { return data; }
   inline operator type() const { return data; }
 
   inline auto operator++(int) { auto value = *this; data = mask(data + 1); return value; }
@@ -75,5 +77,30 @@ private:
 
   type data;
 };
+
+#define ALL 64
+#define ADD 64  //LHS + RHS
+#define INC 64  //1 + (LHS >= RHS ? LHS : RHS)
+#define MAX 64  //LHS >= RHS ? LHS : RHS
+#define MIN 64  //LHS <= RHS ? LHS : RHS
+#define lhs (uint64_t)(typename Natural<LHS>::type)l
+#define rhs (typename Natural<RHS>::type)r
+template<int LHS, int RHS> inline auto operator *(Natural<LHS> l, Natural<RHS> r) { return Natural<ADD>{lhs  * rhs}; }
+template<int LHS, int RHS> inline auto operator /(Natural<LHS> l, Natural<RHS> r) { return Natural<LHS>{lhs  / rhs}; }
+template<int LHS, int RHS> inline auto operator %(Natural<LHS> l, Natural<RHS> r) { return Natural<LHS>{lhs  % rhs}; }
+template<int LHS, int RHS> inline auto operator +(Natural<LHS> l, Natural<RHS> r) { return Natural<INC>{lhs  + rhs}; }
+template<int LHS, int RHS> inline auto operator -(Natural<LHS> l, Natural<RHS> r) { return Natural<INC>{lhs  - rhs}; }
+template<int LHS, int RHS> inline auto operator<<(Natural<LHS> l, Natural<RHS> r) { return Natural<ALL>{lhs << rhs}; }
+template<int LHS, int RHS> inline auto operator>>(Natural<LHS> l, Natural<RHS> r) { return Natural<LHS>{lhs >> rhs}; }
+template<int LHS, int RHS> inline auto operator &(Natural<LHS> l, Natural<RHS> r) { return Natural<MAX>{lhs  & rhs}; }
+template<int LHS, int RHS> inline auto operator ^(Natural<LHS> l, Natural<RHS> r) { return Natural<MAX>{lhs  ^ rhs}; }
+template<int LHS, int RHS> inline auto operator |(Natural<LHS> l, Natural<RHS> r) { return Natural<MAX>{lhs  | rhs}; }
+#undef ALL
+#undef ADD
+#undef INC
+#undef MAX
+#undef MIN
+#undef lhs
+#undef rhs
 
 }

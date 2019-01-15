@@ -15,7 +15,7 @@ namespace nall {
 #include <nall/primitives/integer.hpp>
 #include <nall/primitives/real.hpp>
 #include <nall/primitives/types.hpp>
-//#include <nall/primitives/operators.hpp>
+#include <nall/primitives/literals.hpp>
 
 namespace nall {
   template<int Bits> auto Natural<Bits>::integer() const -> Integer<Bits> { return Integer<Bits>(*this); }

@@ -34,4 +34,14 @@ private:
   type data;
 };
 
+#define lhs (long double)(typename Real<LHS>::type)l
+#define rhs (typename Real<RHS>::type)r
+template<int LHS, int RHS> inline auto operator*(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs * rhs}; }
+template<int LHS, int RHS> inline auto operator/(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs / rhs}; }
+template<int LHS, int RHS> inline auto operator%(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs % rhs}; }
+template<int LHS, int RHS> inline auto operator+(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs + rhs}; }
+template<int LHS, int RHS> inline auto operator-(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs - rhs}; }
+#undef lhs
+#undef rhs
+
 }

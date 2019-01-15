@@ -329,6 +329,8 @@ struct string_format : vector<string> {
   inline auto append() -> type&;
 };
 
+inline auto operator"" _s(const char* value, std::size_t) -> string { return {value}; }
+
 }
 
 #include <nall/string/view.hpp>
@@ -360,4 +362,4 @@ struct string_format : vector<string> {
 #include <nall/string/markup/xml.hpp>
 
 #include <nall/string/transform/cml.hpp>
-#include <nall/string/transform/dml.hpp>
+//#include <nall/string/transform/dml.hpp>

@@ -171,9 +171,10 @@ auto TLCS900H::instructionLoadCarry(Source source, Offset offset) -> void {
 //note: an 8-bit lookup table is faster (when in L1/L2 cache), but much more code
 auto TLCS900H::instructionMirror(Register<uint16> register) -> void {
   auto data = load(register);
-  uint8 lo = (data.byte(0) * 0x80200802ull & 0x884422110ull) * 0x101010101ull >> 32;
-  uint8 hi = (data.byte(1) * 0x80200802ull & 0x884422110ull) * 0x101010101ull >> 32;
-  store(register, lo << 8 | hi << 0);
+  data = data << 1 & 0xaaaa | data >> 1 & 0x5555;
+  data = data << 2 & 0xcccc | data >> 2 & 0x3333;
+  data = data << 4 & 0xf0f0 | data >> 4 & 0x0f0f;
+  store(register, data << 8 | data >> 8);
 }
 
 template<typename Target, typename Source>

@@ -41,4 +41,7 @@ enum XlibConstants : int {
 #undef None
 #undef True
 
+#undef MAX
+#undef MIN
+
 #endif

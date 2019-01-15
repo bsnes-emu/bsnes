@@ -16,8 +16,10 @@ template<int Requested> struct Integer {
   static inline constexpr auto sign() -> utype { return 1ull << Precision - 1; }
 
   inline Integer() : data(0) {}
+  template<int Bits> inline Integer(Integer<Bits> value) { data = mask(value); }
   template<typename T> inline Integer(const T& value) { data = mask(value); }
 
+  explicit inline operator bool() const { return data; }
   inline operator type() const { return data; }
 
   inline auto operator++(int) { auto value = *this; data = mask(data + 1); return value; }
@@ -45,7 +47,7 @@ template<int Requested> struct Integer {
   template<typename T> inline auto& operator ^=(const T& value) { lhs = mask(lhs  ^ rhs); return *this; }
   template<typename T> inline auto& operator |=(const T& value) { lhs = mask(lhs  | rhs); return *this; }
   #undef lhs
-  #undef rfs
+  #undef rhs
 
   inline auto bits(int lo, int hi) -> BitRange<Requested> { return {(utype&)data, lo, hi}; }
   inline auto bit(int index) -> BitRange<Requested> { return {(utype&)data, index, index}; }
@@ -77,5 +79,30 @@ private:
 
   type data;
 };
+
+#define ALL 64
+#define ADD 64  //LHS + RHS
+#define INC 64  //1 + (LHS >= RHS ? LHS : RHS)
+#define MAX 64  //LHS >= RHS ? LHS : RHS
+#define MIN 64  //LHS <= RHS ? LHS : RHS
+#define lhs (int64_t)(typename Integer<LHS>::type)l
+#define rhs (typename Integer<RHS>::type)r
+template<int LHS, int RHS> inline auto operator *(Integer<LHS> l, Integer<RHS> r) { return Integer<ADD>{lhs  * rhs}; }
+template<int LHS, int RHS> inline auto operator /(Integer<LHS> l, Integer<RHS> r) { return Integer<LHS>{lhs  / rhs}; }
+template<int LHS, int RHS> inline auto operator %(Integer<LHS> l, Integer<RHS> r) { return Integer<LHS>{lhs  % rhs}; }
+template<int LHS, int RHS> inline auto operator +(Integer<LHS> l, Integer<RHS> r) { return Integer<INC>{lhs  + rhs}; }
+template<int LHS, int RHS> inline auto operator -(Integer<LHS> l, Integer<RHS> r) { return Integer<INC>{lhs  - rhs}; }
+template<int LHS, int RHS> inline auto operator<<(Integer<LHS> l, Integer<RHS> r) { return Integer<ALL>{lhs << rhs}; }
+template<int LHS, int RHS> inline auto operator>>(Integer<LHS> l, Integer<RHS> r) { return Integer<LHS>{lhs >> rhs}; }
+template<int LHS, int RHS> inline auto operator &(Integer<LHS> l, Integer<RHS> r) { return Integer<MAX>{lhs  & rhs}; }
+template<int LHS, int RHS> inline auto operator ^(Integer<LHS> l, Integer<RHS> r) { return Integer<MAX>{lhs  ^ rhs}; }
+template<int LHS, int RHS> inline auto operator |(Integer<LHS> l, Integer<RHS> r) { return Integer<MAX>{lhs  | rhs}; }
+#undef ALL
+#undef ADD
+#undef INC
+#undef MAX
+#undef MIN
+#undef lhs
+#undef rhs
 
 }
