@@ -25,7 +25,7 @@ template<typename T> auto TLCS900H::toImmediate3(uint3 constant) const -> Immedi
 auto TLCS900H::instruction() -> void {
   auto data = fetch();
 
-  switch(data) {
+  switch(r.prefix = data) {
   case 0x00: return instructionNoOperation();
   case 0x01: return (void)Undefined;
   case 0x02: return instructionPush(SR);
@@ -293,8 +293,12 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0x0b:
     if constexpr(bits != 32) return instructionDivideSigned(register, fetchImmediate<T>());
     return (void)Undefined;
-//case 0x0c: LINK r,dd
-//case 0x0d: UNLK r
+  case 0x0c:
+    if constexpr(bits == 32) return instructionLink(register, fetchImmediate<int16>());
+    return (void)Undefined;
+  case 0x0d:
+    if constexpr(bits == 32) return instructionUnlink(register);
+    return (void)Undefined;
   case 0x0e:
     if constexpr(bits == 16) return instructionBitSearch1Forward(register);
     return (void)Undefined;
@@ -311,7 +315,9 @@ auto TLCS900H::instructionRegister(R register) -> void {
   case 0x13:
     if constexpr(bits != 8) return instructionExtendSign(register);
     return (void)Undefined;
-//case 0x14: PAA r
+  case 0x14:
+    if constexpr(bits != 8) return instructionPointerAdjustAccumulator(register);
+    return (void)Undefined;
   case 0x15: return (void)Undefined;
   case 0x16:
     if constexpr(bits == 16) return instructionMirror(register);
@@ -321,7 +327,9 @@ auto TLCS900H::instructionRegister(R register) -> void {
     if constexpr(bits == 16) return instructionMultiplyAdd(register);
     return (void)Undefined;
   case 0x1a: case 0x1b: return (void)Undefined;
-//case 0x1c: DJNZ r,d
+  case 0x1c:
+    if constexpr(bits != 32) return instructionDecrementJumpNotZero(register, fetchImmediate<int8>());
+    return (void)Undefined;
   case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
   case 0x20:
     if constexpr(bits != 32) return instructionAndCarry(register, fetchImmediate<uint8>());
@@ -373,13 +381,25 @@ auto TLCS900H::instructionRegister(R register) -> void {
     if constexpr(bits != 32) return instructionTestSet(register, fetchImmediate<uint8>());
     return (void)Undefined;
   case 0x35: case 0x36: case 0x37: return (void)Undefined;
-//case 0x38: MINC1 #,r
-//case 0x39: MINC2 #,r
-//case 0x3a: MINC4 #,r
+  case 0x38:
+    if constexpr(bits == 16) return instructionModuloIncrement<1>(register, fetchImmediate<int16>());
+    return (void)Undefined;
+  case 0x39:
+    if constexpr(bits == 16) return instructionModuloIncrement<2>(register, fetchImmediate<int16>());
+    return (void)Undefined;
+  case 0x3a:
+    if constexpr(bits == 16) return instructionModuloIncrement<4>(register, fetchImmediate<int16>());
+    return (void)Undefined;
   case 0x3b: return (void)Undefined;
-//case 0x3c: MDEC1 #,r
-//case 0x3d: MDEC2 #,r
-//case 0x3e: MDEC4 #,r
+  case 0x3c:
+    if constexpr(bits == 16) return instructionModuloDecrement<1>(register, fetchImmediate<int16>());
+    return (void)Undefined;
+  case 0x3d:
+    if constexpr(bits == 16) return instructionModuloDecrement<2>(register, fetchImmediate<int16>());
+    return (void)Undefined;
+  case 0x3e:
+    if constexpr(bits == 16) return instructionModuloDecrement<4>(register, fetchImmediate<int16>());
+    return (void)Undefined;
   case 0x3f: return (void)Undefined;
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
     if constexpr(bits != 32) return instructionMultiply(toRegister3<T>(data), register);
@@ -467,17 +487,45 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
     if constexpr(bits == 32) return (void)Undefined;
     return instructionPush(memory);
   case 0x05: return (void)Undefined;
-//case 0x06: RLD A,(mem)
-//case 0x07: RRD A,(mem)
+  case 0x06:
+    if constexpr(bits == 8) return instructionRotateLeftDigit(A, memory);
+    return (void)Undefined;
+  case 0x07:
+    if constexpr(bits == 8) return instructionRotateRightDigit(A, memory);
+    return (void)Undefined;
   case 0x08: case 0x09: case 0x0a: case 0x0b: case 0x0c: case 0x0d: case 0x0e: case 0x0f: return (void)Undefined;
-//case 0x10: LDI
-//case 0x11: LDIR
-//case 0x12: LDIR
-//case 0x13: LDDR
-//case 0x14: CPI
-//case 0x15: CPIR
-//case 0x16: CPD
-//case 0x17: CPDR
+  case 0x10:
+    if constexpr(bits ==  8) return instructionLoad<T, +1>();
+    if constexpr(bits == 16) return instructionLoad<T, +2>();
+    return (void)Undefined;
+  case 0x11:
+    if constexpr(bits ==  8) return instructionLoadRepeat<T, +1>();
+    if constexpr(bits == 16) return instructionLoadRepeat<T, +2>();
+    return (void)Undefined;
+  case 0x12:
+    if constexpr(bits ==  8) return instructionLoad<T, -1>();
+    if constexpr(bits == 16) return instructionLoad<T, -2>();
+    return (void)Undefined;
+  case 0x13:
+    if constexpr(bits ==  8) return instructionLoadRepeat<T, -1>();
+    if constexpr(bits == 16) return instructionLoadRepeat<T, -2>();
+    return (void)Undefined;
+  case 0x14:
+    if constexpr(bits ==  8) return instructionCompare<T, +1>(A);
+    if constexpr(bits == 16) return instructionCompare<T, +2>(WA);
+    return (void)Undefined;
+  case 0x15:
+    if constexpr(bits ==  8) return instructionCompareRepeat<T, +1>(A);
+    if constexpr(bits == 16) return instructionCompareRepeat<T, +2>(WA);
+    return (void)Undefined;
+  case 0x16:
+    if constexpr(bits ==  8) return instructionCompare<T, -1>(A);
+    if constexpr(bits == 16) return instructionCompare<T, -2>(WA);
+    return (void)Undefined;
+  case 0x17:
+    if constexpr(bits ==  8) return instructionCompareRepeat<T, -1>(A);
+    if constexpr(bits == 16) return instructionCompareRepeat<T, -2>(WA);
+    return (void)Undefined;
   case 0x18: return (void)Undefined;
   case 0x19:
     if constexpr(bits == 32) return (void)Undefined;

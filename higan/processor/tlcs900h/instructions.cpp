@@ -63,6 +63,22 @@ auto TLCS900H::instructionChange(Target target, Offset offset) -> void {
   store(target, result);
 }
 
+template<typename Size, int Adjust, typename Target>
+auto TLCS900H::instructionCompare(Target target) -> void {
+  auto source = toRegister3<uint32>(r.prefix);
+  auto cf = CF;  //CF is not modified; but algorithmSubtract will modify it
+  algorithmSubtract(load(target), load(toMemory<Size>(load(source))));
+  store(source, load(source) + Adjust);
+  store(BC, load(BC) - 1);
+  CF = cf;
+  VF = load(BC) == 0;
+}
+
+template<typename Size, int Adjust, typename Target>
+auto TLCS900H::instructionCompareRepeat(Target target) -> void {
+  do { instructionCompare<Size, Adjust>(target); } while(VF && !ZF);
+}
+
 template<typename Target, typename Source>
 auto TLCS900H::instructionCompare(Target target, Source source) -> void {
   algorithmSubtract(load(target), load(source));
@@ -91,6 +107,13 @@ auto TLCS900H::instructionDecrement(Target target, Source source) -> void {
   auto immediate = load(source);
   if(!immediate) immediate = 8;
   store(target, algorithmDecrement(load(target), immediate));
+}
+
+template<typename Target, typename Offset>
+auto TLCS900H::instructionDecrementJumpNotZero(Target target, Offset offset) -> void {
+  auto result = load(target);
+  store(target, --result);
+  if(result) store(PC, load(PC) + load(offset));
 }
 
 template<typename Target, typename Source>
@@ -156,6 +179,13 @@ auto TLCS900H::instructionJumpRelative(uint4 code, Source displacement) -> void 
   if(condition(code)) store(PC, load(PC) + load(displacement));
 }
 
+template<typename Target, typename Offset>
+auto TLCS900H::instructionLink(Target target, Offset offset) -> void {
+  push(target);
+  store(target, load(XSP));
+  store(XSP, load(XSP) + load(offset));
+}
+
 template<typename Target, typename Source>
 auto TLCS900H::instructionLoad(Target target, Source source) -> void {
   store(target, load(source));
@@ -167,6 +197,22 @@ auto TLCS900H::instructionLoadCarry(Source source, Offset offset) -> void {
   CF = load(source).bit(load(offset) & Source::bits - 1);
 }
 
+template<typename Size, int Adjust> auto TLCS900H::instructionLoad() -> void {
+  auto target = (uint3)r.prefix == 5 ? XIX : XDE;
+  auto source = (uint3)r.prefix == 5 ? XIY : XHL;
+  store(toMemory<Size>(load(target)), load(toMemory<Size>(load(source))));
+  store(target, load(target) + Adjust);
+  store(source, load(source) + Adjust);
+  store(BC, load(BC) - 1);
+  NF = 0;
+  VF = load(BC) == 0;
+  HF = 0;
+}
+
+template<typename Size, int Adjust> auto TLCS900H::instructionLoadRepeat() -> void {
+  do { instructionLoad<Size, Adjust>(); } while(VF);
+}
+
 //reverse all bits in a 16-bit register
 //note: an 8-bit lookup table is faster (when in L1/L2 cache), but much more code
 auto TLCS900H::instructionMirror(Register<uint16> register) -> void {
@@ -175,6 +221,28 @@ auto TLCS900H::instructionMirror(Register<uint16> register) -> void {
   data = data << 2 & 0xcccc | data >> 2 & 0x3333;
   data = data << 4 & 0xf0f0 | data >> 4 & 0x0f0f;
   store(register, data << 8 | data >> 8);
+}
+
+template<uint Modulo, typename Target, typename Source>
+auto TLCS900H::instructionModuloDecrement(Target target, Source source) -> void {
+  auto result = load(target);
+  auto number = load(source);
+  if(result % number == 0) {
+    store(target, result + (number - Modulo));
+  } else {
+    store(target, result - Modulo);
+  }
+}
+
+template<uint Modulo, typename Target, typename Source>
+auto TLCS900H::instructionModuloIncrement(Target target, Source source) -> void {
+  auto result = load(target);
+  auto number = load(source);
+  if(result % number == number - Modulo) {
+    store(target, result - (number - Modulo));
+  } else {
+    store(target, result + Modulo);
+  }
 }
 
 template<typename Target, typename Source>
@@ -221,6 +289,13 @@ auto TLCS900H::instructionOrCarry(Source source, Offset offset) -> void {
   CF |= load(source).bit(load(offset) & Source::bits - 1);
 }
 
+//increments odd addresses only to ensure they are even (16-bit aligned)
+template<typename Target>
+auto TLCS900H::instructionPointerAdjustAccumulator(Target target) -> void {
+  auto result = load(target);
+  store(target, result + result.bit(0));
+}
+
 template<typename Target>
 auto TLCS900H::instructionPop(Target target) -> void {
   pop(target);
@@ -254,6 +329,23 @@ auto TLCS900H::instructionReturnInterrupt() -> void {
   store(INTNEST, load(INTNEST) - 1);
 }
 
+template<typename LHS, typename RHS>
+auto TLCS900H::instructionRotateLeftDigit(LHS lhs, RHS rhs) -> void {
+  auto lvalue = load(lhs);
+  auto rvalue = load(rhs);
+  auto Lvalue = lvalue;
+  lvalue.bits(0,3) = rvalue.bits(4,7);
+  rvalue.bits(4,7) = rvalue.bits(0,3);
+  rvalue.bits(0,3) = Lvalue.bits(0,3);
+  store(lhs, lvalue);
+  store(rhs, rvalue);
+  NF = 0;
+  PF = parity(lvalue);
+  HF = 0;
+  ZF = lvalue == 0;
+  SF = lvalue.bit(-1);
+}
+
 template<typename Target, typename Amount>
 auto TLCS900H::instructionRotateLeft(Target target, Amount amount) -> void {
   auto result = load(target);
@@ -275,6 +367,23 @@ auto TLCS900H::instructionRotateLeftWithoutCarry(Target target, Amount amount) -
     result = result << 1 | CF;
   }
   store(target, algorithmRotated(result));
+}
+
+template<typename LHS, typename RHS>
+auto TLCS900H::instructionRotateRightDigit(LHS lhs, RHS rhs) -> void {
+  auto lvalue = load(lhs);
+  auto rvalue = load(rhs);
+  auto Rvalue = rvalue;
+  rvalue.bits(0,3) = rvalue.bits(4,7);
+  rvalue.bits(4,7) = lvalue.bits(0,3);
+  lvalue.bits(0,3) = Rvalue.bits(0,3);
+  store(lhs, lvalue);
+  store(rhs, rvalue);
+  NF = 0;
+  PF = parity(lvalue);
+  HF = 0;
+  ZF = lvalue == 0;
+  SF = lvalue.bit(-1);
 }
 
 template<typename Target, typename Amount>
@@ -402,6 +511,12 @@ auto TLCS900H::instructionTestSet(Target target, Offset offset) -> void {
   SF = Undefined;
   result.bit(load(offset) & Target::bits - 1) = 1;
   store(target, result);
+}
+
+template<typename Target>
+auto TLCS900H::instructionUnlink(Target target) -> void {
+  store(XSP, load(target));
+  pop(target);
 }
 
 template<typename Target, typename Source>

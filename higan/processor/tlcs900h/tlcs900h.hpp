@@ -102,10 +102,13 @@ struct TLCS900H {
   template<typename Source> auto instructionCall(uint4 code, Source) -> void;
   template<typename Source> auto instructionCallRelative(Source) -> void;
   template<typename Target, typename Offset> auto instructionChange(Target, Offset) -> void;
+  template<typename Size, int Adjust, typename Target> auto instructionCompare(Target) -> void;
+  template<typename Size, int Adjust, typename Target> auto instructionCompareRepeat(Target) -> void;
   template<typename Target, typename Source> auto instructionCompare(Target, Source) -> void;
   template<typename Target> auto instructionComplement(Target) -> void;
   auto instructionDecimalAdjustAccumulator(Register<uint8>) -> void;
   template<typename Target, typename Source> auto instructionDecrement(Target, Source) -> void;
+  template<typename Target, typename Offset> auto instructionDecrementJumpNotZero(Target, Offset) -> void;
   template<typename Target, typename Source> auto instructionDivide(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionDivideSigned(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionExchange(Target, Source) -> void;
@@ -115,8 +118,13 @@ struct TLCS900H {
   template<typename Target, typename Source> auto instructionIncrement(Target, Source) -> void;
   template<typename Source> auto instructionJump(uint4 code, Source) -> void;
   template<typename Source> auto instructionJumpRelative(uint4 code, Source) -> void;
+  template<typename Target, typename Offset> auto instructionLink(Target, Offset) -> void;
   template<typename Target, typename Source> auto instructionLoad(Target, Source) -> void;
   template<typename Source, typename Offset> auto instructionLoadCarry(Source, Offset) -> void;
+  template<typename Size, int Adjust> auto instructionLoad() -> void;
+  template<typename Size, int Adjust> auto instructionLoadRepeat() -> void;
+  template<uint Modulo, typename Target, typename Source> auto instructionModuloDecrement(Target, Source) -> void;
+  template<uint Modulo, typename Target, typename Source> auto instructionModuloIncrement(Target, Source) -> void;
   auto instructionMirror(Register<uint16>) -> void;
   template<typename Target, typename Source> auto instructionMultiply(Target, Source) -> void;
   auto instructionMultiplyAdd(Register<uint16>) -> void;
@@ -125,14 +133,17 @@ struct TLCS900H {
   auto instructionNoOperation() -> void;
   template<typename Target, typename Source> auto instructionOr(Target, Source) -> void;
   template<typename Source, typename Offset> auto instructionOrCarry(Source, Offset) -> void;
+  template<typename Target> auto instructionPointerAdjustAccumulator(Target) -> void;
   template<typename Target> auto instructionPop(Target) -> void;
   template<typename Source> auto instructionPush(Source) -> void;
   template<typename Target, typename Offset> auto instructionReset(Target, Offset) -> void;
   auto instructionReturn(uint4 code) -> void;
   template<typename Source> auto instructionReturnDeallocate(Source) -> void;
   auto instructionReturnInterrupt() -> void;
+  template<typename LHS, typename RHS> auto instructionRotateLeftDigit(LHS, RHS) -> void;
   template<typename Target, typename Amount> auto instructionRotateLeft(Target, Amount) -> void;
   template<typename Target, typename Amount> auto instructionRotateLeftWithoutCarry(Target, Amount) -> void;
+  template<typename LHS, typename RHS> auto instructionRotateRightDigit(LHS, RHS) -> void;
   template<typename Target, typename Amount> auto instructionRotateRight(Target, Amount) -> void;
   template<typename Target, typename Amount> auto instructionRotateRightWithoutCarry(Target, Amount) -> void;
   template<typename Target, typename Offset> auto instructionSet(Target, Offset) -> void;
@@ -149,6 +160,7 @@ struct TLCS900H {
   template<typename Target, typename Source> auto instructionSubtract(Target, Source) -> void;
   template<typename Target, typename Source> auto instructionSubtractBorrow(Target, Source) -> void;
   template<typename Target, typename Offset> auto instructionTestSet(Target, Offset) -> void;
+  template<typename Target> auto instructionUnlink(Target) -> void;
   template<typename Target, typename Source> auto instructionXor(Target, Source) -> void;
   template<typename Source, typename Offset> auto instructionXorCarry(Source, Offset) -> void;
 
@@ -188,6 +200,7 @@ struct TLCS900H {
     uint3 iff = 7;  //interrupt mask flip-flop
 
     uint1 halted;
+    uint8 prefix;   //first opcode byte; needed for [CP|LD][ID](R) instructions
   } r;
 
   auto halted() const -> bool { return r.halted; }

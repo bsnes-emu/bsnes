@@ -90,7 +90,7 @@ struct M68K {
 
   //effective-address.cpp
   struct EffectiveAddress {
-    explicit EffectiveAddress(uint mode_, uint reg_) : mode(mode_), reg(reg_) {
+    explicit EffectiveAddress(uint4 mode_, uint3 reg_) : mode(mode_), reg(reg_) {
       if(mode == 7) mode += reg;  //optimization: convert modes {7; 0-4} to {8-11}
     }
 

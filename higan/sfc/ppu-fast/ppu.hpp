@@ -223,9 +223,9 @@ public:
   };
 
   struct Pixel {
-    uint source;
-    uint priority;
-    uint color;
+    uint   source;
+    uint   priority;
+    uint15 color;
   };
 
   //io.cpp

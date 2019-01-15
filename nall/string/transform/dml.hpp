@@ -213,8 +213,8 @@ auto DML::markup(const string& s) -> string {
   boolean deletion;
   boolean code;
 
-  natural link, linkBase;
-  natural embed, embedBase;
+  uint link, linkBase;
+  uint embed, embedBase;
 
   for(uint n = 0; n < s.size();) {
     char a = s[n];
