@@ -232,11 +232,9 @@ auto Presentation::clearViewport() -> void {
   uint32_t opaqueBlack = 0xff000000;
   if(settings.video.format == "RGB30") opaqueBlack = 0xc0000000;
 
-  uint32_t* output;
-  uint length;
   uint width = 16;
   uint height = 16;
-  if(video.acquire(output, length, width, height)) {
+  if(auto [output, length] = video.acquire(width, height); output) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = opaqueBlack;

@@ -3,7 +3,7 @@
 #include <nall/beat/archive/node.hpp>
 #include <nall/beat/archive/container.hpp>
 
-namespace nall { namespace Beat { namespace Archive {
+namespace nall::Beat::Archive {
 
 auto create(Container& container, string name) -> vector<uint8_t> {
   auto& metadata = container.metadata;
@@ -83,4 +83,4 @@ auto create(Container& container, string name) -> vector<uint8_t> {
   return memory;
 }
 
-}}}
+}

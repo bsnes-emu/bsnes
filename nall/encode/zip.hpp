@@ -5,7 +5,7 @@
 #include <nall/string.hpp>
 #include <nall/hash/crc32.hpp>
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 struct ZIP {
   ZIP(const string& filename) {
@@ -98,4 +98,4 @@ protected:
   vector<entry_t> directory;
 };
 
-}}
+}

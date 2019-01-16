@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Markup {
+namespace nall::Markup {
 
 auto ManagedNode::_evaluate(string query) const -> bool {
   if(!query) return true;
@@ -134,4 +134,4 @@ auto ManagedNode::_create(const string& path) -> Node {
   return _children.right();
 }
 
-}}
+}

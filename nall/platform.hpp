@@ -113,6 +113,7 @@ namespace Math {
   #define alwaysinline  inline
 #endif
 
+//P0627: [[unreachable]] -- impossible to simulate with identical syntax, must omit brackets ...
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
   #define unreachable __builtin_unreachable()
 #else

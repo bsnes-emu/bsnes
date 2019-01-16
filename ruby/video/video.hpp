@@ -86,7 +86,12 @@ struct Video {
 
   auto configure(uint width, uint height, double inputFrequency, double outputFrequency) -> bool;
   auto clear() -> void;
-  auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool;
+  struct Acquire {
+    explicit operator bool() const { return data; }
+    uint32_t* data = nullptr;
+    uint pitch = 0;
+  };
+  auto acquire(uint width, uint height) -> Acquire;
   auto release() -> void;
   auto output() -> void;
   auto poll() -> void;

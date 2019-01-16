@@ -4,7 +4,7 @@
 
 #include <nall/suffix-array.hpp>
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 /*
   A standard suffix array cannot produce a proper burrows-wheeler transform, due to rotations.
@@ -83,4 +83,4 @@ inline auto BWT(array_view<uint8_t> input) -> vector<uint8_t> {
   return output;
 }
 
-}}
+}

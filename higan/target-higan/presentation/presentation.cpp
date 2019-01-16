@@ -328,11 +328,9 @@ auto Presentation::clearViewport() -> void {
   if(!emulator || !emulator->loaded()) viewportLayout.setPadding();
   if(!visible() || !video) return;
 
-  uint32_t* output;
-  uint length = 0;
   uint width = 16;
   uint height = 16;
-  if(video->acquire(output, length, width, height)) {
+  if(auto [output, length] = video->acquire(width, height); output) {
     for(uint y : range(height)) {
       auto line = output + y * (length >> 2);
       for(uint x : range(width)) *line++ = 0xff000000;

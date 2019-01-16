@@ -6,7 +6,7 @@
 #include <nall/http/request.hpp>
 #include <nall/http/response.hpp>
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Role {
   struct Settings {
@@ -155,4 +155,4 @@ auto Role::upload(int fd, const Message& message) -> bool {
   return false;
 }
 
-}}
+}

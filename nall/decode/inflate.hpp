@@ -1,8 +1,11 @@
 #pragma once
 
+//a bad implementation of inflate from zlib/minizip
+//todo: replace with Talarubi's version
+
 #include <setjmp.h>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 namespace puff {
   inline auto puff(
@@ -343,4 +346,4 @@ inline auto puff(
 
 }
 
-}}
+}

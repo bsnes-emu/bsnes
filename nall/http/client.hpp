@@ -2,7 +2,7 @@
 
 #include <nall/http/role.hpp>
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Client : Role {
   inline auto open(const string& hostname, uint port = 80) -> bool;
@@ -53,4 +53,4 @@ auto Client::close() -> void {
   }
 }
 
-}}
+}

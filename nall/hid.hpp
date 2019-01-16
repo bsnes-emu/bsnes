@@ -5,7 +5,7 @@
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 
-namespace nall { namespace HID {
+namespace nall::HID {
 
 struct Input {
   Input(const string& name) : _name(name) {}
@@ -118,4 +118,4 @@ private:
   bool _rumble = false;
 };
 
-}}
+}

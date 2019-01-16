@@ -3,7 +3,7 @@
 #include <nall/beat/archive/node.hpp>
 #include <nall/beat/archive/container.hpp>
 
-namespace nall { namespace Beat { namespace Archive {
+namespace nall::Beat::Archive {
 
 auto extract(Container& container) -> bool {
   function<void (Markup::Node)> extract = [&](auto metadata) {
@@ -24,4 +24,4 @@ auto extract(Container& container) -> bool {
   return true;
 }
 
-}}}
+}

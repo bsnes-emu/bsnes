@@ -92,8 +92,10 @@ auto Video::clear() -> void {
   return instance->clear();
 }
 
-auto Video::acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
-  return instance->acquire(data, pitch, width, height);
+auto Video::acquire(uint width, uint height) -> Acquire {
+  Acquire result;
+  if(instance->acquire(result.data, result.pitch, width, height)) return result;
+  return {};
 }
 
 auto Video::release() -> void {

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Beat { namespace Single {
+namespace nall::Beat::Single {
 
 inline auto apply(array_view<uint8_t> source, array_view<uint8_t> beat, maybe<string&> manifest = {}, maybe<string&> result = {}) -> maybe<vector<uint8_t>> {
   #define error(text) { if(result) *result = {"error: ", text}; return {}; }
@@ -85,4 +85,4 @@ inline auto apply(array_view<uint8_t> source, array_view<uint8_t> beat, maybe<st
   #undef success
 }
 
-}}}
+}

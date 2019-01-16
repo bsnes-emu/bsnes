@@ -2,7 +2,7 @@
 
 #include <nall/suffix-array.hpp>
 
-namespace nall { namespace Beat { namespace Single {
+namespace nall::Beat::Single {
 
 inline auto create(array_view<uint8_t> source, array_view<uint8_t> target, string_view manifest = {}) -> vector<uint8_t> {
   vector<uint8_t> beat;
@@ -93,4 +93,4 @@ inline auto create(array_view<uint8_t> source, array_view<uint8_t> target, strin
   return beat;
 }
 
-}}}
+}

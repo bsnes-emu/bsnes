@@ -10,7 +10,7 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 
-namespace nall { namespace Database {
+namespace nall::Database {
 
 struct SQLite3 {
   struct Statement {
@@ -200,4 +200,4 @@ protected:
   sqlite3* _database = nullptr;
 };
 
-}}
+}

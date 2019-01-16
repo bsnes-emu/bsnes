@@ -6,7 +6,7 @@
 
 #include <nall/location.hpp>
 
-namespace nall { namespace {
+namespace nall {
 
 struct CML {
   auto& setPath(const string& pathname) { settings.path = pathname; return *this; }
@@ -34,20 +34,20 @@ private:
   auto parseDocument(const string& filedata, const string& pathname, uint depth) -> bool;
 };
 
-auto CML::parse(const string& filename) -> string {
+inline auto CML::parse(const string& filename) -> string {
   if(!settings.path) settings.path = Location::path(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
   return state.output;
 }
 
-auto CML::parse(const string& filedata, const string& pathname) -> string {
+inline auto CML::parse(const string& filedata, const string& pathname) -> string {
   settings.path = pathname;
   parseDocument(filedata, settings.path, 0);
   return state.output;
 }
 
-auto CML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
+inline auto CML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
   if(depth >= 100) return false;  //prevent infinite recursion
 
   auto vendorAppend = [&](const string& name, const string& value) {
@@ -102,4 +102,4 @@ auto CML::parseDocument(const string& filedata, const string& pathname, uint dep
   return true;
 }
 
-}}
+}

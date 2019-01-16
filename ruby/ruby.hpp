@@ -21,6 +21,7 @@ using nall::function;
 using nall::queue;
 using nall::shared_pointer;
 using nall::string;
+using nall::tuple;
 using nall::unique_pointer;
 using nall::vector;
 

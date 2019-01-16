@@ -10,7 +10,7 @@
 #include <nall/decode/lzsa.hpp>
 #include <nall/encode/lzsa.hpp>
 
-namespace nall { namespace Beat { namespace Archive {
+namespace nall::Beat::Archive {
 
 struct Node {
   static auto create(string name, string location) -> shared_pointer<Node>;
@@ -329,4 +329,4 @@ auto Node::getGroup() const -> string {
   return permission.group.name;
 }
 
-}}}
+}

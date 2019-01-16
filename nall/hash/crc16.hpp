@@ -2,7 +2,7 @@
 
 #include <nall/hash/hash.hpp>
 
-namespace nall { namespace Hash {
+namespace nall::Hash {
 
 struct CRC16 : Hash {
   using Hash::input;
@@ -52,4 +52,4 @@ private:
   uint16_t checksum = 0;
 };
 
-}}
+}

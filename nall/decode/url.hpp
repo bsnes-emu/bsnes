@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 //returns empty string on malformed content
 inline auto URL(string_view input) -> string {
@@ -36,4 +36,4 @@ inline auto URL(string_view input) -> string {
   return output;
 }
 
-}}
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Markup {
+namespace nall::Markup {
 
 struct Node;
 struct ManagedNode;
@@ -136,4 +136,4 @@ protected:
   SharedNode shared;
 };
 
-}}
+}

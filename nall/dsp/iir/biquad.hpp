@@ -4,7 +4,7 @@
 
 //transposed direct form II biquadratic second-order IIR filter
 
-namespace nall { namespace DSP { namespace IIR {
+namespace nall::DSP::IIR {
 
 struct Biquad {
   enum class Type : uint {
@@ -154,4 +154,4 @@ auto Biquad::butterworth(uint order, uint phase) -> double {
   return -0.5 / cos(Math::Pi * (phase + order + 0.5) / order);
 }
 
-}}}
+}

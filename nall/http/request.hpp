@@ -4,7 +4,7 @@
 #include <nall/encode/url.hpp>
 #include <nall/http/message.hpp>
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Request : Message {
   using type = Request;
@@ -181,4 +181,4 @@ auto Request::setBody() -> bool {
   return true;
 }
 
-}}
+}

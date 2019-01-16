@@ -2,7 +2,7 @@
 
 #include <nall/arithmetic/barrett.hpp>
 
-namespace nall { namespace EllipticCurve {
+namespace nall::EllipticCurve {
 
 static const uint256_t P = (1_u256 << 255) - 19;
 
@@ -215,4 +215,4 @@ inline auto squareRoot(const Modulo25519& lhs) -> Modulo25519 {
 
 #undef Mask
 
-}}
+}

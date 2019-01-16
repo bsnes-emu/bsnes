@@ -2,7 +2,7 @@
 
 #include <nall/hash/hash.hpp>
 
-namespace nall { namespace Hash {
+namespace nall::Hash {
 
 struct SHA384 : Hash {
   using Hash::input;
@@ -116,4 +116,4 @@ private:
   uint128_t length = 0;
 };
 
-}}
+}

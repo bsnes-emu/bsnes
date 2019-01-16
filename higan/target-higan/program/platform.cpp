@@ -51,9 +51,6 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
 }
 
 auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height) -> void {
-  uint32_t* output;
-  uint length;
-
   pitch >>= 2;
 
   if(!settings["View/Overscan"].boolean()) {
@@ -69,7 +66,7 @@ auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height
     }
   }
 
-  if(video->acquire(output, length, width, height)) {
+  if(auto [output, length] = video->acquire(width, height); output) {
     length >>= 2;
 
     for(auto y : range(height)) {

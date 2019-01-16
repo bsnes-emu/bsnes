@@ -3,7 +3,7 @@
 #include <nall/algorithm.hpp>
 #include <nall/stdint.hpp>
 
-namespace nall { namespace memory {
+namespace nall::memory {
   template<typename T = uint8_t> inline auto allocate(uint size) -> T*;
   template<typename T = uint8_t> inline auto allocate(uint size, const T& value) -> T*;
 
@@ -33,9 +33,9 @@ namespace nall { namespace memory {
 
   template<uint size, typename T = uint64_t> inline auto writel(void* target, T data) -> void;
   template<uint size, typename T = uint64_t> inline auto writem(void* target, T data) -> void;
-}}
+}
 
-namespace nall { namespace memory {
+namespace nall::memory {
 
 //implementation notes:
 //memcmp, memcpy, memmove have terrible performance on small block sizes (FreeBSD 10.0-amd64)
@@ -160,4 +160,4 @@ template<uint size, typename T> auto writem(void* target, T data) -> void {
   for(int n = size - 1; n >= 0; n--) *p++ = data >> n * 8;
 }
 
-}}
+}

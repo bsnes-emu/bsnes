@@ -3,7 +3,7 @@
 #include <nall/arithmetic.hpp>
 #include <nall/array-view.hpp>
 
-namespace nall { namespace Cipher {
+namespace nall::Cipher {
 
 //64-bit nonce; 64-bit x 64-byte (256GB) counter
 struct ChaCha20 {
@@ -106,4 +106,4 @@ struct XChaCha20 : ChaCha20 {
   }
 };
 
-}}
+}

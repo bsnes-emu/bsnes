@@ -4,7 +4,7 @@
 
 #include <nall/suffix-array.hpp>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 inline auto BWT(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
@@ -44,4 +44,4 @@ inline auto BWT(array_view<uint8_t> input) -> vector<uint8_t> {
   return output;
 }
 
-}}
+}

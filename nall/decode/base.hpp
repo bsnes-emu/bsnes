@@ -2,7 +2,7 @@
 
 #include <nall/arithmetic.hpp>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 template<uint Bits, typename T> inline auto Base(const string& value) -> T {
   static const string format =
@@ -34,4 +34,4 @@ template<uint Bits, typename T> inline auto Base(const string& value) -> T {
   return result;
 }
 
-}}
+}

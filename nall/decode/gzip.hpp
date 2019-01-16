@@ -3,7 +3,7 @@
 #include <nall/file.hpp>
 #include <nall/decode/inflate.hpp>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 struct GZIP {
   inline ~GZIP();
@@ -75,4 +75,4 @@ auto GZIP::decompress(const uint8_t* data, uint size) -> bool {
   return inflate(this->data, this->size, data + p, size - p - 8);
 }
 
-}}
+}

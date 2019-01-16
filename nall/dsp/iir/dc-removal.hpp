@@ -4,7 +4,7 @@
 
 //DC offset removal IIR filter
 
-namespace nall { namespace DSP { namespace IIR {
+namespace nall::DSP::IIR {
 
 struct DCRemoval {
   inline auto reset() -> void;
@@ -26,4 +26,4 @@ auto DCRemoval::process(double in) -> double {
   return x;
 }
 
-}}}
+}

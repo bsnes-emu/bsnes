@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 struct BMP {
   BMP() = default;
@@ -73,4 +73,4 @@ private:
   }
 };
 
-}}
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Eval {
+namespace nall::Eval {
 
 inline auto isLiteral(const char*& s) -> bool {
   char n = s[0];
@@ -96,4 +96,4 @@ inline auto literal(const char*& s) -> string {
   throw "invalid literal";
 }
 
-}}
+}

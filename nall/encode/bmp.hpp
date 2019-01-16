@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 struct BMP {
   static auto create(const string& filename, const void* data, uint pitch, uint width, uint height, bool alpha) -> bool {
@@ -44,4 +44,4 @@ struct BMP {
   }
 };
 
-}}
+}

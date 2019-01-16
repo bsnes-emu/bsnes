@@ -5,7 +5,7 @@
 #undef min
 #undef max
 
-namespace nall { namespace {
+namespace nall {
 
 template<typename T, typename U> auto min(const T& t, const U& u) -> T {
   return t < u ? t : (T)u;
@@ -23,8 +23,4 @@ template<typename T, typename U, typename... P> auto max(const T& t, const U& u,
   return t > u ? max(t, forward<P>(p)...) : max(u, forward<P>(p)...);
 }
 
-//template<typename T, typename U> auto ternary(bool test, const T& lhs, const U& rhs) -> T {
-//  return test ? lhs : (T)rhs;
-//}
-
-}}
+}

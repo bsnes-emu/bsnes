@@ -2,7 +2,7 @@
 
 #include <nall/beat/archive/node.hpp>
 
-namespace nall { namespace Beat { namespace Archive {
+namespace nall::Beat::Archive {
 
 struct Container {
   Container(array_view<uint8_t> = {});
@@ -197,4 +197,4 @@ auto Container::sort() -> void {
   nodes.sort([&](auto& lhs, auto& rhs) { return string::icompare(lhs->name, rhs->name) < 0; });
 }
 
-}}}
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 inline auto Base64(const string& text) -> vector<uint8_t> {
   static bool initialized = false;
@@ -44,4 +44,4 @@ inline auto Base64(const string& text) -> vector<uint8_t> {
   return result;
 }
 
-}}
+}

@@ -262,6 +262,11 @@ struct TLCS900H {
   static inline const uint4 True {0x08};
 
   static inline const uint1 Undefined = 0;
+
+  //disassembler.cpp
+  virtual auto disassembleRead(uint24 address) -> uint8 { return rand(); }
+  auto disassemble() -> string;
+  auto disassembleInstruction() -> string;
 };
 
 }

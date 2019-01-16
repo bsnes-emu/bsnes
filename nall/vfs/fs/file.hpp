@@ -2,7 +2,7 @@
 
 #include <nall/file.hpp>
 
-namespace nall { namespace vfs { namespace fs {
+namespace nall::vfs::fs {
 
 struct file : vfs::file {
   static auto open(string location_, mode mode_) -> vfs::shared::file {
@@ -48,4 +48,4 @@ private:
   file_buffer _fp;
 };
 
-}}}
+}

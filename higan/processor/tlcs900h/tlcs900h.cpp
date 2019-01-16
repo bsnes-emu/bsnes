@@ -23,6 +23,7 @@ namespace Processor {
 #include "instruction.cpp"
 #include "instructions.cpp"
 #include "serialization.cpp"
+#include "disassembler.cpp"
 
 TLCS900H tlcs900h;
 

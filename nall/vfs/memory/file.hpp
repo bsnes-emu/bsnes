@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace vfs { namespace memory {
+namespace nall::vfs::memory {
 
 struct file : vfs::file {
   ~file() { delete[] _data; }
@@ -45,4 +45,4 @@ private:
   uintmax _offset = 0;
 };
 
-}}}
+}

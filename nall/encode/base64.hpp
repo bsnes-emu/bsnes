@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 inline auto Base64(const void* vdata, uint size, const string& format = "MIME") -> string {
   static bool initialized = false;
@@ -65,4 +65,4 @@ inline auto Base64(const string& text, const string& format = "MIME") -> string 
   return Base64(text.data(), text.size(), format);
 }
 
-}}
+}

@@ -2,7 +2,7 @@
 
 #include <nall/string.hpp>
 
-namespace nall { namespace Location {
+namespace nall::Location {
 
 // (/parent/child.type/)
 // (/parent/child.type/)name.type
@@ -75,4 +75,4 @@ inline auto notsuffix(string_view self) -> string {
   return {path(self), prefix(self)};
 }
 
-}}
+}

@@ -208,9 +208,6 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
 }
 
 auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height) -> void {
-  uint32_t* output;
-  uint length;
-
   //this relies on the UI only running between Emulator::Scheduler::Event::Frame events
   //this will always be the case; so we can avoid an unnecessary copy or one-frame delay here
   //if the core were to exit between a frame event, the next frame might've been only partially rendered
@@ -225,7 +222,7 @@ auto Program::videoFrame(const uint32* data, uint pitch, uint width, uint height
     if(height == 480) data += 16 * pitch, height -= 32;
   }
 
-  if(video.acquire(output, length, width, height)) {
+  if(auto [output, length] = video.acquire(width, height); output) {
     length >>= 2;
 
     for(auto y : range(height)) {

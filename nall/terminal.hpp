@@ -2,7 +2,7 @@
 
 #include <nall/string.hpp>
 
-namespace nall { namespace terminal {
+namespace nall::terminal {
 
 inline auto escapable() -> bool {
   #if defined(PLATFORM_WINDOWS)
@@ -62,4 +62,4 @@ template<typename... P> inline auto gray(P&&... p) -> string {
 
 }
 
-}}
+}

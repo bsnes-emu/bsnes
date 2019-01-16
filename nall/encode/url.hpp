@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 inline auto URL(string_view input) -> string {
   string output;
@@ -24,4 +24,4 @@ inline auto URL(string_view input) -> string {
   return output;
 }
 
-}}
+}

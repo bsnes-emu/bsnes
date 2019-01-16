@@ -1,5 +1,5 @@
 #pragma once
 
-namespace nall { namespace DSP {
+namespace nall::DSP {
 
-}}
+}

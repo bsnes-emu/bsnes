@@ -2,7 +2,7 @@
 
 #include <nall/string.hpp>
 
-namespace nall { namespace Path {
+namespace nall::Path {
 
 inline auto active() -> string {
   char path[PATH_MAX] = "";
@@ -130,4 +130,4 @@ inline auto temporary() -> string {
   return result;
 }
 
-}}
+}

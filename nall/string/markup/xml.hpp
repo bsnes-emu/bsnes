@@ -3,7 +3,7 @@
 //XML v1.0 subset parser
 //revision 0.04
 
-namespace nall { namespace XML {
+namespace nall::XML {
 
 //metadata:
 //  0 = element
@@ -214,4 +214,4 @@ inline auto unserialize(const string& markup) -> Markup::SharedNode {
   return node;
 }
 
-}}
+}

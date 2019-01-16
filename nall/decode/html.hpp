@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 inline auto HTML(const string& input) -> string {
   string output;
@@ -37,4 +37,4 @@ inline auto HTML(const string& input) -> string {
   return output;
 }
 
-}}
+}

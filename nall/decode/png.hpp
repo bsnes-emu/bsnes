@@ -3,7 +3,7 @@
 #include <nall/string.hpp>
 #include <nall/decode/inflate.hpp>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 struct PNG {
   inline PNG();
@@ -329,4 +329,4 @@ auto PNG::readbits(const uint8_t*& data) -> uint {
   return result;
 }
 
-}}
+}

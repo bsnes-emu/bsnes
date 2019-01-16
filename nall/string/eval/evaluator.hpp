@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Eval {
+namespace nall::Eval {
 
 inline auto evaluateExpression(Node* node) -> string {
   #define p(n) evaluateExpression(node->link[n])
@@ -143,4 +143,4 @@ inline auto real(const string& expression) -> maybe<long double> {
   }
 }
 
-}}
+}

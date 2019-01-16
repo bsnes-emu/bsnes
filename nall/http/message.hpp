@@ -3,7 +3,7 @@
 //httpMessage: base class for httpRequest and httpResponse
 //provides shared functionality
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Variable {
   string name;
@@ -96,4 +96,4 @@ struct Message {
   string _body;
 };
 
-}}
+}

@@ -6,7 +6,7 @@
 
 #include <nall/location.hpp>
 
-namespace nall { namespace {
+namespace nall {
 
 struct DML {
   auto& setAllowHTML(bool allowHTML) { settings.allowHTML = allowHTML; return *this; }
@@ -40,20 +40,20 @@ private:
   auto markup(const string& text) -> string;
 };
 
-auto DML::parse(const string& filedata, const string& pathname) -> string {
+inline auto DML::parse(const string& filedata, const string& pathname) -> string {
   settings.path = pathname;
   parseDocument(filedata, settings.path, 0);
   return state.output;
 }
 
-auto DML::parse(const string& filename) -> string {
+inline auto DML::parse(const string& filename) -> string {
   if(!settings.path) settings.path = Location::path(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
   return state.output;
 }
 
-auto DML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
+inline auto DML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
   if(depth >= 100) return false;  //attempt to prevent infinite recursion with reasonable limit
 
   auto blocks = filedata.split("\n\n");
@@ -62,7 +62,7 @@ auto DML::parseDocument(const string& filedata, const string& pathname, uint dep
   return true;
 }
 
-auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool {
+inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool {
   if(!block.stripRight()) return true;
   auto lines = block.split("\n");
 
@@ -182,7 +182,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
   return true;
 }
 
-auto DML::count(const string& text, char value) -> uint {
+inline auto DML::count(const string& text, char value) -> uint {
   for(uint n = 0; n < text.size(); n++) {
     if(text[n] != value) {
       if(text[n] == ' ') return n;
@@ -192,7 +192,7 @@ auto DML::count(const string& text, char value) -> uint {
   return 0;
 }
 
-auto DML::escape(const string& text) -> string {
+inline auto DML::escape(const string& text) -> string {
   string output;
   for(auto c : text) {
     if(c == '&') { output.append("&amp;"); continue; }
@@ -204,7 +204,7 @@ auto DML::escape(const string& text) -> string {
   return output;
 }
 
-auto DML::markup(const string& s) -> string {
+inline auto DML::markup(const string& s) -> string {
   string t;
 
   boolean strong;
@@ -266,4 +266,4 @@ auto DML::markup(const string& s) -> string {
   return t;
 }
 
-}}
+}

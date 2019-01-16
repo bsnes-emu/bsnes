@@ -2,7 +2,7 @@
 
 #include <nall/arithmetic.hpp>
 
-namespace nall { namespace MAC {
+namespace nall::MAC {
 
 struct Poly1305 {
   auto authenticate(array_view<uint8_t> memory, uint256_t nonce) -> uint128_t {
@@ -119,4 +119,4 @@ private:
   uint offset;
 };
 
-}}
+}

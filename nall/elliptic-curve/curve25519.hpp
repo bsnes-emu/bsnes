@@ -6,7 +6,7 @@
   #include <nall/elliptic-curve/modulo25519-optimized.hpp>
 #endif
 
-namespace nall { namespace EllipticCurve {
+namespace nall::EllipticCurve {
 
 struct Curve25519 {
   auto sharedKey(uint256_t secretKey, uint256_t basepoint = 9) const -> uint256_t {
@@ -54,4 +54,4 @@ private:
   }
 };
 
-}}
+}

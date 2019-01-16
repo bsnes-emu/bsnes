@@ -3,7 +3,7 @@
 #include <nall/queue.hpp>
 #include <nall/dsp/dsp.hpp>
 
-namespace nall { namespace DSP { namespace Resampler {
+namespace nall::DSP::Resampler {
 
 struct Cubic {
   inline auto reset(double inputFrequency, double outputFrequency = 0, uint queueSize = 0) -> void;
@@ -67,4 +67,4 @@ auto Cubic::write(double sample) -> void {
   mu -= 1.0;
 }
 
-}}}
+}

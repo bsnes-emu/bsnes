@@ -4,6 +4,8 @@
 
 namespace nall {
 
+using std::tuple;
+
 template<typename T> struct base_from_member {
   base_from_member(T value) : value(value) {}
   T value;

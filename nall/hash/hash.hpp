@@ -13,7 +13,7 @@
   Name(const string& data) : Name() { input(data); } \
   using Hash::input; \
 
-namespace nall { namespace Hash {
+namespace nall::Hash {
 
 struct Hash {
   virtual auto reset() -> void = 0;
@@ -44,4 +44,4 @@ struct Hash {
   }
 };
 
-}}
+}

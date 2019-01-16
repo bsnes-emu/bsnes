@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 inline auto Huffman(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
@@ -33,4 +33,4 @@ inline auto Huffman(array_view<uint8_t> input) -> vector<uint8_t> {
   return output;
 }
 
-}}
+}

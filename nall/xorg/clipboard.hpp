@@ -2,7 +2,7 @@
 
 #include <nall/xorg/xorg.hpp>
 
-namespace nall { namespace Clipboard {
+namespace nall::Clipboard {
 
 auto clear() -> void {
   XDisplay display;
@@ -11,4 +11,4 @@ auto clear() -> void {
   }
 }
 
-}}
+}

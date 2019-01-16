@@ -5,7 +5,7 @@
 #include <nall/vector.hpp>
 #include <nall/decode/inflate.hpp>
 
-namespace nall { namespace Decode {
+namespace nall::Decode {
 
 struct ZIP {
   struct File {
@@ -133,4 +133,4 @@ public:
   vector<File> file;
 };
 
-}}
+}

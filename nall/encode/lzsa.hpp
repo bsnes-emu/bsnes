@@ -6,7 +6,7 @@
 #include <nall/encode/mtf.hpp>
 #include <nall/encode/rle.hpp>
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 inline auto LZSA(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
@@ -83,4 +83,4 @@ inline auto LZSA(array_view<uint8_t> input) -> vector<uint8_t> {
   return output;
 }
 
-}}
+}

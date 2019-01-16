@@ -3,21 +3,21 @@
 #include <nall/function.hpp>
 #include <nall/string.hpp>
 
-namespace nall { namespace chrono { namespace {
+namespace nall::chrono {
 
 //passage of time functions (from unknown epoch)
 
-auto nanosecond() -> uint64_t {
+inline auto nanosecond() -> uint64_t {
   timespec tv;
   clock_gettime(CLOCK_MONOTONIC, &tv);
   return tv.tv_sec * 1'000'000'000 + tv.tv_nsec;
 }
 
-auto microsecond() -> uint64_t { return nanosecond() / 1'000; }
-auto millisecond() -> uint64_t { return nanosecond() / 1'000'000; }
-auto second() -> uint64_t { return nanosecond() / 1'000'000'000; }
+inline auto microsecond() -> uint64_t { return nanosecond() / 1'000; }
+inline auto millisecond() -> uint64_t { return nanosecond() / 1'000'000; }
+inline auto second() -> uint64_t { return nanosecond() / 1'000'000'000; }
 
-auto benchmark(const function<void ()>& f, uint64_t times = 1) -> void {
+inline auto benchmark(const function<void ()>& f, uint64_t times = 1) -> void {
   auto start = nanosecond();
   while(times--) f();
   auto end = nanosecond();
@@ -34,7 +34,7 @@ struct timeinfo {
       hour(hour), minute(minute), second(second), weekday(weekday) {
   }
 
-  explicit operator bool() const { return month; }
+  inline explicit operator bool() const { return month; }
 
   uint year;     //...
   uint month;    //1 - 12
@@ -45,12 +45,12 @@ struct timeinfo {
   uint weekday;  //0 - 6
 };
 
-auto timestamp() -> uint64_t {
+inline auto timestamp() -> uint64_t {
   return ::time(nullptr);
 }
 
 namespace utc {
-  auto timeinfo(uint64_t time = 0) -> chrono::timeinfo {
+  inline auto timeinfo(uint64_t time = 0) -> chrono::timeinfo {
     auto stamp = time ? (time_t)time : (time_t)timestamp();
     auto info = gmtime(&stamp);
     return {
@@ -64,24 +64,24 @@ namespace utc {
     };
   }
 
-  auto year(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).year, 4, '0'); }
-  auto month(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).month, 2, '0'); }
-  auto day(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).day, 2, '0'); }
-  auto hour(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).hour, 2, '0'); }
-  auto minute(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).minute, 2, '0'); }
-  auto second(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).second, 2, '0'); }
+  inline auto year(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).year, 4, '0'); }
+  inline auto month(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).month, 2, '0'); }
+  inline auto day(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).day, 2, '0'); }
+  inline auto hour(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).hour, 2, '0'); }
+  inline auto minute(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).minute, 2, '0'); }
+  inline auto second(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).second, 2, '0'); }
 
-  auto date(uint64_t timestamp = 0) -> string {
+  inline auto date(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {pad(t.year, 4, '0'), "-", pad(t.month, 2, '0'), "-", pad(t.day, 2, '0')};
   }
 
-  auto time(uint64_t timestamp = 0) -> string {
+  inline auto time(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {pad(t.hour, 2, '0'), ":", pad(t.minute, 2, '0'), ":", pad(t.second, 2, '0')};
   }
 
-  auto datetime(uint64_t timestamp = 0) -> string {
+  inline auto datetime(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {
       pad(t.year, 4, '0'), "-", pad(t.month, 2, '0'), "-", pad(t.day, 2, '0'), " ",
@@ -91,7 +91,7 @@ namespace utc {
 }
 
 namespace local {
-  auto timeinfo(uint64_t time = 0) -> chrono::timeinfo {
+  inline auto timeinfo(uint64_t time = 0) -> chrono::timeinfo {
     auto stamp = time ? (time_t)time : (time_t)timestamp();
     auto info = localtime(&stamp);
     return {
@@ -105,24 +105,24 @@ namespace local {
     };
   }
 
-  auto year(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).year, 4, '0'); }
-  auto month(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).month, 2, '0'); }
-  auto day(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).day, 2, '0'); }
-  auto hour(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).hour, 2, '0'); }
-  auto minute(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).minute, 2, '0'); }
-  auto second(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).second, 2, '0'); }
+  inline auto year(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).year, 4, '0'); }
+  inline auto month(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).month, 2, '0'); }
+  inline auto day(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).day, 2, '0'); }
+  inline auto hour(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).hour, 2, '0'); }
+  inline auto minute(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).minute, 2, '0'); }
+  inline auto second(uint64_t timestamp = 0) -> string { return pad(timeinfo(timestamp).second, 2, '0'); }
 
-  auto date(uint64_t timestamp = 0) -> string {
+  inline auto date(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {pad(t.year, 4, '0'), "-", pad(t.month, 2, '0'), "-", pad(t.day, 2, '0')};
   }
 
-  auto time(uint64_t timestamp = 0) -> string {
+  inline auto time(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {pad(t.hour, 2, '0'), ":", pad(t.minute, 2, '0'), ":", pad(t.second, 2, '0')};
   }
 
-  auto datetime(uint64_t timestamp = 0) -> string {
+  inline auto datetime(uint64_t timestamp = 0) -> string {
     auto t = timeinfo(timestamp);
     return {
       pad(t.year, 4, '0'), "-", pad(t.month, 2, '0'), "-", pad(t.day, 2, '0'), " ",
@@ -131,4 +131,4 @@ namespace local {
   }
 }
 
-}}}
+}

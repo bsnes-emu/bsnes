@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
 inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
@@ -53,4 +53,4 @@ inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
   return output;
 }
 
-}}
+}

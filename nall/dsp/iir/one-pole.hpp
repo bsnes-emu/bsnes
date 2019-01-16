@@ -4,7 +4,7 @@
 
 //one-pole first-order IIR filter
 
-namespace nall { namespace DSP { namespace IIR {
+namespace nall::DSP::IIR {
 
 struct OnePole {
   enum class Type : uint {
@@ -43,4 +43,4 @@ auto OnePole::process(double in) -> double {
   return z1 = in * a0 + z1 * b1;
 }
 
-}}}
+}

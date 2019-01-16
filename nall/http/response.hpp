@@ -2,7 +2,7 @@
 
 #include <nall/http/message.hpp>
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Response : Message {
   using type = Response;
@@ -254,4 +254,4 @@ auto Response::setText(const string& value) -> type& {
   return *this;
 }
 
-}}
+}

@@ -7,7 +7,7 @@
   #include <nall/elliptic-curve/modulo25519-optimized.hpp>
 #endif
 
-namespace nall { namespace EllipticCurve {
+namespace nall::EllipticCurve {
 
 static const uint256_t L = (1_u256 << 252) + 27742317777372353535851937790883648493_u256;
 
@@ -141,4 +141,4 @@ private:
   }
 };
 
-}}
+}

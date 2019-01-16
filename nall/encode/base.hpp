@@ -7,7 +7,7 @@
 
 #include <nall/arithmetic.hpp>
 
-namespace nall { namespace Encode {
+namespace nall::Encode {
 
 template<uint Bits, typename T> inline auto Base(T value) -> string {
   static const string format =
@@ -35,4 +35,4 @@ template<uint Bits, typename T> inline auto Base(T value) -> string {
   return result;
 }
 
-}}
+}

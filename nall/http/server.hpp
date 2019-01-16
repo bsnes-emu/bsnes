@@ -3,7 +3,7 @@
 #include <nall/service.hpp>
 #include <nall/http/role.hpp>
 
-namespace nall { namespace HTTP {
+namespace nall::HTTP {
 
 struct Server : Role, service {
   inline auto open(uint port = 8080, const string& serviceName = "", const string& command = "") -> bool;
@@ -223,4 +223,4 @@ auto Server::close() -> void {
   ipv6_close();
 }
 
-}}
+}

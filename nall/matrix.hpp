@@ -1,6 +1,9 @@
 #pragma once
 
-namespace nall { namespace Matrix {
+//matrix multiplication primitives
+//used in: ruby/opengl/quark
+
+namespace nall::Matrix {
 
 template<typename T> inline auto Multiply(
 T* output,
@@ -30,4 +33,4 @@ const T* ydata, uint yrows, uint ycols
   return output;
 }
 
-}}
+}

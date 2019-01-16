@@ -1,12 +1,14 @@
 #pragma once
 
+//legacy code; no longer used
+
 #include <nall/string.hpp>
 
 #include <sql.h>
 #include <sqltypes.h>
 #include <sqlext.h>
 
-namespace nall { namespace Database {
+namespace nall::Database {
 
 struct ODBC {
   struct Statement {
@@ -294,4 +296,4 @@ private:
   SQLRETURN _result = SQL_SUCCESS;
 };
 
-}}
+}
