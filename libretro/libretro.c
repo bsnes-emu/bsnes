@@ -296,6 +296,43 @@ static struct retro_input_descriptor descriptors_2p[] = {
     { 0 },
 };
 
+static struct retro_input_descriptor descriptors_4p[] = {
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+    { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+    { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+    { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+    { 0 },
+};
+
+
 static void set_link_cable_state(bool state)
 {
     if (state && emulated_devices == 2)
@@ -404,20 +441,17 @@ static void init_for_current_model(unsigned id)
     environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
 
     /* Let's be extremely nitpicky about how devices and descriptors are set */
-    if (emulated_devices == 1)
-        environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_1p);
-    else
-        environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_2p);
-
-
     if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2))
     {
         static const struct retro_controller_info ports[] = {
             { controllers_sgb, 1 },
             { controllers_sgb, 1 },
+            { controllers_sgb, 1 },
+            { controllers_sgb, 1 },
             { NULL, 0 },
         };
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+        environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_4p);
     }
     else if (emulated_devices == 1)
     {
@@ -426,6 +460,7 @@ static void init_for_current_model(unsigned id)
             { NULL, 0 },
         };
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+        environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_1p);
     }
     else
     {
@@ -435,6 +470,7 @@ static void init_for_current_model(unsigned id)
             { NULL, 0 },
         };
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+        environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_2p);
     }
 
 }
@@ -790,11 +826,15 @@ void retro_run(void)
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
         check_variables();
 
-    GB_update_keys_status(&gameboy[0], 0);
     if (emulated_devices == 2)
         GB_update_keys_status(&gameboy[1], 1);
     else if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2))
-        GB_update_keys_status(&gameboy[0], 1);
+    {
+        for (unsigned i = 0; i < 4; i++)
+            GB_update_keys_status(&gameboy[0], i);
+    }
+    else
+        GB_update_keys_status(&gameboy[0], 0);
 
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
