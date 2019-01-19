@@ -792,10 +792,15 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                        is required. */
                     return;
                 }
+                
+                uint8_t index_reg = (addr & 0xFF) - 1;
                 if (gb->cgb_palettes_blocked) {
+                    if (gb->io_registers[index_reg] & 0x80) {
+                        gb->io_registers[index_reg]++;
+                        gb->io_registers[index_reg] |= 0x80;
+                    }
                     return;
                 }
-                uint8_t index_reg = (addr & 0xFF) - 1;
                 ((addr & 0xFF) == GB_IO_BGPD?
                  gb->background_palettes_data :
                  gb->sprite_palettes_data)[gb->io_registers[index_reg] & 0x3F] = value;
