@@ -465,6 +465,7 @@ struct GB_gameboy_internal_s {
         uint8_t extra_penalty_for_sprite_at_0;
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
+        bool cgb_palettes_blocked;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

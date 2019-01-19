@@ -197,7 +197,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFF00) {
-        if (gb->oam_write_blocked) {
+        if (gb->oam_write_blocked && !GB_is_cgb(gb)) {
             GB_trigger_oam_bug_read(gb, addr);
             return 0xff;
         }
@@ -357,8 +357,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 if (!gb->cgb_mode && gb->boot_rom_finished) {
                     return 0xFF;
                 }
-                /* TODO: Verify actual access timing */
-                if (gb->vram_read_blocked) {
+                if (gb->cgb_palettes_blocked) {
                     return 0xFF;
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
@@ -793,8 +792,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                        is required. */
                     return;
                 }
-                /* TODO: Verify actual access timing */
-                if (gb->vram_write_blocked) {
+                if (gb->cgb_palettes_blocked) {
                     return;
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
