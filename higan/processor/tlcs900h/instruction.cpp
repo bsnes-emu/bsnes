@@ -17,7 +17,7 @@ template<typename T> auto TLCS900H::toRegister8(uint8 code) const -> Register<T>
 template<typename T> auto TLCS900H::toControlRegister(uint8 code) const -> ControlRegister<T> { return {code}; }
 template<typename T> auto TLCS900H::toMemory(uint32 address) const -> Memory<T> { return {address}; }
 template<typename T> auto TLCS900H::toImmediate(uint32 constant) const -> Immediate<T> { return {constant}; }
-template<typename T> auto TLCS900H::toImmediate3(uint3 constant) const -> Immediate<T> { return {constant ? (uint)constant : 8u}; }
+template<typename T> auto TLCS900H::toImmediate3(natural constant) const -> Immediate<T> { return {constant.clip(3).orElse(8)}; }
 
 //note: much of this code is split to multiple statements due to C++ not guaranteeing
 //the order of evaluations of function arguments. fetch() ordering is critical.
@@ -529,7 +529,7 @@ auto TLCS900H::instructionSourceMemory(M memory) -> void {
   case 0x18: return (void)Undefined;
   case 0x19:
     if constexpr(bits == 32) return (void)Undefined;
-    return instructionLoad(fetchMemory<T, T>(), memory);
+    return instructionLoad(fetchMemory<T, uint16>(), memory);
   case 0x1a: case 0x1b: case 0x1c: case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
   case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25: case 0x26: case 0x27:
     return instructionLoad(toRegister3<T>(data), memory);
@@ -657,7 +657,7 @@ auto TLCS900H::instructionTargetMemory(uint32 address) -> void {
   case 0x17: return (void)Undefined;
   case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c: case 0x1d: case 0x1e: case 0x1f: return (void)Undefined;
   case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25: case 0x26: case 0x27:
-    return instructionLoad(toRegister3<uint16>(data), toMemory<uint16>(address));
+    return instructionLoad(toRegister3<uint16>(data), toImmediate<uint16>(address));
   case 0x28: return instructionAndCarry(toMemory<uint8>(address), A);
   case 0x29: return instructionOrCarry(toMemory<uint8>(address), A);
   case 0x2a: return instructionXorCarry(toMemory<uint8>(address), A);
@@ -665,7 +665,7 @@ auto TLCS900H::instructionTargetMemory(uint32 address) -> void {
   case 0x2c: return instructionStoreCarry(toMemory<uint8>(address), A);
   case 0x2d: case 0x2e: case 0x2f: return (void)Undefined;
   case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37:
-    return instructionLoad(toRegister3<uint32>(data), toMemory<uint32>(address));
+    return instructionLoad(toRegister3<uint32>(data), toImmediate<uint32>(address));
   case 0x38: case 0x39: case 0x3a: case 0x3b: case 0x3c: case 0x3d: case 0x3e: case 0x3f: return (void)Undefined;
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
     return instructionLoad(toMemory<uint8>(address), toRegister3<uint8>(data));
@@ -700,10 +700,10 @@ auto TLCS900H::instructionTargetMemory(uint32 address) -> void {
     return instructionBit(toMemory<uint8>(address), toImmediate<uint3>(data));
   case 0xd0: case 0xd1: case 0xd2: case 0xd3: case 0xd4: case 0xd5: case 0xd6: case 0xd7:
   case 0xd8: case 0xd9: case 0xda: case 0xdb: case 0xdc: case 0xdd: case 0xde: case 0xdf:
-    return instructionJump((uint4)data, toMemory<uint32>(address));
+    return instructionJump((uint4)data, toImmediate<uint32>(address));
   case 0xe0: case 0xe1: case 0xe2: case 0xe3: case 0xe4: case 0xe5: case 0xe6: case 0xe7:
   case 0xe8: case 0xe9: case 0xea: case 0xeb: case 0xec: case 0xed: case 0xee: case 0xef:
-    return instructionCall((uint4)data, toMemory<uint32>(address));
+    return instructionCall((uint4)data, toImmediate<uint32>(address));
   case 0xf0: case 0xf1: case 0xf2: case 0xf3: case 0xf4: case 0xf5: case 0xf6: case 0xf7:
   case 0xf8: case 0xf9: case 0xfa: case 0xfb: case 0xfc: case 0xfd: case 0xfe: case 0xff:
     return instructionReturn((uint4)data);

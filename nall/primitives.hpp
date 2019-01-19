@@ -5,8 +5,8 @@
 
 namespace nall {
   struct Boolean;
-  template<int Precision> struct Natural;
-  template<int Precision> struct Integer;
+  template<uint Precision> struct Natural;
+  template<uint Precision> struct Integer;
 }
 
 #include <nall/primitives/bit-range.hpp>
@@ -18,6 +18,6 @@ namespace nall {
 #include <nall/primitives/literals.hpp>
 
 namespace nall {
-  template<int Bits> auto Natural<Bits>::integer() const -> Integer<Bits> { return Integer<Bits>(*this); }
-  template<int Bits> auto Integer<Bits>::natural() const -> Natural<Bits> { return Natural<Bits>(*this); }
+  template<uint Bits> auto Natural<Bits>::integer() const -> Integer<Bits> { return Integer<Bits>(*this); }
+  template<uint Bits> auto Integer<Bits>::natural() const -> Natural<Bits> { return Natural<Bits>(*this); }
 }

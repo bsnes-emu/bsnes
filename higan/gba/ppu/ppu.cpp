@@ -1,5 +1,4 @@
 #include <gba/gba.hpp>
-#include <nall/inline-if.hpp>
 
 //pixel:      4 cycles
 

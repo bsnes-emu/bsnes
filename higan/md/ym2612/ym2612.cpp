@@ -1,5 +1,4 @@
 #include <md/md.hpp>
-#include <nall/inline-if.hpp>
 
 namespace MegaDrive {
 
@@ -65,7 +64,7 @@ auto YM2612::sample() -> void {
     auto wave = [&](uint n, uint modulation) -> int {
       int x = (modulation >> 1) + (op[n].phase.value >> 10);
       int y = sine[x & 0x3ff] + op[n].outputLevel;
-      return if(y < 0x2000, pow2[y & 0x1ff] << 2 >> (y >> 9), 0);
+      return y < 0x2000 ? pow2[y & 0x1ff] << 2 >> (y >> 9) : 0;
     };
 
     int feedback = modMask & op[0].output + op[0].prior >> 9 - channel.feedback;

@@ -2,13 +2,13 @@
 
 namespace nall {
 
-template<int Precision> struct Real {
+template<uint Precision = 64> struct Real {
   static_assert(Precision == 32 || Precision == 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using ftype =
-    typename conditional<bits() == 32, float32_t,
-    typename conditional<bits() == 64, float64_t,
-    void>::type>::type;
+    conditional_t<bits() == 32, float32_t,
+    conditional_t<bits() == 64, float64_t,
+    void>>;
 
   inline Real() : data(0.0) {}
   template<int Bits> inline Real(Real<Bits> value) : data((ftype)value) {}
@@ -38,11 +38,11 @@ private:
 
 #define lhs (float64_t)(typename Real<LHS>::type)l
 #define rhs (typename Real<RHS>::type)r
-template<int LHS, int RHS> inline auto operator*(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs * rhs}; }
-template<int LHS, int RHS> inline auto operator/(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs / rhs}; }
-template<int LHS, int RHS> inline auto operator%(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs % rhs}; }
-template<int LHS, int RHS> inline auto operator+(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs + rhs}; }
-template<int LHS, int RHS> inline auto operator-(Real<LHS> l, Real<RHS> r) { return Real<64>{lhs - rhs}; }
+template<int LHS, int RHS> inline auto operator*(Real<LHS> l, Real<RHS> r) { return Real<>{lhs * rhs}; }
+template<int LHS, int RHS> inline auto operator/(Real<LHS> l, Real<RHS> r) { return Real<>{lhs / rhs}; }
+template<int LHS, int RHS> inline auto operator%(Real<LHS> l, Real<RHS> r) { return Real<>{lhs % rhs}; }
+template<int LHS, int RHS> inline auto operator+(Real<LHS> l, Real<RHS> r) { return Real<>{lhs + rhs}; }
+template<int LHS, int RHS> inline auto operator-(Real<LHS> l, Real<RHS> r) { return Real<>{lhs - rhs}; }
 #undef lhs
 #undef rhs
 

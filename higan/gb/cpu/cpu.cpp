@@ -86,7 +86,7 @@ auto CPU::stop() -> bool {
 
 auto CPU::power() -> void {
   create(Enter, 4 * 1024 * 1024);
-  LR35902::power();
+  SM83::power();
 
   for(uint n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
   for(uint n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)

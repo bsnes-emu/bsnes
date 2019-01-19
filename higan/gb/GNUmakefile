@@ -1,4 +1,4 @@
-processors += lr35902
+processors += sm83
 
 objects += gb-interface gb-system
 objects += gb-memory gb-cartridge

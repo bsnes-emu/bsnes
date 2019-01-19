@@ -1,4 +1,4 @@
-auto LR35902::interrupt(uint16 vector) -> void {
+auto SM83::interrupt(uint16 vector) -> void {
   idle();
   idle();
   idle();
@@ -9,7 +9,7 @@ auto LR35902::interrupt(uint16 vector) -> void {
 
 #define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
 
-auto LR35902::instruction() -> void {
+auto SM83::instruction() -> void {
   auto opcode = operand();
 
   switch(opcode) {
@@ -261,7 +261,7 @@ auto LR35902::instruction() -> void {
   }
 }
 
-auto LR35902::instructionCB() -> void {
+auto SM83::instructionCB() -> void {
   auto opcode = operand();
 
   switch(opcode) {

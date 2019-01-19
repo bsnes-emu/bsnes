@@ -8,7 +8,7 @@
 #include <emulator/scheduler.hpp>
 #include <emulator/cheat.hpp>
 
-#include <processor/lr35902/lr35902.hpp>
+#include <processor/sm83/sm83.hpp>
 
 namespace GameBoy {
   #define platform Emulator::platform

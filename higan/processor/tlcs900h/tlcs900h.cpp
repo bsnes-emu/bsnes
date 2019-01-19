@@ -1,5 +1,4 @@
 #include <processor/processor.hpp>
-#include <nall/inline-if.hpp>
 #include "tlcs900h.hpp"
 
 namespace Processor {

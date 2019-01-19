@@ -76,7 +76,7 @@ template<> struct stringify<int128_t> {
 };
 #endif
 
-template<int Bits> struct stringify<Integer<Bits>> {
+template<uint Bits> struct stringify<Integer<Bits>> {
   stringify(Integer<Bits> source) { fromInteger(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> uint { return strlen(_data); }
@@ -129,7 +129,7 @@ template<> struct stringify<uint128_t> {
 };
 #endif
 
-template<int Bits> struct stringify<Natural<Bits>> {
+template<uint Bits> struct stringify<Natural<Bits>> {
   stringify(Natural<Bits> source) { fromNatural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> uint { return strlen(_data); }

@@ -1,4 +1,4 @@
-auto LR35902::serialize(serializer& s) -> void {
+auto SM83::serialize(serializer& s) -> void {
   s.integer(r.af.word);
   s.integer(r.bc.word);
   s.integer(r.de.word);

@@ -1,5 +1,5 @@
 auto CPU::serialize(serializer& s) -> void {
-  LR35902::serialize(s);
+  SM83::serialize(s);
   Thread::serialize(s);
 
   s.array(wram);

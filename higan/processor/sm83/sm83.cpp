@@ -1,5 +1,5 @@
 #include <processor/processor.hpp>
-#include "lr35902.hpp"
+#include "sm83.hpp"
 
 namespace Processor {
 
@@ -11,7 +11,7 @@ namespace Processor {
 #include "serialization.cpp"
 #include "disassembler.cpp"
 
-auto LR35902::power() -> void {
+auto SM83::power() -> void {
   r = {};
 }
 

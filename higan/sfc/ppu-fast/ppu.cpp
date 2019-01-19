@@ -1,5 +1,4 @@
 #include <sfc/sfc.hpp>
-#include <nall/inline-if.hpp>
 
 namespace SuperFamicom {
 

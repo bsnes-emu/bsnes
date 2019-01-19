@@ -63,4 +63,22 @@ private:
   T values[Size];
 };
 
+template<typename T, T... p> auto from_array(uint index) -> T {
+  static const array<T[sizeof...(p)]> table{p...};
+  struct out_of_bounds {};
+  #if defined(DEBUG)
+  if(index >= sizeof...(p)) throw out_of_bounds{};
+  #endif
+  return table[index];
+}
+
+template<int64_t... p> auto from_array(uint index) -> int64_t {
+  static const array<int64_t[sizeof...(p)]> table{p...};
+  struct out_of_bounds {};
+  #if defined(DEBUG)
+  if(index >= sizeof...(p)) throw out_of_bounds{};
+  #endif
+  return table[index];
+}
+
 }

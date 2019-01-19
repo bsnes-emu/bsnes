@@ -85,7 +85,7 @@ struct TLCS900H {
   template<typename T> auto toControlRegister(uint8) const -> ControlRegister<T>;
   template<typename T> auto toMemory(uint32 address) const -> Memory<T>;
   template<typename T> auto toImmediate(uint32 constant) const -> Immediate<T>;
-  template<typename T> auto toImmediate3(uint3 constant) const -> Immediate<T>;
+  template<typename T> auto toImmediate3(natural constant) const -> Immediate<T>;
   auto instruction() -> void;
   template<typename Register> auto instructionRegister(Register) -> void;
   template<typename Memory> auto instructionSourceMemory(Memory) -> void;
@@ -199,12 +199,9 @@ struct TLCS900H {
     uint2 rfp;      //register file pointer
     uint3 iff = 7;  //interrupt mask flip-flop
 
-    uint1 halted;
+    uint1 halted;   //set if halt instruction executed; waits for an interrupt to resume
     uint8 prefix;   //first opcode byte; needed for [CP|LD][ID](R) instructions
   } r;
-
-  auto halted() const -> bool { return r.halted; }
-  auto setHalted(bool value) -> void { r.halted = value; }
 
   static inline const Register< uint8> A{0xe0};
   static inline const Register< uint8> W{0xe1};

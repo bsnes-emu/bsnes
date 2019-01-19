@@ -1,10 +1,14 @@
-//Sharp LR35902
+//Sharp SM83
+
+//the Game Boy SoC is commonly referred to as the Sharp LR35902
+//SM83 is most likely the internal CPU core, based on strong datasheet similarities
+//as such, this CPU core could serve as a foundation for any SM83xx SoC
 
 #pragma once
 
 namespace Processor {
 
-struct LR35902 {
+struct SM83 {
   virtual auto idle() -> void = 0;
   virtual auto read(uint16 address) -> uint8 = 0;
   virtual auto write(uint16 address, uint8 data) -> void = 0;

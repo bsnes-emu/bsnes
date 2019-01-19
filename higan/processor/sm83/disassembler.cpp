@@ -1,4 +1,4 @@
-auto LR35902::disassemble(uint16 pc) -> string {
+auto SM83::disassemble(uint16 pc) -> string {
   return {
     hex(pc, 4L), "  ",
     pad(disassembleOpcode(pc), -16, ' '), "  ",
@@ -10,7 +10,7 @@ auto LR35902::disassemble(uint16 pc) -> string {
   };
 }
 
-auto LR35902::disassembleOpcode(uint16 pc) -> string {
+auto SM83::disassembleOpcode(uint16 pc) -> string {
   auto opcode = readDebugger(pc);
   auto lo = readDebugger(pc + 1);
   auto hi = readDebugger(pc + 2);
@@ -267,7 +267,7 @@ auto LR35902::disassembleOpcode(uint16 pc) -> string {
   return {"xx"};
 }
 
-auto LR35902::disassembleOpcodeCB(uint16 pc) -> string {
+auto SM83::disassembleOpcodeCB(uint16 pc) -> string {
   auto opcode = readDebugger(pc);
 
   switch(opcode) {

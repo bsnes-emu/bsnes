@@ -1,5 +1,4 @@
 #include <processor/processor.hpp>
-#include <nall/inline-if.hpp>
 #include "spc700.hpp"
 
 namespace Processor {

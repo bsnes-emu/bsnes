@@ -1,4 +1,5 @@
 #pragma once
+#warning "these defines break if statements with multiple parameters to templates"
 
 #define if1(statement) if(statement)
 #define if2(condition, false) ([](auto&& value) -> decltype(condition) { \

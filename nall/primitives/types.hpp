@@ -2,9 +2,9 @@
 
 namespace nall {
   using boolean = Boolean;
-  using natural = Natural<64>;
-  using integer = Integer<64>;
-  using real    = Real<64>;
+  using natural = Natural<>;
+  using integer = Integer<>;
+  using real    = Real<>;
 
   using  natural1 = Natural< 1>; using  natural2 = Natural< 2>; using  natural3 = Natural< 3>; using  natural4 = Natural< 4>;
   using  natural5 = Natural< 5>; using  natural6 = Natural< 6>; using  natural7 = Natural< 7>; using  natural8 = Natural< 8>;

@@ -2,15 +2,15 @@
 
 namespace nall {
 
-template<int Precision> struct Natural {
+template<uint Precision = 64> struct Natural {
   static_assert(Precision >= 1 && Precision <= 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using utype =
-    typename conditional<bits() <=  8,  uint8_t,
-    typename conditional<bits() <= 16, uint16_t,
-    typename conditional<bits() <= 32, uint32_t,
-    typename conditional<bits() <= 64, uint64_t,
-    void>::type>::type>::type>::type;
+    conditional_t<bits() <=  8,  uint8_t,
+    conditional_t<bits() <= 16, uint16_t,
+    conditional_t<bits() <= 32, uint32_t,
+    conditional_t<bits() <= 64, uint64_t,
+    void>>>>;
   static inline constexpr auto mask() -> utype { return ~0ull >> 64 - bits(); }
 
   inline Natural() : data(0) {}
@@ -28,8 +28,8 @@ template<int Precision> struct Natural {
 
   inline auto operator!() const { return Natural{!data}; }
   inline auto operator~() const { return Natural{~data}; }
-  inline auto operator+() const { return Natural{+data}; }
-  inline auto operator-() const { return Natural{-data}; }
+  inline auto operator+() const { return Natural<>{+(uint64_t)data}; }
+  inline auto operator-() const { return Natural<>{-(uint64_t)data}; }
 
   #define lhs data
   #define rhs value
@@ -47,40 +47,8 @@ template<int Precision> struct Natural {
   #undef lhs
   #undef rhs
 
-  //work in progress: we want natural<op>primitive and primitive<op>natural to result in natural<64> ...
-  //however, these operators will create ambiguous overloads unless operator uint64_t() is explicit.
-  //a large volume of existing code will need to be updated before this will be possible.
-  #if 0
-  #define lhs (uint64_t)data
-  #define rhs value
-  template<typename T> inline auto operator *(const T& value) { return Natural<64>{lhs  * rhs}; }
-  template<typename T> inline auto operator /(const T& value) { return Natural<64>{lhs  / rhs}; }
-  template<typename T> inline auto operator %(const T& value) { return Natural<64>{lhs  % rhs}; }
-  template<typename T> inline auto operator +(const T& value) { return Natural<64>{lhs  + rhs}; }
-  template<typename T> inline auto operator -(const T& value) { return Natural<64>{lhs  - rhs}; }
-  template<typename T> inline auto operator<<(const T& value) { return Natural<64>{lhs << rhs}; }
-  template<typename T> inline auto operator>>(const T& value) { return Natural<64>{lhs >> rhs}; }
-  template<typename T> inline auto operator &(const T& value) { return Natural<64>{lhs  & rhs}; }
-  template<typename T> inline auto operator ^(const T& value) { return Natural<64>{lhs  ^ rhs}; }
-  template<typename T> inline auto operator |(const T& value) { return Natural<64>{lhs  | rhs}; }
-  #undef lhs
-  #undef rhs
-
-  #define lhs l
-  #define rhs (uint64_t)r
-  template<typename T> friend inline auto operator *(const T& l, Natural r) { return Natural<64>{lhs  * rhs}; }
-  template<typename T> friend inline auto operator %(const T& l, Natural r) { return Natural<64>{lhs  / rhs}; }
-  template<typename T> friend inline auto operator /(const T& l, Natural r) { return Natural<64>{lhs  % rhs}; }
-  template<typename T> friend inline auto operator +(const T& l, Natural r) { return Natural<64>{lhs  + rhs}; }
-  template<typename T> friend inline auto operator -(const T& l, Natural r) { return Natural<64>{lhs  - rhs}; }
-  template<typename T> friend inline auto operator<<(const T& l, Natural r) { return Natural<64>{lhs << rhs}; }
-  template<typename T> friend inline auto operator>>(const T& l, Natural r) { return Natural<64>{lhs >> rhs}; }
-  template<typename T> friend inline auto operator &(const T& l, Natural r) { return Natural<64>{lhs  & rhs}; }
-  template<typename T> friend inline auto operator ^(const T& l, Natural r) { return Natural<64>{lhs  ^ rhs}; }
-  template<typename T> friend inline auto operator |(const T& l, Natural r) { return Natural<64>{lhs  | rhs}; }
-  #undef lhs
-  #undef rhs
-  #endif
+  //warning: this does not and cannot short-circuit; value is always evaluated
+  template<typename T> inline auto orElse(const T& value) { return Natural<>{data ? data : value}; }
 
   inline auto bits(int lo, int hi) -> BitRange<Precision> { return {(utype&)data, lo, hi}; }
   inline auto bit(int index) -> BitRange<Precision> { return {(utype&)data, index, index}; }
@@ -90,16 +58,19 @@ template<int Precision> struct Natural {
   inline auto bit(int index) const -> const BitRange<Precision> { return {(utype&)data, index, index}; }
   inline auto byte(int index) const -> const BitRange<Precision> { return {(utype&)data, index * 8 + 0, index * 8 + 7}; }
 
+  inline auto slice(int index) const { return Natural<>{bit(index)}; }
+  inline auto slice(int lo, int hi) const { return Natural<>{bits(lo, hi)}; }
+
   inline auto clamp(uint bits) {
-    const uintmax b = 1ull << (bits - 1);
-    const uintmax m = b * 2 - 1;
-    return Natural<64>{data < m ? data : m};
+    const uint64_t b = 1ull << (bits - 1);
+    const uint64_t m = b * 2 - 1;
+    return Natural<>{data < m ? data : m};
   }
 
   inline auto clip(uint bits) {
-    const uintmax b = 1ull << (bits - 1);
-    const uintmax m = b * 2 - 1;
-    return Natural<64>{data & m};
+    const uint64_t b = 1ull << (bits - 1);
+    const uint64_t m = b * 2 - 1;
+    return Natural<>{data & m};
   }
 
   inline auto serialize(serializer& s) { s(data); }
@@ -114,17 +85,17 @@ private:
 };
 
 #define lhs (uint64_t)l
-#define rhs (uint64_t)r
-template<int LHS, int RHS> inline auto operator *(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  * rhs}; }
-template<int LHS, int RHS> inline auto operator /(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  / rhs}; }
-template<int LHS, int RHS> inline auto operator %(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  % rhs}; }
-template<int LHS, int RHS> inline auto operator +(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  + rhs}; }
-template<int LHS, int RHS> inline auto operator -(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  - rhs}; }
-template<int LHS, int RHS> inline auto operator<<(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs << rhs}; }
-template<int LHS, int RHS> inline auto operator>>(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs >> rhs}; }
-template<int LHS, int RHS> inline auto operator &(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  & rhs}; }
-template<int LHS, int RHS> inline auto operator ^(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  ^ rhs}; }
-template<int LHS, int RHS> inline auto operator |(Natural<LHS> l, Natural<RHS> r) { return Natural<64>{lhs  | rhs}; }
+#define rhs r
+template<int LHS, int RHS> inline auto operator *(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  * rhs}; }
+template<int LHS, int RHS> inline auto operator /(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  / rhs}; }
+template<int LHS, int RHS> inline auto operator %(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  % rhs}; }
+template<int LHS, int RHS> inline auto operator +(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  + rhs}; }
+template<int LHS, int RHS> inline auto operator -(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  - rhs}; }
+template<int LHS, int RHS> inline auto operator<<(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs << rhs}; }
+template<int LHS, int RHS> inline auto operator>>(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs >> rhs}; }
+template<int LHS, int RHS> inline auto operator &(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  & rhs}; }
+template<int LHS, int RHS> inline auto operator ^(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  ^ rhs}; }
+template<int LHS, int RHS> inline auto operator |(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  | rhs}; }
 #undef lhs
 #undef rhs
 

@@ -1,4 +1,4 @@
-struct CPU : Processor::LR35902, Thread, MMIO {
+struct CPU : Processor::SM83, Thread, MMIO {
   enum class Interrupt : uint { Vblank, Stat, Timer, Serial, Joypad };
 
   static auto Enter() -> void;

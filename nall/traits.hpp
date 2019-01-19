@@ -9,6 +9,7 @@
 namespace nall {
   using std::add_const;
   using std::conditional;
+  using std::conditional_t;
   using std::decay;
   using std::declval;
   using std::enable_if;
