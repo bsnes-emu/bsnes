@@ -8,6 +8,7 @@
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
 #include <nall/image.hpp>
+#include <nall/literals.hpp>
 #include <nall/random.hpp>
 #include <nall/serializer.hpp>
 #include <nall/shared-pointer.hpp>
@@ -30,7 +31,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "106.83";
+  static const string Version = "106.84";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org/";

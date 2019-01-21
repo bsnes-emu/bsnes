@@ -26,7 +26,6 @@ struct Interface : Emulator::Interface {
   auto hashes() -> vector<string> override;
   auto manifests() -> vector<string> override;
   auto titles() -> vector<string> override;
-  auto load() -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
 
@@ -43,10 +42,14 @@ struct Interface : Emulator::Interface {
 
 struct NeoGeoPocketInterface : Interface {
   auto information() -> Information override;
+
+  auto load() -> bool override;
 };
 
 struct NeoGeoPocketColorInterface : Interface {
   auto information() -> Information override;
+
+  auto load() -> bool override;
 };
 
 }

@@ -46,6 +46,14 @@ struct Writable {
   inline auto read(uint address) const -> T { return self.data[address & self.mask]; }
   inline auto write(uint address, T data) -> void { self.data[address & self.mask] = data; }
 
+  auto serialize(serializer& s) -> void {
+    const uint size = self.size;
+    s.integer(self.size);
+    s.integer(self.mask);
+    if(self.size != size) allocate(self.size);
+    s.array(self.data, self.size);
+  }
+
 private:
   struct {
     T* data = nullptr;

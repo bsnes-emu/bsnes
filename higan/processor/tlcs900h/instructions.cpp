@@ -227,6 +227,7 @@ template<uint Modulo, typename Target, typename Source>
 auto TLCS900H::instructionModuloDecrement(Target target, Source source) -> void {
   auto result = load(target);
   auto number = load(source);
+  if(bit::count(number) != 1) return (void)Undefined;  //must be power of two (what about number==1?)
   if(result % number == 0) {
     store(target, result + (number - Modulo));
   } else {
@@ -238,6 +239,7 @@ template<uint Modulo, typename Target, typename Source>
 auto TLCS900H::instructionModuloIncrement(Target target, Source source) -> void {
   auto result = load(target);
   auto number = load(source);
+  if(bit::count(number) != 1) return (void)Undefined;  //must be power of two (what about number==1?)
   if(result % number == number - Modulo) {
     store(target, result - (number - Modulo));
   } else {
@@ -479,7 +481,10 @@ auto TLCS900H::instructionStoreCarry(Target target, Offset offset) -> void {
 }
 
 auto TLCS900H::instructionSoftwareInterrupt(uint3 interrupt) -> void {
-  //TODO
+  push(PC);
+  push(SR);
+  store(PC, load(Memory<uint24>{0xffff00 + interrupt * 4}));
+  store(INTNEST, load(INTNEST) + 1);  //note: not confirmed behavior
 }
 
 template<typename Target, typename Source>

@@ -26,9 +26,9 @@ template<uint Precision = 64> struct Natural {
   inline auto& operator++() { data = mask(data + 1); return *this; }
   inline auto& operator--() { data = mask(data - 1); return *this; }
 
-  inline auto operator!() const { return Natural{!data}; }
-  inline auto operator~() const { return Natural{~data}; }
-  inline auto operator+() const { return Natural<>{+(uint64_t)data}; }
+  inline auto operator!() const { return !data; }
+  inline auto operator~() const { return Natural<>{mask(~data)}; }
+  inline auto operator+() const { return Natural<>{+data}; }
   inline auto operator-() const { return Natural<>{-(uint64_t)data}; }
 
   #define lhs data

@@ -24,13 +24,15 @@ namespace Processor {
 #include "serialization.cpp"
 #include "disassembler.cpp"
 
-TLCS900H tlcs900h;
+auto TLCS900H::interrupt(uint24 address) -> void {
+  push(PC);
+  push(SR);
+  store(PC, load(Memory<uint24>{address}));
+  store(INTNEST, load(INTNEST) + 1);
+}
 
 auto TLCS900H::power() -> void {
   r = {};
-}
-
-TLCS900H::TLCS900H() {
 }
 
 }

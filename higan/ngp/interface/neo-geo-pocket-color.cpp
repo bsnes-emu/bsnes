@@ -5,3 +5,7 @@ auto NeoGeoPocketColorInterface::information() -> Information {
   information.extension    = "ngpc";
   return information;
 }
+
+auto NeoGeoPocketColorInterface::load() -> bool {
+  return system.load(this, System::Model::NeoGeoPocketColor);
+}

@@ -10,11 +10,11 @@ auto System::serializeInit() -> void {
   s.array(description);
 
   serializeAll(s);
-  _serializeSize = s.size();
+  information.serializeSize = s.size();
 }
 
 auto System::serialize() -> serializer {
-  serializer s(_serializeSize);
+  serializer s(information.serializeSize);
 
   uint signature = 0x31545342;
   char version[16] = {};
@@ -48,18 +48,12 @@ auto System::unserialize(serializer& s) -> bool {
 
 auto System::serializeAll(serializer& s) -> void {
   system.serialize(s);
-  cpu.serialize(s);
-  ppu.serialize(s);
-  apu.serialize(s);
   cartridge.serialize(s);
-  iram.serialize(s);
+  cpu.serialize(s);
+  apu.serialize(s);
+  vpu.serialize(s);
+  psg.serialize(s);
 }
 
 auto System::serialize(serializer& s) -> void {
-  eeprom.serialize(s);
-
-  s.integer(r.unknown);
-  s.integer(r.format);
-  s.integer(r.depth);
-  s.integer(r.color);
 }

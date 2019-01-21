@@ -28,10 +28,10 @@ template<uint Precision = 64> struct Integer {
   inline auto& operator++() { data = mask(data + 1); return *this; }
   inline auto& operator--() { data = mask(data - 1); return *this; }
 
-  inline auto operator!() const { return Integer{!data}; }
-  inline auto operator~() const { return Integer{~data}; }
-  inline auto operator+() const { return Integer<>{+(int64_t)data}; }
-  inline auto operator-() const { return Integer<>{-(int64_t)data}; }
+  inline auto operator!() const { return !data; }
+  inline auto operator~() const { return Integer<>{mask(~data)}; }
+  inline auto operator+() const { return Integer<>{+data}; }
+  inline auto operator-() const { return Integer<>{data == sign() ? data : -data}; }
 
   #define lhs data
   #define rhs value
@@ -46,11 +46,6 @@ template<uint Precision = 64> struct Integer {
   template<typename T> inline auto& operator &=(const T& value) { lhs = mask(lhs  & rhs); return *this; }
   template<typename T> inline auto& operator ^=(const T& value) { lhs = mask(lhs  ^ rhs); return *this; }
   template<typename T> inline auto& operator |=(const T& value) { lhs = mask(lhs  | rhs); return *this; }
-  #undef lhs
-  #undef rhs
-
-  #define lhs (int64_t)data
-  #define rhs value
   #undef lhs
   #undef rhs
 

@@ -9,6 +9,7 @@
  * what value is read back from a non-existent 8-bit register ID? (eg 0x40-0xcf)
  * many instructions are undefined, some are marked as dummy instructions ... what do each do?
  * what happens when using (AND,OR,XOR,LD)CF (byte)source,A with A.bit(3) set?
+ * what happens when using MINC#,MDEC# with a non-power of two? what about with a value of 1?
  */
 
 #pragma once
@@ -16,22 +17,22 @@
 namespace Processor {
 
 struct TLCS900H {
-  virtual auto read(uint24 address) -> uint8 { return 0; }
-  virtual auto write(uint24 address, uint8 data) -> void {};
-
-  TLCS900H();
+  virtual auto step(uint clocks) -> void = 0;
+  virtual auto read(uint24 address) -> uint8 = 0;
+  virtual auto write(uint24 address, uint8 data) -> void = 0;
 
   struct FlagRegister   { using type =  uint8; enum : uint { bits =  8 }; uint1 id; };
   struct StatusRegister { using type = uint16; enum : uint { bits = 16 }; };
   struct ProgramCounter { using type = uint32; enum : uint { bits = 32 }; };
-  template<typename T> struct ControlRegister { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint8 id; };
-  template<typename T> struct Register        { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint8 id; };
-  template<typename T> struct Memory          { using type = T; enum : uint { bits = 8 * sizeof(T) }; T address; };
-  template<typename T> struct Immediate       { using type = T; enum : uint { bits = 8 * sizeof(T) }; T constant; };
+  template<typename T> struct ControlRegister { using type = T; enum : uint { bits = 8 * sizeof(T) };  uint8 id; };
+  template<typename T> struct Register        { using type = T; enum : uint { bits = 8 * sizeof(T) };  uint8 id; };
+  template<typename T> struct Memory          { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint32 address;  };
+  template<typename T> struct Immediate       { using type = T; enum : uint { bits = 8 * sizeof(T) }; uint32 constant; };
 
   template<typename T> auto load(Immediate<T> immediate) const -> T { return immediate.constant; }
 
   //tlcs900h.cpp
+  auto interrupt(uint24 vector) -> void;
   auto power() -> void;
 
   //registers.cpp
@@ -261,7 +262,7 @@ struct TLCS900H {
   static inline const uint1 Undefined = 0;
 
   //disassembler.cpp
-  virtual auto disassembleRead(uint24 address) -> uint8 { return rand(); }
+  virtual auto disassembleRead(uint24 address) -> uint8 { return read(address); }
   auto disassemble() -> string;
 };
 

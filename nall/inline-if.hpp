@@ -2,7 +2,7 @@
 #warning "these defines break if statements with multiple parameters to templates"
 
 #define if1(statement) if(statement)
-#define if2(condition, false) ([](auto&& value) -> decltype(condition) { \
+#define if2(condition, false) ([&](auto&& value) -> decltype(condition) { \
   return (bool)value ? value : (decltype(condition))false; \
 })(condition)
 #define if3(condition, true, false) ((condition) ? (true) : (decltype(true))(false))

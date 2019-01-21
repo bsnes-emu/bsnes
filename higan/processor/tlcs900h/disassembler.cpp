@@ -94,8 +94,8 @@ auto TLCS900H::disassemble() -> string {
   boolean opSourceMemory;
   boolean opTargetMemory;
 
-  static const natural opcodeSizes[] = {8, 16, 32, 0};  //0xc0 - 0xf5
-
+  static const natural opSizes[] = {8, 16, 32, 0};  //0xc0 - 0xf5 use combined logic switch cases:
+  #define opSize opSizes[fetch.bits(4,5)]           //extract the size from the opcode fetch
   switch(auto fetch = read8()) {
   case 0x00: name = "nop"; break;
   case 0x01: break;
@@ -153,7 +153,7 @@ auto TLCS900H::disassemble() -> string {
   case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: case 0x86: case 0x87:
     opSourceMemory = true; lhs.indirectRegister3(8, fetch); break;
   case 0x88: case 0x89: case 0x8a: case 0x8b: case 0x8c: case 0x8d: case 0x8e: case 0x8f:
-    opSourceMemory = true; lhs.indirectRegister3Displacement8(8, fetch, read8());
+    opSourceMemory = true; lhs.indirectRegister3Displacement8(8, fetch, read8()); break;
   case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95: case 0x96: case 0x97:
     opSourceMemory = true; lhs.indirectRegister3(16, fetch); break;
   case 0x98: case 0x99: case 0x9a: case 0x9b: case 0x9c: case 0x9d: case 0x9e: case 0x9f:
@@ -168,31 +168,31 @@ auto TLCS900H::disassemble() -> string {
     opTargetMemory = true; lhs.indirectRegister3Displacement8(0, fetch, read8()); break;
   case 0xc0: case 0xd0: case 0xe0: case 0xf0:
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
-    lhs.indirectImmediate8(opcodeSizes[fetch >> 4], read8()); break;
+    lhs.indirectImmediate8(opSize, read8()); break;
   case 0xc1: case 0xd1: case 0xe1: case 0xf1:
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
-    lhs.indirectImmediate16(opcodeSizes[fetch >> 4], read16()); break;
+    lhs.indirectImmediate16(opSize, read16()); break;
   case 0xc2: case 0xd2: case 0xe2: case 0xf2:
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
-    lhs.indirectImmediate24(opcodeSizes[fetch >> 4], read24()); break;
+    lhs.indirectImmediate24(opSize, read24()); break;
   case 0xc3: case 0xd3: case 0xe3: case 0xf3: {
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
     auto data = read8();
-    if((uint2)data == 0) lhs.indirectRegister(opcodeSizes[fetch >> 4], data);
-    if((uint2)data == 1) lhs.indirectRegisterDisplacement16(opcodeSizes[fetch >> 4], data, read16());
-    if(data == 0x03) { auto r32 = read8(); lhs.indirectRegisterRegister8(opcodeSizes[fetch >> 4], r32, read8()); }
-    if(data == 0x07) { auto r32 = read8(); lhs.indirectRegisterRegister16(opcodeSizes[fetch >> 4], r32, read16()); }
+    if((uint2)data == 0) lhs.indirectRegister(opSize, data);
+    if((uint2)data == 1) lhs.indirectRegisterDisplacement16(opSize, data, read16());
+    if(data == 0x03) { auto r32 = read8(); lhs.indirectRegisterRegister8(opSize, r32, read8()); }
+    if(data == 0x07) { auto r32 = read8(); lhs.indirectRegisterRegister16(opSize, r32, read16()); }
   } break;
   case 0xc4: case 0xd4: case 0xe4: case 0xf4:
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
-    lhs.indirectRegisterDecrement(opcodeSizes[fetch >> 4], read8()); break;
+    lhs.indirectRegisterDecrement(opSize, read8()); break;
   case 0xc5: case 0xd5: case 0xe5: case 0xf5:
     opSourceMemory = fetch < 0xf0; opTargetMemory = !opSourceMemory;
-    lhs.indirectRegisterIncrement(opcodeSizes[fetch >> 4], read8()); break;
+    lhs.indirectRegisterIncrement(opSize, read8()); break;
   case 0xc6: case 0xd6: case 0xe6: case 0xf6: break;
   case 0xc7: case 0xd7: case 0xe7:
     opRegister = true;
-    lhs.indirectRegister(opcodeSizes[fetch >> 4], read8()); break;
+    lhs.indirectRegister(opSize, read8()); break;
   case 0xf7:
     name = "ldx";
     read8(); lhs.indirectImmediate8(8, read8());
@@ -207,6 +207,7 @@ auto TLCS900H::disassemble() -> string {
   case 0xf8: case 0xf9: case 0xfa: case 0xfb: case 0xfc: case 0xfd: case 0xfe: case 0xff:
     name = "swi"; lhs.immediate(3, (uint3)fetch); break;
   }
+  #undef opSize
 
   auto reads = [&](uint size) -> uint32 {
     if(size ==  8) return  read8();
@@ -344,7 +345,7 @@ auto TLCS900H::disassemble() -> string {
   if(opSourceMemory)
   switch(auto fetch = read8()) {
   case 0x00: case 0x01: case 0x02: case 0x03: break;
-  case 0x04: name = "push"; break;
+  case 0x04: name = lhs.size() == 8 ? "push" : "pushw"; break;
   case 0x05: break;
   case 0x06: name = "rld"; rhs = lhs; lhs.register(8, A.id); break;
   case 0x07: name = "rrd"; rhs = lhs; lhs.register(8, A.id); break;
@@ -397,14 +398,14 @@ auto TLCS900H::disassemble() -> string {
   case 0x28: case 0x29: case 0x2a: case 0x2b: case 0x2c: case 0x2d: case 0x2e: case 0x2f: break;
   case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37:
     name = "ex"; rhs.register3(lhs.size(), fetch); break;
-  case 0x38: name = "add"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x39: name = "adc"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x3a: name = "sub"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x3b: name = "sbb"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x3c: name = "and"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x3d: name = "xor"; rhs.immediate(3, (uint3)fetch); break;
-  case 0x3e: name = "or";  rhs.immediate(3, (uint3)fetch); break;
-  case 0x3f: name = "cp";  rhs.immediate(3, (uint3)fetch); break;
+  case 0x38: name = "add"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x39: name = "adc"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3a: name = "sub"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3b: name = "sbb"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3c: name = "and"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3d: name = "xor"; rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3e: name = "or";  rhs.immediate(lhs.size(), reads(lhs.size())); break;
+  case 0x3f: name = "cp";  rhs.immediate(lhs.size(), reads(lhs.size())); break;
   case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
     name = "mul"; rhs = lhs; lhs.register3(rhs.size(), fetch); break;
   case 0x48: case 0x49: case 0x4a: case 0x4b: case 0x4c: case 0x4d: case 0x4e: case 0x4f:
@@ -541,7 +542,7 @@ auto TLCS900H::disassemble() -> string {
     };
     auto register8 = [](uint8 register) -> string {
       if(register <  0x40) return registers8[register];
-      if(register >= 0xd0) return registers8[register - 0x80];
+      if(register >= 0xd0) return registers8[(register - 0xd0 >> 0) + 0x40];
       return "rb?";
     };
 
@@ -556,7 +557,7 @@ auto TLCS900H::disassemble() -> string {
     };
     auto register16 = [](uint8 register) -> string {
       if(register <  0x40) return registers16[register >> 1];
-      if(register >= 0xd0) return registers16[register - 0x80 >> 1];
+      if(register >= 0xd0) return registers16[(register - 0xd0 >> 1) + 0x20];
       return "rw?";
     };
 
@@ -571,7 +572,7 @@ auto TLCS900H::disassemble() -> string {
     };
     auto register32 = [&](uint8 register) -> string {
       if(register <  0x40) return registers32[register >> 2];
-      if(register >= 0xd0) return registers32[register - 0x80 >> 2];
+      if(register >= 0xd0) return registers32[(register - 0xd0 >> 2) + 0x10];
       return "rl?";
     };
 
@@ -630,13 +631,13 @@ auto TLCS900H::disassemble() -> string {
     if(operand.mode() == Displacement) {
       if(operand.size() ==  8) {
         integer displacement = (int8)operand.displacement();
-        if(displacement < 0) return {"-0x", hex(-displacement, 2L)};
-        return {"+0x", hex(displacement, 2L)};
+        if(displacement <  0) return {"-0x", hex(-displacement, 2L)};
+        if(displacement >= 0) return {"+0x", hex(+displacement, 2L)};
       }
       if(operand.size() == 16) {
         integer displacement = (int8)operand.displacement();
-        if(displacement < 0) return {"-0x", hex(-displacement, 4L)};
-        return {"+0x", hex(displacement, 4L)};
+        if(displacement <  0) return {"-0x", hex(-displacement, 4L)};
+        if(displacement >= 0) return {"+0x", hex(+displacement, 4L)};
       }
     }
     if(operand.mode() == DisplacementPC) {
@@ -656,13 +657,15 @@ auto TLCS900H::disassemble() -> string {
     if(operand.mode() == IndirectRegisterRegister16) return {"(", register32(operand.register()), "+", register16(operand.registerAdd()), ")"};
     if(operand.mode() ==  IndirectRegisterDisplacement8) {
       integer displacement = (int8)operand.displacement();
-      if(displacement < 0) return {"(", register32(operand.register()), "-0x", hex(-displacement, 2L), ")"};
-      return {"(", register32(operand.register()), "+0x", hex(displacement, 2L), ")"};
+      if(displacement == 0) return {"(", register32(operand.register()), ")"};
+      if(displacement <  0) return {"(", register32(operand.register()), "-0x", hex(-displacement, 2L), ")"};
+      if(displacement >  0) return {"(", register32(operand.register()), "+0x", hex(+displacement, 2L), ")"};
     }
     if(operand.mode() == IndirectRegisterDisplacement16) {
       integer displacement = (int16)operand.displacement();
-      if(displacement < 0) return {"(", register32(operand.register()), "-0x", hex(-displacement, 4L), ")"};
-      return {"(", register32(operand.register()), "+0x", hex(displacement, 4L), ")"};
+      if(displacement == 0) return {"(", register32(operand.register()), ")"};
+      if(displacement <  0) return {"(", register32(operand.register()), "-0x", hex(-displacement, 4L), ")"};
+      if(displacement >  0) return {"(", register32(operand.register()), "+0x", hex(+displacement, 4L), ")"};
     }
     if(operand.mode() ==  IndirectImmediate8) return {"(0x", hex(operand.immediate(), 2L), ")"};
     if(operand.mode() == IndirectImmediate16) return {"(0x", hex(operand.immediate(), 4L), ")"};
@@ -670,18 +673,27 @@ auto TLCS900H::disassemble() -> string {
     return {};
   };
 
+  //omit true condition operand
+  if(lhs.mode() == Condition && lhs.condition() == 8) {
+    lhs = rhs;
+    rhs.null();
+  }
+
   if(name) {
     output.append(pad(name, -6));
     if(lhs) {
-      output.append(operand(lhs), ",");
+      output.append(operand(lhs));
       if(rhs) {
-        output.append(operand(rhs));
+        output.append(",", operand(rhs));
       }
     }
   } else {
     output.append(pad("???", -6));
-    for(auto byte : range(ops)) output.append(hex(op[byte], 2L), " ");
+    for(auto byte : range(ops)) output.append("0x", hex(op[byte], 2L), ",");
+    output.trimRight(",", 1L);
   }
+
+//for(auto byte : range(ops)) print("0x", hex(op[byte], 2L), " "); print("\n");
 
   output.size(-48);
   output.append("XWA:", hex(r.xwa[r.rfp].l.l0, 8L), " ");

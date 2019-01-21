@@ -61,7 +61,7 @@ namespace bit {
   //count number of bits set in a byte
   inline auto count(uintmax x) -> uint {
     uint count = 0;
-    do count += x & 1; while(x >>= 1);
+    while(x) x &= x - 1, count++;  //clear the least significant bit
     return count;
   }
 

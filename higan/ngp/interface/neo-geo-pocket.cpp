@@ -5,3 +5,7 @@ auto NeoGeoPocketInterface::information() -> Information {
   information.extension    = "ngp";
   return information;
 }
+
+auto NeoGeoPocketInterface::load() -> bool {
+  return system.load(this, System::Model::NeoGeoPocket);
+}

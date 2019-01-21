@@ -39,6 +39,7 @@
 #include <nall/interpolation.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/iterator.hpp>
+#include <nall/literals.hpp>
 #include <nall/locale.hpp>
 #include <nall/location.hpp>
 #include <nall/map.hpp>

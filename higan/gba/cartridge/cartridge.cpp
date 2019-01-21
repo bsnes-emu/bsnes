@@ -24,7 +24,7 @@ Cartridge::~Cartridge() {
 }
 
 auto Cartridge::load() -> bool {
-  information = Information();
+  information = {};
 
   if(auto loaded = platform->load(ID::GameBoyAdvance, "Game Boy Advance", "gba")) {
     information.pathID = loaded.pathID;
