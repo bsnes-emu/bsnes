@@ -16,6 +16,11 @@ struct VPU : Thread {
 
 private:
   uint32 buffer[160 * 152];
+
+  struct IO {
+    uint8  vcounter;
+    uint10 hcounter;
+  } io;
 };
 
 extern VPU vpu;

@@ -50,8 +50,8 @@ template<> auto TLCS900H::map(Register<uint16> register) const -> maybe<uint16&>
   r(0x38, xde[3].w.w0) r(0x3a, xde[3].w.w1) r(0x3c, xhl[3].w.w0) r(0x3e, xhl[3].w.w1)
   r(0xd0, xwa[p].w.w0) r(0xd2, xwa[p].w.w1) r(0xd4, xbc[p].w.w0) r(0xd6, xbc[p].w.w1)
   r(0xd8, xde[p].w.w0) r(0xda, xde[p].w.w1) r(0xdc, xhl[p].w.w0) r(0xde, xhl[p].w.w1)
-  r(0xe0, xwa[p].w.w0) r(0xe2, xwa[p].w.w1) r(0xe4, xbc[p].w.w0) r(0xe6, xbc[p].w.w1)
-  r(0xe8, xde[p].w.w0) r(0xea, xde[p].w.w1) r(0xec, xhl[p].w.w0) r(0xee, xhl[p].w.w1)
+  r(0xe0, xwa[a].w.w0) r(0xe2, xwa[a].w.w1) r(0xe4, xbc[a].w.w0) r(0xe6, xbc[a].w.w1)
+  r(0xe8, xde[a].w.w0) r(0xea, xde[a].w.w1) r(0xec, xhl[a].w.w0) r(0xee, xhl[a].w.w1)
   r(0xf0, xix   .w.w0) r(0xf2, xix   .w.w1) r(0xf4, xiy   .w.w0) r(0xf6, xiy   .w.w1)
   r(0xf8, xiz   .w.w0) r(0xfa, xiz   .w.w1) r(0xfc, xsp   .w.w0) r(0xfe, xsp   .w.w0)
   #undef r
@@ -106,12 +106,13 @@ auto TLCS900H::store(FlagRegister f, uint8 data) -> void {
 }
 
 auto TLCS900H::load(StatusRegister) const -> uint16 {
-  return load(F) | r.rfp << 8 | 1 << 11 | r.iff << 12 | 1 << 15;
+  //900/H: d10 = RFP2 (always 0); d11 = MAX (always 1); d15 = SYSM (always 1)
+  return load(F) | r.rfp << 8 | 0 << 10 | 1 << 11 | r.iff << 12 | 1 << 15;
 }
 
 auto TLCS900H::store(StatusRegister, uint16 data) -> void {
-  store(F, data);
-  r.rfp = data.bits( 8, 9);
+  store(F, data.bits(0,7));
+  r.rfp = data.bits(8,9);
   r.iff = data.bits(12,14);
 }
 

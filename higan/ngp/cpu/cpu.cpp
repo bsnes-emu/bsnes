@@ -12,8 +12,7 @@ auto CPU::Enter() -> void {
 
 auto CPU::main() -> void {
 static uint ctr=0;
-if(++ctr < 200) print(disassemble(), "\n");
-else return step(1);
+if(++ctr<200) print(disassemble(), "\n");
   instruction();
   step(1);
 }
@@ -30,6 +29,17 @@ auto CPU::power() -> void {
   create(CPU::Enter, system.frequency());
   ram.allocate(0x3000);
   r.pc.l.l0 = 0xff1800;
+  io = {};
+}
+
+auto CPU::setInterruptHblank(boolean line) -> void {
+  io.irq.hblank = line;
+//if(line) interrupt(0xffff0c);
+}
+
+auto CPU::setInterruptVblank(boolean line) -> void {
+  io.irq.vblank = line;
+  if(line) interrupt(0xffff10);
 }
 
 }

@@ -191,14 +191,14 @@ struct TLCS900H {
     DataRegister dmam[4];
     DataRegister intnest;  //16-bit
 
-    uint1 c, cp;    //carry
-    uint1 n, np;    //negative
-    uint1 v, vp;    //overflow or parity
-    uint1 h, hp;    //half carry
-    uint1 z, zp;    //zero
-    uint1 s, sp;    //sign
-    uint2 rfp;      //register file pointer
-    uint3 iff = 7;  //interrupt mask flip-flop
+    uint1 c, cp;     //carry
+    uint1 n, np;     //negative
+    uint1 v, vp;     //overflow or parity
+    uint1 h, hp;     //half carry
+    uint1 z, zp;     //zero
+    uint1 s, sp;     //sign
+    uint2 rfp;       //register file pointer
+    uint3 iff = 7;   //interrupt mask flip-flop
 
     uint1 halted;   //set if halt instruction executed; waits for an interrupt to resume
     uint8 prefix;   //first opcode byte; needed for [CP|LD][ID](R) instructions

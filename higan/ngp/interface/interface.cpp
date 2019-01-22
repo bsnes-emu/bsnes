@@ -15,7 +15,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 160;
   display.internalHeight = 152;
   display.aspectCorrection = 1.0;
-  display.refreshRate = 60.0;
   return display;
 }
 

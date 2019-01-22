@@ -21,7 +21,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 240;
   display.internalHeight = 160;
   display.aspectCorrection = 1.0;
-  display.refreshRate = system.frequency() / (228.0 * 1232.0);
   if(settings.rotateLeft) {
     swap(display.width, display.height);
     swap(display.internalWidth, display.internalHeight);

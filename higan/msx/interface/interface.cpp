@@ -19,7 +19,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 256;
   display.internalHeight = 192;
   display.aspectCorrection = 1.0;
-  display.refreshRate = 60.0;  //todo: PAL
   return display;
 }
 

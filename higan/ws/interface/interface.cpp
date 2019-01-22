@@ -16,7 +16,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 224;
   display.internalHeight = 144;
   display.aspectCorrection = 1.0;
-  display.refreshRate = 3'072'000.0 / (159.0 * 256.0);
   if(settings.rotateLeft) {
     swap(display.width, display.height);
     swap(display.internalWidth, display.internalHeight);

@@ -15,8 +15,6 @@ auto MasterSystemInterface::display() -> Display {
   display.internalWidth  = 256;
   display.internalHeight = 240;
   display.aspectCorrection = 8.0 / 7.0;
-  if(Region::NTSC()) display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
-  if(Region::PAL())  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (312.0 * 684.0);
   return display;
 }
 

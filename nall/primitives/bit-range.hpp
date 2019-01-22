@@ -2,15 +2,18 @@
 
 namespace nall {
 
+//warning: so that BitRange can modify the underlying number directly, it must bind a reference.
+//as a result, auto value = number.bits() will capture by-reference, rather than by-value.
+
 template<int Precision> struct BitRange {
   static_assert(Precision >= 1 && Precision <= 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using utype =
-    typename conditional<bits() <=  8,  uint8_t,
-    typename conditional<bits() <= 16, uint16_t,
-    typename conditional<bits() <= 32, uint32_t,
-    typename conditional<bits() <= 64, uint64_t,
-    void>::type>::type>::type>::type;
+    conditional_t<bits() <=  8,  uint8_t,
+    conditional_t<bits() <= 16, uint16_t,
+    conditional_t<bits() <= 32, uint32_t,
+    conditional_t<bits() <= 64, uint64_t,
+    void>>>>;
   static inline constexpr auto mask() -> utype { return ~0ull >> 64 - bits(); }
 
   inline BitRange(utype& source, int lo, int hi) : source(source) {
@@ -22,13 +25,14 @@ template<int Precision> struct BitRange {
   }
   inline auto& operator=(BitRange& source) { return set(source.get()); }
 
+  inline operator utype() const { return get(); }
+
   inline auto operator++(int) { auto value = get(); set(value + 1); return value; }
   inline auto operator--(int) { auto value = get(); set(value - 1); return value; }
 
   inline auto& operator++() { return set(get() + 1); }
   inline auto& operator--() { return set(get() - 1); }
 
-  inline operator utype() const { return get(); }
   template<typename T> inline auto& operator  =(const T& value) { return set(         value); }
   template<typename T> inline auto& operator *=(const T& value) { return set(get()  * value); }
   template<typename T> inline auto& operator /=(const T& value) { return set(get()  / value); }

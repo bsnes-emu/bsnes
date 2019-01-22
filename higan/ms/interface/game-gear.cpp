@@ -15,7 +15,6 @@ auto GameGearInterface::display() -> Display {
   display.internalWidth  = 160;
   display.internalHeight = 144;
   display.aspectCorrection = 1.0;
-  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
   return display;
 }
 

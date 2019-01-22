@@ -2,7 +2,7 @@
 
 namespace nall {
 
-template<uint Precision = 64> struct Integer {
+template<uint Precision> struct Integer {
   static_assert(Precision >= 1 && Precision <= 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using stype =
@@ -16,11 +16,10 @@ template<uint Precision = 64> struct Integer {
   static inline constexpr auto sign() -> utype { return 1ull << Precision - 1; }
 
   inline Integer() : data(0) {}
-  template<int Bits> inline Integer(Integer<Bits> value) { data = mask(value); }
+  template<uint Bits> inline Integer(Integer<Bits> value) { data = mask(value); }
   template<typename T> inline Integer(const T& value) { data = mask(value); }
 
-  explicit inline operator bool() const { return data; }
-  inline operator int64_t() const { return data; }
+  inline operator stype() const { return data; }
 
   inline auto operator++(int) { auto value = *this; data = mask(data + 1); return value; }
   inline auto operator--(int) { auto value = *this; data = mask(data - 1); return value; }
@@ -28,29 +27,17 @@ template<uint Precision = 64> struct Integer {
   inline auto& operator++() { data = mask(data + 1); return *this; }
   inline auto& operator--() { data = mask(data - 1); return *this; }
 
-  inline auto operator!() const { return !data; }
-  inline auto operator~() const { return Integer<>{mask(~data)}; }
-  inline auto operator+() const { return Integer<>{+data}; }
-  inline auto operator-() const { return Integer<>{data == sign() ? data : -data}; }
-
-  #define lhs data
-  #define rhs value
-  template<typename T> inline auto& operator  =(const T& value) { lhs = mask(       rhs); return *this; }
-  template<typename T> inline auto& operator *=(const T& value) { lhs = mask(lhs  * rhs); return *this; }
-  template<typename T> inline auto& operator /=(const T& value) { lhs = mask(lhs  / rhs); return *this; }
-  template<typename T> inline auto& operator %=(const T& value) { lhs = mask(lhs  % rhs); return *this; }
-  template<typename T> inline auto& operator +=(const T& value) { lhs = mask(lhs  + rhs); return *this; }
-  template<typename T> inline auto& operator -=(const T& value) { lhs = mask(lhs  - rhs); return *this; }
-  template<typename T> inline auto& operator<<=(const T& value) { lhs = mask(lhs << rhs); return *this; }
-  template<typename T> inline auto& operator>>=(const T& value) { lhs = mask(lhs >> rhs); return *this; }
-  template<typename T> inline auto& operator &=(const T& value) { lhs = mask(lhs  & rhs); return *this; }
-  template<typename T> inline auto& operator ^=(const T& value) { lhs = mask(lhs  ^ rhs); return *this; }
-  template<typename T> inline auto& operator |=(const T& value) { lhs = mask(lhs  | rhs); return *this; }
-  #undef lhs
-  #undef rhs
-
-  //warning: this does not and cannot short-circuit; value is always evaluated
-  template<typename T> inline auto orElse(const T& value) { return Integer<>{data ? data : value}; }
+  template<typename T> inline auto& operator  =(const T& value) { data = mask(        value); return *this; }
+  template<typename T> inline auto& operator *=(const T& value) { data = mask(data  * value); return *this; }
+  template<typename T> inline auto& operator /=(const T& value) { data = mask(data  / value); return *this; }
+  template<typename T> inline auto& operator %=(const T& value) { data = mask(data  % value); return *this; }
+  template<typename T> inline auto& operator +=(const T& value) { data = mask(data  + value); return *this; }
+  template<typename T> inline auto& operator -=(const T& value) { data = mask(data  - value); return *this; }
+  template<typename T> inline auto& operator<<=(const T& value) { data = mask(data << value); return *this; }
+  template<typename T> inline auto& operator>>=(const T& value) { data = mask(data >> value); return *this; }
+  template<typename T> inline auto& operator &=(const T& value) { data = mask(data  & value); return *this; }
+  template<typename T> inline auto& operator ^=(const T& value) { data = mask(data  ^ value); return *this; }
+  template<typename T> inline auto& operator |=(const T& value) { data = mask(data  | value); return *this; }
 
   inline auto bits(int lo, int hi) -> BitRange<Precision> { return {(utype&)data, lo, hi}; }
   inline auto bit(int index) -> BitRange<Precision> { return {(utype&)data, index, index}; }
@@ -63,16 +50,16 @@ template<uint Precision = 64> struct Integer {
   inline auto slice(int index) const { return Natural<>{bit(index)}; }
   inline auto slice(int lo, int hi) const { return Natural<>{bit(lo, hi)}; }
 
-  inline auto clamp(uint bits) {
+  inline auto clamp(uint bits) -> stype {
     const int64_t b = 1ull << (bits - 1);
     const int64_t m = b - 1;
-    return Integer<>{data > m ? m : data < -b ? -b : data};
+    return data > m ? m : data < -b ? -b : data;
   }
 
-  inline auto clip(uint bits) {
+  inline auto clip(uint bits) -> stype {
     const uint64_t b = 1ull << (bits - 1);
     const uint64_t m = b * 2 - 1;
-    return Integer<>{(data & m ^ b) - b};
+    return (data & m ^ b) - b;
   }
 
   inline auto serialize(serializer& s) { s(data); }
@@ -85,20 +72,5 @@ private:
 
   stype data;
 };
-
-#define lhs (int64_t)l
-#define rhs r
-template<int LHS, int RHS> inline auto operator *(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  * rhs}; }
-template<int LHS, int RHS> inline auto operator /(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  / rhs}; }
-template<int LHS, int RHS> inline auto operator %(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  % rhs}; }
-template<int LHS, int RHS> inline auto operator +(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  + rhs}; }
-template<int LHS, int RHS> inline auto operator -(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  - rhs}; }
-template<int LHS, int RHS> inline auto operator<<(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs << rhs}; }
-template<int LHS, int RHS> inline auto operator>>(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs >> rhs}; }
-template<int LHS, int RHS> inline auto operator &(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  & rhs}; }
-template<int LHS, int RHS> inline auto operator ^(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  ^ rhs}; }
-template<int LHS, int RHS> inline auto operator |(Integer<LHS> l, Integer<RHS> r) { return Integer{lhs  | rhs}; }
-#undef lhs
-#undef rhs
 
 }

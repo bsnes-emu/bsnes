@@ -17,7 +17,7 @@ template<typename T> auto TLCS900H::toRegister8(uint8 code) const -> Register<T>
 template<typename T> auto TLCS900H::toControlRegister(uint8 code) const -> ControlRegister<T> { return {code}; }
 template<typename T> auto TLCS900H::toMemory(uint32 address) const -> Memory<T> { return {address}; }
 template<typename T> auto TLCS900H::toImmediate(uint32 constant) const -> Immediate<T> { return {constant}; }
-template<typename T> auto TLCS900H::toImmediate3(natural constant) const -> Immediate<T> { return {constant.clip(3).orElse(8)}; }
+template<typename T> auto TLCS900H::toImmediate3(natural constant) const -> Immediate<T> { return {constant.clip(3) ? constant.clip(3) : 8}; }
 
 //note: much of this code is split to multiple statements due to C++ not guaranteeing
 //the order of evaluations of function arguments. fetch() ordering is critical.
@@ -27,16 +27,16 @@ auto TLCS900H::instruction() -> void {
 
   switch(r.prefix = data) {
   case 0x00: return instructionNoOperation();
-  case 0x01: return (void)Undefined;
+  case 0x01: return (void)Undefined;  //NORMAL (not present on 900/H)
   case 0x02: return instructionPush(SR);
   case 0x03: return instructionPop(SR);
-  case 0x04: return (void)Undefined;
+  case 0x04: return (void)Undefined;  //MAX or MIN (not present on 900/H)
   case 0x05: return instructionHalt();
   case 0x06: return instructionSetInterruptFlipFlop((uint3)fetch());
   case 0x07: return instructionReturnInterrupt();
   case 0x08: {
     auto memory = fetchMemory<uint8, uint8>();
-    return instructionLoad(memory, fetchImmediate<uint16>()); }
+    return instructionLoad(memory, fetchImmediate<uint8>()); }
   case 0x09: return instructionPush(fetchImmediate<uint8>());
   case 0x0a: {
     auto memory = fetchMemory<uint16, uint8>();

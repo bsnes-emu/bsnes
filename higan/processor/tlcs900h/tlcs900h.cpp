@@ -33,6 +33,7 @@ auto TLCS900H::interrupt(uint24 address) -> void {
 
 auto TLCS900H::power() -> void {
   r = {};
+  r.xsp.l.l0 = 0x100;
 }
 
 }

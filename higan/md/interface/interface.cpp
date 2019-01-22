@@ -22,7 +22,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 1280;
   display.internalHeight =  480;
   display.aspectCorrection = 1.0;
-  display.refreshRate = (system.frequency() / 2.0) / (vdp.frameHeight() * 1710.0);
   return display;
 }
 

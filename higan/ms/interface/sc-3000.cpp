@@ -15,8 +15,6 @@ auto SC3000Interface::display() -> Display {
   display.internalWidth = 256;
   display.internalHeight = 192;
   display.aspectCorrection = 1.0;
-  if(Region::NTSC()) display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (262.0 * 684.0);
-  if(Region::PAL())  display.refreshRate = (system.colorburst() * 15.0 / 5.0) / (312.0 * 684.0);
   return display;
 }
 

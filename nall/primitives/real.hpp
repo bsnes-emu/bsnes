@@ -2,7 +2,7 @@
 
 namespace nall {
 
-template<uint Precision = 64> struct Real {
+template<uint Precision> struct Real {
   static_assert(Precision == 32 || Precision == 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using ftype =
@@ -14,8 +14,7 @@ template<uint Precision = 64> struct Real {
   template<int Bits> inline Real(Real<Bits> value) : data((ftype)value) {}
   template<typename T> inline Real(const T& value) : data((ftype)value) {}
 
-  explicit inline operator bool() const { return data; }
-  inline operator float64_t() const { return data; }
+  inline operator ftype() const { return data; }
 
   inline auto operator++(int) { auto value = *this; ++data; return value; }
   inline auto operator--(int) { auto value = *this; --data; return value; }
@@ -35,15 +34,5 @@ template<uint Precision = 64> struct Real {
 private:
   ftype data;
 };
-
-#define lhs (float64_t)(typename Real<LHS>::type)l
-#define rhs (typename Real<RHS>::type)r
-template<int LHS, int RHS> inline auto operator*(Real<LHS> l, Real<RHS> r) { return Real<>{lhs * rhs}; }
-template<int LHS, int RHS> inline auto operator/(Real<LHS> l, Real<RHS> r) { return Real<>{lhs / rhs}; }
-template<int LHS, int RHS> inline auto operator%(Real<LHS> l, Real<RHS> r) { return Real<>{lhs % rhs}; }
-template<int LHS, int RHS> inline auto operator+(Real<LHS> l, Real<RHS> r) { return Real<>{lhs + rhs}; }
-template<int LHS, int RHS> inline auto operator-(Real<LHS> l, Real<RHS> r) { return Real<>{lhs - rhs}; }
-#undef lhs
-#undef rhs
 
 }

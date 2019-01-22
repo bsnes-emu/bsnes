@@ -2,7 +2,7 @@
 
 namespace nall {
 
-template<uint Precision = 64> struct Natural {
+template<uint Precision> struct Natural {
   static_assert(Precision >= 1 && Precision <= 64);
   static inline constexpr auto bits() -> uint { return Precision; }
   using utype =
@@ -14,11 +14,10 @@ template<uint Precision = 64> struct Natural {
   static inline constexpr auto mask() -> utype { return ~0ull >> 64 - bits(); }
 
   inline Natural() : data(0) {}
-  template<int Bits> inline Natural(Natural<Bits> value) { data = mask(value); }
+  template<uint Bits> inline Natural(Natural<Bits> value) { data = mask(value); }
   template<typename T> inline Natural(const T& value) { data = mask(value); }
 
-  explicit inline operator bool() const { return data; }
-  inline operator uint64_t() const { return data; }
+  inline operator utype() const { return data; }
 
   inline auto operator++(int) { auto value = *this; data = mask(data + 1); return value; }
   inline auto operator--(int) { auto value = *this; data = mask(data - 1); return value; }
@@ -26,29 +25,17 @@ template<uint Precision = 64> struct Natural {
   inline auto& operator++() { data = mask(data + 1); return *this; }
   inline auto& operator--() { data = mask(data - 1); return *this; }
 
-  inline auto operator!() const { return !data; }
-  inline auto operator~() const { return Natural<>{mask(~data)}; }
-  inline auto operator+() const { return Natural<>{+data}; }
-  inline auto operator-() const { return Natural<>{-(uint64_t)data}; }
-
-  #define lhs data
-  #define rhs value
-  template<typename T> inline auto& operator  =(const T& value) { lhs = mask(       rhs); return *this; }
-  template<typename T> inline auto& operator *=(const T& value) { lhs = mask(lhs  * rhs); return *this; }
-  template<typename T> inline auto& operator /=(const T& value) { lhs = mask(lhs  / rhs); return *this; }
-  template<typename T> inline auto& operator %=(const T& value) { lhs = mask(lhs  % rhs); return *this; }
-  template<typename T> inline auto& operator +=(const T& value) { lhs = mask(lhs  + rhs); return *this; }
-  template<typename T> inline auto& operator -=(const T& value) { lhs = mask(lhs  - rhs); return *this; }
-  template<typename T> inline auto& operator<<=(const T& value) { lhs = mask(lhs << rhs); return *this; }
-  template<typename T> inline auto& operator>>=(const T& value) { lhs = mask(lhs >> rhs); return *this; }
-  template<typename T> inline auto& operator &=(const T& value) { lhs = mask(lhs  & rhs); return *this; }
-  template<typename T> inline auto& operator ^=(const T& value) { lhs = mask(lhs  ^ rhs); return *this; }
-  template<typename T> inline auto& operator |=(const T& value) { lhs = mask(lhs  | rhs); return *this; }
-  #undef lhs
-  #undef rhs
-
-  //warning: this does not and cannot short-circuit; value is always evaluated
-  template<typename T> inline auto orElse(const T& value) { return Natural<>{data ? data : value}; }
+  template<typename T> inline auto& operator  =(const T& value) { data = mask(        value); return *this; }
+  template<typename T> inline auto& operator *=(const T& value) { data = mask(data  * value); return *this; }
+  template<typename T> inline auto& operator /=(const T& value) { data = mask(data  / value); return *this; }
+  template<typename T> inline auto& operator %=(const T& value) { data = mask(data  % value); return *this; }
+  template<typename T> inline auto& operator +=(const T& value) { data = mask(data  + value); return *this; }
+  template<typename T> inline auto& operator -=(const T& value) { data = mask(data  - value); return *this; }
+  template<typename T> inline auto& operator<<=(const T& value) { data = mask(data << value); return *this; }
+  template<typename T> inline auto& operator>>=(const T& value) { data = mask(data >> value); return *this; }
+  template<typename T> inline auto& operator &=(const T& value) { data = mask(data  & value); return *this; }
+  template<typename T> inline auto& operator ^=(const T& value) { data = mask(data  ^ value); return *this; }
+  template<typename T> inline auto& operator |=(const T& value) { data = mask(data  | value); return *this; }
 
   inline auto bits(int lo, int hi) -> BitRange<Precision> { return {(utype&)data, lo, hi}; }
   inline auto bit(int index) -> BitRange<Precision> { return {(utype&)data, index, index}; }
@@ -61,16 +48,16 @@ template<uint Precision = 64> struct Natural {
   inline auto slice(int index) const { return Natural<>{bit(index)}; }
   inline auto slice(int lo, int hi) const { return Natural<>{bits(lo, hi)}; }
 
-  inline auto clamp(uint bits) {
+  inline auto clamp(uint bits) -> utype {
     const uint64_t b = 1ull << (bits - 1);
     const uint64_t m = b * 2 - 1;
-    return Natural<>{data < m ? data : m};
+    return data < m ? data : m;
   }
 
-  inline auto clip(uint bits) {
+  inline auto clip(uint bits) -> utype {
     const uint64_t b = 1ull << (bits - 1);
     const uint64_t m = b * 2 - 1;
-    return Natural<>{data & m};
+    return data & m;
   }
 
   inline auto serialize(serializer& s) { s(data); }
@@ -83,20 +70,5 @@ private:
 
   utype data;
 };
-
-#define lhs (uint64_t)l
-#define rhs r
-template<int LHS, int RHS> inline auto operator *(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  * rhs}; }
-template<int LHS, int RHS> inline auto operator /(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  / rhs}; }
-template<int LHS, int RHS> inline auto operator %(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  % rhs}; }
-template<int LHS, int RHS> inline auto operator +(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  + rhs}; }
-template<int LHS, int RHS> inline auto operator -(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  - rhs}; }
-template<int LHS, int RHS> inline auto operator<<(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs << rhs}; }
-template<int LHS, int RHS> inline auto operator>>(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs >> rhs}; }
-template<int LHS, int RHS> inline auto operator &(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  & rhs}; }
-template<int LHS, int RHS> inline auto operator ^(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  ^ rhs}; }
-template<int LHS, int RHS> inline auto operator |(Natural<LHS> l, Natural<RHS> r) { return Natural{lhs  | rhs}; }
-#undef lhs
-#undef rhs
 
 }

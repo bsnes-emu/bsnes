@@ -22,7 +22,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 256;
   display.internalHeight = 240;
   display.aspectCorrection = 8.0 / 7.0;
-  display.refreshRate = system.frequency() / (ppu.vlines() * ppu.rate() * 341.0);
   return display;
 }
 

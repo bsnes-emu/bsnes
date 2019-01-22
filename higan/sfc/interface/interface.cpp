@@ -23,8 +23,6 @@ auto Interface::display() -> Display {
   display.internalWidth  = 512;
   display.internalHeight = 480;
   display.aspectCorrection = 8.0 / 7.0;
-  if(Region::NTSC()) display.refreshRate = system.cpuFrequency() / (262.0 * 1364.0);
-  if(Region::PAL())  display.refreshRate = system.cpuFrequency() / (312.0 * 1364.0);
   return display;
 }
 

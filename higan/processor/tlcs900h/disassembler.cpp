@@ -98,10 +98,10 @@ auto TLCS900H::disassemble() -> string {
   #define opSize opSizes[fetch.bits(4,5)]           //extract the size from the opcode fetch
   switch(auto fetch = read8()) {
   case 0x00: name = "nop"; break;
-  case 0x01: break;
+  case 0x01: break;  //"normal" (not present on 900/H)
   case 0x02: name = "push"; lhs.text("sr"); break;
   case 0x03: name = "pop"; lhs.text("sr"); break;
-  case 0x04: break;
+  case 0x04: break;  //"max" or "min" (not present on 900/H)
   case 0x05: name = "halt"; break;
   case 0x06: name = "ei"; lhs.immediate(3, (uint3)read8()); if(lhs.immediate() == 7) name = "di", lhs.null(); break;
   case 0x07: name = "reti"; break;

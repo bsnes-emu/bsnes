@@ -24,7 +24,6 @@ struct Interface {
     uint internalWidth = 0;
     uint internalHeight = 0;
     double aspectCorrection = 0;
-    double refreshRate = 0;
   };
 
   struct Port {
