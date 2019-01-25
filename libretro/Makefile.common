@@ -1,6 +1,7 @@
 INCFLAGS    := -I$(CORE_DIR)
 
 SOURCES_C   := $(CORE_DIR)/Core/gb.c \
+               $(CORE_DIR)/Core/sgb.c \
                $(CORE_DIR)/Core/apu.c \
                $(CORE_DIR)/Core/memory.c \
                $(CORE_DIR)/Core/mbc.c \
@@ -14,6 +15,8 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/libretro/agb_boot.c \
                $(CORE_DIR)/libretro/cgb_boot.c \
                $(CORE_DIR)/libretro/dmg_boot.c \
+               $(CORE_DIR)/libretro/sgb_boot.c \
+               $(CORE_DIR)/libretro/sgb2_boot.c \
                $(CORE_DIR)/libretro/libretro.c
 
 CFLAGS += -DDISABLE_TIMEKEEPING -DDISABLE_REWIND -DDISABLE_DEBUGGER
