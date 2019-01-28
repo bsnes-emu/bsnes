@@ -472,33 +472,37 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
     }
     gb->apu_output.copy_in_progress = true;
 
+    /* TODO: Rewrite this as a proper cyclic buffer. This is a workaround to avoid a very rare crashing race condition */
+    size_t buffer_position = gb->apu_output.buffer_position;
+    
     if (!gb->apu_output.stream_started) {
         // Intentionally fail the first copy to sync the stream with the Gameboy.
         gb->apu_output.stream_started = true;
         gb->apu_output.buffer_position = 0;
+        buffer_position = 0;
     }
 
-    if (count > gb->apu_output.buffer_position) {
+    if (count > buffer_position) {
         // GB_log(gb, "Audio underflow: %d\n", count - gb->apu_output.buffer_position);
         GB_sample_t output;
         render(gb, true, &output);
         
-        for (unsigned i = 0; i < count - gb->apu_output.buffer_position; i++) {
-            dest[gb->apu_output.buffer_position + i] = output;
+        for (unsigned i = 0; i < count - buffer_position; i++) {
+            dest[buffer_position + i] = output;
         }
         
-        if (gb->apu_output.buffer_position) {
-            if (gb->apu_output.buffer_size + (count - gb->apu_output.buffer_position) < count * 3) {
-                gb->apu_output.buffer_size += count - gb->apu_output.buffer_position;
+        if (buffer_position) {
+            if (gb->apu_output.buffer_size + (count - buffer_position) < count * 3) {
+                gb->apu_output.buffer_size += count - buffer_position;
                 gb->apu_output.buffer = realloc(gb->apu_output.buffer,
                                                 gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
                 gb->apu_output.stream_started = false;
             }
         }
-        count = gb->apu_output.buffer_position;
+        count = buffer_position;
     }
     memcpy(dest, gb->apu_output.buffer, count * sizeof(*gb->apu_output.buffer));
-    memmove(gb->apu_output.buffer, gb->apu_output.buffer + count, (gb->apu_output.buffer_position - count) * sizeof(*gb->apu_output.buffer));
+    memmove(gb->apu_output.buffer, gb->apu_output.buffer + count, (buffer_position - count) * sizeof(*gb->apu_output.buffer));
     gb->apu_output.buffer_position -= count;
 
     gb->apu_output.copy_in_progress = false;
