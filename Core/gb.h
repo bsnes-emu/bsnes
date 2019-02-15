@@ -432,6 +432,7 @@ struct GB_gameboy_internal_s {
         /* The LCDC will skip the first frame it renders after turning it on.
            On the CGB, a frame is not skipped if the previous frame was skipped as well.
            See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
+               /* TODO: Drop this and properly emulate the dropped vreset signal*/
         enum {
             GB_FRAMESKIP_LCD_TURNED_ON, // On a DMG, the LCD renders a blank screen during this state,
                                         // on a CGB, the previous frame is repeated (which might be
@@ -466,6 +467,7 @@ struct GB_gameboy_internal_s {
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
         bool cgb_palettes_blocked;
+        uint8_t current_lcd_line; // The LCD can go out of sync since the vsync signal is skipped in some cases.
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

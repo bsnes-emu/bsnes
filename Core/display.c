@@ -393,7 +393,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             pixel = ((gb->io_registers[GB_IO_BGP] >> (pixel << 1)) & 3);
         }
         if (gb->sgb) {
-            gb->sgb->screen_buffer[gb->position_in_line + gb->current_line * WIDTH] = pixel;
+            if (gb->current_lcd_line < LINES) {
+                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = pixel;
+            }
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
@@ -407,7 +409,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             pixel = ((gb->io_registers[oam_fifo_item->palette? GB_IO_OBP1 : GB_IO_OBP0] >> (pixel << 1)) & 3);
         }
         if (gb->sgb) {
-            gb->sgb->screen_buffer[gb->position_in_line + gb->current_line * WIDTH] =pixel;
+            if (gb->current_lcd_line < LINES) {
+                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = pixel;
+            }
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
@@ -609,6 +613,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     }
 
     /* Todo: Merge this with the normal line routine */
+    /* Todo: Needs actual rendering, affects SGB emulation */
     /* Handle the very first line 0 */
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
@@ -642,7 +647,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
     gb->cgb_palettes_blocked = true;
-    
+    gb->current_lcd_line++; // TODO: Verify timing
+    if (gb->current_lcd_line == LINES) {
+        display_vblank(gb);
+    }
     /* TODO: How does the window affect this line? */
     gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2;
     GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2);
@@ -747,6 +755,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
+            gb->current_lcd_line++; // Todo: unverified timing
+            if (gb->current_lcd_line == LINES) {
+                display_vblank(gb);
+            }
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
             
@@ -961,6 +973,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->wy_diff = 0;
         gb->window_disabled_while_active = false;
         gb->current_line = 0;
+        gb->current_lcd_line = -1; // TODO: not the correct timing
     }
 }
 

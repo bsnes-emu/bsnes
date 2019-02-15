@@ -702,7 +702,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     gb->display_cycles = 0;
                     gb->display_state = 0;
-                    if (gb->frame_skip_state == GB_FRAMESKIP_SECOND_FRAME_RENDERED) {
+                    if (GB_is_sgb(gb)) {
+                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                    }
+                    else if (gb->frame_skip_state == GB_FRAMESKIP_SECOND_FRAME_RENDERED) {
                         gb->frame_skip_state = GB_FRAMESKIP_LCD_TURNED_ON;
                     }
                 }
