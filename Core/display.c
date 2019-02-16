@@ -95,12 +95,8 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
  Mode 1 is VBlank
  */
 
-/* Todo: Clean up the glitched line 0 and get rid of these defines */
 #define MODE2_LENGTH (80)
-#define MODE3_LENGTH (172)
-#define MODE0_LENGTH (204)
-
-#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
+#define LINE_LENGTH (456)
 #define LINES (144)
 #define WIDTH (160)
 #define FRAME_LENGTH (LCDC_PERIOD)
@@ -564,9 +560,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_STATE_MACHINE(gb, display, cycles, 2) {
         GB_STATE(gb, display, 1);
         GB_STATE(gb, display, 2);
-        GB_STATE(gb, display, 3);
-        GB_STATE(gb, display, 4);
-        GB_STATE(gb, display, 5);
+        // GB_STATE(gb, display, 3);
+        // GB_STATE(gb, display, 4);
+        // GB_STATE(gb, display, 5);
         GB_STATE(gb, display, 6);
         GB_STATE(gb, display, 7);
         GB_STATE(gb, display, 8);
@@ -584,19 +580,21 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 21);
         GB_STATE(gb, display, 22);
         GB_STATE(gb, display, 23);
-        GB_STATE(gb, display, 24);
+        // GB_STATE(gb, display, 24);
         GB_STATE(gb, display, 25);
         GB_STATE(gb, display, 26);
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
         GB_STATE(gb, display, 30);
-        GB_STATE(gb, display, 31);
+        // GB_STATE(gb, display, 31);
         GB_STATE(gb, display, 32);
         GB_STATE(gb, display, 33);
         GB_STATE(gb, display, 34);
         GB_STATE(gb, display, 35);
         GB_STATE(gb, display, 36);
+        GB_STATE(gb, display, 37);
+        GB_STATE(gb, display, 38);
 
     }
     
@@ -612,9 +610,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_SLEEP(gb, display, 23, 1);
     }
 
-    /* Todo: Merge this with the normal line routine */
-    /* Todo: Needs actual rendering, affects SGB emulation */
-    /* Handle the very first line 0 */
+    /* Handle mode 2 on the very first line 0 */
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -633,56 +629,33 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_STAT_update(gb);
     GB_SLEEP(gb, display, 34, 2);
     
+    gb->n_visible_objs = 0;
+    gb->cycles_for_line += 8; // Mode 0 is shorter on the first line 0, so we augment cycles_for_line by 8 extra cycles.
+
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->io_registers[GB_IO_STAT] |= 3;
     gb->mode_for_interrupt = 3;
+
+    gb->oam_write_blocked = true;
     gb->oam_read_blocked = true;
-    gb->vram_read_blocked = !GB_is_cgb(gb) || gb->cgb_double_speed;
-    gb->vram_write_blocked = !GB_is_cgb(gb) || gb->cgb_double_speed;
-    gb->cgb_palettes_blocked = !GB_is_cgb(gb);
-    GB_STAT_update(gb);
-    
+    gb->vram_read_blocked = gb->cgb_double_speed;
+    gb->vram_write_blocked = gb->cgb_double_speed;
+    if (!GB_is_cgb(gb)) {
+        gb->vram_read_blocked = true;
+        gb->vram_write_blocked = true;
+    }
     gb->cycles_for_line += 2;
-    GB_SLEEP(gb, display, 24, 2);
+    GB_SLEEP(gb, display, 37, 2);
+    
+    gb->cgb_palettes_blocked = true;
+    gb->cycles_for_line += 2;
+    GB_SLEEP(gb, display, 38, 2);
+    
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
-    gb->cgb_palettes_blocked = true;
-    gb->current_lcd_line++; // TODO: Verify timing
-    if (gb->current_lcd_line == LINES) {
-        display_vblank(gb);
-    }
-    /* TODO: How does the window affect this line? */
-    gb->cycles_for_line += MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2;
-    GB_SLEEP(gb, display, 3, MODE3_LENGTH + (gb->io_registers[GB_IO_SCX] & 7) - 2);
+    goto mode_3_start;
+
     
-    if (!gb->cgb_double_speed) {
-        gb->io_registers[GB_IO_STAT] &= ~3;
-        gb->mode_for_interrupt = 0;
-        gb->oam_read_blocked = false;
-        gb->vram_read_blocked = false;
-        gb->oam_write_blocked = false;
-        gb->vram_write_blocked = false;
-    }
-    gb->cycles_for_line += 1;
-    GB_SLEEP(gb, display, 4, 1);
-    
-    gb->io_registers[GB_IO_STAT] &= ~3;
-    gb->mode_for_interrupt = 0;
-    gb->oam_read_blocked = false;
-    gb->vram_read_blocked = false;
-    gb->oam_write_blocked = false;
-    gb->vram_write_blocked = false;
-    
-    gb->cycles_for_line += 2;
-    GB_SLEEP(gb, display, 31, 2);
-    gb->cgb_palettes_blocked = false;
-    
-    GB_STAT_update(gb);
-    /* Mode 0 is shorter in the very first line */
-    GB_SLEEP(gb, display, 5, LINE_LENGTH - gb->cycles_for_line - 8);
-    
-    gb->mode_for_interrupt = 2;
-    gb->current_line = 1;
     while (true) {
         /* Lines 0 - 143 */
         for (; gb->current_line < LINES; gb->current_line++) {
@@ -738,6 +711,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     GB_STAT_update(gb);
                 }
             }
+            gb->cycles_for_line = MODE2_LENGTH + 4;
+
             gb->accessed_oam_row = -1;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
@@ -746,9 +721,23 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->vram_write_blocked = true;
             gb->cgb_palettes_blocked = false;
             gb->oam_write_blocked = true;
+            gb->oam_read_blocked = true;
+
             GB_STAT_update(gb);
 
-            gb->cycles_for_line = MODE2_LENGTH + 4;
+            
+            uint8_t idle_cycles = 3;
+            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
+                idle_cycles = 2;
+            }
+            gb->cycles_for_line += idle_cycles;
+            GB_SLEEP(gb, display, 10, idle_cycles);
+            
+            gb->cgb_palettes_blocked = true;
+            gb->cycles_for_line += 2;
+            GB_SLEEP(gb, display, 32, 2);
+        mode_3_start:
+
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
             /* Fill the FIFO with 8 pixels of "junk", it's going to be dropped anyway. */
@@ -761,17 +750,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
-            
-            uint8_t idle_cycles = 3;
-            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
-                idle_cycles = 2;
-            }
-            gb->cycles_for_line += idle_cycles;
-            GB_SLEEP(gb, display, 10, idle_cycles);
-            
-            gb->cgb_palettes_blocked = true;
-            gb->cycles_for_line += 2;
-            GB_SLEEP(gb, display, 32, 2);
 
             
             /* The actual rendering cycle */

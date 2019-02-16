@@ -1525,7 +1525,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "Reading OAM data (%d/40)\n", gb->display_state == 8? gb->oam_search_index : 0);
     }
     else if (gb->display_state <= 3 || gb->display_state == 24 || gb->display_state == 31) {
-        GB_log(gb, "Glitched line 0 (%d cycles to next event)\n", -gb->display_cycles / 2);
+        GB_log(gb, "Glitched line 0 OAM mode (%d cycles to next event)\n", -gb->display_cycles / 2);
     }
     else if (gb->mode_for_interrupt == 3) {
         signed pixel = gb->position_in_line > 160? (int8_t) gb->position_in_line : gb->position_in_line;
