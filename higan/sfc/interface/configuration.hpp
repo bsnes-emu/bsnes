@@ -26,15 +26,15 @@ struct Configuration {
 
   struct Hacks {
     struct PPUFast {
-      bool enable = false;
+      bool enable = true;
       bool noSpriteLimit = false;
       bool hiresMode7 = false;
     } ppuFast;
     struct DSPFast {
-      bool enable = false;
+      bool enable = true;
     } dspFast;
     struct Coprocessors {
-      bool delayedSync = false;
+      bool delayedSync = true;
     } coprocessors;
   } hacks;
 

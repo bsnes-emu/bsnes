@@ -20,7 +20,7 @@ struct AudioXAudio2 : AudioDriver, public IXAudio2VoiceCallback {
   auto ready() -> bool override { return self.isReady; }
 
   auto hasBlocking() -> bool override { return true; }
-  auto hasDynamic() -> bool override { return true; }
+  auto hasDynamic() -> bool override { return false; }
 
   auto hasDevices() -> vector<string> override {
     vector<string> devices;
@@ -52,13 +52,13 @@ struct AudioXAudio2 : AudioDriver, public IXAudio2VoiceCallback {
     self.sourceVoice->Start(0);
   }
 
-  auto level() -> double override {
+/*auto level() -> double override {
     XAUDIO2_VOICE_STATE state{};
     self.sourceVoice->GetState(&state);
     uint level = state.BuffersQueued * self.period - state.SamplesPlayed % self.period;
     uint limit = Buffers * self.period;
     return (double)(limit - level) / limit;
-  }
+  }*/
 
   auto output(const double samples[]) -> void override {
     uint32_t frame = 0;

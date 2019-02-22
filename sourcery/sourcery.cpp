@@ -67,22 +67,14 @@ auto Sourcery::parse(Markup::Node& root) -> void {
       }
       auto buffer = file::read(filename);
       header.print("extern const char ", node["name"].text(), "[", buffer.size() + 1, "];\n");
-      source.print("const char ", node["name"].text(), "[", buffer.size() + 1, "] =\n");
-      buffer.foreach([&](uint offset, char data) {
-        if((offset & 127) ==  0) source.print("  \"");
-        if(!data) source.print("\\0");
-        else if(data == '\\') source.print("\\\\");
-        else if(data == '\"') source.print("\\\"");
-        else if(data == '\?') source.print("\\\?");
-        else if(data == '\r') source.print("\\r");
-        else if(data == '\n') source.print("\\n");
-        else if(data == '\t') source.print("\\t");
-        else if(data <= 0x1f || data >= 0x7f) source.print("\\x", hex(data, 2L));
-        else source.print(data);
-        if((offset & 127) == 127) source.print("\"\n");
+      source.print("const char ", node["name"].text(), "[", buffer.size() + 1, "] = {\n");
+      buffer.foreach([&](uint offset, uint8_t data) {
+        if((offset & 31) ==  0) source.print("  ");
+        source.print(data, ",");
+        if((offset & 31) == 31) source.print("\n");
       });
-      if(buffer.size() & 127) source.print("\"\n");
-      source.print(";\n");
+      if(buffer.size() & 31) source.print("\n");
+      source.print("};\n");
     }
   }
 }
