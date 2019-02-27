@@ -31,6 +31,23 @@ cothread_t co_active() {
   return (cothread_t)co_running;
 }
 
+cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void)) {
+  if(!co_running) co_running = &co_primary;
+  ucontext_t* thread = (ucontext_t*)memory;
+  memory = (unsigned char*)memory + sizeof(ucontext_t);
+  heapsize -= sizeof(ucontext_t);
+  if(thread) {
+    if((!getcontext(thread) && !(thread->uc_stack.ss_sp = 0)) && (thread->uc_stack.ss_sp = memory)) {
+      thread->uc_link = co_running;
+      thread->uc_stack.ss_size = heapsize;
+      makecontext(thread, coentry, 0);
+    } else {
+      thread = 0;
+    }
+  }
+  return (cothread_t)thread;
+}
+
 cothread_t co_create(unsigned int heapsize, void (*coentry)(void)) {
   if(!co_running) co_running = &co_primary;
   ucontext_t* thread = (ucontext_t*)malloc(sizeof(ucontext_t));

@@ -24,6 +24,11 @@ cothread_t co_active() {
   return co_active_;
 }
 
+cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void)) {
+  //Windows fibers do not allow users to supply their own memory
+  return (cothread_t)0;
+}
+
 cothread_t co_create(unsigned int heapsize, void (*coentry)(void)) {
   if(!co_active_) {
     ConvertThreadToFiber(0);
