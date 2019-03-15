@@ -827,7 +827,10 @@ void retro_run(void)
         check_variables();
 
     if (emulated_devices == 2)
+    {
+        GB_update_keys_status(&gameboy[0], 0);
         GB_update_keys_status(&gameboy[1], 1);
+    }
     else if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2))
     {
         for (unsigned i = 0; i < 4; i++)
