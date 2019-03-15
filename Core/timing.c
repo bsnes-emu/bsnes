@@ -161,30 +161,57 @@ main:
     }
 }
 
+static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
+{
+    if (gb->serial_length == 0) {
+        gb->serial_cycles += cycles;
+        return;
+    }
+    
+    while (cycles > gb->serial_length) {
+        advance_serial(gb, gb->serial_length);
+        cycles -= gb->serial_length;
+    }
+    
+    uint16_t previous_serial_cycles = gb->serial_cycles;
+    gb->serial_cycles += cycles;
+    if ((gb->serial_cycles & gb->serial_length) != (previous_serial_cycles & gb->serial_length)) {
+        gb->serial_count++;
+        if (gb->serial_count == 8) {
+            gb->serial_length = 0;
+            gb->serial_count = 0;
+            gb->io_registers[GB_IO_SC] &= ~0x80;
+            gb->io_registers[GB_IO_IF] |= 8;
+        }
+        
+        gb->io_registers[GB_IO_SB] <<= 1;
+        
+        if (gb->serial_transfer_bit_end_callback) {
+            gb->io_registers[GB_IO_SB] |= gb->serial_transfer_bit_end_callback(gb);
+        }
+        else {
+            gb->io_registers[GB_IO_SB] |= 1;
+        }
+        
+        if (gb->serial_length) {
+            /* Still more bits to send */
+            if (gb->serial_transfer_bit_start_callback) {
+                gb->serial_transfer_bit_start_callback(gb, gb->io_registers[GB_IO_SB] & 0x80);
+            }
+        }
+        
+    }
+    return;
+    
+}
+
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {   
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
     GB_timers_run(gb, cycles);
-
-    uint16_t previous_serial_cycles = gb->serial_cycles;
-    gb->serial_cycles += cycles;
-    if (gb->serial_length) {
-        if ((gb->serial_cycles & gb->serial_length) != (previous_serial_cycles & gb->serial_length)) {
-            gb->serial_length = 0;
-            gb->io_registers[GB_IO_SC] &= ~0x80;
-            /* TODO: Does SB "update" bit by bit? */
-            if (gb->serial_transfer_end_callback) {
-                gb->io_registers[GB_IO_SB] = gb->serial_transfer_end_callback(gb);
-            }
-            else {
-                gb->io_registers[GB_IO_SB] = 0xFF;
-            }
-            
-            gb->io_registers[GB_IO_IF] |= 8;
-        }
-    }
+    advance_serial(gb, cycles);
 
     gb->debugger_ticks += cycles;
 

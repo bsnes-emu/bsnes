@@ -52,6 +52,10 @@ typedef struct
     
     uint8_t compression_run_lenth;
     bool compression_run_is_compressed;
+    
+    uint8_t bits_recieved;
+    uint8_t byte_being_recieved;
+    bool bit_to_send;
 } GB_printer_t;
 
 

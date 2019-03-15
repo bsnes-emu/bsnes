@@ -227,8 +227,8 @@ typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
-typedef void (*GB_serial_transfer_start_callback_t)(GB_gameboy_t *gb, uint8_t byte_to_send);
-typedef uint8_t (*GB_serial_transfer_end_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
+typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
 
 typedef struct {
     bool state;
@@ -404,6 +404,7 @@ struct GB_gameboy_internal_s {
         uint16_t serial_cycles;
         uint16_t serial_length;
         uint8_t double_speed_alignment;
+        uint8_t serial_count;
     );
 
     /* APU */
@@ -514,8 +515,8 @@ struct GB_gameboy_internal_s {
         GB_camera_get_pixel_callback_t camera_get_pixel_callback;
         GB_camera_update_request_callback_t camera_update_request_callback;
         GB_rumble_callback_t rumble_callback;
-        GB_serial_transfer_start_callback_t serial_transfer_start_callback;
-        GB_serial_transfer_end_callback_t serial_transfer_end_callback;
+        GB_serial_transfer_bit_start_callback_t serial_transfer_bit_start_callback;
+        GB_serial_transfer_bit_end_callback_t serial_transfer_bit_end_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units
@@ -662,12 +663,12 @@ void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback)
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 
 /* These APIs are used when using internal clock */
-void GB_set_serial_transfer_start_callback(GB_gameboy_t *gb, GB_serial_transfer_start_callback_t callback);
-void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_end_callback_t callback);
+void GB_set_serial_transfer_bit_start_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_start_callback_t callback);
+void GB_set_serial_transfer_bit_end_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_end_callback_t callback);
 
 /* These APIs are used when using external clock */
-uint8_t GB_serial_get_data(GB_gameboy_t *gb);
-void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data);
+bool GB_serial_get_data_bit(GB_gameboy_t *gb);
+void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
 

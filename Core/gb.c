@@ -477,40 +477,45 @@ void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback)
     gb->rumble_callback = callback;
 }
 
-void GB_set_serial_transfer_start_callback(GB_gameboy_t *gb, GB_serial_transfer_start_callback_t callback)
+void GB_set_serial_transfer_bit_start_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_start_callback_t callback)
 {
-    gb->serial_transfer_start_callback = callback;
+    gb->serial_transfer_bit_start_callback = callback;
 }
 
-void GB_set_serial_transfer_end_callback(GB_gameboy_t *gb, GB_serial_transfer_end_callback_t callback)
+void GB_set_serial_transfer_bit_end_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_end_callback_t callback)
 {
-    gb->serial_transfer_end_callback = callback;
+    gb->serial_transfer_bit_end_callback = callback;
 }
 
-uint8_t GB_serial_get_data(GB_gameboy_t *gb)
+bool GB_serial_get_data_bit(GB_gameboy_t *gb)
 {
     if (gb->io_registers[GB_IO_SC] & 1) {
         /* Internal Clock */
         GB_log(gb, "Serial read request while using internal clock. \n");
         return 0xFF;
     }
-    return gb->io_registers[GB_IO_SB];
+    return gb->io_registers[GB_IO_SB] & 0x80;
 }
-void GB_serial_set_data(GB_gameboy_t *gb, uint8_t data)
+void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data)
 {
     if (gb->io_registers[GB_IO_SC] & 1) {
         /* Internal Clock */
         GB_log(gb, "Serial write request while using internal clock. \n");
         return;
     }
-    gb->io_registers[GB_IO_SB] = data;
-    gb->io_registers[GB_IO_IF] |= 8;
+    gb->io_registers[GB_IO_SB] <<= 1;
+    gb->io_registers[GB_IO_SB] |= data;
+    gb->serial_count++;
+    if (gb->serial_count == 8) {
+        gb->io_registers[GB_IO_IF] |= 8;
+        gb->serial_count = 0;
+    }
 }
 
 void GB_disconnect_serial(GB_gameboy_t *gb)
 {
-    gb->serial_transfer_start_callback = NULL;
-    gb->serial_transfer_end_callback = NULL;
+    gb->serial_transfer_bit_start_callback = NULL;
+    gb->serial_transfer_bit_end_callback = NULL;
     
     /* Reset any internally-emulated device. Currently, only the printer. */
     memset(&gb->printer, 0, sizeof(gb->printer));

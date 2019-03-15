@@ -70,7 +70,8 @@ static void handle_command(GB_gameboy_t *gb)
     }
 }
 
-static void serial_start(GB_gameboy_t *gb, uint8_t byte_received)
+
+static void byte_reieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
 {
     gb->printer.byte_to_send = 0;
     switch (gb->printer.command_state) {
@@ -147,12 +148,10 @@ static void serial_start(GB_gameboy_t *gb, uint8_t byte_received)
                 gb->printer.command_state = GB_PRINTER_COMMAND_MAGIC1;
                 return;
             }
+            gb->printer.byte_to_send = 0x81;
+
             break;
         case GB_PRINTER_COMMAND_ACTIVE:
-            gb->printer.byte_to_send = 0x81;
-            break;
-        case GB_PRINTER_COMMAND_STATUS:
-            
             if ((gb->printer.command_id & 0xF) == GB_PRINTER_INIT_COMMAND) {
                 /* Games expect INIT commands to return 0? */
                 gb->printer.byte_to_send = 0;
@@ -160,6 +159,8 @@ static void serial_start(GB_gameboy_t *gb, uint8_t byte_received)
             else {
                 gb->printer.byte_to_send = gb->printer.status;
             }
+            break;
+        case GB_PRINTER_COMMAND_STATUS:
             
             /* Printing is done instantly, but let the game recieve a 6 (Printing) status at least once, for compatibility */
             if (gb->printer.status == 6) {
@@ -184,18 +185,32 @@ static void serial_start(GB_gameboy_t *gb, uint8_t byte_received)
             gb->printer.command_state++;
         }
     }
-
 }
 
-static uint8_t serial_end(GB_gameboy_t *gb)
+static void serial_start(GB_gameboy_t *gb, bool bit_received)
 {
-    return gb->printer.byte_to_send;
+    gb->printer.byte_being_recieved <<= 1;
+    gb->printer.byte_being_recieved |= bit_received;
+    gb->printer.bits_recieved++;
+    if (gb->printer.bits_recieved == 8) {
+        byte_reieve_completed(gb, gb->printer.byte_being_recieved);
+        gb->printer.bits_recieved = 0;
+        gb->printer.byte_being_recieved = 0;
+    }
+}
+
+static bool serial_end(GB_gameboy_t *gb)
+{
+    bool ret = gb->printer.bit_to_send;
+    gb->printer.bit_to_send = gb->printer.byte_to_send & 0x80;
+    gb->printer.byte_to_send <<= 1;
+    return ret;
 }
 
 void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback)
 {
     memset(&gb->printer, 0, sizeof(gb->printer));
-    GB_set_serial_transfer_start_callback(gb, serial_start);
-    GB_set_serial_transfer_end_callback(gb, serial_end);
+    GB_set_serial_transfer_bit_start_callback(gb, serial_start);
+    GB_set_serial_transfer_bit_end_callback(gb, serial_end);
     gb->printer.callback = callback;
 }

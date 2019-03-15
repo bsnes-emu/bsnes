@@ -180,29 +180,29 @@ static void vblank2(GB_gameboy_t *gb)
         audio_callback(gb);
 }
 
-static uint8_t byte_to_send1 = 0xFF, byte_to_send2 = 0xFF;
+static bool bit_to_send1 = true, bit_to_send2 = true;
 
-static void serial_start1(GB_gameboy_t *gb, uint8_t byte_received)
+static void serial_start1(GB_gameboy_t *gb, bool bit_received)
 {
-    byte_to_send1 = byte_received;
+    bit_to_send1 = bit_received;
 }
 
-static uint8_t serial_end1(GB_gameboy_t *gb)
+static bool serial_end1(GB_gameboy_t *gb)
 {
-    uint8_t ret = GB_serial_get_data(&gameboy[1]);
-    GB_serial_set_data(&gameboy[1], byte_to_send1);
+    bool ret = GB_serial_get_data_bit(&gameboy[1]);
+    GB_serial_set_data_bit(&gameboy[1], bit_to_send1);
     return ret;
 }
 
-static void serial_start2(GB_gameboy_t *gb, uint8_t byte_received)
+static void serial_start2(GB_gameboy_t *gb, bool bit_received)
 {
-    byte_to_send2 = byte_received;
+    bit_to_send2 = bit_received;
 }
 
-static uint8_t serial_end2(GB_gameboy_t *gb)
+static bool serial_end2(GB_gameboy_t *gb)
 {
-    uint8_t ret = GB_serial_get_data(&gameboy[0]);
-    GB_serial_set_data(&gameboy[0], byte_to_send2);
+    bool ret = GB_serial_get_data_bit(&gameboy[0]);
+    GB_serial_set_data_bit(&gameboy[0], bit_to_send2);
     return ret;
 }
 
@@ -337,17 +337,17 @@ static void set_link_cable_state(bool state)
 {
     if (state && emulated_devices == 2)
     {
-        GB_set_serial_transfer_start_callback(&gameboy[0], serial_start1);
-        GB_set_serial_transfer_end_callback(&gameboy[0], serial_end1);
-        GB_set_serial_transfer_start_callback(&gameboy[1], serial_start2);
-        GB_set_serial_transfer_end_callback(&gameboy[1], serial_end2);
+        GB_set_serial_transfer_bit_start_callback(&gameboy[0], serial_start1);
+        GB_set_serial_transfer_bit_end_callback(&gameboy[0], serial_end1);
+        GB_set_serial_transfer_bit_start_callback(&gameboy[1], serial_start2);
+        GB_set_serial_transfer_bit_end_callback(&gameboy[1], serial_end2);
     }
     else if (!state)
     {
-        GB_set_serial_transfer_start_callback(&gameboy[0], NULL);
-        GB_set_serial_transfer_end_callback(&gameboy[0], NULL);
-        GB_set_serial_transfer_start_callback(&gameboy[1], NULL);
-        GB_set_serial_transfer_end_callback(&gameboy[1], NULL);
+        GB_set_serial_transfer_bit_start_callback(&gameboy[0], NULL);
+        GB_set_serial_transfer_bit_end_callback(&gameboy[0], NULL);
+        GB_set_serial_transfer_bit_start_callback(&gameboy[1], NULL);
+        GB_set_serial_transfer_bit_end_callback(&gameboy[1], NULL);
     }
 }
 

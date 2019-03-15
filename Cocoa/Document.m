@@ -1376,12 +1376,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         currentPrinterImageData = [[NSMutableData alloc] init];
     }
     [currentPrinterImageData appendBytes:paddedImage length:sizeof(paddedImage)];
-    self.feedImageView.image = [Document imageFromData:currentPrinterImageData
-                                                 width:160
-                                                height:currentPrinterImageData.length / 160 / sizeof(imageBytes[0])
-                                                 scale:2.0];
     /* UI related code must run on main thread. */
     dispatch_async(dispatch_get_main_queue(), ^{
+        self.feedImageView.image = [Document imageFromData:currentPrinterImageData
+                                                     width:160
+                                                    height:currentPrinterImageData.length / 160 / sizeof(imageBytes[0])
+                                                     scale:2.0];
         NSRect frame = self.printerFeedWindow.frame;
         frame.size = self.feedImageView.image.size;
         frame.size.height += self.printerFeedWindow.frame.size.height - self.printerFeedWindow.contentView.frame.size.height;
