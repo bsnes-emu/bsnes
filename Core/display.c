@@ -327,12 +327,12 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (gb->obj_comperators[j] <= objects[index].x) break;
+            if (gb->obj_comparators[j] <= objects[index].x) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
-        memmove(gb->obj_comperators + j + 1, gb->obj_comperators + j, gb->n_visible_objs - j);
+        memmove(gb->obj_comparators + j + 1, gb->obj_comparators + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->obj_comperators[j] = objects[index].x;
+        gb->obj_comparators[j] = objects[index].x;
         gb->n_visible_objs++;
     }
 }
@@ -764,12 +764,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 
                 while (gb->n_visible_objs != 0 &&
                        (gb->position_in_line < 160 || gb->position_in_line >= (uint8_t)(-8)) &&
-                       gb->obj_comperators[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
+                       gb->obj_comparators[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
                     gb->n_visible_objs--;
                 }
                 while (gb->n_visible_objs != 0 &&
                        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
-                       gb->obj_comperators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
+                       gb->obj_comparators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
                     while (gb->fetcher_state < 5) {
                         advance_fetcher_state_machine(gb);
@@ -779,7 +779,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     
                     /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
                     if (gb->extra_penalty_for_sprite_at_0 != 0) {
-                        if (gb->obj_comperators[gb->n_visible_objs - 1] == 0) {
+                        if (gb->obj_comparators[gb->n_visible_objs - 1] == 0) {
                             gb->cycles_for_line += gb->extra_penalty_for_sprite_at_0;
                             GB_SLEEP(gb, display, 28, gb->extra_penalty_for_sprite_at_0);
                             gb->extra_penalty_for_sprite_at_0 = 0;
