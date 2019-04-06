@@ -393,7 +393,7 @@ static void init_for_current_model(unsigned id)
             set_link_cable_state(true);
     }
 
-    struct retro_memory_descriptor descs[8];
+    struct retro_memory_descriptor descs[9];
     size_t size;
     uint16_t bank;
 
@@ -414,26 +414,31 @@ static void init_for_current_model(unsigned id)
     descs[2].start = 0xC000;
     descs[2].len   = 0x1000;
 
-    descs[3].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
-    descs[3].start = 0xA000;
-    descs[3].len   = 0x2000;
+    descs[3].ptr   = descs[2].ptr + (bank * 0x1000);
+    descs[3].start = 0xD000;
+    descs[3].len   = 0x1000;
 
-    descs[4].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_VRAM, &size, &bank);
-    descs[4].start = 0x8000;
+    descs[4].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
+    descs[4].start = 0xA000;
     descs[4].len   = 0x2000;
 
-    descs[5].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_ROM, &size, &bank);
-    descs[5].start = 0x0000;
-    descs[5].len   = 0x4000;
-    descs[5].flags = RETRO_MEMDESC_CONST;
+    descs[5].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_VRAM, &size, &bank);
+    descs[5].start = 0x8000;
+    descs[5].len   = 0x2000;
 
-    descs[6].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
-    descs[6].start = 0xFE00;
-    descs[6].len   = 0x00A0;
+    descs[6].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_ROM, &size, &bank);
+    descs[6].start = 0x0000;
+    descs[6].len   = 0x4000;
+    descs[6].flags = RETRO_MEMDESC_CONST;
 
-    descs[7].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_RAM, &size, &bank) + 0x1000;
-    descs[7].start = 0xD000;
-    descs[7].len   = 0x1000;
+    descs[7].ptr   = descs[6].ptr + (bank * 0x4000);
+    descs[7].start = 0x4000;
+    descs[7].len   = 0x4000;
+    descs[7].flags = RETRO_MEMDESC_CONST;
+
+    descs[8].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
+    descs[8].start = 0xFE00;
+    descs[8].len   = 0x00A0;
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
