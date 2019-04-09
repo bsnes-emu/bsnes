@@ -32,8 +32,10 @@ struct pTableView : pWidget {
   auto _doEdit(GtkCellRendererText* gtkCellRendererText, const char* path, const char* text) -> void;
   auto _doEvent(GdkEventButton* event) -> int;
   auto _doHeaderActivate(GtkTreeViewColumn* column) -> void;
+  auto _doKeyPress(GdkEventKey* event) -> bool;
   auto _doMouseMove() -> int;
   auto _doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const char* path) -> void;
+  auto _updateRulesHint() -> void;
   auto _updateSelected() -> void;
   auto _width(uint column) -> uint;
 
@@ -43,6 +45,7 @@ struct pTableView : pWidget {
   GtkTreeSelection* gtkTreeSelection = nullptr;
   GtkListStore* gtkListStore = nullptr;
   GtkTreeModel* gtkTreeModel = nullptr;
+  GtkEntry* gtkEntry = nullptr;
   vector<uint> currentSelection;
   bool suppressChange = false;
 };

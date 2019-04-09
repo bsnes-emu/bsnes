@@ -21,6 +21,7 @@ namespace nall {
 struct directory : inode {
   directory() = delete;
 
+  static auto copy(const string& source, const string& target) -> bool;  //recursive
   static auto create(const string& pathname, uint permissions = 0755) -> bool;  //recursive
   static auto remove(const string& pathname) -> bool;  //recursive
   static auto exists(const string& pathname) -> bool;
@@ -28,6 +29,7 @@ struct directory : inode {
   static auto folders(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname, pattern);
     folders.sort();
+    for(auto& folder : folders) folder.append("/");  //must append after sorting
     return folders;
   }
 
@@ -39,8 +41,9 @@ struct directory : inode {
 
   static auto contents(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
-    auto files = directory::ufiles(pathname, pattern);
     folders.sort();
+    for(auto& folder : folders) folder.append("/");  //must append after sorting
+    auto files = directory::ufiles(pathname, pattern);
     files.sort();
     for(auto& file : files) folders.append(file);
     return folders;
@@ -49,6 +52,7 @@ struct directory : inode {
   static auto ifolders(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = ufolders(pathname, pattern);
     folders.isort();
+    for(auto& folder : folders) folder.append("/");  //must append after sorting
     return folders;
   }
 
@@ -60,8 +64,9 @@ struct directory : inode {
 
   static auto icontents(const string& pathname, const string& pattern = "*") -> vector<string> {
     auto folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
-    auto files = directory::ufiles(pathname, pattern);
     folders.isort();
+    for(auto& folder : folders) folder.append("/");  //must append after sorting
+    auto files = directory::ufiles(pathname, pattern);
     files.isort();
     for(auto& file : files) folders.append(file);
     return folders;
@@ -151,6 +156,18 @@ private:
   static auto ufiles(const string& pathname, const string& pattern = "*") -> vector<string>;
 };
 
+inline auto directory::copy(const string& source, const string& target) -> bool {
+  bool result = true;
+  if(!directory::create(target)) return result = false;
+  for(auto& name : directory::folders(source)) {
+    if(!directory::copy({source, name}, {target, name})) result = false;
+  }
+  for(auto& name : directory::files(source)) {
+    if(!file::copy({source, name}, {target, name})) result = false;
+  }
+  return result;
+}
+
 #if defined(PLATFORM_WINDOWS)
   inline auto directory::create(const string& pathname, uint permissions) -> bool {
     string path;
@@ -219,7 +236,6 @@ private:
       }
       FindClose(handle);
     }
-    for(auto& name : list) name.append("/");  //must append after sorting
     return list;
   }
 
@@ -305,7 +321,6 @@ private:
       }
       closedir(dp);
     }
-    for(auto& name : list) name.append("/");  //must append after sorting
     return list;
   }
 

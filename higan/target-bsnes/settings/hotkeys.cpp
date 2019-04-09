@@ -2,7 +2,7 @@ auto HotkeySettings::create() -> void {
   setIcon(Icon::Device::Keyboard);
   setText("Hotkeys");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   mappingList.setBatchable();
   mappingList.setHeadered();
   mappingList.onActivate([&] {

@@ -24,6 +24,10 @@ auto mFixedLayout::cell(sSizable sizable) const -> FixedLayoutCell {
   return {};
 }
 
+auto mFixedLayout::cells() const -> vector<FixedLayoutCell> {
+  return state.cells;
+}
+
 auto mFixedLayout::cellCount() const -> uint {
   return state.cells.size();
 }
@@ -61,6 +65,11 @@ auto mFixedLayout::remove(sFixedLayoutCell cell) -> type& {
 auto mFixedLayout::reset() -> type& {
   while(state.cells) remove(state.cells.right());
   return synchronize();
+}
+
+auto mFixedLayout::resize() -> type& {
+  setGeometry(geometry());
+  return *this;
 }
 
 auto mFixedLayout::setEnabled(bool enabled) -> type& {

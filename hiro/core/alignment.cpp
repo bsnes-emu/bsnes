@@ -1,5 +1,7 @@
 #if defined(Hiro_Alignment)
 
+const Alignment Alignment::Center = {0.5, 0.5};
+
 Alignment::Alignment() {
   setAlignment(-1.0, -1.0);
 }

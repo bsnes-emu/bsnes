@@ -33,6 +33,7 @@ auto pTreeViewItem::setBackgroundColor(Color color) -> void {
 }
 
 auto pTreeViewItem::setCheckable(bool checkable) -> void {
+  _updateWidth();
 }
 
 auto pTreeViewItem::setChecked(bool checked) -> void {
@@ -46,6 +47,11 @@ auto pTreeViewItem::setExpanded(bool expanded) -> void {
     auto path = gtk_tree_model_get_path(parentWidget->gtkTreeModel, &gtkIter);
     if(expanded) {
       gtk_tree_view_expand_row(parentWidget->gtkTreeView, path, false);
+      //if you collapse a parent node, GTK collapses all child nodes
+      //this isn't very desirable, so restore any child expansions recursively here
+      for(auto& item : state().items) {
+        item->setExpanded(item->expanded());
+      }
     } else {
       gtk_tree_view_collapse_row(parentWidget->gtkTreeView, path);
     }
@@ -74,6 +80,7 @@ auto pTreeViewItem::setIcon(const image& icon) -> void {
       gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 1, nullptr, -1);
     }
   }
+  _updateWidth();
 }
 
 auto pTreeViewItem::setSelected() -> void {
@@ -92,9 +99,21 @@ auto pTreeViewItem::setText(const string& text) -> void {
   if(auto parentWidget = _parentWidget()) {
     gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 2, (const char*)text, -1);
   }
+  _updateWidth();
 }
 
 //
+
+//recursive function to find the minimum (pre-computed / cached) width of a TreeViewItem tree
+auto pTreeViewItem::_minimumWidth(uint depth) -> uint {
+  uint width = TreeViewIndentation * depth + _width;
+  for(auto& item : state().items) {
+    if(auto self = item->self()) {
+      width = max(width, self->_minimumWidth(depth + 1));
+    }
+  }
+  return width;
+}
 
 auto pTreeViewItem::_parentItem() -> pTreeViewItem* {
   if(auto parentItem = self().parentTreeViewItem()) return parentItem->self();
@@ -104,6 +123,17 @@ auto pTreeViewItem::_parentItem() -> pTreeViewItem* {
 auto pTreeViewItem::_parentWidget() -> pTreeView* {
   if(auto parentWidget = self().parentTreeView(true)) return parentWidget->self();
   return nullptr;
+}
+
+//this is called any time a TreeViewItem's checkability, icon, or text is updated
+//in other words, whenever the width of the item might have changed
+//it may change the requirement of the TreeView needing a scrollbar, so notify the TreeView as well
+auto pTreeViewItem::_updateWidth() -> void {
+  _width = 4;
+  if(state().checkable) _width += 16 + (state().icon || state().text ? 4 : 0);
+  if(auto& icon = state().icon) _width += icon.width() + 2;
+  if(auto& text = state().text) _width += pFont::size(self().font(true), text).width();
+  if(auto parent = _parentWidget()) parent->_updateScrollBars();
 }
 
 }

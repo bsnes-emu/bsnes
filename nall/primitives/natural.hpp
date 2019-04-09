@@ -16,6 +16,7 @@ template<uint Precision> struct Natural {
   inline Natural() : data(0) {}
   template<uint Bits> inline Natural(Natural<Bits> value) { data = mask(value); }
   template<typename T> inline Natural(const T& value) { data = mask(value); }
+  explicit inline Natural(const char* value) { data = mask(toNatural(value)); }
 
   inline operator utype() const { return data; }
 

@@ -24,7 +24,7 @@ auto Program::updateVideoDriver(Window parent) -> void {
   if(!video.ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings.video.driver, "] video driver."
-    }).setParent(parent).error();
+    }).setAlignment(parent).error();
     settings.video.driver = "None";
     return updateVideoDriver(parent);
   }

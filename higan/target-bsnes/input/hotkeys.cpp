@@ -46,9 +46,11 @@ auto InputManager::bindHotkeys() -> void {
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
     video.setBlocking(false);
     audio.setBlocking(false);
+    audio.setDynamic(false);
   }).onRelease([] {
     video.setBlocking(settings.video.blocking);
     audio.setBlocking(settings.audio.blocking);
+    audio.setDynamic(settings.audio.dynamic);
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {

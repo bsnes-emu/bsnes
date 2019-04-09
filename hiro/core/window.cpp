@@ -93,6 +93,10 @@ auto mWindow::geometry() const -> Geometry {
   return state.geometry;
 }
 
+auto mWindow::handle() const -> uintptr_t {
+  return signal(handle);
+}
+
 auto mWindow::maximized() const -> bool {
   return state.maximized;
 }
@@ -184,12 +188,30 @@ auto mWindow::resizable() const -> bool {
 }
 
 auto mWindow::setAlignment(Alignment alignment) -> type& {
-  if(!alignment) alignment = {0.0, 0.0};
   auto workspace = Desktop::workspace();
   auto geometry = frameGeometry();
-  int left = alignment.horizontal() * (workspace.width() - geometry.width());
-  int top = alignment.vertical() * (workspace.height() - geometry.height());
-  setFramePosition({left, top});
+  auto x = alignment.horizontal() * (workspace.width() - geometry.width());
+  auto y = alignment.vertical() * (workspace.height() - geometry.height());
+  setFramePosition({(int)x, (int)y});
+  return *this;
+}
+
+auto mWindow::setAlignment(sWindow relativeTo, Alignment alignment) -> type& {
+  if(!relativeTo) return setAlignment(alignment);
+  auto parent = relativeTo->frameGeometry();
+  auto window = frameGeometry();
+  //+0 .. +1 => within parent window
+  auto x = parent.x() + (parent.width() - window.width()) * alignment.horizontal();
+  auto y = parent.y() + (parent.height() - window.height()) * alignment.vertical();
+  //-1 .. -0 => beyond parent window
+  //... I know, relying on -0 IEE754 here is ... less than ideal
+  if(signbit(alignment.horizontal())) {
+    x = (parent.x() - window.width()) + (parent.width() + window.width()) * abs(alignment.horizontal());
+  }
+  if(signbit(alignment.vertical())) {
+    y = (parent.y() - window.height()) + (parent.height() + window.height()) * abs(alignment.vertical());
+  }
+  setFramePosition({(int)x, (int)y});
   return *this;
 }
 
@@ -197,21 +219,6 @@ auto mWindow::setBackgroundColor(Color color) -> type& {
   state.backgroundColor = color;
   signal(setBackgroundColor, color);
   return *this;
-}
-
-auto mWindow::setCentered(sWindow parent) -> type& {
-  Geometry workspace = Desktop::workspace();
-  Geometry parentGeometry = parent ? parent->frameGeometry() : workspace;
-  Geometry geometry = frameGeometry();
-  //center the window to its parent window ...
-  int x = parentGeometry.x() + (parentGeometry.width()  - geometry.width())  / 2;
-  int y = parentGeometry.y() + (parentGeometry.height() - geometry.height()) / 2;
-  //try and keep the window onscreen ...
-  if(x + geometry.width()  > workspace.width())  x = workspace.width()  - geometry.width();
-  if(y + geometry.height() > workspace.height()) y = workspace.height() - geometry.height();
-  if(x < workspace.x()) x = workspace.x();
-  if(y < workspace.y()) y = workspace.y();
-  return setFrameGeometry({x, y, geometry.width(), geometry.height()});
 }
 
 auto mWindow::setDismissable(bool dismissable) -> type& {
@@ -306,6 +313,15 @@ auto mWindow::setPosition(Position position) -> type& {
   return setGeometry({
     position.x(), position.y(),
     state.geometry.width(), state.geometry.height()
+  });
+}
+
+auto mWindow::setPosition(sWindow relativeTo, Position position) -> type& {
+  if(!relativeTo) return setPosition(position);
+  auto geometry = relativeTo->frameGeometry();
+  return setFramePosition({
+    geometry.x() + position.x(),
+    geometry.y() + position.y()
   });
 }
 

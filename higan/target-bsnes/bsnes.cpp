@@ -18,10 +18,6 @@ auto locate(string name) -> string {
   return {Path::userData(), "bsnes/", name};
 }
 
-auto hiro::initialize() -> void {
-  Application::setName("bsnes");
-}
-
 #include <nall/main.hpp>
 auto nall::main(Arguments arguments) -> void {
   settings.location = locate("settings.bml");
@@ -45,6 +41,7 @@ auto nall::main(Arguments arguments) -> void {
   }
 
   settings.load();
+  Application::setName("bsnes");
   Application::setScreenSaver(settings.general.screenSaver);
   Application::setToolTips(settings.general.toolTips);
   emulator = new SuperFamicom::Interface;

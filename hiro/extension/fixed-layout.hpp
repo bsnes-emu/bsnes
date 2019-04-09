@@ -16,11 +16,13 @@ struct mFixedLayout : mSizable {
   auto append(sSizable sizable, Geometry geometry) -> type&;
   auto cell(uint position) const -> FixedLayoutCell;
   auto cell(sSizable sizable) const -> FixedLayoutCell;
+  auto cells() const -> vector<FixedLayoutCell>;
   auto cellCount() const -> uint;
   auto minimumSize() const -> Size override;
   auto remove(sSizable sizable) -> type&;
   auto remove(sFixedLayoutCell cell) -> type&;
   auto reset() -> type& override;
+  auto resize() -> type&;
   auto setEnabled(bool enabled) -> type& override;
   auto setFont(const Font& font) -> type& override;
   auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;

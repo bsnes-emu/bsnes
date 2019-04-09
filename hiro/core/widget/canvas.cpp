@@ -6,6 +6,10 @@ auto mCanvas::allocate() -> pObject* {
 
 //
 
+auto mCanvas::alignment() const -> Alignment {
+  return state.alignment;
+}
+
 auto mCanvas::color() const -> Color {
   return state.color;
 }
@@ -68,6 +72,12 @@ auto mCanvas::onMousePress(const function<void (Mouse::Button)>& callback) -> ty
 
 auto mCanvas::onMouseRelease(const function<void (Mouse::Button)>& callback) -> type& {
   state.onMouseRelease = callback;
+  return *this;
+}
+
+auto mCanvas::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  signal(setAlignment, alignment);
   return *this;
 }
 

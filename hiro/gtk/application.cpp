@@ -2,6 +2,9 @@
 
 namespace hiro {
 
+auto Log_Ignore(const char* logDomain, GLogLevelFlags logLevel, const char* message, void* userData) -> void {
+}
+
 auto pApplication::modal() -> bool {
   return Application::state().modal > 0;
 }
@@ -85,6 +88,10 @@ auto pApplication::initialize() -> void {
     XFlush(state().display);
   }
   #endif
+
+  //prevent useless terminal messages:
+  //GVFS-RemoteVolumeMonitor: "invoking List() failed for type GProxyVolumeMonitorHal: method not implemented"
+  g_log_set_handler("GVFS-RemoteVolumeMonitor", G_LOG_LEVEL_MASK, Log_Ignore, nullptr);
 
   //set WM_CLASS to Application::name()
   auto name = Application::state().name ? Application::state().name : string{"hiro"};

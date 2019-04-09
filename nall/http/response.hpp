@@ -121,7 +121,7 @@ auto Response::body(const function<bool (const uint8_t*, uint)>& callback) const
   } else if(hasData()) {
     if(!callback(data().data(), data().size())) return false;
   } else if(hasFile()) {
-    filemap map(file(), filemap::mode::read);
+    file_map map(file(), file_map::mode::read);
     if(!callback(map.data(), map.size())) return false;
   } else if(hasText()) {
     if(!callback(text().data<uint8_t>(), text().size())) return false;

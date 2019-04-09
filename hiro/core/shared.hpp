@@ -38,12 +38,12 @@
     } \
     return Object(); \
   } \
-  auto property(const string& name) const { return self().property(name); } \
+  template<typename T = string> auto property(const string& name) const { return self().property<T>(name); } \
   auto remove() { return self().remove(), *this; } \
   auto setEnabled(bool enabled = true) { return self().setEnabled(enabled), *this; } \
   auto setFocused() { return self().setFocused(), *this; } \
   auto setFont(const Font& font = {}) { return self().setFont(font), *this; } \
-  auto setProperty(const string& name, const string& value = "") { return self().setProperty(name, value), *this; } \
+  template<typename T = string, typename U = string> auto setProperty(const string& name, const U& value = {}) { return self().setProperty<T, U>(name, value), *this; } \
   auto setVisible(bool visible = true) { return self().setVisible(visible), *this; } \
   auto visible(bool recursive = false) const { return self().visible(recursive); } \
 
@@ -210,6 +210,7 @@ struct Button : sButton {
 struct Canvas : sCanvas {
   DeclareSharedWidget(Canvas)
 
+  auto alignment() const { return self().alignment(); }
   auto color() const { return self().color(); }
   auto data() { return self().data(); }
   auto droppable() const { return self().droppable(); }
@@ -225,6 +226,7 @@ struct Canvas : sCanvas {
   auto onMouseMove(const function<void (Position)>& callback = {}) { return self().onMouseMove(callback), *this; }
   auto onMousePress(const function<void (Mouse::Button)>& callback = {}) { return self().onMousePress(callback), *this; }
   auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) { return self().onMouseRelease(callback), *this; }
+  auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setColor(Color color) { return self().setColor(color), *this; }
   auto setDroppable(bool droppable = true) { return self().setDroppable(droppable), *this; }
   auto setGradient(Gradient gradient = {}) { return self().setGradient(gradient), *this; }
@@ -761,6 +763,8 @@ struct TreeViewItem : sTreeViewItem {
   auto backgroundColor() const { return self().backgroundColor(); }
   auto checkable() const { return self().checkable(); }
   auto checked() const { return self().checked(); }
+  auto collapse(bool recursive = true) { return self().collapse(recursive), *this; }
+  auto expand(bool recursive = true) { return self().expand(recursive), *this; }
   auto expanded() const { return self().expanded(); }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto icon() const { return self().icon(); }
@@ -788,10 +792,12 @@ struct TreeView : sTreeView {
 
   auto append(sTreeViewItem item) { return self().append(item), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
+  auto collapse(bool recursive = true) { return self().collapse(recursive), *this; }
   auto doActivate() const { return self().doActivate(); }
   auto doChange() const { return self().doChange(); }
   auto doContext() const { return self().doContext(); }
   auto doToggle(sTreeViewItem item) const { return self().doToggle(item); }
+  auto expand(bool recursive = true) { return self().expand(recursive), *this; }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto item(const string& path) const { return self().item(path); }
   auto itemCount() const { return self().itemCount(); }
@@ -908,6 +914,7 @@ struct Window : sWindow {
   auto frameGeometry() const { return self().frameGeometry(); }
   auto fullScreen() const { return self().fullScreen(); }
   auto geometry() const { return self().geometry(); }
+  auto handle() const { return self().handle(); }
   auto maximized() const { return self().maximized(); }
   auto maximumSize() const { return self().maximumSize(); }
   auto menuBar() const { return self().menuBar(); }
@@ -926,9 +933,9 @@ struct Window : sWindow {
   auto remove(sStatusBar statusBar) { return self().remove(statusBar), *this; }
   auto reset() { return self().reset(), *this; }
   auto resizable() const { return self().resizable(); }
-  auto setAlignment(Alignment alignment) { return self().setAlignment(alignment), *this; }
+  auto setAlignment(Alignment alignment = Alignment::Center) { return self().setAlignment(alignment), *this; }
+  auto setAlignment(sWindow relativeTo, Alignment alignment = Alignment::Center) { return self().setAlignment(relativeTo, alignment), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
-  auto setCentered(sWindow parent = {}) { return self().setCentered(parent), *this; }
   auto setDismissable(bool dismissable = true) { return self().setDismissable(dismissable), *this; }
   auto setDroppable(bool droppable = true) { return self().setDroppable(droppable), *this; }
   auto setFrameGeometry(Geometry geometry) { return self().setFrameGeometry(geometry), *this; }
@@ -942,6 +949,7 @@ struct Window : sWindow {
   auto setMinimumSize(Size size = {}) { return self().setMinimumSize(size), *this; }
   auto setModal(bool modal = true) { return self().setModal(modal), *this; }
   auto setPosition(Position position) { return self().setPosition(position), *this; }
+  auto setPosition(sWindow relativeTo, Position position) { return self().setPosition(relativeTo, position), *this; }
   auto setResizable(bool resizable = true) { return self().setResizable(resizable), *this; }
   auto setSize(Size size) { return self().setSize(size), *this; }
   auto setTitle(const string& title = "") { return self().setTitle(title), *this; }

@@ -180,8 +180,6 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   auto pWindow = window->self();
   if(!pWindow) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-  if(pWindow->_modalityDisabled()) return DefWindowProc(hwnd, msg, wparam, lparam);
-
   switch(msg) {
   case WM_CTLCOLORBTN:
   case WM_CTLCOLOREDIT:

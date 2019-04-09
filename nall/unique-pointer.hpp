@@ -4,9 +4,13 @@ namespace nall {
 
 template<typename T>
 struct unique_pointer {
+  template<typename... P> static auto create(P&&... p) {
+    return unique_pointer<T>{new T{forward<P>(p)...}};
+  }
+
   using type = T;
   T* pointer = nullptr;
-  function<auto (T*) -> void> deleter;
+  function<void (T*)> deleter;
 
   unique_pointer(const unique_pointer&) = delete;
   auto operator=(const unique_pointer&) -> unique_pointer& = delete;

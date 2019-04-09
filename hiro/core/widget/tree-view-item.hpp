@@ -6,6 +6,8 @@ struct mTreeViewItem : mObject {
   auto backgroundColor(bool recursive = false) const -> Color;
   auto checkable() const -> bool;
   auto checked() const -> bool;
+  auto collapse(bool recursive = true) -> type&;
+  auto expand(bool recursive = true) -> type&;
   auto expanded() const -> bool;
   auto foregroundColor(bool recursive = false) const -> Color;
   auto icon() const -> image;

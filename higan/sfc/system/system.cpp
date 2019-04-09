@@ -111,6 +111,11 @@ auto System::power(bool reset) -> void {
   if(cartridge.has.SDD1) sdd1.power();
   if(cartridge.has.OBC1) obc1.power();
   if(cartridge.has.MSU1) msu1.power();
+  if(cartridge.has.Cx4) cx4.power();
+  if(cartridge.has.DSP1) dsp1.power();
+  if(cartridge.has.DSP2) dsp2.power();
+  if(cartridge.has.DSP4) dsp4.power();
+  if(cartridge.has.ST0010) st0010.power();
   if(cartridge.has.BSMemorySlot) bsmemory.power();
   if(cartridge.has.SufamiTurboSlotA) sufamiturboA.power();
   if(cartridge.has.SufamiTurboSlotB) sufamiturboB.power();

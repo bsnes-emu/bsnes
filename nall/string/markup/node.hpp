@@ -46,31 +46,39 @@ protected:
 struct Node {
   Node() : shared(new ManagedNode) {}
   Node(const SharedNode& source) : shared(source ? source : new ManagedNode) {}
-  Node(const string& name) : shared(new ManagedNode(name)) {}
-  Node(const string& name, const string& value) : shared(new ManagedNode(name, value)) {}
+  Node(const nall::string& name) : shared(new ManagedNode(name)) {}
+  Node(const nall::string& name, const nall::string& value) : shared(new ManagedNode(name, value)) {}
 
   auto unique() const -> bool { return shared.unique(); }
   auto clone() const -> Node { return shared->clone(); }
   auto copy(Node source) -> void { return shared->copy(source.shared); }
 
   explicit operator bool() const { return shared->_name || shared->_children; }
-  auto name() const -> string { return shared->_name; }
-  auto value() const -> string { return shared->_value; }
+  auto name() const -> nall::string { return shared->_name; }
+  auto value() const -> nall::string { return shared->_value; }
 
-  auto text() const -> string { return value().strip(); }
+  auto value(nall::string& target) const -> bool { if(shared) target = string(); return (bool)shared; }
+  auto value(bool& target) const -> bool { if(shared) target = boolean(); return (bool)shared; }
+  auto value(int& target) const -> bool { if(shared) target = integer(); return (bool)shared; }
+  auto value(uint& target) const -> bool { if(shared) target = natural(); return (bool)shared; }
+  auto value(double& target) const -> bool { if(shared) target = real(); return (bool)shared; }
+
+  auto text() const -> nall::string { return value().strip(); }
+  auto string() const -> nall::string { return value().strip(); }
   auto boolean() const -> bool { return text() == "true"; }
   auto integer() const -> intmax { return text().integer(); }
   auto natural() const -> uintmax { return text().natural(); }
   auto real() const -> double { return text().real(); }
 
-  auto text(const string& fallback) const -> string { return bool(*this) ? text() : fallback; }
+  auto text(const nall::string& fallback) const -> nall::string { return bool(*this) ? text() : fallback; }
+  auto string(const nall::string& fallback) const -> nall::string { return bool(*this) ? string() : fallback; }
   auto boolean(bool fallback) const -> bool { return bool(*this) ? boolean() : fallback; }
   auto integer(intmax fallback) const -> intmax { return bool(*this) ? integer() : fallback; }
   auto natural(uintmax fallback) const -> uintmax { return bool(*this) ? natural() : fallback; }
   auto real(double fallback) const -> double { return bool(*this) ? real() : fallback; }
 
-  auto setName(const string& name = "") -> Node& { shared->_name = name; return *this; }
-  auto setValue(const string& value = "") -> Node& { shared->_value = value; return *this; }
+  auto setName(const nall::string& name = "") -> Node& { shared->_name = name; return *this; }
+  auto setValue(const nall::string& value = "") -> Node& { shared->_value = value; return *this; }
 
   auto reset() -> void { shared->_children.reset(); }
   auto size() const -> uint { return shared->_children.size(); }
@@ -102,7 +110,7 @@ struct Node {
   }
 
   auto sort(function<bool (Node, Node)> comparator = [](auto x, auto y) {
-    return string::compare(x.shared->_name, y.shared->_name) < 0;
+    return nall::string::compare(x.shared->_name, y.shared->_name) < 0;
   }) -> void {
     nall::sort(shared->_children.data(), shared->_children.size(), [&](auto x, auto y) {
       return comparator(x, y);  //this call converts SharedNode objects to Node objects
@@ -114,9 +122,9 @@ struct Node {
     return shared->_children[position];
   }
 
-  auto operator[](const string& path) const -> Node { return shared->_lookup(path); }
-  auto operator()(const string& path) -> Node { return shared->_create(path); }
-  auto find(const string& query) const -> vector<Node> { return shared->_find(query); }
+  auto operator[](const nall::string& path) const -> Node { return shared->_lookup(path); }
+  auto operator()(const nall::string& path) -> Node { return shared->_create(path); }
+  auto find(const nall::string& query) const -> vector<Node> { return shared->_find(query); }
 
   struct iterator {
     auto operator*() -> Node { return {source.shared->_children[position]}; }

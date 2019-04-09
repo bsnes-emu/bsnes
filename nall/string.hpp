@@ -18,6 +18,7 @@
 #include <nall/primitives.hpp>
 #include <nall/shared-pointer.hpp>
 #include <nall/stdint.hpp>
+#include <nall/unique-pointer.hpp>
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
@@ -133,6 +134,9 @@ protected:
 
 public:
   inline string();
+  inline string(string& source) : string() { operator=(source); }
+  inline string(const string& source) : string() { operator=(source); }
+  inline string(string&& source) : string() { operator=(move(source)); }
   template<typename T = char> inline auto get() -> T*;
   template<typename T = char> inline auto data() const -> const T*;
   template<typename T = char> auto size() const -> uint { return _size / sizeof(T); }
@@ -172,15 +176,13 @@ public:
   auto operator> (string_view source) const -> bool { return compare(source) >  0; }
   auto operator>=(string_view source) const -> bool { return compare(source) >= 0; }
 
-  string(const string& source) : string() { operator=(source); }
-  string(string&& source) : string() { operator=(move(source)); }
-
   auto begin() -> char* { return &get()[0]; }
   auto end() -> char* { return &get()[size()]; }
   auto begin() const -> const char* { return &data()[0]; }
   auto end() const -> const char* { return &data()[size()]; }
 
   //atoi.hpp
+  inline auto boolean() const -> bool;
   inline auto integer() const -> intmax;
   inline auto natural() const -> uintmax;
   inline auto hex() const -> uintmax;
@@ -193,11 +195,11 @@ public:
   template<typename T, typename... P> inline auto prepend(const T&, P&&...) -> type&;
   template<typename... P> inline auto prepend(const nall::string_format&, P&&...) -> type&;
   inline auto prepend() -> type&;
-  template<typename T> inline auto _prepend(const stringify<T>&) -> string&;
+  template<typename T> inline auto _prepend(const stringify<T>&) -> type&;
   template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
   template<typename... P> inline auto append(const nall::string_format&, P&&...) -> type&;
   inline auto append() -> type&;
-  template<typename T> inline auto _append(const stringify<T>&) -> string&;
+  template<typename T> inline auto _append(const stringify<T>&) -> type&;
   inline auto length() const -> uint;
 
   //find.hpp

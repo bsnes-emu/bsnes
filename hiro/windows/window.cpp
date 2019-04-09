@@ -7,9 +7,6 @@ static auto CALLBACK Window_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARA
 
   if(auto window = (mWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
     if(auto self = window->self()) {
-      if(self->_modalityDisabled()) {
-        return DefWindowProc(hwnd, msg, wparam, lparam);
-      }
       if(auto result = self->windowProc(hwnd, msg, wparam, lparam)) {
         return result();
       }
@@ -19,8 +16,10 @@ static auto CALLBACK Window_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARA
   return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);
 }
 
-static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
-static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
+//warning: do not add WS_CLIPCHILDREN; this will break painting of Frame ("BUTTON" BS_GROUPBOX) controls
+static const uint PopupStyle = WS_POPUP;
+static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
+static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
 uint pWindow::minimumStatusHeight = 0;
 
@@ -72,7 +71,17 @@ auto pWindow::frameMargin() const -> Geometry {
   uint style = state().fullScreen ? 0 : state().resizable ? ResizableStyle : FixedStyle;
   bool menuVisible = state().menuBar && state().menuBar->visible();
   AdjustWindowRect(&rc, style, menuVisible);
-  return {abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + _statusHeight() - 480};
+  auto& efb = state().fullScreen ? settings.efbPopup : !state().resizable ? settings.efbFixed : settings.efbResizable;
+  return {
+    abs(rc.left) - efb.x,
+    abs(rc.top) - efb.y,
+    (rc.right - rc.left) - 640 - efb.width,
+    (rc.bottom - rc.top) + _statusHeight() - 480 - efb.height
+  };
+}
+
+auto pWindow::handle() const -> uintptr_t {
+  return (uintptr_t)hwnd;
 }
 
 auto pWindow::monitor() const -> uint {
@@ -146,10 +155,13 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
 auto pWindow::setGeometry(Geometry geometry) -> void {
   auto lock = acquire();
   Geometry margin = frameMargin();
+  auto& efb = state().fullScreen ? settings.efbPopup : !state().resizable ? settings.efbFixed : settings.efbResizable;
   SetWindowPos(
     hwnd, nullptr,
-    geometry.x() - margin.x(), geometry.y() - margin.y(),
-    geometry.width() + margin.width(), geometry.height() + margin.height(),
+    geometry.x() - margin.x() - efb.x,
+    geometry.y() - margin.y() - efb.y,
+    geometry.width() + margin.width() + efb.width,
+    geometry.height() + margin.height() + efb.height,
     SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
   );
   if(auto& statusBar = state().statusBar) {
@@ -185,9 +197,13 @@ auto pWindow::setModal(bool modality) -> void {
   if(modality) {
     modalIncrement();
     _modalityUpdate();
-    while(state().modal) {
+    while(!Application::state().quit && state().modal) {
+      if(Application::state().onMain) {
+        Application::doMain();
+      } else {
+        usleep(20 * 1000);
+      }
       Application::processEvents();
-      if(!Application::state().onMain) usleep(20 * 1000);
     }
     _modalityUpdate();
   } else {
@@ -212,6 +228,29 @@ auto pWindow::setVisible(bool visible) -> void {
     sizable->setGeometry(self().geometry().setPosition());
   }
   if(!visible) self().setModal(false);
+
+  //calculate window extended frame bounds: DwmGetWindowAttributes is only valid after the window is visible
+  //by then, it's too late to position the window correctly, but we can cache the results here for next time
+  //because GetWindowRect and DwmGetWindowAttribute returns different unit types, the hiro application *must* be DPI aware
+  if(visible) {
+    //in logical units
+    RECT rc;
+    GetWindowRect(hwnd, &rc);
+
+    //in physical units
+    RECT fc;
+    DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &fc, sizeof(RECT));
+
+    //convert to offsets useful to hiro
+    auto& efb = state().fullScreen ? settings.efbPopup : !state().resizable ? settings.efbFixed : settings.efbResizable;
+    efb.x = fc.left - rc.left;
+    efb.y = fc.top - rc.top;
+    efb.width = efb.x + (rc.right - fc.right);
+    efb.height = efb.y + (rc.bottom - fc.bottom);
+
+    //sanitize inputs: if the bounds are obviously nonsense, give up on trying to compensate for them
+    if(efb.x > 100 || efb.y > 100 || efb.width > 100 || efb.height > 100) efb = {};
+  }
 }
 
 //
@@ -230,8 +269,14 @@ auto pWindow::modalDecrement() -> void {
 
 auto pWindow::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
   if(msg == WM_CLOSE || (msg == WM_KEYDOWN && wparam == VK_ESCAPE && state().dismissable)) {
-    if(state().onClose) self().doClose();
-    else self().setVisible(false);
+    if(state().onClose) {
+      self().doClose();
+      //doClose() may end up destroying the window when terminating the application ...
+      //forcefully return early in said case, so that the modal check below doesn't access the destroyed pWindow object
+      if(Application::state().quit) return true;
+    } else {
+      self().setVisible(false);
+    }
     if(state().modal && !self().visible()) self().setModal(false);
     return true;
   }
@@ -303,10 +348,11 @@ auto pWindow::_geometry() -> Geometry {
     GetWindowRect(hwnd, &rc);
   }
 
-  signed x = rc.left + margin.x();
-  signed y = rc.top + margin.y();
-  signed width = (rc.right - rc.left) - margin.width();
-  signed height = (rc.bottom - rc.top) - margin.height();
+  auto& efb = state().fullScreen ? settings.efbPopup : !state().resizable ? settings.efbFixed : settings.efbResizable;
+  auto x = rc.left + margin.x() + efb.x;
+  auto y = rc.top + margin.y() + efb.y;
+  auto width = (rc.right - rc.left) - margin.width() - efb.width;
+  auto height = (rc.bottom - rc.top) - margin.height() - efb.height;
 
   return {x, y, width, height};
 }

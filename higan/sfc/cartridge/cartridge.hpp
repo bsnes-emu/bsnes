@@ -38,6 +38,12 @@ struct Cartridge {
     boolean OBC1;
     boolean MSU1;
 
+    boolean Cx4;
+    boolean DSP1;
+    boolean DSP2;
+    boolean DSP4;
+    boolean ST0010;
+
     boolean GameBoySlot;
     boolean BSMemorySlot;
     boolean SufamiTurboSlotA;

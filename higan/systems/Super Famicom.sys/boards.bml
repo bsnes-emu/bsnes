@@ -237,7 +237,7 @@ board: SHVC-1CB0N7S-01
       map address=00-3f,80-bf:6000-7fff size=0x2000
       map address=70-71:0000-ffff
 
-board: SHVC-1CB5B-20
+board: SHVC-1CB5B-(01,20)
   processor architecture=GSU
     map address=00-3f,80-bf:3000-34ff
     memory type=ROM content=Program

@@ -100,6 +100,7 @@ auto Settings::process(bool load) -> void {
   bind(boolean, "Emulator/Hack/FastPPU/HiresMode7",       emulator.hack.fastPPU.hiresMode7);
   bind(boolean, "Emulator/Hack/FastDSP/Enable",           emulator.hack.fastDSP.enable);
   bind(boolean, "Emulator/Hack/Coprocessors/DelayedSync", emulator.hack.coprocessors.delayedSync);
+  bind(boolean, "Emulator/Hack/Coprocessors/HLE",         emulator.hack.coprocessors.hle);
   bind(natural, "Emulator/Hack/FastSuperFX",              emulator.hack.fastSuperFX);
   bind(boolean, "Emulator/Cheats/Enable",                 emulator.cheats.enable);
 
@@ -112,7 +113,7 @@ auto Settings::process(bool load) -> void {
 }
 
 auto SettingsWindow::create() -> void {
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   panel.append(videoSettings);
   panel.append(audioSettings);
   panel.append(inputSettings);
@@ -123,7 +124,7 @@ auto SettingsWindow::create() -> void {
   statusBar.setFont(Font().setBold());
 
   setTitle("Settings");
-  setSize({600, 400});
+  setSize({600_sx, 400_sx});
   setAlignment({0.0, 1.0});
   setDismissable();
 

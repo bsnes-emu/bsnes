@@ -113,6 +113,10 @@ auto pCanvas::minimumSize() const -> Size {
   return {0, 0};
 }
 
+auto pCanvas::setAlignment(Alignment) -> void {
+  update();
+}
+
 auto pCanvas::setColor(Color color) -> void {
   update();
 }
@@ -147,6 +151,7 @@ auto pCanvas::update() -> void {
   }
 }
 
+//todo: support cases where the icon size does not match the canvas size (alignment)
 auto pCanvas::_rasterize() -> void {
   @autoreleasepool {
     int width = 0;

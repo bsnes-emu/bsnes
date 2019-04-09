@@ -104,6 +104,7 @@ struct InputJoypadXInput {
 
   auto initialize() -> bool {
     if(!libxinput) libxinput = LoadLibraryA("xinput1_3.dll");
+    if(!libxinput) libxinput = LoadLibraryA("xinput1_4.dll");
     if(!libxinput) return false;
 
     //XInputGetStateEx is an undocumented function; but is required to get the state of the guide button

@@ -7,6 +7,7 @@
 #include <uxtheme.h>
 #include <io.h>
 #include <shlobj.h>
+#include <dwmapi.h>
 #include <nall/windows/guard.hpp>
 #include <nall/windows/registry.hpp>
 #include <nall/windows/utf8.hpp>

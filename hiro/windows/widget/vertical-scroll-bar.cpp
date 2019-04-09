@@ -17,7 +17,7 @@ auto pVerticalScrollBar::destruct() -> void {
 }
 
 auto pVerticalScrollBar::minimumSize() const -> Size {
-  return {18, 0};
+  return {18_sx, 0};
 }
 
 auto pVerticalScrollBar::setLength(unsigned length) -> void {

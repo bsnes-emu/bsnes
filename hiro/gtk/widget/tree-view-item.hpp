@@ -17,10 +17,13 @@ struct pTreeViewItem : pObject {
   auto setSelected() -> void;
   auto setText(const string& text) -> void;
 
+  auto _minimumWidth(uint depth = 0) -> uint;
   auto _parentItem() -> pTreeViewItem*;
   auto _parentWidget() -> pTreeView*;
+  auto _updateWidth() -> void;
 
   GtkTreeIter gtkIter;
+  uint _width = 0;
 };
 
 }

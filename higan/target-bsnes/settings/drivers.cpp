@@ -2,7 +2,7 @@ auto DriverSettings::create() -> void {
   setIcon(Icon::Place::Settings);
   setText("Drivers");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
 
   videoLabel.setText("Video").setFont(Font().setBold());
   videoLayout.setSize({2, 2});
@@ -77,7 +77,7 @@ auto DriverSettings::create() -> void {
     presentation.speedMenu.setEnabled(!videoBlockingToggle.checked() && audioBlockingToggle.checked());
   });
   audioDynamicToggle.setText("Dynamic rate").setToolTip(
-    "(OSS, XAudio drivers only)\n\n"
+    "(OSS, XAudio2, waveOut drivers only)\n\n"
     "Dynamically adjusts the audio frequency by tiny amounts.\n"
     "Use this with video sync enabled, and audio sync disabled.\n\n"
     "This can produce perfectly smooth video and clean audio,\n"
@@ -132,7 +132,7 @@ auto DriverSettings::videoDriverChange() -> void {
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the video driver change now anyway?"
-  ).setParent(*settingsWindow).question() == "Yes") {
+  ).setAlignment(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
     settings.general.crashed = true;
@@ -189,7 +189,7 @@ auto DriverSettings::audioDriverChange() -> void {
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the audio driver change now anyway?"
-  ).setParent(*settingsWindow).question() == "Yes") {
+  ).setAlignment(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
     settings.general.crashed = true;
@@ -275,7 +275,7 @@ auto DriverSettings::inputDriverChange() -> void {
     "Warning: incompatible drivers may cause bsnes to crash.\n"
     "It is highly recommended you unload your game first to be safe.\n"
     "Do you wish to proceed with the input driver change now anyway?"
-  ).setParent(*settingsWindow).question() == "Yes") {
+  ).setAlignment(*settingsWindow).question() == "Yes") {
     program.save();
     program.saveUndoState();
     settings.general.crashed = true;

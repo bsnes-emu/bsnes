@@ -2,7 +2,7 @@ auto VideoSettings::create() -> void {
   setIcon(Icon::Device::Display);
   setText("Video");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
 
   colorAdjustmentLabel.setFont(Font().setBold()).setText("Color Adjustment");
   colorLayout.setSize({3, 3});

@@ -242,6 +242,10 @@ auto pWindow::frameMargin() const -> Geometry {
   }
 }
 
+auto pWindow::handle() const -> uintptr_t {
+  return (uintptr_t)cocoaWindow;
+}
+
 auto pWindow::monitor() const -> uint {
   //TODO
   return 0;

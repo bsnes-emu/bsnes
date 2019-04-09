@@ -2,7 +2,7 @@ auto AudioSettings::create() -> void {
   setIcon(Icon::Device::Speaker);
   setText("Audio");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
 
   effectsLabel.setFont(Font().setBold()).setText("Effects");
   effectsLayout.setSize({3, 3});

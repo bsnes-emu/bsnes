@@ -8,6 +8,7 @@ struct Boolean {
 
   inline Boolean() : data(false) {}
   template<typename T> inline Boolean(const T& value) : data(value) {}
+  explicit inline Boolean(const char* value) { data = !strcmp(value, "true"); }
 
   inline operator bool() const { return data; }
   template<typename T> inline auto& operator=(const T& value) { data = value; return *this; }

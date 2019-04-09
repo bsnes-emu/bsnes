@@ -22,6 +22,11 @@ auto mTreeView::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
+auto mTreeView::collapse(bool recursive) -> type& {
+  for(auto& item : state.items) item->collapse(recursive);
+  return *this;
+}
+
 auto mTreeView::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
@@ -36,6 +41,11 @@ auto mTreeView::doContext() const -> void {
 
 auto mTreeView::doToggle(sTreeViewItem item) const -> void {
   if(state.onToggle) return state.onToggle(item);
+}
+
+auto mTreeView::expand(bool recursive) -> type& {
+  for(auto& item : state.items) item->expand(recursive);
+  return *this;
 }
 
 auto mTreeView::foregroundColor() const -> Color {

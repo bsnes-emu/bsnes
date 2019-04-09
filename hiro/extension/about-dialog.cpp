@@ -1,5 +1,17 @@
 #if defined(Hiro_AboutDialog)
 
+auto AboutDialog::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  state.relativeTo = {};
+  return *this;
+}
+
+auto AboutDialog::setAlignment(sWindow relativeTo, Alignment alignment) -> type& {
+  state.alignment = alignment;
+  state.relativeTo = relativeTo;
+  return *this;
+}
+
 auto AboutDialog::setAuthor(const string& author) -> type& {
   state.author = author;
   return *this;
@@ -27,11 +39,6 @@ auto AboutDialog::setName(const string& name) -> type& {
   return *this;
 }
 
-auto AboutDialog::setParent(sWindow parent) -> type& {
-  state.parent = parent;
-  return *this;
-}
-
 auto AboutDialog::setVersion(const string& version) -> type& {
   state.version = version;
   return *this;
@@ -47,7 +54,7 @@ auto AboutDialog::show() -> void {
   window.onClose([&] { window.setModal(false); });
 
   VerticalLayout layout{&window};
-  layout.setPadding(5);
+  layout.setPadding(5_sx, 5_sy);
 
   Label nameLabel{&layout, Size{~0, 0}};
   nameLabel.setCollapsible();
@@ -59,8 +66,13 @@ auto AboutDialog::show() -> void {
 
   Canvas logoCanvas{&layout, Size{~0, 0}};
   logoCanvas.setCollapsible();
-  logoCanvas.setIcon(state.logo);
-  logoCanvas.setVisible((bool)state.logo);
+  if(state.logo) {
+    image logo{state.logo};
+    logo.scale(sx(logo.width()), sy(logo.height()));
+    logoCanvas.setIcon(logo);
+  } else {
+    logoCanvas.setVisible(false);
+  }
 
   Label descriptionLabel{&layout, Size{~0, 0}};
   descriptionLabel.setCollapsible();
@@ -71,7 +83,7 @@ auto AboutDialog::show() -> void {
 
   HorizontalLayout versionLayout{&layout, Size{~0, 0}, 0};
   versionLayout.setCollapsible();
-  Label versionLabel{&versionLayout, Size{~0, 0}, 3};
+  Label versionLabel{&versionLayout, Size{~0, 0}, 3_sx};
   versionLabel.setAlignment(1.0);
   versionLabel.setFont(Font().setBold());
   versionLabel.setForegroundColor({0, 0, 0});
@@ -85,7 +97,7 @@ auto AboutDialog::show() -> void {
 
   HorizontalLayout authorLayout{&layout, Size{~0, 0}, 0};
   authorLayout.setCollapsible();
-  Label authorLabel{&authorLayout, Size{~0, 0}, 3};
+  Label authorLabel{&authorLayout, Size{~0, 0}, 3_sx};
   authorLabel.setAlignment(1.0);
   authorLabel.setFont(Font().setBold());
   authorLabel.setForegroundColor({0, 0, 0});
@@ -99,7 +111,7 @@ auto AboutDialog::show() -> void {
 
   HorizontalLayout licenseLayout{&layout, Size{~0, 0}, 0};
   licenseLayout.setCollapsible();
-  Label licenseLabel{&licenseLayout, Size{~0, 0}, 3};
+  Label licenseLabel{&licenseLayout, Size{~0, 0}, 3_sx};
   licenseLabel.setAlignment(1.0);
   licenseLabel.setFont(Font().setBold());
   licenseLabel.setForegroundColor({0, 0, 0});
@@ -113,7 +125,7 @@ auto AboutDialog::show() -> void {
 
   HorizontalLayout websiteLayout{&layout, Size{~0, 0}, 0};
   websiteLayout.setCollapsible();
-  Label websiteLabel{&websiteLayout, Size{~0, 0}, 3};
+  Label websiteLabel{&websiteLayout, Size{~0, 0}, 3_sx};
   websiteLabel.setAlignment(1.0);
   websiteLabel.setFont(Font().setBold());
   websiteLabel.setForegroundColor({0, 0, 0});
@@ -123,16 +135,16 @@ auto AboutDialog::show() -> void {
   websiteValue.setFont(Font().setBold());
   websiteValue.setForegroundColor({0, 0, 240});
   websiteValue.setText(state.website);
-  websiteValue.onMouseRelease([&](Mouse::Button button) {
+  websiteValue.onMouseRelease([&](auto button) {
     if(button == Mouse::Button::Left) invoke(state.website);
   });
   if(!state.website) websiteLayout.setVisible(false);
 
   window.setTitle({"About ", state.name ? state.name : Application::name(), " ..."});
   window.setBackgroundColor({255, 255, 240});
-  window.setSize({max(360, layout.minimumSize().width()), layout.minimumSize().height()});
+  window.setSize({max(360_sx, layout.minimumSize().width()), layout.minimumSize().height()});
   window.setResizable(false);
-  window.setCentered(state.parent);
+  window.setAlignment(state.relativeTo, state.alignment);
   window.setDismissable();
   window.setVisible();
   window.setModal();

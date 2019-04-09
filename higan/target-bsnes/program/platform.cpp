@@ -91,7 +91,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
     if(MessageDialog({
       "Error: missing required data: ", name, "\n\n",
       "Would you like to view the online documentation for more information?"
-    }).setParent(*presentation).error({"Yes", "No"}) == "Yes") {
+    }).setAlignment(*presentation).error({"Yes", "No"}) == "Yes") {
       presentation.documentation.doActivate();
     }
   }
@@ -101,7 +101,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 
 auto Program::load(uint id, string name, string type, vector<string> options) -> Emulator::Platform::Load {
   BrowserDialog dialog;
-  dialog.setParent(*presentation);
+  dialog.setAlignment(*presentation);
   dialog.setOptions(options);
 
   if(id == 1 && name == "Super Famicom" && type == "sfc") {

@@ -2,7 +2,7 @@ auto EmulatorSettings::create() -> void {
   setIcon(Icon::Action::Settings);
   setText("Emulator");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
 
   optionsLabel.setText("Options").setFont(Font().setBold());
   inputFocusLabel.setText("When focus is lost:");
@@ -60,6 +60,9 @@ auto EmulatorSettings::create() -> void {
   coprocessorsDelayedSyncOption.setText("Fast coprocessors (delayed sync)").setChecked(settings.emulator.hack.coprocessors.delayedSync).onToggle([&] {
     settings.emulator.hack.coprocessors.delayedSync = coprocessorsDelayedSyncOption.checked();
   });
+  coprocessorsHLEOption.setText("Prefer HLE for coprocessors").setChecked(settings.emulator.hack.coprocessors.hle).onToggle([&] {
+    settings.emulator.hack.coprocessors.hle = coprocessorsHLEOption.checked();
+  });
   superFXLabel.setText("SuperFX clock speed:");
   superFXValue.setAlignment(0.5);
   superFXClock.setLength(71).setPosition((settings.emulator.hack.fastSuperFX - 100) / 10).onChange([&] {
@@ -75,4 +78,5 @@ auto EmulatorSettings::updateConfiguration() -> void {
   emulator->configure("Hacks/FastPPU/HiresMode7", hiresMode7.checked());
   emulator->configure("Hacks/FastDSP/Enable", fastDSPOption.checked());
   emulator->configure("Hacks/Coprocessor/DelayedSync", coprocessorsDelayedSyncOption.checked());
+  emulator->configure("Hacks/Coprocessor/HLE", coprocessorsHLEOption.checked());
 }

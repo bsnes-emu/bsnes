@@ -4,9 +4,12 @@ namespace hiro {
   #include "horizontal-layout.hpp"
   #include "vertical-layout.hpp"
   #include "table-layout.hpp"
+  #include "horizontal-resize-grip.hpp"
+  #include "vertical-resize-grip.hpp"
   #include "list-view.hpp"
   #include "shared.hpp"
-  #include "browser-dialog.hpp"
   #include "message-dialog.hpp"
+  #include "name-dialog.hpp"
+  #include "browser-dialog.hpp"
   #include "about-dialog.hpp"
 }

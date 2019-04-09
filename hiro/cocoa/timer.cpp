@@ -28,7 +28,7 @@
 }
 
 -(void) run:(NSTimer*)instance {
-  if(Application::state().quit) return;
+  if(hiro::Application::state().quit) return;
 
   if(timer->enabled()) {
     timer->doActivate();

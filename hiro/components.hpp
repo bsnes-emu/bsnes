@@ -95,18 +95,24 @@
 #define Hiro_VerticalLayout
 #define Hiro_TableLayout
 
+#if defined(Hiro_Timer) && defined(Hiro_Canvas)
+  #define Hiro_HorizontalResizeGrip
+  #define Hiro_VerticalResizeGrip
+#endif
+
 #if defined(Hiro_TableView)
   #define Hiro_ListView
 #endif
 
 #if defined(Hiro_Button) && defined(Hiro_Canvas) && defined(Hiro_Label)
   #define Hiro_MessageDialog
+  #define Hiro_NameDialog
 #endif
 
-#if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_ListView) && defined(Hiro_MessageDialog)
+#if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_ListView) && defined(Hiro_MessageDialog) && defined(Hiro_NameDialog)
   #define Hiro_BrowserDialog
 #endif
 
-#if defined(Hiro_Label)
+#if defined(Hiro_Canvas) && defined(Hiro_Label)
   #define Hiro_AboutDialog
 #endif

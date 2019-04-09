@@ -5,7 +5,6 @@ namespace nall {
 auto image::impose(blend mode, unsigned targetX, unsigned targetY, image source, unsigned sourceX, unsigned sourceY, unsigned sourceWidth, unsigned sourceHeight) -> void {
   source.transform(_endian, _depth, _alpha.mask(), _red.mask(), _green.mask(), _blue.mask());
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < sourceHeight; y++) {
     const uint8_t* sp = source._data + source.pitch() * (sourceY + y) + source.stride() * sourceX;
     uint8_t* dp = _data + pitch() * (targetY + y) + stride() * targetX;

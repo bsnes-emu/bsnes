@@ -1,16 +1,21 @@
 #if defined(Hiro_Application)
 
+auto Application::abort() -> void {
+  quit();
+  ::abort();
+}
+
 auto Application::doMain() -> void {
   if(state().onMain) return state().onMain();
 }
 
-auto Application::font() -> Font {
-  return state().font;
+auto Application::exit() -> void {
+  quit();
+  ::exit(EXIT_SUCCESS);
 }
 
-auto Application::kill() -> void {
-  quit();
-  exit(EXIT_SUCCESS);
+auto Application::font() -> Font {
+  return state().font;
 }
 
 auto Application::locale() -> Locale& {
@@ -134,7 +139,6 @@ auto Application::Cocoa::onQuit(const function<void ()>& callback) -> void {
 auto Application::initialize() -> void {
   if(!state().initialized) {
     state().initialized = true;
-    hiro::initialize();
     pApplication::initialize();
     pApplication::setScreenSaver(state().screenSaver);
   }

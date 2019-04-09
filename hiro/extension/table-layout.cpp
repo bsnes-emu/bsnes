@@ -33,12 +33,20 @@ auto mTableLayout::cell(sSizable sizable) const -> TableLayoutCell {
   return {};
 }
 
+auto mTableLayout::cells() const -> vector<TableLayoutCell> {
+  return state.cells;
+}
+
 auto mTableLayout::cellCount() const -> uint {
   return state.cells.size();
 }
 
 auto mTableLayout::column(uint position) const -> TableLayoutColumn {
   return state.columns(position, {});
+}
+
+auto mTableLayout::columns() const -> vector<TableLayoutColumn> {
+  return state.columns;
 }
 
 auto mTableLayout::columnCount() const -> uint {
@@ -118,8 +126,17 @@ auto mTableLayout::reset() -> type& {
   return synchronize();
 }
 
+auto mTableLayout::resize() -> type& {
+  setGeometry(geometry());
+  return *this;
+}
+
 auto mTableLayout::row(uint position) const -> TableLayoutRow {
   return state.rows(position, {});
+}
+
+auto mTableLayout::rows() const -> vector<TableLayoutRow> {
+  return state.rows;
 }
 
 auto mTableLayout::rowCount() const -> uint {
@@ -144,7 +161,7 @@ auto mTableLayout::setFont(const Font& font) -> type& {
 }
 
 auto mTableLayout::setGeometry(Geometry requestedGeometry) -> type& {
-  if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
+//if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
 
   auto geometry = requestedGeometry;
   geometry.setX(geometry.x() + padding().x());

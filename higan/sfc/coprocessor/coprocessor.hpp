@@ -18,3 +18,9 @@
 #include <sfc/coprocessor/obc1/obc1.hpp>
 
 #include <sfc/coprocessor/msu1/msu1.hpp>
+
+#include <sfc/coprocessor/cx4/cx4.hpp>
+#include <sfc/coprocessor/dsp1/dsp1.hpp>
+#include <sfc/coprocessor/dsp2/dsp2.hpp>
+#include <sfc/coprocessor/dsp4/dsp4.hpp>
+#include <sfc/coprocessor/st0010/st0010.hpp>

@@ -40,7 +40,7 @@ auto Program::create() -> void {
     MessageDialog(
       "Driver crash detected. Hardware drivers have been disabled.\n"
       "Please reconfigure drivers in the advanced settings panel."
-    ).setParent(*presentation).information();
+    ).setAlignment(*presentation).information();
     settings.video.driver = "None";
     settings.audio.driver = "None";
     settings.input.driver = "None";
@@ -90,5 +90,5 @@ auto Program::quit() -> void {
   video.reset();
   audio.reset();
   input.reset();
-  Application::kill();
+  Application::exit();
 }

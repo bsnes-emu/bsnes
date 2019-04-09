@@ -101,6 +101,25 @@ template<typename T> auto vector<T>::remove(uint64_t offset, uint64_t length) ->
   _size -= length;
 }
 
+template<typename T> auto vector<T>::RemoveWhere::operator==(const T& value) -> type& { return remove<std::equal_to<T>>(value); }
+template<typename T> auto vector<T>::RemoveWhere::operator!=(const T& value) -> type& { return remove<std::not_equal_to<T>>(value); }
+template<typename T> auto vector<T>::RemoveWhere::operator< (const T& value) -> type& { return remove<std::less<T>>(value); }
+template<typename T> auto vector<T>::RemoveWhere::operator<=(const T& value) -> type& { return remove<std::less_equal<T>>(value); }
+template<typename T> auto vector<T>::RemoveWhere::operator> (const T& value) -> type& { return remove<std::greater<T>>(value); }
+template<typename T> auto vector<T>::RemoveWhere::operator>=(const T& value) -> type& { return remove<std::greater_equal<T>>(value); }
+
+template<typename T> template<typename Compare> auto vector<T>::RemoveWhere::remove(const T& value) -> type& {
+  auto source = self.begin();
+  auto target = self.begin();
+  while(source != self.end()) {
+    if(source != target) *target = move(*source);
+    if(!Compare()(*target, value)) ++target;
+    ++source;
+  }
+  self.resize(target.offset());
+  return self;
+}
+
 //
 
 template<typename T> auto vector<T>::takeLeft() -> T {

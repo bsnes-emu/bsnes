@@ -255,7 +255,7 @@ auto pWindow::frameMargin() const -> Geometry {
   };
 }
 
-auto pWindow::handle() const -> uintptr {
+auto pWindow::handle() const -> uintptr_t {
   #if defined(DISPLAY_WINDOWS)
   return (uintptr)GDK_WINDOW_HWND(gtk_widget_get_window(widget));
   #endif

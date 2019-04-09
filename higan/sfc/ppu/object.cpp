@@ -137,8 +137,6 @@ auto PPU::Object::tilefetch() -> void {
       uint16 addr = (pos & 0xfff0) + (y & 7);
 
       oamTile[n].data.bits( 0,15) = ppu.vram[addr + 0];
-      ppu.step(2);
-
       oamTile[n].data.bits(16,31) = ppu.vram[addr + 8];
       ppu.step(2);
     }

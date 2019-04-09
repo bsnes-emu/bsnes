@@ -6,6 +6,8 @@
 #define Display XlibDisplay
 #define Screen XlibScreen
 #define Window XlibWindow
+#define Above XlibAbove
+#define Below XlibBelow
 
 #else
 #undef NALL_XORG_GUARD_HPP
@@ -15,6 +17,8 @@
 #undef Display
 #undef Screen
 #undef Window
+#undef Above
+#undef Below
 
 #ifndef NALL_XORG_GUARD_CONSTANTS
 #define NALL_XORG_GUARD_CONSTANTS

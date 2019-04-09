@@ -24,7 +24,7 @@ struct Bus {
 
   ~Bus();
 
-  alwaysinline auto read(uint24 address, uint8 data) -> uint8;
+  alwaysinline auto read(uint24 address, uint8 data = 0) -> uint8;
   alwaysinline auto write(uint24 address, uint8 data) -> void;
 
   auto reset() -> void;

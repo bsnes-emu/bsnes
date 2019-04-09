@@ -2,6 +2,71 @@
 
 namespace nall {
 
+//scan all four sides of the image for fully transparent pixels, and then crop them
+//imagine an icon centered on a transparent background: this function removes the bordering
+//this certainly won't win any speed awards, but nall::image is meant to be correct and simple, not fast
+auto image::shrink(uint64_t transparentColor) -> void {
+  //top
+  { uint padding = 0;
+    for(uint y : range(_height)) {
+      const uint8_t* sp = _data + pitch() * y;
+      bool found = false;
+      for(uint x : range(_width)) {
+        if(read(sp) != transparentColor) { found = true; break; }
+        sp += stride();
+      }
+      if(found) break;
+      padding++;
+    }
+    crop(0, padding, _width, _height - padding);
+  }
+
+  //bottom
+  { uint padding = 0;
+    for(uint y : reverse(range(_height))) {
+      const uint8_t* sp = _data + pitch() * y;
+      bool found = false;
+      for(uint x : range(_width)) {
+        if(read(sp) != transparentColor) { found = true; break; }
+        sp += stride();
+      }
+      if(found) break;
+      padding++;
+    }
+    crop(0, 0, _width, _height - padding);
+  }
+
+  //left
+  { uint padding = 0;
+    for(uint x : range(_width)) {
+      const uint8_t* sp = _data + stride() * x;
+      bool found = false;
+      for(uint y : range(_height)) {
+        if(read(sp) != transparentColor) { found = true; break; }
+        sp += pitch();
+      }
+      if(found) break;
+      padding++;
+    }
+    crop(padding, 0, _width - padding, _height);
+  }
+
+  //right
+  { uint padding = 0;
+    for(uint x : reverse(range(_width))) {
+      const uint8_t* sp = _data + stride() * x;
+      bool found = false;
+      for(uint y : range(_height)) {
+        if(read(sp) != transparentColor) { found = true; break; }
+        sp += pitch();
+      }
+      if(found) break;
+      padding++;
+    }
+    crop(0, 0, _width - padding, _height);
+  }
+}
+
 auto image::crop(unsigned outputX, unsigned outputY, unsigned outputWidth, unsigned outputHeight) -> bool {
   if(outputX + outputWidth > _width) return false;
   if(outputY + outputHeight > _height) return false;
@@ -9,7 +74,6 @@ auto image::crop(unsigned outputX, unsigned outputY, unsigned outputWidth, unsig
   uint8_t* outputData = allocate(outputWidth, outputHeight, stride());
   unsigned outputPitch = outputWidth * stride();
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < outputHeight; y++) {
     const uint8_t* sp = _data + pitch() * (outputY + y) + stride() * outputX;
     uint8_t* dp = outputData + outputPitch * y;
@@ -32,7 +96,6 @@ auto image::alphaBlend(uint64_t alphaColor) -> void {
   uint64_t alphaG = (alphaColor & _green.mask()) >> _green.shift();
   uint64_t alphaB = (alphaColor & _blue.mask() ) >> _blue.shift();
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < _height; y++) {
     uint8_t* dp = _data + pitch() * y;
     for(unsigned x = 0; x < _width; x++) {
@@ -58,7 +121,6 @@ auto image::alphaBlend(uint64_t alphaColor) -> void {
 auto image::alphaMultiply() -> void {
   unsigned divisor = (1 << _alpha.depth()) - 1;
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < _height; y++) {
     uint8_t* dp = _data + pitch() * y;
     for(unsigned x = 0; x < _width; x++) {
@@ -89,7 +151,6 @@ auto image::transform(bool outputEndian, unsigned outputDepth, uint64_t outputAl
   image output(outputEndian, outputDepth, outputAlphaMask, outputRedMask, outputGreenMask, outputBlueMask);
   output.allocate(_width, _height);
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < _height; y++) {
     const uint8_t* sp = _data + pitch() * y;
     uint8_t* dp = output._data + output.pitch() * y;

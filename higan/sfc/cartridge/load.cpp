@@ -406,8 +406,6 @@ auto Cartridge::loadARMDSP(Markup::Node node) -> void {
 
 //processor(architecture=HG51BS169)
 auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
-  has.HitachiDSP = true;
-
   for(auto& word : hitachidsp.dataROM) word = 0x000000;
   for(auto& word : hitachidsp.dataRAM) word = 0x00;
 
@@ -418,10 +416,6 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   }
   hitachidsp.Roms = roms;  //1 or 2
   hitachidsp.Mapping = 0;  //0 or 1
-
-  for(auto map : node.find("map")) {
-    loadMap(map, {&HitachiDSP::readIO, &hitachidsp}, {&HitachiDSP::writeIO, &hitachidsp});
-  }
 
   if(auto memory = node["memory(type=ROM,content=Program)"]) {
     loadMemory(hitachidsp.rom, memory, File::Required);
@@ -435,6 +429,19 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
     for(auto map : memory.find("map")) {
       loadMap(map, {&HitachiDSP::readRAM, &hitachidsp}, {&HitachiDSP::writeRAM, &hitachidsp});
     }
+  }
+
+  if(configuration.hacks.coprocessors.hle) {
+    has.Cx4 = true;
+    for(auto map : node.find("map")) {
+      loadMap(map, {&Cx4::read, &cx4}, {&Cx4::write, &cx4});
+    }
+    if(auto memory = node["memory(type=RAM,content=Data,architecture=HG51BS169)"]) {
+      for(auto map : memory.find("map")) {
+        loadMap(map, {&Cx4::read, &cx4}, {&Cx4::write, &cx4});
+      }
+    }
+    return;
   }
 
   if(auto memory = node["memory(type=ROM,content=Data,architecture=HG51BS169)"]) {
@@ -455,13 +462,16 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
       loadMap(map, {&HitachiDSP::readDRAM, &hitachidsp}, {&HitachiDSP::writeDRAM, &hitachidsp});
     }
   }
+
+  has.HitachiDSP = true;
+
+  for(auto map : node.find("map")) {
+    loadMap(map, {&HitachiDSP::readIO, &hitachidsp}, {&HitachiDSP::writeIO, &hitachidsp});
+  }
 }
 
 //processor(architecture=uPD7725)
 auto Cartridge::loaduPD7725(Markup::Node node) -> void {
-  has.NECDSP = true;
-  necdsp.revision = NECDSP::Revision::uPD7725;
-
   for(auto& word : necdsp.programROM) word = 0x000000;
   for(auto& word : necdsp.dataROM) word = 0x0000;
   for(auto& word : necdsp.dataRAM) word = 0x0000;
@@ -472,24 +482,53 @@ auto Cartridge::loaduPD7725(Markup::Node node) -> void {
     necdsp.Frequency = 7'600'000;
   }
 
-  for(auto map : node.find("map")) {
-    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
-  }
+  bool failed = false;
 
   if(auto memory = node["memory(type=ROM,content=Program,architecture=uPD7725)"]) {
     if(auto file = game.memory(memory)) {
-      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(2048)) necdsp.programROM[n] = fp->readl(3);
-      }
+      } else failed = true;
     }
   }
 
   if(auto memory = node["memory(type=ROM,content=Data,architecture=uPD7725)"]) {
     if(auto file = game.memory(memory)) {
-      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(1024)) necdsp.dataROM[n] = fp->readl(2);
-      }
+      } else failed = true;
     }
+  }
+
+  if(failed || configuration.hacks.coprocessors.hle) {
+    auto manifest = BML::serialize(game.document);
+    if(manifest.find("identifier: DSP1")) {  //also matches DSP1B
+      has.DSP1 = true;
+      for(auto map : node.find("map")) {
+        loadMap(map, {&DSP1::read, &dsp1}, {&DSP1::write, &dsp1});
+      }
+      return;
+    }
+    if(manifest.find("identifier: DSP2")) {
+      has.DSP2 = true;
+      for(auto map : node.find("map")) {
+        loadMap(map, {&DSP2::read, &dsp2}, {&DSP2::write, &dsp2});
+      }
+      return;
+    }
+    if(manifest.find("identifier: DSP4")) {
+      has.DSP4 = true;
+      for(auto map : node.find("map")) {
+        loadMap(map, {&DSP4::read, &dsp4}, {&DSP4::write, &dsp4});
+      }
+      return;
+    }
+  }
+
+  if(failed) {
+    //throw an error to the user
+    platform->open(ID::SuperFamicom, "<DSP1-4>", File::Read, File::Required);
+    return;
   }
 
   if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD7725)"]) {
@@ -502,13 +541,17 @@ auto Cartridge::loaduPD7725(Markup::Node node) -> void {
       loadMap(map, {&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
     }
   }
+
+  has.NECDSP = true;
+  necdsp.revision = NECDSP::Revision::uPD7725;
+
+  for(auto map : node.find("map")) {
+    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
+  }
 }
 
 //processor(architecture=uPD96050)
 auto Cartridge::loaduPD96050(Markup::Node node) -> void {
-  has.NECDSP = true;
-  necdsp.revision = NECDSP::Revision::uPD96050;
-
   for(auto& word : necdsp.programROM) word = 0x000000;
   for(auto& word : necdsp.dataROM) word = 0x0000;
   for(auto& word : necdsp.dataRAM) word = 0x0000;
@@ -519,24 +562,41 @@ auto Cartridge::loaduPD96050(Markup::Node node) -> void {
     necdsp.Frequency = 11'000'000;
   }
 
-  for(auto map : node.find("map")) {
-    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
-  }
+  bool failed = false;
 
   if(auto memory = node["memory(type=ROM,content=Program,architecture=uPD96050)"]) {
     if(auto file = game.memory(memory)) {
-      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(16384)) necdsp.programROM[n] = fp->readl(3);
-      }
+      } else failed = true;
     }
   }
 
   if(auto memory = node["memory(type=ROM,content=Data,architecture=uPD96050)"]) {
     if(auto file = game.memory(memory)) {
-      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(2048)) necdsp.dataROM[n] = fp->readl(2);
-      }
+      } else failed = false;
     }
+  }
+
+  if(failed || configuration.hacks.coprocessors.hle) {
+    auto manifest = BML::serialize(game.document);
+    if(manifest.find("identifier: ST010")) {
+      has.ST0010 = true;
+      if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD96050)"]) {
+        for(auto map : memory.find("map")) {
+          loadMap(map, {&ST0010::read, &st0010}, {&ST0010::write, &st0010});
+        }
+      }
+      return;
+    }
+  }
+
+  if(failed) {
+    //throw an error to the user
+    platform->open(ID::SuperFamicom, "<ST010-011>", File::Read, File::Required);
+    return;
   }
 
   if(auto memory = node["memory(type=RAM,content=Data,architecture=uPD96050)"]) {
@@ -548,6 +608,13 @@ auto Cartridge::loaduPD96050(Markup::Node node) -> void {
     for(auto map : memory.find("map")) {
       loadMap(map, {&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
     }
+  }
+
+  has.NECDSP = true;
+  necdsp.revision = NECDSP::Revision::uPD96050;
+
+  for(auto map : node.find("map")) {
+    loadMap(map, {&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
   }
 }
 

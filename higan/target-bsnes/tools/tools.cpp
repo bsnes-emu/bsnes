@@ -11,7 +11,7 @@ ManifestViewer manifestViewer;
 ToolsWindow toolsWindow;
 
 auto ToolsWindow::create() -> void {
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   panel.append(cheatEditor);
   panel.append(stateManager);
   panel.append(manifestViewer);
@@ -22,7 +22,7 @@ auto ToolsWindow::create() -> void {
   });
 
   setTitle("Tools");
-  setSize({720, 480});
+  setSize({720_sx, 480_sx});
   setAlignment({1.0, 1.0});
   setDismissable();
 

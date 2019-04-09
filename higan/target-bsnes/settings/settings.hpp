@@ -1,4 +1,6 @@
 struct Settings : Markup::Node {
+  using string = nall::string;
+
   auto load() -> void;
   auto save() -> void;
   auto process(bool load) -> void;
@@ -83,6 +85,7 @@ struct Settings : Markup::Node {
       } fastDSP;
       struct Coprocessors {
         bool delayedSync = true;
+        bool hle = true;
       } coprocessors;
       uint fastSuperFX = 100;
     } hack;
@@ -107,15 +110,15 @@ private:
     Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
     TableLayout colorLayout{&layout, Size{~0, 0}};
       Label luminanceLabel{&colorLayout, Size{0, 0}};
-      Label luminanceValue{&colorLayout, Size{50, 0}};
+      Label luminanceValue{&colorLayout, Size{50_sx, 0}};
       HorizontalSlider luminanceSlider{&colorLayout, Size{~0, 0}};
     //
       Label saturationLabel{&colorLayout, Size{0, 0}};
-      Label saturationValue{&colorLayout, Size{50, 0}};
+      Label saturationValue{&colorLayout, Size{50_sx, 0}};
       HorizontalSlider saturationSlider{&colorLayout, Size{~0, 0}};
     //
       Label gammaLabel{&colorLayout, Size{0, 0}};
-      Label gammaValue{&colorLayout, Size{50, 0}};
+      Label gammaValue{&colorLayout, Size{50_sx, 0}};
       HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
 };
 
@@ -127,15 +130,15 @@ private:
     Label effectsLabel{&layout, Size{~0, 0}, 2};
     TableLayout effectsLayout{&layout, Size{~0, 0}};
       Label skewLabel{&effectsLayout, Size{0, 0}};
-      Label skewValue{&effectsLayout, Size{50, 0}};
+      Label skewValue{&effectsLayout, Size{50_sx, 0}};
       HorizontalSlider skewSlider{&effectsLayout, Size{~0, 0}};
     //
       Label volumeLabel{&effectsLayout, Size{0, 0}};
-      Label volumeValue{&effectsLayout, Size{50, 0}};
+      Label volumeValue{&effectsLayout, Size{50_sx, 0}};
       HorizontalSlider volumeSlider{&effectsLayout, Size{~0, 0}};
     //
       Label balanceLabel{&effectsLayout, Size{0, 0}};
-      Label balanceValue{&effectsLayout, Size{50, 0}};
+      Label balanceValue{&effectsLayout, Size{50_sx, 0}};
       HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
 };
 
@@ -168,12 +171,12 @@ private:
       ComboButton turboList{&selectionLayout, Size{0, 0}};
     TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Button assignMouse1{&controlLayout, Size{100, 0}};
-      Button assignMouse2{&controlLayout, Size{100, 0}};
-      Button assignMouse3{&controlLayout, Size{100, 0}};
+      Button assignMouse1{&controlLayout, Size{100_sx, 0}};
+      Button assignMouse2{&controlLayout, Size{100_sx, 0}};
+      Button assignMouse3{&controlLayout, Size{100_sx, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button assignButton{&controlLayout, Size{80, 0}};
-      Button clearButton{&controlLayout, Size{80, 0}};
+      Button assignButton{&controlLayout, Size{80_sx, 0}};
+      Button clearButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct HotkeySettings : TabFrameItem {
@@ -193,8 +196,8 @@ private:
     TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button assignButton{&controlLayout, Size{80, 0}};
-      Button clearButton{&controlLayout, Size{80, 0}};
+      Button assignButton{&controlLayout, Size{80_sx, 0}};
+      Button clearButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct PathSettings : TabFrameItem {
@@ -205,33 +208,33 @@ public:
   TableLayout layout{this};
     Label gamesLabel{&layout, Size{0, 0}};
     LineEdit gamesPath{&layout, Size{~0, 0}};
-    Button gamesAssign{&layout, Size{80, 0}};
-    Button gamesReset{&layout, Size{80, 0}};
+    Button gamesAssign{&layout, Size{80_sx, 0}};
+    Button gamesReset{&layout, Size{80_sx, 0}};
   //
     Label patchesLabel{&layout, Size{0, 0}};
     LineEdit patchesPath{&layout, Size{~0, 0}};
-    Button patchesAssign{&layout, Size{80, 0}};
-    Button patchesReset{&layout, Size{80, 0}};
+    Button patchesAssign{&layout, Size{80_sx, 0}};
+    Button patchesReset{&layout, Size{80_sx, 0}};
   //
     Label savesLabel{&layout, Size{0, 0}};
     LineEdit savesPath{&layout, Size{~0, 0}};
-    Button savesAssign{&layout, Size{80, 0}};
-    Button savesReset{&layout, Size{80, 0}};
+    Button savesAssign{&layout, Size{80_sx, 0}};
+    Button savesReset{&layout, Size{80_sx, 0}};
   //
     Label cheatsLabel{&layout, Size{0, 0}};
     LineEdit cheatsPath{&layout, Size{~0, 0}};
-    Button cheatsAssign{&layout, Size{80, 0}};
-    Button cheatsReset{&layout, Size{80, 0}};
+    Button cheatsAssign{&layout, Size{80_sx, 0}};
+    Button cheatsReset{&layout, Size{80_sx, 0}};
   //
     Label statesLabel{&layout, Size{0, 0}};
     LineEdit statesPath{&layout, Size{~0, 0}};
-    Button statesAssign{&layout, Size{80, 0}};
-    Button statesReset{&layout, Size{80, 0}};
+    Button statesAssign{&layout, Size{80_sx, 0}};
+    Button statesReset{&layout, Size{80_sx, 0}};
   //
     Label screenshotsLabel{&layout, Size{0, 0}};
     LineEdit screenshotsPath{&layout, Size{~0, 0}};
-    Button screenshotsAssign{&layout, Size{80, 0}};
-    Button screenshotsReset{&layout, Size{80, 0}};
+    Button screenshotsAssign{&layout, Size{80_sx, 0}};
+    Button screenshotsReset{&layout, Size{80_sx, 0}};
 };
 
 struct EmulatorSettings : TabFrameItem {
@@ -259,10 +262,12 @@ public:
       CheckLabel noSpriteLimit{&fastPPULayout, Size{0, 0}};
       CheckLabel hiresMode7{&fastPPULayout, Size{0, 0}};
     CheckLabel fastDSPOption{&layout, Size{~0, 0}};
-    CheckLabel coprocessorsDelayedSyncOption{&layout, Size{~0, 0}};
+    HorizontalLayout coprocessorsLayout{&layout, Size{~0, 0}};
+      CheckLabel coprocessorsDelayedSyncOption{&coprocessorsLayout, Size{0, 0}};
+      CheckLabel coprocessorsHLEOption{&coprocessorsLayout, Size{0, 0}};
     HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
       Label superFXLabel{&superFXLayout, Size{0, 0}};
-      Label superFXValue{&superFXLayout, Size{50, 0}};
+      Label superFXValue{&superFXLayout, Size{50_sx, 0}};
       HorizontalSlider superFXClock{&superFXLayout, Size{~0, 0}};
     Label hacksNote{&layout, Size{~0, 0}};
 };

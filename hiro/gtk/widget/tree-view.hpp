@@ -10,12 +10,16 @@ struct pTreeView : pWidget {
   auto setBackgroundColor(Color color) -> void;
   auto setFocused() -> void override;
   auto setForegroundColor(Color color) -> void;
+  auto setGeometry(Geometry geometry) -> void;
 
   auto _activatePath(GtkTreePath* gtkPath) -> void;
   auto _buttonEvent(GdkEventButton* gdkEvent) -> signed;
   auto _doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void;
   auto _togglePath(string path) -> void;
+  auto _updateScrollBars() -> void;
   auto _updateSelected() -> void;
+  auto _width(sTreeViewItem item, uint depth = 0) -> uint;
+  auto _widthRecursive() -> uint;
 
   GtkScrolledWindow* gtkScrolledWindow = nullptr;
   GtkWidget* gtkWidgetChild = nullptr;

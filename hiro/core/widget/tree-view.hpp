@@ -5,10 +5,12 @@ struct mTreeView : mWidget {
 
   auto append(sTreeViewItem item) -> type&;
   auto backgroundColor() const -> Color;
+  auto collapse(bool recursive = true) -> type&;
   auto doActivate() const -> void;
   auto doChange() const -> void;
   auto doContext() const -> void;
   auto doToggle(sTreeViewItem item) const -> void;
+  auto expand(bool recursive = true) -> type&;
   auto foregroundColor() const -> Color;
   auto item(const string& path) const -> TreeViewItem;
   auto itemCount() const -> uint;

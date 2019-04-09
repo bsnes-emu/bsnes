@@ -10,6 +10,7 @@ objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 objects += sfc-epsonrtc sfc-sharprtc
 objects += sfc-spc7110 sfc-sdd1
 objects += sfc-obc1 sfc-msu1
+objects += sfc-cx4 sfc-dsp1 sfc-dsp2 sfc-dsp4 sfc-st0010
 objects += sfc-bsmemory sfc-sufamiturbo
 
 obj/sfc-interface.o:   sfc/interface/interface.cpp
@@ -48,6 +49,12 @@ obj/sfc-sdd1.o:        sfc/coprocessor/sdd1/sdd1.cpp
 obj/sfc-obc1.o:        sfc/coprocessor/obc1/obc1.cpp
 
 obj/sfc-msu1.o:        sfc/coprocessor/msu1/msu1.cpp
+
+obj/sfc-cx4.o:         sfc/coprocessor/cx4/cx4.cpp
+obj/sfc-dsp1.o:        sfc/coprocessor/dsp1/dsp1.cpp
+obj/sfc-dsp2.o:        sfc/coprocessor/dsp2/dsp2.cpp
+obj/sfc-dsp4.o:        sfc/coprocessor/dsp4/dsp4.cpp
+obj/sfc-st0010.o:      sfc/coprocessor/st0010/st0010.cpp
 
 obj/sfc-bsmemory.o:    sfc/slot/bsmemory/bsmemory.cpp
 obj/sfc-sufamiturbo.o: sfc/slot/sufamiturbo/sufamiturbo.cpp

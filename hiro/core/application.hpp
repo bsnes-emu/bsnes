@@ -2,9 +2,10 @@
 struct Application {
   Application() = delete;
 
+  static auto abort() -> void;
   static auto doMain() -> void;
+  static auto exit() -> void;
   static auto font() -> Font;
-  static auto kill() -> void;
   static auto locale() -> Locale&;
   static auto modal() -> bool;
   static auto name() -> string;

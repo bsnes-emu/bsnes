@@ -1,12 +1,9 @@
 #if defined(Hiro_ListView)
 
 mListView::mListView() {
-  mTableView::onActivate([&] {
-    doActivate();
-  });
-  mTableView::onChange([&] {
-    doChange();
-  });
+  mTableView::onActivate([&] { doActivate(); });
+  mTableView::onChange([&] { doChange(); });
+  mTableView::onContext([&] { doContext(); });
   mTableView::onToggle([&](TableViewCell cell) {
     if(auto item = cell->parentTableViewItem()) {
       if(auto shared = item->instance.acquire()) {
@@ -30,6 +27,10 @@ auto mListView::doActivate() const -> void {
 
 auto mListView::doChange() const -> void {
   if(state.onChange) state.onChange();
+}
+
+auto mListView::doContext() const -> void {
+  if(state.onContext) state.onContext();
 }
 
 auto mListView::doToggle(ListViewItem item) const -> void {
@@ -57,6 +58,11 @@ auto mListView::onChange(const function<void ()>& callback) -> type& {
   return *this;
 }
 
+auto mListView::onContext(const function<void ()>& callback) -> type& {
+  state.onContext = callback;
+  return *this;
+}
+
 auto mListView::onToggle(const function<void (ListViewItem)>& callback) -> type& {
   state.onToggle = callback;
   return *this;
@@ -68,8 +74,24 @@ auto mListView::reset() -> type& {
   return *this;
 }
 
+auto mListView::resize() -> type& {
+  mTableView::resizeColumns();
+  return *this;
+}
+
 auto mListView::selected() const -> ListViewItem {
   return ListViewItem{mTableView::selected()};
+}
+
+auto mListView::setVisible(bool visible) -> type& {
+  mTableView::setVisible(visible);
+#if 0
+  if(visible) {
+    Application::processEvents();  //heavy-handed, but necessary for proper Widget geometry
+    mTableView::resizeColumns();
+  }
+#endif
+  return *this;
 }
 
 //

@@ -13,6 +13,7 @@ template<uint Precision> struct Real {
   inline Real() : data(0.0) {}
   template<int Bits> inline Real(Real<Bits> value) : data((ftype)value) {}
   template<typename T> inline Real(const T& value) : data((ftype)value) {}
+  explicit inline Real(const char* value) : data((ftype)toReal(value)) {}
 
   inline operator ftype() const { return data; }
 

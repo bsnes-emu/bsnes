@@ -22,6 +22,10 @@ auto pCanvas::minimumSize() const -> Size {
   return {0, 0};
 }
 
+auto pCanvas::setAlignment(Alignment) -> void {
+  update();
+}
+
 auto pCanvas::setColor(Color color) -> void {
   update();
 }
@@ -132,21 +136,22 @@ auto QtCanvas::paintEvent(QPaintEvent* event) -> void {
   signed width = p.qtImageWidth;
   signed height = p.qtImageHeight;
   auto geometry = p.pSizable::state().geometry;
+  auto alignment = p.state().alignment ? p.state().alignment : Alignment{0.5, 0.5};
 
   if(width <= geometry.width()) {
     sx = 0;
-    dx = (geometry.width() - width) / 2;
+    dx = (geometry.width() - width) * alignment.horizontal();
   } else {
-    sx = (width - geometry.width()) / 2;
+    sx = (width - geometry.width()) * alignment.horizontal();
     dx = 0;
     width = geometry.width();
   }
 
   if(height <= geometry.height()) {
     sy = 0;
-    dy = (geometry.height() - height) / 2;
+    dy = (geometry.height() - height) * alignment.vertical();
   } else {
-    sy = (height - geometry.height()) / 2;
+    sy = (height - geometry.height()) * alignment.vertical();
     dy = 0;
     height = geometry.height();
   }

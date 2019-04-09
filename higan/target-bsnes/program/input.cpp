@@ -12,7 +12,7 @@ auto Program::updateInputDriver(Window parent) -> void {
   if(!input.ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings.input.driver, "] input driver."
-    }).setParent(parent).error();
+    }).setAlignment(parent).error();
     settings.input.driver = "None";
     return updateInputDriver(parent);
   }

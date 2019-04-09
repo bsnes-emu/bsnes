@@ -119,6 +119,6 @@ auto Program::applyPatchBPS(vector<uint8_t>& input, string location) -> bool {
   MessageDialog({
     error, "\n\n",
     "Please ensure you are using the correct (headerless) ROM for this patch."
-  }).setParent(*presentation).error();
+  }).setAlignment(*presentation).error();
   return false;
 }

@@ -297,6 +297,12 @@ auto pTableView::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -
     }
   }
 
+  //when hovering over a WC_LISTVIEW item, it will become selected after a very short pause (~200ms usually)
+  //this is extremely annoying; so intercept the hover event and block it to suppress the LVN_ITEMCHANGING message
+  if(msg == WM_MOUSEHOVER) {
+    return false;
+  }
+
   return pWidget::windowProc(hwnd, msg, wparam, lparam);
 }
 

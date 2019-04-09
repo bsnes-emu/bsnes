@@ -10,7 +10,7 @@ struct pWindow : pObject {
   auto append(sStatusBar statusBar) -> void;
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
-  auto handle() const -> uintptr;
+  auto handle() const -> uintptr_t;
   auto monitor() const -> uint;
   auto remove(sMenuBar menuBar) -> void;
   auto remove(sSizable sizable) -> void;

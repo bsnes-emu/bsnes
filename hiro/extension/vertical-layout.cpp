@@ -29,6 +29,10 @@ auto mVerticalLayout::cell(sSizable sizable) const -> VerticalLayoutCell {
   return {};
 }
 
+auto mVerticalLayout::cells() const -> vector<VerticalLayoutCell> {
+  return state.cells;
+}
+
 auto mVerticalLayout::cellCount() const -> uint {
   return state.cells.size();
 }
@@ -95,6 +99,11 @@ auto mVerticalLayout::reset() -> type& {
   return synchronize();
 }
 
+auto mVerticalLayout::resize() -> type& {
+  setGeometry(geometry());
+  return *this;
+}
+
 auto mVerticalLayout::setAlignment(maybe<float> alignment) -> type& {
   state.alignment = alignment;
   return synchronize();
@@ -113,7 +122,7 @@ auto mVerticalLayout::setFont(const Font& font) -> type& {
 }
 
 auto mVerticalLayout::setGeometry(Geometry requestedGeometry) -> type& {
-  if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
+//if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
 
   auto geometry = requestedGeometry;
   geometry.setX(geometry.x() + padding().x());

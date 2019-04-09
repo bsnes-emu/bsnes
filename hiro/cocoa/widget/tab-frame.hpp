@@ -34,7 +34,6 @@ struct pTabFrame : pWidget {
   auto _synchronizeSizable() -> void;
 
   CocoaTabFrame* cocoaTabFrame = nullptr;
-  vector<CocoaTabFrameItem*> tabs;
 };
 
 }

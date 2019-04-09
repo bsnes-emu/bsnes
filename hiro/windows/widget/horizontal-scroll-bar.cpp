@@ -17,7 +17,7 @@ auto pHorizontalScrollBar::destruct() -> void {
 }
 
 auto pHorizontalScrollBar::minimumSize() const -> Size {
-  return {0, 18};
+  return {0, 18_sy};
 }
 
 auto pHorizontalScrollBar::setLength(unsigned length) -> void {

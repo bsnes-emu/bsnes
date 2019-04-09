@@ -16,7 +16,7 @@ auto Program::updateAudioDriver(Window parent) -> void {
   if(!audio.ready()) {
     MessageDialog({
       "Error: failed to initialize [", settings.audio.driver, "] audio driver."
-    }).setParent(parent).error();
+    }).setAlignment(parent).error();
     settings.audio.driver = "None";
     return updateAudioDriver(parent);
   }

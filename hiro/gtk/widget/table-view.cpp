@@ -7,13 +7,12 @@ static auto TableView_buttonEvent(GtkTreeView* treeView, GdkEventButton* event, 
 static auto TableView_change(GtkTreeSelection*, pTableView* p) -> void { return p->_doChange(); }
 static auto TableView_edit(GtkCellRendererText* renderer, const char* path, const char* text, pTableView* p) -> void { return p->_doEdit(renderer, path, text); }
 static auto TableView_headerActivate(GtkTreeViewColumn* column, pTableView* p) -> void { return p->_doHeaderActivate(column); }
+static auto TableView_keyPressEvent(GtkTreeView* treeView, GdkEventKey* event, pTableView* p) -> bool { return p->_doKeyPress(event); }
 static auto TableView_mouseMoveEvent(GtkWidget*, GdkEvent*, pTableView* p) -> signed { return p->_doMouseMove(); }
 static auto TableView_popup(GtkTreeView*, pTableView* p) -> void { return p->_doContext(); }
 
 static auto TableView_dataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeModel* model, GtkTreeIter* iter, pTableView* p) -> void { return p->_doDataFunc(column, renderer, iter); }
 static auto TableView_toggle(GtkCellRendererToggle* toggle, const char* path, pTableView* p) -> void { return p->_doToggle(toggle, path); }
-
-//gtk_tree_view_set_rules_hint(gtkTreeView, true);
 
 auto pTableView::construct() -> void {
   gtkWidget = gtk_scrolled_window_new(0, 0);
@@ -39,20 +38,27 @@ auto pTableView::construct() -> void {
 
   g_signal_connect(G_OBJECT(gtkTreeView), "button-press-event", G_CALLBACK(TableView_buttonEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "button-release-event", G_CALLBACK(TableView_buttonEvent), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkTreeView), "key-press-event", G_CALLBACK(TableView_keyPressEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "motion-notify-event", G_CALLBACK(TableView_mouseMoveEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "popup-menu", G_CALLBACK(TableView_popup), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "row-activated", G_CALLBACK(TableView_activate), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeSelection), "changed", G_CALLBACK(TableView_change), (gpointer)this);
 
+  //searching doesn't currently work anyway ...
+  gtkEntry = (GtkEntry*)gtk_entry_new();
+  gtk_tree_view_set_search_entry(gtkTreeView, gtkEntry);
+
   pWidget::construct();
 }
 
 auto pTableView::destruct() -> void {
+  gtk_widget_destroy(GTK_WIDGET(gtkEntry));
   gtk_widget_destroy(gtkWidgetChild);
   gtk_widget_destroy(gtkWidget);
 }
 
 auto pTableView::append(sTableViewColumn column) -> void {
+  _updateRulesHint();
 }
 
 auto pTableView::append(sTableViewItem item) -> void {
@@ -63,6 +69,7 @@ auto pTableView::focused() const -> bool {
 }
 
 auto pTableView::remove(sTableViewColumn column) -> void {
+  _updateRulesHint();
 }
 
 auto pTableView::remove(sTableViewItem item) -> void {
@@ -103,11 +110,13 @@ auto pTableView::resizeColumns() -> void {
 }
 
 auto pTableView::setAlignment(Alignment alignment) -> void {
+  _updateRulesHint();
 }
 
 auto pTableView::setBackgroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_base(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+  _updateRulesHint();
 }
 
 auto pTableView::setBatchable(bool batchable) -> void {
@@ -121,11 +130,13 @@ auto pTableView::setBordered(bool bordered) -> void {
 auto pTableView::setFocused() -> void {
   //gtk_widget_grab_focus() will select the first item if nothing is currently selected
   //this behavior is undesirable. detect selection state first, and restore if required
-  lock();
-  bool selected = gtk_tree_selection_get_selected(gtkTreeSelection, nullptr, nullptr);
-  gtk_widget_grab_focus(gtkWidgetChild);
-  if(!selected) gtk_tree_selection_unselect_all(gtkTreeSelection);
-  unlock();
+  if(!state().batchable) {  //gtk_tree_selection_get_selected() will throw a critical exception in batchable mode
+    lock();
+    bool selected = gtk_tree_selection_get_selected(gtkTreeSelection, nullptr, nullptr);
+    gtk_widget_grab_focus(gtkWidgetChild);
+    if(!selected) gtk_tree_selection_unselect_all(gtkTreeSelection);
+    unlock();
+  }
 }
 
 auto pTableView::setFont(const Font& font) -> void {
@@ -134,6 +145,7 @@ auto pTableView::setFont(const Font& font) -> void {
 auto pTableView::setForegroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_text(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+  _updateRulesHint();
 }
 
 auto pTableView::setGeometry(Geometry geometry) -> void {
@@ -208,11 +220,6 @@ auto pTableView::_createModel() -> void {
   gtkListStore = gtk_list_store_newv(types.size(), types.data());
   gtkTreeModel = GTK_TREE_MODEL(gtkListStore);
   gtk_tree_view_set_model(gtkTreeView, gtkTreeModel);
-
-//  for(auto& item : state().items) {
-//    gtk_list_store_append(gtkListStore, &item->self()->gtkIter);
-//    item->self()->_setState();
-//  }
 }
 
 auto pTableView::_doActivate() -> void {
@@ -344,6 +351,26 @@ auto pTableView::_doHeaderActivate(GtkTreeViewColumn* gtkTreeViewColumn) -> void
   }
 }
 
+auto pTableView::_doKeyPress(GdkEventKey* event) -> bool {
+  if(state().batchable && event->type == GDK_KEY_PRESS) {
+    //when using keyboard to activate tree view items in GTK_SELECTION_MULTIPLE mode, GTK will deselect all but the last item
+    //this code detects said case, blocks the key from being propagated, and calls the activate callback directly
+    //the result is that the enter key can be used to activate multiple selected items at a time
+    //there are four ways to activate items via the keyboard in GTK, so we have to detect all of them here
+    auto modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_SUPER_MASK);  //ignore other modifiers (eg mouse buttons)
+    if((event->keyval == GDK_KEY_Return && !modifiers)
+    || (event->keyval == GDK_KEY_KP_Enter && !modifiers)
+    || (event->keyval == GDK_KEY_space && !modifiers)
+    || (event->keyval == GDK_KEY_space && modifiers == GDK_SHIFT_MASK)
+    ) {
+      _doActivate();
+      return true;
+    }
+  }
+  //allow GTK to handle this keypress
+  return false;
+}
+
 //GtkTreeView::cursor-changed and GtkTreeSelection::changed do not send signals for changes during rubber-banding selection
 //so here we capture motion-notify-event, and if the selections have changed, invoke TableView::onChange
 auto pTableView::_doMouseMove() -> signed {
@@ -368,6 +395,17 @@ auto pTableView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const c
       }
     }
   }
+}
+
+//the rules hint draws each row with alternating background colors
+//this isn't currently exposed as a hiro API call, so try and determine if we should apply it here
+//basically, if there's two or more columns and no custom colors applied, then we do so
+auto pTableView::_updateRulesHint() -> void {
+  bool rules = true;
+  if(state().backgroundColor) rules = false;
+  if(state().foregroundColor) rules = false;
+  if(state().columns.size() <= 1) rules = false;
+  gtk_tree_view_set_rules_hint(gtkTreeView, rules);
 }
 
 //compare currently selected items to previously selected items

@@ -3,47 +3,51 @@
 namespace nall {
 
 template<typename T> struct iterator {
-  iterator(T* self, uint64_t offset) : self(self), offset(offset) {}
-  auto operator*() -> T& { return self[offset]; }
-  auto operator!=(const iterator& source) const -> bool { return offset != source.offset; }
-  auto operator++() -> iterator& { return offset++, *this; }
+  iterator(T* self, uint64_t offset) : _self(self), _offset(offset) {}
+  auto operator*() -> T& { return _self[_offset]; }
+  auto operator!=(const iterator& source) const -> bool { return _offset != source._offset; }
+  auto operator++() -> iterator& { return _offset++, *this; }
+  auto offset() const -> uint64_t { return _offset; }
 
 private:
-  T* self;
-  uint64_t offset;
+  T* _self;
+  uint64_t _offset;
 };
 
 template<typename T> struct iterator_const {
-  iterator_const(const T* self, uint64_t offset) : self(self), offset(offset) {}
-  auto operator*() -> const T& { return self[offset]; }
-  auto operator!=(const iterator_const& source) const -> bool { return offset != source.offset; }
-  auto operator++() -> iterator_const& { return offset++, *this; }
+  iterator_const(const T* self, uint64_t offset) : _self(self), _offset(offset) {}
+  auto operator*() -> const T& { return _self[_offset]; }
+  auto operator!=(const iterator_const& source) const -> bool { return _offset != source._offset; }
+  auto operator++() -> iterator_const& { return _offset++, *this; }
+  auto offset() const -> uint64_t { return _offset; }
 
 private:
-  const T* self;
-  uint64_t offset;
+  const T* _self;
+  uint64_t _offset;
 };
 
 template<typename T> struct reverse_iterator {
-  reverse_iterator(T* self, uint64_t offset) : self(self), offset(offset) {}
-  auto operator*() -> T& { return self[offset]; }
-  auto operator!=(const reverse_iterator& source) const -> bool { return offset != source.offset; }
-  auto operator++() -> reverse_iterator& { return offset--, *this; }
+  reverse_iterator(T* self, uint64_t offset) : _self(self), _offset(offset) {}
+  auto operator*() -> T& { return _self[_offset]; }
+  auto operator!=(const reverse_iterator& source) const -> bool { return _offset != source._offset; }
+  auto operator++() -> reverse_iterator& { return _offset--, *this; }
+  auto offset() const -> uint64_t { return _offset; }
 
 private:
-  T* self;
-  uint64_t offset;
+  T* _self;
+  uint64_t _offset;
 };
 
 template<typename T> struct reverse_iterator_const {
-  reverse_iterator_const(const T* self, uint64_t offset) : self(self), offset(offset) {}
-  auto operator*() -> const T& { return self[offset]; }
-  auto operator!=(const reverse_iterator_const& source) const -> bool { return offset != source.offset; }
-  auto operator++() -> reverse_iterator_const& { return offset--, *this; }
+  reverse_iterator_const(const T* self, uint64_t offset) : _self(self), _offset(offset) {}
+  auto operator*() -> const T& { return _self[_offset]; }
+  auto operator!=(const reverse_iterator_const& source) const -> bool { return _offset != source._offset; }
+  auto operator++() -> reverse_iterator_const& { return _offset--, *this; }
+  auto offset() const -> uint64_t { return _offset; }
 
 private:
-  const T* self;
-  uint64_t offset;
+  const T* _self;
+  uint64_t _offset;
 };
 
 //std::rbegin(), std::rend() is missing from GCC 4.9; which I still target
@@ -55,13 +59,13 @@ template<typename T> auto rbegin(T& self) { return self.rbegin(); }
 template<typename T> auto rend(T& self) { return self.rend(); }
 
 template<typename T> struct reverse_wrapper {
-  T self;
+  auto begin() { return rbegin(_self); }
+  auto end() { return rend(_self); }
 
-  auto begin() { return rbegin(self); }
-  auto end() { return rend(self); }
+  auto begin() const { return rbegin(_self); }
+  auto end() const { return rend(_self); }
 
-  auto begin() const { return rbegin(self); }
-  auto end() const { return rend(self); }
+  T _self;
 };
 
 template<typename T> auto reverse(T& object) -> reverse_wrapper<T&> {

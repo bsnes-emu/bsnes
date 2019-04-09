@@ -39,6 +39,18 @@ auto mTreeViewItem::checked() const -> bool {
   return state.checked;
 }
 
+auto mTreeViewItem::collapse(bool recursive) -> type& {
+  if(recursive) for(auto& item : state.items) item->collapse(recursive);
+  setExpanded(false);
+  return *this;
+}
+
+auto mTreeViewItem::expand(bool recursive) -> type& {
+  setExpanded(true);
+  if(recursive) for(auto& item : state.items) item->expand(recursive);
+  return *this;
+}
+
 auto mTreeViewItem::expanded() const -> bool {
   return state.expanded;
 }

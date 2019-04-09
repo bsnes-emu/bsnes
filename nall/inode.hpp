@@ -31,6 +31,16 @@ struct inode {
     return access(name, X_OK) == 0;
   }
 
+  static auto hidden(const string& name) -> bool {
+    #if defined(PLATFORM_WINDOWS)
+    auto attributes = GetFileAttributes(utf16_t(name));
+    return attributes & FILE_ATTRIBUTE_HIDDEN;
+    #else
+    //todo: is this really the best way to do this? stat doesn't have S_ISHIDDEN ...
+    return name.split("/").last().beginsWith(".");
+    #endif
+  }
+
   static auto mode(const string& name) -> uint {
     struct stat data{};
     stat(name, &data);

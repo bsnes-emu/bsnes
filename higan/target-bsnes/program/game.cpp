@@ -18,7 +18,7 @@ auto Program::load() -> void {
       "Warning: this game image is unverified.\n"
       "Running it *may* be a security risk.\n\n"
       "Do you wish to run the game anyway?"
-    ).setParent(*presentation).question({"Always", "Yes", "No"});
+    ).setAlignment(*presentation).question({"Always", "Yes", "No"});
     if(response == "No") {
       emulator->unload();
       return showMessage("Game loading cancelled");

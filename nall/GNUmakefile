@@ -139,8 +139,6 @@ ifeq ($(threaded),true)
 endif
 
 # paths
-prefix := $(HOME)/.local
-
 ifeq ($(object.path),)
   object.path := obj
 endif
@@ -227,3 +225,10 @@ streq = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),,1)
 
 # function strne(source)
 strne = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),1,)
+
+# prefix
+ifeq ($(platform),windows)
+  prefix := $(subst $([space]),\$([space]),$(strip $(call strtr,$(LOCALAPPDATA),\,/)))
+else
+  prefix := $(HOME)/.local
+endif

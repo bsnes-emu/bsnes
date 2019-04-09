@@ -20,6 +20,7 @@ struct mWindow : mObject {
   auto frameGeometry() const -> Geometry;
   auto fullScreen() const -> bool;
   auto geometry() const -> Geometry;
+  auto handle() const -> uintptr_t;
   auto maximized() const -> bool;
   auto maximumSize() const -> Size;
   auto menuBar() const -> MenuBar;
@@ -38,9 +39,9 @@ struct mWindow : mObject {
   auto remove(sStatusBar statusBar) -> type&;
   auto reset() -> type& override;
   auto resizable() const -> bool;
-  auto setAlignment(Alignment alignment) -> type&;
+  auto setAlignment(Alignment = Alignment::Center) -> type&;
+  auto setAlignment(sWindow relativeTo, Alignment = Alignment::Center) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCentered(sWindow parent = {}) -> type&;
   auto setDismissable(bool dismissable = true) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
   auto setFrameGeometry(Geometry geometry) -> type&;
@@ -53,7 +54,8 @@ struct mWindow : mObject {
   auto setMinimized(bool minimized = true) -> type&;
   auto setMinimumSize(Size size = {}) -> type&;
   auto setModal(bool modal = true) -> type&;
-  auto setPosition(Position position) -> type&;
+  auto setPosition(Position) -> type&;
+  auto setPosition(sWindow relativeTo, Position) -> type&;
   auto setResizable(bool resizable = true) -> type&;
   auto setSize(Size size) -> type&;
   auto setTitle(const string& title = "") -> type&;

@@ -16,11 +16,6 @@
 
 namespace nall {
 
-template<typename T> struct vector_iterator;
-template<typename T> struct vector_iterator_const;
-template<typename T> struct vector_reverse_iterator;
-template<typename T> struct vector_reverse_iterator_const;
-
 template<typename T>
 struct vector_base {
   using type = vector_base;
@@ -100,6 +95,19 @@ struct vector_base {
   auto removeRight(uint64_t length = 1) -> void;
   auto removeLast(uint64_t length = 1) -> void { return removeRight(length); }
   auto remove(uint64_t offset, uint64_t length = 1) -> void;
+  struct RemoveWhere {
+    RemoveWhere(type& source) : self(source) {}
+    auto operator==(const T& value) -> type&;
+    auto operator!=(const T& value) -> type&;
+    auto operator< (const T& value) -> type&;
+    auto operator<=(const T& value) -> type&;
+    auto operator> (const T& value) -> type&;
+    auto operator>=(const T& value) -> type&;
+  private:
+    type& self;
+    template<typename Compare> auto remove(const T& value) -> type&;
+  };
+  auto removeWhere() -> RemoveWhere { return RemoveWhere{*this}; }
 
   auto takeLeft() -> T;
   auto takeFirst() -> T { return move(takeLeft()); }
@@ -127,6 +135,32 @@ struct vector_base {
   auto find(const function<bool (const T& lhs)>& comparator) -> maybe<uint64_t>;
   auto find(const T& value) const -> maybe<uint64_t>;
   auto findSorted(const T& value) const -> maybe<uint64_t>;
+  struct FindWhere {
+    FindWhere(type& source) : self(source) {}
+    auto operator==(const T& value) -> vector_base<iterator<T>>;
+    auto operator!=(const T& value) -> vector_base<iterator<T>>;
+    auto operator< (const T& value) -> vector_base<iterator<T>>;
+    auto operator<=(const T& value) -> vector_base<iterator<T>>;
+    auto operator> (const T& value) -> vector_base<iterator<T>>;
+    auto operator>=(const T& value) -> vector_base<iterator<T>>;
+  private:
+    type& self;
+    template<typename Compare> auto find(const T& value) -> vector_base<iterator<T>>;
+  };
+  auto findWhere() { return FindWhere{*this}; }
+  struct FindWhereConst {
+    FindWhereConst(const type& source) : self(source) {}
+    auto operator==(const T& value) const -> vector_base<iterator_const<T>>;
+    auto operator!=(const T& value) const -> vector_base<iterator_const<T>>;
+    auto operator< (const T& value) const -> vector_base<iterator_const<T>>;
+    auto operator<=(const T& value) const -> vector_base<iterator_const<T>>;
+    auto operator> (const T& value) const -> vector_base<iterator_const<T>>;
+    auto operator>=(const T& value) const -> vector_base<iterator_const<T>>;
+  private:
+    const type& self;
+    template<typename Compare> auto find(const T& value) const -> vector_base<iterator_const<T>>;
+  };
+  auto findWhere() const { return FindWhereConst{*this}; }
   auto foreach(const function<void (const T&)>& callback) -> void;
   auto foreach(const function<void (uint, const T&)>& callback) -> void;
 
@@ -136,6 +170,10 @@ protected:
   uint64_t _left = 0;   //number of allocated elements free on the left of pool
   uint64_t _right = 0;  //number of allocated elements free on the right of pool
 };
+
+template<typename T> auto removeWhere(vector_base<T>& source) { return source.removeWhere(); }
+template<typename T> auto findWhere(vector_base<T>& source) { return source.findWhere(); }
+template<typename T> auto findWhere(const vector_base<T>& source) { return source.findWhere(); }
 
 }
 

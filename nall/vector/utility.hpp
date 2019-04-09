@@ -36,6 +36,36 @@ template<typename T> auto vector<T>::findSorted(const T& value) const -> maybe<u
   return nothing;
 }
 
+template<typename T> auto vector<T>::FindWhere::operator==(const T& value) -> vector<iterator<T>> { return move(find<std::equal_to<T>>(value)); }
+template<typename T> auto vector<T>::FindWhere::operator!=(const T& value) -> vector<iterator<T>> { return move(find<std::not_equal_to<T>>(value)); }
+template<typename T> auto vector<T>::FindWhere::operator< (const T& value) -> vector<iterator<T>> { return move(find<std::less<T>>(value)); }
+template<typename T> auto vector<T>::FindWhere::operator<=(const T& value) -> vector<iterator<T>> { return move(find<std::less_equal<T>>(value)); }
+template<typename T> auto vector<T>::FindWhere::operator> (const T& value) -> vector<iterator<T>> { return move(find<std::greater<T>>(value)); }
+template<typename T> auto vector<T>::FindWhere::operator>=(const T& value) -> vector<iterator<T>> { return move(find<std::greater_equal<T>>(value)); }
+
+template<typename T> template<typename Compare> auto vector<T>::FindWhere::find(const T& value) -> vector<iterator<T>> {
+  vector<iterator<T>> found;
+  for(auto iterator = self.begin(); iterator != self.end(); ++iterator) {
+    if(Compare()(*iterator, value)) found.append(iterator);
+  }
+  return move(found);
+}
+
+template<typename T> auto vector<T>::FindWhereConst::operator==(const T& value) const -> vector<iterator_const<T>> { return move(find<std::equal_to<T>>(value)); }
+template<typename T> auto vector<T>::FindWhereConst::operator!=(const T& value) const -> vector<iterator_const<T>> { return move(find<std::not_equal_to<T>>(value)); }
+template<typename T> auto vector<T>::FindWhereConst::operator< (const T& value) const -> vector<iterator_const<T>> { return move(find<std::less<T>>(value)); }
+template<typename T> auto vector<T>::FindWhereConst::operator<=(const T& value) const -> vector<iterator_const<T>> { return move(find<std::less_equal<T>>(value)); }
+template<typename T> auto vector<T>::FindWhereConst::operator> (const T& value) const -> vector<iterator_const<T>> { return move(find<std::greater<T>>(value)); }
+template<typename T> auto vector<T>::FindWhereConst::operator>=(const T& value) const -> vector<iterator_const<T>> { return move(find<std::greater_equal<T>>(value)); }
+
+template<typename T> template<typename Compare> auto vector<T>::FindWhereConst::find(const T& value) const -> vector<iterator_const<T>> {
+  vector<iterator_const<T>> found;
+  for(auto iterator = self.begin(); iterator != self.end(); ++iterator) {
+    if(Compare()(*iterator, value)) found.append(iterator);
+  }
+  return move(found);
+}
+
 template<typename T> auto vector<T>::foreach(const function<void (const T&)>& callback) -> void {
   for(uint64_t n : range(size())) callback(_pool[n]);
 }

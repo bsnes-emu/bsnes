@@ -57,3 +57,4 @@
 #include "widget/viewport.cpp"
 
 #include "application.cpp"
+#include "settings.cpp"

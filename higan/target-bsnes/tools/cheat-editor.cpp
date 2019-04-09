@@ -1,5 +1,5 @@
 auto CheatDatabase::create() -> void {
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   selectAllButton.setText("Select All").onActivate([&] {
     for(auto item : cheatList.items()) item.setChecked(true);
   });
@@ -10,7 +10,7 @@ auto CheatDatabase::create() -> void {
     addCheats();
   });
 
-  setSize({800, 400});
+  setSize({800_sx, 400_sx});
   setAlignment({0.5, 1.0});
   setDismissable();
 }
@@ -36,7 +36,7 @@ auto CheatDatabase::findCheats() -> void {
     return;
   }
 
-  MessageDialog().setParent(*toolsWindow).setText("Sorry, no cheats were found for this game.").information();
+  MessageDialog().setAlignment(*toolsWindow).setText("Sorry, no cheats were found for this game.").information();
 }
 
 auto CheatDatabase::addCheats() -> void {
@@ -51,7 +51,7 @@ auto CheatDatabase::addCheats() -> void {
 //
 
 auto CheatWindow::create() -> void {
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   tableLayout.setSize({2, 2});
   tableLayout.cell(0).setAlignment({1.0, 0.5});
   tableLayout.cell(2).setAlignment({1.0, 0.0});
@@ -65,7 +65,7 @@ auto CheatWindow::create() -> void {
   acceptButton.onActivate([&] { doAccept(); });
   cancelButton.setText("Cancel").onActivate([&] { setVisible(false); });
 
-  setSize({400, layout.minimumSize().height() + 100});
+  setSize({400_sx, layout.minimumSize().height() + 100_sx});
   setDismissable();
 }
 
@@ -75,7 +75,7 @@ auto CheatWindow::show(Cheat cheat) -> void {
   enableOption.setChecked(cheat.enable);
   doChange();
   setTitle(!cheat.name ? "Add Cheat" : "Edit Cheat");
-  setCentered(*toolsWindow);
+  setAlignment(*toolsWindow);
   setVisible();
   setFocused();
   nameValue.setFocused();
@@ -105,7 +105,7 @@ auto CheatEditor::create() -> void {
   setIcon(Icon::Edit::Replace);
   setText("Cheat Editor");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   cheatList.setBatchable();
   cheatList.setHeadered();
   cheatList.setSortable();
@@ -201,7 +201,7 @@ auto CheatEditor::editCheat(Cheat cheat) -> void {
 auto CheatEditor::removeCheats() -> void {
   if(auto batched = cheatList.batched()) {
     if(MessageDialog("Are you sure you want to permanently remove the selected cheat(s)?")
-    .setParent(*toolsWindow).question() == "Yes") {
+    .setAlignment(*toolsWindow).question() == "Yes") {
       for(auto& item : reverse(batched)) cheats.remove(item.offset());
       cheats.sort();
       refresh();

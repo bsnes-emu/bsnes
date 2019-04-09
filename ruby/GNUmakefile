@@ -1,7 +1,7 @@
 ifeq ($(ruby),)
   ifeq ($(platform),windows)
     ruby += video.wgl video.direct3d video.directdraw video.gdi
-    ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound
+    ruby += audio.asio audio.wasapi audio.xaudio2 audio.directsound audio.waveout
     ruby += input.windows
   else ifeq ($(platform),macos)
     ruby += video.cgl
@@ -42,6 +42,7 @@ ruby.options += $(if $(findstring audio.directsound,$(ruby)),-ldsound -luuid)
 ruby.options += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
 ruby.options += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
 ruby.options += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)
+ruby.options += $(if $(findstring audio.waveout,$(ruby)),-lwinmm)
 ruby.options += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
 
 ruby.options += $(if $(findstring input.sdl,$(ruby)),$(shell sdl2-config --libs))

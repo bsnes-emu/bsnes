@@ -21,6 +21,7 @@ namespace nall {
   using std::initializer_list;
   using std::is_array;
   using std::is_base_of;
+  using std::is_base_of_v;
   using std::is_function;
   using std::is_integral;
   using std::is_integral_v;

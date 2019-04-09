@@ -68,6 +68,12 @@ auto System::serializeAll(serializer& s) -> void {
   if(cartridge.has.OBC1) obc1.serialize(s);
   if(cartridge.has.MSU1) msu1.serialize(s);
 
+  if(cartridge.has.Cx4) cx4.serialize(s);
+  if(cartridge.has.DSP1) dsp1.serialize(s);
+  if(cartridge.has.DSP2) dsp2.serialize(s);
+  if(cartridge.has.DSP4) dsp4.serialize(s);
+  if(cartridge.has.ST0010) st0010.serialize(s);
+
   if(cartridge.has.BSMemorySlot) bsmemory.serialize(s);
   if(cartridge.has.SufamiTurboSlotA) sufamiturboA.serialize(s);
   if(cartridge.has.SufamiTurboSlotB) sufamiturboB.serialize(s);

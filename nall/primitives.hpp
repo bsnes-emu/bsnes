@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nall/atoi.hpp>
 #include <nall/serializer.hpp>
 #include <nall/traits.hpp>
 

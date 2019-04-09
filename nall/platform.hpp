@@ -120,4 +120,5 @@ namespace Math {
   #define unreachable throw
 #endif
 
+#define export $export
 #define register $register

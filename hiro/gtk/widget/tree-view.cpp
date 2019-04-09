@@ -2,6 +2,8 @@
 
 namespace hiro {
 
+static const uint TreeViewIndentation = 20;
+
 //gtk_tree_view_collapse_all(gtkTreeView);
 //gtk_tree_view_expand_all(gtkTreeView);
 
@@ -26,7 +28,7 @@ auto pTreeView::construct() -> void {
   gtkTreeSelection = gtk_tree_view_get_selection(gtkTreeView);
   gtk_tree_view_set_headers_visible(gtkTreeView, false);
   gtk_tree_view_set_show_expanders(gtkTreeView, false);
-  gtk_tree_view_set_level_indentation(gtkTreeView, 20);
+  gtk_tree_view_set_level_indentation(gtkTreeView, TreeViewIndentation);
   gtk_container_add(GTK_CONTAINER(gtkWidget), gtkWidgetChild);
   gtk_widget_show(gtkWidgetChild);
 
@@ -103,6 +105,11 @@ auto pTreeView::setFocused() -> void {
 auto pTreeView::setForegroundColor(Color color) -> void {
   auto gdkColor = CreateColor(color);
   gtk_widget_modify_text(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+}
+
+auto pTreeView::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  _updateScrollBars();
 }
 
 //
@@ -196,6 +203,35 @@ auto pTreeView::_togglePath(string path) -> void {
     item->state.checked = checked;
     if(!locked()) self().doToggle(item);
   }
+}
+
+//it is necessary to compute the minimum width necessary to show all items in a tree,
+//before a horizontal scroll bar must be shown. this is because GTK2 (and possibly GTK3)
+//fail to subtract the tree view indentation level on items before determining if the
+//horizontal scroll bar is necessary. as a result, without this, the scroll bar shows up
+//far before it is necessary, and gets worse the more nested the tree is.
+//
+//this is called whenever the TreeView geometry changes, or whenever a TreeViewItem's
+//checkability, icon, or text is updated. in other words, whenever the need for a horizontal
+//scroll bar to show all items in the tree is necessary or not.
+auto pTreeView::_updateScrollBars() -> void {
+  int maximumWidth = self().geometry().width() - 6;
+  if(auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow)) {
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(scrollBar, &allocation);
+    if(gtk_widget_get_visible(scrollBar)) maximumWidth -= allocation.width;
+  }
+
+  int minimumWidth = 0;
+  for(auto& item : state().items) {
+    if(auto self = item->self()) {
+      minimumWidth = max(minimumWidth, self->_minimumWidth());
+    }
+  }
+
+  gtk_scrolled_window_set_policy(gtkScrolledWindow,
+    minimumWidth >= maximumWidth ? GTK_POLICY_ALWAYS : GTK_POLICY_NEVER,
+    GTK_POLICY_AUTOMATIC);
 }
 
 auto pTreeView::_updateSelected() -> void {

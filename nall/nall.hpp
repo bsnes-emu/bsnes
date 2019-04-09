@@ -36,6 +36,7 @@
 #include <nall/hid.hpp>
 #include <nall/image.hpp>
 #include <nall/inode.hpp>
+#include <nall/instance.hpp>
 #include <nall/interpolation.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/iterator.hpp>
@@ -50,7 +51,6 @@
 #include <nall/path.hpp>
 #include <nall/pointer.hpp>
 #include <nall/primitives.hpp>
-#include <nall/property.hpp>
 #include <nall/queue.hpp>
 #include <nall/random.hpp>
 #include <nall/range.hpp>
@@ -66,6 +66,7 @@
 #include <nall/traits.hpp>
 #include <nall/unique-pointer.hpp>
 #include <nall/utility.hpp>
+#include <nall/variant.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
 #include <nall/view.hpp>

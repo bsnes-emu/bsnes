@@ -79,5 +79,6 @@ static vector<wObject> windows;
 #include "widget/viewport.hpp"
 
 #include "application.hpp"
+#include "settings.hpp"
 
 #undef Declare

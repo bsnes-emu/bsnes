@@ -34,6 +34,10 @@
   #include <ruby/audio/wasapi.cpp>
 #endif
 
+#if defined(AUDIO_WAVEOUT)
+  #include <ruby/audio/waveout.cpp>
+#endif
+
 #if defined(AUDIO_XAUDIO2)
   #include <ruby/audio/xaudio2.cpp>
 #endif
@@ -174,6 +178,10 @@ auto Audio::create(string driver) -> bool {
   if(driver == "WASAPI") self.instance = new AudioWASAPI(*this);
   #endif
 
+  #if defined(AUDIO_WAVEOUT)
+  if(driver == "waveOut") self.instance = new AudioWaveOut(*this);
+  #endif
+
   #if defined(AUDIO_XAUDIO2)
   if(driver == "XAudio 2.1") self.instance = new AudioXAudio2(*this);
   #endif
@@ -200,6 +208,10 @@ auto Audio::hasDrivers() -> vector<string> {
 
   #if defined(AUDIO_DIRECTSOUND)
   "DirectSound 7.0",
+  #endif
+
+  #if defined(AUDIO_WAVEOUT)
+  "waveOut",
   #endif
 
   #if defined(AUDIO_ALSA)
@@ -238,6 +250,8 @@ auto Audio::optimalDriver() -> string {
   return "XAudio 2.1";
   #elif defined(AUDIO_DIRECTSOUND)
   return "DirectSound 7.0";
+  #elif defined(AUDIO_WAVEOUT)
+  return "waveOut";
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OSS)
@@ -256,7 +270,9 @@ auto Audio::optimalDriver() -> string {
 }
 
 auto Audio::safestDriver() -> string {
-  #if defined(AUDIO_DIRECTSOUND)
+  #if defined(AUDIO_WAVEOUT)
+  return "waveOut";
+  #elif defined(AUDIO_DIRECTSOUND)
   return "DirectSound 7.0";
   #elif defined(AUDIO_WASAPI)
   return "WASAPI";

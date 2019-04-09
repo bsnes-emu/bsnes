@@ -19,7 +19,7 @@ auto pRadioLabel::destruct() -> void {
 
 auto pRadioLabel::minimumSize() const -> Size {
   auto size = pFont::size(self().font(true), state().text ? state().text : " ");
-  return {size.width() + 20, size.height() + 4};
+  return {size.width() + 20_sx, size.height() + 4_sy};
 }
 
 auto pRadioLabel::setChecked() -> void {

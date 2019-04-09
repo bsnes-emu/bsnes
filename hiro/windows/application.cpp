@@ -11,17 +11,17 @@ auto pApplication::modal() -> bool {
 }
 
 auto pApplication::run() -> void {
-  MSG msg;
-  if(Application::state().onMain) {
-    while(!Application::state().quit) {
+  while(!Application::state().quit) {
+    if(Application::state().onMain) {
+      //doMain() is responsible for sleeping the thread where practical
       Application::doMain();
-      processEvents();
+      if(Application::state().quit) break;
+    } else {
+      //avoid consuming 100% CPU thread usage
+      usleep(20 * 1000);
     }
-  } else {
-    MSG msg;
-    while(GetMessage(&msg, 0, 0, 0)) {
-      Application_processDialogMessage(msg);
-    }
+    //called after doMain(), in case doMain() calls Application::quit()
+    processEvents();
   }
 }
 

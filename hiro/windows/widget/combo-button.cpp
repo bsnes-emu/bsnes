@@ -30,7 +30,7 @@ auto pComboButton::minimumSize() const -> Size {
   for(auto& item : state().items) {
     width = max(width, pFont::size(hfont, item->state.text).width());
   }
-  return {width + 24, pFont::size(hfont, " ").height() + 10};
+  return {width + 24_sx, pFont::size(hfont, " ").height() + 10_sy};
 }
 
 auto pComboButton::remove(sComboButtonItem item) -> void {

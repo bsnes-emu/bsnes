@@ -2,10 +2,9 @@
 
 namespace hiro {
 
+//warning: WS_CLIPSIBLINGS flag will prevent Label widgets from rendering inside of Frame widgets
 auto pLabel::construct() -> void {
-  hwnd = CreateWindow(L"hiroWidget", L"",
-    WS_CHILD | WS_CLIPSIBLINGS,
-    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"hiroWidget", L"", WS_CHILD, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
   pWidget::construct();
   setText(state().text);
 }

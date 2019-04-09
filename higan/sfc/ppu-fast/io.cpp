@@ -53,7 +53,8 @@ auto PPU::readOAM(uint10 address) -> uint8 {
 
 auto PPU::writeOAM(uint10 address, uint8 data) -> void {
   Line::flush();
-  if(!io.displayDisable && cpu.vcounter() < vdisp()) address = latch.oamAddress;
+  //Uniracers 2-player mode hack
+  if(!io.displayDisable && cpu.vcounter() < vdisp()) address = 0x0218;  //latch.oamAddress;
   return writeObject(address, data);
 }
 

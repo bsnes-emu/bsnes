@@ -7,6 +7,7 @@ struct BrowserDialogWindow {
   auto accept() -> void;
   auto activate() -> void;
   auto change() -> void;
+  auto context() -> void;
   auto isFolder(const string& name) -> bool;
   auto isMatch(const string& name) -> bool;
   auto run() -> BrowserDialog::Response;
@@ -15,18 +16,26 @@ struct BrowserDialogWindow {
 private:
   Window window;
     VerticalLayout layout{&window};
-      HorizontalLayout pathLayout{&layout, Size{~0, 0}, 5};
+      HorizontalLayout pathLayout{&layout, Size{~0, 0}, 5_sx};
         LineEdit pathName{&pathLayout, Size{~0, 0}, 0};
         Button pathRefresh{&pathLayout, Size{0, 0}, 0};
+        Button pathNew{&pathLayout, Size{0, 0}, 0};
         Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathUp{&pathLayout, Size{0, 0}, 0};
-      ListView view{&layout, Size{~0, ~0}, 5};
+      ListView view{&layout, Size{~0, ~0}, 5_sx};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-        ComboButton filterList{&controlLayout, Size{0, 0}, 5};
-        LineEdit fileName{&controlLayout, Size{~0, 0}, 5};
-        ComboButton optionList{&controlLayout, Size{0, 0}, 5};
-        Button acceptButton{&controlLayout, Size{80, 0}, 5};
-        Button cancelButton{&controlLayout, Size{80, 0}, 5};
+        ComboButton filterList{&controlLayout, Size{0, 0}, 5_sx};
+        LineEdit fileName{&controlLayout, Size{~0, 0}, 5_sx};
+        ComboButton optionList{&controlLayout, Size{0, 0}, 5_sx};
+        Button acceptButton{&controlLayout, Size{80_sx, 0}, 5_sx};
+        Button cancelButton{&controlLayout, Size{80_sx, 0}, 5_sx};
+
+  PopupMenu contextMenu;
+    MenuItem createAction{&contextMenu};
+    MenuItem renameAction{&contextMenu};
+    MenuItem removeAction{&contextMenu};
+    MenuSeparator contextSeparator{&contextMenu};
+    MenuCheckItem showHiddenOption{&contextMenu};
 
   BrowserDialog::State& state;
   BrowserDialog::Response response;
@@ -45,6 +54,8 @@ auto BrowserDialogWindow::accept() -> void {
   }
 
   if(state.action == "openFiles" && batched) {
+    string name = batched[0].text();
+    if(isFolder(name) && batched.size() == 1) return setPath({state.path, name});
     for(auto item : batched) {
       string name = item.text();
       if(isFolder(name)) {
@@ -135,6 +146,24 @@ auto BrowserDialogWindow::change() -> void {
   }
 }
 
+auto BrowserDialogWindow::context() -> void {
+  auto batched = view.batched();
+  if(!batched) {
+    createAction.setVisible(true);
+    renameAction.setVisible(false);
+    removeAction.setVisible(false);
+  } else if(batched.size() == 1) {
+    createAction.setVisible(false);
+    renameAction.setVisible(true);
+    removeAction.setVisible(true);
+  } else {
+    createAction.setVisible(false);
+    renameAction.setVisible(false);
+    removeAction.setVisible(true);
+  }
+  contextMenu.setVisible();
+}
+
 auto BrowserDialogWindow::isFolder(const string& name) -> bool {
   return directory::exists({state.path, name});
 }
@@ -151,12 +180,28 @@ auto BrowserDialogWindow::isMatch(const string& name) -> bool {
 auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   response = {};
 
-  layout.setPadding(5);
+  auto document = BML::unserialize(file::read({Path::userSettings(), "hiro/browser-dialog.bml"}));
+  struct Settings {
+    bool showHidden = true;
+  } settings;
+  if(auto node = document["BrowserDialog/ShowHidden"]) settings.showHidden = node.boolean();
+
+  layout.setPadding(5_sx, 5_sy);
   pathName.onActivate([&] { setPath(pathName.text()); });
-  pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
-  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(Path::user()); });
-  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(Location::dir(state.path)); });
+  image iconRefresh{Icon::Action::Refresh};
+  iconRefresh.scale(16_sx, 16_sy);
+  pathRefresh.setBordered(false).setIcon(iconRefresh).onActivate([&] { setPath(state.path); });
+  image iconNew{Icon::Action::NewFolder};
+  iconNew.scale(16_sx, 16_sy);
+  pathNew.setBordered(false).setIcon(iconNew).onActivate([&] { createAction.doActivate(); });
+  image iconHome{Icon::Go::Home};
+  iconHome.scale(16_sx, 16_sy);
+  pathHome.setBordered(false).setIcon(iconHome).onActivate([&] { setPath(Path::user()); });
+  image iconUp{Icon::Go::Up};
+  iconUp.scale(16_sx, 16_sy);
+  pathUp.setBordered(false).setIcon(iconUp).onActivate([&] { setPath(Location::dir(state.path)); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
+  view.onContext([&] { context(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
     auto part = filter.split("|", 1L);
@@ -184,12 +229,101 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
     filters.append(part.right().split(":"));
   }
 
+  createAction.setIcon(Icon::Action::NewFolder).setText("Create Folder ...").onActivate([&] {
+    if(auto name = NameDialog()
+    .setTitle("Create Folder")
+    .setText("Enter a new folder name:")
+    .setIcon(Icon::Emblem::Folder)
+    .setAlignment(window)
+    .create()
+    ) {
+      directory::create({state.path, name});
+      pathRefresh.doActivate();
+    }
+  });
+
+  renameAction.setIcon(Icon::Application::TextEditor).setText("Rename ...").onActivate([&] {
+    auto batched = view.batched();
+    if(batched.size() != 1) return;
+    auto name = batched[0].text();
+    if(directory::exists({state.path, name})) {
+      if(auto rename = NameDialog()
+      .setTitle({"Rename ", name})
+      .setText("Enter the new folder name:")
+      .setIcon(Icon::Emblem::Folder)
+      .setAlignment(window)
+      .rename(name)
+      ) {
+        if(name == rename) return;
+        if(!directory::rename({state.path, name}, {state.path, rename})) return (void)MessageDialog()
+        .setTitle("Error")
+        .setText("Failed to rename folder.")
+        .setAlignment(window)
+        .error();
+        pathRefresh.doActivate();
+      }
+    } else if(file::exists({state.path, name})) {
+      if(auto rename = NameDialog()
+      .setTitle({"Rename ", name})
+      .setText("Enter the new file name:")
+      .setIcon(Icon::Emblem::File)
+      .setAlignment(window)
+      .rename(name)
+      ) {
+        if(name == rename) return;
+        if(!file::rename({state.path, name}, {state.path, rename})) return (void)MessageDialog()
+        .setTitle("Error")
+        .setText("Failed to rename file.")
+        .setAlignment(window)
+        .error();
+        pathRefresh.doActivate();
+      }
+    }
+  });
+
+  removeAction.setIcon(Icon::Action::Remove).setText("Delete ...").onActivate([&] {
+    auto batched = view.batched();
+    if(!batched) return;
+    if(MessageDialog()
+    .setTitle("Remove Selected")
+    .setText({"Are you sure you want to permanently delete the selected item", batched.size() == 1 ? "" : "s", "?"})
+    .setAlignment(window)
+    .question() == "No") return;
+    for(auto& item : batched) {
+      auto name = item.text();
+      if(directory::exists({state.path, name})) {
+        if(!directory::remove({state.path, name})) {
+          if(MessageDialog()
+          .setTitle("Warning")
+          .setText({"Failed to remove ", name, "\n\nContinue trying to remove remaining items?"})
+          .question() == "No") break;
+        }
+      } else if(file::exists({state.path, name})) {
+        if(!file::remove({state.path, name})) {
+          if(MessageDialog()
+          .setTitle("Warning")
+          .setText({"Failed to remove ", name, "\n\nContinue trying to remove remaining items?"})
+          .question() == "No") break;
+        }
+      }
+    }
+    pathRefresh.doActivate();
+  });
+
+  showHiddenOption.setChecked(settings.showHidden).setText("Show Hidden").onToggle([&] {
+    auto document = BML::unserialize(file::read({Path::userSettings(), "hiro/browser-dialog.bml"}));
+    document("BrowserDialog/ShowHidden").setValue(showHiddenOption.checked());
+    directory::create({Path::userSettings(), "hiro/"});
+    file::write({Path::userSettings(), "hiro/browser-dialog.bml"}, BML::serialize(document));
+    pathRefresh.doActivate();
+  });
+
   setPath(state.path);
 
   window.onClose([&] { window.setModal(false); });
   window.setTitle(state.title);
-  window.setSize({640, 480});
-  window.setCentered(state.parent);
+  window.setSize({640_sx, 480_sy});
+  window.setAlignment(state.relativeTo, state.alignment);
   window.setDismissable();
   window.setVisible();
   view.setFocused();
@@ -218,6 +352,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     } else {
       continue;
     }
+    if(!showHiddenOption.checked() && directory::hidden({state.path, content})) continue;
     view.append(ListViewItem().setText(content).setIcon(Icon::Emblem::Folder));
   }
 
@@ -230,6 +365,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
       if(state.action == "openFolder") continue;
     }
     if(!isMatch(content)) continue;
+    if(!showHiddenOption.checked() && file::hidden({state.path, content})) continue;
     view.append(ListViewItem().setText(content).setIcon(isFolder ? (image)Icon::Action::Open : (image)Icon::Emblem::File));
   }
 
@@ -293,6 +429,18 @@ auto BrowserDialog::selectFolder() -> string {
   return {};
 }
 
+auto BrowserDialog::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  state.relativeTo = {};
+  return *this;
+}
+
+auto BrowserDialog::setAlignment(sWindow relativeTo, Alignment alignment) -> type& {
+  state.alignment = alignment;
+  state.relativeTo = relativeTo;
+  return *this;
+}
+
 auto BrowserDialog::setFilters(const vector<string>& filters) -> type& {
   state.filters = filters;
   return *this;
@@ -300,11 +448,6 @@ auto BrowserDialog::setFilters(const vector<string>& filters) -> type& {
 
 auto BrowserDialog::setOptions(const vector<string>& options) -> type& {
   state.options = options;
-  return *this;
-}
-
-auto BrowserDialog::setParent(const sWindow& parent) -> type& {
-  state.parent = parent;
   return *this;
 }
 

@@ -17,6 +17,7 @@ struct pFrame : pWidget {
   auto _sizable() -> maybe<pSizable&>;
 
   GtkWidget* gtkLabel = nullptr;
+  GtkWidget* gtkChild = nullptr;
 };
 
 }

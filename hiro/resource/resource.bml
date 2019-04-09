@@ -6,7 +6,8 @@ namespace name=Icon
     binary name=Close file=icon/action/close.png
     binary name=FullScreen file=icon/action/full-screen.png
     binary name=Mute file=icon/action/mute.png
-    binary name=New file=icon/action/new.png
+    binary name=NewFile file=icon/action/new-file.png
+    binary name=NewFolder file=icon/action/new-folder.png
     binary name=Open file=icon/action/open.png
     binary name=Properties file=icon/action/properties.png
     binary name=Quit file=icon/action/quit.png
@@ -55,6 +56,7 @@ namespace name=Icon
     binary name=File file=icon/emblem/file.png
     binary name=Folder file=icon/emblem/folder.png
     binary name=FolderOpen file=icon/emblem/folder-open.png
+    binary name=FolderTemplate file=icon/emblem/folder-template.png
     binary name=Font file=icon/emblem/font.png
     binary name=Image file=icon/emblem/image.png
     binary name=Markup file=icon/emblem/markup.png

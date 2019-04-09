@@ -1,12 +1,14 @@
+#include <nall/encode/bmp.hpp>
+
 auto StateWindow::create() -> void {
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   nameLabel.setText("Name:");
   nameValue.onActivate([&] { if(acceptButton.enabled()) acceptButton.doActivate(); });
   nameValue.onChange([&] { doChange(); });
   acceptButton.onActivate([&] { doAccept(); });
   cancelButton.setText("Cancel").onActivate([&] { setVisible(false); });
 
-  setSize({400, layout.minimumSize().height()});
+  setSize({400_sx, layout.minimumSize().height()});
   setDismissable();
 }
 
@@ -16,7 +18,7 @@ auto StateWindow::show(string name) -> void {
   nameValue.setText(property("name"));
   doChange();
   setTitle(!property("name") ? "Add State" : "Rename State");
-  setCentered(*toolsWindow);
+  setAlignment(*toolsWindow);
   setVisible();
   setFocused();
   nameValue.setFocused();
@@ -48,7 +50,7 @@ auto StateManager::create() -> void {
   setIcon(Icon::Application::FileManager);
   setText("State Manager");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   stateLayout.setAlignment(0.0);
   stateList.setBatchable();
   stateList.setHeadered();
@@ -131,7 +133,7 @@ auto StateManager::modifyState(string name) -> void {
 auto StateManager::removeStates() -> void {
   if(auto batched = stateList.batched()) {
     if(MessageDialog("Are you sure you want to permanently remove the selected state(s)?")
-    .setParent(*toolsWindow).question() == "Yes") {
+    .setAlignment(*toolsWindow).question() == "Yes") {
       auto lock = acquire();
       for(auto& item : batched) program.removeState(item.property("name"));
       loadStates();
@@ -159,9 +161,18 @@ auto StateManager::updateSelection() -> void {
         if(signature == Program::State::Signature && preview) {
           uint offset = 3 * sizeof(uint) + serializer;
           auto preview = Decode::RLE<2>({saveState.data() + offset, max(offset, saveState.size()) - offset});
-          image icon{0, 15, 0x8000, 0x7c00, 0x03e0, 0x001f};
+          image icon{0, 16, 0x8000, 0x7c00, 0x03e0, 0x001f};
           icon.copy(preview.data(), 256 * sizeof(uint16_t), 256, 240);
           icon.transform();
+          //restore the missing alpha channel
+          for(uint y : range(icon.height())) {
+            auto data = icon.data() + y * icon.pitch();
+            for(uint x : range(icon.width())) {
+              auto pixel = icon.read(data);
+              icon.write(data, 0xff000000 | pixel);
+              data += icon.stride();
+            }
+          }
           statePreview.setIcon(icon);
         }
       }

@@ -104,7 +104,7 @@ auto Presentation::create() -> void {
     program.loadState("Quick/Redo");
   }));
   loadState.append(MenuItem().setIcon(Icon::Edit::Clear).setText("Remove All States").onActivate([&] {
-    if(MessageDialog("Are you sure you want to permanently remove all quick states for this game?").setParent(*this).question() == "Yes") {
+    if(MessageDialog("Are you sure you want to permanently remove all quick states for this game?").setAlignment(*this).question() == "Yes") {
       for(uint index : range(QuickStates)) program.removeState({"Quick/Slot ", 1 + index});
       program.removeState("Quick/Undo");
       program.removeState("Quick/Redo");
@@ -141,7 +141,7 @@ auto Presentation::create() -> void {
     .setAuthor("byuu")
     .setLicense("GPLv3")
     .setWebsite("https://byuu.org/")
-    .setParent(*this)
+    .setAlignment(*this)
     .show();
   });
 
@@ -195,7 +195,7 @@ auto Presentation::create() -> void {
   setTitle({"bsnes v", Emulator::Version});
   setBackgroundColor({0, 0, 0});
   resizeWindow();
-  setCentered();
+  setAlignment(Alignment::Center);
   setFullScreen(startFullScreen);
 
   #if defined(PLATFORM_MACOS)
@@ -324,7 +324,7 @@ auto Presentation::toggleFullscreenMode() -> void {
     menuBar.setVisible(true);
     if(settings.general.statusBar) layout.append(statusLayout, Size{~0, StatusHeight});
     resizeWindow();
-    setCentered();
+    setAlignment(Alignment::Center);
   }
 }
 
@@ -419,7 +419,7 @@ auto Presentation::updateSizeMenu() -> void {
     resizeWindow();
   }));
   sizeMenu.append(MenuItem().setIcon(Icon::Place::Settings).setText("Center Window").onActivate([&] {
-    setCentered();
+    setAlignment(Alignment::Center);
   }));
 }
 

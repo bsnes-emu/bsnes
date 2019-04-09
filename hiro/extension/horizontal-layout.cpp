@@ -29,6 +29,10 @@ auto mHorizontalLayout::cell(sSizable sizable) const -> HorizontalLayoutCell {
   return {};
 }
 
+auto mHorizontalLayout::cells() const -> vector<HorizontalLayoutCell> {
+  return state.cells;
+}
+
 auto mHorizontalLayout::cellCount() const -> uint {
   return state.cells.size();
 }
@@ -95,6 +99,11 @@ auto mHorizontalLayout::reset() -> type& {
   return synchronize();
 }
 
+auto mHorizontalLayout::resize() -> type& {
+  setGeometry(geometry());
+  return *this;
+}
+
 auto mHorizontalLayout::setAlignment(maybe<float> alignment) -> type& {
   state.alignment = alignment;
   return synchronize();
@@ -113,7 +122,7 @@ auto mHorizontalLayout::setFont(const Font& font) -> type& {
 }
 
 auto mHorizontalLayout::setGeometry(Geometry requestedGeometry) -> type& {
-  if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
+//if(!visible(true)) return mSizable::setGeometry(requestedGeometry), *this;
 
   auto geometry = requestedGeometry;
   geometry.setX(geometry.x() + padding().x());

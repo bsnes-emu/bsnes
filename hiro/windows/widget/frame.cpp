@@ -28,19 +28,19 @@ auto pFrame::setEnabled(bool enabled) -> void {
 auto pFrame::setGeometry(Geometry geometry) -> void {
   bool empty = !state().text;
   auto size = pFont::size(hfont, state().text);
+  //offsets are based on the default Windows 10 theme
   pWidget::setGeometry({
     geometry.x(),
-    geometry.y() - (empty ? size.height() / 2 : 0),
+    geometry.y() - (empty ? 6_sy : 3_sy),
     geometry.width(),
-    geometry.height() + (empty ? size.height() / 2 : 0)
+    geometry.height() + (empty ? 7_sy : 4_sy)
   });
   if(auto& sizable = state().sizable) {
-    if(empty) size.setHeight(1);
     sizable->setGeometry({
-      geometry.x() + 1,
-      geometry.y() + size.height(),
-      geometry.width() - 2,
-      geometry.height() - (size.height() + 2)
+      geometry.x() + 5_sx,
+      geometry.y() + (empty ? 5_sy : size.height()),
+      geometry.width() - 10_sx,
+      geometry.height() - (empty ? 10_sy : size.height() + 5_sy)
     });
   }
 }

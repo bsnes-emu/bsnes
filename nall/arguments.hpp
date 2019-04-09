@@ -137,7 +137,7 @@ inline auto Arguments::take(string_view name) -> bool {
 
 inline auto Arguments::take(string_view name, bool& argument) -> bool {
   for(uint index : range(arguments.size())) {
-    if(arguments[index].match(name) && arguments.size() >= index
+    if(arguments[index].match(name) && arguments.size() > index + 1
     && (arguments[index + 1] == "true" || arguments[index + 1] == "false")) {
       arguments.remove(index);
       argument = arguments.take(index) == "true";
@@ -149,7 +149,7 @@ inline auto Arguments::take(string_view name, bool& argument) -> bool {
 
 inline auto Arguments::take(string_view name, string& argument) -> bool {
   for(uint index : range(arguments.size())) {
-    if(arguments[index].match(name) && arguments.size() >= index) {
+    if(arguments[index].match(name) && arguments.size() > index + 1) {
       arguments.remove(index);
       argument = arguments.take(index);
       return true;

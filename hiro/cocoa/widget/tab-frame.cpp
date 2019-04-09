@@ -154,9 +154,7 @@ auto pTabFrame::_synchronizeSizable() -> void {
     int selected = tabViewItem ? [cocoaView indexOfTabViewItem:tabViewItem] : -1;
     for(auto& item : state().items) {
       item->state.selected = item->offset() == selected;
-      if(auto& sizable = item->state.sizable) {
-        if(auto self = sizable->self()) self->setVisible(sizable->visible(true) && item->selected());
-      }
+      if(auto& sizable = item->state.sizable) sizable->setVisible(item->selected());
     }
   }
 }

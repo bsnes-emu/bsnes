@@ -27,7 +27,6 @@ auto image::scaleLinearWidth(unsigned outputWidth) -> void {
   unsigned outputPitch = outputWidth * stride();
   uint64_t xstride = ((uint64_t)(_width - 1) << 32) / max(1u, outputWidth - 1);
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < _height; y++) {
     uint64_t xfraction = 0;
 
@@ -63,7 +62,6 @@ auto image::scaleLinearHeight(unsigned outputHeight) -> void {
   uint8_t* outputData = allocate(_width, outputHeight, stride());
   uint64_t ystride = ((uint64_t)(_height - 1) << 32) / max(1u, outputHeight - 1);
 
-  #pragma omp parallel for
   for(unsigned x = 0; x < _width; x++) {
     uint64_t yfraction = 0;
 
@@ -102,7 +100,6 @@ auto image::scaleLinear(unsigned outputWidth, unsigned outputHeight) -> void {
   uint64_t xstride = ((uint64_t)(_width  - 1) << 32) / max(1u, outputWidth  - 1);
   uint64_t ystride = ((uint64_t)(_height - 1) << 32) / max(1u, outputHeight - 1);
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < outputHeight; y++) {
     uint64_t yfraction = ystride * y;
     uint64_t xfraction = 0;
@@ -147,7 +144,6 @@ auto image::scaleNearest(unsigned outputWidth, unsigned outputHeight) -> void {
   uint64_t xstride = ((uint64_t)_width  << 32) / outputWidth;
   uint64_t ystride = ((uint64_t)_height << 32) / outputHeight;
 
-  #pragma omp parallel for
   for(unsigned y = 0; y < outputHeight; y++) {
     uint64_t yfraction = ystride * y;
     uint64_t xfraction = 0;

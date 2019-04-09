@@ -5,7 +5,7 @@ ifeq ($(platform),windows)
 
   ifeq ($(hiro),windows)
     hiro.flags   = $(flags.cpp) -DHIRO_WINDOWS
-    hiro.options = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -luxtheme -lmsimg32 -lshlwapi
+    hiro.options = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -luxtheme -lmsimg32 -lshlwapi -ldwmapi
   endif
 
   ifeq ($(hiro),gtk2)
@@ -14,7 +14,7 @@ ifeq ($(platform),windows)
   endif
 
   ifeq ($(hiro),gtk3)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0) -Wno-deprecated-declarations
     hiro.options = $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
   endif
 endif
@@ -41,12 +41,12 @@ ifneq ($(filter $(platform),linux bsd),)
   endif
 
   ifeq ($(hiro),gtk3)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0) -Wno-deprecated-declarations
     hiro.options = -lX11 $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
   endif
 
   ifeq ($(hiro),qt4)
-    moc = moc-qt4
+    moc = /usr/local/lib/qt4/bin/moc
     hiro.flags   = $(flags.cpp) -DHIRO_QT=4 $(shell pkg-config --cflags QtCore QtGui)
     hiro.options = -lX11 $(shell pkg-config --libs QtCore QtGui)
   endif

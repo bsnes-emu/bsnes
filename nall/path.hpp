@@ -75,13 +75,35 @@ inline auto desktop(string_view name = {}) -> string {
   return {user(), "Desktop/", name};
 }
 
-// /home/username/.local/share/
+//todo: MacOS uses the same location for userData() and userSettings()
+//... is there a better option here?
+
+// /home/username/.config/
 // ~/Library/Application Support/
 // c:/users/username/appdata/roaming/
-inline auto userData() -> string {
+inline auto userSettings() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
+  string result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  #elif defined(PLATFORM_MACOS)
+  string result = {Path::user(), "Library/Application Support/"};
+  #else
+  string result = {Path::user(), ".config/"};
+  #endif
+  if(!result) result = ".";
+  if(!result.endsWith("/")) result.append("/");
+  return result;
+}
+
+// /home/username/.local/share/
+// ~/Library/Application Support/
+// c:/users/username/appdata/local/
+inline auto userData() -> string {
+  #if defined(PLATFORM_WINDOWS)
+  wchar_t path[PATH_MAX] = L"";
+  SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #elif defined(PLATFORM_MACOS)

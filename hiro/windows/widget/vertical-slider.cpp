@@ -3,10 +3,14 @@
 namespace hiro {
 
 auto pVerticalSlider::construct() -> void {
-  hwnd = CreateWindow(
-    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_TRANSPARENTBKGND | TBS_NOTICKS | TBS_BOTH | TBS_VERT,
-    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
-  );
+  //TBS_TRANSPARENTBKGND is needed to render the transparent area of sliders properly inside TabFrame controls
+  //however, this flag will prevent the slider control from redrawing during vertical window resizes when not inside TabFrame controls
+  //this is because WM_PRINTCLIENT must be implemented in the parent window for this case
+  //however, WM_PRINTCLIENT is incompatible with WM_PAINT, which is how most hiro custom widgets are rendered
+  //as a hacky workaround, TBS_TRANSPARENTBKGND is enabled only when sliders are placed inside of TabFrame controls
+  auto style = WS_CHILD | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH | TBS_VERT;
+  if(self().parentTabFrame(true)) style |= TBS_TRANSPARENTBKGND;
+  hwnd = CreateWindow(TRACKBAR_CLASS, L"", style, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
   pWidget::construct();
   setLength(state().length);
   setPosition(state().position);
@@ -17,7 +21,7 @@ auto pVerticalSlider::destruct() -> void {
 }
 
 auto pVerticalSlider::minimumSize() const -> Size {
-  return {25, 0};
+  return {25_sx, 0};
 }
 
 auto pVerticalSlider::setLength(unsigned length) -> void {

@@ -86,6 +86,7 @@ struct image {
   inline auto impose(blend mode, uint targetX, uint targetY, image source, uint x, uint y, uint width, uint height) -> void;
 
   //utility.hpp
+  inline auto shrink(uint64_t transparentColor = 0) -> void;
   inline auto crop(uint x, uint y, uint width, uint height) -> bool;
   inline auto alphaBlend(uint64_t alphaColor) -> void;
   inline auto alphaMultiply() -> void;

@@ -1,4 +1,5 @@
 #include <nall/platform.hpp>
+#include <nall/any.hpp>
 #include <nall/chrono.hpp>
 #include <nall/directory.hpp>
 #include <nall/function.hpp>
@@ -17,6 +18,7 @@
 #include <nall/utility.hpp>
 #include <nall/vector.hpp>
 
+using nall::any;
 using nall::function;
 using nall::image;
 using nall::Locale;
@@ -30,8 +32,6 @@ using nall::unique_pointer;
 using nall::vector;
 
 namespace hiro {
-
-auto initialize() -> void;
 
 struct Font;
 struct Keyboard;
@@ -158,6 +158,7 @@ struct Gradient {
 #if defined(Hiro_Alignment)
 struct Alignment {
   using type = Alignment;
+  static const Alignment Center;
 
   Alignment();
   Alignment(float horizontal, float vertical = 0.5);
@@ -408,24 +409,7 @@ struct MessageWindow {
 };
 #endif
 
-struct Property {
-  using type = Property;
-
-  Property(const string& name, const string& value = "");
-
-  auto operator==(const Property& source) const -> bool;
-  auto operator< (const Property& source) const -> bool;
-
-  auto name() const -> string;
-  auto setValue(const string& value = "") -> type&;
-  auto value() const -> string;
-
-private:
-  struct State {
-    string name;
-    string value;
-  } state;
-};
+#include "property.hpp"
 
 #define Declare(Name) \
   using type = m##Name; \
@@ -652,47 +636,7 @@ struct mButton : mWidget {
 };
 #endif
 
-#if defined(Hiro_Canvas)
-struct mCanvas : mWidget {
-  Declare(Canvas)
-
-  auto color() const -> Color;
-  auto data() -> uint32_t*;
-  auto droppable() const -> bool;
-  auto doDrop(vector<string> names) const -> void;
-  auto doMouseLeave() const -> void;
-  auto doMouseMove(Position position) const -> void;
-  auto doMousePress(Mouse::Button button) const -> void;
-  auto doMouseRelease(Mouse::Button button) const -> void;
-  auto gradient() const -> Gradient;
-  auto icon() const -> image;
-  auto onDrop(const function<void (vector<string>)>& callback = {}) -> type&;
-  auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
-  auto onMouseMove(const function<void (Position)>& callback = {}) -> type&;
-  auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
-  auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) -> type&;
-  auto setColor(Color color = {}) -> type&;
-  auto setDroppable(bool droppable = true) -> type&;
-  auto setGradient(Gradient gradient = {}) -> type&;
-  auto setIcon(const image& icon = {}) -> type&;
-  auto setSize(Size size = {}) -> type&;
-  auto size() const -> Size;
-  auto update() -> type&;
-
-//private:
-  struct State {
-    Color color;
-    bool droppable = false;
-    Gradient gradient;
-    image icon;
-    function<void (vector<string>)> onDrop;
-    function<void ()> onMouseLeave;
-    function<void (Position)> onMouseMove;
-    function<void (Mouse::Button)> onMousePress;
-    function<void (Mouse::Button)> onMouseRelease;
-  } state;
-};
-#endif
+#include "widget/canvas.hpp"
 
 #if defined(Hiro_CheckButton)
 struct mCheckButton : mWidget {

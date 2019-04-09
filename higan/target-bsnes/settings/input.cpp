@@ -2,7 +2,7 @@ auto InputSettings::create() -> void {
   setIcon(Icon::Device::Joypad);
   setText("Input");
 
-  layout.setPadding(5);
+  layout.setPadding(5_sx);
   portLabel.setText("Port:");
   portList.onChange([&] { reloadDevices(); });
   deviceLabel.setText("Device:");

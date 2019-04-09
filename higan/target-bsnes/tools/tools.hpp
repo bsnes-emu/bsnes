@@ -21,10 +21,10 @@ public:
   VerticalLayout layout{this};
     ListView cheatList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Button selectAllButton{&controlLayout, Size{100, 0}};
-      Button unselectAllButton{&controlLayout, Size{100, 0}};
+      Button selectAllButton{&controlLayout, Size{100_sx, 0}};
+      Button unselectAllButton{&controlLayout, Size{100_sx, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
-      Button addCheatsButton{&controlLayout, Size{100, 0}};
+      Button addCheatsButton{&controlLayout, Size{100_sx, 0}};
 };
 
 struct CheatWindow : Window {
@@ -43,8 +43,8 @@ public:
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget controlSpacer{&controlLayout, Size{~0, 0}};
       CheckLabel enableOption{&controlLayout, Size{0, 0}};
-      Button acceptButton{&controlLayout, Size{80, 0}};
-      Button cancelButton{&controlLayout, Size{80, 0}};
+      Button acceptButton{&controlLayout, Size{80_sx, 0}};
+      Button cancelButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct CheatEditor : TabFrameItem {
@@ -63,12 +63,12 @@ public:
   VerticalLayout layout{this};
     TableView cheatList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Button findCheatsButton{&controlLayout, Size{120, 0}};
+      Button findCheatsButton{&controlLayout, Size{120_sx, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
       CheckLabel enableCheats{&controlLayout, Size{0, 0}};
-      Button addButton{&controlLayout, Size{80, 0}};
-      Button editButton{&controlLayout, Size{80, 0}};
-      Button removeButton{&controlLayout, Size{80, 0}};
+      Button addButton{&controlLayout, Size{80_sx, 0}};
+      Button editButton{&controlLayout, Size{80_sx, 0}};
+      Button removeButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct StateWindow : Window {
@@ -80,12 +80,12 @@ struct StateWindow : Window {
 public:
   VerticalLayout layout{this};
     HorizontalLayout nameLayout{&layout, Size{~0, 0}};
-      Label nameLabel{&nameLayout, Size{40, 0}};
+      Label nameLabel{&nameLayout, Size{40_sx, 0}};
       LineEdit nameValue{&nameLayout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
-      Button acceptButton{&controlLayout, Size{80, 0}};
-      Button cancelButton{&controlLayout, Size{80, 0}};
+      Button acceptButton{&controlLayout, Size{80_sx, 0}};
+      Button cancelButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct StateManager : TabFrameItem, Lock {
@@ -117,12 +117,12 @@ public:
         Label statePreviewLabel{&previewLayout, Size{~0, 0}};
         Canvas statePreview{&previewLayout, Size{256, 224}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Button loadButton{&controlLayout, Size{80, 0}};
-      Button saveButton{&controlLayout, Size{80, 0}};
+      Button loadButton{&controlLayout, Size{80_sx, 0}};
+      Button saveButton{&controlLayout, Size{80_sx, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
-      Button addButton{&controlLayout, Size{80, 0}};
-      Button editButton{&controlLayout, Size{80, 0}};
-      Button removeButton{&controlLayout, Size{80, 0}};
+      Button addButton{&controlLayout, Size{80_sx, 0}};
+      Button editButton{&controlLayout, Size{80_sx, 0}};
+      Button removeButton{&controlLayout, Size{80_sx, 0}};
 };
 
 struct ManifestViewer : TabFrameItem {

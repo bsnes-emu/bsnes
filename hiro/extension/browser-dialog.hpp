@@ -14,19 +14,21 @@ struct BrowserDialog {
   auto saveFile() -> string;           //one file
   auto selected() -> vector<string>;
   auto selectFolder() -> string;       //one existing folder
+  auto setAlignment(Alignment = Alignment::Center) -> type&;
+  auto setAlignment(sWindow relativeTo, Alignment = Alignment::Center) -> type&;
   auto setFilters(const vector<string>& filters = {}) -> type&;
   auto setOptions(const vector<string>& options = {}) -> type&;
-  auto setParent(const sWindow& parent) -> type&;
   auto setPath(const string& path = "") -> type&;
   auto setTitle(const string& title = "") -> type&;
 
 private:
   struct State {
     string action;
+    Alignment alignment = Alignment::Center;
     vector<string> filters = {"*"};
     vector<string> options;
-    sWindow parent;
     string path;
+    sWindow relativeTo;
     string title;
   } state;
 

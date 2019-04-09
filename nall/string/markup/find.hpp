@@ -5,7 +5,7 @@ namespace nall::Markup {
 auto ManagedNode::_evaluate(string query) const -> bool {
   if(!query) return true;
 
-  for(auto& rule : query.replace(" ", "").split(",")) {
+  for(auto& rule : query.split(",")) {
     enum class Comparator : uint { ID, EQ, NE, LT, LE, GT, GE };
     auto comparator = Comparator::ID;
          if(rule.match("*!=*")) comparator = Comparator::NE;

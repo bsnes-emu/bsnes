@@ -33,7 +33,6 @@ struct mObject {
   auto parentTreeViewItem(bool recursive = false) const -> mTreeViewItem*;
   auto parentWidget(bool recursive = false) const -> mWidget*;
   auto parentWindow(bool recursive = false) const -> mWindow*;
-  auto property(const string& name) const -> string;
   virtual auto remove() -> type&;
   virtual auto reset() -> type&;
   virtual auto setEnabled(bool enabled = true) -> type&;
@@ -41,9 +40,33 @@ struct mObject {
   virtual auto setFont(const Font& font = {}) -> type&;
   virtual auto setGroup(sGroup group = {}) -> type&;
   virtual auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
-  virtual auto setProperty(const string& name, const string& value = "") -> type&;
   virtual auto setVisible(bool visible = true) -> type&;
   auto visible(bool recursive = false) const -> bool;
+
+  template<typename T = string> auto property(const string& name) const -> T {
+    if(auto property = state.properties.find(name)) {
+      if(property->value().is<T>()) return property->value().get<T>();
+    }
+    return {};
+  }
+
+  //this template basically disables implicit template type deduction:
+  //if setProperty(name, value) is called without a type, the type will be a string, so property(name) will just work.
+  //if setProperty<T>(name, value) is called, the type will be T. as such, U must be cast to T on assignment.
+  //when T = string, value must be convertible to a string.
+  //U defaults to a string, so that setProperty(name, {values, ...}) will deduce U as a string.
+  template<typename T = string, typename U = string> auto setProperty(const string& name, const U& value) -> type& {
+    if constexpr(std::is_same_v<T, string> && !std::is_same_v<U, string>) {
+      return setProperty(name, string{value});
+    }
+    if(auto property = state.properties.find(name)) {
+      if((const T&)value) property->setValue((const T&)value);
+      else state.properties.remove(*property);
+    } else {
+      if((const T&)value) state.properties.insert({name, (const T&)value});
+    }
+    return *this;
+  }
 
 //private:
 //sizeof(mObject) == 88
