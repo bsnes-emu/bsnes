@@ -142,6 +142,9 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->sgb) {
         free(gb->sgb);
     }
+    if (gb->nontrivial_jump_state) {
+        free(gb->nontrivial_jump_state);
+    }
 #ifndef DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
 #endif
@@ -688,6 +691,11 @@ void GB_reset(GB_gameboy_t *gb)
     gb->div_state = 3;
 
     GB_apu_update_cycles_per_sample(gb);
+    
+    if (gb->nontrivial_jump_state) {
+        free(gb->nontrivial_jump_state);
+        gb->nontrivial_jump_state = NULL;
+    }
     
     gb->magic = (uintptr_t)'SAME';
 }

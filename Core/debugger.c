@@ -34,6 +34,7 @@ struct GB_breakpoint_s {
         uint32_t key; /* For sorting and comparing */
     };
     char *condition;
+    bool is_jump_to;
 };
 
 #define BP_KEY(x) (((struct GB_breakpoint_s){.addr = ((x).value), .bank = (x).has_bank? (x).bank : -1 }).key)
@@ -845,7 +846,15 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
 
 static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
-    NO_MODIFIERS
+    bool is_jump_to = true;
+    if (!modifiers) {
+        is_jump_to = false;
+    }
+    else if (strcmp(modifiers, "j") != 0) {
+        print_usage(gb, command);
+        return true;
+    }
+    
     if (strlen(lstrip(arguments)) == 0) {
         print_usage(gb, command);
         return true;
@@ -904,6 +913,12 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
         gb->breakpoints[index].condition = NULL;
     }
     gb->n_breakpoints++;
+    
+    gb->breakpoints[index].is_jump_to = is_jump_to;
+    
+    if (is_jump_to) {
+        gb->has_jump_to_breakpoints = true;
+    }
 
     GB_log(gb, "Breakpoint set at %s\n", debugger_value_to_string(gb, result, true));
     return true;
@@ -955,6 +970,16 @@ static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
         free(gb->breakpoints[index].condition);
     }
 
+    if (gb->breakpoints[index].is_jump_to) {
+        gb->has_jump_to_breakpoints = false;
+        for (unsigned i = 0; i < gb->n_breakpoints; i++) {
+            if (i == index) continue;
+            if (gb->breakpoints[i].is_jump_to) {
+                gb->has_jump_to_breakpoints = true;
+                break;
+            }
+        }
+    }
     
     memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index - 1) * sizeof(gb->breakpoints[0]));
     gb->n_breakpoints--;
@@ -1152,12 +1177,15 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
         for (uint16_t i = 0; i < gb->n_breakpoints; i++) {
             value_t addr = (value_t){gb->breakpoints[i].bank != (uint16_t)-1, gb->breakpoints[i].bank, gb->breakpoints[i].addr};
             if (gb->breakpoints[i].condition) {
-                GB_log(gb, " %d. %s (Condition: %s)\n", i + 1,
+                GB_log(gb, " %d. %s (%sCondition: %s)\n", i + 1,
                                                         debugger_value_to_string(gb, addr, addr.has_bank),
+                                                        gb->breakpoints[i].is_jump_to? "Jump to, ": "",
                                                         gb->breakpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s\n", i + 1, debugger_value_to_string(gb, addr, addr.has_bank));
+                GB_log(gb, " %d. %s%s\n", i + 1,
+                                          debugger_value_to_string(gb, addr, addr.has_bank),
+                                          gb->breakpoints[i].is_jump_to? " (Jump to)" : "");
             }
         }
     }
@@ -1186,12 +1214,12 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
     return true;
 }
 
-static bool _should_break(GB_gameboy_t *gb, value_t addr)
+static bool _should_break(GB_gameboy_t *gb, value_t addr, bool jump_to)
 {
     uint16_t index = find_breakpoint(gb, addr);
     uint32_t key = BP_KEY(addr);
 
-    if (index < gb->n_breakpoints && gb->breakpoints[index].key == key) {
+    if (index < gb->n_breakpoints && gb->breakpoints[index].key == key && gb->breakpoints[index].is_jump_to == jump_to) {
         if (!gb->breakpoints[index].condition) {
             return true;
         }
@@ -1208,16 +1236,16 @@ static bool _should_break(GB_gameboy_t *gb, value_t addr)
     return false;
 }
 
-static bool should_break(GB_gameboy_t *gb, uint16_t addr)
+static bool should_break(GB_gameboy_t *gb, uint16_t addr, bool jump_to)
 {
     /* Try any-bank breakpoint */
     value_t full_addr = (VALUE_16(addr));
-    if (_should_break(gb, full_addr)) return true;
+    if (_should_break(gb, full_addr, jump_to)) return true;
 
     /* Try bank-specific breakpoint */
     full_addr.has_bank = true;
     full_addr.bank = bank_for_addr(gb, addr);
-    return _should_break(gb, full_addr);
+    return _should_break(gb, full_addr, jump_to);
 }
 
 static bool print(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
@@ -1562,8 +1590,10 @@ static const debugger_command_t commands[] = {
     {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
-                                  "Can also modify the condition of existing breakpoints.",
-                                  "<expression>[ if <condition expression>]"},
+                                  "Can also modify the condition of existing breakpoints." HELP_NEWLINE
+                                  "If the j modifier is used, the breakpoint will occur just" HELP_NEWLINE
+                                  "before jumping to the target.",
+                                  "<expression>[ if <condition expression>]", "(j)"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]"},
     {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
                         "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
@@ -1834,6 +1864,14 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
     }
 }
 
+typedef enum {
+    JUMP_TO_NONE,
+    JUMP_TO_BREAK,
+    JUMP_TO_NONTRIVIAL,
+} jump_to_return_t;
+
+static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *address);
+
 void GB_debugger_run(GB_gameboy_t *gb)
 {
     if (gb->debug_disable) return;
@@ -1852,11 +1890,55 @@ next_command:
     if (input) {
         free(input);
     }
-    if (gb->breakpoints && !gb->debug_stopped && should_break(gb, gb->pc)) {
+    if (gb->breakpoints && !gb->debug_stopped && should_break(gb, gb->pc, false)) {
         gb->debug_stopped = true;
         GB_log(gb, "Breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
+    
+    if (gb->breakpoints && !gb->debug_stopped) {
+        uint16_t address = 0;
+        jump_to_return_t jump_to_result = test_jump_to_breakpoints(gb, &address);
+        
+        bool should_delete_state = true;
+        if (gb->nontrivial_jump_state && should_break(gb, gb->pc, true)) {
+            if (gb->non_trivial_jump_breakpoint_occured) {
+                gb->non_trivial_jump_breakpoint_occured = false;
+            }
+            else {
+                gb->non_trivial_jump_breakpoint_occured = true;
+                GB_log(gb, "Jumping to breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
+                GB_cpu_disassemble(gb, gb->pc, 5);
+                GB_load_state_from_buffer(gb, gb->nontrivial_jump_state, -1);
+                gb->debug_stopped = true;
+            }
+        }
+        else if (jump_to_result == JUMP_TO_BREAK) {
+            gb->debug_stopped = true;
+            GB_log(gb, "Jumping to breakpoint: PC = %s\n", value_to_string(gb, address, true));
+            GB_cpu_disassemble(gb, gb->pc, 5);
+            gb->non_trivial_jump_breakpoint_occured = false;
+        }
+        else if (jump_to_result == JUMP_TO_NONTRIVIAL) {
+            if (!gb->nontrivial_jump_state) {
+                gb->nontrivial_jump_state = malloc(GB_get_save_state_size(gb));
+            }
+            GB_save_state_to_buffer(gb, gb->nontrivial_jump_state);
+            gb->non_trivial_jump_breakpoint_occured = false;
+            should_delete_state = false;
+        }
+        else {
+            gb->non_trivial_jump_breakpoint_occured = false;
+        }
+        
+        if (should_delete_state) {
+            if (gb->nontrivial_jump_state) {
+                free(gb->nontrivial_jump_state);
+                gb->nontrivial_jump_state = NULL;
+            }
+        }
+    }
+
     if (gb->debug_stopped && !gb->debug_disable) {
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
@@ -1985,4 +2067,211 @@ bool GB_debugger_is_stopped(GB_gameboy_t *gb)
 void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled)
 {
     gb->debug_disable = disabled;
+}
+
+/* Jump-to breakpoints */
+
+static bool is_in_trivial_memory(uint16_t addr)
+{
+    /* ROM */
+    if (addr < 0x8000) {
+        return true;
+    }
+    
+    /* HRAM */
+    if (addr >= 0xFF80 && addr < 0xFFFF) {
+        return true;
+    }
+    
+    /* RAM */
+    if (addr >= 0xC000 && addr < 0xE000) {
+        return true;
+    }
+    
+    return false;
+}
+
+typedef uint16_t GB_opcode_address_getter_t(GB_gameboy_t *gb, uint8_t opcode);
+
+uint16_t trivial_1(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return gb->pc + 1;
+}
+
+uint16_t trivial_2(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return gb->pc + 2;
+}
+
+uint16_t trivial_3(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return gb->pc + 3;
+}
+
+static uint16_t jr_r8(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return gb->pc + 2 + (int8_t)GB_read_memory(gb, gb->pc + 1);
+}
+
+static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
+{
+    switch ((opcode >> 3) & 0x3) {
+        case 0:
+            return !(gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+        case 1:
+            return (gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+        case 2:
+            return !(gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+        case 3:
+            return (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+    }
+    
+    return false;
+}
+
+static uint16_t jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
+{
+    if (!condition_code(gb, opcode)) {
+        return gb->pc + 2;
+    }
+    
+    return gb->pc + 2 + (int8_t)GB_read_memory(gb, gb->pc + 1);
+}
+
+static uint16_t ret(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return GB_read_memory(gb, gb->registers[GB_REGISTER_SP]) |
+           (GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
+}
+
+
+static uint16_t ret_cc(GB_gameboy_t *gb, uint8_t opcode)
+{
+    if (condition_code(gb, opcode)) {
+        return ret(gb, opcode);
+    }
+    else {
+        return gb->pc + 1;
+    }
+}
+
+static uint16_t jp_a16(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return GB_read_memory(gb, gb->pc + 1) |
+           (GB_read_memory(gb, gb->pc + 2) << 8);
+}
+
+static uint16_t jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
+{
+    if (condition_code(gb, opcode)) {
+        return jp_a16(gb, opcode);
+    }
+    else {
+        return gb->pc + 3;
+    }
+}
+
+static uint16_t rst(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return opcode ^ 0xC7;
+}
+
+static uint16_t jp_hl(GB_gameboy_t *gb, uint8_t opcode)
+{
+    return gb->hl;
+}
+
+static GB_opcode_address_getter_t *opcodes[256] = {
+    /*  X0          X1          X2          X3          X4          X5          X6          X7                */
+    /*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
+    trivial_1,  trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,   /* 0X */
+    trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,
+    trivial_2,  trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,  /* 1X */
+    jr_r8,      trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,
+    jr_cc_r8,   trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,  /* 2X */
+    jr_cc_r8,   trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,
+    jr_cc_r8,   trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,  /* 3X */
+    jr_cc_r8,   trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* 4X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* 5X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* 6X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  NULL,       trivial_1,  /* 7X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* 8X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* 9X */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* aX */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  /* bX */
+    trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_1,
+    ret_cc,     trivial_1,  jp_cc_a16,  jp_a16,     jp_cc_a16,  trivial_1,  trivial_2,  rst,        /* cX */
+    ret_cc,     ret,        jp_cc_a16,  trivial_2,  jp_cc_a16,  jp_a16,     trivial_2,  rst,
+    ret_cc,     trivial_1,  jp_cc_a16,  NULL,       jp_cc_a16,  trivial_1,  trivial_2,  rst,        /* dX */
+    ret_cc,     ret,        jp_cc_a16,  NULL,       jp_cc_a16,  NULL,       trivial_2,  rst,
+    trivial_2,  trivial_1,  trivial_1,  NULL,       NULL,       trivial_1,  trivial_2,  rst,        /* eX */
+    trivial_2,  jp_hl,      trivial_3,  NULL,       NULL,       NULL,       trivial_2,  rst,
+    trivial_2,  trivial_1,  trivial_1,  trivial_1,  NULL,       trivial_1,  trivial_2,  rst,        /* fX */
+    trivial_2,  trivial_1,  trivial_3,  trivial_1,  NULL,       NULL,       trivial_2,  rst,
+};
+
+static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *address)
+{
+    if (!gb->has_jump_to_breakpoints) return JUMP_TO_NONE;
+    
+    if (!is_in_trivial_memory(gb->pc) || !is_in_trivial_memory(gb->pc + 2) ||
+        !is_in_trivial_memory(gb->registers[GB_REGISTER_SP]) || !is_in_trivial_memory(gb->registers[GB_REGISTER_SP] + 1)) {
+        return JUMP_TO_NONTRIVIAL;
+    }
+    
+    /* Interrupts */
+    if (gb->ime) {
+        for (unsigned i = 0; i < 5; i++) {
+            if ((gb->interrupt_enable & (1 << i)) && (gb->io_registers[GB_IO_IF] & (1 << i))) {
+                if (should_break(gb, 0x40 + i * 8, true)) {
+                    if (address) {
+                        *address = 0x40 + i * 8;
+                    }
+                    return JUMP_TO_BREAK;
+                }
+            }
+        }
+    }
+    
+    uint16_t n_watchpoints = gb->n_watchpoints;
+    gb->n_watchpoints = 0;
+    
+    uint8_t opcode = GB_read_memory(gb, gb->pc);
+    
+    if (opcode == 0x76) {
+        gb->n_watchpoints = n_watchpoints;
+        if (gb->ime) { /* Already handled in above */
+            return JUMP_TO_NONE;
+        }
+        
+        if (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) {
+            return JUMP_TO_NONTRIVIAL; /* HALT bug could occur */
+        }
+        
+        return JUMP_TO_NONE;
+    }
+    
+    GB_opcode_address_getter_t *getter = opcodes[opcode];
+    if (!getter) {
+        gb->n_watchpoints = n_watchpoints;
+        return JUMP_TO_NONE;
+    }
+    
+    uint16_t new_pc = getter(gb, opcode);
+    
+    gb->n_watchpoints = n_watchpoints;
+    
+    if (address) {
+        *address = new_pc;
+    }
+    
+    return should_break(gb, new_pc, true) ? JUMP_TO_BREAK : JUMP_TO_NONE;
 }
