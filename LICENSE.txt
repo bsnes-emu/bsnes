@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
-higan  - Suite of videogame console emulators
+bsnes  - Suite of videogame console emulators
 icarus - Game library importer for higan
 
   Copyright © 2004-2017  byuu
