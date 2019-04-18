@@ -6,9 +6,9 @@ image: ubuntu:latest
 bsnes-linux-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
-    - make -C higan target=bsnes
+    - make -C bsnes
     - mkdir bsnes-nightly
-    - cp -a higan/out/bsnes bsnes-nightly/bsnes
+    - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
     - cp -a shaders bsnes-nightly/
     - cp -a GPLv3.txt bsnes-nightly/
   artifacts:
@@ -18,9 +18,9 @@ bsnes-linux-x86_64-binaries:
 bsnes-windows-x86_64-binaries:
   script:
     - apt-get update && apt-get -y install build-essential mingw-w64
-    - make -C higan target=bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
+    - make -C bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
     - mkdir bsnes-nightly
-    - cp -a higan/out/bsnes bsnes-nightly/bsnes.exe
+    - cp -a bsnes/out/bsnes bsnes-nightly/bsnes.exe
     - cp -a shaders bsnes-nightly/
     - cp -a GPLv3.txt bsnes-nightly/
   artifacts:
