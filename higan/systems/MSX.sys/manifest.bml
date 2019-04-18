@@ -1,5 +1,0 @@
-system name:MSX
-  memory
-    type: ROM
-    size: 0x8000
-    content: BIOS

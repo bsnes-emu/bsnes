@@ -1,3 +1,0 @@
-namespace name=Resource
-  binary name=Icon file=icon.png
-  binary name=Logo file=logo.png

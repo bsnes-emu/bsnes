@@ -1,3 +1,0 @@
-system name:Mega Drive
-  cpu version=0
-    rom name=tmss.rom size=0x800

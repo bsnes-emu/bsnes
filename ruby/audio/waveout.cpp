@@ -10,7 +10,7 @@ struct AudioWaveOut : AudioDriver {
   auto create() -> bool override {
     super.setChannels(2);
     super.setFrequency(44100);
-    super.setLatency(0);
+    super.setLatency(512);
     return initialize();
   }
 
@@ -31,10 +31,11 @@ struct AudioWaveOut : AudioDriver {
   auto hasBlocking() -> bool override { return true; }
   auto hasDynamic() -> bool override { return true; }
   auto hasFrequencies() -> vector<uint> override { return {44100}; }
-  auto hasLatencies() -> vector<uint> override { return {0}; }
+  auto hasLatencies() -> vector<uint> override { return {512, 384, 320, 256, 192, 160, 128, 96, 80, 64, 48, 40, 32}; }
 
   auto setBlocking(bool blocking) -> bool override { return true; }
-  auto setDynamic(bool dynamic) -> bool override { initialize(); return true; }
+  auto setDynamic(bool dynamic) -> bool override { return initialize(); }
+  auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto clear() -> void override {
     for(auto& header : headers) {
@@ -87,6 +88,12 @@ private:
     //-1 = default; 0+ = specific device; subtract -1 as hasDevices() includes "Default" entry
     waveOutOpen(&handle, (int)*deviceIndex - 1, &format, (DWORD_PTR)waveOutCallback, (DWORD_PTR)this, CALLBACK_FUNCTION);
 
+    frameCount = self.latency;
+    blockCount = 32;
+    frameIndex = 0;
+    blockIndex = 0;
+    blockQueue = 0;
+
     headers.resize(blockCount);
     for(auto& header : headers) {
       memory::fill(&header, sizeof(WAVEHDR));
@@ -94,10 +101,6 @@ private:
       header.dwBufferLength = frameCount * 4;
       waveOutPrepareHeader(handle, &header, sizeof(WAVEHDR));
     }
-
-    frameIndex = 0;
-    blockIndex = 0;
-    blockQueue = 0;
 
     waveOutSetVolume(handle, 0xffff'ffff);  //100% volume (65535 left, 65535 right)
     waveOutRestart(handle);
@@ -119,8 +122,8 @@ private:
 
   HWAVEOUT handle = nullptr;
   vector<WAVEHDR> headers;
-  const uint frameCount = 512;
-  const uint blockCount =  32;
+  uint frameCount = 0;
+  uint blockCount = 0;
   uint frameIndex = 0;
   uint blockIndex = 0;
 
