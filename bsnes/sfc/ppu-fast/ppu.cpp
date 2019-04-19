@@ -9,7 +9,6 @@ PPUfast ppufast;
 #include "line.cpp"
 #include "background.cpp"
 #include "mode7.cpp"
-#include "mode7hires.cpp"
 #include "mode7hd.cpp"
 #include "object.cpp"
 #include "window.cpp"
@@ -20,8 +19,11 @@ auto PPUfast::overscan() const -> bool { return ppubase.display.overscan; }
 auto PPUfast::vdisp() const -> uint { return ppubase.display.vdisp; }
 auto PPUfast::hires() const -> bool { return latch.hires; }
 auto PPUfast::hd() const -> bool { return latch.hd; }
+auto PPUfast::ss() const -> bool { return latch.ss; }
 auto PPUfast::hdScale() const -> uint { return configuration.hacks.ppu.mode7.scale; }
 auto PPUfast::hdPerspective() const -> bool { return configuration.hacks.ppu.mode7.perspective; }
+auto PPUfast::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.supersample; }
+auto PPUfast::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
 
 PPUfast::PPUfast() {
   output = new uint32[2304 * 2304] + 72 * 2304;  //overscan offset
@@ -78,14 +80,15 @@ auto PPUfast::scanline() -> void {
     ppubase.display.overscan = io.overscan;
     latch.hires = false;
     latch.hd = false;
+    latch.ss = false;
     io.obj.timeOver = false;
     io.obj.rangeOver = false;
   }
 
   if(vcounter() > 0 && vcounter() < vdisp()) {
     latch.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-    latch.hires |= io.bgMode == 7 && configuration.hacks.ppu.mode7.hires;
-    latch.hd |= io.bgMode == 7 && hdScale() > 1;
+    latch.hd |= io.bgMode == 7 && hdScale() > 1 && hdSupersample() == 0;
+    latch.ss |= io.bgMode == 7 && hdScale() > 1 && hdSupersample() == 1;
   }
 
   if(vcounter() == vdisp() && !io.displayDisable) {

@@ -14,6 +14,7 @@ auto PPUfast::Line::flush() -> void {
 
 auto PPUfast::Line::render() -> void {
   auto hd = ppufast.hd();
+  auto ss = ppufast.ss();
   auto scale = ppufast.hdScale();
   auto output = ppufast.output + (!hd
   ? (y * 1024 + (ppufast.interlace() && ppufast.field() ? 512 : 0))
@@ -29,11 +30,10 @@ auto PPUfast::Line::render() -> void {
   }
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-  bool hiresMode7 = io.bgMode == 7 && configuration.hacks.ppu.mode7.hires;
   auto aboveColor = cgram[0];
   auto belowColor = hires ? cgram[0] : io.col.fixedColor;
-  uint xa = hd && ppufast.interlace() && ppufast.field() ? 256 * scale * scale / 2 : 0;
-  uint xb = !hd ? 256 << hiresMode7 : ppufast.interlace() && !ppufast.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
+  uint xa =  (hd || ss) && ppufast.interlace() && ppufast.field() ? 256 * scale * scale / 2 : 0;
+  uint xb = !(hd || ss) ? 256 : ppufast.interlace() && !ppufast.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {
     above[x] = {Source::COL, 0, aboveColor};
     below[x] = {Source::COL, 0, belowColor};
@@ -50,10 +50,6 @@ auto PPUfast::Line::render() -> void {
   auto luma = io.displayBrightness << 15;
   if(hd) for(uint x : range(256 * scale * scale)) {
     *output++ = luma | pixel(x / scale & 255, above[x], below[x]);
-  } else if(hiresMode7) for(uint x : range(512)) {
-    auto Above = above[x >> 1].source >= Source::OBJ1 ? above[x >> 1] : above[x >> 1 | (x & 1 ? 256 : 0)];
-    auto Below = below[x >> 1].source >= Source::OBJ1 ? below[x >> 1] : below[x >> 1 | (x & 1 ? 256 : 0)];
-    *output++ = luma | pixel(x >> 1, Above, Below);
   } else if(width == 256) for(uint x : range(256)) {
     *output++ = luma | pixel(x, above[x], below[x]);
   } else if(!hires) for(uint x : range(256)) {

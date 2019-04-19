@@ -18,6 +18,7 @@ auto PPUfast::Latch::serialize(serializer& s) -> void {
   s.integer(overscan);
   s.integer(hires);
   s.integer(hd);
+  s.integer(ss);
   s.integer(vram);
   s.integer(oam);
   s.integer(cgram);

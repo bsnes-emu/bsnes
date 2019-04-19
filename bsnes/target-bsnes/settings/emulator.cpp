@@ -42,18 +42,12 @@ auto EmulatorSettings::create() -> void {
     settings.emulator.hack.ppu.fast = fastPPU.checked();
     if(!fastPPU.checked()) {
       noSpriteLimit.setEnabled(false).setChecked(false).doToggle();
-      hiresMode7.setEnabled(false).setChecked(false).doToggle();
     } else {
       noSpriteLimit.setEnabled(true);
-      hiresMode7.setEnabled(true);
     }
   }).doToggle();
   noSpriteLimit.setText("No sprite limit").setChecked(settings.emulator.hack.ppu.noSpriteLimit).onToggle([&] {
     settings.emulator.hack.ppu.noSpriteLimit = noSpriteLimit.checked();
-  });
-  hiresMode7.setText("Hires mode 7").setChecked(settings.emulator.hack.ppu.mode7.hires).setVisible(false).onToggle([&] {
-    settings.emulator.hack.ppu.mode7.hires = hiresMode7.checked();
-    emulator->configure("Hacks/PPU/Mode7/Hires", settings.emulator.hack.ppu.mode7.hires);
   });
   mode7Label.setText("HD Mode 7 (fast PPU only)").setFont(Font().setBold());
   mode7ScaleLabel.setText("Scale:");
@@ -76,6 +70,14 @@ auto EmulatorSettings::create() -> void {
   mode7Perspective.setText("Perspective correction").setChecked(settings.emulator.hack.ppu.mode7.perspective).onToggle([&] {
     settings.emulator.hack.ppu.mode7.perspective = mode7Perspective.checked();
     emulator->configure("Hacks/PPU/Mode7/Perspective", settings.emulator.hack.ppu.mode7.perspective);
+  });
+  mode7Supersample.setText("Supersample").setChecked(settings.emulator.hack.ppu.mode7.supersample).onToggle([&] {
+    settings.emulator.hack.ppu.mode7.supersample = mode7Supersample.checked();
+    emulator->configure("Hacks/PPU/Mode7/Supersample", settings.emulator.hack.ppu.mode7.supersample);
+  });
+  mode7Mosaic.setText("HD->SD Mosaic").setChecked(settings.emulator.hack.ppu.mode7.mosaic).onToggle([&] {
+    settings.emulator.hack.ppu.mode7.mosaic = mode7Mosaic.checked();
+    emulator->configure("Hacks/PPU/Mode7/Mosaic", settings.emulator.hack.ppu.mode7.mosaic);
   });
   dspLabel.setText("DSP (audio)").setFont(Font().setBold());
   fastDSP.setText("Fast mode").setChecked(settings.emulator.hack.dsp.fast).onToggle([&] {
@@ -105,8 +107,10 @@ auto EmulatorSettings::create() -> void {
 auto EmulatorSettings::updateConfiguration() -> void {
   emulator->configure("Hacks/PPU/Fast", fastPPU.checked());
   emulator->configure("Hacks/PPU/NoSpriteLimit", noSpriteLimit.checked());
-  emulator->configure("Hacks/PPU/Mode7/Hires", hiresMode7.checked());
   emulator->configure("Hacks/PPU/Mode7/Scale", mode7Scale.selected().property("multiplier").natural());
+  emulator->configure("Hacks/PPU/Mode7/Perspective", mode7Perspective.checked());
+  emulator->configure("Hacks/PPU/Mode7/Supersample", mode7Supersample.checked());
+  emulator->configure("Hacks/PPU/Mode7/Mosaic", mode7Mosaic.checked());
   emulator->configure("Hacks/DSP/Fast", fastDSP.checked());
   emulator->configure("Hacks/DSP/Cubic", cubicInterpolation.checked());
   emulator->configure("Hacks/Coprocessor/DelayedSync", coprocessorsDelayedSyncOption.checked());

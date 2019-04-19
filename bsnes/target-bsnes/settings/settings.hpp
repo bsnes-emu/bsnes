@@ -79,9 +79,10 @@ struct Settings : Markup::Node {
         bool fast = true;
         bool noSpriteLimit = false;
         struct Mode7 {
-          bool hires = false;
           uint scale = 1;
           bool perspective = true;
+          bool supersample = false;
+          bool mosaic = true;
         } mode7;
       } ppu;
       struct DSP {
@@ -265,12 +266,13 @@ public:
     HorizontalLayout ppuLayout{&layout, Size{~0, 0}};
       CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
       CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
-      CheckLabel hiresMode7{&ppuLayout, Size{0, 0}};
     Label mode7Label{&layout, Size{~0, 0}, 2};
     HorizontalLayout mode7Layout{&layout, Size{~0, 0}};
       Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
       ComboButton mode7Scale{&mode7Layout, Size{0, 0}};
       CheckLabel mode7Perspective{&mode7Layout, Size{0, 0}};
+      CheckLabel mode7Supersample{&mode7Layout, Size{0, 0}};
+      CheckLabel mode7Mosaic{&mode7Layout, Size{0, 0}};
     Label dspLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout dspLayout{&layout, Size{~0, 0}};
       CheckLabel fastDSP{&dspLayout, Size{0, 0}};

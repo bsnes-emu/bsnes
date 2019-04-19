@@ -29,9 +29,10 @@ struct Configuration {
       bool fast = true;
       bool noSpriteLimit = false;
       struct Mode7 {
-        bool hires = false;
         uint scale = 1;
         bool perspective = true;
+        bool supersample = false;
+        bool mosaic = true;
       } mode7;
     } ppu;
     struct DSP {

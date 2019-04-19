@@ -13,7 +13,7 @@ auto DriverSettings::create() -> void {
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
-  videoExclusiveToggle.setText("Exclusive").setToolTip(
+  videoExclusiveToggle.setText("Exclusive fullscreen mode").setToolTip(
     "(Direct3D driver only)\n\n"
     "Acquires exclusive access to the display in fullscreen mode.\n"
     "Eliminates compositing issues such as video stuttering."
@@ -57,7 +57,7 @@ auto DriverSettings::create() -> void {
   audioFrequencyOption.onChange([&] { audioFrequencyChange(); });
   audioLatencyLabel.setText("Latency:");
   audioLatencyOption.onChange([&] { audioLatencyChange(); });
-  audioExclusiveToggle.setText("Exclusive").setToolTip(
+  audioExclusiveToggle.setText("Exclusive mode").setToolTip(
     "(ASIO, WASAPI drivers only)\n\n"
     "Acquires exclusive control of the sound card device.\n"
     "This can significantly reduce audio latency.\n"

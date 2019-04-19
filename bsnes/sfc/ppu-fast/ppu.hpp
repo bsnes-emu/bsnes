@@ -11,8 +11,11 @@ struct PPUfast : Thread, PPUcounter {
   alwaysinline auto vdisp() const -> uint;
   alwaysinline auto hires() const -> bool;
   alwaysinline auto hd() const -> bool;
+  alwaysinline auto ss() const -> bool;
   alwaysinline auto hdScale() const -> uint;
   alwaysinline auto hdPerspective() const -> bool;
+  alwaysinline auto hdSupersample() const -> bool;
+  alwaysinline auto hdMosaic() const -> bool;
 
   //ppu.cpp
   PPUfast();
@@ -42,6 +45,7 @@ public:
      uint1 overscan;
      uint1 hires;
      uint1 hd;
+     uint1 ss;
 
     uint16 vram;
      uint8 oam;
@@ -280,9 +284,6 @@ public:
 
     //mode7.cpp
     auto renderMode7(PPUfast::IO::Background&, uint source) -> void;
-
-    //mode7hires.cpp
-    auto renderMode7Hires(PPUfast::IO::Background&, uint source) -> void;
 
     //mode7hd.cpp
     auto renderMode7HD(PPUfast::IO::Background&, uint source) -> void;

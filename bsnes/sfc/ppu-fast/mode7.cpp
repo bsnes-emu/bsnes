@@ -1,6 +1,12 @@
 auto PPUfast::Line::renderMode7(PPUfast::IO::Background& self, uint source) -> void {
-  if(ppufast.hdScale() > 1) return renderMode7HD(self, source);
-  if(configuration.hacks.ppu.mode7.hires) return renderMode7Hires(self, source);
+  //EXTBG is only really used by games to give the mode 7 layer two priority levels
+  //especially with HD mode 7, it's just wasteful to render BG1 just to be overwritten by BG2
+  if(io.extbg && source == Source::BG1) return;
+
+  //HD mode 7 support
+  if(!ppufast.hdMosaic() || !self.mosaicEnable || !io.mosaicSize) {
+    if(ppufast.hdScale() > 1) return renderMode7HD(self, source);
+  }
 
   int Y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
   int y = !io.mode7.vflip ? Y : 255 - Y;
