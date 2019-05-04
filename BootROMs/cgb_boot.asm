@@ -99,6 +99,10 @@ Start:
     ld hl, $98C2
     ld b, 3
     ld a, 8
+IF DEF(FAST)
+    xor a
+    ldh [$4F], a
+ENDC
 
 .tilemapLoop
     ld c, $10
@@ -107,6 +111,7 @@ Start:
 
     ld [hl], a
     push af
+IF !DEF(FAST)
     ; Switch to second VRAM Bank
     ld a, 1
     ldh [$4F], a
@@ -115,6 +120,7 @@ Start:
     ; Switch to back first VRAM Bank
     xor a
     ldh [$4F], a
+ENDC
     pop af
     ldi [hl], a
     inc a
