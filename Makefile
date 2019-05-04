@@ -13,6 +13,10 @@ ifneq ($(findstring MSYS,$(PLATFORM)),)
 PLATFORM := windows32
 endif
 
+ifeq ($(PLATFORM),windows32)
+_ := $(shell chcp 65001)
+endif
+
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
 else
