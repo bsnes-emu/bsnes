@@ -414,7 +414,7 @@ static void init_for_current_model(unsigned id)
     descs[2].start = 0xC000;
     descs[2].len   = 0x1000;
 
-    descs[3].ptr   = descs[2].ptr + (bank * 0x1000);
+    descs[3].ptr   = descs[2].ptr + 0x1000; /* GB RAM/GBC RAM bank 1 */
     descs[3].start = 0xD000;
     descs[3].len   = 0x1000;
 
@@ -440,9 +440,9 @@ static void init_for_current_model(unsigned id)
     descs[8].start = 0xFE00;
     descs[8].len   = 0x00A0;
 
-    descs[9].ptr   = descs[2].ptr + 0x1000;
+    descs[9].ptr   = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
     descs[9].start = 0x10000;
-    descs[9].len   = GB_is_cgb(&gameboy[i]) ? 0x7000 : 0;
+    descs[9].len   = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
