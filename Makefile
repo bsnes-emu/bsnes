@@ -44,8 +44,10 @@ endif
 # Set tools
 
 # Use clang if it's available.
+ifeq ($(origin CC),default)
 ifneq (, $(shell which clang))
 CC := clang
+endif
 endif
 
 ifeq ($(PLATFORM),windows32)
