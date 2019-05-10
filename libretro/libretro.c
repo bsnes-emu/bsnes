@@ -697,6 +697,11 @@ void retro_init(void)
         snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", dir);
     else
         snprintf(retro_save_directory, sizeof(retro_save_directory), "%s", ".");
+
+    if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
+        log_cb = logging.log;
+    else
+        log_cb = fallback_log;
 }
 
 void retro_deinit(void)
@@ -774,11 +779,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 void retro_set_environment(retro_environment_t cb)
 {
     environ_cb = cb;
-
-    if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
-        log_cb = logging.log;
-    else
-        log_cb = fallback_log;
 
     cb(RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO,  (void*)subsystems);
 }
