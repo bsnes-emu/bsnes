@@ -70,7 +70,8 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
 {
     GB_sample_t output = {0,0};
 
-    for (unsigned i = GB_N_CHANNELS; i--;) {
+    UNROLL
+    for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
         double multiplier = CH_STEP;
         if (!is_DAC_enabled(gb, i)) {
             gb->apu_output.dac_discharge[i] -= ((double) DAC_DECAY_SPEED) / gb->apu_output.sample_rate;
@@ -375,7 +376,7 @@ void GB_apu_run(GB_gameboy_t *gb)
     }
     
     UNROLL
-    for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+    for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
         if (gb->apu.is_active[i]) {
             uint8_t cycles_left = cycles;
             while (unlikely(cycles_left > gb->apu.square_channels[i].sample_countdown)) {
