@@ -27,9 +27,7 @@ static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
 static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, bool flip_x)
 {
     if (!flip_x) {
-#ifdef __clang__
-        #pragma unroll
-#endif
+        UNROLL
         for (unsigned i = 8; i--;) {
             fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
                 (lower >> 7) | ((upper >> 7) << 1),
@@ -45,9 +43,7 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
         }
     }
     else {
-#ifdef __clang__
-        #pragma unroll
-#endif
+        UNROLL
         for (unsigned i = 8; i--;) {
             fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
                 (lower & 1) | ((upper & 1) << 1),
@@ -74,9 +70,7 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
     
     uint8_t flip_xor = flip_x? 0: 0x7;
     
-#ifdef __clang__
-    #pragma unroll
-#endif
+    UNROLL
     for (unsigned i = 8; i--;) {
         uint8_t pixel = (lower >> 7) | ((upper >> 7) << 1);
         GB_fifo_item_t *target = &fifo->fifo[(fifo->read_end + (i ^ flip_xor)) & (GB_FIFO_LENGTH - 1)];
@@ -1123,9 +1117,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
         }
 
         for (unsigned y = 0; y < *sprite_height; y++) {
-#ifdef __clang__
-            #pragma unroll
-#endif
+            UNROLL
             for (unsigned x = 0; x < 8; x++) {
                 uint8_t color = (((gb->vram[vram_address    ] >> ((~x)&7)) & 1 ) |
                                  ((gb->vram[vram_address + 1] >> ((~x)&7)) & 1) << 1 );
