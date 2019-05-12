@@ -315,7 +315,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 	-@$(MKDIR) -p $(dir $@)
 	cd BootROMs && rgbasm -o ../$@.tmp ../$<
 	rgblink -o $@.tmp2 $@.tmp
-	head -c $(if $(findstring dmg,$@)$(findstring sgb,$@), 256, 2304) $@.tmp2 > $@
+	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@),256,2304)
 	@rm $@.tmp $@.tmp2
 
 # Libretro Core (uses its own build system)
