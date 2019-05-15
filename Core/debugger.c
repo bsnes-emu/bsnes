@@ -214,7 +214,7 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
                 return r;
             }
             return VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
-            
+
         case LVALUE_MEMORY16:
             if (lvalue.memory_address.has_bank) {
                 banking_state_t state;
@@ -254,7 +254,7 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
             }
             GB_write_memory(gb, lvalue.memory_address.value, value);
             return;
-        
+
         case LVALUE_MEMORY16:
             if (lvalue.memory_address.has_bank) {
                 banking_state_t state;
@@ -288,7 +288,7 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
    25 bit address <op> 16 bit value   = 25 bit address
    16 bit value   <op> 25 bit address = 25 bit address
    25 bit address <op> 25 bit address = 16 bit value (since adding pointers, for examples, makes no sense)
- 
+
    Boolean operators always return a 16-bit value
    */
 #define FIX_BANK(x) ((value_t){a.has_bank ^ b.has_bank, a.has_bank? a.bank : b.bank, (x)})
@@ -473,9 +473,9 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     /* Disable watchpoints while evaulating expressions */
     uint16_t n_watchpoints = gb->n_watchpoints;
     gb->n_watchpoints = 0;
-    
+
     value_t ret = ERROR;
-    
+
     *error = false;
     // Strip whitespace
     while (length && (string[0] == ' ' || string[0] == '\n' || string[0] == '\r' || string[0] == '\t')) {
@@ -547,7 +547,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             }
             if (string[i] == '}') depth--;
         }
-        
+
         if (depth == 0) {
             value_t addr = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
             banking_state_t state;
@@ -751,7 +751,7 @@ static bool next(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
         print_usage(gb, command);
         return true;
     }
-    
+
     gb->debug_stopped = false;
     gb->debug_next_command = true;
     gb->debug_call_depth = 0;
@@ -791,7 +791,7 @@ static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, char *modifi
 {
     NO_MODIFIERS
     STOPPED_ONLY
-    
+
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -854,7 +854,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
         print_usage(gb, command);
         return true;
     }
-    
+
     if (strlen(lstrip(arguments)) == 0) {
         print_usage(gb, command);
         return true;
@@ -913,9 +913,9 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
         gb->breakpoints[index].condition = NULL;
     }
     gb->n_breakpoints++;
-    
+
     gb->breakpoints[index].is_jump_to = is_jump_to;
-    
+
     if (is_jump_to) {
         gb->has_jump_to_breakpoints = true;
     }
@@ -957,7 +957,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
             index = i;
         }
     }
-    
+
     if (index >= gb->n_breakpoints) {
         GB_log(gb, "No breakpoint set at %s\n", debugger_value_to_string(gb, result, true));
         return true;
@@ -965,7 +965,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
 
     result.bank = gb->breakpoints[index].bank;
     result.has_bank = gb->breakpoints[index].bank != (uint16_t) -1;
-    
+
     if (gb->breakpoints[index].condition) {
         free(gb->breakpoints[index].condition);
     }
@@ -980,7 +980,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
             }
         }
     }
-    
+
     memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index - 1) * sizeof(gb->breakpoints[0]));
     gb->n_breakpoints--;
     gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
@@ -1140,12 +1140,12 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
             index = i;
         }
     }
-    
+
     if (index >= gb->n_watchpoints) {
         GB_log(gb, "No watchpoint set at %s\n", debugger_value_to_string(gb, result, true));
         return true;
     }
-    
+
     result.bank = gb->watchpoints[index].bank;
     result.has_bank = gb->watchpoints[index].bank != (uint16_t) -1;
 
@@ -1457,7 +1457,7 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
         print_usage(gb, command);
         return true;
     }
-    
+
     GB_log(gb, "  1. %s\n", debugger_value_to_string(gb, (value_t){true, bank_for_addr(gb, gb->pc), gb->pc}, true));
     for (unsigned int i = gb->backtrace_size; i--;) {
         GB_log(gb, "%3d. %s\n", gb->backtrace_size - i + 1, debugger_value_to_string(gb, (value_t){true, gb->backtrace_returns[i].bank, gb->backtrace_returns[i].addr}, true));
@@ -1532,7 +1532,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    Background and Window Tileset: %s\n", (gb->io_registers[GB_IO_LCDC] & 16)? "$8000" : "$8800");
     GB_log(gb, "    Window: %s\n", (gb->io_registers[GB_IO_LCDC] & 32)? "Enabled" : "Disabled");
     GB_log(gb, "    Window tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & 64)? "$9C00" : "$9800");
-    
+
     GB_log(gb, "\nSTAT:\n");
     static const char *modes[] = {"Mode 0, H-Blank", "Mode 1, V-Blank", "Mode 2, OAM", "Mode 3, Rendering"};
     GB_log(gb, "    Current mode: %s\n", modes[gb->io_registers[GB_IO_STAT] & 3]);
@@ -1541,9 +1541,9 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    V-Blank interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 16)? "Enabled" : "Disabled");
     GB_log(gb, "    OAM interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 32)? "Enabled" : "Disabled");
     GB_log(gb, "    LYC interrupt: %s\n", (gb->io_registers[GB_IO_STAT] & 64)? "Enabled" : "Disabled");
-    
-    
-    
+
+
+
     GB_log(gb, "\nCurrent line: %d\n", gb->current_line);
     GB_log(gb, "Current state: ");
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -1566,7 +1566,173 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
     GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
     GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
-    
+
+    return true;
+}
+
+static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+
+
+    GB_log(gb, "Current state: ");
+    if(!gb->apu.global_enable) {
+        GB_log(gb, "Disabled\n");
+    }
+    else {
+        GB_log(gb, "Enabled\n");
+        for(uint8_t channel = 0; channel < GB_N_CHANNELS; channel++) {
+            GB_log(gb, "CH%u is %s, DAC %s; current sample = 0x%x\n", channel + 1,
+                gb->apu.is_active[channel] ? "active  " : "inactive",
+                GB_apu_is_DAC_enabled(gb, channel) ? "active  " : "inactive",
+                gb->apu.samples[channel]);
+        }
+    }
+
+    GB_log(gb, "SO1 (left output):  volume %u,", gb->io_registers[GB_IO_NR50] & 0x07);
+    if(gb->io_registers[GB_IO_NR51] & 0x0f) {
+        for(uint8_t channel = 0, mask = 0x01; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
+            if(gb->io_registers[GB_IO_NR51] & mask) {
+                GB_log(gb, " CH%u", channel + 1);
+            }
+        }
+    } else {
+        GB_log(gb, " no channels");
+    }
+    GB_log(gb, "%s\n", gb->io_registers[GB_IO_NR50] & 0x80 ? " VIN": "");
+
+    GB_log(gb, "SO2 (right output): volume %u,", gb->io_registers[GB_IO_NR50] & 0x70 >> 4);
+    if(gb->io_registers[GB_IO_NR51] & 0xf0) {
+        for(uint8_t channel = 0, mask = 0x10; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
+            if(gb->io_registers[GB_IO_NR51] & mask) {
+                GB_log(gb, " CH%u", channel + 1);
+            }
+        }
+    } else {
+        GB_log(gb, " no channels");
+    }
+    GB_log(gb, "%s\n", gb->io_registers[GB_IO_NR50] & 0x80 ? " VIN": "");
+
+
+    for(uint8_t channel = GB_SQUARE_1; channel <= GB_SQUARE_2; channel++) {
+        GB_log(gb, "\nCH%u:\n", channel + 1);
+        GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
+            gb->apu.square_channels[channel].current_volume,
+            gb->apu.square_channels[channel].sample_length,
+            gb->apu.square_channels[channel].sample_countdown);
+
+        uint8_t nrx2 = gb->io_registers[channel == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
+        GB_log(gb, "    %u 256 Hz ticks till next volume %screase (out of %u)\n",
+            gb->apu.square_channels[channel].volume_countdown,
+            nrx2 & 8 ? "in" : "de",
+            nrx2 & 7);
+
+        uint8_t duty = gb->io_registers[channel == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
+        GB_log(gb, "    Duty cycle %s%% (%s), current index %u/8%s\n",
+            (char*[]){"12.5", "  25", "  50", "  75"}[duty],
+            (char*[]){"_______-", "-______-", "-____---", "_------_"}[duty],
+            gb->apu.square_channels[channel].current_sample_index & 0x7f,
+            gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
+
+        if(channel == GB_SQUARE_1) {
+            GB_log(gb, "    Frequency sweep %s and %s (next in %u APU ticks)\n",
+                gb->apu.sweep_enabled? "active" : "inactive",
+                gb->apu.sweep_decreasing? "decreasing" : "increasing",
+                gb->apu.square_sweep_calculate_countdown);
+        }
+
+        if(gb->apu.square_channels[channel].length_enabled) {
+            GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
+                gb->apu.square_channels[channel].pulse_length);
+        }
+    }
+
+
+    GB_log(gb, "\nCH3:\n");
+    GB_log(gb, "    Wave:");
+    for(uint8_t i = 0; i < 32; i++) {
+        GB_log(gb, "%s%X", i%4?"":" ", gb->apu.wave_channel.wave_form[i]);
+    }
+    GB_log(gb, ", has %sjust been read\n", gb->apu.wave_channel.wave_form_just_read? "": "not ");
+    GB_log(gb, "    Current position: %u\n", gb->apu.wave_channel.current_sample_index);
+
+    GB_log(gb, "    Volume %s (right-shifted %ux)\n",
+        (char*[]){"100%", "50%", "25%", NULL, "muted"}[gb->apu.wave_channel.shift],
+        gb->apu.wave_channel.shift);
+
+    GB_log(gb, "    Current sample length: %u APU ticks (next in %u ticks)\n",
+        gb->apu.wave_channel.sample_length,
+        gb->apu.wave_channel.sample_countdown);
+
+    if(gb->apu.wave_channel.length_enabled) {
+        GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
+            gb->apu.wave_channel.pulse_length);
+    }
+
+
+    GB_log(gb, "\nCH4:\n");
+    GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
+        gb->apu.noise_channel.current_volume,
+        gb->apu.noise_channel.sample_length,
+        gb->apu.noise_channel.sample_countdown);
+
+    GB_log(gb, "    %u 256 Hz ticks till next volume %screase (out of %u)\n",
+        gb->apu.noise_channel.volume_countdown,
+        gb->io_registers[GB_IO_NR42] & 8 ? "in" : "de",
+        gb->io_registers[GB_IO_NR42] & 7);
+
+    GB_log(gb, "    LFSR in %u-step mode, current value %%",
+        gb->apu.noise_channel.narrow? 7 : 15);
+    for(uint16_t lfsr = gb->apu.noise_channel.lfsr, i = 15; i--; lfsr <<= 1) {
+        GB_log(gb, "%u%s", (lfsr >> 14) & 1, i%4 ? "" : " ");
+    }
+
+    if(gb->apu.noise_channel.length_enabled) {
+        GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
+            gb->apu.noise_channel.pulse_length);
+    }
+
+
+    GB_log(gb, "\n\nReminder: APU ticks are @ 2 MiHz\n");
+
+    return true;
+}
+
+static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    if (strlen(lstrip(arguments)) || (modifiers && !strchr("fcl", modifiers[0]))) {
+        print_usage(gb, command);
+        return true;
+    }
+
+    uint8_t shift_amount = 1, mask;
+    if(modifiers) {
+        switch(modifiers[0]) {
+            case 'c':
+                shift_amount = 2;
+                break;
+            case 'l':
+                shift_amount = 8;
+                break;
+        }
+    }
+    mask = (0xf << (shift_amount - 1)) & 0xf;
+
+    for(int8_t cur_val = 0xf & mask; cur_val >= 0; cur_val -= shift_amount) {
+        for(uint8_t i = 0; i < 32; i++) {
+            if((gb->apu.wave_channel.wave_form[i] & mask) == cur_val) {
+                GB_log(gb, "%X", gb->apu.wave_channel.wave_form[i]);
+            } else {
+                GB_log(gb, "%c", i%4 == 2 ? '-' : ' ');
+            }
+        }
+        GB_log(gb, "\n");
+    }
+
     return true;
 }
 
@@ -1587,6 +1753,10 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
+    {"apu", 3, apu, "Displays information about the current state of the audio chip"},
+    {"wave", 3, wave, "Prints a visual representation of the wave RAM" HELP_NEWLINE
+                      "Modifiers can be used for a (f)ull print (the default)," HELP_NEWLINE
+                      "a more (c)ompact one, or a one-(l)iner"},
     {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
@@ -1875,7 +2045,7 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
 void GB_debugger_run(GB_gameboy_t *gb)
 {
     if (gb->debug_disable) return;
-    
+
     char *input = NULL;
     if (gb->debug_next_command && gb->debug_call_depth <= 0) {
         gb->debug_stopped = true;
@@ -1895,11 +2065,11 @@ next_command:
         GB_log(gb, "Breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
-    
+
     if (gb->breakpoints && !gb->debug_stopped) {
         uint16_t address = 0;
         jump_to_return_t jump_to_result = test_jump_to_breakpoints(gb, &address);
-        
+
         bool should_delete_state = true;
         if (gb->nontrivial_jump_state && should_break(gb, gb->pc, true)) {
             if (gb->non_trivial_jump_breakpoint_occured) {
@@ -1930,7 +2100,7 @@ next_command:
         else {
             gb->non_trivial_jump_breakpoint_occured = false;
         }
-        
+
         if (should_delete_state) {
             if (gb->nontrivial_jump_state) {
                 free(gb->nontrivial_jump_state);
@@ -2077,17 +2247,17 @@ static bool is_in_trivial_memory(uint16_t addr)
     if (addr < 0x8000) {
         return true;
     }
-    
+
     /* HRAM */
     if (addr >= 0xFF80 && addr < 0xFFFF) {
         return true;
     }
-    
+
     /* RAM */
     if (addr >= 0xC000 && addr < 0xE000) {
         return true;
     }
-    
+
     return false;
 }
 
@@ -2125,7 +2295,7 @@ static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
         case 3:
             return (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
     }
-    
+
     return false;
 }
 
@@ -2134,7 +2304,7 @@ static uint16_t jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
     if (!condition_code(gb, opcode)) {
         return gb->pc + 2;
     }
-    
+
     return gb->pc + 2 + (int8_t)GB_read_memory(gb, gb->pc + 1);
 }
 
@@ -2221,12 +2391,12 @@ static GB_opcode_address_getter_t *opcodes[256] = {
 static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *address)
 {
     if (!gb->has_jump_to_breakpoints) return JUMP_TO_NONE;
-    
+
     if (!is_in_trivial_memory(gb->pc) || !is_in_trivial_memory(gb->pc + 2) ||
         !is_in_trivial_memory(gb->registers[GB_REGISTER_SP]) || !is_in_trivial_memory(gb->registers[GB_REGISTER_SP] + 1)) {
         return JUMP_TO_NONTRIVIAL;
     }
-    
+
     /* Interrupts */
     if (gb->ime) {
         for (unsigned i = 0; i < 5; i++) {
@@ -2240,38 +2410,38 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
             }
         }
     }
-    
+
     uint16_t n_watchpoints = gb->n_watchpoints;
     gb->n_watchpoints = 0;
-    
+
     uint8_t opcode = GB_read_memory(gb, gb->pc);
-    
+
     if (opcode == 0x76) {
         gb->n_watchpoints = n_watchpoints;
         if (gb->ime) { /* Already handled in above */
             return JUMP_TO_NONE;
         }
-        
+
         if (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) {
             return JUMP_TO_NONTRIVIAL; /* HALT bug could occur */
         }
-        
+
         return JUMP_TO_NONE;
     }
-    
+
     GB_opcode_address_getter_t *getter = opcodes[opcode];
     if (!getter) {
         gb->n_watchpoints = n_watchpoints;
         return JUMP_TO_NONE;
     }
-    
+
     uint16_t new_pc = getter(gb, opcode);
-    
+
     gb->n_watchpoints = n_watchpoints;
-    
+
     if (address) {
         *address = new_pc;
     }
-    
+
     return should_break(gb, new_pc, true) ? JUMP_TO_BREAK : JUMP_TO_NONE;
 }
