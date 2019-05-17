@@ -1635,16 +1635,16 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
         uint8_t duty = gb->io_registers[channel == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
         GB_log(gb, "    Duty cycle %s%% (%s), current index %u/8%s\n",
-            (char*[]){"12.5", "  25", "  50", "  75"}[duty],
-            (char*[]){"_______-", "-______-", "-____---", "_------_"}[duty],
-            gb->apu.square_channels[channel].current_sample_index & 0x7f,
-            gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
+               duty > 3? "" : (const char *[]){"12.5", "  25", "  50", "  75"}[duty],
+               duty > 3? "" : (const char *[]){"_______-", "-______-", "-____---", "_------_"}[duty],
+               gb->apu.square_channels[channel].current_sample_index & 0x7f,
+               gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
 
         if (channel == GB_SQUARE_1) {
             GB_log(gb, "    Frequency sweep %s and %s (next in %u APU ticks)\n",
-                gb->apu.sweep_enabled? "active" : "inactive",
-                gb->apu.sweep_decreasing? "decreasing" : "increasing",
-                gb->apu.square_sweep_calculate_countdown);
+                   gb->apu.sweep_enabled? "active" : "inactive",
+                   gb->apu.sweep_decreasing? "decreasing" : "increasing",
+                   gb->apu.square_sweep_calculate_countdown);
         }
 
         if (gb->apu.square_channels[channel].length_enabled) {
@@ -1663,8 +1663,8 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    Current position: %u\n", gb->apu.wave_channel.current_sample_index);
 
     GB_log(gb, "    Volume %s (right-shifted %u times)\n",
-        (char*[]){"100%", "50%", "25%", NULL, "muted"}[gb->apu.wave_channel.shift],
-        gb->apu.wave_channel.shift);
+           gb->apu.wave_channel.shift > 4? "" : (const char *[]){"100%", "50%", "25%", "", "muted"}[gb->apu.wave_channel.shift],
+           gb->apu.wave_channel.shift);
 
     GB_log(gb, "    Current sample length: %u APU ticks (next in %u ticks)\n",
         gb->apu.wave_channel.sample_length,
