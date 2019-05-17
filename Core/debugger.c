@@ -1580,12 +1580,12 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
 
     GB_log(gb, "Current state: ");
-    if(!gb->apu.global_enable) {
+    if (!gb->apu.global_enable) {
         GB_log(gb, "Disabled\n");
     }
     else {
         GB_log(gb, "Enabled\n");
-        for(uint8_t channel = 0; channel < GB_N_CHANNELS; channel++) {
+        for (uint8_t channel = 0; channel < GB_N_CHANNELS; channel++) {
             GB_log(gb, "CH%u is %s, DAC %s; current sample = 0x%x\n", channel + 1,
                 gb->apu.is_active[channel] ? "active  " : "inactive",
                 GB_apu_is_DAC_enabled(gb, channel) ? "active  " : "inactive",
@@ -1594,31 +1594,33 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
 
     GB_log(gb, "SO1 (left output):  volume %u,", gb->io_registers[GB_IO_NR50] & 0x07);
-    if(gb->io_registers[GB_IO_NR51] & 0x0f) {
-        for(uint8_t channel = 0, mask = 0x01; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
-            if(gb->io_registers[GB_IO_NR51] & mask) {
+    if (gb->io_registers[GB_IO_NR51] & 0x0f) {
+        for (uint8_t channel = 0, mask = 0x01; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
+            if (gb->io_registers[GB_IO_NR51] & mask) {
                 GB_log(gb, " CH%u", channel + 1);
             }
         }
-    } else {
+    }
+    else {
         GB_log(gb, " no channels");
     }
     GB_log(gb, "%s\n", gb->io_registers[GB_IO_NR50] & 0x80 ? " VIN": "");
 
     GB_log(gb, "SO2 (right output): volume %u,", gb->io_registers[GB_IO_NR50] & 0x70 >> 4);
-    if(gb->io_registers[GB_IO_NR51] & 0xf0) {
-        for(uint8_t channel = 0, mask = 0x10; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
-            if(gb->io_registers[GB_IO_NR51] & mask) {
+    if (gb->io_registers[GB_IO_NR51] & 0xf0) {
+        for (uint8_t channel = 0, mask = 0x10; channel < GB_N_CHANNELS; channel++, mask <<= 1) {
+            if (gb->io_registers[GB_IO_NR51] & mask) {
                 GB_log(gb, " CH%u", channel + 1);
             }
         }
-    } else {
+    }
+    else {
         GB_log(gb, " no channels");
     }
     GB_log(gb, "%s\n", gb->io_registers[GB_IO_NR50] & 0x80 ? " VIN": "");
 
 
-    for(uint8_t channel = GB_SQUARE_1; channel <= GB_SQUARE_2; channel++) {
+    for (uint8_t channel = GB_SQUARE_1; channel <= GB_SQUARE_2; channel++) {
         GB_log(gb, "\nCH%u:\n", channel + 1);
         GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
             gb->apu.square_channels[channel].current_volume,
@@ -1638,14 +1640,14 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
             gb->apu.square_channels[channel].current_sample_index & 0x7f,
             gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
 
-        if(channel == GB_SQUARE_1) {
+        if (channel == GB_SQUARE_1) {
             GB_log(gb, "    Frequency sweep %s and %s (next in %u APU ticks)\n",
                 gb->apu.sweep_enabled? "active" : "inactive",
                 gb->apu.sweep_decreasing? "decreasing" : "increasing",
                 gb->apu.square_sweep_calculate_countdown);
         }
 
-        if(gb->apu.square_channels[channel].length_enabled) {
+        if (gb->apu.square_channels[channel].length_enabled) {
             GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
                 gb->apu.square_channels[channel].pulse_length);
         }
@@ -1654,13 +1656,13 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
     GB_log(gb, "\nCH3:\n");
     GB_log(gb, "    Wave:");
-    for(uint8_t i = 0; i < 32; i++) {
+    for (uint8_t i = 0; i < 32; i++) {
         GB_log(gb, "%s%X", i%4?"":" ", gb->apu.wave_channel.wave_form[i]);
     }
-    GB_log(gb, ", has %sjust been read\n", gb->apu.wave_channel.wave_form_just_read? "": "not ");
+    GB_log(gb, "\n");
     GB_log(gb, "    Current position: %u\n", gb->apu.wave_channel.current_sample_index);
 
-    GB_log(gb, "    Volume %s (right-shifted %ux)\n",
+    GB_log(gb, "    Volume %s (right-shifted %u times)\n",
         (char*[]){"100%", "50%", "25%", NULL, "muted"}[gb->apu.wave_channel.shift],
         gb->apu.wave_channel.shift);
 
@@ -1668,7 +1670,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         gb->apu.wave_channel.sample_length,
         gb->apu.wave_channel.sample_countdown);
 
-    if(gb->apu.wave_channel.length_enabled) {
+    if (gb->apu.wave_channel.length_enabled) {
         GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
             gb->apu.wave_channel.pulse_length);
     }
@@ -1685,13 +1687,13 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         gb->io_registers[GB_IO_NR42] & 8 ? "in" : "de",
         gb->io_registers[GB_IO_NR42] & 7);
 
-    GB_log(gb, "    LFSR in %u-step mode, current value %%",
+    GB_log(gb, "    LFSR in %u-step mode, current value ",
         gb->apu.noise_channel.narrow? 7 : 15);
-    for(uint16_t lfsr = gb->apu.noise_channel.lfsr, i = 15; i--; lfsr <<= 1) {
+    for (uint16_t lfsr = gb->apu.noise_channel.lfsr, i = 15; i--; lfsr <<= 1) {
         GB_log(gb, "%u%s", (lfsr >> 14) & 1, i%4 ? "" : " ");
     }
 
-    if(gb->apu.noise_channel.length_enabled) {
+    if (gb->apu.noise_channel.length_enabled) {
         GB_log(gb, "    Channel will end in %u 256 Hz ticks\n",
             gb->apu.noise_channel.pulse_length);
     }
@@ -1710,7 +1712,7 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
     }
 
     uint8_t shift_amount = 1, mask;
-    if(modifiers) {
+    if (modifiers) {
         switch(modifiers[0]) {
             case 'c':
                 shift_amount = 2;
@@ -1722,11 +1724,12 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
     }
     mask = (0xf << (shift_amount - 1)) & 0xf;
 
-    for(int8_t cur_val = 0xf & mask; cur_val >= 0; cur_val -= shift_amount) {
-        for(uint8_t i = 0; i < 32; i++) {
-            if((gb->apu.wave_channel.wave_form[i] & mask) == cur_val) {
+    for (int8_t cur_val = 0xf & mask; cur_val >= 0; cur_val -= shift_amount) {
+        for (uint8_t i = 0; i < 32; i++) {
+            if ((gb->apu.wave_channel.wave_form[i] & mask) == cur_val) {
                 GB_log(gb, "%X", gb->apu.wave_channel.wave_form[i]);
-            } else {
+            }
+            else {
                 GB_log(gb, "%c", i%4 == 2 ? '-' : ' ');
             }
         }
