@@ -23,6 +23,13 @@ static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_of
 
 bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
 {
+    if (gb->model >= GB_MODEL_AGB) {
+        /* On the AGB, mixing is done digitally, so there are no per-channel
+           DACs. Instead, all channels are summed digital regardless of
+           whatever the DAC state would be on a CGB or earlier model. */
+        return true;
+    }
+    
     switch (index) {
         case GB_SQUARE_1:
             return gb->io_registers[GB_IO_NR12] & 0xF8;
@@ -37,11 +44,45 @@ bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
             return gb->io_registers[GB_IO_NR42] & 0xF8;
     }
 
-    return 0;
+    return false;
 }
 
 static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
+    if (gb->model >= GB_MODEL_AGB) {
+        /* On the AGB, because no analog mixing is done, the behavior of NR51 is a bit different.
+           A channel that is not connected to a terminal is idenitcal to a connected channel
+           playing PCM sample 0. */
+        gb->apu.samples[index] = value;
+        
+        if (gb->apu_output.sample_rate) {
+            unsigned right_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
+            unsigned left_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
+            
+            GB_sample_t output;
+            if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
+                output.right = (0xf - value * 2) * right_volume;
+            }
+            else {
+                output.right = 0xf * right_volume;
+            }
+            
+            if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
+                output.left = (0xf - value * 2) * left_volume;
+            }
+            else {
+                output.left = 0xf * left_volume;
+            }
+            
+            if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
+                refresh_channel(gb, index, cycles_offset);
+                gb->apu_output.current_sample[index] = output;
+            }
+        }
+        
+        return;
+    }
+    
     if (!GB_apu_is_DAC_enabled(gb, index)) {
         value = gb->apu.samples[index];
     }
@@ -73,23 +114,26 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
     UNROLL
     for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
         double multiplier = CH_STEP;
-        if (!GB_apu_is_DAC_enabled(gb, i)) {
-            gb->apu_output.dac_discharge[i] -= ((double) DAC_DECAY_SPEED) / gb->apu_output.sample_rate;
-            if (gb->apu_output.dac_discharge[i] < 0) {
-                multiplier = 0;
-                gb->apu_output.dac_discharge[i] = 0;
+        
+        if (gb->model < GB_MODEL_AGB) {
+            if (!GB_apu_is_DAC_enabled(gb, i)) {
+                gb->apu_output.dac_discharge[i] -= ((double) DAC_DECAY_SPEED) / gb->apu_output.sample_rate;
+                if (gb->apu_output.dac_discharge[i] < 0) {
+                    multiplier = 0;
+                    gb->apu_output.dac_discharge[i] = 0;
+                }
+                else {
+                    multiplier *= gb->apu_output.dac_discharge[i];
+                }
             }
             else {
-                multiplier *= gb->apu_output.dac_discharge[i];
-            }
-        }
-        else {
-            gb->apu_output.dac_discharge[i] += ((double) DAC_ATTACK_SPEED) / gb->apu_output.sample_rate;
-            if (gb->apu_output.dac_discharge[i] > 1) {
-                gb->apu_output.dac_discharge[i] = 1;
-            }
-            else {
-                multiplier *= gb->apu_output.dac_discharge[i];
+                gb->apu_output.dac_discharge[i] += ((double) DAC_ATTACK_SPEED) / gb->apu_output.sample_rate;
+                if (gb->apu_output.dac_discharge[i] > 1) {
+                    gb->apu_output.dac_discharge[i] = 1;
+                }
+                else {
+                    multiplier *= gb->apu_output.dac_discharge[i];
+                }
             }
         }
 
