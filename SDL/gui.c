@@ -307,6 +307,31 @@ const char *current_model_string(unsigned index)
         [configuration.model];
 }
 
+static void cycle_sgb_revision(unsigned index)
+{
+    
+    configuration.sgb_revision++;
+    if (configuration.sgb_revision == SGB_MAX) {
+        configuration.sgb_revision = 0;
+    }
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+static void cycle_sgb_revision_backwards(unsigned index)
+{
+    if (configuration.sgb_revision == 0) {
+        configuration.sgb_revision = SGB_MAX;
+    }
+    configuration.sgb_revision--;
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+const char *current_sgb_revision_string(unsigned index)
+{
+    return (const char *[]){"Super Game Boy NTSC", "Super Game Boy PAL", "Super Game Boy 2"}
+    [configuration.sgb_revision];
+}
+
 static const uint32_t rewind_lengths[] = {0, 10, 30, 60, 60 * 2, 60 * 5, 60 * 10};
 static const char *rewind_strings[] = {"Disabled",
                                        "10 Seconds",
@@ -355,6 +380,7 @@ const char *current_rewind_string(unsigned index)
 
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
+    {"SGB Revision:", cycle_sgb_revision, current_sgb_revision_string, cycle_sgb_revision_backwards},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
     {"Back", return_to_root_menu},
     {NULL,}

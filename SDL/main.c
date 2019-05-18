@@ -35,14 +35,6 @@ static char *battery_save_path_ptr;
 
 SDL_AudioDeviceID device_id;
 
-static const GB_model_t sdl_to_internal_model[] =
-{
-    [MODEL_DMG] = GB_MODEL_DMG_B,
-    [MODEL_CGB] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB,
-    [MODEL_SGB] = GB_MODEL_SGB,
-};
-
 void set_filename(const char *new_filename, bool new_should_free)
 {
     if (filename && should_free_filename) {
@@ -407,13 +399,27 @@ static bool handle_pending_command(void)
 
 static void run(void)
 {
+    GB_model_t model;
     pending_command = GB_SDL_NO_COMMAND;
 restart:
+    model = (GB_model_t [])
+    {
+        [MODEL_DMG] = GB_MODEL_DMG_B,
+        [MODEL_CGB] = GB_MODEL_CGB_E,
+        [MODEL_AGB] = GB_MODEL_AGB,
+        [MODEL_SGB] = (GB_model_t [])
+        {
+            [SGB_NTSC] = GB_MODEL_SGB_NTSC,
+            [SGB_PAL] = GB_MODEL_SGB_PAL,
+            [SGB_2] = GB_MODEL_SGB2,
+        }[configuration.sgb_revision],
+    }[configuration.model];
+    
     if (GB_is_inited(&gb)) {
-        GB_switch_model_and_reset(&gb, sdl_to_internal_model[configuration.model]);
+        GB_switch_model_and_reset(&gb, model);
     }
     else {
-        GB_init(&gb, sdl_to_internal_model[configuration.model]);
+        GB_init(&gb, model);
         
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
         GB_set_pixels_output(&gb, active_pixel_buffer);
@@ -434,7 +440,11 @@ restart:
     bool error = false;
     start_capturing_logs();
     const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin", "sgb_boot.bin"};
-    error = GB_load_boot_rom(&gb, resource_path(boot_roms[configuration.model]));
+    const char *boot_rom = boot_roms[configuration.model];
+    if (configuration.model == GB_MODEL_SGB && configuration.sgb_revision == SGB_2) {
+        boot_rom = "sgb2_boot.bin";
+    }
+    error = GB_load_boot_rom(&gb, resource_path(boot_rom));
     end_capturing_logs(true, error);
     
     start_capturing_logs();
