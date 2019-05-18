@@ -24,7 +24,7 @@
 
 GB_gameboy_t gb;
 static bool paused = false;
-static uint32_t pixel_buffer_1[160*144], pixel_buffer_2[160*144];
+static uint32_t pixel_buffer_1[256 * 224], pixel_buffer_2[256 * 224];
 static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
 static bool underclock_down = false, rewind_down = false, do_rewind = false, rewind_paused = false, turbo_down = false;
 static double clock_mutliplier = 1.0;
@@ -39,7 +39,8 @@ static const GB_model_t sdl_to_internal_model[] =
 {
     [MODEL_DMG] = GB_MODEL_DMG_B,
     [MODEL_CGB] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB
+    [MODEL_AGB] = GB_MODEL_AGB,
+    [MODEL_SGB] = GB_MODEL_SGB,
 };
 
 void set_filename(const char *new_filename, bool new_should_free)
@@ -423,9 +424,16 @@ restart:
         GB_set_rewind_length(&gb, configuration.rewind_length);
     }
     
+    SDL_DestroyTexture(texture);
+    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING,
+                                GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    
+    SDL_SetWindowMinimumSize(window, GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+
+    
     bool error = false;
     start_capturing_logs();
-    const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin"};
+    const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin", "sgb_boot.bin"};
     error = GB_load_boot_rom(&gb, resource_path(boot_roms[configuration.model]));
     end_capturing_logs(true, error);
     
@@ -447,7 +455,9 @@ restart:
     char symbols_path[path_length + 5];
     replace_extension(filename, path_length, symbols_path, ".sym");
     GB_debugger_load_symbol_file(&gb, symbols_path);
-    
+        
+    update_viewport();
+
     /* Run emulation */
     while (true) {
         if (paused || rewind_paused) {

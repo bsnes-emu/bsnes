@@ -44,7 +44,9 @@ void render_texture(void *pixels,  void *previous)
         }
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_bitmap_with_shader(&shader, _pixels, previous, rect.x, rect.y, rect.w, rect.h);
+        render_bitmap_with_shader(&shader, _pixels, previous,
+                                  GB_get_screen_width(&gb), GB_get_screen_height(&gb),
+                                  rect.x, rect.y, rect.w, rect.h);
         SDL_GL_SwapWindow(window);
     }
 }
@@ -116,8 +118,8 @@ void update_viewport(void)
 {
     int win_width, win_height;
     SDL_GL_GetDrawableSize(window, &win_width, &win_height);
-    double x_factor = win_width / 160.0;
-    double y_factor = win_height / 144.0;
+    double x_factor = win_width / (double) GB_get_screen_width(&gb);
+    double y_factor = win_height / (double) GB_get_screen_height(&gb);
     
     if (configuration.scaling_mode == GB_SDL_SCALING_INTEGER_FACTOR) {
         x_factor = (int)(x_factor);
@@ -133,8 +135,8 @@ void update_viewport(void)
         }
     }
     
-    unsigned new_width = x_factor * 160;
-    unsigned new_height = y_factor * 144;
+    unsigned new_width = x_factor * GB_get_screen_width(&gb);
+    unsigned new_height = y_factor * GB_get_screen_height(&gb);
     
     rect = (SDL_Rect){(win_width  - new_width) / 2, (win_height - new_height) /2,
         new_width, new_height};
@@ -148,7 +150,7 @@ void update_viewport(void)
 }
 
 /* Does NOT check for bounds! */
-static void draw_char(uint32_t *buffer, unsigned char ch, uint32_t color)
+static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigned char ch, uint32_t color)
 {
     if (ch < ' ' || ch > font_max) {
         ch = '?';
@@ -163,11 +165,11 @@ static void draw_char(uint32_t *buffer, unsigned char ch, uint32_t color)
             }
             buffer++;
         }
-        buffer += 160 - GLYPH_WIDTH;
+        buffer += width - GLYPH_WIDTH;
     }
 }
 
-static void draw_unbordered_text(uint32_t *buffer, unsigned x, unsigned y, const char *string, uint32_t color)
+static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color)
 {
     unsigned orig_x = x;
     while (*string) {
@@ -178,23 +180,23 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned x, unsigned y, const
             continue;
         }
         
-        if (x > 160 - GLYPH_WIDTH || y == 0 || y > 144 - GLYPH_HEIGHT) {
+        if (x > width - GLYPH_WIDTH || y == 0 || y > height - GLYPH_HEIGHT) {
             break;
         }
         
-        draw_char(&buffer[x + 160 * y], *string, color);
+        draw_char(&buffer[x + width * y], width, height, *string, color);
         x += GLYPH_WIDTH;
         string++;
     }
 }
 
-static void draw_text(uint32_t *buffer, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
+static void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
 {
-    draw_unbordered_text(buffer, x - 1, y, string, border);
-    draw_unbordered_text(buffer, x + 1, y, string, border);
-    draw_unbordered_text(buffer, x, y - 1, string, border);
-    draw_unbordered_text(buffer, x, y + 1, string, border);
-    draw_unbordered_text(buffer, x, y, string, color);
+    draw_unbordered_text(buffer, width, height, x - 1, y, string, border);
+    draw_unbordered_text(buffer, width, height, x + 1, y, string, border);
+    draw_unbordered_text(buffer, width, height, x, y - 1, string, border);
+    draw_unbordered_text(buffer, width, height, x, y + 1, string, border);
+    draw_unbordered_text(buffer, width, height, x, y, string, color);
 }
 
 enum decoration {
@@ -203,17 +205,17 @@ enum decoration {
     DECORATION_ARROWS,
 };
 
-static void draw_text_centered(uint32_t *buffer, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
+static void draw_text_centered(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
 {
-    unsigned x = 160 / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
-    draw_text(buffer, x, y, string, color, border);
+    unsigned x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
+    draw_text(buffer, width, height, x, y, string, color, border);
     switch (decoration) {
         case DECORATION_SELECTION:
-            draw_text(buffer, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
             break;
         case DECORATION_ARROWS:
-            draw_text(buffer, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border);
-            draw_text(buffer, 160 - x, y, RIGHT_ARROW_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border);
+            draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border);
             break;
             
         case DECORATION_NONE:
@@ -301,7 +303,7 @@ static void cycle_model_backwards(unsigned index)
 
 const char *current_model_string(unsigned index)
 {
-    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance"}
+    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance" , "Super Game Boy"}
         [configuration.model];
 }
 
@@ -764,7 +766,18 @@ void run_gui(bool is_running)
         }
     }
 
-    uint32_t pixels[160 * 144];
+    unsigned width = GB_get_screen_width(&gb);
+    unsigned height = GB_get_screen_height(&gb);
+    unsigned x_offset = (width - 160) / 2;
+    unsigned y_offset = (height - 144) / 2;
+    uint32_t pixels[width * height];
+    
+    if (width != 160 || height != 144) {
+        for (unsigned i = 0; i < width * height; i++) {
+            pixels[i] = gui_palette_native[0];
+        }
+    }
+    
     SDL_Event event = {0,};
     gui_state = is_running? SHOWING_MENU : SHOWING_DROP_MESSAGE;
     bool should_render = true;
@@ -994,32 +1007,39 @@ void run_gui(bool is_running)
         
         if (should_render) {
             should_render = false;
-            memcpy(pixels, converted_background->pixels, sizeof(pixels));
+            if (width == 160 && height == 144) {
+                memcpy(pixels, converted_background->pixels, sizeof(pixels));
+            }
+            else {
+                for (unsigned y = 0; y < 144; y++) {
+                    memcpy(pixels + x_offset + width * (y + y_offset), ((uint32_t *)converted_background->pixels) + 160 * y, 160 * 4);
+                }
+            }
             
             switch (gui_state) {
                 case SHOWING_DROP_MESSAGE:
-                    draw_text_centered(pixels, 8, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], false);
-                    draw_text_centered(pixels, 116, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
-                    draw_text_centered(pixels, 128, "file to play", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_text_centered(pixels, width, height, 8 + y_offset, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_text_centered(pixels, width, height, 116 + y_offset, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_text_centered(pixels, width, height, 128 + y_offset, "file to play", gui_palette_native[3], gui_palette_native[0], false);
                     break;
                 case SHOWING_MENU:
-                    draw_text_centered(pixels, 8, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_text_centered(pixels, width, height, 8 + y_offset, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
                     unsigned i = 0, y = 24;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
                         if (item->value_getter && !item->backwards_handler) {
                             char line[25];
                             snprintf(line, sizeof(line), "%s%*s", item->string, 24 - (int)strlen(item->string), item->value_getter(i));
-                            draw_text_centered(pixels, y, line, gui_palette_native[3], gui_palette_native[0],
+                            draw_text_centered(pixels, width, height, y + y_offset, line, gui_palette_native[3], gui_palette_native[0],
                                                i == current_selection ? DECORATION_SELECTION : DECORATION_NONE);
                             y += 12;
                             
                         }
                         else {
-                            draw_text_centered(pixels, y, item->string, gui_palette_native[3], gui_palette_native[0],
+                            draw_text_centered(pixels, width, height, y + y_offset, item->string, gui_palette_native[3], gui_palette_native[0],
                                                i == current_selection && !item->value_getter ? DECORATION_SELECTION : DECORATION_NONE);
                             y += 12;
                             if (item->value_getter) {
-                                draw_text_centered(pixels, y, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
+                                draw_text_centered(pixels, width, height, y + y_offset, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
                                                    i == current_selection ? DECORATION_ARROWS : DECORATION_NONE);
                                 y += 12;
                             }
@@ -1027,16 +1047,16 @@ void run_gui(bool is_running)
                     }
                     break;
                 case SHOWING_HELP:
-                    draw_text(pixels, 2, 2, help[current_help_page], gui_palette_native[3], gui_palette_native[0]);
+                    draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0]);
                     break;
                 case WAITING_FOR_KEY:
-                    draw_text_centered(pixels, 68, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    draw_text_centered(pixels, width, height, 68 + y_offset, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
                     break;
                 case WAITING_FOR_JBUTTON:
-                    draw_text_centered(pixels, 68,
+                    draw_text_centered(pixels, width, height, 68 + y_offset,
                                        joypad_configuration_progress != JOYPAD_BUTTONS_MAX ? "Press button for" : "Move the Analog Stick",
                                        gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
-                    draw_text_centered(pixels, 80,
+                    draw_text_centered(pixels, width, height, 80 + y_offset,
                                       (const char *[])
                                        {
                                            "Right",
@@ -1054,7 +1074,7 @@ void run_gui(bool is_running)
                                            "",
                                        } [joypad_configuration_progress],
                                        gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
-                    draw_text_centered(pixels, 104, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    draw_text_centered(pixels, width, height, 104 + y_offset, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
                     break;
             }
             

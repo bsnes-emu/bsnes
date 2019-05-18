@@ -77,6 +77,7 @@ typedef struct {
         MODEL_DMG,
         MODEL_CGB,
         MODEL_AGB,
+        MODEL_SGB,
         MODEL_MAX,
     } model;
     

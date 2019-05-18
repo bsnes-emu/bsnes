@@ -798,12 +798,12 @@ uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
     return CPU_FREQUENCY * gb->clock_multiplier;
 }
 
-size_t GB_get_screen_width(GB_gameboy_t *gb)
+unsigned GB_get_screen_width(GB_gameboy_t *gb)
 {
     return GB_is_sgb(gb)? 256 : 160;
 }
 
-size_t GB_get_screen_height(GB_gameboy_t *gb)
+unsigned GB_get_screen_height(GB_gameboy_t *gb)
 {
     return GB_is_sgb(gb)? 224 : 144;
 }

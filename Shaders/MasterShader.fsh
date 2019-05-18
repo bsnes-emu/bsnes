@@ -5,7 +5,6 @@ uniform bool mix_previous;
 
 uniform vec2 output_resolution;
 uniform vec2 origin;
-const vec2 input_resolution = vec2(160, 144);
 
 #define equal(x, y) ((x) == (y))
 #define inequal(x, y) ((x) != (y))
