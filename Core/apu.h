@@ -8,12 +8,8 @@
 
 #ifdef GB_INTERNAL
 /* Speed = 1 / Length (in seconds) */
-/* Todo: Measure these  and find the actual curve shapes.
-   They are known to be incorrect (Some analog test ROM sound different),
-   but are good enough approximations to fix Cannon Fodder's terrible audio.
-   It also varies by model. */
-#define DAC_DECAY_SPEED 50000
-#define DAC_ATTACK_SPEED 1000
+#define DAC_DECAY_SPEED 20000
+#define DAC_ATTACK_SPEED 20000
 
 
 /* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */

@@ -107,6 +107,11 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
     }
 }
 
+static double smooth(double x)
+{
+    return 3*x*x - 2*x*x*x;
+}
+
 static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
 {
     GB_sample_t output = {0,0};
@@ -123,7 +128,7 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
                     gb->apu_output.dac_discharge[i] = 0;
                 }
                 else {
-                    multiplier *= gb->apu_output.dac_discharge[i];
+                    multiplier *= smooth(gb->apu_output.dac_discharge[i]);
                 }
             }
             else {
@@ -132,7 +137,7 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
                     gb->apu_output.dac_discharge[i] = 1;
                 }
                 else {
-                    multiplier *= gb->apu_output.dac_discharge[i];
+                    multiplier *= smooth(gb->apu_output.dac_discharge[i]);
                 }
             }
         }
@@ -350,7 +355,6 @@ void GB_apu_div_event(GB_gameboy_t *gb)
             if (gb->apu.wave_channel.pulse_length) {
                 if (!--gb->apu.wave_channel.pulse_length) {
                     gb->apu.is_active[GB_WAVE] = false;
-                    gb->apu.wave_channel.current_sample = 0;
                     update_sample(gb, GB_WAVE, 0, 0);
                 }
             }
@@ -806,7 +810,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.wave_channel.enable = value & 0x80;
             if (!gb->apu.wave_channel.enable) {
                 gb->apu.is_active[GB_WAVE] = false;
-                gb->apu.wave_channel.current_sample = 0;
                 update_sample(gb, GB_WAVE, 0, 0);
             }
             break;
@@ -815,7 +818,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             break;
         case GB_IO_NR32:
             gb->apu.wave_channel.shift = (uint8_t[]){4, 0, 1, 2}[(value >> 5) & 3];
-            update_sample(gb, GB_WAVE, gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift, 0);
+            if (gb->apu.is_active[GB_WAVE]) {
+                update_sample(gb, GB_WAVE, gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift, 0);
+            }
             break;
         case GB_IO_NR33:
             gb->apu.wave_channel.sample_length &= ~0xFF;
@@ -856,7 +861,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 if (!gb->apu.is_active[GB_WAVE]) {
                     gb->apu.is_active[GB_WAVE] = true;
-                    update_sample(gb, GB_WAVE, 0, 0);
+                    update_sample(gb, GB_WAVE,
+                                  gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
+                                  0);
                 }
                 gb->apu.wave_channel.sample_countdown = (gb->apu.wave_channel.sample_length ^ 0x7FF) + 3;
                 gb->apu.wave_channel.current_sample_index = 0;
@@ -865,11 +872,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.wave_channel.length_enabled = false;
                 }
                 /* Note that we don't change the sample just yet! This was verified on hardware. */
-                /* Todo: The first sample might *not* beskipped on the DMG, this could be a bug
-                   introduced on the CGB. It appears that the bug was fixed on the AGB, but it's
-                   not reflected by PCM34. This should be probably verified as this could just
-                   mean differences in the DACs. */
-                /* Todo: Similar issues may apply to the other channels on the DMG/AGB, test, verify and fix if needed */
             }
 
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
