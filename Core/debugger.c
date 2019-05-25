@@ -1623,9 +1623,9 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     for (uint8_t channel = GB_SQUARE_1; channel <= GB_SQUARE_2; channel++) {
         GB_log(gb, "\nCH%u:\n", channel + 1);
         GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
-            gb->apu.square_channels[channel].current_volume,
-            gb->apu.square_channels[channel].sample_length,
-            gb->apu.square_channels[channel].sample_countdown);
+             gb->apu.square_channels[channel].current_volume,
+            (gb->apu.square_channels[channel].sample_length ^ 0x7FF) * 2 + 1,
+             gb->apu.square_channels[channel].sample_countdown);
 
         uint8_t nrx2 = gb->io_registers[channel == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
         GB_log(gb, "    %u 256 Hz ticks till next volume %screase (out of %u)\n",
@@ -1667,7 +1667,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
            gb->apu.wave_channel.shift);
 
     GB_log(gb, "    Current sample length: %u APU ticks (next in %u ticks)\n",
-        gb->apu.wave_channel.sample_length,
+        gb->apu.wave_channel.sample_length ^ 0x7ff,
         gb->apu.wave_channel.sample_countdown);
 
     if (gb->apu.wave_channel.length_enabled) {
@@ -1679,7 +1679,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "\nCH4:\n");
     GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
         gb->apu.noise_channel.current_volume,
-        gb->apu.noise_channel.sample_length,
+        gb->apu.noise_channel.sample_length * 4 + 3,
         gb->apu.noise_channel.sample_countdown);
 
     GB_log(gb, "    %u 256 Hz ticks till next volume %screase (out of %u)\n",
