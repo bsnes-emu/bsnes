@@ -25,7 +25,8 @@ unsigned command_parameter;
 #endif
 
 shader_t shader;
-SDL_Rect rect;
+static SDL_Rect rect;
+static unsigned factor;
 
 void render_texture(void *pixels,  void *previous)
 {
@@ -118,6 +119,10 @@ void update_viewport(void)
 {
     int win_width, win_height;
     SDL_GL_GetDrawableSize(window, &win_width, &win_height);
+    int logical_width, logical_height;
+    SDL_GetWindowSize(window, &logical_width, &logical_height);
+    factor = win_width / logical_width;
+    
     double x_factor = win_width / (double) GB_get_screen_width(&gb);
     double y_factor = win_height / (double) GB_get_screen_height(&gb);
     
@@ -810,9 +815,60 @@ void run_gui(bool is_running)
     current_menu = root_menu = is_running? paused_menu : nonpaused_menu;
     current_selection = 0;
     do {
-        /* Convert Joypad events (We only generate down events) */
+        /* Convert Joypad and mouse events (We only generate down events) */
         if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
             switch (event.type) {
+                case SDL_MOUSEBUTTONDOWN:
+                    if (gui_state == SHOWING_HELP) {
+                        event.type = SDL_KEYDOWN;
+                        event.key.keysym.scancode = SDL_SCANCODE_RETURN;
+                    }
+                    else if (gui_state == SHOWING_DROP_MESSAGE) {
+                        event.type = SDL_KEYDOWN;
+                        event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+                    }
+                    else if (gui_state == SHOWING_MENU) {
+                        signed x = (event.button.x - rect.x / factor) * 160 / (rect.w / factor) - x_offset;
+                        signed y = (event.button.y - rect.y / factor) * 144 / (rect.h / factor) - y_offset;
+                        
+                        if (strcmp("CRT", configuration.filter) == 0) {
+                            y = y * 8 / 7;
+                            y -= 144 / 16;
+                        }
+                        
+                        if (x < 0 || x >= 160 || y < 24) {
+                            continue;
+                        }
+                        
+                        unsigned item_y = 24;
+                        unsigned index = 0;
+                        for (const struct menu_item *item = current_menu; item->string; item++, index++) {
+                            if (!item->backwards_handler) {
+                                if (y >= item_y && y < item_y + 12) {
+                                    break;
+                                }
+                                item_y += 12;
+                            }
+                            else {
+                                if (y >= item_y && y < item_y + 24) {
+                                    break;
+                                }
+                                item_y += 24;
+                            }
+                        }
+                        
+                        if (!current_menu[index].string) continue;
+                        
+                        current_selection = index;
+                        event.type = SDL_KEYDOWN;
+                        if (current_menu[index].backwards_handler) {
+                            event.key.keysym.scancode = x < 80? SDL_SCANCODE_LEFT : SDL_SCANCODE_RIGHT;
+                        }
+                        else {
+                            event.key.keysym.scancode = SDL_SCANCODE_RETURN;
+                        }
+
+                    }
                 case SDL_JOYBUTTONDOWN:
                     event.type = SDL_KEYDOWN;
                     joypad_button_t button = get_joypad_button(event.jbutton.button);
