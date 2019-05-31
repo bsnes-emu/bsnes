@@ -828,8 +828,8 @@ void run_gui(bool is_running)
                         event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
                     }
                     else if (gui_state == SHOWING_MENU) {
-                        signed x = (event.button.x - rect.x / factor) * 160 / (rect.w / factor) - x_offset;
-                        signed y = (event.button.y - rect.y / factor) * 144 / (rect.h / factor) - y_offset;
+                        signed x = (event.button.x - rect.x / factor) * width / (rect.w / factor) - x_offset;
+                        signed y = (event.button.y - rect.y / factor) * height / (rect.h / factor) - y_offset;
                         
                         if (strcmp("CRT", configuration.filter) == 0) {
                             y = y * 8 / 7;
