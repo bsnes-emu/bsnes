@@ -6,6 +6,8 @@
 #include <string.h>
 
 #define GTK_FILE_CHOOSER_ACTION_OPEN 0
+#define GTK_RESPONSE_ACCEPT -3
+#define GTK_RESPONSE_CANCEL -6
 
 
 void *_gtk_file_chooser_dialog_new (const char *title,
@@ -16,13 +18,16 @@ void *_gtk_file_chooser_dialog_new (const char *title,
 bool _gtk_init_check (int *argc, char ***argv);
 int _gtk_dialog_run(void *);
 void _g_free(void *);
-void _g_object_unref(void *);
+void _gtk_widget_destroy(void *);
 char *_gtk_file_chooser_get_filename(void *);
 void _g_log_set_default_handler (void *function, void *data);
 void *_gtk_file_filter_new(void);
 void _gtk_file_filter_add_pattern(void *filter, const char *pattern);
 void _gtk_file_filter_set_name(void *filter, const char *name);
 void _gtk_file_chooser_add_filter(void *dialog, void *filter);
+void _gtk_main_iteration(void);
+bool _gtk_events_pending(void);
+
 
 #define LAZY(symbol) static typeof(_##symbol) *symbol = NULL;\
 if (symbol == NULL) symbol = dlsym(handle, #symbol);\
@@ -49,13 +54,15 @@ char *do_open_rom_dialog(void)
     LAZY(gtk_file_chooser_dialog_new);
     LAZY(gtk_dialog_run);
     LAZY(g_free);
-    LAZY(g_object_unref);
+    LAZY(gtk_widget_destroy);
     LAZY(gtk_file_chooser_get_filename);
     LAZY(g_log_set_default_handler);
     LAZY(gtk_file_filter_new);
     LAZY(gtk_file_filter_add_pattern);
     LAZY(gtk_file_filter_set_name);
     LAZY(gtk_file_chooser_add_filter);
+    LAZY(gtk_events_pending);
+    LAZY(gtk_main_iteration);
     
     /* Shut up GTK */
     g_log_set_default_handler(nop, NULL);
@@ -66,7 +73,9 @@ char *do_open_rom_dialog(void)
     void *dialog = gtk_file_chooser_dialog_new("Open ROM",
                                                0,
                                                GTK_FILE_CHOOSER_ACTION_OPEN,
-                                               "Open", 0, NULL);
+                                               "_Cancel", GTK_RESPONSE_CANCEL,
+                                               "_Open", GTK_RESPONSE_ACCEPT,
+                                               NULL );
     
     
     void *filter = gtk_file_filter_new();
@@ -79,15 +88,23 @@ char *do_open_rom_dialog(void)
     int res = gtk_dialog_run (dialog);
     char *ret = NULL;
     
-    if (res == 0)
+    if (res == GTK_RESPONSE_ACCEPT)
     {
         char *filename;
         filename = gtk_file_chooser_get_filename(dialog);
         ret = strdup(filename);
         g_free(filename);
     }
-    
-    g_object_unref(dialog);
+
+    while (gtk_events_pending()) {
+        gtk_main_iteration();
+    }
+
+    gtk_widget_destroy(dialog);
+
+    while (gtk_events_pending()) {
+        gtk_main_iteration();
+    }
     return ret;
     
 lazy_error:
