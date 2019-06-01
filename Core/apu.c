@@ -59,6 +59,11 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
             unsigned right_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
             unsigned left_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
             
+            if (index == GB_WAVE) {
+                /* For some reason, channel 3 is inverted on the AGB */
+                value ^= 0xF;
+            }
+            
             GB_sample_t output;
             if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
                 output.right = (0xf - value * 2) * right_volume;
