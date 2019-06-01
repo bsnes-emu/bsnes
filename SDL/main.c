@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <signal.h>
+#include <OpenDialog/open_dialog.h>
 #include <SDL2/SDL.h>
 #include <Core/gb.h>
 #include "utils.h"
@@ -30,18 +31,18 @@ static bool underclock_down = false, rewind_down = false, do_rewind = false, rew
 static double clock_mutliplier = 1.0;
 
 static char *filename = NULL;
-static bool should_free_filename = false;
+static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr;
 
 SDL_AudioDeviceID device_id;
 
-void set_filename(const char *new_filename, bool new_should_free)
+void set_filename(const char *new_filename, typeof(free) *new_free_function)
 {
-    if (filename && should_free_filename) {
-        SDL_free(filename);
+    if (filename && free_function) {
+        free_function(filename);
     }
     filename = (char *) new_filename;
-    should_free_filename = new_should_free;
+    free_function = new_free_function;
 }
 
 static SDL_AudioSpec want_aspec, have_aspec;
@@ -101,11 +102,6 @@ static void open_menu(void)
 
 static void handle_events(GB_gameboy_t *gb)
 {
-#ifdef __APPLE__
-#define MODIFIER KMOD_GUI
-#else
-#define MODIFIER KMOD_CTRL
-#endif
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -115,7 +111,7 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
                 
             case SDL_DROPFILE: {
-                set_filename(event.drop.file, true);
+                set_filename(event.drop.file, SDL_free);
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 break;
             }
@@ -226,6 +222,17 @@ static void handle_events(GB_gameboy_t *gb)
                             pending_command = GB_SDL_RESET_COMMAND;
                         }
                         break;
+                        
+                    case SDL_SCANCODE_O: {
+                        if (event.key.keysym.mod & MODIFIER) {
+                            char *filename = do_open_rom_dialog();
+                            if (filename) {
+                                set_filename(filename, free);
+                                pending_command = GB_SDL_NEW_FILE_COMMAND;
+                            }
+                        }
+                        break;
+                    }
                     
                     case SDL_SCANCODE_P:
                         if (event.key.keysym.mod & MODIFIER) {

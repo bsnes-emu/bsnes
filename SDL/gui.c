@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <OpenDialog/open_dialog.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -97,11 +98,11 @@ configuration_t configuration =
 
 
 static const char *help[] ={
-"Drop a GB or GBC ROM\n"
-"file to play.\n"
+"Drop a ROM to play.\n"
 "\n"
 "Keyboard Shortcuts:\n"
 " Open Menu:        Escape\n"
+" Open ROM:          " MODIFIER_NAME "+O\n"
 " Reset:             " MODIFIER_NAME "+R\n"
 " Pause:             " MODIFIER_NAME "+P\n"
 " Save state:    " MODIFIER_NAME "+(0-9)\n"
@@ -267,8 +268,19 @@ static void enter_controls_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
 static void enter_audio_menu(unsigned index);
 
+extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
+static void open_rom(unsigned index)
+{
+    char *filename = do_open_rom_dialog();
+    if (filename) {
+        set_filename(filename, free);
+        pending_command = GB_SDL_NEW_FILE_COMMAND;
+    }
+}
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
+    {"Open ROM", open_rom},
     {"Emulation Options", enter_emulation_menu},
     {"Graphic Options", enter_graphics_menu},
     {"Audio Options", enter_audio_menu},
@@ -778,7 +790,6 @@ void connect_joypad(void)
     }
 }
 
-extern void set_filename(const char *new_filename, bool new_should_free);
 void run_gui(bool is_running)
 {
     connect_joypad();
@@ -818,6 +829,9 @@ void run_gui(bool is_running)
         /* Convert Joypad and mouse events (We only generate down events) */
         if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
             switch (event.type) {
+                case SDL_WINDOWEVENT:
+                    should_render = true;
+                    break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (gui_state == SHOWING_HELP) {
                         event.type = SDL_KEYDOWN;
@@ -957,7 +971,7 @@ void run_gui(bool is_running)
                 break;
             }
             case SDL_DROPFILE: {
-                set_filename(event.drop.file, true);
+                set_filename(event.drop.file, SDL_free);
                 pending_command = GB_SDL_NEW_FILE_COMMAND;
                 return;
             }
@@ -995,7 +1009,17 @@ void run_gui(bool is_running)
             }
 
             case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_RETURN && gui_state == WAITING_FOR_JBUTTON) {
+                if (event.key.keysym.scancode == SDL_SCANCODE_O) {
+                    if (event.key.keysym.mod & MODIFIER) {
+                        char *filename = do_open_rom_dialog();
+                        if (filename) {
+                            set_filename(filename, free);
+                            pending_command = GB_SDL_NEW_FILE_COMMAND;
+                            return;
+                        }
+                    }
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN && gui_state == WAITING_FOR_JBUTTON) {
                     should_render = true;
                     if (joypad_configuration_progress != JOYPAD_BUTTONS_MAX) {
                         configuration.joypad_configuration[joypad_configuration_progress] = -1;

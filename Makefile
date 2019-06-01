@@ -65,14 +65,25 @@ endif
 
 # Set compilation and linkage flags based on target, platform and configuration
 
+OPEN_DIALOG = OpenDialog/gtk.c
+
+ifeq ($(PLATFORM),windows32)
+OPEN_DIALOG = OpenDialog/windows.c
+endif
+
+ifeq ($(PLATFORM),Darwin)
+OPEN_DIALOG = OpenDialog/cocoa.m
+endif
+
+
 CFLAGS += -Werror -Wall -Wno-strict-aliasing -Wno-unknown-warning -Wno-unknown-warning-option -Wno-multichar -Wno-int-in-bool-context -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 SDL_LDFLAGS := -lSDL2 -lGL
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -IWindows
-LDFLAGS += -lmsvcrt -lSDL2main -Wl,/MANIFESTFILE:NUL
+CFLAGS += -IWindows -Drandom=rand
+LDFLAGS += -lmsvcrt -lcomdlg32 -lSDL2main -Wl,/MANIFESTFILE:NUL
 SDL_LDFLAGS := -lSDL2 -lopengl32
 else
-LDFLAGS += -lc -lm
+LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -120,7 +131,7 @@ all: cocoa sdl tester libretro
 # Get a list of our source files and their respective object file targets
 
 CORE_SOURCES := $(shell ls Core/*.c)
-SDL_SOURCES := $(shell ls SDL/*.c)
+SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG)
 TESTER_SOURCES := $(shell ls Tester/*.c)
 
 ifeq ($(PLATFORM),Darwin)

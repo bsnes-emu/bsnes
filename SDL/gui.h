@@ -9,6 +9,12 @@
 #define JOYSTICK_HIGH 0x4000
 #define JOYSTICK_LOW 0x3800
 
+#ifdef __APPLE__
+#define MODIFIER KMOD_GUI
+#else
+#define MODIFIER KMOD_CTRL
+#endif
+
 extern GB_gameboy_t gb;
 
 extern SDL_Window *window;

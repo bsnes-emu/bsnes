@@ -606,7 +606,7 @@ static void ld_dhl_d8(GB_gameboy_t *gb, uint8_t opcode)
     cycle_write(gb, gb->registers[GB_REGISTER_HL], data);
 }
 
-uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
+static uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t src_register_id;
     uint8_t src_low;
