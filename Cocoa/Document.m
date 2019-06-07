@@ -936,7 +936,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
                                 (GB_map_type_t) self.tilemapMapButton.indexOfSelectedItem,
                                 (GB_tileset_type_t) self.TilemapSetButton.indexOfSelectedItem);
                 
-                self.tilemapImageView.scrollRect = NSMakeRect(gb.io_registers[GB_IO_SCX], gb.io_registers[GB_IO_SCY], 160, 144);
+                self.tilemapImageView.scrollRect = NSMakeRect(GB_read_memory(&gb, 0xFF00 | GB_IO_SCX),
+                                                              GB_read_memory(&gb, 0xFF00 | GB_IO_SCY),
+                                                              160, 144);
                 self.tilemapImageView.image = [Document imageFromData:data width:256 height:256 scale:1.0];
                 self.tilemapImageView.layer.magnificationFilter = kCAFilterNearest;
             }
