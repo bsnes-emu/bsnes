@@ -137,13 +137,13 @@ static void display_vblank(GB_gameboy_t *gb)
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
-            uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ? 0x3 : 0x0;
+            uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped && GB_is_cgb(gb) ? 0x3 : 0x0;
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
                 gb->sgb->screen_buffer[i] = color;
             }
         }
         else {
-            uint32_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped ?
+            uint32_t color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped && GB_is_cgb(gb) ?
                                 gb->rgb_encode_callback(gb, 0, 0, 0) :
                                 gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
@@ -555,6 +555,15 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
  */
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
+    /* The PPU does not advance while in STOP mode on the DMG */
+    if (gb->stopped && !GB_is_cgb(gb)) {
+        gb->cycles_in_stop_mode += cycles;
+        if (gb->cycles_in_stop_mode >= LCDC_PERIOD) {
+            gb->cycles_in_stop_mode -= LCDC_PERIOD;
+            display_vblank(gb);
+        }
+        return;
+    }
     GB_object_t *objects = (GB_object_t *) &gb->oam;
     
     GB_STATE_MACHINE(gb, display, cycles, 2) {
@@ -696,7 +705,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             for (gb->oam_search_index = 0; gb->oam_search_index < 40; gb->oam_search_index++) {
                 if (GB_is_cgb(gb)) {
                     add_object_from_index(gb, gb->oam_search_index);
-                    /* The CGB does not care about the accessed OAM row as there's no OAM bug*/
+                    /* The CGB does not care about the accessed OAM row as there's no OAM bug */
                 }
                 GB_SLEEP(gb, display, 8, 2);
                 if (!GB_is_cgb(gb)) {

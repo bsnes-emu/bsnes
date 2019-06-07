@@ -406,106 +406,108 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
+    
+    if (likely(!gb->stopped || GB_is_cgb(gb))) {
+        /* To align the square signal to 1MHz */
+        gb->apu.lf_div ^= cycles & 1;
+        gb->apu.noise_channel.alignment += cycles;
 
-    /* To align the square signal to 1MHz */
-    gb->apu.lf_div ^= cycles & 1;
-    gb->apu.noise_channel.alignment += cycles;
-
-    if (gb->apu.square_sweep_calculate_countdown) {
-        if (gb->apu.square_sweep_calculate_countdown > cycles) {
-            gb->apu.square_sweep_calculate_countdown -= cycles;
-        }
-        else {
-            /* APU bug: sweep frequency is checked after adding the sweep delta twice */
-            gb->apu.new_sweep_sample_legnth = new_sweep_sample_legnth(gb);
-            if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
-                gb->apu.is_active[GB_SQUARE_1] = false;
-                update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
-                gb->apu.sweep_enabled = false;
-            }
-            gb->apu.sweep_decreasing |= gb->io_registers[GB_IO_NR10] & 8;
-            gb->apu.square_sweep_calculate_countdown = 0;
-        }
-    }
-
-    UNROLL
-    for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
-        if (gb->apu.is_active[i]) {
-            uint8_t cycles_left = cycles;
-            while (unlikely(cycles_left > gb->apu.square_channels[i].sample_countdown)) {
-                cycles_left -= gb->apu.square_channels[i].sample_countdown + 1;
-                gb->apu.square_channels[i].sample_countdown = (gb->apu.square_channels[i].sample_length ^ 0x7FF) * 2 + 1;
-                gb->apu.square_channels[i].current_sample_index++;
-                gb->apu.square_channels[i].current_sample_index &= 0x7;
-
-                update_square_sample(gb, i);
-            }
-            if (cycles_left) {
-                gb->apu.square_channels[i].sample_countdown -= cycles_left;
-            }
-        }
-    }
-
-    gb->apu.wave_channel.wave_form_just_read = false;
-    if (gb->apu.is_active[GB_WAVE]) {
-        uint8_t cycles_left = cycles;
-        while (unlikely(cycles_left > gb->apu.wave_channel.sample_countdown)) {
-            cycles_left -= gb->apu.wave_channel.sample_countdown + 1;
-            gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length ^ 0x7FF;
-            gb->apu.wave_channel.current_sample_index++;
-            gb->apu.wave_channel.current_sample_index &= 0x1F;
-            gb->apu.wave_channel.current_sample =
-                gb->apu.wave_channel.wave_form[gb->apu.wave_channel.current_sample_index];
-            update_sample(gb, GB_WAVE,
-                          gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
-                          cycles - cycles_left);
-            gb->apu.wave_channel.wave_form_just_read = true;
-        }
-        if (cycles_left) {
-            gb->apu.wave_channel.sample_countdown -= cycles_left;
-            gb->apu.wave_channel.wave_form_just_read = false;
-        }
-    }
-
-    if (gb->apu.is_active[GB_NOISE]) {
-        uint8_t cycles_left = cycles;
-        while (unlikely(cycles_left > gb->apu.noise_channel.sample_countdown)) {
-            cycles_left -= gb->apu.noise_channel.sample_countdown + 1;
-            gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 4 + 3;
-
-            /* Step LFSR */
-            unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
-            /* Todo: is this formula is different on a GBA? */
-            bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
-            gb->apu.noise_channel.lfsr >>= 1;
-
-            if (new_high_bit) {
-                gb->apu.noise_channel.lfsr |= high_bit_mask;
+        if (gb->apu.square_sweep_calculate_countdown) {
+            if (gb->apu.square_sweep_calculate_countdown > cycles) {
+                gb->apu.square_sweep_calculate_countdown -= cycles;
             }
             else {
-                /* This code is not redundent, it's relevant when switching LFSR widths */
-                gb->apu.noise_channel.lfsr &= ~high_bit_mask;
+                /* APU bug: sweep frequency is checked after adding the sweep delta twice */
+                gb->apu.new_sweep_sample_legnth = new_sweep_sample_legnth(gb);
+                if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
+                    gb->apu.is_active[GB_SQUARE_1] = false;
+                    update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
+                    gb->apu.sweep_enabled = false;
+                }
+                gb->apu.sweep_decreasing |= gb->io_registers[GB_IO_NR10] & 8;
+                gb->apu.square_sweep_calculate_countdown = 0;
             }
-
-            gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
-            if (gb->model == GB_MODEL_CGB_C) {
-                /* Todo: This was confirmed to happen on a CGB-C. This may or may not happen on pre-CGB models.
-                   Because this degrades audio quality, and testing this on a pre-CGB device requires audio records,
-                   I'll assume these devices are innocent until proven guilty.
-
-                   Also happens on CGB-B, but not on CGB-D.
-                 */
-                gb->apu.current_lfsr_sample &= gb->apu.previous_lfsr_sample;
-            }
-            gb->apu.previous_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
-
-            update_sample(gb, GB_NOISE,
-                          gb->apu.current_lfsr_sample ?
-                          gb->apu.noise_channel.current_volume : 0,
-                          0);
         }
-        if (cycles_left) {
-            gb->apu.noise_channel.sample_countdown -= cycles_left;
+
+        UNROLL
+        for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
+            if (gb->apu.is_active[i]) {
+                uint8_t cycles_left = cycles;
+                while (unlikely(cycles_left > gb->apu.square_channels[i].sample_countdown)) {
+                    cycles_left -= gb->apu.square_channels[i].sample_countdown + 1;
+                    gb->apu.square_channels[i].sample_countdown = (gb->apu.square_channels[i].sample_length ^ 0x7FF) * 2 + 1;
+                    gb->apu.square_channels[i].current_sample_index++;
+                    gb->apu.square_channels[i].current_sample_index &= 0x7;
+
+                    update_square_sample(gb, i);
+                }
+                if (cycles_left) {
+                    gb->apu.square_channels[i].sample_countdown -= cycles_left;
+                }
+            }
+        }
+
+        gb->apu.wave_channel.wave_form_just_read = false;
+        if (gb->apu.is_active[GB_WAVE]) {
+            uint8_t cycles_left = cycles;
+            while (unlikely(cycles_left > gb->apu.wave_channel.sample_countdown)) {
+                cycles_left -= gb->apu.wave_channel.sample_countdown + 1;
+                gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length ^ 0x7FF;
+                gb->apu.wave_channel.current_sample_index++;
+                gb->apu.wave_channel.current_sample_index &= 0x1F;
+                gb->apu.wave_channel.current_sample =
+                    gb->apu.wave_channel.wave_form[gb->apu.wave_channel.current_sample_index];
+                update_sample(gb, GB_WAVE,
+                              gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
+                              cycles - cycles_left);
+                gb->apu.wave_channel.wave_form_just_read = true;
+            }
+            if (cycles_left) {
+                gb->apu.wave_channel.sample_countdown -= cycles_left;
+                gb->apu.wave_channel.wave_form_just_read = false;
+            }
+        }
+
+        if (gb->apu.is_active[GB_NOISE]) {
+            uint8_t cycles_left = cycles;
+            while (unlikely(cycles_left > gb->apu.noise_channel.sample_countdown)) {
+                cycles_left -= gb->apu.noise_channel.sample_countdown + 1;
+                gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 4 + 3;
+
+                /* Step LFSR */
+                unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
+                /* Todo: is this formula is different on a GBA? */
+                bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
+                gb->apu.noise_channel.lfsr >>= 1;
+
+                if (new_high_bit) {
+                    gb->apu.noise_channel.lfsr |= high_bit_mask;
+                }
+                else {
+                    /* This code is not redundent, it's relevant when switching LFSR widths */
+                    gb->apu.noise_channel.lfsr &= ~high_bit_mask;
+                }
+
+                gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+                if (gb->model == GB_MODEL_CGB_C) {
+                    /* Todo: This was confirmed to happen on a CGB-C. This may or may not happen on pre-CGB models.
+                       Because this degrades audio quality, and testing this on a pre-CGB device requires audio records,
+                       I'll assume these devices are innocent until proven guilty.
+
+                       Also happens on CGB-B, but not on CGB-D.
+                     */
+                    gb->apu.current_lfsr_sample &= gb->apu.previous_lfsr_sample;
+                }
+                gb->apu.previous_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+
+                update_sample(gb, GB_NOISE,
+                              gb->apu.current_lfsr_sample ?
+                              gb->apu.noise_channel.current_volume : 0,
+                              0);
+            }
+            if (cycles_left) {
+                gb->apu.noise_channel.sample_countdown -= cycles_left;
+            }
         }
     }
 

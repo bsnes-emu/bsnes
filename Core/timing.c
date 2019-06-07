@@ -210,8 +210,10 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
-    GB_timers_run(gb, cycles);
-    advance_serial(gb, cycles);
+    if (!gb->stopped) {
+        GB_timers_run(gb, cycles);
+        advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
+    }
 
     gb->debugger_ticks += cycles;
 
@@ -227,8 +229,10 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_input_ir_change += cycles;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
-    GB_dma_run(gb);
-    GB_hdma_run(gb);
+    if (!gb->stopped) { // TODO: Verify what happens in STOP mode
+        GB_dma_run(gb);
+        GB_hdma_run(gb);
+    }
     GB_apu_run(gb);
     GB_display_run(gb, cycles);
     GB_ir_run(gb);
