@@ -156,11 +156,6 @@ static bool verify_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
         return false;
     }
     
-    if (gb->ram_size != save->ram_size) {
-        GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
-        return false;
-    }
-    
     if (gb->vram_size != save->vram_size) {
         GB_log(gb, "The save state has non-matching VRAM size. Try changing the emulated model.\n");
         return false;
@@ -169,6 +164,17 @@ static bool verify_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
     if (GB_is_sgb(gb) != GB_is_sgb(save)) {
         GB_log(gb, "The save state is %sfor a Super Game Boy. Try changing the emulated model.\n", GB_is_sgb(save)? "" : "not ");
         return false;
+    }
+    
+    if (gb->ram_size != save->ram_size) {
+        if (gb->ram_size == 0x1000 * 8 && save->ram_size == 0x2000 * 8) {
+            /* A bug in versions prior to 0.12 made CGB instances allocate twice the ammount of RAM.
+               Ignore this issue to retain compatibility with older, 0.11, save states. */
+        }
+        else {
+            GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
+            return false;
+        }
     }
     
     return true;
@@ -182,6 +188,8 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     
     /* Every unread value should be kept the same. */
     memcpy(&save, gb, sizeof(save));
+    /* ...Except ram size, we use it to detect old saves with incorrect ram sizes */
+    save.ram_size = 0;
     
     FILE *f = fopen(path, "rb");
     if (!f) {
@@ -198,6 +206,17 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     if (!READ_SECTION(&save, f, apu       )) goto error;
     if (!READ_SECTION(&save, f, rtc       )) goto error;
     if (!READ_SECTION(&save, f, video     )) goto error;
+    
+    if (save.ram_size == 0) {
+        /* Save doesn't have ram size specified, it's a pre 0.12 save state with potentially
+           incorrect RAM amount if it's a CGB instance */
+        if (GB_is_cgb(&save)) {
+            save.ram_size = 0x2000 * 8; // Incorrect RAM size
+        }
+        else {
+            save.ram_size = gb->ram_size;
+        }
+    }
     
     if (!verify_state_compatibility(gb, &save)) {
         errno = -1;
@@ -218,13 +237,19 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
         fclose(f);
         return EIO;
     }
+
+    /* Fix for 0.11 save states that allocate twice the amount of RAM in CGB instances */
+    fseek(f, save.ram_size - gb->ram_size, SEEK_CUR);
     
     if (fread(gb->vram, 1, gb->vram_size, f) != gb->vram_size) {
         fclose(f);
         return EIO;
     }
     
+    size_t orig_ram_size = gb->ram_size;
     memcpy(gb, &save, sizeof(save));
+    gb->ram_size = orig_ram_size;
+
     errno = 0;
     
     if (gb->cartridge_type->has_rumble && gb->rumble_callback) {
@@ -323,6 +348,10 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     if (buffer_read(gb->vram,gb->vram_size, &buffer, &length) != gb->vram_size) {
         return -1;
     }
+    
+    /* Fix for 0.11 save states that allocate twice the amount of RAM in CGB instances */
+    buffer += save.ram_size - gb->ram_size;
+    length -= save.ram_size - gb->ram_size;
     
     memcpy(gb, &save, sizeof(save));
     

@@ -333,6 +333,7 @@ struct GB_gameboy_internal_s {
         bool infrared_input;
         GB_printer_t printer;
         uint8_t extra_oam[0xff00 - 0xfea0];
+        uint32_t ram_size; // Different between CGB and DMG
     );
 
     /* DMA and HDMA */
@@ -593,7 +594,6 @@ struct GB_gameboy_internal_s {
         bool turbo;
         bool turbo_dont_skip;
         bool disable_rendering;
-        uint32_t ram_size; // Different between CGB and DMG
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
         uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units

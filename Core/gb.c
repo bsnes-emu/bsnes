@@ -95,7 +95,7 @@ void GB_init(GB_gameboy_t *gb, GB_model_t model)
     memset(gb, 0, sizeof(*gb));
     gb->model = model;
     if (GB_is_cgb(gb)) {
-        gb->ram = malloc(gb->ram_size = 0x2000 * 8);
+        gb->ram = malloc(gb->ram_size = 0x1000 * 8);
         gb->vram = malloc(gb->vram_size = 0x2000 * 2);
     }
     else {
@@ -632,7 +632,7 @@ void GB_reset(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_JOYP] = 0xF;
     gb->mbc_ram_size = mbc_ram_size;
     if (GB_is_cgb(gb)) {
-        gb->ram_size = 0x2000 * 8;
+        gb->ram_size = 0x1000 * 8;
         gb->vram_size = 0x2000 * 2;
         memset(gb->vram, 0, gb->vram_size);
         gb->cgb_mode = true;
@@ -703,7 +703,7 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
 {
     gb->model = model;
     if (GB_is_cgb(gb)) {
-        gb->ram = realloc(gb->ram, gb->ram_size = 0x2000 * 8);
+        gb->ram = realloc(gb->ram, gb->ram_size = 0x1000 * 8);
         gb->vram = realloc(gb->vram, gb->vram_size = 0x2000 * 2);
     }
     else {
