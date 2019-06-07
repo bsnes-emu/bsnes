@@ -114,7 +114,6 @@ typedef struct
 
     bool skip_div_event;
     bool current_lfsr_sample;
-    bool previous_lfsr_sample;
 } GB_apu_t;
 
 typedef enum {
