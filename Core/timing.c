@@ -73,6 +73,9 @@ void GB_timing_sync(GB_gameboy_t *gb)
     }
 
     gb->cycles_since_last_sync = 0;
+    if (gb->update_input_hint_callback) {
+        gb->update_input_hint_callback(gb);
+    }
 }
 #else
 

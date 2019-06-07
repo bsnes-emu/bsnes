@@ -65,6 +65,7 @@ void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed)
 {
     assert(index >= 0 && index < GB_KEY_MAX);
     gb->keys[0][index] = pressed;
+    GB_update_joyp(gb);
 }
 
 void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned player, bool pressed)
@@ -72,4 +73,5 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
     assert(index >= 0 && index < GB_KEY_MAX);
     assert(player < 4);
     gb->keys[player][index] = pressed;
+    GB_update_joyp(gb);
 }

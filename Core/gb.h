@@ -238,6 +238,7 @@ typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_si
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_update_input_hint_callback_t)(GB_gameboy_t *gb);
 
 typedef struct {
     bool state;
@@ -527,6 +528,7 @@ struct GB_gameboy_internal_s {
         GB_rumble_callback_t rumble_callback;
         GB_serial_transfer_bit_start_callback_t serial_transfer_bit_start_callback;
         GB_serial_transfer_bit_end_callback_t serial_transfer_bit_end_callback;
+        GB_update_input_hint_callback_t update_input_hint_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units
@@ -674,6 +676,7 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
+void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
 
 /* These APIs are used when using internal clock */
 void GB_set_serial_transfer_bit_start_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_start_callback_t callback);

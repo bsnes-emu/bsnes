@@ -372,7 +372,6 @@ uint8_t GB_run(GB_gameboy_t *gb)
     gb->cycles_since_run = 0;
     GB_cpu_run(gb);
     if (gb->vblank_just_occured) {
-        GB_update_joyp(gb);
         GB_rtc_run(gb);
         GB_debugger_handle_async_commands(gb);
         GB_rewind_push(gb);
@@ -811,4 +810,9 @@ unsigned GB_get_screen_height(GB_gameboy_t *gb)
 unsigned GB_get_player_count(GB_gameboy_t *gb)
 {
     return GB_is_sgb(gb)? gb->sgb->player_count : 1;
+}
+
+void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback)
+{
+    gb->update_input_hint_callback = callback;
 }

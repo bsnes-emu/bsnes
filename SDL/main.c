@@ -435,6 +435,7 @@ restart:
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
         GB_set_rewind_length(&gb, configuration.rewind_length);
+        GB_set_update_input_hint_callback(&gb, handle_events);
     }
     
     SDL_DestroyTexture(texture);
