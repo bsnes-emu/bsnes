@@ -288,7 +288,7 @@
                                 <menuItem title="CPU-CGB 0" tag="512" enabled="NO" id="2Uk-u3-6Gw"/>
                                 <menuItem title="CPU-CGB A" tag="513" enabled="NO" id="axv-yk-RWM"/>
                                 <menuItem title="CPU-CGB B" tag="514" enabled="NO" id="NtJ-oo-IM2"/>
-                                <menuItem title="CPU-CGB C" tag="515" id="9YL-u8-12z"/>
+                                <menuItem title="CPU-CGB C (Experimental)" tag="515" id="9YL-u8-12z"/>
                                 <menuItem title="CPU-CGB D" tag="516" enabled="NO" id="c76-oF-fkU"/>
                                 <menuItem title="CPU-CGB E" state="on" tag="517" id="3lF-1Q-2SS"/>
                             </items>
