@@ -758,13 +758,17 @@ ENDC
     ld a, [$143]
     bit 7, a
     call z, EmulateDMG
+    bit 7, a
+    
     ldh [$4C], a
     ldh a, [TitleChecksum]
     ld b, a
     
+    jr z, .skipDMGForCGBCheck
     ldh a, [InputPalette]
     and a
     jr nz, .emulateDMGForCGBGame
+.skipDMGForCGBCheck
 IF DEF(AGB)
     ; Set registers to match the original AGB-CGB boot
     ; AF = $1100, C = 0

@@ -322,6 +322,10 @@ $(BIN)/SDL/Shaders: Shaders
 
 # Boot ROMs
 
+$(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
+$(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
+$(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
+
 $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 	-@$(MKDIR) -p $(dir $@)
 	cd BootROMs && rgbasm -o ../$@.tmp ../$<
