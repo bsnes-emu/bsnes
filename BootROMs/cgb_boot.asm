@@ -5,21 +5,26 @@ Start:
 ; Init stack pointer
     ld sp, $fffe
 
+; Clear memory VRAM
+    ld hl, $8000
+    call ClearMemoryPage
+    ld a, 2
+    ld c, $70
+    ld [c], a
+; Clear RAM Bank 2 (Like the original boot ROM
+    ld h, $D0
     xor a
+    call ClearMemoryPage
+    ld [c], a
+
 ; Clear chosen input palette
     ldh [InputPalette], a
 ; Clear title checksum
     ldh [TitleChecksum], a
-; Clear memory VRAM
-    ld hl, $8000
-    call ClearMemoryPage
-    ld h, $d0
-    call ClearMemoryPage
-
+    
 ; Clear OAM
-    ld hl, $fe00
+    ld h, $fe
     ld c, $a0
-    xor a
 .clearOAMLoop
     ldi [hl], a
     dec c
@@ -67,7 +72,7 @@ Start:
     ld hl, $8000
     call ClearMemoryPage
 
-; Copy Sameboy Logo
+; Copy SameBoy Logo
     ld de, SameboyLogo
     ld hl, $8080
     ld c, (SameboyLogoEnd - SameboyLogo) / 2
@@ -183,7 +188,7 @@ ENDC
 
     ld hl, BgPalettes
     ld d, 64 ; Length of write
-    ld e, 0 ; Index of write
+    ld e, c ; Index of write (C=0)
     call LoadBGPalettes
 
     ; Turn on LCD
@@ -1008,7 +1013,7 @@ ClearVRAMViaHDMA:
     ld hl, $FF51
 
     ; Src
-    ld a, $D0
+    ld a, $88
     ld [hli], a
     xor a
     ld [hli], a
@@ -1021,7 +1026,7 @@ ClearVRAMViaHDMA:
 
     ; Do it
     ld a, $12
-    ld [hli], a
+    ld [hl], a
     ret
 
 GetInputPaletteIndex:
