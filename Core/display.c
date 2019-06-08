@@ -112,7 +112,7 @@ typedef struct __attribute__((packed)) {
 static bool window_enabled(GB_gameboy_t *gb)
 {
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
-        if (!gb->cgb_mode && GB_is_cgb(gb)) {
+        if (!gb->cgb_mode) {
             return false;
         }
     }
@@ -375,9 +375,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         else {
             bg_enabled = false;
         }
-    }
-    if (!GB_is_cgb(gb) && gb->in_window) {
-        bg_enabled = true;
     }
     
     {

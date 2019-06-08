@@ -1529,7 +1529,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
     GB_log(gb, "LCDC:\n");
     GB_log(gb, "    LCD enabled: %s\n",(gb->io_registers[GB_IO_LCDC] & 128)? "Enabled" : "Disabled");
-    GB_log(gb, "    %s: %s\n", GB_is_cgb(gb)? (gb->cgb_mode? "Sprite priority flags" : "Background and Window") : "Background",
+    GB_log(gb, "    %s: %s\n", (gb->cgb_mode? "Sprite priority flags" : "Background and Window"),
                                (gb->io_registers[GB_IO_LCDC] & 1)? "Enabled" : "Disabled");
     GB_log(gb, "    Objects: %s\n", (gb->io_registers[GB_IO_LCDC] & 2)? "Enabled" : "Disabled");
     GB_log(gb, "    Object size: %s\n", (gb->io_registers[GB_IO_LCDC] & 4)? "8x16" : "8x8");
