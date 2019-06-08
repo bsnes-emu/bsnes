@@ -350,15 +350,15 @@ static struct {
     {"&", 1, and},
     {"^", 1, xor},
     {"<<", 2, shleft},
-    {"<=", 3, lower_equals},
-    {"<", 3, lower},
+    {"<=", -1, lower_equals},
+    {"<", -1, lower},
     {">>", 2, shright},
-    {">=", 3, greater_equals},
-    {">", 3, greater},
-    {"==", 3, equals},
-    {"=", -1, NULL, assign},
-    {"!=", 3, different},
-    {":", 4, bank},
+    {">=", -1, greater_equals},
+    {">", -1, greater},
+    {"==", -1, equals},
+    {"=", -2, NULL, assign},
+    {"!=", -1, different},
+    {":", 3, bank},
 };
 
 value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
@@ -575,9 +575,13 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             for (int j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
                 if (strlen(operators[j].string) > length - i) continue; // Operator too big.
                  // Priority higher than what we already have.
-                if (operator_index != -1 && operators[operator_index].priority < operators[j].priority) continue;
                 unsigned long operator_length = strlen(operators[j].string);
                 if (memcmp(string + i, operators[j].string, operator_length) == 0) {
+                    if (operator_index != -1 && operators[operator_index].priority < operators[j].priority) {
+                        /* for supporting = vs ==, etc*/
+                        i += operator_length - 1;
+                        continue;
+                    }
                     // Found an operator!
                     operator_pos = i;
                     operator_index = j;
