@@ -602,6 +602,87 @@ static void reset_ram(GB_gameboy_t *gb)
             break;
     }
     
+    /* HRAM */
+    switch (gb->model) {
+        case GB_MODEL_CGB_C:
+        // case GB_MODEL_CGB_D:
+        case GB_MODEL_CGB_E:
+        case GB_MODEL_AGB:
+            for (unsigned i = 0; i < sizeof(gb->hram); i++) {
+                gb->hram[i] = (random() & 0xFF);
+            }
+            break;
+            
+        case GB_MODEL_DMG_B:
+        case GB_MODEL_SGB_NTSC: /* Unverified*/
+        case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB2:
+            for (unsigned i = 0; i < sizeof(gb->hram); i++) {
+                if (i & 1) {
+                    gb->hram[i] = random() | random() | random();
+                }
+                else {
+                    gb->hram[i] = random() & random() & random();
+                }
+            }
+            break;
+    }
+    
+    /* OAM */
+    switch (gb->model) {
+        case GB_MODEL_CGB_C:
+        case GB_MODEL_CGB_E:
+        case GB_MODEL_AGB:
+            /* Zero'd out by boot ROM anyway*/
+            break;
+            
+        case GB_MODEL_DMG_B:
+        case GB_MODEL_SGB_NTSC: /* Unverified*/
+        case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB2:
+            for (unsigned i = 0; i < 8; i++) {
+                if (i & 2) {
+                    gb->oam[i] = random() & random() & random();
+                }
+                else {
+                    gb->oam[i] = random() | random() | random();
+                }
+            }
+            for (unsigned i = 8; i < sizeof(gb->oam); i++) {
+                gb->oam[i] = gb->oam[i - 8];
+            }
+            break;
+    }
+    
+    /* Wave RAM */
+    switch (gb->model) {
+        case GB_MODEL_CGB_C:
+        case GB_MODEL_CGB_E:
+        case GB_MODEL_AGB:
+            /* Initialized by CGB-A and newer, 0s in CGB-0*/
+            break;
+            
+        case GB_MODEL_DMG_B:
+        case GB_MODEL_SGB_NTSC: /* Unverified*/
+        case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB2: {
+            uint8_t temp;
+            for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
+                if (i & 1) {
+                    temp = random() & random() & random();
+                }
+                else {
+                    temp = random() | random() | random();
+                }
+                gb->apu.wave_channel.wave_form[i * 2]     = temp >> 4;
+                gb->apu.wave_channel.wave_form[i * 2 + 1] = temp & 0xF;
+                gb->io_registers[GB_IO_WAV_START + i] = temp;
+
+            }
+            break;
+        }
+    }
+    
     for (unsigned i = 0; i < sizeof(gb->extra_oam); i++) {
         gb->extra_oam[i] = (random() & 0xFF);
     }
