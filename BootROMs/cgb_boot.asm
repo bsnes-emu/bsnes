@@ -103,10 +103,11 @@ Start:
 ; Load Tilemap
     ld hl, $98C2
     ld b, 3
-    ld a, 8
 IF DEF(FAST)
     xor a
     ldh [$4F], a
+ELSE
+    ld a, 8
 ENDC
 
 .tilemapLoop
@@ -120,8 +121,7 @@ IF !DEF(FAST)
     ; Switch to second VRAM Bank
     ld a, 1
     ldh [$4F], a
-    ld a, 8
-    ld [hl], a
+    ld [hl], 8
     ; Switch to back first VRAM Bank
     xor a
     ldh [$4F], a
@@ -628,6 +628,8 @@ ClearMemoryPage:
     jr z, ClearMemoryPage
     ret
 
+ReadTwoTileLines:
+    call ReadTileLine
 ; c = $f0 for even lines, $f for odd lines.
 ReadTileLine:
     ld a, [de]
@@ -647,33 +649,27 @@ ReadTileLine:
 .dontSwap
     inc hl
     ldi [hl], a
+    swap c
     ret
 
 
 ReadCGBLogoHalfTile:
-    ld c, $f0
-    call ReadTileLine
-    ld c, $f
-    call ReadTileLine
+    call .do_twice
+.do_twice
+    call ReadTwoTileLines
     inc e
-    ld c, $f0
-    call ReadTileLine
-    ld c, $f
-    call ReadTileLine
-    inc e
+    ld a, e
     ret
 
 ReadCGBLogoTile:
+    ld c, $f0
     call ReadCGBLogoHalfTile
-    ld a, e
     add a, 22
     ld e, a
     call ReadCGBLogoHalfTile
-    ld a, e
     sub a, 22
     ld e, a
     ret
-
 
 ReadTrademarkSymbol:
     ld de, TrademarkSymbol
@@ -706,19 +702,23 @@ LoadPalettes:
     jr nz, .loop
     ret
 
-
-AdvanceIntroAnimation:
+DoIntroAnimation:
+    ; Animate the intro
+    ld a, 1
+    ldh [$4F], a
+    ld d, 26
+.animationLoop
+    ld b, 2
+    call WaitBFrames
     ld hl, $98C0
     ld c, 3 ; Row count
 .loop
     ld a, [hl]
     cp $F ; Already blue
     jr z, .nextTile
-    inc a
-    ld [hl], a
+    inc [hl]
     and $7
-    cp $1 ; Changed a white tile, go to next line
-    jr z, .nextLine
+    jr z, .nextLine ; Changed a white tile, go to next line
 .nextTile
     inc hl
     jr .loop
@@ -728,18 +728,7 @@ AdvanceIntroAnimation:
     ld l, a
     inc hl
     dec c
-    ret z
-    jr .loop
-
-DoIntroAnimation:
-    ; Animate the intro
-    ld a, 1
-    ldh [$4F], a
-    ld d, 26
-.animationLoop
-    ld b, 2
-    call WaitBFrames
-    call AdvanceIntroAnimation
+    jr nz, .loop
     dec d
     jr nz, .animationLoop
     ret
@@ -796,7 +785,7 @@ ENDC
 .emulateDMGForCGBGame
     call EmulateDMG
     ldh [$4C], a
-    ld a, $1;
+    ld a, $1
     ret
 
 EmulateDMG:
@@ -833,7 +822,7 @@ GetPaletteIndex:
     ld a, [hl] ; Old Licensee
     cp $33
     jr z, .newLicensee
-    cp 1 ; Nintendo
+    dec a ; 1 = Nintendo
     jr nz, .notNintendo
     jr .doChecksum
 .newLicensee
@@ -848,22 +837,22 @@ GetPaletteIndex:
 .doChecksum
     ld l, $34
     ld c, $10
-    ld b, 0
+    xor a
 
 .checksumLoop
-    ld a, [hli]
-    add b
-    ld b, a
+    add [hl]
+    inc l
     dec c
     jr nz, .checksumLoop
+    ld b, a
 
     ; c = 0
     ld hl, TitleChecksums
 
 .searchLoop
     ld a, l
-    cp ChecksumsEnd & $FF
-    jr z, .notNintendo
+    sub LOW(ChecksumsEnd) ; use sub to zero out a
+    ret z
     ld a, [hli]
     cp b
     jr nz, .searchLoop
