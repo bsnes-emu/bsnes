@@ -30,7 +30,8 @@ static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower,
-            do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values, large_stack, push_right;
+            do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values, large_stack, push_right,
+            semi_random, limit_start, pointer_control;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -63,35 +64,54 @@ static void vblank(GB_gameboy_t *gb)
         unsigned combo_length = 40;
         if (start_is_not_first || push_a_twice) combo_length = 60; /* The start item in the menu is not the first, so also push down */
         else if (a_is_bad || start_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
-
-        switch ((push_faster ? frames * 2 :
-                 push_slower ? frames / 2 : 
-                 push_a_twice? frames / 4:
-                 frames) % combo_length + (start_is_bad? 20 : 0) ) {
-            case 0:
-                gb->keys[0][push_right? 0 : 7] = true; // Start (Or right) down
-                break;
-            case 10:
-                gb->keys[0][push_right? 0 : 7] = false; // Start (Or right) up
-                break;
-            case 20:
-                gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
-                break;
-            case 30:
-                gb->keys[0][b_is_confirm? 5: 4] = false; // A up (or B)
-                break;
-            case 40:
-                if (push_a_twice) {
+        
+        if (semi_random) {
+            if (frames % 10 == 0) {
+                unsigned key = (((frames / 20) * 0x1337cafe) >> 29) & 7;
+                gb->keys[0][key] = (frames % 20) == 0;
+            }
+        }
+        else {
+            switch ((push_faster ? frames * 2 :
+                     push_slower ? frames / 2 :
+                     push_a_twice? frames / 4:
+                     frames) % combo_length + (start_is_bad? 20 : 0) ) {
+                case 0:
+                    if (!limit_start || frames < 20 * 60) {
+                        gb->keys[0][push_right? 0 : 7] = true; // Start (Or right) down
+                    }
+                    if (pointer_control) {
+                        gb->keys[0][1] = true; // left
+                        gb->keys[0][2] = true; // up
+                    }
+                    
+                    break;
+                case 10:
+                    gb->keys[0][push_right? 0 : 7] = false; // Start (Or right) up
+                    if (pointer_control) {
+                        gb->keys[0][1] = false; // left
+                        gb->keys[0][2] = false; // up
+                    }
+                    break;
+                case 20:
                     gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
-                }
-                else if (gb->boot_rom_finished) {
-                    gb->keys[0][3] = true; // D-Pad Down down
-                }
-                break;
-            case 50:
-                gb->keys[0][b_is_confirm? 5: 4] = false; // A down (or B)
-                gb->keys[0][3] = false; // D-Pad Down up
-                break;
+                    break;
+                case 30:
+                    gb->keys[0][b_is_confirm? 5: 4] = false; // A up (or B)
+                    break;
+                case 40:
+                    if (push_a_twice) {
+                        gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
+                    }
+                    else if (gb->boot_rom_finished) {
+                        gb->keys[0][3] = true; // D-Pad Down down
+                    }
+                    break;
+                case 50:
+                    gb->keys[0][b_is_confirm? 5: 4] = false; // A down (or B)
+                    gb->keys[0][3] = false; // D-Pad Down up
+                    break;
+            }
         }
     }
     
@@ -337,7 +357,9 @@ int main(int argc, char **argv)
                    strcmp((const char *)(gb.rom + 0x134), "KWIRK") == 0 ||
                    strcmp((const char *)(gb.rom + 0x134), "PUZZLE BOY") == 0;
         start_is_bad = strcmp((const char *)(gb.rom + 0x134), "BLUESALPHA") == 0;
-        b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0;
+        b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0 ||
+                       strcmp((const char *)(gb.rom + 0x134), "SOCCER") == 0 ||
+                       strcmp((const char *)(gb.rom + 0x134), "GEX GECKO") == 0;
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
@@ -346,6 +368,9 @@ int main(int argc, char **argv)
                      /* M&M's Minis Madness Demo (which has no menu but the same title as the full game) */
                      (memcmp((const char *)(gb.rom + 0x134), "MINIMADNESSBMIE", strlen("MINIMADNESSBMIE")) == 0 &&
                       gb.rom[0x14e] == 0x6c);
+        /* This game has some terrible menus. */
+        semi_random = strcmp((const char *)(gb.rom + 0x134), "KUKU GAME") == 0;
+        
 
         
         /* This game temporarily sets SP to OAM RAM */
@@ -356,6 +381,10 @@ int main(int argc, char **argv)
         /* This game uses some recursive algorithms and therefore requires quite a large call stack */
         large_stack = memcmp((const char *)(gb.rom + 0x134), "MICRO EPAK1BM", strlen("MICRO EPAK1BM")) == 0 ||
                       strcmp((const char *)(gb.rom + 0x134), "TECMO BOWL") == 0;
+        /* High quality game that leaks stack whenever you open the menu (with start),
+         but requires pressing start to play it. */
+        limit_start = strcmp((const char *)(gb.rom + 0x134), "DIVA STARS") == 0;
+        large_stack |= limit_start;
 
         /* Pressing start while in the map in Tsuri Sensei will leak an internal screen-stack which
            will eventually overflow, override an array of jump-table indexes, jump to a random
@@ -363,6 +392,10 @@ int main(int argc, char **argv)
            will prevent this scenario. */
         push_a_twice = strcmp((const char *)(gb.rom + 0x134), "TURI SENSEI V1") == 0;
 
+        /* Yes, you should totally use a cursor point & click interface for the language select menu. */
+        pointer_control = memcmp((const char *)(gb.rom + 0x134), "LEGO ATEAM BLPP", strlen("LEGO ATEAM BLPP")) == 0;
+        push_faster |= pointer_control;
+        
         /* Run emulation */
         running = true;
         gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
@@ -375,6 +408,7 @@ int main(int argc, char **argv)
                 frames = test_length - 1;
             }
         }
+        
         
         if (log_file) {
             fclose(log_file);
