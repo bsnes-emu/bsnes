@@ -1185,6 +1185,10 @@ void run_gui(bool is_running)
             }
             
             render_texture(pixels, NULL);
+#ifdef _WIN32
+            /* Required for some Windows 10 machines, god knows why */
+            render_texture(pixels, NULL);
+#endif
         }
     } while (SDL_WaitEvent(&event));
 }
