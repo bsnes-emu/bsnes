@@ -322,13 +322,23 @@ $(BIN)/SDL/Shaders: Shaders
 
 # Boot ROMs
 
+$(OBJ)/%.1bpp: %.png
+	-@$(MKDIR) -p $(dir $@)
+	rgbgfx -d 1 -h -o $@ $<
+
+$(OBJ)/BootROMs/SameboyLogo.rle: $(OBJ)/BootROMs/SameboyLogo.1bpp build/logo-compress
+	build/logo-compress < $< > $@
+
+build/logo-compress: BootROMs/logo-compress.c
+	$(CC) $< -o $@
+
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
 
-$(BIN)/BootROMs/%.bin: BootROMs/%.asm
+$(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameboyLogo.rle
 	-@$(MKDIR) -p $(dir $@)
-	cd BootROMs && rgbasm -o ../$@.tmp ../$<
+	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
 	rgblink -o $@.tmp2 $@.tmp
 	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@),256,2304)
 	@rm $@.tmp $@.tmp2
