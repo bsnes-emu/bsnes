@@ -1,4 +1,4 @@
-; Sameboy CGB bootstrap ROM
+; SameBoy CGB bootstrap ROM
 ; Todo: use friendly names for HW registers instead of magic numbers
 SECTION "BootCode", ROM0[$0]
 Start:
@@ -468,7 +468,7 @@ ENDM
     palette_comb 4, 3, 28
     palette_comb 28, 3, 6
     palette_comb 4, 28, 29
-    ; Sameboy "Exclusives"
+    ; SameBoy "Exclusives"
     palette_comb 30, 30, 30 ; CGA
     palette_comb 31, 31, 31 ; DMG LCD
     palette_comb 28, 4, 1
@@ -505,7 +505,7 @@ Palettes:
     dw $0000, $4200, $037F, $7FFF
     dw $7FFF, $7E8C, $7C00, $0000
     dw $7FFF, $1BEF, $6180, $0000
-    ; Sameboy "Exclusives"
+    ; SameBoy "Exclusives"
     dw $7FFF, $7FEA, $7D5F, $0000 ; CGA 1
     dw $4778, $3290, $1D87, $0861 ; DMG LCD
 
@@ -522,7 +522,7 @@ KeyCombinationPalettes
     db 7 ; Left + B
     db 28 ; Up + B
     db 49 ; Down + B
-    ; Sameboy "Exclusives"
+    ; SameBoy "Exclusives"
     db 51 ; Right + A + B
     db 52 ; Left + A + B
     db 53 ; Up + A + B
@@ -531,8 +531,8 @@ KeyCombinationPalettes
 TrademarkSymbol:
     db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
-SameboyLogo:
-    incbin "SameboyLogo.rle"
+SameBoyLogo:
+    incbin "SameBoyLogo.rle"
 
 AnimationColors:
     dw $7FFF ; White
@@ -636,7 +636,7 @@ ReadCGBLogoHalfTile:
 
 LoadTileset:
 ; Copy SameBoy Logo
-    ld de, SameboyLogo
+    ld de, SameBoyLogo
     ld hl, $8080
 .sameboyLogoLoop
     ld a, [de]

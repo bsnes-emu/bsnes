@@ -326,7 +326,7 @@ $(OBJ)/%.1bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
 	rgbgfx -d 1 -h -o $@ $<
 
-$(OBJ)/BootROMs/SameboyLogo.rle: $(OBJ)/BootROMs/SameboyLogo.1bpp build/logo-compress
+$(OBJ)/BootROMs/SameBoyLogo.rle: $(OBJ)/BootROMs/SameBoyLogo.1bpp build/logo-compress
 	build/logo-compress < $< > $@
 
 build/logo-compress: BootROMs/logo-compress.c
@@ -336,7 +336,7 @@ $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
 
-$(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameboyLogo.rle
+$(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.rle
 	-@$(MKDIR) -p $(dir $@)
 	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
 	rgblink -o $@.tmp2 $@.tmp

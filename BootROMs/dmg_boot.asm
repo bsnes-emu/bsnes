@@ -1,4 +1,4 @@
-; Sameboy CGB bootstrap ROM
+; SameBoy DMG bootstrap ROM
 ; Todo: use friendly names for HW registers instead of magic numbers
 SECTION "BootCode", ROM0[$0]
 Start:
