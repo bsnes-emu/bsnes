@@ -16,12 +16,7 @@
 #endif
 
 #include <Core/gb.h>
-
-/* Disable all randomness during automatic tests */
-long random(void)
-{
-    return 0;
-}
+#include <Core/random.h>
 
 static bool running = false;
 static char *filename;
@@ -262,6 +257,8 @@ int main(int argc, char **argv)
 
     bool dmg = false;
     const char *boot_rom_path = NULL;
+    
+    GB_random_set_enabled(false);
 
     for (unsigned i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--dmg") == 0) {

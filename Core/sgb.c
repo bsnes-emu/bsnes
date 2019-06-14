@@ -1,4 +1,5 @@
 #include "gb.h"
+#include "random.h"
 #include <math.h>
 
 #define INTRO_ANIMATION_LENGTH 200
@@ -682,7 +683,7 @@ static double fm_sweep(double phase)
 }
 static double random_double(void)
 {
-    return ((random() % 0x10001) - 0x8000) / (double) 0x8000;
+    return ((signed)(GB_random32() % 0x10001) - 0x8000) / (double) 0x8000;
 }
 
 bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)

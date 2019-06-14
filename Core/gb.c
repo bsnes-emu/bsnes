@@ -9,7 +9,9 @@
 #include <sys/select.h>
 #include <unistd.h>
 #endif
+#include "random.h"
 #include "gb.h"
+
 
 #ifdef DISABLE_REWIND
 #define GB_rewind_free(...)
@@ -565,7 +567,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
-                gb->ram[i] = (random() & 0xFF);
+                gb->ram[i] = GB_random();
             }
             break;
             
@@ -573,12 +575,12 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
-                gb->ram[i] = (random() & 0xFF);
+                gb->ram[i] = GB_random();
                 if (i & 0x100) {
-                    gb->ram[i] &= random();
+                    gb->ram[i] &= GB_random();
                 }
                 else {
-                    gb->ram[i] |= random();
+                    gb->ram[i] |= GB_random();
                 }
             }
             break;
@@ -586,7 +588,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB2:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = 0x55;
-                gb->ram[i] ^= random() & random() & random();
+                gb->ram[i] ^= GB_random() & GB_random() & GB_random();
             }
             break;
         
@@ -596,7 +598,7 @@ static void reset_ram(GB_gameboy_t *gb)
                     gb->ram[i] = 0;
                 }
                 else {
-                    gb->ram[i] = (random() | random() | random() | random())  & 0xFF;
+                    gb->ram[i] = GB_random() | GB_random() | GB_random() | GB_random();
                 }
             }
             break;
@@ -609,7 +611,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
-                gb->hram[i] = (random() & 0xFF);
+                gb->hram[i] = GB_random();
             }
             break;
             
@@ -619,10 +621,10 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB2:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 if (i & 1) {
-                    gb->hram[i] = random() | random() | random();
+                    gb->hram[i] = GB_random() | GB_random() | GB_random();
                 }
                 else {
-                    gb->hram[i] = random() & random() & random();
+                    gb->hram[i] = GB_random() & GB_random() & GB_random();
                 }
             }
             break;
@@ -642,10 +644,10 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB2:
             for (unsigned i = 0; i < 8; i++) {
                 if (i & 2) {
-                    gb->oam[i] = random() & random() & random();
+                    gb->oam[i] = GB_random() & GB_random() & GB_random();
                 }
                 else {
-                    gb->oam[i] = random() | random() | random();
+                    gb->oam[i] = GB_random() | GB_random() | GB_random();
                 }
             }
             for (unsigned i = 8; i < sizeof(gb->oam); i++) {
@@ -669,10 +671,10 @@ static void reset_ram(GB_gameboy_t *gb)
             uint8_t temp;
             for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
-                    temp = random() & random() & random();
+                    temp = GB_random() & GB_random() & GB_random();
                 }
                 else {
-                    temp = random() | random() | random();
+                    temp = GB_random() | GB_random() | GB_random();
                 }
                 gb->apu.wave_channel.wave_form[i * 2]     = temp >> 4;
                 gb->apu.wave_channel.wave_form[i * 2 + 1] = temp & 0xF;
@@ -684,13 +686,13 @@ static void reset_ram(GB_gameboy_t *gb)
     }
     
     for (unsigned i = 0; i < sizeof(gb->extra_oam); i++) {
-        gb->extra_oam[i] = (random() & 0xFF);
+        gb->extra_oam[i] = GB_random();
     }
     
     if (GB_is_cgb(gb)) {
         for (unsigned i = 0; i < 64; i++) {
-            gb->background_palettes_data[i] = random() & 0xFF; /* Doesn't really matter as the boot ROM overrides it anyway*/
-            gb->sprite_palettes_data[i] = random() & 0xFF;
+            gb->background_palettes_data[i] = GB_random(); /* Doesn't really matter as the boot ROM overrides it anyway*/
+            gb->sprite_palettes_data[i] = GB_random();
         }
         for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, true, i * 2);

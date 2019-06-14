@@ -243,7 +243,6 @@ else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
-   CFLAGS += -Drandom=rand
 endif
 
 TARGET := $(CORE_DIR)/build/bin/$(TARGET)
