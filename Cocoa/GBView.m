@@ -341,6 +341,27 @@
     }
 }
 
+- (void) joystick:(NSString *)joystick_name hat: (unsigned)hat changedState: (int8_t) state
+{
+    unsigned player_count = GB_get_player_count(_gb);
+    
+    UpdateSystemActivity(UsrActivity);
+    for (unsigned player = 0; player < player_count; player++) {
+        NSString *preferred_joypad = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"]
+                                      objectForKey:[NSString stringWithFormat:@"%u", player]];
+        if (player_count != 1 && // Single player, accpet inputs from all joypads
+            !(player == 0 && !preferred_joypad) && // Multiplayer, but player 1 has no joypad configured, so it takes inputs from all joypads
+            ![preferred_joypad isEqualToString:joystick_name]) {
+            continue;
+        }
+        assert(state + 1  < 9);
+                                                                      /* -  N NE  E SE  S SW  W NW */
+        GB_set_key_state_for_player(_gb, GB_KEY_UP,    player, (bool []){0, 1, 1, 0, 0, 0, 0, 0, 1}[state + 1]);
+        GB_set_key_state_for_player(_gb, GB_KEY_RIGHT, player, (bool []){0, 0, 1, 1, 1, 0, 0, 0, 0}[state + 1]);
+        GB_set_key_state_for_player(_gb, GB_KEY_DOWN,  player, (bool []){0, 0, 0, 0, 1, 1, 1, 0, 0}[state + 1]);
+        GB_set_key_state_for_player(_gb, GB_KEY_LEFT,  player, (bool []){0, 0, 0, 0, 0, 0, 1, 1, 1}[state + 1]);
+    }
+}
 
 - (BOOL)acceptsFirstResponder
 {

@@ -53,6 +53,9 @@ struct _SDL_Joystick
     int nbuttons;               /* Number of buttons on the joystick */
     uint8_t *buttons;             /* Current button states */
     
+    int nhats;
+    uint8_t *hats;
+    
     struct joystick_hwdata *hwdata;     /* Driver dependent information */
     
     int ref_count;              /* Reference count for multiple opens */
@@ -93,11 +96,13 @@ struct joystick_hwdata
     
     int axes;                  /* number of axis (calculated, not reported by device) */
     int buttons;               /* number of buttons (calculated, not reported by device) */
+    int hats;
     int elements;              /* number of total elements (should be total of above) (calculated, not reported by device) */
     
     recElement *firstAxis;
     recElement *firstButton;
-    
+    recElement *firstHat;
+
     bool removed;
     
     int instance_id;
@@ -178,6 +183,30 @@ void SDL_PrivateJoystickButton(SDL_Joystick *joystick, uint8_t button, uint8_t s
     }
 }
 
+void SDL_PrivateJoystickHat(SDL_Joystick *joystick, uint8_t hat, uint8_t state)
+{
+    
+    /* Make sure we're not getting garbage or duplicate events */
+    if (hat >= joystick->nhats) {
+        return;
+    }
+    if (state == joystick->hats[hat]) {
+        return;
+    }
+    
+    /* Update internal joystick state */
+    joystick->hats[hat] = state;
+    
+    NSResponder<GBJoystickListener> *responder = (typeof(responder)) [[NSApp keyWindow] firstResponder];
+    while (responder) {
+        if ([responder respondsToSelector:@selector(joystick:button:changedState:)]) {
+            [responder joystick:@(joystick->name) hat:hat changedState:state];
+            break;
+        }
+        responder = (typeof(responder)) [responder nextResponder];
+    }
+}
+
 static void
 FreeElementList(recElement *pElement)
 {
@@ -202,6 +231,7 @@ FreeDevice(recDevice *removeDevice)
         /* free element lists */
         FreeElementList(removeDevice->firstAxis);
         FreeElementList(removeDevice->firstButton);
+        FreeElementList(removeDevice->firstHat);
 
         free(removeDevice);
     }
@@ -312,6 +342,15 @@ AddHIDElement(const void *value, void *parameter)
                                     if (element) {
                                         pDevice->axes++;
                                         headElement = &(pDevice->firstAxis);
+                                    }
+                                }
+                                break;
+                            case kHIDUsage_GD_Hatswitch:
+                                if (!ElementAlreadyAdded(cookie, pDevice->firstHat)) {
+                                    element = (recElement *) calloc(1, sizeof (recElement));
+                                    if (element) {
+                                        pDevice->hats++;
+                                        headElement = &(pDevice->firstHat);
                                     }
                                 }
                                 break;
@@ -535,6 +574,27 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
         element = element->pNext;
         ++i;
     }
+    
+    element = device->firstHat;
+    i = 0;
+    while (element) {
+        signed range = (element->max - element->min + 1);
+        value = GetHIDElementState(device, element) - element->min;
+        if (range == 4) {         /* 4 position hatswitch - scale up value */
+            value *= 2;
+        } else if (range != 8) {    /* Neither a 4 nor 8 positions - fall back to default position (centered) */
+            value = -1;
+        }
+        if ((unsigned)value >= 8) {
+            value = -1;
+        }
+        
+        SDL_PrivateJoystickHat(joystick, i, value);
+        
+        element = element->pNext;
+        ++i;
+    }
+
 }
 
 static void JoystickInputCallback(
@@ -579,12 +639,16 @@ JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDevic
     
     joystick->naxes = device->axes;
     joystick->nbuttons = device->buttons;
-    
+    joystick->nhats = device->hats;
+
     if (joystick->naxes > 0) {
         joystick->axes = (SDL_JoystickAxisInfo *) calloc(joystick->naxes, sizeof(SDL_JoystickAxisInfo));
     }
     if (joystick->nbuttons > 0) {
         joystick->buttons = (uint8_t *) calloc(joystick->nbuttons, 1);
+    }
+    if (joystick->nhats > 0) {
+        joystick->hats = (uint8_t *) calloc(joystick->nhats, 1);
     }
     
     /* Get notified when this device is disconnected. */

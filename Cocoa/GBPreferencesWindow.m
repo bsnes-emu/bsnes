@@ -309,6 +309,42 @@
     [self advanceConfigurationStateMachine];
 }
 
+- (void) joystick:(NSString *)joystick_name hat: (unsigned)hat changedState: (int8_t) state
+{
+    /* Hats are always mapped to the D-pad, ignore them on non-Dpad keys and skip the D-pad configuration if used*/
+    if (!state) return;
+    if (joystick_configuration_state == -1) return;
+    if (joystick_configuration_state > GBDown) return;
+    if (!joystick_being_configured) {
+        joystick_being_configured = joystick_name;
+    }
+    else if (![joystick_being_configured isEqualToString:joystick_name]) {
+        return;
+    }
+    
+    NSMutableDictionary *all_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] mutableCopy];
+    
+    if (!all_mappings) {
+        all_mappings = [[NSMutableDictionary alloc] init];
+    }
+    
+    NSMutableDictionary *mapping = [[all_mappings objectForKey:joystick_name] mutableCopy];
+    
+    if (!mapping) {
+        mapping = [[NSMutableDictionary alloc] init];
+    }
+    
+    for (joystick_configuration_state = 0;; joystick_configuration_state++) {
+        [mapping removeObjectForKey:GBButtonNames[joystick_configuration_state]];
+        if (joystick_configuration_state == GBDown) break;
+    }
+    
+    all_mappings[joystick_name] = mapping;
+    [[NSUserDefaults standardUserDefaults] setObject:all_mappings forKey:@"GBJoypadMappings"];
+    [self refreshJoypadMenu:nil];
+    [self advanceConfigurationStateMachine];
+}
+
 - (NSButton *)aspectRatioCheckbox
 {
     return _aspectRatioCheckbox;
