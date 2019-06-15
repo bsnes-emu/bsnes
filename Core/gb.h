@@ -555,7 +555,7 @@ struct GB_gameboy_internal_s {
         uint16_t addr_for_call_depth[0x200];
 
         /* Backtrace */
-        unsigned int backtrace_size;
+        unsigned backtrace_size;
         uint16_t backtrace_sps[0x200];
         struct {
             uint16_t bank;

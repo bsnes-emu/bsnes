@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #endif
 
-static const unsigned int GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
+static const unsigned GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
 
 #ifndef DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
@@ -251,8 +251,8 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
     /* Glitch only happens when old_tac is enabled. */
     if (!(old_tac & 4)) return;
 
-    unsigned int old_clocks = GB_TAC_TRIGGER_BITS[old_tac & 3];
-    unsigned int new_clocks = GB_TAC_TRIGGER_BITS[new_tac & 3];
+    unsigned old_clocks = GB_TAC_TRIGGER_BITS[old_tac & 3];
+    unsigned new_clocks = GB_TAC_TRIGGER_BITS[new_tac & 3];
 
     /* The bit used for overflow testing must have been 1 */
     if (gb->div_counter & old_clocks) {

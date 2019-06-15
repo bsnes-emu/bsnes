@@ -12,6 +12,7 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/sm83_cpu.c \
                $(CORE_DIR)/Core/joypad.c \
                $(CORE_DIR)/Core/save_state.c \
+               $(CORE_DIR)/Core/random.c \
                $(CORE_DIR)/libretro/agb_boot.c \
                $(CORE_DIR)/libretro/cgb_boot.c \
                $(CORE_DIR)/libretro/dmg_boot.c \

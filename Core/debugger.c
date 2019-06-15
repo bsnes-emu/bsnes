@@ -455,12 +455,12 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
                 case 'p': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
             }
         }
-        GB_log(gb, "Unknown register: %.*s\n", (unsigned int) length, string);
+        GB_log(gb, "Unknown register: %.*s\n", (unsigned) length, string);
         *error = true;
         return (lvalue_t){0,};
     }
 
-    GB_log(gb, "Expression is not an lvalue: %.*s\n", (unsigned int) length, string);
+    GB_log(gb, "Expression is not an lvalue: %.*s\n", (unsigned) length, string);
     *error = true;
     return (lvalue_t){0,};
 }
@@ -564,8 +564,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     // Search for lowest priority operator
     signed int depth = 0;
-    unsigned int operator_index = -1;
-    unsigned int operator_pos = 0;
+    unsigned operator_index = -1;
+    unsigned operator_pos = 0;
     for (int i = 0; i < length; i++) {
         if (string[i] == '(') depth++;
         else if (string[i] == ')') depth--;
@@ -593,7 +593,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
         }
     }
     if (operator_index != -1) {
-        unsigned int right_start = (unsigned int)(operator_pos + strlen(operators[operator_index].string));
+        unsigned right_start = (unsigned)(operator_pos + strlen(operators[operator_index].string));
         value_t right = debugger_evaluate(gb, string + right_start, length - right_start, error, watchpoint_address, watchpoint_new_value);
         if (*error) goto exit;
         if (operators[operator_index].lvalue_operator) {
@@ -661,7 +661,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             goto exit;
         }
 
-        GB_log(gb, "Unknown register or symbol: %.*s\n", (unsigned int) length, string);
+        GB_log(gb, "Unknown register or symbol: %.*s\n", (unsigned) length, string);
         *error = true;
         goto exit;
     }
@@ -675,7 +675,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     uint16_t literal = (uint16_t) (strtol(string, &end, base));
     if (end != string + length) {
-        GB_log(gb, "Failed to parse: %.*s\n", (unsigned int) length, string);
+        GB_log(gb, "Failed to parse: %.*s\n", (unsigned) length, string);
         *error = true;
         goto exit;
     }
@@ -880,13 +880,13 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
         condition += strlen(" if ");
         /* Verify condition is sane (Todo: This might have side effects!) */
         bool error;
-        debugger_evaluate(gb, condition, (unsigned int)strlen(condition), &error, NULL, NULL);
+        debugger_evaluate(gb, condition, (unsigned)strlen(condition), &error, NULL, NULL);
         if (error) return true;
 
     }
 
     bool error;
-    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint32_t key = BP_KEY(result);
 
     if (error) return true;
@@ -949,7 +949,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
     }
 
     bool error;
-    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint32_t key = BP_KEY(result);
 
     if (error) return true;
@@ -1065,13 +1065,13 @@ print_usage:
         /* To make $new and $old legal */
         uint16_t dummy = 0;
         uint8_t dummy2 = 0;
-        debugger_evaluate(gb, condition, (unsigned int)strlen(condition), &error, &dummy, &dummy2);
+        debugger_evaluate(gb, condition, (unsigned)strlen(condition), &error, &dummy, &dummy2);
         if (error) return true;
 
     }
 
     bool error;
-    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint32_t key = WP_KEY(result);
 
     if (error) return true;
@@ -1132,7 +1132,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
     }
 
     bool error;
-    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint32_t key = WP_KEY(result);
 
     if (error) return true;
@@ -1234,7 +1234,7 @@ static bool _should_break(GB_gameboy_t *gb, value_t addr, bool jump_to)
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->breakpoints[index].condition,
-                                           (unsigned int)strlen(gb->breakpoints[index].condition), &error, NULL, NULL).value;
+                                           (unsigned)strlen(gb->breakpoints[index].condition), &error, NULL, NULL).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -1273,7 +1273,7 @@ static bool print(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
     }
 
     bool error;
-    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     if (!error) {
         switch (modifiers[0]) {
             case 'a':
@@ -1319,7 +1319,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
     }
 
     bool error;
-    value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t addr = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint16_t count = 32;
 
     if (modifiers) {
@@ -1371,7 +1371,7 @@ static bool disassemble(GB_gameboy_t *gb, char *arguments, char *modifiers, cons
     }
 
     bool error;
-    value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t addr = debugger_evaluate(gb, arguments, (unsigned)strlen(arguments), &error, NULL, NULL);
     uint16_t count = 5;
 
     if (modifiers) {
@@ -1468,7 +1468,7 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     }
 
     GB_log(gb, "  1. %s\n", debugger_value_to_string(gb, (value_t){true, bank_for_addr(gb, gb->pc), gb->pc}, true));
-    for (unsigned int i = gb->backtrace_size; i--;) {
+    for (unsigned i = gb->backtrace_size; i--;) {
         GB_log(gb, "%3d. %s\n", gb->backtrace_size - i + 1, debugger_value_to_string(gb, (value_t){true, gb->backtrace_returns[i].bank, gb->backtrace_returns[i].addr}, true));
     }
 
@@ -1937,7 +1937,7 @@ static bool _GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, value_t addr, u
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr.value, &value).value;
+                                           (unsigned)strlen(gb->watchpoints[index].condition), &error, &addr.value, &value).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -1982,7 +1982,7 @@ static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr.value, NULL).value;
+                                           (unsigned)strlen(gb->watchpoints[index].condition), &error, &addr.value, NULL).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -2169,7 +2169,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
         }
         if (length == 0) continue;
 
-        unsigned int bank, address;
+        unsigned bank, address;
         char symbol[length];
 
         if (sscanf(line, "%02x:%04x %s", &bank, &address, symbol) == 3) {

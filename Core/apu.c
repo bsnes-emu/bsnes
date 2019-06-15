@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 #include "gb.h"
 
 #define likely(x)   __builtin_expect((x), 1)
@@ -117,7 +118,7 @@ static double smooth(double x)
     return 3*x*x - 2*x*x*x;
 }
 
-static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
+static void render(GB_gameboy_t *gb)
 {
     GB_sample_t output = {0,0};
 
@@ -147,7 +148,7 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
             }
         }
 
-        if (likely(gb->apu_output.last_update[i] == 0 || no_downsampling)) {
+        if (likely(gb->apu_output.last_update[i] == 0)) {
             output.left += gb->apu_output.current_sample[i].left * multiplier;
             output.right += gb->apu_output.current_sample[i].right * multiplier;
         }
@@ -205,17 +206,9 @@ static void render(GB_gameboy_t *gb, bool no_downsampling, GB_sample_t *dest)
         }
 
     }
-    if (dest) {
-        *dest = filtered_output;
-        return;
-    }
-
-    while (gb->apu_output.copy_in_progress);
-    while (!__sync_bool_compare_and_swap(&gb->apu_output.lock, false, true));
-    if (gb->apu_output.buffer_position < gb->apu_output.buffer_size) {
-        gb->apu_output.buffer[gb->apu_output.buffer_position++] = filtered_output;
-    }
-    gb->apu_output.lock = false;
+    
+    assert(gb->apu_output.sample_callback);
+    gb->apu_output.sample_callback(gb, &filtered_output);
 }
 
 static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
@@ -504,56 +497,12 @@ void GB_apu_run(GB_gameboy_t *gb)
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_since_render += cycles;
 
-        if (gb->apu_output.sample_cycles > gb->apu_output.cycles_per_sample) {
+        if (gb->apu_output.sample_cycles >= gb->apu_output.cycles_per_sample) {
             gb->apu_output.sample_cycles -= gb->apu_output.cycles_per_sample;
-            render(gb, false, NULL);
+            render(gb);
         }
     }
 }
-
-void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count)
-{
-    if (gb->sgb) {
-        if (GB_sgb_render_jingle(gb, dest, count)) return;
-    }
-    gb->apu_output.copy_in_progress = true;
-
-    /* TODO: Rewrite this as a proper cyclic buffer. This is a workaround to avoid a very rare crashing race condition */
-    size_t buffer_position = gb->apu_output.buffer_position;
-
-    if (!gb->apu_output.stream_started) {
-        // Intentionally fail the first copy to sync the stream with the Gameboy.
-        gb->apu_output.stream_started = true;
-        gb->apu_output.buffer_position = 0;
-        buffer_position = 0;
-    }
-
-    if (count > buffer_position) {
-        // GB_log(gb, "Audio underflow: %d\n", count - gb->apu_output.buffer_position);
-        GB_sample_t output;
-        render(gb, true, &output);
-
-        for (unsigned i = 0; i < count - buffer_position; i++) {
-            dest[buffer_position + i] = output;
-        }
-
-        if (buffer_position) {
-            if (gb->apu_output.buffer_size + (count - buffer_position) < count * 3) {
-                gb->apu_output.buffer_size += count - buffer_position;
-                gb->apu_output.buffer = realloc(gb->apu_output.buffer,
-                                                gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
-                gb->apu_output.stream_started = false;
-            }
-        }
-        count = buffer_position;
-    }
-    memcpy(dest, gb->apu_output.buffer, count * sizeof(*gb->apu_output.buffer));
-    memmove(gb->apu_output.buffer, gb->apu_output.buffer + count, (buffer_position - count) * sizeof(*gb->apu_output.buffer));
-    gb->apu_output.buffer_position -= count;
-
-    gb->apu_output.copy_in_progress = false;
-}
-
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
@@ -1009,24 +958,19 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
     gb->io_registers[reg] = value;
 }
 
-size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb)
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
 {
-    return gb->apu_output.buffer_position;
-}
 
-void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
-{
-    if (gb->apu_output.buffer) {
-        free(gb->apu_output.buffer);
-    }
-    gb->apu_output.buffer_size = sample_rate / 25; // 40ms delay
-    gb->apu_output.buffer = malloc(gb->apu_output.buffer_size * sizeof(*gb->apu_output.buffer));
     gb->apu_output.sample_rate = sample_rate;
-    gb->apu_output.buffer_position = 0;
     if (sample_rate) {
         gb->apu_output.highpass_rate = pow(0.999958,  GB_get_clock_rate(gb) / (double)sample_rate);
     }
     GB_apu_update_cycles_per_sample(gb);
+}
+
+void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback)
+{
+    gb->apu_output.sample_callback = callback;
 }
 
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode)

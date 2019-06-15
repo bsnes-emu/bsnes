@@ -150,34 +150,22 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 }
 
 
-static void audio_callback(void *gb)
+static void audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
-    size_t length = GB_apu_get_current_buffer_length(gb);
-
-    while (length > sizeof(soundbuf) / 4)
-    {
-        GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, 1024);
-        audio_batch_cb(soundbuf, 1024);
-        length -= 1024;
-    }
-    if (length) {
-        GB_apu_copy_buffer(gb, (GB_sample_t *) soundbuf, length);
-        audio_batch_cb(soundbuf, length);
+    if ((audio_out == GB_1 && gb == &gameboy[0]) ||
+        (audio_out == GB_2 && gb == &gameboy[1])) {
+        audio_batch_cb((void*)sample, 1);
     }
 }
 
 static void vblank1(GB_gameboy_t *gb)
 {
     vblank1_occurred = true;
-    if (audio_out == GB_1)
-        audio_callback(gb);
 }
 
 static void vblank2(GB_gameboy_t *gb)
 {
     vblank2_occurred = true;
-    if (audio_out == GB_2)
-        audio_callback(gb);
 }
 
 static bool bit_to_send1 = true, bit_to_send2 = true;
@@ -383,6 +371,7 @@ static void init_for_current_model(unsigned id)
     GB_set_pixels_output(&gameboy[i],(unsigned int*)(frame_buf + i * ((model[i] == MODEL_SGB || model[i] == MODEL_SGB2) ? SGB_VIDEO_PIXELS : VIDEO_PIXELS)));
     GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
     GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
+    GB_apu_set_sample_callback(&gameboy[i], audio_callback);
 
     /* todo: attempt to make these more generic */
     GB_set_vblank_callback(&gameboy[0], (GB_vblank_callback_t) vblank1);

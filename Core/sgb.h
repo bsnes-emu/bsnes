@@ -54,7 +54,6 @@ struct GB_sgb_s {
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 void GB_sgb_render(GB_gameboy_t *gb);
 void GB_sgb_load_default_data(GB_gameboy_t *gb);
-bool GB_sgb_render_jingle(GB_gameboy_t *gb, GB_sample_t *dest, size_t count);
 
 #endif
 

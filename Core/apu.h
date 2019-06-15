@@ -46,6 +46,8 @@ enum GB_CHANNELS {
     GB_N_CHANNELS
 };
 
+typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
+
 typedef struct
 {
     bool global_enable;
@@ -126,14 +128,6 @@ typedef enum {
 typedef struct {
     unsigned sample_rate;
 
-    GB_sample_t *buffer;
-    size_t buffer_size;
-    size_t buffer_position;
-
-    bool stream_started; /* detects first copy request to minimize lag */
-    volatile bool copy_in_progress;
-    volatile bool lock;
-
     double sample_cycles; // In 8 MHz units
     double cycles_per_sample;
 
@@ -147,13 +141,13 @@ typedef struct {
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;
     GB_double_sample_t highpass_diff;
+    
+    GB_sample_callback_t sample_callback;
 } GB_apu_output_t;
 
-void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
-void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, size_t count);
-size_t GB_apu_get_current_buffer_length(GB_gameboy_t *gb);
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
-
+void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
 #ifdef GB_INTERNAL
 bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);

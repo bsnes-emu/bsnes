@@ -55,6 +55,12 @@ enum model {
     
     bool rewind;
     bool modelsChanging;
+    
+    NSCondition *audioLock;
+    GB_sample_t *audioBuffer;
+    size_t audioBufferSize;
+    size_t audioBufferPosition;
+    size_t audioBufferNeeded;
 }
 
 @property GBAudioClient *audioClient;
@@ -67,6 +73,7 @@ enum model {
 - (void) printImage:(uint32_t *)image height:(unsigned) height
           topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
            exposure:(unsigned) exposure;
+- (void) gotNewSample:(GB_sample_t *)sample;
 @end
 
 static void vblank(GB_gameboy_t *gb)
@@ -118,6 +125,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [self printImage:image height:height topMargin:top_margin bottomMargin:bottom_margin exposure:exposure];
 }
 
+static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self gotNewSample:sample];
+}
+
 @implementation Document
 {
     GB_gameboy_t gb;
@@ -133,6 +146,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
         debugger_input_queue = [[NSMutableArray alloc] init];
         console_output_lock = [[NSRecursiveLock alloc] init];
+        audioLock = [[NSCondition alloc] init];
     }
     return self;
 }
@@ -184,6 +198,7 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
     GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
     GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
+    GB_apu_set_sample_callback(&gb, audioCallback);
 }
 
 - (void) vblank
@@ -201,13 +216,57 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     }
 }
 
+- (void)gotNewSample:(GB_sample_t *)sample
+{
+    [audioLock lock];
+    if (self.audioClient.isPlaying) {
+        if (audioBufferPosition == audioBufferSize) {
+            if (audioBufferSize >= 0x4000) {
+                audioBufferPosition = 0;
+                [audioLock unlock];
+                return;
+            }
+            
+            if (audioBufferSize == 0) {
+                audioBufferSize = 512;
+            }
+            else {
+                audioBufferSize += audioBufferSize >> 2;
+            }
+            audioBuffer = realloc(audioBuffer, sizeof(*sample) * audioBufferSize);
+        }
+        audioBuffer[audioBufferPosition++] = *sample;
+    }
+    if (audioBufferPosition == audioBufferNeeded) {
+        [audioLock signal];
+        audioBufferNeeded = 0;
+    }
+    [audioLock unlock];
+}
+
 - (void) run
 {
     running = true;
     GB_set_pixels_output(&gb, self.view.pixels);
     GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
-        GB_apu_copy_buffer(&gb, buffer, nFrames);
+        [audioLock lock];
+        
+        if (audioBufferPosition < nFrames) {
+            audioBufferNeeded = nFrames;
+            [audioLock wait];
+        }
+        
+        if (audioBufferPosition >= nFrames && audioBufferPosition < nFrames + 4800) {
+            memcpy(buffer, audioBuffer, nFrames * sizeof(*buffer));
+            memmove(audioBuffer, audioBuffer + nFrames, (audioBufferPosition - nFrames) * sizeof(*buffer));
+            audioBufferPosition = audioBufferPosition - nFrames;
+        }
+        else {
+            memcpy(buffer, audioBuffer + (audioBufferPosition - nFrames), nFrames * sizeof(*buffer));
+            audioBufferPosition = 0;
+        }
+        [audioLock unlock];
     } andSampleRate:96000];
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"Mute"]) {
         [self.audioClient start];
@@ -227,6 +286,11 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
         }
     }
     [hex_timer invalidate];
+    [audioLock lock];
+    memset(audioBuffer, 0, (audioBufferSize - audioBufferPosition) * sizeof(*audioBuffer));
+    audioBufferPosition = audioBufferNeeded;
+    [audioLock signal];
+    [audioLock unlock];
     [self.audioClient stop];
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
@@ -328,6 +392,9 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     GB_free(&gb);
     if (cameraImage) {
         CVBufferRelease(cameraImage);
+    }
+    if (audioBuffer) {
+        free(audioBuffer);
     }
 }
 

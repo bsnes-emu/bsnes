@@ -135,9 +135,6 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->rom) {
         free(gb->rom);
     }
-    if (gb->apu_output.buffer) {
-        free(gb->apu_output.buffer);
-    }
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }

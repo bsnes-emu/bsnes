@@ -33,6 +33,7 @@ static double clock_mutliplier = 1.0;
 static char *filename = NULL;
 static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr;
+static bool skip_audio;
 
 SDL_AudioDeviceID device_id;
 
@@ -336,6 +337,8 @@ static void vblank(GB_gameboy_t *gb)
     }
     do_rewind = rewind_down;
     handle_events(gb);
+    
+    skip_audio = (SDL_GetQueuedAudioSize(device_id) / sizeof(GB_sample_t)) > have_aspec.freq / 20;
 }
 
 
@@ -355,16 +358,12 @@ static void debugger_interrupt(int ignore)
     GB_debugger_break(&gb);
 }
 
-
-static void audio_callback(void *gb, Uint8 *stream, int len)
+static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
-    if (GB_is_inited(gb)) {
-        GB_apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
-    }
-    else {
-        memset(stream, 0, len);
-    }
+    if (skip_audio) return;
+    SDL_QueueAudio(device_id, sample, sizeof(*sample));
 }
+
     
 static bool handle_pending_command(void)
 {
@@ -436,6 +435,7 @@ restart:
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
         GB_set_rewind_length(&gb, configuration.rewind_length);
         GB_set_update_input_hint_callback(&gb, handle_events);
+        GB_apu_set_sample_callback(&gb, gb_audio_callback);
     }
     
     SDL_DestroyTexture(texture);
@@ -612,9 +612,6 @@ int main(int argc, char **argv)
     }
 #endif
     
-
-    want_aspec.callback = audio_callback;
-    want_aspec.userdata = &gb;
     device_id = SDL_OpenAudioDevice(0, 0, &want_aspec, &have_aspec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
     
     /* Start Audio */
