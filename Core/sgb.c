@@ -98,6 +98,9 @@ static void command_ready(GB_gameboy_t *gb)
         return;
     }
     
+    /* Ignore malformed commands (0 length)*/
+    if ((gb->sgb->command[0] & 7) == 0) return;
+    
     switch (gb->sgb->command[0] >> 3) {
         case PAL01:
             pal_command(gb, 0, 1);
