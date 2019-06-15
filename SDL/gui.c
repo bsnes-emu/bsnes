@@ -913,6 +913,7 @@ void run_gui(bool is_running)
                             event.key.keysym.scancode = scancode;
                         }
                     }
+                    break;
                }
                     
                 case SDL_JOYAXISMOTION: {
