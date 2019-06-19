@@ -466,7 +466,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count);
 void GB_sgb_render(GB_gameboy_t *gb)
 {
     if (gb->apu_output.sample_rate) {
-        render_jingle(gb, gb->apu_output.sample_rate / (GB_get_clock_rate(gb) / (double)LCDC_PERIOD));
+        render_jingle(gb, gb->apu_output.sample_rate / GB_get_usual_frame_rate(gb));
     }
     
     if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
