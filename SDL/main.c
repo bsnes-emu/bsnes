@@ -318,11 +318,11 @@ static void handle_events(GB_gameboy_t *gb)
 static void vblank(GB_gameboy_t *gb)
 {
     if (underclock_down && clock_mutliplier > 0.5) {
-        clock_mutliplier -= 0.1;
+        clock_mutliplier -= 1.0/16;
         GB_set_clock_multiplier(gb, clock_mutliplier);
     }
     else if (!underclock_down && clock_mutliplier < 1.0) {
-        clock_mutliplier += 0.1;
+        clock_mutliplier += 1.0/16;
         GB_set_clock_multiplier(gb, clock_mutliplier);
     }
     if (configuration.blend_frames) {

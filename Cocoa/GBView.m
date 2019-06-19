@@ -148,11 +148,11 @@
 - (void) flip
 {
     if (underclockKeyDown && clockMultiplier > 0.5) {
-        clockMultiplier -= 0.1;
+        clockMultiplier -= 1.0/16;
         GB_set_clock_multiplier(_gb, clockMultiplier);
     }
     if (!underclockKeyDown && clockMultiplier < 1.0) {
-        clockMultiplier += 0.1;
+        clockMultiplier += 1.0/16;
         GB_set_clock_multiplier(_gb, clockMultiplier);
     }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
