@@ -397,8 +397,8 @@
                                                 <outlet property="delegate" destination="-2" id="EAG-Zh-oRi"/>
                                             </connections>
                                         </imageView>
-                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" id="loB-0k-Qff">
-                                            <rect key="frame" x="4" y="387" width="128" height="18"/>
+                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" misplaced="YES" id="loB-0k-Qff">
+                                            <rect key="frame" x="4" y="388" width="128" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundRect" title="Effective Palettes" bezelStyle="roundedRect" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" selectedItem="oUH-Sa-Ec1" id="Eij-Cp-URa">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -430,8 +430,8 @@
                                                 <action selector="reloadVRAMData:" target="-2" id="BmB-JE-W8g"/>
                                             </connections>
                                         </popUpButton>
-                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" id="YIJ-Qc-SIZ">
-                                            <rect key="frame" x="135" y="387" width="96" height="18"/>
+                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" misplaced="YES" id="YIJ-Qc-SIZ">
+                                            <rect key="frame" x="135" y="388" width="96" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundRect" title="Effective Tilemap" bezelStyle="roundedRect" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" selectedItem="XRF-Vj-3gs" id="3W1-Db-wDn">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -448,8 +448,8 @@
                                                 <action selector="reloadVRAMData:" target="-2" id="xwp-Ju-p00"/>
                                             </connections>
                                         </popUpButton>
-                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" id="k4c-Vg-MBu">
-                                            <rect key="frame" x="235" y="387" width="96" height="18"/>
+                                        <popUpButton focusRingType="none" verticalHuggingPriority="750" misplaced="YES" id="k4c-Vg-MBu">
+                                            <rect key="frame" x="235" y="388" width="96" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundRect" title="Effective Tileset" bezelStyle="roundedRect" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" selectedItem="CRe-dX-rzY" id="h53-sb-Odg">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
