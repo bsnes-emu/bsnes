@@ -294,6 +294,8 @@ static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, v
         return false;
     }
     
+    if (saved_size > *buffer_length) return false;
+    
     if (saved_size <= size) {
         if (buffer_read(dest, saved_size, buffer, buffer_length) != saved_size) {
             return false;
