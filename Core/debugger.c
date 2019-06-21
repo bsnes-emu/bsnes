@@ -1775,7 +1775,7 @@ static const debugger_command_t commands[] = {
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
                                   "jumping to the target.",
-                                  "<expression>[ if <condition expression>]", "(j)"},
+                                  "<expression>[ if <condition expression>]", "j"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]"},
     {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
                         "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
