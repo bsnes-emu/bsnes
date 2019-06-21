@@ -916,16 +916,16 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                    display_vblank(gb);
+                        display_vblank(gb);
                     }
                     gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                 }
                 else {
                     gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                    display_vblank(gb);
+                        display_vblank(gb);
+                    }
                 }
-            }
             }
             
             GB_STAT_update(gb);
