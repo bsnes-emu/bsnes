@@ -327,7 +327,7 @@ $(OBJ)/%.1bpp: %.png
 	rgbgfx -d 1 -h -o $@ $<
 
 $(OBJ)/BootROMs/SameBoyLogo.rle: $(OBJ)/BootROMs/SameBoyLogo.1bpp build/logo-compress
-	build/logo-compress < $< > $@
+	./build/logo-compress < $< > $@
 
 build/logo-compress: BootROMs/logo-compress.c
 	$(CC) $< -o $@
