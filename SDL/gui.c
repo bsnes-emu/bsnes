@@ -883,6 +883,7 @@ void run_gui(bool is_running)
                         }
 
                     }
+                    break;
                 case SDL_JOYBUTTONDOWN:
                     event.type = SDL_KEYDOWN;
                     joypad_button_t button = get_joypad_button(event.jbutton.button);
