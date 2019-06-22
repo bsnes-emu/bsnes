@@ -33,7 +33,6 @@ static double clock_mutliplier = 1.0;
 static char *filename = NULL;
 static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr;
-static bool skip_audio;
 
 SDL_AudioDeviceID device_id;
 
@@ -337,8 +336,6 @@ static void vblank(GB_gameboy_t *gb)
     }
     do_rewind = rewind_down;
     handle_events(gb);
-    
-    skip_audio = (SDL_GetQueuedAudioSize(device_id) / sizeof(GB_sample_t)) > have_aspec.freq / 20;
 }
 
 
@@ -360,7 +357,9 @@ static void debugger_interrupt(int ignore)
 
 static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
-    if (skip_audio) return;
+    if ((SDL_GetQueuedAudioSize(device_id) / sizeof(GB_sample_t)) > have_aspec.freq / 12) {
+        return;
+    }
     SDL_QueueAudio(device_id, sample, sizeof(*sample));
 }
 
