@@ -1,6 +1,10 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 void pair(size_t count, uint8_t byte)
 {
@@ -36,6 +40,11 @@ int main(int argc, char *argv[])
     uint8_t byte = getchar();
     int new;
     size_t position = 0;
+
+#ifdef _WIN32
+    _setmode(0,_O_BINARY);
+    _setmode(1,_O_BINARY);
+#endif
 
     while ((new = getchar()) != EOF) {
         if (byte == new) {

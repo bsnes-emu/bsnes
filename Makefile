@@ -13,8 +13,11 @@ ifneq ($(findstring MSYS,$(PLATFORM)),)
 PLATFORM := windows32
 endif
 
+LOGO_COMPRESS := build/logo-compress
+
 ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
+LOGO_COMPRESS := build/logo-compress.exe
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -326,10 +329,10 @@ $(OBJ)/%.1bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
 	rgbgfx -d 1 -h -o $@ $<
 
-$(OBJ)/BootROMs/SameBoyLogo.rle: $(OBJ)/BootROMs/SameBoyLogo.1bpp build/logo-compress
-	./build/logo-compress < $< > $@
+$(OBJ)/BootROMs/SameBoyLogo.rle: $(OBJ)/BootROMs/SameBoyLogo.1bpp $(LOGO_COMPRESS)
+	$(realpath $(LOGO_COMPRESS)) < $< > $@
 
-build/logo-compress: BootROMs/logo-compress.c
+$(LOGO_COMPRESS): BootROMs/logo-compress.c
 	$(CC) $< -o $@
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
