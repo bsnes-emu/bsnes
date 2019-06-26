@@ -1,5 +1,5 @@
-#include <SDL2/SDL.h>
 #include <OpenDialog/open_dialog.h>
+#include <SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>

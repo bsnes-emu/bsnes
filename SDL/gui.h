@@ -1,7 +1,7 @@
 #ifndef gui_h
 #define gui_h
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <Core/gb.h>
 #include <stdbool.h> 
 #include "shader.h"

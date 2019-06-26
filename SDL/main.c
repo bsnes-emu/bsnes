@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <OpenDialog/open_dialog.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <Core/gb.h>
 #include "utils.h"
 #include "gui.h"

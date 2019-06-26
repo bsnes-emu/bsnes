@@ -55,6 +55,11 @@ CC := clang
 endif
 endif
 
+# Find libraries with pkg-config if available.
+ifneq (, $(shell which pkg-config))
+PKG_CONFIG := pkg-config
+endif
+
 ifeq ($(PLATFORM),windows32)
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
@@ -82,7 +87,19 @@ endif
 
 
 CFLAGS += -Werror -Wall -Wno-unused-result -Wno-strict-aliasing -Wno-unknown-warning -Wno-unknown-warning-option -Wno-multichar -Wno-int-in-bool-context -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
-SDL_LDFLAGS := -lSDL2 -lGL
+ifeq (,$(PKG_CONFIG))
+SDL_CFLAGS := $(shell sdl2-config --cflags)
+SDL_LDFLAGS := $(shell sdl2-config --libs)
+else
+SDL_CFLAGS := $(shell $(PKG_CONFIG) --cflags sdl2)
+SDL_LDFLAGS := $(shell $(PKG_CONFIG) --libs sdl2)
+endif
+ifeq (,$(PKG_CONFIG))
+GL_LDFLAGS := -lGL
+else
+GL_CFLAGS := $(shell $(PKG_CONFIG) --cflags gl)
+GL_LDFLAGS := $(shell $(PKG_CONFIG) --libs gl || echo -lGL)
+endif
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows -Drandom=rand
 LDFLAGS += -lmsvcrt -lcomdlg32 -lSDL2main -Wl,/MANIFESTFILE:NUL
@@ -169,6 +186,10 @@ ifneq ($(filter $(MAKECMDGOALS),cocoa),)
 endif
 endif
 
+$(OBJ)/SDL/%.dep: SDL/%
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -MT $(OBJ)/$^.o -M $^ -c -o $@
+
 $(OBJ)/%.dep: %
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) -MT $(OBJ)/$^.o -M $^ -c -o $@
@@ -178,6 +199,10 @@ $(OBJ)/%.dep: %
 $(OBJ)/Core/%.c.o: Core/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) -DGB_INTERNAL -c $< -o $@
+
+$(OBJ)/SDL/%.c.o: SDL/%.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
 $(OBJ)/%.c.o: %.c
 	-@$(MKDIR) -p $(dir $@)
@@ -256,7 +281,7 @@ $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs
 # Unix versions build only one binary
 $(BIN)/SDL/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) $(GL_LDFLAGS)
 ifeq ($(CONF), release)
 	strip $@
 endif
