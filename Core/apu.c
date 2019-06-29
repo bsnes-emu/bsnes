@@ -506,6 +506,11 @@ void GB_apu_run(GB_gameboy_t *gb)
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
+    /* Restore the wave form */
+    for (unsigned reg = GB_IO_WAV_START; reg <= GB_IO_WAV_END; reg++) {
+        gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2]     = gb->io_registers[reg] >> 4;
+        gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2 + 1] = gb->io_registers[reg] & 0xF;
+    }
     gb->apu.lf_div = 1;
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
        the first DIV/APU event is skipped. */
@@ -556,14 +561,14 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
-    if (!gb->apu.global_enable && reg != GB_IO_NR52 && (GB_is_cgb(gb) ||
-                                                        (
-                                                        reg != GB_IO_NR11 &&
-                                                        reg != GB_IO_NR21 &&
-                                                        reg != GB_IO_NR31 &&
-                                                        reg != GB_IO_NR41
-                                                        )
-                                                        )) {
+    if (!gb->apu.global_enable && reg != GB_IO_NR52 && reg < GB_IO_WAV_START && (GB_is_cgb(gb) ||
+                                                                                (
+                                                                                reg != GB_IO_NR11 &&
+                                                                                reg != GB_IO_NR21 &&
+                                                                                reg != GB_IO_NR31 &&
+                                                                                reg != GB_IO_NR41
+                                                                                )
+                                                                                )) {
         return;
     }
 
