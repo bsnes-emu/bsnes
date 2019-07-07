@@ -23,8 +23,8 @@ auto PPU::Screen::run() -> void {
   auto belowColor = below(hires);
   auto aboveColor = above();
 
-  *lineA++ = *lineB++ = ppu.io.displayBrightness << 15 | (hires ? belowColor : aboveColor);
-  *lineA++ = *lineB++ = ppu.io.displayBrightness << 15 | (aboveColor);
+  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][(hires ? belowColor : aboveColor)];
+  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][(aboveColor)];
 }
 
 auto PPU::Screen::below(bool hires) -> uint16 {

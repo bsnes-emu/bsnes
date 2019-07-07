@@ -40,7 +40,8 @@ private:
     uint16 mask = 0x7fff;
   } vram;
 
-  uint32* output = nullptr;
+  uint16* output = nullptr;
+  uint16 lightTable[16][32768];
 
   struct {
     bool interlace;

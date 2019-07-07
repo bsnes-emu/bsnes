@@ -44,7 +44,7 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
-    emulator->setFrameSkip(9);
+    emulator->setFrameSkip(emulator->configuration("Hacks/PPU/Fast") == "true" && settings.video.fastForwardFrameSkip ? 9 : 0);
     video.setBlocking(false);
     audio.setBlocking(false);
     audio.setDynamic(false);

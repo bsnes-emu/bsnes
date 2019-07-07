@@ -59,22 +59,6 @@ auto Sourcery::parse(Markup::Node& root) -> void {
       });
       if(buffer.size() & 31) source.print("\n");
       source.print("};\n");
-    } else if(node.name() == "string") {
-      string filename{pathname, node["file"].text()};
-      if(!file::exists(filename)) {
-        print("warning: string file ", node["file"].text(), " not found\n");
-        continue;
-      }
-      auto buffer = file::read(filename);
-      header.print("extern const char ", node["name"].text(), "[", buffer.size() + 1, "];\n");
-      source.print("const char ", node["name"].text(), "[", buffer.size() + 1, "] = {\n");
-      buffer.foreach([&](uint offset, uint8_t data) {
-        if((offset & 31) ==  0) source.print("  ");
-        source.print(data, ",");
-        if((offset & 31) == 31) source.print("\n");
-      });
-      if(buffer.size() & 31) source.print("\n");
-      source.print("};\n");
     }
   }
 }

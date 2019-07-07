@@ -10,10 +10,6 @@ auto mTextEdit::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
-auto mTextEdit::cursor() const -> Cursor {
-  return state.cursor;
-}
-
 auto mTextEdit::doChange() const -> void {
   if(state.onChange) return state.onChange();
 }
@@ -46,12 +42,6 @@ auto mTextEdit::setBackgroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mTextEdit::setCursor(Cursor cursor) -> type& {
-  state.cursor = cursor;
-  signal(setCursor, cursor);
-  return *this;
-}
-
 auto mTextEdit::setEditable(bool editable) -> type& {
   state.editable = editable;
   signal(setEditable, editable);
@@ -70,6 +60,12 @@ auto mTextEdit::setText(const string& text) -> type& {
   return *this;
 }
 
+auto mTextEdit::setTextCursor(TextCursor textCursor) -> type& {
+  state.textCursor = textCursor;
+  signal(setTextCursor, textCursor);
+  return *this;
+}
+
 auto mTextEdit::setWordWrap(bool wordWrap) -> type& {
   state.wordWrap = wordWrap;
   signal(setWordWrap, wordWrap);
@@ -78,6 +74,10 @@ auto mTextEdit::setWordWrap(bool wordWrap) -> type& {
 
 auto mTextEdit::text() const -> string {
   return signal(text);
+}
+
+auto mTextEdit::textCursor() const -> TextCursor {
+  return signal(textCursor);
 }
 
 auto mTextEdit::wordWrap() const -> bool {

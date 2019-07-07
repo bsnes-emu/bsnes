@@ -20,8 +20,6 @@ auto Video::reset(Interface* interface) -> void {
   width = 0;
   height = 0;
   effects.colorBleed = false;
-  effects.interframeBlending = false;
-  effects.rotateLeft = false;
 }
 
 auto Video::setPalette() -> void {
@@ -85,14 +83,6 @@ auto Video::setEffect(Effect effect, const any& value) -> void {
   if(effect == Effect::ColorBleed && value.is<bool>()) {
     effects.colorBleed = value.get<bool>();
   }
-
-  if(effect == Effect::InterframeBlending && value.is<bool>()) {
-    effects.interframeBlending = value.get<bool>();
-  }
-
-  if(effect == Effect::RotateLeft && value.is<bool>()) {
-    effects.rotateLeft = value.get<bool>();
-  }
 }
 
 auto Video::createSprite(uint width, uint height) -> shared_pointer<Sprite> {
@@ -128,18 +118,9 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
     auto source = input + y * pitch;
     auto target = output + y * width;
 
-    if(!effects.interframeBlending) {
-      for(uint x : range(width)) {
-        auto color = palette[*source++];
-        *target++ = color;
-      }
-    } else {
-      uint32 mask = depth == 30 ? 0x40100401 : 0x01010101;
-      for(uint x : range(width)) {
-        auto a = *target;
-        auto b = palette[*source++];
-        *target++ = (a + b - ((a ^ b) & mask)) >> 1;
-      }
+    for(uint x : range(width)) {
+      auto color = palette[*source++];
+      *target++ = color;
     }
   }
 
@@ -153,18 +134,6 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
         target[x] = (a + b - ((a ^ b) & mask)) >> 1;
       }
     }
-  }
-
-  if(effects.rotateLeft) {
-    for(uint y : range(height)) {
-      auto source = buffer + y * width;
-      for(uint x : range(width)) {
-        auto target = rotate + (width - 1 - x) * height + y;
-        *target = *source++;
-      }
-    }
-    output = rotate;
-    swap(width, height);
   }
 
   for(auto& sprite : sprites) {
@@ -185,7 +154,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
     }
   }
 
-  platform->videoFrame(output, width * sizeof(uint32), width, height);
+  platform->videoFrame((const uint16*)output, width * sizeof(uint32), width, height);
 }
 
 }

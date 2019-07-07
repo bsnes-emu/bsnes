@@ -34,17 +34,13 @@ template<typename... P> auto string::assign(P&&... p) -> string& {
 }
 
 template<typename T, typename... P> auto string::prepend(const T& value, P&&... p) -> string& {
-  prepend(forward<P>(p)...);
+  if constexpr(sizeof...(p)) prepend(forward<P>(p)...);
   return _prepend(make_string(value));
 }
 
 template<typename... P> auto string::prepend(const nall::string_format& value, P&&... p) -> string& {
-  prepend(forward<P>(p)...);
+  if constexpr(sizeof...(p)) prepend(forward<P>(p)...);
   return format(value);
-}
-
-auto string::prepend() -> string& {
-  return *this;
 }
 
 template<typename T> auto string::_prepend(const stringify<T>& source) -> string& {
@@ -56,15 +52,13 @@ template<typename T> auto string::_prepend(const stringify<T>& source) -> string
 
 template<typename T, typename... P> auto string::append(const T& value, P&&... p) -> string& {
   _append(make_string(value));
-  return append(forward<P>(p)...);
+  if constexpr(sizeof...(p)) append(forward<P>(p)...);
+  return *this;
 }
 
 template<typename... P> auto string::append(const nall::string_format& value, P&&... p) -> string& {
   format(value);
-  return append(forward<P>(p)...);
-}
-
-auto string::append() -> string& {
+  if constexpr(sizeof...(p)) append(forward<P>(p)...);
   return *this;
 }
 

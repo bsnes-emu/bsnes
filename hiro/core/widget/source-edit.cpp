@@ -6,10 +6,6 @@ auto mSourceEdit::allocate() -> pObject* {
 
 //
 
-auto mSourceEdit::cursor() const -> Cursor {
-  return signal(cursor);
-}
-
 auto mSourceEdit::doChange() const -> void {
   if(state.onChange) return state.onChange();
 }
@@ -44,11 +40,6 @@ auto mSourceEdit::scheme() const -> string {
   return state.scheme;
 }
 
-auto mSourceEdit::setCursor(Cursor cursor) -> type& {
-  signal(setCursor, cursor);
-  return *this;
-}
-
 auto mSourceEdit::setEditable(bool editable) -> type& {
   state.editable = editable;
   signal(setEditable, editable);
@@ -79,6 +70,12 @@ auto mSourceEdit::setText(const string& text) -> type& {
   return *this;
 }
 
+auto mSourceEdit::setTextCursor(TextCursor textCursor) -> type& {
+  state.textCursor = textCursor;
+  signal(setTextCursor, textCursor);
+  return *this;
+}
+
 auto mSourceEdit::setWordWrap(bool wordWrap) -> type& {
   state.wordWrap = wordWrap;
   signal(setWordWrap, wordWrap);
@@ -87,6 +84,10 @@ auto mSourceEdit::setWordWrap(bool wordWrap) -> type& {
 
 auto mSourceEdit::text() const -> string {
   return signal(text);
+}
+
+auto mSourceEdit::textCursor() const -> TextCursor {
+  return signal(textCursor);
 }
 
 auto mSourceEdit::wordWrap() const -> bool {

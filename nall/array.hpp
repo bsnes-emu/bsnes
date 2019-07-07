@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nall/array-span.hpp>
 #include <nall/array-view.hpp>
 #include <nall/range.hpp>
 #include <nall/view.hpp>
@@ -17,6 +18,10 @@ template<typename T, uint Size> struct array<T[Size]> {
     for(auto& value : source) {
       operator[](index++) = value;
     }
+  }
+
+  operator array_span<T>() {
+    return {data(), size()};
   }
 
   operator array_view<T>() const {

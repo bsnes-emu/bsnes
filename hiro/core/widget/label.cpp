@@ -14,26 +14,8 @@ auto mLabel::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
-auto mLabel::doMousePress(Mouse::Button button) const -> void {
-  if(state.onMousePress) return state.onMousePress(button);
-}
-
-auto mLabel::doMouseRelease(Mouse::Button button) const -> void {
-  if(state.onMouseRelease) return state.onMouseRelease(button);
-}
-
 auto mLabel::foregroundColor() const -> Color {
   return state.foregroundColor;
-}
-
-auto mLabel::onMousePress(const function<void (Mouse::Button)>& callback) -> type& {
-  state.onMousePress = callback;
-  return *this;
-}
-
-auto mLabel::onMouseRelease(const function<void (Mouse::Button)>& callback) -> type& {
-  state.onMouseRelease = callback;
-  return *this;
 }
 
 auto mLabel::setAlignment(Alignment alignment) -> type& {

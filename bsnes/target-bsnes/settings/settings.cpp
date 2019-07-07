@@ -14,7 +14,8 @@ HotkeySettings hotkeySettings;
 PathSettings pathSettings;
 EmulatorSettings emulatorSettings;
 DriverSettings driverSettings;
-SettingsWindow settingsWindow;
+namespace Instances { Instance<SettingsWindow> settingsWindow; }
+SettingsWindow& settingsWindow = Instances::settingsWindow();
 
 auto Settings::load() -> void {
   Markup::Node::operator=(BML::unserialize(string::read(location), " "));
@@ -43,21 +44,23 @@ auto Settings::process(bool load) -> void {
     } \
 
   bind(text,    "Video/Driver",    video.driver);
-  bind(boolean, "Video/Exclusive", video.exclusive);
   bind(boolean, "Video/Blocking",  video.blocking);
   bind(boolean, "Video/Flush",     video.flush);
   bind(text,    "Video/Format",    video.format);
   bind(text,    "Video/Shader",    video.shader);
 
-  bind(natural, "Video/Luminance",  video.luminance);
-  bind(natural, "Video/Saturation", video.saturation);
-  bind(natural, "Video/Gamma",      video.gamma);
+  bind(natural, "Video/Luminance",            video.luminance);
+  bind(natural, "Video/Saturation",           video.saturation);
+  bind(natural, "Video/Gamma",                video.gamma);
+  bind(boolean, "Video/FastForwardFrameSkip", video.fastForwardFrameSkip);
+  bind(boolean, "Video/Snow",                 video.snow);
 
   bind(text,    "Video/Output",           video.output);
   bind(natural, "Video/Multiplier",       video.multiplier);
   bind(boolean, "Video/AspectCorrection", video.aspectCorrection);
   bind(boolean, "Video/Overscan",         video.overscan);
   bind(boolean, "Video/Blur",             video.blur);
+  bind(text,    "Video/Filter",           video.filter);
 
   bind(text,    "Audio/Driver",    audio.driver);
   bind(boolean, "Audio/Exclusive", audio.exclusive);

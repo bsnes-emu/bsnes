@@ -40,6 +40,12 @@ template<uint Precision> struct Integer {
   template<typename T> inline auto& operator ^=(const T& value) { data = mask(data  ^ value); return *this; }
   template<typename T> inline auto& operator |=(const T& value) { data = mask(data  | value); return *this; }
 
+  inline auto operator()(int index) -> BitRange<Precision> { return {(utype&)data, index, index}; }
+  inline auto operator()(int lo, int hi) -> BitRange<Precision> { return {(utype&)data, lo, hi}; }
+
+  inline auto operator()(int index) const -> const BitRange<Precision> { return {(utype&)data, index, index}; }
+  inline auto operator()(int lo, int hi) const -> const BitRange<Precision> { return {(utype&)data, lo, hi}; }
+
   inline auto bits(int lo, int hi) -> BitRange<Precision> { return {(utype&)data, lo, hi}; }
   inline auto bit(int index) -> BitRange<Precision> { return {(utype&)data, index, index}; }
   inline auto byte(int index) -> BitRange<Precision> { return {(utype&)data, index * 8 + 0, index * 8 + 7}; }

@@ -12,11 +12,12 @@
 #define Hiro_Color
 #define Hiro_Gradient
 #define Hiro_Alignment
-#define Hiro_Cursor
+#define Hiro_TextCursor
 #define Hiro_Position
 #define Hiro_Size
 #define Hiro_Geometry
 #define Hiro_Font
+#define Hiro_MouseCursor
 
 #define Hiro_Application
 #define Hiro_Desktop

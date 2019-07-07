@@ -6,7 +6,8 @@ struct pViewport : pWidget {
   Declare(Viewport, Widget)
 
   auto handle() const -> uintptr_t;
-  auto setDroppable(bool droppable) -> void;
+  auto setDroppable(bool droppable) -> void override;
+  auto setFocusable(bool focusable) -> void override;
 
   auto doMouseLeave() -> void override;
   auto doMouseMove(int x, int y) -> void override;

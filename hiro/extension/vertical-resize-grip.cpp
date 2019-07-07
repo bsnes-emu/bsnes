@@ -12,6 +12,7 @@ mVerticalResizeGrip::mVerticalResizeGrip() {
     icon.write(data, 0x00000000); data += icon.pitch();
   }
   mCanvas::setIcon(icon);
+  mCanvas::setMouseCursor(MouseCursor::VerticalResize);
   mCanvas::onMousePress([&](auto button) {
     if(button == Mouse::Button::Left && !state.timer.enabled()) {
       doActivate();

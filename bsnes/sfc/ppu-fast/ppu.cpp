@@ -26,7 +26,22 @@ auto PPUfast::hdSupersample() const -> bool { return configuration.hacks.ppu.mod
 auto PPUfast::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
 
 PPUfast::PPUfast() {
-  output = new uint32[2304 * 2304] + 72 * 2304;  //overscan offset
+  output = new uint16[2304 * 2304] + 72 * 2304;  //overscan offset
+
+  for(uint l : range(16)) {
+    for(uint r : range(32)) {
+      for(uint g : range(32)) {
+        for(uint b : range(32)) {
+          double luma = (double)l / 15.0;
+          uint ar = (luma * r + 0.5);
+          uint ag = (luma * g + 0.5);
+          uint ab = (luma * b + 0.5);
+          lightTable[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
+        }
+      }
+    }
+  }
+
   tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
   tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
   tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
@@ -116,8 +131,7 @@ auto PPUfast::refresh() -> void {
       width  = 256 * hdScale();
       height = 240 * hdScale();
     }
-    Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation && hires());
-    Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
+    platform->videoFrame(output, pitch * sizeof(uint16), width, height);
   }
   if(system.frameCounter++ >= system.frameSkip) system.frameCounter = 0;
 }
@@ -129,7 +143,7 @@ auto PPUfast::load() -> bool {
 auto PPUfast::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint32>(output, 1024 * 960);
+  memory::fill<uint16>(output, 1024 * 960);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPUfast::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPUfast::writeIO, this};

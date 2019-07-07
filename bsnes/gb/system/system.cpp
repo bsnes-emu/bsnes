@@ -85,8 +85,6 @@ auto System::power() -> void {
   if(model() != Model::SuperGameBoy) {
     Emulator::video.reset(interface);
     Emulator::video.setPalette();
-    Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
-
     Emulator::audio.reset(interface);
   }
 

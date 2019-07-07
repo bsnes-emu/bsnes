@@ -53,7 +53,7 @@ auto pTextEdit::construct() -> void {
     setEditable(state().editable);
     setWordWrap(state().wordWrap);
     setText(state().text);
-    setCursor(state().cursor);
+    setTextCursor(state().textCursor);
   }
 }
 
@@ -65,15 +65,6 @@ auto pTextEdit::destruct() -> void {
 }
 
 auto pTextEdit::setBackgroundColor(Color color) -> void {
-}
-
-auto pTextEdit::setCursor(Cursor cursor) -> void {
-  @autoreleasepool {
-    //todo: handle text selection (cursor.length())
-    string text = [[[cocoaView content] string] UTF8String];
-    auto offset = min(cursor.offset(), text.length());
-    [[cocoaView content] setSelectedRange:NSMakeRange(offset, 0)];
-  }
 }
 
 auto pTextEdit::setEditable(bool editable) -> void {
@@ -102,6 +93,15 @@ auto pTextEdit::setText(const string& text) -> void {
   }
 }
 
+auto pTextEdit::setTextCursor(TextCursor cursor) -> void {
+  @autoreleasepool {
+    //todo: handle text selection (cursor.length())
+    string text = [[[cocoaView content] string] UTF8String];
+    auto offset = min(cursor.offset(), text.length());
+    [[cocoaView content] setSelectedRange:NSMakeRange(offset, 0)];
+  }
+}
+
 auto pTextEdit::setWordWrap(bool wordWrap) -> void {
   @autoreleasepool {
     [cocoaView configure];
@@ -112,6 +112,11 @@ auto pTextEdit::text() const -> string {
   @autoreleasepool {
     return [[[cocoaView content] string] UTF8String];
   }
+}
+
+auto pTextEdit::textCursor() const -> TextCursor {
+  //TODO
+  return state().textCursor;
 }
 
 }

@@ -60,6 +60,14 @@ struct VideoCGL : VideoDriver, OpenGL {
     }
   }
 
+  auto size(uint& width, uint& height) -> void override {
+    @autoreleasepool {
+      auto area = [view convertRectToBacking:[view bounds]];
+      width = area.size.width;
+      height = area.size.height;
+    }
+  }
+
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
@@ -68,12 +76,16 @@ struct VideoCGL : VideoDriver, OpenGL {
   auto release() -> void override {
   }
 
-  auto output() -> void override {
+  auto output(uint width, uint height) -> void override {
+    uint windowWidth, windowHeight;
+    size(windowWidth, windowHeight);
+
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
-        auto area = [view convertRectToBacking:[view bounds]];
-        OpenGL::outputWidth = area.size.width;
-        OpenGL::outputHeight = area.size.height;
+        OpenGL::absoluteWidth = width;
+        OpenGL::absoluteHeight = height;
+        OpenGL::outputWidth = windowWidth;
+        OpenGL::outputHeight = windowHeight;
         OpenGL::output();
         [[view openGLContext] flushBuffer];
         if(self.flush) glFinish();

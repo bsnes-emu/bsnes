@@ -36,6 +36,7 @@ auto Program::load() -> void {
     verified() ? "Verified game loaded" : "Game loaded",
     appliedPatch() ? " and patch applied" : ""
   });
+  presentation.setFocused();
   presentation.setTitle(emulator->titles().merge(" + "));
   presentation.resetSystem.setEnabled(true);
   presentation.unloadGame.setEnabled(true);
@@ -43,9 +44,8 @@ auto Program::load() -> void {
   presentation.updateStateMenus();
   presentation.speedNormal.setChecked();
   presentation.pauseEmulation.setChecked(false);
+  presentation.updateProgramIcon();
   presentation.updateStatusIcon();
-  presentation.viewportLayout.remove(presentation.iconLayout);
-  presentation.resizeViewport();
   cheatEditor.loadCheats();
   stateManager.loadStates();
   manifestViewer.loadManifest();
@@ -64,17 +64,19 @@ auto Program::load() -> void {
 }
 
 auto Program::loadFile(string location) -> vector<uint8_t> {
-  if(Location::suffix(location) == ".zip") {
+  if(Location::suffix(location).downcase() == ".zip") {
     Decode::ZIP archive;
     if(archive.open(location)) {
       for(auto& file : archive.file) {
-        auto type = Location::suffix(file.name);
+        auto type = Location::suffix(file.name).downcase();
         if(type == ".sfc" || type == ".smc" || type == ".gb" || type == ".gbc" || type == ".bs" || type == ".st") {
           return archive.extract(file);
         }
       }
     }
     return {};
+  } else if(Location::suffix(location).downcase() == ".7z") {
+    return LZMA::extract(location);
   } else {
     return file::read(location);
   }
@@ -109,7 +111,7 @@ auto Program::loadSuperFamicom(string location) -> bool {
   if(!superFamicom.patched) superFamicom.patched = applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SuperFamicom(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
-  if(auto document = BML::unserialize(string::read(locate("database/Super Famicom.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/Super Famicom.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       superFamicom.verified = true;
@@ -163,13 +165,13 @@ auto Program::loadGameBoy(string location) -> bool {
   gameBoy.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::GameBoy(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
-  if(auto document = BML::unserialize(string::read(locate("database/Game Boy.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/Game Boy.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       gameBoy.verified = true;
     }
   }
-  if(auto document = BML::unserialize(string::read(locate("database/Game Boy Color.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/Game Boy Color.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       gameBoy.verified = true;
@@ -200,7 +202,7 @@ auto Program::loadBSMemory(string location) -> bool {
   bsMemory.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::BSMemory(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
-  if(auto document = BML::unserialize(string::read(locate("database/BS Memory.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/BS Memory.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       bsMemory.verified = true;
@@ -230,7 +232,7 @@ auto Program::loadSufamiTurboA(string location) -> bool {
   sufamiTurboA.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SufamiTurbo(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
-  if(auto document = BML::unserialize(string::read(locate("database/Sufami Turbo.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       sufamiTurboA.verified = true;
@@ -260,7 +262,7 @@ auto Program::loadSufamiTurboB(string location) -> bool {
   sufamiTurboB.patched = applyPatchIPS(rom, location) || applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SufamiTurbo(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
-  if(auto document = BML::unserialize(string::read(locate("database/Sufami Turbo.bml")))) {
+  if(auto document = BML::unserialize(string::read(locate("Database/Sufami Turbo.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
       sufamiTurboB.verified = true;
@@ -307,9 +309,8 @@ auto Program::unload() -> void {
   presentation.resetSystem.setEnabled(false);
   presentation.unloadGame.setEnabled(false);
   presentation.toolsMenu.setVisible(false);
+  presentation.updateProgramIcon();
   presentation.updateStatusIcon();
-  presentation.clearViewport();
-  presentation.viewportLayout.append(presentation.iconLayout, Size{0, ~0});
 }
 
 //a game is considered verified if the game plus its slot(s) are found in the games database

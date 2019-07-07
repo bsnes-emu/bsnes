@@ -9,11 +9,6 @@ auto locate(string name) -> string {
   string location = {Path::program(), name};
   if(inode::exists(location)) return location;
 
-  if(name.beginsWith("database/")) {
-    location = {Path::userData(), "icarus/", name};
-    if(inode::exists(location)) return location;
-  }
-
   directory::create({Path::userData(), "bsnes/"});
   return {Path::userData(), "bsnes/", name};
 }
@@ -26,7 +21,7 @@ auto nall::main(Arguments arguments) -> void {
     if(argument == "--fullscreen") {
       presentation.startFullScreen = true;
     } else if(argument.beginsWith("--locale=")) {
-      Application::locale().scan(locate("locales/"));
+      Application::locale().scan(locate("Locale/"));
       Application::locale().select(argument.trimLeft("--locale=", 1L));
     } else if(argument.beginsWith("--settings=")) {
       settings.location = argument.trimLeft("--settings=", 1L);
@@ -44,7 +39,19 @@ auto nall::main(Arguments arguments) -> void {
   Application::setName("bsnes");
   Application::setScreenSaver(settings.general.screenSaver);
   Application::setToolTips(settings.general.toolTips);
+  Instances::presentation.construct();
+  Instances::settingsWindow.construct();
+  Instances::cheatDatabase.construct();
+  Instances::cheatWindow.construct();
+  Instances::stateWindow.construct();
+  Instances::toolsWindow.construct();
   emulator = new SuperFamicom::Interface;
   program.create();
   Application::run();
+  Instances::presentation.destruct();
+  Instances::settingsWindow.destruct();
+  Instances::cheatDatabase.destruct();
+  Instances::cheatWindow.destruct();
+  Instances::stateWindow.destruct();
+  Instances::toolsWindow.destruct();
 }

@@ -1,3 +1,0 @@
-system name:Game Boy Color
-  cpu
-    rom name=boot.rom size=2048

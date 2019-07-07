@@ -173,6 +173,21 @@ auto mTableView::resizeColumns() -> type& {
   return *this;
 }
 
+auto mTableView::selectAll() -> type& {
+  if(!state.batchable) return *this;
+  for(auto& item : state.items) {
+    item->setSelected(true);
+  }
+  return *this;
+}
+
+auto mTableView::selectNone() -> type& {
+  for(auto& item : state.items) {
+    item->setSelected(false);
+  }
+  return *this;
+}
+
 auto mTableView::selected() const -> TableViewItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;

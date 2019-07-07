@@ -2,13 +2,17 @@
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
 #include "manifest-viewer.cpp"
-CheatDatabase cheatDatabase;
-CheatWindow cheatWindow;
+namespace Instances { Instance<CheatDatabase> cheatDatabase; }
+CheatDatabase& cheatDatabase = Instances::cheatDatabase();
+namespace Instances { Instance<CheatWindow> cheatWindow; }
+CheatWindow& cheatWindow = Instances::cheatWindow();
 CheatEditor cheatEditor;
-StateWindow stateWindow;
+namespace Instances { Instance<StateWindow> stateWindow; }
+StateWindow& stateWindow = Instances::stateWindow();
 StateManager stateManager;
 ManifestViewer manifestViewer;
-ToolsWindow toolsWindow;
+namespace Instances { Instance<ToolsWindow> toolsWindow; }
+ToolsWindow& toolsWindow = Instances::toolsWindow();
 
 auto ToolsWindow::create() -> void {
   layout.setPadding(5_sx);

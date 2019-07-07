@@ -3,7 +3,6 @@
 namespace GameBoy {
 
 SuperGameBoyInterface* superGameBoy = nullptr;
-Settings settings;
 #include "game-boy.cpp"
 #include "game-boy-color.cpp"
 
@@ -110,32 +109,14 @@ auto Interface::cheats(const vector<string>& list) -> void {
 }
 
 auto Interface::cap(const string& name) -> bool {
-  if(name == "Blur Emulation") return true;
-  if(name == "Color Emulation") return true;
   return false;
 }
 
 auto Interface::get(const string& name) -> any {
-  if(name == "Blur Emulation") return settings.blurEmulation;
-  if(name == "Color Emulation") return settings.colorEmulation;
   return {};
 }
 
 auto Interface::set(const string& name, const any& value) -> bool {
-  if(name == "Blur Emulation" && value.is<bool>()) {
-    settings.blurEmulation = value.get<bool>();
-    if(Model::SuperGameBoy()) return true;
-    Emulator::video.setEffect(Emulator::Video::Effect::InterframeBlending, settings.blurEmulation);
-    return true;
-  }
-
-  if(name == "Color Emulation" && value.is<bool>()) {
-    settings.colorEmulation = value.get<bool>();
-    if(Model::SuperGameBoy()) return true;
-    Emulator::video.setPalette();
-    return true;
-  }
-
   return false;
 }
 

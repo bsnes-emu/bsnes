@@ -11,6 +11,7 @@
 #include "utility.cpp"
 #include "patch.cpp"
 #include "hacks.cpp"
+#include "viewport.cpp"
 Program program;
 
 auto Program::create() -> void {
@@ -75,7 +76,10 @@ auto Program::main() -> void {
 
   if(inactive()) {
     audio.clear();
-    if(!Application::modal()) usleep(20 * 1000);
+    if(!Application::modal()) {
+      usleep(20 * 1000);
+      refreshViewport();
+    }
     return;
   }
 
@@ -90,6 +94,10 @@ auto Program::main() -> void {
 }
 
 auto Program::quit() -> void {
+  //make closing the program feel more responsive
+  presentation.setVisible(false);
+  Application::processEvents();
+
   unload();
   settings.save();
   video.reset();

@@ -42,11 +42,19 @@ auto pWidget::minimumSize() -> Size {
   return {0, 0};
 }
 
+auto pWidget::setDroppable(bool droppable) -> void {
+  //TODO
+}
+
 auto pWidget::setEnabled(bool enabled) -> void {
   if(!self().parentWindow(true)) enabled = false;
   if(!self().enabled(true)) enabled = false;
   if(abstract) enabled = false;
   EnableWindow(hwnd, enabled);
+}
+
+auto pWidget::setFocusable(bool focusable) -> void {
+  //TODO
 }
 
 auto pWidget::setFocused() -> void {
@@ -67,6 +75,10 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
   }
   SetWindowPos(hwnd, nullptr, geometry.x(), geometry.y(), geometry.width(), geometry.height(), SWP_NOZORDER);
   pSizable::setGeometry(geometry);
+}
+
+auto pWidget::setMouseCursor(const MouseCursor& mouseCursor) -> void {
+  //TODO
 }
 
 auto pWidget::setToolTip(const string& toolTipText) -> void {
@@ -97,6 +109,39 @@ auto pWidget::doMouseMove(int x, int y) -> void {
 }
 
 auto pWidget::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> maybe<LRESULT> {
+  if(msg == WM_SETCURSOR) {
+    if(auto cursor = self().mouseCursor()) {
+      maybe<LPWSTR> cursorID;
+      if(cursor.name() == MouseCursor::Hand) cursorID = IDC_HAND;
+      if(cursor.name() == MouseCursor::HorizontalResize) cursorID = IDC_SIZEWE;
+      if(cursor.name() == MouseCursor::VerticalResize) cursorID = IDC_SIZENS;
+      if(cursorID) return SetCursor(LoadCursor(0, cursorID())), true;
+    }
+  }
+
+  if(msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN) {
+    //if using a (Horizontal,Vertical)ResizeGrip, it's possible to move the cursor off the widget momentarily.
+    //ordinarily, this will cause the cursor to revert to the newly hovered Widget.
+    //by capturing the mouse until the mouse button is released, this prevents said cursor flickering.
+    //if(msg == WM_LBUTTONDOWN && self().mouseCursor()) SetCapture(hwnd);
+
+    switch(msg) {
+    case WM_LBUTTONDOWN: self().doMousePress(Mouse::Button::Left); break;
+    case WM_MBUTTONDOWN: self().doMousePress(Mouse::Button::Middle); break;
+    case WM_RBUTTONDOWN: self().doMousePress(Mouse::Button::Right); break;
+    }
+  }
+
+  if(msg == WM_LBUTTONUP || msg == WM_MBUTTONUP || msg == WM_RBUTTONUP) {
+    //if(msg == WM_LBUTTONUP && self().mouseCursor() && GetCapture() == hwnd) ReleaseCapture();
+
+    switch(msg) {
+    case WM_LBUTTONUP: self().doMouseRelease(Mouse::Button::Left); break;
+    case WM_MBUTTONUP: self().doMouseRelease(Mouse::Button::Middle); break;
+    case WM_RBUTTONUP: self().doMouseRelease(Mouse::Button::Right); break;
+    }
+  }
+
   if(msg == WM_MOUSEMOVE) {
     TRACKMOUSEEVENT event{sizeof(TRACKMOUSEEVENT)};
     event.hwndTrack = hwnd;
@@ -147,8 +192,11 @@ auto pWidget::_parentWindow() -> maybe<pWindow&> {
 }
 
 auto pWidget::_setState() -> void {
+  setDroppable(self().droppable());
   setEnabled(self().enabled());
+  setFocusable(self().focusable());
   setFont(self().font());
+  setMouseCursor(self().mouseCursor());
   setToolTip(self().toolTip());
   setVisible(self().visible());
 }

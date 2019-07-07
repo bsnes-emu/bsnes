@@ -46,6 +46,16 @@ static auto Label_expose(GtkWidget* widget, GdkEvent* event, pLabel* p) -> int {
   return false;
 }
 
+static auto Label_mouseEnter(GtkWidget* widget, GdkEventButton* event, pCanvas* p) -> signed {
+  Widget_mouseEnter(widget, event, p);
+  return true;
+}
+
+static auto Label_mouseLeave(GtkWidget* widget, GdkEventButton* event, pCanvas* p) -> signed {
+  Widget_mouseLeave(widget, event, p);
+  return true;
+}
+
 static auto Label_mousePress(GtkWidget* widget, GdkEventButton* event, pLabel* p) -> int {
   switch(event->button) {
   case 1: p->self().doMousePress(Mouse::Button::Left); break;
@@ -82,6 +92,8 @@ auto pLabel::construct() -> void {
   #elif HIRO_GTK==3
   g_signal_connect(G_OBJECT(subWidget), "draw", G_CALLBACK(Label_draw), (gpointer)this);
   #endif
+  g_signal_connect(G_OBJECT(gtkWidget), "enter-notify-event", G_CALLBACK(Label_mouseEnter), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Label_mouseLeave), (gpointer)this);
 
   pWidget::construct();
 }

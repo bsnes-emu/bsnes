@@ -188,6 +188,10 @@ struct shared_pointer {
     return manager && manager->strong == 1;
   }
 
+  auto references() const -> uint {
+    return manager ? manager->strong : 0;
+  }
+
   auto reset() -> void {
     if(manager && manager->strong) {
       //pointer may contain weak references; if strong==0 it may destroy manager

@@ -5,10 +5,11 @@ namespace hiro {
 struct pCanvas : pWidget {
   Declare(Canvas, Widget)
 
+  auto handle() const -> uintptr;
   auto minimumSize() const -> Size;
   auto setAlignment(Alignment) -> void;
   auto setColor(Color color) -> void;
-  auto setDroppable(bool droppable) -> void;
+  auto setFocusable(bool focusable) -> void override;
   auto setGeometry(Geometry geometry) -> void override;
   auto setGradient(Gradient gradient) -> void;
   auto setIcon(const image& icon) -> void;

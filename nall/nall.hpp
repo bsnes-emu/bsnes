@@ -32,6 +32,7 @@
 #include <nall/file-buffer.hpp>
 #include <nall/file-map.hpp>
 #include <nall/function.hpp>
+#include <nall/galois-field.hpp>
 #include <nall/hashset.hpp>
 #include <nall/hid.hpp>
 #include <nall/image.hpp>
@@ -45,6 +46,7 @@
 #include <nall/location.hpp>
 #include <nall/map.hpp>
 #include <nall/matrix.hpp>
+#include <nall/matrix-multiply.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
 #include <nall/merge-sort.hpp>
@@ -54,6 +56,7 @@
 #include <nall/queue.hpp>
 #include <nall/random.hpp>
 #include <nall/range.hpp>
+#include <nall/reed-solomon.hpp>
 #include <nall/run.hpp>
 #include <nall/serializer.hpp>
 #include <nall/set.hpp>

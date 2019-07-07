@@ -34,6 +34,10 @@ auto pCanvas::setDroppable(bool droppable) -> void {
   qtCanvas->setAcceptDrops(droppable);
 }
 
+auto pCanvas::setFocusable(bool focusable) -> void {
+  //TODO
+}
+
 auto pCanvas::setGeometry(Geometry geometry) -> void {
   update();
   pWidget::setGeometry(geometry);

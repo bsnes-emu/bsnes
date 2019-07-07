@@ -2,7 +2,6 @@
 struct mSourceEdit : mWidget {
   Declare(SourceEdit)
 
-  auto cursor() const -> Cursor;
   auto doChange() const -> void;
   auto doMove() const -> void;
   auto editable() const -> bool;
@@ -11,14 +10,15 @@ struct mSourceEdit : mWidget {
   auto onChange(const function<void ()>& callback = {}) -> type&;
   auto onMove(const function<void ()>& callback = {}) -> type&;
   auto scheme() const -> string;
-  auto setCursor(Cursor cursor = {}) -> type&;
   auto setEditable(bool editable) -> type&;
   auto setLanguage(const string& language = "") -> type&;
   auto setNumbered(bool numbered = true) -> type&;
   auto setScheme(const string& scheme = "") -> type&;
   auto setText(const string& text = "") -> type&;
+  auto setTextCursor(TextCursor textCursor = {}) -> type&;
   auto setWordWrap(bool wordWrap = true) -> type&;
   auto text() const -> string;
+  auto textCursor() const -> TextCursor;
   auto wordWrap() const -> bool;
 
 //private:
@@ -30,6 +30,7 @@ struct mSourceEdit : mWidget {
     function<void ()> onMove;
     string scheme;
     string text;
+    TextCursor textCursor;
     bool wordWrap = true;
   } state;
 };

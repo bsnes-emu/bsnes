@@ -262,7 +262,8 @@ public:
   Object objects[128];
 
   //[unserialized]
-  uint32* output;
+  uint16* output;
+  uint16 lightTable[16][32768];
    uint8* tilecache[3];  //bitplane -> bitmap tiledata
   uint32 ItemLimit;
   uint32 TileLimit;

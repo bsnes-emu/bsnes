@@ -13,14 +13,6 @@ auto DriverSettings::create() -> void {
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
-  videoExclusiveToggle.setText("Exclusive fullscreen mode").setToolTip(
-    "(Direct3D driver only)\n\n"
-    "Acquires exclusive access to the display in fullscreen mode.\n"
-    "Eliminates compositing issues such as video stuttering."
-  ).onToggle([&] {
-    settings.video.exclusive = videoExclusiveToggle.checked();
-    program.updateVideoExclusive();
-  });
   videoBlockingToggle.setText("Synchronize").setToolTip(
     "Waits for the video card to be ready before rendering frames.\n"
     "Eliminates dropped or duplicated frames; but can distort audio.\n\n"
@@ -119,7 +111,6 @@ auto DriverSettings::videoDriverChanged() -> void {
   videoDriverActive.setText({"Active driver: ", video.driver()});
   videoDriverOption.doChange();
   videoFormatChanged();
-  videoExclusiveToggle.setChecked(settings.video.exclusive && video.hasExclusive()).setEnabled(video.hasExclusive());
   videoBlockingToggle.setChecked(video.blocking()).setEnabled(video.hasBlocking());
   videoFlushToggle.setChecked(video.flush()).setEnabled(video.hasFlush());
   layout.setGeometry(layout.geometry());

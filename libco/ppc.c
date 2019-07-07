@@ -258,6 +258,70 @@ static const uint32_t libco_ppc_code[1024] = {
   #define CO_SWAP_ASM(x, y) ((void (*)(cothread_t, cothread_t))(uintptr_t)libco_ppc_code)(x, y)
 #endif
 
+static uint32_t* co_derive_(void* memory, unsigned size, uintptr_t entry) {
+  (void)entry;
+
+  uint32_t* t = (uint32_t*)memory;
+
+  #if LIBCO_PPCDESC
+  if(t) {
+    memcpy(t, (void*)entry, sizeof(void*) * 3);  /* copy entry's descriptor */
+    *(const void**)t = libco_ppc_code;  /* set function pointer to swap routine */
+  }
+  #endif
+
+  return t;
+}
+
+cothread_t co_derive(void* memory, unsigned int size, void (*entry_)(void)) {
+  uintptr_t entry = (uintptr_t)entry_;
+  uint32_t* t = 0;
+
+  /* be sure main thread was successfully allocated */
+  if(co_active()) {
+    t = co_derive_(memory, size, entry);
+  }
+
+  if(t) {
+    uintptr_t sp;
+    int shift;
+
+    /* save current registers into new thread, so that any special ones will have proper values when thread is begun */
+    CO_SWAP_ASM(t, t);
+
+    #if LIBCO_PPCDESC
+    entry = (uintptr_t)*(void**)entry;  /* get real address */
+    #endif
+
+    /* put stack near end of block, and align */
+    sp = (uintptr_t)t + size - above_stack;
+    sp -= sp % stack_align;
+
+    /* on PPC32, we save and restore GPRs as 32 bits. for PPC64, we
+       save and restore them as 64 bits, regardless of the size the ABI
+       uses. so, we manually write pointers at the proper size. we always
+       save and restore at the same address, and since PPC is big-endian,
+       we must put the low byte first on PPC32. */
+
+    /* if uintptr_t is 32 bits, >>32 is undefined behavior,
+       so we do two shifts and don't have to care how many bits uintptr_t is. */
+    #if LIBCO_PPC64
+    shift = 16;
+    #else
+    shift = 0;
+    #endif
+
+    /* set up so entry will be called on next swap */
+    t[ 8] = (uint32_t)(entry >> shift >> shift);
+    t[ 9] = (uint32_t)entry;
+
+    t[10] = (uint32_t)(sp >> shift >> shift); 
+    t[11] = (uint32_t)sp;
+  }
+
+  return t;
+}
+
 static uint32_t* co_create_(unsigned size, uintptr_t entry) {
   (void)entry;
 

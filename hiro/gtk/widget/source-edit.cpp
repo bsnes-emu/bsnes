@@ -7,6 +7,7 @@ static auto SourceEdit_change(GtkTextBuffer*, pSourceEdit* p) -> void {
 }
 
 static auto SourceEdit_move(GObject*, GParamSpec*, pSourceEdit* p) -> void {
+  p->state().textCursor = p->textCursor();
   if(!p->locked()) p->self().doMove();
 }
 
@@ -53,6 +54,7 @@ auto pSourceEdit::construct() -> void {
   setNumbered(state().numbered);
   setScheme(state().scheme);
   setText(state().text);
+  setTextCursor(state().textCursor);
   setWordWrap(state().wordWrap);
 
   g_signal_connect(G_OBJECT(gtkSourceBuffer), "changed", G_CALLBACK(SourceEdit_change), (gpointer)this);
@@ -67,37 +69,6 @@ auto pSourceEdit::destruct() -> void {
   gtk_widget_destroy(gtkWidget);
 }
 
-auto pSourceEdit::cursor() const -> Cursor {
-  Cursor cursor;
-  int offset = 0;
-  g_object_get(G_OBJECT(gtkSourceBuffer), "cursor-position", &offset, nullptr);
-  cursor.setOffset(offset);
-  GtkTextIter start, end;
-  if(gtk_text_buffer_get_selection_bounds(gtkTextBuffer, &start, &end)) {
-    //if selecting text from left to right, the cursor may be ahead of the selection start ...
-    //since hiro combines selection bounds (end-start) into length, move the offset to the start
-    int origin = gtk_text_iter_get_offset(&start);
-    cursor.setOffset(origin);
-    int length = gtk_text_iter_get_offset(&end) - origin;
-    cursor.setLength(length);
-  }
-  return cursor;
-}
-
-auto pSourceEdit::setCursor(Cursor cursor) -> void {
-  lock();
-  GtkTextIter offset, length;
-  gtk_text_buffer_get_end_iter(gtkTextBuffer, &offset);
-  gtk_text_buffer_get_end_iter(gtkTextBuffer, &length);
-  signed end = gtk_text_iter_get_offset(&offset);
-  gtk_text_iter_set_offset(&offset, max(0, min(end, cursor.offset())));
-  gtk_text_iter_set_offset(&length, max(0, min(end, cursor.offset() + cursor.length())));
-  gtk_text_buffer_select_range(gtkTextBuffer, &offset, &length);
-  auto mark = gtk_text_buffer_get_mark(gtkTextBuffer, "insert");
-  gtk_text_view_scroll_mark_onscreen(gtkTextView, mark);
-  unlock();
-}
-
 auto pSourceEdit::setEditable(bool editable) -> void {
   gtk_text_view_set_editable(gtkTextView, editable);
 }
@@ -110,7 +81,7 @@ auto pSourceEdit::setLanguage(const string& language) -> void {
   string name;
   if(language == "C") name = "c";
   if(language == "C++") name = "cpp";
-  if(language == "Make") name = "makefile";
+  if(language == "Makefile") name = "makefile";
   gtkSourceLanguage = gtk_source_language_manager_get_language(gtkSourceLanguageManager, name);
   gtk_source_buffer_set_language(gtkSourceBuffer, gtkSourceLanguage);
 }
@@ -136,6 +107,20 @@ auto pSourceEdit::setText(const string& text) -> void {
   unlock();
 }
 
+auto pSourceEdit::setTextCursor(TextCursor cursor) -> void {
+  lock();
+  GtkTextIter offset, length;
+  gtk_text_buffer_get_end_iter(gtkTextBuffer, &offset);
+  gtk_text_buffer_get_end_iter(gtkTextBuffer, &length);
+  signed end = gtk_text_iter_get_offset(&offset);
+  gtk_text_iter_set_offset(&offset, max(0, min(end, cursor.offset())));
+  gtk_text_iter_set_offset(&length, max(0, min(end, cursor.offset() + cursor.length())));
+  gtk_text_buffer_select_range(gtkTextBuffer, &offset, &length);
+  auto mark = gtk_text_buffer_get_mark(gtkTextBuffer, "insert");
+  gtk_text_view_scroll_mark_onscreen(gtkTextView, mark);
+  unlock();
+}
+
 auto pSourceEdit::setWordWrap(bool wordWrap) -> void {
   gtk_text_view_set_wrap_mode(gtkTextView, wordWrap ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
   gtk_scrolled_window_set_policy(gtkScrolledWindow, wordWrap ? GTK_POLICY_NEVER : GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS);
@@ -152,6 +137,23 @@ auto pSourceEdit::text() const -> string {
   string text = textBuffer;
   g_free(textBuffer);
   return text;
+}
+
+auto pSourceEdit::textCursor() const -> TextCursor {
+  TextCursor cursor;
+  int offset = 0;
+  g_object_get(G_OBJECT(gtkSourceBuffer), "cursor-position", &offset, nullptr);
+  cursor.setOffset(offset);
+  GtkTextIter start, end;
+  if(gtk_text_buffer_get_selection_bounds(gtkTextBuffer, &start, &end)) {
+    //if selecting text from left to right, the cursor may be ahead of the selection start ...
+    //since hiro combines selection bounds (end-start) into length, move the offset to the start
+    int origin = gtk_text_iter_get_offset(&start);
+    cursor.setOffset(origin);
+    int length = gtk_text_iter_get_offset(&end) - origin;
+    cursor.setLength(length);
+  }
+  return cursor;
 }
 
 }

@@ -182,7 +182,7 @@ struct Alignment {
 };
 #endif
 
-#include "cursor.hpp"
+#include "text-cursor.hpp"
 
 #if defined(Hiro_Position)
 struct Position {
@@ -289,6 +289,7 @@ struct Geometry {
 #endif
 
 #include "font.hpp"
+#include "mouse-cursor.hpp"
 
 #if defined(Hiro_Hotkey)
 struct Hotkey {
@@ -1093,42 +1094,7 @@ struct mRadioLabel : mWidget {
 #include "widget/table-view-column.hpp"
 #include "widget/table-view-item.hpp"
 #include "widget/table-view-cell.hpp"
-
-#if defined(Hiro_TextEdit)
-struct mTextEdit : mWidget {
-  Declare(TextEdit)
-
-  auto backgroundColor() const -> Color;
-  auto cursor() const -> Cursor;
-  auto doChange() const -> void;
-  auto doMove() const -> void;
-  auto editable() const -> bool;
-  auto foregroundColor() const -> Color;
-  auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onMove(const function<void ()>& callback = {}) -> type&;
-  auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCursor(Cursor cursor = {}) -> type&;
-  auto setEditable(bool editable = true) -> type&;
-  auto setForegroundColor(Color color = {}) -> type&;
-  auto setText(const string& text = "") -> type&;
-  auto setWordWrap(bool wordWrap = true) -> type&;
-  auto text() const -> string;
-  auto wordWrap() const -> bool;
-
-//private:
-  struct State {
-    Color backgroundColor;
-    Cursor cursor;
-    bool editable = true;
-    Color foregroundColor;
-    function<void ()> onChange;
-    function<void ()> onMove;
-    string text;
-    bool wordWrap = true;
-  } state;
-};
-#endif
-
+#include "widget/text-edit.hpp"
 #include "widget/tree-view.hpp"
 #include "widget/tree-view-item.hpp"
 
@@ -1172,35 +1138,7 @@ struct mVerticalSlider : mWidget {
 };
 #endif
 
-#if defined(Hiro_Viewport)
-struct mViewport : mWidget {
-  Declare(Viewport)
-
-  auto doDrop(vector<string> names) const -> void;
-  auto doMouseLeave() const -> void;
-  auto doMouseMove(Position position) const -> void;
-  auto doMousePress(Mouse::Button button) const -> void;
-  auto doMouseRelease(Mouse::Button button) const -> void;
-  auto droppable() const -> bool;
-  auto handle() const -> uintptr_t;
-  auto onDrop(const function<void (vector<string>)>& callback = {}) -> type&;
-  auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
-  auto onMouseMove(const function<void (Position position)>& callback = {}) -> type&;
-  auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
-  auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) -> type&;
-  auto setDroppable(bool droppable = true) -> type&;
-
-//private:
-  struct State {
-    bool droppable = false;
-    function<void (vector<string>)> onDrop;
-    function<void ()> onMouseLeave;
-    function<void (Position)> onMouseMove;
-    function<void (Mouse::Button)> onMousePress;
-    function<void (Mouse::Button)> onMouseRelease;
-  } state;
-};
-#endif
+#include "widget/viewport.hpp"
 
 #undef Declare
 

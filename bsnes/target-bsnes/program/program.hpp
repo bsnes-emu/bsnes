@@ -9,7 +9,7 @@ struct Program : Lock, Emulator::Platform {
   //platform.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
-  auto videoFrame(const uint32* data, uint pitch, uint width, uint height) -> void override;
+  auto videoFrame(const uint16* data, uint pitch, uint width, uint height) -> void override;
   auto audioFrame(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
@@ -104,6 +104,9 @@ struct Program : Lock, Emulator::Platform {
   auto hackPatchMemory(vector<uint8_t>& data) -> void;
   auto hackOverclockSuperFX() -> void;
 
+  //viewport.cpp
+  auto refreshViewport() -> void;
+
 public:
   struct Game {
     explicit operator bool() const { return (bool)location; }
@@ -138,8 +141,10 @@ public:
 
   vector<string> gameQueue;
 
+  uint32_t palette[32768];
+
   struct Screenshot {
-    const uint32* data = nullptr;
+    const uint16* data = nullptr;
     uint pitch = 0;
     uint width = 0;
     uint height = 0;

@@ -45,11 +45,14 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/applications/
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
-	mkdir -p $(prefix)/share/$(name)/locales/
+	mkdir -p $(prefix)/share/$(name)/Database/
+	mkdir -p $(prefix)/share/$(name)/Locale/
 	cp out/$(name) $(prefix)/bin/$(name)
-	cp $(ui)/resource/locales/* $(prefix)/share/$(name)/locales/
 	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
+	cp Database/* $(prefix)/share/$(name)/Database/
+	cp ../icarus/Database/* $(prefix)/share/$(name)/Database/
+	cp Locale/* $(prefix)/share/$(name)/Locale/
 endif
 
 uninstall:
@@ -62,4 +65,5 @@ else ifneq ($(filter $(platform),linux bsd),)
 	rm -f $(prefix)/bin/$(name)
 	rm -f $(prefix)/share/applications/$(name).desktop
 	rm -f $(prefix)/share/icons/$(name).png
+	rm -rf $(prefix)/share/$(name)
 endif

@@ -66,15 +66,15 @@ struct Node {
   auto text() const -> nall::string { return value().strip(); }
   auto string() const -> nall::string { return value().strip(); }
   auto boolean() const -> bool { return text() == "true"; }
-  auto integer() const -> intmax { return text().integer(); }
-  auto natural() const -> uintmax { return text().natural(); }
+  auto integer() const -> int64_t { return text().integer(); }
+  auto natural() const -> uint64_t { return text().natural(); }
   auto real() const -> double { return text().real(); }
 
   auto text(const nall::string& fallback) const -> nall::string { return bool(*this) ? text() : fallback; }
   auto string(const nall::string& fallback) const -> nall::string { return bool(*this) ? string() : fallback; }
   auto boolean(bool fallback) const -> bool { return bool(*this) ? boolean() : fallback; }
-  auto integer(intmax fallback) const -> intmax { return bool(*this) ? integer() : fallback; }
-  auto natural(uintmax fallback) const -> uintmax { return bool(*this) ? natural() : fallback; }
+  auto integer(int64_t fallback) const -> int64_t { return bool(*this) ? integer() : fallback; }
+  auto natural(uint64_t fallback) const -> uint64_t { return bool(*this) ? natural() : fallback; }
   auto real(double fallback) const -> double { return bool(*this) ? real() : fallback; }
 
   auto setName(const nall::string& name = "") -> Node& { shared->_name = name; return *this; }

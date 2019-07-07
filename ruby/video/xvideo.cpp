@@ -19,11 +19,16 @@ struct VideoXVideo : VideoDriver {
   auto driver() -> string override { return "XVideo"; }
   auto ready() -> bool override { return _ready; }
 
+  auto hasExclusive() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
 
   auto hasFormats() -> vector<string> override {
     return _formatNames;
+  }
+
+  auto setExclusive(bool exclusive) -> bool override {
+    return initialize();
   }
 
   auto setContext(uintptr context) -> bool override {
@@ -53,6 +58,21 @@ struct VideoXVideo : VideoDriver {
     output();
   }
 
+  auto size(uint& width, uint& height) -> void override {
+    XWindowAttributes window;
+    XGetWindowAttributes(_display, _window, &window);
+
+    XWindowAttributes parent;
+    XGetWindowAttributes(_display, _parent, &parent);
+
+    if(window.width != parent.width || window.height != parent.height) {
+      XResizeWindow(_display, _window, parent.width, parent.height);
+    }
+
+    width = parent.width;
+    height = parent.height;
+  }
+
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
     if(width != _width || height != _height) resize(_width = width, _height = height);
     pitch = _bufferWidth * 4;
@@ -62,22 +82,9 @@ struct VideoXVideo : VideoDriver {
   auto release() -> void override {
   }
 
-  auto output() -> void override {
-    XWindowAttributes target;
-    XGetWindowAttributes(_display, _window, &target);
-
-    //we must ensure that the child window is the same size as the parent window.
-    //unfortunately, we cannot hook the parent window resize event notification,
-    //as we did not create the parent window, nor have any knowledge of the toolkit used.
-    //therefore, query each window size and resize as needed.
-    XWindowAttributes parent;
-    XGetWindowAttributes(_display, (Window)self.context, &parent);
-    if(target.width != parent.width || target.height != parent.height) {
-      XResizeWindow(_display, _window, parent.width, parent.height);
-    }
-
-    //update target width and height attributes
-    XGetWindowAttributes(_display, _window, &target);
+  auto output(uint width = 0, uint height = 0) -> void override {
+    uint windowWidth, windowHeight;
+    size(windowWidth, windowHeight);
 
     auto& name = _formatName;
     if(name == "RGB24" ) renderRGB24 (_width, _height);
@@ -89,9 +96,14 @@ struct VideoXVideo : VideoDriver {
     if(name == "YV12"  ) renderYV12  (_width, _height);
     if(name == "I420"  ) renderI420  (_width, _height);
 
+    if(!width) width = windowWidth;
+    if(!height) height = windowHeight;
+    int x = (windowWidth - width) / 2;
+    int y = (windowHeight - height) / 2;
+
     XvShmPutImage(_display, _port, _window, _gc, _image,
       0, 0, _width, _height,
-      0, 0, target.width, target.height,
+      x, y, width, height,
       true);
   }
 
@@ -110,9 +122,10 @@ struct VideoXVideo : VideoDriver {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!self.context) return false;
+    if(!self.exclusive && !self.context) return false;
 
     _display = XOpenDisplay(nullptr);
+    _screen = DefaultScreen(_display);
 
     if(!XShmQueryExtension(_display)) {
       print("XVideo: XShm extension not found.\n");
@@ -143,15 +156,9 @@ private:
       return false;
     }
 
-    //create child window to attach to parent window.
-    //this is so that even if parent window visual depth doesn't match Xv visual
-    //(common with composited windows), Xv can still render to child window.
-    XWindowAttributes windowAttributes;
-    XGetWindowAttributes(_display, (Window)self.context, &windowAttributes);
-
     XVisualInfo visualTemplate;
     visualTemplate.visualid = visualID;
-    visualTemplate.screen = DefaultScreen(_display);
+    visualTemplate.screen = _screen;
     visualTemplate.depth = depth;
     visualTemplate.visual = 0;
     int visualMatches = 0;
@@ -162,17 +169,25 @@ private:
       return false;
     }
 
-    _colormap = XCreateColormap(_display, (Window)self.context, visualInfo->visual, AllocNone);
-    XSetWindowAttributes attributes = {};
-    attributes.colormap = _colormap;
+    _parent = self.exclusive ? RootWindow(_display, _screen) : (Window)self.context;
+    //create child window to attach to parent window.
+    //this is so that even if parent window visual depth doesn't match Xv visual
+    //(common with composited windows), Xv can still render to child window.
+    XWindowAttributes windowAttributes;
+    XGetWindowAttributes(_display, _parent, &windowAttributes);
+
+    _colormap = XCreateColormap(_display, _parent, visualInfo->visual, AllocNone);
+    XSetWindowAttributes attributes{};
     attributes.border_pixel = 0;
-    _window = XCreateWindow(_display, /* parent = */ (Window)self.context,
-      /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
-      /* border_width = */ 0, depth, InputOutput, visualInfo->visual,
-      CWColormap | CWBorderPixel | CWEventMask, &attributes);
+    attributes.colormap = _colormap;
+    attributes.override_redirect = self.exclusive;
+    _window = XCreateWindow(_display, _parent,
+      0, 0, windowAttributes.width, windowAttributes.height,
+      0, depth, InputOutput, visualInfo->visual,
+      CWBorderPixel | CWColormap | CWOverrideRedirect, &attributes);
     XSelectInput(_display, _window, ExposureMask);
     XFree(visualInfo);
-    XSetWindowBackground(_display, _window, /* color = */ 0);
+    XSetWindowBackground(_display, _window, 0);
     XMapWindow(_display, _window);
 
     _gc = XCreateGC(_display, _window, 0, 0);
@@ -500,7 +515,9 @@ private:
   uint8_t* _vtable = nullptr;
 
   Display* _display = nullptr;
+  int _screen = 0;
   GC _gc = 0;
+  Window _parent = 0;
   Window _window = 0;
   Colormap _colormap = 0;
   XShmSegmentInfo _shmInfo;

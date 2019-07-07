@@ -1,5 +1,6 @@
 #include "../bsnes.hpp"
-Presentation presentation;
+namespace Instances { Instance<Presentation> presentation; }
+Presentation& presentation = Instances::presentation();
 
 auto Presentation::create() -> void {
   systemMenu.setText(tr("System"));
@@ -26,15 +27,15 @@ auto Presentation::create() -> void {
   outputMenu.setIcon(Icon::Emblem::Image).setText("Output");
   centerViewport.setText("Center").onActivate([&] {
     settings.video.output = "Center";
-    resizeViewport();
+    video.clear();
   });
   scaleViewport.setText("Scale").onActivate([&] {
     settings.video.output = "Scale";
-    resizeViewport();
+    video.clear();
   });
   stretchViewport.setText("Stretch").onActivate([&] {
     settings.video.output = "Stretch";
-    resizeViewport();
+    video.clear();
   });
   if(settings.video.output == "Center") centerViewport.setChecked();
   if(settings.video.output == "Scale") scaleViewport.setChecked();
@@ -51,6 +52,37 @@ auto Presentation::create() -> void {
     settings.video.blur = blurEmulation.checked();
     emulator->configure("Video/BlurEmulation", blurEmulation.checked());
   }).doToggle();
+  filterMenu.setIcon(Icon::Emblem::Image).setText("Filter");
+  filterNone.setText("None").onActivate([&] { settings.video.filter = "None"; });
+  filterScanlinesLight.setText("Scanlines (66%)").onActivate([&] { settings.video.filter = "Scanlines (66%)"; });
+  filterScanlinesDark.setText("Scanlines (33%)").onActivate([&] { settings.video.filter = "Scanlines (33%)"; });
+  filterScanlinesBlack.setText("Scanlines (0%)").onActivate([&] { settings.video.filter = "Scanlines (0%)"; });
+  filterPixellate2x.setText("Pixellate2x").onActivate([&] { settings.video.filter = "Pixellate2x"; });
+  filterScale2x.setText("Scale2x").onActivate([&] { settings.video.filter = "Scale2x"; });
+  filter2xSaI.setText("2xSaI").onActivate([&] { settings.video.filter = "2xSaI"; });
+  filterSuper2xSaI.setText("Super 2xSaI").onActivate([&] { settings.video.filter = "Super 2xSaI"; });
+  filterSuperEagle.setText("Super Eagle").onActivate([&] { settings.video.filter = "Super Eagle"; });
+  filterLQ2x.setText("LQ2x").onActivate([&] { settings.video.filter = "LQ2x"; });
+  filterHQ2x.setText("HQ2x").onActivate([&] { settings.video.filter = "HQ2x"; });
+  filterNTSC_RF.setText("NTSC (RF)").onActivate([&] { settings.video.filter = "NTSC (RF)"; });
+  filterNTSC_Composite.setText("NTSC (Composite)").onActivate([&] { settings.video.filter = "NTSC (Composite)"; });
+  filterNTSC_SVideo.setText("NTSC (S-Video)").onActivate([&] { settings.video.filter = "NTSC (S-Video)"; });
+  filterNTSC_RGB.setText("NTSC (RGB)").onActivate([&] { settings.video.filter = "NTSC (RGB)"; });
+  if(settings.video.filter == "None") filterNone.setChecked();
+  if(settings.video.filter == "Scanlines (66%)") filterScanlinesLight.setChecked();
+  if(settings.video.filter == "Scanlines (33%)") filterScanlinesDark.setChecked();
+  if(settings.video.filter == "Scanlines (0%)") filterScanlinesBlack.setChecked();
+  if(settings.video.filter == "Pixellate2x") filterPixellate2x.setChecked();
+  if(settings.video.filter == "Scale2x") filterScale2x.setChecked();
+  if(settings.video.filter == "2xSaI") filter2xSaI.setChecked();
+  if(settings.video.filter == "Super 2xSaI") filterSuper2xSaI.setChecked();
+  if(settings.video.filter == "Super Eagle") filterSuperEagle.setChecked();
+  if(settings.video.filter == "LQ2x") filterLQ2x.setChecked();
+  if(settings.video.filter == "HQ2x") filterHQ2x.setChecked();
+  if(settings.video.filter == "NTSC (RF)") filterNTSC_RF.setChecked();
+  if(settings.video.filter == "NTSC (Composite)") filterNTSC_Composite.setChecked();
+  if(settings.video.filter == "NTSC (S-Video)") filterNTSC_SVideo.setChecked();
+  if(settings.video.filter == "NTSC (RGB)") filterNTSC_RGB.setChecked();
   shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
   muteAudio.setText("Mute Audio").setChecked(settings.audio.mute).onToggle([&] {
     settings.audio.mute = muteAudio.checked();
@@ -145,17 +177,17 @@ auto Presentation::create() -> void {
     .show();
   });
 
-  viewport.setDroppable().onDrop([&](vector<string> locations) {
+  viewport.setFocusable();
+  viewport.setDroppable();
+  viewport.onDrop([&](vector<string> locations) {
     if(!locations) return;
     program.gameQueue = {};
     program.gameQueue.append({"Auto;", locations.first()});
     program.load();
     setFocused();
-  }).onSize([&] {
-    configureViewport();
   });
 
-  iconLayout.setAlignment(0.0);
+  iconLayout.setAlignment(0.0).setCollapsible();
   image icon{Resource::Icon};
   icon.alphaBlend(0x000000);
   iconCanvas.setIcon(icon);
@@ -166,6 +198,7 @@ auto Presentation::create() -> void {
   auto back = Color{ 32,  32,  32};
   auto fore = Color{255, 255, 255};
 
+  updateProgramIcon();
   updateStatusIcon();
 
   spacerIcon.setBackgroundColor(back).setForegroundColor(fore);
@@ -190,10 +223,6 @@ auto Presentation::create() -> void {
     program.quit();
   });
 
-  onSize([&] {
-    resizeViewport();
-  });
-
   setTitle({"bsnes v", Emulator::Version});
   setBackgroundColor({0, 0, 0});
   resizeWindow();
@@ -211,6 +240,11 @@ auto Presentation::create() -> void {
   #endif
 }
 
+auto Presentation::updateProgramIcon() -> void {
+  presentation.iconLayout.setVisible(!emulator->loaded() && !settings.video.snow);
+  presentation.layout.resize();
+}
+
 auto Presentation::updateStatusIcon() -> void {
   image icon;
   icon.allocate(16, StatusHeight);
@@ -224,80 +258,6 @@ auto Presentation::updateStatusIcon() -> void {
   statusIcon.setIcon(icon);
 }
 
-auto Presentation::configureViewport() -> void {
-  uint width = viewport.geometry().width();
-  uint height = viewport.geometry().height();
-  video.configure(width, height, 60, 60);
-}
-
-auto Presentation::clearViewport() -> void {
-  if(!emulator->loaded()) viewportLayout.setPadding();
-  if(!visible() || !video) return;
-
-  uint32_t opaqueBlack = 0xff000000;
-  if(settings.video.format == "RGB30") opaqueBlack = 0xc0000000;
-
-  uint width = 16;
-  uint height = 16;
-  if(auto [output, length] = video.acquire(width, height); output) {
-    for(uint y : range(height)) {
-      auto line = output + y * (length >> 2);
-      for(uint x : range(width)) *line++ = opaqueBlack;
-    }
-    video.release();
-    video.output();
-  }
-}
-
-auto Presentation::resizeViewport() -> void {
-  uint layoutWidth = viewportLayout.geometry().width();
-  uint layoutHeight = viewportLayout.geometry().height();
-
-  uint width = 256 * (settings.video.aspectCorrection ? 8.0 / 7.0 : 1.0);
-  uint height = (settings.video.overscan ? 240.0 : 224.0);
-  uint viewportWidth, viewportHeight;
-
-  if(visible() && !fullScreen()) {
-    uint widthMultiplier = layoutWidth / width;
-    uint heightMultiplier = layoutHeight / height;
-    uint multiplier = max(1, min(widthMultiplier, heightMultiplier));
-    settings.video.multiplier = multiplier;
-    for(auto item : sizeGroup.objects<MenuRadioItem>()) {
-      if(auto property = item.property("multiplier")) {
-        if(property.natural() == multiplier) item.setChecked();
-      }
-    }
-  }
-
-  if(!emulator->loaded()) return clearViewport();
-  if(!video) return;
-
-  if(settings.video.output == "Center") {
-    uint widthMultiplier = layoutWidth / width;
-    uint heightMultiplier = layoutHeight / height;
-    uint multiplier = min(widthMultiplier, heightMultiplier);
-    viewportWidth = width * multiplier;
-    viewportHeight = height * multiplier;
-  } else if(settings.video.output == "Scale") {
-    double widthMultiplier = (double)layoutWidth / width;
-    double heightMultiplier = (double)layoutHeight / height;
-    double multiplier = min(widthMultiplier, heightMultiplier);
-    viewportWidth = width * multiplier;
-    viewportHeight = height * multiplier;
-  } else if(settings.video.output == "Stretch" || 1) {
-    viewportWidth = layoutWidth;
-    viewportHeight = layoutHeight;
-  }
-
-  //center viewport within viewportLayout by use of viewportLayout padding
-  uint paddingWidth = layoutWidth - viewportWidth;
-  uint paddingHeight = layoutHeight - viewportHeight;
-  viewportLayout.setPadding({
-    paddingWidth / 2, paddingHeight / 2,
-    paddingWidth - paddingWidth / 2, paddingHeight - paddingHeight / 2
-  });
-}
-
 auto Presentation::resizeWindow() -> void {
   if(fullScreen()) return;
   if(maximized()) setMaximized(false);
@@ -309,27 +269,16 @@ auto Presentation::resizeWindow() -> void {
 
   setMinimumSize({width, height + statusHeight});
   setSize({width * multiplier, height * multiplier + statusHeight});
-  resizeViewport();
 }
 
 auto Presentation::toggleFullscreenMode() -> void {
-  if(!fullScreen()) {
-    if(settings.general.statusBar) layout.remove(statusLayout);
-    menuBar.setVisible(false);
-    setFullScreen(true);
-    video.setExclusive(settings.video.exclusive);
-    if(video.exclusive()) setVisible(false);
+  if(!video.exclusive()) {
+    video.setExclusive(true);
     if(!input.acquired()) input.acquire();
-    resizeViewport();
   } else {
     if(input.acquired()) input.release();
-    if(video.exclusive()) setVisible(true);
     video.setExclusive(false);
-    setFullScreen(false);
-    menuBar.setVisible(true);
-    if(settings.general.statusBar) layout.append(statusLayout, Size{~0, StatusHeight});
-    resizeWindow();
-    setAlignment(Alignment::Center);
+    viewport.setFocused();
   }
 }
 

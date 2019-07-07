@@ -34,6 +34,8 @@ struct mTableView : mWidget {
   auto remove(sTableViewItem item) -> type&;
   auto reset() -> type&;
   auto resizeColumns() -> type&;
+  auto selectAll() -> type&;
+  auto selectNone() -> type&;
   auto selected() const -> TableViewItem;
   auto setAlignment(Alignment alignment = {}) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;

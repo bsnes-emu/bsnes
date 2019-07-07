@@ -59,7 +59,7 @@ namespace bit {
   }
 
   //count number of bits set in a byte
-  inline auto count(uintmax x) -> uint {
+  constexpr inline auto count(uintmax x) -> uint {
     uint count = 0;
     while(x) x &= x - 1, count++;  //clear the least significant bit
     return count;
@@ -67,7 +67,7 @@ namespace bit {
 
   //return index of the first bit set (or zero of no bits are set)
   //first(0b1000) == 3
-  inline auto first(uintmax x) -> uint {
+  constexpr inline auto first(uintmax x) -> uint {
     uint first = 0;
     while(x) { if(x & 1) break; x >>= 1; first++; }
     return first;
@@ -75,7 +75,7 @@ namespace bit {
 
   //round up to next highest single bit:
   //round(15) == 16, round(16) == 16, round(17) == 32
-  inline auto round(uintmax x) -> uintmax {
+  constexpr inline auto round(uintmax x) -> uintmax {
     if((x & (x - 1)) == 0) return x;
     while(x & (x - 1)) x &= x - 1;
     return x << 1;

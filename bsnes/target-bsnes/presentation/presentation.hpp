@@ -5,10 +5,8 @@ struct Presentation : Window {
   enum : uint { RecentGames = 9, QuickStates = 9 };
   enum : uint { StatusHeight = 24 };
 
+  auto updateProgramIcon() -> void;
   auto updateStatusIcon() -> void;
-  auto configureViewport() -> void;
-  auto clearViewport() -> void;
-  auto resizeViewport() -> void;
   auto resizeWindow() -> void;
   auto updateStatus() -> void;
   auto toggleFullscreenMode() -> void;
@@ -47,6 +45,39 @@ struct Presentation : Window {
         MenuCheckItem aspectCorrection{&outputMenu};
         MenuCheckItem showOverscanArea{&outputMenu};
         MenuCheckItem blurEmulation{&outputMenu};
+      Menu filterMenu{&settingsMenu};
+        MenuRadioItem filterNone{&filterMenu};
+        MenuRadioItem filterScanlinesLight{&filterMenu};
+        MenuRadioItem filterScanlinesDark{&filterMenu};
+        MenuRadioItem filterScanlinesBlack{&filterMenu};
+        MenuRadioItem filterPixellate2x{&filterMenu};
+        MenuRadioItem filterScale2x{&filterMenu};
+        MenuRadioItem filter2xSaI{&filterMenu};
+        MenuRadioItem filterSuper2xSaI{&filterMenu};
+        MenuRadioItem filterSuperEagle{&filterMenu};
+        MenuRadioItem filterLQ2x{&filterMenu};
+        MenuRadioItem filterHQ2x{&filterMenu};
+        MenuRadioItem filterNTSC_RF{&filterMenu};
+        MenuRadioItem filterNTSC_Composite{&filterMenu};
+        MenuRadioItem filterNTSC_SVideo{&filterMenu};
+        MenuRadioItem filterNTSC_RGB{&filterMenu};
+        Group filterGroup{
+          &filterNone,
+          &filterScanlinesLight,
+          &filterScanlinesDark,
+          &filterScanlinesBlack,
+          &filterPixellate2x,
+          &filterScale2x,
+          &filter2xSaI,
+          &filterSuper2xSaI,
+          &filterSuperEagle,
+          &filterLQ2x,
+          &filterHQ2x,
+          &filterNTSC_RF,
+          &filterNTSC_Composite,
+          &filterNTSC_SVideo,
+          &filterNTSC_RGB
+        };
       Menu shaderMenu{&settingsMenu};
       MenuSeparator settingsSeparatorA{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
@@ -97,4 +128,5 @@ struct Presentation : Window {
       Label spacerRight{&statusLayout, Size{8, ~0}, 0};
 };
 
-extern Presentation presentation;
+namespace Instances { extern Instance<Presentation> presentation; }
+extern Presentation& presentation;

@@ -52,7 +52,7 @@ inline auto prefix(string_view self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(int offset = self.size() - 1, suffix = -1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
-    if(*p == '/') return slice(self, offset + 1, suffix >= 0 ? suffix - offset - 1 : 0).trimRight("/");
+    if(*p == '/') return slice(self, offset + 1, (suffix >= 0 ? suffix : self.size()) - offset - 1).trimRight("/");
     if(*p == '.' && suffix == -1) { suffix = offset; continue; }
     if(offset == 0) return slice(self, offset, suffix).trimRight("/");
   }

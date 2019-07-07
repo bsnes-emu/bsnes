@@ -12,8 +12,11 @@ auto pWidget::construct() -> void {
 
     if(auto window = self().parentWindow(true)) {
       if(auto p = window->self()) p->_append(self());
+      setDroppable(self().droppable());
       setEnabled(self().enabled(true));
+      setFocusable(self().focusable());
       setFont(self().font(true));
+      setMouseCursor(self().mouseCursor());
       setToolTip(self().toolTip());
       setVisible(self().visible(true));
     }
@@ -33,6 +36,10 @@ auto pWidget::focused() const -> bool {
   }
 }
 
+auto pWidget::setDroppable(bool droppable) -> void {
+  //virtual
+}
+
 auto pWidget::setEnabled(bool enabled) -> void {
   if(abstract) enabled = false;
 
@@ -41,6 +48,10 @@ auto pWidget::setEnabled(bool enabled) -> void {
       [cocoaView setEnabled:enabled];
     }
   }
+}
+
+auto pWidget::setFocusable(bool focusable) -> void {
+  //virtual
 }
 
 auto pWidget::setFocused() -> void {
@@ -64,6 +75,10 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
     [[cocoaView superview] setNeedsDisplay:YES];
   }
   pSizable::setGeometry(geometry);
+}
+
+auto pWidget::setMouseCursor(const MouseCursor& mouseCursor) -> void {
+  //TODO
 }
 
 auto pWidget::setToolTip(const string& toolTip) -> void {

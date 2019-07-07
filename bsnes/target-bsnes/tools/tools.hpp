@@ -156,10 +156,14 @@ public:
     TabFrame panel{&layout, Size{~0, ~0}};
 };
 
-extern CheatDatabase cheatDatabase;
-extern CheatWindow cheatWindow;
+namespace Instances { extern Instance<CheatDatabase> cheatDatabase; }
+extern CheatDatabase& cheatDatabase;
+namespace Instances { extern Instance<CheatWindow> cheatWindow; }
+extern CheatWindow& cheatWindow;
 extern CheatEditor cheatEditor;
-extern StateWindow stateWindow;
+namespace Instances { extern Instance<StateWindow> stateWindow; }
+extern StateWindow& stateWindow;
 extern StateManager stateManager;
 extern ManifestViewer manifestViewer;
-extern ToolsWindow toolsWindow;
+namespace Instances { extern Instance<ToolsWindow> toolsWindow; }
+extern ToolsWindow& toolsWindow;

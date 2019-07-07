@@ -12,7 +12,7 @@ auto pTextEdit::construct() -> void {
   setBackgroundColor(state().backgroundColor);
   setEditable(state().editable);
   setText(state().text);
-  setCursor(state().cursor);
+  setTextCursor(state().textCursor);
 }
 
 auto pTextEdit::destruct() -> void {
@@ -25,14 +25,6 @@ auto pTextEdit::setBackgroundColor(Color color) -> void {
   if(backgroundBrush) { DeleteObject(backgroundBrush); backgroundBrush = 0; }
   backgroundBrush = CreateSolidBrush(color ? CreateRGB(color) : GetSysColor(COLOR_WINDOW));
   InvalidateRect(hwnd, 0, true);
-}
-
-auto pTextEdit::setCursor(Cursor cursor) -> void {
-  signed end = GetWindowTextLength(hwnd);
-  signed offset = max(0, min(end, cursor.offset()));
-  signed length = max(0, min(end, cursor.offset() + cursor.length()));
-  Edit_SetSel(hwnd, offset, length);
-  Edit_ScrollCaret(hwnd);
 }
 
 auto pTextEdit::setEditable(bool editable) -> void {
@@ -50,6 +42,14 @@ auto pTextEdit::setText(string text) -> void {
   SetWindowText(hwnd, utf16_t(text));
 }
 
+auto pTextEdit::setTextCursor(TextCursor cursor) -> void {
+  signed end = GetWindowTextLength(hwnd);
+  signed offset = max(0, min(end, cursor.offset()));
+  signed length = max(0, min(end, cursor.offset() + cursor.length()));
+  Edit_SetSel(hwnd, offset, length);
+  Edit_ScrollCaret(hwnd);
+}
+
 auto pTextEdit::setWordWrap(bool wordWrap) -> void {
   //ES_AUTOHSCROLL cannot be changed after widget creation.
   //As a result, we must destroy and re-create widget to change this setting.
@@ -64,6 +64,10 @@ auto pTextEdit::text() const -> string {
   string text = (const char*)utf8_t(buffer);
   text.replace("\r", "");
   return text;
+}
+
+auto pTextEdit::textCursor() const -> TextCursor {
+  return state().textCursor;
 }
 
 //

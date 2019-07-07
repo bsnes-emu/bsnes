@@ -27,7 +27,7 @@ struct mListView : mTableView {
   auto onContext(const function<void ()>& callback) -> type&;
   auto onToggle(const function<void (ListViewItem)>& callback) -> type&;
   auto reset() -> type& override;
-  auto resize() -> type&;
+  auto resizeColumn() -> type&;
   auto selected() const -> ListViewItem;
   auto setVisible(bool visible = true) -> type&;
 

@@ -14,6 +14,15 @@ static auto TableView_popup(GtkTreeView*, pTableView* p) -> void { return p->_do
 static auto TableView_dataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeModel* model, GtkTreeIter* iter, pTableView* p) -> void { return p->_doDataFunc(column, renderer, iter); }
 static auto TableView_toggle(GtkCellRendererToggle* toggle, const char* path, pTableView* p) -> void { return p->_doToggle(toggle, path); }
 
+static auto TableView_realize(GtkTreeView*, pTableView* p) -> void {
+  //the initial geometry for column sizing is most likely wrong at this point:
+  //having to call processEvents() twice is very heavy-handed, but necessary here.
+  for(uint repeat : range(2)) {
+    Application::processEvents();
+    p->resizeColumns();
+  }
+}
+
 auto pTableView::construct() -> void {
   gtkWidget = gtk_scrolled_window_new(0, 0);
   gtkScrolledWindow = GTK_SCROLLED_WINDOW(gtkWidget);
@@ -41,6 +50,7 @@ auto pTableView::construct() -> void {
   g_signal_connect(G_OBJECT(gtkTreeView), "key-press-event", G_CALLBACK(TableView_keyPressEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "motion-notify-event", G_CALLBACK(TableView_mouseMoveEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "popup-menu", G_CALLBACK(TableView_popup), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkTreeView), "realize", G_CALLBACK(TableView_realize), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "row-activated", G_CALLBACK(TableView_activate), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeSelection), "changed", G_CALLBACK(TableView_change), (gpointer)this);
 
@@ -128,15 +138,18 @@ auto pTableView::setBordered(bool bordered) -> void {
 }
 
 auto pTableView::setFocused() -> void {
+  lock();
   //gtk_widget_grab_focus() will select the first item if nothing is currently selected
   //this behavior is undesirable. detect selection state first, and restore if required
-  if(!state().batchable) {  //gtk_tree_selection_get_selected() will throw a critical exception in batchable mode
-    lock();
+  if(!state().batchable) {
+    //gtk_tree_selection_get_selected() will throw a critical exception in batchable mode
     bool selected = gtk_tree_selection_get_selected(gtkTreeSelection, nullptr, nullptr);
     gtk_widget_grab_focus(gtkWidgetChild);
     if(!selected) gtk_tree_selection_unselect_all(gtkTreeSelection);
-    unlock();
+  } else {
+    gtk_widget_grab_focus(gtkWidgetChild);
   }
+  unlock();
 }
 
 auto pTableView::setFont(const Font& font) -> void {
@@ -151,7 +164,10 @@ auto pTableView::setForegroundColor(Color color) -> void {
 auto pTableView::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
   for(auto& column : state().columns) {
-    if(column->expandable()) return resizeColumns();
+    if(column->expandable()) {
+      Application::processEvents();
+      return resizeColumns();
+    }
   }
 }
 
@@ -352,23 +368,25 @@ auto pTableView::_doHeaderActivate(GtkTreeViewColumn* gtkTreeViewColumn) -> void
 }
 
 auto pTableView::_doKeyPress(GdkEventKey* event) -> bool {
+  //TODO: GCC 8.2.0 on FreeBSD 12.0 (amd64) seems to miscompile this function periodically to always return true.
+  return false;
+
   if(state().batchable && event->type == GDK_KEY_PRESS) {
     //when using keyboard to activate tree view items in GTK_SELECTION_MULTIPLE mode, GTK will deselect all but the last item
     //this code detects said case, blocks the key from being propagated, and calls the activate callback directly
     //the result is that the enter key can be used to activate multiple selected items at a time
     //there are four ways to activate items via the keyboard in GTK, so we have to detect all of them here
-    auto modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_SUPER_MASK);  //ignore other modifiers (eg mouse buttons)
+    uint modifiers = event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_SUPER_MASK);  //ignore other modifiers (eg mouse buttons)
     if((event->keyval == GDK_KEY_Return && !modifiers)
     || (event->keyval == GDK_KEY_KP_Enter && !modifiers)
     || (event->keyval == GDK_KEY_space && !modifiers)
     || (event->keyval == GDK_KEY_space && modifiers == GDK_SHIFT_MASK)
     ) {
       _doActivate();
-      return true;
+      return true;  //block GTK from handling this keypress
     }
   }
-  //allow GTK to handle this keypress
-  return false;
+  return false;  //allow GTK to handle this keypress
 }
 
 //GtkTreeView::cursor-changed and GtkTreeSelection::changed do not send signals for changes during rubber-banding selection
@@ -401,7 +419,7 @@ auto pTableView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const c
 //this isn't currently exposed as a hiro API call, so try and determine if we should apply it here
 //basically, if there's two or more columns and no custom colors applied, then we do so
 auto pTableView::_updateRulesHint() -> void {
-  bool rules = true;
+  bool rules = false;  //true
   if(state().backgroundColor) rules = false;
   if(state().foregroundColor) rules = false;
   if(state().columns.size() <= 1) rules = false;

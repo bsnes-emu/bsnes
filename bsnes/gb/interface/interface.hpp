@@ -74,12 +74,6 @@ struct SuperGameBoyInterface {
   virtual auto joypWrite(bool p15, bool p14) -> void = 0;
 };
 
-struct Settings {
-  bool blurEmulation = true;
-  bool colorEmulation = true;
-};
-
 extern SuperGameBoyInterface* superGameBoy;
-extern Settings settings;
 
 }

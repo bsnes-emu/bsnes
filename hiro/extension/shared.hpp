@@ -222,7 +222,8 @@ struct ListView : sListView {
   auto onToggle(const function<void (ListViewItem)>& callback = {}) { return self().onToggle(callback), *this; }
   auto remove(sListViewItem item) { return self().remove(item), *this; }
   auto reset() { return self().reset(), *this; }
-  auto resize() { return self().resize(), *this; }
+  auto resizeColumn() { return self().resizeColumn(), *this; }
+  auto selectNone() { return self().selectNone(), *this; }
   auto selected() { return self().selected(); }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }

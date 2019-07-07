@@ -266,6 +266,13 @@ auto mWindow::setFullScreen(bool fullScreen) -> type& {
 }
 
 auto mWindow::setGeometry(Geometry geometry) -> type& {
+  //round fractional bits of geometry coordinates that window managers cannot display.
+  //the pWindow classes lose this precision and so not doing so here can cause off-by-1 issues.
+  geometry.setX(round(geometry.x()));
+  geometry.setY(round(geometry.y()));
+  geometry.setWidth(round(geometry.width()));
+  geometry.setHeight(round(geometry.height()));
+
   state.geometry = geometry;
   signal(setGeometry, geometry);
   if(auto& sizable = state.sizable) sizable->setGeometry(sizable->geometry());

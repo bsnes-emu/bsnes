@@ -20,8 +20,22 @@ bg4(Background::ID::BG4) {
   ppu1.version = 1;  //allowed values: 1
   ppu2.version = 3;  //allowed values: 1, 2, 3
 
-  output = new uint32[512 * 512];
+  output = new uint16[512 * 512];
   output += 16 * 512;  //overscan offset
+
+  for(uint l = 0; l < 16; l++) {
+    for(uint r = 0; r < 32; r++) {
+      for(uint g = 0; g < 32; g++) {
+        for(uint b = 0; b < 32; b++) {
+          double luma = (double)l / 15.0;
+          uint ar = (luma * r + 0.5);
+          uint ag = (luma * g + 0.5);
+          uint ab = (luma * b + 0.5);
+          lightTable[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
+        }
+      }
+    }
+  }
 }
 
 PPU::~PPU() {
@@ -101,7 +115,7 @@ auto PPU::power(bool reset) -> void {
 
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint32>(output, 512 * 480);
+  memory::fill<uint16>(output, 512 * 480);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
@@ -243,8 +257,8 @@ auto PPU::refresh() -> void {
   auto pitch = 512;
   auto width = 512;
   auto height = 480;
-  Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation);
-  Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
+//Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation);
+  platform->videoFrame(output, pitch * sizeof(uint16), width, height);
 }
 
 }

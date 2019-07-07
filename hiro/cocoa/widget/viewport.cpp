@@ -67,6 +67,8 @@ auto pViewport::setDroppable(bool droppable) -> void {
   }
 }
 
+auto pViewport::setFocusable(bool focusable) -> void {
+  //TODO
 }
 
 #endif

@@ -541,9 +541,12 @@ auto pWindow::_synchronizeGeometry() -> void {
   if(!gtk_widget_get_realized(widget)) return;
   if(!gtk_widget_get_visible(widget)) return;
 
+  //get_allocation(formContainer) returns the same values as get_allocation(widget) ...
+  //as a result, we have to compensate for the window margin ourselves here.
   GtkAllocation allocation;
-
-  gtk_widget_get_allocation(formContainer, &allocation);
+  gtk_widget_get_allocation(widget, &allocation);
+  allocation.height -= _menuHeight();
+  allocation.height -= _statusHeight();
   if(allocation.width != lastSize.width || allocation.height != lastSize.height) {
     auto size = self().geometry().size();
     state().geometry.setSize({allocation.width, allocation.height});

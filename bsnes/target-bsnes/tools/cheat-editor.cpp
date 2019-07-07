@@ -18,16 +18,21 @@ auto CheatDatabase::create() -> void {
 auto CheatDatabase::findCheats() -> void {
   auto sha256 = emulator->hashes()[0];
 
-  auto document = BML::unserialize(string::read(locate("cheats.bml")));
+  auto document = BML::unserialize(string::read(locate("Database/Cheat Codes.bml")));
   for(auto game : document.find("cartridge")) {
     if(game["sha256"].text() != sha256) continue;
 
     cheatList.reset();
     for(auto cheat : game.find("cheat")) {
+      //convert old cheat format (address/data and address/compare/data)
+      //to new cheat format (address=data and address=compare?data)
+      auto code = cheat["code"].text();
+      code.replace("/", "=", 1L);
+      code.replace("/", "?", 1L);
       cheatList.append(ListViewItem()
         .setCheckable()
         .setText(cheat["description"].text())
-        .setProperty("code", cheat["code"].text())
+        .setProperty("code", code)
       );
     }
 
@@ -158,8 +163,8 @@ auto CheatEditor::create() -> void {
     removeCheats();
   });
 
-  //do not display "Find Cheats" button if there is no cheat database available
-  if(!file::exists(locate("cheats.bml"))) findCheatsButton.setVisible(false);
+  //hide the "Find Cheats" button if the cheat code database isn't found
+  if(!file::exists(locate("Database/Cheat Codes.bml"))) findCheatsButton.setVisible(false);
 }
 
 auto CheatEditor::refresh() -> void {

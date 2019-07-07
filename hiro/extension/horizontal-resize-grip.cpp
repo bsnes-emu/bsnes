@@ -12,6 +12,7 @@ mHorizontalResizeGrip::mHorizontalResizeGrip() {
     icon.write(data, 0x00000000); data += icon.stride();
   }
   mCanvas::setIcon(icon);
+  mCanvas::setMouseCursor(MouseCursor::HorizontalResize);
   mCanvas::onMousePress([&](auto button) {
     if(button == Mouse::Button::Left && !state.timer.enabled()) {
       doActivate();

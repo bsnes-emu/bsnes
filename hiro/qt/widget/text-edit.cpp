@@ -27,10 +27,6 @@ auto pTextEdit::setBackgroundColor(Color color) -> void {
   qtTextEdit->setAutoFillBackground((bool)color);
 }
 
-auto pTextEdit::setCursor(Cursor cursor) -> void {
-  _setState();
-}
-
 auto pTextEdit::setEditable(bool editable) -> void {
   _setState();
 }
@@ -47,6 +43,10 @@ auto pTextEdit::setText(const string& text) -> void {
   qtTextEdit->setPlainText(QString::fromUtf8(text));
 }
 
+auto pTextEdit::setTextCursor(TextCursor cursor) -> void {
+  _setState();
+}
+
 auto pTextEdit::setWordWrap(bool wordWrap) -> void {
   _setState();
 }
@@ -55,11 +55,16 @@ auto pTextEdit::text() const -> string {
   return qtTextEdit->toPlainText().toUtf8().constData();
 }
 
+auto pTextEdit::textCursor() const -> TextCursor {
+  //TODO
+  return state().textCursor;
+}
+
 auto pTextEdit::_setState() -> void {
   QTextCursor cursor = qtTextEdit->textCursor();
   signed lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
-  cursor.setPosition(max(0, min(lastCharacter, state().cursor.offset())));
-  cursor.setPosition(max(0, min(lastCharacter, state().cursor.offset() + state().cursor.length())), QTextCursor::KeepAnchor);
+  cursor.setPosition(max(0, min(lastCharacter, state().textCursor.offset())));
+  cursor.setPosition(max(0, min(lastCharacter, state().textCursor.offset() + state().textCursor.length())), QTextCursor::KeepAnchor);
   qtTextEdit->setTextCursor(cursor);
   qtTextEdit->setTextInteractionFlags(state().editable
     ? Qt::TextEditorInteraction

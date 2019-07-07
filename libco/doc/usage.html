@@ -62,6 +62,14 @@ Return handle to current cothread. Always returns a valid handle, even when
 called from the main program thread.
 <hr/>
 
+<code>cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void));</code><br/><br/>
+Initializes new cothread.</br>
+This function is identical to co_create, only it attempts to use the provided
+memory instead of allocating new memory on the heap. Please note that certain
+implementations (currently only Windows Fibers) cannot be created using existing
+memory, and as such, this function will fail.
+<hr/>
+
 <code>cothread_t co_create(unsigned int heapsize, void (*coentry)(void));</code><br/><br/>
 Create new cothread.<br/>
 Heapsize is the amount of memory allocated for the cothread stack, specified

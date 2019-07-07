@@ -39,6 +39,7 @@ namespace Math {
 #include <time.h>
 #include <utime.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -77,7 +78,6 @@ namespace Math {
   inline auto putenv(const char* value) -> int { return _wputenv(nall::utf16_t(value)); }
   inline auto realpath(const char* file_name, char* resolved_name) -> char* { wchar_t wfile_name[PATH_MAX] = L""; if(!_wfullpath(wfile_name, nall::utf16_t(file_name), PATH_MAX)) return nullptr; strcpy(resolved_name, nall::utf8_t(wfile_name)); return resolved_name; }
   inline auto rename(const char* oldname, const char* newname) -> int { return _wrename(nall::utf16_t(oldname), nall::utf16_t(newname)); }
-  inline auto usleep(unsigned milliseconds) -> void { Sleep(milliseconds / 1000); }
 
   namespace nall {
     //network functions take void*, not char*. this allows them to be used without casting

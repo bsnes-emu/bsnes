@@ -8,7 +8,7 @@ ifeq ($(ruby),)
     ruby += audio.openal
     ruby += input.quartz input.carbon
   else ifeq ($(platform),linux)
-    ruby += video.glx video.xvideo video.xshm
+    ruby += video.glx video.glx2 video.xvideo video.xshm
     ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
     ruby += input.sdl input.xlib input.udev
   else ifeq ($(platform),bsd)

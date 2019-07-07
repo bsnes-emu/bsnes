@@ -47,18 +47,26 @@ auto PPUfast::Line::render() -> void {
   renderWindow(io.col.window, io.col.window.aboveMask, windowAbove);
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
-  auto luma = io.displayBrightness << 15;
+  auto luma = ppufast.lightTable[io.displayBrightness];
+  uint curr = 0, prev = 0;
   if(hd) for(uint x : range(256 * scale * scale)) {
-    *output++ = luma | pixel(x / scale & 255, above[x], below[x]);
+    *output++ = luma[pixel(x / scale & 255, above[x], below[x])];
   } else if(width == 256) for(uint x : range(256)) {
-    *output++ = luma | pixel(x, above[x], below[x]);
+    *output++ = luma[pixel(x, above[x], below[x])];
   } else if(!hires) for(uint x : range(256)) {
-    auto color = luma | pixel(x, above[x], below[x]);
+    auto color = luma[pixel(x, above[x], below[x])];
     *output++ = color;
     *output++ = color;
+  } else if(!configuration.video.blurEmulation) for(uint x : range(256)) {
+    *output++ = luma[pixel(x, below[x], above[x])];
+    *output++ = luma[pixel(x, above[x], below[x])];
   } else for(uint x : range(256)) {
-    *output++ = luma | pixel(x, below[x], above[x]);
-    *output++ = luma | pixel(x, above[x], below[x]);
+    curr = luma[pixel(x, below[x], above[x])];
+    *output++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+    prev = curr;
+    curr = luma[pixel(x, above[x], below[x])];
+    *output++ = (prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+    prev = curr;
   }
 }
 

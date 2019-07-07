@@ -34,10 +34,12 @@ else
   $(error "unsupported platform")
 endif
 
-objects := libco emulator
+objects := libco emulator filter lzma
 
 obj/libco.o: ../libco/libco.c
 obj/emulator.o: emulator/emulator.cpp
+obj/filter.o: filter/filter.cpp
+obj/lzma.o: lzma/lzma.cpp
 
 include sfc/GNUmakefile
 include gb/GNUmakefile

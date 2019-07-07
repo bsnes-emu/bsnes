@@ -21,6 +21,7 @@ struct mTreeView : mWidget {
   auto onToggle(const function<void (sTreeViewItem)>& callback = {}) -> type&;
   auto remove(sTreeViewItem item) -> type&;
   auto reset() -> type&;
+  auto selectNone() -> type&;
   auto selected() const -> TreeViewItem;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;

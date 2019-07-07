@@ -107,6 +107,14 @@ auto mTreeView::reset() -> type& {
   return *this;
 }
 
+auto mTreeView::selectNone() -> type& {
+  if(auto item = selected()) {
+  //TODO
+  //item->setSelected(false);
+  }
+  return *this;
+}
+
 auto mTreeView::selected() const -> TreeViewItem {
   return item(state.selectedPath);
 }

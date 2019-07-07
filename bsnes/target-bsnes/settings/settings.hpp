@@ -9,7 +9,6 @@ struct Settings : Markup::Node {
 
   struct Video {
     string driver;
-    bool exclusive = false;
     bool blocking = false;
     bool flush = false;
     string format = "Default";
@@ -18,12 +17,15 @@ struct Settings : Markup::Node {
     uint luminance = 100;
     uint saturation = 100;
     uint gamma = 150;
+    bool fastForwardFrameSkip = true;
+    bool snow = false;
 
     string output = "Scale";
     uint multiplier = 2;
     bool aspectCorrection = true;
     bool overscan = false;
     bool blur = false;
+    string filter = "None";
   } video;
 
   struct Audio {
@@ -126,6 +128,9 @@ private:
       Label gammaLabel{&colorLayout, Size{0, 0}};
       Label gammaValue{&colorLayout, Size{50_sx, 0}};
       HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
+    //
+    CheckLabel fastForwardFrameSkip{&layout, Size{~0, 0}};
+    CheckLabel snowOption{&layout, Size{~0, 0}};
 };
 
 struct AudioSettings : TabFrameItem {
@@ -318,7 +323,6 @@ public:
       HorizontalLayout videoPropertyLayout{&videoLayout, Size{~0, 0}};
         ComboButton videoFormatOption{&videoPropertyLayout, Size{0, 0}};
     HorizontalLayout videoToggleLayout{&layout, Size{~0, 0}};
-      CheckLabel videoExclusiveToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
       CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
     Canvas videoSpacer{&layout, Size{~0, 1}};
@@ -369,4 +373,5 @@ extern HotkeySettings hotkeySettings;
 extern PathSettings pathSettings;
 extern EmulatorSettings emulatorSettings;
 extern DriverSettings driverSettings;
-extern SettingsWindow settingsWindow;
+namespace Instances { extern Instance<SettingsWindow> settingsWindow; }
+extern SettingsWindow& settingsWindow;

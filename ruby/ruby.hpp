@@ -7,6 +7,7 @@
 #include <nall/hid.hpp>
 #include <nall/image.hpp>
 #include <nall/matrix.hpp>
+#include <nall/matrix-multiply.hpp>
 #include <nall/queue.hpp>
 #include <nall/range.hpp>
 #include <nall/set.hpp>

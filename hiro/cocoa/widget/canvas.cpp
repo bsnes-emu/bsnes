@@ -96,8 +96,6 @@ auto pCanvas::construct() -> void {
   @autoreleasepool {
     cocoaView = cocoaCanvas = [[CocoaCanvas alloc] initWith:self()];
     pWidget::construct();
-
-    setDroppable(state().droppable);
   }
 }
 
@@ -129,6 +127,10 @@ auto pCanvas::setDroppable(bool droppable) -> void {
       [cocoaCanvas unregisterDraggedTypes];
     }
   }
+}
+
+auto pCanvas::setFocusable(bool focusable) -> void {
+  //TODO
 }
 
 auto pCanvas::setGeometry(Geometry geometry) -> void {
@@ -168,7 +170,6 @@ auto pCanvas::_rasterize() -> void {
 
     if(width != surfaceWidth || height != surfaceHeight) {
       [cocoaView setImage:nil];
-      [surface release];
       surface = nullptr;
       bitmap = nullptr;
     }

@@ -9,8 +9,6 @@ struct Sprite;
 struct Video {
   enum class Effect : uint {
     ColorBleed,
-    InterframeBlending,
-    RotateLeft,
   };
 
   ~Video();
@@ -48,8 +46,6 @@ private:
 
   struct Effects {
     bool colorBleed = false;
-    bool interframeBlending = false;
-    bool rotateLeft = false;
   } effects;
 
   friend class Sprite;
