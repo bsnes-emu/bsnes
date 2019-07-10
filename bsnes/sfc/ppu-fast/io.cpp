@@ -5,7 +5,7 @@ auto PPUfast::latchCounters() -> void {
 }
 
 auto PPUfast::vramAddress() const -> uint15 {  //uint15 for 64K VRAM; uint16 for 128K VRAM
-  uint16 address = io.vramAddress;
+  uint15 address = io.vramAddress;
   switch(io.vramMapping) {
   case 0: return address;
   case 1: return address.bits( 8,15) <<  8 | address.bits(0,4) << 3 | address.bits(5,7);
@@ -21,28 +21,31 @@ auto PPUfast::readVRAM() -> uint16 {
   return vram[address];
 }
 
-auto PPUfast::writeVRAM(uint1 byte, uint8 data) -> void {
+template<bool Byte>
+auto PPUfast::writeVRAM(uint8_t data) -> void {
   if(!io.displayDisable && cpu.vcounter() < vdisp()) return;
   Line::flush();
   auto address = vramAddress();
-  vram[address].byte(byte) = data;
+  if constexpr(Byte == 0) {
+    vram[address] = vram[address] & 0xff00 | data << 0;
+  }
+  if constexpr(Byte == 1) {
+    vram[address] = vram[address] & 0x00ff | data << 8;
+  }
   updateTiledata(address);
 }
 
-auto PPUfast::updateTiledata(uint15 address) -> void {
+auto PPUfast::updateTiledata(uint address) -> void {
   auto word = vram[address];
-  auto line2bpp = tilecache[TileMode::BPP2] + (address.bits(3,14) << 6) + (address.bits(0,2) << 3);
-  auto line4bpp = tilecache[TileMode::BPP4] + (address.bits(4,14) << 6) + (address.bits(0,2) << 3);
-  auto line8bpp = tilecache[TileMode::BPP8] + (address.bits(5,14) << 6) + (address.bits(0,2) << 3);
-  uint plane4bpp = address.bit(3) << 1;
-  uint plane8bpp = address.bit(3) << 1 | address.bit(4) << 2;
+  auto line2bpp = tilecache[TileMode::BPP2] + ((address & 0x7fff) << 3);
+  auto line4bpp = tilecache[TileMode::BPP4] + ((address & 0x7ff0) << 2) + ((address & 7) << 3);
+  auto line8bpp = tilecache[TileMode::BPP8] + ((address & 0x7fe0) << 1) + ((address & 7) << 3);
+  uint plane4bpp = address >> 2 & 2;
+  uint plane8bpp = address >> 2 & 6;
   for(uint x : range(8)) {
-    line2bpp[7 - x].bit(            0) = word.bit(x + 0);
-    line2bpp[7 - x].bit(            1) = word.bit(x + 8);
-    line4bpp[7 - x].bit(plane4bpp + 0) = word.bit(x + 0);
-    line4bpp[7 - x].bit(plane4bpp + 1) = word.bit(x + 8);
-    line8bpp[7 - x].bit(plane8bpp + 0) = word.bit(x + 0);
-    line8bpp[7 - x].bit(plane8bpp + 1) = word.bit(x + 8);
+    line2bpp[7 - x] = word >> x & 1 | word >> x + 7 & 2;
+    line4bpp[7 - x] = line4bpp[7 - x] & ~(3 << plane4bpp) | (word >> x & 1) << plane4bpp | (word >> x + 7 & 2) << plane4bpp;
+    line8bpp[7 - x] = line8bpp[7 - x] & ~(3 << plane8bpp) | (word >> x & 1) << plane8bpp | (word >> x + 7 & 2) << plane8bpp;
   }
 }
 
@@ -58,12 +61,18 @@ auto PPUfast::writeOAM(uint10 address, uint8 data) -> void {
   return writeObject(address, data);
 }
 
-auto PPUfast::readCGRAM(uint1 byte, uint8 address) -> uint8 {
+template<bool Byte>
+auto PPUfast::readCGRAM(uint8_t address) -> uint8 {
   if(!io.displayDisable
   && cpu.vcounter() > 0 && cpu.vcounter() < vdisp()
   && cpu.hcounter() >= 88 && cpu.hcounter() < 1096
   ) address = latch.cgramAddress;
-  return cgram[address].byte(byte);
+  if constexpr(Byte == 0) {
+    return cgram[address] >> 0;
+  }
+  if constexpr(Byte == 1) {
+    return cgram[address] >> 8;
+  }
 }
 
 auto PPUfast::writeCGRAM(uint8 address, uint15 data) -> void {
@@ -114,7 +123,7 @@ auto PPUfast::readIO(uint24 address, uint8 data) -> uint8 {
   }
 
   case 0x2139: {  //VMDATALREAD
-    data = latch.vram.byte(0);
+    data = latch.vram & 0xff;
     if(io.vramIncrementMode == 0) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
@@ -123,7 +132,7 @@ auto PPUfast::readIO(uint24 address, uint8 data) -> uint8 {
   }
 
   case 0x213a: {  //VMDATAHREAD
-    data = latch.vram.byte(1);
+    data = latch.vram >> 8;
     if(io.vramIncrementMode == 1) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
@@ -133,26 +142,30 @@ auto PPUfast::readIO(uint24 address, uint8 data) -> uint8 {
 
   case 0x213b: {  //CGDATAREAD
     if(io.cgramAddressLatch++ == 0) {
-      latch.ppu2.mdr.bits(0,7) = readCGRAM(0, io.cgramAddress);
+      latch.ppu2.mdr.bits(0,7) = readCGRAM<0>(io.cgramAddress);
     } else {
-      latch.ppu2.mdr.bits(0,6) = readCGRAM(1, io.cgramAddress++);
+      latch.ppu2.mdr.bits(0,6) = readCGRAM<1>(io.cgramAddress++);
     }
     return latch.ppu2.mdr;
   }
 
   case 0x213c: {  //OPHCT
-    if(latch.hcounter++ == 0) {
+    if(latch.hcounter == 0) {
+      latch.hcounter = 1;
       latch.ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
     } else {
+      latch.hcounter = 0;
       latch.ppu2.mdr.bit(0) = io.hcounter.bit(8);
     }
     return latch.ppu2.mdr;
   }
 
   case 0x213d: {  //OPVCT
-    if(latch.vcounter++ == 0) {
+    if(latch.vcounter == 0) {
+      latch.vcounter = 1;
       latch.ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
     } else {
+      latch.vcounter = 0;
       latch.ppu2.mdr.bit(0) = io.vcounter.bit(8);
     }
     return latch.ppu2.mdr;
@@ -355,25 +368,25 @@ auto PPUfast::writeIO(uint24 address, uint8 data) -> void {
   }
 
   case 0x2116: {  //VMADDL
-    io.vramAddress.byte(0) = data;
+    io.vramAddress = io.vramAddress & 0xff00 | data << 0;
     latch.vram = readVRAM();
     return;
   }
 
   case 0x2117: {  //VMADDH
-    io.vramAddress.byte(1) = data;
+    io.vramAddress = io.vramAddress & 0x00ff | data << 8;
     latch.vram = readVRAM();
     return;
   }
 
   case 0x2118: {  //VMDATAL
-    writeVRAM(0, data);
+    writeVRAM<0>(data);
     if(io.vramIncrementMode == 0) io.vramAddress += io.vramIncrementSize;
     return;
   }
 
   case 0x2119: {  //VMDATAH
-    writeVRAM(1, data);
+    writeVRAM<1>(data);
     if(io.vramIncrementMode == 1) io.vramAddress += io.vramIncrementSize;
     return;
   }

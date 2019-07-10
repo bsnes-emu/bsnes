@@ -24,7 +24,6 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto idle() -> void override;
   auto read(uint24 addr) -> uint8 override;
   auto write(uint24 addr, uint8 data) -> void override;
-  alwaysinline auto wait(uint24 addr) const -> uint;
   auto readDisassembler(uint24 addr) -> uint8 override;
 
   //io.cpp
@@ -42,8 +41,9 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   inline auto dmaCounter() const -> uint;
   inline auto joypadCounter() const -> uint;
 
-  auto step(uint clocks) -> void;
-  inline auto stepIdle(uint clocks) -> void;
+  alwaysinline auto stepOnce() -> void;
+  alwaysinline auto step(uint clocks) -> void;
+  template<uint Clocks, bool Synchronize> auto step() -> void;
   auto scanline() -> void;
 
   alwaysinline auto aluEdge() -> void;
@@ -67,7 +67,6 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
 
   uint8 wram[128 * 1024];
   vector<Thread*> coprocessors;
-  vector<Thread*> peripherals;
 
 private:
   uint version = 2;  //allowed: 1, 2
@@ -146,7 +145,7 @@ private:
     uint9  vtime = 0x1ff;
 
     //$420d
-    uint romSpeed = 8;
+    uint1 fastROM = 0;
 
     //$4214-$4217
     uint16 rddiv;
@@ -167,7 +166,7 @@ private:
 
   struct Channel {
     //dma.cpp
-    inline auto step(uint clocks) -> void;
+    template<uint Clocks, bool Synchronize> inline auto step() -> void;
     inline auto edge() -> void;
 
     inline auto validA(uint24 address) -> bool;

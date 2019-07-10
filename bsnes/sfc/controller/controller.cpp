@@ -11,24 +11,9 @@ ControllerPort controllerPort2;
 #include "justifier/justifier.cpp"
 
 Controller::Controller(uint port) : port(port) {
-  if(!handle()) create(Controller::Enter, 1);
 }
 
 Controller::~Controller() {
-  scheduler.remove(*this);
-}
-
-auto Controller::Enter() -> void {
-  while(true) {
-    scheduler.synchronize();
-    if(controllerPort1.device->active()) controllerPort1.device->main();
-    if(controllerPort2.device->active()) controllerPort2.device->main();
-  }
-}
-
-auto Controller::main() -> void {
-  step(1);
-  synchronize(cpu);
 }
 
 auto Controller::iobit() -> bool {
@@ -61,11 +46,6 @@ auto ControllerPort::connect(uint deviceID) -> void {
   case ID::Device::Justifier: device = new Justifier(port, false); break;
   case ID::Device::Justifiers: device = new Justifier(port, true); break;
   }
-
-  cpu.peripherals.reset();
-  if(auto device = controllerPort1.device) cpu.peripherals.append(device);
-  if(auto device = controllerPort2.device) cpu.peripherals.append(device);
-  if(auto device = expansionPort.device) cpu.peripherals.append(device);
 }
 
 auto ControllerPort::power(uint port) -> void {

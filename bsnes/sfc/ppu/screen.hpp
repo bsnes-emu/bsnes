@@ -13,8 +13,8 @@ struct Screen {
 
   auto serialize(serializer&) -> void;
 
-  uint16* lineA;
-  uint16* lineB;
+  uint16_t* lineA;
+  uint16_t* lineB;
 
   uint15 cgram[256];
 

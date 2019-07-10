@@ -11,7 +11,6 @@
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
 SuperScope::SuperScope(uint port) : Controller(port) {
-  create(Controller::Enter, system.cpuFrequency());
   sprite = Emulator::video.createSprite(32, 32);
   sprite->setPixels(Resource::Sprite::CrosshairGreen);
 
@@ -39,6 +38,7 @@ SuperScope::~SuperScope() {
   Emulator::video.removeSprite(sprite);
 }
 
+/*
 auto SuperScope::main() -> void {
   uint next = cpu.vcounter() * 1364 + cpu.hcounter();
 
@@ -68,6 +68,7 @@ auto SuperScope::main() -> void {
   step(2);
   synchronize(cpu);
 }
+*/
 
 auto SuperScope::data() -> uint2 {
   if(counter >= 8) return 1;

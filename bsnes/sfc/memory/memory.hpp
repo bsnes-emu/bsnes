@@ -1,4 +1,6 @@
 struct Memory {
+  static bool GlobalWriteEnable;
+
   virtual ~Memory() { reset(); }
   inline explicit operator bool() const { return size() > 0; }
 

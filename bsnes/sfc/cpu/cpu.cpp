@@ -30,12 +30,12 @@ auto CPU::main() -> void {
       interrupt();
     } else if(status.resetPending) {
       status.resetPending = false;
-      step(132);
+      for(uint repeat : range(22)) step<6,0>();  //step(132);
       r.vector = 0xfffc;
       interrupt();
     } else if(status.powerPending) {
       status.powerPending = false;
-      step(186);
+      for(uint repeat : range(31)) step<6,0>();  //step(186);
       r.pc.byte(0) = bus.read(0xfffc, r.mdr);
       r.pc.byte(1) = bus.read(0xfffd, r.mdr);
     }

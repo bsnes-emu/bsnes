@@ -17,53 +17,48 @@ auto CPU::joypadCounter() const -> uint {
   return counter.cpu & 255;
 }
 
-auto CPU::step(uint clocks) -> void {
-  status.irqLock = false;
-  uint ticks = clocks >> 1;
-  while(ticks--) {
-    counter.cpu += 2;
-    tick();
-    if(hcounter() & 2) pollInterrupts();
-    if(joypadCounter() == 0) joypadEdge();
-  }
-
-  Thread::step(clocks);
-  for(auto peripheral : peripherals) synchronize(*peripheral);
-
-  if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {
-    //note: pattern should technically be 5-3, 5-3, 5-3, 5-3, 5-3 per logic analyzer
-    //result averages out the same as no coprocessor polls refresh() at > frequency()/2
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-  }
-
-  if(configuration.hacks.coprocessors.delayedSync) return;
-  for(auto coprocessor : coprocessors) synchronize(*coprocessor);
+auto CPU::stepOnce() -> void {
+  counter.cpu += 2;
+  tick();
+  if(hcounter() & 2) pollInterrupts();
+  if(joypadCounter() == 0) joypadEdge();
 }
 
-auto CPU::stepIdle(uint clocks) -> void {
-  status.irqLock = false;
-  uint ticks = clocks >> 1;
-  while(ticks--) {
-    counter.cpu += 2;
-    tick();
-    if(hcounter() & 2) pollInterrupts();
-    if(joypadCounter() == 0) joypadEdge();
-  }
-
-  Thread::step(clocks);
+template<uint Clocks, bool Synchronize>
+auto CPU::step() -> void {
+  static_assert(Clocks == 2 || Clocks == 4 || Clocks == 6 || Clocks == 8 || Clocks == 10 || Clocks == 12);
+  if constexpr(Clocks >=  2) stepOnce();
+  if constexpr(Clocks >=  4) stepOnce();
+  if constexpr(Clocks >=  6) stepOnce();
+  if constexpr(Clocks >=  8) stepOnce();
+  if constexpr(Clocks >= 10) stepOnce();
+  if constexpr(Clocks >= 12) stepOnce();
+  Thread::step(Clocks);
 
   if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {
     //note: pattern should technically be 5-3, 5-3, 5-3, 5-3, 5-3 per logic analyzer
     //result averages out the same as no coprocessor polls refresh() at > frequency()/2
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
-    status.dramRefresh = 1; step(6); status.dramRefresh = 2; step(2); aluEdge();
+    status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
+    status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
+    status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
+    status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
+    status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
+  }
+
+  if constexpr(Synchronize) {
+    if(configuration.hacks.coprocessors.delayedSync) return;
+    for(auto coprocessor : coprocessors) synchronize(*coprocessor);
+  }
+}
+
+auto CPU::step(uint clocks) -> void {
+  switch(clocks) {
+  case  2: return step< 2,1>();
+  case  4: return step< 4,1>();
+  case  6: return step< 6,1>();
+  case  8: return step< 8,1>();
+  case 10: return step<10,1>();
+  case 12: return step<12,1>();
   }
 }
 

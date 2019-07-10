@@ -245,9 +245,57 @@ auto Interface::unserialize(serializer& s) -> bool {
 }
 
 auto Interface::cheats(const vector<string>& list) -> void {
-  cheat.reset();
   if(cartridge.has.ICD) return GameBoy::cheat.assign(list);
-  cheat.assign(list);
+
+  //make all ROM data writable temporarily
+  Memory::GlobalWriteEnable = true;
+
+  Cheat oldCheat = cheat;
+  Cheat newCheat;
+  newCheat.assign(list);
+
+  //determine all old codes to remove
+  for(auto& oldCode : oldCheat.codes) {
+    bool found = false;
+    for(auto& newCode : newCheat.codes) {
+      if(oldCode == newCode) {
+        found = true;
+        break;
+      }
+    }
+    if(!found) {
+      //remove old cheat
+      if(oldCode.enable) {
+        bus.write(oldCode.address, oldCode.restore);
+      }
+    }
+  }
+
+  //determine all new codes to create
+  for(auto& newCode : newCheat.codes) {
+    bool found = false;
+    for(auto& oldCode : oldCheat.codes) {
+      if(newCode == oldCode) {
+        found = true;
+        break;
+      }
+    }
+    if(!found) {
+      //create new cheat
+      newCode.restore = bus.read(newCode.address);
+      if(!newCode.compare || newCode.compare() == newCode.restore) {
+        newCode.enable = true;
+        bus.write(newCode.address, newCode.data);
+      } else {
+        newCode.enable = false;
+      }
+    }
+  }
+
+  cheat = newCheat;
+
+  //restore ROM write protection
+  Memory::GlobalWriteEnable = false;
 }
 
 auto Interface::configuration() -> string {

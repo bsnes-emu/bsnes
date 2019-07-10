@@ -8,7 +8,6 @@ struct SuperScope : Controller {
   SuperScope(uint port);
   ~SuperScope();
 
-  auto main() -> void;
   auto data() -> uint2;
   auto latch(bool data) -> void;
 

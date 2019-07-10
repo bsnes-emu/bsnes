@@ -32,8 +32,9 @@ struct ProtectableMemory : Memory {
   }
 
   inline auto write(uint24 address, uint8 data) -> void override {
-    if(!self.writable) return;
-    self.data[address] = data;
+    if(self.writable || Memory::GlobalWriteEnable) {
+      self.data[address] = data;
+    }
   }
 
   inline auto operator[](uint24 address) const -> uint8 {

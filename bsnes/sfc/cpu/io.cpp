@@ -203,7 +203,7 @@ auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
     return;
 
   case 0x420d:  //MEMSEL
-    io.romSpeed = data.bit(0) ? 6 : 8;
+    io.fastROM = data.bit(0);
     return;
 
   }

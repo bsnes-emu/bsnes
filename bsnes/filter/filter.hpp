@@ -2,6 +2,12 @@
 
 #include <emulator/emulator.hpp>
 
+namespace Filter {
+  using Size = auto (*)(uint& width, uint& height) -> void;
+  using Render = auto (*)(uint32_t* palette, uint32_t* output, uint outpitch,
+    const uint16_t* input, uint pitch, uint width, uint height) -> void;
+}
+
 namespace Filter::None {
   auto size(uint& width, uint& height) -> void;
   auto render(

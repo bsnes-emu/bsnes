@@ -14,7 +14,7 @@ auto CPU::hdmaActive() -> bool {
 }
 
 auto CPU::dmaRun() -> void {
-  step(8);
+  step<8,0>();
   dmaEdge();
   for(auto& channel : channels) channel.dmaRun();
   status.irqLock = true;
@@ -25,13 +25,13 @@ auto CPU::hdmaReset() -> void {
 }
 
 auto CPU::hdmaSetup() -> void {
-  step(8);
+  step<8,0>();
   for(auto& channel : channels) channel.hdmaSetup();
   status.irqLock = true;
 }
 
 auto CPU::hdmaRun() -> void {
-  step(8);
+  step<8,0>();
   for(auto& channel : channels) channel.hdmaTransfer();
   for(auto& channel : channels) channel.hdmaAdvance();
   status.irqLock = true;
@@ -39,7 +39,8 @@ auto CPU::hdmaRun() -> void {
 
 //
 
-auto CPU::Channel::step(uint clocks) -> void { return cpu.step(clocks); }
+template<uint Clocks, bool Synchronize>
+auto CPU::Channel::step() -> void { return cpu.step<Clocks, Synchronize>(); }
 auto CPU::Channel::edge() -> void { return cpu.dmaEdge(); }
 
 auto CPU::Channel::validA(uint24 address) -> bool {
@@ -52,16 +53,16 @@ auto CPU::Channel::validA(uint24 address) -> bool {
 }
 
 auto CPU::Channel::readA(uint24 address) -> uint8 {
-  step(4);
+  step<4,1>();
   cpu.r.mdr = validA(address) ? bus.read(address, cpu.r.mdr) : (uint8)0x00;
-  step(4);
+  step<4,1>();
   return cpu.r.mdr;
 }
 
 auto CPU::Channel::readB(uint8 address, bool valid) -> uint8 {
-  step(4);
+  step<4,1>();
   cpu.r.mdr = valid ? bus.read(0x2100 | address, cpu.r.mdr) : (uint8)0x00;
-  step(4);
+  step<4,1>();
   return cpu.r.mdr;
 }
 
@@ -97,7 +98,7 @@ auto CPU::Channel::transfer(uint24 addressA, uint2 index) -> void {
 auto CPU::Channel::dmaRun() -> void {
   if(!dmaEnable) return;
 
-  step(8);
+  step<8,0>();
   edge();
 
   uint2 index = 0;

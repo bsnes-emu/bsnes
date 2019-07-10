@@ -20,9 +20,6 @@ bg4(Background::ID::BG4) {
   ppu1.version = 1;  //allowed values: 1
   ppu2.version = 3;  //allowed values: 1, 2, 3
 
-  output = new uint16[512 * 512];
-  output += 16 * 512;  //overscan offset
-
   for(uint l = 0; l < 16; l++) {
     for(uint r = 0; r < 32; r++) {
       for(uint g = 0; g < 32; g++) {
@@ -42,9 +39,6 @@ PPU::~PPU() {
   if(system.fastPPU()) {
     setHandle(nullptr);
   }
-
-  output -= 16 * 512;
-  delete[] output;
 }
 
 auto PPU::step(uint clocks) -> void {
@@ -253,12 +247,10 @@ auto PPU::refresh() -> void {
   }
 
   auto output = this->output;
-  if(!overscan()) output -= 14 * 512;
-  auto pitch = 512;
-  auto width = 512;
+  auto pitch  = 512;
+  auto width  = 512;
   auto height = 480;
-//Emulator::video.setEffect(Emulator::Video::Effect::ColorBleed, configuration.video.blurEmulation);
-  platform->videoFrame(output, pitch * sizeof(uint16), width, height);
+  platform->videoFrame(output, pitch * sizeof(uint16), width, height, /* scale = */ 1);
 }
 
 }

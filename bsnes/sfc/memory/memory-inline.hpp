@@ -24,12 +24,7 @@ auto Bus::reduce(uint addr, uint mask) -> uint {
 }
 
 auto Bus::read(uint24 addr, uint8 data) -> uint8 {
-  data = reader[lookup[addr]](target[addr], data);
-  if(cheat) {
-    if(!(addr & 0x40e000)) addr = 0x7e0000 | (addr & 0x1fff);  //de-mirror WRAM
-    if(auto result = cheat.find(addr, data)) return result();
-  }
-  return data;
+  return reader[lookup[addr]](target[addr], data);
 }
 
 auto Bus::write(uint24 addr, uint8 data) -> void {

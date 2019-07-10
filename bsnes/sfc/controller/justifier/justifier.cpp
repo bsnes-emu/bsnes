@@ -3,7 +3,6 @@ Controller(port),
 chained(chained),
 device(!chained ? ID::Device::Justifier : ID::Device::Justifiers)
 {
-  create(Controller::Enter, system.cpuFrequency());
   latched = 0;
   counter = 0;
   active = 0;
@@ -37,6 +36,7 @@ Justifier::~Justifier() {
   Emulator::video.removeSprite(player2.sprite);
 }
 
+/*
 auto Justifier::main() -> void {
   uint next = cpu.vcounter() * 1364 + cpu.hcounter();
 
@@ -78,6 +78,7 @@ auto Justifier::main() -> void {
   step(2);
   synchronize(cpu);
 }
+*/
 
 auto Justifier::data() -> uint2 {
   if(counter >= 32) return 1;

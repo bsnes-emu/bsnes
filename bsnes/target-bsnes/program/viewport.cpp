@@ -1,4 +1,113 @@
-uint16_t SnowData[] = {
+extern uint16_t SnowData[800];
+extern  uint8_t SnowVelDist[800];
+
+auto Program::viewportSize(uint& width, uint& height, uint scale) -> void {
+  uint videoWidth = 256 * (settings.video.aspectCorrection ? 8.0 / 7.0 : 1.0);
+  uint videoHeight = (settings.video.overscan ? 240.0 : 224.0);
+
+  auto [viewportWidth, viewportHeight] = video.size();
+
+  uint multiplierX = viewportWidth / videoWidth;
+  uint multiplierY = viewportHeight / videoHeight;
+  uint multiplier = min(multiplierX, multiplierY);
+
+  uint outputWidth = videoWidth * multiplier;
+  uint outputHeight = videoHeight * multiplier;
+
+  if(multiplier == 0 || settings.video.output == "Scale") {
+    float multiplierX = (float)viewportWidth / (float)videoWidth;
+    float multiplierY = (float)viewportHeight / (float)videoHeight;
+    float multiplier = min(multiplierX, multiplierY);
+
+    outputWidth = videoWidth * multiplier;
+    outputHeight = videoHeight * multiplier;
+  }
+
+  if(settings.video.output == "Stretch") {
+    outputWidth = viewportWidth;
+    outputHeight = viewportHeight;
+  }
+
+  width = outputWidth;
+  height = outputHeight;
+}
+
+auto Program::viewportRefresh() -> void {
+  if(!emulator->loaded() && !settings.video.snow) return;
+
+  static uint32_t SnowMover = 0;
+  static uint32_t SnowTimer = 18;
+  static uint32_t NumSnow = 0;
+  if(settings.video.snow) SnowMover++;
+
+  static const uint16_t nullData[256 * 240] = {};
+  auto data   = nullData;
+  uint pitch  = 512;
+  uint width  = 256;
+  uint height = 240;
+  uint scale  = 1;
+
+  if(emulator->loaded() && screenshot.data) {
+    data   = screenshot.data;
+    pitch  = screenshot.pitch;
+    width  = screenshot.width;
+    height = screenshot.height;
+    scale  = screenshot.scale;
+  }
+
+  if(!settings.video.overscan) {
+    uint multiplier = height / 240;
+    data += 8 * multiplier * (pitch >> 1);
+    height -= 16 * multiplier;
+  }
+
+  uint outputWidth, outputHeight;
+  viewportSize(outputWidth, outputHeight, scale);
+
+  uint filterWidth = width, filterHeight = height;
+  auto filterRender = filterSelect(filterWidth, filterHeight, scale);
+
+  if(auto [output, length] = video.acquire(filterWidth, filterHeight); output) {
+    filterRender(palettePaused, output, length, (const uint16_t*)data, pitch, width, height);
+    length >>= 2;
+
+    if(settings.video.snow) {
+      uint32_t i = 0;
+      float snowX = filterWidth  / 256.0;
+      float snowY = filterHeight / 256.0;
+      do {
+        uint x = uint8_t(SnowData[i * 2 + 0] >> 8) * snowX;
+        uint y = uint8_t(SnowData[i * 2 + 1] >> 8) * snowY;
+        if((SnowVelDist[i * 2] & 8) != 0) {
+          uint8_t color = 228 + (SnowVelDist[i * 2] & 0x03);
+          if(y) output[y * length + x] = color << 16 | color << 8 | color << 0;
+        }
+      } while(++i != 200);
+
+      for(; SnowMover != 0; --SnowMover) {
+        if(--SnowTimer == 0) {
+          ++NumSnow;
+          SnowTimer = 18;
+        }
+        uint32_t i = 0;
+        uint32_t n = NumSnow;
+        while(n-- != 0) {
+          SnowData[i * 2 + 0] += SnowVelDist[i * 2 + 0] + 4 * (uint8_t)(100 - 50);
+          SnowData[i * 2 + 1] += SnowVelDist[i * 2 + 1] + 256;
+          if(SnowData[i * 2 + 1] <= 0x200) {
+            SnowVelDist[i * 2] |= 8;
+          }
+          ++i;
+        }
+      }
+    }
+
+    video.release();
+    video.output(outputWidth, outputHeight);
+  }
+}
+
+uint16_t SnowData[800] = {
 	161, 251, 115, 211, 249,  87, 128, 101, 232, 176,  51, 180, 108, 193, 224, 112, 254, 159, 102, 238,
 	223, 123, 218,  42, 173, 160, 143, 170,  64,   1, 174,  29,  34, 187, 194, 199,  40,  89, 232,  32,
 	  7, 195, 141,  67, 216,  48, 234,   1, 243, 116, 164, 182, 146, 136,  66,  70,  36,  43,  98, 208,
@@ -41,7 +150,7 @@ uint16_t SnowData[] = {
 	140,  81, 118,  81,  63, 193, 173, 228, 214,  78, 124, 123, 222, 149,   9, 242,   0, 128, 194, 110
 };
 
-uint8_t SnowVelDist[] = {
+uint8_t SnowVelDist[800] = {
 	 57,  92, 100,  19, 100, 184, 238, 225,  55, 240, 255, 221, 215, 105, 226, 153, 164,  41,  22,  93,
 	176, 203, 155, 199, 244,  52, 233, 219, 110, 227, 229, 227, 152, 240,  83, 248, 226,  31, 163,  22,
 	 28, 156,  18,  10, 248,  67, 123, 167,  25, 138,  90,  10,  79, 107, 208, 229, 248, 233, 185,  10,
@@ -83,119 +192,3 @@ uint8_t SnowVelDist[] = {
 	242,  37,  89,  73, 151, 162, 139, 189, 131, 209, 221,  96, 107, 144, 175,  79, 199, 123,  98, 138,
 	226,  86, 221, 254,  72,  14, 126, 180, 200, 171,  85,  94, 120, 124, 196, 225, 150,  57, 219, 158
 };
-
-auto Program::refreshViewport() -> void {
-  if(!emulator->loaded() && !settings.video.snow) return;
-
-  static uint32_t SnowMover = 0;
-  static uint32_t SnowTimer = 18;
-  static uint32_t NumSnow = 0;
-  if(settings.video.snow) SnowMover++;
-
-  auto [viewportWidth, viewportHeight] = video.size();
-
-  uint videoWidth = 256 * (settings.video.aspectCorrection ? 8.0 / 7.0 : 1.0);
-  uint videoHeight = (settings.video.overscan ? 240.0 : 224.0);
-
-  uint multiplierX = viewportWidth / videoWidth;
-  uint multiplierY = viewportHeight / videoHeight;
-  uint multiplier = min(multiplierX, multiplierY);
-
-  uint outputWidth = videoWidth * multiplier;
-  uint outputHeight = videoHeight * multiplier;
-
-  if(multiplier == 0 || settings.video.output == "Scale") {
-    float multiplierX = (float)viewportWidth / (float)videoWidth;
-    float multiplierY = (float)viewportHeight / (float)videoHeight;
-    float multiplier = min(multiplierX, multiplierY);
-
-    outputWidth = videoWidth * multiplier;
-    outputHeight = videoHeight * multiplier;
-  }
-
-  if(settings.video.output == "Stretch") {
-    outputWidth = viewportWidth;
-    outputHeight = viewportHeight;
-  }
-
-  uint width  = 256;
-  uint height = 240;
-
-  if(emulator->loaded() && screenshot.data) {
-    width  = screenshot.width;
-    height = screenshot.height;
-  }
-
-  if(!settings.video.overscan) {
-    if(height == 240) height = 224;
-    if(height == 480) height = 448;
-  }
-
-  if(auto [output, length] = video.acquire(width, height); output) {
-    length >>= 2;
-
-    if(!emulator->loaded() || !screenshot.data) {
-      for(uint y : range(height)) {
-        memory::fill<uint32>(output + y * length, length, 0xff000000);
-      }
-    } else {
-      for(uint y : range(height)) {
-        auto source = screenshot.data + y * (screenshot.pitch >> 1);
-        if(!settings.video.overscan) source += 8 * (screenshot.pitch >> 1);
-        auto target = output + y * length;
-        for(uint x : range(width)) {
-          auto color = *source++;
-
-          uint a = 255;
-          uint r = (color >> 10) & 31;
-          uint g = (color >>  5) & 31;
-          uint b = (color >>  0) & 31;
-
-          r = r << 3 | r >> 2;
-          g = g << 3 | g >> 2;
-          b = b << 3 | b >> 2;
-
-          r >>= 1;
-          g >>= 1;
-          b >>= 1;
-
-          *target++ = a << 24 | r << 16 | g << 8 | b << 0;
-        }
-      }
-    }
-
-    if(settings.video.snow) {
-      uint32_t i = 0;
-      do {
-        uint y = uint8_t(SnowData[i * 2 + 1] >> 8);
-        uint x = uint8_t(SnowData[i * 2 + 0] >> 8);
-        if(width  > 256) x <<= 1;
-        if(height > 240) y <<= 1;
-        if((SnowVelDist[i * 2] & 8) != 0) {
-          uint8_t color = 228 + (SnowVelDist[i * 2] & 0x03);
-          if(y > 0 && y < height) output[y * width + x] = color << 16 | color << 8 | color << 0;
-        }
-      } while(++i != 200);
-
-      for(; SnowMover != 0; --SnowMover) {
-        if(--SnowTimer == 0) {
-          ++NumSnow;
-          SnowTimer = 18;
-        }
-        uint32_t i = 0;
-        uint32_t n = NumSnow;
-        while(n-- != 0) {
-          SnowData[i * 2 + 0] += SnowVelDist[i * 2 + 0] + 4 * (uint8_t)(100 - 50);
-          SnowData[i * 2 + 1] += SnowVelDist[i * 2 + 1] + 256;
-          if(SnowData[i * 2 + 1] <= 0x200) {
-            SnowVelDist[i * 2] |= 8;
-          }
-          ++i;
-        }
-      }
-    }
-
-    video.release();
-    video.output(outputWidth, outputHeight);
-  }
-}

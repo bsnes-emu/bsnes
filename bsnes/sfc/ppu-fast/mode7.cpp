@@ -43,8 +43,8 @@ auto PPUfast::Line::renderMode7(PPUfast::IO::Background& self, uint source) -> v
     bool outOfBounds = (pixelX | pixelY) & ~1023;
     uint15 tileAddress = tileY * 128 + tileX;
     uint15 paletteAddress = ((pixelY & 7) << 3) + (pixelX & 7);
-    uint8 tile = io.mode7.repeat == 3 && outOfBounds ? 0 : ppufast.vram[tileAddress].byte(0);
-    uint8 palette = io.mode7.repeat == 2 && outOfBounds ? 0 : ppufast.vram[paletteAddress + (tile << 6)].byte(1);
+    uint8 tile = io.mode7.repeat == 3 && outOfBounds ? 0 : (ppufast.vram[tileAddress] & 0xff);
+    uint8 palette = io.mode7.repeat == 2 && outOfBounds ? 0 : (ppufast.vram[paletteAddress + (tile << 6)] >> 8);
 
     uint priority;
     if(source == Source::BG1) {

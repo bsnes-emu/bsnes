@@ -1,5 +1,7 @@
 auto PPU::Screen::scanline() -> void {
-  lineA = ppu.output + ppu.vcounter() * 1024;
+  auto y = ppu.vcounter() + (!ppu.display.overscan ? 7 : 0);
+
+  lineA = ppu.output + y * 1024;
   lineB = lineA + (ppu.display.interlace ? 0 : 512);
   if(ppu.display.interlace && ppu.field()) lineA += 512, lineB += 512;
 

@@ -59,6 +59,7 @@ struct CheatEditor : TabFrameItem {
 
 public:
   vector<Cheat> cheats;
+  uint64_t activateTimeout = 0;
 
   VerticalLayout layout{this};
     TableView cheatList{&layout, Size{~0, ~0}};

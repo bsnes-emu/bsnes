@@ -4,9 +4,19 @@ namespace Emulator {
 
 struct Cheat {
   struct Code {
-    uint addr;
+    auto operator==(const Code& code) const -> bool {
+      if(address != code.address) return false;
+      if(data != code.data) return false;
+      if((bool)compare != (bool)code.compare) return false;
+      if(compare && code.compare && compare() != code.compare()) return false;
+      return true;
+    }
+
+    uint address;
     uint data;
-    maybe<uint> comp;
+    maybe<uint> compare;
+    bool enable;
+    uint restore;
   };
 
   explicit operator bool() const {
@@ -17,8 +27,8 @@ struct Cheat {
     codes.reset();
   }
 
-  auto append(uint addr, uint data, maybe<uint> comp = {}) -> void {
-    codes.append({addr, data, comp});
+  auto append(uint address, uint data, maybe<uint> compare = {}) -> void {
+    codes.append({address, data, compare});
   }
 
   auto assign(const vector<string>& list) -> void {
@@ -32,16 +42,15 @@ struct Cheat {
     }
   }
 
-  auto find(uint addr, uint comp) -> maybe<uint> {
+  auto find(uint address, uint compare) -> maybe<uint> {
     for(auto& code : codes) {
-      if(code.addr == addr && (!code.comp || code.comp() == comp)) {
+      if(code.address == address && (!code.compare || code.compare() == compare)) {
         return code.data;
       }
     }
     return nothing;
   }
 
-private:
   vector<Code> codes;
 };
 

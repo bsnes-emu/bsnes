@@ -120,8 +120,8 @@ auto PPUfast::Line::getTile(PPUfast::IO::Background& self, uint hoffset, uint vo
   bool hires = io.bgMode == 5 || io.bgMode == 6;
   uint tileHeight = 3 + self.tileSize;
   uint tileWidth = !hires ? tileHeight : 4;
-  uint screenX = self.screenSize.bit(0) ? 32 << 5 : 0;
-  uint screenY = self.screenSize.bit(1) ? 32 << 5 + self.screenSize.bit(0) : 0;
+  uint screenX = (self.screenSize & 1) ? 32 << 5 : 0;
+  uint screenY = (self.screenSize & 2) ? 32 << 5 + (self.screenSize & 1) : 0;
   uint tileX = hoffset >> tileWidth;
   uint tileY = voffset >> tileHeight;
   uint offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);

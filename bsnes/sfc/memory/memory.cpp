@@ -2,6 +2,7 @@
 
 namespace SuperFamicom {
 
+bool Memory::GlobalWriteEnable = false;
 Bus bus;
 
 Bus::~Bus() {

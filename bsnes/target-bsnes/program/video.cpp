@@ -99,6 +99,15 @@ auto Program::updateVideoPalette() -> void {
     case 24: palette[color] = r >> 8 << 16 | g >> 8 <<  8 | b >> 8 << 0; break;
     case 30: palette[color] = r >> 6 << 20 | g >> 6 << 10 | b >> 6 << 0; break;
     }
+
+    r >>= 1;
+    g >>= 1;
+    b >>= 1;
+
+    switch(depth) {
+    case 24: palettePaused[color] = r >> 8 << 16 | g >> 8 <<  8 | b >> 8 << 0; break;
+    case 30: palettePaused[color] = r >> 6 << 20 | g >> 6 << 10 | b >> 6 << 0; break;
+    }
   }
 
   emulator->configure("Video/ColorEmulation", false);

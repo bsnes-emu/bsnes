@@ -115,6 +115,9 @@ auto CheatEditor::create() -> void {
   cheatList.setHeadered();
   cheatList.setSortable();
   cheatList.onActivate([&] {
+    //kind of a hack: toggling a cheat code twice quickly (onToggle) will call onActivate.
+    //do not trigger the CheatWindow unless it's been at least two seconds since a cheat code was last toggled on or off.
+    if(chrono::timestamp() - activateTimeout < 2) return;
     editButton.doActivate();
   });
   cheatList.onChange([&] {
@@ -123,6 +126,7 @@ auto CheatEditor::create() -> void {
     removeButton.setEnabled(batched.size() >= 1);
   });
   cheatList.onToggle([&](TableViewCell cell) {
+    activateTimeout = chrono::timestamp();
     if(auto item = cell->parentTableViewItem()) {
       cheats[item->offset()].enable = cell.checked();
       synchronizeCodes();

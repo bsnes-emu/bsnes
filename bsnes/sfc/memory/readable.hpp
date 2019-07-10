@@ -24,6 +24,9 @@ struct ReadableMemory : Memory {
   }
 
   inline auto write(uint24 address, uint8 data) -> void override {
+    if(Memory::GlobalWriteEnable) {
+      self.data[address] = data;
+    }
   }
 
   inline auto operator[](uint24 address) const -> uint8 {

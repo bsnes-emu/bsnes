@@ -1,17 +1,45 @@
 auto CPU::idle() -> void {
+  status.irqLock = false;
   status.clockCount = 6;
   dmaEdge();
-  stepIdle(6);
+  step<6,0>();
   aluEdge();
 }
 
 auto CPU::read(uint24 address) -> uint8 {
-  status.clockCount = wait(address);
-  dmaEdge();
-  r.mar = address;
-  step(status.clockCount - 4);
+  status.irqLock = false;
+
+  if(address & 0x408000) {
+    if(address & 0x800000 && io.fastROM) {
+      status.clockCount = 6;
+      dmaEdge();
+      r.mar = address;
+      step<2,1>();
+    } else {
+      status.clockCount = 8;
+      dmaEdge();
+      r.mar = address;
+      step<4,1>();
+    }
+  } else if(address + 0x6000 & 0x4000) {
+    status.clockCount = 8;
+    dmaEdge();
+    r.mar = address;
+    step<4,1>();
+  } else if(address - 0x4000 & 0x7e00) {
+    status.clockCount = 6;
+    dmaEdge();
+    r.mar = address;
+    step<2,1>();
+  } else {
+    status.clockCount = 12;
+    dmaEdge();
+    r.mar = address;
+    step<8,1>();
+  }
+
   auto data = bus.read(address, r.mdr);
-  step(4);
+  step<4,0>();
   aluEdge();
   //$00-3f,80-bf:4000-43ff reads are internal to CPU, and do not update the MDR
   if((address & 0x40fc00) != 0x4000) r.mdr = data;
@@ -19,19 +47,39 @@ auto CPU::read(uint24 address) -> uint8 {
 }
 
 auto CPU::write(uint24 address, uint8 data) -> void {
+  status.irqLock = false;
   aluEdge();
-  status.clockCount = wait(address);
-  dmaEdge();
-  r.mar = address;
-  step(status.clockCount);
-  bus.write(address, r.mdr = data);
-}
 
-auto CPU::wait(uint24 address) const -> uint {
-  if(address & 0x408000) return address & 0x800000 ? io.romSpeed : 8;
-  if(address + 0x6000 & 0x4000) return 8;
-  if(address - 0x4000 & 0x7e00) return 6;
-  return 12;
+  if(address & 0x408000) {
+    if(address & 0x800000 && io.fastROM) {
+      status.clockCount = 6;
+      dmaEdge();
+      r.mar = address;
+      step<6,1>();
+    } else {
+      status.clockCount = 8;
+      dmaEdge();
+      r.mar = address;
+      step<8,1>();
+    }
+  } else if(address + 0x6000 & 0x4000) {
+    status.clockCount = 8;
+    dmaEdge();
+    r.mar = address;
+    step<8,1>();
+  } else if(address - 0x4000 & 0x7e00) {
+    status.clockCount = 6;
+    dmaEdge();
+    r.mar = address;
+    step<6,1>();
+  } else {
+    status.clockCount = 12;
+    dmaEdge();
+    r.mar = address;
+    step<12,1>();
+  }
+
+  bus.write(address, r.mdr = data);
 }
 
 auto CPU::readDisassembler(uint24 address) -> uint8 {

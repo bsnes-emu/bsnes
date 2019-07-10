@@ -9,7 +9,7 @@ struct Program : Lock, Emulator::Platform {
   //platform.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
-  auto videoFrame(const uint16* data, uint pitch, uint width, uint height) -> void override;
+  auto videoFrame(const uint16_t* data, uint pitch, uint width, uint height, uint scale) -> void override;
   auto audioFrame(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
@@ -104,8 +104,12 @@ struct Program : Lock, Emulator::Platform {
   auto hackPatchMemory(vector<uint8_t>& data) -> void;
   auto hackOverclockSuperFX() -> void;
 
+  //filter.cpp
+  auto filterSelect(uint& width, uint& height, uint scale) -> Filter::Render;
+
   //viewport.cpp
-  auto refreshViewport() -> void;
+  auto viewportSize(uint& width, uint& height, uint scale) -> void;
+  auto viewportRefresh() -> void;
 
 public:
   struct Game {
@@ -142,12 +146,14 @@ public:
   vector<string> gameQueue;
 
   uint32_t palette[32768];
+  uint32_t palettePaused[32768];
 
   struct Screenshot {
-    const uint16* data = nullptr;
-    uint pitch = 0;
-    uint width = 0;
+    const uint16_t* data = nullptr;
+    uint pitch  = 0;
+    uint width  = 0;
     uint height = 0;
+    uint scale  = 0;
   } screenshot;
 
   bool frameAdvance = false;

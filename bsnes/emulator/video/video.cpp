@@ -154,7 +154,7 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
     }
   }
 
-  platform->videoFrame((const uint16*)output, width * sizeof(uint32), width, height);
+//platform->videoFrame((const uint16*)output, width * sizeof(uint32), width, height);
 }
 
 }

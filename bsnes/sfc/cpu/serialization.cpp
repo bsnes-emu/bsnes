@@ -69,7 +69,7 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(io.htime);
   s.integer(io.vtime);
 
-  s.integer(io.romSpeed);
+  s.integer(io.fastROM);
 
   s.integer(io.rddiv);
   s.integer(io.rdmpy);

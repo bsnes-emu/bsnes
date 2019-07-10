@@ -4,31 +4,38 @@ build := performance
 openmp := true
 flags += -I. -I..
 
+# in order for this to work, obj/lzma.o must be omitted or bsnes will hang on startup.
+# further, only the X-Video driver works reliably. OpenGL 3.2, OpenGL 2.0, and XShm crash bsnes.
+ifeq ($(profile),true)
+  flags += -pg
+  options += -pg
+endif
+
 nall.path := ../nall
 include $(nall.path)/GNUmakefile
 
 ifeq ($(platform),windows)
   ifeq ($(binary),application)
-    link += -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
-    link += -Wl,-enable-auto-import
-    link += -Wl,-enable-runtime-pseudo-reloc
+    options += -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
+    options += -Wl,-enable-auto-import
+    options += -Wl,-enable-runtime-pseudo-reloc
   else ifeq ($(binary),library)
-    link += -shared
+    options += -shared
   endif
 else ifeq ($(platform),macos)
   ifeq ($(binary),application)
   else ifeq ($(binary),library)
     flags += -fPIC
-    link += -dynamiclib
+    options += -dynamiclib
   endif
 else ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(binary),application)
     flags += -march=native
-    link += -Wl,-export-dynamic
-    link += -lX11 -lXext
+    options += -Wl,-export-dynamic
+    options += -lX11 -lXext
   else ifeq ($(binary),library)
     flags += -fPIC
-    link += -shared
+    options += -shared
   endif
 else
   $(error "unsupported platform")

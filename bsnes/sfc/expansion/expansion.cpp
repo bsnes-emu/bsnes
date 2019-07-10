@@ -1,24 +1,15 @@
 #include <sfc/sfc.hpp>
+#include <sfc/expansion/satellaview/satellaview.cpp>
+//#include <sfc/expansion/21fx/21fx.cpp>
 
 namespace SuperFamicom {
 
 ExpansionPort expansionPort;
 
 Expansion::Expansion() {
-  if(!handle()) create(Expansion::Enter, 1);
 }
 
 Expansion::~Expansion() {
-  scheduler.remove(*this);
-}
-
-auto Expansion::Enter() -> void {
-  while(true) scheduler.synchronize(), expansionPort.device->main();
-}
-
-auto Expansion::main() -> void {
-  step(1);
-  synchronize(cpu);
 }
 
 //
@@ -30,13 +21,8 @@ auto ExpansionPort::connect(uint deviceID) -> void {
   switch(deviceID) { default:
   case ID::Device::None: device = new Expansion; break;
   case ID::Device::Satellaview: device = new Satellaview; break;
-  case ID::Device::S21FX: device = new S21FX; break;
+//case ID::Device::S21FX: device = new S21FX; break;
   }
-
-  cpu.peripherals.reset();
-  if(auto device = controllerPort1.device) cpu.peripherals.append(device);
-  if(auto device = controllerPort2.device) cpu.peripherals.append(device);
-  if(auto device = expansionPort.device) cpu.peripherals.append(device);
 }
 
 auto ExpansionPort::power() -> void {

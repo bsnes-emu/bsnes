@@ -13,6 +13,8 @@ auto PPUfast::Line::flush() -> void {
 }
 
 auto PPUfast::Line::render() -> void {
+  uint y = this->y + (!ppufast.latch.overscan ? 7 : 0);
+
   auto hd = ppufast.hd();
   auto ss = ppufast.ss();
   auto scale = ppufast.hdScale();
@@ -25,13 +27,13 @@ auto PPUfast::Line::render() -> void {
   : (256 * scale * scale));
 
   if(io.displayDisable) {
-    memory::fill<uint32>(output, width);
+    memory::fill<uint16_t>(output, width);
     return;
   }
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   auto aboveColor = cgram[0];
-  auto belowColor = hires ? cgram[0] : io.col.fixedColor;
+  auto belowColor = hires ? cgram[0] : (uint16_t)io.col.fixedColor;
   uint xa =  (hd || ss) && ppufast.interlace() && ppufast.field() ? 256 * scale * scale / 2 : 0;
   uint xb = !(hd || ss) ? 256 : ppufast.interlace() && !ppufast.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {
@@ -70,7 +72,7 @@ auto PPUfast::Line::render() -> void {
   }
 }
 
-auto PPUfast::Line::pixel(uint x, Pixel above, Pixel below) const -> uint15 {
+auto PPUfast::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16_t {
   if(!windowAbove[x]) above.color = 0x0000;
   if(!windowBelow[x]) return above.color;
   if(!io.col.enable[above.source]) return above.color;
@@ -78,7 +80,7 @@ auto PPUfast::Line::pixel(uint x, Pixel above, Pixel below) const -> uint15 {
   return blend(above.color, below.color, io.col.halve && windowAbove[x] && below.source != Source::COL);
 }
 
-auto PPUfast::Line::blend(uint x, uint y, bool halve) const -> uint15 {
+auto PPUfast::Line::blend(uint x, uint y, bool halve) const -> uint16_t {
   if(!io.col.mathMode) {  //add
     if(!halve) {
       uint sum = x + y;
@@ -98,7 +100,7 @@ auto PPUfast::Line::blend(uint x, uint y, bool halve) const -> uint15 {
   }
 }
 
-auto PPUfast::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint15 {
+auto PPUfast::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint16_t {
   //paletteIndex = bgr
   //paletteColor = BBGGGRRR
   //output       = 0 BBb00 GGGg0 RRRr0

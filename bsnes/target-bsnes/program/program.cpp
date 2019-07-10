@@ -11,6 +11,7 @@
 #include "utility.cpp"
 #include "patch.cpp"
 #include "hacks.cpp"
+#include "filter.cpp"
 #include "viewport.cpp"
 Program program;
 
@@ -78,7 +79,7 @@ auto Program::main() -> void {
     audio.clear();
     if(!Application::modal()) {
       usleep(20 * 1000);
-      refreshViewport();
+      viewportRefresh();
     }
     return;
   }

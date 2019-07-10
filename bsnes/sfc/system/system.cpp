@@ -9,7 +9,18 @@ Cheat cheat;
 #include "serialization.cpp"
 
 auto System::run() -> void {
-  if(scheduler.enter() == Scheduler::Event::Frame) ppu.refresh();
+  if(scheduler.enter() == Scheduler::Event::Frame) {
+    ppu.refresh();
+
+    //refresh all cheat codes once per frame
+    Memory::GlobalWriteEnable = true;
+    for(auto& code : cheat.codes) {
+      if(code.enable) {
+        bus.write(code.address, code.data);
+      }
+    }
+    Memory::GlobalWriteEnable = false;
+  }
 }
 
 auto System::runToSave() -> void {
@@ -17,7 +28,6 @@ auto System::runToSave() -> void {
   scheduler.synchronize(smp);
   scheduler.synchronize(ppu);
   for(auto coprocessor : cpu.coprocessors) scheduler.synchronize(*coprocessor);
-  for(auto peripheral : cpu.peripherals) scheduler.synchronize(*peripheral);
 }
 
 auto System::load(Emulator::Interface* interface) -> bool {
@@ -57,7 +67,6 @@ auto System::save() -> void {
 auto System::unload() -> void {
   if(!loaded()) return;
 
-  cpu.peripherals.reset();
   controllerPort1.unload();
   controllerPort2.unload();
   expansionPort.unload();

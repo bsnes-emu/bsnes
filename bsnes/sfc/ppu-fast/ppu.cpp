@@ -26,8 +26,6 @@ auto PPUfast::hdSupersample() const -> bool { return configuration.hacks.ppu.mod
 auto PPUfast::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
 
 PPUfast::PPUfast() {
-  output = new uint16[2304 * 2304] + 72 * 2304;  //overscan offset
-
   for(uint l : range(16)) {
     for(uint r : range(32)) {
       for(uint g : range(32)) {
@@ -42,9 +40,9 @@ PPUfast::PPUfast() {
     }
   }
 
-  tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
-  tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
-  tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
+  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8];
+  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8];
+  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8];
 
   for(uint y : range(lines.size())) {
     lines[y].y = y;
@@ -52,7 +50,6 @@ PPUfast::PPUfast() {
 }
 
 PPUfast::~PPUfast() {
-  delete[] (output - 72 * 2304);  //overscan offset
   delete[] tilecache[TileMode::BPP2];
   delete[] tilecache[TileMode::BPP4];
   delete[] tilecache[TileMode::BPP8];
@@ -93,6 +90,7 @@ auto PPUfast::scanline() -> void {
   if(vcounter() == 0) {
     ppubase.display.interlace = io.interlace;
     ppubase.display.overscan = io.overscan;
+    latch.overscan = io.overscan;
     latch.hires = false;
     latch.hd = false;
     latch.ss = false;
@@ -121,17 +119,31 @@ auto PPUfast::refresh() -> void {
     auto output = this->output;
     uint pitch, width, height;
     if(!hd()) {
-      if(!overscan()) output -= 7 * 1024;
       pitch  = 512 << !interlace();
       width  = 256 << hires();
       height = 240 << interlace();
     } else {
-      if(!overscan()) output -= 7 * 256 * hdScale() * hdScale();
       pitch  = 256 * hdScale();
       width  = 256 * hdScale();
       height = 240 * hdScale();
     }
-    platform->videoFrame(output, pitch * sizeof(uint16), width, height);
+
+    //clear the areas of the screen that won't be rendered:
+    //previous video frames may have drawn data here that would now be stale otherwise.
+    if(!latch.overscan && pitch != frame.pitch && width != frame.width && height != frame.height) {
+      for(uint y : range(240)) {
+        if(y >= 8 && y <= 230) continue;  //these scanlines are always rendered.
+        auto output = this->output + (!hd() ? (y * 1024 + (interlace() && field() ? 512 : 0)) : (y * 256 * hdScale() * hdScale()));
+        auto width = (!hd() ? (!hires() ? 256 : 512) : (256 * hdScale() * hdScale()));
+        memory::fill<uint16>(output, width);
+      }
+    }
+
+    platform->videoFrame(output, pitch * sizeof(uint16), width, height, hd() ? hdScale() : 1);
+
+    frame.pitch  = pitch;
+    frame.width  = width;
+    frame.height = height;
   }
   if(system.frameCounter++ >= system.frameSkip) system.frameCounter = 0;
 }
@@ -143,7 +155,7 @@ auto PPUfast::load() -> bool {
 auto PPUfast::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint16>(output, 1024 * 960);
+  memory::fill<uint16_t>(output, 1024 * 960);
 
   function<auto (uint24, uint8) -> uint8> reader{&PPUfast::readIO, this};
   function<auto (uint24, uint8) -> void> writer{&PPUfast::writeIO, this};
@@ -167,6 +179,8 @@ auto PPUfast::power(bool reset) -> void {
 
   Line::start = 0;
   Line::count = 0;
+
+  frame = {};
 }
 
 }
