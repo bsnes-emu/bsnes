@@ -663,7 +663,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 /* These are the states when LY changes, let the display routine call GB_STAT_update for use
                    so it correctly handles T-cycle accurate LYC writes */
                 if (!GB_is_cgb(gb)  || (
-                    gb->display_state != 6 &&
+                    gb->display_state != 35 &&
                     gb->display_state != 26 &&
                     gb->display_state != 15 &&
                     gb->display_state != 16)) {
