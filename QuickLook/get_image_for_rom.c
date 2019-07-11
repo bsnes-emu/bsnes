@@ -58,6 +58,7 @@ int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *out
     GB_set_rgb_encode_callback(&gb, rgb_encode);
     GB_set_async_input_callback(&gb, async_input_callback);
     GB_set_log_callback(&gb, log_callback);
+    GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
     
     if (GB_load_rom(&gb, filename)) {
         GB_free(&gb);
