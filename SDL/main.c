@@ -94,6 +94,7 @@ static void open_menu(void)
     }
     run_gui(true);
     if (audio_playing) {
+        SDL_ClearQueuedAudio(device_id);
         SDL_PauseAudioDevice(device_id, 0);
     }
     GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
@@ -130,6 +131,7 @@ static void handle_events(GB_gameboy_t *gb)
                     GB_set_key_state(gb, (GB_key_t) button, event.type == SDL_JOYBUTTONDOWN);
                 }
                 else if (button == JOYPAD_BUTTON_TURBO) {
+                    SDL_ClearQueuedAudio(device_id);
                     turbo_down = event.type == SDL_JOYBUTTONDOWN;
                     GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
@@ -239,7 +241,6 @@ static void handle_events(GB_gameboy_t *gb)
                             paused = !paused;
                         }
                         break;
-                        
                     case SDL_SCANCODE_M:
                         if (event.key.keysym.mod & MODIFIER) {
 #ifdef __APPLE__
@@ -253,6 +254,7 @@ static void handle_events(GB_gameboy_t *gb)
                                 SDL_PauseAudioDevice(device_id, 1);
                             }
                             else if (!audio_playing) {
+                                SDL_ClearQueuedAudio(device_id);
                                 SDL_PauseAudioDevice(device_id, 0);
                             }
                         }
@@ -288,6 +290,7 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_KEYUP: // Fallthrough
                 if (event.key.keysym.scancode == configuration.keys[8]) {
                     turbo_down = event.type == SDL_KEYDOWN;
+                    SDL_ClearQueuedAudio(device_id);
                     GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
                 else if (event.key.keysym.scancode == configuration.keys_2[0]) {
@@ -356,11 +359,24 @@ static void debugger_interrupt(int ignore)
 }
 
 static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
-{
-    if ((SDL_GetQueuedAudioSize(device_id) / sizeof(GB_sample_t)) > have_aspec.freq / 12) {
+{    
+    if (turbo_down) {
+        static unsigned skip = 0;
+        skip++;
+        if (skip == have_aspec.freq / 8) {
+            skip = 0;
+        }
+        if (skip > have_aspec.freq / 16) {
+            return;
+        }
+    }
+    
+    if (SDL_GetQueuedAudioSize(device_id) / sizeof(*sample) > have_aspec.freq / 4) {
         return;
     }
+    
     SDL_QueueAudio(device_id, sample, sizeof(*sample));
+    
 }
 
     
@@ -599,20 +615,14 @@ int main(int argc, char **argv)
         want_aspec.samples = 2048;
     }
 #else
-    if (sdl_version >= 2006) {
-        /* SDL 2.0.6 offers WASAPI support which allows for much lower audio buffer lengths which at least
-         theoretically reduces lagging. */
-        want_aspec.samples = 32;
-    }
-    else {
+    if (sdl_version < 2006) {
         /* Since WASAPI audio was introduced in SDL 2.0.6, we have to lower the audio frequency
          to 44100 because otherwise we would get garbled audio output.*/
         want_aspec.freq = 44100;
     }
 #endif
     
-    device_id = SDL_OpenAudioDevice(0, 0, &want_aspec, &have_aspec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
-    
+    device_id = SDL_OpenAudioDevice(0, 0, &want_aspec, &have_aspec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
     /* Start Audio */
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
