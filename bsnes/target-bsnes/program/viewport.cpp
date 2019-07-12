@@ -40,7 +40,7 @@ auto Program::viewportRefresh() -> void {
   static uint32_t NumSnow = 0;
   if(settings.video.snow) SnowMover++;
 
-  static const uint16_t nullData[256 * 240] = {};
+  static const uint16 nullData[256 * 240] = {};
   auto data   = nullData;
   uint pitch  = 512;
   uint width  = 256;

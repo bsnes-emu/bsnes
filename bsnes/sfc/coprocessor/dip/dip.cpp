@@ -11,11 +11,11 @@ DIP dip;
 auto DIP::power() -> void {
 }
 
-auto DIP::read(uint24, uint8) -> uint8 {
+auto DIP::read(uint, uint8) -> uint8 {
   return value;
 }
 
-auto DIP::write(uint24, uint8) -> void {
+auto DIP::write(uint, uint8) -> void {
 }
 
 }

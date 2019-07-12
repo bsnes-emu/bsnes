@@ -30,7 +30,7 @@ auto DSP1::power() -> void {
   dsp1emu.reset();
 }
 
-auto DSP1::read(uint24 addr, uint8 data) -> uint8 {
+auto DSP1::read(uint addr, uint8 data) -> uint8 {
   if(addr & 1) {
     return dsp1emu.getSr();
   } else {
@@ -38,7 +38,7 @@ auto DSP1::read(uint24 addr, uint8 data) -> uint8 {
   }
 }
 
-auto DSP1::write(uint24 addr, uint8 data) -> void {
+auto DSP1::write(uint addr, uint8 data) -> void {
   if(addr & 1) {
   } else {
     return dsp1emu.setDr(data);

@@ -9,8 +9,8 @@ struct MSU1 : Thread {
   auto dataOpen() -> void;
   auto audioOpen() -> void;
 
-  auto readIO(uint24 addr, uint8 data) -> uint8;
-  auto writeIO(uint24 addr, uint8 data) -> void;
+  auto readIO(uint addr, uint8 data) -> uint8;
+  auto writeIO(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 

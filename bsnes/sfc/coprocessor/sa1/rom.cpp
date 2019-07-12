@@ -6,18 +6,18 @@ auto SA1::ROM::conflict() const -> bool {
   return false;
 }
 
-auto SA1::ROM::read(uint24 address, uint8 data) -> uint8 {
+auto SA1::ROM::read(uint address, uint8 data) -> uint8 {
   address = bus.mirror(address, size());
   return ReadableMemory::read(address, data);
 }
 
-auto SA1::ROM::write(uint24 address, uint8 data) -> void {
+auto SA1::ROM::write(uint address, uint8 data) -> void {
 }
 
 //note: addresses are translated prior to invoking this function:
 //00-3f,80-bf:8000-ffff mask=0x408000 => 00-3f:0000-ffff
 //c0-ff:0000-ffff => untranslated
-auto SA1::ROM::readCPU(uint24 address, uint8 data) -> uint8 {
+auto SA1::ROM::readCPU(uint address, uint8 data) -> uint8 {
   //reset vector overrides
   if((address & 0xffffe0) == 0x007fe0) {  //00:ffe0-ffef
     if(address == 0x7fea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
@@ -57,15 +57,15 @@ auto SA1::ROM::readCPU(uint24 address, uint8 data) -> uint8 {
   return data;  //unreachable
 }
 
-auto SA1::ROM::writeCPU(uint24 address, uint8 data) -> void {
+auto SA1::ROM::writeCPU(uint address, uint8 data) -> void {
 }
 
-auto SA1::ROM::readSA1(uint24 address, uint8 data) -> uint8 {
+auto SA1::ROM::readSA1(uint address, uint8 data) -> uint8 {
   if((address & 0x408000) == 0x008000) {
     address = (address & 0x800000) >> 2 | (address & 0x3f0000) >> 1 | address & 0x007fff;
   }
   return readCPU(address, data);
 }
 
-auto SA1::ROM::writeSA1(uint24 address, uint8 data) -> void {
+auto SA1::ROM::writeSA1(uint address, uint8 data) -> void {
 }

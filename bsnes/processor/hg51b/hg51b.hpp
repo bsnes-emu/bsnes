@@ -10,10 +10,10 @@ struct HG51B {
 
   //hg51b.cpp
   virtual auto step(uint clocks) -> void;
-  virtual auto isROM(uint24 address) -> bool = 0;
-  virtual auto isRAM(uint24 address) -> bool = 0;
-  virtual auto read(uint24 address) -> uint8 = 0;
-  virtual auto write(uint24 address, uint8 data) -> void = 0;
+  virtual auto isROM(uint address) -> bool = 0;
+  virtual auto isRAM(uint address) -> bool = 0;
+  virtual auto read(uint address) -> uint8 = 0;
+  virtual auto write(uint address, uint8 data) -> void = 0;
   virtual auto lock() -> void;
   virtual auto halt() -> void;
   auto wait(uint24 address) -> uint;

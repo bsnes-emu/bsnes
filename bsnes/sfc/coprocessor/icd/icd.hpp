@@ -20,8 +20,8 @@ struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   auto joypWrite(bool p15, bool p14) -> void override;
 
   //io.cpp
-  auto readIO(uint24 addr, uint8 data) -> uint8;
-  auto writeIO(uint24 addr, uint8 data) -> void;
+  auto readIO(uint addr, uint8 data) -> uint8;
+  auto writeIO(uint addr, uint8 data) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

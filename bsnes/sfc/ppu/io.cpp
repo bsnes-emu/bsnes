@@ -13,9 +13,9 @@ auto PPU::addressVRAM() const -> uint16 {
   uint16 address = io.vramAddress;
   switch(io.vramMapping) {
   case 0: return address;
-  case 1: return address.bits( 8,15) <<  8 | address.bits(0,4) << 3 | address.bits(5,7);
-  case 2: return address.bits( 9,15) <<  9 | address.bits(0,5) << 3 | address.bits(6,8);
-  case 3: return address.bits(10,15) << 10 | address.bits(0,6) << 3 | address.bits(7,9);
+  case 1: return bits(address, 8-15) <<  8 | bits(address,0-4) << 3 | bits(address,5-7);
+  case 2: return bits(address, 9-15) <<  9 | bits(address,0-5) << 3 | bits(address,6-8);
+  case 3: return bits(address,10-15) << 10 | bits(address,0-6) << 3 | bits(address,7-9);
   }
   unreachable;
 }
@@ -29,7 +29,7 @@ auto PPU::readVRAM() -> uint16 {
 auto PPU::writeVRAM(bool byte, uint8 data) -> void {
   if(!io.displayDisable && vcounter() < vdisp()) return;
   auto address = addressVRAM();
-  vram[address].byte(byte) = data;
+  bit8(vram[address],byte) = data;
 }
 
 auto PPU::readOAM(uint10 addr) -> uint8 {
@@ -58,10 +58,10 @@ auto PPU::writeCGRAM(uint8 addr, uint15 data) -> void {
   screen.cgram[addr] = data;
 }
 
-auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
+auto PPU::readIO(uint addr, uint8 data) -> uint8 {
   cpu.synchronize(ppu);
 
-  switch((uint16)addr) {
+  switch(addr & 0xffff) {
 
   case 0x2104: case 0x2105: case 0x2106: case 0x2108:
   case 0x2109: case 0x210a: case 0x2114: case 0x2115:
@@ -91,7 +91,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //SLHV
   case 0x2137: {
-    if(cpu.pio().bit(7)) latchCounters();
+    if(cbit1(cpu.pio(),7)) latchCounters();
     return data;  //CPU MDR
   }
 
@@ -104,7 +104,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //VMDATALREAD
   case 0x2139: {
-    ppu1.mdr = latch.vram.byte(0);
+    ppu1.mdr = bit8(latch.vram,0);
     if(io.vramIncrementMode == 0) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
@@ -114,7 +114,7 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //VMDATAHREAD
   case 0x213a: {
-    ppu1.mdr = latch.vram.byte(1);
+    ppu1.mdr = bit8(latch.vram,1);
     if(io.vramIncrementMode == 1) {
       latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
@@ -125,9 +125,9 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   //CGDATAREAD
   case 0x213b: {
     if(io.cgramAddressLatch++ == 0) {
-      ppu2.mdr.bits(0,7) = readCGRAM(0, io.cgramAddress);
+      bits(ppu2.mdr,0-7) = readCGRAM(0, io.cgramAddress);
     } else {
-      ppu2.mdr.bits(0,6) = readCGRAM(1, io.cgramAddress++);
+      bits(ppu2.mdr,0-6) = readCGRAM(1, io.cgramAddress++);
     }
     return ppu2.mdr;
   }
@@ -135,9 +135,9 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   //OPHCT
   case 0x213c: {
     if(latch.hcounter++ == 0) {
-      ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
+      bits(ppu2.mdr,0-7) = bits(io.hcounter,0-7);
     } else {
-      ppu2.mdr.bit (0  ) = io.hcounter.bit (8  );
+      bit1(ppu2.mdr,0  ) = bit1(io.hcounter,8  );
     }
     return ppu2.mdr;
   }
@@ -145,19 +145,19 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   //OPVCT
   case 0x213d: {
     if(latch.vcounter++ == 0) {
-      ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
+      bits(ppu2.mdr,0-7) = bits(io.vcounter,0-7);
     } else {
-      ppu2.mdr.bit (0  ) = io.vcounter.bit (8  );
+      bit1(ppu2.mdr,0  ) = bit1(io.vcounter,8  );
     }
     return ppu2.mdr;
   }
 
   //STAT77
   case 0x213e: {
-    ppu1.mdr.bits(0,3) = ppu1.version;
-    ppu1.mdr.bit (  5) = 0;
-    ppu1.mdr.bit (  6) = obj.io.rangeOver;
-    ppu1.mdr.bit (  7) = obj.io.timeOver;
+    bits(ppu1.mdr,0-3) = ppu1.version;
+    bit1(ppu1.mdr,  5) = 0;
+    bit1(ppu1.mdr,  6) = obj.io.rangeOver;
+    bit1(ppu1.mdr,  7) = obj.io.timeOver;
     return ppu1.mdr;
   }
 
@@ -165,15 +165,15 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   case 0x213f: {
     latch.hcounter = 0;
     latch.vcounter = 0;
-    ppu2.mdr.bits(0,3) = ppu2.version;
-    ppu2.mdr.bit (  4) = Region::PAL();  //0 = NTSC, 1 = PAL
-    if(!cpu.pio().bit(7)) {
-      ppu2.mdr.bit( 6) = 1;
+    bits(ppu2.mdr,0-3) = ppu2.version;
+    bit1(ppu2.mdr,  4) = Region::PAL();  //0 = NTSC, 1 = PAL
+    if(!cbit1(cpu.pio(),7)) {
+      bit1(ppu2.mdr, 6) = 1;
     } else {
-      ppu2.mdr.bit( 6) = latch.counters;
+      bit1(ppu2.mdr, 6) = latch.counters;
       latch.counters = 0;
     }
-    ppu2.mdr.bit (  7) = field();
+    bit1(ppu2.mdr,  7) = field();
     return ppu2.mdr;
   }
 
@@ -182,24 +182,24 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto PPU::writeIO(uint24 addr, uint8 data) -> void {
+auto PPU::writeIO(uint addr, uint8 data) -> void {
   cpu.synchronize(ppu);
 
-  switch((uint16)addr) {
+  switch(addr & 0xffff) {
 
   //INIDISP
   case 0x2100: {
     if(io.displayDisable && vcounter() == vdisp()) obj.addressReset();
-    io.displayBrightness = data.bits(0,3);
-    io.displayDisable    = data.bit (7);
+    io.displayBrightness = bits(data,0-3);
+    io.displayDisable    = bit1(data,7);
     return;
   }
 
   //OBSEL
   case 0x2101: {
-    obj.io.tiledataAddress = data.bits(0,2) << 13;
-    obj.io.nameselect      = data.bits(3,4);
-    obj.io.baseSize        = data.bits(5,7);
+    obj.io.tiledataAddress = bits(data,0-2) << 13;
+    obj.io.nameselect      = bits(data,3-4);
+    obj.io.baseSize        = bits(data,5-7);
     return;
   }
 
@@ -212,18 +212,18 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //OAMADDH
   case 0x2103: {
-    io.oamBaseAddress = data.bit(0) << 9 | (io.oamBaseAddress & 0x01fe);
-    io.oamPriority    = data.bit(7);
+    io.oamBaseAddress = bit1(data,0) << 9 | (io.oamBaseAddress & 0x01fe);
+    io.oamPriority    = bit1(data,7);
     obj.addressReset();
     return;
   }
 
   //OAMDATA
   case 0x2104: {
-    uint1 latchBit = io.oamAddress.bit(0);
+    uint1 latchBit = bit1(io.oamAddress,0);
     uint10 address = io.oamAddress++;
     if(latchBit == 0) latch.oam = data;
-    if(address.bit(9)) {
+    if(bit1(address,9)) {
       writeOAM(address, data);
     } else if(latchBit == 1) {
       writeOAM((address & ~1) + 0, latch.oam);
@@ -235,65 +235,65 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //BGMODE
   case 0x2105: {
-    io.bgMode       = data.bits(0,2);
-    io.bgPriority   = data.bit (  3);
-    bg1.io.tileSize = data.bit (  4);
-    bg2.io.tileSize = data.bit (  5);
-    bg3.io.tileSize = data.bit (  6);
-    bg4.io.tileSize = data.bit (  7);
+    io.bgMode       = bits(data,0-2);
+    io.bgPriority   = bit1(data,  3);
+    bg1.io.tileSize = bit1(data,  4);
+    bg2.io.tileSize = bit1(data,  5);
+    bg3.io.tileSize = bit1(data,  6);
+    bg4.io.tileSize = bit1(data,  7);
     updateVideoMode();
     return;
   }
 
   //MOSAIC
   case 0x2106: {
-    bg1.mosaic.enable = data.bit(0);
-    bg2.mosaic.enable = data.bit(1);
-    bg3.mosaic.enable = data.bit(2);
-    bg4.mosaic.enable = data.bit(3);
-    Background::Mosaic::size = data.bits(4,7);
+    bg1.mosaic.enable = bit1(data,0);
+    bg2.mosaic.enable = bit1(data,1);
+    bg3.mosaic.enable = bit1(data,2);
+    bg4.mosaic.enable = bit1(data,3);
+    Background::Mosaic::size = bits(data,4-7);
     return;
   }
 
   //BG1SC
   case 0x2107: {
-    bg1.io.screenSize    = data.bits(0,1);
-    bg1.io.screenAddress = data.bits(2,7) << 10;
+    bg1.io.screenSize    = bits(data,0-1);
+    bg1.io.screenAddress = bits(data,2-7) << 10;
     return;
   }
 
   //BG2SC
   case 0x2108: {
-    bg2.io.screenSize    = data.bits(0,1);
-    bg2.io.screenAddress = data.bits(2,7) << 10;
+    bg2.io.screenSize    = bits(data,0-1);
+    bg2.io.screenAddress = bits(data,2-7) << 10;
     return;
   }
 
   //BG3SC
   case 0x2109: {
-    bg3.io.screenSize    = data.bits(0,1);
-    bg3.io.screenAddress = data.bits(2,7) << 10;
+    bg3.io.screenSize    = bits(data,0-1);
+    bg3.io.screenAddress = bits(data,2-7) << 10;
     return;
   }
 
   //BG4SC
   case 0x210a: {
-    bg4.io.screenSize    = data.bits(0,1);
-    bg4.io.screenAddress = data.bits(2,7) << 10;
+    bg4.io.screenSize    = bits(data,0-1);
+    bg4.io.screenAddress = bits(data,2-7) << 10;
     return;
   }
 
   //BG12NBA
   case 0x210b: {
-    bg1.io.tiledataAddress = data.bits(0,3) << 12;
-    bg2.io.tiledataAddress = data.bits(4,7) << 12;
+    bg1.io.tiledataAddress = bits(data,0-3) << 12;
+    bg2.io.tiledataAddress = bits(data,4-7) << 12;
     return;
   }
 
   //BG34NBA
   case 0x210c: {
-    bg3.io.tiledataAddress = data.bits(0,3) << 12;
-    bg4.io.tiledataAddress = data.bits(4,7) << 12;
+    bg3.io.tiledataAddress = bits(data,0-3) << 12;
+    bg4.io.tiledataAddress = bits(data,4-7) << 12;
     return;
   }
 
@@ -366,22 +366,22 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
   //VMAIN
   case 0x2115: {
     static const uint size[4] = {1, 32, 128, 128};
-    io.vramIncrementSize = size[data.bits(0,1)];
-    io.vramMapping       = data.bits(2,3);
-    io.vramIncrementMode = data.bit (  7);
+    io.vramIncrementSize = size[data & 3];
+    io.vramMapping       = bits(data,2-3);
+    io.vramIncrementMode = bit1(data,  7);
     return;
   }
 
   //VMADDL
   case 0x2116: {
-    io.vramAddress.byte(0) = data;
+    bit8(io.vramAddress,0) = data;
     latch.vram = readVRAM();
     return;
   }
 
   //VMADDH
   case 0x2117: {
-    io.vramAddress.byte(1) = data;
+    bit8(io.vramAddress,1) = data;
     latch.vram = readVRAM();
     return;
   }
@@ -402,9 +402,9 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //M7SEL
   case 0x211a: {
-    io.hflipMode7  = data.bit (  0);
-    io.vflipMode7  = data.bit (  1);
-    io.repeatMode7 = data.bits(6,7);
+    io.hflipMode7  = bit1(data,  0);
+    io.vflipMode7  = bit1(data,  1);
+    io.repeatMode7 = bits(data,6-7);
     return;
   }
 
@@ -462,47 +462,47 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
     if(io.cgramAddressLatch++ == 0) {
       latch.cgram = data;
     } else {
-      writeCGRAM(io.cgramAddress++, data.bits(0,6) << 8 | latch.cgram);
+      writeCGRAM(io.cgramAddress++, bits(data,0-6) << 8 | latch.cgram);
     }
     return;
   }
 
   //W12SEL
   case 0x2123: {
-    window.io.bg1.oneInvert = data.bit(0);
-    window.io.bg1.oneEnable = data.bit(1);
-    window.io.bg1.twoInvert = data.bit(2);
-    window.io.bg1.twoEnable = data.bit(3);
-    window.io.bg2.oneInvert = data.bit(4);
-    window.io.bg2.oneEnable = data.bit(5);
-    window.io.bg2.twoInvert = data.bit(6);
-    window.io.bg2.twoEnable = data.bit(7);
+    window.io.bg1.oneInvert = bit1(data,0);
+    window.io.bg1.oneEnable = bit1(data,1);
+    window.io.bg1.twoInvert = bit1(data,2);
+    window.io.bg1.twoEnable = bit1(data,3);
+    window.io.bg2.oneInvert = bit1(data,4);
+    window.io.bg2.oneEnable = bit1(data,5);
+    window.io.bg2.twoInvert = bit1(data,6);
+    window.io.bg2.twoEnable = bit1(data,7);
     return;
   }
 
   //W34SEL
   case 0x2124: {
-    window.io.bg3.oneInvert = data.bit(0);
-    window.io.bg3.oneEnable = data.bit(1);
-    window.io.bg3.twoInvert = data.bit(2);
-    window.io.bg3.twoEnable = data.bit(3);
-    window.io.bg4.oneInvert = data.bit(4);
-    window.io.bg4.oneEnable = data.bit(5);
-    window.io.bg4.twoInvert = data.bit(6);
-    window.io.bg4.twoEnable = data.bit(7);
+    window.io.bg3.oneInvert = bit1(data,0);
+    window.io.bg3.oneEnable = bit1(data,1);
+    window.io.bg3.twoInvert = bit1(data,2);
+    window.io.bg3.twoEnable = bit1(data,3);
+    window.io.bg4.oneInvert = bit1(data,4);
+    window.io.bg4.oneEnable = bit1(data,5);
+    window.io.bg4.twoInvert = bit1(data,6);
+    window.io.bg4.twoEnable = bit1(data,7);
     return;
   }
 
   //WOBJSEL
   case 0x2125: {
-    window.io.obj.oneInvert = data.bit(0);
-    window.io.obj.oneEnable = data.bit(1);
-    window.io.obj.twoInvert = data.bit(2);
-    window.io.obj.twoEnable = data.bit(3);
-    window.io.col.oneInvert = data.bit(4);
-    window.io.col.oneEnable = data.bit(5);
-    window.io.col.twoInvert = data.bit(6);
-    window.io.col.twoEnable = data.bit(7);
+    window.io.obj.oneInvert = bit1(data,0);
+    window.io.obj.oneEnable = bit1(data,1);
+    window.io.obj.twoInvert = bit1(data,2);
+    window.io.obj.twoEnable = bit1(data,3);
+    window.io.col.oneInvert = bit1(data,4);
+    window.io.col.oneEnable = bit1(data,5);
+    window.io.col.twoInvert = bit1(data,6);
+    window.io.col.twoEnable = bit1(data,7);
     return;
   }
 
@@ -532,97 +532,97 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //WBGLOG
   case 0x212a: {
-    window.io.bg1.mask = data.bits(0,1);
-    window.io.bg2.mask = data.bits(2,3);
-    window.io.bg3.mask = data.bits(4,5);
-    window.io.bg4.mask = data.bits(6,7);
+    window.io.bg1.mask = bits(data,0-1);
+    window.io.bg2.mask = bits(data,2-3);
+    window.io.bg3.mask = bits(data,4-5);
+    window.io.bg4.mask = bits(data,6-7);
     return;
   }
 
   //WOBJLOG
   case 0x212b: {
-    window.io.obj.mask = data.bits(0,1);
-    window.io.col.mask = data.bits(2,3);
+    window.io.obj.mask = bits(data,0-1);
+    window.io.col.mask = bits(data,2-3);
     return;
   }
 
   //TM
   case 0x212c: {
-    bg1.io.aboveEnable = data.bit(0);
-    bg2.io.aboveEnable = data.bit(1);
-    bg3.io.aboveEnable = data.bit(2);
-    bg4.io.aboveEnable = data.bit(3);
-    obj.io.aboveEnable = data.bit(4);
+    bg1.io.aboveEnable = bit1(data,0);
+    bg2.io.aboveEnable = bit1(data,1);
+    bg3.io.aboveEnable = bit1(data,2);
+    bg4.io.aboveEnable = bit1(data,3);
+    obj.io.aboveEnable = bit1(data,4);
     return;
   }
 
   //TS
   case 0x212d: {
-    bg1.io.belowEnable = data.bit(0);
-    bg2.io.belowEnable = data.bit(1);
-    bg3.io.belowEnable = data.bit(2);
-    bg4.io.belowEnable = data.bit(3);
-    obj.io.belowEnable = data.bit(4);
+    bg1.io.belowEnable = bit1(data,0);
+    bg2.io.belowEnable = bit1(data,1);
+    bg3.io.belowEnable = bit1(data,2);
+    bg4.io.belowEnable = bit1(data,3);
+    obj.io.belowEnable = bit1(data,4);
     return;
   }
 
   //TMW
   case 0x212e: {
-    window.io.bg1.aboveEnable = data.bit(0);
-    window.io.bg2.aboveEnable = data.bit(1);
-    window.io.bg3.aboveEnable = data.bit(2);
-    window.io.bg4.aboveEnable = data.bit(3);
-    window.io.obj.aboveEnable = data.bit(4);
+    window.io.bg1.aboveEnable = bit1(data,0);
+    window.io.bg2.aboveEnable = bit1(data,1);
+    window.io.bg3.aboveEnable = bit1(data,2);
+    window.io.bg4.aboveEnable = bit1(data,3);
+    window.io.obj.aboveEnable = bit1(data,4);
     return;
   }
 
   //TSW
   case 0x212f: {
-    window.io.bg1.belowEnable = data.bit(0);
-    window.io.bg2.belowEnable = data.bit(1);
-    window.io.bg3.belowEnable = data.bit(2);
-    window.io.bg4.belowEnable = data.bit(3);
-    window.io.obj.belowEnable = data.bit(4);
+    window.io.bg1.belowEnable = bit1(data,0);
+    window.io.bg2.belowEnable = bit1(data,1);
+    window.io.bg3.belowEnable = bit1(data,2);
+    window.io.bg4.belowEnable = bit1(data,3);
+    window.io.obj.belowEnable = bit1(data,4);
     return;
   }
 
   //CGWSEL
   case 0x2130: {
-    screen.io.directColor   = data.bit (  0);
-    screen.io.blendMode     = data.bit (  1);
-    window.io.col.belowMask = data.bits(4,5);
-    window.io.col.aboveMask = data.bits(6,7);
+    screen.io.directColor   = bit1(data,  0);
+    screen.io.blendMode     = bit1(data,  1);
+    window.io.col.belowMask = bits(data,4-5);
+    window.io.col.aboveMask = bits(data,6-7);
     return;
   }
 
   //CGADDSUB
   case 0x2131: {
-    screen.io.bg1.colorEnable  = data.bit(0);
-    screen.io.bg2.colorEnable  = data.bit(1);
-    screen.io.bg3.colorEnable  = data.bit(2);
-    screen.io.bg4.colorEnable  = data.bit(3);
-    screen.io.obj.colorEnable  = data.bit(4);
-    screen.io.back.colorEnable = data.bit(5);
-    screen.io.colorHalve       = data.bit(6);
-    screen.io.colorMode        = data.bit(7);
+    screen.io.bg1.colorEnable  = bit1(data,0);
+    screen.io.bg2.colorEnable  = bit1(data,1);
+    screen.io.bg3.colorEnable  = bit1(data,2);
+    screen.io.bg4.colorEnable  = bit1(data,3);
+    screen.io.obj.colorEnable  = bit1(data,4);
+    screen.io.back.colorEnable = bit1(data,5);
+    screen.io.colorHalve       = bit1(data,6);
+    screen.io.colorMode        = bit1(data,7);
     return;
   }
 
   //COLDATA
   case 0x2132: {
-    if(data.bit(5)) screen.io.colorRed   = data.bits(0,4);
-    if(data.bit(6)) screen.io.colorGreen = data.bits(0,4);
-    if(data.bit(7)) screen.io.colorBlue  = data.bits(0,4);
+    if(bit1(data,5)) screen.io.colorRed   = bits(data,0-4);
+    if(bit1(data,6)) screen.io.colorGreen = bits(data,0-4);
+    if(bit1(data,7)) screen.io.colorBlue  = bits(data,0-4);
     return;
   }
 
   //SETINI
   case 0x2133: {
-    io.interlace     = data.bit(0);
-    obj.io.interlace = data.bit(1);
-    io.overscan      = data.bit(2);
-    io.pseudoHires   = data.bit(3);
-    io.extbg         = data.bit(6);
+    io.interlace     = bit1(data,0);
+    obj.io.interlace = bit1(data,1);
+    io.overscan      = bit1(data,2);
+    io.pseudoHires   = bit1(data,3);
+    io.extbg         = bit1(data,6);
     updateVideoMode();
     return;
   }

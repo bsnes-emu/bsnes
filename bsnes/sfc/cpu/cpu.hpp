@@ -22,19 +22,20 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
 
   //memory.cpp
   auto idle() -> void override;
-  auto read(uint24 addr) -> uint8 override;
-  auto write(uint24 addr, uint8 data) -> void override;
-  auto readDisassembler(uint24 addr) -> uint8 override;
+  auto readPC(uint addr) -> uint8 override;
+  auto read(uint addr) -> uint8 override;
+  auto write(uint addr, uint8 data) -> void override;
+  auto readDisassembler(uint addr) -> uint8 override;
 
   //io.cpp
-  auto readRAM(uint24 address, uint8 data) -> uint8;
-  auto readAPU(uint24 address, uint8 data) -> uint8;
-  auto readCPU(uint24 address, uint8 data) -> uint8;
-  auto readDMA(uint24 address, uint8 data) -> uint8;
-  auto writeRAM(uint24 address, uint8 data) -> void;
-  auto writeAPU(uint24 address, uint8 data) -> void;
-  auto writeCPU(uint24 address, uint8 data) -> void;
-  auto writeDMA(uint24 address, uint8 data) -> void;
+  auto readRAM(uint address, uint8 data) -> uint8;
+  auto readAPU(uint address, uint8 data) -> uint8;
+  auto readCPU(uint address, uint8 data) -> uint8;
+  auto readDMA(uint address, uint8 data) -> uint8;
+  auto writeRAM(uint address, uint8 data) -> void;
+  auto writeAPU(uint address, uint8 data) -> void;
+  auto writeCPU(uint address, uint8 data) -> void;
+  auto writeDMA(uint address, uint8 data) -> void;
 
   //timing.cpp
   inline auto dmaClocks() const -> uint;
@@ -91,17 +92,17 @@ private:
     uint hdmaPosition = 0;
     bool hdmaTriggered = false;
 
-    boolean nmiValid;
-    boolean nmiLine;
-    boolean nmiTransition;
-    boolean nmiPending;
-    boolean nmiHold;
+    boolean nmiValid = 0;
+    boolean nmiLine = 0;
+    boolean nmiTransition = 0;
+    boolean nmiPending = 0;
+    boolean nmiHold = 0;
 
-    boolean irqValid;
-    boolean irqLine;
-    boolean irqTransition;
-    boolean irqPending;
-    boolean irqHold;
+    boolean irqValid = 0;
+    boolean irqLine = 0;
+    boolean irqTransition = 0;
+    boolean irqPending = 0;
+    boolean irqHold = 0;
 
     bool powerPending = false;
     bool resetPending = false;
@@ -120,14 +121,14 @@ private:
 
   struct IO {
     //$2181-$2183
-    uint17 wramAddress;
+    uint17 wramAddress = 0;
 
     //$4200
-    boolean hirqEnable;
-    boolean virqEnable;
-    boolean irqEnable;
-    boolean nmiEnable;
-    boolean autoJoypadPoll;
+    boolean hirqEnable = 0;
+    boolean virqEnable = 0;
+    boolean irqEnable = 0;
+    boolean nmiEnable = 0;
+    boolean autoJoypadPoll = 0;
 
     //$4201
     uint8 pio = 0xff;
@@ -148,14 +149,14 @@ private:
     uint1 fastROM = 0;
 
     //$4214-$4217
-    uint16 rddiv;
-    uint16 rdmpy;
+    uint16 rddiv = 0;
+    uint16 rdmpy = 0;
 
     //$4218-$421f
-    uint16 joy1;
-    uint16 joy2;
-    uint16 joy3;
-    uint16 joy4;
+    uint16 joy1 = 0;
+    uint16 joy2 = 0;
+    uint16 joy3 = 0;
+    uint16 joy4 = 0;
   } io;
 
   struct ALU {
@@ -186,10 +187,10 @@ private:
     inline auto hdmaAdvance() -> void;
 
     //$420b
-    uint1 dmaEnable;
+    uint1 dmaEnable = 0;
 
     //$420c
-    uint1 hdmaEnable;
+    uint1 hdmaEnable = 0;
 
     //$43x0
     uint3 transferMode = 7;
@@ -227,8 +228,8 @@ private:
     uint8 unknown = 0xff;
 
     //internal state
-    uint1 hdmaCompleted;
-    uint1 hdmaDoTransfer;
+    uint1 hdmaCompleted = 0;
+    uint1 hdmaDoTransfer = 0;
 
     maybe<Channel&> next;
 

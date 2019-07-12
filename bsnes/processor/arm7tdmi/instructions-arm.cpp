@@ -20,7 +20,7 @@ auto ARM7TDMI::armALU(uint4 mode, uint4 d, uint4 n, uint32 rm) -> void {
   case 15: r(d) = BIT(~rm); break;  //MVN
   }
 
-  if(exception() && d == 15 && opcode.bit(20)) {
+  if(exception() && d == 15 && bit1(opcode,20)) {
     cpsr() = spsr();
   }
 }
@@ -31,19 +31,19 @@ auto ARM7TDMI::armMoveToStatus(uint4 field, uint1 mode, uint32 data) -> void {
 
   if(field.bit(0)) {
     if(mode || privileged()) {
-      psr.m = data.bits(0,4);
-      psr.t = data.bit (5);
-      psr.f = data.bit (6);
-      psr.i = data.bit (7);
+      psr.m = bits(data,0-4);
+      psr.t = bit1(data,5);
+      psr.f = bit1(data,6);
+      psr.i = bit1(data,7);
       if(!mode && psr.t) r(15).data += 2;
     }
   }
 
   if(field.bit(3)) {
-    psr.v = data.bit(28);
-    psr.c = data.bit(29);
-    psr.z = data.bit(30);
-    psr.n = data.bit(31);
+    psr.v = bit1(data,28);
+    psr.c = bit1(data,29);
+    psr.z = bit1(data,30);
+    psr.n = bit1(data,31);
   }
 }
 
@@ -58,7 +58,7 @@ auto ARM7TDMI::armInstructionBranch
 auto ARM7TDMI::armInstructionBranchExchangeRegister
 (uint4 m) -> void {
   uint32 address = r(m);
-  cpsr().t = address.bit(0);
+  cpsr().t = address & 1;
   r(15) = address;
 }
 
@@ -193,13 +193,13 @@ auto ARM7TDMI::armInstructionMoveMultiple
 
   auto cpsrMode = cpsr().m;
   bool usr = false;
-  if(type && mode == 1 && !list.bit(15)) usr = true;
+  if(type && mode == 1 && !bit1(list,15)) usr = true;
   if(type && mode == 0) usr = true;
   if(usr) cpsr().m = PSR::USR;
 
   uint sequential = Nonsequential;
   for(uint m : range(16)) {
-    if(!list.bit(m)) continue;
+    if(!bit1(list,m)) continue;
     if(mode == 1) r(m) = read(Word | sequential, rn);
     if(mode == 0) write(Word | sequential, rn, r(m));
     rn += 4;
@@ -210,7 +210,7 @@ auto ARM7TDMI::armInstructionMoveMultiple
 
   if(mode) {
     idle();
-    if(type && list.bit(15) && cpsr().m != PSR::USR && cpsr().m != PSR::SYS) {
+    if(type && bit1(list,15) && cpsr().m != PSR::USR && cpsr().m != PSR::SYS) {
       cpsr() = spsr();
     }
   } else {
@@ -299,7 +299,7 @@ auto ARM7TDMI::armInstructionMultiplyLong
 
   if(save) {
     cpsr().z = rd == 0;
-    cpsr().n = rd.bit(63);
+    cpsr().n = bit1(rd,63);
   }
 }
 

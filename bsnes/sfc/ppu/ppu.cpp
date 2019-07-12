@@ -111,8 +111,8 @@ auto PPU::power(bool reset) -> void {
   PPUcounter::reset();
   memory::fill<uint16>(output, 512 * 480);
 
-  function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
-  function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
+  function<auto (uint, uint8) -> uint8> reader{&PPU::readIO, this};
+  function<auto (uint, uint8) -> void> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   if(!reset) random.array((uint8*)vram.data, sizeof(vram.data));

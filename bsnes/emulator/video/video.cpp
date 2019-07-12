@@ -30,9 +30,9 @@ auto Video::setPalette() -> void {
   palette = new uint32[colors];
   for(auto index : range(colors)) {
     uint64 color = interface->color(index);
-    uint16 b = color.bits( 0,15);
-    uint16 g = color.bits(16,31);
-    uint16 r = color.bits(32,47);
+    uint16 b = bits(color, 0-15);
+    uint16 g = bits(color,16-31);
+    uint16 r = bits(color,32-47);
     uint16 a = 0xffff;
 
     if(saturation != 1.0) {

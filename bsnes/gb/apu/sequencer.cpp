@@ -66,26 +66,26 @@ auto APU::Sequencer::read(uint16 addr) -> uint8 {
 
 auto APU::Sequencer::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff24) {  //NR50
-    leftEnable  = data.bit (7);
-    leftVolume  = data.bits(6,4);
-    rightEnable = data.bit (3);
-    rightVolume = data.bits(2,0);
+    leftEnable  = bit1(data,7);
+    leftVolume  = bits(data,4-6);
+    rightEnable = bit1(data,3);
+    rightVolume = bits(data,0-2);
   }
 
   if(addr == 0xff25) {  //NR51
-    noise.leftEnable    = data.bit(7);
-    wave.leftEnable     = data.bit(6);
-    square2.leftEnable  = data.bit(5);
-    square1.leftEnable  = data.bit(4);
-    noise.rightEnable   = data.bit(3);
-    wave.rightEnable    = data.bit(2);
-    square2.rightEnable = data.bit(1);
-    square1.rightEnable = data.bit(0);
+    noise.leftEnable    = bit1(data,7);
+    wave.leftEnable     = bit1(data,6);
+    square2.leftEnable  = bit1(data,5);
+    square1.leftEnable  = bit1(data,4);
+    noise.rightEnable   = bit1(data,3);
+    wave.rightEnable    = bit1(data,2);
+    square2.rightEnable = bit1(data,1);
+    square1.rightEnable = bit1(data,0);
   }
 
   if(addr == 0xff26) {  //NR52
-    if(enable != data.bit(7)) {
-      enable = data.bit(7);
+    if(enable != bit1(data,7)) {
+      enable = bit1(data,7);
 
       if(!enable) {
         //power(bool) resets length counters when true (eg for CGB only)

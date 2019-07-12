@@ -207,7 +207,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
   return {};
 }
 
-auto Program::videoFrame(const uint16_t* data, uint pitch, uint width, uint height, uint scale) -> void {
+auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height, uint scale) -> void {
   //this relies on the UI only running between Emulator::Scheduler::Event::Frame events
   //this will always be the case; so we can avoid an unnecessary copy or one-frame delay here
   //if the core were to exit between a frame event, the next frame might've been only partially rendered

@@ -32,10 +32,9 @@ auto MCC::commit() -> void {
   bsmemory.writable(r.externallyWritable);
 }
 
-auto MCC::read(uint24 address, uint8 data) -> uint8 {
+auto MCC::read(uint address, uint8 data) -> uint8 {
   if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
-    uint4 index = address.bits(16,19);
-    switch(index) {
+    switch(address >> 16 & 15) {
     case  0: return irq.flag << 7;
     case  1: return irq.enable << 7;
     case  2: return r.mapping << 7;
@@ -58,37 +57,36 @@ auto MCC::read(uint24 address, uint8 data) -> uint8 {
   return data;
 }
 
-auto MCC::write(uint24 address, uint8 data) -> void {
+auto MCC::write(uint address, uint8 data) -> void {
   if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
-    uint4 index = address.bits(16,19);
-    switch(index) {
-    case  1: irq.enable = data.bit(7); break;
-    case  2: w.mapping = data.bit(7); break;
-    case  3: w.psramEnableLo = data.bit(7); break;
-    case  4: w.psramEnableHi = data.bit(7); break;
-    case  5: w.psramMapping.bit(0) = data.bit(7); break;
-    case  6: w.psramMapping.bit(1) = data.bit(7); break;
-    case  7: w.romEnableLo = data.bit(7); break;
-    case  8: w.romEnableHi = data.bit(7); break;
-    case  9: w.exEnableLo = data.bit(7); break;
-    case 10: w.exEnableHi = data.bit(7); break;
-    case 11: w.exMapping = data.bit(7); break;
-    case 12: w.internallyWritable = data.bit(7); break;
-    case 13: w.externallyWritable = data.bit(7); break;
-    case 14: if(data.bit(7)) commit(); break;
+    switch(address >> 16 & 15) {
+    case  1: irq.enable = bit1(data,7); break;
+    case  2: w.mapping = bit1(data,7); break;
+    case  3: w.psramEnableLo = bit1(data,7); break;
+    case  4: w.psramEnableHi = bit1(data,7); break;
+    case  5: bit1(w.psramMapping,0) = bit1(data,7); break;
+    case  6: bit1(w.psramMapping,1) = bit1(data,7); break;
+    case  7: w.romEnableLo = bit1(data,7); break;
+    case  8: w.romEnableHi = bit1(data,7); break;
+    case  9: w.exEnableLo = bit1(data,7); break;
+    case 10: w.exEnableHi = bit1(data,7); break;
+    case 11: w.exMapping = bit1(data,7); break;
+    case 12: w.internallyWritable = bit1(data,7); break;
+    case 13: w.externallyWritable = bit1(data,7); break;
+    case 14: if(bit1(data,7)) commit(); break;
     }
   }
 }
 
-auto MCC::mcuRead(uint24 address, uint8 data) -> uint8 {
+auto MCC::mcuRead(uint address, uint8 data) -> uint8 {
   return mcuAccess(0, address, data);
 }
 
-auto MCC::mcuWrite(uint24 address, uint8 data) -> void {
+auto MCC::mcuWrite(uint address, uint8 data) -> void {
   return mcuAccess(1, address, data), void();
 }
 
-auto MCC::mcuAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+auto MCC::mcuAccess(bool mode, uint address, uint8 data) -> uint8 {
   //[[ROM]]
 
   if(r.romEnableLo) {
@@ -229,27 +227,27 @@ auto MCC::mcuAccess(bool mode, uint24 address, uint8 data) -> uint8 {
 }
 
 //size: 0x100000
-auto MCC::romAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+auto MCC::romAccess(bool mode, uint address, uint8 data) -> uint8 {
   address = bus.mirror(address, rom.size());
   if(mode == 0) return rom.read(address);
   return data;
 }
 
 //size: 0x80000
-auto MCC::psramAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+auto MCC::psramAccess(bool mode, uint address, uint8 data) -> uint8 {
   address = bus.mirror(address, psram.size());
   if(mode == 0) return psram.read(address);
   return psram.write(address, data), data;
 }
 
 //size: 0x100000 (?)
-auto MCC::exAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+auto MCC::exAccess(bool mode, uint address, uint8 data) -> uint8 {
   //not physically present on BSC-1A5B9P-01
   return data;
 }
 
 //size: 0x100000, 0x200000, 0x400000
-auto MCC::bsAccess(bool mode, uint24 address, uint8 data) -> uint8 {
+auto MCC::bsAccess(bool mode, uint address, uint8 data) -> uint8 {
   address = bus.mirror(address, bsmemory.size());
   if(mode == 0) return bsmemory.read(address, data);
   if(!r.internallyWritable) return data;

@@ -27,17 +27,17 @@ struct ProtectableMemory : Memory {
     self.writable = writable;
   }
 
-  inline auto read(uint24 address, uint8 data = 0) -> uint8 override {
+  inline auto read(uint address, uint8 data = 0) -> uint8 override {
     return self.data[address];
   }
 
-  inline auto write(uint24 address, uint8 data) -> void override {
+  inline auto write(uint address, uint8 data) -> void override {
     if(self.writable || Memory::GlobalWriteEnable) {
       self.data[address] = data;
     }
   }
 
-  inline auto operator[](uint24 address) const -> uint8 {
+  inline auto operator[](uint address) const -> uint8 {
     return self.data[address];
   }
 

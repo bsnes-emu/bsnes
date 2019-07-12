@@ -65,10 +65,10 @@ struct Random {
     if((random() & 1) == 0) hivalue = ~lovalue;
 
     for(uint32 address : range(size)) {
-      uint8 value = address.bit(lobit) ? lovalue : hivalue;
-      if(address.bit(hibit)) value = ~value;
-      if((random() &  511) == 0) value.bit(random() & 7) ^= 1;
-      if((random() & 2047) == 0) value.bit(random() & 7) ^= 1;
+      uint8 value = bit1(address,lobit) ? lovalue : hivalue;
+      if(bit1(address,hibit)) value = ~value;
+      if((random() &  511) == 0) bit1(value,random() & 7) ^= 1;
+      if((random() & 2047) == 0) bit1(value,random() & 7) ^= 1;
       data[address] = value;
     }
   }

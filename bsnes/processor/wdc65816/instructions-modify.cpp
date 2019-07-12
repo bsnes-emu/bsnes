@@ -1,93 +1,93 @@
-auto WDC65816::instructionImpliedModify8(alu8 op, uint16& data) -> void {
+auto WDC65816::instructionImpliedModify8(alu8 op, r16& M) -> void {
 L idleIRQ();
-  lo(data) = alu(lo(data));
+  M.l = alu(M.l);
 }
 
-auto WDC65816::instructionImpliedModify16(alu16 op, uint16& data) -> void {
+auto WDC65816::instructionImpliedModify16(alu16 op, r16& M) -> void {
 L idleIRQ();
-  data = alu(data);
+  M.w = alu(M.w);
 }
 
 auto WDC65816::instructionBankModify8(alu8 op) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-  uint8 data = readBank(absolute);
+  V.l = fetch();
+  V.h = fetch();
+  W.l = readBank(V.w + 0);
   idle();
-  data = alu(data);
-L writeBank(absolute, data);
+  W.l = alu(W.l);
+L writeBank(V.w + 0, W.l);
 }
 
 auto WDC65816::instructionBankModify16(alu16 op) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-  uint16 data = readBank(absolute + 0);
-  hi(data) = readBank(absolute + 1);
+  V.l = fetch();
+  V.h = fetch();
+  W.l = readBank(V.w + 0);
+  W.h = readBank(V.w + 1);
   idle();
-  data = alu(data);
-  writeBank(absolute + 1, hi(data));
-L writeBank(absolute + 0, lo(data));
+  W.w = alu(W.w);
+  writeBank(V.w + 1, W.h);
+L writeBank(V.w + 0, W.l);
 }
 
 auto WDC65816::instructionBankIndexedModify8(alu8 op) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
+  V.l = fetch();
+  V.h = fetch();
   idle();
-  uint8 data = readBank(absolute + X);
+  W.l = readBank(V.w + X.w + 0);
   idle();
-  data = alu(data);
-L writeBank(absolute + X, data);
+  W.l = alu(W.l);
+L writeBank(V.w + X.w + 0, W.l);
 }
 
 auto WDC65816::instructionBankIndexedModify16(alu16 op) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
+  V.l = fetch();
+  V.h = fetch();
   idle();
-  uint16 data = readBank(absolute + X + 0);
-  hi(data) = readBank(absolute + X + 1);
+  W.l = readBank(V.w + X.w + 0);
+  W.h = readBank(V.w + X.w + 1);
   idle();
-  data = alu(data);
-  writeBank(absolute + X + 1, hi(data));
-L writeBank(absolute + X + 0, lo(data));
+  W.w = alu(W.w);
+  writeBank(V.w + X.w + 1, W.h);
+L writeBank(V.w + X.w + 0, W.l);
 }
 
 auto WDC65816::instructionDirectModify8(alu8 op) -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint8 data = readDirect(direct);
+  W.l = readDirect(U.l + 0);
   idle();
-  data = alu(data);
-L writeDirect(direct, data);
+  W.l = alu(W.l);
+L writeDirect(U.l + 0, W.l);
 }
 
 auto WDC65816::instructionDirectModify16(alu16 op) -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint16 data = readDirect(direct + 0);
-  hi(data) = readDirect(direct + 1);
+  W.l = readDirect(U.l + 0);
+  W.h = readDirect(U.l + 1);
   idle();
-  data = alu(data);
-  writeDirect(direct + 1, hi(data));
-L writeDirect(direct + 0, lo(data));
+  W.w = alu(W.w);
+  writeDirect(U.l + 1, W.h);
+L writeDirect(U.l + 0, W.l);
 }
 
 auto WDC65816::instructionDirectIndexedModify8(alu8 op) -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
   idle();
-  uint8 data = readDirect(direct + X);
+  W.l = readDirect(U.l + X.w + 0);
   idle();
-  data = alu(data);
-L writeDirect(direct + X, data);
+  W.l = alu(W.l);
+L writeDirect(U.l + X.w + 0, W.l);
 }
 
 auto WDC65816::instructionDirectIndexedModify16(alu16 op) -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
   idle();
-  uint16 data = readDirect(direct + X + 0);
-  hi(data) = readDirect(direct + X + 1);
+  W.l = readDirect(U.l + X.w + 0);
+  W.h = readDirect(U.l + X.w + 1);
   idle();
-  data = alu(data);
-  writeDirect(direct + X + 1, hi(data));
-L writeDirect(direct + X + 0, lo(data));
+  W.w = alu(W.w);
+  writeDirect(U.l + X.w + 1, W.h);
+L writeDirect(U.l + X.w + 0, W.l);
 }

@@ -143,8 +143,8 @@ auto Cartridge::loadMap(Markup::Node map, T& memory) -> uint {
 
 auto Cartridge::loadMap(
   Markup::Node map,
-  const function<uint8 (uint24, uint8)>& reader,
-  const function<void (uint24, uint8)>& writer
+  const function<uint8 (uint, uint8)>& reader,
+  const function<void (uint, uint8)>& writer
 ) -> uint {
   auto addr = map["address"].text();
   auto size = map["size"].natural();

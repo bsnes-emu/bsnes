@@ -1,444 +1,468 @@
-enum : uint {
-  OPTYPE_DP = 0,    //dp
-  OPTYPE_DPX,       //dp,x
-  OPTYPE_DPY,       //dp,y
-  OPTYPE_IDP,       //(dp)
-  OPTYPE_IDPX,      //(dp,x)
-  OPTYPE_IDPY,      //(dp),y
-  OPTYPE_ILDP,      //[dp]
-  OPTYPE_ILDPY,     //[dp],y
-  OPTYPE_ADDR,      //addr
-  OPTYPE_ADDRX,     //addr,x
-  OPTYPE_ADDRY,     //addr,y
-  OPTYPE_IADDRX,    //(addr,x)
-  OPTYPE_ILADDR,    //[addr]
-  OPTYPE_LONG,      //long
-  OPTYPE_LONGX,     //long, x
-  OPTYPE_SR,        //sr,s
-  OPTYPE_ISRY,      //(sr,s),y
-  OPTYPE_ADDR_PC,   //pbr:addr
-  OPTYPE_IADDR_PC,  //pbr:(addr)
-  OPTYPE_RELB,      //relb
-  OPTYPE_RELW,      //relw
-};
-
-auto WDC65816::dreadb(uint24 addr) -> uint8 {
-  if((addr & 0x40ffff) >= 0x2000 && (addr & 0x40ffff) <= 0x5fff) {
-    //$00-3f|80-bf:2000-5fff
-    //do not read MMIO registers within debugger
-    return 0x00;
-  }
-  return readDisassembler(addr);
-}
-
-auto WDC65816::dreadw(uint24 addr) -> uint16 {
-  uint16 data;
-  data.byte(0) = dreadb(addr++);
-  data.byte(1) = dreadb(addr++);
-  return data;
-}
-
-auto WDC65816::dreadl(uint24 addr) -> uint24 {
-  uint24 data;
-  data.byte(0) = dreadb(addr++);
-  data.byte(1) = dreadb(addr++);
-  data.byte(2) = dreadb(addr++);
-  return data;
-}
-
-auto WDC65816::decode(uint8 mode, uint24 addr) -> uint24 {
-  uint24 a = 0;
-
-  switch(mode) {
-  case OPTYPE_DP:
-    a = (r.d + (addr & 0xffff)) & 0xffff;
-    break;
-  case OPTYPE_DPX:
-    a = (r.d + r.x + (addr & 0xffff)) & 0xffff;
-    break;
-  case OPTYPE_DPY:
-    a = (r.d + r.y + (addr & 0xffff)) & 0xffff;
-    break;
-  case OPTYPE_IDP:
-    addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = (r.b << 16) + dreadw(addr);
-    break;
-  case OPTYPE_IDPX:
-    addr = (r.d + r.x + (addr & 0xffff)) & 0xffff;
-    a = (r.b << 16) + dreadw(addr);
-    break;
-  case OPTYPE_IDPY:
-    addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = (r.b << 16) + dreadw(addr) + r.y;
-    break;
-  case OPTYPE_ILDP:
-    addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = dreadl(addr);
-    break;
-  case OPTYPE_ILDPY:
-    addr = (r.d + (addr & 0xffff)) & 0xffff;
-    a = dreadl(addr) + r.y;
-    break;
-  case OPTYPE_ADDR:
-    a = (r.b << 16) + (addr & 0xffff);
-    break;
-  case OPTYPE_ADDR_PC:
-    a = (r.pc & 0xff0000) + (addr & 0xffff);
-    break;
-  case OPTYPE_ADDRX:
-    a = (r.b << 16) + (addr & 0xffff) + r.x;
-    break;
-  case OPTYPE_ADDRY:
-    a = (r.b << 16) + (addr & 0xffff) + r.y;
-    break;
-  case OPTYPE_IADDR_PC:
-    a = (r.pc & 0xff0000) + (addr & 0xffff);
-    break;
-  case OPTYPE_IADDRX:
-    a = (r.pc & 0xff0000) + ((addr + r.x) & 0xffff);
-    break;
-  case OPTYPE_ILADDR:
-    a = addr;
-    break;
-  case OPTYPE_LONG:
-    a = addr;
-    break;
-  case OPTYPE_LONGX:
-    a = (addr + r.x);
-    break;
-  case OPTYPE_SR:
-    a = (r.s + (addr & 0xff)) & 0xffff;
-    break;
-  case OPTYPE_ISRY:
-    addr = (r.s + (addr & 0xff)) & 0xffff;
-    a = (r.b << 16) + dreadw(addr) + r.y;
-    break;
-  case OPTYPE_RELB:
-    a  = (r.pc & 0xff0000) + (((r.pc & 0xffff) + 2) & 0xffff);
-    a += int8(addr);
-    break;
-  case OPTYPE_RELW:
-    a  = (r.pc & 0xff0000) + (((r.pc & 0xffff) + 3) & 0xffff);
-    a += (int16)addr;
-    break;
-  }
-
-  return a;
-}
-
 auto WDC65816::disassemble() -> string {
-  return disassemble(r.pc, r.e, r.p.m, r.p.x);
+  return disassemble(r.pc.d, r.e, r.p.m, r.p.x);
 }
 
-auto WDC65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
+auto WDC65816::disassemble(uint24 address, bool e, bool m, bool x) -> string {
   string s;
 
-  uint24 pc = addr;
-  s = {hex(pc, 6), " "};
+  uint24 pc = address;
+  s = {hex(pc, 6), "  "};
 
-  uint8 op  = dreadb(pc); pc.bits(0,15)++;
-  uint8 op0 = dreadb(pc); pc.bits(0,15)++;
-  uint8 op1 = dreadb(pc); pc.bits(0,15)++;
-  uint8 op2 = dreadb(pc);
+  string name;
+  string operand;
+  maybe<uint24> effective;
 
-  #define op8  ((op0))
-  #define op16 ((op0) | (op1 << 8))
-  #define op24 ((op0) | (op1 << 8) | (op2 << 16))
-  #define a8   (e || m)
-  #define x8   (e || x)
+  auto read = [&](uint24 address) -> uint8 {
+    //$00-3f,80-bf:2000-5fff: do not attempt to read I/O registers from the disassembler:
+    //this is because such reads are much more likely to have side effects to emulation.
+    if((address & 0x40ffff) >= 0x2000 && (address & 0x40ffff) <= 0x5fff) return 0x00;
+    return readDisassembler(address);
+  };
 
-  char t[256];
-  switch(op) {
-  case 0x00: sprintf(t, "brk #$%.2x              ", op8); break;
-  case 0x01: sprintf(t, "ora ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0x02: sprintf(t, "cop #$%.2x              ", op8); break;
-  case 0x03: sprintf(t, "ora $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0x04: sprintf(t, "tsb $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x05: sprintf(t, "ora $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x06: sprintf(t, "asl $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x07: sprintf(t, "ora [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0x08: sprintf(t, "php                   "); break;
-  case 0x09: if(a8)sprintf(t, "ora #$%.2x              ", op8);
-             else  sprintf(t, "ora #$%.4x            ", op16); break;
-  case 0x0a: sprintf(t, "asl a                 "); break;
-  case 0x0b: sprintf(t, "phd                   "); break;
-  case 0x0c: sprintf(t, "tsb $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x0d: sprintf(t, "ora $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x0e: sprintf(t, "asl $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x0f: sprintf(t, "ora $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x10: sprintf(t, "bpl $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x11: sprintf(t, "ora ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0x12: sprintf(t, "ora ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0x13: sprintf(t, "ora ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0x14: sprintf(t, "trb $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x15: sprintf(t, "ora $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x16: sprintf(t, "asl $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x17: sprintf(t, "ora [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0x18: sprintf(t, "clc                   "); break;
-  case 0x19: sprintf(t, "ora $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0x1a: sprintf(t, "inc                   "); break;
-  case 0x1b: sprintf(t, "tcs                   "); break;
-  case 0x1c: sprintf(t, "trb $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x1d: sprintf(t, "ora $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x1e: sprintf(t, "asl $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x1f: sprintf(t, "ora $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0x20: sprintf(t, "jsr $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR_PC, op16)); break;
-  case 0x21: sprintf(t, "and ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0x22: sprintf(t, "jsl $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x23: sprintf(t, "and $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0x24: sprintf(t, "bit $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x25: sprintf(t, "and $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x26: sprintf(t, "rol $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x27: sprintf(t, "and [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0x28: sprintf(t, "plp                   "); break;
-  case 0x29: if(a8)sprintf(t, "and #$%.2x              ", op8);
-             else  sprintf(t, "and #$%.4x            ", op16); break;
-  case 0x2a: sprintf(t, "rol a                 "); break;
-  case 0x2b: sprintf(t, "pld                   "); break;
-  case 0x2c: sprintf(t, "bit $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x2d: sprintf(t, "and $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x2e: sprintf(t, "rol $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x2f: sprintf(t, "and $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x30: sprintf(t, "bmi $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x31: sprintf(t, "and ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0x32: sprintf(t, "and ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0x33: sprintf(t, "and ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0x34: sprintf(t, "bit $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x35: sprintf(t, "and $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x36: sprintf(t, "rol $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x37: sprintf(t, "and [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0x38: sprintf(t, "sec                   "); break;
-  case 0x39: sprintf(t, "and $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0x3a: sprintf(t, "dec                   "); break;
-  case 0x3b: sprintf(t, "tsc                   "); break;
-  case 0x3c: sprintf(t, "bit $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x3d: sprintf(t, "and $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x3e: sprintf(t, "rol $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x3f: sprintf(t, "and $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0x40: sprintf(t, "rti                   "); break;
-  case 0x41: sprintf(t, "eor ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0x42: sprintf(t, "wdm                   "); break;
-  case 0x43: sprintf(t, "eor $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0x44: sprintf(t, "mvp $%.2x,$%.2x           ", op1, op8); break;
-  case 0x45: sprintf(t, "eor $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x46: sprintf(t, "lsr $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x47: sprintf(t, "eor [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0x48: sprintf(t, "pha                   "); break;
-  case 0x49: if(a8)sprintf(t, "eor #$%.2x              ", op8);
-             else  sprintf(t, "eor #$%.4x            ", op16); break;
-  case 0x4a: sprintf(t, "lsr a                 "); break;
-  case 0x4b: sprintf(t, "phk                   "); break;
-  case 0x4c: sprintf(t, "jmp $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR_PC, op16)); break;
-  case 0x4d: sprintf(t, "eor $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x4e: sprintf(t, "lsr $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x4f: sprintf(t, "eor $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x50: sprintf(t, "bvc $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x51: sprintf(t, "eor ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0x52: sprintf(t, "eor ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0x53: sprintf(t, "eor ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0x54: sprintf(t, "mvn $%.2x,$%.2x           ", op1, op8); break;
-  case 0x55: sprintf(t, "eor $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x56: sprintf(t, "lsr $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x57: sprintf(t, "eor [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0x58: sprintf(t, "cli                   "); break;
-  case 0x59: sprintf(t, "eor $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0x5a: sprintf(t, "phy                   "); break;
-  case 0x5b: sprintf(t, "tcd                   "); break;
-  case 0x5c: sprintf(t, "jml $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x5d: sprintf(t, "eor $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x5e: sprintf(t, "lsr $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x5f: sprintf(t, "eor $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0x60: sprintf(t, "rts                   "); break;
-  case 0x61: sprintf(t, "adc ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0x62: sprintf(t, "per $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x63: sprintf(t, "adc $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0x64: sprintf(t, "stz $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x65: sprintf(t, "adc $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x66: sprintf(t, "ror $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x67: sprintf(t, "adc [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0x68: sprintf(t, "pla                   "); break;
-  case 0x69: if(a8)sprintf(t, "adc #$%.2x              ", op8);
-             else  sprintf(t, "adc #$%.4x            ", op16); break;
-  case 0x6a: sprintf(t, "ror a                 "); break;
-  case 0x6b: sprintf(t, "rtl                   "); break;
-  case 0x6c: sprintf(t, "jmp ($%.4x)   [%.6x]", op16, decode(OPTYPE_IADDR_PC, op16)); break;
-  case 0x6d: sprintf(t, "adc $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x6e: sprintf(t, "ror $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x6f: sprintf(t, "adc $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x70: sprintf(t, "bvs $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x71: sprintf(t, "adc ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0x72: sprintf(t, "adc ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0x73: sprintf(t, "adc ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0x74: sprintf(t, "stz $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x75: sprintf(t, "adc $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x76: sprintf(t, "ror $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x77: sprintf(t, "adc [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0x78: sprintf(t, "sei                   "); break;
-  case 0x79: sprintf(t, "adc $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0x7a: sprintf(t, "ply                   "); break;
-  case 0x7b: sprintf(t, "tdc                   "); break;
-  case 0x7c: sprintf(t, "jmp ($%.4x,x) [%.6x]", op16, decode(OPTYPE_IADDRX, op16)); break;
-  case 0x7d: sprintf(t, "adc $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x7e: sprintf(t, "ror $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x7f: sprintf(t, "adc $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0x80: sprintf(t, "bra $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x81: sprintf(t, "sta ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0x82: sprintf(t, "brl $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELW, op16)), decode(OPTYPE_RELW, op16)); break;
-  case 0x83: sprintf(t, "sta $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0x84: sprintf(t, "sty $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x85: sprintf(t, "sta $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x86: sprintf(t, "stx $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0x87: sprintf(t, "sta [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0x88: sprintf(t, "dey                   "); break;
-  case 0x89: if(a8)sprintf(t, "bit #$%.2x              ", op8);
-             else  sprintf(t, "bit #$%.4x            ", op16); break;
-  case 0x8a: sprintf(t, "txa                   "); break;
-  case 0x8b: sprintf(t, "phb                   "); break;
-  case 0x8c: sprintf(t, "sty $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x8d: sprintf(t, "sta $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x8e: sprintf(t, "stx $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x8f: sprintf(t, "sta $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0x90: sprintf(t, "bcc $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0x91: sprintf(t, "sta ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0x92: sprintf(t, "sta ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0x93: sprintf(t, "sta ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0x94: sprintf(t, "sty $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x95: sprintf(t, "sta $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0x96: sprintf(t, "stx $%.2x,y     [%.6x]", op8, decode(OPTYPE_DPY, op8)); break;
-  case 0x97: sprintf(t, "sta [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0x98: sprintf(t, "tya                   "); break;
-  case 0x99: sprintf(t, "sta $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0x9a: sprintf(t, "txs                   "); break;
-  case 0x9b: sprintf(t, "txy                   "); break;
-  case 0x9c: sprintf(t, "stz $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0x9d: sprintf(t, "sta $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x9e: sprintf(t, "stz $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0x9f: sprintf(t, "sta $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0xa0: if(x8)sprintf(t, "ldy #$%.2x              ", op8);
-             else  sprintf(t, "ldy #$%.4x            ", op16); break;
-  case 0xa1: sprintf(t, "lda ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0xa2: if(x8)sprintf(t, "ldx #$%.2x              ", op8);
-             else  sprintf(t, "ldx #$%.4x            ", op16); break;
-  case 0xa3: sprintf(t, "lda $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0xa4: sprintf(t, "ldy $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xa5: sprintf(t, "lda $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xa6: sprintf(t, "ldx $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xa7: sprintf(t, "lda [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0xa8: sprintf(t, "tay                   "); break;
-  case 0xa9: if(a8)sprintf(t, "lda #$%.2x              ", op8);
-             else  sprintf(t, "lda #$%.4x            ", op16); break;
-  case 0xaa: sprintf(t, "tax                   "); break;
-  case 0xab: sprintf(t, "plb                   "); break;
-  case 0xac: sprintf(t, "ldy $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xad: sprintf(t, "lda $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xae: sprintf(t, "ldx $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xaf: sprintf(t, "lda $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0xb0: sprintf(t, "bcs $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0xb1: sprintf(t, "lda ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0xb2: sprintf(t, "lda ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0xb3: sprintf(t, "lda ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0xb4: sprintf(t, "ldy $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xb5: sprintf(t, "lda $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xb6: sprintf(t, "ldx $%.2x,y     [%.6x]", op8, decode(OPTYPE_DPY, op8)); break;
-  case 0xb7: sprintf(t, "lda [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0xb8: sprintf(t, "clv                   "); break;
-  case 0xb9: sprintf(t, "lda $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0xba: sprintf(t, "tsx                   "); break;
-  case 0xbb: sprintf(t, "tyx                   "); break;
-  case 0xbc: sprintf(t, "ldy $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xbd: sprintf(t, "lda $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xbe: sprintf(t, "ldx $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0xbf: sprintf(t, "lda $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0xc0: if(x8)sprintf(t, "cpy #$%.2x              ", op8);
-             else  sprintf(t, "cpy #$%.4x            ", op16); break;
-  case 0xc1: sprintf(t, "cmp ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0xc2: sprintf(t, "rep #$%.2x              ", op8); break;
-  case 0xc3: sprintf(t, "cmp $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0xc4: sprintf(t, "cpy $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xc5: sprintf(t, "cmp $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xc6: sprintf(t, "dec $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xc7: sprintf(t, "cmp [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0xc8: sprintf(t, "iny                   "); break;
-  case 0xc9: if(a8)sprintf(t, "cmp #$%.2x              ", op8);
-             else  sprintf(t, "cmp #$%.4x            ", op16); break;
-  case 0xca: sprintf(t, "dex                   "); break;
-  case 0xcb: sprintf(t, "wai                   "); break;
-  case 0xcc: sprintf(t, "cpy $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xcd: sprintf(t, "cmp $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xce: sprintf(t, "dec $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xcf: sprintf(t, "cmp $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0xd0: sprintf(t, "bne $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0xd1: sprintf(t, "cmp ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0xd2: sprintf(t, "cmp ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0xd3: sprintf(t, "cmp ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0xd4: sprintf(t, "pei ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0xd5: sprintf(t, "cmp $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xd6: sprintf(t, "dec $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xd7: sprintf(t, "cmp [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0xd8: sprintf(t, "cld                   "); break;
-  case 0xd9: sprintf(t, "cmp $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0xda: sprintf(t, "phx                   "); break;
-  case 0xdb: sprintf(t, "stp                   "); break;
-  case 0xdc: sprintf(t, "jmp [$%.4x]   [%.6x]", op16, decode(OPTYPE_ILADDR, op16)); break;
-  case 0xdd: sprintf(t, "cmp $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xde: sprintf(t, "dec $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xdf: sprintf(t, "cmp $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
-  case 0xe0: if(x8)sprintf(t, "cpx #$%.2x              ", op8);
-             else  sprintf(t, "cpx #$%.4x            ", op16); break;
-  case 0xe1: sprintf(t, "sbc ($%.2x,x)   [%.6x]", op8, decode(OPTYPE_IDPX, op8)); break;
-  case 0xe2: sprintf(t, "sep #$%.2x              ", op8); break;
-  case 0xe3: sprintf(t, "sbc $%.2x,s     [%.6x]", op8, decode(OPTYPE_SR, op8)); break;
-  case 0xe4: sprintf(t, "cpx $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xe5: sprintf(t, "sbc $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xe6: sprintf(t, "inc $%.2x       [%.6x]", op8, decode(OPTYPE_DP, op8)); break;
-  case 0xe7: sprintf(t, "sbc [$%.2x]     [%.6x]", op8, decode(OPTYPE_ILDP, op8)); break;
-  case 0xe8: sprintf(t, "inx                   "); break;
-  case 0xe9: if(a8)sprintf(t, "sbc #$%.2x              ", op8);
-             else  sprintf(t, "sbc #$%.4x            ", op16); break;
-  case 0xea: sprintf(t, "nop                   "); break;
-  case 0xeb: sprintf(t, "xba                   "); break;
-  case 0xec: sprintf(t, "cpx $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xed: sprintf(t, "sbc $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xee: sprintf(t, "inc $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xef: sprintf(t, "sbc $%.6x   [%.6x]", op24, decode(OPTYPE_LONG, op24)); break;
-  case 0xf0: sprintf(t, "beq $%.4x     [%.6x]", uint16_t(decode(OPTYPE_RELB, op8)), decode(OPTYPE_RELB, op8)); break;
-  case 0xf1: sprintf(t, "sbc ($%.2x),y   [%.6x]", op8, decode(OPTYPE_IDPY, op8)); break;
-  case 0xf2: sprintf(t, "sbc ($%.2x)     [%.6x]", op8, decode(OPTYPE_IDP, op8)); break;
-  case 0xf3: sprintf(t, "sbc ($%.2x,s),y [%.6x]", op8, decode(OPTYPE_ISRY, op8)); break;
-  case 0xf4: sprintf(t, "pea $%.4x     [%.6x]", op16, decode(OPTYPE_ADDR, op16)); break;
-  case 0xf5: sprintf(t, "sbc $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xf6: sprintf(t, "inc $%.2x,x     [%.6x]", op8, decode(OPTYPE_DPX, op8)); break;
-  case 0xf7: sprintf(t, "sbc [$%.2x],y   [%.6x]", op8, decode(OPTYPE_ILDPY, op8)); break;
-  case 0xf8: sprintf(t, "sed                   "); break;
-  case 0xf9: sprintf(t, "sbc $%.4x,y   [%.6x]", op16, decode(OPTYPE_ADDRY, op16)); break;
-  case 0xfa: sprintf(t, "plx                   "); break;
-  case 0xfb: sprintf(t, "xce                   "); break;
-  case 0xfc: sprintf(t, "jsr ($%.4x,x) [%.6x]", op16, decode(OPTYPE_IADDRX, op16)); break;
-  case 0xfd: sprintf(t, "sbc $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xfe: sprintf(t, "inc $%.4x,x   [%.6x]", op16, decode(OPTYPE_ADDRX, op16)); break;
-  case 0xff: sprintf(t, "sbc $%.6x,x [%.6x]", op24, decode(OPTYPE_LONGX, op24)); break;
+  auto readByte = [&](uint24 address) -> uint8 {
+    return read(address);
+  };
+  auto readWord = [&](uint24 address) -> uint16 {
+    uint16 data = readByte(address + 0) << 0;
+    return data | readByte(address + 1) << 8;
+  };
+  auto readLong = [&](uint24 address) -> uint24 {
+    uint24 data = readByte(address + 0) << 0;
+    return data | readWord(address + 1) << 8;
+  };
+
+  auto opcode   = read(address); address(0,15)++;
+  auto operand0 = read(address); address(0,15)++;
+  auto operand1 = read(address); address(0,15)++;
+  auto operand2 = read(address); address(0,15)++;
+
+   uint8 operandByte = operand0 << 0;
+  uint16 operandWord = operand0 << 0 | operand1 << 8;
+  uint24 operandLong = operand0 << 0 | operand1 << 8 | operand2 << 16;
+
+  auto absolute = [&]() -> string {
+    effective = r.b << 16 | operandWord;
+    return {"$", hex(operandWord, 4L)};
+  };
+
+  auto absolutePC = [&]() -> string {
+    effective = pc & 0xff0000 | operandWord;
+    return {"$", hex(operandWord, 4L)};
+  };
+
+  auto absoluteX = [&]() -> string {
+    effective = (r.b << 16) + operandWord + r.x.w;
+    return {"$", hex(operandWord, 4L), ",x"};
+  };
+
+  auto absoluteY = [&]() -> string {
+    effective = (r.b << 16) + operandWord + r.y.w;
+    return {"$", hex(operandWord, 4L), ",y"};
+  };
+
+  auto absoluteLong = [&]() -> string {
+    effective = operandLong;
+    return {"$", hex(operandLong, 6L)};
+  };
+
+  auto absoluteLongX = [&]() -> string {
+    effective = operandLong + r.x.w;
+    return {"$", hex(operandLong, 6L), ",x"};
+  };
+
+  auto direct = [&]() -> string {
+    effective = uint16(r.d.w + operandByte);
+    return {"$", hex(operandByte, 2L)};
+  };
+
+  auto directX = [&]() -> string {
+    effective = uint16(r.d.w + operandByte + r.x.w);
+    return {"$", hex(operandByte, 2L), ",x"};
+  };
+
+  auto directY = [&]() -> string {
+    effective = uint16(r.d.w + operandByte + r.y.w);
+    return {"$", hex(operandByte, 2L), ",y"};
+  };
+
+  auto immediate = [&]() -> string {
+    return {"#$", hex(operandByte, 2L)};
+  };
+
+  auto immediateA = [&]() -> string {
+    return {"#$", m ? hex(operandByte, 2L) : hex(operandWord, 4L)};
+  };
+
+  auto immediateX = [&]() -> string {
+    return {"#$", x ? hex(operandByte, 2L) : hex(operandWord, 4L)};
+  };
+
+  auto implied = [&]() -> string {
+    return {};
+  };
+
+  auto indexedIndirectX = [&]() -> string {
+    effective = uint16(r.d.w + operandByte + r.x.w);
+    effective = r.b << 16 | readWord(*effective);
+    return {"($", hex(operandByte, 2L), ",x)"};
+  };
+
+  auto indirect = [&]() -> string {
+    effective = uint16(r.d.w + operandByte);
+    effective = (r.b << 16) + readWord(*effective);
+    return {"($", hex(operandByte, 2L), ")"};
+  };
+
+  auto indirectPC = [&]() -> string {
+    effective = operandWord;
+    effective = pc & 0xff0000 | readWord(*effective);
+    return {"($", hex(operandWord, 4L), ")"};
+  };
+
+  auto indirectX = [&]() -> string {
+    effective = operandWord;
+    effective = pc & 0xff0000 | uint16(*effective + r.x.w);
+    effective = pc & 0xff0000 | readWord(*effective);
+    return {"($", hex(operandWord, 4L), ",x)"};
+  };
+
+  auto indirectIndexedY = [&]() -> string {
+    effective = uint16(r.d.w + operandByte);
+    effective = (r.b << 16) + readWord(*effective) + r.y.w;
+    return {"($", hex(operandByte, 2L), "),y"};
+  };
+
+  auto indirectLong = [&]() -> string {
+    effective = uint16(r.d.w + operandByte);
+    effective = readLong(*effective);
+    return {"[$", hex(operandByte, 2L), "]"};
+  };
+
+  auto indirectLongPC = [&]() -> string {
+    effective = readLong(operandWord);
+    return {"[$", hex(operandWord, 4L), "]"};
+  };
+
+  auto indirectLongY = [&]() -> string {
+    effective = uint16(r.d.w + operandByte);
+    effective = readLong(*effective) + r.y.w;
+    return {"[$", hex(operandByte, 2L), "],y"};
+  };
+
+  auto move = [&]() -> string {
+    return {"$", hex(operand0, 2L), "=$", hex(operand1, 2L)};
+  };
+
+  auto relative = [&]() -> string {
+    effective = pc & 0xff0000 | uint16(pc + 2 + (int8)operandByte);
+    return {"$", hex(*effective, 4L)};
+  };
+
+  auto relativeWord = [&]() -> string {
+    effective = pc & 0xff0000 | uint16(pc + 3 + (int16)operandWord);
+    return {"$", hex(*effective, 4L)};
+  };
+
+  auto stack = [&]() -> string {
+    effective = uint16(r.s.w + operandByte);
+    return {"$", hex(operandByte, 2L), ",s"};
+  };
+
+  auto stackIndirect = [&]() -> string {
+    effective = uint16(operandByte + r.s.w);
+    effective = (r.b << 16) + readWord(*effective) + r.y.w;
+    return {"($", hex(operandByte, 2L), ",s),y"};
+  };
+
+  #define op(id, label, function) case id: name = label; operand = function(); break;
+  switch(opcode) {
+  op(0x00, "brk", immediate)
+  op(0x01, "ora", indexedIndirectX)
+  op(0x02, "cop", immediate)
+  op(0x03, "ora", stack)
+  op(0x04, "tsb", direct)
+  op(0x05, "ora", direct)
+  op(0x06, "asl", direct)
+  op(0x07, "ora", indirectLong)
+  op(0x08, "php", implied)
+  op(0x09, "ora", immediateA)
+  op(0x0a, "asl", implied)
+  op(0x0b, "phd", implied)
+  op(0x0c, "tsb", absolute)
+  op(0x0d, "ora", absolute)
+  op(0x0e, "asl", absolute)
+  op(0x0f, "ora", absoluteLong)
+  op(0x10, "bpl", relative)
+  op(0x11, "ora", indirectIndexedY)
+  op(0x12, "ora", indirect)
+  op(0x13, "ora", stackIndirect)
+  op(0x14, "trb", direct)
+  op(0x15, "ora", directX)
+  op(0x16, "asl", directX)
+  op(0x17, "ora", indirectLongY)
+  op(0x18, "clc", implied)
+  op(0x19, "ora", absoluteY)
+  op(0x1a, "inc", implied)
+  op(0x1b, "tas", implied)
+  op(0x1c, "trb", absolute)
+  op(0x1d, "ora", absoluteX)
+  op(0x1e, "asl", absoluteX)
+  op(0x1f, "ora", absoluteLongX)
+
+  op(0x20, "jsr", absolutePC)
+  op(0x21, "and", indexedIndirectX)
+  op(0x22, "jsl", absoluteLong)
+  op(0x23, "and", stack)
+  op(0x24, "bit", direct)
+  op(0x25, "and", direct)
+  op(0x26, "rol", direct)
+  op(0x27, "and", indirectLong)
+  op(0x28, "plp", implied)
+  op(0x29, "and", immediateA)
+  op(0x2a, "rol", implied)
+  op(0x2b, "pld", implied)
+  op(0x2c, "bit", absolute)
+  op(0x2d, "and", absolute)
+  op(0x2e, "rol", absolute)
+  op(0x2f, "and", absoluteLong)
+  op(0x30, "bmi", relative)
+  op(0x31, "and", indirectIndexedY)
+  op(0x32, "and", indirect)
+  op(0x33, "and", stackIndirect)
+  op(0x34, "bit", directX)
+  op(0x35, "and", directX)
+  op(0x36, "rol", directX)
+  op(0x37, "and", indirectLongY)
+  op(0x38, "sec", implied)
+  op(0x39, "and", absoluteY)
+  op(0x3a, "dec", implied)
+  op(0x3b, "tsa", implied)
+  op(0x3c, "bit", absoluteX)
+  op(0x3d, "and", absoluteX)
+  op(0x3e, "rol", absoluteX)
+  op(0x3f, "and", absoluteLongX)
+
+  op(0x40, "rti", implied)
+  op(0x41, "eor", indexedIndirectX)
+  op(0x42, "wdm", immediate)
+  op(0x43, "eor", stack)
+  op(0x44, "mvp", move)
+  op(0x45, "eor", direct)
+  op(0x46, "lsr", direct)
+  op(0x47, "eor", indirectLong)
+  op(0x48, "pha", implied)
+  op(0x49, "eor", immediateA)
+  op(0x4a, "lsr", implied)
+  op(0x4b, "phk", implied)
+  op(0x4c, "jmp", absolutePC)
+  op(0x4d, "eor", absolute)
+  op(0x4e, "lsr", absolute)
+  op(0x4f, "eor", absoluteLong)
+  op(0x50, "bvc", relative)
+  op(0x51, "eor", indirectIndexedY)
+  op(0x52, "eor", indirect)
+  op(0x53, "eor", stackIndirect)
+  op(0x54, "mvn", move)
+  op(0x55, "eor", directX)
+  op(0x56, "lsr", directX)
+  op(0x57, "eor", indirectLongY)
+  op(0x58, "cli", implied)
+  op(0x59, "eor", absoluteY)
+  op(0x5a, "phy", implied)
+  op(0x5b, "tad", implied)
+  op(0x5c, "jml", absoluteLong)
+  op(0x5d, "eor", absoluteX)
+  op(0x5e, "lsr", absoluteX)
+  op(0x5f, "eor", absoluteLongX)
+
+  op(0x60, "rts", implied)
+  op(0x61, "adc", indexedIndirectX)
+  op(0x62, "per", absolute)
+  op(0x63, "adc", stack)
+  op(0x64, "stz", direct)
+  op(0x65, "adc", direct)
+  op(0x66, "ror", direct)
+  op(0x67, "adc", indirectLong)
+  op(0x68, "pla", implied)
+  op(0x69, "adc", immediateA)
+  op(0x6a, "ror", implied)
+  op(0x6b, "rtl", implied)
+  op(0x6c, "jmp", indirectPC)
+  op(0x6d, "adc", absolute)
+  op(0x6e, "ror", absolute)
+  op(0x6f, "adc", absoluteLong)
+  op(0x70, "bvs", relative)
+  op(0x71, "adc", indirectIndexedY)
+  op(0x72, "adc", indirect)
+  op(0x73, "adc", stackIndirect)
+  op(0x74, "stz", absoluteX)
+  op(0x75, "adc", absoluteX)
+  op(0x76, "ror", absoluteX)
+  op(0x77, "adc", indirectLongY)
+  op(0x78, "sei", implied)
+  op(0x79, "adc", absoluteY)
+  op(0x7a, "ply", implied)
+  op(0x7b, "tda", implied)
+  op(0x7c, "jmp", indirectX)
+  op(0x7d, "adc", absoluteX)
+  op(0x7e, "ror", absoluteX)
+  op(0x7f, "adc", absoluteLongX)
+
+  op(0x80, "bra", relative)
+  op(0x81, "sta", indexedIndirectX)
+  op(0x82, "brl", relativeWord)
+  op(0x83, "sta", stack)
+  op(0x84, "sty", direct)
+  op(0x85, "sta", direct)
+  op(0x86, "stx", direct)
+  op(0x87, "sta", indirectLong)
+  op(0x88, "dey", implied)
+  op(0x89, "bit", immediateA)
+  op(0x8a, "txa", implied)
+  op(0x8b, "phb", implied)
+  op(0x8c, "sty", absolute)
+  op(0x8d, "sta", absolute)
+  op(0x8e, "stx", absolute)
+  op(0x8f, "sta", absoluteLong)
+  op(0x90, "bcc", relative)
+  op(0x91, "sta", indirectIndexedY)
+  op(0x92, "sta", indirect)
+  op(0x93, "sta", stackIndirect)
+  op(0x94, "sty", directX)
+  op(0x95, "sta", directX)
+  op(0x96, "stx", directY)
+  op(0x97, "sta", indirectLongY)
+  op(0x98, "tya", implied)
+  op(0x99, "sta", absoluteY)
+  op(0x9a, "txs", implied)
+  op(0x9b, "txy", implied)
+  op(0x9c, "stz", absolute)
+  op(0x9d, "sta", absoluteX)
+  op(0x9e, "stz", absoluteX)
+  op(0x9f, "sta", absoluteLongX)
+
+  op(0xa0, "ldy", immediateX)
+  op(0xa1, "lda", indexedIndirectX)
+  op(0xa2, "ldx", immediateX)
+  op(0xa3, "lda", stack)
+  op(0xa4, "ldy", direct)
+  op(0xa5, "lda", direct)
+  op(0xa6, "ldx", direct)
+  op(0xa7, "lda", indirectLong)
+  op(0xa8, "tay", implied)
+  op(0xa9, "lda", immediateA)
+  op(0xaa, "tax", implied)
+  op(0xab, "plb", implied)
+  op(0xac, "ldy", absolute)
+  op(0xad, "lda", absolute)
+  op(0xae, "ldx", absolute)
+  op(0xaf, "lda", absoluteLong)
+  op(0xb0, "bcs", relative)
+  op(0xb1, "lda", indirectIndexedY)
+  op(0xb2, "lda", indirect)
+  op(0xb3, "lda", stackIndirect)
+  op(0xb4, "ldy", directX)
+  op(0xb5, "lda", directX)
+  op(0xb6, "ldx", directY)
+  op(0xb7, "lda", indirectLongY)
+  op(0xb8, "clv", implied)
+  op(0xb9, "lda", absoluteY)
+  op(0xba, "tsx", implied)
+  op(0xbb, "tyx", implied)
+  op(0xbc, "ldy", absoluteX)
+  op(0xbd, "lda", absoluteX)
+  op(0xbe, "ldx", absoluteY)
+  op(0xbf, "lda", absoluteLongX)
+
+  op(0xc0, "cpy", immediateX)
+  op(0xc1, "cmp", indexedIndirectX)
+  op(0xc2, "rep", immediate)
+  op(0xc3, "cmp", stack)
+  op(0xc4, "cpy", direct)
+  op(0xc5, "cmp", direct)
+  op(0xc6, "dec", direct)
+  op(0xc7, "cmp", indirectLong)
+  op(0xc8, "iny", implied)
+  op(0xc9, "cmp", immediateA)
+  op(0xca, "dex", implied)
+  op(0xcb, "wai", implied)
+  op(0xcc, "cpy", absolute)
+  op(0xcd, "cmp", absolute)
+  op(0xce, "dec", absolute)
+  op(0xcf, "cmp", absoluteLong)
+  op(0xd0, "bne", relative)
+  op(0xd1, "cmp", indirectIndexedY)
+  op(0xd2, "cmp", indirect)
+  op(0xd3, "cmp", stackIndirect)
+  op(0xd4, "pei", indirect)
+  op(0xd5, "cmp", directX)
+  op(0xd6, "dec", directX)
+  op(0xd7, "cmp", indirectLongY)
+  op(0xd8, "cld", implied)
+  op(0xd9, "cmp", absoluteY)
+  op(0xda, "phx", implied)
+  op(0xdb, "stp", implied)
+  op(0xdc, "jmp", indirectLongPC)
+  op(0xdd, "cmp", absoluteX)
+  op(0xde, "dec", absoluteX)
+  op(0xdf, "cmp", absoluteLongX)
+
+  op(0xe0, "cpx", immediateX)
+  op(0xe1, "sbc", indexedIndirectX)
+  op(0xe2, "sep", immediate)
+  op(0xe3, "sbc", stack)
+  op(0xe4, "cpx", direct)
+  op(0xe5, "sbc", direct)
+  op(0xe6, "inc", direct)
+  op(0xe7, "sbc", indirectLong)
+  op(0xe8, "inx", implied)
+  op(0xe9, "sbc", immediateA)
+  op(0xea, "nop", implied)
+  op(0xeb, "xba", implied)
+  op(0xec, "cpx", absolute)
+  op(0xed, "sbc", absolute)
+  op(0xee, "inc", absolute)
+  op(0xef, "sbc", absoluteLong)
+  op(0xf0, "beq", relative)
+  op(0xf1, "sbc", indirectIndexedY)
+  op(0xf2, "sbc", indirect)
+  op(0xf3, "sbc", stackIndirect)
+  op(0xf4, "pea", absolute)
+  op(0xf5, "sbc", directX)
+  op(0xf6, "inc", directX)
+  op(0xf7, "sbc", indirectLongY)
+  op(0xf8, "sed", implied)
+  op(0xf9, "sbc", absoluteY)
+  op(0xfa, "plx", implied)
+  op(0xfb, "xce", implied)
+  op(0xfc, "jsr", indirectX)
+  op(0xfd, "sbc", absoluteX)
+  op(0xfe, "inc", absoluteX)
+  op(0xff, "sbc", absoluteLongX)
   }
+  #undef op
 
-  #undef op8
-  #undef op16
-  #undef op24
-  #undef a8
-  #undef x8
+  s.append(name, " ", operand);
+  while(s.size() < 23) s.append(" ");
+  if(effective) s.append("[", hex(*effective, 6L), "]");
+  while(s.size() < 31) s.append(" ");
 
-  s.append(t, " A:{0} X:{1} Y:{2} S:{3} D:{4} B:{5} ", string_format{
-    hex(r.a, 4), hex(r.x, 4), hex(r.y, 4),
-    hex(r.s, 4), hex(r.d, 4), hex(r.b, 2)
-  });
+  s.append(" A:", hex(r.a.w, 4L));
+  s.append(" X:", hex(r.x.w, 4L));
+  s.append(" Y:", hex(r.y.w, 4L));
+  s.append(" S:", hex(r.s.w, 4L));
+  s.append(" D:", hex(r.d.w, 4L));
+  s.append(" B:", hex(r.b  , 2L));
 
-  if(r.e) {
-    s.append(
+  if(e) {
+    s.append(' ',
       r.p.n ? 'N' : 'n', r.p.v ? 'V' : 'v',
       r.p.m ? '1' : '0', r.p.x ? 'B' : 'b',
       r.p.d ? 'D' : 'd', r.p.i ? 'I' : 'i',
       r.p.z ? 'Z' : 'z', r.p.c ? 'C' : 'c'
     );
   } else {
-    s.append(
+    s.append(' ',
       r.p.n ? 'N' : 'n', r.p.v ? 'V' : 'v',
       r.p.m ? 'M' : 'm', r.p.x ? 'X' : 'x',
       r.p.d ? 'D' : 'd', r.p.i ? 'I' : 'i',

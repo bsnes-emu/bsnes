@@ -84,8 +84,8 @@ public:
   vector<InputPort> ports;
   vector<InputHotkey> hotkeys;
 
-  uint64 lastPoll;   //time in milliseconds since last call to poll()
-  uint64 frequency;  //minimum time in milliseconds before poll() can be called again
+  uint64 lastPoll = 0;   //time in milliseconds since last call to poll()
+  uint64 frequency = 0;  //minimum time in milliseconds before poll() can be called again
 
   uint turboCounter = 0;
   uint turboFrequency = 0;

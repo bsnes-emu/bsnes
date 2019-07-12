@@ -10,8 +10,8 @@ struct EpsonRTC : Thread {
   auto power() -> void;
   auto synchronize(uint64 timestamp) -> void;
 
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto read(uint addr, uint8 data) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 

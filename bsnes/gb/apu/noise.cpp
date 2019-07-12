@@ -62,31 +62,31 @@ auto APU::Noise::read(uint16 addr) -> uint8 {
 
 auto APU::Noise::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff20) {  //NR41
-    length = 64 - (data & 0x3f);
+    length = 64 - bits(data,0-5);
   }
 
   if(addr == 0xff21) {  //NR42
-    envelopeVolume    = data.bits(7,4);
-    envelopeDirection = data.bit (3);
-    envelopeFrequency = data.bits(2,0);
+    envelopeVolume    = bits(data,4-7);
+    envelopeDirection = bit1(data,3);
+    envelopeFrequency = bits(data,0-2);
     if(!dacEnable()) enable = false;
   }
 
   if(addr == 0xff22) {  //NR43
-    frequency = data.bits(7,4);
-    narrow    = data.bit (3);
-    divisor   = data.bits(2,0);
+    frequency = bits(data,4-7);
+    narrow    = bit1(data,3);
+    divisor   = bits(data,0-2);
     period = getPeriod();
   }
 
   if(addr == 0xff23) {  //NR44
-    if((apu.phase & 1) && !counter && (data & 0x40)) {
+    if(bit1(apu.phase,0) && !counter && bit1(data,6)) {
       if(length && --length == 0) enable = false;
     }
 
-    counter = data.bit(6);
+    counter = bit1(data,6);
 
-    if(data.bit(7)) {
+    if(bit1(data,7)) {
       enable = dacEnable();
       lfsr = -1;
       envelopePeriod = envelopeFrequency ? (uint)envelopeFrequency : 8;
@@ -94,7 +94,7 @@ auto APU::Noise::write(uint16 addr, uint8 data) -> void {
 
       if(!length) {
         length = 64;
-        if(apu.phase.bit(0) && counter) length--;
+        if(bit1(apu.phase,0) && counter) length--;
       }
     }
   }

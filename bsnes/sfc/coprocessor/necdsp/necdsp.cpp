@@ -15,7 +15,7 @@ auto NECDSP::main() -> void {
   synchronize(cpu);
 }
 
-auto NECDSP::read(uint24 addr, uint8) -> uint8 {
+auto NECDSP::read(uint addr, uint8) -> uint8 {
   cpu.synchronize(*this);
   if(addr & 1) {
     return uPD96050::readSR();
@@ -24,7 +24,7 @@ auto NECDSP::read(uint24 addr, uint8) -> uint8 {
   }
 }
 
-auto NECDSP::write(uint24 addr, uint8 data) -> void {
+auto NECDSP::write(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
   if(addr & 1) {
     return uPD96050::writeSR(data);
@@ -33,12 +33,12 @@ auto NECDSP::write(uint24 addr, uint8 data) -> void {
   }
 }
 
-auto NECDSP::readRAM(uint24 addr, uint8) -> uint8 {
+auto NECDSP::readRAM(uint addr, uint8) -> uint8 {
   cpu.synchronize(*this);
   return uPD96050::readDP(addr);
 }
 
-auto NECDSP::writeRAM(uint24 addr, uint8 data) -> void {
+auto NECDSP::writeRAM(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
   return uPD96050::writeDP(addr, data);
 }

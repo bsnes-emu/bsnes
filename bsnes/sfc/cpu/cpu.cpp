@@ -36,8 +36,8 @@ auto CPU::main() -> void {
     } else if(status.powerPending) {
       status.powerPending = false;
       for(uint repeat : range(31)) step<6,0>();  //step(186);
-      r.pc.byte(0) = bus.read(0xfffc, r.mdr);
-      r.pc.byte(1) = bus.read(0xfffd, r.mdr);
+      r.pc.l = bus.read(0xfffc, r.mdr);
+      r.pc.h = bus.read(0xfffd, r.mdr);
     }
   }
 
@@ -58,8 +58,8 @@ auto CPU::power(bool reset) -> void {
   PPUcounter::reset();
   PPUcounter::scanline = {&CPU::scanline, this};
 
-  function<auto (uint24, uint8) -> uint8> reader;
-  function<auto (uint24, uint8) -> void> writer;
+  function<auto (uint, uint8) -> uint8> reader;
+  function<auto (uint, uint8) -> void> writer;
 
   reader = {&CPU::readRAM, this};
   writer = {&CPU::writeRAM, this};

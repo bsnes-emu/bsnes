@@ -59,7 +59,7 @@ auto APU::Wave::read(uint16 addr) -> uint8 {
 
 auto APU::Wave::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff1a) {  //NR30
-    dacEnable = data.bit(7);
+    dacEnable = bit1(data,7);
     if(!dacEnable) enable = false;
   }
 
@@ -68,22 +68,22 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff1c) {  //NR32
-    volume = data.bits(6,5);
+    volume = bits(data,5-6);
   }
 
   if(addr == 0xff1d) {  //NR33
-    frequency.bits(7,0) = data;
+    bits(frequency,0-7) = data;
   }
 
   if(addr == 0xff1e) {  //NR34
-    if(apu.phase.bit(0) && !counter && data.bit(6)) {
+    if(bit1(apu.phase,0) && !counter && bit1(data,6)) {
       if(length && --length == 0) enable = false;
     }
 
-    counter = data.bit(6);
-    frequency.bits(10,8) = data.bits(2,0);
+    counter = bit1(data,6);
+    bits(frequency,8-10) = (uint)bits(data,0-2);
 
-    if(data.bit(7)) {
+    if(bit1(data,7)) {
       if(!Model::GameBoyColor() && patternHold) {
         //DMG,SGB trigger while channel is being read corrupts wave RAM
         if((patternOffset >> 1) <= 3) {
@@ -106,7 +106,7 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
 
       if(!length) {
         length = 256;
-        if(apu.phase.bit(0) && counter) length--;
+        if(bit1(apu.phase,0) && counter) length--;
       }
     }
   }

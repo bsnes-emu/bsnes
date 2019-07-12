@@ -1,4 +1,4 @@
-auto ICD::readIO(uint24 addr, uint8 data) -> uint8 {
+auto ICD::readIO(uint addr, uint8 data) -> uint8 {
   addr &= 0x40ffff;
 
   //LY counter
@@ -38,7 +38,7 @@ auto ICD::readIO(uint24 addr, uint8 data) -> uint8 {
   return 0x00;
 }
 
-auto ICD::writeIO(uint24 addr, uint8 data) -> void {
+auto ICD::writeIO(uint addr, uint8 data) -> void {
   addr &= 0xffff;
 
   //VRAM port

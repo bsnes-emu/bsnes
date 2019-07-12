@@ -40,9 +40,9 @@ PPUfast::PPUfast() {
     }
   }
 
-  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8];
-  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8];
-  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8];
+  tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
+  tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
+  tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
 
   for(uint y : range(lines.size())) {
     lines[y].y = y;
@@ -155,14 +155,14 @@ auto PPUfast::load() -> bool {
 auto PPUfast::power(bool reset) -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill<uint16_t>(output, 1024 * 960);
+  memory::fill<uint16>(output, 1024 * 960);
 
-  function<auto (uint24, uint8) -> uint8> reader{&PPUfast::readIO, this};
-  function<auto (uint24, uint8) -> void> writer{&PPUfast::writeIO, this};
+  function<auto (uint, uint8) -> uint8> reader{&PPUfast::readIO, this};
+  function<auto (uint, uint8) -> void> writer{&PPUfast::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   if(!reset) {
-    for(auto address : range(32768)) {
+    for(uint address : range(32768)) {
       vram[address] = 0x0000;
       updateTiledata(address);
     }

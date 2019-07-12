@@ -67,8 +67,8 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
 
     uint16 tiledataAddress = self.tiledataAddress;
     if(object.nameselect) tiledataAddress += 1 + self.nameselect << 12;
-    uint16 characterX =  object.character.bits(0,3);
-    uint16 characterY = (object.character.bits(4,7) + (y >> 3) & 15) << 4;
+    uint16 characterX =  (object.character & 15);
+    uint16 characterY = ((object.character >> 4) + (y >> 3) & 15) << 4;
 
     for(uint tileX : range(tileWidth)) {
       uint objectX = x + (tileX << 3) & 511;
@@ -93,8 +93,8 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
   ppufast.io.obj.rangeOver |= itemCount > ppufast.ItemLimit;
   ppufast.io.obj.timeOver  |= tileCount > ppufast.TileLimit;
 
-  uint8 palette[256];
-  uint8 priority[256];
+  uint8 palette[256] = {};
+  uint8 priority[256] = {};
 
   for(uint n : range(ppufast.TileLimit)) {
     const auto& tile = tiles[n];
@@ -133,10 +133,10 @@ auto PPUfast::oamSetFirstObject() -> void {
 }
 
 auto PPUfast::readObject(uint10 address) -> uint8 {
-  if(!address.bit(9)) {
+  if(!(address & 0x200)) {
     uint n = address >> 2;  //object#
     address &= 3;
-    if(address == 0) return objects[n].x.bits(0,7);
+    if(address == 0) return objects[n].x;
     if(address == 1) return objects[n].y - 1;
     if(address == 2) return objects[n].character;
     return (
@@ -149,39 +149,39 @@ auto PPUfast::readObject(uint10 address) -> uint8 {
   } else {
     uint n = (address & 0x1f) << 2;  //object#
     return (
-      objects[n + 0].x.bit(8) << 0
-    | objects[n + 0].size     << 1
-    | objects[n + 1].x.bit(8) << 2
-    | objects[n + 1].size     << 3
-    | objects[n + 2].x.bit(8) << 4
-    | objects[n + 2].size     << 5
-    | objects[n + 3].x.bit(8) << 6
-    | objects[n + 3].size     << 7
+      objects[n + 0].x >> 8 << 0
+    | objects[n + 0].size   << 1
+    | objects[n + 1].x >> 8 << 2
+    | objects[n + 1].size   << 3
+    | objects[n + 2].x >> 8 << 4
+    | objects[n + 2].size   << 5
+    | objects[n + 3].x >> 8 << 6
+    | objects[n + 3].size   << 7
     );
   }
 }
 
 auto PPUfast::writeObject(uint10 address, uint8 data) -> void {
-  if(!address.bit(9)) {
+  if(!(address & 0x200)) {
     uint n = address >> 2;  //object#
     address &= 3;
-    if(address == 0) { objects[n].x.bits(0,7) = data; return; }
+    if(address == 0) { objects[n].x = objects[n].x & 0x100 | data; return; }
     if(address == 1) { objects[n].y = data + 1; return; }  //+1 => rendering happens one scanline late
     if(address == 2) { objects[n].character = data; return; }
-    objects[n].nameselect = data.bit (0);
-    objects[n].palette    = data.bits(1,3);
-    objects[n].priority   = data.bits(4,5);
-    objects[n].hflip      = data.bit (6);
-    objects[n].vflip      = data.bit (7);
+    objects[n].nameselect = data >> 0 & 1;
+    objects[n].palette    = data >> 1 & 7;
+    objects[n].priority   = data >> 4 & 3;
+    objects[n].hflip      = data >> 6 & 1;
+    objects[n].vflip      = data >> 7 & 1;
   } else {
     uint n = (address & 0x1f) << 2;  //object#
-    objects[n + 0].x.bit(8) = data.bit(0);
-    objects[n + 0].size     = data.bit(1);
-    objects[n + 1].x.bit(8) = data.bit(2);
-    objects[n + 1].size     = data.bit(3);
-    objects[n + 2].x.bit(8) = data.bit(4);
-    objects[n + 2].size     = data.bit(5);
-    objects[n + 3].x.bit(8) = data.bit(6);
-    objects[n + 3].size     = data.bit(7);
+    objects[n + 0].x = objects[n + 0].x & 0xff | data << 8 & 0x100;
+    objects[n + 1].x = objects[n + 1].x & 0xff | data << 6 & 0x100;
+    objects[n + 2].x = objects[n + 2].x & 0xff | data << 4 & 0x100;
+    objects[n + 3].x = objects[n + 3].x & 0xff | data << 2 & 0x100;
+    objects[n + 0].size = data >> 1 & 1;
+    objects[n + 1].size = data >> 3 & 1;
+    objects[n + 2].size = data >> 5 & 1;
+    objects[n + 3].size = data >> 7 & 1;
   }
 }

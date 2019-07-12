@@ -15,7 +15,7 @@ auto OBC1::power() -> void {
   status.shift   = (ramRead(0x1ff6) & 3) << 1;
 }
 
-auto OBC1::read(uint24 addr, uint8) -> uint8 {
+auto OBC1::read(uint addr, uint8) -> uint8 {
   addr &= 0x1fff;
 
   switch(addr) {
@@ -29,7 +29,7 @@ auto OBC1::read(uint24 addr, uint8) -> uint8 {
   return ramRead(addr);
 }
 
-auto OBC1::write(uint24 addr, uint8 data) -> void {
+auto OBC1::write(uint addr, uint8 data) -> void {
   addr &= 0x1fff;
 
   switch(addr) {

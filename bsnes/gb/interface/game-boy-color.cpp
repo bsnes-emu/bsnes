@@ -7,13 +7,13 @@ auto GameBoyColorInterface::information() -> Information {
 }
 
 auto GameBoyColorInterface::color(uint32 color) -> uint64 {
-  uint r = color.bits( 0, 4);
-  uint g = color.bits( 5, 9);
-  uint b = color.bits(10,14);
+  uint r = bits(color, 0- 4);
+  uint g = bits(color, 5- 9);
+  uint b = bits(color,10-14);
 
-  uint64_t R = image::normalize(r, 5, 16);
-  uint64_t G = image::normalize(g, 5, 16);
-  uint64_t B = image::normalize(b, 5, 16);
+  uint64 R = image::normalize(r, 5, 16);
+  uint64 G = image::normalize(g, 5, 16);
+  uint64 B = image::normalize(b, 5, 16);
 
   return R << 32 | G << 16 | B << 0;
 }

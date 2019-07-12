@@ -6,8 +6,8 @@ struct S21FX : Expansion {
   auto step(uint clocks) -> void;
   auto main() -> void;
 
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto read(uint addr, uint8 data) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
 private:
   auto quit() -> bool;

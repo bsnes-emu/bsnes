@@ -95,7 +95,7 @@ auto SPC7110::power() -> void {
   r4834 = 0x00;
 }
 
-auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
+auto SPC7110::read(uint addr, uint8 data) -> uint8 {
   cpu.synchronize(*this);
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
@@ -179,7 +179,7 @@ auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SPC7110::write(uint24 addr, uint8 data) -> void {
+auto SPC7110::write(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
@@ -243,7 +243,7 @@ auto SPC7110::write(uint24 addr, uint8 data) -> void {
 
 //map address=00-3f,80-bf:8000-ffff mask=0x800000 => 00-3f:8000-ffff
 //map address=c0-ff:0000-ffff mask=0xc00000 => c0-ff:0000-ffff
-auto SPC7110::mcuromRead(uint24 addr, uint8 data) -> uint8 {
+auto SPC7110::mcuromRead(uint addr, uint8 data) -> uint8 {
   uint mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
 
   if(addr < 0x100000) {  //$00-0f,80-8f:8000-ffff; $c0-cf:0000-ffff
@@ -279,7 +279,7 @@ auto SPC7110::mcuromRead(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SPC7110::mcuromWrite(uint24 addr, uint8 data) -> void {
+auto SPC7110::mcuromWrite(uint addr, uint8 data) -> void {
 }
 
 //===============
@@ -287,7 +287,7 @@ auto SPC7110::mcuromWrite(uint24 addr, uint8 data) -> void {
 //===============
 
 //map address=00-3f,80-bf:6000-7fff mask=0x80e000 => 00-07:0000-ffff
-auto SPC7110::mcuramRead(uint24 addr, uint8) -> uint8 {
+auto SPC7110::mcuramRead(uint addr, uint8) -> uint8 {
   if(r4830 & 0x80) {
     addr = bus.mirror(addr, ram.size());
     return ram.read(addr);
@@ -295,7 +295,7 @@ auto SPC7110::mcuramRead(uint24 addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto SPC7110::mcuramWrite(uint24 addr, uint8 data) -> void {
+auto SPC7110::mcuramWrite(uint addr, uint8 data) -> void {
   if(r4830 & 0x80) {
     addr = bus.mirror(addr, ram.size());
     ram.write(addr, data);

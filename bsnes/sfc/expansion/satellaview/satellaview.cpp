@@ -11,7 +11,7 @@ Satellaview::~Satellaview() {
   bus.unmap("00-3f,80-bf:2188-219f");
 }
 
-auto Satellaview::read(uint24 addr, uint8 data) -> uint8 {
+auto Satellaview::read(uint addr, uint8 data) -> uint8 {
   switch(addr &= 0xffff) {
   case 0x2188: return regs.r2188;
   case 0x2189: return regs.r2189;
@@ -67,7 +67,7 @@ auto Satellaview::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto Satellaview::write(uint24 addr, uint8 data) -> void {
+auto Satellaview::write(uint addr, uint8 data) -> void {
   switch(addr &= 0xffff) {
   case 0x2188: {
     regs.r2188 = data;

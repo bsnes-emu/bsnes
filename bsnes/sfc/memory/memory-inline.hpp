@@ -23,10 +23,10 @@ auto Bus::reduce(uint addr, uint mask) -> uint {
   return addr;
 }
 
-auto Bus::read(uint24 addr, uint8 data) -> uint8 {
+auto Bus::read(uint addr, uint8 data) -> uint8 {
   return reader[lookup[addr]](target[addr], data);
 }
 
-auto Bus::write(uint24 addr, uint8 data) -> void {
+auto Bus::write(uint addr, uint8 data) -> void {
   return writer[lookup[addr]](target[addr], data);
 }

@@ -1,22 +1,22 @@
 auto Cartridge::MMM01::read(uint16 address) -> uint8 {
   if(io.mode == 0) {
     if((address & 0x8000) == 0x0000) {  //$0000-7fff
-      return cartridge.rom.read(cartridge.rom.size - 0x8000 + address.bits(0,14));
+      return cartridge.rom.read(cartridge.rom.size - 0x8000 + bits(address,0-14));
     }
 
     return 0xff;
   } else {
     if((address & 0xc000) == 0x0000) {  //$0000-3fff
-      return cartridge.rom.read((io.rom.base << 14) + address.bits(0,13));
+      return cartridge.rom.read((io.rom.base << 14) + bits(address,0-13));
     }
 
     if((address & 0xc000) == 0x4000) {  //$4000-7fff
-      return cartridge.rom.read((io.rom.base << 14) + (io.rom.bank << 14) + address.bits(0,13));
+      return cartridge.rom.read((io.rom.base << 14) + (io.rom.bank << 14) + bits(address,0-13));
     }
 
     if((address & 0xe000) == 0xa000) {  //$a000-bfff
       if(!io.ram.enable) return 0xff;
-      return cartridge.ram.read(io.ram.bank << 13 | address.bits(0,12));
+      return cartridge.ram.read(io.ram.bank << 13 | bits(address,0-12));
     }
 
     return 0xff;
@@ -30,11 +30,11 @@ auto Cartridge::MMM01::write(uint16 address, uint8 data) -> void {
     }
 
     if((address & 0xe000) == 0x2000) {  //$2000-3fff
-      io.rom.base = data.bits(0,5);
+      io.rom.base = bits(data,0-5);
     }
   } else {
     if((address & 0xe000) == 0x0000) {  //$0000-1fff
-      io.ram.enable = data.bits(0,3) == 0x0a;
+      io.ram.enable = bits(data,0-3) == 0x0a;
     }
 
     if((address & 0xe000) == 0x2000) {  //$2000-3fff
@@ -47,7 +47,7 @@ auto Cartridge::MMM01::write(uint16 address, uint8 data) -> void {
 
     if((address & 0xe000) == 0xa000) {  //$a000-bfff
       if(!io.ram.enable) return;
-      cartridge.ram.write(io.ram.bank << 13 | address.bits(0,12), data);
+      cartridge.ram.write(io.ram.bank << 13 | bits(address,0-12), data);
     }
   }
 }

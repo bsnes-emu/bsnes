@@ -86,37 +86,37 @@ auto APU::Square1::read(uint16 addr) -> uint8 {
 
 auto APU::Square1::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff10) {  //NR10
-    if(sweepEnable && sweepNegate && !data.bit(3)) enable = false;
-    sweepFrequency = data.bits(6,4);
-    sweepDirection = data.bit (3);
-    sweepShift     = data.bits(2,0);
+    if(sweepEnable && sweepNegate && !bit1(data,3)) enable = false;
+    sweepFrequency = bits(data,4-6);
+    sweepDirection = bit1(data,3);
+    sweepShift     = bits(data,0-2);
   }
 
   if(addr == 0xff11) {  //NR11
-    duty = data.bits(7,6);
-    length = 64 - data.bits(5,0);
+    duty = bits(data,6-7);
+    length = 64 - bits(data,0-5);
   }
 
   if(addr == 0xff12) {  //NR12
-    envelopeVolume    = data.bits(7,4);
-    envelopeDirection = data.bit (3);
-    envelopeFrequency = data.bits(2,0);
+    envelopeVolume    = bits(data,4-7);
+    envelopeDirection = bit1(data,3);
+    envelopeFrequency = bits(data,0-2);
     if(!dacEnable()) enable = false;
   }
 
   if(addr == 0xff13) {  //NR13
-    frequency.bits(7,0) = data;
+    bits(frequency,0-7) = data;
   }
 
   if(addr == 0xff14) {  //NR14
-    if(apu.phase.bit(0) && !counter && data.bit(6)) {
+    if(bit1(apu.phase,0) && !counter && bit1(data,6)) {
       if(length && --length == 0) enable = false;
     }
 
-    counter = data.bit(6);
-    frequency.bits(10,8) = data.bits(2,0);
+    counter = bit1(data,6);
+    bits(frequency,8-10) = (uint)bits(data,0-2);
 
-    if(data.bit(7)) {
+    if(bit1(data,7)) {
       enable = dacEnable();
       period = 2 * (2048 - frequency);
       envelopePeriod = envelopeFrequency ? (uint)envelopeFrequency : 8;
@@ -124,7 +124,7 @@ auto APU::Square1::write(uint16 addr, uint8 data) -> void {
 
       if(!length) {
         length = 64;
-        if(apu.phase.bit(0) && counter) length--;
+        if(bit1(apu.phase,0) && counter) length--;
       }
 
       frequencyShadow = frequency;

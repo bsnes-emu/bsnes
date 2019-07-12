@@ -1,15 +1,15 @@
 auto WDC65816::interrupt() -> void {
-  read(PC);
+  read(PC.d);
   idle();
-N push(db(PC));
-  push(hi(PC));
-  push(lo(PC));
+N push(PC.b);
+  push(PC.h);
+  push(PC.l);
   push(EF ? P & ~0x10 : P);
   IF = 1;
   DF = 0;
-  lo(PC) = read(r.vector + 0);
-  hi(PC) = read(r.vector + 1);
-  db(PC) = 0x00;
+  PC.l = read(r.vector + 0);
+  PC.h = read(r.vector + 1);
+  PC.b = 0x00;
   idleJump();
 }
 

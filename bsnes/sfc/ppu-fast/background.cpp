@@ -23,8 +23,8 @@ auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source)
 
   uint hscroll = self.hoffset;
   uint vscroll = self.voffset;
-  uint hmask = (width << self.tileSize << self.screenSize.bit(0)) - 1;
-  uint vmask = (width << self.tileSize << self.screenSize.bit(1)) - 1;
+  uint hmask = (width << self.tileSize << bit1(self.screenSize,0)) - 1;
+  uint vmask = (width << self.tileSize << bit1(self.screenSize,1)) - 1;
 
   uint y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
   if(hires) {

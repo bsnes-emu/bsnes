@@ -87,16 +87,16 @@ auto PPU::Background::getTile() -> void {
       uint valid = 13 + id;
 
       if(ppu.io.bgMode == 4) {
-        if(hlookup.bit(valid)) {
-          if(!hlookup.bit(15)) {
+        if(bit1(hlookup,valid)) {
+          if(!bit1(hlookup,15)) {
             hoffset = offsetX + (hlookup & ~7);
           } else {
             voffset = py + hlookup;
           }
         }
       } else {
-        if(hlookup.bit(valid)) hoffset = offsetX + (hlookup & ~7);
-        if(vlookup.bit(valid)) voffset = py + vlookup;
+        if(bit1(hlookup,valid)) hoffset = offsetX + (hlookup & ~7);
+        if(bit1(vlookup,valid)) voffset = py + vlookup;
       }
     }
   }
@@ -116,27 +116,27 @@ auto PPU::Background::getTile() -> void {
 
   uint16 address = io.screenAddress + offset;
   tile = ppu.vram[address];
-  bool mirrorY = tile.bit(15);
-  bool mirrorX = tile.bit(14);
-  priority = io.priority[tile.bit(13)];
-  paletteNumber = tile.bits(10,12);
+  bool mirrorY = bit1(tile,15);
+  bool mirrorX = bit1(tile,14);
+  priority = io.priority[bit1(tile,13)];
+  paletteNumber = bits(tile,10-12);
   paletteIndex = paletteOffset + (paletteNumber << paletteSize);
 
   if(tileWidth  == 4 && (bool)(hoffset & 8) != mirrorX) tile +=  1;
   if(tileHeight == 4 && (bool)(voffset & 8) != mirrorY) tile += 16;
-  uint16 character = tile.bits(0,9) + tiledataIndex & tileMask;
+  uint16 character = bits(tile,0-9) + tiledataIndex & tileMask;
 
   if(mirrorY) voffset ^= 7;
   offset = (character << 3 + io.mode) + (voffset & 7);
 
   switch(io.mode) {
   case Mode::BPP8:
-    data[1].bits(16,31) = ppu.vram[offset + 24];
-    data[1].bits( 0,15) = ppu.vram[offset + 16];
+    bits(data[1],16-31) = ppu.vram[offset + 24];
+    bits(data[1], 0-15) = ppu.vram[offset + 16];
   case Mode::BPP4:
-    data[0].bits(16,31) = ppu.vram[offset +  8];
+    bits(data[0],16-31) = ppu.vram[offset +  8];
   case Mode::BPP2:
-    data[0].bits( 0,15) = ppu.vram[offset +  0];
+    bits(data[0], 0-15) = ppu.vram[offset +  0];
   }
 
   if(mirrorX) for(auto n : range(2)) {

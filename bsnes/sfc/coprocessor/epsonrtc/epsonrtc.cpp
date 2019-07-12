@@ -126,7 +126,7 @@ auto EpsonRTC::synchronize(uint64 timestamp) -> void {
   resync = true;  //alert program that time has changed
 }
 
-auto EpsonRTC::read(uint24 addr, uint8 data) -> uint8 {
+auto EpsonRTC::read(uint addr, uint8 data) -> uint8 {
   cpu.synchronize(*this);
   addr &= 3;
 
@@ -151,7 +151,7 @@ auto EpsonRTC::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto EpsonRTC::write(uint24 addr, uint8 data) -> void {
+auto EpsonRTC::write(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
   addr &= 3, data &= 15;
 

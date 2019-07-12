@@ -25,34 +25,34 @@ private:
     uint dspCounter = 0;
 
     //external
-    uint8 apu0;
-    uint8 apu1;
-    uint8 apu2;
-    uint8 apu3;
+    uint8 apu0 = 0;
+    uint8 apu1 = 0;
+    uint8 apu2 = 0;
+    uint8 apu3 = 0;
 
     //$00f0
-    uint1 timersDisable;
-    uint1 ramWritable = true;
-    uint1 ramDisable;
-    uint1 timersEnable = true;
-    uint2 externalWaitStates;
-    uint2 internalWaitStates;
+    uint1 timersDisable = 0;
+    uint1 ramWritable = 1;
+    uint1 ramDisable = 0;
+    uint1 timersEnable = 1;
+    uint2 externalWaitStates = 0;
+    uint2 internalWaitStates = 0;
 
     //$00f1
-    uint1 iplromEnable = true;
+    uint1 iplromEnable = 1;
 
     //$00f2
-    uint8 dspAddr;
+    uint8 dspAddr = 0;
 
     //$00f4-00f7
-    uint8 cpu0;
-    uint8 cpu1;
-    uint8 cpu2;
-    uint8 cpu3;
+    uint8 cpu0 = 0;
+    uint8 cpu1 = 0;
+    uint8 cpu2 = 0;
+    uint8 cpu3 = 0;
 
     //$00f8-00f9
-    uint8 aux4;
-    uint8 aux5;
+    uint8 aux4 = 0;
+    uint8 aux5 = 0;
   } io;
 
   //memory.cpp
@@ -72,13 +72,13 @@ private:
   //timing.cpp
   template<uint Frequency>
   struct Timer {
-    uint8   stage0;
-    uint8   stage1;
-    uint8   stage2;
-    uint4   stage3;
-    boolean line;
-    boolean enable;
-    uint8   target;
+    uint8   stage0 = 0;
+    uint8   stage1 = 0;
+    uint8   stage2 = 0;
+    uint4   stage3 = 0;
+    boolean line = 0;
+    boolean enable = 0;
+    uint8   target = 0;
 
     auto step(uint clocks) -> void;
     auto synchronizeStage1() -> void;

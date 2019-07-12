@@ -40,7 +40,7 @@ auto ArmDSP::step(uint clocks) -> void {
 //3800-3807 mirrored throughout
 //a0 ignored
 
-auto ArmDSP::read(uint24 addr, uint8) -> uint8 {
+auto ArmDSP::read(uint addr, uint8) -> uint8 {
   cpu.synchronize(*this);
 
   uint8 data = 0x00;
@@ -64,7 +64,7 @@ auto ArmDSP::read(uint24 addr, uint8) -> uint8 {
   return data;
 }
 
-auto ArmDSP::write(uint24 addr, uint8 data) -> void {
+auto ArmDSP::write(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
 
   addr &= 0xff06;

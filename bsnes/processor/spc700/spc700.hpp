@@ -120,28 +120,28 @@ struct SPC700 {
   auto disassemble(uint16 address, bool p) -> string;
 
   struct Flags {
-    bool c;  //carry
-    bool z;  //zero
-    bool i;  //interrupt disable
-    bool h;  //half-carry
-    bool b;  //break
-    bool p;  //page
-    bool v;  //overflow
-    bool n;  //negative
+    bool c = 0;  //carry
+    bool z = 0;  //zero
+    bool i = 0;  //interrupt disable
+    bool h = 0;  //half-carry
+    bool b = 0;  //break
+    bool p = 0;  //page
+    bool v = 0;  //overflow
+    bool n = 0;  //negative
 
     inline operator uint() const {
       return c << 0 | z << 1 | i << 2 | h << 3 | b << 4 | p << 5 | v << 6 | n << 7;
     }
 
     inline auto& operator=(uint8 data) {
-      c = data.bit(0);
-      z = data.bit(1);
-      i = data.bit(2);
-      h = data.bit(3);
-      b = data.bit(4);
-      p = data.bit(5);
-      v = data.bit(6);
-      n = data.bit(7);
+      c = bit1(data,0);
+      z = bit1(data,1);
+      i = bit1(data,2);
+      h = bit1(data,3);
+      b = bit1(data,4);
+      p = bit1(data,5);
+      v = bit1(data,6);
+      n = bit1(data,7);
       return *this;
     }
   };
@@ -152,11 +152,12 @@ struct SPC700 {
       uint16 w;
       struct Byte { uint8 order_lsb2(l, h); } byte;
     } pc, ya;
-    uint8 x, s;
+    uint8 x = 0;
+    uint8 s = 0;
     Flags p;
 
-    bool wait = false;
-    bool stop = false;
+    bool wait = 0;
+    bool stop = 0;
   } r;
 };
 

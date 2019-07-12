@@ -80,7 +80,7 @@ void Cx4::transfer_data() {
   }
 }
 
-void Cx4::write(uint24 addr, uint8 data) {
+void Cx4::write(uint addr, uint8 data) {
   addr &= 0x1fff;
 
   if(addr < 0x0c00) {
@@ -162,7 +162,7 @@ void Cx4::writel(uint16 addr, uint32 data) {
   write(addr + 2, data >> 16);
 }
 
-uint8 Cx4::read(uint24 addr, uint8 data) {
+uint8 Cx4::read(uint addr, uint8 data) {
   addr &= 0x1fff;
 
   if(addr < 0x0c00) {

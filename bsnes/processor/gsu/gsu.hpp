@@ -20,8 +20,8 @@ struct GSU {
   virtual auto writeRAMBuffer(uint16 addr, uint8 data) -> void = 0;
   virtual auto flushCache() -> void = 0;
 
-  virtual auto read(uint24 addr, uint8 data = 0x00) -> uint8 = 0;
-  virtual auto write(uint24 addr, uint8 data) -> void = 0;
+  virtual auto read(uint addr, uint8 data = 0x00) -> uint8 = 0;
+  virtual auto write(uint addr, uint8 data) -> void = 0;
 
   //gsu.cpp
   auto power() -> void;

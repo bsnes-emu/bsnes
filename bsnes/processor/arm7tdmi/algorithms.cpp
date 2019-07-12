@@ -1,11 +1,11 @@
 auto ARM7TDMI::ADD(uint32 source, uint32 modify, bool carry) -> uint32 {
   uint32 result = source + modify + carry;
-  if(cpsr().t || opcode.bit(20)) {
+  if(cpsr().t || bit1(opcode,20)) {
     uint32 overflow = ~(source ^ modify) & (source ^ result);
     cpsr().v = 1 << 31 & (overflow);
     cpsr().c = 1 << 31 & (overflow ^ source ^ modify ^ result);
     cpsr().z = result == 0;
-    cpsr().n = result.bit(31);
+    cpsr().n = bit1(result,31);
   }
   return result;
 }
@@ -19,10 +19,10 @@ auto ARM7TDMI::ASR(uint32 source, uint8 shift) -> uint32 {
 }
 
 auto ARM7TDMI::BIT(uint32 result) -> uint32 {
-  if(cpsr().t || opcode.bit(20)) {
+  if(cpsr().t || bit1(opcode,20)) {
     cpsr().c = carry;
     cpsr().z = result == 0;
-    cpsr().n = result.bit(31);
+    cpsr().n = bit1(result,31);
   }
   return result;
 }
@@ -49,9 +49,9 @@ auto ARM7TDMI::MUL(uint32 product, uint32 multiplicand, uint32 multiplier) -> ui
   if(multiplier >> 16 && multiplier >> 16 !=   0xffff) idle();
   if(multiplier >> 24 && multiplier >> 24 !=     0xff) idle();
   product += multiplicand * multiplier;
-  if(cpsr().t || opcode.bit(20)) {
+  if(cpsr().t || bit1(opcode,20)) {
     cpsr().z = product == 0;
-    cpsr().n = product.bit(31);
+    cpsr().n = bit1(product,31);
   }
   return product;
 }
@@ -65,7 +65,7 @@ auto ARM7TDMI::ROR(uint32 source, uint8 shift) -> uint32 {
 }
 
 auto ARM7TDMI::RRX(uint32 source) -> uint32 {
-  carry = source.bit(0);
+  carry = source & 1;
   return cpsr().c << 31 | source >> 1;
 }
 

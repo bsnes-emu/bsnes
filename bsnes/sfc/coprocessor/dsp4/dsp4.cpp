@@ -43,7 +43,7 @@ auto DSP4::power() -> void {
   DSP4i::InitDSP4();
 }
 
-auto DSP4::read(uint24 addr, uint8 data) -> uint8 {
+auto DSP4::read(uint addr, uint8 data) -> uint8 {
   if(addr & 1) return 0x80;
 
   DSP4i::dsp4_address = addr;
@@ -51,7 +51,7 @@ auto DSP4::read(uint24 addr, uint8 data) -> uint8 {
   return DSP4i::dsp4_byte;
 }
 
-auto DSP4::write(uint24 addr, uint8 data) -> void {
+auto DSP4::write(uint addr, uint8 data) -> void {
   if(addr & 1) return;
 
   DSP4i::dsp4_address = addr;

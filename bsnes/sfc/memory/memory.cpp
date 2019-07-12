@@ -23,13 +23,13 @@ auto Bus::reset() -> void {
   lookup = new uint8 [16 * 1024 * 1024]();
   target = new uint32[16 * 1024 * 1024]();
 
-  reader[0] = [](uint24, uint8 data) -> uint8 { return data; };
-  writer[0] = [](uint24, uint8) -> void {};
+  reader[0] = [](uint, uint8 data) -> uint8 { return data; };
+  writer[0] = [](uint, uint8) -> void {};
 }
 
 auto Bus::map(
-  const function<uint8 (uint24, uint8)>& read,
-  const function<void (uint24, uint8)>& write,
+  const function<uint8 (uint, uint8)>& read,
+  const function<void (uint, uint8)>& write,
   const string& addr, uint size, uint base, uint mask
 ) -> uint {
   uint id = 1;

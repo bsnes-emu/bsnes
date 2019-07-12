@@ -30,8 +30,8 @@ auto SDD1::power() -> void {
   dmaReady = false;
 }
 
-auto SDD1::ioRead(uint24 addr, uint8 data) -> uint8 {
-  addr = 0x4800 | addr.bits(0,3);
+auto SDD1::ioRead(uint addr, uint8 data) -> uint8 {
+  addr = 0x4800 | addr & 0xf;
 
   switch(addr) {
   case 0x4800: return r4800;
@@ -46,8 +46,8 @@ auto SDD1::ioRead(uint24 addr, uint8 data) -> uint8 {
   return rom.read(addr);
 }
 
-auto SDD1::ioWrite(uint24 addr, uint8 data) -> void {
-  addr = 0x4800 | addr.bits(0,3);
+auto SDD1::ioWrite(uint addr, uint8 data) -> void {
+  addr = 0x4800 | addr & 0xf;
 
   switch(addr) {
   case 0x4800: r4800 = data; break;
@@ -59,40 +59,40 @@ auto SDD1::ioWrite(uint24 addr, uint8 data) -> void {
   }
 }
 
-auto SDD1::dmaRead(uint24 addr, uint8 data) -> uint8 {
+auto SDD1::dmaRead(uint addr, uint8 data) -> uint8 {
   return cpu.readDMA(addr, data);
 }
 
-auto SDD1::dmaWrite(uint24 addr, uint8 data) -> void {
-  uint channel = addr.bits(4,6);
-  switch(addr.bits(0,3)) {
-  case 2: dma[channel].addr.byte(0) = data; break;
-  case 3: dma[channel].addr.byte(1) = data; break;
-  case 4: dma[channel].addr.byte(2) = data; break;
-  case 5: dma[channel].size.byte(0) = data; break;
-  case 6: dma[channel].size.byte(1) = data; break;
+auto SDD1::dmaWrite(uint addr, uint8 data) -> void {
+  uint channel = addr >> 4 & 7;
+  switch(addr & 15) {
+  case 2: bit8(dma[channel].addr,0) = data; break;
+  case 3: bit8(dma[channel].addr,1) = data; break;
+  case 4: bit8(dma[channel].addr,2) = data; break;
+  case 5: bit8(dma[channel].size,0) = data; break;
+  case 6: bit8(dma[channel].size,1) = data; break;
   }
   return cpu.writeDMA(addr, data);
 }
 
-auto SDD1::mmcRead(uint24 addr) -> uint8 {
-  switch(addr.bits(20,21)) {
-  case 0: return rom.read(r4804.bits(0,3) << 20 | addr.bits(0,19));  //c0-cf:0000-ffff
-  case 1: return rom.read(r4805.bits(0,3) << 20 | addr.bits(0,19));  //d0-df:0000-ffff
-  case 2: return rom.read(r4806.bits(0,3) << 20 | addr.bits(0,19));  //e0-ef:0000-ffff
-  case 3: return rom.read(r4807.bits(0,3) << 20 | addr.bits(0,19));  //f0-ff:0000-ffff
+auto SDD1::mmcRead(uint addr) -> uint8 {
+  switch(addr >> 20 & 3) {
+  case 0: return rom.read((r4804 & 0xf) << 20 | addr & 0xfffff);  //c0-cf:0000-ffff
+  case 1: return rom.read((r4805 & 0xf) << 20 | addr & 0xfffff);  //d0-df:0000-ffff
+  case 2: return rom.read((r4806 & 0xf) << 20 | addr & 0xfffff);  //e0-ef:0000-ffff
+  case 3: return rom.read((r4807 & 0xf) << 20 | addr & 0xfffff);  //f0-ff:0000-ffff
   }
   unreachable;
 }
 
 //map address=00-3f,80-bf:8000-ffff
 //map address=c0-ff:0000-ffff
-auto SDD1::mcuRead(uint24 addr, uint8 data) -> uint8 {
+auto SDD1::mcuRead(uint addr, uint8 data) -> uint8 {
   //map address=00-3f,80-bf:8000-ffff
-  if(!addr.bit(22)) {
-    if(!addr.bit(23) && addr.bit(21) && r4805.bit(7)) addr.bit(21) = 0;  //20-3f:8000-ffff
-    if( addr.bit(23) && addr.bit(21) && r4807.bit(7)) addr.bit(21) = 0;  //a0-bf:8000-ffff
-    addr = addr.bits(16,21) << 15 | addr.bits(0,14);
+  if(!(addr & 1 << 22)) {
+    if(!(addr & 1 << 23) && (addr & 1 << 21) && (r4805 & 0x80)) addr &= ~(1 << 21);  //20-3f:8000-ffff
+    if( (addr & 1 << 23) && (addr & 1 << 21) && (r4807 & 0x80)) addr &= ~(1 << 21);  //a0-bf:8000-ffff
+    addr = addr >> 1 & 0x1f8000 | addr & 0x7fff;
     return rom.read(addr);
   }
 
@@ -100,7 +100,7 @@ auto SDD1::mcuRead(uint24 addr, uint8 data) -> uint8 {
   if(r4800 & r4801) {
     //at least one channel has S-DD1 decompression enabled ...
     for(auto n : range(8)) {
-      if(r4800.bit(n) && r4801.bit(n)) {
+      if(bit1(r4800,n) && bit1(r4801,n)) {
         //S-DD1 always uses fixed transfer mode, so address will not change during transfer
         if(addr == dma[n].addr) {
           if(!dmaReady) {
@@ -113,7 +113,7 @@ auto SDD1::mcuRead(uint24 addr, uint8 data) -> uint8 {
           data = decompressor.read();
           if(--dma[n].size == 0) {
             dmaReady = false;
-            r4801.bit(n) = 0;
+            bit1(r4801,n) = 0;
           }
 
           return data;
@@ -126,7 +126,7 @@ auto SDD1::mcuRead(uint24 addr, uint8 data) -> uint8 {
   return mmcRead(addr);
 }
 
-auto SDD1::mcuWrite(uint24 addr, uint8 data) -> void {
+auto SDD1::mcuWrite(uint addr, uint8 data) -> void {
 }
 
 }

@@ -31,21 +31,20 @@ auto SA1::main() -> void {
     return;
   }
 
-//print(disassemble(), "\n");
   instruction();
 }
 
 //override R65816::interrupt() to support SA-1 vector location IO registers
 auto SA1::interrupt() -> void {
-  read(r.pc);
+  read(r.pc.d);
   idle();
-  if(!r.e) push(r.pc >> 16);
-  push(r.pc >> 8);
-  push(r.pc >> 0);
+  if(!r.e) push(r.pc.b);
+  push(r.pc.h);
+  push(r.pc.l);
   push(r.e ? r.p & ~0x10 : r.p);
   r.p.i = 1;
   r.p.d = 0;
-  r.pc = r.vector;  //PC bank set to 0x00
+  r.pc.d = r.vector;  //PC bank set to 0x00
 }
 
 auto SA1::lastCycle() -> void {

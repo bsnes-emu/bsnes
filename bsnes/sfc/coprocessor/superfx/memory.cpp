@@ -1,4 +1,4 @@
-auto SuperFX::read(uint24 addr, uint8 data) -> uint8 {
+auto SuperFX::read(uint addr, uint8 data) -> uint8 {
   if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff,:8000-ffff
     while(!regs.scmr.ron) {
       step(6);
@@ -29,7 +29,7 @@ auto SuperFX::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SuperFX::write(uint24 addr, uint8 data) -> void {
+auto SuperFX::write(uint addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
     while(!regs.scmr.ran) {
       step(6);

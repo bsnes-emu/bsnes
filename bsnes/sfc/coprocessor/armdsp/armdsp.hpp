@@ -16,8 +16,8 @@ struct ArmDSP : Processor::ARM7TDMI, Thread {
   auto get(uint mode, uint32 addr) -> uint32 override;
   auto set(uint mode, uint32 addr, uint32 word) -> void override;
 
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto read(uint addr, uint8 data) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
   auto power() -> void;
   auto reset() -> void;  //soft reset

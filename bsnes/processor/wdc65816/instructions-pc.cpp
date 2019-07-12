@@ -2,103 +2,103 @@ auto WDC65816::instructionBranch(bool take) -> void {
   if(!take) {
 L   fetch();
   } else {
-    uint8 displacement = fetch();
-    uint16 absolute = PC + (int8)displacement;
-    idle6(absolute);
+    U.l = fetch();
+    V.w = PC.d + (int8)U.l;
+    idle6(V.w);
 L   idle();
-    aa(PC) = absolute;
+    PC.w = V.w;
     idleBranch();
   }
 }
 
 auto WDC65816::instructionBranchLong() -> void {
-  uint16 displacement = fetch();
-  hi(displacement) = fetch();
-  uint16 absolute = PC + (int16)displacement;
+  U.l = fetch();
+  U.h = fetch();
+  V.w = PC.d + (int16)U.w;
 L idle();
-  aa(PC) = absolute;
+  PC.w = V.w;
   idleBranch();
 }
 
 auto WDC65816::instructionJumpShort() -> void {
-  uint16 data = fetch();
-L hi(data) = fetch();
-  aa(PC) = data;
+  W.l = fetch();
+L W.h = fetch();
+  PC.w = W.w;
   idleJump();
 }
 
 auto WDC65816::instructionJumpLong() -> void {
-  uint24 data = fetch();
-  hi(data) = fetch();
-L db(data) = fetch();
-  PC = data;
+  V.l = fetch();
+  V.h = fetch();
+L V.b = fetch();
+  PC.d = V.d;
   idleJump();
 }
 
 auto WDC65816::instructionJumpIndirect() -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-  uint16 data = read(uint16(absolute + 0));
-L hi(data) = read(uint16(absolute + 1));
-  aa(PC) = data;
+  V.l = fetch();
+  V.h = fetch();
+  W.l = read(uint16(V.w + 0));
+L W.h = read(uint16(V.w + 1));
+  PC.w = W.w;
   idleJump();
 }
 
 auto WDC65816::instructionJumpIndexedIndirect() -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
+  V.l = fetch();
+  V.h = fetch();
   idle();
-  uint16 data = read(db(PC) << 16 | uint16(absolute + X + 0));
-L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
-  aa(PC) = data;
+  W.l = read(PC.b << 16 | uint16(V.w + X.w + 0));
+L W.h = read(PC.b << 16 | uint16(V.w + X.w + 1));
+  PC.w = W.w;
   idleJump();
 }
 
 auto WDC65816::instructionJumpIndirectLong() -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-  uint24 data = read(uint16(absolute + 0));
-  hi(data) = read(uint16(absolute + 1));
-L db(data) = read(uint16(absolute + 2));
-  PC = data;
+  U.l = fetch();
+  U.h = fetch();
+  V.l = read(uint16(U.w + 0));
+  V.h = read(uint16(U.w + 1));
+L V.b = read(uint16(U.w + 2));
+  PC.d = V.d;
   idleJump();
 }
 
 auto WDC65816::instructionCallShort() -> void {
-  uint16 data = fetch();
-  hi(data) = fetch();
+  W.l = fetch();
+  W.h = fetch();
   idle();
-  aa(PC)--;
-  push(hi(PC));
-L push(lo(PC));
-  aa(PC) = data;
+  PC.w--;
+  push(PC.h);
+L push(PC.l);
+  PC.w = W.w;
   idleJump();
 }
 
 auto WDC65816::instructionCallLong() -> void {
-  uint24 data = fetch();
-  hi(data) = fetch();
-  pushN(db(PC));
+  V.l = fetch();
+  V.h = fetch();
+  pushN(PC.b);
   idle();
-  db(data) = fetch();
-  aa(PC)--;
-  pushN(hi(PC));
-L pushN(lo(PC));
-  PC = data;
-E hi(S) = 0x01;
+  V.b = fetch();
+  PC.w--;
+  pushN(PC.h);
+L pushN(PC.l);
+  PC.d = V.d;
+E S.h = 0x01;
   idleJump();
 }
 
 auto WDC65816::instructionCallIndexedIndirect() -> void {
-  uint16 absolute = fetch();
-  pushN(hi(PC));
-  pushN(lo(PC));
-  hi(absolute) = fetch();
+  V.l = fetch();
+  pushN(PC.h);
+  pushN(PC.l);
+  V.h = fetch();
   idle();
-  uint16 data = read(db(PC) << 16 | uint16(absolute + X + 0));
-L hi(data) = read(db(PC) << 16 | uint16(absolute + X + 1));
-  aa(PC) = data;
-E hi(S) = 0x01;
+  W.l = read(PC.b << 16 | uint16(V.w + X.w + 0));
+L W.h = read(PC.b << 16 | uint16(V.w + X.w + 1));
+  PC.w = W.w;
+E S.h = 0x01;
   idleJump();
 }
 
@@ -107,13 +107,13 @@ auto WDC65816::instructionReturnInterrupt() -> void {
   idle();
   P = pull();
 E XF = 1, MF = 1;
-  if(XF) hi(X) = 0x00, hi(Y) = 0x00;
-  lo(PC) = pull();
+  if(XF) X.h = 0x00, Y.h = 0x00;
+  PC.l = pull();
   if(EF) {
-  L hi(PC) = pull();
+  L PC.h = pull();
   } else {
-    hi(PC) = pull();
-  L db(PC) = pull();
+    PC.h = pull();
+  L PC.b = pull();
   }
   idleJump();
 }
@@ -121,22 +121,22 @@ E XF = 1, MF = 1;
 auto WDC65816::instructionReturnShort() -> void {
   idle();
   idle();
-  uint16 data = pull();
-  hi(data) = pull();
+  W.l = pull();
+  W.h = pull();
 L idle();
-  aa(PC) = data;
-  aa(PC)++;
+  PC.w = W.w;
+  PC.w++;
   idleJump();
 }
 
 auto WDC65816::instructionReturnLong() -> void {
   idle();
   idle();
-  uint24 data = pullN();
-  hi(data) = pullN();
-L db(data) = pullN();
-  PC = data;
-  aa(PC)++;
-E hi(S) = 0x01;
+  V.l = pullN();
+  V.h = pullN();
+L V.b = pullN();
+  PC.d = V.d;
+  PC.w++;
+E S.h = 0x01;
   idleJump();
 }

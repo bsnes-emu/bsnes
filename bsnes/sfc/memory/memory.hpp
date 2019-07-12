@@ -10,8 +10,8 @@ struct Memory {
   virtual auto data() -> uint8* = 0;
   virtual auto size() const -> uint = 0;
 
-  virtual auto read(uint24 address, uint8 data = 0) -> uint8 = 0;
-  virtual auto write(uint24 address, uint8 data) -> void = 0;
+  virtual auto read(uint address, uint8 data = 0) -> uint8 = 0;
+  virtual auto write(uint address, uint8 data) -> void = 0;
 
   uint id = 0;
 };
@@ -26,13 +26,13 @@ struct Bus {
 
   ~Bus();
 
-  alwaysinline auto read(uint24 address, uint8 data = 0) -> uint8;
-  alwaysinline auto write(uint24 address, uint8 data) -> void;
+  alwaysinline auto read(uint address, uint8 data = 0) -> uint8;
+  alwaysinline auto write(uint address, uint8 data) -> void;
 
   auto reset() -> void;
   auto map(
-    const function<uint8 (uint24, uint8)>& read,
-    const function<void (uint24, uint8)>& write,
+    const function<uint8 (uint, uint8)>& read,
+    const function<void (uint, uint8)>& write,
     const string& address, uint size = 0, uint base = 0, uint mask = 0
   ) -> uint;
   auto unmap(const string& address) -> void;
@@ -41,9 +41,9 @@ private:
   uint8* lookup = nullptr;
   uint32* target = nullptr;
 
-  function<uint8 (uint24, uint8)> reader[256];
-  function<void (uint24, uint8)> writer[256];
-  uint24 counter[256];
+  function<uint8 (uint, uint8)> reader[256];
+  function<void (uint, uint8)> writer[256];
+  uint counter[256];
 };
 
 extern Bus bus;

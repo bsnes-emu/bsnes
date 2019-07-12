@@ -1,176 +1,176 @@
-auto WDC65816::instructionBankWrite8(uint16& data) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-L writeBank(absolute, data);
+auto WDC65816::instructionBankWrite8(r16 F) -> void {
+  V.l = fetch();
+  V.h = fetch();
+L writeBank(V.w + 0, F.l);
 }
 
-auto WDC65816::instructionBankWrite16(uint16& data) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
-  writeBank(absolute + 0, lo(data));
-L writeBank(absolute + 1, hi(data));
+auto WDC65816::instructionBankWrite16(r16 F) -> void {
+  V.l = fetch();
+  V.h = fetch();
+  writeBank(V.w + 0, F.l);
+L writeBank(V.w + 1, F.h);
 }
 
-auto WDC65816::instructionBankWrite8(uint16& data, uint16 index) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
+auto WDC65816::instructionBankWrite8(r16 F, r16 I) -> void {
+  V.l = fetch();
+  V.h = fetch();
   idle();
-L writeBank(absolute + index, data);
+L writeBank(V.w + I.w + 0, F.l);
 }
 
-auto WDC65816::instructionBankWrite16(uint16& data, uint16 index) -> void {
-  uint16 absolute = fetch();
-  hi(absolute) = fetch();
+auto WDC65816::instructionBankWrite16(r16 F, r16 I) -> void {
+  V.l = fetch();
+  V.h = fetch();
   idle();
-  writeBank(absolute + index + 0, lo(data));
-L writeBank(absolute + index + 1, hi(data));
+  writeBank(V.w + I.w + 0, F.l);
+L writeBank(V.w + I.w + 1, F.h);
 }
 
-auto WDC65816::instructionLongWrite8(uint16 index) -> void {
-  uint24 address = fetch();
-  hi(address) = fetch();
-  db(address) = fetch();
-L write(address + index, lo(A));
+auto WDC65816::instructionLongWrite8(r16 I) -> void {
+  V.l = fetch();
+  V.h = fetch();
+  V.b = fetch();
+L write(V.d + I.w + 0, A.l);
 }
 
-auto WDC65816::instructionLongWrite16(uint16 index) -> void {
-  uint24 address = fetch();
-  hi(address) = fetch();
-  db(address) = fetch();
-  write(address + index + 0, lo(A));
-L write(address + index + 1, hi(A));
+auto WDC65816::instructionLongWrite16(r16 I) -> void {
+  V.l = fetch();
+  V.h = fetch();
+  V.b = fetch();
+  write(V.d + I.w + 0, A.l);
+L write(V.d + I.w + 1, A.h);
 }
 
-auto WDC65816::instructionDirectWrite8(uint16& data) -> void {
-  uint8 direct = fetch();
+auto WDC65816::instructionDirectWrite8(r16 F) -> void {
+  U.l = fetch();
   idle2();
-L writeDirect(direct, data);
+L writeDirect(U.l + 0, F.l);
 }
 
-auto WDC65816::instructionDirectWrite16(uint16& data) -> void {
-  uint8 direct = fetch();
+auto WDC65816::instructionDirectWrite16(r16 F) -> void {
+  U.l = fetch();
   idle2();
-  writeDirect(direct + 0, lo(data));
-L writeDirect(direct + 1, hi(data));
+  writeDirect(U.l + 0, F.l);
+L writeDirect(U.l + 1, F.h);
 }
 
-auto WDC65816::instructionDirectWrite8(uint16& data, uint16 index) -> void {
-  uint8 direct = fetch();
-  idle2();
-  idle();
-L writeDirect(direct + index, lo(data));
-}
-
-auto WDC65816::instructionDirectWrite16(uint16& data, uint16 index) -> void {
-  uint8 direct = fetch();
+auto WDC65816::instructionDirectWrite8(r16 F, r16 I) -> void {
+  U.l = fetch();
   idle2();
   idle();
-  writeDirect(direct + index + 0, lo(data));
-L writeDirect(direct + index + 1, hi(data));
+L writeDirect(U.l + I.w + 0, F.l);
+}
+
+auto WDC65816::instructionDirectWrite16(r16 F, r16 I) -> void {
+  U.l = fetch();
+  idle2();
+  idle();
+  writeDirect(U.l + I.w + 0, F.l);
+L writeDirect(U.l + I.w + 1, F.h);
 }
 
 auto WDC65816::instructionIndirectWrite8() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint16 absolute = readDirect(direct + 0);
-  hi(absolute) = readDirect(direct + 1);
-L writeBank(absolute, lo(A));
+  V.l = readDirect(U.l + 0);
+  V.h = readDirect(U.l + 1);
+L writeBank(V.w + 0, A.l);
 }
 
 auto WDC65816::instructionIndirectWrite16() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint16 absolute = readDirect(direct + 0);
-  hi(absolute) = readDirect(direct + 1);
-  writeBank(absolute + 0, lo(A));
-L writeBank(absolute + 1, hi(A));
+  V.l = readDirect(U.l + 0);
+  V.h = readDirect(U.l + 1);
+  writeBank(V.w + 0, A.l);
+L writeBank(V.w + 1, A.h);
 }
 
 auto WDC65816::instructionIndexedIndirectWrite8() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
   idle();
-  uint16 absolute = readDirect(direct + X + 0);
-  hi(absolute) = readDirect(direct + X + 1);
-L writeBank(absolute, lo(A));
+  V.l = readDirect(U.l + X.w + 0);
+  V.h = readDirect(U.l + X.w + 1);
+L writeBank(V.w + 0, A.l);
 }
 
 auto WDC65816::instructionIndexedIndirectWrite16() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
   idle();
-  uint16 absolute = readDirect(direct + X + 0);
-  hi(absolute) = readDirect(direct + X + 1);
-  writeBank(absolute + 0, lo(A));
-L writeBank(absolute + 1, hi(A));
+  V.l = readDirect(U.l + X.w + 0);
+  V.h = readDirect(U.l + X.w + 1);
+  writeBank(V.w + 0, A.l);
+L writeBank(V.w + 1, A.h);
 }
 
 auto WDC65816::instructionIndirectIndexedWrite8() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint16 absolute = readDirect(direct + 0);
-  hi(absolute) = readDirect(direct + 1);
+  V.l = readDirect(U.l + 0);
+  V.h = readDirect(U.l + 1);
   idle();
-L writeBank(absolute + Y, lo(A));
+L writeBank(V.w + Y.w + 0, A.l);
 }
 
 auto WDC65816::instructionIndirectIndexedWrite16() -> void {
-  uint8 direct = fetch();
+  U.l = fetch();
   idle2();
-  uint16 absolute = readDirect(direct + 0);
-  hi(absolute) = readDirect(direct + 1);
+  V.l = readDirect(U.l + 0);
+  V.h = readDirect(U.l + 1);
   idle();
-  writeBank(absolute + Y + 0, lo(A));
-L writeBank(absolute + Y + 1, hi(A));
+  writeBank(V.w + Y.w + 0, A.l);
+L writeBank(V.w + Y.w + 1, A.h);
 }
 
-auto WDC65816::instructionIndirectLongWrite8(uint16 index) -> void {
-  uint8 direct = fetch();
+auto WDC65816::instructionIndirectLongWrite8(r16 I) -> void {
+  U.l = fetch();
   idle2();
-  uint24 address = readDirectN(direct + 0);
-  hi(address) = readDirectN(direct + 1);
-  db(address) = readDirectN(direct + 2);
-L write(address + index, lo(A));
+  V.l = readDirectN(U.l + 0);
+  V.h = readDirectN(U.l + 1);
+  V.b = readDirectN(U.l + 2);
+L write(V.d + I.w + 0, A.l);
 }
 
-auto WDC65816::instructionIndirectLongWrite16(uint16 index) -> void {
-  uint8 direct = fetch();
+auto WDC65816::instructionIndirectLongWrite16(r16 I) -> void {
+  U.l = fetch();
   idle2();
-  uint24 address = readDirectN(direct + 0);
-  hi(address) = readDirectN(direct + 1);
-  db(address) = readDirectN(direct + 2);
-  write(address + index + 0, lo(A));
-L write(address + index + 1, hi(A));
+  V.l = readDirectN(U.l + 0);
+  V.h = readDirectN(U.l + 1);
+  V.b = readDirectN(U.l + 2);
+  write(V.d + I.w + 0, A.l);
+L write(V.d + I.w + 1, A.h);
 }
 
 auto WDC65816::instructionStackWrite8() -> void {
-  uint8 stack = fetch();
+  U.l = fetch();
   idle();
-L writeStack(stack, lo(A));
+L writeStack(U.l + 0, A.l);
 }
 
 auto WDC65816::instructionStackWrite16() -> void {
-  uint8 stack = fetch();
+  U.l = fetch();
   idle();
-  writeStack(stack + 0, lo(A));
-L writeStack(stack + 1, hi(A));
+  writeStack(U.l + 0, A.l);
+L writeStack(U.l + 1, A.h);
 }
 
 auto WDC65816::instructionIndirectStackWrite8() -> void {
-  uint8 stack = fetch();
+  U.l = fetch();
   idle();
-  uint16 absolute = readStack(stack + 0);
-  hi(absolute) = readStack(stack + 1);
+  V.l = readStack(U.l + 0);
+  V.h = readStack(U.l + 1);
   idle();
-L writeBank(absolute + Y, lo(A));
+L writeBank(V.w + Y.w + 0, A.l);
 }
 
 auto WDC65816::instructionIndirectStackWrite16() -> void {
-  uint8 stack = fetch();
+  U.l = fetch();
   idle();
-  uint16 absolute = readStack(stack + 0);
-  hi(absolute) = readStack(stack + 1);
+  V.l = readStack(U.l + 0);
+  V.h = readStack(U.l + 1);
   idle();
-  writeBank(absolute + Y + 0, lo(A));
-L writeBank(absolute + Y + 1, hi(A));
+  writeBank(V.w + Y.w + 0, A.l);
+L writeBank(V.w + Y.w + 1, A.h);
 }

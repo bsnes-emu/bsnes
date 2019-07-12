@@ -2,16 +2,16 @@ struct SDD1 {
   auto unload() -> void;
   auto power() -> void;
 
-  auto ioRead(uint24 addr, uint8 data) -> uint8;
-  auto ioWrite(uint24 addr, uint8 data) -> void;
+  auto ioRead(uint addr, uint8 data) -> uint8;
+  auto ioWrite(uint addr, uint8 data) -> void;
 
-  auto dmaRead(uint24 addr, uint8 data) -> uint8;
-  auto dmaWrite(uint24 addr, uint8 data) -> void;
+  auto dmaRead(uint addr, uint8 data) -> uint8;
+  auto dmaWrite(uint addr, uint8 data) -> void;
 
-  auto mmcRead(uint24 addr) -> uint8;
+  auto mmcRead(uint addr) -> uint8;
 
-  auto mcuRead(uint24 addr, uint8 data) -> uint8;
-  auto mcuWrite(uint24 addr, uint8 data) -> void;
+  auto mcuRead(uint addr, uint8 data) -> uint8;
+  auto mcuWrite(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 

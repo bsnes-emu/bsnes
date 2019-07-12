@@ -2,7 +2,7 @@
 
 struct DSP {
   shared_pointer<Emulator::Stream> stream;
-  uint8 apuram[64 * 1024];
+  uint8 apuram[64 * 1024] = {};
 
   void main();
   uint8 read(uint8 addr);
@@ -14,7 +14,7 @@ struct DSP {
 
   void serialize(serializer&);
 
-  int64 clock;
+  int64 clock = 0;
 
 private:
   SPC_DSP spc_dsp;

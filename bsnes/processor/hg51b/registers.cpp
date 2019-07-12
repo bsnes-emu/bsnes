@@ -1,7 +1,7 @@
 auto HG51B::readRegister(uint7 address) -> uint24 {
   switch(address) {
-  case 0x01: return r.mul.bits(24,47);
-  case 0x02: return r.mul.bits( 0,23);
+  case 0x01: return bits(r.mul,24-47);
+  case 0x02: return bits(r.mul, 0-23);
   case 0x03: return r.mdr;
   case 0x08: return r.rom;
   case 0x0c: return r.ram;
@@ -64,8 +64,8 @@ auto HG51B::readRegister(uint7 address) -> uint24 {
 
 auto HG51B::writeRegister(uint7 address, uint24 data) -> void {
   switch(address) {
-  case 0x01: r.mul.bits(24,47) = data; return;
-  case 0x02: r.mul.bits( 0,23) = data; return;
+  case 0x01: bits(r.mul,24-47) = data; return;
+  case 0x02: bits(r.mul, 0-23) = data; return;
   case 0x03: r.mdr = data; return;
   case 0x08: r.rom = data; return;
   case 0x0c: r.ram = data; return;

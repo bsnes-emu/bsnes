@@ -1,6 +1,6 @@
-auto SuperFX::readIO(uint24 addr, uint8) -> uint8 {
+auto SuperFX::readIO(uint addr, uint8) -> uint8 {
   cpu.synchronize(*this);
-  addr = 0x3000 | addr.bits(0,9);
+  addr = 0x3000 | addr & 0x3ff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
     return readCache(addr - 0x3100);
@@ -50,9 +50,9 @@ auto SuperFX::readIO(uint24 addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
+auto SuperFX::writeIO(uint addr, uint8 data) -> void {
   cpu.synchronize(*this);
-  addr = 0x3000 | addr.bits(0,9);
+  addr = 0x3000 | addr & 0x3ff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
     return writeCache(addr - 0x3100, data);

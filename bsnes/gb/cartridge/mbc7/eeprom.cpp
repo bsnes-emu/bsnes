@@ -53,33 +53,33 @@ auto Cartridge::MBC7::EEPROM::power() -> void {
 
 auto Cartridge::MBC7::EEPROM::readIO() -> uint8 {
   uint8 data = 0b00'1111'00;
-  data.bit(7) = select;
-  data.bit(6) = clock;
-  data.bit(1) = input.edge();
+  bit1(data,7) = select;
+  bit1(data,6) = clock;
+  bit1(data,1) = input.edge();
   if(!select) {
-    data.bit(0) = 1;  //high-z when the chip is idle (not selected)
+    bit1(data,0) = 1;  //high-z when the chip is idle (not selected)
   } else if(busy) {
-    data.bit(0) = 0;  //low when a programming command is in progress
+    bit1(data,0) = 0;  //low when a programming command is in progress
   } else if(output.count) {
-    data.bit(0) = output.edge();  //shift register data during read commands
+    bit1(data,0) = output.edge();  //shift register data during read commands
   } else {
-    data.bit(0) = 1;  //high-z during all other commands
+    bit1(data,0) = 1;  //high-z during all other commands
   }
   return data;
 }
 
 auto Cartridge::MBC7::EEPROM::writeIO(uint8 data) -> void {
   //chip enters idle state on falling CS edge
-  if(select && !data.bit(7)) return power();
+  if(select && !bit1(data,7)) return power();
 
   //chip leaves idle state on rising CS edge
-  if(!(select = data.bit(7))) return;
+  if(!(select = bit1(data,7))) return;
 
   //input shift register clocks on rising edge
-  if(!clock.raise(data.bit(6))) return;
+  if(!clock.raise(bit1(data,6))) return;
 
   //read mode
-  if(output.count && !data.bit(1)) {
+  if(output.count && !bit1(data,1)) {
     if(input.start() && *input.start() == 1) {
       if(input.opcode() && *input.opcode() == 0b10) {
         output.read();
@@ -94,7 +94,7 @@ auto Cartridge::MBC7::EEPROM::writeIO(uint8 data) -> void {
   }
   output.flush();
 
-  input.write(data.bit(1));
+  input.write(bit1(data,1));
 
   //wait for start
   if(!input.start()) return;
@@ -128,7 +128,7 @@ auto Cartridge::MBC7::EEPROM::read() -> void {
   uint address = *input.address() << (width == 16) & size - 1;
   output.flush();
   for(uint4 index : range(width)) {
-    output.write(data[address + !index.bit(3)].bit(index.bits(0,2)));
+    output.write(bit1(data[address + !bit1(index,3)],bits(index,0-2)));
   }
   output.write(0);  //reads have an extra dummy data bit
 }
@@ -138,7 +138,7 @@ auto Cartridge::MBC7::EEPROM::write() -> void {
   if(!writable) return input.flush();
   uint address = *input.address() << (width == 16) & size - 1;
   for(uint4 index : range(width)) {
-    data[address + !index.bit(3)].bit(index.bits(0,2)) = input.read();
+    bit1(data[address + !bit1(index,3)],bits(index,0-2)) = input.read();
   }
   busy = 4;  //milliseconds
   return input.flush();
@@ -148,7 +148,7 @@ auto Cartridge::MBC7::EEPROM::erase() -> void {
   if(!writable) return input.flush();
   uint address = *input.address() << (width == 16) & size - 1;
   for(uint index : range(width)) {
-    data[address + index / 8].bit(index % 8) = 1;
+    bit1(data[address + index / 8],index % 8) = 1;
   }
   busy = 4;  //milliseconds
   return input.flush();
@@ -159,8 +159,8 @@ auto Cartridge::MBC7::EEPROM::writeAll() -> void {
   if(!writable) return input.flush();
   auto word = *input.data();
   for(uint address = 0; address < 512;) {
-    data[address++] = word.byte(width == 16);
-    data[address++] = word.byte(0);
+    data[address++] = bit8(word,width == 16);
+    data[address++] = bit8(word,0);
   }
   busy = 16;  //milliseconds
   return input.flush();
@@ -191,11 +191,11 @@ auto Cartridge::MBC7::EEPROM::ShiftRegister::flush() -> void {
 }
 
 auto Cartridge::MBC7::EEPROM::ShiftRegister::edge() -> uint1 {
-  return value.bit(0);
+  return value & 1;
 }
 
 auto Cartridge::MBC7::EEPROM::ShiftRegister::read() -> uint1 {
-  uint1 bit = value.bit(0);
+  uint1 bit = value & 1;
   value >>= 1;
   count--;
   return bit;
@@ -203,7 +203,7 @@ auto Cartridge::MBC7::EEPROM::ShiftRegister::read() -> uint1 {
 
 auto Cartridge::MBC7::EEPROM::ShiftRegister::write(uint1 bit) -> void {
   value <<= 1;
-  value.bit(0) = bit;
+  bit1(value,0) = bit;
   count++;
 }
 
@@ -231,9 +231,11 @@ auto Cartridge::MBC7::EEPROM::InputShiftRegister::address() -> maybe<uint9> {
 
 auto Cartridge::MBC7::EEPROM::InputShiftRegister::data() -> maybe<uint16> {
   if(count < 1 + 2 + addressLength + dataLength) return {};
-  return {value >> count - (3 + addressLength + dataLength) & (1 << dataLength) - 1};
+  uint16 data = value >> count - (3 + addressLength + dataLength) & (1 << dataLength) - 1;
+  return data;
 }
 
 auto Cartridge::MBC7::EEPROM::InputShiftRegister::increment() -> void {
-  value.bits(0, addressLength - 1)++;
+  uint mask = (1 << addressLength) - 1;
+  value = value & ~mask | (value + 1 & mask);
 }

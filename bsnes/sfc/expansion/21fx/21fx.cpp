@@ -73,7 +73,7 @@ auto S21FX::main() -> void {
   while(true) step(10'000'000);
 }
 
-auto S21FX::read(uint24 addr, uint8 data) -> uint8 {
+auto S21FX::read(uint addr, uint8 data) -> uint8 {
   addr &= 0x40ffff;
 
   if(addr == 0xfffc) return booted ? resetVector.byte(0) : (uint8)0x84;
@@ -96,7 +96,7 @@ auto S21FX::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto S21FX::write(uint24 addr, uint8 data) -> void {
+auto S21FX::write(uint addr, uint8 data) -> void {
   addr &= 0x40ffff;
 
   if(addr == 0x21ff) {

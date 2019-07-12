@@ -12,15 +12,15 @@ struct SuperFX : Processor::GSU, Thread {
   struct CPUROM : Memory {
     auto data() -> uint8* override;
     auto size() const -> uint override;
-    auto read(uint24, uint8) -> uint8 override;
-    auto write(uint24, uint8) -> void override;
+    auto read(uint, uint8) -> uint8 override;
+    auto write(uint, uint8) -> void override;
   };
 
   struct CPURAM : Memory {
     auto data() -> uint8* override;
     auto size() const -> uint override;
-    auto read(uint24, uint8) -> uint8 override;
-    auto write(uint24, uint8) -> void override;
+    auto read(uint, uint8) -> uint8 override;
+    auto write(uint, uint8) -> void override;
   };
 
   //core.cpp
@@ -32,8 +32,8 @@ struct SuperFX : Processor::GSU, Thread {
   auto flushPixelCache(PixelCache& cache) -> void;
 
   //memory.cpp
-  auto read(uint24 addr, uint8 data = 0x00) -> uint8 override;
-  auto write(uint24 addr, uint8 data) -> void override;
+  auto read(uint addr, uint8 data = 0x00) -> uint8 override;
+  auto write(uint addr, uint8 data) -> void override;
 
   auto readOpcode(uint16 addr) -> uint8;
   alwaysinline auto peekpipe() -> uint8;
@@ -44,8 +44,8 @@ struct SuperFX : Processor::GSU, Thread {
   auto writeCache(uint16 addr, uint8 data) -> void;
 
   //io.cpp
-  auto readIO(uint24 addr, uint8 data) -> uint8;
-  auto writeIO(uint24 addr, uint8 data) -> void;
+  auto readIO(uint addr, uint8 data) -> uint8;
+  auto writeIO(uint addr, uint8 data) -> void;
 
   //timing.cpp
   auto step(uint clocks) -> void override;

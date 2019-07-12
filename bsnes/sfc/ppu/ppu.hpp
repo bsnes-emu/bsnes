@@ -30,8 +30,8 @@ private:
   alwaysinline auto writeOAM(uint10 addr, uint8 data) -> void;
   alwaysinline auto readCGRAM(bool byte, uint8 addr) -> uint8;
   alwaysinline auto writeCGRAM(uint8 addr, uint15 data) -> void;
-  auto readIO(uint24 addr, uint8 data) -> uint8;
-  auto writeIO(uint24 addr, uint8 data) -> void;
+  auto readIO(uint addr, uint8 data) -> uint8;
+  auto writeIO(uint addr, uint8 data) -> void;
   auto updateVideoMode() -> void;
 
   struct VRAM {
@@ -40,8 +40,8 @@ private:
     uint16 mask = 0x7fff;
   } vram;
 
-  uint16_t output[512 * 480];
-  uint16_t lightTable[16][32768];
+  uint16 output[512 * 480];
+  uint16 lightTable[16][32768];
 
   struct {
     bool interlace;

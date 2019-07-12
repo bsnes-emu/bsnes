@@ -108,7 +108,7 @@ auto InputMapping::poll() -> int16 {
     if(result) return inputManager.turboCounter >= inputManager.turboFrequency;
   }
 
-  int16 result;
+  int16 result = 0;
 
   for(auto& mapping : mappings) {
     auto& device = mapping.device;

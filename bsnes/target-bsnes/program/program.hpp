@@ -9,7 +9,7 @@ struct Program : Lock, Emulator::Platform {
   //platform.cpp
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
-  auto videoFrame(const uint16_t* data, uint pitch, uint width, uint height, uint scale) -> void override;
+  auto videoFrame(const uint16* data, uint pitch, uint width, uint height, uint scale) -> void override;
   auto audioFrame(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
@@ -149,7 +149,7 @@ public:
   uint32_t palettePaused[32768];
 
   struct Screenshot {
-    const uint16_t* data = nullptr;
+    const uint16* data = nullptr;
     uint pitch  = 0;
     uint width  = 0;
     uint height = 0;
