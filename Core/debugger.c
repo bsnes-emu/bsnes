@@ -2172,7 +2172,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
         unsigned bank, address;
         char symbol[length];
 
-        if (sscanf(line, "%02x:%04x %s", &bank, &address, symbol) == 3) {
+        if (sscanf(line, "%x:%x %s", &bank, &address, symbol) == 3) {
             bank &= 0x1FF;
             if (!gb->bank_symbols[bank]) {
                 gb->bank_symbols[bank] = GB_map_alloc();
