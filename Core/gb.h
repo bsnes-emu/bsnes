@@ -623,7 +623,7 @@ void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model);
 
-/* Returns the time passed, in 4MHz ticks. */
+/* Returns the time passed, in 8MHz ticks. */
 uint8_t GB_run(GB_gameboy_t *gb);
 /* Returns the time passed since the last frame, in nanoseconds */
 uint64_t GB_run_frame(GB_gameboy_t *gb);

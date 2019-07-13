@@ -50,12 +50,12 @@ static char *async_input_callback(GB_gameboy_t *gb)
     return NULL;
 }
 
-static void vblank(GB_gameboy_t *gb)
+static void handle_buttons(GB_gameboy_t *gb)
 {
     /* Do not press any buttons during the last two seconds, this might cause a
-       screenshot to be taken while the LCD is off if the press makes the game
-       load graphics. */
-    if (push_start_a && (frames < test_length - 120 || do_not_stop)) { 
+     screenshot to be taken while the LCD is off if the press makes the game
+     load graphics. */
+    if (push_start_a && (frames < test_length - 120 || do_not_stop)) {
         unsigned combo_length = 40;
         if (start_is_not_first || push_a_twice) combo_length = 60; /* The start item in the menu is not the first, so also push down */
         else if (a_is_bad || start_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
@@ -109,7 +109,11 @@ static void vblank(GB_gameboy_t *gb)
             }
         }
     }
-    
+
+}
+
+static void vblank(GB_gameboy_t *gb)
+{
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {
         if (gb->backtrace_size >= 0x200 + (large_stack? 0x80: 0) || (!allow_weird_sp_values && (gb->registers[GB_REGISTER_SP] >= 0xfe00 && gb->registers[GB_REGISTER_SP] < 0xff80))) {
@@ -123,7 +127,7 @@ static void vblank(GB_gameboy_t *gb)
         }
     }
 
-    if (frames >= test_length ) {
+    if (frames >= test_length && !gb->disable_rendering) {
         bool is_screen_blank = true;
         for (unsigned i = 160*144; i--;) {
             if (bitmap[i] != bitmap[0]) {
@@ -147,11 +151,9 @@ static void vblank(GB_gameboy_t *gb)
             running = false;
         }
     }
-    else if (frames == test_length - 1) {
+    else if (frames >= test_length - 1) {
         gb->disable_rendering = false;
     }
-    
-    frames++;
 }
 
 static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
@@ -339,6 +341,7 @@ int main(int argc, char **argv)
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_log_callback(&gb, log_callback);
         GB_set_async_input_callback(&gb, async_input_callback);
+        GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
         
         if (GB_load_rom(&gb, filename)) {
             perror("Failed to load ROM");
@@ -353,11 +356,14 @@ int main(int argc, char **argv)
                     /* Restarting in Puzzle Boy/Kwirk (Start followed by A) leaks stack. */
                    strcmp((const char *)(gb.rom + 0x134), "KWIRK") == 0 ||
                    strcmp((const char *)(gb.rom + 0x134), "PUZZLE BOY") == 0;
-        start_is_bad = strcmp((const char *)(gb.rom + 0x134), "BLUESALPHA") == 0;
+        start_is_bad = strcmp((const char *)(gb.rom + 0x134), "BLUESALPHA") == 0 ||
+                       strcmp((const char *)(gb.rom + 0x134), "ONI 5") == 0;
         b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0 ||
                        strcmp((const char *)(gb.rom + 0x134), "SOCCER") == 0 ||
                        strcmp((const char *)(gb.rom + 0x134), "GEX GECKO") == 0;
-        push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
+        push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0 ||
+                      strcmp((const char *)(gb.rom + 0x134), "HUGO2 1/2") == 0 ||
+                      strcmp((const char *)(gb.rom + 0x134), "HUGO") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
         push_right = memcmp((const char *)(gb.rom + 0x134), "BOB ET BOB", strlen("BOB ET BOB")) == 0 ||
@@ -397,8 +403,14 @@ int main(int argc, char **argv)
         running = true;
         gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
         frames = 0;
+        unsigned cycles = 0;
         while (running) {
-            GB_run(&gb);
+            cycles += GB_run(&gb);
+            if (cycles >= 139810) { /* Approximately 1/60 a second. Intentionally not the actual length of a frame. */
+                handle_buttons(&gb);
+                cycles -= 139810;
+                frames++;
+            }
             /* This early crash test must not run in vblank because PC might not point to the next instruction. */
             if (gb.pc == 0x38 && frames < test_length - 1 && GB_read_memory(&gb, 0x38) == 0xFF) {
                 GB_log(&gb, "The game is probably stuck in an FF loop.\n");
