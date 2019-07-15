@@ -255,8 +255,9 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
   }
 }
 
-auto Program::audioFrame(const double* samples, uint channels) -> void {
-  audio.output(samples);
+auto Program::audioFrame(const float* samples, uint channels) -> void {
+  double frame[] = {samples[0], samples[1]};
+  audio.output(frame);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

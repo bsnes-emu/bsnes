@@ -1,3 +1,5 @@
+#define double float
+
 namespace Emulator {
 
 #include "stream.cpp"
@@ -69,3 +71,5 @@ auto Audio::process() -> void {
 }
 
 }
+
+#undef double

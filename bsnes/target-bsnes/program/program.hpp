@@ -10,7 +10,7 @@ struct Program : Lock, Emulator::Platform {
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
   auto videoFrame(const uint16* data, uint pitch, uint width, uint height, uint scale) -> void override;
-  auto audioFrame(const double* samples, uint channels) -> void override;
+  auto audioFrame(const float* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
 

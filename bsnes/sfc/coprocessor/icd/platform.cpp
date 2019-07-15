@@ -1,4 +1,4 @@
-auto ICD::audioSample(const double* samples, uint channels) -> void {
+auto ICD::audioSample(const float* samples, uint channels) -> void {
   stream->write(samples);
 }
 

@@ -1,6 +1,8 @@
 struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   shared_pointer<Emulator::Stream> stream;
 
+  inline auto pathID() const -> uint { return information.pathID; }
+
   static auto Enter() -> void;
   auto main() -> void;
 
@@ -10,7 +12,7 @@ struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   auto reset() -> void;  //software reset
 
   //platform.cpp
-  auto audioSample(const double* samples, uint channels) -> void override;
+  auto audioSample(const float* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint id) -> int16 override;
 
   //interface.cpp
@@ -22,6 +24,10 @@ struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   //io.cpp
   auto readIO(uint addr, uint8 data) -> uint8;
   auto writeIO(uint addr, uint8 data) -> void;
+
+  //boot-roms.cpp
+  static const uint8_t SGB1BootROM[256];
+  static const uint8_t SGB2BootROM[256];
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -62,6 +68,13 @@ private:
   uint writeAddress;
 
   GameBoy::GameBoyInterface gameBoyInterface;
+
+  struct Information {
+    uint pathID = 0;
+  } information;
+
+  GB_gameboy_t sameboy;
+  uint32_t bitmap[160 * 144];
 };
 
 extern ICD icd;

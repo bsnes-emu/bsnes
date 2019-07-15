@@ -65,7 +65,7 @@ struct GameBoyColorInterface : Interface {
 };
 
 struct SuperGameBoyInterface {
-  virtual auto audioSample(const double* samples, uint channels) -> void = 0;
+  virtual auto audioSample(const float* samples, uint channels) -> void = 0;
   virtual auto inputPoll(uint port, uint device, uint id) -> int16 = 0;
 
   virtual auto lcdScanline() -> void = 0;

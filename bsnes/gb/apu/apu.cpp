@@ -22,9 +22,9 @@ auto APU::main() -> void {
   sequencer.run();
 
   if(!Model::SuperGameBoy()) {
-    stream->sample(sequencer.left / 32768.0, sequencer.right / 32768.0);
+    stream->sample(float(sequencer.left / 32768.0), float(sequencer.right / 32768.0));
   } else {
-    double samples[] = {sequencer.left / 32768.0, sequencer.right / 32768.0};
+    float samples[] = {float(sequencer.left / 32768.0), float(sequencer.right / 32768.0)};
     superGameBoy->audioSample(samples, 2);
   }
 

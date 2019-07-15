@@ -28,7 +28,7 @@ auto WDC65816::idle6(uint16 address) -> void {
 }
 
 auto WDC65816::fetch() -> uint8 {
-  return readPC(PC.b << 16 | PC.w++);
+  return read(PC.b << 16 | PC.w++);
 }
 
 auto WDC65816::pull() -> uint8 {

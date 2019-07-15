@@ -10,7 +10,6 @@ struct WDC65816 {
   virtual auto idle() -> void = 0;
   virtual auto idleBranch() -> void {}
   virtual auto idleJump() -> void {}
-  virtual auto readPC(uint addr) -> uint8 = 0;
   virtual auto read(uint addr) -> uint8 = 0;
   virtual auto write(uint addr, uint8 data) -> void = 0;
   virtual auto lastCycle() -> void = 0;

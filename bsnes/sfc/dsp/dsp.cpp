@@ -19,7 +19,7 @@ void DSP::main() {
   signed count = spc_dsp.sample_count();
   if(count > 0) {
     for(unsigned n = 0; n < count; n += 2) {
-      stream->sample(samplebuffer[n + 0] / 32768.0, samplebuffer[n + 1] / 32768.0);
+      stream->sample(samplebuffer[n + 0] / 32768.0f, samplebuffer[n + 1] / 32768.0f);
     }
     spc_dsp.set_output(samplebuffer, 8192);
   }

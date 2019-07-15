@@ -17,6 +17,10 @@
 #include <processor/wdc65816/wdc65816.hpp>
 
 #include <gb/gb.hpp>
+extern "C" {
+  #include <sameboy/Core/gb.h>
+  #include <sameboy/Core/random.h>
+}
 
 namespace SuperFamicom {
   #define platform Emulator::platform

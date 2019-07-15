@@ -1,4 +1,5 @@
 #pragma once
+#define uintmax uint64
 
 namespace Emulator {
 
@@ -59,3 +60,5 @@ protected:
 };
 
 }
+
+#undef uintmax

@@ -34,7 +34,7 @@ auto MSU1::main() -> void {
     }
   }
 
-  stream->sample(left, right);
+  stream->sample(float(left), float(right));
   step(1);
   synchronize(cpu);
 }

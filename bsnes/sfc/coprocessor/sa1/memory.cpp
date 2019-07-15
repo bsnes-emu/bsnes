@@ -18,50 +18,6 @@ auto SA1::idleBranch() -> void {
   if(r.pc.d & 1) idleJump();
 }
 
-auto SA1::readPC(uint address) -> uint8 {
-  r.mar = address;
-  uint8 data = r.mdr;
-
-  if((address & 0x40fe00) == 0x002200  //00-3f,80-bf:2200-23ff
-  ) {
-    step();
-    return r.mdr = readIOSA1(address, data);
-  }
-
-  if((address & 0x408000) == 0x008000  //00-3f,80-bf:8000-ffff
-  || (address & 0xc00000) == 0xc00000  //c0-ff:0000-ffff
-  ) {
-    step();
-    if(rom.conflict()) step();
-    return r.mdr = rom.readSA1(address, data);
-  }
-
-  if((address & 0x40e000) == 0x006000  //00-3f,80-bf:6000-7fff
-  || (address & 0xf00000) == 0x400000  //40-4f:0000-ffff
-  || (address & 0xf00000) == 0x600000  //60-6f:0000-ffff
-  ) {
-    step();
-    step();
-    if(bwram.conflict()) step();
-    if(bwram.conflict()) step();
-    if((address & 1 << 22) && (address & 1 << 21)) return r.mdr = bwram.readBitmap(address, data);
-    if((address & 1 << 22)) return r.mdr = bwram.readLinear(address, data);
-    return r.mdr = bwram.readSA1(address, data);
-  }
-
-  if((address & 0x40f800) == 0x000000  //00-3f,80-bf:0000-07ff
-  || (address & 0x40f800) == 0x003000  //00-3f,80-bf:3000-37ff
-  ) {
-    step();
-    if(iram.conflict()) step();
-    if(iram.conflict()) step();
-    return r.mdr = iram.readSA1(address, data);
-  }
-
-  step();
-  return data;
-}
-
 auto SA1::read(uint address) -> uint8 {
   r.mar = address;
   uint8 data = r.mdr;

@@ -1,4 +1,5 @@
 #pragma once
+#define uintmax uint64
 
 namespace Emulator {
 
@@ -24,11 +25,15 @@ struct Scheduler {
 
   auto primary(Thread& thread) -> void {
     _master = _resume = thread.handle();
+    uintmax clock = 0;
+    for(auto& thread : _threads) {
+      thread->_clock = clock++;  //this bias prioritizes threads appended earlier first
+    }
   }
 
   auto append(Thread& thread) -> bool {
     if(_threads.find(&thread)) return false;
-    thread._clock += _threads.size();  //this bias prioritizes threads appended earlier first
+    thread._clock = _threads.size();
     return _threads.append(&thread), true;
   }
 
@@ -89,3 +94,5 @@ private:
 };
 
 }
+
+#undef uintmax

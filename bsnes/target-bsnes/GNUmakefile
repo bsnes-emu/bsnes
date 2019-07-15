@@ -46,12 +46,14 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/share/$(name)/
 	mkdir -p $(prefix)/share/$(name)/Database/
+	mkdir -p $(prefix)/share/$(name)/Firmware/
 	mkdir -p $(prefix)/share/$(name)/Locale/
 	cp out/$(name) $(prefix)/bin/$(name)
 	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
 	cp Database/* $(prefix)/share/$(name)/Database/
 	cp ../icarus/Database/* $(prefix)/share/$(name)/Database/
+	cp Firmware/* $(prefix)/share/$(name)/Firmware/
 	cp Locale/* $(prefix)/share/$(name)/Locale/
 endif
 

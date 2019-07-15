@@ -7,7 +7,14 @@ ICD icd;
 #include "platform.cpp"
 #include "interface.cpp"
 #include "io.cpp"
+#include "boot-roms.cpp"
 #include "serialization.cpp"
+
+namespace SameBoy {
+  static auto rgbEncode(GB_gameboy_t*, uint8_t r, uint8_t g, uint8_t b) -> uint32_t {
+    return r << 16 | g << 8 | b << 0;
+  }
+}
 
 auto ICD::Enter() -> void {
   while(true) {
@@ -23,19 +30,40 @@ auto ICD::main() -> void {
     step(GameBoy::system._clocksExecuted);
     GameBoy::system._clocksExecuted = 0;
   } else {  //DMG halted
-    stream->sample(0.0, 0.0);
+    stream->sample(float(0.0), float(0.0));
     step(2);  //two clocks per audio sample
   }
   synchronize(cpu);
 }
 
 auto ICD::load() -> bool {
+  information = {};
+
+  GB_random_set_enabled(false);
+  GB_init(&sameboy, GB_MODEL_DMG_B);
+  if(Frequency == 0) {
+    GB_load_boot_rom_from_buffer(&sameboy, (const unsigned char*)&SGB1BootROM, 256);
+  } else {
+    GB_load_boot_rom_from_buffer(&sameboy, (const unsigned char*)&SGB2BootROM, 256);
+  }
+  GB_set_pixels_output(&sameboy, bitmap);
+  GB_set_rgb_encode_callback(&sameboy, SameBoy::rgbEncode);
+  if(auto loaded = platform->load(ID::GameBoy, "Game Boy", "gb")) {
+    information.pathID = loaded.pathID;
+  } else return false;
+  if(auto fp = platform->open(pathID(), "program.rom", File::Read, File::Required)) {
+    auto size = fp->size();
+    auto data = (uint8_t*)malloc(size);
+    fp->read(data, size);
+    GB_load_rom_from_buffer(&sameboy, data, size);
+  } else return false;
   GameBoy::superGameBoy = this;
   GameBoy::system.load(&gameBoyInterface, GameBoy::System::Model::SuperGameBoy, cartridge.pathID());
   return cartridge.loadGameBoy();
 }
 
 auto ICD::unload() -> void {
+  GB_free(&sameboy);
   GameBoy::system.save();
   GameBoy::system.unload();
 }
