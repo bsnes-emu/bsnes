@@ -137,9 +137,8 @@ static void display_vblank(GB_gameboy_t *gb)
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
-            uint8_t color = (gb->io_registers[GB_IO_LCDC] & 0x80)  && gb->stopped && GB_is_cgb(gb) ? 0x3 : 0x0;
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
-                gb->sgb->screen_buffer[i] = color;
+                gb->sgb->screen_buffer[i] = 0x0;
             }
         }
         else {
@@ -387,8 +386,11 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         if (gb->sgb) {
             if (gb->current_lcd_line < LINES) {
-                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = pixel;
+                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
             }
+        }
+        else if (gb->model & GB_MODEL_NO_SFC_BIT) {
+            gb->icd_row[gb->position_in_line] = pixel;
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
@@ -403,8 +405,11 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         if (gb->sgb) {
             if (gb->current_lcd_line < LINES) {
-                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = pixel;
+                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
             }
+        }
+        else if (gb->model & GB_MODEL_NO_SFC_BIT) {
+            gb->icd_row[gb->position_in_line] = pixel;
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
@@ -890,6 +895,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
             gb->mode_for_interrupt = 2;
+            
+            /* TODO: Can this timing even be verified? */
+            if (gb->icd_row_callback) {
+                gb->icd_row_callback(gb, gb->icd_row);
+            }
         }
         
         /* Lines 144 - 152 */
@@ -961,7 +971,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->wy_diff = 0;
         gb->window_disabled_while_active = false;
         gb->current_line = 0;
-        gb->current_lcd_line = -1; // TODO: not the correct timing
+        // TODO: not the correct timing
+        gb->current_lcd_line = -1;
+        if (gb->icd_vreset_callback) {
+            gb->icd_vreset_callback(gb);
+        }
     }
 }
 

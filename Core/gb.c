@@ -112,6 +112,11 @@ void GB_init(GB_gameboy_t *gb, GB_model_t model)
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
     gb->clock_multiplier = 1.0;
     
+    if (model & GB_MODEL_NO_SFC_BIT) {
+        /* Disable time syncing. Timing should be done by the SFC emulator. */
+        gb->turbo = true;
+    }
+    
     GB_reset(gb);
 }
 
@@ -576,6 +581,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB_NO_SFC:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = GB_random();
                 if (i & 0x100) {
@@ -588,6 +594,7 @@ static void reset_ram(GB_gameboy_t *gb)
             break;
             
         case GB_MODEL_SGB2:
+        case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = 0x55;
                 gb->ram[i] ^= GB_random() & GB_random() & GB_random();
@@ -620,7 +627,9 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB_NO_SFC:
         case GB_MODEL_SGB2:
+        case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 if (i & 1) {
                     gb->hram[i] = GB_random() | GB_random() | GB_random();
@@ -641,9 +650,11 @@ static void reset_ram(GB_gameboy_t *gb)
             break;
             
         case GB_MODEL_DMG_B:
-        case GB_MODEL_SGB_NTSC: /* Unverified*/
+        case GB_MODEL_SGB_NTSC: /* Unverified */
         case GB_MODEL_SGB_PAL: /* Unverified */
+        case GB_MODEL_SGB_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
+        case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < 8; i++) {
                 if (i & 2) {
                     gb->oam[i] = GB_random() & GB_random() & GB_random();
@@ -669,7 +680,9 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB2: {
+        case GB_MODEL_SGB_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB2:
+        case GB_MODEL_SGB2_NO_SFC: {
             uint8_t temp;
             for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
@@ -910,4 +923,14 @@ double GB_get_usual_frame_rate(GB_gameboy_t *gb)
 void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback)
 {
     gb->joyp_write_callback = callback;
+}
+
+void GB_set_icd_row_callback(GB_gameboy_t *gb, GB_icd_row_callback_t callback)
+{
+    gb->icd_row_callback = callback;
+}
+
+void GB_set_icd_vreset_callback(GB_gameboy_t *gb, GB_icd_vreset_callback_t callback)
+{
+    gb->icd_vreset_callback = callback;
 }

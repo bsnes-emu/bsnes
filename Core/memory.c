@@ -273,7 +273,9 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_MODEL_DMG_B:
             case GB_MODEL_SGB_NTSC:
             case GB_MODEL_SGB_PAL:
+            case GB_MODEL_SGB_NO_SFC:
             case GB_MODEL_SGB2:
+            case GB_MODEL_SGB2_NO_SFC:
                 ;
         }
     }
@@ -584,7 +586,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case GB_MODEL_DMG_B:
                 case GB_MODEL_SGB_NTSC:
                 case GB_MODEL_SGB_PAL:
+                case GB_MODEL_SGB_NO_SFC:
                 case GB_MODEL_SGB2:
+                case GB_MODEL_SGB2_NO_SFC:
                 case GB_MODEL_CGB_E:
                 case GB_MODEL_AGB:
                     break;
