@@ -123,8 +123,8 @@ static void display_vblank(GB_gameboy_t *gb)
 {  
     gb->vblank_just_occured = true;
     
-    /* TODO: Slow in trubo mode! */
-    if (GB_is_sgb(gb)) {
+    /* TODO: Slow in turbo mode! */
+    if (GB_is_hle_sgb(gb)) {
         GB_sgb_render(gb);
     }
     

@@ -534,6 +534,11 @@ bool GB_is_cgb(GB_gameboy_t *gb)
 
 bool GB_is_sgb(GB_gameboy_t *gb)
 {
+    return (gb->model & ~GB_MODEL_PAL_BIT & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB || (gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB2;
+}
+
+bool GB_is_hle_sgb(GB_gameboy_t *gb)
+{
     return (gb->model & ~GB_MODEL_PAL_BIT) == GB_MODEL_SGB || gb->model == GB_MODEL_SGB2;
 }
 
@@ -745,7 +750,7 @@ void GB_reset(GB_gameboy_t *gb)
     gb->accessed_oam_row = -1;
     
     
-    if (GB_is_sgb(gb)) {
+    if (GB_is_hle_sgb(gb)) {
         if (!gb->sgb) {
             gb->sgb = malloc(sizeof(*gb->sgb));
         }
@@ -879,17 +884,17 @@ uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 
 unsigned GB_get_screen_width(GB_gameboy_t *gb)
 {
-    return GB_is_sgb(gb)? 256 : 160;
+    return GB_is_hle_sgb(gb)? 256 : 160;
 }
 
 unsigned GB_get_screen_height(GB_gameboy_t *gb)
 {
-    return GB_is_sgb(gb)? 224 : 144;
+    return GB_is_hle_sgb(gb)? 224 : 144;
 }
 
 unsigned GB_get_player_count(GB_gameboy_t *gb)
 {
-    return GB_is_sgb(gb)? gb->sgb->player_count : 1;
+    return GB_is_hle_sgb(gb)? gb->sgb->player_count : 1;
 }
 
 void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback)

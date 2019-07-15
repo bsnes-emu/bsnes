@@ -296,6 +296,10 @@ static void command_ready(GB_gameboy_t *gb)
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
 {
     if (!GB_is_sgb(gb)) return;
+    if (!GB_is_hle_sgb(gb)) {
+        /* Notify via callback */
+        return;
+    }
     if (gb->sgb->disable_commands) return;
     if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) return;
     

@@ -29,6 +29,7 @@
 #define GB_MODEL_MGB_FAMILY 0x100
 #define GB_MODEL_CGB_FAMILY 0x200
 #define GB_MODEL_PAL_BIT 0x1000
+#define GB_MODEL_NO_SFC_BIT 0x2000
 
 #if __clang__
 #define UNROLL _Pragma("unroll")
@@ -67,9 +68,11 @@ typedef enum {
     // GB_MODEL_DMG_C = 0x003,
     GB_MODEL_SGB = 0x004,
     GB_MODEL_SGB_NTSC = GB_MODEL_SGB,
-    GB_MODEL_SGB_PAL = 0x1004,
+    GB_MODEL_SGB_PAL = GB_MODEL_SGB | GB_MODEL_PAL_BIT,
+    GB_MODEL_SGB_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT,
     // GB_MODEL_MGB = 0x100,
     GB_MODEL_SGB2 = 0x101,
+    GB_MODEL_SGB2_NO_SFC = GB_MODEL_SGB2 | GB_MODEL_NO_SFC_BIT,
     // GB_MODEL_CGB_0 = 0x200,
     // GB_MODEL_CGB_A = 0x201,
     // GB_MODEL_CGB_B = 0x202,
@@ -617,7 +620,8 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 void GB_init(GB_gameboy_t *gb, GB_model_t model);
 bool GB_is_inited(GB_gameboy_t *gb);
 bool GB_is_cgb(GB_gameboy_t *gb);
-bool GB_is_sgb(GB_gameboy_t *gb);
+bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
+bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd
 GB_model_t GB_get_model(GB_gameboy_t *gb);
 void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
