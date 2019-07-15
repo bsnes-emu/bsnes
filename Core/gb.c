@@ -906,3 +906,8 @@ double GB_get_usual_frame_rate(GB_gameboy_t *gb)
 {
     return GB_get_clock_rate(gb) / (double)LCDC_PERIOD;
 }
+
+void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback)
+{
+    gb->joyp_write_callback = callback;
+}

@@ -242,6 +242,7 @@ typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_update_input_hint_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_joyp_write_callback_t)(GB_gameboy_t *gb, uint8_t value);
 
 typedef struct {
     bool state;
@@ -533,6 +534,7 @@ struct GB_gameboy_internal_s {
         GB_serial_transfer_bit_start_callback_t serial_transfer_bit_start_callback;
         GB_serial_transfer_bit_end_callback_t serial_transfer_bit_end_callback;
         GB_update_input_hint_callback_t update_input_hint_callback;
+        GB_joyp_write_callback_t joyp_write_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units
@@ -691,6 +693,9 @@ bool GB_serial_get_data_bit(GB_gameboy_t *gb);
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
+    
+/* For integration with SFC/SNES emulators */
+void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback);
 
 #ifdef GB_INTERNAL
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb);
