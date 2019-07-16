@@ -23,6 +23,11 @@
 #define AUDIO_FREQUENCY 48000
 #endif
 
+/* Compatibility with older SDL versions */
+#ifndef SDL_AUDIO_ALLOW_SAMPLES_CHANGE
+#define SDL_AUDIO_ALLOW_SAMPLES_CHANGE 0
+#endif
+
 GB_gameboy_t gb;
 static bool paused = false;
 static uint32_t pixel_buffer_1[256 * 224], pixel_buffer_2[256 * 224];
@@ -464,7 +469,7 @@ restart:
     start_capturing_logs();
     const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin", "sgb_boot.bin"};
     const char *boot_rom = boot_roms[configuration.model];
-    if (configuration.model == GB_MODEL_SGB && configuration.sgb_revision == SGB_2) {
+    if (configuration.model == MODEL_SGB && configuration.sgb_revision == SGB_2) {
         boot_rom = "sgb2_boot.bin";
     }
     error = GB_load_boot_rom(&gb, resource_path(boot_rom));
