@@ -21,7 +21,7 @@
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
-    vasprintf(&string, fmt, args);
+    (void)vasprintf(&string, fmt, args);
     if (string) {
         if (gb->log_callback) {
             gb->log_callback(gb, string, attributes);
@@ -158,9 +158,12 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
         GB_log(gb, "Could not open boot ROM: %s.\n", strerror(errno));
         return errno;
     }
-    fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f);
+    int ret = 0;
+    if (fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f) != 1) {
+        ret = -1;
+    }
     fclose(f);
-    return 0;
+    return ret;
 }
 
 void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size)
@@ -193,7 +196,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     }
     gb->rom = malloc(gb->rom_size);
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
-    fread(gb->rom, gb->rom_size, 1, f);
+    (void) fread(gb->rom, gb->rom_size, 1, f);
     fclose(f);
     GB_configure_cart(gb);
 
