@@ -243,7 +243,8 @@ typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool b
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_update_input_hint_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_joyp_write_callback_t)(GB_gameboy_t *gb, uint8_t value);
-typedef void (*GB_icd_row_callback_t)(GB_gameboy_t *gb, uint8_t *row);
+typedef void (*GB_icd_pixel_callback_t)(GB_gameboy_t *gb, uint8_t row);
+typedef void (*GB_icd_hreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_icd_vreset_callback_t)(GB_gameboy_t *gb);
 
 typedef struct {
@@ -422,7 +423,6 @@ struct GB_gameboy_internal_s {
         uint16_t serial_length;
         uint8_t double_speed_alignment;
         uint8_t serial_count;
-        uint8_t icd_row[160];
     );
 
     /* APU */
@@ -451,7 +451,8 @@ struct GB_gameboy_internal_s {
         /* The LCDC will skip the first frame it renders after turning it on.
            On the CGB, a frame is not skipped if the previous frame was skipped as well.
            See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
-               /* TODO: Drop this and properly emulate the dropped vreset signal*/
+               
+        /* TODO: Drop this and properly emulate the dropped vreset signal*/
         enum {
             GB_FRAMESKIP_LCD_TURNED_ON, // On a DMG, the LCD renders a blank screen during this state,
                                         // on a CGB, the previous frame is repeated (which might be
@@ -538,7 +539,8 @@ struct GB_gameboy_internal_s {
         GB_serial_transfer_bit_end_callback_t serial_transfer_bit_end_callback;
         GB_update_input_hint_callback_t update_input_hint_callback;
         GB_joyp_write_callback_t joyp_write_callback;
-        GB_icd_row_callback_t icd_row_callback;
+        GB_icd_pixel_callback_t icd_pixel_callback;
+        GB_icd_vreset_callback_t icd_hreset_callback;
         GB_icd_vreset_callback_t icd_vreset_callback;
                
         /* IR */
@@ -701,7 +703,8 @@ void GB_disconnect_serial(GB_gameboy_t *gb);
     
 /* For integration with SFC/SNES emulators */
 void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback);
-void GB_set_icd_row_callback(GB_gameboy_t *gb, GB_icd_row_callback_t callback);
+void GB_set_icd_pixel_callback(GB_gameboy_t *gb, GB_icd_pixel_callback_t callback);
+void GB_set_icd_hreset_callback(GB_gameboy_t *gb, GB_icd_hreset_callback_t callback);
 void GB_set_icd_vreset_callback(GB_gameboy_t *gb, GB_icd_vreset_callback_t callback);
     
 #ifdef GB_INTERNAL

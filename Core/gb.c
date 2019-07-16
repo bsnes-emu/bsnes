@@ -925,10 +925,16 @@ void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callb
     gb->joyp_write_callback = callback;
 }
 
-void GB_set_icd_row_callback(GB_gameboy_t *gb, GB_icd_row_callback_t callback)
+void GB_set_icd_pixel_callback(GB_gameboy_t *gb, GB_icd_pixel_callback_t callback)
 {
-    gb->icd_row_callback = callback;
+    gb->icd_pixel_callback = callback;
 }
+
+void GB_set_icd_hreset_callback(GB_gameboy_t *gb, GB_icd_hreset_callback_t callback)
+{
+    gb->icd_hreset_callback = callback;
+}
+
 
 void GB_set_icd_vreset_callback(GB_gameboy_t *gb, GB_icd_vreset_callback_t callback)
 {

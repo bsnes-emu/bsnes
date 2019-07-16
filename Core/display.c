@@ -390,7 +390,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             }
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
-            gb->icd_row[gb->position_in_line] = pixel;
+            if (gb->icd_pixel_callback) {
+                gb->icd_pixel_callback(gb, pixel);
+            }
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
@@ -409,7 +411,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             }
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
-            gb->icd_row[gb->position_in_line] = pixel;
+            if (gb->icd_pixel_callback) {
+                gb->icd_pixel_callback(gb, pixel);
+            }
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
@@ -897,8 +901,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->mode_for_interrupt = 2;
             
             /* TODO: Can this timing even be verified? */
-            if (gb->icd_row_callback) {
-                gb->icd_row_callback(gb, gb->icd_row);
+            if (gb->icd_hreset_callback) {
+                gb->icd_hreset_callback(gb);
             }
         }
         
