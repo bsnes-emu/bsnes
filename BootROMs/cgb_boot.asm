@@ -532,7 +532,7 @@ TrademarkSymbol:
     db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
 SameBoyLogo:
-    incbin "SameBoyLogo.rle"
+    incbin "SameBoyLogo.pb8"
 
 AnimationColors:
     dw $7FFF ; White
@@ -634,41 +634,55 @@ ReadCGBLogoHalfTile:
     ld a, e
     ret
 
+; LoadTileset using PB8 codec, 2019 Damian Yerrick
+;
+; The logo is compressed using PB8, a form of RLE with unary-coded
+; run lengths.  Each block representing 8 bytes consists of a control
+; byte, where each bit (MSB to LSB) is 0 for literal or 1 for repeat
+; previous, followed by the literals in that block.
+
+SameBoyLogo_dst = $8080
+SameBoyLogo_length = (128 * 24) / 64
+
 LoadTileset:
-; Copy SameBoy Logo
-    ld de, SameBoyLogo
-    ld hl, $8080
-.sameboyLogoLoop
-    ld a, [de]
-    inc de
-
-    ld b, a
-    and $0f
-    jr z, .skipLiteral
-    ld c, a
-
-.literalLoop
-    ld a, [de]
-    ldi [hl], a
+    ld hl, SameBoyLogo
+    ld de, SameBoyLogo_dst
+    ld c, SameBoyLogo_length
+.pb8BlockLoop:
+    ; Register map for PB8 decompression
+    ; HL: source address in boot ROM
+    ; DE: destination address in VRAM
+    ; A: Current literal value
+    ; B: Repeat bits, terminated by 1000...
+    ; C: Number of 8-byte blocks left in this block
+    ; Source address in HL lets the repeat bits go straight to B,
+    ; bypassing A and avoiding spilling registers to the stack.
+    ld b, [hl]
     inc hl
-    inc de
-    dec c
-    jr nz, .literalLoop
-.skipLiteral
-    swap b
-    ld a, b
-    and $0f
-    jr z, .sameboyLogoEnd
-    ld c, a
-    ld a, [de]
-    inc de
 
-.repeatLoop
-    ldi [hl], a
-    inc hl
+    ; Shift a 1 into lower bit of shift value.  Once this bit
+    ; reaches the carry, B becomes 0 and the byte is over
+    scf
+    rl b
+
+.pb8BitLoop:
+    ; If not a repeat, load a literal byte
+    jr c,.pb8Repeat
+    ld a, [hli]
+.pb8Repeat:
+    ; Decompressed data uses colors 0 and 1, so write once, inc twice
+    ld [de], a
+    inc de
+    inc de
+    sla b
+    jr nz, .pb8BitLoop
+
     dec c
-    jr nz, .repeatLoop
-    jr .sameboyLogoLoop
+    jr nz, .pb8BlockLoop
+
+; End PB8 decoding.  The rest uses HL as the destination
+    ld h, d
+    ld l, e
 
 .sameboyLogoEnd
 ; Copy (unresized) ROM logo
