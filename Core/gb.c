@@ -198,11 +198,27 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     }
     gb->rom = malloc(gb->rom_size);
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
-    fread(gb->rom, gb->rom_size, 1, f);
+    fread(gb->rom, 1, gb->rom_size, f);
     fclose(f);
     GB_configure_cart(gb);
 
     return 0;
+}
+
+void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size)
+{
+    gb->rom_size = (size + 0x3fff) & ~0x3fff;
+    while (gb->rom_size & (gb->rom_size - 1)) {
+        gb->rom_size |= gb->rom_size >> 1;
+        gb->rom_size++;
+    }
+    if (gb->rom) {
+        free(gb->rom);
+    }
+    gb->rom = malloc(gb->rom_size);
+    memset(gb->rom, 0xff, gb->rom_size);
+    memcpy(gb->rom, buffer, size);
+    GB_configure_cart(gb);
 }
 
 typedef struct {
