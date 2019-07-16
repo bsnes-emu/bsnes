@@ -1,4 +1,4 @@
-The unofficial bsnes repository
+The official bsnes repository
 ===============================
 
 bsnes emulates the Super Famicom and Super Nintendo consoles,
