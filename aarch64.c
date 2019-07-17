@@ -21,7 +21,7 @@ static void (*co_swap)(cothread_t, cothread_t) = 0;
 #else
   section(text)
 #endif
-static const uint32_t co_swap_function[1024] = {
+static const uint32_t co_swap_functin[1024] = {
   0xa9002428,  /* stp x8,x9,[x1]        */
   0xa9012c2a,  /* stp x10,x11,[x1,#16]  */
   0xa902342c,  /* stp x12,x13,[x1,#32]  */
