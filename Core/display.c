@@ -375,6 +375,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             bg_enabled = false;
         }
     }
+
+    uint8_t icd_pixel = 0;
     
     {
         uint8_t pixel = bg_enabled? fifo_item->pixel : 0;
@@ -391,7 +393,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
             if (gb->icd_pixel_callback) {
-                gb->icd_pixel_callback(gb, pixel);
+                icd_pixel = pixel;
+              //gb->icd_pixel_callback(gb, pixel);
             }
         }
         else {
@@ -412,11 +415,18 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
             if (gb->icd_pixel_callback) {
-                gb->icd_pixel_callback(gb, pixel);
+                icd_pixel = pixel;
+              //gb->icd_pixel_callback(gb, pixel);
             }
         }
         else {
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
+        }
+    }
+	
+    if (gb->model & GB_MODEL_NO_SFC_BIT) {
+        if (gb->icd_pixel_callback) {
+            gb->icd_pixel_callback(gb, icd_pixel);
         }
     }
     
