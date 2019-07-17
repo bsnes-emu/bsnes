@@ -2,7 +2,7 @@
 bsnes  - Suite of videogame console emulators
 icarus - Game library importer for higan
 
-  Copyright © 2004-2017  byuu
+  Copyright © 2004-2019  byuu
 
   https://byuu.org/
 
@@ -26,7 +26,7 @@ libco  - C cooperative threading library
 nall   - C++ template library
 ruby   - Hardware abstraction layer
 
-  Copyright © 2006-2017  byuu
+  Copyright © 2006-2019  byuu
 
 Permission to use, copy, modify, and/or distribute this software for
 any purpose with or without fee is hereby granted, provided that the
