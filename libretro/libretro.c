@@ -84,7 +84,7 @@ static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
 
 static retro_video_refresh_t video_cb;
-static retro_audio_sample_batch_t audio_batch_cb;
+static retro_audio_sample_t audio_sample_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
@@ -152,7 +152,7 @@ static void audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
     if ((audio_out == GB_1 && gb == &gameboy[0]) ||
         (audio_out == GB_2 && gb == &gameboy[1])) {
-        audio_batch_cb((void*)sample, 1);
+            audio_sample_cb(sample->left, sample->right);
     }
 }
 
@@ -772,11 +772,11 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
+    audio_sample_cb = cb;
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-    audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -850,8 +850,7 @@ void retro_run(void)
     }
     else
     {
-        int x = GB_run_frame(&gameboy[0]);
-        log_cb(RETRO_LOG_DEBUG, "%d\n", x);
+        GB_run_frame(&gameboy[0]);
     }
 
     if (emulated_devices == 2)
