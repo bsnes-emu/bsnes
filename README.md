@@ -26,19 +26,23 @@ or [shaders](shaders/)
 directories should be exactly as it appeared in official releases.
 Everything else has been added for various reasons.
 
+This repository shares history
+with [the official higan repo](https://github.com/byuu/higan)
+so you can trace bsnes' development
+all the way back to 2010.
+With [the bsnes history repo](https://gitlab.com/higan/bsnes-history),
+you can trace development back to the earliest surviving releases.
+
 Official bsnes resources
 ------------------------
 
   - [Official homepage](https://byuu.org/emulation/bsnes/)
+  - [Official git repo](https://github.com/byuu/bsnes)
 
-Unofficial higan resources
+Unofficial bsnes resources
 --------------------------
 
   - [Unofficial forum](https://helmet.kafuka.org/bboard/)
-  - [Source code repository](https://gitlab.com/higan/higan/)
-    archives official bsnes and higan releases
-    and WIP snapshots
-    since approximately v067r21
   - [Latest WIP build for Windows][wipwin]
 
 
