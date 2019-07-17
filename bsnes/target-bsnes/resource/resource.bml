@@ -1,6 +1,7 @@
 namespace name=Resource
   binary name=Icon file=icon.png
   binary name=Logo file=logo.png
+  binary name=SameBoy file=sameboy.png
   namespace name=System
     binary name=Boards file="system/boards.bml"
     binary name=IPLROM file="system/ipl.rom"

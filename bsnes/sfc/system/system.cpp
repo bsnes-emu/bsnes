@@ -50,7 +50,9 @@ auto System::load(Emulator::Interface* interface) -> bool {
     information.cpuFrequency = Emulator::Constants::Colorburst::PAL * 4.8;
   }
 
-  if(cartridge.has.ICD) icd.load();
+  if(cartridge.has.ICD) {
+    if(!icd.load()) return false;
+  }
   if(cartridge.has.BSMemorySlot) bsmemory.load();
 
   serializeInit();

@@ -1,4 +1,4 @@
-struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
+struct ICD : Emulator::Platform, Thread {
   shared_pointer<Emulator::Stream> stream;
 
   inline auto pathID() const -> uint { return information.pathID; }
@@ -11,15 +11,11 @@ struct ICD : Emulator::Platform, GameBoy::SuperGameBoyInterface, Thread {
   auto power() -> void;
   auto reset() -> void;  //software reset
 
-  //platform.cpp
-  auto audioSample(const float* samples, uint channels) -> void override;
-  auto inputPoll(uint port, uint device, uint id) -> int16 override;
-
   //interface.cpp
-  auto lcdScanline() -> void override;
-  auto lcdOutput(uint2 color) -> void override;
-  auto joypRead() -> uint4 override;
-  auto joypWrite(bool p15, bool p14) -> void override;
+  auto ppuScanline() -> void;
+  auto ppuOutput(uint2 color) -> void;
+  auto apuOutput(float left, float right) -> void;
+  auto joypWrite(bool p14, bool p15) -> void;
 
   //io.cpp
   auto readIO(uint addr, uint8 data) -> uint8;
@@ -67,14 +63,17 @@ private:
   uint writeBank;
   uint writeAddress;
 
-  GameBoy::GameBoyInterface gameBoyInterface;
-
   struct Information {
     uint pathID = 0;
   } information;
 
+public:
+  //warning: the size of this object will be too large due to C++ size rules differing from C rules.
+  //in practice, this won't pose a problem so long as the struct is never accessed from C++ code,
+  //as the offsets of all member variables will be wrong compared to what the C SameBoy code expects.
   GB_gameboy_t sameboy;
   uint32_t bitmap[160 * 144];
+  uint ly = 0;
 };
 
 extern ICD icd;

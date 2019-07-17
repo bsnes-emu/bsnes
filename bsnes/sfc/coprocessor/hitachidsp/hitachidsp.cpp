@@ -4,6 +4,7 @@ namespace SuperFamicom {
 
 #include "memory.cpp"
 #include "serialization.cpp"
+#include "data-rom.cpp"
 HitachiDSP hitachidsp;
 
 auto HitachiDSP::Enter() -> void {

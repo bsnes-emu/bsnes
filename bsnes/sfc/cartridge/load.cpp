@@ -72,9 +72,6 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   if(auto fp = platform->open(pathID(), "msu1/data.rom", File::Read)) loadMSU1();
 }
 
-auto Cartridge::loadCartridgeGameBoy(Markup::Node node) -> void {
-}
-
 auto Cartridge::loadCartridgeBSMemory(Markup::Node node) -> void {
   if(auto memory = Emulator::Game::Memory{node["game/board/memory(content=Program)"]}) {
     bsmemory.ROM = memory.type == "ROM";
@@ -446,8 +443,14 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
 
   if(auto memory = node["memory(type=ROM,content=Data,architecture=HG51BS169)"]) {
     if(auto file = game.memory(memory)) {
-      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read, File::Required)) {
+      if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(1 * 1024)) hitachidsp.dataROM[n] = fp->readl(3);
+      } else {
+        for(auto n : range(1 * 1024)) {
+          hitachidsp.dataROM[n]  = hitachidsp.staticDataROM[n * 3 + 0] <<  0;
+          hitachidsp.dataROM[n] |= hitachidsp.staticDataROM[n * 3 + 1] <<  8;
+          hitachidsp.dataROM[n] |= hitachidsp.staticDataROM[n * 3 + 2] << 16;
+        }
       }
     }
   }

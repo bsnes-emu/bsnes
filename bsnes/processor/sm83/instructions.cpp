@@ -138,7 +138,7 @@ auto SM83::instructionEI() -> void {
 
 auto SM83::instructionHALT() -> void {
   r.halt = 1;
-  while(r.halt) idle();
+  while(r.halt) halt();
 }
 
 auto SM83::instructionINC_Direct(uint8& data) -> void {
@@ -428,9 +428,9 @@ auto SM83::instructionSRL_Indirect(uint16& address) -> void {
 }
 
 auto SM83::instructionSTOP() -> void {
-  if(stop()) return;
+  if(!stoppable()) return;
   r.stop = 1;
-  while(r.stop) idle();
+  while(r.stop) stop();
 }
 
 auto SM83::instructionSUB_Direct_Data(uint8& target) -> void {

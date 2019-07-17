@@ -164,15 +164,26 @@ auto Presentation::create() -> void {
 
   helpMenu.setText(tr("Help"));
   documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
-    invoke("https://doc.byuu.org/bsnes/");
+    invoke("https://doc.byuu.org/bsnes");
   });
-  about.setIcon(Icon::Prompt::Question).setText({tr("About"), " ..."}).onActivate([&] {
+  about.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
     AboutDialog()
     .setLogo(Resource::Logo)
     .setVersion(Emulator::Version)
     .setAuthor("byuu")
     .setLicense("GPLv3")
-    .setWebsite("https://byuu.org/")
+    .setWebsite("https://byuu.org")
+    .setAlignment(*this)
+    .show();
+  });
+  aboutSameBoy.setIcon(Icon::Prompt::Question).setText({tr("About SameBoy"), " ..."}).onActivate([&] {
+    AboutDialog()
+    .setName("SameBoy")
+    .setLogo(Resource::SameBoy)
+    .setVersion("0.12.1")
+    .setAuthor("Lior Halphon")
+    .setLicense("MIT")
+    .setWebsite("https://sameboy.github.io")
     .setAlignment(*this)
     .show();
   });

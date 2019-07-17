@@ -1,38 +1,24 @@
-processors += sm83
-
-objects += gb-interface gb-system
-objects += gb-memory gb-cartridge
-objects += gb-cpu gb-ppu gb-apu
-
-obj/gb-interface.o: gb/interface/interface.cpp
-obj/gb-system.o:    gb/system/system.cpp
-obj/gb-cartridge.o: gb/cartridge/cartridge.cpp
-obj/gb-memory.o:    gb/memory/memory.cpp
-obj/gb-cpu.o:       gb/cpu/cpu.cpp
-obj/gb-ppu.o:       gb/ppu/ppu.cpp
-obj/gb-apu.o:       gb/apu/apu.cpp
-
 flags += -DGB_INTERNAL -Wno-multichar -Dtypeof=__typeof__
 options += -I../sameboy
 
-objects += sb-apu sb-camera sb-debugger sb-display sb-gb sb-joypad sb-mbc
-objects += sb-memory sb-printer sb-random sb-rewind sb-save_state sb-sgb
-objects += sb-sm83_cpu sb-sm83_disassembler sb-symbol_hash sb-timing
+objects += gb-apu gb-camera gb-debugger gb-display gb-gb gb-joypad gb-mbc
+objects += gb-memory gb-printer gb-random gb-rewind gb-save_state gb-sgb
+objects += gb-sm83_cpu gb-sm83_disassembler gb-symbol_hash gb-timing
 
-obj/sb-apu.o:               ../sameboy/Core/apu.c
-obj/sb-camera.o:            ../sameboy/Core/camera.c
-obj/sb-debugger.o:          ../sameboy/Core/debugger.c
-obj/sb-display.o:           ../sameboy/Core/display.c
-obj/sb-gb.o:                ../sameboy/Core/gb.c
-obj/sb-joypad.o:            ../sameboy/Core/joypad.c
-obj/sb-mbc.o:               ../sameboy/Core/mbc.c
-obj/sb-memory.o:            ../sameboy/Core/memory.c
-obj/sb-printer.o:           ../sameboy/Core/printer.c
-obj/sb-random.o:            ../sameboy/Core/random.c
-obj/sb-rewind.o:            ../sameboy/Core/rewind.c
-obj/sb-save_state.o:        ../sameboy/Core/save_state.c
-obj/sb-sgb.o:               ../sameboy/Core/sgb.c
-obj/sb-sm83_cpu.o:          ../sameboy/Core/sm83_cpu.c
-obj/sb-sm83_disassembler.o: ../sameboy/Core/sm83_disassembler.c
-obj/sb-symbol_hash.o:       ../sameboy/Core/symbol_hash.c
-obj/sb-timing.o:            ../sameboy/Core/timing.c
+obj/gb-apu.o:               gb/Core/apu.c
+obj/gb-camera.o:            gb/Core/camera.c
+obj/gb-debugger.o:          gb/Core/debugger.c
+obj/gb-display.o:           gb/Core/display.c
+obj/gb-gb.o:                gb/Core/gb.c
+obj/gb-joypad.o:            gb/Core/joypad.c
+obj/gb-mbc.o:               gb/Core/mbc.c
+obj/gb-memory.o:            gb/Core/memory.c
+obj/gb-printer.o:           gb/Core/printer.c
+obj/gb-random.o:            gb/Core/random.c
+obj/gb-rewind.o:            gb/Core/rewind.c
+obj/gb-save_state.o:        gb/Core/save_state.c
+obj/gb-sgb.o:               gb/Core/sgb.c
+obj/gb-sm83_cpu.o:          gb/Core/sm83_cpu.c
+obj/gb-sm83_disassembler.o: gb/Core/sm83_disassembler.c
+obj/gb-symbol_hash.o:       gb/Core/symbol_hash.c
+obj/gb-timing.o:            gb/Core/timing.c

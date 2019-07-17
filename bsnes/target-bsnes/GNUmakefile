@@ -53,7 +53,6 @@ else ifneq ($(filter $(platform),linux bsd),)
 	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
 	cp Database/* $(prefix)/share/$(name)/Database/
 	cp ../icarus/Database/* $(prefix)/share/$(name)/Database/
-	cp Firmware/* $(prefix)/share/$(name)/Firmware/
 	cp Locale/* $(prefix)/share/$(name)/Locale/
 endif
 

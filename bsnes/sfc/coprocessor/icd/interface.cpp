@@ -1,25 +1,26 @@
-auto ICD::lcdScanline() -> void {
-  if(GameBoy::ppu.status.ly > 143) return;  //Vblank
-  if((GameBoy::ppu.status.ly & 7) == 0) {
+auto ICD::ppuScanline() -> void {
+  if(ly > 143) return;  //Vblank
+  if((ly & 7) == 0) {
     writeBank = (writeBank + 1) & 3;
     writeAddress = 0;
   }
 }
 
-auto ICD::lcdOutput(uint2 color) -> void {
+auto ICD::ppuOutput(uint2 color) -> void {
   uint y = writeAddress / 160;
   uint x = writeAddress % 160;
   uint addr = writeBank * 512 + y * 2 + x / 8 * 16;
-  output[addr + 0] = (output[addr + 0] << 1) | color.bit(0);
-  output[addr + 1] = (output[addr + 1] << 1) | color.bit(1);
+  output[addr + 0] = (output[addr + 0] << 1) | !!(color & 1);
+  output[addr + 1] = (output[addr + 1] << 1) | !!(color & 2);
   writeAddress = (writeAddress + 1) % 1280;
 }
 
-auto ICD::joypRead() -> uint4 {
-  return 0xf - joypID;
+auto ICD::apuOutput(float left, float right) -> void {
+  float samples[] = {left, right};
+  stream->write(samples);
 }
 
-auto ICD::joypWrite(bool p15, bool p14) -> void {
+auto ICD::joypWrite(bool p14, bool p15) -> void {
   //joypad handling
   if(p15 == 1 && p14 == 1) {
     if(joyp15Lock == 0 && joyp14Lock == 0) {
@@ -32,6 +33,19 @@ auto ICD::joypWrite(bool p15, bool p14) -> void {
       if(mltReq == 3) joypID &= 3;  //4-player mode
     }
   }
+
+  uint8 joypad;
+  if(joypID == 0) joypad = r6004;
+  if(joypID == 1) joypad = r6005;
+  if(joypID == 2) joypad = r6006;
+  if(joypID == 3) joypad = r6007;
+
+  uint4 input = 0xf;
+  if(p15 == 1 && p14 == 1) input = 0xf - joypID;
+  if(p14 == 0) input &= bits(joypad,0-3);  //d-pad
+  if(p15 == 0) input &= bits(joypad,4-7);  //buttons
+
+  GB_icd_set_joyp(&sameboy, input);
 
   if(p15 == 0 && p14 == 1) joyp15Lock = 0;
   if(p15 == 1 && p14 == 0) joyp14Lock = 0;

@@ -112,6 +112,7 @@ struct Presentation : Window {
       MenuItem documentation{&helpMenu};
       MenuSeparator helpSeparator{&helpMenu};
       MenuItem about{&helpMenu};
+      MenuItem aboutSameBoy{&helpMenu};
 
   VerticalLayout layout{this};
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};

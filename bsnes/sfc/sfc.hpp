@@ -16,10 +16,9 @@
 #include <processor/upd96050/upd96050.hpp>
 #include <processor/wdc65816/wdc65816.hpp>
 
-#include <gb/gb.hpp>
 extern "C" {
-  #include <sameboy/Core/gb.h>
-  #include <sameboy/Core/random.h>
+  #include <gb/Core/gb.h>
+  #include <gb/Core/random.h>
 }
 
 namespace SuperFamicom {

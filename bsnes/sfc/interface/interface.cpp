@@ -245,7 +245,7 @@ auto Interface::unserialize(serializer& s) -> bool {
 }
 
 auto Interface::cheats(const vector<string>& list) -> void {
-  if(cartridge.has.ICD) return GameBoy::cheat.assign(list);
+  if(cartridge.has.ICD) return;  //TODO: SameBoy cheat code support
 
   //make all ROM data writable temporarily
   Memory::GlobalWriteEnable = true;

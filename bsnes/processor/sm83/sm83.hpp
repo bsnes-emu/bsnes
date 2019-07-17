@@ -9,10 +9,12 @@
 namespace Processor {
 
 struct SM83 {
+  virtual auto stoppable() -> bool = 0;
+  virtual auto stop() -> void = 0;
+  virtual auto halt() -> void = 0;
   virtual auto idle() -> void = 0;
   virtual auto read(uint16 address) -> uint8 = 0;
   virtual auto write(uint16 address, uint8 data) -> void = 0;
-  virtual auto stop() -> bool = 0;
 
   //lr35902.cpp
   auto power() -> void;

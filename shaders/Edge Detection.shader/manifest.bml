@@ -1,4 +1,0 @@
-program
-  filter: linear
-  wrap: edge
-  fragment: edge-detection.fs

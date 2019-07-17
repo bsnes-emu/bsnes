@@ -101,14 +101,6 @@ auto Cartridge::load() -> bool {
   return true;
 }
 
-auto Cartridge::loadGameBoy() -> bool {
-  //invoked from ICD::load()
-  information.sha256 = GameBoy::cartridge.hash();
-  slotGameBoy.load(GameBoy::cartridge.manifest());
-  loadCartridgeGameBoy(slotGameBoy.document);
-  return true;
-}
-
 auto Cartridge::loadBSMemory() -> bool {
   if(auto fp = platform->open(bsmemory.pathID, "manifest.bml", File::Read, File::Required)) {
     slotBSMemory.load(fp->reads());

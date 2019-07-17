@@ -1,6 +1,16 @@
 auto ICD::serialize(serializer& s) -> void {
   Thread::serialize(s);
-  GameBoy::system.serializeAll(s);
+
+  auto size = GB_get_save_state_size(&sameboy);
+  auto data = new uint8_t[size];
+  s.array(data, size);
+  if(s.mode() == serializer::Load) {
+    GB_load_state_from_buffer(&sameboy, data, size);
+  }
+  if(s.mode() == serializer::Save) {
+    GB_save_state_to_buffer(&sameboy, data);
+  }
+  delete[] data;
 
   for(auto n : range(64)) s.array(packet[n].data);
   s.integer(packetSize);

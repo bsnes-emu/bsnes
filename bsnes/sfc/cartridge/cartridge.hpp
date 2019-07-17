@@ -59,7 +59,6 @@ private:
   Markup::Node board;
 
   //cartridge.cpp
-  auto loadGameBoy() -> bool;
   auto loadBSMemory() -> bool;
   auto loadSufamiTurboA() -> bool;
   auto loadSufamiTurboB() -> bool;
@@ -67,7 +66,6 @@ private:
   //load.cpp
   auto loadBoard(string) -> Markup::Node;
   auto loadCartridge(Markup::Node) -> void;
-  auto loadCartridgeGameBoy(Markup::Node) -> void;
   auto loadCartridgeBSMemory(Markup::Node) -> void;
   auto loadCartridgeSufamiTurboA(Markup::Node) -> void;
   auto loadCartridgeSufamiTurboB(Markup::Node) -> void;

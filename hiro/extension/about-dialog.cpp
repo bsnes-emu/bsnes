@@ -62,7 +62,7 @@ auto AboutDialog::show() -> void {
   nameLabel.setForegroundColor({0, 0, 0});
   nameLabel.setFont(Font().setFamily("Georgia").setBold().setSize(36.0));
   nameLabel.setText(state.name ? state.name : Application::name());
-  nameLabel.setVisible((bool)state.name);
+  nameLabel.setVisible((bool)state.name && !(bool)state.logo);
 
   Canvas logoCanvas{&layout, Size{~0, 0}};
   logoCanvas.setCollapsible();
