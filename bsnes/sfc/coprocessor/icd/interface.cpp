@@ -1,18 +1,19 @@
 auto ICD::ppuScanline() -> void {
-  if(ly > 143) return;  //Vblank
-  if((ly & 7) == 0) {
+  if(++writeY == 8) {
     writeBank = (writeBank + 1) & 3;
-    writeAddress = 0;
+    writeY = 0;
   }
+  writeX = 0;
 }
 
 auto ICD::ppuOutput(uint2 color) -> void {
-  uint y = writeAddress / 160;
-  uint x = writeAddress % 160;
-  uint addr = writeBank * 512 + y * 2 + x / 8 * 16;
+  if(writeX >= 160) return; // Unverified behavior
+  if(writeY >= 8) return; // Should never happen
+  
+  uint addr = writeBank * 512 + writeY * 2 + writeX / 8 * 16;
   output[addr + 0] = (output[addr + 0] << 1) | !!(color & 1);
   output[addr + 1] = (output[addr + 1] << 1) | !!(color & 2);
-  writeAddress = (writeAddress + 1) % 1280;
+  writeX++;
 }
 
 auto ICD::apuOutput(float left, float right) -> void {

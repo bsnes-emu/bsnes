@@ -61,7 +61,8 @@ private:
   uint readBank;
   uint readAddress;
   uint writeBank;
-  uint writeAddress;
+  uint writeX;
+  uint writeY;
 
   struct Information {
     uint pathID = 0;
@@ -73,7 +74,7 @@ public:
   //as the offsets of all member variables will be wrong compared to what the C SameBoy code expects.
   GB_gameboy_t sameboy;
   uint32_t bitmap[160 * 144];
-  uint ly = 0;
+  uint8_t ly = 0;
 };
 
 extern ICD icd;

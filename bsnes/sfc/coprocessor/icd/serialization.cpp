@@ -38,5 +38,6 @@ auto ICD::serialize(serializer& s) -> void {
   s.integer(readBank);
   s.integer(readAddress);
   s.integer(writeBank);
-  s.integer(writeAddress);
+  s.integer(writeX);
+  s.integer(writeY);
 }

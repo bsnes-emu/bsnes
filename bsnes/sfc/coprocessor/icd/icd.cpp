@@ -16,7 +16,6 @@ namespace SameBoy {
 
   static auto vreset(GB_gameboy_t*) -> void {
     icd.ly = 0;
-    icd.ppuScanline();
   }
 
   static auto icd_pixel(GB_gameboy_t*, uint8_t pixel) -> void {
@@ -122,7 +121,8 @@ auto ICD::power() -> void {
   readBank = 0;
   readAddress = 0;
   writeBank = 0;
-  writeAddress = 0;
+  writeX = 0;
+  writeY = 0;
 
   packetSize = 0;
   joypID = 3;
@@ -148,7 +148,8 @@ auto ICD::reset() -> void {
   readBank = 0;
   readAddress = 0;
   writeBank = 0;
-  writeAddress = 0;
+  writeX = 0;
+  writeY = 0;
 
   packetSize = 0;
   joypID = 3;
