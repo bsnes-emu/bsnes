@@ -1,4 +1,4 @@
-flags += -DGB_INTERNAL -Wno-multichar -Dtypeof=__typeof__
+flags += -DGB_INTERNAL -Wno-multichar
 options += -I../sameboy
 
 objects += gb-apu gb-camera gb-debugger gb-display gb-gb gb-joypad gb-mbc

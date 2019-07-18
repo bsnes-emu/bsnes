@@ -1,5 +1,7 @@
 #ifndef GB_h
 #define GB_h
+#define typeof __typeof__
+#define _XOPEN_SOURCE 500
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -277,7 +279,7 @@ typedef struct {
 
 /* We make sure bool is 1 for cross-platform save state compatibility. */
 /* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
-_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
+//_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
 #ifdef GB_INTERNAL
 struct GB_gameboy_s {

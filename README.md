@@ -1,49 +1,63 @@
-The official bsnes repository
-=============================
+bsnes
+=====
 
-bsnes emulates the Super Famicom and Super Nintendo consoles,
-including various peripherals,
-allowing you to play classic games on a modern general-purpose computer.
+bsnes is a multi-platform Super Nintendo (Super Famicom) emulator that focuses
+on performance, features, and ease of use.
 
-The name "bsnes" originally referred to a standalone SNES emulator.
-Later, bsnes added support for other classic game consoles,
-then in v091 it was renamed "higan".
-higan still exists, and still includes SNES emulation,
-but for people who don't want or need all the other emulators,
-as of v107 the SNES emulation is once again
-available on its own as "bsnes".
+bsnes currently enjoys 100% known, bug-free compatibility with the entire SNES
+library when configured to its most accurate settings.
 
-Basically,
-apart from `.gitignore` files,
-anything in the
-[bsnes](bsnes/),
-[hiro](hiro/),
-[icarus](icarus/),
-[libco](libco/),
-[nall](nall/),
-[ruby](ruby/),
-or [shaders](shaders/)
-directories should be exactly as it appeared in official releases.
-Everything else has been added for various reasons.
+Development
+-----------
 
-This repository shares history
-with [the official higan repo](https://github.com/byuu/higan)
-so you can trace bsnes' development
-all the way back to 2010.
-With [the bsnes history repo](https://gitlab.com/higan/bsnes-history),
-you can trace development back to the earliest surviving releases.
+Git is used for the development of new releases, and represents a staging
+environment. As bsnes is rather mature, things should generally be quite stable.
+However, bugs will exist, regressions will occur, so proceed at your own risk.
 
-Official bsnes resources
-------------------------
+If stability is required, please download the latest stable release from the
+[official website](https://bsnes.byuu.org)
 
-  - [Official homepage](https://byuu.org/emulation/bsnes/)
-  - [Official git repo](https://github.com/byuu/bsnes)
+Unique Features
+---------------
 
-Unofficial bsnes resources
---------------------------
+  - True Super Game Boy emulation (using the SameBoy core by Lior Halphon)
+  - HD mode 7 graphics with optional supersampling (by DerKoun)
+  - Low-level emulation of SNES coprocessors (DSP-n, ST-n, Cx4)
+  - Multi-threaded PPU graphics renderer
+  - Speed mode settings which retain smooth audio output (50%, 75%, 100%, 150%, 200%)
+  - Built-in games database with thousands of game entries
+  - Built-in cheat code database for hundreds of popular games (by mightymo)
+  - Built-in save state manager with screenshot previews and naming capabilities
+  - Support for ASIO low-latency audio
+  - Customizable per-byte game mappings to support any cartridges, including prototype games
+  - 7-zip decompression support
+  - Extensive Satellaview emulation, including BS Memory flash write and wear-leveling emulation
+  - 30-bit color output support (where supported)
 
-  - [Unofficial forum](https://helmet.kafuka.org/bboard/)
-  - [Latest WIP build for Windows][wipwin]
+Standard Features
+-----------------
 
+  - MSU1 support
+  - BPS and IPS soft-patching support
+  - Save states
+  - OpenGL multi-pass pixel shaders
+  - Built-in software filters including HQ2x (by MaxSt) and snes_ntsc (by blargg)
+  - Adaptive sync and dynamic rate control for perfect audio/video synchronization
+  - Just-in-time input polling for minimal input latency
+  - Support for Direct3D exclusive mode video
+  - Support for WASAPI exclusive mode audio
+  - Periodic auto-saving of game saves
+  - Undo states to revert any accidental save state loads
+  - Auto-saving of states when unloading games, and auto-resuming of states when reloading games
+  - Sprite limit disable support
+  - Cubic audio interpolation support
+  - Optional high-level emulation of SNES coprocessors
+  - SuperFX overclocking of up to 800%
+  - Frame advance support
+  - Screenshot support
 
-[wipwin]: https://gitlab.com/higan/higan/-/jobs/artifacts/bsnes-v107/download?job=higan-windows-x86_64-binaries
+Links
+-----
+
+  - [Official website](https://bsnes.byuu.org)
+  - [Official git repository](https://github.com/byuu/bsnes)
