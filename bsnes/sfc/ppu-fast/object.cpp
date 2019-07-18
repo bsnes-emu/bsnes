@@ -1,19 +1,19 @@
-auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
+auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
   if(!self.aboveEnable && !self.belowEnable) return;
 
-  array<bool[256]> windowAbove;
-  array<bool[256]> windowBelow;
+  bool windowAbove[256];
+  bool windowBelow[256];
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
   uint itemCount = 0;
   uint tileCount = 0;
-  for(auto n : range(ppufast.ItemLimit)) items[n].valid = false;
-  for(auto n : range(ppufast.TileLimit)) tiles[n].valid = false;
+  for(auto n : range(ppu.ItemLimit)) items[n].valid = false;
+  for(auto n : range(ppu.TileLimit)) tiles[n].valid = false;
 
   for(auto n : range(128)) {
     ObjectItem item{true, self.first + n};
-    const auto& object = ppufast.objects[item.index];
+    const auto& object = ppu.objects[item.index];
 
     if(object.size == 0) {
       static const uint widths[]  = { 8,  8,  8, 16, 16, 32, 16, 16};
@@ -33,16 +33,16 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
     if((y >= object.y && y < object.y + height)
     || (object.y + height >= 256 && y < (object.y + height & 255))
     ) {
-      if(itemCount++ >= ppufast.ItemLimit) break;
+      if(itemCount++ >= ppu.ItemLimit) break;
       items[itemCount - 1] = item;
     }
   }
 
-  for(int n : reverse(range(ppufast.ItemLimit))) {
+  for(int n : reverse(range(ppu.ItemLimit))) {
     const auto& item = items[n];
     if(!item.valid) continue;
 
-    const auto& object = ppufast.objects[item.index];
+    const auto& object = ppu.objects[item.index];
     uint tileWidth = item.width >> 3;
     int x = object.x;
     int y = this->y - object.y & 0xff;
@@ -59,7 +59,7 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
     }
 
     if(self.interlace) {
-      y = !object.vflip ? y + ppufast.field() : y - ppufast.field();
+      y = !object.vflip ? y + ppu.field() : y - ppu.field();
     }
 
     x &= 511;
@@ -85,22 +85,22 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
       uint address = tiledataAddress + ((characterY + (characterX + mirrorX & 15)) << 4);
       tile.number = address >> 4;
 
-      if(tileCount++ >= ppufast.TileLimit) break;
+      if(tileCount++ >= ppu.TileLimit) break;
       tiles[tileCount - 1] = tile;
     }
   }
 
-  ppufast.io.obj.rangeOver |= itemCount > ppufast.ItemLimit;
-  ppufast.io.obj.timeOver  |= tileCount > ppufast.TileLimit;
+  ppu.io.obj.rangeOver |= itemCount > ppu.ItemLimit;
+  ppu.io.obj.timeOver  |= tileCount > ppu.TileLimit;
 
-  uint8 palette[256] = {};
-  uint8 priority[256] = {};
+  uint8_t palette[256] = {};
+  uint8_t priority[256] = {};
 
-  for(uint n : range(ppufast.TileLimit)) {
+  for(uint n : range(ppu.TileLimit)) {
     const auto& tile = tiles[n];
     if(!tile.valid) continue;
 
-    auto tiledata = ppufast.tilecache[TileMode::BPP4] + (tile.number << 6) + ((tile.y & 7) << 3);
+    auto tiledata = ppu.tilecache[TileMode::BPP4] + (tile.number << 6) + ((tile.y & 7) << 3);
     uint tileX = tile.x;
     uint mirrorX = tile.hflip ? 7 : 0;
     for(uint x : range(8)) {
@@ -123,16 +123,16 @@ auto PPUfast::Line::renderObject(PPUfast::IO::Object& self) -> void {
   }
 }
 
-auto PPUfast::oamAddressReset() -> void {
+auto PPU::oamAddressReset() -> void {
   io.oamAddress = io.oamBaseAddress;
   oamSetFirstObject();
 }
 
-auto PPUfast::oamSetFirstObject() -> void {
-  io.obj.first = !io.oamPriority ? 0 : uint(io.oamAddress >> 2);
+auto PPU::oamSetFirstObject() -> void {
+  io.obj.first = !io.oamPriority ? 0 : io.oamAddress >> 2;
 }
 
-auto PPUfast::readObject(uint10 address) -> uint8 {
+auto PPU::readObject(uint10 address) -> uint8 {
   if(!(address & 0x200)) {
     uint n = address >> 2;  //object#
     address &= 3;
@@ -161,7 +161,7 @@ auto PPUfast::readObject(uint10 address) -> uint8 {
   }
 }
 
-auto PPUfast::writeObject(uint10 address, uint8 data) -> void {
+auto PPU::writeObject(uint10 address, uint8 data) -> void {
   if(!(address & 0x200)) {
     uint n = address >> 2;  //object#
     address &= 3;

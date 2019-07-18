@@ -1,11 +1,11 @@
-auto PPUfast::Line::renderMode7(PPUfast::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   //EXTBG is only really used by games to give the mode 7 layer two priority levels
   //especially with HD mode 7, it's just wasteful to render BG1 just to be overwritten by BG2
   if(io.extbg && source == Source::BG1) return;
 
   //HD mode 7 support
-  if(!ppufast.hdMosaic() || !self.mosaicEnable || !io.mosaicSize) {
-    if(ppufast.hdScale() > 1) return renderMode7HD(self, source);
+  if(!ppu.hdMosaic() || !self.mosaicEnable || !io.mosaicSize) {
+    if(ppu.hdScale() > 1) return renderMode7HD(self, source);
   }
 
   int Y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
@@ -29,8 +29,8 @@ auto PPUfast::Line::renderMode7(PPUfast::IO::Background& self, uint source) -> v
   int originX = (a * clip(hoffset - hcenter) & ~63) + (b * clip(voffset - vcenter) & ~63) + (b * y & ~63) + (hcenter << 8);
   int originY = (c * clip(hoffset - hcenter) & ~63) + (d * clip(voffset - vcenter) & ~63) + (d * y & ~63) + (vcenter << 8);
 
-  array<bool[256]> windowAbove;
-  array<bool[256]> windowBelow;
+  bool windowAbove[256];
+  bool windowBelow[256];
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
@@ -43,8 +43,8 @@ auto PPUfast::Line::renderMode7(PPUfast::IO::Background& self, uint source) -> v
     bool outOfBounds = (pixelX | pixelY) & ~1023;
     uint15 tileAddress = tileY * 128 + tileX;
     uint15 paletteAddress = ((pixelY & 7) << 3) + (pixelX & 7);
-    uint8 tile = io.mode7.repeat == 3 && outOfBounds ? 0 : (ppufast.vram[tileAddress] & 0xff);
-    uint8 palette = io.mode7.repeat == 2 && outOfBounds ? 0 : (ppufast.vram[paletteAddress + (tile << 6)] >> 8);
+    uint8_t tile = io.mode7.repeat == 3 && outOfBounds ? 0 : ppu.vram[tileAddress] >> 0;
+    uint8_t palette = io.mode7.repeat == 2 && outOfBounds ? 0 : ppu.vram[paletteAddress + (tile << 6)] >> 8;
 
     uint priority;
     if(source == Source::BG1) {

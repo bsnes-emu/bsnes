@@ -1,29 +1,29 @@
-uint PPUfast::Line::start = 0;
-uint PPUfast::Line::count = 0;
+uint PPU::Line::start = 0;
+uint PPU::Line::count = 0;
 
-auto PPUfast::Line::flush() -> void {
+auto PPU::Line::flush() -> void {
   if(Line::count) {
     #pragma omp parallel for if(Line::count >= 8)
     for(uint y = 0; y < Line::count; y++) {
-      ppufast.lines[Line::start + y].render();
+      ppu.lines[Line::start + y].render();
     }
     Line::start = 0;
     Line::count = 0;
   }
 }
 
-auto PPUfast::Line::render() -> void {
-  uint y = this->y + (!ppufast.latch.overscan ? 7 : 0);
+auto PPU::Line::render() -> void {
+  uint y = this->y + (!ppu.latch.overscan ? 7 : 0);
 
-  auto hd = ppufast.hd();
-  auto ss = ppufast.ss();
-  auto scale = ppufast.hdScale();
-  auto output = ppufast.output + (!hd
-  ? (y * 1024 + (ppufast.interlace() && ppufast.field() ? 512 : 0))
+  auto hd = ppu.hd();
+  auto ss = ppu.ss();
+  auto scale = ppu.hdScale();
+  auto output = ppu.output + (!hd
+  ? (y * 1024 + (ppu.interlace() && ppu.field() ? 512 : 0))
   : (y * 256 * scale * scale)
   );
   auto width = (!hd
-  ? (!ppufast.hires() ? 256 : 512)
+  ? (!ppu.hires() ? 256 : 512)
   : (256 * scale * scale));
 
   if(io.displayDisable) {
@@ -33,9 +33,9 @@ auto PPUfast::Line::render() -> void {
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   auto aboveColor = cgram[0];
-  auto belowColor = hires ? cgram[0] : (uint16)io.col.fixedColor;
-  uint xa =  (hd || ss) && ppufast.interlace() && ppufast.field() ? 256 * scale * scale / 2 : 0;
-  uint xb = !(hd || ss) ? 256 : ppufast.interlace() && !ppufast.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
+  auto belowColor = hires ? cgram[0] : (uint16_t)io.col.fixedColor;
+  uint xa =  (hd || ss) && ppu.interlace() && ppu.field() ? 256 * scale * scale / 2 : 0;
+  uint xb = !(hd || ss) ? 256 : ppu.interlace() && !ppu.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {
     above[x] = {Source::COL, 0, aboveColor};
     below[x] = {Source::COL, 0, belowColor};
@@ -49,7 +49,7 @@ auto PPUfast::Line::render() -> void {
   renderWindow(io.col.window, io.col.window.aboveMask, windowAbove);
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 
-  auto luma = ppufast.lightTable[io.displayBrightness];
+  auto luma = ppu.lightTable[io.displayBrightness];
   uint curr = 0, prev = 0;
   if(hd) for(uint x : range(256 * scale * scale)) {
     *output++ = luma[pixel(x / scale & 255, above[x], below[x])];
@@ -72,7 +72,7 @@ auto PPUfast::Line::render() -> void {
   }
 }
 
-auto PPUfast::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16 {
+auto PPU::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16_t {
   if(!windowAbove[x]) above.color = 0x0000;
   if(!windowBelow[x]) return above.color;
   if(!io.col.enable[above.source]) return above.color;
@@ -80,7 +80,7 @@ auto PPUfast::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16 {
   return blend(above.color, below.color, io.col.halve && windowAbove[x] && below.source != Source::COL);
 }
 
-auto PPUfast::Line::blend(uint x, uint y, bool halve) const -> uint16 {
+auto PPU::Line::blend(uint x, uint y, bool halve) const -> uint16_t {
   if(!io.col.mathMode) {  //add
     if(!halve) {
       uint sum = x + y;
@@ -100,7 +100,7 @@ auto PPUfast::Line::blend(uint x, uint y, bool halve) const -> uint16 {
   }
 }
 
-auto PPUfast::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint16 {
+auto PPU::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint16_t {
   //paletteIndex = bgr
   //paletteColor = BBGGGRRR
   //output       = 0 BBb00 GGGg0 RRRr0
@@ -109,25 +109,25 @@ auto PPUfast::Line::directColor(uint paletteIndex, uint paletteColor) const -> u
        + (paletteColor << 7 & 0x6000) + (paletteIndex << 10 & 0x1000);  //B
 }
 
-auto PPUfast::Line::plotAbove(uint x, uint source, uint priority, uint color) -> void {
-  if(ppufast.hd()) return plotHD(above, x, source, priority, color, false, false);
+auto PPU::Line::plotAbove(uint x, uint source, uint priority, uint color) -> void {
+  if(ppu.hd()) return plotHD(above, x, source, priority, color, false, false);
   if(priority > above[x].priority) above[x] = {source, priority, color};
 }
 
-auto PPUfast::Line::plotBelow(uint x, uint source, uint priority, uint color) -> void {
-  if(ppufast.hd()) return plotHD(below, x, source, priority, color, false, false);
+auto PPU::Line::plotBelow(uint x, uint source, uint priority, uint color) -> void {
+  if(ppu.hd()) return plotHD(below, x, source, priority, color, false, false);
   if(priority > below[x].priority) below[x] = {source, priority, color};
 }
 
 //todo: name these variables more clearly ...
-auto PPUfast::Line::plotHD(Pixel* pixel, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void {
-  auto scale = ppufast.hdScale();
+auto PPU::Line::plotHD(Pixel* pixel, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void {
+  auto scale = ppu.hdScale();
   int xss = hires && subpixel ? scale / 2 : 0;
-  int ys = ppufast.interlace() && ppufast.field() ? scale / 2 : 0;
+  int ys = ppu.interlace() && ppu.field() ? scale / 2 : 0;
   if(priority > pixel[x * scale + xss + ys * 256 * scale].priority) {
     Pixel p = {source, priority, color};
     int xsm = hires && !subpixel ? scale / 2 : scale;
-    int ysm = ppufast.interlace() && !ppufast.field() ? scale / 2 : scale;
+    int ysm = ppu.interlace() && !ppu.field() ? scale / 2 : scale;
     for(int xs = xss; xs < xsm; xs++) {
       pixel[x * scale + xs + ys * 256 * scale] = p;
     }

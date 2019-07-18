@@ -50,7 +50,6 @@ private:
   } display;
 
   auto scanline() -> void;
-  auto frame() -> void;
   auto refresh() -> void;
 
   struct {

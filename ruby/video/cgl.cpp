@@ -162,7 +162,7 @@ private:
 }
 
 -(void) reshape {
-  video->output();
+  video->output(0, 0);
 }
 
 @end

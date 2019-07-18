@@ -4,7 +4,10 @@ namespace SuperFamicom {
 
 PPU& ppubase = ppu;
 
-PPUfast ppufast;
+#define PPU PPUfast
+#define ppu ppufast
+
+PPU ppu;
 #include "io.cpp"
 #include "line.cpp"
 #include "background.cpp"
@@ -14,18 +17,20 @@ PPUfast ppufast;
 #include "window.cpp"
 #include "serialization.cpp"
 
-auto PPUfast::interlace() const -> bool { return ppubase.display.interlace; }
-auto PPUfast::overscan() const -> bool { return ppubase.display.overscan; }
-auto PPUfast::vdisp() const -> uint { return ppubase.display.vdisp; }
-auto PPUfast::hires() const -> bool { return latch.hires; }
-auto PPUfast::hd() const -> bool { return latch.hd; }
-auto PPUfast::ss() const -> bool { return latch.ss; }
-auto PPUfast::hdScale() const -> uint { return configuration.hacks.ppu.mode7.scale; }
-auto PPUfast::hdPerspective() const -> bool { return configuration.hacks.ppu.mode7.perspective; }
-auto PPUfast::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.supersample; }
-auto PPUfast::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
+auto PPU::interlace() const -> bool { return ppubase.display.interlace; }
+auto PPU::overscan() const -> bool { return ppubase.display.overscan; }
+auto PPU::vdisp() const -> uint { return ppubase.display.vdisp; }
+auto PPU::hires() const -> bool { return latch.hires; }
+auto PPU::hd() const -> bool { return latch.hd; }
+auto PPU::ss() const -> bool { return latch.ss; }
+#undef ppu
+auto PPU::hdScale() const -> uint { return configuration.hacks.ppu.mode7.scale; }
+auto PPU::hdPerspective() const -> bool { return configuration.hacks.ppu.mode7.perspective; }
+auto PPU::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.supersample; }
+auto PPU::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
+#define ppu ppufast
 
-PPUfast::PPUfast() {
+PPU::PPU() {
   for(uint l : range(16)) {
     for(uint r : range(32)) {
       for(uint g : range(32)) {
@@ -34,38 +39,38 @@ PPUfast::PPUfast() {
           uint ar = (luma * r + 0.5);
           uint ag = (luma * g + 0.5);
           uint ab = (luma * b + 0.5);
-          lightTable[l][(r << 10) + (g << 5) + b] = (ab << 10) + (ag << 5) + ar;
+          lightTable[l][r << 10 | g << 5 | b << 0] = ab << 10 | ag << 5 | ar << 0;
         }
       }
     }
   }
 
-  tilecache[TileMode::BPP2] = new uint8[4096 * 8 * 8];
-  tilecache[TileMode::BPP4] = new uint8[2048 * 8 * 8];
-  tilecache[TileMode::BPP8] = new uint8[1024 * 8 * 8];
+  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8];
+  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8];
+  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8];
 
-  for(uint y : range(lines.size())) {
+  for(uint y : range(240)) {
     lines[y].y = y;
   }
 }
 
-PPUfast::~PPUfast() {
+PPU::~PPU() {
   delete[] tilecache[TileMode::BPP2];
   delete[] tilecache[TileMode::BPP4];
   delete[] tilecache[TileMode::BPP8];
 }
 
-auto PPUfast::Enter() -> void {
-  while(true) scheduler.synchronize(), ppufast.main();
+auto PPU::Enter() -> void {
+  while(true) scheduler.synchronize(), ppu.main();
 }
 
-auto PPUfast::step(uint clocks) -> void {
+auto PPU::step(uint clocks) -> void {
   tick(clocks);
   Thread::step(clocks);
   synchronize(cpu);
 }
 
-auto PPUfast::main() -> void {
+auto PPU::main() -> void {
   scanline();
 
   if(system.frameCounter == 0) {
@@ -86,7 +91,7 @@ auto PPUfast::main() -> void {
   step(lineclocks() - hcounter());
 }
 
-auto PPUfast::scanline() -> void {
+auto PPU::scanline() -> void {
   if(vcounter() == 0) {
     ppubase.display.interlace = io.interlace;
     ppubase.display.overscan = io.overscan;
@@ -114,7 +119,7 @@ auto PPUfast::scanline() -> void {
   }
 }
 
-auto PPUfast::refresh() -> void {
+auto PPU::refresh() -> void {
   if(system.frameCounter == 0) {
     auto output = this->output;
     uint pitch, width, height;
@@ -148,17 +153,17 @@ auto PPUfast::refresh() -> void {
   if(system.frameCounter++ >= system.frameSkip) system.frameCounter = 0;
 }
 
-auto PPUfast::load() -> bool {
+auto PPU::load() -> bool {
   return true;
 }
 
-auto PPUfast::power(bool reset) -> void {
-  create(Enter, system.cpuFrequency());
+auto PPU::power(bool reset) -> void {
+  Thread::create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint16>(output, 1024 * 960);
 
-  function<auto (uint, uint8) -> uint8> reader{&PPUfast::readIO, this};
-  function<auto (uint, uint8) -> void> writer{&PPUfast::writeIO, this};
+  function<uint8 (uint, uint8)> reader{&PPU::readIO, this};
+  function<void  (uint, uint8)> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   if(!reset) {
@@ -174,6 +179,7 @@ auto PPUfast::power(bool reset) -> void {
   io = {};
   updateVideoMode();
 
+  #undef ppu
   ItemLimit = !configuration.hacks.ppu.noSpriteLimit ? 32 : 128;
   TileLimit = !configuration.hacks.ppu.noSpriteLimit ? 34 : 128;
 

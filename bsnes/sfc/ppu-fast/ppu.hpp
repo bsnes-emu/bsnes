@@ -5,7 +5,9 @@
 //* vertical mosaic coordinates are not exact
 //* (hardware-mod) 128KB VRAM mode not supported
 
-struct PPUfast : Thread, PPUcounter {
+#define PPU PPUfast
+
+struct PPU : Thread, PPUcounter {
   alwaysinline auto interlace() const -> bool;
   alwaysinline auto overscan() const -> bool;
   alwaysinline auto vdisp() const -> uint;
@@ -18,8 +20,8 @@ struct PPUfast : Thread, PPUcounter {
   alwaysinline auto hdMosaic() const -> bool;
 
   //ppu.cpp
-  PPUfast();
-  ~PPUfast();
+  PPU();
+  ~PPU();
 
   static auto Enter() -> void;
   alwaysinline auto step(uint clocks) -> void;
@@ -47,24 +49,24 @@ public:
     bool hd = 0;
     bool ss = 0;
 
-    uint16 vram = 0;
-    uint8 oam = 0;
-    uint8 cgram = 0;
+    uint16_t vram = 0;
+    uint8_t oam = 0;
+    uint8_t cgram = 0;
 
     uint10 oamAddress = 0;
-    uint8 cgramAddress = 0;
+    uint8_t cgramAddress = 0;
 
-    uint8 mode7 = 0;
+    uint8_t mode7 = 0;
     bool counters = 0;
     bool hcounter = 0;  //hdot
     bool vcounter = 0;
 
-    struct PPU {
+    struct PPUstate {
       //serialization.cpp
       auto serialize(serializer&) -> void;
 
-      uint8 mdr = 0;
-      uint8 bgofs = 0;
+      uint8_t mdr = 0;
+      uint8_t bgofs = 0;
     } ppu1, ppu2;
   };
 
@@ -114,10 +116,10 @@ public:
       //serialization.cpp
       auto serialize(serializer&) -> void;
 
-      uint8 oneLeft = 0;
-      uint8 oneRight = 0;
-      uint8 twoLeft = 0;
-      uint8 twoRight = 0;
+      uint8_t oneLeft = 0;
+      uint8_t oneRight = 0;
+      uint8_t twoLeft = 0;
+      uint8_t twoRight = 0;
     } window;
 
     struct WindowLayer {
@@ -200,8 +202,8 @@ public:
     auto serialize(serializer&) -> void;
 
     uint9 x = 0;
-    uint8 y = 0;
-    uint8 character = 0;
+    uint8_t y = 0;
+    uint8_t character = 0;
     bool nameselect = 0;
     bool vflip = 0;
     bool hflip = 0;
@@ -213,16 +215,16 @@ public:
   struct ObjectItem {
     bool valid = 0;
     uint7 index = 0;
-    uint8 width = 0;
-    uint8 height = 0;
+    uint8_t width = 0;
+    uint8_t height = 0;
   };
 
   struct ObjectTile {
     bool valid = 0;
     uint9 x = 0;
-    uint8 y = 0;
+    uint8_t y = 0;
     uint2 priority = 0;
-    uint8 palette = 0;
+    uint8_t palette = 0;
     bool hflip = 0;
     uint11 number = 0;
   };
@@ -235,14 +237,14 @@ public:
 
   //io.cpp
   auto latchCounters() -> void;
-  alwaysinline auto vramAddress() const -> uint15;
+  alwaysinline auto vramAddress() const -> uint;
   alwaysinline auto readVRAM() -> uint16;
-  template<bool Byte> alwaysinline auto writeVRAM(uint8 data) -> void;
+  template<bool Byte> alwaysinline auto writeVRAM(uint8_t data) -> void;
   alwaysinline auto updateTiledata(uint address) -> void;
   alwaysinline auto readOAM(uint10 address) -> uint8;
-  alwaysinline auto writeOAM(uint10 address, uint8 data) -> void;
-  template<bool Byte> alwaysinline auto readCGRAM(uint8 address) -> uint8;
-  alwaysinline auto writeCGRAM(uint8 address, uint15 data) -> void;
+  alwaysinline auto writeOAM(uint10 address, uint8_t data) -> void;
+  template<bool Byte> alwaysinline auto readCGRAM(uint8_t address) -> uint8;
+  alwaysinline auto writeCGRAM(uint8_t address, uint15 data) -> void;
   auto readIO(uint address, uint8 data) -> uint8;
   auto writeIO(uint address, uint8 data) -> void;
   auto updateVideoMode() -> void;
@@ -257,14 +259,14 @@ public:
   Latch latch;
   IO io;
 
-  uint16 vram[32 * 1024] = {};
-  uint16 cgram[256] = {};
+  uint16_t vram[32 * 1024] = {};
+  uint16_t cgram[256] = {};
   Object objects[128] = {};
 
   //[unserialized]
-  uint16 output[2304 * 2160] = {};
-  uint16 lightTable[16][32768] = {};
-  uint8* tilecache[3] = {};  //bitplane -> bitmap tiledata
+  uint16_t output[2304 * 2160] = {};
+  uint16_t lightTable[16][32768] = {};
+  uint8_t* tilecache[3] = {};  //bitplane -> bitmap tiledata
   uint ItemLimit = 0;
   uint TileLimit = 0;
 
@@ -272,51 +274,51 @@ public:
     //line.cpp
     static auto flush() -> void;
     auto render() -> void;
-    auto pixel(uint x, Pixel above, Pixel below) const -> uint16;
-    auto blend(uint x, uint y, bool halve) const -> uint16;
-    alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint16;
+    auto pixel(uint x, Pixel above, Pixel below) const -> uint16_t;
+    auto blend(uint x, uint y, bool halve) const -> uint16_t;
+    alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint16_t;
     alwaysinline auto plotAbove(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotBelow(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotHD(Pixel*, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void;
 
     //background.cpp
-    auto renderBackground(PPUfast::IO::Background&, uint source) -> void;
-    auto getTile(PPUfast::IO::Background&, uint hoffset, uint voffset) -> uint;
+    auto renderBackground(PPU::IO::Background&, uint source) -> void;
+    auto getTile(PPU::IO::Background&, uint hoffset, uint voffset) -> uint;
 
     //mode7.cpp
-    auto renderMode7(PPUfast::IO::Background&, uint source) -> void;
+    auto renderMode7(PPU::IO::Background&, uint source) -> void;
 
     //mode7hd.cpp
-    auto renderMode7HD(PPUfast::IO::Background&, uint source) -> void;
+    auto renderMode7HD(PPU::IO::Background&, uint source) -> void;
     alwaysinline auto lerp(float pa, float va, float pb, float vb, float pr) -> float;
 
     //object.cpp
-    auto renderObject(PPUfast::IO::Object&) -> void;
+    auto renderObject(PPU::IO::Object&) -> void;
 
     //window.cpp
-    auto renderWindow(PPUfast::IO::WindowLayer&, bool, array<bool[256]>&) -> void;
-    auto renderWindow(PPUfast::IO::WindowColor&, uint, array<bool[256]>&) -> void;
+    auto renderWindow(PPU::IO::WindowLayer&, bool enable, bool output[256]) -> void;
+    auto renderWindow(PPU::IO::WindowColor&, uint mask,   bool output[256]) -> void;
 
     //[unserialized]
     uint9 y;  //constant
 
     IO io;
-    array<uint16[256]> cgram;
+    uint16_t cgram[256];
 
-    array<ObjectItem[128]> items;  //32 on real hardware
-    array<ObjectTile[128]> tiles;  //34 on real hardware; 1024 max (128 * 64-width tiles)
+    ObjectItem items[128];  //32 on real hardware
+    ObjectTile tiles[128];  //34 on real hardware; 1024 max (128 * 64-width tiles)
 
     Pixel above[256 * 9 * 9];
     Pixel below[256 * 9 * 9];
 
-    array<bool[256]> windowAbove;
-    array<bool[256]> windowBelow;
+    bool windowAbove[256];
+    bool windowBelow[256];
 
     //flush()
     static uint start;
     static uint count;
   };
-  array<Line[240]> lines;
+  Line lines[240];
 
   //used to help detect when the video output size changes between frames to clear overscan area.
   struct Frame {
@@ -326,4 +328,6 @@ public:
   } frame;
 };
 
-extern PPUfast ppufast;
+extern PPU ppufast;
+
+#undef PPU

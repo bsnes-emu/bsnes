@@ -62,7 +62,7 @@ auto PPU::main() -> void {
   bg3.begin();
   bg4.begin();
 
-  if(vcounter() <= 239) {
+  if(vcounter() < vdisp()) {
     for(int pixel = -7; pixel <= 255; pixel++) {
       bg1.run(1);
       bg2.run(1);
@@ -210,16 +210,17 @@ auto PPU::power(bool reset) -> void {
   screen.power();
 
   updateVideoMode();
-  frame();
 }
 
 auto PPU::scanline() -> void {
   if(vcounter() == 0) {
-    frame();
+    display.interlace = io.interlace;
+    display.overscan = io.overscan;
     bg1.frame();
     bg2.frame();
     bg3.frame();
     bg4.frame();
+    obj.frame();
   }
 
   bg1.scanline();
@@ -233,12 +234,6 @@ auto PPU::scanline() -> void {
   if(vcounter() == 240) {
     scheduler.exit(Scheduler::Event::Frame);
   }
-}
-
-auto PPU::frame() -> void {
-  obj.frame();
-  display.interlace = io.interlace;
-  display.overscan = io.overscan;
 }
 
 auto PPU::refresh() -> void {

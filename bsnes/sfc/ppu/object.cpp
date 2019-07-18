@@ -26,7 +26,7 @@ auto PPU::Object::scanline() -> void {
   auto oamTile = t.tile[t.active];
 
   if(t.y == ppu.vdisp() && !ppu.io.displayDisable) addressReset();
-  if(t.y >= ppu.vdisp() - 1) return;
+  if(t.y >= ppu.vdisp() - 1 || ppu.io.displayDisable) return;
 
   for(auto n : range(32)) oamItem[n].valid = false;
   for(auto n : range(34)) oamTile[n].valid = false;

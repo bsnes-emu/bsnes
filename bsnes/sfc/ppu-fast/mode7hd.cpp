@@ -1,6 +1,6 @@
-auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint source) -> void {
   const bool extbg = source == Source::BG2;
-  const uint scale = ppufast.hdScale();
+  const uint scale = ppu.hdScale();
 
   Pixel  pixel;
   Pixel* above = &this->above[-1];
@@ -9,10 +9,10 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
   //find the first and last scanline for interpolation
   int y_a = y;
   int y_b = y;
-  #define isLineMode7(n) (ppufast.lines[n].io.bg1.tileMode == TileMode::Mode7 && ( \
-    (ppufast.lines[n].io.bg1.aboveEnable || ppufast.lines[n].io.bg1.belowEnable) \
+  #define isLineMode7(n) (ppu.lines[n].io.bg1.tileMode == TileMode::Mode7 && ( \
+    (ppu.lines[n].io.bg1.aboveEnable || ppu.lines[n].io.bg1.belowEnable) \
   ))
-  if(ppufast.hdPerspective()) {
+  if(ppu.hdPerspective()) {
     while(y_a >   1 && isLineMode7(y_a)) y_a--; y_a += 1;
     while(y_b < 239 && isLineMode7(y_b)) y_b++; y_b -= 8;
   } else {
@@ -21,13 +21,13 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
   }
   #undef isLineMode7
 
-  Line line_a = ppufast.lines[y_a];
+  Line line_a = ppu.lines[y_a];
   float a_a = (int16)line_a.io.mode7.a;
   float b_a = (int16)line_a.io.mode7.b;
   float c_a = (int16)line_a.io.mode7.c;
   float d_a = (int16)line_a.io.mode7.d;
 
-  Line line_b = ppufast.lines[y_b];
+  Line line_b = ppu.lines[y_b];
   float a_b = (int16)line_b.io.mode7.a;
   float b_b = (int16)line_b.io.mode7.b;
   float c_b = (int16)line_b.io.mode7.c;
@@ -43,8 +43,8 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
     y_b = 255 - y_b;
   }
 
-  array<bool[256]> windowAbove;
-  array<bool[256]> windowBelow;
+  bool windowAbove[256];
+  bool windowBelow[256];
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
@@ -80,8 +80,8 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
 
         //only compute color again when coordinates have changed
         if(pixelX != pixelXp || pixelY != pixelYp) {
-          uint tile    = io.mode7.repeat == 3 && ((pixelX | pixelY) & ~1023) ? 0 : (ppufast.vram[(pixelY >> 3 & 127) * 128 + (pixelX >> 3 & 127)] & 0xff);
-          uint palette = io.mode7.repeat == 2 && ((pixelX | pixelY) & ~1023) ? 0 : (ppufast.vram[(((pixelY & 7) << 3) + (pixelX & 7)) + (tile << 6)] >> 8);
+          uint tile    = io.mode7.repeat == 3 && ((pixelX | pixelY) & ~1023) ? 0 : (ppu.vram[(pixelY >> 3 & 127) * 128 + (pixelX >> 3 & 127)] & 0xff);
+          uint palette = io.mode7.repeat == 2 && ((pixelX | pixelY) & ~1023) ? 0 : (ppu.vram[(((pixelY & 7) << 3) + (pixelX & 7)) + (tile << 6)] >> 8);
 
           uint priority;
           if(!extbg) {
@@ -110,7 +110,7 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
     }
   }
 
-  if(ppufast.ss()) {
+  if(ppu.ss()) {
     uint divisor = scale * scale;
     for(uint p : range(256)) {
       uint ab = 0, bb = 0;
@@ -139,7 +139,7 @@ auto PPUfast::Line::renderMode7HD(PPUfast::IO::Background& self, uint source) ->
 }
 
 //interpolation and extrapolation
-auto PPUfast::Line::lerp(float pa, float va, float pb, float vb, float pr) -> float {
+auto PPU::Line::lerp(float pa, float va, float pb, float vb, float pr) -> float {
   if(va == vb || pr == pa) return va;
   if(pr == pb) return vb;
   return va + (vb - va) / (pb - pa) * (pr - pa);

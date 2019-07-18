@@ -1,10 +1,10 @@
-auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void {
   if(!self.aboveEnable && !self.belowEnable) return;
   if(self.tileMode == TileMode::Mode7) return renderMode7(self, source);
   if(self.tileMode == TileMode::Inactive) return;
 
-  array<bool[256]> windowAbove;
-  array<bool[256]> windowBelow;
+  bool windowAbove[256];
+  bool windowBelow[256];
   renderWindow(self.window, self.window.aboveEnable, windowAbove);
   renderWindow(self.window, self.window.belowEnable, windowBelow);
 
@@ -23,13 +23,13 @@ auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source)
 
   uint hscroll = self.hoffset;
   uint vscroll = self.voffset;
-  uint hmask = (width << self.tileSize << bit1(self.screenSize,0)) - 1;
-  uint vmask = (width << self.tileSize << bit1(self.screenSize,1)) - 1;
+  uint hmask = (width << self.tileSize << !!(self.screenSize & 1)) - 1;
+  uint vmask = (width << self.tileSize << !!(self.screenSize & 2)) - 1;
 
   uint y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
   if(hires) {
     hscroll <<= 1;
-    if(io.interlace) y = y << 1 | ppufast.field();
+    if(io.interlace) y = y << 1 | ppu.field();
   }
 
   uint mosaicCounter = 1;
@@ -79,7 +79,7 @@ auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source)
     if(tileHeight == 4 && (bool(voffset & 8) ^ bool(mirrorY))) tileNumber += 16;
     tileNumber = (tileNumber & 0x03ff) + tiledataIndex & tileMask;
 
-    auto tiledata = ppufast.tilecache[self.tileMode] + (tileNumber << 6);
+    auto tiledata = ppu.tilecache[self.tileMode] + (tileNumber << 6);
     tiledata += (voffset & 7 ^ mirrorY) << 3;
 
     for(uint tileX = 0; tileX < 8; tileX++, x++) {
@@ -101,7 +101,7 @@ auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source)
         if(self.belowEnable && !windowBelow[x]) plotBelow(x, source, mosaicPriority, mosaicColor);
       } else {
         uint X = x >> 1;
-        if(!ppufast.hd()) {
+        if(!ppu.hd()) {
           if(x & 1) {
             if(self.aboveEnable && !windowAbove[X]) plotAbove(X, source, mosaicPriority, mosaicColor);
           } else {
@@ -116,17 +116,16 @@ auto PPUfast::Line::renderBackground(PPUfast::IO::Background& self, uint source)
   }
 }
 
-auto PPUfast::Line::getTile(PPUfast::IO::Background& self, uint hoffset, uint voffset) -> uint {
+auto PPU::Line::getTile(PPU::IO::Background& self, uint hoffset, uint voffset) -> uint {
   bool hires = io.bgMode == 5 || io.bgMode == 6;
   uint tileHeight = 3 + self.tileSize;
   uint tileWidth = !hires ? tileHeight : 4;
-  uint screenX = (self.screenSize & 1) ? 32 << 5 : 0;
-  uint screenY = (self.screenSize & 2) ? 32 << 5 + (self.screenSize & 1) : 0;
+  uint screenX = self.screenSize & 1 ? 32 << 5 : 0;
+  uint screenY = self.screenSize & 2 ? 32 << 5 + (self.screenSize & 1) : 0;
   uint tileX = hoffset >> tileWidth;
   uint tileY = voffset >> tileHeight;
   uint offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);
   if(tileX & 0x20) offset += screenX;
   if(tileY & 0x20) offset += screenY;
-  uint15 address = self.screenAddress + offset;
-  return ppufast.vram[address];
+  return ppu.vram[self.screenAddress + offset & 0x7fff];
 }

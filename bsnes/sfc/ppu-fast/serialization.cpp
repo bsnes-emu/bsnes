@@ -1,4 +1,4 @@
-auto PPUfast::serialize(serializer& s) -> void {
+auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
   PPUcounter::serialize(s);
 
@@ -13,7 +13,7 @@ auto PPUfast::serialize(serializer& s) -> void {
   Line::count = 0;
 }
 
-auto PPUfast::Latch::serialize(serializer& s) -> void {
+auto PPU::Latch::serialize(serializer& s) -> void {
   s.integer(interlace);
   s.integer(overscan);
   s.integer(hires);
@@ -32,12 +32,12 @@ auto PPUfast::Latch::serialize(serializer& s) -> void {
   ppu2.serialize(s);
 }
 
-auto PPUfast::Latch::PPU::serialize(serializer& s) -> void {
+auto PPU::Latch::PPUstate::serialize(serializer& s) -> void {
   s.integer(mdr);
   s.integer(bgofs);
 }
 
-auto PPUfast::IO::serialize(serializer& s) -> void {
+auto PPU::IO::serialize(serializer& s) -> void {
   s.integer(displayDisable);
   s.integer(displayBrightness);
   s.integer(oamBaseAddress);
@@ -69,7 +69,7 @@ auto PPUfast::IO::serialize(serializer& s) -> void {
   col.serialize(s);
 }
 
-auto PPUfast::IO::Mode7::serialize(serializer& s) -> void {
+auto PPU::IO::Mode7::serialize(serializer& s) -> void {
   s.integer(hflip);
   s.integer(vflip);
   s.integer(repeat);
@@ -83,14 +83,14 @@ auto PPUfast::IO::Mode7::serialize(serializer& s) -> void {
   s.integer(voffset);
 }
 
-auto PPUfast::IO::Window::serialize(serializer& s) -> void {
+auto PPU::IO::Window::serialize(serializer& s) -> void {
   s.integer(oneLeft);
   s.integer(oneRight);
   s.integer(twoLeft);
   s.integer(twoRight);
 }
 
-auto PPUfast::IO::WindowLayer::serialize(serializer& s) -> void {
+auto PPU::IO::WindowLayer::serialize(serializer& s) -> void {
   s.integer(oneEnable);
   s.integer(oneInvert);
   s.integer(twoEnable);
@@ -100,7 +100,7 @@ auto PPUfast::IO::WindowLayer::serialize(serializer& s) -> void {
   s.integer(belowEnable);
 }
 
-auto PPUfast::IO::WindowColor::serialize(serializer& s) -> void {
+auto PPU::IO::WindowColor::serialize(serializer& s) -> void {
   s.integer(oneEnable);
   s.integer(oneInvert);
   s.integer(twoEnable);
@@ -110,7 +110,7 @@ auto PPUfast::IO::WindowColor::serialize(serializer& s) -> void {
   s.integer(belowMask);
 }
 
-auto PPUfast::IO::Background::serialize(serializer& s) -> void {
+auto PPU::IO::Background::serialize(serializer& s) -> void {
   window.serialize(s);
   s.integer(aboveEnable);
   s.integer(belowEnable);
@@ -125,7 +125,7 @@ auto PPUfast::IO::Background::serialize(serializer& s) -> void {
   s.array(priority);
 }
 
-auto PPUfast::IO::Object::serialize(serializer& s) -> void {
+auto PPU::IO::Object::serialize(serializer& s) -> void {
   window.serialize(s);
   s.integer(aboveEnable);
   s.integer(belowEnable);
@@ -139,7 +139,7 @@ auto PPUfast::IO::Object::serialize(serializer& s) -> void {
   s.array(priority);
 }
 
-auto PPUfast::IO::Color::serialize(serializer& s) -> void {
+auto PPU::IO::Color::serialize(serializer& s) -> void {
   window.serialize(s);
   s.array(enable);
   s.integer(directColor);
@@ -149,7 +149,7 @@ auto PPUfast::IO::Color::serialize(serializer& s) -> void {
   s.integer(fixedColor);
 }
 
-auto PPUfast::Object::serialize(serializer& s) -> void {
+auto PPU::Object::serialize(serializer& s) -> void {
   s.integer(x);
   s.integer(y);
   s.integer(character);
