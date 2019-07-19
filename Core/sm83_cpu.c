@@ -33,6 +33,7 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
     /* Todo: most values not verified, and probably differ between revisions */
 };
 
+/* Todo: verify on an MGB */
 static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
@@ -40,10 +41,27 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
     [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
  
-    /* Todo: these are GB_CONFLICT_READ_NEW on MGB/SGB2 */
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
+    
+    /* Todo: these were not verified at all */
+    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
+    [GB_IO_WX] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
+};
+
+/* Todo: Verify on an SGB1 */
+static const GB_conflict_t sgb_conflict_map[0x80] = {
+    [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
+    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
+    
+    [GB_IO_BGP] = GB_CONFLICT_READ_NEW,
+    [GB_IO_OBP0] = GB_CONFLICT_READ_NEW,
+    [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
     
     /* Todo: these were not verified at all */
     [GB_IO_WY] = GB_CONFLICT_READ_NEW,
@@ -92,7 +110,17 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     assert(gb->pending_cycles);
     GB_conflict_t conflict = GB_CONFLICT_READ_OLD;
     if ((addr & 0xFF80) == 0xFF00) {
-        conflict = (GB_is_cgb(gb)? cgb_conflict_map : dmg_conflict_map)[addr & 0x7F];
+        const GB_conflict_t *map = NULL;
+        if (GB_is_cgb(gb)) {
+            map = cgb_conflict_map;
+        }
+        else if (GB_is_sgb(gb)) {
+            map = sgb_conflict_map;
+        }
+        else {
+            map = dmg_conflict_map;
+        }
+        conflict = map[addr & 0x7F];
     }
     switch (conflict) {
         case GB_CONFLICT_READ_OLD:
