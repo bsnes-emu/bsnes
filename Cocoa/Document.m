@@ -389,6 +389,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 - (void)dealloc
 {
     [cameraSession stopRunning];
+    self.view.gb = NULL;
     GB_free(&gb);
     if (cameraImage) {
         CVBufferRelease(cameraImage);

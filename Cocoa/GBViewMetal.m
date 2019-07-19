@@ -131,6 +131,7 @@ static const vector_float2 rect[] =
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
     if (!(view.window.occlusionState & NSWindowOcclusionStateVisible)) return;
+    if (!self.gb) return;
     if (texture.width  != GB_get_screen_width(self.gb) ||
         texture.height != GB_get_screen_height(self.gb)) {
         [self allocateTextures];
