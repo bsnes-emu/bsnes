@@ -1,3 +1,4 @@
+
 auto ICD::ppuScanline() -> void {
   if(++writeY == 8) {
     writeBank = (writeBank + 1) & 3;
@@ -10,7 +11,7 @@ auto ICD::ppuOutput(uint2 color) -> void {
   if(writeX >= 160) return; // Unverified behavior
   if(writeY >= 8) return; // Should never happen
   
-  uint addr = writeBank * 512 + writeY * 2 + writeX / 8 * 16;
+  uint addr = (writeBank & 3) * 512 + writeY * 2 + writeX / 8 * 16;
   output[addr + 0] = (output[addr + 0] << 1) | !!(color & 1);
   output[addr + 1] = (output[addr + 1] << 1) | !!(color & 2);
   writeX++;
