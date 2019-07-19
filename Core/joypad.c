@@ -3,7 +3,7 @@
 
 void GB_update_joyp(GB_gameboy_t *gb)
 {
-    if (gb->model & GB_MODEL_SGB_NO_SFC) return;
+    if (gb->model & GB_MODEL_NO_SFC_BIT) return;
     
     uint8_t key_selection = 0;
     uint8_t previous_state = 0;
