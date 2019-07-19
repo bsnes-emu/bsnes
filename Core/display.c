@@ -905,11 +905,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
             gb->mode_for_interrupt = 2;
           
-          // Todo: unverified timing
-          gb->current_lcd_line++;
-          if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-              display_vblank(gb);
-          }
+            // Todo: unverified timing
+            gb->current_lcd_line++;
+            if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
+                display_vblank(gb);
+            }
+            
             if (gb->icd_hreset_callback) {
                 gb->icd_hreset_callback(gb);
             }
