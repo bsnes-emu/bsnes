@@ -377,7 +377,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
 
     uint8_t icd_pixel = 0;
-    
     {
         uint8_t pixel = bg_enabled? fifo_item->pixel : 0;
         if (pixel && bg_priority) {
@@ -394,7 +393,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
             if (gb->icd_pixel_callback) {
                 icd_pixel = pixel;
-              //gb->icd_pixel_callback(gb, pixel);
             }
         }
         else {
@@ -770,9 +768,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
           
-            if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-                display_vblank(gb);
-            }
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
 
@@ -912,6 +907,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
           
           // Todo: unverified timing
           gb->current_lcd_line++;
+          if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
+              display_vblank(gb);
+          }
             if (gb->icd_hreset_callback) {
                 gb->icd_hreset_callback(gb);
             }
