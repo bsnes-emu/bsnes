@@ -769,13 +769,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
-            
-            // Todo: unverified timing
-            gb->current_lcd_line++;
-            if (gb->icd_hreset_callback) {
-                gb->icd_hreset_callback(gb);
-            }
-            
+          
             if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
                 display_vblank(gb);
             }
@@ -915,6 +909,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
             gb->mode_for_interrupt = 2;
+          
+          // Todo: unverified timing
+          gb->current_lcd_line++;
+            if (gb->icd_hreset_callback) {
+                gb->icd_hreset_callback(gb);
+            }
         }
         
         /* Lines 144 - 152 */
@@ -987,7 +987,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->window_disabled_while_active = false;
         gb->current_line = 0;
         // TODO: not the correct timing
-        gb->current_lcd_line = -1;
+        gb->current_lcd_line = 0;
         if (gb->icd_vreset_callback) {
             gb->icd_vreset_callback(gb);
         }
