@@ -10,16 +10,15 @@ ICD icd;
 
 namespace SameBoy {
   static auto hreset(GB_gameboy_t*) -> void {
-    icd.ly++;
-    icd.ppuScanline();
+    icd.ppuHreset();
   }
 
   static auto vreset(GB_gameboy_t*) -> void {
-    icd.ly = 0;
+    icd.ppuVreset();
   }
 
   static auto icd_pixel(GB_gameboy_t*, uint8_t pixel) -> void {
-    icd.ppuOutput(pixel);
+    icd.ppuWrite(pixel);
   }
 
   static auto joyp_write(GB_gameboy_t*, uint8_t value) -> void {
@@ -35,7 +34,7 @@ namespace SameBoy {
   static auto sample(GB_gameboy_t*, GB_sample_t* sample) -> void {
     float left  = sample->left  / 32768.0f;
     float right = sample->right / 32768.0f;
-    icd.apuOutput(left, right);
+    icd.apuWrite(left, right);
   }
 
   static auto vblank(GB_gameboy_t*) -> void {
@@ -63,7 +62,8 @@ auto ICD::main() -> void {
 auto ICD::load() -> bool {
   information = {};
 
-  GB_random_set_enabled(false);
+//todo: connect to SFC random enable setting
+//GB_random_set_enabled(false);
   if(Frequency == 0) {
     GB_init(&sameboy, GB_MODEL_SGB_NO_SFC);
     GB_load_boot_rom_from_buffer(&sameboy, (const unsigned char*)&SGB1BootROM[0], 256);
@@ -96,7 +96,6 @@ auto ICD::load() -> bool {
     fp->read(data, size);
     GB_load_rom_from_buffer(&sameboy, data, size);
   } else return unload(), false;
-  ly = 0;
   return true;
 }
 
@@ -104,10 +103,31 @@ auto ICD::unload() -> void {
   GB_free(&sameboy);
 }
 
-auto ICD::power() -> void {
+auto ICD::power(bool reset) -> void {
   //SGB1 uses CPU oscillator; SGB2 uses dedicated oscillator
   create(ICD::Enter, (Frequency ? Frequency : system.cpuFrequency()) / 5.0);
-  stream = Emulator::audio.createStream(2, uint((Frequency ? Frequency : system.cpuFrequency()) / 5.0 / 128.0));
+  if(!reset) {
+    stream = Emulator::audio.createStream(2, uint((Frequency ? Frequency : system.cpuFrequency()) / 5.0 / 128.0));
+  }
+
+  for(auto& packet : this->packet) packet = {};
+  packetSize = 0;
+
+  joypID = 3;
+  joyp14Lock = 0;
+  joyp15Lock = 0;
+  pulseLock = 1;
+  strobeLock = 0;
+  packetLock = 0;
+  joypPacket = {};
+  packetOffset = 0;
+  bitData = 0;
+  bitOffset = 0;
+
+  for(auto& n : output) n = 0xff;
+  readBank = 0;
+  readAddress = 0;
+  writeBank = 0;
 
   r6003 = 0x00;
   r6004 = 0xff;
@@ -117,45 +137,8 @@ auto ICD::power() -> void {
   for(auto& r : r7000) r = 0x00;
   mltReq = 0;
 
-  for(auto& n : output) n = 0xff;
-  readBank = 0;
-  readAddress = 0;
-  writeBank = 0;
-  writeX = 0;
-  writeY = 0;
-
-  packetSize = 0;
-  joypID = 3;
-  joyp15Lock = 0;
-  joyp14Lock = 0;
-  pulseLock = true;
-
-  GB_reset(&sameboy);
-}
-
-auto ICD::reset() -> void {
-  create(ICD::Enter, (Frequency ? Frequency : system.cpuFrequency()) / 5.0);
-
-  r6003 = 0x00;
-  r6004 = 0xff;
-  r6005 = 0xff;
-  r6006 = 0xff;
-  r6007 = 0xff;
-  for(auto& r : r7000) r = 0x00;
-  mltReq = 0;
-
-  for(auto& n : output) n = 0xff;
-  readBank = 0;
-  readAddress = 0;
-  writeBank = 0;
-  writeX = 0;
-  writeY = 0;
-
-  packetSize = 0;
-  joypID = 3;
-  joyp15Lock = 0;
-  joyp14Lock = 0;
-  pulseLock = true;
+  hcounter = 0;
+  vcounter = 0;
 
   GB_reset(&sameboy);
 }

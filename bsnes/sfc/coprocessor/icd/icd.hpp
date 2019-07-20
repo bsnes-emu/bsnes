@@ -8,13 +8,13 @@ struct ICD : Emulator::Platform, Thread {
 
   auto load() -> bool;
   auto unload() -> void;
-  auto power() -> void;
-  auto reset() -> void;  //software reset
+  auto power(bool reset = false) -> void;
 
   //interface.cpp
-  auto ppuScanline() -> void;
-  auto ppuOutput(uint2 color) -> void;
-  auto apuOutput(float left, float right) -> void;
+  auto ppuHreset() -> void;
+  auto ppuVreset() -> void;
+  auto ppuWrite(uint2 color) -> void;
+  auto apuWrite(float left, float right) -> void;
   auto joypWrite(bool p14, bool p15) -> void;
 
   //io.cpp
@@ -33,21 +33,27 @@ struct ICD : Emulator::Platform, Thread {
 
 private:
   struct Packet {
-    auto operator[](uint addr) -> uint8& { return data[addr & 15]; }
+    auto operator[](uint4 address) -> uint8& { return data[address]; }
     uint8 data[16];
   };
   Packet packet[64];
-  uint packetSize;
+  uint7 packetSize;
 
-  uint joypID;
-  bool joyp15Lock;
-  bool joyp14Lock;
-  bool pulseLock;
-  bool strobeLock;
-  bool packetLock;
+  uint2 joypID;
+  uint1 joyp14Lock;
+  uint1 joyp15Lock;
+  uint1 pulseLock;
+  uint1 strobeLock;
+  uint1 packetLock;
   Packet joypPacket;
-  uint8 packetOffset;
-  uint8 bitData, bitOffset;
+  uint4 packetOffset;
+  uint8 bitData;
+  uint3 bitOffset;
+
+  uint8 output[4 * 512];
+  uint2 readBank;
+  uint9 readAddress;
+  uint2 writeBank;
 
   uint8 r6003;      //control port
   uint8 r6004;      //joypad 1
@@ -57,12 +63,8 @@ private:
   uint8 r7000[16];  //JOYP packet data
   uint8 mltReq;     //number of active joypads
 
-  uint8 output[4 * 512];
-  uint readBank;
-  uint readAddress;
-  uint writeBank;
-  uint writeX;
-  uint writeY;
+  uint8 hcounter;
+  uint8 vcounter;
 
   struct Information {
     uint pathID = 0;
@@ -74,7 +76,6 @@ public:
   //as the offsets of all member variables will be wrong compared to what the C SameBoy code expects.
   GB_gameboy_t sameboy;
   uint32_t bitmap[160 * 144];
-  uint8_t ly = 0;
 };
 
 extern ICD icd;
