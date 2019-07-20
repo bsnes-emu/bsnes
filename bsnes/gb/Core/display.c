@@ -127,13 +127,13 @@ static void display_vblank(GB_gameboy_t *gb)
     if (GB_is_hle_sgb(gb)) {
         GB_sgb_render(gb);
     }
-
+    
     if (gb->turbo) {
         if (GB_timing_sync_turbo(gb)) {
             return;
         }
     }
-
+    
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
@@ -423,8 +423,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
         }
     }
-
-    /* byuu: gotta do this later so it's only done once ... you'll probably wanna refactor this somehow :/ */
+	
     if (gb->model & GB_MODEL_NO_SFC_BIT) {
         if (gb->icd_pixel_callback) {
             gb->icd_pixel_callback(gb, icd_pixel);
@@ -770,7 +769,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
-            gb->current_lcd_line++; // Todo: unverified timing
+            
+            // Todo: unverified timing
+            gb->current_lcd_line++;
+            
             if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
                 display_vblank(gb);
             }
@@ -910,8 +912,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
             gb->mode_for_interrupt = 2;
-            
-            /* TODO: Can this timing even be verified? */
+          
             if (gb->icd_hreset_callback) {
                 gb->icd_hreset_callback(gb);
             }
