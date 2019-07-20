@@ -49,6 +49,9 @@ struct GB_sgb_s {
     
     /* Intro */
     int16_t intro_animation;
+    
+    /* GB Header */
+    uint8_t received_header[0x54];
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
