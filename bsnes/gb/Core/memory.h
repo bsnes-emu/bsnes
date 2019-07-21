@@ -3,6 +3,9 @@
 #include "gb_struct_def.h"
 #include <stdint.h>
 
+typedef uint8_t (*GB_read_memory_callback_t)(GB_gameboy_t *gb, uint16_t addr, uint8_t data);
+void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t callback);
+
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr);
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 #ifdef GB_INTERNAL

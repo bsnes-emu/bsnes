@@ -27,6 +27,11 @@ namespace SameBoy {
     icd.joypWrite(p14, p15);
   }
 
+  static auto read_memory(GB_gameboy_t*, uint16_t addr, uint8_t data) -> uint8_t {
+    if(auto replace = icd.cheats.find(addr, data)) return replace();
+    return data;
+  }
+
   static auto rgb_encode(GB_gameboy_t*, uint8_t r, uint8_t g, uint8_t b) -> uint32_t {
     return r << 16 | g << 8 | b << 0;
   }
@@ -78,6 +83,7 @@ auto ICD::load() -> bool {
   GB_set_icd_vreset_callback(&sameboy, &SameBoy::vreset);
   GB_set_icd_pixel_callback(&sameboy, &SameBoy::icd_pixel);
   GB_set_joyp_write_callback(&sameboy, &SameBoy::joyp_write);
+  GB_set_read_memory_callback(&sameboy, &SameBoy::read_memory);
   GB_set_rgb_encode_callback(&sameboy, &SameBoy::rgb_encode);
   GB_apu_set_sample_callback(&sameboy, &SameBoy::sample);
   GB_set_vblank_callback(&sameboy, &SameBoy::vblank);

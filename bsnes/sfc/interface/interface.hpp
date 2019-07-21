@@ -60,6 +60,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
+  auto read(uint24 address) -> uint8 override;
   auto cheats(const vector<string>&) -> void override;
 
   auto configuration() -> string override;

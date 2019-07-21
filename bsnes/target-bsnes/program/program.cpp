@@ -31,6 +31,7 @@ auto Program::create() -> void {
   driverSettings.create();
 
   toolsWindow.create();
+  cheatFinder.create();
   cheatDatabase.create();
   cheatWindow.create();
   cheatEditor.create();

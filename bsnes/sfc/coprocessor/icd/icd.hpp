@@ -1,5 +1,6 @@
 struct ICD : Emulator::Platform, Thread {
   shared_pointer<Emulator::Stream> stream;
+  Emulator::Cheat cheats;
 
   inline auto pathID() const -> uint { return information.pathID; }
 

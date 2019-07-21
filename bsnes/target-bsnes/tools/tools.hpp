@@ -1,3 +1,35 @@
+struct CheatCandidate {
+  uint32_t address;
+  uint32_t data;
+  uint32_t size;
+  uint32_t mode;
+  uint32_t span;
+};
+
+struct CheatFinder : TabFrameItem {
+  auto create() -> void;
+  auto restart() -> void;
+  auto refresh() -> void;
+  auto eventScan() -> void;
+  auto eventClear() -> void;
+  auto read(uint32_t size, uint32_t address) -> uint32_t;
+  auto compare(uint32_t mode, uint32_t x, uint32_t y) -> bool;
+
+public:
+  vector<CheatCandidate> candidates;
+
+  VerticalLayout layout{this};
+    TableView searchList{&layout, Size{~0, ~0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Label searchLabel{&controlLayout, Size{0, 0}};
+      LineEdit searchValue{&controlLayout, Size{~0, 0}};
+      ComboButton searchSize{&controlLayout, Size{0, 0}};
+      ComboButton searchMode{&controlLayout, Size{0, 0}};
+      ComboButton searchSpan{&controlLayout, Size{0, 0}};
+      Button searchScan{&controlLayout, Size{80, 0}};
+      Button searchClear{&controlLayout, Size{80, 0}};
+};
+
 struct Cheat {
   auto operator==(const Cheat& compare) const -> bool {
     return name == compare.name && code == compare.code && enable == compare.enable;
@@ -158,6 +190,7 @@ public:
 };
 
 namespace Instances { extern Instance<CheatDatabase> cheatDatabase; }
+extern CheatFinder cheatFinder;
 extern CheatDatabase& cheatDatabase;
 namespace Instances { extern Instance<CheatWindow> cheatWindow; }
 extern CheatWindow& cheatWindow;

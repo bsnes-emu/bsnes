@@ -105,6 +105,7 @@ struct Presentation : Window {
       MenuItem frameAdvance{&toolsMenu};
       MenuItem captureScreenshot{&toolsMenu};
       MenuSeparator toolsSeparatorB{&toolsMenu};
+      MenuItem cheatFinder{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
       MenuItem manifestViewer{&toolsMenu};

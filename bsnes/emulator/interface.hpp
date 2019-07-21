@@ -84,6 +84,7 @@ struct Interface {
   virtual auto unserialize(serializer&) -> bool { return false; }
 
   //cheat functions
+  virtual auto read(uint24 address) -> uint8 { return 0; }
   virtual auto cheats(const vector<string>& = {}) -> void {}
 
   //configuration

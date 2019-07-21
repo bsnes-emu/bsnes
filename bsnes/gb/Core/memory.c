@@ -421,6 +421,13 @@ static GB_read_function_t * const read_map[] =
     read_ram,         read_high_memory,                             /* EXXX FXXX */
 };
 
+static GB_read_memory_callback_t GB_read_memory_callback_v = 0;
+
+void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t callback)
+{
+  GB_read_memory_callback_v = callback;
+}
+
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->n_watchpoints) {
@@ -428,6 +435,11 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     }
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
+    }
+    if (GB_read_memory_callback_v) {
+        uint8_t data = read_map[addr >> 12](gb, addr);
+        data = GB_read_memory_callback_v(gb, addr, data);
+        return data;
     }
     return read_map[addr >> 12](gb, addr);
 }

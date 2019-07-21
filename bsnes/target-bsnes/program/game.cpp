@@ -46,6 +46,7 @@ auto Program::load() -> void {
   presentation.pauseEmulation.setChecked(false);
   presentation.updateProgramIcon();
   presentation.updateStatusIcon();
+  cheatFinder.restart();  //clear any old cheat search results
   cheatEditor.loadCheats();
   stateManager.loadStates();
   manifestViewer.loadManifest();

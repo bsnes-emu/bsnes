@@ -244,8 +244,15 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
+auto Interface::read(uint24 address) -> uint8 {
+  return cpu.readDisassembler(address);
+}
+
 auto Interface::cheats(const vector<string>& list) -> void {
-  if(cartridge.has.ICD) return;  //TODO: SameBoy cheat code support
+  if(cartridge.has.ICD) {
+    icd.cheats.assign(list);
+    return;
+  }
 
   //make all ROM data writable temporarily
   Memory::GlobalWriteEnable = true;

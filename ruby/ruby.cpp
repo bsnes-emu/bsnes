@@ -4,6 +4,7 @@ using namespace ruby;
 
 #undef deprecated
 #undef mkdir
+#undef noinline
 #undef usleep
 
 #if defined(DISPLAY_XORG)

@@ -16,11 +16,14 @@ auto CheatDatabase::create() -> void {
 }
 
 auto CheatDatabase::findCheats() -> void {
-  auto sha256 = emulator->hashes()[0];
+  //hack to locate Super Game Boy cheat codes
+  auto sha256a = emulator->hashes()(0, "none");
+  auto sha256b = emulator->hashes()(1, "none");
 
   auto document = BML::unserialize(string::read(locate("Database/Cheat Codes.bml")));
   for(auto game : document.find("cartridge")) {
-    if(game["sha256"].text() != sha256) continue;
+    if(game["sha256"].text() != sha256a
+    && game["sha256"].text() != sha256b) continue;
 
     cheatList.reset();
     for(auto cheat : game.find("cheat")) {
