@@ -55,6 +55,7 @@ Standard Features
   - SuperFX overclocking of up to 800%
   - Frame advance support
   - Screenshot support
+  - Cheat code search support
 
 Links
 -----

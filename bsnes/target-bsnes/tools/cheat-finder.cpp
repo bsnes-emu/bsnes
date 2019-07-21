@@ -9,7 +9,7 @@ auto CheatFinder::create() -> void {
   searchSize.append(ComboButtonItem().setText("Byte"));
   searchSize.append(ComboButtonItem().setText("Word"));
   searchSize.append(ComboButtonItem().setText("Long"));
-  searchMode.append(ComboButtonItem().setText("=="));
+  searchMode.append(ComboButtonItem().setText("="));
   searchMode.append(ComboButtonItem().setText("!="));
   searchMode.append(ComboButtonItem().setText(">="));
   searchMode.append(ComboButtonItem().setText("<="));
@@ -61,7 +61,7 @@ auto CheatFinder::eventScan() -> void {
   uint32_t size = searchSize.selected().offset();
   uint32_t mode = searchMode.selected().offset();
   uint32_t span = searchSpan.selected().offset();
-  uint32_t data = searchValue.text().replace("$", "0x").replace("#", "").natural();
+  uint32_t data = searchValue.text().replace("$", "0x").replace("#", "").integer();
   if(size == 0) data &= 0xff;
   if(size == 1) data &= 0xffff;
   if(size == 2) data &= 0xffffff;
