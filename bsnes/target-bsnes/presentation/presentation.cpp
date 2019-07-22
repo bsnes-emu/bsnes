@@ -151,6 +151,11 @@ auto Presentation::create() -> void {
   pauseEmulation.setText("Pause Emulation").onToggle([&] {
     if(pauseEmulation.checked()) audio.clear();
   });
+  movieMenu.setIcon(Icon::Emblem::Video).setText("Movie");
+  moviePlay.setIcon(Icon::Media::Play).setText("Play").onActivate([&] { program.moviePlay(); });
+  movieRecord.setIcon(Icon::Media::Record).setText("Record").onActivate([&] { program.movieRecord(false); });
+  movieRecordFromBeginning.setIcon(Icon::Media::Record).setText("Reset & Record").onActivate([&] { program.movieRecord(true); });
+  movieStop.setIcon(Icon::Media::Stop).setText("Stop").onActivate([&] { program.movieStop(); });
   frameAdvance.setIcon(Icon::Media::Next).setText("Frame Advance").onActivate([&] {
     pauseEmulation.setChecked(false);
     program.frameAdvance = true;

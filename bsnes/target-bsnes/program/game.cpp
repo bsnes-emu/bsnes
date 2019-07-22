@@ -46,6 +46,8 @@ auto Program::load() -> void {
   presentation.pauseEmulation.setChecked(false);
   presentation.updateProgramIcon();
   presentation.updateStatusIcon();
+  rewindReset();  //starts rewind state recording
+  movieMode(Movie::Mode::Inactive);  //to set initial movie menu state
   cheatFinder.restart();  //clear any old cheat search results
   cheatEditor.loadCheats();
   stateManager.loadStates();
@@ -284,6 +286,7 @@ auto Program::save() -> void {
 
 auto Program::reset() -> void {
   if(!emulator->loaded()) return;
+  rewindReset();  //don't allow rewinding past a reset point
   hackCompatibility();
   emulator->reset();
   showMessage("Game reset");
@@ -291,6 +294,8 @@ auto Program::reset() -> void {
 
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
+  rewindReset();  //free up memory that is no longer needed
+  movieStop();  //in case a movie is currently being played or recorded
   cheatEditor.saveCheats();
   toolsWindow.setVisible(false);
   if(emulatorSettings.autoSaveStateOnUnload.checked()) {

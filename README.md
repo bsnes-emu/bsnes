@@ -5,7 +5,10 @@ bsnes is a multi-platform Super Nintendo (Super Famicom) emulator that focuses
 on performance, features, and ease of use.
 
 bsnes currently enjoys 100% known, bug-free compatibility with the entire SNES
-library when configured to its most accurate settings.
+library when configured to its most accurate settings, giving it the same
+accuracy level as higan. Accuracy can also optionally be traded for performance,
+allowing bsnes to operate more than 300% faster than higan while still remaining
+almost as accurate.
 
 Development
 -----------
@@ -20,6 +23,7 @@ If stability is required, please download the latest stable release from the
 Unique Features
 ---------------
 
+  - 100% (known) bug-free compatibility with the entire officially licensed SNES games library
   - True Super Game Boy emulation (using the SameBoy core by Lior Halphon)
   - HD mode 7 graphics with optional supersampling (by DerKoun)
   - Low-level emulation of all SNES coprocessors (DSP-n, ST-01n, Cx4)
@@ -56,6 +60,8 @@ Standard Features
   - Frame advance support
   - Screenshot support
   - Cheat code search support
+  - Movie recording and playback support
+  - Rewind support
 
 Links
 -----

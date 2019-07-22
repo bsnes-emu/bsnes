@@ -64,6 +64,29 @@ struct Program : Lock, Emulator::Platform {
   auto removeState(string filename) -> bool;
   auto renameState(string from, string to) -> bool;
 
+  //movies.cpp
+  struct Movie {
+    enum Mode : uint { Inactive, Playing, Recording } mode = Mode::Inactive;
+    serializer state;
+    vector<int16> input;
+  } movie;
+  auto movieMode(Movie::Mode) -> void;
+  auto moviePlay() -> void;
+  auto movieRecord(bool fromBeginning) -> void;
+  auto movieStop() -> void;
+
+  //rewind.cpp
+  struct Rewind {
+    enum Mode : uint { Playing, Rewinding } mode = Mode::Playing;
+    vector<serializer> history;
+    uint length = 0;
+    uint frequency = 0;
+    uint counter = 0;  //in frames
+  } rewind;
+  auto rewindMode(Rewind::Mode) -> void;
+  auto rewindReset() -> void;
+  auto rewindRun() -> void;
+
   //video.cpp
   auto updateVideoDriver(Window parent) -> void;
   auto updateVideoExclusive() -> void;

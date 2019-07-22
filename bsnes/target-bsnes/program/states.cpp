@@ -65,6 +65,7 @@ auto Program::loadState(string filename) -> bool {
     auto serializerRLE = Decode::RLE<1>({memory.data() + 3 * sizeof(uint), memory.size() - 3 * sizeof(uint)});
     serializer s{serializerRLE.data(), (uint)serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
+    rewindReset();  //do not allow rewinding past a state load event
     return showMessage({"Loaded [", prefix, "]"}), true;
   } else {
     return showMessage({"[", prefix, "] not found"}), false;

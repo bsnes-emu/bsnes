@@ -261,13 +261,24 @@ auto Program::audioFrame(const float* samples, uint channels) -> void {
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
+  int16 value = 0;
   if(focused() || emulatorSettings.allowInput().checked()) {
     inputManager.poll();
     if(auto mapping = inputManager.mapping(port, device, input)) {
-      return mapping->poll();
+      value = mapping->poll();
     }
   }
-  return 0;
+  if(movie.mode == Movie::Mode::Recording) {
+    movie.input.append(value);
+  } else if(movie.mode == Movie::Mode::Playing) {
+    if(movie.input) {
+      value = movie.input.takeFirst();
+    }
+    if(!movie.input) {
+      movieStop();
+    }
+  }
+  return value;
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {

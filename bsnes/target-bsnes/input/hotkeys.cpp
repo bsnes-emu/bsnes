@@ -13,6 +13,12 @@ auto InputManager::bindHotkeys() -> void {
     cheatEditor.enableCheats.setChecked(!cheatEditor.enableCheats.checked()).doToggle();
   }));
 
+  hotkeys.append(InputHotkey("Rewind").onPress([&] {
+    program.rewindMode(Program::Rewind::Mode::Rewinding);
+  }).onRelease([&] {
+    program.rewindMode(Program::Rewind::Mode::Playing);
+  }));
+
   hotkeys.append(InputHotkey("Save State").onPress([&] {
     program.saveState({"Quick/Slot ", stateSlot});
   }));

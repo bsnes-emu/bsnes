@@ -98,6 +98,8 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Emulator/AutoSaveMemory/Interval",       emulator.autoSaveMemory.interval);
   bind(boolean, "Emulator/AutoSaveStateOnUnload",         emulator.autoSaveStateOnUnload);
   bind(boolean, "Emulator/AutoLoadStateOnLoad",           emulator.autoLoadStateOnLoad);
+  bind(natural, "Emulator/Rewind/Frequency",              emulator.rewind.frequency);
+  bind(natural, "Emulator/Rewind/Length",                 emulator.rewind.length);
   bind(boolean, "Emulator/Hack/PPU/Fast",                 emulator.hack.ppu.fast);
   bind(boolean, "Emulator/Hack/PPU/NoSpriteLimit",        emulator.hack.ppu.noSpriteLimit);
   bind(natural, "Emulator/Hack/PPU/Mode7/Scale",          emulator.hack.ppu.mode7.scale);

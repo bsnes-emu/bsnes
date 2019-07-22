@@ -76,6 +76,10 @@ struct Settings : Markup::Node {
     } autoSaveMemory;
     bool autoSaveStateOnUnload = false;
     bool autoLoadStateOnLoad = false;
+    struct Rewind {
+      uint frequency = 0;
+      uint length = 80;
+    } rewind;
     struct Hack {
       struct PPU {
         bool fast = true;
@@ -266,6 +270,11 @@ public:
     HorizontalLayout autoStateLayout{&layout, Size{~0, 0}};
       CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
       CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
+    HorizontalLayout rewindLayout{&layout, Size{~0, 0}};
+      Label rewindFrequencyLabel{&rewindLayout, Size{0, 0}};
+      ComboButton rewindFrequencyOption{&rewindLayout, Size{0, 0}};
+      Label rewindLengthLabel{&rewindLayout, Size{0, 0}};
+      ComboButton rewindLengthOption{&rewindLayout, Size{0, 0}};
     Canvas optionsSpacer{&layout, Size{~0, 1}};
     Label ppuLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout ppuLayout{&layout, Size{~0, 0}};

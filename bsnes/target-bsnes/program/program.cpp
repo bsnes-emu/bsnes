@@ -5,6 +5,8 @@
 #include "game-rom.cpp"
 #include "paths.cpp"
 #include "states.cpp"
+#include "movies.cpp"
+#include "rewind.cpp"
 #include "video.cpp"
 #include "audio.cpp"
 #include "input.cpp"
@@ -85,6 +87,7 @@ auto Program::main() -> void {
     return;
   }
 
+  rewindRun();
   emulator->run();
   if(emulatorSettings.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();

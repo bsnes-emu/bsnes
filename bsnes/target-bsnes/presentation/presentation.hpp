@@ -93,7 +93,7 @@ struct Presentation : Window {
     Menu toolsMenu{&menuBar};
       Menu saveState{&toolsMenu};
       Menu loadState{&toolsMenu};
-      MenuSeparator toolsSeparatorA{&toolsMenu};
+      MenuSeparator toolsSeparatorB{&toolsMenu};
       Menu speedMenu{&toolsMenu};
         MenuRadioItem speedSlowest{&speedMenu};
         MenuRadioItem speedSlow{&speedMenu};
@@ -101,10 +101,16 @@ struct Presentation : Window {
         MenuRadioItem speedFast{&speedMenu};
         MenuRadioItem speedFastest{&speedMenu};
         Group speedGroup{&speedSlowest, &speedSlow, &speedNormal, &speedFast, &speedFastest};
-      MenuCheckItem pauseEmulation{&toolsMenu};
+        MenuSeparator speedSeparator{&speedMenu};
+        MenuCheckItem pauseEmulation{&speedMenu};
+      Menu movieMenu{&toolsMenu};
+        MenuItem moviePlay{&movieMenu};
+        MenuItem movieRecord{&movieMenu};
+        MenuItem movieRecordFromBeginning{&movieMenu};
+        MenuItem movieStop{&movieMenu};
       MenuItem frameAdvance{&toolsMenu};
       MenuItem captureScreenshot{&toolsMenu};
-      MenuSeparator toolsSeparatorB{&toolsMenu};
+      MenuSeparator toolsSeparatorC{&toolsMenu};
       MenuItem cheatFinder{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
