@@ -14,8 +14,14 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Rewind").onPress([&] {
-    program.rewindMode(Program::Rewind::Mode::Rewinding);
+    if(!emulator->loaded()) return;
+    if(program.rewind.frequency == 0) {
+      program.showMessage("Please enable rewind support in Settings->Emulator first");
+    } else {
+      program.rewindMode(Program::Rewind::Mode::Rewinding);
+    }
   }).onRelease([&] {
+    if(!emulator->loaded()) return;
     program.rewindMode(Program::Rewind::Mode::Playing);
   }));
 
