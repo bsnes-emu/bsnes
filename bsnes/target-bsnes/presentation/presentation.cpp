@@ -174,7 +174,9 @@ auto Presentation::create() -> void {
   });
   about.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
     AboutDialog()
+    .setName(Emulator::Name)
     .setLogo(Resource::Logo)
+    .setDescription("Super Nintendo emulator")
     .setVersion(Emulator::Version)
     .setAuthor("byuu")
     .setLicense("GPLv3")
@@ -186,6 +188,7 @@ auto Presentation::create() -> void {
     AboutDialog()
     .setName("SameBoy")
     .setLogo(Resource::SameBoy)
+    .setDescription("Super Game Boy emulator")
     .setVersion("0.12.1")
     .setAuthor("Lior Halphon")
     .setLicense("MIT")

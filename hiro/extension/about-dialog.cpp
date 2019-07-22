@@ -137,7 +137,7 @@ auto AboutDialog::show() -> void {
   websiteValue.setAlignment(0.0);
   websiteValue.setFont(Font().setBold());
   websiteValue.setForegroundColor({0, 0, 240});
-  websiteValue.setText(state.website);
+  websiteValue.setText(string{state.website}.trimLeft("http://", 1L).trimLeft("https://", 1L));
   //so that the hand cursor is only visible when overing over the link.
   websiteValue.setMouseCursor(MouseCursor::Hand);
   websiteValue.onMouseRelease([&](auto button) {
