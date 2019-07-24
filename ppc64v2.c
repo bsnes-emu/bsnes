@@ -1,9 +1,4 @@
-/**
- * libco implementation for ppc64 elfv2.
- *
- * Written by Shawn Anastasio.
- * Licensed under the ISC license.
- */
+/* author: Shawn Anastasio */
 
 #define LIBCO_C
 #include "libco.h"
@@ -11,38 +6,37 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct ppc64_context {
-  // GPRs
+  //GPRs
   uint64_t gprs[32];
   uint64_t lr;
   uint64_t ccr;
 
-  // FPRs
+  //FPRs
   uint64_t fprs[32];
 
-#ifdef __ALTIVEC__
-  // Altivec (VMX)
-  uint64_t vmx[24 /* 12 non-volatile * 2 */];
+  #ifdef __ALTIVEC__
+  //Altivec (VMX)
+  uint64_t vmx[12 * 2];
   uint32_t vrsave;
-#endif
+  #endif
 };
 
-static thread_local struct ppc64_context *context_running = 0;
+static thread_local struct ppc64_context* co_active_handle = 0;
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define ALIGN(ptr, x) ( (void *)( (uintptr_t)(ptr) & ~((x)-1) ) )
+#define ALIGN(p, x) ((void*)((uintptr_t)(p) & ~((x) - 1)))
 
-#define MIN_STACK       0x10000lu
+#define MIN_STACK    0x10000lu
 #define MIN_STACK_FRAME 0x20lu
 #define STACK_ALIGN     0x10lu
 
-void swap_context(struct ppc64_context *read, struct ppc64_context *write);
+void swap_context(struct ppc64_context* read, struct ppc64_context* write);
 __asm__(
   ".text\n"
   ".align 4\n"
@@ -50,7 +44,7 @@ __asm__(
   "swap_context:\n"
   ".cfi_startproc\n"
 
-  // Dump non-volatile and special GPRs
+  //save GPRs
   "std 1, 8(4)\n"
   "std 2, 16(4)\n"
   "std 12, 96(4)\n"
@@ -74,15 +68,15 @@ __asm__(
   "std 30, 240(4)\n"
   "std 31, 248(4)\n"
 
-  // LR
+  //save LR
   "mflr 5\n"
   "std 5, 256(4)\n"
 
-  // CCR
+  //save CCR
   "mfcr 5\n"
   "std 5, 264(4)\n"
 
-  // Dump non-volatile FPRs
+  //save FPRs
   "stfd 14, 384(4)\n"
   "stfd 15, 392(4)\n"
   "stfd 16, 400(4)\n"
@@ -102,8 +96,8 @@ __asm__(
   "stfd 30, 512(4)\n"
   "stfd 31, 520(4)\n"
 
-#ifdef __ALTIVEC__
-  // Dump non-volatile VMX registers
+  #ifdef __ALTIVEC__
+  //save VMX
   "li 5, 528\n"
   "stvxl 20, 4, 5\n"
   "addi 5, 5, 16\n"
@@ -130,12 +124,12 @@ __asm__(
   "stvxl 31, 4, 5\n"
   "addi 5, 5, 16\n"
 
-  // VRSAVE
+  //save VRSAVE
   "mfvrsave 5\n"
   "stw 5, 736(4)\n"
-#endif
+  #endif
 
-  // Restore GPRs
+  //restore GPRs
   "ld 1, 8(3)\n"
   "ld 2, 16(3)\n"
   "ld 12, 96(3)\n"
@@ -159,15 +153,15 @@ __asm__(
   "ld 30, 240(3)\n"
   "ld 31, 248(3)\n"
 
-  // Restore LR
+  //restore LR
   "ld 5, 256(3)\n"
   "mtlr 5\n"
 
-  // Restore CCR
+  //restore CCR
   "ld 5, 264(3)\n"
   "mtcr 5\n"
 
-  // Restore FPRs
+  //restore FPRs
   "lfd 14, 384(3)\n"
   "lfd 15, 392(3)\n"
   "lfd 16, 400(3)\n"
@@ -187,8 +181,8 @@ __asm__(
   "lfd 30, 512(3)\n"
   "lfd 31, 520(3)\n"
 
-#ifdef __ALTIVEC__
-  // Restore VMX
+  #ifdef __ALTIVEC__
+  //restore VMX
   "li 5, 528\n"
   "lvxl 20, 3, 5\n"
   "addi 5, 5, 16\n"
@@ -215,12 +209,12 @@ __asm__(
   "lvxl 31, 3, 5\n"
   "addi 5, 5, 16\n"
 
-  // VRSAVE
+  //restore VRSAVE
   "lwz 5, 720(3)\n"
   "mtvrsave 5\n"
-#endif
+  #endif
 
-  // Context restored, branch to LR
+  //branch to LR
   "blr\n"
 
   ".cfi_endproc\n"
@@ -228,55 +222,54 @@ __asm__(
 );
 
 cothread_t co_active() {
-  if (!context_running)
-    context_running = (struct ppc64_context *)
-                        malloc(MIN_STACK + sizeof(struct ppc64_context));
-  return (cothread_t)context_running;
+  if(!co_active_handle) {
+    co_active_handle = (struct ppc64_context*)malloc(MIN_STACK + sizeof(struct ppc64_context));
+  }
+  return (cothread_t)co_active_handle;
 }
 
-cothread_t co_derive(void *memory, unsigned int size, void (*coentry)(void)) {
-  uint8_t *sp;
-  struct ppc64_context *context = (struct ppc64_context *)memory;
+cothread_t co_derive(void* memory, unsigned int size, void (*coentry)(void)) {
+  uint8_t* sp;
+  struct ppc64_context* context = (struct ppc64_context*)memory;
 
-  // Save current context into new context to initialize it
+  //save current context into new context to initialize it
   swap_context(context, context);
 
-  // Align stack
-  sp = (uint8_t *)memory + size - STACK_ALIGN;
-  sp = (uint8_t *)ALIGN(sp, STACK_ALIGN);
+  //align stack
+  sp = (uint8_t*)memory + size - STACK_ALIGN;
+  sp = (uint8_t*)ALIGN(sp, STACK_ALIGN);
 
-  // Write 0 for initial backchain
-  *(uint64_t *)sp = 0;
+  //write 0 for initial backchain
+  *(uint64_t*)sp = 0;
 
-  // Create new frame with backchain
+  //create new frame with backchain
   sp -= MIN_STACK_FRAME;
-  *(uint64_t *)sp = (uint64_t)(sp + MIN_STACK_FRAME);
+  *(uint64_t*)sp = (uint64_t)(sp + MIN_STACK_FRAME);
 
-  // Update context with new stack (r1) and entrypoint (LR, r12)
-  context->lr = (uint64_t)coentry;
+  //update context with new stack (r1) and entrypoint (r12, lr)
+  context->gprs[ 1] = (uint64_t)sp;
   context->gprs[12] = (uint64_t)coentry;
-  context->gprs[1] = (uint64_t)sp;
+  context->lr       = (uint64_t)coentry;
 
   return (cothread_t)memory;
 }
 
 cothread_t co_create(unsigned int size, void (*coentry)(void)) {
   size_t total = MAX(size, MIN_STACK) + sizeof(struct ppc64_context);
-  void *memory = malloc(total);
-  if (!memory)
-    return (cothread_t)0;
+  void* memory = malloc(total);
 
+  if(!memory) return (cothread_t)0;
   return co_derive(memory, total, coentry);
 }
 
-void co_delete(cothread_t t) {
-  free(t);
+void co_delete(cothread_t handle) {
+  free(handle);
 }
 
-void co_switch(cothread_t t) {
-  struct ppc64_context *old = context_running;
-  context_running = (struct ppc64_context *)t;
-  swap_context((struct ppc64_context *)t, old);
+void co_switch(cothread_t to) {
+  struct ppc64_context* from = co_active_handle;
+  co_active_handle = (struct ppc64_context*)to;
+  swap_context((struct ppc64_context*)to, from);
 }
 
 #ifdef __cplusplus
