@@ -13,6 +13,7 @@ struct PPU : Thread, PPUcounter {
   auto power(bool reset) -> void;
 
   //io.cpp
+  auto latchCounters(uint hcounter, uint vcounter) -> void;
   auto latchCounters() -> void;
 
   //serialization.cpp

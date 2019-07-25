@@ -92,9 +92,6 @@ auto System::unload() -> void {
 }
 
 auto System::power(bool reset) -> void {
-  Emulator::video.reset(interface);
-  Emulator::video.setPalette();
-
   Emulator::audio.reset(interface);
 
   random.entropy(Random::Entropy::Low);

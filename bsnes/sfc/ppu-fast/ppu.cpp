@@ -109,8 +109,9 @@ auto PPU::scanline() -> void {
     latch.ss |= io.bgMode == 7 && hdScale() > 1 && hdSupersample() == 1;
   }
 
-  if(vcounter() == vdisp() && !io.displayDisable) {
-    oamAddressReset();
+  if(vcounter() == vdisp()) {
+    if(auto device = controllerPort2.device) device->latch();  //light guns
+    if(!io.displayDisable) oamAddressReset();
   }
 
   if(vcounter() == 240) {
@@ -144,6 +145,7 @@ auto PPU::refresh() -> void {
       }
     }
 
+    if(auto device = controllerPort2.device) device->draw(output, pitch * sizeof(uint16), width, height);
     platform->videoFrame(output, pitch * sizeof(uint16), width, height, hd() ? hdScale() : 1);
 
     frame.pitch  = pitch;

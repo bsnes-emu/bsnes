@@ -1,3 +1,13 @@
+auto PPU::latchCounters(uint hcounter, uint vcounter) -> void {
+  if(system.fastPPU()) {
+    return ppufast.latchCounters(hcounter, vcounter);
+  }
+
+  io.hcounter = hcounter;
+  io.vcounter = vcounter;
+  latch.counters = 1;
+}
+
 auto PPU::latchCounters() -> void {
   if(system.fastPPU()) {
     return ppufast.latchCounters();

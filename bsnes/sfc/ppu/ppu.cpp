@@ -231,6 +231,10 @@ auto PPU::scanline() -> void {
   window.scanline();
   screen.scanline();
 
+  if(vcounter() == vdisp()) {
+    if(auto device = controllerPort2.device) device->latch();  //light guns
+  }
+
   if(vcounter() == 240) {
     scheduler.exit(Scheduler::Event::Frame);
   }
@@ -245,6 +249,7 @@ auto PPU::refresh() -> void {
   auto pitch  = 512;
   auto width  = 512;
   auto height = 480;
+  if(auto device = controllerPort2.device) device->draw(output, pitch * sizeof(uint16), width, height);
   platform->videoFrame(output, pitch * sizeof(uint16), width, height, /* scale = */ 1);
 }
 

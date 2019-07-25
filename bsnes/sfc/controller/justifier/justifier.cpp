@@ -8,15 +8,11 @@ device(!chained ? ID::Device::Justifier : ID::Device::Justifiers)
   active = 0;
   prev = 0;
 
-  player1.sprite = Emulator::video.createSprite(32, 32);
-  player1.sprite->setPixels(Resource::Sprite::CrosshairGreen);
   player1.x = 256 / 2;
   player1.y = 240 / 2;
   player1.trigger = false;
   player2.start = false;
 
-  player2.sprite = Emulator::video.createSprite(32, 32);
-  player2.sprite->setPixels(Resource::Sprite::CrosshairRed);
   player2.x = 256 / 2;
   player2.y = 240 / 2;
   player2.trigger = false;
@@ -30,55 +26,6 @@ device(!chained ? ID::Device::Justifier : ID::Device::Justifiers)
     player2.x += 16;
   }
 }
-
-Justifier::~Justifier() {
-  Emulator::video.removeSprite(player1.sprite);
-  Emulator::video.removeSprite(player2.sprite);
-}
-
-/*
-auto Justifier::main() -> void {
-  uint next = cpu.vcounter() * 1364 + cpu.hcounter();
-
-  int x = (active == 0 ? player1.x : player2.x), y = (active == 0 ? player1.y : player2.y);
-  bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
-
-  if(!offscreen) {
-    uint target = y * 1364 + (x + 24) * 4;
-    if(next >= target && prev < target) {
-      //CRT raster detected, toggle iobit to latch counters
-      iobit(0);
-      iobit(1);
-    }
-  }
-
-  if(next < prev) {
-    int nx1 = platform->inputPoll(port, device, 0 + X);
-    int ny1 = platform->inputPoll(port, device, 0 + Y);
-    nx1 += player1.x;
-    ny1 += player1.y;
-    player1.x = max(-16, min(256 + 16, nx1));
-    player1.y = max(-16, min(240 + 16, ny1));
-    player1.sprite->setPosition(player1.x * 2 - 16, player1.y * 2 - 16);
-    player1.sprite->setVisible(true);
-  }
-
-  if(next < prev && chained) {
-    int nx2 = platform->inputPoll(port, device, 4 + X);
-    int ny2 = platform->inputPoll(port, device, 4 + Y);
-    nx2 += player2.x;
-    ny2 += player2.y;
-    player2.x = max(-16, min(256 + 16, nx2));
-    player2.y = max(-16, min(240 + 16, ny2));
-    player2.sprite->setPosition(player2.x * 2 - 16, player2.y * 2 - 16);
-    player2.sprite->setVisible(true);
-  }
-
-  prev = next;
-  step(2);
-  synchronize(cpu);
-}
-*/
 
 auto Justifier::data() -> uint2 {
   if(counter >= 32) return 1;
@@ -140,4 +87,76 @@ auto Justifier::latch(bool data) -> void {
   latched = data;
   counter = 0;
   if(latched == 0) active = !active;  //toggle between both controllers, even when unchained
+}
+
+auto Justifier::latch() -> void {
+  /* active value is inverted here ... */
+
+  if(active != 0) {
+    int nx = platform->inputPoll(port, device, 0 + X);
+    int ny = platform->inputPoll(port, device, 0 + Y);
+    player1.x = max(-16, min(256 + 16, nx + player1.x));
+    player1.y = max(-16, min((int)ppu.vdisp() + 16, ny + player1.y));
+    bool offscreen = (player1.x < 0 || player1.y < 0 || player1.x >= 256 || player1.y >= (int)ppu.vdisp());
+    if(!offscreen) ppu.latchCounters(player1.x, player1.y);
+  }
+
+  if(active != 1) {
+    int nx = platform->inputPoll(port, device, 4 + X);
+    int ny = platform->inputPoll(port, device, 4 + Y);
+    player2.x = max(-16, min(256 + 16, nx + player2.x));
+    player2.y = max(-16, min((int)ppu.vdisp() + 16, ny + player2.y));
+    bool offscreen = (player2.x < 0 || player2.y < 0 || player2.x >= 256 || player2.y >= (int)ppu.vdisp());
+    if(!offscreen) ppu.latchCounters(player2.x, player2.y);
+  }
+}
+
+auto Justifier::draw(uint16_t* data, uint pitch, uint width, uint height) -> void {
+  pitch >>= 1;
+  float scaleX = (float)width  / 256.0;
+  float scaleY = (float)height / (float)ppu.vdisp();
+  int length = (float)width / 256.0 * 4.0;
+
+  auto plot = [&](int x, int y, uint16_t color) -> void {
+    if(x >= 0 && y >= 0 && x < (int)width && y < (int)height) {
+      data[y * pitch + x] = color;
+    }
+  };
+
+  { int x = player1.x * scaleX;
+    int y = player1.y * scaleY;
+
+    uint16_t color = 0x03e0;
+    uint16_t black = 0x0000;
+
+    for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y - 1, black);
+    for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y + 1, black);
+    for(int py = y - length - 1; py <= y + length + 1; py++) plot(x - 1, py, black);
+    for(int py = y - length - 1; py <= y + length + 1; py++) plot(x + 1, py, black);
+    plot(x - length - 1, y, black);
+    plot(x + length + 1, y, black);
+    plot(x, y - length - 1, black);
+    plot(x, y + length + 1, black);
+    for(int px = x - length; px <= x + length; px++) plot(px, y, color);
+    for(int py = y - length; py <= y + length; py++) plot(x, py, color);
+  }
+
+  if(chained)
+  { int x = player2.x * scaleX;
+    int y = player2.y * scaleY;
+
+    uint16_t color = 0x7c00;
+    uint16_t black = 0x0000;
+
+    for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y - 1, black);
+    for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y + 1, black);
+    for(int py = y - length - 1; py <= y + length + 1; py++) plot(x - 1, py, black);
+    for(int py = y - length - 1; py <= y + length + 1; py++) plot(x + 1, py, black);
+    plot(x - length - 1, y, black);
+    plot(x + length + 1, y, black);
+    plot(x, y - length - 1, black);
+    plot(x, y + length + 1, black);
+    for(int px = x - length; px <= x + length; px++) plot(px, y, color);
+    for(int py = y - length; py <= y + length; py++) plot(x, py, color);
+  }
 }

@@ -236,6 +236,7 @@ public:
   };
 
   //io.cpp
+  auto latchCounters(uint hcounter, uint vcounter) -> void;
   auto latchCounters() -> void;
   alwaysinline auto vramAddress() const -> uint;
   alwaysinline auto readVRAM() -> uint16;

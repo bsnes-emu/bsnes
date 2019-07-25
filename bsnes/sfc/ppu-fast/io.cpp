@@ -1,3 +1,9 @@
+auto PPU::latchCounters(uint hcounter, uint vcounter) -> void {
+  io.hcounter = hcounter;
+  io.vcounter = vcounter;
+  latch.counters = 1;
+}
+
 auto PPU::latchCounters() -> void {
   io.hcounter = cpu.hdot();
   io.vcounter = cpu.vcounter();

@@ -1,15 +1,14 @@
 struct SuperScope : Controller {
-  shared_pointer<Emulator::Sprite> sprite;
-
   enum : uint {
     X, Y, Trigger, Cursor, Turbo, Pause,
   };
 
   SuperScope(uint port);
-  ~SuperScope();
 
   auto data() -> uint2;
   auto latch(bool data) -> void;
+  auto latch() -> void override;
+  auto draw(uint16_t* data, uint pitch, uint width, uint height) -> void override;
 
 private:
   bool latched;

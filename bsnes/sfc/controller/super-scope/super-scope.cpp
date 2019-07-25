@@ -11,9 +11,6 @@
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
 SuperScope::SuperScope(uint port) : Controller(port) {
-  sprite = Emulator::video.createSprite(32, 32);
-  sprite->setPixels(Resource::Sprite::CrosshairGreen);
-
   latched = 0;
   counter = 0;
 
@@ -34,42 +31,6 @@ SuperScope::SuperScope(uint port) : Controller(port) {
   prev = 0;
 }
 
-SuperScope::~SuperScope() {
-  Emulator::video.removeSprite(sprite);
-}
-
-/*
-auto SuperScope::main() -> void {
-  uint next = cpu.vcounter() * 1364 + cpu.hcounter();
-
-  if(!offscreen) {
-    uint target = y * 1364 + (x + 24) * 4;
-    if(next >= target && prev < target) {
-      //CRT raster detected, toggle iobit to latch counters
-      iobit(0);
-      iobit(1);
-    }
-  }
-
-  if(next < prev) {
-    //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
-    int nx = platform->inputPoll(port, ID::Device::SuperScope, X);
-    int ny = platform->inputPoll(port, ID::Device::SuperScope, Y);
-    nx += x;
-    ny += y;
-    x = max(-16, min(256 + 16, nx));
-    y = max(-16, min(240 + 16, ny));
-    offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
-    sprite->setPosition(x * 2 - 16, y * 2 - 16);
-    sprite->setVisible(true);
-  }
-
-  prev = next;
-  step(2);
-  synchronize(cpu);
-}
-*/
-
 auto SuperScope::data() -> uint2 {
   if(counter >= 8) return 1;
 
@@ -78,7 +39,6 @@ auto SuperScope::data() -> uint2 {
     bool newturbo = platform->inputPoll(port, ID::Device::SuperScope, Turbo);
     if(newturbo && !oldturbo) {
       turbo = !turbo;  //toggle state
-      sprite->setPixels(turbo ? (image)Resource::Sprite::CrosshairRed : (image)Resource::Sprite::CrosshairGreen);
     }
     oldturbo = newturbo;
 
@@ -127,4 +87,43 @@ auto SuperScope::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
+}
+
+auto SuperScope::latch() -> void {
+  int nx = platform->inputPoll(port, ID::Device::SuperScope, X);
+  int ny = platform->inputPoll(port, ID::Device::SuperScope, Y);
+  x = max(-16, min(256 + 16, nx + x));
+  y = max(-16, min((int)ppu.vdisp() + 16, ny + y));
+  offscreen = (x < 0 || y < 0 || x >= 256 || y >= (int)ppu.vdisp());
+  if(!offscreen) ppu.latchCounters(x, y);
+}
+
+auto SuperScope::draw(uint16_t* data, uint pitch, uint width, uint height) -> void {
+  pitch >>= 1;
+  float scaleX = (float)width  / 256.0;
+  float scaleY = (float)height / (float)ppu.vdisp();
+  int length = (float)width / 256.0 * 4.0;
+
+  int x = this->x * scaleX;
+  int y = this->y * scaleY;
+
+  auto plot = [&](int x, int y, uint16_t color) -> void {
+    if(x >= 0 && y >= 0 && x < (int)width && y < (int)height) {
+      data[y * pitch + x] = color;
+    }
+  };
+
+  uint16_t color = turbo ? 0x7c00 : 0x03e0;
+  uint16_t black = 0x0000;
+
+  for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y - 1, black);
+  for(int px = x - length - 1; px <= x + length + 1; px++) plot(px, y + 1, black);
+  for(int py = y - length - 1; py <= y + length + 1; py++) plot(x - 1, py, black);
+  for(int py = y - length - 1; py <= y + length + 1; py++) plot(x + 1, py, black);
+  plot(x - length - 1, y, black);
+  plot(x + length + 1, y, black);
+  plot(x, y - length - 1, black);
+  plot(x, y + length + 1, black);
+  for(int px = x - length; px <= x + length; px++) plot(px, y, color);
+  for(int py = y - length; py <= y + length; py++) plot(x, py, color);
 }
