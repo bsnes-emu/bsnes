@@ -12,7 +12,9 @@
 #endif
 #include "random.h"
 #include "gb.h"
-
+#ifdef _WIN32
+  #include "../Windows/getline.h"
+#endif
 
 #ifdef DISABLE_REWIND
 #define GB_rewind_free(...)
