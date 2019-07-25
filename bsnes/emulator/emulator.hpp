@@ -28,11 +28,10 @@ using namespace nall;
 #include <emulator/memory/readable.hpp>
 #include <emulator/memory/writable.hpp>
 #include <emulator/audio/audio.hpp>
-#include <emulator/resource/resource.hpp>
 
 namespace Emulator {
   static const string Name    = "bsnes";
-  static const string Version = "107.14";
+  static const string Version = "107.15";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org";

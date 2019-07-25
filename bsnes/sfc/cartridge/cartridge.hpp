@@ -98,7 +98,6 @@ private:
 
   //save.cpp
   auto saveCartridge(Markup::Node) -> void;
-  auto saveCartridgeGameBoy(Markup::Node) -> void;
   auto saveCartridgeBSMemory(Markup::Node) -> void;
   auto saveCartridgeSufamiTurboA(Markup::Node) -> void;
   auto saveCartridgeSufamiTurboB(Markup::Node) -> void;

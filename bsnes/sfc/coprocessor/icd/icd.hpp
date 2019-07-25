@@ -8,6 +8,7 @@ struct ICD : Emulator::Platform, Thread {
   auto main() -> void;
 
   auto load() -> bool;
+  auto save() -> void;
   auto unload() -> void;
   auto power(bool reset = false) -> void;
 

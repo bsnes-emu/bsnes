@@ -128,7 +128,7 @@ auto Cartridge::loadSufamiTurboB() -> bool {
 auto Cartridge::save() -> void {
   saveCartridge(game.document);
   if(has.GameBoySlot) {
-    saveCartridgeGameBoy(slotGameBoy.document);
+    icd.save();
   }
   if(has.BSMemorySlot) {
     saveCartridgeBSMemory(slotBSMemory.document);

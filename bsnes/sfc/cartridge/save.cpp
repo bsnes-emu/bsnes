@@ -13,9 +13,6 @@ auto Cartridge::saveCartridge(Markup::Node node) -> void {
   if(auto node = board["processor(identifier=OBC1)"]) saveOBC1(node);
 }
 
-auto Cartridge::saveCartridgeGameBoy(Markup::Node node) -> void {
-}
-
 auto Cartridge::saveCartridgeBSMemory(Markup::Node node) -> void {
   if(auto memory = Emulator::Game::Memory{node["game/board/memory(type=Flash,content=Program)"]}) {
     if(auto fp = platform->open(bsmemory.pathID, memory.name(), File::Write)) {

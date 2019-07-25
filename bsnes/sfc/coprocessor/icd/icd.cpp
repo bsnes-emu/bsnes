@@ -101,11 +101,31 @@ auto ICD::load() -> bool {
     cartridge.information.sha256 = Hash::SHA256({data, (uint64_t)size}).digest();
     fp->read(data, size);
     GB_load_rom_from_buffer(&sameboy, data, size);
+    free(data);
   } else return unload(), false;
+  if(auto fp = platform->open(pathID(), "save.ram", File::Read)) {
+    auto size = fp->size();
+    auto data = (uint8_t*)malloc(size);
+    fp->read(data, size);
+    GB_load_battery_from_buffer(&sameboy, data, size);
+    free(data);
+  }
   return true;
 }
 
+auto ICD::save() -> void {
+  if(auto size = GB_save_battery_size(&sameboy)) {
+    auto data = (uint8_t*)malloc(size);
+    GB_save_battery_to_buffer(&sameboy, data, size);
+    if(auto fp = platform->open(pathID(), "save.ram", File::Write)) {
+      fp->write(data, size);
+    }
+    free(data);
+  }
+}
+
 auto ICD::unload() -> void {
+  save();
   GB_free(&sameboy);
 }
 
