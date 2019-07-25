@@ -2,9 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gb.h"
-#ifdef _WIN32
-  #include "../Windows/getline.h"
-#endif
 
 typedef struct {
     bool has_bank;

@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -12,9 +11,6 @@
 #endif
 #include "random.h"
 #include "gb.h"
-#ifdef _WIN32
-  #include "../Windows/getline.h"
-#endif
 
 #ifdef DISABLE_REWIND
 #define GB_rewind_free(...)

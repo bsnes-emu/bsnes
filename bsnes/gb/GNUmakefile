@@ -1,9 +1,10 @@
-flags += -DGB_INTERNAL -Wno-multichar
+flags += -DGB_INTERNAL -DDISABLE_DEBUGGER -D_GNU_SOURCE -Wno-multichar
 options += -I../sameboy
 
-objects += gb-apu gb-camera gb-debugger gb-display gb-gb gb-joypad gb-mbc
+objects += gb-apu gb-camera gb-display gb-gb gb-joypad gb-mbc
 objects += gb-memory gb-printer gb-random gb-rewind gb-save_state gb-sgb
-objects += gb-sm83_cpu gb-sm83_disassembler gb-symbol_hash gb-timing
+objects += gb-sm83_cpu gb-symbol_hash gb-timing
+#objects+= gb-debugger gb-sm83_disassembler
 
 obj/gb-apu.o:               gb/Core/apu.c
 obj/gb-camera.o:            gb/Core/camera.c
