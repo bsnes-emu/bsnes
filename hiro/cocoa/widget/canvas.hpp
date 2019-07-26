@@ -5,9 +5,11 @@
   hiro::mCanvas* canvas;
 }
 -(id) initWith:(hiro::mCanvas&)canvas;
+-(void) resetCursorRects;
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender;
 -(BOOL) performDragOperation:(id<NSDraggingInfo>)sender;
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown;
+-(void) mouseEntered:(NSEvent*)event;
 -(void) mouseExited:(NSEvent*)event;
 -(void) mouseMove:(NSEvent*)event;
 -(void) mouseDown:(NSEvent*)event;

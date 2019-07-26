@@ -9,6 +9,12 @@
   return self;
 }
 
+-(void) resetCursorRects {
+  if(auto mouseCursor = NSMakeCursor(label->mouseCursor())) {
+    [self addCursorRect:self.bounds cursor:mouseCursor];
+  }
+}
+
 -(void) drawRect:(NSRect)rect {
   [[NSColor blackColor] setFill];
   NSRectFillUsingOperation(rect, NSCompositeSourceOver);

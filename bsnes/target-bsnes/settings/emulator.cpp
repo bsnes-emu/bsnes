@@ -137,7 +137,7 @@ auto EmulatorSettings::create() -> void {
     settings.emulator.hack.fastSuperFX = superFXClock.position() * 10 + 100;
     superFXValue.setText({settings.emulator.hack.fastSuperFX, "%"});
   }).doChange();
-  hacksNote.setForegroundColor({224, 0, 0}).setText("Note: some hack setting changes do not take effect until after reloading games.");
+  hacksNote.setText("Note: some hack setting changes do not take effect until after reloading games.");
 }
 
 auto EmulatorSettings::updateConfiguration() -> void {

@@ -365,7 +365,6 @@ auto pTableView::setForegroundColor(Color color) -> void {
 
 auto pTableView::setHeadered(bool headered) -> void {
   @autoreleasepool {
-    if(headered == state().headered) return;
     if(headered) {
       [[cocoaView content] setHeaderView:[[[NSTableHeaderView alloc] init] autorelease]];
     } else {

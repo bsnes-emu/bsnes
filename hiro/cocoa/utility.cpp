@@ -2,6 +2,13 @@ auto NSMakeColor(const hiro::Color& color) -> NSColor* {
   return [NSColor colorWithRed:(color.red() / 255.0) green:(color.green() / 255.0) blue:(color.blue() / 255.0) alpha:(color.alpha() / 255.0)];
 }
 
+auto NSMakeCursor(const hiro::MouseCursor& mouseCursor) -> NSCursor* {
+  if(mouseCursor == MouseCursor::Hand) return [NSCursor pointingHandCursor];
+  if(mouseCursor == MouseCursor::HorizontalResize) return [NSCursor resizeLeftRightCursor];
+  if(mouseCursor == MouseCursor::VerticalResize) return [NSCursor resizeUpDownCursor];
+  return nil;
+}
+
 auto NSMakeImage(image icon, uint scaleWidth = 0, uint scaleHeight = 0) -> NSImage* {
   if(!icon) return nil;
 
@@ -14,7 +21,7 @@ auto NSMakeImage(image icon, uint scaleWidth = 0, uint scaleHeight = 0) -> NSIma
     initWithBitmapDataPlanes:nil
     pixelsWide:icon.width() pixelsHigh:icon.height()
     bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES
-    isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace
+    isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace
     bitmapFormat:NSAlphaNonpremultipliedBitmapFormat
     bytesPerRow:(4 * icon.width()) bitsPerPixel:32
   ] autorelease];

@@ -39,7 +39,10 @@ ifeq ($(shell id -un),root)
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
+	mkdir -p ~/Library/Application\ Support/$(name)/Database/
 	cp -R out/$(name).app /Applications/$(name).app
+	cp Database/* ~/Library/Application\ Support/$(name)/Database/
+	cp ../icarus/Database/* ~/Library/Application\ Support/$(name)/Database/
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/applications/

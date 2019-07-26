@@ -22,6 +22,7 @@ auto Program::create() -> void {
 
   presentation.create();
   presentation.setVisible();
+  presentation.viewport.setFocused();
 
   settingsWindow.create();
   videoSettings.create();

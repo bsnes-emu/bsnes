@@ -5,6 +5,7 @@
   hiro::mViewport* viewport;
 }
 -(id) initWith:(hiro::mViewport&)viewport;
+-(void) resetCursorRects;
 -(void) drawRect:(NSRect)rect;
 -(BOOL) acceptsFirstResponder;
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender;

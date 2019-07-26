@@ -97,7 +97,7 @@ auto InputSettings::reloadMappings() -> void {
   mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(mapping.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))
+      .append(TableViewCell().setText(mapping.name).setFont(Font().setBold()))
       .append(TableViewCell())
     );
   }

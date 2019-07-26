@@ -137,7 +137,11 @@ auto AboutDialog::show() -> void {
   websiteValue.setAlignment(0.0);
   websiteValue.setFont(Font().setBold());
   websiteValue.setForegroundColor({0, 0, 240});
-  websiteValue.setText(string{state.website}.trimLeft("http://", 1L).trimLeft("https://", 1L));
+  auto website = state.website;
+  if(0);  //remove protocol prefix from displayed label:
+  else if(website.beginsWith("http://" )) website.trimLeft("http://" , 1L);
+  else if(website.beginsWith("https://")) website.trimLeft("https://", 1L);
+  websiteValue.setText(website);
   //so that the hand cursor is only visible when overing over the link.
   websiteValue.setMouseCursor(MouseCursor::Hand);
   websiteValue.onMouseRelease([&](auto button) {
@@ -153,6 +157,7 @@ auto AboutDialog::show() -> void {
   window.setDismissable();
   window.setVisible();
   window.setModal();
+  window.setVisible(false);
 }
 
 #endif

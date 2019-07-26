@@ -15,6 +15,12 @@
   return self;
 }
 
+-(void) resetCursorRects {
+  if(auto mouseCursor = NSMakeCursor(label->mouseCursor())) {
+    [self addCursorRect:self.bounds cursor:mouseCursor];
+  }
+}
+
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
   return DropPathsOperation(sender);
 }
@@ -40,6 +46,10 @@
     case 2: return canvas->doMouseRelease(hiro::Mouse::Button::Middle);
     }
   }
+}
+
+-(void) mouseEntered:(NSEvent*)event {
+  canvas->doMouseEnter();
 }
 
 -(void) mouseExited:(NSEvent*)event {
@@ -183,7 +193,7 @@ auto pCanvas::_rasterize() -> void {
         initWithBitmapDataPlanes:nil
         pixelsWide:width pixelsHigh:height
         bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES
-        isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace
+        isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace
         bitmapFormat:NSAlphaNonpremultipliedBitmapFormat
         bytesPerRow:(width * 4) bitsPerPixel:32
       ] autorelease];

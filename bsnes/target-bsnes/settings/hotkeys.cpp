@@ -33,7 +33,7 @@ auto HotkeySettings::reloadMappings() -> void {
   mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
   for(auto& hotkey : inputManager.hotkeys) {
     mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(hotkey.name).setFont(Font().setBold()).setBackgroundColor({240, 240, 255}))
+      .append(TableViewCell().setText(hotkey.name).setFont(Font().setBold()))
       .append(TableViewCell())
     );
   }
