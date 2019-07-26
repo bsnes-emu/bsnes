@@ -98,7 +98,11 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
     *argp++ = nullptr;
 
     if(execvp(name, (char* const*)argv) < 0) {
+      #if defined(PLATFORM_MACOS)
+      execlp("open", "open", (const char*)name, nullptr);
+      #else
       execlp("xdg-open", "xdg-open", (const char*)name, nullptr);
+      #endif
     }
     exit(0);
   }

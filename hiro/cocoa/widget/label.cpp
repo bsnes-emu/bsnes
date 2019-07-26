@@ -16,13 +16,10 @@
 }
 
 -(void) drawRect:(NSRect)dirtyRect {
-  auto geometry = label->geometry();
-  NSRect rect = {{geometry.x(), geometry.y()}, {geometry.width(), geometry.height()}};
-
   if(auto backgroundColor = label->backgroundColor()) {
     NSColor* color = NSMakeColor(backgroundColor);
     [color setFill];
-    NSRectFill(rect);
+    NSRectFill(dirtyRect);
   }
 
   NSFont* font = hiro::pFont::create(label->font(true));
@@ -43,6 +40,8 @@
   auto alignment = label->alignment();
   if(!alignment) alignment = {0.0, 0.5};
 
+  auto geometry = label->geometry();
+  NSRect rect = {{geometry.x(), geometry.y()}, {geometry.width(), geometry.height()}};
   rect.origin.x = max(0, (geometry.width() - size.width()) * alignment.horizontal());
   rect.origin.y = max(0, (geometry.height() - size.height()) * alignment.vertical());
   rect.size.width = min(geometry.width(), size.width());
@@ -128,8 +127,8 @@ auto pLabel::construct() -> void {
     pWidget::construct();
 
     setAlignment(state().alignment);
-    setBackgroundColor(state().backgroundColor());
-    setForegroundColor(state().foregroundColor());
+    setBackgroundColor(state().backgroundColor);
+    setForegroundColor(state().foregroundColor);
     setText(state().text);
   }
 }

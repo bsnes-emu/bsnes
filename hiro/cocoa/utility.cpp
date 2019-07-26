@@ -3,9 +3,9 @@ auto NSMakeColor(const hiro::Color& color) -> NSColor* {
 }
 
 auto NSMakeCursor(const hiro::MouseCursor& mouseCursor) -> NSCursor* {
-  if(mouseCursor == MouseCursor::Hand) return [NSCursor pointingHandCursor];
-  if(mouseCursor == MouseCursor::HorizontalResize) return [NSCursor resizeLeftRightCursor];
-  if(mouseCursor == MouseCursor::VerticalResize) return [NSCursor resizeUpDownCursor];
+  if(mouseCursor == hiro::MouseCursor::Hand) return [NSCursor pointingHandCursor];
+  if(mouseCursor == hiro::MouseCursor::HorizontalResize) return [NSCursor resizeLeftRightCursor];
+  if(mouseCursor == hiro::MouseCursor::VerticalResize) return [NSCursor resizeUpDownCursor];
   return nil;
 }
 

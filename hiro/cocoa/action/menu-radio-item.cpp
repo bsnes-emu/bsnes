@@ -7,7 +7,9 @@
     menuRadioItem = &menuRadioItemReference;
 
     [self setTarget:self];
-    [self setOnStateImage:[NSImage imageNamed:@"NSMenuRadio"]];
+  //todo: the default image is a check mark, which is not indicative of radio states.
+  //however, NSMenuRadio does not respect macOS' dark theme, and is barely visible.
+  //[self setOnStateImage:[NSImage imageNamed:@"NSMenuRadio"]];
   }
   return self;
 }

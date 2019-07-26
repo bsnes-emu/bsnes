@@ -294,6 +294,13 @@ auto Program::reset() -> void {
 
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
+  //todo: video.clear() is not working on macOS/OpenGL 3.2
+  if(auto [output, length] = video.acquire(1, 1); output) {
+    *output = 0;
+    video.release();
+    video.output();
+  }
+  audio.clear();
   rewindReset();  //free up memory that is no longer needed
   movieStop();  //in case a movie is currently being played or recorded
   cheatEditor.saveCheats();

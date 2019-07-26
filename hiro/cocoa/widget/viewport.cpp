@@ -10,7 +10,7 @@
 }
 
 -(void) resetCursorRects {
-  if(auto mouseCursor = NSMakeCursor(label->mouseCursor())) {
+  if(auto mouseCursor = NSMakeCursor(viewport->mouseCursor())) {
     [self addCursorRect:self.bounds cursor:mouseCursor];
   }
 }
