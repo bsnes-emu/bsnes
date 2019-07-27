@@ -263,6 +263,12 @@ auto Presentation::create() -> void {
 auto Presentation::updateProgramIcon() -> void {
   presentation.iconLayout.setVisible(!emulator->loaded() && !settings.video.snow);
   presentation.layout.resize();
+  //todo: video.clear() is not working on macOS/OpenGL 3.2
+  if(auto [output, length] = video.acquire(1, 1); output) {
+    *output = 0;
+    video.release();
+    video.output();
+  }
 }
 
 auto Presentation::updateStatusIcon() -> void {

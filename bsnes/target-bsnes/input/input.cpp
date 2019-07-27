@@ -164,7 +164,7 @@ auto InputMapping::displayName() -> string {
       //show device IDs to distinguish between multiple joypads
       path.append("(", hex(mapping.device->id()), ")");
     }
-    if(mapping.device->name() != "Keyboard") {
+    if(mapping.device->name() != "Keyboard" && mapping.device->name() != "Mouse") {
       //keyboards only have one group; no need to append group name
       path.append(".", mapping.device->group(mapping.group).name());
     }
