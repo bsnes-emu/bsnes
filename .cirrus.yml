@@ -1,0 +1,80 @@
+linux-x86_64-binaries_task:
+    container:
+        image: ubuntu:latest
+
+    setup_script:
+        - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+
+    compile_script:
+        - make -C bsnes
+
+    package_script:
+        - mkdir bsnes-nightly
+        - mkdir bsnes-nightly/Database
+        - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
+        - cp -a bsnes/Database/* bsnes-nightly/Database
+        - cp -a icarus/Database/* bsnes-nightly/Database
+        - cp -a GPLv3.txt bsnes-nightly/
+
+    bsnes-nightly_artifacts:
+        path: "bsnes-nightly/**"
+
+freebsd-x86_64-binaries_task:
+    freebsd_instance:
+        image: freebsd-12-0-release-amd64
+
+    setup_script:
+        - pkg install --yes gmake gdb gcc8 pkgconf sdl2 openal-soft gtksourceview2 libXv
+
+    compile_script:
+        - gmake -C bsnes
+
+    package_script:
+        - mkdir bsnes-nightly
+        - mkdir bsnes-nightly/Database
+        - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
+        - cp -a bsnes/Database/* bsnes-nightly/Database/
+        - cp -a icarus/Database/* bsnes-nightly/Database/
+        - cp -a GPLv3.txt bsnes-nightly/
+
+    bsnes-nightly_artifacts:
+        path: "bsnes-nightly/**"
+
+windows-x86_64-binaries_task:
+    container:
+        image: ubuntu:latest
+
+    setup_script:
+        - apt-get update && apt-get -y install build-essential mingw-w64
+
+    compile_script:
+        - make -C bsnes platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
+
+    package_script:
+        - mkdir bsnes-nightly
+        - mkdir bsnes-nightly/Database
+        - cp -a bsnes/out/bsnes bsnes-nightly/bsnes.exe
+        - cp -a bsnes/Database/* bsnes-nightly/Database/
+        - cp -a icarus/Database/* bsnes-nightly/Database/
+        - cp -a GPLv3.txt bsnes-nightly/
+
+    bsnes-nightly_artifacts:
+        path: "bsnes-nightly/**"
+
+macOS-x86_64-binaries_task:
+    osx_instance:
+        image: mojave-base
+
+    compile_script:
+        - make -C bsnes
+
+    package_script:
+        - mkdir bsnes-nightly
+        - mkdir bsnes-nightly/Database
+        - cp -a bsnes/out/bsnes.app bsnes-nightly/
+        - cp -a bsnes/Database/* bsnes-nightly/Database/
+        - cp -a icarus/Database/* bsnes-nightly/Database/
+        - cp -a GPLv3.txt bsnes-nightly/
+
+    bsnes-nightly_artifacts:
+        path: "bsnes-nightly/**"
