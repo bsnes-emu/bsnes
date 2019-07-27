@@ -20,6 +20,10 @@ However, bugs will exist, regressions will occur, so proceed at your own risk.
 If stability is required, please download the latest stable release from the
 [official website.](https://bsnes.byuu.org)
 
+Nightly builds are available via Cirrus CI.
+
+  - [Nightly builds](https://cirrus-ci.com/github/byuu/bsnes)
+
 Unique Features
 ---------------
 
