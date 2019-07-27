@@ -248,6 +248,8 @@ auto SuperFamicom::board() const -> string {
     if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
   }
 
+  if(mode == "LOROM-" && headerAddress == 0x407fb0) mode = "EXLOROM-";
+
   bool epsonRTC = false;
   bool sharpRTC = false;
 

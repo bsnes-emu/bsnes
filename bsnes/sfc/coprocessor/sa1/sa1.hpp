@@ -36,8 +36,8 @@ struct SA1 : Processor::WDC65816, Thread {
   alwaysinline auto idle() -> void override;
   alwaysinline auto idleJump() -> void override;
   alwaysinline auto idleBranch() -> void override;
-  alwaysinline auto read(uint address) -> uint8 override;
-  alwaysinline auto write(uint address, uint8 data) -> void override;
+  alwaysinline auto read(uint24 address) -> uint8 override;
+  alwaysinline auto write(uint24 address, uint8 data) -> void override;
   auto readVBR(uint address, uint8 data = 0) -> uint8;
   auto readDisassembler(uint address) -> uint8 override;
 

@@ -18,7 +18,7 @@ auto SA1::idleBranch() -> void {
   if(r.pc.d & 1) idleJump();
 }
 
-auto SA1::read(uint address) -> uint8 {
+auto SA1::read(uint24 address) -> uint8 {
   r.mar = address;
   uint8 data = r.mdr;
 
@@ -62,7 +62,7 @@ auto SA1::read(uint address) -> uint8 {
   return data;
 }
 
-auto SA1::write(uint address, uint8 data) -> void {
+auto SA1::write(uint24 address, uint8 data) -> void {
   r.mar = address;
   r.mdr = data;
 

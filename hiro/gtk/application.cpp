@@ -11,7 +11,7 @@ auto Log_Filter(const char* logDomain, GLogLevelFlags logLevel, const char* mess
   //FreeBSD 12.0: caused by gtk_combo_box_size_allocate() internal function being defective
   if(string{message}.find("gtk_widget_size_allocate():")) return;
 
-  //prin all other messages
+  //print all other messages
   print(terminal::color::yellow("hiro: "), logDomain, "::", message, "\n");
 }
 
@@ -102,7 +102,7 @@ auto pApplication::initialize() -> void {
   //prevent useless terminal messages:
   //GVFS-RemoteVolumeMonitor: "invoking List() failed for type GProxyVolumeMonitorHal: method not implemented"
   g_log_set_handler("GVFS-RemoteVolumeMonitor", G_LOG_LEVEL_MASK, Log_Ignore, nullptr);
-  //Gtk: gtk_widget_size_allocate(): attempt to allocate widget with (width or height < 1)
+  //Gtk: "gtk_widget_size_allocate(): attempt to allocate widget with (width or height < 1)"
   g_log_set_handler("Gtk", G_LOG_LEVEL_MASK, Log_Filter, nullptr);
 
   //set WM_CLASS to Application::name()
