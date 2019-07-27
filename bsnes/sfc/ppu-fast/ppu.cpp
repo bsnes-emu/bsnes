@@ -45,9 +45,9 @@ PPU::PPU() {
     }
   }
 
-  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8];
-  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8];
-  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8];
+  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8]();
+  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8]();
+  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8]();
 
   for(uint y : range(240)) {
     lines[y].y = y;
