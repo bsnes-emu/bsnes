@@ -3,7 +3,7 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
 #endif
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <sys/time.h>
 #endif
