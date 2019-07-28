@@ -20,10 +20,6 @@ However, bugs will exist, regressions will occur, so proceed at your own risk.
 If stability is required, please download the latest stable release from the
 [official website.](https://bsnes.byuu.org)
 
-Nightly builds are available via Cirrus CI.
-
-  - [Nightly builds](https://cirrus-ci.com/github/byuu/bsnes)
-
 Unique Features
 ---------------
 
@@ -73,3 +69,12 @@ Links
   - [Official website](https://bsnes.byuu.org)
   - [Official git repository](https://github.com/byuu/bsnes)
   - [Donations](https://patreon.com/byuu)
+
+Nightly Builds
+--------------
+
+  - [Download](https://cirrus-ci.com/github/byuu/bsnes/master)
+  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=windows-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=macOS-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=linux-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=freebsd-x86_64-binaries)
