@@ -41,11 +41,16 @@ auto PPU::Line::render() -> void {
     below[x] = {Source::COL, 0, belowColor};
   }
 
+  //hack: generally, renderBackground/renderObject ordering do not matter.
+  //but for HD mode 7, a larger grid of pixels are generated, and so ordering ends up mattering.
+  //as a hack for Mohawk & Headphone Jack, we reorder things for BG2 to render properly.
+  //longer-term, we need to devise a better solution that can work for every game.
   renderBackground(io.bg1, Source::BG1);
-  renderBackground(io.bg2, Source::BG2);
+  if(io.extbg == 0) renderBackground(io.bg2, Source::BG2);
   renderBackground(io.bg3, Source::BG3);
   renderBackground(io.bg4, Source::BG4);
   renderObject(io.obj);
+  if(io.extbg == 1) renderBackground(io.bg2, Source::BG2);
   renderWindow(io.col.window, io.col.window.aboveMask, windowAbove);
   renderWindow(io.col.window, io.col.window.belowMask, windowBelow);
 

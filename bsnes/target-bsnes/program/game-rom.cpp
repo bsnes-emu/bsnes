@@ -16,7 +16,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0x00000], 0x20000);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Program,architecture=ARM6)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".program.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -26,7 +26,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0x20000], 0x08000);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Data,architecture=ARM6)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".data.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -36,7 +36,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(superFamicom.firmware.data(), superFamicom.firmware.size());
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Data,architecture=HG51BS169)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".data.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -46,7 +46,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(superFamicom.firmware.data(), superFamicom.firmware.size());
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Boot,architecture=LR35902)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".boot.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".boot.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -56,7 +56,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0x0000], 0x1800);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Program,architecture=uPD7725)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".program.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -66,7 +66,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0x1800], 0x0800);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Data,architecture=uPD7725)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".data.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -76,7 +76,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0x0000], 0xc000);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Program,architecture=uPD96050)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".program.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".program.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }
@@ -86,7 +86,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
       return vfs::memory::file::open(&superFamicom.firmware.data()[0xc000], 0x1000);
     }
     if(auto memory = superFamicom.document["game/board/memory(type=ROM,content=Data,architecture=uPD96050)"]) {
-      string location = locate({"firmware/", memory["identifier"].text().downcase(), ".data.rom"});
+      string location = locate({"Firmware/", memory["identifier"].text().downcase(), ".data.rom"});
       return vfs::fs::file::open(location, mode);
     }
   }

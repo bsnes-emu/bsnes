@@ -11,6 +11,7 @@ linux-x86_64-binaries_task:
     package_script:
         - mkdir bsnes-nightly
         - mkdir bsnes-nightly/Database
+        - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
         - cp -a bsnes/Database/* bsnes-nightly/Database
         - cp -a icarus/Database/* bsnes-nightly/Database
@@ -32,6 +33,7 @@ freebsd-x86_64-binaries_task:
     package_script:
         - mkdir bsnes-nightly
         - mkdir bsnes-nightly/Database
+        - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
         - cp -a bsnes/Database/* bsnes-nightly/Database/
         - cp -a icarus/Database/* bsnes-nightly/Database/
@@ -53,6 +55,7 @@ windows-x86_64-binaries_task:
     package_script:
         - mkdir bsnes-nightly
         - mkdir bsnes-nightly/Database
+        - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes.exe
         - cp -a bsnes/Database/* bsnes-nightly/Database/
         - cp -a icarus/Database/* bsnes-nightly/Database/
@@ -70,10 +73,7 @@ macOS-x86_64-binaries_task:
 
     package_script:
         - mkdir bsnes-nightly
-        - mkdir bsnes-nightly/Database
         - cp -a bsnes/out/bsnes.app bsnes-nightly/
-        - cp -a bsnes/Database/* bsnes-nightly/Database/
-        - cp -a icarus/Database/* bsnes-nightly/Database/
         - cp -a GPLv3.txt bsnes-nightly/
 
     bsnes-nightly_artifacts:

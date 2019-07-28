@@ -25,8 +25,12 @@ all: $(hiro.objects) $(ruby.objects) $(objects)
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/
+	mkdir -p out/$(name).app/Contents/MacOS/Database/
+	mkdir -p out/$(name).app/Contents/MacOS/Firmware/
 	mkdir -p out/$(name).app/Contents/Resources/
 	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
+	cp Database/* out/$(name).app/Contents/MacOS/Database/
+	cp ../icarus/Database/* out/$(name).app/Contents/MacOS/Database/
 	cp $(ui)/resource/$(name).plist out/$(name).app/Contents/Info.plist
 	sips -s format icns $(ui)/resource/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
@@ -40,9 +44,8 @@ else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Library/Application\ Support/$(name)/Database/
+	mkdir -p ~/Library/Application\ Support/$(name)/Firmware/
 	cp -R out/$(name).app /Applications/$(name).app
-	cp Database/* ~/Library/Application\ Support/$(name)/Database/
-	cp ../icarus/Database/* ~/Library/Application\ Support/$(name)/Database/
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/applications/
