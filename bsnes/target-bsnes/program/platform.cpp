@@ -262,7 +262,7 @@ auto Program::audioFrame(const float* samples, uint channels) -> void {
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
   int16 value = 0;
-  if(focused() || emulatorSettings.allowInput().checked()) {
+  if(focused() || inputSettings.allowInput().checked()) {
     inputManager.poll();
     if(auto mapping = inputManager.mapping(port, device, input)) {
       value = mapping->poll();
@@ -282,7 +282,7 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
-  if(focused() || emulatorSettings.allowInput().checked() || !enable) {
+  if(focused() || inputSettings.allowInput().checked() || !enable) {
     if(auto mapping = inputManager.mapping(port, device, input)) {
       return mapping->rumble(enable);
     }

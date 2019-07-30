@@ -1,23 +1,8 @@
 auto EmulatorSettings::create() -> void {
-  setIcon(Icon::Action::Settings);
-  setText("Emulator");
-
-  layout.setPadding(5_sx);
+  setCollapsible();
+  setVisible(false);
 
   optionsLabel.setText("Options").setFont(Font().setBold());
-  inputFocusLabel.setText("When focus is lost:");
-  pauseEmulation.setText("Pause emulation").onActivate([&] {
-    settings.input.defocus = "Pause";
-  });
-  blockInput.setText("Block input").onActivate([&] {
-    settings.input.defocus = "Block";
-  });
-  allowInput.setText("Allow input").onActivate([&] {
-    settings.input.defocus = "Allow";
-  });
-  if(settings.input.defocus == "Pause") pauseEmulation.setChecked();
-  if(settings.input.defocus == "Block") blockInput.setChecked();
-  if(settings.input.defocus == "Allow") allowInput.setChecked();
   warnOnUnverifiedGames.setText("Warn when loading games that have not been verified").setChecked(settings.emulator.warnOnUnverifiedGames).onToggle([&] {
     settings.emulator.warnOnUnverifiedGames = warnOnUnverifiedGames.checked();
   });
@@ -34,42 +19,6 @@ auto EmulatorSettings::create() -> void {
   }).doToggle();
   autoLoadStateOnLoad.setText("Auto-resume on load").setChecked(settings.emulator.autoLoadStateOnLoad).onToggle([&] {
     settings.emulator.autoLoadStateOnLoad = autoLoadStateOnLoad.checked();
-  });
-  rewindFrequencyLabel.setText("Rewind Frequency:");
-  rewindFrequencyOption.append(ComboButtonItem().setText("Disabled"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 10 frames"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 20 frames"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 30 frames"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 40 frames"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 50 frames"));
-  rewindFrequencyOption.append(ComboButtonItem().setText("Every 60 frames"));
-  if(settings.emulator.rewind.frequency ==  0) rewindFrequencyOption.item(0).setSelected();
-  if(settings.emulator.rewind.frequency == 10) rewindFrequencyOption.item(1).setSelected();
-  if(settings.emulator.rewind.frequency == 20) rewindFrequencyOption.item(2).setSelected();
-  if(settings.emulator.rewind.frequency == 30) rewindFrequencyOption.item(3).setSelected();
-  if(settings.emulator.rewind.frequency == 40) rewindFrequencyOption.item(4).setSelected();
-  if(settings.emulator.rewind.frequency == 50) rewindFrequencyOption.item(5).setSelected();
-  if(settings.emulator.rewind.frequency == 60) rewindFrequencyOption.item(6).setSelected();
-  rewindFrequencyOption.onChange([&] {
-    settings.emulator.rewind.frequency = rewindFrequencyOption.selected().offset() * 10;
-    program.rewindReset();
-  });
-  rewindLengthLabel.setText("Rewind Length:");
-  rewindLengthOption.append(ComboButtonItem().setText( "10 states"));
-  rewindLengthOption.append(ComboButtonItem().setText( "20 states"));
-  rewindLengthOption.append(ComboButtonItem().setText( "40 states"));
-  rewindLengthOption.append(ComboButtonItem().setText( "80 states"));
-  rewindLengthOption.append(ComboButtonItem().setText("160 states"));
-  rewindLengthOption.append(ComboButtonItem().setText("320 states"));
-  if(settings.emulator.rewind.length ==  10) rewindLengthOption.item(0).setSelected();
-  if(settings.emulator.rewind.length ==  20) rewindLengthOption.item(1).setSelected();
-  if(settings.emulator.rewind.length ==  40) rewindLengthOption.item(2).setSelected();
-  if(settings.emulator.rewind.length ==  80) rewindLengthOption.item(3).setSelected();
-  if(settings.emulator.rewind.length == 160) rewindLengthOption.item(4).setSelected();
-  if(settings.emulator.rewind.length == 320) rewindLengthOption.item(5).setSelected();
-  rewindLengthOption.onChange([&] {
-    settings.emulator.rewind.length = 10 << rewindLengthOption.selected().offset();
-    program.rewindReset();
   });
   optionsSpacer.setColor({192, 192, 192});
 
@@ -131,24 +80,5 @@ auto EmulatorSettings::create() -> void {
   coprocessorsHLEOption.setText("Prefer HLE").setChecked(settings.emulator.hack.coprocessors.hle).onToggle([&] {
     settings.emulator.hack.coprocessors.hle = coprocessorsHLEOption.checked();
   });
-  superFXLabel.setText("SuperFX clock speed:");
-  superFXValue.setAlignment(0.5);
-  superFXClock.setLength(71).setPosition((settings.emulator.hack.fastSuperFX - 100) / 10).onChange([&] {
-    settings.emulator.hack.fastSuperFX = superFXClock.position() * 10 + 100;
-    superFXValue.setText({settings.emulator.hack.fastSuperFX, "%"});
-  }).doChange();
   hacksNote.setText("Note: some hack setting changes do not take effect until after reloading games.");
-}
-
-auto EmulatorSettings::updateConfiguration() -> void {
-  emulator->configure("Hacks/PPU/Fast", fastPPU.checked());
-  emulator->configure("Hacks/PPU/NoSpriteLimit", noSpriteLimit.checked());
-  emulator->configure("Hacks/PPU/Mode7/Scale", mode7Scale.selected().property("multiplier").natural());
-  emulator->configure("Hacks/PPU/Mode7/Perspective", mode7Perspective.checked());
-  emulator->configure("Hacks/PPU/Mode7/Supersample", mode7Supersample.checked());
-  emulator->configure("Hacks/PPU/Mode7/Mosaic", mode7Mosaic.checked());
-  emulator->configure("Hacks/DSP/Fast", fastDSP.checked());
-  emulator->configure("Hacks/DSP/Cubic", cubicInterpolation.checked());
-  emulator->configure("Hacks/Coprocessor/DelayedSync", coprocessorsDelayedSyncOption.checked());
-  emulator->configure("Hacks/Coprocessor/HLE", coprocessorsHLEOption.checked());
 }

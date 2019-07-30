@@ -65,8 +65,8 @@ auto mTableView::columns() const -> vector<TableViewColumn> {
   return columns;
 }
 
-auto mTableView::doActivate() const -> void {
-  if(state.onActivate) return state.onActivate();
+auto mTableView::doActivate(sTableViewCell cell) const -> void {
+  if(state.onActivate) return state.onActivate(cell);
 }
 
 auto mTableView::doChange() const -> void {
@@ -112,7 +112,7 @@ auto mTableView::items() const -> vector<TableViewItem> {
   return items;
 }
 
-auto mTableView::onActivate(const function<void ()>& callback) -> type& {
+auto mTableView::onActivate(const function<void (TableViewCell)>& callback) -> type& {
   state.onActivate = callback;
   return *this;
 }

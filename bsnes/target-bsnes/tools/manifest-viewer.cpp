@@ -1,8 +1,7 @@
 auto ManifestViewer::create() -> void {
-  setIcon(Icon::Emblem::Text);
-  setText("Manifest Viewer");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
   manifestLabel.setText("Manifest:");
   manifestOption.onChange([&] { selectManifest(); });
   manifestSpacer.setColor({192, 192, 192});

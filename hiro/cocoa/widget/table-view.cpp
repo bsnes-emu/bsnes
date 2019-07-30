@@ -111,7 +111,7 @@
 }
 
 -(IBAction) activate:(id)sender {
-  tableView->doActivate();
+  tableView->doActivate({});
 }
 
 -(IBAction) doubleAction:(id)sender {

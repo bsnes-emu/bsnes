@@ -1,11 +1,12 @@
+enum : uint { BindingLimit = 4 };
+
 struct InputMapping {
   auto bind() -> void;
-  auto bind(string mapping) -> void;
-  auto bind(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> bool;
-  auto unbind() -> void;
+  auto bind(string mapping, uint binding) -> void;
+  auto bind(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, uint binding) -> bool;
+  auto unbind(uint binding) -> void;
   auto poll() -> int16;
   auto rumble(bool enable) -> void;
-  auto displayName() -> string;
 
   using Type = Emulator::Interface::Input::Type;
   auto isDigital() const -> bool {
@@ -26,31 +27,34 @@ struct InputMapping {
   string path;  //configuration file key path
   string name;  //input name (human readable)
   uint type = 0;
-  string assignment = "None";
+  string assignments[BindingLimit];
 
   enum class Logic : uint { AND, OR };
   enum class Qualifier : uint { None, Lo, Hi, Rumble };
   virtual auto logic() const -> Logic { return Logic::OR; }
 
-  struct Mapping {
+  struct Binding {
+    auto icon() -> image;
+    auto name() -> string;
+
     shared_pointer<HID::Device> device;
     uint group = 0;
     uint input = 0;
     Qualifier qualifier = Qualifier::None;
   };
-  vector<Mapping> mappings;
+  Binding bindings[BindingLimit];
 
   uint3 turboCounter = 0;
 };
 
 struct InputHotkey : InputMapping {
   InputHotkey(string name) { this->name = name; }
-  auto& onPress(function<void()> press) { return this->press = press, *this; }
-  auto& onRelease(function<void()> release) { return this->release = release, *this; }
-//auto logic() const -> Logic override { return Logic::AND; }
+  auto& onPress(function<void ()> press) { return this->press = press, *this; }
+  auto& onRelease(function<void ()> release) { return this->release = release, *this; }
+  auto logic() const -> Logic override;
 
-  function<auto() -> void> press;
-  function<auto() -> void> release;
+  function<void ()> press;
+  function<void ()> release;
   int16 state = 0;
 };
 
@@ -67,6 +71,8 @@ struct InputPort {
 };
 
 struct InputManager {
+  InputMapping::Logic hotkeyLogic = InputMapping::Logic::OR;
+
   auto initialize() -> void;
   auto bind() -> void;
   auto poll() -> void;

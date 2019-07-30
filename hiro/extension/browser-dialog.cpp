@@ -11,7 +11,7 @@ struct BrowserDialogWindow {
   auto isFolder(const string& name) -> bool;
   auto isMatch(const string& name) -> bool;
   auto run() -> BrowserDialog::Response;
-  auto setPath(string path) -> void;
+  auto setPath(string path, const string& contains = "") -> void;
 
 private:
   Window window;
@@ -24,7 +24,8 @@ private:
         Button pathUp{&pathLayout, Size{0, 0}, 0};
       ListView view{&layout, Size{~0, ~0}, 5_sx};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-        ComboButton filterList{&controlLayout, Size{0, 0}, 5_sx};
+        ComboButton filterList{&controlLayout, Size{0, 0}, 0};
+        Button searchButton{&controlLayout, Size{0, 0}, 0};
         LineEdit fileName{&controlLayout, Size{~0, 0}, 5_sx};
         ComboButton optionList{&controlLayout, Size{0, 0}, 5_sx};
         Button acceptButton{&controlLayout, Size{80_sx, 0}, 5_sx};
@@ -212,12 +213,17 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
     optionList.append(ComboButtonItem().setText(option));
   }
   optionList.doChange();  //updates response.option to point to the default (first) option
-  fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); }).onChange([&] {
+  image iconSearch{Icon::Action::Search};
+  iconSearch.scale(16_sx, 16_sy);
+  searchButton.setIcon(iconSearch).setBordered(false).onActivate([&] { setPath(state.path, fileName.text()); });
+  fileName.onActivate([&] {
+    if(state.action == "saveFile") return accept();
+    setPath(state.path, fileName.text());
+  }).onChange([&] {
     auto name = fileName.text();
-    acceptButton.setEnabled(name && !isFolder(name));
-    fileName.setBackgroundColor(acceptButton.enabled() ? Color{} : Color{255, 224, 224});
+    if(state.action == "saveFile") acceptButton.setEnabled(name && !isFolder(name));
   });
-  acceptButton.onActivate([&] { accept(); });
+  acceptButton.setEnabled(false).onActivate([&] { accept(); });
   if(state.action.beginsWith("open")) acceptButton.setText(tr("Open"));
   if(state.action.beginsWith("save")) acceptButton.setText(tr("Save"));
   if(state.action.beginsWith("select")) acceptButton.setText(tr("Select"));
@@ -326,7 +332,7 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   window.setAlignment(state.relativeTo, state.alignment);
   window.setDismissable();
   window.setVisible();
-  view.setFocused();
+  fileName.setFocused();
   Application::processEvents();
   view->resizeColumns();
   window.setModal();
@@ -335,7 +341,7 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   return response;
 }
 
-auto BrowserDialogWindow::setPath(string path) -> void {
+auto BrowserDialogWindow::setPath(string path, const string& contains) -> void {
   path.transform("\\", "/");
   if((path || Path::root() == "/") && !path.endsWith("/")) path.append("/");
   pathName.setText(state.path = path);
@@ -365,13 +371,14 @@ auto BrowserDialogWindow::setPath(string path) -> void {
       if(state.action == "openFolder") continue;
     }
     if(!isMatch(content)) continue;
+    if(contains && !content.ifind(contains)) continue;
     if(!showHiddenOption.checked() && file::hidden({state.path, content})) continue;
     view.append(ListViewItem().setText(content).setIcon(isFolder ? (image)Icon::Action::Open : (image)Icon::Emblem::File));
   }
 
   Application::processEvents();
   view->resizeColumns();  //todo: on Windows, adding items may add vertical scrollbar; this hack corrects column width
-  view.setFocused().doChange();
+  view.doChange();
 }
 
 //

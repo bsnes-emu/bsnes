@@ -10,45 +10,45 @@ Audio::~Audio() {
 }
 
 auto Audio::reset(Interface* interface) -> void {
-  this->interface = interface;
-  streams.reset();
-  channels = 0;
+  _interface = interface;
+  _streams.reset();
+  _channels = 0;
 }
 
 auto Audio::setFrequency(double frequency) -> void {
-  this->frequency = frequency;
-  for(auto& stream : streams) {
+  _frequency = frequency;
+  for(auto& stream : _streams) {
     stream->setFrequency(stream->inputFrequency, frequency);
   }
 }
 
 auto Audio::setVolume(double volume) -> void {
-  this->volume = volume;
+  _volume = volume;
 }
 
 auto Audio::setBalance(double balance) -> void {
-  this->balance = balance;
+  _balance = balance;
 }
 
 auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stream> {
-  this->channels = max(this->channels, channels);
+  _channels = max(_channels, channels);
   shared_pointer<Stream> stream = new Stream;
-  stream->reset(channels, frequency, this->frequency);
-  streams.append(stream);
+  stream->reset(channels, frequency, _frequency);
+  _streams.append(stream);
   return stream;
 }
 
 auto Audio::process() -> void {
-  while(streams) {
-    for(auto& stream : streams) {
+  while(_streams) {
+    for(auto& stream : _streams) {
       if(!stream->pending()) return;
     }
 
-    double samples[channels];
+    double samples[_channels];
     for(auto& sample : samples) sample = 0.0;
 
-    for(auto& stream : streams) {
-      double buffer[channels];
+    for(auto& stream : _streams) {
+      double buffer[_channels];
       uint length = stream->read(buffer), offset = 0;
 
       for(auto& sample : samples) {
@@ -57,16 +57,16 @@ auto Audio::process() -> void {
       }
     }
 
-    for(auto c : range(channels)) {
-      samples[c] = max(-1.0, min(+1.0, samples[c] * volume));
+    for(auto c : range(_channels)) {
+      samples[c] = max(-1.0, min(+1.0, samples[c] * _volume));
     }
 
-    if(channels == 2) {
-      if(balance < 0.0) samples[1] *= 1.0 + balance;
-      if(balance > 0.0) samples[0] *= 1.0 - balance;
+    if(_channels == 2) {
+      if(_balance < 0.0) samples[1] *= 1.0 + _balance;
+      if(_balance > 0.0) samples[0] *= 1.0 - _balance;
     }
 
-    platform->audioFrame(samples, channels);
+    platform->audioFrame(samples, _channels);
   }
 }
 

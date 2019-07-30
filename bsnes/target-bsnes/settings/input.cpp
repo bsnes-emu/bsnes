@@ -1,8 +1,22 @@
 auto InputSettings::create() -> void {
-  setIcon(Icon::Device::Joypad);
-  setText("Input");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
+  inputFocusLabel.setText("When focus is lost:");
+  pauseEmulation.setText("Pause emulation").onActivate([&] {
+    settings.input.defocus = "Pause";
+  });
+  blockInput.setText("Block input").onActivate([&] {
+    settings.input.defocus = "Block";
+  });
+  allowInput.setText("Allow input").onActivate([&] {
+    settings.input.defocus = "Allow";
+  });
+  if(settings.input.defocus == "Pause") pauseEmulation.setChecked();
+  if(settings.input.defocus == "Block") blockInput.setChecked();
+  if(settings.input.defocus == "Allow") allowInput.setChecked();
+  separator.setColor({192, 192, 192});
+
   portLabel.setText("Port:");
   portList.onChange([&] { reloadDevices(); });
   deviceLabel.setText("Device:");
@@ -23,18 +37,23 @@ auto InputSettings::create() -> void {
   });
   mappingList.setBatchable();
   mappingList.setHeadered();
-  mappingList.onActivate([&] { if(assignButton.enabled()) assignButton.doActivate(); });
+  mappingList.onActivate([&](auto cell) { assignMapping(cell); });
   mappingList.onChange([&] { updateControls(); });
   mappingList.onSize([&] { mappingList.resizeColumns(); });
+  inputSink.setFocusable();
   assignMouse1.onActivate([&] { assignMouseInput(0); });
   assignMouse2.onActivate([&] { assignMouseInput(1); });
   assignMouse3.onActivate([&] { assignMouseInput(2); });
   assignButton.setText("Assign").onActivate([&] {
-    assignMapping();
+    clearButton.doActivate();
+    assignMapping(mappingList.selected().cell(0));
   });
   clearButton.setText("Clear").onActivate([&] {
+    cancelMapping();
     for(auto mapping : mappingList.batched()) {
-      activeDevice().mappings[mapping.offset()].unbind();
+      for(uint index : range(BindingLimit)) {
+        activeDevice().mappings[mapping.offset()].unbind(index);
+      }
     }
     refreshMappings();
   });
@@ -48,7 +67,7 @@ auto InputSettings::updateControls() -> void {
   assignMouse2.setVisible(false);
   assignMouse3.setVisible(false);
 
-  if(batched.size() == 1) {
+  if(activeMapping) {
     auto& input = activeDevice().mappings[batched.left().offset()];
     if(input.isDigital()) {
       assignMouse1.setVisible().setText("Mouse Left");
@@ -59,6 +78,8 @@ auto InputSettings::updateControls() -> void {
       assignMouse2.setVisible().setText("Mouse Y-axis");
     }
   }
+
+  controlLayout.resize();
 }
 
 auto InputSettings::activePort() -> InputPort& {
@@ -94,54 +115,65 @@ auto InputSettings::reloadDevices() -> void {
 auto InputSettings::reloadMappings() -> void {
   mappingList.reset();
   mappingList.append(TableViewColumn().setText("Name"));
-  mappingList.append(TableViewColumn().setText("Mapping").setExpandable());
+  for(uint n : range(BindingLimit)) {
+    mappingList.append(TableViewColumn().setText({"Mapping #", 1 + n}).setExpandable());
+  }
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.append(TableViewItem()
-      .append(TableViewCell().setText(mapping.name).setFont(Font().setBold()))
-      .append(TableViewCell())
-    );
+    TableViewItem item{&mappingList};
+    item.append(TableViewCell().setText(mapping.name).setFont(Font().setBold()));
+    for(uint n : range(BindingLimit)) item.append(TableViewCell());
   }
   refreshMappings();
   updateControls();
 }
 
 auto InputSettings::refreshMappings() -> void {
-  uint index = 0;
+  uint item = 0;
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.item(index++).cell(1).setText(mapping.displayName());
+    for(uint index : range(BindingLimit)) {
+      auto cell = mappingList.item(item).cell(1 + index);
+      auto& binding = mapping.bindings[index];
+      cell.setIcon(binding.icon());
+      cell.setText(binding.name());
+    }
+    item++;
   }
   Application::processEvents();
   mappingList.resizeColumns();
 }
 
-auto InputSettings::assignMapping() -> void {
+auto InputSettings::assignMapping(TableViewCell cell) -> void {
   inputManager.poll();  //clear any pending events first
 
   for(auto mapping : mappingList.batched()) {
     activeMapping = activeDevice().mappings[mapping.offset()];
-    settingsWindow.layout.setEnabled(false);
-    settingsWindow.statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+    activeBinding = max(0, (int)cell.offset() - 1);
+    mappingList.item(mapping.offset()).cell(1 + activeBinding).setIcon(Icon::Go::Right).setText("(assign ...)");
+    settingsWindow.statusBar.setText({"Press a key or button for mapping #", 1 + activeBinding, " [", activeMapping->name, "] ..."});
     settingsWindow.setDismissable(false);
+    updateControls();
+    Application::processEvents();
+    inputSink.setFocused();
+    return;  //map only one input at a time
   }
 }
 
 auto InputSettings::cancelMapping() -> void {
   activeMapping.reset();
   settingsWindow.statusBar.setText();
-  settingsWindow.layout.setEnabled();
   settingsWindow.doSize();
   settingsWindow.setDismissable(true);
+  mappingList.setFocused();
+  updateControls();
 }
 
 auto InputSettings::assignMouseInput(uint id) -> void {
-  if(auto mapping = mappingList.selected()) {
-    activeMapping = activeDevice().mappings[mapping.offset()];
-    if(auto mouse = inputManager.findMouse()) {
-      if(activeMapping->isDigital()) {
-        return inputEvent(mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
-      } else if(activeMapping->isAnalog()) {
-        return inputEvent(mouse, HID::Mouse::GroupID::Axis, id, 0, +32767, true);
-      }
+  if(!activeMapping) return;
+  if(auto mouse = inputManager.findMouse()) {
+    if(activeMapping->isDigital()) {
+      return inputEvent(mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
+    } else if(activeMapping->isAnalog()) {
+      return inputEvent(mouse, HID::Mouse::GroupID::Axis, id, 0, +32767, true);
     }
   }
 }
@@ -150,7 +182,7 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
   if(!activeMapping) return;
   if(device->isMouse() && !allowMouseInput) return;
 
-  if(activeMapping->bind(device, group, input, oldValue, newValue)) {
+  if(activeMapping->bind(device, group, input, oldValue, newValue, activeBinding)) {
     activeMapping.reset();
     settingsWindow.statusBar.setText("Mapping assigned.");
     refreshMappings();

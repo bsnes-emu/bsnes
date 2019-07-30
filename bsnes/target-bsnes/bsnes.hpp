@@ -18,6 +18,7 @@ extern unique_pointer<Emulator::Interface> emulator;
 #include <nall/decode/zip.hpp>
 #include <nall/encode/rle.hpp>
 #include <nall/encode/zip.hpp>
+#include <nall/hash/crc16.hpp>
 
 #include "program/program.hpp"
 #include "input/input.hpp"

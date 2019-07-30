@@ -1,8 +1,7 @@
 auto CheatFinder::create() -> void {
-  setIcon(Icon::Edit::Find);
-  setText("Cheat Finder");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
   searchList.setHeadered();
   searchValue.onActivate([&] { eventScan(); });
   searchLabel.setText("Value:");

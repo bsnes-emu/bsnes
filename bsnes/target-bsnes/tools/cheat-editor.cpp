@@ -110,14 +110,13 @@ auto CheatWindow::doAccept() -> void {
 //
 
 auto CheatEditor::create() -> void {
-  setIcon(Icon::Edit::Replace);
-  setText("Cheat Editor");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
   cheatList.setBatchable();
   cheatList.setHeadered();
   cheatList.setSortable();
-  cheatList.onActivate([&] {
+  cheatList.onActivate([&](auto cell) {
     //kind of a hack: toggling a cheat code twice quickly (onToggle) will call onActivate.
     //do not trigger the CheatWindow unless it's been at least two seconds since a cheat code was last toggled on or off.
     if(chrono::timestamp() - activateTimeout < 2) return;

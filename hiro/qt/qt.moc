@@ -1328,20 +1328,19 @@ static const uint qt_meta_data_hiro__QtTableView[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      18,   31,   31,   31, 0x0a,
-      32,   31,   31,   31, 0x0a,
-      43,   31,   31,   31, 0x0a,
-      55,   67,   31,   31, 0x0a,
-      74,  105,   31,   31, 0x0a,
+      18,   51,   63,   63, 0x0a,
+      64,   63,   63,   63, 0x0a,
+      75,   63,   63,   63, 0x0a,
+      87,   99,   63,   63, 0x0a,
+     106,   51,   63,   63, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_hiro__QtTableView[] = {
-    "hiro::QtTableView\0onActivate()\0\0"
-    "onChange()\0onContext()\0onSort(int)\0"
-    "column\0onToggle(QTreeWidgetItem*,int)\0"
-    "item,column\0"
+    "hiro::QtTableView\0onActivate(QTreeWidgetItem*,int)\0"
+    "item,column\0\0onChange()\0onContext()\0"
+    "onSort(int)\0column\0onToggle(QTreeWidgetItem*,int)\0"
 };
 
 void hiro::QtTableView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -1350,7 +1349,7 @@ void hiro::QtTableView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         Q_ASSERT(staticMetaObject.cast(_o));
         QtTableView *_t = static_cast<QtTableView *>(_o);
         switch (_id) {
-        case 0: _t->onActivate(); break;
+        case 0: _t->onActivate((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 1: _t->onChange(); break;
         case 2: _t->onContext(); break;
         case 3: _t->onSort((*reinterpret_cast< int(*)>(_a[1]))); break;

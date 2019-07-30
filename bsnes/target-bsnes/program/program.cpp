@@ -30,6 +30,7 @@ auto Program::create() -> void {
   inputSettings.create();
   hotkeySettings.create();
   pathSettings.create();
+  speedSettings.create();
   emulatorSettings.create();
   driverSettings.create();
 
@@ -65,9 +66,7 @@ auto Program::create() -> void {
   driverSettings.inputDriverChanged();
 
   if(gameQueue) load();
-  if(presentation.startFullScreen && emulator->loaded()) {
-    //remove the earlier fullscreen mode state, so that toggleFullscreenMode will enter fullscreen exclusive mode
-    presentation.setFullScreen(false);
+  if(startFullScreen && emulator->loaded()) {
     presentation.toggleFullscreenMode();
   }
   Application::onMain({&Program::main, this});

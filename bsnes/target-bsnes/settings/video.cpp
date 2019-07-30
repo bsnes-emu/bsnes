@@ -1,8 +1,6 @@
 auto VideoSettings::create() -> void {
-  setIcon(Icon::Device::Display);
-  setText("Video");
-
-  layout.setPadding(5_sx);
+  setCollapsible();
+  setVisible(false);
 
   colorAdjustmentLabel.setFont(Font().setBold()).setText("Color Adjustment");
   colorLayout.setSize({3, 3});
@@ -31,13 +29,6 @@ auto VideoSettings::create() -> void {
     gammaValue.setText(value);
     program.updateVideoPalette();
   }).doChange();
-
-  fastForwardFrameSkip.setText("Skip frames while fast forwarding").setChecked(settings.video.fastForwardFrameSkip).setToolTip({
-    "When using the fast forward hotkey, this option will enable a frame skip of 9.\n"
-    "Frame skipping while fast forwarding allows a higher maximum frame skipping frame rate."
-  }).onToggle([&] {
-    settings.video.fastForwardFrameSkip = fastForwardFrameSkip.checked();
-  });
 
   snowOption.setText("Draw snow effect when idle").setChecked(settings.video.snow).onToggle([&] {
     settings.video.snow = snowOption.checked();

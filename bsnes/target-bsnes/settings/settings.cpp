@@ -4,6 +4,7 @@
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"
+#include "speed.cpp"
 #include "emulator.cpp"
 #include "drivers.cpp"
 Settings settings;
@@ -12,6 +13,7 @@ AudioSettings audioSettings;
 InputSettings inputSettings;
 HotkeySettings hotkeySettings;
 PathSettings pathSettings;
+SpeedSettings speedSettings;
 EmulatorSettings emulatorSettings;
 DriverSettings driverSettings;
 namespace Instances { Instance<SettingsWindow> settingsWindow; }
@@ -31,9 +33,9 @@ auto Settings::save() -> void {
 auto Settings::process(bool load) -> void {
   if(load) {
     //initialize non-static default settings
-    video.driver = ruby::Video::safestDriver();
-    audio.driver = ruby::Audio::safestDriver();
-    input.driver = ruby::Input::safestDriver();
+    video.driver = ruby::Video::optimalDriver();
+    audio.driver = ruby::Audio::optimalDriver();
+    input.driver = ruby::Input::optimalDriver();
   }
 
   #define bind(type, path, name) \
@@ -49,11 +51,10 @@ auto Settings::process(bool load) -> void {
   bind(text,    "Video/Format",    video.format);
   bind(text,    "Video/Shader",    video.shader);
 
-  bind(natural, "Video/Luminance",            video.luminance);
-  bind(natural, "Video/Saturation",           video.saturation);
-  bind(natural, "Video/Gamma",                video.gamma);
-  bind(boolean, "Video/FastForwardFrameSkip", video.fastForwardFrameSkip);
-  bind(boolean, "Video/Snow",                 video.snow);
+  bind(natural, "Video/Luminance",  video.luminance);
+  bind(natural, "Video/Saturation", video.saturation);
+  bind(natural, "Video/Gamma",      video.gamma);
+  bind(boolean, "Video/Snow",       video.snow);
 
   bind(text,    "Video/Output",           video.output);
   bind(natural, "Video/Multiplier",       video.multiplier);
@@ -79,6 +80,7 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Input/Frequency",       input.frequency);
   bind(text,    "Input/Defocus",         input.defocus);
   bind(natural, "Input/Turbo/Frequency", input.turbo.frequency);
+  bind(text,    "Input/Hotkey/Logic",    input.hotkey.logic);
 
   bind(text,    "Path/Games",       path.games);
   bind(text,    "Path/Patches",     path.patches);
@@ -93,13 +95,20 @@ auto Settings::process(bool load) -> void {
   bind(text,    "Path/Recent/SufamiTurboA", path.recent.sufamiTurboA);
   bind(text,    "Path/Recent/SufamiTurboB", path.recent.sufamiTurboB);
 
+  bind(natural, "FastForward/FrameSkip", fastForward.frameSkip);
+  bind(natural, "FastForward/Limiter",   fastForward.limiter);
+  bind(boolean, "FastForward/Mute",      fastForward.mute);
+
+  bind(natural, "Rewind/Frequency", rewind.frequency);
+  bind(natural, "Rewind/Length",    rewind.length);
+  bind(boolean, "Rewind/Mute",      rewind.mute);
+
   bind(boolean, "Emulator/WarnOnUnverifiedGames",         emulator.warnOnUnverifiedGames);
   bind(boolean, "Emulator/AutoSaveMemory/Enable",         emulator.autoSaveMemory.enable);
   bind(natural, "Emulator/AutoSaveMemory/Interval",       emulator.autoSaveMemory.interval);
   bind(boolean, "Emulator/AutoSaveStateOnUnload",         emulator.autoSaveStateOnUnload);
   bind(boolean, "Emulator/AutoLoadStateOnLoad",           emulator.autoLoadStateOnLoad);
-  bind(natural, "Emulator/Rewind/Frequency",              emulator.rewind.frequency);
-  bind(natural, "Emulator/Rewind/Length",                 emulator.rewind.length);
+  bind(natural, "Emulator/Hack/CPU/Overclock",            emulator.hack.cpu.overclock);
   bind(boolean, "Emulator/Hack/PPU/Fast",                 emulator.hack.ppu.fast);
   bind(boolean, "Emulator/Hack/PPU/NoSpriteLimit",        emulator.hack.ppu.noSpriteLimit);
   bind(natural, "Emulator/Hack/PPU/Mode7/Scale",          emulator.hack.ppu.mode7.scale);
@@ -110,7 +119,8 @@ auto Settings::process(bool load) -> void {
   bind(boolean, "Emulator/Hack/DSP/Cubic",                emulator.hack.dsp.cubic);
   bind(boolean, "Emulator/Hack/Coprocessors/DelayedSync", emulator.hack.coprocessors.delayedSync);
   bind(boolean, "Emulator/Hack/Coprocessors/HLE",         emulator.hack.coprocessors.hle);
-  bind(natural, "Emulator/Hack/FastSuperFX",              emulator.hack.fastSuperFX);
+  bind(natural, "Emulator/Hack/SA1/Overclock",            emulator.hack.sa1.overclock);
+  bind(natural, "Emulator/Hack/SuperFX/Overclock",        emulator.hack.superfx.overclock);
   bind(boolean, "Emulator/Cheats/Enable",                 emulator.cheats.enable);
 
   bind(boolean, "General/StatusBar",   general.statusBar);
@@ -121,19 +131,61 @@ auto Settings::process(bool load) -> void {
   #undef bind
 }
 
+struct SettingsHome : VerticalLayout {
+  SettingsHome() {
+    setCollapsible();
+    setVisible(false);
+    image icon{Resource::Icon};
+    auto data = icon.data();
+    for(uint y : range(icon.height())) {
+      for(uint x : range(icon.width())) {
+        auto pixel = icon.read(data);
+        auto a = pixel >> 24 & 255;
+        auto r = pixel >> 16 & 255;
+        auto g = pixel >>  8 & 255;
+        auto b = pixel >>  0 & 255;
+        a = a * 0.25;
+        icon.write(data, a << 24 | r << 16 | g << 8 | b << 0);
+        data += icon.stride();
+      }
+    }
+    canvas.setIcon(icon);
+  }
+
+public:
+  Canvas canvas{this, Size{~0, ~0}};
+} settingsHome;
+
 auto SettingsWindow::create() -> void {
   layout.setPadding(5_sx);
-  panel.append(videoSettings);
-  panel.append(audioSettings);
-  panel.append(inputSettings);
-  panel.append(hotkeySettings);
-  panel.append(pathSettings);
-  panel.append(emulatorSettings);
-  panel.append(driverSettings);
+  panelList.append(ListViewItem().setText("Video").setIcon(Icon::Device::Display));
+  panelList.append(ListViewItem().setText("Audio").setIcon(Icon::Device::Speaker));
+  panelList.append(ListViewItem().setText("Input").setIcon(Icon::Device::Joypad));
+  panelList.append(ListViewItem().setText("Hotkeys").setIcon(Icon::Device::Keyboard));
+  panelList.append(ListViewItem().setText("Paths").setIcon(Icon::Emblem::Folder));
+  panelList.append(ListViewItem().setText("Speed").setIcon(Icon::Device::Clock));
+  panelList.append(ListViewItem().setText("Emulator").setIcon(Icon::Action::Settings));
+  panelList.append(ListViewItem().setText("Drivers").setIcon(Icon::Place::Settings));
+  panelList.onChange([&] {
+    if(auto item = panelList.selected()) {
+      show(item.offset());
+    } else {
+      show(-1);
+    }
+  });
+  panelContainer.append(settingsHome, Size{~0, ~0});
+  panelContainer.append(videoSettings, Size{~0, ~0});
+  panelContainer.append(audioSettings, Size{~0, ~0});
+  panelContainer.append(inputSettings, Size{~0, ~0});
+  panelContainer.append(hotkeySettings, Size{~0, ~0});
+  panelContainer.append(pathSettings, Size{~0, ~0});
+  panelContainer.append(speedSettings, Size{~0, ~0});
+  panelContainer.append(emulatorSettings, Size{~0, ~0});
+  panelContainer.append(driverSettings, Size{~0, ~0});
   statusBar.setFont(Font().setBold());
 
   setTitle("Settings");
-  setSize({600_sx, 400_sx});
+  setSize({680_sx, 400_sx});
   setAlignment({0.0, 1.0});
   setDismissable();
 
@@ -153,8 +205,27 @@ auto SettingsWindow::setVisible(bool visible) -> SettingsWindow& {
   return Window::setVisible(visible), *this;
 }
 
-auto SettingsWindow::show(uint index) -> void {
-  panel.item(index).setSelected();
+auto SettingsWindow::show(int index) -> void {
+  settingsHome.setVisible(false);
+  videoSettings.setVisible(false);
+  audioSettings.setVisible(false);
+  inputSettings.setVisible(false);
+  hotkeySettings.setVisible(false);
+  pathSettings.setVisible(false);
+  speedSettings.setVisible(false);
+  emulatorSettings.setVisible(false);
+  driverSettings.setVisible(false);
+  panelList.item(index).setSelected();
+  if(index ==-1) settingsHome.setVisible(true);
+  if(index == 0) videoSettings.setVisible(true);
+  if(index == 1) audioSettings.setVisible(true);
+  if(index == 2) inputSettings.setVisible(true);
+  if(index == 3) hotkeySettings.setVisible(true);
+  if(index == 4) pathSettings.setVisible(true);
+  if(index == 5) speedSettings.setVisible(true);
+  if(index == 6) emulatorSettings.setVisible(true);
+  if(index == 7) driverSettings.setVisible(true);
+  panelContainer.resize();
   setVisible();
   setFocused();
 }

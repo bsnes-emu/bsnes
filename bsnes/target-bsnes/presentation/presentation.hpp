@@ -19,8 +19,6 @@ struct Presentation : Window {
   auto addRecentGame(string location) -> void;
   auto updateShaders() -> void;
 
-  bool startFullScreen = false;
-
   MenuBar menuBar{this};
     Menu systemMenu{&menuBar};
       MenuItem loadGame{&systemMenu};
@@ -88,6 +86,7 @@ struct Presentation : Window {
       MenuItem inputSettings{&settingsMenu};
       MenuItem hotkeySettings{&settingsMenu};
       MenuItem pathSettings{&settingsMenu};
+      MenuItem speedSettings{&settingsMenu};
       MenuItem emulatorSettings{&settingsMenu};
       MenuItem driverSettings{&settingsMenu};
     Menu toolsMenu{&menuBar};

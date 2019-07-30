@@ -127,8 +127,10 @@ auto SA1::unload() -> void {
 }
 
 auto SA1::power() -> void {
+  double overclock = max(1.0, min(4.0, configuration.hacks.sa1.overclock / 100.0));
+
   WDC65816::power();
-  create(SA1::Enter, system.cpuFrequency());
+  create(SA1::Enter, system.cpuFrequency() * overclock);
 
   bwram.dma = false;
   for(uint address : range(iram.size())) {

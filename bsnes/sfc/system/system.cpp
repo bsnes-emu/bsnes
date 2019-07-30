@@ -32,7 +32,6 @@ auto System::runToSave() -> void {
 
 auto System::load(Emulator::Interface* interface) -> bool {
   information = {};
-  hacks.fastPPU = configuration.hacks.ppu.fast;
 
   bus.reset();
   if(!cpu.load()) return false;
@@ -92,6 +91,8 @@ auto System::unload() -> void {
 }
 
 auto System::power(bool reset) -> void {
+  hacks.fastPPU = configuration.hacks.ppu.fast;
+
   Emulator::audio.reset(interface);
 
   random.entropy(Random::Entropy::Low);

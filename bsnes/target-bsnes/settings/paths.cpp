@@ -1,15 +1,14 @@
 auto PathSettings::create() -> void {
-  setIcon(Icon::Emblem::Folder);
-  setText("Paths");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
   layout.setSize({4, 6});
   layout.column(0).setAlignment(1.0);
 
   gamesLabel.setText("Games:");
   gamesPath.setEditable(false);
   gamesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.games = location;
       refreshPaths();
     }
@@ -22,7 +21,7 @@ auto PathSettings::create() -> void {
   patchesLabel.setText("Patches:");
   patchesPath.setEditable(false);
   patchesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.patches = location;
       refreshPaths();
     }
@@ -35,7 +34,7 @@ auto PathSettings::create() -> void {
   savesLabel.setText("Saves:");
   savesPath.setEditable(false);
   savesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.saves = location;
       refreshPaths();
     }
@@ -48,7 +47,7 @@ auto PathSettings::create() -> void {
   cheatsLabel.setText("Cheats:");
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.cheats = location;
       refreshPaths();
     }
@@ -61,7 +60,7 @@ auto PathSettings::create() -> void {
   statesLabel.setText("States:");
   statesPath.setEditable(false);
   statesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.states = location;
       refreshPaths();
     }
@@ -74,7 +73,7 @@ auto PathSettings::create() -> void {
   screenshotsLabel.setText("Screenshots:");
   screenshotsPath.setEditable(false);
   screenshotsAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().setAlignment(*settingsWindow).selectFolder()) {
+    if(auto location = BrowserDialog().selectFolder()) {
       settings.path.screenshots = location;
       refreshPaths();
     }

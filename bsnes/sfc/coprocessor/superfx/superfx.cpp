@@ -37,8 +37,10 @@ auto SuperFX::unload() -> void {
 }
 
 auto SuperFX::power() -> void {
+  double overclock = max(1.0, min(8.0, configuration.hacks.superfx.overclock / 100.0));
+
   GSU::power();
-  create(SuperFX::Enter, Frequency);
+  create(SuperFX::Enter, Frequency * overclock);
 
   romMask = rom.size() - 1;
   ramMask = ram.size() - 1;

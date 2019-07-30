@@ -21,7 +21,7 @@ auto Program::updateStatus() -> void {
     frameRate = tr("Unloaded");
   } else if(presentation.pauseEmulation.checked()) {
     frameRate = tr("Paused");
-  } else if(!focused() && emulatorSettings.pauseEmulation.checked()) {
+  } else if(!focused() && inputSettings.pauseEmulation.checked()) {
     frameRate = tr("Paused");
   } else {
     frameRate = statusFrameRate;
@@ -66,7 +66,7 @@ auto Program::inactive() -> bool {
   if(locked()) return true;
   if(!emulator->loaded()) return true;
   if(presentation.pauseEmulation.checked()) return true;
-  if(!focused() && emulatorSettings.pauseEmulation.checked()) return true;
+  if(!focused() && inputSettings.pauseEmulation.checked()) return true;
   return false;
 }
 

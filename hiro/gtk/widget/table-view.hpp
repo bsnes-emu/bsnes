@@ -25,7 +25,7 @@ struct pTableView : pWidget {
   auto _cellWidth(uint row, uint column) -> uint;
   auto _columnWidth(uint column) -> uint;
   auto _createModel() -> void;
-  auto _doActivate() -> void;
+  auto _doActivate(GtkTreePath* = nullptr, GtkTreeViewColumn* = nullptr) -> void;
   auto _doChange() -> void;
   auto _doContext() -> void;
   auto _doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void;

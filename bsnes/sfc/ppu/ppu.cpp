@@ -90,15 +90,11 @@ auto PPU::main() -> void {
 }
 
 auto PPU::load() -> bool {
-  if(system.fastPPU()) {
-    return ppufast.load();
-  }
-
   ppu1.version = max(1, min(1, configuration.system.ppu1.version));
   ppu2.version = max(1, min(3, configuration.system.ppu2.version));
   vram.mask = configuration.system.ppu1.vram.size / sizeof(uint16) - 1;
   if(vram.mask != 0xffff) vram.mask = 0x7fff;
-  return true;
+  return true && ppufast.load();
 }
 
 auto PPU::power(bool reset) -> void {

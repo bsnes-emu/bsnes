@@ -74,7 +74,7 @@ struct VideoXShm : VideoDriver {
   auto output(uint width = 0, uint height = 0) -> void override {
     uint windowWidth, windowHeight;
     size(windowWidth, windowHeight);
-    if(!_image) return;
+    if(!_image || !_inputBuffer || !_outputBuffer) return;
 
     if(!width) width = _outputWidth;
     if(!height) height = _outputHeight;

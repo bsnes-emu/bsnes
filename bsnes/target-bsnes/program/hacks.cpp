@@ -34,32 +34,3 @@ auto Program::hackPatchMemory(vector<uint8_t>& data) -> void {
     if(data[0x4e9a] == 0x10) data[0x4e9a] = 0x80;
   }
 }
-
-auto Program::hackOverclockSuperFX() -> void {
-  //todo: implement a better way of detecting SuperFX games
-  //todo: apply multiplier changes on reset, not just on game load?
-  double multiplier = emulatorSettings.superFXValue.text().natural() / 100.0;
-  if(multiplier == 1.0) return;
-
-  auto title = superFamicom.title;
-  if(title == "NIDAN MORITASHOGI2") return;  //ST018 uses same clock speed as SuperFX
-
-  auto document = BML::unserialize(superFamicom.manifest);
-
-  //GSU-1, GSU-2 have a 21440000hz oscillator
-  if(auto oscillator = document["game/board/oscillator"]) {
-    if(oscillator["frequency"].text() == "21440000") {
-      oscillator["frequency"].setValue(uint(21440000 * multiplier));
-      superFamicom.manifest = BML::serialize(document);
-    }
-    return;
-  }
-
-  //MARIO CHIP 1 uses CPU oscillator; force it to use its own crystal to overclock it
-  bool marioChip1 = false;
-  if(title == "STAR FOX" || title == "STAR WING") marioChip1 = true;
-  if(marioChip1) {
-    document("game/board/oscillator/frequency").setValue(uint(21440000 * multiplier));
-    superFamicom.manifest = BML::serialize(document);
-  }
-}

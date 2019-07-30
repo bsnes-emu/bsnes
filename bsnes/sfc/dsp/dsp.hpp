@@ -2,7 +2,7 @@
 
 struct DSP {
   shared_pointer<Emulator::Stream> stream;
-  uint8 apuram[64 * 1024] = {};
+  uint8_t apuram[64 * 1024] = {};
 
   void main();
   uint8 read(uint8 addr);

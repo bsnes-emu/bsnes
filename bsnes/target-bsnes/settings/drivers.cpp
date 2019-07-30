@@ -1,8 +1,6 @@
 auto DriverSettings::create() -> void {
-  setIcon(Icon::Place::Settings);
-  setText("Drivers");
-
-  layout.setPadding(5_sx);
+  setCollapsible();
+  setVisible(false);
 
   videoLabel.setText("Video").setFont(Font().setBold());
   videoLayout.setSize({2, 2});
@@ -113,7 +111,7 @@ auto DriverSettings::videoDriverChanged() -> void {
   videoFormatChanged();
   videoBlockingToggle.setChecked(video.blocking()).setEnabled(video.hasBlocking());
   videoFlushToggle.setChecked(video.flush()).setEnabled(video.hasFlush());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::videoDriverChange() -> void {
@@ -143,7 +141,7 @@ auto DriverSettings::videoFormatChanged() -> void {
     if(format == video.format()) item.setSelected();
   }
 //videoFormatOption.setEnabled(video.hasFormat());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
   videoFormatChange();
 }
 
@@ -170,7 +168,7 @@ auto DriverSettings::audioDriverChanged() -> void {
   audioExclusiveToggle.setChecked(audio.exclusive()).setEnabled(audio.hasExclusive());
   audioBlockingToggle.setChecked(audio.blocking()).setEnabled(audio.hasBlocking());
   audioDynamicToggle.setChecked(audio.dynamic()).setEnabled(audio.hasDynamic());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::audioDriverChange() -> void {
@@ -200,7 +198,7 @@ auto DriverSettings::audioDeviceChanged() -> void {
     if(device == audio.device()) item.setSelected();
   }
 //audioDeviceOption.setEnabled(audio->hasDevice());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::audioDeviceChange() -> void {
@@ -219,7 +217,7 @@ auto DriverSettings::audioFrequencyChanged() -> void {
     if(frequency == audio.frequency()) item.setSelected();
   }
 //audioFrequencyOption.setEnabled(audio->hasFrequency());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::audioFrequencyChange() -> void {
@@ -236,7 +234,7 @@ auto DriverSettings::audioLatencyChanged() -> void {
     if(latency == audio.latency()) item.setSelected();
   }
 //audioLatencyOption.setEnabled(audio->hasLatency());
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::audioLatencyChange() -> void {
@@ -256,7 +254,7 @@ auto DriverSettings::inputDriverChanged() -> void {
   }
   inputDriverActive.setText({"Active driver: ", input.driver()});
   inputDriverOption.doChange();
-  layout.setGeometry(layout.geometry());
+  setGeometry(geometry());
 }
 
 auto DriverSettings::inputDriverChange() -> void {

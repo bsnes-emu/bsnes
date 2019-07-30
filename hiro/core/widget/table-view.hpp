@@ -13,7 +13,7 @@ struct mTableView : mWidget {
   auto column(uint position) const -> TableViewColumn;
   auto columnCount() const -> uint;
   auto columns() const -> vector<TableViewColumn>;
-  auto doActivate() const -> void;
+  auto doActivate(sTableViewCell cell) const -> void;
   auto doChange() const -> void;
   auto doContext() const -> void;
   auto doEdit(sTableViewCell cell) const -> void;
@@ -24,7 +24,7 @@ struct mTableView : mWidget {
   auto item(uint position) const -> TableViewItem;
   auto itemCount() const -> uint;
   auto items() const -> vector<TableViewItem>;
-  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onActivate(const function<void (TableViewCell)>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
   auto onContext(const function<void ()>& callback = {}) -> type&;
   auto onEdit(const function<void (TableViewCell)>& callback = {}) -> type&;
@@ -59,7 +59,7 @@ struct mTableView : mWidget {
     Color foregroundColor;
     bool headered = false;
     vector<sTableViewItem> items;
-    function<void ()> onActivate;
+    function<void (TableViewCell)> onActivate;
     function<void ()> onChange;
     function<void ()> onContext;
     function<void (TableViewCell)> onEdit;

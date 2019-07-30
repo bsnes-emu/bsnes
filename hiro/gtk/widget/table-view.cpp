@@ -2,7 +2,7 @@
 
 namespace hiro {
 
-static auto TableView_activate(GtkTreeView*, GtkTreePath*, GtkTreeViewColumn*, pTableView* p) -> void { return p->_doActivate(); }
+static auto TableView_activate(GtkTreeView*, GtkTreePath* gtkRow, GtkTreeViewColumn* gtkColumn, pTableView* p) -> void { return p->_doActivate(gtkRow, gtkColumn); }
 static auto TableView_buttonEvent(GtkTreeView* treeView, GdkEventButton* event, pTableView* p) -> signed { return p->_doEvent(event); }
 static auto TableView_change(GtkTreeSelection*, pTableView* p) -> void { return p->_doChange(); }
 static auto TableView_edit(GtkCellRendererText* renderer, const char* path, const char* text, pTableView* p) -> void { return p->_doEdit(renderer, path, text); }
@@ -238,8 +238,26 @@ auto pTableView::_createModel() -> void {
   gtk_tree_view_set_model(gtkTreeView, gtkTreeModel);
 }
 
-auto pTableView::_doActivate() -> void {
-  if(!locked()) self().doActivate();
+auto pTableView::_doActivate(GtkTreePath* gtkRow, GtkTreeViewColumn* gtkColumn) -> void {
+  if(locked()) return;
+
+  if(gtkRow && gtkColumn) {
+    auto path = gtk_tree_path_to_string(gtkRow);
+    auto item = self().item(toNatural(path));
+    auto cell = item.cell(0);
+    for(auto& column : state().columns) {
+      if(auto self = column->self()) {
+        if(self->gtkColumn == gtkColumn) {
+          cell = item.cell(column->offset());
+          break;
+        }
+      }
+    }
+    g_free(path);
+    self().doActivate(cell);
+  } else {
+    self().doActivate({});
+  }
 }
 
 auto pTableView::_doChange() -> void {

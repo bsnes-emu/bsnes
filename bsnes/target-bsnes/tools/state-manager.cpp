@@ -47,15 +47,14 @@ auto StateWindow::doAccept() -> void {
 }
 
 auto StateManager::create() -> void {
-  setIcon(Icon::Application::FileManager);
-  setText("State Manager");
+  setCollapsible();
+  setVisible(false);
 
-  layout.setPadding(5_sx);
   stateLayout.setAlignment(0.0);
   stateList.setBatchable();
   stateList.setHeadered();
   stateList.setSortable();
-  stateList.onActivate([&] { loadButton.doActivate(); });
+  stateList.onActivate([&](auto cell) { loadButton.doActivate(); });
   stateList.onChange([&] { updateSelection(); });
   stateList.onSort([&](TableViewColumn column) {
     column.setSorting(column.sorting() == Sort::Ascending ? Sort::Descending : Sort::Ascending);
@@ -68,8 +67,9 @@ auto StateManager::create() -> void {
   categoryOption.append(ComboButtonItem().setText("Managed States").setProperty("type", "Managed/"));
   categoryOption.append(ComboButtonItem().setText("Quick States").setProperty("type", "Quick/"));
   categoryOption.onChange([&] { loadStates(); });
-  statePreviewSeparator.setColor({192, 192, 192});
+  statePreviewSeparator1.setColor({192, 192, 192});
   statePreviewLabel.setFont(Font().setBold()).setText("Preview");
+  statePreviewSeparator2.setColor({192, 192, 192});
   loadButton.setText("Load").onActivate([&] {
     if(auto item = stateList.selected()) program.loadState(item.property("name"));
   });

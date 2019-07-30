@@ -252,7 +252,7 @@ public:
   auto showEvent(QShowEvent*) -> void override;
   pTableView& p;
 public slots:
-  void onActivate();
+  void onActivate(QTreeWidgetItem* item, int column);
   void onChange();
   void onContext();
   void onSort(int column);

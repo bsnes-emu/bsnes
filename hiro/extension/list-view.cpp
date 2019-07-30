@@ -1,7 +1,7 @@
 #if defined(Hiro_ListView)
 
 mListView::mListView() {
-  mTableView::onActivate([&] { doActivate(); });
+  mTableView::onActivate([&](auto) { doActivate(); });
   mTableView::onChange([&] { doChange(); });
   mTableView::onContext([&] { doContext(); });
   mTableView::onToggle([&](TableViewCell cell) {

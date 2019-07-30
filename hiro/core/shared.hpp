@@ -700,7 +700,7 @@ struct TableView : sTableView {
   auto column(uint position) const { return self().column(position); }
   auto columnCount() const { return self().columnCount(); }
   auto columns() const { return self().columns(); }
-  auto doActivate() const { return self().doActivate(); }
+  auto doActivate(sTableViewCell cell) const { return self().doActivate(cell); }
   auto doChange() const { return self().doChange(); }
   auto doContext() const { return self().doContext(); }
   auto doEdit(sTableViewCell cell) const { return self().doEdit(cell); }
@@ -711,7 +711,7 @@ struct TableView : sTableView {
   auto item(unsigned position) const { return self().item(position); }
   auto itemCount() const { return self().itemCount(); }
   auto items() const { return self().items(); }
-  auto onActivate(const function<void ()>& callback = {}) { return self().onActivate(callback), *this; }
+  auto onActivate(const function<void (TableViewCell)>& callback = {}) { return self().onActivate(callback), *this; }
   auto onChange(const function<void ()>& callback = {}) { return self().onChange(callback), *this; }
   auto onContext(const function<void ()>& callback = {}) { return self().onContext(callback), *this; }
   auto onEdit(const function<void (TableViewCell)>& callback = {}) { return self().onEdit(callback), *this; }

@@ -17,7 +17,6 @@ struct Settings : Markup::Node {
     uint luminance = 100;
     uint saturation = 100;
     uint gamma = 150;
-    bool fastForwardFrameSkip = true;
     bool snow = false;
 
     string output = "Scale";
@@ -50,6 +49,9 @@ struct Settings : Markup::Node {
     struct Turbo {
       uint frequency = 4;
     } turbo;
+    struct Hotkey {
+      string logic = "or";
+    } hotkey;
   } input;
 
   struct Path {
@@ -68,6 +70,18 @@ struct Settings : Markup::Node {
     } recent;
   } path;
 
+  struct FastForward {
+    uint frameSkip = 9;
+    uint limiter = 0;
+    bool mute = false;
+  } fastForward;
+
+  struct Rewind {
+    uint frequency = 0;
+    uint length = 80;
+    bool mute = false;
+  } rewind;
+
   struct Emulator {
     bool warnOnUnverifiedGames = false;
     struct AutoSaveMemory {
@@ -76,11 +90,10 @@ struct Settings : Markup::Node {
     } autoSaveMemory;
     bool autoSaveStateOnUnload = false;
     bool autoLoadStateOnLoad = false;
-    struct Rewind {
-      uint frequency = 0;
-      uint length = 80;
-    } rewind;
     struct Hack {
+      struct CPU {
+        uint overclock = 100;
+      } cpu;
       struct PPU {
         bool fast = true;
         bool noSpriteLimit = false;
@@ -99,7 +112,12 @@ struct Settings : Markup::Node {
         bool delayedSync = true;
         bool hle = true;
       } coprocessors;
-      uint fastSuperFX = 100;
+      struct SA1 {
+        uint overclock = 100;
+      } sa1;
+      struct SuperFX {
+        uint overclock = 100;
+      } superfx;
     } hack;
     struct Cheats {
       bool enable = true;
@@ -114,50 +132,47 @@ struct Settings : Markup::Node {
   } general;
 };
 
-struct VideoSettings : TabFrameItem {
+struct VideoSettings : VerticalLayout {
   auto create() -> void;
 
 private:
-  VerticalLayout layout{this};
-    Label colorAdjustmentLabel{&layout, Size{~0, 0}, 2};
-    TableLayout colorLayout{&layout, Size{~0, 0}};
-      Label luminanceLabel{&colorLayout, Size{0, 0}};
-      Label luminanceValue{&colorLayout, Size{50_sx, 0}};
-      HorizontalSlider luminanceSlider{&colorLayout, Size{~0, 0}};
-    //
-      Label saturationLabel{&colorLayout, Size{0, 0}};
-      Label saturationValue{&colorLayout, Size{50_sx, 0}};
-      HorizontalSlider saturationSlider{&colorLayout, Size{~0, 0}};
-    //
-      Label gammaLabel{&colorLayout, Size{0, 0}};
-      Label gammaValue{&colorLayout, Size{50_sx, 0}};
-      HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
-    //
-    CheckLabel fastForwardFrameSkip{&layout, Size{~0, 0}};
-    CheckLabel snowOption{&layout, Size{~0, 0}};
+  Label colorAdjustmentLabel{this, Size{~0, 0}, 2};
+  TableLayout colorLayout{this, Size{~0, 0}};
+    Label luminanceLabel{&colorLayout, Size{0, 0}};
+    Label luminanceValue{&colorLayout, Size{50_sx, 0}};
+    HorizontalSlider luminanceSlider{&colorLayout, Size{~0, 0}};
+  //
+    Label saturationLabel{&colorLayout, Size{0, 0}};
+    Label saturationValue{&colorLayout, Size{50_sx, 0}};
+    HorizontalSlider saturationSlider{&colorLayout, Size{~0, 0}};
+  //
+    Label gammaLabel{&colorLayout, Size{0, 0}};
+    Label gammaValue{&colorLayout, Size{50_sx, 0}};
+    HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
+  //
+  CheckLabel snowOption{this, Size{~0, 0}};
 };
 
-struct AudioSettings : TabFrameItem {
+struct AudioSettings : VerticalLayout {
   auto create() -> void;
 
 private:
-  VerticalLayout layout{this};
-    Label effectsLabel{&layout, Size{~0, 0}, 2};
-    TableLayout effectsLayout{&layout, Size{~0, 0}};
-      Label skewLabel{&effectsLayout, Size{0, 0}};
-      Label skewValue{&effectsLayout, Size{50_sx, 0}};
-      HorizontalSlider skewSlider{&effectsLayout, Size{~0, 0}};
-    //
-      Label volumeLabel{&effectsLayout, Size{0, 0}};
-      Label volumeValue{&effectsLayout, Size{50_sx, 0}};
-      HorizontalSlider volumeSlider{&effectsLayout, Size{~0, 0}};
-    //
-      Label balanceLabel{&effectsLayout, Size{0, 0}};
-      Label balanceValue{&effectsLayout, Size{50_sx, 0}};
-      HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
+  Label effectsLabel{this, Size{~0, 0}, 2};
+  TableLayout effectsLayout{this, Size{~0, 0}};
+    Label skewLabel{&effectsLayout, Size{0, 0}};
+    Label skewValue{&effectsLayout, Size{50_sx, 0}};
+    HorizontalSlider skewSlider{&effectsLayout, Size{~0, 0}};
+  //
+    Label volumeLabel{&effectsLayout, Size{0, 0}};
+    Label volumeValue{&effectsLayout, Size{50_sx, 0}};
+    HorizontalSlider volumeSlider{&effectsLayout, Size{~0, 0}};
+  //
+    Label balanceLabel{&effectsLayout, Size{0, 0}};
+    Label balanceValue{&effectsLayout, Size{50_sx, 0}};
+    HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
 };
 
-struct InputSettings : TabFrameItem {
+struct InputSettings : VerticalLayout {
   auto create() -> void;
   auto updateControls() -> void;
   auto activePort() -> InputPort&;
@@ -166,61 +181,72 @@ struct InputSettings : TabFrameItem {
   auto reloadDevices() -> void;
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
-  auto assignMapping() -> void;
+  auto assignMapping(TableViewCell cell) -> void;
   auto cancelMapping() -> void;
   auto assignMouseInput(uint id) -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
   maybe<InputMapping&> activeMapping;
+  uint activeBinding = 0;
 
-private:
+public:
   Timer timer;
 
-  VerticalLayout layout{this};
-    HorizontalLayout selectionLayout{&layout, Size{~0, 0}};
-      Label portLabel{&selectionLayout, Size{0, 0}};
-      ComboButton portList{&selectionLayout, Size{~0, 0}};
-      Label deviceLabel{&selectionLayout, Size{0, 0}};
-      ComboButton deviceList{&selectionLayout, Size{~0, 0}};
-      Label turboLabel{&selectionLayout, Size{0, 0}};
-      ComboButton turboList{&selectionLayout, Size{0, 0}};
-    TableView mappingList{&layout, Size{~0, ~0}};
-    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Button assignMouse1{&controlLayout, Size{100_sx, 0}};
-      Button assignMouse2{&controlLayout, Size{100_sx, 0}};
-      Button assignMouse3{&controlLayout, Size{100_sx, 0}};
-      Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button assignButton{&controlLayout, Size{80_sx, 0}};
-      Button clearButton{&controlLayout, Size{80_sx, 0}};
+  HorizontalLayout inputFocusLayout{this, Size{~0, 0}};
+    Label inputFocusLabel{&inputFocusLayout, Size{0, 0}};
+    RadioLabel pauseEmulation{&inputFocusLayout, Size{0, 0}};
+    RadioLabel blockInput{&inputFocusLayout, Size{0, 0}};
+    RadioLabel allowInput{&inputFocusLayout, Size{0, 0}};
+    Group inputFocusGroup{&pauseEmulation, &blockInput, &allowInput};
+  Canvas separator{this, Size{~0, 1}};
+  HorizontalLayout selectionLayout{this, Size{~0, 0}};
+    Label portLabel{&selectionLayout, Size{0, 0}};
+    ComboButton portList{&selectionLayout, Size{~0, 0}};
+    Label deviceLabel{&selectionLayout, Size{0, 0}};
+    ComboButton deviceList{&selectionLayout, Size{~0, 0}};
+    Label turboLabel{&selectionLayout, Size{0, 0}};
+    ComboButton turboList{&selectionLayout, Size{0, 0}};
+  TableView mappingList{this, Size{~0, ~0}};
+  HorizontalLayout controlLayout{this, Size{~0, 0}};
+    Button assignMouse1{&controlLayout, Size{100_sx, 0}};
+    Button assignMouse2{&controlLayout, Size{100_sx, 0}};
+    Button assignMouse3{&controlLayout, Size{100_sx, 0}};
+    Canvas inputSink{&controlLayout, Size{~0, ~0}};
+    Button assignButton{&controlLayout, Size{80_sx, 0}};
+    Button clearButton{&controlLayout, Size{80_sx, 0}};
 };
 
-struct HotkeySettings : TabFrameItem {
+struct HotkeySettings : VerticalLayout {
   auto create() -> void;
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
-  auto assignMapping() -> void;
+  auto assignMapping(TableViewCell cell) -> void;
   auto cancelMapping() -> void;
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
 
   maybe<InputMapping&> activeMapping;
+  uint activeBinding = 0;
 
 private:
   Timer timer;
 
-  VerticalLayout layout{this};
-    TableView mappingList{&layout, Size{~0, ~0}};
-    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Widget controlSpacer{&controlLayout, Size{~0, 0}};
-      Button assignButton{&controlLayout, Size{80_sx, 0}};
-      Button clearButton{&controlLayout, Size{80_sx, 0}};
+  TableView mappingList{this, Size{~0, ~0}};
+  HorizontalLayout controlLayout{this, Size{~0, 0}};
+    Label logicLabel{&controlLayout, Size{0, 0}};
+    RadioLabel logicAND{&controlLayout, Size{0, 0}};
+    RadioLabel logicOR{&controlLayout, Size{0, 0}};
+    Group logicGroup{&logicAND, &logicOR};
+    Canvas inputSink{&controlLayout, Size{~0, ~0}};
+    Button assignButton{&controlLayout, Size{80_sx, 0}};
+    Button clearButton{&controlLayout, Size{80_sx, 0}};
 };
 
-struct PathSettings : TabFrameItem {
+struct PathSettings : VerticalLayout {
   auto create() -> void;
   auto refreshPaths() -> void;
 
 public:
-  TableLayout layout{this};
+  TableLayout layout{this, Size{~0, ~0}};
     Label gamesLabel{&layout, Size{0, 0}};
     LineEdit gamesPath{&layout, Size{~0, 0}};
     Button gamesAssign{&layout, Size{80_sx, 0}};
@@ -252,57 +278,73 @@ public:
     Button screenshotsReset{&layout, Size{80_sx, 0}};
 };
 
-struct EmulatorSettings : TabFrameItem {
+struct SpeedSettings : VerticalLayout {
   auto create() -> void;
-  auto updateConfiguration() -> void;
 
 public:
-  VerticalLayout layout{this};
-    Label optionsLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout inputFocusLayout{&layout, Size{~0, 0}};
-      Label inputFocusLabel{&inputFocusLayout, Size{0, 0}};
-      RadioLabel pauseEmulation{&inputFocusLayout, Size{0, 0}};
-      RadioLabel blockInput{&inputFocusLayout, Size{0, 0}};
-      RadioLabel allowInput{&inputFocusLayout, Size{0, 0}};
-      Group inputFocusGroup{&pauseEmulation, &blockInput, &allowInput};
-    CheckLabel warnOnUnverifiedGames{&layout, Size{~0, 0}};
-    CheckLabel autoSaveMemory{&layout, Size{~0, 0}};
-    HorizontalLayout autoStateLayout{&layout, Size{~0, 0}};
-      CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
-      CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
-    HorizontalLayout rewindLayout{&layout, Size{~0, 0}};
-      Label rewindFrequencyLabel{&rewindLayout, Size{0, 0}};
-      ComboButton rewindFrequencyOption{&rewindLayout, Size{0, 0}};
-      Label rewindLengthLabel{&rewindLayout, Size{0, 0}};
-      ComboButton rewindLengthOption{&rewindLayout, Size{0, 0}};
-    Canvas optionsSpacer{&layout, Size{~0, 1}};
-    Label ppuLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout ppuLayout{&layout, Size{~0, 0}};
-      CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
-      CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
-    Label mode7Label{&layout, Size{~0, 0}, 2};
-    HorizontalLayout mode7Layout{&layout, Size{~0, 0}};
-      Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
-      ComboButton mode7Scale{&mode7Layout, Size{0, 0}};
-      CheckLabel mode7Perspective{&mode7Layout, Size{0, 0}};
-      CheckLabel mode7Supersample{&mode7Layout, Size{0, 0}};
-      CheckLabel mode7Mosaic{&mode7Layout, Size{0, 0}};
-    Label dspLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout dspLayout{&layout, Size{~0, 0}};
-      CheckLabel fastDSP{&dspLayout, Size{0, 0}};
-      CheckLabel cubicInterpolation{&dspLayout, Size{0, 0}};
-    Label coprocessorLabel{&layout, Size{~0, 0}, 2};
-    HorizontalLayout coprocessorsLayout{&layout, Size{~0, 0}};
-      CheckLabel coprocessorsDelayedSyncOption{&coprocessorsLayout, Size{0, 0}};
-      CheckLabel coprocessorsHLEOption{&coprocessorsLayout, Size{0, 0}};
-    HorizontalLayout superFXLayout{&layout, Size{~0, 0}};
-      Label superFXLabel{&superFXLayout, Size{0, 0}};
-      Label superFXValue{&superFXLayout, Size{50_sx, 0}};
-      HorizontalSlider superFXClock{&superFXLayout, Size{~0, 0}};
-    Label hacksNote{&layout, Size{~0, 0}};
+  Label overclockingLabel{this, Size{~0, 0}, 2};
+  TableLayout overclockingLayout{this, Size{~0, 0}};
+    Label cpuLabel{&overclockingLayout, Size{0, 0}};
+    Label cpuValue{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider cpuClock{&overclockingLayout, Size{~0, 0}};
+  //
+    Label sa1Label{&overclockingLayout, Size{0, 0}};
+    Label sa1Value{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider sa1Clock{&overclockingLayout, Size{~0, 0}};
+  //
+    Label sfxLabel{&overclockingLayout, Size{0, 0}};
+    Label sfxValue{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider sfxClock{&overclockingLayout, Size{~0, 0}};
+  Label fastForwardLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout fastForwardLayout{this, Size{~0, 0}};
+    Label frameSkipLabel{&fastForwardLayout, Size{0, 0}};
+    ComboButton frameSkipAmount{&fastForwardLayout, Size{0, 0}};
+    Label limiterLabel{&fastForwardLayout, Size{0, 0}};
+    ComboButton limiterAmount{&fastForwardLayout, Size{0, 0}};
+  CheckLabel fastForwardMute{this, Size{0, 0}};
+  Label rewindLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout rewindLayout{this, Size{~0, 0}};
+    Label rewindFrequencyLabel{&rewindLayout, Size{0, 0}};
+    ComboButton rewindFrequencyOption{&rewindLayout, Size{0, 0}};
+    Label rewindLengthLabel{&rewindLayout, Size{0, 0}};
+    ComboButton rewindLengthOption{&rewindLayout, Size{0, 0}};
+  CheckLabel rewindMute{this, Size{0, 0}};
 };
 
-struct DriverSettings : TabFrameItem {
+struct EmulatorSettings : VerticalLayout {
+  auto create() -> void;
+
+public:
+  Label optionsLabel{this, Size{~0, 0}, 2};
+  CheckLabel warnOnUnverifiedGames{this, Size{~0, 0}};
+  CheckLabel autoSaveMemory{this, Size{~0, 0}};
+  HorizontalLayout autoStateLayout{this, Size{~0, 0}};
+    CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
+    CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
+  Canvas optionsSpacer{this, Size{~0, 1}};
+  Label ppuLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout ppuLayout{this, Size{~0, 0}};
+    CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
+    CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
+  Label mode7Label{this, Size{~0, 0}, 2};
+  HorizontalLayout mode7Layout{this, Size{~0, 0}};
+    Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
+    ComboButton mode7Scale{&mode7Layout, Size{0, 0}};
+    CheckLabel mode7Perspective{&mode7Layout, Size{0, 0}};
+    CheckLabel mode7Supersample{&mode7Layout, Size{0, 0}};
+    CheckLabel mode7Mosaic{&mode7Layout, Size{0, 0}};
+  Label dspLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout dspLayout{this, Size{~0, 0}};
+    CheckLabel fastDSP{&dspLayout, Size{0, 0}};
+    CheckLabel cubicInterpolation{&dspLayout, Size{0, 0}};
+  Label coprocessorLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout coprocessorsLayout{this, Size{~0, 0}};
+    CheckLabel coprocessorsDelayedSyncOption{&coprocessorsLayout, Size{0, 0}};
+    CheckLabel coprocessorsHLEOption{&coprocessorsLayout, Size{0, 0}};
+  Label hacksNote{this, Size{~0, 0}};
+};
+
+struct DriverSettings : VerticalLayout {
   auto create() -> void;
   auto videoDriverChanged() -> void;
   auto videoDriverChange() -> void;
@@ -320,57 +362,58 @@ struct DriverSettings : TabFrameItem {
   auto inputDriverChange() -> void;
 
 public:
-  VerticalLayout layout{this};
-    Label videoLabel{&layout, Size{~0, 0}, 2};
-    TableLayout videoLayout{&layout, Size{~0, 0}};
-      Label videoDriverLabel{&videoLayout, Size{0, 0}};
-      HorizontalLayout videoDriverLayout{&videoLayout, Size{~0, 0}};
-        ComboButton videoDriverOption{&videoDriverLayout, Size{0, 0}};
-        Button videoDriverUpdate{&videoDriverLayout, Size{0, 0}};
-        Label videoDriverActive{&videoDriverLayout, Size{0, 0}};
-      Label videoFormatLabel{&videoLayout, Size{0, 0}};
-      HorizontalLayout videoPropertyLayout{&videoLayout, Size{~0, 0}};
-        ComboButton videoFormatOption{&videoPropertyLayout, Size{0, 0}};
-    HorizontalLayout videoToggleLayout{&layout, Size{~0, 0}};
-      CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
-      CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
-    Canvas videoSpacer{&layout, Size{~0, 1}};
-    Label audioLabel{&layout, Size{~0, 0}, 2};
-    TableLayout audioLayout{&layout, Size{~0, 0}};
-      Label audioDriverLabel{&audioLayout, Size{0, 0}};
-      HorizontalLayout audioDriverLayout{&audioLayout, Size{~0, 0}};
-        ComboButton audioDriverOption{&audioDriverLayout, Size{0, 0}};
-        Button audioDriverUpdate{&audioDriverLayout, Size{0, 0}};
-        Label audioDriverActive{&audioDriverLayout, Size{0, 0}};
-      Label audioDeviceLabel{&audioLayout, Size{0, 0}};
-      HorizontalLayout audioPropertyLayout{&audioLayout, Size{~0, 0}};
-        ComboButton audioDeviceOption{&audioPropertyLayout, Size{0, 0}};
-        Label audioFrequencyLabel{&audioPropertyLayout, Size{0, 0}};
-        ComboButton audioFrequencyOption{&audioPropertyLayout, Size{0, 0}};
-        Label audioLatencyLabel{&audioPropertyLayout, Size{0, 0}};
-        ComboButton audioLatencyOption{&audioPropertyLayout, Size{0, 0}};
-    HorizontalLayout audioToggleLayout{&layout, Size{~0, 0}};
-      CheckLabel audioExclusiveToggle{&audioToggleLayout, Size{0, 0}};
-      CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
-      CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
-    Canvas audioSpacer{&layout, Size{~0, 1}};
-    Label inputLabel{&layout, Size{~0, 0}, 2};
-    TableLayout inputLayout{&layout, Size{~0, 0}};
-      Label inputDriverLabel{&inputLayout, Size{0, 0}};
-      HorizontalLayout inputDriverLayout{&inputLayout, Size{~0, 0}};
-        ComboButton inputDriverOption{&inputDriverLayout, Size{0, 0}};
-        Button inputDriverUpdate{&inputDriverLayout, Size{0, 0}};
-        Label inputDriverActive{&inputDriverLayout, Size{0, 0}};
+  Label videoLabel{this, Size{~0, 0}, 2};
+  TableLayout videoLayout{this, Size{~0, 0}};
+    Label videoDriverLabel{&videoLayout, Size{0, 0}};
+    HorizontalLayout videoDriverLayout{&videoLayout, Size{~0, 0}};
+      ComboButton videoDriverOption{&videoDriverLayout, Size{0, 0}};
+      Button videoDriverUpdate{&videoDriverLayout, Size{0, 0}};
+      Label videoDriverActive{&videoDriverLayout, Size{0, 0}};
+    Label videoFormatLabel{&videoLayout, Size{0, 0}};
+    HorizontalLayout videoPropertyLayout{&videoLayout, Size{~0, 0}};
+      ComboButton videoFormatOption{&videoPropertyLayout, Size{0, 0}};
+  HorizontalLayout videoToggleLayout{this, Size{~0, 0}};
+    CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
+    CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
+  Canvas videoSpacer{this, Size{~0, 1}};
+  Label audioLabel{this, Size{~0, 0}, 2};
+  TableLayout audioLayout{this, Size{~0, 0}};
+    Label audioDriverLabel{&audioLayout, Size{0, 0}};
+    HorizontalLayout audioDriverLayout{&audioLayout, Size{~0, 0}};
+      ComboButton audioDriverOption{&audioDriverLayout, Size{0, 0}};
+      Button audioDriverUpdate{&audioDriverLayout, Size{0, 0}};
+      Label audioDriverActive{&audioDriverLayout, Size{0, 0}};
+    Label audioDeviceLabel{&audioLayout, Size{0, 0}};
+    HorizontalLayout audioPropertyLayout{&audioLayout, Size{~0, 0}};
+      ComboButton audioDeviceOption{&audioPropertyLayout, Size{0, 0}};
+      Label audioFrequencyLabel{&audioPropertyLayout, Size{0, 0}};
+      ComboButton audioFrequencyOption{&audioPropertyLayout, Size{0, 0}};
+      Label audioLatencyLabel{&audioPropertyLayout, Size{0, 0}};
+      ComboButton audioLatencyOption{&audioPropertyLayout, Size{0, 0}};
+  HorizontalLayout audioToggleLayout{this, Size{~0, 0}};
+    CheckLabel audioExclusiveToggle{&audioToggleLayout, Size{0, 0}};
+    CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
+    CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
+  Canvas audioSpacer{this, Size{~0, 1}};
+  Label inputLabel{this, Size{~0, 0}, 2};
+  TableLayout inputLayout{this, Size{~0, 0}};
+    Label inputDriverLabel{&inputLayout, Size{0, 0}};
+    HorizontalLayout inputDriverLayout{&inputLayout, Size{~0, 0}};
+      ComboButton inputDriverOption{&inputDriverLayout, Size{0, 0}};
+      Button inputDriverUpdate{&inputDriverLayout, Size{0, 0}};
+      Label inputDriverActive{&inputDriverLayout, Size{0, 0}};
 };
 
-struct SettingsWindow : Window {
+struct SettingsWindow : Window, Lock {
   auto create() -> void;
   auto setVisible(bool visible = true) -> SettingsWindow&;
-  auto show(uint index) -> void;
+  auto show(int index) -> void;
 
 public:
   VerticalLayout layout{this};
-    TabFrame panel{&layout, Size{~0, ~0}};
+    HorizontalLayout panelLayout{&layout, Size{~0, ~0}};
+      ListView panelList{&panelLayout, Size{120_sx, ~0}};
+      VerticalLayout panelContainer{&panelLayout, Size{~0, ~0}};
   StatusBar statusBar{this};
 };
 
@@ -380,6 +423,7 @@ extern AudioSettings audioSettings;
 extern InputSettings inputSettings;
 extern HotkeySettings hotkeySettings;
 extern PathSettings pathSettings;
+extern SpeedSettings speedSettings;
 extern EmulatorSettings emulatorSettings;
 extern DriverSettings driverSettings;
 namespace Instances { extern Instance<SettingsWindow> settingsWindow; }

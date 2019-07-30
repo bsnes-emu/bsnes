@@ -37,24 +37,24 @@ ifneq ($(filter $(platform),linux bsd),)
 
   ifeq ($(hiro),gtk2)
     hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
-    hiro.options = -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
   endif
 
   ifeq ($(hiro),gtk3)
     hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0) -Wno-deprecated-declarations
-    hiro.options = -lX11 $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
   endif
 
   ifeq ($(hiro),qt4)
     moc = /usr/local/lib/qt4/bin/moc
     hiro.flags   = $(flags.cpp) -DHIRO_QT=4 $(shell pkg-config --cflags QtCore QtGui)
-    hiro.options = -lX11 $(shell pkg-config --libs QtCore QtGui)
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs QtCore QtGui)
   endif
 
   ifeq ($(hiro),qt5)
     moc = /usr/local/lib/qt5/bin/moc
     hiro.flags   = $(flags.cpp) -DHIRO_QT=5 -fPIC $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets)
-    hiro.options = -lX11 $(shell pkg-config --libs Qt5Core Qt5Gui Qt5Widgets)
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs Qt5Core Qt5Gui Qt5Widgets)
   endif
 endif
 

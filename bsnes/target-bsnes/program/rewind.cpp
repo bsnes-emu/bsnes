@@ -6,8 +6,8 @@ auto Program::rewindMode(Rewind::Mode mode) -> void {
 auto Program::rewindReset() -> void {
   rewindMode(Rewind::Mode::Playing);
   rewind.history.reset();
-  rewind.frequency = settings.emulator.rewind.frequency;
-  rewind.length = settings.emulator.rewind.length;
+  rewind.frequency = settings.rewind.frequency;
+  rewind.length = settings.rewind.length;
 }
 
 auto Program::rewindRun() -> void {

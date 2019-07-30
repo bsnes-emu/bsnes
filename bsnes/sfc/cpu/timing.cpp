@@ -27,6 +27,12 @@ auto CPU::stepOnce() -> void {
 template<uint Clocks, bool Synchronize>
 auto CPU::step() -> void {
   static_assert(Clocks == 2 || Clocks == 4 || Clocks == 6 || Clocks == 8 || Clocks == 10 || Clocks == 12);
+
+  if(overclocking.target) {
+    overclocking.counter += Clocks;
+    if(overclocking.counter < overclocking.target) return;
+  }
+
   if constexpr(Clocks >=  2) stepOnce();
   if constexpr(Clocks >=  4) stepOnce();
   if constexpr(Clocks >=  6) stepOnce();
@@ -87,6 +93,17 @@ auto CPU::scanline() -> void {
   if(vcounter() < ppu.vdisp()) {
     status.hdmaPosition = 1104;
     status.hdmaTriggered = false;
+  }
+
+  //overclocking
+  if(vcounter() == (Region::NTSC() ? 261 : 311)) {
+    overclocking.counter = 0;
+    overclocking.target = 0;
+    double overclock = configuration.hacks.cpu.overclock / 100.0;
+    if(overclock > 1.0) {
+      int clocks = (Region::NTSC() ? 262 : 312) * 1364;
+      overclocking.target = clocks * overclock - clocks;
+    }
   }
 }
 

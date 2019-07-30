@@ -58,8 +58,8 @@ auto CPU::power(bool reset) -> void {
   PPUcounter::reset();
   PPUcounter::scanline = {&CPU::scanline, this};
 
-  function<auto (uint, uint8) -> uint8> reader;
-  function<auto (uint, uint8) -> void> writer;
+  function<uint8 (uint, uint8)> reader;
+  function<void  (uint, uint8)> writer;
 
   reader = {&CPU::readRAM, this};
   writer = {&CPU::writeRAM, this};

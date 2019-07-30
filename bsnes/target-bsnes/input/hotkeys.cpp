@@ -1,5 +1,15 @@
+auto InputHotkey::logic() const -> Logic {
+  return inputManager.hotkeyLogic;
+}
+
+//
+
 auto InputManager::bindHotkeys() -> void {
   static int stateSlot = 1;
+  static double frequency = 48000.0;
+  static double volume = 0.0;
+  static bool fastForwarding = false;
+  static bool rewinding = false;
 
   hotkeys.append(InputHotkey("Toggle Fullscreen Mode").onPress([] {
     presentation.toggleFullscreenMode();
@@ -14,15 +24,24 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Rewind").onPress([&] {
-    if(!emulator->loaded()) return;
+    if(!emulator->loaded() || fastForwarding) return;
+    rewinding = true;
     if(program.rewind.frequency == 0) {
       program.showMessage("Please enable rewind support in Settings->Emulator first");
     } else {
       program.rewindMode(Program::Rewind::Mode::Rewinding);
     }
+    volume = Emulator::audio.volume();
+    if(settings.rewind.mute) {
+      Emulator::audio.setVolume(0.0);
+    } else {
+      Emulator::audio.setVolume(volume * 0.65);
+    }
   }).onRelease([&] {
+    rewinding = false;
     if(!emulator->loaded()) return;
     program.rewindMode(Program::Rewind::Mode::Playing);
+    Emulator::audio.setVolume(volume);
   }));
 
   hotkeys.append(InputHotkey("Save State").onPress([&] {
@@ -56,15 +75,33 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
-    emulator->setFrameSkip(emulator->configuration("Hacks/PPU/Fast") == "true" && settings.video.fastForwardFrameSkip ? 9 : 0);
+    if(!emulator->loaded() || rewinding) return;
+    fastForwarding = true;
+    emulator->setFrameSkip(emulator->configuration("Hacks/PPU/Fast") == "true" ? settings.fastForward.frameSkip : 0);
     video.setBlocking(false);
-    audio.setBlocking(false);
+    audio.setBlocking(settings.fastForward.limiter != 0);
     audio.setDynamic(false);
+    frequency = Emulator::audio.frequency();
+    volume = Emulator::audio.volume();
+    if(settings.fastForward.limiter) {
+      Emulator::audio.setFrequency(frequency / settings.fastForward.limiter);
+    }
+    if(settings.fastForward.mute) {
+      Emulator::audio.setVolume(0.0);
+    } else if(settings.fastForward.limiter) {
+      Emulator::audio.setVolume(volume * 0.65);
+    }
   }).onRelease([] {
+    fastForwarding = false;
+    if(!emulator->loaded()) return;
     emulator->setFrameSkip(0);
     video.setBlocking(settings.video.blocking);
     audio.setBlocking(settings.audio.blocking);
     audio.setDynamic(settings.audio.dynamic);
+    if(settings.fastForward.limiter) {
+      Emulator::audio.setFrequency(frequency);
+    }
+    Emulator::audio.setVolume(volume);
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {
@@ -85,7 +122,8 @@ auto InputManager::bindHotkeys() -> void {
 
   for(auto& hotkey : hotkeys) {
     hotkey.path = string{"Hotkey/", hotkey.name}.replace(" ", "");
-    hotkey.assignment = settings(hotkey.path).text();
+    auto assignments = settings(hotkey.path).text().split(";");
+    for(uint index : range(BindingLimit)) hotkey.assignments[index] = assignments(index);
     hotkey.bind();
   }
 }

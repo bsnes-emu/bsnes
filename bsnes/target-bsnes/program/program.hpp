@@ -125,7 +125,6 @@ struct Program : Lock, Emulator::Platform {
   //hacks.cpp
   auto hackCompatibility() -> void;
   auto hackPatchMemory(vector<uint8_t>& data) -> void;
-  auto hackOverclockSuperFX() -> void;
 
   //filter.cpp
   auto filterSelect(uint& width, uint& height, uint scale) -> Filter::Render;
@@ -186,6 +185,8 @@ public:
   uint64 statusTime;
   string statusMessage;
   string statusFrameRate;
+
+  bool startFullScreen = false;
 };
 
 extern Program program;

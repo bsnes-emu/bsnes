@@ -25,6 +25,9 @@ struct Configuration {
   } video;
 
   struct Hacks {
+    struct CPU {
+      uint overclock = 100;
+    } cpu;
     struct PPU {
       bool fast = true;
       bool noSpriteLimit = false;
@@ -43,6 +46,12 @@ struct Configuration {
       bool delayedSync = true;
       bool hle = true;
     } coprocessors;
+    struct SA1 {
+      uint overclock = 100;
+    } sa1;
+    struct SuperFX {
+      uint overclock = 100;
+    } superfx;
   } hacks;
 
 private:

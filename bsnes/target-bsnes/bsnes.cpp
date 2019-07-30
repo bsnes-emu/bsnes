@@ -9,8 +9,11 @@ auto locate(string name) -> string {
   string location = {Path::program(), name};
   if(inode::exists(location)) return location;
 
-  directory::create({Path::userData(), "bsnes/"});
-  return {Path::userData(), "bsnes/", name};
+  location = {Path::userData(), "bsnes/", name};
+  if(inode::exists(location)) return location;
+
+  directory::create({Path::userSettings(), "bsnes/"});
+  return {Path::userSettings(), "bsnes/", name};
 }
 
 #include <nall/main.hpp>
@@ -19,7 +22,7 @@ auto nall::main(Arguments arguments) -> void {
 
   for(auto argument : arguments) {
     if(argument == "--fullscreen") {
-      presentation.startFullScreen = true;
+      program.startFullScreen = true;
     } else if(argument.beginsWith("--locale=")) {
       Application::locale().scan(locate("Locale/"));
       Application::locale().select(argument.trimLeft("--locale=", 1L));

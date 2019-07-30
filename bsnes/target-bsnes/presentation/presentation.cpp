@@ -102,8 +102,9 @@ auto Presentation::create() -> void {
   inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow.show(2); });
   hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow.show(3); });
   pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow.show(4); });
-  emulatorSettings.setIcon(Icon::Action::Settings).setText("Emulator ...").onActivate([&] { settingsWindow.show(5); });
-  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(6); });
+  speedSettings.setIcon(Icon::Device::Clock).setText("Speed ...").onActivate([&] { settingsWindow.show(5); });
+  emulatorSettings.setIcon(Icon::Action::Settings).setText("Emulator ...").onActivate([&] { settingsWindow.show(6); });
+  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(7); });
 
   toolsMenu.setText(tr("Tools")).setVisible(false);
   saveState.setIcon(Icon::Action::Save).setText("Save State");
@@ -163,7 +164,7 @@ auto Presentation::create() -> void {
   captureScreenshot.setIcon(Icon::Emblem::Image).setText("Capture Screenshot").onActivate([&] {
     program.captureScreenshot();
   });
-  cheatFinder.setIcon(Icon::Edit::Find).setText("Cheat Finder ...").onActivate([&] { toolsWindow.show(0); });
+  cheatFinder.setIcon(Icon::Action::Search).setText("Cheat Finder ...").onActivate([&] { toolsWindow.show(0); });
   cheatEditor.setIcon(Icon::Edit::Replace).setText("Cheat Editor ...").onActivate([&] { toolsWindow.show(1); });
   stateManager.setIcon(Icon::Application::FileManager).setText("State Manager ...").onActivate([&] { toolsWindow.show(2); });
   manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow.show(3); });
@@ -247,10 +248,6 @@ auto Presentation::create() -> void {
   setBackgroundColor({0, 0, 0});
   resizeWindow();
   setAlignment(Alignment::Center);
-
-  //start in fullscreen mode if requested ...
-  //perform the exclusive mode change later on inside Program::create(), after the video driver has been initialized
-  if(startFullScreen) setFullScreen();
 
   #if defined(PLATFORM_MACOS)
   Application::Cocoa::onAbout([&] { about.doActivate(); });

@@ -17,7 +17,7 @@ auto pTableView::construct() -> void {
   qtTableViewDelegate = new QtTableViewDelegate(*this);
   qtTableView->setItemDelegate(qtTableViewDelegate);
 
-  qtTableView->connect(qtTableView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate()));
+  qtTableView->connect(qtTableView, SIGNAL(itemActivated(QTreeWidgetItem*, int)), SLOT(onActivate(QTreeWidgetItem*, int)));
   qtTableView->connect(qtTableView, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
   qtTableView->connect(qtTableView, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(onContext()));
   qtTableView->connect(qtTableView->header(), SIGNAL(sectionClicked(int)), SLOT(onSort(int)));
@@ -186,8 +186,20 @@ auto pTableView::_widthOfCell(unsigned _row, unsigned _column) -> unsigned {
   return width;
 }
 
-auto QtTableView::onActivate() -> void {
-  if(!p.locked()) p.self().doActivate();
+auto QtTableView::onActivate(QTreeWidgetItem* qtItem, int column) -> void {
+  if(p.locked()) return;
+
+  for(auto& item : p.state().items) {
+    if(auto self = item->self()) {
+      if(qtItem == self->qtItem) {
+        if(auto cell = item->cell(column)) {
+          return p.self().doActivate(cell);
+        }
+      }
+    }
+  }
+
+  p.self().doActivate({});
 }
 
 auto QtTableView::onChange() -> void {

@@ -453,7 +453,7 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   }
 
   case AppMessage::TableView_onActivate: {
-    if(auto tableView = (mTableView*)lparam) tableView->doActivate();
+    if(auto tableView = (mTableView*)lparam) tableView->doActivate({});
     break;
   }
 
