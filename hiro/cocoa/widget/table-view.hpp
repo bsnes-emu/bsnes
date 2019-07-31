@@ -8,7 +8,7 @@
   CocoaTableViewContent* content;
   NSFont* font;
 }
--(id) initWith:(hiro::mTableView&)tableView;
+-(id) initWith:(hiro::mTableView&)tableViewReference;
 -(void) dealloc;
 -(CocoaTableViewContent*) content;
 -(NSFont*) font;
@@ -24,7 +24,9 @@
 @end
 
 @interface CocoaTableViewContent : NSTableView {
+  hiro::mTableView* tableView;
 }
+-(id) initWith:(hiro::mTableView&)tableViewReference;
 -(void) keyDown:(NSEvent*)event;
 @end
 

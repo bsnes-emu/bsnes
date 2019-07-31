@@ -5,7 +5,7 @@
 -(id) initWith:(hiro::mTableView&)tableViewReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     tableView = &tableViewReference;
-    content = [[CocoaTableViewContent alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
+    content = [[CocoaTableViewContent alloc] initWith:tableViewReference];
 
     [self setDocumentView:content];
     [self setBorderType:NSBezelBorder];
@@ -125,6 +125,13 @@
 @end
 
 @implementation CocoaTableViewContent : NSTableView
+
+-(id) initWith:(hiro::mTableView&)tableViewReference {
+  if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
+    tableView = &tableViewReference;
+  }
+  return self;
+}
 
 -(void) keyDown:(NSEvent*)event {
   auto character = [[event characters] characterAtIndex:0];

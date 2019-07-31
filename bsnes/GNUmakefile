@@ -2,6 +2,7 @@ target := bsnes
 binary := application
 build := performance
 openmp := true
+local := true
 flags += -I. -I..
 
 # in order for this to work, obj/lzma.o must be omitted or bsnes will hang on startup.
@@ -9,6 +10,11 @@ flags += -I. -I..
 ifeq ($(profile),true)
   flags += -pg
   options += -pg
+endif
+
+# binaries built with this flag are faster, but are not portable to multiple machines.
+ifeq ($(local),true)
+  flags += -march=native
 endif
 
 nall.path := ../nall
@@ -30,7 +36,6 @@ else ifeq ($(platform),macos)
   endif
 else ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(binary),application)
-    flags += -march=native
     options += -Wl,-export-dynamic
     options += -lX11 -lXext
   else ifeq ($(binary),library)
