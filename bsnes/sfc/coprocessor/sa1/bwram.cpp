@@ -22,7 +22,7 @@ auto SA1::BWRAM::write(uint address, uint8 data) -> void {
 //00-3f,80-bf:6000-7fff size=0x2000 => 00:0000-1fff
 //40-4f:0000-ffff => untranslated
 auto SA1::BWRAM::readCPU(uint address, uint8 data) -> uint8 {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
 
   if(address < 0x2000) {  //$00-3f,80-bf:6000-7fff
     address = sa1.mmio.sbm * 0x2000 + (address & 0x1fff);
@@ -33,7 +33,7 @@ auto SA1::BWRAM::readCPU(uint address, uint8 data) -> uint8 {
 }
 
 auto SA1::BWRAM::writeCPU(uint address, uint8 data) -> void {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
 
   if(address < 0x2000) {  //$00-3f,80-bf:6000-7fff
     address = sa1.mmio.sbm * 0x2000 + (address & 0x1fff);

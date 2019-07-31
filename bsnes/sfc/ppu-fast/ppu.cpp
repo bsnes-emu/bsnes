@@ -60,14 +60,21 @@ PPU::~PPU() {
   delete[] tilecache[TileMode::BPP8];
 }
 
+auto PPU::synchronizeCPU() -> void {
+  if(ppubase.clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto PPU::Enter() -> void {
-  while(true) scheduler.synchronize(), ppu.main();
+  while(true) {
+    scheduler.synchronize();
+    ppu.main();
+  }
 }
 
 auto PPU::step(uint clocks) -> void {
   tick(clocks);
-  Thread::step(clocks);
-  synchronize(cpu);
+  ppubase.clock += clocks;
+  synchronizeCPU();
 }
 
 auto PPU::main() -> void {
@@ -116,7 +123,7 @@ auto PPU::scanline() -> void {
 
   if(vcounter() == 240) {
     Line::flush();
-    scheduler.exit(Scheduler::Event::Frame);
+    scheduler.leave(Scheduler::Event::Frame);
   }
 }
 
@@ -160,7 +167,6 @@ auto PPU::load() -> bool {
 }
 
 auto PPU::power(bool reset) -> void {
-  Thread::create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint16>(output, 1024 * 960);
 

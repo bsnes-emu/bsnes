@@ -10,8 +10,27 @@ CPU cpu;
 #include "irq.cpp"
 #include "serialization.cpp"
 
+auto CPU::synchronizeSMP() -> void {
+  if(smp.clock < 0) co_switch(smp.thread);
+}
+
+auto CPU::synchronizePPU() -> void {
+  if(ppu.clock < 0) co_switch(ppu.thread);
+}
+
+auto CPU::synchronizeCoprocessors() -> void {
+  for(auto coprocessor : coprocessors) {
+    if(coprocessor->clock < 0) co_switch(coprocessor->thread);
+  }
+}
+
 auto CPU::Enter() -> void {
-  while(true) scheduler.synchronize(), cpu.main();
+  while(true) {
+    if(scheduler.mode == Scheduler::Mode::SynchronizeCPU) {
+      scheduler.leave(Scheduler::Event::Synchronize);
+    }
+    cpu.main();
+  }
 }
 
 auto CPU::main() -> void {

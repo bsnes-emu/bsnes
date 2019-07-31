@@ -31,19 +31,19 @@ auto SMP::readIO(uint16 address) -> uint8 {
     return dsp.read(io.dspAddr & 0x7f);
 
   case 0xf4:  //CPUIO0
-    synchronize(cpu);
+    synchronizeCPU();
     return io.apu0;
 
   case 0xf5:  //CPUIO1
-    synchronize(cpu);
+    synchronizeCPU();
     return io.apu1;
 
   case 0xf6:  //CPUIO2
-    synchronize(cpu);
+    synchronizeCPU();
     return io.apu2;
 
   case 0xf7:  //CPUIO3
-    synchronize(cpu);
+    synchronizeCPU();
     return io.apu3;
 
   case 0xf8:  //AUXIO4
@@ -111,13 +111,13 @@ auto SMP::writeIO(uint16 address, uint8 data) -> void {
     }
 
     if(bit1(data,4)) {
-      synchronize(cpu);
+      synchronizeCPU();
       io.apu0 = 0x00;
       io.apu1 = 0x00;
     }
 
     if(bit1(data,5)) {
-      synchronize(cpu);
+      synchronizeCPU();
       io.apu2 = 0x00;
       io.apu3 = 0x00;
     }
@@ -135,22 +135,22 @@ auto SMP::writeIO(uint16 address, uint8 data) -> void {
     break;
 
   case 0xf4:  //CPUIO0
-    synchronize(cpu);
+    synchronizeCPU();
     io.cpu0 = data;
     break;
 
   case 0xf5:  //CPUIO1
-    synchronize(cpu);
+    synchronizeCPU();
     io.cpu1 = data;
     break;
 
   case 0xf6:  //CPUIO2
-    synchronize(cpu);
+    synchronizeCPU();
     io.cpu2 = data;
     break;
 
   case 0xf7:  //CPUIO3
-    synchronize(cpu);
+    synchronizeCPU();
     io.cpu3 = data;
     break;
 

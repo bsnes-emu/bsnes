@@ -18,12 +18,12 @@ auto SA1::IRAM::write(uint address, uint8 data) -> void {
 }
 
 auto SA1::IRAM::readCPU(uint address, uint8 data) -> uint8 {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
   return read(address, data);
 }
 
 auto SA1::IRAM::writeCPU(uint address, uint8 data) -> void {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
   return write(address, data);
 }
 

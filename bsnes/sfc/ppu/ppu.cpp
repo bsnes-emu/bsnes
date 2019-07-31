@@ -36,22 +36,26 @@ bg4(Background::ID::BG4) {
 }
 
 PPU::~PPU() {
-  if(system.fastPPU()) {
-    setHandle(nullptr);
-  }
+}
+
+auto PPU::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
 }
 
 auto PPU::step(uint clocks) -> void {
   clocks >>= 1;
   while(clocks--) {
     tick(2);
-    Thread::step(2);
-    synchronize(cpu);
+    clock += 2;
+    synchronizeCPU();
   }
 }
 
 auto PPU::Enter() -> void {
-  while(true) scheduler.synchronize(), ppu.main();
+  while(true) {
+    scheduler.synchronize();
+    ppu.main();
+  }
 }
 
 auto PPU::main() -> void {
@@ -99,16 +103,17 @@ auto PPU::load() -> bool {
 
 auto PPU::power(bool reset) -> void {
   if(system.fastPPU()) {
+    create(PPUfast::Enter, system.cpuFrequency());
     ppufast.power(reset);
-    return setHandle(ppufast.handle());
+    return;
   }
 
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memory::fill<uint16>(output, 512 * 480);
 
-  function<auto (uint, uint8) -> uint8> reader{&PPU::readIO, this};
-  function<auto (uint, uint8) -> void> writer{&PPU::writeIO, this};
+  function<uint8 (uint, uint8)> reader{&PPU::readIO, this};
+  function<void  (uint, uint8)> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   if(!reset) random.array((uint8*)vram.data, sizeof(vram.data));
@@ -232,7 +237,7 @@ auto PPU::scanline() -> void {
   }
 
   if(vcounter() == 240) {
-    scheduler.exit(Scheduler::Event::Frame);
+    scheduler.leave(Scheduler::Event::Frame);
   }
 }
 

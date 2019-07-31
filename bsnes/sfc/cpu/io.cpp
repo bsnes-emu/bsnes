@@ -3,7 +3,7 @@ auto CPU::readRAM(uint addr, uint8 data) -> uint8 {
 }
 
 auto CPU::readAPU(uint addr, uint8 data) -> uint8 {
-  synchronize(smp);
+  synchronizeSMP();
   return smp.portRead(addr & 3);
 }
 
@@ -100,7 +100,7 @@ auto CPU::writeRAM(uint addr, uint8 data) -> void {
 }
 
 auto CPU::writeAPU(uint addr, uint8 data) -> void {
-  synchronize(smp);
+  synchronizeSMP();
   return smp.portWrite(addr & 3, data);
 }
 

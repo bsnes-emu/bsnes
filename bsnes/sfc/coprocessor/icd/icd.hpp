@@ -4,8 +4,10 @@ struct ICD : Emulator::Platform, Thread {
 
   inline auto pathID() const -> uint { return information.pathID; }
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
+  auto step(uint clocks) -> void;
 
   auto load() -> bool;
   auto save() -> void;

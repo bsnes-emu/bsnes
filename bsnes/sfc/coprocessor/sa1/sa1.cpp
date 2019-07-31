@@ -11,6 +11,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 SA1 sa1;
 
+auto SA1::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto SA1::Enter() -> void {
   while(true) scheduler.synchronize(), sa1.main();
 }
@@ -78,13 +82,9 @@ auto SA1::interruptPending() const -> bool {
   return status.interruptPending;
 }
 
-auto SA1::synchronizing() const -> bool {
-  return scheduler.synchronizing();
-}
-
 auto SA1::step() -> void {
-  Thread::step(2);
-  synchronize(cpu);
+  clock += (uint64_t)cpu.frequency << 1;
+  synchronizeCPU();
 
   //adjust counters:
   //note that internally, status counters are in clocks;

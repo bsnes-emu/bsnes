@@ -1,6 +1,8 @@
 struct NECDSP : Processor::uPD96050, Thread {
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
+  auto step(uint clocks) -> void;
 
   auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;

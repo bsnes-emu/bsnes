@@ -1,5 +1,5 @@
 auto SA1::readIOCPU(uint address, uint8 data) -> uint8 {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
 
   switch(0x2200 | address & 0x1ff) {
 
@@ -25,7 +25,7 @@ auto SA1::readIOCPU(uint address, uint8 data) -> uint8 {
 }
 
 auto SA1::readIOSA1(uint address, uint8) -> uint8 {
-  synchronize(cpu);
+  synchronizeCPU();
 
   switch(0x2200 | address & 0x1ff) {
 
@@ -101,7 +101,7 @@ auto SA1::readIOSA1(uint address, uint8) -> uint8 {
 }
 
 auto SA1::writeIOCPU(uint address, uint8 data) -> void {
-  cpu.synchronize(sa1);
+  cpu.synchronizeCoprocessors();
 
   switch(0x2200 | address & 0x1ff) {
 
@@ -236,7 +236,7 @@ auto SA1::writeIOCPU(uint address, uint8 data) -> void {
 }
 
 auto SA1::writeIOSA1(uint address, uint8 data) -> void {
-  synchronize(cpu);
+  synchronizeCPU();
 
   switch(0x2200 | address & 0x1ff) {
 

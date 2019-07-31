@@ -16,6 +16,10 @@ SPC7110::~SPC7110() {
   delete decompressor;
 }
 
+auto SPC7110::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto SPC7110::Enter() -> void {
   while(true) scheduler.synchronize(), spc7110.main();
 }
@@ -27,9 +31,13 @@ auto SPC7110::main() -> void {
   addClocks(1);
 }
 
+auto SPC7110::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
+}
+
 auto SPC7110::addClocks(uint clocks) -> void {
   step(clocks);
-  synchronize(cpu);
+  synchronizeCPU();
 }
 
 auto SPC7110::unload() -> void {
@@ -96,7 +104,7 @@ auto SPC7110::power() -> void {
 }
 
 auto SPC7110::read(uint addr, uint8 data) -> uint8 {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
   addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f
@@ -180,7 +188,7 @@ auto SPC7110::read(uint addr, uint8 data) -> uint8 {
 }
 
 auto SPC7110::write(uint addr, uint8 data) -> void {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
   addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f

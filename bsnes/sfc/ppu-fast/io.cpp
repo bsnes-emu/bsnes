@@ -90,7 +90,7 @@ auto PPU::writeCGRAM(uint8_t address, uint15 data) -> void {
 }
 
 auto PPU::readIO(uint address, uint8 data) -> uint8 {
-  cpu.synchronize(ppu);
+  cpu.synchronizePPU();
 
   switch(address & 0xffff) {
 
@@ -202,7 +202,7 @@ auto PPU::readIO(uint address, uint8 data) -> uint8 {
 }
 
 auto PPU::writeIO(uint address, uint8 data) -> void {
-  cpu.synchronize(ppu);
+  cpu.synchronizePPU();
 
   switch(address & 0xffff) {
 

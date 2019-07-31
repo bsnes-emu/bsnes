@@ -46,6 +46,10 @@ namespace SameBoy {
   }
 }
 
+auto ICD::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto ICD::Enter() -> void {
   while(true) {
     scheduler.synchronize();
@@ -61,7 +65,11 @@ auto ICD::main() -> void {
     stream->sample(float(0.0), float(0.0));
     step(128);
   }
-  synchronize(cpu);
+  synchronizeCPU();
+}
+
+auto ICD::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
 }
 
 auto ICD::load() -> bool {

@@ -7,6 +7,7 @@ struct PPU : Thread, PPUcounter {
   PPU();
   ~PPU();
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
   auto load() -> bool;

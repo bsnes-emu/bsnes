@@ -12,6 +12,10 @@ BSMemory::BSMemory() {
   block.self = this;
 }
 
+auto BSMemory::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto BSMemory::Enter() -> void {
   while(true) scheduler.synchronize(), bsmemory.main();
 }
@@ -30,8 +34,8 @@ auto BSMemory::main() -> void {
 }
 
 auto BSMemory::step(uint clocks) -> void {
-  Thread::step(clocks);
-  synchronize(cpu);
+  clock += clocks * (uint64_t)cpu.frequency;
+  synchronizeCPU();
 }
 
 auto BSMemory::load() -> bool {

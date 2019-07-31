@@ -4,8 +4,6 @@
 //started: 2004-10-14
 
 #include <emulator/emulator.hpp>
-#include <emulator/thread.hpp>
-#include <emulator/scheduler.hpp>
 #include <emulator/random.hpp>
 #include <emulator/cheat.hpp>
 
@@ -24,22 +22,55 @@ extern "C" {
 namespace SuperFamicom {
   #define platform Emulator::platform
   namespace File = Emulator::File;
-  using Scheduler = Emulator::Scheduler;
   using Random = Emulator::Random;
   using Cheat = Emulator::Cheat;
-  extern Scheduler scheduler;
   extern Random random;
   extern Cheat cheat;
 
-  struct Thread : Emulator::Thread {
-    auto create(auto (*entrypoint)() -> void, double frequency) -> void {
-      Emulator::Thread::create(entrypoint, frequency);
-      scheduler.append(*this);
+  struct Scheduler {
+    enum class Mode : uint { Run, SynchronizeCPU, SynchronizeAll } mode;
+    enum class Event : uint { Frame, Synchronize } event;
+
+    cothread_t host = nullptr;
+    cothread_t active = nullptr;
+
+    auto enter() -> void {
+      host = co_active();
+      co_switch(active);
     }
 
-    inline auto synchronize(Thread& thread) -> void {
-      if(clock() >= thread.clock()) scheduler.resume(thread);
+    auto leave(Event event_) -> void {
+      event = event_;
+      active = co_active();
+      co_switch(host);
     }
+
+    auto synchronize() -> void {
+      if(mode == Mode::SynchronizeAll) leave(Event::Synchronize);
+    }
+  };
+  extern Scheduler scheduler;
+
+  struct Thread {
+    auto create(auto (*entrypoint)() -> void, uint frequency_) -> void {
+      if(thread) co_delete(thread);
+      thread = co_create(65536 * sizeof(void*), entrypoint);
+      frequency = frequency_;
+      clock = 0;
+    }
+
+    auto active() const -> bool {
+      return thread == co_active();
+    }
+
+    auto serialize(serializer& s) -> void {
+      s.integer(frequency);
+      s.integer(clock);
+    }
+
+    cothread_t thread = nullptr;
+      uint32_t frequency = 0;
+       int64_t clock = 0;
   };
 
   struct Region {

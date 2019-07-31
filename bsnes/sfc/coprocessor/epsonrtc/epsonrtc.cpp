@@ -7,6 +7,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 EpsonRTC epsonrtc;
 
+auto EpsonRTC::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto EpsonRTC::Enter() -> void {
   while(true) scheduler.synchronize(), epsonrtc.main();
 }
@@ -27,7 +31,11 @@ auto EpsonRTC::main() -> void {
   }
 
   step(1);
-  synchronize(cpu);
+  synchronizeCPU();
+}
+
+auto EpsonRTC::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
 }
 
 auto EpsonRTC::initialize() -> void {
@@ -127,7 +135,7 @@ auto EpsonRTC::synchronize(uint64 timestamp) -> void {
 }
 
 auto EpsonRTC::read(uint addr, uint8 data) -> uint8 {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   addr &= 3;
 
   if(addr == 0) {
@@ -152,7 +160,7 @@ auto EpsonRTC::read(uint addr, uint8 data) -> uint8 {
 }
 
 auto EpsonRTC::write(uint addr, uint8 data) -> void {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   addr &= 3, data &= 15;
 
   if(addr == 0) {

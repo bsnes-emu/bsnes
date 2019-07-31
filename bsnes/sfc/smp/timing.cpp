@@ -33,21 +33,21 @@ auto SMP::waitIdle(maybe<uint16> addr) -> void {
 }
 
 auto SMP::step(uint clocks) -> void {
-  Thread::step(clocks);
+  clock += clocks * (uint64_t)cpu.frequency;
   dsp.clock -= clocks;
-  while(dsp.clock < 0) dsp.main();
+  synchronizeDSP();
 
   #if defined(DEBUGGER)
-  synchronize(cpu);
+  synchronizeCPU();
   #else
   //forcefully sync S-SMP to S-CPU in case chips are not communicating
-  //sync if S-SMP is more than 1ms ahead of S-CPU
-  if(clock() - cpu.clock() > Thread::Second / 1'000) synchronize(cpu);
+  //sync if S-SMP is more than 24 samples ahead of S-CPU
+  if(clock > +(768 * 24 * (int64_t)24'000'000)) synchronizeCPU();
   #endif
 }
 
 auto SMP::stepIdle(uint clocks) -> void {
-  Thread::step(clocks);
+  clock += clocks * (uint64_t)cpu.frequency;
   dsp.clock -= clocks;
 }
 

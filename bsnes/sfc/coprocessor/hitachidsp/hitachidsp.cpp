@@ -7,14 +7,18 @@ namespace SuperFamicom {
 #include "data-rom.cpp"
 HitachiDSP hitachidsp;
 
+auto HitachiDSP::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto HitachiDSP::Enter() -> void {
   while(true) scheduler.synchronize(), hitachidsp.main();
 }
 
 auto HitachiDSP::step(uint clocks) -> void {
   HG51B::step(clocks);
-  Thread::step(clocks);
-  synchronize(cpu);
+  clock += clocks * (uint64_t)cpu.frequency;
+  synchronizeCPU();
 }
 
 auto HitachiDSP::halt() -> void {

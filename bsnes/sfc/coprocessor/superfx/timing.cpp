@@ -14,8 +14,8 @@ auto SuperFX::step(uint clocks) -> void {
     }
   }
 
-  Thread::step(clocks);
-  synchronize(cpu);
+  clock += clocks * (uint64_t)cpu.frequency;
+  synchronizeCPU();
 }
 
 auto SuperFX::syncROMBuffer() -> void {

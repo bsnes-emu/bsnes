@@ -7,7 +7,7 @@
 
 #define PPU PPUfast
 
-struct PPU : Thread, PPUcounter {
+struct PPU : PPUcounter {
   alwaysinline auto interlace() const -> bool;
   alwaysinline auto overscan() const -> bool;
   alwaysinline auto vdisp() const -> uint;
@@ -23,6 +23,7 @@ struct PPU : Thread, PPUcounter {
   PPU();
   ~PPU();
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   alwaysinline auto step(uint clocks) -> void;
   auto main() -> void;

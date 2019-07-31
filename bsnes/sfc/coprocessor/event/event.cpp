@@ -5,6 +5,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 Event event;
 
+auto Event::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto Event::Enter() -> void {
   while(true) scheduler.synchronize(), event.main();
 }
@@ -26,7 +30,11 @@ auto Event::main() -> void {
   }
 
   step(1);
-  synchronize(cpu);
+  synchronizeCPU();
+}
+
+auto Event::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
 }
 
 auto Event::unload() -> void {

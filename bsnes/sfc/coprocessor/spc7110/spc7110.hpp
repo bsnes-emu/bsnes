@@ -4,8 +4,10 @@ struct SPC7110 : Thread {
   SPC7110();
   ~SPC7110();
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
+  auto step(uint clocks) -> void;
   auto unload() -> void;
   auto power() -> void;
 

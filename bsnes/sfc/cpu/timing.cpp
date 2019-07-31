@@ -28,9 +28,19 @@ template<uint Clocks, bool Synchronize>
 auto CPU::step() -> void {
   static_assert(Clocks == 2 || Clocks == 4 || Clocks == 6 || Clocks == 8 || Clocks == 10 || Clocks == 12);
 
+  for(auto coprocessor : coprocessors) {
+    coprocessor->clock -= Clocks * (uint64_t)coprocessor->frequency;
+  }
+
   if(overclocking.target) {
     overclocking.counter += Clocks;
-    if(overclocking.counter < overclocking.target) return;
+    if(overclocking.counter < overclocking.target) {
+      if constexpr(Synchronize) {
+        if(configuration.hacks.coprocessors.delayedSync) return;
+        synchronizeCoprocessors();
+      }
+      return;
+    }
   }
 
   if constexpr(Clocks >=  2) stepOnce();
@@ -39,7 +49,9 @@ auto CPU::step() -> void {
   if constexpr(Clocks >=  8) stepOnce();
   if constexpr(Clocks >= 10) stepOnce();
   if constexpr(Clocks >= 12) stepOnce();
-  Thread::step(Clocks);
+
+  smp.clock -= Clocks * (uint64_t)smp.frequency;
+  ppu.clock -= Clocks;
 
   if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {
     //note: pattern should technically be 5-3, 5-3, 5-3, 5-3, 5-3 per logic analyzer
@@ -53,7 +65,7 @@ auto CPU::step() -> void {
 
   if constexpr(Synchronize) {
     if(configuration.hacks.coprocessors.delayedSync) return;
-    for(auto coprocessor : coprocessors) synchronize(*coprocessor);
+    synchronizeCoprocessors();
   }
 }
 
@@ -73,9 +85,9 @@ auto CPU::scanline() -> void {
   status.lineClocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
-  synchronize(smp);
-  synchronize(ppu);
-  for(auto coprocessor : coprocessors) synchronize(*coprocessor);
+  synchronizeSMP();
+  synchronizePPU();
+  synchronizeCoprocessors();
 
   if(vcounter() == 0) {
     //HDMA setup triggers once every frame

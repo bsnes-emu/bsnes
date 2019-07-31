@@ -1,8 +1,10 @@
 struct MSU1 : Thread {
   shared_pointer<Emulator::Stream> stream;
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
+  auto step(uint clocks) -> void;
   auto unload() -> void;
   auto power() -> void;
 

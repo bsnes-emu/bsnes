@@ -7,6 +7,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 SharpRTC sharprtc;
 
+auto SharpRTC::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto SharpRTC::Enter() -> void {
   while(true) scheduler.synchronize(), sharprtc.main();
 }
@@ -15,7 +19,11 @@ auto SharpRTC::main() -> void {
   tickSecond();
 
   step(1);
-  synchronize(cpu);
+  synchronizeCPU();
+}
+
+auto SharpRTC::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
 }
 
 auto SharpRTC::initialize() -> void {

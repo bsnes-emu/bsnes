@@ -1,5 +1,5 @@
 auto SuperFX::readIO(uint addr, uint8) -> uint8 {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   addr = 0x3000 | addr & 0x3ff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
@@ -51,7 +51,7 @@ auto SuperFX::readIO(uint addr, uint8) -> uint8 {
 }
 
 auto SuperFX::writeIO(uint addr, uint8 data) -> void {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
   addr = 0x3000 | addr & 0x3ff;
 
   if(addr >= 0x3100 && addr <= 0x32ff) {

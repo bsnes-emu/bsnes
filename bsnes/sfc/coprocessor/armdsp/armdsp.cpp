@@ -6,6 +6,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 ArmDSP armdsp;
 
+auto ArmDSP::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto ArmDSP::Enter() -> void {
   armdsp.boot();
   while(true) scheduler.synchronize(), armdsp.main();
@@ -32,8 +36,8 @@ auto ArmDSP::main() -> void {
 
 auto ArmDSP::step(uint clocks) -> void {
   if(bridge.timer && --bridge.timer == 0);
-  Thread::step(clocks);
-  synchronize(cpu);
+  clock += clocks * (uint64_t)cpu.frequency;
+  synchronizeCPU();
 }
 
 //MMIO: 00-3f,80-bf:3800-38ff
@@ -41,7 +45,7 @@ auto ArmDSP::step(uint clocks) -> void {
 //a0 ignored
 
 auto ArmDSP::read(uint addr, uint8) -> uint8 {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
 
   uint8 data = 0x00;
   addr &= 0xff06;
@@ -65,7 +69,7 @@ auto ArmDSP::read(uint addr, uint8) -> uint8 {
 }
 
 auto ArmDSP::write(uint addr, uint8 data) -> void {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
 
   addr &= 0xff06;
 

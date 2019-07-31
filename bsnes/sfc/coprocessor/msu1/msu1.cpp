@@ -6,6 +6,11 @@ MSU1 msu1;
 
 #include "serialization.cpp"
 
+auto MSU1::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
+
 auto MSU1::Enter() -> void {
   while(true) scheduler.synchronize(), msu1.main();
 }
@@ -36,7 +41,11 @@ auto MSU1::main() -> void {
 
   stream->sample(float(left), float(right));
   step(1);
-  synchronize(cpu);
+  synchronizeCPU();
+}
+
+auto MSU1::step(uint clocks) -> void {
+  clock += clocks * (uint64_t)cpu.frequency;
 }
 
 auto MSU1::unload() -> void {
@@ -46,7 +55,7 @@ auto MSU1::unload() -> void {
 
 auto MSU1::power() -> void {
   create(MSU1::Enter, 44100);
-  stream = Emulator::audio.createStream(2, frequency());
+  stream = Emulator::audio.createStream(2, frequency);
 
   io.dataSeekOffset = 0;
   io.dataReadOffset = 0;
@@ -98,7 +107,7 @@ auto MSU1::audioOpen() -> void {
 }
 
 auto MSU1::readIO(uint addr, uint8) -> uint8 {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
 
   switch(0x2000 | (addr & 7)) {
   case 0x2000:
@@ -128,7 +137,7 @@ auto MSU1::readIO(uint addr, uint8) -> uint8 {
 }
 
 auto MSU1::writeIO(uint addr, uint8 data) -> void {
-  cpu.synchronize(*this);
+  cpu.synchronizeCoprocessors();
 
   switch(0x2000 | (addr & 7)) {
   case 0x2000: bit8(io.dataSeekOffset,0) = data; break;

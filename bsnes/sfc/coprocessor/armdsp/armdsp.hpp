@@ -7,6 +7,7 @@
 struct ArmDSP : Processor::ARM7TDMI, Thread {
   #include "registers.hpp"
 
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto boot() -> void;
   auto main() -> void;

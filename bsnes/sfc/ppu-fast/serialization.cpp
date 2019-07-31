@@ -1,5 +1,5 @@
 auto PPU::serialize(serializer& s) -> void {
-  Thread::serialize(s);
+  ppubase.Thread::serialize(s);
   PPUcounter::serialize(s);
 
   latch.serialize(s);

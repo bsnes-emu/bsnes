@@ -10,6 +10,10 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 SuperFX superfx;
 
+auto SuperFX::synchronizeCPU() -> void {
+  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+}
+
 auto SuperFX::Enter() -> void {
   while(true) scheduler.synchronize(), superfx.main();
 }

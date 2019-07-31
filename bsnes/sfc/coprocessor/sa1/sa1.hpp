@@ -1,7 +1,10 @@
 //Super Accelerator (SA-1)
 
 struct SA1 : Processor::WDC65816, Thread {
+  inline auto synchronizing() const -> bool override { return scheduler.mode == Scheduler::Mode::SynchronizeAll; }
+
   //sa1.cpp
+  auto synchronizeCPU() -> void;
   static auto Enter() -> void;
   auto main() -> void;
   auto step() -> void;
@@ -10,7 +13,6 @@ struct SA1 : Processor::WDC65816, Thread {
   alwaysinline auto triggerIRQ() -> void;
   alwaysinline auto lastCycle() -> void override;
   alwaysinline auto interruptPending() const -> bool override;
-  auto synchronizing() const -> bool override;
 
   auto unload() -> void;
   auto power() -> void;

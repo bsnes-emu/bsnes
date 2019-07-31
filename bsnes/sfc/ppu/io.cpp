@@ -13,7 +13,7 @@ auto PPU::latchCounters() -> void {
     return ppufast.latchCounters();
   }
 
-  cpu.synchronize(ppu);
+  cpu.synchronizePPU();
   io.hcounter = hdot();
   io.vcounter = vcounter();
   latch.counters = 1;
@@ -69,7 +69,7 @@ auto PPU::writeCGRAM(uint8 addr, uint15 data) -> void {
 }
 
 auto PPU::readIO(uint addr, uint8 data) -> uint8 {
-  cpu.synchronize(ppu);
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
 
@@ -193,7 +193,7 @@ auto PPU::readIO(uint addr, uint8 data) -> uint8 {
 }
 
 auto PPU::writeIO(uint addr, uint8 data) -> void {
-  cpu.synchronize(ppu);
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
 

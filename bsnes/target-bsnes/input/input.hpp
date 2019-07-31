@@ -1,4 +1,9 @@
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
+//TODO: hiro support for TableView::activate(TableViewCell) is required for > 1 binding
+enum : uint { BindingLimit = 1 };
+#else
 enum : uint { BindingLimit = 4 };
+#endif
 
 struct InputMapping {
   auto bind() -> void;
