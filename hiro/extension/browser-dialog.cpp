@@ -8,6 +8,8 @@ struct BrowserDialogWindow {
   auto activate() -> void;
   auto change() -> void;
   auto context() -> void;
+  auto isObject(const string& name) -> bool;
+  auto isFile(const string& name) -> bool;
   auto isFolder(const string& name) -> bool;
   auto isMatch(const string& name) -> bool;
   auto run() -> BrowserDialog::Response;
@@ -43,7 +45,7 @@ private:
   vector<vector<string>> filters;
 };
 
-//accept button clicked, or enter pressed on file name line edit
+//accept button clicked, or enter pressed inside file name field
 //also called by table view activate after special case handling
 auto BrowserDialogWindow::accept() -> void {
   auto batched = view.batched();
@@ -51,7 +53,7 @@ auto BrowserDialogWindow::accept() -> void {
   if(state.action == "openFile" && batched.size() == 1) {
     string name = batched[0].text();
     if(isFolder(name)) return setPath({state.path, name});
-    response.selected.append(string{state.path, name});
+    response.selected.append({state.path, name});
   }
 
   if(state.action == "openFiles" && batched) {
@@ -63,20 +65,20 @@ auto BrowserDialogWindow::accept() -> void {
         response.selected.reset();
         return;
       }
-      response.selected.append(string{state.path, name});
+      response.selected.append({state.path, name});
     }
   }
 
   if(state.action == "openFolder" && batched.size() == 1) {
     string name = batched[0].text();
     if(!isMatch(name)) return setPath({state.path, name});
-    response.selected.append(string{state.path, name, "/"});
+    response.selected.append({state.path, name, "/"});
   }
 
   if(state.action == "openObject" && batched.size() == 1) {
     string name = batched[0].text();
     if(!isMatch(name) && isFolder(name)) return setPath({state.path, name});
-    response.selected.append(string{state.path, name, isFolder(name) ? "/" : ""});
+    response.selected.append({state.path, name, isFolder(name) ? "/" : ""});
   }
 
   if(state.action == "saveFile") {
@@ -85,7 +87,7 @@ auto BrowserDialogWindow::accept() -> void {
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists. Overwrite it?").question() != "Yes") return;
     }
-    response.selected.append(string{state.path, name});
+    response.selected.append({state.path, name});
   }
 
   if(state.action == "selectFolder") {
@@ -93,7 +95,7 @@ auto BrowserDialogWindow::accept() -> void {
       response.selected.append(state.path);
     } else if(batched.size() == 1) {
       string name = batched[0].text();
-      if(isFolder(name)) response.selected.append(string{state.path, name, "/"});
+      if(isFolder(name)) response.selected.append({state.path, name, "/"});
     }
   }
 
@@ -137,9 +139,13 @@ auto BrowserDialogWindow::change() -> void {
     acceptButton.setEnabled(batched.size() == 1);
   }
   if(state.action == "saveFile") {
+    string result;
     if(batched.size() == 1) {
       string name = batched[0].text();
-      if(!isFolder(name)) fileName.setText(name).doChange();
+      if(!isFolder(name)) result = name;
+    }
+    if(result != fileName.text()) {
+      fileName.setText(result).doChange();
     }
   }
   if(state.action == "selectFolder") {
@@ -163,6 +169,14 @@ auto BrowserDialogWindow::context() -> void {
     removeAction.setVisible(true);
   }
   contextMenu.setVisible();
+}
+
+auto BrowserDialogWindow::isObject(const string& name) -> bool {
+  return inode::exists({state.path, name});
+}
+
+auto BrowserDialogWindow::isFile(const string& name) -> bool {
+  return file::exists({state.path, name});
 }
 
 auto BrowserDialogWindow::isFolder(const string& name) -> bool {
@@ -217,8 +231,21 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   iconSearch.scale(16_sx, 16_sy);
   searchButton.setIcon(iconSearch).setBordered(false).onActivate([&] { setPath(state.path, fileName.text()); });
   fileName.onActivate([&] {
+    string name = fileName.text();
+    if((state.action == "openFile" || state.action == "openFiles") && isFile(name)) {
+      response.selected.append({state.path, name});
+      return (void)window.setModal(false);
+    }
+    if((state.action == "openFolder" || state.action == "selectFolder") && isFolder(name)) {
+      response.selected.append({state.path, name});
+      return (void)window.setModal(false);
+    }
+    if(state.action == "openObject" && isObject(name)) {
+      response.selected.append({state.path, name});
+      return (void)window.setModal(false);
+    }
     if(state.action == "saveFile") return accept();
-    setPath(state.path, fileName.text());
+    setPath(state.path, name);
   }).onChange([&] {
     auto name = fileName.text();
     if(state.action == "saveFile") acceptButton.setEnabled(name && !isFolder(name));

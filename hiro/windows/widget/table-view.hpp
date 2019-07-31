@@ -35,6 +35,7 @@ struct pTableView : pWidget {
   auto _setIcons() -> void;
   auto _width(unsigned column) -> unsigned;
 
+  TableViewCell activateCell;
   HIMAGELIST imageList = 0;
   vector<image> icons;
 };

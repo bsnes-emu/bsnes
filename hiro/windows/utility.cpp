@@ -447,18 +447,26 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   #if defined(Hiro_TableView)
   case AppMessage::TableView_doPaint: {
     if(auto tableView = (mTableView*)lparam) {
-      if(auto self = tableView->self()) InvalidateRect(self->hwnd, nullptr, true);
+      if(auto self = tableView->self()) {
+        InvalidateRect(self->hwnd, nullptr, true);
+      }
     }
     break;
   }
 
   case AppMessage::TableView_onActivate: {
-    if(auto tableView = (mTableView*)lparam) tableView->doActivate({});
+    if(auto tableView = (mTableView*)lparam) {
+      if(auto self = tableView->self()) {
+        tableView->doActivate(self->activateCell);
+      }
+    }
     break;
   }
 
   case AppMessage::TableView_onChange: {
-    if(auto tableView = (mTableView*)lparam) tableView->doChange();
+    if(auto tableView = (mTableView*)lparam) {
+      tableView->doChange();
+    }
   }
   #endif
   }

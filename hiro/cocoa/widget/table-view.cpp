@@ -110,13 +110,15 @@
   tableView->doChange();
 }
 
--(IBAction) activate:(id)sender {
-  tableView->doActivate({});
-}
-
 -(IBAction) doubleAction:(id)sender {
-  if([content clickedRow] >= 0) {
-    [self activate:self];
+  int row = [content clickedRow];
+  if(row >= 0 && row < tableView->state.items.size()) {
+    int column = [content clickedColumn];
+    if(column >= 0 && column < tableView->state.columns.size()) {
+      auto item = tableView->state.items[row];
+      auto cell = item->cell(column);
+      tableView->doActivate(cell);
+    }
   }
 }
 
@@ -127,9 +129,14 @@
 -(void) keyDown:(NSEvent*)event {
   auto character = [[event characters] characterAtIndex:0];
   if(character == NSEnterCharacter || character == NSCarriageReturnCharacter) {
-    if([self selectedRow] >= 0) {
-      [[self delegate] activate:self];
-      return;
+    int row = [self selectedRow];
+    if(row >= 0 && row < tableView->state.items.size()) {
+      int column = max(0, [self selectedColumn]);  //can be -1?
+      if(column >= 0 && column < tableView->state.columns.size()) {
+        auto item = tableView->state.items[row];
+        auto cell = item->cell(column);
+        tableView->doActivate(cell);
+      }
     }
   }
 

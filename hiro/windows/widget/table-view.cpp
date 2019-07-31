@@ -105,6 +105,21 @@ auto pTableView::onActivate(LPARAM lparam) -> void {
   auto nmlistview = (LPNMLISTVIEW)lparam;
   if(ListView_GetSelectedCount(hwnd) == 0) return;
   if(!locked()) {
+    activateCell = TableViewCell();
+    LVHITTESTINFO hitTest{};
+    GetCursorPos(&hitTest.pt);
+    ScreenToClient(nmlistview->hdr.hwndFrom, &hitTest.pt);
+    ListView_SubItemHitTest(nmlistview->hdr.hwndFrom, &hitTest);
+    if(hitTest.flags & LVHT_ONITEM) {
+      int row = hitTest.iItem;
+      if(row >= 0 && row < state().items.size()) {
+        int column = hitTest.iSubItem;
+        if(column >= 0 && column < state().columns.size()) {
+          auto item = state().items[row];
+          activateCell = item->cell(column);
+        }
+      }
+    }
     //LVN_ITEMACTIVATE is not re-entrant until DispatchMessage() completes
     //thus, we don't call self().doActivate() here
     PostMessageOnce(_parentHandle(), AppMessage::TableView_onActivate, 0, (LPARAM)&reference);
