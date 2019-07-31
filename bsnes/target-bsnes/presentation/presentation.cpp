@@ -50,7 +50,7 @@ auto Presentation::create() -> void {
   });
   blurEmulation.setText("Blur Emulation").setChecked(settings.video.blur).onToggle([&] {
     settings.video.blur = blurEmulation.checked();
-    emulator->configure("Video/BlurEmulation", blurEmulation.checked());
+    emulator->configure("Video/BlurEmulation", settings.video.blur);
   }).doToggle();
   filterMenu.setIcon(Icon::Emblem::Image).setText("Filter");
   filterNone.setText("None").onActivate([&] { settings.video.filter = "None"; });

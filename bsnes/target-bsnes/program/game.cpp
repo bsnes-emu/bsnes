@@ -70,6 +70,7 @@ auto Program::load() -> void {
   presentation.addRecentGame(games.trimRight("|", 1L));
 
   updateVideoPalette();
+  updateVideoEffects();
   updateAudioEffects();
   updateAudioFrequency();
 }

@@ -250,6 +250,16 @@ auto PPU::refresh() -> void {
   auto pitch  = 512;
   auto width  = 512;
   auto height = 480;
+  if(configuration.video.blurEmulation) {
+    for(uint y : range(height)) {
+      auto data = output + y * pitch;
+      for(uint x : range(width - 1)) {
+        auto a = data[x + 0];
+        auto b = data[x + 1];
+        data[x] = (a + b - ((a ^ b) & 0x0421)) >> 1;
+      }
+    }
+  }
   if(auto device = controllerPort2.device) device->draw(output, pitch * sizeof(uint16), width, height);
   platform->videoFrame(output, pitch * sizeof(uint16), width, height, /* scale = */ 1);
 }

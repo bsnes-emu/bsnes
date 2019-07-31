@@ -110,3 +110,7 @@ auto Program::updateVideoPalette() -> void {
 
   emulator->configure("Video/ColorEmulation", false);
 }
+
+auto Program::updateVideoEffects() -> void {
+  emulator->configure("Video/BlurEmulation", settings.video.blur);
+}

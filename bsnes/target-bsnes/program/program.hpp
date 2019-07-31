@@ -95,6 +95,7 @@ struct Program : Lock, Emulator::Platform {
   auto updateVideoFormat() -> void;
   auto updateVideoShader() -> void;
   auto updateVideoPalette() -> void;
+  auto updateVideoEffects() -> void;
 
   //audio.cpp
   auto updateAudioDriver(Window parent) -> void;
