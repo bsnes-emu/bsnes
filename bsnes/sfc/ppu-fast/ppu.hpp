@@ -244,12 +244,12 @@ public:
   auto latchCounters() -> void;
   alwaysinline auto vramAddress() const -> uint;
   alwaysinline auto readVRAM() -> uint16;
-  template<bool Byte> alwaysinline auto writeVRAM(uint8_t data) -> void;
+  template<bool Byte> alwaysinline auto writeVRAM(uint8 data) -> void;
   alwaysinline auto updateTiledata(uint address) -> void;
   alwaysinline auto readOAM(uint10 address) -> uint8;
-  alwaysinline auto writeOAM(uint10 address, uint8_t data) -> void;
-  template<bool Byte> alwaysinline auto readCGRAM(uint8_t address) -> uint8;
-  alwaysinline auto writeCGRAM(uint8_t address, uint15 data) -> void;
+  alwaysinline auto writeOAM(uint10 address, uint8 data) -> void;
+  template<bool Byte> alwaysinline auto readCGRAM(uint8 address) -> uint8;
+  alwaysinline auto writeCGRAM(uint8 address, uint15 data) -> void;
   auto readIO(uint address, uint8 data) -> uint8;
   auto writeIO(uint address, uint8 data) -> void;
   auto updateVideoMode() -> void;
@@ -264,14 +264,14 @@ public:
   Latch latch;
   IO io;
 
-  uint16_t vram[32 * 1024] = {};
-  uint16_t cgram[256] = {};
+  uint16 vram[32 * 1024] = {};
+  uint16 cgram[256] = {};
   Object objects[128] = {};
 
   //[unserialized]
-  uint16_t* output = {};
-  uint16_t* lightTable[16] = {};
-  uint8_t* tilecache[3] = {};  //bitplane -> bitmap tiledata
+  uint16* output = {};
+  uint16* lightTable[16] = {};
+  uint8* tilecache[3] = {};  //bitplane -> bitmap tiledata
 
   uint ItemLimit = 0;
   uint TileLimit = 0;
@@ -280,9 +280,9 @@ public:
     //line.cpp
     static auto flush() -> void;
     auto render() -> void;
-    auto pixel(uint x, Pixel above, Pixel below) const -> uint16_t;
-    auto blend(uint x, uint y, bool halve) const -> uint16_t;
-    alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint16_t;
+    auto pixel(uint x, Pixel above, Pixel below) const -> uint16;
+    auto blend(uint x, uint y, bool halve) const -> uint16;
+    alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint16;
     alwaysinline auto plotAbove(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotBelow(uint x, uint source, uint priority, uint color) -> void;
     alwaysinline auto plotHD(Pixel*, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void;

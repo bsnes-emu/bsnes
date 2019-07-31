@@ -28,7 +28,7 @@ auto PPU::readVRAM() -> uint16 {
 }
 
 template<bool Byte>
-auto PPU::writeVRAM(uint8_t data) -> void {
+auto PPU::writeVRAM(uint8 data) -> void {
   if(!io.displayDisable && cpu.vcounter() < vdisp()) return;
   Line::flush();
   auto address = vramAddress();
@@ -60,7 +60,7 @@ auto PPU::readOAM(uint10 address) -> uint8 {
   return readObject(address);
 }
 
-auto PPU::writeOAM(uint10 address, uint8_t data) -> void {
+auto PPU::writeOAM(uint10 address, uint8 data) -> void {
   Line::flush();
   //0x0218: Uniracers (2-player mode) hack; requires cycle timing for latch.oamAddress to be correct
   if(!io.displayDisable && cpu.vcounter() < vdisp()) address = 0x0218;  //latch.oamAddress;
@@ -68,7 +68,7 @@ auto PPU::writeOAM(uint10 address, uint8_t data) -> void {
 }
 
 template<bool Byte>
-auto PPU::readCGRAM(uint8_t address) -> uint8 {
+auto PPU::readCGRAM(uint8 address) -> uint8 {
   if(!io.displayDisable
   && cpu.vcounter() > 0 && cpu.vcounter() < vdisp()
   && cpu.hcounter() >= 88 && cpu.hcounter() < 1096
@@ -81,7 +81,7 @@ auto PPU::readCGRAM(uint8_t address) -> uint8 {
   }
 }
 
-auto PPU::writeCGRAM(uint8_t address, uint15 data) -> void {
+auto PPU::writeCGRAM(uint8 address, uint15 data) -> void {
   if(!io.displayDisable
   && cpu.vcounter() > 0 && cpu.vcounter() < vdisp()
   && cpu.hcounter() >= 88 && cpu.hcounter() < 1096
@@ -103,17 +103,17 @@ auto PPU::readIO(uint address, uint8 data) -> uint8 {
   }
 
   case 0x2134: {  //MPYL
-    uint result = (int16_t)io.mode7.a * (int8_t)(io.mode7.b >> 8);
+    uint result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
     return latch.ppu1.mdr = result >> 0;
   }
 
   case 0x2135: {  //MPYM
-    uint result = (int16_t)io.mode7.a * (int8_t)(io.mode7.b >> 8);
+    uint result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
     return latch.ppu1.mdr = result >> 8;
   }
 
   case 0x2136: {  //MPYH
-    uint result = (int16_t)io.mode7.a * (int8_t)(io.mode7.b >> 8);
+    uint result = (int16)io.mode7.a * (int8)(io.mode7.b >> 8);
     return latch.ppu1.mdr = result >> 16;
   }
 
