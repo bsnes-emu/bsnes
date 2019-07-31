@@ -31,7 +31,10 @@ auto PPU::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic
 #define ppu ppufast
 
 PPU::PPU() {
+  output = new uint16_t[2304 * 2160]();
+
   for(uint l : range(16)) {
+    lightTable[l] = new uint16_t[32768];
     for(uint r : range(32)) {
       for(uint g : range(32)) {
         for(uint b : range(32)) {
@@ -55,6 +58,8 @@ PPU::PPU() {
 }
 
 PPU::~PPU() {
+  delete[] output;
+  for(uint l : range(16)) delete[] lightTable[l];
   delete[] tilecache[TileMode::BPP2];
   delete[] tilecache[TileMode::BPP4];
   delete[] tilecache[TileMode::BPP8];

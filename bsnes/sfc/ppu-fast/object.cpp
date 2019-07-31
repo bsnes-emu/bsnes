@@ -8,11 +8,11 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
   uint itemCount = 0;
   uint tileCount = 0;
-  for(auto n : range(ppu.ItemLimit)) items[n].valid = false;
-  for(auto n : range(ppu.TileLimit)) tiles[n].valid = false;
+  for(uint n : range(ppu.ItemLimit)) items[n].valid = false;
+  for(uint n : range(ppu.TileLimit)) tiles[n].valid = false;
 
-  for(auto n : range(128)) {
-    ObjectItem item{true, self.first + n};
+  for(uint n : range(128)) {
+    ObjectItem item{true, uint8_t(self.first + n)};
     const auto& object = ppu.objects[item.index];
 
     if(object.size == 0) {
@@ -83,7 +83,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
       uint mirrorX = !object.hflip ? tileX : tileWidth - 1 - tileX;
       uint address = tiledataAddress + ((characterY + (characterX + mirrorX & 15)) << 4);
-      tile.number = address >> 4;
+      tile.number = address >> 4 & 0x7ff;
 
       if(tileCount++ >= ppu.TileLimit) break;
       tiles[tileCount - 1] = tile;
@@ -129,7 +129,7 @@ auto PPU::oamAddressReset() -> void {
 }
 
 auto PPU::oamSetFirstObject() -> void {
-  io.obj.first = !io.oamPriority ? 0 : io.oamAddress >> 2;
+  io.obj.first = !io.oamPriority ? 0 : io.oamAddress >> 2 & 0x7f;
 }
 
 auto PPU::readObject(uint10 address) -> uint8 {

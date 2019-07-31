@@ -33,7 +33,7 @@ auto PPU::Line::render() -> void {
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   auto aboveColor = cgram[0];
-  auto belowColor = hires ? cgram[0] : (uint16_t)io.col.fixedColor;
+  auto belowColor = hires ? cgram[0] : io.col.fixedColor;
   uint xa =  (hd || ss) && ppu.interlace() && ppu.field() ? 256 * scale * scale / 2 : 0;
   uint xb = !(hd || ss) ? 256 : ppu.interlace() && !ppu.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {

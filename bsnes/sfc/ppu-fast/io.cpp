@@ -123,7 +123,8 @@ auto PPU::readIO(uint address, uint8 data) -> uint8 {
   }
 
   case 0x2138: {  //OAMDATAREAD
-    data = readOAM(io.oamAddress++);
+    data = readOAM(io.oamAddress);
+    io.oamAddress = io.oamAddress + 1 & 0x3ff;
     oamSetFirstObject();
     return latch.ppu1.mdr = data;
   }
@@ -147,9 +148,11 @@ auto PPU::readIO(uint address, uint8 data) -> uint8 {
   }
 
   case 0x213b: {  //CGDATAREAD
-    if(io.cgramAddressLatch++ == 0) {
+    if(io.cgramAddressLatch == 0) {
+      io.cgramAddressLatch = 1;
       latch.ppu2.mdr = readCGRAM<0>(io.cgramAddress);
     } else {
+      io.cgramAddressLatch = 0;
       latch.ppu2.mdr = readCGRAM<1>(io.cgramAddress++) & 0x7f | latch.ppu2.mdr & 0x80;
     }
     return latch.ppu2.mdr;
@@ -214,7 +217,7 @@ auto PPU::writeIO(uint address, uint8 data) -> void {
   }
 
   case 0x2101: {  //OBSEL
-    io.obj.tiledataAddress = (data & 7) << 13;
+    io.obj.tiledataAddress = data << 13 & 0x6000;
     io.obj.nameselect      = data >> 3 & 3;
     io.obj.baseSize        = data >> 5 & 7;
     return;
@@ -235,7 +238,8 @@ auto PPU::writeIO(uint address, uint8 data) -> void {
 
   case 0x2104: {  //OAMDATA
     bool latchBit = io.oamAddress & 1;
-    uint address = io.oamAddress++;
+    uint address = io.oamAddress;
+    io.oamAddress = io.oamAddress + 1 & 0x3ff;
     if(latchBit == 0) latch.oam = data;
     if(address & 0x200) {
       writeOAM(address, data);
@@ -269,37 +273,37 @@ auto PPU::writeIO(uint address, uint8 data) -> void {
 
   case 0x2107: {  //BG1SC
     io.bg1.screenSize    = data >> 0 & 3;
-    io.bg1.screenAddress = data >> 2 << 10;
+    io.bg1.screenAddress = data << 8 & 0x7c00;
     return;
   }
 
   case 0x2108: {  //BG2SC
     io.bg2.screenSize    = data >> 0 & 3;
-    io.bg2.screenAddress = data >> 2 << 10;
+    io.bg2.screenAddress = data << 8 & 0x7c00;
     return;
   }
 
   case 0x2109: {  //BG3SC
     io.bg3.screenSize    = data >> 0 & 3;
-    io.bg3.screenAddress = data >> 2 << 10;
+    io.bg3.screenAddress = data << 8 & 0x7c00;
     return;
   }
 
   case 0x210a: {  //BG4SC
     io.bg4.screenSize    = data >> 0 & 3;
-    io.bg4.screenAddress = data >> 2 << 10;
+    io.bg4.screenAddress = data << 8 & 0x7c00;
     return;
   }
 
   case 0x210b: {  //BG12NBA
-    io.bg1.tiledataAddress = (data & 15) << 12;
-    io.bg2.tiledataAddress = (data >> 4) << 12;
+    io.bg1.tiledataAddress = data << 12 & 0x7000;
+    io.bg2.tiledataAddress = data <<  8 & 0x7000;
     return;
   }
 
   case 0x210c: {  //BG34NBA
-    io.bg3.tiledataAddress = (data & 15) << 12;
-    io.bg4.tiledataAddress = (data >> 4) << 12;
+    io.bg3.tiledataAddress = data << 12 & 0x7000;
+    io.bg4.tiledataAddress = data <<  8 & 0x7000;
     return;
   }
 
@@ -443,9 +447,11 @@ auto PPU::writeIO(uint address, uint8 data) -> void {
   }
 
   case 0x2122: {  //CGDATA
-    if(io.cgramAddressLatch++ == 0) {
+    if(io.cgramAddressLatch == 0) {
+      io.cgramAddressLatch = 1;
       latch.cgram = data;
     } else {
+      io.cgramAddressLatch = 0;
       writeCGRAM(io.cgramAddress++, (data & 0x7f) << 8 | latch.cgram);
     }
     return;
