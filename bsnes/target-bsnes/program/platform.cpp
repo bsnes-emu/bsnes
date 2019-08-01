@@ -229,7 +229,6 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
 
   uint filterWidth = width, filterHeight = height;
   auto filterRender = filterSelect(filterWidth, filterHeight, scale);
-
   if(auto [output, length] = video.acquire(filterWidth, filterHeight); output) {
     filterRender(palette, output, length, (const uint16_t*)data, pitch << 1, width, height);
     video.release();
@@ -256,6 +255,11 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
 }
 
 auto Program::audioFrame(const float* samples, uint channels) -> void {
+  if(mute) {
+    double silence[] = {0.0, 0.0};
+    return audio.output(silence);
+  }
+
   double frame[] = {samples[0], samples[1]};
   audio.output(frame);
 }

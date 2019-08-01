@@ -242,6 +242,6 @@ auto CPU::lastCycle() -> void {
   if(!status.irqLock) {
     if(nmiTest()) status.nmiPending = true;
     if(irqTest()) status.irqPending = true;
-    status.interruptPending = (status.nmiPending || status.irqPending);
+    status.interruptPending = status.nmiPending || status.irqPending;
   }
 }

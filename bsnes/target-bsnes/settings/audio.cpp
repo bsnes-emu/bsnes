@@ -45,4 +45,8 @@ auto AudioSettings::create() -> void {
     balanceValue.setText(value);
     program.updateAudioEffects();
   }).doChange();
+
+  muteUnfocused.setText("Mute when unfocused").setChecked(settings.audio.muteUnfocused).onToggle([&] {
+    settings.audio.muteUnfocused = muteUnfocused.checked();
+  });
 }

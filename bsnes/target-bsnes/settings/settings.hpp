@@ -37,6 +37,7 @@ struct Settings : Markup::Node {
     uint latency = 0;
 
     bool mute = false;
+    bool muteUnfocused = false;
     int skew = 0;
     uint volume = 100;
     uint balance = 50;
@@ -170,6 +171,8 @@ private:
     Label balanceLabel{&effectsLayout, Size{0, 0}};
     Label balanceValue{&effectsLayout, Size{50_sx, 0}};
     HorizontalSlider balanceSlider{&effectsLayout, Size{~0, 0}};
+  //
+  CheckLabel muteUnfocused{this, Size{~0, 0}};
 };
 
 struct InputSettings : VerticalLayout {

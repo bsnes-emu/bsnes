@@ -86,8 +86,12 @@ auto Presentation::create() -> void {
   shaderMenu.setIcon(Icon::Emblem::Image).setText("Shader");
   muteAudio.setText("Mute Audio").setChecked(settings.audio.mute).onToggle([&] {
     settings.audio.mute = muteAudio.checked();
-    program.updateAudioEffects();
-  });
+    if(settings.audio.mute) {
+      program.mute |= Program::Mute::Always;
+    } else {
+      program.mute &= ~Program::Mute::Always;
+    }
+  }).doToggle();  //set initial mute state flag
   showStatusBar.setText("Show Status Bar").setChecked(settings.general.statusBar).onToggle([&] {
     settings.general.statusBar = showStatusBar.checked();
     if(!showStatusBar.checked()) {

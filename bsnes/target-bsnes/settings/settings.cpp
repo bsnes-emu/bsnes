@@ -71,10 +71,11 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Audio/Frequency", audio.frequency);
   bind(natural, "Audio/Latency",   audio.latency);
 
-  bind(boolean, "Audio/Mute",    audio.mute);
-  bind(integer, "Audio/Skew",    audio.skew);
-  bind(natural, "Audio/Volume",  audio.volume);
-  bind(natural, "Audio/Balance", audio.balance);
+  bind(boolean, "Audio/Mute",          audio.mute);
+  bind(boolean, "Audio/MuteUnfocused", audio.muteUnfocused);
+  bind(integer, "Audio/Skew",          audio.skew);
+  bind(natural, "Audio/Volume",        audio.volume);
+  bind(natural, "Audio/Balance",       audio.balance);
 
   bind(text,    "Input/Driver",          input.driver);
   bind(natural, "Input/Frequency",       input.frequency);

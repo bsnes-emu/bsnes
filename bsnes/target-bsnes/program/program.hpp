@@ -188,6 +188,14 @@ public:
   string statusFrameRate;
 
   bool startFullScreen = false;
+
+  struct Mute { enum : uint {
+    Always      = 1 << 1,
+    Unfocused   = 1 << 2,
+    FastForward = 1 << 3,
+    Rewind      = 1 << 4,
+  };};
+  uint mute = 0;
 };
 
 extern Program program;

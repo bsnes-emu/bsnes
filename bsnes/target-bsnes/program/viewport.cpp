@@ -78,9 +78,13 @@ auto Program::viewportRefresh() -> void {
       do {
         uint x = uint8_t(SnowData[i * 2 + 0] >> 8) * snowX;
         uint y = uint8_t(SnowData[i * 2 + 1] >> 8) * snowY;
-        if((SnowVelDist[i * 2] & 8) != 0) {
-          uint8_t color = 228 + (SnowVelDist[i * 2] & 0x03);
-          if(y) output[y * length + x] = color << 16 | color << 8 | color << 0;
+        if((SnowVelDist[i * 2] & 8) != 0 && y) {
+          uint32_t pixel = output[y * length + x];
+          float   a = SnowVelDist[i * 2] / 255.0;
+          uint8_t r = (pixel >> 16 & 0xff) * a + 255 * (1.0 - a);
+          uint8_t g = (pixel >>  8 & 0xff) * a + 255 * (1.0 - a);
+          uint8_t b = (pixel >>  0 & 0xff) * a + 255 * (1.0 - a);
+          output[y * length + x] = 255u << 24 | r << 16 | g << 8 | b << 0;
         }
       } while(++i != 200);
 

@@ -33,7 +33,7 @@ auto InputManager::bindHotkeys() -> void {
     }
     volume = Emulator::audio.volume();
     if(settings.rewind.mute) {
-      Emulator::audio.setVolume(0.0);
+      program.mute |= Program::Mute::Rewind;
     } else {
       Emulator::audio.setVolume(volume * 0.65);
     }
@@ -41,6 +41,7 @@ auto InputManager::bindHotkeys() -> void {
     rewinding = false;
     if(!emulator->loaded()) return;
     program.rewindMode(Program::Rewind::Mode::Playing);
+    program.mute &= ~Program::Mute::Rewind;
     Emulator::audio.setVolume(volume);
   }));
 
@@ -87,7 +88,7 @@ auto InputManager::bindHotkeys() -> void {
       Emulator::audio.setFrequency(frequency / settings.fastForward.limiter);
     }
     if(settings.fastForward.mute) {
-      Emulator::audio.setVolume(0.0);
+      program.mute |= Program::Mute::FastForward;
     } else if(settings.fastForward.limiter) {
       Emulator::audio.setVolume(volume * 0.65);
     }
@@ -101,6 +102,7 @@ auto InputManager::bindHotkeys() -> void {
     if(settings.fastForward.limiter) {
       Emulator::audio.setFrequency(frequency);
     }
+    program.mute &= ~Program::Mute::FastForward;
     Emulator::audio.setVolume(volume);
   }));
 
