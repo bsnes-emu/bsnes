@@ -82,7 +82,7 @@ auto CPU::step(uint clocks) -> void {
 
 //called by ppu.tick() when Hcounter=0
 auto CPU::scanline() -> void {
-  status.lineClocks = lineclocks();
+  status.lineClocks = hperiod();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   synchronizeSMP();

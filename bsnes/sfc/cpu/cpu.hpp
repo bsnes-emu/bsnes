@@ -25,8 +25,8 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
 
   //memory.cpp
   auto idle() -> void override;
-  auto read(uint24 addr) -> uint8 override;
-  auto write(uint24 addr, uint8 data) -> void override;
+  auto read(uint addr) -> uint8 override;
+  auto write(uint addr, uint8 data) -> void override;
   auto readDisassembler(uint addr) -> uint8 override;
 
   //io.cpp

@@ -90,7 +90,7 @@ auto PPU::main() -> void {
     obj.tilefetch();
   }
 
-  step(lineclocks() - hcounter());
+  step(hperiod() - hcounter());
 }
 
 auto PPU::load() -> bool {

@@ -6,7 +6,7 @@ auto CPU::idle() -> void {
   aluEdge();
 }
 
-auto CPU::read(uint24 address) -> uint8 {
+auto CPU::read(uint address) -> uint8 {
   status.irqLock = false;
 
   if(address & 0x408000) {
@@ -46,7 +46,7 @@ auto CPU::read(uint24 address) -> uint8 {
   return data;
 }
 
-auto CPU::write(uint24 address, uint8 data) -> void {
+auto CPU::write(uint address, uint8 data) -> void {
   status.irqLock = false;
   aluEdge();
 

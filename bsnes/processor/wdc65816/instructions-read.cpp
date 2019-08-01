@@ -45,7 +45,7 @@ auto WDC65816::instructionLongRead8(alu8 op, r16 I) -> void {
   V.l = fetch();
   V.h = fetch();
   V.b = fetch();
-L W.l = read(V.d + I.w + 0);
+L W.l = readLong(V.d + I.w + 0);
   alu(W.l);
 }
 
@@ -53,8 +53,8 @@ auto WDC65816::instructionLongRead16(alu16 op, r16 I) -> void {
   V.l = fetch();
   V.h = fetch();
   V.b = fetch();
-  W.l = read(V.d + I.w + 0);
-L W.h = read(V.d + I.w + 1);
+  W.l = readLong(V.d + I.w + 0);
+L W.h = readLong(V.d + I.w + 1);
   alu(W.w);
 }
 
@@ -157,7 +157,7 @@ auto WDC65816::instructionIndirectLongRead8(alu8 op, r16 I) -> void {
   V.l = readDirectN(U.l + 0);
   V.h = readDirectN(U.l + 1);
   V.b = readDirectN(U.l + 2);
-L W.l = read(V.d + I.w + 0);
+L W.l = readLong(V.d + I.w + 0);
   alu(W.l);
 }
 
@@ -167,8 +167,8 @@ auto WDC65816::instructionIndirectLongRead16(alu16 op, r16 I) -> void {
   V.l = readDirectN(U.l + 0);
   V.h = readDirectN(U.l + 1);
   V.b = readDirectN(U.l + 2);
-  W.l = read(V.d + I.w + 0);
-L W.h = read(V.d + I.w + 1);
+  W.l = readLong(V.d + I.w + 0);
+L W.h = readLong(V.d + I.w + 1);
   alu(W.w);
 }
 

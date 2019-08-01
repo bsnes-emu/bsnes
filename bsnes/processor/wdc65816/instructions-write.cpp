@@ -30,15 +30,15 @@ auto WDC65816::instructionLongWrite8(r16 I) -> void {
   V.l = fetch();
   V.h = fetch();
   V.b = fetch();
-L write(V.d + I.w + 0, A.l);
+L writeLong(V.d + I.w + 0, A.l);
 }
 
 auto WDC65816::instructionLongWrite16(r16 I) -> void {
   V.l = fetch();
   V.h = fetch();
   V.b = fetch();
-  write(V.d + I.w + 0, A.l);
-L write(V.d + I.w + 1, A.h);
+  writeLong(V.d + I.w + 0, A.l);
+L writeLong(V.d + I.w + 1, A.h);
 }
 
 auto WDC65816::instructionDirectWrite8(r16 F) -> void {
@@ -130,7 +130,7 @@ auto WDC65816::instructionIndirectLongWrite8(r16 I) -> void {
   V.l = readDirectN(U.l + 0);
   V.h = readDirectN(U.l + 1);
   V.b = readDirectN(U.l + 2);
-L write(V.d + I.w + 0, A.l);
+L writeLong(V.d + I.w + 0, A.l);
 }
 
 auto WDC65816::instructionIndirectLongWrite16(r16 I) -> void {
@@ -139,8 +139,8 @@ auto WDC65816::instructionIndirectLongWrite16(r16 I) -> void {
   V.l = readDirectN(U.l + 0);
   V.h = readDirectN(U.l + 1);
   V.b = readDirectN(U.l + 2);
-  write(V.d + I.w + 0, A.l);
-L write(V.d + I.w + 1, A.h);
+  writeLong(V.d + I.w + 0, A.l);
+L writeLong(V.d + I.w + 1, A.h);
 }
 
 auto WDC65816::instructionStackWrite8() -> void {

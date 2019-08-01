@@ -12,16 +12,17 @@
 
 struct PPUcounter {
   alwaysinline auto tick() -> void;
-  alwaysinline auto tick(uint clocks) -> void;
+  alwaysinline auto tick(uint clocks) -> void; private:
+  alwaysinline auto tickScanline() -> void; public:
 
   alwaysinline auto interlace() const -> bool;
   alwaysinline auto field() const -> bool;
   alwaysinline auto vcounter() const -> uint;
   alwaysinline auto hcounter() const -> uint;
-  alwaysinline auto hdot() const -> uint;
-  alwaysinline auto lineclocks() const -> uint;
+  alwaysinline auto hdot() const -> uint; private:
+  alwaysinline auto vperiod() const -> uint; public:
+  alwaysinline auto hperiod() const -> uint;
 
-  alwaysinline auto field(uint offset) const -> bool;
   alwaysinline auto vcounter(uint offset) const -> uint;
   alwaysinline auto hcounter(uint offset) const -> uint;
 
@@ -31,20 +32,17 @@ struct PPUcounter {
   function<void ()> scanline;
 
 private:
-  alwaysinline auto vcounterTick() -> void;
-
   struct {
     bool interlace = 0;
     bool field = 0;
+    uint vperiod = 0;
+    uint hperiod = 0;
     uint vcounter = 0;
     uint hcounter = 0;
-    uint lineclocks = 1364;
-  } status;
+  } time;
 
   struct {
-    uint index = 0;
-    bool field[2048] = {};
-    uint vcounter[2048] = {};
-    uint hcounter[2048] = {};
-  } history;
+    uint vperiod = 0;
+    uint hperiod = 0;
+  } last;
 };

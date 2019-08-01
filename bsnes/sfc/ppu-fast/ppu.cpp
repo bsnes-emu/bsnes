@@ -100,7 +100,7 @@ auto PPU::main() -> void {
     }
   }
 
-  step(lineclocks() - hcounter());
+  step(hperiod() - hcounter());
 }
 
 auto PPU::scanline() -> void {

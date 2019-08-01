@@ -109,7 +109,7 @@ auto CPU::power(bool reset) -> void {
   alu = {};
 
   status = {};
-  status.lineClocks = lineclocks();
+  status.lineClocks = hperiod();
   status.dramRefreshPosition = (version == 1 ? 530 : 538);
   status.hdmaSetupPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
   status.hdmaPosition = 1104;
