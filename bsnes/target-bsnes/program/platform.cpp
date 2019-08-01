@@ -1,10 +1,10 @@
 #include <nall/encode/bmp.hpp>
-#include <icarus/heuristics/heuristics.hpp>
-#include <icarus/heuristics/heuristics.cpp>
-#include <icarus/heuristics/super-famicom.cpp>
-#include <icarus/heuristics/game-boy.cpp>
-#include <icarus/heuristics/bs-memory.cpp>
-#include <icarus/heuristics/sufami-turbo.cpp>
+#include <heuristics/heuristics.hpp>
+#include <heuristics/heuristics.cpp>
+#include <heuristics/super-famicom.cpp>
+#include <heuristics/game-boy.cpp>
+#include <heuristics/bs-memory.cpp>
+#include <heuristics/sufami-turbo.cpp>
 
 //ROM data is held in memory to support compressed archives, soft-patching, and game hacks
 auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
