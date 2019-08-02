@@ -33,9 +33,6 @@ auto CPU::Enter() -> void {
   }
 }
 
-auto CPU::boot() -> void {
-}
-
 auto CPU::main() -> void {
   if(r.wai) return instructionWait();
   if(r.stp) return instructionStop();

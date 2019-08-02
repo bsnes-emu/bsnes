@@ -9,7 +9,6 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   auto synchronizePPU() -> void;
   auto synchronizeCoprocessors() -> void;
   static auto Enter() -> void;
-  auto boot() -> void;
   auto main() -> void;
   auto load() -> bool;
   auto power(bool reset) -> void;
