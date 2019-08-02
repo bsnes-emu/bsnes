@@ -33,34 +33,34 @@ auto CPU::Enter() -> void {
   }
 }
 
+auto CPU::boot() -> void {
+}
+
 auto CPU::main() -> void {
   if(r.wai) return instructionWait();
   if(r.stp) return instructionStop();
+  if(!status.interruptPending) return instruction();
 
-  if(status.interruptPending) {
-    status.interruptPending = false;
-    if(status.nmiPending) {
-      status.nmiPending = false;
-      r.vector = r.e ? 0xfffa : 0xffea;
-      interrupt();
-    } else if(status.irqPending) {
-      status.irqPending = false;
-      r.vector = r.e ? 0xfffe : 0xffee;
-      interrupt();
-    } else if(status.resetPending) {
-      status.resetPending = false;
-      for(uint repeat : range(22)) step<6,0>();  //step(132);
-      r.vector = 0xfffc;
-      interrupt();
-    } else if(status.powerPending) {
-      status.powerPending = false;
-      for(uint repeat : range(31)) step<6,0>();  //step(186);
-      r.pc.l = bus.read(0xfffc, r.mdr);
-      r.pc.h = bus.read(0xfffd, r.mdr);
-    }
+  if(status.nmiPending) {
+    status.nmiPending = 0;
+    r.vector = r.e ? 0xfffa : 0xffea;
+    return interrupt();
   }
 
-  instruction();
+  if(status.irqPending) {
+    status.irqPending = 0;
+    r.vector = r.e ? 0xfffe : 0xffee;
+    return interrupt();
+  }
+
+  if(status.resetPending) {
+    status.resetPending = 0;
+    for(uint repeat : range(22)) step<6,0>();  //step(132);
+    r.vector = 0xfffc;
+    return interrupt();
+  }
+
+  status.interruptPending = 0;
 }
 
 auto CPU::load() -> bool {
@@ -109,13 +109,11 @@ auto CPU::power(bool reset) -> void {
   alu = {};
 
   status = {};
-  status.lineClocks = hperiod();
   status.dramRefreshPosition = (version == 1 ? 530 : 538);
   status.hdmaSetupPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
   status.hdmaPosition = 1104;
-  status.powerPending = reset == 0;
-  status.resetPending = reset == 1;
-  status.interruptPending = true;
+  status.resetPending = 1;
+  status.interruptPending = 1;
 }
 
 }

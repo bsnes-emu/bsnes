@@ -51,7 +51,7 @@ auto SA1::dmaCC1() -> void {
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
     mmio.chdma_irqcl = 0;
-    cpu.r.irq = 1;
+    cpu.irq(1);
   }
 }
 

@@ -136,14 +136,14 @@ auto SA1::writeIOCPU(uint address, uint8 data) -> void {
     if(!mmio.cpu_irqen && (data & 0x80)) {
       if(mmio.cpu_irqfl) {
         mmio.cpu_irqcl = 0;
-        cpu.r.irq = 1;
+        cpu.irq(1);
       }
     }
 
     if(!mmio.chdma_irqen && (data & 0x20)) {
       if(mmio.chdma_irqfl) {
         mmio.chdma_irqcl = 0;
-        cpu.r.irq = 1;
+        cpu.irq(1);
       }
     }
 
@@ -160,7 +160,7 @@ auto SA1::writeIOCPU(uint address, uint8 data) -> void {
     if(mmio.cpu_irqcl  ) mmio.cpu_irqfl   = false;
     if(mmio.chdma_irqcl) mmio.chdma_irqfl = false;
 
-    if(!mmio.cpu_irqfl && !mmio.chdma_irqfl) cpu.r.irq = 0;
+    if(!mmio.cpu_irqfl && !mmio.chdma_irqfl) cpu.irq(0);
     return;
   }
 
@@ -251,7 +251,7 @@ auto SA1::writeIOSA1(uint address, uint8 data) -> void {
       mmio.cpu_irqfl = true;
       if(mmio.cpu_irqen) {
         mmio.cpu_irqcl = 0;
-        cpu.r.irq = 1;
+        cpu.irq(1);
       }
     }
 

@@ -223,7 +223,7 @@ auto HitachiDSP::writeIO(uint address, uint8 data) -> void {
 
   case 0x7f51:
     io.irq = data & 1;
-    if(io.irq == 1) r.i = 0, cpu.r.irq = 0;
+    if(io.irq == 1) cpu.irq(r.i = 0);
     return;
 
   case 0x7f52:

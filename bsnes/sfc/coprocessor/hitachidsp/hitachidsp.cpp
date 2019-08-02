@@ -23,7 +23,7 @@ auto HitachiDSP::step(uint clocks) -> void {
 
 auto HitachiDSP::halt() -> void {
   HG51B::halt();
-  if(io.irq == 0) r.i = 1, cpu.r.irq = 1;
+  if(io.irq == 0) cpu.irq(r.i = 1);
 }
 
 auto HitachiDSP::unload() -> void {

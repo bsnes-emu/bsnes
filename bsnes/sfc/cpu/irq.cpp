@@ -1,3 +1,12 @@
+//external interrupt line changed.
+auto CPU::irq(bool line) -> void {
+  WDC65816::irq(line);
+  if(line) {
+    status.irqTransition = 1;
+    r.wai = 0;
+  }
+}
+
 //called once every four clock cycles;
 //as NMI steps by scanlines (divisible by 4) and IRQ by PPU 4-cycle dots.
 //
@@ -5,48 +14,56 @@
 //it is used to emulate hardware communication delay between opcode and interrupt units.
 auto CPU::pollInterrupts() -> void {
   //NMI hold
-  if(status.nmiHold.lower() && io.nmiEnable) status.nmiTransition = true;
+  if(status.nmiHold.lower() && io.nmiEnable) {
+    status.nmiTransition = 1;
+    r.wai = 0;
+  }
 
   //NMI test
   if(status.nmiValid.flip(vcounter(2) >= ppu.vdisp())) {
-    if(status.nmiLine = status.nmiValid) status.nmiHold = true;  //hold /NMI for four cycles
+    if(status.nmiLine = status.nmiValid) status.nmiHold = 1;  //hold /NMI for four cycles
   }
 
   //IRQ hold
-  status.irqHold = false;
-  if(status.irqLine && io.irqEnable) status.irqTransition = true;
+  status.irqHold = 0;
+  if(status.irqLine && io.irqEnable) {
+    status.irqTransition = 1;
+    r.wai = 0;
+  }
 
   //IRQ test
   if(status.irqValid.raise(io.irqEnable
   && (!io.virqEnable || vcounter(10) == io.vtime)
   && (!io.hirqEnable || hcounter(10) == io.htime)
   && (vcounter(6) || hcounter(6))  //IRQs cannot trigger on last dot of fields
-  )) status.irqLine = status.irqHold = true;  //hold /IRQ for four cycles
+  )) status.irqLine = status.irqHold = 1;  //hold /IRQ for four cycles
 }
 
 auto CPU::nmitimenUpdate(uint8 data) -> void {
-  io.hirqEnable = bit1(data,4);
-  io.virqEnable = bit1(data,5);
+  io.hirqEnable = data & 0x10;
+  io.virqEnable = data & 0x20;
   io.irqEnable = io.hirqEnable || io.virqEnable;
 
   if(io.virqEnable && !io.hirqEnable && status.irqLine) {
-    status.irqTransition = true;
+    status.irqTransition = 1;
+    r.wai = 0;
   } else if(!io.irqEnable) {
-    status.irqLine = false;
-    status.irqTransition = false;
+    status.irqLine = 0;
+    status.irqTransition = 0;
   }
 
-  if(io.nmiEnable.raise(bit1(data,7)) && status.nmiLine) {
-    status.nmiTransition = true;
+  if(io.nmiEnable.raise(data & 0x80) && status.nmiLine) {
+    status.nmiTransition = 1;
+    r.wai = 0;
   }
 
-  status.irqLock = true;
+  status.irqLock = 1;
 }
 
 auto CPU::rdnmi() -> bool {
   bool result = status.nmiLine;
   if(!status.nmiHold) {
-    status.nmiLine = false;
+    status.nmiLine = 0;
   }
   return result;
 }
@@ -54,22 +71,32 @@ auto CPU::rdnmi() -> bool {
 auto CPU::timeup() -> bool {
   bool result = status.irqLine;
   if(!status.irqHold) {
-    status.irqLine = false;
-    status.irqTransition = false;
+    status.irqLine = 0;
+    status.irqTransition = 0;
   }
   return result;
 }
 
 auto CPU::nmiTest() -> bool {
-  if(!status.nmiTransition) return false;
-  status.nmiTransition = false;
-  r.wai = false;
-  return true;
+  if(!status.nmiTransition) return 0;
+  status.nmiTransition = 0;
+  return 1;
 }
 
 auto CPU::irqTest() -> bool {
-  if(!status.irqTransition && !r.irq) return false;
-  status.irqTransition = false;
-  r.wai = false;
+  if(!status.irqTransition) return 0;
+  status.irqTransition = 0;
   return !r.p.i;
+}
+
+//used to test for NMI/IRQ, which can trigger on the edge of every opcode.
+//test one cycle early to simulate two-stage pipeline of the 65816 CPU.
+//
+//status.irqLock is used to simulate hardware delay before interrupts can
+//trigger during certain events (immediately after DMA, writes to $4200, etc)
+auto CPU::lastCycle() -> void {
+  if(!status.irqLock) {
+    if(nmiTest()) status.nmiPending = 1, status.interruptPending = 1;
+    if(irqTest()) status.irqPending = 1, status.interruptPending = 1;
+  }
 }

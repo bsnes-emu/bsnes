@@ -82,8 +82,6 @@ auto CPU::step(uint clocks) -> void {
 
 //called by ppu.tick() when Hcounter=0
 auto CPU::scanline() -> void {
-  status.lineClocks = hperiod();
-
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   synchronizeSMP();
   synchronizePPU();
@@ -230,18 +228,5 @@ auto CPU::joypadEdge() -> void {
     }
 
     status.autoJoypadCounter++;
-  }
-}
-
-//used to test for NMI/IRQ, which can trigger on the edge of every opcode.
-//test one cycle early to simulate two-stage pipeline of x816 CPU.
-//
-//status.irq_lock is used to simulate hardware delay before interrupts can
-//trigger during certain events (immediately after DMA, writes to $4200, etc)
-auto CPU::lastCycle() -> void {
-  if(!status.irqLock) {
-    if(nmiTest()) status.nmiPending = true;
-    if(irqTest()) status.irqPending = true;
-    status.interruptPending = status.nmiPending || status.irqPending;
   }
 }
