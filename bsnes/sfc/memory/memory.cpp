@@ -11,7 +11,7 @@ Bus::~Bus() {
 }
 
 auto Bus::reset() -> void {
-  for(auto id : range(256)) {
+  for(uint id : range(256)) {
     reader[id].reset();
     writer[id].reset();
     counter[id] = 0;
@@ -29,7 +29,7 @@ auto Bus::reset() -> void {
 
 auto Bus::map(
   const function<uint8 (uint, uint8)>& read,
-  const function<void (uint, uint8)>& write,
+  const function<void  (uint, uint8)>& write,
   const string& addr, uint size, uint base, uint mask
 ) -> uint {
   uint id = 1;

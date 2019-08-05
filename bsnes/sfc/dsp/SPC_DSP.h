@@ -231,6 +231,9 @@ private:
 	void echo_30();
 	
 	void soft_reset_common();
+
+public:
+    bool mute() { return m.regs[r_flg] & 0x40; }
 };
 
 #include <assert.h>

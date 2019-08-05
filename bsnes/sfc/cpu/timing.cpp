@@ -29,7 +29,7 @@ auto CPU::step() -> void {
   static_assert(Clocks == 2 || Clocks == 4 || Clocks == 6 || Clocks == 8 || Clocks == 10 || Clocks == 12);
 
   for(auto coprocessor : coprocessors) {
-    coprocessor->clock -= Clocks * (uint64_t)coprocessor->frequency;
+    coprocessor->clock -= Clocks * (uint64)coprocessor->frequency;
   }
 
   if(overclocking.target) {
@@ -37,9 +37,8 @@ auto CPU::step() -> void {
     if(overclocking.counter < overclocking.target) {
       if constexpr(Synchronize) {
         if(configuration.hacks.coprocessor.delayedSync) return;
-        synchronizeCoprocessors();
+        return synchronizeCoprocessors();
       }
-      return;
     }
   }
 
@@ -50,7 +49,7 @@ auto CPU::step() -> void {
   if constexpr(Clocks >= 10) stepOnce();
   if constexpr(Clocks >= 12) stepOnce();
 
-  smp.clock -= Clocks * (uint64_t)smp.frequency;
+  smp.clock -= Clocks * (uint64)smp.frequency;
   ppu.clock -= Clocks;
 
   if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {

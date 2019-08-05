@@ -1,4 +1,5 @@
 #include <sfc/sfc.hpp>
+#include <processor/gsu/gsu.cpp>
 
 namespace SuperFamicom {
 

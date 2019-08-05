@@ -1,4 +1,5 @@
 #include <sfc/sfc.hpp>
+#include <processor/hg51b/hg51b.cpp>
 
 namespace SuperFamicom {
 

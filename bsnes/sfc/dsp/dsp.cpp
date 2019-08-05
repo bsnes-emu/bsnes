@@ -7,7 +7,7 @@ DSP dsp;
 #include "serialization.cpp"
 #include "SPC_DSP.cpp"
 
-void DSP::main() {
+auto DSP::main() -> void {
   if(!configuration.hacks.dsp.fast) {
     spc_dsp.run(1);
     clock += 2;
@@ -25,19 +25,19 @@ void DSP::main() {
   }
 }
 
-uint8 DSP::read(uint8 addr) {
-  return spc_dsp.read(addr);
+auto DSP::read(uint8 address) -> uint8 {
+  return spc_dsp.read(address);
 }
 
-void DSP::write(uint8 addr, uint8 data) {
-  spc_dsp.write(addr, data);
+auto DSP::write(uint8 address, uint8 data) -> void {
+  spc_dsp.write(address, data);
 }
 
-bool DSP::load() {
+auto DSP::load() -> bool {
   return true;
 }
 
-void DSP::power(bool reset) {
+auto DSP::power(bool reset) -> void {
   clock = 0;
   stream = Emulator::audio.createStream(2, system.apuFrequency() / 768.0);
 
@@ -51,8 +51,8 @@ void DSP::power(bool reset) {
   }
 }
 
-bool DSP::mute() {
-  return false;
+auto DSP::mute() -> bool {
+  return spc_dsp.mute();
 }
 
 }

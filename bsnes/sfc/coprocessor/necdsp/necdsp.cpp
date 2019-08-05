@@ -1,4 +1,5 @@
 #include <sfc/sfc.hpp>
+#include <processor/upd96050/upd96050.cpp>
 
 namespace SuperFamicom {
 

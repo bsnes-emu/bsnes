@@ -1,20 +1,20 @@
-static void dsp_state_save(unsigned char **out, void *in, size_t size) {
+static auto dsp_state_save(unsigned char** out, void* in, size_t size) -> void {
   memcpy(*out, in, size);
   *out += size;
 }
 
-static void dsp_state_load(unsigned char **in, void *out, size_t size) {
+static auto dsp_state_load(unsigned char** in, void* out, size_t size) -> void {
   memcpy(out, *in, size);
   *in += size;
 }
 
-void DSP::serialize(serializer &s) {
+auto DSP::serialize(serializer& s) -> void {
   s.array(apuram);
   s.array(samplebuffer);
   s.integer(clock);
 
   unsigned char state[SPC_DSP::state_size];
-  unsigned char *p = state;
+  unsigned char* p = state;
   memset(&state, 0, SPC_DSP::state_size);
   if(s.mode() == serializer::Save) {
     spc_dsp.copy_state(&p, dsp_state_save);

@@ -42,7 +42,7 @@ private:
   uint32* target = nullptr;
 
   function<uint8 (uint, uint8)> reader[256];
-  function<void (uint, uint8)> writer[256];
+  function<void  (uint, uint8)> writer[256];
   uint counter[256];
 };
 

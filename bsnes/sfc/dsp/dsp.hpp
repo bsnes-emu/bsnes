@@ -2,23 +2,24 @@
 
 struct DSP {
   shared_pointer<Emulator::Stream> stream;
-  uint8_t apuram[64 * 1024] = {};
+  uint8 apuram[64 * 1024] = {};
 
-  void main();
-  uint8 read(uint8 addr);
-  void write(uint8 addr, uint8 data);
+  auto main() -> void;
+  auto read(uint8 address) -> uint8;
+  auto write(uint8 address, uint8 data) -> void;
 
-  bool load();
-  void power(bool reset);
-  bool mute();
+  auto load() -> bool;
+  auto power(bool reset) -> void;
+  auto mute() -> bool;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 
   int64 clock = 0;
 
 private:
+  bool fastDSP = false;
   SPC_DSP spc_dsp;
-  int16_t samplebuffer[8192];
+  int16 samplebuffer[8192];
 };
 
 extern DSP dsp;
