@@ -10,8 +10,8 @@ auto Program::load() -> void {
   emulator->configure("Hacks/PPU/Mode7/Mosaic", settings.emulator.hack.ppu.mode7.mosaic);
   emulator->configure("Hacks/DSP/Fast", settings.emulator.hack.dsp.fast);
   emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
-  emulator->configure("Hacks/Coprocessor/DelayedSync", settings.emulator.hack.coprocessors.delayedSync);
-  emulator->configure("Hacks/Coprocessor/HLE", settings.emulator.hack.coprocessors.hle);
+  emulator->configure("Hacks/Coprocessor/DelayedSync", settings.emulator.hack.coprocessor.delayedSync);
+  emulator->configure("Hacks/Coprocessor/PreferHLE", settings.emulator.hack.coprocessor.preferHLE);
   emulator->configure("Hacks/SuperFX/Overclock", settings.emulator.hack.superfx.overclock);
   if(!emulator->load()) return;
 
@@ -45,7 +45,7 @@ auto Program::load() -> void {
     appliedPatch() ? " and patch applied" : ""
   });
   presentation.setFocused();
-  presentation.setTitle(emulator->titles().merge(" + "));
+  presentation.setTitle(emulator->title());
   presentation.resetSystem.setEnabled(true);
   presentation.unloadGame.setEnabled(true);
   presentation.toolsMenu.setVisible(true);

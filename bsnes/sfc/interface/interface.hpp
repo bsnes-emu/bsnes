@@ -40,6 +40,7 @@ struct Interface : Emulator::Interface {
   auto hashes() -> vector<string> override;
   auto manifests() -> vector<string> override;
   auto titles() -> vector<string> override;
+  auto title() -> string override;
   auto load() -> bool override;
   auto save() -> void override;
   auto unload() -> void override;

@@ -109,10 +109,10 @@ struct Settings : Markup::Node {
         bool fast = true;
         bool cubic = false;
       } dsp;
-      struct Coprocessors {
+      struct Coprocessor {
         bool delayedSync = true;
-        bool hle = true;
-      } coprocessors;
+        bool preferHLE = false;
+      } coprocessor;
       struct SA1 {
         uint overclock = 100;
       } sa1;
@@ -341,9 +341,9 @@ public:
     CheckLabel fastDSP{&dspLayout, Size{0, 0}};
     CheckLabel cubicInterpolation{&dspLayout, Size{0, 0}};
   Label coprocessorLabel{this, Size{~0, 0}, 2};
-  HorizontalLayout coprocessorsLayout{this, Size{~0, 0}};
-    CheckLabel coprocessorsDelayedSyncOption{&coprocessorsLayout, Size{0, 0}};
-    CheckLabel coprocessorsHLEOption{&coprocessorsLayout, Size{0, 0}};
+  HorizontalLayout coprocessorLayout{this, Size{~0, 0}};
+    CheckLabel coprocessorDelayedSyncOption{&coprocessorLayout, Size{0, 0}};
+    CheckLabel coprocessorPreferHLEOption{&coprocessorLayout, Size{0, 0}};
   Label hacksNote{this, Size{~0, 0}};
 };
 

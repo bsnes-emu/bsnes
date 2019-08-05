@@ -70,6 +70,10 @@ auto Interface::titles() -> vector<string> {
   return cartridge.titles();
 }
 
+auto Interface::title() -> string {
+  return cartridge.title();
+}
+
 auto Interface::load() -> bool {
   return system.load(this);
 }

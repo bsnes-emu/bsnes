@@ -37,6 +37,17 @@ auto Cartridge::titles() const -> vector<string> {
   return titles;
 }
 
+auto Cartridge::title() const -> string {
+  if(slotGameBoy.label) return slotGameBoy.label;
+  if(has.MCC && slotBSMemory.label) return slotBSMemory.label;
+  if(slotBSMemory.label) return {game.label, " + ", slotBSMemory.label};
+  if(slotSufamiTurboA.label && slotSufamiTurboB.label) return {slotSufamiTurboA.label, " + ", slotSufamiTurboB.label};
+  if(slotSufamiTurboA.label) return slotSufamiTurboA.label;
+  if(slotSufamiTurboB.label) return slotSufamiTurboB.label;
+  if(has.Cx4 || has.DSP1 || has.DSP2 || has.DSP4 || has.ST0010) return {"[HLE] ", game.label};
+  return game.label;
+}
+
 auto Cartridge::load() -> bool {
   information = {};
   has = {};

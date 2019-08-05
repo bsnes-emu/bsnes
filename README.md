@@ -56,12 +56,13 @@ Standard Features
   - Sprite limit disable support
   - Cubic audio interpolation support
   - Optional high-level emulation of most SNES coprocessors
-  - SuperFX overclocking of up to 800%
+  - CPU, SA1, and SuperFX overclocking support
   - Frame advance support
   - Screenshot support
   - Cheat code search support
   - Movie recording and playback support
   - Rewind support
+  - HiDPI support
 
 Links
 -----

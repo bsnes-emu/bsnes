@@ -277,12 +277,23 @@ auto Presentation::updateStatusIcon() -> void {
   icon.allocate(16, StatusHeight);
   icon.fill(0xff202020);
 
-  if(emulator->loaded()) {
-    image emblem{program.verified() ? (image)Icon::Emblem::Program : (image)Icon::Emblem::Binary};
+  if(emulator->loaded() && program.verified()) {
+    image emblem{Icon::Emblem::Program};
     icon.impose(image::blend::sourceAlpha, 0, (StatusHeight - 16) / 2, emblem, 0, 0, 16, 16);
+    statusIcon.setIcon(icon).setToolTip(
+      "This is a known clean game image.\n"
+      "PCB emulation is 100% accurate."
+    );
+  } else if(emulator->loaded()) {
+    image emblem{Icon::Emblem::Binary};
+    icon.impose(image::blend::sourceAlpha, 0, (StatusHeight - 16) / 2, emblem, 0, 0, 16, 16);
+    statusIcon.setIcon(icon).setToolTip(
+      "This is not a verified game image.\n"
+      "PCB emulation is relying on heuristics."
+    );
+  } else {
+    statusIcon.setIcon(icon).setToolTip();
   }
-
-  statusIcon.setIcon(icon);
 }
 
 auto Presentation::resizeWindow() -> void {

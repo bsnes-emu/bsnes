@@ -75,15 +75,19 @@ auto Program::create() -> void {
 auto Program::main() -> void {
   updateStatus();
   video.poll();
+
+  if(Application::modal()) {
+    audio.clear();
+    return;
+  }
+
   inputManager.poll();
   inputManager.pollHotkeys();
 
   if(inactive()) {
     audio.clear();
-    if(!Application::modal()) {
-      usleep(20 * 1000);
-      viewportRefresh();
-    }
+    usleep(20 * 1000);
+    viewportRefresh();
     return;
   }
 

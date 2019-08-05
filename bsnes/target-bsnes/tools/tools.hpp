@@ -88,6 +88,9 @@ struct CheatEditor : VerticalLayout {
   auto saveCheats() -> void;
   auto synchronizeCodes() -> void;
 
+  auto decodeSNES(string& code) -> bool;
+  auto decodeGB(string& code) -> bool;
+
 public:
   vector<Cheat> cheats;
   uint64_t activateTimeout = 0;

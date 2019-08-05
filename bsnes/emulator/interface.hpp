@@ -61,6 +61,7 @@ struct Interface {
   virtual auto hashes() -> vector<string> { return {}; }
   virtual auto manifests() -> vector<string> { return {}; }
   virtual auto titles() -> vector<string> { return {}; }
+  virtual auto title() -> string { return {}; }
   virtual auto load() -> bool { return false; }
   virtual auto save() -> void {}
   virtual auto unload() -> void {}

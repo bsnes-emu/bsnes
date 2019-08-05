@@ -3,6 +3,28 @@ auto CheatFinder::create() -> void {
   setVisible(false);
 
   searchList.setHeadered();
+  searchList.onActivate([&](auto cell) {
+    if(auto item = searchList.selected()) {
+      uint address = toHex(item.cell(0).text().trimLeft("0x", 1L));
+      string data = item.cell(1).text().trimLeft("0x", 1L).split(" ", 1L).first();
+      string code;
+      if(data.size() == 2) {
+        code.append(hex(address + 0, 6L), "=", data.slice(0, 2), "\n");
+      }
+      if(data.size() == 4) {
+        code.append(hex(address + 0, 6L), "=", data.slice(2, 2), "\n");
+        code.append(hex(address + 1, 6L), "=", data.slice(0, 2), "\n");
+      }
+      if(data.size() == 6) {
+        code.append(hex(address + 0, 6L), "=", data.slice(4, 2), "\n");
+        code.append(hex(address + 1, 6L), "=", data.slice(2, 2), "\n");
+        code.append(hex(address + 2, 6L), "=", data.slice(0, 2), "\n");
+      }
+      toolsWindow.show(1);
+      cheatEditor.addButton.doActivate();
+      cheatWindow.codeValue.setText(code).doChange();
+    }
+  });
   searchValue.onActivate([&] { eventScan(); });
   searchLabel.setText("Value:");
   searchSize.append(ComboButtonItem().setText("Byte"));
@@ -34,7 +56,7 @@ auto CheatFinder::restart() -> void {
 auto CheatFinder::refresh() -> void {
   searchList.reset();
   searchList.append(TableViewColumn().setText("Address"));
-  searchList.append(TableViewColumn().setText("Value").setExpandable());
+  searchList.append(TableViewColumn().setText("Value"));
 
   for(auto& candidate : candidates) {
     TableViewItem item{&searchList};

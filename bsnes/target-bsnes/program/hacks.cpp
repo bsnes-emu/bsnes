@@ -2,7 +2,7 @@ auto Program::hackCompatibility() -> void {
   bool fastPPU = emulatorSettings.fastPPU.checked();
   bool fastPPUNoSpriteLimit = emulatorSettings.noSpriteLimit.checked();
   bool fastDSP = emulatorSettings.fastDSP.checked();
-  bool coprocessorsDelayedSync = emulatorSettings.coprocessorsDelayedSyncOption.checked();
+  bool coprocessorDelayedSync = emulatorSettings.coprocessorDelayedSyncOption.checked();
 
   auto title = superFamicom.title;
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
@@ -17,7 +17,7 @@ auto Program::hackCompatibility() -> void {
   emulator->configure("Hacks/PPU/Mode7/Mosaic", settings.emulator.hack.ppu.mode7.mosaic);
   emulator->configure("Hacks/DSP/Fast", fastDSP);
   emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
-  emulator->configure("Hacks/Coprocessors/DelayedSync", coprocessorsDelayedSync);
+  emulator->configure("Hacks/Coprocessor/DelayedSync", coprocessorDelayedSync);
 }
 
 auto Program::hackPatchMemory(vector<uint8_t>& data) -> void {

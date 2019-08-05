@@ -36,7 +36,7 @@ auto CPU::step() -> void {
     overclocking.counter += Clocks;
     if(overclocking.counter < overclocking.target) {
       if constexpr(Synchronize) {
-        if(configuration.hacks.coprocessors.delayedSync) return;
+        if(configuration.hacks.coprocessor.delayedSync) return;
         synchronizeCoprocessors();
       }
       return;
@@ -64,7 +64,7 @@ auto CPU::step() -> void {
   }
 
   if constexpr(Synchronize) {
-    if(configuration.hacks.coprocessors.delayedSync) return;
+    if(configuration.hacks.coprocessor.delayedSync) return;
     synchronizeCoprocessors();
   }
 }

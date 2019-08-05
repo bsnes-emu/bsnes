@@ -5,6 +5,7 @@ struct Cartridge {
   auto hashes() const -> vector<string>;
   auto manifests() const -> vector<string>;
   auto titles() const -> vector<string>;
+  auto title() const -> string;
 
   auto load() -> bool;
   auto save() -> void;

@@ -74,11 +74,14 @@ auto EmulatorSettings::create() -> void {
     emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
   });
   coprocessorLabel.setText("Coprocessors").setFont(Font().setBold());
-  coprocessorsDelayedSyncOption.setText("Fast mode").setChecked(settings.emulator.hack.coprocessors.delayedSync).onToggle([&] {
-    settings.emulator.hack.coprocessors.delayedSync = coprocessorsDelayedSyncOption.checked();
+  coprocessorDelayedSyncOption.setText("Fast mode").setChecked(settings.emulator.hack.coprocessor.delayedSync).onToggle([&] {
+    settings.emulator.hack.coprocessor.delayedSync = coprocessorDelayedSyncOption.checked();
   });
-  coprocessorsHLEOption.setText("Prefer HLE").setChecked(settings.emulator.hack.coprocessors.hle).onToggle([&] {
-    settings.emulator.hack.coprocessors.hle = coprocessorsHLEOption.checked();
+  coprocessorPreferHLEOption.setText("Prefer HLE").setChecked(settings.emulator.hack.coprocessor.preferHLE).setToolTip(
+    "When checked, less accurate HLE emulation will always be used when available.\n"
+    "When unchecked, HLE will only be used when LLE firmware is missing."
+  ).onToggle([&] {
+    settings.emulator.hack.coprocessor.preferHLE = coprocessorPreferHLEOption.checked();
   });
   hacksNote.setText("Note: some hack setting changes do not take effect until after reloading games.");
 }

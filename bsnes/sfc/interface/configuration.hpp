@@ -42,10 +42,10 @@ struct Configuration {
       bool fast = true;
       bool cubic = false;
     } dsp;
-    struct Coprocessors {
+    struct Coprocessor {
       bool delayedSync = true;
-      bool hle = true;
-    } coprocessors;
+      bool preferHLE = false;
+    } coprocessor;
     struct SA1 {
       uint overclock = 100;
     } sa1;
