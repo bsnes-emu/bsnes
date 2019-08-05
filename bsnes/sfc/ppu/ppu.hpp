@@ -28,16 +28,16 @@ private:
   alwaysinline auto addressVRAM() const -> uint16;
   alwaysinline auto readVRAM() -> uint16;
   alwaysinline auto writeVRAM(bool byte, uint8 data) -> void;
-  alwaysinline auto readOAM(uint10 addr) -> uint8;
-  alwaysinline auto writeOAM(uint10 addr, uint8 data) -> void;
-  alwaysinline auto readCGRAM(bool byte, uint8 addr) -> uint8;
-  alwaysinline auto writeCGRAM(uint8 addr, uint15 data) -> void;
-  auto readIO(uint addr, uint8 data) -> uint8;
-  auto writeIO(uint addr, uint8 data) -> void;
+  alwaysinline auto readOAM(uint10 address) -> uint8;
+  alwaysinline auto writeOAM(uint10 address, uint8 data) -> void;
+  alwaysinline auto readCGRAM(bool byte, uint8 address) -> uint8;
+  alwaysinline auto writeCGRAM(uint8 address, uint15 data) -> void;
+  auto readIO(uint address, uint8 data) -> uint8;
+  auto writeIO(uint address, uint8 data) -> void;
   auto updateVideoMode() -> void;
 
   struct VRAM {
-    auto& operator[](uint addr) { return data[addr & mask]; }
+    auto& operator[](uint address) { return data[address & mask]; }
     uint16 data[64 * 1024];
     uint16 mask = 0x7fff;
   } vram;

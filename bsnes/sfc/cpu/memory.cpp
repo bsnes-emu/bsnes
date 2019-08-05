@@ -1,14 +1,12 @@
 auto CPU::idle() -> void {
-  status.irqLock = false;
   status.clockCount = 6;
   dmaEdge();
   step<6,0>();
+  status.irqLock = 0;
   aluEdge();
 }
 
 auto CPU::read(uint address) -> uint8 {
-  status.irqLock = false;
-
   if(address & 0x408000) {
     if(address & 0x800000 && io.fastROM) {
       status.clockCount = 6;
@@ -38,6 +36,7 @@ auto CPU::read(uint address) -> uint8 {
     step<8,1>();
   }
 
+  status.irqLock = 0;
   auto data = bus.read(address, r.mdr);
   step<4,0>();
   aluEdge();
@@ -47,7 +46,6 @@ auto CPU::read(uint address) -> uint8 {
 }
 
 auto CPU::write(uint address, uint8 data) -> void {
-  status.irqLock = false;
   aluEdge();
 
   if(address & 0x408000) {
@@ -79,6 +77,7 @@ auto CPU::write(uint address, uint8 data) -> void {
     step<12,1>();
   }
 
+  status.irqLock = 0;
   bus.write(address, r.mdr = data);
 }
 

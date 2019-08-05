@@ -140,7 +140,7 @@ auto PPU::power(bool reset) -> void {
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  io.oamBaseAddress = random();
+  io.oamBaseAddress = random() & ~1;
   io.oamAddress = random();
   io.oamPriority = random();
 
