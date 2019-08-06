@@ -175,6 +175,6 @@ auto CPU::Channel::hdmaTransfer() -> void {
 auto CPU::Channel::hdmaAdvance() -> void {
   if(!hdmaActive()) return;
   lineCounter--;
-  hdmaDoTransfer = bit1(lineCounter,7);
+  hdmaDoTransfer = bool(lineCounter & 0x80);
   hdmaReload();
 }

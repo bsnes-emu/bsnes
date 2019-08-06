@@ -41,21 +41,21 @@ auto CPU::readCPU(uint addr, uint8 data) -> uint8 {
     data |= (vcounter() >= ppu.vdisp()) << 7;              //vblank
     return data;
 
-  case 0x4213: return io.pio;            //RDIO
+  case 0x4213: return io.pio;  //RDIO
 
-  case 0x4214: return bit8(io.rddiv,0);  //RDDIVL
-  case 0x4215: return bit8(io.rddiv,1);  //RDDIVH
-  case 0x4216: return bit8(io.rdmpy,0);  //RDMPYL
-  case 0x4217: return bit8(io.rdmpy,1);  //RDMPYH
+  case 0x4214: return io.rddiv >> 0;  //RDDIVL
+  case 0x4215: return io.rddiv >> 8;  //RDDIVH
+  case 0x4216: return io.rdmpy >> 0;  //RDMPYL
+  case 0x4217: return io.rdmpy >> 8;  //RDMPYH
 
-  case 0x4218: return bit8(io.joy1,0);   //JOY1L
-  case 0x4219: return bit8(io.joy1,1);   //JOY1H
-  case 0x421a: return bit8(io.joy2,0);   //JOY2L
-  case 0x421b: return bit8(io.joy2,1);   //JOY2H
-  case 0x421c: return bit8(io.joy3,0);   //JOY3L
-  case 0x421d: return bit8(io.joy3,1);   //JOY3H
-  case 0x421e: return bit8(io.joy4,0);   //JOY4L
-  case 0x421f: return bit8(io.joy4,1);   //JOY4H
+  case 0x4218: return io.joy1 >> 0;   //JOY1L
+  case 0x4219: return io.joy1 >> 8;   //JOY1H
+  case 0x421a: return io.joy2 >> 0;   //JOY2L
+  case 0x421b: return io.joy2 >> 8;   //JOY2H
+  case 0x421c: return io.joy3 >> 0;   //JOY3L
+  case 0x421d: return io.joy3 >> 8;   //JOY3H
+  case 0x421e: return io.joy4 >> 0;   //JOY4L
+  case 0x421f: return io.joy4 >> 8;   //JOY4H
 
   }
 
@@ -77,18 +77,18 @@ auto CPU::readDMA(uint addr, uint8 data) -> uint8 {
     | channel.direction       << 7
     );
 
-  case 0x4301: return channel.targetAddress;          //BBADx
-  case 0x4302: return bit8(channel.sourceAddress,0);  //A1TxL
-  case 0x4303: return bit8(channel.sourceAddress,1);  //A1TxH
-  case 0x4304: return channel.sourceBank;             //A1Bx
-  case 0x4305: return bit8(channel.transferSize,0);   //DASxL
-  case 0x4306: return bit8(channel.transferSize,1);   //DASxH
-  case 0x4307: return channel.indirectBank;           //DASBx
-  case 0x4308: return bit8(channel.hdmaAddress,0);    //A2AxL
-  case 0x4309: return bit8(channel.hdmaAddress,1);    //A2AxH
-  case 0x430a: return channel.lineCounter;            //NTRLx
-  case 0x430b: return channel.unknown;                //???x
-  case 0x430f: return channel.unknown;                //???x ($43xb mirror)
+  case 0x4301: return channel.targetAddress;       //BBADx
+  case 0x4302: return channel.sourceAddress >> 0;  //A1TxL
+  case 0x4303: return channel.sourceAddress >> 8;  //A1TxH
+  case 0x4304: return channel.sourceBank;          //A1Bx
+  case 0x4305: return channel.transferSize >> 0;   //DASxL
+  case 0x4306: return channel.transferSize >> 8;   //DASxH
+  case 0x4307: return channel.indirectBank;        //DASBx
+  case 0x4308: return channel.hdmaAddress >> 0;    //A2AxL
+  case 0x4309: return channel.hdmaAddress >> 8;    //A2AxH
+  case 0x430a: return channel.lineCounter;         //NTRLx
+  case 0x430b: return channel.unknown;             //???x
+  case 0x430f: return channel.unknown;             //???x ($43xb mirror)
 
   }
 
@@ -111,15 +111,15 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     return bus.write(0x7e0000 | io.wramAddress++, data);
 
   case 0x2181:  //WMADDL
-    bits(io.wramAddress,0-7) = data;
+    io.wramAddress = io.wramAddress & 0x1ff00 | data << 0;
     return;
 
   case 0x2182:  //WMADDM
-    bits(io.wramAddress,8-15) = data;
+    io.wramAddress = io.wramAddress & 0x100ff | data << 8;
     return;
 
   case 0x2183:  //WMADDH
-    bit1(io.wramAddress,16) = bit1(data,0);
+    io.wramAddress = io.wramAddress & 0x0ffff | (data & 1) << 16;
     return;
 
   case 0x4016:  //JOYSER0
@@ -136,7 +136,7 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     return;
 
   case 0x4201:  //WRIO
-    if(bit1(io.pio,7) && !bit1(data,7)) ppu.latchCounters();
+    if((io.pio & 0x80) && !(data & 0x80)) ppu.latchCounters();
     io.pio = data;
     return;
 
@@ -149,18 +149,18 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     if(alu.mpyctr || alu.divctr) return;
 
     io.wrmpyb = data;
-    io.rddiv = (io.wrmpyb << 8) | io.wrmpya;
+    io.rddiv = io.wrmpyb << 8 | io.wrmpya;
 
     alu.mpyctr = 8;  //perform multiplication over the next eight cycles
     alu.shift = io.wrmpyb;
     return;
 
   case 0x4204:  //WRDIVL
-    bit8(io.wrdiva,0) = data;
+    io.wrdiva = io.wrdiva & 0xff00 | data << 0;
     return;
 
   case 0x4205:  //WRDIVH
-    bit8(io.wrdiva,1) = data;
+    io.wrdiva = io.wrdiva & 0x00ff | data << 8;
     return;
 
   case 0x4206:  //WRDIVB
@@ -175,31 +175,31 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
 
   case 0x4207:  //HTIMEL
     io.htime = (io.htime >> 2) - 1;
-    bits(io.htime,0-7) = data;
+    io.htime = io.htime & 0x100 | data << 0;
     io.htime = (io.htime + 1) << 2;
     return;
 
   case 0x4208:  //HTIMEH
     io.htime = (io.htime >> 2) - 1;
-    bit1(io.htime,8) = data & 1;
+    io.htime = io.htime & 0x0ff | (data & 1) << 8;
     io.htime = (io.htime + 1) << 2;
     return;
 
   case 0x4209:  //VTIMEL
-    bits(io.vtime,0-7) = data;
+    io.vtime = io.vtime & 0x100 | data << 0;
     return;
 
   case 0x420a:  //VTIMEH
-    bit1(io.vtime,8) = data & 1;
+    io.vtime = io.vtime & 0x0ff | (data & 1) << 8;
     return;
 
   case 0x420b:  //DMAEN
-    for(auto n : range(8)) channels[n].dmaEnable = bit1(data,n);
+    for(auto n : range(8)) channels[n].dmaEnable = bool(data & 1 << n);
     if(data) status.dmaPending = true;
     return;
 
   case 0x420c:  //HDMAEN
-    for(auto n : range(8)) channels[n].hdmaEnable = bit1(data,n);
+    for(auto n : range(8)) channels[n].hdmaEnable = bool(data & 1 << n);
     return;
 
   case 0x420d:  //MEMSEL
@@ -215,12 +215,12 @@ auto CPU::writeDMA(uint addr, uint8 data) -> void {
   switch(addr & 0xff8f) {
 
   case 0x4300:  //DMAPx
-    channel.transferMode    = bits(data,0-2);
-    channel.fixedTransfer   = bit1(data,3);
-    channel.reverseTransfer = bit1(data,4);
-    channel.unused          = bit1(data,5);
-    channel.indirect        = bit1(data,6);
-    channel.direction       = bit1(data,7);
+    channel.transferMode    = data >> 0 & 7;
+    channel.fixedTransfer   = data >> 3 & 1;
+    channel.reverseTransfer = data >> 4 & 1;
+    channel.unused          = data >> 5 & 1;
+    channel.indirect        = data >> 6 & 1;
+    channel.direction       = data >> 7 & 1;
     return;
 
   case 0x4301:  //BBADx
@@ -228,11 +228,11 @@ auto CPU::writeDMA(uint addr, uint8 data) -> void {
     return;
 
   case 0x4302:  //A1TxL
-    bit8(channel.sourceAddress,0) = data;
+    channel.sourceAddress = channel.sourceAddress & 0xff00 | data << 0;
     return;
 
   case 0x4303:  //A1TxH
-    bit8(channel.sourceAddress,1) = data;
+    channel.sourceAddress = channel.sourceAddress & 0x00ff | data << 8;
     return;
 
   case 0x4304:  //A1Bx
@@ -240,11 +240,11 @@ auto CPU::writeDMA(uint addr, uint8 data) -> void {
     return;
 
   case 0x4305:  //DASxL
-    bit8(channel.transferSize,0) = data;
+    channel.transferSize = channel.transferSize & 0xff00 | data << 0;
     return;
 
   case 0x4306:  //DASxH
-    bit8(channel.transferSize,1) = data;
+    channel.transferSize = channel.transferSize & 0x00ff | data << 8;
     return;
 
   case 0x4307:  //DASBx
@@ -252,11 +252,11 @@ auto CPU::writeDMA(uint addr, uint8 data) -> void {
     return;
 
   case 0x4308:  //A2AxL
-    bit8(channel.hdmaAddress,0) = data;
+    channel.hdmaAddress = channel.hdmaAddress & 0xff00 | data << 0;
     return;
 
   case 0x4309:  //A2AxH
-    bit8(channel.hdmaAddress,1) = data;
+    channel.hdmaAddress = channel.hdmaAddress & 0x00ff | data << 8;
     return;
 
   case 0x430a:  //NTRLx

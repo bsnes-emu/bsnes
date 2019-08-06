@@ -80,18 +80,18 @@ auto SA1::BWRAM::readBitmap(uint20 address, uint8 data) -> uint8 {
     uint shift = address & 1;
     address >>= 1;
     switch(shift) {
-    case 0: return cbits(read(address),0-3);
-    case 1: return cbits(read(address),4-7);
+    case 0: return read(address) >> 0 & 15;
+    case 1: return read(address) >> 4 & 15;
     }
   } else {
     //2bpp
     uint shift = address & 3;
     address >>= 2;
     switch(shift) {
-    case 0: return cbits(read(address),0-1);
-    case 1: return cbits(read(address),2-3);
-    case 2: return cbits(read(address),4-5);
-    case 3: return cbits(read(address),6-7);
+    case 0: return read(address) >> 0 & 3;
+    case 1: return read(address) >> 2 & 3;
+    case 2: return read(address) >> 4 & 3;
+    case 3: return read(address) >> 6 & 3;
     }
   }
   unreachable;

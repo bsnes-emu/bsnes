@@ -66,11 +66,11 @@ auto SDD1::dmaRead(uint addr, uint8 data) -> uint8 {
 auto SDD1::dmaWrite(uint addr, uint8 data) -> void {
   uint channel = addr >> 4 & 7;
   switch(addr & 15) {
-  case 2: bit8(dma[channel].addr,0) = data; break;
-  case 3: bit8(dma[channel].addr,1) = data; break;
-  case 4: bit8(dma[channel].addr,2) = data; break;
-  case 5: bit8(dma[channel].size,0) = data; break;
-  case 6: bit8(dma[channel].size,1) = data; break;
+  case 2: dma[channel].addr = dma[channel].addr & 0xffff00 | data <<  0; break;
+  case 3: dma[channel].addr = dma[channel].addr & 0xff00ff | data <<  8; break;
+  case 4: dma[channel].addr = dma[channel].addr & 0x00ffff | data << 16; break;
+  case 5: dma[channel].size = dma[channel].size & 0xff00 | data << 0; break;
+  case 6: dma[channel].size = dma[channel].size & 0x00ff | data << 8; break;
   }
   return cpu.writeDMA(addr, data);
 }
@@ -100,7 +100,7 @@ auto SDD1::mcuRead(uint addr, uint8 data) -> uint8 {
   if(r4800 & r4801) {
     //at least one channel has S-DD1 decompression enabled ...
     for(auto n : range(8)) {
-      if(bit1(r4800,n) && bit1(r4801,n)) {
+      if((r4800 & 1 << n) && (r4801 & 1 << n)) {
         //S-DD1 always uses fixed transfer mode, so address will not change during transfer
         if(addr == dma[n].addr) {
           if(!dmaReady) {
@@ -113,7 +113,7 @@ auto SDD1::mcuRead(uint addr, uint8 data) -> uint8 {
           data = decompressor.read();
           if(--dma[n].size == 0) {
             dmaReady = false;
-            bit1(r4801,n) = 0;
+            r4801 &= ~(1 << n);
           }
 
           return data;

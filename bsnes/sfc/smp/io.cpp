@@ -81,12 +81,12 @@ auto SMP::writeIO(uint16 address, uint8 data) -> void {
   case 0xf0:  //TEST
     if(r.p.p) break;  //writes only valid when P flag is clear
 
-    io.timersDisable      = bit1(data,0);
-    io.ramWritable        = bit1(data,1);
-    io.ramDisable         = bit1(data,2);
-    io.timersEnable       = bit1(data,3);
-    io.externalWaitStates = bits(data,4-5);
-    io.internalWaitStates = bits(data,6-7);
+    io.timersDisable      = data >> 0 & 1;
+    io.ramWritable        = data >> 1 & 1;
+    io.ramDisable         = data >> 2 & 1;
+    io.timersEnable       = data >> 3 & 1;
+    io.externalWaitStates = data >> 4 & 3;
+    io.internalWaitStates = data >> 6 & 3;
 
     timer0.synchronizeStage1();
     timer1.synchronizeStage1();
@@ -95,34 +95,34 @@ auto SMP::writeIO(uint16 address, uint8 data) -> void {
 
   case 0xf1:  //CONTROL
     //0->1 transistion resets timers
-    if(timer0.enable.raise(bit1(data,0))) {
+    if(timer0.enable.raise(data & 0x01)) {
       timer0.stage2 = 0;
       timer0.stage3 = 0;
     }
 
-    if(timer1.enable.raise(bit1(data,1))) {
+    if(timer1.enable.raise(data & 0x02)) {
       timer1.stage2 = 0;
       timer1.stage3 = 0;
     }
 
-    if(!timer2.enable.raise(bit1(data,2))) {
+    if(!timer2.enable.raise(data & 0x04)) {
       timer2.stage2 = 0;
       timer2.stage3 = 0;
     }
 
-    if(bit1(data,4)) {
+    if(data & 0x10) {
       synchronizeCPU();
       io.apu0 = 0x00;
       io.apu1 = 0x00;
     }
 
-    if(bit1(data,5)) {
+    if(data & 0x20) {
       synchronizeCPU();
       io.apu2 = 0x00;
       io.apu3 = 0x00;
     }
 
-    io.iplromEnable = bit1(data,7);
+    io.iplromEnable = bool(data & 0x80);
     break;
 
   case 0xf2:  //DSPADDR

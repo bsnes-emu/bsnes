@@ -40,8 +40,8 @@ auto MCC::read(uint address, uint8 data) -> uint8 {
     case  2: return r.mapping << 7;
     case  3: return r.psramEnableLo << 7;
     case  4: return r.psramEnableHi << 7;
-    case  5: return r.psramMapping.bit(0) << 7;
-    case  6: return r.psramMapping.bit(1) << 7;
+    case  5: return (r.psramMapping >> 0 & 1) << 7;
+    case  6: return (r.psramMapping >> 1 & 1) << 7;
     case  7: return r.romEnableLo << 7;
     case  8: return r.romEnableHi << 7;
     case  9: return r.exEnableLo << 7;
@@ -60,20 +60,20 @@ auto MCC::read(uint address, uint8 data) -> uint8 {
 auto MCC::write(uint address, uint8 data) -> void {
   if((address & 0xf0f000) == 0x005000) {  //$00-0f:5000-5fff
     switch(address >> 16 & 15) {
-    case  1: irq.enable = bit1(data,7); break;
-    case  2: w.mapping = bit1(data,7); break;
-    case  3: w.psramEnableLo = bit1(data,7); break;
-    case  4: w.psramEnableHi = bit1(data,7); break;
-    case  5: bit1(w.psramMapping,0) = bit1(data,7); break;
-    case  6: bit1(w.psramMapping,1) = bit1(data,7); break;
-    case  7: w.romEnableLo = bit1(data,7); break;
-    case  8: w.romEnableHi = bit1(data,7); break;
-    case  9: w.exEnableLo = bit1(data,7); break;
-    case 10: w.exEnableHi = bit1(data,7); break;
-    case 11: w.exMapping = bit1(data,7); break;
-    case 12: w.internallyWritable = bit1(data,7); break;
-    case 13: w.externallyWritable = bit1(data,7); break;
-    case 14: if(bit1(data,7)) commit(); break;
+    case  1: irq.enable = data >> 7; break;
+    case  2: w.mapping = data >> 7; break;
+    case  3: w.psramEnableLo = data >> 7; break;
+    case  4: w.psramEnableHi = data >> 7; break;
+    case  5: w.psramMapping = w.psramMapping & 2 | data >> 7 << 0; break;
+    case  6: w.psramMapping = w.psramMapping & 1 | data >> 7 << 1; break;
+    case  7: w.romEnableLo = data >> 7; break;
+    case  8: w.romEnableHi = data >> 7; break;
+    case  9: w.exEnableLo = data >> 7; break;
+    case 10: w.exEnableHi = data >> 7; break;
+    case 11: w.exMapping = data >> 7; break;
+    case 12: w.internallyWritable = data >> 7; break;
+    case 13: w.externallyWritable = data >> 7; break;
+    case 14: if(data >> 7) commit(); break;
     }
   }
 }

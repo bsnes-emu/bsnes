@@ -403,19 +403,19 @@ auto SA1::writeIOSA1(uint address, uint8 data) -> void {
 
   //(MAL) multiplicand / dividend low
   case 0x2251: {
-    bit8(mmio.ma,0) = data;
+    mmio.ma = mmio.ma & ~0x00ff | data << 0;
     return;
   }
 
   //(MAH) multiplicand / dividend high
   case 0x2252: {
-    bit8(mmio.ma,1) = data;
+    mmio.ma = mmio.ma & ~0xff00 | data << 8;
     return;
   }
 
   //(MBL) multiplier / divisor low
   case 0x2253: {
-    bit8(mmio.mb,0) = data;
+    mmio.mb = mmio.mb & ~0x00ff | data << 0;
     return;
   }
 
@@ -423,7 +423,7 @@ auto SA1::writeIOSA1(uint address, uint8 data) -> void {
   //multiplication / cumulative sum only resets MB
   //division resets both MA and MB
   case 0x2254: {
-    bit8(mmio.mb,1) = data;
+    mmio.mb = mmio.mb & ~0xff00 | data << 8;
 
     if(mmio.acm == 0) {
       if(mmio.md == 0) {

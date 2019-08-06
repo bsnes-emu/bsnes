@@ -203,11 +203,11 @@ auto HG51B::instructionLD(uint15& out, uint8 imm) -> void {
 }
 
 auto HG51B::instructionLDL(uint15& out, uint8 imm) -> void {
-  bits(out,0-7) = imm;
+  out = out & 0x7f00 | imm << 0;
 }
 
 auto HG51B::instructionLDH(uint15& out, uint7 imm) -> void {
-  bits(out,8-14) = imm;
+  out = out & 0x00ff | (imm & 0x7f) << 8;
 }
 
 auto HG51B::instructionMUL(uint7 reg) -> void {

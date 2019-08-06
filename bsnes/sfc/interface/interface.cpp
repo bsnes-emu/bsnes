@@ -27,10 +27,10 @@ auto Interface::display() -> Display {
 }
 
 auto Interface::color(uint32 color) -> uint64 {
-  uint r = bits(color, 0- 4);
-  uint g = bits(color, 5- 9);
-  uint b = bits(color,10-14);
-  uint l = bits(color,15-18);
+  uint r = color >>  0 & 31;
+  uint g = color >>  5 & 31;
+  uint b = color >> 10 & 31;
+  uint l = color >> 15 & 15;
 
   //luma=0 is not 100% black; but it's much darker than normal linear scaling
   //exact effect seems to be analog; requires > 24-bit color depth to represent accurately

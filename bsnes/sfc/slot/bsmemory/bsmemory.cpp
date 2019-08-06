@@ -136,8 +136,8 @@ auto BSMemory::read(uint address, uint8 data) -> uint8 {
   if(ROM) return memory.read(bus.mirror(address, size()));
 
   if(mode == Mode::Chip) {
-    if(address == 0) return bit8(chip.vendor,0);  //only appears once
-    if(address == 1) return bit8(chip.device,0);  //only appears once
+    if(address == 0) return chip.vendor;  //only appears once
+    if(address == 1) return chip.device;  //only appears once
     if((uint3)address == 2) return 0x63;  //unknown constant: repeats every eight bytes
     return 0x20;  //unknown constant: fills in all remaining bytes
   }
@@ -167,8 +167,8 @@ auto BSMemory::write(uint address, uint8 data) -> void {
   if(queue.data(0) == 0x0c) {
   if(queue.size() < 3) return;
     uint16 count;  //1 - 65536
-    bit8(count,0) = queue.data(!cbit1(queue.address(1),0) ? 1 : 2);
-    bit8(count,1) = queue.data(!cbit1(queue.address(1),0) ? 2 : 1);
+    count  = queue.data(!(queue.address(1) & 1) ? 1 : 2) << 0;
+    count |= queue.data(!(queue.address(1) & 1) ? 2 : 1) << 8;
     uint address = queue.address(2);
     do {
       block(address >> block.bitCount()).write(address, page.read(address));
@@ -315,13 +315,13 @@ auto BSMemory::write(uint address, uint8 data) -> void {
     page.write(0x07, 0x00);  //unknown constant
     for(uint6 id : range(block.count())) {
       uint8 address;
-      address += bits(id,0-1) * 0x08;  //verified for LH28F800SUT-ZI
-      address += bits(id,2-3) * 0x40;  //verified for LH28F800SUT-ZI
-      address += bit1(id,  4) * 0x20;  //guessed for LH28F016SU
-      address += bit1(id,  5) * 0x04;  //guessed for LH28F032SU; will overwrite unknown constants
+      address += (id >> 0 & 3) * 0x08;  //verified for LH28F800SUT-ZI
+      address += (id >> 2 & 3) * 0x40;  //verified for LH28F800SUT-ZI
+      address += (id >> 4 & 1) * 0x20;  //guessed for LH28F016SU
+      address += (id >> 5 & 1) * 0x04;  //guessed for LH28F032SU; will overwrite unknown constants
       uint32 erased = 1 << 31 | block(id).erased;  //unknown if d31 is set when erased == 0
       for(uint2 byte : range(4)) {
-        page.write(address + byte, bit8(erased,byte));  //little endian
+        page.write(address + byte, erased >> byte * 8);  //little endian
       }
     }
     page.swap();
@@ -350,12 +350,12 @@ auto BSMemory::write(uint address, uint8 data) -> void {
   if(queue.data(0) == 0xe0) {
   if(queue.size() < 4) return;  //command length = 3 + count
     uint16 count;  //1 - 65536
-    bit8(count,0) = queue.data(1);  //endian order not affected by queue.address(1).bit(0)
-    bit8(count,1) = queue.data(2);
+    count  = queue.data(1) << 0;  //endian order not affected by queue.address(1).bit(0)
+    count |= queue.data(2) << 8;
     page.write(queue.address(3), queue.data(3));
     if(count--) {
-      queue.history[1].data = bit8(count,0);
-      queue.history[2].data = bit8(count,1);
+      queue.history[1].data = count >> 0;
+      queue.history[2].data = count >> 8;
       return queue.pop();  //hack to avoid needing a 65539-entry queue
     } else {
       return queue.flush();
@@ -374,11 +374,11 @@ auto BSMemory::write(uint address, uint8 data) -> void {
   if(queue.data(0) == 0xfb) {
   if(queue.size() < 3) return;
     uint16 value;
-    bit8(value,0) = queue.data(!cbit1(queue.address(1),0) ? 1 : 2);
-    bit8(value,1) = queue.data(!cbit1(queue.address(1),0) ? 2 : 1);
+    value  = queue.data(!(queue.address(1) & 1) ? 1 : 2) << 0;
+    value |= queue.data(!(queue.address(1) & 1) ? 2 : 1) << 8;
     //writes are always word-aligned: a0 toggles, rather than increments
-    block(queue.address(2) >> block.bitCount()).write(queue.address(2) ^ 0, bit8(value,0));
-    block(queue.address(2) >> block.bitCount()).write(queue.address(2) ^ 1, bit8(value,1));
+    block(queue.address(2) >> block.bitCount()).write(queue.address(2) ^ 0, value >> 0);
+    block(queue.address(2) >> block.bitCount()).write(queue.address(2) ^ 1, value >> 8);
     mode = Mode::CompatibleStatus;
     return queue.flush();
   }

@@ -117,8 +117,8 @@ auto PPU::Object::tilefetch() -> void {
 
     uint16 tiledataAddress = io.tiledataAddress;
     if(sprite.nameselect) tiledataAddress += 1 + io.nameselect << 12;
-    uint16 chrx =  cbits(sprite.character,0-3);
-    uint16 chry = (cbits(sprite.character,4-7) + (y >> 3) & 15) << 4;
+    uint16 chrx =  (sprite.character >> 0 & 15);
+    uint16 chry = ((sprite.character >> 4 & 15) + (y >> 3) & 15) << 4;
 
     for(uint tx : range(tileWidth)) {
       uint sx = x + (tx << 3) & 511;
@@ -136,8 +136,7 @@ auto PPU::Object::tilefetch() -> void {
       uint pos = tiledataAddress + ((chry + (chrx + mx & 15)) << 4);
       uint16 addr = (pos & 0xfff0) + (y & 7);
 
-      bits(oamTile[n].data, 0-15) = ppu.vram[addr + 0];
-      bits(oamTile[n].data,16-31) = ppu.vram[addr + 8];
+      oamTile[n].data = ppu.vram[addr + 0] << 0 | ppu.vram[addr + 8] << 16;
       ppu.step(2);
     }
   }

@@ -84,19 +84,19 @@ auto PPU::Background::getTile() -> void {
     if(offsetX >= 8) {
       auto hlookup = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 0);
       auto vlookup = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 8);
-      uint valid = 13 + id;
+      uint valid = 1 << 13 + id;
 
       if(ppu.io.bgMode == 4) {
-        if(bit1(hlookup,valid)) {
-          if(!bit1(hlookup,15)) {
+        if(hlookup & valid) {
+          if(!(hlookup & 0x8000)) {
             hoffset = offsetX + (hlookup & ~7);
           } else {
             voffset = py + hlookup;
           }
         }
       } else {
-        if(bit1(hlookup,valid)) hoffset = offsetX + (hlookup & ~7);
-        if(bit1(vlookup,valid)) voffset = py + vlookup;
+        if(hlookup & valid) hoffset = offsetX + (hlookup & ~7);
+        if(vlookup & valid) voffset = py + vlookup;
       }
     }
   }
@@ -116,27 +116,30 @@ auto PPU::Background::getTile() -> void {
 
   uint16 address = io.screenAddress + offset;
   tile = ppu.vram[address];
-  bool mirrorY = bit1(tile,15);
-  bool mirrorX = bit1(tile,14);
-  priority = io.priority[bit1(tile,13)];
-  paletteNumber = bits(tile,10-12);
+  bool mirrorY = tile & 0x8000;
+  bool mirrorX = tile & 0x4000;
+  priority = io.priority[bool(tile & 0x2000)];
+  paletteNumber = tile >> 10 & 7;
   paletteIndex = paletteOffset + (paletteNumber << paletteSize);
 
-  if(tileWidth  == 4 && (bool)(hoffset & 8) != mirrorX) tile +=  1;
-  if(tileHeight == 4 && (bool)(voffset & 8) != mirrorY) tile += 16;
-  uint16 character = bits(tile,0-9) + tiledataIndex & tileMask;
+  if(tileWidth  == 4 && bool(hoffset & 8) != mirrorX) tile +=  1;
+  if(tileHeight == 4 && bool(voffset & 8) != mirrorY) tile += 16;
+  uint16 character = (tile & 0x03ff) + tiledataIndex & tileMask;
 
   if(mirrorY) voffset ^= 7;
   offset = (character << 3 + io.mode) + (voffset & 7);
 
   switch(io.mode) {
   case Mode::BPP8:
-    bits(data[1],16-31) = ppu.vram[offset + 24];
-    bits(data[1], 0-15) = ppu.vram[offset + 16];
+    data[0] = ppu.vram[offset +  0] << 0 | ppu.vram[offset +  8] << 16;
+    data[1] = ppu.vram[offset + 16] << 0 | ppu.vram[offset + 24] << 16;
+    break;
   case Mode::BPP4:
-    bits(data[0],16-31) = ppu.vram[offset +  8];
+    data[0] = ppu.vram[offset +  0] << 0 | ppu.vram[offset +  8] << 16;
+    break;
   case Mode::BPP2:
-    bits(data[0], 0-15) = ppu.vram[offset +  0];
+    data[0] = ppu.vram[offset +  0] << 0;
+    break;
   }
 
   if(mirrorX) for(auto n : range(2)) {

@@ -46,8 +46,8 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
 
   uint4 input = 0xf;
   if(p14 == 1 && p15 == 1) input = 0xf - joypID;
-  if(p14 == 0) input &= bits(joypad,0-3);  //d-pad
-  if(p15 == 0) input &= bits(joypad,4-7);  //buttons
+  if(p14 == 0) input &= (joypad >> 0 & 15);  //d-pad
+  if(p15 == 0) input &= (joypad >> 4 & 15);  //buttons
 
   GB_icd_set_joyp(&sameboy, input);
 

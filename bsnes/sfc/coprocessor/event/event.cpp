@@ -48,7 +48,7 @@ auto Event::power() -> void {
   create(Event::Enter, 1);
 
   //DIP switches 0-3 control the time: 3 minutes + 0-15 extra minutes
-  timer = (3 + bits(dip.value,0-3)) * 60;  //in seconds
+  timer = (3 + (dip.value & 15)) * 60;  //in seconds
   //DIP switches 4-5 serve an unknown purpose
   //DIP switches 6-7 are not connected
 

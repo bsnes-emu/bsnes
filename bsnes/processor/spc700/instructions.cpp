@@ -7,32 +7,33 @@ auto SPC700::instructionAbsoluteBitModify(uint3 mode) -> void {
   switch(mode) {
   case 0:  //or addr:bit
     idle();
-    CF |= bit1(data,bit);
+    CF |= bool(data & 1 << bit);
     break;
   case 1:  //or !addr:bit
     idle();
-    CF |= !bit1(data,bit);
+    CF |= !bool(data & 1 << bit);
     break;
   case 2:  //and addr:bit
-    CF &= bit1(data,bit);
+    CF &= bool(data & 1 << bit);
     break;
   case 3:  //and !addr:bit
-    CF &= !bit1(data,bit);
+    CF &= !bool(data & 1 << bit);
     break;
   case 4:  //eor addr:bit
     idle();
-    CF ^= bit1(data,bit);
+    CF ^= bool(data & 1 << bit);
     break;
   case 5:  //ld addr:bit
-    CF = bit1(data,bit);
+    CF = bool(data & 1 << bit);
     break;
   case 6:  //st addr:bit
     idle();
-    bit1(data,bit) = CF;
+    data &= ~(1 << bit);
+    data |= CF << bit;
     write(address, data);
     break;
   case 7:  //not addr:bit
-    bit1(data,bit) ^= 1;
+    data ^= 1 << bit;
     write(address, data);
     break;
   }
@@ -41,7 +42,8 @@ auto SPC700::instructionAbsoluteBitModify(uint3 mode) -> void {
 auto SPC700::instructionAbsoluteBitSet(uint3 bit, bool value) -> void {
   uint8 address = fetch();
   uint8 data = load(address);
-  bit1(data,bit) = value;
+  data &= ~(1 << bit);
+  data |= value << bit;
   store(address, data);
 }
 
@@ -95,7 +97,7 @@ auto SPC700::instructionBranchBit(uint3 bit, bool match) -> void {
   uint8 data = load(address);
   idle();
   uint8 displacement = fetch();
-  if(bit1(data,bit) != match) return;
+  if(bool(data & 1 << bit) != match) return;
   idle();
   idle();
   PC += (int8)displacement;

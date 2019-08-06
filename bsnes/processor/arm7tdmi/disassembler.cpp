@@ -186,7 +186,7 @@ auto ARM7TDMI::armDisassembleMoveMultiple
 (uint16 list, uint4 n, uint1 mode, uint1 writeback, uint1 type, uint1 up, uint1 pre) -> string {
   string registers;
   for(auto index : range(16)) {
-    if(bit1(list,index)) registers.append(_r[index], ",");
+    if((list & 1 << index)) registers.append(_r[index], ",");
   }
   registers.trimRight(",", 1L);
   return {mode ? "ldm" : "stm", _c,
@@ -358,7 +358,7 @@ auto ARM7TDMI::thumbDisassembleMoveMultiple
 (uint8 list, uint3 n, uint1 mode) -> string {
   string registers;
   for(uint m : range(8)) {
-    if(bit1(list,m)) registers.append(_r[m], ",");
+    if((list & 1 << m)) registers.append(_r[m], ",");
   }
   registers.trimRight(",", 1L);
   return {mode ? "ldmia" : "stmia", " ", _r[n], "!,{", registers, "}"};
@@ -395,7 +395,7 @@ auto ARM7TDMI::thumbDisassembleStackMultiple
 (uint8 list, uint1 lrpc, uint1 mode) -> string {
   string registers;
   for(uint m : range(8)) {
-    if(bit1(list,m)) registers.append(_r[m], ",");
+    if((list & 1 << m)) registers.append(_r[m], ",");
   }
   if(lrpc) registers.append(!mode ? "lr," : "pc,");
   registers.trimRight(",", 1L);

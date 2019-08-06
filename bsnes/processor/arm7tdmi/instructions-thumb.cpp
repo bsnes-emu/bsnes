@@ -127,7 +127,7 @@ auto ARM7TDMI::thumbInstructionMoveMultiple
   uint32 rn = r(n);
 
   for(uint m : range(8)) {
-    if(!bit1(list,m)) continue;
+    if(!(list & 1 << m)) continue;
     switch(mode) {
     case 0: write(Word | Nonsequential, rn, r(m)); break;  //STMIA
     case 1: r(m) = read(Word | Nonsequential, rn); break;  //LDMIA
@@ -135,7 +135,7 @@ auto ARM7TDMI::thumbInstructionMoveMultiple
     rn += 4;
   }
 
-  if(mode == 0 || !bit1(list,n)) r(n) = rn;
+  if(mode == 0 || !(list & 1 << n)) r(n) = rn;
   if(mode == 1) idle();
 }
 
@@ -193,7 +193,7 @@ auto ARM7TDMI::thumbInstructionStackMultiple
 
   uint sequential = Nonsequential;
   for(uint m : range(8)) {
-    if(!bit1(list,m)) continue;
+    if(!(list & 1 << m)) continue;
     switch(mode) {
     case 0: write(Word | sequential, sp, r(m)); break;  //PUSH
     case 1: r(m) = read(Word | sequential, sp); break;  //POP

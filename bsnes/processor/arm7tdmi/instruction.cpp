@@ -68,8 +68,11 @@ auto ARM7TDMI::armInitialize() -> void {
   #define pattern(s) \
     std::integral_constant<uint32_t, bit::test(s)>::value
 
+  #define bit1(value, index) (value >> index & 1)
+  #define bits(value, lo, hi) (value >> lo & (1ull << (hi - lo + 1)) - 1)
+
   #define arguments \
-    bits(opcode, 0-23),  /* displacement */ \
+    bits(opcode, 0,23),  /* displacement */ \
     bit1(opcode,24)      /* link */
   for(uint4 displacementLo : range(16))
   for(uint4 displacementHi : range(16))
@@ -81,7 +84,7 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3)   /* m */
+    bits(opcode, 0, 3)   /* m */
   {
     auto opcode = pattern(".... 0001 0010 ---- ---- ---- 0001 ????");
     bind(opcode, BranchExchangeRegister);
@@ -89,12 +92,12 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 7),  /* immediate */ \
-    bits(opcode, 8-11),  /* shift */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 7),  /* immediate */ \
+    bits(opcode, 8,11),  /* shift */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* save */ \
-    bits(opcode,21-24)   /* mode */
+    bits(opcode,21,24)   /* mode */
   for(uint4 shiftHi : range(16))
   for(uint1 save : range(2))
   for(uint4 mode : range(16)) {
@@ -105,13 +108,13 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode, 5- 6),  /* type */ \
-    bits(opcode, 7-11),  /* shift */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode, 5, 6),  /* type */ \
+    bits(opcode, 7,11),  /* shift */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* save */ \
-    bits(opcode,21-24)   /* mode */
+    bits(opcode,21,24)   /* mode */
   for(uint2 type : range(4))
   for(uint1 shiftLo : range(2))
   for(uint1 save : range(2))
@@ -123,13 +126,13 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode, 5- 6),  /* type */ \
-    bits(opcode, 8-11),  /* s */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode, 5, 6),  /* type */ \
+    bits(opcode, 8,11),  /* s */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* save */ \
-    bits(opcode,21-24)   /* mode */
+    bits(opcode,21,24)   /* mode */
   for(uint2 type : range(4))
   for(uint1 save : range(2))
   for(uint4 mode : range(16)) {
@@ -140,10 +143,10 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3) << 0 | bits(opcode, 8-11) << 4,  /* immediate */ \
+    bits(opcode, 0, 3) << 0 | bits(opcode, 8,11) << 4,  /* immediate */ \
     bit1(opcode, 5),     /* half */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,23),     /* up */ \
     bit1(opcode,24)      /* pre */
@@ -157,10 +160,10 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
+    bits(opcode, 0, 3),  /* m */ \
     bit1(opcode, 5),     /* half */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,23),     /* up */ \
     bit1(opcode,24)      /* pre */
@@ -174,9 +177,9 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,22)      /* byte */
   for(uint1 byte : range(2)) {
     auto opcode = pattern(".... 0001 0?00 ???? ???? ---- 1001 ????") | byte << 22;
@@ -185,9 +188,9 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3) << 0 | bits(opcode, 8-11) << 4,  /* immediate */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3) << 0 | bits(opcode, 8,11) << 4,  /* immediate */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* mode */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,23),     /* up */ \
@@ -202,9 +205,9 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* mode */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,23),     /* up */ \
@@ -219,9 +222,9 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0-11),  /* immediate */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0,11),  /* immediate */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* mode */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,22),     /* byte */ \
@@ -240,8 +243,8 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0-15),  /* list */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0,15),  /* list */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* mode */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,22),     /* type */ \
@@ -260,11 +263,11 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode, 5- 6),  /* type */ \
-    bits(opcode, 7-11),  /* shift */ \
-    bits(opcode,12-15),  /* d */ \
-    bits(opcode,16-19),  /* n */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode, 5, 6),  /* type */ \
+    bits(opcode, 7,11),  /* shift */ \
+    bits(opcode,12,15),  /* d */ \
+    bits(opcode,16,19),  /* n */ \
     bit1(opcode,20),     /* mode */ \
     bit1(opcode,21),     /* writeback */ \
     bit1(opcode,22),     /* byte */ \
@@ -284,7 +287,7 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode,12-15),  /* d */ \
+    bits(opcode,12,15),  /* d */ \
     bit1(opcode,22)      /* mode */
   for(uint1 mode : range(2)) {
     auto opcode = pattern(".... 0001 0?00 ---- ???? ---- 0000 ----") | mode << 22;
@@ -293,9 +296,9 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 7),  /* immediate */ \
-    bits(opcode, 8-11),  /* rotate */ \
-    bits(opcode,16-19),  /* field */ \
+    bits(opcode, 0, 7),  /* immediate */ \
+    bits(opcode, 8,11),  /* rotate */ \
+    bits(opcode,16,19),  /* field */ \
     bit1(opcode,22)      /* mode */
   for(uint4 immediateHi : range(16))
   for(uint1 mode : range(2)) {
@@ -305,8 +308,8 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode,16-19),  /* field */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode,16,19),  /* field */ \
     bit1(opcode,22)      /* mode */
   for(uint1 mode : range(2)) {
     auto opcode = pattern(".... 0001 0?10 ???? ---- ---- 0000 ????") | mode << 22;
@@ -315,10 +318,10 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode, 8-11),  /* s */ \
-    bits(opcode,12-15),  /* n */ \
-    bits(opcode,16-19),  /* d */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode, 8,11),  /* s */ \
+    bits(opcode,12,15),  /* n */ \
+    bits(opcode,16,19),  /* d */ \
     bit1(opcode,20),     /* save */ \
     bit1(opcode,21)      /* accumulate */
   for(uint1 save : range(2))
@@ -329,10 +332,10 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0- 3),  /* m */ \
-    bits(opcode, 8-11),  /* s */ \
-    bits(opcode,12-15),  /* l */ \
-    bits(opcode,16-19),  /* h */ \
+    bits(opcode, 0, 3),  /* m */ \
+    bits(opcode, 8,11),  /* s */ \
+    bits(opcode,12,15),  /* l */ \
+    bits(opcode,16,19),  /* h */ \
     bit1(opcode,20),     /* save */ \
     bit1(opcode,21),     /* accumulate */ \
     bit1(opcode,22)      /* sign */
@@ -345,7 +348,7 @@ auto ARM7TDMI::armInitialize() -> void {
   #undef arguments
 
   #define arguments \
-    bits(opcode, 0-23)  /* immediate */
+    bits(opcode, 0,23)  /* immediate */
   for(uint4 immediateLo : range(16))
   for(uint4 immediateHi : range(16)) {
     auto opcode = pattern(".... 1111 ???? ???? ???? ???? ???? ????") | immediateLo << 4 | immediateHi << 20;
@@ -356,7 +359,7 @@ auto ARM7TDMI::armInitialize() -> void {
   #define arguments
   for(uint12 id : range(4096)) {
     if(armInstruction[id]) continue;
-    auto opcode = pattern(".... ???? ???? ---- ---- ---- ???? ----") | bits(id,0-3) << 4 | bits(id,4-11) << 20;
+    auto opcode = pattern(".... ???? ???? ---- ---- ---- ???? ----") | bits(id,0,3) << 4 | bits(id,4,11) << 20;
     bind(opcode, Undefined);
   }
   #undef arguments
@@ -386,7 +389,7 @@ auto ARM7TDMI::thumbInitialize() -> void {
   for(uint4 m : range(16))
   for(uint2 mode : range(4)) {
     if(mode == 3) continue;
-    auto opcode = pattern("0100 01?? ???? ????") | bits(d,0-2) << 0 | m << 3 | bit1(d,3) << 7 | mode << 8;
+    auto opcode = pattern("0100 01?? ???? ????") | bits(d,0,2) << 0 | m << 3 | bit1(d,3) << 7 | mode << 8;
     bind(opcode, ALUExtended, d, m, mode);
   }
 
@@ -532,6 +535,9 @@ auto ARM7TDMI::thumbInitialize() -> void {
     auto opcode = pattern("???? ???? ???? ????") | id << 0;
     bind(opcode, Undefined);
   }
+
+  #undef bit1
+  #undef bits
 
   #undef bind
   #undef pattern
