@@ -64,8 +64,8 @@ auto HG51B::readRegister(uint7 address) -> uint24 {
 
 auto HG51B::writeRegister(uint7 address, uint24 data) -> void {
   switch(address) {
-  case 0x01: r.mul = r.mul & ~0xffffffull | data <<  0; return;
-  case 0x02: r.mul = r.mul &  0xffffffull | data << 24; return;
+  case 0x01: r.mul = r.mul &  0xffffffull | data << 24; return;
+  case 0x02: r.mul = r.mul & ~0xffffffull | data <<  0; return;
   case 0x03: r.mdr = data; return;
   case 0x08: r.rom = data; return;
   case 0x0c: r.ram = data; return;
