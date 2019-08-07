@@ -130,6 +130,7 @@ struct Settings : Markup::Node {
     bool screenSaver = false;
     bool toolTips = true;
     bool crashed = false;
+    bool betaWarning = true;
   } general;
 };
 

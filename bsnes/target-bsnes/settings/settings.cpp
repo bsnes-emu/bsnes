@@ -128,6 +128,7 @@ auto Settings::process(bool load) -> void {
   bind(boolean, "General/ScreenSaver", general.screenSaver);
   bind(boolean, "General/ToolTips",    general.toolTips);
   bind(boolean, "General/Crashed",     general.crashed);
+  bind(boolean, "General/BetaWarning", general.betaWarning);
 
   #undef bind
 }
