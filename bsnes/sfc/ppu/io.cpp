@@ -183,7 +183,7 @@ auto PPU::readIO(uint addr, uint8 data) -> uint8 {
     ppu2.mdr |= ppu2.version;
     ppu2.mdr |= Region::PAL() << 4;  //0 = NTSC, 1 = PAL
     if(!(cpu.pio() & 0x80)) {
-      ppu2.mdr |= 1 << 6;;
+      ppu2.mdr |= 1 << 6;
     } else {
       ppu2.mdr |= latch.counters << 6;
       latch.counters = 0;
