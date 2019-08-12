@@ -28,6 +28,7 @@ auto PPU::hdScale() const -> uint { return configuration.hacks.ppu.mode7.scale; 
 auto PPU::hdPerspective() const -> bool { return configuration.hacks.ppu.mode7.perspective; }
 auto PPU::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.supersample; }
 auto PPU::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
+auto PPU::deinterlace() const -> bool { return configuration.hacks.ppu.deinterlace; }
 #define ppu ppufast
 
 PPU::PPU() {

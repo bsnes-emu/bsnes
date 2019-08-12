@@ -59,7 +59,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
     }
 
     if(self.interlace) {
-      y = !object.vflip ? y + ppu.field() : y - ppu.field();
+      y = !object.vflip ? y + field() : y - field();
     }
 
     x &= 511;

@@ -97,7 +97,8 @@ struct Settings : Markup::Node {
       } cpu;
       struct PPU {
         bool fast = true;
-        bool noSpriteLimit = false;
+        bool noSpriteLimit = true;
+        bool deinterlace = true;
         struct Mode7 {
           uint scale = 1;
           bool perspective = true;
@@ -330,6 +331,7 @@ public:
   HorizontalLayout ppuLayout{this, Size{~0, 0}};
     CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
     CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
+    CheckLabel deinterlace{&ppuLayout, Size{0, 0}};
   Label mode7Label{this, Size{~0, 0}, 2};
   HorizontalLayout mode7Layout{this, Size{~0, 0}};
     Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};

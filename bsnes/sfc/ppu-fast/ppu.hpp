@@ -18,6 +18,7 @@ struct PPU : PPUcounter {
   alwaysinline auto hdPerspective() const -> bool;
   alwaysinline auto hdSupersample() const -> bool;
   alwaysinline auto hdMosaic() const -> bool;
+  alwaysinline auto deinterlace() const -> bool;
 
   //ppu.cpp
   PPU();
@@ -278,8 +279,9 @@ public:
 
   struct Line {
     //line.cpp
+    inline auto field() const -> bool { return fieldID; }
     static auto flush() -> void;
-    auto render() -> void;
+    auto render(bool field) -> void;
     auto pixel(uint x, Pixel above, Pixel below) const -> uint16;
     auto blend(uint x, uint y, bool halve) const -> uint16;
     alwaysinline auto directColor(uint paletteIndex, uint paletteColor) const -> uint16;
@@ -307,6 +309,7 @@ public:
 
     //[unserialized]
     uint y;  //constant
+    bool fieldID;
 
     IO io;
     uint16 cgram[256];

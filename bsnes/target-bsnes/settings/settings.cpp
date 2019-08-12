@@ -112,6 +112,7 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Emulator/Hack/CPU/Overclock",           emulator.hack.cpu.overclock);
   bind(boolean, "Emulator/Hack/PPU/Fast",                emulator.hack.ppu.fast);
   bind(boolean, "Emulator/Hack/PPU/NoSpriteLimit",       emulator.hack.ppu.noSpriteLimit);
+  bind(boolean, "Emulator/Hack/PPU/Deinterlace",         emulator.hack.ppu.deinterlace);
   bind(natural, "Emulator/Hack/PPU/Mode7/Scale",         emulator.hack.ppu.mode7.scale);
   bind(boolean, "Emulator/Hack/PPU/Mode7/Perspective",   emulator.hack.ppu.mode7.perspective);
   bind(boolean, "Emulator/Hack/PPU/Mode7/Supersample",   emulator.hack.ppu.mode7.supersample);

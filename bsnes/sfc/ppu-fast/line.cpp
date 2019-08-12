@@ -5,21 +5,34 @@ auto PPU::Line::flush() -> void {
   if(Line::count) {
     #pragma omp parallel for if(Line::count >= 8)
     for(uint y = 0; y < Line::count; y++) {
-      ppu.lines[Line::start + y].render();
+      if(ppu.deinterlace()) {
+        if(!ppu.interlace()) {
+          //some games enable interlacing in 240p mode, just force these to even fields
+          ppu.lines[Line::start + y].render(0);
+        } else {
+          //for actual interlaced frames, render both fields every farme for 480i -> 480p
+          ppu.lines[Line::start + y].render(0);
+          ppu.lines[Line::start + y].render(1);
+        }
+      } else {
+        //standard 240p (progressive) and 480i (interlaced) rendering
+        ppu.lines[Line::start + y].render(ppu.field());
+      }
     }
     Line::start = 0;
     Line::count = 0;
   }
 }
 
-auto PPU::Line::render() -> void {
+auto PPU::Line::render(bool fieldID) -> void {
+  this->fieldID = fieldID;
   uint y = this->y + (!ppu.latch.overscan ? 7 : 0);
 
   auto hd = ppu.hd();
   auto ss = ppu.ss();
   auto scale = ppu.hdScale();
   auto output = ppu.output + (!hd
-  ? (y * 1024 + (ppu.interlace() && ppu.field() ? 512 : 0))
+  ? (y * 1024 + (ppu.interlace() && field() ? 512 : 0))
   : (y * 256 * scale * scale)
   );
   auto width = (!hd
@@ -34,8 +47,8 @@ auto PPU::Line::render() -> void {
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
   auto aboveColor = cgram[0];
   auto belowColor = hires ? cgram[0] : io.col.fixedColor;
-  uint xa =  (hd || ss) && ppu.interlace() && ppu.field() ? 256 * scale * scale / 2 : 0;
-  uint xb = !(hd || ss) ? 256 : ppu.interlace() && !ppu.field() ? 256 * scale * scale / 2 : 256 * scale * scale;
+  uint xa =  (hd || ss) && ppu.interlace() && field() ? 256 * scale * scale / 2 : 0;
+  uint xb = !(hd || ss) ? 256 : ppu.interlace() && !field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {
     above[x] = {Source::COL, 0, aboveColor};
     below[x] = {Source::COL, 0, belowColor};
@@ -128,11 +141,11 @@ auto PPU::Line::plotBelow(uint x, uint source, uint priority, uint color) -> voi
 auto PPU::Line::plotHD(Pixel* pixel, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void {
   auto scale = ppu.hdScale();
   int xss = hires && subpixel ? scale / 2 : 0;
-  int ys = ppu.interlace() && ppu.field() ? scale / 2 : 0;
+  int ys = ppu.interlace() && field() ? scale / 2 : 0;
   if(priority > pixel[x * scale + xss + ys * 256 * scale].priority) {
     Pixel p = {source, priority, color};
     int xsm = hires && !subpixel ? scale / 2 : scale;
-    int ysm = ppu.interlace() && !ppu.field() ? scale / 2 : scale;
+    int ysm = ppu.interlace() && !field() ? scale / 2 : scale;
     for(int xs = xss; xs < xsm; xs++) {
       pixel[x * scale + xs + ys * 256 * scale] = p;
     }

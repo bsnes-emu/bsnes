@@ -30,7 +30,8 @@ struct Configuration {
     } cpu;
     struct PPU {
       bool fast = true;
-      bool noSpriteLimit = false;
+      bool noSpriteLimit = true;
+      bool deinterlace = true;
       struct Mode7 {
         uint scale = 1;
         bool perspective = true;

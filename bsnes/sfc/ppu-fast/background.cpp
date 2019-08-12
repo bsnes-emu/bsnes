@@ -29,7 +29,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
   uint y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
   if(hires) {
     hscroll <<= 1;
-    if(io.interlace) y = y << 1 | ppu.field();
+    if(io.interlace) y = y << 1 | field();
   }
 
   uint mosaicCounter = 1;
