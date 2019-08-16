@@ -1,5 +1,6 @@
 #ifndef GB_h
 #define GB_h
+#define typeof __typeof__
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -542,6 +543,7 @@ struct GB_gameboy_internal_s {
         GB_icd_pixel_callback_t icd_pixel_callback;
         GB_icd_vreset_callback_t icd_hreset_callback;
         GB_icd_vreset_callback_t icd_vreset_callback;
+        GB_read_memory_callback_t read_memory_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units
@@ -668,8 +670,12 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size);
-    
+
+int GB_save_battery_size(GB_gameboy_t *gb);
+int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size);
 int GB_save_battery(GB_gameboy_t *gb, const char *path);
+
+void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size);
 void GB_load_battery(GB_gameboy_t *gb, const char *path);
 
 void GB_set_turbo_mode(GB_gameboy_t *gb, bool on, bool no_frame_skip);

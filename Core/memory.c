@@ -429,6 +429,11 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
     }
+    if (gb->read_memory_callback) {
+        uint8_t data = read_map[addr >> 12](gb, addr);
+        data = gb->read_memory_callback(gb, addr, data);
+        return data;
+    }
     return read_map[addr >> 12](gb, addr);
 }
 
