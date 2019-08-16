@@ -7,7 +7,7 @@ struct Program : Lock, Emulator::Platform {
   auto quit() -> void;
 
   //platform.cpp
-  auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
+  auto open(uint id, string name, vfs::file::mode mode, bool required) -> shared_pointer<vfs::file> override;
   auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
   auto videoFrame(const uint16* data, uint pitch, uint width, uint height, uint scale) -> void override;
   auto audioFrame(const float* samples, uint channels) -> void override;
@@ -28,18 +28,18 @@ struct Program : Lock, Emulator::Platform {
   auto verified() const -> bool;
 
   //game-pak.cpp
-  auto openPakSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openPakGameBoy(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openPakBSMemory(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openPakSufamiTurboA(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openPakSufamiTurboB(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openPakSuperFamicom(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openPakGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openPakBSMemory(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openPakSufamiTurboA(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openPakSufamiTurboB(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
 
   //game-rom.cpp
-  auto openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openRomGameBoy(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openRomBSMemory(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openRomSufamiTurboA(string name, vfs::file::mode mode) -> vfs::shared::file;
-  auto openRomSufamiTurboB(string name, vfs::file::mode mode) -> vfs::shared::file;
+  auto openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openRomBSMemory(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openRomSufamiTurboA(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+  auto openRomSufamiTurboB(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
 
   //paths.cpp
   auto path(string type, string location, string extension = "") -> string;
@@ -92,10 +92,12 @@ struct Program : Lock, Emulator::Platform {
   auto updateVideoExclusive() -> void;
   auto updateVideoBlocking() -> void;
   auto updateVideoFlush() -> void;
+  auto updateVideoMonitor() -> void;
   auto updateVideoFormat() -> void;
   auto updateVideoShader() -> void;
   auto updateVideoPalette() -> void;
   auto updateVideoEffects() -> void;
+  auto toggleVideoFullScreen() -> void;
 
   //audio.cpp
   auto updateAudioDriver(Window parent) -> void;
@@ -169,7 +171,7 @@ public:
   vector<string> gameQueue;
 
   uint32_t palette[32768];
-  uint32_t palettePaused[32768];
+  uint32_t paletteDimmed[32768];
 
   struct Screenshot {
     const uint16* data = nullptr;
@@ -179,7 +181,7 @@ public:
     uint scale  = 0;
   } screenshot;
 
-  bool frameAdvance = false;
+  bool frameAdvanceLock = false;
 
   uint64 autoSaveTime;
 

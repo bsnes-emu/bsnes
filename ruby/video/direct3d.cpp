@@ -19,11 +19,15 @@ struct VideoDirect3D : VideoDriver {
   auto driver() -> string override { return "Direct3D 9.0"; }
   auto ready() -> bool override { return _ready; }
 
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasExclusive() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
+  auto setFullScreen(bool fullScreen) -> bool override { return initialize(); }
+  auto setMonitor(string monitor) -> bool override { return initialize(); }
   auto setExclusive(bool exclusive) -> bool override { return initialize(); }
   auto setContext(uintptr context) -> bool override { return initialize(); }
   auto setBlocking(bool blocking) -> bool override { return true; }
@@ -241,19 +245,30 @@ private:
 
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
-    POINT point{0, 0};
-    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEX information{};
-    information.cbSize = sizeof(MONITORINFOEX);
-    GetMonitorInfo(monitor, &information);
-    _monitorWidth = information.rcMonitor.right - information.rcMonitor.left;
-    _monitorHeight = information.rcMonitor.bottom - information.rcMonitor.top;
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
 
+    //Direct3D exclusive mode targets the primary monitor only
     if(self.exclusive) {
-      _context = _exclusive = CreateWindowEx(WS_EX_TOPMOST, L"VideoDirect3D9_Window", L"", WS_VISIBLE | WS_POPUP,
-        information.rcMonitor.left, information.rcMonitor.top, _monitorWidth, _monitorHeight,
+      POINT point{0, 0};  //the primary monitor always starts at (0,0)
+      HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
+      MONITORINFOEX info{};
+      info.cbSize = sizeof(MONITORINFOEX);
+      GetMonitorInfo(monitor, &info);
+      _monitorX = info.rcMonitor.left;
+      _monitorY = info.rcMonitor.top;
+      _monitorWidth = info.rcMonitor.right - info.rcMonitor.left;
+      _monitorHeight = info.rcMonitor.bottom - info.rcMonitor.top;
+    }
+
+    if(self.fullScreen) {
+      _context = _window = CreateWindowEx(WS_EX_TOPMOST, L"VideoDirect3D9_Window", L"", WS_VISIBLE | WS_POPUP,
+        _monitorX, _monitorY, _monitorWidth, _monitorHeight,
         nullptr, nullptr, GetModuleHandle(0), nullptr);
     } else {
       _context = (HWND)self.context;
@@ -312,7 +327,7 @@ private:
     if(_texture) { _texture->Release(); _texture = nullptr; }
     if(_device) { _device->Release(); _device = nullptr; }
     if(_instance) { _instance->Release(); _instance = nullptr; }
-    if(_exclusive) { DestroyWindow(_exclusive); _exclusive = nullptr; }
+    if(_window) { DestroyWindow(_window); _window = nullptr; }
     _context = nullptr;
   }
 
@@ -323,7 +338,7 @@ private:
 
   bool _ready = false;
 
-  HWND _exclusive = nullptr;
+  HWND _window = nullptr;
   HWND _context = nullptr;
   LPDIRECT3D9 _instance = nullptr;
   LPDIRECT3DDEVICE9 _device = nullptr;
@@ -338,8 +353,10 @@ private:
   uint _windowHeight;
   uint _textureWidth;
   uint _textureHeight;
-  uint _monitorWidth;
-  uint _monitorHeight;
+  int _monitorX;
+  int _monitorY;
+  int _monitorWidth;
+  int _monitorHeight;
   uint _inputWidth;
   uint _inputHeight;
 

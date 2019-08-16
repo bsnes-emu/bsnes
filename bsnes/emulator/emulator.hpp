@@ -3,7 +3,6 @@
 #include <nall/platform.hpp>
 #include <nall/adaptive-array.hpp>
 #include <nall/any.hpp>
-#include <nall/bit-field.hpp>
 #include <nall/chrono.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
@@ -30,7 +29,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "bsnes";
-  static const string Version = "108.8";
+  static const string Version = "108.9";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org";

@@ -9,7 +9,6 @@ struct Presentation : Window {
   auto updateStatusIcon() -> void;
   auto resizeWindow() -> void;
   auto updateStatus() -> void;
-  auto toggleFullscreenMode() -> void;
   auto updateDeviceMenu() -> void;
   auto updateDeviceSelections() -> void;
   auto updateSizeMenu() -> void;
@@ -100,14 +99,16 @@ struct Presentation : Window {
         MenuRadioItem speedFast{&speedMenu};
         MenuRadioItem speedFastest{&speedMenu};
         Group speedGroup{&speedSlowest, &speedSlow, &speedNormal, &speedFast, &speedFastest};
-        MenuSeparator speedSeparator{&speedMenu};
-        MenuCheckItem pauseEmulation{&speedMenu};
+      Menu runMenu{&toolsMenu};
+        MenuRadioItem runEmulation{&runMenu};
+        MenuRadioItem pauseEmulation{&runMenu};
+        MenuRadioItem frameAdvance{&runMenu};
+        Group runGroup{&runEmulation, &pauseEmulation, &frameAdvance};
       Menu movieMenu{&toolsMenu};
         MenuItem moviePlay{&movieMenu};
         MenuItem movieRecord{&movieMenu};
         MenuItem movieRecordFromBeginning{&movieMenu};
         MenuItem movieStop{&movieMenu};
-      MenuItem frameAdvance{&toolsMenu};
       MenuItem captureScreenshot{&toolsMenu};
       MenuSeparator toolsSeparatorC{&toolsMenu};
       MenuItem cheatFinder{&toolsMenu};

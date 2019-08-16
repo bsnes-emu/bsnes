@@ -8,6 +8,7 @@ auto Program::updateVideoDriver(Window parent) -> void {
   updateVideoExclusive();
   updateVideoBlocking();
   updateVideoFlush();
+  updateVideoMonitor();
   updateVideoFormat();
   updateVideoShader();
 
@@ -32,8 +33,7 @@ auto Program::updateVideoDriver(Window parent) -> void {
 }
 
 auto Program::updateVideoExclusive() -> void {
-  //only enabled in fullscreen mode via Presentation::toggleFullScreen()
-  video.setExclusive(false);
+  video.setExclusive(settings.video.exclusive);
 }
 
 auto Program::updateVideoBlocking() -> void {
@@ -42,6 +42,13 @@ auto Program::updateVideoBlocking() -> void {
 
 auto Program::updateVideoFlush() -> void {
   video.setFlush(settings.video.flush);
+}
+
+auto Program::updateVideoMonitor() -> void {
+  if(!video.hasMonitor(settings.video.monitor)) {
+    settings.video.monitor = video.monitor();
+  }
+  video.setMonitor(settings.video.monitor);
 }
 
 auto Program::updateVideoFormat() -> void {
@@ -103,8 +110,8 @@ auto Program::updateVideoPalette() -> void {
     b >>= 1;
 
     switch(depth) {
-    case 24: palettePaused[color] = r >> 8 << 16 | g >> 8 <<  8 | b >> 8 << 0; break;
-    case 30: palettePaused[color] = r >> 6 << 20 | g >> 6 << 10 | b >> 6 << 0; break;
+    case 24: paletteDimmed[color] = r >> 8 << 16 | g >> 8 <<  8 | b >> 8 << 0; break;
+    case 30: paletteDimmed[color] = r >> 6 << 20 | g >> 6 << 10 | b >> 6 << 0; break;
     }
   }
 
@@ -113,4 +120,19 @@ auto Program::updateVideoPalette() -> void {
 
 auto Program::updateVideoEffects() -> void {
   emulator->configure("Video/BlurEmulation", settings.video.blur);
+}
+
+auto Program::toggleVideoFullScreen() -> void {
+  if(!video.hasFullScreen()) return;
+
+  video.clear();
+
+  if(!video.fullScreen()) {
+    video.setFullScreen(true);
+    if(!input.acquired() && video.exclusive()) input.acquire();
+  } else {
+    if(input.acquired()) input.release();
+    video.setFullScreen(false);
+    presentation.viewport.setFocused();
+  }
 }

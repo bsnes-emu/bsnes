@@ -30,6 +30,8 @@ private:
     string value;
   };
   vector<Variable> variables;
+  bool inMedia = false;
+  bool inMediaNode = false;
 
   auto parseDocument(const string& filedata, const string& pathname, uint depth) -> bool;
 };
@@ -57,7 +59,7 @@ inline auto CML::parseDocument(const string& filedata, const string& pathname, u
 
   for(auto& block : filedata.split("\n\n")) {
     auto lines = block.stripRight().split("\n");
-    auto name = lines.takeLeft();
+    auto name = lines.takeFirst();
 
     if(name.beginsWith("include ")) {
       name.trimLeft("include ", 1L);
@@ -76,7 +78,16 @@ inline auto CML::parseDocument(const string& filedata, const string& pathname, u
     }
 
     state.output.append(name, " {\n");
+    inMedia = name.beginsWith("@media");
+
     for(auto& line : lines) {
+      if(inMedia && !line.find(": ")) {
+        if(inMediaNode) state.output.append("  }\n");
+        state.output.append(line, " {\n");
+        inMediaNode = true;
+        continue;
+      }
+
       auto data = line.split(":", 1L).strip();
       auto name = data(0), value = data(1);
       while(auto offset = value.find("var(")) {
@@ -93,8 +104,12 @@ inline auto CML::parseDocument(const string& filedata, const string& pathname, u
         }
         if(!found) break;
       }
-      state.output.append("  ", name, ": ", value, ";\n");
+      state.output.append(inMedia ? "    " : "  ", name, ": ", value, ";\n");
       if(name == "box-sizing") vendorAppend(name, value);
+    }
+    if(inMediaNode) {
+      state.output.append("  }\n");
+      inMediaNode = false;
     }
     state.output.append("}\n\n");
   }

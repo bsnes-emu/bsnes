@@ -1,4 +1,4 @@
-auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::shared::file {
+auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
   if(name == "program.rom" && mode == vfs::file::mode::read) {
     return vfs::memory::file::open(superFamicom.program.data(), superFamicom.program.size());
   }
@@ -131,7 +131,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> vfs::sha
   return {};
 }
 
-auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> vfs::shared::file {
+auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
   if(name == "program.rom" && mode == vfs::file::mode::read) {
     return vfs::memory::file::open(gameBoy.program.data(), gameBoy.program.size());
   }
@@ -147,7 +147,7 @@ auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> vfs::shared::
   return {};
 }
 
-auto Program::openRomBSMemory(string name, vfs::file::mode mode) -> vfs::shared::file {
+auto Program::openRomBSMemory(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
   if(name == "program.rom" && mode == vfs::file::mode::read) {
     return vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
   }
@@ -160,7 +160,7 @@ auto Program::openRomBSMemory(string name, vfs::file::mode mode) -> vfs::shared:
   return {};
 }
 
-auto Program::openRomSufamiTurboA(string name, vfs::file::mode mode) -> vfs::shared::file {
+auto Program::openRomSufamiTurboA(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
   if(name == "program.rom" && mode == vfs::file::mode::read) {
     return vfs::memory::file::open(sufamiTurboA.program.data(), sufamiTurboA.program.size());
   }
@@ -172,7 +172,7 @@ auto Program::openRomSufamiTurboA(string name, vfs::file::mode mode) -> vfs::sha
   return {};
 }
 
-auto Program::openRomSufamiTurboB(string name, vfs::file::mode mode) -> vfs::shared::file {
+auto Program::openRomSufamiTurboB(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
   if(name == "program.rom" && mode == vfs::file::mode::read) {
     return vfs::memory::file::open(sufamiTurboB.program.data(), sufamiTurboB.program.size());
   }

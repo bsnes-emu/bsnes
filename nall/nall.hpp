@@ -22,8 +22,6 @@
 #include <nall/array-view.hpp>
 #include <nall/atoi.hpp>
 #include <nall/bit.hpp>
-#include <nall/bit-field.hpp>
-#include <nall/bit-vector.hpp>
 #include <nall/chrono.hpp>
 #include <nall/directory.hpp>
 #include <nall/dl.hpp>

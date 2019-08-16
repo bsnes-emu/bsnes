@@ -37,13 +37,14 @@ auto OpenGLSurface::release() -> void {
   width = 0, height = 0;
 }
 
-auto OpenGLSurface::render(uint sourceWidth, uint sourceHeight, uint targetWidth, uint targetHeight) -> void {
-  glViewport(0, 0, targetWidth, targetHeight);
+auto OpenGLSurface::render(uint sourceWidth, uint sourceHeight, uint targetX, uint targetY, uint targetWidth, uint targetHeight) -> void {
+  glViewport(targetX, targetY, targetWidth, targetHeight);
 
   float w = (float)sourceWidth / (float)glrSize(sourceWidth);
   float h = (float)sourceHeight / (float)glrSize(sourceHeight);
-  float u = (float)targetWidth, v = (float)targetHeight;
-  GLint location;
+
+  float u = (float)targetWidth;
+  float v = (float)targetHeight;
 
   GLfloat modelView[] = {
     1, 0, 0, 0,

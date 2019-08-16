@@ -52,7 +52,7 @@ template<typename T> auto string::_prepend(const stringify<T>& source) -> string
 
 template<typename T, typename... P> auto string::append(const T& value, P&&... p) -> string& {
   _append(make_string(value));
-  if constexpr(sizeof...(p)) append(forward<P>(p)...);
+  if constexpr(sizeof...(p) > 0) append(forward<P>(p)...);
   return *this;
 }
 

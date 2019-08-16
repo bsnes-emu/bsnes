@@ -13,26 +13,32 @@ struct VideoGLX : VideoDriver, OpenGL {
   ~VideoGLX() { destruct(); }
 
   auto create() -> bool override {
-    super.setFormat("RGB24");
+    VideoDriver::exclusive = true;
+    VideoDriver::format = "ARGB24";
     return initialize();
   }
 
   auto driver() -> string override { return "OpenGL 3.2"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasExclusive() -> bool override { return true; }
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
   auto hasFormats() -> vector<string> override {
-    if(_depth == 30) return {"RGB30", "RGB24"};
-    if(_depth == 24) return {"RGB24"};
-    return {"RGB24"};  //fallback
+    if(_depth == 30) return {"ARGB30", "ARGB24"};
+    if(_depth == 24) return {"ARGB24"};
+    return {"ARGB24"};  //fallback
   }
 
-  auto setExclusive(bool exclusive) -> bool override {
+  auto setFullScreen(bool fullScreen) -> bool override {
+    return initialize();
+  }
+
+  auto setMonitor(string monitor) -> bool override {
     return initialize();
   }
 
@@ -50,12 +56,12 @@ struct VideoGLX : VideoDriver, OpenGL {
   }
 
   auto setFormat(string format) -> bool override {
-    if(format == "RGB24") {
+    if(format == "ARGB24") {
       OpenGL::inputFormat = GL_RGBA8;
       return initialize();
     }
 
-    if(format == "RGB30") {
+    if(format == "ARGB30") {
       OpenGL::inputFormat = GL_RGB10_A2;
       return initialize();
     }
@@ -74,18 +80,15 @@ struct VideoGLX : VideoDriver, OpenGL {
   }
 
   auto size(uint& width, uint& height) -> void override {
-    XWindowAttributes window;
-    XGetWindowAttributes(_display, _window, &window);
-
-    XWindowAttributes parent;
-    XGetWindowAttributes(_display, _parent, &parent);
-
-    if(window.width != parent.width || window.height != parent.height) {
-      XResizeWindow(_display, _window, parent.width, parent.height);
+    if(self.fullScreen) {
+      width = _monitorWidth;
+      height = _monitorHeight;
+    } else {
+      XWindowAttributes parent;
+      XGetWindowAttributes(_display, _parent, &parent);
+      width = parent.width;
+      height = parent.height;
     }
-
-    width = parent.width;
-    height = parent.height;
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
@@ -97,14 +100,28 @@ struct VideoGLX : VideoDriver, OpenGL {
   }
 
   auto output(uint width, uint height) -> void override {
-    uint windowWidth, windowHeight;
-    size(windowWidth, windowHeight);
+    XWindowAttributes window;
+    XGetWindowAttributes(_display, _window, &window);
+
+    XWindowAttributes parent;
+    XGetWindowAttributes(_display, _parent, &parent);
+
+    if(window.width != parent.width || window.height != parent.height) {
+      XResizeWindow(_display, _window, parent.width, parent.height);
+    }
+
+    //convert (0,0) from top-left to bottom-left coordinates
+    auto _height = height ? height : _monitorHeight;
+    auto _monitorY = parent.height - (this->_monitorY + _height) - (_monitorHeight - _height);
 
     OpenGL::absoluteWidth = width;
     OpenGL::absoluteHeight = height;
-    OpenGL::outputWidth = windowWidth;
-    OpenGL::outputHeight = windowHeight;
+    OpenGL::outputX = self.fullScreen ? _monitorX : 0;
+    OpenGL::outputY = self.fullScreen ? _monitorY : 0;
+    OpenGL::outputWidth = self.fullScreen ? _monitorWidth : parent.width;
+    OpenGL::outputHeight = self.fullScreen ? _monitorHeight : parent.height;
     OpenGL::output();
+
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);
     if(self.flush) glFinish();
   }
@@ -133,17 +150,12 @@ private:
 
   auto destruct() -> void {
     terminate();
-
-    if(_display) {
-      XCloseDisplay(_display);
-      _display = nullptr;
-      _screen = 0;
-    }
+    XCloseDisplay(_display);
   }
 
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
     //require GLX 1.2+ API
     glXQueryVersion(_display, &_versionMajor, &_versionMinor);
@@ -171,9 +183,15 @@ private:
 
     auto visual = glXGetVisualFromFBConfig(_display, fbConfig[0]);
 
-    _parent = self.exclusive ? RootWindow(_display, visual->screen) : (Window)self.context;
+    _parent = self.fullScreen ? RootWindow(_display, visual->screen) : (Window)self.context;
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(_display, _parent, &windowAttributes);
+
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
 
     //(Window)self.context has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.
@@ -183,7 +201,7 @@ private:
     XSetWindowAttributes attributes{};
     attributes.border_pixel = 0;
     attributes.colormap = _colormap;
-    attributes.override_redirect = self.exclusive;
+    attributes.override_redirect = self.fullScreen;
     _window = XCreateWindow(_display, _parent,
       0, 0, windowAttributes.width, windowAttributes.height,
       0, visual->depth, InputOutput, visual->visual,
@@ -269,6 +287,10 @@ private:
   auto (*glXSwapInterval)(int) -> int = nullptr;
 
   Display* _display = nullptr;
+  uint _monitorX = 0;
+  uint _monitorY = 0;
+  uint _monitorWidth = 0;
+  uint _monitorHeight = 0;
   int _screen = 0;
   uint _depth = 24;  //depth of the default root window
   Window _parent = 0;

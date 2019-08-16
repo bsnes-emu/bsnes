@@ -11,6 +11,7 @@ namespace nall {
   template<uint Precision = 64> struct Real;
 }
 
+#include <nall/primitives/bit-field.hpp>
 #include <nall/primitives/bit-range.hpp>
 #include <nall/primitives/boolean.hpp>
 #include <nall/primitives/natural.hpp>

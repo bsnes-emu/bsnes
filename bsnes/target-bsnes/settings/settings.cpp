@@ -46,14 +46,17 @@ auto Settings::process(bool load) -> void {
     } \
 
   bind(text,    "Video/Driver",    video.driver);
+  bind(boolean, "Video/Exclusive", video.exclusive);
   bind(boolean, "Video/Blocking",  video.blocking);
   bind(boolean, "Video/Flush",     video.flush);
+  bind(text,    "Video/Monitor",   video.monitor);
   bind(text,    "Video/Format",    video.format);
   bind(text,    "Video/Shader",    video.shader);
 
   bind(natural, "Video/Luminance",  video.luminance);
   bind(natural, "Video/Saturation", video.saturation);
   bind(natural, "Video/Gamma",      video.gamma);
+  bind(boolean, "Video/Dimming",    video.dimming);
   bind(boolean, "Video/Snow",       video.snow);
 
   bind(text,    "Video/Output",           video.output);

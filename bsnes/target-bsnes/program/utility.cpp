@@ -19,6 +19,8 @@ auto Program::updateStatus() -> void {
   string frameRate;
   if(!emulator->loaded()) {
     frameRate = tr("Unloaded");
+  } else if(presentation.frameAdvance.checked() && frameAdvanceLock) {
+    frameRate = tr("Frame Advance");
   } else if(presentation.pauseEmulation.checked()) {
     frameRate = tr("Paused");
   } else if(!focused() && inputSettings.pauseEmulation.checked()) {
@@ -66,6 +68,7 @@ auto Program::inactive() -> bool {
   if(locked()) return true;
   if(!emulator->loaded()) return true;
   if(presentation.pauseEmulation.checked()) return true;
+  if(presentation.frameAdvance.checked() && frameAdvanceLock) return true;
   if(!focused() && inputSettings.pauseEmulation.checked()) return true;
   return false;
 }

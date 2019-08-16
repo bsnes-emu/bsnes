@@ -1,24 +1,48 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qt.hpp'
 **
-** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.7)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.11.2)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
+#include <QtCore/qbytearray.h>
+#include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'qt.hpp' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 63
-#error "This file was generated using the moc from 4.8.7. It"
+#elif Q_MOC_OUTPUT_REVISION != 67
+#error "This file was generated using the moc from 5.11.2. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
+struct qt_meta_stringdata_hiro__QtTimer_t {
+    QByteArrayData data[3];
+    char stringdata0[26];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtTimer_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtTimer_t qt_meta_stringdata_hiro__QtTimer = {
+    {
+QT_MOC_LITERAL(0, 0, 13), // "hiro::QtTimer"
+QT_MOC_LITERAL(1, 14, 10), // "onActivate"
+QT_MOC_LITERAL(2, 25, 0) // ""
+
+    },
+    "hiro::QtTimer\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtTimer[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -28,21 +52,20 @@ static const uint qt_meta_data_hiro__QtTimer[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      14,   27,   27,   27, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtTimer[] = {
-    "hiro::QtTimer\0onActivate()\0\0"
 };
 
 void hiro::QtTimer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtTimer *_t = static_cast<QtTimer *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -51,29 +74,22 @@ void hiro::QtTimer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtTimer::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtTimer::staticMetaObject = {
+    { &QTimer::staticMetaObject, qt_meta_stringdata_hiro__QtTimer.data,
+      qt_meta_data_hiro__QtTimer,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtTimer::staticMetaObject = {
-    { &QTimer::staticMetaObject, qt_meta_stringdata_hiro__QtTimer,
-      qt_meta_data_hiro__QtTimer, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtTimer::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtTimer::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtTimer::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTimer))
-        return static_cast<void*>(const_cast< QtTimer*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTimer.stringdata0))
+        return static_cast<void*>(this);
     return QTimer::qt_metacast(_clname);
 }
 
@@ -86,13 +102,37 @@ int hiro::QtTimer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtMenuItem_t {
+    QByteArrayData data[3];
+    char stringdata0[29];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtMenuItem_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtMenuItem_t qt_meta_stringdata_hiro__QtMenuItem = {
+    {
+QT_MOC_LITERAL(0, 0, 16), // "hiro::QtMenuItem"
+QT_MOC_LITERAL(1, 17, 10), // "onActivate"
+QT_MOC_LITERAL(2, 28, 0) // ""
+
+    },
+    "hiro::QtMenuItem\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtMenuItem[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -102,21 +142,20 @@ static const uint qt_meta_data_hiro__QtMenuItem[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      17,   30,   30,   30, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtMenuItem[] = {
-    "hiro::QtMenuItem\0onActivate()\0\0"
 };
 
 void hiro::QtMenuItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtMenuItem *_t = static_cast<QtMenuItem *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -125,29 +164,22 @@ void hiro::QtMenuItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtMenuItem::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtMenuItem::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuItem.data,
+      qt_meta_data_hiro__QtMenuItem,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtMenuItem::staticMetaObject = {
-    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuItem,
-      qt_meta_data_hiro__QtMenuItem, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtMenuItem::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtMenuItem::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtMenuItem::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuItem))
-        return static_cast<void*>(const_cast< QtMenuItem*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuItem.stringdata0))
+        return static_cast<void*>(this);
     return QAction::qt_metacast(_clname);
 }
 
@@ -160,13 +192,37 @@ int hiro::QtMenuItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtMenuCheckItem_t {
+    QByteArrayData data[3];
+    char stringdata0[32];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtMenuCheckItem_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtMenuCheckItem_t qt_meta_stringdata_hiro__QtMenuCheckItem = {
+    {
+QT_MOC_LITERAL(0, 0, 21), // "hiro::QtMenuCheckItem"
+QT_MOC_LITERAL(1, 22, 8), // "onToggle"
+QT_MOC_LITERAL(2, 31, 0) // ""
+
+    },
+    "hiro::QtMenuCheckItem\0onToggle\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtMenuCheckItem[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -176,21 +232,20 @@ static const uint qt_meta_data_hiro__QtMenuCheckItem[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      22,   33,   33,   33, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtMenuCheckItem[] = {
-    "hiro::QtMenuCheckItem\0onToggle()\0\0"
 };
 
 void hiro::QtMenuCheckItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtMenuCheckItem *_t = static_cast<QtMenuCheckItem *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onToggle(); break;
         default: ;
@@ -199,29 +254,22 @@ void hiro::QtMenuCheckItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtMenuCheckItem::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtMenuCheckItem::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuCheckItem.data,
+      qt_meta_data_hiro__QtMenuCheckItem,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtMenuCheckItem::staticMetaObject = {
-    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuCheckItem,
-      qt_meta_data_hiro__QtMenuCheckItem, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtMenuCheckItem::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtMenuCheckItem::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtMenuCheckItem::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuCheckItem))
-        return static_cast<void*>(const_cast< QtMenuCheckItem*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuCheckItem.stringdata0))
+        return static_cast<void*>(this);
     return QAction::qt_metacast(_clname);
 }
 
@@ -234,13 +282,37 @@ int hiro::QtMenuCheckItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtMenuRadioItem_t {
+    QByteArrayData data[3];
+    char stringdata0[34];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtMenuRadioItem_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtMenuRadioItem_t qt_meta_stringdata_hiro__QtMenuRadioItem = {
+    {
+QT_MOC_LITERAL(0, 0, 21), // "hiro::QtMenuRadioItem"
+QT_MOC_LITERAL(1, 22, 10), // "onActivate"
+QT_MOC_LITERAL(2, 33, 0) // ""
+
+    },
+    "hiro::QtMenuRadioItem\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtMenuRadioItem[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -250,21 +322,20 @@ static const uint qt_meta_data_hiro__QtMenuRadioItem[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      22,   35,   35,   35, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtMenuRadioItem[] = {
-    "hiro::QtMenuRadioItem\0onActivate()\0\0"
 };
 
 void hiro::QtMenuRadioItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtMenuRadioItem *_t = static_cast<QtMenuRadioItem *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -273,29 +344,22 @@ void hiro::QtMenuRadioItem::qt_static_metacall(QObject *_o, QMetaObject::Call _c
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtMenuRadioItem::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtMenuRadioItem::staticMetaObject = {
+    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuRadioItem.data,
+      qt_meta_data_hiro__QtMenuRadioItem,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtMenuRadioItem::staticMetaObject = {
-    { &QAction::staticMetaObject, qt_meta_stringdata_hiro__QtMenuRadioItem,
-      qt_meta_data_hiro__QtMenuRadioItem, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtMenuRadioItem::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtMenuRadioItem::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtMenuRadioItem::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuRadioItem))
-        return static_cast<void*>(const_cast< QtMenuRadioItem*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtMenuRadioItem.stringdata0))
+        return static_cast<void*>(this);
     return QAction::qt_metacast(_clname);
 }
 
@@ -308,13 +372,37 @@ int hiro::QtMenuRadioItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtButton_t {
+    QByteArrayData data[3];
+    char stringdata0[27];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtButton_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtButton_t qt_meta_stringdata_hiro__QtButton = {
+    {
+QT_MOC_LITERAL(0, 0, 14), // "hiro::QtButton"
+QT_MOC_LITERAL(1, 15, 10), // "onActivate"
+QT_MOC_LITERAL(2, 26, 0) // ""
+
+    },
+    "hiro::QtButton\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtButton[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -324,21 +412,20 @@ static const uint qt_meta_data_hiro__QtButton[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      15,   28,   28,   28, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtButton[] = {
-    "hiro::QtButton\0onActivate()\0\0"
 };
 
 void hiro::QtButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtButton *_t = static_cast<QtButton *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -347,29 +434,22 @@ void hiro::QtButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtButton::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtButton::staticMetaObject = {
+    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtButton.data,
+      qt_meta_data_hiro__QtButton,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtButton::staticMetaObject = {
-    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtButton,
-      qt_meta_data_hiro__QtButton, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtButton::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtButton::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtButton::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtButton))
-        return static_cast<void*>(const_cast< QtButton*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtButton.stringdata0))
+        return static_cast<void*>(this);
     return QToolButton::qt_metacast(_clname);
 }
 
@@ -382,13 +462,35 @@ int hiro::QtButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtCanvas_t {
+    QByteArrayData data[1];
+    char stringdata0[15];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtCanvas_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtCanvas_t qt_meta_stringdata_hiro__QtCanvas = {
+    {
+QT_MOC_LITERAL(0, 0, 14) // "hiro::QtCanvas"
+
+    },
+    "hiro::QtCanvas"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtCanvas[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -401,10 +503,6 @@ static const uint qt_meta_data_hiro__QtCanvas[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtCanvas[] = {
-    "hiro::QtCanvas\0"
-};
-
 void hiro::QtCanvas::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
@@ -413,43 +511,55 @@ void hiro::QtCanvas::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtCanvas::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtCanvas::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtCanvas.data,
+      qt_meta_data_hiro__QtCanvas,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtCanvas::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtCanvas,
-      qt_meta_data_hiro__QtCanvas, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtCanvas::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtCanvas::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtCanvas::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCanvas))
-        return static_cast<void*>(const_cast< QtCanvas*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCanvas.stringdata0))
+        return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
 int hiro::QtCanvas::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtCheckButton_t {
+    QByteArrayData data[4];
+    char stringdata0[38];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtCheckButton_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtCheckButton_t qt_meta_stringdata_hiro__QtCheckButton = {
+    {
+QT_MOC_LITERAL(0, 0, 19), // "hiro::QtCheckButton"
+QT_MOC_LITERAL(1, 20, 8), // "onToggle"
+QT_MOC_LITERAL(2, 29, 0), // ""
+QT_MOC_LITERAL(3, 30, 7) // "checked"
+
+    },
+    "hiro::QtCheckButton\0onToggle\0\0checked"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtCheckButton[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -459,22 +569,20 @@ static const uint qt_meta_data_hiro__QtCheckButton[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      20,   35,   43,   43, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    1,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void, QMetaType::Bool,    3,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtCheckButton[] = {
-    "hiro::QtCheckButton\0onToggle(bool)\0"
-    "checked\0\0"
 };
 
 void hiro::QtCheckButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtCheckButton *_t = static_cast<QtCheckButton *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onToggle((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
@@ -482,29 +590,22 @@ void hiro::QtCheckButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
     }
 }
 
-const QMetaObjectExtraData hiro::QtCheckButton::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtCheckButton::staticMetaObject = {
+    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtCheckButton.data,
+      qt_meta_data_hiro__QtCheckButton,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtCheckButton::staticMetaObject = {
-    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtCheckButton,
-      qt_meta_data_hiro__QtCheckButton, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtCheckButton::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtCheckButton::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtCheckButton::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCheckButton))
-        return static_cast<void*>(const_cast< QtCheckButton*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCheckButton.stringdata0))
+        return static_cast<void*>(this);
     return QToolButton::qt_metacast(_clname);
 }
 
@@ -517,13 +618,37 @@ int hiro::QtCheckButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtCheckLabel_t {
+    QByteArrayData data[3];
+    char stringdata0[29];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtCheckLabel_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtCheckLabel_t qt_meta_stringdata_hiro__QtCheckLabel = {
+    {
+QT_MOC_LITERAL(0, 0, 18), // "hiro::QtCheckLabel"
+QT_MOC_LITERAL(1, 19, 8), // "onToggle"
+QT_MOC_LITERAL(2, 28, 0) // ""
+
+    },
+    "hiro::QtCheckLabel\0onToggle\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtCheckLabel[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -533,21 +658,20 @@ static const uint qt_meta_data_hiro__QtCheckLabel[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      19,   30,   30,   30, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtCheckLabel[] = {
-    "hiro::QtCheckLabel\0onToggle()\0\0"
 };
 
 void hiro::QtCheckLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtCheckLabel *_t = static_cast<QtCheckLabel *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onToggle(); break;
         default: ;
@@ -556,29 +680,22 @@ void hiro::QtCheckLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtCheckLabel::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtCheckLabel::staticMetaObject = {
+    { &QCheckBox::staticMetaObject, qt_meta_stringdata_hiro__QtCheckLabel.data,
+      qt_meta_data_hiro__QtCheckLabel,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtCheckLabel::staticMetaObject = {
-    { &QCheckBox::staticMetaObject, qt_meta_stringdata_hiro__QtCheckLabel,
-      qt_meta_data_hiro__QtCheckLabel, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtCheckLabel::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtCheckLabel::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtCheckLabel::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCheckLabel))
-        return static_cast<void*>(const_cast< QtCheckLabel*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtCheckLabel.stringdata0))
+        return static_cast<void*>(this);
     return QCheckBox::qt_metacast(_clname);
 }
 
@@ -591,13 +708,38 @@ int hiro::QtCheckLabel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtComboButton_t {
+    QByteArrayData data[4];
+    char stringdata0[37];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtComboButton_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtComboButton_t qt_meta_stringdata_hiro__QtComboButton = {
+    {
+QT_MOC_LITERAL(0, 0, 19), // "hiro::QtComboButton"
+QT_MOC_LITERAL(1, 20, 8), // "onChange"
+QT_MOC_LITERAL(2, 29, 0), // ""
+QT_MOC_LITERAL(3, 30, 6) // "offset"
+
+    },
+    "hiro::QtComboButton\0onChange\0\0offset"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtComboButton[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -607,22 +749,20 @@ static const uint qt_meta_data_hiro__QtComboButton[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      20,   34,   41,   41, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    1,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void, QMetaType::Int,    3,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtComboButton[] = {
-    "hiro::QtComboButton\0onChange(int)\0"
-    "offset\0\0"
 };
 
 void hiro::QtComboButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtComboButton *_t = static_cast<QtComboButton *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
@@ -630,29 +770,22 @@ void hiro::QtComboButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
     }
 }
 
-const QMetaObjectExtraData hiro::QtComboButton::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtComboButton::staticMetaObject = {
+    { &QComboBox::staticMetaObject, qt_meta_stringdata_hiro__QtComboButton.data,
+      qt_meta_data_hiro__QtComboButton,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtComboButton::staticMetaObject = {
-    { &QComboBox::staticMetaObject, qt_meta_stringdata_hiro__QtComboButton,
-      qt_meta_data_hiro__QtComboButton, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtComboButton::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtComboButton::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtComboButton::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtComboButton))
-        return static_cast<void*>(const_cast< QtComboButton*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtComboButton.stringdata0))
+        return static_cast<void*>(this);
     return QComboBox::qt_metacast(_clname);
 }
 
@@ -665,13 +798,35 @@ int hiro::QtComboButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtHexEdit_t {
+    QByteArrayData data[1];
+    char stringdata0[16];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtHexEdit_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtHexEdit_t qt_meta_stringdata_hiro__QtHexEdit = {
+    {
+QT_MOC_LITERAL(0, 0, 15) // "hiro::QtHexEdit"
+
+    },
+    "hiro::QtHexEdit"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtHexEdit[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -684,10 +839,6 @@ static const uint qt_meta_data_hiro__QtHexEdit[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtHexEdit[] = {
-    "hiro::QtHexEdit\0"
-};
-
 void hiro::QtHexEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
@@ -696,43 +847,54 @@ void hiro::QtHexEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtHexEdit::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtHexEdit::staticMetaObject = {
+    { &QTextEdit::staticMetaObject, qt_meta_stringdata_hiro__QtHexEdit.data,
+      qt_meta_data_hiro__QtHexEdit,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtHexEdit::staticMetaObject = {
-    { &QTextEdit::staticMetaObject, qt_meta_stringdata_hiro__QtHexEdit,
-      qt_meta_data_hiro__QtHexEdit, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtHexEdit::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtHexEdit::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtHexEdit::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHexEdit))
-        return static_cast<void*>(const_cast< QtHexEdit*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHexEdit.stringdata0))
+        return static_cast<void*>(this);
     return QTextEdit::qt_metacast(_clname);
 }
 
 int hiro::QtHexEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QTextEdit::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtHexEditScrollBar_t {
+    QByteArrayData data[3];
+    char stringdata0[35];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtHexEditScrollBar_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtHexEditScrollBar_t qt_meta_stringdata_hiro__QtHexEditScrollBar = {
+    {
+QT_MOC_LITERAL(0, 0, 24), // "hiro::QtHexEditScrollBar"
+QT_MOC_LITERAL(1, 25, 8), // "onScroll"
+QT_MOC_LITERAL(2, 34, 0) // ""
+
+    },
+    "hiro::QtHexEditScrollBar\0onScroll\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtHexEditScrollBar[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -742,22 +904,20 @@ static const uint qt_meta_data_hiro__QtHexEditScrollBar[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      25,   36,   36,   36, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtHexEditScrollBar[] = {
-    "hiro::QtHexEditScrollBar\0onScroll()\0"
-    "\0"
 };
 
 void hiro::QtHexEditScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtHexEditScrollBar *_t = static_cast<QtHexEditScrollBar *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onScroll(); break;
         default: ;
@@ -766,29 +926,22 @@ void hiro::QtHexEditScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtHexEditScrollBar::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtHexEditScrollBar::staticMetaObject = {
+    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHexEditScrollBar.data,
+      qt_meta_data_hiro__QtHexEditScrollBar,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtHexEditScrollBar::staticMetaObject = {
-    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHexEditScrollBar,
-      qt_meta_data_hiro__QtHexEditScrollBar, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtHexEditScrollBar::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtHexEditScrollBar::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtHexEditScrollBar::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHexEditScrollBar))
-        return static_cast<void*>(const_cast< QtHexEditScrollBar*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHexEditScrollBar.stringdata0))
+        return static_cast<void*>(this);
     return QScrollBar::qt_metacast(_clname);
 }
 
@@ -801,13 +954,38 @@ int hiro::QtHexEditScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtHorizontalScrollBar_t {
+    QByteArrayData data[3];
+    char stringdata0[38];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtHorizontalScrollBar_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtHorizontalScrollBar_t qt_meta_stringdata_hiro__QtHorizontalScrollBar = {
+    {
+QT_MOC_LITERAL(0, 0, 27), // "hiro::QtHorizontalScrollBar"
+QT_MOC_LITERAL(1, 28, 8), // "onChange"
+QT_MOC_LITERAL(2, 37, 0) // ""
+
+    },
+    "hiro::QtHorizontalScrollBar\0onChange\0"
+    ""
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtHorizontalScrollBar[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -817,22 +995,20 @@ static const uint qt_meta_data_hiro__QtHorizontalScrollBar[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      28,   39,   39,   39, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtHorizontalScrollBar[] = {
-    "hiro::QtHorizontalScrollBar\0onChange()\0"
-    "\0"
 };
 
 void hiro::QtHorizontalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtHorizontalScrollBar *_t = static_cast<QtHorizontalScrollBar *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -841,29 +1017,22 @@ void hiro::QtHorizontalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::C
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtHorizontalScrollBar::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtHorizontalScrollBar::staticMetaObject = {
+    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalScrollBar.data,
+      qt_meta_data_hiro__QtHorizontalScrollBar,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtHorizontalScrollBar::staticMetaObject = {
-    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalScrollBar,
-      qt_meta_data_hiro__QtHorizontalScrollBar, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtHorizontalScrollBar::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtHorizontalScrollBar::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtHorizontalScrollBar::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalScrollBar))
-        return static_cast<void*>(const_cast< QtHorizontalScrollBar*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalScrollBar.stringdata0))
+        return static_cast<void*>(this);
     return QScrollBar::qt_metacast(_clname);
 }
 
@@ -876,13 +1045,37 @@ int hiro::QtHorizontalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtHorizontalSlider_t {
+    QByteArrayData data[3];
+    char stringdata0[35];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtHorizontalSlider_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtHorizontalSlider_t qt_meta_stringdata_hiro__QtHorizontalSlider = {
+    {
+QT_MOC_LITERAL(0, 0, 24), // "hiro::QtHorizontalSlider"
+QT_MOC_LITERAL(1, 25, 8), // "onChange"
+QT_MOC_LITERAL(2, 34, 0) // ""
+
+    },
+    "hiro::QtHorizontalSlider\0onChange\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtHorizontalSlider[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -892,22 +1085,20 @@ static const uint qt_meta_data_hiro__QtHorizontalSlider[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      25,   36,   36,   36, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtHorizontalSlider[] = {
-    "hiro::QtHorizontalSlider\0onChange()\0"
-    "\0"
 };
 
 void hiro::QtHorizontalSlider::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtHorizontalSlider *_t = static_cast<QtHorizontalSlider *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -916,29 +1107,22 @@ void hiro::QtHorizontalSlider::qt_static_metacall(QObject *_o, QMetaObject::Call
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtHorizontalSlider::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtHorizontalSlider::staticMetaObject = {
+    { &QSlider::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalSlider.data,
+      qt_meta_data_hiro__QtHorizontalSlider,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtHorizontalSlider::staticMetaObject = {
-    { &QSlider::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalSlider,
-      qt_meta_data_hiro__QtHorizontalSlider, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtHorizontalSlider::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtHorizontalSlider::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtHorizontalSlider::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalSlider))
-        return static_cast<void*>(const_cast< QtHorizontalSlider*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalSlider.stringdata0))
+        return static_cast<void*>(this);
     return QSlider::qt_metacast(_clname);
 }
 
@@ -951,13 +1135,35 @@ int hiro::QtHorizontalSlider::qt_metacall(QMetaObject::Call _c, int _id, void **
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtLabel_t {
+    QByteArrayData data[1];
+    char stringdata0[14];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtLabel_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtLabel_t qt_meta_stringdata_hiro__QtLabel = {
+    {
+QT_MOC_LITERAL(0, 0, 13) // "hiro::QtLabel"
+
+    },
+    "hiro::QtLabel"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtLabel[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -970,10 +1176,6 @@ static const uint qt_meta_data_hiro__QtLabel[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtLabel[] = {
-    "hiro::QtLabel\0"
-};
-
 void hiro::QtLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
@@ -982,43 +1184,55 @@ void hiro::QtLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtLabel::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtLabel::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtLabel.data,
+      qt_meta_data_hiro__QtLabel,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtLabel::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtLabel,
-      qt_meta_data_hiro__QtLabel, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtLabel::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtLabel::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtLabel::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtLabel))
-        return static_cast<void*>(const_cast< QtLabel*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtLabel.stringdata0))
+        return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
 int hiro::QtLabel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtLineEdit_t {
+    QByteArrayData data[4];
+    char stringdata0[38];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtLineEdit_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtLineEdit_t qt_meta_stringdata_hiro__QtLineEdit = {
+    {
+QT_MOC_LITERAL(0, 0, 16), // "hiro::QtLineEdit"
+QT_MOC_LITERAL(1, 17, 10), // "onActivate"
+QT_MOC_LITERAL(2, 28, 0), // ""
+QT_MOC_LITERAL(3, 29, 8) // "onChange"
+
+    },
+    "hiro::QtLineEdit\0onActivate\0\0onChange"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtLineEdit[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        2,   14, // methods
@@ -1028,23 +1242,22 @@ static const uint qt_meta_data_hiro__QtLineEdit[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      17,   30,   30,   30, 0x0a,
-      31,   30,   30,   30, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   24,    2, 0x0a /* Public */,
+       3,    0,   25,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtLineEdit[] = {
-    "hiro::QtLineEdit\0onActivate()\0\0"
-    "onChange()\0"
 };
 
 void hiro::QtLineEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtLineEdit *_t = static_cast<QtLineEdit *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         case 1: _t->onChange(); break;
@@ -1054,29 +1267,22 @@ void hiro::QtLineEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtLineEdit::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtLineEdit::staticMetaObject = {
+    { &QLineEdit::staticMetaObject, qt_meta_stringdata_hiro__QtLineEdit.data,
+      qt_meta_data_hiro__QtLineEdit,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtLineEdit::staticMetaObject = {
-    { &QLineEdit::staticMetaObject, qt_meta_stringdata_hiro__QtLineEdit,
-      qt_meta_data_hiro__QtLineEdit, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtLineEdit::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtLineEdit::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtLineEdit::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtLineEdit))
-        return static_cast<void*>(const_cast< QtLineEdit*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtLineEdit.stringdata0))
+        return static_cast<void*>(this);
     return QLineEdit::qt_metacast(_clname);
 }
 
@@ -1089,13 +1295,37 @@ int hiro::QtLineEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 2)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 2;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 2)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 2;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtRadioLabel_t {
+    QByteArrayData data[3];
+    char stringdata0[31];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtRadioLabel_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtRadioLabel_t qt_meta_stringdata_hiro__QtRadioLabel = {
+    {
+QT_MOC_LITERAL(0, 0, 18), // "hiro::QtRadioLabel"
+QT_MOC_LITERAL(1, 19, 10), // "onActivate"
+QT_MOC_LITERAL(2, 30, 0) // ""
+
+    },
+    "hiro::QtRadioLabel\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtRadioLabel[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1105,21 +1335,20 @@ static const uint qt_meta_data_hiro__QtRadioLabel[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      19,   32,   32,   32, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtRadioLabel[] = {
-    "hiro::QtRadioLabel\0onActivate()\0\0"
 };
 
 void hiro::QtRadioLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtRadioLabel *_t = static_cast<QtRadioLabel *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -1128,29 +1357,22 @@ void hiro::QtRadioLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtRadioLabel::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtRadioLabel::staticMetaObject = {
+    { &QRadioButton::staticMetaObject, qt_meta_stringdata_hiro__QtRadioLabel.data,
+      qt_meta_data_hiro__QtRadioLabel,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtRadioLabel::staticMetaObject = {
-    { &QRadioButton::staticMetaObject, qt_meta_stringdata_hiro__QtRadioLabel,
-      qt_meta_data_hiro__QtRadioLabel, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtRadioLabel::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtRadioLabel::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtRadioLabel::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtRadioLabel))
-        return static_cast<void*>(const_cast< QtRadioLabel*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtRadioLabel.stringdata0))
+        return static_cast<void*>(this);
     return QRadioButton::qt_metacast(_clname);
 }
 
@@ -1163,13 +1385,37 @@ int hiro::QtRadioLabel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtRadioButton_t {
+    QByteArrayData data[3];
+    char stringdata0[32];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtRadioButton_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtRadioButton_t qt_meta_stringdata_hiro__QtRadioButton = {
+    {
+QT_MOC_LITERAL(0, 0, 19), // "hiro::QtRadioButton"
+QT_MOC_LITERAL(1, 20, 10), // "onActivate"
+QT_MOC_LITERAL(2, 31, 0) // ""
+
+    },
+    "hiro::QtRadioButton\0onActivate\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtRadioButton[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1179,21 +1425,20 @@ static const uint qt_meta_data_hiro__QtRadioButton[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      20,   33,   33,   33, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtRadioButton[] = {
-    "hiro::QtRadioButton\0onActivate()\0\0"
 };
 
 void hiro::QtRadioButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtRadioButton *_t = static_cast<QtRadioButton *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate(); break;
         default: ;
@@ -1202,29 +1447,22 @@ void hiro::QtRadioButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtRadioButton::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtRadioButton::staticMetaObject = {
+    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtRadioButton.data,
+      qt_meta_data_hiro__QtRadioButton,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtRadioButton::staticMetaObject = {
-    { &QToolButton::staticMetaObject, qt_meta_stringdata_hiro__QtRadioButton,
-      qt_meta_data_hiro__QtRadioButton, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtRadioButton::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtRadioButton::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtRadioButton::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtRadioButton))
-        return static_cast<void*>(const_cast< QtRadioButton*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtRadioButton.stringdata0))
+        return static_cast<void*>(this);
     return QToolButton::qt_metacast(_clname);
 }
 
@@ -1237,13 +1475,38 @@ int hiro::QtRadioButton::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtTabFrame_t {
+    QByteArrayData data[4];
+    char stringdata0[37];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtTabFrame_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtTabFrame_t qt_meta_stringdata_hiro__QtTabFrame = {
+    {
+QT_MOC_LITERAL(0, 0, 16), // "hiro::QtTabFrame"
+QT_MOC_LITERAL(1, 17, 8), // "onChange"
+QT_MOC_LITERAL(2, 26, 0), // ""
+QT_MOC_LITERAL(3, 27, 9) // "selection"
+
+    },
+    "hiro::QtTabFrame\0onChange\0\0selection"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtTabFrame[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1253,22 +1516,20 @@ static const uint qt_meta_data_hiro__QtTabFrame[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      17,   31,   41,   41, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    1,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void, QMetaType::Int,    3,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtTabFrame[] = {
-    "hiro::QtTabFrame\0onChange(int)\0selection\0"
-    "\0"
 };
 
 void hiro::QtTabFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtTabFrame *_t = static_cast<QtTabFrame *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
@@ -1276,29 +1537,22 @@ void hiro::QtTabFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     }
 }
 
-const QMetaObjectExtraData hiro::QtTabFrame::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtTabFrame::staticMetaObject = {
+    { &QTabWidget::staticMetaObject, qt_meta_stringdata_hiro__QtTabFrame.data,
+      qt_meta_data_hiro__QtTabFrame,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtTabFrame::staticMetaObject = {
-    { &QTabWidget::staticMetaObject, qt_meta_stringdata_hiro__QtTabFrame,
-      qt_meta_data_hiro__QtTabFrame, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtTabFrame::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtTabFrame::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtTabFrame::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTabFrame))
-        return static_cast<void*>(const_cast< QtTabFrame*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTabFrame.stringdata0))
+        return static_cast<void*>(this);
     return QTabWidget::qt_metacast(_clname);
 }
 
@@ -1311,13 +1565,46 @@ int hiro::QtTabFrame::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtTableView_t {
+    QByteArrayData data[10];
+    char stringdata0[94];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtTableView_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtTableView_t qt_meta_stringdata_hiro__QtTableView = {
+    {
+QT_MOC_LITERAL(0, 0, 17), // "hiro::QtTableView"
+QT_MOC_LITERAL(1, 18, 10), // "onActivate"
+QT_MOC_LITERAL(2, 29, 0), // ""
+QT_MOC_LITERAL(3, 30, 16), // "QTreeWidgetItem*"
+QT_MOC_LITERAL(4, 47, 4), // "item"
+QT_MOC_LITERAL(5, 52, 6), // "column"
+QT_MOC_LITERAL(6, 59, 8), // "onChange"
+QT_MOC_LITERAL(7, 68, 9), // "onContext"
+QT_MOC_LITERAL(8, 78, 6), // "onSort"
+QT_MOC_LITERAL(9, 85, 8) // "onToggle"
+
+    },
+    "hiro::QtTableView\0onActivate\0\0"
+    "QTreeWidgetItem*\0item\0column\0onChange\0"
+    "onContext\0onSort\0onToggle"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtTableView[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        5,   14, // methods
@@ -1327,27 +1614,28 @@ static const uint qt_meta_data_hiro__QtTableView[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      18,   51,   63,   63, 0x0a,
-      64,   63,   63,   63, 0x0a,
-      75,   63,   63,   63, 0x0a,
-      87,   99,   63,   63, 0x0a,
-     106,   51,   63,   63, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    2,   39,    2, 0x0a /* Public */,
+       6,    0,   44,    2, 0x0a /* Public */,
+       7,    0,   45,    2, 0x0a /* Public */,
+       8,    1,   46,    2, 0x0a /* Public */,
+       9,    2,   49,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void, 0x80000000 | 3, QMetaType::Int,    4,    5,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,    5,
+    QMetaType::Void, 0x80000000 | 3, QMetaType::Int,    4,    5,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtTableView[] = {
-    "hiro::QtTableView\0onActivate(QTreeWidgetItem*,int)\0"
-    "item,column\0\0onChange()\0onContext()\0"
-    "onSort(int)\0column\0onToggle(QTreeWidgetItem*,int)\0"
 };
 
 void hiro::QtTableView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtTableView *_t = static_cast<QtTableView *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onActivate((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 1: _t->onChange(); break;
@@ -1359,29 +1647,22 @@ void hiro::QtTableView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
     }
 }
 
-const QMetaObjectExtraData hiro::QtTableView::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtTableView::staticMetaObject = {
+    { &QTreeWidget::staticMetaObject, qt_meta_stringdata_hiro__QtTableView.data,
+      qt_meta_data_hiro__QtTableView,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtTableView::staticMetaObject = {
-    { &QTreeWidget::staticMetaObject, qt_meta_stringdata_hiro__QtTableView,
-      qt_meta_data_hiro__QtTableView, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtTableView::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtTableView::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtTableView::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTableView))
-        return static_cast<void*>(const_cast< QtTableView*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTableView.stringdata0))
+        return static_cast<void*>(this);
     return QTreeWidget::qt_metacast(_clname);
 }
 
@@ -1394,13 +1675,37 @@ int hiro::QtTableView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 5;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 5)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 5;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtTextEdit_t {
+    QByteArrayData data[3];
+    char stringdata0[27];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtTextEdit_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtTextEdit_t qt_meta_stringdata_hiro__QtTextEdit = {
+    {
+QT_MOC_LITERAL(0, 0, 16), // "hiro::QtTextEdit"
+QT_MOC_LITERAL(1, 17, 8), // "onChange"
+QT_MOC_LITERAL(2, 26, 0) // ""
+
+    },
+    "hiro::QtTextEdit\0onChange\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtTextEdit[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1410,21 +1715,20 @@ static const uint qt_meta_data_hiro__QtTextEdit[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      17,   28,   28,   28, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtTextEdit[] = {
-    "hiro::QtTextEdit\0onChange()\0\0"
 };
 
 void hiro::QtTextEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtTextEdit *_t = static_cast<QtTextEdit *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -1433,29 +1737,22 @@ void hiro::QtTextEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtTextEdit::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtTextEdit::staticMetaObject = {
+    { &QTextEdit::staticMetaObject, qt_meta_stringdata_hiro__QtTextEdit.data,
+      qt_meta_data_hiro__QtTextEdit,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtTextEdit::staticMetaObject = {
-    { &QTextEdit::staticMetaObject, qt_meta_stringdata_hiro__QtTextEdit,
-      qt_meta_data_hiro__QtTextEdit, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtTextEdit::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtTextEdit::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtTextEdit::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTextEdit))
-        return static_cast<void*>(const_cast< QtTextEdit*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtTextEdit.stringdata0))
+        return static_cast<void*>(this);
     return QTextEdit::qt_metacast(_clname);
 }
 
@@ -1468,13 +1765,37 @@ int hiro::QtTextEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtVerticalScrollBar_t {
+    QByteArrayData data[3];
+    char stringdata0[36];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtVerticalScrollBar_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtVerticalScrollBar_t qt_meta_stringdata_hiro__QtVerticalScrollBar = {
+    {
+QT_MOC_LITERAL(0, 0, 25), // "hiro::QtVerticalScrollBar"
+QT_MOC_LITERAL(1, 26, 8), // "onChange"
+QT_MOC_LITERAL(2, 35, 0) // ""
+
+    },
+    "hiro::QtVerticalScrollBar\0onChange\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtVerticalScrollBar[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1484,22 +1805,20 @@ static const uint qt_meta_data_hiro__QtVerticalScrollBar[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      26,   37,   37,   37, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtVerticalScrollBar[] = {
-    "hiro::QtVerticalScrollBar\0onChange()\0"
-    "\0"
 };
 
 void hiro::QtVerticalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtVerticalScrollBar *_t = static_cast<QtVerticalScrollBar *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -1508,29 +1827,22 @@ void hiro::QtVerticalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Cal
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtVerticalScrollBar::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtVerticalScrollBar::staticMetaObject = {
+    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalScrollBar.data,
+      qt_meta_data_hiro__QtVerticalScrollBar,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtVerticalScrollBar::staticMetaObject = {
-    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalScrollBar,
-      qt_meta_data_hiro__QtVerticalScrollBar, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtVerticalScrollBar::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtVerticalScrollBar::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtVerticalScrollBar::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalScrollBar))
-        return static_cast<void*>(const_cast< QtVerticalScrollBar*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalScrollBar.stringdata0))
+        return static_cast<void*>(this);
     return QScrollBar::qt_metacast(_clname);
 }
 
@@ -1543,13 +1855,37 @@ int hiro::QtVerticalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void *
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtVerticalSlider_t {
+    QByteArrayData data[3];
+    char stringdata0[33];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtVerticalSlider_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtVerticalSlider_t qt_meta_stringdata_hiro__QtVerticalSlider = {
+    {
+QT_MOC_LITERAL(0, 0, 22), // "hiro::QtVerticalSlider"
+QT_MOC_LITERAL(1, 23, 8), // "onChange"
+QT_MOC_LITERAL(2, 32, 0) // ""
+
+    },
+    "hiro::QtVerticalSlider\0onChange\0"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtVerticalSlider[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -1559,21 +1895,20 @@ static const uint qt_meta_data_hiro__QtVerticalSlider[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-      23,   34,   34,   34, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_hiro__QtVerticalSlider[] = {
-    "hiro::QtVerticalSlider\0onChange()\0\0"
 };
 
 void hiro::QtVerticalSlider::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         QtVerticalSlider *_t = static_cast<QtVerticalSlider *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -1582,29 +1917,22 @@ void hiro::QtVerticalSlider::qt_static_metacall(QObject *_o, QMetaObject::Call _
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtVerticalSlider::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtVerticalSlider::staticMetaObject = {
+    { &QSlider::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalSlider.data,
+      qt_meta_data_hiro__QtVerticalSlider,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtVerticalSlider::staticMetaObject = {
-    { &QSlider::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalSlider,
-      qt_meta_data_hiro__QtVerticalSlider, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtVerticalSlider::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtVerticalSlider::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtVerticalSlider::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalSlider))
-        return static_cast<void*>(const_cast< QtVerticalSlider*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalSlider.stringdata0))
+        return static_cast<void*>(this);
     return QSlider::qt_metacast(_clname);
 }
 
@@ -1617,13 +1945,35 @@ int hiro::QtVerticalSlider::qt_metacall(QMetaObject::Call _c, int _id, void **_a
         if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
         _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
     }
     return _id;
 }
+struct qt_meta_stringdata_hiro__QtViewport_t {
+    QByteArrayData data[1];
+    char stringdata0[17];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_hiro__QtViewport_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_hiro__QtViewport_t qt_meta_stringdata_hiro__QtViewport = {
+    {
+QT_MOC_LITERAL(0, 0, 16) // "hiro::QtViewport"
+
+    },
+    "hiro::QtViewport"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_hiro__QtViewport[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        0,    0, // methods
@@ -1636,10 +1986,6 @@ static const uint qt_meta_data_hiro__QtViewport[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtViewport[] = {
-    "hiro::QtViewport\0"
-};
-
 void hiro::QtViewport::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
@@ -1648,37 +1994,29 @@ void hiro::QtViewport::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtViewport::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
+QT_INIT_METAOBJECT const QMetaObject hiro::QtViewport::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtViewport.data,
+      qt_meta_data_hiro__QtViewport,  qt_static_metacall, nullptr, nullptr}
 };
 
-const QMetaObject hiro::QtViewport::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_hiro__QtViewport,
-      qt_meta_data_hiro__QtViewport, &staticMetaObjectExtraData }
-};
-
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtViewport::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *hiro::QtViewport::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *hiro::QtViewport::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtViewport))
-        return static_cast<void*>(const_cast< QtViewport*>(this));
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtViewport.stringdata0))
+        return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
 int hiro::QtViewport::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
-    if (_id < 0)
-        return _id;
     return _id;
 }
+QT_WARNING_POP
 QT_END_MOC_NAMESPACE

@@ -83,8 +83,9 @@ auto pWindow::handle() const -> uintptr_t {
 }
 
 auto pWindow::monitor() const -> uint {
-  //TODO
-  return 0;
+  int monitor = QDesktopWidget().screenNumber(qtWindow);
+  if(monitor < 0) monitor = Monitor::primary();
+  return monitor;
 }
 
 auto pWindow::remove(sMenuBar menuBar) -> void {
@@ -130,7 +131,8 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
   if(fullScreen) {
     windowedGeometry = state().geometry;
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-    qtContainer->setFixedSize(Desktop::size().width() - frameMargin().width(), Desktop::size().height() - frameMargin().height());
+    auto monitorGeometry = Monitor::geometry(monitor());
+    qtContainer->setFixedSize(monitorGeometry.width() - frameMargin().width(), monitorGeometry.height() - frameMargin().height());
     qtWindow->showFullScreen();
     state().geometry = Monitor::geometry(Monitor::primary());
   } else {

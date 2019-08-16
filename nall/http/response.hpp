@@ -180,6 +180,7 @@ auto Response::findContentType(const string& s) const -> string {
   if(s == ".gz"  ) return "application/gzip";
   if(s == ".htm" ) return "text/html; charset=utf-8";
   if(s == ".html") return "text/html; charset=utf-8";
+  if(s == ".ico" ) return "image/x-icon";
   if(s == ".jpg" ) return "image/jpeg";
   if(s == ".jpeg") return "image/jpeg";
   if(s == ".js"  ) return "application/javascript";

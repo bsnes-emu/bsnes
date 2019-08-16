@@ -77,16 +77,16 @@ struct directory : inode {
     function<void (const string&, const string&, const string&)>
     recurse = [&](const string& basename, const string& pathname, const string& pattern) {
       for(auto& folder : directory::ufolders(pathname)) {
-        contents.append(string{pathname, folder}.trimLeft(basename, 1L));
-        recurse(basename, {pathname, folder}, pattern);
+        contents.append(string{pathname, folder, "/"}.trimLeft(basename, 1L));
+        recurse(basename, {pathname, folder, "/"}, pattern);
       }
       for(auto& file : directory::ufiles(pathname, pattern)) {
         contents.append(string{pathname, file}.trimLeft(basename, 1L));
       }
     };
     for(auto& folder : directory::ufolders(pathname)) {
-      contents.append(folder);
-      recurse(pathname, {pathname, folder}, pattern);
+      contents.append({folder, "/"});
+      recurse(pathname, {pathname, folder, "/"}, pattern);
     }
     for(auto& file : directory::ufiles(pathname, pattern)) {
       contents.append(file);
@@ -100,16 +100,16 @@ struct directory : inode {
     function<void (const string&, const string&, const string&)>
     recurse = [&](const string& basename, const string& pathname, const string& pattern) {
       for(auto& folder : directory::ufolders(pathname)) {
-        contents.append(string{pathname, folder}.trimLeft(basename, 1L));
-        recurse(basename, {pathname, folder}, pattern);
+        contents.append(string{pathname, folder, "/"}.trimLeft(basename, 1L));
+        recurse(basename, {pathname, folder, "/"}, pattern);
       }
       for(auto& file : directory::ufiles(pathname, pattern)) {
         contents.append(string{pathname, file}.trimLeft(basename, 1L));
       }
     };
     for(auto& folder : directory::ufolders(pathname)) {
-      contents.append(folder);
-      recurse(pathname, {pathname, folder}, pattern);
+      contents.append({folder, "/"});
+      recurse(pathname, {pathname, folder, "/"}, pattern);
     }
     for(auto& file : directory::ufiles(pathname, pattern)) {
       contents.append(file);

@@ -12,7 +12,7 @@ auto InputManager::bindHotkeys() -> void {
   static bool rewinding = false;
 
   hotkeys.append(InputHotkey("Toggle Fullscreen Mode").onPress([] {
-    presentation.toggleFullscreenMode();
+    program.toggleVideoFullScreen();
   }));
 
   hotkeys.append(InputHotkey("Toggle Mouse Capture").onPress([] {
@@ -107,11 +107,22 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Pause Emulation").onPress([] {
-    presentation.pauseEmulation.setChecked(!presentation.pauseEmulation.checked());
+    if(presentation.runEmulation.checked()) {
+      presentation.pauseEmulation.setChecked().doActivate();
+    } else {
+      //unpausing can also cancel frame advance mode
+      presentation.runEmulation.setChecked().doActivate();
+    }
   }));
 
   hotkeys.append(InputHotkey("Frame Advance").onPress([] {
-    presentation.frameAdvance.doActivate();
+    if(!presentation.frameAdvance.checked()) {
+      //start frame advance if not currently frame advancing
+      presentation.frameAdvance.setChecked().doActivate();
+    } else {
+      //advance to the next video frame otherwise
+      program.frameAdvanceLock = false;
+    }
   }));
 
   hotkeys.append(InputHotkey("Reset Emulation").onPress([] {

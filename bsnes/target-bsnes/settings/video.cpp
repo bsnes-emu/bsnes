@@ -30,6 +30,12 @@ auto VideoSettings::create() -> void {
     program.updateVideoPalette();
   }).doChange();
 
+  dimmingOption.setText("Dim video when idle").setToolTip(
+    "Darkens the video to indicate that the emulation is not running."
+  ).setChecked(settings.video.dimming).onToggle([&] {
+    settings.video.dimming = dimmingOption.checked();
+  });
+
   snowOption.setText("Draw snow effect when idle").setChecked(settings.video.snow).onToggle([&] {
     settings.video.snow = snowOption.checked();
     presentation.updateProgramIcon();

@@ -67,7 +67,7 @@ auto Program::create() -> void {
 
   if(gameQueue) load();
   if(startFullScreen && emulator->loaded()) {
-    presentation.toggleFullscreenMode();
+    toggleVideoFullScreen();
   }
   Application::onMain({&Program::main, this});
 }

@@ -90,12 +90,12 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
-    state.output.append("<header id=\"", name, "\">", data);
+    state.output.append("<h1 id=\"", name, "\">", data);
     for(auto& line : lines) {
       if(!line.beginsWith("# ")) continue;
       state.output.append("<span>", line.trimLeft("# ", 1L), "</span>");
     }
-    state.output.append("</header>\n");
+    state.output.append("</h1>\n");
   }
 
   //header
@@ -103,13 +103,13 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
-    if(depth <= 6) {
-      state.output.append("<h", depth, " id=\"", name, "\">", data);
+    if(depth <= 5) {
+      state.output.append("<h", depth + 1, " id=\"", name, "\">", data);
       for(auto& line : lines) {
         if(count(line, '=') != depth) continue;
         state.output.append("<span>", slice(line, depth + 1), "</span>");
       }
-      state.output.append("</h", depth, ">\n");
+      state.output.append("</h", depth + 1, ">\n");
     }
   }
 
@@ -215,12 +215,13 @@ inline auto DML::markup(const string& s) -> string {
 
   natural link, linkBase;
   natural embed, embedBase;
+  natural iframe, iframeBase;
 
   for(uint n = 0; n < s.size();) {
     char a = s[n];
     char b = s[n + 1];
 
-    if(!link && !embed) {
+    if(!link && !embed && !iframe) {
       if(a == '*' && b == '*') { t.append(strong.flip() ? "<strong>" : "</strong>"); n += 2; continue; }
       if(a == '/' && b == '/') { t.append(emphasis.flip() ? "<em>" : "</em>"); n += 2; continue; }
       if(a == '_' && b == '_') { t.append(insertion.flip() ? "<ins>" : "</ins>"); n += 2; continue; }
@@ -228,6 +229,9 @@ inline auto DML::markup(const string& s) -> string {
       if(a == '|' && b == '|') { t.append(code.flip() ? "<code>" : "</code>"); n += 2; continue; }
       if(a =='\\' && b =='\\') { t.append("<br>"); n += 2; continue; }
     }
+
+    if(iframe == 0 && a == '<' && b == '<') { t.append("<iframe width='772' height='434' src=\""); iframe = 1; iframeBase = n += 2; continue; }
+    if(iframe != 0 && a == '>' && b == '>') { t.append("\" frameborder='0' allowfullscreen></iframe>"); iframe = 0; n += 2; continue; }
 
     if(!embed) {
       if(link == 0 && a == '[' && b == '[') { t.append("<a href=\""); link = 1; linkBase = n += 2; continue; }

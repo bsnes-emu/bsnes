@@ -11,18 +11,23 @@ struct VideoDirectDraw : VideoDriver {
   ~VideoDirectDraw() { destruct(); }
 
   auto create() -> bool override {
-    super.setShader("Blur");
+    VideoDriver::shader = "Blur";
     return initialize();
   }
 
   auto driver() -> string override { return "DirectDraw 7.0"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasExclusive() -> bool override { return true; }
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
 
-  auto setExclusive(bool exclusive) -> bool override {
+  auto setFullScreen(bool fullScreen) -> bool override {
+    return initialize();
+  }
+
+  auto setMonitor(bool monitor) -> bool override {
     return initialize();
   }
 
@@ -118,19 +123,17 @@ private:
 
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
-    POINT point{0, 0};
-    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEX information{};
-    information.cbSize = sizeof(MONITORINFOEX);
-    GetMonitorInfo(monitor, &information);
-    uint monitorWidth = information.rcMonitor.right - information.rcMonitor.left;
-    uint monitorHeight = information.rcMonitor.bottom - information.rcMonitor.top;
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
 
-    if(self.exclusive) {
-      _context = _exclusive = CreateWindowEx(WS_EX_TOPMOST, L"VideoDirectDraw7_Window", L"", WS_VISIBLE | WS_POPUP,
-        information.rcMonitor.left, information.rcMonitor.top, monitorWidth, monitorHeight,
+    if(self.fullScreen) {
+      _context = _window = CreateWindowEx(WS_EX_TOPMOST, L"VideoDirectDraw7_Window", L"", WS_VISIBLE | WS_POPUP,
+        _monitorX, _monitorY, _monitorWidth, _monitorHeight,
         nullptr, nullptr, GetModuleHandle(0), nullptr);
     } else {
       _context = (HWND)self.context;
@@ -166,7 +169,7 @@ private:
     if(_raster) { _raster->Release(); _raster = nullptr; }
     if(_screen) { _screen->Release(); _screen = nullptr; }
     if(_interface) { _interface->Release(); _interface = nullptr; }
-    if(_exclusive) { DestroyWindow(_exclusive); _exclusive = nullptr; }
+    if(_window) { DestroyWindow(_window); _window = nullptr; }
     _context = nullptr;
   }
 
@@ -213,11 +216,16 @@ private:
 
   bool _ready = false;
 
+  int _monitorX = 0;
+  int _monitorY = 0;
+  int _monitorWidth = 0;
+  int _monitorHeight = 0;
+
   uint _width = 0;
   uint _height = 0;
 
   HWND _context = nullptr;
-  HWND _exclusive = nullptr;
+  HWND _window = nullptr;
   LPDIRECTDRAW7 _interface = nullptr;
   LPDIRECTDRAWSURFACE7 _screen = nullptr;
   LPDIRECTDRAWSURFACE7 _raster = nullptr;

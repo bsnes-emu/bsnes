@@ -18,7 +18,6 @@ auto Program::load() -> void {
 
   gameQueue = {};
   screenshot = {};
-  frameAdvance = false;
   if(!verified() && emulatorSettings.warnOnUnverifiedGames.checked()) {
     //Emulator::loaded() is true at this point:
     //prevent Program::main() from calling Emulator::run() during this dialog window
@@ -52,7 +51,7 @@ auto Program::load() -> void {
   presentation.toolsMenu.setVisible(true);
   presentation.updateStateMenus();
   presentation.speedNormal.setChecked();
-  presentation.pauseEmulation.setChecked(false);
+  presentation.runEmulation.setChecked().doActivate();
   presentation.updateProgramIcon();
   presentation.updateStatusIcon();
   rewindReset();  //starts rewind state recording

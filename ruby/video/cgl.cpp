@@ -84,9 +84,12 @@ struct VideoCGL : VideoDriver, OpenGL {
       if([view lockFocusIfCanDraw]) {
         OpenGL::absoluteWidth = width;
         OpenGL::absoluteHeight = height;
+        OpenGL::outputX = 0;
+        OpenGL::outputY = 0;
         OpenGL::outputWidth = windowWidth;
         OpenGL::outputHeight = windowHeight;
         OpenGL::output();
+
         [[view openGLContext] flushBuffer];
         if(self.flush) glFinish();
         [view unlockFocus];

@@ -68,7 +68,8 @@ auto Program::viewportRefresh() -> void {
   auto filterRender = filterSelect(filterWidth, filterHeight, scale);
 
   if(auto [output, length] = video.acquire(filterWidth, filterHeight); output) {
-    filterRender(palettePaused, output, length, (const uint16_t*)data, pitch, width, height);
+    bool dimmed = settings.video.dimming && !presentation.frameAdvance.checked();
+    filterRender(dimmed ? paletteDimmed : palette, output, length, (const uint16_t*)data, pitch, width, height);
     length >>= 2;
 
     if(settings.video.snow) {

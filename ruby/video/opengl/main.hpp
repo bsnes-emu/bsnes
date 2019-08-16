@@ -148,7 +148,7 @@ auto OpenGL::output() -> void {
 
     glActiveTexture(GL_TEXTURE0);
     glrParameters(sources[0].filter, sources[0].wrap);
-    p.render(sources[0].width, sources[0].height, targetWidth, targetHeight);
+    p.render(sources[0].width, sources[0].height, 0, 0, targetWidth, targetHeight);
     glBindTexture(GL_TEXTURE_2D, p.texture);
 
     p.phase = (p.phase + 1) % p.modulo;
@@ -168,7 +168,7 @@ auto OpenGL::output() -> void {
   glrUniform4f("outputSize", outputWidth, outputHeight, 1.0 / outputWidth, 1.0 / outputHeight);
 
   glrParameters(sources[0].filter, sources[0].wrap);
-  render(sources[0].width, sources[0].height, outputWidth, outputHeight);
+  render(sources[0].width, sources[0].height, outputX, outputY, outputWidth, outputHeight);
 
   if(history.size() > 0) {
     OpenGLTexture frame = history.takeRight();

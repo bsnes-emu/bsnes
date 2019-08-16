@@ -10,13 +10,13 @@ namespace nall::HTTP {
 
 struct Role {
   struct Settings {
-    int connectionLimit =    1 * 1024;  //server
-    int headSizeLimit   =   16 * 1024;  //client, server
-    int bodySizeLimit   = 8192 * 1024;  //client, server
-    int chunkSize       =   32 * 1024;  //client, server
-    int threadStackSize =  128 * 1024;  //server
-    int timeoutReceive  =   15 * 1000;  //server
-    int timeoutSend     =   15 * 1000;  //server
+    int connectionLimit =     1 * 1024;  //server
+    int headSizeLimit   =    16 * 1024;  //client, server
+    int bodySizeLimit   = 65536 * 1024;  //client, server
+    int chunkSize       =    32 * 1024;  //client, server
+    int threadStackSize =   128 * 1024;  //server
+    int timeoutReceive  =    15 * 1000;  //server
+    int timeoutSend     =    15 * 1000;  //server
   } settings;
 
   inline auto configure(const string& parameters) -> bool;

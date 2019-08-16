@@ -7,8 +7,8 @@
 #include <heuristics/sufami-turbo.cpp>
 
 //ROM data is held in memory to support compressed archives, soft-patching, and game hacks
-auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
-  vfs::shared::file result;
+auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> shared_pointer<vfs::file> {
+  shared_pointer<vfs::file> result;
 
   if(id == 0) {  //System
     if(name == "boards.bml" && mode == vfs::file::mode::read) {
@@ -237,9 +237,8 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
 
   inputManager.frame();
 
-  if(frameAdvance) {
-    frameAdvance = false;
-    presentation.pauseEmulation.setChecked();
+  if(presentation.frameAdvance.checked()) {
+    frameAdvanceLock = true;
   }
 
   static uint frameCounter = 0;

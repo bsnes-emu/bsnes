@@ -19,13 +19,18 @@ struct VideoWGL : VideoDriver, OpenGL {
   auto driver() -> string override { return "OpenGL 3.2"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasExclusive() -> bool override { return true; }
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
   auto hasFlush() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
-  auto setExclusive(bool exclusive) -> bool override {
+  auto setFullScreen(bool fullScreen) -> bool override {
+    return initialize();
+  }
+
+  auto setMonitor(string monitor) -> bool override {
     return initialize();
   }
 
@@ -52,11 +57,16 @@ struct VideoWGL : VideoDriver, OpenGL {
     SwapBuffers(_display);
   }
 
-  auto size(uint& width, uint& height) -> void {
-    RECT rectangle;
-    GetClientRect(_context, &rectangle);
-    width = rectangle.right - rectangle.left;
-    height = rectangle.bottom - rectangle.top;
+  auto size(uint& width, uint& height) -> void override {
+    if(self.fullScreen) {
+      width = _monitorWidth;
+      height = _monitorHeight;
+    } else {
+      RECT rectangle;
+      GetClientRect(_context, &rectangle);
+      width = rectangle.right - rectangle.left;
+      height = rectangle.bottom - rectangle.top;
+    }
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
@@ -70,11 +80,15 @@ struct VideoWGL : VideoDriver, OpenGL {
   auto output(uint width, uint height) -> void override {
     uint windowWidth, windowHeight;
     size(windowWidth, windowHeight);
+
     OpenGL::absoluteWidth = width;
     OpenGL::absoluteHeight = height;
+    OpenGL::outputX = 0;
+    OpenGL::outputY = 0;
     OpenGL::outputWidth = windowWidth;
     OpenGL::outputHeight = windowHeight;
     OpenGL::output();
+
     SwapBuffers(_display);
     if(self.flush) glFinish();
   }
@@ -101,19 +115,17 @@ private:
 
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
-    POINT point{0, 0};
-    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEX information{};
-    information.cbSize = sizeof(MONITORINFOEX);
-    GetMonitorInfo(monitor, &information);
-    _monitorWidth = information.rcMonitor.right - information.rcMonitor.left;
-    _monitorHeight = information.rcMonitor.bottom - information.rcMonitor.top;
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
 
-    if(self.exclusive) {
-      _context = _exclusive = CreateWindowEx(WS_EX_TOPMOST, L"VideoOpenGL32_Window", L"", WS_VISIBLE | WS_POPUP,
-        information.rcMonitor.left, information.rcMonitor.top, _monitorWidth, _monitorHeight,
+    if(self.fullScreen) {
+      _context = _window = CreateWindowEx(WS_EX_TOPMOST, L"VideoOpenGL32_Window", L"", WS_VISIBLE | WS_POPUP,
+        _monitorX, _monitorY, _monitorWidth, _monitorHeight,
         nullptr, nullptr, GetModuleHandle(0), nullptr);
     } else {
       _context = (HWND)self.context;
@@ -162,9 +174,9 @@ private:
       _wglContext = nullptr;
     }
 
-    if(_exclusive) {
-      DestroyWindow(_exclusive);
-      _exclusive = nullptr;
+    if(_window) {
+      DestroyWindow(_window);
+      _window = nullptr;
     }
 
     _context = nullptr;
@@ -175,10 +187,12 @@ private:
 
   bool _ready = false;
 
-  uint _monitorWidth = 0;
-  uint _monitorHeight = 0;
+  int _monitorX = 0;
+  int _monitorY = 0;
+  int _monitorWidth = 0;
+  int _monitorHeight = 0;
 
-  HWND _exclusive = nullptr;
+  HWND _window = nullptr;
   HWND _context = nullptr;
   HDC _display = nullptr;
   HGLRC _wglContext = nullptr;

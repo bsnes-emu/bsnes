@@ -9,14 +9,17 @@ struct Settings : Markup::Node {
 
   struct Video {
     string driver;
+    bool exclusive = false;
     bool blocking = false;
     bool flush = false;
+    string monitor = "Primary";
     string format = "Default";
     string shader = "Blur";
 
     uint luminance = 100;
     uint saturation = 100;
     uint gamma = 150;
+    bool dimming = true;
     bool snow = false;
 
     string output = "Scale";
@@ -153,6 +156,7 @@ private:
     Label gammaValue{&colorLayout, Size{50_sx, 0}};
     HorizontalSlider gammaSlider{&colorLayout, Size{~0, 0}};
   //
+  CheckLabel dimmingOption{this, Size{~0, 0}};
   CheckLabel snowOption{this, Size{~0, 0}};
 };
 
@@ -354,6 +358,8 @@ struct DriverSettings : VerticalLayout {
   auto create() -> void;
   auto videoDriverChanged() -> void;
   auto videoDriverChange() -> void;
+  auto videoMonitorChanged() -> void;
+  auto videoMonitorChange() -> void;
   auto videoFormatChanged() -> void;
   auto videoFormatChange() -> void;
   auto audioDriverChanged() -> void;
@@ -369,16 +375,19 @@ struct DriverSettings : VerticalLayout {
 
 public:
   Label videoLabel{this, Size{~0, 0}, 2};
-  TableLayout videoLayout{this, Size{~0, 0}};
-    Label videoDriverLabel{&videoLayout, Size{0, 0}};
+  VerticalLayout videoLayout{this, Size{~0, 0}};
     HorizontalLayout videoDriverLayout{&videoLayout, Size{~0, 0}};
+      Label videoDriverLabel{&videoDriverLayout, Size{0, 0}};
       ComboButton videoDriverOption{&videoDriverLayout, Size{0, 0}};
       Button videoDriverUpdate{&videoDriverLayout, Size{0, 0}};
       Label videoDriverActive{&videoDriverLayout, Size{0, 0}};
-    Label videoFormatLabel{&videoLayout, Size{0, 0}};
     HorizontalLayout videoPropertyLayout{&videoLayout, Size{~0, 0}};
+      Label videoMonitorLabel{&videoPropertyLayout, Size{0, 0}};
+      ComboButton videoMonitorOption{&videoPropertyLayout, Size{0, 0}};
+      Label videoFormatLabel{&videoPropertyLayout, Size{0, 0}};
       ComboButton videoFormatOption{&videoPropertyLayout, Size{0, 0}};
   HorizontalLayout videoToggleLayout{this, Size{~0, 0}};
+    CheckLabel videoExclusiveToggle{&videoToggleLayout, Size{0, 0}};
     CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
     CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
   Canvas videoSpacer{this, Size{~0, 1}};

@@ -29,6 +29,7 @@ namespace nall {
   constexpr auto compiler() -> Compiler { return Compiler::Clang; }
 
   #pragma clang diagnostic warning "-Wreturn-type"
+  #pragma clang diagnostic ignored "-Wunused-result"
   #pragma clang diagnostic ignored "-Wunknown-pragmas"
   #pragma clang diagnostic ignored "-Wempty-body"
   #pragma clang diagnostic ignored "-Wparentheses"
@@ -36,20 +37,20 @@ namespace nall {
   #pragma clang diagnostic ignored "-Wswitch-bool"
   #pragma clang diagnostic ignored "-Wtautological-compare"
   #pragma clang diagnostic ignored "-Wabsolute-value"
-  #pragma clang diagnostic ignored "-Wunused-result"
+  #pragma clang diagnostic ignored "-Wshift-count-overflow"
 
   //temporary
   #pragma clang diagnostic ignored "-Winconsistent-missing-override"
-  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//#pragma clang diagnostic error   "-Wdeprecated-declarations"
 #elif defined(__GNUC__)
   #define COMPILER_GCC
   constexpr auto compiler() -> Compiler { return Compiler::GCC; }
 
   #pragma GCC diagnostic warning "-Wreturn-type"
+  #pragma GCC diagnostic ignored "-Wunused-result"
   #pragma GCC diagnostic ignored "-Wunknown-pragmas"
   #pragma GCC diagnostic ignored "-Wpragmas"
   #pragma GCC diagnostic ignored "-Wswitch-bool"
-  #pragma GCC diagnostic ignored "-Wunused-result"
 #elif defined(_MSC_VER)
   #define COMPILER_MICROSOFT
   constexpr auto compiler() -> Compiler { return Compiler::Microsoft; }

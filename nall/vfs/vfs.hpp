@@ -67,9 +67,5 @@ struct file {
 
 }
 
-namespace nall::vfs::shared {
-  using file = shared_pointer<vfs::file>;
-}
-
 #include <nall/vfs/fs/file.hpp>
 #include <nall/vfs/memory/file.hpp>

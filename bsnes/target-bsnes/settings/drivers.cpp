@@ -3,14 +3,26 @@ auto DriverSettings::create() -> void {
   setVisible(false);
 
   videoLabel.setText("Video").setFont(Font().setBold());
-  videoLayout.setSize({2, 2});
   videoDriverLabel.setText("Driver:");
   videoDriverOption.onChange([&] {
     videoDriverUpdate.setText(videoDriverOption.selected().text() != video.driver() ? "Change" : "Reload");
   });
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
+  videoMonitorLabel.setText("Fullscreen Monitor:").setToolTip(
+    "Sets which monitor video is sent to in fullscreen mode."
+  );
+  videoMonitorOption.onChange([&] { videoMonitorChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
+  videoExclusiveToggle.setText("Exclusive").setToolTip(
+    "Causes fullscreen mode to take over all monitors.\n"
+    "This allows adaptive sync to work better and reduces input latency.\n"
+    "However, multi-monitor users should turn this option off.\n"
+    "Note: Direct3D exclusive mode also does not honor the requested monitor."
+  ).onToggle([&] {
+    settings.video.exclusive = videoExclusiveToggle.checked();
+    program.updateVideoExclusive();
+  });
   videoBlockingToggle.setText("Synchronize").setToolTip(
     "Waits for the video card to be ready before rendering frames.\n"
     "Eliminates dropped or duplicated frames; but can distort audio.\n\n"
@@ -90,11 +102,6 @@ auto DriverSettings::create() -> void {
     "This is useful for APIs that lack auto-hotplug support,\n"
     "such as DirectInput and SDL."
   ).onActivate([&] { inputDriverChange(); });
-
-  //this will hide the video format setting for simplicity, as it's not very useful just yet ...
-  //videoLayout.setSize({2, 1});
-  //videoLayout.remove(videoFormatLabel);
-  //videoLayout.remove(videoPropertyLayout);
 }
 
 //
@@ -108,7 +115,9 @@ auto DriverSettings::videoDriverChanged() -> void {
   }
   videoDriverActive.setText({"Active driver: ", video.driver()});
   videoDriverOption.doChange();
+  videoMonitorChanged();
   videoFormatChanged();
+  videoExclusiveToggle.setChecked(video.exclusive()).setEnabled(video.hasExclusive());
   videoBlockingToggle.setChecked(video.blocking()).setEnabled(video.hasBlocking());
   videoFlushToggle.setChecked(video.flush()).setEnabled(video.hasFlush());
   setGeometry(geometry());
@@ -131,6 +140,24 @@ auto DriverSettings::videoDriverChange() -> void {
     settings.save();
     videoDriverChanged();
   }
+}
+
+auto DriverSettings::videoMonitorChanged() -> void {
+  videoMonitorOption.reset();
+  for(auto& monitor : Video::hasMonitors()) {
+    ComboButtonItem item{&videoMonitorOption};
+    item.setText(monitor.name);
+    if(monitor.name == video.monitor()) item.setSelected();
+  }
+  videoMonitorOption.setEnabled(videoMonitorOption.itemCount() > 1);
+  setGeometry(geometry());
+  videoMonitorChange();
+}
+
+auto DriverSettings::videoMonitorChange() -> void {
+  auto item = videoMonitorOption.selected();
+  settings.video.monitor = item.text();
+  program.updateVideoMonitor();
 }
 
 auto DriverSettings::videoFormatChanged() -> void {

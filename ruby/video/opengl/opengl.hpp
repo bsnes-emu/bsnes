@@ -38,7 +38,7 @@ struct OpenGLSurface : OpenGLTexture {
   auto allocate() -> void;
   auto size(uint width, uint height) -> void;
   auto release() -> void;
-  auto render(uint sourceWidth, uint sourceHeight, uint targetWidth, uint targetHeight) -> void;
+  auto render(uint sourceWidth, uint sourceHeight, uint targetX, uint targetY, uint targetWidth, uint targetHeight) -> void;
 
   GLuint program = 0;
   GLuint framebuffer = 0;
@@ -76,6 +76,8 @@ struct OpenGL : OpenGLProgram {
   vector<OpenGLProgram> programs;
   vector<OpenGLTexture> history;
   GLuint inputFormat = GL_RGBA8;
+  uint outputX = 0;
+  uint outputY = 0;
   uint outputWidth = 0;
   uint outputHeight = 0;
   struct Setting {

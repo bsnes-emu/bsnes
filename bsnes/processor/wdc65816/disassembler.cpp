@@ -31,10 +31,10 @@ auto WDC65816::disassemble(uint24 address, bool e, bool m, bool x) -> string {
     return data | readWord(address + 1) << 8;
   };
 
-  auto opcode   = read(address); address(0,15)++;
-  auto operand0 = read(address); address(0,15)++;
-  auto operand1 = read(address); address(0,15)++;
-  auto operand2 = read(address); address(0,15)++;
+  auto opcode   = read(address); address.bit(0,15)++;
+  auto operand0 = read(address); address.bit(0,15)++;
+  auto operand1 = read(address); address.bit(0,15)++;
+  auto operand2 = read(address); address.bit(0,15)++;
 
    uint8 operandByte = operand0 << 0;
   uint16 operandWord = operand0 << 0 | operand1 << 8;

@@ -12,14 +12,16 @@ struct VideoXVideo : VideoDriver {
   ~VideoXVideo() { terminate(); }
 
   auto create() -> bool override {
-    super.setShader("Blur");
+    VideoDriver::exclusive = true;
+    VideoDriver::shader = "Blur";
     return initialize();
   }
 
   auto driver() -> string override { return "XVideo"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasExclusive() -> bool override { return true; }
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasBlocking() -> bool override { return true; }
 
@@ -27,7 +29,11 @@ struct VideoXVideo : VideoDriver {
     return _formatNames;
   }
 
-  auto setExclusive(bool exclusive) -> bool override {
+  auto setFullScreen(bool fullScreen) -> bool override {
+    return initialize();
+  }
+
+  auto setMonitor(string monitor) -> bool override {
     return initialize();
   }
 
@@ -59,18 +65,15 @@ struct VideoXVideo : VideoDriver {
   }
 
   auto size(uint& width, uint& height) -> void override {
-    XWindowAttributes window;
-    XGetWindowAttributes(_display, _window, &window);
-
-    XWindowAttributes parent;
-    XGetWindowAttributes(_display, _parent, &parent);
-
-    if(window.width != parent.width || window.height != parent.height) {
-      XResizeWindow(_display, _window, parent.width, parent.height);
+    if(self.fullScreen) {
+      width = _monitorWidth;
+      height = _monitorHeight;
+    } else {
+      XWindowAttributes parent;
+      XGetWindowAttributes(_display, _parent, &parent);
+      width = parent.width;
+      height = parent.height;
     }
-
-    width = parent.width;
-    height = parent.height;
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
@@ -83,8 +86,27 @@ struct VideoXVideo : VideoDriver {
   }
 
   auto output(uint width = 0, uint height = 0) -> void override {
-    uint windowWidth, windowHeight;
-    size(windowWidth, windowHeight);
+    XWindowAttributes window;
+    XGetWindowAttributes(_display, _window, &window);
+
+    XWindowAttributes parent;
+    XGetWindowAttributes(_display, _parent, &parent);
+
+    if(window.width != parent.width || window.height != parent.height) {
+      XResizeWindow(_display, _window, parent.width, parent.height);
+    }
+
+    uint viewportX = 0;
+    uint viewportY = 0;
+    uint viewportWidth = parent.width;
+    uint viewportHeight = parent.height;
+
+    if(self.fullScreen) {
+      viewportX = _monitorX;
+      viewportY = _monitorY;
+      viewportWidth = _monitorWidth;
+      viewportHeight = _monitorHeight;
+    }
 
     auto& name = _formatName;
     if(name == "RGB24" ) renderRGB24 (_width, _height);
@@ -96,10 +118,10 @@ struct VideoXVideo : VideoDriver {
     if(name == "YV12"  ) renderYV12  (_width, _height);
     if(name == "I420"  ) renderI420  (_width, _height);
 
-    if(!width) width = windowWidth;
-    if(!height) height = windowHeight;
-    int x = (windowWidth - width) / 2;
-    int y = (windowHeight - height) / 2;
+    if(!width) width = viewportWidth;
+    if(!height) height = viewportHeight;
+    int x = viewportX + ((int)viewportWidth - (int)width) / 2;
+    int y = viewportY + ((int)viewportHeight - (int)height) / 2;
 
     XvShmPutImage(_display, _port, _window, _gc, _image,
       0, 0, _width, _height,
@@ -122,7 +144,7 @@ struct VideoXVideo : VideoDriver {
 private:
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
     _display = XOpenDisplay(nullptr);
     _screen = DefaultScreen(_display);
@@ -169,18 +191,24 @@ private:
       return false;
     }
 
-    _parent = self.exclusive ? RootWindow(_display, _screen) : (Window)self.context;
+    _parent = self.fullScreen ? RootWindow(_display, _screen) : (Window)self.context;
     //create child window to attach to parent window.
     //this is so that even if parent window visual depth doesn't match Xv visual
     //(common with composited windows), Xv can still render to child window.
-    XWindowAttributes windowAttributes;
+    XWindowAttributes windowAttributes{};
     XGetWindowAttributes(_display, _parent, &windowAttributes);
+
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
 
     _colormap = XCreateColormap(_display, _parent, visualInfo->visual, AllocNone);
     XSetWindowAttributes attributes{};
     attributes.border_pixel = 0;
     attributes.colormap = _colormap;
-    attributes.override_redirect = self.exclusive;
+    attributes.override_redirect = self.fullScreen;
     _window = XCreateWindow(_display, _parent,
       0, 0, windowAttributes.width, windowAttributes.height,
       0, depth, InputOutput, visualInfo->visual,
@@ -515,7 +543,11 @@ private:
   uint8_t* _vtable = nullptr;
 
   Display* _display = nullptr;
-  int _screen = 0;
+  uint _monitorX = 0;
+  uint _monitorY = 0;
+  uint _monitorWidth = 0;
+  uint _monitorHeight = 0;
+  uint _screen = 0;
   GC _gc = 0;
   Window _parent = 0;
   Window _window = 0;

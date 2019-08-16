@@ -36,6 +36,20 @@
 
 namespace ruby {
 
+auto Video::setFullScreen(bool fullScreen) -> bool {
+  if(instance->fullScreen == fullScreen) return true;
+  if(!instance->hasFullScreen()) return false;
+  if(!instance->setFullScreen(instance->fullScreen = fullScreen)) return false;
+  return true;
+}
+
+auto Video::setMonitor(string monitor) -> bool {
+  if(instance->monitor == monitor) return true;
+  if(!instance->hasMonitor()) return false;
+  if(!instance->setMonitor(instance->monitor = monitor)) return false;
+  return true;
+}
+
 auto Video::setExclusive(bool exclusive) -> bool {
   if(instance->exclusive == exclusive) return true;
   if(!instance->hasExclusive()) return false;
@@ -253,6 +267,115 @@ auto Video::safestDriver() -> string {
   #else
   return "None";
   #endif
+}
+
+#if defined(DISPLAY_WINDOWS)
+static auto CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL {
+  vector<Video::Monitor>& monitors = *(vector<Video::Monitor>*)dwData;
+  MONITORINFOEX mi{};
+  mi.cbSize = sizeof(MONITORINFOEX);
+  GetMonitorInfo(hMonitor, &mi);
+  Video::Monitor monitor;
+  monitor.name = {"Monitor ", 1 + index};
+  string displayName = (const char*)utf8_t(mi.szDevice);
+  if(displayName.beginsWith(R"(\\.\DISPLAYV)")) return true;  //ignore pseudo-monitors
+  monitor.primary = mi.dwFlags & MONITORINFOF_PRIMARY;
+  monitor.x = lprcMonitor->left;
+  monitor.y = lprcMonitor->top;
+  monitor.width = lprcMonitor->right - lprcMonitor->left;
+  monitor.height = lprcMonitor->bottom - lprcMonitor->top;
+  monitors.append(monitor);
+  return true;
+}
+
+auto Video::hasMonitors() -> vector<Monitor> {
+  vector<Monitor> monitors;
+  EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc, (LPARAM)&monitors);
+  vector<Monitor> sorted;
+  for(auto& monitor : monitors) { if(monitor.primary == 1) sorted.append(monitor); }
+  for(auto& monitor : monitors) { if(monitor.primary == 0) sorted.append(monitor); }
+  return sorted;
+}
+#endif
+
+#if defined(DISPLAY_QUARTZ)
+auto Video::hasMonitors() -> vector<Monitor> {
+  vector<Monitor> monitors;
+  @autoreleasepool {
+    uint count = [[NSScreen screens] count];
+    for(uint index : range(count)) {
+      NSRect rectangle = [[[NSScreen screens] objectAtindex:index] frame];
+      Monitor monitor;
+      monitor.name = {"Monitor ", 1 + index};  //todo: retrieve vendor name here?
+      monitor.primary = monitors.size() == 0;  //on macOS, the primary monitor is always the first monitor.
+      monitor.x = rectangle.origin.x;
+      monitor.y = rectangle.origin.y;
+      monitor.width = rectangle.size.width;
+      monitor.height = rectangle.size.height;
+      monitors.append(monitor);
+    }
+  }
+  return monitors;
+}
+#endif
+
+#if defined(DISPLAY_XORG)
+auto Video::hasMonitors() -> vector<Monitor> {
+  vector<Monitor> monitors;
+
+  auto display = XOpenDisplay(nullptr);
+  auto screen = DefaultScreen(display);
+  auto rootWindow = RootWindow(display, screen);
+  auto resources = XRRGetScreenResourcesCurrent(display, rootWindow);
+  auto primary = XRRGetOutputPrimary(display, rootWindow);
+  for(uint index : range(resources->noutput)) {
+    Monitor monitor;
+    auto output = XRRGetOutputInfo(display, resources, resources->outputs[index]);
+    if(output->connection != RR_Connected || output->crtc == None) {
+      XRRFreeOutputInfo(output);
+      continue;
+    }
+    auto crtc = XRRGetCrtcInfo(display, resources, output->crtc);
+    monitor.name = output->name;
+    monitor.primary = false;
+    for(uint n : range(crtc->noutput)) monitor.primary |= crtc->outputs[n] == primary;
+    monitor.x = crtc->x;
+    monitor.y = crtc->y;
+    monitor.width = crtc->width;
+    monitor.height = crtc->height;
+    monitors.append(monitor);
+    XRRFreeCrtcInfo(crtc);
+    XRRFreeOutputInfo(output);
+  }
+  XRRFreeScreenResources(resources);
+  XCloseDisplay(display);
+
+  vector<Monitor> sorted;
+  for(auto& monitor : monitors) { if(monitor.primary == 1) sorted.append(monitor); }
+  for(auto& monitor : monitors) { if(monitor.primary == 0) sorted.append(monitor); }
+  return sorted;
+}
+#endif
+
+auto Video::monitor(string name) -> Monitor {
+  auto monitors = Video::hasMonitors();
+  //try to find by name if possible
+  for(auto& monitor : monitors) {
+    if(monitor.name == name) return monitor;
+  }
+  //fall back to primary if not found
+  for(auto& monitor : monitors) {
+    if(monitor.primary) return monitor;
+  }
+  //Video::monitors() should never let this occur
+  Monitor monitor;
+  monitor.name = "Primary";
+  monitor.primary = true;
+  monitor.x = 0;
+  monitor.y = 0;
+  monitor.width = 640;
+  monitor.height = 480;
+  return monitor;
 }
 
 }

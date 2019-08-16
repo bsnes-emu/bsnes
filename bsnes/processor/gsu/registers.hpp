@@ -34,22 +34,22 @@ struct Register {
 };
 
 struct SFR {
-  union {
-    uint16_t data = 0;
-    BooleanBitField<uint16_t, 15> irq;     //interrupt flag
-    BooleanBitField<uint16_t, 12> b;       //with flag
-    BooleanBitField<uint16_t, 11> ih;      //immediate higher 8-bit flag
-    BooleanBitField<uint16_t, 10> il;      //immediate lower 8-bit flag
-    BooleanBitField<uint16_t,  9> alt2;    //alt2 instruction mode
-    BooleanBitField<uint16_t,  8> alt1;    //alt1 instruction mode
-    BooleanBitField<uint16_t,  6> r;       //ROM r14 read flag
-    BooleanBitField<uint16_t,  5> g;       //go flag
-    BooleanBitField<uint16_t,  4> ov;      //overflow flag
-    BooleanBitField<uint16_t,  3> s;       //sign flag
-    BooleanBitField<uint16_t,  2> cy;      //carry flag
-    BooleanBitField<uint16_t,  1> z;       //zero flag
-    NaturalBitField<uint16_t,  9, 8> alt;  //instruction mode (composite flag)
-  };
+  uint16_t data = 0;
+
+  BitField<16, 1> z   {&data};  //zero flag
+  BitField<16, 2> cy  {&data};  //carry flag
+  BitField<16, 3> s   {&data};  //sign flag
+  BitField<16, 4> ov  {&data};  //overflow flag
+  BitField<16, 5> g   {&data};  //go flag
+  BitField<16, 6> r   {&data};  //ROM r14 flag
+  BitField<16, 8> alt1{&data};  //alt1 instruction mode
+  BitField<16, 9> alt2{&data};  //alt2 instruction mode
+  BitField<16,10> il  {&data};  //immediate lower 8-bit flag
+  BitField<16,11> ih  {&data};  //immediate upper 8-bit flag
+  BitField<16,12> b   {&data};  //with flag
+  BitField<16,15> irq {&data};  //interrupt flag
+
+  BitRange<16,8,9> alt{&data};  //composite instruction mode
 
   inline operator uint() const { return data & 0x9f7e; }
   inline auto& operator=(const uint value) { return data = value, *this; }

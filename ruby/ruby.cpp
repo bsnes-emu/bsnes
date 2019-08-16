@@ -11,6 +11,7 @@ using namespace ruby;
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
+  #include <X11/extensions/Xrandr.h>
 #elif defined(DISPLAY_QUARTZ)
   #include <nall/macos/guard.hpp>
   #include <Cocoa/Cocoa.h>

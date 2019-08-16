@@ -103,13 +103,13 @@ namespace Math {
 #endif
 
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
-  #define neverinline   __attribute__((noinline))
+  #define noinline   __attribute__((noinline))
   #define alwaysinline  inline __attribute__((always_inline))
 #elif defined(COMPILER_MICROSOFT)
-  #define neverinline   __declspec(noinline)
+  #define noinline   __declspec(noinline)
   #define alwaysinline  inline __forceinline
 #else
-  #define neverinline
+  #define noinline
   #define alwaysinline  inline
 #endif
 

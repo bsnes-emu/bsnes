@@ -24,8 +24,11 @@ auto pMonitor::primary() -> uint {
 }
 
 auto pMonitor::workspace(uint monitor) -> Geometry {
-  //TODO: per-monitor?
-  return pDesktop::workspace();
+  if(Monitor::count() == 1) {
+    return Desktop::workspace();
+  } else {
+    return Monitor::geometry(monitor);
+  }
 }
 
 }

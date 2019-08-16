@@ -2,66 +2,254 @@
 
 namespace nall {
 
-//warning: so that BitRange can modify the underlying number directly, it must bind a reference.
-//as a result, auto value = number.bits() will capture by-reference, rather than by-value.
+template<int...> struct BitRange;
 
-template<int Precision> struct BitRange {
+/* static BitRange */
+
+template<int Precision, int Lo, int Hi> struct BitRange<Precision, Lo, Hi> {
   static_assert(Precision >= 1 && Precision <= 64);
-  static inline constexpr auto bits() -> uint { return Precision; }
-  using utype =
-    conditional_t<bits() <=  8,  uint8_t,
-    conditional_t<bits() <= 16, uint16_t,
-    conditional_t<bits() <= 32, uint32_t,
-    conditional_t<bits() <= 64, uint64_t,
+  enum : uint { bits = Precision };
+  using type =
+    conditional_t<bits <=  8,  uint8_t,
+    conditional_t<bits <= 16, uint16_t,
+    conditional_t<bits <= 32, uint32_t,
+    conditional_t<bits <= 64, uint64_t,
     void>>>>;
-  static inline constexpr auto mask() -> utype { return ~0ull >> 64 - bits(); }
+  enum : uint { lo = Lo < 0 ? Precision + Lo : Lo };
+  enum : uint { hi = Hi < 0 ? Precision + Hi : Hi };
+  enum : type { mask = ~0ull >> 64 - (hi - lo + 1) << lo };
+  enum : uint { shift = lo };
 
-  inline BitRange(utype& source, int lo, int hi) : source(source) {
-    if(lo < 0) lo = Precision + lo;
-    if(hi < 0) hi = Precision + hi;
-    if(lo > hi) swap(lo, hi);
-    this->lo = lo;
-    this->hi = hi;
-  }
-  inline auto& operator=(BitRange& source) { return set(source.get()); }
+  BitRange(const BitRange& source) = delete;
 
-  inline operator utype() const { return get(); }
-
-  inline auto operator++(int) { auto value = get(); set(value + 1); return value; }
-  inline auto operator--(int) { auto value = get(); set(value - 1); return value; }
-
-  inline auto& operator++() { return set(get() + 1); }
-  inline auto& operator--() { return set(get() - 1); }
-
-  template<typename T> inline auto& operator  =(const T& value) { return set(         value); }
-  template<typename T> inline auto& operator *=(const T& value) { return set(get()  * value); }
-  template<typename T> inline auto& operator /=(const T& value) { return set(get()  / value); }
-  template<typename T> inline auto& operator %=(const T& value) { return set(get()  % value); }
-  template<typename T> inline auto& operator +=(const T& value) { return set(get()  + value); }
-  template<typename T> inline auto& operator -=(const T& value) { return set(get()  - value); }
-  template<typename T> inline auto& operator<<=(const T& value) { return set(get() << value); }
-  template<typename T> inline auto& operator>>=(const T& value) { return set(get() >> value); }
-  template<typename T> inline auto& operator &=(const T& value) { return set(get()  & value); }
-  template<typename T> inline auto& operator ^=(const T& value) { return set(get()  ^ value); }
-  template<typename T> inline auto& operator |=(const T& value) { return set(get()  | value); }
-
-private:
-  inline auto get() const -> utype {
-    const utype rangeBits = hi - lo + 1;
-    const utype rangeMask = (1ull << rangeBits) - 1 << lo & mask();
-    return (source & rangeMask) >> lo;
-  }
-
-  inline auto& set(const utype& value) {
-    const utype rangeBits = hi - lo + 1;
-    const utype rangeMask = (1ull << rangeBits) - 1 << lo & mask();
-    source = source & ~rangeMask | value << lo & rangeMask;
+  inline auto& operator=(const BitRange& source) {
+    target = target & ~mask | ((source.target & source.mask) >> source.shift) << shift & mask;
     return *this;
   }
 
-  utype& source;
-  uint lo;
-  uint hi;
+  template<typename T> inline BitRange(T* source) : target((type&)*source) {
+    static_assert(sizeof(T) == sizeof(type));
+  }
+
+  inline operator type() const {
+    return (target & mask) >> shift;
+  }
+
+  inline auto operator++(int) {
+    auto value = (target & mask) >> shift;
+    target = target & ~mask | target + (1 << shift) & mask;
+    return value;
+  }
+
+  inline auto operator--(int) {
+    auto value = (target & mask) >> shift;
+    target = target & ~mask | target - (1 << shift) & mask;
+    return value;
+  }
+
+  inline auto& operator++() {
+    target = target & ~mask | target + (1 << shift) & mask;
+    return *this;
+  }
+
+  inline auto& operator--() {
+    target = target & ~mask | target - (1 << shift) & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator=(const T& source) {
+    target = target & ~mask | source << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator*=(const T& source) {
+    auto value = ((target & mask) >> shift) * source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator/=(const T& source) {
+    auto value = ((target & mask) >> shift) / source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator%=(const T& source) {
+    auto value = ((target & mask) >> shift) % source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator+=(const T& source) {
+    auto value = ((target & mask) >> shift) + source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator-=(const T& source) {
+    auto value = ((target & mask) >> shift) - source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator<<=(const T& source) {
+    auto value = ((target & mask) >> shift) << source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator>>=(const T& source) {
+    auto value = ((target & mask) >> shift) >> source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator&=(const T& source) {
+    target = target & (~mask | source << shift & mask);
+    return *this;
+  }
+
+  template<typename T> inline auto& operator^=(const T& source) {
+    target = target ^ source << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator|=(const T& source) {
+    target = target | source << shift & mask;
+    return *this;
+  }
+
+private:
+  type& target;
+};
+
+/* dynamic BitRange */
+
+template<int Precision> struct BitRange<Precision> {
+  static_assert(Precision >= 1 && Precision <= 64);
+  enum : uint { bits = Precision };
+  using type =
+    conditional_t<bits <=  8,  uint8_t,
+    conditional_t<bits <= 16, uint16_t,
+    conditional_t<bits <= 32, uint32_t,
+    conditional_t<bits <= 64, uint64_t,
+    void>>>>;
+
+  BitRange(const BitRange& source) = delete;
+
+  inline auto& operator=(const BitRange& source) {
+    target = target & ~mask | ((source.target & source.mask) >> source.shift) << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline BitRange(T* source, int index) : target((type&)*source) {
+    static_assert(sizeof(T) == sizeof(type));
+    if(index < 0) index = Precision + index;
+    mask = 1ull << index;
+    shift = index;
+  }
+
+  template<typename T> inline BitRange(T* source, int lo, int hi) : target((type&)*source) {
+    static_assert(sizeof(T) == sizeof(type));
+    if(lo < 0) lo = Precision + lo;
+    if(hi < 0) hi = Precision + hi;
+    if(lo > hi) swap(lo, hi);
+    mask = ~0ull >> 64 - (hi - lo + 1) << lo;
+    shift = lo;
+  }
+
+  inline operator type() const {
+    return (target & mask) >> shift;
+  }
+
+  inline auto operator++(int) {
+    auto value = (target & mask) >> shift;
+    target = target & ~mask | target + (1 << shift) & mask;
+    return value;
+  }
+
+  inline auto operator--(int) {
+    auto value = (target & mask) >> shift;
+    target = target & ~mask | target - (1 << shift) & mask;
+    return value;
+  }
+
+  inline auto& operator++() {
+    target = target & ~mask | target + (1 << shift) & mask;
+    return *this;
+  }
+
+  inline auto& operator--() {
+    target = target & ~mask | target - (1 << shift) & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator=(const T& source) {
+    target = target & ~mask | source << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator*=(const T& source) {
+    auto value = ((target & mask) >> shift) * source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator/=(const T& source) {
+    auto value = ((target & mask) >> shift) / source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator%=(const T& source) {
+    auto value = ((target & mask) >> shift) % source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator+=(const T& source) {
+    auto value = ((target & mask) >> shift) + source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator-=(const T& source) {
+    auto value = ((target & mask) >> shift) - source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator<<=(const T& source) {
+    auto value = ((target & mask) >> shift) << source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator>>=(const T& source) {
+    auto value = ((target & mask) >> shift) >> source;
+    target = target & ~mask | value << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator&=(const T& source) {
+    target = target & (~mask | source << shift & mask);
+    return *this;
+  }
+
+  template<typename T> inline auto& operator^=(const T& source) {
+    target = target ^ source << shift & mask;
+    return *this;
+  }
+
+  template<typename T> inline auto& operator|=(const T& source) {
+    target = target | source << shift & mask;
+    return *this;
+  }
+
+private:
+  type& target;
+  type mask;
+  uint shift;
 };
 
 }

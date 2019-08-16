@@ -188,10 +188,10 @@ auto mWindow::resizable() const -> bool {
 }
 
 auto mWindow::setAlignment(Alignment alignment) -> type& {
-  auto workspace = Desktop::workspace();
+  auto workspace = Monitor::workspace();
   auto geometry = frameGeometry();
-  auto x = alignment.horizontal() * (workspace.width() - geometry.width());
-  auto y = alignment.vertical() * (workspace.height() - geometry.height());
+  auto x = workspace.x() + alignment.horizontal() * (workspace.width() - geometry.width());
+  auto y = workspace.y() + alignment.vertical() * (workspace.height() - geometry.height());
   setFramePosition({(int)x, (int)y});
   return *this;
 }
@@ -206,10 +206,10 @@ auto mWindow::setAlignment(sWindow relativeTo, Alignment alignment) -> type& {
   //-1 .. -0 => beyond parent window
   //... I know, relying on -0 IEE754 here is ... less than ideal
   if(signbit(alignment.horizontal())) {
-    x = (parent.x() - window.width()) + (parent.width() + window.width()) * abs(alignment.horizontal());
+    x = (parent.x() - window.width()) + abs(alignment.horizontal()) * (parent.width() + window.width());
   }
   if(signbit(alignment.vertical())) {
-    y = (parent.y() - window.height()) + (parent.height() + window.height()) * abs(alignment.vertical());
+    y = (parent.y() - window.height()) + abs(alignment.vertical()) * (parent.height() + window.height());
   }
   setFramePosition({(int)x, (int)y});
   return *this;

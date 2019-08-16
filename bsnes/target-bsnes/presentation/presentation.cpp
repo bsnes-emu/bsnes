@@ -111,7 +111,7 @@ auto Presentation::create() -> void {
   driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(7); });
 
   toolsMenu.setText(tr("Tools")).setVisible(false);
-  saveState.setIcon(Icon::Action::Save).setText("Save State");
+  saveState.setIcon(Icon::Media::Record).setText("Save State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&saveState};
     item.setProperty("name", {"Quick/Slot ", 1 + index});
@@ -119,7 +119,7 @@ auto Presentation::create() -> void {
     item.setText({"Slot ", 1 + index});
     item.onActivate([=] { program.saveState({"Quick/Slot ", 1 + index}); });
   }
-  loadState.setIcon(Icon::Media::Play).setText("Load State");
+  loadState.setIcon(Icon::Media::Rewind).setText("Load State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&loadState};
     item.setProperty("name", {"Quick/Slot ", 1 + index});
@@ -153,18 +153,21 @@ auto Presentation::create() -> void {
   speedNormal.setText("100% (Normal)").setProperty("multiplier", "1.0").onActivate([&] { program.updateAudioFrequency(); });
   speedFast.setText("150% (Fast)").setProperty("multiplier", "0.667").onActivate([&] { program.updateAudioFrequency(); });
   speedFastest.setText("200% (Fastest)").setProperty("multiplier", "0.5").onActivate([&] { program.updateAudioFrequency(); });
-  pauseEmulation.setText("Pause Emulation").onToggle([&] {
-    if(pauseEmulation.checked()) audio.clear();
+  runMenu.setIcon(Icon::Media::Play).setText("Run Mode");
+  runEmulation.setText("Normal").onActivate([&] {
+  });
+  pauseEmulation.setText("Pause Emulation").onActivate([&] {
+    audio.clear();
+  });
+  frameAdvance.setText("Frame Advance").onActivate([&] {
+    audio.clear();
+    program.frameAdvanceLock = true;
   });
   movieMenu.setIcon(Icon::Emblem::Video).setText("Movie");
   moviePlay.setIcon(Icon::Media::Play).setText("Play").onActivate([&] { program.moviePlay(); });
   movieRecord.setIcon(Icon::Media::Record).setText("Record").onActivate([&] { program.movieRecord(false); });
-  movieRecordFromBeginning.setIcon(Icon::Media::Record).setText("Reset & Record").onActivate([&] { program.movieRecord(true); });
+  movieRecordFromBeginning.setIcon(Icon::Media::Record).setText("Reset and Record").onActivate([&] { program.movieRecord(true); });
   movieStop.setIcon(Icon::Media::Stop).setText("Stop").onActivate([&] { program.movieStop(); });
-  frameAdvance.setIcon(Icon::Media::Next).setText("Frame Advance").onActivate([&] {
-    pauseEmulation.setChecked(false);
-    program.frameAdvance = true;
-  });
   captureScreenshot.setIcon(Icon::Emblem::Image).setText("Capture Screenshot").onActivate([&] {
     program.captureScreenshot();
   });
@@ -307,17 +310,6 @@ auto Presentation::resizeWindow() -> void {
 
   setMinimumSize({width, height + statusHeight});
   setSize({width * multiplier, height * multiplier + statusHeight});
-}
-
-auto Presentation::toggleFullscreenMode() -> void {
-  if(!video.exclusive()) {
-    video.setExclusive(true);
-    if(!input.acquired()) input.acquire();
-  } else {
-    if(input.acquired()) input.release();
-    video.setExclusive(false);
-    viewport.setFocused();
-  }
 }
 
 auto Presentation::updateDeviceMenu() -> void {

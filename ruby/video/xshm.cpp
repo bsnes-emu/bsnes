@@ -14,19 +14,20 @@ struct VideoXShm : VideoDriver {
   ~VideoXShm() { destruct(); }
 
   auto create() -> bool override {
+    VideoDriver::exclusive = true;
     return initialize();
   }
 
   auto driver() -> string override { return "XShm"; }
   auto ready() -> bool override { return _ready; }
 
-  auto hasExclusive() -> bool override { return true; }
+  auto hasFullScreen() -> bool override { return true; }
+  auto hasMonitor() -> bool override { return true; }
   auto hasContext() -> bool override { return true; }
   auto hasShader() -> bool override { return true; }
 
-  auto hasFormats() -> vector<string> override { return {"RGB24"}; }
-
-  auto setExclusive(bool exclusive) -> bool override { return initialize(); }
+  auto setFullScreen(bool fullScreen) -> bool override { return initialize(); }
+  auto setMonitor(string monitor) -> bool override { return initialize(); }
   auto setContext(uintptr context) -> bool override { return initialize(); }
   auto setShader(string shader) -> bool override { return true; }
 
@@ -38,21 +39,15 @@ struct VideoXShm : VideoDriver {
   }
 
   auto size(uint& width, uint& height) -> void override {
-    XWindowAttributes window;
-    XGetWindowAttributes(_display, _window, &window);
-
-    XWindowAttributes parent;
-    XGetWindowAttributes(_display, _parent, &parent);
-
-    if(window.width != parent.width || window.height != parent.height) {
-      _outputWidth = parent.width;
-      _outputHeight = parent.height;
-      XResizeWindow(_display, _window, _outputWidth, _outputHeight);
-      allocate();
+    if(self.fullScreen) {
+      width = _monitorWidth;
+      height = _monitorHeight;
+    } else {
+      XWindowAttributes parent;
+      XGetWindowAttributes(_display, _parent, &parent);
+      width = parent.width;
+      height = parent.height;
     }
-
-    width = parent.width;
-    height = parent.height;
   }
 
   auto acquire(uint32_t*& data, uint& pitch, uint width, uint height) -> bool override {
@@ -72,21 +67,44 @@ struct VideoXShm : VideoDriver {
   }
 
   auto output(uint width = 0, uint height = 0) -> void override {
-    uint windowWidth, windowHeight;
-    size(windowWidth, windowHeight);
+    XWindowAttributes window;
+    XGetWindowAttributes(_display, _window, &window);
+
+    XWindowAttributes parent;
+    XGetWindowAttributes(_display, _parent, &parent);
+
+    if(window.width != parent.width || window.height != parent.height) {
+      _outputWidth = parent.width;
+      _outputHeight = parent.height;
+      XResizeWindow(_display, _window, _outputWidth, _outputHeight);
+      allocate();
+    }
+
+    uint viewportX = 0;
+    uint viewportY = 0;
+    uint viewportWidth = parent.width;
+    uint viewportHeight = parent.height;
+
+    if(self.fullScreen) {
+      viewportX = _monitorX;
+      viewportY = _monitorY;
+      viewportWidth = _monitorWidth;
+      viewportHeight = _monitorHeight;
+    }
+
     if(!_image || !_inputBuffer || !_outputBuffer) return;
 
-    if(!width) width = _outputWidth;
-    if(!height) height = _outputHeight;
+    if(!width) width = viewportWidth;
+    if(!height) height = viewportHeight;
 
     float xratio = (float)_inputWidth / (float)width;
     float yratio = (float)_inputHeight / (float)height;
 
-    int x = ((int)_outputWidth - (int)width) / 2;
-    int y = ((int)_outputHeight - (int)height) / 2;
+    int x = ((int)viewportWidth - (int)width) / 2;
+    int y = ((int)viewportHeight - (int)height) / 2;
 
-    width = min(width, _outputWidth);
-    height = min(height, _outputHeight);
+    width = min(width, viewportWidth);
+    height = min(height, viewportHeight);
 
     auto inputBuffer = _inputBuffer;
     auto outputBuffer = _outputBuffer;
@@ -100,6 +118,9 @@ struct VideoXShm : VideoDriver {
       inputBuffer += abs(y) * _inputWidth;
       y = 0;
     }
+
+    x += viewportX;
+    y += viewportY;
 
     #pragma omp parallel for
     for(uint y = 0; y < height; y++) {
@@ -148,38 +169,41 @@ private:
   }
 
   auto destruct() -> void {
+    terminate();
     XCloseDisplay(_display);
   }
 
   auto initialize() -> bool {
     terminate();
-    if(!self.exclusive && !self.context) return false;
+    if(!self.fullScreen && !self.context) return false;
 
-    _parent = self.exclusive ? RootWindow(_display, _screen) : (Window)self.context;
-
+    _parent = self.fullScreen ? RootWindow(_display, _screen) : (Window)self.context;
     XWindowAttributes windowAttributes{};
     XGetWindowAttributes(_display, _parent, &windowAttributes);
-    _outputWidth = windowAttributes.width;
-    _outputHeight = windowAttributes.height;
-    _depth = windowAttributes.depth;
-    _visual = windowAttributes.visual;
     //driver only supports 32-bit pixels
     //note that even on 15-bit and 16-bit displays, the window visual's depth should be 32
-    if(_depth < 24 || _depth > 32) {
-      free();
-      return false;
-    }
+    if(windowAttributes.depth < 24 || windowAttributes.depth > 32) return free(), false;
 
+    auto monitor = Video::monitor(self.monitor);
+    _monitorX = monitor.x;
+    _monitorY = monitor.y;
+    _monitorWidth = monitor.width;
+    _monitorHeight = monitor.height;
+
+    _depth = windowAttributes.depth;
+    _visual = windowAttributes.visual;
     _colormap = XCreateColormap(_display, _parent, _visual, AllocNone);
     XSetWindowAttributes attributes{};
     attributes.border_pixel = 0;
     attributes.colormap = _colormap;
-    attributes.override_redirect = self.exclusive;
+    attributes.override_redirect = self.fullScreen;
+
     _window = XCreateWindow(_display, _parent,
-      0, 0, _outputWidth, _outputHeight,
+      0, 0, windowAttributes.width, windowAttributes.height,
       0, _depth, InputOutput, _visual,
       CWBorderPixel | CWColormap | CWOverrideRedirect, &attributes
     );
+
     XSelectInput(_display, _window, ExposureMask);
     XSetWindowBackground(_display, _window, 0);
     XMapWindow(_display, _window);
@@ -190,12 +214,21 @@ private:
       XNextEvent(_display, &event);
     }
 
+    _outputWidth = windowAttributes.width;
+    _outputHeight = windowAttributes.height;
     allocate();
-    return _ready = true;
+    return _ready = (bool)_outputBuffer;
   }
 
   auto terminate() -> void {
+    _ready = false;
+
     free();
+
+    if(_window) {
+      XUnmapWindow(_display, _window);
+      _window = 0;
+    }
 
     if(_colormap) {
       XFreeColormap(_display, _colormap);
@@ -217,13 +250,15 @@ private:
   }
 
   auto free() -> void {
-    if(_outputBuffer) {
-      _outputBuffer = nullptr;
+    if(_image) {
       XShmDetach(_display, &_shmInfo);
       XDestroyImage(_image);
       shmdt(_shmInfo.shmaddr);
       shmctl(_shmInfo.shmid, IPC_RMID, 0);
+      _image = nullptr;
     }
+
+    _outputBuffer = nullptr;
   }
 
   alwaysinline auto interpolate(float mu, uint32_t a, uint32_t b) -> uint32_t {
@@ -248,6 +283,10 @@ private:
   uint _inputHeight = 0;
 
   Display* _display = nullptr;
+  uint _monitorX = 0;
+  uint _monitorY = 0;
+  uint _monitorWidth = 0;
+  uint _monitorHeight = 0;
   int _screen = 0;
   int _depth = 0;
   Visual* _visual = nullptr;

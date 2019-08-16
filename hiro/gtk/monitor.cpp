@@ -48,8 +48,12 @@ auto pMonitor::primary() -> uint {
 
 auto pMonitor::workspace(uint monitor) -> Geometry {
   #if HIRO_GTK==2 || 1
-  //todo: can this be done on a per-monitor basis with raw Xlib / Win32 APIs?
-  return pDesktop::workspace();
+  if(Monitor::count() == 1) {
+    return Desktop::workspace();
+  } else {
+    //it is currently unknown how to get per-monitor workspace areas, use geometry instead
+    return Monitor::geometry(monitor);
+  }
   #elif HIRO_GTK==3
   auto gdkMonitor = gdk_display_get_monitor(gdk_display_get_default(), monitor);
   GdkRectangle rectangle = {};

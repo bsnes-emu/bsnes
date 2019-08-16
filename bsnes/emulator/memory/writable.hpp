@@ -24,14 +24,14 @@ struct Writable {
     memory::fill<T>(self.data, self.mask + 1, fill);
   }
 
-  inline auto load(vfs::shared::file fp) -> void {
+  inline auto load(shared_pointer<vfs::file> fp) -> void {
     fp->read(self.data, min(fp->size(), self.size * sizeof(T)));
     for(uint address = self.size; address <= self.mask; address++) {
       self.data[address] = self.data[mirror(address, self.size)];
     }
   }
 
-  inline auto save(vfs::shared::file fp) -> void {
+  inline auto save(shared_pointer<vfs::file> fp) -> void {
     fp->write(self.data, self.size * sizeof(T));
   }
 
