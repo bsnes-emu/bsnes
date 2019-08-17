@@ -87,6 +87,11 @@ auto pTextEdit::setFont(const Font& font) -> void {
 auto pTextEdit::setForegroundColor(Color color) -> void {
 }
 
+auto pTextEdit::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  [cocoaView configure];
+}
+
 auto pTextEdit::setText(const string& text) -> void {
   @autoreleasepool {
     [[cocoaView content] setString:[NSString stringWithUTF8String:text]];

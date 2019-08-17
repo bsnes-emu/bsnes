@@ -27,7 +27,7 @@ auto pRadioLabel::construct() -> void {
     cocoaView = cocoaRadioLabel = [[CocoaRadioLabel alloc] initWith:self()];
     pWidget::construct();
 
-    if(state().checked) setChecked();
+    setGroup(state().group);
     setText(state().text);
   }
 }
@@ -41,24 +41,11 @@ auto pRadioLabel::destruct() -> void {
 
 auto pRadioLabel::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
-  return {size.width() + 22, size.height()};
+  return {size.width() + 22, size.height() + 2};
 }
 
 auto pRadioLabel::setChecked() -> void {
-  @autoreleasepool {
-    if(auto group = state().group) {
-      for(auto& weak : group->state.objects) {
-        if(auto object = weak.acquire()) {
-          if(auto self = object->self()) {
-            if(auto p = dynamic_cast<pRadioLabel*>(self)) {
-              auto state = this == p ? NSOnState : NSOffState;
-              [p->cocoaView setState:state];
-            }
-          }
-        }
-      }
-    }
-  }
+  setGroup(state().group);
 }
 
 auto pRadioLabel::setGeometry(Geometry geometry) -> void {
@@ -66,9 +53,26 @@ auto pRadioLabel::setGeometry(Geometry geometry) -> void {
     geometry.x() - 1, geometry.y(),
     geometry.width() + 2, geometry.height()
   });
+  //buttonType:NSRadioButton does not set initial icon via programmatically calling setState:NSOnState.
+  //I can only get the icon to show as checked initially by setting the state on geometry resizes.
+  //adjusting the initWithFrame:NSMakeRect did not help.
+  if(state().checked) setChecked();
 }
 
 auto pRadioLabel::setGroup(sGroup group) -> void {
+  @autoreleasepool {
+    if(!group) return;
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto self = object->self()) {
+          if(auto p = dynamic_cast<pRadioLabel*>(self)) {
+            auto state = p->state().checked ? NSOnState : NSOffState;
+            [p->cocoaView setState:state];
+          }
+        }
+      }
+    }
+  }
 }
 
 auto pRadioLabel::setText(const string& text) -> void {

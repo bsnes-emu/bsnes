@@ -16,6 +16,9 @@ using namespace ruby;
   #include <nall/macos/guard.hpp>
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
+  #include <CoreFoundation/CoreFoundation.h>
+  #include <IOKit/IOKitLib.h>
+  #include <IOKit/graphics/IOGraphicsLib.h>
   #include <nall/macos/guard.hpp>
 #elif defined(DISPLAY_WINDOWS)
   #define far

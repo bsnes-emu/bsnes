@@ -276,9 +276,13 @@ static auto CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT l
   mi.cbSize = sizeof(MONITORINFOEX);
   GetMonitorInfo(hMonitor, &mi);
   Video::Monitor monitor;
-  monitor.name = {"Monitor ", 1 + index};
-  string displayName = (const char*)utf8_t(mi.szDevice);
-  if(displayName.beginsWith(R"(\\.\DISPLAYV)")) return true;  //ignore pseudo-monitors
+  string deviceName = (const char*)utf8_t(mi.szDevice);
+  if(deviceName.beginsWith(R"(\\.\DISPLAYV)")) return true;  //ignore pseudo-monitors
+  DISPLAY_DEVICE dd{};
+  dd.cb = sizeof(DISPLAY_DEVICE);
+  EnumDisplayDevices(mi.szDevice, 0, &dd, 0);
+  string displayName = (const char*)utf8_t(dd.DeviceString);
+  monitor.name = {1 + monitors.size(), ": ", displayName};
   monitor.primary = mi.dwFlags & MONITORINFOF_PRIMARY;
   monitor.x = lprcMonitor->left;
   monitor.y = lprcMonitor->top;
@@ -299,19 +303,44 @@ auto Video::hasMonitors() -> vector<Monitor> {
 #endif
 
 #if defined(DISPLAY_QUARTZ)
+static auto MonitorKeyArrayCallback(const void* key, const void* value, void* context) -> void {
+  CFArrayAppendValue((CFMutableArrayRef)context, key);
+}
+
 auto Video::hasMonitors() -> vector<Monitor> {
   vector<Monitor> monitors;
   @autoreleasepool {
     uint count = [[NSScreen screens] count];
     for(uint index : range(count)) {
-      NSRect rectangle = [[[NSScreen screens] objectAtindex:index] frame];
+      auto screen = [[NSScreen screens] objectAtIndex:index];
+      auto rectangle = [screen frame];
       Monitor monitor;
-      monitor.name = {"Monitor ", 1 + index};  //todo: retrieve vendor name here?
-      monitor.primary = monitors.size() == 0;  //on macOS, the primary monitor is always the first monitor.
+      monitor.name = {1 + monitors.size(), ": Monitor"};  //fallback in case name lookup fails
+      monitor.primary = monitors.size() == 0;   //on macOS, the primary monitor is always the first monitor.
       monitor.x = rectangle.origin.x;
       monitor.y = rectangle.origin.y;
       monitor.width = rectangle.size.width;
       monitor.height = rectangle.size.height;
+      //getting the name of the monitor on macOS: "Think Different"
+      auto screenDictionary = [screen deviceDescription];
+      auto screenID = [screenDictionary objectForKey:@"NSScreenNumber"];
+      auto displayID = [screenID unsignedIntValue];
+      auto displayPort = CGDisplayIOServicePort(displayID);
+      auto dictionary = IODisplayCreateInfoDictionary(displayPort, 0);
+      if(auto names = CFDictionaryGetValue(dictionary, CFSTR(kDisplayProductName))) {
+        auto languageKeys = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+        CFDictionaryApplyFunction(names, MonitorKeyArrayCallback, (void*)languageKeys);
+        auto orderLanguageKeys = CFBundleCopyPreferredLocalizationsFromArray(languageKeys);
+        CFRelease(languageKeys);
+        if(orderLanguageKeys && CFArrayGetCount(orderLanguageKeys)) {
+          auto languageKey = CFArrayGetValueAtIndex(orderLanguageKeys, 0);
+          auto localName = CFDictionaryGetValue(names, languageKey);
+          monitor.name = {1 + monitors.size(), ": ", [(__bridge NSString*)localName UTF8String]};
+          CFRelease(localName);
+        }
+        CFRelease(orderLanguageKeys);
+      }
+      CFRelease(dictionary);
       monitors.append(monitor);
     }
   }
@@ -336,13 +365,36 @@ auto Video::hasMonitors() -> vector<Monitor> {
       continue;
     }
     auto crtc = XRRGetCrtcInfo(display, resources, output->crtc);
-    monitor.name = output->name;
+    monitor.name = {1 + monitors.size(), ": ", output->name};  //fallback name
     monitor.primary = false;
     for(uint n : range(crtc->noutput)) monitor.primary |= crtc->outputs[n] == primary;
     monitor.x = crtc->x;
     monitor.y = crtc->y;
     monitor.width = crtc->width;
     monitor.height = crtc->height;
+    //Linux: "Think Low-Level"
+    Atom actualType;
+    int actualFormat;
+    unsigned long size;
+    unsigned long bytesAfter;
+    unsigned char* data = nullptr;
+    auto property = XRRGetOutputProperty(
+      display, resources->outputs[index],
+      XInternAtom(display, "EDID", 1), 0, 384,
+      0, 0, 0, &actualType, &actualFormat, &size, &bytesAfter, &data
+    );
+    if(size >= 128) {
+      string name{"             "};
+      //there are four lights! er ... descriptors. one of them is the monitor name.
+      if(data[0x39] == 0xfc) memory::copy(name.get(), &data[0x3b], 13);
+      if(data[0x4b] == 0xfc) memory::copy(name.get(), &data[0x4d], 13);
+      if(data[0x5d] == 0xfc) memory::copy(name.get(), &data[0x5f], 13);
+      if(data[0x6f] == 0xfc) memory::copy(name.get(), &data[0x71], 13);
+      if(name.strip()) {  //format: "name\n   " -> "name"
+        monitor.name = {1 + monitors.size(), ": ", name, " [", output->name, "]"};
+      }
+    }
+    XFree(data);
     monitors.append(monitor);
     XRRFreeCrtcInfo(crtc);
     XRRFreeOutputInfo(output);

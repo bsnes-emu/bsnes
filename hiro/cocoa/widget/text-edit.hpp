@@ -21,6 +21,7 @@ struct pTextEdit : pWidget {
   auto setEnabled(bool enabled) -> void override;
   auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
   auto setText(const string& text) -> void;
   auto setTextCursor(TextCursor textCursor) -> void;
   auto setWordWrap(bool wordWrap) -> void;

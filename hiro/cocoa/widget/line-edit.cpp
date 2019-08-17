@@ -21,6 +21,7 @@
 }
 
 -(IBAction) activate:(id)sender {
+  lineEdit->state.text = [[self stringValue] UTF8String];
   lineEdit->doActivate();
 }
 

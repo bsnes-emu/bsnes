@@ -100,6 +100,12 @@ auto mTableViewItem::setParent(mObject* parent, signed offset) -> type& {
 }
 
 auto mTableViewItem::setSelected(bool selected) -> type& {
+  //if in single-selection mode, selecting one item must deselect all other items in the TableView
+  if(auto parent = parentTableView()) {
+    if(!parent->state.batchable && selected) {
+      for(auto& item : parent->state.items) item->state.selected = false;
+    }
+  }
   state.selected = selected;
   signal(setSelected, selected);
   return *this;

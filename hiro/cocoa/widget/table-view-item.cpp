@@ -37,6 +37,17 @@ auto pTableViewItem::setForegroundColor(Color color) -> void {
 }
 
 auto pTableViewItem::setSelected(bool selected) -> void {
+  @autoreleasepool {
+    if(auto tableView = _parent()) {
+      auto lock = tableView->acquire();
+      auto indexSet = [[NSMutableIndexSet alloc] init];
+      for(auto& item : tableView->state().items) {
+        if(item->selected()) [indexSet addIndex:item->offset()];
+      }
+      [[tableView->cocoaView content] selectRowIndexes:indexSet byExtendingSelection:NO];
+      [indexSet release];
+    }
+  }
 }
 
 auto pTableViewItem::_parent() -> maybe<pTableView&> {

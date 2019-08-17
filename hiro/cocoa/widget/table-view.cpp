@@ -104,6 +104,7 @@
 }
 
 -(void) tableViewSelectionDidChange:(NSNotification*)notification {
+  if(tableView->self()->locked()) return;
   for(auto& tableViewItem : tableView->state.items) {
     tableViewItem->state.selected = tableViewItem->offset() == [content selectedRow];
   }

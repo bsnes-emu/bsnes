@@ -27,7 +27,7 @@ struct VideoDirectDraw : VideoDriver {
     return initialize();
   }
 
-  auto setMonitor(bool monitor) -> bool override {
+  auto setMonitor(string monitor) -> bool override {
     return initialize();
   }
 
