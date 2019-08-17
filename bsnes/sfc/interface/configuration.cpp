@@ -18,8 +18,8 @@ auto Configuration::process(Markup::Node document, bool load) -> void {
 
   bind(natural, "Hacks/CPU/Overclock", hacks.cpu.overclock);
   bind(boolean, "Hacks/PPU/Fast", hacks.ppu.fast);
-  bind(boolean, "Hacks/PPU/NoSpriteLimit", hacks.ppu.noSpriteLimit);
   bind(boolean, "Hacks/PPU/Deinterlace", hacks.ppu.deinterlace);
+  bind(boolean, "Hacks/PPU/NoSpriteLimit", hacks.ppu.noSpriteLimit);
   bind(natural, "Hacks/PPU/Mode7/Scale", hacks.ppu.mode7.scale);
   bind(boolean, "Hacks/PPU/Mode7/Perspective", hacks.ppu.mode7.perspective);
   bind(boolean, "Hacks/PPU/Mode7/Supersample", hacks.ppu.mode7.supersample);

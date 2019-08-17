@@ -74,8 +74,8 @@ auto Program::inactive() -> bool {
 }
 
 auto Program::focused() -> bool {
-  //exclusive mode creates its own top-level window: presentation window will not have focus
-  if(video.exclusive() || presentation.focused()) {
+  //full-screen mode creates its own top-level window: presentation window will not have focus
+  if(video.fullScreen() || presentation.focused()) {
     mute &= ~Mute::Unfocused;
     return true;
   } else {

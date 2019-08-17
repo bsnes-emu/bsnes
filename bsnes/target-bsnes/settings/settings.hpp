@@ -100,8 +100,8 @@ struct Settings : Markup::Node {
       } cpu;
       struct PPU {
         bool fast = true;
-        bool noSpriteLimit = true;
         bool deinterlace = true;
+        bool noSpriteLimit = false;
         struct Mode7 {
           uint scale = 1;
           bool perspective = true;
@@ -334,8 +334,8 @@ public:
   Label ppuLabel{this, Size{~0, 0}, 2};
   HorizontalLayout ppuLayout{this, Size{~0, 0}};
     CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
-    CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
     CheckLabel deinterlace{&ppuLayout, Size{0, 0}};
+    CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
   Label mode7Label{this, Size{~0, 0}, 2};
   HorizontalLayout mode7Layout{this, Size{~0, 0}};
     Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
@@ -392,14 +392,14 @@ public:
     CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
   Canvas videoSpacer{this, Size{~0, 1}};
   Label audioLabel{this, Size{~0, 0}, 2};
-  TableLayout audioLayout{this, Size{~0, 0}};
-    Label audioDriverLabel{&audioLayout, Size{0, 0}};
+  VerticalLayout audioLayout{this, Size{~0, 0}};
     HorizontalLayout audioDriverLayout{&audioLayout, Size{~0, 0}};
+      Label audioDriverLabel{&audioDriverLayout, Size{0, 0}};
       ComboButton audioDriverOption{&audioDriverLayout, Size{0, 0}};
       Button audioDriverUpdate{&audioDriverLayout, Size{0, 0}};
       Label audioDriverActive{&audioDriverLayout, Size{0, 0}};
-    Label audioDeviceLabel{&audioLayout, Size{0, 0}};
     HorizontalLayout audioPropertyLayout{&audioLayout, Size{~0, 0}};
+      Label audioDeviceLabel{&audioPropertyLayout, Size{0, 0}};
       ComboButton audioDeviceOption{&audioPropertyLayout, Size{0, 0}};
       Label audioFrequencyLabel{&audioPropertyLayout, Size{0, 0}};
       ComboButton audioFrequencyOption{&audioPropertyLayout, Size{0, 0}};
@@ -411,9 +411,9 @@ public:
     CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
   Canvas audioSpacer{this, Size{~0, 1}};
   Label inputLabel{this, Size{~0, 0}, 2};
-  TableLayout inputLayout{this, Size{~0, 0}};
-    Label inputDriverLabel{&inputLayout, Size{0, 0}};
+  VerticalLayout inputLayout{this, Size{~0, 0}};
     HorizontalLayout inputDriverLayout{&inputLayout, Size{~0, 0}};
+      Label inputDriverLabel{&inputDriverLayout, Size{0, 0}};
       ComboButton inputDriverOption{&inputDriverLayout, Size{0, 0}};
       Button inputDriverUpdate{&inputDriverLayout, Size{0, 0}};
       Label inputDriverActive{&inputDriverLayout, Size{0, 0}};

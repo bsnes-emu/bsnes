@@ -35,12 +35,12 @@ auto EmulatorSettings::create() -> void {
       mode7Layout.setEnabled(true);
     }
   }).doToggle();
-  noSpriteLimit.setText("No sprite limit").setChecked(settings.emulator.hack.ppu.noSpriteLimit).onToggle([&] {
-    settings.emulator.hack.ppu.noSpriteLimit = noSpriteLimit.checked();
-  });
   deinterlace.setText("Deinterlace").setChecked(settings.emulator.hack.ppu.deinterlace).onToggle([&] {
     settings.emulator.hack.ppu.deinterlace = deinterlace.checked();
     emulator->configure("Hacks/PPU/Deinterlace", settings.emulator.hack.ppu.deinterlace);
+  });
+  noSpriteLimit.setText("No sprite limit").setChecked(settings.emulator.hack.ppu.noSpriteLimit).onToggle([&] {
+    settings.emulator.hack.ppu.noSpriteLimit = noSpriteLimit.checked();
   });
   mode7Label.setText("HD Mode 7 (fast PPU only)").setFont(Font().setBold());
   mode7ScaleLabel.setText("Scale:");

@@ -8,13 +8,13 @@ auto DriverSettings::create() -> void {
     videoDriverUpdate.setText(videoDriverOption.selected().text() != video.driver() ? "Change" : "Reload");
   });
   videoDriverUpdate.setText("Change").onActivate([&] { videoDriverChange(); });
-  videoMonitorLabel.setText("Fullscreen Monitor:").setToolTip(
+  videoMonitorLabel.setText("Fullscreen monitor:").setToolTip(
     "Sets which monitor video is sent to in fullscreen mode."
   );
   videoMonitorOption.onChange([&] { videoMonitorChange(); });
   videoFormatLabel.setText("Format:");
   videoFormatOption.onChange([&] { videoFormatChange(); });
-  videoExclusiveToggle.setText("Exclusive").setToolTip(
+  videoExclusiveToggle.setText("Exclusive mode").setToolTip(
     "Causes fullscreen mode to take over all monitors.\n"
     "This allows adaptive sync to work better and reduces input latency.\n"
     "However, multi-monitor users should turn this option off.\n"
@@ -47,13 +47,12 @@ auto DriverSettings::create() -> void {
   videoSpacer.setColor({192, 192, 192});
 
   audioLabel.setText("Audio").setFont(Font().setBold());
-  audioLayout.setSize({2, 2});
   audioDriverLabel.setText("Driver:");
   audioDriverOption.onChange([&] {
     audioDriverUpdate.setText(audioDriverOption.selected().text() != audio.driver() ? "Change" : "Reload");
   });
   audioDriverUpdate.setText("Change").onActivate([&] { audioDriverChange(); });
-  audioDeviceLabel.setText("Device:");
+  audioDeviceLabel.setText("Output device:");
   audioDeviceOption.onChange([&] { audioDeviceChange(); });
   audioFrequencyLabel.setText("Frequency:");
   audioFrequencyOption.onChange([&] { audioFrequencyChange(); });
@@ -92,7 +91,6 @@ auto DriverSettings::create() -> void {
   audioSpacer.setColor({192, 192, 192});
 
   inputLabel.setText("Input").setFont(Font().setBold());
-  inputLayout.setSize({2, 1});
   inputDriverLabel.setText("Driver:");
   inputDriverOption.onChange([&] {
     inputDriverUpdate.setText(inputDriverOption.selected().text() != input.driver() ? "Change" : "Reload");
@@ -167,7 +165,7 @@ auto DriverSettings::videoFormatChanged() -> void {
     item.setText(format);
     if(format == video.format()) item.setSelected();
   }
-//videoFormatOption.setEnabled(video.hasFormat());
+  videoFormatOption.setEnabled(videoFormatOption.itemCount() > 1);
   setGeometry(geometry());
   videoFormatChange();
 }
