@@ -17,11 +17,11 @@
 }
 
 -(void) textDidChange:(NSNotification*)n {
+  lineEdit->state.text = [[self stringValue] UTF8String];
   lineEdit->doChange();
 }
 
 -(IBAction) activate:(id)sender {
-  lineEdit->state.text = [[self stringValue] UTF8String];
   lineEdit->doActivate();
 }
 

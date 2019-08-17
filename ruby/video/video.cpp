@@ -329,12 +329,12 @@ auto Video::hasMonitors() -> vector<Monitor> {
       auto dictionary = IODisplayCreateInfoDictionary(displayPort, 0);
       if(auto names = CFDictionaryGetValue(dictionary, CFSTR(kDisplayProductName))) {
         auto languageKeys = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-        CFDictionaryApplyFunction(names, MonitorKeyArrayCallback, (void*)languageKeys);
+        CFDictionaryApplyFunction((CFDictionaryRef)names, MonitorKeyArrayCallback, (void*)languageKeys);
         auto orderLanguageKeys = CFBundleCopyPreferredLocalizationsFromArray(languageKeys);
         CFRelease(languageKeys);
         if(orderLanguageKeys && CFArrayGetCount(orderLanguageKeys)) {
           auto languageKey = CFArrayGetValueAtIndex(orderLanguageKeys, 0);
-          auto localName = CFDictionaryGetValue(names, languageKey);
+          auto localName = CFDictionaryGetValue((CFDictionaryRef)names, languageKey);
           monitor.name = {1 + monitors.size(), ": ", [(__bridge NSString*)localName UTF8String]};
           CFRelease(localName);
         }
