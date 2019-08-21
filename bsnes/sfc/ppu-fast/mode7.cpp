@@ -1,8 +1,4 @@
 auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
-  //EXTBG is only really used by games to give the mode 7 layer two priority levels
-  //especially with HD mode 7, it's just wasteful to render BG1 just to be overwritten by BG2
-  if(io.extbg && source == Source::BG1) return;
-
   //HD mode 7 support
   if(!ppu.hdMosaic() || !self.mosaicEnable || !io.mosaicSize) {
     if(ppu.hdScale() > 1) return renderMode7HD(self, source);
@@ -19,6 +15,8 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   int vcenter = (int13)io.mode7.y;
   int hoffset = (int13)io.mode7.hoffset;
   int voffset = (int13)io.mode7.voffset;
+
+//if(source==Source::BG1&&y==1) print(a, " ", b, " ", c, " ", d, " ", hcenter, " ", vcenter, " ", hoffset, " ", voffset, "\n");
 
   uint mosaicCounter = 1;
   uint mosaicPalette = 0;
