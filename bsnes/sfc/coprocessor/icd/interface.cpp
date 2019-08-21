@@ -91,7 +91,7 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
     if(p14 == 0 && p15 == 1) {
       if((joypPacket[0] >> 3) == 0x11) {
         mltReq = joypPacket[1] & 3;
-        joypID = 3;  //required: the next time P14==1 && P15==1; increment and start from ID=0 (Joypad 1)
+        joypID = 0;
       }
 
       if(packetSize < 64) packet[packetSize++] = joypPacket;
