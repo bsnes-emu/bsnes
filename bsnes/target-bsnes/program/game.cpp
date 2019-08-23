@@ -130,6 +130,7 @@ auto Program::loadSuperFamicom(string location) -> bool {
     }
   }
   superFamicom.title = heuristics.title();
+  superFamicom.region = heuristics.videoRegion();
   superFamicom.manifest = manifest ? manifest : heuristics.manifest();
   hackPatchMemory(rom);
   superFamicom.document = BML::unserialize(superFamicom.manifest);

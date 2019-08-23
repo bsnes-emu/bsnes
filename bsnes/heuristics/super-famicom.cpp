@@ -6,6 +6,7 @@ struct SuperFamicom {
 
   auto manifest() const -> string;
   auto region() const -> string;
+  auto videoRegion() const -> string;
   auto revision() const -> string;
   auto board() const -> string;
   auto title() const -> string;
@@ -184,6 +185,11 @@ auto SuperFamicom::region() const -> string {
   }
 
   return region ? region : "NTSC";
+}
+
+auto SuperFamicom::videoRegion() const -> string {
+  auto region = data[headerAddress + 0x29];
+  return (region <= 0x01 || region >= 0x12) ? "NTSC" : "PAL";
 }
 
 auto SuperFamicom::revision() const -> string {

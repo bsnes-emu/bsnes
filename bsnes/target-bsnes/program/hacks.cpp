@@ -3,14 +3,26 @@ auto Program::hackCompatibility() -> void {
   bool fastPPUNoSpriteLimit = emulatorSettings.noSpriteLimit.checked();
   bool fastDSP = emulatorSettings.fastDSP.checked();
   bool coprocessorDelayedSync = emulatorSettings.coprocessorDelayedSyncOption.checked();
+  uint renderCycle = 512;
 
   auto title = superFamicom.title;
+  auto region = superFamicom.region;
+
+  //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
+
+  //relies on cycle-accurate writes to the echo buffer
   if(title == "KOUSHIEN_2") fastDSP = false;
+
+  //extremely timing sensitive
   if(title == "RENDERING RANGER R2") fastDSP = false;
+
+  //fixes an errant scanline on the title screen due to writing to PPU registers too late
+  if(title == "ADVENTURES OF FRANKEN" && region == "PAL") renderCycle = 32;
 
   emulator->configure("Hacks/PPU/Fast", fastPPU);
   emulator->configure("Hacks/PPU/NoSpriteLimit", fastPPUNoSpriteLimit);
+  emulator->configure("Hacks/PPU/RenderCycle", renderCycle);
   emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale);
   emulator->configure("Hacks/PPU/Mode7/Perspective", settings.emulator.hack.ppu.mode7.perspective);
   emulator->configure("Hacks/PPU/Mode7/Supersample", settings.emulator.hack.ppu.mode7.supersample);

@@ -19,6 +19,7 @@ struct PPU : PPUcounter {
   alwaysinline auto hdSupersample() const -> bool;
   alwaysinline auto hdMosaic() const -> bool;
   alwaysinline auto deinterlace() const -> bool;
+  alwaysinline auto renderCycle() const -> uint;
 
   //ppu.cpp
   PPU();

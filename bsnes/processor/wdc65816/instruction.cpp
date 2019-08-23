@@ -8,7 +8,7 @@ N push(PC.b);
   IF = 1;
   DF = 0;
   PC.l = read(r.vector + 0);
-  PC.h = read(r.vector + 1);
+L PC.h = read(r.vector + 1);
   PC.b = 0x00;
   idleJump();
 }

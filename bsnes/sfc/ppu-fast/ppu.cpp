@@ -29,6 +29,7 @@ auto PPU::hdPerspective() const -> bool { return configuration.hacks.ppu.mode7.p
 auto PPU::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.supersample; }
 auto PPU::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
 auto PPU::deinterlace() const -> bool { return configuration.hacks.ppu.deinterlace; }
+auto PPU::renderCycle() const -> uint { return configuration.hacks.ppu.renderCycle; }
 #define ppu ppufast
 
 PPU::PPU() {
@@ -88,7 +89,7 @@ auto PPU::main() -> void {
 
   if(system.frameCounter == 0) {
     uint y = vcounter();
-    step(512);
+    step(renderCycle());
     if(y >= 1 && y <= 239) {
       if(io.displayDisable || y >= vdisp()) {
         lines[y].io.displayDisable = true;

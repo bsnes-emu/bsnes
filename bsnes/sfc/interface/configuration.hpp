@@ -32,6 +32,7 @@ struct Configuration {
       bool fast = true;
       bool deinterlace = true;
       bool noSpriteLimit = false;
+      uint renderCycle = 512;
       struct Mode7 {
         uint scale = 1;
         bool perspective = true;

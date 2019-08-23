@@ -150,6 +150,7 @@ public:
 
   struct SuperFamicom : Game {
     string title;
+    string region;
     vector<uint8_t> program;
     vector<uint8_t> data;
     vector<uint8_t> expansion;
