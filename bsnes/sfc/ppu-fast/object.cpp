@@ -12,7 +12,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
   for(uint n : range(ppu.TileLimit)) tiles[n].valid = false;
 
   for(uint n : range(128)) {
-    ObjectItem item{true, uint8_t(self.first + n)};
+    ObjectItem item{true, uint8_t(self.first + n & 127)};
     const auto& object = ppu.objects[item.index];
 
     if(object.size == 0) {

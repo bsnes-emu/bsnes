@@ -253,8 +253,10 @@ private:
     _monitorWidth = monitor.width;
     _monitorHeight = monitor.height;
 
+    _exclusive = self.exclusive && self.fullScreen;
+
     //Direct3D exclusive mode targets the primary monitor only
-    if(self.exclusive) {
+    if(_exclusive) {
       POINT point{0, 0};  //the primary monitor always starts at (0,0)
       HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
       MONITORINFOEX info{};
@@ -292,10 +294,10 @@ private:
     _presentation.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
     _presentation.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     _presentation.hDeviceWindow = _context;
-    _presentation.Windowed = !self.exclusive;
-    _presentation.BackBufferFormat = self.exclusive ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
-    _presentation.BackBufferWidth = self.exclusive ? _monitorWidth : 0;
-    _presentation.BackBufferHeight = self.exclusive ? _monitorHeight : 0;
+    _presentation.Windowed = !_exclusive;
+    _presentation.BackBufferFormat = _exclusive ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
+    _presentation.BackBufferWidth = _exclusive ? _monitorWidth : 0;
+    _presentation.BackBufferHeight = _exclusive ? _monitorHeight : 0;
     _presentation.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 
     if(_instance->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, _context,
@@ -348,6 +350,7 @@ private:
   LPDIRECT3DTEXTURE9 _texture = nullptr;
   LPDIRECT3DSURFACE9 _surface = nullptr;
 
+  bool _exclusive = false;
   bool _lost = true;
   uint _windowWidth;
   uint _windowHeight;
