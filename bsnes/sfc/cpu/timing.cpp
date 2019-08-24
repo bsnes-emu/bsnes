@@ -1,12 +1,3 @@
-//the number of clock cycles that have elapsed since (H)DMA began
-auto CPU::dmaClocks() const -> uint {
-  if(counter.cpu >= counter.dma) {
-    return counter.cpu - counter.dma;
-  } else {
-    return 0 - counter.cpu + counter.dma;
-  }
-}
-
 //DMA clock divider
 auto CPU::dmaCounter() const -> uint {
   return counter.cpu & 7;
@@ -150,12 +141,11 @@ auto CPU::dmaEdge() -> void {
       status.hdmaPending = false;
       if(hdmaEnable()) {
         if(!dmaEnable()) {
-          counter.dma = counter.cpu;
-          step(8 - dmaCounter());
+          step(counter.dma = 8 - dmaCounter());
         }
         status.hdmaMode == 0 ? hdmaSetup() : hdmaRun();
         if(!dmaEnable()) {
-          step(status.clockCount - dmaClocks() % status.clockCount);
+          step(status.clockCount - counter.dma % status.clockCount);
           status.dmaActive = false;
         }
       }
@@ -164,10 +154,9 @@ auto CPU::dmaEdge() -> void {
     if(status.dmaPending) {
       status.dmaPending = false;
       if(dmaEnable()) {
-        counter.dma = counter.cpu;
-        step(8 - dmaCounter());
+        step(counter.dma = 8 - dmaCounter());
         dmaRun();
-        step(status.clockCount - dmaClocks() % status.clockCount);
+        step(status.clockCount - counter.dma % status.clockCount);
         status.dmaActive = false;
       }
     }
