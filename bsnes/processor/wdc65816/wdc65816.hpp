@@ -20,7 +20,7 @@ struct WDC65816 {
   virtual auto readDisassembler(uint addr) -> uint8 { return 0; }
 
   inline auto irq() const -> bool { return r.irq; }
-  virtual inline auto irq(bool line) -> void { r.irq = line; }
+  inline auto irq(bool line) -> void { r.irq = line; }
 
   using r8 = uint8;
 

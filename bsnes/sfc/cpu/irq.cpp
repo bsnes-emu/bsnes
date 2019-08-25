@@ -1,11 +1,3 @@
-//external interrupt line changed.
-auto CPU::irq(bool line) -> void {
-  WDC65816::irq(line);
-  if(line) {
-    status.irqTransition = 1;
-  }
-}
-
 //called once every four clock cycles;
 //as NMI steps by scanlines (divisible by 4) and IRQ by PPU 4-cycle dots.
 //
@@ -80,7 +72,7 @@ auto CPU::nmiTest() -> bool {
 }
 
 auto CPU::irqTest() -> bool {
-  if(!status.irqTransition) return 0;
+  if(!status.irqTransition && !r.irq) return 0;
   status.irqTransition = 0;
   r.wai = 0;
   return !r.p.i;

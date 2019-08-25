@@ -52,7 +52,6 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   alwaysinline auto dmaEdge() -> void;
 
   //irq.cpp
-  auto irq(bool line) -> void override;
   alwaysinline auto pollInterrupts() -> void;
   auto nmitimenUpdate(uint8 data) -> void;
   auto rdnmi() -> bool;
