@@ -14,8 +14,11 @@ auto Program::hackCompatibility() -> void {
   //relies on cycle-accurate writes to the echo buffer
   if(title == "KOUSHIEN_2") fastDSP = false;
 
-  //extremely timing sensitive
+  //will hang immediately
   if(title == "RENDERING RANGER R2") fastDSP = false;
+
+  //will hang sometimes in the "Bach in Time" stage
+  if(title == "BUBSY II" && region == "PAL") fastDSP = false;
 
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "ADVENTURES OF FRANKEN" && region == "PAL") renderCycle = 32;
