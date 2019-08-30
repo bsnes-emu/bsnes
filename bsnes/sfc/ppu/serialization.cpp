@@ -96,6 +96,7 @@ auto PPU::Background::serialize(serializer& s) -> void {
 
   s.integer(latch.hoffset);
   s.integer(latch.voffset);
+  s.integer(latch.screenAddress);
 
   s.integer(output.above.priority);
   s.integer(output.above.palette);

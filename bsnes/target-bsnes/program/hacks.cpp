@@ -11,6 +11,9 @@ auto Program::hackCompatibility() -> void {
   //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
 
+  //stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
+  if(title == "SFC クレヨンシンチャン") fastPPU = false;
+
   //relies on cycle-accurate writes to the echo buffer
   if(title == "KOUSHIEN_2") fastDSP = false;
 

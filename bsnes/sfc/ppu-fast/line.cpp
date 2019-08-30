@@ -107,7 +107,7 @@ auto PPU::Line::render(bool fieldID) -> void {
   }
 }
 
-auto PPU::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16_t {
+auto PPU::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16 {
   if(!windowAbove[x]) above.color = 0x0000;
   if(!windowBelow[x]) return above.color;
   if(!io.col.enable[above.source]) return above.color;
@@ -115,7 +115,7 @@ auto PPU::Line::pixel(uint x, Pixel above, Pixel below) const -> uint16_t {
   return blend(above.color, below.color, io.col.halve && windowAbove[x] && below.source != Source::COL);
 }
 
-auto PPU::Line::blend(uint x, uint y, bool halve) const -> uint16_t {
+auto PPU::Line::blend(uint x, uint y, bool halve) const -> uint16 {
   if(!io.col.mathMode) {  //add
     if(!halve) {
       uint sum = x + y;
@@ -135,7 +135,7 @@ auto PPU::Line::blend(uint x, uint y, bool halve) const -> uint16_t {
   }
 }
 
-auto PPU::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint16_t {
+auto PPU::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint16 {
   //paletteIndex = bgr
   //paletteColor = BBGGGRRR
   //output       = 0 BBb00 GGGg0 RRRr0

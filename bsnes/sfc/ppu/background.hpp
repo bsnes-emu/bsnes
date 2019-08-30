@@ -12,8 +12,8 @@ struct Background {
   auto power() -> void;
 
   auto getTile() -> void;
-  auto getTileColor() -> uint;
   auto getTile(uint x, uint y) -> uint16;
+  auto getTileColor() -> uint;
   alwaysinline auto clip(int n) -> int;
   auto beginMode7() -> void;
   auto runMode7() -> void;
@@ -47,6 +47,7 @@ struct Background {
   struct Latch {
     uint16 hoffset;
     uint16 voffset;
+    uint16 screenAddress;
   } latch;
 
   struct Pixel {

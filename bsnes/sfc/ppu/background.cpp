@@ -40,6 +40,7 @@ auto PPU::Background::begin() -> void {
     latch.hoffset = io.hoffset;
     latch.voffset = io.voffset;
   }
+  latch.screenAddress = io.screenAddress;
 
   mosaic.hcounter = mosaic.size + 1;
   mosaic.hoffset = 0;
@@ -114,7 +115,7 @@ auto PPU::Background::getTile() -> void {
   if(tileX & 0x20) offset += screenX;
   if(tileY & 0x20) offset += screenY;
 
-  uint16 address = io.screenAddress + offset;
+  uint16 address = latch.screenAddress + offset;
   tile = ppu.vram[address];
   bool mirrorY = tile & 0x8000;
   bool mirrorX = tile & 0x4000;
@@ -187,6 +188,20 @@ auto PPU::Background::run(bool screen) -> void {
   if(!hires() || screen == Screen::Below) if(io.belowEnable) output.below = pixel;
 }
 
+auto PPU::Background::getTile(uint x, uint y) -> uint16 {
+  uint tileHeight = 3 + io.tileSize;
+  uint tileWidth = !hires() ? tileHeight : 4;
+  uint screenX = io.screenSize.bit(0) ? 32 << 5 : 0;
+  uint screenY = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
+  uint tileX = x >> tileWidth;
+  uint tileY = y >> tileHeight;
+  uint16 offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);
+  if(tileX & 0x20) offset += screenX;
+  if(tileY & 0x20) offset += screenY;
+  uint16 address = latch.screenAddress + offset;
+  return ppu.vram[address];
+}
+
 auto PPU::Background::getTileColor() -> uint {
   uint color = 0;
 
@@ -238,18 +253,4 @@ auto PPU::Background::power() -> void {
   paletteNumber = 0;
   paletteIndex = 0;
   for(auto& word : data) word = 0;
-}
-
-auto PPU::Background::getTile(uint x, uint y) -> uint16 {
-  uint tileHeight = 3 + io.tileSize;
-  uint tileWidth = !hires() ? tileHeight : 4;
-  uint screenX = io.screenSize.bit(0) ? 32 << 5 : 0;
-  uint screenY = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
-  uint tileX = x >> tileWidth;
-  uint tileY = y >> tileHeight;
-  uint16 offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);
-  if(tileX & 0x20) offset += screenX;
-  if(tileY & 0x20) offset += screenY;
-  uint16 address = io.screenAddress + offset;
-  return ppu.vram[address];
 }
