@@ -1,3 +1,15 @@
+//single-threaded
+auto PPU::Line::cacheBackground(PPU::IO::Background& bg) -> void {
+  if(y == 1) {
+    bg.mosaicCounter = ppu.io.mosaicSize + 1;
+    bg.mosaicOffset = 1;
+  } else if(--bg.mosaicCounter == 0) {
+    bg.mosaicCounter = ppu.io.mosaicSize + 1;
+    bg.mosaicOffset += ppu.io.mosaicSize + 1;
+  }
+}
+
+//parallelized
 auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void {
   if(!self.aboveEnable && !self.belowEnable) return;
   if(self.tileMode == TileMode::Mode7) return renderMode7(self, source);
@@ -26,7 +38,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
   uint hmask = (width << self.tileSize << !!(self.screenSize & 1)) - 1;
   uint vmask = (width << self.tileSize << !!(self.screenSize & 2)) - 1;
 
-  uint y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
+  uint y = self.mosaicEnable ? self.mosaicOffset : this->y;
   if(hires) {
     hscroll <<= 1;
     if(io.interlace) y = y << 1 | field();

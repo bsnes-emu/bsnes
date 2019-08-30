@@ -4,7 +4,7 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
     if(ppu.hdScale() > 1) return renderMode7HD(self, source);
   }
 
-  int Y = this->y - (self.mosaicEnable ? this->y % (1 + io.mosaicSize) : 0);
+  int Y = self.mosaicEnable ? self.mosaicOffset : this->y;
   int y = !io.mode7.vflip ? Y : 255 - Y;
 
   int a = (int16)io.mode7.a;

@@ -24,6 +24,23 @@ auto PPU::Line::flush() -> void {
   }
 }
 
+auto PPU::Line::cache() -> void {
+  cacheBackground(ppu.io.bg1);
+  cacheBackground(ppu.io.bg2);
+  cacheBackground(ppu.io.bg3);
+  cacheBackground(ppu.io.bg4);
+
+  uint y = ppu.vcounter();
+  if(ppu.io.displayDisable || y >= ppu.vdisp()) {
+    io.displayDisable = true;
+  } else {
+    memcpy(&io, &ppu.io, sizeof(io));
+    memcpy(&cgram, &ppu.cgram, sizeof(cgram));
+  }
+  if(!Line::count) Line::start = y;
+  Line::count++;
+}
+
 auto PPU::Line::render(bool fieldID) -> void {
   this->fieldID = fieldID;
   uint y = this->y + (!ppu.latch.overscan ? 7 : 0);

@@ -160,6 +160,8 @@ public:
       bool aboveEnable = 0;
       bool belowEnable = 0;
       bool mosaicEnable = 0;
+      uint16 mosaicCounter = 0;
+      uint16 mosaicOffset = 0;
       uint16 tiledataAddress = 0;
       uint16 screenAddress = 0;
       uint8 screenSize = 0;
@@ -282,6 +284,7 @@ public:
     //line.cpp
     inline auto field() const -> bool { return fieldID; }
     static auto flush() -> void;
+    auto cache() -> void;
     auto render(bool field) -> void;
     auto pixel(uint x, Pixel above, Pixel below) const -> uint16;
     auto blend(uint x, uint y, bool halve) const -> uint16;
@@ -291,6 +294,7 @@ public:
     alwaysinline auto plotHD(Pixel*, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void;
 
     //background.cpp
+    auto cacheBackground(PPU::IO::Background&) -> void;
     auto renderBackground(PPU::IO::Background&, uint source) -> void;
     auto getTile(PPU::IO::Background&, uint hoffset, uint voffset) -> uint;
 

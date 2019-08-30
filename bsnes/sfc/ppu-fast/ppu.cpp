@@ -89,16 +89,9 @@ auto PPU::main() -> void {
 
   if(system.frameCounter == 0) {
     uint y = vcounter();
-    step(renderCycle());
     if(y >= 1 && y <= 239) {
-      if(io.displayDisable || y >= vdisp()) {
-        lines[y].io.displayDisable = true;
-      } else {
-        memcpy(&lines[y].io, &io, sizeof(io));
-        memcpy(&lines[y].cgram, &cgram, sizeof(cgram));
-      }
-      if(!Line::count) Line::start = y;
-      Line::count++;
+      step(renderCycle());
+      lines[y].cache();
     }
   }
 

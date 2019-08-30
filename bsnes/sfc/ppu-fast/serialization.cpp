@@ -115,6 +115,8 @@ auto PPU::IO::Background::serialize(serializer& s) -> void {
   s.integer(aboveEnable);
   s.integer(belowEnable);
   s.integer(mosaicEnable);
+  s.integer(mosaicCounter);
+  s.integer(mosaicOffset);
   s.integer(tiledataAddress);
   s.integer(screenAddress);
   s.integer(screenSize);
