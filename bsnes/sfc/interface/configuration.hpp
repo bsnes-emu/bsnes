@@ -25,6 +25,7 @@ struct Configuration {
   } video;
 
   struct Hacks {
+    string entropy = "Low";
     struct CPU {
       uint overclock = 100;
     } cpu;

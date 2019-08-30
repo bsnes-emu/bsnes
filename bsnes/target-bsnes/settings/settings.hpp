@@ -95,6 +95,7 @@ struct Settings : Markup::Node {
     bool autoSaveStateOnUnload = false;
     bool autoLoadStateOnLoad = false;
     struct Hack {
+      string entropy = "Low";
       struct CPU {
         uint overclock = 100;
       } cpu;
@@ -331,6 +332,12 @@ public:
     CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
     CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
   Canvas optionsSpacer{this, Size{~0, 1}};
+  Label entropyLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout entropyLayout{this, Size{~0, 0}};
+    RadioLabel entropyNone{&entropyLayout, Size{0, 0}};
+    RadioLabel entropyLow{&entropyLayout, Size{0, 0}};
+    RadioLabel entropyHigh{&entropyLayout, Size{0, 0}};
+    Group entropyGroup{&entropyNone, &entropyLow, &entropyHigh};
   Label ppuLabel{this, Size{~0, 0}, 2};
   HorizontalLayout ppuLayout{this, Size{~0, 0}};
     CheckLabel fastPPU{&ppuLayout, Size{0, 0}};

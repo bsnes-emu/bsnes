@@ -109,7 +109,10 @@ auto System::power(bool reset) -> void {
 
   Emulator::audio.reset(interface);
 
-  random.entropy(Random::Entropy::Low);
+  random.entropy(Random::Entropy::Low);  //fallback case
+  if(configuration.hacks.entropy == "None") random.entropy(Random::Entropy::None);
+  if(configuration.hacks.entropy == "Low" ) random.entropy(Random::Entropy::Low );
+  if(configuration.hacks.entropy == "High") random.entropy(Random::Entropy::High);
 
   cpu.power(reset);
   smp.power(reset);

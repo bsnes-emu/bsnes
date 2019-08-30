@@ -22,6 +22,29 @@ auto EmulatorSettings::create() -> void {
   });
   optionsSpacer.setColor({192, 192, 192});
 
+  entropyLabel.setText("Entropy (randomness)").setFont(Font().setBold());
+  entropyNone.setText("None").setToolTip(
+    "All memory and registers are initialized to constant values at startup.\n"
+    "Use this for movie recording and compatibility with very old demoscene homebrew games."
+  ).onActivate([&] {
+    settings.emulator.hack.entropy = "None";
+  });
+  entropyLow.setText("Low").setToolTip(
+    "All memory is randomized with repeating patterns, all registers are randomized at startup.\n"
+    "Use this for the most accurate representation of a real SNES."
+  ).onActivate([&] {
+    settings.emulator.hack.entropy = "Low";
+  });
+  entropyHigh.setText("High").setToolTip(
+    "All memory and registers are randomized as much as possible.\n"
+    "Use this when developing new SNES software to ensure maximum compatibility with real hardware."
+  ).onActivate([&] {
+    settings.emulator.hack.entropy = "High";
+  });
+  if(settings.emulator.hack.entropy == "None") entropyNone.setChecked();
+  if(settings.emulator.hack.entropy == "Low") entropyLow.setChecked();
+  if(settings.emulator.hack.entropy == "High") entropyHigh.setChecked();
+
   ppuLabel.setText("PPU (video)").setFont(Font().setBold());
   fastPPU.setText("Fast mode").setChecked(settings.emulator.hack.ppu.fast).onToggle([&] {
     settings.emulator.hack.ppu.fast = fastPPU.checked();

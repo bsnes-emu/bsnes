@@ -1,6 +1,7 @@
 auto Program::load() -> void {
   unload();
 
+  emulator->configure("Hacks/Entropy", settings.emulator.hack.entropy);
   emulator->configure("Hacks/CPU/Overclock", settings.emulator.hack.cpu.overclock);
   emulator->configure("Hacks/PPU/Fast", settings.emulator.hack.ppu.fast);
   emulator->configure("Hacks/PPU/Deinterlace", settings.emulator.hack.ppu.deinterlace);
