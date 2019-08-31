@@ -61,23 +61,23 @@ auto PPU::Enter() -> void {
 auto PPU::main() -> void {
   scanline();
   step(28);
-  bg1.begin();
-  bg2.begin();
-  bg3.begin();
   bg4.begin();
+  bg3.begin();
+  bg2.begin();
+  bg1.begin();
 
   if(vcounter() < vdisp()) {
     for(int pixel = -7; pixel <= 255; pixel++) {
-      bg1.run(1);
-      bg2.run(1);
-      bg3.run(1);
       bg4.run(1);
+      bg3.run(1);
+      bg2.run(1);
+      bg1.run(1);
       step(2);
 
-      bg1.run(0);
-      bg2.run(0);
-      bg3.run(0);
       bg4.run(0);
+      bg3.run(0);
+      bg2.run(0);
+      bg1.run(0);
       if(pixel >= 0) {
         obj.run();
         window.run();

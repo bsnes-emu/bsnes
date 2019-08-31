@@ -14,6 +14,7 @@ struct Background {
   auto getTile() -> void;
   auto getTile(uint x, uint y) -> uint16;
   auto getTileColor() -> uint;
+
   alwaysinline auto clip(int n) -> int;
   auto beginMode7() -> void;
   auto runMode7() -> void;
