@@ -25,7 +25,7 @@ auto EmulatorSettings::create() -> void {
   entropyLabel.setText("Entropy (randomness)").setFont(Font().setBold());
   entropyNone.setText("None").setToolTip(
     "All memory and registers are initialized to constant values at startup.\n"
-    "Use this for movie recording and compatibility with very old demoscene homebrew games."
+    "Use this for compatibility with very old demoscene homebrew games."
   ).onActivate([&] {
     settings.emulator.hack.entropy = "None";
   });

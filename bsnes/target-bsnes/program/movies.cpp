@@ -41,6 +41,8 @@ auto Program::moviePlay() -> void {
           if(!emulator->unserialize(s)) failed = true;
         }
       } else {
+        //entropy can desync movies recorded without save states
+        emulator->configure("Hacks/Entropy", "None");
         emulator->power();
       }
       if(!failed) {
@@ -61,6 +63,8 @@ auto Program::movieRecord(bool fromBeginning) -> void {
   if(movie.mode == Movie::Mode::Inactive) {
     movieMode(Movie::Mode::Recording);
     if(fromBeginning) {
+      //entropy can desync movies recorded without save states
+      emulator->configure("Hacks/Entropy", "None");
       emulator->power();
       movie.state = {};
     } else {
