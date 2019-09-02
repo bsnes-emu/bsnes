@@ -1,6 +1,7 @@
 struct Cartridge {
   auto pathID() const -> uint { return information.pathID; }
   auto region() const -> string { return information.region; }
+  auto headerTitle() const -> string { return game.title; }
 
   auto hashes() const -> vector<string>;
   auto manifests() const -> vector<string>;

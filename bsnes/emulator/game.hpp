@@ -37,6 +37,7 @@ struct Game {
   string sha256;
   string label;
   string name;
+  string title;
   string region;
   string revision;
   string board;
@@ -50,6 +51,7 @@ auto Game::load(string_view text) -> void {
   sha256 = document["game/sha256"].text();
   label = document["game/label"].text();
   name = document["game/name"].text();
+  title = document["game/title"].text();
   region = document["game/region"].text();
   revision = document["game/revision"].text();
   board = document["game/board"].text();

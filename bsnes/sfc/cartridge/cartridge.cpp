@@ -65,6 +65,7 @@ auto Cartridge::load() -> bool {
   if(auto fp = platform->open(ID::SuperFamicom, "manifest.bml", File::Read, File::Required)) {
     game.load(fp->reads());
   } else return false;
+
   loadCartridge(game.document);
 
   //Game Boy
