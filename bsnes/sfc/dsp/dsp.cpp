@@ -30,6 +30,12 @@ auto DSP::read(uint8 address) -> uint8 {
 }
 
 auto DSP::write(uint8 address, uint8 data) -> void {
+  if(configuration.hacks.dsp.echoShadow) {
+    if(address == 0x6c && (data & 0x20)) {
+      memset(echoram, 0x00, 65536);
+    }
+  }
+
   spc_dsp.write(address, data);
 }
 
@@ -42,7 +48,12 @@ auto DSP::power(bool reset) -> void {
   stream = Emulator::audio.createStream(2, system.apuFrequency() / 768.0);
 
   if(!reset) {
-    spc_dsp.init(apuram);
+    if(!configuration.hacks.dsp.echoShadow) {
+      spc_dsp.init(apuram, apuram);
+    } else {
+      memset(echoram, 0x00, 65536);
+      spc_dsp.init(apuram, echoram);
+    }
     spc_dsp.reset();
     spc_dsp.set_output(samplebuffer, 8192);
   } else {

@@ -29,7 +29,7 @@ auto PPU::readVRAM() -> uint16 {
 
 template<bool Byte>
 auto PPU::writeVRAM(uint8 data) -> void {
-  if(!io.displayDisable && cpu.vcounter() < vdisp()) return;
+  if(!io.displayDisable && cpu.vcounter() < vdisp() && !noVRAMBlocking()) return;
   Line::flush();
   auto address = vramAddress();
   if constexpr(Byte == 0) {

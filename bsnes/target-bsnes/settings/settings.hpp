@@ -103,6 +103,7 @@ struct Settings : Markup::Node {
         bool fast = true;
         bool deinterlace = true;
         bool noSpriteLimit = false;
+        bool noVRAMBlocking = false;
         struct Mode7 {
           uint scale = 1;
           bool perspective = true;
@@ -113,6 +114,7 @@ struct Settings : Markup::Node {
       struct DSP {
         bool fast = true;
         bool cubic = false;
+        bool echoShadow = false;
       } dsp;
       struct Coprocessor {
         bool delayedSync = true;
@@ -343,6 +345,7 @@ public:
     CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
     CheckLabel deinterlace{&ppuLayout, Size{0, 0}};
     CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
+    CheckLabel noVRAMBlocking{&ppuLayout, Size{0, 0}};
   Label mode7Label{this, Size{~0, 0}, 2};
   HorizontalLayout mode7Layout{this, Size{~0, 0}};
     Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
@@ -354,6 +357,7 @@ public:
   HorizontalLayout dspLayout{this, Size{~0, 0}};
     CheckLabel fastDSP{&dspLayout, Size{0, 0}};
     CheckLabel cubicInterpolation{&dspLayout, Size{0, 0}};
+    CheckLabel echoShadow{&dspLayout, Size{0, 0}};
   Label coprocessorLabel{this, Size{~0, 0}, 2};
   HorizontalLayout coprocessorLayout{this, Size{~0, 0}};
     CheckLabel coprocessorDelayedSyncOption{&coprocessorLayout, Size{0, 0}};

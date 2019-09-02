@@ -612,7 +612,7 @@ VOICE_CLOCK(V9_V6_V3) { voice_V9(v); voice_V6(v+1); voice_V3(v+2); }
 //// Echo
 
 // Current echo buffer pointer for left/right channel
-#define ECHO_PTR( ch )      (&m.ram [m.t_echo_ptr + ch * 2])
+#define ECHO_PTR( ch )      (&m.echo [m.t_echo_ptr + ch * 2])
 
 // Sample in echo history buffer, where 0 is the oldest
 #define ECHO_FIR( i )       (m.echo_hist_pos [i])
@@ -835,9 +835,10 @@ void SPC_DSP::run( int clocks_remain )
 
 //// Setup
 
-void SPC_DSP::init( void* ram_64k )
+void SPC_DSP::init( void* ram_64k, void* echo_64k )
 {
-	m.ram = (uint8_t*) ram_64k;
+	m.ram  = (uint8_t*) ram_64k;
+    m.echo = (uint8_t*) echo_64k;
 	mute_voices( 0 );
 	disable_surround( false );
 	set_output( 0, 0 );
@@ -861,7 +862,8 @@ void SPC_DSP::init( void* ram_64k )
 
 void SPC_DSP::soft_reset_common()
 {
-	require( m.ram ); // init() must have been called already
+	require( m.ram  ); // init() must have been called already
+	require( m.echo );
 	
 	m.noise              = 0x4000;
 	m.echo_hist_pos      = m.echo_hist;

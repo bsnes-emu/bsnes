@@ -65,6 +65,15 @@ auto EmulatorSettings::create() -> void {
   noSpriteLimit.setText("No sprite limit").setChecked(settings.emulator.hack.ppu.noSpriteLimit).onToggle([&] {
     settings.emulator.hack.ppu.noSpriteLimit = noSpriteLimit.checked();
   });
+  noVRAMBlocking.setText("No VRAM blocking").setToolTip(
+    "This option emulates a bug in older releases of ZSNES and Snes9X where VRAM blocking was not emulated.\n"
+    "A few older ROM hacks relied on this behavior, and will render graphics incorrectly if not enabled.\n"
+    "Not only is this extremely inaccurate to real hardware, it also hurts the speed of the fast PPU.\n"
+    "Do not enable this option unless you need to play a game that is incompatible with bsnes otherwise."
+  ).setChecked(settings.emulator.hack.ppu.noVRAMBlocking).onToggle([&] {
+    settings.emulator.hack.ppu.noVRAMBlocking = noVRAMBlocking.checked();
+    emulator->configure("Hacks/PPU/NoVRAMBlocking", settings.emulator.hack.ppu.noVRAMBlocking);
+  });
   mode7Label.setText("HD Mode 7 (fast PPU only)").setFont(Font().setBold());
   mode7ScaleLabel.setText("Scale:");
   mode7Scale.append(ComboButtonItem().setText( "240p").setProperty("multiplier", 1));
@@ -103,6 +112,14 @@ auto EmulatorSettings::create() -> void {
   cubicInterpolation.setText("Cubic interpolation").setChecked(settings.emulator.hack.dsp.cubic).onToggle([&] {
     settings.emulator.hack.dsp.cubic = cubicInterpolation.checked();
     emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
+  });
+  echoShadow.setText("Echo shadow RAM").setToolTip(
+    "This option emulates a bug in ZSNES where echo RAM was treated as separate from APU RAM.\n"
+    "Many older ROM hacks for Super Mario World relied on this behavior, and will crash without enabling this.\n"
+    "It is, however, extremely inaccurate to real hardware and should not be enabled unless required."
+  ).setChecked(settings.emulator.hack.dsp.echoShadow).onToggle([&] {
+    settings.emulator.hack.dsp.echoShadow = echoShadow.checked();
+    //not a run-time setting: do not call emulator->configure() here.
   });
   coprocessorLabel.setText("Coprocessors").setFont(Font().setBold());
   coprocessorDelayedSyncOption.setText("Fast mode").setChecked(settings.emulator.hack.coprocessor.delayedSync).onToggle([&] {

@@ -6,12 +6,14 @@ auto Program::load() -> void {
   emulator->configure("Hacks/PPU/Fast", settings.emulator.hack.ppu.fast);
   emulator->configure("Hacks/PPU/Deinterlace", settings.emulator.hack.ppu.deinterlace);
   emulator->configure("Hacks/PPU/NoSpriteLimit", settings.emulator.hack.ppu.noSpriteLimit);
+  emulator->configure("Hacks/PPU/NoVRAMBlocking", settings.emulator.hack.ppu.noVRAMBlocking);
   emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale);
   emulator->configure("Hacks/PPU/Mode7/Perspective", settings.emulator.hack.ppu.mode7.perspective);
   emulator->configure("Hacks/PPU/Mode7/Supersample", settings.emulator.hack.ppu.mode7.supersample);
   emulator->configure("Hacks/PPU/Mode7/Mosaic", settings.emulator.hack.ppu.mode7.mosaic);
   emulator->configure("Hacks/DSP/Fast", settings.emulator.hack.dsp.fast);
   emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
+  emulator->configure("Hacks/DSP/EchoShadow", settings.emulator.hack.dsp.echoShadow);
   emulator->configure("Hacks/Coprocessor/DelayedSync", settings.emulator.hack.coprocessor.delayedSync);
   emulator->configure("Hacks/Coprocessor/PreferHLE", settings.emulator.hack.coprocessor.preferHLE);
   emulator->configure("Hacks/SuperFX/Overclock", settings.emulator.hack.superfx.overclock);

@@ -30,6 +30,7 @@ auto PPU::hdSupersample() const -> bool { return configuration.hacks.ppu.mode7.s
 auto PPU::hdMosaic() const -> bool { return configuration.hacks.ppu.mode7.mosaic; }
 auto PPU::deinterlace() const -> bool { return configuration.hacks.ppu.deinterlace; }
 auto PPU::renderCycle() const -> uint { return configuration.hacks.ppu.renderCycle; }
+auto PPU::noVRAMBlocking() const -> bool { return configuration.hacks.ppu.noVRAMBlocking; }
 #define ppu ppufast
 
 PPU::PPU() {
