@@ -265,7 +265,7 @@ public:
   auto readObject(uint10 address) -> uint8;
   auto writeObject(uint10 address, uint8 data) -> void;
 
-  //[serialized]
+//serialized:
   Latch latch;
   IO io;
 
@@ -303,6 +303,7 @@ public:
     auto renderMode7(PPU::IO::Background&, uint source) -> void;
 
     //mode7hd.cpp
+    static auto cacheMode7HD() -> void;
     auto renderMode7HD(PPU::IO::Background&, uint source) -> void;
     alwaysinline auto lerp(float pa, float va, float pb, float vb, float pr) -> float;
 
@@ -313,7 +314,7 @@ public:
     auto renderWindow(PPU::IO::WindowLayer&, bool enable, bool output[256]) -> void;
     auto renderWindow(PPU::IO::WindowColor&, uint mask,   bool output[256]) -> void;
 
-    //[unserialized]
+  //unserialized:
     uint y;  //constant
     bool fieldID;
 
@@ -333,6 +334,8 @@ public:
     static uint start;
     static uint count;
   };
+
+//unserialized:
   Line lines[240];
 
   //used to help detect when the video output size changes between frames to clear overscan area.
@@ -341,6 +344,14 @@ public:
     uint width = 0;
     uint height = 0;
   } frame;
+
+  struct Mode7LineGroups {
+    int count = -1;
+    int startLine[32];
+    int endLine[32];
+    int startLerpLine[32];
+    int endLerpLine[32];
+  } mode7LineGroups;
 };
 
 extern PPU ppufast;

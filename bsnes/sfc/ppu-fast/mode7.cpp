@@ -16,8 +16,6 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
   int hoffset = (int13)io.mode7.hoffset;
   int voffset = (int13)io.mode7.voffset;
 
-//if(source==Source::BG1&&y==1) print(a, " ", b, " ", c, " ", d, " ", hcenter, " ", vcenter, " ", hoffset, " ", voffset, "\n");
-
   uint mosaicCounter = 1;
   uint mosaicPalette = 0;
   uint mosaicPriority = 0;
