@@ -71,7 +71,6 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
     offset |= patch(index++, 0) <<  8;
     offset |= patch(index++, 0) <<  0;
     if(headered) offset -= 512;
-    if(offset < 0 || offset > 16_MiB) return false;  //sanity check
 
     uint16_t length = 0;
     length |= patch(index++, 0) << 8;
@@ -84,9 +83,16 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
 
       uint8_t fill = patch(index++, 0);
 
-      while(repeat--) data(offset++) = fill;
+      while(repeat--) {
+        if(offset >= 0) data(offset) = fill;
+        offset++;
+      }
     } else {
-      while(length--) data(offset++) = patch(index++, 0);
+      while(length--) {
+        if(offset >= 0) data(offset) = patch(index, 0);
+        offset++;
+        index++;
+      }
     }
   }
 

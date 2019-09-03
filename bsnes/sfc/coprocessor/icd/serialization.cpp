@@ -16,8 +16,7 @@ auto ICD::serialize(serializer& s) -> void {
   s.integer(packetSize);
 
   s.integer(joypID);
-  s.integer(joyp14Lock);
-  s.integer(joyp15Lock);
+  s.integer(joypLock);
   s.integer(pulseLock);
   s.integer(strobeLock);
   s.integer(packetLock);

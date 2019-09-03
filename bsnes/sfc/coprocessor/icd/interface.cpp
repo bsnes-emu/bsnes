@@ -27,9 +27,8 @@ auto ICD::apuWrite(float left, float right) -> void {
 auto ICD::joypWrite(bool p14, bool p15) -> void {
   //joypad handling
   if(p14 == 1 && p15 == 1) {
-    if(joyp14Lock == 0 && joyp15Lock == 0) {
-      joyp14Lock = 1;
-      joyp15Lock = 1;
+    if(joypLock == 0) {
+      joypLock = 1;
       joypID++;
       if(mltReq == 0) joypID &= 0;  //1-player mode
       if(mltReq == 1) joypID &= 1;  //2-player mode
@@ -51,30 +50,30 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
 
   GB_icd_set_joyp(&sameboy, input);
 
-  if(p14 == 0 && p15 == 1) joyp14Lock = 0;
-  if(p14 == 1 && p15 == 0) joyp15Lock = 0;
+  if(p14 == 0 && p15 == 1);
+  if(p14 == 1 && p15 == 0) joypLock ^= 1;
 
   //packet handling
   if(p14 == 0 && p15 == 0) {  //pulse
-    pulseLock = false;
+    pulseLock = 0;
     packetOffset = 0;
     bitOffset = 0;
-    strobeLock = true;
-    packetLock = false;
+    strobeLock = 1;
+    packetLock = 0;
     return;
   }
 
-  if(pulseLock) return;
+  if(pulseLock == 1) return;
 
   if(p14 == 1 && p15 == 1) {
-    strobeLock = false;
+    strobeLock = 0;
     return;
   }
 
-  if(strobeLock) {
+  if(strobeLock == 1) {
     if(p14 == 1 || p15 == 1) {  //malformed packet
-      packetLock = false;
-      pulseLock = true;
+      packetLock = 0;
+      pulseLock = 1;
       bitOffset = 0;
       packetOffset = 0;
     } else {
@@ -85,18 +84,21 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
   //p14:0, p15:1 = 0
   //p14:1, p15:0 = 1
   bool bit = p15 == 0;
-  strobeLock = true;
+  strobeLock = 1;
 
-  if(packetLock) {
+  if(packetLock == 1) {
     if(p14 == 0 && p15 == 1) {
       if((joypPacket[0] >> 3) == 0x11) {
         mltReq = joypPacket[1] & 3;
-        joypID = 3;
+        if(mltReq == 0) joypID &= 0;  //1-player mode
+        if(mltReq == 1) joypID &= 1;  //2-player mode
+        if(mltReq == 2) joypID &= 3;  //4-player mode (unverified; but the most likely behavior)
+        if(mltReq == 3) joypID &= 3;  //4-player mode
       }
 
       if(packetSize < 64) packet[packetSize++] = joypPacket;
-      packetLock = false;
-      pulseLock = true;
+      packetLock = 0;
+      pulseLock = 1;
     }
     return;
   }
@@ -107,5 +109,5 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
   joypPacket[packetOffset] = bitData;
   if(++packetOffset) return;
 
-  packetLock = true;
+  packetLock = 1;
 }

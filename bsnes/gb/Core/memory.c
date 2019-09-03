@@ -310,6 +310,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                        (gb->apu.is_active[GB_WAVE] ? (gb->apu.samples[GB_WAVE]) : 0);
             case GB_IO_JOYP:
                 GB_timing_sync(gb);
+                return gb->io_registers[addr & 0xFF] | 0xC0;
             case GB_IO_TMA:
             case GB_IO_LCDC:
             case GB_IO_SCY:

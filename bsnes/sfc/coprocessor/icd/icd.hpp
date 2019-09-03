@@ -44,8 +44,7 @@ private:
   uint7 packetSize;
 
   uint2 joypID;
-  uint1 joyp14Lock;
-  uint1 joyp15Lock;
+  uint1 joypLock;
   uint1 pulseLock;
   uint1 strobeLock;
   uint1 packetLock;
