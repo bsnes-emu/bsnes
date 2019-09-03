@@ -1,8 +1,10 @@
 auto Program::load() -> void {
   unload();
 
+  emulator->configure("Hacks/Hotfixes", settings.emulator.hack.hotfixes);
   emulator->configure("Hacks/Entropy", settings.emulator.hack.entropy);
   emulator->configure("Hacks/CPU/Overclock", settings.emulator.hack.cpu.overclock);
+  emulator->configure("Hacks/CPU/FastMath", settings.emulator.hack.cpu.fastMath);
   emulator->configure("Hacks/PPU/Fast", settings.emulator.hack.ppu.fast);
   emulator->configure("Hacks/PPU/Deinterlace", settings.emulator.hack.ppu.deinterlace);
   emulator->configure("Hacks/PPU/NoSpriteLimit", settings.emulator.hack.ppu.noSpriteLimit);
@@ -115,14 +117,13 @@ auto Program::loadSuperFamicom(string location) -> bool {
   }
   if(rom.size() < 0x8000) return false;
 
-  //assume ROM and IPS agree on whether a copier header is present
-  superFamicom.patched = applyPatchIPS(rom, location);
   if((rom.size() & 0x7fff) == 512) {
     //remove copier header
     memory::move(&rom[0], &rom[512], rom.size() - 512);
     rom.resize(rom.size() - 512);
   }
-  //assume BPS is made against a ROM without a copier header
+
+  if(!superFamicom.patched) superFamicom.patched = applyPatchIPS(rom, location);
   if(!superFamicom.patched) superFamicom.patched = applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SuperFamicom(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();

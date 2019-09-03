@@ -140,6 +140,11 @@ auto SuperFamicom::manifest() const -> string {
 }
 
 auto SuperFamicom::region() const -> string {
+  //Unlicensed software (homebrew, ROM hacks, etc) often change the standard region code,
+  //and then neglect to change the extended header region code. Thanks to that, we can't
+  //decode and display the full game serial + region code.
+  return videoRegion();
+
   string region;
 
   char A = data[headerAddress + 0x02];  //game type

@@ -25,9 +25,11 @@ struct Configuration {
   } video;
 
   struct Hacks {
+    bool hotfixes = true;
     string entropy = "Low";
     struct CPU {
       uint overclock = 100;
+      bool fastMath = false;
     } cpu;
     struct PPU {
       bool fast = true;

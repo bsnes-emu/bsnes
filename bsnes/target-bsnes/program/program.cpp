@@ -30,8 +30,9 @@ auto Program::create() -> void {
   inputSettings.create();
   hotkeySettings.create();
   pathSettings.create();
-  speedSettings.create();
   emulatorSettings.create();
+  enhancementSettings.create();
+  compatibilitySettings.create();
   driverSettings.create();
 
   toolsWindow.create();

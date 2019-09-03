@@ -96,11 +96,13 @@ auto CPU::power(bool reset) -> void {
 
   if(!reset) random.array(wram, sizeof(wram));
 
-  //Dirt Racer (Europe) relies on uninitialized memory containing certain values to boot without freezing.
-  //the game itself is broken and will fail to run sometimes on real hardware, but for the sake of expedience,
-  //WRAM is initialized to a constant value that will allow this game to always boot in successfully.
-  if(cartridge.headerTitle() == "DIRT RACER") {
-    for(auto& byte : wram) byte = 0xff;
+  if(configuration.hacks.hotfixes) {
+    //Dirt Racer (Europe) relies on uninitialized memory containing certain values to boot without freezing.
+    //the game itself is broken and will fail to run sometimes on real hardware, but for the sake of expedience,
+    //WRAM is initialized to a constant value that will allow this game to always boot in successfully.
+    if(cartridge.headerTitle() == "DIRT RACER") {
+      for(auto& byte : wram) byte = 0xff;
+    }
   }
 
   for(uint n : range(8)) {

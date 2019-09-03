@@ -4,8 +4,9 @@
 #include "input.cpp"
 #include "hotkeys.cpp"
 #include "paths.cpp"
-#include "speed.cpp"
 #include "emulator.cpp"
+#include "enhancements.cpp"
+#include "compatibility.cpp"
 #include "drivers.cpp"
 Settings settings;
 VideoSettings videoSettings;
@@ -13,8 +14,9 @@ AudioSettings audioSettings;
 InputSettings inputSettings;
 HotkeySettings hotkeySettings;
 PathSettings pathSettings;
-SpeedSettings speedSettings;
 EmulatorSettings emulatorSettings;
+EnhancementSettings enhancementSettings;
+CompatibilitySettings compatibilitySettings;
 DriverSettings driverSettings;
 namespace Instances { Instance<SettingsWindow> settingsWindow; }
 SettingsWindow& settingsWindow = Instances::settingsWindow();
@@ -112,8 +114,10 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Emulator/AutoSaveMemory/Interval",      emulator.autoSaveMemory.interval);
   bind(boolean, "Emulator/AutoSaveStateOnUnload",        emulator.autoSaveStateOnUnload);
   bind(boolean, "Emulator/AutoLoadStateOnLoad",          emulator.autoLoadStateOnLoad);
+  bind(boolean, "Emulator/Hack/Hotfixes",                emulator.hack.hotfixes);
   bind(text,    "Emulator/Hack/Entropy",                 emulator.hack.entropy);
   bind(natural, "Emulator/Hack/CPU/Overclock",           emulator.hack.cpu.overclock);
+  bind(boolean, "Emulator/Hack/CPU/FastMath",            emulator.hack.cpu.fastMath);
   bind(boolean, "Emulator/Hack/PPU/Fast",                emulator.hack.ppu.fast);
   bind(boolean, "Emulator/Hack/PPU/Deinterlace",         emulator.hack.ppu.deinterlace);
   bind(boolean, "Emulator/Hack/PPU/NoSpriteLimit",       emulator.hack.ppu.noSpriteLimit);
@@ -172,8 +176,9 @@ auto SettingsWindow::create() -> void {
   panelList.append(ListViewItem().setText("Input").setIcon(Icon::Device::Joypad));
   panelList.append(ListViewItem().setText("Hotkeys").setIcon(Icon::Device::Keyboard));
   panelList.append(ListViewItem().setText("Paths").setIcon(Icon::Emblem::Folder));
-  panelList.append(ListViewItem().setText("Speed").setIcon(Icon::Device::Clock));
   panelList.append(ListViewItem().setText("Emulator").setIcon(Icon::Action::Settings));
+  panelList.append(ListViewItem().setText("Enhancements").setIcon(Icon::Action::Add));
+  panelList.append(ListViewItem().setText("Compatibility").setIcon(Icon::Action::Remove));
   panelList.append(ListViewItem().setText("Drivers").setIcon(Icon::Place::Settings));
   panelList.onChange([&] {
     if(auto item = panelList.selected()) {
@@ -188,13 +193,14 @@ auto SettingsWindow::create() -> void {
   panelContainer.append(inputSettings, Size{~0, ~0});
   panelContainer.append(hotkeySettings, Size{~0, ~0});
   panelContainer.append(pathSettings, Size{~0, ~0});
-  panelContainer.append(speedSettings, Size{~0, ~0});
   panelContainer.append(emulatorSettings, Size{~0, ~0});
+  panelContainer.append(enhancementSettings, Size{~0, ~0});
+  panelContainer.append(compatibilitySettings, Size{~0, ~0});
   panelContainer.append(driverSettings, Size{~0, ~0});
   statusBar.setFont(Font().setBold());
 
   setTitle("Settings");
-  setSize({680_sx, 400_sx});
+  setSize({680_sx, 400_sy});
   setAlignment({0.0, 1.0});
   setDismissable();
 
@@ -221,8 +227,9 @@ auto SettingsWindow::show(int index) -> void {
   inputSettings.setVisible(false);
   hotkeySettings.setVisible(false);
   pathSettings.setVisible(false);
-  speedSettings.setVisible(false);
   emulatorSettings.setVisible(false);
+  enhancementSettings.setVisible(false);
+  compatibilitySettings.setVisible(false);
   driverSettings.setVisible(false);
   panelList.item(index).setSelected();
   if(index ==-1) settingsHome.setVisible(true);
@@ -231,9 +238,10 @@ auto SettingsWindow::show(int index) -> void {
   if(index == 2) inputSettings.setVisible(true);
   if(index == 3) hotkeySettings.setVisible(true);
   if(index == 4) pathSettings.setVisible(true);
-  if(index == 5) speedSettings.setVisible(true);
-  if(index == 6) emulatorSettings.setVisible(true);
-  if(index == 7) driverSettings.setVisible(true);
+  if(index == 5) emulatorSettings.setVisible(true);
+  if(index == 6) enhancementSettings.setVisible(true);
+  if(index == 7) compatibilitySettings.setVisible(true);
+  if(index == 8) driverSettings.setVisible(true);
   panelContainer.resize();
   setVisible();
   setFocused();

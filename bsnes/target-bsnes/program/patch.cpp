@@ -29,6 +29,15 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
   }
   if(!patch) return false;
 
+  bool headered = false;
+  if(MessageDialog().setAlignment(*presentation).setTitle({Location::prefix(location), ".ips"}).setText({
+    "(You're seeing this prompt because IPS is a terrible patch file format,\n"
+    " and nobody can agree on whether SNES ROMs should be headered or not.\n"
+    " Please consider asking the patch author to use BPS patches instead.)\n\n"
+    "Does this IPS patch expect to be applied to a headered ROM?\n"
+    "If you're not sure, try 'No', and if it fails to work, try again with 'Yes'."
+  }).question() == "Yes") headered = true;
+
   //sanity checks
   if(patch.size() < 8) return false;
   if(patch[0] != 'P') return false;
@@ -57,10 +66,12 @@ auto Program::applyPatchIPS(vector<uint8_t>& data, string location) -> bool {
 
     if(index >= patch.size()) break;
 
-    uint32_t offset = 0;
+    int32_t offset = 0;
     offset |= patch(index++, 0) << 16;
     offset |= patch(index++, 0) <<  8;
     offset |= patch(index++, 0) <<  0;
+    if(headered) offset -= 512;
+    if(offset < 0 || offset > 16_MiB) return false;  //sanity check
 
     uint16_t length = 0;
     length |= patch(index++, 0) << 8;

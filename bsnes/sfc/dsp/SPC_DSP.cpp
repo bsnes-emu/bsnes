@@ -838,7 +838,7 @@ void SPC_DSP::run( int clocks_remain )
 void SPC_DSP::init( void* ram_64k, void* echo_64k )
 {
 	m.ram  = (uint8_t*) ram_64k;
-    m.echo = (uint8_t*) echo_64k;
+	m.echo = (uint8_t*) echo_64k;
 	mute_voices( 0 );
 	disable_surround( false );
 	set_output( 0, 0 );

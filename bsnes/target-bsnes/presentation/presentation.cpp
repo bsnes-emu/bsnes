@@ -106,9 +106,10 @@ auto Presentation::create() -> void {
   inputSettings.setIcon(Icon::Device::Joypad).setText("Input ...").onActivate([&] { settingsWindow.show(2); });
   hotkeySettings.setIcon(Icon::Device::Keyboard).setText("Hotkeys ...").onActivate([&] { settingsWindow.show(3); });
   pathSettings.setIcon(Icon::Emblem::Folder).setText("Paths ...").onActivate([&] { settingsWindow.show(4); });
-  speedSettings.setIcon(Icon::Device::Clock).setText("Speed ...").onActivate([&] { settingsWindow.show(5); });
-  emulatorSettings.setIcon(Icon::Action::Settings).setText("Emulator ...").onActivate([&] { settingsWindow.show(6); });
-  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(7); });
+  emulatorSettings.setIcon(Icon::Action::Settings).setText("Emulator ...").onActivate([&] { settingsWindow.show(5); });
+  enhancementSettings.setIcon(Icon::Action::Add).setText("Enhancements ...").onActivate([&] { settingsWindow.show(6); });
+  compatibilitySettings.setIcon(Icon::Action::Remove).setText("Compatibility ...").onActivate([&] { settingsWindow.show(7); });
+  driverSettings.setIcon(Icon::Place::Settings).setText("Drivers ...").onActivate([&] { settingsWindow.show(8); });
 
   toolsMenu.setText(tr("Tools")).setVisible(false);
   saveState.setIcon(Icon::Media::Record).setText("Save State");
@@ -180,18 +181,6 @@ auto Presentation::create() -> void {
   documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
     invoke("https://doc.byuu.org/bsnes");
   });
-  about.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
-    AboutDialog()
-    .setName(Emulator::Name)
-    .setLogo(Resource::Logo)
-    .setDescription("Super Nintendo emulator")
-    .setVersion(Emulator::Version)
-    .setAuthor("byuu")
-    .setLicense("GPLv3")
-    .setWebsite("https://byuu.org")
-    .setAlignment(*this)
-    .show();
-  });
   aboutSameBoy.setIcon(Icon::Prompt::Question).setText({tr("About SameBoy"), " ..."}).onActivate([&] {
     AboutDialog()
     .setName("SameBoy")
@@ -201,6 +190,18 @@ auto Presentation::create() -> void {
     .setAuthor("Lior Halphon")
     .setLicense("MIT")
     .setWebsite("https://sameboy.github.io")
+    .setAlignment(*this)
+    .show();
+  });
+  about.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
+    AboutDialog()
+    .setName(Emulator::Name)
+    .setLogo(Resource::Logo)
+    .setDescription("Super Nintendo emulator")
+    .setVersion(Emulator::Version)
+    .setAuthor("byuu")
+    .setLicense("GPLv3")
+    .setWebsite("https://byuu.org")
     .setAlignment(*this)
     .show();
   });

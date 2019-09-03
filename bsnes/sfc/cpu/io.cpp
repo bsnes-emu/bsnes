@@ -151,8 +151,12 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     io.wrmpyb = data;
     io.rddiv = io.wrmpyb << 8 | io.wrmpya;
 
-    alu.mpyctr = 8;  //perform multiplication over the next eight cycles
-    alu.shift = io.wrmpyb;
+    if(!configuration.hacks.cpu.fastMath) {
+      alu.mpyctr = 8;  //perform multiplication over the next eight cycles
+      alu.shift = io.wrmpyb;
+    } else {
+      io.rdmpy = io.wrmpya * io.wrmpyb;
+    }
     return;
 
   case 0x4204:  //WRDIVL
@@ -169,8 +173,18 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
 
     io.wrdivb = data;
 
-    alu.divctr = 16;  //perform division over the next sixteen cycles
-    alu.shift = io.wrdivb << 16;
+    if(!configuration.hacks.cpu.fastMath) {
+      alu.divctr = 16;  //perform division over the next sixteen cycles
+      alu.shift = io.wrdivb << 16;
+    } else {
+      if(io.wrdivb) {
+        io.rddiv = io.wrdiva / io.wrdivb;
+        io.rdmpy = io.wrdiva % io.wrdivb;
+      } else {
+        io.rddiv = 0xffff;
+        io.rdmpy = io.wrdiva;
+      }
+    }
     return;
 
   case 0x4207:  //HTIMEL

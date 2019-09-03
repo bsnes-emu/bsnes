@@ -22,114 +22,107 @@ auto EmulatorSettings::create() -> void {
   });
   optionsSpacer.setColor({192, 192, 192});
 
-  entropyLabel.setText("Entropy (randomness)").setFont(Font().setBold());
-  entropyNone.setText("None").setToolTip(
-    "All memory and registers are initialized to constant values at startup.\n"
-    "Use this for compatibility with very old demoscene homebrew games."
-  ).onActivate([&] {
-    settings.emulator.hack.entropy = "None";
-  });
-  entropyLow.setText("Low").setToolTip(
-    "All memory is randomized with repeating patterns, all registers are randomized at startup.\n"
-    "Use this for the most accurate representation of a real SNES."
-  ).onActivate([&] {
-    settings.emulator.hack.entropy = "Low";
-  });
-  entropyHigh.setText("High").setToolTip(
-    "All memory and registers are randomized as much as possible.\n"
-    "Use this when developing new SNES software to ensure maximum compatibility with real hardware."
-  ).onActivate([&] {
-    settings.emulator.hack.entropy = "High";
-  });
-  if(settings.emulator.hack.entropy == "None") entropyNone.setChecked();
-  if(settings.emulator.hack.entropy == "Low") entropyLow.setChecked();
-  if(settings.emulator.hack.entropy == "High") entropyHigh.setChecked();
+  fastForwardLabel.setText("Fast Forward").setFont(Font().setBold());
 
-  ppuLabel.setText("PPU (video)").setFont(Font().setBold());
-  fastPPU.setText("Fast mode").setChecked(settings.emulator.hack.ppu.fast).onToggle([&] {
-    settings.emulator.hack.ppu.fast = fastPPU.checked();
-    if(!fastPPU.checked()) {
-      noSpriteLimit.setEnabled(false);
-      deinterlace.setEnabled(false);
-      mode7Layout.setEnabled(false);
-    } else {
-      noSpriteLimit.setEnabled(true);
-      deinterlace.setEnabled(true);
-      mode7Layout.setEnabled(true);
-    }
-  }).doToggle();
-  deinterlace.setText("Deinterlace").setChecked(settings.emulator.hack.ppu.deinterlace).onToggle([&] {
-    settings.emulator.hack.ppu.deinterlace = deinterlace.checked();
-    emulator->configure("Hacks/PPU/Deinterlace", settings.emulator.hack.ppu.deinterlace);
+  frameSkipLabel.setText("Frame skip:").setToolTip({
+    "Set how many frames to skip while fast forwarding.\n"
+    "Frame skipping allows a higher maximum fast forwarding frame rate."
   });
-  noSpriteLimit.setText("No sprite limit").setChecked(settings.emulator.hack.ppu.noSpriteLimit).onToggle([&] {
-    settings.emulator.hack.ppu.noSpriteLimit = noSpriteLimit.checked();
+
+  frameSkipAmount.append(ComboButtonItem().setText("None"));
+  frameSkipAmount.append(ComboButtonItem().setText("1 frame"));
+  frameSkipAmount.append(ComboButtonItem().setText("2 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("3 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("4 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("5 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("6 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("7 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("8 frames"));
+  frameSkipAmount.append(ComboButtonItem().setText("9 frames"));
+  frameSkipAmount.item(settings.fastForward.frameSkip).setSelected();
+  frameSkipAmount.onChange([&] {
+    settings.fastForward.frameSkip = frameSkipAmount.selected().offset();
   });
-  noVRAMBlocking.setText("No VRAM blocking").setToolTip(
-    "This option emulates a bug in older releases of ZSNES and Snes9X where VRAM blocking was not emulated.\n"
-    "A few older ROM hacks relied on this behavior, and will render graphics incorrectly if not enabled.\n"
-    "Not only is this extremely inaccurate to real hardware, it also hurts the speed of the fast PPU.\n"
-    "Do not enable this option unless you need to play a game that is incompatible with bsnes otherwise."
-  ).setChecked(settings.emulator.hack.ppu.noVRAMBlocking).onToggle([&] {
-    settings.emulator.hack.ppu.noVRAMBlocking = noVRAMBlocking.checked();
-    emulator->configure("Hacks/PPU/NoVRAMBlocking", settings.emulator.hack.ppu.noVRAMBlocking);
+
+  limiterLabel.setText("Limiter:").setToolTip({
+    "Set the maximum speed when fast forwarding."
   });
-  mode7Label.setText("HD Mode 7 (fast PPU only)").setFont(Font().setBold());
-  mode7ScaleLabel.setText("Scale:");
-  mode7Scale.append(ComboButtonItem().setText( "240p").setProperty("multiplier", 1));
-  mode7Scale.append(ComboButtonItem().setText( "480p").setProperty("multiplier", 2));
-  mode7Scale.append(ComboButtonItem().setText( "720p").setProperty("multiplier", 3));
-  mode7Scale.append(ComboButtonItem().setText( "960p").setProperty("multiplier", 4));
-  mode7Scale.append(ComboButtonItem().setText("1200p").setProperty("multiplier", 5));
-  mode7Scale.append(ComboButtonItem().setText("1440p").setProperty("multiplier", 6));
-  mode7Scale.append(ComboButtonItem().setText("1680p").setProperty("multiplier", 7));
-  mode7Scale.append(ComboButtonItem().setText("1920p").setProperty("multiplier", 8));
-  mode7Scale.append(ComboButtonItem().setText("2160p").setProperty("multiplier", 9));
-  for(uint n = 1; n <= 9; n++) {
-    if(settings.emulator.hack.ppu.mode7.scale == n) mode7Scale.item(n - 1).setSelected();
-  }
-  mode7Scale.onChange([&] {
-    settings.emulator.hack.ppu.mode7.scale = mode7Scale.selected().property("multiplier").natural();
-    emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale);
+
+  limiterAmount.append(ComboButtonItem().setText("None"));
+  limiterAmount.append(ComboButtonItem().setText("200%"));
+  limiterAmount.append(ComboButtonItem().setText("300%"));
+  limiterAmount.append(ComboButtonItem().setText("400%"));
+  limiterAmount.append(ComboButtonItem().setText("500%"));
+  limiterAmount.append(ComboButtonItem().setText("600%"));
+  limiterAmount.append(ComboButtonItem().setText("700%"));
+  limiterAmount.append(ComboButtonItem().setText("800%"));
+  if(settings.fastForward.limiter == 0) limiterAmount.item(0).setSelected();
+  if(settings.fastForward.limiter == 2) limiterAmount.item(1).setSelected();
+  if(settings.fastForward.limiter == 3) limiterAmount.item(2).setSelected();
+  if(settings.fastForward.limiter == 4) limiterAmount.item(3).setSelected();
+  if(settings.fastForward.limiter == 5) limiterAmount.item(4).setSelected();
+  if(settings.fastForward.limiter == 6) limiterAmount.item(5).setSelected();
+  if(settings.fastForward.limiter == 7) limiterAmount.item(6).setSelected();
+  if(settings.fastForward.limiter == 8) limiterAmount.item(7).setSelected();
+  limiterAmount.onChange([&] {
+    auto index = limiterAmount.selected().offset();
+    if(index == 0) settings.fastForward.limiter = 0;
+    if(index == 1) settings.fastForward.limiter = 2;
+    if(index == 2) settings.fastForward.limiter = 3;
+    if(index == 3) settings.fastForward.limiter = 4;
+    if(index == 4) settings.fastForward.limiter = 5;
+    if(index == 5) settings.fastForward.limiter = 6;
+    if(index == 6) settings.fastForward.limiter = 7;
+    if(index == 7) settings.fastForward.limiter = 8;
   });
-  mode7Perspective.setText("Perspective correction").setChecked(settings.emulator.hack.ppu.mode7.perspective).onToggle([&] {
-    settings.emulator.hack.ppu.mode7.perspective = mode7Perspective.checked();
-    emulator->configure("Hacks/PPU/Mode7/Perspective", settings.emulator.hack.ppu.mode7.perspective);
+
+  fastForwardMute.setText("Mute while fast forwarding").setChecked(settings.fastForward.mute).onToggle([&] {
+    settings.fastForward.mute = fastForwardMute.checked();
   });
-  mode7Supersample.setText("Supersampling").setChecked(settings.emulator.hack.ppu.mode7.supersample).onToggle([&] {
-    settings.emulator.hack.ppu.mode7.supersample = mode7Supersample.checked();
-    emulator->configure("Hacks/PPU/Mode7/Supersample", settings.emulator.hack.ppu.mode7.supersample);
+
+  fastForwardSpacer.setColor({192, 192, 192});
+
+  rewindLabel.setText("Rewind").setFont(Font().setBold());
+
+  rewindFrequencyLabel.setText("Frequency:");
+  rewindFrequencyOption.append(ComboButtonItem().setText("Disabled"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 10 frames"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 20 frames"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 30 frames"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 40 frames"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 50 frames"));
+  rewindFrequencyOption.append(ComboButtonItem().setText("Every 60 frames"));
+  if(settings.rewind.frequency ==  0) rewindFrequencyOption.item(0).setSelected();
+  if(settings.rewind.frequency == 10) rewindFrequencyOption.item(1).setSelected();
+  if(settings.rewind.frequency == 20) rewindFrequencyOption.item(2).setSelected();
+  if(settings.rewind.frequency == 30) rewindFrequencyOption.item(3).setSelected();
+  if(settings.rewind.frequency == 40) rewindFrequencyOption.item(4).setSelected();
+  if(settings.rewind.frequency == 50) rewindFrequencyOption.item(5).setSelected();
+  if(settings.rewind.frequency == 60) rewindFrequencyOption.item(6).setSelected();
+  rewindFrequencyOption.onChange([&] {
+    settings.rewind.frequency = rewindFrequencyOption.selected().offset() * 10;
+    program.rewindReset();
   });
-  mode7Mosaic.setText("HD->SD Mosaic").setChecked(settings.emulator.hack.ppu.mode7.mosaic).onToggle([&] {
-    settings.emulator.hack.ppu.mode7.mosaic = mode7Mosaic.checked();
-    emulator->configure("Hacks/PPU/Mode7/Mosaic", settings.emulator.hack.ppu.mode7.mosaic);
+
+  rewindLengthLabel.setText("Length:");
+  rewindLengthOption.append(ComboButtonItem().setText( "10 states"));
+  rewindLengthOption.append(ComboButtonItem().setText( "20 states"));
+  rewindLengthOption.append(ComboButtonItem().setText( "40 states"));
+  rewindLengthOption.append(ComboButtonItem().setText( "80 states"));
+  rewindLengthOption.append(ComboButtonItem().setText("160 states"));
+  rewindLengthOption.append(ComboButtonItem().setText("320 states"));
+  if(settings.rewind.length ==  10) rewindLengthOption.item(0).setSelected();
+  if(settings.rewind.length ==  20) rewindLengthOption.item(1).setSelected();
+  if(settings.rewind.length ==  40) rewindLengthOption.item(2).setSelected();
+  if(settings.rewind.length ==  80) rewindLengthOption.item(3).setSelected();
+  if(settings.rewind.length == 160) rewindLengthOption.item(4).setSelected();
+  if(settings.rewind.length == 320) rewindLengthOption.item(5).setSelected();
+  rewindLengthOption.onChange([&] {
+    settings.rewind.length = 10 << rewindLengthOption.selected().offset();
+    program.rewindReset();
   });
-  dspLabel.setText("DSP (audio)").setFont(Font().setBold());
-  fastDSP.setText("Fast mode").setChecked(settings.emulator.hack.dsp.fast).onToggle([&] {
-    settings.emulator.hack.dsp.fast = fastDSP.checked();
-    emulator->configure("Hacks/DSP/Fast", settings.emulator.hack.dsp.fast);
+
+  rewindMute.setText("Mute while rewinding").setChecked(settings.rewind.mute).onToggle([&] {
+    settings.rewind.mute = rewindMute.checked();
   });
-  cubicInterpolation.setText("Cubic interpolation").setChecked(settings.emulator.hack.dsp.cubic).onToggle([&] {
-    settings.emulator.hack.dsp.cubic = cubicInterpolation.checked();
-    emulator->configure("Hacks/DSP/Cubic", settings.emulator.hack.dsp.cubic);
-  });
-  echoShadow.setText("Echo shadow RAM").setToolTip(
-    "This option emulates a bug in ZSNES where echo RAM was treated as separate from APU RAM.\n"
-    "Many older ROM hacks for Super Mario World relied on this behavior, and will crash without enabling this.\n"
-    "It is, however, extremely inaccurate to real hardware and should not be enabled unless required."
-  ).setChecked(settings.emulator.hack.dsp.echoShadow).onToggle([&] {
-    settings.emulator.hack.dsp.echoShadow = echoShadow.checked();
-    //not a run-time setting: do not call emulator->configure() here.
-  });
-  coprocessorLabel.setText("Coprocessors").setFont(Font().setBold());
-  coprocessorDelayedSyncOption.setText("Fast mode").setChecked(settings.emulator.hack.coprocessor.delayedSync).onToggle([&] {
-    settings.emulator.hack.coprocessor.delayedSync = coprocessorDelayedSyncOption.checked();
-  });
-  coprocessorPreferHLEOption.setText("Prefer HLE").setChecked(settings.emulator.hack.coprocessor.preferHLE).setToolTip(
-    "When checked, less accurate HLE emulation will always be used when available.\n"
-    "When unchecked, HLE will only be used when LLE firmware is missing."
-  ).onToggle([&] {
-    settings.emulator.hack.coprocessor.preferHLE = coprocessorPreferHLEOption.checked();
-  });
-  hacksNote.setText("Note: some hack setting changes do not take effect until after reloading games.");
 }

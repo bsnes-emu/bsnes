@@ -95,9 +95,11 @@ struct Settings : Markup::Node {
     bool autoSaveStateOnUnload = false;
     bool autoLoadStateOnLoad = false;
     struct Hack {
+      bool hotfixes = true;
       string entropy = "Low";
       struct CPU {
         uint overclock = 100;
+        bool fastMath = false;
       } cpu;
       struct PPU {
         bool fast = true;
@@ -290,39 +292,6 @@ public:
     Button screenshotsReset{&layout, Size{80_sx, 0}};
 };
 
-struct SpeedSettings : VerticalLayout {
-  auto create() -> void;
-
-public:
-  Label overclockingLabel{this, Size{~0, 0}, 2};
-  TableLayout overclockingLayout{this, Size{~0, 0}};
-    Label cpuLabel{&overclockingLayout, Size{0, 0}};
-    Label cpuValue{&overclockingLayout, Size{50_sx, 0}};
-    HorizontalSlider cpuClock{&overclockingLayout, Size{~0, 0}};
-  //
-    Label sa1Label{&overclockingLayout, Size{0, 0}};
-    Label sa1Value{&overclockingLayout, Size{50_sx, 0}};
-    HorizontalSlider sa1Clock{&overclockingLayout, Size{~0, 0}};
-  //
-    Label sfxLabel{&overclockingLayout, Size{0, 0}};
-    Label sfxValue{&overclockingLayout, Size{50_sx, 0}};
-    HorizontalSlider sfxClock{&overclockingLayout, Size{~0, 0}};
-  Label fastForwardLabel{this, Size{~0, 0}, 2};
-  HorizontalLayout fastForwardLayout{this, Size{~0, 0}};
-    Label frameSkipLabel{&fastForwardLayout, Size{0, 0}};
-    ComboButton frameSkipAmount{&fastForwardLayout, Size{0, 0}};
-    Label limiterLabel{&fastForwardLayout, Size{0, 0}};
-    ComboButton limiterAmount{&fastForwardLayout, Size{0, 0}};
-  CheckLabel fastForwardMute{this, Size{0, 0}};
-  Label rewindLabel{this, Size{~0, 0}, 2};
-  HorizontalLayout rewindLayout{this, Size{~0, 0}};
-    Label rewindFrequencyLabel{&rewindLayout, Size{0, 0}};
-    ComboButton rewindFrequencyOption{&rewindLayout, Size{0, 0}};
-    Label rewindLengthLabel{&rewindLayout, Size{0, 0}};
-    ComboButton rewindLengthOption{&rewindLayout, Size{0, 0}};
-  CheckLabel rewindMute{this, Size{0, 0}};
-};
-
 struct EmulatorSettings : VerticalLayout {
   auto create() -> void;
 
@@ -334,18 +303,50 @@ public:
     CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
     CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
   Canvas optionsSpacer{this, Size{~0, 1}};
-  Label entropyLabel{this, Size{~0, 0}, 2};
-  HorizontalLayout entropyLayout{this, Size{~0, 0}};
-    RadioLabel entropyNone{&entropyLayout, Size{0, 0}};
-    RadioLabel entropyLow{&entropyLayout, Size{0, 0}};
-    RadioLabel entropyHigh{&entropyLayout, Size{0, 0}};
-    Group entropyGroup{&entropyNone, &entropyLow, &entropyHigh};
+  //
+  Label fastForwardLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout fastForwardLayout{this, Size{~0, 0}};
+    Label frameSkipLabel{&fastForwardLayout, Size{0, 0}};
+    ComboButton frameSkipAmount{&fastForwardLayout, Size{0, 0}};
+    Label limiterLabel{&fastForwardLayout, Size{0, 0}};
+    ComboButton limiterAmount{&fastForwardLayout, Size{0, 0}};
+  CheckLabel fastForwardMute{this, Size{0, 0}};
+  Canvas fastForwardSpacer{this, Size{~0, 1}};
+  //
+  Label rewindLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout rewindLayout{this, Size{~0, 0}};
+    Label rewindFrequencyLabel{&rewindLayout, Size{0, 0}};
+    ComboButton rewindFrequencyOption{&rewindLayout, Size{0, 0}};
+    Label rewindLengthLabel{&rewindLayout, Size{0, 0}};
+    ComboButton rewindLengthOption{&rewindLayout, Size{0, 0}};
+  CheckLabel rewindMute{this, Size{0, 0}};
+};
+
+struct EnhancementSettings : VerticalLayout {
+  auto create() -> void;
+
+private:
+  Label overclockingLabel{this, Size{~0, 0}, 2};
+  TableLayout overclockingLayout{this, Size{~0, 0}};
+    Label cpuLabel{&overclockingLayout, Size{0, 0}};
+    Label cpuValue{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider cpuClock{&overclockingLayout, Size{~0, 0}};
+  Canvas overclockingSpacer{this, Size{~0, 1}};
+  //
+    Label sa1Label{&overclockingLayout, Size{0, 0}};
+    Label sa1Value{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider sa1Clock{&overclockingLayout, Size{~0, 0}};
+  //
+    Label sfxLabel{&overclockingLayout, Size{0, 0}};
+    Label sfxValue{&overclockingLayout, Size{50_sx, 0}};
+    HorizontalSlider sfxClock{&overclockingLayout, Size{~0, 0}};
+  //
   Label ppuLabel{this, Size{~0, 0}, 2};
   HorizontalLayout ppuLayout{this, Size{~0, 0}};
     CheckLabel fastPPU{&ppuLayout, Size{0, 0}};
     CheckLabel deinterlace{&ppuLayout, Size{0, 0}};
     CheckLabel noSpriteLimit{&ppuLayout, Size{0, 0}};
-    CheckLabel noVRAMBlocking{&ppuLayout, Size{0, 0}};
+  //
   Label mode7Label{this, Size{~0, 0}, 2};
   HorizontalLayout mode7Layout{this, Size{~0, 0}};
     Label mode7ScaleLabel{&mode7Layout, Size{0, 0}};
@@ -353,16 +354,47 @@ public:
     CheckLabel mode7Perspective{&mode7Layout, Size{0, 0}};
     CheckLabel mode7Supersample{&mode7Layout, Size{0, 0}};
     CheckLabel mode7Mosaic{&mode7Layout, Size{0, 0}};
+  //
   Label dspLabel{this, Size{~0, 0}, 2};
   HorizontalLayout dspLayout{this, Size{~0, 0}};
     CheckLabel fastDSP{&dspLayout, Size{0, 0}};
     CheckLabel cubicInterpolation{&dspLayout, Size{0, 0}};
-    CheckLabel echoShadow{&dspLayout, Size{0, 0}};
+  //
   Label coprocessorLabel{this, Size{~0, 0}, 2};
   HorizontalLayout coprocessorLayout{this, Size{~0, 0}};
     CheckLabel coprocessorDelayedSyncOption{&coprocessorLayout, Size{0, 0}};
     CheckLabel coprocessorPreferHLEOption{&coprocessorLayout, Size{0, 0}};
-  Label hacksNote{this, Size{~0, 0}};
+  Canvas coprocessorSpacer{this, Size{~0, 1}};
+  //
+  Label gameLabel{this, Size{~0, 0}, 2};
+  CheckLabel hotfixes{this, Size{0, 0}};
+  //
+  Widget spacer{this, Size{~0, ~0}};
+  Label note{this, Size{~0, 0}};
+};
+
+struct CompatibilitySettings : VerticalLayout {
+  auto create() -> void;
+
+private:
+  Label entropyLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout entropyLayout{this, Size{~0, 0}};
+    RadioLabel entropyNone{&entropyLayout, Size{0, 0}};
+    RadioLabel entropyLow{&entropyLayout, Size{0, 0}};
+    RadioLabel entropyHigh{&entropyLayout, Size{0, 0}};
+    Group entropyGroup{&entropyNone, &entropyLow, &entropyHigh};
+  //
+  Label cpuLabel{this, Size{~0, 0}, 2};
+  CheckLabel fastMath{this, Size{0, 0}};
+  //
+  Label ppuLabel{this, Size{~0, 0}, 2};
+  CheckLabel noVRAMBlocking{this, Size{0, 0}};
+  //
+  Label dspLabel{this, Size{~0, 0}, 2};
+  CheckLabel echoShadow{this, Size{0, 0}};
+  //
+  Widget spacer{this, Size{~0, ~0}};
+  Label note{this, Size{~0, 0}};
 };
 
 struct DriverSettings : VerticalLayout {
@@ -402,6 +434,7 @@ public:
     CheckLabel videoBlockingToggle{&videoToggleLayout, Size{0, 0}};
     CheckLabel videoFlushToggle{&videoToggleLayout, Size{0, 0}};
   Canvas videoSpacer{this, Size{~0, 1}};
+  //
   Label audioLabel{this, Size{~0, 0}, 2};
   VerticalLayout audioLayout{this, Size{~0, 0}};
     HorizontalLayout audioDriverLayout{&audioLayout, Size{~0, 0}};
@@ -421,6 +454,7 @@ public:
     CheckLabel audioBlockingToggle{&audioToggleLayout, Size{0, 0}};
     CheckLabel audioDynamicToggle{&audioToggleLayout, Size{0, 0}};
   Canvas audioSpacer{this, Size{~0, 1}};
+  //
   Label inputLabel{this, Size{~0, 0}, 2};
   VerticalLayout inputLayout{this, Size{~0, 0}};
     HorizontalLayout inputDriverLayout{&inputLayout, Size{~0, 0}};
@@ -438,7 +472,7 @@ struct SettingsWindow : Window, Lock {
 public:
   VerticalLayout layout{this};
     HorizontalLayout panelLayout{&layout, Size{~0, ~0}};
-      ListView panelList{&panelLayout, Size{120_sx, ~0}};
+      ListView panelList{&panelLayout, Size{125_sx, ~0}};
       VerticalLayout panelContainer{&panelLayout, Size{~0, ~0}};
   StatusBar statusBar{this};
 };
@@ -449,8 +483,9 @@ extern AudioSettings audioSettings;
 extern InputSettings inputSettings;
 extern HotkeySettings hotkeySettings;
 extern PathSettings pathSettings;
-extern SpeedSettings speedSettings;
 extern EmulatorSettings emulatorSettings;
+extern EnhancementSettings enhancementSettings;
+extern CompatibilitySettings compatibilitySettings;
 extern DriverSettings driverSettings;
 namespace Instances { extern Instance<SettingsWindow> settingsWindow; }
 extern SettingsWindow& settingsWindow;

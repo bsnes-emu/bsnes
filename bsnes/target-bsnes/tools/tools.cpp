@@ -61,7 +61,7 @@ auto ToolsWindow::create() -> void {
   panelContainer.append(manifestViewer, Size{~0, ~0});
 
   setTitle("Tools");
-  setSize({720_sx, 400_sx});
+  setSize({720_sx, 400_sy});
   setAlignment({1.0, 1.0});
   setDismissable();
 

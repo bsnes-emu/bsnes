@@ -1,8 +1,8 @@
 auto Program::hackCompatibility() -> void {
-  bool fastPPU = emulatorSettings.fastPPU.checked();
-  bool fastPPUNoSpriteLimit = emulatorSettings.noSpriteLimit.checked();
-  bool fastDSP = emulatorSettings.fastDSP.checked();
-  bool coprocessorDelayedSync = emulatorSettings.coprocessorDelayedSyncOption.checked();
+  bool fastPPU = settings.emulator.hack.ppu.fast;
+  bool fastPPUNoSpriteLimit = settings.emulator.hack.ppu.noSpriteLimit;
+  bool fastDSP = settings.emulator.hack.dsp.fast;
+  bool coprocessorDelayedSync = settings.emulator.hack.coprocessor.delayedSync;
   uint renderCycle = 512;
 
   auto title = superFamicom.title;

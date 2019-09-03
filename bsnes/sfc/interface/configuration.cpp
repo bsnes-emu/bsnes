@@ -16,8 +16,10 @@ auto Configuration::process(Markup::Node document, bool load) -> void {
   bind(boolean, "Video/BlurEmulation", video.blurEmulation);
   bind(boolean, "Video/ColorEmulation", video.colorEmulation);
 
+  bind(boolean, "Hacks/Hotfixes", hacks.hotfixes);
   bind(text,    "Hacks/Entropy", hacks.entropy);
   bind(natural, "Hacks/CPU/Overclock", hacks.cpu.overclock);
+  bind(boolean, "Hacks/CPU/FastMath", hacks.cpu.fastMath);
   bind(boolean, "Hacks/PPU/Fast", hacks.ppu.fast);
   bind(boolean, "Hacks/PPU/Deinterlace", hacks.ppu.deinterlace);
   bind(natural, "Hacks/PPU/RenderCycle", hacks.ppu.renderCycle);
