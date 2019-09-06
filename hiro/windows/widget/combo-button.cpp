@@ -45,12 +45,10 @@ auto pComboButton::reset() -> void {
 }
 
 auto pComboButton::setGeometry(Geometry geometry) -> void {
-  //height = minimum drop-down list height; use CB_SETITEMHEIGHT to control actual widget height
-  pWidget::setGeometry({geometry.x(), geometry.y(), geometry.width(), 1});
   RECT rc;
   GetWindowRect(hwnd, &rc);
-  unsigned adjustedHeight = geometry.height() - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
-  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
+  geometry.setY(geometry.y() + (geometry.height() - (rc.bottom - rc.top)));
+  pWidget::setGeometry({geometry.x(), geometry.y(), geometry.width(), 1});
 }
 
 auto pComboButton::onChange() -> void {

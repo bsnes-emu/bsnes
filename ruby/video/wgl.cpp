@@ -4,6 +4,7 @@
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 
 static LRESULT CALLBACK VideoOpenGL32_WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  if(msg == WM_SYSKEYDOWN && waram == VK_F4) return false;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 

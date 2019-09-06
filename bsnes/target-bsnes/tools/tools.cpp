@@ -99,4 +99,5 @@ auto ToolsWindow::show(int index) -> void {
   panelContainer.resize();
   setVisible();
   setFocused();
+  panelList.setFocused();
 }

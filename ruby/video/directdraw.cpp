@@ -2,6 +2,7 @@
 #undef interface
 
 static LRESULT CALLBACK VideoDirectDraw7_WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  if(msg == WM_SYSKEYDOWN && waram == VK_F4) return false;
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 

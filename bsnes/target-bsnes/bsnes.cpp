@@ -4,7 +4,7 @@ Video video;
 Audio audio;
 Input input;
 unique_pointer<Emulator::Interface> emulator;
-//
+
 auto locate(string name) -> string {
   string location = {Path::program(), name};
   if(inode::exists(location)) return location;
