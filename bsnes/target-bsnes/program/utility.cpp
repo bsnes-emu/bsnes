@@ -1,5 +1,5 @@
 auto Program::showMessage(string text) -> void {
-  statusTime = chrono::timestamp();
+  statusTime = chrono::millisecond();
   statusMessage = text;
 }
 
@@ -9,7 +9,7 @@ auto Program::showFrameRate(string text) -> void {
 
 auto Program::updateStatus() -> void {
   string message;
-  if(chrono::timestamp() - statusTime <= 2) {
+  if(chrono::millisecond() - statusTime <= 2000) {
     message = statusMessage;
   }
   if(message != presentation.statusLeft.text()) {

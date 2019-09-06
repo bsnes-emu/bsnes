@@ -327,6 +327,7 @@ auto Video::hasMonitors() -> vector<Monitor> {
       auto displayID = [screenID unsignedIntValue];
       auto displayPort = CGDisplayIOServicePort(displayID);
       auto dictionary = IODisplayCreateInfoDictionary(displayPort, 0);
+      CFRetain(dictionary);
       if(auto names = (CFDictionaryRef)CFDictionaryGetValue(dictionary, CFSTR(kDisplayProductName))) {
         auto languageKeys = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
         CFDictionaryApplyFunction(names, MonitorKeyArrayCallback, (void*)languageKeys);

@@ -25,11 +25,40 @@ static void flush_variables()
 			emulator->configure("Video/BlurEmulation", false);
 	}
 
+	variable = { "bsnes_hotfixes", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "ON") == 0)
+			emulator->configure("Hacks/Hotfixes", true);
+		else if (strcmp(variable.value, "OFF") == 0)
+			emulator->configure("Hacks/Hotfixes", false);
+	}
+
+	variable = { "bsnes_entropy", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "None") == 0)
+			emulator->configure("Hacks/Entropy", "None");
+		else if (strcmp(variable.value, "Low") == 0)
+			emulator->configure("Hacks/Entropy", "Low");
+		else if (strcmp(variable.value, "High") == 0)
+			emulator->configure("Hacks/Entropy", "High");
+	}
+
 	variable = { "bsnes_cpu_overclock", nullptr };
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
 	{
 		int val = atoi(variable.value);
 		emulator->configure("Hacks/CPU/Overclock", val);
+	}
+
+	variable = { "bsnes_cpu_fastmath", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "ON") == 0)
+			emulator->configure("Hacks/CPU/FastMath", true);
+		else if (strcmp(variable.value, "OFF") == 0)
+			emulator->configure("Hacks/CPU/FastMath", false);
 	}
 
 	variable = { "bsnes_cpu_sa1_overclock", nullptr };
@@ -71,6 +100,15 @@ static void flush_variables()
 			emulator->configure("Hacks/PPU/NoSpriteLimit", true);
 		else if (strcmp(variable.value, "OFF") == 0)
 			emulator->configure("Hacks/PPU/NoSpriteLimit", false);
+	}
+
+	variable = { "bsnes_ppu_no_vram_blocking", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "ON") == 0)
+			emulator->configure("Hacks/PPU/NoVRAMBlocking", true);
+		else if (strcmp(variable.value, "OFF") == 0)
+			emulator->configure("Hacks/PPU/NoVRAMBlocking", false);
 	}
 
 	variable = { "bsnes_ppu_show_overscan", nullptr };
@@ -134,6 +172,15 @@ static void flush_variables()
 			emulator->configure("Hacks/DSP/Cubic", true);
 		else if (strcmp(variable.value, "OFF") == 0)
 			emulator->configure("Hacks/DSP/Cubic", false);
+	}
+
+	variable = { "bsnes_dsp_echo_shadow", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "ON") == 0)
+			emulator->configure("Hacks/DSP/EchoShadow", true);
+		else if (strcmp(variable.value, "OFF") == 0)
+			emulator->configure("Hacks/DSP/EchoShadow", false);
 	}
 
 	variable = { "bsnes_coprocessor_delayed_sync", nullptr };
@@ -293,12 +340,16 @@ static void set_environment_info(retro_environment_t cb)
 
 	static const retro_variable vars[] = {
 		{ "bsnes_blur_emulation", "Blur emulation; OFF|ON" },
+		{ "bsnes_entropy", "Entropy (randomization); Low|High|None" },
+		{ "bsnes_hotfixes", "Hotfixes; OFF|ON" },
 		{ "bsnes_cpu_overclock", "CPU Overclocking; 100|110|120|130|140|150|160|170|180|190|200|210|220|230|240|250|260|270|280|290|300|310|320|330|340|350|360|370|380|390|400|10|20|30|40|50|60|70|80|90" },
+		{ "bsnes_cpu_fastmath", "CPU Fast Math; OFF|ON" },
 		{ "bsnes_sa1_overclock", "SA1 Coprocessor Overclocking; 100|110|120|130|140|150|160|170|180|190|200|210|220|230|240|250|260|270|280|290|300|310|320|330|340|350|360|370|380|390|400|10|20|30|40|50|60|70|80|90" },
 		{ "bsnes_sfx_overclock", "SuperFX Coprocessor Overclocking; 100|110|120|130|140|150|160|170|180|190|200|210|220|230|240|250|260|270|280|290|300|310|320|330|340|350|360|370|380|390|400|410|420|430|440|450|460|470|480|490|500|510|520|530|540|550|560|570|580|590|600|610|620|630|640|650|660|670|680|690|700|710|720|730|740|750|760|770|780|790|800|10|20|30|40|50|60|70|80|90" },
 		{ "bsnes_ppu_fast", "PPU Fast mode; ON|OFF" },
 		{ "bsnes_ppu_deinterlace", "PPU Deinterlace; ON|OFF" },
 		{ "bsnes_ppu_no_sprite_limit", "PPU No sprite limit; OFF|ON" },
+		{ "bsnes_ppu_no_vram_blocking", "PPU No VRAM blocking; OFF|ON" },
 		{ "bsnes_ppu_show_overscan", "Show Overscan; OFF|ON" },
 		{ "bsnes_mode7_scale", "HD Mode 7 Scale; 1x|2x|3x|4x|5x|6x|7x|8x" },
 		{ "bsnes_mode7_perspective", "HD Mode 7 Perspective correction; ON|OFF" },
@@ -306,6 +357,7 @@ static void set_environment_info(retro_environment_t cb)
 		{ "bsnes_mode7_mosaic", "HD Mode 7 HD->SD Mosaic; ON|OFF" },
 		{ "bsnes_dsp_fast", "DSP Fast mode; ON|OFF" },
 		{ "bsnes_dsp_cubic", "DSP Cubic interpolation; ON|OFF" },
+		{ "bsnes_dsp_echo_shadow", "DSP Echo shadow RAM; OFF|ON" },
 		{ "bsnes_coprocessor_delayed_sync", "Coprocessor Delayed Sync; ON|OFF" },
 		{ "bsnes_coprocessor_prefer_hle", "Coprocessor Prefer HLE; ON|OFF" },
 		{ nullptr },
