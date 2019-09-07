@@ -3,9 +3,28 @@
 static retro_environment_t environ_cb;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
+static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll;
 static retro_input_state_t input_state;
 static retro_log_printf_t libretro_print;
+
+#define SAMPLERATE 48000
+#define AUDIOBUFSIZE (SAMPLERATE/50) * 2
+static int16_t audio_buffer[AUDIOBUFSIZE];
+static uint16_t audio_buffer_index = 0;
+static uint16_t audio_buffer_max = AUDIOBUFSIZE;
+
+static void audio_queue(int16_t left, int16_t right)
+{
+	audio_buffer[audio_buffer_index++] = left;
+	audio_buffer[audio_buffer_index++] = right;
+
+	if (audio_buffer_index == audio_buffer_max)
+	{
+		audio_batch_cb(audio_buffer, audio_buffer_max/2);
+		audio_buffer_index = 0;
+	}
+}
 
 #include "program.cpp"
 
@@ -386,8 +405,9 @@ RETRO_API void retro_set_audio_sample(retro_audio_sample_t cb)
 	audio_cb = cb;
 }
 
-RETRO_API void retro_set_audio_sample_batch(retro_audio_sample_batch_t)
+RETRO_API void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
+	audio_batch_cb = cb;
 }
 
 RETRO_API void retro_set_input_poll(retro_input_poll_t cb)
@@ -431,8 +451,15 @@ RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info)
 	info->geometry.base_height = program->overscan ? 480 : 448; // accurate ppu
 	info->geometry.max_width   = 2048;  // 8x 256 for hd mode 7
 	info->geometry.max_height  = 1920;  // 8x 240
-	info->timing.fps           = 60;
-	info->timing.sample_rate   = 48000;
+	info->timing.sample_rate   = SAMPLERATE;
+	if (retro_get_region() == RETRO_REGION_NTSC) {
+		info->timing.fps = 21477272.0 / 357366.0;
+		audio_buffer_max = (SAMPLERATE/60) * 2;
+	}
+	else
+	{
+		info->timing.fps = 21281370.0 / 425568.0;
+	}
 }
 
 RETRO_API void retro_set_controller_port_device(unsigned port, unsigned device)
@@ -507,7 +534,7 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 	program->superFamicom.location = string(game->path);
 	program->base_name = string(game->path);
 
-	emulator->configure("Audio/Frequency", 48000);
+	emulator->configure("Audio/Frequency", SAMPLERATE);
 
 	// turn into core options later
 	emulator->configure("Hacks/CPU/Overclock", 100);
@@ -537,7 +564,7 @@ RETRO_API void retro_unload_game()
 
 RETRO_API unsigned retro_get_region()
 {
-	return RETRO_REGION_NTSC;
+	return program->superFamicom.region == "NTSC" ? RETRO_REGION_NTSC : RETRO_REGION_PAL;
 }
 
 // Currently, there is no safe/sensible way to use the memory interface without severe hackery.

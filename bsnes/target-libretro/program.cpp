@@ -129,7 +129,7 @@ auto Program::load() -> void {
 auto Program::load(uint id, string name, string type, vector<string> options) -> Emulator::Platform::Load {
 	if (loadSuperFamicom(superFamicom.location))
 	{
-		return {id, superFamicom.option};
+		return {id, superFamicom.region};
 	}
 	return { id, options(0) };
 }
@@ -159,7 +159,8 @@ auto Program::audioFrame(const float* samples, uint channels) -> void
 {
 	int16_t left = d2i16(samples[0]);
 	int16_t right = d2i16(samples[1]);
-	audio_cb(left, right);
+	//audio_cb(left, right);
+	audio_queue(left, right);
 }
 
 auto pollInputDevices(uint port, uint device, uint input) -> int16
