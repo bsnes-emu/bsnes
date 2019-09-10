@@ -206,8 +206,8 @@ auto Presentation::create() -> void {
     .show();
   });
 
-  viewport.setFocusable();
-  viewport.setDroppable();
+  viewport.setFocusable(false);  //true would also capture Alt, which breaks keyboard menu navigation
+  viewport.setDroppable(true);
   viewport.onDrop([&](vector<string> locations) {
     if(!locations) return;
     program.gameQueue = {};

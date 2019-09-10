@@ -35,9 +35,9 @@ auto Settings::save() -> void {
 auto Settings::process(bool load) -> void {
   if(load) {
     //initialize non-static default settings
-    video.driver = ruby::Video::optimalDriver();
-    audio.driver = ruby::Audio::optimalDriver();
-    input.driver = ruby::Input::optimalDriver();
+    video.driver = ruby::Video::safestDriver();
+    audio.driver = ruby::Audio::safestDriver();
+    input.driver = ruby::Input::safestDriver();
   }
 
   #define bind(type, path, name) \

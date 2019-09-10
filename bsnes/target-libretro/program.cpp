@@ -123,6 +123,29 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 auto Program::load() -> void {
 	emulator->unload();
 	emulator->load();
+
+	// per-game hack overrides
+	auto title = superFamicom.title;
+	auto region = superFamicom.region;
+
+	//relies on mid-scanline rendering techniques
+	if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") emulator->configure("Hacks/PPU/Fast", false);
+
+	//stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
+	if(title == "SFC クレヨンシンチャン") emulator->configure("Hacks/PPU/Fast", false);
+
+	//relies on cycle-accurate writes to the echo buffer
+	if(title == "KOUSHIEN_2") emulator->configure("Hacks/DSP/Fast", false);
+
+	//will hang immediately
+	if(title == "RENDERING RANGER R2") emulator->configure("Hacks/DSP/Fast", false);
+
+	//will hang sometimes in the "Bach in Time" stage
+	if(title == "BUBSY II" && region == "PAL") emulator->configure("Hacks/DSP/Fast", false);
+
+	//fixes an errant scanline on the title screen due to writing to PPU registers too late
+	if(title == "ADVENTURES OF FRANKEN" && region == "PAL") emulator->configure("Hacks/PPU/RenderCycle", 32);
+
 	emulator->power();
 }
 

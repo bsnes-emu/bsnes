@@ -62,8 +62,7 @@ auto EnhancementSettings::create() -> void {
   mode7Scale.append(ComboButtonItem().setText("1440p").setProperty("multiplier", 6));
   mode7Scale.append(ComboButtonItem().setText("1680p").setProperty("multiplier", 7));
   mode7Scale.append(ComboButtonItem().setText("1920p").setProperty("multiplier", 8));
-  mode7Scale.append(ComboButtonItem().setText("2160p").setProperty("multiplier", 9));
-  for(uint n = 1; n <= 9; n++) {
+  for(uint n = 1; n <= 8; n++) {
     if(settings.emulator.hack.ppu.mode7.scale == n) mode7Scale.item(n - 1).setSelected();
   }
   mode7Scale.onChange([&] {
