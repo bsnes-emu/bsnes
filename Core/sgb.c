@@ -338,7 +338,6 @@ static void command_ready(GB_gameboy_t *gb)
             break;
         case MLT_REQ:
             gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
-            gb->sgb->current_player = gb->sgb->player_count - 1;
             break;
         case CHR_TRN:
             gb->sgb->vram_transfer_countdown = 2;
@@ -382,13 +381,16 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     if (gb->joyp_write_callback) {
         gb->joyp_write_callback(gb, value);
     }
+    
     if (!GB_is_sgb(gb)) return;
     if (!GB_is_hle_sgb(gb)) {
         /* Notify via callback */
         return;
     }
     if (gb->sgb->disable_commands) return;
-    if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) return;
+    if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) {
+        return;
+    }
     
     uint16_t command_size = (gb->sgb->command[0] & 7 ?: 1) * SGB_PACKET_SIZE * 8;
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
@@ -398,10 +400,10 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     switch ((value >> 4) & 3) {
         case 3:
             gb->sgb->ready_for_pulse = true;
-            /* TODO: This is the logic used by BGB which *should* work for most/all games, but a proper test ROM is needed */
-            if (gb->sgb->player_count > 1 && (gb->io_registers[GB_IO_JOYP] & 0x30) == 0x10) {
+            if (gb->sgb->player_count > 1 && !gb->sgb->mlt_lock) {
                 gb->sgb->current_player++;
-                gb->sgb->current_player &= gb->sgb->player_count - 1;
+                gb->sgb->current_player &= 3;
+                gb->sgb->mlt_lock = true;
             }
             break;
             
@@ -426,6 +428,7 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
             }
             break;
         case 1: // One
+            gb->sgb->mlt_lock ^= true;
             if (!gb->sgb->ready_for_pulse || !gb->sgb->ready_for_write) return;
             if (gb->sgb->ready_for_stop) {
                 GB_log(gb, "Corrupt SGB command.\n");

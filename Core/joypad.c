@@ -12,7 +12,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
     previous_state = gb->io_registers[GB_IO_JOYP] & 0xF;
     key_selection = (gb->io_registers[GB_IO_JOYP] >> 4) & 3;
     gb->io_registers[GB_IO_JOYP] &= 0xF0;
-    uint8_t current_player = gb->sgb? gb->sgb->current_player : 0;
+    uint8_t current_player = gb->sgb? (gb->sgb->current_player & (gb->sgb->player_count - 1)) : 0;
     switch (key_selection) {
         case 3:
             if (gb->sgb && gb->sgb->player_count > 1) {
@@ -73,7 +73,7 @@ void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value)
     if (previous_state & ~(gb->io_registers[GB_IO_JOYP] & 0xF)) {
         gb->io_registers[GB_IO_IF] |= 0x10;
     }
-
+    gb->io_registers[GB_IO_JOYP] |= 0xC0;
 }
 
 void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed)

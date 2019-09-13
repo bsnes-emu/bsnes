@@ -858,7 +858,7 @@ void GB_reset(GB_gameboy_t *gb)
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
     gb->cgb_ram_bank = 1;
-    gb->io_registers[GB_IO_JOYP] = 0xF;
+    gb->io_registers[GB_IO_JOYP] = 0xCF;
     gb->mbc_ram_size = mbc_ram_size;
     if (GB_is_cgb(gb)) {
         gb->ram_size = 0x1000 * 8;
