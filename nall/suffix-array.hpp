@@ -71,8 +71,8 @@ suffix_array_plcp:
   plcp = [1,0,0,3,2,2,1,1,0,0]
 
 suffix_array_lrcp:
-  llcp = [0,0,0,3,1,0,0,0,0,1] => llcp[m] == lcp(l, m)
-  rlcp = [0,1,1,1,2,0,2,0,0,0] => rlcp[m] == lcp(m, r)
+  llcp = [0,0,0,3,0,2,0,2,0,0] => llcp[m] == lcp(l, m)
+  rlcp = [0,1,1,1,0,0,0,0,0,0] => rlcp[m] == lcp(m, r)
 
 suffix_array_lpf:
   lengths = [0,0,1,3,2,1,0,2,1,0]
@@ -93,7 +93,7 @@ suffix_array_lpf:
 // suffix array via induced sorting
 // O(n)
 inline auto suffix_array(array_view<uint8_t> input) -> vector<int> {
-  return induced_sort(input.data(), input.size());
+  return induced_sort(input);
 }
 
 // inverse
@@ -192,17 +192,17 @@ inline auto suffix_array_lrcp(vector<int>& llcp, vector<int>& rlcp, array_view<i
   rlcp.reset(), rlcp.reallocate(size + 1);
 
   function<int (int, int)> recurse = [&](int l, int r) -> int {
-    if(l == r - 1) {
-      if(r > size) return 0;
-      if(lcp) return lcp[r];
-      return plcp[sa[r]];
+    if(l >= r - 1) {
+      if(l >= size) return 0;
+      if(lcp) return lcp[l];
+      return plcp[sa[l]];
     }
     int m = l + r >> 1;
-    llcp[m] = recurse(l, m);
-    rlcp[m] = recurse(m, r);
-    return min(llcp[m], rlcp[m]);
+    llcp[m - 1] = recurse(l, m);
+    rlcp[m - 1] = recurse(m, r);
+    return min(llcp[m - 1], rlcp[m - 1]);
   };
-  recurse(0, size + 1);
+  recurse(1, size + 1);
 
   llcp[0] = 0;
   rlcp[0] = 0;
@@ -274,6 +274,8 @@ inline auto suffix_array_find(int& length, int& offset, array_view<int> sa, arra
       if(k == match.size()) return true;
     }
 
+    if(k == match.size() || s + k == input.size()) k--;
+
     if(match[k] < input[s + k]) {
       r = m;
     } else {
@@ -303,6 +305,8 @@ inline auto suffix_array_find(int& length, int& offset, array_view<int> llcp, ar
       offset = s;
       if(k == match.size()) return true;
     }
+
+    if(k == match.size() || s + k == input.size()) k--;
 
     if(match[k] < input[s + k]) {
       r = m;

@@ -91,7 +91,7 @@ auto Program::viewportRefresh() -> void {
 
       for(; SnowMover != 0; --SnowMover) {
         if(--SnowTimer == 0) {
-          ++NumSnow;
+          if(NumSnow < 400) ++NumSnow;
           SnowTimer = 18;
         }
         uint32_t i = 0;

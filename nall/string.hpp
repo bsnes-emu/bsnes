@@ -45,6 +45,7 @@ struct string_view {
   inline auto operator=(const string_view& source) -> type&;
   inline auto operator=(string_view&& source) -> type&;
 
+  inline explicit operator bool() const;
   inline operator const char*() const;
   inline auto data() const -> const char*;
   inline auto size() const -> uint;

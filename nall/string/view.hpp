@@ -69,6 +69,10 @@ auto string_view::operator=(string_view&& source) -> type& {
   return *this;
 };
 
+string_view::operator bool() const {
+  return _size > 0;
+}
+
 string_view::operator const char*() const {
   return _data;
 }

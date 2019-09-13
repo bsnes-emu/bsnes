@@ -10,7 +10,8 @@ namespace nall {
 //where the first character is the empty suffix, equal to size
 
 template<typename T>
-inline auto induced_sort(const T* data, const uint size, const uint characters = 256) -> vector<int> {
+inline auto induced_sort(array_view<T> data, const uint characters = 256) -> vector<int> {
+  const uint size = data.size();
   if(size == 0) return vector<int>{0};  //required to avoid out-of-bounds accesses
   if(size == 1) return vector<int>{1, 0};  //not strictly necessary; but more performant
 
@@ -153,14 +154,14 @@ inline auto induced_sort(const T* data, const uint size, const uint characters =
     }
   } else {
     //recurse until every character in summaryData is unique ...
-    summaries = induced_sort(summaryData.data(), summaryData.size() - 1, summaryCharacters);
+    summaries = induced_sort<int>({summaryData.data(), summaryData.size()}, summaryCharacters);
   }
 
   suffixes.fill(-1);  //reuse existing buffer for accurate sort
 
   //accurate LMS sort
   getTails();
-  for(uint n : reverse(range(1, summaries.size()))) {
+  for(uint n : reverse(range(2, summaries.size()))) {
     auto index = summaryOffsets[summaries[n]];
     suffixes[tails[data[index]]--] = index;  //advance from the tail of the bucket
   }

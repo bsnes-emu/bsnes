@@ -81,6 +81,17 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     }
   }
 
+  //title
+  else if(block.beginsWith("! ")) {
+    auto name = lines.takeLeft().trimLeft("! ", 1L);
+    state.output.append("<h1>", markup(name));
+    for(auto& line : lines) {
+      if(!line.beginsWith("! ")) continue;
+      state.output.append("<span>", markup(line.trimLeft("! ", 1L)), "</span>");
+    }
+    state.output.append("</h1>\n");
+  }
+
   //section
   else if(block.beginsWith("# ")) {
     if(settings.sectioned) {
@@ -90,12 +101,12 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
-    state.output.append("<h1 id=\"", name, "\">", data);
+    state.output.append("<h2 id=\"", name, "\">", data);
     for(auto& line : lines) {
       if(!line.beginsWith("# ")) continue;
       state.output.append("<span>", line.trimLeft("# ", 1L), "</span>");
     }
-    state.output.append("</h1>\n");
+    state.output.append("</h2>\n");
   }
 
   //header
@@ -103,13 +114,13 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
-    if(depth <= 5) {
-      state.output.append("<h", depth + 1, " id=\"", name, "\">", data);
+    if(depth <= 4) {
+      state.output.append("<h", depth + 2, " id=\"", name, "\">", data);
       for(auto& line : lines) {
         if(count(line, '=') != depth) continue;
         state.output.append("<span>", slice(line, depth + 1), "</span>");
       }
-      state.output.append("</h", depth + 1, ">\n");
+      state.output.append("</h", depth + 2, ">\n");
     }
   }
 

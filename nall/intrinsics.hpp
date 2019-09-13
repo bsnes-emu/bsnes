@@ -4,7 +4,7 @@ namespace nall {
   using uint = unsigned;
 
   enum class Compiler : uint { Clang, GCC, Microsoft, Unknown };
-  enum class Platform : uint { Windows, MacOS, Linux, BSD, Unknown };
+  enum class Platform : uint { Windows, MacOS, Linux, BSD, Android, Unknown };
   enum class API : uint { Windows, Posix, Unknown };
   enum class DisplayServer : uint { Windows, Quartz, Xorg, Unknown };
   enum class Architecture : uint { x86, amd64, ARM32, ARM64, PPC32, PPC64, Unknown };
@@ -82,6 +82,13 @@ namespace nall {
   constexpr auto platform() -> Platform { return Platform::MacOS; }
   constexpr auto api() -> API { return API::Posix; }
   constexpr auto display() -> DisplayServer { return DisplayServer::Quartz; }
+#elif defined(__ANDROID__)
+  #define PLATFORM_ANDROID
+  #define API_POSIX
+  #define DISPLAY_UNKNOWN
+  constexpr auto platform() -> Platform { return Platform::Android; }
+  constexpr auto api() -> API { return API::Posix; }
+  constexpr auto display() -> DisplayServer { return DisplayServer::Unknown; }
 #elif defined(linux) || defined(__linux__)
   #define PLATFORM_LINUX
   #define API_POSIX
