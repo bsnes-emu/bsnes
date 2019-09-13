@@ -465,22 +465,9 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     }
 }
 
-static inline uint8_t scale_channel(uint8_t x)
-{
-    return (x << 3) | (x >> 2);
-}
-
 static uint32_t convert_rgb15(GB_gameboy_t *gb, uint16_t color)
 {
-    uint8_t r = (color) & 0x1F;
-    uint8_t g = (color >> 5) & 0x1F;
-    uint8_t b = (color >> 10) & 0x1F;
-    
-    r = scale_channel(r);
-    g = scale_channel(g);
-    b = scale_channel(b);
-    
-    return gb->rgb_encode_callback(gb, r, g, b);
+    return GB_convert_rgb15(gb, color);
 }
 
 static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_t fade)
@@ -493,11 +480,9 @@ static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_
     if (g >= 0x20) g = 0;
     if (b >= 0x20) b = 0;
     
-    r = scale_channel(r);
-    g = scale_channel(g);
-    b = scale_channel(b);
+    color = r | (g << 5) | (b << 10);
     
-    return gb->rgb_encode_callback(gb, r, g, b);
+    return GB_convert_rgb15(gb, color);
 }
 
 #include <stdio.h>
