@@ -337,7 +337,15 @@ static void command_ready(GB_gameboy_t *gb)
             // Not supported, but used by almost all SGB games for hot patching, so let's mute the warning for this
             break;
         case MLT_REQ:
-            gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
+            if (gb->sgb->player_count == 1) {
+                gb->sgb->current_player = 0;
+            }
+            gb->sgb->player_count = (gb->sgb->command[1] & 3) + 1; /* Todo: When breaking save state comaptibility,
+                                                                            fix this to be 0 based. */
+            if (gb->sgb->player_count == 3) {
+                gb->sgb->current_player++;
+            }
+            gb->sgb->mlt_lock = true;
             break;
         case CHR_TRN:
             gb->sgb->vram_transfer_countdown = 2;
@@ -397,10 +405,14 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
         command_size = SGB_PACKET_SIZE * 8;
     }
     
+    if ((value & 0x20) == 0 && (gb->io_registers[GB_IO_JOYP] & 0x20) != 0) {
+        gb->sgb->mlt_lock ^= true;
+    }
+    
     switch ((value >> 4) & 3) {
         case 3:
             gb->sgb->ready_for_pulse = true;
-            if (gb->sgb->player_count > 1 && !gb->sgb->mlt_lock) {
+            if ((gb->sgb->player_count & 1) == 0 && !gb->sgb->mlt_lock) {
                 gb->sgb->current_player++;
                 gb->sgb->current_player &= 3;
                 gb->sgb->mlt_lock = true;
@@ -428,7 +440,6 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
             }
             break;
         case 1: // One
-            gb->sgb->mlt_lock ^= true;
             if (!gb->sgb->ready_for_pulse || !gb->sgb->ready_for_write) return;
             if (gb->sgb->ready_for_stop) {
                 GB_log(gb, "Corrupt SGB command.\n");
