@@ -11,6 +11,10 @@ auto mTreeView::destruct() -> void {
 
 //
 
+auto mTreeView::activation() const -> Mouse::Click {
+  return state.activation;
+}
+
 auto mTreeView::append(sTreeViewItem item) -> type& {
   state.items.append(item);
   item->setParent(this, itemCount() - 1);
@@ -117,6 +121,12 @@ auto mTreeView::selectNone() -> type& {
 
 auto mTreeView::selected() const -> TreeViewItem {
   return item(state.selectedPath);
+}
+
+auto mTreeView::setActivation(Mouse::Click activation) -> type& {
+  state.activation = activation;
+  signal(setActivation, activation);
+  return *this;
 }
 
 auto mTreeView::setBackgroundColor(Color color) -> type& {

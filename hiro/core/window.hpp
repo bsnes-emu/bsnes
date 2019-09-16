@@ -49,6 +49,7 @@ struct mWindow : mObject {
   auto setFrameSize(Size size) -> type&;
   auto setFullScreen(bool fullScreen = true) -> type&;
   auto setGeometry(Geometry geometry) -> type&;
+  auto setGeometry(Alignment, Size) -> type&;
   auto setMaximized(bool maximized = true) -> type&;
   auto setMaximumSize(Size size = {}) -> type&;
   auto setMinimized(bool minimized = true) -> type&;

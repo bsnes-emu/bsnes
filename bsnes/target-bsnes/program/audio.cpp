@@ -56,7 +56,7 @@ auto Program::updateAudioFrequency() -> void {
   double frequency = settings.audio.frequency + settings.audio.skew;
   if(!settings.video.blocking && settings.audio.blocking) {
     for(auto item : presentation.speedGroup.objects<MenuRadioItem>()) {
-      if(item.checked()) frequency *= item.property("multiplier").real();
+      if(item.checked()) frequency *= item.attribute("multiplier").real();
     }
   }
   Emulator::audio.setFrequency(frequency);

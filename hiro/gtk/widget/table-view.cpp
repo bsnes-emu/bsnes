@@ -200,13 +200,13 @@ auto pTableView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
 }
 
 auto pTableView::_columnWidth(unsigned _column) -> unsigned {
-  unsigned width = 8;
+  unsigned width = 6;
   if(auto column = self().column(_column)) {
     if(auto& icon = column->state.icon) {
       width += icon.width() + 2;
     }
     if(auto& text = column->state.text) {
-      width += pFont::size(column->font(true), text).width();
+      width += pFont::size(column->font(true), text).width() + 8;
     }
     if(column->state.sorting != Sort::None) {
       width += 20;

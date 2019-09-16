@@ -3,6 +3,7 @@ struct mTreeView : mWidget {
   Declare(TreeView)
   using mObject::remove;
 
+  auto activation() const -> Mouse::Click;
   auto append(sTreeViewItem item) -> type&;
   auto backgroundColor() const -> Color;
   auto collapse(bool recursive = true) -> type&;
@@ -23,12 +24,14 @@ struct mTreeView : mWidget {
   auto reset() -> type&;
   auto selectNone() -> type&;
   auto selected() const -> TreeViewItem;
+  auto setActivation(Mouse::Click activation = Mouse::Click::Double) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
   auto setParent(mObject* parent = nullptr, int offset = -1) -> type&;
 
 //private:
   struct State {
+    Mouse::Click activation = Mouse::Click::Double;
     Color backgroundColor;
     Color foregroundColor;
     vector<sTreeViewItem> items;

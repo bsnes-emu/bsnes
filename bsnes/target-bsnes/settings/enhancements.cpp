@@ -54,19 +54,19 @@ auto EnhancementSettings::create() -> void {
 
   mode7Label.setText("HD Mode 7 (fast PPU only)").setFont(Font().setBold());
   mode7ScaleLabel.setText("Scale:");
-  mode7Scale.append(ComboButtonItem().setText( "240p").setProperty("multiplier", 1));
-  mode7Scale.append(ComboButtonItem().setText( "480p").setProperty("multiplier", 2));
-  mode7Scale.append(ComboButtonItem().setText( "720p").setProperty("multiplier", 3));
-  mode7Scale.append(ComboButtonItem().setText( "960p").setProperty("multiplier", 4));
-  mode7Scale.append(ComboButtonItem().setText("1200p").setProperty("multiplier", 5));
-  mode7Scale.append(ComboButtonItem().setText("1440p").setProperty("multiplier", 6));
-  mode7Scale.append(ComboButtonItem().setText("1680p").setProperty("multiplier", 7));
-  mode7Scale.append(ComboButtonItem().setText("1920p").setProperty("multiplier", 8));
+  mode7Scale.append(ComboButtonItem().setText( "240p").setAttribute("multiplier", 1));
+  mode7Scale.append(ComboButtonItem().setText( "480p").setAttribute("multiplier", 2));
+  mode7Scale.append(ComboButtonItem().setText( "720p").setAttribute("multiplier", 3));
+  mode7Scale.append(ComboButtonItem().setText( "960p").setAttribute("multiplier", 4));
+  mode7Scale.append(ComboButtonItem().setText("1200p").setAttribute("multiplier", 5));
+  mode7Scale.append(ComboButtonItem().setText("1440p").setAttribute("multiplier", 6));
+  mode7Scale.append(ComboButtonItem().setText("1680p").setAttribute("multiplier", 7));
+  mode7Scale.append(ComboButtonItem().setText("1920p").setAttribute("multiplier", 8));
   for(uint n = 1; n <= 8; n++) {
     if(settings.emulator.hack.ppu.mode7.scale == n) mode7Scale.item(n - 1).setSelected();
   }
   mode7Scale.onChange([&] {
-    settings.emulator.hack.ppu.mode7.scale = mode7Scale.selected().property("multiplier").natural();
+    settings.emulator.hack.ppu.mode7.scale = mode7Scale.selected().attribute("multiplier").natural();
     emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale);
   });
   mode7Perspective.setText("Perspective correction").setChecked(settings.emulator.hack.ppu.mode7.perspective).onToggle([&] {

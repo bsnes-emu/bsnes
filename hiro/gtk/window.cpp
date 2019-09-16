@@ -317,13 +317,15 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
   } else {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
   }
+
   auto time = chrono::millisecond();
-  while(chrono::millisecond() - time < 20) Application::processEvents();
+  while(chrono::millisecond() - time < 20) {
+    Application::processEvents();
+  }
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
   auto margin = frameMargin();
-  gtk_window_move(GTK_WINDOW(widget), geometry.x() - margin.x(), geometry.y() - margin.y());
 
   setMaximumSize(state().maximumSize);
   setMinimumSize(state().minimumSize);
@@ -333,10 +335,13 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
     Application::processEvents();
   }
 
+  gtk_window_move(GTK_WINDOW(widget), geometry.x() - margin.x(), geometry.y() - margin.y());
   gtk_window_resize(GTK_WINDOW(widget), geometry.width(), geometry.height() + _menuHeight() + _statusHeight());
 
   auto time2 = chrono::millisecond();
-  while(chrono::millisecond() - time2 < 20) Application::processEvents();
+  while(chrono::millisecond() - time2 < 20) {
+    Application::processEvents();
+  }
 }
 
 auto pWindow::setMaximized(bool maximized) -> void {

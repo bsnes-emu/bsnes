@@ -25,7 +25,7 @@ auto ManifestViewer::loadManifest() -> void {
   auto titles = emulator->titles();
   for(uint offset : range(manifests.size())) {
     ComboButtonItem item{&manifestOption};
-    item.setProperty("manifest", manifests[offset]);
+    item.setAttribute("manifest", manifests[offset]);
     item.setText(titles[offset]);
     bool verified = false;
     if(offset == 0) verified = program.superFamicom.verified;
@@ -41,7 +41,7 @@ auto ManifestViewer::loadManifest() -> void {
 auto ManifestViewer::selectManifest() -> void {
   auto selected = manifestOption.selected();
   uint offset = selected->offset();
-  manifestView.setText(selected.property("manifest"));
+  manifestView.setText(selected.attribute("manifest"));
   string location;
   if(offset == 0) location = program.superFamicom.location;
   if(offset == 1 && program.gameBoy) location = program.gameBoy.location;

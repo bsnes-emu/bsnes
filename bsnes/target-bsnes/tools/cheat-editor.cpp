@@ -38,7 +38,7 @@ auto CheatDatabase::findCheats() -> void {
       cheatList.append(ListViewItem()
         .setCheckable()
         .setText(cheat["description"].text())
-        .setProperty("code", code)
+        .setAttribute("code", code)
       );
     }
 
@@ -53,7 +53,7 @@ auto CheatDatabase::findCheats() -> void {
 auto CheatDatabase::addCheats() -> void {
   for(auto item : cheatList.items()) {
     if(item.checked()) {
-      cheatEditor.addCheat({item.text(), item.property("code"), false});
+      cheatEditor.addCheat({item.text(), item.attribute("code"), false});
     }
   }
   setVisible(false);

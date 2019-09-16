@@ -115,29 +115,29 @@ auto Presentation::create() -> void {
   saveState.setIcon(Icon::Media::Record).setText("Save State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&saveState};
-    item.setProperty("name", {"Quick/Slot ", 1 + index});
-    item.setProperty("title", {"Slot ", 1 + index});
+    item.setAttribute("name", {"Quick/Slot ", 1 + index});
+    item.setAttribute("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
     item.onActivate([=] { program.saveState({"Quick/Slot ", 1 + index}); });
   }
   loadState.setIcon(Icon::Media::Rewind).setText("Load State");
   for(uint index : range(QuickStates)) {
     MenuItem item{&loadState};
-    item.setProperty("name", {"Quick/Slot ", 1 + index});
-    item.setProperty("title", {"Slot ", 1 + index});
+    item.setAttribute("name", {"Quick/Slot ", 1 + index});
+    item.setAttribute("title", {"Slot ", 1 + index});
     item.setText({"Slot ", 1 + index});
     item.onActivate([=] { program.loadState({"Quick/Slot ", 1 + index}); });
   }
   loadState.append(MenuSeparator());
   loadState.append(MenuItem()
-  .setProperty("name", "Quick/Undo")
-  .setProperty("title", "Undo Last Save")
+  .setAttribute("name", "Quick/Undo")
+  .setAttribute("title", "Undo Last Save")
   .setIcon(Icon::Edit::Undo).setText("Undo Last Save").onActivate([&] {
     program.loadState("Quick/Undo");
   }));
   loadState.append(MenuItem()
-  .setProperty("name", "Quick/Redo")
-  .setProperty("title", "Redo Last Undo")
+  .setAttribute("name", "Quick/Redo")
+  .setAttribute("title", "Redo Last Undo")
   .setIcon(Icon::Edit::Redo).setText("Redo Last Undo").onActivate([&] {
     program.loadState("Quick/Redo");
   }));
@@ -149,11 +149,11 @@ auto Presentation::create() -> void {
     }
   }));
   speedMenu.setIcon(Icon::Device::Clock).setText("Speed").setEnabled(!settings.video.blocking && settings.audio.blocking);
-  speedSlowest.setText("50% (Slowest)").setProperty("multiplier", "2.0").onActivate([&] { program.updateAudioFrequency(); });
-  speedSlow.setText("75% (Slow)").setProperty("multiplier", "1.333").onActivate([&] { program.updateAudioFrequency(); });
-  speedNormal.setText("100% (Normal)").setProperty("multiplier", "1.0").onActivate([&] { program.updateAudioFrequency(); });
-  speedFast.setText("150% (Fast)").setProperty("multiplier", "0.667").onActivate([&] { program.updateAudioFrequency(); });
-  speedFastest.setText("200% (Fastest)").setProperty("multiplier", "0.5").onActivate([&] { program.updateAudioFrequency(); });
+  speedSlowest.setText("50% (Slowest)").setAttribute("multiplier", "2.0").onActivate([&] { program.updateAudioFrequency(); });
+  speedSlow.setText("75% (Slow)").setAttribute("multiplier", "1.333").onActivate([&] { program.updateAudioFrequency(); });
+  speedNormal.setText("100% (Normal)").setAttribute("multiplier", "1.0").onActivate([&] { program.updateAudioFrequency(); });
+  speedFast.setText("150% (Fast)").setAttribute("multiplier", "0.667").onActivate([&] { program.updateAudioFrequency(); });
+  speedFastest.setText("200% (Fastest)").setAttribute("multiplier", "0.5").onActivate([&] { program.updateAudioFrequency(); });
   runMenu.setIcon(Icon::Media::Play).setText("Run Mode");
   runEmulation.setText("Normal").onActivate([&] {
   });
@@ -335,7 +335,7 @@ auto Presentation::updateDeviceMenu() -> void {
       if(port.name == "Expansion Port" && device.name == "21fx") continue;
 
       MenuRadioItem item{menu};
-      item.setProperty("deviceID", device.id);
+      item.setAttribute("deviceID", device.id);
       item.setText(tr(device.name));
       item.onActivate([=] {
         settings(path).setValue(device.name);
@@ -363,7 +363,7 @@ auto Presentation::updateDeviceSelections() -> void {
     auto deviceID = emulator->connected(port.id);
     for(auto& action : menu->actions()) {
       if(auto item = action.cast<MenuRadioItem>()) {
-        if(item.property("deviceID").natural() == deviceID) {
+        if(item.attribute("deviceID").natural() == deviceID) {
           item.setChecked();
           break;
         }
@@ -385,7 +385,7 @@ auto Presentation::updateSizeMenu() -> void {
   uint multipliers = max(1, height / 240);
   for(uint multiplier : range(1, multipliers + 1)) {
     MenuRadioItem item{&sizeMenu};
-    item.setProperty("multiplier", multiplier);
+    item.setAttribute("multiplier", multiplier);
     item.setText({multiplier, "x (", 240 * multiplier, "p)"});
     item.onActivate([=] {
       settings.video.multiplier = multiplier;
@@ -394,7 +394,7 @@ auto Presentation::updateSizeMenu() -> void {
     sizeGroup.append(item);
   }
   for(auto item : sizeGroup.objects<MenuRadioItem>()) {
-    if(settings.video.multiplier == item.property("multiplier").natural()) {
+    if(settings.video.multiplier == item.attribute("multiplier").natural()) {
       item.setChecked();
     }
   }
@@ -413,11 +413,11 @@ auto Presentation::updateStateMenus() -> void {
 
   for(auto& action : saveState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
-      if(auto name = item.property("name")) {
+      if(auto name = item.attribute("name")) {
         if(auto offset = states.find([&](auto& state) { return state.name == name; })) {
-          item.setText({item.property("title"), " (", chrono::local::datetime(states[*offset].date), ")"});
+          item.setText({item.attribute("title"), " (", chrono::local::datetime(states[*offset].date), ")"});
         } else {
-          item.setText({item.property("title"), " (empty)"});
+          item.setText({item.attribute("title"), " (empty)"});
         }
       }
     }
@@ -425,13 +425,13 @@ auto Presentation::updateStateMenus() -> void {
 
   for(auto& action : loadState.actions()) {
     if(auto item = action.cast<MenuItem>()) {
-      if(auto name = item.property("name")) {
+      if(auto name = item.attribute("name")) {
         if(auto offset = states.find([&](auto& state) { return state.name == name; })) {
           item.setEnabled(true);
-          item.setText({item.property("title"), " (", chrono::local::datetime(states[*offset].date), ")"});
+          item.setText({item.attribute("title"), " (", chrono::local::datetime(states[*offset].date), ")"});
         } else {
           item.setEnabled(false);
-          item.setText({item.property("title"), " (empty)"});
+          item.setText({item.attribute("title"), " (empty)"});
         }
       }
     }

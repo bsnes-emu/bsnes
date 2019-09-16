@@ -48,7 +48,7 @@ namespace hiro {
   #include "browser-window.cpp"
   #include "message-window.cpp"
 
-  #include "property.cpp"
+  #include "attribute.cpp"
 
   #include "object.cpp"
   #include "group.cpp"

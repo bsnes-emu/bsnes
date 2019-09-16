@@ -87,7 +87,7 @@ auto InputSettings::activePort() -> InputPort& {
 }
 
 auto InputSettings::activeDevice() -> InputDevice& {
-  auto index = deviceList.selected().property("index").natural();
+  auto index = deviceList.selected().attribute("index").natural();
   return activePort().devices[index];
 }
 
@@ -105,7 +105,7 @@ auto InputSettings::reloadDevices() -> void {
   uint index = 0;
   for(auto& device : activePort().devices) {
     if(device.mappings) {  //only display devices that have configurable inputs
-      deviceList.append(ComboButtonItem().setText(device.name).setProperty("index", index));
+      deviceList.append(ComboButtonItem().setText(device.name).setAttribute("index", index));
     }
     index++;
   }

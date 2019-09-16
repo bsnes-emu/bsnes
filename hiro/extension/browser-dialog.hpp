@@ -17,6 +17,7 @@ struct BrowserDialog {
   auto setAlignment(Alignment = Alignment::Center) -> type&;
   auto setAlignment(sWindow relativeTo, Alignment = Alignment::Center) -> type&;
   auto setFilters(const vector<string>& filters = {}) -> type&;
+  auto setName(const string& name = "") -> type&;
   auto setOptions(const vector<string>& options = {}) -> type&;
   auto setPath(const string& path = "") -> type&;
   auto setTitle(const string& title = "") -> type&;
@@ -26,6 +27,7 @@ private:
     string action;
     Alignment alignment = Alignment::Center;
     vector<string> filters = {"*"};
+    string name;
     vector<string> options;
     string path;
     sWindow relativeTo;

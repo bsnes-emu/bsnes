@@ -43,45 +43,43 @@ struct mObject {
   virtual auto setVisible(bool visible = true) -> type&;
   auto visible(bool recursive = false) const -> bool;
 
-  template<typename T = string> auto property(const string& name) const -> T {
-    if(auto property = state.properties.find(name)) {
-      if(property->value().is<T>()) return property->value().get<T>();
+  template<typename T = string> auto attribute(const string& name) const -> T {
+    if(auto attribute = state.attributes.find(name)) {
+      if(attribute->value().is<T>()) return attribute->value().get<T>();
     }
     return {};
   }
 
   //this template basically disables implicit template type deduction:
-  //if setProperty(name, value) is called without a type, the type will be a string, so property(name) will just work.
-  //if setProperty<T>(name, value) is called, the type will be T. as such, U must be cast to T on assignment.
+  //if setAttribute(name, value) is called without a type, the type will be a string, so attribute(name) will just work.
+  //if setAttribute<T>(name, value) is called, the type will be T. as such, U must be cast to T on assignment.
   //when T = string, value must be convertible to a string.
-  //U defaults to a string, so that setProperty(name, {values, ...}) will deduce U as a string.
-  template<typename T = string, typename U = string> auto setProperty(const string& name, const U& value) -> type& {
+  //U defaults to a string, so that setAttribute(name, {values, ...}) will deduce U as a string.
+  template<typename T = string, typename U = string> auto setAttribute(const string& name, const U& value) -> type& {
     if constexpr(std::is_same_v<T, string> && !std::is_same_v<U, string>) {
-      return setProperty(name, string{value});
+      return setAttribute(name, string{value});
     }
-    if(auto property = state.properties.find(name)) {
-      if((const T&)value) property->setValue((const T&)value);
-      else state.properties.remove(*property);
+    if(auto attribute = state.attributes.find(name)) {
+      if((const T&)value) attribute->setValue((const T&)value);
+      else state.attributes.remove(*attribute);
     } else {
-      if((const T&)value) state.properties.insert({name, (const T&)value});
+      if((const T&)value) state.attributes.insert({name, (const T&)value});
     }
     return *this;
   }
 
 //private:
-//sizeof(mObject) == 88
   struct State {
-    Font font;                  //32
-    set<Property> properties;   //16
-    mObject* parent = nullptr;  // 8
-    int offset = -1;            // 4
-    char enabled = true;        // 1+
-    char visible = true;        // 1=4
+    set<Attribute> attributes;
+    Font font;
+    mObject* parent = nullptr;
+    int offset = -1;
+    char enabled = true;
+    char visible = true;
   } state;
 
-  wObject instance;             // 8
-  pObject* delegate = nullptr;  // 8
-  //vtable                      // 8
+  wObject instance;
+  pObject* delegate = nullptr;
 
   virtual auto construct() -> void;
   virtual auto destruct() -> void;

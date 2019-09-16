@@ -7,6 +7,7 @@ struct pTreeView : pWidget {
 
   auto append(sTreeViewItem item) -> void;
   auto remove(sTreeViewItem item) -> void;
+  auto setActivation(Mouse::Click activation) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setFocused() -> void override;
   auto setForegroundColor(Color color) -> void;
@@ -32,6 +33,7 @@ struct pTreeView : pWidget {
   GtkCellRenderer* gtkCellPixbuf = nullptr;
   GtkCellRenderer* gtkCellText = nullptr;
   GtkEntry* gtkEntry = nullptr;
+  bool suppressActivate = false;
   bool suppressChange = false;
 };
 

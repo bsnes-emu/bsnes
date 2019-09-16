@@ -28,6 +28,7 @@
     } \
     return T(); \
   } \
+  template<typename T = string> auto attribute(const string& name) const { return self().attribute<T>(name); } \
   auto enabled(bool recursive = false) const { return self().enabled(recursive); } \
   auto focused() const { return self().focused(); } \
   auto font(bool recursive = false) const { return self().font(recursive); } \
@@ -38,12 +39,11 @@
     } \
     return Object(); \
   } \
-  template<typename T = string> auto property(const string& name) const { return self().property<T>(name); } \
   auto remove() { return self().remove(), *this; } \
+  template<typename T = string, typename U = string> auto setAttribute(const string& name, const U& value = {}) { return self().setAttribute<T, U>(name, value), *this; } \
   auto setEnabled(bool enabled = true) { return self().setEnabled(enabled), *this; } \
   auto setFocused() { return self().setFocused(), *this; } \
   auto setFont(const Font& font = {}) { return self().setFont(font), *this; } \
-  template<typename T = string, typename U = string> auto setProperty(const string& name, const U& value = {}) { return self().setProperty<T, U>(name, value), *this; } \
   auto setVisible(bool visible = true) { return self().setVisible(visible), *this; } \
   auto visible(bool recursive = false) const { return self().visible(recursive); } \
 
@@ -794,6 +794,7 @@ struct TreeViewItem : sTreeViewItem {
 struct TreeView : sTreeView {
   DeclareSharedWidget(TreeView)
 
+  auto activation() const { return self().activation(); }
   auto append(sTreeViewItem item) { return self().append(item), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
   auto collapse(bool recursive = true) { return self().collapse(recursive), *this; }
@@ -814,6 +815,7 @@ struct TreeView : sTreeView {
   auto reset() { return self().reset(), *this; }
   auto selectNone() { return self().selectNone(), *this; }
   auto selected() const { return self().selected(); }
+  auto setActivation(Mouse::Click activation = Mouse::Click::Double) { return self().setActivation(activation), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
 };
@@ -936,6 +938,7 @@ struct Window : sWindow {
   auto setFrameSize(Size size) { return self().setFrameSize(size), *this; }
   auto setFullScreen(bool fullScreen = true) { return self().setFullScreen(fullScreen), *this; }
   auto setGeometry(Geometry geometry) { return self().setGeometry(geometry), *this; }
+  auto setGeometry(Alignment alignment, Size size) { return self().setGeometry(alignment, size), *this; }
   auto setMaximized(bool maximized) { return self().setMaximized(maximized), *this; }
   auto setMaximumSize(Size size = {}) { return self().setMaximumSize(size), *this; }
   auto setMinimized(bool minimized) { return self().setMinimized(minimized), *this; }

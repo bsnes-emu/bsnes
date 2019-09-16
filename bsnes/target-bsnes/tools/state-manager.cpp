@@ -13,31 +13,31 @@ auto StateWindow::create() -> void {
 }
 
 auto StateWindow::show(string name) -> void {
-  setProperty("type", {name.split("/").first(), "/"});
-  setProperty("name", {name.split("/").last()});
-  nameValue.setText(property("name"));
+  setAttribute("type", {name.split("/").first(), "/"});
+  setAttribute("name", {name.split("/").last()});
+  nameValue.setText(attribute("name"));
   doChange();
-  setTitle(!property("name") ? "Add State" : "Rename State");
+  setTitle(!attribute("name") ? "Add State" : "Rename State");
   setAlignment(*toolsWindow);
   setVisible();
   setFocused();
   nameValue.setFocused();
-  acceptButton.setText(!property("name") ? "Add" : "Rename");
+  acceptButton.setText(!attribute("name") ? "Add" : "Rename");
 }
 
 auto StateWindow::doChange() -> void {
   auto name = nameValue.text().strip();
   bool valid = name && !name.contains("\\\"\t/:*?<>|");
-  if(property("name") && name != property("name")) {
+  if(attribute("name") && name != attribute("name")) {
     //don't allow a state to be renamed to the same name as an existing state (as this would overwrite it)
-    if(program.hasState({property("type"), name})) valid = false;
+    if(program.hasState({attribute("type"), name})) valid = false;
   }
   nameValue.setBackgroundColor(valid ? Color{} : Color{255, 224, 224});
   acceptButton.setEnabled(valid);
 }
 
 auto StateWindow::doAccept() -> void {
-  string name = {property("type"), nameValue.text().strip()};
+  string name = {attribute("type"), nameValue.text().strip()};
   if(acceptButton.text() == "Add") {
     stateManager.createState(name);
   } else {
@@ -64,23 +64,23 @@ auto StateManager::create() -> void {
     stateList.resizeColumns();
   });
   categoryLabel.setText("Category:");
-  categoryOption.append(ComboButtonItem().setText("Managed States").setProperty("type", "Managed/"));
-  categoryOption.append(ComboButtonItem().setText("Quick States").setProperty("type", "Quick/"));
+  categoryOption.append(ComboButtonItem().setText("Managed States").setAttribute("type", "Managed/"));
+  categoryOption.append(ComboButtonItem().setText("Quick States").setAttribute("type", "Quick/"));
   categoryOption.onChange([&] { loadStates(); });
   statePreviewSeparator1.setColor({192, 192, 192});
   statePreviewLabel.setFont(Font().setBold()).setText("Preview");
   statePreviewSeparator2.setColor({192, 192, 192});
   loadButton.setText("Load").onActivate([&] {
-    if(auto item = stateList.selected()) program.loadState(item.property("name"));
+    if(auto item = stateList.selected()) program.loadState(item.attribute("name"));
   });
   saveButton.setText("Save").onActivate([&] {
-    if(auto item = stateList.selected()) program.saveState(item.property("name"));
+    if(auto item = stateList.selected()) program.saveState(item.attribute("name"));
   });
   addButton.setText("Add").onActivate([&] {
     stateWindow.show(type());
   });
   editButton.setText("Rename").onActivate([&] {
-    if(auto item = stateList.selected()) stateWindow.show(item.property("name"));
+    if(auto item = stateList.selected()) stateWindow.show(item.attribute("name"));
   });
   removeButton.setText("Remove").onActivate([&] {
     removeStates();
@@ -88,7 +88,7 @@ auto StateManager::create() -> void {
 }
 
 auto StateManager::type() const -> string {
-  return categoryOption.selected().property("type");
+  return categoryOption.selected().attribute("type");
 }
 
 auto StateManager::loadStates() -> void {
@@ -98,7 +98,7 @@ auto StateManager::loadStates() -> void {
   auto type = this->type();
   for(auto& state : program.availableStates(type)) {
     TableViewItem item{&stateList};
-    item.setProperty("name", state.name);
+    item.setAttribute("name", state.name);
     item.append(TableViewCell().setText(state.name.trimLeft(type, 1L)));
     item.append(TableViewCell().setText(chrono::local::datetime(state.date)));
   }
@@ -111,19 +111,19 @@ auto StateManager::createState(string name) -> void {
   }
   program.saveState(name);
   for(auto& item : stateList.items()) {
-    item.setSelected(item.property("name") == name);
+    item.setSelected(item.attribute("name") == name);
   }
   stateList.doChange();
 }
 
 auto StateManager::modifyState(string name) -> void {
   if(auto item = stateList.selected()) {
-    string from = item.property("name");
+    string from = item.attribute("name");
     string to = name;
     if(from != to) {
       program.renameState(from, to);
       for(auto& item : stateList.items()) {
-        item.setSelected(item.property("name") == to);
+        item.setSelected(item.attribute("name") == to);
       }
       stateList.doChange();
     }
@@ -135,7 +135,7 @@ auto StateManager::removeStates() -> void {
     if(MessageDialog("Are you sure you want to permanently remove the selected state(s)?")
     .setAlignment(*toolsWindow).question() == "Yes") {
       auto lock = acquire();
-      for(auto& item : batched) program.removeState(item.property("name"));
+      for(auto& item : batched) program.removeState(item.attribute("name"));
       loadStates();
     }
   }
@@ -153,7 +153,7 @@ auto StateManager::updateSelection() -> void {
 
   statePreview.setColor({0, 0, 0});
   if(batched.size() == 1) {
-    if(auto saveState = program.loadStateData(batched.first().property("name"))) {
+    if(auto saveState = program.loadStateData(batched.first().attribute("name"))) {
       if(saveState.size() >= 3 * sizeof(uint)) {
         uint signature  = memory::readl<sizeof(uint)>(saveState.data() + 0 * sizeof(uint));
         uint serializer = memory::readl<sizeof(uint)>(saveState.data() + 1 * sizeof(uint));
@@ -182,10 +182,10 @@ auto StateManager::updateSelection() -> void {
 
 auto StateManager::stateEvent(string name) -> void {
   if(locked() || !name.beginsWith(type())) return;
-  auto selected = stateList.selected().property("name");
+  auto selected = stateList.selected().attribute("name");
   loadStates();
   for(auto& item : stateList.items()) {
-    item.setSelected(item.property("name") == selected);
+    item.setSelected(item.attribute("name") == selected);
   }
   stateList.doChange();
 }

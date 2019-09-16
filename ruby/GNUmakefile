@@ -6,7 +6,7 @@ ifeq ($(ruby),)
   else ifeq ($(platform),macos)
     ruby += video.cgl
     ruby += audio.openal
-    ruby += input.quartz input.carbon
+    ruby += input.quartz #input.carbon
   else ifeq ($(platform),linux)
     ruby += video.glx video.glx2 video.xvideo video.xshm
     ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao

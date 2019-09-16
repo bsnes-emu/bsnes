@@ -5,7 +5,9 @@
 #include <nall/range.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
+#if !defined(PLATFORM_ANDROID)
 #include <nall/cipher/chacha20.hpp>
+#endif
 
 #if defined(PLATFORM_LINUX) && __has_include(<sys/random.h>)
   #include <sys/random.h>
@@ -125,6 +127,7 @@ private:
 
 }
 
+#if !defined(PLATFORM_ANDROID)
 namespace CSPRNG {
 
 //XChaCha20 cryptographically secure pseudo-random number generator
@@ -153,6 +156,7 @@ private:
 };
 
 }
+#endif
 
 //
 

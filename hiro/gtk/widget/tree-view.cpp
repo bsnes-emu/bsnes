@@ -12,6 +12,7 @@ static auto TreeView_buttonEvent(GtkTreeView*, GdkEventButton* gdkEvent, pTreeVi
 static auto TreeView_change(GtkTreeSelection*, pTreeView* p) -> void { p->_updateSelected(); }
 static auto TreeView_context(GtkTreeView*, pTreeView* p) -> void { p->self().doContext(); }
 static auto TreeView_dataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeModel* model, GtkTreeIter* iter, pTreeView* p) -> void { return p->_doDataFunc(column, renderer, iter); }
+static auto TreeView_keyPress(GtkWidget*, GdkEventKey*, pTreeView* p) -> int { p->suppressActivate = false; return false; }
 static auto TreeView_toggle(GtkCellRendererToggle*, char* path, pTreeView* p) -> void { p->_togglePath(path); }
 
 auto pTreeView::construct() -> void {
@@ -52,11 +53,13 @@ auto pTreeView::construct() -> void {
   gtk_tree_view_append_column(gtkTreeView, gtkTreeViewColumn);
   gtk_tree_view_set_search_column(gtkTreeView, 2);
 
+  setActivation(state().activation);
   setBackgroundColor(state().backgroundColor);
   setForegroundColor(state().foregroundColor);
 
   g_signal_connect(G_OBJECT(gtkWidgetChild), "button-press-event", G_CALLBACK(TreeView_buttonEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidgetChild), "button-release-event", G_CALLBACK(TreeView_buttonEvent), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidgetChild), "key-press-event", G_CALLBACK(TreeView_keyPress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidgetChild), "popup-menu", G_CALLBACK(TreeView_context), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidgetChild), "row-activated", G_CALLBACK(TreeView_activate), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeSelection), "changed", G_CALLBACK(TreeView_change), (gpointer)this);
@@ -87,6 +90,10 @@ auto pTreeView::append(sTreeViewItem item) -> void {
 auto pTreeView::remove(sTreeViewItem item) -> void {
 }
 
+auto pTreeView::setActivation(Mouse::Click activation) -> void {
+  //handled by callbacks
+}
+
 auto pTreeView::setBackgroundColor(Color color) -> void {
   auto gdkColor = CreateColor(color);
   gtk_widget_modify_base(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
@@ -115,6 +122,11 @@ auto pTreeView::setGeometry(Geometry geometry) -> void {
 //
 
 auto pTreeView::_activatePath(GtkTreePath* gtkPath) -> void {
+  if(suppressActivate) {
+    suppressActivate = false;
+    return;
+  }
+
   char* path = gtk_tree_path_to_string(gtkPath);
   if(auto item = self().item(string{path}.transform(":", "/"))) {
     if(!locked()) self().doActivate();
@@ -137,6 +149,25 @@ auto pTreeView::_buttonEvent(GdkEventButton* gdkEvent) -> signed {
         state().selectedPath.reset();
         self().doChange();
         return true;
+      }
+    }
+
+    if(gdkEvent->button == 1) {
+      //emulate activate-on-single-click, which is only available in GTK+ 3.8 and later
+      if(gtkPath && self().activation() == Mouse::Click::Single) {
+        //selectedPath must be updated for TreeView::doActivate() to act on the correct TreeViewItem.
+        //as this will then cause "changed" to not see that the path has changed, we must handle that case here as well.
+        char* path = gtk_tree_path_to_string(gtkPath);
+        string selectedPath = string{path}.transform(":", "/");
+        g_free(path);
+        if(state().selectedPath != selectedPath) {
+          state().selectedPath = selectedPath;
+          self().doChange();
+        }
+        self().doActivate();
+        //"row-activated" is sent before "button-press-event" (GDK_2BUTTON_PRESS);
+        //so stop a double-click from calling TreeView::doActivate() twice by setting a flag after single-clicks
+        suppressActivate = true;  //key presses will clear this flag to allow key-activations to work correctly
       }
     }
 

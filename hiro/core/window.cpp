@@ -279,6 +279,17 @@ auto mWindow::setGeometry(Geometry geometry) -> type& {
   return *this;
 }
 
+auto mWindow::setGeometry(Alignment alignment, Size size) -> type& {
+  auto margin = signal(frameMargin);
+  auto width = margin.width() + size.width();
+  auto height = margin.height() + size.height();
+  auto workspace = Monitor::workspace();
+  auto x = workspace.x() + alignment.horizontal() * (workspace.width() - width);
+  auto y = workspace.y() + alignment.vertical() * (workspace.height() - height);
+  setFrameGeometry({(int)x, (int)y, (int)width, (int)height});
+  return *this;
+}
+
 auto mWindow::setMaximized(bool maximized) -> type& {
   state.maximized = maximized;
   signal(setMaximized, maximized);

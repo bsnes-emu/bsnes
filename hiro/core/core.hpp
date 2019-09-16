@@ -352,6 +352,7 @@ struct Keyboard {
 #if defined(Hiro_Mouse)
 struct Mouse {
   enum class Button : uint { Left, Middle, Right };
+  enum class Click : uint { Single, Double };
 
   Mouse() = delete;
 
@@ -410,7 +411,7 @@ struct MessageWindow {
 };
 #endif
 
-#include "property.hpp"
+#include "attribute.hpp"
 
 #define Declare(Name) \
   using type = m##Name; \
