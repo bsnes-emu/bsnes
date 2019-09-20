@@ -145,7 +145,7 @@ struct InputJoypadIOKit {
           }
         }
         assign(jp.hid, HID::Joypad::GroupID::Hat, n * 2 + 0, x * 32767);
-        assign(jp.hid, HID::Joypad::GroupID::Hat, n * 2 + 1, x * 32767);
+        assign(jp.hid, HID::Joypad::GroupID::Hat, n * 2 + 1, y * 32767);
       }
 
       for(uint n : range(jp.buttons.size())) {
@@ -247,7 +247,7 @@ private:
     if(!pageNumber) return nullptr;
 
     CFNumberRef usageNumber = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage);
-    if(!usageNumber) return nullptr;
+    if(!usageNumber) return CFRelease(pageNumber), nullptr;
 
     const void* keys[] = {CFSTR(kIOHIDDeviceUsagePageKey), CFSTR(kIOHIDDeviceUsageKey)};
     const void* values[] = {pageNumber, usageNumber};
