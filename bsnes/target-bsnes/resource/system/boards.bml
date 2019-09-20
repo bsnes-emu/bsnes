@@ -562,6 +562,13 @@ board: SHVC-YJ0N-01
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
 
+//Boards (Prototypes)
+
+board: SHVC-4PV5B-01
+  memory type=ROM content=Program
+    map address=00-7d,80-ff:8000-ffff mask=0x8000
+    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+
 //Boards (Generic)
 
 database

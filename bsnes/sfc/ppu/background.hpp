@@ -2,19 +2,18 @@ struct Background {
   Background(uint id) : id(id) {}
 
   alwaysinline auto hires() const -> bool;
-  alwaysinline auto hoffset() const -> uint16;
-  alwaysinline auto voffset() const -> uint16;
 
+  //background.cpp
   auto frame() -> void;
   auto scanline() -> void;
   auto begin() -> void;
+  auto fetchNameTable() -> void;
+  auto fetchOffset(uint y) -> void;
+  auto fetchCharacter(uint index) -> void;
   auto run(bool screen) -> void;
   auto power() -> void;
 
-  auto getTile() -> void;
-  auto getTile(uint x, uint y) -> uint16;
-  auto getTileColor() -> uint;
-
+  //mode7.cpp
   alwaysinline auto clip(int n) -> int;
   auto beginMode7() -> void;
   auto runMode7() -> void;
@@ -32,14 +31,14 @@ struct Background {
   struct IO {
     uint16 tiledataAddress;
     uint16 screenAddress;
-    uint2 screenSize;
-    uint1 tileSize;
+     uint2 screenSize;
+     uint1 tileSize;
 
-    uint8 mode;
-    uint8 priority[2];
+     uint8 mode;
+     uint8 priority[2];
 
-    uint1 aboveEnable;
-    uint1 belowEnable;
+     uint1 aboveEnable;
+     uint1 belowEnable;
 
     uint16 hoffset;
     uint16 voffset;
@@ -48,13 +47,12 @@ struct Background {
   struct Latch {
     uint16 hoffset;
     uint16 voffset;
-    uint16 screenAddress;
   } latch;
 
   struct Pixel {
     uint8 priority;  //0 = none (transparent)
     uint8 palette;
-    uint16 tile;
+    uint3 paletteGroup;
   } above, below;
 
   struct Output {
@@ -64,7 +62,7 @@ struct Background {
 
   struct Mosaic {
     static uint4 size;
-    uint1 enable;
+     uint1 enable;
 
     uint16 vcounter;
     uint16 hcounter;
@@ -72,18 +70,30 @@ struct Background {
     uint16 voffset;
     uint16 hoffset;
 
-    Pixel pixel;
+    Pixel  pixel;
   } mosaic;
 
-  int x;
-  int y;
+  struct OffsetPerTile {
+    //set in BG3 only; used by BG1 and BG2
+    uint16 hoffset;
+    uint16 voffset;
+  } opt;
 
-  uint3 tileCounter;
-  uint16 tile;
-  uint8 priority;
-  uint3 paletteNumber;
-  uint8 paletteIndex;
-  uint32 data[2];
+  struct Tile {
+    uint16 address;
+    uint10 character;
+     uint8 palette;
+     uint3 paletteGroup;
+     uint8 priority;
+     uint1 hmirror;
+     uint1 vmirror;
+    uint16 data[4];
+  } tiles[66];
+
+  uint7 nameTableIndex;
+  uint7 characterIndex;
+  uint7 renderingIndex;
+  uint3 pixelCounter;
 
   friend class PPU;
 };

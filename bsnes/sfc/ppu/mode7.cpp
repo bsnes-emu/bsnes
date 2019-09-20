@@ -20,7 +20,6 @@ auto PPU::Background::runMode7() -> void {
   int hoffset = (int13)latch.hoffset;
   int voffset = (int13)latch.voffset;
 
-  if(Background::x++ & ~255) return;
   uint x = mosaic.hoffset;
   uint y = ppu.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
@@ -37,36 +36,36 @@ auto PPU::Background::runMode7() -> void {
 
   int pixelX = originX + a * x >> 8;
   int pixelY = originY + c * x >> 8;
-  uint16 paletteAddress = (pixelY & 7) << 3 | (pixelX & 7);
+  uint16 paletteAddress = (uint3)pixelY << 3 | (uint3)pixelX;
 
-  int tileX = pixelX >> 3;
-  int tileY = pixelY >> 3;
-  uint16 tileAddress = (tileY & 127) << 7 | (tileX & 127);
+  uint7 tileX = pixelX >> 3;
+  uint7 tileY = pixelY >> 3;
+  uint16 tileAddress = tileY << 7 | tileX;
 
   bool outOfBounds = (pixelX | pixelY) & ~1023;
 
-  uint8 tile = ppu.io.repeatMode7 == 3 & outOfBounds ? 0 : ppu.vram[tileAddress] >> 0;
+  uint8 tile = ppu.io.repeatMode7 == 3 && outOfBounds ? 0 : ppu.vram[tileAddress] >> 0;
   uint8 palette = ppu.io.repeatMode7 == 2 && outOfBounds ? 0 : ppu.vram[tile << 6 | paletteAddress] >> 8;
 
   uint priority;
   if(id == ID::BG1) {
     priority = io.priority[0];
   } else if(id == ID::BG2) {
-    priority = io.priority[bool(palette & 0x80)];
+    priority = io.priority[palette >> 7];
     palette &= 0x7f;
   }
 
   if(palette == 0) return;
 
   if(io.aboveEnable) {
-    output.above.palette = palette;
     output.above.priority = priority;
-    output.above.tile = 0;
+    output.above.palette = palette;
+    output.above.paletteGroup = 0;
   }
 
   if(io.belowEnable) {
-    output.below.palette = palette;
     output.below.priority = priority;
-    output.below.tile = 0;
+    output.below.palette = palette;
+    output.below.paletteGroup = 0;
   }
 }

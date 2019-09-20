@@ -17,7 +17,6 @@ auto PPU::Object::frame() -> void {
 auto PPU::Object::scanline() -> void {
   t.x = 0;
   t.y = ppu.vcounter();
-
   t.itemCount = 0;
   t.tileCount = 0;
 
@@ -25,21 +24,25 @@ auto PPU::Object::scanline() -> void {
   auto oamItem = t.item[t.active];
   auto oamTile = t.tile[t.active];
 
+  for(uint n : range(32)) oamItem[n].valid = false;
+  for(uint n : range(34)) oamTile[n].valid = false;
+
   if(t.y == ppu.vdisp() && !ppu.io.displayDisable) addressReset();
   if(t.y >= ppu.vdisp() - 1 || ppu.io.displayDisable) return;
+}
 
-  for(auto n : range(32)) oamItem[n].valid = false;
-  for(auto n : range(34)) oamTile[n].valid = false;
+auto PPU::Object::evaluate(uint7 index) -> void {
+  if(ppu.io.displayDisable) return;
 
-  for(auto n : range(128)) {
-    uint7 sprite = io.firstSprite + n;
-    if(!onScanline(oam.object[sprite])) continue;
-    if(t.itemCount++ >= 32) break;
+  auto oamItem = t.item[t.active];
+  auto oamTile = t.tile[t.active];
+
+  uint7 sprite = io.firstSprite + index;
+  if(!onScanline(oam.object[sprite])) return;
+  ppu.latch.oamAddress = sprite;
+
+  if(t.itemCount++ < 32) {
     oamItem[t.itemCount - 1] = {true, sprite};
-  }
-
-  if(t.itemCount > 0 && oamItem[t.itemCount - 1].valid) {
-    ppu.latch.oamAddress = 0x0200 + (oamItem[t.itemCount - 1].index >> 2);
   }
 }
 
@@ -58,7 +61,7 @@ auto PPU::Object::run() -> void {
   auto oamTile = t.tile[!t.active];
   uint x = t.x++;
 
-  for(auto n : range(34)) {
+  for(uint n : range(34)) {
     const auto& tile = oamTile[n];
     if(!tile.valid) break;
 
@@ -66,10 +69,10 @@ auto PPU::Object::run() -> void {
     if(px & ~7) continue;
 
     uint color = 0, shift = tile.hflip ? px : 7 - px;
-    color += tile.data >> (shift +  0) & 1;
-    color += tile.data >> (shift +  7) & 2;
-    color += tile.data >> (shift + 14) & 4;
-    color += tile.data >> (shift + 21) & 8;
+    color += tile.data >> shift +  0 & 1;
+    color += tile.data >> shift +  7 & 2;
+    color += tile.data >> shift + 14 & 4;
+    color += tile.data >> shift + 21 & 8;
 
     if(color) {
       if(io.aboveEnable) {
@@ -85,13 +88,20 @@ auto PPU::Object::run() -> void {
   }
 }
 
-auto PPU::Object::tilefetch() -> void {
+auto PPU::Object::fetch() -> void {
   auto oamItem = t.item[t.active];
   auto oamTile = t.tile[t.active];
 
-  for(int i = 31; i >= 0; i--) {
+  for(uint i : reverse(range(32))) {
     if(!oamItem[i].valid) continue;
-    const auto& sprite = oam.object[oamItem[i].index];
+
+    if(ppu.io.displayDisable) {
+      ppu.step(8);
+      continue;
+    }
+
+    ppu.latch.oamAddress = oamItem[i].index;
+    const auto& sprite = oam.object[ppu.latch.oamAddress];
 
     uint tileWidth = sprite.width() >> 3;
     int x = sprite.x;
@@ -117,8 +127,8 @@ auto PPU::Object::tilefetch() -> void {
 
     uint16 tiledataAddress = io.tiledataAddress;
     if(sprite.nameselect) tiledataAddress += 1 + io.nameselect << 12;
-    uint16 chrx =  (sprite.character >> 0 & 15);
-    uint16 chry = ((sprite.character >> 4 & 15) + (y >> 3) & 15) << 4;
+    uint16 chrx =  (sprite.character & 15);
+    uint16 chry = ((sprite.character >> 4) + (y >> 3) & 15) << 4;
 
     for(uint tx : range(tileWidth)) {
       uint sx = x + (tx << 3) & 511;
@@ -134,14 +144,18 @@ auto PPU::Object::tilefetch() -> void {
 
       uint mx = !sprite.hflip ? tx : tileWidth - 1 - tx;
       uint pos = tiledataAddress + ((chry + (chrx + mx & 15)) << 4);
-      uint16 addr = (pos & 0xfff0) + (y & 7);
+      uint16 address = (pos & 0xfff0) + (y & 7);
 
-      oamTile[n].data = ppu.vram[addr + 0] << 0 | ppu.vram[addr + 8] << 16;
-      ppu.step(2);
+      if(!ppu.io.displayDisable)
+      oamTile[n].data  = ppu.vram[address + 0] <<  0;
+      ppu.step(4);
+
+      if(!ppu.io.displayDisable)
+      oamTile[n].data |= ppu.vram[address + 8] << 16;
+      ppu.step(4);
     }
   }
 
-  if(t.tileCount < 34) ppu.step((34 - t.tileCount) * 4);
   io.timeOver  |= (t.tileCount > 34);
   io.rangeOver |= (t.itemCount > 32);
 }
@@ -166,12 +180,12 @@ auto PPU::Object::power() -> void {
   t.tileCount = 0;
 
   t.active = 0;
-  for(auto p : range(2)) {
-    for(auto n : range(32)) {
+  for(uint p : range(2)) {
+    for(uint n : range(32)) {
       t.item[p][n].valid = false;
       t.item[p][n].index = 0;
     }
-    for(auto n : range(34)) {
+    for(uint n : range(34)) {
       t.tile[p][n].valid = false;
       t.tile[p][n].x = 0;
       t.tile[p][n].priority = 0;

@@ -23,8 +23,9 @@ struct Object {
   alwaysinline auto setFirstSprite() -> void;
   auto frame() -> void;
   auto scanline() -> void;
+  auto evaluate(uint7 index) -> void;
   auto run() -> void;
-  auto tilefetch() -> void;
+  auto fetch() -> void;
   auto power() -> void;
 
   auto onScanline(PPU::OAM::Object&) -> bool;
@@ -34,32 +35,32 @@ struct Object {
   OAM oam;
 
   struct IO {
-    bool aboveEnable;
-    bool belowEnable;
-    bool interlace;
+     uint1 aboveEnable;
+     uint1 belowEnable;
+     uint1 interlace;
 
-    uint3  baseSize;
-    uint2  nameselect;
+     uint3 baseSize;
+     uint2 nameselect;
     uint16 tiledataAddress;
-    uint7  firstSprite;
+     uint7 firstSprite;
 
-    uint priority[4];
+     uint8 priority[4];
 
-    bool timeOver;
-    bool rangeOver;
+     uint1 timeOver;
+     uint1 rangeOver;
   } io;
 
   struct Item {
-    bool  valid;
-    uint7 index;
+     uint1 valid;
+     uint7 index;
   };
 
   struct Tile {
-    bool   valid;
-    uint9  x;
-    uint2  priority;
-    uint8  palette;
-    uint1  hflip;
+     uint1 valid;
+     uint9 x;
+     uint2 priority;
+     uint8 palette;
+     uint1 hflip;
     uint32 data;
   };
 
@@ -77,7 +78,7 @@ struct Object {
 
   struct Output {
     struct Pixel {
-      uint  priority;  //0 = none (transparent)
+      uint8 priority;  //0 = none (transparent)
       uint8 palette;
     } above, below;
   } output;

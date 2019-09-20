@@ -9,9 +9,18 @@ struct PPU : Thread, PPUcounter {
 
   auto synchronizeCPU() -> void;
   static auto Enter() -> void;
-  auto main() -> void;
   auto load() -> bool;
   auto power(bool reset) -> void;
+
+  //main.cpp
+  auto main() -> void;
+  noinline auto cycleObjectEvaluate() -> void;
+  template<uint Cycle> noinline auto cycleBackgroundFetch() -> void;
+  noinline auto cycleBackgroundBegin() -> void;
+  noinline auto cycleBackgroundBelow() -> void;
+  noinline auto cycleBackgroundAbove() -> void;
+  noinline auto cycleRenderPixel() -> void;
+  template<uint> auto cycle() -> void;
 
   //io.cpp
   auto latchCounters(uint hcounter, uint vcounter) -> void;
@@ -22,6 +31,7 @@ struct PPU : Thread, PPUcounter {
 
 private:
   //ppu.cpp
+  alwaysinline auto step() -> void;
   alwaysinline auto step(uint clocks) -> void;
 
   //io.cpp
@@ -51,7 +61,7 @@ private:
     uint vdisp;
   } display;
 
-  auto scanline() -> void;
+//  auto scanline() -> void;
   auto refresh() -> void;
 
   struct {

@@ -5,31 +5,13 @@ auto PPU::Background::hires() const -> bool {
   return ppu.io.bgMode == 5 || ppu.io.bgMode == 6;
 }
 
-auto PPU::Background::voffset() const -> uint16 {
-  return mosaic.enable ? latch.voffset : io.voffset;
-}
-
-auto PPU::Background::hoffset() const -> uint16 {
-  return mosaic.enable ? latch.hoffset : io.hoffset;
-}
-
 //V = 0, H = 0
 auto PPU::Background::frame() -> void {
 }
 
 //H = 0
 auto PPU::Background::scanline() -> void {
-}
-
-//H = 28
-auto PPU::Background::begin() -> void {
-  x = -7;
-  y = ppu.vcounter();
-
-  tileCounter = 7 - (io.hoffset & 7) << hires();
-  for(auto& word : data) word = 0;
-
-  if(y == 1) {
+  if(ppu.vcounter() == 1) {
     mosaic.vcounter = mosaic.size + 1;
     mosaic.voffset = 1;
     latch.hoffset = io.hoffset;
@@ -40,7 +22,6 @@ auto PPU::Background::begin() -> void {
     latch.hoffset = io.hoffset;
     latch.voffset = io.voffset;
   }
-  latch.screenAddress = io.screenAddress;
 
   mosaic.hcounter = mosaic.size + 1;
   mosaic.hoffset = 0;
@@ -50,140 +31,159 @@ auto PPU::Background::begin() -> void {
     latch.hoffset = io.hoffset;
     latch.voffset = io.voffset;
   }
+
+  nameTableIndex = 0;
+  characterIndex = 0;
+  renderingIndex = 0;
+
+  opt.hoffset = 0;
+  opt.voffset = 0;
 }
 
-auto PPU::Background::getTile() -> void {
-  uint paletteOffset = ppu.io.bgMode == 0 ? id << 5 : 0;
-  uint paletteSize = 2 << io.mode;
-  uint tileMask = ppu.vram.mask >> 3 + io.mode;
-  uint tiledataIndex = io.tiledataAddress >> 3 + io.mode;
+//H = 56
+auto PPU::Background::begin() -> void {
+  //remove partial tile columns that have been scrolled offscreen
+  pixelCounter = io.hoffset & 7;
+  for(auto& data : tiles[0].data) data >>= pixelCounter << 1;
+}
 
-  uint tileHeight = 3 + io.tileSize;
-  uint tileWidth = !hires() ? tileHeight : 4;
+auto PPU::Background::fetchNameTable() -> void {
+  if(ppu.vcounter() == 0) return;
 
-  uint width = 256 << hires();
+  int x = (ppu.hcounter() & ~31) >> 2;
+  uint hpixel = x << hires();
+  uint vpixel = mosaic.enable ? (uint)mosaic.voffset : ppu.vcounter();
 
-  uint hmask = (width << io.tileSize << io.screenSize.bit(0)) - 1;
-  uint vmask = (width << io.tileSize << io.screenSize.bit(1)) - 1;
-
-  uint px = x << hires();
-  uint py = mosaic.enable ? (uint)mosaic.voffset : y;
-
-  uint hscroll = hoffset();
-  uint vscroll = voffset();
+  uint hscroll = mosaic.enable ? latch.hoffset : io.hoffset;
+  uint vscroll = mosaic.enable ? latch.voffset : io.voffset;
   if(hires()) {
     hscroll <<= 1;
-    if(ppu.io.interlace) py = py << 1 | (ppu.field() & !mosaic.enable);  //todo: temporary vmosaic hack
+    if(ppu.io.interlace) vpixel = vpixel << 1 | (ppu.field() && !mosaic.enable);
   }
 
-  uint hoffset = hscroll + px;
-  uint voffset = vscroll + py;
+  bool repeated = false;
+  repeat:
+
+  uint hoffset = hpixel + hscroll;
+  uint voffset = vpixel + vscroll;
 
   if(ppu.io.bgMode == 2 || ppu.io.bgMode == 4 || ppu.io.bgMode == 6) {
-    uint16 offsetX = px + (hscroll & 7);
+    auto hlookup = ppu.bg3.opt.hoffset;
+    auto vlookup = ppu.bg3.opt.voffset;
+    uint valid = 1 << 13 + id;
 
-    if(offsetX >= 8) {
-      auto hlookup = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 0);
-      auto vlookup = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 8);
-      uint valid = 1 << 13 + id;
-
-      if(ppu.io.bgMode == 4) {
-        if(hlookup & valid) {
-          if(!(hlookup & 0x8000)) {
-            hoffset = offsetX + (hlookup & ~7);
-          } else {
-            voffset = py + hlookup;
-          }
+    if(ppu.io.bgMode == 4) {
+      if(hlookup & valid) {
+        if(!(hlookup & 0x8000)) {
+          hoffset = hpixel + (hlookup & ~7) + (hscroll & ~7);
+        } else {
+          voffset = vpixel + (vlookup);
         }
-      } else {
-        if(hlookup & valid) hoffset = offsetX + (hlookup & ~7);
-        if(vlookup & valid) voffset = py + vlookup;
       }
+    } else {
+      if(hlookup & valid) hoffset = hpixel + (hlookup & ~7) + (hscroll & ~7);
+      if(vlookup & valid) voffset = vpixel + (vlookup);
     }
   }
 
-  hoffset &= hmask;
-  voffset &= vmask;
+  uint width = 256 << hires();
+  uint hsize = width << io.tileSize << io.screenSize.bit(0);
+  uint vsize = width << io.tileSize << io.screenSize.bit(1);
 
-  uint screenX = io.screenSize.bit(0) ? 32 << 5 : 0;
-  uint screenY = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
+  hoffset &= hsize - 1;
+  voffset &= vsize - 1;
 
-  uint tileX = hoffset >> tileWidth;
-  uint tileY = voffset >> tileHeight;
+  uint vtiles = 3 + io.tileSize;
+  uint htiles = !hires() ? vtiles : 4;
 
-  uint16 offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);
-  if(tileX & 0x20) offset += screenX;
-  if(tileY & 0x20) offset += screenY;
+  uint htile = hoffset >> htiles;
+  uint vtile = voffset >> vtiles;
 
-  uint16 address = latch.screenAddress + offset;
-  tile = ppu.vram[address];
-  bool mirrorY = tile & 0x8000;
-  bool mirrorX = tile & 0x4000;
-  priority = io.priority[bool(tile & 0x2000)];
-  paletteNumber = tile >> 10 & 7;
-  paletteIndex = paletteOffset + (paletteNumber << paletteSize);
+  uint hscreen = io.screenSize.bit(0) ? 32 << 5 : 0;
+  uint vscreen = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
 
-  if(tileWidth  == 4 && bool(hoffset & 8) != mirrorX) tile +=  1;
-  if(tileHeight == 4 && bool(voffset & 8) != mirrorY) tile += 16;
-  uint16 character = (tile & 0x03ff) + tiledataIndex & tileMask;
+  uint16 offset = (uint5)htile << 0 | (uint5)vtile << 5;
+  if(htile & 0x20) offset += hscreen;
+  if(vtile & 0x20) offset += vscreen;
 
-  if(mirrorY) voffset ^= 7;
-  offset = (character << 3 + io.mode) + (voffset & 7);
+  uint16 address = io.screenAddress + offset;
+  uint16 attributes = ppu.vram[address];
 
-  switch(io.mode) {
-  case Mode::BPP8:
-    data[0] = ppu.vram[offset +  0] << 0 | ppu.vram[offset +  8] << 16;
-    data[1] = ppu.vram[offset + 16] << 0 | ppu.vram[offset + 24] << 16;
-    break;
-  case Mode::BPP4:
-    data[0] = ppu.vram[offset +  0] << 0 | ppu.vram[offset +  8] << 16;
-    break;
-  case Mode::BPP2:
-    data[0] = ppu.vram[offset +  0] << 0;
-    break;
-  }
+  auto& tile = tiles[nameTableIndex];
+  tile.character = attributes & 0x03ff;
+  tile.paletteGroup = attributes >> 10 & 7;
+  tile.priority = io.priority[attributes >> 13 & 1];
+  tile.hmirror = bool(attributes & 0x4000);
+  tile.vmirror = bool(attributes & 0x8000);
 
-  if(mirrorX) for(auto n : range(2)) {
-    data[n] = (data[n] >> 4 & 0x0f0f0f0f) | (data[n] << 4 & 0xf0f0f0f0);
-    data[n] = (data[n] >> 2 & 0x33333333) | (data[n] << 2 & 0xcccccccc);
-    data[n] = (data[n] >> 1 & 0x55555555) | (data[n] << 1 & 0xaaaaaaaa);
+  if(htiles == 4 && bool(hoffset & 8) != tile.hmirror) tile.character +=  1;
+  if(vtiles == 4 && bool(voffset & 8) != tile.vmirror) tile.character += 16;
+
+  uint characterMask = ppu.vram.mask >> 3 + io.mode;
+  uint characterIndex = io.tiledataAddress >> 3 + io.mode;
+  uint16 origin = tile.character + characterIndex & characterMask;
+
+  if(tile.vmirror) voffset ^= 7;
+  tile.address = (origin << 3 + io.mode) + (voffset & 7);
+
+  uint paletteOffset = ppu.io.bgMode == 0 ? id << 5 : 0;
+  uint paletteSize = 2 << io.mode;
+  tile.palette = paletteOffset + (tile.paletteGroup << paletteSize);
+
+  nameTableIndex++;
+  if(hires() && !repeated) {
+    repeated = true;
+    hpixel += 8;
+    goto repeat;
   }
 }
 
-auto PPU::Background::getTile(uint x, uint y) -> uint16 {
-  uint tileHeight = 3 + io.tileSize;
-  uint tileWidth = !hires() ? tileHeight : 4;
-  uint screenX = io.screenSize.bit(0) ? 32 << 5 : 0;
-  uint screenY = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
-  uint tileX = x >> tileWidth;
-  uint tileY = y >> tileHeight;
-  uint16 offset = (tileY & 0x1f) << 5 | (tileX & 0x1f);
-  if(tileX & 0x20) offset += screenX;
-  if(tileY & 0x20) offset += screenY;
-  uint16 address = latch.screenAddress + offset;
-  return ppu.vram[address];
+auto PPU::Background::fetchOffset(uint y) -> void {
+  if(ppu.vcounter() == 0) return;
+
+  int x = ppu.hcounter() >> 2;
+
+  uint hoffset = x + (io.hoffset & ~7);
+  uint voffset = y + (io.voffset);
+
+  uint vtiles = 3 + io.tileSize;
+  uint htiles = !hires() ? vtiles : 4;
+
+  uint htile = hoffset >> htiles;
+  uint vtile = voffset >> vtiles;
+
+  uint hscreen = io.screenSize.bit(0) ? 32 << 5 : 0;
+  uint vscreen = io.screenSize.bit(1) ? 32 << 5 + io.screenSize.bit(0) : 0;
+
+  uint16 offset = (uint5)htile << 0 | (uint5)vtile << 5;
+  if(htile & 0x20) offset += hscreen;
+  if(vtile & 0x20) offset += vscreen;
+
+  uint16 address = io.screenAddress + offset;
+  if(y == 0) opt.hoffset = ppu.vram[address];
+  if(y == 8) opt.voffset = ppu.vram[address];
 }
 
-auto PPU::Background::getTileColor() -> uint {
-  uint color = 0;
+auto PPU::Background::fetchCharacter(uint index) -> void {
+  if(ppu.vcounter() == 0) return;
 
-  switch(io.mode) {
-  case Mode::BPP8:
-    color += data[1] >> 24 & 0x80;
-    color += data[1] >> 17 & 0x40;
-    color += data[1] >> 10 & 0x20;
-    color += data[1] >>  3 & 0x10;
-    data[1] <<= 1;
-  case Mode::BPP4:
-    color += data[0] >> 28 & 0x08;
-    color += data[0] >> 21 & 0x04;
-  case Mode::BPP2:
-    color += data[0] >> 14 & 0x02;
-    color += data[0] >>  7 & 0x01;
-    data[0] <<= 1;
+  auto& tile = tiles[characterIndex];
+  uint16 data = ppu.vram[tile.address + (index << 3)];
+
+  //reverse bits so that the lowest bit is the left-most pixel
+  if(!tile.hmirror) {
+    data = data >> 4 & 0x0f0f | data << 4 & 0xf0f0;
+    data = data >> 2 & 0x3333 | data << 2 & 0xcccc;
+    data = data >> 1 & 0x5555 | data << 1 & 0xaaaa;
   }
 
-  return color;
+  //interleave two bitplanes for faster planar decoding later
+  tile.data[index] = (
+    ((uint8(data >> 0) * 0x0101010101010101ull & 0x8040201008040201ull) * 0x0102040810204081ull >> 49) & 0x5555
+  | ((uint8(data >> 8) * 0x0101010101010101ull & 0x8040201008040201ull) * 0x0102040810204081ull >> 48) & 0xaaaa
+  );
+
+  if(index == 0) characterIndex++;
 }
 
 auto PPU::Background::run(bool screen) -> void {
@@ -195,19 +195,22 @@ auto PPU::Background::run(bool screen) -> void {
     if(!hires()) return;
   }
 
-  if(tileCounter-- == 0) {
-    tileCounter = 7;
-    getTile();
-  }
-
   if(io.mode == Mode::Mode7) return runMode7();
 
-  uint8 color = getTileColor();
-  Pixel pixel;
-  pixel.priority = priority;
-  pixel.palette = color ? uint(paletteIndex + color) : 0;
-  pixel.tile = tile;
+  auto& tile = tiles[renderingIndex];
+  uint8 color = 0;
+  if(io.mode >= Mode::BPP2) color |= (tile.data[0] & 3) << 0; tile.data[0] >>= 2;
+  if(io.mode >= Mode::BPP4) color |= (tile.data[1] & 3) << 2; tile.data[1] >>= 2;
+  if(io.mode >= Mode::BPP8) color |= (tile.data[2] & 3) << 4; tile.data[2] >>= 2;
+  if(io.mode >= Mode::BPP8) color |= (tile.data[3] & 3) << 6; tile.data[3] >>= 2;
 
+  Pixel pixel;
+  pixel.priority = tile.priority;
+  pixel.palette = color ? uint(tile.palette + color) : 0;
+  pixel.paletteGroup = tile.paletteGroup;
+  if(++pixelCounter == 0) renderingIndex++;
+
+  uint x = ppu.hcounter() - 56 >> 2;
   if(x == 0) {
     mosaic.hcounter = mosaic.size + 1;
     mosaic.pixel = pixel;
@@ -243,14 +246,4 @@ auto PPU::Background::power() -> void {
   mosaic = {};
   mosaic.size = random();
   mosaic.enable = random();
-
-  x = 0;
-  y = 0;
-
-  tileCounter = 0;
-  tile = 0;
-  priority = 0;
-  paletteNumber = 0;
-  paletteIndex = 0;
-  for(auto& word : data) word = 0;
 }

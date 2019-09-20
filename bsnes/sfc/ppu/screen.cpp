@@ -25,8 +25,8 @@ auto PPU::Screen::run() -> void {
   auto belowColor = below(hires);
   auto aboveColor = above();
 
-  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][(hires ? belowColor : aboveColor)];
-  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][(aboveColor)];
+  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][hires ? belowColor : aboveColor];
+  *lineA++ = *lineB++ = ppu.lightTable[ppu.io.displayBrightness][aboveColor];
 }
 
 auto PPU::Screen::below(bool hires) -> uint16 {
@@ -36,7 +36,7 @@ auto PPU::Screen::below(bool hires) -> uint16 {
   if(ppu.bg1.output.below.priority) {
     priority = ppu.bg1.output.below.priority;
     if(io.directColor && (ppu.io.bgMode == 3 || ppu.io.bgMode == 4 || ppu.io.bgMode == 7)) {
-      math.below.color = directColor(ppu.bg1.output.below.palette, ppu.bg1.output.below.tile);
+      math.below.color = directColor(ppu.bg1.output.below.palette, ppu.bg1.output.below.paletteGroup);
     } else {
       math.below.color = paletteColor(ppu.bg1.output.below.palette);
     }
@@ -75,7 +75,7 @@ auto PPU::Screen::above() -> uint16 {
   if(ppu.bg1.output.above.priority) {
     priority = ppu.bg1.output.above.priority;
     if(io.directColor && (ppu.io.bgMode == 3 || ppu.io.bgMode == 4 || ppu.io.bgMode == 7)) {
-      math.above.color = directColor(ppu.bg1.output.above.palette, ppu.bg1.output.above.tile);
+      math.above.color = directColor(ppu.bg1.output.above.palette, ppu.bg1.output.above.paletteGroup);
     } else {
       math.above.color = paletteColor(ppu.bg1.output.above.palette);
     }
@@ -149,13 +149,13 @@ auto PPU::Screen::paletteColor(uint8 palette) const -> uint15 {
   return cgram[palette];
 }
 
-auto PPU::Screen::directColor(uint palette, uint tile) const -> uint15 {
+auto PPU::Screen::directColor(uint8 palette, uint3 paletteGroup) const -> uint15 {
   //palette = -------- BBGGGRRR
-  //tile    = ---bgr-- --------
+  //group   = -------- -----bgr
   //output  = 0BBb00GG Gg0RRRr0
-  return (palette << 7 & 0x6000) + (tile >> 0 & 0x1000)
-       + (palette << 4 & 0x0380) + (tile >> 5 & 0x0040)
-       + (palette << 2 & 0x001c) + (tile >> 9 & 0x0002);
+  return (palette << 7 & 0x6000) + (paletteGroup << 10 & 0x1000)
+       + (palette << 4 & 0x0380) + (paletteGroup <<  5 & 0x0040)
+       + (palette << 2 & 0x001c) + (paletteGroup <<  1 & 0x0002);
 }
 
 auto PPU::Screen::fixedColor() const -> uint15 {

@@ -39,8 +39,8 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(io.oamAddress);
   s.integer(io.oamPriority);
 
-  s.integer(io.bgPriority);
   s.integer(io.bgMode);
+  s.integer(io.bgPriority);
 
   s.integer(io.hoffsetMode7);
   s.integer(io.voffsetMode7);
@@ -96,14 +96,14 @@ auto PPU::Background::serialize(serializer& s) -> void {
 
   s.integer(latch.hoffset);
   s.integer(latch.voffset);
-  s.integer(latch.screenAddress);
 
   s.integer(output.above.priority);
   s.integer(output.above.palette);
-  s.integer(output.above.tile);
+  s.integer(output.above.paletteGroup);
+
   s.integer(output.below.priority);
   s.integer(output.below.palette);
-  s.integer(output.below.tile);
+  s.integer(output.below.paletteGroup);
 
   s.integer(mosaic.size);
   s.integer(mosaic.enable);
@@ -111,18 +111,29 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(mosaic.hcounter);
   s.integer(mosaic.voffset);
   s.integer(mosaic.hoffset);
+
   s.integer(mosaic.pixel.priority);
   s.integer(mosaic.pixel.palette);
-  s.integer(mosaic.pixel.tile);
+  s.integer(mosaic.pixel.paletteGroup);
 
-  s.integer(x);
-  s.integer(y);
-  s.integer(tileCounter);
-  s.integer(tile);
-  s.integer(priority);
-  s.integer(paletteNumber);
-  s.integer(paletteIndex);
-  s.array(data);
+  s.integer(opt.hoffset);
+  s.integer(opt.voffset);
+
+  for(auto& tile : tiles) {
+    s.integer(tile.address);
+    s.integer(tile.character);
+    s.integer(tile.palette);
+    s.integer(tile.paletteGroup);
+    s.integer(tile.priority);
+    s.integer(tile.hmirror);
+    s.integer(tile.vmirror);
+    s.array(tile.data);
+  }
+
+  s.integer(nameTableIndex);
+  s.integer(characterIndex);
+  s.integer(renderingIndex);
+  s.integer(pixelCounter);
 }
 
 auto PPU::Object::serialize(serializer& s) -> void {

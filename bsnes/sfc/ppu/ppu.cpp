@@ -3,7 +3,7 @@
 namespace SuperFamicom {
 
 PPU ppu;
-
+#include "main.cpp"
 #include "io.cpp"
 #include "background.cpp"
 #include "object.cpp"
@@ -42,6 +42,12 @@ auto PPU::synchronizeCPU() -> void {
   if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
 }
 
+auto PPU::step() -> void {
+  tick(2);
+  clock += 2;
+  synchronizeCPU();
+}
+
 auto PPU::step(uint clocks) -> void {
   clocks >>= 1;
   while(clocks--) {
@@ -56,41 +62,6 @@ auto PPU::Enter() -> void {
     scheduler.synchronize();
     ppu.main();
   }
-}
-
-auto PPU::main() -> void {
-  scanline();
-  step(28);
-  bg4.begin();
-  bg3.begin();
-  bg2.begin();
-  bg1.begin();
-
-  if(vcounter() < vdisp()) {
-    for(int pixel = -7; pixel <= 255; pixel++) {
-      bg4.run(1);
-      bg3.run(1);
-      bg2.run(1);
-      bg1.run(1);
-      step(2);
-
-      bg4.run(0);
-      bg3.run(0);
-      bg2.run(0);
-      bg1.run(0);
-      if(pixel >= 0) {
-        obj.run();
-        window.run();
-        screen.run();
-      }
-      step(2);
-    }
-
-    step(14 + 34 * 2);
-    obj.tilefetch();
-  }
-
-  step(hperiod() - hcounter());
 }
 
 auto PPU::load() -> bool {
@@ -211,34 +182,6 @@ auto PPU::power(bool reset) -> void {
   screen.power();
 
   updateVideoMode();
-}
-
-auto PPU::scanline() -> void {
-  if(vcounter() == 0) {
-    display.interlace = io.interlace;
-    display.overscan = io.overscan;
-    bg1.frame();
-    bg2.frame();
-    bg3.frame();
-    bg4.frame();
-    obj.frame();
-  }
-
-  bg1.scanline();
-  bg2.scanline();
-  bg3.scanline();
-  bg4.scanline();
-  obj.scanline();
-  window.scanline();
-  screen.scanline();
-
-  if(vcounter() == vdisp()) {
-    if(auto device = controllerPort2.device) device->latch();  //light guns
-  }
-
-  if(vcounter() == 240) {
-    scheduler.leave(Scheduler::Event::Frame);
-  }
 }
 
 auto PPU::refresh() -> void {

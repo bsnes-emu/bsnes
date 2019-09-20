@@ -26,6 +26,9 @@ auto Program::hackCompatibility() -> void {
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "ADVENTURES OF FRANKEN" && region == "PAL") renderCycle = 32;
 
+  //fixes an errant scanline on the title screen due to writing the PPU registers too late
+  if(title == "FIREPOWER 2000") renderCycle = 32;
+
   emulator->configure("Hacks/PPU/Fast", fastPPU);
   emulator->configure("Hacks/PPU/NoSpriteLimit", fastPPUNoSpriteLimit);
   emulator->configure("Hacks/PPU/RenderCycle", renderCycle);
