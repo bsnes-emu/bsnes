@@ -23,6 +23,10 @@ auto InputManager::bindHotkeys() -> void {
     cheatEditor.enableCheats.setChecked(!cheatEditor.enableCheats.checked()).doToggle();
   }));
 
+  hotkeys.append(InputHotkey("Toggle Mute").onPress([] {
+    presentation.muteAudio.setChecked(!presentation.muteAudio.checked()).doToggle();
+  }));
+
   hotkeys.append(InputHotkey("Rewind").onPress([&] {
     if(!emulator->loaded() || fastForwarding) return;
     rewinding = true;
@@ -123,6 +127,24 @@ auto InputManager::bindHotkeys() -> void {
       //advance to the next video frame otherwise
       program.frameAdvanceLock = false;
     }
+  }));
+
+  hotkeys.append(InputHotkey("Increase HD Mode 7").onPress([] {
+    int index = enhancementSettings.mode7Scale.selected().offset() - 1;
+    if(index < 0) return;
+    enhancementSettings.mode7Scale.item(index).setSelected();
+    enhancementSettings.mode7Scale.doChange();
+  }));
+
+  hotkeys.append(InputHotkey("Decrease HD Mode 7").onPress([] {
+    int index = enhancementSettings.mode7Scale.selected().offset() + 1;
+    if(index >= enhancementSettings.mode7Scale.itemCount()) return;
+    enhancementSettings.mode7Scale.item(index).setSelected();
+    enhancementSettings.mode7Scale.doChange();
+  }));
+
+  hotkeys.append(InputHotkey("Toggle Supersampling").onPress([] {
+    enhancementSettings.mode7Supersample.setChecked(!enhancementSettings.mode7Supersample.checked()).doToggle();
   }));
 
   hotkeys.append(InputHotkey("Reset Emulation").onPress([] {

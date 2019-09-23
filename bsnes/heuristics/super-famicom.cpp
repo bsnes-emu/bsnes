@@ -194,7 +194,7 @@ auto SuperFamicom::region() const -> string {
 
 auto SuperFamicom::videoRegion() const -> string {
   auto region = data[headerAddress + 0x29];
-  return (region <= 0x01 || region >= 0x12) ? "NTSC" : "PAL";
+  return (region <= 0x01 || region >= 0x0c) ? "NTSC" : "PAL";
 }
 
 auto SuperFamicom::revision() const -> string {

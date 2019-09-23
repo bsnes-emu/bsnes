@@ -325,7 +325,7 @@ public:
 struct EnhancementSettings : VerticalLayout {
   auto create() -> void;
 
-private:
+public:
   Label overclockingLabel{this, Size{~0, 0}, 2};
   TableLayout overclockingLayout{this, Size{~0, 0}};
     Label cpuLabel{&overclockingLayout, Size{0, 0}};
