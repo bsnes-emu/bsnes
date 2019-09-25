@@ -46,7 +46,7 @@ else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Library/Application\ Support/$(name)/Database/
 	mkdir -p ~/Library/Application\ Support/$(name)/Firmware/
-    mkdir -p ~/Library/Application\ Support/$(name)/Shaders/
+	mkdir -p ~/Library/Application\ Support/$(name)/Shaders/
 	cp -R out/$(name).app /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/

@@ -14,6 +14,7 @@ linux-x86_64-binaries_task:
         - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
         - cp -a bsnes/Database/* bsnes-nightly/Database
+        - cp -a shaders bsnes-nightly/Shaders
         - cp -a GPLv3.txt bsnes-nightly
         - zip -r bsnes-nightly.zip bsnes-nightly
 
@@ -36,6 +37,7 @@ freebsd-x86_64-binaries_task:
         - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes
         - cp -a bsnes/Database/* bsnes-nightly/Database
+        - cp -a shaders bsnes-nightly/Shaders
         - cp -a GPLv3.txt bsnes-nightly
         - zip -r bsnes-nightly.zip bsnes-nightly
 
@@ -58,6 +60,7 @@ windows-x86_64-binaries_task:
         - mkdir bsnes-nightly/Firmware
         - cp -a bsnes/out/bsnes bsnes-nightly/bsnes.exe
         - cp -a bsnes/Database/* bsnes-nightly/Database
+        - cp -a shaders bsnes-nightly/Shaders
         - cp -a GPLv3.txt bsnes-nightly
         - zip -r bsnes-nightly.zip bsnes-nightly
 
