@@ -146,6 +146,9 @@ auto Program::load() -> void {
 	//fixes an errant scanline on the title screen due to writing to PPU registers too late
 	if(title == "ADVENTURES OF FRANKEN" && region == "PAL") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
+	//fixes an errant scanline on the title screen due to writing to PPU registers too late
+	if(title == "FIREPOWER 2000") emulator->configure("Hacks/PPU/RenderCycle", 32);
+
 	emulator->power();
 }
 
@@ -288,7 +291,7 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_p
 		string save_path;
 
 		auto suffix = Location::suffix(base_name);
-		auto base = Location::base(base_name);
+		auto base = Location::base(base_name.transform("\\", "/"));
 
 		const char *save = nullptr;
 		if (environ_cb && environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &save) && save)

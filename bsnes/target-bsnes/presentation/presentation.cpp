@@ -530,7 +530,7 @@ auto Presentation::updateShaders() -> void {
   });
   shaders.append(blur);
 
-  auto location = locate("shaders/");
+  auto location = locate("Shaders/");
 
   if(settings.video.driver == "OpenGL 3.2") {
     for(auto shader : directory::folders(location, "*.shader")) {
