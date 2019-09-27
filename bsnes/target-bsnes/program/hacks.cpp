@@ -1,4 +1,5 @@
 auto Program::hackCompatibility() -> void {
+  string entropy = settings.emulator.hack.entropy;
   bool fastPPU = settings.emulator.hack.ppu.fast;
   bool fastPPUNoSpriteLimit = settings.emulator.hack.ppu.noSpriteLimit;
   bool fastDSP = settings.emulator.hack.dsp.fast;
@@ -26,9 +27,20 @@ auto Program::hackCompatibility() -> void {
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "ADVENTURES OF FRANKEN" && region == "PAL") renderCycle = 32;
 
-  //fixes an errant scanline on the title screen due to writing the PPU registers too late
+  //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "FIREPOWER 2000") renderCycle = 32;
 
+  //fixes an errant scanline on the title screen due to writing to PPU registers too late
+  if(title == "NHL '94") renderCycle = 32;
+
+  if(settings.emulator.hack.hotfixes) {
+    //this game transfers uninitialized memory into video RAM: this can cause a row of invalid tiles
+    //to appear in the background of stage 12. this one is a bug in the original game, so only enable
+    //it if the hotfixes option has been enabled.
+    if(title == "The Hurricanes") entropy = "None";
+  }
+
+  emulator->configure("Hacks/Entropy", entropy);
   emulator->configure("Hacks/PPU/Fast", fastPPU);
   emulator->configure("Hacks/PPU/NoSpriteLimit", fastPPUNoSpriteLimit);
   emulator->configure("Hacks/PPU/RenderCycle", renderCycle);

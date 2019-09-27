@@ -3,7 +3,7 @@ auto PPU::Background::clip(int n) -> int {
   return n & 0x2000 ? (n | ~1023) : (n & 1023);
 }
 
-//H = 28
+//H = 0
 auto PPU::Background::beginMode7() -> void {
   latch.hoffset = ppu.io.hoffsetMode7;
   latch.voffset = ppu.io.voffsetMode7;

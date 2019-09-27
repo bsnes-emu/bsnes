@@ -241,8 +241,12 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
       return (void)window.setModal(false);
     }
     if(state.action == "openObject" && isObject(name)) {
-      response.selected.append({state.path, name});
-      return (void)window.setModal(false);
+      if(isMatch(name)) {
+        response.selected.append({state.path, name});
+        return (void)window.setModal(false);
+      } else if(isFolder(name)) {
+        return setPath({state.path, name});
+      }
     }
     if(state.action == "saveFile") return accept();
     setPath(state.path, name);
