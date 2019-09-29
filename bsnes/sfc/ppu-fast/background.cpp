@@ -10,7 +10,7 @@ auto PPU::Line::cacheBackground(PPU::IO::Background& bg) -> void {
 }
 
 //parallelized
-auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> void {
   if(!self.aboveEnable && !self.belowEnable) return;
   if(self.tileMode == TileMode::Mode7) return renderMode7(self, source);
   if(self.tileMode == TileMode::Inactive) return;
@@ -46,8 +46,8 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
 
   uint mosaicCounter = 1;
   uint mosaicPalette = 0;
-  uint mosaicPriority = 0;
-  uint mosaicColor = 0;
+  uint8 mosaicPriority = 0;
+  uint16 mosaicColor = 0;
 
   int x = 0 - (hscroll & 7);
   while(x < width) {
@@ -83,7 +83,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint source) -> void
     uint tileNumber = getTile(self, hoffset, voffset);
     uint mirrorY = tileNumber & 0x8000 ? 7 : 0;
     uint mirrorX = tileNumber & 0x4000 ? 7 : 0;
-    uint tilePriority = self.priority[bool(tileNumber & 0x2000)];
+    uint8 tilePriority = self.priority[bool(tileNumber & 0x2000)];
     uint paletteNumber = tileNumber >> 10 & 7;
     uint paletteIndex = paletteBase + (paletteNumber << paletteShift) & 0xff;
 
