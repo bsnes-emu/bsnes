@@ -60,6 +60,14 @@ auto DSP::power(bool reset) -> void {
     spc_dsp.soft_reset();
     spc_dsp.set_output(samplebuffer, 8192);
   }
+
+  if(configuration.hacks.hotfixes) {
+    //Magical Drop (Japan) does not initialize the DSP registers at startup.
+    //Tokoton mode will hang forever in some instances even on real hardware.
+    if(cartridge.headerTitle() == "MAGICAL DROP") {
+      for(uint address : range(0x80)) spc_dsp.write(address, 0xff);
+    }
+  }
 }
 
 auto DSP::mute() -> bool {
