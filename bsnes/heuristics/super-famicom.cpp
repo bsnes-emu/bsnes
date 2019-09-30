@@ -454,15 +454,17 @@ auto SuperFamicom::firmwareRomSize() const -> uint {
 }
 
 auto SuperFamicom::ramSize() const -> uint {
-  auto ramSize = data[headerAddress + 0x28] & 7;
-  if(ramSize) return 1024 << ramSize;
+  auto ramSize = data[headerAddress + 0x28] & 15;
+  if(ramSize > 8) ramSize = 8;
+  if(ramSize > 0) return 1024 << ramSize;
   return 0;
 }
 
 auto SuperFamicom::expansionRamSize() const -> uint {
   if(data[headerAddress + 0x2a] == 0x33) {
-    auto ramSize = data[headerAddress + 0x0d] & 7;
-    if(ramSize) return 1024 << ramSize;
+    auto ramSize = data[headerAddress + 0x0d] & 15;
+    if(ramSize > 8) ramSize = 8;
+    if(ramSize > 0) return 1024 << ramSize;
   }
   if((data[headerAddress + 0x26] >> 4) == 1) {
     //GSU: Starfox / Starwing lacks an extended header; but still has expansion RAM
