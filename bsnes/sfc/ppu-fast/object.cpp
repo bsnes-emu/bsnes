@@ -117,7 +117,7 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
   for(uint x : range(256)) {
     if(!priority[x]) continue;
-    uint source = palette[x] < 192 ? Source::OBJ1 : Source::OBJ2;
+    uint8 source = palette[x] < 192 ? Source::OBJ1 : Source::OBJ2;
     if(self.aboveEnable && !windowAbove[x]) plotAbove(x, source, priority[x], cgram[palette[x]]);
     if(self.belowEnable && !windowBelow[x]) plotBelow(x, source, priority[x], cgram[palette[x]]);
   }

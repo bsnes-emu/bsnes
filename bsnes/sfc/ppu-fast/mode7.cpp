@@ -1,4 +1,4 @@
-auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderMode7(PPU::IO::Background& self, uint8 source) -> void {
   //HD mode 7 support
   if(!ppu.hdMosaic() || !self.mosaicEnable || !io.mosaicSize) {
     if(ppu.hdScale() > 1) return renderMode7HD(self, source);
@@ -18,8 +18,8 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
 
   uint mosaicCounter = 1;
   uint mosaicPalette = 0;
-  uint mosaicPriority = 0;
-  uint mosaicColor = 0;
+  uint8 mosaicPriority = 0;
+  uint16 mosaicColor = 0;
 
   auto clip = [](int n) -> int { return n & 0x2000 ? (n | ~1023) : (n & 1023); };
   int originX = (a * clip(hoffset - hcenter) & ~63) + (b * clip(voffset - vcenter) & ~63) + (b * y & ~63) + (hcenter << 8);
@@ -42,7 +42,7 @@ auto PPU::Line::renderMode7(PPU::IO::Background& self, uint source) -> void {
     uint8 tile = io.mode7.repeat == 3 && outOfBounds ? 0 : ppu.vram[tileAddress] >> 0;
     uint8 palette = io.mode7.repeat == 2 && outOfBounds ? 0 : ppu.vram[tile << 6 | paletteAddress] >> 8;
 
-    uint priority;
+    uint8 priority;
     if(source == Source::BG1) {
       priority = self.priority[0];
     } else if(source == Source::BG2) {

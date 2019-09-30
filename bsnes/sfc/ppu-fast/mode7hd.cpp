@@ -95,7 +95,7 @@ auto PPU::Line::cacheMode7HD() -> void {
   }
 }
 
-auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint source) -> void {
+auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint8 source) -> void {
   const bool extbg = source == Source::BG2;
   const uint scale = ppu.hdScale();
 
@@ -190,7 +190,7 @@ auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint source) -> void {
           uint tile    = io.mode7.repeat == 3 && ((pixelX | pixelY) & ~1023) ? 0 : (ppu.vram[(pixelY >> 3 & 127) * 128 + (pixelX >> 3 & 127)] & 0xff);
           uint palette = io.mode7.repeat == 2 && ((pixelX | pixelY) & ~1023) ? 0 : (ppu.vram[(((pixelY & 7) << 3) + (pixelX & 7)) + (tile << 6)] >> 8);
 
-          uint priority;
+          uint8 priority;
           if(!extbg) {
             priority = self.priority[0];
           } else {
@@ -199,7 +199,7 @@ auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint source) -> void {
           }
           if(!palette) continue;
 
-          uint color;
+          uint16 color;
           if(io.col.directColor && !extbg) {
             color = directColor(0, palette);
           } else {
@@ -237,8 +237,8 @@ auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint source) -> void {
           br += b >> 10 & 31;
         }
       }
-      uint aboveColor = ab / divisor << 0 | ag / divisor << 5 | ar / divisor << 10;
-      uint belowColor = bb / divisor << 0 | bg / divisor << 5 | br / divisor << 10;
+      uint16 aboveColor = ab / divisor << 0 | ag / divisor << 5 | ar / divisor << 10;
+      uint16 belowColor = bb / divisor << 0 | bg / divisor << 5 | br / divisor << 10;
       this->above[p] = {source, this->above[p * scale].priority, aboveColor};
       this->below[p] = {source, this->below[p * scale].priority, belowColor};
     }

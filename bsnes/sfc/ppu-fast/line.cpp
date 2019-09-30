@@ -63,8 +63,8 @@ auto PPU::Line::render(bool fieldID) -> void {
   }
 
   bool hires = io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-  auto aboveColor = cgram[0];
-  auto belowColor = hires ? cgram[0] : io.col.fixedColor;
+  uint16 aboveColor = cgram[0];
+  uint16 belowColor = hires ? cgram[0] : io.col.fixedColor;
   uint xa =  (hd || ss) && ppu.interlace() && field() ? 256 * scale * scale / 2 : 0;
   uint xb = !(hd || ss) ? 256 : ppu.interlace() && !field() ? 256 * scale * scale / 2 : 256 * scale * scale;
   for(uint x = xa; x < xb; x++) {
@@ -145,18 +145,18 @@ auto PPU::Line::directColor(uint paletteIndex, uint paletteColor) const -> uint1
        + (paletteColor << 7 & 0x6000) + (paletteIndex << 10 & 0x1000);  //B
 }
 
-auto PPU::Line::plotAbove(uint x, uint source, uint priority, uint color) -> void {
+auto PPU::Line::plotAbove(uint x, uint8 source, uint8 priority, uint16 color) -> void {
   if(ppu.hd()) return plotHD(above, x, source, priority, color, false, false);
   if(priority > above[x].priority) above[x] = {source, priority, color};
 }
 
-auto PPU::Line::plotBelow(uint x, uint source, uint priority, uint color) -> void {
+auto PPU::Line::plotBelow(uint x, uint8 source, uint8 priority, uint16 color) -> void {
   if(ppu.hd()) return plotHD(below, x, source, priority, color, false, false);
   if(priority > below[x].priority) below[x] = {source, priority, color};
 }
 
 //todo: name these variables more clearly ...
-auto PPU::Line::plotHD(Pixel* pixel, uint x, uint source, uint priority, uint color, bool hires, bool subpixel) -> void {
+auto PPU::Line::plotHD(Pixel* pixel, uint x, uint8 source, uint8 priority, uint16 color, bool hires, bool subpixel) -> void {
   auto scale = ppu.hdScale();
   int xss = hires && subpixel ? scale / 2 : 0;
   int ys = ppu.interlace() && field() ? scale / 2 : 0;
