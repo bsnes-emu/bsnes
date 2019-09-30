@@ -40,8 +40,8 @@ struct PPU : PPUcounter {
 
 public:
   struct Source { enum : uint8 { BG1, BG2, BG3, BG4, OBJ1, OBJ2, COL }; };
-  struct TileMode { enum : uint { BPP2, BPP4, BPP8, Mode7, Inactive }; };
-  struct ScreenMode { enum : uint { Above, Below }; };
+  struct TileMode { enum : uint8 { BPP2, BPP4, BPP8, Mode7, Inactive }; };
+  struct ScreenMode { enum : uint8 { Above, Below }; };
 
   struct Latch {
     //serialization.cpp
@@ -239,9 +239,9 @@ public:
   };
 
   struct Pixel {
-    uint8 source;
-    uint8 priority;
-    uint16 color;
+    uint8 source = 0;
+    uint8 priority = 0;
+    uint16 color = 0;
   };
 
   //io.cpp
