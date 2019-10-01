@@ -48,6 +48,23 @@ bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
     return false;
 }
 
+static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
+{
+    if (!gb->apu.is_active[index]) return 0;
+    
+    switch (index) {
+        case GB_SQUARE_1:
+            return gb->apu.square_channels[GB_SQUARE_1].current_volume;
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[GB_SQUARE_2].current_volume;
+        case GB_WAVE:
+            return 0;
+        case GB_NOISE:
+            return gb->apu.noise_channel.current_volume;
+    }
+    return 0;
+}
+
 static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
     if (gb->model >= GB_MODEL_AGB) {
@@ -66,15 +83,17 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
             }
             
             GB_sample_t output;
+            uint8_t bias = agb_bias_for_channel(gb, index);
+            
             if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
-                output.right = (0xf - value * 2) * right_volume;
+                output.right = (0xf - value * 2 + bias) * right_volume;
             }
             else {
                 output.right = 0xf * right_volume;
             }
             
             if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
-                output.left = (0xf - value * 2) * left_volume;
+                output.left = (0xf - value * 2 + bias) * left_volume;
             }
             else {
                 output.left = 0xf * left_volume;
