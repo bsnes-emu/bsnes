@@ -1,3 +1,5 @@
+#define USE_AVX2 0
+
 //determine mode 7 line groups for perspective correction
 auto PPU::Line::cacheMode7HD() -> void {
   ppu.mode7LineGroups.count = 0;
@@ -169,6 +171,13 @@ auto PPU::Line::renderMode7HD(PPU::IO::Background& self, uint8 source) -> void {
     float vty = ((voffset - vcenter) % 1024) + yf;
     float originX = (a * ht) + (b * vty) + (hcenter << 8);
     float originY = (c * ht) + (d * vty) + (vcenter << 8);
+
+    if(USE_AVX2 == 1) {  //__builtin_cpu_supports("avx2")) {
+      renderMode7HD_AVX2(self, source, above + 1, below + 1, windowAbove, windowBelow, originX, a, originY, c);
+      above += 256 * scale;
+      below += 256 * scale;
+      continue;
+    }
 
     int pixelXp = INT_MIN;
     for(int x : range(256)) {

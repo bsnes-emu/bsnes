@@ -307,6 +307,15 @@ public:
     auto renderMode7HD(PPU::IO::Background&, uint8 source) -> void;
     alwaysinline auto lerp(float pa, float va, float pb, float vb, float pr) -> float;
 
+    //mode7hd-avx2.cpp
+    auto renderMode7HD_AVX2(
+      PPU::IO::Background&, uint8 source,
+      Pixel* above, Pixel* below,
+      bool* windowAbove, bool* windowBelow,
+      float originX, float a,
+      float originY, float c
+    ) -> void;
+
     //object.cpp
     auto renderObject(PPU::IO::Object&) -> void;
 
