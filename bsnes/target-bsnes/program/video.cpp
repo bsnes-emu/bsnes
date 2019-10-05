@@ -129,7 +129,7 @@ auto Program::toggleVideoFullScreen() -> void {
 
   if(!video.fullScreen()) {
     video.setFullScreen(true);
-    if(!input.acquired() && video.exclusive()) input.acquire();
+    if(!input.acquired() && (video.exclusive() || video.hasMonitors().size() == 1)) input.acquire();
   } else {
     if(input.acquired()) input.release();
     video.setFullScreen(false);

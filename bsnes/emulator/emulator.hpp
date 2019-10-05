@@ -29,7 +29,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "bsnes";
-  static const string Version = "110.7";
+  static const string Version = "111";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org";
