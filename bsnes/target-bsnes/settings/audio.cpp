@@ -20,7 +20,7 @@ auto AudioSettings::create() -> void {
     string value = {skewSlider.position() > 5000 ? "+" : "", (int)skewSlider.position() - 5000};
     settings.audio.skew = value.integer();
     skewValue.setText(value);
-    program.updateAudioFrequency();
+    if(audio.driver() != "None") program.updateAudioFrequency();
   }).doChange();
   volumeLabel.setText("Volume:").setToolTip(
     "Adjusts the audio output volume.\n\n"
