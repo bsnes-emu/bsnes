@@ -32,12 +32,11 @@ Unique Features
   - Built-in games database with thousands of game entries
   - Built-in cheat code database for hundreds of popular games (by mightymo)
   - Built-in save state manager with screenshot previews and naming capabilities
-  - Support for ASIO low-latency audio
   - Customizable per-byte game mappings to support any cartridges, including prototype games
   - 7-zip decompression support
   - Extensive Satellaview emulation, including BS Memory flash write and wear-leveling emulation
-  - 30-bit color output support (where supported)
   - Optional higan game folder support (standard game ROM files are also fully supported!)
+  - Advanced mapping system allowing multiple bindings to every emulated input
 
 Standard Features
 -----------------
@@ -56,6 +55,7 @@ Standard Features
   - Sprite limit disable support
   - Cubic audio interpolation support
   - Optional high-level emulation of most SNES coprocessors
+  - Optional emulation of flaws in older emulators for compatibility with older unofficial software
   - CPU, SA1, and SuperFX overclocking support
   - Frame advance support
   - Screenshot support
@@ -63,12 +63,15 @@ Standard Features
   - Movie recording and playback support
   - Rewind support
   - HiDPI support
+  - Multi-monitor support
+  - Turbo support for controller inputs
 
 Links
 -----
 
   - [Official website](https://bsnes.byuu.org)
   - [Official git repository](https://github.com/byuu/bsnes)
+  - [Developer resources](https://byuu.net)
   - [Donations](https://patreon.com/byuu)
 
 Nightly Builds

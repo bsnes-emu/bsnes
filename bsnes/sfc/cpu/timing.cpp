@@ -54,6 +54,23 @@ auto CPU::step() -> void {
     status.dramRefresh = 1; step<6,0>(); status.dramRefresh = 2; step<2,0>(); aluEdge();
   }
 
+  if(!status.hdmaSetupTriggered && hcounter() >= status.hdmaSetupPosition) {
+    status.hdmaSetupTriggered = true;
+    hdmaReset();
+    if(hdmaEnable()) {
+      status.hdmaPending = true;
+      status.hdmaMode = 0;
+    }
+  }
+
+  if(!status.hdmaTriggered && hcounter() >= status.hdmaPosition) {
+    status.hdmaTriggered = true;
+    if(hdmaActive()) {
+      status.hdmaPending = true;
+      status.hdmaMode = 1;
+    }
+  }
+
   if constexpr(Synchronize) {
     if(configuration.hacks.coprocessor.delayedSync) return;
     synchronizeCoprocessors();
@@ -159,23 +176,6 @@ auto CPU::dmaEdge() -> void {
         step(status.clockCount - counter.dma % status.clockCount);
         status.dmaActive = false;
       }
-    }
-  }
-
-  if(!status.hdmaSetupTriggered && hcounter() >= status.hdmaSetupPosition) {
-    status.hdmaSetupTriggered = true;
-    hdmaReset();
-    if(hdmaEnable()) {
-      status.hdmaPending = true;
-      status.hdmaMode = 0;
-    }
-  }
-
-  if(!status.hdmaTriggered && hcounter() >= status.hdmaPosition) {
-    status.hdmaTriggered = true;
-    if(hdmaActive()) {
-      status.hdmaPending = true;
-      status.hdmaMode = 1;
     }
   }
 
