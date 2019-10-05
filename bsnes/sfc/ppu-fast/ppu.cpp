@@ -13,7 +13,6 @@ PPU ppu;
 #include "background.cpp"
 #include "mode7.cpp"
 #include "mode7hd.cpp"
-#include "mode7hd-avx2.cpp"
 #include "object.cpp"
 #include "window.cpp"
 #include "serialization.cpp"
