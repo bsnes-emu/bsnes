@@ -41,7 +41,7 @@ struct queue {
   template<typename U = T> auto capacity() const -> uint { return _capacity * sizeof(T) / sizeof(U); }
   template<typename U = T> auto size() const -> uint { return _size * sizeof(T) / sizeof(U); }
   auto empty() const -> bool { return _size == 0; }
-  auto pending() const -> bool { return _size; }
+  auto pending() const -> bool { return _size > 0; }
   auto full() const -> bool { return _size >= (int)_capacity; }
   auto underflow() const -> bool { return _size < 0; }
   auto overflow() const -> bool { return _size > (int)_capacity; }

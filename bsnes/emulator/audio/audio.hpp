@@ -63,7 +63,7 @@ struct Stream {
   auto addLowPassFilter(double cutoffFrequency, Filter::Order order, uint passes = 1) -> void;
   auto addHighPassFilter(double cutoffFrequency, Filter::Order order, uint passes = 1) -> void;
 
-  auto pending() const -> uint;
+  auto pending() const -> bool;
   auto read(double samples[]) -> uint;
   auto write(const double samples[]) -> void;
 

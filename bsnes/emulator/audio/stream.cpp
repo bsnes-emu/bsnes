@@ -81,9 +81,8 @@ auto Stream::addHighPassFilter(double cutoffFrequency, Filter::Order order, uint
   }
 }
 
-auto Stream::pending() const -> uint {
-  if(!channels) return 0;
-  return channels[0].resampler.pending();
+auto Stream::pending() const -> bool {
+  return channels && channels[0].resampler.pending();
 }
 
 auto Stream::read(double samples[]) -> uint {
