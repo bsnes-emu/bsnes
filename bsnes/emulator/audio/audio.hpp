@@ -56,13 +56,14 @@ struct Filter {
 struct Stream {
   auto reset(uint channels, double inputFrequency, double outputFrequency) -> void;
 
+  auto frequency() const -> double;
   auto setFrequency(double inputFrequency, maybe<double> outputFrequency = nothing) -> void;
 
   auto addDCRemovalFilter() -> void;
   auto addLowPassFilter(double cutoffFrequency, Filter::Order order, uint passes = 1) -> void;
   auto addHighPassFilter(double cutoffFrequency, Filter::Order order, uint passes = 1) -> void;
 
-  auto pending() const -> bool;
+  auto pending() const -> uint;
   auto read(double samples[]) -> uint;
   auto write(const double samples[]) -> void;
 

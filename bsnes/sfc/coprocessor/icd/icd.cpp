@@ -62,8 +62,8 @@ auto ICD::main() -> void {
     auto clocks = GB_run(&sameboy);
     step(clocks >> 1);
   } else {  //DMG halted
-    stream->sample(float(0.0), float(0.0));
-    step(128);
+    apuWrite(0.0, 0.0);
+    step(256);
   }
   synchronizeCPU();
 }
