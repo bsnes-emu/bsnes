@@ -1,0 +1,11 @@
+input
+  filter: nearest
+
+program
+  filter: nearest
+  height: 100%
+  fragment: pal-r57shell.fs
+  
+output
+  height: 0
+  filter: linear

@@ -1,0 +1,12 @@
+program
+  filter: nearest
+  fragment: retro.fs
+  
+program
+  filter: nearest
+  fragment: gamma.fs
+
+output
+  filter: nearest
+  width: 0
+  height: 0

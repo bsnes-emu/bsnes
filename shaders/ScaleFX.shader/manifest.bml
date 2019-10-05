@@ -1,0 +1,51 @@
+input
+  filter: nearest
+
+program
+  filter: nearest
+  format: rgba16f
+  width: 100%
+  height: 100%
+  vertex: scalefx-pass0.vs
+  fragment: scalefx-pass0.fs
+  
+program
+  filter: nearest
+  format: rgba16f
+  width: 100%
+  height: 100%
+  vertex: scalefx-pass1.vs
+  fragment: scalefx-pass1.fs
+  
+program
+  filter: nearest
+  width: 100%
+  height: 100%
+  vertex: scalefx-pass2.vs
+  fragment: scalefx-pass2.fs
+  
+program
+  filter: nearest
+  width: 100%
+  height: 100%
+  vertex: scalefx-pass3.vs
+  fragment: scalefx-pass3.fs
+  
+program
+  filter: nearest
+  width: 300%
+  height: 300%
+  vertex: scalefx-pass4.vs
+  fragment: scalefx-pass4.fs
+  
+program
+  filter: nearest
+  height: 200%
+  width: 200%
+  vertex: advanced-aa.vs
+  fragment: advanced-aa.fs
+  
+output
+  height: 0
+  width: 0
+  filter: linear

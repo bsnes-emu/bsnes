@@ -1,0 +1,18 @@
+input
+  filter: nearest
+
+program
+  filter: nearest
+  format: srgb8
+  height: 100%
+  width: 100%
+  vertex: bloompass.vs
+  fragment: bloompass.fs
+  
+program
+  filter: nearest
+  vertex: scanpass.vs
+  fragment: scanpass.fs
+  
+output
+  filter: linear

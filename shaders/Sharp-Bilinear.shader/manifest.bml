@@ -1,0 +1,8 @@
+input
+  filter: linear
+
+program
+  fragment: sharp-bilinear.fs
+  
+output
+  filter: linear

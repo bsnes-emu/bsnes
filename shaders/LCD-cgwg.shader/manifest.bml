@@ -1,0 +1,23 @@
+settings
+  persistence: 0.5
+  red:   vec3(1,0,0)
+  green: vec3(0,1,0)
+  blue:  vec3(0,0,1)
+  gain: 1.0
+  gamma: 3.0
+  blacklevel: 0.05
+  ambient: 0.0
+  BGR
+  
+input
+  history: 8
+  filter: nearest
+
+program
+  fragment: motion-blur.fs
+  filter: nearest
+  width: 100%
+  height: 100%
+  
+program
+  fragment: lcd-grid.fs

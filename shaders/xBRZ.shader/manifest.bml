@@ -1,0 +1,17 @@
+input
+  filter: nearest
+
+program
+  filter: nearest
+  fragment: xBRZ-Freescale-p0.fs
+  
+program
+  filter: nearest
+  fragment: xBRZ-Freescale-p1.fs
+  
+program
+  filter: linear
+  fragment: fxaa.fs
+
+output
+  filter: linear

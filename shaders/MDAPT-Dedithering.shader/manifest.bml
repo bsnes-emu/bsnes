@@ -1,0 +1,24 @@
+program
+	width: 100%
+	height: 100%
+	filter: nearest
+	fragment: mdapt-pass1.fs
+	wrap: edge
+program
+	width: 100%
+	height: 100%
+	filter: nearest
+	fragment: mdapt-pass2.fs
+	wrap: edge
+program
+	width: 100%
+	height: 100%
+	filter: nearest
+	fragment: mdapt-pass3.fs
+	wrap: edge
+program
+	width: 100%
+	height: 100%
+	filter: nearest
+	fragment: mdapt-pass4.fs	
+	wrap: edge

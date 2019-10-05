@@ -1,0 +1,8 @@
+input
+  filter: nearest
+
+program
+  fragment: AANN.fs
+  
+output
+  filter: nearest

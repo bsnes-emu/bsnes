@@ -1,0 +1,26 @@
+input
+  filter: nearest
+  format: rgba16f
+
+program
+  filter: nearest
+  format: rgba16f
+  width: 400%
+  height: 100%
+  modulo: 2
+  fragment: ntsc-pass1.fs
+  
+program
+  filter: nearest
+  format: rgba16f
+  width: 50%
+  height: 100%
+  fragment: ntsc-pass2.fs
+
+program
+  filter: linear
+  width: 100%
+  height: 100%
+  
+output
+  filter: nearest

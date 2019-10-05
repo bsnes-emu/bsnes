@@ -1,0 +1,28 @@
+program
+	width: 100%
+	height: 100%
+	format: rgba32f
+	filter: nearest
+	wrap: edge
+	fragment: GTU-pass1.fs
+program
+	height:	100%
+	format: rgba32f
+	filter: nearest
+	wrap: edge
+	vertex: GTU-pass2.vs
+	fragment: GTU-pass2.fs
+program
+	height:	100%
+	format: rgba32f
+	filter: nearest
+	wrap: edge
+	fragment: GTU-pass3.fs
+program
+	format: rgba8
+	filter: nearest
+	wrap: edge
+	vertex: GTU-pass4.vs
+	fragment: GTU-pass4.fs
+output
+	filter: nearest

@@ -1,0 +1,30 @@
+program
+  width: 100%
+  height: 100%
+  filter: nearest
+  fragment: super-4xbr-3d-pass0.fs
+   
+program
+  width: 100%
+  height: 100%
+  filter: nearest
+  fragment: super-4xbr-3d-pass1.fs
+
+program
+  width: 100%
+  height: 100%
+  filter: nearest
+  fragment: super-4xbr-3d-pass2.fs
+
+program
+  width: 100%
+  height: 100%
+  filter: nearest
+  fragment: super-4xbr-3d-pass3.fs
+
+program
+  filter: nearest
+  fragment: custom-jinc2-sharper.fs
+   
+output
+  filter: linear

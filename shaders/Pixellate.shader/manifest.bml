@@ -1,0 +1,7 @@
+program
+  filter: nearest
+  wrap: edge
+  fragment: pixellate.fs
+
+output
+  filter: nearest

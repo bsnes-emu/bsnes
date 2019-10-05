@@ -1,0 +1,20 @@
+input
+  filter: linear
+
+program
+  filter: linear
+  height: 100%
+  width: 100%
+  vertex: mame-ntsc.vs
+  fragment: mame-ntsc.fs
+  
+program
+  filter: linear
+  modulo: 270.0
+  vertex: mame-postproc.vs
+  fragment: mame-postproc.fs
+  
+output
+  height: 0
+  width: 0
+  filter: linear

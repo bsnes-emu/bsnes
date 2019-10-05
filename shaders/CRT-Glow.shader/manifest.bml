@@ -1,0 +1,54 @@
+input
+  filter: nearest
+
+program
+  format: srgb8
+  filter: nearest
+  vertex: linearize.vs
+  fragment: linearize.fs
+  
+program
+  format: srgb8
+  filter: nearest
+  height: 25%
+  width: 100%
+  vertex: gauss_horiz.vs
+  fragment: gauss_horiz.fs
+  
+program
+  format: srgb8
+  filter: nearest
+  vertex: gauss_vert.vs
+  fragment: gauss_vert.fs
+  
+program
+  format: srgb8
+  filter: nearest
+  height: 100%
+  width: 100%
+  vertex: threshold.vs
+  fragment: threshold.fs
+  
+program
+  format: srgb8
+  filter: linear
+  height: 25%
+  width: 25%
+  vertex: blur_horiz.vs
+  fragment: blur_horiz.fs
+  
+program
+  format: srgb8
+  filter: linear
+  height: 100%
+  width: 100%
+  vertex: blur_vert.vs
+  fragment: blur_vert.fs
+  
+program
+  filter: linear
+  vertex: resolve.vs
+  fragment: resolve.fs
+  
+output
+  filter: linear
