@@ -170,13 +170,23 @@ auto InputMapping::Binding::icon() -> image {
 }
 
 auto InputMapping::Binding::name() -> string {
-  if(device && device->isKeyboard()) {
+  //if ruby drivers cannot report accurate vendor/product IDs (eg SDL),
+  //and the user closes the emulator, changes gamepads, and restarts it,
+  //it is possible the wrong device will now be mapped to the input IDs.
+  //that could potentially make the group/input IDs go out of bounds.
+  if(!device) return {};
+  if(group >= device->size()) return {};
+  if(input >= device->group(group).size()) return {};
+
+  if(device->isKeyboard()) {
     return device->group(group).input(input).name();
   }
-  if(device && device->isMouse()) {
+
+  if(device->isMouse()) {
     return device->group(group).input(input).name();
   }
-  if(device && device->isJoypad()) {
+
+  if(device->isJoypad()) {
     string name{Hash::CRC16(string{device->id()}).digest().upcase()};
     name.append(" ", device->group(group).name());
     name.append(" ", device->group(group).input(input).name());
@@ -185,6 +195,7 @@ auto InputMapping::Binding::name() -> string {
     if(qualifier == Qualifier::Rumble) name.append(" Rumble");
     return name;
   }
+
   return {};
 }
 

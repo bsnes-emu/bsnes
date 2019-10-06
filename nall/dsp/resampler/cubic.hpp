@@ -8,7 +8,7 @@ namespace nall::DSP::Resampler {
 struct Cubic {
   inline auto reset(double inputFrequency, double outputFrequency = 0, uint queueSize = 0) -> void;
   inline auto setInputFrequency(double inputFrequency) -> void;
-  inline auto pending() const -> bool;
+  inline auto pending() const -> uint;
   inline auto read() -> double;
   inline auto write(double sample) -> void;
 
@@ -37,7 +37,7 @@ auto Cubic::setInputFrequency(double inputFrequency) -> void {
   ratio = inputFrequency / outputFrequency;
 }
 
-auto Cubic::pending() const -> bool {
+auto Cubic::pending() const -> uint {
   return samples.pending();
 }
 

@@ -9,6 +9,12 @@ auto Stream::reset(uint channelCount, double inputFrequency, double outputFreque
   setFrequency(inputFrequency, outputFrequency);
 }
 
+auto Stream::reset() -> void {
+  for(auto& channel : channels) {
+    channel.resampler.reset(this->inputFrequency, this->outputFrequency);
+  }
+}
+
 auto Stream::frequency() const -> double {
   return inputFrequency;
 }
@@ -81,8 +87,9 @@ auto Stream::addHighPassFilter(double cutoffFrequency, Filter::Order order, uint
   }
 }
 
-auto Stream::pending() const -> bool {
-  return channels && channels[0].resampler.pending();
+auto Stream::pending() const -> uint {
+  if(!channels) return 0;
+  return channels[0].resampler.pending();
 }
 
 auto Stream::read(double samples[]) -> uint {
