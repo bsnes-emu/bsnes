@@ -50,6 +50,10 @@ struct Object {
      uint1 rangeOver;
   } io;
 
+  struct Latch {
+     uint7 firstSprite;
+  } latch;
+
   struct Item {
      uint1 valid;
      uint7 index;

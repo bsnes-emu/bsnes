@@ -61,7 +61,6 @@ private:
     uint vdisp;
   } display;
 
-//  auto scanline() -> void;
   auto refresh() -> void;
 
   struct {

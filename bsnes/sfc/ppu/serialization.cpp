@@ -163,6 +163,8 @@ auto PPU::Object::serialize(serializer& s) -> void {
   s.integer(io.timeOver);
   s.integer(io.rangeOver);
 
+  s.integer(latch.firstSprite);
+
   s.integer(t.x);
   s.integer(t.y);
 

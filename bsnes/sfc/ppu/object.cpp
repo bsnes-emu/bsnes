@@ -15,6 +15,8 @@ auto PPU::Object::frame() -> void {
 }
 
 auto PPU::Object::scanline() -> void {
+  latch.firstSprite = io.firstSprite;
+
   t.x = 0;
   t.y = ppu.vcounter();
   t.itemCount = 0;
@@ -33,11 +35,12 @@ auto PPU::Object::scanline() -> void {
 
 auto PPU::Object::evaluate(uint7 index) -> void {
   if(ppu.io.displayDisable) return;
+  if(t.itemCount > 32) return;
 
   auto oamItem = t.item[t.active];
   auto oamTile = t.tile[t.active];
 
-  uint7 sprite = io.firstSprite + index;
+  uint7 sprite = latch.firstSprite + index;
   if(!onScanline(oam.object[sprite])) return;
   ppu.latch.oamAddress = sprite;
 
@@ -95,7 +98,7 @@ auto PPU::Object::fetch() -> void {
   for(uint i : reverse(range(32))) {
     if(!oamItem[i].valid) continue;
 
-    if(ppu.io.displayDisable) {
+    if(ppu.io.displayDisable || ppu.vcounter() >= ppu.vdisp() - 1) {
       ppu.step(8);
       continue;
     }
@@ -208,6 +211,8 @@ auto PPU::Object::power() -> void {
 
   io.timeOver = false;
   io.rangeOver = false;
+
+  latch = {};
 
   output.above.palette = 0;
   output.above.priority = 0;

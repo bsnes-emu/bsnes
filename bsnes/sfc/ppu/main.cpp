@@ -184,7 +184,7 @@ auto PPU::cycleRenderPixel() -> void {
 
 template<uint Cycle>
 auto PPU::cycle() -> void {
-  if constexpr(Cycle >=  0 && Cycle <= 1022 && (Cycle -  0) % 8 == 0) cycleObjectEvaluate();
+  if constexpr(Cycle >=  0 && Cycle <= 1016 && (Cycle -  0) % 8 == 0) cycleObjectEvaluate();
   if constexpr(Cycle >=  0 && Cycle <= 1054 && (Cycle -  0) % 4 == 0) cycleBackgroundFetch<(Cycle - 0) / 4 & 7>();
   if constexpr(Cycle == 56                                          ) cycleBackgroundBegin();
   if constexpr(Cycle >= 56 && Cycle <= 1078 && (Cycle - 56) % 4 == 0) cycleBackgroundBelow();
