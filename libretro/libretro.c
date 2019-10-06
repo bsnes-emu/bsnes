@@ -486,7 +486,7 @@ static void check_variables()
     {
         var.key = "sameboy_color_correction_mode";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[0]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
@@ -540,7 +540,7 @@ static void check_variables()
     {
         var.key = "sameboy_color_correction_mode_1";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[0]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
@@ -554,7 +554,7 @@ static void check_variables()
 
         var.key = "sameboy_color_correction_mode_2";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[1]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_DISABLED);
