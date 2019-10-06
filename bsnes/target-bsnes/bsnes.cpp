@@ -52,7 +52,7 @@ auto nall::main(Arguments arguments) -> void {
   emulator = new SuperFamicom::Interface;
   program.create();
 
-  if(Emulator::Version.find(".") && settings.general.betaWarning) {
+  if(Emulator::Version.find(".") && settings.general.betaWarning && 0) {
     MessageDialog dialog;
     dialog.setTitle(Emulator::Name);
     dialog.setText(
