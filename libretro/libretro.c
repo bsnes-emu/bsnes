@@ -92,6 +92,7 @@ static unsigned emulated_devices = 1;
 static bool initialized = false;
 static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
+static unsigned sgb_border = 1;
 
 static bool geometry_updated = false;
 static bool link_cable_emulation = false;
@@ -204,6 +205,7 @@ static const struct retro_variable vars_single[] = {
     { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
+    { "sameboy_border", "Super Game Boy border; enabled|disabled" },
     { NULL }
 };
 
@@ -534,6 +536,16 @@ static void check_variables()
                 model[0] = new_model;
                 init_for_current_model(0);
             }
+        }
+
+        var.key = "sameboy_border";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            if (strcmp(var.value, "enabled") == 0)
+                sgb_border = 1;
+            else if (strcmp(var.value, "disabled") == 0)
+                sgb_border = 0;
         }
     }
     else
@@ -880,8 +892,15 @@ void retro_run(void)
     }
     else
     {
-        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)
-            video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2) {
+            if (sgb_border == 1)
+                video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+            else {
+                int crop = SGB_VIDEO_WIDTH * ((SGB_VIDEO_HEIGHT - VIDEO_HEIGHT) / 2) + ((SGB_VIDEO_WIDTH - VIDEO_WIDTH) / 2);
+
+                video_cb(frame_buf + crop, VIDEO_WIDTH, VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+            }
+        }
         else
             video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
     }
