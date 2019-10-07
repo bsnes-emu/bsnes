@@ -530,7 +530,7 @@ auto Cartridge::loaduPD7725(Markup::Node node) -> void {
 
   if(failed) {
     //throw an error to the user
-    platform->open(ID::SuperFamicom, "<DSP1-4>", File::Read, File::Required);
+    platform->open(ID::SuperFamicom, "DSP3", File::Read, File::Required);
     return;
   }
 
@@ -579,7 +579,7 @@ auto Cartridge::loaduPD96050(Markup::Node node) -> void {
     if(auto file = game.memory(memory)) {
       if(auto fp = platform->open(ID::SuperFamicom, file->name(), File::Read)) {
         for(auto n : range(2048)) necdsp.dataROM[n] = fp->readl(2);
-      } else failed = false;
+      } else failed = true;
     }
   }
 
@@ -598,7 +598,7 @@ auto Cartridge::loaduPD96050(Markup::Node node) -> void {
 
   if(failed) {
     //throw an error to the user
-    platform->open(ID::SuperFamicom, "<ST010-011>", File::Read, File::Required);
+    platform->open(ID::SuperFamicom, "ST011", File::Read, File::Required);
     return;
   }
 
