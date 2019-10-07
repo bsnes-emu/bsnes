@@ -2,7 +2,7 @@ struct SuperFX : Processor::GSU, Thread {
   ReadableMemory rom;
   WritableMemory ram;
 
-  inline auto synchronizing() const -> bool { return scheduler.mode == Scheduler::Mode::SynchronizeAll; }
+  inline auto synchronizing() const -> bool { return scheduler.synchronizingAll(); }
 
   //superfx.cpp
   auto synchronizeCPU() -> void;

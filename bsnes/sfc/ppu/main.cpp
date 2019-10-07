@@ -21,7 +21,7 @@ auto PPU::main() -> void {
     if(auto device = controllerPort2.device) device->latch();  //light guns
   }
 
-  if(vcounter() == 240) {
+  if(vcounter() == vdisp()) {  //240
     scheduler.leave(Scheduler::Event::Frame);
   }
 

@@ -39,7 +39,8 @@ PPU::~PPU() {
 }
 
 auto PPU::synchronizeCPU() -> void {
-  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+  if(scheduler.synchronizingAll()) return;
+  if(clock >= 0) co_switch(cpu.thread);
 }
 
 auto PPU::step() -> void {
@@ -59,7 +60,7 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::Enter() -> void {
   while(true) {
-    scheduler.synchronize();
+    scheduler.synchronizeAll();
     ppu.main();
   }
 }

@@ -13,11 +13,15 @@ BSMemory::BSMemory() {
 }
 
 auto BSMemory::synchronizeCPU() -> void {
-  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+  if(scheduler.synchronizingAll()) return;
+  if(clock >= 0) co_switch(cpu.thread);
 }
 
 auto BSMemory::Enter() -> void {
-  while(true) scheduler.synchronize(), bsmemory.main();
+  while(true) {
+    scheduler.synchronizeAll();
+    bsmemory.main();
+  }
 }
 
 auto BSMemory::main() -> void {

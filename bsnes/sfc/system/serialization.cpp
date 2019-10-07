@@ -33,6 +33,7 @@ auto System::unserialize(serializer& s) -> bool {
   power(/* reset = */ false);
   serializeAll(s);
   serializeInit();  //hacks.fastPPU setting changes serializeSize
+
   return true;
 }
 

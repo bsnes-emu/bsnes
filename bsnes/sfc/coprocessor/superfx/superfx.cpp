@@ -12,11 +12,15 @@ namespace SuperFamicom {
 SuperFX superfx;
 
 auto SuperFX::synchronizeCPU() -> void {
-  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+  if(scheduler.synchronizingAll()) return;
+  if(clock >= 0) co_switch(cpu.thread);
 }
 
 auto SuperFX::Enter() -> void {
-  while(true) scheduler.synchronize(), superfx.main();
+  while(true) {
+    scheduler.synchronizeAll();
+    superfx.main();
+  }
 }
 
 auto SuperFX::main() -> void {

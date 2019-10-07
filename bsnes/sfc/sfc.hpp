@@ -45,7 +45,19 @@ namespace SuperFamicom {
       co_switch(host);
     }
 
-    auto synchronize() -> void {
+    inline auto synchronizingCPU() const -> bool {
+      return mode == Mode::SynchronizeCPU;
+    }
+
+    inline auto synchronizingAll() const -> bool {
+      return mode == Mode::SynchronizeAll;
+    }
+
+    inline auto synchronizeCPU() -> void {
+      if(mode == Mode::SynchronizeCPU) leave(Event::Synchronize);
+    }
+
+    inline auto synchronizeAll() -> void {
       if(mode == Mode::SynchronizeAll) leave(Event::Synchronize);
     }
   };

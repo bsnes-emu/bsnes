@@ -48,7 +48,7 @@ auto Presentation::create() -> void {
     settings.video.overscan = showOverscanArea.checked();
     resizeWindow();
   });
-  blurEmulation.setText("Blur Emulation").setChecked(settings.video.blur).onToggle([&] {
+  blurEmulation.setText("Hires Blur Emulation").setChecked(settings.video.blur).onToggle([&] {
     settings.video.blur = blurEmulation.checked();
     emulator->configure("Video/BlurEmulation", settings.video.blur);
   }).doToggle();

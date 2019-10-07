@@ -69,12 +69,13 @@ PPU::~PPU() {
 }
 
 auto PPU::synchronizeCPU() -> void {
-  if(ppubase.clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+  if(scheduler.synchronizingAll()) return;
+  if(ppubase.clock >= 0) co_switch(cpu.thread);
 }
 
 auto PPU::Enter() -> void {
   while(true) {
-    scheduler.synchronize();
+    scheduler.synchronizeAll();
     ppu.main();
   }
 }
@@ -122,9 +123,13 @@ auto PPU::scanline() -> void {
     if(!io.displayDisable) oamAddressReset();
   }
 
-  if(vcounter() == 240) {
+  if(vcounter() == vdisp()) {  //240
     Line::flush();
     scheduler.leave(Scheduler::Event::Frame);
+  }
+
+  if(vcounter() == 240) {
+    Line::flush();
   }
 }
 

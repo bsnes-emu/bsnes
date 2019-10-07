@@ -11,37 +11,59 @@ Cheat cheat;
 auto System::run() -> void {
   scheduler.mode = Scheduler::Mode::Run;
   scheduler.enter();
-  if(scheduler.event == Scheduler::Event::Frame) {
-    ppu.refresh();
-
-    //refresh all cheat codes once per frame
-    Memory::GlobalWriteEnable = true;
-    for(auto& code : cheat.codes) {
-      if(code.enable) {
-        bus.write(code.address, code.data);
-      }
-    }
-    Memory::GlobalWriteEnable = false;
-  }
+  if(scheduler.event == Scheduler::Event::Frame) frameEvent();
 }
 
 auto System::runToSave() -> void {
+  //run the CPU thread normally, exiting once we reach the next synchronization point.
+  //the CPU thread may run in the pathological case for up to 10 frames for a long 8-channel x 64KB DMA transfer.
+  //in practice, this will typically be at most one DMA transfer.
   scheduler.mode = Scheduler::Mode::SynchronizeCPU;
-  while(true) { scheduler.enter(); if(scheduler.event == Scheduler::Event::Synchronize) break; }
+  runToSynchronize();
 
+  //now synchronize every other thread to their synchronization points.
+  //stop after each thread is very slightly ahead of the CPU thread.
   scheduler.mode = Scheduler::Mode::SynchronizeAll;
-  scheduler.active = smp.thread;
-  while(true) { scheduler.enter(); if(scheduler.event == Scheduler::Event::Synchronize) break; }
+  runToThread(smp);
+  runToThread(ppu);
+  for(auto coprocessor : cpu.coprocessors) runToThread(*coprocessor);
 
-  scheduler.mode = Scheduler::Mode::SynchronizeAll;
-  scheduler.active = ppu.thread;
-  while(true) { scheduler.enter(); if(scheduler.event == Scheduler::Event::Synchronize) break; }
+  //at this point, the CPU thread is the furthest behind in time.
+  //all threads are now at their synchronization points and can be serialized safely.
+  scheduler.mode = Scheduler::Mode::Run;
+  scheduler.active = cpu.thread;
+}
 
-  for(auto coprocessor : cpu.coprocessors) {
-    scheduler.mode = Scheduler::Mode::SynchronizeAll;
-    scheduler.active = coprocessor->thread;
-    while(true) { scheduler.enter(); if(scheduler.event == Scheduler::Event::Synchronize) break; }
+auto System::runToSynchronize() -> void {
+  while(true) {
+    scheduler.enter();
+    if(scheduler.event == Scheduler::Event::Frame) frameEvent();
+    if(scheduler.event == Scheduler::Event::Synchronize) break;
   }
+}
+
+auto System::runToThread(Thread& aux) -> void {
+  //first, ensure that the CPU is ahead of the thread we want to synchronize to.
+  //because if it isn't, and the other thread is ahead, it will run even more ahead to synchronize itself.
+  scheduler.active = cpu.thread;
+  while(aux.clock >= 0) runToSynchronize();
+
+  //now that it is, run the other thread until it's just barely surpassed the CPU thread.
+  scheduler.active = aux.thread;
+  do runToSynchronize(); while(aux.clock < 0);
+}
+
+auto System::frameEvent() -> void {
+  ppu.refresh();
+
+  //refresh all cheat codes once per frame
+  Memory::GlobalWriteEnable = true;
+  for(auto& code : cheat.codes) {
+    if(code.enable) {
+      bus.write(code.address, code.data);
+    }
+  }
+  Memory::GlobalWriteEnable = false;
 }
 
 auto System::load(Emulator::Interface* interface) -> bool {

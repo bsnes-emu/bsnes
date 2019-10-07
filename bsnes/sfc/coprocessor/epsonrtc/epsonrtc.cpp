@@ -8,11 +8,15 @@ namespace SuperFamicom {
 EpsonRTC epsonrtc;
 
 auto EpsonRTC::synchronizeCPU() -> void {
-  if(clock >= 0 && scheduler.mode != Scheduler::Mode::SynchronizeAll) co_switch(cpu.thread);
+  if(scheduler.synchronizingAll()) return;
+  if(clock >= 0) co_switch(cpu.thread);
 }
 
 auto EpsonRTC::Enter() -> void {
-  while(true) scheduler.synchronize(), epsonrtc.main();
+  while(true) {
+    scheduler.synchronizeAll();
+    epsonrtc.main();
+  }
 }
 
 auto EpsonRTC::main() -> void {
