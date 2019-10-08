@@ -4,6 +4,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,6 +166,20 @@ void co_delete(cothread_t handle) {
 void co_switch(cothread_t handle) {
   register cothread_t co_previous_handle = co_active_handle;
   co_swap(co_active_handle = handle, co_previous_handle);
+}
+
+unsigned int co_size(unsigned int size) {
+  size += 512;
+  size &= ~15;
+  return size;
+}
+
+void co_save(cothread_t handle, void* memory, unsigned int size) {
+  memcpy(memory, handle, size);
+}
+
+void co_load(cothread_t handle, const void* memory, unsigned int size) {
+  memcpy(handle, memory, size);
 }
 
 #ifdef __cplusplus

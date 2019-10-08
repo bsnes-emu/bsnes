@@ -2,7 +2,7 @@ struct CPU : Processor::WDC65816, Thread, PPUcounter {
   inline auto interruptPending() const -> bool override { return status.interruptPending; }
   inline auto pio() const -> uint8 { return io.pio; }
   inline auto refresh() const -> bool { return status.dramRefresh == 1; }
-  inline auto synchronizing() const -> bool override { return scheduler.mode == Scheduler::Mode::SynchronizeCPU; }
+  inline auto synchronizing() const -> bool override { return scheduler.synchronizing(); }
 
   //cpu.cpp
   auto synchronizeSMP() -> void;

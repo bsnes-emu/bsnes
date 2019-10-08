@@ -12,13 +12,15 @@ namespace SuperFamicom {
 SA1 sa1;
 
 auto SA1::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) {
+    scheduler.desynchronize();
+    co_switch(cpu.thread);
+  }
 }
 
 auto SA1::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     sa1.main();
   }
 }

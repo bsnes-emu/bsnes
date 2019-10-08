@@ -6,13 +6,12 @@ namespace SuperFamicom {
 Event event;
 
 auto Event::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) scheduler.resume(cpu.thread);
 }
 
 auto Event::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     event.main();
   }
 }

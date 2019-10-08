@@ -69,13 +69,12 @@ PPU::~PPU() {
 }
 
 auto PPU::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(ppubase.clock >= 0) co_switch(cpu.thread);
+  if(ppubase.clock >= 0) scheduler.resume(cpu.thread);
 }
 
 auto PPU::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     ppu.main();
   }
 }

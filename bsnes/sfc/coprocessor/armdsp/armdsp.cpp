@@ -7,14 +7,13 @@ namespace SuperFamicom {
 ArmDSP armdsp;
 
 auto ArmDSP::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) scheduler.resume(cpu.thread);
 }
 
 auto ArmDSP::Enter() -> void {
   armdsp.boot();
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     armdsp.main();
   }
 }

@@ -10,8 +10,7 @@ struct System {
 
   auto run() -> void;
   auto runToSave() -> void;
-  auto runToSynchronize() -> void;
-  auto runToThread(Thread&) -> void;
+  auto runToSynchronize() -> bool;
   auto frameEvent() -> void;
 
   auto load(Emulator::Interface*) -> bool;

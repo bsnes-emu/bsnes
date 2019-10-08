@@ -17,13 +17,12 @@ SPC7110::~SPC7110() {
 }
 
 auto SPC7110::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) scheduler.resume(cpu.thread);
 }
 
 auto SPC7110::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     spc7110.main();
   }
 }

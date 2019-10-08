@@ -48,13 +48,15 @@ namespace SameBoy {
 }
 
 auto ICD::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) {
+    scheduler.desynchronize();
+    co_switch(cpu.thread);
+  }
 }
 
 auto ICD::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     icd.main();
   }
 }

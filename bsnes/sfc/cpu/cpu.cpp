@@ -11,26 +11,22 @@ CPU cpu;
 #include "serialization.cpp"
 
 auto CPU::synchronizeSMP() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(smp.clock < 0) co_switch(smp.thread);
+  if(smp.clock < 0) scheduler.resume(smp.thread);
 }
 
 auto CPU::synchronizePPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(ppu.clock < 0) co_switch(ppu.thread);
+  if(ppu.clock < 0) scheduler.resume(ppu.thread);
 }
 
 auto CPU::synchronizeCoprocessors() -> void {
-  if(scheduler.synchronizingAll()) return;
   for(auto coprocessor : coprocessors) {
-    if(coprocessor->clock < 0) co_switch(coprocessor->thread);
+    if(coprocessor->clock < 0) scheduler.resume(coprocessor->thread);
   }
 }
 
 auto CPU::Enter() -> void {
   while(true) {
-    scheduler.synchronizeCPU();
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     cpu.main();
   }
 }

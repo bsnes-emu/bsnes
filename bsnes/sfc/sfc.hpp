@@ -28,11 +28,12 @@ namespace SuperFamicom {
   extern Cheat cheat;
 
   struct Scheduler {
-    enum class Mode : uint { Run, SynchronizeCPU, SynchronizeAll } mode;
-    enum class Event : uint { Frame, Synchronize } event;
+    enum class Mode : uint { Run, Synchronize } mode;
+    enum class Event : uint { Frame, Synchronized, Desynchronized } event;
 
     cothread_t host = nullptr;
     cothread_t active = nullptr;
+    bool desynchronized = false;
 
     auto enter() -> void {
       host = co_active();
@@ -45,20 +46,28 @@ namespace SuperFamicom {
       co_switch(host);
     }
 
-    inline auto synchronizingCPU() const -> bool {
-      return mode == Mode::SynchronizeCPU;
+    auto resume(cothread_t thread) -> void {
+      if(mode == Mode::Synchronize) desynchronized = true;
+      co_switch(thread);
     }
 
-    inline auto synchronizingAll() const -> bool {
-      return mode == Mode::SynchronizeAll;
+    inline auto synchronizing() const -> bool {
+      return mode == Mode::Synchronize;
     }
 
-    inline auto synchronizeCPU() -> void {
-      if(mode == Mode::SynchronizeCPU) leave(Event::Synchronize);
+    inline auto synchronize() -> void {
+      if(mode == Mode::Synchronize) {
+        if(desynchronized) {
+          desynchronized = false;
+          leave(Event::Desynchronized);
+        } else {
+          leave(Event::Synchronized);
+        }
+      }
     }
 
-    inline auto synchronizeAll() -> void {
-      if(mode == Mode::SynchronizeAll) leave(Event::Synchronize);
+    inline auto desynchronize() -> void {
+      desynchronized = true;
     }
   };
   extern Scheduler scheduler;

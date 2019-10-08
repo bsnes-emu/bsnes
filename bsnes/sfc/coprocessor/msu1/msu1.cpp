@@ -7,14 +7,13 @@ MSU1 msu1;
 #include "serialization.cpp"
 
 auto MSU1::synchronizeCPU() -> void {
-  if(scheduler.synchronizingAll()) return;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0) scheduler.resume(cpu.thread);
 }
 
 
 auto MSU1::Enter() -> void {
   while(true) {
-    scheduler.synchronizeAll();
+    scheduler.synchronize();
     msu1.main();
   }
 }

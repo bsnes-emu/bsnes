@@ -15,42 +15,45 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  //run the CPU thread normally, exiting once we reach the next synchronization point.
-  //the CPU thread may run in the pathological case for up to 10 frames for a long 8-channel x 64KB DMA transfer.
-  //in practice, this will typically be at most one DMA transfer.
-  scheduler.mode = Scheduler::Mode::SynchronizeCPU;
-  runToSynchronize();
+  while(true) {
+    //SMP thread is synchronized twice to ensure the CPU and SMP are closely aligned:
+    //this is extremely critical for Tales of Phantasia and Star Ocean.
+    scheduler.mode = Scheduler::Mode::Synchronize;
+    scheduler.active = smp.thread;
+    if(!runToSynchronize()) continue;
 
-  //now synchronize every other thread to their synchronization points.
-  //stop after each thread is very slightly ahead of the CPU thread.
-  scheduler.mode = Scheduler::Mode::SynchronizeAll;
-  runToThread(smp);
-  runToThread(ppu);
-  for(auto coprocessor : cpu.coprocessors) runToThread(*coprocessor);
+    scheduler.mode = Scheduler::Mode::Synchronize;
+    scheduler.active = cpu.thread;
+    if(!runToSynchronize()) continue;
 
-  //at this point, the CPU thread is the furthest behind in time.
-  //all threads are now at their synchronization points and can be serialized safely.
+    scheduler.mode = Scheduler::Mode::Synchronize;
+    scheduler.active = smp.thread;
+    if(!runToSynchronize()) continue;
+
+    scheduler.mode = Scheduler::Mode::Synchronize;
+    scheduler.active = ppu.thread;
+    if(!runToSynchronize()) continue;
+
+    for(auto coprocessor : cpu.coprocessors) {
+      scheduler.mode = Scheduler::Mode::Synchronize;
+      scheduler.active = coprocessor->thread;
+      if(!runToSynchronize()) continue;
+    }
+
+    break;
+  }
+
   scheduler.mode = Scheduler::Mode::Run;
   scheduler.active = cpu.thread;
 }
 
-auto System::runToSynchronize() -> void {
+auto System::runToSynchronize() -> bool {
   while(true) {
     scheduler.enter();
     if(scheduler.event == Scheduler::Event::Frame) frameEvent();
-    if(scheduler.event == Scheduler::Event::Synchronize) break;
+    if(scheduler.event == Scheduler::Event::Synchronized) return true;
+    if(scheduler.event == Scheduler::Event::Desynchronized) return false;
   }
-}
-
-auto System::runToThread(Thread& aux) -> void {
-  //first, ensure that the CPU is ahead of the thread we want to synchronize to.
-  //because if it isn't, and the other thread is ahead, it will run even more ahead to synchronize itself.
-  scheduler.active = cpu.thread;
-  while(aux.clock >= 0) runToSynchronize();
-
-  //now that it is, run the other thread until it's just barely surpassed the CPU thread.
-  scheduler.active = aux.thread;
-  do runToSynchronize(); while(aux.clock < 0);
 }
 
 auto System::frameEvent() -> void {
