@@ -712,7 +712,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC:
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = GB_random();
                 if (i & 0x100) {
@@ -758,7 +759,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC:
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
@@ -783,7 +785,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified */
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < 8; i++) {
@@ -811,7 +814,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC: {
             uint8_t temp;
@@ -1017,11 +1021,11 @@ void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 {
-    if (gb->model == GB_MODEL_SGB_NTSC) {
-        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
-    }
-    if (gb->model == GB_MODEL_SGB_PAL) {
+    if (gb->model & GB_MODEL_PAL_BIT) {
         return SGB_PAL_FREQUENCY * gb->clock_multiplier;
+    }
+    if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
+        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
     }
     return CPU_FREQUENCY * gb->clock_multiplier;
 }
