@@ -18,9 +18,6 @@ cothread_t co_derive(void*, unsigned int, void (*)(void));
 cothread_t co_create(unsigned int, void (*)(void));
 void co_delete(cothread_t);
 void co_switch(cothread_t);
-unsigned int co_size(unsigned int);
-void co_save(cothread_t, void*, unsigned int);
-void co_load(cothread_t, const void*, unsigned int);
 
 #ifdef __cplusplus
 }

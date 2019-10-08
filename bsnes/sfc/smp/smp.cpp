@@ -9,10 +9,7 @@ SMP smp;
 #include "serialization.cpp"
 
 auto SMP::synchronizeCPU() -> void {
-  if(clock >= 0) {
-    scheduler.desynchronize();
-    co_switch(cpu.thread);
-  }
+  if(clock >= 0) scheduler.resume(cpu.thread);
 }
 
 auto SMP::synchronizeDSP() -> void {
