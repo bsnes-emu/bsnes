@@ -118,13 +118,7 @@ auto PPU::scanline() -> void {
   }
 
   if(vcounter() == vdisp()) {
-    if(auto device = controllerPort2.device) device->latch();  //light guns
     if(!io.displayDisable) oamAddressReset();
-  }
-
-  if(vcounter() == vdisp()) {  //240
-    Line::flush();
-    scheduler.leave(Scheduler::Event::Frame);
   }
 
   if(vcounter() == 240) {

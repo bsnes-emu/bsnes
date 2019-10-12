@@ -123,10 +123,9 @@ auto InputManager::bindHotkeys() -> void {
     if(!presentation.frameAdvance.checked()) {
       //start frame advance if not currently frame advancing
       presentation.frameAdvance.setChecked().doActivate();
-    } else {
-      //advance to the next video frame otherwise
-      program.frameAdvanceLock = false;
     }
+    //advance one frame, even if we were currently paused when starting frame advance mode
+    program.frameAdvanceLock = false;
   }));
 
   hotkeys.append(InputHotkey("Increase HD Mode 7").onPress([] {

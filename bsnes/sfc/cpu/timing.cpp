@@ -123,6 +123,15 @@ auto CPU::scanline() -> void {
       overclocking.target = clocks * overclock - clocks;
     }
   }
+
+  //handle video frame events from the CPU core to prevent a race condition between
+  //games polling inputs during NMI and the PPU thread not being 100% synchronized.
+  if(vcounter() == ppu.vdisp()) {
+    if(auto device = controllerPort2.device) device->latch();  //light guns
+    synchronizePPU();
+    if(system.fastPPU()) PPUfast::Line::flush();
+    scheduler.leave(Scheduler::Event::Frame);
+  }
 }
 
 auto CPU::aluEdge() -> void {

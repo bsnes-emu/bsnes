@@ -17,14 +17,6 @@ auto PPU::main() -> void {
   window.scanline();
   screen.scanline();
 
-  if(vcounter() == vdisp()) {
-    if(auto device = controllerPort2.device) device->latch();  //light guns
-  }
-
-  if(vcounter() == vdisp()) {  //240
-    scheduler.leave(Scheduler::Event::Frame);
-  }
-
   if(vcounter() > 240) {
     step(hperiod());
     return;
