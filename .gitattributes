@@ -1,0 +1,2 @@
+*.fs linguist-detectable=false
+*.vs linguist-detectable=false
