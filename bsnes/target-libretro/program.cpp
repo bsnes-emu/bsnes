@@ -150,7 +150,7 @@ auto Program::load() -> void {
 	if(title == "FIREPOWER 2000") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
 	//fixes an errant scanline on the title screen due to writing to PPU registers too late
-	if(title == "NHL '94") emulator->configure("Hacks/PPU/RenderCycle", 32);
+	if(title == "NHL '94" || title == "NHL PROHOCKEY'94") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
 	if (emulator->configuration("Hacks/Hotfixes")) {
 		if (title == "The Hurricanes") emulator->configure("Hacks/Entropy", "None");
