@@ -15,45 +15,49 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
+  auto method = configuration.system.serialization.method;
+
+  //these games will periodically deadlock when using "Fast" synchronization
+  if(cartridge.headerTitle() == "Star Ocean") method = "Strict";
+  if(cartridge.headerTitle() == "TALES OF PHANTASIA") method = "Strict";
+
+  //fallback in case of unrecognized method specified
+  if(method != "Fast" && method != "Strict") method = "Fast";
+
+  auto synchronize = [&](cothread_t thread) -> bool {
+    scheduler.mode = Scheduler::Mode::Synchronize;
+    scheduler.active = thread;
+    while(true) {
+      scheduler.enter();
+      if(scheduler.event == Scheduler::Event::Frame) frameEvent();
+      if(scheduler.event == Scheduler::Event::Synchronized) break;
+      if(scheduler.event == Scheduler::Event::Desynchronized) {
+        if(method == "Fast") continue;
+        if(method == "Strict") return false;
+      }
+    }
+    return true;
+  };
+
   while(true) {
     //SMP thread is synchronized twice to ensure the CPU and SMP are closely aligned:
     //this is extremely critical for Tales of Phantasia and Star Ocean.
-    scheduler.mode = Scheduler::Mode::Synchronize;
-    scheduler.active = smp.thread;
-    if(!runToSynchronize()) continue;
+    if(!synchronize(smp.thread)) continue;
+    if(!synchronize(cpu.thread)) continue;
+    if(!synchronize(smp.thread)) continue;
+    if(!synchronize(ppu.thread)) continue;
 
-    scheduler.mode = Scheduler::Mode::Synchronize;
-    scheduler.active = cpu.thread;
-    if(!runToSynchronize()) continue;
-
-    scheduler.mode = Scheduler::Mode::Synchronize;
-    scheduler.active = smp.thread;
-    if(!runToSynchronize()) continue;
-
-    scheduler.mode = Scheduler::Mode::Synchronize;
-    scheduler.active = ppu.thread;
-    if(!runToSynchronize()) continue;
-
+    bool synchronized = true;
     for(auto coprocessor : cpu.coprocessors) {
-      scheduler.mode = Scheduler::Mode::Synchronize;
-      scheduler.active = coprocessor->thread;
-      if(!runToSynchronize()) continue;
+      if(!synchronize(coprocessor->thread)) { synchronized = false; break; }
     }
+    if(!synchronized) continue;
 
     break;
   }
 
   scheduler.mode = Scheduler::Mode::Run;
   scheduler.active = cpu.thread;
-}
-
-auto System::runToSynchronize() -> bool {
-  while(true) {
-    scheduler.enter();
-    if(scheduler.event == Scheduler::Event::Frame) frameEvent();
-    if(scheduler.event == Scheduler::Event::Synchronized) return true;
-    if(scheduler.event == Scheduler::Event::Desynchronized) return false;
-  }
 }
 
 auto System::frameEvent() -> void {

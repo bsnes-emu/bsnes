@@ -14,6 +14,7 @@ using namespace nall;
 #include <heuristics/heuristics.hpp>
 #include <heuristics/heuristics.cpp>
 #include <heuristics/super-famicom.cpp>
+#include <heuristics/game-boy.cpp>
 
 #include "resources.hpp"
 
@@ -34,10 +35,12 @@ struct Program : Emulator::Platform
 	auto load() -> void;
 	auto loadFile(string location) -> vector<uint8_t>;
 	auto loadSuperFamicom(string location) -> bool;
+	auto loadGameBoy(string location) -> bool;
 
 	auto save() -> void;
 
 	auto openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+	auto openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
 	
 	auto hackPatchMemory(vector<uint8_t>& data) -> void;
 	
@@ -68,6 +71,10 @@ public:
 		vector<uint8_t> expansion;
 		vector<uint8_t> firmware;
 	} superFamicom;
+
+	struct GameBoy : Game {
+		vector<uint8_t> program;
+	} gameBoy;
 };
 
 static Program *program = nullptr;
@@ -100,7 +107,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 		result = vfs::memory::file::open(boardsbml, sizeof(boardsbml));
 	}
 
-	if (id == 1) {  //Super Famicom
+	if (id == 1) { //Super Famicom
 		if (name == "manifest.bml" && mode == vfs::file::mode::read) {
 			result = vfs::memory::file::open(superFamicom.manifest.data<uint8_t>(), superFamicom.manifest.size());
 		}
@@ -115,6 +122,17 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 		}
 		else {
 			result = openRomSuperFamicom(name, mode);
+		}
+	}
+	else if (id == 2) { //Game Boy
+		if (name == "manifest.bml" && mode == vfs::file::mode::read) {
+			result = vfs::memory::file::open(gameBoy.manifest.data<uint8_t>(), gameBoy.manifest.size());
+		}
+		else if (name == "program.rom" && mode == vfs::file::mode::read) {
+			result = vfs::memory::file::open(gameBoy.program.data(), gameBoy.program.size());
+		}
+		else {
+			result = openRomGameBoy(name, mode);
 		}
 	}
 	return result;
@@ -160,9 +178,19 @@ auto Program::load() -> void {
 }
 
 auto Program::load(uint id, string name, string type, vector<string> options) -> Emulator::Platform::Load {
-	if (loadSuperFamicom(superFamicom.location))
+	if (id == 1)
 	{
-		return {id, superFamicom.region};
+		if (loadSuperFamicom(superFamicom.location))
+		{
+			return {id, superFamicom.region};
+		}
+	}
+	else if (id == 2)
+	{
+		if (loadGameBoy(gameBoy.location))
+		{
+			return { id, NULL };
+		}
 	}
 	return { id, options(0) };
 }
@@ -312,6 +340,47 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_p
 	return {};
 }
 
+auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
+	if(name == "program.rom" && mode == vfs::file::mode::read)
+	{
+		return vfs::memory::file::open(gameBoy.program.data(), gameBoy.program.size());
+	}
+
+	if(name == "save.ram")
+	{
+		string save_path;
+
+		auto suffix = Location::suffix(base_name);
+		auto base = Location::base(base_name.transform("\\", "/"));
+
+		const char *save = nullptr;
+		if (environ_cb && environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &save) && save)
+			save_path = { string(save).transform("\\", "/"), "/", base.trimRight(suffix, 1L), ".srm" };
+		else
+			save_path = { base_name.trimRight(suffix, 1L), ".srm" };
+
+		return vfs::fs::file::open(save_path, mode);
+	}
+
+	if(name == "time.rtc")
+	{
+		string save_path;
+
+		auto suffix = Location::suffix(base_name);
+		auto base = Location::base(base_name.transform("\\", "/"));
+
+		const char *save = nullptr;
+		if (environ_cb && environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &save) && save)
+			save_path = { string(save).transform("\\", "/"), "/", base.trimRight(suffix, 1L), ".rtc" };
+		else
+			save_path = { base_name.trimRight(suffix, 1L), ".rtc" };
+
+		return vfs::fs::file::open(save_path, mode);
+	}
+
+	return {};
+}
+
 auto Program::loadFile(string location) -> vector<uint8_t>
 {
 	if(Location::suffix(location).downcase() == ".zip") {
@@ -336,12 +405,9 @@ auto Program::loadFile(string location) -> vector<uint8_t>
 
 auto Program::loadSuperFamicom(string location) -> bool
 {
-	string manifest;
 	vector<uint8_t> rom;
-
-	manifest = file::read({Location::notsuffix(location), ".bml"});
-
 	rom = loadFile(location);
+
 	if(rom.size() < 0x8000) return false;
 
 	//assume ROM and IPS agree on whether a copier header is present
@@ -357,7 +423,7 @@ auto Program::loadSuperFamicom(string location) -> bool
 
 	superFamicom.title = heuristics.title();
 	superFamicom.region = heuristics.videoRegion();
-	superFamicom.manifest = manifest ? manifest : heuristics.manifest();
+	superFamicom.manifest = heuristics.manifest();
 
 	hackPatchMemory(rom);
 	superFamicom.document = BML::unserialize(superFamicom.manifest);
@@ -384,6 +450,23 @@ auto Program::loadSuperFamicom(string location) -> bool
 		memory::copy(&superFamicom.firmware[0], &rom[offset], size);
 		offset += size;
 	}
+	return true;
+}
+
+auto Program::loadGameBoy(string location) -> bool {
+	vector<uint8_t> rom;
+	rom = loadFile(location);
+
+	if (rom.size() < 0x4000) return false;
+
+	auto heuristics = Heuristics::GameBoy(rom, location);
+	auto sha256 = Hash::SHA256(rom).digest();
+
+	gameBoy.manifest = heuristics.manifest();
+	gameBoy.document = BML::unserialize(gameBoy.manifest);
+	gameBoy.location = location;
+	gameBoy.program = rom;
+
 	return true;
 }
 

@@ -1,6 +1,7 @@
 auto Program::load() -> void {
   unload();
 
+  emulator->configure("System/Serialization/Method", settings.emulator.serialization.method);
   emulator->configure("Hacks/Hotfixes", settings.emulator.hack.hotfixes);
   emulator->configure("Hacks/Entropy", settings.emulator.hack.entropy);
   emulator->configure("Hacks/CPU/Overclock", settings.emulator.hack.cpu.overclock);
@@ -127,14 +128,16 @@ auto Program::loadSuperFamicom(string location) -> bool {
   if(!superFamicom.patched) superFamicom.patched = applyPatchBPS(rom, location);
   auto heuristics = Heuristics::SuperFamicom(rom, location);
   auto sha256 = Hash::SHA256(rom).digest();
+  superFamicom.title = heuristics.title();
+  superFamicom.region = heuristics.videoRegion();
   if(auto document = BML::unserialize(string::read(locate("Database/Super Famicom.bml")))) {
     if(auto game = document[{"game(sha256=", sha256, ")"}]) {
       manifest = BML::serialize(game);
+      //the internal ROM header title is not present in the database, but is needed for internal core overrides
+      manifest.append("  title: ", superFamicom.title, "\n");
       superFamicom.verified = true;
     }
   }
-  superFamicom.title = heuristics.title();
-  superFamicom.region = heuristics.videoRegion();
   superFamicom.manifest = manifest ? manifest : heuristics.manifest();
   hackPatchMemory(rom);
   superFamicom.document = BML::unserialize(superFamicom.manifest);

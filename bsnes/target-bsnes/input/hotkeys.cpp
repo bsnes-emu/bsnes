@@ -11,8 +11,12 @@ auto InputManager::bindHotkeys() -> void {
   static bool fastForwarding = false;
   static bool rewinding = false;
 
-  hotkeys.append(InputHotkey("Toggle Fullscreen Mode").onPress([] {
+  hotkeys.append(InputHotkey("Toggle Fullscreen").onPress([] {
     program.toggleVideoFullScreen();
+  }));
+
+  hotkeys.append(InputHotkey("Toggle Pseudo-Fullscreen").onPress([] {
+    program.toggleVideoPseudoFullScreen();
   }));
 
   hotkeys.append(InputHotkey("Toggle Mouse Capture").onPress([] {

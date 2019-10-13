@@ -114,6 +114,7 @@ auto Settings::process(bool load) -> void {
   bind(natural, "Emulator/AutoSaveMemory/Interval",      emulator.autoSaveMemory.interval);
   bind(boolean, "Emulator/AutoSaveStateOnUnload",        emulator.autoSaveStateOnUnload);
   bind(boolean, "Emulator/AutoLoadStateOnLoad",          emulator.autoLoadStateOnLoad);
+  bind(text,    "Emulator/Serialization/Method",         emulator.serialization.method);
   bind(boolean, "Emulator/Hack/Hotfixes",                emulator.hack.hotfixes);
   bind(text,    "Emulator/Hack/Entropy",                 emulator.hack.entropy);
   bind(natural, "Emulator/Hack/CPU/Overclock",           emulator.hack.cpu.overclock);

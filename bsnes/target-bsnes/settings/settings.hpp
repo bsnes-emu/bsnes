@@ -94,6 +94,9 @@ struct Settings : Markup::Node {
     } autoSaveMemory;
     bool autoSaveStateOnUnload = false;
     bool autoLoadStateOnLoad = false;
+    struct Serialization {
+      string method = "Fast";
+    } serialization;
     struct Hack {
       bool hotfixes = true;
       string entropy = "Low";
@@ -462,6 +465,14 @@ public:
       ComboButton inputDriverOption{&inputDriverLayout, Size{0, 0}};
       Button inputDriverUpdate{&inputDriverLayout, Size{0, 0}};
       Label inputDriverActive{&inputDriverLayout, Size{0, 0}};
+  Canvas inputSpacer{this, Size{~0, 1}};
+  //
+  Widget spacer{this, Size{~0, ~0}, 0};
+  Label syncModeLabel{this, Size{~0, 0}, 0};
+  Label syncModeRequirements{this, Size{~0, 0}};
+  HorizontalLayout modeLayout{this, Size{~0, 0}};
+    Button adaptiveSyncMode{&modeLayout, Size{0, 0}};
+    Button dynamicRateControlMode{&modeLayout, Size{0, 0}};
 };
 
 struct SettingsWindow : Window, Lock {

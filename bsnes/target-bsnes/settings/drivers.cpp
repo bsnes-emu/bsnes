@@ -59,7 +59,7 @@ auto DriverSettings::create() -> void {
   audioLatencyLabel.setText("Latency:");
   audioLatencyOption.onChange([&] { audioLatencyChange(); });
   audioExclusiveToggle.setText("Exclusive mode").setToolTip(
-    "(ASIO, WASAPI drivers only)\n\n"
+    "(WASAPI driver only)\n\n"
     "Acquires exclusive control of the sound card device.\n"
     "This can significantly reduce audio latency.\n"
     "However, it will block sounds from all other applications."
@@ -100,6 +100,52 @@ auto DriverSettings::create() -> void {
     "This is useful for APIs that lack auto-hotplug support,\n"
     "such as DirectInput and SDL."
   ).onActivate([&] { inputDriverChange(); });
+  inputSpacer.setColor({192, 192, 192});
+
+  syncModeLabel.setText("Synchronization Mode Presets:").setFont(Font().setBold());
+  syncModeRequirements.setText(
+    "Adaptive Sync: requires G-sync or FreeSync monitor.\n"
+    "Dynamic Rate Control: requires monitor and SNES refresh rates to match."
+  );
+  adaptiveSyncMode.setText("Adaptive Sync").onActivate([&] {
+    if(!audioBlockingToggle.enabled()) {
+      return (void)MessageDialog().setAlignment(settingsWindow).setTitle("Failure").setText({
+        "Sorry, the current driver configuration is not compatible with adaptive sync mode.\n"
+        "Adaptive sync requires audio synchronization support."
+      }).error();
+    }
+
+    if(videoExclusiveToggle.enabled() && !videoExclusiveToggle.checked()) videoExclusiveToggle.setChecked(true).doToggle();
+    if(videoBlockingToggle.enabled() && videoBlockingToggle.checked()) videoBlockingToggle.setChecked(false).doToggle();
+    if(audioBlockingToggle.enabled() && !audioBlockingToggle.checked()) audioBlockingToggle.setChecked(true).doToggle();
+    if(audioDynamicToggle.enabled() && audioDynamicToggle.checked()) audioDynamicToggle.setChecked(false).doToggle();
+
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Adaptive sync works best in fullscreen exclusive mode.\n"
+      "Use the lowest audio latency setting your system can manage.\n"
+      "A G-sync or FreeSync monitor is required.\n"
+      "Adaptive sync must be enabled in your driver settings panel."
+    }).information();
+  });
+  dynamicRateControlMode.setText("Dynamic Rate Control").onActivate([&] {
+    if(!videoBlockingToggle.enabled() || !audioDynamicToggle.enabled()) {
+      return (void)MessageDialog().setAlignment(settingsWindow).setTitle("Failure").setText({
+        "Sorry, the current driver configuration is not compatible with dynamic rate control mode.\n"
+        "Dynamic rate control requires video synchronization and audio dynamic rate support."
+      }).error();
+    }
+
+    if(videoBlockingToggle.enabled() && !videoBlockingToggle.checked()) videoBlockingToggle.setChecked(true).doToggle();
+    if(audioExclusiveToggle.enabled() && !audioExclusiveToggle.checked()) audioExclusiveToggle.setChecked(true).doToggle();
+    if(audioBlockingToggle.enabled() && audioBlockingToggle.checked()) audioBlockingToggle.setChecked(false).doToggle();
+    if(audioDynamicToggle.enabled() && !audioDynamicToggle.checked()) audioDynamicToggle.setChecked(true).doToggle();
+
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Dynamic rate control requires your monitor to be running at:\n"
+      "60hz refresh rate for NTSC games, 50hz refresh rate for PAL games.\n"
+      "Use the lowest audio latency setting your system can manage."
+    }).information();
+  });
 }
 
 //

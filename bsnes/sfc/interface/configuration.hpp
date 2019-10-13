@@ -17,6 +17,9 @@ struct Configuration {
     struct PPU2 {
       uint version = 3;
     } ppu2;
+    struct Serialization {
+      string method = "Fast";
+    } serialization;
   } system;
 
   struct Video {

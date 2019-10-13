@@ -28,6 +28,8 @@ static void audio_queue(int16_t left, int16_t right)
 
 #include "program.cpp"
 
+static string sgb_bios;
+
 #define RETRO_DEVICE_JOYPAD_MULTITAP       RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0)
 #define RETRO_DEVICE_LIGHTGUN_SUPER_SCOPE  RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_LIGHTGUN, 0)
 #define RETRO_DEVICE_LIGHTGUN_JUSTIFIER    RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_LIGHTGUN, 1)
@@ -219,6 +221,12 @@ static void flush_variables()
 		else if (strcmp(variable.value, "OFF") == 0)
 			emulator->configure("Hacks/Coprocessor/PreferHLE", false);
 	}
+
+	variable = { "bsnes_sgb_bios", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		sgb_bios = variable.value;
+	}
 }
 
 static void check_variables()
@@ -375,10 +383,11 @@ static void set_environment_info(retro_environment_t cb)
 		{ "bsnes_mode7_supersample", "HD Mode 7 Supersampling; OFF|ON" },
 		{ "bsnes_mode7_mosaic", "HD Mode 7 HD->SD Mosaic; ON|OFF" },
 		{ "bsnes_dsp_fast", "DSP Fast mode; ON|OFF" },
-		{ "bsnes_dsp_cubic", "DSP Cubic interpolation; ON|OFF" },
+		{ "bsnes_dsp_cubic", "DSP Cubic interpolation; OFF|ON" },
 		{ "bsnes_dsp_echo_shadow", "DSP Echo shadow RAM; OFF|ON" },
 		{ "bsnes_coprocessor_delayed_sync", "Coprocessor Delayed Sync; ON|OFF" },
 		{ "bsnes_coprocessor_prefer_hle", "Coprocessor Prefer HLE; ON|OFF" },
+		{ "bsnes_sgb_bios", "Preferred Super GameBoy BIOS (restart); SGB1.sfc|SGB2.sfc" },
 		{ nullptr },
 	};
 	cb(RETRO_ENVIRONMENT_SET_VARIABLES, const_cast<retro_variable *>(vars));
@@ -531,17 +540,28 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
 		return false;*/
 
-	program->superFamicom.location = string(game->path);
-	program->base_name = string(game->path);
-
 	emulator->configure("Audio/Frequency", SAMPLERATE);
 
-	// turn into core options later
-	emulator->configure("Hacks/CPU/Overclock", 100);
-	emulator->configure("Hacks/SA1/Overclock", 100);
-	emulator->configure("Hacks/SuperFX/Overclock", 100);
-
 	flush_variables();
+
+	if (string(game->path).endsWith(".gb") || string(game->path).endsWith(".gbc"))
+	{
+		const char *system_dir;
+		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
+		string sgb_full_path = string(system_dir, "/", sgb_bios).transform("\\", "/");
+		if (!file::exists(sgb_full_path)) {
+			libretro_print(RETRO_LOG_ERROR, "GameBoy games require SGB BIOS in system directory: %s\n", sgb_bios);
+			return false;
+		}
+
+		program->superFamicom.location = sgb_full_path;
+		program->gameBoy.location = string(game->path);
+	}
+	else
+	{
+		program->superFamicom.location = string(game->path);
+	}
+	program->base_name = string(game->path);
 
 	program->load();
 
