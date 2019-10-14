@@ -239,9 +239,8 @@ auto Interface::synchronize(uint64 timestamp) -> void {
   if(cartridge.has.SharpRTC) sharprtc.synchronize(timestamp);
 }
 
-auto Interface::serialize() -> serializer {
-  system.runToSave();
-  return system.serialize();
+auto Interface::serialize(bool synchronize) -> serializer {
+  return system.serialize(synchronize);
 }
 
 auto Interface::unserialize(serializer& s) -> bool {

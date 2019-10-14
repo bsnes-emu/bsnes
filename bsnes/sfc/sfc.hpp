@@ -73,9 +73,14 @@ namespace SuperFamicom {
   extern Scheduler scheduler;
 
   struct Thread {
+    enum : uint { Size = 16_KiB * sizeof(void*) };
+
     auto create(auto (*entrypoint)() -> void, uint frequency_) -> void {
-      if(thread) co_delete(thread);
-      thread = co_create(65536 * sizeof(void*), entrypoint);
+      if(!thread) {
+        thread = co_create(Thread::Size, entrypoint);
+      } else {
+        co_derive(thread, Thread::Size, entrypoint);
+      }
       frequency = frequency_;
       clock = 0;
     }
@@ -87,6 +92,26 @@ namespace SuperFamicom {
     auto serialize(serializer& s) -> void {
       s.integer(frequency);
       s.integer(clock);
+    }
+
+    auto serializeStack(serializer& s) -> void {
+      auto stack = new uint8_t[Thread::Size];
+
+      if(s.mode() == serializer::Size) {
+        s.array(stack, Thread::Size);
+      }
+
+      if(s.mode() == serializer::Load) {
+        s.array(stack, Thread::Size);
+        memory::copy(thread, stack, Thread::Size);
+      }
+
+      if(s.mode() == serializer::Save) {
+        memory::copy(stack, thread, Thread::Size);
+        s.array(stack, Thread::Size);
+      }
+
+      delete[] stack;
     }
 
     cothread_t thread = nullptr;

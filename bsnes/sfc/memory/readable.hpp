@@ -6,9 +6,13 @@ struct ReadableMemory : Memory {
   }
 
   inline auto allocate(uint size, uint8 fill = 0xff) -> void override {
-    delete[] self.data;
-    self.data = new uint8[self.size = size];
-    for(uint address : range(size)) self.data[address] = fill;
+    if(self.size != size) {
+      delete[] self.data;
+      self.data = new uint8[self.size = size];
+    }
+    for(uint address : range(size)) {
+      self.data[address] = fill;
+    }
   }
 
   inline auto data() -> uint8* override {

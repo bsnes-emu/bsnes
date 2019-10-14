@@ -96,6 +96,7 @@ struct Settings : Markup::Node {
     bool autoLoadStateOnLoad = false;
     struct Serialization {
       string method = "Fast";
+      bool synchronize = true;
     } serialization;
     struct Hack {
       bool hotfixes = true;

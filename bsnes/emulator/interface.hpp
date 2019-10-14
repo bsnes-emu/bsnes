@@ -81,7 +81,7 @@ struct Interface {
   virtual auto synchronize(uint64 timestamp = 0) -> void {}
 
   //state functions
-  virtual auto serialize() -> serializer { return {}; }
+  virtual auto serialize(bool synchronize = true) -> serializer { return {}; }
   virtual auto unserialize(serializer&) -> bool { return false; }
 
   //cheat functions

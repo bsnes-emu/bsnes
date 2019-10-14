@@ -97,7 +97,8 @@ auto System::load(Emulator::Interface* interface) -> bool {
   }
   if(cartridge.has.BSMemorySlot) bsmemory.load();
 
-  serializeInit();
+  information.serializeSize[0] = serializeInit(0);
+  information.serializeSize[1] = serializeInit(1);
   this->interface = interface;
   return information.loaded = true;
 }

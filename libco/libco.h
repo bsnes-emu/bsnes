@@ -1,5 +1,5 @@
 /*
-  libco v19 (2019-02-18)
+  libco v20 (2019-10-14)
   author: byuu
   license: ISC
 */

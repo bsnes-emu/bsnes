@@ -58,7 +58,7 @@ struct Interface : Emulator::Interface {
   auto rtc() -> bool override;
   auto synchronize(uint64 timestamp) -> void override;
 
-  auto serialize() -> serializer override;
+  auto serialize(bool synchronize = true) -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
   auto read(uint24 address) -> uint8 override;

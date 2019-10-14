@@ -1,49 +1,51 @@
-auto System::serialize() -> serializer {
-  serializer s(serializeSize);
+auto System::serialize(bool synchronize) -> serializer {
+  if(synchronize) runToSave();
 
   uint signature = 0x31545342;
+  uint serializeSize = information.serializeSize[synchronize];
   char version[16] = {};
   char description[512] = {};
   memory::copy(&version, (const char*)Emulator::SerializerVersion, Emulator::SerializerVersion.size());
 
+  serializer s(serializeSize);
   s.integer(signature);
+  s.integer(serializeSize);
   s.array(version);
   s.array(description);
-
+  s.boolean(synchronize);
   s.boolean(hacks.fastPPU);
-
-  serializeAll(s);
+  serializeAll(s, synchronize);
   return s;
 }
 
 auto System::unserialize(serializer& s) -> bool {
   uint signature = 0;
+  uint serializeSize = 0;
   char version[16] = {};
   char description[512] = {};
+  bool synchronize = false;
+  bool fastPPU = false;
 
   s.integer(signature);
+  s.integer(serializeSize);
   s.array(version);
   s.array(description);
+  s.boolean(synchronize);
+  s.boolean(fastPPU);
 
   if(signature != 0x31545342) return false;
+  if(serializeSize != information.serializeSize[synchronize]) return false;
   if(string{version} != Emulator::SerializerVersion) return false;
-
-  s.boolean(hacks.fastPPU);
+  if(fastPPU != hacks.fastPPU) return false;
 
   power(/* reset = */ false);
-  serializeAll(s);
-  serializeInit();  //hacks.fastPPU setting changes serializeSize
-
+  serializeAll(s, synchronize);
   return true;
 }
 
 //internal
 
-auto System::serialize(serializer& s) -> void {
-}
-
-auto System::serializeAll(serializer& s) -> void {
-  system.serialize(s);
+auto System::serializeAll(serializer& s, bool synchronize) -> void {
   random.serialize(s);
   cartridge.serialize(s);
   cpu.serialize(s);
@@ -80,24 +82,34 @@ auto System::serializeAll(serializer& s) -> void {
   controllerPort1.serialize(s);
   controllerPort2.serialize(s);
   expansionPort.serialize(s);
+
+  if(!synchronize) {
+    cpu.serializeStack(s);
+    smp.serializeStack(s);
+    ppu.serializeStack(s);
+    for(auto coprocessor : cpu.coprocessors) {
+      coprocessor->serializeStack(s);
+    }
+  }
 }
 
 //perform dry-run state save:
 //determines exactly how many bytes are needed to save state for this cartridge,
 //as amount varies per game (eg different RAM sizes, special chips, etc.)
-auto System::serializeInit() -> void {
+auto System::serializeInit(bool synchronize) -> uint {
   serializer s;
 
   uint signature = 0;
+  uint serializeSize = 0;
   char version[16] = {};
   char description[512] = {};
 
   s.integer(signature);
+  s.integer(serializeSize);
   s.array(version);
   s.array(description);
-
+  s.boolean(synchronize);
   s.boolean(hacks.fastPPU);
-
-  serializeAll(s);
-  serializeSize = s.size();
+  serializeAll(s, synchronize);
+  return s.size();
 }
