@@ -484,6 +484,7 @@ RETRO_API void retro_reset()
 RETRO_API void retro_run()
 {
 	check_variables();
+	input_poll();
 	emulator->run();
 }
 
