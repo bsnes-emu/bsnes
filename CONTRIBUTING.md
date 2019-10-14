@@ -22,7 +22,7 @@ GPLv4 and later licenses will change, and if they will be in the best interests
 of emulator development and video game preservation.
 
 Although I put a good deal of trust into the FSF, no one is an oracle that can
-predict the future. Would /you/ agree to a license before being able to read it?
+predict the future. Would *you* agree to a license before being able to read it?
 
 However, the GPLv4 may prove beneficial, and close important holes in the GPLv3
 license, just as the GPLv3 license closed the GPLv2's TiVoization loophole. And
