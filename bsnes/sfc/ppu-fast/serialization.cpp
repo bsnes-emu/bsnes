@@ -8,7 +8,8 @@ auto PPU::serialize(serializer& s) -> void {
   s.array(cgram);
   for(auto& object : objects) object.serialize(s);
 
-  for(auto address : range(32768)) updateTiledata(address);
+  if (s.mode() == s.Load)
+    for(auto address : range(32768)) updateTiledata(address);
   Line::start = 0;
   Line::count = 0;
 }
