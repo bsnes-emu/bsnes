@@ -200,6 +200,9 @@ public:
     Rewind      = 1 << 4,
   };};
   uint mute = 0;
+
+  bool fastForwarding = false;
+  bool rewinding = false;
 };
 
 extern Program program;

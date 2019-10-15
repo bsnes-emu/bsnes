@@ -67,7 +67,7 @@ auto CPU::load() -> bool {
 
 auto CPU::power(bool reset) -> void {
   WDC65816::power();
-  create(Enter, system.cpuFrequency());
+  Thread::create(Enter, system.cpuFrequency());
   coprocessors.reset();
   PPUcounter::reset();
   PPUcounter::scanline = {&CPU::scanline, this};

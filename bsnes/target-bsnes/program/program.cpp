@@ -93,7 +93,22 @@ auto Program::main() -> void {
   }
 
   rewindRun();
-  emulator->run();
+
+  if(!settings.emulator.runAhead.frames || fastForwarding || rewinding) {
+    emulator->run();
+  } else {
+    emulator->setRunAhead(true);
+    emulator->run();
+    auto state = emulator->serialize(0);
+    if(settings.emulator.runAhead.frames >= 2) emulator->run();
+    if(settings.emulator.runAhead.frames >= 3) emulator->run();
+    if(settings.emulator.runAhead.frames >= 4) emulator->run();
+    emulator->setRunAhead(false);
+    emulator->run();
+    state.setMode(serializer::Mode::Load);
+    emulator->unserialize(state);
+  }
+
   if(emulatorSettings.autoSaveMemory.checked()) {
     auto currentTime = chrono::timestamp();
     if(currentTime - autoSaveTime >= settings.emulator.autoSaveMemory.interval) {

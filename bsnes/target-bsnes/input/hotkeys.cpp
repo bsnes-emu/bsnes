@@ -8,8 +8,6 @@ auto InputManager::bindHotkeys() -> void {
   static int stateSlot = 1;
   static double frequency = 48000.0;
   static double volume = 0.0;
-  static bool fastForwarding = false;
-  static bool rewinding = false;
 
   hotkeys.append(InputHotkey("Toggle Fullscreen").onPress([] {
     program.toggleVideoFullScreen();
@@ -32,8 +30,8 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Rewind").onPress([&] {
-    if(!emulator->loaded() || fastForwarding) return;
-    rewinding = true;
+    if(!emulator->loaded() || program.fastForwarding) return;
+    program.rewinding = true;
     if(program.rewind.frequency == 0) {
       program.showMessage("Please enable rewind support in Settings->Emulator first");
     } else {
@@ -46,7 +44,7 @@ auto InputManager::bindHotkeys() -> void {
       Emulator::audio.setVolume(volume * 0.65);
     }
   }).onRelease([&] {
-    rewinding = false;
+    program.rewinding = false;
     if(!emulator->loaded()) return;
     program.rewindMode(Program::Rewind::Mode::Playing);
     program.mute &= ~Program::Mute::Rewind;
@@ -84,8 +82,8 @@ auto InputManager::bindHotkeys() -> void {
   }));
 
   hotkeys.append(InputHotkey("Fast Forward").onPress([] {
-    if(!emulator->loaded() || rewinding) return;
-    fastForwarding = true;
+    if(!emulator->loaded() || program.rewinding) return;
+    program.fastForwarding = true;
     emulator->setFrameSkip(emulator->configuration("Hacks/PPU/Fast") == "true" ? settings.fastForward.frameSkip : 0);
     video.setBlocking(false);
     audio.setBlocking(settings.fastForward.limiter != 0);
@@ -101,7 +99,7 @@ auto InputManager::bindHotkeys() -> void {
       Emulator::audio.setVolume(volume * 0.65);
     }
   }).onRelease([] {
-    fastForwarding = false;
+    program.fastForwarding = false;
     if(!emulator->loaded()) return;
     emulator->setFrameSkip(0);
     video.setBlocking(settings.video.blocking);

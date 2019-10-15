@@ -51,6 +51,15 @@ struct serializer {
     return _capacity;
   }
 
+  auto setMode(Mode mode) -> bool {
+    if(_mode == Mode::Save && mode == Mode::Load) {
+      _mode = mode;
+      _size = 0;
+      return true;
+    }
+    return false;
+  }
+
   template<typename T> auto real(T& value) -> serializer& {
     enum : uint { size = sizeof(T) };
     //this is rather dangerous, and not cross-platform safe;

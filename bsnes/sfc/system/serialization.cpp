@@ -1,4 +1,5 @@
 auto System::serialize(bool synchronize) -> serializer {
+  if(!information.serializeSize[synchronize]) return {};  //should never occur
   if(synchronize) runToSave();
 
   uint signature = 0x31545342;
@@ -38,7 +39,7 @@ auto System::unserialize(serializer& s) -> bool {
   if(string{version} != Emulator::SerializerVersion) return false;
   if(fastPPU != hacks.fastPPU) return false;
 
-  power(/* reset = */ false);
+  if(synchronize) power(/* reset = */ false);
   serializeAll(s, synchronize);
   return true;
 }

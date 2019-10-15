@@ -24,17 +24,54 @@ auto System::runToSave() -> void {
   //fallback in case of unrecognized method specified
   if(method != "Fast" && method != "Strict") method = "Fast";
 
-  auto synchronize = [&](cothread_t thread) -> bool {
-    scheduler.mode = Scheduler::Mode::Synchronize;
+  scheduler.mode = Scheduler::Mode::Synchronize;
+  if(method == "Fast") runToSaveFast();
+  if(method == "Strict") runToSaveStrict();
+
+  scheduler.mode = Scheduler::Mode::Run;
+  scheduler.active = cpu.thread;
+}
+
+auto System::runToSaveFast() -> void {
+  //run the emulator normally until the CPU thread naturally hits a synchronization point
+  while(true) {
+    scheduler.enter();
+    if(scheduler.event == Scheduler::Event::Frame) frameEvent();
+    if(scheduler.event == Scheduler::Event::Synchronized) {
+      if(scheduler.active != cpu.thread) continue;
+      break;
+    }
+    if(scheduler.event == Scheduler::Event::Desynchronized) continue;
+  }
+
+  //ignore any desynchronization events to force all other threads to their synchronization points
+  auto synchronize = [&](cothread_t thread) -> void {
     scheduler.active = thread;
     while(true) {
       scheduler.enter();
       if(scheduler.event == Scheduler::Event::Frame) frameEvent();
       if(scheduler.event == Scheduler::Event::Synchronized) break;
-      if(scheduler.event == Scheduler::Event::Desynchronized) {
-        if(method == "Fast") continue;
-        if(method == "Strict") return false;
-      }
+      if(scheduler.event == Scheduler::Event::Desynchronized) continue;
+    }
+  };
+
+  synchronize(smp.thread);
+  synchronize(ppu.thread);
+  for(auto coprocessor : cpu.coprocessors) {
+    synchronize(coprocessor->thread);
+  }
+}
+
+auto System::runToSaveStrict() -> void {
+  //run every thread until it cleanly hits a synchronization point
+  //if it fails, start resynchronizing every thread again
+  auto synchronize = [&](cothread_t thread) -> bool {
+    scheduler.active = thread;
+    while(true) {
+      scheduler.enter();
+      if(scheduler.event == Scheduler::Event::Frame) frameEvent();
+      if(scheduler.event == Scheduler::Event::Synchronized) break;
+      if(scheduler.event == Scheduler::Event::Desynchronized) return false;
     }
     return true;
   };
@@ -55,9 +92,6 @@ auto System::runToSave() -> void {
 
     break;
   }
-
-  scheduler.mode = Scheduler::Mode::Run;
-  scheduler.active = cpu.thread;
 }
 
 auto System::frameEvent() -> void {
@@ -97,8 +131,6 @@ auto System::load(Emulator::Interface* interface) -> bool {
   }
   if(cartridge.has.BSMemorySlot) bsmemory.load();
 
-  information.serializeSize[0] = serializeInit(0);
-  information.serializeSize[1] = serializeInit(1);
   this->interface = interface;
   return information.loaded = true;
 }
@@ -195,6 +227,9 @@ auto System::power(bool reset) -> void {
   controllerPort1.connect(settings.controllerPort1);
   controllerPort2.connect(settings.controllerPort2);
   expansionPort.connect(settings.expansionPort);
+
+  information.serializeSize[0] = serializeInit(0);
+  information.serializeSize[1] = serializeInit(1);
 }
 
 }

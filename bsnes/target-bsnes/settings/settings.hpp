@@ -96,8 +96,10 @@ struct Settings : Markup::Node {
     bool autoLoadStateOnLoad = false;
     struct Serialization {
       string method = "Fast";
-      bool synchronize = true;
     } serialization;
+    struct RunAhead {
+      uint frames = 0;
+    } runAhead;
     struct Hack {
       bool hotfixes = true;
       string entropy = "Low";
@@ -330,6 +332,16 @@ struct EnhancementSettings : VerticalLayout {
   auto create() -> void;
 
 public:
+  Label runAheadLabel{this, Size{~0, 0}, 2};
+  HorizontalLayout runAheadLayout{this, Size{~0, 0}};
+    RadioLabel runAhead0{&runAheadLayout, Size{0, 0}};
+    RadioLabel runAhead1{&runAheadLayout, Size{0, 0}};
+    RadioLabel runAhead2{&runAheadLayout, Size{0, 0}};
+    RadioLabel runAhead3{&runAheadLayout, Size{0, 0}};
+    RadioLabel runAhead4{&runAheadLayout, Size{0, 0}};
+    Group runAheadGroup{&runAhead0, &runAhead1, &runAhead2, &runAhead3, &runAhead4};
+  Canvas runAheadSpacer{this, Size{~0, 1}};
+  //
   Label overclockingLabel{this, Size{~0, 0}, 2};
   TableLayout overclockingLayout{this, Size{~0, 0}};
     Label cpuLabel{&overclockingLayout, Size{0, 0}};

@@ -88,7 +88,7 @@ auto PPU::step(uint clocks) -> void {
 auto PPU::main() -> void {
   scanline();
 
-  if(system.frameCounter == 0) {
+  if(system.frameCounter == 0 && !system.runAhead) {
     uint y = vcounter();
     if(y >= 1 && y <= 239) {
       step(renderCycle());
@@ -127,7 +127,7 @@ auto PPU::scanline() -> void {
 }
 
 auto PPU::refresh() -> void {
-  if(system.frameCounter == 0) {
+  if(system.frameCounter == 0 && !system.runAhead) {
     auto output = this->output;
     uint pitch, width, height;
     if(!hd()) {

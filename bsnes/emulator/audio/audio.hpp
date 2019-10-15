@@ -73,6 +73,8 @@ struct Stream {
     write(samples);
   }
 
+  auto serialize(serializer&) -> void;
+
 private:
   struct Channel {
     vector<Filter> filters;

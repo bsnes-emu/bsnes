@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nall/queue.hpp>
+#include <nall/serializer.hpp>
 #include <nall/dsp/dsp.hpp>
 
 namespace nall::DSP::Resampler {
@@ -11,6 +12,7 @@ struct Cubic {
   inline auto pending() const -> uint;
   inline auto read() -> double;
   inline auto write(double sample) -> void;
+  inline auto serialize(serializer&) -> void;
 
 private:
   double inputFrequency;
@@ -65,6 +67,15 @@ auto Cubic::write(double sample) -> void {
   }
 
   mu -= 1.0;
+}
+
+auto Cubic::serialize(serializer& s) -> void {
+  s.real(inputFrequency);
+  s.real(outputFrequency);
+  s.real(ratio);
+  s.real(fraction);
+  s.array(history);
+  samples.serialize(s);
 }
 
 }

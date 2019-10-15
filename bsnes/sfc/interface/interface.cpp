@@ -330,7 +330,15 @@ auto Interface::frameSkip() -> uint {
 
 auto Interface::setFrameSkip(uint frameSkip) -> void {
   system.frameSkip = frameSkip;
-  system.frameCounter = 0;
+  system.frameCounter = frameSkip;
+}
+
+auto Interface::runAhead() -> bool {
+  return system.runAhead;
+}
+
+auto Interface::setRunAhead(bool runAhead) -> void {
+  system.runAhead = runAhead;
 }
 
 }

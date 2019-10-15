@@ -115,3 +115,11 @@ auto Stream::write(const double samples[]) -> void {
 
   audio.process();
 }
+
+auto Stream::serialize(serializer& s) -> void {
+  for(auto& channel : channels) {
+    channel.resampler.serialize(s);
+  }
+  s.real(inputFrequency);
+  s.real(outputFrequency);
+}

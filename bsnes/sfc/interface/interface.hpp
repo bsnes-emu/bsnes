@@ -71,6 +71,9 @@ struct Interface : Emulator::Interface {
 
   auto frameSkip() -> uint override;
   auto setFrameSkip(uint frameSkip) -> void override;
+
+  auto runAhead() -> bool override;
+  auto setRunAhead(bool runAhead) -> void override;
 };
 
 #include "configuration.hpp"

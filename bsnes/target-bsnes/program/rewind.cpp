@@ -35,7 +35,7 @@ auto Program::rewindRun() -> void {
     if(rewind.history.size() >= rewind.length) {
       rewind.history.takeFirst();
     }
-    auto s = emulator->serialize(settings.emulator.serialization.synchronize);
+    auto s = emulator->serialize(0);
     rewind.history.append(s);
     return;
   }

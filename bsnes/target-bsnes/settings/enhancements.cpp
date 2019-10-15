@@ -2,8 +2,30 @@ auto EnhancementSettings::create() -> void {
   setCollapsible();
   setVisible(false);
 
-  overclockingLabel.setText("Overclocking").setFont(Font().setBold());
+  runAheadLabel.setText("Run-Ahead").setFont(Font().setBold());
+  runAhead0.setText("Disabled").onActivate([&] {
+    settings.emulator.runAhead.frames = 0;
+  });
+  runAhead1.setText("One Frame").onActivate([&] {
+    settings.emulator.runAhead.frames = 1;
+  });
+  runAhead2.setText("Two Frames").onActivate([&] {
+    settings.emulator.runAhead.frames = 2;
+  });
+  runAhead3.setText("Three Frames").onActivate([&] {
+    settings.emulator.runAhead.frames = 3;
+  });
+  runAhead4.setText("Four Frames").onActivate([&] {
+    settings.emulator.runAhead.frames = 4;
+  });
+  if(settings.emulator.runAhead.frames == 0) runAhead0.setChecked();
+  if(settings.emulator.runAhead.frames == 1) runAhead1.setChecked();
+  if(settings.emulator.runAhead.frames == 2) runAhead2.setChecked();
+  if(settings.emulator.runAhead.frames == 3) runAhead3.setChecked();
+  if(settings.emulator.runAhead.frames == 4) runAhead4.setChecked();
+  runAheadSpacer.setColor({192, 192, 192});
 
+  overclockingLabel.setText("Overclocking").setFont(Font().setBold());
   overclockingLayout.setSize({3, 3});
   overclockingLayout.column(0).setAlignment(1.0);
   overclockingLayout.column(1).setAlignment(0.5);

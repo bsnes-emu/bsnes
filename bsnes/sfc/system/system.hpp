@@ -10,6 +10,8 @@ struct System {
 
   auto run() -> void;
   auto runToSave() -> void;
+  auto runToSaveFast() -> void;
+  auto runToSaveStrict() -> void;
   auto frameEvent() -> void;
 
   auto load(Emulator::Interface*) -> bool;
@@ -23,6 +25,7 @@ struct System {
 
   uint frameSkip = 0;
   uint frameCounter = 0;
+  bool runAhead = 0;
 
 private:
   Emulator::Interface* interface = nullptr;
