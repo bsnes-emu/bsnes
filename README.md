@@ -48,6 +48,7 @@ Standard Features
   - Several built-in software filters, including HQ2x (by MaxSt) and snes_ntsc (by blargg)
   - Adaptive sync and dynamic rate control for perfect audio/video synchronization
   - Just-in-time input polling for minimal input latency
+  - Run-ahead support for removing internal game engine input latency
   - Support for Direct3D exclusive mode video
   - Support for WASAPI exclusive mode audio
   - Periodic auto-saving of game saves
