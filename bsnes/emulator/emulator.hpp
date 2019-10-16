@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libco/libco.h>
+
 #include <nall/platform.hpp>
 #include <nall/adaptive-array.hpp>
 #include <nall/any.hpp>
@@ -20,8 +22,6 @@
 #include <nall/hash/sha256.hpp>
 using namespace nall;
 
-#include <libco/libco.h>
-
 #include <emulator/types.hpp>
 #include <emulator/memory/readable.hpp>
 #include <emulator/memory/writable.hpp>
@@ -29,7 +29,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "bsnes";
-  static const string Version = "111.8";
+  static const string Version = "111.9";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "https://byuu.org";

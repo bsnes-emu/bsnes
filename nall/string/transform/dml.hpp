@@ -1,7 +1,7 @@
 #pragma once
 
 /* Document Markup Language (DML) v1.0 parser
- * revision 0.04
+ * revision 0.05
  */
 
 #include <nall/location.hpp>
@@ -9,6 +9,11 @@
 namespace nall {
 
 struct DML {
+  inline auto title() const -> string { return state.title; }
+  inline auto subtitle() const -> string { return state.subtitle; }
+  inline auto description() const -> string { return state.description; }
+  inline auto content() const -> string { return state.output; }
+
   auto& setAllowHTML(bool allowHTML) { settings.allowHTML = allowHTML; return *this; }
   auto& setHost(const string& hostname) { settings.host = {hostname, "/"}; return *this; }
   auto& setPath(const string& pathname) { settings.path = pathname; return *this; }
@@ -28,6 +33,9 @@ private:
   } settings;
 
   struct State {
+    string title;
+    string subtitle;
+    string description;
     string output;
     uint sections = 0;
   } state;
@@ -41,12 +49,14 @@ private:
 };
 
 inline auto DML::parse(const string& filedata, const string& pathname) -> string {
+  state = {};
   settings.path = pathname;
   parseDocument(filedata, settings.path, 0);
   return state.output;
 }
 
 inline auto DML::parse(const string& filename) -> string {
+  state = {};
   if(!settings.path) settings.path = Location::path(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
@@ -83,13 +93,21 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
 
   //title
   else if(block.beginsWith("! ")) {
-    auto name = lines.takeLeft().trimLeft("! ", 1L);
-    state.output.append("<h1>", markup(name));
+    state.title = lines.takeLeft().trimLeft("! ", 1L);
+    state.output.append("<h1>", markup(state.title));
     for(auto& line : lines) {
       if(!line.beginsWith("! ")) continue;
       state.output.append("<span>", markup(line.trimLeft("! ", 1L)), "</span>");
     }
     state.output.append("</h1>\n");
+  }
+
+  //description
+  else if(block.beginsWith("? ")) {
+    while(lines) {
+      state.description.append(lines.takeLeft().trimLeft("? ", 1L), " ");
+    }
+    state.description.strip();
   }
 
   //section
@@ -101,6 +119,7 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
+    state.subtitle = content[0];
     state.output.append("<h2 id=\"", name, "\">", data);
     for(auto& line : lines) {
       if(!line.beginsWith("# ")) continue;
@@ -226,13 +245,14 @@ inline auto DML::markup(const string& s) -> string {
 
   natural link, linkBase;
   natural embed, embedBase;
+  natural photo, photoBase;
   natural iframe, iframeBase;
 
   for(uint n = 0; n < s.size();) {
     char a = s[n];
     char b = s[n + 1];
 
-    if(!link && !embed && !iframe) {
+    if(!link && !embed && !photo && !iframe) {
       if(a == '*' && b == '*') { t.append(strong.flip() ? "<strong>" : "</strong>"); n += 2; continue; }
       if(a == '/' && b == '/') { t.append(emphasis.flip() ? "<em>" : "</em>"); n += 2; continue; }
       if(a == '_' && b == '_') { t.append(insertion.flip() ? "<ins>" : "</ins>"); n += 2; continue; }
@@ -244,7 +264,15 @@ inline auto DML::markup(const string& s) -> string {
     if(iframe == 0 && a == '<' && b == '<') { t.append("<iframe width='772' height='434' src=\""); iframe = 1; iframeBase = n += 2; continue; }
     if(iframe != 0 && a == '>' && b == '>') { t.append("\" frameborder='0' allowfullscreen></iframe>"); iframe = 0; n += 2; continue; }
 
-    if(!embed) {
+    if(!embed && !link) {
+      if(photo == 0 && a == '[' && b == '{') { t.append("<a href=\""); photo = 1; photoBase = n += 2; continue; }
+      if(photo == 1 && a == '}' && b == ']') { t.append(slice(s, photoBase, n - photoBase).replace("@/", settings.host), "\"><img src=\"", slice(s, photoBase, n - photoBase).replace("@/", settings.host), "\" alt=\"\"></a>"); n += 2; photo = 0; continue; }
+      if(photo == 1 && a == ':' && b == ':') { t.append(slice(s, photoBase, n - photoBase).replace("@/", settings.host), "\"><img src=\"", slice(s, photoBase, n - photoBase).replace("@/", settings.host), "\" alt=\""); photo = 2; photoBase = n += 2; continue; }
+      if(photo == 2 && a == '}' && b == ']') { t.append(slice(s, photoBase, n - photoBase).replace("@/", settings.host), "\"></a>"); n += 2; photo = 0; continue; }
+      if(photo != 0) { n++; continue; }
+    }
+
+    if(!photo && !embed) {
       if(link == 0 && a == '[' && b == '[') { t.append("<a href=\""); link = 1; linkBase = n += 2; continue; }
       if(link == 1 && a == ':' && b == ':') { t.append("\">"); link = 2; n += 2; continue; }
       if(link == 1 && a == ']' && b == ']') { t.append("\">", slice(s, linkBase, n - linkBase), "</a>"); n += 2; link = 0; continue; }
@@ -252,7 +280,7 @@ inline auto DML::markup(const string& s) -> string {
       if(link == 1 && a == '@' && b == '/') { t.append(settings.host); n += 2; continue; }
     }
 
-    if(!link) {
+    if(!photo && !link) {
       if(embed == 0 && a == '{' && b == '{') { t.append("<img src=\""); embed = 1; embedBase = n += 2; continue; }
       if(embed == 1 && a == ':' && b == ':') { t.append("\" alt=\""); embed = 2; n += 2; continue; }
       if(embed != 0 && a == '}' && b == '}') { t.append("\">"); embed = 0; n += 2; continue; }

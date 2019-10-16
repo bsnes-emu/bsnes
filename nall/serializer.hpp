@@ -51,13 +51,9 @@ struct serializer {
     return _capacity;
   }
 
-  auto setMode(Mode mode) -> bool {
-    if(_mode == Mode::Save && mode == Mode::Load) {
-      _mode = mode;
-      _size = 0;
-      return true;
-    }
-    return false;
+  auto setMode(Mode mode) -> void {
+    _mode = mode;
+    _size = 0;
   }
 
   template<typename T> auto real(T& value) -> serializer& {
@@ -110,34 +106,37 @@ struct serializer {
     return *this;
   }
 
-  template<int N> auto array(uint8_t (&array_)[N]) -> serializer& {
-    array(array_, N);
-    return *this;
-  }
-  auto array(uint8_t* array, uint size) -> serializer& {
-    if(_mode == Save) {
-      memcpy(_data+_size, array, size);
-    } else if(_mode == Load) {
-      memcpy(array, _data+_size, size);
-    }
-    _size += size;
-    return *this;
-  }
-#ifdef ENDIAN_LSB
-  template<int N> auto array(uint16_t (&array_)[N]) -> serializer& {
-    array(array_, N);
-    return *this;
-  }
-  auto array(uint16_t* array_, uint size) -> serializer& {
-    array((uint8_t*)array_, size*2);
-    return *this;
-  }
-#endif
-
   template<typename T, uint Size> auto array(nall::array<T[Size]>& array) -> serializer& {
     for(auto& value : array) operator()(value);
     return *this;
   }
+
+  //optimized specializations
+
+  auto array(uint8_t* data, uint size) -> serializer& {
+    if(_mode == Save) {
+      memory::copy(_data + _size, data, size);
+    } else if(_mode == Load) {
+      memory::copy(data, _data + _size, size);
+    } else {
+    }
+    _size += size;
+    return *this;
+  }
+
+  template<int N> auto array(uint8_t (&data)[N]) -> serializer& {
+    return array(data, N);
+  }
+
+  //nall/serializer saves data in little-endian ordering
+  #if defined(ENDIAN_LSB)
+  auto array(uint16_t* data, uint size) -> serializer& { return array((uint8_t*)data, size * sizeof(uint16_t)); }
+  auto array(uint32_t* data, uint size) -> serializer& { return array((uint8_t*)data, size * sizeof(uint32_t)); }
+  auto array(uint64_t* data, uint size) -> serializer& { return array((uint8_t*)data, size * sizeof(uint64_t)); }
+  template<int N> auto array(uint16_t (&data)[N]) -> serializer& { return array(data, N); }
+  template<int N> auto array(uint32_t (&data)[N]) -> serializer& { return array(data, N); }
+  template<int N> auto array(uint64_t (&data)[N]) -> serializer& { return array(data, N); }
+  #endif
 
   template<typename T> auto operator()(T& value, typename std::enable_if<has_serialize<T>::value>::type* = 0) -> serializer& { value.serialize(*this); return *this; }
   template<typename T> auto operator()(T& value, typename std::enable_if<std::is_integral<T>::value>::type* = 0) -> serializer& { return integer(value); }

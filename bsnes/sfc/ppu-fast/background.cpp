@@ -23,6 +23,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
   bool hires = io.bgMode == 5 || io.bgMode == 6;
   bool offsetPerTileMode = io.bgMode == 2 || io.bgMode == 4 || io.bgMode == 6;
   bool directColorMode = io.col.directColor && source == Source::BG1 && (io.bgMode == 3 || io.bgMode == 4);
+  uint colorShift = 3 + self.tileMode;
   int width = 256 << hires;
 
   uint tileHeight = 3 + self.tileSize;
@@ -91,14 +92,36 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
     if(tileHeight == 4 && (bool(voffset & 8) ^ bool(mirrorY))) tileNumber += 16;
     tileNumber = (tileNumber & 0x03ff) + tiledataIndex & tileMask;
 
-    auto tiledata = ppu.tilecache[self.tileMode] + (tileNumber << 6);
-    tiledata += (voffset & 7 ^ mirrorY) << 3;
+    uint16 address;
+    address = (tileNumber << colorShift) + (voffset & 7 ^ mirrorY);
+
+    uint64 data;
+    data  = (uint64)ppu.vram[address +  0] <<  0;
+    data |= (uint64)ppu.vram[address +  8] << 16;
+    data |= (uint64)ppu.vram[address + 16] << 32;
+    data |= (uint64)ppu.vram[address + 24] << 48;
 
     for(uint tileX = 0; tileX < 8; tileX++, x++) {
       if(x & width) continue;  //x < 0 || x >= width
       if(!self.mosaicEnable || --mosaicCounter == 0) {
+        uint color, shift = mirrorX ? tileX : 7 - tileX;
+      /*if(self.tileMode >= TileMode::BPP2)*/ {
+          color  = data >> shift +  0 &   1;
+          color += data >> shift +  7 &   2;
+        }
+        if(self.tileMode >= TileMode::BPP4) {
+          color += data >> shift + 14 &   4;
+          color += data >> shift + 21 &   8;
+        }
+        if(self.tileMode >= TileMode::BPP8) {
+          color += data >> shift + 28 &  16;
+          color += data >> shift + 35 &  32;
+          color += data >> shift + 42 &  64;
+          color += data >> shift + 49 & 128;
+        }
+
         mosaicCounter = 1 + io.mosaicSize;
-        mosaicPalette = tiledata[tileX ^ mirrorX];
+        mosaicPalette = color;
         mosaicPriority = tilePriority;
         if(directColorMode) {
           mosaicColor = directColor(paletteNumber, mosaicPalette);

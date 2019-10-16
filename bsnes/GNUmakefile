@@ -42,8 +42,6 @@ else ifneq ($(filter $(platform),linux bsd),)
     flags += -fPIC
     options += -shared
   endif
-else
-  $(error "unsupported platform")
 endif
 
 objects := libco emulator filter lzma

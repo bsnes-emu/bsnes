@@ -1,4 +1,11 @@
 auto System::serialize(bool synchronize) -> serializer {
+  //deterministic serialization (synchronize=false) is only possible with select libco methods.
+  if(co_method() != "x86"
+  && co_method() != "amd64"
+  && co_method() != "arm"
+  && co_method() != "aarch64"
+  ) synchronize = true;
+
   if(!information.serializeSize[synchronize]) return {};  //should never occur
   if(synchronize) runToSave();
 

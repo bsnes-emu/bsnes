@@ -83,7 +83,9 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
 
       uint mirrorX = !object.hflip ? tileX : tileWidth - 1 - tileX;
       uint address = tiledataAddress + ((characterY + (characterX + mirrorX & 15)) << 4);
-      tile.number = address >> 4 & 0x7ff;
+      address = (address & 0x7ff0) + (y & 7);
+      tile.data  = ppu.vram[address + 0] <<  0;
+      tile.data |= ppu.vram[address + 8] << 16;
 
       if(tileCount++ >= ppu.TileLimit) break;
       tiles[tileCount - 1] = tile;
@@ -97,16 +99,19 @@ auto PPU::Line::renderObject(PPU::IO::Object& self) -> void {
   uint8_t priority[256] = {};
 
   for(uint n : range(ppu.TileLimit)) {
-    const auto& tile = tiles[n];
+    auto& tile = tiles[n];
     if(!tile.valid) continue;
 
-    auto tiledata = ppu.tilecache[TileMode::BPP4] + (tile.number << 6) + ((tile.y & 7) << 3);
     uint tileX = tile.x;
-    uint mirrorX = tile.hflip ? 7 : 0;
     for(uint x : range(8)) {
       tileX &= 511;
       if(tileX < 256) {
-        if(uint color = tiledata[x ^ mirrorX]) {
+        uint color, shift = tile.hflip ? x : 7 - x;
+        color  = tile.data >> shift +  0 & 1;
+        color += tile.data >> shift +  7 & 2;
+        color += tile.data >> shift + 14 & 4;
+        color += tile.data >> shift + 21 & 8;
+        if(color) {
           palette[tileX] = tile.palette + color;
           priority[tileX] = self.priority[tile.priority];
         }

@@ -44,9 +44,6 @@ struct Program : Emulator::Platform
 	
 	auto hackPatchMemory(vector<uint8_t>& data) -> void;
 	
-	serializer cached_serialize;
-	bool has_cached_serialize = false;
-	
 	string base_name;
 
 	bool overscan = false;

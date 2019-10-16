@@ -490,38 +490,18 @@ RETRO_API void retro_run()
 
 RETRO_API size_t retro_serialize_size()
 {
-	// To avoid having to serialize twice to query the size -> serialize.
-	if (program->has_cached_serialize)
-	{
-		return program->cached_serialize.size();
-	}
-	else
-	{
-		program->cached_serialize = emulator->serialize();
-		program->has_cached_serialize = true;
-		return program->cached_serialize.size();
-	}
+	return emulator->serialize().size();
 }
 
 RETRO_API bool retro_serialize(void *data, size_t size)
 {
-	if (!program->has_cached_serialize)
-	{
-		program->cached_serialize = emulator->serialize();
-		program->has_cached_serialize = true;
-	}
-
-	if (program->cached_serialize.size() != size)
-		return false;
-
-	memcpy(data, program->cached_serialize.data(), size);
+	memcpy(data, emulator->serialize().data(), size);
 	return true;
 }
 
 RETRO_API bool retro_unserialize(const void *data, size_t size)
 {
 	serializer s(static_cast<const uint8_t *>(data), size);
-	program->has_cached_serialize = false;
 	return emulator->unserialize(s);
 }
 

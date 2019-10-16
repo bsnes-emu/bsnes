@@ -3,6 +3,7 @@ struct Decompressor {
     IM(SDD1::Decompressor& self) : self(self) {}
     auto init(uint offset) -> void;
     auto getCodeWord(uint8 codeLength) -> uint8;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -13,6 +14,7 @@ struct Decompressor {
   struct GCD {  //golomb-code decoder
     GCD(SDD1::Decompressor& self) : self(self) {}
     auto getRunCount(uint8 codeNumber, uint8& mpsCount, bool& lpsIndex) -> void;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -23,6 +25,7 @@ struct Decompressor {
     BG(SDD1::Decompressor& self, uint8 codeNumber) : self(self), codeNumber(codeNumber) {}
     auto init() -> void;
     auto getBit(bool& endOfRun) -> uint8;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -35,6 +38,7 @@ struct Decompressor {
     PEM(SDD1::Decompressor& self) : self(self) {}
     auto init() -> void;
     auto getBit(uint8 context) -> uint8;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -54,6 +58,7 @@ struct Decompressor {
     CM(SDD1::Decompressor& self) : self(self) {}
     auto init(uint offset) -> void;
     auto getBit() -> uint8;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -68,6 +73,7 @@ struct Decompressor {
     OL(SDD1::Decompressor& self) : self(self) {}
     auto init(uint offset) -> void;
     auto decompress() -> uint8;
+    auto serialize(serializer&) -> void;
 
   private:
     Decompressor& self;
@@ -78,6 +84,7 @@ struct Decompressor {
   Decompressor();
   auto init(uint offset) -> void;
   auto read() -> uint8;
+  auto serialize(serializer&) -> void;
 
   IM  im;
   GCD gcd;

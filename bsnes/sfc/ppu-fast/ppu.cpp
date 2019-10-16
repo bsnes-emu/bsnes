@@ -51,10 +51,6 @@ PPU::PPU() {
     }
   }
 
-  tilecache[TileMode::BPP2] = new uint8_t[4096 * 8 * 8]();
-  tilecache[TileMode::BPP4] = new uint8_t[2048 * 8 * 8]();
-  tilecache[TileMode::BPP8] = new uint8_t[1024 * 8 * 8]();
-
   for(uint y : range(240)) {
     lines[y].y = y;
   }
@@ -63,9 +59,6 @@ PPU::PPU() {
 PPU::~PPU() {
   delete[] output;
   for(uint l : range(16)) delete[] lightTable[l];
-  delete[] tilecache[TileMode::BPP2];
-  delete[] tilecache[TileMode::BPP4];
-  delete[] tilecache[TileMode::BPP8];
 }
 
 auto PPU::synchronizeCPU() -> void {

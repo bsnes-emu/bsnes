@@ -35,6 +35,10 @@ static void co_init() {
   #endif
 }
 
+const char* co_method() {
+  return "arm";
+}
+
 cothread_t co_active() {
   if(!co_active_handle) co_active_handle = &co_active_buffer;
   return co_active_handle;
@@ -49,7 +53,8 @@ cothread_t co_derive(void* memory, unsigned int size, void (*entrypoint)(void)) 
   if(!co_active_handle) co_active_handle = &co_active_buffer;
 
   if(handle = (unsigned long*)memory) {
-    unsigned long* p = (unsigned long*)((unsigned char*)handle + size);
+    unsigned int offset = (size & ~15);
+    unsigned long* p = (unsigned long*)((unsigned char*)handle + offset);
     handle[8] = (unsigned long)p;
     handle[9] = (unsigned long)entrypoint;
   }
@@ -58,22 +63,9 @@ cothread_t co_derive(void* memory, unsigned int size, void (*entrypoint)(void)) 
 }
 
 cothread_t co_create(unsigned int size, void (*entrypoint)(void)) {
-  unsigned long* handle;
-  if(!co_swap) {
-    co_init();
-    co_swap = (void (*)(cothread_t, cothread_t))co_swap_function;
-  }
-  if(!co_active_handle) co_active_handle = &co_active_buffer;
-  size += 256;
-  size &= ~15;
-
-  if(handle = (unsigned long*)malloc(size)) {
-    unsigned long* p = (unsigned long*)((unsigned char*)handle + size);
-    handle[8] = (unsigned long)p;
-    handle[9] = (unsigned long)entrypoint;
-  }
-
-  return handle;
+  void* memory = malloc(size);
+  if(!memory) return (cothread_t)0;
+  return co_derive(memory, size, entrypoint);
 }
 
 void co_delete(cothread_t handle) {

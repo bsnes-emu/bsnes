@@ -42,6 +42,7 @@ auto PPU::writeVRAM(uint8 data) -> void {
 }
 
 auto PPU::updateTiledata(uint address) -> void {
+/*
   auto word = vram[address & 0x7fff];
   auto line2bpp = tilecache[TileMode::BPP2] + (address << 3 & 0x3fff8);
   auto line4bpp = tilecache[TileMode::BPP4] + (address << 2 & 0x1ffc0) + (address << 3 & 0x38);
@@ -53,6 +54,7 @@ auto PPU::updateTiledata(uint address) -> void {
     line4bpp[7 - x] = line4bpp[7 - x] & ~(3 << plane4bpp) | (word >> x & 1) << plane4bpp | (word >> x + 7 & 2) << plane4bpp;
     line8bpp[7 - x] = line8bpp[7 - x] & ~(3 << plane8bpp) | (word >> x & 1) << plane8bpp | (word >> x + 7 & 2) << plane8bpp;
   }
+*/
 }
 
 auto PPU::readOAM(uint10 address) -> uint8 {
