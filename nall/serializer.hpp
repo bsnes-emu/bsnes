@@ -110,6 +110,30 @@ struct serializer {
     return *this;
   }
 
+  template<int N> auto array(uint8_t (&array_)[N]) -> serializer& {
+    array(array_, N);
+    return *this;
+  }
+  auto array(uint8_t* array, uint size) -> serializer& {
+    if(_mode == Save) {
+      memcpy(_data+_size, array, size);
+    } else if(_mode == Load) {
+      memcpy(array, _data+_size, size);
+    }
+    _size += size;
+    return *this;
+  }
+#ifdef ENDIAN_LSB
+  template<int N> auto array(uint16_t (&array_)[N]) -> serializer& {
+    array(array_, N);
+    return *this;
+  }
+  auto array(uint16_t* array_, uint size) -> serializer& {
+    array((uint8_t*)array_, size*2);
+    return *this;
+  }
+#endif
+
   template<typename T, uint Size> auto array(nall::array<T[Size]>& array) -> serializer& {
     for(auto& value : array) operator()(value);
     return *this;
