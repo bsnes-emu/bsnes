@@ -250,7 +250,6 @@ public:
   alwaysinline auto vramAddress() const -> uint;
   alwaysinline auto readVRAM() -> uint16;
   template<bool Byte> alwaysinline auto writeVRAM(uint8 data) -> void;
-  alwaysinline auto updateTiledata(uint address) -> void;
   alwaysinline auto readOAM(uint10 address) -> uint8;
   alwaysinline auto writeOAM(uint10 address, uint8 data) -> void;
   template<bool Byte> alwaysinline auto readCGRAM(uint8 address) -> uint8;

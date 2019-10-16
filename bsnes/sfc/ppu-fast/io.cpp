@@ -38,23 +38,6 @@ auto PPU::writeVRAM(uint8 data) -> void {
   if constexpr(Byte == 1) {
     vram[address] = vram[address] & 0x00ff | data << 8;
   }
-  updateTiledata(address);
-}
-
-auto PPU::updateTiledata(uint address) -> void {
-/*
-  auto word = vram[address & 0x7fff];
-  auto line2bpp = tilecache[TileMode::BPP2] + (address << 3 & 0x3fff8);
-  auto line4bpp = tilecache[TileMode::BPP4] + (address << 2 & 0x1ffc0) + (address << 3 & 0x38);
-  auto line8bpp = tilecache[TileMode::BPP8] + (address << 1 & 0x0ffc0) + (address << 3 & 0x38);
-  uint plane4bpp = address >> 2 & 2;
-  uint plane8bpp = address >> 2 & 6;
-  for(uint x : range(8)) {
-    line2bpp[7 - x] = word >> x & 1 | word >> x + 7 & 2;
-    line4bpp[7 - x] = line4bpp[7 - x] & ~(3 << plane4bpp) | (word >> x & 1) << plane4bpp | (word >> x + 7 & 2) << plane4bpp;
-    line8bpp[7 - x] = line8bpp[7 - x] & ~(3 << plane8bpp) | (word >> x & 1) << plane8bpp | (word >> x + 7 & 2) << plane8bpp;
-  }
-*/
 }
 
 auto PPU::readOAM(uint10 address) -> uint8 {

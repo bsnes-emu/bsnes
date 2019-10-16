@@ -167,10 +167,7 @@ auto PPU::power(bool reset) -> void {
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   if(!reset) {
-    for(uint address : range(32768)) {
-      vram[address] = 0x0000;
-      updateTiledata(address);
-    }
+    for(auto& word : vram) word = 0x0000;
     for(auto& color : cgram) color = 0x0000;
     for(auto& object : objects) object = {};
   }
