@@ -93,7 +93,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
     tileNumber = (tileNumber & 0x03ff) + tiledataIndex & tileMask;
 
     uint16 address;
-    address = (tileNumber << colorShift) + (voffset & 7 ^ mirrorY);
+    address = (tileNumber << colorShift) + (voffset & 7 ^ mirrorY) & 0x7fff;
 
     uint64 data;
     data  = (uint64)ppu.vram[address +  0] <<  0;

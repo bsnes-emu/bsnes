@@ -16,10 +16,6 @@ static void __stdcall co_thunk(void* coentry) {
   ((void (*)(void))coentry)();
 }
 
-const char* co_method() {
-  return "fiber";
-}
-
 cothread_t co_active() {
   if(!co_active_) {
     ConvertThreadToFiber(0);
@@ -48,6 +44,10 @@ void co_delete(cothread_t cothread) {
 void co_switch(cothread_t cothread) {
   co_active_ = cothread;
   SwitchToFiber(cothread);
+}
+
+int co_serializable() {
+  return 0;
 }
 
 #ifdef __cplusplus

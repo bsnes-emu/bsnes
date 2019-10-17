@@ -13,12 +13,12 @@ extern "C" {
 
 typedef void* cothread_t;
 
-const char* co_method();
 cothread_t co_active();
 cothread_t co_derive(void*, unsigned int, void (*)(void));
 cothread_t co_create(unsigned int, void (*)(void));
 void co_delete(cothread_t);
 void co_switch(cothread_t);
+int co_serializable();
 
 #ifdef __cplusplus
 }

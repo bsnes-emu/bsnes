@@ -221,10 +221,6 @@ __asm__(
   ".size swap_context, .-swap_context\n"
 );
 
-const char* co_method() {
-  return "ppc64v2";
-}
-
 cothread_t co_active() {
   if(!co_active_handle) {
     co_active_handle = (struct ppc64_context*)malloc(MIN_STACK + sizeof(struct ppc64_context));
@@ -272,6 +268,10 @@ void co_switch(cothread_t to) {
   struct ppc64_context* from = co_active_handle;
   co_active_handle = (struct ppc64_context*)to;
   swap_context((struct ppc64_context*)to, from);
+}
+
+int co_serializable() {
+  return 1;
 }
 
 #ifdef __cplusplus
