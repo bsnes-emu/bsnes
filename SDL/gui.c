@@ -33,7 +33,7 @@ void render_texture(void *pixels,  void *previous)
 {
     if (renderer) {
         if (pixels) {
-            SDL_UpdateTexture(texture, NULL, pixels, 160 * sizeof (uint32_t));
+            SDL_UpdateTexture(texture, NULL, pixels, GB_get_screen_width(&gb) * sizeof (uint32_t));
         }
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
