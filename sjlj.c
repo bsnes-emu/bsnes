@@ -33,10 +33,6 @@ static void springboard(int ignored) {
   }
 }
 
-const char* co_method() {
-  return "sjlj";
-}
-
 cothread_t co_active() {
   if(!co_running) co_running = &co_primary;
   return (cothread_t)co_running;
@@ -138,6 +134,10 @@ void co_switch(cothread_t cothread) {
     co_running = (cothread_struct*)cothread;
     siglongjmp(co_running->context, 1);
   }
+}
+
+int co_serializable() {
+  return 0;
 }
 
 #ifdef __cplusplus

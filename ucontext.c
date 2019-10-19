@@ -26,10 +26,6 @@ extern "C" {
 static thread_local ucontext_t co_primary;
 static thread_local ucontext_t* co_running = 0;
 
-const char* co_module() {
-  return "ucontext";
-}
-
 cothread_t co_active() {
   if(!co_running) co_running = &co_primary;
   return (cothread_t)co_running;
@@ -79,6 +75,10 @@ void co_switch(cothread_t cothread) {
   ucontext_t* old_thread = co_running;
   co_running = (ucontext_t*)cothread;
   swapcontext(old_thread, co_running);
+}
+
+int co_serializable() {
+  return 0;
 }
 
 #ifdef __cplusplus

@@ -115,10 +115,6 @@ static void crash() {
   assert(0);  /* called only if cothread_t entrypoint returns */
 }
 
-const char* co_method() {
-  return "amd64";
-}
-
 cothread_t co_active() {
   if(!co_active_handle) co_active_handle = &co_active_buffer;
   return co_active_handle;
@@ -156,6 +152,10 @@ void co_delete(cothread_t handle) {
 void co_switch(cothread_t handle) {
   register cothread_t co_previous_handle = co_active_handle;
   co_swap(co_active_handle = handle, co_previous_handle);
+}
+
+int co_serializable() {
+  return 1;
 }
 
 #ifdef __cplusplus
