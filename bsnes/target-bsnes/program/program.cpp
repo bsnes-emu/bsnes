@@ -88,7 +88,7 @@ auto Program::main() -> void {
   if(inactive()) {
     audio.clear();
     usleep(20 * 1000);
-    viewportRefresh();
+    if(settings.emulator.runAhead.frames == 0) viewportRefresh();
     return;
   }
 
