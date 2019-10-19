@@ -2,6 +2,7 @@
 #include "GBButtons.h"
 #include <Core/gb.h>
 #import <Carbon/Carbon.h>
+#import <JoyKit/JoyKit.h>
 
 @implementation AppDelegate
 {
@@ -41,6 +42,11 @@
                                                               @"GBCGBModel": @(GB_MODEL_CGB_E),
                                                               @"GBSGBModel": @(GB_MODEL_SGB2),
                                                               }];
+    
+    [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{
+        JOYAxes2DEmulateButtonsKey: @YES,
+        JOYHatsEmulateButtonsKey: @YES,
+    }];
 }
 
 - (IBAction)toggleDeveloperMode:(id)sender

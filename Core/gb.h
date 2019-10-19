@@ -241,7 +241,7 @@ typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_a
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
-typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
+typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_update_input_hint_callback_t)(GB_gameboy_t *gb);
@@ -614,6 +614,8 @@ struct GB_gameboy_internal_s {
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
         uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units
         double clock_multiplier;
+        uint32_t rumble_on_cycles;
+        uint32_t rumble_off_cycles;
    );
 };
     

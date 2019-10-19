@@ -141,12 +141,17 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
     GB_set_key_state_for_player(gb, GB_KEY_START,  emulated_devices == 1 ? port : 0,
         input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START));
 
-    if (gb->rumble_state)
-        rumble.set_rumble_state(port, RETRO_RUMBLE_STRONG, 65535);
-    else
-        rumble.set_rumble_state(port, RETRO_RUMBLE_STRONG, 0);
 }
 
+static void rumble_callback(GB_gameboy_t *gb, double amplitude)
+{
+    if (gb == &gameboy[0]) {
+        rumble.set_rumble_state(0, RETRO_RUMBLE_STRONG, 65535 * amplitude);
+    }
+    else if (gb == &gameboy[1]) {
+        rumble.set_rumble_state(1, RETRO_RUMBLE_STRONG, 65535 * amplitude);
+    }
+}
 
 static void audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
@@ -370,6 +375,8 @@ static void init_for_current_model(unsigned id)
     GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
     GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
     GB_apu_set_sample_callback(&gameboy[i], audio_callback);
+    GB_set_rumble_callback(&gameboy[i], rumble_callback);
+
 
     /* todo: attempt to make these more generic */
     GB_set_vblank_callback(&gameboy[0], (GB_vblank_callback_t) vblank1);

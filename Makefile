@@ -140,7 +140,7 @@ SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG)
 TESTER_SOURCES := $(shell ls Tester/*.c)
 
 ifeq ($(PLATFORM),Darwin)
-COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m)
+COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
 endif
 

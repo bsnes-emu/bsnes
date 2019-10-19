@@ -9,13 +9,14 @@
     NSInteger button_being_modified;
     signed joystick_configuration_state;
     NSString *joystick_being_configured;
-    signed last_axis;
+    bool joypad_wait;
 
     NSPopUpButton *_graphicsFilterPopupButton;
     NSPopUpButton *_highpassFilterPopupButton;
     NSPopUpButton *_colorCorrectionPopupButton;
     NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
+    NSButton *_analogControlsCheckbox;
     NSEventModifierFlags previousModifiers;
     
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
@@ -51,7 +52,7 @@
     joystick_configuration_state = -1;
     [self.configureJoypadButton setEnabled:YES];
     [self.skipButton setEnabled:NO];
-    [self.configureJoypadButton setTitle:@"Configure Joypad"];
+    [self.configureJoypadButton setTitle:@"Configure Controller"];
     [super close];
 }
 
@@ -184,6 +185,12 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBHighpassFilterChanged" object:nil];
 }
 
+- (IBAction)changeAnalogControls:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBAnalogControls"];
+}
+
 - (IBAction)changeAspectRatio:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
@@ -212,7 +219,6 @@
     [self.skipButton setEnabled:YES];
     joystick_being_configured = nil;
     [self advanceConfigurationStateMachine];
-    last_axis = -1;
 }
 
 - (IBAction) skipButton:(id)sender
@@ -223,11 +229,11 @@
 - (void) advanceConfigurationStateMachine
 {
     joystick_configuration_state++;
-    if (joystick_configuration_state < GBButtonCount) {
-        [self.configureJoypadButton setTitle:[NSString stringWithFormat:@"Press Button for %@", GBButtonNames[joystick_configuration_state]]];
+    if (joystick_configuration_state == GBUnderclock) {
+        [self.configureJoypadButton setTitle:@"Press Button for Slo-Mo"]; // Full name is too long :<
     }
-    else if (joystick_configuration_state == GBButtonCount) {
-        [self.configureJoypadButton setTitle:@"Move the Analog Stick"];
+    else if (joystick_configuration_state < GBButtonCount) {
+        [self.configureJoypadButton setTitle:[NSString stringWithFormat:@"Press Button for %@", GBButtonNames[joystick_configuration_state]]];
     }
     else {
         joystick_configuration_state = -1;
@@ -237,112 +243,97 @@
     }
 }
 
-- (void) joystick:(NSString *)joystick_name button: (unsigned)button changedState: (bool) state
+- (void)controller:(JOYController *)controller buttonChangedState:(JOYButton *)button
 {
-    if (!state) return;
+    /* Debounce */
+    if (joypad_wait) return;
+    joypad_wait = true;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        joypad_wait = false;
+    });
+    
+    NSLog(@"%@", button);
+    
+    if (!button.isPressed) return;
     if (joystick_configuration_state == -1) return;
     if (joystick_configuration_state == GBButtonCount) return;
     if (!joystick_being_configured) {
-        joystick_being_configured = joystick_name;
+        joystick_being_configured = controller.uniqueID;
     }
-    else if (![joystick_being_configured isEqualToString:joystick_name]) {
+    else if (![joystick_being_configured isEqualToString:controller.uniqueID]) {
         return;
     }
     
-    NSMutableDictionary *all_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] mutableCopy];
+    NSMutableDictionary *instance_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitInstanceMapping"] mutableCopy];
     
-    if (!all_mappings) {
-        all_mappings = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *name_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitNameMapping"] mutableCopy];
+
+    
+    if (!instance_mappings) {
+        instance_mappings = [[NSMutableDictionary alloc] init];
     }
     
-    NSMutableDictionary *mapping = [[all_mappings objectForKey:joystick_name] mutableCopy];
+    if (!name_mappings) {
+        name_mappings = [[NSMutableDictionary alloc] init];
+    }
     
-    if (!mapping) {
+    NSMutableDictionary *mapping = nil;
+    if (joystick_configuration_state != 0) {
+        mapping = [instance_mappings[controller.uniqueID] mutableCopy];
+    }
+    else {
         mapping = [[NSMutableDictionary alloc] init];
     }
+
     
-    mapping[GBButtonNames[joystick_configuration_state]] = @(button);
+    static const unsigned gb_to_joykit[] = {
+    [GBRight]=JOYButtonUsageDPadRight,
+    [GBLeft]=JOYButtonUsageDPadLeft,
+    [GBUp]=JOYButtonUsageDPadUp,
+    [GBDown]=JOYButtonUsageDPadDown,
+    [GBA]=JOYButtonUsageA,
+    [GBB]=JOYButtonUsageB,
+    [GBSelect]=JOYButtonUsageSelect,
+    [GBStart]=JOYButtonUsageStart,
+    [GBTurbo]=JOYButtonUsageL1,
+    [GBRewind]=JOYButtonUsageL2,
+    [GBUnderclock]=JOYButtonUsageR1,
+    };
     
-    all_mappings[joystick_name] = mapping;
-    [[NSUserDefaults standardUserDefaults] setObject:all_mappings forKey:@"GBJoypadMappings"];
-    [self refreshJoypadMenu:nil];
+    if (joystick_configuration_state == GBUnderclock) {
+        for (JOYAxis *axis in controller.axes) {
+            if (axis.value > 0.5) {
+                mapping[@"AnalogUnderclock"] = @(axis.uniqueID);
+            }
+        }
+    }
+    
+    if (joystick_configuration_state == GBTurbo) {
+        for (JOYAxis *axis in controller.axes) {
+            if (axis.value > 0.5) {
+                mapping[@"AnalogTurbo"] = @(axis.uniqueID);
+            }
+        }
+    }
+    
+    mapping[n2s(button.uniqueID)] = @(gb_to_joykit[joystick_configuration_state]);
+    
+    instance_mappings[controller.uniqueID] = mapping;
+    name_mappings[controller.deviceName] = mapping;
+    [[NSUserDefaults standardUserDefaults] setObject:instance_mappings forKey:@"JoyKitInstanceMapping"];
+    [[NSUserDefaults standardUserDefaults] setObject:name_mappings forKey:@"JoyKitNameMapping"];
     [self advanceConfigurationStateMachine];
 }
 
-- (void) joystick:(NSString *)joystick_name axis: (unsigned)axis movedTo: (signed) value
+- (NSButton *)analogControlsCheckbox
 {
-    if (abs(value) < 0x4000) return;
-    if (joystick_configuration_state != GBButtonCount) return;
-    if (!joystick_being_configured) {
-        joystick_being_configured = joystick_name;
-    }
-    else if (![joystick_being_configured isEqualToString:joystick_name]) {
-        return;
-    }
-    
-    if (last_axis == -1) {
-        last_axis = axis;
-        return;
-    }
-    
-    if (axis == last_axis) {
-        return;
-    }
-    
-    NSMutableDictionary *all_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] mutableCopy];
-    
-    if (!all_mappings) {
-        all_mappings = [[NSMutableDictionary alloc] init];
-    }
-    
-    NSMutableDictionary *mapping = [[all_mappings objectForKey:joystick_name] mutableCopy];
-    
-    if (!mapping) {
-        mapping = [[NSMutableDictionary alloc] init];
-    }
-    
-    mapping[@"XAxis"] = @(MIN(axis, last_axis));
-    mapping[@"YAxis"] = @(MAX(axis, last_axis));
-    
-    all_mappings[joystick_name] = mapping;
-    [[NSUserDefaults standardUserDefaults] setObject:all_mappings forKey:@"GBJoypadMappings"];
-    [self advanceConfigurationStateMachine];
+    return _analogControlsCheckbox;
 }
 
-- (void) joystick:(NSString *)joystick_name hat: (unsigned)hat changedState: (int8_t) state
+- (void)setAnalogControlsCheckbox:(NSButton *)analogControlsCheckbox
 {
-    /* Hats are always mapped to the D-pad, ignore them on non-Dpad keys and skip the D-pad configuration if used*/
-    if (!state) return;
-    if (joystick_configuration_state == -1) return;
-    if (joystick_configuration_state > GBDown) return;
-    if (!joystick_being_configured) {
-        joystick_being_configured = joystick_name;
-    }
-    else if (![joystick_being_configured isEqualToString:joystick_name]) {
-        return;
-    }
-    
-    NSMutableDictionary *all_mappings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] mutableCopy];
-    
-    if (!all_mappings) {
-        all_mappings = [[NSMutableDictionary alloc] init];
-    }
-    
-    NSMutableDictionary *mapping = [[all_mappings objectForKey:joystick_name] mutableCopy];
-    
-    if (!mapping) {
-        mapping = [[NSMutableDictionary alloc] init];
-    }
-    
-    for (joystick_configuration_state = 0;; joystick_configuration_state++) {
-        [mapping removeObjectForKey:GBButtonNames[joystick_configuration_state]];
-        if (joystick_configuration_state == GBDown) break;
-    }
-    
-    all_mappings[joystick_name] = mapping;
-    [[NSUserDefaults standardUserDefaults] setObject:all_mappings forKey:@"GBJoypadMappings"];
-    [self refreshJoypadMenu:nil];
-    [self advanceConfigurationStateMachine];
+    _analogControlsCheckbox = analogControlsCheckbox;
+    [_analogControlsCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAnalogControls"]];
 }
 
 - (NSButton *)aspectRatioCheckbox
@@ -361,10 +352,13 @@
     [super awakeFromNib];
     [self updateBootROMFolderButton];
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self.controlsTableView selector:@selector(reloadData) name:(NSString*)kTISNotifySelectedKeyboardInputSourceChanged object:nil];
+    [JOYController registerListener:self];
+    joystick_configuration_state = -1;
 }
 
 - (void)dealloc
 {
+    [JOYController unregisterListener:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self.controlsTableView];
 }
 
@@ -483,21 +477,47 @@
     return _preferredJoypadButton;
 }
 
+- (void)controllerConnected:(JOYController *)controller
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshJoypadMenu:nil];
+    });
+}
+
+- (void)controllerDisconnected:(JOYController *)controller
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshJoypadMenu:nil];
+    });
+}
+
 - (IBAction)refreshJoypadMenu:(id)sender
 {
-    NSArray *joypads = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoypadMappings"] allKeys];
-    for (NSString *joypad in joypads) {
-        if ([self.preferredJoypadButton indexOfItemWithTitle:joypad] == -1) {
-            [self.preferredJoypadButton addItemWithTitle:joypad];
+    bool preferred_is_connected = false;
+    NSString *player_string = n2s(self.playerListButton.selectedTag);
+    NSString *selected_controller = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitDefaultControllers"][player_string];
+    
+    [self.preferredJoypadButton removeAllItems];
+    [self.preferredJoypadButton addItemWithTitle:@"None"];
+    for (JOYController *controller in [JOYController allControllers]) {
+        [self.preferredJoypadButton addItemWithTitle:[NSString stringWithFormat:@"%@ (%@)", controller.deviceName, controller.uniqueID]];
+        
+        self.preferredJoypadButton.lastItem.identifier = controller.uniqueID;
+        
+        if ([controller.uniqueID isEqualToString:selected_controller]) {
+            preferred_is_connected = true;
+            [self.preferredJoypadButton selectItem:self.preferredJoypadButton.lastItem];
         }
     }
     
-    NSString *player_string = [NSString stringWithFormat: @"%ld", (long)self.playerListButton.selectedTag];
-    NSString *selected_joypad = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"][player_string];
-    if (selected_joypad && [self.preferredJoypadButton indexOfItemWithTitle:selected_joypad] != -1) {
-        [self.preferredJoypadButton selectItemWithTitle:selected_joypad];
+    if (!preferred_is_connected && selected_controller) {
+        [self.preferredJoypadButton addItemWithTitle:[NSString stringWithFormat:@"Unavailable Controller (%@)", selected_controller]];
+        self.preferredJoypadButton.lastItem.identifier = selected_controller;
+        [self.preferredJoypadButton selectItem:self.preferredJoypadButton.lastItem];
     }
-    else {
+    
+
+    if (!selected_controller) {
         [self.preferredJoypadButton selectItemWithTitle:@"None"];
     }
     [self.controlsTableView reloadData];
@@ -505,18 +525,18 @@
 
 - (IBAction)changeDefaultJoypad:(id)sender
 {
-    NSMutableDictionary *default_joypads = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBDefaultJoypads"] mutableCopy];
+    NSMutableDictionary *default_joypads = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitDefaultControllers"] mutableCopy];
     if (!default_joypads) {
         default_joypads = [[NSMutableDictionary alloc] init];
     }
 
-    NSString *player_string = [NSString stringWithFormat: @"%ld", self.playerListButton.selectedTag];
+    NSString *player_string = n2s(self.playerListButton.selectedTag);
     if ([[sender titleOfSelectedItem] isEqualToString:@"None"]) {
         [default_joypads removeObjectForKey:player_string];
     }
     else {
-        default_joypads[player_string] = [sender titleOfSelectedItem];
+        default_joypads[player_string] = [[sender selectedItem] identifier];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:default_joypads forKey:@"GBDefaultJoypads"];
+    [[NSUserDefaults standardUserDefaults] setObject:default_joypads forKey:@"JoyKitDefaultControllers"];
 }
 @end

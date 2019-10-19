@@ -1,9 +1,10 @@
 #import <Cocoa/Cocoa.h>
-#import "GBJoystickListener.h"
+#import <JoyKit/JoyKit.h>
 
-@interface GBPreferencesWindow : NSWindow <NSTableViewDelegate, NSTableViewDataSource, GBJoystickListener>
+@interface GBPreferencesWindow : NSWindow <NSTableViewDelegate, NSTableViewDataSource, JOYListener>
 @property IBOutlet NSTableView *controlsTableView;
 @property IBOutlet NSPopUpButton *graphicsFilterPopupButton;
+@property (strong) IBOutlet NSButton *analogControlsCheckbox;
 @property (strong) IBOutlet NSButton *aspectRatioCheckbox;
 @property (strong) IBOutlet NSPopUpButton *highpassFilterPopupButton;
 @property (strong) IBOutlet NSPopUpButton *colorCorrectionPopupButton;

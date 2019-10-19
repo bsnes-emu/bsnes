@@ -1448,7 +1448,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
 
     if (cartridge->has_rumble) {
-        GB_log(gb, "Cart contains a rumble pak\n");
+        GB_log(gb, "Cart contains a Rumble Pak\n");
     }
 
     if (cartridge->has_rtc) {

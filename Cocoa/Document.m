@@ -74,6 +74,7 @@ enum model {
           topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
            exposure:(unsigned) exposure;
 - (void) gotNewSample:(GB_sample_t *)sample;
+- (void) rumbleChanged:(double)amp;
 @end
 
 static void vblank(GB_gameboy_t *gb)
@@ -129,6 +130,12 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self gotNewSample:sample];
+}
+
+static void rumbleCallback(GB_gameboy_t *gb, double amp)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self rumbleChanged:amp];
 }
 
 @implementation Document
@@ -199,6 +206,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_set_highpass_filter_mode(&gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
     GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
     GB_apu_set_sample_callback(&gb, audioCallback);
+    GB_set_rumble_callback(&gb, rumbleCallback);
 }
 
 - (void) vblank
@@ -242,6 +250,11 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
         audioBufferNeeded = 0;
     }
     [audioLock unlock];
+}
+
+- (void)rumbleChanged:(double)amp
+{
+    [_view setRumble:amp];
 }
 
 - (void) run
@@ -295,6 +308,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    [_view setRumble:false];
     stopping = false;
 }
 
@@ -1563,5 +1577,4 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[fileURL path] lastPathComponent]];
     
 }
-
 @end

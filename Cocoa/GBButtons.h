@@ -19,6 +19,11 @@ typedef enum : NSUInteger {
 
 extern NSString const *GBButtonNames[GBButtonCount];
 
+static inline NSString *n2s(uint64_t number)
+{
+    return [NSString stringWithFormat:@"%llx", number];
+}
+
 static inline NSString *button_to_preference_name(GBButton button, unsigned player)
 {
     if (player) {

@@ -478,9 +478,6 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     if (gb->cartridge_type->has_rumble) {
                         if (!!(value & 8) != gb->rumble_state) {
                             gb->rumble_state = !gb->rumble_state;
-                            if (gb->rumble_callback) {
-                                gb->rumble_callback(gb, gb->rumble_state);
-                            }
                         }
                         value &= 7;
                     }

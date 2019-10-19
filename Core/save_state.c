@@ -252,10 +252,6 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
 
     errno = 0;
     
-    if (gb->cartridge_type->has_rumble && gb->rumble_callback) {
-        gb->rumble_callback(gb, gb->rumble_state);
-    }
-    
     for (unsigned i = 0; i < 32; i++) {
         GB_palette_changed(gb, false, i * 2);
         GB_palette_changed(gb, true, i * 2);
@@ -356,10 +352,6 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     length -= save.ram_size - gb->ram_size;
     
     memcpy(gb, &save, sizeof(save));
-    
-    if (gb->cartridge_type->has_rumble && gb->rumble_callback) {
-        gb->rumble_callback(gb, gb->rumble_state);
-    }
     
     for (unsigned i = 0; i < 32; i++) {
         GB_palette_changed(gb, false, i * 2);

@@ -232,6 +232,14 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_input_ir_change += cycles;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
+    
+    if (gb->rumble_state) {
+        gb->rumble_on_cycles++;
+    }
+    else {
+        gb->rumble_off_cycles++;
+    }
+    
     if (!gb->stopped) { // TODO: Verify what happens in STOP mode
         GB_dma_run(gb);
         GB_hdma_run(gb);
