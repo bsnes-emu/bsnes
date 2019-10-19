@@ -16,6 +16,10 @@ static void __stdcall co_thunk(void* coentry) {
   ((void (*)(void))coentry)();
 }
 
+const char* co_method() {
+  return "fiber";
+}
+
 cothread_t co_active() {
   if(!co_active_) {
     ConvertThreadToFiber(0);

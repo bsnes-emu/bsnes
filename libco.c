@@ -1,7 +1,7 @@
 #if defined(__clang__)
   #pragma clang diagnostic ignored "-Wparentheses"
 
-  //placing code in section(text) does not mark it executable with Clang.
+  /* placing code in section(text) does not mark it executable with Clang. */
   #undef  LIBCO_MPROTECT
   #define LIBCO_MPROTECT
 #endif

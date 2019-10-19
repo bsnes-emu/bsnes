@@ -26,6 +26,10 @@ extern "C" {
 static thread_local ucontext_t co_primary;
 static thread_local ucontext_t* co_running = 0;
 
+const char* co_module() {
+  return "ucontext";
+}
+
 cothread_t co_active() {
   if(!co_running) co_running = &co_primary;
   return (cothread_t)co_running;

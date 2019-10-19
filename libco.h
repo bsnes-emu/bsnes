@@ -1,5 +1,5 @@
 /*
-  libco v20 (2019-10-14)
+  libco v20 (2019-10-16)
   author: byuu
   license: ISC
 */
@@ -13,6 +13,7 @@ extern "C" {
 
 typedef void* cothread_t;
 
+const char* co_method();
 cothread_t co_active();
 cothread_t co_derive(void*, unsigned int, void (*)(void));
 cothread_t co_create(unsigned int, void (*)(void));

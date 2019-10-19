@@ -413,6 +413,10 @@ static void co_init_(void) {
   co_active_handle = co_create_(state_size, (uintptr_t)&co_switch);
 }
 
+const char* co_method() {
+  return "ppc";
+}
+
 cothread_t co_active() {
   if(!co_active_handle) co_init_();
 

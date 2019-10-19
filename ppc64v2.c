@@ -221,6 +221,10 @@ __asm__(
   ".size swap_context, .-swap_context\n"
 );
 
+const char* co_method() {
+  return "ppc64v2";
+}
+
 cothread_t co_active() {
   if(!co_active_handle) {
     co_active_handle = (struct ppc64_context*)malloc(MIN_STACK + sizeof(struct ppc64_context));
@@ -255,11 +259,9 @@ cothread_t co_derive(void* memory, unsigned int size, void (*coentry)(void)) {
 }
 
 cothread_t co_create(unsigned int size, void (*coentry)(void)) {
-  size_t total = MAX(size, MIN_STACK) + sizeof(struct ppc64_context);
-  void* memory = malloc(total);
-
+  void* memory = malloc(size);
   if(!memory) return (cothread_t)0;
-  return co_derive(memory, total, coentry);
+  return co_derive(memory, size, coentry);
 }
 
 void co_delete(cothread_t handle) {
