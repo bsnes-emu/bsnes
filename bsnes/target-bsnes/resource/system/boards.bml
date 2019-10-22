@@ -877,6 +877,16 @@ board: OBC1-LOROM-RAM
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
     memory type=RAM content=Save
 
+board: SA1
+  processor architecture=W65C816S
+    map address=00-3f,80-bf:2200-23ff
+    mcu
+      map address=00-3f,80-bf:8000-ffff mask=0x408000
+      map address=c0-ff:0000-ffff
+      memory type=ROM content=Program
+    memory type=RAM content=Internal
+      map address=00-3f,80-bf:3000-37ff size=0x800
+
 board: SA1-RAM
   processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
