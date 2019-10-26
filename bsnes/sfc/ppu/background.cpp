@@ -75,13 +75,13 @@ auto PPU::Background::fetchNameTable() -> void {
     if(ppu.io.bgMode == 4) {
       if(hlookup & valid) {
         if(!(hlookup & 0x8000)) {
-          hoffset = hpixel + (hlookup & ~7) + (hscroll & ~7);
+          hoffset = hpixel + (hlookup & ~7) + (hscroll & 7);
         } else {
           voffset = vpixel + (vlookup);
         }
       }
     } else {
-      if(hlookup & valid) hoffset = hpixel + (hlookup & ~7) + (hscroll & ~7);
+      if(hlookup & valid) hoffset = hpixel + (hlookup & ~7) + (hscroll & 7);
       if(vlookup & valid) voffset = vpixel + (vlookup);
     }
   }
@@ -141,7 +141,7 @@ auto PPU::Background::fetchNameTable() -> void {
 auto PPU::Background::fetchOffset(uint y) -> void {
   if(ppu.vcounter() == 0) return;
 
-  int x = ppu.hcounter() >> 2;
+  uint x = characterIndex << 3;
 
   uint hoffset = x + (io.hoffset & ~7);
   uint voffset = y + (io.voffset);
@@ -162,6 +162,8 @@ auto PPU::Background::fetchOffset(uint y) -> void {
   uint16 address = io.screenAddress + offset;
   if(y == 0) opt.hoffset = ppu.vram[address];
   if(y == 8) opt.voffset = ppu.vram[address];
+
+  if(y == 0) characterIndex++;
 }
 
 auto PPU::Background::fetchCharacter(uint index) -> void {

@@ -94,8 +94,8 @@ auto PPU::cycleBackgroundFetch() -> void {
   case 2:
     if constexpr(Cycle == 0) bg2.fetchNameTable();
     if constexpr(Cycle == 1) bg1.fetchNameTable();
-    if constexpr(Cycle == 2) bg3.fetchOffset(0);
-    if constexpr(Cycle == 3) bg3.fetchOffset(8);
+    if constexpr(Cycle == 2) bg3.fetchOffset(8);
+    if constexpr(Cycle == 3) bg3.fetchOffset(0);
     if constexpr(Cycle == 4) bg2.fetchCharacter(1);
     if constexpr(Cycle == 5) bg2.fetchCharacter(0);
     if constexpr(Cycle == 6) bg1.fetchCharacter(1);
@@ -134,8 +134,8 @@ auto PPU::cycleBackgroundFetch() -> void {
   case 6:
     if constexpr(Cycle == 0) bg2.fetchNameTable();
     if constexpr(Cycle == 1) bg1.fetchNameTable();
-    if constexpr(Cycle == 2) bg3.fetchOffset(0);
-    if constexpr(Cycle == 3) bg3.fetchOffset(8);
+    if constexpr(Cycle == 2) bg3.fetchOffset(8);
+    if constexpr(Cycle == 3) bg3.fetchOffset(0);
     if constexpr(Cycle == 4) bg1.fetchCharacter(1);
     if constexpr(Cycle == 5) bg1.fetchCharacter(0);
     if constexpr(Cycle == 6) bg1.fetchCharacter(1);
