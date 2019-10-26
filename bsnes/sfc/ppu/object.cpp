@@ -103,8 +103,8 @@ auto PPU::Object::fetch() -> void {
       continue;
     }
 
-    ppu.latch.oamAddress = oamItem[i].index;
-    const auto& sprite = oam.object[ppu.latch.oamAddress];
+    ppu.latch.oamAddress = 0x0200 + (oamItem[i].index >> 2);
+    const auto& sprite = oam.object[oamItem[i].index];
 
     uint tileWidth = sprite.width() >> 3;
     int x = sprite.x;

@@ -44,7 +44,8 @@ auto Program::create() -> void {
   stateManager.create();
   manifestViewer.create();
 
-  if(settings.general.crashed) {
+  //seems to be misfiring on Windows, so disable for now
+  if(0 && settings.general.crashed) {
     MessageDialog(
       "Driver crash detected. Hardware drivers have been disabled.\n"
       "Please reconfigure drivers in the advanced settings panel."
