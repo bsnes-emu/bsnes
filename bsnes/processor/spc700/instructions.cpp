@@ -250,7 +250,7 @@ auto SPC700::instructionDirectDirectCompare(fpb op) -> void {
   uint8 target = fetch();
   uint8 lhs = load(target);
   lhs = alu(lhs, rhs);
-  load(target);
+  idle();
 }
 
 auto SPC700::instructionDirectDirectModify(fpb op) -> void {
@@ -274,7 +274,7 @@ auto SPC700::instructionDirectImmediateCompare(fpb op) -> void {
   uint8 address = fetch();
   uint8 data = load(address);
   data = alu(data, immediate);
-  load(address);
+  idle();
 }
 
 auto SPC700::instructionDirectImmediateModify(fpb op) -> void {
@@ -469,7 +469,7 @@ auto SPC700::instructionIndirectXCompareIndirectY(fpb op) -> void {
   uint8 rhs = load(Y);
   uint8 lhs = load(X);
   lhs = alu(lhs, rhs);
-  load(X);
+  idle();
 }
 
 auto SPC700::instructionIndirectXWriteIndirectY(fpb op) -> void {

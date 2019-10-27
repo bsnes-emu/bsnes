@@ -20,6 +20,7 @@ auto CPU::step() -> void {
   static_assert(Clocks == 2 || Clocks == 4 || Clocks == 6 || Clocks == 8 || Clocks == 10 || Clocks == 12);
 
   for(auto coprocessor : coprocessors) {
+    if(coprocessor == &icd || coprocessor == &msu1) continue;
     coprocessor->clock -= Clocks * (uint64)coprocessor->frequency;
   }
 
@@ -43,6 +44,10 @@ auto CPU::step() -> void {
 
   smp.clock -= Clocks * (uint64)smp.frequency;
   ppu.clock -= Clocks;
+  for(auto coprocessor : coprocessors) {
+    if(coprocessor != &icd && coprocessor != &msu1) continue;
+    coprocessor->clock -= Clocks * (uint64)coprocessor->frequency;
+  }
 
   if(!status.dramRefresh && hcounter() >= status.dramRefreshPosition) {
     //note: pattern should technically be 5-3, 5-3, 5-3, 5-3, 5-3 per logic analyzer

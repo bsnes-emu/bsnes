@@ -106,8 +106,9 @@ auto PPU::scanline() -> void {
 
   if(vcounter() > 0 && vcounter() < vdisp()) {
     latch.hires |= io.pseudoHires || io.bgMode == 5 || io.bgMode == 6;
-    latch.hd |= io.bgMode == 7 && hdScale() > 1 && hdSupersample() == 0;
-    latch.ss |= io.bgMode == 7 && hdScale() > 1 && hdSupersample() == 1;
+    //supersampling and EXTBG mode are not compatible, so disable supersampling in EXTBG mode
+    latch.hd |= io.bgMode == 7 && hdScale() > 1 && (hdSupersample() == 0 || io.extbg == 1);
+    latch.ss |= io.bgMode == 7 && hdScale() > 1 && (hdSupersample() == 1 && io.extbg == 0);
   }
 
   if(vcounter() == vdisp()) {

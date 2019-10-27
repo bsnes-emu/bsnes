@@ -21,7 +21,7 @@ auto ICD::ppuWrite(uint2 color) -> void {
 
 auto ICD::apuWrite(float left, float right) -> void {
   float samples[] = {left, right};
-  stream->write(samples);
+  if(!system.runAhead) stream->write(samples);
 }
 
 auto ICD::joypWrite(bool p14, bool p15) -> void {
