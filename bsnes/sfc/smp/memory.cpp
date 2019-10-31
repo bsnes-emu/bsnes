@@ -14,9 +14,10 @@ auto SMP::idle() -> void {
 }
 
 auto SMP::read(uint16 address) -> uint8 {
-  wait(address);
+  wait(address, 0);
   uint8 data = readRAM(address);
   if((address & 0xfff0) == 0x00f0) data = readIO(address);
+//wait(address, 0);
   return data;
 }
 

@@ -126,6 +126,13 @@ auto System::load(Emulator::Interface* interface) -> bool {
     information.cpuFrequency = Emulator::Constants::Colorburst::PAL * 4.8;
   }
 
+  if(configuration.hacks.hotfixes) {
+    //due to poor programming, Rendering Ranger R2 will rarely lock up at 32040 * 768hz.
+    if(cartridge.headerTitle() == "RENDERING RANGER R2") {
+      information.apuFrequency = 32000.0 * 768.0;
+    }
+  }
+
   if(cartridge.has.ICD) {
     if(!icd.load()) return false;
   }

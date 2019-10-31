@@ -90,8 +90,8 @@ private:
   Timer<128> timer1;
   Timer< 16> timer2;
 
-  inline auto wait(maybe<uint16> address = nothing) -> void;
-  inline auto waitIdle(maybe<uint16> address = nothing) -> void;
+  inline auto wait(maybe<uint16> address = nothing, bool half = false) -> void;
+  inline auto waitIdle(maybe<uint16> address = nothing, bool half = false) -> void;
   inline auto step(uint clocks) -> void;
   inline auto stepIdle(uint clocks) -> void;
   inline auto stepTimers(uint clocks) -> void;
