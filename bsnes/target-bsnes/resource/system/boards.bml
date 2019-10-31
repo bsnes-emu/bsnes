@@ -35,21 +35,21 @@ board: BSC-1A5B9P-01
 
 board: BSC-1A5M-02
   memory type=ROM content=Program
-    map address=00-1f:8000-ffff mask=0x8000 base=0x000000
-    map address=20-3f:8000-ffff mask=0x8000 base=0x100000
-    map address=80-9f:8000-ffff mask=0x8000 base=0x200000
-    map address=a0-bf:8000-ffff mask=0x8000 base=0x100000
+    map address=00-1f:8000-ffff mask=0xe08000 base=0x000000
+    map address=20-3f:8000-ffff mask=0xe08000 base=0x100000
+    map address=80-9f:8000-ffff mask=0xe08000 base=0x200000
+    map address=a0-bf:8000-ffff mask=0xe08000 base=0x100000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
   slot type=BSMemory
     map address=c0-ef:0000-ffff
 
-board: BSC-1A7M-01
+board: BSC-1A7M-(01,10)
   memory type=ROM content=Program
-    map address=00-1f:8000-ffff mask=0x8000 base=0x000000
-    map address=20-3f:8000-ffff mask=0x8000 base=0x100000
-    map address=80-9f:8000-ffff mask=0x8000 base=0x200000
-    map address=a0-bf:8000-ffff mask=0x8000 base=0x100000
+    map address=00-1f:8000-ffff mask=0xe08000 base=0x000000
+    map address=20-3f:8000-ffff mask=0xe08000 base=0x100000
+    map address=80-9f:8000-ffff mask=0xe08000 base=0x200000
+    map address=a0-bf:8000-ffff mask=0xe08000 base=0x100000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
   slot type=BSMemory
@@ -604,10 +604,10 @@ board: BS-HIROM-RAM
 
 board: BS-LOROM-RAM
   memory type=ROM content=Program
-    map address=00-1f:8000-ffff base=0x000000 mask=0x8000
-    map address=20-3f:8000-ffff base=0x100000 mask=0x8000
-    map address=80-9f:8000-ffff base=0x200000 mask=0x8000
-    map address=a0-bf:8000-ffff base=0x100000 mask=0x8000
+    map address=00-1f:8000-ffff mask=0xe08000 base=0x000000
+    map address=20-3f:8000-ffff mask=0xe08000 base=0x100000
+    map address=80-9f:8000-ffff mask=0xe08000 base=0x200000
+    map address=a0-bf:8000-ffff mask=0xe08000 base=0x100000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
   slot type=BSMemory
