@@ -101,7 +101,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 	}
 
 	if (name == "boards.bml" && mode == vfs::file::mode::read) {
-		result = vfs::memory::file::open(boardsbml, sizeof(boardsbml));
+		result = vfs::memory::file::open(Boards, sizeof(Boards));
 	}
 
 	if (id == 1) { //Super Famicom
