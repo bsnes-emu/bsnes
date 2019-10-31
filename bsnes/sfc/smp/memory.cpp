@@ -14,11 +14,20 @@ auto SMP::idle() -> void {
 }
 
 auto SMP::read(uint16 address) -> uint8 {
-  wait(address, 0);
-  uint8 data = readRAM(address);
-  if((address & 0xfff0) == 0x00f0) data = readIO(address);
-//wait(address, 0);
-  return data;
+  //Kishin Douji Zenki - Tenchi Meidou requires bus hold delays on CPU I/O reads.
+  //smp_mem_access_times requires no bus hold delays on APU RAM reads.
+  if((address & 0xfffc) == 0x00f4) {
+    wait(address, 1);
+    uint8 data = readRAM(address);
+    if((address & 0xfff0) == 0x00f0) data = readIO(address);
+    wait(address, 1);
+    return data;
+  } else {
+    wait(address, 0);
+    uint8 data = readRAM(address);
+    if((address & 0xfff0) == 0x00f0) data = readIO(address);
+    return data;
+  }
 }
 
 auto SMP::write(uint16 address, uint8 data) -> void {
