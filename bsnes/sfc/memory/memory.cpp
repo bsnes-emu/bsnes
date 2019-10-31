@@ -61,6 +61,7 @@ auto Bus::map(
           }
 
           uint offset = reduce(bank << 16 | addr, mask);
+          if(size) base = mirror(base, size);
           if(size) offset = base + mirror(offset, size - base);
           lookup[bank << 16 | addr] = id;
           target[bank << 16 | addr] = offset;
