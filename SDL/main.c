@@ -123,7 +123,7 @@ static void handle_events(GB_gameboy_t *gb)
             }
                 
             case SDL_WINDOWEVENT: {
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     update_viewport();
                 }
                 break;
