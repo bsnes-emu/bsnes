@@ -98,6 +98,7 @@ static void open_menu(void)
         SDL_PauseAudioDevice(device_id, 1);
     }
     run_gui(true);
+    SDL_ShowCursor(SDL_DISABLE);
     if (audio_playing) {
         SDL_ClearQueuedAudio(device_id);
         SDL_PauseAudioDevice(device_id, 0);
@@ -425,6 +426,7 @@ static bool handle_pending_command(void)
 
 static void run(void)
 {
+    SDL_ShowCursor(SDL_DISABLE);
     GB_model_t model;
     pending_command = GB_SDL_NO_COMMAND;
 restart:
