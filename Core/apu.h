@@ -148,7 +148,7 @@ typedef struct {
 } GB_apu_output_t;
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
-void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, unsigned cycles_per_sample); /* Cycles are in 8MHz units */
+void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
 #ifdef GB_INTERNAL
