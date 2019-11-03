@@ -406,14 +406,12 @@ static bool handle_pending_command(void)
             return false;
         }
             
-        case GB_SDL_RESET_COMMAND:
-            GB_save_battery(&gb, battery_save_path_ptr);
-            return true;
-            
         case GB_SDL_NO_COMMAND:
             return false;
             
+        case GB_SDL_RESET_COMMAND:
         case GB_SDL_NEW_FILE_COMMAND:
+            GB_save_battery(&gb, battery_save_path_ptr);
             return true;
             
         case GB_SDL_QUIT_COMMAND:
