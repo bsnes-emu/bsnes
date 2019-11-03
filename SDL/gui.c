@@ -792,6 +792,7 @@ void connect_joypad(void)
 
 void run_gui(bool is_running)
 {
+    SDL_ShowCursor(SDL_ENABLE);
     connect_joypad();
     
     /* Draw the background screen */
