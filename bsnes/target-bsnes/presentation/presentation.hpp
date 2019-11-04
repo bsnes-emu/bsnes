@@ -5,6 +5,7 @@ struct Presentation : Window {
   enum : uint { RecentGames = 9, QuickStates = 9 };
   enum : uint { StatusHeight = 24 };
 
+  auto onDrop(vector<string> locations) -> void;
   auto updateProgramIcon() -> void;
   auto updateStatusIcon() -> void;
   auto resizeWindow() -> void;
@@ -126,7 +127,7 @@ struct Presentation : Window {
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};
       Viewport viewport{&viewportLayout, Size{~0, ~0}, 0};
       VerticalLayout iconLayout{&viewportLayout, Size{0, ~0}, 0};
-        Widget iconSpacer{&iconLayout, Size{144, ~0}, 0};
+        Canvas iconSpacer{&iconLayout, Size{144, ~0}, 0};
         Canvas iconCanvas{&iconLayout, Size{128, 128}, 0};
     HorizontalLayout statusLayout{&layout, Size{~0, StatusHeight}, 0};
       Label spacerIcon{&statusLayout, Size{8, ~0}, 0};
