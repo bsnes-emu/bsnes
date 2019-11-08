@@ -191,20 +191,24 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     io.htime = (io.htime >> 2) - 1;
     io.htime = io.htime & 0x100 | data << 0;
     io.htime = (io.htime + 1) << 2;
+    pollIRQ();  //unverified
     return;
 
   case 0x4208:  //HTIMEH
     io.htime = (io.htime >> 2) - 1;
     io.htime = io.htime & 0x0ff | (data & 1) << 8;
     io.htime = (io.htime + 1) << 2;
+    pollIRQ();  //unverified
     return;
 
   case 0x4209:  //VTIMEL
     io.vtime = io.vtime & 0x100 | data << 0;
+    pollIRQ();  //unverified
     return;
 
   case 0x420a:  //VTIMEH
     io.vtime = io.vtime & 0x0ff | (data & 1) << 8;
+    pollIRQ();  //unverified
     return;
 
   case 0x420b:  //DMAEN

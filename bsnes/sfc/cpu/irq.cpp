@@ -1,9 +1,10 @@
-//called once every four clock cycles;
+//pollNMI() and pollIRQ() are called once every four clock cycles;
 //as NMI steps by scanlines (divisible by 4) and IRQ by PPU 4-cycle dots.
 //
 //ppu.(vh)counter(n) returns the value of said counters n-clocks before current time;
 //it is used to emulate hardware communication delay between opcode and interrupt units.
-auto CPU::pollInterrupts() -> void {
+
+auto CPU::pollNMI() -> void {
   //NMI hold
   if(status.nmiHold.lower() && io.nmiEnable) {
     status.nmiTransition = 1;
@@ -13,7 +14,9 @@ auto CPU::pollInterrupts() -> void {
   if(status.nmiValid.flip(vcounter(2) >= ppu.vdisp())) {
     if(status.nmiLine = status.nmiValid) status.nmiHold = 1;  //hold /NMI for four cycles
   }
+}
 
+auto CPU::pollIRQ() -> void {
   //IRQ hold
   status.irqHold = 0;
   if(status.irqLine && io.irqEnable) {
