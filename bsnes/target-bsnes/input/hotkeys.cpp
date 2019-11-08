@@ -67,12 +67,12 @@ auto InputManager::bindHotkeys() -> void {
     program.loadState("Quick/Redo");
   }));
 
-  hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {
+  hotkeys.append(InputHotkey("Decrement State Slot").onPress([&] {
     if(--stateSlot < 1) stateSlot = 9;
     program.showMessage({"Selected state slot ", stateSlot});
   }));
 
-  hotkeys.append(InputHotkey("Decrement State Slot").onPress([&] {
+  hotkeys.append(InputHotkey("Increment State Slot").onPress([&] {
     if(++stateSlot > 9) stateSlot = 1;
     program.showMessage({"Selected state slot ", stateSlot});
   }));
