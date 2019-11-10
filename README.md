@@ -1,3 +1,5 @@
+![bsnes icon © byuu](https://images.byuu.org/bsnes/icon-128.png)
+
 bsnes
 =====
 
@@ -83,3 +85,8 @@ Nightly Builds
   - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=macOS-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=linux-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=freebsd-x86_64-binaries)
+
+Preview
+-------
+
+![bsnes preview © byuu](https://images.byuu.org/bsnes/byuu-bsnes-bahamutlagoon.png)
