@@ -21,7 +21,7 @@ auto PPU::Background::runMode7() -> void {
   int voffset = (int13)latch.voffset;
 
   uint x = mosaic.hoffset;
-  uint y = mosaic.enable ? ppu.bg1.mosaic.voffset : ppu.vcounter();  //BG2 vertical mosaic uses BG1 mosaic size
+  uint y = !mosaic.enable ? ppu.vcounter() : ppu.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
   if(!mosaic.enable) {
     mosaic.hoffset += 1;
