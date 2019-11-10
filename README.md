@@ -1,7 +1,7 @@
-![bsnes icon © byuu](https://images.byuu.org/bsnes/icon-128.png)
-
 bsnes
 =====
+
+![bsnes icon © byuu](https://images.byuu.org/bsnes/icon-128.png)
 
 bsnes is a multi-platform Super Nintendo (Super Famicom) emulator that focuses
 on performance, features, and ease of use.
