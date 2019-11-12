@@ -33,6 +33,9 @@ auto Program::hackCompatibility() -> void {
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "NHL '94" || title == "NHL PROHOCKEY'94") renderCycle = 32;
 
+  //fixes an errant scanline on the title screen due to writing to PPU registers too late
+  if(title == "Sugoro Quest++") renderCycle = 128;
+
   if(settings.emulator.hack.hotfixes) {
     //this game transfers uninitialized memory into video RAM: this can cause a row of invalid tiles
     //to appear in the background of stage 12. this one is a bug in the original game, so only enable
