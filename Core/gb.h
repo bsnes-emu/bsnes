@@ -278,10 +278,6 @@ typedef struct {
    This struct is not packed, but dumped sections exclusively use types that have the same alignment in both 32 and 64
    bit platforms. */
 
-/* We make sure bool is 1 for cross-platform save state compatibility. */
-/* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
-_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
-
 #ifdef GB_INTERNAL
 struct GB_gameboy_s {
 #else
