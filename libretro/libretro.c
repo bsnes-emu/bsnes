@@ -425,21 +425,20 @@ static void init_for_current_model(unsigned id)
     descs[7].len     = 0x4000;
     descs[7].flags   = RETRO_MEMDESC_CONST;
 
-    descs[8].ptr     = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
-    descs[8].start   = 0xFE00;
-    descs[8].select  = 0xFFFFFF00;
-    descs[8].len     = 0x00A0;
+    descs[8].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
+    descs[8].start = 0xFE00;
+    descs[8].len   = 0x00A0;
+    descs[8].select= 0xFFFFFF00;
 
-    descs[9].ptr     = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
-    descs[9].start   = 0x10000;
-    descs[9].select  = 0xFFFF0000;
-    descs[9].len     = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
+    descs[9].ptr   = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
+    descs[9].start = 0x10000;
+    descs[9].len   = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
+    descs[9].select= 0xFFFF0000;
 
-    descs[10].ptr    = descs[8].ptr;
-    descs[10].offset = 0x100;
-    descs[10].start  = 0xFF00;
-    descs[10].select = 0xFFFFFF00;
-    descs[10].len    = 0x0080;
+    descs[10].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_IO, &size, &bank);
+    descs[10].start = 0xFF00;
+    descs[10].len   = 0x0080;
+    descs[10].select= 0xFFFFFF00;
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
