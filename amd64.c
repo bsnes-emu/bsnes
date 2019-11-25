@@ -99,7 +99,9 @@ static void (*co_swap)(cothread_t, cothread_t) = 0;
   };
 
   #include <unistd.h>
-  #include <sys/mman.h>
+  #ifdef LIBCO_MPROTECT
+    #include <sys/mman.h>
+  #endif
 
   static void co_init() {
     #ifdef LIBCO_MPROTECT
