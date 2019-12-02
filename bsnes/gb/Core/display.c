@@ -127,13 +127,13 @@ static void display_vblank(GB_gameboy_t *gb)
     if (GB_is_hle_sgb(gb)) {
         GB_sgb_render(gb);
     }
-
+    
     if (gb->turbo) {
         if (GB_timing_sync_turbo(gb)) {
             return;
         }
     }
-
+    
     if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
@@ -162,8 +162,19 @@ static inline uint8_t scale_channel(uint8_t x)
 
 static inline uint8_t scale_channel_with_curve(uint8_t x)
 {
-    return (uint8_t[]){0,2,4,7,12,18,25,34,42,52,62,73,85,97,109,121,134,146,158,170,182,193,203,213,221,230,237,243,248,251,253,255,}[x];
+    return (uint8_t[]){0,2,4,7,12,18,25,34,42,52,62,73,85,97,109,121,134,146,158,170,182,193,203,213,221,230,237,243,248,251,253,255}[x];
 }
+
+static inline uint8_t scale_channel_with_curve_agb(uint8_t x)
+{
+    return (uint8_t[]){0,2,5,10,15,20,26,32,38,45,52,60,68,76,84,92,101,110,119,128,138,148,158,168,178,189,199,210,221,232,244,255}[x];
+}
+
+static inline uint8_t scale_channel_with_curve_sgb(uint8_t x)
+{
+    return (uint8_t[]){0,2,5,9,15,20,27,34,42,50,58,67,76,85,94,104,114,123,133,143,153,163,173,182,192,202,211,220,229,238,247,255}[x];
+}
+
 
 uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color)
 {
@@ -177,13 +188,29 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color)
         b = scale_channel(b);
     }
     else {
-        r = scale_channel_with_curve(r);
-        g = scale_channel_with_curve(g);
-        b = scale_channel_with_curve(b);
+        if (GB_is_sgb(gb)) {
+            return gb->rgb_encode_callback(gb,
+                                           scale_channel_with_curve_sgb(r),
+                                           scale_channel_with_curve_sgb(g),
+                                           scale_channel_with_curve_sgb(b));
+        }
+        bool agb = gb->model == GB_MODEL_AGB;
+        r = agb? scale_channel_with_curve_agb(r) : scale_channel_with_curve(r);
+        g = agb? scale_channel_with_curve_agb(g) : scale_channel_with_curve(g);
+        b = agb? scale_channel_with_curve_agb(b) : scale_channel_with_curve(b);
         
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
-            uint8_t new_g = (g * 3 + b) / 4;
-            uint8_t new_r = r, new_b = b;
+            uint8_t new_r, new_g, new_b;
+            if (agb) {
+                new_r = (r * 7 + g * 1) / 8;
+                new_g = (g * 3 + b * 1) / 4;
+                new_b = (b * 7 + r * 1) / 8;
+            }
+            else {
+                new_g = (g * 3 + b) / 4;
+                new_r = r;
+                new_b = b;
+            }
             if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
                 uint8_t old_max = MAX(r, MAX(g, b));
                 uint8_t new_max = MAX(new_r, MAX(new_g, new_b));
@@ -200,7 +227,7 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color)
                 if (new_min != 0xff) {
                     new_r = 0xff - (0xff - new_r) * (0xff - old_min) / (0xff - new_min);
                     new_g = 0xff - (0xff - new_g) * (0xff - old_min) / (0xff - new_min);
-                    new_b = 0xff - (0xff - new_b) * (0xff - old_min) / (0xff - new_min);;
+                    new_b = 0xff - (0xff - new_b) * (0xff - old_min) / (0xff - new_min);
                 }
             }
             r = new_r;
@@ -377,7 +404,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
 
     uint8_t icd_pixel = 0;
-    
     {
         uint8_t pixel = bg_enabled? fifo_item->pixel : 0;
         if (pixel && bg_priority) {
@@ -394,7 +420,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
             if (gb->icd_pixel_callback) {
                 icd_pixel = pixel;
-              //gb->icd_pixel_callback(gb, pixel);
             }
         }
         else {
@@ -423,7 +448,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
         }
     }
-
+	
     if (gb->model & GB_MODEL_NO_SFC_BIT) {
         if (gb->icd_pixel_callback) {
             gb->icd_pixel_callback(gb, icd_pixel);
@@ -769,10 +794,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
-            gb->current_lcd_line++; // Todo: unverified timing
-            if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-                display_vblank(gb);
-            }
+          
             gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
 
@@ -909,6 +931,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
             gb->mode_for_interrupt = 2;
+          
+            // Todo: unverified timing
+            gb->current_lcd_line++;
+            if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
+                display_vblank(gb);
+            }
             
             if (gb->icd_hreset_callback) {
                 gb->icd_hreset_callback(gb);
@@ -985,7 +1013,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->window_disabled_while_active = false;
         gb->current_line = 0;
         // TODO: not the correct timing
-        gb->current_lcd_line = -1;
+        gb->current_lcd_line = 0;
         if (gb->icd_vreset_callback) {
             gb->icd_vreset_callback(gb);
         }

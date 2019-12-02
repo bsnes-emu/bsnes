@@ -72,6 +72,75 @@ static inline void load_attribute_file(GB_gameboy_t *gb, unsigned file_index)
     }
 }
 
+static const uint16_t built_in_palettes[] =
+{
+    0x67BF, 0x265B, 0x10B5, 0x2866,
+    0x637B, 0x3AD9, 0x0956, 0x0000,
+    0x7F1F, 0x2A7D, 0x30F3, 0x4CE7,
+    0x57FF, 0x2618, 0x001F, 0x006A,
+    0x5B7F, 0x3F0F, 0x222D, 0x10EB,
+    0x7FBB, 0x2A3C, 0x0015, 0x0900,
+    0x2800, 0x7680, 0x01EF, 0x2FFF,
+    0x73BF, 0x46FF, 0x0110, 0x0066,
+    0x533E, 0x2638, 0x01E5, 0x0000,
+    0x7FFF, 0x2BBF, 0x00DF, 0x2C0A,
+    0x7F1F, 0x463D, 0x74CF, 0x4CA5,
+    0x53FF, 0x03E0, 0x00DF, 0x2800,
+    0x433F, 0x72D2, 0x3045, 0x0822,
+    0x7FFA, 0x2A5F, 0x0014, 0x0003,
+    0x1EED, 0x215C, 0x42FC, 0x0060,
+    0x7FFF, 0x5EF7, 0x39CE, 0x0000,
+    0x4F5F, 0x630E, 0x159F, 0x3126,
+    0x637B, 0x121C, 0x0140, 0x0840,
+    0x66BC, 0x3FFF, 0x7EE0, 0x2C84,
+    0x5FFE, 0x3EBC, 0x0321, 0x0000,
+    0x63FF, 0x36DC, 0x11F6, 0x392A,
+    0x65EF, 0x7DBF, 0x035F, 0x2108,
+    0x2B6C, 0x7FFF, 0x1CD9, 0x0007,
+    0x53FC, 0x1F2F, 0x0E29, 0x0061,
+    0x36BE, 0x7EAF, 0x681A, 0x3C00,
+    0x7BBE, 0x329D, 0x1DE8, 0x0423,
+    0x739F, 0x6A9B, 0x7293, 0x0001,
+    0x5FFF, 0x6732, 0x3DA9, 0x2481,
+    0x577F, 0x3EBC, 0x456F, 0x1880,
+    0x6B57, 0x6E1B, 0x5010, 0x0007,
+    0x0F96, 0x2C97, 0x0045, 0x3200,
+    0x67FF, 0x2F17, 0x2230, 0x1548,
+};
+
+static const struct {
+    char name[16];
+    unsigned palette_index;
+} palette_assignments[] =
+{
+    {"ZELDA", 5},
+    {"SUPER MARIOLAND", 6},
+    {"MARIOLAND2", 0x14},
+    {"SUPERMARIOLAND3", 2},
+    {"KIRBY DREAM LAND", 0xB},
+    {"HOSHINOKA-BI", 0xB},
+    {"KIRBY'S PINBALL", 3},
+    {"YOSSY NO TAMAGO", 0xC},
+    {"MARIO & YOSHI", 0xC},
+    {"YOSSY NO COOKIE", 4},
+    {"YOSHI'S COOKIE", 4},
+    {"DR.MARIO", 0x12},
+    {"TETRIS", 0x11},
+    {"YAKUMAN", 0x13},
+    {"METROID2", 0x1F},
+    {"KAERUNOTAMENI", 9},
+    {"GOLF", 0x18},
+    {"ALLEY WAY", 0x16},
+    {"BASEBALL", 0xF},
+    {"TENNIS", 0x17},
+    {"F1RACE", 0x1E},
+    {"KID ICARUS", 0xE},
+    {"QIX", 0x19},
+    {"SOLARSTRIKER", 7},
+    {"X", 0x1C},
+    {"GBWARS", 0x15},
+};
+
 static void command_ready(GB_gameboy_t *gb)
 {
     /* SGB header commands are used to send the contents of the header to the SNES CPU.
@@ -81,6 +150,8 @@ static void command_ready(GB_gameboy_t *gb)
        0xE content bytes. The last command, FB, is padded with zeros, so information past the header is not sent. */
     
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
+        if(gb->boot_rom_finished) return;
+        
         uint8_t checksum = 0;
         for (unsigned i = 2; i < 0x10; i++) {
             checksum += gb->sgb->command[i];
@@ -90,14 +161,23 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb->disable_commands = true;
             return;
         }
-        if (gb->sgb->command[0] == 0xf9) {
-            if (gb->sgb->command[0xc] != 3) { // SGB Flag
-                gb->sgb->disable_commands = true;
-            }
+        unsigned index = (gb->sgb->command[0] >> 1) & 7;
+        if (index > 5) {
+            return;
         }
-        else if (gb->sgb->command[0] == 0xfb) {
-            if (gb->sgb->command[0x3] != 0x33) { // Old licensee code
+        memcpy(&gb->sgb->received_header[index * 14], &gb->sgb->command[2], 14);
+        if (gb->sgb->command[0] == 0xfb) {
+            if (gb->sgb->received_header[0x42] != 3 || gb->sgb->received_header[0x47] != 0x33) {
                 gb->sgb->disable_commands = true;
+                for (unsigned i = 0; i < sizeof(palette_assignments) / sizeof(palette_assignments[0]); i++) {
+                    if (memcmp(palette_assignments[i].name, &gb->sgb->received_header[0x30], sizeof(palette_assignments[i].name)) == 0) {
+                        gb->sgb->effective_palettes[0] = built_in_palettes[palette_assignments[i].palette_index * 4 - 4];
+                        gb->sgb->effective_palettes[1] = built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4];
+                        gb->sgb->effective_palettes[2] = built_in_palettes[palette_assignments[i].palette_index * 4 + 2 - 4];
+                        gb->sgb->effective_palettes[3] = built_in_palettes[palette_assignments[i].palette_index * 4 + 3 - 4];
+                        break;
+                    }
+                }
             }
         }
         return;
@@ -257,8 +337,15 @@ static void command_ready(GB_gameboy_t *gb)
             // Not supported, but used by almost all SGB games for hot patching, so let's mute the warning for this
             break;
         case MLT_REQ:
-            gb->sgb->player_count = (uint8_t[]){1, 2, 1, 4}[gb->sgb->command[1] & 3];
-            gb->sgb->current_player = gb->sgb->player_count - 1;
+            if (gb->sgb->player_count == 1) {
+                gb->sgb->current_player = 0;
+            }
+            gb->sgb->player_count = (gb->sgb->command[1] & 3) + 1; /* Todo: When breaking save state comaptibility,
+                                                                            fix this to be 0 based. */
+            if (gb->sgb->player_count == 3) {
+                gb->sgb->current_player++;
+            }
+            gb->sgb->mlt_lock = true;
             break;
         case CHR_TRN:
             gb->sgb->vram_transfer_countdown = 2;
@@ -298,30 +385,33 @@ static void command_ready(GB_gameboy_t *gb)
 }
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
-{
-    if (gb->joyp_write_callback) {
-        gb->joyp_write_callback(gb, value);
-    }
+{    
     if (!GB_is_sgb(gb)) return;
     if (!GB_is_hle_sgb(gb)) {
         /* Notify via callback */
         return;
     }
     if (gb->sgb->disable_commands) return;
-    if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) return;
+    if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) {
+        return;
+    }
     
     uint16_t command_size = (gb->sgb->command[0] & 7 ?: 1) * SGB_PACKET_SIZE * 8;
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
         command_size = SGB_PACKET_SIZE * 8;
     }
     
+    if ((value & 0x20) == 0 && (gb->io_registers[GB_IO_JOYP] & 0x20) != 0) {
+        gb->sgb->mlt_lock ^= true;
+    }
+    
     switch ((value >> 4) & 3) {
         case 3:
             gb->sgb->ready_for_pulse = true;
-            /* TODO: This is the logic used by BGB which *should* work for most/all games, but a proper test ROM is needed */
-            if (gb->sgb->player_count > 1 && (gb->io_registers[GB_IO_JOYP] & 0x30) == 0x10) {
+            if ((gb->sgb->player_count & 1) == 0 && !gb->sgb->mlt_lock) {
                 gb->sgb->current_player++;
-                gb->sgb->current_player &= gb->sgb->player_count - 1;
+                gb->sgb->current_player &= 3;
+                gb->sgb->mlt_lock = true;
             }
             break;
             
@@ -382,22 +472,9 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     }
 }
 
-static inline uint8_t scale_channel(uint8_t x)
-{
-    return (x << 3) | (x >> 2);
-}
-
 static uint32_t convert_rgb15(GB_gameboy_t *gb, uint16_t color)
 {
-    uint8_t r = (color) & 0x1F;
-    uint8_t g = (color >> 5) & 0x1F;
-    uint8_t b = (color >> 10) & 0x1F;
-    
-    r = scale_channel(r);
-    g = scale_channel(g);
-    b = scale_channel(b);
-    
-    return gb->rgb_encode_callback(gb, r, g, b);
+    return GB_convert_rgb15(gb, color);
 }
 
 static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_t fade)
@@ -410,11 +487,9 @@ static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_
     if (g >= 0x20) g = 0;
     if (b >= 0x20) b = 0;
     
-    r = scale_channel(r);
-    g = scale_channel(g);
-    b = scale_channel(b);
+    color = r | (g << 5) | (b << 10);
     
-    return gb->rgb_encode_callback(gb, r, g, b);
+    return GB_convert_rgb15(gb, color);
 }
 
 #include <stdio.h>
@@ -679,10 +754,10 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
         /* Re-center */
         memmove(&gb->sgb->border.map[25 * 32 + 1], &gb->sgb->border.map[25 * 32], (32 * 3 - 1) * sizeof(gb->sgb->border.map[0]));
     }
-    gb->sgb->effective_palettes[0] = 0x639E;
-    gb->sgb->effective_palettes[1] = 0x263A;
-    gb->sgb->effective_palettes[2] = 0x10D4;
-    gb->sgb->effective_palettes[3] = 0x2866;
+    gb->sgb->effective_palettes[0] = built_in_palettes[0];
+    gb->sgb->effective_palettes[1] = built_in_palettes[1];
+    gb->sgb->effective_palettes[2] = built_in_palettes[2];
+    gb->sgb->effective_palettes[3] = built_in_palettes[3];
 }
 
 static double fm_synth(double phase)

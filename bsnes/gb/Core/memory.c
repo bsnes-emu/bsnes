@@ -273,7 +273,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_MODEL_DMG_B:
             case GB_MODEL_SGB_NTSC:
             case GB_MODEL_SGB_PAL:
-            case GB_MODEL_SGB_NO_SFC:
+            case GB_MODEL_SGB_NTSC_NO_SFC:
+            case GB_MODEL_SGB_PAL_NO_SFC:
             case GB_MODEL_SGB2:
             case GB_MODEL_SGB2_NO_SFC:
                 ;
@@ -310,7 +311,6 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                        (gb->apu.is_active[GB_WAVE] ? (gb->apu.samples[GB_WAVE]) : 0);
             case GB_IO_JOYP:
                 GB_timing_sync(gb);
-                return gb->io_registers[addr & 0xFF] | 0xC0;
             case GB_IO_TMA:
             case GB_IO_LCDC:
             case GB_IO_SCY:
@@ -422,11 +422,9 @@ static GB_read_function_t * const read_map[] =
     read_ram,         read_high_memory,                             /* EXXX FXXX */
 };
 
-static GB_read_memory_callback_t GB_read_memory_callback_v = 0;
-
 void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t callback)
 {
-  GB_read_memory_callback_v = callback;
+    gb->read_memory_callback = callback;
 }
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
@@ -437,9 +435,9 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
     }
-    if (GB_read_memory_callback_v) {
+    if (gb->read_memory_callback) {
         uint8_t data = read_map[addr >> 12](gb, addr);
-        data = GB_read_memory_callback_v(gb, addr, data);
+        data = gb->read_memory_callback(gb, addr, data);
         return data;
     }
     return read_map[addr >> 12](gb, addr);
@@ -599,7 +597,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case GB_MODEL_DMG_B:
                 case GB_MODEL_SGB_NTSC:
                 case GB_MODEL_SGB_PAL:
-                case GB_MODEL_SGB_NO_SFC:
+                case GB_MODEL_SGB_NTSC_NO_SFC:
+                case GB_MODEL_SGB_PAL_NO_SFC:
                 case GB_MODEL_SGB2:
                 case GB_MODEL_SGB2_NO_SFC:
                 case GB_MODEL_CGB_E:
@@ -754,9 +753,15 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_JOYP:
-                gb->io_registers[GB_IO_JOYP] = value & 0xF0;
-                GB_sgb_write(gb, value);
-                GB_update_joyp(gb);
+                if (gb->joyp_write_callback) {
+                    gb->joyp_write_callback(gb, value);
+                    GB_update_joyp(gb);
+                }
+                else if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
+                    GB_sgb_write(gb, value);
+                    gb->io_registers[GB_IO_JOYP] = value & 0xF0;
+                    GB_update_joyp(gb);
+                }
                 return;
 
             case GB_IO_BIOS:

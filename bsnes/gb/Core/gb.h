@@ -1,7 +1,6 @@
 #ifndef GB_h
 #define GB_h
 #define typeof __typeof__
-#define _XOPEN_SOURCE 500
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -71,7 +70,9 @@ typedef enum {
     GB_MODEL_SGB = 0x004,
     GB_MODEL_SGB_NTSC = GB_MODEL_SGB,
     GB_MODEL_SGB_PAL = GB_MODEL_SGB | GB_MODEL_PAL_BIT,
-    GB_MODEL_SGB_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT,
+    GB_MODEL_SGB_NTSC_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT,
+    GB_MODEL_SGB_NO_SFC = GB_MODEL_SGB_NTSC_NO_SFC,
+    GB_MODEL_SGB_PAL_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT | GB_MODEL_PAL_BIT,
     // GB_MODEL_MGB = 0x100,
     GB_MODEL_SGB2 = 0x101,
     GB_MODEL_SGB2_NO_SFC = GB_MODEL_SGB2 | GB_MODEL_NO_SFC_BIT,
@@ -276,10 +277,6 @@ typedef struct {
    Some other changes might be "safe" as well.
    This struct is not packed, but dumped sections exclusively use types that have the same alignment in both 32 and 64
    bit platforms. */
-
-/* We make sure bool is 1 for cross-platform save state compatibility. */
-/* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
-//_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
 #ifdef GB_INTERNAL
 struct GB_gameboy_s {
@@ -544,6 +541,7 @@ struct GB_gameboy_internal_s {
         GB_icd_pixel_callback_t icd_pixel_callback;
         GB_icd_vreset_callback_t icd_hreset_callback;
         GB_icd_vreset_callback_t icd_vreset_callback;
+        GB_read_memory_callback_t read_memory_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units

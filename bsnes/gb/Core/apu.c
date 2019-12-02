@@ -48,6 +48,23 @@ bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
     return false;
 }
 
+static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
+{
+    if (!gb->apu.is_active[index]) return 0;
+    
+    switch (index) {
+        case GB_SQUARE_1:
+            return gb->apu.square_channels[GB_SQUARE_1].current_volume;
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[GB_SQUARE_2].current_volume;
+        case GB_WAVE:
+            return 0;
+        case GB_NOISE:
+            return gb->apu.noise_channel.current_volume;
+    }
+    return 0;
+}
+
 static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
     if (gb->model >= GB_MODEL_AGB) {
@@ -66,15 +83,17 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
             }
             
             GB_sample_t output;
+            uint8_t bias = agb_bias_for_channel(gb, index);
+            
             if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
-                output.right = (0xf - value * 2) * right_volume;
+                output.right = (0xf - value * 2 + bias) * right_volume;
             }
             else {
                 output.right = 0xf * right_volume;
             }
             
             if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
-                output.left = (0xf - value * 2) * left_volume;
+                output.left = (0xf - value * 2 + bias) * left_volume;
             }
             else {
                 output.left = 0xf * left_volume;
@@ -681,6 +700,21 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR14:
         case GB_IO_NR24: {
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
+            
+            /* TODO: When the sample length changes right before being updated, the countdown should change to the
+                     old length, but the current sample should not change. Because our write timing isn't accurate to
+                     the T-cycle, we hack around it by stepping the sample index backwards. */
+            if ((value & 0x80) == 0 && gb->apu.is_active[index]) {
+                /* On an AGB, as well as on CGB C and earlier (TODO: Tested: 0, B and C), it behaves slightly different on
+                   double speed. */
+                if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */ || gb->apu.square_channels[index].sample_countdown & 1) {
+                    if (gb->apu.square_channels[index].sample_countdown >> 1 == (gb->apu.square_channels[index].sample_length ^ 0x7FF)) {
+                        gb->apu.square_channels[index].current_sample_index--;
+                        gb->apu.square_channels[index].current_sample_index &= 7;
+                    }
+                }
+            }
+
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (index == GB_SQUARE_1) {
@@ -970,7 +1004,21 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
     if (sample_rate) {
         gb->apu_output.highpass_rate = pow(0.999958,  GB_get_clock_rate(gb) / (double)sample_rate);
     }
+    gb->apu_output.rate_set_in_clocks = false;
     GB_apu_update_cycles_per_sample(gb);
+}
+
+void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample)
+{
+
+    if (cycles_per_sample == 0) {
+        GB_set_sample_rate(gb, 0);
+        return;
+    }
+    gb->apu_output.cycles_per_sample = cycles_per_sample;
+    gb->apu_output.sample_rate = GB_get_clock_rate(gb) / cycles_per_sample * 2;
+    gb->apu_output.highpass_rate = pow(0.999958, cycles_per_sample);
+    gb->apu_output.rate_set_in_clocks = true;
 }
 
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback)
@@ -985,6 +1033,7 @@ void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode)
 
 void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb)
 {
+    if (gb->apu_output.rate_set_in_clocks) return;
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_per_sample = 2 * GB_get_clock_rate(gb) / (double)gb->apu_output.sample_rate; /* 2 * because we use 8MHz units */
     }

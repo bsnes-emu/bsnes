@@ -12,10 +12,18 @@
 #include "random.h"
 #include "gb.h"
 
+
 #ifdef DISABLE_REWIND
 #define GB_rewind_free(...)
 #define GB_rewind_push(...)
 #endif
+
+
+static inline uint32_t state_magic(void)
+{
+    if (sizeof(bool) == 1) return 'SAME';
+    return 'S4ME';
+}
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
@@ -659,7 +667,7 @@ void GB_disconnect_serial(GB_gameboy_t *gb)
 
 bool GB_is_inited(GB_gameboy_t *gb)
 {
-    return gb->magic == 'SAME';
+    return gb->magic == state_magic();
 }
 
 bool GB_is_cgb(GB_gameboy_t *gb)
@@ -711,7 +719,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC:
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = GB_random();
                 if (i & 0x100) {
@@ -757,7 +766,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC:
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
@@ -782,7 +792,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified */
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
             for (unsigned i = 0; i < 8; i++) {
@@ -810,7 +821,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_DMG_B:
         case GB_MODEL_SGB_NTSC: /* Unverified*/
         case GB_MODEL_SGB_PAL: /* Unverified */
-        case GB_MODEL_SGB_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_NTSC_NO_SFC: /* Unverified */
+        case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC: {
             uint8_t temp;
@@ -857,7 +869,7 @@ void GB_reset(GB_gameboy_t *gb)
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
     gb->cgb_ram_bank = 1;
-    gb->io_registers[GB_IO_JOYP] = 0xF;
+    gb->io_registers[GB_IO_JOYP] = 0xCF;
     gb->mbc_ram_size = mbc_ram_size;
     if (GB_is_cgb(gb)) {
         gb->ram_size = 0x1000 * 8;
@@ -924,7 +936,7 @@ void GB_reset(GB_gameboy_t *gb)
         gb->nontrivial_jump_state = NULL;
     }
     
-    gb->magic = (uintptr_t)'SAME';
+    gb->magic = state_magic();
 }
 
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
@@ -1016,11 +1028,11 @@ void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 {
-    if (gb->model == GB_MODEL_SGB_NTSC) {
-        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
-    }
-    if (gb->model == GB_MODEL_SGB_PAL) {
+    if (gb->model & GB_MODEL_PAL_BIT) {
         return SGB_PAL_FREQUENCY * gb->clock_multiplier;
+    }
+    if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
+        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
     }
     return CPU_FREQUENCY * gb->clock_multiplier;
 }
