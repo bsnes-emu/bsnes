@@ -5,9 +5,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef LIBCO_MPROTECT
-  #include <sys/mman.h>
-#endif
+#include <sys/mman.h>
 
 #ifdef __cplusplus
 extern "C" {
