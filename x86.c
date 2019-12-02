@@ -52,8 +52,10 @@ static const unsigned char co_swap_function[4096] = {
     #endif
   }
 #else
-  #include <unistd.h>
-  #include <sys/mman.h>
+  #ifdef LIBCO_MPROTECT
+    #include <unistd.h>
+    #include <sys/mman.h>
+  #endif
 
   static void co_init() {
     #ifdef LIBCO_MPROTECT

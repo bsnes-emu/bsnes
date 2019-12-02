@@ -98,8 +98,10 @@ static void (*co_swap)(cothread_t, cothread_t) = 0;
     0xff, 0xe0,              /* jmp rax          */
   };
 
-  #include <unistd.h>
-  #include <sys/mman.h>
+  #ifdef LIBCO_MPROTECT
+    #include <unistd.h>
+    #include <sys/mman.h>
+  #endif
 
   static void co_init() {
     #ifdef LIBCO_MPROTECT

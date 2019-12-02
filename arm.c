@@ -4,8 +4,10 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/mman.h>
+#ifdef LIBCO_MPROTECT
+  #include <unistd.h>
+  #include <sys/mman.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
