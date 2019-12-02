@@ -39,9 +39,9 @@ endif
 verbose: hiro.verbose ruby.verbose nall.verbose all;
 
 install: all
-ifeq ($(shell id -un),root)
+ifeq ($(platform),windows)
+else ifeq ($(shell id -un),root)
 	$(error "make install should not be run as root")
-else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Library/Application\ Support/$(name)/Database/
@@ -64,9 +64,9 @@ else ifneq ($(filter $(platform),linux bsd),)
 endif
 
 uninstall:
-ifeq ($(shell id -un),root)
+ifeq ($(platform),windows)
+else ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
-else ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	rm -rf /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)

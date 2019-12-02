@@ -10,8 +10,8 @@ auto PPU::Screen::scanline() -> void {
   math.above.color = paletteColor(0);
   math.below.color = math.above.color;
 
-  math.above.colorEnable = !(ppu.window.io.col.aboveMask & 1);
-  math.below.colorEnable = !(ppu.window.io.col.belowMask & 1) && io.back.colorEnable;
+  math.above.colorEnable = false;
+  math.below.colorEnable = false;
 
   math.transparent = true;
   math.blendMode   = false;

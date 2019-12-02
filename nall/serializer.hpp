@@ -35,6 +35,11 @@ struct serializer {
     return _size;
   }
 
+  auto setMode(Mode mode) -> void {
+    _mode = mode;
+    _size = 0;
+  }
+
   auto mode() const -> Mode {
     return _mode;
   }
@@ -49,11 +54,6 @@ struct serializer {
 
   auto capacity() const -> uint {
     return _capacity;
-  }
-
-  auto setMode(Mode mode) -> void {
-    _mode = mode;
-    _size = 0;
   }
 
   template<typename T> auto real(T& value) -> serializer& {

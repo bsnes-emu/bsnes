@@ -12,6 +12,12 @@ MAKEFLAGS := Rr
 
 # platform detection
 ifeq ($(platform),)
+  ifeq ($(OS),Windows_NT)
+    platform := windows
+  endif
+endif
+
+ifeq ($(platform),)
   uname := $(shell uname)
   ifeq ($(uname),)
     platform := windows

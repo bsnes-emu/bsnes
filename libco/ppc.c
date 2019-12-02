@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#if LIBCO_MPROTECT
+#ifdef LIBCO_MPROTECT
   #include <unistd.h>
   #include <sys/mman.h>
 #endif
