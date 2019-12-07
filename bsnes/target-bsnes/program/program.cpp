@@ -44,8 +44,7 @@ auto Program::create() -> void {
   stateManager.create();
   manifestViewer.create();
 
-  //seems to be misfiring on Windows, so disable for now
-  if(0 && settings.general.crashed) {
+  if(settings.general.crashed) {
     MessageDialog(
       "Driver crash detected. Hardware drivers have been disabled.\n"
       "Please reconfigure drivers in the advanced settings panel."
@@ -124,10 +123,22 @@ auto Program::quit() -> void {
   presentation.setVisible(false);
   Application::processEvents();
 
+  //in case the emulator was closed prior to initialization completing:
+  settings.general.crashed = false;
+
   unload();
   settings.save();
   video.reset();
   audio.reset();
   input.reset();
+
+  #if defined(PLATFORM_WINDOWS)
+  //in rare cases, when Application::exit() calls exit(0), a crash will occur.
+  //this seems to be due to the internal state of certain ruby drivers.
+  auto processID = GetCurrentProcessId();
+  auto handle = OpenProcess(SYNCHRONIZE | PROCESS_TERMINATE, true, processID);
+  TerminateProcess(handle, 0);
+  #endif
+
   Application::exit();
 }
