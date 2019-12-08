@@ -40,7 +40,6 @@ namespace SameBoy {
     float left  = sample->left  / 32768.0f;
     float right = sample->right / 32768.0f;
     icd.apuWrite(left, right);
-  //print(dsp.stream->pending(), " ", icd.stream->pending(), "\n");
   }
 
   static auto vblank(GB_gameboy_t*) -> void {
@@ -59,6 +58,14 @@ auto ICD::Enter() -> void {
 }
 
 auto ICD::main() -> void {
+  #if 0
+  static uint n = 0;
+  float x = sin((2 * 3.141592 * n++ * 1000.0) / 44100.0) * 0.1;
+  apuWrite(x, x);
+  step(128);
+  return synchronizeCPU();
+  #endif
+
   if(r6003 & 0x80) {
     auto clocks = GB_run(&sameboy);
     step(clocks >> 1);
