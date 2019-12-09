@@ -62,7 +62,7 @@ auto ICD::main() -> void {
   static uint n = 0;
   float x = sin((2 * 3.141592 * n++ * 1000.0) / 44100.0) * 0.1;
   apuWrite(x, x);
-  step(128);
+  step(256);
   return synchronizeCPU();
   #endif
 
@@ -149,8 +149,8 @@ auto ICD::power(bool reset) -> void {
   //SGB1 uses CPU oscillator; SGB2 uses dedicated oscillator
   create(ICD::Enter, frequency);
   if(!reset) stream = Emulator::audio.createStream(2, frequency / 128);
-  dsp.stream->reset();
-  icd.stream->reset();
+//dsp.stream->reset();
+//icd.stream->reset();
 
   for(auto& packet : this->packet) packet = {};
   packetSize = 0;
