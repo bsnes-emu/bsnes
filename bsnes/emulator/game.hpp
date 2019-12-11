@@ -101,6 +101,7 @@ Game::Memory::Memory(Markup::Node node) {
 }
 
 auto Game::Memory::name() const -> string {
+  if(identifier) return string{identifier, ".", content, ".", type}.downcase();
   if(architecture) return string{architecture, ".", content, ".", type}.downcase();
   return string{content, ".", type}.downcase();
 }
