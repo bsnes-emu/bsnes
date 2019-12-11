@@ -8,6 +8,7 @@ struct ICD : Emulator::Platform, Thread {
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;
+  auto clockFrequency() const -> uint;
 
   auto load() -> bool;
   auto save() -> void;
