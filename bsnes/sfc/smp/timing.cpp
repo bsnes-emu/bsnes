@@ -35,8 +35,9 @@ auto SMP::waitIdle(maybe<uint16> addr, bool half) -> void {
 auto SMP::step(uint clocks) -> void {
   clock += clocks * (uint64_t)cpu.frequency;
   dsp.clock -= clocks;
-  synchronizeCPU();
   synchronizeDSP();
+  //forcefully sync SMP to CPU in case chips are not communicating
+  if(clock > 768 * 24 * (int64_t)24'000'000) synchronizeCPU();
 }
 
 auto SMP::stepIdle(uint clocks) -> void {

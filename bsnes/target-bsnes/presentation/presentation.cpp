@@ -179,7 +179,7 @@ auto Presentation::create() -> void {
 
   helpMenu.setText(tr("Help"));
   documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
-    invoke("https://doc.byuu.org/bsnes");
+    invoke("https://byuu.org/doc/bsnes");
   });
   aboutSameBoy.setIcon(Icon::Prompt::Question).setText({tr("About SameBoy"), " ..."}).onActivate([&] {
     AboutDialog()
