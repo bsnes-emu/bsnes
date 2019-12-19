@@ -130,14 +130,14 @@ auto InputManager::bindHotkeys() -> void {
     program.frameAdvanceLock = false;
   }));
 
-  hotkeys.append(InputHotkey("Increase HD Mode 7").onPress([] {
+  hotkeys.append(InputHotkey("Decrease HD Mode 7").onPress([] {
     int index = enhancementSettings.mode7Scale.selected().offset() - 1;
     if(index < 0) return;
     enhancementSettings.mode7Scale.item(index).setSelected();
     enhancementSettings.mode7Scale.doChange();
   }));
 
-  hotkeys.append(InputHotkey("Decrease HD Mode 7").onPress([] {
+  hotkeys.append(InputHotkey("Increase HD Mode 7").onPress([] {
     int index = enhancementSettings.mode7Scale.selected().offset() + 1;
     if(index >= enhancementSettings.mode7Scale.itemCount()) return;
     enhancementSettings.mode7Scale.item(index).setSelected();

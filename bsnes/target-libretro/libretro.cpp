@@ -1,3 +1,4 @@
+#include <cassert>
 #include "libretro.h"
 
 static retro_environment_t environ_cb;
@@ -13,6 +14,8 @@ static retro_log_printf_t libretro_print;
 static int16_t audio_buffer[AUDIOBUFSIZE];
 static uint16_t audio_buffer_index = 0;
 static uint16_t audio_buffer_max = AUDIOBUFSIZE;
+
+static int run_ahead_frames = 0;
 
 static void audio_queue(int16_t left, int16_t right)
 {
@@ -231,6 +234,15 @@ static void flush_variables()
 	{
 		sgb_bios = variable.value;
 	}
+
+	variable = { "bsnes_run_ahead_frames", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "OFF") == 0)
+			run_ahead_frames = 0;
+		else
+			run_ahead_frames = atoi(variable.value);
+	}
 }
 
 static void check_variables()
@@ -409,6 +421,7 @@ static void set_environment_info(retro_environment_t cb)
 		{ "bsnes_coprocessor_delayed_sync", "Coprocessor Delayed Sync; ON|OFF" },
 		{ "bsnes_coprocessor_prefer_hle", "Coprocessor Prefer HLE; ON|OFF" },
 		{ "bsnes_sgb_bios", "Preferred Super GameBoy BIOS (restart); SGB1.sfc|SGB2.sfc" },
+		{ "bsnes_run_ahead_frames", "Amount of frames for run-ahead; OFF|1|2|3|4" },
 		{ nullptr },
 	};
 	cb(RETRO_ENVIRONMENT_SET_VARIABLES, const_cast<retro_variable *>(vars));
@@ -502,11 +515,33 @@ RETRO_API void retro_reset()
 	emulator->reset();
 }
 
+static void run_with_runahead(const int frames)
+{
+	assert(frames > 0);
+
+	emulator->setRunAhead(true);
+	emulator->run();
+	auto state = emulator->serialize(0);
+	for (int i = 0; i < frames - 1; ++i) {
+		emulator->run();
+	}
+	emulator->setRunAhead(false);
+	emulator->run();
+	state.setMode(serializer::Mode::Load);
+	emulator->unserialize(state);
+}
+
 RETRO_API void retro_run()
 {
 	check_variables();
 	input_poll();
-	emulator->run();
+
+	bool is_fast_forwarding = false;
+	environ_cb(RETRO_ENVIRONMENT_GET_FASTFORWARDING, &is_fast_forwarding);
+	if (is_fast_forwarding || run_ahead_frames == 0)
+		emulator->run();
+	else
+		run_with_runahead(run_ahead_frames);
 }
 
 RETRO_API size_t retro_serialize_size()
