@@ -1,7 +1,7 @@
 bsnes
 =====
 
-![bsnes logo © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-gui.png)
+![bsnes logo © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-logo.png)
 
 bsnes is a multi-platform Super Nintendo (Super Famicom) emulator from
 [byuu](https://byuu.org) that focuses on performance, features, and ease of use.
