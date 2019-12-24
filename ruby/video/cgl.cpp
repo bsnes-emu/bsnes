@@ -145,6 +145,7 @@ private:
       [view setWantsBestResolutionOpenGLSurface:YES];
       [context addSubview:view];
       [openGLContext setView:view];
+      [openGLContext makeCurrentContext];
       [[view window] makeFirstResponder:view];
       [view lockFocus];
 
