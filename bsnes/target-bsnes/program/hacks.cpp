@@ -28,7 +28,7 @@ auto Program::hackCompatibility() -> void {
   if(title == "ADVENTURES OF FRANKEN" && region == "PAL") renderCycle = 32;
 
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
-  if(title == "FIREPOWER 2000") renderCycle = 32;
+  if(title == "FIREPOWER 2000" || title == "SUPER SWIV") renderCycle = 32;
 
   //fixes an errant scanline on the title screen due to writing to PPU registers too late
   if(title == "NHL '94" || title == "NHL PROHOCKEY'94") renderCycle = 32;
