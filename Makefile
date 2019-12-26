@@ -103,7 +103,8 @@ endif
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows -Drandom=rand
 LDFLAGS += -lmsvcrt -lcomdlg32 -lSDL2main -Wl,/MANIFESTFILE:NUL
-SDL_LDFLAGS := -lSDL2 -lopengl32
+SDL_LDFLAGS := -lSDL2
+GL_LDFLAGS := -lopengl32
 else
 LDFLAGS += -lc -lm -ldl
 endif
@@ -113,7 +114,8 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> /dev/null)
 CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT) -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
-SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2 -framework OpenGL
+SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
+GL_LDFLAGS := -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
 ifeq ($(PLATFORM),windows32)
