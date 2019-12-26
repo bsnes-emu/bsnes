@@ -41,6 +41,9 @@ auto Program::hackCompatibility() -> void {
     //to appear in the background of stage 12. this one is a bug in the original game, so only enable
     //it if the hotfixes option has been enabled.
     if(title == "The Hurricanes") entropy = "None";
+
+    //Frisky Tom attract sequence sometimes hangs when WRAM is initialized to pseudo-random patterns
+    if(title == "ニチブツ・アーケード・クラシックス") entropy = "None";
   }
 
   emulator->configure("Hacks/Entropy", entropy);
