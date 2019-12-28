@@ -5,7 +5,11 @@ auto CPU::dmaCounter() const -> uint {
 
 //joypad auto-poll clock divider
 auto CPU::joypadCounter() const -> uint {
-  return counter.cpu & 255;
+  //todo: this should be &255, but it causes too many issues in games, due to incomplete emulation:
+  //Nuke (PD): inputs do not work (unless clearing $421x to $00)
+  //Taikyoku Igo - Goliath: start button not acknowledged (unless clearing $421x to $ff)
+  //Tatakae Genshijin 2: attract sequence ends early
+  return counter.cpu & 31;
 }
 
 auto CPU::stepOnce() -> void {
