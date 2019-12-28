@@ -214,7 +214,7 @@ auto CPU::joypadEdge() -> void {
         controllerPort1.device->latch(0);
         controllerPort2.device->latch(0);
 
-        //shift registers are cleared at start of auto joypad polling
+        //shift registers are flushed at start of auto joypad polling
         io.joy1 = ~0;
         io.joy2 = ~0;
         io.joy3 = ~0;

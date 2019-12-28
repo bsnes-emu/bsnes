@@ -169,7 +169,7 @@ auto SuperFamicom::region() const -> string {
     if(D == 'P') region = {"SNSP-", code, "-EUR"};
     if(D == 'S') region = {"SNSP-", code, "-ESP"};
     if(D == 'U') region = {"SNSP-", code, "-AUS"};
-    if(D == 'W') region = {"SNSP-", code, "-SCN"};
+    if(D == 'X') region = {"SNSP-", code, "-SCN"};
   }
 
   if(!region) {
@@ -187,6 +187,7 @@ auto SuperFamicom::region() const -> string {
     if(E == 0x0f) region = {"CAN"};
     if(E == 0x10) region = {"BRA"};
     if(E == 0x11) region = {"AUS"};
+    if(E == 0x12) region = {"SCN"};
   }
 
   return region ? region : "NTSC";
@@ -194,7 +195,13 @@ auto SuperFamicom::region() const -> string {
 
 auto SuperFamicom::videoRegion() const -> string {
   auto region = data[headerAddress + 0x29];
-  return (region <= 0x01 || region >= 0x0c) ? "NTSC" : "PAL";
+  if(region == 0x00) return "NTSC";  //JPN
+  if(region == 0x01) return "NTSC";  //USA
+  if(region == 0x0b) return "NTSC";  //ROC
+  if(region == 0x0d) return "NTSC";  //KOR
+  if(region == 0x0f) return "NTSC";  //CAN
+  if(region == 0x10) return "NTSC";  //BRA
+  return "PAL";
 }
 
 auto SuperFamicom::revision() const -> string {
@@ -223,7 +230,7 @@ auto SuperFamicom::revision() const -> string {
     if(D == 'P') revision = {"SNSP-", code, "-", F};
     if(D == 'S') revision = {"SNSP-", code, "-", F};
     if(D == 'U') revision = {"SNSP-", code, "-", F};
-    if(D == 'W') revision = {"SNSP-", code, "-", F};
+    if(D == 'X') revision = {"SNSP-", code, "-", F};
   }
 
   if(!revision) {
