@@ -15,6 +15,13 @@ auto Program::hackCompatibility() -> void {
   //stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
   if(title == "SFC クレヨンシンチャン") fastPPU = false;
 
+  //title screen game select (after choosing a game) changes OAM tiledata address mid-frame
+  //this is only supported by the cycle-based PPU renderer
+  if(title == "Winter olympics") fastPPU = false;
+
+  //title screen shows remnants of the flag after choosing a language with the scanline-based renderer
+  if(title == "WORLD CUP STRIKER") fastPPU = false;
+
   //relies on cycle-accurate writes to the echo buffer
   if(title == "KOUSHIEN_2") fastDSP = false;
 

@@ -94,6 +94,15 @@ auto PPU::main() -> void {
 
 auto PPU::scanline() -> void {
   if(vcounter() == 0) {
+    if(latch.overscan && !io.overscan) {
+      //when disabling overscan, clear the overscan area that won't be rendered to:
+      for(uint y = 1; y <= 240; y++) {
+        if(y >= 8 && y <= 231) continue;
+        auto output = ppu.output + y * 1024;
+        memory::fill<uint16>(output, 1024);
+      }
+    }
+
     ppubase.display.interlace = io.interlace;
     ppubase.display.overscan = io.overscan;
     latch.overscan = io.overscan;

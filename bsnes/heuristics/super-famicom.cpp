@@ -266,6 +266,9 @@ auto SuperFamicom::board() const -> string {
     if(headerAddress == 0x40ffb0) mode = "EXHIROM-";
   }
 
+  //this game's title ovewrites the map mode with '!' (0x21), but is a LOROM game
+  if(title() == "YUYU NO QUIZ DE GO!GO") mode = "LOROM-";
+
   if(mode == "LOROM-" && headerAddress == 0x407fb0) mode = "EXLOROM-";
 
   bool epsonRTC = false;
