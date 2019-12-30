@@ -1012,6 +1012,15 @@ void run_gui(bool is_running)
             }
 
             case SDL_KEYDOWN:
+                if (event.key.keysym.scancode == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
+                    if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                    else {
+                        SDL_SetWindowFullscreen(window, 0);
+                    }
+                }
+                break;
                 if (event.key.keysym.scancode == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
                         char *filename = do_open_rom_dialog();
