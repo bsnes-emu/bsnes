@@ -209,8 +209,8 @@ auto CPU::joypadEdge() -> void {
   //Super Star Wars: Start button auto-unpauses
   //Taikyoku Igo - Goliath: start button not acknowledged
   //Tatakae Genshijin 2: attract sequence ends early
-  //Williams Arcade's Greatest Hits: inputs fire on their own
-  //World Masters Golf: holding D-pad should only move the cursor once, not continuously
+  //Williams Arcade's Greatest Hits: inputs fire on their own; or menu items sometimes skipped
+  //World Masters Golf: inputs fail to register; or holding D-pad should only move the cursor once, not continuously
 
   if(configuration.hacks.cpu.fastJoypadPolling) {
     //Taikyoku Igo - Goliath
