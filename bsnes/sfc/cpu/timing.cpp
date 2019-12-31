@@ -210,10 +210,12 @@ auto CPU::joypadEdge() -> void {
   //Taikyoku Igo - Goliath: start button not acknowledged
   //Tatakae Genshijin 2: attract sequence ends early
   //Williams Arcade's Greatest Hits: inputs fire on their own
-  //World Masters Golf: inputs do not work at all
+  //World Masters Golf: holding D-pad should only move the cursor once, not continuously
 
   if(configuration.hacks.cpu.fastJoypadPolling) {
     //Taikyoku Igo - Goliath
+    //Williams Arcade's Greatest Hits
+    //World Masters Golf
     if(!status.autoJoypadCounter && vcounter() >= ppu.vdisp()) {
       controllerPort1.device->latch(1);
       controllerPort2.device->latch(1);

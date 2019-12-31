@@ -10,7 +10,11 @@ auto Program::hackCompatibility() -> void {
   auto title = superFamicom.title;
   auto region = superFamicom.region;
 
+  if(title == "Arcades Greatest Hits") fastJoypadPolling = true;
+
   if(title == "TAIKYOKU-IGO Goliath") fastJoypadPolling = true;
+
+  if(title == "WORLD MASTERS GOLF") fastJoypadPolling = true;
 
   //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
