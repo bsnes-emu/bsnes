@@ -1,5 +1,6 @@
 auto Program::hackCompatibility() -> void {
   string entropy = settings.emulator.hack.entropy;
+  bool fastJoypadPolling = false;
   bool fastPPU = settings.emulator.hack.ppu.fast;
   bool fastPPUNoSpriteLimit = settings.emulator.hack.ppu.noSpriteLimit;
   bool fastDSP = settings.emulator.hack.dsp.fast;
@@ -8,6 +9,8 @@ auto Program::hackCompatibility() -> void {
 
   auto title = superFamicom.title;
   auto region = superFamicom.region;
+
+  if(title == "TAIKYOKU-IGO Goliath") fastJoypadPolling = true;
 
   //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
@@ -54,6 +57,7 @@ auto Program::hackCompatibility() -> void {
   }
 
   emulator->configure("Hacks/Entropy", entropy);
+  emulator->configure("Hacks/CPU/FastJoypadPolling", fastJoypadPolling);
   emulator->configure("Hacks/PPU/Fast", fastPPU);
   emulator->configure("Hacks/PPU/NoSpriteLimit", fastPPUNoSpriteLimit);
   emulator->configure("Hacks/PPU/RenderCycle", renderCycle);
