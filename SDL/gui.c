@@ -1019,8 +1019,8 @@ void run_gui(bool is_running)
                     else {
                         SDL_SetWindowFullscreen(window, 0);
                     }
+                    update_viewport();
                 }
-                break;
                 if (event.key.keysym.scancode == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
                         char *filename = do_open_rom_dialog();

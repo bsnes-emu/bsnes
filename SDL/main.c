@@ -274,6 +274,7 @@ static void handle_events(GB_gameboy_t *gb)
                             else { 
                                 SDL_SetWindowFullscreen(window, 0);
                             }
+                            update_viewport();
                         }
                         break;
                         
