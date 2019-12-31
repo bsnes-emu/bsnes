@@ -10,6 +10,7 @@
 
 
 #ifndef _WIN32
+#include <Windows.h>
 #define AUDIO_FREQUENCY 96000
 #else
 /* Windows (well, at least my VM) can't handle 96KHz sound well :( */
@@ -551,6 +552,9 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
 
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+	SetProcessDPIAware();
+#endif
 #define str(x) #x
 #define xstr(x) str(x)
     fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
