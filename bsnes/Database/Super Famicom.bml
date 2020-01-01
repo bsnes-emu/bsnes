@@ -1,5 +1,5 @@
 database
-  revision: 2018-09-20
+  revision: 2020-01-01
 
 //Prototypes (JPN)
 
@@ -125,7 +125,7 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2018-09-20
+  revision: 2020-01-01
 
 game
   sha256:   5c4e283efc338958b8dd45ebd6daf133a9eb280420a98e2e1df358ae0242c366
@@ -1277,7 +1277,7 @@ game
       size: 0x100
       content: Boot
       manufacturer: Nintendo
-      architecture: LR35902
+      architecture: SM83
       identifier: SGB1
 
 game
@@ -1296,7 +1296,7 @@ game
       size: 0x100
       content: Boot
       manufacturer: Nintendo
-      architecture: LR35902
+      architecture: SM83
       identifier: SGB2
     oscillator
       frequency: 20971520
@@ -1705,7 +1705,7 @@ game
 //Super Nintendo (ESP)
 
 database
-  revision: 2018-04-14
+  revision: 2018-09-21
 
 game
   sha256:   bd5e7a6bc08f64d39c54204b82c6c156f144c03e13c890128588c5faa560659c
@@ -1768,6 +1768,50 @@ game
       content: Program
 
 game
+  sha256:   bd7e98db82d6b52307be1f3e1fd171e1e7204dc1f8810a95ee2cc64757087e4a
+  label:    The Lost Vikings
+  name:     Lost Vikings, The
+  region:   SNSP-LV-ESP
+  revision: SESP-LV-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+
+game
+  sha256:   6eecabd46305ac95d9cf3a17e1392c24a1b68a7a313173ef0c5b5a3a24cf3353
+  label:    Lufia
+  name:     Lufia
+  region:   SNSP-ANIS-ESP
+  revision: SPAL-ANIS-0
+  board:    SHVC-1A3M-30
+    memory
+      type: ROM
+      size: 0x300000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   d70bc7916ed5132c3b0053f2adbb5004d78ccb986210c9440fedf642cac68554
+  label:    MechWarrior
+  name:     MechWarrior
+  region:   SNSP-WM-ESP
+  revision: SESP-WM-0
+  board:    SHVC-1A1M-10
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+
+game
   sha256:   d2233d6310522bbf183b6ca9bbe3e2afaf24de0cc4304bff6d0d547d678aed6f
   label:    Sonic Blast Man
   name:     Sonic Blast Man
@@ -1777,6 +1821,18 @@ game
     memory
       type: ROM
       size: 0x100000
+      content: Program
+
+game
+  sha256:   a20d346da18ddabf70dc43f5095c4189c4a646ca8e6d4ed6c68c20e380f50332
+  label:    Super Battletank 2
+  name:     Super Battletank 2
+  region:   SNSP-2X-ESP
+  revision: SESP-2X-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x200000
       content: Program
 
 game
@@ -1801,6 +1857,46 @@ game
     memory
       type: ROM
       size: 0x100000
+      content: Program
+
+game
+  sha256:   7f731f4bb620e682132660da39641dda5762211dca4732f8192dd2411211b822
+  label:    Terranigma
+  name:     Terranigma
+  region:   SNSP-AQTS-ESP
+  revision: SPAL-AQTS-0
+  board:    SHVC-1J3M-20
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   981128c93f0753dec7af29ec084f13e704cc5d02414be55bb477fc4b2fef5e58
+  label:    Tiny Toon Adventures: Buster Busts Loose!
+  name:     Tiny Toon Adventures - Buster Busts Loose!
+  region:   SNSP-TA-ESP
+  revision: SESP-TA-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+
+game
+  sha256:   ce2445ecd0a43f6025dc80857d91dae7c46d33f7821bf98232c2894ca1959da2
+  label:    Turn and Burn: No-Fly Zone
+  name:     Turn and Burn - No-Fly Zone
+  region:   SNSP-ZN-ESP
+  revision: SESP-ZN-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x200000
       content: Program
 
 game
@@ -1846,7 +1942,7 @@ game
 //Super Nintendo (EUR)
 
 database
-  revision: 2018-05-06
+  revision: 2018-09-21
 
 game
   sha256:   ec3e81d628a293514e303b44e3b1ac03461ddd1da32764b10b7fab1e507602df
@@ -2905,6 +3001,18 @@ game
       content: Program
 
 game
+  sha256:   4ad736a9e1c7f34740afaa7777b8f1a31da4bb4a021e7ae341d1dafd74fa0acc
+  label:    True Lies
+  name:     True Lies
+  region:   SNSP-ATLP-EUR
+  revision: SPAL-ATLP-0
+  board:    SHVC-1A0N-30
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+
+game
   sha256:   dbf11d4c77b9aa3416f687201d57d71a23bb8fb0b8fe5e9e8212db3fac036631
   label:    Turbo Toons
   name:     Turbo Toons
@@ -2942,7 +3050,7 @@ game
 
 game
   sha256:   1217ddf2fe475661a54f50e111864102faf854397ce5aceea4297204ebd6cbb6
-  label:    Val d'isére Championship
+  label:    Val d'isère Championship
   name:     Val d'isere Championship
   region:   SNSP-8Z-EUR
   revision: SPAL-8Z-0
@@ -3016,7 +3124,7 @@ game
 //Super Nintendo (FAH)
 
 database
-  revision: 2018-04-14
+  revision: 2018-09-21
 
 game
   sha256:   0aafd04a43ae29266e43920a7f9954d4a49f6fe43a5abffecc9c2fd5ad7d6cea
@@ -3109,6 +3217,18 @@ game
       type: RAM
       size: 0x800
       content: Save
+
+game
+  sha256:   826a328f401cdf5a9ee87aaa7a2784cbb21813b165a6c7ca3f702fe6ba8c0804
+  label:    Eric Cantona: Football Challenge
+  name:     Eric Cantona - Football Challenge
+  region:   SNSP-EC-FAH
+  revision: SPAL-EC-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
 
 game
   sha256:   ce09743d44a54f64862d8c53c11c2c84f2f861ec74c778bd8b05b0a3b07708d6
@@ -3423,10 +3543,22 @@ game
       size: 0x180000
       content: Program
 
+game
+  sha256:   5a9103b04b9246f63af9018cbbd7934c6b79076dd9b0062887bd16077cd37c81
+  label:    Val d'Isère Championship
+  name:     Val d'Isere Championship
+  region:   SNSP-8V-FAH
+  revision: SPAL-8V-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+
 //Super Nintendo (FRA)
 
 database
-  revision: 2018-04-14
+  revision: 2018-09-21
 
 game
   sha256:   65df600780021f13ced52e7fbc507b7b2e6491b2c5c25fe78d0515dcbe669403
@@ -3661,6 +3793,22 @@ game
       content: Program
 
 game
+  sha256:   b730adcbb34a19f8fd1c2abe27455cc3256329a9b8a021291e3009ea33004127
+  label:    Secret of Mana
+  name:     Secret of Mana
+  region:   SNSP-K2-FRA
+  revision: SFRA-K2-1
+  board:    SHVC-1J3M-11
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
   sha256:   f73e6da9e979c839c7c22ec487bea6667d3e65e7d8f9fcc97a2bcdeb4487cddf
   label:    SimCity
   name:     SimCity
@@ -3674,6 +3822,38 @@ game
     memory
       type: RAM
       size: 0x8000
+      content: Save
+
+game
+  sha256:   1f226553ba05fe738d085a88154469bbc9f9058f7dfc320a327259d84ae5f393
+  label:    Soul Blazer
+  name:     Soul Blazer
+  region:   SNSP-SO-FRA
+  revision: SFRA-SO-0
+  board:    SHVC-1J3M-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   5d0a234a2fcb343d169206d9d7d578507c44f800ead9cc9ccfa0b1d4cb1cc9e5
+  label:    Terranigma
+  name:     Terranigma
+  region:   SNSP-AQTF-FRA
+  revision: SPAL-AQTF-0
+  board:    SHVC-1J3M-20
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
       content: Save
 
 //Super Nintendo (FRG)
@@ -3762,7 +3942,23 @@ game
 //Super Nintendo (ITA)
 
 database
-  revision: 2018-04-14
+  revision: 2018-09-21
+
+game
+  sha256:   deab7aad7c168423e43eae14e9e31efa29c7341ab84f936be508911ce508b372
+  label:    MechWarrior
+  name:     MechWarrior
+  region:   SNSP-WM-ITA
+  revision: SITA-WM-0
+  board:    SHVC-1A1M-01
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
 
 game
   sha256:   aafbae4c2a7a5a35c81a183df0470027b4b5690f836592af21c15af6b259328d
@@ -3796,7 +3992,7 @@ game
 //Super Nintendo (NOE)
 
 database
-  revision: 2018-04-14
+  revision: 2020-01-01
 
 game
   sha256:   b342d12d71729edebc1911725ea23d58c1a397b27253a5c8cd96cfb58af242a9
@@ -4395,6 +4591,18 @@ game
       content: Program
 
 game
+  sha256:   09299d142e485ba2fcdbd9b3a6d1a5acfbc7fc70b06cf22be28479686419a7a9
+  label:    Jimmy Connors Pro Tennis Tour
+  name:     Jimmy Connors Pro Tennis Tour
+  region:   SNSP-JC-NOE
+  revision: SFRG-JC-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
+
+game
   sha256:   74c55ea3c9733bf263628a260df7492fc840d7de1c3fceebb7bcf6d99a8c81d6
   label:    Joe & Mac: Caveman Ninja
   name:     Joe & Mac - Caveman Ninja
@@ -4464,6 +4672,18 @@ game
   name:     Last Action Hero
   region:   SNSP-L5-NOE
   revision: SPAL-L5-0
+  board:    SHVC-1A0N-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+
+game
+  sha256:   4a7444780a750f97943d974589586d4cf89d8957e396cc5a7ad565cd4c1b70a7
+  label:    The Legend of the Mystical Ninja
+  name:     Legend of the Mystical Ninja, The
+  region:   SNSP-GG-NOE
+  revision: SFRG-GG-0
   board:    SHVC-1A0N-20
     memory
       type: ROM
@@ -4820,7 +5040,7 @@ game
       size: 0x100
       content: Boot
       manufacturer: Nintendo
-      architecture: LR35902
+      architecture: SM83
       identifier: SGB1
 
 game
@@ -4976,6 +5196,18 @@ game
       content: Program
 
 game
+  sha256:   94e6fe78bb1a1d89ccfd74ad92e2a489f8e2e257d6dfe62404155741763f962f
+  label:    True Lies
+  name:     True Lies
+  region:   SNSP-ATLD-NOE
+  revision: SPAL-ATLD-0
+  board:    SHVC-1A0N-30
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+
+game
   sha256:   a1105819d48c04d680c8292bbfa9abbce05224f1bc231afd66af43b7e0a1fd4e
   label:    Unirally
   name:     Unirally
@@ -5054,7 +5286,7 @@ game
 //Super Nintendo (SCN)
 
 database
-  revision: 2018-04-14
+  revision: 2018-09-21
 
 game
   sha256:   beb379ba48f63561c0f939ecd8f623ec06c1b5e06976eef9887e5c62f3df2766
@@ -5081,6 +5313,22 @@ game
       content: Program
 
 game
+  sha256:   4fb9eb8fa4d9c3a0b6c24bac5b0a0b0f079f083f5e6dfa937a161c8f4bcde853
+  label:    Shadowrun
+  name:     Shadowrun
+  region:   SNSP-WR-SCN
+  revision: SSWE-WR-0
+  board:    SHVC-1A3M-20
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
   sha256:   e15247495311e91db9431d61777a264d4b42def011291d512b273fc8acd1cbfa
   label:    Soul Blazer
   name:     Soul Blazer
@@ -5095,6 +5343,18 @@ game
       type: RAM
       size: 0x2000
       content: Save
+
+game
+  sha256:   687c4f9a14cc16605f5e92aa0fe33bf083fe8e39ba781676259fadf932480890
+  label:    Tintin i Tibet
+  name:     Tintin i Tibet
+  region:   SNSP-AT6X-SCN
+  revision: SPAL-AT6X-0
+  board:    SHVC-2A0N-20
+    memory
+      type: ROM
+      size: 0x180000
+      content: Program
 
 game
   sha256:   a6297356fb06f1575b432fae463171f53e3b786fd77b841557547a9117fb52fe
@@ -5761,7 +6021,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2018-09-20
+  revision: 2020-01-01
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -6555,8 +6815,8 @@ game
   sha256:   6fa6b8a8804ff6544bdedf94339a86ba64ce0b6dbf059605abb1cd6f102d3483
   label:    Bill Laimbeer's Combat Basketball
   name:     Bill Laimbeer's Combat Basketball
-  region:   SNS-C8-USA
-  revision: SNS-C8-0
+  region:   SNS-CB-USA
+  revision: SNS-CB-0
   board:    SHVC-1A3B-12
     memory
       type: ROM
@@ -13628,7 +13888,7 @@ game
       size: 0x100
       content: Boot
       manufacturer: Nintendo
-      architecture: LR35902
+      architecture: SM83
       identifier: SGB1
 
 game
@@ -14516,8 +14776,8 @@ game
   sha256:   3cdebbd8adc4bb6773a7995f542fdac49adefca71cba583255a1c1bf37ac3946
   label:    Tetris & Dr. Mario
   name:     Tetris & Dr. Mario
-  region:   SNS-AFTE-USA
-  revision: SNS-AFTE-0
+  region:   SNS-ATFE-USA
+  revision: SNS-ATFE-0
   board:    SHVC-1A0N-30
     memory
       type: ROM
