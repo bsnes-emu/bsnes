@@ -51,7 +51,7 @@ endif
 # Use clang if it's available.
 ifeq ($(origin CC),default)
 ifneq (, $(shell which clang))
-CC := clang
+CC := clang 
 endif
 endif
 
@@ -76,9 +76,11 @@ endif
 # Set compilation and linkage flags based on target, platform and configuration
 
 OPEN_DIALOG = OpenDialog/gtk.c
+NULL := /dev/null
 
 ifeq ($(PLATFORM),windows32)
 OPEN_DIALOG = OpenDialog/windows.c
+NULL := NUL
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -110,9 +112,9 @@ LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(PLATFORM),Darwin)
-SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> /dev/null)
-CFLAGS += -F/Library/Frameworks
-OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT) -mmacosx-version-min=10.9
+SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
+CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9
+OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
 SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
 GL_LDFLAGS := -framework OpenGL
@@ -127,10 +129,16 @@ ifeq ($(CONF),debug)
 CFLAGS += -g
 else ifeq ($(CONF), release)
 CFLAGS += -O3 -DNDEBUG
+STRIP := strip
+ifeq ($(PLATFORM),Darwin)
+LDFLAGS += -Wl,-exported_symbols_list,$(NULL)
+STRIP := -@true
+endif
 ifneq ($(PLATFORM),windows32)
 LDFLAGS += -flto
 CFLAGS += -flto
 endif
+
 else
 $(error Invalid value for CONF: $(CONF). Use "debug", "release" or "native_release")
 endif
@@ -247,7 +255,7 @@ $(BIN)/SameBoy.app/Contents/MacOS/SameBoy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework IOKit
 ifeq ($(CONF), release)
-	strip $@
+	$(STRIP) $@
 endif
 
 $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
@@ -267,10 +275,7 @@ $(BIN)/SameBoy.qlgenerator: $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL 
 # once in the QL Generator. It should probably become a dylib instead.
 $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL: $(CORE_OBJECTS) $(QUICKLOOK_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) -bundle -framework Cocoa -framework Quicklook
-ifeq ($(CONF), release)
-	strip -u -r -s QuickLook/exports.sym $@
-endif
+	$(CC) $^ -o $@ $(LDFLAGS) -Wl,-exported_symbols_list,QuickLook/exports.sym -bundle -framework Cocoa -framework Quicklook
 
 # cgb_boot_fast.bin is not a standard boot ROM, we don't expect it to exist in the user-provided
 # boot ROM directory.
@@ -285,7 +290,7 @@ $(BIN)/SDL/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) $(GL_LDFLAGS)
 ifeq ($(CONF), release)
-	strip $@
+	$(STRIP) $@
 endif
 
 # Windows version builds two, one with a conole and one without it
@@ -321,7 +326,7 @@ $(BIN)/tester/sameboy_tester: $(CORE_OBJECTS) $(TESTER_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS)
 ifeq ($(CONF), release)
-	strip $@
+	$(STRIP) $@
 endif
 
 $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
@@ -372,7 +377,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb8
 	-@$(MKDIR) -p $(dir $@)
 	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
 	rgblink -o $@.tmp2 $@.tmp
-	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@),256,2304)
+	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@),256,2304) 2> $(NULL)
 	@rm $@.tmp $@.tmp2
 
 # Libretro Core (uses its own build system)
