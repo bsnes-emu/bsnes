@@ -98,7 +98,7 @@ enum {
 enum {
     GB_CARRY_FLAG = 16,
     GB_HALF_CARRY_FLAG = 32,
-    GB_SUBSTRACT_FLAG = 64,
+    GB_SUBTRACT_FLAG = 64,
     GB_ZERO_FLAG = 128,
 };
 
