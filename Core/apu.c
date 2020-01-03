@@ -1008,7 +1008,7 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
     GB_apu_update_cycles_per_sample(gb);
 }
 
-void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, unsigned cycles_per_sample)
+void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample)
 {
 
     if (cycles_per_sample == 0) {

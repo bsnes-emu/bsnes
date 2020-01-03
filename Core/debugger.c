@@ -819,7 +819,7 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     GB_log(gb, "AF = $%04x (%c%c%c%c)\n", gb->registers[GB_REGISTER_AF], /* AF can't really be an address */
            (gb->f & GB_CARRY_FLAG)?      'C' : '-',
            (gb->f & GB_HALF_CARRY_FLAG)? 'H' : '-',
-           (gb->f & GB_SUBSTRACT_FLAG)?  'N' : '-',
+           (gb->f & GB_SUBTRACT_FLAG)?   'N' : '-',
            (gb->f & GB_ZERO_FLAG)?       'Z' : '-');
     GB_log(gb, "BC = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_BC], false));
     GB_log(gb, "DE = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_DE], false));

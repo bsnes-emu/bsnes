@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <OpenDialog/open_dialog.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <Core/gb.h>
 #include "utils.h"
 #include "gui.h"
@@ -12,6 +12,7 @@
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
 #else
+#include <Windows.h>
 /* Windows (well, at least my VM) can't handle 96KHz sound well :( */
 
 /* felsqualle says: For SDL 2.0.6+ using the WASAPI driver, the highest freq.
@@ -98,6 +99,7 @@ static void open_menu(void)
         SDL_PauseAudioDevice(device_id, 1);
     }
     run_gui(true);
+    SDL_ShowCursor(SDL_DISABLE);
     if (audio_playing) {
         SDL_ClearQueuedAudio(device_id);
         SDL_PauseAudioDevice(device_id, 0);
@@ -123,7 +125,7 @@ static void handle_events(GB_gameboy_t *gb)
             }
                 
             case SDL_WINDOWEVENT: {
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     update_viewport();
                 }
                 break;
@@ -273,6 +275,7 @@ static void handle_events(GB_gameboy_t *gb)
                             else { 
                                 SDL_SetWindowFullscreen(window, 0);
                             }
+                            update_viewport();
                         }
                         break;
                         
@@ -406,14 +409,12 @@ static bool handle_pending_command(void)
             return false;
         }
             
-        case GB_SDL_RESET_COMMAND:
-            GB_save_battery(&gb, battery_save_path_ptr);
-            return true;
-            
         case GB_SDL_NO_COMMAND:
             return false;
             
+        case GB_SDL_RESET_COMMAND:
         case GB_SDL_NEW_FILE_COMMAND:
+            GB_save_battery(&gb, battery_save_path_ptr);
             return true;
             
         case GB_SDL_QUIT_COMMAND:
@@ -425,6 +426,7 @@ static bool handle_pending_command(void)
 
 static void run(void)
 {
+    SDL_ShowCursor(SDL_DISABLE);
     GB_model_t model;
     pending_command = GB_SDL_NO_COMMAND;
 restart:
@@ -550,6 +552,9 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
 
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+	SetProcessDPIAware();
+#endif
 #define str(x) #x
 #define xstr(x) str(x)
     fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");

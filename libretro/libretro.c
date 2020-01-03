@@ -92,6 +92,7 @@ static unsigned emulated_devices = 1;
 static bool initialized = false;
 static unsigned screen_layout = 0;
 static unsigned audio_out = 0;
+static unsigned sgb_border = 1;
 
 static bool geometry_updated = false;
 static bool link_cable_emulation = false;
@@ -209,6 +210,7 @@ static const struct retro_variable vars_single[] = {
     { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
+    { "sameboy_border", "Super Game Boy border; enabled|disabled" },
     { NULL }
 };
 
@@ -430,21 +432,20 @@ static void init_for_current_model(unsigned id)
     descs[7].len     = 0x4000;
     descs[7].flags   = RETRO_MEMDESC_CONST;
 
-    descs[8].ptr     = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
-    descs[8].start   = 0xFE00;
-    descs[8].select  = 0xFFFFFF00;
-    descs[8].len     = 0x00A0;
+    descs[8].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
+    descs[8].start = 0xFE00;
+    descs[8].len   = 0x00A0;
+    descs[8].select= 0xFFFFFF00;
 
-    descs[9].ptr     = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
-    descs[9].start   = 0x10000;
-    descs[9].select  = 0xFFFF0000;
-    descs[9].len     = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
+    descs[9].ptr   = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
+    descs[9].start = 0x10000;
+    descs[9].len   = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
+    descs[9].select= 0xFFFF0000;
 
-    descs[10].ptr    = descs[8].ptr;
-    descs[10].offset = 0x100;
-    descs[10].start  = 0xFF00;
-    descs[10].select = 0xFFFFFF00;
-    descs[10].len    = 0x0080;
+    descs[10].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_IO, &size, &bank);
+    descs[10].start = 0xFF00;
+    descs[10].len   = 0x0080;
+    descs[10].select= 0xFFFFFF00;
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
@@ -493,7 +494,7 @@ static void check_variables()
     {
         var.key = "sameboy_color_correction_mode";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[0]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
@@ -542,12 +543,22 @@ static void check_variables()
                 init_for_current_model(0);
             }
         }
+
+        var.key = "sameboy_border";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+        {
+            if (strcmp(var.value, "enabled") == 0)
+                sgb_border = 1;
+            else if (strcmp(var.value, "disabled") == 0)
+                sgb_border = 0;
+        }
     }
     else
     {
         var.key = "sameboy_color_correction_mode_1";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[0]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
@@ -561,7 +572,7 @@ static void check_variables()
 
         var.key = "sameboy_color_correction_mode_2";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && GB_is_cgb(&gameboy[1]))
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
         {
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_DISABLED);
@@ -887,8 +898,15 @@ void retro_run(void)
     }
     else
     {
-        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)
-            video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2) {
+            if (sgb_border == 1)
+                video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+            else {
+                int crop = SGB_VIDEO_WIDTH * ((SGB_VIDEO_HEIGHT - VIDEO_HEIGHT) / 2) + ((SGB_VIDEO_WIDTH - VIDEO_WIDTH) / 2);
+
+                video_cb(frame_buf + crop, VIDEO_WIDTH, VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
+            }
+        }
         else
             video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * sizeof(uint32_t));
     }

@@ -422,6 +422,11 @@ static GB_read_function_t * const read_map[] =
     read_ram,         read_high_memory,                             /* EXXX FXXX */
 };
 
+void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t callback)
+{
+    gb->read_memory_callback = callback;
+}
+
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->n_watchpoints) {
@@ -745,7 +750,11 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_JOYP:
-                if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
+                if (gb->joyp_write_callback) {
+                    gb->joyp_write_callback(gb, value);
+                    GB_update_joyp(gb);
+                }
+                else if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
                     GB_sgb_write(gb, value);
                     gb->io_registers[GB_IO_JOYP] = value & 0xF0;
                     GB_update_joyp(gb);

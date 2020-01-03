@@ -1185,6 +1185,23 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @try {
             if (!cameraSession) {
+                if (@available(macOS 10.14, *)) {
+                    switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo]) {
+                        case AVAuthorizationStatusAuthorized:
+                            break;
+                        case AVAuthorizationStatusNotDetermined: {
+                            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                                [self cameraRequestUpdate];
+                            }];
+                            return;
+                        }
+                        case AVAuthorizationStatusDenied:
+                        case AVAuthorizationStatusRestricted:
+                            GB_camera_updated(&gb);
+                            return;
+                    }
+                }
+
                 NSError *error;
                 AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
                 AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice: device error: &error];

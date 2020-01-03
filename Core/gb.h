@@ -98,7 +98,7 @@ enum {
 enum {
     GB_CARRY_FLAG = 16,
     GB_HALF_CARRY_FLAG = 32,
-    GB_SUBSTRACT_FLAG = 64,
+    GB_SUBTRACT_FLAG = 64,
     GB_ZERO_FLAG = 128,
 };
 
@@ -277,10 +277,6 @@ typedef struct {
    Some other changes might be "safe" as well.
    This struct is not packed, but dumped sections exclusively use types that have the same alignment in both 32 and 64
    bit platforms. */
-
-/* We make sure bool is 1 for cross-platform save state compatibility. */
-/* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
-_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
 #ifdef GB_INTERNAL
 struct GB_gameboy_s {

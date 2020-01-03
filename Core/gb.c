@@ -18,6 +18,13 @@
 #define GB_rewind_push(...)
 #endif
 
+
+static inline uint32_t state_magic(void)
+{
+    if (sizeof(bool) == 1) return 'SAME';
+    return 'S4ME';
+}
+
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
@@ -660,7 +667,7 @@ void GB_disconnect_serial(GB_gameboy_t *gb)
 
 bool GB_is_inited(GB_gameboy_t *gb)
 {
-    return gb->magic == 'SAME';
+    return gb->magic == state_magic();
 }
 
 bool GB_is_cgb(GB_gameboy_t *gb)
@@ -929,7 +936,7 @@ void GB_reset(GB_gameboy_t *gb)
         gb->nontrivial_jump_state = NULL;
     }
     
-    gb->magic = (uintptr_t)'SAME';
+    gb->magic = state_magic();
 }
 
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)

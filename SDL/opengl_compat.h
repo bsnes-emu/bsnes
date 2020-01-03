@@ -2,8 +2,8 @@
 #define opengl_compat_h
 
 #define GL_GLEXT_PROTOTYPES
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_video.h>
+#include <SDL_opengl.h>
+#include <SDL_video.h>
 
 #ifndef __APPLE__
 #define GL_COMPAT_NAME(func) gl_compat_##func
