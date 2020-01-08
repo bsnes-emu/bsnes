@@ -77,6 +77,11 @@ Links
   - [Developer resources](https://byuu.net)
   - [Donations](https://patreon.com/byuu)
 
+Release Builds
+--------------
+
+  - [Windows binaries](https://byuu.itch.io)
+
 Nightly Builds
 --------------
 
