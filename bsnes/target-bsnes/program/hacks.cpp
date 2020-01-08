@@ -10,14 +10,20 @@ auto Program::hackCompatibility() -> void {
   auto title = superFamicom.title;
   auto region = superFamicom.region;
 
+  //sometimes menu options are skipped over in the main menu with cycle-based joypad polling
   if(title == "Arcades Greatest Hits") fastJoypadPolling = true;
 
+  //the start button doesn't work in this game with cycle-based joypad polling
   if(title == "TAIKYOKU-IGO Goliath") fastJoypadPolling = true;
 
+  //holding up or down on the menu quickly cycles through options instead of stopping after each button press
   if(title == "WORLD MASTERS GOLF") fastJoypadPolling = true;
 
   //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
+
+  //the dialogue text is blurry due to an issue in the scanline-based renderer's color math support
+  if(title == "マーヴェラス") fastPPU = false;
 
   //stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
   if(title == "SFC クレヨンシンチャン") fastPPU = false;
