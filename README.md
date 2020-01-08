@@ -80,7 +80,7 @@ Links
 Release Builds
 --------------
 
-  - [Windows binaries](https://byuu.itch.io)
+  - [Windows binaries](https://byuu.itch.io/bsnes)
 
 Nightly Builds
 --------------
