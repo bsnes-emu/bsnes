@@ -1,5 +1,4 @@
 #pragma once
-#define double float
 
 #include <nall/dsp/iir/dc-removal.hpp>
 #include <nall/dsp/iir/one-pole.hpp>

@@ -1,5 +1,3 @@
-#define double float
-
 namespace Emulator {
 
 #include "stream.cpp"

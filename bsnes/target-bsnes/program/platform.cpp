@@ -253,14 +253,13 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
   }
 }
 
-auto Program::audioFrame(const float* samples, uint channels) -> void {
+auto Program::audioFrame(const double* samples, uint channels) -> void {
   if(mute) {
     double silence[] = {0.0, 0.0};
-    return audio.output(silence);
+    audio.output(silence);
+  } else {
+    audio.output(samples);
   }
-
-  double frame[] = {samples[0], samples[1]};
-  audio.output(frame);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
