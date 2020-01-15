@@ -28,7 +28,7 @@ struct Program : Emulator::Platform
 	auto open(uint id, string name, vfs::file::mode mode, bool required) -> shared_pointer<vfs::file> override;
 	auto load(uint id, string name, string type, vector<string> options = {}) -> Emulator::Platform::Load override;
 	auto videoFrame(const uint16* data, uint pitch, uint width, uint height, uint scale) -> void override;
-	auto audioFrame(const float* samples, uint channels) -> void override;
+	auto audioFrame(const double* samples, uint channels) -> void override;
 	auto inputPoll(uint port, uint device, uint input) -> int16 override;
 	auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
 	
@@ -143,11 +143,30 @@ auto Program::load() -> void {
 	auto title = superFamicom.title;
 	auto region = superFamicom.region;
 
+	//sometimes menu options are skipped over in the main menu with cycle-based joypad polling
+	if(title == "Arcades Greatest Hits") emulator->configure("Hacks/CPU/FastJoypadPolling", true);
+
+	//the start button doesn't work in this game with cycle-based joypad polling
+	if(title == "TAIKYOKU-IGO Goliath") emulator->configure("Hacks/CPU/FastJoypadPolling", true);
+
+	//holding up or down on the menu quickly cycles through options instead of stopping after each button press
+	if(title == "WORLD MASTERS GOLF") emulator->configure("Hacks/CPU/FastJoypadPolling", true);
+
 	//relies on mid-scanline rendering techniques
 	if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") emulator->configure("Hacks/PPU/Fast", false);
 
+	//the dialogue text is blurry due to an issue in the scanline-based renderer's color math support
+	if(title == "マーヴェラス") emulator->configure("Hacks/PPU/Fast", false);
+
 	//stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
 	if(title == "SFC クレヨンシンチャン") emulator->configure("Hacks/PPU/Fast", false);
+
+	//title screen game select (after choosing a game) changes OAM tiledata address mid-frame
+	//this is only supported by the cycle-based PPU renderer
+	if(title == "Winter olympics") emulator->configure("Hacks/PPU/Fast", false);
+
+	//title screen shows remnants of the flag after choosing a language with the scanline-based renderer
+	if(title == "WORLD CUP STRIKER") emulator->configure("Hacks/PPU/Fast", false);
 
 	//relies on cycle-accurate writes to the echo buffer
 	if(title == "KOUSHIEN_2") emulator->configure("Hacks/DSP/Fast", false);
@@ -162,13 +181,22 @@ auto Program::load() -> void {
 	if(title == "ADVENTURES OF FRANKEN" && region == "PAL") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
 	//fixes an errant scanline on the title screen due to writing to PPU registers too late
-	if(title == "FIREPOWER 2000") emulator->configure("Hacks/PPU/RenderCycle", 32);
+	if(title == "FIREPOWER 2000" || title == "SUPER SWIV") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
 	//fixes an errant scanline on the title screen due to writing to PPU registers too late
 	if(title == "NHL '94" || title == "NHL PROHOCKEY'94") emulator->configure("Hacks/PPU/RenderCycle", 32);
 
+	//fixes an errant scanline on the title screen due to writing to PPU registers too late
+	if(title == "Sugoro Quest++") emulator->configure("Hacks/PPU/RenderCycle", 128);
+
 	if (emulator->configuration("Hacks/Hotfixes")) {
-		if (title == "The Hurricanes") emulator->configure("Hacks/Entropy", "None");
+		//this game transfers uninitialized memory into video RAM: this can cause a row of invalid tiles
+		//to appear in the background of stage 12. this one is a bug in the original game, so only enable
+		//it if the hotfixes option has been enabled.
+		if(title == "The Hurricanes") emulator->configure("Hacks/Entropy", "None");
+
+		//Frisky Tom attract sequence sometimes hangs when WRAM is initialized to pseudo-random patterns
+		if (title == "ニチブツ・アーケード・クラシックス") emulator->configure("Hacks/Entropy", "None");
 	}
 
 	emulator->power();
@@ -213,7 +241,7 @@ static int16_t d2i16(double v)
 	return int16_t(floor(v + 0.5));
 }
 
-auto Program::audioFrame(const float* samples, uint channels) -> void
+auto Program::audioFrame(const double* samples, uint channels) -> void
 {
 	int16_t left = d2i16(samples[0]);
 	int16_t right = d2i16(samples[1]);
@@ -316,6 +344,17 @@ auto Program::openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_p
 	if(name == "expansion.rom" && mode == vfs::file::mode::read)
 	{
 		return vfs::memory::file::open(superFamicom.expansion.data(), superFamicom.expansion.size());
+	}
+
+	if(name == "msu1/data.rom")
+	{
+		return vfs::fs::file::open({Location::notsuffix(superFamicom.location), ".msu"}, mode);
+	}
+
+	if(name.match("msu1/track*.pcm"))
+	{
+		name.trimLeft("msu1/track", 1L);
+		return vfs::fs::file::open({Location::notsuffix(superFamicom.location), name}, mode);
 	}
 
 	if(name == "save.ram")
@@ -481,4 +520,173 @@ auto Program::hackPatchMemory(vector<uint8_t>& data) -> void
 		if(data[0x4ded] == 0x10) data[0x4ded] = 0x80;
 		if(data[0x4e9a] == 0x10) data[0x4e9a] = 0x80;
 	}
+}
+
+auto decodeSNES(string& code) -> bool {
+  //Game Genie
+  if(code.size() == 9 && code[4u] == '-') {
+    //strip '-'
+    code = {code.slice(0, 4), code.slice(5, 4)};
+    //validate
+    for(uint n : code) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //decode
+    code.transform("df4709156bc8a23e", "0123456789abcdef");
+    uint32_t r = toHex(code);
+    //abcd efgh ijkl mnop qrst uvwx
+    //ijkl qrst opab cduv wxef ghmn
+    uint address =
+      (!!(r & 0x002000) << 23) | (!!(r & 0x001000) << 22)
+    | (!!(r & 0x000800) << 21) | (!!(r & 0x000400) << 20)
+    | (!!(r & 0x000020) << 19) | (!!(r & 0x000010) << 18)
+    | (!!(r & 0x000008) << 17) | (!!(r & 0x000004) << 16)
+    | (!!(r & 0x800000) << 15) | (!!(r & 0x400000) << 14)
+    | (!!(r & 0x200000) << 13) | (!!(r & 0x100000) << 12)
+    | (!!(r & 0x000002) << 11) | (!!(r & 0x000001) << 10)
+    | (!!(r & 0x008000) <<  9) | (!!(r & 0x004000) <<  8)
+    | (!!(r & 0x080000) <<  7) | (!!(r & 0x040000) <<  6)
+    | (!!(r & 0x020000) <<  5) | (!!(r & 0x010000) <<  4)
+    | (!!(r & 0x000200) <<  3) | (!!(r & 0x000100) <<  2)
+    | (!!(r & 0x000080) <<  1) | (!!(r & 0x000040) <<  0);
+    uint data = r >> 24;
+    code = {hex(address, 6L), "=", hex(data, 2L)};
+    return true;
+  }
+
+  //Pro Action Replay
+  if(code.size() == 8) {
+    //validate
+    for(uint n : code) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //decode
+    uint32_t r = toHex(code);
+    uint address = r >> 8;
+    uint data = r & 0xff;
+    code = {hex(address, 6L), "=", hex(data, 2L)};
+    return true;
+  }
+
+  //higan: address=data
+  if(code.size() == 9 && code[6u] == '=') {
+    string nibbles = {code.slice(0, 6), code.slice(7, 2)};
+    //validate
+    for(uint n : nibbles) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //already in decoded form
+    return true;
+  }
+
+  //higan: address=compare?data
+  if(code.size() == 12 && code[6u] == '=' && code[9u] == '?') {
+    string nibbles = {code.slice(0, 6), code.slice(7, 2), code.slice(10, 2)};
+    //validate
+    for(uint n : nibbles) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //already in decoded form
+    return true;
+  }
+
+  //unrecognized code format
+  return false;
+}
+
+auto decodeGB(string& code) -> bool {
+  auto nibble = [&](const string& s, uint index) -> uint {
+    if(index >= s.size()) return 0;
+    if(s[index] >= '0' && s[index] <= '9') return s[index] - '0';
+    return s[index] - 'a' + 10;
+  };
+
+  //Game Genie
+  if(code.size() == 7 && code[3u] == '-') {
+    code = {code.slice(0, 3), code.slice(4, 3)};
+    //validate
+    for(uint n : code) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    uint data = nibble(code, 0) << 4 | nibble(code, 1) << 0;
+    uint address = (nibble(code, 5) ^ 15) << 12 | nibble(code, 2) << 8 | nibble(code, 3) << 4 | nibble(code, 4) << 0;
+    code = {hex(address, 4L), "=", hex(data, 2L)};
+    return true;
+  }
+
+  //Game Genie
+  if(code.size() == 11 && code[3u] == '-' && code[7u] == '-') {
+    code = {code.slice(0, 3), code.slice(4, 3), code.slice(8, 3)};
+    //validate
+    for(uint n : code) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    uint data = nibble(code, 0) << 4 | nibble(code, 1) << 0;
+    uint address = (nibble(code, 5) ^ 15) << 12 | nibble(code, 2) << 8 | nibble(code, 3) << 4 | nibble(code, 4) << 0;
+    uint8_t t = nibble(code, 6) << 4 | nibble(code, 8) << 0;
+    t = t >> 2 | t << 6;
+    uint compare = t ^ 0xba;
+    code = {hex(address, 4L), "=", hex(compare, 2L), "?", hex(data, 2L)};
+    return true;
+  }
+
+  //GameShark
+  if(code.size() == 8) {
+    //validate
+    for(uint n : code) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //first two characters are the code type / VRAM bank, which is almost always 01.
+    //other values are presumably supported, but I have no info on them, so they're not supported.
+    if(code[0u] != '0') return false;
+    if(code[1u] != '1') return false;
+    uint data = toHex(code.slice(2, 2));
+    uint16_t address = toHex(code.slice(4, 4));
+    address = address >> 8 | address << 8;
+    code = {hex(address, 4L), "=", hex(data, 2L)};
+    return true;
+  }
+
+  //higan: address=data
+  if(code.size() == 7 && code[4u] == '=') {
+    string nibbles = {code.slice(0, 4), code.slice(5, 2)};
+    //validate
+    for(uint n : nibbles) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //already in decoded form
+    return true;
+  }
+
+  //higan: address=compare?data
+  if(code.size() == 10 && code[4u] == '=' && code[7u] == '?') {
+    string nibbles = {code.slice(0, 4), code.slice(5, 2), code.slice(8, 2)};
+    //validate
+    for(uint n : nibbles) {
+      if(n >= '0' && n <= '9') continue;
+      if(n >= 'a' && n <= 'f') continue;
+      return false;
+    }
+    //already in decoded form
+    return true;
+  }
+
+  //unrecognized code format
+  return false;
 }

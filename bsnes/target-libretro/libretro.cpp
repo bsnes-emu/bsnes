@@ -32,6 +32,8 @@ static void audio_queue(int16_t left, int16_t right)
 #include "program.cpp"
 
 static string sgb_bios;
+static vector<string> cheatList;
+static int aspect_ratio_mode = 0;
 
 #define RETRO_DEVICE_JOYPAD_MULTITAP       RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0)
 #define RETRO_DEVICE_LIGHTGUN_SUPER_SCOPE  RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_LIGHTGUN, 0)
@@ -42,9 +44,42 @@ static string sgb_bios;
 #define RETRO_MEMORY_SGB_SRAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
 #define RETRO_MEMORY_GB_SRAM ((2 << 8) | RETRO_MEMORY_SAVE_RAM)
 
+static double get_aspect_ratio()
+{
+	if (aspect_ratio_mode == 0 && program->superFamicom.region == "NTSC")
+		return 1.306122;
+	else if (aspect_ratio_mode == 0 && program->superFamicom.region == "PAL")
+		return 1.584216;
+	else if (aspect_ratio_mode == 1) // 8:7
+		return 8.0/7.0;
+	else if (aspect_ratio_mode == 2) // 4:3
+		return 4.0/3.0;
+	else if (aspect_ratio_mode == 3) // NTSC
+		return 1.306122;
+	else if (aspect_ratio_mode == 4) // PAL
+		return 1.584216;
+	else
+		return 8.0/7.0; // Default
+}
+
 static void flush_variables()
 {
-	retro_variable variable = { "bsnes_blur_emulation", nullptr };
+	retro_variable variable = { "bsnes_aspect_ratio", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "8:7") == 0)
+			aspect_ratio_mode = 1;
+		else if (strcmp(variable.value, "4:3") == 0)
+			aspect_ratio_mode = 2;
+		else if (strcmp(variable.value, "NTSC") == 0)
+			aspect_ratio_mode = 3;
+		else if (strcmp(variable.value, "PAL") == 0)
+			aspect_ratio_mode = 4;
+		else
+			aspect_ratio_mode = 0;
+	}
+
+	variable = { "bsnes_blur_emulation", nullptr };
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
 	{
 		if (strcmp(variable.value, "ON") == 0)
@@ -243,6 +278,12 @@ static void flush_variables()
 		else
 			run_ahead_frames = atoi(variable.value);
 	}
+	
+	// Refresh Geometry
+	struct retro_system_av_info avinfo;
+	retro_get_system_av_info(&avinfo);
+	avinfo.geometry.aspect_ratio = get_aspect_ratio();
+	environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &avinfo);
 }
 
 static void check_variables()
@@ -399,6 +440,7 @@ static void set_environment_info(retro_environment_t cb)
 	cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, const_cast<retro_input_descriptor *>(desc));
 
 	static const retro_variable vars[] = {
+		{ "bsnes_aspect_ratio", "Aspect Ratio; Auto|8:7|4:3|NTSC|PAL" },
 		{ "bsnes_blur_emulation", "Blur emulation; OFF|ON" },
 		{ "bsnes_entropy", "Entropy (randomization); Low|High|None" },
 		{ "bsnes_hotfixes", "Hotfixes; OFF|ON" },
@@ -494,7 +536,9 @@ RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info)
 	info->geometry.base_height = program->overscan ? 480 : 448; // accurate ppu
 	info->geometry.max_width   = 2048;  // 8x 256 for hd mode 7
 	info->geometry.max_height  = 1920;  // 8x 240
+	info->geometry.aspect_ratio = get_aspect_ratio();
 	info->timing.sample_rate   = SAMPLERATE;
+	
 	if (retro_get_region() == RETRO_REGION_NTSC) {
 		info->timing.fps = 21477272.0 / 357366.0;
 		audio_buffer_max = (SAMPLERATE/60) * 2;
@@ -563,10 +607,29 @@ RETRO_API bool retro_unserialize(const void *data, size_t size)
 
 RETRO_API void retro_cheat_reset()
 {
+	cheatList.reset();
+	emulator->cheats(cheatList);
 }
 
 RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code)
 {
+	string cheat = string(code);
+	bool decoded = false;
+
+	if (program->gameBoy.program)
+	{
+		decoded = decodeGB(cheat);
+	}
+	else
+	{
+		decoded = decodeSNES(cheat);
+	}
+
+	if (enabled && decoded)
+	{
+		cheatList.append(cheat);
+		emulator->cheats(cheatList);
+	}
 }
 
 RETRO_API bool retro_load_game(const retro_game_info *game)
