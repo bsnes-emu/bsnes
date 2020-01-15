@@ -262,15 +262,16 @@ auto PPU::writeIO(uint addr, uint8 data) -> void {
 
   //MOSAIC
   case 0x2106: {
-    if(!mosaic.enable() && (data >> 0 & 15)) {
-      //mosaic vcounter is reloaded when mosaic becomes enabled
-      mosaic.vcounter = (data >> 4 & 15) + 2;
-    }
+    bool mosaicEnable = mosaic.enable();
     bg1.mosaic.enable = data >> 0 & 1;
     bg2.mosaic.enable = data >> 1 & 1;
     bg3.mosaic.enable = data >> 2 & 1;
     bg4.mosaic.enable = data >> 3 & 1;
     mosaic.size       = (data >> 4 & 15) + 1;
+    if(!mosaicEnable && mosaic.enable()) {
+      //mosaic vcounter is reloaded when mosaic becomes enabled
+      mosaic.vcounter = mosaic.size + 1;
+    }
     return;
   }
 

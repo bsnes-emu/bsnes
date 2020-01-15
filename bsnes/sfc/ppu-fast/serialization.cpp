@@ -69,7 +69,6 @@ auto PPU::IO::serialize(serializer& s) -> void {
 }
 
 auto PPU::IO::Mosaic::serialize(serializer& s) -> void {
-  s.integer(enable);
   s.integer(size);
   s.integer(counter);
 }

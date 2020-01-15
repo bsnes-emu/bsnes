@@ -85,6 +85,13 @@ auto PPU::main() -> void {
     uint y = vcounter();
     if(y >= 1 && y <= 239) {
       step(renderCycle());
+      bool mosaicEnable = io.bg1.mosaicEnable || io.bg2.mosaicEnable || io.bg3.mosaicEnable || io.bg4.mosaicEnable;
+      if(y == 1) {
+        io.mosaic.counter = mosaicEnable ? io.mosaic.size + 1 : 0;
+      }
+      if(io.mosaic.counter && !--io.mosaic.counter) {
+        io.mosaic.counter = mosaicEnable ? io.mosaic.size + 0 : 0;
+      }
       lines[y].cache();
     }
   }

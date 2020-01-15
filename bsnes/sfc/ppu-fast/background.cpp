@@ -33,7 +33,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
     hscroll <<= 1;
     if(io.interlace) {
       y = y << 1 | field();
-      if(self.mosaicEnable) y -= io.mosaic.size - io.mosaic.counter + ppu.field();
+      if(self.mosaicEnable) y -= io.mosaic.size - io.mosaic.counter + field();
     }
   }
 

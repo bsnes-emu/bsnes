@@ -102,7 +102,6 @@ public:
       //serialization.cpp
       auto serialize(serializer&) -> void;
 
-      uint8 enable = 0;
       uint8 size = 1;
       uint8 counter = 0;
     } mosaic;

@@ -248,14 +248,13 @@ auto PPU::writeIO(uint address, uint8 data) -> void {
   }
 
   case 0x2106: {  //MOSAIC
-    bool enable = io.bg1.mosaicEnable || io.bg2.mosaicEnable || io.bg3.mosaicEnable || io.bg4.mosaicEnable;
+    bool mosaicEnable = io.bg1.mosaicEnable || io.bg2.mosaicEnable || io.bg3.mosaicEnable || io.bg4.mosaicEnable;
     io.bg1.mosaicEnable = data >> 0 & 1;
     io.bg2.mosaicEnable = data >> 1 & 1;
     io.bg3.mosaicEnable = data >> 2 & 1;
     io.bg4.mosaicEnable = data >> 3 & 1;
-    io.mosaic.enable    = data >> 0 & 15;
     io.mosaic.size      = (data >> 4 & 15) + 1;
-    if(!enable && (data >> 0 & 15)) {
+    if(!mosaicEnable && (data >> 0 & 15)) {
       //mosaic vcounter is reloaded when mosaic becomes enabled
       io.mosaic.counter = io.mosaic.size + 1;
     }

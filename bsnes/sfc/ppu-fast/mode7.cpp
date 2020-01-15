@@ -1,12 +1,12 @@
 auto PPU::Line::renderMode7(PPU::IO::Background& self, uint8 source) -> void {
   //HD mode 7 support
-  if(!ppu.hdMosaic() || !self.mosaicEnable || !io.mosaic.size) {
+  if(!ppu.hdMosaic() || !self.mosaicEnable || io.mosaic.size == 1) {
     if(ppu.hdScale() > 1) return renderMode7HD(self, source);
   }
 
   int Y = this->y;
+  if(self.mosaicEnable) Y -= io.mosaic.size - io.mosaic.counter;
   int y = !io.mode7.vflip ? Y : 255 - Y;
-  if(self.mosaicEnable) y -= io.mosaic.size - io.mosaic.counter;
 
   int a = (int16)io.mode7.a;
   int b = (int16)io.mode7.b;
