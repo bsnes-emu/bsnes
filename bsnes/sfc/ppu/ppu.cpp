@@ -5,6 +5,7 @@ namespace SuperFamicom {
 PPU ppu;
 #include "main.cpp"
 #include "io.cpp"
+#include "mosaic.cpp"
 #include "background.cpp"
 #include "object.cpp"
 #include "window.cpp"
@@ -173,6 +174,7 @@ auto PPU::power(bool reset) -> void {
   //$213d  OPVCT
   io.vcounter = 0;
 
+  mosaic.power();
   bg1.power();
   bg2.power();
   bg3.power();

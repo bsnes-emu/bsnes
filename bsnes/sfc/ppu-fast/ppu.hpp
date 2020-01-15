@@ -85,7 +85,6 @@ public:
     bool oamPriority = 0;
     bool bgPriority = 0;
     uint8 bgMode = 0;
-    uint8 mosaicSize = 0;
     bool vramIncrementMode = 0;
     uint8 vramMapping = 0;
     uint8 vramIncrementSize = 0;
@@ -98,6 +97,15 @@ public:
     bool overscan = 0;
     bool pseudoHires = 0;
     bool extbg = 0;
+
+    struct Mosaic {
+      //serialization.cpp
+      auto serialize(serializer&) -> void;
+
+      uint8 enable = 0;
+      uint8 size = 1;
+      uint8 counter = 0;
+    } mosaic;
 
     struct Mode7 {
       //serialization.cpp
@@ -161,8 +169,6 @@ public:
       bool aboveEnable = 0;
       bool belowEnable = 0;
       bool mosaicEnable = 0;
-      uint16 mosaicCounter = 0;
-      uint16 mosaicOffset = 0;
       uint16 tiledataAddress = 0;
       uint16 screenAddress = 0;
       uint8 screenSize = 0;
@@ -293,7 +299,6 @@ public:
     alwaysinline auto plotHD(Pixel*, uint x, uint8 source, uint8 priority, uint16 color, bool hires, bool subpixel) -> void;
 
     //background.cpp
-    auto cacheBackground(PPU::IO::Background&) -> void;
     auto renderBackground(PPU::IO::Background&, uint8 source) -> void;
     auto getTile(PPU::IO::Background&, uint hoffset, uint voffset) -> uint;
 

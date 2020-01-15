@@ -1,5 +1,4 @@
 #include "mode7.cpp"
-uint4 PPU::Background::Mosaic::size;
 
 auto PPU::Background::hires() const -> bool {
   return ppu.io.bgMode == 5 || ppu.io.bgMode == 6;
@@ -11,26 +10,13 @@ auto PPU::Background::frame() -> void {
 
 //H = 0
 auto PPU::Background::scanline() -> void {
-  if(ppu.vcounter() == 1) {
-    mosaic.vcounter = mosaic.size + 1;
-    mosaic.voffset = 1;
-    latch.hoffset = io.hoffset;
-    latch.voffset = io.voffset;
-  } else if(--mosaic.vcounter == 0) {
-    mosaic.vcounter = mosaic.size + 1;
-    mosaic.voffset += mosaic.size + 1;
-    latch.hoffset = io.hoffset;
-    latch.voffset = io.voffset;
-  }
-
-  mosaic.hcounter = mosaic.size + 1;
+  mosaic.hcounter = ppu.mosaic.size;
   mosaic.hoffset = 0;
 
   if(io.mode == Mode::Mode7) return beginMode7();
-  if(mosaic.size == 0) {
-    latch.hoffset = io.hoffset;
-    latch.voffset = io.voffset;
-  }
+
+  latch.hoffset = io.hoffset;
+  latch.voffset = io.voffset;
 
   nameTableIndex = 0;
   characterIndex = 0;
@@ -52,13 +38,17 @@ auto PPU::Background::fetchNameTable() -> void {
 
   int x = (ppu.hcounter() & ~31) >> 2;
   uint hpixel = x << hires();
-  uint vpixel = mosaic.enable ? (uint)mosaic.voffset : ppu.vcounter();
+  uint vpixel = ppu.vcounter();
+  uint hscroll = latch.hoffset;
+  uint vscroll = latch.voffset;
 
-  uint hscroll = mosaic.enable ? latch.hoffset : io.hoffset;
-  uint vscroll = mosaic.enable ? latch.voffset : io.voffset;
+  if(mosaic.enable) vpixel -= ppu.mosaic.voffset();
   if(hires()) {
     hscroll <<= 1;
-    if(ppu.io.interlace) vpixel = vpixel << 1 | (ppu.field() && !mosaic.enable);
+    if(ppu.io.interlace) {
+      vpixel = vpixel << 1 | ppu.field();
+      if(mosaic.enable) vpixel -= ppu.mosaic.voffset() + ppu.field();
+    }
   }
 
   bool repeated = false;
@@ -214,10 +204,10 @@ auto PPU::Background::run(bool screen) -> void {
 
   uint x = ppu.hcounter() - 56 >> 2;
   if(x == 0) {
-    mosaic.hcounter = mosaic.size + 1;
+    mosaic.hcounter = ppu.mosaic.size;
     mosaic.pixel = pixel;
   } else if((!hires() || screen == Screen::Below) && --mosaic.hcounter == 0) {
-    mosaic.hcounter = mosaic.size + 1;
+    mosaic.hcounter = ppu.mosaic.size;
     mosaic.pixel = pixel;
   } else if(mosaic.enable) {
     pixel = mosaic.pixel;
@@ -246,6 +236,5 @@ auto PPU::Background::power() -> void {
   output.below = {};
 
   mosaic = {};
-  mosaic.size = random();
   mosaic.enable = random();
 }

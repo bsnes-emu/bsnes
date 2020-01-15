@@ -61,15 +61,9 @@ struct Background {
   } output;
 
   struct Mosaic {
-    static uint4 size;
      uint1 enable;
-
-    uint16 vcounter;
     uint16 hcounter;
-
-    uint16 voffset;
     uint16 hoffset;
-
     Pixel  pixel;
   } mosaic;
 

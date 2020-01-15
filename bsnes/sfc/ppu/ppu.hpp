@@ -153,11 +153,13 @@ private:
     uint16 vcounter;
   } io;
 
+  #include "mosaic.hpp"
   #include "background.hpp"
   #include "object.hpp"
   #include "window.hpp"
   #include "screen.hpp"
 
+  Mosaic mosaic;
   Background bg1;
   Background bg2;
   Background bg3;

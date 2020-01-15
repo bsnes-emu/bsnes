@@ -26,12 +26,13 @@ auto PPU::Line::flush() -> void {
 }
 
 auto PPU::Line::cache() -> void {
-  cacheBackground(ppu.io.bg1);
-  cacheBackground(ppu.io.bg2);
-  cacheBackground(ppu.io.bg3);
-  cacheBackground(ppu.io.bg4);
-
   uint y = ppu.vcounter();
+  if(y == 1) {
+    ppu.io.mosaic.counter = ppu.io.mosaic.enable ? ppu.io.mosaic.size + 1 : 0;
+  }
+  if(ppu.io.mosaic.counter && !--ppu.io.mosaic.counter) {
+    ppu.io.mosaic.counter = ppu.io.mosaic.enable ? ppu.io.mosaic.size + 0 : 0;
+  }
   if(ppu.io.displayDisable || y >= ppu.vdisp()) {
     io.displayDisable = true;
   } else {
