@@ -100,9 +100,6 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(io.hoffset);
   s.integer(io.voffset);
 
-  s.integer(latch.hoffset);
-  s.integer(latch.voffset);
-
   s.integer(output.above.priority);
   s.integer(output.above.palette);
   s.integer(output.above.paletteGroup);
@@ -133,8 +130,6 @@ auto PPU::Background::serialize(serializer& s) -> void {
     s.array(tile.data);
   }
 
-  s.integer(nameTableIndex);
-  s.integer(characterIndex);
   s.integer(renderingIndex);
   s.integer(pixelCounter);
 }

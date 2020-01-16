@@ -3,12 +3,6 @@ auto PPU::Background::clip(int n) -> int {
   return n & 0x2000 ? (n | ~1023) : (n & 1023);
 }
 
-//H = 0
-auto PPU::Background::beginMode7() -> void {
-  latch.hoffset = ppu.io.hoffsetMode7;
-  latch.voffset = ppu.io.voffsetMode7;
-}
-
 auto PPU::Background::runMode7() -> void {
   int a = (int16)ppu.io.m7a;
   int b = (int16)ppu.io.m7b;
@@ -17,14 +11,16 @@ auto PPU::Background::runMode7() -> void {
 
   int hcenter = (int13)ppu.io.m7x;
   int vcenter = (int13)ppu.io.m7y;
-  int hoffset = (int13)latch.hoffset;
-  int voffset = (int13)latch.voffset;
+  int hoffset = (int13)ppu.io.hoffsetMode7;
+  int voffset = (int13)ppu.io.voffsetMode7;
 
   uint x = mosaic.hoffset;
   uint y = ppu.vcounter();
   if(ppu.bg1.mosaic.enable) y -= ppu.mosaic.voffset();  //BG2 vertical mosaic uses BG1 mosaic enable
 
-  if(--mosaic.hcounter == 0) {
+  if(!mosaic.enable) {
+    mosaic.hoffset += 1;
+  } else if(--mosaic.hcounter == 0) {
     mosaic.hcounter = ppu.mosaic.size;
     mosaic.hoffset += ppu.mosaic.size;
   }

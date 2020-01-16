@@ -13,13 +13,6 @@ auto PPU::Background::scanline() -> void {
   mosaic.hcounter = ppu.mosaic.size;
   mosaic.hoffset = 0;
 
-  if(io.mode == Mode::Mode7) return beginMode7();
-
-  latch.hoffset = io.hoffset;
-  latch.voffset = io.voffset;
-
-  nameTableIndex = 0;
-  characterIndex = 0;
   renderingIndex = 0;
 
   opt.hoffset = 0;
@@ -36,11 +29,13 @@ auto PPU::Background::begin() -> void {
 auto PPU::Background::fetchNameTable() -> void {
   if(ppu.vcounter() == 0) return;
 
+  uint nameTableIndex = ppu.hcounter() >> 5 << hires();
   int x = (ppu.hcounter() & ~31) >> 2;
+
   uint hpixel = x << hires();
   uint vpixel = ppu.vcounter();
-  uint hscroll = latch.hoffset;
-  uint vscroll = latch.voffset;
+  uint hscroll = io.hoffset;
+  uint vscroll = io.voffset;
 
   if(mosaic.enable) vpixel -= ppu.mosaic.voffset();
   if(hires()) {
@@ -131,6 +126,7 @@ auto PPU::Background::fetchNameTable() -> void {
 auto PPU::Background::fetchOffset(uint y) -> void {
   if(ppu.vcounter() == 0) return;
 
+  uint characterIndex = ppu.hcounter() >> 5 << hires();
   uint x = characterIndex << 3;
 
   uint hoffset = x + (io.hoffset & ~7);
@@ -152,12 +148,12 @@ auto PPU::Background::fetchOffset(uint y) -> void {
   uint16 address = io.screenAddress + offset;
   if(y == 0) opt.hoffset = ppu.vram[address];
   if(y == 8) opt.voffset = ppu.vram[address];
-
-  if(y == 0) characterIndex++;
 }
 
-auto PPU::Background::fetchCharacter(uint index) -> void {
+auto PPU::Background::fetchCharacter(uint index, bool half) -> void {
   if(ppu.vcounter() == 0) return;
+
+  uint characterIndex = (ppu.hcounter() >> 5 << hires()) + half;
 
   auto& tile = tiles[characterIndex];
   uint16 data = ppu.vram[tile.address + (index << 3)];
@@ -174,8 +170,6 @@ auto PPU::Background::fetchCharacter(uint index) -> void {
     ((uint8(data >> 0) * 0x0101010101010101ull & 0x8040201008040201ull) * 0x0102040810204081ull >> 49) & 0x5555
   | ((uint8(data >> 8) * 0x0101010101010101ull & 0x8040201008040201ull) * 0x0102040810204081ull >> 48) & 0xaaaa
   );
-
-  if(index == 0) characterIndex++;
 }
 
 auto PPU::Background::run(bool screen) -> void {
@@ -229,8 +223,6 @@ auto PPU::Background::power() -> void {
   io.belowEnable = random();
   io.hoffset = random();
   io.voffset = random();
-
-  latch = {};
 
   output.above = {};
   output.below = {};
