@@ -78,8 +78,6 @@ struct Background {
     uint16 data[4];
   } tiles[66];
 
-uint7 nameTableIndex2;
-uint7 characterIndex2;
   uint7 renderingIndex;
   uint3 pixelCounter;
 
