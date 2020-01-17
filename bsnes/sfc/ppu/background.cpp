@@ -17,12 +17,13 @@ auto PPU::Background::scanline() -> void {
 
   opt.hoffset = 0;
   opt.voffset = 0;
+
+  pixelCounter = io.hoffset & 7;
 }
 
 //H = 56
 auto PPU::Background::begin() -> void {
   //remove partial tile columns that have been scrolled offscreen
-  pixelCounter = io.hoffset & 7;
   for(auto& data : tiles[0].data) data >>= pixelCounter << 1;
 }
 
