@@ -4,7 +4,8 @@ bsnes
 ![bsnes logo © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-logo.png)
 
 bsnes is a multi-platform Super Nintendo (Super Famicom) emulator from
-[byuu](https://byuu.org) that focuses on performance, features, and ease of use.
+[byuu](https://byuu.org/about) that focuses on performance, features, and ease
+of use.
 
 bsnes currently enjoys 100% known, bug-free compatibility with the entire SNES
 library when configured to its most accurate settings, giving it the same
@@ -20,12 +21,11 @@ environment. As bsnes is rather mature, things should generally be quite stable.
 However, bugs will exist, regressions will occur, so proceed at your own risk.
 
 If stability is required, please download the latest stable release from the
-[official website.](https://bsnes.byuu.org)
+[official website.](https://byuu.org/bsnes)
 
 Unique Features
 ---------------
 
-  - 100% (known) bug-free compatibility with the entire officially licensed SNES games library
   - True Super Game Boy emulation (using the SameBoy core by Lior Halphon)
   - HD mode 7 graphics with optional supersampling (by DerKoun)
   - Low-level emulation of all SNES coprocessors (DSP-n, ST-01n, Cx4)
