@@ -7,12 +7,6 @@ bsnes is a multi-platform Super Nintendo (Super Famicom) emulator from
 [byuu](https://byuu.org/about) that focuses on performance, features, and ease
 of use.
 
-bsnes currently enjoys 100% known, bug-free compatibility with the entire SNES
-library when configured to its most accurate settings, giving it the same
-accuracy level as higan. Accuracy can also optionally be traded for performance,
-allowing bsnes to operate more than 300% faster than higan while still remaining
-almost as accurate.
-
 Development
 -----------
 
