@@ -180,6 +180,7 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
 {
     y -= scroll;
     unsigned orig_x = x;
+    unsigned y_offset = (GB_get_screen_height(&gb) - 144) / 2;
     while (*string) {
         if (*string == '\n') {
             x = orig_x;
@@ -188,7 +189,7 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
             continue;
         }
         
-        if (x > width - GLYPH_WIDTH || y == 0 || y > height - GLYPH_HEIGHT) {
+        if (x > width - GLYPH_WIDTH || y == 0 || y - y_offset > 144 - GLYPH_HEIGHT) {
             break;
         }
         
