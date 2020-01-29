@@ -50,6 +50,17 @@
 #error Unable to detect endianess
 #endif
 
+typedef struct {
+    struct {
+        uint8_t r,g,b;
+    } colors[5];
+} GB_palette_t;
+
+extern const GB_palette_t GB_PALETTE_GREY;
+extern const GB_palette_t GB_PALETTE_DMG;
+extern const GB_palette_t GB_PALETTE_MGB;
+extern const GB_palette_t GB_PALETTE_GBL;
+
 typedef union {
     struct {
         uint8_t seconds;
@@ -60,7 +71,6 @@ typedef union {
     };
     uint8_t data[5];
 } GB_rtc_time_t;
-
 
 typedef enum {
     // GB_MODEL_DMG_0 = 0x000,
@@ -513,6 +523,7 @@ struct GB_gameboy_internal_s {
         uint32_t *screen;
         uint32_t background_palettes_rgb[0x20];
         uint32_t sprite_palettes_rgb[0x20];
+        const GB_palette_t *dmg_palette;
         GB_color_correction_mode_t color_correction_mode;
         bool keys[4][GB_KEY_MAX];
                
@@ -695,6 +706,8 @@ void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callb
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
+
+void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
 
 /* These APIs are used when using internal clock */
 void GB_set_serial_transfer_bit_start_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_start_callback_t callback);

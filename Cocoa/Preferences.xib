@@ -63,6 +63,7 @@
                 <outlet property="bootROMsFolderItem" destination="Dzv-Gc-zoL" id="yhV-ZI-avD"/>
                 <outlet property="cgbPopupButton" destination="dlD-sk-SHO" id="4tg-SR-e17"/>
                 <outlet property="colorCorrectionPopupButton" destination="VEz-N4-uP6" id="EO2-Vt-JFJ"/>
+                <outlet property="colorPalettePopupButton" destination="Iwr-eI-SD1" id="Xzc-RZ-JtV"/>
                 <outlet property="configureJoypadButton" destination="Qa7-Z7-yfO" id="RaX-P3-oCX"/>
                 <outlet property="controlsTableView" destination="UDd-IJ-fxX" id="a1D-Md-yXv"/>
                 <outlet property="delegate" destination="-2" id="ASc-vN-Zbq"/>
@@ -78,11 +79,11 @@
             <point key="canvasLocation" x="183" y="354"/>
         </window>
         <customView id="sRK-wO-K6R">
-            <rect key="frame" x="0.0" y="0.0" width="292" height="166"/>
+            <rect key="frame" x="0.0" y="0.0" width="292" height="213"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T91-rh-rRp">
-                    <rect key="frame" x="18" y="129" width="256" height="17"/>
+                    <rect key="frame" x="18" y="176" width="256" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Graphics Filter:" id="pXg-WY-8Q5">
                         <font key="font" metaFont="system"/>
@@ -91,7 +92,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6pP-kK-EEC">
-                    <rect key="frame" x="30" y="97" width="234" height="26"/>
+                    <rect key="frame" x="30" y="144" width="234" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Nearest Neighbor (Pixelated)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="neN-eo-LA7" id="I1w-05-lGl">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -127,7 +128,7 @@
                     </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wc3-2K-6CD">
-                    <rect key="frame" x="18" y="75" width="256" height="17"/>
+                    <rect key="frame" x="18" y="122" width="256" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Color Correction:" id="5Si-hz-EK3">
                         <font key="font" metaFont="system"/>
@@ -136,7 +137,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VEz-N4-uP6">
-                    <rect key="frame" x="30" y="43" width="234" height="26"/>
+                    <rect key="frame" x="30" y="90" width="234" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="D2J-wV-1vu" id="fNJ-Fi-yOm">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -156,6 +157,36 @@
                         <action selector="colorCorrectionChanged:" target="QvC-M9-y7g" id="Oq4-B5-nO6"/>
                     </connections>
                 </popUpButton>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8fG-zm-hpr">
+                    <rect key="frame" x="18" y="68" width="252" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Color Palette for Monochrome Models:" id="LAN-8Y-T7H">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iwr-eI-SD1">
+                    <rect key="frame" x="30" y="39" width="229" height="22"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="Greyscale" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Ajr-5r-iIk" id="rEU-jh-m3j">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="dHJ-3R-Ora">
+                            <items>
+                                <menuItem title="Greyscale" state="on" id="Ajr-5r-iIk">
+                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                </menuItem>
+                                <menuItem title="Lime (Game Boy)" id="snU-ht-fQq"/>
+                                <menuItem title="Olive (Pocket)" id="MQi-yt-nsT"/>
+                                <menuItem title="Teal (Light)" id="xlg-6i-Fhl"/>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="colorPaletteChanged:" target="QvC-M9-y7g" id="ui3-rg-PTs"/>
+                    </connections>
+                </popUpButton>
                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vfj-tg-7OP">
                     <rect key="frame" x="18" y="18" width="256" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -168,7 +199,7 @@
                     </connections>
                 </button>
             </subviews>
-            <point key="canvasLocation" x="-176" y="589"/>
+            <point key="canvasLocation" x="-176" y="612.5"/>
         </customView>
         <customView id="ymk-46-SX7">
             <rect key="frame" x="0.0" y="0.0" width="292" height="320"/>

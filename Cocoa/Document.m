@@ -184,6 +184,27 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     }
 }
 
+- (void) updatePalette
+{
+    switch ([[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"]) {
+        case 1:
+            GB_set_palette(&gb, &GB_PALETTE_DMG);
+            break;
+            
+        case 2:
+            GB_set_palette(&gb, &GB_PALETTE_MGB);
+            break;
+            
+        case 3:
+            GB_set_palette(&gb, &GB_PALETTE_GBL);
+            break;
+            
+        default:
+            GB_set_palette(&gb, &GB_PALETTE_GREY);
+            break;
+    }
+}
+
 - (void) initCommon
 {
     GB_init(&gb, [self internalModel]);
@@ -193,6 +214,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
+    [self updatePalette];
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
@@ -451,6 +473,12 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
                                              selector:@selector(updateColorCorrectionMode)
                                                  name:@"GBColorCorrectionChanged"
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updatePalette)
+                                                 name:@"GBColorPaletteChanged"
+                                               object:nil];
+
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateRewindLength)

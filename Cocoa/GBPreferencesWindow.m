@@ -14,6 +14,7 @@
     NSPopUpButton *_graphicsFilterPopupButton;
     NSPopUpButton *_highpassFilterPopupButton;
     NSPopUpButton *_colorCorrectionPopupButton;
+    NSPopUpButton *_colorPalettePopupButton;
     NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
     NSEventModifierFlags previousModifiers;
@@ -82,6 +83,18 @@
 - (NSPopUpButton *)colorCorrectionPopupButton
 {
     return _colorCorrectionPopupButton;
+}
+
+- (void)setColorPalettePopupButton:(NSPopUpButton *)colorPalettePopupButton
+{
+    _colorPalettePopupButton = colorPalettePopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"];
+    [_colorPalettePopupButton selectItemAtIndex:mode];
+}
+
+- (NSPopUpButton *)colorPalettePopupButton
+{
+    return _colorPalettePopupButton;
 }
 
 - (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
@@ -197,6 +210,14 @@
                                               forKey:@"GBColorCorrection"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
 
+}
+
+- (IBAction)colorPaletteChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+                                              forKey:@"GBColorPalette"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];
+    
 }
 
 - (IBAction)rewindLengthChanged:(id)sender

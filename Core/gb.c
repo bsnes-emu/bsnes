@@ -573,21 +573,41 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 #endif
 }
 
+const GB_palette_t GB_PALETTE_GREY = {{{0x00, 0x00, 0x00}, {0x55, 0x55, 0x55}, {0xaa, 0xaa, 0xaa}, {0xff ,0xff, 0xff}, {0xff ,0xff, 0xff}}};
+const GB_palette_t GB_PALETTE_DMG  = {{{0x08, 0x18, 0x10}, {0x39, 0x61, 0x39}, {0x84, 0xa5, 0x63}, {0xc6, 0xde, 0x8c}, {0xd2 ,0xe6 ,0xa6}}};
+const GB_palette_t GB_PALETTE_MGB  = {{{0x07, 0x10, 0x0e}, {0x3a, 0x4c, 0x3a}, {0x81, 0x8d, 0x66}, {0xc2, 0xce, 0x93}, {0xcf, 0xda, 0xac}}};
+const GB_palette_t GB_PALETTE_GBL  = {{{0x0a, 0x1c, 0x15}, {0x35, 0x78, 0x62}, {0x56, 0xb4, 0x95}, {0x7f, 0xe2, 0xc3}, {0x91, 0xea, 0xd0}}};
+
+static void update_dmg_palette(GB_gameboy_t *gb)
+{
+    const GB_palette_t *palette = gb->dmg_palette ?: &GB_PALETTE_GREY;
+    if (gb->rgb_encode_callback && !GB_is_cgb(gb)) {
+        gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
+        gb->rgb_encode_callback(gb, palette->colors[3].r, palette->colors[3].g, palette->colors[3].b);
+        gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
+        gb->rgb_encode_callback(gb, palette->colors[2].r, palette->colors[2].g, palette->colors[2].b);
+        gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
+        gb->rgb_encode_callback(gb, palette->colors[1].r, palette->colors[1].g, palette->colors[1].b);
+        gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
+        gb->rgb_encode_callback(gb, palette->colors[0].r, palette->colors[0].g, palette->colors[0].b);
+        
+        // LCD off color
+        gb->background_palettes_rgb[4] =
+        gb->rgb_encode_callback(gb, palette->colors[4].r, palette->colors[4].g, palette->colors[4].b);
+    }
+}
+
+void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette)
+{
+    gb->dmg_palette = palette;
+    update_dmg_palette(gb);
+}
 
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
-    if (!gb->rgb_encode_callback && !GB_is_cgb(gb)) {
-        gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
-        callback(gb, 0xFF, 0xFF, 0xFF);
-        gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
-        callback(gb, 0xAA, 0xAA, 0xAA);
-        gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
-        callback(gb, 0x55, 0x55, 0x55);
-        gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
-        callback(gb, 0, 0, 0);
-    }
 
     gb->rgb_encode_callback = callback;
+    update_dmg_palette(gb);
     
     for (unsigned i = 0; i < 32; i++) {
         GB_palette_changed(gb, true, i * 2);
@@ -882,16 +902,7 @@ void GB_reset(GB_gameboy_t *gb)
         gb->vram_size = 0x2000;
         memset(gb->vram, 0, gb->vram_size);
         
-        if (gb->rgb_encode_callback) {
-            gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
-                gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
-            gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
-                gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA);
-            gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
-                gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55);
-            gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
-                gb->rgb_encode_callback(gb, 0, 0, 0);
-        }
+        update_dmg_palette(gb);
     }
     reset_ram(gb);
     

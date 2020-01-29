@@ -142,9 +142,17 @@ static void display_vblank(GB_gameboy_t *gb)
             }
         }
         else {
-            uint32_t color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped && GB_is_cgb(gb) ?
-                                gb->rgb_encode_callback(gb, 0, 0, 0) :
-                                gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+            uint32_t color = 0;
+            if (GB_is_cgb(gb)) {
+                color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped ?
+                            gb->rgb_encode_callback(gb, 0, 0, 0) :
+                            gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+            }
+            else {
+                color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped ?
+                            gb->background_palettes_rgb[3] :
+                            gb->background_palettes_rgb[4];
+            }
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
                 gb ->screen[i] = color;
             }
