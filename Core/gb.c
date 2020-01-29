@@ -878,6 +878,36 @@ static void reset_ram(GB_gameboy_t *gb)
     }
 }
 
+static void request_boot_rom(GB_gameboy_t *gb)
+{
+    if (gb->boot_rom_load_callback) {
+        GB_boot_rom_t type = 0;
+        switch (gb->model) {
+            case GB_MODEL_DMG_B:
+                type = GB_BOOT_ROM_DMG;
+                break;
+            case GB_MODEL_SGB_NTSC:
+            case GB_MODEL_SGB_PAL:
+            case GB_MODEL_SGB_NTSC_NO_SFC:
+            case GB_MODEL_SGB_PAL_NO_SFC:
+                type = GB_BOOT_ROM_SGB;
+                break;
+            case GB_MODEL_SGB2:
+            case GB_MODEL_SGB2_NO_SFC:
+                type = GB_BOOT_ROM_SGB2;
+                break;
+            case GB_MODEL_CGB_C:
+            case GB_MODEL_CGB_E:
+                type = GB_BOOT_ROM_CGB;
+                break;
+            case GB_MODEL_AGB:
+                type = GB_BOOT_ROM_AGB;
+                break;
+        }
+        gb->boot_rom_load_callback(gb, type);
+    }
+}
+
 void GB_reset(GB_gameboy_t *gb)
 {
     uint32_t mbc_ram_size = gb->mbc_ram_size;
@@ -948,6 +978,7 @@ void GB_reset(GB_gameboy_t *gb)
     }
     
     gb->magic = state_magic();
+    request_boot_rom(gb);
 }
 
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
@@ -1092,4 +1123,10 @@ void GB_set_icd_hreset_callback(GB_gameboy_t *gb, GB_icd_hreset_callback_t callb
 void GB_set_icd_vreset_callback(GB_gameboy_t *gb, GB_icd_vreset_callback_t callback)
 {
     gb->icd_vreset_callback = callback;
+}
+
+void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t callback)
+{
+    gb->boot_rom_load_callback = callback;
+    request_boot_rom(gb);
 }

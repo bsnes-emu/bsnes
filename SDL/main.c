@@ -445,6 +445,24 @@ static bool handle_pending_command(void)
     return false;
 }
 
+static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
+{
+    bool error = false;
+    start_capturing_logs();
+    static const char *const names[] = {
+        [GB_BOOT_ROM_DMG0] = "dmg0_boot.bin",
+        [GB_BOOT_ROM_DMG] = "dmg_boot.bin",
+        [GB_BOOT_ROM_MGB] = "mgb_boot.bin",
+        [GB_BOOT_ROM_SGB] = "sgb_boot.bin",
+        [GB_BOOT_ROM_SGB2] = "sgb2_boot.bin",
+        [GB_BOOT_ROM_CGB0] = "cgb0_boot.bin",
+        [GB_BOOT_ROM_CGB] = "cgb_boot.bin",
+        [GB_BOOT_ROM_AGB] = "agb_boot.bin",
+    };
+    GB_load_boot_rom(gb, resource_path(names[type]));
+    end_capturing_logs(true, error);
+}
+
 static void run(void)
 {
     SDL_ShowCursor(SDL_DISABLE);
@@ -470,6 +488,7 @@ restart:
     else {
         GB_init(&gb, model);
         
+        GB_set_boot_rom_load_callback(&gb, load_boot_rom);
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
         GB_set_pixels_output(&gb, active_pixel_buffer);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
@@ -490,15 +509,6 @@ restart:
 
     
     bool error = false;
-    start_capturing_logs();
-    const char * const boot_roms[] = {"dmg_boot.bin", "cgb_boot.bin", "agb_boot.bin", "sgb_boot.bin"};
-    const char *boot_rom = boot_roms[configuration.model];
-    if (configuration.model == MODEL_SGB && configuration.sgb_revision == SGB_2) {
-        boot_rom = "sgb2_boot.bin";
-    }
-    error = GB_load_boot_rom(&gb, resource_path(boot_rom));
-    end_capturing_logs(true, error);
-    
     start_capturing_logs();
     error = GB_load_rom(&gb, filename);
     end_capturing_logs(true, error);

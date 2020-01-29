@@ -74,7 +74,14 @@ enum model {
           topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
            exposure:(unsigned) exposure;
 - (void) gotNewSample:(GB_sample_t *)sample;
+- (void) loadBootROM:(GB_boot_rom_t)type;
 @end
+
+static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self loadBootROM: type];
+}
 
 static void vblank(GB_gameboy_t *gb)
 {
@@ -209,6 +216,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
     GB_init(&gb, [self internalModel]);
     GB_set_user_data(&gb, (__bridge void *)(self));
+    GB_set_boot_rom_load_callback(&gb, (GB_boot_rom_load_callback_t)boot_rom_load);
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
@@ -340,15 +348,19 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_debugger_set_disabled(&gb, false);
 }
 
-- (void) loadBootROM
+- (void) loadBootROM: (GB_boot_rom_t)type
 {
-    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
-    if ([self internalModel] == GB_MODEL_SGB2) {
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"sgb2_boot"] UTF8String]);
-    }
-    else {
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
-    }
+    static NSString *const names[] = {
+        [GB_BOOT_ROM_DMG0] = @"dmg0_boot",
+        [GB_BOOT_ROM_DMG] = @"dmg_boot",
+        [GB_BOOT_ROM_MGB] = @"mgb_boot",
+        [GB_BOOT_ROM_SGB] = @"sgb_boot",
+        [GB_BOOT_ROM_SGB2] = @"sgb2_boot",
+        [GB_BOOT_ROM_CGB0] = @"cgb0_boot",
+        [GB_BOOT_ROM_CGB] = @"cgb_boot",
+        [GB_BOOT_ROM_AGB] = @"agb_boot",
+    };
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:names[type]] UTF8String]);
 }
 
 - (IBAction)reset:(id)sender
@@ -359,8 +371,6 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     if ([sender tag] != MODEL_NONE) {
         current_model = (enum model)[sender tag];
     }
-    
-    [self loadBootROM];
     
     if (!modelsChanging && [sender tag] == MODEL_NONE) {
         GB_reset(&gb);

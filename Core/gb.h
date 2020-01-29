@@ -229,6 +229,17 @@ typedef enum {
     GB_LOG_UNDERLINE_MASK =  GB_LOG_DASHED_UNDERLINE | GB_LOG_UNDERLINE
 } GB_log_attributes;
 
+typedef enum {
+    GB_BOOT_ROM_DMG0,
+    GB_BOOT_ROM_DMG,
+    GB_BOOT_ROM_MGB,
+    GB_BOOT_ROM_SGB,
+    GB_BOOT_ROM_SGB2,
+    GB_BOOT_ROM_CGB0,
+    GB_BOOT_ROM_CGB,
+    GB_BOOT_ROM_AGB,
+} GB_boot_rom_t;
+
 #ifdef GB_INTERNAL
 #define LCDC_PERIOD 70224
 #define CPU_FREQUENCY 0x400000
@@ -259,6 +270,7 @@ typedef void (*GB_joyp_write_callback_t)(GB_gameboy_t *gb, uint8_t value);
 typedef void (*GB_icd_pixel_callback_t)(GB_gameboy_t *gb, uint8_t row);
 typedef void (*GB_icd_hreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_icd_vreset_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_boot_rom_load_callback_t)(GB_gameboy_t *gb, GB_boot_rom_t type);
 
 typedef struct {
     bool state;
@@ -553,6 +565,7 @@ struct GB_gameboy_internal_s {
         GB_icd_vreset_callback_t icd_hreset_callback;
         GB_icd_vreset_callback_t icd_vreset_callback;
         GB_read_memory_callback_t read_memory_callback;
+        GB_boot_rom_load_callback_t boot_rom_load_callback;
                
         /* IR */
         long cycles_since_ir_change; // In 8MHz units
@@ -706,7 +719,9 @@ void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callb
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
-
+/* Called when a new boot ROM is needed. The callback should call GB_load_boot_rom or GB_load_boot_rom_from_buffer */
+void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t callback);
+    
 void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
 
 /* These APIs are used when using internal clock */
