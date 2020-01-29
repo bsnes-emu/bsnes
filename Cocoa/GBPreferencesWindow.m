@@ -32,6 +32,7 @@
                     @"NearestNeighbor",
                     @"Bilinear",
                     @"SmoothBilinear",
+                    @"MonoLCD",
                     @"LCD",
                     @"CRT",
                     @"Scale2x",

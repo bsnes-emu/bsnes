@@ -501,6 +501,7 @@ struct shader_name {
     {"NearestNeighbor", "Nearest Neighbor"},
     {"Bilinear", "Bilinear"},
     {"SmoothBilinear", "Smooth Bilinear"},
+    {"MonoLCD", "Monochrome LCD"},
     {"LCD", "LCD Display"},
     {"CRT", "CRT Display"},
     {"Scale2x", "Scale2x"},
