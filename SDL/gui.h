@@ -100,6 +100,9 @@ typedef struct {
         SGB_2,
         SGB_MAX
     } sgb_revision;
+    
+    /* v0.13 */
+    uint8_t dmg_palette;
 } configuration_t;
 
 extern configuration_t configuration;

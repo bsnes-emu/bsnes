@@ -92,6 +92,26 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit)
     return captured_log;
 }
 
+static void update_palette(void)
+{
+    switch (configuration.dmg_palette) {
+        case 1:
+            GB_set_palette(&gb, &GB_PALETTE_DMG);
+            break;
+            
+        case 2:
+            GB_set_palette(&gb, &GB_PALETTE_MGB);
+            break;
+            
+        case 3:
+            GB_set_palette(&gb, &GB_PALETTE_GBL);
+            break;
+            
+        default:
+            GB_set_palette(&gb, &GB_PALETTE_GREY);
+    }
+}
+
 static void open_menu(void)
 {
     bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
@@ -105,6 +125,7 @@ static void open_menu(void)
         SDL_PauseAudioDevice(device_id, 0);
     }
     GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+    update_palette();
     GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
 }
 
@@ -454,6 +475,7 @@ restart:
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_sample_rate(&gb, have_aspec.freq);
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+        update_palette();
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
         GB_set_rewind_length(&gb, configuration.rewind_length);
         GB_set_update_input_hint_callback(&gb, handle_events);
