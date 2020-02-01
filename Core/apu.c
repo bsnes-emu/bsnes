@@ -329,11 +329,16 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
-    if (gb->apu.skip_div_event) {
-        gb->apu.skip_div_event = false;
+    if (gb->apu.skip_div_event == GB_SKIP_DIV_EVENT_SKIP) {
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIPPED;
         return;
     }
-    gb->apu.div_divider++;
+    if (gb->apu.skip_div_event == GB_SKIP_DIV_EVENT_SKIPPED) {
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_INACTIVE;
+    }
+    else {
+        gb->apu.div_divider++;
+    }
 
     if ((gb->apu.div_divider & 1) == 0) {
         for (unsigned i = GB_SQUARE_2 + 1; i--;) {
@@ -534,7 +539,8 @@ void GB_apu_init(GB_gameboy_t *gb)
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
        the first DIV/APU event is skipped. */
     if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
-        gb->apu.skip_div_event = true;
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIP;
+        gb->apu.div_divider = 1;
     }
 }
 

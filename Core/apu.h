@@ -114,7 +114,10 @@ typedef struct
 
     } noise_channel;
 
-    bool skip_div_event;
+#define GB_SKIP_DIV_EVENT_INACTIVE 0
+#define GB_SKIP_DIV_EVENT_SKIPPED 1
+#define GB_SKIP_DIV_EVENT_SKIP 2
+    uint8_t skip_div_event;
     bool current_lfsr_sample;
 } GB_apu_t;
 
