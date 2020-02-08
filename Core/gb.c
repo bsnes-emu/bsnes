@@ -99,6 +99,42 @@ static char *default_async_input_callback(GB_gameboy_t *gb)
 }
 #endif
 
+static void load_default_border(GB_gameboy_t *gb)
+{
+    if (gb->has_sgb_border) return;
+    
+    #define LOAD_BORDER() do { \
+        memcpy(gb->borrowed_border.map, tilemap, sizeof(tilemap));\
+        memcpy(gb->borrowed_border.palette, palette, sizeof(palette));\
+        \
+        /* Expand tileset */\
+        for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {\
+            for (unsigned y = 0; y < 8; y++) {\
+                for (unsigned x = 0; x < 8; x++) {\
+                    gb->borrowed_border.tiles[tile * 8 * 8 + y * 8 + x] =\
+                    (tiles[tile * 32 + y * 2 +  0] & (1 << (7 ^ x)) ? 1 : 0) |\
+                    (tiles[tile * 32 + y * 2 +  1] & (1 << (7 ^ x)) ? 2 : 0) |\
+                    (tiles[tile * 32 + y * 2 + 16] & (1 << (7 ^ x)) ? 4 : 0) |\
+                    (tiles[tile * 32 + y * 2 + 17] & (1 << (7 ^ x)) ? 8 : 0);\
+                }\
+            }\
+        }\
+    } while(false);
+    
+    if (gb->model == GB_MODEL_AGB) {
+        #include "graphics/agb_border.inc"
+        LOAD_BORDER();
+    }
+    else if (GB_is_cgb(gb)) {
+        #include "graphics/cgb_border.inc"
+        LOAD_BORDER();
+    }
+    else {
+        #include "graphics/dmg_border.inc"
+        LOAD_BORDER();
+    }
+}
+
 void GB_init(GB_gameboy_t *gb, GB_model_t model)
 {
     memset(gb, 0, sizeof(*gb));
@@ -125,6 +161,7 @@ void GB_init(GB_gameboy_t *gb, GB_model_t model)
     }
     
     GB_reset(gb);
+    load_default_border(gb);
 }
 
 GB_model_t GB_get_model(GB_gameboy_t *gb)
@@ -184,6 +221,46 @@ void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer,
     memcpy(gb->boot_rom, buffer, size);
 }
 
+void GB_borrow_sgb_border(GB_gameboy_t *gb)
+{
+    if (GB_is_sgb(gb)) return;
+    if (gb->border_mode != GB_BORDER_ALWAYS) return;
+    if (gb->tried_loading_sgb_border) return;
+    gb->tried_loading_sgb_border = true;
+    if (gb->rom[0x146] != 3) return; // Not an SGB game, nothing to borrow
+    if (!gb->boot_rom_load_callback) return; // Can't borrow a border without this callback
+    GB_gameboy_t sgb;
+    GB_init(&sgb, GB_MODEL_SGB);
+    sgb.cartridge_type = gb->cartridge_type;
+    sgb.rom = gb->rom;
+    sgb.rom_size = gb->rom_size;
+    sgb.turbo = true;
+    sgb.turbo_dont_skip = true;
+    // sgb.disable_rendering = true;
+    
+    /* Load the boot ROM using the existing gb object */
+    typeof(gb->boot_rom) boot_rom_backup;
+    memcpy(boot_rom_backup, gb->boot_rom, sizeof(gb->boot_rom));
+    gb->boot_rom_load_callback(gb, GB_BOOT_ROM_SGB);
+    memcpy(sgb.boot_rom, gb->boot_rom, sizeof(gb->boot_rom));
+    memcpy(gb->boot_rom, boot_rom_backup, sizeof(gb->boot_rom));
+    sgb.sgb->intro_animation = -1;
+    
+    for (unsigned i = 600; i--;) {
+        GB_run_frame(&sgb);
+        if (sgb.sgb->border_animation) {
+            gb->has_sgb_border = true;
+            memcpy(&gb->borrowed_border, &sgb.sgb->pending_border, sizeof(gb->borrowed_border));
+            gb->borrowed_border.palette[0] = sgb.sgb->effective_palettes[0];
+            break;
+        }
+    }
+    
+    sgb.rom = NULL;
+    sgb.rom_size = 0;
+    GB_free(&sgb);
+}
+
 int GB_load_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");
@@ -199,6 +276,9 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
         gb->rom_size |= gb->rom_size >> 1;
         gb->rom_size++;
     }
+    if (gb->rom_size == 0) {
+        gb->rom_size = 0x8000;
+    }
     fseek(f, 0, SEEK_SET);
     if (gb->rom) {
         free(gb->rom);
@@ -208,7 +288,6 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     fread(gb->rom, 1, gb->rom_size, f);
     fclose(f);
     GB_configure_cart(gb);
-
     return 0;
 }
 
@@ -218,6 +297,9 @@ void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t siz
     while (gb->rom_size & (gb->rom_size - 1)) {
         gb->rom_size |= gb->rom_size >> 1;
         gb->rom_size++;
+    }
+    if (gb->rom_size == 0) {
+        gb->rom_size = 0x8000;
     }
     if (gb->rom) {
         free(gb->rom);
@@ -994,6 +1076,7 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
     }
     GB_rewind_free(gb);
     GB_reset(gb);
+    load_default_border(gb);
 }
 
 void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank)
@@ -1079,14 +1162,36 @@ uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
     return CPU_FREQUENCY * gb->clock_multiplier;
 }
 
+void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode)
+{
+    if (gb->border_mode > GB_BORDER_ALWAYS) return;
+    gb->border_mode = border_mode;
+}
+
 unsigned GB_get_screen_width(GB_gameboy_t *gb)
 {
-    return GB_is_hle_sgb(gb)? 256 : 160;
+    switch (gb->border_mode) {
+        default:
+        case GB_BORDER_SGB:
+            return GB_is_hle_sgb(gb)? 256 : 160;
+        case GB_BORDER_NEVER:
+            return 160;
+        case GB_BORDER_ALWAYS:
+            return 256;
+    }
 }
 
 unsigned GB_get_screen_height(GB_gameboy_t *gb)
 {
-    return GB_is_hle_sgb(gb)? 224 : 144;
+    switch (gb->border_mode) {
+        default:
+        case GB_BORDER_SGB:
+            return GB_is_hle_sgb(gb)? 224 : 144;
+        case GB_BORDER_NEVER:
+            return 144;
+        case GB_BORDER_ALWAYS:
+            return 224;
+    }
 }
 
 unsigned GB_get_player_count(GB_gameboy_t *gb)

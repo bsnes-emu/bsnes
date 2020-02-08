@@ -15,6 +15,7 @@
     NSPopUpButton *_highpassFilterPopupButton;
     NSPopUpButton *_colorCorrectionPopupButton;
     NSPopUpButton *_colorPalettePopupButton;
+    NSPopUpButton *_displayBorderPopupButton;
     NSPopUpButton *_rewindPopupButton;
     NSButton *_aspectRatioCheckbox;
     NSEventModifierFlags previousModifiers;
@@ -96,6 +97,18 @@
 - (NSPopUpButton *)colorPalettePopupButton
 {
     return _colorPalettePopupButton;
+}
+
+- (void)setDisplayBorderPopupButton:(NSPopUpButton *)displayBorderPopupButton
+{
+    _displayBorderPopupButton = displayBorderPopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"];
+    [_displayBorderPopupButton selectItemWithTag:mode];
+}
+
+- (NSPopUpButton *)displayBorderPopupButton
+{
+    return _displayBorderPopupButton;
 }
 
 - (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
@@ -218,6 +231,14 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBColorPalette"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];
+    
+}
+
+- (IBAction)displayBorderChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
+                                              forKey:@"GBBorderMode"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBBorderModeChanged" object:nil];
     
 }
 

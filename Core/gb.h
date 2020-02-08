@@ -112,6 +112,12 @@ enum {
     GB_ZERO_FLAG = 128,
 };
 
+typedef enum {
+    GB_BORDER_SGB,
+    GB_BORDER_NEVER,
+    GB_BORDER_ALWAYS,
+} GB_border_mode_t;
+
 #define GB_MAX_IR_QUEUE 256
 
 enum {
@@ -538,6 +544,10 @@ struct GB_gameboy_internal_s {
         const GB_palette_t *dmg_palette;
         GB_color_correction_mode_t color_correction_mode;
         bool keys[4][GB_KEY_MAX];
+        GB_border_mode_t border_mode;
+        GB_sgb_border_t borrowed_border;
+        bool tried_loading_sgb_border;
+        bool has_sgb_border;
                
         /* Timing */
         uint64_t last_sync;
@@ -707,7 +717,8 @@ void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
 
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
-
+void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
+    
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change); /* In 8MHz units*/
     

@@ -112,12 +112,24 @@ static void update_palette(void)
     }
 }
 
+static void screen_size_changed(void)
+{
+    SDL_DestroyTexture(texture);
+    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING,
+                                GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    
+    SDL_SetWindowMinimumSize(window, GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    
+    update_viewport();
+}
+
 static void open_menu(void)
 {
     bool audio_playing = SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
     if (audio_playing) {
         SDL_PauseAudioDevice(device_id, 1);
     }
+    size_t previous_width = GB_get_screen_width(&gb);
     run_gui(true);
     SDL_ShowCursor(SDL_DISABLE);
     if (audio_playing) {
@@ -125,8 +137,12 @@ static void open_menu(void)
         SDL_PauseAudioDevice(device_id, 0);
     }
     GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+    GB_set_border_mode(&gb, configuration.border_mode);
     update_palette();
     GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
+    if (previous_width != GB_get_screen_width(&gb)) {
+        screen_size_changed();
+    }
 }
 
 static void handle_events(GB_gameboy_t *gb)
@@ -495,19 +511,15 @@ restart:
         GB_set_sample_rate(&gb, have_aspec.freq);
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
         update_palette();
+        if ((unsigned)configuration.border_mode <= GB_BORDER_ALWAYS) {
+            GB_set_border_mode(&gb, configuration.border_mode);
+        }
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
         GB_set_rewind_length(&gb, configuration.rewind_length);
         GB_set_update_input_hint_callback(&gb, handle_events);
         GB_apu_set_sample_callback(&gb, gb_audio_callback);
     }
-    
-    SDL_DestroyTexture(texture);
-    texture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STREAMING,
-                                GB_get_screen_width(&gb), GB_get_screen_height(&gb));
-    
-    SDL_SetWindowMinimumSize(window, GB_get_screen_width(&gb), GB_get_screen_height(&gb));
 
-    
     bool error = false;
     start_capturing_logs();
     error = GB_load_rom(&gb, filename);
@@ -528,7 +540,7 @@ restart:
     replace_extension(filename, path_length, symbols_path, ".sym");
     GB_debugger_load_symbol_file(&gb, symbols_path);
         
-    update_viewport();
+    screen_size_changed();
 
     /* Run emulation */
     while (true) {

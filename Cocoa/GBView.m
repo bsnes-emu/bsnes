@@ -65,9 +65,9 @@
     
     size_t buffer_size = sizeof(image_buffers[0][0]) * GB_get_screen_width(_gb) * GB_get_screen_height(_gb);
     
-    image_buffers[0] = malloc(buffer_size);
-    image_buffers[1] = malloc(buffer_size);
-    image_buffers[2] = malloc(buffer_size);
+    image_buffers[0] = calloc(1, buffer_size);
+    image_buffers[1] = calloc(1, buffer_size);
+    image_buffers[2] = calloc(1, buffer_size);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [self setFrame:self.superview.frame];

@@ -7,7 +7,8 @@
 @property (strong) IBOutlet NSButton *aspectRatioCheckbox;
 @property (strong) IBOutlet NSPopUpButton *highpassFilterPopupButton;
 @property (strong) IBOutlet NSPopUpButton *colorCorrectionPopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *colorPalettePopupButton;
+@property (strong) IBOutlet NSPopUpButton *colorPalettePopupButton;
+@property (strong) IBOutlet NSPopUpButton *displayBorderPopupButton;
 @property (strong) IBOutlet NSPopUpButton *rewindPopupButton;
 @property (strong) IBOutlet NSButton *configureJoypadButton;
 @property (strong) IBOutlet NSButton *skipButton;

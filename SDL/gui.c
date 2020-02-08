@@ -429,7 +429,13 @@ const char *current_color_correction_mode(unsigned index)
 const char *current_palette(unsigned index)
 {
     return (const char *[]){"Greyscale", "Lime (Game Boy)", "Olive (Pocket)", "Teal (Light)"}
-    [configuration.dmg_palette];
+        [configuration.dmg_palette];
+}
+
+const char *current_border_mode(unsigned index)
+{
+    return (const char *[]){"SGB Only", "Never", "Always"}
+        [configuration.border_mode];
 }
 
 void cycle_scaling(unsigned index)
@@ -491,6 +497,26 @@ static void cycle_palette_backwards(unsigned index)
     }
     else {
         configuration.dmg_palette--;
+    }
+}
+
+static void cycle_border_mode(unsigned index)
+{
+    if (configuration.border_mode == GB_BORDER_ALWAYS) {
+        configuration.border_mode = GB_BORDER_SGB;
+    }
+    else {
+        configuration.border_mode++;
+    }
+}
+
+static void cycle_border_mode_backwards(unsigned index)
+{
+    if (configuration.border_mode == GB_BORDER_SGB) {
+        configuration.border_mode = GB_BORDER_ALWAYS;
+    }
+    else {
+        configuration.border_mode--;
     }
 }
 
@@ -589,6 +615,7 @@ static const struct menu_item graphics_menu[] = {
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
+    {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
     {"Blend Frames:", toggle_blend_frames, blend_frames_string, toggle_blend_frames},
     {"Back", return_to_root_menu},
     {NULL,}

@@ -61,6 +61,8 @@ enum model {
     size_t audioBufferSize;
     size_t audioBufferPosition;
     size_t audioBufferNeeded;
+    
+    bool borderModeChanged;
 }
 
 @property GBAudioClient *audioClient;
@@ -212,6 +214,11 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     }
 }
 
+- (void) updateBorderMode
+{
+    borderModeChanged = true;
+}
+
 - (void) initCommon
 {
     GB_init(&gb, [self internalModel]);
@@ -222,6 +229,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
+    GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
     [self updatePalette];
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
@@ -234,6 +242,16 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 - (void) vblank
 {
     [self.view flip];
+    if (borderModeChanged) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            size_t previous_width = GB_get_screen_width(&gb);
+            GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
+            if (GB_get_screen_width(&gb) != previous_width) {
+                [self.view screenSizeChanged];
+            }
+        });
+        borderModeChanged = false;
+    }
     GB_set_pixels_output(&gb, self.view.pixels);
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -493,6 +511,10 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
                                                  name:@"GBColorPaletteChanged"
                                                object:nil];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateBorderMode)
+                                                 name:@"GBBorderModeChanged"
+                                               object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateRewindLength)

@@ -99,6 +99,8 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
 #define LINE_LENGTH (456)
 #define LINES (144)
 #define WIDTH (160)
+#define BORDERED_WIDTH 256
+#define BORDERED_HEIGHT 224
 #define FRAME_LENGTH (LCDC_PERIOD)
 #define VIRTUAL_LINES (FRAME_LENGTH / LINE_LENGTH) // = 154
 
@@ -134,7 +136,7 @@ static void display_vblank(GB_gameboy_t *gb)
         }
     }
     
-    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
+    if ((!gb->disable_rendering || gb->sgb) && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (gb->sgb) {
             for (unsigned i = 0; i < WIDTH * LINES; i++) {
@@ -153,13 +155,70 @@ static void display_vblank(GB_gameboy_t *gb)
                             gb->background_palettes_rgb[3] :
                             gb->background_palettes_rgb[4];
             }
-            for (unsigned i = 0; i < WIDTH * LINES; i++) {
-                gb ->screen[i] = color;
+            if (gb->border_mode == GB_BORDER_ALWAYS) {
+                for (unsigned y = 0; y < LINES; y++) {
+                    for (unsigned x = 0; x < WIDTH; x++) {
+                        gb ->screen[x + y * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH] = color;
+                    }
+                }
+            }
+            else {
+                for (unsigned i = 0; i < WIDTH * LINES; i++) {
+                    gb ->screen[i] = color;
+                }
+            }
+        }
+    }
+    
+    if (gb->border_mode == GB_BORDER_ALWAYS && !GB_is_sgb(gb)) {
+        GB_borrow_sgb_border(gb);
+        uint32_t border_colors[16 * 4];
+        
+        if (!gb->has_sgb_border && GB_is_cgb(gb) && gb->model != GB_MODEL_AGB) {
+            static uint16_t colors[] = {
+                0x2095, 0x5129, 0x1EAF, 0x1EBA, 0x4648,
+                0x30DA, 0x69AD, 0x2B57, 0x2B5D, 0x632C,
+                0x1050, 0x3C84, 0x0E07, 0x0E18, 0x2964,
+            };
+            unsigned index = gb->rom[0x14e] % 5;
+            gb->borrowed_border.palette[0] = colors[index];
+            gb->borrowed_border.palette[10] = colors[5 + index];
+            gb->borrowed_border.palette[14] = colors[10 + index];
+
+        }
+        
+        for (unsigned i = 0; i < 16 * 4; i++) {
+            border_colors[i] = GB_convert_rgb15(gb, gb->borrowed_border.palette[i], true);
+        }
+        
+        for (unsigned tile_y = 0; tile_y < 28; tile_y++) {
+            for (unsigned tile_x = 0; tile_x < 32; tile_x++) {
+                if (tile_x >= 6 && tile_x < 26 && tile_y >= 5 && tile_y < 23) {
+                    continue;
+                }
+                uint16_t tile = gb->borrowed_border.map[tile_x + tile_y * 32];
+                uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
+                uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
+                uint8_t palette = (tile >> 10) & 3;
+                for (unsigned y = 0; y < 8; y++) {
+                    for (unsigned x = 0; x < 8; x++) {
+                        uint8_t color = gb->borrowed_border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
+                        uint32_t *output = gb->screen + tile_x * 8 + x + (tile_y * 8 + y) * 256;
+                        if (color == 0) {
+                            *output = border_colors[0];
+                        }
+                        else {
+                            *output = border_colors[color + palette * 16];
+                        }
+                    }
+                }
             }
         }
     }
 
-    gb->vblank_callback(gb);
+    if (gb->vblank_callback) {
+        gb->vblank_callback(gb);
+    }
     GB_timing_sync(gb);
 }
 
@@ -184,19 +243,19 @@ static inline uint8_t scale_channel_with_curve_sgb(uint8_t x)
 }
 
 
-uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color)
+uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
 {
     uint8_t r = (color) & 0x1F;
     uint8_t g = (color >> 5) & 0x1F;
     uint8_t b = (color >> 10) & 0x1F;
     
-    if (gb->color_correction_mode == GB_COLOR_CORRECTION_DISABLED) {
+    if (gb->color_correction_mode == GB_COLOR_CORRECTION_DISABLED || (for_border && !gb->has_sgb_border)) {
         r = scale_channel(r);
         g = scale_channel(g);
         b = scale_channel(b);
     }
     else {
-        if (GB_is_sgb(gb)) {
+        if (GB_is_sgb(gb) || for_border) {
             return gb->rgb_encode_callback(gb,
                                            scale_channel_with_curve_sgb(r),
                                            scale_channel_with_curve_sgb(g),
@@ -253,7 +312,7 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
     uint8_t *palette_data = background_palette? gb->background_palettes_data : gb->sprite_palettes_data;
     uint16_t color = palette_data[index & ~1] | (palette_data[index | 1] << 8);
 
-    (background_palette? gb->background_palettes_rgb : gb->sprite_palettes_rgb)[index / 2] = GB_convert_rgb15(gb, color);
+    (background_palette? gb->background_palettes_rgb : gb->sprite_palettes_rgb)[index / 2] = GB_convert_rgb15(gb, color, false);
 }
 
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode)
@@ -393,7 +452,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
     
     /* Drop pixels for scrollings */
-    if (gb->position_in_line >= 160 || gb->disable_rendering) {
+    if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {
         gb->position_in_line++;
         return;
     }
@@ -412,6 +471,16 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
 
     uint8_t icd_pixel = 0;
+    uint32_t *dest = NULL;
+    if (!gb->sgb) {
+        if (gb->border_mode != GB_BORDER_ALWAYS) {
+            dest = gb->screen + gb->position_in_line + gb->current_line * WIDTH;
+        }
+        else {
+            dest = gb->screen + gb->position_in_line + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
+        }
+    }
+    
     {
         uint8_t pixel = bg_enabled? fifo_item->pixel : 0;
         if (pixel && bg_priority) {
@@ -431,7 +500,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             }
         }
         else {
-            gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
+            *dest = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
         }
     }
     
@@ -453,7 +522,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             }
         }
         else {
-            gb->screen[gb->position_in_line + gb->current_line * WIDTH] = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
+            *dest = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
         }
     }
 	
