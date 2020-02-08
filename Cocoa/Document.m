@@ -281,6 +281,10 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         [audioLock lock];
+        if (stopping) {
+            memset(buffer, 0, nFrames * sizeof(*buffer));
+            [audioLock unlock];
+        }
         
         if (audioBufferPosition < nFrames) {
             audioBufferNeeded = nFrames;
