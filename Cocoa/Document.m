@@ -239,6 +239,15 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_apu_set_sample_callback(&gb, audioCallback);
 }
 
+- (void) updateMinSize
+{
+    self.mainWindow.contentMinSize = NSMakeSize(GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    if (self.mainWindow.contentView.bounds.size.width < GB_get_screen_width(&gb) ||
+        self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
+        [self.mainWindow zoom:nil];
+    }
+}
+
 - (void) vblank
 {
     [self.view flip];
@@ -248,6 +257,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
             GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
             if (GB_get_screen_width(&gb) != previous_width) {
                 [self.view screenSizeChanged];
+                [self updateMinSize];
             }
         });
         borderModeChanged = false;
@@ -405,11 +415,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
         [self.view screenSizeChanged];
     }
     
-    self.mainWindow.contentMinSize = NSMakeSize(GB_get_screen_width(&gb), GB_get_screen_height(&gb));
-    if (self.mainWindow.contentView.bounds.size.width < GB_get_screen_width(&gb) ||
-        self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
-        [self.mainWindow zoom:nil];
-    }
+    [self updateMinSize];
     
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
