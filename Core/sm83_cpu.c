@@ -1512,10 +1512,11 @@ void GB_cpu_run(GB_gameboy_t *gb)
         opcodes[gb->last_opcode_read](gb, gb->last_opcode_read);
     }
     
+    flush_pending_cycles(gb);
+
     if (gb->hdma_starting) {
         gb->hdma_starting = false;
         gb->hdma_on = true;
         gb->hdma_cycles = -8;
     }
-    flush_pending_cycles(gb);
 }
