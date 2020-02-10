@@ -1454,19 +1454,19 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     gb->just_halted = false;
 
-    bool effecitve_ime = gb->ime;
+    bool effective_ime = gb->ime;
     if (gb->ime_toggle) {
         gb->ime = !gb->ime;
         gb->ime_toggle = false;
     }
 
     /* Wake up from HALT mode without calling interrupt code. */
-    if (gb->halted && !effecitve_ime && interrupt_queue) {
+    if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
     }
     
     /* Call interrupt */
-    else if (effecitve_ime && interrupt_queue) {
+    else if (effective_ime && interrupt_queue) {
         gb->halted = false;
         uint16_t call_addr = gb->pc;
         
