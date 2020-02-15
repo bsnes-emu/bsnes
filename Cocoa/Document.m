@@ -374,7 +374,9 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     if (GB_debugger_is_stopped(&gb)) {
         [self interruptDebugInputRead];
     }
+    [audioLock lock];
     stopping = true;
+    [audioLock unlock];
     running = false;
     while (stopping);
     GB_debugger_set_disabled(&gb, false);
