@@ -229,7 +229,7 @@ static inline uint8_t scale_channel(uint8_t x)
 
 static inline uint8_t scale_channel_with_curve(uint8_t x)
 {
-    return (uint8_t[]){0,2,4,7,12,18,25,34,42,52,62,73,85,97,109,121,134,146,158,170,182,193,203,213,221,230,237,243,248,251,253,255}[x];
+    return (uint8_t[]){0,5,8,11,16,22,28,36,43,51,59,67,77,87,97,107,119,130,141,153,166,177,188,200,209,221,230,238,245,249,252,255}[x];
 }
 
 static inline uint8_t scale_channel_with_curve_agb(uint8_t x)
