@@ -515,6 +515,9 @@ struct GB_gameboy_internal_s {
         uint8_t current_lcd_line; // The LCD can go out of sync since the vsync signal is skipped in some cases.
         uint32_t cycles_in_stop_mode;
         uint8_t object_priority;
+        bool oam_ppu_blocked;
+        bool vram_ppu_blocked;
+        bool cgb_palettes_ppu_blocked;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

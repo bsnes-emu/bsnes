@@ -236,6 +236,26 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode)
 {
 }
 
+static void enter_stop_mode(GB_gameboy_t *gb)
+{
+    gb->stopped = true;
+    gb->oam_ppu_blocked = !gb->oam_read_blocked;
+    gb->vram_ppu_blocked = !gb->vram_read_blocked;
+    gb->cgb_palettes_ppu_blocked = !gb->cgb_palettes_blocked;
+}
+
+static void leave_stop_mode(GB_gameboy_t *gb)
+{
+    /* The CPU takes more time to wake up then the other components */
+    for (unsigned i = 0x200; i--;) {
+        GB_advance_cycles(gb, 0x10);
+    }
+    gb->stopped = false;
+    gb->oam_ppu_blocked = false;
+    gb->vram_ppu_blocked = false;
+    gb->cgb_palettes_ppu_blocked = false;
+}
+
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
@@ -252,9 +272,8 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
         gb->cgb_double_speed ^= true;
         gb->io_registers[GB_IO_KEY1] = 0;
         
-        for (unsigned i = 0x800; i--;) {
-            GB_advance_cycles(gb, 0x40);
-        }
+        enter_stop_mode(gb);
+        leave_stop_mode(gb);
         
         if (!needs_alignment) {
             GB_advance_cycles(gb, 0x4);
@@ -270,7 +289,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
             gb->halted = true;
         }
         else {
-            gb->stopped = true;
+            enter_stop_mode(gb);
         }
     }
     
@@ -1429,11 +1448,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
         if ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF) {
-            gb->stopped = false;
-            /* The CPU takes more time to wake up then the other components */
-            for (unsigned i = 0x800; i--;) {
-                GB_advance_cycles(gb, 0x40);
-            }
+            leave_stop_mode(gb);
             GB_advance_cycles(gb, 8);
         }
         return;

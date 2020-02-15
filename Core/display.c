@@ -136,23 +136,18 @@ static void display_vblank(GB_gameboy_t *gb)
         }
     }
     
-    if ((!gb->disable_rendering || gb->sgb) && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
+    bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
+    
+    if (!gb->disable_rendering  && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
-        if (gb->sgb) {
-            for (unsigned i = 0; i < WIDTH * LINES; i++) {
-                gb->sgb->screen_buffer[i] = 0x0;
-            }
-        }
-        else {
+        if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
             if (GB_is_cgb(gb)) {
-                color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped ?
-                            gb->rgb_encode_callback(gb, 0, 0, 0) :
-                            gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+                color = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
             }
             else {
-                color = (gb->io_registers[GB_IO_LCDC] & 0x80) && gb->stopped ?
-                            gb->background_palettes_rgb[3] :
+                color = is_ppu_stopped ?
+                            gb->background_palettes_rgb[0] :
                             gb->background_palettes_rgb[4];
             }
             if (gb->border_mode == GB_BORDER_ALWAYS) {
@@ -412,6 +407,10 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (gb->dma_steps_left && (gb->dma_cycles >= 0 || gb->is_dma_restarting)) {
         return;
     }
+    
+    if (gb->oam_ppu_blocked) {
+        return;
+    }
 
     /* This reverse sorts the visible objects by location and priority */
     GB_object_t *objects = (GB_object_t *) &gb->oam;
@@ -499,6 +498,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
                 icd_pixel = pixel;
             }
         }
+        else if (gb->cgb_palettes_ppu_blocked) {
+            *dest = gb->rgb_encode_callback(gb, 0, 0, 0);
+        }
         else {
             *dest = gb->background_palettes_rgb[fifo_item->palette * 4 + pixel];
         }
@@ -520,6 +522,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
                 icd_pixel = pixel;
               //gb->icd_pixel_callback(gb, pixel);
             }
+        }
+        else if (gb->cgb_palettes_ppu_blocked) {
+            *dest = gb->rgb_encode_callback(gb, 0, 0, 0);
         }
         else {
             *dest = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
@@ -585,10 +590,16 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 gb->fetcher_y = y;
             }
             gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
+            if (gb->vram_ppu_blocked) {
+                gb->current_tile = 0xFF;
+            }
             if (GB_is_cgb(gb)) {
                 /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
                  This probably means the CGB has a 16-bit data bus for the VRAM. */
                 gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + y / 8 * 32 + 0x2000];
+                if (gb->vram_ppu_blocked) {
+                    gb->current_tile_attributes = 0xFF;
+                }
             }
             gb->fetcher_x++;
             gb->fetcher_x &= 0x1f;
@@ -615,7 +626,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 y_flip = 0x7;
             }
             gb->current_tile_data[0] =
-            gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
+                gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
+            if (gb->vram_ppu_blocked) {
+                gb->current_tile_data[0] = 0xFF;
+            }
         }
         gb->fetcher_state++;
         break;
@@ -642,7 +656,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 y_flip = 0x7;
             }
             gb->current_tile_data[1] =
-            gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
+                gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
+            if (gb->vram_ppu_blocked) {
+                gb->current_tile_data[1] = 0xFF;
+            }
         }
         gb->fetcher_state++;
         break;
@@ -913,7 +930,11 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->cycles_for_line += 6;
                     GB_SLEEP(gb, display, 20, 6);
                     /* TODO: what does the PPU read if DMA is active? */
-                    GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
+                    const GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
+                    if (gb->oam_ppu_blocked) {
+                        static const GB_object_t blocked = {0xFF, 0xFF, 0xFF, 0xFF};
+                        object = &blocked;
+                    }
                     
                     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
                     uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
@@ -933,10 +954,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     if (gb->cgb_mode) {
                         palette = object->flags & 0x7;
                     }
-                    
                     fifo_overlay_object_row(&gb->oam_fifo,
-                                            gb->vram[line_address],
-                                            gb->vram[line_address + 1],
+                                            gb->vram_ppu_blocked? 0xFF : gb->vram[line_address],
+                                            gb->vram_ppu_blocked? 0xFF : gb->vram[line_address + 1],
                                             palette,
                                             object->flags & 0x80,
                                             gb->object_priority == GB_OBJECT_PRIORITY_INDEX? gb->visible_objs[gb->n_visible_objs - 1] : 0,

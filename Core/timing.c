@@ -139,6 +139,11 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 
 static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
+    if (gb->stopped) {
+        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        return;
+    }
+    
     GB_STATE_MACHINE(gb, div, cycles, 1) {
         GB_STATE(gb, div, 1);
         GB_STATE(gb, div, 2);
@@ -213,8 +218,8 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
+    GB_timers_run(gb, cycles);
     if (!gb->stopped) {
-        GB_timers_run(gb, cycles);
         advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
     }
 
