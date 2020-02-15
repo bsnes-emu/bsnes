@@ -939,7 +939,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                                             gb->vram[line_address + 1],
                                             palette,
                                             object->flags & 0x80,
-                                            gb->cgb_mode? gb->visible_objs[gb->n_visible_objs - 1] : 0,
+                                            gb->object_priority == GB_OBJECT_PRIORITY_INDEX? gb->visible_objs[gb->n_visible_objs - 1] : 0,
                                             object->flags & 0x20);
                     
                     gb->n_visible_objs--;

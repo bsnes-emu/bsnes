@@ -11,6 +11,13 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
 void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value);
 void GB_STAT_update(GB_gameboy_t *gb);
 void GB_lcd_off(GB_gameboy_t *gb);
+
+enum {
+  GB_OBJECT_PRIORITY_UNDEFINED, // For save state compatibility
+  GB_OBJECT_PRIORITY_X,
+  GB_OBJECT_PRIORITY_INDEX,
+};
+
 #endif
 
 typedef enum {

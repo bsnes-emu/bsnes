@@ -185,7 +185,7 @@ enum {
     // Unfortunately it is not readable or writable after boot has finished, so research of this
     // register is quite limited. The value written to this register, however, can be controlled
     // in some cases.
-    GB_IO_DMG_EMULATION = 0x4c,
+    GB_IO_MODE = 0x4c,
 
     /* General CGB features */
     GB_IO_KEY1       = 0x4d, // CGB Mode Only - Prepare Speed Switch
@@ -212,9 +212,7 @@ enum {
     GB_IO_BGPD       = 0x69, // CGB Mode Only - Background Palette Data
     GB_IO_OBPI       = 0x6a, // CGB Mode Only - Sprite Palette Index
     GB_IO_OBPD       = 0x6b, // CGB Mode Only - Sprite Palette Data
-
-    // 1 is written for DMG ROMs on a CGB. Does not appear to have an effect.
-    GB_IO_DMG_EMULATION_INDICATION   = 0x6c, // (FEh) Bit 0 (Read/Write)
+    GB_IO_OBJECT_PRIORITY = 0x6c, // Affects object priority (X based or index based)
 
     /* Missing */
 
@@ -516,6 +514,7 @@ struct GB_gameboy_internal_s {
         bool cgb_palettes_blocked;
         uint8_t current_lcd_line; // The LCD can go out of sync since the vsync signal is skipped in some cases.
         uint32_t cycles_in_stop_mode;
+        uint8_t object_priority;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

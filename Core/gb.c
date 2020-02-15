@@ -1008,11 +1008,13 @@ void GB_reset(GB_gameboy_t *gb)
         gb->vram_size = 0x2000 * 2;
         memset(gb->vram, 0, gb->vram_size);
         gb->cgb_mode = true;
+        gb->object_priority = GB_OBJECT_PRIORITY_INDEX;
     }
     else {
         gb->ram_size = 0x2000;
         gb->vram_size = 0x2000;
         memset(gb->vram, 0, gb->vram_size);
+        gb->object_priority = GB_OBJECT_PRIORITY_X;
         
         update_dmg_palette(gb);
     }
