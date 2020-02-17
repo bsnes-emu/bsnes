@@ -264,15 +264,13 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
             uint8_t new_r, new_g, new_b;
             if (agb) {
-                new_r = (r * 7 + g * 1) / 8;
-                new_g = (g * 3 + b * 1) / 4;
-                new_b = (b * 7 + r * 1) / 8;
+                new_g = (g * 6 + b * 1) / 7;
             }
             else {
                 new_g = (g * 3 + b) / 4;
-                new_r = r;
-                new_b = b;
             }
+            new_r = r;
+            new_b = b;
             if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
                 uint8_t old_max = MAX(r, MAX(g, b));
                 uint8_t new_max = MAX(new_r, MAX(new_g, new_b));
