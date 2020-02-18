@@ -88,14 +88,6 @@ auto ICD::joypWrite(bool p14, bool p15) -> void {
 
   if(packetLock == 1) {
     if(p14 == 0 && p15 == 1) {
-      if((joypPacket[0] >> 3) == 0x11) {
-        mltReq = joypPacket[1] & 3;
-        if(mltReq == 0) joypID &= 0;  //1-player mode
-        if(mltReq == 1) joypID &= 1;  //2-player mode
-        if(mltReq == 2) joypID &= 3;  //4-player mode (unverified; but the most likely behavior)
-        if(mltReq == 3) joypID &= 3;  //4-player mode
-      }
-
       if(packetSize < 64) packet[packetSize++] = joypPacket;
       packetLock = 0;
       pulseLock = 1;

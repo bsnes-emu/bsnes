@@ -24,7 +24,7 @@ SettingsWindow& settingsWindow = Instances::settingsWindow();
 auto Settings::load() -> void {
   Markup::Node::operator=(BML::unserialize(string::read(location), " "));
   process(true);
-  file::write(locate("settings.bml"), BML::serialize(*this, " "));
+  save();
 }
 
 auto Settings::save() -> void {

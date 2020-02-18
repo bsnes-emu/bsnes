@@ -55,6 +55,13 @@ auto ICD::writeIO(uint addr, uint8 data) -> void {
     if((r6003 & 0x80) == 0x00 && (data & 0x80) == 0x80) {
       power(true);  //soft reset
     }
+
+    mltReq = data >> 4 & 3;
+    if(mltReq == 0) joypID &= ~0;  //1-player mode
+    if(mltReq == 1) joypID &= ~1;  //2-player mode
+    if(mltReq == 2) joypID &= ~3;  //4-player mode (unverified; but the most likely behavior)
+    if(mltReq == 3) joypID &= ~3;  //4-player mode
+
     auto frequency = clockFrequency();
     switch(data & 3) {
     case 0: this->frequency = frequency / 4; break;  //fast (glitchy, even on real hardware)
