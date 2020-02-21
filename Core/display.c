@@ -761,6 +761,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 38);
         GB_STATE(gb, display, 39);
         GB_STATE(gb, display, 40);
+        GB_STATE(gb, display, 41);
 
     }
     
@@ -956,8 +957,16 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         }
                     }
                     
-                    gb->cycles_for_line += 4;
-                    GB_SLEEP(gb, display, 20, 4);
+                    advance_fetcher_state_machine(gb);
+                    gb->cycles_for_line++;
+                    GB_SLEEP(gb, display, 41, 1);
+                    if (gb->object_fetch_aborted) {
+                        goto abort_fetching_object;
+                    }
+                    advance_fetcher_state_machine(gb);
+                    
+                    gb->cycles_for_line += 3;
+                    GB_SLEEP(gb, display, 20, 3);
                     if (gb->object_fetch_aborted) {
                         goto abort_fetching_object;
                     }
