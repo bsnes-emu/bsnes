@@ -581,18 +581,20 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
+            uint8_t x = gb->in_window? gb->fetcher_x :
+             (((gb->io_registers[GB_IO_SCX] / 8) + (gb->position_in_line / 8) + 1) & 0x1F);
             if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
             }
-            gb->current_tile = gb->vram[map + gb->fetcher_x + y / 8 * 32];
+            gb->current_tile = gb->vram[map + x + y / 8 * 32];
             if (gb->vram_ppu_blocked) {
                 gb->current_tile = 0xFF;
             }
             if (GB_is_cgb(gb)) {
                 /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
                  This probably means the CGB has a 16-bit data bus for the VRAM. */
-                gb->current_tile_attributes = gb->vram[map + gb->fetcher_x + y / 8 * 32 + 0x2000];
+                gb->current_tile_attributes = gb->vram[map + x + y / 8 * 32 + 0x2000];
                 if (gb->vram_ppu_blocked) {
                     gb->current_tile_attributes = 0xFF;
                 }
