@@ -441,7 +441,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
         oam_fifo_item = fifo_pop(&gb->oam_fifo);
-        /* Todo: Verify access timings */
         if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
             draw_oam = true;
             bg_priority |= oam_fifo_item->bg_priority;
@@ -457,7 +456,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     /* Mixing */
     
-    /* Todo: Verify access timings */
     if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
         if (gb->cgb_mode) {
             bg_priority = false;
