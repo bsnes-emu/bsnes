@@ -19,6 +19,7 @@ typedef enum {
     GB_CONFLICT_PALETTE_DMG,
     GB_CONFLICT_PALETTE_CGB,
     GB_CONFLICT_DMG_LCDC,
+    GB_CONFLICT_SGB_LCDC,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -56,7 +57,7 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
 static const GB_conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
-    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_LCDC] = GB_CONFLICT_SGB_LCDC,
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
     [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
     
@@ -207,16 +208,9 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
             
-            if (gb->current_lcd_line == 108) {
-                
-            }
-            
             /* Handle disabling objects while already fetching an object */
             if ((old_value & 2) && !(value & 2)) {
-                if (gb->display_state == 27) {
-                    old_value &= ~2;
-                }
-                else if (gb->display_state == 20 || gb->display_state == 28) {
+                if (gb->during_object_fetch) {
                     gb->cycles_for_line -= gb->display_cycles;
                     gb->display_cycles = 0;
                     gb->object_fetch_aborted = true;
@@ -231,10 +225,34 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             /* Handle disabling objects while already fetching an object */
             if ((old_value & 2) && !(value & 2)) {
-                if (gb->display_state == 27) {
-                    old_value &= ~2;
+                if (gb->during_object_fetch) {
+                    gb->cycles_for_line -= gb->display_cycles;
+                    gb->display_cycles = 0;
+                    gb->object_fetch_aborted = true;
                 }
-                else if (gb->display_state == 20 || gb->display_state == 28) {
+            }
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 5;
+            return;
+        }
+            
+        case GB_CONFLICT_SGB_LCDC: {
+            /* Simplified version of the above */
+            
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
+            /* Handle disabling objects while already fetching an object */
+            if ((old_value & 2) && !(value & 2)) {
+                if (gb->during_object_fetch) {
+                    gb->cycles_for_line -= gb->display_cycles;
+                    gb->display_cycles = 0;
+                    gb->object_fetch_aborted = true;
+                }
+            }
+            GB_advance_cycles(gb, 1);
+            /* Handle disabling objects while already fetching an object */
+            if ((old_value & 2) && !(value & 2)) {
+                if (gb->during_object_fetch) {
                     gb->cycles_for_line -= gb->display_cycles;
                     gb->display_cycles = 0;
                     gb->object_fetch_aborted = true;

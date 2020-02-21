@@ -519,6 +519,7 @@ struct GB_gameboy_internal_s {
         bool vram_ppu_blocked;
         bool cgb_palettes_ppu_blocked;
         bool object_fetch_aborted;
+        bool during_object_fetch;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
