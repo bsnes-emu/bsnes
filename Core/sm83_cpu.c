@@ -18,6 +18,7 @@ typedef enum {
     GB_CONFLICT_STAT_DMG,
     GB_CONFLICT_PALETTE_DMG,
     GB_CONFLICT_PALETTE_CGB,
+    GB_CONFLICT_READ_DMG_LCDC,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -37,7 +38,7 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
 static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
-    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_LCDC] = GB_CONFLICT_READ_DMG_LCDC,
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
     [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
  
@@ -190,6 +191,17 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, gb->pending_cycles - 2);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 6;
+            return;
+        }
+            
+        case GB_CONFLICT_READ_DMG_LCDC: {
+            /* Seems to be affected by screen? Both my DMG (B, blob) and Game Boy Light behave this way though. */
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
+            GB_write_memory(gb, addr, old_value | (value & 1));
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 5;
             return;
         }
     }
