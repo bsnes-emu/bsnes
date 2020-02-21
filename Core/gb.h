@@ -520,6 +520,7 @@ struct GB_gameboy_internal_s {
         bool cgb_palettes_ppu_blocked;
         bool object_fetch_aborted;
         bool during_object_fetch;
+        uint16_t object_low_line_address;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

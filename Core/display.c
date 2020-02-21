@@ -680,6 +680,30 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
     gb->fetcher_state &= 7;
 }
 
+static uint16_t get_object_line_address(GB_gameboy_t *gb, const GB_object_t *object)
+{
+    /* TODO: what does the PPU read if DMA is active? */
+    if (gb->oam_ppu_blocked) {
+        static const GB_object_t blocked = {0xFF, 0xFF, 0xFF, 0xFF};
+        object = &blocked;
+    }
+    
+    bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
+    uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
+    
+    if (object->flags & 0x40) { /* Flip Y */
+        tile_y ^= height_16? 0xF : 7;
+    }
+    
+    /* Todo: I'm not 100% sure an access to OAM can't trigger the OAM bug while we're accessing this */
+    uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
+    
+    if (gb->cgb_mode && (object->flags & 0x8)) { /* Use VRAM bank 2 */
+        line_address += 0x2000;
+    }
+    return line_address;
+}
+
 /*
  TODO: It seems that the STAT register's mode bits are always "late" by 4 T-cycles.
        The PPU logic can be greatly simplified if that delay is simply emulated.
@@ -736,6 +760,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 37);
         GB_STATE(gb, display, 38);
         GB_STATE(gb, display, 39);
+        GB_STATE(gb, display, 40);
 
     }
     
@@ -931,42 +956,34 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         }
                     }
                     
-                    gb->cycles_for_line += 5;
-                    GB_SLEEP(gb, display, 20, 5);
+                    gb->cycles_for_line += 4;
+                    GB_SLEEP(gb, display, 20, 4);
                     if (gb->object_fetch_aborted) {
                         goto abort_fetching_object;
                     }
-                    gb->during_object_fetch = false;
+                    
+                    gb->object_low_line_address = get_object_line_address(gb, &objects[gb->visible_objs[gb->n_visible_objs - 1]]);
+                    
                     gb->cycles_for_line++;
                     GB_SLEEP(gb, display, 39, 1);
+                    if (gb->object_fetch_aborted) {
+                        goto abort_fetching_object;
+                    }
+                    
+                    gb->during_object_fetch = false;
+                    gb->cycles_for_line++;
+                    GB_SLEEP(gb, display, 40, 1);
 
-                    /* TODO: what does the PPU read if DMA is active? */
                     const GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
-                    if (gb->oam_ppu_blocked) {
-                        static const GB_object_t blocked = {0xFF, 0xFF, 0xFF, 0xFF};
-                        object = &blocked;
-                    }
                     
-                    bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
-                    uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
-                    
-                    if (object->flags & 0x40) { /* Flip Y */
-                        tile_y ^= height_16? 0xF : 7;
-                    }
-                    
-                    /* Todo: I'm not 100% sure an access to OAM can't trigger the OAM bug while we're accessing this */
-                    uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
-                    
-                    if (gb->cgb_mode && (object->flags & 0x8)) { /* Use VRAM bank 2 */
-                        line_address += 0x2000;
-                    }
+                    uint16_t line_address = get_object_line_address(gb, object);
                     
                     uint8_t palette = (object->flags & 0x10) ? 1 : 0;
                     if (gb->cgb_mode) {
                         palette = object->flags & 0x7;
                     }
                     fifo_overlay_object_row(&gb->oam_fifo,
-                                            gb->vram_ppu_blocked? 0xFF : gb->vram[line_address],
+                                            gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address],
                                             gb->vram_ppu_blocked? 0xFF : gb->vram[line_address + 1],
                                             palette,
                                             object->flags & 0x80,

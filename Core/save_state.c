@@ -265,6 +265,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     gb->bg_fifo.write_end &= 0xF;
     gb->oam_fifo.read_end &= 0xF;
     gb->oam_fifo.write_end &= 0xF;
+    gb->object_low_line_address &= gb->vram_size & ~1;
     
     if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
         gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
@@ -374,6 +375,7 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     gb->bg_fifo.write_end &= 0xF;
     gb->oam_fifo.read_end &= 0xF;
     gb->oam_fifo.write_end &= 0xF;
+    gb->object_low_line_address &= gb->vram_size & ~1;
     
     if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
         gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
