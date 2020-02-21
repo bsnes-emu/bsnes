@@ -912,6 +912,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         advance_fetcher_state_machine(gb);
                         gb->cycles_for_line++;
                         GB_SLEEP(gb, display, 27, 1);
+                        if (!(gb->io_registers[GB_IO_LCDC] & 2) && !GB_is_cgb(gb)) {
+                            goto abort_fetching_object;
+                        }
                     }
                     
                     /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
@@ -920,11 +923,19 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             gb->cycles_for_line += gb->extra_penalty_for_sprite_at_0;
                             GB_SLEEP(gb, display, 28, gb->extra_penalty_for_sprite_at_0);
                             gb->extra_penalty_for_sprite_at_0 = 0;
+                            if (gb->object_fetch_aborted) {
+                                gb->object_fetch_aborted = false;
+                                goto abort_fetching_object;
+                            }
                         }
                     }
                     
                     gb->cycles_for_line += 6;
                     GB_SLEEP(gb, display, 20, 6);
+                    if (gb->object_fetch_aborted) {
+                        gb->object_fetch_aborted = false;
+                        goto abort_fetching_object;
+                    }
                     /* TODO: what does the PPU read if DMA is active? */
                     const GB_object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
                     if (gb->oam_ppu_blocked) {
@@ -961,6 +972,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     gb->n_visible_objs--;
                 }
                 
+abort_fetching_object:
                 /* Handle window */
                 /* Todo: Timing (Including penalty and access timings) not verified by test ROM */
                 if (!gb->in_window && window_enabled(gb) &&

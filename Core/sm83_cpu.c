@@ -195,14 +195,51 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         }
             
         case GB_CONFLICT_DMG_LCDC: {
-            /* Seems to be affected by screen? Both my DMG (B, blob) and Game Boy Light behave this way though. */
+            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by it. Both my DMG (B, blob) and Game Boy Light behave this way though.
+             
+               Additionally, LCDC.1 is very nasty because on the it is read both by the FIFO when popping pixels,
+               and the sprite-fetching state machine, and both behave differently when it comes to access conflicts.
+               Hacks ahead.
+             */
+            
+            
+            
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
+            
+            if (gb->current_lcd_line == 108) {
+                
+            }
+            
+            /* Handle disabling objects while already fetching an object */
+            if ((old_value & 2) && !(value & 2)) {
+                if (gb->display_state == 27) {
+                    old_value &= ~2;
+                }
+                else if (gb->display_state == 20 || gb->display_state == 28) {
+                    gb->cycles_for_line -= gb->display_cycles;
+                    gb->display_cycles = 0;
+                    gb->object_fetch_aborted = true;
+                }
+            }
+            
             if (/* gb->model != GB_MODEL_MGB && */ gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
                 old_value &= ~2;
             }
+            
             GB_write_memory(gb, addr, old_value | (value & 1));
             GB_advance_cycles(gb, 1);
+            /* Handle disabling objects while already fetching an object */
+            if ((old_value & 2) && !(value & 2)) {
+                if (gb->display_state == 27) {
+                    old_value &= ~2;
+                }
+                else if (gb->display_state == 20 || gb->display_state == 28) {
+                    gb->cycles_for_line -= gb->display_cycles;
+                    gb->display_cycles = 0;
+                    gb->object_fetch_aborted = true;
+                }
+            }
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
             return;
