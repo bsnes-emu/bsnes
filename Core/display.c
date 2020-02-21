@@ -582,7 +582,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
             uint8_t x = gb->in_window? gb->fetcher_x :
-             (((gb->io_registers[GB_IO_SCX] / 8) + (gb->position_in_line / 8) + 1) & 0x1F);
+             (((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F);
             if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
@@ -914,7 +914,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
           
-            gb->fetcher_x = ((gb->io_registers[GB_IO_SCX]) / 8) & 0x1f;
+            gb->fetcher_x = 0;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
 
             
