@@ -1005,7 +1005,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef) data);
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
     CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
     
     CGImageRef iref = CGImageCreate(width,
