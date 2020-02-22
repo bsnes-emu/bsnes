@@ -472,7 +472,7 @@ struct GB_gameboy_internal_s {
         uint8_t position_in_line;
         bool stat_interrupt_line;
         uint8_t effective_scx;
-        uint8_t wy_diff;
+        GB_PADDING(uint8_t,wy_diff);
         /* The LCDC will skip the first frame it renders after turning it on.
            On the CGB, a frame is not skipped if the previous frame was skipped as well.
            See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
@@ -489,7 +489,7 @@ struct GB_gameboy_internal_s {
         bool vram_read_blocked;
         bool oam_write_blocked;
         bool vram_write_blocked;
-        bool window_disabled_while_active;
+        GB_PADDING(bool, window_disabled_while_active);
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
@@ -502,7 +502,7 @@ struct GB_gameboy_internal_s {
         uint8_t fetcher_state;
         bool bg_fifo_paused;
         bool oam_fifo_paused;
-        bool in_window;
+        GB_PADDING(bool, in_window);
         uint8_t visible_objs[10];
         uint8_t obj_comparators[10];
         uint8_t n_visible_objs;

@@ -111,16 +111,6 @@ typedef struct __attribute__((packed)) {
     uint8_t flags;
 } GB_object_t;
 
-static bool window_enabled(GB_gameboy_t *gb)
-{
-    if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
-        if (!gb->cgb_mode) {
-            return false;
-        }
-    }
-    return (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] < 167;
-}
-
 static void display_vblank(GB_gameboy_t *gb)
 {  
     gb->vblank_just_occured = true;
@@ -388,9 +378,6 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->vram_write_blocked = false;
     gb->cgb_palettes_blocked = false;
     
-    /* Reset window rendering state */
-    gb->wy_diff = 0;
-    gb->window_disabled_while_active = false;
     gb->current_line = 0;
     gb->ly_for_comparison = 0;
     
@@ -543,7 +530,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
 
 static inline uint8_t fetcher_y(GB_gameboy_t *gb)
 {
-    return gb->current_line + (gb->in_window? - gb->io_registers[GB_IO_WY] - gb->wy_diff : gb->io_registers[GB_IO_SCY]);
+    return gb->current_line + gb->io_registers[GB_IO_SCY];
 }
 
 static void advance_fetcher_state_machine(GB_gameboy_t *gb)
@@ -572,17 +559,16 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             uint16_t map = 0x1800;
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-            if (gb->io_registers[GB_IO_LCDC] & 0x08 && !gb->in_window) {
+            if (gb->io_registers[GB_IO_LCDC] & 0x08 /* && !gb->in_window */) {
                 map = 0x1C00;
             }
-            else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
+            /* else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
                 map = 0x1C00;
-            }
+            } */
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
-            uint8_t x = gb->in_window? gb->fetcher_x :
-             (((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F);
+            uint8_t x = ((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F;
             if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
@@ -922,7 +908,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->fetcher_state = 0;
             gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
-            gb->in_window = false;
             while (true) {
                 /* Handle objects */
                 /* When the sprite enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
@@ -1009,17 +994,7 @@ abort_fetching_object:
                 gb->during_object_fetch = false;
                 
                 /* Handle window */
-                /* Todo: Timing (Including penalty and access timings) not verified by test ROM */
-                if (!gb->in_window && window_enabled(gb) &&
-                    gb->current_line >= gb->io_registers[GB_IO_WY] + gb->wy_diff &&
-                    (uint8_t)(gb->position_in_line + 7) == gb->io_registers[GB_IO_WX]) {
-                    gb->in_window = true;
-                    fifo_clear(&gb->bg_fifo);
-                    gb->bg_fifo_paused = true;
-                    gb->oam_fifo_paused = true;
-                    gb->fetcher_x = 0;
-                    gb->fetcher_state = 0;
-                }
+                /* TBD */
                 
                 render_pixel_if_possible(gb);
                 advance_fetcher_state_machine(gb);
@@ -1154,9 +1129,6 @@ abort_fetching_object:
         GB_SLEEP(gb, display, 17, LINE_LENGTH - 24);
         
         
-        /* Reset window rendering state */
-        gb->wy_diff = 0;
-        gb->window_disabled_while_active = false;
         gb->current_line = 0;
         // TODO: not the correct timing
         gb->current_lcd_line = 0;
@@ -1342,32 +1314,4 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
         }
     }
     return count;
-}
-
-/* Called when a write might enable or disable the window */
-void GB_window_related_write(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
-{
-    bool before = window_enabled(gb);
-    gb->io_registers[addr] = value;
-    bool after = window_enabled(gb);
-    
-    if (before != after && gb->current_line < LINES) {
-        /* Window was disabled or enabled outside of vblank */
-        if (gb->current_line >= gb->io_registers[GB_IO_WY]) {
-            if (after) {
-                if (!gb->window_disabled_while_active) {
-                    /* Window was turned on for the first time this frame while LY > WY,
-                       should start window in the next line */
-                    gb->wy_diff = gb->current_line + 1 - gb->io_registers[GB_IO_WY];
-                }
-                else {
-                    gb->wy_diff += gb->current_line;
-                }
-            }
-            else {
-                gb->wy_diff -= gb->current_line;
-                gb->window_disabled_while_active = true;
-            }
-        }
-    }
 }

@@ -646,8 +646,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         /* Hardware registers */
         switch (addr & 0xFF) {
             case GB_IO_WX:
-                GB_window_related_write(gb, addr & 0xFF, value);
-                break;
             case GB_IO_IF:
             case GB_IO_SCX:
             case GB_IO_SCY:
@@ -740,8 +738,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);
                 }
-                /* Writing to LCDC might enable to disable the window, so we write it via GB_window_related_write */
-                GB_window_related_write(gb, addr & 0xFF, value);
+                gb->io_registers[GB_IO_LCDC] = value;
                 return;
 
             case GB_IO_STAT:
