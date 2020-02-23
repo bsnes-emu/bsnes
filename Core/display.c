@@ -530,7 +530,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
 
 static inline uint8_t fetcher_y(GB_gameboy_t *gb)
 {
-    return gb->current_line + gb->io_registers[GB_IO_SCY];
+    return gb->wx_triggered? gb->window_y : gb->current_line + gb->io_registers[GB_IO_SCY];
 }
 
 static void advance_fetcher_state_machine(GB_gameboy_t *gb)
@@ -539,6 +539,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_GET_TILE,
         GB_FETCHER_GET_TILE_DATA_LOWER,
         GB_FETCHER_GET_TILE_DATA_HIGH,
+        GB_ADVANCE_TILES,
         GB_FETCHER_PUSH,
         GB_FETCHER_SLEEP,
     } fetcher_step_t;
@@ -550,7 +551,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_GET_TILE_DATA_LOWER,
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE_DATA_HIGH,
-        GB_FETCHER_SLEEP,
+        GB_ADVANCE_TILES,
         GB_FETCHER_PUSH,
     };
     
@@ -558,17 +559,27 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         case GB_FETCHER_GET_TILE: {
             uint16_t map = 0x1800;
             
+            if (!(gb->io_registers[GB_IO_LCDC] & 0x20)) {
+                gb->wx_triggered = false;
+            }
+            
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-            if (gb->io_registers[GB_IO_LCDC] & 0x08 /* && !gb->in_window */) {
+            if (gb->io_registers[GB_IO_LCDC] & 0x08  && !gb->wx_triggered) {
                 map = 0x1C00;
             }
-            /* else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->in_window) {
+            else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->wx_triggered) {
                 map = 0x1C00;
-            } */
+            }
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             uint8_t y = fetcher_y(gb);
-            uint8_t x = ((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F;
+            uint8_t x = 0;
+            if (gb->wx_triggered) {
+                x = gb->window_tile_x;
+            }
+            else {
+                x = ((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F;
+            }
             if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
@@ -585,8 +596,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                     gb->current_tile_attributes = 0xFF;
                 }
             }
-            gb->fetcher_x++;
-            gb->fetcher_x &= 0x1f;
         }
         gb->fetcher_state++;
         break;
@@ -647,6 +656,19 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         }
         gb->fetcher_state++;
         break;
+            
+        case GB_ADVANCE_TILES: {
+            if (gb->wx_triggered) {
+                gb->window_tile_x++;
+                gb->window_tile_x &= 0x1f;
+            }
+            else {
+                gb->fetcher_x++;
+                gb->fetcher_x &= 0x1f;
+            }
+            gb->fetcher_state++;
+        }
+            
             
         case GB_FETCHER_PUSH: {
             if (fifo_size(&gb->bg_fifo) > 0) break;
@@ -767,6 +789,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 
     /* Handle mode 2 on the very first line 0 */
     gb->current_line = 0;
+    gb->window_y = -1;
+    /* Todo: verify timings */
+    if (gb->io_registers[GB_IO_WY] == 0) {
+        gb->wy_triggered = true;
+    }
+    else {
+        gb->wy_triggered = false;
+    }
+    
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
     gb->mode_for_interrupt = -1;
@@ -813,7 +844,16 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     while (true) {
         /* Lines 0 - 143 */
+        gb->window_y = -1;
         for (; gb->current_line < LINES; gb->current_line++) {
+            gb->wx_triggered = false;
+            /* Todo: verify timings */
+            if ((gb->io_registers[GB_IO_WY] == gb->current_line ||
+                (gb->current_line != 0 && gb->io_registers[GB_IO_WY] == gb->current_line - 1))) {
+                gb->wy_triggered = true;
+            }
+            gb->window_tile_x = 0;
+            
             gb->oam_write_blocked = GB_is_cgb(gb) && !gb->cgb_double_speed;
             gb->accessed_oam_row = 0;
             
@@ -994,7 +1034,18 @@ abort_fetching_object:
                 gb->during_object_fetch = false;
                 
                 /* Handle window */
-                /* TBD */
+                /* Todo: verify timings */
+                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
+                    if (gb->io_registers[GB_IO_WX] == gb->position_in_line + 7 ||
+                          gb->io_registers[GB_IO_WX] == gb->position_in_line + 6) {
+                        gb->wx_triggered = true;
+                        gb->window_y++;
+                        fifo_clear(&gb->bg_fifo);
+                        gb->bg_fifo_paused = true;
+                        gb->oam_fifo_paused = true;
+                        gb->fetcher_state = 0;
+                    }
+                }
                 
                 render_pixel_if_possible(gb);
                 advance_fetcher_state_machine(gb);
@@ -1130,6 +1181,15 @@ abort_fetching_object:
         
         
         gb->current_line = 0;
+        /* Todo: verify timings */
+        if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
+            (gb->io_registers[GB_IO_WY] == 0)) {
+            gb->wy_triggered = true;
+        }
+        else {
+            gb->wy_triggered = false;
+        }
+        
         // TODO: not the correct timing
         gb->current_lcd_line = 0;
         if (gb->icd_vreset_callback) {
