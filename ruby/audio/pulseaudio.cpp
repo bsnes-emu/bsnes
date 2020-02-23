@@ -93,7 +93,7 @@ private:
       if(!PA_STREAM_IS_GOOD(streamState)) return false;
     } while(streamState != PA_STREAM_READY);
 
-    pa_buffer_attr* attributes = pa_stream_get_buffer_attr(_stream);
+    const pa_buffer_attr* attributes = pa_stream_get_buffer_attr(_stream);
     _period = attributes->minreq;
     _bufferSize = attributes->tlength;
     _offset = 0;
