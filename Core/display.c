@@ -539,7 +539,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_GET_TILE,
         GB_FETCHER_GET_TILE_DATA_LOWER,
         GB_FETCHER_GET_TILE_DATA_HIGH,
-        GB_ADVANCE_TILES,
         GB_FETCHER_PUSH,
         GB_FETCHER_SLEEP,
     } fetcher_step_t;
@@ -551,8 +550,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_GET_TILE_DATA_LOWER,
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE_DATA_HIGH,
-        GB_ADVANCE_TILES,
         GB_FETCHER_PUSH,
+        GB_FETCHER_PUSH, // Compatibility
     };
     
     switch (fetcher_state_machine[gb->fetcher_state]) {
@@ -657,7 +656,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         gb->fetcher_state++;
         break;
             
-        case GB_ADVANCE_TILES: {
+            
+        case GB_FETCHER_PUSH: {
+            if (fifo_size(&gb->bg_fifo) > 0) break;
+            
             if (gb->wx_triggered) {
                 gb->window_tile_x++;
                 gb->window_tile_x &= 0x1f;
@@ -666,17 +668,12 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 gb->fetcher_x++;
                 gb->fetcher_x &= 0x1f;
             }
-            gb->fetcher_state++;
-        }
             
-            
-        case GB_FETCHER_PUSH: {
-            if (fifo_size(&gb->bg_fifo) > 0) break;
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
             gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
-            gb->fetcher_state++;
+            gb->fetcher_state = 0;
         }
         break;
             
@@ -984,12 +981,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         }
                     }
                     
+                    /* TODO: Can this be deleted?  { */
                     advance_fetcher_state_machine(gb);
                     gb->cycles_for_line++;
                     GB_SLEEP(gb, display, 41, 1);
                     if (gb->object_fetch_aborted) {
                         goto abort_fetching_object;
                     }
+                    /* } */
+                    
                     advance_fetcher_state_machine(gb);
                     
                     gb->cycles_for_line += 3;
@@ -1036,8 +1036,11 @@ abort_fetching_object:
                 /* Handle window */
                 /* Todo: verify timings */
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
-                    if (gb->io_registers[GB_IO_WX] == gb->position_in_line + 7 ||
-                          gb->io_registers[GB_IO_WX] == gb->position_in_line + 6) {
+                    if (gb->io_registers[GB_IO_WX] >= 166) {
+                        // Too late to enable the window
+                    }
+                    else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
+                          gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6)) {
                         gb->wx_triggered = true;
                         gb->window_y++;
                         fifo_clear(&gb->bg_fifo);
