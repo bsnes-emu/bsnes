@@ -20,6 +20,9 @@ auto EmulatorSettings::create() -> void {
   autoLoadStateOnLoad.setText("Auto-resume on load").setChecked(settings.emulator.autoLoadStateOnLoad).onToggle([&] {
     settings.emulator.autoLoadStateOnLoad = autoLoadStateOnLoad.checked();
   });
+  nativeFileDialogs.setText("Use native file dialogs").setChecked(settings.general.nativeFileDialogs).onToggle([&] {
+    settings.general.nativeFileDialogs = nativeFileDialogs.checked();
+  });
   optionsSpacer.setColor({192, 192, 192});
 
   fastForwardLabel.setText("Fast Forward").setFont(Font().setBold());

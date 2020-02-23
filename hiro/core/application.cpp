@@ -10,8 +10,8 @@ auto Application::doMain() -> void {
 }
 
 auto Application::exit() -> void {
-  quit();
-  ::exit(EXIT_SUCCESS);
+  state().quit = true;
+  return pApplication::exit();
 }
 
 auto Application::font() -> Font {

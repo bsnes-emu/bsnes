@@ -57,6 +57,10 @@ struct VideoXVideo : VideoDriver {
     return initialize();
   }
 
+  auto focused() -> bool override {
+    return true;
+  }
+
   auto clear() -> void override {
     memory::fill<uint32_t>(_buffer, _bufferWidth * _bufferHeight);
     //clear twice in case video is double buffered ...

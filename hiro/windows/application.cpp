@@ -6,6 +6,13 @@ static auto Application_keyboardProc(HWND, UINT, WPARAM, LPARAM) -> bool;
 static auto Application_processDialogMessage(MSG&) -> void;
 static auto CALLBACK Window_windowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
+auto pApplication::exit() -> void {
+  quit();
+  auto processID = GetCurrentProcessId();
+  auto handle = OpenProcess(SYNCHRONIZE | PROCESS_TERMINATE, true, processID);
+  TerminateProcess(handle, 0);
+}
+
 auto pApplication::modal() -> bool {
   return state().modalCount > 0;
 }

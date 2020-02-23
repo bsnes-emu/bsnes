@@ -9,16 +9,12 @@
 namespace nall {
 
 struct DML {
-  inline auto title() const -> string { return state.title; }
-  inline auto subtitle() const -> string { return state.subtitle; }
-  inline auto description() const -> string { return state.description; }
-  inline auto content() const -> string { return state.output; }
+  auto content() const -> string { return state.output; }
 
   auto& setAllowHTML(bool allowHTML) { settings.allowHTML = allowHTML; return *this; }
-  auto& setHost(const string& hostname) { settings.host = {hostname, "/"}; return *this; }
+  auto& setHost(const string& hostname) { settings.host = hostname; return *this; }
   auto& setPath(const string& pathname) { settings.path = pathname; return *this; }
   auto& setReader(const function<string (string)>& reader) { settings.reader = reader; return *this; }
-  auto& setSectioned(bool sectioned) { settings.sectioned = sectioned; return *this; }
 
   auto parse(const string& filedata, const string& pathname) -> string;
   auto parse(const string& filename) -> string;
@@ -28,18 +24,13 @@ struct DML {
 private:
   struct Settings {
     bool allowHTML = true;
-    string host = "localhost/";
+    string host = "localhost";
     string path;
     function<string (string)> reader;
-    bool sectioned = true;
   } settings;
 
   struct State {
-    string title;
-    string subtitle;
-    string description;
     string output;
-    uint sections = 0;
   } state;
 
   struct Attribute {
@@ -52,6 +43,7 @@ private:
   auto parseBlock(string& block, const string& pathname, uint depth) -> bool;
   auto count(const string& text, char value) -> uint;
 
+  auto address(string text) -> string;
   auto escape(const string& text) -> string;
   auto markup(const string& text) -> string;
 };
@@ -83,7 +75,6 @@ inline auto DML::parseDocument(const string& filedata, const string& pathname, u
 
   auto blocks = filedata.split("\n\n");
   for(auto& block : blocks) parseBlock(block, pathname, depth);
-  if(settings.sectioned && state.sections && depth == 0) state.output.append("</section>\n");
   return true;
 }
 
@@ -98,6 +89,18 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     parseDocument(document, Location::path(filename), depth + 1);
   }
 
+  //attribute
+  else if(block.beginsWith("? ")) {
+    for(auto n : range(lines.size())) {
+      if(!lines[n].beginsWith("? ")) continue;
+      auto part = lines[n].trimLeft("? ", 1L).split(":", 1L);
+      if(part.size() != 2) continue;
+      auto name = part[0].strip();
+      auto value = part[1].strip();
+      attributes.append({name, value});
+    }
+  }
+
   //html
   else if(block.beginsWith("<html>\n") && settings.allowHTML) {
     for(auto n : range(lines.size())) {
@@ -106,52 +109,18 @@ inline auto DML::parseBlock(string& block, const string& pathname, uint depth) -
     }
   }
 
-  //attribute
-  else if(block.beginsWith("! ")) {
-    for(auto& line : lines) {
-      auto parts = line.trimLeft("! ", 1L).split(":", 1L);
-      if(parts.size() == 2) attributes.append({parts[0].strip(), parts[1].strip()});
-    }
-  }
-
-  //description
-  else if(block.beginsWith("? ")) {
-    while(lines) {
-      state.description.append(lines.takeLeft().trimLeft("? ", 1L), " ");
-    }
-    state.description.strip();
-  }
-
-  //section
-  else if(block.beginsWith("# ")) {
-    if(settings.sectioned) {
-      if(state.sections++) state.output.append("</section>");
-      state.output.append("<section>");
-    }
-    auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L).strip();
-    auto data = markup(content[0]);
-    auto name = escape(content(1, data.hash()));
-    state.subtitle = content[0];
-    state.output.append("<h2 id=\"", name, "\">", data);
-    for(auto& line : lines) {
-      if(!line.beginsWith("# ")) continue;
-      state.output.append("<span>", line.trimLeft("# ", 1L), "</span>");
-    }
-    state.output.append("</h2>\n");
-  }
-
   //header
-  else if(auto depth = count(block, '=')) {
+  else if(auto depth = count(block, '#')) {
     auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L).strip();
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
-    if(depth <= 4) {
-      state.output.append("<h", depth + 2, " id=\"", name, "\">", data);
+    if(depth <= 5) {
+      state.output.append("<h", depth + 1, " id=\"", name, "\">", data);
       for(auto& line : lines) {
-        if(count(line, '=') != depth) continue;
+        if(count(line, '#') != depth) continue;
         state.output.append("<span>", slice(line, depth + 1), "</span>");
       }
-      state.output.append("</h", depth + 2, ">\n");
+      state.output.append("</h", depth + 1, ">\n");
     }
   }
 
@@ -239,6 +208,29 @@ inline auto DML::count(const string& text, char value) -> uint {
   return 0;
 }
 
+// . => domain
+// ./* => domain/*
+// ../subdomain => subdomain.domain
+// ../subdomain/* => subdomain.domain/*
+inline auto DML::address(string s) -> string {
+  if(s.beginsWith("../")) {
+    s.trimLeft("../", 1L);
+    if(auto p = s.find("/")) {
+      return {"//", s.slice(0, *p), ".", settings.host, s.slice(*p)};
+    } else {
+      return {"//", s, ".", settings.host};
+    }
+  }
+  if(s.beginsWith("./")) {
+    s.trimLeft(".", 1L);
+    return {"//", settings.host, s};
+  }
+  if(s == ".") {
+    return {"//", settings.host};
+  }
+  return s;
+}
+
 inline auto DML::escape(const string& text) -> string {
   string output;
   for(auto c : text) {
@@ -281,8 +273,8 @@ inline auto DML::markup(const string& s) -> string {
 
     if(link && !image && a == ']' && b == ']') {
       auto list = slice(s, link(), n - link()).split("::", 1L);
-      string uri = list.last();
-      string name = list.size() == 2 ? list.first() : list.last().split("//", 1L).last();
+      string uri = address(list.last());
+      string name = list.size() == 2 ? list.first() : uri.split("//", 1L).last();
 
       t.append("<a href=\"", escape(uri), "\">", escape(name), "</a>");
 
@@ -294,8 +286,8 @@ inline auto DML::markup(const string& s) -> string {
     if(image && !link && a == '}' && b == '}') {
       auto side = slice(s, image(), n - image()).split("}{", 1L);
       auto list = side(0).split("::", 1L);
-      string uri = list.last();
-      string name = list.size() == 2 ? list.first() : list.last().split("//", 1L).last();
+      string uri = address(list.last());
+      string name = list.size() == 2 ? list.first() : uri.split("//", 1L).last();
       list = side(1).split("; ");
       boolean link, title, caption;
       string width, height;
@@ -322,7 +314,6 @@ inline auto DML::markup(const string& s) -> string {
         if(link) t.append("<a href=\"", escape(uri), "\">");
         t.append("<img loading=\"lazy\" src=\"", escape(uri), "\" alt=\"", escape(name ? name : uri.hash()), "\"");
         if(title) t.append(" title=\"", escape(name), "\"");
-        if(width && height) t.append(" style=\"width: ", escape(width), "px; max-height: ", escape(height), "px;\"");
         if(width) t.append(" width=\"", escape(width), "\"");
         if(height) t.append(" height=\"", escape(height), "\"");
         t.append(">");

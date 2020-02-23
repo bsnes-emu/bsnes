@@ -241,12 +241,8 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
       return (void)window.setModal(false);
     }
     if(state.action == "openObject" && isObject(name)) {
-      if(isMatch(name)) {
-        response.selected.append({state.path, name});
-        return (void)window.setModal(false);
-      } else if(isFolder(name)) {
-        return setPath({state.path, name});
-      }
+      response.selected.append({state.path, name});
+      return (void)window.setModal(false);
     }
     if(state.action == "saveFile") return accept();
     setPath(state.path, name);
@@ -417,6 +413,18 @@ auto BrowserDialogWindow::setPath(string path, const string& contains) -> void {
 BrowserDialog::BrowserDialog() {
 }
 
+auto BrowserDialog::alignment() const -> Alignment {
+  return state.alignment;
+}
+
+auto BrowserDialog::alignmentWindow() const -> Window {
+  return state.relativeTo;
+}
+
+auto BrowserDialog::filters() const -> vector<string> {
+  return state.filters;
+}
+
 auto BrowserDialog::openFile() -> string {
   state.action = "openFile";
   if(!state.title) state.title = "Open File";
@@ -447,6 +455,10 @@ auto BrowserDialog::openObject() -> string {
 
 auto BrowserDialog::option() -> string {
   return response.option;
+}
+
+auto BrowserDialog::path() const -> string {
+  return state.path;
 }
 
 auto BrowserDialog::saveFile() -> string {
@@ -502,6 +514,10 @@ auto BrowserDialog::setPath(const string& path) -> type& {
 auto BrowserDialog::setTitle(const string& title) -> type& {
   state.title = title;
   return *this;
+}
+
+auto BrowserDialog::title() const -> string {
+  return state.title;
 }
 
 auto BrowserDialog::_run() -> vector<string> {

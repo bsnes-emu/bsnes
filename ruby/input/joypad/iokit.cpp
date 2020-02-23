@@ -14,7 +14,6 @@ struct InputJoypadIOKit {
       for(uint n : range(CFArrayGetCount(elements))) {
         IOHIDElementRef element = (IOHIDElementRef)CFArrayGetValueAtIndex(elements, n);
         IOHIDElementType type = IOHIDElementGetType(element);
-        uint32_t page = IOHIDElementGetUsagePage(element);
         uint32_t usage = IOHIDElementGetUsage(element);
         switch(type) {
         case kIOHIDElementTypeInput_Button:
@@ -22,7 +21,6 @@ struct InputJoypadIOKit {
           break;
         case kIOHIDElementTypeInput_Axis:
         case kIOHIDElementTypeInput_Misc:
-          if(page != kHIDPage_GenericDesktop && page != kHIDPage_Simulation) break;
           if(usage == kHIDUsage_Sim_Accelerator || usage == kHIDUsage_Sim_Brake
           || usage == kHIDUsage_Sim_Rudder      || usage == kHIDUsage_Sim_Throttle
           || usage == kHIDUsage_GD_X  || usage == kHIDUsage_GD_Y  || usage == kHIDUsage_GD_Z

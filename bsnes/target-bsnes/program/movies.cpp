@@ -25,7 +25,7 @@ auto Program::moviePlay() -> void {
   dialog.setTitle("Play Movie");
   dialog.setPath(Path::desktop());
   dialog.setFilters({string{"Movies (.bsv)|*.bsv"}});
-  if(auto location = dialog.openFile()) {
+  if(auto location = openFile(dialog)) {
     if(auto fp = file::open(location, file::mode::read)) {
       bool failed = false;
       if(fp.read() != 'B') failed = true;
@@ -92,7 +92,7 @@ auto Program::movieStop() -> void {
     dialog.setTitle("Save Movie");
     dialog.setPath(Path::desktop());
     dialog.setFilters({string{"Movies (.bsv)|*.bsv"}});
-    if(auto location = dialog.saveFile()) {
+    if(auto location = saveFile(dialog)) {
       if(!location.endsWith(".bsv")) location.append(".bsv");
       if(auto fp = file::open(location, file::mode::write)) {
         fp.write('B');

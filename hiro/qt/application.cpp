@@ -2,6 +2,11 @@
 
 namespace hiro {
 
+auto pApplication::exit() -> void {
+  quit();
+  ::exit(EXIT_SUCCESS);
+}
+
 auto pApplication::modal() -> bool {
   return Application::state().modal > 0;
 }

@@ -242,10 +242,10 @@ auto Audio::hasDrivers() -> vector<string> {
 }
 
 auto Audio::optimalDriver() -> string {
-  #if defined(AUDIO_ASIO)
-  return "ASIO";
-  #elif defined(AUDIO_WASAPI)
+  #if defined(AUDIO_WASAPI)
   return "WASAPI";
+  #elif defined(AUDIO_ASIO)
+  return "ASIO";
   #elif defined(AUDIO_XAUDIO2)
   return "XAudio 2.1";
   #elif defined(AUDIO_DIRECTSOUND)

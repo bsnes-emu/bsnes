@@ -3,7 +3,9 @@
 namespace hiro {
 
 auto pFrame::construct() -> void {
-  hwnd = CreateWindow(L"BUTTON", L"",
+  hwnd = CreateWindowEx(
+    //WS_EX_TRANSPARENT fixes rendering issues caused by Windows using WS_CLIPCHILDREN
+    WS_EX_TRANSPARENT, L"BUTTON", L"",
     WS_CHILD | BS_GROUPBOX,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
   pWidget::construct();

@@ -17,6 +17,7 @@ struct AudioALSA : AudioDriver {
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }
+  auto hasDynamic() -> bool override { return true; }
 
   auto hasDevices() -> vector<string> override {
     vector<string> devices;
@@ -55,20 +56,27 @@ struct AudioALSA : AudioDriver {
   auto setLatency(uint latency) -> bool override { return initialize(); }
 
   auto level() -> double override {
-    snd_pcm_sframes_t available = snd_pcm_avail_update(_interface);
-    if(available < 0) return 0.5;
+    snd_pcm_sframes_t available;
+    for(uint timeout : range(256)) {
+      available = snd_pcm_avail_update(_interface);
+      if(available >= 0) break;
+      snd_pcm_recover(_interface, available, 1);
+    }
     return (double)(_bufferSize - available) / _bufferSize;
   }
 
   auto output(const double samples[]) -> void override {
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
     _buffer[_offset] |= (uint16_t)sclamp<16>(samples[1] * 32767.0) << 16;
-    _offset++;
+    if(++_offset < _periodSize) return;
 
     snd_pcm_sframes_t available;
     do {
       available = snd_pcm_avail_update(_interface);
-      if(available < 0) snd_pcm_recover(_interface, available, 1);
+      if(available < 0) {
+        snd_pcm_recover(_interface, available, 1);
+        continue;
+      }
       if(available < _offset) {
         if(!self.blocking) {
           _offset = 0;

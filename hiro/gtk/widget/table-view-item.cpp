@@ -32,6 +32,9 @@ auto pTableViewItem::setBackgroundColor(Color color) -> void {
 
 auto pTableViewItem::setFocused() -> void {
   if(auto parent = _parent()) {
+    //calling setSelected() and then setFocused() right after sometimes fails to set focus
+    Application::processEvents();
+
     auto lock = parent->acquire();
     GtkTreePath* path = gtk_tree_path_new_from_string(string{self().offset()});
     gtk_tree_view_set_cursor(parent->gtkTreeView, path, nullptr, false);

@@ -66,6 +66,10 @@ struct VideoCGL : VideoDriver, OpenGL {
     return true;
   }
 
+  auto focused() -> bool override {
+    return true;
+  }
+
   auto clear() -> void override {
     @autoreleasepool {
       [view lockFocus];

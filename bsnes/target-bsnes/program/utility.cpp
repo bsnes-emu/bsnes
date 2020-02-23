@@ -1,3 +1,54 @@
+auto Program::openGame(BrowserDialog& dialog) -> string {
+  if(!settings.general.nativeFileDialogs) {
+    return dialog.openObject();
+  }
+
+  BrowserWindow window;
+  window.setTitle(dialog.title());
+  window.setPath(dialog.path());
+  window.setFilters(dialog.filters());
+  window.setParent(dialog.alignmentWindow());
+  return window.open();
+}
+
+auto Program::openFile(BrowserDialog& dialog) -> string {
+  if(!settings.general.nativeFileDialogs) {
+    return dialog.openFile();
+  }
+
+  BrowserWindow window;
+  window.setTitle(dialog.title());
+  window.setPath(dialog.path());
+  window.setFilters(dialog.filters());
+  window.setParent(dialog.alignmentWindow());
+  return window.open();
+}
+
+auto Program::saveFile(BrowserDialog& dialog) -> string {
+  if(!settings.general.nativeFileDialogs) {
+    return dialog.saveFile();
+  }
+
+  BrowserWindow window;
+  window.setTitle(dialog.title());
+  window.setPath(dialog.path());
+  window.setFilters(dialog.filters());
+  window.setParent(dialog.alignmentWindow());
+  return window.save();
+}
+
+auto Program::selectPath() -> string {
+  if(!settings.general.nativeFileDialogs) {
+    BrowserDialog dialog;
+    dialog.setPath(Path::desktop());
+    return dialog.selectFolder();
+  }
+
+  BrowserWindow window;
+  window.setPath(Path::desktop());
+  return window.directory();
+}
+
 auto Program::showMessage(string text) -> void {
   statusTime = chrono::millisecond();
   statusMessage = text;

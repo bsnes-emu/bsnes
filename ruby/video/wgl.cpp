@@ -53,6 +53,12 @@ struct VideoWGL : VideoDriver, OpenGL {
     return true;
   }
 
+  auto focused() -> bool override {
+    if(self.fullScreen && self.exclusive) return true;
+    auto focused = GetFocus();
+    return _context == focused || IsChild(_context, focused);
+  }
+
   auto clear() -> void override {
     OpenGL::clear();
     SwapBuffers(_display);

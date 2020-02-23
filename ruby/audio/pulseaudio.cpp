@@ -15,6 +15,7 @@ struct AudioPulseAudio : AudioDriver {
   auto ready() -> bool override { return _ready; }
 
   auto hasBlocking() -> bool override { return true; }
+  auto hasDynamic() -> bool override { return true; }
 
   auto hasFrequencies() -> vector<uint> override {
     return {44100, 48000, 96000};
@@ -28,6 +29,12 @@ struct AudioPulseAudio : AudioDriver {
   auto setFrequency(uint frequency) -> bool override { return initialize(); }
   auto setLatency(uint latency) -> bool override { return initialize(); }
 
+  auto level() -> double override {
+    pa_mainloop_iterate(_mainLoop, 0, nullptr);
+    auto length = pa_stream_writable_size(_stream);
+    return (double)(_bufferSize - length) / _bufferSize;
+  }
+
   auto output(const double samples[]) -> void override {
     pa_stream_begin_write(_stream, (void**)&_buffer, &_period);
     _buffer[_offset]  = (uint16_t)sclamp<16>(samples[0] * 32767.0) <<  0;
@@ -35,13 +42,8 @@ struct AudioPulseAudio : AudioDriver {
     if((++_offset + 1) * pa_frame_size(&_specification) <= _period) return;
 
     while(true) {
-      if(_first) {
-        _first = false;
-        pa_mainloop_iterate(_mainLoop, 0, nullptr);
-      } else {
-        pa_mainloop_iterate(_mainLoop, 1, nullptr);
-      }
-      uint length = pa_stream_writable_size(_stream);
+      pa_mainloop_iterate(_mainLoop, 0, nullptr);
+      auto length = pa_stream_writable_size(_stream);
       if(length >= _offset * pa_frame_size(&_specification)) break;
       if(!self.blocking) {
         _offset = 0;
@@ -91,9 +93,10 @@ private:
       if(!PA_STREAM_IS_GOOD(streamState)) return false;
     } while(streamState != PA_STREAM_READY);
 
-    _period = 960;
+    pa_buffer_attr* attributes = pa_stream_get_buffer_attr(_stream);
+    _period = attributes->minreq;
+    _bufferSize = attributes->tlength;
     _offset = 0;
-    _first = true;
     return _ready = true;
   }
 
@@ -127,11 +130,11 @@ private:
 
   uint32_t* _buffer = nullptr;
   size_t _period = 0;
+  size_t _bufferSize = 0;
   uint _offset = 0;
 
   pa_mainloop* _mainLoop = nullptr;
   pa_context* _context = nullptr;
   pa_stream* _stream = nullptr;
   pa_sample_spec _specification;
-  bool _first = true;
 };

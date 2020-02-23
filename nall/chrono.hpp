@@ -49,6 +49,55 @@ inline auto timestamp() -> uint64_t {
   return ::time(nullptr);
 }
 
+//0 = failure condition
+inline auto timestamp(const string& datetime) -> uint64_t {
+  static const uint monthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  uint64_t timestamp = 0;
+  if(datetime.match("??????????")) {
+    return datetime.natural();
+  }
+  if(datetime.match("????*")) {
+    uint year = datetime.slice(0, 4).natural();
+    if(year < 1970 || year > 2199) return 0;
+    for(uint y = 1970; y < year && y < 2999; y++) {
+      uint daysInYear = 365;
+      if(y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) daysInYear++;
+      timestamp += daysInYear * 24 * 60 * 60;
+    }
+  }
+  if(datetime.match("????-??*")) {
+    uint y = datetime.slice(0, 4).natural();
+    uint month = datetime.slice(5, 2).natural();
+    if(month < 1 || month > 12) return 0;
+    for(uint m = 1; m < month && m < 12; m++) {
+      uint daysInMonth = monthDays[m - 1];
+      if(m == 2 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) daysInMonth++;
+      timestamp += daysInMonth * 24 * 60 * 60;
+    }
+  }
+  if(datetime.match("????-??-??*")) {
+    uint day = datetime.slice(8, 2).natural();
+    if(day < 1 || day > 31) return 0;
+    timestamp += (day - 1) * 24 * 60 * 60;
+  }
+  if(datetime.match("????-??-?? ??*")) {
+    uint hour = datetime.slice(11, 2).natural();
+    if(hour > 23) return 0;
+    timestamp += hour * 60 * 60;
+  }
+  if(datetime.match("????-??-?? ??:??*")) {
+    uint minute = datetime.slice(14, 2).natural();
+    if(minute > 59) return 0;
+    timestamp += minute * 60;
+  }
+  if(datetime.match("????-??-?? ??:??:??*")) {
+    uint second = datetime.slice(17, 2).natural();
+    if(second > 59) return 0;
+    timestamp += second;
+  }
+  return timestamp;
+}
+
 namespace utc {
   inline auto timeinfo(uint64_t time = 0) -> chrono::timeinfo {
     auto stamp = time ? (time_t)time : (time_t)timestamp();

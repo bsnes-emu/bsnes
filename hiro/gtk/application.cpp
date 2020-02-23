@@ -15,6 +15,11 @@ auto Log_Filter(const char* logDomain, GLogLevelFlags logLevel, const char* mess
   print(terminal::color::yellow("hiro: "), logDomain, "::", message, "\n");
 }
 
+auto pApplication::exit() -> void {
+  quit();
+  ::exit(EXIT_SUCCESS);
+}
+
 auto pApplication::modal() -> bool {
   return Application::state().modal > 0;
 }

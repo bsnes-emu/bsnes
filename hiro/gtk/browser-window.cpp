@@ -4,9 +4,12 @@ namespace hiro {
 
 static auto BrowserWindow_addFilters(GtkWidget* dialog, vector<string> filters) -> void {
   for(auto& filter : filters) {
+    auto part = filter.split("|", 1L);
+    if(part.size() != 2) continue;
+
     GtkFileFilter* gtkFilter = gtk_file_filter_new();
-    gtk_file_filter_set_name(gtkFilter, filter);
-    auto patterns = filter.split("(", 1L)(1).trimRight(")", 1L).split(",").strip();
+    gtk_file_filter_set_name(gtkFilter, part[0]);
+    auto patterns = part[1].split(":");
     for(auto& pattern : patterns) gtk_file_filter_add_pattern(gtkFilter, pattern);
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), gtkFilter);
   }

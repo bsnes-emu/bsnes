@@ -16,10 +16,9 @@ static auto CALLBACK Window_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARA
   return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);
 }
 
-//warning: do not add WS_CLIPCHILDREN; this will break painting of Frame ("BUTTON" BS_GROUPBOX) controls
-static const uint PopupStyle = WS_POPUP;
-static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
-static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
+static const uint PopupStyle = WS_POPUP | WS_CLIPCHILDREN;
+static const uint FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN;
+static const uint ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN;
 
 uint pWindow::minimumStatusHeight = 0;
 

@@ -31,6 +31,10 @@ struct VideoXShm : VideoDriver {
   auto setContext(uintptr context) -> bool override { return initialize(); }
   auto setShader(string shader) -> bool override { return true; }
 
+  auto focused() -> bool override {
+    return true;
+  }
+
   auto clear() -> void override {
     auto dp = _inputBuffer;
     uint length = _inputWidth * _inputHeight;

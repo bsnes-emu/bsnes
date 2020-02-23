@@ -113,7 +113,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       dialog.setTitle("Load SNES ROM");
       dialog.setPath(path("Games", settings.path.recent.superFamicom));
       dialog.setFilters({string{"SNES ROMs|*.sfc:*.smc:*.zip:*.7z:*.SFC:*.SMC:*.ZIP:*.7Z:*.Sfc:*.Smc:*.Zip"}, string{"All Files|*"}});
-      superFamicom.location = dialog.openObject();
+      superFamicom.location = openGame(dialog);
       superFamicom.option = dialog.option();
     }
     if(inode::exists(superFamicom.location)) {
@@ -133,7 +133,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       dialog.setTitle("Load Game Boy ROM");
       dialog.setPath(path("Games", settings.path.recent.gameBoy));
       dialog.setFilters({string{"Game Boy ROMs|*.gb:*.gbc:*.zip:*.7z:*.GB:*.GBC:*.ZIP:*.7Z:*.Gb:*.Gbc:*.Zip"}, string{"All Files|*"}});
-      gameBoy.location = dialog.openObject();
+      gameBoy.location = openGame(dialog);
       gameBoy.option = dialog.option();
     }
     if(inode::exists(gameBoy.location)) {
@@ -153,7 +153,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       dialog.setTitle("Load BS Memory ROM");
       dialog.setPath(path("Games", settings.path.recent.bsMemory));
       dialog.setFilters({string{"BS Memory ROMs|*.bs:*.zip:*.7z:*.BS:*.ZIP:*.7Z:*.Bs:*.Zip"}, string{"All Files|*"}});
-      bsMemory.location = dialog.openObject();
+      bsMemory.location = openGame(dialog);
       bsMemory.option = dialog.option();
     }
     if(inode::exists(bsMemory.location)) {
@@ -173,7 +173,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       dialog.setTitle("Load Sufami Turbo ROM - Slot A");
       dialog.setPath(path("Games", settings.path.recent.sufamiTurboA));
       dialog.setFilters({string{"Sufami Turbo ROMs|*.st:*.zip:*.7z:*.ST:*.ZIP:*.7Z:*.St:*.Zip"}, string{"All Files|*"}});
-      sufamiTurboA.location = dialog.openObject();
+      sufamiTurboA.location = openGame(dialog);
       sufamiTurboA.option = dialog.option();
     }
     if(inode::exists(sufamiTurboA.location)) {
@@ -193,7 +193,7 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
       dialog.setTitle("Load Sufami Turbo ROM - Slot B");
       dialog.setPath(path("Games", settings.path.recent.sufamiTurboB));
       dialog.setFilters({string{"Sufami Turbo ROMs|*.st:*.zip:*.7z:*.ST:*.ZIP:*.7Z:*.St:*.Zip"}, string{"All Files|*"}});
-      sufamiTurboB.location = dialog.openObject();
+      sufamiTurboB.location = openGame(dialog);
       sufamiTurboB.option = dialog.option();
     }
     if(inode::exists(sufamiTurboB.location)) {

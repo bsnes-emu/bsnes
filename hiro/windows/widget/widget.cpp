@@ -74,6 +74,8 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
     geometry.setY(geometry.y() - displacement.y());
   }
   SetWindowPos(hwnd, nullptr, geometry.x(), geometry.y(), geometry.width(), geometry.height(), SWP_NOZORDER);
+  //RedrawWindow fixes painting problems when adjusting Layouts manually
+  RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
   pSizable::setGeometry(geometry);
 }
 

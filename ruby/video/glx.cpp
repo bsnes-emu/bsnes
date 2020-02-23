@@ -74,6 +74,10 @@ struct VideoGLX : VideoDriver, OpenGL {
     return true;
   }
 
+  auto focused() -> bool override {
+    return true;
+  }
+
   auto clear() -> void override {
     OpenGL::clear();
     if(_doubleBuffer) glXSwapBuffers(_display, _glXWindow);

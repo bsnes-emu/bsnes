@@ -24,6 +24,12 @@ struct VideoGDI : VideoDriver {
   auto setMonitor(string monitor) -> bool override { return initialize(); }
   auto setContext(uintptr context) -> bool override { return initialize(); }
 
+  auto focused() -> bool override {
+    if(self.fullScreen && self.exclusive) return true;
+    auto focused = GetFocus();
+    return _context == focused || IsChild(_context, focused);
+  }
+
   auto size(uint& width, uint& height) -> void override {
     RECT rectangle;
     GetClientRect(_context, &rectangle);

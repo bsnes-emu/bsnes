@@ -8,7 +8,7 @@ auto PathSettings::create() -> void {
   gamesLabel.setText("Games:");
   gamesPath.setEditable(false);
   gamesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.games = location;
       refreshPaths();
     }
@@ -21,7 +21,7 @@ auto PathSettings::create() -> void {
   patchesLabel.setText("Patches:");
   patchesPath.setEditable(false);
   patchesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.patches = location;
       refreshPaths();
     }
@@ -34,7 +34,7 @@ auto PathSettings::create() -> void {
   savesLabel.setText("Saves:");
   savesPath.setEditable(false);
   savesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.saves = location;
       refreshPaths();
     }
@@ -47,7 +47,7 @@ auto PathSettings::create() -> void {
   cheatsLabel.setText("Cheats:");
   cheatsPath.setEditable(false);
   cheatsAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.cheats = location;
       refreshPaths();
     }
@@ -60,7 +60,7 @@ auto PathSettings::create() -> void {
   statesLabel.setText("States:");
   statesPath.setEditable(false);
   statesAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.states = location;
       refreshPaths();
     }
@@ -73,7 +73,7 @@ auto PathSettings::create() -> void {
   screenshotsLabel.setText("Screenshots:");
   screenshotsPath.setEditable(false);
   screenshotsAssign.setText("Assign ...").onActivate([&] {
-    if(auto location = BrowserDialog().selectFolder()) {
+    if(auto location = program.selectPath()) {
       settings.path.screenshots = location;
       refreshPaths();
     }

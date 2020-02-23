@@ -83,6 +83,10 @@ struct VideoGLX2 : VideoDriver {
     return true;
   }
 
+  auto focused() -> bool override {
+    return true;
+  }
+
   auto clear() -> void override {
     memory::fill<uint32_t>(_glBuffer, _glWidth * _glHeight);
     glClearColor(0.0, 0.0, 0.0, 1.0);

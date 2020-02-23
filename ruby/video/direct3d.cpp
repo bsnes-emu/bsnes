@@ -34,6 +34,12 @@ struct VideoDirect3D : VideoDriver {
   auto setBlocking(bool blocking) -> bool override { return true; }
   auto setShader(string shader) -> bool override { return updateFilter(); }
 
+  auto focused() -> bool override {
+    if(self.fullScreen && self.exclusive) return true;
+    auto focused = GetFocus();
+    return _context == focused || IsChild(_context, focused);
+  }
+
   auto clear() -> void override {
     if(_lost && !recover()) return;
 

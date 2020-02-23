@@ -52,6 +52,11 @@ struct AudioASIO : AudioDriver {
       }
       latencies.append(latency);
     }
+    //it is possible that no latencies in the hard-coded list above will match; so ensure driver-declared latencies are available
+    if(!latencies.find(self.activeDevice.minimumBufferSize)) latencies.append(self.activeDevice.minimumBufferSize);
+    if(!latencies.find(self.activeDevice.maximumBufferSize)) latencies.append(self.activeDevice.maximumBufferSize);
+    if(!latencies.find(self.activeDevice.preferredBufferSize)) latencies.append(self.activeDevice.preferredBufferSize);
+    latencies.sort();
     return latencies;
   }
 
@@ -75,6 +80,15 @@ struct AudioASIO : AudioDriver {
 
   auto output(const double samples[]) -> void override {
     if(!ready()) return;
+    //defer call to IASIO::start(), because the drivers themselves will sometimes crash internally.
+    //if software initializes AudioASIO but does not play music at startup, this can prevent a crash loop.
+    if(!_started) {
+      _started = true;
+      if(_asio->start() != ASE_OK) {
+        _ready = false;
+        return;
+      }
+    }
     if(self.blocking) {
       while(_queue.count >= self.latency);
     }
@@ -151,13 +165,14 @@ private:
     }
 
     _ready = true;
+    _started = false;
     clear();
-    if(_asio->start() != ASE_OK) return _ready = false;
     return true;
   }
 
   auto terminate() -> void {
     _ready = false;
+    _started = false;
     self.activeDevice = {};
     if(_asio) {
       _asio->stop();
@@ -244,6 +259,7 @@ private:
   }
 
   bool _ready = false;
+  bool _started = false;
 
   struct Queue {
     double samples[65536][8];

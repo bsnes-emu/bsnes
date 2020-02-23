@@ -114,6 +114,10 @@ struct Program : Lock, Emulator::Platform {
   auto updateInputDriver(Window parent) -> void;
 
   //utility.cpp
+  auto openGame(BrowserDialog& dialog) -> string;
+  auto openFile(BrowserDialog& dialog) -> string;
+  auto saveFile(BrowserDialog& dialog) -> string;
+  auto selectPath() -> string;
   auto showMessage(string text) -> void;
   auto showFrameRate(string text) -> void;
   auto updateStatus() -> void;

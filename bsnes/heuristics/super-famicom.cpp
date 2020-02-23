@@ -433,13 +433,7 @@ auto SuperFamicom::serial() const -> string {
 }
 
 auto SuperFamicom::romSize() const -> uint {
-  //subtract appended firmware size, if firmware is present
-  if((size() &  0x7fff) ==   0x100) return size() -   0x100;
-  if((size() &  0x7fff) ==   0xc00) return size() -   0xc00;
-  if((size() &  0x7fff) ==  0x2000) return size() -  0x2000;
-  if((size() &  0xffff) ==  0xd000) return size() -  0xd000;
-  if((size() & 0x3ffff) == 0x28000) return size() - 0x28000;
-  return size();
+  return size() - firmwareRomSize();
 }
 
 auto SuperFamicom::programRomSize() const -> uint {
@@ -459,8 +453,38 @@ auto SuperFamicom::expansionRomSize() const -> uint {
   return 0;
 }
 
+//detect if any firmware is appended to the ROM image, and return its size if so
 auto SuperFamicom::firmwareRomSize() const -> uint {
-  return size() - romSize();
+  auto cartridgeTypeLo  = data[headerAddress + 0x26] & 15;
+  auto cartridgeTypeHi  = data[headerAddress + 0x26] >> 4;
+  auto cartridgeSubType = data[headerAddress + 0x0f];
+
+  if(serial() == "042J" || (cartridgeTypeLo == 0x3 && cartridgeTypeHi == 0xe)) {
+    //Game Boy
+    if((size() & 0x7fff) == 0x100) return 0x100;
+  }
+
+  if(cartridgeTypeLo >= 0x3 && cartridgeTypeHi == 0xf && cartridgeSubType == 0x10) {
+    //Hitachi HG51BS169
+    if((size() & 0x7fff) == 0xc00) return 0xc00;
+  }
+
+  if(cartridgeTypeLo >= 0x3 && cartridgeTypeHi == 0x0) {
+    //NEC uPD7725
+    if((size() & 0x7fff) == 0x2000) return 0x2000;
+  }
+
+  if(cartridgeTypeLo >= 0x3 && cartridgeTypeHi == 0xf && cartridgeSubType == 0x01) {
+    //NEC uPD96050
+    if((size() & 0xffff) == 0xd000) return 0xd000;
+  }
+
+  if(cartridgeTypeLo >= 0x3 && cartridgeTypeHi == 0xf && cartridgeSubType == 0x02) {
+    //ARM6
+    if((size() & 0x3ffff) == 0x28000) return 0x28000;
+  }
+
+  return 0;
 }
 
 auto SuperFamicom::ramSize() const -> uint {

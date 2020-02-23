@@ -1,9 +1,7 @@
 #pragma once
 
-/* SQLite3 C++ RAII wrapper for nall
- *
- * Note on code below: it is safe (no-op) to call sqlite3_* functions on null sqlite3 objects
- */
+//SQLite3 C++ RAII wrapper for nall
+//note: it is safe (no-op) to call sqlite3_* functions on null sqlite3 objects
 
 #include <sqlite3.h>
 
@@ -34,24 +32,28 @@ struct SQLite3 {
       return sqlite3_data_count(statement());
     }
 
-    auto columns() -> unsigned {
+    auto columns() -> uint {
       return sqlite3_column_count(statement());
     }
 
-    auto integer(unsigned column) -> int64_t {
+    auto boolean(uint column) -> bool {
+      return sqlite3_column_int64(statement(), column) != 0;
+    }
+
+    auto integer(uint column) -> int64_t {
       return sqlite3_column_int64(statement(), column);
     }
 
-    auto natural(unsigned column) -> uint64_t {
+    auto natural(uint column) -> uint64_t {
       return sqlite3_column_int64(statement(), column);
     }
 
-    auto real(unsigned column) -> double {
+    auto real(uint column) -> double {
       return sqlite3_column_double(statement(), column);
     }
 
-    auto text(unsigned column) -> string {
-      string result;
+    auto string(uint column) -> nall::string {
+      nall::string result;
       if(auto text = sqlite3_column_text(statement(), column)) {
         result.resize(sqlite3_column_bytes(statement(), column));
         memory::copy(result.get(), text, result.size());
@@ -59,7 +61,7 @@ struct SQLite3 {
       return result;
     }
 
-    auto data(unsigned column) -> vector<uint8_t> {
+    auto data(uint column) -> vector<uint8_t> {
       vector<uint8_t> result;
       if(auto data = sqlite3_column_blob(statement(), column)) {
         result.resize(sqlite3_column_bytes(statement(), column));
@@ -68,18 +70,19 @@ struct SQLite3 {
       return result;
     }
 
+    auto boolean() -> bool { return boolean(_output++); }
     auto integer() -> int64_t { return integer(_output++); }
     auto natural() -> uint64_t { return natural(_output++); }
     auto real() -> double { return real(_output++); }
-    auto text() -> string { return text(_output++); }
+    auto string() -> nall::string { return string(_output++); }
     auto data() -> vector<uint8_t> { return data(_output++); }
 
   protected:
     virtual auto statement() -> sqlite3_stmt* { return _statement; }
 
     sqlite3_stmt* _statement = nullptr;
-    signed _response = SQLITE_OK;
-    unsigned _output = 0;
+    int _response = SQLITE_OK;
+    uint _output = 0;
   };
 
   struct Query : Statement {
@@ -102,22 +105,34 @@ struct SQLite3 {
       return *this;
     }
 
-    auto& bind(unsigned column, nullptr_t) { sqlite3_bind_null(_statement, 1 + column); return *this; }
-    auto& bind(unsigned column, int32_t value) { sqlite3_bind_int(_statement, 1 + column, value); return *this; }
-    auto& bind(unsigned column, uint32_t value) { sqlite3_bind_int(_statement, 1 + column, value); return *this; }
-    auto& bind(unsigned column, int64_t value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
-    auto& bind(unsigned column, uint64_t value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
-    auto& bind(unsigned column, double value) { sqlite3_bind_double(_statement, 1 + column, value); return *this; }
-    auto& bind(unsigned column, const string& value) { sqlite3_bind_text(_statement, 1 + column, value.data(), value.size(), SQLITE_TRANSIENT); return *this; }
-    auto& bind(unsigned column, const vector<uint8_t>& value) { sqlite3_bind_blob(_statement, 1 + column, value.data(), value.size(), SQLITE_TRANSIENT); return *this; }
+    auto& bind(uint column, nullptr_t) { sqlite3_bind_null(_statement, 1 + column); return *this; }
+    auto& bind(uint column, bool value) { sqlite3_bind_int(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, int32_t value) { sqlite3_bind_int(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, uint32_t value) { sqlite3_bind_int(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, int64_t value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, uint64_t value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, intmax value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, uintmax value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, nall::boolean value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, nall::integer value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, nall::natural value) { sqlite3_bind_int64(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, double value) { sqlite3_bind_double(_statement, 1 + column, value); return *this; }
+    auto& bind(uint column, const nall::string& value) { sqlite3_bind_text(_statement, 1 + column, value.data(), value.size(), SQLITE_TRANSIENT); return *this; }
+    auto& bind(uint column, const vector<uint8_t>& value) { sqlite3_bind_blob(_statement, 1 + column, value.data(), value.size(), SQLITE_TRANSIENT); return *this; }
 
     auto& bind(nullptr_t) { return bind(_input++, nullptr); }
+    auto& bind(bool value) { return bind(_input++, value); }
     auto& bind(int32_t value) { return bind(_input++, value); }
     auto& bind(uint32_t value) { return bind(_input++, value); }
     auto& bind(int64_t value) { return bind(_input++, value); }
     auto& bind(uint64_t value) { return bind(_input++, value); }
+    auto& bind(intmax value) { return bind(_input++, value); }
+    auto& bind(uintmax value) { return bind(_input++, value); }
+    auto& bind(nall::boolean value) { return bind(_input++, value); }
+    auto& bind(nall::integer value) { return bind(_input++, value); }
+    auto& bind(nall::natural value) { return bind(_input++, value); }
     auto& bind(double value) { return bind(_input++, value); }
-    auto& bind(const string& value) { return bind(_input++, value); }
+    auto& bind(const nall::string& value) { return bind(_input++, value); }
     auto& bind(const vector<uint8_t>& value) { return bind(_input++, value); }
 
     auto step() -> bool {
@@ -145,7 +160,7 @@ struct SQLite3 {
       return _statement;
     }
 
-    unsigned _input = 0;
+    uint _input = 0;
     bool _stepped = false;
   };
 

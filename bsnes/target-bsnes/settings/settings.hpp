@@ -145,7 +145,7 @@ struct Settings : Markup::Node {
     bool screenSaver = false;
     bool toolTips = true;
     bool crashed = false;
-    bool betaWarning = true;
+    bool nativeFileDialogs = false;
   } general;
 };
 
@@ -303,11 +303,12 @@ struct EmulatorSettings : VerticalLayout {
 
 public:
   Label optionsLabel{this, Size{~0, 0}, 2};
-  CheckLabel warnOnUnverifiedGames{this, Size{~0, 0}};
-  CheckLabel autoSaveMemory{this, Size{~0, 0}};
-  HorizontalLayout autoStateLayout{this, Size{~0, 0}};
+  CheckLabel warnOnUnverifiedGames{this, Size{~0, 0}, 2};
+  CheckLabel autoSaveMemory{this, Size{~0, 0}, 2};
+  HorizontalLayout autoStateLayout{this, Size{~0, 0}, 2};
     CheckLabel autoSaveStateOnUnload{&autoStateLayout, Size{0, 0}};
     CheckLabel autoLoadStateOnLoad{&autoStateLayout, Size{0, 0}};
+  CheckLabel nativeFileDialogs{this, Size{~0, 0}};
   Canvas optionsSpacer{this, Size{~0, 1}};
   //
   Label fastForwardLabel{this, Size{~0, 0}, 2};

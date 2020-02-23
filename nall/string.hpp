@@ -291,7 +291,7 @@ public:
   inline auto remove(uint offset, uint length) -> type&;
   inline auto reverse() -> type&;
   inline auto size(int length, char fill = ' ') -> type&;
-  inline auto slice(int offset = 0, int length = -1) -> string;
+  inline auto slice(int offset = 0, int length = -1) const -> string;
 };
 
 template<> struct vector<string> : vector_base<string> {

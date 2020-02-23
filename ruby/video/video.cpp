@@ -94,6 +94,10 @@ auto Video::setShader(string shader) -> bool {
 
 //
 
+auto Video::focused() -> bool {
+  return instance->focused();
+}
+
 auto Video::clear() -> void {
   return instance->clear();
 }

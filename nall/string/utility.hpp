@@ -95,7 +95,7 @@ auto slice(string_view self, int offset, int length) -> string {
   return result;
 }
 
-auto string::slice(int offset, int length) -> string {
+auto string::slice(int offset, int length) const -> string {
   return nall::slice(*this, offset, length);
 }
 

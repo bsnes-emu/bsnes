@@ -127,6 +127,8 @@ auto pWidget::setGeometry(Geometry geometry) -> void {
     }
   }
   pSizable::setGeometry(geometry);
+  //this is needed to prevent some repainting issues (specifically with a Label which has a background color set for it)
+  gtk_widget_queue_draw(gtkWidget);
 }
 
 auto pWidget::setMouseCursor(const MouseCursor& mouseCursor) -> void {

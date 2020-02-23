@@ -11,6 +11,7 @@
 namespace hiro {
 
 struct pApplication {
+  static auto exit() -> void;
   static auto modal() -> bool;
   static auto run() -> void;
   static auto pendingEvents() -> bool;
