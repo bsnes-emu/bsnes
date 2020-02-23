@@ -839,8 +839,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
+    gb->wx_triggered = false;
     goto mode_3_start;
-
     
     while (true) {
         /* Lines 0 - 143 */
