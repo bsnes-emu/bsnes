@@ -21,7 +21,7 @@ static auto BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) -> 
   for(auto& filter : state.filters) {
     auto part = filter.split("|", 1L);
     if(part.size() != 2) continue;
-    filters.append(filter, "\t", part[1].merge(";"), "\t");
+    filters.append(filter, "\t", part[1].transform(":", ";"), "\t");
   }
 
   utf16_t wfilters(filters);
