@@ -434,12 +434,13 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
     }
     
+    if (gb->bg_fifo_paused) return;
+
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {
         gb->position_in_line++;
         return;
     }
-    if (gb->bg_fifo_paused) return;
     
     /* Mixing */
     
