@@ -831,8 +831,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_SLEEP(gb, display, 37, 2);
     
     gb->cgb_palettes_blocked = true;
-    gb->cycles_for_line += 2;
-    GB_SLEEP(gb, display, 38, 2);
+    gb->cycles_for_line += 3;
+    GB_SLEEP(gb, display, 38, 3);
     
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
@@ -1046,7 +1046,7 @@ abort_fetching_object:
                         fifo_clear(&gb->bg_fifo);
                         gb->bg_fifo_paused = true;
                         gb->oam_fifo_paused = true;
-                        gb->fetcher_state = 0;
+                        gb->fetcher_state = 1;
                     }
                 }
                 
