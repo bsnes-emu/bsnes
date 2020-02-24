@@ -1037,17 +1037,19 @@ abort_fetching_object:
                 /* Handle window */
                 /* Todo: verify timings */
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
-                    if (gb->io_registers[GB_IO_WX] >= 166) {
+                    if (gb->io_registers[GB_IO_WX] >= 167) {
                         // Too late to enable the window
                     }
                     else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                          gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6)) {
-                        gb->wx_triggered = true;
+                               gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6)) {
                         gb->window_y++;
-                        fifo_clear(&gb->bg_fifo);
-                        gb->bg_fifo_paused = true;
-                        gb->oam_fifo_paused = true;
-                        gb->fetcher_state = 1;
+                        if (gb->io_registers[GB_IO_WX] != 166) {
+                            gb->wx_triggered = true;
+                            fifo_clear(&gb->bg_fifo);
+                            gb->bg_fifo_paused = true;
+                            gb->oam_fifo_paused = true;
+                            gb->fetcher_state = 1;
+                        }
                     }
                 }
                 
