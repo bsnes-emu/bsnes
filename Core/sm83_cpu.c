@@ -31,7 +31,6 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     
-
     /* Todo: most values not verified, and probably differ between revisions */
 };
 
@@ -46,9 +45,9 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
-    
+    [GB_IO_WY] = GB_CONFLICT_READ_OLD,
+
     /* Todo: these were not verified at all */
-    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
     [GB_IO_WX] = GB_CONFLICT_READ_NEW,
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
@@ -64,9 +63,9 @@ static const GB_conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_BGP] = GB_CONFLICT_READ_NEW,
     [GB_IO_OBP0] = GB_CONFLICT_READ_NEW,
     [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
-    
+    [GB_IO_WY] = GB_CONFLICT_READ_OLD,
+
     /* Todo: these were not verified at all */
-    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
     [GB_IO_WX] = GB_CONFLICT_READ_NEW,
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };

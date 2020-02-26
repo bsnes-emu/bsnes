@@ -645,6 +645,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (addr < 0xFF80) {
         /* Hardware registers */
         switch (addr & 0xFF) {
+            case GB_IO_WY:
+                if (value == gb->current_line) {
+                    gb->wy_triggered = true;
+                }
             case GB_IO_WX:
             case GB_IO_IF:
             case GB_IO_SCX:
@@ -652,7 +656,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_BGP:
             case GB_IO_OBP0:
             case GB_IO_OBP1:
-            case GB_IO_WY:
             case GB_IO_SB:
             case GB_IO_UNKNOWN2:
             case GB_IO_UNKNOWN3:

@@ -382,6 +382,7 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->ly_for_comparison = 0;
     
     gb->accessed_oam_row = -1;
+    gb->wy_triggered = false;
 }
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
