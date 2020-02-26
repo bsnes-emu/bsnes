@@ -68,7 +68,6 @@ Links
 
   - [Official website](https://byuu.org/bsnes)
   - [Official git repository](https://github.com/byuu/bsnes)
-  - [Developer resources](https://byuu.net)
   - [Donations](https://patreon.com/byuu)
 
 Release Builds

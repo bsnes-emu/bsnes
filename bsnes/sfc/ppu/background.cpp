@@ -14,7 +14,7 @@ auto PPU::Background::scanline() -> void {
   mosaic.hoffset = 0;
 
   renderingIndex = 0;
-  pixelCounter = io.hoffset & 7;
+  pixelCounter = (io.hoffset & 7) << hires();
 
   opt.hoffset = 0;
   opt.voffset = 0;

@@ -142,7 +142,7 @@ auto PPU::readObject(uint10 address) -> uint8 {
     uint n = address >> 2;  //object#
     address &= 3;
     if(address == 0) return objects[n].x;
-    if(address == 1) return objects[n].y - 1;
+    if(address == 1) return objects[n].y - 1;  //-1 => rendering happens one scanline late
     if(address == 2) return objects[n].character;
     return (
       objects[n].nameselect << 0
