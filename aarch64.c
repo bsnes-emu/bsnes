@@ -24,10 +24,10 @@ static void (*co_swap)(cothread_t, cothread_t) = 0;
   section(text)
 #endif
 static const uint32_t co_swap_function[1024] = {
-  0xa9002428,  /* stp x8,x9,[x1]        */
-  0xa9012c2a,  /* stp x10,x11,[x1,#16]  */
-  0xa902342c,  /* stp x12,x13,[x1,#32]  */
-  0xa9033c2e,  /* stp x14,x15,[x1,#48]  */
+  0x6d002428,  /* stp d8,d9,[x1]        */
+  0x6d012c2a,  /* stp d10,d11,[x1,#16]  */
+  0x6d02342c,  /* stp d12,d13,[x1,#32]  */
+  0x6d033c2e,  /* stp d14,d15,[x1,#48]  */
   0xf9002433,  /* str x19,[x1,#72]      */
   0xa9055434,  /* stp x20,x21,[x1,#80]  */
   0xa9065c36,  /* stp x22,x23,[x1,#96]  */
@@ -37,10 +37,10 @@ static const uint32_t co_swap_function[1024] = {
   0x910003f0,  /* mov x16,sp            */
   0xa90a7830,  /* stp x16,x30,[x1,#160] */
 
-  0xa9402408,  /* ldp x8,x9,[x0]        */
-  0xa9412c0a,  /* ldp x10,x11,[x0,#16]  */
-  0xa942340c,  /* ldp x12,x13,[x0,#32]  */
-  0xa9433c0e,  /* ldp x14,x15,[x0,#48]  */
+  0x6d402408,  /* ldp d8,d9,[x0]        */
+  0x6d412c0a,  /* ldp d10,d11,[x0,#16]  */
+  0x6d42340c,  /* ldp d12,d13,[x0,#32]  */
+  0x6d433c0e,  /* ldp d14,d15,[x0,#48]  */
   0xf9402413,  /* ldr x19,[x0,#72]      */
   0xa9455414,  /* ldp x20,x21,[x0,#80]  */
   0xa9465c16,  /* ldp x22,x23,[x0,#96]  */
