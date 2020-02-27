@@ -729,6 +729,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         return;
     }
     GB_object_t *objects = (GB_object_t *) &gb->oam;
+    bool window_got_activated = false;
     
     GB_STATE_MACHINE(gb, display, cycles, 2) {
         GB_STATE(gb, display, 1);
@@ -771,6 +772,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 39);
         GB_STATE(gb, display, 40);
         GB_STATE(gb, display, 41);
+        GB_STATE(gb, display, 42);
 
     }
     
@@ -948,6 +950,26 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->bg_fifo_paused = false;
             gb->oam_fifo_paused = false;
             while (true) {
+                /* Handle window */
+                /* Todo: verify timings */
+                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
+                    if (gb->io_registers[GB_IO_WX] >= 167) {
+                        // Too late to enable the window
+                    }
+                    else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
+                             (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed)) {
+                        gb->window_y++;
+                        if (gb->io_registers[GB_IO_WX] != 166) {
+                            gb->wx_triggered = true;
+                            fifo_clear(&gb->bg_fifo);
+                            gb->bg_fifo_paused = true;
+                            gb->oam_fifo_paused = true;
+                            gb->fetcher_state = 1;
+                            window_got_activated = true;
+                        }
+                    }
+                }
+
                 /* Handle objects */
                 /* When the sprite enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
@@ -962,6 +984,15 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 while (gb->n_visible_objs != 0 &&
                        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
                        gb->obj_comparators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
+                    
+                    /* TODO: This is wrong. It is only correct for a single object, not for more than one. */
+                    if (window_got_activated) {
+                        window_got_activated = false;
+                        gb->fetcher_state = 0;
+                        gb->cycles_for_line += 6;
+                        GB_SLEEP(gb, display, 42, 6);
+                    }
+                    
                     while (gb->fetcher_state < 5) {
                         advance_fetcher_state_machine(gb);
                         gb->cycles_for_line++;
@@ -1034,25 +1065,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 abort_fetching_object:
                 gb->object_fetch_aborted = false;
                 gb->during_object_fetch = false;
-                
-                /* Handle window */
-                /* Todo: verify timings */
-                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
-                    if (gb->io_registers[GB_IO_WX] >= 167) {
-                        // Too late to enable the window
-                    }
-                    else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                               (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed)) {
-                        gb->window_y++;
-                        if (gb->io_registers[GB_IO_WX] != 166) {
-                            gb->wx_triggered = true;
-                            fifo_clear(&gb->bg_fifo);
-                            gb->bg_fifo_paused = true;
-                            gb->oam_fifo_paused = true;
-                            gb->fetcher_state = 1;
-                        }
-                    }
-                }
                 
                 render_pixel_if_possible(gb);
                 advance_fetcher_state_machine(gb);
