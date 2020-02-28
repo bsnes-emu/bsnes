@@ -230,13 +230,13 @@ static void render(GB_gameboy_t *gb)
     gb->apu_output.sample_callback(gb, &filtered_output);
 }
 
-static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
+static uint16_t new_sweep_sample_length(GB_gameboy_t *gb)
 {
-    uint16_t delta = gb->apu.shadow_sweep_sample_legnth >> (gb->io_registers[GB_IO_NR10] & 7);
+    uint16_t delta = gb->apu.shadow_sweep_sample_length >> (gb->io_registers[GB_IO_NR10] & 7);
     if (gb->io_registers[GB_IO_NR10] & 8) {
-        return gb->apu.shadow_sweep_sample_legnth - delta;
+        return gb->apu.shadow_sweep_sample_length - delta;
     }
-    return gb->apu.shadow_sweep_sample_legnth + delta;
+    return gb->apu.shadow_sweep_sample_length + delta;
 }
 
 static void update_square_sample(GB_gameboy_t *gb, unsigned index)
@@ -400,8 +400,8 @@ void GB_apu_div_event(GB_gameboy_t *gb)
             if (!--gb->apu.square_sweep_countdown) {
                 if ((gb->io_registers[GB_IO_NR10] & 0x70) && (gb->io_registers[GB_IO_NR10] & 0x07)) {
                     gb->apu.square_channels[GB_SQUARE_1].sample_length =
-                        gb->apu.shadow_sweep_sample_legnth =
-                        gb->apu.new_sweep_sample_legnth;
+                        gb->apu.shadow_sweep_sample_length =
+                        gb->apu.new_sweep_sample_length;
                 }
 
                 if (gb->io_registers[GB_IO_NR10] & 0x70) {
@@ -435,8 +435,8 @@ void GB_apu_run(GB_gameboy_t *gb)
             }
             else {
                 /* APU bug: sweep frequency is checked after adding the sweep delta twice */
-                gb->apu.new_sweep_sample_legnth = new_sweep_sample_legnth(gb);
-                if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
+                gb->apu.new_sweep_sample_length = new_sweep_sample_length(gb);
+                if (gb->apu.new_sweep_sample_length > 0x7ff) {
                     gb->apu.is_active[GB_SQUARE_1] = false;
                     update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
                     gb->apu.sweep_enabled = false;
@@ -724,8 +724,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (index == GB_SQUARE_1) {
-                gb->apu.shadow_sweep_sample_legnth =
-                    gb->apu.new_sweep_sample_legnth =
+                gb->apu.shadow_sweep_sample_length =
+                    gb->apu.new_sweep_sample_length =
                     gb->apu.square_channels[0].sample_length;
             }
             if (value & 0x80) {
