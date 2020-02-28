@@ -489,7 +489,7 @@ struct GB_gameboy_internal_s {
         bool vram_read_blocked;
         bool oam_write_blocked;
         bool vram_write_blocked;
-        GB_PADDING(bool, window_disabled_while_active);
+        bool fifo_insertion_glitch;
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
@@ -500,8 +500,8 @@ struct GB_gameboy_internal_s {
         uint8_t current_tile_attributes;
         uint8_t current_tile_data[2];
         uint8_t fetcher_state;
-        bool bg_fifo_paused;
-        bool oam_fifo_paused;
+        GB_PADDING(bool,bg_fifo_paused);
+        GB_PADDING(bool,oam_fifo_paused);
         bool wx_triggered;
         uint8_t visible_objs[10];
         uint8_t obj_comparators[10];

@@ -422,20 +422,21 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
     
-    if (!gb->bg_fifo_paused) {
+    if (fifo_size(&gb->bg_fifo)) {
         fifo_item = fifo_pop(&gb->bg_fifo);
         bg_priority = fifo_item->bg_priority;
-    }
-    
-    if (!gb->oam_fifo_paused && fifo_size(&gb->oam_fifo)) {
-        oam_fifo_item = fifo_pop(&gb->oam_fifo);
-        if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
-            draw_oam = true;
-            bg_priority |= oam_fifo_item->bg_priority;
+        
+        if (fifo_size(&gb->oam_fifo)) {
+            oam_fifo_item = fifo_pop(&gb->oam_fifo);
+            if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
+                draw_oam = true;
+                bg_priority |= oam_fifo_item->bg_priority;
+            }
         }
     }
     
-    if (gb->bg_fifo_paused) return;
+
+    if (!fifo_item) return;
 
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {
@@ -658,7 +659,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         gb->fetcher_state++;
         // fallthrough
             
-            
         case GB_FETCHER_PUSH: {
             if (fifo_size(&gb->bg_fifo) > 0) break;
             
@@ -673,8 +673,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
-            gb->bg_fifo_paused = false;
-            gb->oam_fifo_paused = false;
             gb->fetcher_state = 0;
         }
         break;
@@ -946,8 +944,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             
             /* The actual rendering cycle */
             gb->fetcher_state = 0;
-            gb->bg_fifo_paused = false;
-            gb->oam_fifo_paused = false;
             while (true) {
                 /* Handle window */
                 /* Todo: verify timings */
@@ -962,8 +958,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             gb->wx_triggered = true;
                             gb->window_tile_x = 0;
                             fifo_clear(&gb->bg_fifo);
-                            gb->bg_fifo_paused = true;
-                            gb->oam_fifo_paused = true;
                             gb->fetcher_state = 0;
                             window_got_activated = true;
                         }
