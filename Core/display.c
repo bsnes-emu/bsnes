@@ -656,7 +656,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             }
         }
         gb->fetcher_state++;
-        break;
+        // fallthrough
             
             
         case GB_FETCHER_PUSH: {
@@ -964,7 +964,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             fifo_clear(&gb->bg_fifo);
                             gb->bg_fifo_paused = true;
                             gb->oam_fifo_paused = true;
-                            gb->fetcher_state = 1;
+                            gb->fetcher_state = 0;
                             window_got_activated = true;
                         }
                     }
@@ -988,7 +988,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     /* TODO: This is wrong. It is only correct for a single object, not for more than one. */
                     if (window_got_activated) {
                         window_got_activated = false;
-                        gb->fetcher_state = 0;
                         gb->cycles_for_line += 6;
                         GB_SLEEP(gb, display, 42, 6);
                     }
