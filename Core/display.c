@@ -853,7 +853,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                 (gb->current_line != 0 && gb->io_registers[GB_IO_WY] == gb->current_line - 1))) {
                 gb->wy_triggered = true;
             }
-            gb->window_tile_x = 0;
             
             gb->oam_write_blocked = GB_is_cgb(gb) && !gb->cgb_double_speed;
             gb->accessed_oam_row = 0;
@@ -961,6 +960,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         gb->window_y++;
                         if (gb->io_registers[GB_IO_WX] != 166) {
                             gb->wx_triggered = true;
+                            gb->window_tile_x = 0;
                             fifo_clear(&gb->bg_fifo);
                             gb->bg_fifo_paused = true;
                             gb->oam_fifo_paused = true;
