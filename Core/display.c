@@ -728,7 +728,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         return;
     }
     GB_object_t *objects = (GB_object_t *) &gb->oam;
-    bool window_got_activated = false;
     
     GB_STATE_MACHINE(gb, display, cycles, 2) {
         GB_STATE(gb, display, 1);
@@ -772,7 +771,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 40);
         GB_STATE(gb, display, 41);
         GB_STATE(gb, display, 42);
-        GB_STATE(gb, display, 43);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -961,13 +959,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             /* TODO: Verify fetcher access timings in this case */
                             if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
                                 gb->cycles_for_line++;
-                                GB_SLEEP(gb, display, 43, 1);
+                                GB_SLEEP(gb, display, 42, 1);
                             }
                             gb->wx_triggered = true;
                             gb->window_tile_x = 0;
                             fifo_clear(&gb->bg_fifo);
                             gb->fetcher_state = 0;
-                            window_got_activated = true;
                             gb->window_is_being_fetched = true;
                         }
                     }
@@ -997,14 +994,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
                        gb->obj_comparators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
-                    /* TODO: This is wrong. It is only correct for a single object, not for more than one. */
-                    if (window_got_activated) {
-                        window_got_activated = false;
-                        gb->cycles_for_line += 6;
-                        GB_SLEEP(gb, display, 42, 6);
-                    }
-                    
-                    while (gb->fetcher_state < 5) {
+                    while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
                         advance_fetcher_state_machine(gb);
                         gb->cycles_for_line++;
                         GB_SLEEP(gb, display, 27, 1);
