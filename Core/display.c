@@ -524,6 +524,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
     
     gb->position_in_line++;
+    gb->window_is_being_fetched = false;
 }
 
 /* All verified CGB timings are based on CGB CPU E. CGB CPUs >= D are known to have
@@ -960,8 +961,18 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                             fifo_clear(&gb->bg_fifo);
                             gb->fetcher_state = 0;
                             window_got_activated = true;
+                            gb->window_is_being_fetched = true;
                         }
                     }
+                }
+                
+                if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
+                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ) {
+                    // Insert a pixel right at the FIFO's end
+                    gb->bg_fifo.read_end--;
+                    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+                    gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->window_is_being_fetched = false;
                 }
 
                 /* Handle objects */
