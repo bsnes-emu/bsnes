@@ -772,7 +772,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 40);
         GB_STATE(gb, display, 41);
         GB_STATE(gb, display, 42);
-
+        GB_STATE(gb, display, 43);
     }
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
@@ -948,14 +948,21 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             while (true) {
                 /* Handle window */
                 /* Todo: verify timings */
+                static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
                     if (gb->io_registers[GB_IO_WX] >= 167) {
                         // Too late to enable the window
                     }
                     else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                             (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed)) {
+                             (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed) ||
+                             (gb->io_registers[GB_IO_WX] == 0 && (gb->position_in_line) == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7])) {
                         gb->window_y++;
                         if (gb->io_registers[GB_IO_WX] != 166) {
+                            /* TODO: Verify fetcher access timings in this case */
+                            if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
+                                gb->cycles_for_line++;
+                                GB_SLEEP(gb, display, 43, 1);
+                            }
                             gb->wx_triggered = true;
                             gb->window_tile_x = 0;
                             fifo_clear(&gb->bg_fifo);
