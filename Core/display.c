@@ -970,6 +970,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     }
                 }
                 
+                /* TODO: What happens when WX=0? */
                 if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
                     gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ) {
                     // Insert a pixel right at the FIFO's end
