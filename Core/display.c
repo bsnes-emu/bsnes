@@ -564,6 +564,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
             if (!(gb->io_registers[GB_IO_LCDC] & 0x20)) {
                 gb->wx_triggered = false;
+                gb->wx166_glitch = false;
             }
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
@@ -838,13 +839,13 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
     gb->wx_triggered = false;
+    gb->wx166_glitch = false;
     goto mode_3_start;
     
     while (true) {
         /* Lines 0 - 143 */
         gb->window_y = -1;
         for (; gb->current_line < LINES; gb->current_line++) {
-            gb->wx_triggered = false;
             /* Todo: verify timings */
             if ((gb->io_registers[GB_IO_WY] == gb->current_line ||
                 (gb->current_line != 0 && gb->io_registers[GB_IO_WY] == gb->current_line - 1))) {
@@ -945,28 +946,47 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->fetcher_state = 0;
             while (true) {
                 /* Handle window */
-                /* Todo: verify timings */
-                static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
+                /* TODO: It appears that WX checks if the window beings *next* pixel, not *this* pixel. For this reason,
+                   WX=167 has no effect at all (It checks if the PPU X position is 161, which never happens) and WX=166
+                   has weird artifacts (It appears to activate the window during HBlank, as PPU X is temporarily 160 at
+                   that point. The code should be updated to represent this, and this will fix the time travel hack in
+                   WX's access conflict code. */
+                
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
-                    if (gb->io_registers[GB_IO_WX] >= 167) {
-                        // Too late to enable the window
-                    }
-                    else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                             (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed) ||
-                             (gb->io_registers[GB_IO_WX] == 0 && (gb->position_in_line) == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7])) {
-                        gb->window_y++;
-                        if (gb->io_registers[GB_IO_WX] != 166) {
-                            /* TODO: Verify fetcher access timings in this case */
-                            if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
-                                gb->cycles_for_line++;
-                                GB_SLEEP(gb, display, 42, 1);
-                            }
-                            gb->wx_triggered = true;
-                            gb->window_tile_x = 0;
-                            fifo_clear(&gb->bg_fifo);
-                            gb->fetcher_state = 0;
-                            gb->window_is_being_fetched = true;
+                    bool should_activate_window = false;
+                    if (gb->io_registers[GB_IO_WX] == 0) {
+                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
+                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
+                            should_activate_window = true;
                         }
+                    }
+                    else if (gb->wx166_glitch) {
+                        static const uint8_t scx_to_wx166_comparisons[] = {-8, -9, -10, -11, -12, -13, -14, -15};
+                        if (gb->position_in_line == scx_to_wx166_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
+                            should_activate_window = true;
+                        }
+                    }
+                    else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
+                        if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
+                           (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed))
+                        should_activate_window = true;
+                    }
+                    
+                    if (should_activate_window) {
+                        gb->window_y++;
+                        /* TODO: Verify fetcher access timings in this case */
+                        if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
+                            gb->cycles_for_line++;
+                            GB_SLEEP(gb, display, 42, 1);
+                        }
+                        gb->wx_triggered = true;
+                        gb->window_tile_x = 0;
+                        fifo_clear(&gb->bg_fifo);
+                        gb->fetcher_state = 0;
+                        gb->window_is_being_fetched = true;
+                    }
+                    else if (!GB_is_cgb(gb) && gb->io_registers[GB_IO_WX] == 166 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
+                        gb->window_y++;
                     }
                 }
                 
@@ -1075,6 +1095,14 @@ abort_fetching_object:
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
             }
+            /* TODO: Verify timing */
+            if (!GB_is_cgb(gb) && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] == 166) {
+                gb->wx166_glitch = true;
+            }
+            else {
+                gb->wx166_glitch = false;
+            }
+            gb->wx_triggered = false;
             
             if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
                 gb->cycles_for_line++;
@@ -1129,7 +1157,7 @@ abort_fetching_object:
                 gb->icd_hreset_callback(gb);
             }
         }
-        
+        gb->wx166_glitch = false;
         /* Lines 144 - 152 */
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->io_registers[GB_IO_LY] = gb->current_line;
