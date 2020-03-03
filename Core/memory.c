@@ -742,6 +742,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_lcd_off(gb);
                 }
                 gb->io_registers[GB_IO_LCDC] = value;
+                if (!(value & 0x20)) {
+                    gb->wx_triggered = false;
+                    gb->wx166_glitch = false;
+                }
                 return;
 
             case GB_IO_STAT:

@@ -547,7 +547,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_SLEEP,
     } fetcher_step_t;
     
-    fetcher_step_t fetcher_state_machine [8] = {
+    fetcher_step_t fetcher_state_machine [9] = {
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE,
         GB_FETCHER_SLEEP,
@@ -555,9 +555,13 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE_DATA_HIGH,
         GB_FETCHER_PUSH,
-        GB_FETCHER_PUSH, // Compatibility
+        GB_FETCHER_PUSH,
+        GB_FETCHER_PUSH,
     };
-    
+
+    if (gb->fetcher_state >= sizeof(fetcher_state_machine)) {
+        gb->fetcher_state = 0;
+    }
     switch (fetcher_state_machine[gb->fetcher_state]) {
         case GB_FETCHER_GET_TILE: {
             uint16_t map = 0x1800;
@@ -659,19 +663,23 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             }
         }
         gb->fetcher_state++;
+        if (gb->wx_triggered) {
+            gb->window_tile_x++;
+            gb->window_tile_x &= 0x1f;
+        }
+            
         // fallthrough
-            
         case GB_FETCHER_PUSH: {
-            if (fifo_size(&gb->bg_fifo) > 0) break;
-            
-            if (gb->wx_triggered) {
-                gb->window_tile_x++;
-                gb->window_tile_x &= 0x1f;
-            }
-            else {
+            if (gb->fetcher_state == 7) {
+                /* The background map index increase at this specific point. If this state is not reached,
+                   it will simply not increase. */
                 gb->fetcher_x++;
                 gb->fetcher_x &= 0x1f;
             }
+            if (gb->fetcher_state < 8) {
+                gb->fetcher_state++;
+            }
+            if (fifo_size(&gb->bg_fifo) > 0) break;
             
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
@@ -685,8 +693,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         }
         break;
     }
-    
-    gb->fetcher_state &= 7;
 }
 
 static uint16_t get_object_line_address(GB_gameboy_t *gb, const GB_object_t *object)
@@ -946,7 +952,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->fetcher_state = 0;
             while (true) {
                 /* Handle window */
-                /* TODO: It appears that WX checks if the window beings *next* pixel, not *this* pixel. For this reason,
+                /* TODO: It appears that WX checks if the window begins *next* pixel, not *this* pixel. For this reason,
                    WX=167 has no effect at all (It checks if the PPU X position is 161, which never happens) and WX=166
                    has weird artifacts (It appears to activate the window during HBlank, as PPU X is temporarily 160 at
                    that point. The code should be updated to represent this, and this will fix the time travel hack in
