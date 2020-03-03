@@ -28,8 +28,8 @@ This software would not be where it is today without the help and support of the
   - Lioncash
   - Lord Nightmare
   - lowkey
-  - Max833
   - Matthew Callis
+  - Max833
   - MerryMage
   - mightymo
   - Nach

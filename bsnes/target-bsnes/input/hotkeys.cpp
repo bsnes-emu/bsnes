@@ -31,12 +31,11 @@ auto InputManager::bindHotkeys() -> void {
 
   hotkeys.append(InputHotkey("Rewind").onPress([&] {
     if(!emulator->loaded() || program.fastForwarding) return;
-    program.rewinding = true;
     if(program.rewind.frequency == 0) {
-      program.showMessage("Please enable rewind support in Settings->Emulator first");
-    } else {
-      program.rewindMode(Program::Rewind::Mode::Rewinding);
+      return program.showMessage("Please enable rewind support in Settings->Emulator first");
     }
+    program.rewinding = true;
+    program.rewindMode(Program::Rewind::Mode::Rewinding);
     volume = Emulator::audio.volume();
     if(settings.rewind.mute) {
       program.mute |= Program::Mute::Rewind;

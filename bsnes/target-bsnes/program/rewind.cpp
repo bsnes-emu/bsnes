@@ -13,6 +13,18 @@ auto Program::rewindReset() -> void {
 auto Program::rewindRun() -> void {
   if(rewind.frequency == 0) return;  //rewind disabled?
 
+  if(rewind.mode == Rewind::Mode::Playing) {
+    if(++rewind.counter < rewind.frequency) return;
+
+    rewind.counter = 0;
+    if(rewind.history.size() >= rewind.length) {
+      rewind.history.takeFirst();
+    }
+    auto s = emulator->serialize(0);
+    rewind.history.append(s);
+    return;
+  }
+
   if(rewind.mode == Rewind::Mode::Rewinding) {
     if(rewind.history.size() == 0) return rewindMode(Rewind::Mode::Playing);  //nothing left to rewind?
     if(++rewind.counter < rewind.frequency / 4) return;
@@ -25,18 +37,6 @@ auto Program::rewindRun() -> void {
       rewindReset();
     }
     emulator->unserialize(s);
-    return;
-  }
-
-  if(rewind.mode == Rewind::Mode::Playing) {
-    if(++rewind.counter < rewind.frequency) return;
-
-    rewind.counter = 0;
-    if(rewind.history.size() >= rewind.length) {
-      rewind.history.takeFirst();
-    }
-    auto s = emulator->serialize(0);
-    rewind.history.append(s);
     return;
   }
 }
