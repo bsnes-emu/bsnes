@@ -974,8 +974,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     }
                     else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                           (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed))
-                        should_activate_window = true;
+                            (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed)) {
+                            should_activate_window = true;
+                        }
                     }
                     
                     if (should_activate_window) {
