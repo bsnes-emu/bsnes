@@ -547,7 +547,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_SLEEP,
     } fetcher_step_t;
     
-    fetcher_step_t fetcher_state_machine [9] = {
+    fetcher_step_t fetcher_state_machine [8] = {
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE,
         GB_FETCHER_SLEEP,
@@ -556,13 +556,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_GET_TILE_DATA_HIGH,
         GB_FETCHER_PUSH,
         GB_FETCHER_PUSH,
-        GB_FETCHER_PUSH,
     };
-
-    if (gb->fetcher_state >= sizeof(fetcher_state_machine)) {
-        gb->fetcher_state = 0;
-    }
-    switch (fetcher_state_machine[gb->fetcher_state]) {
+    switch (fetcher_state_machine[gb->fetcher_state & 7]) {
         case GB_FETCHER_GET_TILE: {
             uint16_t map = 0x1800;
             
@@ -662,7 +657,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 gb->current_tile_data[1] = 0xFF;
             }
         }
-        gb->fetcher_state++;
         if (gb->wx_triggered) {
             gb->window_tile_x++;
             gb->window_tile_x &= 0x1f;
@@ -670,13 +664,13 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
         // fallthrough
         case GB_FETCHER_PUSH: {
-            if (gb->fetcher_state == 7) {
+            if (gb->fetcher_state == 6) {
                 /* The background map index increase at this specific point. If this state is not reached,
                    it will simply not increase. */
                 gb->fetcher_x++;
                 gb->fetcher_x &= 0x1f;
             }
-            if (gb->fetcher_state < 8) {
+            if (gb->fetcher_state < 7) {
                 gb->fetcher_state++;
             }
             if (fifo_size(&gb->bg_fifo) > 0) break;
