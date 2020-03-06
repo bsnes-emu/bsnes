@@ -224,23 +224,10 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
-            /* Handle disabling objects while already fetching an object */
-            if ((old_value & 2) && !(value & 2)) {
-                if (gb->during_object_fetch) {
-                    gb->cycles_for_line += gb->display_cycles;
-                    gb->display_cycles = 0;
-                    gb->object_fetch_aborted = true;
-                }
-            }
+            /* Hack to force aborting object fetch */
+            GB_write_memory(gb, addr, value);
+            GB_write_memory(gb, addr, old_value);
             GB_advance_cycles(gb, 1);
-            /* Handle disabling objects while already fetching an object */
-            if ((old_value & 2) && !(value & 2)) {
-                if (gb->during_object_fetch) {
-                    gb->cycles_for_line += gb->display_cycles;
-                    gb->display_cycles = 0;
-                    gb->object_fetch_aborted = true;
-                }
-            }
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
             return;
