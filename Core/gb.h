@@ -523,6 +523,7 @@ struct GB_gameboy_internal_s {
         uint16_t object_low_line_address;
         bool wy_triggered;
         uint8_t window_tile_x;
+        uint8_t lcd_x; // The LCD can go out of sync since the push signal is skipped in some cases.
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

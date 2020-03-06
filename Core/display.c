@@ -459,10 +459,10 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     uint32_t *dest = NULL;
     if (!gb->sgb) {
         if (gb->border_mode != GB_BORDER_ALWAYS) {
-            dest = gb->screen + gb->position_in_line + gb->current_line * WIDTH;
+            dest = gb->screen + gb->lcd_x + gb->current_line * WIDTH;
         }
         else {
-            dest = gb->screen + gb->position_in_line + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
+            dest = gb->screen + gb->lcd_x + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
         }
     }
     
@@ -476,7 +476,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         if (gb->sgb) {
             if (gb->current_lcd_line < LINES) {
-                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
+                gb->sgb->screen_buffer[gb->lcd_x + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
             }
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
@@ -500,7 +500,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
         if (gb->sgb) {
             if (gb->current_lcd_line < LINES) {
-                gb->sgb->screen_buffer[gb->position_in_line + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
+                gb->sgb->screen_buffer[gb->lcd_x + gb->current_lcd_line * WIDTH] = gb->stopped? 0 : pixel;
             }
         }
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
@@ -524,6 +524,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     }
     
     gb->position_in_line++;
+    gb->lcd_x++;
     gb->window_is_being_fetched = false;
 }
 
@@ -937,6 +938,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
             /* Todo: find out actual access time of SCX */
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
+            gb->lcd_x = 0;
           
             gb->fetcher_x = 0;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
@@ -967,9 +969,18 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                         }
                     }
                     else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
-                        if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ||
-                            (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed)) {
+                        if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
                             should_activate_window = true;
+                        }
+                        else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed) {
+                            should_activate_window = true;
+                            /* LCD-PPU horizontal desync! It only appears to happen on DMGs, but not all of them.
+                               This doesn't seem to be CPU revision dependent, but most revisions */
+                            if ((gb->model & GB_MODEL_FAMILY_MASK) == GB_MODEL_DMG_FAMILY && !GB_is_sgb(gb)) {
+                                if (gb->lcd_x > 0) {
+                                    gb->lcd_x--;
+                                }
+                            }
                         }
                     }
                     
@@ -1096,6 +1107,21 @@ abort_fetching_object:
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
             }
+            
+            while (gb->lcd_x != 160 && !gb->disable_rendering && gb->screen && !gb->sgb) {
+                /* Oh no! The PPU and LCD desynced! Fill the rest of the line whith white. */
+                uint32_t *dest = NULL;
+                if (gb->border_mode != GB_BORDER_ALWAYS) {
+                    dest = gb->screen + gb->lcd_x + gb->current_line * WIDTH;
+                }
+                else {
+                    dest = gb->screen + gb->lcd_x + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
+                }
+                *dest = gb->background_palettes_rgb[0];
+                gb->lcd_x++;
+
+            }
+            
             /* TODO: Verify timing */
             if (!GB_is_cgb(gb) && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] == 166) {
                 gb->wx166_glitch = true;
