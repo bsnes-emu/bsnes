@@ -158,6 +158,8 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
         ret *= output_resolution.y - pixel_position.y;
     }
     
+    // Gamma correction
+    ret = pow(ret, 0.72);
     
     return ret;
 }
