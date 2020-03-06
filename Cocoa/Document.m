@@ -318,6 +318,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
         if (stopping) {
             memset(buffer, 0, nFrames * sizeof(*buffer));
             [audioLock unlock];
+            return;
         }
         
         if (audioBufferPosition >= nFrames && audioBufferPosition < nFrames + 4800) {
@@ -380,7 +381,11 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [audioLock signal];
     [audioLock unlock];
     running = false;
-    while (stopping);
+    while (stopping) {
+        [audioLock lock];
+        [audioLock signal];
+        [audioLock unlock];
+    }
     GB_debugger_set_disabled(&gb, false);
 }
 
