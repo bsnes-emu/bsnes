@@ -741,6 +741,14 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);
                 }
+                /* Handle disabling objects while already fetching an object */
+                if ((gb->io_registers[GB_IO_LCDC] & 2) && !(value & 2)) {
+                    if (gb->during_object_fetch) {
+                        gb->cycles_for_line += gb->display_cycles;
+                        gb->display_cycles = 0;
+                        gb->object_fetch_aborted = true;
+                    }
+                }
                 gb->io_registers[GB_IO_LCDC] = value;
                 if (!(value & 0x20)) {
                     gb->wx_triggered = false;
