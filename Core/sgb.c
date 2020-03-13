@@ -17,6 +17,7 @@ enum {
     ATTR_BLK = 0x04,
     ATTR_LIN = 0x05,
     ATTR_DIV = 0x06,
+    ATTR_CHR = 0x07,
     PAL_SET  = 0x0A,
     PAL_TRN  = 0x0B,
     DATA_SND = 0x0F,
@@ -252,6 +253,52 @@ static void command_ready(GB_gameboy_t *gb)
                     }
                 }
             }
+            break;
+        }
+        case ATTR_CHR: {
+            struct __attribute__((packed)) {
+                uint8_t x, y;
+                uint16_t length;
+                uint8_t direction;
+                uint8_t data[];
+            } *command = (void *)(gb->sgb->command + 1);
+            
+            uint16_t count = command->length;
+#ifdef GB_BIG_ENDIAN
+            count = __builtin_bswap16(count);
+#endif
+            uint8_t x = command->x;
+            uint8_t y = command->y;
+            if (x >= 20 || y >= 18 || (count + 3) / 4 > sizeof(gb->sgb->command) - sizeof(*command) - 1) {
+                /* TODO: Verify with the SFC BIOS */
+                break;
+            }
+
+            for (unsigned i = 0; i < count; i++) {
+                uint8_t palette = (command->data[i / 4] >> (((~i) & 3) << 1)) & 3;
+                gb->sgb->attribute_map[x + 20 * y] = palette;
+                if (command->direction) {
+                    y++;
+                    if (y == 18) {
+                        x++;
+                        y = 0;
+                        if (x == 20) {
+                            x = 0;
+                        }
+                    }
+                }
+                else {
+                    x++;
+                    if (x == 20) {
+                        y++;
+                        x = 0;
+                        if (y == 18) {
+                            y = 0;
+                        }
+                    }
+                }
+            }
+            
             break;
         }
         case ATTR_LIN: {
