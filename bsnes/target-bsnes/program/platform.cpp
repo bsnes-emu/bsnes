@@ -88,12 +88,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   }
 
   if(!result && required) {
-    if(MessageDialog({
-      "Error: missing required data: ", name, "\n\n",
-      "Would you like to view the online documentation for more information?"
-    }).setAlignment(*presentation).error({"Yes", "No"}) == "Yes") {
-      presentation.documentation.doActivate();
-    }
+    MessageDialog({"Error: missing required data: ", name}).setAlignment(*presentation).error();
   }
 
   return result;

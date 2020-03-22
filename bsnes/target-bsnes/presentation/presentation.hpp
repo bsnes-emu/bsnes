@@ -118,10 +118,8 @@ struct Presentation : Window {
       MenuItem stateManager{&toolsMenu};
       MenuItem manifestViewer{&toolsMenu};
     Menu helpMenu{&menuBar};
-      MenuItem documentation{&helpMenu};
-      MenuSeparator helpSeparator{&helpMenu};
       MenuItem aboutSameBoy{&helpMenu};
-      MenuItem about{&helpMenu};
+      MenuItem aboutBsnes{&helpMenu};
 
   VerticalLayout layout{this};
     HorizontalLayout viewportLayout{&layout, Size{~0, ~0}, 0};

@@ -178,9 +178,6 @@ auto Presentation::create() -> void {
   manifestViewer.setIcon(Icon::Emblem::Text).setText("Manifest Viewer ...").onActivate([&] { toolsWindow.show(3); });
 
   helpMenu.setText(tr("Help"));
-  documentation.setIcon(Icon::Application::Browser).setText({tr("Documentation"), " ..."}).onActivate([&] {
-    invoke("https://byuu.org/doc/bsnes");
-  });
   aboutSameBoy.setIcon(Icon::Prompt::Question).setText({tr("About SameBoy"), " ..."}).onActivate([&] {
     AboutDialog()
     .setName("SameBoy")
@@ -193,7 +190,7 @@ auto Presentation::create() -> void {
     .setAlignment(*this)
     .show();
   });
-  about.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
+  aboutBsnes.setIcon(Icon::Prompt::Question).setText({tr("About bsnes"), " ..."}).onActivate([&] {
     AboutDialog()
     .setName(Emulator::Name)
     .setLogo(Resource::Logo)
