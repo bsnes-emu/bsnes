@@ -255,7 +255,7 @@ auto Presentation::create() -> void {
   setAlignment(Alignment::Center);
 
   #if defined(PLATFORM_MACOS)
-  Application::Cocoa::onAbout([&] { about.doActivate(); });
+  Application::Cocoa::onAbout([&] { aboutBsnes.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
   Application::Cocoa::onPreferences([&] { settingsWindow.show(2); });
   Application::Cocoa::onQuit([&] { doClose(); });
