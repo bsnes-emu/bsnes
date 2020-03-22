@@ -1,21 +1,11 @@
 bsnes
 =====
 
-![bsnes logo © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-logo.png)
+![bsnes logo](https://byuu.org/images/bsnes/github/byuu-bsnes-logo.png)
 
-bsnes is a multi-platform Super Nintendo (Super Famicom) emulator from
-[byuu](https://byuu.org/about) that focuses on performance, features, and ease
-of use.
-
-Development
------------
-
-Git is used for the development of new releases, and represents a staging
-environment. As bsnes is rather mature, things should generally be quite stable.
-However, bugs will exist, regressions will occur, so proceed at your own risk.
-
-If stability is required, please download the latest stable release from the
-[official website.](https://byuu.org/bsnes)
+bsnes is a multi-platform Super Nintendo (Super Famicom) emulator, originally
+developed by [byuu](https://byuu.org/about), which focuses on performance,
+features, and ease of use.
 
 Unique Features
 ---------------
@@ -66,27 +56,20 @@ Standard Features
 Links
 -----
 
-  - [Official website](https://byuu.org/bsnes)
-  - [Official git repository](https://github.com/byuu/bsnes)
-  - [Donations](https://patreon.com/byuu)
-
-Release Builds
---------------
-
-  - [Windows binaries](https://byuu.itch.io/bsnes)
+  - [Official git repository](https://github.com/bsnes-emu/bsnes)
 
 Nightly Builds
 --------------
 
-  - [Download](https://cirrus-ci.com/github/byuu/bsnes/master)
-  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=windows-x86_64-binaries)
-  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=macOS-x86_64-binaries)
-  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=linux-x86_64-binaries)
-  - ![Build status](https://api.cirrus-ci.com/github/byuu/bsnes.svg?task=freebsd-x86_64-binaries)
+  - [Download](https://cirrus-ci.com/github/bsnes-emu/bsnes/master)
+  - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=windows-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=macOS-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=linux-x86_64-binaries)
+  - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=freebsd-x86_64-binaries)
 
 Preview
 -------
 
-![bsnes user interface © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-user-interface.png)
-![bsnes running Bahamut Lagoon © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-bahamut-lagoon.png)
-![bsnes running Tengai Makyou Zero © byuu](https://byuu.org/images/bsnes/github/byuu-bsnes-tengai-makyou-zero.png)
+![bsnes user interface](https://byuu.org/images/bsnes/github/byuu-bsnes-user-interface.png)
+![bsnes running Bahamut Lagoon](https://byuu.org/images/bsnes/github/byuu-bsnes-bahamut-lagoon.png)
+![bsnes running Tengai Makyou Zero](https://byuu.org/images/bsnes/github/byuu-bsnes-tengai-makyou-zero.png)

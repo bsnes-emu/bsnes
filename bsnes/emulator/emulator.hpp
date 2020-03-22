@@ -30,9 +30,9 @@ using namespace nall;
 namespace Emulator {
   static const string Name      = "bsnes";
   static const string Version   = "115";
-  static const string Copyright = "byuu";
-  static const string License   = "GPLv3";
-  static const string Website   = "https://byuu.org";
+  static const string Copyright = "byuu et al";
+  static const string License   = "GPLv3 or later";
+  static const string Website   = "https://github.com/bsnes-emu";
 
   //incremented only when serialization format changes
   static const string SerializerVersion = "115";

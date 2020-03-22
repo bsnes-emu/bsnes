@@ -1,4 +1,4 @@
-bsnes was created and is maintained by byuu (Near), but many people have contributed to the project.
+bsnes was originally developed by byuu, and is now a group project.
 
 This software would not be where it is today without the help and support of the following individuals:
 
@@ -6,8 +6,10 @@ This software would not be where it is today without the help and support of the
   - Ange Albertini
   - anomie
   - AWJ
+  - BearOso
   - Bisqwit
   - blargg
+  - byuu
   - Łukasz Krawczyk
   - Danish
   - DerKoun
@@ -39,6 +41,7 @@ This software would not be where it is today without the help and support of the
   - Overload
   - p4plus2
   - quequotion
+  - qwertymodo
   - RedDwarf
   - Richard Bannister
   - Ryphecha
@@ -52,4 +55,5 @@ This software would not be where it is today without the help and support of the
   - wareya
   - zones
 
-If your contributions have been missed here, please reach out [here](https://byuu.org/contact) to have this corrected, thank you!
+If you feel you are missing from this list, please submit a pull request and we will be happy to add your name here!
+

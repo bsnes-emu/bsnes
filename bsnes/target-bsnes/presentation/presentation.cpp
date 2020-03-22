@@ -199,9 +199,9 @@ auto Presentation::create() -> void {
     .setLogo(Resource::Logo)
     .setDescription("Super Nintendo emulator")
     .setVersion(Emulator::Version)
-    .setCopyright("byuu")
-    .setLicense("GPLv3")
-    .setWebsite("https://byuu.org")
+    .setCopyright(Emulator::Copyright)
+    .setLicense(Emulator::License)
+    .setWebsite(Emulator::Website)
     .setAlignment(*this)
     .show();
   });
