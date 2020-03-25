@@ -46,20 +46,27 @@ static int aspect_ratio_mode = 0;
 
 static double get_aspect_ratio()
 {
+	double ratio;
+
 	if (aspect_ratio_mode == 0 && program->superFamicom.region == "NTSC")
-		return 1.306122;
+		ratio = 1.306122;
 	else if (aspect_ratio_mode == 0 && program->superFamicom.region == "PAL")
-		return 1.584216;
+		ratio = 1.584216;
 	else if (aspect_ratio_mode == 1) // 8:7
-		return 8.0/7.0;
+		ratio = 8.0/7.0;
 	else if (aspect_ratio_mode == 2) // 4:3
 		return 4.0/3.0;
 	else if (aspect_ratio_mode == 3) // NTSC
-		return 1.306122;
+		ratio = 1.306122;
 	else if (aspect_ratio_mode == 4) // PAL
-		return 1.584216;
+		ratio = 1.584216;
 	else
-		return 8.0/7.0; // Default
+		ratio = 8.0/7.0; // Default
+
+	if (program->overscan)
+		return (ratio / 240) * 224;
+	else
+		return ratio;
 }
 
 static void flush_variables()
