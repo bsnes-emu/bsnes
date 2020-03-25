@@ -202,7 +202,7 @@ static retro_environment_t environ_cb;
 
 /* variables for single cart mode */
 static const struct retro_variable vars_single[] = {
-    { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness|reduce contrast" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
     { "sameboy_border", "Super Game Boy border; enabled|disabled" },
@@ -497,6 +497,8 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
         }
 
         var.key = "sameboy_high_pass_filter_mode";
@@ -561,6 +563,8 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
         }
 
         var.key = "sameboy_color_correction_mode_2";
@@ -575,6 +579,9 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
+
         }
 
         var.key = "sameboy_high_pass_filter_mode_1";

@@ -133,7 +133,7 @@ static void display_vblank(GB_gameboy_t *gb)
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
             if (GB_is_cgb(gb)) {
-                color = gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF);
+                color = GB_convert_rgb15(gb, 0x7FFF, false);
             }
             else {
                 color = is_ppu_stopped ?
@@ -261,7 +261,21 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
             }
             new_r = r;
             new_b = b;
-            if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
+            if (gb->color_correction_mode == GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
+                r = new_r;
+                g = new_r;
+                b = new_r;
+                
+                new_r = new_r * 7 / 8 + (    g + b) / 16;
+                new_g = new_g * 7 / 8 + (r   +   b) / 16;
+                new_b = new_b * 7 / 8 + (r + g    ) / 16;
+
+                
+                new_r = new_r * (224 - 32) / 255 + 32;
+                new_g = new_g * (220 - 36) / 255 + 36;
+                new_b = new_b * (216 - 40) / 255 + 40;
+            }
+            else if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
                 uint8_t old_max = MAX(r, MAX(g, b));
                 uint8_t new_max = MAX(new_r, MAX(new_g, new_b));
                 

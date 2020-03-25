@@ -50,6 +50,7 @@ typedef enum {
     GB_COLOR_CORRECTION_CORRECT_CURVES,
     GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS,
+    GB_COLOR_CORRECTION_REDUCE_CONTRAST,
 } GB_color_correction_mode_t;
 
 void GB_draw_tileset(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index);
