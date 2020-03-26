@@ -432,7 +432,7 @@ static double distanceMod1(double a, double b) {
         // Compute the vertical offset
         CGFloat textYOffset = (glyphCount == 1 ? 4 : 5);                
         // LOL
-        if ([_label isEqualToString:@"6"] || [_label isEqualToString:@"7"] == 7) textYOffset -= 1;
+        if ([_label isEqualToString:@"6"]) textYOffset -= 1;
         
         
         // Apply this text matrix
