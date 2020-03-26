@@ -46,9 +46,22 @@ void render_texture(void *pixels,  void *previous)
         }
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
+        GB_frame_blending_mode_t mode = configuration.blending_mode;
+        if (!previous) {
+            mode = GB_FRAME_BLENDING_MODE_DISABLED;
+        }
+        else if (mode == GB_FRAME_BLENDING_MODE_ACCURATE) {
+            if (GB_is_sgb(&gb)) {
+                mode = GB_FRAME_BLENDING_MODE_SIMPLE;
+            }
+            else {
+                mode = GB_is_odd_frame(&gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
+            }
+        }
         render_bitmap_with_shader(&shader, _pixels, previous,
                                   GB_get_screen_width(&gb), GB_get_screen_height(&gb),
-                                  rect.x, rect.y, rect.w, rect.h);
+                                  rect.x, rect.y, rect.w, rect.h,
+                                  mode);
         SDL_GL_SwapWindow(window);
     }
 }
@@ -91,7 +104,7 @@ configuration_t configuration =
     .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
-    .blend_frames = true,
+    .blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE,
     .rewind_length = 60 * 2,
     .model = MODEL_CGB
 };
@@ -600,23 +613,39 @@ const char *current_filter_name(unsigned index)
     return shaders[i].display_name;
 }
 
-static void toggle_blend_frames(unsigned index)
+static void cycle_blending_mode(unsigned index)
 {
-    configuration.blend_frames ^= true;
+    if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_ACCURATE) {
+        configuration.blending_mode = GB_FRAME_BLENDING_MODE_DISABLED;
+    }
+    else {
+        configuration.blending_mode++;
+    }
 }
 
-const char *blend_frames_string(unsigned index)
+static void cycle_blending_mode_backwards(unsigned index)
 {
-    return configuration.blend_frames? "Enabled" : "Disabled";
+    if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_DISABLED) {
+        configuration.blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE;
+    }
+    else {
+        configuration.blending_mode--;
+    }
+}
+
+const char *blending_mode_string(unsigned index)
+{
+    return (const char *[]){"Disabled", "Simple", "Accurate"}
+    [configuration.blending_mode];
 }
 
 static const struct menu_item graphics_menu[] = {
     {"Scaling Mode:", cycle_scaling, current_scaling_mode, cycle_scaling_backwards},
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
+    {"Frame Blending:", cycle_blending_mode, blending_mode_string, cycle_blending_mode_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
-    {"Blend Frames:", toggle_blend_frames, blend_frames_string, toggle_blend_frames},
     {"Back", return_to_root_menu},
     {NULL,}
 };

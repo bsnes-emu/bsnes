@@ -797,6 +797,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         return;
     }
     
+    gb->is_odd_frame = false;
+    
     if (!GB_is_cgb(gb)) {
         GB_SLEEP(gb, display, 23, 1);
     }
@@ -1228,6 +1230,7 @@ abort_fetching_object:
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
+                            gb->is_odd_frame ^= true;
                             display_vblank(gb);
                         }
                         gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
@@ -1236,6 +1239,7 @@ abort_fetching_object:
                 else {
                     gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
+                        gb->is_odd_frame ^= true;
                         display_vblank(gb);
                     }
                 }
@@ -1464,4 +1468,10 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
         }
     }
     return count;
+}
+
+
+bool GB_is_odd_frame(GB_gameboy_t *gb)
+{
+    return gb->is_odd_frame;
 }

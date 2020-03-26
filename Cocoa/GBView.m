@@ -19,6 +19,7 @@
     bool underclockKeyDown;
     double clockMultiplier;
     NSEventModifierFlags previousModifiers;
+    GB_frame_blending_mode_t _frameBlendingMode;
 }
 
 + (instancetype)alloc
@@ -43,8 +44,7 @@
 }
 
 - (void) _init
-{    
-    _shouldBlendFrameWithPrevious = 1;
+{
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
                                                   options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect
@@ -79,15 +79,26 @@
     [self setFrame:self.superview.frame];
 }
 
-- (void) setShouldBlendFrameWithPrevious:(BOOL)shouldBlendFrameWithPrevious
+- (void) setFrameBlendingMode:(GB_frame_blending_mode_t)frameBlendingMode
 {
-    _shouldBlendFrameWithPrevious = shouldBlendFrameWithPrevious;
+    _frameBlendingMode = frameBlendingMode;
     [self setNeedsDisplay:YES];
 }
 
+
+- (GB_frame_blending_mode_t)frameBlendingMode
+{
+    if (_frameBlendingMode == GB_FRAME_BLENDING_MODE_ACCURATE) {
+        if (GB_is_sgb(_gb)) {
+            return GB_FRAME_BLENDING_MODE_SIMPLE;
+        }
+        return GB_is_odd_frame(_gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
+    }
+    return _frameBlendingMode;
+}
 - (unsigned char) numberOfBuffers
 {
-    return _shouldBlendFrameWithPrevious? 3 : 2;
+    return _frameBlendingMode? 3 : 2;
 }
 
 - (void)dealloc

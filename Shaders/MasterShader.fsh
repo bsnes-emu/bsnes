@@ -1,7 +1,7 @@
 #version 150
 uniform sampler2D image;
 uniform sampler2D previous_image;
-uniform bool mix_previous;
+uniform int frame_blending_mode;
 
 uniform vec2 output_resolution;
 uniform vec2 origin;
@@ -15,6 +15,15 @@ out vec4 frag_color;
 #line 1
 {filter}
 
+
+#define BLEND_BIAS (1.0/3.0)
+
+#define DISABLED 0
+#define SIMPLE 1
+#define ACCURATE 2
+#define ACCURATE_EVEN ACCURATE
+#define ACCURATE_ODD 3
+
 void main()
 {
     vec2 position = gl_FragCoord.xy - origin;
@@ -22,11 +31,34 @@ void main()
     position.y = 1 - position.y;
     vec2 input_resolution = textureSize(image, 0);
 
-    if (mix_previous) {
-        frag_color = mix(scale(image, position, input_resolution, output_resolution),
-                         scale(previous_image, position, input_resolution, output_resolution), 0.5);
+    float ratio;
+    switch (frame_blending_mode) {
+        default:
+        case DISABLED:
+            frag_color = scale(image, position, input_resolution, output_resolution);
+            return;
+        case SIMPLE:
+            ratio = 0.5;
+            break;
+        case ACCURATE_EVEN:
+            if ((int(position.y * input_resolution.y) & 1) == 0) {
+                ratio = BLEND_BIAS;
+            }
+            else {
+                ratio = 1 - BLEND_BIAS;
+            }
+            break;
+        case ACCURATE_ODD:
+            if ((int(position.y * input_resolution.y) & 1) == 0) {
+                ratio = 1 - BLEND_BIAS;
+            }
+            else {
+                ratio = BLEND_BIAS;
+            }
+            break;
     }
-    else {
-        frag_color = scale(image, position, input_resolution, output_resolution);
-    }
+
+    frag_color = mix(scale(image, position, input_resolution, output_resolution),
+                     scale(previous_image, position, input_resolution, output_resolution), ratio);
+
 }

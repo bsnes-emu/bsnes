@@ -42,19 +42,52 @@ static inline float4 texture(texture2d<half> texture, float2 pos)
 #line 1
 {filter}
 
+#define BLEND_BIAS (1.0/3.0)
+
+enum frame_blending_mode {
+    DISABLED,
+    SIMPLE,
+    ACCURATE,
+    ACCURATE_EVEN = ACCURATE,
+    ACCURATE_ODD,
+};
+
 fragment float4 fragment_shader(rasterizer_data in [[stage_in]],
                                 texture2d<half> image [[ texture(0) ]],
                                 texture2d<half> previous_image [[ texture(1) ]],
-                                constant bool *mix_previous [[ buffer(0) ]],
+                                constant enum frame_blending_mode *frame_blending_mode [[ buffer(0) ]],
                                 constant float2 *output_resolution [[ buffer(1) ]])
 {
     float2 input_resolution = float2(image.get_width(), image.get_height());
 
     in.texcoords.y = 1 - in.texcoords.y;
-    if (*mix_previous) {
-        return mix(scale(image, in.texcoords, input_resolution, *output_resolution),
-                   scale(previous_image, in.texcoords, input_resolution, *output_resolution), 0.5);
+    float ratio;
+    switch (*frame_blending_mode) {
+        default:
+        case DISABLED:
+            return scale(image, in.texcoords, input_resolution, *output_resolution);
+        case SIMPLE:
+            ratio = 0.5;
+            break;
+        case ACCURATE_EVEN:
+            if (((int)(in.texcoords.y * input_resolution.y) & 1) == 0) {
+                ratio = BLEND_BIAS;
+            }
+            else {
+                ratio = 1 - BLEND_BIAS;
+            }
+            break;
+        case ACCURATE_ODD:
+            if (((int)(in.texcoords.y * input_resolution.y) & 1) == 0) {
+                ratio = 1 - BLEND_BIAS;
+            }
+            else {
+                ratio = BLEND_BIAS;
+            }
+            break;
     }
-    return scale(image, in.texcoords, input_resolution, *output_resolution);
+    
+    return mix(scale(image, in.texcoords, input_resolution, *output_resolution),
+               scale(previous_image, in.texcoords, input_resolution, *output_resolution), ratio);
 }
 

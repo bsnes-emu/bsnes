@@ -492,7 +492,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     
     self.consoleOutput.textContainerInset = NSMakeSize(4, 4);
     [self.view becomeFirstResponder];
-    self.view.shouldBlendFrameWithPrevious = ![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableFrameBlending"];
+    self.view.frameBlendingMode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
     CGRect window_frame = self.mainWindow.frame;
     window_frame.size.width  = MAX([[NSUserDefaults standardUserDefaults] integerForKey:@"LastWindowWidth"],
                                   window_frame.size.width);
@@ -519,6 +519,11 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateColorCorrectionMode)
                                                  name:@"GBColorCorrectionChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateFrameBlendingMode)
+                                                 name:@"GBFrameBlendingModeChanged"
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -677,12 +682,6 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [[NSUserDefaults standardUserDefaults] setBool:!self.audioClient.isPlaying forKey:@"Mute"];
 }
 
-- (IBAction)toggleBlend:(id)sender
-{
-    self.view.shouldBlendFrameWithPrevious ^= YES;
-    [[NSUserDefaults standardUserDefaults] setBool:!self.view.shouldBlendFrameWithPrevious forKey:@"DisableFrameBlending"];
-}
-
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     if([anItem action] == @selector(mute:)) {
@@ -694,9 +693,6 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
         [(NSMenuItem*)anItem setState:anItem.tag == current_model];
-    }
-    else if ([anItem action] == @selector(toggleBlend:)) {
-        [(NSMenuItem*)anItem setState:self.view.shouldBlendFrameWithPrevious];
     }
     else if ([anItem action] == @selector(interrupt:)) {
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
@@ -1615,6 +1611,11 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     if (GB_is_inited(&gb)) {
         GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
     }
+}
+
+- (void) updateFrameBlendingMode
+{
+    self.view.frameBlendingMode = (GB_frame_blending_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
 }
 
 - (void) updateRewindLength

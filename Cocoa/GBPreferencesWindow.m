@@ -14,6 +14,7 @@
     NSPopUpButton *_graphicsFilterPopupButton;
     NSPopUpButton *_highpassFilterPopupButton;
     NSPopUpButton *_colorCorrectionPopupButton;
+    NSPopUpButton *_frameBlendingModePopupButton;
     NSPopUpButton *_colorPalettePopupButton;
     NSPopUpButton *_displayBorderPopupButton;
     NSPopUpButton *_rewindPopupButton;
@@ -85,6 +86,18 @@
 - (NSPopUpButton *)colorCorrectionPopupButton
 {
     return _colorCorrectionPopupButton;
+}
+
+- (void)setFrameBlendingModePopupButton:(NSPopUpButton *)frameBlendingModePopupButton
+{
+    _frameBlendingModePopupButton = frameBlendingModePopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
+    [_frameBlendingModePopupButton selectItemAtIndex:mode];
+}
+
+- (NSPopUpButton *)frameBlendingModePopupButton
+{
+    return _frameBlendingModePopupButton;
 }
 
 - (void)setColorPalettePopupButton:(NSPopUpButton *)colorPalettePopupButton
@@ -223,7 +236,14 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBColorCorrection"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
+}
 
+- (IBAction)franeBlendingModeChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+                                              forKey:@"GBFrameBlendingMode"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFrameBlendingModeChanged" object:nil];
+    
 }
 
 - (IBAction)colorPaletteChanged:(id)sender
@@ -231,7 +251,6 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBColorPalette"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];
-    
 }
 
 - (IBAction)displayBorderChanged:(id)sender
@@ -239,7 +258,6 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBBorderMode"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBBorderModeChanged" object:nil];
-    
 }
 
 - (IBAction)rewindLengthChanged:(id)sender

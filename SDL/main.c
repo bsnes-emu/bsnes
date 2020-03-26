@@ -372,7 +372,7 @@ static void vblank(GB_gameboy_t *gb)
         clock_mutliplier += 1.0/16;
         GB_set_clock_multiplier(gb, clock_mutliplier);
     }
-    if (configuration.blend_frames) {
+    if (configuration.blending_mode) {
         render_texture(active_pixel_buffer, previous_pixel_buffer);
         uint32_t *temp = active_pixel_buffer;
         active_pixel_buffer = previous_pixel_buffer;
