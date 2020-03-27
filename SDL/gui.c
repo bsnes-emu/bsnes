@@ -106,7 +106,8 @@ configuration_t configuration =
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
     .blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE,
     .rewind_length = 60 * 2,
-    .model = MODEL_CGB
+    .model = MODEL_CGB,
+    .volume = 100,
 };
 
 
@@ -681,8 +682,32 @@ void cycle_highpass_filter_backwards(unsigned index)
     }
 }
 
+const char *volume_string(unsigned index)
+{
+    static char ret[5];
+    sprintf(ret, "%d%%", configuration.volume);
+    return ret;
+}
+
+void increase_volume(unsigned index)
+{
+    configuration.volume += 5;
+    if (configuration.volume > 100) {
+        configuration.volume = 100;
+    }
+}
+
+void decrease_volume(unsigned index)
+{
+    configuration.volume -= 5;
+    if (configuration.volume > 100) {
+        configuration.volume = 0;
+    }
+}
+
 static const struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
+    {"Volume:", increase_volume, volume_string, decrease_volume},
     {"Back", return_to_root_menu},
     {NULL,}
 };

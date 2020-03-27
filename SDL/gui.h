@@ -104,6 +104,7 @@ typedef struct {
     /* v0.13 */
     uint8_t dmg_palette;
     GB_border_mode_t border_mode;
+    uint8_t volume;
 } configuration_t;
 
 extern configuration_t configuration;

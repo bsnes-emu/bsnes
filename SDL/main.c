@@ -420,6 +420,11 @@ static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
         return;
     }
     
+    if (configuration.volume != 100) {
+        sample->left = sample->left * configuration.volume / 100;
+        sample->right = sample->right * configuration.volume / 100;
+    }
+    
     SDL_QueueAudio(device_id, sample, sizeof(*sample));
     
 }
