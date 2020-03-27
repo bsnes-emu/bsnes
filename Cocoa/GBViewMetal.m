@@ -23,7 +23,7 @@ static const vector_float2 rect[] =
 + (bool)isSupported
 {
     if (MTLCopyAllDevices) {
-        return false; //[MTLCopyAllDevices() count];
+        return [MTLCopyAllDevices() count];
     }
     return false;
 }
