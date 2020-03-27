@@ -89,7 +89,7 @@
 - (GB_frame_blending_mode_t)frameBlendingMode
 {
     if (_frameBlendingMode == GB_FRAME_BLENDING_MODE_ACCURATE) {
-        if (GB_is_sgb(_gb)) {
+        if (!_gb || GB_is_sgb(_gb)) {
             return GB_FRAME_BLENDING_MODE_SIMPLE;
         }
         return GB_is_odd_frame(_gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
