@@ -456,9 +456,9 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             break;
         case GB_MBC2:
-            switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
-                case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
+            switch (addr & 0x4100) {
+                case 0x0000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x0100: gb->mbc2.rom_bank  = value; break;
             }
             break;
         case GB_MBC3:
