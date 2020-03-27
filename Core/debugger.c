@@ -2059,7 +2059,7 @@ void GB_debugger_run(GB_gameboy_t *gb)
     if (gb->debug_disable) return;
 
     char *input = NULL;
-    if (gb->debug_next_command && gb->debug_call_depth <= 0) {
+    if (gb->debug_next_command && gb->debug_call_depth <= 0 && !gb->halted) {
         gb->debug_stopped = true;
     }
     if (gb->debug_fin_command && gb->debug_call_depth == -1) {
