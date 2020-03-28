@@ -2,6 +2,10 @@
 #include_next <stdio.h>
 #include <stdlib.h>
 
+int access(const char *filename, int mode);
+#define R_OK 2
+#define W_OK 4
+
 #ifndef __MINGW32__
 #ifndef __LIBRETRO__
 static inline int vasprintf(char **str, const char *fmt, va_list args)

@@ -11,6 +11,7 @@
 
 #ifndef _WIN32
 #define AUDIO_FREQUENCY 96000
+#include <unistd.h>
 #else
 #include <Windows.h>
 /* Windows (well, at least my VM) can't handle 96KHz sound well :( */
@@ -686,9 +687,12 @@ int main(int argc, char **argv)
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
-    char *prefs_dir = SDL_GetPrefPath("", "SameBoy");
-    snprintf(prefs_path, sizeof(prefs_path) - 1, "%sprefs.bin", prefs_dir);
-    SDL_free(prefs_dir);
+    strcpy(prefs_path, resource_path("prefs.bin"));
+    if (access(prefs_path, R_OK | W_OK) != 0) {
+        char *prefs_dir = SDL_GetPrefPath("", "SameBoy");
+        snprintf(prefs_path, sizeof(prefs_path) - 1, "%sprefs.bin", prefs_dir);
+        SDL_free(prefs_dir);
+    }
     
     FILE *prefs_file = fopen(prefs_path, "rb");
     if (prefs_file) {
