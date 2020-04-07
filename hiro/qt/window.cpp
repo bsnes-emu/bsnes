@@ -193,10 +193,11 @@ auto pWindow::setMinimumSize(Size size) -> void {
 
 auto pWindow::setModal(bool modal) -> void {
   if(modal) {
-    //windowModality can only be enabled while window is invisible
-    setVisible(false);
+    bool isVisible = qtWindow->isVisible();
+    if(isVisible) setVisible(false);
     qtWindow->setWindowModality(Qt::ApplicationModal);
-    setVisible(true);
+    if(isVisible) setVisible(true);
+
     while(!Application::state().quit && state().modal) {
       if(Application::state().onMain) {
         Application::doMain();
@@ -205,7 +206,11 @@ auto pWindow::setModal(bool modal) -> void {
       }
       Application::processEvents();
     }
+
+    isVisible = qtWindow->isVisible();
+    if(isVisible) setVisible(false);
     qtWindow->setWindowModality(Qt::NonModal);
+    if(isVisible) setVisible(true);
   }
 }
 
