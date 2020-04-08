@@ -295,11 +295,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return gb->io_registers[GB_IO_TAC] | 0xF8;
             case GB_IO_STAT:
                 return gb->io_registers[GB_IO_STAT] | 0x80;
-            case GB_IO_OBJECT_PRIORITY:
+            case GB_IO_OPRI:
                 if (!GB_is_cgb(gb)) {
                     return 0xFF;
                 }
-                return gb->io_registers[GB_IO_OBJECT_PRIORITY] | 0xFE;
+                return gb->io_registers[GB_IO_OPRI] | 0xFE;
 
             case GB_IO_PCM_12:
                 if (!GB_is_cgb(gb)) return 0xFF;
@@ -663,8 +663,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_UNKNOWN5:
                 gb->io_registers[addr & 0xFF] = value;
                 return;
-            case GB_IO_OBJECT_PRIORITY:
-                if ((!gb->boot_rom_finished || (gb->io_registers[GB_IO_MODE] & 8)) && GB_is_cgb(gb)) {
+            case GB_IO_OPRI:
+                if ((!gb->boot_rom_finished || (gb->io_registers[GB_IO_KEY0] & 8)) && GB_is_cgb(gb)) {
                     gb->io_registers[addr & 0xFF] = value;
                     gb->object_priority = (value & 1) ? GB_OBJECT_PRIORITY_X : GB_OBJECT_PRIORITY_INDEX;
                 }
@@ -785,14 +785,14 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 return;
 
-            case GB_IO_BIOS:
+            case GB_IO_BANK:
                 gb->boot_rom_finished = true;
                 return;
 
-            case GB_IO_MODE:
+            case GB_IO_KEY0:
                 if (GB_is_cgb(gb) && !gb->boot_rom_finished) {
                     gb->cgb_mode = !(value & 0xC); /* The real "contents" of this register aren't quite known yet. */
-                    gb->io_registers[GB_IO_MODE] = value;
+                    gb->io_registers[GB_IO_KEY0] = value;
                 }
                 return;
 

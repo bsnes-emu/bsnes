@@ -185,7 +185,7 @@ enum {
     // Unfortunately it is not readable or writable after boot has finished, so research of this
     // register is quite limited. The value written to this register, however, can be controlled
     // in some cases.
-    GB_IO_MODE = 0x4c,
+    GB_IO_KEY0 = 0x4c,
 
     /* General CGB features */
     GB_IO_KEY1       = 0x4d, // CGB Mode Only - Prepare Speed Switch
@@ -193,7 +193,7 @@ enum {
     /* Missing */
 
     GB_IO_VBK        = 0x4f, // CGB Mode Only - VRAM Bank
-    GB_IO_BIOS       = 0x50, // Write to disable the BIOS mapping
+    GB_IO_BANK       = 0x50, // Write to disable the BIOS mapping
 
     /* CGB DMA */
     GB_IO_HDMA1      = 0x51, // CGB Mode Only - New DMA Source, High
@@ -212,7 +212,7 @@ enum {
     GB_IO_BGPD       = 0x69, // CGB Mode Only - Background Palette Data
     GB_IO_OBPI       = 0x6a, // CGB Mode Only - Sprite Palette Index
     GB_IO_OBPD       = 0x6b, // CGB Mode Only - Sprite Palette Data
-    GB_IO_OBJECT_PRIORITY = 0x6c, // Affects object priority (X based or index based)
+    GB_IO_OPRI       = 0x6c, // Affects object priority (X based or index based)
 
     /* Missing */
 
