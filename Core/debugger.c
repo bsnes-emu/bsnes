@@ -220,7 +220,8 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
                 banking_state_t state;
                 save_banking_state(gb, &state);
                 switch_banking_state(gb, lvalue.memory_address.bank);
-                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
+                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value) |
+                                   (GB_read_memory(gb, lvalue.memory_address.value + 1) * 0x100));
                 restore_banking_state(gb, &state);
                 return r;
             }
@@ -261,6 +262,7 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
                 save_banking_state(gb, &state);
                 switch_banking_state(gb, lvalue.memory_address.bank);
                 GB_write_memory(gb, lvalue.memory_address.value, value);
+                GB_write_memory(gb, lvalue.memory_address.value + 1, value >> 8);
                 restore_banking_state(gb, &state);
                 return;
             }
