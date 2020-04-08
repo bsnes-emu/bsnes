@@ -403,9 +403,8 @@ struct GB_gameboy_internal_s {
             } mbc2;
 
             struct {
-                uint8_t rom_bank:7;
-                uint8_t padding:1;
-                uint8_t ram_bank:4;
+                uint8_t rom_bank:8;
+                uint8_t ram_bank:3;
             } mbc3;
 
             struct {
@@ -538,6 +537,7 @@ struct GB_gameboy_internal_s {
             GB_STANDARD_MBC1_WIRING,
             GB_MBC1M_WIRING,
         } mbc1_wiring;
+        bool is_mbc30;
 
         unsigned pending_cycles;
                
