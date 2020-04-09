@@ -1,11 +1,3 @@
-//
-//  GBSplitView.m
-//  SameBoySDL
-//
-//  Created by Lior Halphon on 9/4/20.
-//  Copyright © 2020 Lior Halphon. All rights reserved.
-//
-
 #import "GBSplitView.h"
 
 @implementation GBSplitView
