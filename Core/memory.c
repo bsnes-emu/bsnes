@@ -435,12 +435,12 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
     }
+    uint8_t data = read_map[addr >> 12](gb, addr);
+    GB_apply_cheat(gb, addr, &data);
     if (gb->read_memory_callback) {
-        uint8_t data = read_map[addr >> 12](gb, addr);
         data = gb->read_memory_callback(gb, addr, data);
-        return data;
     }
-    return read_map[addr >> 12](gb, addr);
+    return data;
 }
 
 static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)

@@ -21,6 +21,7 @@
 #include "sm83_cpu.h"
 #include "symbol_hash.h"
 #include "sgb.h"
+#include "cheats.h"
 
 #define GB_STRUCT_VERSION 13
 
@@ -644,6 +645,11 @@ struct GB_gameboy_internal_s {
         double sgb_intro_jingle_phases[7];
         double sgb_intro_sweep_phase;
         double sgb_intro_sweep_previous_sample;
+               
+        /* Cheats */
+        size_t cheat_count;
+        GB_cheat_t **cheats;
+        GB_cheat_hash_t *cheat_hash[256];
 
         /* Misc */
         bool turbo;

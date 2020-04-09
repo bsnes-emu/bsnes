@@ -197,6 +197,9 @@ void GB_free(GB_gameboy_t *gb)
     GB_debugger_clear_symbols(gb);
 #endif
     GB_rewind_free(gb);
+    while (gb->cheats) {
+        GB_remove_cheat(gb, gb->cheats[0]);
+    }
     memset(gb, 0, sizeof(*gb));
 }
 
