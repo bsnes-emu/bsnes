@@ -334,7 +334,7 @@ static value_t bank(value_t a, value_t b) {return (value_t) {true, a.value, b.va
 
 static struct {
     const char *string;
-    char priority;
+    int8_t priority;
     value_t (*operator)(value_t, value_t);
     value_t (*lvalue_operator)(GB_gameboy_t *, lvalue_t, uint16_t);
 } operators[] =
@@ -352,15 +352,15 @@ static struct {
     {"&", 1, and},
     {"^", 1, xor},
     {"<<", 2, shleft},
-    {"<=", -1, lower_equals},
-    {"<", -1, lower},
+    {"<=", 3, lower_equals},
+    {"<", 3, lower},
     {">>", 2, shright},
-    {">=", -1, greater_equals},
-    {">", -1, greater},
-    {"==", -1, equals},
-    {"=", -2, NULL, assign},
-    {"!=", -1, different},
-    {":", 3, bank},
+    {">=", 3, greater_equals},
+    {">", 3, greater},
+    {"==", 3, equals},
+    {"=", -1, NULL, assign},
+    {"!=", 3, different},
+    {":", 4, bank},
 };
 
 value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
@@ -388,8 +388,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '(') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -402,8 +402,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '[' && string[length - 1] == ']') {
         // Attempt to strip square parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '[') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -418,8 +418,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '{' && string[length - 1] == '}') {
         // Attempt to strip curly parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '{') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -495,8 +495,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '(') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -512,8 +512,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '[' && string[length - 1] == ']') {
         // Attempt to strip square parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '[') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -539,8 +539,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '{' && string[length - 1] == '}') {
         // Attempt to strip curly parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '{') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -565,7 +565,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
         }
     }
     // Search for lowest priority operator
-    signed int depth = 0;
+    signed depth = 0;
     unsigned operator_index = -1;
     unsigned operator_pos = 0;
     for (int i = 0; i < length; i++) {
@@ -574,15 +574,15 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
         else if (string[i] == '[') depth++;
         else if (string[i] == ']') depth--;
         else if (depth == 0) {
-            for (int j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
-                if (strlen(operators[j].string) > length - i) continue; // Operator too big.
-                 // Priority higher than what we already have.
-                unsigned long operator_length = strlen(operators[j].string);
+            for (unsigned j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
+                unsigned operator_length = strlen(operators[j].string);
+                if (operator_length > length - i) continue; // Operator too long
+                
                 if (memcmp(string + i, operators[j].string, operator_length) == 0) {
                     if (operator_index != -1 && operators[operator_index].priority < operators[j].priority) {
                         /* for supporting = vs ==, etc*/
                         i += operator_length - 1;
-                        continue;
+                        break;
                     }
                     // Found an operator!
                     operator_pos = i;
@@ -669,7 +669,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
 
     char *end;
-    int base = 10;
+    unsigned base = 10;
     if (string[0] == '$') {
         string++;
         base = 16;
