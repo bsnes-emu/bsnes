@@ -1,8 +1,9 @@
 #import <Cocoa/Cocoa.h>
 #include "GBView.h"
 #include "GBImageView.h"
+#include "GBSplitView.h"
 
-@interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate>
 @property (strong) IBOutlet GBView *view;
 @property (strong) IBOutlet NSTextView *consoleOutput;
 @property (strong) IBOutlet NSPanel *consoleWindow;
@@ -30,6 +31,8 @@
 @property (strong) IBOutlet NSButton *feedSaveButton;
 @property (strong) IBOutlet NSTextView *debuggerSideViewInput;
 @property (strong) IBOutlet NSTextView *debuggerSideView;
+@property (strong) IBOutlet GBSplitView *debuggerSplitView;
+@property (strong) IBOutlet NSBox *debuggerVerticalLine;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

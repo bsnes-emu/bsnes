@@ -505,6 +505,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [self.feedSaveButton removeFromSuperview];
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[self.fileURL path] lastPathComponent]];
+    self.debuggerSplitView.dividerColor = [NSColor clearColor];
     
     /* contentView.superview.subviews.lastObject is the titlebar view */
     NSView *titleView = self.printerFeedWindow.contentView.superview.subviews.lastObject;
@@ -1659,6 +1660,43 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [super setFileURL:fileURL];
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[fileURL path] lastPathComponent]];
     
+}
+
+- (BOOL)splitView:(NSSplitView *)splitView canCollapseSubview:(NSView *)subview;
+{
+    if ([[splitView arrangedSubviews] lastObject] == subview) {
+        return YES;
+    }
+    return NO;
+}
+
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMinimumPosition ofSubviewAt:(NSInteger)dividerIndex
+{
+    return 600;
+}
+
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
+    return splitView.frame.size.width - 321;
+}
+
+- (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view {
+    if ([[splitView arrangedSubviews] lastObject] == view) {
+        return NO;
+    }
+    return YES;
+}
+
+- (void)splitViewDidResizeSubviews:(NSNotification *)notification
+{
+    NSSplitView *splitview = notification.object;
+    if ([[[splitview arrangedSubviews] firstObject] frame].size.width < 600) {
+        [splitview setPosition:600 ofDividerAtIndex:0];
+    }
+    /* NSSplitView renders its separator without the proper vibrancy, so we made it transparent and move an
+       NSBox-based separator that renders properly so it acts like the split view's separator. */
+    NSRect rect = self.debuggerVerticalLine.frame;
+    rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 1;
+    self.debuggerVerticalLine.frame = rect;
 }
 
 @end
