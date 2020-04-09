@@ -731,8 +731,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     
     NSRect rect = window.contentView.frame;
 
-    int titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
-    int step = width / [[window screen] backingScaleFactor];
+    unsigned titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
+    unsigned step = width / [[window screen] backingScaleFactor];
 
     rect.size.width = floor(rect.size.width / step) * step + step;
     rect.size.height = rect.size.width * height / width + titlebarSize;
@@ -1468,7 +1468,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
     if (tableView == self.paletteTableView) {
         if (columnIndex == 0) {
-            return [NSString stringWithFormat:@"%s %d", row >=8 ? "Object" : "Background", (int)(row & 7)];
+            return [NSString stringWithFormat:@"%s %u", row >=8 ? "Object" : "Background", (unsigned)(row & 7)];
         }
         
         uint8_t *palette_data = GB_get_direct_access(&gb, row >= 8? GB_DIRECT_ACCESS_OBP : GB_DIRECT_ACCESS_BGP, NULL, NULL);
@@ -1486,9 +1486,9 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
                                         height:oamHeight
                                          scale:16.0/oamHeight];
             case 1:
-                return @((int)oamInfo[row].x - 8);
+                return @((unsigned)oamInfo[row].x - 8);
             case 2:
-                return @((int)oamInfo[row].y - 16);
+                return @((unsigned)oamInfo[row].y - 16);
             case 3:
                 return [NSString stringWithFormat:@"$%02x", oamInfo[row].tile];
             case 4:

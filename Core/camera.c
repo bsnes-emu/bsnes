@@ -1,17 +1,17 @@
 #include "gb.h"
 
-static int noise_seed = 0;
+static signed noise_seed = 0;
 
 /* This is not a complete emulation of the camera chip. Only the features used by the GameBoy Camera ROMs are supported.
     We also do not emulate the timing of the real cart, as it might be actually faster than the webcam. */
 
 static uint8_t generate_noise(uint8_t x, uint8_t y)
 {
-    int value = (x + y * 128 + noise_seed);
+    signed value = (x + y * 128 + noise_seed);
     uint8_t *data = (uint8_t *) &value;
     unsigned hash = 0;
 
-    while ((int *) data != &value + 1) {
+    while ((signed *) data != &value + 1) {
         hash ^= (*data << 8);
         if (hash & 0x8000) {
             hash ^= 0x8a00;

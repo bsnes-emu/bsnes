@@ -471,7 +471,7 @@ static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
 
-    if ( ((unsigned long) hl + (unsigned long) rr) & 0x10000) {
+    if ( ((unsigned) hl + (unsigned) rr) & 0x10000) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -802,7 +802,7 @@ static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -821,7 +821,7 @@ static void adc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) + carry > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -857,7 +857,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) < (value & 0xF) + carry) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) - ((unsigned long) value) - carry > 0xFF) {
+    if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -1001,7 +1001,7 @@ static void add_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -1020,7 +1020,7 @@ static void adc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) + carry > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -1056,7 +1056,7 @@ static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) < (value & 0xF) + carry) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) - ((unsigned long) value) - carry > 0xFF) {
+    if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }

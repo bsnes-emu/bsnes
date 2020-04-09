@@ -1421,7 +1421,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
         GB_object_t *sprite = (GB_object_t *) &gb->oam;
         uint8_t sprites_in_line = 0;
         for (uint8_t i = 0; i < 40; i++, sprite++) {
-            int sprite_y = sprite->y - 16;
+            signed sprite_y = sprite->y - 16;
             bool obscured = false;
             // Is sprite not in this line?
             if (sprite_y > y || sprite_y + *sprite_height <= y) continue;

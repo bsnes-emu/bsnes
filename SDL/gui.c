@@ -142,8 +142,8 @@ void update_viewport(void)
     double y_factor = win_height / (double) GB_get_screen_height(&gb);
     
     if (configuration.scaling_mode == GB_SDL_SCALING_INTEGER_FACTOR) {
-        x_factor = (int)(x_factor);
-        y_factor = (int)(y_factor);
+        x_factor = (unsigned)(x_factor);
+        y_factor = (unsigned)(y_factor);
     }
     
     if (configuration.scaling_mode != GB_SDL_SCALING_ENTIRE_WINDOW) {
@@ -1265,7 +1265,7 @@ void run_gui(bool is_running)
                         }
                         if (item->value_getter && !item->backwards_handler) {
                             char line[25];
-                            snprintf(line, sizeof(line), "%s%*s", item->string, 24 - (int)strlen(item->string), item->value_getter(i));
+                            snprintf(line, sizeof(line), "%s%*s", item->string, 24 - (unsigned)strlen(item->string), item->value_getter(i));
                             draw_text_centered(pixels, width, height, y + y_offset, line, gui_palette_native[3], gui_palette_native[0],
                                                i == current_selection ? DECORATION_SELECTION : DECORATION_NONE);
                             y += 12;

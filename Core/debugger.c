@@ -568,7 +568,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     signed depth = 0;
     unsigned operator_index = -1;
     unsigned operator_pos = 0;
-    for (int i = 0; i < length; i++) {
+    for (unsigned i = 0; i < length; i++) {
         if (string[i] == '(') depth++;
         else if (string[i] == ')') depth--;
         else if (string[i] == '[') depth++;
@@ -841,8 +841,8 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
 
     uint32_t key = BP_KEY(addr);
 
-    int min = 0;
-    int max = gb->n_breakpoints;
+    unsigned min = 0;
+    unsigned max = gb->n_breakpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
         if (gb->breakpoints[pivot].key == key) return pivot;
@@ -1008,8 +1008,8 @@ static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
         return 0;
     }
     uint32_t key = WP_KEY(addr);
-    int min = 0;
-    int max = gb->n_watchpoints;
+    unsigned min = 0;
+    unsigned max = gb->n_watchpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
         if (gb->watchpoints[pivot].key == key) return pivot;
@@ -1342,7 +1342,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
 
             while (count) {
                 GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
-                for (int i = 0; i < 16 && count; i++) {
+                for (unsigned i = 0; i < 16 && count; i++) {
                     GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
                     count--;
                 }
@@ -1355,7 +1355,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
         else {
             while (count) {
                 GB_log(gb, "%04x: ", addr.value);
-                for (int i = 0; i < 16 && count; i++) {
+                for (unsigned i = 0; i < 16 && count; i++) {
                     GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
                     count--;
                 }
@@ -1493,7 +1493,7 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
         return true;
     }
 
-    GB_log(gb, "Ticks: %lu. (Resetting)\n", gb->debugger_ticks);
+    GB_log(gb, "Ticks: %llu. (Resetting)\n", (unsigned long long)gb->debugger_ticks);
     gb->debugger_ticks = 0;
 
     return true;
@@ -2197,13 +2197,13 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 
 void GB_debugger_clear_symbols(GB_gameboy_t *gb)
 {
-    for (int i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
+    for (unsigned i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
         if (gb->bank_symbols[i]) {
             GB_map_free(gb->bank_symbols[i]);
             gb->bank_symbols[i] = 0;
         }
     }
-    for (int i = sizeof(gb->reversed_symbol_map.buckets) / sizeof(gb->reversed_symbol_map.buckets[0]); i--;) {
+    for (unsigned i = sizeof(gb->reversed_symbol_map.buckets) / sizeof(gb->reversed_symbol_map.buckets[0]); i--;) {
         while (gb->reversed_symbol_map.buckets[i]) {
             GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
             free(gb->reversed_symbol_map.buckets[i]);

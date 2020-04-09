@@ -265,7 +265,7 @@ typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
-typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
+typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, uint64_t cycles_since_last_update);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
@@ -278,7 +278,7 @@ typedef void (*GB_boot_rom_load_callback_t)(GB_gameboy_t *gb, GB_boot_rom_t type
 
 typedef struct {
     bool state;
-    long delay;
+    uint64_t delay;
 } GB_ir_queue_item_t;
 
 struct GB_breakpoint_s;
@@ -587,8 +587,8 @@ struct GB_gameboy_internal_s {
         GB_boot_rom_load_callback_t boot_rom_load_callback;
                
         /* IR */
-        long cycles_since_ir_change; // In 8MHz units
-        long cycles_since_input_ir_change; // In 8MHz units
+        uint64_t cycles_since_ir_change; // In 8MHz units
+        uint64_t cycles_since_input_ir_change; // In 8MHz units
         GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
         size_t ir_queue_length;
 
@@ -605,7 +605,7 @@ struct GB_gameboy_internal_s {
 
         /* SLD (Todo: merge with backtrace) */
         bool stack_leak_detection;
-        int debug_call_depth;
+        signed debug_call_depth;
         uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
         uint16_t addr_for_call_depth[0x200];
 
@@ -626,7 +626,7 @@ struct GB_gameboy_internal_s {
         GB_reversed_symbol_map_t reversed_symbol_map;
 
         /* Ticks command */
-        unsigned long debugger_ticks;
+        uint64_t debugger_ticks;
                
         /* Rewind */
 #define GB_REWIND_FRAMES_PER_KEY 255
@@ -732,7 +732,7 @@ void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
     
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
-void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change); /* In 8MHz units*/
+void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, uint64_t cycles_after_previous_change); /* In 8MHz units*/
     
 void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);

@@ -71,9 +71,9 @@ void GB_map_free(GB_symbol_map_t *map)
     free(map);
 }
 
-static int hash_name(const char *name)
+static unsigned hash_name(const char *name)
 {
-    int r = 0;
+    unsigned r = 0;
     while (*name) {
         r <<= 1;
         if (r & 0x400) {
@@ -87,7 +87,7 @@ static int hash_name(const char *name)
 
 void GB_reversed_map_add_symbol(GB_reversed_symbol_map_t *map, uint16_t bank, GB_bank_symbol_t *bank_symbol)
 {
-    int hash = hash_name(bank_symbol->name);
+    unsigned hash = hash_name(bank_symbol->name);
     GB_symbol_t *symbol = malloc(sizeof(*symbol));
     symbol->name = bank_symbol->name;
     symbol->addr = bank_symbol->addr;
@@ -98,7 +98,7 @@ void GB_reversed_map_add_symbol(GB_reversed_symbol_map_t *map, uint16_t bank, GB
 
 const GB_symbol_t *GB_reversed_map_find_symbol(GB_reversed_symbol_map_t *map, const char *name)
 {
-    int hash = hash_name(name);
+    unsigned hash = hash_name(name);
     GB_symbol_t *symbol = map->buckets[hash];
 
     while (symbol) {

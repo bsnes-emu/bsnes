@@ -709,7 +709,7 @@ void GB_set_infrared_input(GB_gameboy_t *gb, bool state)
     gb->ir_queue_length = 0;
 }
 
-void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change)
+void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, uint64_t cycles_after_previous_change)
 {
     if (gb->ir_queue_length == GB_MAX_IR_QUEUE) {
         GB_log(gb, "IR Queue is full\n");

@@ -132,7 +132,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
             gb->mbc_ram_size = 0x200;
         }
         else {
-            static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
+            static const unsigned ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
             gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
         }
         gb->mbc_ram = malloc(gb->mbc_ram_size);

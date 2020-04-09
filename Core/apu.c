@@ -548,7 +548,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 {
     if (reg == GB_IO_NR52) {
         uint8_t value = 0;
-        for (int i = 0; i < GB_N_CHANNELS; i++) {
+        for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
             value >>= 1;
             if (gb->apu.is_active[i]) {
                 value |= 0x8;
