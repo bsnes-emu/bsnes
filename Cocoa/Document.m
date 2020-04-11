@@ -470,7 +470,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
-    
+    // Interface Builder bug?
+    [self.consoleWindow setContentSize:self.consoleWindow.minSize];
     /* Close Open Panels, if any */
     for (NSWindow *window in [[NSApplication sharedApplication] windows]) {
         if ([window isKindOfClass:[NSOpenPanel class]]) {

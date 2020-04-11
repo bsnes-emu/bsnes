@@ -1766,10 +1766,11 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
-    {"backtrace", 2, backtrace, "Display the current call stack"},
+    {"backtrace", 2, backtrace, "Displays the current call stack"},
     {"bt", 2, }, /* Alias */
     {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected (Experimental)"},
-    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was used"},
+    {"ticks", 2, ticks, "Displays the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
+                        "used"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
