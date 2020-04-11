@@ -231,4 +231,10 @@
     [self.cheatsTable reloadData];
 }
 
+- (void)cheatsUpdated
+{
+    [self.cheatsTable reloadData];
+    [self tableViewSelectionDidChange:nil];
+}
+
 @end

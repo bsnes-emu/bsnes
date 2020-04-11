@@ -646,7 +646,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
         GB_load_rom(&gb, [self.fileName UTF8String]);
         GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
         GB_load_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
-        [self.cheatWindowController.cheatsTable reloadData];
+        [self.cheatWindowController cheatsUpdated];
         GB_debugger_clear_symbols(&gb);
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);

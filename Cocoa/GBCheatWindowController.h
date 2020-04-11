@@ -12,6 +12,6 @@
 @property (weak) IBOutlet NSTextField *importCodeField;
 @property (weak) IBOutlet NSTextField *importDescriptionField;
 @property (weak) IBOutlet Document *document;
-
+- (void)cheatsUpdated;
 @end
 
