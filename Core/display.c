@@ -165,7 +165,7 @@ static void display_vblank(GB_gameboy_t *gb)
                 0x30DA, 0x69AD, 0x2B57, 0x2B5D, 0x632C,
                 0x1050, 0x3C84, 0x0E07, 0x0E18, 0x2964,
             };
-            unsigned index = gb->rom[0x14e] % 5;
+            unsigned index = gb->rom? gb->rom[0x14e] % 5 : 0;
             gb->borrowed_border.palette[0] = colors[index];
             gb->borrowed_border.palette[10] = colors[5 + index];
             gb->borrowed_border.palette[14] = colors[10 + index];
