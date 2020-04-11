@@ -647,6 +647,7 @@ struct GB_gameboy_internal_s {
         double sgb_intro_sweep_previous_sample;
                
         /* Cheats */
+        bool cheat_enabled;
         size_t cheat_count;
         GB_cheat_t **cheats;
         GB_cheat_hash_t *cheat_hash[256];

@@ -706,6 +706,9 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     else if ([anItem action] == @selector(connectPrinter:)) {
         [(NSMenuItem*)anItem setState:accessory == GBAccessoryPrinter];
     }
+    else if ([anItem action] == @selector(toggleCheats:)) {
+        [(NSMenuItem*)anItem setState:GB_cheats_enabled(&gb)];
+    }
     return [super validateUserInterfaceItem:anItem];
 }
 
@@ -1697,6 +1700,16 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     NSRect rect = self.debuggerVerticalLine.frame;
     rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 1;
     self.debuggerVerticalLine.frame = rect;
+}
+
+- (IBAction)showCheats:(id)sender
+{
+    [self.cheatsWindow makeKeyAndOrderFront:nil];
+}
+
+- (IBAction)toggleCheats:(id)sender
+{
+    GB_set_cheats_enabled(&gb, !GB_cheats_enabled(&gb));
 }
 
 @end

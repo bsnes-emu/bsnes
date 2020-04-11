@@ -16,7 +16,7 @@
 }
 - (void)drawRect:(NSRect)dirtyRect
 {
-    CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
+    CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
     CGContextSetInterpolationQuality(context, kCGInterpolationNone);
     [super drawRect:dirtyRect];
     CGFloat y_ratio = self.frame.size.height / self.image.size.height;

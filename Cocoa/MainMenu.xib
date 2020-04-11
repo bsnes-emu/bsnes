@@ -345,6 +345,24 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Cheats" id="8ld-Ad-nvc">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Cheats" id="Ucc-Hm-TVA">
+                        <items>
+                            <menuItem title="Enable Cheats" keyEquivalent="C" id="vtx-LG-v6y">
+                                <connections>
+                                    <action selector="toggleCheats:" target="-1" id="gsw-UY-fhu"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Cheats" id="LZV-QK-YXi">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showCheats:" target="-1" id="tfr-qM-q8X"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Connectivity" id="IcW-ZC-4wb">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Connectivity" id="BDM-Cv-BOm">

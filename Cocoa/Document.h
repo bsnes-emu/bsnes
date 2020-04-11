@@ -33,6 +33,7 @@
 @property (strong) IBOutlet NSTextView *debuggerSideView;
 @property (strong) IBOutlet GBSplitView *debuggerSplitView;
 @property (strong) IBOutlet NSBox *debuggerVerticalLine;
+@property (strong) IBOutlet NSPanel *cheatsWindow;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

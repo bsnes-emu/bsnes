@@ -1,6 +1,7 @@
 #include "gb.h"
 #include "cheats.h"
 #include <stdio.h>
+#include <assert.h>
 
 static inline uint8_t hash_addr(uint16_t addr)
 {
@@ -30,6 +31,8 @@ static uint16_t bank_for_addr(GB_gameboy_t *gb, uint16_t addr)
 
 void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
 {
+    if (!gb->cheat_enabled) return;
+    if (!gb->boot_rom_finished) return;
     const GB_cheat_hash_t *hash = gb->cheat_hash[hash_addr(address)];
     if (hash) {
         for (unsigned i = 0; i < hash->size; i++) {
@@ -42,6 +45,16 @@ void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
             }
         }
     }
+}
+
+bool GB_cheats_enabled(GB_gameboy_t *gb)
+{
+    return gb->cheat_enabled;
+}
+
+void GB_set_cheats_enabled(GB_gameboy_t *gb, bool enabled)
+{
+    gb->cheat_enabled = enabled;
 }
 
 void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
@@ -66,7 +79,7 @@ void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, u
     }
     else {
         (*hash)->size++;
-        *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+        *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
         (*hash)->cheats[(*hash)->size - 1] = cheat;
     }
 }
@@ -170,4 +183,58 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
         }
     }
     return false;
+}
+
+void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
+{
+    GB_cheat_t *cheat = NULL;
+    for (unsigned i = 0; i < gb->cheat_count; i++) {
+        if (gb->cheats[i] == _cheat) {
+            cheat = gb->cheats[i];
+            break;
+        }
+    }
+    
+    assert(cheat);
+    
+    if (cheat->address != address) {
+        /* Remove from old bucket */
+        GB_cheat_hash_t **hash = &gb->cheat_hash[hash_addr(cheat->address)];
+        for (unsigned i = 0; i < (*hash)->size; i++) {
+            if ((*hash)->cheats[i] == cheat) {
+                (*hash)->cheats[i] = (*hash)->cheats[(*hash)->size--];
+                if ((*hash)->size == 0) {
+                    free(*hash);
+                    *hash = NULL;
+                }
+                else {
+                    *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                }
+                break;
+            }
+        }
+        cheat->address = address;
+        
+        /* Add to new bucket */
+        hash = &gb->cheat_hash[hash_addr(address)];
+        if (!*hash) {
+            *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat));
+            (*hash)->size = 1;
+            (*hash)->cheats[0] = cheat;
+        }
+        else {
+            (*hash)->size++;
+            *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+            (*hash)->cheats[(*hash)->size - 1] = cheat;
+        }
+    }
+    cheat->bank = bank;
+    cheat->value = value;
+    cheat->old_value = old_value;
+    cheat->use_old_value = use_old_value;
+    cheat->enabled = enabled;
+    if (description != cheat->description) {
+        strncpy(cheat->description, description, sizeof(cheat->description));
+        cheat->description[sizeof(cheat->description) - 1] = 0;
+    }
 }
