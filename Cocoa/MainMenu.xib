@@ -382,9 +382,9 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Developer" id="IwX-DJ-dBk">
+                <menuItem title="Develop" id="IwX-DJ-dBk">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Developer" id="UVb-cc-at0">
+                    <menu key="submenu" title="Develop" id="UVb-cc-at0">
                         <items>
                             <menuItem title="Developer Mode" id="Qx6-Tt-zZR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
