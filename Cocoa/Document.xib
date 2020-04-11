@@ -9,6 +9,8 @@
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
             <connections>
                 <outlet property="TilemapSetButton" destination="k4c-Vg-MBu" id="Ak1-6d-B1N"/>
+                <outlet property="cheatController" destination="v7q-gT-jHT" id="yg2-23-kOX"/>
+                <outlet property="cheatWindowController" destination="v7q-gT-jHT" id="UNn-g4-2kP"/>
                 <outlet property="cheatsWindow" destination="4Yb-Np-JrF" id="YCZ-cj-gn5"/>
                 <outlet property="consoleInput" destination="l22-S8-uji" id="Heu-am-YgB"/>
                 <outlet property="consoleOutput" destination="doS-dM-hnl" id="Gn5-ju-Wb0"/>
@@ -1056,7 +1058,7 @@
         <customObject id="v7q-gT-jHT" customClass="GBCheatWindowController">
             <connections>
                 <outlet property="addressField" destination="qHx-1z-daR" id="FWo-4u-Qse"/>
-                <outlet property="cheatsTable" destination="tA3-8T-bxb" id="n7v-rn-TOg"/>
+                <outlet property="cheatsTable" destination="tA3-8T-bxb" id="Z2r-AQ-5th"/>
                 <outlet property="descriptionField" destination="C6E-oI-hDC" id="tc0-gI-FBa"/>
                 <outlet property="document" destination="-2" id="5NX-N4-5Rt"/>
                 <outlet property="importCodeField" destination="X7K-nJ-alF" id="ni0-zH-XDU"/>

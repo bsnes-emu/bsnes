@@ -2,6 +2,7 @@
 #include "cheats.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 
 static inline uint8_t hash_addr(uint16_t addr)
 {
@@ -237,4 +238,79 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
         strncpy(cheat->description, description, sizeof(cheat->description));
         cheat->description[sizeof(cheat->description) - 1] = 0;
     }
+}
+
+#define CHEAT_MAGIC 'SBCh'
+
+void GB_load_cheats(GB_gameboy_t *gb, const char *path)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        return;
+    }
+    
+    uint32_t magic = 0;
+    uint32_t struct_size = 0;
+    fread(&magic, sizeof(magic), 1, f);
+    fread(&struct_size, sizeof(struct_size), 1, f);
+    if (magic != CHEAT_MAGIC && magic != __builtin_bswap32(CHEAT_MAGIC)) {
+        GB_log(gb, "The file is not a SameBoy cheat database");
+        return;
+    }
+    
+    if (struct_size != sizeof(GB_cheat_t)) {
+        GB_log(gb, "This cheat database is not compatible with this version of SameBoy");
+        return;
+    }
+    
+    // Remove all cheats first
+    while (gb->cheats) {
+        GB_remove_cheat(gb, gb->cheats[0]);
+    }
+    
+    GB_cheat_t cheat;
+    while (fread(&cheat, sizeof(cheat), 1, f)) {
+        if (magic == __builtin_bswap32(CHEAT_MAGIC)) {
+            cheat.address = __builtin_bswap16(cheat.address);
+            cheat.bank = __builtin_bswap16(cheat.bank);
+        }
+        cheat.description[sizeof(cheat.description) - 1] = 0;
+        GB_add_cheat(gb, cheat.description, cheat.address, cheat.bank, cheat.value, cheat.old_value, cheat.use_old_value, cheat.enabled);
+    }
+    
+    return;
+}
+
+int GB_save_cheats(GB_gameboy_t *gb, const char *path)
+{
+    if (!gb->cheat_count) return 0; // Nothing to save.
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        GB_log(gb, "Could not dump cheat database: %s.\n", strerror(errno));
+        return errno;
+    }
+    
+    uint32_t magic = CHEAT_MAGIC;
+    uint32_t struct_size = sizeof(GB_cheat_t);
+    
+    if (fwrite(&magic, sizeof(magic), 1, f) != 1) {
+        fclose(f);
+        return EIO;
+    }
+    
+    if (fwrite(&struct_size, sizeof(struct_size), 1, f) != 1) {
+        fclose(f);
+        return EIO;
+    }
+    
+    for (size_t i = 0; i <gb->cheat_count; i++) {
+        if (fwrite(gb->cheats[i], sizeof(*gb->cheats[i]), 1, f) != 1) {
+            fclose(f);
+            return EIO;
+        }
+    }
+    
+    errno = 0;
+    fclose(f);
+    return errno;
 }

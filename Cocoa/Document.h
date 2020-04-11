@@ -3,6 +3,8 @@
 #include "GBImageView.h"
 #include "GBSplitView.h"
 
+@class GBCheatWindowController;
+
 @interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate>
 @property (strong) IBOutlet GBView *view;
 @property (strong) IBOutlet NSTextView *consoleOutput;
@@ -34,6 +36,7 @@
 @property (strong) IBOutlet GBSplitView *debuggerSplitView;
 @property (strong) IBOutlet NSBox *debuggerVerticalLine;
 @property (strong) IBOutlet NSPanel *cheatsWindow;
+@property (strong) IBOutlet GBCheatWindowController *cheatWindowController;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

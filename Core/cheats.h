@@ -13,6 +13,8 @@ const GB_cheat_t *const *GB_get_cheats(GB_gameboy_t *gb, size_t *size);
 void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat);
 bool GB_cheats_enabled(GB_gameboy_t *gb);
 void GB_set_cheats_enabled(GB_gameboy_t *gb, bool enabled);
+void GB_load_cheats(GB_gameboy_t *gb, const char *path);
+int GB_save_cheats(GB_gameboy_t *gb, const char *path);
 
 #ifdef GB_INTERNAL
 void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value);

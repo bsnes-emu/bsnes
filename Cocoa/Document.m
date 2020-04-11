@@ -7,6 +7,7 @@
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 #include "GBWarningPopover.h"
+#include "GBCheatWindowController.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -359,6 +360,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_save_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
     stopping = false;
 }
 
@@ -643,6 +645,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     NSString *rom_warnings = [self captureOutputForBlock:^{
         GB_load_rom(&gb, [self.fileName UTF8String]);
         GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+        GB_load_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
+        [self.cheatWindowController.cheatsTable reloadData];
         GB_debugger_clear_symbols(&gb);
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
