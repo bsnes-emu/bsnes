@@ -1,4 +1,6 @@
 #import "GBViewMetal.h"
+#pragma clang diagnostic ignored "-Wpartial-availability"
+
 
 static const vector_float2 rect[] =
 {

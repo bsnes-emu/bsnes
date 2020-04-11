@@ -817,9 +817,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     }
     
     if (![console_output_timer isValid]) {
-        console_output_timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)0.05 repeats:NO block:^(NSTimer * _Nonnull timer) {
-            [self appendPendingOutput];
-        }];
+        console_output_timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)0.05 target:self selector:@selector(appendPendingOutput) userInfo:nil repeats:NO];
         [[NSRunLoop mainRunLoop] addTimer:console_output_timer forMode:NSDefaultRunLoopMode];
     }
     
@@ -1665,7 +1663,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     
 }
 
-- (BOOL)splitView:(NSSplitView *)splitView canCollapseSubview:(NSView *)subview;
+- (BOOL)splitView:(GBSplitView *)splitView canCollapseSubview:(NSView *)subview;
 {
     if ([[splitView arrangedSubviews] lastObject] == subview) {
         return YES;
@@ -1673,16 +1671,16 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     return NO;
 }
 
-- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMinimumPosition ofSubviewAt:(NSInteger)dividerIndex
+- (CGFloat)splitView:(GBSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMinimumPosition ofSubviewAt:(NSInteger)dividerIndex
 {
     return 600;
 }
 
-- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
+- (CGFloat)splitView:(GBSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
     return splitView.frame.size.width - 321;
 }
 
-- (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view {
+- (BOOL)splitView:(GBSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view {
     if ([[splitView arrangedSubviews] lastObject] == view) {
         return NO;
     }
@@ -1691,7 +1689,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 
 - (void)splitViewDidResizeSubviews:(NSNotification *)notification
 {
-    NSSplitView *splitview = notification.object;
+    GBSplitView *splitview = notification.object;
     if ([[[splitview arrangedSubviews] firstObject] frame].size.width < 600) {
         [splitview setPosition:600 ofDividerAtIndex:0];
     }

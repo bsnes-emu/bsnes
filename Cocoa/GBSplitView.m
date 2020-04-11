@@ -17,4 +17,14 @@
     return [super dividerColor];
 }
 
+/* Mavericks comaptibility */
+- (NSArray<NSView *> *)arrangedSubviews
+{
+    if (@available(macOS 10.11, *)) {
+        return [super arrangedSubviews];
+    } else {
+        return [self subviews];
+    }
+}
+
 @end
