@@ -87,11 +87,15 @@ ifeq ($(PLATFORM),Darwin)
 OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
-# This must come first because GCC is special
-CFLAGS += -Werror=partial-availability
 # These must come before the -Wno- flags
 CFLAGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
 CFLAGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
+
+# Only add this flag if the compiler supports it
+ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2> $(NULL); echo $$?),0)
+CFLAGS += -Wpartial-availability
+endif
+
 CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 
 ifeq (,$(PKG_CONFIG))
