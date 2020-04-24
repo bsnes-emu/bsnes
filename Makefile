@@ -87,7 +87,7 @@ ifeq ($(PLATFORM),Darwin)
 OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
-# These myst come before the -Wno- flags
+# These must come before the -Wno- flags
 CFLAGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
 
 CFLAGS += -Wpartial-availability -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
