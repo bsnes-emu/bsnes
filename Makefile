@@ -90,7 +90,7 @@ endif
 # These must come before the -Wno- flags
 CFLAGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
 
-CFLAGS += -Wpartial-availability -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
+CFLAGS += -Werror=partial-availability -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
 
 CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 
