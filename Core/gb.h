@@ -53,7 +53,7 @@
 
 typedef struct {
     struct {
-        uint8_t r,g,b;
+        uint8_t r, g, b;
     } colors[5];
 } GB_palette_t;
 
@@ -254,11 +254,11 @@ typedef enum {
 #define INTERNAL_DIV_CYCLES (0x40000)
 
 #if !defined(MIN)
-#define MIN(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
+#define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
 #endif
 
 #if !defined(MAX)
-#define MAX(A,B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
+#define MAX(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
 #endif
 #endif
 

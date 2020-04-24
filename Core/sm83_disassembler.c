@@ -97,7 +97,8 @@ static void rla(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     GB_log(gb, "RLA\n");
 }
 
-static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc){
+static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
+{
     uint16_t addr;
     (*pc)++;
     addr = GB_read_memory(gb, (*pc)++);

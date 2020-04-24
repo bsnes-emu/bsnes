@@ -530,7 +530,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             *dest = gb->sprite_palettes_rgb[oam_fifo_item->palette * 4 + pixel];
         }
     }
-	
+    
     if (gb->model & GB_MODEL_NO_SFC_BIT) {
         if (gb->icd_pixel_callback) {
             gb->icd_pixel_callback(gb, icd_pixel);

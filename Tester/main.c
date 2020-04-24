@@ -300,7 +300,7 @@ int main(int argc, char **argv)
         if (max_forks > 1) {
             while (current_forks >= max_forks) {
                 int wait_out;
-                while(wait(&wait_out) == -1);
+                while (wait(&wait_out) == -1);
                 current_forks--;
             }
             
@@ -433,7 +433,7 @@ int main(int argc, char **argv)
     }
 #ifndef _WIN32
     int wait_out;
-    while(wait(&wait_out) != -1);
+    while (wait(&wait_out) != -1);
 #endif
     return 0;
 }

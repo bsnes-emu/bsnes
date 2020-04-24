@@ -159,8 +159,7 @@ static const vector_float2 rect[] =
     MTLRenderPassDescriptor *render_pass_descriptor = view.currentRenderPassDescriptor;
     id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
 
-    if (render_pass_descriptor != nil)
-    {
+    if (render_pass_descriptor != nil) { 
         *(GB_frame_blending_mode_t *)[frame_blending_mode_buffer contents] = [self frameBlendingMode];
         *(vector_float2 *)[output_resolution_buffer contents] = output_resolution;
 

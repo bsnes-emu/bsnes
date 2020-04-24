@@ -26,8 +26,7 @@ static OSStatus render(
 -(id) initWithRendererBlock:(void (^)(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer)) block
               andSampleRate:(UInt32) rate
 {
-    if(!(self = [super init]))
-    {
+    if (!(self = [super init])) { 
         return nil;
     }
 
@@ -102,7 +101,8 @@ static OSStatus render(
     _playing = NO;
 }
 
--(void) dealloc {
+-(void) dealloc 
+{
     [self stop];
     AudioUnitUninitialize(audioUnit);
     AudioComponentInstanceDispose(audioUnit);

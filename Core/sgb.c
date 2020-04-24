@@ -151,7 +151,7 @@ static void command_ready(GB_gameboy_t *gb)
        0xE content bytes. The last command, FB, is padded with zeros, so information past the header is not sent. */
     
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
-        if(gb->boot_rom_finished) return;
+        if (gb->boot_rom_finished) return;
         
         uint8_t checksum = 0;
         for (unsigned i = 2; i < 0x10; i++) {
@@ -247,7 +247,7 @@ static void command_ready(GB_gameboy_t *gb)
                                 gb->sgb->attribute_map[x + 20 * y] = inside_palette;
                             }
                         }
-                        else if(middle) {
+                        else if (middle) {
                             gb->sgb->attribute_map[x + 20 * y] = middle_palette;
                         }
                     }

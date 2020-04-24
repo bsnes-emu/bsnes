@@ -338,7 +338,7 @@ static void cycle_model_backwards(unsigned index)
 
 const char *current_model_string(unsigned index)
 {
-    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance" , "Super Game Boy"}
+    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy"}
         [configuration.model];
 }
 
@@ -800,7 +800,7 @@ static void cycle_joypads(unsigned index)
         SDL_JoystickClose(joystick);
         joystick = NULL;
     }
-    if ((controller = SDL_GameControllerOpen(joypad_index))){
+    if ((controller = SDL_GameControllerOpen(joypad_index))) {
         joystick = SDL_GameControllerGetJoystick(controller);
     }
     else {
@@ -822,7 +822,7 @@ static void cycle_joypads_backwards(unsigned index)
         SDL_JoystickClose(joystick);
         joystick = NULL;
     }
-    if ((controller = SDL_GameControllerOpen(joypad_index))){
+    if ((controller = SDL_GameControllerOpen(joypad_index))) {
         joystick = SDL_GameControllerGetJoystick(controller);
     }
     else {
@@ -886,7 +886,7 @@ void connect_joypad(void)
         }
     }
     else if (!joystick && SDL_NumJoysticks()) {
-        if ((controller = SDL_GameControllerOpen(0))){
+        if ((controller = SDL_GameControllerOpen(0))) {
             joystick = SDL_GameControllerGetJoystick(controller);
         }
         else {

@@ -361,7 +361,7 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
         return -1;
     }
     
-    if (buffer_read(gb->vram,gb->vram_size, &buffer, &length) != gb->vram_size) {
+    if (buffer_read(gb->vram, gb->vram_size, &buffer, &length) != gb->vram_size) {
         return -1;
     }
     

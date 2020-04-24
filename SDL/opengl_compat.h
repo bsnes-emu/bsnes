@@ -10,7 +10,7 @@
 
 #define GL_COMPAT_WRAPPER(func) \
 ({  extern typeof(func) *GL_COMPAT_NAME(func); \
-if(!GL_COMPAT_NAME(func)) GL_COMPAT_NAME(func) = SDL_GL_GetProcAddress(#func); \
+if (!GL_COMPAT_NAME(func)) GL_COMPAT_NAME(func) = SDL_GL_GetProcAddress(#func); \
     GL_COMPAT_NAME(func); \
 })
 

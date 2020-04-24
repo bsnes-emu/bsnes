@@ -17,8 +17,7 @@ char *do_open_rom_dialog(void)
     dialog.lpstrInitialDir = NULL;
     dialog.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
     
-    if (GetOpenFileNameW(&dialog) == TRUE)
-    {
+    if (GetOpenFileNameW(&dialog) == TRUE) { 
         char *ret = malloc(MAX_PATH * 4);
         WideCharToMultiByte(CP_UTF8, 0, filename, sizeof(filename), ret, MAX_PATH * 4, NULL, NULL);
         return ret;

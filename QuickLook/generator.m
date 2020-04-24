@@ -79,7 +79,7 @@ static OSStatus render(CGContextRef cgContext, CFURLRef url, bool showBorder)
         }
         
         /* Mask it with the template (The middle part of the template image is transparent) */
-        [effectiveTemplate drawInRect:(NSRect){{0,0},template.size}];
+        [effectiveTemplate drawInRect:(NSRect){{0, 0}, template.size}];
     }
     
     CGColorSpaceRelease(colorSpaceRef);

@@ -149,8 +149,7 @@ static void open_menu(void)
 static void handle_events(GB_gameboy_t *gb)
 {
     SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
+    while (SDL_PollEvent(&event)) { 
         switch (event.type) {
             case SDL_QUIT:
                 pending_command = GB_SDL_QUIT_COMMAND;
@@ -603,7 +602,7 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
 int main(int argc, char **argv)
 {
 #ifdef _WIN32
-	SetProcessDPIAware();
+    SetProcessDPIAware();
 #endif
 #define str(x) #x
 #define xstr(x) str(x)

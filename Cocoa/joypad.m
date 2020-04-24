@@ -295,7 +295,8 @@ AddHIDElements(CFArrayRef array, recDevice *pDevice)
 }
 
 static bool
-ElementAlreadyAdded(const IOHIDElementCookie cookie, const recElement *listitem) {
+ElementAlreadyAdded(const IOHIDElementCookie cookie, const recElement *listitem) 
+{
     while (listitem) {
         if (listitem->cookie == cookie) {
             return true;
@@ -431,7 +432,8 @@ AddHIDElement(const void *value, void *parameter)
             }
             if (elementPrevious) {
                 elementPrevious->pNext = element;
-            } else {
+            }
+            else {
                 *headElement = element;
             }
 
@@ -519,7 +521,8 @@ GetDeviceInfo(IOHIDDeviceRef hidDevice, recDevice *pDevice)
         *guid16++ = 0;
         *guid16++ = version;
         *guid16++ = 0;
-    } else {
+    }
+    else {
         *guid16++ = BUS_BLUETOOTH;
         *guid16++ = 0;
         strlcpy((char*)guid16, pDevice->product, sizeof(pDevice->guid.data) - 4);
@@ -582,7 +585,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
         value = GetHIDElementState(device, element) - element->min;
         if (range == 4) {         /* 4 position hatswitch - scale up value */
             value *= 2;
-        } else if (range != 8) {    /* Neither a 4 nor 8 positions - fall back to default position (centered) */
+        }
+        else if (range != 8) {    /* Neither a 4 nor 8 positions - fall back to default position (centered) */
             value = -1;
         }
         if ((unsigned)value >= 8) {

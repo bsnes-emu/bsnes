@@ -452,7 +452,7 @@ static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode)
     addr = cycle_read_inc_oam_bug(gb, gb->pc++);
     addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8;
     cycle_write(gb, addr, gb->registers[GB_REGISTER_SP] & 0xFF);
-    cycle_write(gb, addr+1, gb->registers[GB_REGISTER_SP] >> 8);
+    cycle_write(gb, addr + 1, gb->registers[GB_REGISTER_SP] >> 8);
 }
 
 static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -1222,7 +1222,7 @@ static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode)
     uint16_t addr;
     gb->registers[GB_REGISTER_AF] &= 0xFF;
     addr = cycle_read_inc_oam_bug(gb, gb->pc++);
-    addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8 ;
+    addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8;
     gb->registers[GB_REGISTER_AF] |= cycle_read(gb, addr) << 8;
 }
 
@@ -1410,10 +1410,10 @@ static void bit_r(GB_gameboy_t *gb, uint8_t opcode)
         }
     }
     else if ((opcode & 0xC0) == 0x80) { /* res */
-        set_src_value(gb, opcode, value & ~bit) ;
+        set_src_value(gb, opcode, value & ~bit);
     }
     else if ((opcode & 0xC0) == 0xC0) { /* set */
-        set_src_value(gb, opcode, value | bit) ;
+        set_src_value(gb, opcode, value | bit);
     }
 }
 
@@ -1567,7 +1567,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_debugger_call_hook(gb, call_addr);
     }
     /* Run mode */
-    else if(!gb->halted) {
+    else if (!gb->halted) {
         gb->last_opcode_read = cycle_read_inc_oam_bug(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;

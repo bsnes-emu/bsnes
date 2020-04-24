@@ -169,7 +169,7 @@ void main(void) {\n\
 + (GLuint)shaderWithContents:(NSString*)contents type:(GLenum)type
 {
 
-    const GLchar* source = [contents UTF8String];
+    const GLchar *source = [contents UTF8String];
     // Create the shader object
     GLuint shader = glCreateShader(type);
     // Load the shader source

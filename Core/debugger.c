@@ -298,13 +298,15 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
 static value_t add(value_t a, value_t b) {return FIX_BANK(a.value + b.value);}
 static value_t sub(value_t a, value_t b) {return FIX_BANK(a.value - b.value);}
 static value_t mul(value_t a, value_t b) {return FIX_BANK(a.value * b.value);}
-static value_t _div(value_t a, value_t b) {
+static value_t _div(value_t a, value_t b) 
+{
     if (b.value == 0) {
         return FIX_BANK(0);
     }
     return FIX_BANK(a.value / b.value);
 };
-static value_t mod(value_t a, value_t b) {
+static value_t mod(value_t a, value_t b) 
+{
     if (b.value == 0) {
         return FIX_BANK(0);
     }
@@ -380,8 +382,7 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     while (length && (string[length-1] == ' ' || string[length-1] == '\n' || string[length-1] == '\r' || string[length-1] == '\t')) {
         length--;
     }
-    if (length == 0)
-    {
+    if (length == 0) { 
         GB_log(gb, "Expected expression.\n");
         *error = true;
         return (lvalue_t){0,};
@@ -487,8 +488,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     while (length && (string[length-1] == ' ' || string[length-1] == '\n' || string[length-1] == '\r' || string[length-1] == '\t')) {
         length--;
     }
-    if (length == 0)
-    {
+    if (length == 0) { 
         GB_log(gb, "Expected expression.\n");
         *error = true;
         goto exit;
@@ -1167,7 +1167,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
 
     memmove(&gb->watchpoints[index], &gb->watchpoints[index + 1], (gb->n_watchpoints - index - 1) * sizeof(gb->watchpoints[0]));
     gb->n_watchpoints--;
-    gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints* sizeof(gb->watchpoints[0]));
+    gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints *sizeof(gb->watchpoints[0]));
 
     GB_log(gb, "Watchpoint removed from %s\n", debugger_value_to_string(gb, result, true));
     return true;
@@ -1216,7 +1216,7 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
                                                               gb->watchpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s (%c%c)\n", i + 1, debugger_value_to_string(gb,addr, addr.has_bank),
+                GB_log(gb, " %d. %s (%c%c)\n", i + 1, debugger_value_to_string(gb, addr, addr.has_bank),
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-');
             }
@@ -1581,7 +1581,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
     GB_log(gb, "LY: %d\n", gb->io_registers[GB_IO_LY]);
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
-    GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
+    GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7, gb->io_registers[GB_IO_WY]);
     GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
 
     return true;
@@ -1730,7 +1730,7 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 
     uint8_t shift_amount = 1, mask;
     if (modifiers) {
-        switch(modifiers[0]) {
+        switch (modifiers[0]) {
             case 'c':
                 shift_amount = 2;
                 break;
@@ -1826,7 +1826,7 @@ static const debugger_command_t *find_command(const char *string)
 static void print_command_shortcut(GB_gameboy_t *gb, const debugger_command_t *command)
 {
     GB_attributed_log(gb, GB_LOG_BOLD | GB_LOG_UNDERLINE, "%.*s", command->min_length, command->command);
-    GB_attributed_log(gb, GB_LOG_BOLD , "%s", command->command + command->min_length);
+    GB_attributed_log(gb, GB_LOG_BOLD, "%s", command->command + command->min_length);
 }
 
 static void print_command_description(GB_gameboy_t *gb, const debugger_command_t *command)

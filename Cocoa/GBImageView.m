@@ -93,7 +93,7 @@
 
 - (void)updateTrackingAreas
 {
-    if(trackingArea != nil) {
+    if (trackingArea != nil) {
         [self removeTrackingArea:trackingArea];
     }
     

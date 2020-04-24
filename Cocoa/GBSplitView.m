@@ -5,12 +5,14 @@
     NSColor *_dividerColor;
 }
 
-- (void)setDividerColor:(NSColor *)color {
+- (void)setDividerColor:(NSColor *)color 
+{
     _dividerColor = color;
     [self setNeedsDisplay:YES];
 }
 
-- (NSColor *)dividerColor {
+- (NSColor *)dividerColor 
+{
     if (_dividerColor) {
         return _dividerColor;
     }
@@ -22,7 +24,8 @@
 {
     if (@available(macOS 10.11, *)) {
         return [super arrangedSubviews];
-    } else {
+    }
+    else {
         return [self subviews];
     }
 }

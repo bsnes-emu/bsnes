@@ -150,7 +150,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     NSMutableArray *debugger_input_queue;
 }
 
-- (instancetype)init {
+- (instancetype)init 
+{
     self = [super init];
     if (self) {
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
@@ -470,7 +471,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     }
 }
 
-- (void)windowControllerDidLoadNib:(NSWindowController *)aController {
+- (void)windowControllerDidLoadNib:(NSWindowController *)aController 
+{
     [super windowControllerDidLoadNib:aController];
     // Interface Builder bug?
     [self.consoleWindow setContentSize:self.consoleWindow.minSize];
@@ -625,11 +627,13 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     self.memoryBankItem.enabled = false;
 }
 
-+ (BOOL)autosavesInPlace {
++ (BOOL)autosavesInPlace 
+{
     return YES;
 }
 
-- (NSString *)windowNibName {
+- (NSString *)windowNibName 
+{
     // Override returning the nib file name of the document
     // If you need to use a subclass of NSWindowController or if your document supports multiple NSWindowControllers, you should remove this method and override -makeWindowControllers instead.
     return @"Document";
@@ -690,7 +694,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
 
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
-    if([anItem action] == @selector(mute:)) {
+    if ([anItem action] == @selector(mute:)) {
         [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
@@ -837,7 +841,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [self.consoleWindow orderBack:nil];
 }
 
-- (IBAction)consoleInput:(NSTextField *)sender {
+- (IBAction)consoleInput:(NSTextField *)sender 
+{
     NSString *line = [sender stringValue];
     if ([line isEqualToString:@""] && lastConsoleInput) {
         line = lastConsoleInput;
@@ -1475,7 +1480,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
     if (tableView == self.paletteTableView) {
         if (columnIndex == 0) {
-            return [NSString stringWithFormat:@"%s %u", row >=8 ? "Object" : "Background", (unsigned)(row & 7)];
+            return [NSString stringWithFormat:@"%s %u", row >= 8 ? "Object" : "Background", (unsigned)(row & 7)];
         }
         
         uint8_t *palette_data = GB_get_direct_access(&gb, row >= 8? GB_DIRECT_ACCESS_OBP : GB_DIRECT_ACCESS_BGP, NULL, NULL);
@@ -1572,7 +1577,7 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [self stop];
     NSSavePanel * savePanel = [NSSavePanel savePanel];
     [savePanel setAllowedFileTypes:@[@"png"]];
-    [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result){
+    [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
             [savePanel orderOut:self];
             CGImageRef cgRef = [self.feedImageView.image CGImageForProposedRect:NULL
@@ -1681,11 +1686,13 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     return 600;
 }
 
-- (CGFloat)splitView:(GBSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
+- (CGFloat)splitView:(GBSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex 
+{
     return splitView.frame.size.width - 321;
 }
 
-- (BOOL)splitView:(GBSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view {
+- (BOOL)splitView:(GBSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view 
+{
     if ([[splitView arrangedSubviews] lastObject] == view) {
         return NO;
     }

@@ -274,19 +274,14 @@ void GB_rtc_run(GB_gameboy_t *gb)
         time_t current_time = time(NULL);
         while (gb->last_rtc_second < current_time) {
             gb->last_rtc_second++;
-            if (++gb->rtc_real.seconds == 60)
-            {
+            if (++gb->rtc_real.seconds == 60) { 
                 gb->rtc_real.seconds = 0;
-                if (++gb->rtc_real.minutes == 60)
-                {
+                if (++gb->rtc_real.minutes == 60) { 
                     gb->rtc_real.minutes = 0;
-                    if (++gb->rtc_real.hours == 24)
-                    {
+                    if (++gb->rtc_real.hours == 24) { 
                         gb->rtc_real.hours = 0;
-                        if (++gb->rtc_real.days == 0)
-                        {
-                            if (gb->rtc_real.high & 1) /* Bit 8 of days*/
-                            {
+                        if (++gb->rtc_real.days == 0) { 
+                            if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
                                 gb->rtc_real.high |= 0x80; /* Overflow bit */
                             }
                             gb->rtc_real.high ^= 1;

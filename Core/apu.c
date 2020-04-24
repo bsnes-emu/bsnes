@@ -139,7 +139,7 @@ static double smooth(double x)
 
 static void render(GB_gameboy_t *gb)
 {
-    GB_sample_t output = {0,0};
+    GB_sample_t output = {0, 0};
 
     UNROLL
     for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
@@ -907,7 +907,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.is_active[GB_NOISE] = false;
                 update_sample(gb, GB_NOISE, 0, 0);
             }
-            else if (gb->apu.is_active[GB_NOISE]){
+            else if (gb->apu.is_active[GB_NOISE]) {
                 nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
                 update_sample(gb, GB_NOISE,
                               gb->apu.current_lfsr_sample ?

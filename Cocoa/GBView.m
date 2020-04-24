@@ -114,8 +114,7 @@
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if (!(self = [super initWithCoder:coder]))
-    {
+    if (!(self = [super initWithCoder:coder])) { 
         return self;
     }
     [self _init];
@@ -124,8 +123,7 @@
 
 - (instancetype)initWithFrame:(NSRect)frameRect
 {
-    if (!(self = [super initWithFrame:frameRect]))
-    {
+    if (!(self = [super initWithFrame:frameRect])) { 
         return self;
     }
     [self _init];

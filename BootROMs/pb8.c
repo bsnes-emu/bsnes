@@ -97,7 +97,8 @@ LoadTileset:
  * @param blocklength size of an independent input block in bytes
  * @return 0 for reaching infp end of file, or EOF for error
  */
-int pb8(FILE *infp, FILE *outfp, size_t blocklength) {
+int pb8(FILE *infp, FILE *outfp, size_t blocklength) 
+{
   blocklength >>= 3;  // convert bytes to blocks
   assert(blocklength > 0);
   while (1) {
@@ -113,7 +114,8 @@ int pb8(FILE *infp, FILE *outfp, size_t blocklength) {
         control_byte <<= 1;
         if (c == last_byte) {
           control_byte |= 0x01;
-        } else {
+        }
+        else {
           literals[nliterals++] = last_byte = c;
         }
       }
@@ -143,7 +145,8 @@ int pb8(FILE *infp, FILE *outfp, size_t blocklength) {
  * @param outfp output stream
  * @return 0 for reaching infp end of file, or EOF for error
  */
-int unpb8(FILE *infp, FILE *outfp) {
+int unpb8(FILE *infp, FILE *outfp) 
+{
   int last_byte = 0;
   while (1) {
     int control_byte = fgetc(infp);
@@ -165,7 +168,8 @@ int unpb8(FILE *infp, FILE *outfp) {
 
 /* CLI frontend ****************************************************/
 
-static inline void set_fd_binary(unsigned int fd) {
+static inline void set_fd_binary(unsigned int fd) 
+{
 #ifdef _WIN32
   _setmode(fd, _O_BINARY);
 #else
@@ -197,7 +201,8 @@ static const char *version_msg =
 static const char *toomanyfilenames_msg =
 "pb8: too many filenames; try pb8 --help\n";
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
   const char *infilename = NULL;
   const char *outfilename = NULL;
   bool decompress = false;
@@ -248,11 +253,14 @@ int main(int argc, char **argv) {
           fprintf(stderr, "pb8: unknown option -%c\n", argtype);
           return EXIT_FAILURE;
       }
-    } else if (!infilename) {
+    }
+    else if (!infilename) {
       infilename = argv[i];
-    } else if (!outfilename) {
+    }
+    else if (!outfilename) {
       outfilename = argv[i];
-    } else {
+    }
+    else {
       fputs(toomanyfilenames_msg, stderr);
       return EXIT_FAILURE;
     }
@@ -282,7 +290,8 @@ int main(int argc, char **argv) {
       perror("for reading");
       return EXIT_FAILURE;
     }
-  } else {
+  }
+  else {
     infp = stdin;
     set_fd_binary(0);
   }
@@ -296,7 +305,8 @@ int main(int argc, char **argv) {
       fclose(infp);
       return EXIT_FAILURE;
     }
-  } else {
+  }
+  else {
     outfp = stdout;
     set_fd_binary(1);
   }
@@ -305,7 +315,8 @@ int main(int argc, char **argv) {
   int has_ferror = 0;
   if (decompress) {
     compfailed = unpb8(infp, outfp);
-  } else {
+  }
+  else {
     compfailed = pb8(infp, outfp, blocklength);
   }
   fflush(outfp);

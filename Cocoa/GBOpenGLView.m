@@ -4,7 +4,8 @@
 
 @implementation GBOpenGLView
 
-- (void)drawRect:(NSRect)dirtyRect {
+- (void)drawRect:(NSRect)dirtyRect 
+{
     if (!self.shader) {
         self.shader = [[GBGLShader alloc] initWithName:[[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"]];
     }
