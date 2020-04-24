@@ -87,8 +87,13 @@ ifeq ($(PLATFORM),Darwin)
 OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
+# These myst come before the -Wno- flags
+CFLAGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
 
-CFLAGS += -Werror -Wall -Wpartial-availability -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-unknown-warning -Wno-unknown-warning-option -Wno-multichar -Wno-int-in-bool-context -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+CFLAGS += -Wpartial-availability -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
+
+CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+
 ifeq (,$(PKG_CONFIG))
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LDFLAGS := $(shell sdl2-config --libs)
