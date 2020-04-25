@@ -307,7 +307,11 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
 #define READ(x) if (fread(&x, sizeof(x), 1, f) != 1) goto error
     fread(magic, 1, sizeof(magic), f);
     
-    bool extended = *(uint32_t *)&magic == htonl('ISX ');
+#ifdef GB_BIG_ENDIAN
+    bool extended = *(uint32_t *)&magic == 'ISX ';
+#else
+    bool extended = *(uint32_t *)&magic == __builtin_bswap32('ISX ');
+#endif
     
     fseek(f, extended? 0x20 : 0, SEEK_SET);
     
