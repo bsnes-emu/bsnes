@@ -529,18 +529,18 @@ restart:
     bool error = false;
     GB_debugger_clear_symbols(&gb);
     start_capturing_logs();
-    size_t length = strlen(filename);
+    size_t path_length = strlen(filename);
     char extension[4] = {0,};
-    if (length > 4) {
-        if (filename[length - 4] == '.') {
-            extension[0] = tolower(filename[length - 3]);
-            extension[1] = tolower(filename[length - 2]);
-            extension[2] = tolower(filename[length - 1]);
+    if (path_length > 4) {
+        if (filename[path_length - 4] == '.') {
+            extension[0] = tolower(filename[path_length - 3]);
+            extension[1] = tolower(filename[path_length - 2]);
+            extension[2] = tolower(filename[path_length - 1]);
         }
     }
     if (strcmp(extension, "isx") == 0) {
         error = GB_load_isx(&gb, filename);
-        /* Try loading .ram file if available */
+        /* Configure battery */
         char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
         replace_extension(filename, path_length, battery_save_path, ".ram");
         battery_save_path_ptr = battery_save_path;
@@ -551,7 +551,6 @@ restart:
     }
     end_capturing_logs(true, error);
     
-    size_t path_length = strlen(filename);
     
     /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
