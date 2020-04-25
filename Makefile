@@ -145,6 +145,7 @@ endif
 ifneq ($(PLATFORM),windows32)
 LDFLAGS += -flto
 CFLAGS += -flto
+LDFLAGS += -DGB_INTERNAL # For GCC's LTO
 endif
 
 else
