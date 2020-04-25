@@ -1,0 +1,28 @@
+name: "Bulidability"
+on: push
+
+jobs:
+  buildability:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-16.04, macos-latest]
+        cc: [gcc, clang]
+        include:
+        - os: macos-latest
+          cc: clang
+          extra_target: cocoa
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install deps
+        shell: bash
+        run: |
+          ./.github/actions/install_deps.sh ${{ matrix.os }}
+      - name: Build
+        run: |
+          make sdl ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
+      - name: Upload binaries
+        uses: actions/upload-artifact@v1
+        with:
+          name: sameboy-canary-${{ matrix.os }}-${{ matrix.cc }}
+          path: build/bin
