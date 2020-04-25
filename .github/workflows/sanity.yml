@@ -2,7 +2,7 @@ name: "Bulidability and Sanity"
 on: push
 
 jobs:
-  buildability:
+  sanity:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-16.04, macos-latest]
@@ -23,7 +23,7 @@ jobs:
           ./.github/actions/install_deps.sh ${{ matrix.os }}
       - name: Build
         run: |
-          ${{ matrix.cc }} -v; make sdl tester libretro ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
+          ${{ matrix.cc }} -v; make sdl tester libretro ${{ matrix.extra_target }} CONF=release CC=${{ matrix.cc }}
       - name: Sanity tests
         shell: bash
         run: |
