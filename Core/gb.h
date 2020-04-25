@@ -35,7 +35,7 @@
 #ifdef GB_INTERNAL
 #if __clang__
 #define UNROLL _Pragma("unroll")
-#elif __GNUC__
+#elif __GNUC__ >= 8
 #define UNROLL _Pragma("GCC unroll 8")
 #else
 #define UNROLL
