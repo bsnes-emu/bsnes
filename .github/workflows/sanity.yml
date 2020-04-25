@@ -5,7 +5,7 @@ jobs:
   sanity:
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-16.04, macos-latest]
+        os: [macos-latest, ubuntu-latest, ubuntu-16.04]
         cc: [gcc, clang]
         include:
         - os: macos-latest
