@@ -1,3 +1,5 @@
+set -e
+
 ./build/bin/tester/sameboy_tester --jobs 5 \
       --length 40 .github/actions/cgb_sound.gb \
       --length 10  .github/actions/cgb-acid2.gbc \
