@@ -650,6 +650,8 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
         GB_debugger_clear_symbols(&gb);
         if ([[self.fileType pathExtension] isEqualToString:@"isx"]) {
             GB_load_isx(&gb, [self.fileName UTF8String]);
+            GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"ram"] UTF8String]);
+
         }
         else {
             GB_load_rom(&gb, [self.fileName UTF8String]);

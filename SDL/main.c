@@ -540,6 +540,11 @@ restart:
     }
     if (strcmp(extension, "isx") == 0) {
         error = GB_load_isx(&gb, filename);
+        /* Try loading .ram file if available */
+        char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
+        replace_extension(filename, path_length, battery_save_path, ".ram");
+        battery_save_path_ptr = battery_save_path;
+        GB_load_battery(&gb, battery_save_path);
     }
     else {
         GB_load_rom(&gb, filename);
