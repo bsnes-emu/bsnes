@@ -178,8 +178,7 @@ static const char *executable_folder(void)
     _NSGetExecutablePath(&path[0], &length);
 #else
 #ifdef __linux__
-    ssize_t length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
-    assert (length != -1);
+    assert (readlink("/proc/self/exe", &path[0], sizeof(path) - 1) != -1);
 #else
 #ifdef _WIN32
     HMODULE hModule = GetModuleHandle(NULL);
