@@ -174,7 +174,7 @@ static const char *executable_folder(void)
     }
     /* Ugly unportable code! :( */
 #ifdef __APPLE__
-    size_t length = sizeof(path) - 1;
+    uint32_t length = sizeof(path) - 1;
     _NSGetExecutablePath(&path[0], &length);
 #else
 #ifdef __linux__
