@@ -17,7 +17,11 @@ void GB_load_cheats(GB_gameboy_t *gb, const char *path);
 int GB_save_cheats(GB_gameboy_t *gb, const char *path);
 
 #ifdef GB_INTERNAL
+#ifdef GB_DISABLE_CHEATS
+#define GB_apply_cheat(...)
+#else
 void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value);
+#endif
 #endif
 
 typedef struct {

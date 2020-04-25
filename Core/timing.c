@@ -10,7 +10,7 @@
 
 static const unsigned GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
 
-#ifndef DISABLE_TIMEKEEPING
+#ifndef GB_DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
 {
 #ifndef _WIN32

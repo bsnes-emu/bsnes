@@ -13,7 +13,7 @@
 #include "gb.h"
 
 
-#ifdef DISABLE_REWIND
+#ifdef GB_DISABLE_REWIND
 #define GB_rewind_free(...)
 #define GB_rewind_push(...)
 #endif
@@ -57,7 +57,7 @@ void GB_log(GB_gameboy_t *gb, const char *fmt, ...)
     va_end(args);
 }
 
-#ifndef DISABLE_DEBUGGER
+#ifndef GB_DISABLE_DEBUGGER
 static char *default_input_callback(GB_gameboy_t *gb)
 {
     char *expression = NULL;
@@ -148,7 +148,7 @@ void GB_init(GB_gameboy_t *gb, GB_model_t model)
         gb->vram = malloc(gb->vram_size = 0x2000);
     }
 
-#ifndef DISABLE_DEBUGGER
+#ifndef GB_DISABLE_DEBUGGER
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
 #endif
@@ -193,13 +193,15 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->nontrivial_jump_state) {
         free(gb->nontrivial_jump_state);
     }
-#ifndef DISABLE_DEBUGGER
+#ifndef GB_DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
 #endif
     GB_rewind_free(gb);
+#ifndef GB_DISABLE_CHEATS
     while (gb->cheats) {
         GB_remove_cheat(gb, gb->cheats[0]);
     }
+#endif
     memset(gb, 0, sizeof(*gb));
 }
 
@@ -643,7 +645,7 @@ void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback)
 
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
-#ifndef DISABLE_DEBUGGER
+#ifndef GB_DISABLE_DEBUGGER
     if (gb->input_callback == default_input_callback) {
         gb->async_input_callback = NULL;
     }
@@ -653,7 +655,7 @@ void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
-#ifndef DISABLE_DEBUGGER
+#ifndef GB_DISABLE_DEBUGGER
     gb->async_input_callback = callback;
 #endif
 }

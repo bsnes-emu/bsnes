@@ -260,7 +260,7 @@ endif
 
 include Makefile.common
 
-OBJECTS := $(patsubst %.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
+OBJECTS := $(patsubst $(CORE_DIR)/%.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
 
 OBJOUT   = -o
 LINKOUT  = -o 
@@ -306,7 +306,7 @@ else
 	$(LD) $(fpic) $(SHARED) $(INCFLAGS) $(LINKOUT)$@ $(OBJECTS) $(LDFLAGS)
 endif
 
-$(CORE_DIR)/build/obj/%_libretro.c.o: %.c
+$(CORE_DIR)/build/obj/%_libretro.c.o: $(CORE_DIR)/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) -c $(OBJOUT)$@ $< $(CFLAGS) $(fpic) -DGB_INTERNAL
 
