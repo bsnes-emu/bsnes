@@ -342,7 +342,11 @@ $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 
-$(BIN)/SDL/%.bin $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
+$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+
+$(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 
@@ -397,4 +401,4 @@ libretro:
 clean:
 	rm -rf build
 
-.PHONY: libretro
+.PHONY: libretro tester
