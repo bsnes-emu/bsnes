@@ -23,7 +23,7 @@ jobs:
           ./.github/actions/install_deps.sh ${{ matrix.os }}
       - name: Build
         run: |
-          make sdl ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
+          ${{ matrix.cc }} -v; make sdl ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
       - name: Upload binaries
         uses: actions/upload-artifact@v1
         with:
