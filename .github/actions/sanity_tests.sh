@@ -12,6 +12,8 @@ mv .github/actions/dmg{,-mode}-acid2.bmp
 ./build/bin/tester/sameboy_tester \
 --dmg --length 10  .github/actions/dmg-acid2.gb 
 
+set +e
+
 FAILED_TESTS=`
 shasum .github/actions/*.bmp | grep -q -E -v \(\
 44ce0c7d49254df0637849c9155080ac7dc3ef3d\ \ .github/actions/cgb-acid2.bmp\|\
