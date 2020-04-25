@@ -484,16 +484,36 @@ done:;
     
     // Fix a common wrong MBC error
     if (gb->rom[0x147] == 3) { // MBC1 + RAM + Battery
-        if (gb->rom_size >= 33 * 0x4000) {
-            for (unsigned i = 32 * 0x4000; i < 33 * 0x4000; i++) {
+        bool needs_fix = false;
+        if (gb->rom_size >= 0x21 * 0x4000) {
+            for (unsigned i = 0x20 * 0x4000; i < 0x21 * 0x4000; i++) {
                 if (gb->rom[i]) {
-                    gb->rom[0x147] = 0x10; // MBC3 + RTC + RAM + Battery
-                    GB_configure_cart(gb);
-                    gb->rom[0x147] = 0x3;
-                    GB_log(gb, "ROM claims to use MBC1 but appears to require MBC3 or 5, assuming MBC3.\n");
+                    needs_fix = true;
                     break;
                 }
             }
+        }
+        if (!needs_fix && gb->rom_size >= 0x41 * 0x4000) {
+            for (unsigned i = 0x40 * 0x4000; i < 0x41 * 0x4000; i++) {
+                if (gb->rom[i]) {
+                    needs_fix = true;
+                    break;
+                }
+            }
+        }
+        if (!needs_fix && gb->rom_size >= 0x61 * 0x4000) {
+            for (unsigned i = 0x60 * 0x4000; i < 0x61 * 0x4000; i++) {
+                if (gb->rom[i]) {
+                    needs_fix = true;
+                    break;
+                }
+            }
+        }
+        if (needs_fix) {
+            gb->rom[0x147] = 0x10; // MBC3 + RTC + RAM + Battery
+            GB_configure_cart(gb);
+            gb->rom[0x147] = 0x3;
+            GB_log(gb, "ROM claims to use MBC1 but appears to require MBC3 or 5, assuming MBC3.\n");
         }
     }
     
