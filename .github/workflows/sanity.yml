@@ -1,4 +1,4 @@
-name: "Bulidability"
+name: "Bulidability and Sanity"
 on: push
 
 jobs:
@@ -23,7 +23,11 @@ jobs:
           ./.github/actions/install_deps.sh ${{ matrix.os }}
       - name: Build
         run: |
-          ${{ matrix.cc }} -v; make sdl libretro ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
+          ${{ matrix.cc }} -v; make sdl tester libretro ${{ matrix.extra_target }} -j CONF=release CC=${{ matrix.cc }}
+      - name: Sanity tests
+        shell: bash
+        run: |
+          ./.github/actions/sanity_tests.sh
       - name: Upload binaries
         uses: actions/upload-artifact@v1
         with:
