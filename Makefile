@@ -125,7 +125,6 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
 CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
-SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
 GL_LDFLAGS := -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
