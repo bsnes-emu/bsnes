@@ -174,11 +174,12 @@ static const char *executable_folder(void)
     }
     /* Ugly unportable code! :( */
 #ifdef __APPLE__
-    unsigned int length = sizeof(path) - 1;
+    size_t length = sizeof(path) - 1;
     _NSGetExecutablePath(&path[0], &length);
 #else
 #ifdef __linux__
-    assert (readlink("/proc/self/exe", &path[0], sizeof(path) - 1) != -1);
+    size_t __attribute__((unused)) length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
+    assert(length != -1);
 #else
 #ifdef _WIN32
     HMODULE hModule = GetModuleHandle(NULL);
