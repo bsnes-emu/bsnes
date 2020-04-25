@@ -721,7 +721,8 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size);
-
+int GB_load_isx(GB_gameboy_t *gb, const char *path);
+    
 int GB_save_battery_size(GB_gameboy_t *gb);
 int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size);
 int GB_save_battery(GB_gameboy_t *gb, const char *path);

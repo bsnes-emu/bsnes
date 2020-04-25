@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <signal.h>
+#include <ctype.h>
 #include <OpenDialog/open_dialog.h>
 #include <SDL.h>
 #include <Core/gb.h>
@@ -526,8 +527,23 @@ restart:
     }
 
     bool error = false;
+    GB_debugger_clear_symbols(&gb);
     start_capturing_logs();
-    error = GB_load_rom(&gb, filename);
+    size_t length = strlen(filename);
+    char extension[4] = {0,};
+    if (length > 4) {
+        if (filename[length - 4] == '.') {
+            extension[0] = tolower(filename[length - 3]);
+            extension[1] = tolower(filename[length - 2]);
+            extension[2] = tolower(filename[length - 1]);
+        }
+    }
+    if (strcmp(extension, "isx") == 0) {
+        error = GB_load_isx(&gb, filename);
+    }
+    else {
+        GB_load_rom(&gb, filename);
+    }
     end_capturing_logs(true, error);
     
     size_t path_length = strlen(filename);

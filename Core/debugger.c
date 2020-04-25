@@ -2160,6 +2160,19 @@ void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
     }
 }
 
+void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol)
+{
+    bank &= 0x1FF;
+
+    if (!gb->bank_symbols[bank]) {
+        gb->bank_symbols[bank] = GB_map_alloc();
+    }
+    GB_bank_symbol_t *allocated_symbol = GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
+    if (allocated_symbol) {
+        GB_reversed_map_add_symbol(&gb->reversed_symbol_map, bank, allocated_symbol);
+    }
+}
+
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "r");
@@ -2182,14 +2195,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
         char symbol[length];
 
         if (sscanf(line, "%x:%x %s", &bank, &address, symbol) == 3) {
-            bank &= 0x1FF;
-            if (!gb->bank_symbols[bank]) {
-                gb->bank_symbols[bank] = GB_map_alloc();
-            }
-            GB_bank_symbol_t *allocated_symbol = GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
-            if (allocated_symbol) {
-                GB_reversed_map_add_symbol(&gb->reversed_symbol_map, bank, allocated_symbol);
-            }
+            GB_debugger_add_symbol(gb, bank, address, symbol);
         }
     }
     free(line);

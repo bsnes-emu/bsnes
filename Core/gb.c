@@ -296,6 +296,219 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     return 0;
 }
 
+int GB_load_isx(GB_gameboy_t *gb, const char *path)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        GB_log(gb, "Could not open ISX file: %s.\n", strerror(errno));
+        return errno;
+    }
+    char magic[4];
+#define READ(x) if (fread(&x, sizeof(x), 1, f) != 1) goto error
+    fread(magic, 1, sizeof(magic), f);
+    
+    bool extended = *(uint32_t *)&magic == htonl('ISX ');
+    
+    fseek(f, extended? 0x20 : 0, SEEK_SET);
+    
+    
+    uint8_t *old_rom = gb->rom;
+    uint32_t old_size = gb->rom_size;
+    gb->rom = NULL;
+    gb->rom_size = 0;
+    
+    while (true) {
+        uint8_t record_type = 0;
+        if (fread(&record_type, sizeof(record_type), 1, f) != 1) break;
+        switch (record_type) {
+            case 0x01: { // Binary
+                uint16_t bank;
+                uint16_t address;
+                uint16_t length;
+                uint8_t byte;
+                READ(byte);
+                bank = byte;
+                if (byte >= 0x80) {
+                    READ(byte);
+                    bank |= byte << 8;
+                }
+                
+                READ(address);
+#ifdef GB_BIG_ENDIAN
+                address = __builtin_bswap16(address);
+#endif
+                address &= 0x3FFF;
+
+                READ(length);
+#ifdef GB_BIG_ENDIAN
+                length = __builtin_bswap16(length);
+#endif
+
+                size_t needed_size = bank * 0x4000 + address + length;
+                if (needed_size > 1024 * 1024 * 32)
+                    goto error;
+                
+                if (gb->rom_size < needed_size) {
+                    gb->rom = realloc(gb->rom, needed_size);
+                    memset(gb->rom + gb->rom_size, 0, needed_size - gb->rom_size);
+                    gb->rom_size = needed_size;
+                }
+                
+                if (fread(gb->rom + (bank * 0x4000 + address), length, 1, f) != 1)
+                    goto error;
+                
+                break;
+            }
+                
+            case 0x11: { // Extended Binary
+                uint32_t address;
+                uint32_t length;
+                
+                READ(address);
+#ifdef GB_BIG_ENDIAN
+                address = __builtin_bswap32(address);
+#endif
+                
+                READ(length);
+#ifdef GB_BIG_ENDIAN
+                length = __builtin_bswap32(length);
+#endif
+                size_t needed_size = address + length;
+                if (needed_size > 1024 * 1024 * 32)
+                    goto error;
+                if (gb->rom_size < needed_size) {
+                    gb->rom = realloc(gb->rom, needed_size);
+                    memset(gb->rom + gb->rom_size, 0, needed_size - gb->rom_size);
+                    gb->rom_size = needed_size;
+                }
+                
+                if (fread(gb->rom + address, length, 1, f) != 1)
+                    goto error;
+                
+                break;
+            }
+                
+            case 0x04: { // Symbol
+                uint16_t count;
+                uint8_t length;
+                char name[257];
+                uint8_t flag;
+                uint16_t bank;
+                uint16_t address;
+                uint8_t byte;
+                READ(count);
+#ifdef GB_BIG_ENDIAN
+                count = __builtin_bswap16(count);
+#endif
+                while (count--) {
+                    READ(length);
+                    if (fread(name, length, 1, f) != 1)
+                        goto error;
+                    name[length] = 0;
+                    READ(flag); // unused
+                    
+                    READ(byte);
+                    bank = byte;
+                    if (byte >= 0x80) {
+                        READ(byte);
+                        bank |= byte << 8;
+                    }
+                    
+                    READ(address);
+#ifdef GB_BIG_ENDIAN
+                    address = __builtin_bswap16(address);
+#endif
+                    GB_debugger_add_symbol(gb, bank, address, name);
+                }
+                break;
+            }
+                
+            case 0x14: { // Extended Binary
+                uint16_t count;
+                uint8_t length;
+                char name[257];
+                uint8_t flag;
+                uint32_t address;
+                READ(count);
+#ifdef GB_BIG_ENDIAN
+                count = __builtin_bswap16(count);
+#endif
+                while (count--) {
+                    READ(length);
+                    if (fread(name, length + 1, 1, f) != 1)
+                        goto error;
+                    name[length] = 0;
+                    READ(flag); // unused
+                    
+                    READ(address);
+#ifdef GB_BIG_ENDIAN
+                    address = __builtin_bswap32(address);
+#endif
+                    // TODO: How to convert 32-bit addresses to Bank:Address? Needs to tell RAM and ROM apart
+                }
+                break;
+            }
+                
+            default:
+                goto done;
+        }
+    }
+done:;
+#undef READ
+    if (gb->rom_size == 0) goto error;
+    
+    size_t needed_size = (gb->rom_size + 0x3FFF) & ~0x3FFF; /* Round to bank */
+    
+    /* And then round to a power of two */
+    while (needed_size & (needed_size - 1)) {
+        /* I promise this works. */
+        needed_size |= needed_size >> 1;
+        needed_size++;
+    }
+    
+    if (needed_size < 0x8000) {
+        needed_size = 0x8000;
+    }
+    
+    if (gb->rom_size < needed_size) {
+        gb->rom = realloc(gb->rom, needed_size);
+        memset(gb->rom + gb->rom_size, 0, needed_size - gb->rom_size);
+        gb->rom_size = needed_size;
+    }
+    
+    GB_configure_cart(gb);
+    
+    // Fix a common wrong MBC error
+    if (gb->rom[0x147] == 3) { // MBC1 + RAM + Battery
+        if (gb->rom_size == 64 * 0x4000) {
+            for (unsigned i = 63 * 0x4000; i < 64 * 0x4000; i++) {
+                if (gb->rom[i]) {
+                    gb->rom[0x147] = 0x10; // MBC3 + RTC + RAM + Battery
+                    GB_configure_cart(gb);
+                    gb->rom[0x147] = 0x3;
+                    GB_log(gb, "ROM uses MBC1 but appears to use all 64 banks, assuming MBC3\n");
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (old_rom) {
+        free(old_rom);
+    }
+    
+    return 0;
+error:
+    GB_log(gb, "Invalid or unsupported ISX file.\n");
+    if (gb->rom) {
+        free(gb->rom);
+        gb->rom = old_rom;
+        gb->rom_size = old_size;
+    }
+    fclose(f);
+    return -1;
+}
+
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size)
 {
     gb->rom_size = (size + 0x3fff) & ~0x3fff;

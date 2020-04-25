@@ -14,6 +14,8 @@
 #define GB_debugger_call_hook(gb, addr) (void)addr
 #define GB_debugger_test_write_watchpoint(gb, addr, value) ((void)addr, (void)value)
 #define GB_debugger_test_read_watchpoint(gb, addr) (void)addr
+#define GB_debugger_add_symbol(gb, bank, address, symbol) ((void)bank, (void)address, (void)symbol)
+
 #else
 void GB_debugger_run(GB_gameboy_t *gb);
 void GB_debugger_handle_async_commands(GB_gameboy_t *gb);
@@ -22,6 +24,7 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb);
 void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
+void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol);
 #endif /* GB_DISABLE_DEBUGGER */
 #endif
 
