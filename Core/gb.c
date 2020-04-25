@@ -484,13 +484,13 @@ done:;
     
     // Fix a common wrong MBC error
     if (gb->rom[0x147] == 3) { // MBC1 + RAM + Battery
-        if (gb->rom_size == 64 * 0x4000) {
-            for (unsigned i = 63 * 0x4000; i < 64 * 0x4000; i++) {
+        if (gb->rom_size >= 33 * 0x4000) {
+            for (unsigned i = 32 * 0x4000; i < 33 * 0x4000; i++) {
                 if (gb->rom[i]) {
                     gb->rom[0x147] = 0x10; // MBC3 + RTC + RAM + Battery
                     GB_configure_cart(gb);
                     gb->rom[0x147] = 0x3;
-                    GB_log(gb, "ROM uses MBC1 but appears to use all 64 banks, assuming MBC3\n");
+                    GB_log(gb, "ROM claims to use MBC1 but appears to require MBC3 or 5, assuming MBC3.\n");
                     break;
                 }
             }
