@@ -1,6 +1,8 @@
 STATIC_LINKING := 0
 AR             := ar
 
+CFLAGS := -Wall $(CFLAGS)
+
 GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
    CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
@@ -93,7 +95,7 @@ else ifeq ($(platform), linux-portable)
 else ifeq ($(platform), switch)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
    include $(LIBTRANSISTOR_HOME)/libtransistor.mk
-   CFLAGS += -Wl,-q -Wall -O3 -fno-short-enums -fno-optimize-sibling-calls
+   CFLAGS += -Wl,-q -O3 -fno-short-enums -fno-optimize-sibling-calls
    STATIC_LINKING=1
 # Nintendo WiiU
 else ifeq ($(platform), wiiu)
@@ -141,7 +143,7 @@ else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_vita.a
    CC = arm-vita-eabi-gcc
    AR = arm-vita-eabi-ar
-   CFLAGS += -Wl,-q -Wall -O3 -fno-short-enums -fno-optimize-sibling-calls
+   CFLAGS += -Wl,-q -O3 -fno-short-enums -fno-optimize-sibling-calls
 	STATIC_LINKING = 1
 
 # Windows MSVC 2017 all architectures
@@ -278,7 +280,7 @@ else
 	LD = $(CC)
 endif
 
-CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
+CFLAGS   += -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 
 all: $(TARGET)
 
