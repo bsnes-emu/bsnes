@@ -89,13 +89,15 @@ OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
 # These must come before the -Wno- flags
-CFLAGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
-CFLAGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
+WARNINGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
+WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
 
 # Only add this flag if the compiler supports it
 ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2> $(NULL); echo $$?),0)
-CFLAGS += -Wpartial-availability
+WARNINGS += -Wpartial-availability
 endif
+
+CFLAGS += $(WARNINGS)
 
 CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 
@@ -396,7 +398,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb8
 
 # Libretro Core (uses its own build system)
 libretro:
-	$(MAKE) -C libretro
+	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro
 
 # Clean
 clean:
