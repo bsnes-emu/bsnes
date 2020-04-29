@@ -493,7 +493,6 @@ void GB_apu_run(GB_gameboy_t *gb)
 
                 /* Step LFSR */
                 unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
-                /* Todo: is this formula is different on a GBA? */
                 bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
                 gb->apu.noise_channel.lfsr >>= 1;
 

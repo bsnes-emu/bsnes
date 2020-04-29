@@ -22,6 +22,7 @@
 #include "symbol_hash.h"
 #include "sgb.h"
 #include "cheats.h"
+#include "rumble.h"
 
 #define GB_STRUCT_VERSION 13
 

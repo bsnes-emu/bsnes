@@ -200,14 +200,8 @@ static void display_vblank(GB_gameboy_t *gb)
             }
         }
     }
+    GB_handle_rumble(gb);
 
-    if (gb->rumble_callback) {
-        if (gb->rumble_on_cycles + gb->rumble_off_cycles) {
-            gb->rumble_callback(gb, gb->rumble_on_cycles / (double)(gb->rumble_on_cycles + gb->rumble_off_cycles));
-            gb->rumble_on_cycles = gb->rumble_off_cycles = 0;
-        }
-    }
-    
     if (gb->vblank_callback) {
         gb->vblank_callback(gb);
     }
