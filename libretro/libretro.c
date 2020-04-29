@@ -376,6 +376,7 @@ static void init_for_current_model(unsigned id)
     GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
     GB_apu_set_sample_callback(&gameboy[i], audio_callback);
     GB_set_rumble_callback(&gameboy[i], rumble_callback);
+    GB_set_rumble_mode(&gameboy[i], GB_RUMBLE_CARTRIDGE_ONLY);
 
 
     /* todo: attempt to make these more generic */
