@@ -125,6 +125,13 @@ endif
 
 ifeq ($(PLATFORM),Darwin)
 SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
+ifeq ($(SYSROOT),)
+SYSROOT := $(shell ls /Library/Developer/CommandLineTools/SDKs/ | grep 10 | tail -n 1)
+endif
+ifeq ($(SYSROOT),)
+$(error Could not find a macOS SDK)
+endif
+
 CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
