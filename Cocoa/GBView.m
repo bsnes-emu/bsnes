@@ -270,9 +270,9 @@
     }
 }
 
-- (void)setRumble:(bool)on
+- (void)setRumble:(double)amp
 {
-    [lastController setRumbleAmplitude:(double)on];
+    [lastController setRumbleAmplitude:amp];
 }
 
 - (void)controller:(JOYController *)controller movedAxis:(JOYAxis *)axis

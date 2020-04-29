@@ -22,5 +22,5 @@ typedef enum {
 - (uint32_t *)currentBuffer;
 - (uint32_t *)previousBuffer;
 - (void)screenSizeChanged;
-- (void)setRumble: (bool)on;
+- (void)setRumble: (double)amp;
 @end
