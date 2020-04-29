@@ -4,6 +4,7 @@
 - (instancetype)initWithDevice:(IOHIDDeviceRef)device reportIDFilter:(NSArray <NSNumber *> *) filter serialSuffix:(NSString *)suffix;
 - (void)elementChanged:(IOHIDElementRef) element toValue:(IOHIDValueRef) value;
 - (void)disconnected;
+- (void)sendReport:(NSData *)report;
 @end
 
 @implementation JOYMultiplayerController
@@ -39,6 +40,11 @@
     for (JOYController *child in _children) {
         [child disconnected];
     }
+}
+
+- (void)sendReport:(NSData *)report
+{
+    [[_children firstObject] sendReport:report];
 }
 
 @end
