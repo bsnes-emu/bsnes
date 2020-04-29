@@ -332,9 +332,7 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         joypad_wait = false;
     });
-    
-    NSLog(@"%@", button);
-    
+        
     if (!button.isPressed) return;
     if (joystick_configuration_state == -1) return;
     if (joystick_configuration_state == GBButtonCount) return;
