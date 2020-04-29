@@ -128,7 +128,7 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
 ifeq ($(SYSROOT),)
 SYSROOT := /Library/Developer/CommandLineTools/SDKs/$(shell ls /Library/Developer/CommandLineTools/SDKs/ | grep 10 | tail -n 1)
 endif
-ifeq ($(SYSROOT),)
+ifeq ($(SYSROOT),/Library/Developer/CommandLineTools/SDKs/)
 $(error Could not find a macOS SDK)
 endif
 
