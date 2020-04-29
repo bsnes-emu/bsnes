@@ -19,7 +19,7 @@ static NSString const *JOYConnectedUsagePage = @"JOYConnectedUsagePage";
 static NSString const *JOYRumbleMin = @"JOYRumbleMin";
 static NSString const *JOYRumbleMax = @"JOYRumbleMax";
 static NSString const *JOYSwapZRz = @"JOYSwapZRz";
-
+static NSString const *JOYActivationReport = @"JOYActivationReport";
 
 static NSMutableDictionary<id, JOYController *> *controllers; // Physical controllers
 static NSMutableArray<JOYController *> *exposedControllers; // Logical controllers
@@ -691,15 +691,25 @@ typedef struct __attribute__((packed)) {
 {
     NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
     NSDictionary *hacks = hacksByName[name];
+    if (!hacks) {
+        hacks = hacksByManufacturer[(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDVendorIDKey))];
+    }
     NSArray *filters = hacks[JOYReportIDFilters];
+    JOYController *controller = nil;
     if (filters) {
-        JOYController *controller = [[JOYMultiplayerController alloc] initWithDevice:device
-                                                                     reportIDFilters:filters];
-        [controllers setObject:controller forKey:[NSValue valueWithPointer:device]];
+        controller = [[JOYMultiplayerController alloc] initWithDevice:device
+                                                      reportIDFilters:filters];
     }
     else {
-        [controllers setObject:[[JOYController alloc] initWithDevice:device] forKey:[NSValue valueWithPointer:device]];
+        controller = [[JOYController alloc] initWithDevice:device];
     }
+    
+    if (hacks[JOYActivationReport]) {
+        [controller sendReport:hacks[JOYActivationReport]];
+    }
+    [controllers setObject:controller forKey:[NSValue valueWithPointer:device]];
+
+
 }
 
 + (void)controllerRemoved:(IOHIDDeviceRef) device

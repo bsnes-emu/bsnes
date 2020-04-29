@@ -120,6 +120,8 @@ hacksByName = @{
         
         JOYConnectedUsage: @2,
         JOYConnectedUsagePage: @0xFF00,
+        
+        JOYActivationReport: [NSData dataWithBytes:(uint8_t[]){0x13} length:1],
 
         JOYSubElementStructs: @{
             
