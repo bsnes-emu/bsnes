@@ -125,23 +125,21 @@
     
     double old1 = _state1, old2 = _state2;
     {
-        double min = [self effectiveMinX];
-        double max = [self effectiveMaxX];
-        if (min == max) return false;
         int32_t value = x;
- 
+
         if (initialX != 0) {
             minX = MIN(value, minX);
             maxX = MAX(value, maxX);
         }
         
+        double min = [self effectiveMinX];
+        double max = [self effectiveMaxX];
+        if (min == max) return false;
+        
         _state1 = (value - min) / (max - min) * 2 - 1;
     }
     
     {
-        double min = [self effectiveMinY];
-        double max = [self effectiveMaxY];
-        if (min == max) return false;
         int32_t value = y;
 
         if (initialY != 0) {
@@ -149,7 +147,22 @@
             maxY = MAX(value, maxY);
         }
         
+        double min = [self effectiveMinY];
+        double max = [self effectiveMaxY];
+        if (min == max) return false;
+        
         _state2 = (value - min) / (max - min) * 2 - 1;
+    }
+    
+    if (_state1 < -1 || _state1 > 1 ||
+        _state2 < -1 || _state2 > 1) {
+        // Makes no sense, recalibrate
+        _state1 = _state2 = 0;
+        initialX = initialY = 0;
+        minX = _element1.max;
+        minY = _element2.max;
+        maxX = _element1.min;
+        maxY = _element2.min;
     }
 
     return old1 != _state1 || old2 != _state2;

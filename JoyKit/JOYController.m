@@ -382,11 +382,13 @@ typedef struct __attribute__((packed)) {
 
 - (NSString *)deviceName
 {
+    if (!_device) return nil;
     return IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDProductKey));
 }
 
 - (NSString *)uniqueID
 {
+    if (!_device) return nil;
     NSString *serial = (__bridge NSString *)IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDSerialNumberKey));
     if (!serial || [(__bridge NSString *)IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDTransportKey)) isEqualToString:@"USB"]) {
         serial = [NSString stringWithFormat:@"%04x%04x%08x",
@@ -581,6 +583,7 @@ typedef struct __attribute__((packed)) {
 - (void)sendReport:(NSData *)report
 {
     if (!report.length) return;
+    if (!_device) return;
     IOHIDDeviceSetReport(_device, kIOHIDReportTypeOutput, *(uint8_t *)report.bytes, report.bytes, report.length);
 }
 
