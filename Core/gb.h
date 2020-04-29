@@ -661,6 +661,7 @@ struct GB_gameboy_internal_s {
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
         uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units
         double clock_multiplier;
+        GB_rumble_mode_t rumble_mode;
         uint32_t rumble_on_cycles;
         uint32_t rumble_off_cycles;
                

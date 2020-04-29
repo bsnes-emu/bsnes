@@ -228,6 +228,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     borderModeChanged = true;
 }
 
+- (void) updateRumbleMode
+{
+    GB_set_rumble_mode(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRumbleMode"]);
+}
+
 - (void) initCommon
 {
     GB_init(&gb, [self internalModel]);
@@ -247,6 +252,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
     GB_apu_set_sample_callback(&gb, audioCallback);
     GB_set_rumble_callback(&gb, rumbleCallback);
+    [self updateRumbleMode];
 }
 
 - (void) updateMinSize
@@ -554,6 +560,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateBorderMode)
                                                  name:@"GBBorderModeChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateRumbleMode)
+                                                 name:@"GBRumbleModeChanged"
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self

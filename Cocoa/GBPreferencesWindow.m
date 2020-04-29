@@ -24,6 +24,7 @@
     
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
     NSPopUpButton *_preferredJoypadButton;
+    NSPopUpButton *_rumbleModePopupButton;
 }
 
 + (NSArray *)filterList
@@ -123,6 +124,18 @@
 - (NSPopUpButton *)displayBorderPopupButton
 {
     return _displayBorderPopupButton;
+}
+
+- (void)setRumbleModePopupButton:(NSPopUpButton *)rumbleModePopupButton
+{
+    _rumbleModePopupButton = rumbleModePopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRumbleMode"];
+    [_rumbleModePopupButton selectItemWithTag:mode];
+}
+
+- (NSPopUpButton *)rumbleModePopupButton
+{
+    return _rumbleModePopupButton;
 }
 
 - (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
@@ -265,6 +278,13 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBBorderMode"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBBorderModeChanged" object:nil];
+}
+
+- (IBAction)rumbleModeChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
+                                              forKey:@"GBRumbleMode"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRumbleModeChanged" object:nil];
 }
 
 - (IBAction)rewindLengthChanged:(id)sender

@@ -43,6 +43,7 @@
                                                               @"GBDMGModel": @(GB_MODEL_DMG_B),
                                                               @"GBCGBModel": @(GB_MODEL_CGB_E),
                                                               @"GBSGBModel": @(GB_MODEL_SGB2),
+                                                              @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
                                                               }];
     
     [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{
