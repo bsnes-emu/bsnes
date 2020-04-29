@@ -3,8 +3,8 @@ on: push
 
 jobs:
   sanity:
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, ubuntu-16.04]
         cc: [gcc, clang]
