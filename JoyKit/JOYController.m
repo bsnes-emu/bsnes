@@ -115,6 +115,7 @@ typedef struct __attribute__((packed)) {
     volatile double _rumblePWMRatio;
     bool _physicallyConnected;
     bool _logicallyConnected;
+    bool _rumblePWMThreadRunning;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device
@@ -609,7 +610,7 @@ typedef struct __attribute__((packed)) {
         [NSThread sleepForTimeInterval:(1 - _rumblePWMRatio) / 10];
     }
     [_rumblePWMThreadLock lock];
-    [_rumblePWMThreadLock signal];
+    _rumblePWMThreadRunning = false;
     [_rumblePWMThreadLock unlock];
 }
 
@@ -657,23 +658,23 @@ typedef struct __attribute__((packed)) {
     }
     else {
         if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
-            if (_rumblePWMRatio == 0) { // PWM thread not running, start it.
+            [_rumblePWMThreadLock lock];
+            if (!_rumblePWMThreadRunning) { // PWM thread not running, start it.
                 if (amp != 0) {
                     _rumblePWMRatio = amp;
+                    _rumblePWMThreadRunning = true;
                     [self performSelectorInBackground:@selector(pwmThread) withObject:nil];
                 }
             }
             else {
                 if (amp == 0) { // Thread is running, signal it to stop
-                    [_rumblePWMThreadLock lock];
                     _rumblePWMRatio = 0;
-                    [_rumblePWMThreadLock wait];
-                    [_rumblePWMThreadLock unlock];
                 }
                 else {
                     _rumblePWMRatio = amp;
                 }
             }
+            [_rumblePWMThreadLock unlock];
         }
         else {
             [_rumbleElement setValue:amp * (_rumbleElement.max - _rumbleElement.min) + _rumbleElement.min];
