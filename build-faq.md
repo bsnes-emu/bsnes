@@ -4,4 +4,4 @@ When building on macOS, the build system will make a native Cocoa app by default
 
 # Attempting to build the SDL frontend on macOS fails on linking
 
-SameBoy on macOS expects you to have the SDL2 framework installed as a framework. You can find the SDL2 binaries on the [SDL homepage](https://www.libsdl.org/download-2.0.php). Mount the DMG and copy SDL2.framework to `/Library/Frameworks/`.
+SameBoy on macOS expects you to have SDL2 installed via Brew, and not as a framework. Older versions expected it to be installed as a framework, but this is no longer the case.

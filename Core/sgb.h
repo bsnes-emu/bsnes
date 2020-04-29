@@ -5,6 +5,16 @@
 #include <stdbool.h>
 
 typedef struct GB_sgb_s GB_sgb_t;
+typedef struct {
+    uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
+    union {
+        struct {
+            uint16_t map[32 * 32];
+            uint16_t palette[16 * 4];
+        };
+        uint16_t raw_data[0x440];
+    };
+} GB_sgb_border_t;
 
 #ifdef GB_INTERNAL
 struct GB_sgb_s {
@@ -29,16 +39,7 @@ struct GB_sgb_s {
     uint8_t vram_transfer_countdown, transfer_dest;
     
     /* Border */
-    struct {
-        uint8_t tiles[0x100 * 8 * 8]; /* High nibble not used*/
-        union {
-            struct {
-                uint16_t map[32 * 32];
-                uint16_t palette[16 * 4];
-            };
-            uint16_t raw_data[0x440];
-        };
-    } border, pending_border;
+    GB_sgb_border_t border, pending_border;
     uint8_t border_animation;
     
     /* Colorization */

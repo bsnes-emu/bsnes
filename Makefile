@@ -37,6 +37,7 @@ endif
 VERSION := 0.12.3
 export VERSION
 CONF ?= debug
+SDL_AUDIO_DRIVER ?= sdl
 
 BIN := build/bin
 OBJ := build/obj
@@ -87,8 +88,19 @@ ifeq ($(PLATFORM),Darwin)
 OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
+# These must come before the -Wno- flags
+WARNINGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
+WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
 
-CFLAGS += -Werror -Wall -Wno-unused-result -Wno-strict-aliasing -Wno-unknown-warning -Wno-unknown-warning-option -Wno-multichar -Wno-int-in-bool-context -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+# Only add this flag if the compiler supports it
+ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2> $(NULL); echo $$?),0)
+WARNINGS += -Wpartial-availability
+endif
+
+CFLAGS += $(WARNINGS)
+
+CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+
 ifeq (,$(PKG_CONFIG))
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LDFLAGS := $(shell sdl2-config --libs)
@@ -116,7 +128,6 @@ SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
 CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
-SDL_LDFLAGS := -F/Library/Frameworks -framework SDL2
 GL_LDFLAGS := -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
@@ -137,6 +148,7 @@ endif
 ifneq ($(PLATFORM),windows32)
 LDFLAGS += -flto
 CFLAGS += -flto
+LDFLAGS += -Wno-lto-type-mismatch # For GCC's LTO
 endif
 
 else
@@ -163,7 +175,7 @@ all: cocoa sdl tester libretro
 # Get a list of our source files and their respective object file targets
 
 CORE_SOURCES := $(shell ls Core/*.c)
-SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG)
+SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) SDL/audio/$(SDL_AUDIO_DRIVER).c
 TESTER_SOURCES := $(shell ls Tester/*.c)
 
 ifeq ($(PLATFORM),Darwin)
@@ -333,7 +345,11 @@ $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 
-$(BIN)/SDL/%.bin $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
+$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+
+$(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 
@@ -382,10 +398,10 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb8
 
 # Libretro Core (uses its own build system)
 libretro:
-	$(MAKE) -C libretro
+	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro
 
 # Clean
 clean:
 	rm -rf build
 
-.PHONY: libretro
+.PHONY: libretro tester

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <assert.h>
+#include <ctype.h>
 #include <Core/gb.h>
 
 #include "get_image_for_rom.h"
@@ -60,7 +61,22 @@ int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *out
     GB_set_log_callback(&gb, log_callback);
     GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
     
-    if (GB_load_rom(&gb, filename)) {
+    size_t length = strlen(filename);
+    char extension[4] = {0,};
+    if (length > 4) {
+        if (filename[length - 4] == '.') {
+            extension[0] = tolower(filename[length - 3]);
+            extension[1] = tolower(filename[length - 2]);
+            extension[2] = tolower(filename[length - 1]);
+        }
+    }
+    if (strcmp(extension, "isx") == 0) {
+        if (GB_load_isx(&gb, filename)) {
+            GB_free(&gb);
+            return 1;
+        }
+    }
+    else if (GB_load_rom(&gb, filename)) {
         GB_free(&gb);
         return 1;
     }

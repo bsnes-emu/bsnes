@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -342,11 +342,22 @@
                                     <action selector="mute:" target="-1" id="YE5-mi-Yzd"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="YIZ-pz-N4V"/>
-                            <menuItem title="Blend Frames" id="AWj-r8-L6U">
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="Cheats" id="8ld-Ad-nvc">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Cheats" id="Ucc-Hm-TVA">
+                        <items>
+                            <menuItem title="Enable Cheats" keyEquivalent="C" id="vtx-LG-v6y">
+                                <connections>
+                                    <action selector="toggleCheats:" target="-1" id="gsw-UY-fhu"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Cheats" id="LZV-QK-YXi">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="toggleBlend:" target="-1" id="TjO-ce-UxL"/>
+                                    <action selector="showCheats:" target="-1" id="tfr-qM-q8X"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -371,9 +382,9 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Developer" id="IwX-DJ-dBk">
+                <menuItem title="Develop" id="IwX-DJ-dBk">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Developer" id="UVb-cc-at0">
+                    <menu key="submenu" title="Develop" id="UVb-cc-at0">
                         <items>
                             <menuItem title="Developer Mode" id="Qx6-Tt-zZR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -454,6 +465,7 @@
                     </menu>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="140" y="260"/>
         </menu>
     </objects>
 </document>

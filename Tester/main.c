@@ -73,38 +73,38 @@ static void handle_buttons(GB_gameboy_t *gb)
                      frames) % combo_length + (start_is_bad? 20 : 0) ) {
                 case 0:
                     if (!limit_start || frames < 20 * 60) {
-                        gb->keys[0][push_right? 0 : 7] = true; // Start (Or right) down
+                        GB_set_key_state(gb, push_right? GB_KEY_RIGHT: GB_KEY_START, true);
                     }
                     if (pointer_control) {
-                        gb->keys[0][1] = true; // left
-                        gb->keys[0][2] = true; // up
+                        GB_set_key_state(gb, GB_KEY_LEFT, true);
+                        GB_set_key_state(gb, GB_KEY_UP, true);
                     }
                     
                     break;
                 case 10:
-                    gb->keys[0][push_right? 0 : 7] = false; // Start (Or right) up
+                    GB_set_key_state(gb, push_right? GB_KEY_RIGHT: GB_KEY_START, false);
                     if (pointer_control) {
-                        gb->keys[0][1] = false; // left
-                        gb->keys[0][2] = false; // up
+                        GB_set_key_state(gb, GB_KEY_LEFT, false);
+                        GB_set_key_state(gb, GB_KEY_UP, false);
                     }
                     break;
                 case 20:
-                    gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
+                    GB_set_key_state(gb, b_is_confirm? GB_KEY_B: GB_KEY_A, true);
                     break;
                 case 30:
-                    gb->keys[0][b_is_confirm? 5: 4] = false; // A up (or B)
+                    GB_set_key_state(gb, b_is_confirm? GB_KEY_B: GB_KEY_A, false);
                     break;
                 case 40:
                     if (push_a_twice) {
-                        gb->keys[0][b_is_confirm? 5: 4] = true; // A down (or B)
+                        GB_set_key_state(gb, b_is_confirm? GB_KEY_B: GB_KEY_A, true);
                     }
                     else if (gb->boot_rom_finished) {
-                        gb->keys[0][3] = true; // D-Pad Down down
+                        GB_set_key_state(gb, GB_KEY_DOWN, true);
                     }
                     break;
                 case 50:
-                    gb->keys[0][b_is_confirm? 5: 4] = false; // A down (or B)
-                    gb->keys[0][3] = false; // D-Pad Down up
+                    GB_set_key_state(gb, b_is_confirm? GB_KEY_B: GB_KEY_A, false);
+                    GB_set_key_state(gb, GB_KEY_DOWN, false);
                     break;
             }
         }
@@ -174,12 +174,12 @@ static const char *executable_folder(void)
     }
     /* Ugly unportable code! :( */
 #ifdef __APPLE__
-    unsigned int length = sizeof(path) - 1;
+    uint32_t length = sizeof(path) - 1;
     _NSGetExecutablePath(&path[0], &length);
 #else
 #ifdef __linux__
-    ssize_t length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
-    assert (length != -1);
+    size_t __attribute__((unused)) length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
+    assert(length != -1);
 #else
 #ifdef _WIN32
     HMODULE hModule = GetModuleHandle(NULL);
@@ -300,7 +300,7 @@ int main(int argc, char **argv)
         if (max_forks > 1) {
             while (current_forks >= max_forks) {
                 int wait_out;
-                while(wait(&wait_out) == -1);
+                while (wait(&wait_out) == -1);
                 current_forks--;
             }
             
@@ -323,15 +323,15 @@ int main(int argc, char **argv)
         
         if (dmg) {
             GB_init(&gb, GB_MODEL_DMG_B);
-            if (GB_load_boot_rom(&gb, boot_rom_path? boot_rom_path : executable_relative_path("dmg_boot.bin"))) {
-                perror("Failed to load boot ROM");
+            if (GB_load_boot_rom(&gb, boot_rom_path ?: executable_relative_path("dmg_boot.bin"))) {
+                fprintf(stderr, "Failed to load boot ROM from '%s'\n", boot_rom_path ?: executable_relative_path("dmg_boot.bin"));
                 exit(1);
             }
         }
         else {
             GB_init(&gb, GB_MODEL_CGB_E);
-            if (GB_load_boot_rom(&gb, boot_rom_path? boot_rom_path : executable_relative_path("cgb_boot.bin"))) {
-                perror("Failed to load boot ROM");
+            if (GB_load_boot_rom(&gb, boot_rom_path ?: executable_relative_path("cgb_boot.bin"))) {
+                fprintf(stderr, "Failed to load boot ROM from '%s'\n", boot_rom_path ?: executable_relative_path("cgb_boot.bin"));
                 exit(1);
             }
         }
@@ -433,7 +433,7 @@ int main(int argc, char **argv)
     }
 #ifndef _WIN32
     int wait_out;
-    while(wait(&wait_out) != -1);
+    while (wait(&wait_out) != -1);
 #endif
     return 0;
 }

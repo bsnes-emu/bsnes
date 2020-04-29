@@ -64,8 +64,8 @@ typedef struct
 
     uint8_t square_sweep_countdown; // In 128Hz
     uint8_t square_sweep_calculate_countdown; // In 2 MHz
-    uint16_t new_sweep_sample_legnth;
-    uint16_t shadow_sweep_sample_legnth;
+    uint16_t new_sweep_sample_length;
+    uint16_t shadow_sweep_sample_length;
     bool sweep_enabled;
     bool sweep_decreasing;
 
@@ -114,7 +114,10 @@ typedef struct
 
     } noise_channel;
 
-    bool skip_div_event;
+#define GB_SKIP_DIV_EVENT_INACTIVE 0
+#define GB_SKIP_DIV_EVENT_SKIPPED 1
+#define GB_SKIP_DIV_EVENT_SKIP 2
+    uint8_t skip_div_event;
     bool current_lfsr_sample;
 } GB_apu_t;
 
@@ -159,6 +162,7 @@ void GB_apu_div_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
 void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
+void GB_borrow_sgb_border(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */

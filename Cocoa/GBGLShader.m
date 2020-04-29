@@ -21,7 +21,7 @@ void main(void) {\n\
     GLuint resolution_uniform;
     GLuint texture_uniform;
     GLuint previous_texture_uniform;
-    GLuint mix_previous_uniform;
+    GLuint frame_blending_mode_uniform;
 
     GLuint position_attribute;
     GLuint texture;
@@ -70,7 +70,7 @@ void main(void) {\n\
         glBindTexture(GL_TEXTURE_2D, 0);
         previous_texture_uniform = glGetUniformLocation(program, "previous_image");
 
-        mix_previous_uniform = glGetUniformLocation(program, "mix_previous");
+        frame_blending_mode_uniform = glGetUniformLocation(program, "frame_blending_mode");
 
         // Configure OpenGL
         [self configureOpenGL];
@@ -79,7 +79,7 @@ void main(void) {\n\
     return self;
 }
 
-- (void) renderBitmap: (void *)bitmap previous:(void*) previous sized:(NSSize)srcSize inSize:(NSSize)dstSize scale: (double) scale
+- (void) renderBitmap: (void *)bitmap previous:(void*) previous sized:(NSSize)srcSize inSize:(NSSize)dstSize scale: (double) scale withBlendingMode:(GB_frame_blending_mode_t)blendingMode
 {
     glUseProgram(program);
     glUniform2f(resolution_uniform, dstSize.width * scale, dstSize.height * scale);
@@ -87,8 +87,8 @@ void main(void) {\n\
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcSize.width, srcSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
     glUniform1i(texture_uniform, 0);
-    glUniform1i(mix_previous_uniform, previous != NULL);
-    if (previous) {
+    glUniform1i(frame_blending_mode_uniform, blendingMode);
+    if (blendingMode) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, previous_texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, srcSize.width, srcSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, previous);
@@ -169,7 +169,7 @@ void main(void) {\n\
 + (GLuint)shaderWithContents:(NSString*)contents type:(GLenum)type
 {
 
-    const GLchar* source = [contents UTF8String];
+    const GLchar *source = [contents UTF8String];
     // Create the shader object
     GLuint shader = glCreateShader(type);
     // Load the shader source

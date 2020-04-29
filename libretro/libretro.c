@@ -200,14 +200,14 @@ static bool serial_end2(GB_gameboy_t *gb)
 
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
-    return r<<16|g<<8|b;
+    return r <<16 | g <<8 | b;
 }
 
 static retro_environment_t environ_cb;
 
 /* variables for single cart mode */
 static const struct retro_variable vars_single[] = {
-    { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness" },
+    { "sameboy_color_correction_mode", "Color correction; off|correct curves|emulate hardware|preserve brightness|reduce contrast" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
     { "sameboy_border", "Super Game Boy border; enabled|disabled" },
@@ -328,15 +328,13 @@ static struct retro_input_descriptor descriptors_4p[] = {
 
 static void set_link_cable_state(bool state)
 {
-    if (state && emulated_devices == 2)
-    {
+    if (state && emulated_devices == 2) { 
         GB_set_serial_transfer_bit_start_callback(&gameboy[0], serial_start1);
         GB_set_serial_transfer_bit_end_callback(&gameboy[0], serial_end1);
         GB_set_serial_transfer_bit_start_callback(&gameboy[1], serial_start2);
         GB_set_serial_transfer_bit_end_callback(&gameboy[1], serial_end2);
     }
-    else if (!state)
-    {
+    else if (!state) { 
         GB_set_serial_transfer_bit_start_callback(&gameboy[0], NULL);
         GB_set_serial_transfer_bit_end_callback(&gameboy[0], NULL);
         GB_set_serial_transfer_bit_start_callback(&gameboy[1], NULL);
@@ -382,8 +380,7 @@ static void init_for_current_model(unsigned id)
 
     /* todo: attempt to make these more generic */
     GB_set_vblank_callback(&gameboy[0], (GB_vblank_callback_t) vblank1);
-    if (emulated_devices == 2)
-    {
+    if (emulated_devices == 2) { 
         GB_set_vblank_callback(&gameboy[1], (GB_vblank_callback_t) vblank2);
         if (link_cable_emulation)
             set_link_cable_state(true);
@@ -435,17 +432,17 @@ static void init_for_current_model(unsigned id)
     descs[8].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_OAM, &size, &bank);
     descs[8].start = 0xFE00;
     descs[8].len   = 0x00A0;
-    descs[8].select= 0xFFFFFF00;
+    descs[8].select = 0xFFFFFF00;
 
     descs[9].ptr   = descs[2].ptr + 0x2000; /* GBC RAM bank 2 */
     descs[9].start = 0x10000;
     descs[9].len   = GB_is_cgb(&gameboy[i]) ? 0x6000 : 0; /* 0x1000 per bank (2-7), unmapped on GB */
-    descs[9].select= 0xFFFF0000;
+    descs[9].select = 0xFFFF0000;
 
     descs[10].ptr   = GB_get_direct_access(&gameboy[i], GB_DIRECT_ACCESS_IO, &size, &bank);
     descs[10].start = 0xFF00;
     descs[10].len   = 0x0080;
-    descs[10].select= 0xFFFFFF00;
+    descs[10].select = 0xFFFFFF00;
 
     struct retro_memory_map mmaps;
     mmaps.descriptors = descs;
@@ -453,8 +450,7 @@ static void init_for_current_model(unsigned id)
     environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
 
     /* Let's be extremely nitpicky about how devices and descriptors are set */
-    if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2))
-    {
+    if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)) { 
         static const struct retro_controller_info ports[] = {
             { controllers_sgb, 1 },
             { controllers_sgb, 1 },
@@ -465,8 +461,7 @@ static void init_for_current_model(unsigned id)
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_4p);
     }
-    else if (emulated_devices == 1)
-    {
+    else if (emulated_devices == 1) { 
         static const struct retro_controller_info ports[] = {
             { controllers, 1 },
             { NULL, 0 },
@@ -474,8 +469,7 @@ static void init_for_current_model(unsigned id)
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_1p);
     }
-    else
-    {
+    else { 
         static const struct retro_controller_info ports[] = {
             { controllers, 1 },
             { controllers, 1 },
@@ -490,12 +484,10 @@ static void init_for_current_model(unsigned id)
 static void check_variables()
 {
     struct retro_variable var = {0};
-    if (emulated_devices == 1)
-    {
+    if (emulated_devices == 1) { 
         var.key = "sameboy_color_correction_mode";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
             else if (strcmp(var.value, "correct curves") == 0)
@@ -504,12 +496,13 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
         }
 
         var.key = "sameboy_high_pass_filter_mode";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_highpass_filter_mode(&gameboy[0], GB_HIGHPASS_OFF);
             else if (strcmp(var.value, "accurate") == 0)
@@ -520,8 +513,7 @@ static void check_variables()
 
         var.key = "sameboy_model";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             enum model new_model = model[0];
             if (strcmp(var.value, "Game Boy") == 0)
                 new_model = MODEL_DMG;
@@ -536,8 +528,7 @@ static void check_variables()
             else
                 new_model = MODEL_AUTO;
 
-            if (new_model != model[0])
-            {
+            if (new_model != model[0]) { 
                 geometry_updated = true;
                 model[0] = new_model;
                 init_for_current_model(0);
@@ -546,20 +537,17 @@ static void check_variables()
 
         var.key = "sameboy_border";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "enabled") == 0)
                 sgb_border = 1;
             else if (strcmp(var.value, "disabled") == 0)
                 sgb_border = 0;
         }
     }
-    else
-    {
+    else { 
         var.key = "sameboy_color_correction_mode_1";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_DISABLED);
             else if (strcmp(var.value, "correct curves") == 0)
@@ -568,12 +556,13 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
         }
 
         var.key = "sameboy_color_correction_mode_2";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_DISABLED);
             else if (strcmp(var.value, "correct curves") == 0)
@@ -582,12 +571,14 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+            else if (strcmp(var.value, "reduce_contrast") == 0)
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
+
         }
 
         var.key = "sameboy_high_pass_filter_mode_1";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_highpass_filter_mode(&gameboy[0], GB_HIGHPASS_OFF);
             else if (strcmp(var.value, "accurate") == 0)
@@ -598,8 +589,7 @@ static void check_variables()
 
         var.key = "sameboy_high_pass_filter_mode_2";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "off") == 0)
                 GB_set_highpass_filter_mode(&gameboy[1], GB_HIGHPASS_OFF);
             else if (strcmp(var.value, "accurate") == 0)
@@ -610,8 +600,7 @@ static void check_variables()
 
         var.key = "sameboy_model_1";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             enum model new_model = model[0];
             if (strcmp(var.value, "Game Boy") == 0)
                 new_model = MODEL_DMG;
@@ -626,8 +615,7 @@ static void check_variables()
             else
                 new_model = MODEL_AUTO;
 
-            if (model[0] != new_model)
-            {
+            if (model[0] != new_model) { 
                 model[0] = new_model;
                 init_for_current_model(0);
             }
@@ -635,8 +623,7 @@ static void check_variables()
 
         var.key = "sameboy_model_2";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             enum model new_model = model[1];
             if (strcmp(var.value, "Game Boy") == 0)
                 new_model = MODEL_DMG;
@@ -651,8 +638,7 @@ static void check_variables()
             else
                 new_model = MODEL_AUTO;
 
-            if (model[1] != new_model)
-            {
+            if (model[1] != new_model) { 
                 model[1] = new_model;
                 init_for_current_model(1);
             }
@@ -660,8 +646,7 @@ static void check_variables()
 
         var.key = "sameboy_screen_layout";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "top-down") == 0)
                 screen_layout = LAYOUT_TOP_DOWN;
             else
@@ -672,8 +657,7 @@ static void check_variables()
 
         var.key = "sameboy_link";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             bool tmp = link_cable_emulation;
             if (strcmp(var.value, "enabled") == 0)
                 link_cable_emulation = true;
@@ -687,8 +671,7 @@ static void check_variables()
 
         var.key = "sameboy_audio_output";
         var.value = NULL;
-        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-        {
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) { 
             if (strcmp(var.value, "Game Boy #1") == 0)
                 audio_out = GB_1;
             else
@@ -753,28 +736,25 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
     struct retro_game_geometry geom;
     struct retro_system_timing timing = { GB_get_usual_frame_rate(&gameboy[0]), AUDIO_FREQUENCY };
 
-    if (emulated_devices == 2)
-    {
+    if (emulated_devices == 2) { 
         if (screen_layout == LAYOUT_TOP_DOWN) {
             geom.base_width = VIDEO_WIDTH;
             geom.base_height = VIDEO_HEIGHT * emulated_devices;
             geom.aspect_ratio = (double)VIDEO_WIDTH / (emulated_devices * VIDEO_HEIGHT);
-        }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+        }
+        else if (screen_layout == LAYOUT_LEFT_RIGHT) {
             geom.base_width = VIDEO_WIDTH * emulated_devices;
             geom.base_height = VIDEO_HEIGHT;
             geom.aspect_ratio = ((double)VIDEO_WIDTH * emulated_devices) / VIDEO_HEIGHT;
         }
     }
-    else
-    {
-        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)
-        {
+    else { 
+        if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2) { 
             geom.base_width = SGB_VIDEO_WIDTH;
             geom.base_height = SGB_VIDEO_HEIGHT;
             geom.aspect_ratio = (double)SGB_VIDEO_WIDTH / SGB_VIDEO_HEIGHT;
         }
-        else
-        {
+        else { 
             geom.base_width = VIDEO_WIDTH;
             geom.base_height = VIDEO_HEIGHT;
             geom.aspect_ratio = (double)VIDEO_WIDTH / VIDEO_HEIGHT;
@@ -848,13 +828,11 @@ void retro_run(void)
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
         check_variables();
 
-    if (emulated_devices == 2)
-    {
+    if (emulated_devices == 2) { 
         GB_update_keys_status(&gameboy[0], 0);
         GB_update_keys_status(&gameboy[1], 1);
     }
-    else if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2))
-    {
+    else if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)) { 
         for (unsigned i = 0; i < 4; i++)
             GB_update_keys_status(&gameboy[0], i);
     }
@@ -863,8 +841,7 @@ void retro_run(void)
 
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
-    if (emulated_devices == 2)
-    {
+    if (emulated_devices == 2) { 
     while (!vblank1_occurred || !vblank2_occurred) {
             if (delta >= 0) {
                 delta -= GB_run(&gameboy[0]);
@@ -874,16 +851,15 @@ void retro_run(void)
             }
         }
     }
-    else
-    {
+    else { 
         GB_run_frame(&gameboy[0]);
     }
 
-    if (emulated_devices == 2)
-    {
+    if (emulated_devices == 2) { 
         if (screen_layout == LAYOUT_TOP_DOWN) {
             video_cb(frame_buf, VIDEO_WIDTH, VIDEO_HEIGHT * emulated_devices, VIDEO_WIDTH * sizeof(uint32_t));
-        }else if (screen_layout == LAYOUT_LEFT_RIGHT) {
+        }
+        else if (screen_layout == LAYOUT_LEFT_RIGHT) {
             /* use slow memcpy method for now */
             for (int index = 0; index < emulated_devices; index++) {
                 for (int y = 0; y < VIDEO_HEIGHT; y++) {
@@ -896,8 +872,7 @@ void retro_run(void)
             video_cb(frame_buf_copy, VIDEO_WIDTH * emulated_devices, VIDEO_HEIGHT, VIDEO_WIDTH * emulated_devices * sizeof(uint32_t));
         }
     }
-    else
-    {
+    else { 
         if (model[0] == MODEL_SGB || model[0] == MODEL_SGB2) {
             if (sgb_border == 1)
                 video_cb(frame_buf, SGB_VIDEO_WIDTH, SGB_VIDEO_HEIGHT, SGB_VIDEO_WIDTH * sizeof(uint32_t));
@@ -920,12 +895,11 @@ bool retro_load_game(const struct retro_game_info *info)
     environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars_single);
     check_variables();
 
-    frame_buf = (uint32_t*)malloc(SGB_VIDEO_PIXELS* emulated_devices * sizeof(uint32_t));
+    frame_buf = (uint32_t*)malloc(SGB_VIDEO_PIXELS *emulated_devices * sizeof(uint32_t));
     memset(frame_buf, 0, SGB_VIDEO_PIXELS * emulated_devices * sizeof(uint32_t));
 
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-    {
+    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) { 
         log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported\n");
         return false;
     }
@@ -933,11 +907,9 @@ bool retro_load_game(const struct retro_game_info *info)
     auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
     snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
 
-    for (int i = 0; i < emulated_devices; i++)
-    {
+    for (int i = 0; i < emulated_devices; i++) { 
         init_for_current_model(i);
-        if (GB_load_rom(&gameboy[i],info->path))
-        {
+        if (GB_load_rom(&gameboy[i], info->path)) { 
             log_cb(RETRO_LOG_INFO, "Failed to load ROM at %s\n", info->path);
             return false;
         }
@@ -984,8 +956,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     memset(frame_buf_copy, 0, emulated_devices * SGB_VIDEO_PIXELS * sizeof(uint32_t));
 
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-    {
+    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) { 
         log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported\n");
         return false;
     }
@@ -993,11 +964,9 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
     auto_model = (info->path[strlen(info->path) - 1] & ~0x20) == 'C' ? MODEL_CGB : MODEL_DMG;
     snprintf(retro_game_path, sizeof(retro_game_path), "%s", info->path);
 
-    for (int i = 0; i < emulated_devices; i++)
-    {
+    for (int i = 0; i < emulated_devices; i++) { 
         init_for_current_model(i);
-        if (GB_load_rom(&gameboy[i], info[i].path))
-        {
+        if (GB_load_rom(&gameboy[i], info[i].path)) { 
             log_cb(RETRO_LOG_INFO, "Failed to load ROM\n");
             return false;
         }
@@ -1063,8 +1032,7 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void *data, size_t size)
 {
-    for (int i = 0; i < emulated_devices; i++)
-    {
+    for (int i = 0; i < emulated_devices; i++) { 
         size_t state_size = GB_get_save_state_size(&gameboy[i]);
         if (state_size > size) {
             return false;
@@ -1085,10 +1053,8 @@ bool retro_unserialize(const void *data, size_t size)
 void *retro_get_memory_data(unsigned type)
 {
     void *data = NULL;
-    if (emulated_devices == 1)
-    {
-        switch(type)
-        {
+    if (emulated_devices == 1) { 
+        switch (type) { 
             case RETRO_MEMORY_SYSTEM_RAM:
                 data = gameboy[0].ram;
                 break;
@@ -1102,7 +1068,7 @@ void *retro_get_memory_data(unsigned type)
                 data = gameboy[0].vram;
                 break;
             case RETRO_MEMORY_RTC:
-                if(gameboy[0].cartridge_type->has_battery)
+                if (gameboy[0].cartridge_type->has_battery)
                     data = GB_GET_SECTION(&gameboy[0], rtc);
                 else
                     data = NULL;
@@ -1111,10 +1077,8 @@ void *retro_get_memory_data(unsigned type)
                 break;
         }
     }
-    else
-    {
-        switch (type)
-        {
+    else { 
+        switch (type) { 
             case RETRO_MEMORY_GAMEBOY_1_SRAM:
                 if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
                     data = gameboy[0].mbc_ram;
@@ -1128,13 +1092,13 @@ void *retro_get_memory_data(unsigned type)
                     data = NULL;
                 break;
             case RETRO_MEMORY_GAMEBOY_1_RTC:
-                if(gameboy[0].cartridge_type->has_battery)
+                if (gameboy[0].cartridge_type->has_battery)
                     data = GB_GET_SECTION(&gameboy[0], rtc);
                 else
                     data = NULL;
                 break;
             case RETRO_MEMORY_GAMEBOY_2_RTC:
-                if(gameboy[1].cartridge_type->has_battery)
+                if (gameboy[1].cartridge_type->has_battery)
                     data = GB_GET_SECTION(&gameboy[1], rtc);
                 else
                     data = NULL;
@@ -1150,10 +1114,8 @@ void *retro_get_memory_data(unsigned type)
 size_t retro_get_memory_size(unsigned type)
 {
     size_t size = 0;
-    if (emulated_devices == 1)
-    {
-        switch(type)
-        {
+    if (emulated_devices == 1) { 
+        switch (type) { 
             case RETRO_MEMORY_SYSTEM_RAM:
                 size = gameboy[0].ram_size;
                 break;
@@ -1167,7 +1129,7 @@ size_t retro_get_memory_size(unsigned type)
                 size = gameboy[0].vram_size;
                 break;
             case RETRO_MEMORY_RTC:
-                if(gameboy[0].cartridge_type->has_battery)
+                if (gameboy[0].cartridge_type->has_battery)
                     size = GB_SECTION_SIZE(rtc);
                 else
                     size =  0;
@@ -1176,10 +1138,8 @@ size_t retro_get_memory_size(unsigned type)
                 break;
         }
     }
-    else
-    {
-        switch (type)
-        {
+    else { 
+        switch (type) { 
             case RETRO_MEMORY_GAMEBOY_1_SRAM:
                 if (gameboy[0].cartridge_type->has_battery && gameboy[0].mbc_ram_size != 0)
                     size = gameboy[0].mbc_ram_size;
@@ -1193,11 +1153,11 @@ size_t retro_get_memory_size(unsigned type)
                     size = 0;
                 break;
             case RETRO_MEMORY_GAMEBOY_1_RTC:
-                if(gameboy[0].cartridge_type->has_battery)
+                if (gameboy[0].cartridge_type->has_battery)
                     size = GB_SECTION_SIZE(rtc);
                 break;
             case RETRO_MEMORY_GAMEBOY_2_RTC:
-                if(gameboy[1].cartridge_type->has_battery)
+                if (gameboy[1].cartridge_type->has_battery)
                     size = GB_SECTION_SIZE(rtc);
                 break;
             default:

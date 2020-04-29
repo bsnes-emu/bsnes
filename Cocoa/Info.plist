@@ -16,7 +16,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>Cartridge</string>
 			<key>CFBundleTypeName</key>
-			<string>GameBoy Game</string>
+			<string>Game Boy Game</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
@@ -36,12 +36,32 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>ColorCartridge</string>
 			<key>CFBundleTypeName</key>
-			<string>GameBoy Color Game</string>
+			<string>Game Boy Color Game</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.github.liji32.sameboy.gbc</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<integer>0</integer>
+			<key>NSDocumentClass</key>
+			<string>Document</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gbc</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>ColorCartridge</string>
+			<key>CFBundleTypeName</key>
+			<string>Game Boy ISX File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.github.liji32.sameboy.isx</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<integer>0</integer>
@@ -85,7 +105,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>GameBoy Game</string>
+			<string>Game Boy Game</string>
 			<key>UTTypeIconFile</key>
 			<string>Cartridge</string>
 			<key>UTTypeIdentifier</key>
@@ -104,7 +124,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>GameBoy Color Game</string>
+			<string>Game Boy Color Game</string>
 			<key>UTTypeIconFile</key>
 			<string>ColorCartridge</string>
 			<key>UTTypeIdentifier</key>
@@ -114,6 +134,25 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>gbc</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Game Boy ISX File</string>
+			<key>UTTypeIconFile</key>
+			<string>ColorCartridge</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.github.liji32.sameboy.isx</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>isx</string>
 				</array>
 			</dict>
 		</dict>

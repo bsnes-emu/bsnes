@@ -86,6 +86,10 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
         case GB_MBC3:
             gb->mbc_rom_bank = gb->mbc3.rom_bank;
             gb->mbc_ram_bank = gb->mbc3.ram_bank;
+            if (!gb->is_mbc30) {
+                gb->mbc_rom_bank &= 0x7F;
+                gb->mbc_ram_bank &= 0x3;
+            }
             if (gb->mbc_rom_bank == 0) {
                 gb->mbc_rom_bank = 1;
             }
@@ -128,7 +132,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
             gb->mbc_ram_size = 0x200;
         }
         else {
-            static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
+            static const unsigned ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
             gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
         }
         gb->mbc_ram = malloc(gb->mbc_ram_size);
@@ -144,6 +148,13 @@ void GB_configure_cart(GB_gameboy_t *gb)
     if (gb->cartridge_type->mbc_type == GB_MBC1) {
         if (gb->rom_size >= 0x44000 && memcmp(gb->rom + 0x104, gb->rom + 0x40104, 0x30) == 0) {
             gb->mbc1_wiring = GB_MBC1M_WIRING;
+        }
+    }
+    
+    /* Detect MBC30 */
+    if (gb->cartridge_type->mbc_type == GB_MBC3) {
+        if (gb->rom_size > 0x200000 || gb->mbc_ram_size > 0x8000) {
+            gb->is_mbc30 = true;
         }
     }
     

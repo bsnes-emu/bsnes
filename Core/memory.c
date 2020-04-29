@@ -277,7 +277,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_MODEL_SGB_PAL_NO_SFC:
             case GB_MODEL_SGB2:
             case GB_MODEL_SGB2_NO_SFC:
-                ;
+                break;
         }
     }
 
@@ -295,11 +295,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return gb->io_registers[GB_IO_TAC] | 0xF8;
             case GB_IO_STAT:
                 return gb->io_registers[GB_IO_STAT] | 0x80;
-            case GB_IO_DMG_EMULATION_INDICATION:
-                if (!gb->cgb_mode) {
+            case GB_IO_OPRI:
+                if (!GB_is_cgb(gb)) {
                     return 0xFF;
                 }
-                return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
+                return gb->io_registers[GB_IO_OPRI] | 0xFE;
 
             case GB_IO_PCM_12:
                 if (!GB_is_cgb(gb)) return 0xFF;
@@ -435,12 +435,12 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
     }
+    uint8_t data = read_map[addr >> 12](gb, addr);
+    GB_apply_cheat(gb, addr, &data);
     if (gb->read_memory_callback) {
-        uint8_t data = read_map[addr >> 12](gb, addr);
         data = gb->read_memory_callback(gb, addr, data);
-        return data;
     }
-    return read_map[addr >> 12](gb, addr);
+    return data;
 }
 
 static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
@@ -456,9 +456,9 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             break;
         case GB_MBC2:
-            switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
-                case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
+            switch (addr & 0x4100) {
+                case 0x0000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x0100: gb->mbc2.rom_bank  = value; break;
             }
             break;
         case GB_MBC3:
@@ -642,23 +642,33 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (addr < 0xFF80) {
         /* Hardware registers */
         switch (addr & 0xFF) {
+            case GB_IO_WY:
+                if (value == gb->current_line) {
+                    gb->wy_triggered = true;
+                }
             case GB_IO_WX:
-                GB_window_related_write(gb, addr & 0xFF, value);
-                break;
             case GB_IO_IF:
             case GB_IO_SCX:
             case GB_IO_SCY:
             case GB_IO_BGP:
             case GB_IO_OBP0:
             case GB_IO_OBP1:
-            case GB_IO_WY:
             case GB_IO_SB:
-            case GB_IO_DMG_EMULATION_INDICATION:
             case GB_IO_UNKNOWN2:
             case GB_IO_UNKNOWN3:
             case GB_IO_UNKNOWN4:
             case GB_IO_UNKNOWN5:
                 gb->io_registers[addr & 0xFF] = value;
+                return;
+            case GB_IO_OPRI:
+                if ((!gb->boot_rom_finished || (gb->io_registers[GB_IO_KEY0] & 8)) && GB_is_cgb(gb)) {
+                    gb->io_registers[addr & 0xFF] = value;
+                    gb->object_priority = (value & 1) ? GB_OBJECT_PRIORITY_X : GB_OBJECT_PRIORITY_INDEX;
+                }
+                else if (gb->cgb_mode) {
+                    gb->io_registers[addr & 0xFF] = value;
+
+                }
                 return;
             case GB_IO_LYC:
                 
@@ -728,8 +738,19 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);
                 }
-                /* Writing to LCDC might enable to disable the window, so we write it via GB_window_related_write */
-                GB_window_related_write(gb, addr & 0xFF, value);
+                /* Handle disabling objects while already fetching an object */
+                if ((gb->io_registers[GB_IO_LCDC] & 2) && !(value & 2)) {
+                    if (gb->during_object_fetch) {
+                        gb->cycles_for_line += gb->display_cycles;
+                        gb->display_cycles = 0;
+                        gb->object_fetch_aborted = true;
+                    }
+                }
+                gb->io_registers[GB_IO_LCDC] = value;
+                if (!(value & 0x20)) {
+                    gb->wx_triggered = false;
+                    gb->wx166_glitch = false;
+                }
                 return;
 
             case GB_IO_STAT:
@@ -756,18 +777,19 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 else if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
                     GB_sgb_write(gb, value);
-                    gb->io_registers[GB_IO_JOYP] = value & 0xF0;
+                    gb->io_registers[GB_IO_JOYP] = (value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
                     GB_update_joyp(gb);
                 }
                 return;
 
-            case GB_IO_BIOS:
+            case GB_IO_BANK:
                 gb->boot_rom_finished = true;
                 return;
 
-            case GB_IO_DMG_EMULATION:
+            case GB_IO_KEY0:
                 if (GB_is_cgb(gb) && !gb->boot_rom_finished) {
                     gb->cgb_mode = !(value & 0xC); /* The real "contents" of this register aren't quite known yet. */
+                    gb->io_registers[GB_IO_KEY0] = value;
                 }
                 return;
 

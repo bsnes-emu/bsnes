@@ -7,6 +7,7 @@
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 #include "GBWarningPopover.h"
+#include "GBCheatWindowController.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -61,6 +62,8 @@ enum model {
     size_t audioBufferSize;
     size_t audioBufferPosition;
     size_t audioBufferNeeded;
+    
+    bool borderModeChanged;
 }
 
 @property GBAudioClient *audioClient;
@@ -75,7 +78,14 @@ enum model {
            exposure:(unsigned) exposure;
 - (void) gotNewSample:(GB_sample_t *)sample;
 - (void) rumbleChanged:(double)amp;
+- (void) loadBootROM:(GB_boot_rom_t)type;
 @end
+
+static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self loadBootROM: type];
+}
 
 static void vblank(GB_gameboy_t *gb)
 {
@@ -147,7 +157,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     NSMutableArray *debugger_input_queue;
 }
 
-- (instancetype)init {
+- (instancetype)init 
+{
     self = [super init];
     if (self) {
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
@@ -191,15 +202,44 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
 }
 
+- (void) updatePalette
+{
+    switch ([[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"]) {
+        case 1:
+            GB_set_palette(&gb, &GB_PALETTE_DMG);
+            break;
+            
+        case 2:
+            GB_set_palette(&gb, &GB_PALETTE_MGB);
+            break;
+            
+        case 3:
+            GB_set_palette(&gb, &GB_PALETTE_GBL);
+            break;
+            
+        default:
+            GB_set_palette(&gb, &GB_PALETTE_GREY);
+            break;
+    }
+}
+
+- (void) updateBorderMode
+{
+    borderModeChanged = true;
+}
+
 - (void) initCommon
 {
     GB_init(&gb, [self internalModel]);
     GB_set_user_data(&gb, (__bridge void *)(self));
+    GB_set_boot_rom_load_callback(&gb, (GB_boot_rom_load_callback_t)boot_rom_load);
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
+    GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
+    [self updatePalette];
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
@@ -209,9 +249,29 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_set_rumble_callback(&gb, rumbleCallback);
 }
 
+- (void) updateMinSize
+{
+    self.mainWindow.contentMinSize = NSMakeSize(GB_get_screen_width(&gb), GB_get_screen_height(&gb));
+    if (self.mainWindow.contentView.bounds.size.width < GB_get_screen_width(&gb) ||
+        self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
+        [self.mainWindow zoom:nil];
+    }
+}
+
 - (void) vblank
 {
     [self.view flip];
+    if (borderModeChanged) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            size_t previous_width = GB_get_screen_width(&gb);
+            GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
+            if (GB_get_screen_width(&gb) != previous_width) {
+                [self.view screenSizeChanged];
+                [self updateMinSize];
+            }
+        });
+        borderModeChanged = false;
+    }
     GB_set_pixels_output(&gb, self.view.pixels);
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -270,6 +330,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             [audioLock wait];
         }
         
+        if (stopping) {
+            memset(buffer, 0, nFrames * sizeof(*buffer));
+            [audioLock unlock];
+            return;
+        }
+        
         if (audioBufferPosition >= nFrames && audioBufferPosition < nFrames + 4800) {
             memcpy(buffer, audioBuffer, nFrames * sizeof(*buffer));
             memmove(audioBuffer, audioBuffer + nFrames, (audioBufferPosition - nFrames) * sizeof(*buffer));
@@ -308,6 +374,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_save_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
     [_view setRumble:false];
     stopping = false;
 }
@@ -326,21 +393,32 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (GB_debugger_is_stopped(&gb)) {
         [self interruptDebugInputRead];
     }
+    [audioLock lock];
     stopping = true;
+    [audioLock signal];
+    [audioLock unlock];
     running = false;
-    while (stopping);
+    while (stopping) {
+        [audioLock lock];
+        [audioLock signal];
+        [audioLock unlock];
+    }
     GB_debugger_set_disabled(&gb, false);
 }
 
-- (void) loadBootROM
+- (void) loadBootROM: (GB_boot_rom_t)type
 {
-    static NSString * const boot_names[] = {@"dmg_boot", @"cgb_boot", @"agb_boot", @"sgb_boot"};
-    if ([self internalModel] == GB_MODEL_SGB2) {
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:@"sgb2_boot"] UTF8String]);
-    }
-    else {
-        GB_load_boot_rom(&gb, [[self bootROMPathForName:boot_names[current_model - 1]] UTF8String]);
-    }
+    static NSString *const names[] = {
+        [GB_BOOT_ROM_DMG0] = @"dmg0_boot",
+        [GB_BOOT_ROM_DMG] = @"dmg_boot",
+        [GB_BOOT_ROM_MGB] = @"mgb_boot",
+        [GB_BOOT_ROM_SGB] = @"sgb_boot",
+        [GB_BOOT_ROM_SGB2] = @"sgb2_boot",
+        [GB_BOOT_ROM_CGB0] = @"cgb0_boot",
+        [GB_BOOT_ROM_CGB] = @"cgb_boot",
+        [GB_BOOT_ROM_AGB] = @"agb_boot",
+    };
+    GB_load_boot_rom(&gb, [[self bootROMPathForName:names[type]] UTF8String]);
 }
 
 - (IBAction)reset:(id)sender
@@ -351,8 +429,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if ([sender tag] != MODEL_NONE) {
         current_model = (enum model)[sender tag];
     }
-    
-    [self loadBootROM];
     
     if (!modelsChanging && [sender tag] == MODEL_NONE) {
         GB_reset(&gb);
@@ -365,11 +441,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [self.view screenSizeChanged];
     }
     
-    self.mainWindow.contentMinSize = NSMakeSize(GB_get_screen_width(&gb), GB_get_screen_height(&gb));
-    if (self.mainWindow.contentView.bounds.size.width < GB_get_screen_width(&gb) ||
-        self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
-        [self.mainWindow zoom:nil];
-    }
+    [self updateMinSize];
     
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
@@ -413,9 +485,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
 }
 
-- (void)windowControllerDidLoadNib:(NSWindowController *)aController {
+- (void)windowControllerDidLoadNib:(NSWindowController *)aController 
+{
     [super windowControllerDidLoadNib:aController];
-    
+    // Interface Builder bug?
+    [self.consoleWindow setContentSize:self.consoleWindow.minSize];
     /* Close Open Panels, if any */
     for (NSWindow *window in [[NSApplication sharedApplication] windows]) {
         if ([window isKindOfClass:[NSOpenPanel class]]) {
@@ -437,7 +511,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     self.consoleOutput.textContainerInset = NSMakeSize(4, 4);
     [self.view becomeFirstResponder];
-    self.view.shouldBlendFrameWithPrevious = ![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableFrameBlending"];
+    self.view.frameBlendingMode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
     CGRect window_frame = self.mainWindow.frame;
     window_frame.size.width  = MAX([[NSUserDefaults standardUserDefaults] integerForKey:@"LastWindowWidth"],
                                   window_frame.size.width);
@@ -450,6 +524,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self.feedSaveButton removeFromSuperview];
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[self.fileURL path] lastPathComponent]];
+    self.debuggerSplitView.dividerColor = [NSColor clearColor];
     
     /* contentView.superview.subviews.lastObject is the titlebar view */
     NSView *titleView = self.printerFeedWindow.contentView.superview.subviews.lastObject;
@@ -464,6 +539,21 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateColorCorrectionMode)
                                                  name:@"GBColorCorrectionChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateFrameBlendingMode)
+                                                 name:@"GBFrameBlendingModeChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updatePalette)
+                                                 name:@"GBColorPaletteChanged"
+                                               object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateBorderMode)
+                                                 name:@"GBBorderModeChanged"
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -551,11 +641,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.memoryBankItem.enabled = false;
 }
 
-+ (BOOL)autosavesInPlace {
++ (BOOL)autosavesInPlace 
+{
     return YES;
 }
 
-- (NSString *)windowNibName {
+- (NSString *)windowNibName 
+{
     // Override returning the nib file name of the document
     // If you need to use a subclass of NSWindowController or if your document supports multiple NSWindowControllers, you should remove this method and override -makeWindowControllers instead.
     return @"Document";
@@ -569,9 +661,18 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void) loadROM
 {
     NSString *rom_warnings = [self captureOutputForBlock:^{
-        GB_load_rom(&gb, [self.fileName UTF8String]);
-        GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
         GB_debugger_clear_symbols(&gb);
+        if ([[self.fileType pathExtension] isEqualToString:@"isx"]) {
+            GB_load_isx(&gb, [self.fileName UTF8String]);
+            GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"ram"] UTF8String]);
+
+        }
+        else {
+            GB_load_rom(&gb, [self.fileName UTF8String]);
+        }
+        GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+        GB_load_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
+        [self.cheatWindowController cheatsUpdated];
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
     }];
@@ -612,15 +713,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[NSUserDefaults standardUserDefaults] setBool:!self.audioClient.isPlaying forKey:@"Mute"];
 }
 
-- (IBAction)toggleBlend:(id)sender
-{
-    self.view.shouldBlendFrameWithPrevious ^= YES;
-    [[NSUserDefaults standardUserDefaults] setBool:!self.view.shouldBlendFrameWithPrevious forKey:@"DisableFrameBlending"];
-}
-
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
-    if([anItem action] == @selector(mute:)) {
+    if ([anItem action] == @selector(mute:)) {
         [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
@@ -629,9 +724,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
         [(NSMenuItem*)anItem setState:anItem.tag == current_model];
-    }
-    else if ([anItem action] == @selector(toggleBlend:)) {
-        [(NSMenuItem*)anItem setState:self.view.shouldBlendFrameWithPrevious];
     }
     else if ([anItem action] == @selector(interrupt:)) {
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
@@ -643,6 +735,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     else if ([anItem action] == @selector(connectPrinter:)) {
         [(NSMenuItem*)anItem setState:accessory == GBAccessoryPrinter];
+    }
+    else if ([anItem action] == @selector(toggleCheats:)) {
+        [(NSMenuItem*)anItem setState:GB_cheats_enabled(&gb)];
     }
     return [super validateUserInterfaceItem:anItem];
 }
@@ -670,8 +765,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     NSRect rect = window.contentView.frame;
 
-    int titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
-    int step = width / [[window screen] backingScaleFactor];
+    unsigned titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
+    unsigned step = width / [[window screen] backingScaleFactor];
 
     rect.size.width = floor(rect.size.width / step) * step + step;
     rect.size.height = rect.size.width * height / width + titlebarSize;
@@ -752,9 +847,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     
     if (![console_output_timer isValid]) {
-        console_output_timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)0.05 repeats:NO block:^(NSTimer * _Nonnull timer) {
-            [self appendPendingOutput];
-        }];
+        console_output_timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)0.05 target:self selector:@selector(appendPendingOutput) userInfo:nil repeats:NO];
         [[NSRunLoop mainRunLoop] addTimer:console_output_timer forMode:NSDefaultRunLoopMode];
     }
     
@@ -769,7 +862,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self.consoleWindow orderBack:nil];
 }
 
-- (IBAction)consoleInput:(NSTextField *)sender {
+- (IBAction)consoleInput:(NSTextField *)sender 
+{
     NSString *line = [sender stringValue];
     if ([line isEqualToString:@""] && lastConsoleInput) {
         line = lastConsoleInput;
@@ -947,7 +1041,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef) data);
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
     CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
     
     CGImageRef iref = CGImageCreate(width,
@@ -1407,7 +1501,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
     if (tableView == self.paletteTableView) {
         if (columnIndex == 0) {
-            return [NSString stringWithFormat:@"%s %d", row >=8 ? "Object" : "Background", (int)(row & 7)];
+            return [NSString stringWithFormat:@"%s %u", row >= 8 ? "Object" : "Background", (unsigned)(row & 7)];
         }
         
         uint8_t *palette_data = GB_get_direct_access(&gb, row >= 8? GB_DIRECT_ACCESS_OBP : GB_DIRECT_ACCESS_BGP, NULL, NULL);
@@ -1425,9 +1519,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                         height:oamHeight
                                          scale:16.0/oamHeight];
             case 1:
-                return @((int)oamInfo[row].x - 8);
+                return @((unsigned)oamInfo[row].x - 8);
             case 2:
-                return @((int)oamInfo[row].y - 16);
+                return @((unsigned)oamInfo[row].y - 16);
             case 3:
                 return [NSString stringWithFormat:@"$%02x", oamInfo[row].tile];
             case 4:
@@ -1504,7 +1598,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self stop];
     NSSavePanel * savePanel = [NSSavePanel savePanel];
     [savePanel setAllowedFileTypes:@[@"png"]];
-    [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result){
+    [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
             [savePanel orderOut:self];
             CGImageRef cgRef = [self.feedImageView.image CGImageForProposedRect:NULL
@@ -1552,6 +1646,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
 }
 
+- (void) updateFrameBlendingMode
+{
+    self.view.frameBlendingMode = (GB_frame_blending_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
+}
+
 - (void) updateRewindLength
 {
     [self performAtomicBlock:^{
@@ -1593,5 +1692,54 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [super setFileURL:fileURL];
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[fileURL path] lastPathComponent]];
     
+}
+
+- (BOOL)splitView:(GBSplitView *)splitView canCollapseSubview:(NSView *)subview;
+{
+    if ([[splitView arrangedSubviews] lastObject] == subview) {
+        return YES;
+    }
+    return NO;
+}
+
+- (CGFloat)splitView:(GBSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMinimumPosition ofSubviewAt:(NSInteger)dividerIndex
+{
+    return 600;
+}
+
+- (CGFloat)splitView:(GBSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex 
+{
+    return splitView.frame.size.width - 321;
+}
+
+- (BOOL)splitView:(GBSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view 
+{
+    if ([[splitView arrangedSubviews] lastObject] == view) {
+        return NO;
+    }
+    return YES;
+}
+
+- (void)splitViewDidResizeSubviews:(NSNotification *)notification
+{
+    GBSplitView *splitview = notification.object;
+    if ([[[splitview arrangedSubviews] firstObject] frame].size.width < 600) {
+        [splitview setPosition:600 ofDividerAtIndex:0];
+    }
+    /* NSSplitView renders its separator without the proper vibrancy, so we made it transparent and move an
+       NSBox-based separator that renders properly so it acts like the split view's separator. */
+    NSRect rect = self.debuggerVerticalLine.frame;
+    rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 1;
+    self.debuggerVerticalLine.frame = rect;
+}
+
+- (IBAction)showCheats:(id)sender
+{
+    [self.cheatsWindow makeKeyAndOrderFront:nil];
+}
+
+- (IBAction)toggleCheats:(id)sender
+{
+    GB_set_cheats_enabled(&gb, !GB_cheats_enabled(&gb));
 }
 @end

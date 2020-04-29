@@ -22,6 +22,7 @@
     bool analogClockMultiplierValid;
     NSEventModifierFlags previousModifiers;
     JOYController *lastController;
+    GB_frame_blending_mode_t _frameBlendingMode;
 }
 
 + (instancetype)alloc
@@ -46,8 +47,7 @@
 }
 
 - (void) _init
-{    
-    _shouldBlendFrameWithPrevious = 1;
+{
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
                                                   options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect
@@ -69,9 +69,9 @@
     
     size_t buffer_size = sizeof(image_buffers[0][0]) * GB_get_screen_width(_gb) * GB_get_screen_height(_gb);
     
-    image_buffers[0] = malloc(buffer_size);
-    image_buffers[1] = malloc(buffer_size);
-    image_buffers[2] = malloc(buffer_size);
+    image_buffers[0] = calloc(1, buffer_size);
+    image_buffers[1] = calloc(1, buffer_size);
+    image_buffers[2] = calloc(1, buffer_size);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [self setFrame:self.superview.frame];
@@ -83,15 +83,26 @@
     [self setFrame:self.superview.frame];
 }
 
-- (void) setShouldBlendFrameWithPrevious:(BOOL)shouldBlendFrameWithPrevious
+- (void) setFrameBlendingMode:(GB_frame_blending_mode_t)frameBlendingMode
 {
-    _shouldBlendFrameWithPrevious = shouldBlendFrameWithPrevious;
+    _frameBlendingMode = frameBlendingMode;
     [self setNeedsDisplay:YES];
 }
 
+
+- (GB_frame_blending_mode_t)frameBlendingMode
+{
+    if (_frameBlendingMode == GB_FRAME_BLENDING_MODE_ACCURATE) {
+        if (!_gb || GB_is_sgb(_gb)) {
+            return GB_FRAME_BLENDING_MODE_SIMPLE;
+        }
+        return GB_is_odd_frame(_gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
+    }
+    return _frameBlendingMode;
+}
 - (unsigned char) numberOfBuffers
 {
-    return _shouldBlendFrameWithPrevious? 3 : 2;
+    return _frameBlendingMode? 3 : 2;
 }
 
 - (void)dealloc
@@ -109,8 +120,7 @@
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if (!(self = [super initWithCoder:coder]))
-    {
+    if (!(self = [super initWithCoder:coder])) { 
         return self;
     }
     [self _init];
@@ -119,8 +129,7 @@
 
 - (instancetype)initWithFrame:(NSRect)frameRect
 {
-    if (!(self = [super initWithFrame:frameRect]))
-    {
+    if (!(self = [super initWithFrame:frameRect])) { 
         return self;
     }
     [self _init];

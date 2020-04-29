@@ -10,7 +10,7 @@
 
 static const unsigned GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
 
-#ifndef DISABLE_TIMEKEEPING
+#ifndef GB_DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
 {
 #ifndef _WIN32
@@ -139,6 +139,11 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 
 static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
+    if (gb->stopped) {
+        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        return;
+    }
+    
     GB_STATE_MACHINE(gb, div, cycles, 1) {
         GB_STATE(gb, div, 1);
         GB_STATE(gb, div, 2);
@@ -213,8 +218,8 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
+    GB_timers_run(gb, cycles);
     if (!gb->stopped) {
-        GB_timers_run(gb, cycles);
         advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
     }
 
@@ -277,19 +282,14 @@ void GB_rtc_run(GB_gameboy_t *gb)
         time_t current_time = time(NULL);
         while (gb->last_rtc_second < current_time) {
             gb->last_rtc_second++;
-            if (++gb->rtc_real.seconds == 60)
-            {
+            if (++gb->rtc_real.seconds == 60) { 
                 gb->rtc_real.seconds = 0;
-                if (++gb->rtc_real.minutes == 60)
-                {
+                if (++gb->rtc_real.minutes == 60) { 
                     gb->rtc_real.minutes = 0;
-                    if (++gb->rtc_real.hours == 24)
-                    {
+                    if (++gb->rtc_real.hours == 24) { 
                         gb->rtc_real.hours = 0;
-                        if (++gb->rtc_real.days == 0)
-                        {
-                            if (gb->rtc_real.high & 1) /* Bit 8 of days*/
-                            {
+                        if (++gb->rtc_real.days == 0) { 
+                            if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
                                 gb->rtc_real.high |= 0x80; /* Overflow bit */
                             }
                             gb->rtc_real.high ^= 1;

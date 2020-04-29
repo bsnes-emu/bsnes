@@ -2,6 +2,10 @@
 #include_next <stdio.h>
 #include <stdlib.h>
 
+int access(const char *filename, int mode);
+#define R_OK 2
+#define W_OK 4
+
 #ifndef __MINGW32__
 #ifndef __LIBRETRO__
 static inline int vasprintf(char **str, const char *fmt, va_list args)
@@ -20,7 +24,8 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
 #endif
 
 /* This code is public domain -- Will Hartung 4/9/09 */
-static inline size_t getline(char **lineptr, size_t *n, FILE *stream) {
+static inline size_t getline(char **lineptr, size_t *n, FILE *stream) 
+{
     char *bufptr = NULL;
     char *p = bufptr;
     size_t size;

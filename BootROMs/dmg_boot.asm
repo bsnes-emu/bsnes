@@ -24,7 +24,7 @@ Start:
     ldh [$24], a
 
 ; Init BG palette
-    ld a, $fc
+    ld a, $54
     ldh [$47], a
 
 ; Load logo from ROM.
@@ -69,14 +69,36 @@ Start:
     jr .tilemapLoop
 .tilemapDone
 
+    ld a, 30
+    ldh [$ff42], a
+    
     ; Turn on LCD
     ld a, $91
     ldh [$40], a
 
-; Wait ~0.75 seconds
-    ld b, 45
-    call WaitBFrames
-
+    ld d, (-119) & $FF
+    ld c, 15
+    
+.animate
+    call WaitFrame
+    ld a, d
+    sra a
+    sra a
+    ldh [$ff42], a
+    ld a, d
+    add c
+    ld d, a
+    ld a, c
+    cp 8
+    jr nz, .noPaletteChange
+    ld a, $A8
+    ldh [$47], a
+.noPaletteChange
+    dec c
+    jr nz, .animate
+    ld a, $fc
+    ldh [$47], a
+    
     ; Play first sound
     ld a, $83
     call PlaySound
@@ -85,9 +107,11 @@ Start:
     ; Play second sound
     ld a, $c1
     call PlaySound
+    
 
-; Wait ~1.15 seconds
-    ld b, 70
+
+; Wait ~1 second
+    ld b, 60
     call WaitBFrames
     
 ; Set registers to match the original DMG boot

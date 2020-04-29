@@ -173,7 +173,8 @@
     [super setSelectedRanges:ranges affinity:affinity stillSelecting:stillSelectingFlag];
 }
 
-- (BOOL)resignFirstResponder {
+- (BOOL)resignFirstResponder 
+{
     reverse_search_mode = false;
     return [super resignFirstResponder];
 }
