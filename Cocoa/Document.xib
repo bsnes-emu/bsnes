@@ -9,7 +9,6 @@
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
             <connections>
                 <outlet property="TilemapSetButton" destination="k4c-Vg-MBu" id="Ak1-6d-B1N"/>
-                <outlet property="cheatController" destination="v7q-gT-jHT" id="yg2-23-kOX"/>
                 <outlet property="cheatWindowController" destination="v7q-gT-jHT" id="UNn-g4-2kP"/>
                 <outlet property="cheatsWindow" destination="4Yb-Np-JrF" id="YCZ-cj-gn5"/>
                 <outlet property="consoleInput" destination="l22-S8-uji" id="Heu-am-YgB"/>
