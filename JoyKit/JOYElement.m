@@ -41,6 +41,24 @@
         IOHIDElementRef parent = IOHIDElementGetParent(element);
         _parentID = parent? (uint32_t)IOHIDElementGetCookie(parent) : -1;
         _device = IOHIDElementGetDevice(element);
+        
+        /* Catalina added a new input type in a way that breaks cookie consistency across macOS versions,
+           we shall adjust our cookies to to compensate */
+        unsigned cookieShift = 0, parentCookieShift = 0;
+        NSArray *nones = CFBridgingRelease(IOHIDDeviceCopyMatchingElements(IOHIDElementGetDevice(element),
+                                                                           (__bridge CFDictionaryRef)@{@(kIOHIDElementTypeKey): @(kIOHIDElementTypeInput_NULL)},
+                                                                           0));
+        for (id none in nones) {
+            if (IOHIDElementGetCookie((__bridge IOHIDElementRef) none) < _uniqueID) {
+                cookieShift++;
+            }
+            if (IOHIDElementGetCookie((__bridge IOHIDElementRef) none) < (int32_t)_parentID) {
+                parentCookieShift++;
+            }
+        }
+        
+        _uniqueID -= cookieShift;
+        _parentID -= parentCookieShift;
     }
     return self;
 }
