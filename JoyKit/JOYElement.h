@@ -10,7 +10,6 @@
 @property (readonly) uint16_t usage;
 @property (readonly) uint16_t usagePage;
 @property (readonly) uint32_t uniqueID;
-@property unsigned persistentUniqueID;
 @property int32_t min;
 @property int32_t max;
 @property (readonly) int32_t reportID;

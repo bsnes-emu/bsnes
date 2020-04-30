@@ -36,7 +36,7 @@
 
 - (uint64_t)uniqueID
 {
-    return _element1.persistentUniqueID;
+    return _element1.uniqueID;
 }
 
 - (NSString *)description
