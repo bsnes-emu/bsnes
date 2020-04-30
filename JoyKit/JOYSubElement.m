@@ -34,6 +34,7 @@
         _usage = usage;
         _usagePage = usagePage;
         _uniqueID = (uint32_t)((_parent.uniqueID << 16) | offset);
+        self.persistentUniqueID = (uint32_t)((_parent.persistentUniqueID << 16) | offset);
         _min = min;
         _max = max;
         _reportID = _parent.reportID;

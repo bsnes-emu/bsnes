@@ -126,14 +126,14 @@ hacksByName = @{
         JOYSubElementStructs: @{
             
             // Rumble
-            @(1364): @[
+            @(1357): @[
                 @{@"reportID": @(1), @"size":@1, @"offset":@0, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(2), @"size":@1, @"offset":@1, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(3), @"size":@1, @"offset":@2, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(4), @"size":@1, @"offset":@3, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
             ],
             
-            @(11): @[
+            @(4): @[
             
             // Player 1
             

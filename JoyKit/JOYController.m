@@ -173,13 +173,17 @@ typedef struct __attribute__((packed)) {
 
     JOYElement *previousAxisElement = nil;
     id previous = nil;
+    unsigned persistentUniqueID = 0;
     for (id _element in array) {
         if (_element == previous) continue; // Some elements are reported twice for some reason
         previous = _element;
         NSArray *elements = nil;
         JOYElement *element = [[JOYElement alloc] initWithElement:(__bridge IOHIDElementRef)_element];
+        /* Cookie is not persistent across macOS versions because Apple added kIOHIDElementTypeInput_NULL
+           in a backwards incompatible manner. We must maintain our own cookie-like ID. */
+        element.persistentUniqueID = persistentUniqueID++;
         
-        NSArray<NSDictionary <NSString *,NSNumber *>*> *subElementDefs = hacks[JOYSubElementStructs][@(element.uniqueID)];
+        NSArray<NSDictionary <NSString *,NSNumber *>*> *subElementDefs = hacks[JOYSubElementStructs][@(element.persistentUniqueID)];
 
         bool isOutput = false;
         if (subElementDefs && element.uniqueID != element.parentID) {
