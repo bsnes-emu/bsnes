@@ -703,6 +703,7 @@ typedef struct __attribute__((packed)) {
         _forceStopPWMThread = true;
     }
     [_rumblePWMThreadLock unlock];
+    while (_rumblePWMThreadRunning);
 }
 
 + (void)controllerAdded:(IOHIDDeviceRef) device
