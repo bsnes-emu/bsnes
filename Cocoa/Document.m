@@ -381,7 +381,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     GB_save_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
-    [_view setRumble:false];
+    [_view setRumble:0];
     stopping = false;
 }
 

@@ -118,6 +118,7 @@ typedef struct __attribute__((packed)) {
     bool _physicallyConnected;
     bool _logicallyConnected;
     bool _rumblePWMThreadRunning;
+    volatile bool _forceStopPWMThread;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device
@@ -608,7 +609,7 @@ typedef struct __attribute__((packed)) {
     /* TODO: This does not handle correctly the case of having a multi-port controller where more than one controller
              uses rumble. */
     unsigned rumbleCounter = 0;
-    while (self.connected) {
+    while (self.connected && !_forceStopPWMThread) {
         if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
             break;
         }
@@ -619,6 +620,7 @@ typedef struct __attribute__((packed)) {
     }
     [_rumblePWMThreadLock lock];
     _rumblePWMThreadRunning = false;
+    _forceStopPWMThread = false;
     [_rumblePWMThreadLock unlock];
 }
 
@@ -686,6 +688,15 @@ typedef struct __attribute__((packed)) {
 - (bool)isConnected
 {
     return _logicallyConnected && _physicallyConnected;
+}
+
+- (void)_forceStopPWMThread
+{
+    [_rumblePWMThreadLock lock];
+    if (_rumblePWMThreadRunning) {
+        _forceStopPWMThread = true;
+    }
+    [_rumblePWMThreadLock unlock];
 }
 
 + (void)controllerAdded:(IOHIDDeviceRef) device

@@ -116,6 +116,7 @@
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [lastController setRumbleAmplitude:0];
+    [lastController _forceStopPWMThread];
     [JOYController unregisterListener:self];
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -302,6 +303,7 @@
     if (![self.window isMainWindow]) return;
     if (controller != lastController) {
         [lastController setRumbleAmplitude:0];
+        [lastController _forceStopPWMThread];
         lastController = controller;
     }
     
