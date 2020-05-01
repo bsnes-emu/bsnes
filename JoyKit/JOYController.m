@@ -35,6 +35,8 @@ static bool axesEmulateButtons = false;
 static bool axes2DEmulateButtons = false;
 static bool hatsEmulateButtons = false;
 
+static NSLock *globalPWMThreadLock;
+
 @interface JOYController ()
 + (void)controllerAdded:(IOHIDDeviceRef) device;
 + (void)controllerRemoved:(IOHIDDeviceRef) device;
@@ -111,9 +113,9 @@ typedef struct __attribute__((packed)) {
     JOYElement *_connectedElement;
     NSMutableDictionary<NSValue *, JOYElement *> *_iokitToJOY;
     NSString *_serialSuffix;
-    bool _isSwitch; // Does thie controller use the Switch protocol?
+    bool _isSwitch; // Does this controller use the Switch protocol?
     JOYSwitchPacket _lastSwitchPacket;
-    NSCondition *_rumblePWMThreadLock;
+    NSLock *_rumblePWMThreadLock;
     volatile double _rumblePWMRatio;
     bool _physicallyConnected;
     bool _logicallyConnected;
@@ -149,7 +151,7 @@ typedef struct __attribute__((packed)) {
     _hatEmulatedButtons = [NSMutableDictionary dictionary];
     _multiElements = [NSMutableDictionary dictionary];
     _iokitToJOY = [NSMutableDictionary dictionary];
-    _rumblePWMThreadLock = [[NSCondition alloc] init];
+    _rumblePWMThreadLock = [[NSLock alloc] init];
     
     
     //NSMutableArray *axes3d = [NSMutableArray array];
@@ -606,13 +608,6 @@ typedef struct __attribute__((packed)) {
 
 - (void)pwmThread
 {
-    /* TODO: This does not handle correctly the case of having a multi-port controller where more than one controller
-             uses rumble. At least make sure any sibling controllers don't have their PWM thread running. */
-    for (JOYController *controller in [JOYController allControllers]) {
-        if (controller != self && controller->_device == _device) {
-            [controller _forceStopPWMThread];
-        }
-    }
     unsigned rumbleCounter = 0;
     while (self.connected && !_forceStopPWMThread) {
         if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
@@ -678,9 +673,20 @@ typedef struct __attribute__((packed)) {
             _rumblePWMRatio = amp;
             if (!_rumblePWMThreadRunning) { // PWM thread not running, start it.
                 if (amp != 0) {
+                    /* TODO: The PWM thread does not handle correctly the case of having a multi-port controller where more
+                     than one controller uses rumble. At least make sure any sibling controllers don't have their
+                     PWM thread running. */
+                    
+                    [globalPWMThreadLock lock];
+                    for (JOYController *controller in [JOYController allControllers]) {
+                        if (controller != self && controller->_device == _device) {
+                            [controller _forceStopPWMThread];
+                        }
+                    }
                     _rumblePWMRatio = amp;
                     _rumblePWMThreadRunning = true;
                     [self performSelectorInBackground:@selector(pwmThread) withObject:nil];
+                    [globalPWMThreadLock unlock];
                 }
             }
             [_rumblePWMThreadLock unlock];
@@ -765,6 +771,7 @@ typedef struct __attribute__((packed)) {
     
     controllers = [NSMutableDictionary dictionary];
     exposedControllers = [NSMutableArray array];
+    globalPWMThreadLock = [[NSLock alloc] init];
     NSArray *array = @[
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_Joystick),
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_GamePad),
