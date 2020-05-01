@@ -35,7 +35,6 @@ static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 - (NSArray<JOYHat *> *) hats;
 - (void)setRumbleAmplitude:(double)amp;
 - (void)setPlayerLEDs:(uint8_t)mask;
-- (void)_forceStopPWMThread; // Hack
 @property (readonly, getter=isConnected) bool connected;
 @end
 

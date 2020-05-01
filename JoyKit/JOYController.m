@@ -607,7 +607,12 @@ typedef struct __attribute__((packed)) {
 - (void)pwmThread
 {
     /* TODO: This does not handle correctly the case of having a multi-port controller where more than one controller
-             uses rumble. */
+             uses rumble. At least make sure any sibling controllers don't have their PWM thread running. */
+    for (JOYController *controller in [JOYController allControllers]) {
+        if (controller != self && controller->_device == _device) {
+            [controller _forceStopPWMThread];
+        }
+    }
     unsigned rumbleCounter = 0;
     while (self.connected && !_forceStopPWMThread) {
         if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
@@ -619,6 +624,7 @@ typedef struct __attribute__((packed)) {
         }
     }
     [_rumblePWMThreadLock lock];
+    [_rumbleElement setValue:0];
     _rumblePWMThreadRunning = false;
     _forceStopPWMThread = false;
     [_rumblePWMThreadLock unlock];
