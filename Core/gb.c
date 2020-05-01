@@ -349,8 +349,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
 #endif
 
                 size_t needed_size = bank * 0x4000 + address + length;
-                if (needed_size > 1024 * 1024 * 32)
-                    goto error;
+                if (needed_size > 1024 * 1024 * 32) goto error;
                 
                 if (gb->rom_size < needed_size) {
                     gb->rom = realloc(gb->rom, needed_size);
@@ -358,8 +357,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
                     gb->rom_size = needed_size;
                 }
                 
-                if (fread(gb->rom + (bank * 0x4000 + address), length, 1, f) != 1)
-                    goto error;
+                if (fread(gb->rom + (bank * 0x4000 + address), length, 1, f) != 1) goto error;
                 
                 break;
             }
@@ -378,16 +376,15 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
                 length = __builtin_bswap32(length);
 #endif
                 size_t needed_size = address + length;
-                if (needed_size > 1024 * 1024 * 32)
-                    goto error;
+                if (needed_size > 1024 * 1024 * 32) goto error;
+
                 if (gb->rom_size < needed_size) {
                     gb->rom = realloc(gb->rom, needed_size);
                     memset(gb->rom + gb->rom_size, 0, needed_size - gb->rom_size);
                     gb->rom_size = needed_size;
                 }
                 
-                if (fread(gb->rom + address, length, 1, f) != 1)
-                    goto error;
+                if (fread(gb->rom + address, length, 1, f) != 1) goto error;
                 
                 break;
             }
@@ -406,8 +403,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
 #endif
                 while (count--) {
                     READ(length);
-                    if (fread(name, length, 1, f) != 1)
-                        goto error;
+                    if (fread(name, length, 1, f) != 1) goto error;
                     name[length] = 0;
                     READ(flag); // unused
                     
@@ -439,8 +435,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
 #endif
                 while (count--) {
                     READ(length);
-                    if (fread(name, length + 1, 1, f) != 1)
-                        goto error;
+                    if (fread(name, length + 1, 1, f) != 1) goto error;
                     name[length] = 0;
                     READ(flag); // unused
                     
