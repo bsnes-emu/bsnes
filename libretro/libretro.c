@@ -211,6 +211,7 @@ static const struct retro_variable vars_single[] = {
     { "sameboy_high_pass_filter_mode", "High-pass filter; off|accurate|remove dc offset" },
     { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
     { "sameboy_border", "Super Game Boy border; enabled|disabled" },
+    { "sameboy_rumble", "Enable rumble; never|rumble-enabled games|all games" },
     { NULL }
 };
 
@@ -226,6 +227,8 @@ static const struct retro_variable vars_dual[] = {
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; off|correct curves|emulate hardware|preserve brightness" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; off|accurate|remove dc offset" },
     { "sameboy_high_pass_filter_mode_2", "High-pass filter for Game Boy #2; off|accurate|remove dc offset" },
+    { "sameboy_rumble_1", "Enable rumble for Game Boy #1; never|rumble-enabled games|all games" },
+    { "sameboy_rumble_2", "Enable rumble for Game Boy #2; never|rumble-enabled games|all games" },
     { NULL }
 };
 
@@ -497,8 +500,19 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
-            else if (strcmp(var.value, "reduce_contrast") == 0)
+            else if (strcmp(var.value, "reduce contrast") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
+        }
+        
+        var.key = "sameboy_rumble";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            if (strcmp(var.value, "never") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_DISABLED);
+            else if (strcmp(var.value, "rumble-enabled games") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_CARTRIDGE_ONLY);
+            else if (strcmp(var.value, "all games") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_ALL_GAMES);
         }
 
         var.key = "sameboy_high_pass_filter_mode";
@@ -557,7 +571,7 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
-            else if (strcmp(var.value, "reduce_contrast") == 0)
+            else if (strcmp(var.value, "reduce contrast") == 0)
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
         }
 
@@ -572,9 +586,31 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
             else if (strcmp(var.value, "preserve brightness") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
-            else if (strcmp(var.value, "reduce_contrast") == 0)
+            else if (strcmp(var.value, "reduce contrast") == 0)
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
 
+        }
+        
+        var.key = "sameboy_rumble_1";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            if (strcmp(var.value, "never") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_DISABLED);
+            else if (strcmp(var.value, "rumble-enabled games") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_CARTRIDGE_ONLY);
+            else if (strcmp(var.value, "all games") == 0)
+                GB_set_rumble_mode(&gameboy[0], GB_RUMBLE_ALL_GAMES);
+        }
+        
+        var.key = "sameboy_rumble_2";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            if (strcmp(var.value, "never") == 0)
+                GB_set_rumble_mode(&gameboy[1], GB_RUMBLE_DISABLED);
+            else if (strcmp(var.value, "rumble-enabled games") == 0)
+                GB_set_rumble_mode(&gameboy[1], GB_RUMBLE_CARTRIDGE_ONLY);
+            else if (strcmp(var.value, "all games") == 0)
+                GB_set_rumble_mode(&gameboy[1], GB_RUMBLE_ALL_GAMES);
         }
 
         var.key = "sameboy_high_pass_filter_mode_1";
