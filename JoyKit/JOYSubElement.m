@@ -65,15 +65,15 @@
     return ret;
 }
 
-- (void)setValue: (uint32_t) value
+- (IOReturn)setValue: (uint32_t) value
 {
     NSMutableData *dataValue = [[_parent dataValue] mutableCopy];
-    if (!dataValue) return;
-    if (_size > 32) return;
-    if (_size + (_offset % 8) > 32) return;
+    if (!dataValue) return -1;
+    if (_size > 32) return -1;
+    if (_size + (_offset % 8) > 32) return -1;
     size_t parentLength = dataValue.length;
-    if (_size > parentLength * 8) return;
-    if (_size + _offset >= parentLength * 8) return;
+    if (_size > parentLength * 8) return -1;
+    if (_size + _offset >= parentLength * 8) return -1;
     uint8_t *bytes = dataValue.mutableBytes;
     
     uint8_t temp[4] = {0,};
@@ -81,7 +81,7 @@
     (*(uint32_t *)temp) &= ~((1 << (_size - 1)) << (_offset % 8));
     (*(uint32_t *)temp) |= (value) << (_offset % 8);
     memcpy(bytes + _offset / 8, temp, (_offset + _size - 1) / 8 - _offset / 8 + 1);
-    [_parent setDataValue:dataValue];
+    return [_parent setDataValue:dataValue];
 }
 
 - (NSData *)dataValue
@@ -90,9 +90,10 @@
     return nil;
 }
 
-- (void)setDataValue:(NSData *)data
+- (IOReturn)setDataValue:(NSData *)data
 {
     [self doesNotRecognizeSelector:_cmd];
+    return -1;
 }
 
 

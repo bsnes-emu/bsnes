@@ -81,18 +81,20 @@
     return [NSData dataWithBytes:IOHIDValueGetBytePtr(value) length:IOHIDValueGetLength(value)];
 }
 
-- (void)setValue:(uint32_t)value
+- (IOReturn)setValue:(uint32_t)value
 {
     IOHIDValueRef ivalue = IOHIDValueCreateWithIntegerValue(NULL, (__bridge IOHIDElementRef)_element, 0, value);
-    IOHIDDeviceSetValue(_device, (__bridge IOHIDElementRef)_element, ivalue);
+    IOReturn ret = IOHIDDeviceSetValue(_device, (__bridge IOHIDElementRef)_element, ivalue);
     CFRelease(ivalue);
+    return ret;
 }
 
-- (void)setDataValue:(NSData *)value
+- (IOReturn)setDataValue:(NSData *)value
 {
     IOHIDValueRef ivalue = IOHIDValueCreateWithBytes(NULL, (__bridge IOHIDElementRef)_element, 0, value.bytes, value.length);
-    IOHIDDeviceSetValue(_device, (__bridge IOHIDElementRef)_element, ivalue);
+    IOReturn ret = IOHIDDeviceSetValue(_device, (__bridge IOHIDElementRef)_element, ivalue);
     CFRelease(ivalue);
+    return ret;
 }
 
 /* For use as a dictionary key */

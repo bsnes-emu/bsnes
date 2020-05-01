@@ -5,6 +5,8 @@
 #import "JOYEmulatedButton.h"
 #include <IOKit/hid/IOHIDLib.h>
 
+#define PWM_RESOLUTION 16
+
 static NSString const *JOYAxisGroups = @"JOYAxisGroups";
 static NSString const *JOYReportIDFilters = @"JOYReportIDFilters";
 static NSString const *JOYButtonUsageMapping = @"JOYButtonUsageMapping";
@@ -130,7 +132,7 @@ typedef struct __attribute__((packed)) {
     
     _physicallyConnected = true;
     _logicallyConnected = true;
-    _device = device;
+    _device = (IOHIDDeviceRef)CFRetain(device);
     _serialSuffix = suffix;
 
     IOHIDDeviceRegisterInputValueCallback(device, HIDInput, (void *)self);
@@ -603,11 +605,17 @@ typedef struct __attribute__((packed)) {
 
 - (void)pwmThread
 {
-    while (_rumblePWMRatio != 0) {
-        [_rumbleElement setValue:1];
-        [NSThread sleepForTimeInterval:_rumblePWMRatio / 10];
-        [_rumbleElement setValue:0];
-        [NSThread sleepForTimeInterval:(1 - _rumblePWMRatio) / 10];
+    /* TODO: This does not handle correctly the case of having a multi-port controller where more than one controller
+             uses rumble. */
+    unsigned rumbleCounter = 0;
+    while (self.connected) {
+        if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
+            break;
+        }
+        rumbleCounter += round(_rumblePWMRatio * PWM_RESOLUTION);
+        if (rumbleCounter >= PWM_RESOLUTION) {
+            rumbleCounter -= PWM_RESOLUTION;
+        }
     }
     [_rumblePWMThreadLock lock];
     _rumblePWMThreadRunning = false;
@@ -659,19 +667,12 @@ typedef struct __attribute__((packed)) {
     else {
         if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
             [_rumblePWMThreadLock lock];
+            _rumblePWMRatio = amp;
             if (!_rumblePWMThreadRunning) { // PWM thread not running, start it.
                 if (amp != 0) {
                     _rumblePWMRatio = amp;
                     _rumblePWMThreadRunning = true;
                     [self performSelectorInBackground:@selector(pwmThread) withObject:nil];
-                }
-            }
-            else {
-                if (amp == 0) { // Thread is running, signal it to stop
-                    _rumblePWMRatio = 0;
-                }
-                else {
-                    _rumblePWMRatio = amp;
                 }
             }
             [_rumblePWMThreadLock unlock];
@@ -770,5 +771,13 @@ typedef struct __attribute__((packed)) {
     IOHIDManagerRegisterDeviceMatchingCallback(manager, HIDDeviceAdded, NULL);
     IOHIDManagerRegisterDeviceRemovalCallback(manager, HIDDeviceRemoved, NULL);
     IOHIDManagerScheduleWithRunLoop(manager, [runloop getCFRunLoop], kCFRunLoopDefaultMode);
+}
+
+- (void)dealloc
+{
+    if (_device) {
+        CFRelease(_device);
+        _device = NULL;
+    }
 }
 @end
