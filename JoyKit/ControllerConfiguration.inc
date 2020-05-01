@@ -127,10 +127,10 @@ hacksByName = @{
             
             // Rumble
             @(1364): @[
-                @{@"reportID": @(1), @"size":@1, @"offset":@0, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
-                @{@"reportID": @(2), @"size":@1, @"offset":@1, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
-                @{@"reportID": @(3), @"size":@1, @"offset":@2, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
-                @{@"reportID": @(4), @"size":@1, @"offset":@3, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
+                @{@"reportID": @(1), @"size":@1, @"offset":@0,  @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
+                @{@"reportID": @(2), @"size":@1, @"offset":@8,  @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
+                @{@"reportID": @(3), @"size":@1, @"offset":@16, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
+                @{@"reportID": @(4), @"size":@1, @"offset":@24, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
             ],
             
             @(11): @[
