@@ -123,17 +123,17 @@ hacksByName = @{
         
         JOYActivationReport: [NSData dataWithBytes:(uint8_t[]){0x13} length:1],
 
-        JOYSubElementStructs: @{
+        JOYCustomReports: @{
             
             // Rumble
-            @(1364): @[
+            @(-17): @[
                 @{@"reportID": @(1), @"size":@1, @"offset":@0,  @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(2), @"size":@1, @"offset":@8,  @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(3), @"size":@1, @"offset":@16, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
                 @{@"reportID": @(4), @"size":@1, @"offset":@24, @"usagePage":@(0xFF00), @"usage":@1, @"min": @0, @"max": @1},
             ],
             
-            @(11): @[
+            @(33): @[
             
             // Player 1
             
@@ -141,11 +141,11 @@ hacksByName = @{
                                         
             @{@"reportID": @(1), @"size":@1, @"offset":@8, @"usagePage":@(kHIDPage_Button), @"usage":@1},
             @{@"reportID": @(1), @"size":@1, @"offset":@9, @"usagePage":@(kHIDPage_Button), @"usage":@2},
-            @{@"reportID": @(1), @"size":@1, @"offset":@10, @"usagePage":@(kHIDPage_Button), @"usage":@3},
-            @{@"reportID": @(1), @"size":@1, @"offset":@11, @"usagePage":@(kHIDPage_Button), @"usage":@4},
+            @{@"reportID": @(1), @"size":@1, @"offset":@10,@"usagePage":@(kHIDPage_Button), @"usage":@3},
+            @{@"reportID": @(1), @"size":@1, @"offset":@11,@"usagePage":@(kHIDPage_Button), @"usage":@4},
                 
-            @{@"reportID": @(1), @"size":@1, @"offset":@12,  @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadLeft)},
-            @{@"reportID": @(1), @"size":@1, @"offset":@13,  @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadRight)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@12, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadLeft)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@13, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadRight)},
             @{@"reportID": @(1), @"size":@1, @"offset":@14, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadDown)},
             @{@"reportID": @(1), @"size":@1, @"offset":@15, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadUp)},
             

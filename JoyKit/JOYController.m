@@ -2,6 +2,8 @@
 #import "JOYMultiplayerController.h"
 #import "JOYElement.h"
 #import "JOYSubElement.h"
+#import "JOYFullReportElement.h"
+
 #import "JOYEmulatedButton.h"
 #include <IOKit/hid/IOHIDLib.h>
 
@@ -12,7 +14,7 @@ static NSString const *JOYReportIDFilters = @"JOYReportIDFilters";
 static NSString const *JOYButtonUsageMapping = @"JOYButtonUsageMapping";
 static NSString const *JOYAxisUsageMapping = @"JOYAxisUsageMapping";
 static NSString const *JOYAxes2DUsageMapping = @"JOYAxes2DUsageMapping";
-static NSString const *JOYSubElementStructs = @"JOYSubElementStructs";
+static NSString const *JOYCustomReports = @"JOYCustomReports";
 static NSString const *JOYIsSwitch = @"JOYIsSwitch";
 static NSString const *JOYRumbleUsage = @"JOYRumbleUsage";
 static NSString const *JOYRumbleUsagePage = @"JOYRumbleUsagePage";
@@ -41,6 +43,8 @@ static NSLock *globalPWMThreadLock;
 + (void)controllerAdded:(IOHIDDeviceRef) device;
 + (void)controllerRemoved:(IOHIDDeviceRef) device;
 - (void)elementChanged:(IOHIDElementRef) element;
+- (void)gotReport:(NSData *)report;
+
 @end
 
 @interface JOYButton ()
@@ -86,6 +90,11 @@ static void HIDInput(void *context, IOReturn result, void *sender, IOHIDValueRef
     [(__bridge JOYController *)context elementChanged:IOHIDValueGetElement(value)];
 }
 
+static void HIDReport(void *context, IOReturn result, void *sender, IOHIDReportType type,
+                      uint32_t reportID, uint8_t *report, CFIndex reportLength)
+{
+    [(__bridge JOYController *)context gotReport:[[NSData alloc] initWithBytesNoCopy:report length:reportLength freeWhenDone:NO]];
+}
 
 typedef struct __attribute__((packed)) {
     uint8_t reportID;
@@ -102,7 +111,8 @@ typedef struct __attribute__((packed)) {
     NSMutableDictionary<JOYElement *, JOYAxis *> *_axes;
     NSMutableDictionary<JOYElement *, JOYAxes2D *> *_axes2D;
     NSMutableDictionary<JOYElement *, JOYHat *> *_hats;
-    NSMutableDictionary<JOYElement *, NSArray<JOYElement *> *> *_multiElements;
+    NSMutableDictionary<NSNumber *, JOYFullReportElement *> *_fullReportElements;
+    NSMutableDictionary<JOYFullReportElement *, NSArray<JOYElement *> *> *_multiElements;
 
     // Button emulation
     NSMutableDictionary<NSNumber *, JOYEmulatedButton *> *_axisEmulatedButtons;
@@ -121,14 +131,182 @@ typedef struct __attribute__((packed)) {
     bool _logicallyConnected;
     bool _rumblePWMThreadRunning;
     volatile bool _forceStopPWMThread;
+    
+    NSDictionary *_hacks;
+    NSMutableData *_lastReport;
+    
+    // Used when creating inputs
+    JOYElement *_previousAxisElement;
+
 }
 
-- (instancetype)initWithDevice:(IOHIDDeviceRef) device
+- (instancetype)initWithDevice:(IOHIDDeviceRef) device hacks:(NSDictionary *)hacks
 {
-    return [self initWithDevice:device reportIDFilter:nil serialSuffix:nil];
+    return [self initWithDevice:device reportIDFilter:nil serialSuffix:nil hacks:hacks];
 }
 
-- (instancetype)initWithDevice:(IOHIDDeviceRef)device reportIDFilter:(NSArray <NSNumber *> *) filter serialSuffix:(NSString *)suffix
+-(void)createOutputForElement:(JOYElement *)element
+{
+    uint16_t rumbleUsagePage = (uint16_t)[_hacks[JOYRumbleUsagePage] unsignedIntValue];
+    uint16_t rumbleUsage = (uint16_t)[_hacks[JOYRumbleUsage] unsignedIntValue];
+
+    if (!_rumbleElement && rumbleUsage && rumbleUsagePage && element.usage == rumbleUsage && element.usagePage == rumbleUsagePage) {
+        if (_hacks[JOYRumbleMin]) {
+            element.min = [_hacks[JOYRumbleMin] unsignedIntValue];
+        }
+        if (_hacks[JOYRumbleMax]) {
+            element.max = [_hacks[JOYRumbleMax] unsignedIntValue];
+        }
+        _rumbleElement = element;
+    }
+}
+
+-(void)createInputForElement:(JOYElement *)element
+{
+    uint16_t connectedUsagePage = (uint16_t)[_hacks[JOYConnectedUsagePage] unsignedIntValue];
+    uint16_t connectedUsage = (uint16_t)[_hacks[JOYConnectedUsage] unsignedIntValue];
+
+    if (!_connectedElement && connectedUsage && connectedUsagePage && element.usage == connectedUsage && element.usagePage == connectedUsagePage) {
+        _connectedElement = element;
+        _logicallyConnected = element.value != element.min;
+        return;
+    }
+    
+    if (element.usagePage == kHIDPage_Button) {
+    button: {
+        JOYButton *button = [[JOYButton alloc] initWithElement: element];
+        [_buttons setObject:button forKey:element];
+        NSNumber *replacementUsage = _hacks[JOYButtonUsageMapping][@(button.usage)];
+        if (replacementUsage) {
+            button.usage = [replacementUsage unsignedIntValue];
+        }
+        return;
+    }
+    }
+    else if (element.usagePage == kHIDPage_GenericDesktop) {
+        NSDictionary *axisGroups = @{
+            @(kHIDUsage_GD_X): @(0),
+            @(kHIDUsage_GD_Y): @(0),
+            @(kHIDUsage_GD_Z): @(1),
+            @(kHIDUsage_GD_Rx): @(2),
+            @(kHIDUsage_GD_Ry): @(2),
+            @(kHIDUsage_GD_Rz): @(1),
+        };
+        
+        axisGroups = _hacks[JOYAxisGroups] ?: axisGroups;
+
+        switch (element.usage) {
+            case kHIDUsage_GD_X:
+            case kHIDUsage_GD_Y:
+            case kHIDUsage_GD_Z:
+            case kHIDUsage_GD_Rx:
+            case kHIDUsage_GD_Ry:
+            case kHIDUsage_GD_Rz: {
+                
+                JOYElement *other = _previousAxisElement;
+                _previousAxisElement = element;
+                if (!other) goto single;
+                if (other.usage >= element.usage) goto single;
+                if (other.reportID != element.reportID) goto single;
+                if (![axisGroups[@(other.usage)] isEqualTo: axisGroups[@(element.usage)]]) goto single;
+                if (other.parentID != element.parentID) goto single;
+                
+                JOYAxes2D *axes = nil;
+                if (other.usage == kHIDUsage_GD_Z && element.usage == kHIDUsage_GD_Rz && [_hacks[JOYSwapZRz] boolValue]) {
+                    axes = [[JOYAxes2D alloc] initWithFirstElement:element secondElement:other];
+                }
+                else {
+                    axes = [[JOYAxes2D alloc] initWithFirstElement:other secondElement:element];
+                }
+                NSNumber *replacementUsage = _hacks[JOYAxes2DUsageMapping][@(axes.usage)];
+                if (replacementUsage) {
+                    axes.usage = [replacementUsage unsignedIntValue];
+                }
+                
+                [_axisEmulatedButtons removeObjectForKey:@(_axes[other].uniqueID)];
+                [_axes removeObjectForKey:other];
+                _previousAxisElement = nil;
+                _axes2D[other] = axes;
+                _axes2D[element] = axes;
+                
+                if (axes2DEmulateButtons) {
+                    _axes2DEmulatedButtons[@(axes.uniqueID)] = @[
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:axes.uniqueID | 0x100000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:axes.uniqueID | 0x200000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:axes.uniqueID | 0x300000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:axes.uniqueID | 0x400000000L],
+                    ];
+                }
+                
+                /*
+                 for (NSArray *group in axes2d) {
+                 break;
+                 IOHIDElementRef first  = (__bridge IOHIDElementRef)group[0];
+                 IOHIDElementRef second = (__bridge IOHIDElementRef)group[1];
+                 if (IOHIDElementGetUsage(first)  > element.usage) continue;
+                 if (IOHIDElementGetUsage(second) > element.usage) continue;
+                 if (IOHIDElementGetReportID(first) != IOHIDElementGetReportID(element)) continue;
+                 if ((IOHIDElementGetUsage(first) - kHIDUsage_GD_X) / 3 != (element.usage - kHIDUsage_GD_X) / 3) continue;
+                 if (IOHIDElementGetParent(first) != IOHIDElementGetParent(element)) continue;
+                 
+                 [axes2d removeObject:group];
+                 [axes3d addObject:@[(__bridge id)first, (__bridge id)second, _element]];
+                 found = true;
+                 break;
+                 }*/
+                break;
+            }
+            single:
+            case kHIDUsage_GD_Slider:
+            case kHIDUsage_GD_Dial:
+            case kHIDUsage_GD_Wheel: {
+                JOYAxis *axis = [[JOYAxis alloc] initWithElement: element];
+                [_axes setObject:axis forKey:element];
+                
+                NSNumber *replacementUsage = _hacks[JOYAxisUsageMapping][@(axis.usage)];
+                if (replacementUsage) {
+                    axis.usage = [replacementUsage unsignedIntValue];
+                }
+                
+                if (axesEmulateButtons && axis.usage >= JOYAxisUsageL1 && axis.usage <= JOYAxisUsageR3) {
+                    _axisEmulatedButtons[@(axis.uniqueID)] =
+                    [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageL1 + JOYButtonUsageL1 uniqueID:axis.uniqueID];
+                }
+                
+                if (axesEmulateButtons && axis.usage >= JOYAxisUsageGeneric0) {
+                    _axisEmulatedButtons[@(axis.uniqueID)] =
+                    [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageGeneric0 + JOYButtonUsageGeneric0 uniqueID:axis.uniqueID];
+                }
+                
+                break;
+            }
+            case kHIDUsage_GD_DPadUp:
+            case kHIDUsage_GD_DPadDown:
+            case kHIDUsage_GD_DPadRight:
+            case kHIDUsage_GD_DPadLeft:
+            case kHIDUsage_GD_Start:
+            case kHIDUsage_GD_Select:
+            case kHIDUsage_GD_SystemMainMenu:
+                goto button;
+                
+            case kHIDUsage_GD_Hatswitch: {
+                JOYHat *hat = [[JOYHat alloc] initWithElement: element];
+                [_hats setObject:hat forKey:element];
+                if (hatsEmulateButtons) {
+                    _hatEmulatedButtons[@(hat.uniqueID)] = @[
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:hat.uniqueID | 0x100000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:hat.uniqueID | 0x200000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:hat.uniqueID | 0x300000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:hat.uniqueID | 0x400000000L],
+                    ];
+                }
+                break;
+            }
+        }
+    }
+}
+
+- (instancetype)initWithDevice:(IOHIDDeviceRef)device reportIDFilter:(NSArray <NSNumber *> *) filter serialSuffix:(NSString *)suffix hacks:(NSDictionary *)hacks
 {
     self = [super init];
     if (!self) return self;
@@ -149,229 +327,109 @@ typedef struct __attribute__((packed)) {
     _axisEmulatedButtons = [NSMutableDictionary dictionary];
     _axes2DEmulatedButtons = [NSMutableDictionary dictionary];
     _hatEmulatedButtons = [NSMutableDictionary dictionary];
-    _multiElements = [NSMutableDictionary dictionary];
     _iokitToJOY = [NSMutableDictionary dictionary];
     _rumblePWMThreadLock = [[NSLock alloc] init];
     
     
     //NSMutableArray *axes3d = [NSMutableArray array];
     
-    NSDictionary *axisGroups = @{
-        @(kHIDUsage_GD_X): @(0),
-        @(kHIDUsage_GD_Y): @(0),
-        @(kHIDUsage_GD_Z): @(1),
-        @(kHIDUsage_GD_Rx): @(2),
-        @(kHIDUsage_GD_Ry): @(2),
-        @(kHIDUsage_GD_Rz): @(1),
-    };
-    NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
-    NSDictionary *hacks = hacksByName[name];
-    if (!hacks) {
-        hacks = hacksByManufacturer[(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDVendorIDKey))];
+    _hacks = hacks;
+    _isSwitch = [_hacks[JOYIsSwitch] boolValue];
+    NSDictionary *customReports = hacks[JOYCustomReports];
+    
+    if (hacks[JOYCustomReports]) {
+        _multiElements = [NSMutableDictionary dictionary];
+        _fullReportElements = [NSMutableDictionary dictionary];
+        _lastReport = [NSMutableData dataWithLength:MAX(
+                                                          MAX(
+                                                              [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxInputReportSizeKey)) unsignedIntValue],
+                                                              [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxOutputReportSizeKey)) unsignedIntValue]
+                                                              ),
+                                                          [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxFeatureReportSizeKey)) unsignedIntValue]
+                                                          )];
+        IOHIDDeviceRegisterInputReportCallback(device, _lastReport.mutableBytes, _lastReport.length, HIDReport, (void *)self);
+        
+        for (NSNumber *_reportID in customReports) {
+            signed reportID = [_reportID intValue];
+            bool isOutput = false;
+            if (reportID < 0) {
+                isOutput = true;
+                reportID = -reportID;
+            }
+            
+            JOYFullReportElement *element = [[JOYFullReportElement alloc] initWithDevice:device reportID:reportID];
+            NSMutableArray *elements = [NSMutableArray array];
+            for (NSDictionary <NSString *,NSNumber *> *subElementDef in customReports[_reportID]) {
+                if (filter && subElementDef[@"reportID"] && ![filter containsObject:subElementDef[@"reportID"]]) continue;
+                JOYSubElement *subElement = [[JOYSubElement alloc] initWithRealElement:element
+                                                                                  size:subElementDef[@"size"].unsignedLongValue
+                                                                                offset:subElementDef[@"offset"].unsignedLongValue + 8 // Compensate for the reportID
+                                                                             usagePage:subElementDef[@"usagePage"].unsignedLongValue
+                                                                                 usage:subElementDef[@"usage"].unsignedLongValue
+                                                                                   min:subElementDef[@"min"].unsignedIntValue
+                                                                                   max:subElementDef[@"max"].unsignedIntValue];
+                [elements addObject:subElement];
+                if (isOutput) {
+                    [self createOutputForElement:subElement];
+                }
+                else {
+                    [self createInputForElement:subElement];
+                }
+            }
+            _multiElements[element] = elements;
+            if (!isOutput) {
+                _fullReportElements[@(reportID)] = element;
+            }
+        }
     }
-    axisGroups = hacks[JOYAxisGroups] ?: axisGroups;
-    _isSwitch = [hacks[JOYIsSwitch] boolValue];
-    uint16_t rumbleUsagePage = (uint16_t)[hacks[JOYRumbleUsagePage] unsignedIntValue];
-    uint16_t rumbleUsage = (uint16_t)[hacks[JOYRumbleUsage] unsignedIntValue];
-    uint16_t connectedUsagePage = (uint16_t)[hacks[JOYConnectedUsagePage] unsignedIntValue];
-    uint16_t connectedUsage = (uint16_t)[hacks[JOYConnectedUsage] unsignedIntValue];
-
-    JOYElement *previousAxisElement = nil;
+    
     id previous = nil;
     for (id _element in array) {
         if (_element == previous) continue; // Some elements are reported twice for some reason
         previous = _element;
-        NSArray *elements = nil;
         JOYElement *element = [[JOYElement alloc] initWithElement:(__bridge IOHIDElementRef)_element];
-        
-        NSArray<NSDictionary <NSString *,NSNumber *>*> *subElementDefs = hacks[JOYSubElementStructs][@(element.uniqueID)];
 
         bool isOutput = false;
-        if (subElementDefs && element.uniqueID != element.parentID) {
-            elements = [NSMutableArray array];
-            for (NSDictionary<NSString *,NSNumber *> *virtualInput in subElementDefs) {
-                if (filter && virtualInput[@"reportID"] && ![filter containsObject:virtualInput[@"reportID"]]) continue;
-                [(NSMutableArray *)elements addObject:[[JOYSubElement alloc] initWithRealElement:element
-                                                                                            size:virtualInput[@"size"].unsignedLongValue
-                                                                                          offset:virtualInput[@"offset"].unsignedLongValue
-                                                                                       usagePage:virtualInput[@"usagePage"].unsignedLongValue
-                                                                                           usage:virtualInput[@"usage"].unsignedLongValue
-                                                                                             min:virtualInput[@"min"].unsignedIntValue
-                                                                                             max:virtualInput[@"max"].unsignedIntValue]];
-            }
-            isOutput = IOHIDElementGetType((__bridge IOHIDElementRef)_element) == kIOHIDElementTypeOutput;
-            [_multiElements setObject:elements forKey:element];
+        if (filter && ![filter containsObject:@(element.reportID)]) continue;
+
+        switch (IOHIDElementGetType((__bridge IOHIDElementRef)_element)) {
+            /* Handled */
+            case kIOHIDElementTypeInput_Misc:
+            case kIOHIDElementTypeInput_Button:
+            case kIOHIDElementTypeInput_Axis:
+                break;
+            case kIOHIDElementTypeOutput:
+                isOutput = true;
+                break;
+            /* Ignored */
+            default:
+            case kIOHIDElementTypeInput_ScanCodes:
+            case kIOHIDElementTypeInput_NULL:
+            case kIOHIDElementTypeFeature:
+            case kIOHIDElementTypeCollection:
+                continue;
+        }
+        if ((!isOutput && customReports[@(element.reportID)]) ||
+            (isOutput && customReports[@(-element.reportID)])) continue;
+
+        
+        if (IOHIDElementIsArray((__bridge IOHIDElementRef)_element)) continue;
+        
+        if (isOutput) {
+            [self createOutputForElement:element];
         }
         else {
-            if (filter && ![filter containsObject:@(element.reportID)]) continue;
-
-            switch (IOHIDElementGetType((__bridge IOHIDElementRef)_element)) {
-                /* Handled */
-                case kIOHIDElementTypeInput_Misc:
-                case kIOHIDElementTypeInput_Button:
-                case kIOHIDElementTypeInput_Axis:
-                    break;
-                case kIOHIDElementTypeOutput:
-                    isOutput = true;
-                    break;
-                /* Ignored */
-                default:
-                case kIOHIDElementTypeInput_ScanCodes:
-                case kIOHIDElementTypeInput_NULL:
-                case kIOHIDElementTypeFeature:
-                case kIOHIDElementTypeCollection:
-                    continue;
-            }
-            if (IOHIDElementIsArray((__bridge IOHIDElementRef)_element)) continue;
-            
-            elements = @[element];
+            [self createInputForElement:element];
         }
         
         _iokitToJOY[@(IOHIDElementGetCookie((__bridge IOHIDElementRef)_element))] = element;
         
-        for (JOYElement *element in elements) {
-            if (isOutput) {
-                if (!_rumbleElement && rumbleUsage && rumbleUsagePage && element.usage == rumbleUsage && element.usagePage == rumbleUsagePage) {
-                    if (hacks[JOYRumbleMin]) {
-                        element.min = [hacks[JOYRumbleMin] unsignedIntValue];
-                    }
-                    if (hacks[JOYRumbleMax]) {
-                        element.max = [hacks[JOYRumbleMax] unsignedIntValue];
-                    }
-                    _rumbleElement = element;
-                }
-                continue;
-            }
-            else {
-                if (!_connectedElement && connectedUsage && connectedUsagePage && element.usage == connectedUsage && element.usagePage == connectedUsagePage) {
-                    _connectedElement = element;
-                    _logicallyConnected = element.value != element.min;
-                    continue;
-                }
-            }
-            
-            if (element.usagePage == kHIDPage_Button) {
-                button: {
-                    JOYButton *button = [[JOYButton alloc] initWithElement: element];
-                    [_buttons setObject:button forKey:element];
-                    NSNumber *replacementUsage = hacks[JOYButtonUsageMapping][@(button.usage)];
-                    if (replacementUsage) {
-                        button.usage = [replacementUsage unsignedIntValue];
-                    }
-                    continue;
-                }
-            }
-            else if (element.usagePage == kHIDPage_GenericDesktop) {
-                switch (element.usage) {
-                    case kHIDUsage_GD_X:
-                    case kHIDUsage_GD_Y:
-                    case kHIDUsage_GD_Z:
-                    case kHIDUsage_GD_Rx:
-                    case kHIDUsage_GD_Ry:
-                    case kHIDUsage_GD_Rz: {
-                        
-                        JOYElement *other = previousAxisElement;
-                        previousAxisElement = element;
-                        if (!other) goto single;
-                        if (other.usage >= element.usage) goto single;
-                        if (other.reportID != element.reportID) goto single;
-                        if (![axisGroups[@(other.usage)] isEqualTo: axisGroups[@(element.usage)]]) goto single;
-                        if (other.parentID != element.parentID) goto single;
-                        
-                        JOYAxes2D *axes = nil;
-                        if (other.usage == kHIDUsage_GD_Z && element.usage == kHIDUsage_GD_Rz && [hacks[JOYSwapZRz] boolValue]) {
-                            axes = [[JOYAxes2D alloc] initWithFirstElement:element secondElement:other];
-                        }
-                        else {
-                            axes = [[JOYAxes2D alloc] initWithFirstElement:other secondElement:element];
-                        }
-                        NSNumber *replacementUsage = hacks[JOYAxes2DUsageMapping][@(axes.usage)];
-                        if (replacementUsage) {
-                            axes.usage = [replacementUsage unsignedIntValue];
-                        }
-
-                        [_axisEmulatedButtons removeObjectForKey:@(_axes[other].uniqueID)];
-                        [_axes removeObjectForKey:other];
-                        previousAxisElement = nil;
-                        _axes2D[other] = axes;
-                        _axes2D[element] = axes;
-                        
-                        if (axes2DEmulateButtons) {
-                            _axes2DEmulatedButtons[@(axes.uniqueID)] = @[
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:axes.uniqueID | 0x100000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:axes.uniqueID | 0x200000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:axes.uniqueID | 0x300000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:axes.uniqueID | 0x400000000L],
-                                ];
-                        }
-                        
-                        /*
-                        for (NSArray *group in axes2d) {
-                            break;
-                            IOHIDElementRef first  = (__bridge IOHIDElementRef)group[0];
-                            IOHIDElementRef second = (__bridge IOHIDElementRef)group[1];
-                            if (IOHIDElementGetUsage(first)  > element.usage) continue;
-                            if (IOHIDElementGetUsage(second) > element.usage) continue;
-                            if (IOHIDElementGetReportID(first) != IOHIDElementGetReportID(element)) continue;
-                            if ((IOHIDElementGetUsage(first) - kHIDUsage_GD_X) / 3 != (element.usage - kHIDUsage_GD_X) / 3) continue;
-                            if (IOHIDElementGetParent(first) != IOHIDElementGetParent(element)) continue;
-                            
-                            [axes2d removeObject:group];
-                            [axes3d addObject:@[(__bridge id)first, (__bridge id)second, _element]];
-                            found = true;
-                            break;
-                        }*/
-                        break;
-                    }
-                    single:
-                    case kHIDUsage_GD_Slider:
-                    case kHIDUsage_GD_Dial:
-                    case kHIDUsage_GD_Wheel: {
-                        JOYAxis *axis = [[JOYAxis alloc] initWithElement: element];
-                        [_axes setObject:axis forKey:element];
-
-                        NSNumber *replacementUsage = hacks[JOYAxisUsageMapping][@(axis.usage)];
-                        if (replacementUsage) {
-                            axis.usage = [replacementUsage unsignedIntValue];
-                        }
-                        
-                        if (axesEmulateButtons && axis.usage >= JOYAxisUsageL1 && axis.usage <= JOYAxisUsageR3) {
-                            _axisEmulatedButtons[@(axis.uniqueID)] =
-                                [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageL1 + JOYButtonUsageL1 uniqueID:axis.uniqueID];
-                        }
-                        
-                        if (axesEmulateButtons && axis.usage >= JOYAxisUsageGeneric0) {
-                            _axisEmulatedButtons[@(axis.uniqueID)] =
-                                [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageGeneric0 + JOYButtonUsageGeneric0 uniqueID:axis.uniqueID];
-                        }
-
-                        break;
-                    }
-                    case kHIDUsage_GD_DPadUp:
-                    case kHIDUsage_GD_DPadDown:
-                    case kHIDUsage_GD_DPadRight:
-                    case kHIDUsage_GD_DPadLeft:
-                    case kHIDUsage_GD_Start:
-                    case kHIDUsage_GD_Select:
-                    case kHIDUsage_GD_SystemMainMenu:
-                        goto button;
-                        
-                    case kHIDUsage_GD_Hatswitch: {
-                        JOYHat *hat = [[JOYHat alloc] initWithElement: element];
-                        [_hats setObject:hat forKey:element];
-                        if (hatsEmulateButtons) {
-                            _hatEmulatedButtons[@(hat.uniqueID)] = @[
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:hat.uniqueID | 0x100000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:hat.uniqueID | 0x200000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:hat.uniqueID | 0x300000000L],
-                                    [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:hat.uniqueID | 0x400000000L],
-                                ];
-                        }
-                        break;
-                    }
-                }
-            }
+        if (_isSwitch && element.reportID == 0x30) {
+            /* This report does not match its report descriptor (The descriptor ignores several fields) so
+               we can't use the elements in it directly.*/
+            continue;
         }
+        
     }
     
     [exposedControllers addObject:self];
@@ -382,6 +440,11 @@ typedef struct __attribute__((packed)) {
             }
         }
     }
+    
+    if (_hacks[JOYActivationReport]) {
+        [self sendReport:hacks[JOYActivationReport]];
+    }
+    
     
     return self;
 }
@@ -441,6 +504,21 @@ typedef struct __attribute__((packed)) {
     return [_hats allValues];
 }
 
+- (void)gotReport:(NSData *)report
+{
+    JOYFullReportElement *element = _fullReportElements[@(*(uint8_t *)report.bytes)];
+    if (!element) return;
+    [element updateValue:report];
+    
+    NSArray<JOYElement *> *subElements = _multiElements[element];
+    if (subElements) {
+        for (JOYElement *subElement in subElements) {
+            [self _elementChanged:subElement];
+        }
+        return;
+    }
+}
+
 - (void)elementChanged:(IOHIDElementRef)element
 {
     JOYElement *_element = _iokitToJOY[@(IOHIDElementGetCookie(element))];
@@ -470,16 +548,6 @@ typedef struct __attribute__((packed)) {
                     [listener controllerDisconnected:self];
                 }
             }
-        }
-    }
-    
-    {
-        NSArray<JOYElement *> *subElements = _multiElements[element];
-        if (subElements) {
-            for (JOYElement *subElement in subElements) {
-                [self _elementChanged:subElement];
-            }
-            return;
         }
     }
     
@@ -602,7 +670,7 @@ typedef struct __attribute__((packed)) {
         _lastSwitchPacket.sequence &= 0xF;
         _lastSwitchPacket.command = 0x30; // LED
         _lastSwitchPacket.commandData[0] = mask;
-        [self sendReport:[NSData dataWithBytes:&_lastSwitchPacket length:sizeof(_lastSwitchPacket)]];
+        //[self sendReport:[NSData dataWithBytes:&_lastSwitchPacket length:sizeof(_lastSwitchPacket)]];
     }
 }
 
@@ -723,15 +791,13 @@ typedef struct __attribute__((packed)) {
     JOYController *controller = nil;
     if (filters) {
         controller = [[JOYMultiplayerController alloc] initWithDevice:device
-                                                      reportIDFilters:filters];
+                                                      reportIDFilters:filters
+                                                                hacks:hacks];
     }
     else {
-        controller = [[JOYController alloc] initWithDevice:device];
+        controller = [[JOYController alloc] initWithDevice:device hacks:hacks];
     }
-    
-    if (hacks[JOYActivationReport]) {
-        [controller sendReport:hacks[JOYActivationReport]];
-    }
+        
     [controllers setObject:controller forKey:[NSValue valueWithPointer:device]];
 
 
