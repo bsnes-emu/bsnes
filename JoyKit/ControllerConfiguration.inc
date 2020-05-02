@@ -367,5 +367,45 @@ hacksByName = @{
             AXES2D(1): @(JOYAxes2DUsageLeftStick),
             AXES2D(4): @(JOYAxes2DUsageRightStick),
         },
+        
+        JOYCustomReports: @{
+            @(0x30): @[
+            
+            // For USB mode, which uses the wrong report descriptor
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@16, @"usagePage":@(kHIDPage_Button), @"usage":@3},
+            @{@"reportID": @(1), @"size":@1, @"offset":@17, @"usagePage":@(kHIDPage_Button), @"usage":@4},
+            @{@"reportID": @(1), @"size":@1, @"offset":@18, @"usagePage":@(kHIDPage_Button), @"usage":@1},
+            @{@"reportID": @(1), @"size":@1, @"offset":@19, @"usagePage":@(kHIDPage_Button), @"usage":@2},
+            
+            // SR and SL not used on the Pro Controller
+            @{@"reportID": @(1), @"size":@1, @"offset":@22, @"usagePage":@(kHIDPage_Button), @"usage":@6},
+            @{@"reportID": @(1), @"size":@1, @"offset":@23, @"usagePage":@(kHIDPage_Button), @"usage":@8},
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@24, @"usagePage":@(kHIDPage_Button), @"usage":@9},
+            @{@"reportID": @(1), @"size":@1, @"offset":@25, @"usagePage":@(kHIDPage_Button), @"usage":@10},
+            @{@"reportID": @(1), @"size":@1, @"offset":@26, @"usagePage":@(kHIDPage_Button), @"usage":@12},
+            @{@"reportID": @(1), @"size":@1, @"offset":@27, @"usagePage":@(kHIDPage_Button), @"usage":@11},
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@28, @"usagePage":@(kHIDPage_Button), @"usage":@13},
+            @{@"reportID": @(1), @"size":@1, @"offset":@29, @"usagePage":@(kHIDPage_Button), @"usage":@14},
+
+            @{@"reportID": @(1), @"size":@1, @"offset":@32, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadDown)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@33, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadUp)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@34, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadRight)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@35, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadLeft)},
+            
+            // SR and SL not used on the Pro Controller
+            @{@"reportID": @(1), @"size":@1, @"offset":@38, @"usagePage":@(kHIDPage_Button), @"usage":@5},
+            @{@"reportID": @(1), @"size":@1, @"offset":@39, @"usagePage":@(kHIDPage_Button), @"usage":@7},
+
+            /* Sticks */
+            @{@"reportID": @(1), @"size":@12, @"offset":@40, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_X), @"min": @0, @"max": @0xFFF},
+            @{@"reportID": @(1), @"size":@12, @"offset":@52, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Y), @"min": @0xFFF, @"max": @0},
+            
+            @{@"reportID": @(1), @"size":@12, @"offset":@64, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @0xFFF},
+            @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
+            ],
+        },
     },
 };

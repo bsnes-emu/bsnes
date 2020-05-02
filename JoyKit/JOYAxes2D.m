@@ -57,8 +57,8 @@
         uint16_t usage = element1.usage;
         _usage = JOYAxes2DUsageGeneric0 + usage - kHIDUsage_GD_X + 1;
     }
-    initialX = [_element1 value];
-    initialY = [_element2 value];
+    initialX = 0;
+    initialY = 0;
     minX = element1.max;
     minY = element2.max;
     maxX = element1.min;

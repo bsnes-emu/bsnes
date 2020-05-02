@@ -445,6 +445,10 @@ typedef struct __attribute__((packed)) {
         [self sendReport:hacks[JOYActivationReport]];
     }
     
+    if (_isSwitch) {
+        [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x04} length:2]];
+        [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x02} length:2]];
+    }
     
     return self;
 }
