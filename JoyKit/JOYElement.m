@@ -1,5 +1,6 @@
 #import "JOYElement.h"
 #include <IOKit/hid/IOHIDLib.h>
+#include <objc/runtime.h>
 
 @implementation JOYElement
 {
@@ -28,6 +29,24 @@
     _max = max;
 }
 
+/* Ugly hack because IOHIDDeviceCopyMatchingElements is slow */
++ (NSArray *) cookiesToSkipForDevice:(IOHIDDeviceRef)device
+{
+    id _device = (__bridge id)device;
+    NSMutableArray *ret = objc_getAssociatedObject(_device, _cmd);
+    if (ret) return ret;
+    
+    ret = [NSMutableArray array];
+    NSArray *nones = CFBridgingRelease(IOHIDDeviceCopyMatchingElements(device,
+                                                                       (__bridge CFDictionaryRef)@{@(kIOHIDElementTypeKey): @(kIOHIDElementTypeInput_NULL)},
+                                                                       0));
+    for (id none in nones) {
+        [ret addObject:@(IOHIDElementGetCookie((__bridge IOHIDElementRef)none))];
+    }
+    objc_setAssociatedObject(_device, _cmd, ret, OBJC_ASSOCIATION_RETAIN);
+    return ret;
+}
+
 - (instancetype)initWithElement:(IOHIDElementRef)element
 {
     if ((self = [super init])) {
@@ -45,14 +64,12 @@
         /* Catalina added a new input type in a way that breaks cookie consistency across macOS versions,
            we shall adjust our cookies to to compensate */
         unsigned cookieShift = 0, parentCookieShift = 0;
-        NSArray *nones = CFBridgingRelease(IOHIDDeviceCopyMatchingElements(IOHIDElementGetDevice(element),
-                                                                           (__bridge CFDictionaryRef)@{@(kIOHIDElementTypeKey): @(kIOHIDElementTypeInput_NULL)},
-                                                                           0));
-        for (id none in nones) {
-            if (IOHIDElementGetCookie((__bridge IOHIDElementRef) none) < _uniqueID) {
+
+        for (NSNumber *none in [JOYElement cookiesToSkipForDevice:_device]) {
+            if (none.unsignedIntValue < _uniqueID) {
                 cookieShift++;
             }
-            if (IOHIDElementGetCookie((__bridge IOHIDElementRef) none) < (int32_t)_parentID) {
+            if (none.unsignedIntValue < (int32_t)_parentID) {
                 parentCookieShift++;
             }
         }
