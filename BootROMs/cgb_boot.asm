@@ -984,14 +984,13 @@ BrightenColor:
     and $1F
     cp $1F
     jr nz, .blueNotMaxed
-    res 0, c
+    dec c
 .blueNotMaxed
 
     ; Is green maxed?
     ld a, e
-    and $E0
     cp $E0
-    jr nz, .greenNotMaxed
+    jr c, .greenNotMaxed
     ld a, d
     and $3
     cp $3
@@ -1007,18 +1006,13 @@ BrightenColor:
     res 2, b
 .redNotMaxed
 
-    ; Add de to bc
-    push hl
-    ld h, d
-    ld l, e
-    add hl, bc
-    ld d, h
-    ld e, l
-    pop hl
-
+    ; add de, bc
+    ; ld [hli], de
     ld a, e
+    add c
     ld [hli], a
     ld a, d
+    adc b
     ld [hli], a
     ret
 
@@ -1155,7 +1149,7 @@ ReplaceColorInAllPalettes:
     dec c
     jr nz, .loop
     ret
-    
+
 LoadDMGTilemap:
     push af
     call WaitFrame
