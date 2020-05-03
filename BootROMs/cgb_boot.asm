@@ -1093,12 +1093,11 @@ GetInputPaletteIndex:
     ; Slide into change Animation Palette
 
 ChangeAnimationPalette:
-    push af
     push hl
     push bc
     push de
     ld hl, KeyCombinationPalettes - 1 ; Input palettes are 1-based, 0 means nothing down
-    ld c ,a
+    ld c, a
     ld b, 0
     add hl, bc
     ld a, [hl]
@@ -1149,6 +1148,7 @@ ChangeAnimationPalette:
 .isNotWhite
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 6], a ; Fourth color, 7th palette
+    ldh [BgPalettes + 7 * 8 + 2], a ; Second color, half, 7th palette; rough color mixing
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 7], a ; Fourth color, 7th palette
     ld a, [hli]
@@ -1165,7 +1165,6 @@ ChangeAnimationPalette:
     pop de
     pop bc
     pop hl
-    pop af
     ret
 
 ReplaceColorInAllPalettes:
