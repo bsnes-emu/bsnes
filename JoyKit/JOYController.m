@@ -24,6 +24,8 @@ static NSString const *JOYRumbleMin = @"JOYRumbleMin";
 static NSString const *JOYRumbleMax = @"JOYRumbleMax";
 static NSString const *JOYSwapZRz = @"JOYSwapZRz";
 static NSString const *JOYActivationReport = @"JOYActivationReport";
+static NSString const *JOYIgnoredReports = @"JOYIgnoredReports";
+static NSString const *JOYIsDualShock3 = @"JOYIsDualShock3";
 
 static NSMutableDictionary<id, JOYController *> *controllers; // Physical controllers
 static NSMutableArray<JOYController *> *exposedControllers; // Logical controllers
@@ -104,6 +106,30 @@ typedef struct __attribute__((packed)) {
     uint8_t commandData[26];
 } JOYSwitchPacket;
 
+typedef struct __attribute__((packed)) {
+    uint8_t reportID;
+    uint8_t padding;
+    uint8_t rumbleRightDuration;
+    uint8_t rumbleRightStrength;
+    uint8_t rumbleLeftDuration;
+    uint8_t rumbleLeftStrength;
+    uint32_t padding2;
+    uint8_t ledsEnabled;
+    struct {
+        uint8_t timeEnabled;
+        uint8_t dutyLength;
+        uint8_t enabled;
+        uint8_t dutyOff;
+        uint8_t dutyOnn;
+    } __attribute__((packed)) led[5];
+    uint8_t padding3[13];
+} JOYDualShock3Output;
+
+typedef union {
+    JOYSwitchPacket switchPacket;
+    JOYDualShock3Output ds3Output;
+} JOYVendorSpecificOutput;
+
 @implementation JOYController
 {
     IOHIDDeviceRef _device;
@@ -124,7 +150,8 @@ typedef struct __attribute__((packed)) {
     NSMutableDictionary<NSValue *, JOYElement *> *_iokitToJOY;
     NSString *_serialSuffix;
     bool _isSwitch; // Does this controller use the Switch protocol?
-    JOYSwitchPacket _lastSwitchPacket;
+    bool _isDualShock3; // Does this controller use DS3 outputs?
+    JOYVendorSpecificOutput _lastVendorSpecificOutput;
     NSLock *_rumblePWMThreadLock;
     volatile double _rumblePWMRatio;
     bool _physicallyConnected;
@@ -335,6 +362,8 @@ typedef struct __attribute__((packed)) {
     
     _hacks = hacks;
     _isSwitch = [_hacks[JOYIsSwitch] boolValue];
+    _isDualShock3 = [_hacks[JOYIsDualShock3] boolValue];
+
     NSDictionary *customReports = hacks[JOYCustomReports];
     
     if (hacks[JOYCustomReports]) {
@@ -384,6 +413,11 @@ typedef struct __attribute__((packed)) {
     }
     
     id previous = nil;
+    NSSet *ignoredReports = nil;
+    if (hacks[ignoredReports]) {
+        ignoredReports = [NSSet setWithArray:hacks[ignoredReports]];
+    }
+    
     for (id _element in array) {
         if (_element == previous) continue; // Some elements are reported twice for some reason
         previous = _element;
@@ -409,8 +443,8 @@ typedef struct __attribute__((packed)) {
             case kIOHIDElementTypeCollection:
                 continue;
         }
-        if ((!isOutput && customReports[@(element.reportID)]) ||
-            (isOutput && customReports[@(-element.reportID)])) continue;
+        if ((!isOutput && [ignoredReports containsObject:@(element.reportID)]) ||
+            (isOutput && [ignoredReports containsObject:@(-element.reportID)])) continue;
 
         
         if (IOHIDElementIsArray((__bridge IOHIDElementRef)_element)) continue;
@@ -423,13 +457,6 @@ typedef struct __attribute__((packed)) {
         }
         
         _iokitToJOY[@(IOHIDElementGetCookie((__bridge IOHIDElementRef)_element))] = element;
-        
-        if (_isSwitch && element.reportID == 0x30) {
-            /* This report does not match its report descriptor (The descriptor ignores several fields) so
-               we can't use the elements in it directly.*/
-            continue;
-        }
-        
     }
     
     [exposedControllers addObject:self];
@@ -448,6 +475,20 @@ typedef struct __attribute__((packed)) {
     if (_isSwitch) {
         [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x04} length:2]];
         [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x02} length:2]];
+    }
+    
+    if (_isDualShock3) {
+        _lastVendorSpecificOutput.ds3Output = (JOYDualShock3Output){
+            .reportID = 1,
+            .led = {
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
+                {.timeEnabled =  0,    .dutyLength = 0,    .enabled = 0,    .dutyOff = 0, .dutyOnn = 0},
+            }
+        };
+
     }
     
     return self;
@@ -653,7 +694,7 @@ typedef struct __attribute__((packed)) {
         }
     }
     _physicallyConnected = false;
-    [self setRumbleAmplitude:0]; // Stop the rumble thread.
+    [self _forceStopPWMThread]; // Stop the rumble thread.
     [exposedControllers removeObject:self];
     _device = nil;
 }
@@ -669,12 +710,17 @@ typedef struct __attribute__((packed)) {
 {
     mask &= 0xF;
     if (_isSwitch) {
-        _lastSwitchPacket.reportID = 0x1; // Rumble and LEDs
-        _lastSwitchPacket.sequence++;
-        _lastSwitchPacket.sequence &= 0xF;
-        _lastSwitchPacket.command = 0x30; // LED
-        _lastSwitchPacket.commandData[0] = mask;
+        _lastVendorSpecificOutput.switchPacket.reportID = 0x1; // Rumble and LEDs
+        _lastVendorSpecificOutput.switchPacket.sequence++;
+        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+        _lastVendorSpecificOutput.switchPacket.command = 0x30; // LED
+        _lastVendorSpecificOutput.switchPacket.commandData[0] = mask;
         //[self sendReport:[NSData dataWithBytes:&_lastSwitchPacket length:sizeof(_lastSwitchPacket)]];
+    }
+    else if (_isDualShock3) {
+        _lastVendorSpecificOutput.ds3Output.reportID = 1;
+        _lastVendorSpecificOutput.ds3Output.ledsEnabled = mask << 1;
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
     }
 }
 
@@ -727,17 +773,23 @@ typedef struct __attribute__((packed)) {
             lowAmp = 0;
         }
         
-        _lastSwitchPacket.rumbleData[0] = _lastSwitchPacket.rumbleData[4] = highFreq & 0xFF;
-        _lastSwitchPacket.rumbleData[1] = _lastSwitchPacket.rumbleData[5] = (highAmp << 1) + ((highFreq >> 8) & 0x1);
-        _lastSwitchPacket.rumbleData[2] = _lastSwitchPacket.rumbleData[6] = lowFreq;
-        _lastSwitchPacket.rumbleData[3] = _lastSwitchPacket.rumbleData[7] = lowAmp;
+        _lastVendorSpecificOutput.switchPacket.rumbleData[0] = _lastVendorSpecificOutput.switchPacket.rumbleData[4] = highFreq & 0xFF;
+        _lastVendorSpecificOutput.switchPacket.rumbleData[1] = _lastVendorSpecificOutput.switchPacket.rumbleData[5] = (highAmp << 1) + ((highFreq >> 8) & 0x1);
+        _lastVendorSpecificOutput.switchPacket.rumbleData[2] = _lastVendorSpecificOutput.switchPacket.rumbleData[6] = lowFreq;
+        _lastVendorSpecificOutput.switchPacket.rumbleData[3] = _lastVendorSpecificOutput.switchPacket.rumbleData[7] = lowAmp;
             
         
-        _lastSwitchPacket.reportID = 0x10; // Rumble only
-        _lastSwitchPacket.sequence++;
-        _lastSwitchPacket.sequence &= 0xF;
-        _lastSwitchPacket.command = 0; // LED
-        [self sendReport:[NSData dataWithBytes:&_lastSwitchPacket length:sizeof(_lastSwitchPacket)]];
+        _lastVendorSpecificOutput.switchPacket.reportID = 0x10; // Rumble only
+        _lastVendorSpecificOutput.switchPacket.sequence++;
+        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+        _lastVendorSpecificOutput.switchPacket.command = 0; // LED
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+    }
+    else if (_isDualShock3) {
+        _lastVendorSpecificOutput.ds3Output.reportID = 1;
+        _lastVendorSpecificOutput.ds3Output.rumbleLeftDuration = _lastVendorSpecificOutput.ds3Output.rumbleRightDuration = amp? 0xff : 0;
+        _lastVendorSpecificOutput.ds3Output.rumbleLeftStrength = _lastVendorSpecificOutput.ds3Output.rumbleRightStrength = amp * 0xff;
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
     }
     else {
         if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {

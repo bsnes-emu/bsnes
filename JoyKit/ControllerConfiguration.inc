@@ -408,4 +408,70 @@ hacksByName = @{
             ],
         },
     },
+    
+    JOYIgnoredReports: @(0x30), // Ignore the real 0x30 report as it's broken
+    
+    @"PLAYSTATION(R)3 Controller": @{ // DualShock 3
+        JOYAxisGroups: @{
+            @(kHIDUsage_GD_X): @(0),
+            @(kHIDUsage_GD_Y): @(0),
+            @(kHIDUsage_GD_Z): @(1),
+            @(kHIDUsage_GD_Rx): @(2),
+            @(kHIDUsage_GD_Ry): @(3),
+            @(kHIDUsage_GD_Rz): @(1),
+        },
+        
+        JOYButtonUsageMapping: @{
+            BUTTON(1): @(JOYButtonUsageSelect),
+            BUTTON(2): @(JOYButtonUsageL3),
+            BUTTON(3): @(JOYButtonUsageR3),
+            BUTTON(4): @(JOYButtonUsageStart),
+            BUTTON(5): @(JOYButtonUsageDPadUp),
+            BUTTON(6): @(JOYButtonUsageDPadRight),
+            BUTTON(7): @(JOYButtonUsageDPadDown),
+            BUTTON(8): @(JOYButtonUsageDPadLeft),
+            BUTTON(9): @(JOYButtonUsageL2),
+            BUTTON(10): @(JOYButtonUsageR2),
+            BUTTON(11): @(JOYButtonUsageL1),
+            BUTTON(12): @(JOYButtonUsageR1),
+            BUTTON(13): @(JOYButtonUsageX),
+            BUTTON(14): @(JOYButtonUsageA),
+            BUTTON(15): @(JOYButtonUsageB),
+            BUTTON(16): @(JOYButtonUsageY),
+            BUTTON(17): @(JOYButtonUsageHome),
+        },
+        
+        JOYAxisUsageMapping: @{
+            AXIS(4): @(JOYAxisUsageL1),
+            AXIS(5): @(JOYAxisUsageR1),
+            AXIS(8): @(JOYAxisUsageL2),
+            AXIS(9): @(JOYAxisUsageR2),
+        },
+        
+        JOYAxes2DUsageMapping: @{
+            AXES2D(1): @(JOYAxes2DUsageLeftStick),
+            AXES2D(3): @(JOYAxes2DUsageRightStick),
+        },
+                
+        JOYCustomReports: @{
+            @(0x01): @[
+            /* Pressure sensitive inputs */
+            @{@"reportID": @(1), @"size":@8, @"offset":@(13 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(14 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(15 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(16 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(17 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Dial), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(18 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Wheel), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(19 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(20 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(21 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(22 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(23 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            @{@"reportID": @(1), @"size":@8, @"offset":@(24 * 8), @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Slider), @"min": @0, @"max": @255},
+            ]
+        },
+        
+        JOYIsDualShock3: @YES,
+    },
+
 };
