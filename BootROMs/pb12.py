@@ -63,6 +63,6 @@ def pb12(data):
 
 _, infile, outfile = sys.argv
 with open(infile, 'rb') as f:
-    data = f.read()
+    data = f.read().rstrip(b'\x00')
 with open(outfile, 'wb') as f:
     f.writelines(pb12(data))

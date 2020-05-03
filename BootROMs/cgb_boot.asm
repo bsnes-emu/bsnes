@@ -138,41 +138,24 @@ ENDC
 
     ; Expand Palettes
     ld de, AnimationColors
-    ld c, 8
+    ld c, 16
     ld hl, BgPalettes
     xor a
 .expandPalettesLoop:
-IF !DEF(FAST)
     cpl
-ENDC
-    ; One white
+    ; One white or black
     ldi [hl], a
     ldi [hl], a
-
-IF DEF(FAST)
-    ; 3 more whites
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-ELSE    
-    ; The actual color
+    
+    ; One color
+    push af
     ld a, [de]
     inc de
     ldi [hl], a
     ld a, [de]
     inc de
     ldi [hl], a
-
-    xor a
-    ; Two blacks
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-    ldi [hl], a
-ENDC
+    pop af
 
     dec c
     jr nz, .expandPalettesLoop
@@ -551,19 +534,20 @@ TrademarkSymbol:
 SameBoyLogo:
     incbin "SameBoyLogo.pb12"
 
-AnimationColors:
-    dw $7FFF ; White
-    dw $774F ; Cyan
-    dw $22C7 ; Green
-    dw $039F ; Yellow
-    dw $017D ; Orange
-    dw $241D ; Red
-    dw $6D38 ; Purple
-    dw $7102 ; Blue
-AnimationColorsEnd:
+animation_color: MACRO
+    dw ((\1) >> 1) | $4210, (\1)
+ENDM
 
-DMGPalettes:
-    dw $7FFF, $32BF, $00D0, $0000
+AnimationColors:
+    animation_color $7FFF, ($7FFF >> 1) ; White
+    animation_color $774F, ($774F >> 1) ; Cyan
+    animation_color $22C7, ($22C7 >> 1) ; Green
+    animation_color $039F, ($039F >> 1) ; Yellow
+    animation_color $017D, ($017D >> 1) ; Orange
+    animation_color $241D, ($241D >> 1) ; Red
+    animation_color $6D38, ($6D38 >> 1) ; Purple
+    animation_color $7102, ($7102 >> 1) ; Blue
+AnimationColorsEnd:
 
 ; Helper Functions
 DoubleBitsAndWriteRowTwice:
@@ -1140,27 +1124,33 @@ ChangeAnimationPalette:
 .isWhite
     push af
     ld a, [hli]
+    
     push hl
-    ld hl, BgPalettes ; First color, all palette
+    ld hl, BgPalettes ; First color, all palettes
+    call ReplaceColorInAllPalettes
+    ld l, LOW(BgPalettes + 2)  ; Second color, all palettes
     call ReplaceColorInAllPalettes
     pop hl
-    ldh [BgPalettes + 2], a ; Second color, first palette
+    ldh [BgPalettes + 6], a ; Fourth color, first palette
 
     ld a, [hli]
     push hl
-    ld hl, BgPalettes + 1 ; First color, all palette
+    ld hl, BgPalettes + 1 ; First color, all palettes
+    call ReplaceColorInAllPalettes
+    ld l, LOW(BgPalettes + 3) ; Second color, all palettes
     call ReplaceColorInAllPalettes
     pop hl
-    ldh [BgPalettes + 3], a ; Second color, first palette
+    ldh [BgPalettes + 7], a ; Fourth color, first palette
+    
     pop af
     jr z, .isNotWhite
     inc hl
     inc hl
 .isNotWhite
     ld a, [hli]
-    ldh [BgPalettes + 7 * 8 + 2], a ; Second color, 7th palette
+    ldh [BgPalettes + 7 * 8 + 6], a ; Fourth color, 7th palette
     ld a, [hli]
-    ldh [BgPalettes + 7 * 8 + 3], a ; Second color, 7th palette
+    ldh [BgPalettes + 7 * 8 + 7], a ; Fourth color, 7th palette
     ld a, [hli]
     ldh [BgPalettes + 4], a ; Third color, first palette
     ld a, [hl]
@@ -1180,7 +1170,7 @@ ChangeAnimationPalette:
 
 ReplaceColorInAllPalettes:
     ld de, 8
-    ld c, 8
+    ld c, e
 .loop
     ld [hl], a
     add hl, de
