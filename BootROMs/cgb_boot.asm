@@ -87,20 +87,24 @@ ELSE
 
 .tilemapRowLoop
 
+    call .write_with_palette
+
+    ; Repeat the 3 tiles common between E and B. This saves 27 bytes after
+    ; compression, with a cost of 17 bytes of code.
     push af
-    ; Switch to second VRAM Bank
-    ld a, 1
-    ldh [$4F], a
-    ld [hl], 8
-    ; Switch to back first VRAM Bank
-    xor a
-    ldh [$4F], a
+    sub $20
+    sub $3
+    jr nc, .notspecial
+    add $20
+    call .write_with_palette
+    dec c
+.notspecial
     pop af
-    ldi [hl], a
-    add d
+
+    add d ; d = 3 for SameBoy logo, d = 1 for Nintendo logo
     dec c
     jr nz, .tilemapRowLoop
-    sub 47
+    sub 44
     push de
     ld de, $10
     add hl, de
@@ -116,6 +120,19 @@ ELSE
     ld l, $a7
     ld bc, $0107
     jr .tilemapRowLoop
+
+.write_with_palette
+    push af
+    ; Switch to second VRAM Bank
+    ld a, 1
+    ldh [$4F], a
+    ld [hl], 8
+    ; Switch to back first VRAM Bank
+    xor a
+    ldh [$4F], a
+    pop af
+    ldi [hl], a
+    ret
 .endTilemap
 ENDC
 
@@ -532,7 +549,7 @@ TrademarkSymbol:
     db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
 SameBoyLogo:
-    incbin "SameBoyLogo.pb8"
+    incbin "SameBoyLogo.pb12"
 
 AnimationColors:
     dw $7FFF ; White
@@ -634,30 +651,28 @@ ReadCGBLogoHalfTile:
     ld a, e
     ret
 
-; LoadTileset using PB8 codec, 2019 Damian Yerrick
-;
-; The logo is compressed using PB8, a form of RLE with unary-coded
-; run lengths.  Each block representing 8 bytes consists of a control
-; byte, where each bit (MSB to LSB) is 0 for literal or 1 for repeat
-; previous, followed by the literals in that block.
+; LoadTileset using PB12 codec, 2020 Jakub Kądziołka
+; (based on PB8 codec, 2019 Damian Yerrick)
 
 SameBoyLogo_dst = $8080
 SameBoyLogo_length = (128 * 24) / 64
 
 LoadTileset:
     ld hl, SameBoyLogo
-    ld de, SameBoyLogo_dst
+    ld de, SameBoyLogo_dst - 1
     ld c, SameBoyLogo_length
-.pb8BlockLoop:
-    ; Register map for PB8 decompression
+.refill
+    ; Register map for PB12 decompression
     ; HL: source address in boot ROM
     ; DE: destination address in VRAM
     ; A: Current literal value
     ; B: Repeat bits, terminated by 1000...
-    ; C: Number of 8-byte blocks left in this block
     ; Source address in HL lets the repeat bits go straight to B,
     ; bypassing A and avoiding spilling registers to the stack.
     ld b, [hl]
+    dec b
+    jr z, .sameboyLogoEnd
+    inc b
     inc hl
 
     ; Shift a 1 into lower bit of shift value.  Once this bit
@@ -665,26 +680,53 @@ LoadTileset:
     scf
     rl b
 
-.pb8BitLoop:
+.loop
     ; If not a repeat, load a literal byte
-    jr c,.pb8Repeat
-    ld a, [hli]
-.pb8Repeat:
-    ; Decompressed data uses colors 0 and 1, so write once, inc twice
-    ld [de], a
-    inc de
-    inc de
+    jr c, .simple_repeat
     sla b
-    jr nz, .pb8BitLoop
+    jr c, .shifty_repeat
+    ld a, [hli]
+    jr .got_byte
+.shifty_repeat
+    sla b
+    jr nz, .no_refill_during_shift
+    ld b, [hl] ; see above. Also, no, factoring it out into a callable
+    inc hl ; routine doesn't save bytes, even with conditional calls
+    scf
+    rl b
+.no_refill_during_shift
+    ld c, a
+    jr nc, .shift_left
+    srl a
+    db $fe ; eat the add a with cp d8
+.shift_left
+    add a
+    sla b
+    jr c, .go_and
+    or c
+    db $fe ; eat the and c with cp d8
+.go_and
+    and c
+    jr .got_byte
+.simple_repeat
+    sla b
+    jr c, .got_byte
+    ; far repeat
+    dec de
+    ld a, [de]
+    inc de
+.got_byte
+    inc de
+    ld [de], a
+    sla b
+    jr nz, .loop
+    jr .refill
 
-    dec c
-    jr nz, .pb8BlockLoop
-
-; End PB8 decoding.  The rest uses HL as the destination
-    ld h, d
-    ld l, e
-
+; End PB12 decoding.  The rest uses HL as the destination
 .sameboyLogoEnd
+    ld h, d
+    ld l, $80
+
 ; Copy (unresized) ROM logo
     ld de, $104
 .CGBROMLogoLoop
