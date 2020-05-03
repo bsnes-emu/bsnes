@@ -21,7 +21,7 @@ Start:
     ldh [InputPalette], a
 ; Clear title checksum
     ldh [TitleChecksum], a
-    
+
 ; Clear OAM
     ld h, $fe
     ld c, $a0
@@ -753,29 +753,6 @@ ReadTrademarkSymbol:
     jr nz, .loadTrademarkSymbolLoop
     ret
 
-LoadObjPalettes:
-    ld c, $6A
-    jr LoadPalettes
-
-LoadBGPalettes64:
-    ld d, 64
-
-LoadBGPalettes:
-    ld e, 0
-    ld c, $68
-
-LoadPalettes:
-    ld a, $80
-    or e
-    ld [c], a
-    inc c
-.loop
-    ld a, [hli]
-    ld [c], a
-    dec d
-    jr nz, .loop
-    ret
-
 DoIntroAnimation:
     ; Animate the intro
     ld a, 1
@@ -902,8 +879,7 @@ EmulateDMG:
     call LoadPalettesFromIndex
     ld a, 4
     ; Set the final values for DMG mode
-    ld d, 0
-    ld e, $8
+    ld de, 8
     ld l, $7c
     ret
 
@@ -997,7 +973,8 @@ LoadPalettesFromIndex: ; a = index of combination
     ld c, a
     add hl, bc
     ld d, 8
-    call LoadObjPalettes
+    ld c, $6A
+    call LoadPalettes
     pop hl
     bit 3, e
     jr nz, .loadBGPalette
@@ -1011,7 +988,26 @@ LoadPalettesFromIndex: ; a = index of combination
     ld c, a
     add hl, bc
     ld d, 8
-    jp LoadBGPalettes
+    jr LoadBGPalettes
+
+LoadBGPalettes64:
+    ld d, 64
+
+LoadBGPalettes:
+    ld e, 0
+    ld c, $68
+
+LoadPalettes:
+    ld a, $80
+    or e
+    ld [c], a
+    inc c
+.loop
+    ld a, [hli]
+    ld [c], a
+    dec d
+    jr nz, .loop
+    ret
 
 BrightenColor:
     ld a, [hli]
