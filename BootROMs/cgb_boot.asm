@@ -6,8 +6,7 @@ Start:
     ld sp, $fffe
 
 ; Clear memory VRAM
-    ld hl, $8000
-    call ClearMemoryPage
+    call ClearMemoryPage8000
     ld a, 2
     ld c, $70
     ld [c], a
@@ -74,9 +73,7 @@ Start:
 ; Clear the second VRAM bank
     ld a, 1
     ldh [$4F], a
-    xor a
-    ld hl, $8000
-    call ClearMemoryPage
+    call ClearMemoryPage8000
     call LoadTileset
 
     ld b, 3
@@ -177,8 +174,10 @@ ENDC
 IF !DEF(FAST)
     call DoIntroAnimation
 
+    ld a, 45
+    ldh [WaitLoopCounter], a
 ; Wait ~0.75 seconds
-    ld b, 45
+    ld b, a
     call WaitBFrames
 
     ; Play first sound
@@ -189,10 +188,6 @@ IF !DEF(FAST)
     ; Play second sound
     ld a, $c1
     call PlaySound
-
-; Wait ~0.5 seconds
-    ld a, 30
-    ldh [WaitLoopCounter], a
     
 .waitLoop
     call GetInputPaletteIndex
@@ -602,8 +597,11 @@ PlaySound:
     ldh [$14], a
     ret
 
+ClearMemoryPage8000:
+    ld hl, $8000
 ; Clear from HL to HL | 0x2000
 ClearMemoryPage:
+    xor a
     ldi [hl], a
     bit 5, h
     jr z, ClearMemoryPage
@@ -781,6 +779,7 @@ IF !DEF(FAST)
 .fadeLoop
     ld c, 32 ; 32 colors to fade
     ld hl, BgPalettes
+    push hl
 .frameLoop
     push bc
     
@@ -833,7 +832,7 @@ IF !DEF(FAST)
     jr nz, .frameLoop
 
     call WaitFrame
-    ld hl, BgPalettes
+    pop hl
     call LoadBGPalettes64
     call WaitFrame
     dec b
@@ -888,6 +887,14 @@ ENDC
     ldh [$4C], a
     ld a, $1
     ret
+    
+GetKeyComboPalette:
+    ld hl, KeyCombinationPalettes - 1 ; Return value is 1-based, 0 means nothing down
+    ld c ,a
+    ld b, 0
+    add hl, bc
+    ld a, [hl]
+    ret
 
 EmulateDMG:
     ld a, 1
@@ -900,11 +907,7 @@ EmulateDMG:
     ldh a, [InputPalette]
     and a
     jr z, .nothingDown
-    ld hl, KeyCombinationPalettes - 1 ; Return value is 1-based, 0 means nothing down
-    ld c ,a
-    ld b, 0
-    add hl, bc
-    ld a, [hl]
+    call GetKeyComboPalette
     jr .paletteFromKeys
 .nothingDown
     ld a, b
@@ -985,17 +988,21 @@ GetPaletteIndex:
 .notNintendo
     xor a
     ret
-
-LoadPalettesFromIndex: ; a = index of combination
+    
+GetPaletteCombo:
     ld b, a
     ; Multiply by 3
     add b
     add b
-
+    
     ld hl, PaletteCombinations
     ld b, 0
     ld c, a
     add hl, bc
+    ret
+
+LoadPalettesFromIndex: ; a = index of combination
+    call GetPaletteCombo
 
     ; Obj Palettes
     ld e, 0
@@ -1100,20 +1107,10 @@ ChangeAnimationPalette:
     push hl
     push bc
     push de
-    ld hl, KeyCombinationPalettes - 1 ; Input palettes are 1-based, 0 means nothing down
-    ld c, a
-    ld b, 0
-    add hl, bc
-    ld a, [hl]
-    ld b, a
-    ; Multiply by 3
-    add b
-    add b
-
-    ld hl, PaletteCombinations + 2; Background Palette
-    ld b, 0
-    ld c, a
-    add hl, bc
+    call GetKeyComboPalette
+    call GetPaletteCombo
+    inc l
+    inc l
     ld a, [hl]
     ld hl, Palettes + 1
     ld b, 0
@@ -1164,7 +1161,7 @@ ChangeAnimationPalette:
     ld hl, BgPalettes
     call LoadBGPalettes64
     ; Delay the wait loop while the user is selecting a palette
-    ld a, 30
+    ld a, 45
     ldh [WaitLoopCounter], a
     pop de
     pop bc
