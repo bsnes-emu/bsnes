@@ -16,6 +16,15 @@ Start:
     xor a
     call ClearMemoryPage
     ld [c], a
+    
+    ld hl, $FF30
+; Init waveform
+    ld c, $10
+.waveformLoop
+    ldi [hl], a
+    cpl
+    dec c
+    jr nz, .waveformLoop
 
 ; Clear chosen input palette
     ldh [InputPalette], a
@@ -40,8 +49,6 @@ Start:
     ld a, $77
     ldh [$24], a
     
-    call InitWaveform
-
 ; Init BG palette
     ld a, $fc
     ldh [$47], a
@@ -776,25 +783,68 @@ IF !DEF(FAST)
     ld hl, BgPalettes
 .frameLoop
     push bc
-    call BrightenColor
+    
+    ; Brighten Color
+    ld a, [hli]
+    ld e, a
+    ld a, [hld]
+    ld d, a
+    ; RGB(1,1,1)
+    ld bc, $421
+
+   ; Is blue maxed?
+    ld a, e
+    and $1F
+    cp $1F
+    jr nz, .blueNotMaxed
+    dec c
+.blueNotMaxed
+
+    ; Is green maxed?
+    ld a, e
+    cp $E0
+    jr c, .greenNotMaxed
+    ld a, d
+    and $3
+    cp $3
+    jr nz, .greenNotMaxed
+    res 5, c
+.greenNotMaxed
+
+    ; Is red maxed?
+    ld a, d
+    and $7C
+    cp $7C
+    jr nz, .redNotMaxed
+    res 2, b
+.redNotMaxed
+
+    ; add de, bc
+    ; ld [hli], de
+    ld a, e
+    add c
+    ld [hli], a
+    ld a, d
+    adc b
+    ld [hli], a
     pop bc
+    
     dec c
     jr nz, .frameLoop
 
     call WaitFrame
-    call WaitFrame
     ld hl, BgPalettes
     call LoadBGPalettes64
+    call WaitFrame
     dec b
     jr nz, .fadeLoop
 ENDC
+    ld a, 1
     call ClearVRAMViaHDMA
-    ; Select the first bank
-    xor a
-    ldh [$4F], a
-    cpl
+    call _ClearVRAMViaHDMA
+    call ClearVRAMViaHDMA ; A = $40, so it's bank 0
+    ; A should be $FF
     ldh [$00], a
-    call ClearVRAMViaHDMA
     
     ; Final values for CGB mode
     ld de, $ff56
@@ -993,69 +1043,23 @@ LoadPalettes:
     jr nz, .loop
     ret
 
-BrightenColor:
-    ld a, [hli]
-    ld e, a
-    ld a, [hld]
-    ld d, a
-    ; RGB(1,1,1)
-    ld bc, $421
-
-    ; Is blue maxed?
-    ld a, e
-    and $1F
-    cp $1F
-    jr nz, .blueNotMaxed
-    dec c
-.blueNotMaxed
-
-    ; Is green maxed?
-    ld a, e
-    cp $E0
-    jr c, .greenNotMaxed
-    ld a, d
-    and $3
-    cp $3
-    jr nz, .greenNotMaxed
-    res 5, c
-.greenNotMaxed
-
-    ; Is red maxed?
-    ld a, d
-    and $7C
-    cp $7C
-    jr nz, .redNotMaxed
-    res 2, b
-.redNotMaxed
-
-    ; add de, bc
-    ; ld [hli], de
-    ld a, e
-    add c
-    ld [hli], a
-    ld a, d
-    adc b
-    ld [hli], a
-    ret
-
 ClearVRAMViaHDMA:
-    ld hl, $FF51
-
-    ; Src
-    ld a, $88
-    ld [hli], a
-    xor a
-    ld [hli], a
-
-    ; Dest
-    ld a, $98
-    ld [hli], a
-    ld a, $A0
-    ld [hli], a
-
-    ; Do it
-    ld [hl], $12
+    ldh [$4F], a
+    ld hl, HDMAData
+_ClearVRAMViaHDMA:
+    ld c, $51
+    ld b, 5
+.loop
+    ld a, [hli]
+    ldh [c], a
+    inc c
+    dec b
+    jr nz, .loop
     ret
+
+HDMAData:
+    db $88, $00, $98, $A0, $12
+    db $88, $00, $80, $00, $40
 
 GetInputPaletteIndex:
     ld a, $20 ; Select directions
@@ -1196,17 +1200,6 @@ LoadDMGTilemap:
     pop af
     ret
 
-InitWaveform:
-    ld hl, $FF30
-; Init waveform
-    xor a
-    ld c, $10
-.waveformLoop
-    ldi [hl], a
-    cpl
-    dec c
-    jr nz, .waveformLoop
-    ret
 
 SECTION "ROMMax", ROM0[$900]
     ; Prevent us from overflowing
