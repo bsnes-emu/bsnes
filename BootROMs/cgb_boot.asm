@@ -858,8 +858,7 @@ ENDC
     call ClearVRAMViaHDMA
     call _ClearVRAMViaHDMA
     call ClearVRAMViaHDMA ; A = $40, so it's bank 0
-    cpl
-    ; A should be $FF
+    ld a, $ff
     ldh [$00], a
     
     ; Final values for CGB mode
