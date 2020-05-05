@@ -10,35 +10,16 @@ Start:
     ld a, 2
     ld c, $70
     ld [c], a
-; Clear RAM Bank 2 (Like the original boot ROM
+; Clear RAM Bank 2 (Like the original boot ROM)
     ld h, $D0
-    xor a
     call ClearMemoryPage
     ld [c], a
     
-    ld hl, $FF30
-; Init waveform
-    ld c, $10
-.waveformLoop
-    ldi [hl], a
-    cpl
-    dec c
-    jr nz, .waveformLoop
-
 ; Clear chosen input palette
     ldh [InputPalette], a
 ; Clear title checksum
     ldh [TitleChecksum], a
-
-; Clear OAM
-    ld h, $fe
-    ld c, $a0
-.clearOAMLoop
-    ldi [hl], a
-    dec c
-    jr nz, .clearOAMLoop
-
-; Init Audio
+        
     ld a, $80
     ldh [$26], a
     ldh [$11], a
@@ -47,6 +28,23 @@ Start:
     ldh [$25], a
     ld a, $77
     ldh [$24], a
+    ld hl, $FF30
+; Init waveform
+    ld c, $10
+.waveformLoop
+    ldi [hl], a
+    cpl
+    dec c
+    jr nz, .waveformLoop
+        
+
+; Clear OAM
+    ld h, $fe
+    ld c, $a0
+.clearOAMLoop
+    ldi [hl], a
+    dec c
+    jr nz, .clearOAMLoop
     
 ; Init BG palette
     ld a, $fc
@@ -142,25 +140,44 @@ ENDC
 
     ; Expand Palettes
     ld de, AnimationColors
-    ld c, 16
+    ld c, 8
     ld hl, BgPalettes
     xor a
 .expandPalettesLoop:
     cpl
-    ; One white or black
-    ldi [hl], a
-    ldi [hl], a
+    ; One white
+    ld [hli], a
+    ld [hli], a
+    
+    ; Mixed with white
+    ld a, [de]
+    inc e
+    or $20
+    ld b, a
+    
+    ld a, [de]
+    dec e
+    or $84
+    rra
+    rr b
+    ld [hl], b
+    inc l
+    ld [hli], a
+    
+    ; One black
+    xor a
+    ld [hli], a
+    ld [hli], a
     
     ; One color
-    push af
     ld a, [de]
-    inc de
-    ldi [hl], a
+    inc e
+    ld [hli], a
     ld a, [de]
-    inc de
-    ldi [hl], a
-    pop af
-
+    inc e
+    ld [hli], a    
+    
+    xor a
     dec c
     jr nz, .expandPalettesLoop
 
@@ -200,6 +217,9 @@ ELSE
     call PlaySound
 ENDC
     call Preboot
+IF DEF(AGB)
+    ld b, 1
+ENDC
 
 ; Will be filled with NOPs
 
@@ -208,7 +228,6 @@ BootGame:
     ldh [$50], a
 
 SECTION "MoreStuff", ROM0[$200]
-
 ; Game Palettes Data
 TitleChecksums:
     db $00 ; Default
@@ -512,43 +531,40 @@ Palettes:
     dw $4778, $3290, $1D87, $0861 ; DMG LCD
 
 KeyCombinationPalettes
-    db 1 ; Right
-    db 48 ; Left
-    db 5 ; Up
-    db 8 ; Down
-    db 0 ; Right + A
-    db 40 ; Left + A
-    db 43 ; Up + A
-    db 3 ; Down + A
-    db 6 ; Right + B
-    db 7 ; Left + B
-    db 28 ; Up + B
-    db 49 ; Down + B
+    db 1  * 3  ; Right
+    db 48 * 3  ; Left
+    db 5  * 3  ; Up
+    db 8  * 3  ; Down
+    db 0  * 3  ; Right + A
+    db 40 * 3  ; Left + A
+    db 43 * 3  ; Up + A
+    db 3  * 3  ; Down + A
+    db 6  * 3  ; Right + B
+    db 7  * 3  ; Left + B
+    db 28 * 3  ; Up + B
+    db 49 * 3  ; Down + B
     ; SameBoy "Exclusives"
-    db 51 ; Right + A + B
-    db 52 ; Left + A + B
-    db 53 ; Up + A + B
-    db 54 ; Down + A + B
-
+    db 51 * 3 ; Right + A + B
+    db 52 * 3 ; Left + A + B
+    db 53 * 3 ; Up + A + B
+    db 54 * 3 ; Down + A + B
+    
 TrademarkSymbol:
     db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
 SameBoyLogo:
     incbin "SameBoyLogo.pb12"
 
-animation_color: MACRO
-    dw ((\1) >> 1) | $4210, (\1)
-ENDM
 
 AnimationColors:
-    animation_color $7FFF, ($7FFF >> 1) ; White
-    animation_color $774F, ($774F >> 1) ; Cyan
-    animation_color $22C7, ($22C7 >> 1) ; Green
-    animation_color $039F, ($039F >> 1) ; Yellow
-    animation_color $017D, ($017D >> 1) ; Orange
-    animation_color $241D, ($241D >> 1) ; Red
-    animation_color $6D38, ($6D38 >> 1) ; Purple
-    animation_color $7102, ($7102 >> 1) ; Blue
+    dw $7FFF ; White
+    dw $774F ; Cyan
+    dw $22C7 ; Green
+    dw $039F ; Yellow
+    dw $017D ; Orange
+    dw $241D ; Red
+    dw $6D38 ; Purple
+    dw $7102 ; Blue
 AnimationColorsEnd:
 
 ; Helper Functions
@@ -842,11 +858,13 @@ ENDC
     call ClearVRAMViaHDMA
     call _ClearVRAMViaHDMA
     call ClearVRAMViaHDMA ; A = $40, so it's bank 0
+    cpl
     ; A should be $FF
     ldh [$00], a
     
     ; Final values for CGB mode
-    ld de, $ff56
+    ld d, a
+    ld e, c
     ld l, $0d
     
     ld a, [$143]
@@ -870,7 +888,7 @@ IF DEF(AGB)
     ld c, a
     add a, $11
     ld h, c
-    ld b, 1
+    ; B is set to 1 after ret
 ELSE
     ; Set registers to match the original CGB boot
     ; AF = $1180, C = 0
@@ -990,11 +1008,6 @@ GetPaletteIndex:
     ret
     
 GetPaletteCombo:
-    ld b, a
-    ; Multiply by 3
-    add b
-    add b
-    
     ld hl, PaletteCombinations
     ld b, 0
     ld c, a
@@ -1064,10 +1077,6 @@ _ClearVRAMViaHDMA:
     jr nz, .loop
     ret
 
-HDMAData:
-    db $88, $00, $98, $A0, $12
-    db $88, $00, $80, $00, $40
-
 GetInputPaletteIndex:
     ld a, $20 ; Select directions
     ldh [$00], a
@@ -1104,7 +1113,6 @@ GetInputPaletteIndex:
     ; Slide into change Animation Palette
 
 ChangeAnimationPalette:
-    push hl
     push bc
     push de
     call GetKeyComboPalette
@@ -1147,15 +1155,36 @@ ChangeAnimationPalette:
     inc hl
     inc hl
 .isNotWhite
+    ; Mixing code by ISSOtm
+    ldh a, [BgPalettes + 7 * 8 + 2]
+    and ~$21
+    ld b, a
+    ld a, [hli]
+    and ~$21
+    add a, b
+    ld b, a
+    ld a, [BgPalettes + 7 * 8 + 3]
+    res 2, a ; and ~$04, but not touching carry
+    ld c, [hl]
+    res 2, c ; and ~$04, but not touching carry
+    adc a, c
+    rra ; Carry sort of "extends" the accumulator, we're bringing that bit back home
+    ld [BgPalettes + 7 * 8 + 3], a
+    ld a, b
+    rra
+    ld [BgPalettes + 7 * 8 + 2], a
+    dec l
+    
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 6], a ; Fourth color, 7th palette
-    ldh [BgPalettes + 7 * 8 + 2], a ; Second color, half, 7th palette; rough color mixing
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 7], a ; Fourth color, 7th palette
+    
     ld a, [hli]
     ldh [BgPalettes + 4], a ; Third color, first palette
-    ld a, [hl]
+    ld a, [hli]
     ldh [BgPalettes + 5], a ; Third color, first palette
+
 
     call WaitFrame
     ld hl, BgPalettes
@@ -1165,7 +1194,6 @@ ChangeAnimationPalette:
     ldh [WaitLoopCounter], a
     pop de
     pop bc
-    pop hl
     ret
 
 ReplaceColorInAllPalettes:
@@ -1181,7 +1209,7 @@ ReplaceColorInAllPalettes:
 LoadDMGTilemap:
     push af
     call WaitFrame
-    ld a,$19      ; Trademark symbol
+    ld a, $19      ; Trademark symbol
     ld [$9910], a ; ... put in the superscript position
     ld hl,$992f   ; Bottom right corner of the logo
     ld c,$c       ; Tiles in a logo row
@@ -1191,16 +1219,20 @@ LoadDMGTilemap:
     ldd [hl], a
     dec c
     jr nz, .tilemapLoop
-    ld l,$0f ; Jump to top row
+    ld l, $0f ; Jump to top row
     jr .tilemapLoop
 .tilemapDone
     pop af
     ret
-
-
-SECTION "ROMMax", ROM0[$900]
-    ; Prevent us from overflowing
-    ds 1
+    
+HDMAData:
+    db $88, $00, $98, $A0, $12
+    db $88, $00, $80, $00, $40
+    
+BootEnd:
+IF BootEnd > $900
+    FAIL "BootROM overflowed: {BootEnd}"
+ENDC
 
 SECTION "HRAM", HRAM[$FF80]
 TitleChecksum:
