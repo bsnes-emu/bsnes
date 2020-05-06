@@ -67,7 +67,7 @@ int main()
                 }
             }
             if (!found) {
-                literals = realloc(literals, literals_size++);
+                literals = realloc(literals, ++literals_size);
                 literals[literals_size - 1] = byte;
             }
         }
