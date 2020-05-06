@@ -20,7 +20,7 @@ else
 EXESUFFIX:=
 endif
 
-PB8_COMPRESS := build/pb8$(EXESUFFIX)
+PB12_COMPRESS := build/pb12$(EXESUFFIX)
 
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
@@ -386,8 +386,11 @@ $(OBJ)/%.2bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
 	rgbgfx -h -u -o $@ $<
 
-$(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp BootROMs/pb12.py
-	python3 BootROMs/pb12.py $< $@
+$(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
+	$(PB12_COMPRESS) < $< > $@
+	
+$(PB12_COMPRESS): BootROMs/pb12.c
+	$(CC) -Wall -Werror $< -o $@
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
