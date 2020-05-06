@@ -20,7 +20,7 @@ else
 EXESUFFIX:=
 endif
 
-PB8_COMPRESS := build/pb8$(EXESUFFIX)
+PB12_COMPRESS := build/pb12$(EXESUFFIX)
 
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
@@ -382,21 +382,21 @@ $(BIN)/SDL/Shaders: Shaders
 
 # Boot ROMs
 
-$(OBJ)/%.1bpp: %.png
+$(OBJ)/%.2bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
-	rgbgfx -d 1 -h -o $@ $<
+	rgbgfx -h -u -o $@ $<
 
-$(OBJ)/BootROMs/SameBoyLogo.pb8: $(OBJ)/BootROMs/SameBoyLogo.1bpp $(PB8_COMPRESS)
-	$(realpath $(PB8_COMPRESS)) -l 384 $< $@
-
-$(PB8_COMPRESS): BootROMs/pb8.c
-	$(CC) $< -o $@
+$(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
+	$(PB12_COMPRESS) < $< > $@
+	
+$(PB12_COMPRESS): BootROMs/pb12.c
+	$(CC) -Wall -Werror $< -o $@
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
 
-$(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb8
+$(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 	-@$(MKDIR) -p $(dir $@)
 	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
 	rgblink -o $@.tmp2 $@.tmp
