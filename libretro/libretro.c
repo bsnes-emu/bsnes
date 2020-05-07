@@ -142,6 +142,8 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 
 static void rumble_callback(GB_gameboy_t *gb, double amplitude)
 {
+    if (!rumble.set_rumble_state) return;
+    
     if (gb == &gameboy[0]) {
         rumble.set_rumble_state(0, RETRO_RUMBLE_STRONG, 65535 * amplitude);
     }
