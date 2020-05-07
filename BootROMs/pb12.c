@@ -23,7 +23,7 @@ int main()
         size--;
     }
     
-    uint8_t *literals = NULL;
+    uint8_t literals[8];
     size_t literals_size = 0;
     unsigned bits = 0;
     unsigned control = 0;
@@ -67,8 +67,7 @@ int main()
                 }
             }
             if (!found) {
-                literals = realloc(literals, ++literals_size);
-                literals[literals_size - 1] = byte;
+                literals[literals_size++] = byte;
             }
         }
         
@@ -87,9 +86,5 @@ int main()
     uint8_t end_byte = 1;
     write(STDOUT_FILENO, &end_byte, 1);
 
-    if (literals) {
-        free(literals);
-    }
-    
     return 0;
 }
