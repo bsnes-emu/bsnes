@@ -28,8 +28,6 @@ GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const c
 {
     size_t index = GB_map_find_symbol_index(map, addr);
 
-    if (index < map->n_symbols && map->symbols[index].addr == addr) return NULL;
-
     map->symbols = realloc(map->symbols, (map->n_symbols + 1) * sizeof(map->symbols[0]));
     memmove(&map->symbols[index + 1], &map->symbols[index], (map->n_symbols - index) * sizeof(map->symbols[0]));
     map->symbols[index].addr = addr;
