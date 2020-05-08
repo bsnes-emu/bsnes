@@ -14,12 +14,12 @@ Start:
     ld h, $D0
     call ClearMemoryPage
     ld [c], a
-    
+
 ; Clear chosen input palette
     ldh [InputPalette], a
 ; Clear title checksum
     ldh [TitleChecksum], a
-        
+
     ld a, $80
     ldh [$26], a
     ldh [$11], a
@@ -36,7 +36,7 @@ Start:
     cpl
     dec c
     jr nz, .waveformLoop
-        
+
 
 ; Clear OAM
     ld h, $fe
@@ -45,7 +45,7 @@ Start:
     ldi [hl], a
     dec c
     jr nz, .clearOAMLoop
-    
+
 ; Init BG palette
     ld a, $fc
     ldh [$47], a
@@ -148,13 +148,13 @@ ENDC
     ; One white
     ld [hli], a
     ld [hli], a
-    
+
     ; Mixed with white
     ld a, [de]
     inc e
     or $20
     ld b, a
-    
+
     ld a, [de]
     dec e
     or $84
@@ -163,26 +163,25 @@ ENDC
     ld [hl], b
     inc l
     ld [hli], a
-    
+
     ; One black
     xor a
     ld [hli], a
     ld [hli], a
-    
+
     ; One color
     ld a, [de]
     inc e
     ld [hli], a
     ld a, [de]
     inc e
-    ld [hli], a    
-    
+    ld [hli], a
+
     xor a
     dec c
     jr nz, .expandPalettesLoop
 
-    ld hl, BgPalettes
-    call LoadBGPalettes64
+    call LoadPalettesFromHRAM
 
     ; Turn on LCD
     ld a, $91
@@ -205,7 +204,7 @@ IF !DEF(FAST)
     ; Play second sound
     ld a, $c1
     call PlaySound
-    
+
 .waitLoop
     call GetInputPaletteIndex
     call WaitFrame
@@ -530,7 +529,7 @@ Palettes:
     dw $7FFF, $7FEA, $7D5F, $0000 ; CGA 1
     dw $4778, $3290, $1D87, $0861 ; DMG LCD
 
-KeyCombinationPalettes
+KeyCombinationPalettes:
     db 1  * 3  ; Right
     db 48 * 3  ; Left
     db 5  * 3  ; Up
@@ -548,7 +547,7 @@ KeyCombinationPalettes
     db 52 * 3 ; Left + A + B
     db 53 * 3 ; Up + A + B
     db 54 * 3 ; Down + A + B
-    
+
 TrademarkSymbol:
     db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
@@ -795,10 +794,9 @@ IF !DEF(FAST)
 .fadeLoop
     ld c, 32 ; 32 colors to fade
     ld hl, BgPalettes
-    push hl
 .frameLoop
     push bc
-    
+
     ; Brighten Color
     ld a, [hli]
     ld e, a
@@ -843,13 +841,12 @@ IF !DEF(FAST)
     adc b
     ld [hli], a
     pop bc
-    
+
     dec c
     jr nz, .frameLoop
 
     call WaitFrame
-    pop hl
-    call LoadBGPalettes64
+    call LoadPalettesFromHRAM
     call WaitFrame
     dec b
     jr nz, .fadeLoop
@@ -860,21 +857,21 @@ ENDC
     call ClearVRAMViaHDMA ; A = $40, so it's bank 0
     ld a, $ff
     ldh [$00], a
-    
+
     ; Final values for CGB mode
     ld d, a
     ld e, c
     ld l, $0d
-    
+
     ld a, [$143]
     bit 7, a
     call z, EmulateDMG
     bit 7, a
-    
+
     ldh [$4C], a
     ldh a, [TitleChecksum]
     ld b, a
-    
+
     jr z, .skipDMGForCGBCheck
     ldh a, [InputPalette]
     and a
@@ -904,10 +901,10 @@ ENDC
     ldh [$4C], a
     ld a, $1
     ret
-    
+
 GetKeyComboPalette:
     ld hl, KeyCombinationPalettes - 1 ; Return value is 1-based, 0 means nothing down
-    ld c ,a
+    ld c, a
     ld b, 0
     add hl, bc
     ld a, [hl]
@@ -1005,7 +1002,8 @@ GetPaletteIndex:
 .notNintendo
     xor a
     ret
-    
+
+; optimizations in callers rely on this returning with b = 0
 GetPaletteCombo:
     ld hl, PaletteCombinations
     ld b, 0
@@ -1022,7 +1020,7 @@ LoadPalettesFromIndex: ; a = index of combination
     ld a, [hli]
     push hl
     ld hl, Palettes
-    ld b, 0
+    ; b is already 0
     ld c, a
     add hl, bc
     ld d, 8
@@ -1035,15 +1033,15 @@ LoadPalettesFromIndex: ; a = index of combination
     jr .loadObjPalette
 .loadBGPalette
     ;BG Palette
-    ld a, [hli]
+    ld c, [hl]
+    ; b is already 0
     ld hl, Palettes
-    ld b, 0
-    ld c, a
     add hl, bc
     ld d, 8
     jr LoadBGPalettes
 
-LoadBGPalettes64:
+LoadPalettesFromHRAM:
+    ld hl, BgPalettes
     ld d, 64
 
 LoadBGPalettes:
@@ -1076,6 +1074,7 @@ _ClearVRAMViaHDMA:
     jr nz, .loop
     ret
 
+; clobbers AF and HL
 GetInputPaletteIndex:
     ld a, $20 ; Select directions
     ldh [$00], a
@@ -1083,11 +1082,10 @@ GetInputPaletteIndex:
     cpl
     and $F
     ret z ; No direction keys pressed, no palette
-    push bc
-    ld c, 0
 
+    ld l, 0
 .directionLoop
-    inc c
+    inc l
     rra
     jr nc, .directionLoop
 
@@ -1100,15 +1098,13 @@ GetInputPaletteIndex:
     rla
     rla
     and $C
-    add c
-    ld b, a
+    add l
+    ld l, a
     ldh a, [InputPalette]
-    ld c, a
-    ld a, b
-    ldh [InputPalette], a
-    cp c
-    pop bc
+    cp l
     ret z ; No change, don't load
+    ld a, l
+    ldh [InputPalette], a
     ; Slide into change Animation Palette
 
 ChangeAnimationPalette:
@@ -1118,10 +1114,8 @@ ChangeAnimationPalette:
     call GetPaletteCombo
     inc l
     inc l
-    ld a, [hl]
+    ld c, [hl]
     ld hl, Palettes + 1
-    ld b, 0
-    ld c, a
     add hl, bc
     ld a, [hld]
     cp $7F ; Is white color?
@@ -1131,7 +1125,7 @@ ChangeAnimationPalette:
 .isWhite
     push af
     ld a, [hli]
-    
+
     push hl
     ld hl, BgPalettes ; First color, all palettes
     call ReplaceColorInAllPalettes
@@ -1148,7 +1142,7 @@ ChangeAnimationPalette:
     call ReplaceColorInAllPalettes
     pop hl
     ldh [BgPalettes + 7], a ; Fourth color, first palette
-    
+
     pop af
     jr z, .isNotWhite
     inc hl
@@ -1173,12 +1167,12 @@ ChangeAnimationPalette:
     rra
     ld [BgPalettes + 7 * 8 + 2], a
     dec l
-    
+
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 6], a ; Fourth color, 7th palette
     ld a, [hli]
     ldh [BgPalettes + 7 * 8 + 7], a ; Fourth color, 7th palette
-    
+
     ld a, [hli]
     ldh [BgPalettes + 4], a ; Third color, first palette
     ld a, [hli]
@@ -1186,8 +1180,7 @@ ChangeAnimationPalette:
 
 
     call WaitFrame
-    ld hl, BgPalettes
-    call LoadBGPalettes64
+    call LoadPalettesFromHRAM
     ; Delay the wait loop while the user is selecting a palette
     ld a, 45
     ldh [WaitLoopCounter], a
@@ -1223,11 +1216,11 @@ LoadDMGTilemap:
 .tilemapDone
     pop af
     ret
-    
+
 HDMAData:
     db $88, $00, $98, $A0, $12
     db $88, $00, $80, $00, $40
-    
+
 BootEnd:
 IF BootEnd > $900
     FAIL "BootROM overflowed: {BootEnd}"
