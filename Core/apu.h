@@ -119,6 +119,7 @@ typedef struct
 #define GB_SKIP_DIV_EVENT_SKIP 2
     uint8_t skip_div_event;
     bool current_lfsr_sample;
+    uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
 } GB_apu_t;
 
 typedef enum {

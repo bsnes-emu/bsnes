@@ -214,7 +214,8 @@ static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
 }
 
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
-{   
+{
+    gb->apu.pcm_mask[0] = gb->apu.pcm_mask[1] = 0xFF; // Sort of hacky, but too many cross-component interactions to do it right
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
