@@ -25,6 +25,10 @@
 static SDL_AudioDeviceID device_id;
 static SDL_AudioSpec want_aspec, have_aspec;
 
+#define AUDIO_BUFFER_SIZE 512
+static unsigned buffer_pos = 0;
+static GB_sample_t audio_buffer[AUDIO_BUFFER_SIZE];
+
 bool GB_audio_is_playing(void)
 {
     return SDL_GetAudioDeviceStatus(device_id) == SDL_AUDIO_PLAYING;
@@ -53,7 +57,12 @@ size_t GB_audio_get_queue_length(void)
 
 void GB_audio_queue_sample(GB_sample_t *sample)
 {
-    SDL_QueueAudio(device_id, sample, sizeof(*sample));
+    audio_buffer[buffer_pos++] = *sample;
+
+    if (buffer_pos == AUDIO_BUFFER_SIZE) {
+        buffer_pos = 0;
+        SDL_QueueAudio(device_id, (const void *)audio_buffer, sizeof(audio_buffer));
+    }
 }
 
 void GB_audio_init(void)
