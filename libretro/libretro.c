@@ -346,14 +346,14 @@ static void set_link_cable_state(bool state)
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
 {
     const char *model_name = (char *[]){
-        [GB_BOOT_ROM_DMG0] = "dmg0_boot",
-        [GB_BOOT_ROM_DMG] = "dmg_boot",
-        [GB_BOOT_ROM_MGB] = "mgb_boot",
-        [GB_BOOT_ROM_SGB] = "sgb_boot",
-        [GB_BOOT_ROM_SGB2] = "sgb2_boot",
-        [GB_BOOT_ROM_CGB0] = "cgb0_boot",
-        [GB_BOOT_ROM_CGB] = "cgb_boot",
-        [GB_BOOT_ROM_AGB] = "agb_boot",
+        [GB_BOOT_ROM_DMG0] = "dmg0",
+        [GB_BOOT_ROM_DMG] = "dmg",
+        [GB_BOOT_ROM_MGB] = "mgb",
+        [GB_BOOT_ROM_SGB] = "sgb",
+        [GB_BOOT_ROM_SGB2] = "sgb2",
+        [GB_BOOT_ROM_CGB0] = "cgb0",
+        [GB_BOOT_ROM_CGB] = "cgb",
+        [GB_BOOT_ROM_AGB] = "agb",
     }[type];
     
     const uint8_t *boot_code = (const unsigned char *[])
