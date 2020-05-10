@@ -25,9 +25,9 @@
 static SDL_AudioDeviceID device_id;
 static SDL_AudioSpec want_aspec, have_aspec;
 
-#define BUFFERSIZE 1024
-static int bufferpos = 0;
-static int16_t audiobuffer[BUFFERSIZE];
+#define AUDIO_BUFFER_SIZE 512
+static unsigned buffer_pos = 0;
+static GB_sample_t audio_buffer[AUDIO_BUFFER_SIZE];
 
 bool GB_audio_is_playing(void)
 {
@@ -57,13 +57,11 @@ size_t GB_audio_get_queue_length(void)
 
 void GB_audio_queue_sample(GB_sample_t *sample)
 {
-	audiobuffer[bufferpos++] = sample->left;
-	audiobuffer[bufferpos++] = sample->right;
+    audio_buffer[buffer_pos++] = *sample;
 
-    if (bufferpos == BUFFERSIZE)
-    {
-        bufferpos = 0;
-        SDL_QueueAudio(device_id, (const void*)audiobuffer, BUFFERSIZE * sizeof(int16_t));
+    if (buffer_pos == AUDIO_BUFFER_SIZE) {
+        buffer_pos = 0;
+        SDL_QueueAudio(device_id, (const void *)audio_buffer, sizeof(audio_buffer));
     }
 }
 
@@ -74,7 +72,7 @@ void GB_audio_init(void)
     want_aspec.freq = AUDIO_FREQUENCY;
     want_aspec.format = AUDIO_S16SYS;
     want_aspec.channels = 2;
-    want_aspec.samples = 1024;
+    want_aspec.samples = 512;
     
     SDL_version _sdl_version;
     SDL_GetVersion(&_sdl_version);
