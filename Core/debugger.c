@@ -1439,7 +1439,9 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
         if (cartridge->has_ram) {
             GB_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
-            GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+            if (gb->cartridge_type->mbc_type != GB_HUC1) {
+                GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+            }
         }
         if (cartridge->mbc_type == GB_MBC1 && gb->mbc1_wiring == GB_STANDARD_MBC1_WIRING) {
             GB_log(gb, "MBC1 banking mode is %s\n", gb->mbc1.mode == 1 ? "RAM" : "ROM");

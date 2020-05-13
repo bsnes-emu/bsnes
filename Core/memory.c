@@ -150,6 +150,10 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         gb->cartridge_type->mbc_subtype != GB_CAMERA &&
         gb->cartridge_type->mbc_type != GB_HUC1) return 0xFF;
     
+    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
+        return 0xc0 | gb->cart_ir | gb->infrared_input | (gb->io_registers[GB_IO_RP] & 1);
+    }
+    
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
         gb->rtc_latched.high |= ~0xC1; /* Not all bytes in RTC high are used. */
@@ -379,7 +383,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_RP: {
                 if (!gb->cgb_mode) return 0xFF;
                 /* You will read your own IR LED if it's on. */
-                bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1);
+                bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1) || gb->cart_ir;
                 uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
                 if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && read_value) {
                     ret |= 2;
@@ -493,10 +497,9 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_HUC1:
             switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x0000: case 0x1000: gb->huc1.mode = (value & 0xF) == 0xE; break;
                 case 0x2000: case 0x3000: gb->huc1.bank_low  = value; break;
                 case 0x4000: case 0x5000: gb->huc1.bank_high = value; break;
-                case 0x6000: case 0x7000: gb->huc1.mode      = value; break;
             }
             break;
         case GB_HUC3:
@@ -526,7 +529,16 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
     
-    if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return;
+    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) && gb->cartridge_type->mbc_type != GB_HUC1) return;
+    
+    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
+        if (gb->cart_ir != (value & 1) && gb->infrared_callback) {
+            gb->infrared_callback(gb, value & 1, gb->cycles_since_ir_change);
+            gb->cycles_since_ir_change = 0;
+        }
+        gb->cart_ir = value & 1;
+        return;
+    }
 
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         gb->rtc_latched.data[gb->mbc_ram_bank - 8] = gb->rtc_real.data[gb->mbc_ram_bank - 8] = value;

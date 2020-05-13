@@ -430,6 +430,7 @@ struct GB_gameboy_internal_s {
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
         bool rumble_state;
+        bool cart_ir;
     );
 
 
