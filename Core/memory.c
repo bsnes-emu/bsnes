@@ -568,6 +568,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         }
                         gb->huc3_access_index++;
                         return;
+                    case 2:
                     case 3:
                         if (gb->huc3_access_index < 3) {
                             gb->huc3_minutes &= ~(0xF << (gb->huc3_access_index * 4));
@@ -577,7 +578,9 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                           gb->huc3_days &= ~(0xF << ((gb->huc3_access_index - 3) * 4));
                           gb->huc3_days |= ((value & 0xF) << ((gb->huc3_access_index - 3) * 4));
                         }
-                        gb->huc3_access_index++;
+                        if ((value >> 4) == 3) {
+                            gb->huc3_access_index++;
+                        }
                         return;
                     case 4:
                         gb->huc3_access_index &= 0xF0;
