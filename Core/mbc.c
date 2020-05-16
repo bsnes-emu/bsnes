@@ -37,8 +37,8 @@ const GB_cartridge_t GB_cart_defs[256] = {
     [0xFC] =
     {  GB_MBC5  , GB_CAMERA      , true , true , false, false}, // FCh  POCKET CAMERA
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5 (Todo: Not supported)
-    {  GB_HUC3  , GB_STANDARD_MBC, true , true , false, false}, // FEh  HuC3 (Todo: Mapper support only)
-    {  GB_HUC1  , GB_STANDARD_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY (Todo: No IR bindings)
+    {  GB_HUC3  , GB_STANDARD_MBC, true , true , true,  false}, // FEh  HuC3
+    {  GB_HUC1  , GB_STANDARD_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
 };
 
 void GB_update_mbc_mappings(GB_gameboy_t *gb)

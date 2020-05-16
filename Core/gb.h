@@ -422,8 +422,9 @@ struct GB_gameboy_internal_s {
             } huc1;
 
             struct {
-                uint8_t rom_bank;
-                uint8_t ram_bank;
+                uint8_t rom_bank:7;
+                uint8_t padding:1;
+                uint8_t ram_bank:4;
             } huc3;
         };
         uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
@@ -431,6 +432,13 @@ struct GB_gameboy_internal_s {
         uint8_t camera_registers[0x36];
         bool rumble_state;
         bool cart_ir;
+        
+        // TODO: move to huc3 struct when breaking save compat
+        uint8_t huc3_mode;
+        uint8_t huc3_access_index;
+        uint16_t huc3_minutes, huc3_days;
+        uint8_t huc3_read;
+        uint8_t huc3_access_flags;
     );
 
 

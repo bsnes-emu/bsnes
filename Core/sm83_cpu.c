@@ -917,10 +917,7 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
     assert(gb->pending_cycles == 4);
     gb->pending_cycles = 0;
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
+    GB_advance_cycles(gb, 4);
     
     gb->halted = true;
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */

@@ -560,6 +560,12 @@ typedef struct {
     uint8_t padding5[3];
 } GB_vba_rtc_time_t;
 
+typedef struct __attribute__((packed)) {
+    uint64_t last_rtc_second;
+    uint16_t minutes;
+    uint16_t days;
+} GB_huc3_rtc_time_t;
+
 typedef union {
     struct __attribute__((packed)) {
         GB_rtc_time_t rtc_real;
@@ -582,6 +588,9 @@ int GB_save_battery_size(GB_gameboy_t *gb)
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        return  gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
+    }
     GB_rtc_save_t rtc_save_size;
     return gb->mbc_ram_size + (gb->cartridge_type->has_rtc ? sizeof(rtc_save_size.vba64) : 0);
 }
@@ -595,7 +604,25 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 
     memcpy(buffer, gb->mbc_ram, gb->mbc_ram_size);
 
-    if (gb->cartridge_type->has_rtc) {
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        buffer += gb->mbc_ram_size;
+
+#ifdef GB_BIG_ENDIAN
+        GB_huc3_rtc_time_t rtc_save = {
+            __builtin_bswap64(gb->last_rtc_second),
+            __builtin_bswap16(gb->huc3_minutes),
+            __builtin_bswap16(gb->huc3_days),
+        };
+#else
+        GB_huc3_rtc_time_t rtc_save = {
+            gb->last_rtc_second,
+            gb->huc3_minutes,
+            gb->huc3_days,
+        };
+#endif
+        memcpy(buffer, &rtc_save, sizeof(rtc_save));
+    }
+    else if (gb->cartridge_type->has_rtc) {
         GB_rtc_save_t rtc_save = {{{{0,}},},};
         rtc_save.vba64.rtc_real.seconds = gb->rtc_real.seconds;
         rtc_save.vba64.rtc_real.minutes = gb->rtc_real.minutes;
@@ -633,7 +660,27 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
         fclose(f);
         return EIO;
     }
-    if (gb->cartridge_type->has_rtc) {
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+#ifdef GB_BIG_ENDIAN
+        GB_huc3_rtc_time_t rtc_save = {
+            __builtin_bswap64(gb->last_rtc_second),
+            __builtin_bswap16(gb->huc3_minutes),
+            __builtin_bswap16(gb->huc3_days),
+        };
+#else
+        GB_huc3_rtc_time_t rtc_save = {
+            gb->last_rtc_second,
+            gb->huc3_minutes,
+            gb->huc3_days,
+        };
+#endif
+
+        if (fwrite(&rtc_save, sizeof(rtc_save), 1, f) != 1) {
+            fclose(f);
+            return EIO;
+        }
+    }
+    else if (gb->cartridge_type->has_rtc) {
         GB_rtc_save_t rtc_save = {{{{0,}},},};
         rtc_save.vba64.rtc_real.seconds = gb->rtc_real.seconds;
         rtc_save.vba64.rtc_real.minutes = gb->rtc_real.minutes;
@@ -667,6 +714,28 @@ void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t
     memcpy(gb->mbc_ram, buffer, MIN(gb->mbc_ram_size, size));
     if (size <= gb->mbc_ram_size) {
         goto reset_rtc;
+    }
+    
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        GB_huc3_rtc_time_t rtc_save;
+        if (size - gb->mbc_ram_size < sizeof(rtc_save)) {
+            goto reset_rtc;
+        }
+        memcpy(&rtc_save, buffer + gb->mbc_ram_size, sizeof(rtc_save));
+#ifdef GB_BIG_ENDIAN
+        gb->last_rtc_second = __builtin_bswap64(rtc_save.last_rtc_second);
+        gb->huc3_minutes = __builtin_bswap16(rtc_save.minutes);
+        gb->huc3_days = __builtin_bswap16(rtc_save.days);
+#else
+        gb->last_rtc_second = rtc_save.last_rtc_second;
+        gb->huc3_minutes = rtc_save.minutes;
+        gb->huc3_days = rtc_save.days;
+#endif
+        if (gb->last_rtc_second > time(NULL)) {
+            /* We must reset RTC here, or it will not advance. */
+            goto reset_rtc;
+        }
+        return;
     }
 
     GB_rtc_save_t rtc_save;
@@ -731,6 +800,8 @@ void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
+    gb->huc3_days = 0xFFFF;
+    gb->huc3_minutes = 0xFFF;
 exit:
     return;
 }
@@ -745,6 +816,27 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
 
     if (fread(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
         goto reset_rtc;
+    }
+    
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        GB_huc3_rtc_time_t rtc_save;
+        if (fread(&rtc_save, sizeof(rtc_save), 1, f) != 1) {
+            goto reset_rtc;
+        }
+#ifdef GB_BIG_ENDIAN
+        gb->last_rtc_second = __builtin_bswap64(rtc_save.last_rtc_second);
+        gb->huc3_minutes = __builtin_bswap16(rtc_save.minutes);
+        gb->huc3_days = __builtin_bswap16(rtc_save.days);
+#else
+        gb->last_rtc_second = rtc_save.last_rtc_second;
+        gb->huc3_minutes = rtc_save.minutes;
+        gb->huc3_days = rtc_save.days;
+#endif
+        if (gb->last_rtc_second > time(NULL)) {
+            /* We must reset RTC here, or it will not advance. */
+            goto reset_rtc;
+        }
+        return;
     }
 
     GB_rtc_save_t rtc_save;
@@ -808,6 +900,8 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
+    gb->huc3_days = 0xFFFF;
+    gb->huc3_minutes = 0xFFF;
 exit:
     fclose(f);
     return;

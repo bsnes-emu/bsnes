@@ -279,6 +279,18 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
 
 void GB_rtc_run(GB_gameboy_t *gb)
 {
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        time_t current_time = time(NULL);
+        while (gb->last_rtc_second / 60 < current_time / 60) {
+            gb->last_rtc_second += 60;
+            gb->huc3_minutes++;
+            if (gb->huc3_minutes == 60 * 24) {
+                gb->huc3_days++;
+                gb->huc3_minutes = 0;
+            }
+        }
+        return;
+    }
     if ((gb->rtc_real.high & 0x40) == 0) { /* is timer running? */
         time_t current_time = time(NULL);
         while (gb->last_rtc_second < current_time) {

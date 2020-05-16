@@ -113,6 +113,11 @@ static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
     return bus_for_addr(gb, addr) == bus_for_addr(gb, gb->dma_current_src);
 }
 
+static bool effective_ir_input(GB_gameboy_t *gb)
+{
+    return gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1) || gb->cart_ir;
+}
+
 static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
 {
     if (addr < 0x100 && !gb->boot_rom_finished) {
@@ -146,12 +151,33 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        switch (gb->huc3_mode) {
+            case 0xC: // RTC read
+                if (gb->huc3_access_flags == 0x2) {
+                    return 1;
+                }
+                return gb->huc3_read;
+            case 0xD: // RTC status
+                return 1;
+            case 0xE: // IR mode
+                return effective_ir_input(gb); // TODO: What are the other bits?
+            default:
+                GB_log(gb, "Unsupported HuC-3 mode %x read: %04x\n", gb->huc3_mode, addr);
+                return 1; // TODO: What happens in this case?
+            case 0: // TODO: R/O RAM? (or is it disabled?)
+            case 0xA: // RAM
+                break;
+        }
+    }
+    
     if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) &&
         gb->cartridge_type->mbc_subtype != GB_CAMERA &&
-        gb->cartridge_type->mbc_type != GB_HUC1) return 0xFF;
+        gb->cartridge_type->mbc_type != GB_HUC1 &&
+        gb->cartridge_type->mbc_type != GB_HUC3) return 0xFF;
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
-        return 0xc0 | gb->cart_ir | gb->infrared_input | (gb->io_registers[GB_IO_RP] & 1);
+        return 0xc0 | effective_ir_input(gb);
     }
     
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
@@ -383,9 +409,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_RP: {
                 if (!gb->cgb_mode) return 0xFF;
                 /* You will read your own IR LED if it's on. */
-                bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1) || gb->cart_ir;
                 uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
-                if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && read_value) {
+                if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && effective_ir_input(gb)) {
                     ret |= 2;
                 }
                 return ret;
@@ -504,7 +529,10 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_HUC3:
             switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x0000: case 0x1000:
+                    gb->huc3_mode = value & 0xF;
+                    gb->mbc_ram_enable = gb->huc3_mode == 0xA;
+                    break;
                 case 0x2000: case 0x3000: gb->huc3.rom_bank  = value; break;
                 case 0x4000: case 0x5000: gb->huc3.ram_bank  = value; break;
             }
@@ -524,19 +552,82 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        switch (gb->huc3_mode) {
+            case 0xB: // RTC Write
+                switch (value >> 4) {
+                    case 1:
+                        if (gb->huc3_access_index < 3) {
+                            gb->huc3_read = (gb->huc3_minutes >> (gb->huc3_access_index  * 4)) & 0xF;
+                        }
+                        else if (gb->huc3_access_index < 7) {
+                            gb->huc3_read = (gb->huc3_days >> ((gb->huc3_access_index - 3) * 4)) & 0xF;
+                        }
+                        else {
+                            GB_log(gb, "Attempting to read from unsupported HuC-3 register: %03x\n", gb->huc3_access_index);
+                        }
+                        gb->huc3_access_index++;
+                        return;
+                    case 3:
+                        if (gb->huc3_access_index < 3) {
+                            gb->huc3_minutes &= ~(0xF << (gb->huc3_access_index * 4));
+                            gb->huc3_minutes |= ((value & 0xF) << (gb->huc3_access_index * 4));
+                        }
+                        else if (gb->huc3_access_index < 7)  {
+                          gb->huc3_days &= ~(0xF << ((gb->huc3_access_index - 3) * 4));
+                          gb->huc3_days |= ((value & 0xF) << ((gb->huc3_access_index - 3) * 4));
+                        }
+                        gb->huc3_access_index++;
+                        return;
+                    case 4:
+                        gb->huc3_access_index &= 0xF0;
+                        gb->huc3_access_index |= value & 0xF;
+                        return;
+                    case 5:
+                        gb->huc3_access_index &= 0x0F;
+                        gb->huc3_access_index |= (value & 0xF) << 4;
+                        return;
+                    case 6:
+                        gb->huc3_access_flags = (value & 0xF);
+                        return;
+                        
+                    default:
+                        GB_log(gb, "HuC-3 RTC Write %02x\n", value);
+                        break;
+                }
+
+                return;
+            case 0xD: // RTC status
+                // Not sure what writes here mean, they're always 0xFE
+                return;
+            case 0xE: // IR mode
+                gb->cart_ir = value & 1;
+                return;
+            default:
+                GB_log(gb, "Unsupported HuC-3 mode %x write: [%04x] = %02x\n", gb->huc3_mode, addr, value);
+                return;
+            case 0: // Disabled
+            case 0xA: // RAM
+                break;
+        }
+    }
+    
     if (gb->camera_registers_mapped) {
         GB_camera_write_register(gb, addr, value);
         return;
     }
     
-    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) && gb->cartridge_type->mbc_type != GB_HUC1) return;
+    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size)
+       && gb->cartridge_type->mbc_type != GB_HUC1) return;
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
-        if (gb->cart_ir != (value & 1) && gb->infrared_callback) {
-            gb->infrared_callback(gb, value & 1, gb->cycles_since_ir_change);
+        bool old_input = effective_ir_input(gb);
+        gb->cart_ir = value & 1;
+        bool new_input = effective_ir_input(gb);
+        if (new_input != old_input) {
+            gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
             gb->cycles_since_ir_change = 0;
         }
-        gb->cart_ir = value & 1;
         return;
     }
 
@@ -943,13 +1034,13 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (!GB_is_cgb(gb)) {
                     return;
                 }
-                if ((value & 1) != (gb->io_registers[GB_IO_RP] & 1)) {
-                    if (gb->infrared_callback) {
-                        gb->infrared_callback(gb, value & 1, gb->cycles_since_ir_change);
-                        gb->cycles_since_ir_change = 0;
-                    }
-                }
+                bool old_input = effective_ir_input(gb);
                 gb->io_registers[GB_IO_RP] = value;
+                bool new_input = effective_ir_input(gb);
+                if (new_input != old_input) {
+                    gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                    gb->cycles_since_ir_change = 0;
+                }
                 return;
             }
 
