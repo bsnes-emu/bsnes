@@ -15,6 +15,22 @@ Start:
     call ClearMemoryPage
     ld [c], a
 
+; Clear OAM
+    ld h, $fe
+    ld c, $a0
+.clearOAMLoop
+    ldi [hl], a
+    dec c
+    jr nz, .clearOAMLoop
+
+; Init waveform
+    ld c, $10
+.waveformLoop
+    ldi [hl], a
+    cpl
+    dec c
+    jr nz, .waveformLoop
+
 ; Clear chosen input palette
     ldh [InputPalette], a
 ; Clear title checksum
@@ -29,22 +45,6 @@ Start:
     ld a, $77
     ldh [$24], a
     ld hl, $FF30
-; Init waveform
-    ld c, $10
-.waveformLoop
-    ldi [hl], a
-    cpl
-    dec c
-    jr nz, .waveformLoop
-
-
-; Clear OAM
-    ld h, $fe
-    ld c, $a0
-.clearOAMLoop
-    ldi [hl], a
-    dec c
-    jr nz, .clearOAMLoop
 
 ; Init BG palette
     ld a, $fc
