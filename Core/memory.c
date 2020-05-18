@@ -595,7 +595,6 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         return;
                         
                     default:
-                        GB_log(gb, "HuC-3 RTC Write %02x\n", value);
                         break;
                 }
 
@@ -603,9 +602,18 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case 0xD: // RTC status
                 // Not sure what writes here mean, they're always 0xFE
                 return;
-            case 0xE: // IR mode
+            case 0xE: { // IR mode
+                bool old_input = effective_ir_input(gb);
                 gb->cart_ir = value & 1;
+                bool new_input = effective_ir_input(gb);
+                if (new_input != old_input) {
+                    if (gb->infrared_callback) {
+                        gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                    }
+                    gb->cycles_since_ir_change = 0;
+                }
                 return;
+            }
             default:
                 GB_log(gb, "Unsupported HuC-3 mode %x write: [%04x] = %02x\n", gb->huc3_mode, addr, value);
                 return;
@@ -628,7 +636,9 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         gb->cart_ir = value & 1;
         bool new_input = effective_ir_input(gb);
         if (new_input != old_input) {
-            gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+            if (gb->infrared_callback) {
+                gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+            }
             gb->cycles_since_ir_change = 0;
         }
         return;
@@ -1041,7 +1051,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_RP] = value;
                 bool new_input = effective_ir_input(gb);
                 if (new_input != old_input) {
-                    gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                    if (gb->infrared_callback) {
+                        gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                    }
                     gb->cycles_since_ir_change = 0;
                 }
                 return;
