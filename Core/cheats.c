@@ -133,9 +133,6 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
         uint8_t value;
         uint16_t address;
         if (sscanf(cheat, "%02hhx%02hhx%04hx%c", &bank, &value, &address, &dummy) == 3) {
-            if (address > 0x7FFF) {
-                return false;
-            }
             if (bank >= 0x80) {
                 bank &= 0xF;
             }
@@ -144,7 +141,7 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
         }
     }
     
-    /* GameGnie */
+    /* GameGenie */
     {
         char stripped_cheat[10] = {0,};
         for (unsigned i = 0; i < 9 && *cheat; i++) {
