@@ -178,7 +178,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         return 0xFF;
     }
     
-    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
+    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
         return 0xc0 | effective_ir_input(gb);
     }
     
@@ -525,9 +525,10 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_HUC1:
             switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: gb->huc1.mode = (value & 0xF) == 0xE; break;
+                case 0x0000: case 0x1000: gb->huc1.ir_mode = (value & 0xF) == 0xE; break;
                 case 0x2000: case 0x3000: gb->huc1.bank_low  = value; break;
                 case 0x4000: case 0x5000: gb->huc1.bank_high = value; break;
+                case 0x6000: case 0x7000: gb->huc1.mode      = value; break;
             }
             break;
         case GB_HUC3:
@@ -634,7 +635,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if ((!gb->mbc_ram_enable || !gb->mbc_ram_size)
        && gb->cartridge_type->mbc_type != GB_HUC1) return;
     
-    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
+    if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
         bool old_input = effective_ir_input(gb);
         gb->cart_ir = value & 1;
         bool new_input = effective_ir_input(gb);
