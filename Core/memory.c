@@ -174,13 +174,16 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) &&
         gb->cartridge_type->mbc_subtype != GB_CAMERA &&
         gb->cartridge_type->mbc_type != GB_HUC1 &&
-        gb->cartridge_type->mbc_type != GB_HUC3) return 0xFF;
+        gb->cartridge_type->mbc_type != GB_HUC3) {
+        return 0xFF;
+    }
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.mode) {
         return 0xc0 | effective_ir_input(gb);
     }
     
-    if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
+    if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
+        gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
         gb->rtc_latched.high |= ~0xC1; /* Not all bytes in RTC high are used. */
         return gb->rtc_latched.data[gb->mbc_ram_bank - 8];
