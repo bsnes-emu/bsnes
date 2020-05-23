@@ -438,6 +438,8 @@ struct GB_gameboy_internal_s {
         uint8_t huc3_mode;
         uint8_t huc3_access_index;
         uint16_t huc3_minutes, huc3_days;
+        uint16_t huc3_alarm_minutes, huc3_alarm_days;
+        bool huc3_alarm_enabled;
         uint8_t huc3_read;
         uint8_t huc3_access_flags;
     );
@@ -778,6 +780,9 @@ bool GB_serial_get_data_bit(GB_gameboy_t *gb);
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
+    
+/* For cartridges with an alarm clock */
+unsigned GB_time_to_alarm(GB_gameboy_t *gb); // 0 if no alarm
     
 /* For integration with SFC/SNES emulators */
 void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback);

@@ -50,6 +50,8 @@
         JOYAxes2DEmulateButtonsKey: @YES,
         JOYHatsEmulateButtonsKey: @YES,
     }];
+    
+    [NSUserNotificationCenter defaultUserNotificationCenter].delegate = self;
 }
 
 - (IBAction)toggleDeveloperMode:(id)sender
@@ -101,4 +103,8 @@
     return YES;
 }
 
+- (void)userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification
+{
+    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:notification.identifier display:YES];
+}
 @end

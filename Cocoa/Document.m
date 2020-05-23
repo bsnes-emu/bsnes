@@ -358,6 +358,23 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
+    
+    /* Clear pending alarms, don't play alarms while playing*/
+     NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
+    for (NSUserNotification *notification in [center scheduledNotifications]) {
+        if ([notification.identifier isEqualToString:self.fileName]) {
+            [center removeScheduledNotification:notification];
+            break;
+        }
+    }
+    
+    for (NSUserNotification *notification in [center deliveredNotifications]) {
+        if ([notification.identifier isEqualToString:self.fileName]) {
+            [center removeDeliveredNotification:notification];
+            break;
+        }
+    }
+    
     while (running) {
         if (rewind) {
             rewind = false;
@@ -381,6 +398,22 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     GB_save_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
+    unsigned time_to_alarm = GB_time_to_alarm(&gb);
+    
+    if (time_to_alarm) {
+        NSUserNotification *notification = [[NSUserNotification alloc] init];
+        NSString *friendlyName = [[self.fileName lastPathComponent] stringByDeletingPathExtension];
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
+        friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
+        friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+
+        notification.title = [NSString stringWithFormat:@"%@ Played an Alarm", friendlyName];
+        notification.informativeText = [NSString stringWithFormat:@"%@ requested your attention by playing a scheduled alarm", friendlyName];
+        notification.identifier = self.fileName;
+        notification.deliveryDate = [NSDate dateWithTimeIntervalSinceNow:time_to_alarm];
+        notification.soundName = NSUserNotificationDefaultSoundName;
+        [center scheduleNotification:notification];
+    }
     [_view setRumble:0];
     stopping = false;
 }

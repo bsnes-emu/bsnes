@@ -564,6 +564,8 @@ typedef struct __attribute__((packed)) {
     uint64_t last_rtc_second;
     uint16_t minutes;
     uint16_t days;
+    uint16_t alarm_minutes, alarm_days;
+    uint8_t alarm_enabled;
 } GB_huc3_rtc_time_t;
 
 typedef union {
@@ -612,12 +614,18 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
             __builtin_bswap64(gb->last_rtc_second),
             __builtin_bswap16(gb->huc3_minutes),
             __builtin_bswap16(gb->huc3_days),
+            __builtin_bswap16(gb->huc3_alarm_minutes),
+            __builtin_bswap16(gb->huc3_alarm_days),
+            gb->huc3_alarm_enabled,
         };
 #else
         GB_huc3_rtc_time_t rtc_save = {
             gb->last_rtc_second,
             gb->huc3_minutes,
             gb->huc3_days,
+            gb->huc3_alarm_minutes,
+            gb->huc3_alarm_days,
+            gb->huc3_alarm_enabled,
         };
 #endif
         memcpy(buffer, &rtc_save, sizeof(rtc_save));
@@ -666,12 +674,18 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
             __builtin_bswap64(gb->last_rtc_second),
             __builtin_bswap16(gb->huc3_minutes),
             __builtin_bswap16(gb->huc3_days),
+            __builtin_bswap16(gb->huc3_alarm_minutes),
+            __builtin_bswap16(gb->huc3_alarm_days),
+            gb->huc3_alarm_enabled,
         };
 #else
         GB_huc3_rtc_time_t rtc_save = {
             gb->last_rtc_second,
             gb->huc3_minutes,
             gb->huc3_days,
+            gb->huc3_alarm_minutes,
+            gb->huc3_alarm_days,
+            gb->huc3_alarm_enabled,
         };
 #endif
 
@@ -726,10 +740,16 @@ void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t
         gb->last_rtc_second = __builtin_bswap64(rtc_save.last_rtc_second);
         gb->huc3_minutes = __builtin_bswap16(rtc_save.minutes);
         gb->huc3_days = __builtin_bswap16(rtc_save.days);
+        gb->huc3_alarm_minutes = __builtin_bswap16(rtc_save.alarm_minutes);
+        gb->huc3_alarm_days = __builtin_bswap16(rtc_save.alarm_days);
+        gb->huc3_alarm_enabled = rtc_save.alarm_enabled;
 #else
         gb->last_rtc_second = rtc_save.last_rtc_second;
         gb->huc3_minutes = rtc_save.minutes;
         gb->huc3_days = rtc_save.days;
+        gb->huc3_alarm_minutes = rtc_save.alarm_minutes;
+        gb->huc3_alarm_days = rtc_save.alarm_days;
+        gb->huc3_alarm_enabled = rtc_save.alarm_enabled;
 #endif
         if (gb->last_rtc_second > time(NULL)) {
             /* We must reset RTC here, or it will not advance. */
@@ -802,6 +822,7 @@ reset_rtc:
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
     gb->huc3_days = 0xFFFF;
     gb->huc3_minutes = 0xFFF;
+    gb->huc3_alarm_enabled = false;
 exit:
     return;
 }
@@ -827,10 +848,16 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
         gb->last_rtc_second = __builtin_bswap64(rtc_save.last_rtc_second);
         gb->huc3_minutes = __builtin_bswap16(rtc_save.minutes);
         gb->huc3_days = __builtin_bswap16(rtc_save.days);
+        gb->huc3_alarm_minutes = __builtin_bswap16(rtc_save.alarm_minutes);
+        gb->huc3_alarm_days = __builtin_bswap16(rtc_save.alarm_days);
+        gb->huc3_alarm_enabled = rtc_save.alarm_enabled;
 #else
         gb->last_rtc_second = rtc_save.last_rtc_second;
         gb->huc3_minutes = rtc_save.minutes;
         gb->huc3_days = rtc_save.days;
+        gb->huc3_alarm_minutes = rtc_save.alarm_minutes;
+        gb->huc3_alarm_days = rtc_save.alarm_days;
+        gb->huc3_alarm_enabled = rtc_save.alarm_enabled;
 #endif
         if (gb->last_rtc_second > time(NULL)) {
             /* We must reset RTC here, or it will not advance. */
@@ -902,6 +929,7 @@ reset_rtc:
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
     gb->huc3_days = 0xFFFF;
     gb->huc3_minutes = 0xFFF;
+    gb->huc3_alarm_enabled = false;
 exit:
     fclose(f);
     return;
@@ -1567,4 +1595,15 @@ void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t
 {
     gb->boot_rom_load_callback = callback;
     request_boot_rom(gb);
+}
+
+unsigned GB_time_to_alarm(GB_gameboy_t *gb)
+{
+    if (gb->cartridge_type->mbc_type != GB_HUC3) return 0;
+    if (!gb->huc3_alarm_enabled) return 0;
+    if (!(gb->huc3_alarm_days & 0x2000)) return 0;
+    unsigned current_time = (gb->huc3_days & 0x1FFF) * 24 * 60 * 60 + gb->huc3_minutes * 60 + (time(NULL) % 60);
+    unsigned alarm_time = (gb->huc3_alarm_days & 0x1FFF) * 24 * 60 * 60 + gb->huc3_alarm_minutes * 60;
+    if (current_time > alarm_time) return 0;
+    return alarm_time - current_time;
 }

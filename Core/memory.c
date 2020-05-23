@@ -554,77 +554,97 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000] = value;
 }
 
+static bool huc3_write(GB_gameboy_t *gb, uint8_t value)
+{
+    switch (gb->huc3_mode) {
+        case 0xB: // RTC Write
+            switch (value >> 4) {
+                case 1:
+                    if (gb->huc3_access_index < 3) {
+                        gb->huc3_read = (gb->huc3_minutes >> (gb->huc3_access_index  * 4)) & 0xF;
+                    }
+                    else if (gb->huc3_access_index < 7) {
+                        gb->huc3_read = (gb->huc3_days >> ((gb->huc3_access_index - 3) * 4)) & 0xF;
+                    }
+                    else {
+                        // GB_log(gb, "Attempting to read from unsupported HuC-3 register: %03x\n", gb->huc3_access_index);
+                    }
+                    gb->huc3_access_index++;
+                    break;
+                case 2:
+                case 3:
+                    if (gb->huc3_access_index < 3) {
+                        gb->huc3_minutes &= ~(0xF << (gb->huc3_access_index * 4));
+                        gb->huc3_minutes |= ((value & 0xF) << (gb->huc3_access_index * 4));
+                    }
+                    else if (gb->huc3_access_index < 7)  {
+                        gb->huc3_days &= ~(0xF << ((gb->huc3_access_index - 3) * 4));
+                        gb->huc3_days |= ((value & 0xF) << ((gb->huc3_access_index - 3) * 4));
+                    }
+                    else if (gb->huc3_access_index >= 0x58 && gb->huc3_access_index <= 0x5a) {
+                        gb->huc3_alarm_minutes &= ~(0xF << ((gb->huc3_access_index - 0x58) * 4));
+                        gb->huc3_alarm_minutes |= ((value & 0xF) << ((gb->huc3_access_index - 0x58) * 4));
+                    }
+                    else if (gb->huc3_access_index >= 0x5b && gb->huc3_access_index <= 0x5e) {
+                        gb->huc3_alarm_days &= ~(0xF << ((gb->huc3_access_index - 0x5b) * 4));
+                        gb->huc3_alarm_days |= ((value & 0xF) << ((gb->huc3_access_index - 0x5b) * 4));
+                    }
+                    else if (gb->huc3_access_index == 0x5f) {
+                        gb->huc3_alarm_enabled = value & 1;
+                    }
+                    else {
+                        // GB_log(gb, "Attempting to write %x to unsupported HuC-3 register: %03x\n", value & 0xF, gb->huc3_access_index);
+                    }
+                    if ((value >> 4) == 3) {
+                        gb->huc3_access_index++;
+                    }
+                    break;
+                case 4:
+                    gb->huc3_access_index &= 0xF0;
+                    gb->huc3_access_index |= value & 0xF;
+                    break;
+                case 5:
+                    gb->huc3_access_index &= 0x0F;
+                    gb->huc3_access_index |= (value & 0xF) << 4;
+                    break;
+                case 6:
+                    gb->huc3_access_flags = (value & 0xF);
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            return true;
+        case 0xD: // RTC status
+            // Not sure what writes here mean, they're always 0xFE
+            return true;
+        case 0xE: { // IR mode
+            bool old_input = effective_ir_input(gb);
+            gb->cart_ir = value & 1;
+            bool new_input = effective_ir_input(gb);
+            if (new_input != old_input) {
+                if (gb->infrared_callback) {
+                    gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                }
+                gb->cycles_since_ir_change = 0;
+            }
+            return true;
+        }
+        case 0xC:
+            return true;
+        default:
+            return false;
+        case 0: // Disabled
+        case 0xA: // RAM
+            return false;
+    }
+}
+
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
-        switch (gb->huc3_mode) {
-            case 0xB: // RTC Write
-                switch (value >> 4) {
-                    case 1:
-                        if (gb->huc3_access_index < 3) {
-                            gb->huc3_read = (gb->huc3_minutes >> (gb->huc3_access_index  * 4)) & 0xF;
-                        }
-                        else if (gb->huc3_access_index < 7) {
-                            gb->huc3_read = (gb->huc3_days >> ((gb->huc3_access_index - 3) * 4)) & 0xF;
-                        }
-                        else {
-                            GB_log(gb, "Attempting to read from unsupported HuC-3 register: %03x\n", gb->huc3_access_index);
-                        }
-                        gb->huc3_access_index++;
-                        return;
-                    case 2:
-                    case 3:
-                        if (gb->huc3_access_index < 3) {
-                            gb->huc3_minutes &= ~(0xF << (gb->huc3_access_index * 4));
-                            gb->huc3_minutes |= ((value & 0xF) << (gb->huc3_access_index * 4));
-                        }
-                        else if (gb->huc3_access_index < 7)  {
-                          gb->huc3_days &= ~(0xF << ((gb->huc3_access_index - 3) * 4));
-                          gb->huc3_days |= ((value & 0xF) << ((gb->huc3_access_index - 3) * 4));
-                        }
-                        if ((value >> 4) == 3) {
-                            gb->huc3_access_index++;
-                        }
-                        return;
-                    case 4:
-                        gb->huc3_access_index &= 0xF0;
-                        gb->huc3_access_index |= value & 0xF;
-                        return;
-                    case 5:
-                        gb->huc3_access_index &= 0x0F;
-                        gb->huc3_access_index |= (value & 0xF) << 4;
-                        return;
-                    case 6:
-                        gb->huc3_access_flags = (value & 0xF);
-                        return;
-                        
-                    default:
-                        break;
-                }
-
-                return;
-            case 0xD: // RTC status
-                // Not sure what writes here mean, they're always 0xFE
-                return;
-            case 0xE: { // IR mode
-                bool old_input = effective_ir_input(gb);
-                gb->cart_ir = value & 1;
-                bool new_input = effective_ir_input(gb);
-                if (new_input != old_input) {
-                    if (gb->infrared_callback) {
-                        gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
-                    }
-                    gb->cycles_since_ir_change = 0;
-                }
-                return;
-            }
-            default:
-                GB_log(gb, "Unsupported HuC-3 mode %x write: [%04x] = %02x\n", gb->huc3_mode, addr, value);
-                return;
-            case 0: // Disabled
-            case 0xA: // RAM
-                break;
-        }
+        if (huc3_write(gb, value)) return;
     }
     
     if (gb->camera_registers_mapped) {
