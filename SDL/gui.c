@@ -108,10 +108,11 @@ configuration_t configuration =
     .rewind_length = 60 * 2,
     .model = MODEL_CGB,
     .volume = 100,
+    .rumble_mode = GB_RUMBLE_ALL_GAMES,
 };
 
 
-static const char *help[] ={
+static const char *help[] = {
 "Drop a ROM to play.\n"
 "\n"
 "Keyboard Shortcuts:\n"
@@ -763,6 +764,7 @@ static void enter_controls_menu(unsigned index)
 static unsigned joypad_index = 0;
 static SDL_Joystick *joystick = NULL;
 static SDL_GameController *controller = NULL;
+SDL_Haptic *haptic = NULL;
 
 const char *current_joypad_name(unsigned index)
 {
@@ -792,6 +794,12 @@ static void cycle_joypads(unsigned index)
     if (joypad_index >= SDL_NumJoysticks()) {
         joypad_index = 0;
     }
+    
+    if (haptic) {
+        SDL_HapticClose(haptic);
+        haptic = NULL;
+    }
+    
     if (controller) {
         SDL_GameControllerClose(controller);
         controller = NULL;
@@ -806,14 +814,22 @@ static void cycle_joypads(unsigned index)
     else {
         joystick = SDL_JoystickOpen(joypad_index);
     }
-}
+    if (joystick) {
+        haptic = SDL_HapticOpenFromJoystick(joystick);
+    }}
 
 static void cycle_joypads_backwards(unsigned index)
 {
-    joypad_index++;
+    joypad_index--;
     if (joypad_index >= SDL_NumJoysticks()) {
         joypad_index = SDL_NumJoysticks() - 1;
     }
+    
+    if (haptic) {
+        SDL_HapticClose(haptic);
+        haptic = NULL;
+    }
+    
     if (controller) {
         SDL_GameControllerClose(controller);
         controller = NULL;
@@ -828,7 +844,9 @@ static void cycle_joypads_backwards(unsigned index)
     else {
         joystick = SDL_JoystickOpen(joypad_index);
     }
-}
+    if (joystick) {
+        haptic = SDL_HapticOpenFromJoystick(joystick);
+    }}
 
 static void detect_joypad_layout(unsigned index)
 {
@@ -837,9 +855,36 @@ static void detect_joypad_layout(unsigned index)
     joypad_axis_temp = -1;
 }
 
+static void cycle_rumble_mode(unsigned index)
+{
+    if (configuration.rumble_mode == GB_RUMBLE_ALL_GAMES) {
+        configuration.rumble_mode = GB_RUMBLE_DISABLED;
+    }
+    else {
+        configuration.rumble_mode++;
+    }
+}
+
+static void cycle_rumble_mode_backwards(unsigned index)
+{
+    if (configuration.rumble_mode == GB_RUMBLE_DISABLED) {
+        configuration.rumble_mode = GB_RUMBLE_ALL_GAMES;
+    }
+    else {
+        configuration.rumble_mode--;
+    }
+}
+
+const char *current_rumble_mode(unsigned index)
+{
+    return (const char *[]){"Disabled", "Rumble Game Paks Only", "All Games"}
+    [configuration.rumble_mode];
+}
+
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Configure layout", detect_joypad_layout},
+    {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -892,6 +937,9 @@ void connect_joypad(void)
         else {
             joystick = SDL_JoystickOpen(0);
         }
+    }
+    if (joystick) {
+        haptic = SDL_HapticOpenFromJoystick(joystick);
     }
 }
 

@@ -367,6 +367,11 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return SDL_MapRGB(pixel_format, r, g, b);
 }
 
+static void rumble(GB_gameboy_t *gb, double amp)
+{
+    SDL_HapticRumblePlay(haptic, amp, 250);
+}
+
 static void debugger_interrupt(int ignore)
 {
     if (!GB_is_inited(&gb)) return;
@@ -488,6 +493,8 @@ restart:
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
         GB_set_pixels_output(&gb, active_pixel_buffer);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
+        GB_set_rumble_callback(&gb, rumble);
+        GB_set_rumble_mode(&gb, configuration.rumble_mode);
         GB_set_sample_rate(&gb, GB_audio_get_frequency());
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
         update_palette();

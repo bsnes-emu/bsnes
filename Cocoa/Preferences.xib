@@ -603,13 +603,13 @@
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ogs-xG-b4b">
                     <rect key="frame" x="30" y="58" width="245" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="Never" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="jki-7x-bnM" id="o9b-MH-8kd">
+                    <popUpButtonCell key="cell" type="push" title="Never" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="jki-7x-bnM" id="o9b-MH-8kd">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" id="8p7-je-0Fh">
                             <items>
-                                <menuItem title="Never" id="jki-7x-bnM"/>
-                                <menuItem title="For rumble-enabled cartridges" state="on" tag="1" id="58e-Tp-TWd"/>
+                                <menuItem title="Never" state="on" id="jki-7x-bnM"/>
+                                <menuItem title="For rumble-enabled Game Paks" tag="1" id="58e-Tp-TWd"/>
                                 <menuItem title="Always" tag="2" id="qVe-2b-W1P"/>
                             </items>
                         </menu>

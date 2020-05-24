@@ -21,6 +21,7 @@ extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern SDL_Texture *texture;
 extern SDL_PixelFormat *pixel_format;
+extern SDL_Haptic *haptic;
 extern shader_t shader;
 
 enum scaling_mode {
@@ -105,6 +106,7 @@ typedef struct {
     uint8_t dmg_palette;
     GB_border_mode_t border_mode;
     uint8_t volume;
+    GB_rumble_mode_t rumble_mode;
 } configuration_t;
 
 extern configuration_t configuration;
