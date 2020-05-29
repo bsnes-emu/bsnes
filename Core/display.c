@@ -851,8 +851,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_SLEEP(gb, display, 37, 2);
     
     gb->cgb_palettes_blocked = true;
-    gb->cycles_for_line += 3;
-    GB_SLEEP(gb, display, 38, 3);
+    gb->cycles_for_line += (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C)? 2 : 3;
+    GB_SLEEP(gb, display, 38, (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C)? 2 : 3);
     
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
