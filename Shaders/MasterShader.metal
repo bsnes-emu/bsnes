@@ -42,7 +42,7 @@ static inline float4 texture(texture2d<half> texture, float2 pos)
 #line 1
 {filter}
 
-#define BLEND_BIAS (1.0/3.0)
+#define BLEND_BIAS (2.0/5.0)
 
 enum frame_blending_mode {
     DISABLED,
