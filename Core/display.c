@@ -603,14 +603,15 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
                 gb->fetcher_y = y;
             }
-            gb->current_tile = gb->vram[map + x + y / 8 * 32];
+            gb->last_tile_index_address = map + x + y / 8 * 32;
+            gb->current_tile = gb->vram[gb->last_tile_index_address];
             if (gb->vram_ppu_blocked) {
                 gb->current_tile = 0xFF;
             }
             if (GB_is_cgb(gb)) {
                 /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
-                 This probably means the CGB has a 16-bit data bus for the VRAM. */
-                gb->current_tile_attributes = gb->vram[map + x + y / 8 * 32 + 0x2000];
+                   This probably means the CGB has a 16-bit data bus for the VRAM. */
+                gb->current_tile_attributes = gb->vram[gb->last_tile_index_address + 0x2000];
                 if (gb->vram_ppu_blocked) {
                     gb->current_tile_attributes = 0xFF;
                 }
@@ -667,8 +668,9 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             if (gb->current_tile_attributes & 0x40) {
                 y_flip = 0x7;
             }
+            gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1;
             gb->current_tile_data[1] =
-                gb->vram[tile_address +  ((y & 7) ^ y_flip) * 2 + 1];
+                gb->vram[gb->last_tile_data_address];
             if (gb->vram_ppu_blocked) {
                 gb->current_tile_data[1] = 0xFF;
             }

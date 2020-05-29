@@ -538,6 +538,8 @@ struct GB_gameboy_internal_s {
         uint8_t window_tile_x;
         uint8_t lcd_x; // The LCD can go out of sync since the push signal is skipped in some cases.
         bool is_odd_frame;
+        uint16_t last_tile_data_address;
+        uint16_t last_tile_index_address;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
