@@ -540,6 +540,7 @@ struct GB_gameboy_internal_s {
         bool is_odd_frame;
         uint16_t last_tile_data_address;
         uint16_t last_tile_index_address;
+        bool cgb_repeated_a_frame;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

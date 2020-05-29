@@ -128,7 +128,7 @@ static void display_vblank(GB_gameboy_t *gb)
     
     bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
     
-    if (!gb->disable_rendering  && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
+    if (!gb->disable_rendering  && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
@@ -796,6 +796,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         while (true) {
             GB_SLEEP(gb, display, 1, LCDC_PERIOD);
             display_vblank(gb);
+            gb->cgb_repeated_a_frame = true;
         }
         return;
     }
@@ -1240,10 +1241,16 @@ abort_fetching_object:
                     }
                 }
                 else {
-                    gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                         gb->is_odd_frame ^= true;
                         display_vblank(gb);
+                    }
+                    if (gb->frame_skip_state == GB_FRAMESKIP_FIRST_FRAME_SKIPPED) {
+                        gb->cgb_repeated_a_frame = true;
+                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                    }
+                    else {
+                        gb->cgb_repeated_a_frame = false;
                     }
                 }
             }
