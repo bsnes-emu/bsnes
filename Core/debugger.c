@@ -839,7 +839,7 @@ static bool softbreak(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     if (strcmp(lstrip(arguments), "on") == 0 || !strlen(lstrip(arguments))) {
         gb->has_software_breakpoints = true;
     }
-    else if(strcmp(lstrip(arguments), "off") == 0) {
+    else if (strcmp(lstrip(arguments), "off") == 0) {
         gb->has_software_breakpoints = false;
     }
     else {
