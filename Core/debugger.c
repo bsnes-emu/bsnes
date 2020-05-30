@@ -832,6 +832,23 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     return true;
 }
 
+/* Enable or disable software breakpoints */
+static bool softbreak(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    if (strcmp(lstrip(arguments), "on") == 0 || !strlen(lstrip(arguments))) {
+        gb->has_software_breakpoints = true;
+    }
+    else if (strcmp(lstrip(arguments), "off") == 0) {
+        gb->has_software_breakpoints = false;
+    }
+    else {
+        print_usage(gb, command);
+    }
+
+    return true;
+}
+
 /* Find the index of the closest breakpoint equal or greater to addr */
 static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
 {
@@ -1782,6 +1799,7 @@ static const debugger_command_t commands[] = {
                       "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)"},
     {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
+    {"softbreak", 2, softbreak, "Enables or disables software breakpoints", "(on|off)"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
