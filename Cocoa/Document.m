@@ -359,19 +359,21 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
     
-    /* Clear pending alarms, don't play alarms while playing*/
-     NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
-    for (NSUserNotification *notification in [center scheduledNotifications]) {
-        if ([notification.identifier isEqualToString:self.fileName]) {
-            [center removeScheduledNotification:notification];
-            break;
+    /* Clear pending alarms, don't play alarms while playing */
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
+        NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
+        for (NSUserNotification *notification in [center scheduledNotifications]) {
+            if ([notification.identifier isEqualToString:self.fileName]) {
+                [center removeScheduledNotification:notification];
+                break;
+            }
         }
-    }
-    
-    for (NSUserNotification *notification in [center deliveredNotifications]) {
-        if ([notification.identifier isEqualToString:self.fileName]) {
-            [center removeDeliveredNotification:notification];
-            break;
+        
+        for (NSUserNotification *notification in [center deliveredNotifications]) {
+            if ([notification.identifier isEqualToString:self.fileName]) {
+                [center removeDeliveredNotification:notification];
+                break;
+            }
         }
     }
     
@@ -412,7 +414,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         notification.identifier = self.fileName;
         notification.deliveryDate = [NSDate dateWithTimeIntervalSinceNow:time_to_alarm];
         notification.soundName = NSUserNotificationDefaultSoundName;
-        [center scheduleNotification:notification];
+        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBNotificationsUsed"];
     }
     [_view setRumble:0];
     stopping = false;
