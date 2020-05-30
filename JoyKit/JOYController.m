@@ -722,7 +722,7 @@ typedef union {
         _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
         _lastVendorSpecificOutput.switchPacket.command = 0x30; // LED
         _lastVendorSpecificOutput.switchPacket.commandData[0] = mask;
-        //[self sendReport:[NSData dataWithBytes:&_lastSwitchPacket length:sizeof(_lastSwitchPacket)]];
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
     }
     else if (_isDualShock3) {
         _lastVendorSpecificOutput.ds3Output.reportID = 1;
