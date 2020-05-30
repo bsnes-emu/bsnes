@@ -697,6 +697,8 @@ typedef union {
     }
     _physicallyConnected = false;
     [exposedControllers removeObject:self];
+    [self setRumbleAmplitude:0];
+    [self updateRumble];
     _device = nil;
 }
 
@@ -732,6 +734,9 @@ typedef union {
 - (void)updateRumble
 {
     if (!self.connected) {
+        return;
+    }
+    if (!_rumbleElement && !_isSwitch && !_isDualShock3) {
         return;
     }
     if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
