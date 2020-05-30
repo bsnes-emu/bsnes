@@ -836,7 +836,7 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
 static bool softbreak(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
-    if (strcmp(lstrip(arguments), "on") == 0) {
+    if (strcmp(lstrip(arguments), "on") == 0 || !strlen(lstrip(arguments))) {
         gb->has_software_breakpoints = true;
     }
     else if(strcmp(lstrip(arguments), "off") == 0) {
