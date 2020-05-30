@@ -115,7 +115,7 @@
         [NSCursor unhide];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [lastController setRumbleAmplitude:0];
+    [self setRumble:0];
     [JOYController unregisterListener:self];
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -272,7 +272,9 @@
 
 - (void)setRumble:(double)amp
 {
-    [lastController setRumbleAmplitude:amp];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [lastController setRumbleAmplitude:amp];
+    });
 }
 
 - (void)controller:(JOYController *)controller movedAxis:(JOYAxis *)axis
@@ -301,7 +303,7 @@
 {
     if (![self.window isMainWindow]) return;
     if (controller != lastController) {
-        [lastController setRumbleAmplitude:0];
+        [self setRumble:0];
         lastController = controller;
     }
     
@@ -319,7 +321,9 @@
             ![preferred_joypad isEqualToString:controller.uniqueID]) {
             continue;
         }
-        [controller setPlayerLEDs:1 << player];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [controller setPlayerLEDs:1 << player];
+        });
         NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitInstanceMapping"][controller.uniqueID];
         if (!mapping) {
             mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitNameMapping"][controller.deviceName];
