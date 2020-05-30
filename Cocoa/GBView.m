@@ -272,9 +272,7 @@
 
 - (void)setRumble:(double)amp
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [lastController setRumbleAmplitude:amp];
-    });
+    [lastController setRumbleAmplitude:amp];
 }
 
 - (void)controller:(JOYController *)controller movedAxis:(JOYAxis *)axis

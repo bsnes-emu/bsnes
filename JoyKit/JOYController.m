@@ -39,8 +39,6 @@ static bool axesEmulateButtons = false;
 static bool axes2DEmulateButtons = false;
 static bool hatsEmulateButtons = false;
 
-static NSLock *globalRumbleThreadLock;
-
 @interface JOYController ()
 + (void)controllerAdded:(IOHIDDeviceRef) device;
 + (void)controllerRemoved:(IOHIDDeviceRef) device;
@@ -95,7 +93,9 @@ static void HIDInput(void *context, IOReturn result, void *sender, IOHIDValueRef
 static void HIDReport(void *context, IOReturn result, void *sender, IOHIDReportType type,
                       uint32_t reportID, uint8_t *report, CFIndex reportLength)
 {
-    [(__bridge JOYController *)context gotReport:[[NSData alloc] initWithBytesNoCopy:report length:reportLength freeWhenDone:NO]];
+    if (reportLength) {
+        [(__bridge JOYController *)context gotReport:[[NSData alloc] initWithBytesNoCopy:report length:reportLength freeWhenDone:NO]];
+    }
 }
 
 typedef struct __attribute__((packed)) {
@@ -152,12 +152,9 @@ typedef union {
     bool _isSwitch; // Does this controller use the Switch protocol?
     bool _isDualShock3; // Does this controller use DS3 outputs?
     JOYVendorSpecificOutput _lastVendorSpecificOutput;
-    NSLock *_rumbleThreadLock;
-    volatile double _rumblePWMRatio;
+    volatile double _rumbleAmplitude;
     bool _physicallyConnected;
     bool _logicallyConnected;
-    bool _rumbleThreadRunning;
-    volatile bool _forceStopRumbleThread;
     
     NSDictionary *_hacks;
     NSMutableData *_lastReport;
@@ -166,7 +163,8 @@ typedef union {
     JOYElement *_previousAxisElement;
     
     uint8_t _playerLEDs;
-
+    double _sentRumbleAmp;
+    unsigned _rumbleCounter;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device hacks:(NSDictionary *)hacks
@@ -358,7 +356,6 @@ typedef union {
     _axes2DEmulatedButtons = [NSMutableDictionary dictionary];
     _hatEmulatedButtons = [NSMutableDictionary dictionary];
     _iokitToJOY = [NSMutableDictionary dictionary];
-    _rumbleThreadLock = [[NSLock alloc] init];
     
     
     //NSMutableArray *axes3d = [NSMutableArray array];
@@ -368,18 +365,19 @@ typedef union {
     _isDualShock3 = [_hacks[JOYIsDualShock3] boolValue];
 
     NSDictionary *customReports = hacks[JOYCustomReports];
-    
+    _lastReport = [NSMutableData dataWithLength:MAX(
+                                                    MAX(
+                                                        [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxInputReportSizeKey)) unsignedIntValue],
+                                                        [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxOutputReportSizeKey)) unsignedIntValue]
+                                                        ),
+                                                    [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxFeatureReportSizeKey)) unsignedIntValue]
+                                                    )];
+    IOHIDDeviceRegisterInputReportCallback(device, _lastReport.mutableBytes, _lastReport.length, HIDReport, (void *)self);
+
     if (hacks[JOYCustomReports]) {
         _multiElements = [NSMutableDictionary dictionary];
         _fullReportElements = [NSMutableDictionary dictionary];
-        _lastReport = [NSMutableData dataWithLength:MAX(
-                                                          MAX(
-                                                              [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxInputReportSizeKey)) unsignedIntValue],
-                                                              [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxOutputReportSizeKey)) unsignedIntValue]
-                                                              ),
-                                                          [(__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDMaxFeatureReportSizeKey)) unsignedIntValue]
-                                                          )];
-        IOHIDDeviceRegisterInputReportCallback(device, _lastReport.mutableBytes, _lastReport.length, HIDReport, (void *)self);
+
         
         for (NSNumber *_reportID in customReports) {
             signed reportID = [_reportID intValue];
@@ -555,16 +553,17 @@ typedef union {
 - (void)gotReport:(NSData *)report
 {
     JOYFullReportElement *element = _fullReportElements[@(*(uint8_t *)report.bytes)];
-    if (!element) return;
-    [element updateValue:report];
-    
-    NSArray<JOYElement *> *subElements = _multiElements[element];
-    if (subElements) {
-        for (JOYElement *subElement in subElements) {
-            [self _elementChanged:subElement];
+    if (element) {
+        [element updateValue:report];
+        
+        NSArray<JOYElement *> *subElements = _multiElements[element];
+        if (subElements) {
+            for (JOYElement *subElement in subElements) {
+                [self _elementChanged:subElement];
+            }
         }
-        return;
     }
+    [self updateRumble];
 }
 
 - (void)elementChanged:(IOHIDElementRef)element
@@ -697,7 +696,6 @@ typedef union {
         }
     }
     _physicallyConnected = false;
-    [self _forceStopRumbleThread]; // Stop the rumble thread.
     [exposedControllers removeObject:self];
     _device = nil;
 }
@@ -731,118 +729,83 @@ typedef union {
     }
 }
 
-- (void)rumbleThread
+- (void)updateRumble
 {
-    unsigned rumbleCounter = 0;
+    if (!self.connected) {
+        return;
+    }
     if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
-        while (self.connected && !_forceStopRumbleThread) {
-            if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
-                break;
-            }
-            rumbleCounter += round(_rumblePWMRatio * PWM_RESOLUTION);
-            if (rumbleCounter >= PWM_RESOLUTION) {
-                rumbleCounter -= PWM_RESOLUTION;
-            }
+        double ampToSend = _rumbleCounter < round(_rumbleAmplitude * PWM_RESOLUTION);
+        if (ampToSend != _sentRumbleAmp) {
+            [_rumbleElement setValue:ampToSend];
+            _sentRumbleAmp = ampToSend;
+        }
+        _rumbleCounter += round(_rumbleAmplitude * PWM_RESOLUTION);
+        if (_rumbleCounter >= PWM_RESOLUTION) {
+            _rumbleCounter -= PWM_RESOLUTION;
         }
     }
     else {
-        while (self.connected && !_forceStopRumbleThread) {
-            [_rumbleElement setValue:_rumblePWMRatio * (_rumbleElement.max - _rumbleElement.min) + _rumbleElement.min];
+        if (_rumbleAmplitude == _sentRumbleAmp) {
+            return;
+        }
+        _sentRumbleAmp = _rumbleAmplitude;
+        if (_isSwitch) {
+            double frequency = 144;
+            double amp = _rumbleAmplitude;
+            
+            uint8_t highAmp = amp * 0x64;
+            uint8_t lowAmp = amp * 0x32 + 0x40;
+            if (frequency < 0) frequency = 0;
+            if (frequency > 1252) frequency = 1252;
+            uint8_t encodedFrequency = (uint8_t)round(log2(frequency / 10.0) * 32.0);
+            
+            uint16_t highFreq = (encodedFrequency - 0x60) * 4;
+            uint8_t lowFreq = encodedFrequency - 0x40;
+            
+            //if (frequency < 82 || frequency > 312) {
+            if (amp) {
+                highAmp = 0;
+            }
+            
+            if (frequency < 40 || frequency > 626) {
+                lowAmp = 0;
+            }
+            
+            _lastVendorSpecificOutput.switchPacket.rumbleData[0] = _lastVendorSpecificOutput.switchPacket.rumbleData[4] = highFreq & 0xFF;
+            _lastVendorSpecificOutput.switchPacket.rumbleData[1] = _lastVendorSpecificOutput.switchPacket.rumbleData[5] = (highAmp << 1) + ((highFreq >> 8) & 0x1);
+            _lastVendorSpecificOutput.switchPacket.rumbleData[2] = _lastVendorSpecificOutput.switchPacket.rumbleData[6] = lowFreq;
+            _lastVendorSpecificOutput.switchPacket.rumbleData[3] = _lastVendorSpecificOutput.switchPacket.rumbleData[7] = lowAmp;
+            
+            
+            _lastVendorSpecificOutput.switchPacket.reportID = 0x10; // Rumble only
+            _lastVendorSpecificOutput.switchPacket.sequence++;
+            _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+            _lastVendorSpecificOutput.switchPacket.command = 0; // LED
+            [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+        }
+        else if (_isDualShock3) {
+            _lastVendorSpecificOutput.ds3Output.reportID = 1;
+            _lastVendorSpecificOutput.ds3Output.rumbleLeftDuration = _lastVendorSpecificOutput.ds3Output.rumbleRightDuration = _rumbleAmplitude? 0xff : 0;
+            _lastVendorSpecificOutput.ds3Output.rumbleLeftStrength = _lastVendorSpecificOutput.ds3Output.rumbleRightStrength = round(_rumbleAmplitude * 0xff);
+            [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
+        }
+        else {
+            [_rumbleElement setValue:_rumbleAmplitude * (_rumbleElement.max - _rumbleElement.min) + _rumbleElement.min];
         }
     }
-    [_rumbleThreadLock lock];
-    [_rumbleElement setValue:0];
-    _rumbleThreadRunning = false;
-    _forceStopRumbleThread = false;
-    [_rumbleThreadLock unlock];
 }
 
 - (void)setRumbleAmplitude:(double)amp /* andFrequency: (double)frequency */
 {
-    double frequency = 144; // I have no idea what I'm doing.
-    
     if (amp < 0) amp = 0;
     if (amp > 1) amp = 1;
-    if (_isSwitch) {
-        if (amp == 0) {
-            amp = 1;
-            frequency = 0;
-        }
-        
-        uint8_t highAmp = amp * 0x64;
-        uint8_t lowAmp = amp * 0x32 + 0x40;
-        if (frequency < 0) frequency = 0;
-        if (frequency > 1252) frequency = 1252;
-        uint8_t encodedFrequency = (uint8_t)round(log2(frequency / 10.0) * 32.0);
-
-        uint16_t highFreq = (encodedFrequency - 0x60) * 4;
-        uint8_t lowFreq = encodedFrequency - 0x40;
-        
-        //if (frequency < 82 || frequency > 312) {
-        if (amp) {
-            highAmp = 0;
-        }
-        
-        if (frequency < 40 || frequency > 626) {
-            lowAmp = 0;
-        }
-        
-        _lastVendorSpecificOutput.switchPacket.rumbleData[0] = _lastVendorSpecificOutput.switchPacket.rumbleData[4] = highFreq & 0xFF;
-        _lastVendorSpecificOutput.switchPacket.rumbleData[1] = _lastVendorSpecificOutput.switchPacket.rumbleData[5] = (highAmp << 1) + ((highFreq >> 8) & 0x1);
-        _lastVendorSpecificOutput.switchPacket.rumbleData[2] = _lastVendorSpecificOutput.switchPacket.rumbleData[6] = lowFreq;
-        _lastVendorSpecificOutput.switchPacket.rumbleData[3] = _lastVendorSpecificOutput.switchPacket.rumbleData[7] = lowAmp;
-            
-        
-        _lastVendorSpecificOutput.switchPacket.reportID = 0x10; // Rumble only
-        _lastVendorSpecificOutput.switchPacket.sequence++;
-        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
-        _lastVendorSpecificOutput.switchPacket.command = 0; // LED
-        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
-    }
-    else if (_isDualShock3) {
-        _lastVendorSpecificOutput.ds3Output.reportID = 1;
-        _lastVendorSpecificOutput.ds3Output.rumbleLeftDuration = _lastVendorSpecificOutput.ds3Output.rumbleRightDuration = amp? 0xff : 0;
-        _lastVendorSpecificOutput.ds3Output.rumbleLeftStrength = _lastVendorSpecificOutput.ds3Output.rumbleRightStrength = amp * 0xff;
-        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
-    }
-    else {
-        [_rumbleThreadLock lock];
-        _rumblePWMRatio = amp;
-        if (!_rumbleThreadRunning) { // PWM thread not running, start it.
-            if (amp != 0) {
-                /* TODO: The PWM thread does not handle correctly the case of having a multi-port controller where more
-                 than one controller uses rumble. At least make sure any sibling controllers don't have their
-                 PWM thread running. */
-                
-                [globalRumbleThreadLock lock];
-                for (JOYController *controller in [JOYController allControllers]) {
-                    if (controller != self && controller->_device == _device) {
-                        [controller _forceStopRumbleThread];
-                    }
-                }
-                _rumblePWMRatio = amp;
-                _rumbleThreadRunning = true;
-                [self performSelectorInBackground:@selector(rumbleThread) withObject:nil];
-                [globalRumbleThreadLock unlock];
-            }
-        }
-        [_rumbleThreadLock unlock];
-    }
+    _rumbleAmplitude = amp;
 }
 
 - (bool)isConnected
 {
     return _logicallyConnected && _physicallyConnected;
-}
-
-- (void)_forceStopRumbleThread
-{
-    [_rumbleThreadLock lock];
-    if (_rumbleThreadRunning) {
-        _forceStopRumbleThread = true;
-    }
-    [_rumbleThreadLock unlock];
-    while (_rumbleThreadRunning);
 }
 
 + (void)controllerAdded:(IOHIDDeviceRef) device
@@ -902,7 +865,6 @@ typedef union {
     
     controllers = [NSMutableDictionary dictionary];
     exposedControllers = [NSMutableArray array];
-    globalRumbleThreadLock = [[NSLock alloc] init];
     NSArray *array = @[
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_Joystick),
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_GamePad),
