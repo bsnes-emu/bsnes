@@ -39,7 +39,7 @@ static bool axesEmulateButtons = false;
 static bool axes2DEmulateButtons = false;
 static bool hatsEmulateButtons = false;
 
-static NSLock *globalPWMThreadLock;
+static NSLock *globalRumbleThreadLock;
 
 @interface JOYController ()
 + (void)controllerAdded:(IOHIDDeviceRef) device;
@@ -152,12 +152,12 @@ typedef union {
     bool _isSwitch; // Does this controller use the Switch protocol?
     bool _isDualShock3; // Does this controller use DS3 outputs?
     JOYVendorSpecificOutput _lastVendorSpecificOutput;
-    NSLock *_rumblePWMThreadLock;
+    NSLock *_rumbleThreadLock;
     volatile double _rumblePWMRatio;
     bool _physicallyConnected;
     bool _logicallyConnected;
-    bool _rumblePWMThreadRunning;
-    volatile bool _forceStopPWMThread;
+    bool _rumbleThreadRunning;
+    volatile bool _forceStopRumbleThread;
     
     NSDictionary *_hacks;
     NSMutableData *_lastReport;
@@ -358,7 +358,7 @@ typedef union {
     _axes2DEmulatedButtons = [NSMutableDictionary dictionary];
     _hatEmulatedButtons = [NSMutableDictionary dictionary];
     _iokitToJOY = [NSMutableDictionary dictionary];
-    _rumblePWMThreadLock = [[NSLock alloc] init];
+    _rumbleThreadLock = [[NSLock alloc] init];
     
     
     //NSMutableArray *axes3d = [NSMutableArray array];
@@ -697,7 +697,7 @@ typedef union {
         }
     }
     _physicallyConnected = false;
-    [self _forceStopPWMThread]; // Stop the rumble thread.
+    [self _forceStopRumbleThread]; // Stop the rumble thread.
     [exposedControllers removeObject:self];
     _device = nil;
 }
@@ -731,23 +731,30 @@ typedef union {
     }
 }
 
-- (void)pwmThread
+- (void)rumbleThread
 {
     unsigned rumbleCounter = 0;
-    while (self.connected && !_forceStopPWMThread) {
-        if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
-            break;
-        }
-        rumbleCounter += round(_rumblePWMRatio * PWM_RESOLUTION);
-        if (rumbleCounter >= PWM_RESOLUTION) {
-            rumbleCounter -= PWM_RESOLUTION;
+    if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
+        while (self.connected && !_forceStopRumbleThread) {
+            if ([_rumbleElement setValue:rumbleCounter < round(_rumblePWMRatio * PWM_RESOLUTION)]) {
+                break;
+            }
+            rumbleCounter += round(_rumblePWMRatio * PWM_RESOLUTION);
+            if (rumbleCounter >= PWM_RESOLUTION) {
+                rumbleCounter -= PWM_RESOLUTION;
+            }
         }
     }
-    [_rumblePWMThreadLock lock];
+    else {
+        while (self.connected && !_forceStopRumbleThread) {
+            [_rumbleElement setValue:_rumblePWMRatio * (_rumbleElement.max - _rumbleElement.min) + _rumbleElement.min];
+        }
+    }
+    [_rumbleThreadLock lock];
     [_rumbleElement setValue:0];
-    _rumblePWMThreadRunning = false;
-    _forceStopPWMThread = false;
-    [_rumblePWMThreadLock unlock];
+    _rumbleThreadRunning = false;
+    _forceStopRumbleThread = false;
+    [_rumbleThreadLock unlock];
 }
 
 - (void)setRumbleAmplitude:(double)amp /* andFrequency: (double)frequency */
@@ -799,32 +806,27 @@ typedef union {
         [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
     }
     else {
-        if (_rumbleElement.max == 1 && _rumbleElement.min == 0) {
-            [_rumblePWMThreadLock lock];
-            _rumblePWMRatio = amp;
-            if (!_rumblePWMThreadRunning) { // PWM thread not running, start it.
-                if (amp != 0) {
-                    /* TODO: The PWM thread does not handle correctly the case of having a multi-port controller where more
-                     than one controller uses rumble. At least make sure any sibling controllers don't have their
-                     PWM thread running. */
-                    
-                    [globalPWMThreadLock lock];
-                    for (JOYController *controller in [JOYController allControllers]) {
-                        if (controller != self && controller->_device == _device) {
-                            [controller _forceStopPWMThread];
-                        }
+        [_rumbleThreadLock lock];
+        _rumblePWMRatio = amp;
+        if (!_rumbleThreadRunning) { // PWM thread not running, start it.
+            if (amp != 0) {
+                /* TODO: The PWM thread does not handle correctly the case of having a multi-port controller where more
+                 than one controller uses rumble. At least make sure any sibling controllers don't have their
+                 PWM thread running. */
+                
+                [globalRumbleThreadLock lock];
+                for (JOYController *controller in [JOYController allControllers]) {
+                    if (controller != self && controller->_device == _device) {
+                        [controller _forceStopRumbleThread];
                     }
-                    _rumblePWMRatio = amp;
-                    _rumblePWMThreadRunning = true;
-                    [self performSelectorInBackground:@selector(pwmThread) withObject:nil];
-                    [globalPWMThreadLock unlock];
                 }
+                _rumblePWMRatio = amp;
+                _rumbleThreadRunning = true;
+                [self performSelectorInBackground:@selector(rumbleThread) withObject:nil];
+                [globalRumbleThreadLock unlock];
             }
-            [_rumblePWMThreadLock unlock];
         }
-        else {
-            [_rumbleElement setValue:amp * (_rumbleElement.max - _rumbleElement.min) + _rumbleElement.min];
-        }
+        [_rumbleThreadLock unlock];
     }
 }
 
@@ -833,14 +835,14 @@ typedef union {
     return _logicallyConnected && _physicallyConnected;
 }
 
-- (void)_forceStopPWMThread
+- (void)_forceStopRumbleThread
 {
-    [_rumblePWMThreadLock lock];
-    if (_rumblePWMThreadRunning) {
-        _forceStopPWMThread = true;
+    [_rumbleThreadLock lock];
+    if (_rumbleThreadRunning) {
+        _forceStopRumbleThread = true;
     }
-    [_rumblePWMThreadLock unlock];
-    while (_rumblePWMThreadRunning);
+    [_rumbleThreadLock unlock];
+    while (_rumbleThreadRunning);
 }
 
 + (void)controllerAdded:(IOHIDDeviceRef) device
@@ -900,7 +902,7 @@ typedef union {
     
     controllers = [NSMutableDictionary dictionary];
     exposedControllers = [NSMutableArray array];
-    globalPWMThreadLock = [[NSLock alloc] init];
+    globalRumbleThreadLock = [[NSLock alloc] init];
     NSArray *array = @[
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_Joystick),
         CreateHIDDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_GamePad),
