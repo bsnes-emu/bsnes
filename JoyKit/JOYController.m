@@ -120,7 +120,7 @@ typedef struct __attribute__((packed)) {
         uint8_t dutyLength;
         uint8_t enabled;
         uint8_t dutyOff;
-        uint8_t dutyOnn;
+        uint8_t dutyOn;
     } __attribute__((packed)) led[5];
     uint8_t padding3[13];
 } JOYDualShock3Output;
@@ -165,6 +165,7 @@ typedef union {
     uint8_t _playerLEDs;
     double _sentRumbleAmp;
     unsigned _rumbleCounter;
+    bool _deviceCantSendReports;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device hacks:(NSDictionary *)hacks
@@ -482,11 +483,11 @@ typedef union {
         _lastVendorSpecificOutput.ds3Output = (JOYDualShock3Output){
             .reportID = 1,
             .led = {
-                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
-                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
-                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
-                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOnn = 0x32},
-                {.timeEnabled =  0,    .dutyLength = 0,    .enabled = 0,    .dutyOff = 0, .dutyOnn = 0},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOn = 0x32},
+                {.timeEnabled =  0xff, .dutyLength = 0x27, .enabled = 0x10, .dutyOff = 0, .dutyOn = 0x32},
+                {.timeEnabled =  0,    .dutyLength = 0,    .enabled = 0,    .dutyOff = 0, .dutyOn = 0},
             }
         };
 
@@ -706,7 +707,13 @@ typedef union {
 {
     if (!report.length) return;
     if (!_device) return;
-    IOHIDDeviceSetReport(_device, kIOHIDReportTypeOutput, *(uint8_t *)report.bytes, report.bytes, report.length);
+    if (_deviceCantSendReports) return;
+    /* Some Macs fail to send reports to some devices, specifically the DS3, returning the bogus(?) error code 1 after
+       freezing for 5 seconds. Stop sending reports if that's the case. */
+    if (IOHIDDeviceSetReport(_device, kIOHIDReportTypeOutput, *(uint8_t *)report.bytes, report.bytes, report.length) == 1) {
+        _deviceCantSendReports = true;
+        NSLog(@"This Mac appears to be incapable of sending output reports to %@", self);
+    }
 }
 
 - (void)setPlayerLEDs:(uint8_t)mask
