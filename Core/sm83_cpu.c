@@ -790,10 +790,12 @@ LD_X_Y(l,b) LD_X_Y(l,c) LD_X_Y(l,d) LD_X_Y(l,e) LD_X_Y(l,h)             LD_X_DHL
 LD_DHL_Y(b) LD_DHL_Y(c) LD_DHL_Y(d) LD_DHL_Y(e) LD_DHL_Y(h) LD_DHL_Y(l)             LD_DHL_Y(a)
 LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL(a)
 
-// simply fire the debugger
+// fire the debugger if software breakpoints are enabled
 static void ld_b_b(GB_gameboy_t *gb, uint8_t opcode)
 {
-    GB_debugger_break(gb);
+    if(gb->has_software_breakpoints) {
+        GB_debugger_break(gb);
+    }
 }
 
 static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)

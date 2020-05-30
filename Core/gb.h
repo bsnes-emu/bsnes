@@ -601,7 +601,7 @@ struct GB_gameboy_internal_s {
         /* Breakpoints */
         uint16_t n_breakpoints;
         struct GB_breakpoint_s *breakpoints;
-        bool has_jump_to_breakpoints;
+        bool has_jump_to_breakpoints, has_software_breakpoints;
         void *nontrivial_jump_state;
         bool non_trivial_jump_breakpoint_occured;
 
