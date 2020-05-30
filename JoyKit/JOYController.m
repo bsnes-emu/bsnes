@@ -164,6 +164,8 @@ typedef union {
     
     // Used when creating inputs
     JOYElement *_previousAxisElement;
+    
+    uint8_t _playerLEDs;
 
 }
 
@@ -342,6 +344,7 @@ typedef union {
     _logicallyConnected = true;
     _device = (IOHIDDeviceRef)CFRetain(device);
     _serialSuffix = suffix;
+    _playerLEDs = -1;
 
     IOHIDDeviceRegisterInputValueCallback(device, HIDInput, (void *)self);
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
@@ -709,6 +712,10 @@ typedef union {
 - (void)setPlayerLEDs:(uint8_t)mask
 {
     mask &= 0xF;
+    if (mask == _playerLEDs) {
+        return;
+    }
+    _playerLEDs = mask;
     if (_isSwitch) {
         _lastVendorSpecificOutput.switchPacket.reportID = 0x1; // Rumble and LEDs
         _lastVendorSpecificOutput.switchPacket.sequence++;
