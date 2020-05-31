@@ -387,10 +387,10 @@ $(OBJ)/%.2bpp: %.png
 	rgbgfx -h -u -o $@ $<
 
 $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
-	$(PB12_COMPRESS) < $< > $@
+	$(realpath $(PB12_COMPRESS)) < $< > $@
 	
 $(PB12_COMPRESS): BootROMs/pb12.c
-	$(CC) -Wall -Werror $< -o $@
+	$(CC) $(LDFLAGS) $(CFLAGS) -Wall -Werror $< -o $@
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
