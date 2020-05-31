@@ -62,6 +62,9 @@ static char *default_input_callback(GB_gameboy_t *gb)
 {
     char *expression = NULL;
     size_t size = 0;
+    if (gb->debug_stopped) {
+        printf(">");
+    }
 
     if (getline(&expression, &size, stdin) == -1) {
         /* The user doesn't have STDIN or used ^D. We make sure the program keeps running. */
@@ -76,6 +79,12 @@ static char *default_input_callback(GB_gameboy_t *gb)
     size_t length = strlen(expression);
     if (expression[length - 1] == '\n') {
         expression[length - 1] = 0;
+    }
+    
+    if (expression[0] == '\x03') {
+        gb->debug_stopped = true;
+        free(expression);
+        return strdup("");
     }
     return expression;
 }
