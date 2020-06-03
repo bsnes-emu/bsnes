@@ -18,6 +18,9 @@ typedef enum {
     GB_CONFLICT_STAT_DMG,
     GB_CONFLICT_PALETTE_DMG,
     GB_CONFLICT_PALETTE_CGB,
+    GB_CONFLICT_DMG_LCDC,
+    GB_CONFLICT_SGB_LCDC,
+    GB_CONFLICT_WX,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -29,7 +32,6 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     
-
     /* Todo: most values not verified, and probably differ between revisions */
 };
 
@@ -37,17 +39,17 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
 static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
-    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_LCDC] = GB_CONFLICT_DMG_LCDC,
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
     [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
  
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
-    
+    [GB_IO_WY] = GB_CONFLICT_READ_OLD,
+    [GB_IO_WX] = GB_CONFLICT_WX,
+
     /* Todo: these were not verified at all */
-    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
-    [GB_IO_WX] = GB_CONFLICT_READ_NEW,
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
 
@@ -55,17 +57,17 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
 static const GB_conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
-    [GB_IO_LCDC] = GB_CONFLICT_READ_NEW,
+    [GB_IO_LCDC] = GB_CONFLICT_SGB_LCDC,
     [GB_IO_SCY] = GB_CONFLICT_READ_NEW,
     [GB_IO_STAT] = GB_CONFLICT_STAT_DMG,
     
     [GB_IO_BGP] = GB_CONFLICT_READ_NEW,
     [GB_IO_OBP0] = GB_CONFLICT_READ_NEW,
     [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
-    
+    [GB_IO_WY] = GB_CONFLICT_READ_OLD,
+    [GB_IO_WX] = GB_CONFLICT_WX,
+
     /* Todo: these were not verified at all */
-    [GB_IO_WY] = GB_CONFLICT_READ_NEW,
-    [GB_IO_WX] = GB_CONFLICT_READ_NEW,
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
 
@@ -192,6 +194,53 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->pending_cycles = 6;
             return;
         }
+            
+        case GB_CONFLICT_DMG_LCDC: {
+            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by it. Both my DMG (B, blob) and Game Boy Light behave this way though.
+             
+               Additionally, LCDC.1 is very nasty because on the it is read both by the FIFO when popping pixels,
+               and the sprite-fetching state machine, and both behave differently when it comes to access conflicts.
+               Hacks ahead.
+             */
+            
+            
+            
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
+            
+            if (/* gb->model != GB_MODEL_MGB && */ gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
+                old_value &= ~2;
+            }
+            
+            GB_write_memory(gb, addr, old_value | (value & 1));
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 5;
+            return;
+        }
+            
+        case GB_CONFLICT_SGB_LCDC: {
+            /* Simplified version of the above */
+            
+            uint8_t old_value = GB_read_memory(gb, addr);
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
+            /* Hack to force aborting object fetch */
+            GB_write_memory(gb, addr, value);
+            GB_write_memory(gb, addr, old_value);
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 5;
+            return;
+        }
+            
+        case GB_CONFLICT_WX:
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, value);
+            gb->wx_just_changed = true;
+            GB_advance_cycles(gb, 1);
+            gb->wx_just_changed = false;
+            gb->pending_cycles = 3;
+            return;
     }
 }
 
@@ -236,6 +285,26 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode)
 {
 }
 
+static void enter_stop_mode(GB_gameboy_t *gb)
+{
+    gb->stopped = true;
+    gb->oam_ppu_blocked = !gb->oam_read_blocked;
+    gb->vram_ppu_blocked = !gb->vram_read_blocked;
+    gb->cgb_palettes_ppu_blocked = !gb->cgb_palettes_blocked;
+}
+
+static void leave_stop_mode(GB_gameboy_t *gb)
+{
+    /* The CPU takes more time to wake up then the other components */
+    for (unsigned i = 0x200; i--;) {
+        GB_advance_cycles(gb, 0x10);
+    }
+    gb->stopped = false;
+    gb->oam_ppu_blocked = false;
+    gb->vram_ppu_blocked = false;
+    gb->cgb_palettes_ppu_blocked = false;
+}
+
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
@@ -252,9 +321,8 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
         gb->cgb_double_speed ^= true;
         gb->io_registers[GB_IO_KEY1] = 0;
         
-        for (unsigned i = 0x800; i--;) {
-            GB_advance_cycles(gb, 0x40);
-        }
+        enter_stop_mode(gb);
+        leave_stop_mode(gb);
         
         if (!needs_alignment) {
             GB_advance_cycles(gb, 0x4);
@@ -270,7 +338,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
             gb->halted = true;
         }
         else {
-            gb->stopped = true;
+            enter_stop_mode(gb);
         }
     }
     
@@ -318,7 +386,7 @@ static void inc_hr(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t register_id;
     register_id = ((opcode >> 4) + 1) & 0x03;
     gb->registers[register_id] += 0x100;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBSTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
 
     if ((gb->registers[register_id] & 0x0F00) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
@@ -334,7 +402,7 @@ static void dec_hr(GB_gameboy_t *gb, uint8_t opcode)
     register_id = ((opcode >> 4) + 1) & 0x03;
     gb->registers[register_id] -= 0x100;
     gb->registers[GB_REGISTER_AF] &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
 
     if ((gb->registers[register_id] & 0x0F00) == 0xF00) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
@@ -384,7 +452,7 @@ static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode)
     addr = cycle_read_inc_oam_bug(gb, gb->pc++);
     addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8;
     cycle_write(gb, addr, gb->registers[GB_REGISTER_SP] & 0xFF);
-    cycle_write(gb, addr+1, gb->registers[GB_REGISTER_SP] >> 8);
+    cycle_write(gb, addr + 1, gb->registers[GB_REGISTER_SP] >> 8);
 }
 
 static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -396,14 +464,14 @@ static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
     register_id = (opcode >> 4) + 1;
     rr = gb->registers[register_id];
     gb->registers[GB_REGISTER_HL] = hl + rr;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBSTRACT_FLAG | GB_CARRY_FLAG | GB_HALF_CARRY_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_CARRY_FLAG | GB_HALF_CARRY_FLAG);
 
     /* The meaning of the Half Carry flag is really hard to track -_- */
     if (((hl & 0xFFF) + (rr & 0xFFF)) & 0x1000) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
 
-    if ( ((unsigned long) hl + (unsigned long) rr) & 0x10000) {
+    if ( ((unsigned) hl + (unsigned) rr) & 0x10000) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -432,7 +500,7 @@ static void inc_lr(GB_gameboy_t *gb, uint8_t opcode)
     value = (gb->registers[register_id] & 0xFF) + 1;
     gb->registers[register_id] = (gb->registers[register_id] & 0xFF00) | value;
 
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBSTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
 
     if ((gb->registers[register_id] & 0x0F) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
@@ -452,7 +520,7 @@ static void dec_lr(GB_gameboy_t *gb, uint8_t opcode)
     gb->registers[register_id] = (gb->registers[register_id] & 0xFF00) | value;
 
     gb->registers[GB_REGISTER_AF] &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
 
     if ((gb->registers[register_id] & 0x0F) == 0xF) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
@@ -533,7 +601,7 @@ static void daa(GB_gameboy_t *gb, uint8_t opcode)
 
     gb->registers[GB_REGISTER_AF] &= ~(0xFF00 | GB_ZERO_FLAG);
 
-    if (gb->registers[GB_REGISTER_AF] & GB_SUBSTRACT_FLAG) {
+    if (gb->registers[GB_REGISTER_AF] & GB_SUBTRACT_FLAG) {
         if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
             result = (result - 0x06) & 0xFF;
         }
@@ -567,19 +635,19 @@ static void daa(GB_gameboy_t *gb, uint8_t opcode)
 static void cpl(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->registers[GB_REGISTER_AF] ^= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG | GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG;
 }
 
 static void scf(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBSTRACT_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
 }
 
 static void ccf(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->registers[GB_REGISTER_AF] ^= GB_CARRY_FLAG;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBSTRACT_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
 }
 
 static void ld_dhli_a(GB_gameboy_t *gb, uint8_t opcode)
@@ -610,7 +678,7 @@ static void inc_dhl(GB_gameboy_t *gb, uint8_t opcode)
     value = cycle_read(gb, gb->registers[GB_REGISTER_HL]) + 1;
     cycle_write(gb, gb->registers[GB_REGISTER_HL], value);
 
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBSTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
     if ((value & 0x0F) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
@@ -627,7 +695,7 @@ static void dec_dhl(GB_gameboy_t *gb, uint8_t opcode)
     cycle_write(gb, gb->registers[GB_REGISTER_HL], value);
 
     gb->registers[GB_REGISTER_AF] &= ~( GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
     if ((value & 0x0F) == 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
@@ -721,6 +789,13 @@ LD_X_Y(l,b) LD_X_Y(l,c) LD_X_Y(l,d) LD_X_Y(l,e) LD_X_Y(l,h)             LD_X_DHL
 LD_DHL_Y(b) LD_DHL_Y(c) LD_DHL_Y(d) LD_DHL_Y(e) LD_DHL_Y(h) LD_DHL_Y(l)             LD_DHL_Y(a)
 LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL(a)
 
+// fire the debugger if software breakpoints are enabled
+static void ld_b_b(GB_gameboy_t *gb, uint8_t opcode)
+{
+    if (gb->has_software_breakpoints) {
+        gb->debug_stopped = true;
+    }
+}
 
 static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
@@ -734,7 +809,7 @@ static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -753,7 +828,7 @@ static void adc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) + carry > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -763,7 +838,7 @@ static void sub_a_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value, a;
     value = get_src_value(gb, opcode);
     a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBTRACT_FLAG;
     if (a == value) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
     }
@@ -781,7 +856,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     value = get_src_value(gb, opcode);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
@@ -789,7 +864,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) < (value & 0xF) + carry) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) - ((unsigned long) value) - carry > 0xFF) {
+    if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -833,7 +908,7 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
     value = get_src_value(gb, opcode);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
     if (a == value) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
     }
@@ -849,10 +924,7 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
     assert(gb->pending_cycles == 4);
     gb->pending_cycles = 0;
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
-    GB_advance_cycles(gb, 1);
+    GB_advance_cycles(gb, 4);
     
     gb->halted = true;
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
@@ -933,7 +1005,7 @@ static void add_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -952,7 +1024,7 @@ static void adc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) + ((unsigned long) value) + carry > 0xFF) {
+    if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -962,7 +1034,7 @@ static void sub_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value, a;
     value = cycle_read_inc_oam_bug(gb, gb->pc++);
     a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBTRACT_FLAG;
     if (a == value) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
     }
@@ -980,7 +1052,7 @@ static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     value = cycle_read_inc_oam_bug(gb, gb->pc++);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
@@ -988,7 +1060,7 @@ static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     if ((a & 0xF) < (value & 0xF) + carry) {
         gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
     }
-    if (((unsigned long) a) - ((unsigned long) value) - carry > 0xFF) {
+    if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
         gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
     }
 }
@@ -1032,7 +1104,7 @@ static void cp_a_d8(GB_gameboy_t *gb, uint8_t opcode)
     value = cycle_read_inc_oam_bug(gb, gb->pc++);
     a = gb->registers[GB_REGISTER_AF] >> 8;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_SUBSTRACT_FLAG;
+    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
     if (a == value) {
         gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
     }
@@ -1154,7 +1226,7 @@ static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode)
     uint16_t addr;
     gb->registers[GB_REGISTER_AF] &= 0xFF;
     addr = cycle_read_inc_oam_bug(gb, gb->pc++);
-    addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8 ;
+    addr |= cycle_read_inc_oam_bug(gb, gb->pc++) << 8;
     gb->registers[GB_REGISTER_AF] |= cycle_read(gb, addr) << 8;
 }
 
@@ -1342,10 +1414,10 @@ static void bit_r(GB_gameboy_t *gb, uint8_t opcode)
         }
     }
     else if ((opcode & 0xC0) == 0x80) { /* res */
-        set_src_value(gb, opcode, value & ~bit) ;
+        set_src_value(gb, opcode, value & ~bit);
     }
     else if ((opcode & 0xC0) == 0xC0) { /* set */
-        set_src_value(gb, opcode, value | bit) ;
+        set_src_value(gb, opcode, value | bit);
     }
 }
 
@@ -1394,7 +1466,7 @@ static GB_opcode_t *opcodes[256] = {
     jr_cc_r8,   add_hl_rr,  ld_a_dhli,  dec_rr,     inc_lr,     dec_lr,     ld_lr_d8,   cpl,
     jr_cc_r8,   ld_rr_d16,  ld_dhld_a,  inc_rr,     inc_dhl,    dec_dhl,    ld_dhl_d8,  scf,        /* 3X */
     jr_cc_r8,   add_hl_rr,  ld_a_dhld,  dec_rr,     inc_hr,     dec_hr,     ld_hr_d8,   ccf,
-    nop,        ld_b_c,     ld_b_d,     ld_b_e,     ld_b_h,     ld_b_l,     ld_b_dhl,   ld_b_a,     /* 4X */
+    ld_b_b,     ld_b_c,     ld_b_d,     ld_b_e,     ld_b_h,     ld_b_l,     ld_b_dhl,   ld_b_a,     /* 4X */
     ld_c_b,     nop,        ld_c_d,     ld_c_e,     ld_c_h,     ld_c_l,     ld_c_dhl,   ld_c_a,
     ld_d_b,     ld_d_c,     nop,        ld_d_e,     ld_d_h,     ld_d_l,     ld_d_dhl,   ld_d_a,     /* 5X */
     ld_e_b,     ld_e_c,     ld_e_d,     nop,        ld_e_h,     ld_e_l,     ld_e_dhl,   ld_e_a,
@@ -1429,11 +1501,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
         if ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF) {
-            gb->stopped = false;
-            /* The CPU takes more time to wake up then the other components */
-            for (unsigned i = 0x800; i--;) {
-                GB_advance_cycles(gb, 0x40);
-            }
+            leave_stop_mode(gb);
             GB_advance_cycles(gb, 8);
         }
         return;
@@ -1454,19 +1522,19 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     gb->just_halted = false;
 
-    bool effecitve_ime = gb->ime;
+    bool effective_ime = gb->ime;
     if (gb->ime_toggle) {
         gb->ime = !gb->ime;
         gb->ime_toggle = false;
     }
 
     /* Wake up from HALT mode without calling interrupt code. */
-    if (gb->halted && !effecitve_ime && interrupt_queue) {
+    if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
     }
     
     /* Call interrupt */
-    else if (effecitve_ime && interrupt_queue) {
+    else if (effective_ime && interrupt_queue) {
         gb->halted = false;
         uint16_t call_addr = gb->pc;
         
@@ -1503,7 +1571,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         GB_debugger_call_hook(gb, call_addr);
     }
     /* Run mode */
-    else if(!gb->halted) {
+    else if (!gb->halted) {
         gb->last_opcode_read = cycle_read_inc_oam_bug(gb, gb->pc++);
         if (gb->halt_bug) {
             gb->pc--;
@@ -1512,10 +1580,11 @@ void GB_cpu_run(GB_gameboy_t *gb)
         opcodes[gb->last_opcode_read](gb, gb->last_opcode_read);
     }
     
+    flush_pending_cycles(gb);
+
     if (gb->hdma_starting) {
         gb->hdma_starting = false;
         gb->hdma_on = true;
         gb->hdma_cycles = -8;
     }
-    flush_pending_cycles(gb);
 }

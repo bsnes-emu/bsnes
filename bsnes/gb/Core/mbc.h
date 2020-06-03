@@ -10,7 +10,7 @@ typedef struct {
         GB_MBC2,
         GB_MBC3,
         GB_MBC5,
-        GB_HUC1, /* Todo: HUC1 features are not emulated. Should be unified with the CGB IR sensor API. */
+        GB_HUC1,
         GB_HUC3,
     } mbc_type;
     enum {

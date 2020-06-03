@@ -139,7 +139,7 @@ static double smooth(double x)
 
 static void render(GB_gameboy_t *gb)
 {
-    GB_sample_t output = {0,0};
+    GB_sample_t output = {0, 0};
 
     UNROLL
     for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
@@ -230,13 +230,13 @@ static void render(GB_gameboy_t *gb)
     gb->apu_output.sample_callback(gb, &filtered_output);
 }
 
-static uint16_t new_sweep_sample_legnth(GB_gameboy_t *gb)
+static uint16_t new_sweep_sample_length(GB_gameboy_t *gb)
 {
-    uint16_t delta = gb->apu.shadow_sweep_sample_legnth >> (gb->io_registers[GB_IO_NR10] & 7);
+    uint16_t delta = gb->apu.shadow_sweep_sample_length >> (gb->io_registers[GB_IO_NR10] & 7);
     if (gb->io_registers[GB_IO_NR10] & 8) {
-        return gb->apu.shadow_sweep_sample_legnth - delta;
+        return gb->apu.shadow_sweep_sample_length - delta;
     }
-    return gb->apu.shadow_sweep_sample_legnth + delta;
+    return gb->apu.shadow_sweep_sample_length + delta;
 }
 
 static void update_square_sample(GB_gameboy_t *gb, unsigned index)
@@ -283,6 +283,15 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
 
     if (gb->apu.square_channels[index].volume_countdown || (nrx2 & 7)) {
         if (!gb->apu.square_channels[index].volume_countdown || !--gb->apu.square_channels[index].volume_countdown) {
+            if (gb->cgb_double_speed) {
+                if (index == GB_SQUARE_1) {
+                    gb->apu.pcm_mask[0] &= gb->apu.square_channels[GB_SQUARE_1].current_volume | 0xF1;
+                }
+                else {
+                    gb->apu.pcm_mask[0] &= (gb->apu.square_channels[GB_SQUARE_2].current_volume << 2) | 0x1F;
+                }
+            }
+            
             if ((nrx2 & 8) && gb->apu.square_channels[index].current_volume < 0xF) {
                 gb->apu.square_channels[index].current_volume++;
             }
@@ -305,7 +314,10 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
     uint8_t nr42 = gb->io_registers[GB_IO_NR42];
 
     if (gb->apu.noise_channel.volume_countdown || (nr42 & 7)) {
-        if (!--gb->apu.noise_channel.volume_countdown) {
+        if (!gb->apu.noise_channel.volume_countdown || !--gb->apu.noise_channel.volume_countdown) {
+            if (gb->cgb_double_speed) {
+                gb->apu.pcm_mask[0] &= (gb->apu.noise_channel.current_volume << 2) | 0x1F;
+            }
             if ((nr42 & 8) && gb->apu.noise_channel.current_volume < 0xF) {
                 gb->apu.noise_channel.current_volume++;
             }
@@ -329,11 +341,16 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
-    if (gb->apu.skip_div_event) {
-        gb->apu.skip_div_event = false;
+    if (gb->apu.skip_div_event == GB_SKIP_DIV_EVENT_SKIP) {
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIPPED;
         return;
     }
-    gb->apu.div_divider++;
+    if (gb->apu.skip_div_event == GB_SKIP_DIV_EVENT_SKIPPED) {
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_INACTIVE;
+    }
+    else {
+        gb->apu.div_divider++;
+    }
 
     if ((gb->apu.div_divider & 1) == 0) {
         for (unsigned i = GB_SQUARE_2 + 1; i--;) {
@@ -395,8 +412,8 @@ void GB_apu_div_event(GB_gameboy_t *gb)
             if (!--gb->apu.square_sweep_countdown) {
                 if ((gb->io_registers[GB_IO_NR10] & 0x70) && (gb->io_registers[GB_IO_NR10] & 0x07)) {
                     gb->apu.square_channels[GB_SQUARE_1].sample_length =
-                        gb->apu.shadow_sweep_sample_legnth =
-                        gb->apu.new_sweep_sample_legnth;
+                        gb->apu.shadow_sweep_sample_length =
+                        gb->apu.new_sweep_sample_length;
                 }
 
                 if (gb->io_registers[GB_IO_NR10] & 0x70) {
@@ -418,7 +435,7 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
-    
+        
     if (likely(!gb->stopped || GB_is_cgb(gb))) {
         /* To align the square signal to 1MHz */
         gb->apu.lf_div ^= cycles & 1;
@@ -430,8 +447,8 @@ void GB_apu_run(GB_gameboy_t *gb)
             }
             else {
                 /* APU bug: sweep frequency is checked after adding the sweep delta twice */
-                gb->apu.new_sweep_sample_legnth = new_sweep_sample_legnth(gb);
-                if (gb->apu.new_sweep_sample_legnth > 0x7ff) {
+                gb->apu.new_sweep_sample_length = new_sweep_sample_length(gb);
+                if (gb->apu.new_sweep_sample_length > 0x7ff) {
                     gb->apu.is_active[GB_SQUARE_1] = false;
                     update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
                     gb->apu.sweep_enabled = false;
@@ -450,6 +467,9 @@ void GB_apu_run(GB_gameboy_t *gb)
                     gb->apu.square_channels[i].sample_countdown = (gb->apu.square_channels[i].sample_length ^ 0x7FF) * 2 + 1;
                     gb->apu.square_channels[i].current_sample_index++;
                     gb->apu.square_channels[i].current_sample_index &= 0x7;
+                    if (cycles_left == 0 && gb->apu.samples[i] == 0) {
+                        gb->apu.pcm_mask[0] &= i == GB_SQUARE_1? 0xF0 : 0x0F;
+                    }
 
                     update_square_sample(gb, i);
                 }
@@ -488,7 +508,6 @@ void GB_apu_run(GB_gameboy_t *gb)
 
                 /* Step LFSR */
                 unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
-                /* Todo: is this formula is different on a GBA? */
                 bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
                 gb->apu.noise_channel.lfsr >>= 1;
 
@@ -502,6 +521,10 @@ void GB_apu_run(GB_gameboy_t *gb)
 
                 gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
 
+                if (cycles_left == 0 && gb->apu.samples[GB_NOISE] == 0) {
+                    gb->apu.pcm_mask[1] &= 0x0F;
+                }
+                
                 update_sample(gb, GB_NOISE,
                               gb->apu.current_lfsr_sample ?
                               gb->apu.noise_channel.current_volume : 0,
@@ -534,7 +557,8 @@ void GB_apu_init(GB_gameboy_t *gb)
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
        the first DIV/APU event is skipped. */
     if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
-        gb->apu.skip_div_event = true;
+        gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIP;
+        gb->apu.div_divider = 1;
     }
 }
 
@@ -542,7 +566,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 {
     if (reg == GB_IO_NR52) {
         uint8_t value = 0;
-        for (int i = 0; i < GB_N_CHANNELS; i++) {
+        for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
             value >>= 1;
             if (gb->apu.is_active[i]) {
                 value |= 0x8;
@@ -718,8 +742,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (index == GB_SQUARE_1) {
-                gb->apu.shadow_sweep_sample_legnth =
-                    gb->apu.new_sweep_sample_legnth =
+                gb->apu.shadow_sweep_sample_length =
+                    gb->apu.new_sweep_sample_length =
                     gb->apu.square_channels[0].sample_length;
             }
             if (value & 0x80) {
@@ -901,7 +925,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.is_active[GB_NOISE] = false;
                 update_sample(gb, GB_NOISE, 0, 0);
             }
-            else if (gb->apu.is_active[GB_NOISE]){
+            else if (gb->apu.is_active[GB_NOISE]) {
                 nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
                 update_sample(gb, GB_NOISE,
                               gb->apu.current_lfsr_sample ?

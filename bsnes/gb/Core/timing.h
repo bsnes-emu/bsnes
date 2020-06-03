@@ -15,7 +15,6 @@ enum {
     GB_TIMA_RELOADED = 2
 };
 
-#define GB_HALT_VALUE (0xFFFF)
 
 #define GB_SLEEP(gb, unit, state, cycles) do {\
     (gb)->unit##_cycles -= (cycles) * __state_machine_divisor; \
@@ -26,12 +25,10 @@ enum {
     }\
 } while (0)
 
-#define GB_HALT(gb, unit) (gb)->unit##_cycles = GB_HALT_VALUE
-
 #define GB_STATE_MACHINE(gb, unit, cycles, divisor) \
 static const int __state_machine_divisor = divisor;\
 (gb)->unit##_cycles += cycles; \
-if ((gb)->unit##_cycles <= 0 || (gb)->unit##_cycles == GB_HALT_VALUE) {\
+if ((gb)->unit##_cycles <= 0) {\
     return;\
 }\
 switch ((gb)->unit##_state)

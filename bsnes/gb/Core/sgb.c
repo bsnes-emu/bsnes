@@ -17,6 +17,7 @@ enum {
     ATTR_BLK = 0x04,
     ATTR_LIN = 0x05,
     ATTR_DIV = 0x06,
+    ATTR_CHR = 0x07,
     PAL_SET  = 0x0A,
     PAL_TRN  = 0x0B,
     DATA_SND = 0x0F,
@@ -150,7 +151,7 @@ static void command_ready(GB_gameboy_t *gb)
        0xE content bytes. The last command, FB, is padded with zeros, so information past the header is not sent. */
     
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
-        if(gb->boot_rom_finished) return;
+        if (gb->boot_rom_finished) return;
         
         uint8_t checksum = 0;
         for (unsigned i = 2; i < 0x10; i++) {
@@ -246,12 +247,58 @@ static void command_ready(GB_gameboy_t *gb)
                                 gb->sgb->attribute_map[x + 20 * y] = inside_palette;
                             }
                         }
-                        else if(middle) {
+                        else if (middle) {
                             gb->sgb->attribute_map[x + 20 * y] = middle_palette;
                         }
                     }
                 }
             }
+            break;
+        }
+        case ATTR_CHR: {
+            struct __attribute__((packed)) {
+                uint8_t x, y;
+                uint16_t length;
+                uint8_t direction;
+                uint8_t data[];
+            } *command = (void *)(gb->sgb->command + 1);
+            
+            uint16_t count = command->length;
+#ifdef GB_BIG_ENDIAN
+            count = __builtin_bswap16(count);
+#endif
+            uint8_t x = command->x;
+            uint8_t y = command->y;
+            if (x >= 20 || y >= 18 || (count + 3) / 4 > sizeof(gb->sgb->command) - sizeof(*command) - 1) {
+                /* TODO: Verify with the SFC BIOS */
+                break;
+            }
+
+            for (unsigned i = 0; i < count; i++) {
+                uint8_t palette = (command->data[i / 4] >> (((~i) & 3) << 1)) & 3;
+                gb->sgb->attribute_map[x + 20 * y] = palette;
+                if (command->direction) {
+                    y++;
+                    if (y == 18) {
+                        x++;
+                        y = 0;
+                        if (x == 20) {
+                            x = 0;
+                        }
+                    }
+                }
+                else {
+                    x++;
+                    if (x == 20) {
+                        y++;
+                        x = 0;
+                        if (y == 18) {
+                            y = 0;
+                        }
+                    }
+                }
+            }
+            
             break;
         }
         case ATTR_LIN: {
@@ -474,7 +521,7 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
 
 static uint32_t convert_rgb15(GB_gameboy_t *gb, uint16_t color)
 {
-    return GB_convert_rgb15(gb, color);
+    return GB_convert_rgb15(gb, color, false);
 }
 
 static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_t fade)
@@ -489,14 +536,17 @@ static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_
     
     color = r | (g << 5) | (b << 10);
     
-    return GB_convert_rgb15(gb, color);
+    return GB_convert_rgb15(gb, color, false);
 }
 
 #include <stdio.h>
 static void render_boot_animation (GB_gameboy_t *gb)
 {
-#include "sgb_animation_logo.inc"
-    uint32_t *output = &gb->screen[48 + 40 * 256];
+#include "graphics/sgb_animation_logo.inc"
+    uint32_t *output = gb->screen;
+    if (gb->border_mode != GB_BORDER_NEVER) {
+        output += 48 + 40 * 256;
+    }
     uint8_t *input = animation_logo;
     unsigned fade_blue = 0;
     unsigned fade_red = 0;
@@ -544,7 +594,9 @@ static void render_boot_animation (GB_gameboy_t *gb)
                 input++;
             }
         }
-        output += 256 - 160;
+        if (gb->border_mode != GB_BORDER_NEVER) {
+            output += 256 - 160;
+        }
     }
 }
 
@@ -556,14 +608,6 @@ void GB_sgb_render(GB_gameboy_t *gb)
     }
     
     if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
-
-    if (!gb->screen || !gb->rgb_encode_callback) return;
-    
-    if (gb->sgb->mask_mode != MASK_FREEZE) {
-        memcpy(gb->sgb->effective_screen_buffer,
-               gb->sgb->screen_buffer,
-               sizeof(gb->sgb->effective_screen_buffer));
-    }
     
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
@@ -626,16 +670,27 @@ void GB_sgb_render(GB_gameboy_t *gb)
         }
     }
     
+    if (!gb->screen || !gb->rgb_encode_callback || gb->disable_rendering) return;
+
     uint32_t colors[4 * 4];
     for (unsigned i = 0; i < 4 * 4; i++) {
         colors[i] = convert_rgb15(gb, gb->sgb->effective_palettes[i]);
+    }
+    
+    if (gb->sgb->mask_mode != MASK_FREEZE) {
+        memcpy(gb->sgb->effective_screen_buffer,
+               gb->sgb->screen_buffer,
+               sizeof(gb->sgb->effective_screen_buffer));
     }
     
     if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) {
         render_boot_animation(gb);
     }
     else {
-        uint32_t *output = &gb->screen[48 + 40 * 256];
+        uint32_t *output = gb->screen;
+        if (gb->border_mode != GB_BORDER_NEVER) {
+            output += 48 + 40 * 256;
+        }
         uint8_t *input = gb->sgb->effective_screen_buffer;
         switch ((mask_mode_t) gb->sgb->mask_mode) {
             case MASK_DISABLED:
@@ -645,7 +700,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
                         uint8_t palette = gb->sgb->attribute_map[x / 8 + y / 8 * 20] & 3;
                         *(output++) = colors[(*(input++) & 3) + palette * 4];
                     }
-                    output += 256 - 160;
+                    if (gb->border_mode != GB_BORDER_NEVER) {
+                        output += 256 - 160;
+                    }
                 }
                 break;
             }
@@ -656,7 +713,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     for (unsigned x = 0; x < 160; x++) {
                         *(output++) = black;
                     }
-                    output += 256 - 160;
+                    if (gb->border_mode != GB_BORDER_NEVER) {
+                        output += 256 - 160;
+                    }
                 }
                 break;
             }
@@ -666,7 +725,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     for (unsigned x = 0; x < 160; x++) {
                         *(output++) = colors[0];
                     }
-                    output += 256 - 160;
+                    if (gb->border_mode != GB_BORDER_NEVER) {
+                        output += 256 - 160;
+                    }
                 }
                 break;
             }
@@ -703,6 +764,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
             if (tile_x >= 6 && tile_x < 26 && tile_y >= 5 && tile_y < 23) {
                 gb_area = true;
             }
+            else if (gb->border_mode == GB_BORDER_NEVER) {
+                continue;
+            }
             uint16_t tile = gb->sgb->border.map[tile_x + tile_y * 32];
             uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
             uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
@@ -710,12 +774,19 @@ void GB_sgb_render(GB_gameboy_t *gb)
             for (unsigned y = 0; y < 8; y++) {
                 for (unsigned x = 0; x < 8; x++) {
                     uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
-                    if (color == 0) {
-                        if (gb_area) continue;
-                        gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = colors[0];
+                    uint32_t *output = gb->screen;
+                    if (gb->border_mode == GB_BORDER_NEVER) {
+                        output += (tile_x - 6) * 8 + x + ((tile_y - 5) * 8 + y) * 160;
                     }
                     else {
-                        gb->screen[tile_x * 8 + x + (tile_y * 8 + y) * 0x100] = border_colors[color + palette * 16];
+                        output += tile_x * 8 + x + (tile_y * 8 + y) * 256;
+                    }
+                    if (color == 0) {
+                        if (gb_area) continue;
+                        *output = colors[0];
+                    }
+                    else {
+                       *output = border_colors[color + palette * 16];
                     }
                 }
             }
@@ -726,12 +797,12 @@ void GB_sgb_render(GB_gameboy_t *gb)
 void GB_sgb_load_default_data(GB_gameboy_t *gb)
 {
     
-#include "sgb_border.inc"
+#include "graphics/sgb_border.inc"
     
     memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
     memcpy(gb->sgb->border.palette, palette, sizeof(palette));
     
-    /* Expend tileset */
+    /* Expand tileset */
     for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
         for (unsigned y = 0; y < 8; y++) {
             for (unsigned x = 0; x < 8; x++) {

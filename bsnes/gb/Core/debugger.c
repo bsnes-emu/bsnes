@@ -220,7 +220,8 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
                 banking_state_t state;
                 save_banking_state(gb, &state);
                 switch_banking_state(gb, lvalue.memory_address.bank);
-                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
+                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value) |
+                                   (GB_read_memory(gb, lvalue.memory_address.value + 1) * 0x100));
                 restore_banking_state(gb, &state);
                 return r;
             }
@@ -261,6 +262,7 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
                 save_banking_state(gb, &state);
                 switch_banking_state(gb, lvalue.memory_address.bank);
                 GB_write_memory(gb, lvalue.memory_address.value, value);
+                GB_write_memory(gb, lvalue.memory_address.value + 1, value >> 8);
                 restore_banking_state(gb, &state);
                 return;
             }
@@ -296,13 +298,15 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
 static value_t add(value_t a, value_t b) {return FIX_BANK(a.value + b.value);}
 static value_t sub(value_t a, value_t b) {return FIX_BANK(a.value - b.value);}
 static value_t mul(value_t a, value_t b) {return FIX_BANK(a.value * b.value);}
-static value_t _div(value_t a, value_t b) {
+static value_t _div(value_t a, value_t b) 
+{
     if (b.value == 0) {
         return FIX_BANK(0);
     }
     return FIX_BANK(a.value / b.value);
 };
-static value_t mod(value_t a, value_t b) {
+static value_t mod(value_t a, value_t b) 
+{
     if (b.value == 0) {
         return FIX_BANK(0);
     }
@@ -332,7 +336,7 @@ static value_t bank(value_t a, value_t b) {return (value_t) {true, a.value, b.va
 
 static struct {
     const char *string;
-    char priority;
+    int8_t priority;
     value_t (*operator)(value_t, value_t);
     value_t (*lvalue_operator)(GB_gameboy_t *, lvalue_t, uint16_t);
 } operators[] =
@@ -350,15 +354,15 @@ static struct {
     {"&", 1, and},
     {"^", 1, xor},
     {"<<", 2, shleft},
-    {"<=", -1, lower_equals},
-    {"<", -1, lower},
+    {"<=", 3, lower_equals},
+    {"<", 3, lower},
     {">>", 2, shright},
-    {">=", -1, greater_equals},
-    {">", -1, greater},
-    {"==", -1, equals},
-    {"=", -2, NULL, assign},
-    {"!=", -1, different},
-    {":", 3, bank},
+    {">=", 3, greater_equals},
+    {">", 3, greater},
+    {"==", 3, equals},
+    {"=", -1, NULL, assign},
+    {"!=", 3, different},
+    {":", 4, bank},
 };
 
 value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
@@ -378,16 +382,15 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     while (length && (string[length-1] == ' ' || string[length-1] == '\n' || string[length-1] == '\r' || string[length-1] == '\t')) {
         length--;
     }
-    if (length == 0)
-    {
+    if (length == 0) { 
         GB_log(gb, "Expected expression.\n");
         *error = true;
         return (lvalue_t){0,};
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '(') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -400,8 +403,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '[' && string[length - 1] == ']') {
         // Attempt to strip square parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '[') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -416,8 +419,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '{' && string[length - 1] == '}') {
         // Attempt to strip curly parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '{') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -485,16 +488,15 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     while (length && (string[length-1] == ' ' || string[length-1] == '\n' || string[length-1] == '\r' || string[length-1] == '\t')) {
         length--;
     }
-    if (length == 0)
-    {
+    if (length == 0) { 
         GB_log(gb, "Expected expression.\n");
         *error = true;
         goto exit;
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '(') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -510,8 +512,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '[' && string[length - 1] == ']') {
         // Attempt to strip square parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '[') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -537,8 +539,8 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     else if (string[0] == '{' && string[length - 1] == '}') {
         // Attempt to strip curly parentheses (memory dereference)
-        signed int depth = 0;
-        for (int i = 0; i < length; i++) {
+        signed depth = 0;
+        for (unsigned i = 0; i < length; i++) {
             if (string[i] == '{') depth++;
             if (depth == 0) {
                 // First and last are not matching
@@ -563,24 +565,24 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
         }
     }
     // Search for lowest priority operator
-    signed int depth = 0;
+    signed depth = 0;
     unsigned operator_index = -1;
     unsigned operator_pos = 0;
-    for (int i = 0; i < length; i++) {
+    for (unsigned i = 0; i < length; i++) {
         if (string[i] == '(') depth++;
         else if (string[i] == ')') depth--;
         else if (string[i] == '[') depth++;
         else if (string[i] == ']') depth--;
         else if (depth == 0) {
-            for (int j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
-                if (strlen(operators[j].string) > length - i) continue; // Operator too big.
-                 // Priority higher than what we already have.
-                unsigned long operator_length = strlen(operators[j].string);
+            for (unsigned j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
+                unsigned operator_length = strlen(operators[j].string);
+                if (operator_length > length - i) continue; // Operator too long
+                
                 if (memcmp(string + i, operators[j].string, operator_length) == 0) {
                     if (operator_index != -1 && operators[operator_index].priority < operators[j].priority) {
                         /* for supporting = vs ==, etc*/
                         i += operator_length - 1;
-                        continue;
+                        break;
                     }
                     // Found an operator!
                     operator_pos = i;
@@ -667,7 +669,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
 
     char *end;
-    int base = 10;
+    unsigned base = 10;
     if (string[0] == '$') {
         string++;
         base = 16;
@@ -816,16 +818,34 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     }
 
 
-    GB_log(gb, "AF = $%04x (%c%c%c%c)\n", gb->registers[GB_REGISTER_AF], /* AF can't really be an address */
+    GB_log(gb, "AF  = $%04x (%c%c%c%c)\n", gb->registers[GB_REGISTER_AF], /* AF can't really be an address */
            (gb->f & GB_CARRY_FLAG)?      'C' : '-',
            (gb->f & GB_HALF_CARRY_FLAG)? 'H' : '-',
-           (gb->f & GB_SUBSTRACT_FLAG)?  'N' : '-',
+           (gb->f & GB_SUBTRACT_FLAG)?   'N' : '-',
            (gb->f & GB_ZERO_FLAG)?       'Z' : '-');
-    GB_log(gb, "BC = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_BC], false));
-    GB_log(gb, "DE = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_DE], false));
-    GB_log(gb, "HL = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_HL], false));
-    GB_log(gb, "SP = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_SP], false));
-    GB_log(gb, "PC = %s\n", value_to_string(gb, gb->pc, false));
+    GB_log(gb, "BC  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_BC], false));
+    GB_log(gb, "DE  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_DE], false));
+    GB_log(gb, "HL  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_HL], false));
+    GB_log(gb, "SP  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_SP], false));
+    GB_log(gb, "PC  = %s\n", value_to_string(gb, gb->pc, false));
+    GB_log(gb, "IME = %s\n", gb->ime? "Enabled" : "Disabled");
+    return true;
+}
+
+/* Enable or disable software breakpoints */
+static bool softbreak(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    if (strcmp(lstrip(arguments), "on") == 0 || !strlen(lstrip(arguments))) {
+        gb->has_software_breakpoints = true;
+    }
+    else if (strcmp(lstrip(arguments), "off") == 0) {
+        gb->has_software_breakpoints = false;
+    }
+    else {
+        print_usage(gb, command);
+    }
+
     return true;
 }
 
@@ -838,8 +858,8 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
 
     uint32_t key = BP_KEY(addr);
 
-    int min = 0;
-    int max = gb->n_breakpoints;
+    unsigned min = 0;
+    unsigned max = gb->n_breakpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
         if (gb->breakpoints[pivot].key == key) return pivot;
@@ -1005,8 +1025,8 @@ static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
         return 0;
     }
     uint32_t key = WP_KEY(addr);
-    int min = 0;
-    int max = gb->n_watchpoints;
+    unsigned min = 0;
+    unsigned max = gb->n_watchpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
         if (gb->watchpoints[pivot].key == key) return pivot;
@@ -1164,7 +1184,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
 
     memmove(&gb->watchpoints[index], &gb->watchpoints[index + 1], (gb->n_watchpoints - index - 1) * sizeof(gb->watchpoints[0]));
     gb->n_watchpoints--;
-    gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints* sizeof(gb->watchpoints[0]));
+    gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints *sizeof(gb->watchpoints[0]));
 
     GB_log(gb, "Watchpoint removed from %s\n", debugger_value_to_string(gb, result, true));
     return true;
@@ -1213,7 +1233,7 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
                                                               gb->watchpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s (%c%c)\n", i + 1, debugger_value_to_string(gb,addr, addr.has_bank),
+                GB_log(gb, " %d. %s (%c%c)\n", i + 1, debugger_value_to_string(gb, addr, addr.has_bank),
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-');
             }
@@ -1339,7 +1359,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
 
             while (count) {
                 GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
-                for (int i = 0; i < 16 && count; i++) {
+                for (unsigned i = 0; i < 16 && count; i++) {
                     GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
                     count--;
                 }
@@ -1352,7 +1372,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
         else {
             while (count) {
                 GB_log(gb, "%04x: ", addr.value);
-                for (int i = 0; i < 16 && count; i++) {
+                for (unsigned i = 0; i < 16 && count; i++) {
                     GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
                     count--;
                 }
@@ -1419,19 +1439,26 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
 
     if (cartridge->mbc_type) {
-        static const char * const mapper_names[] = {
-            [GB_MBC1] = "MBC1",
-            [GB_MBC2] = "MBC2",
-            [GB_MBC3] = "MBC3",
-            [GB_MBC5] = "MBC5",
-            [GB_HUC1] = "HUC1",
-            [GB_HUC3] = "HUC3",
-        };
-        GB_log(gb, "%s\n", mapper_names[cartridge->mbc_type]);
+        if (gb->is_mbc30) {
+            GB_log(gb, "MBC30\n");
+        }
+        else {
+            static const char *const mapper_names[] = {
+                [GB_MBC1] = "MBC1",
+                [GB_MBC2] = "MBC2",
+                [GB_MBC3] = "MBC3",
+                [GB_MBC5] = "MBC5",
+                [GB_HUC1] = "HUC-1",
+                [GB_HUC3] = "HUC-3",
+            };
+            GB_log(gb, "%s\n", mapper_names[cartridge->mbc_type]);
+        }
         GB_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
         if (cartridge->has_ram) {
             GB_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
-            GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+            if (gb->cartridge_type->mbc_type != GB_HUC1) {
+                GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+            }
         }
         if (cartridge->mbc_type == GB_MBC1 && gb->mbc1_wiring == GB_STANDARD_MBC1_WIRING) {
             GB_log(gb, "MBC1 banking mode is %s\n", gb->mbc1.mode == 1 ? "RAM" : "ROM");
@@ -1448,7 +1475,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
 
     if (cartridge->has_rumble) {
-        GB_log(gb, "Cart contains a rumble pak\n");
+        GB_log(gb, "Cart contains a Rumble Pak\n");
     }
 
     if (cartridge->has_rtc) {
@@ -1485,7 +1512,7 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
         return true;
     }
 
-    GB_log(gb, "Ticks: %lu. (Resetting)\n", gb->debugger_ticks);
+    GB_log(gb, "Ticks: %llu. (Resetting)\n", (unsigned long long)gb->debugger_ticks);
     gb->debugger_ticks = 0;
 
     return true;
@@ -1573,7 +1600,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
     GB_log(gb, "LY: %d\n", gb->io_registers[GB_IO_LY]);
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
-    GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7 , gb->io_registers[GB_IO_WY]);
+    GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7, gb->io_registers[GB_IO_WY]);
     GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
 
     return true;
@@ -1722,7 +1749,7 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 
     uint8_t shift_amount = 1, mask;
     if (modifiers) {
-        switch(modifiers[0]) {
+        switch (modifiers[0]) {
             case 'c':
                 shift_amount = 2;
                 break;
@@ -1758,10 +1785,11 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
-    {"backtrace", 2, backtrace, "Display the current call stack"},
+    {"backtrace", 2, backtrace, "Displays the current call stack"},
     {"bt", 2, }, /* Alias */
     {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected (Experimental)"},
-    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was used"},
+    {"ticks", 2, ticks, "Displays the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
+                        "used"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
@@ -1771,6 +1799,7 @@ static const debugger_command_t commands[] = {
                       "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)"},
     {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
+    {"softbreak", 2, softbreak, "Enables or disables software breakpoints", "(on|off)"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
@@ -1817,7 +1846,7 @@ static const debugger_command_t *find_command(const char *string)
 static void print_command_shortcut(GB_gameboy_t *gb, const debugger_command_t *command)
 {
     GB_attributed_log(gb, GB_LOG_BOLD | GB_LOG_UNDERLINE, "%.*s", command->min_length, command->command);
-    GB_attributed_log(gb, GB_LOG_BOLD , "%s", command->command + command->min_length);
+    GB_attributed_log(gb, GB_LOG_BOLD, "%s", command->command + command->min_length);
 }
 
 static void print_command_description(GB_gameboy_t *gb, const debugger_command_t *command)
@@ -2059,7 +2088,7 @@ void GB_debugger_run(GB_gameboy_t *gb)
     if (gb->debug_disable) return;
 
     char *input = NULL;
-    if (gb->debug_next_command && gb->debug_call_depth <= 0) {
+    if (gb->debug_next_command && gb->debug_call_depth <= 0 && !gb->halted) {
         gb->debug_stopped = true;
     }
     if (gb->debug_fin_command && gb->debug_call_depth == -1) {
@@ -2151,6 +2180,19 @@ void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
     }
 }
 
+void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol)
+{
+    bank &= 0x1FF;
+
+    if (!gb->bank_symbols[bank]) {
+        gb->bank_symbols[bank] = GB_map_alloc();
+    }
+    GB_bank_symbol_t *allocated_symbol = GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
+    if (allocated_symbol) {
+        GB_reversed_map_add_symbol(&gb->reversed_symbol_map, bank, allocated_symbol);
+    }
+}
+
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "r");
@@ -2173,14 +2215,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
         char symbol[length];
 
         if (sscanf(line, "%x:%x %s", &bank, &address, symbol) == 3) {
-            bank &= 0x1FF;
-            if (!gb->bank_symbols[bank]) {
-                gb->bank_symbols[bank] = GB_map_alloc();
-            }
-            GB_bank_symbol_t *allocated_symbol = GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
-            if (allocated_symbol) {
-                GB_reversed_map_add_symbol(&gb->reversed_symbol_map, bank, allocated_symbol);
-            }
+            GB_debugger_add_symbol(gb, bank, address, symbol);
         }
     }
     free(line);
@@ -2189,13 +2224,13 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 
 void GB_debugger_clear_symbols(GB_gameboy_t *gb)
 {
-    for (int i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
+    for (unsigned i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
         if (gb->bank_symbols[i]) {
             GB_map_free(gb->bank_symbols[i]);
             gb->bank_symbols[i] = 0;
         }
     }
-    for (int i = sizeof(gb->reversed_symbol_map.buckets) / sizeof(gb->reversed_symbol_map.buckets[0]); i--;) {
+    for (unsigned i = sizeof(gb->reversed_symbol_map.buckets) / sizeof(gb->reversed_symbol_map.buckets[0]); i--;) {
         while (gb->reversed_symbol_map.buckets[i]) {
             GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
             free(gb->reversed_symbol_map.buckets[i]);
