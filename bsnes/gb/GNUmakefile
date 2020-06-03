@@ -9,6 +9,7 @@ objects += gb-sm83_cpu gb-symbol_hash gb-timing
 obj/gb-apu.o:               gb/Core/apu.c
 obj/gb-camera.o:            gb/Core/camera.c
 obj/gb-debugger.o:          gb/Core/debugger.c
+obj/gb-rumble.o:            gb/Core/rumble.c
 obj/gb-display.o:           gb/Core/display.c
 obj/gb-gb.o:                gb/Core/gb.c
 obj/gb-joypad.o:            gb/Core/joypad.c
