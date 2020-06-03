@@ -114,7 +114,7 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
 void GB_configure_cart(GB_gameboy_t *gb)
 {
     gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
-    
+
     if (gb->rom[0x147] == 0 && gb->rom_size > 0x8000) {
         GB_log(gb, "ROM header reports no MBC, but file size is over 32Kb. Assuming cartridge uses MBC3.\n");
         gb->cartridge_type = &GB_cart_defs[0x11];
@@ -131,7 +131,10 @@ void GB_configure_cart(GB_gameboy_t *gb)
             static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
             gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
         }
-        gb->mbc_ram = malloc(gb->mbc_ram_size);
+
+        if (gb->mbc_ram_size) {
+            gb->mbc_ram = malloc(gb->mbc_ram_size);
+        }
 
         /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridges types? */
         memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
@@ -146,7 +149,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
             gb->mbc1_wiring = GB_MBC1M_WIRING;
         }
     }
-    
+
     /* Set MBC5's bank to 1 correctly */
     if (gb->cartridge_type->mbc_type == GB_MBC5) {
         gb->mbc5.rom_bank_low = 1;
