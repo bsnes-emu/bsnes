@@ -671,7 +671,19 @@ int main(int argc, char **argv)
     if (prefs_file) {
         fread(&configuration, 1, sizeof(configuration), prefs_file);
         fclose(prefs_file);
+        
+        /* Sanitize for stability */
+        configuration.color_correction_mode %= GB_COLOR_CORRECTION_REDUCE_CONTRAST +1;
+        configuration.scaling_mode %= GB_SDL_SCALING_MAX;
+        configuration.blending_mode %= GB_FRAME_BLENDING_MODE_ACCURATE + 1;
+        configuration.highpass_mode %= GB_HIGHPASS_MAX;
+        configuration.model %= MODEL_MAX;
+        configuration.sgb_revision %= SGB_MAX;
+        configuration.dmg_palette %= 3;
+        configuration.border_mode %= GB_BORDER_ALWAYS + 1;
+        configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
     }
+    
     if (configuration.model >= MODEL_MAX) {
         configuration.model = MODEL_CGB;
     }
