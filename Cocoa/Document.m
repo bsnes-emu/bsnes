@@ -8,6 +8,7 @@
 #include "GBMemoryByteArray.h"
 #include "GBWarningPopover.h"
 #include "GBCheatWindowController.h"
+#include "GBTerminalTextFieldCell.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -546,6 +547,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.debuggerSideViewInput.textColor = [NSColor whiteColor];
     self.debuggerSideViewInput.defaultParagraphStyle = paragraph_style;
     [self.debuggerSideViewInput setString:@"registers\nbacktrace\n"];
+    ((GBTerminalTextFieldCell *)self.consoleInput.cell).gb = &gb;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateSideView)
                                                  name:NSTextDidChangeNotification
@@ -1008,6 +1010,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [debugger_input_queue removeObjectAtIndex:0];
     }
     [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
+    if ((id)input == [NSNull null]) {
+        return NULL;
+    }
     return input? strdup([input UTF8String]): NULL;
 }
 

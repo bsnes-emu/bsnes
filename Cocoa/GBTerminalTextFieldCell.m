@@ -2,6 +2,7 @@
 #import "GBTerminalTextFieldCell.h"
 
 @interface GBTerminalTextView : NSTextView
+@property GB_gameboy_t *gb;
 @end
 
 @implementation GBTerminalTextFieldCell
@@ -12,10 +13,12 @@
 - (NSTextView *)fieldEditorForView:(NSView *)controlView
 {
     if (field_editor) {
+        field_editor.gb = self.gb;
         return field_editor;
     }
     field_editor = [[GBTerminalTextView alloc] init];
     [field_editor setFieldEditor:YES];
+    field_editor.gb = self.gb;
     return field_editor;
 }
 
@@ -26,6 +29,8 @@
     NSMutableOrderedSet *lines;
     NSUInteger current_line;
     bool reverse_search_mode;
+    NSRange auto_complete_range;
+    uintptr_t auto_complete_context;
 }
 
 - (instancetype)init
@@ -170,6 +175,7 @@
 -(void)setSelectedRanges:(NSArray<NSValue *> *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)stillSelectingFlag
 {
     reverse_search_mode = false;
+    auto_complete_context = 0;
     [super setSelectedRanges:ranges affinity:affinity stillSelecting:stillSelectingFlag];
 }
 
@@ -188,6 +194,38 @@
         [attributes setObject:color forKey:NSForegroundColorAttributeName];
         [[[NSAttributedString alloc] initWithString:@"Reverse search..." attributes:attributes] drawAtPoint:NSMakePoint(2, 0)];
     }
-
 }
+
+/* Todo: lazy design, make it use a delegate instead of having a gb reference*/
+
+- (void)insertTab:(id)sender
+{
+    if (auto_complete_context == 0) {
+        NSRange selection = self.selectedRange;
+        if (selection.length) {
+            [self delete:nil];
+        }
+        auto_complete_range = NSMakeRange(selection.location, 0);
+    }
+    char *substring = strdup([self.string substringToIndex:auto_complete_range.location].UTF8String);
+    uintptr_t context = auto_complete_context;
+    char *completion = GB_debugger_complete_substring(self.gb, substring, &context);
+    free(substring);
+    if (completion) {
+        NSString *ns_completion = @(completion);
+        free(completion);
+        if (!ns_completion) {
+            goto error;
+        }
+        self.selectedRange = auto_complete_range;
+        auto_complete_range.length = ns_completion.length;
+        [self replaceCharactersInRange:self.selectedRange withString:ns_completion];
+        auto_complete_context = context;
+        return;
+    }
+error:
+    auto_complete_context = context;
+    NSBeep();
+}
+
 @end

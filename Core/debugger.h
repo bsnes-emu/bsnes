@@ -34,7 +34,7 @@ bool /* Returns true if debugger waits for more commands. Not relevant for non-G
 void
 #endif
 GB_debugger_execute_command(GB_gameboy_t *gb, char *input); /* Destroys input. */
-
+char *GB_debugger_complete_substring(GB_gameboy_t *gb, char *input, uintptr_t *context);  /* Destroys input, result requires free */
 
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path);
 const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr);
