@@ -6,12 +6,6 @@
 
 #include <stdint.h>
 
-#if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
-  #include <stdlib.h>
-  #define LIBCO_MALLOC(...) malloc(__VA_ARGS__)
-  #define LIBCO_FREE(...)   free(__VA_ARGS__)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

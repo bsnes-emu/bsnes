@@ -2,17 +2,6 @@
 #include "libco.h"
 #include "settings.h"
 
-#if !defined(LIBCO_ASSERT)
-  #include <assert.h>
-  #define LIBCO_ASSERT(...) assert(__VA_ARGS__)
-#endif
-
-#if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
-  #include <stdlib.h>
-  #define LIBCO_MALLOC(...) malloc(__VA_ARGS__)
-  #define LIBCO_FREE(...)   free(__VA_ARGS__)
-#endif
-
 #include <stdint.h>
 #ifdef LIBCO_MPROTECT
   #include <unistd.h>
