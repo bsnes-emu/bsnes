@@ -2,8 +2,17 @@
 #include "libco.h"
 #include "settings.h"
 
-#include <assert.h>
-#include <stdlib.h>
+#if !defined(LIBCO_ASSERT)
+  #include <assert.h>
+  #define LIBCO_ASSERT(...) assert(__VA_ARGS__)
+#endif
+
+#if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
+  #include <stdlib.h>
+  #define LIBCO_MALLOC(...) malloc(__VA_ARGS__)
+  #define LIBCO_FREE(...)   free(__VA_ARGS__)
+#endif
+
 #include <stdint.h>
 #ifdef LIBCO_MPROTECT
   #include <unistd.h>
@@ -85,13 +94,13 @@ cothread_t co_derive(void* memory, unsigned int size, void (*entrypoint)(void)) 
 }
 
 cothread_t co_create(unsigned int size, void (*entrypoint)(void)) {
-  void* memory = malloc(size);
+  void* memory = LIBCO_MALLOC(size);
   if(!memory) return (cothread_t)0;
   return co_derive(memory, size, entrypoint);
 }
 
 void co_delete(cothread_t handle) {
-  free(handle);
+  LIBCO_FREE(handle);
 }
 
 void co_switch(cothread_t handle) {

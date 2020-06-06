@@ -4,7 +4,12 @@
 #include "libco.h"
 #include "settings.h"
 
-#include <stdlib.h>
+#if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
+  #include <stdlib.h>
+  #define LIBCO_MALLOC(...) malloc(__VA_ARGS__)
+  #define LIBCO_FREE(...)   free(__VA_ARGS__)
+#endif
+
 #include <stdint.h>
 #include <string.h>
 
@@ -327,7 +332,7 @@ cothread_t co_derive(void* memory, unsigned int size, void (*entry_)(void)) {
 static uint32_t* co_create_(unsigned size, uintptr_t entry) {
   (void)entry;
 
-  uint32_t* t = (uint32_t*)malloc(size);
+  uint32_t* t = (uint32_t*)LIBCO_MALLOC(size);
 
   #if LIBCO_PPCDESC
   if(t) {
@@ -390,7 +395,7 @@ cothread_t co_create(unsigned int size, void (*entry_)(void)) {
 }
 
 void co_delete(cothread_t t) {
-  free(t);
+  LIBCO_FREE(t);
 }
 
 static void co_init_(void) {
