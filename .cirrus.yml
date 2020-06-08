@@ -3,7 +3,7 @@ linux-x86_64-binaries_task:
         image: ubuntu:latest
 
     setup_script:
-        - apt-get update && apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev zip
+        - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev zip
 
     compile_script:
         - make -C bsnes local=false
@@ -23,7 +23,7 @@ linux-x86_64-binaries_task:
 
 freebsd-x86_64-binaries_task:
     freebsd_instance:
-        image: freebsd-12-0-release-amd64
+        image_family: freebsd-12-1
 
     setup_script:
         - pkg install --yes gmake gdb gcc8 pkgconf sdl2 openal-soft gtksourceview2 libXv zip
@@ -49,7 +49,7 @@ windows-x86_64-binaries_task:
         image: ubuntu:latest
 
     setup_script:
-        - apt-get update && apt-get -y install build-essential mingw-w64 zip
+        - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential mingw-w64 zip
 
     compile_script:
         - make -C bsnes local=false platform=windows compiler="x86_64-w64-mingw32-g++" windres="x86_64-w64-mingw32-windres"
@@ -58,7 +58,7 @@ windows-x86_64-binaries_task:
         - mkdir bsnes-nightly
         - mkdir bsnes-nightly/Database
         - mkdir bsnes-nightly/Firmware
-        - cp -a bsnes/out/bsnes bsnes-nightly/bsnes.exe
+        - cp -a bsnes/out/bsnes.exe bsnes-nightly/bsnes.exe
         - cp -a bsnes/Database/* bsnes-nightly/Database
         - cp -a shaders bsnes-nightly/Shaders
         - cp -a GPLv3.txt bsnes-nightly
