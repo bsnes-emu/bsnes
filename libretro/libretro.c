@@ -389,47 +389,12 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
     }
 }
 
-static void init_for_current_model(unsigned id)
+static void retro_set_memory_maps(void)
 {
-    unsigned i = id;
-    enum model effective_model;
-
-    effective_model = model[i];
-    if (effective_model == MODEL_AUTO) {
-        effective_model = auto_model;
-    }
-
-
-    if (GB_is_inited(&gameboy[i])) {
-        GB_switch_model_and_reset(&gameboy[i], libretro_to_internal_model[effective_model]);
-    }
-    else {
-        GB_init(&gameboy[i], libretro_to_internal_model[effective_model]);
-    }
-    
-    GB_set_boot_rom_load_callback(&gameboy[i], boot_rom_load);
-
-    /* When running multiple devices they are assumed to use the same resolution */
-
-    GB_set_pixels_output(&gameboy[i],
-                         (uint32_t *)(frame_buf + GB_get_screen_width(&gameboy[0]) * GB_get_screen_height(&gameboy[0]) * i));
-    GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
-    GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
-    GB_apu_set_sample_callback(&gameboy[i], audio_callback);
-    GB_set_rumble_callback(&gameboy[i], rumble_callback);
-
-    /* todo: attempt to make these more generic */
-    GB_set_vblank_callback(&gameboy[0], (GB_vblank_callback_t) vblank1);
-    if (emulated_devices == 2) { 
-        GB_set_vblank_callback(&gameboy[1], (GB_vblank_callback_t) vblank2);
-        if (link_cable_emulation) {
-            set_link_cable_state(true);
-        }
-    }
-
     struct retro_memory_descriptor descs[11];
     size_t size;
     uint16_t bank;
+    unsigned i;
 
 
     /* todo: add netplay awareness for this so achievements can be granted on the respective client */
@@ -489,6 +454,45 @@ static void init_for_current_model(unsigned id)
     mmaps.descriptors = descs;
     mmaps.num_descriptors = sizeof(descs) / sizeof(descs[0]);
     environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mmaps);
+}
+
+static void init_for_current_model(unsigned id)
+{
+    unsigned i = id;
+    enum model effective_model;
+
+    effective_model = model[i];
+    if (effective_model == MODEL_AUTO) {
+        effective_model = auto_model;
+    }
+
+
+    if (GB_is_inited(&gameboy[i])) {
+        GB_switch_model_and_reset(&gameboy[i], libretro_to_internal_model[effective_model]);
+    }
+    else {
+        GB_init(&gameboy[i], libretro_to_internal_model[effective_model]);
+    }
+
+    GB_set_boot_rom_load_callback(&gameboy[i], boot_rom_load);
+
+    /* When running multiple devices they are assumed to use the same resolution */
+
+    GB_set_pixels_output(&gameboy[i],
+                         (uint32_t *)(frame_buf + GB_get_screen_width(&gameboy[0]) * GB_get_screen_height(&gameboy[0]) * i));
+    GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
+    GB_set_sample_rate(&gameboy[i], AUDIO_FREQUENCY);
+    GB_apu_set_sample_callback(&gameboy[i], audio_callback);
+    GB_set_rumble_callback(&gameboy[i], rumble_callback);
+
+    /* todo: attempt to make these more generic */
+    GB_set_vblank_callback(&gameboy[0], (GB_vblank_callback_t) vblank1);
+    if (emulated_devices == 2) {
+        GB_set_vblank_callback(&gameboy[1], (GB_vblank_callback_t) vblank2);
+        if (link_cable_emulation) {
+            set_link_cable_state(true);
+        }
+    }
 
     /* Let's be extremely nitpicky about how devices and descriptors are set */
     if (emulated_devices == 1 && (model[0] == MODEL_SGB || model[0] == MODEL_SGB2)) { 
@@ -1070,6 +1074,9 @@ bool retro_load_game(const struct retro_game_info *info)
     }
 
     check_variables();
+
+    retro_set_memory_maps();
+
     return true;
 }
 
