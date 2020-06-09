@@ -164,6 +164,20 @@
     return GBGameBoyButtonCount;
 }
 
+- (unsigned) usesForKey:(unsigned) key
+{
+    unsigned ret = 0;
+    for (unsigned player = 4; player--;) {
+        for (unsigned button = player == 0? GBButtonCount:GBGameBoyButtonCount; button--;) {
+            NSNumber *other = [[NSUserDefaults standardUserDefaults] valueForKey:button_to_preference_name(button, player)];
+            if (other && [other unsignedIntValue] == key) {
+                ret++;
+            }
+        }
+    }
+    return ret;
+}
+
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     if ([tableColumn.identifier isEqualToString:@"keyName"]) {
@@ -176,6 +190,12 @@
     
     NSNumber *key = [[NSUserDefaults standardUserDefaults] valueForKey:button_to_preference_name(row, self.playerListButton.selectedTag)];
     if (key) {
+        if ([self usesForKey:[key unsignedIntValue]] > 1) {
+            return [[NSAttributedString alloc] initWithString:[NSString displayStringForKeyCode: [key unsignedIntegerValue]]
+                                                   attributes:@{NSForegroundColorAttributeName: [NSColor colorWithRed:0.9375 green:0.25 blue:0.25 alpha:1.0],
+                                                                NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]
+                                                   }];
+        }
         return [NSString displayStringForKeyCode: [key unsignedIntegerValue]];
     }
 

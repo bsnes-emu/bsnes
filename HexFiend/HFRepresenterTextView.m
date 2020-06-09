@@ -441,7 +441,7 @@ enum LineCoverage_t {
 - (void)drawCaretIfNecessaryWithClip:(NSRect)clipRect {
     NSRect caretRect = NSIntersectionRect(caretRectToDraw, clipRect);
     if (! NSIsEmptyRect(caretRect)) {
-        [[NSColor blackColor] set];
+        [[NSColor controlTextColor] set];
         NSRectFill(caretRect);
         lastDrawnCaretRect = caretRect;
     }
@@ -456,12 +456,18 @@ enum LineCoverage_t {
 
 /* This is the color when we are not in the key window */
 - (NSColor *)inactiveTextSelectionColor {
+    if (@available(macOS 10.14, *)) {
+        return [NSColor unemphasizedSelectedTextBackgroundColor];
+    }
     return [NSColor colorWithCalibratedWhite: (CGFloat)(212./255.) alpha:1];
 }
 
 /* This is the color when we are not the first responder, but we are in the key window */
 - (NSColor *)secondaryTextSelectionColor {
-    return [[self primaryTextSelectionColor] blendedColorWithFraction:.66 ofColor:[NSColor colorWithCalibratedWhite:.8f alpha:1]];
+    if (@available(macOS 10.14, *)) {
+        return [NSColor unemphasizedSelectedTextBackgroundColor];
+    }
+    return [NSColor colorWithCalibratedWhite: (CGFloat)(212./255.) alpha:1];
 }
 
 - (NSColor *)textSelectionColor {
@@ -826,7 +832,7 @@ enum LineCoverage_t {
 - (HFTextVisualStyleRun *)styleRunForByteAtIndex:(NSUInteger)byteIndex {
     HFTextVisualStyleRun *run = [[HFTextVisualStyleRun alloc] init];
     [run setRange:NSMakeRange(0, NSUIntegerMax)];
-    [run setForegroundColor:[NSColor blackColor]];
+    [run setForegroundColor:[NSColor textColor]];
     return [run autorelease];
 }
 
@@ -902,8 +908,8 @@ static size_t unionAndCleanLists(NSRect *rectList, id *valueList, size_t count) 
         guideIndex++;
     }
     if (rectIndex > 0) {
-        [[NSColor colorWithCalibratedWhite:(CGFloat).8 alpha:1] set];
-        NSRectFillListUsingOperation(lineRects, rectIndex, NSCompositePlusDarker);
+        [[NSColor gridColor] set];
+        NSRectFillListUsingOperation(lineRects, rectIndex, NSCompositeSourceOver);
     }
     FREE_ARRAY(lineRects);
 }
@@ -1344,7 +1350,7 @@ static size_t unionAndCleanLists(NSRect *rectList, id *valueList, size_t count) 
     [self _drawDefaultLineBackgrounds:clip withLineHeight:[self lineHeight] maxLines:ll2l(HFRoundUpToNextMultipleSaturate(byteCount, bytesPerLine) / bytesPerLine)];
     [self drawSelectionIfNecessaryWithClip:clip];
     
-    NSColor *textColor = [NSColor blackColor];
+    NSColor *textColor = [NSColor textColor];
     [textColor set];
     
     if (! antialias) {

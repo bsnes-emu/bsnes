@@ -119,20 +119,6 @@
     [super viewWillMoveToWindow:newWindow];
 }
 
-- (void)drawGradientWithClip:(NSRect)clip {
-    [_representer.backgroundColor set];
-    NSRectFill(clip);
-    
-    NSInteger shadowEdge = _representer.interiorShadowEdge;
-    
-    if (shadowEdge >= 0) {
-        const CGFloat shadowWidth = 6;
-        NSWindow *window = self.window;
-        BOOL drawActive = (window == nil || [window isKeyWindow] || [window isMainWindow]);
-        HFDrawShadow([[NSGraphicsContext currentContext] graphicsPort], self.bounds, shadowWidth, shadowEdge, drawActive, clip);
-    }
-}
-
 - (void)drawDividerWithClip:(NSRect)clipRect {
     USE(clipRect);
     
@@ -267,7 +253,7 @@ static inline int common_prefix_length(const char *a, const char *b) {
             NSUInteger glyphCount;
             [textStorage replaceCharactersInRange:replacementRange withString:replacementCharacters];
             if (previousTextStorageCharacterCount == 0) {
-                NSDictionary *atts = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor colorWithCalibratedWhite:(CGFloat).1 alpha:(CGFloat).8], NSForegroundColorAttributeName, nil];
+                NSDictionary *atts = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, nil];
                 [textStorage setAttributes:atts range:NSMakeRange(0, newStringLength)];
                 [atts release];
             }
@@ -305,7 +291,7 @@ static inline int common_prefix_length(const char *a, const char *b) {
         [mutableStyle setAlignment:NSRightTextAlignment];
         NSParagraphStyle *paragraphStyle = [mutableStyle copy];
         [mutableStyle release];
-        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor colorWithCalibratedWhite:(CGFloat).1 alpha:(CGFloat).8], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
+        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
         [paragraphStyle release];
     }
     
@@ -456,12 +442,12 @@ static inline int common_prefix_length(const char *a, const char *b) {
         }
     }
     
-    if (! textAttributes) {
+    if (!textAttributes) {
         NSMutableParagraphStyle *mutableStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [mutableStyle setAlignment:NSRightTextAlignment];
         NSParagraphStyle *paragraphStyle = [mutableStyle copy];
         [mutableStyle release];
-        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor colorWithCalibratedWhite:(CGFloat).1 alpha:(CGFloat).8], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
+        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
         [paragraphStyle release];
         [textStorage setAttributes:textAttributes range:NSMakeRange(0, [textStorage length])];
     }
@@ -489,27 +475,28 @@ static inline int common_prefix_length(const char *a, const char *b) {
     NSUInteger linesRemaining = ll2l(HFFPToUL(ceill(_lineRangeToDraw.length + _lineRangeToDraw.location) - floorl(_lineRangeToDraw.location)));
     
     CGFloat linesToVerticallyOffset = ld2f(_lineRangeToDraw.location - floorl(_lineRangeToDraw.location));
-    CGFloat verticalOffset = linesToVerticallyOffset * _lineHeight + 1;
+    CGFloat verticalOffset = linesToVerticallyOffset * _lineHeight + 1.5;
     NSRect textRect = self.bounds;
     textRect.size.width -= 5;
     textRect.origin.y -= verticalOffset;
-    textRect.size.height += verticalOffset;
+    textRect.size.height += verticalOffset + _lineHeight;
     
-    if (! textAttributes) {
-        NSMutableParagraphStyle *mutableStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-        [mutableStyle setAlignment:NSRightTextAlignment];
-        [mutableStyle setMinimumLineHeight:_lineHeight];
-        [mutableStyle setMaximumLineHeight:_lineHeight];
-        NSParagraphStyle *paragraphStyle = [mutableStyle copy];
-        [mutableStyle release];
-        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor colorWithCalibratedWhite:(CGFloat).1 alpha:(CGFloat).8], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
-        [paragraphStyle release];
-    }    
+    NSMutableParagraphStyle *mutableStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    [mutableStyle setAlignment:NSRightTextAlignment];
+    [mutableStyle setMinimumLineHeight:_lineHeight];
+    [mutableStyle setMaximumLineHeight:_lineHeight];
+    NSParagraphStyle *paragraphStyle = [mutableStyle copy];
+    [mutableStyle release];
+    NSColor *color = [[NSColor textColor] colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
+    color = [NSColor colorWithRed:color.redComponent green:color.greenComponent blue:color.blueComponent alpha:0.75];
+    NSDictionary *_textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:_font.fontName size:9], NSFontAttributeName, color, NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
+    [paragraphStyle release];
     
-    
+
     NSString *string = [self newLineStringForRange:HFRangeMake(lineIndex, linesRemaining)];
-    [string drawInRect:textRect withAttributes:textAttributes];
+    [string drawInRect:textRect withAttributes:_textAttributes];
     [string release];
+    [_textAttributes release];
 }
 
 - (void)drawLineNumbersWithClipSingleStringCellDrawing:(NSRect)clipRect {
@@ -533,7 +520,7 @@ static inline int common_prefix_length(const char *a, const char *b) {
         [mutableStyle setMaximumLineHeight:_lineHeight];
         NSParagraphStyle *paragraphStyle = [mutableStyle copy];
         [mutableStyle release];
-        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor colorWithCalibratedWhite:(CGFloat).1 alpha:(CGFloat).8], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
+        textAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:_font, NSFontAttributeName, [NSColor controlTextColor], NSForegroundColorAttributeName, paragraphStyle, NSParagraphStyleAttributeName, nil];
         [paragraphStyle release];
     }
     
@@ -568,7 +555,7 @@ static inline int common_prefix_length(const char *a, const char *b) {
 #if TIME_LINE_NUMBERS
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
 #endif
-    NSInteger drawingMode = (useStringDrawingPath ? 1 : 3);
+    NSInteger drawingMode = 3; // (useStringDrawingPath ? 1 : 3);
     switch (drawingMode) {
         // Drawing can't be done right if fonts are wider than expected, but all
         // of these have rather nasty behavior in that case. I've commented what
@@ -606,7 +593,6 @@ static inline int common_prefix_length(const char *a, const char *b) {
 }
 
 - (void)drawRect:(NSRect)clipRect {
-    [self drawGradientWithClip:clipRect];
     [self drawDividerWithClip:clipRect];
     [self drawLineNumbersWithClip:clipRect];
 }

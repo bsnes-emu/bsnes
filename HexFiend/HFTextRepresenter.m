@@ -20,9 +20,13 @@
 - (instancetype)init {
     self = [super init];
     
-    NSColor *color1 = [NSColor colorWithCalibratedWhite:1.0 alpha:1.0];
-    NSColor *color2 = [NSColor colorWithCalibratedRed:.87 green:.89 blue:1. alpha:1.];
-    _rowBackgroundColors = [@[color1, color2] retain];
+    if (@available(macOS 10.14, *)) {
+        _rowBackgroundColors = [[NSColor alternatingContentBackgroundColors] retain];
+    } else {
+        NSColor *color1 = [NSColor windowBackgroundColor];
+        NSColor *color2 = [NSColor colorWithDeviceWhite:0.96 alpha:1];
+        _rowBackgroundColors = [@[color1, color2] retain];
+    }
     
     return self;
 }
@@ -237,7 +241,7 @@
     FOREACH(HFRangeWrapper *, wrapper, selectedRanges) {
         HFRange selectedRange = [wrapper HFRange];
         BOOL clippedRangeIsVisible;
-        NSRange clippedSelectedRange;
+        NSRange clippedSelectedRange = {0,};
         /* Necessary because zero length ranges do not intersect anything */
         if (selectedRange.length == 0) {
             /* Remember that {6, 0} is considered a subrange of {3, 3} */

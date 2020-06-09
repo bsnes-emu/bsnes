@@ -647,7 +647,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     hex_controller = [[HFController alloc] init];
     [hex_controller setBytesPerColumn:1];
-    [hex_controller setFont:[NSFont userFixedPitchFontOfSize:12]];
     [hex_controller setEditMode:HFOverwriteMode];
     
     [hex_controller setByteArray:[[GBMemoryByteArray alloc] initWithDocument:self]];

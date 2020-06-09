@@ -57,8 +57,8 @@ static CGFloat maximumDigitAdvanceForFont(NSFont *font) {
         interiorShadowEdge = NSMaxXEdge;
         
         _borderedEdges = (1 << NSMaxXEdge);
-        _borderColor = [[NSColor darkGrayColor] retain];
-        _backgroundColor = [[NSColor colorWithCalibratedWhite:(CGFloat).87 alpha:1] retain];
+        _borderColor = [[NSColor controlShadowColor] retain];
+        _backgroundColor = [[NSColor windowBackgroundColor] retain];
     }
     return self;
 }
@@ -82,9 +82,9 @@ static CGFloat maximumDigitAdvanceForFont(NSFont *font) {
     lineNumberFormat = (HFLineNumberFormat)[coder decodeInt64ForKey:@"HFLineNumberFormat"];
     
     _borderedEdges = [coder decodeObjectForKey:@"HFBorderedEdges"] ? (NSInteger)[coder decodeInt64ForKey:@"HFBorderedEdges"] : 0;
-    _borderColor = [[coder decodeObjectForKey:@"HFBorderColor"] ?: [NSColor darkGrayColor] retain];
-    _backgroundColor = [[coder decodeObjectForKey:@"HFBackgroundColor"] ?: [NSColor colorWithCalibratedWhite:(CGFloat).87 alpha:1] retain];
-    
+    _borderColor = [[NSColor controlShadowColor] retain];
+    _backgroundColor = [[NSColor windowBackgroundColor] retain];
+
     return self;
 }
 

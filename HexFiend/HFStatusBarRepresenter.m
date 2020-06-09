@@ -29,7 +29,7 @@
 - (void)_sharedInitStatusBarView {
     NSMutableParagraphStyle *style = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
     [style setAlignment:NSCenterTextAlignment];
-    cellAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor colorWithCalibratedWhite:(CGFloat).15 alpha:1], NSForegroundColorAttributeName, [NSFont labelFontOfSize:10], NSFontAttributeName, style, NSParagraphStyleAttributeName, nil];
+    cellAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor windowFrameTextColor], NSForegroundColorAttributeName, [NSFont labelFontOfSize:[NSFont smallSystemFontSize]], NSFontAttributeName, style, NSParagraphStyleAttributeName, nil];
     cell = [[NSCell alloc] initTextCell:@""];
     [cell setAlignment:NSCenterTextAlignment];
     [cell setBackgroundStyle:NSBackgroundStyleRaised];
@@ -62,50 +62,23 @@
     [self setNeedsDisplay:YES];
 }
 
-- (void)drawDividerWithClip:(NSRect)clipRect {
-    [[NSColor lightGrayColor] set];
-    NSRect bounds = [self bounds];
-    NSRect lineRect = bounds;
-    lineRect.size.height = 1;
-    NSRectFill(NSIntersectionRect(lineRect, clipRect));
-}
-
-
-- (NSGradient *)getGradient:(BOOL)active {
-    static NSGradient *sActiveGradient;
-    static NSGradient *sInactiveGradient;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sActiveGradient = [[NSGradient alloc] initWithColorsAndLocations:
-                           [NSColor colorWithCalibratedWhite:.89 alpha:1.], 0.00, 
-                           [NSColor colorWithCalibratedWhite:.77 alpha:1.], 0.9,
-                           [NSColor colorWithCalibratedWhite:.82 alpha:1.], 1.0,
-                           nil];
-        
-        sInactiveGradient = [[NSGradient alloc] initWithColorsAndLocations:
-                             [NSColor colorWithCalibratedWhite:.93 alpha:1.], 0.00, 
-                             [NSColor colorWithCalibratedWhite:.87 alpha:1.], 0.9,
-                             [NSColor colorWithCalibratedWhite:.90 alpha:1.], 1.0,
-                             nil];
-    });
-    return active ? sActiveGradient : sInactiveGradient;
-}
-
-
 - (void)drawRect:(NSRect)clip {
     USE(clip);
     NSRect bounds = [self bounds];
     //    [[NSColor colorWithCalibratedWhite:(CGFloat).91 alpha:1] set];
     //    NSRectFill(clip);
     
-    NSWindow *window = [self window];
-    BOOL drawActive = (window == nil || [window isMainWindow] || [window isKeyWindow]);
-    [[self getGradient:drawActive] drawInRect:bounds angle:90.];
     
-    [self drawDividerWithClip:clip];
     NSRect cellRect = NSMakeRect(NSMinX(bounds), HFCeil(NSMidY(bounds) - cellSize.height / 2), NSWidth(bounds), cellSize.height);
     [cell drawWithFrame:cellRect inView:self];
 }
+
+- (void)setFrame:(NSRect)frame
+{
+    [super setFrame:frame];
+    [self.window setContentBorderThickness:frame.origin.y + frame.size.height forEdge:NSMinYEdge];
+}
+
 
 - (void)mouseDown:(NSEvent *)event {
     USE(event);
@@ -122,6 +95,7 @@
 - (void)viewDidMoveToWindow {
     HFRegisterViewForWindowAppearanceChanges(self, @selector(windowDidChangeKeyStatus:), !registeredForAppNotifications);
     registeredForAppNotifications = YES;
+    [self.window setContentBorderThickness:self.frame.origin.y + self.frame.size.height forEdge:NSMinYEdge];
     [super viewDidMoveToWindow];
 }
 
