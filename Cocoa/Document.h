@@ -30,7 +30,6 @@
 @property (strong) IBOutlet NSTableView *spritesTableView;
 @property (strong) IBOutlet NSPanel *printerFeedWindow;
 @property (strong) IBOutlet NSImageView *feedImageView;
-@property (strong) IBOutlet NSButton *feedSaveButton;
 @property (strong) IBOutlet NSTextView *debuggerSideViewInput;
 @property (strong) IBOutlet NSTextView *debuggerSideView;
 @property (strong) IBOutlet GBSplitView *debuggerSplitView;

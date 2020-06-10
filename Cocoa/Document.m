@@ -565,16 +565,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     self.vramStatusLabel.cell.backgroundStyle = NSBackgroundStyleRaised;
     
     
-    [self.feedSaveButton removeFromSuperview];
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[self.fileURL path] lastPathComponent]];
     self.debuggerSplitView.dividerColor = [NSColor clearColor];
-    
-    /* contentView.superview.subviews.lastObject is the titlebar view */
-    NSView *titleView = self.printerFeedWindow.contentView.superview.subviews.lastObject;
-    [titleView addSubview: self.feedSaveButton];
-    self.feedSaveButton.frame = (NSRect){{268, 2}, {48, 17}};
-    
+        
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateHighpassFilter)
                                                  name:@"GBHighpassFilterChanged"
@@ -1636,13 +1630,24 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                      scale:2.0];
         NSRect frame = self.printerFeedWindow.frame;
         frame.size = self.feedImageView.image.size;
+        [self.printerFeedWindow setContentMaxSize:frame.size];
         frame.size.height += self.printerFeedWindow.frame.size.height - self.printerFeedWindow.contentView.frame.size.height;
-        [self.printerFeedWindow setMaxSize:frame.size];
         [self.printerFeedWindow setFrame:frame display:NO animate: self.printerFeedWindow.isVisible];
         [self.printerFeedWindow orderFront:NULL];
     });
     
 }
+
+- (void)printDocument:(id)sender
+{
+    if (self.feedImageView.image.size.height == 0) {
+        NSBeep(); return;
+    }
+    NSImageView *view = [[NSImageView alloc] initWithFrame:(NSRect){{0,0}, self.feedImageView.image.size}];
+    view.image = self.feedImageView.image;
+    [[NSPrintOperation printOperationWithView:view] runOperationModalForWindow:self.printerFeedWindow delegate:nil didRunSelector:NULL contextInfo:NULL];
+}
+
 - (IBAction)savePrinterFeed:(id)sender
 {
     bool shouldResume = running;
@@ -1678,7 +1683,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (IBAction)connectPrinter:(id)sender
 {
     [self performAtomicBlock:^{
-            accessory = GBAccessoryPrinter;
+        accessory = GBAccessoryPrinter;
         GB_connect_printer(&gb, printImage);
     }];
 }
