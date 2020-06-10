@@ -602,7 +602,7 @@ struct GB_gameboy_internal_s {
         GB_icd_vreset_callback_t icd_vreset_callback;
         GB_read_memory_callback_t read_memory_callback;
         GB_boot_rom_load_callback_t boot_rom_load_callback;
-               
+        GB_print_image_callback_t printer_callback;
         /* IR */
         uint64_t cycles_since_ir_change; // In 8MHz units
         uint64_t cycles_since_input_ir_change; // In 8MHz units

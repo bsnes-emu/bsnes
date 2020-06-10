@@ -40,7 +40,6 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
         if (!dump_section(f, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
     
-    
     if (fwrite(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
         goto error;
     }
@@ -116,11 +115,19 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
 }
 
 /* Best-effort read function for maximum future compatibility. */
-static bool read_section(FILE *f, void *dest, uint32_t size)
+static bool read_section(FILE *f, void *dest, uint32_t size, bool fix_broken_windows_saves)
 {
     uint32_t saved_size = 0;
     if (fread(&saved_size, 1, sizeof(size), f) != sizeof(size)) {
         return false;
+    }
+    
+    if (fix_broken_windows_saves) {
+        if (saved_size < 4) {
+            return false;
+        }
+        saved_size -= 4;
+        fseek(f, 4, SEEK_CUR);
     }
     
     if (saved_size <= size) {
@@ -139,11 +146,21 @@ static bool read_section(FILE *f, void *dest, uint32_t size)
 }
 #undef DUMP_SECTION
 
-static bool verify_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
+static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
 {
-    if (gb->magic != save->magic) {
-        GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
-        return false;
+    if (save->ram_size == 0 && (&save->ram_size)[-1] == gb->ram_size) {
+        /* This is a save state with a bad printer struct from a 32-bit OS */
+        memcpy(save->extra_oam + 4, save->extra_oam, (uintptr_t)&save->ram_size - (uintptr_t)&save->extra_oam);
+    }
+    if (save->ram_size == 0) {
+        /* Save doesn't have ram size specified, it's a pre 0.12 save state with potentially
+         incorrect RAM amount if it's a CGB instance */
+        if (GB_is_cgb(save)) {
+            save->ram_size = 0x2000 * 8; // Incorrect RAM size
+        }
+        else {
+            save->ram_size = gb->ram_size;
+        }
     }
     
     if (gb->version != save->version) {
@@ -202,7 +219,7 @@ static void sanitize_state(GB_gameboy_t *gb)
     }
 }
 
-#define READ_SECTION(gb, f, section) read_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
+#define READ_SECTION(gb, f, section) read_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
 
 int GB_load_state(GB_gameboy_t *gb, const char *path)
 {
@@ -219,7 +236,18 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
         return errno;
     }
     
+    bool fix_broken_windows_saves = false;
     if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+    if (save.magic == 0) {
+        /* Potentially legacy, broken Windows save state */
+        fseek(f, 4, SEEK_SET);
+        if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+        fix_broken_windows_saves = true;
+    }
+    if (gb->magic != save.magic) {
+        GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
+        return false;
+    }
     if (!READ_SECTION(&save, f, core_state)) goto error;
     if (!READ_SECTION(&save, f, dma       )) goto error;
     if (!READ_SECTION(&save, f, mbc       )) goto error;
@@ -229,24 +257,13 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     if (!READ_SECTION(&save, f, rtc       )) goto error;
     if (!READ_SECTION(&save, f, video     )) goto error;
     
-    if (save.ram_size == 0) {
-        /* Save doesn't have ram size specified, it's a pre 0.12 save state with potentially
-           incorrect RAM amount if it's a CGB instance */
-        if (GB_is_cgb(&save)) {
-            save.ram_size = 0x2000 * 8; // Incorrect RAM size
-        }
-        else {
-            save.ram_size = gb->ram_size;
-        }
-    }
-    
-    if (!verify_state_compatibility(gb, &save)) {
+    if (!verify_and_update_state_compatibility(gb, &save)) {
         errno = -1;
         goto error;
     }
     
     if (GB_is_hle_sgb(gb)) {
-        if (!read_section(f, gb->sgb, sizeof(*gb->sgb))) goto error;
+        if (!read_section(f, gb->sgb, sizeof(*gb->sgb), false)) goto error;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
@@ -297,7 +314,7 @@ static size_t buffer_read(void *dest, size_t length, const uint8_t **buffer, siz
     return length;
 }
 
-static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, void *dest, uint32_t size)
+static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, void *dest, uint32_t size, bool fix_broken_windows_saves)
 {
     uint32_t saved_size = 0;
     if (buffer_read(&saved_size, sizeof(size), buffer, buffer_length) != sizeof(size)) {
@@ -305,6 +322,14 @@ static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, v
     }
     
     if (saved_size > *buffer_length) return false;
+    
+    if (fix_broken_windows_saves) {
+        if (saved_size < 4) {
+            return false;
+        }
+        saved_size -= 4;
+        *buffer += 4;
+    }
     
     if (saved_size <= size) {
         if (buffer_read(dest, saved_size, buffer, buffer_length) != saved_size) {
@@ -322,15 +347,27 @@ static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, v
     return true;
 }
 
-#define READ_SECTION(gb, buffer, length, section) buffer_read_section(&buffer, &length, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
+#define READ_SECTION(gb, buffer, length, section) buffer_read_section(&buffer, &length, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
 int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length)
 {
     GB_gameboy_t save;
     
     /* Every unread value should be kept the same. */
     memcpy(&save, gb, sizeof(save));
-    
+    bool fix_broken_windows_saves = false;
+
     if (buffer_read(GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header), &buffer, &length) != GB_SECTION_SIZE(header)) return -1;
+    if (save.magic == 0) {
+        /* Potentially legacy, broken Windows save state*/
+        buffer -= GB_SECTION_SIZE(header) - 4;
+        length += GB_SECTION_SIZE(header) - 4;
+        if (buffer_read(GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header), &buffer, &length) != GB_SECTION_SIZE(header)) return -1;
+        fix_broken_windows_saves = true;
+    }
+    if (gb->magic != save.magic) {
+        GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
+        return false;
+    }
     if (!READ_SECTION(&save, buffer, length, core_state)) return -1;
     if (!READ_SECTION(&save, buffer, length, dma       )) return -1;
     if (!READ_SECTION(&save, buffer, length, mbc       )) return -1;
@@ -339,13 +376,14 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     if (!READ_SECTION(&save, buffer, length, apu       )) return -1;
     if (!READ_SECTION(&save, buffer, length, rtc       )) return -1;
     if (!READ_SECTION(&save, buffer, length, video     )) return -1;
+
     
-    if (!verify_state_compatibility(gb, &save)) {
+    if (!verify_and_update_state_compatibility(gb, &save)) {
         return -1;
     }
     
     if (GB_is_hle_sgb(gb)) {
-        if (!buffer_read_section(&buffer, &length, gb->sgb, sizeof(*gb->sgb))) return -1;
+        if (!buffer_read_section(&buffer, &length, gb->sgb, sizeof(*gb->sgb), false)) return -1;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
