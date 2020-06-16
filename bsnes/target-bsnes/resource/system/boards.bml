@@ -1,10 +1,10 @@
 database
-  revision: 2018-07-25
+  revision: 2020-06-16
 
 //Boards (Production)
 
 database
-  revision: 2018-05-16
+  revision: 2020-06-16
 
 board: BANDAI-PT-923
   memory type=ROM content=Program
@@ -337,6 +337,19 @@ board: SHVC-1K1B-01
     memory type=RAM content=Data architecture=uPD7725
     oscillator
 
+board: SHVC-1K1X-10
+  memory type=ROM content=Program
+    map address=00-3f,80-bf:8000-ffff
+    map address=40-7d,c0-ff:0000-ffff
+  memory type=RAM content=Save
+    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  processor architecture=uPD7725
+    map address=00-1f,80-9f:6000-7fff mask=0xfff
+    memory type=ROM content=Program architecture=uPD7725
+    memory type=ROM content=Data architecture=uPD7725
+    memory type=RAM content=Data architecture=uPD7725
+    oscillator
+
 board: SHVC-1L0N3S-01
   processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
@@ -363,7 +376,7 @@ board: SHVC-1L3B-(02,11)
     memory type=RAM content=Internal
       map address=00-3f,80-bf:3000-37ff size=0x800
 
-board: SHVC-1L5B-(11,20)
+board: SHVC-1L5B-(02,11,20)
   processor architecture=W65C816S
     map address=00-3f,80-bf:2200-23ff
     mcu
@@ -491,7 +504,7 @@ board: SHVC-BA1M-01
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-7fff mask=0x8000
 
-board: SHVC-BA3M-(01,10)
+board: SHVC-BA3M-(01,10,20)
   memory type=ROM content=Program
     map address=00-7d,80-ff:8000-ffff mask=0x8000
   memory type=RAM content=Save
@@ -531,6 +544,15 @@ board: SHVC-LDH3C-01
     map address=00-3f,80-bf:4840-4842
     memory type=RTC content=Time manufacturer=Epson
 
+board: SHVC-LJ3M-01
+  memory type=ROM content=Program
+    map address=00-3f:8000-ffff base=0x400000
+    map address=40-7d:0000-ffff base=0x400000
+    map address=80-bf:8000-ffff mask=0xc00000
+    map address=c0-ff:0000-ffff mask=0xc00000
+  memory type=RAM content=Save
+    map address=80-bf:6000-7fff mask=0xe000
+
 board: SHVC-LN3B-01
   memory type=RAM content=Save
     map address=00-3f,80-bf:6000-7fff mask=0xe000
@@ -562,22 +584,10 @@ board: SHVC-YJ0N-01
     map address=00-3f,80-bf:8000-ffff
     map address=40-7d,c0-ff:0000-ffff
 
-//Boards (Prototypes)
-
-board: SHVC-2P3B-01
-  memory type=ROM content=Program
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-
-board: SHVC-4PV5B-01
-  memory type=ROM content=Program
-    map address=00-7d,80-ff:8000-ffff mask=0x8000
-    map address=40-7d,c0-ff:0000-7fff mask=0x8000
-
 //Boards (Generic)
 
 database
-  revision: 2018-07-25
+  revision: 2020-06-16
 
 board: ARM-LOROM-RAM
   memory type=ROM content=Program
@@ -876,16 +886,6 @@ board: OBC1-LOROM-RAM
     map address=00-3f,80-bf:6000-7fff mask=0xe000
     map address=70-71,f0-f1:6000-7fff,e000-ffff mask=0xe000
     memory type=RAM content=Save
-
-board: SA1
-  processor architecture=W65C816S
-    map address=00-3f,80-bf:2200-23ff
-    mcu
-      map address=00-3f,80-bf:8000-ffff mask=0x408000
-      map address=c0-ff:0000-ffff
-      memory type=ROM content=Program
-    memory type=RAM content=Internal
-      map address=00-3f,80-bf:3000-37ff size=0x800
 
 board: SA1-RAM
   processor architecture=W65C816S
