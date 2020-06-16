@@ -1,10 +1,10 @@
 database
-  revision: 2020-01-01
+  revision: 2020-06-16
 
 //Prototypes (JPN)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   182cd72c2ef57119b56bef1f7c18660498422a912f1bb652771d465cd183b04e
@@ -33,7 +33,7 @@ game
 //Super Comboy (KOR)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   b820ef79c16b3f43139cc9622c685020db3e87364c3a0f3946242bff93b787c8
@@ -102,7 +102,7 @@ game
 //Super Famicom (HKG)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   bd763c1a56365c244be92e6cffefd318780a2a19eda7d5baf1c6d5bd6c1b3e06
@@ -125,7 +125,31 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2020-01-01
+  revision: 2020-06-16
+
+game
+  sha256:   3cb1bb56e18ccea0edf6fbe3b52868272ab47bae3665506a5c055808d282225b
+  label:    悪魔城ドラキュラ
+  name:     Akumajou Dracula
+  region:   SHVC-AD
+  revision: SHVC-AD-0
+  board:    SHVC-1A0N-01
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+
+game
+  sha256:   0e4e700aa5ea5d4c9ba541860c92aa141d8fecd746047ef4ce0c4e3b1f8baad9
+  label:    悪魔城ドラキュラXX
+  name:     Akumajou Dracula XX
+  region:   SHVC-ADZJ-JPN
+  revision: SHVC-ADZJ-0
+  board:    SHVC-1A0N-30
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
 
 game
   sha256:   5c4e283efc338958b8dd45ebd6daf133a9eb280420a98e2e1df358ae0242c366
@@ -426,6 +450,38 @@ game
       content: Save
 
 game
+  sha256:   31acec84611795f937a7261c1d30aca8c4ed330791dad7a69880a0671e1963ce
+  label:    エストポリス伝記
+  name:     Estpolis Denki
+  region:   SHVC-ES
+  revision: SHVC-ES-1
+  board:    SHVC-1A3B-13
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   f62df5ffda3047b2d7717cb49be1029defa0de28191a8c66e380d1c9adbebc6f
+  label:    エストポリス伝記II
+  name:     Estpolis Denki II
+  region:   SHVC-ANIJ-JPN
+  revision: SHVC-ANIJ-0
+  board:    SHVC-BA3M-20
+    memory
+      type: ROM
+      size: 0x280000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
   sha256:   69d06a3f3a4f3ba769541fe94e92b42142e423e9f0924eab97865b2d826ec82d
   label:    Far East of Eden 天外魔境Zero 少年ジャンプの章
   name:     Far East of Eden - Tengai Makyou Zero - Shounen Jump no Shou
@@ -588,6 +644,27 @@ game
       content: Program
 
 game
+  sha256:   0c637df08d73e13e8e22fafbfe2b9196e08670ac27dbdd43330289c7fbce74e1
+  label:    星のカービィ3
+  name:     Hoshi no Kirby 3
+  region:   SHVC-AFJJ-JPN
+  revision: SHVC-AFJJ-0
+  board:    SHVC-1L5B-20
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x8000
+      content: Save
+    memory
+      type: RAM
+      size: 0x800
+      content: Internal
+      volatile
+
+game
   sha256:   8e0d620a307a225a757bbc9ef2a2a666792e5d533aa0279d3c0060a1b93ead82
   label:    アイアンコマンドー 鋼鉄の戦士
   name:     Iron Commando - Koutetsu no Senshi
@@ -651,7 +728,7 @@ game
 game
   sha256:   f9ec39546e18b15b8f6a738204d0227c1542cd8157e3e0ea16934e76f39e288c
   label:    迦楼羅王
-  name:     Karuraou
+  name:     Karura Ou
   region:   SHVC-OH
   revision: SHVC-OH-0
   board:    SHVC-1A0N-20
@@ -990,6 +1067,18 @@ game
       content: Save
 
 game
+  sha256:   704c035cf9236577334de9b935190d8d22fe775fb64ce3008c893b7bd3bfa64a
+  label:    ロックマン7 宿命の対決!
+  name:     Rockman 7 - Shukumei no Taiketsu!
+  region:   SHVC-A7RJ-JPN
+  revision: SHVC-A7RJ-0
+  board:    SHVC-1J0N-20
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+
+game
   sha256:   2626625f29e451746c8762f9e313d1140457fe68b27d36ce0cbee9b5c5be9743
   label:    ロックマンエックス
   name:     Rockman X
@@ -1013,6 +1102,64 @@ game
       type: ROM
       size: 0x180000
       content: Program
+
+game
+  sha256:   bdf02761180720ab88deeb5ad0de162019fdbf54d87dfdaef569337b9cbd415a
+  label:    ロックマンX2
+  name:     Rockman X2
+  region:   SHVC-ARXJ-JPN
+  revision: SHVC-ARXJ-0
+  board:    SHVC-2DC0N-01
+    memory
+      type: ROM
+      size: 0x180000
+      content: Program
+    memory
+      type: ROM
+      size: 0xc00
+      content: Data
+      manufacturer: Hitachi
+      architecture: HG51BS169
+      identifier: Cx4
+    memory
+      type: RAM
+      size: 0xc00
+      content: Data
+      manufacturer: Hitachi
+      architecture: HG51BS169
+      identifier: Cx4
+      volatile
+    oscillator
+      frequency: 20000000
+          
+game
+  sha256:   c477282947b4de4e23afaa99fbf3ca7613ec6b31c1755e616d6dce7aeeeb66d6
+  label:    ロックマンX3
+  name:     Rockman X3
+  region:   SHVC-AR3J-JPN
+  revision: SHVC-AR3J-0
+  board:    SHVC-1DC0N-01
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: ROM
+      size: 0xc00
+      content: Data
+      manufacturer: Hitachi
+      architecture: HG51BS169
+      identifier: Cx4
+    memory
+      type: RAM
+      size: 0xc00
+      content: Data
+      manufacturer: Hitachi
+      architecture: HG51BS169
+      identifier: Cx4
+      volatile
+    oscillator
+      frequency: 20000000
 
 game
   sha256:   6dfc016c571a16e5d42045060b1a88b6f3da5831e05b33c22035e1d990deccf3
@@ -1246,6 +1393,54 @@ game
       content: Save
 
 game
+  sha256:   d6e8f5066ea6b87ecf3a574259c264e3c68c84bbe76c32c1945a799af581a65d
+  label:    スーパードンキーコング
+  name:     Super Donkey Kong
+  region:   SHVC-8X
+  revision: SHVC-8X-1
+  board:    SHVC-1J1M-11
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+
+game
+  sha256:   83fb105dd16194711dba7464458c9a4833092404e61cd8376d8080a3e5d3354e
+  label:    スーパードンキーコング2 ディクシー＆ディディ
+  name:     Super Donkey Kong 2 - Dixie & Diddy
+  region:   SHVC-ADNJ-JPN-1
+  revision: SHVC-ADNJ-1
+  board:    SHVC-1J1M-20
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+
+game
+  sha256:   ca34ba159f15a169a1723e65f8157ae7e541cb566303a4b302ce02eec257dbdb
+  label:    スーパードンキーコング３　謎のクレミス島
+  name:     Super Donkey Kong 3 - Nazo no Kremis-tou
+  region:   SHVC-A3CJ-JPN
+  revision: SHVC-A3CJ-1
+  board:    SHVC-1J1M-20
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+
+game
   sha256:   f73238b97807fc37911d9e94ad7b671be2746baf11200974e12aeb089b7f3c35
   label:    スーパーフォーメーションサッカー95 デッラセリエA ザクア
   name:     Super Formation Soccer '95 - della Serie A - Xaqua
@@ -1359,6 +1554,133 @@ game
     memory
       type: ROM
       size: 0x80000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   d54a3eaab7ce4d250f8ef2cb86fa5afebb4712f95cadc65c85a6e5a7355d8b81
+  label:    スーパーマリオ ヨッシーアイランド
+  name:     Super Mario - Yossy Island
+  region:   SHVC-YI
+  revision: SHVC-YI-2
+  board:    SHVC-1CB5B-20
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: RAM
+      size: 0x8000
+      content: Save
+    oscillator
+      frequency: 21440000
+          
+game
+  sha256:   2be58db4c82330bb843fb6ba08a8d6760592256db24f7e06ef7bacc0b09da4de
+  label:    スーパーマリオコレクション
+  name:     Super Mario Collection
+  region:   SHVC-4M
+  revision: SHVC-4M-1
+  board:    SHVC-2A3M-01
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+          
+game
+  sha256:   c04f517c2675d7a8f3498d958f097443dfaa0e66606c69c59b58a915b3454973
+  label:    スーパーマリオカート
+  name:     Super Mario Kart
+  region:   SHVC-MK
+  revision: SHVC-MK-0
+  board:    SHVC-1K1B-01
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+    memory
+      type: ROM
+      size: 0x1800
+      content: Program
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1
+    memory
+      type: ROM
+      size: 0x800
+      content: Data
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1
+    memory
+      type: RAM
+      size: 0x200
+      content: Data
+      manufacturer: NEC
+      architecture: uPD7725
+      identifier: DSP1
+      volatile
+    oscillator
+      frequency: 7600000
+          
+game
+  sha256:   5d6aa9daec8525495510cda7cbd0bf476466dc4d8d86c28420e31715db351c64
+  label:    スーパーマリオRPG
+  name:     Super Mario RPG
+  region:   SHVC-ARWJ-JPN
+  revision: SHVC-ARWJ-0
+  board:    SHVC-1L5B-02
+    memory
+      type: ROM
+      size: 0x400000
+      content: Program
+    memory
+      type: RAM
+      size: 0x8000
+      content: Save
+    memory
+      type: RAM
+      size: 0x800
+      content: Internal
+      volatile
+          
+game
+  sha256:   c6808e082ab343be554d07f2b3eb157c3c5134b364a2ffb3806a67f17e0992d0
+  label:    スーパーマリオブラザーズ4 スーパーマリオワールド
+  name:     Super Mario World - Super Mario Bros. 4
+  region:   SHVC-MW
+  revision: SHVC-MW-0
+  board:    SHVC-1A1B-06
+    memory
+      type: ROM
+      size: 0x80000
+      content: Program
+    memory
+      type: RAM
+      size: 0x800
+      content: Save
+          
+game
+  sha256:   12b77c4bc9c1832cee8881244659065ee1d84c70c3d29e6eaf92e6798cc2ca72
+  label:    スーパーメトロイド
+  name:     Super Metroid
+  region:   SHVC-RI
+  revision: SHVC-RI-0
+  board:    SHVC-BA3M-10
+    memory
+      type: ROM
+      size: 0x300000
       content: Program
     memory
       type: RAM
@@ -1593,10 +1915,26 @@ game
       size: 0x100000
       content: Program
 
+game
+  sha256:   f7fd1efceb89708b338812d6a6e6014d7b7b0d0523ca0e27fe0aac8f954c1e7f
+  label:    ゼルダの伝説 神々のトライフォース
+  name:     Zelda no Densetsu - Kamigami no Triforce
+  region:   SHVC-ZL
+  revision: SHVC-ZL-2
+  board:    SHVC-1A3B-13
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
 //Super Famicom (ROC)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   1cf13dac329f83a7fe5347dcc20f92c3a09b3eab1511dd461f9cec90e9258403
@@ -1617,7 +1955,7 @@ game
 //Super Nintendo (AUS)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   7dbaebb1007984610623cb0b571f0e7167d73d89274598bfffc845cfb2de4aac
@@ -1662,7 +2000,7 @@ game
 //Super Nintendo (BRA)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   1edcceab07d1544dcbd0fd681148b0fbefeea58b7077136fa0c3011973bf34df
@@ -1684,7 +2022,7 @@ game
 //Super Nintendo (CAN)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   dd499445275fca6692c0487a8bd70a23f6c8e78e766df0e3c58fbbe53f8adb06
@@ -1705,7 +2043,7 @@ game
 //Super Nintendo (ESP)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   bd5e7a6bc08f64d39c54204b82c6c156f144c03e13c890128588c5faa560659c
@@ -1942,7 +2280,7 @@ game
 //Super Nintendo (EUR)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   ec3e81d628a293514e303b44e3b1ac03461ddd1da32764b10b7fab1e507602df
@@ -3124,7 +3462,7 @@ game
 //Super Nintendo (FAH)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   0aafd04a43ae29266e43920a7f9954d4a49f6fe43a5abffecc9c2fd5ad7d6cea
@@ -3558,7 +3896,7 @@ game
 //Super Nintendo (FRA)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   65df600780021f13ced52e7fbc507b7b2e6491b2c5c25fe78d0515dcbe669403
@@ -3859,7 +4197,7 @@ game
 //Super Nintendo (FRG)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   f415cafaaac4d5fe062b61be35e64ee6b5e8b925f12b9c82777b4566d31de8f4
@@ -3900,7 +4238,7 @@ game
 //Super Nintendo (GPS)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   0d4c05f75c95d5b8c0fc00e61027ce3fda2dd288fcf6695656232176fce7843e
@@ -3921,7 +4259,7 @@ game
 //Super Nintendo (HOL)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   dc8b3144329a23459bfcce93c89e0e561d133709aca6bfc74f9e0755f1a04b91
@@ -3942,7 +4280,7 @@ game
 //Super Nintendo (ITA)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   deab7aad7c168423e43eae14e9e31efa29c7341ab84f936be508911ce508b372
@@ -3975,7 +4313,7 @@ game
 //Super Nintendo (LTN)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   e678a29a93111cf2016c487ba9977b14de8f719040651a42c74bd74eea2d0d81
@@ -5286,7 +5624,7 @@ game
 //Super Nintendo (SCN)
 
 database
-  revision: 2018-09-21
+  revision: 2020-06-16
 
 game
   sha256:   beb379ba48f63561c0f939ecd8f623ec06c1b5e06976eef9887e5c62f3df2766
@@ -5371,7 +5709,7 @@ game
 //Super Nintendo (UKV)
 
 database
-  revision: 2018-04-14
+  revision: 2020-06-16
 
 game
   sha256:   38e050ac3ffec01031c6dd8ead20676aacec78ebf8d890a3a00d1badaaba3d3b
@@ -6021,7 +6359,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2020-01-01
+  revision: 2020-06-16
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -13329,6 +13667,24 @@ game
       size: 0x8000
       content: Save
       volatile
+
+game
+  sha256:   e134f20f6ee7d422d06faea6b1ae1e4101d1d0a200a0571d715d1cf23d959e8c
+  label:    Star Fox 2
+  name:     Star Fox 2
+  region:   SNS-XJ-USA
+  revision: SNS-XJ-0
+  board:    SHVC-1CB0N7S-01
+    memory
+      type: ROM
+      size: 0x200000
+      content: Program
+    memory
+      type: RAM
+      size: 0x10000
+      content: Save
+    oscillator
+      frequency: 21440000
 
 game
   sha256:   3a16ad45ae3d89b13c9e53e21c2a4c725ff7cec7fbe7896d538d163f92cb4aac
