@@ -9,14 +9,22 @@ uniform vec2 origin;
 #define equal(x, y) ((x) == (y))
 #define inequal(x, y) ((x) != (y))
 #define STATIC
+#define GAMMA (2.2)
 
 out vec4 frag_color;
+
+vec4 _texture(sampler2D t, vec2 pos)
+{
+    return pow(texture(t, pos), vec4(GAMMA));
+}
+
+#define texture _texture
 
 #line 1
 {filter}
 
 
-#define BLEND_BIAS (1.0/3.0)
+#define BLEND_BIAS (2.0/5.0)
 
 #define DISABLED 0
 #define SIMPLE 1
@@ -58,7 +66,7 @@ void main()
             break;
     }
 
-    frag_color = mix(scale(image, position, input_resolution, output_resolution),
-                     scale(previous_image, position, input_resolution, output_resolution), ratio);
+    frag_color = pow(mix(scale(image, position, input_resolution, output_resolution),
+                         scale(previous_image, position, input_resolution, output_resolution), ratio), vec4(1.0 / GAMMA));
 
 }

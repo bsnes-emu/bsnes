@@ -12,6 +12,7 @@ typedef texture2d<half> sampler2D;
 #define equal(x, y) all((x) == (y))
 #define inequal(x, y) any((x) != (y))
 #define STATIC static
+#define GAMMA (2.2)
 
 typedef struct {
     float4 position [[position]];
@@ -36,7 +37,7 @@ vertex rasterizer_data vertex_shader(uint index [[ vertex_id ]],
 static inline float4 texture(texture2d<half> texture, float2 pos)
 {
     constexpr sampler texture_sampler;
-    return float4(texture.sample(texture_sampler, pos));
+    return pow(float4(texture.sample(texture_sampler, pos)), GAMMA);
 }
 
 #line 1
@@ -87,7 +88,7 @@ fragment float4 fragment_shader(rasterizer_data in [[stage_in]],
             break;
     }
     
-    return mix(scale(image, in.texcoords, input_resolution, *output_resolution),
-               scale(previous_image, in.texcoords, input_resolution, *output_resolution), ratio);
+    return pow(mix(scale(image, in.texcoords, input_resolution, *output_resolution),
+               scale(previous_image, in.texcoords, input_resolution, *output_resolution), ratio), 1 / GAMMA);
 }
 

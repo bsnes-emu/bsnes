@@ -19,7 +19,7 @@ STATIC vec3 rgb_to_hq_colospace(vec4 rgb)
 STATIC bool is_different(vec4 a, vec4 b)
 {
     vec3 diff = abs(rgb_to_hq_colospace(a) - rgb_to_hq_colospace(b));
-    return diff.x > 0.125 || diff.y > 0.027 || diff.z > 0.031;
+    return diff.x > 0.018 || diff.y > 0.002 || diff.z > 0.005;
 }
 
 #define P(m, r) ((pattern & (m)) == (r))
