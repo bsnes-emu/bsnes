@@ -533,7 +533,7 @@ RETRO_API void retro_get_system_info(retro_system_info *info)
 	info->library_name     = "bsnes";
 	info->library_version  = Emulator::Version;
 	info->need_fullpath    = true;
-	info->valid_extensions = "smc|sfc";
+	info->valid_extensions = "smc|sfc|gb|gbc";
 	info->block_extract = false;
 }
 
