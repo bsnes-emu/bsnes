@@ -52,6 +52,10 @@
 #error Unable to detect endianess
 #endif
 
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
+#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
+#endif
+
 typedef struct {
     struct {
         uint8_t r, g, b;
