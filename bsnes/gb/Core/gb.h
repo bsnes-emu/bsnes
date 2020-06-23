@@ -52,6 +52,10 @@
 #error Unable to detect endianess
 #endif
 
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
+#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
+#endif
+
 typedef struct {
     struct {
         uint8_t r, g, b;
@@ -290,7 +294,7 @@ typedef struct {
     uint8_t pixel; // Color, 0-3
     uint8_t palette; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
     uint8_t priority; // Sprite priority – 0 in DMG, OAM index in CGB
-    bool bg_priority; // For sprite FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
+    bool bg_priority; // For sprite FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
 } GB_fifo_item_t;
 
 #define GB_FIFO_LENGTH 16
@@ -602,7 +606,7 @@ struct GB_gameboy_internal_s {
         GB_icd_vreset_callback_t icd_vreset_callback;
         GB_read_memory_callback_t read_memory_callback;
         GB_boot_rom_load_callback_t boot_rom_load_callback;
-               
+        GB_print_image_callback_t printer_callback;
         /* IR */
         uint64_t cycles_since_ir_change; // In 8MHz units
         uint64_t cycles_since_input_ir_change; // In 8MHz units
