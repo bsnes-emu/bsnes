@@ -43,7 +43,7 @@ void main()
     switch (frame_blending_mode) {
         default:
         case DISABLED:
-            frag_color = scale(image, position, input_resolution, output_resolution);
+            frag_color = pow(scale(image, position, input_resolution, output_resolution), vec4(1.0 / GAMMA));
             return;
         case SIMPLE:
             ratio = 0.5;
