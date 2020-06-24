@@ -329,101 +329,103 @@ FirstChecksumWithDuplicate:
 ChecksumsEnd:
 
 PalettePerChecksum:
-; | $80 means game requires DMG boot tilemap
-    db 0 	; Default Palette
-    db 4 	; ALLEY WAY
-    db 5 	; YAKUMAN
-    db 35 	; BASEBALL, (Game and Watch 2)
-    db 34 	; TENNIS
-    db 3 	; TETRIS
-    db 31 	; QIX
-    db 15 	; DR.MARIO
-    db 10 	; RADARMISSION
-    db 5 	; F1RACE
-    db 19 	; YOSSY NO TAMAGO
-    db 36 	;
-    db 7 | $80 ; X
-    db 37 	; MARIOLAND2
-    db 30 	; YOSSY NO COOKIE
-    db 44 	; ZELDA
-    db 21 	;
-    db 32 	;
-    db 31 	; TETRIS FLASH
-    db 20 	; DONKEY KONG
-    db 5 	; MARIO'S PICROSS
-    db 33 	;
-    db 13 	; POKEMON RED, (GAMEBOYCAMERA G)
-    db 14 	; POKEMON GREEN
-    db 5 	; PICROSS 2
-    db 29 	; YOSSY NO PANEPON
-    db 5 	; KIRAKIRA KIDS
-    db 18 	; GAMEBOY GALLERY
-    db 9 	; POCKETCAMERA
-    db 3 	;
-    db 2 	; BALLOON KID
-    db 26 	; KINGOFTHEZOO
-    db 25 	; DMG FOOTBALL
-    db 25 	; WORLD CUP
-    db 41 	; OTHELLO
-    db 42 	; SUPER RC PRO-AM
-    db 26 	; DYNABLASTER
-    db 45 	; BOY AND BLOB GB2
-    db 42 	; MEGAMAN
-    db 45 	; STAR WARS-NOA
-    db 36 	;
-    db 38 	; WAVERACE
-    db 26 	;
-    db 42 	; LOLO2
-    db 30 	; YOSHI'S COOKIE
-    db 41 	; MYSTIC QUEST
-    db 34 	;
-    db 34 	; TOPRANKINGTENNIS
-    db 5 	; MANSELL
-    db 42 	; MEGAMAN3
-    db 6 	; SPACE INVADERS
-    db 5 	; GAME&WATCH
-    db 33 	; DONKEYKONGLAND95
-    db 25 	; ASTEROIDS/MISCMD
-    db 42 	; STREET FIGHTER 2
-    db 42 	; DEFENDER/JOUST
-    db 40 	; KILLERINSTINCT95
-    db 2 	; TETRIS BLAST
-    db 16 	; PINOCCHIO
-    db 25 	;
-    db 42 	; BA.TOSHINDEN
-    db 42 	; NETTOU KOF 95
-    db 5 	;
-    db 0 	; TETRIS PLUS
-    db 39 	; DONKEYKONGLAND 3
-    db 36 	;
-    db 22 	; SUPER MARIOLAND
-    db 25 	; GOLF
-    db 6 	; SOLARSTRIKER
-    db 32 	; GBWARS
-    db 12 	; KAERUNOTAMENI
-    db 36 	;
-    db 11 	; POKEMON BLUE
-    db 39 	; DONKEYKONGLAND
-    db 18 	; GAMEBOY GALLERY2
-    db 39 	; DONKEYKONGLAND 2
-    db 24 	; KID ICARUS
-    db 31 	; TETRIS2
-    db 50 	;
-    db 17 	; MOGURANYA
-    db 46 	;
-    db 6 	; GALAGA&GALAXIAN
-    db 27 	; BT2RAGNAROKWORLD
-    db 0 	; KEN GRIFFEY JR
-    db 47 	;
-    db 41 	; MAGNETIC SOCCER
-    db 41 	; VEGAS STAKES
-    db 0 	;
-    db 0 	; MILLI/CENTI/PEDE
-    db 19 	; MARIO & YOSHI
-    db 34 	; SOCCER
-    db 23 	; POKEBOM
-    db 18 	; G&W GALLERY
-    db 29 	; TETRIS ATTACK
+palette_index: MACRO ; palette, flags
+    db ((\1) * 3) | (\2) ; | $80 means game requires DMG boot tilemap
+ENDM
+    palette_index 0, 0  ; Default Palette
+    palette_index 4, 0  ; ALLEY WAY
+    palette_index 5, 0  ; YAKUMAN
+    palette_index 35, 0 ; BASEBALL, (Game and Watch 2)
+    palette_index 34, 0 ; TENNIS
+    palette_index 3, 0  ; TETRIS
+    palette_index 31, 0 ; QIX
+    palette_index 15, 0 ; DR.MARIO
+    palette_index 10, 0 ; RADARMISSION
+    palette_index 5, 0  ; F1RACE
+    palette_index 19, 0 ; YOSSY NO TAMAGO
+    palette_index 36, 0 ;
+    palette_index 7, $80 ; X
+    palette_index 37, 0 ; MARIOLAND2
+    palette_index 30, 0 ; YOSSY NO COOKIE
+    palette_index 44, 0 ; ZELDA
+    palette_index 21, 0 ;
+    palette_index 32, 0 ;
+    palette_index 31, 0 ; TETRIS FLASH
+    palette_index 20, 0 ; DONKEY KONG
+    palette_index 5, 0  ; MARIO'S PICROSS
+    palette_index 33, 0 ;
+    palette_index 13, 0 ; POKEMON RED, (GAMEBOYCAMERA G)
+    palette_index 14, 0 ; POKEMON GREEN
+    palette_index 5, 0  ; PICROSS 2
+    palette_index 29, 0 ; YOSSY NO PANEPON
+    palette_index 5, 0  ; KIRAKIRA KIDS
+    palette_index 18, 0 ; GAMEBOY GALLERY
+    palette_index 9, 0  ; POCKETCAMERA
+    palette_index 3, 0  ;
+    palette_index 2, 0  ; BALLOON KID
+    palette_index 26, 0 ; KINGOFTHEZOO
+    palette_index 25, 0 ; DMG FOOTBALL
+    palette_index 25, 0 ; WORLD CUP
+    palette_index 41, 0 ; OTHELLO
+    palette_index 42, 0 ; SUPER RC PRO-AM
+    palette_index 26, 0 ; DYNABLASTER
+    palette_index 45, 0 ; BOY AND BLOB GB2
+    palette_index 42, 0 ; MEGAMAN
+    palette_index 45, 0 ; STAR WARS-NOA
+    palette_index 36, 0 ;
+    palette_index 38, 0 ; WAVERACE
+    palette_index 26, 0 ;
+    palette_index 42, 0 ; LOLO2
+    palette_index 30, 0 ; YOSHI'S COOKIE
+    palette_index 41, 0 ; MYSTIC QUEST
+    palette_index 34, 0 ;
+    palette_index 34, 0 ; TOPRANKINGTENNIS
+    palette_index 5, 0  ; MANSELL
+    palette_index 42, 0 ; MEGAMAN3
+    palette_index 6, 0  ; SPACE INVADERS
+    palette_index 5, 0  ; GAME&WATCH
+    palette_index 33, 0 ; DONKEYKONGLAND95
+    palette_index 25, 0 ; ASTEROIDS/MISCMD
+    palette_index 42, 0 ; STREET FIGHTER 2
+    palette_index 42, 0 ; DEFENDER/JOUST
+    palette_index 40, 0 ; KILLERINSTINCT95
+    palette_index 2, 0  ; TETRIS BLAST
+    palette_index 16, 0 ; PINOCCHIO
+    palette_index 25, 0 ;
+    palette_index 42, 0 ; BA.TOSHINDEN
+    palette_index 42, 0 ; NETTOU KOF 95
+    palette_index 5, 0  ;
+    palette_index 0, 0  ; TETRIS PLUS
+    palette_index 39, 0 ; DONKEYKONGLAND 3
+    palette_index 36, 0 ;
+    palette_index 22, 0 ; SUPER MARIOLAND
+    palette_index 25, 0 ; GOLF
+    palette_index 6, 0  ; SOLARSTRIKER
+    palette_index 32, 0 ; GBWARS
+    palette_index 12, 0 ; KAERUNOTAMENI
+    palette_index 36, 0 ;
+    palette_index 11, 0 ; POKEMON BLUE
+    palette_index 39, 0 ; DONKEYKONGLAND
+    palette_index 18, 0 ; GAMEBOY GALLERY2
+    palette_index 39, 0 ; DONKEYKONGLAND 2
+    palette_index 24, 0 ; KID ICARUS
+    palette_index 31, 0 ; TETRIS2
+    palette_index 50, 0 ;
+    palette_index 17, 0 ; MOGURANYA
+    palette_index 46, 0 ;
+    palette_index 6, 0  ; GALAGA&GALAXIAN
+    palette_index 27, 0 ; BT2RAGNAROKWORLD
+    palette_index 0, 0  ; KEN GRIFFEY JR
+    palette_index 47, 0 ;
+    palette_index 41, 0 ; MAGNETIC SOCCER
+    palette_index 41, 0 ; VEGAS STAKES
+    palette_index 0, 0  ;
+    palette_index 0, 0  ; MILLI/CENTI/PEDE
+    palette_index 19, 0 ; MARIO & YOSHI
+    palette_index 34, 0 ; SOCCER
+    palette_index 23, 0 ; POKEBOM
+    palette_index 18, 0 ; G&W GALLERY
+    palette_index 29, 0 ; TETRIS ATTACK
 
 Dups4thLetterArray:
     db "BEFAARBEKEK R-URAR INAILICE R"
