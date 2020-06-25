@@ -76,6 +76,13 @@ LDFLAGS += -march=native -mtune=native
 CFLAGS += -march=native -mtune=native
 endif
 
+ifeq ($(CONF),fat_release)
+override CONF := release
+FAT_FLAGS += -arch x86_64 -arch arm64
+endif
+
+
+
 # Set compilation and linkage flags based on target, platform and configuration
 
 OPEN_DIALOG = OpenDialog/gtk.c
@@ -134,9 +141,9 @@ ifeq ($(SYSROOT),/Library/Developer/CommandLineTools/SDKs/)
 $(error Could not find a macOS SDK)
 endif
 
-CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9
+CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
-LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9
+LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
 GL_LDFLAGS := -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
@@ -229,24 +236,24 @@ $(OBJ)/%.dep: %
 
 $(OBJ)/Core/%.c.o: Core/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) -DGB_INTERNAL -c $< -o $@
+	$(CC) $(CFLAGS) $(FAT_FLAGS) -DGB_INTERNAL -c $< -o $@
 
 $(OBJ)/SDL/%.c.o: SDL/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
 $(OBJ)/%.c.o: %.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(FAT_FLAGS) -c $< -o $@
 	
 # HexFiend requires more flags
 $(OBJ)/HexFiend/%.m.o: HexFiend/%.m
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(OCFLAGS) -c $< -o $@ -fno-objc-arc -include HexFiend/HexFiend_2_Framework_Prefix.pch
+	$(CC) $(CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@ -fno-objc-arc -include HexFiend/HexFiend_2_Framework_Prefix.pch
 	
 $(OBJ)/%.m.o: %.m
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(OCFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@
 
 # Cocoa Port
 
@@ -274,7 +281,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
 
 $(BIN)/SameBoy.app/Contents/MacOS/SameBoy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework IOKit
+	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) -framework OpenGL -framework AudioUnit -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework IOKit
 ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
@@ -296,7 +303,7 @@ $(BIN)/SameBoy.qlgenerator: $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL 
 # once in the QL Generator. It should probably become a dylib instead.
 $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL: $(CORE_OBJECTS) $(QUICKLOOK_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) -Wl,-exported_symbols_list,QuickLook/exports.sym -bundle -framework Cocoa -framework Quicklook
+	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) -Wl,-exported_symbols_list,QuickLook/exports.sym -bundle -framework Cocoa -framework Quicklook
 
 # cgb_boot_fast.bin is not a standard boot ROM, we don't expect it to exist in the user-provided
 # boot ROM directory.
@@ -309,7 +316,7 @@ $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs
 # Unix versions build only one binary
 $(BIN)/SDL/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) $(GL_LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) $(SDL_LDFLAGS) $(GL_LDFLAGS)
 ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
