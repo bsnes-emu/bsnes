@@ -2,8 +2,6 @@
 #include "libco.h"
 #include "settings.h"
 
-#include <assert.h>
-#include <stdlib.h>
 #include <stdint.h>
 #ifdef LIBCO_MPROTECT
   #include <unistd.h>
@@ -85,13 +83,13 @@ cothread_t co_derive(void* memory, unsigned int size, void (*entrypoint)(void)) 
 }
 
 cothread_t co_create(unsigned int size, void (*entrypoint)(void)) {
-  void* memory = malloc(size);
+  void* memory = LIBCO_MALLOC(size);
   if(!memory) return (cothread_t)0;
   return co_derive(memory, size, entrypoint);
 }
 
 void co_delete(cothread_t handle) {
-  free(handle);
+  LIBCO_FREE(handle);
 }
 
 void co_switch(cothread_t handle) {

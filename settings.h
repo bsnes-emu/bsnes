@@ -26,6 +26,17 @@
   #define alignas(bytes)
 #endif
 
+#if !defined(LIBCO_ASSERT)
+  #include <assert.h>
+  #define LIBCO_ASSERT assert
+#endif
+
+#if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
+  #include <stdlib.h>
+  #define LIBCO_MALLOC malloc
+  #define LIBCO_FREE   free
+#endif
+
 #if defined(_MSC_VER)
   #define section(name) __declspec(allocate("." #name))
 #elif defined(__APPLE__)
@@ -33,6 +44,7 @@
 #else
   #define section(name) __attribute__((section("." #name "#")))
 #endif
+
 
 /* if defined(LIBCO_C) */
 #endif
