@@ -287,7 +287,7 @@ ifeq ($(CONF), release)
 endif
 
 $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
-	ibtool --compile $@ $^
+	ibtool --compile $@ $^ 2>&1 | cat -
 	
 # Quick Look generator
 
