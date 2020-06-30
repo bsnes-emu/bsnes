@@ -151,6 +151,10 @@ auto InputManager::bindHotkeys() -> void {
     program.reset();
   }));
 
+  hotkeys.append(InputHotkey("Power Cycle").onPress([] {
+    program.power();
+  }));
+
   hotkeys.append(InputHotkey("Quit Emulator").onPress([] {
     program.quit();
   }));

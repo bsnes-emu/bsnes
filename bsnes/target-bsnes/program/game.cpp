@@ -308,6 +308,14 @@ auto Program::reset() -> void {
   showMessage("Game reset");
 }
 
+auto Program::power() -> void {
+  if(!emulator->loaded()) return;
+  rewindReset();
+  hackCompatibility();
+  emulator->power();
+  showMessage("Power cycle");
+}
+
 auto Program::unload() -> void {
   if(!emulator->loaded()) return;
   //todo: video.clear() is not working on macOS/OpenGL 3.2
