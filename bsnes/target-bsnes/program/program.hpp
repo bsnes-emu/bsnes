@@ -24,6 +24,7 @@ struct Program : Lock, Emulator::Platform {
   auto loadSufamiTurboB(string location) -> bool;
   auto save() -> void;
   auto reset() -> void;
+  auto power() -> void;
   auto unload() -> void;
   auto verified() const -> bool;
 
