@@ -155,6 +155,10 @@ auto InputManager::bindHotkeys() -> void {
     program.power();
   }));
 
+  hotkeys.append(InputHotkey("Unload Game").onPress([] {
+    program.unload();
+  }));
+
   hotkeys.append(InputHotkey("Quit Emulator").onPress([] {
     program.quit();
   }));
