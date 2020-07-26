@@ -2,13 +2,14 @@
 MAKEFLAGS := Rr
 .SUFFIXES:
 
+# An empty variable to defeat make functions that trim whitespace.
+[empty] =
 [0-9] = 0 1 2 3 4 5 6 7 8 9
 [A-Z] = A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 [a-z] = a b c d e f g h i j k l m n o p q r s t u v w x y z
 [markup] = ` ~ ! @ \# $$ % ^ & * ( ) - _ = + [ { ] } \ | ; : ' " , < . > / ?
 [all] = $([0-9]) $([A-Z]) $([a-z]) $([markup])
-[space] :=
-[space] +=
+[space] := $([empty]) $([empty])
 
 # platform detection
 ifeq ($(platform),)
