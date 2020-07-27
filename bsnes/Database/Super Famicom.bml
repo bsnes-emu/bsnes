@@ -1,5 +1,5 @@
 database
-  revision: 2020-01-01
+  revision: 2020-01-21
 
 //Prototypes (JPN)
 
@@ -125,7 +125,7 @@ game
 //Super Famicom (JPN)
 
 database
-  revision: 2020-01-01
+  revision: 2020-01-21
 
 game
   sha256:   5c4e283efc338958b8dd45ebd6daf133a9eb280420a98e2e1df358ae0242c366
@@ -169,6 +169,22 @@ game
     memory
       type: RAM
       size: 0x8000
+      content: Save
+
+game
+  sha256:   a98eb5f0521746e6ce6d208591e86d366b6e0479d96474bfff43856fe8cfec12
+  label:    バハムートラグーン
+  name:     Bahamut Lagoon
+  region:   SHVC-AXBJ-JPN
+  revision: SHVC-AXBJ-0
+  board:    SHVC-1J3M-20
+    memory
+      type: ROM
+      size: 0x300000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
       content: Save
 
 game
@@ -1459,6 +1475,22 @@ game
     memory
       type: ROM
       size: 0x2e0000
+      content: Program
+    memory
+      type: RAM
+      size: 0x2000
+      content: Save
+
+game
+  sha256:   77b2d5450ce3c87185f913c2584673530c13dfbe8cc433b1e9fe5e9a653bf7d5
+  label:    テイルズオブファンタジア
+  name:     Tales of Phantasia
+  region:   SHVC-ATVJ-JPN
+  revision: SHVC-ATVJ-0
+  board:    SHVC-LJ3M-01
+    memory
+      type: ROM
+      size: 0x600000
       content: Program
     memory
       type: RAM
