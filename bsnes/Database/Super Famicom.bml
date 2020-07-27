@@ -6053,7 +6053,7 @@ game
 //Super Nintendo (USA)
 
 database
-  revision: 2020-01-01
+  revision: 2020-07-27
 
 game
   sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
@@ -13361,6 +13361,24 @@ game
       size: 0x8000
       content: Save
       volatile
+
+game
+  sha256:   e134f20f6ee7d422d06faea6b1ae1e4101d1d0a200a0571d715d1cf23d959e8c
+  label:    Star Fox 2
+  name:     Star Fox 2
+  region:   USA
+  revision: 1.0
+  board:    GSU-RAM
+    memory
+      type: ROM
+      size: 0x100000
+      content: Program
+    memory
+      type: RAM
+      size: 0x10000
+      content: Save
+    oscillator
+      frequency: 21440000
 
 game
   sha256:   3a16ad45ae3d89b13c9e53e21c2a4c725ff7cec7fbe7896d538d163f92cb4aac
