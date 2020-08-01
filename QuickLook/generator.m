@@ -61,9 +61,9 @@ static OSStatus render(CGContextRef cgContext, CFURLRef url, bool showBorder)
     }
     
     if (showBorder) {
-        /* Use the CGB flag to determine the cartrdige "look":
+        /* Use the CGB flag to determine the cartridge "look":
          - DMG cartridges are grey
-         - CGB cartrdiges are transparent
+         - CGB cartridges are transparent
          - CGB cartridges that support DMG systems are black
          */
         NSImage *effectiveTemplate = nil;
