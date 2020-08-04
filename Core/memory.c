@@ -195,10 +195,10 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
-        gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
+        gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
         /* RTC read */
         gb->rtc_latched.high |= ~0xC1; /* Not all bytes in RTC high are used. */
-        return gb->rtc_latched.data[gb->mbc_ram_bank - 8];
+        return gb->rtc_latched.data[gb->mbc_ram_bank];
     }
 
     if (gb->camera_registers_mapped) {
@@ -509,7 +509,10 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
                 case 0x2000: case 0x3000: gb->mbc3.rom_bank  = value; break;
-                case 0x4000: case 0x5000: gb->mbc3.ram_bank  = value; break;
+                case 0x4000: case 0x5000:
+                    gb->mbc3.ram_bank  = value;
+                    gb->mbc3_rtc_mapped = value & 8;
+                    break;
                 case 0x6000: case 0x7000:
                     if (!gb->rtc_latch && (value & 1)) { /* Todo: verify condition is correct */
                         memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
@@ -693,8 +696,8 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
-    if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
-        gb->rtc_latched.data[gb->mbc_ram_bank - 8] = gb->rtc_real.data[gb->mbc_ram_bank - 8] = value;
+    if (gb->cartridge_type->has_rtc && gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
+        gb->rtc_latched.data[gb->mbc_ram_bank] = gb->rtc_real.data[gb->mbc_ram_bank] = value;
         return;
     }
 

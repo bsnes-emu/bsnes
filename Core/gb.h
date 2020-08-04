@@ -438,7 +438,7 @@ struct GB_gameboy_internal_s {
         bool rumble_state;
         bool cart_ir;
         
-        // TODO: move to huc3 struct when breaking save compat
+        // TODO: move to huc3/mbc3 struct when breaking save compat
         uint8_t huc3_mode;
         uint8_t huc3_access_index;
         uint16_t huc3_minutes, huc3_days;
@@ -446,6 +446,7 @@ struct GB_gameboy_internal_s {
         bool huc3_alarm_enabled;
         uint8_t huc3_read;
         uint8_t huc3_access_flags;
+        bool mbc3_rtc_mapped;
     );
 
 
