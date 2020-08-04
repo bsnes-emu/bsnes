@@ -684,7 +684,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
     
-    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size)
+    if ((!gb->mbc_ram_enable)
        && gb->cartridge_type->mbc_type != GB_HUC1) return;
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
@@ -705,7 +705,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
-    if (!gb->mbc_ram) {
+    if (!gb->mbc_ram || !gb->mbc_ram_size) {
         return;
     }
 
