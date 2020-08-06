@@ -205,7 +205,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         return GB_camera_read_register(gb, addr);
     }
 
-    if (!gb->mbc_ram || gb->mbc_ram_size) {
+    if (!gb->mbc_ram || !gb->mbc_ram_size) {
         return 0xFF;
     }
 
@@ -214,7 +214,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
 
     uint8_t effective_bank = gb->mbc_ram_bank;
-    if (gb->is_mbc30) {
+    if (gb->cartridge_type->mbc_type == GB_MBC3 && !gb->is_mbc30) {
         effective_bank &= 0x3;
     }
     uint8_t ret = gb->mbc_ram[((addr & 0x1FFF) + effective_bank * 0x2000) & (gb->mbc_ram_size - 1)];
@@ -708,8 +708,13 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (!gb->mbc_ram || !gb->mbc_ram_size) {
         return;
     }
+    
+    uint8_t effective_bank = gb->mbc_ram_bank;
+    if (gb->cartridge_type->mbc_type == GB_MBC3 && !gb->is_mbc30) {
+        effective_bank &= 0x3;
+    }
 
-    gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)] = value;
+    gb->mbc_ram[((addr & 0x1FFF) + effective_bank * 0x2000) & (gb->mbc_ram_size - 1)] = value;
 }
 
 static void write_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
