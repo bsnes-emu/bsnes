@@ -51,7 +51,9 @@
         JOYHatsEmulateButtonsKey: @YES,
     }];
     
-    [NSUserNotificationCenter defaultUserNotificationCenter].delegate = self;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
+        [NSUserNotificationCenter defaultUserNotificationCenter].delegate = self;
+    }
 }
 
 - (IBAction)toggleDeveloperMode:(id)sender

@@ -404,6 +404,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     unsigned time_to_alarm = GB_time_to_alarm(&gb);
     
     if (time_to_alarm) {
+        [NSUserNotificationCenter defaultUserNotificationCenter].delegate = (id)[NSApp delegate];
         NSUserNotification *notification = [[NSUserNotification alloc] init];
         NSString *friendlyName = [[self.fileName lastPathComponent] stringByDeletingPathExtension];
         NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
