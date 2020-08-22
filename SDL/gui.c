@@ -170,7 +170,8 @@ void update_viewport(void)
     }
 }
 
-void rescale_window() {
+static void rescale_window(void)
+{
     SDL_SetWindowSize(window, GB_get_screen_width(&gb) * configuration.default_scale, GB_get_screen_height(&gb) * configuration.default_scale);
 }
 
@@ -489,7 +490,8 @@ void cycle_default_scale(unsigned index)
 {
     if (configuration.default_scale == GB_SDL_DEFAULT_SCALE_MAX) {
         configuration.default_scale = 1;
-    } else {
+    }
+    else {
         configuration.default_scale++;
     }
 
@@ -501,7 +503,8 @@ void cycle_default_scale_backwards(unsigned index)
 {
     if (configuration.default_scale == 1) {
         configuration.default_scale = GB_SDL_DEFAULT_SCALE_MAX;
-    } else {
+    }
+    else {
         configuration.default_scale--;
     }
 
