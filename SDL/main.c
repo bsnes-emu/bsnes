@@ -624,12 +624,47 @@ int main(int argc, char **argv)
 
     SDL_Init(SDL_INIT_EVERYTHING);
     
+    strcpy(prefs_path, resource_path("prefs.bin"));
+    if (access(prefs_path, R_OK | W_OK) != 0) {
+        char *prefs_dir = SDL_GetPrefPath("", "SameBoy");
+        snprintf(prefs_path, sizeof(prefs_path) - 1, "%sprefs.bin", prefs_dir);
+        SDL_free(prefs_dir);
+    }
+    
+    FILE *prefs_file = fopen(prefs_path, "rb");
+    if (prefs_file) {
+        fread(&configuration, 1, sizeof(configuration), prefs_file);
+        fclose(prefs_file);
+        
+        /* Sanitize for stability */
+        configuration.color_correction_mode %= GB_COLOR_CORRECTION_REDUCE_CONTRAST +1;
+        configuration.scaling_mode %= GB_SDL_SCALING_MAX;
+        configuration.default_scale %= GB_SDL_DEFAULT_SCALE_MAX + 1;
+        configuration.blending_mode %= GB_FRAME_BLENDING_MODE_ACCURATE + 1;
+        configuration.highpass_mode %= GB_HIGHPASS_MAX;
+        configuration.model %= MODEL_MAX;
+        configuration.sgb_revision %= SGB_MAX;
+        configuration.dmg_palette %= 3;
+        configuration.border_mode %= GB_BORDER_ALWAYS + 1;
+        configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
+    }
+    
+    if (configuration.model >= MODEL_MAX) {
+        configuration.model = MODEL_CGB;
+    }
+
+    if (configuration.default_scale == 0) {
+        configuration.default_scale = 2;
+    }
+    
+    atexit(save_configuration);
+    
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              160 * 2, 144 * 2, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+                              160 * configuration.default_scale, 144 * configuration.default_scale, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_SetWindowMinimumSize(window, 160, 144);
     
     if (fullscreen) {
@@ -659,36 +694,6 @@ int main(int argc, char **argv)
     GB_audio_init();
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-    
-    strcpy(prefs_path, resource_path("prefs.bin"));
-    if (access(prefs_path, R_OK | W_OK) != 0) {
-        char *prefs_dir = SDL_GetPrefPath("", "SameBoy");
-        snprintf(prefs_path, sizeof(prefs_path) - 1, "%sprefs.bin", prefs_dir);
-        SDL_free(prefs_dir);
-    }
-    
-    FILE *prefs_file = fopen(prefs_path, "rb");
-    if (prefs_file) {
-        fread(&configuration, 1, sizeof(configuration), prefs_file);
-        fclose(prefs_file);
-        
-        /* Sanitize for stability */
-        configuration.color_correction_mode %= GB_COLOR_CORRECTION_REDUCE_CONTRAST +1;
-        configuration.scaling_mode %= GB_SDL_SCALING_MAX;
-        configuration.blending_mode %= GB_FRAME_BLENDING_MODE_ACCURATE + 1;
-        configuration.highpass_mode %= GB_HIGHPASS_MAX;
-        configuration.model %= MODEL_MAX;
-        configuration.sgb_revision %= SGB_MAX;
-        configuration.dmg_palette %= 3;
-        configuration.border_mode %= GB_BORDER_ALWAYS + 1;
-        configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
-    }
-    
-    if (configuration.model >= MODEL_MAX) {
-        configuration.model = MODEL_CGB;
-    }
-    
-    atexit(save_configuration);
     
     if (!init_shader_with_name(&shader, configuration.filter)) {
         init_shader_with_name(&shader, "NearestNeighbor");
