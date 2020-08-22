@@ -109,6 +109,7 @@ configuration_t configuration =
     .model = MODEL_CGB,
     .volume = 100,
     .rumble_mode = GB_RUMBLE_ALL_GAMES,
+    .default_scale = 2,
 };
 
 
