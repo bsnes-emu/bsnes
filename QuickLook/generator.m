@@ -105,8 +105,9 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
 
 OSStatus GenerateThumbnailForURL(void *thisInterface, QLThumbnailRequestRef thumbnail, CFURLRef url, CFStringRef contentTypeUTI, CFDictionaryRef options, CGSize maxSize)
 {
+    extern NSString *kQLThumbnailPropertyIconFlavorKey;
     @autoreleasepool {
-        CGContextRef cgContext = QLThumbnailRequestCreateContext(thumbnail, ((NSSize){1024, 1024}), true, (__bridge CFDictionaryRef)(@{@"IconFlavor" : @(0)}));
+        CGContextRef cgContext = QLThumbnailRequestCreateContext(thumbnail, ((NSSize){1024, 1024}), true, (__bridge CFDictionaryRef)(@{kQLThumbnailPropertyIconFlavorKey : @(0)}));
         if (render(cgContext, url, true) == noErr) {
             QLThumbnailRequestFlushContext(thumbnail, cgContext);
             CGContextRelease(cgContext);
