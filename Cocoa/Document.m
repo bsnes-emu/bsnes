@@ -9,6 +9,7 @@
 #include "GBWarningPopover.h"
 #include "GBCheatWindowController.h"
 #include "GBTerminalTextFieldCell.h"
+#include "BigSurToolbar.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -569,6 +570,17 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[self.fileURL path] lastPathComponent]];
     self.debuggerSplitView.dividerColor = [NSColor clearColor];
+    if (@available(macOS 11.0, *)) {
+        self.memoryWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
+        self.printerFeedWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
+        [self.printerFeedWindow.toolbar removeItemAtIndex:1];
+        self.printerFeedWindow.toolbar.items.firstObject.image =
+            [NSImage imageWithSystemSymbolName:@"square.and.arrow.down"
+                      accessibilityDescription:@"Save"];
+        self.printerFeedWindow.toolbar.items.lastObject.image =
+            [NSImage imageWithSystemSymbolName:@"printer"
+                      accessibilityDescription:@"Print"];
+    }
         
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateHighpassFilter)

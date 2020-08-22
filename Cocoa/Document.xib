@@ -115,7 +115,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="EQe-Ad-L7S">
                                             <rect key="frame" x="0.0" y="0.0" width="591" height="376"/>
-                                            <autoresizingMask key="autoresizingMask"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textView ambiguous="YES" editable="NO" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" baseWritingDirection="leftToRight" findStyle="bar" allowsNonContiguousLayout="YES" id="doS-dM-hnl">
                                                     <rect key="frame" x="0.0" y="0.0" width="591" height="376"/>
@@ -152,7 +152,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="YHx-TM-zIC">
                                             <rect key="frame" x="0.0" y="0.0" width="329" height="47"/>
-                                            <autoresizingMask key="autoresizingMask"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textView ambiguous="YES" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" allowsCharacterPickerTouchBarItem="NO" allowsUndo="YES" allowsNonContiguousLayout="YES" textCompletion="NO" spellingCorrection="YES" id="w0g-eK-jM4">
                                                     <rect key="frame" x="0.0" y="0.0" width="329" height="47"/>
@@ -186,7 +186,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="Cs9-3x-ATg">
                                             <rect key="frame" x="0.0" y="0.0" width="329" height="328"/>
-                                            <autoresizingMask key="autoresizingMask"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textView ambiguous="YES" editable="NO" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" baseWritingDirection="leftToRight" findStyle="bar" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="JgV-7E-iwp">
                                                     <rect key="frame" x="0.0" y="0.0" width="329" height="328"/>
@@ -800,13 +800,11 @@
             <toolbar key="toolbar" implicitIdentifier="1FF86A2B-6637-4EE6-A25A-7298D79AE84E" autosavesConfiguration="NO" allowsUserCustomization="NO" displayMode="iconAndLabel" sizeMode="regular" id="gH3-SH-7il">
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="15EB8D49-8C6E-42F2-9F7F-F7D7A0BBDAAF" label="Save" paletteLabel="Save" tag="-1" image="NSFolder" id="CBz-1N-o0Q">
-                        <size key="minSize" width="32" height="32"/>
-                        <size key="maxSize" width="32" height="32"/>
                         <connections>
                             <action selector="savePrinterFeed:" target="-2" id="Dm3-h0-ch4"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="mtd-zS-DXa"/>
+                    <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" explicitItemIdentifier="Print" id="mtd-zS-DXa"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="AoG-LH-J4b"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="Q0x-n5-Q2Y"/>
                 </allowedToolbarItems>

@@ -1,6 +1,7 @@
 #import "GBPreferencesWindow.h"
 #import "NSString+StringForKey.h"
 #import "GBButtons.h"
+#import "BigSurToolbar.h"
 #import <Carbon/Carbon.h>
 
 @implementation GBPreferencesWindow
@@ -50,6 +51,11 @@
                     ];
     }
     return filters;
+}
+
+- (NSWindowToolbarStyle)toolbarStyle
+{
+    return NSWindowToolbarStylePreference;
 }
 
 - (void)close
