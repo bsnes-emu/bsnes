@@ -41,6 +41,7 @@ enum pending_command {
     GB_SDL_QUIT_COMMAND,
 };
 
+#define GB_SDL_DEFAULT_SCALE_MAX 8
 
 extern enum pending_command pending_command;
 extern unsigned command_parameter;
@@ -107,6 +108,8 @@ typedef struct {
     GB_border_mode_t border_mode;
     uint8_t volume;
     GB_rumble_mode_t rumble_mode;
+
+    uint8_t default_scale;
 } configuration_t;
 
 extern configuration_t configuration;
