@@ -108,7 +108,7 @@ endif
 
 # GCC's implementation of this warning has false positives, so we skip it
 ifneq ($(shell $(CC) --version 2>&1 | grep "gcc"), )
-WARNINGS += -no-maybe-uninitialized
+WARNINGS += -Wno-maybe-uninitialized
 endif
 
 CFLAGS += $(WARNINGS)
