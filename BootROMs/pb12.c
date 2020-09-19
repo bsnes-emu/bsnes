@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <err.h>
 
 void opts(uint8_t byte, uint8_t *options)
 {
@@ -11,6 +12,17 @@ void opts(uint8_t byte, uint8_t *options)
     *(options++) = byte & (byte << 1);
     *(options++) = byte | ((byte >> 1) & 0xff);
     *(options++) = byte & (byte >> 1);
+}
+
+void write_all(int fd, const void *buf, size_t count) {
+    while (count) {
+        ssize_t written = write(fd, buf, count);
+        if (written < 0) {
+            err(1, "write");
+        }
+        count -= written;
+        buf += written;
+    }
 }
 
 int main()
@@ -76,15 +88,15 @@ int main()
         if (bits >= 8) {
             uint8_t outctl = control >> (bits - 8);
             assert(outctl != 1);
-            write(STDOUT_FILENO, &outctl, 1);
-            write(STDOUT_FILENO, literals, literals_size);
+            write_all(STDOUT_FILENO, &outctl, 1);
+            write_all(STDOUT_FILENO, literals, literals_size);
             bits -= 8;
             control &= (1 << bits) - 1;
             literals_size = 0;
         }
     }
     uint8_t end_byte = 1;
-    write(STDOUT_FILENO, &end_byte, 1);
+    write_all(STDOUT_FILENO, &end_byte, 1);
 
     return 0;
 }

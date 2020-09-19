@@ -106,6 +106,11 @@ ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2>
 WARNINGS += -Wpartial-availability
 endif
 
+# GCC's implementation of this warning has false positives, so we skip it
+ifneq ($(shell $(CC) --version 2>&1 | grep "gcc"), )
+WARNINGS += -Wno-maybe-uninitialized
+endif
+
 CFLAGS += $(WARNINGS)
 
 CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
