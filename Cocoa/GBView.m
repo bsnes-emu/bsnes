@@ -1,4 +1,5 @@
 #import <IOKit/pwr_mgt/IOPMLib.h>
+#import <Carbon/Carbon.h>
 #import "GBView.h"
 #import "GBViewGL.h"
 #import "GBViewMetal.h"
@@ -7,6 +8,98 @@
 
 #define JOYSTICK_HIGH 0x4000
 #define JOYSTICK_LOW 0x3800
+
+static const uint8_t workboy_ascii_to_key[] = {
+    ['0'] = GB_WORKBOY_0,
+    ['`'] = GB_WORKBOY_UMLAUT,
+    ['1'] = GB_WORKBOY_1,
+    ['2'] = GB_WORKBOY_2,
+    ['3'] = GB_WORKBOY_3,
+    ['4'] = GB_WORKBOY_4,
+    ['5'] = GB_WORKBOY_5,
+    ['6'] = GB_WORKBOY_6,
+    ['7'] = GB_WORKBOY_7,
+    ['8'] = GB_WORKBOY_8,
+    ['9'] = GB_WORKBOY_9,
+    
+    ['\r'] = GB_WORKBOY_ENTER,
+    [3] = GB_WORKBOY_ENTER,
+    
+    ['!'] = GB_WORKBOY_EXCLAMATION_MARK,
+    ['$'] = GB_WORKBOY_DOLLAR,
+    ['#'] = GB_WORKBOY_HASH,
+    ['~'] = GB_WORKBOY_TILDE,
+    ['*'] = GB_WORKBOY_ASTERISK,
+    ['+'] = GB_WORKBOY_PLUS,
+    ['-'] = GB_WORKBOY_MINUS,
+    ['('] = GB_WORKBOY_LEFT_PARENTHESIS,
+    [')'] = GB_WORKBOY_RIGHT_PARENTHESIS,
+    [';'] = GB_WORKBOY_SEMICOLON,
+    [':'] = GB_WORKBOY_COLON,
+    ['%'] = GB_WORKBOY_PERCENT,
+    ['='] = GB_WORKBOY_EQUAL,
+    [','] = GB_WORKBOY_COMMA,
+    ['<'] = GB_WORKBOY_LT,
+    ['.'] = GB_WORKBOY_DOT,
+    ['>'] = GB_WORKBOY_GT,
+    ['/'] = GB_WORKBOY_SLASH,
+    ['?'] = GB_WORKBOY_QUESTION_MARK,
+    [' '] = GB_WORKBOY_SPACE,
+    ['\''] = GB_WORKBOY_QUOTE,
+    ['@'] = GB_WORKBOY_AT,
+    
+    ['q'] = GB_WORKBOY_Q,
+    ['w'] = GB_WORKBOY_W,
+    ['e'] = GB_WORKBOY_E,
+    ['r'] = GB_WORKBOY_R,
+    ['t'] = GB_WORKBOY_T,
+    ['y'] = GB_WORKBOY_Y,
+    ['u'] = GB_WORKBOY_U,
+    ['i'] = GB_WORKBOY_I,
+    ['o'] = GB_WORKBOY_O,
+    ['p'] = GB_WORKBOY_P,
+    ['a'] = GB_WORKBOY_A,
+    ['s'] = GB_WORKBOY_S,
+    ['d'] = GB_WORKBOY_D,
+    ['f'] = GB_WORKBOY_F,
+    ['g'] = GB_WORKBOY_G,
+    ['h'] = GB_WORKBOY_H,
+    ['j'] = GB_WORKBOY_J,
+    ['k'] = GB_WORKBOY_K,
+    ['l'] = GB_WORKBOY_L,
+    ['z'] = GB_WORKBOY_Z,
+    ['x'] = GB_WORKBOY_X,
+    ['c'] = GB_WORKBOY_C,
+    ['v'] = GB_WORKBOY_V,
+    ['b'] = GB_WORKBOY_B,
+    ['n'] = GB_WORKBOY_N,
+    ['m'] = GB_WORKBOY_M,
+};
+
+static const uint8_t workboy_vk_to_key[] = {
+    [kVK_F1] = GB_WORKBOY_CLOCK,
+    [kVK_F2] = GB_WORKBOY_TEMPERATURE,
+    [kVK_F3] = GB_WORKBOY_MONEY,
+    [kVK_F4] = GB_WORKBOY_CALCULATOR,
+    [kVK_F5] = GB_WORKBOY_DATE,
+    [kVK_F6] = GB_WORKBOY_CONVERSION,
+    [kVK_F7] = GB_WORKBOY_RECORD,
+    [kVK_F8] = GB_WORKBOY_WORLD,
+    [kVK_F9] = GB_WORKBOY_PHONE,
+    [kVK_F10] = GB_WORKBOY_UNKNOWN,
+    [kVK_Delete] = GB_WORKBOY_BACKSPACE,
+    [kVK_Shift] = GB_WORKBOY_SHIFT_DOWN,
+    [kVK_RightShift] = GB_WORKBOY_SHIFT_DOWN,
+    [kVK_UpArrow] = GB_WORKBOY_UP,
+    [kVK_DownArrow] = GB_WORKBOY_DOWN,
+    [kVK_LeftArrow] = GB_WORKBOY_LEFT,
+    [kVK_RightArrow] = GB_WORKBOY_RIGHT,
+    [kVK_Escape] = GB_WORKBOY_ESCAPE,
+    [kVK_ANSI_KeypadDecimal] = GB_WORKBOY_DECIMAL_POINT,
+    [kVK_ANSI_KeypadClear] = GB_WORKBOY_M,
+    [kVK_ANSI_KeypadMultiply] = GB_WORKBOY_H,
+    [kVK_ANSI_KeypadDivide] = GB_WORKBOY_J,
+};
 
 @implementation GBView
 {
@@ -188,7 +281,20 @@
 
 -(void)keyDown:(NSEvent *)theEvent
 {
+    if ([theEvent type] != NSEventTypeFlagsChanged && theEvent.isARepeat) return;
     unsigned short keyCode = theEvent.keyCode;
+    if (GB_workboy_is_enabled(_gb)) {
+        if (theEvent.keyCode < sizeof(workboy_vk_to_key) && workboy_vk_to_key[theEvent.keyCode]) {
+            GB_workboy_set_key(_gb, workboy_vk_to_key[theEvent.keyCode]);
+            return;
+        }
+        unichar c = [theEvent type] != NSEventTypeFlagsChanged? [theEvent.charactersIgnoringModifiers.lowercaseString characterAtIndex:0] : 0;
+        if (c < sizeof(workboy_ascii_to_key) && workboy_ascii_to_key[c]) {
+            GB_workboy_set_key(_gb, workboy_ascii_to_key[c]);
+            return;
+        }
+    }
+    
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -232,6 +338,15 @@
 -(void)keyUp:(NSEvent *)theEvent
 {
     unsigned short keyCode = theEvent.keyCode;
+    if (GB_workboy_is_enabled(_gb)) {
+        if (keyCode == kVK_Shift || keyCode == kVK_RightShift) {
+            GB_workboy_set_key(_gb, GB_WORKBOY_SHIFT_UP);
+        }
+        else {
+            GB_workboy_set_key(_gb, GB_WORKBOY_NONE);
+        }
+
+    }
     bool handled = false;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];

@@ -1131,8 +1131,9 @@ void GB_disconnect_serial(GB_gameboy_t *gb)
     gb->serial_transfer_bit_start_callback = NULL;
     gb->serial_transfer_bit_end_callback = NULL;
     
-    /* Reset any internally-emulated device. Currently, only the printer. */
+    /* Reset any internally-emulated device. */
     memset(&gb->printer, 0, sizeof(gb->printer));
+    memset(&gb->workboy, 0, sizeof(gb->workboy));
 }
 
 bool GB_is_inited(GB_gameboy_t *gb)

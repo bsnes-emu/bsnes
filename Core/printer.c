@@ -189,13 +189,13 @@ static void byte_reieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
 
 static void serial_start(GB_gameboy_t *gb, bool bit_received)
 {
-    gb->printer.byte_being_recieved <<= 1;
-    gb->printer.byte_being_recieved |= bit_received;
-    gb->printer.bits_recieved++;
-    if (gb->printer.bits_recieved == 8) {
-        byte_reieve_completed(gb, gb->printer.byte_being_recieved);
-        gb->printer.bits_recieved = 0;
-        gb->printer.byte_being_recieved = 0;
+    gb->printer.byte_being_received <<= 1;
+    gb->printer.byte_being_received |= bit_received;
+    gb->printer.bits_received++;
+    if (gb->printer.bits_received == 8) {
+        byte_reieve_completed(gb, gb->printer.byte_being_received);
+        gb->printer.bits_received = 0;
+        gb->printer.byte_being_received = 0;
     }
 }
 

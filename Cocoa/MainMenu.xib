@@ -379,6 +379,12 @@
                                     <action selector="connectPrinter:" target="-1" id="tl1-CL-tAw"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Workboy" id="lo9-CX-BJj">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="connectWorkboy:" target="-1" id="6vS-bq-wAX"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
