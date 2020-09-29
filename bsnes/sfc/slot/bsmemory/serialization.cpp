@@ -1,6 +1,6 @@
 auto BSMemory::serialize(serializer& s) -> void {
-  Thread::serialize(s);
   if(ROM) return;
+  Thread::serialize(s);
 
   s.array(memory.data(), memory.size());
 
