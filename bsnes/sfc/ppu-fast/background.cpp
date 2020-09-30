@@ -28,13 +28,13 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
   uint vmask = (width << self.tileSize << !!(self.screenSize & 2)) - 1;
 
   uint y = this->y;
-  if(self.mosaicEnable) y -= io.mosaic.size - io.mosaic.counter;
+
   if(hires) {
     hscroll <<= 1;
-    if(io.interlace) {
-      y = y << 1 | field();
-      if(self.mosaicEnable) y -= io.mosaic.size - io.mosaic.counter + field();
-    }
+    if(io.interlace) y = y << 1 | (field() && !self.mosaicEnable);
+  }
+  if(self.mosaicEnable) {
+    y -= (io.mosaic.size - io.mosaic.counter) << (hires && io.interlace);
   }
 
   uint mosaicCounter = 1;
@@ -112,7 +112,7 @@ auto PPU::Line::renderBackground(PPU::IO::Background& self, uint8 source) -> voi
           color += data >> shift + 49 & 128;
         }
 
-        mosaicCounter = self.mosaicEnable ? io.mosaic.size : 1;
+        mosaicCounter = self.mosaicEnable ? io.mosaic.size << hires : 1;
         mosaicPalette = color;
         mosaicPriority = tilePriority;
         if(directColorMode) {
