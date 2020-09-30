@@ -5,7 +5,6 @@
 #include "settings.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -223,7 +222,7 @@ __asm__(
 
 cothread_t co_active() {
   if(!co_active_handle) {
-    co_active_handle = (struct ppc64_context*)malloc(MIN_STACK + sizeof(struct ppc64_context));
+    co_active_handle = (struct ppc64_context*)LIBCO_MALLOC(MIN_STACK + sizeof(struct ppc64_context));
   }
   return (cothread_t)co_active_handle;
 }
@@ -255,13 +254,13 @@ cothread_t co_derive(void* memory, unsigned int size, void (*coentry)(void)) {
 }
 
 cothread_t co_create(unsigned int size, void (*coentry)(void)) {
-  void* memory = malloc(size);
+  void* memory = LIBCO_MALLOC(size);
   if(!memory) return (cothread_t)0;
   return co_derive(memory, size, coentry);
 }
 
 void co_delete(cothread_t handle) {
-  free(handle);
+  LIBCO_FREE(handle);
 }
 
 void co_switch(cothread_t to) {

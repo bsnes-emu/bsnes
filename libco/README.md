@@ -1,5 +1,4 @@
-libco
------
+# libco
 
 libco is a cooperative multithreading library written in C89.
 
@@ -21,7 +20,10 @@ It currently includes backends for:
 * POSIX platforms (setjmp)
 * Windows platforms (fibers)
 
-License
-=======
+See [doc/targets.md] for details.
+
+See [doc/usage.md] for documentation.
+
+## License
 
 libco is released under the ISC license.
