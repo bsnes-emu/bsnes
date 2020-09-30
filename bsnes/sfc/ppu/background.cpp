@@ -37,13 +37,12 @@ auto PPU::Background::fetchNameTable() -> void {
   uint hscroll = io.hoffset;
   uint vscroll = io.voffset;
 
-  if(mosaic.enable) vpixel -= ppu.mosaic.voffset();
   if(hires()) {
     hscroll <<= 1;
-    if(ppu.io.interlace) {
-      vpixel = vpixel << 1 | ppu.field();
-      if(mosaic.enable) vpixel -= ppu.mosaic.voffset() + ppu.field();
-    }
+    if(ppu.io.interlace) vpixel = vpixel << 1 | (ppu.field() && !mosaic.enable);
+  }
+  if(mosaic.enable) {
+    vpixel -= ppu.mosaic.voffset() << (hires() && ppu.io.interlace);
   }
 
   bool repeated = false;
@@ -197,7 +196,8 @@ auto PPU::Background::run(bool screen) -> void {
   if(++pixelCounter == 0) renderingIndex++;
 
   uint x = ppu.hcounter() - 56 >> 2;
-  if(x == 0) {
+
+  if(x == 0 && (!hires() || screen == Screen::Below)) {
     mosaic.hcounter = ppu.mosaic.size;
     mosaic.pixel = pixel;
   } else if((!hires() || screen == Screen::Below) && --mosaic.hcounter == 0) {
