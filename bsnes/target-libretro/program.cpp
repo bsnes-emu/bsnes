@@ -15,6 +15,7 @@ using namespace nall;
 #include <heuristics/heuristics.cpp>
 #include <heuristics/super-famicom.cpp>
 #include <heuristics/game-boy.cpp>
+#include <heuristics/bs-memory.cpp>
 
 #include "resources.hpp"
 
@@ -36,11 +37,13 @@ struct Program : Emulator::Platform
 	auto loadFile(string location) -> vector<uint8_t>;
 	auto loadSuperFamicom(string location) -> bool;
 	auto loadGameBoy(string location) -> bool;
+	auto loadBSMemory(string location) -> bool;
 
 	auto save() -> void;
 
 	auto openRomSuperFamicom(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
 	auto openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
+	auto openRomBSMemory(string name, vfs::file::mode mode) -> shared_pointer<vfs::file>;
 	
 	auto hackPatchMemory(vector<uint8_t>& data) -> void;
 	
@@ -72,6 +75,10 @@ public:
 	struct GameBoy : Game {
 		vector<uint8_t> program;
 	} gameBoy;
+
+	struct BSMemory : Game {
+		vector<uint8_t> program;
+	} bsMemory;
 };
 
 static Program *program = nullptr;
@@ -130,6 +137,21 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 		}
 		else {
 			result = openRomGameBoy(name, mode);
+		}
+	}
+	else if (id == 3) {  //BS Memory
+		if (name == "manifest.bml" && mode == vfs::file::mode::read) {
+			result = vfs::memory::file::open(bsMemory.manifest.data<uint8_t>(), bsMemory.manifest.size());
+		}
+		else if (name == "program.rom" && mode == vfs::file::mode::read) {
+			result = vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
+		}
+		else if(name == "program.flash") {
+			//writes are not flushed to disk in bsnes
+			result = vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
+		}
+		else {
+			result = openRomBSMemory(name, mode);
 		}
 	}
 	return result;
@@ -214,6 +236,11 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
 	{
 		if (loadGameBoy(gameBoy.location))
 		{
+			return { id, NULL };
+		}
+	}
+	else if (id == 3) {
+		if (loadBSMemory(bsMemory.location)) {
 			return { id, NULL };
 		}
 	}
@@ -417,6 +444,21 @@ auto Program::openRomGameBoy(string name, vfs::file::mode mode) -> shared_pointe
 	return {};
 }
 
+auto Program::openRomBSMemory(string name, vfs::file::mode mode) -> shared_pointer<vfs::file> {
+	if (name == "program.rom" && mode == vfs::file::mode::read)
+	{
+		return vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
+	}
+
+	if (name == "program.flash")
+	{
+		//writes are not flushed to disk
+		return vfs::memory::file::open(bsMemory.program.data(), bsMemory.program.size());
+	}
+
+	return {};
+}
+
 auto Program::loadFile(string location) -> vector<uint8_t>
 {
 	if(Location::suffix(location).downcase() == ".zip") {
@@ -503,6 +545,23 @@ auto Program::loadGameBoy(string location) -> bool {
 	gameBoy.location = location;
 	gameBoy.program = rom;
 
+	return true;
+}
+
+auto Program::loadBSMemory(string location) -> bool {
+	vector<uint8_t> rom;
+	rom = loadFile(location);
+
+	if (rom.size() < 0x8000) return false;
+
+	auto heuristics = Heuristics::BSMemory(rom, location);
+	auto sha256 = Hash::SHA256(rom).digest();
+
+	bsMemory.manifest = heuristics.manifest();
+	bsMemory.document = BML::unserialize(bsMemory.manifest);
+	bsMemory.location = location;
+
+	bsMemory.program = rom;
 	return true;
 }
 
