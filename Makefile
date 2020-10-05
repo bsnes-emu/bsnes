@@ -16,7 +16,7 @@ endif
 ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
 EXESUFFIX:=.exe
-NATIVE_CC = clang -IWindows -Wno-deprecated-declarations
+NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=i386-pc-windows
 else
 EXESUFFIX:=
 NATIVE_CC := cc
@@ -129,8 +129,8 @@ GL_CFLAGS := $(shell $(PKG_CONFIG) --cflags gl)
 GL_LDFLAGS := $(shell $(PKG_CONFIG) --libs gl || echo -lGL)
 endif
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -IWindows -Drandom=rand
-LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lSDL2main -Wl,/MANIFESTFILE:NUL
+CFLAGS += -IWindows -Drandom=rand --target=i386-pc-windows
+LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=i386-pc-windows
 SDL_LDFLAGS := -lSDL2
 GL_LDFLAGS := -lopengl32
 else
@@ -404,7 +404,7 @@ $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRE
 	$(realpath $(PB12_COMPRESS)) < $< > $@
 	
 $(PB12_COMPRESS): BootROMs/pb12.c
-	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@
+	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@ --target=i386-pc-windows
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
