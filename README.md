@@ -47,7 +47,7 @@ SameBoy requires the following tools and libraries to build:
 On Windows, SameBoy also requires:
  * Visual Studio (For headers, etc.)
  * [GnuWin](http://gnuwin32.sourceforge.net/)
- * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, respectively. (see [Build FAQ] (https://github.com/LIJI32/SameBoy/blob/master/build-faq.md))
+ * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, respectively. (see [Build FAQ](https://github.com/LIJI32/SameBoy/blob/master/build-faq.md) for more details on Windows compilation)
 
 To compile, simply run `make`. The targets are `cocoa` (Default for macOS), `sdl` (Default for everything else), `libretro`, `bootroms` and `tester`. You may also specify `CONF=debug` (default), `CONF=release`, `CONF=native_release` or `CONF=fat_release`  to control optimization, symbols and multi-architectures. `native_release` is faster than `release`, but is optimized to the host's CPU and therefore is not portable. `fat_release` is exclusive to macOS and builds x86-64 and ARM64 fat binaries; this requires using a recent enough `clang` and macOS SDK using `xcode-select`, or setting them explicitly with `CC=` and `SYSROOT=`, respectively. All other configurations will build to your host architecture. You may set `BOOTROMS_DIR=...` to a directory containing precompiled boot ROM files, otherwise the build system will compile and use SameBoy's own boot ROMs.
 
