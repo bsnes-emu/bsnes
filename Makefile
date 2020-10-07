@@ -404,7 +404,7 @@ $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRE
 	$(realpath $(PB12_COMPRESS)) < $< > $@
 	
 $(PB12_COMPRESS): BootROMs/pb12.c
-	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@ --target=i386-pc-windows
+	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@
 
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
