@@ -25,7 +25,7 @@ cothread_t co_active() {
 }
 
 cothread_t co_derive(void* memory, unsigned int heapsize, void (*coentry)(void)) {
-  //Windows fibers do not allow users to supply their own memory
+  /* Windows fibers do not allow users to supply their own memory */
   return (cothread_t)0;
 }
 
