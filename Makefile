@@ -16,7 +16,7 @@ endif
 ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
 EXESUFFIX:=.exe
-NATIVE_CC = clang -IWindows -Wno-deprecated-declarations
+NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=i386-pc-windows
 else
 EXESUFFIX:=
 NATIVE_CC := cc
@@ -129,8 +129,8 @@ GL_CFLAGS := $(shell $(PKG_CONFIG) --cflags gl)
 GL_LDFLAGS := $(shell $(PKG_CONFIG) --libs gl || echo -lGL)
 endif
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -IWindows -Drandom=rand
-LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lSDL2main -Wl,/MANIFESTFILE:NUL
+CFLAGS += -IWindows -Drandom=rand --target=i386-pc-windows
+LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=i386-pc-windows
 SDL_LDFLAGS := -lSDL2
 GL_LDFLAGS := -lopengl32
 else
