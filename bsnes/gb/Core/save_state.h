@@ -5,7 +5,11 @@
 
 #define GB_PADDING(type, old_usage) type old_usage##__do_not_use
 
-#define GB_SECTION(name, ...) __attribute__ ((aligned (8))) struct {} name##_section_start; __VA_ARGS__; struct {} name##_section_end
+#ifdef __cplusplus
+#define GB_SECTION(name, ...) __attribute__ ((aligned (8))) __VA_ARGS__
+#else
+#define GB_SECTION(name, ...) __attribute__ ((aligned (8))) union {uint8_t name##_section_start; struct {__VA_ARGS__};}; uint8_t name##_section_end[0] 
+#endif
 #define GB_SECTION_OFFSET(name) (offsetof(GB_gameboy_t, name##_section_start))
 #define GB_SECTION_SIZE(name) (offsetof(GB_gameboy_t, name##_section_end) - offsetof(GB_gameboy_t, name##_section_start))
 #define GB_GET_SECTION(gb, name) ((void*)&((gb)->name##_section_start))

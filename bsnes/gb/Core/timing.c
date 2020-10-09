@@ -291,8 +291,20 @@ void GB_rtc_run(GB_gameboy_t *gb)
         }
         return;
     }
+    
     if ((gb->rtc_real.high & 0x40) == 0) { /* is timer running? */
         time_t current_time = time(NULL);
+        
+        while (gb->last_rtc_second + 60 * 60 * 24 < current_time) {
+            gb->last_rtc_second += 60 * 60 * 24;
+            if (++gb->rtc_real.days == 0) {
+                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                    gb->rtc_real.high |= 0x80; /* Overflow bit */
+                }
+                gb->rtc_real.high ^= 1;
+            }
+        }
+        
         while (gb->last_rtc_second < current_time) {
             gb->last_rtc_second++;
             if (++gb->rtc_real.seconds == 60) { 

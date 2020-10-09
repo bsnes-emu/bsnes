@@ -88,7 +88,6 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_ram_bank = gb->mbc3.ram_bank;
             if (!gb->is_mbc30) {
                 gb->mbc_rom_bank &= 0x7F;
-                gb->mbc_ram_bank &= 0x3;
             }
             if (gb->mbc_rom_bank == 0) {
                 gb->mbc_rom_bank = 1;

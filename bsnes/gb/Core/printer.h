@@ -48,7 +48,8 @@ typedef struct
     uint8_t image[160 * 200];
     uint16_t image_offset;
     
-    GB_print_image_callback_t callback;
+    /* TODO: Delete me. */
+    uint64_t padding;
     
     uint8_t compression_run_lenth;
     bool compression_run_is_compressed;

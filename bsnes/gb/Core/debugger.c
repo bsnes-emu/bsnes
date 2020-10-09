@@ -689,6 +689,7 @@ exit:
 
 struct debugger_command_s;
 typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments, char *modifiers, const struct debugger_command_s *command);
+typedef char *debugger_completer_imp_t(GB_gameboy_t *gb, const char *string, uintptr_t *context);
 
 typedef struct debugger_command_s {
     const char *command;
@@ -697,6 +698,8 @@ typedef struct debugger_command_s {
     const char *help_string; // Null if should not appear in help
     const char *arguments_format; // For usage message
     const char *modifiers_format; // For usage message
+    debugger_completer_imp_t *argument_completer;
+    debugger_completer_imp_t *modifiers_completer;
 } debugger_command_t;
 
 static const char *lstrip(const char *str)
@@ -832,6 +835,19 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     return true;
 }
 
+static char *on_off_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"on", "off"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
+}
+
 /* Enable or disable software breakpoints */
 static bool softbreak(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
@@ -871,6 +887,65 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
         }
     }
     return (uint16_t) min;
+}
+
+static inline bool is_legal_symbol_char(char c)
+{
+    if (c >= '0' && c <= '9') return true;
+    if (c >= 'A' && c <= 'Z') return true;
+    if (c >= 'a' && c <= 'z') return true;
+    if (c == '_') return true;
+    if (c == '.') return true;
+    return false;
+}
+
+static char *symbol_completer(GB_gameboy_t *gb, const char *string, uintptr_t *_context)
+{
+    const char *symbol_prefix = string;
+    while (*string) {
+        if (!is_legal_symbol_char(*string)) {
+            symbol_prefix = string + 1;
+        }
+        string++;
+    }
+    
+    if (*symbol_prefix == '$') {
+        return NULL;
+    }
+    
+    struct {
+        uint16_t bank;
+        uint32_t symbol;
+    } *context = (void *)_context;
+    
+    
+    size_t length = strlen(symbol_prefix);
+    while (context->bank < 0x200) {
+        if (gb->bank_symbols[context->bank] == NULL ||
+            context->symbol >= gb->bank_symbols[context->bank]->n_symbols) {
+            context->bank++;
+            context->symbol = 0;
+            continue;
+        }
+        const char *candidate = gb->bank_symbols[context->bank]->symbols[context->symbol++].name;
+        if (memcmp(symbol_prefix, candidate, length) == 0) {
+            return strdup(candidate + length);
+        }
+    }
+    return NULL;
+}
+
+static char *j_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"j"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
 }
 
 static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
@@ -1038,6 +1113,19 @@ static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
         }
     }
     return (uint16_t) min;
+}
+
+static char *rw_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"r", "rw", "w"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
 }
 
 static bool watch(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
@@ -1277,6 +1365,19 @@ static bool should_break(GB_gameboy_t *gb, uint16_t addr, bool jump_to)
     return _should_break(gb, full_addr, jump_to);
 }
 
+static char *format_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"a", "b", "d", "o", "x"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
+}
+
 static bool print(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
@@ -1432,7 +1533,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        GB_log(gb, "Cartrdige includes%s RAM: $%x bytes\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
+        GB_log(gb, "Cartridge includes%s RAM: $%x bytes\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
         GB_log(gb, "No cartridge RAM\n");
@@ -1740,6 +1841,19 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     return true;
 }
 
+static char *wave_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"c", "f", "l"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
+}
+
 static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) || (modifiers && !strchr("fcl", modifiers[0]))) {
@@ -1787,7 +1901,7 @@ static const debugger_command_t commands[] = {
     {"finish", 1, finish, "Run until the current function returns"},
     {"backtrace", 2, backtrace, "Displays the current call stack"},
     {"bt", 2, }, /* Alias */
-    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected (Experimental)"},
+    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected"},
     {"ticks", 2, ticks, "Displays the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
                         "used"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
@@ -1796,30 +1910,33 @@ static const debugger_command_t commands[] = {
     {"apu", 3, apu, "Displays information about the current state of the audio chip"},
     {"wave", 3, wave, "Prints a visual representation of the wave RAM." HELP_NEWLINE
                       "Modifiers can be used for a (f)ull print (the default)," HELP_NEWLINE
-                      "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)"},
+        "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},
     {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
-    {"softbreak", 2, softbreak, "Enables or disables software breakpoints", "(on|off)"},
+    {"softbreak", 2, softbreak, "Enables or disables software breakpoints", "(on|off)", .argument_completer = on_off_completer},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
                                   "jumping to the target.",
-                                  "<expression>[ if <condition expression>]", "j"},
-    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]"},
+                                  "<expression>[ if <condition expression>]", "j",
+                                  .argument_completer = symbol_completer, .modifiers_completer = j_completer},
+    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]", .argument_completer = symbol_completer},
     {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
                         "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
                         "Default watchpoint type is write-only.",
-                        "<expression>[ if <condition expression>]", "(r|w|rw)"},
-    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]"},
+                        "<expression>[ if <condition expression>]", "(r|w|rw)",
+                        .argument_completer = symbol_completer, .modifiers_completer = rw_completer
+    },
+    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]", .argument_completer = symbol_completer},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
     {"print", 1, print, "Evaluate and print an expression" HELP_NEWLINE
                         "Use modifier to format as an address (a, default) or as a number in" HELP_NEWLINE
                         "decimal (d), hexadecimal (x), octal (o) or binary (b).",
-                        "<expression>", "format"},
+                        "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
     {"eval", 2, }, /* Alias */
-    {"examine", 2, examine, "Examine values at address", "<expression>", "count"},
+    {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
     {"x", 1, }, /* Alias */
-    {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count"},
+    {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
 
 
     {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
@@ -2073,6 +2190,63 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
         GB_log(gb, "%s: no such command.\n", command_string);
         return true;
     }
+}
+
+/* Returns true if debugger waits for more commands */
+char *GB_debugger_complete_substring(GB_gameboy_t *gb, char *input, uintptr_t *context)
+{   
+    char *command_string = input;
+    char *arguments = strchr(input, ' ');
+    if (arguments) {
+        /* Actually "split" the string. */
+        arguments[0] = 0;
+        arguments++;
+    }
+    
+    char *modifiers = strchr(command_string, '/');
+    if (modifiers) {
+        /* Actually "split" the string. */
+        modifiers[0] = 0;
+        modifiers++;
+    }
+    
+    const debugger_command_t *command = find_command(command_string);
+    if (command && command->implementation == help && arguments) {
+        command_string = arguments;
+        arguments = NULL;
+    }
+    
+    /* No commands and no modifiers, complete the command */
+    if (!arguments && !modifiers) {
+        size_t length = strlen(command_string);
+        if (*context >= sizeof(commands) / sizeof(commands[0])) {
+            return NULL;
+        }
+        for (const debugger_command_t *command = &commands[*context]; command->command; command++) {
+            (*context)++;
+            if (memcmp(command->command, command_string, length) == 0) { /* Is a substring? */
+                return strdup(command->command + length);
+            }
+        }
+        return NULL;
+    }
+    
+    if (command) {
+        if (arguments) {
+            if (command->argument_completer) {
+                return command->argument_completer(gb, arguments, context);
+            }
+            return NULL;
+        }
+        
+        if (modifiers) {
+            if (command->modifiers_completer) {
+                return command->modifiers_completer(gb, modifiers, context);
+            }
+            return NULL;
+        }
+    }
+    return NULL;
 }
 
 typedef enum {
