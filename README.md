@@ -38,7 +38,7 @@ SameBoy is an open-source project licensed under the MIT license, and you're wel
 
 ## Compilation
 SameBoy requires the following tools and libraries to build:
- * clang
+ * clang (Recommended; required for macOS) or GCC
  * make
  * macOS Cocoa port: macOS SDK and Xcode (For command line tools and ibtool)
  * SDL port: libsdl2
