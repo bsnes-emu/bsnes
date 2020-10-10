@@ -36,7 +36,7 @@ ifeq ($(MAKECMDGOALS),)
 MAKECMDGOALS := $(DEFAULT)
 endif
 
-VERSION := 0.13.6
+include version.mk
 export VERSION
 CONF ?= debug
 SDL_AUDIO_DRIVER ?= sdl
