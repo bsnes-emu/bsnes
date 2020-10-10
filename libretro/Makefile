@@ -17,8 +17,6 @@ filter_out2 = $(call filter_out1,$(call filter_out1,$1))
 unixpath = $(subst \,/,$1)
 unixcygpath = /$(subst :,,$(call unixpath,$1))
 
-CFLAGS += -DSAMEBOY_CORE_VERSION=\"$(VERSION)\"
-
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
@@ -301,6 +299,8 @@ else
 endif
 
 include Makefile.common
+
+CFLAGS += -DSAMEBOY_CORE_VERSION=\"$(VERSION)\"
 
 OBJECTS := $(patsubst $(CORE_DIR)/%.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
 
