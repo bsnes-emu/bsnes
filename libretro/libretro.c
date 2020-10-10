@@ -85,6 +85,8 @@ static retro_audio_sample_t audio_sample_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
+static bool libretro_supports_bitmasks = false;
+
 static unsigned emulated_devices = 1;
 static bool initialized = false;
 static unsigned screen_layout = 0;
@@ -119,24 +121,39 @@ static struct retro_rumble_interface rumble;
 
 static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 {
+    uint16_t joypad_bits = 0;
+
     input_poll_cb();
 
+    if (libretro_supports_bitmasks) {
+        joypad_bits = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
+    }
+    else {
+        unsigned j;
+
+        for (j = 0; j < (RETRO_DEVICE_ID_JOYPAD_R3+1); j++) {
+            if (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, j)) {
+                joypad_bits |= (1 << j);
+            }
+        }
+    }
+
     GB_set_key_state_for_player(gb, GB_KEY_RIGHT,  emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
     GB_set_key_state_for_player(gb, GB_KEY_LEFT,   emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
     GB_set_key_state_for_player(gb, GB_KEY_UP,     emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_UP));
     GB_set_key_state_for_player(gb, GB_KEY_DOWN,   emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_DOWN));
     GB_set_key_state_for_player(gb, GB_KEY_A,      emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_A));
     GB_set_key_state_for_player(gb, GB_KEY_B,      emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_B));
     GB_set_key_state_for_player(gb, GB_KEY_SELECT, emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_SELECT));
     GB_set_key_state_for_player(gb, GB_KEY_START,  emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_START));
 
 }
 
@@ -840,6 +857,10 @@ void retro_init(void)
     else {
         log_cb = fallback_log;
     }
+
+    if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL)) {
+        libretro_supports_bitmasks = true;
+    }
 }
 
 void retro_deinit(void)
@@ -848,6 +869,8 @@ void retro_deinit(void)
     free(frame_buf_copy);
     frame_buf = NULL;
     frame_buf_copy = NULL;
+
+    libretro_supports_bitmasks = false;
 }
 
 unsigned retro_api_version(void)
