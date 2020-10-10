@@ -8,7 +8,7 @@ include $(CORE_DIR)/libretro/Makefile.common
 
 GENERATED_SOURCES := $(filter %_boot.c,$(SOURCES_C))
 
-COREFLAGS := -DINLINE=inline -D__LIBRETRO__ -DGB_INTERNAL $(INCFLAGS) -DSAMEBOY_CORE_VERSION=\"$(VERSION)\" -Wno-multichar
+COREFLAGS := -DINLINE=inline -D__LIBRETRO__ -DGB_INTERNAL $(INCFLAGS) -DSAMEBOY_CORE_VERSION=\"$(VERSION)\" -Wno-multichar -DANDROID
 
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")

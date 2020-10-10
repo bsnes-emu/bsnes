@@ -85,6 +85,8 @@ static retro_audio_sample_t audio_sample_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
+static bool libretro_supports_bitmasks = false;
+
 static unsigned emulated_devices = 1;
 static bool initialized = false;
 static unsigned screen_layout = 0;
@@ -119,24 +121,39 @@ static struct retro_rumble_interface rumble;
 
 static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
 {
+    uint16_t joypad_bits = 0;
+
     input_poll_cb();
 
+    if (libretro_supports_bitmasks) {
+        joypad_bits = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
+    }
+    else {
+        unsigned j;
+
+        for (j = 0; j < (RETRO_DEVICE_ID_JOYPAD_R3+1); j++) {
+            if (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, j)) {
+                joypad_bits |= (1 << j);
+            }
+        }
+    }
+
     GB_set_key_state_for_player(gb, GB_KEY_RIGHT,  emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
     GB_set_key_state_for_player(gb, GB_KEY_LEFT,   emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
     GB_set_key_state_for_player(gb, GB_KEY_UP,     emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_UP));
     GB_set_key_state_for_player(gb, GB_KEY_DOWN,   emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_DOWN));
     GB_set_key_state_for_player(gb, GB_KEY_A,      emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_A));
     GB_set_key_state_for_player(gb, GB_KEY_B,      emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_B));
     GB_set_key_state_for_player(gb, GB_KEY_SELECT, emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_SELECT));
     GB_set_key_state_for_player(gb, GB_KEY_START,  emulated_devices == 1 ? port : 0,
-        input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START));
+        joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_START));
 
 }
 
@@ -207,7 +224,7 @@ static retro_environment_t environ_cb;
 static const struct retro_variable vars_single[] = {
     { "sameboy_color_correction_mode", "Color correction; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; accurate|remove dc offset|off" },
-    { "sameboy_model", "Emulated model; Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
+    { "sameboy_model", "Emulated model (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
     { "sameboy_border", "Display border; Super Game Boy only|always|never" },
     { "sameboy_rumble", "Enable rumble; rumble-enabled games|all games|never" },
     { NULL }
@@ -219,8 +236,8 @@ static const struct retro_variable vars_dual[] = {
     /*{ "sameboy_ir",   "Infrared Sensor Emulation; disabled|enabled" },*/
     { "sameboy_screen_layout", "Screen layout; top-down|left-right" },
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
-    { "sameboy_model_1", "Emulated model for Game Boy #1; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
-    { "sameboy_model_2", "Emulated model for Game Boy #2; Auto|Game Boy|Game Boy Color|Game Boy Advance" },
+    { "sameboy_model_1", "Emulated model for Game Boy #1 (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance" },
+    { "sameboy_model_2", "Emulated model for Game Boy #2 (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance" },
     { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
     { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; accurate|remove dc offset|off" },
@@ -601,11 +618,7 @@ static void check_variables()
                 new_model = MODEL_AUTO;
             }
 
-            if (new_model != model[0]) { 
-                geometry_updated = true;
-                model[0] = new_model;
-                init_for_current_model(0);
-            }
+            model[0] = new_model;
         }
 
         var.key = "sameboy_border";
@@ -747,10 +760,7 @@ static void check_variables()
                 new_model = MODEL_AUTO;
             }
 
-            if (model[0] != new_model) { 
-                model[0] = new_model;
-                init_for_current_model(0);
-            }
+            model[0] = new_model;
         }
 
         var.key = "sameboy_model_2";
@@ -776,10 +786,7 @@ static void check_variables()
                 new_model = MODEL_AUTO;
             }
 
-            if (model[1] != new_model) { 
-                model[1] = new_model;
-                init_for_current_model(1);
-            }
+            model[1] = new_model;
         }
 
         var.key = "sameboy_screen_layout";
@@ -850,6 +857,10 @@ void retro_init(void)
     else {
         log_cb = fallback_log;
     }
+
+    if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL)) {
+        libretro_supports_bitmasks = true;
+    }
 }
 
 void retro_deinit(void)
@@ -858,6 +869,8 @@ void retro_deinit(void)
     free(frame_buf_copy);
     frame_buf = NULL;
     frame_buf_copy = NULL;
+
+    libretro_supports_bitmasks = false;
 }
 
 unsigned retro_api_version(void)
@@ -947,10 +960,14 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_reset(void)
 {
+    check_variables();
+
     for (int i = 0; i < emulated_devices; i++) {
+        init_for_current_model(i);
         GB_reset(&gameboy[i]);
     }
 
+    geometry_updated = true;
 }
 
 void retro_run(void)

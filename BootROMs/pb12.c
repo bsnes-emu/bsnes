@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
-#include <err.h>
 
 void opts(uint8_t byte, uint8_t *options)
 {
@@ -18,7 +17,8 @@ void write_all(int fd, const void *buf, size_t count) {
     while (count) {
         ssize_t written = write(fd, buf, count);
         if (written < 0) {
-            err(1, "write");
+            fprintf(stderr, "write");
+            exit(1);
         }
         count -= written;
         buf += written;

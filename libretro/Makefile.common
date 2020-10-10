@@ -1,3 +1,5 @@
+include $(CORE_DIR)/version.mk
+
 INCFLAGS    := -I$(CORE_DIR)
 
 SOURCES_C   := $(CORE_DIR)/Core/gb.c \
