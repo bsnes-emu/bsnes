@@ -11,3 +11,9 @@ cd "$(dirname "$0")" || exit 1
 
 # Merge changes from the libco repository.
 git subtree pull --prefix=libco https://github.com/higan-emu/libco.git master
+
+# Merge changes from SameBoy
+git subtree pull --prefix=bsnes/gb https://github.com/LIJI32/SameBoy.git master
+echo "If SameBoy updated, remember to update the SameBoy version"
+echo "in bsnes/target-bsnes/presentation/presentation.cpp !"
+

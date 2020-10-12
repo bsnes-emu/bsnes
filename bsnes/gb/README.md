@@ -2,6 +2,10 @@
 
 SameBoy is an open source Game Boy (DMG) and Game Boy Color (CGB) emulator, written in portable C. It has a native Cocoa frontend for macOS, an SDL frontend for other operating systems, and a libretro core. It also includes a text-based debugger with an expression evaluator. Visit [the website](https://sameboy.github.io/).
 
+## bsnes integration
+
+This directory should be a clean copy of the upstream SameBoy source, with the exception of this section of the README, and the `GNUmakefile` file that integrates it with bsnes' build system. Only files in the `Core/` directory are used, none of the UI or other portions.
+
 ## Features
 Features common to both Cocoa and SDL versions:
  * Supports Game Boy (DMG) and Game Boy Color (CGB) emulation
