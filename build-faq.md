@@ -24,7 +24,7 @@ The following examples will be referenced later:
 
 ### rgbds
 
-After downloading [rgbds](https://github.com/bentley/rgbds/releases/), ensure that it is added to the `%PATH%`. This may be done by adding it to the user's or SYSTEM's Environment Variables, or may be added to the command line at compilation time via `set path=%path%;C:\path\to\rgbds`.  
+After downloading [rgbds](https://github.com/gbdev/rgbds/releases/), ensure that it is added to the `%PATH%`. This may be done by adding it to the user's or SYSTEM's Environment Variables, or may be added to the command line at compilation time via `set path=%path%;C:\path\to\rgbds`.  
 
 ### GnuWin
 
