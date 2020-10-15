@@ -53,4 +53,4 @@ To compile, simply run `make`. The targets are `cocoa` (Default for macOS), `sdl
 
 By default, the SDL port will look for resource files with a path relative to executable. If you are packaging SameBoy, you may wish to override this by setting the `DATA_DIR` variable during compilation to the target path of the directory containing all files (apart from the executable, that's not necessary) from the `build/bin/SDL` directory in the source tree. Make sure the variable ends with a `/` character.
 
-SameBoy was compiled and tested on macOS, Ubuntu and 64-bit Windows 7.
+SameBoy is compiled and tested on macOS and Ubuntu.
