@@ -14,7 +14,7 @@
   #if !defined(LIBCO_MP) /* Running in single-threaded environment */
     #define thread_local
   #else /* Running in multi-threaded environment */
-    #if defined(__STDC_VERSION__) /* Compiling as C Language */
+    #if defined(__STDC__) /* Compiling as C Language */
       #if defined(_MSC_VER) /* Don't rely on MSVC's C11 support */
         #define thread_local __declspec(thread)
       #elif __STDC_VERSION__ < 201112L /* If we are on C90/99 */
@@ -55,7 +55,7 @@
    - alignas (TYPE) is equivalent to alignas (alignof (TYPE)).
 */
 #if !defined(alignas) 
-  #if defined(__STDC_VERSION__) /* C Language */
+  #if defined(__STDC__) /* C Language */
     #if defined(_MSC_VER) /* Don't rely on MSVC's C11 support */
       #define alignas(bytes) __declspec(align(bytes))
     #elif __STDC_VERSION__ >= 201112L /* C11 and above */
