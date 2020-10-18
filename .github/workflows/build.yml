@@ -1,0 +1,177 @@
+name: Build
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+        - name: ubuntu
+          version: latest
+        - name: windows
+          version: latest
+        - name: macos
+          version: latest
+    runs-on: ${{ matrix.os.name }}-${{ matrix.os.version }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      if: matrix.os.name == 'ubuntu'
+      run: |
+        sudo apt-get update -y -qq
+        sudo apt-get install \
+          libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev \
+          libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+    - name: Make
+      run: make -j4 -C bsnes local=false
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: bsnes-${{ matrix.os.name }}
+        path: bsnes/out/bsnes*
+
+  release:
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: 'src'
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: 'bin'
+    - name: Package Artifacts
+      run: |
+        set -eu
+        case ${GITHUB_REF} in
+          refs/tags/*) suffix="-${GITHUB_REF#refs/tags/}" ;;
+          refs/heads/master) suffix="-nightly" ;;
+          *) suffix="" ;;
+        esac
+
+        srcdir="${GITHUB_WORKSPACE}/src"
+        bindir="${GITHUB_WORKSPACE}/bin"
+
+        # Hack: Workaround for GitHub artifacts losing attributes.
+        for program in bsnes
+        do
+          chmod +x ${bindir}/${program}-ubuntu/${program}
+          chmod +x ${bindir}/${program}-macos/${program}.app/Contents/MacOS/${program}
+        done
+
+        for os in ubuntu windows macos
+        do
+          mkdir "${os}"
+          cd "${os}"
+
+          # Package bsnes.
+          outdir=bsnes${suffix}
+          mkdir ${outdir}
+          mkdir ${outdir}/Database
+          mkdir ${outdir}/Firmware
+          cp -ar ${bindir}/bsnes-${os}/* ${outdir}
+          cp -a ${srcdir}/bsnes/Database/* ${outdir}/Database
+          cp -a ${srcdir}/shaders ${outdir}/Shaders
+          cp -a ${srcdir}/GPLv3.txt ${outdir}
+          zip -r ../bsnes-${os}.zip ${outdir}
+
+          cd -
+        done
+    - name: Create Release
+      id: release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -eu
+        github_rest()
+        {
+          local method="${1}"
+          local url="https://api.github.com${2}"
+          shift 2
+          >&2 echo "${method} ${url}"
+          curl \
+            --fail \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -X "${method}" \
+            "${url}" \
+            "$@"
+        }
+        github_get_release_id_for_tag()
+        {
+          payload=$(github_rest GET "/repos/${GITHUB_REPOSITORY}/releases/tags/${1}") || return
+          echo "${payload}" | jq .id
+        }
+        github_delete_release_by_id()
+        {
+          github_rest DELETE "/repos/${GITHUB_REPOSITORY}/releases/${1}"
+        }
+        github_create_release()
+        {
+          local payload="{
+            \"tag_name\": \"${1}\",
+            \"target_commitish\": \"${2}\",
+            \"name\": \"${3}\",
+            \"body\": \"${4}\",
+            \"draft\": ${5},
+            \"prerelease\": ${6}
+          }"
+          github_rest POST "/repos/${GITHUB_REPOSITORY}/releases" -d "${payload}"
+        }
+        make_nightly_release()
+        {
+          github_create_release \
+            nightly \
+            "${GITHUB_SHA}" \
+            "bsnes nightly $(date +"%Y-%m-%d")" \
+            "Auto-generated nightly release on $(date -u +"%Y-%m-%d %T %Z")" \
+            false \
+            true
+        }
+        make_version_release()
+        {
+          github_create_release \
+            "${1}" \
+            "${GITHUB_SHA}" \
+            "bsnes ${1}" \
+            "This is bsnes ${1}, released on $(date +"%Y-%m-%d")." \
+            false \
+            false
+        }
+        case ${GITHUB_REF} in
+          refs/tags/*)
+            # Create a new version release using the current revision.
+            echo "UPLOAD_URL=$(make_version_release ${GITHUB_REF#refs/tags/} | jq -r .upload_url)" >> $GITHUB_ENV
+            ;;
+          refs/heads/master)
+            # Check for an existing nightly release.
+            { release_id=$(github_get_release_id_for_tag nightly); status=$?; } || true
+            # Delete existing nightly release if it exists.
+            case ${status} in
+              0) github_delete_release_by_id "${release_id}" ;;
+              22) >&2 echo "No current nightly release; skipping tag deletion." ;;
+              *) >&2 echo "API call failed unexpectedly." && exit 1 ;;
+            esac
+            # Create a new nightly release using the current revision.
+            echo "UPLOAD_URL=$(make_nightly_release | jq -r .upload_url)" >> $GITHUB_ENV
+            ;;
+        esac
+    - name: Upload bsnes-ubuntu
+      uses: actions/upload-release-asset@v1
+      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-ubuntu.zip', asset_name: 'bsnes-ubuntu.zip', asset_content_type: 'application/zip' }
+    - name: Upload bsnes-windows
+      uses: actions/upload-release-asset@v1
+      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-windows.zip', asset_name: 'bsnes-windows.zip', asset_content_type: 'application/zip' }
+    - name: Upload bsnes-macos
+      uses: actions/upload-release-asset@v1
+      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-macos.zip', asset_name: 'bsnes-macos.zip', asset_content_type: 'application/zip' }
