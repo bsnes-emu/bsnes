@@ -101,11 +101,17 @@ auto CheatWindow::doChange() -> void {
 }
 
 auto CheatWindow::doAccept() -> void {
-  auto codes = codeValue.text().downcase().transform("+", "\n").split("\n").strip();
+  auto raw_codes = codeValue.text().downcase().transform("+", "\n").split("\n").strip();
+  vector<string> valid_codes;
   string invalid;  //if empty after below for-loop, code is considered valid
-  for(auto& code : codes) {
+  for(auto& code : raw_codes) {
+    if(code.length() == 0) {
+      continue;
+    }
     if(!program.gameBoy.program) {
-      if(!cheatEditor.decodeSNES(code)) {
+      if(cheatEditor.decodeSNES(code)) {
+        valid_codes.append(code);
+      } else {
         invalid =
           "Invalid code(s), please only use codes in the following format:\n"
           "\n"
@@ -115,7 +121,9 @@ auto CheatWindow::doAccept() -> void {
           "higan (aaaaaa=cc?dd)";
       }
     } else {
-      if(!cheatEditor.decodeGB(code)) {
+      if(cheatEditor.decodeGB(code)) {
+        valid_codes.append(code);
+      } else {
         invalid =
           "Invalid code(s), please only use codes in the following format:\n"
           "\n"
@@ -129,7 +137,7 @@ auto CheatWindow::doAccept() -> void {
   }
   if(invalid) return (void)MessageDialog().setAlignment(*toolsWindow).setText(invalid).error();
 
-  Cheat cheat = {nameValue.text().strip(), codes.merge("+"), enableOption.checked()};
+  Cheat cheat = {nameValue.text().strip(), valid_codes.merge("+"), enableOption.checked()};
   if(acceptButton.text() == "Add") {
     cheatEditor.addCheat(cheat);
   } else {
