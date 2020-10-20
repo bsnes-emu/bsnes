@@ -121,6 +121,15 @@ namespace nall {
   #include <machine/endian.h>
 #elif defined(PLATFORM_LINUX)
   #include <endian.h>
+  #ifndef BYTE_ORDER
+    #define BYTE_ORDER __BYTE_ORDER
+  #endif
+  #ifndef LITTLE_ENDIAN
+    #define LITTLE_ENDIAN __LITTLE_ENDIAN
+  #endif
+  #ifndef BIG_ENDIAN
+    #define BIG_ENDIAN __BIG_ENDIAN
+  #endif
 #elif defined(PLATFORM_BSD)
   #include <sys/endian.h>
 #endif
@@ -159,10 +168,10 @@ namespace nall {
 
 namespace nall {
 
-#if (defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
+#if (defined(BYTE_ORDER) && defined(LITTLE_ENDIAN) && BYTE_ORDER == LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
   #define ENDIAN_LSB
   constexpr auto endian() -> Endian { return Endian::LSB; }
-#elif (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || defined(__BIG_ENDIAN__) || defined(__powerpc__) || defined(_M_PPC)
+#elif (defined(BYTE_ORDER) && defined(BIG_ENDIAN) && BYTE_ORDER == BIG_ENDIAN) || defined(__BIG_ENDIAN__) || defined(__powerpc__) || defined(_M_PPC)
   #define ENDIAN_MSB
   constexpr auto endian() -> Endian { return Endian::MSB; }
 #else
