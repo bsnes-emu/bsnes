@@ -21,7 +21,6 @@ auto Configuration::process(Markup::Node document, bool load) -> void {
   bind(text,    "Hacks/Entropy", hacks.entropy);
   bind(natural, "Hacks/CPU/Overclock", hacks.cpu.overclock);
   bind(boolean, "Hacks/CPU/FastMath", hacks.cpu.fastMath);
-  bind(boolean, "Hacks/CPU/FastJoypadPolling", hacks.cpu.fastJoypadPolling);
   bind(boolean, "Hacks/PPU/Fast", hacks.ppu.fast);
   bind(boolean, "Hacks/PPU/Deinterlace", hacks.ppu.deinterlace);
   bind(natural, "Hacks/PPU/RenderCycle", hacks.ppu.renderCycle);

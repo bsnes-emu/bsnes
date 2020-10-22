@@ -1,6 +1,5 @@
 auto Program::hackCompatibility() -> void {
   string entropy = settings.emulator.hack.entropy;
-  bool fastJoypadPolling = false;
   bool fastPPU = settings.emulator.hack.ppu.fast;
   bool fastPPUNoSpriteLimit = settings.emulator.hack.ppu.noSpriteLimit;
   bool fastDSP = settings.emulator.hack.dsp.fast;
@@ -9,15 +8,6 @@ auto Program::hackCompatibility() -> void {
 
   auto title = superFamicom.title;
   auto region = superFamicom.region;
-
-  //sometimes menu options are skipped over in the main menu with cycle-based joypad polling
-  if(title == "Arcades Greatest Hits") fastJoypadPolling = true;
-
-  //the start button doesn't work in this game with cycle-based joypad polling
-  if(title == "TAIKYOKU-IGO Goliath") fastJoypadPolling = true;
-
-  //holding up or down on the menu quickly cycles through options instead of stopping after each button press
-  if(title == "WORLD MASTERS GOLF") fastJoypadPolling = true;
 
   //relies on mid-scanline rendering techniques
   if(title == "AIR STRIKE PATROL" || title == "DESERT FIGHTER") fastPPU = false;
@@ -67,7 +57,6 @@ auto Program::hackCompatibility() -> void {
   }
 
   emulator->configure("Hacks/Entropy", entropy);
-  emulator->configure("Hacks/CPU/FastJoypadPolling", fastJoypadPolling);
   emulator->configure("Hacks/PPU/Fast", fastPPU);
   emulator->configure("Hacks/PPU/NoSpriteLimit", fastPPUNoSpriteLimit);
   emulator->configure("Hacks/PPU/RenderCycle", renderCycle);
