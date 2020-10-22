@@ -33,7 +33,6 @@ struct Configuration {
     struct CPU {
       uint overclock = 100;
       bool fastMath = false;
-      bool fastJoypadPolling = false;
     } cpu;
     struct PPU {
       bool fast = true;

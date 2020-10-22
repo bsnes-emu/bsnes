@@ -120,7 +120,7 @@ private:
 
     bool autoJoypadActive = 0;
     bool autoJoypadLatch = 0;
-    uint autoJoypadCounter = 0;
+    uint autoJoypadCounter = 33;  //state machine; 4224 / 128 = 33 (inactive)
   } status;
 
   struct IO {
