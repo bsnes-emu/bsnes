@@ -12,11 +12,13 @@ auto CPU::readCPU(uint addr, uint8 data) -> uint8 {
   case 0x2180:  //WMDATA
     return bus.read(0x7e0000 | io.wramAddress++, data);
 
+  //todo: it is not known what happens when reading from this register during auto-joypad polling
   case 0x4016:  //JOYSER0
     data &= 0xfc;
     data |= controllerPort1.device->data();
     return data;
 
+  //todo: it is not known what happens when reading from this register during auto-joypad polling
   case 0x4017:  //JOYSER1
     data &= 0xe0;
     data |= 0x1c;  //pins are connected to GND
@@ -48,6 +50,7 @@ auto CPU::readCPU(uint addr, uint8 data) -> uint8 {
   case 0x4216: return io.rdmpy >> 0;  //RDMPYL
   case 0x4217: return io.rdmpy >> 8;  //RDMPYH
 
+  //todo: it is not known what happens when reading from these registers during auto-joypad polling
   case 0x4218: return io.joy1 >> 0;   //JOY1L
   case 0x4219: return io.joy1 >> 8;   //JOY1H
   case 0x421a: return io.joy2 >> 0;   //JOY2L
@@ -122,6 +125,7 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     io.wramAddress = io.wramAddress & 0x0ffff | (data & 1) << 16;
     return;
 
+  //todo: it is not known what happens when writing to this register during auto-joypad polling
   case 0x4016:  //JOYSER0
     //bit 0 is shared between JOYSER0 and JOYSER1:
     //strobing $4016.d0 affects both controller port latches.
@@ -130,6 +134,7 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     controllerPort2.device->latch(data & 1);
     return;
 
+  //todo: it is not known what happens when writing to this register during auto-joypad polling
   case 0x4200:  //NMITIMEN
     io.autoJoypadPoll = data & 1;
     nmitimenUpdate(data);
