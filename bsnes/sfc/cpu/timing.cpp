@@ -200,7 +200,7 @@ auto CPU::dmaEdge() -> void {
   }
 }
 
-//called every 128 clocks; see CPU::step()
+//called every 128 clocks from inside the CPU::stepOnce() function
 auto CPU::joypadEdge() -> void {
   //it is not yet confirmed if polling can be stopped early and/or (re)started later
   if(!io.autoJoypadPoll) return;
