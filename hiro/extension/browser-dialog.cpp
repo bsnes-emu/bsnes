@@ -3,7 +3,7 @@
 struct BrowserDialogWindow {
   Application::Namespace tr{"BrowserDialog"};
 
-  BrowserDialogWindow(BrowserDialog::State& state) : state(state) {}
+  BrowserDialogWindow(BrowserDialog::State& state, BrowserDialog::Response& response) : state(state), response(response) {}
   auto accept() -> void;
   auto activate() -> void;
   auto change() -> void;
@@ -41,7 +41,7 @@ private:
     MenuCheckItem showHiddenOption{&contextMenu};
 
   BrowserDialog::State& state;
-  BrowserDialog::Response response;
+  BrowserDialog::Response& response;
   vector<vector<string>> filters;
 };
 
@@ -193,8 +193,6 @@ auto BrowserDialogWindow::isMatch(const string& name) -> bool {
 }
 
 auto BrowserDialogWindow::run() -> BrowserDialog::Response {
-  response = {};
-
   auto document = BML::unserialize(file::read({Path::userSettings(), "hiro/browser-dialog.bml"}));
   struct Settings {
     bool showHidden = true;
@@ -226,7 +224,6 @@ auto BrowserDialogWindow::run() -> BrowserDialog::Response {
   for(auto& option : state.options) {
     optionList.append(ComboButtonItem().setText(option));
   }
-  optionList.doChange();  //updates response.option to point to the default (first) option
   image iconSearch{Icon::Action::Search};
   iconSearch.scale(16_sx, 16_sy);
   searchButton.setIcon(iconSearch).setBordered(false).onActivate([&] { setPath(state.path, fileName.text()); });
@@ -503,6 +500,8 @@ auto BrowserDialog::setName(const string& name) -> type& {
 
 auto BrowserDialog::setOptions(const vector<string>& options) -> type& {
   state.options = options;
+  // ensure response.option always contains a valid option
+  response.option = options ? options.first() : "";
   return *this;
 }
 
@@ -522,7 +521,7 @@ auto BrowserDialog::title() const -> string {
 
 auto BrowserDialog::_run() -> vector<string> {
   if(!state.path) state.path = Path::user();
-  response = BrowserDialogWindow(state).run();
+  BrowserDialogWindow(state, response).run();
   return response.selected;
 }
 
