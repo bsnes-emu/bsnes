@@ -32,7 +32,7 @@ namespace Emulator {
   static const string Version   = "115";
   static const string Copyright = "byuu et al";
   static const string License   = "GPLv3 or later";
-  static const string Website   = "https://github.com/bsnes-emu";
+  static const string Website   = "https://byuu.org/bsnes/";
 
   //incremented only when serialization format changes
   static const string SerializerVersion = "115";
