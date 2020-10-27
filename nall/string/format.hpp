@@ -41,7 +41,7 @@ auto string::format(const nall::string_format& params) -> type& {
 
     if(sourceSize > targetSize) {
       uint difference = sourceSize - targetSize;
-      memory::move(&data[x], &data[x + difference], remaining);
+      memory::move(&data[x], &data[x + difference], remaining - difference);
       size -= difference;
     } else if(targetSize > sourceSize) {
       uint difference = targetSize - sourceSize;
