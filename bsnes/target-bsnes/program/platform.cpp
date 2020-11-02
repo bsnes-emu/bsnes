@@ -102,7 +102,14 @@ auto Program::load(uint id, string name, string type, vector<string> options) ->
   if(id == 1 && name == "Super Famicom" && type == "sfc") {
     if(gameQueue) {
       auto game = gameQueue.takeLeft().split(";", 1L);
-      superFamicom.option = game(0);
+      // In bsnes v115 and earlier, opening a game with the native file picker
+      // would set the option to "" (an empty string), effectively forcing the
+      // region to NTSC, rather than the default of "Auto". This didn't matter
+      // for actual NTSC games, but caused problems for PAL games. The problem
+      // with the file-picker has been fixed, but broken entries will still be
+      // present in "Recent Game" lists, so if we get a game with whose option
+      // field is empty, assume it should be "Auto".
+      superFamicom.option = game(0) ? game(0) : "Auto";
       superFamicom.location = game(1);
     } else {
       dialog.setTitle("Load SNES ROM");
