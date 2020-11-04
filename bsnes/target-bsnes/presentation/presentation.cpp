@@ -468,6 +468,20 @@ auto Presentation::updateRecentGames() -> void {
     }
   }
 
+  //replace any empty option strings with "Auto", to work around a bug in bsnes
+  //v115 and below.
+  for(auto entry : settings[{"Game/Recent"}]) {
+    auto old_games = entry.text();
+    if(!old_games) continue;
+    vector<string> new_games;
+    for(auto& game : old_games.split("|")) {
+        auto parts = game.split(";", 1L);
+        if(parts[0] == "") parts[0] = "Auto";
+        new_games.append(parts.merge(";"));
+    }
+    entry.setValue(new_games.merge("|"));
+  }
+
   //update list
   for(auto index : range(RecentGames)) {
     MenuItem item{&loadRecentGame};
