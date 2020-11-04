@@ -1,0 +1,16 @@
+site_name: bsnes User Documentation
+repo_url: https://github.com/bsnes-emu/bsnes/
+theme: readthedocs
+markdown_extensions:
+    - smarty
+    - toc:
+        permalink: true
+    - tables
+
+nav:
+    - Introduction: README.md
+    #- Tutorial:
+    - How-To Guides:
+         - Override a memory map: how-to/manifest.md
+    #- Concepts:
+    #- Reference:
