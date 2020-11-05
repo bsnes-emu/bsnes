@@ -67,7 +67,7 @@ auto InputSettings::updateControls() -> void {
   assignMouse2.setVisible(false);
   assignMouse3.setVisible(false);
 
-  if(activeMapping) {
+  if(activeMapping && batched) {
     auto& input = activeDevice().mappings[batched.left().offset()];
     if(input.isDigital()) {
       assignMouse1.setVisible().setText("Mouse Left");
