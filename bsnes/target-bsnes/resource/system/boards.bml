@@ -718,7 +718,6 @@ board: EXHIROM-RAM
     map address=c0-ff:0000-ffff mask=0xc00000
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-    map address=70-7d:0000-7fff
 
 board: EXHIROM-RAM-SHARPRTC
   memory type=ROM content=Program
@@ -728,7 +727,6 @@ board: EXHIROM-RAM-SHARPRTC
     map address=c0-ff:0000-ffff mask=0xc00000
   memory type=RAM content=Save
     map address=20-3f,a0-bf:6000-7fff mask=0xe000
-    map address=70-7d:0000-7fff
   rtc manufacturer=Sharp
     map address=00-3f,80-bf:2800-2801
     memory type=RTC content=Time manufacturer=Sharp
