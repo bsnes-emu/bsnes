@@ -84,7 +84,7 @@ private:
 
     if(!hasDevices().find(self.device)) self.device = hasDevices().first();
 
-    _fd = open(self.device, O_WRONLY, O_NONBLOCK);
+    _fd = open(self.device, O_WRONLY | O_NONBLOCK);
     if(_fd < 0) return false;
 
     int cooked = 1;
