@@ -68,12 +68,11 @@ auto InputSettings::updateControls() -> void {
   assignMouse3.setVisible(false);
 
   if(activeMapping) {
-    auto& input = activeDevice().mappings[batched.left().offset()];
-    if(input.isDigital()) {
+    if(activeMapping->isDigital()) {
       assignMouse1.setVisible().setText("Mouse Left");
       assignMouse2.setVisible().setText("Mouse Middle");
       assignMouse3.setVisible().setText("Mouse Right");
-    } else if(input.isAnalog()) {
+    } else if(activeMapping->isAnalog()) {
       assignMouse1.setVisible().setText("Mouse X-axis");
       assignMouse2.setVisible().setText("Mouse Y-axis");
     }
@@ -146,6 +145,7 @@ auto InputSettings::assignMapping(TableViewCell cell) -> void {
   inputManager.poll();  //clear any pending events first
 
   for(auto mapping : mappingList.batched()) {
+    refreshMappings();  //clear existing 'assign...' text
     activeMapping = activeDevice().mappings[mapping.offset()];
     activeBinding = max(0, (int)cell.offset() - 1);
     mappingList.item(mapping.offset()).cell(1 + activeBinding).setIcon(Icon::Go::Right).setText("(assign ...)");
