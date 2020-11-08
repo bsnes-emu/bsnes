@@ -1,4 +1,5 @@
 #if defined(Hiro_Application)
+#include <IOKit/pwr_mgt/IOPMLib.h>
 
 @implementation CocoaDelegate : NSObject
 
@@ -92,7 +93,24 @@ auto pApplication::quit() -> void {
 }
 
 auto pApplication::setScreenSaver(bool screenSaver) -> void {
-  //TODO: not implemented
+  static IOPMAssertionID powerAssertion = kIOPMNullAssertionID;
+
+  // do nothing if current already matches desired state
+  bool current = powerAssertion == kIOPMNullAssertionID;
+  if(current == screenSaver) return;
+
+  @autoreleasepool {
+    if(screenSaver) {
+      IOPMAssertionRelease(powerAssertion);
+      powerAssertion = kIOPMNullAssertionID;
+    } else {
+      string reason = {Application::state().name, " screensaver suppression"};
+      NSString* assertionName = [NSString stringWithUTF8String:reason.data()];
+      bool success = IOPMAssertionCreateWithName(kIOPMAssertionTypePreventUserIdleDisplaySleep,
+        kIOPMAssertionLevelOn, (CFStringRef) assertionName, &powerAssertion) != kIOReturnSuccess;
+      if(success) powerAssertion = kIOPMNullAssertionID;
+    }
+  }
 }
 
 auto pApplication::initialize() -> void {
