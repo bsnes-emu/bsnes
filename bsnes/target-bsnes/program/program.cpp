@@ -85,7 +85,16 @@ auto Program::main() -> void {
   inputManager.poll();
   inputManager.pollHotkeys();
 
-  if(inactive()) {
+  static bool previouslyInactive = true;
+  bool currentlyInactive = inactive();
+
+  // check if emulator has transitioned from active to inactive or vice versa
+  if(previouslyInactive != currentlyInactive) {
+    previouslyInactive = currentlyInactive;
+    Application::setScreenSaver(currentlyInactive || settings.general.screenSaver);
+  }
+
+  if(currentlyInactive) {
     audio.clear();
     usleep(20 * 1000);
     if(settings.emulator.runAhead.frames == 0) viewportRefresh();
