@@ -40,7 +40,6 @@ auto nall::main(Arguments arguments) -> void {
 
   settings.load();
   Application::setName("bsnes");
-  Application::setScreenSaver(settings.general.screenSaver);
   Application::setToolTips(settings.general.toolTips);
 
   Instances::presentation.construct();

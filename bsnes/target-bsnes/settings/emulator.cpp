@@ -25,6 +25,8 @@ auto EmulatorSettings::create() -> void {
   });
   screenSaver.setText("Allow screensaver during emulation").setChecked(settings.general.screenSaver).onToggle([&] {
     settings.general.screenSaver = screenSaver.checked();
+    // setting can be toggled while emulation is active
+    if(!program.inactive()) Application::setScreenSaver(settings.general.screenSaver);
   });
   optionsSpacer.setColor({192, 192, 192});
 
