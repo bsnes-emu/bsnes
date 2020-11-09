@@ -90,7 +90,12 @@ inline auto userSettings() -> string {
   #elif defined(PLATFORM_MACOS)
   string result = {Path::user(), "Library/Application Support/"};
   #else
-  string result = {Path::user(), ".config/"};
+  string result;
+  if(const char *env = getenv("XDG_CONFIG_HOME")) {
+    result = string(env);
+  } else {
+    result = {Path::user(), ".config/"};
+  }
   #endif
   if(!result) result = ".";
   if(!result.endsWith("/")) result.append("/");
@@ -109,7 +114,12 @@ inline auto userData() -> string {
   #elif defined(PLATFORM_MACOS)
   string result = {Path::user(), "Library/Application Support/"};
   #else
-  string result = {Path::user(), ".local/share/"};
+  string result;
+  if(const char *env = getenv("XDG_DATA_HOME")) {
+    result = string(env);
+  } else {
+    result = {Path::user(), ".local/share/"};
+  }
   #endif
   if(!result) result = ".";
   if(!result.endsWith("/")) result.append("/");
