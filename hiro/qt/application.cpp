@@ -94,9 +94,7 @@ auto pApplication::initialize() -> void {
       InputOutput, DefaultVisual(state().display, screen),
       CWBackPixel | CWBorderPixel | CWOverrideRedirect, &attributes
     );
-  //note: hopefully xdg-screensaver does not require the window to be mapped ...
-  //if it does, we're in trouble: a small 1x1 black pixel window will be visible in said case
-    XMapWindow(state().display, state().screenSaverWindow);
+    XStoreName(state().display, state().screenSaverWindow, "hiro screensaver-prevention window");
     XFlush(state().display);
   }
   #endif
