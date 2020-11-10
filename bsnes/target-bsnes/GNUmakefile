@@ -58,7 +58,8 @@ else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/share/$(name)/Shaders/
 	cp out/$(name) $(prefix)/bin/$(name)
 	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
-	cp $(ui)/resource/$(name).png $(prefix)/share/icons/$(name).png
+	cp $(ui)/resource/$(name).png $(prefix)/share/icons/hicolor/256x256/apps/$(name).png
+	cp $(ui)/resource/$(name).svg $(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
 	cp Database/* $(prefix)/share/$(name)/Database/
 	cp -r ../shaders/* $(prefix)/share/$(name)/Shaders/
 endif
