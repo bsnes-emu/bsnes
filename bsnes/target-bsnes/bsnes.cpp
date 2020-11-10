@@ -12,6 +12,9 @@ auto locate(string name) -> string {
   location = {Path::userData(), "bsnes/", name};
   if(inode::exists(location)) return location;
 
+  location = {Path::sharedData(), "bsnes/", name};
+  if(inode::exists(location)) return location;
+
   directory::create({Path::userSettings(), "bsnes/"});
   return {Path::userSettings(), "bsnes/", name};
 }
