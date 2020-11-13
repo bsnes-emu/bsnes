@@ -473,7 +473,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                           size_t length, bool *error,
                           uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
 {
-    /* Disable watchpoints while evaulating expressions */
+    /* Disable watchpoints while evaluating expressions */
     uint16_t n_watchpoints = gb->n_watchpoints;
     gb->n_watchpoints = 0;
 
