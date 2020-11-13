@@ -28,6 +28,7 @@ enum model {
     NSMutableAttributedString *pending_console_output;
     NSRecursiveLock *console_output_lock;
     NSTimer *console_output_timer;
+    NSTimer *hex_timer;
     
     bool fullScreen;
     bool in_sync_input;
@@ -47,7 +48,7 @@ enum model {
     bool oamUpdating;
     
     NSMutableData *currentPrinterImageData;
-    enum {GBAccessoryNone, GBAccessoryPrinter, GBAccessoryWorkboy} accessory;
+    enum {GBAccessoryNone, GBAccessoryPrinter, GBAccessoryWorkboy, GBAccessoryLinkCable} accessory;
     
     bool rom_warning_issued;
     
@@ -66,6 +67,12 @@ enum model {
     size_t audioBufferNeeded;
     
     bool borderModeChanged;
+    
+    /* Link cable*/
+    Document *master;
+    Document *slave;
+    signed linkOffset;
+    bool linkCableBit;
 }
 
 @property GBAudioClient *audioClient;
@@ -81,6 +88,10 @@ enum model {
 - (void) gotNewSample:(GB_sample_t *)sample;
 - (void) rumbleChanged:(double)amp;
 - (void) loadBootROM:(GB_boot_rom_t)type;
+- (void)linkCableBitStart:(bool)bit;
+- (bool)linkCableBitEnd;
+- (void)infraredStateChanged:(bool)state;
+
 @end
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -159,6 +170,26 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self rumbleChanged:amp];
 }
+
+
+static void linkCableBitStart(GB_gameboy_t *gb, bool bit_to_send)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self linkCableBitStart:bit_to_send];
+}
+
+static bool linkCableBitEnd(GB_gameboy_t *gb)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    return [self linkCableBitEnd];
+}
+
+static void infraredStateChanged(GB_gameboy_t *gb, bool on, uint64_t cycles_since_last_update)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self infraredStateChanged:on];
+}
+
 
 @implementation Document
 {
@@ -264,6 +295,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_set_rewind_length(&gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
     GB_apu_set_sample_callback(&gb, audioCallback);
     GB_set_rumble_callback(&gb, rumbleCallback);
+    GB_set_infrared_callback(&gb, infraredStateChanged);
     [self updateRumbleMode];
 }
 
@@ -335,9 +367,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [_view setRumble:amp];
 }
 
-- (void) run
+- (void) preRun
 {
-    running = true;
     GB_set_pixels_output(&gb, self.view.pixels);
     GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
@@ -368,7 +399,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"Mute"]) {
         [self.audioClient start];
     }
-    NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
+    hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
     
     /* Clear pending alarms, don't play alarms while playing */
@@ -388,19 +419,58 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             }
         }
     }
-    
-    while (running) {
-        if (rewind) {
-            rewind = false;
-            GB_rewind_pop(&gb);
-            if (!GB_rewind_pop(&gb)) {
-                rewind = self.view.isRewinding;
+}
+
+static unsigned *multiplication_table_for_frequency(unsigned frequency)
+{
+    unsigned *ret = malloc(sizeof(*ret) * 0x100);
+    for (unsigned i = 0; i < 0x100; i++) {
+        ret[i] = i * frequency;
+    }
+    return ret;
+}
+
+- (void) run
+{
+    assert(!master);
+    running = true;
+    [self preRun];
+    if (slave) {
+        [slave preRun];
+        unsigned *masterTable = multiplication_table_for_frequency(GB_get_clock_rate(&gb));
+        unsigned *slaveTable = multiplication_table_for_frequency(GB_get_clock_rate(&slave->gb));
+        while (running) {
+            if (linkOffset <= 0) {
+                linkOffset += slaveTable[GB_run(&gb)];
+            }
+            else {
+                linkOffset -= masterTable[GB_run(&slave->gb)];
             }
         }
-        else {
-            GB_run(&gb);
+        free(masterTable);
+        free(slaveTable);
+        [slave postRun];
+    }
+    else {
+        while (running) {
+            if (rewind) {
+                rewind = false;
+                GB_rewind_pop(&gb);
+                if (!GB_rewind_pop(&gb)) {
+                    rewind = self.view.isRewinding;
+                }
+            }
+            else {
+                GB_run(&gb);
+            }
         }
     }
+    [self postRun];
+    stopping = false;
+}
+
+- (void)postRun
+{
     [hex_timer invalidate];
     [audioLock lock];
     memset(audioBuffer, 0, (audioBufferSize - audioBufferPosition) * sizeof(*audioBuffer));
@@ -421,7 +491,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
         friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
         friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-
+        
         notification.title = [NSString stringWithFormat:@"%@ Played an Alarm", friendlyName];
         notification.informativeText = [NSString stringWithFormat:@"%@ requested your attention by playing a scheduled alarm", friendlyName];
         notification.identifier = self.fileName;
@@ -431,18 +501,31 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBNotificationsUsed"];
     }
     [_view setRumble:0];
-    stopping = false;
 }
 
 - (void) start
 {
-    if (running) return;
     self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
+    if (master) {
+        [master start];
+        return;
+    }
+    if (running) return;
     [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
 
 - (void) stop
 {
+    if (master) {
+        if (!master->running) return;
+        GB_debugger_set_disabled(&gb, true);
+        if (GB_debugger_is_stopped(&gb)) {
+            [self interruptDebugInputRead];
+        }
+        [master stop];
+        GB_debugger_set_disabled(&gb, false);
+        return;
+    }
     if (!running) return;
     GB_debugger_set_disabled(&gb, true);
     if (GB_debugger_is_stopped(&gb)) {
@@ -519,6 +602,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (IBAction)togglePause:(id)sender
 {
+    if (master) {
+        [master togglePause:sender];
+        return;
+    }
     if (running) {
         [self stop];
     }
@@ -749,6 +836,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)close
 {
+    [self disconnectLinkCable];
     [[NSUserDefaults standardUserDefaults] setInteger:self.mainWindow.frame.size.width forKey:@"LastWindowWidth"];
     [[NSUserDefaults standardUserDefaults] setInteger:self.mainWindow.frame.size.height forKey:@"LastWindowHeight"];
     [self stop];
@@ -760,9 +848,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     [self log:"^C\n"];
     GB_debugger_break(&gb);
-    if (!running) {
-        [self start];
-    }
+    [self start];
     [self.consoleWindow makeKeyAndOrderFront:nil];
     [self.consoleInput becomeFirstResponder];
 }
@@ -781,10 +867,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     if ([anItem action] == @selector(mute:)) {
-        [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
+        [(NSMenuItem *)anItem setState:!self.audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
-        [(NSMenuItem*)anItem setState:(!running) || (GB_debugger_is_stopped(&gb))];
+        if (master) {
+            [(NSMenuItem *)anItem setState:(!master->running) || (GB_debugger_is_stopped(&gb)) || (GB_debugger_is_stopped(&gb))];
+        }
+        [(NSMenuItem *)anItem setState:(!running) || (GB_debugger_is_stopped(&gb))];
         return !GB_debugger_is_stopped(&gb);
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
@@ -803,6 +892,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     else if ([anItem action] == @selector(connectWorkboy:)) {
         [(NSMenuItem*)anItem setState:accessory == GBAccessoryWorkboy];
+    }
+    else if ([anItem action] == @selector(connectLinkCable:)) {
+        [(NSMenuItem*)anItem setState:[(NSMenuItem *)anItem representedObject] == master ||
+                                       [(NSMenuItem *)anItem representedObject] == slave];
     }
     else if ([anItem action] == @selector(toggleCheats:)) {
         [(NSMenuItem*)anItem setState:GB_cheats_enabled(&gb)];
@@ -1090,6 +1183,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     while (!GB_is_inited(&gb));
     bool was_running = running && !GB_debugger_is_stopped(&gb);
+    if (master) {
+        was_running |= master->running;
+    }
     if (was_running) {
         [self stop];
     }
@@ -1700,6 +1796,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (IBAction)disconnectAllAccessories:(id)sender
 {
+    [self disconnectLinkCable];
     [self performAtomicBlock:^{
         accessory = GBAccessoryNone;
         GB_disconnect_serial(&gb);
@@ -1708,6 +1805,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (IBAction)connectPrinter:(id)sender
 {
+    [self disconnectLinkCable];
     [self performAtomicBlock:^{
         accessory = GBAccessoryPrinter;
         GB_connect_printer(&gb, printImage);
@@ -1716,6 +1814,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (IBAction)connectWorkboy:(id)sender
 {
+    [self disconnectLinkCable];
     [self performAtomicBlock:^{
         accessory = GBAccessoryWorkboy;
         GB_connect_workboy(&gb, setWorkboyTime, getWorkboyTime);
@@ -1831,5 +1930,84 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (IBAction)toggleCheats:(id)sender
 {
     GB_set_cheats_enabled(&gb, !GB_cheats_enabled(&gb));
+}
+
+- (void)disconnectLinkCable
+{
+    bool wasRunning = self->running;
+    Document *partner = master ?: slave;
+    if (partner) {
+        [self stop];
+        partner->master = nil;
+        partner->slave = nil;
+        master = nil;
+        slave = nil;
+        if (wasRunning) {
+            [partner start];
+            [self start];
+        }
+        GB_set_turbo_mode(&gb, false, false);
+        GB_set_turbo_mode(&partner->gb, false, false);
+        partner->accessory = GBAccessoryNone;
+        accessory = GBAccessoryNone;
+    }
+}
+
+- (void)connectLinkCable:(NSMenuItem *)sender
+{
+    [self disconnectAllAccessories:sender];
+    Document *partner = [sender representedObject];
+    [partner disconnectAllAccessories:sender];
+    
+    bool wasRunning = self->running;
+    [self stop];
+    [partner stop];
+    GB_set_turbo_mode(&partner->gb, true, true);
+    slave = partner;
+    partner->master = self;
+    linkOffset = 0;
+    partner->accessory = GBAccessoryLinkCable;
+    accessory = GBAccessoryLinkCable;
+    GB_set_serial_transfer_bit_start_callback(&gb, linkCableBitStart);
+    GB_set_serial_transfer_bit_start_callback(&partner->gb, linkCableBitStart);
+    GB_set_serial_transfer_bit_end_callback(&gb, linkCableBitEnd);
+    GB_set_serial_transfer_bit_end_callback(&partner->gb, linkCableBitEnd);
+    if (wasRunning) {
+        [self start];
+    }
+}
+
+- (void)linkCableBitStart:(bool)bit
+{
+    linkCableBit = bit;
+}
+
+-(bool)linkCableBitEnd
+{
+    bool ret = GB_serial_get_data_bit(&self.partner->gb);
+    GB_serial_set_data_bit(&self.partner->gb, linkCableBit);
+    return ret;
+}
+
+- (void)infraredStateChanged:(bool)state
+{
+    if (self.partner) {
+        GB_set_infrared_input(&self.partner->gb, state);
+    }
+}
+
+-(Document *)partner
+{
+    return slave ?: master;
+}
+
+- (bool)isSlave
+{
+    return master;
+}
+
+- (GB_gameboy_t *)gb
+{
+    return &gb;
 }
 @end

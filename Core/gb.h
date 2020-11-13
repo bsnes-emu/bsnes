@@ -803,9 +803,7 @@ void GB_set_icd_pixel_callback(GB_gameboy_t *gb, GB_icd_pixel_callback_t callbac
 void GB_set_icd_hreset_callback(GB_gameboy_t *gb, GB_icd_hreset_callback_t callback);
 void GB_set_icd_vreset_callback(GB_gameboy_t *gb, GB_icd_vreset_callback_t callback);
     
-#ifdef GB_INTERNAL
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb);
-#endif
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier);
 
 unsigned GB_get_screen_width(GB_gameboy_t *gb);

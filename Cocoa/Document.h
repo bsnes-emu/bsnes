@@ -6,6 +6,7 @@
 @class GBCheatWindowController;
 
 @interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate>
+@property (readonly) GB_gameboy_t *gb;
 @property (strong) IBOutlet GBView *view;
 @property (strong) IBOutlet NSTextView *consoleOutput;
 @property (strong) IBOutlet NSPanel *consoleWindow;
@@ -36,10 +37,12 @@
 @property (strong) IBOutlet NSBox *debuggerVerticalLine;
 @property (strong) IBOutlet NSPanel *cheatsWindow;
 @property (strong) IBOutlet GBCheatWindowController *cheatWindowController;
+@property (readonly) Document *partner;
+@property (readonly) bool isSlave;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;
 -(void) performAtomicBlock: (void (^)())block;
-
+-(void) connectLinkCable:(NSMenuItem *)sender;
 @end
 

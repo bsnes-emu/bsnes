@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSUserNotificationCenterDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSUserNotificationCenterDelegate, NSMenuDelegate>
 
 @property IBOutlet NSWindow *preferencesWindow;
 @property (strong) IBOutlet NSView *graphicsTab;
@@ -10,6 +10,7 @@
 - (IBAction)showPreferences: (id) sender;
 - (IBAction)toggleDeveloperMode:(id)sender;
 - (IBAction)switchPreferencesTab:(id)sender;
+@property (weak) IBOutlet NSMenuItem *linkCableMenuItem;
 
 @end
 
