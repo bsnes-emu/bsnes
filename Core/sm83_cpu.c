@@ -261,7 +261,20 @@ static void cycle_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
     }
     GB_trigger_oam_bug(gb, gb->registers[register_id]); /* Todo: test T-cycle timing */
     gb->pending_cycles = 4;
+}
 
+static void cycle_oam_bug_pc(GB_gameboy_t *gb)
+{
+    if (GB_is_cgb(gb)) {
+        /* Slight optimization */
+        gb->pending_cycles += 4;
+        return;
+    }
+    if (gb->pending_cycles) {
+        GB_advance_cycles(gb, gb->pending_cycles);
+    }
+    GB_trigger_oam_bug(gb, gb->pc); /* Todo: test T-cycle timing */
+    gb->pending_cycles = 4;
 }
 
 static void flush_pending_cycles(GB_gameboy_t *gb)
@@ -1538,8 +1551,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
         gb->halted = false;
         uint16_t call_addr = gb->pc;
         
-        cycle_no_access(gb);
-        cycle_no_access(gb);
+        gb->last_opcode_read = cycle_read_inc_oam_bug(gb, gb->pc++);
+        cycle_oam_bug_pc(gb);
+        gb->pc--;
         GB_trigger_oam_bug(gb, gb->registers[GB_REGISTER_SP]); /* Todo: test T-cycle timing */
         cycle_no_access(gb);
         
