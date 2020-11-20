@@ -158,6 +158,11 @@ auto pWindow::construct() -> void {
 
   gtkMenu = gtk_menu_bar_new();
   gtk_box_pack_start(GTK_BOX(menuContainer), gtkMenu, false, false, 0);
+  #if HIRO_GTK==3
+  GdkRGBA gtkMenuBackgroundColor;
+  gdk_rgba_parse(&gtkMenuBackgroundColor, "lightgray");
+  gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &gtkMenuBackgroundColor);
+  #endif
 
   formContainer = gtk_fixed_new();
   gtk_box_pack_start(GTK_BOX(menuContainer), formContainer, true, true, 0);
