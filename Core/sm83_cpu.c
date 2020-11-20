@@ -21,10 +21,12 @@ typedef enum {
     GB_CONFLICT_DMG_LCDC,
     GB_CONFLICT_SGB_LCDC,
     GB_CONFLICT_WX,
+    GB_CONFLICT_CGB_LCDC,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
 static const GB_conflict_t cgb_conflict_map[0x80] = {
+    [GB_IO_LCDC] = GB_CONFLICT_CGB_LCDC,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
@@ -241,6 +243,34 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->wx_just_changed = false;
             gb->pending_cycles = 3;
             return;
+            
+        case GB_CONFLICT_CGB_LCDC:
+            if ((value ^ gb->io_registers[GB_IO_LCDC]) & 0x10) {
+                // Todo: This is difference is because my timing is off in one of the models
+                if (gb->model > GB_MODEL_CGB_C) {
+                    GB_advance_cycles(gb, gb->pending_cycles);
+                    gb->tile_sel_glitch = true;
+                    GB_advance_cycles(gb, 1);
+                    gb->tile_sel_glitch = false;
+                    GB_write_memory(gb, addr, value);
+                    gb->pending_cycles = 3;
+                }
+                else {
+                    GB_advance_cycles(gb, gb->pending_cycles - 1);
+                    gb->tile_sel_glitch = true;
+                    GB_advance_cycles(gb, 1);
+                    gb->tile_sel_glitch = false;
+                    GB_write_memory(gb, addr, value);
+                    gb->pending_cycles = 4;
+                }
+            }
+            else {
+                GB_advance_cycles(gb, gb->pending_cycles);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
+            return;
+
     }
 }
 

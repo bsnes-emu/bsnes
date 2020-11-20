@@ -548,6 +548,7 @@ struct GB_gameboy_internal_s {
         uint16_t last_tile_data_address;
         uint16_t last_tile_index_address;
         bool cgb_repeated_a_frame;
+        uint8_t data_for_sel_glitch;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
@@ -692,6 +693,7 @@ struct GB_gameboy_internal_s {
                
         /* Temporary state */
         bool wx_just_changed;
+        bool tile_sel_glitch;
    );
 };
     

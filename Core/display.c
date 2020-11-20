@@ -430,6 +430,23 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     }
 }
 
+static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use)
+{
+    /*
+     Based on Matt Currie's research here:
+     https://github.com/mattcurrie/mealybug-tearoom-tests/blob/master/the-comprehensive-game-boy-ppu-documentation.md#tile_sel-bit-4
+    */
+        
+    *should_use = true;
+    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+        *should_use = !(gb->current_tile & 0x80);
+        /* if (gb->model != GB_MODEL_CGB_D) */ return gb->current_tile;
+        // TODO: CGB D behaves differently
+    }
+    return gb->data_for_sel_glitch;
+}
+
+
 static void render_pixel_if_possible(GB_gameboy_t *gb)
 {
     GB_fifo_item_t *fifo_item = NULL;
@@ -621,6 +638,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER: {
+            bool use_glitched = false;
+            if (gb->tile_sel_glitch) {
+                gb->current_tile_data[0] = data_for_tile_sel_glitch(gb, &use_glitched);
+            }
             uint8_t y_flip = 0;
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
@@ -638,20 +659,32 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             if (gb->current_tile_attributes & 0x40) {
                 y_flip = 0x7;
             }
-            gb->current_tile_data[0] =
+            if (!use_glitched) {
+                gb->current_tile_data[0] =
+                    gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
+                if (gb->vram_ppu_blocked) {
+                    gb->current_tile_data[0] = 0xFF;
+                }
+            }
+            else {
+                gb->data_for_sel_glitch =
                 gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
-            if (gb->vram_ppu_blocked) {
-                gb->current_tile_data[0] = 0xFF;
+                if (gb->vram_ppu_blocked) {
+                    gb->data_for_sel_glitch = 0xFF;
+                }
             }
         }
         gb->fetcher_state++;
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH: {
-            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong.
-             Additionally, on CGB-D and newer mixing two tiles by changing the tileset
-             bit mid-fetching causes a glitched mixing of the two, in comparison to the
-             more logical DMG version. */
+            /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
+            
+            bool use_glitched = false;
+            if (gb->tile_sel_glitch) {
+                gb->current_tile_data[1] = data_for_tile_sel_glitch(gb, &use_glitched);
+            }
+
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
@@ -669,10 +702,20 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 y_flip = 0x7;
             }
             gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1;
-            gb->current_tile_data[1] =
-                gb->vram[gb->last_tile_data_address];
-            if (gb->vram_ppu_blocked) {
-                gb->current_tile_data[1] = 0xFF;
+            if (!use_glitched) {
+                gb->current_tile_data[1] =
+                    gb->vram[gb->last_tile_data_address];
+                if (gb->vram_ppu_blocked) {
+                    gb->current_tile_data[1] = 0xFF;
+                }
+            }
+            else {
+                if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
+                    gb->data_for_sel_glitch = gb->vram[gb->last_tile_data_address];
+                    if (gb->vram_ppu_blocked) {
+                        gb->data_for_sel_glitch = 0xFF;
+                    }
+                }
             }
         }
         if (gb->wx_triggered) {
@@ -1112,7 +1155,8 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                                             object->flags & 0x80,
                                             gb->object_priority == GB_OBJECT_PRIORITY_INDEX? gb->visible_objs[gb->n_visible_objs - 1] : 0,
                                             object->flags & 0x20);
-                    
+
+                    gb->data_for_sel_glitch = gb->vram_ppu_blocked? 0xFF : gb->vram[line_address + 1];
                     gb->n_visible_objs--;
                 }
                 
@@ -1126,6 +1170,14 @@ abort_fetching_object:
                 if (gb->position_in_line == 160) break;
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
+            }
+            
+            /* TODO: Verify */
+            if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
+                gb->data_for_sel_glitch = gb->current_tile_data[0];
+            }
+            else {
+                gb->data_for_sel_glitch = gb->current_tile_data[1];
             }
             
             while (gb->lcd_x != 160 && !gb->disable_rendering && gb->screen && !gb->sgb) {
