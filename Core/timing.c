@@ -89,15 +89,32 @@ void GB_timing_sync(GB_gameboy_t *gb)
 }
 
 #endif
-static void GB_ir_run(GB_gameboy_t *gb)
+
+#define IR_DECAY 31500
+#define IR_THRESHOLD 19900
+#define IR_MAX IR_THRESHOLD * 2 + IR_DECAY
+
+static void GB_ir_run(GB_gameboy_t *gb, uint32_t cycles)
 {
-    if (gb->ir_queue_length == 0) return;
-    if (gb->cycles_since_input_ir_change >= gb->ir_queue[0].delay) {
-        gb->cycles_since_input_ir_change -= gb->ir_queue[0].delay;
-        gb->infrared_input = gb->ir_queue[0].state;
-        gb->ir_queue_length--;
-        memmove(&gb->ir_queue[0], &gb->ir_queue[1], sizeof(gb->ir_queue[0]) * (gb->ir_queue_length));
+    if (gb->model == GB_MODEL_AGB) return;
+    if (gb->infrared_input || gb->cart_ir || (gb->io_registers[GB_IO_RP] & 1)) {
+        gb->ir_sensor += cycles;
+        if (gb->ir_sensor > IR_MAX) {
+            gb->ir_sensor = IR_MAX;
+        }
+        
+        gb->effective_ir_input = gb->ir_sensor >= IR_THRESHOLD && gb->ir_sensor <= IR_THRESHOLD + IR_DECAY;
     }
+    else {
+        if (gb->ir_sensor <= cycles) {
+            gb->ir_sensor = 0;
+        }
+        else {
+            gb->ir_sensor -= cycles;
+        }
+        gb->effective_ir_input = false;
+    }
+    
 }
 
 static void advance_tima_state_machine(GB_gameboy_t *gb)
@@ -234,8 +251,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->double_speed_alignment += cycles;
     gb->hdma_cycles += cycles;
     gb->apu_output.sample_cycles += cycles;
-    gb->cycles_since_ir_change += cycles;
-    gb->cycles_since_input_ir_change += cycles;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
     
@@ -252,7 +267,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     }
     GB_apu_run(gb);
     GB_display_run(gb, cycles);
-    GB_ir_run(gb);
+    GB_ir_run(gb, cycles);
 }
 
 /* 

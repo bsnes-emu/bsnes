@@ -184,7 +184,7 @@ static bool linkCableBitEnd(GB_gameboy_t *gb)
     return [self linkCableBitEnd];
 }
 
-static void infraredStateChanged(GB_gameboy_t *gb, bool on, uint64_t cycles_since_last_update)
+static void infraredStateChanged(GB_gameboy_t *gb, bool on)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self infraredStateChanged:on];

@@ -1073,17 +1073,6 @@ void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback)
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state)
 {
     gb->infrared_input = state;
-    gb->cycles_since_input_ir_change = 0;
-    gb->ir_queue_length = 0;
-}
-
-void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, uint64_t cycles_after_previous_change)
-{
-    if (gb->ir_queue_length == GB_MAX_IR_QUEUE) {
-        GB_log(gb, "IR Queue is full\n");
-        return;
-    }
-    gb->ir_queue[gb->ir_queue_length++] = (GB_ir_queue_item_t){state, cycles_after_previous_change};
 }
 
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback)

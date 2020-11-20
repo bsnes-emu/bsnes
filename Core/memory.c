@@ -113,11 +113,6 @@ static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
     return bus_for_addr(gb, addr) == bus_for_addr(gb, gb->dma_current_src);
 }
 
-static bool effective_ir_input(GB_gameboy_t *gb)
-{
-    return gb->infrared_input || gb->cart_ir;
-}
-
 static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
 {
     if (addr < 0x100 && !gb->boot_rom_finished) {
@@ -173,7 +168,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
             case 0xD: // RTC status
                 return 1;
             case 0xE: // IR mode
-                return effective_ir_input(gb); // TODO: What are the other bits?
+                return gb->effective_ir_input; // TODO: What are the other bits?
             default:
                 GB_log(gb, "Unsupported HuC-3 mode %x read: %04x\n", gb->huc3_mode, addr);
                 return 1; // TODO: What happens in this case?
@@ -191,7 +186,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
-        return 0xc0 | effective_ir_input(gb);
+        return 0xc0 | gb->effective_ir_input;
     }
     
     if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
@@ -432,7 +427,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 if (gb->model != GB_MODEL_CGB_E) {
                     ret |= 0x10;
                 }
-                if (((gb->io_registers[GB_IO_RP] & 0xC1) == 0xC0 && effective_ir_input(gb)) && gb->model != GB_MODEL_AGB) {
+                if (((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && gb->effective_ir_input) && gb->model != GB_MODEL_AGB) {
                     ret &= ~2;
                 }
                 return ret;
@@ -655,14 +650,11 @@ static bool huc3_write(GB_gameboy_t *gb, uint8_t value)
             // Not sure what writes here mean, they're always 0xFE
             return true;
         case 0xE: { // IR mode
-            bool old_input = effective_ir_input(gb);
-            gb->cart_ir = value & 1;
-            bool new_input = effective_ir_input(gb);
-            if (new_input != old_input) {
+            if (gb->cart_ir != (value & 1)) {
+                gb->cart_ir = value & 1;
                 if (gb->infrared_callback) {
-                    gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                    gb->infrared_callback(gb, value & 1);
                 }
-                gb->cycles_since_ir_change = 0;
             }
             return true;
         }
@@ -691,14 +683,11 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
        && gb->cartridge_type->mbc_type != GB_HUC1) return;
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
-        bool old_input = effective_ir_input(gb);
-        gb->cart_ir = value & 1;
-        bool new_input = effective_ir_input(gb);
-        if (new_input != old_input) {
+        if (gb->cart_ir != (value & 1)) {
+            gb->cart_ir = value & 1;
             if (gb->infrared_callback) {
-                gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                gb->infrared_callback(gb, value & 1);
             }
-            gb->cycles_since_ir_change = 0;
         }
         return;
     }
@@ -1111,15 +1100,13 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (!GB_is_cgb(gb)) {
                     return;
                 }
-                bool old_input = effective_ir_input(gb);
-                gb->io_registers[GB_IO_RP] = value;
-                bool new_input = effective_ir_input(gb);
-                if (new_input != old_input) {
+                if ((gb->io_registers[GB_IO_RP] ^ value) & 1) {
                     if (gb->infrared_callback) {
-                        gb->infrared_callback(gb, new_input, gb->cycles_since_ir_change);
+                        gb->infrared_callback(gb, value & 1);
                     }
-                    gb->cycles_since_ir_change = 0;
                 }
+                gb->io_registers[GB_IO_RP] = value;
+
                 return;
             }
 

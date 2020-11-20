@@ -125,8 +125,6 @@ typedef enum {
     GB_BORDER_ALWAYS,
 } GB_border_mode_t;
 
-#define GB_MAX_IR_QUEUE 256
-
 enum {
     /* Joypad and Serial */
     GB_IO_JOYP       = 0x00, // Joypad (R/W)
@@ -272,7 +270,7 @@ typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
-typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, uint64_t cycles_since_last_update);
+typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
@@ -282,11 +280,6 @@ typedef void (*GB_icd_pixel_callback_t)(GB_gameboy_t *gb, uint8_t row);
 typedef void (*GB_icd_hreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_icd_vreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_boot_rom_load_callback_t)(GB_gameboy_t *gb, GB_boot_rom_t type);
-
-typedef struct {
-    bool state;
-    uint64_t delay;
-} GB_ir_queue_item_t;
 
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
@@ -374,6 +367,9 @@ struct GB_gameboy_internal_s {
         uint8_t extra_oam[0xff00 - 0xfea0];
         uint32_t ram_size; // Different between CGB and DMG
         GB_workboy_t workboy;
+               
+       int32_t ir_sensor;
+       bool effective_ir_input;
     );
 
     /* DMA and HDMA */
@@ -613,12 +609,6 @@ struct GB_gameboy_internal_s {
         GB_print_image_callback_t printer_callback;
         GB_workboy_set_time_callback workboy_set_time_callback;
         GB_workboy_get_time_callback workboy_get_time_callback;
-               
-        /* IR */
-        uint64_t cycles_since_ir_change; // In 8MHz units
-        uint64_t cycles_since_input_ir_change; // In 8MHz units
-        GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
-        size_t ir_queue_length;
 
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
@@ -771,7 +761,6 @@ void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
     
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
-void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, uint64_t cycles_after_previous_change); /* In 8MHz units*/
     
 void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
