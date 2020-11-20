@@ -596,6 +596,9 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
         if (!GB_is_cgb(gb) && !gb->apu.wave_channel.wave_form_just_read) {
             return 0xFF;
         }
+        if (gb->model == GB_MODEL_AGB) {
+            return 0xFF;
+        }
         reg = GB_IO_WAV_START + gb->apu.wave_channel.current_sample_index / 2;
     }
 
