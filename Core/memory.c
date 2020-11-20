@@ -115,7 +115,7 @@ static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 
 static bool effective_ir_input(GB_gameboy_t *gb)
 {
-    return gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1) || gb->cart_ir;
+    return gb->infrared_input || gb->cart_ir;
 }
 
 static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
@@ -428,9 +428,12 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_RP: {
                 if (!gb->cgb_mode) return 0xFF;
                 /* You will read your own IR LED if it's on. */
-                uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
-                if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && effective_ir_input(gb)) {
-                    ret |= 2;
+                uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x2E;
+                if (gb->model != GB_MODEL_CGB_E) {
+                    ret |= 0x10;
+                }
+                if (((gb->io_registers[GB_IO_RP] & 0xC1) == 0xC0 && effective_ir_input(gb)) && gb->model != GB_MODEL_AGB) {
+                    ret &= ~2;
                 }
                 return ret;
             }
