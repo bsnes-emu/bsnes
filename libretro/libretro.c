@@ -213,6 +213,16 @@ static bool serial_end2(GB_gameboy_t *gb)
     return ret;
 }
 
+static void infrared_callback1(GB_gameboy_t *gb, bool output)
+{
+    GB_set_infrared_input(&gameboy[1], output);
+}
+
+static void infrared_callback2(GB_gameboy_t *gb, bool output)
+{
+    GB_set_infrared_input(&gameboy[0], output);
+}
+
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return r <<16 | g <<8 | b;
@@ -351,12 +361,16 @@ static void set_link_cable_state(bool state)
         GB_set_serial_transfer_bit_end_callback(&gameboy[0], serial_end1);
         GB_set_serial_transfer_bit_start_callback(&gameboy[1], serial_start2);
         GB_set_serial_transfer_bit_end_callback(&gameboy[1], serial_end2);
+        GB_set_infrared_callback(&gameboy[0], infrared_callback1);
+        GB_set_infrared_callback(&gameboy[1], infrared_callback2);
     }
     else if (!state) { 
         GB_set_serial_transfer_bit_start_callback(&gameboy[0], NULL);
         GB_set_serial_transfer_bit_end_callback(&gameboy[0], NULL);
         GB_set_serial_transfer_bit_start_callback(&gameboy[1], NULL);
         GB_set_serial_transfer_bit_end_callback(&gameboy[1], NULL);
+        GB_set_infrared_callback(&gameboy[0], NULL);
+        GB_set_infrared_callback(&gameboy[1], NULL);
     }
 }
 
