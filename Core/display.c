@@ -1021,7 +1021,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     bool should_activate_window = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
                         static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
-                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
+                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7] && !GB_is_cgb(gb)) {
                             should_activate_window = true;
                         }
                     }
