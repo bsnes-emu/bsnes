@@ -202,6 +202,9 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->nontrivial_jump_state) {
         free(gb->nontrivial_jump_state);
     }
+    if (gb->undo_state) {
+        free(gb->undo_state);
+    }
 #ifndef GB_DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
 #endif
@@ -1433,6 +1436,10 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
     else {
         gb->ram = realloc(gb->ram, gb->ram_size = 0x2000);
         gb->vram = realloc(gb->vram, gb->vram_size = 0x2000);
+    }
+    if (gb->undo_state) {
+        free(gb->undo_state);
+        gb->undo_state = NULL;
     }
     GB_rewind_free(gb);
     GB_reset(gb);

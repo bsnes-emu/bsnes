@@ -646,6 +646,10 @@ struct GB_gameboy_internal_s {
         /* Ticks command */
         uint64_t debugger_ticks;
                
+        /* Undo */
+        uint8_t *undo_state;
+        const char *undo_label;
+
         /* Rewind */
 #define GB_REWIND_FRAMES_PER_KEY 255
         size_t rewind_buffer_length;

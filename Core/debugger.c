@@ -1889,6 +1889,29 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
     return true;
 }
 
+static bool undo(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+    
+    if (!gb->undo_label) {
+        GB_log(gb, "No undo state available\n");
+        return true;
+    }
+    uint16_t pc = gb->pc;
+    GB_load_state_from_buffer(gb, gb->undo_state, GB_get_save_state_size(gb));
+    GB_log(gb, "Reverted a \"%s\" command.\n", gb->undo_label);
+    if (pc != gb->pc) {
+        GB_cpu_disassemble(gb, gb->pc, 5);
+    }
+    gb->undo_label = NULL;
+    
+    return true;
+}
+
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
 #define HELP_NEWLINE "\n             "
@@ -1899,6 +1922,7 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
+    {"undo", 1, undo, "Reverts the last command"},
     {"backtrace", 2, backtrace, "Displays the current call stack"},
     {"bt", 2, }, /* Alias */
     {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected"},
@@ -2184,7 +2208,30 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
 
     const debugger_command_t *command = find_command(command_string);
     if (command) {
-        return command->implementation(gb, arguments, modifiers, command);
+        uint8_t *old_state = malloc(GB_get_save_state_size(gb));
+        GB_save_state_to_buffer(gb, old_state);
+        bool ret = command->implementation(gb, arguments, modifiers, command);
+        if (!ret) { // Command continues, save state in any case
+            free(gb->undo_state);
+            gb->undo_state = old_state;
+            gb->undo_label = command->command;
+        }
+        else {
+            uint8_t *new_state = malloc(GB_get_save_state_size(gb));
+            GB_save_state_to_buffer(gb, new_state);
+            if (memcmp(new_state, old_state, GB_get_save_state_size(gb)) != 0) {
+                // State changed, save the old state as the new undo state
+                free(gb->undo_state);
+                gb->undo_state = old_state;
+                gb->undo_label = command->command;
+            }
+            else {
+                // Nothing changed, just free the old state
+                free(old_state);
+            }
+            free(new_state);
+        }
+        return ret;
     }
     else {
         GB_log(gb, "%s: no such command.\n", command_string);
@@ -2260,6 +2307,11 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
 void GB_debugger_run(GB_gameboy_t *gb)
 {
     if (gb->debug_disable) return;
+    
+    if (!gb->undo_state) {
+        gb->undo_state = malloc(GB_get_save_state_size(gb));
+        GB_save_state_to_buffer(gb, gb->undo_state);
+    }
 
     char *input = NULL;
     if (gb->debug_next_command && gb->debug_call_depth <= 0 && !gb->halted) {
