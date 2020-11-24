@@ -207,6 +207,10 @@ auto pWindow::construct() -> void {
   g_object_set_data(G_OBJECT(widget), "hiro::window", (gpointer)this);
   g_object_set_data(G_OBJECT(formContainer), "hiro::window", (gpointer)this);
 
+  #if HIRO_GTK==3
+  g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
+  #endif
+
   pApplication::state().windows.append(this);
 }
 
