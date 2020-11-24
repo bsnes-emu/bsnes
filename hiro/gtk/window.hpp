@@ -36,6 +36,7 @@ struct pWindow : pObject {
   auto _menuHeight() const -> int;
   auto _menuTextHeight() const -> int;
   auto _setIcon(const string& basename) -> bool;
+  auto _setMenuColor() -> void;
   auto _setMenuEnabled(bool enabled) -> void;
   auto _setMenuFont(const Font& font) -> void;
   auto _setMenuVisible(bool visible) -> void;

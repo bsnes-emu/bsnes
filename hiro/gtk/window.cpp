@@ -158,6 +158,7 @@ auto pWindow::construct() -> void {
 
   gtkMenu = gtk_menu_bar_new();
   gtk_box_pack_start(GTK_BOX(menuContainer), gtkMenu, false, false, 0);
+  _setMenuColor();
 
   formContainer = gtk_fixed_new();
   gtk_box_pack_start(GTK_BOX(menuContainer), formContainer, true, true, 0);
@@ -287,6 +288,7 @@ auto pWindow::remove(sStatusBar statusBar) -> void {
 auto pWindow::setBackgroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+  _setMenuColor();
 }
 
 auto pWindow::setDismissable(bool dismissable) -> void {
@@ -487,6 +489,31 @@ auto pWindow::_setIcon(const string& pathname) -> bool {
   }
 
   return false;
+}
+
+//fix for menu-bar colors with custom window background colors (only needed for GTK3)
+auto pWindow::_setMenuColor() -> void {
+  #if HIRO_GTK==3
+  //if no window background color was set, we can use the original menu-bar color
+  if(!state().backgroundColor) {
+    gtk_widget_override_color(gtkMenu, GTK_STATE_FLAG_NORMAL, nullptr);
+    gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, nullptr);
+    return;
+  }
+
+  //if Window::setBackgroundColor is used, the menu-bar will be the wrong color
+  //to prevent this from being an issue, we retrieve the theme background color and set it ourselves here
+  GtkStyleContext* context = gtk_widget_get_style_context(gtkMenu);
+  GdkRGBA gdkColor;
+  gtk_style_context_lookup_color(context, "theme_bg_color", &gdkColor);
+  if(gdkColor.alpha == 0.0) {
+    //if this fails (it should not happen); set the menubar to black text on a light gray background
+    gdk_rgba_parse(&gdkColor, "#000000");
+    gtk_widget_override_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &gdkColor);
+    gdk_rgba_parse(&gdkColor, "#e8e8e8");
+  }
+  gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &gdkColor);
+  #endif
 }
 
 auto pWindow::_setMenuEnabled(bool enabled) -> void {
