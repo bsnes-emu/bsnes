@@ -287,6 +287,13 @@ auto pWindow::remove(sStatusBar statusBar) -> void {
 auto pWindow::setBackgroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
+
+  #if HIRO_GTK==3
+  GdkRGBA gtkMenuBackgroundColor;
+  auto context = gtk_widget_get_style_context(gtkMenu);
+  gtk_style_context_lookup_color(context, "theme_bg_color", &gtkMenuBackgroundColor);
+  gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &gtkMenuBackgroundColor);
+  #endif
 }
 
 auto pWindow::setDismissable(bool dismissable) -> void {
