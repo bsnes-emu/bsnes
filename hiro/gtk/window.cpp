@@ -289,10 +289,27 @@ auto pWindow::setBackgroundColor(Color color) -> void {
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
 
   #if HIRO_GTK==3
-  GdkRGBA gtkMenuBackgroundColor;
-  auto context = gtk_widget_get_style_context(gtkMenu);
-  gtk_style_context_lookup_color(context, "theme_bg_color", &gtkMenuBackgroundColor);
-  gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &gtkMenuBackgroundColor);
+  if(!state().backgroundColor) {
+    // If no window background color is set, then use the default menu bar color.
+    gtk_widget_override_color(gtkMenu, GTK_STATE_FLAG_NORMAL, nullptr);
+    gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, nullptr);
+  } else {
+    // Otherwise, fix visual inconsistencies between the menu bar and current theme.
+    GdkRGBA themeBackgroundColor;
+    auto context = gtk_widget_get_style_context(gtkMenu);
+    if(gtk_style_context_lookup_color(context, "theme_bg_color", &themeBackgroundColor)) {
+      // If the current theme defines theme_bg_color, then use it.
+      gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &themeBackgroundColor);
+    } else {
+      // Otherwise, set the menu bar to black text on a light gray background.
+      // FIXME: Maybe compute these colors based on the window background instead?
+      GdkRGBA textColor, backgroundColor;
+      gdk_rgba_parse(&textColor, "black");
+      gtk_widget_override_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &textColor);
+      gdk_rgba_parse(&backgroundColor, "gray91");
+      gtk_widget_override_background_color(gtkMenu, GTK_STATE_FLAG_NORMAL, &backgroundColor);
+    }
+  }
   #endif
 }
 
