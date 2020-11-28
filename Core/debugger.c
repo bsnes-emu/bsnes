@@ -1780,7 +1780,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         if (channel == GB_SQUARE_1) {
             GB_log(gb, "    Frequency sweep %s and %s (next in %u APU ticks)\n",
                    gb->apu.sweep_enabled? "active" : "inactive",
-                   gb->apu.sweep_decreasing? "decreasing" : "increasing",
+                   (gb->io_registers[GB_IO_NR10] & 0x8) ? "decreasing" : "increasing",
                    gb->apu.square_sweep_calculate_countdown);
         }
 
