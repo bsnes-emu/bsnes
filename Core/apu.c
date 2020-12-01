@@ -329,6 +329,24 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
     }
 }
 
+static void trigger_sweep_calculation(GB_gameboy_t *gb)
+{
+    if ((gb->io_registers[GB_IO_NR10] & 0x70) && gb->apu.square_sweep_countdown == 7) {
+        if (gb->io_registers[GB_IO_NR10] & 0x07) {
+            gb->apu.square_channels[GB_SQUARE_1].sample_length =
+            gb->apu.sweep_length_addend + gb->apu.shadow_sweep_sample_length + !!(gb->io_registers[GB_IO_NR10] & 0x8);
+            gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
+        }
+        gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
+        gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
+        
+        /* Recalculation and overflow check only occurs after a delay */
+        gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
+        
+        gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
+    }
+}
+
 void GB_apu_div_event(GB_gameboy_t *gb)
 {
     if (!gb->apu.global_enable) return;
@@ -396,27 +414,9 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 3) == 3) {
-        if (gb->apu.square_sweep_countdown) {
-            if (!--gb->apu.square_sweep_countdown && gb->apu.sweep_enabled) {
-                if ((gb->io_registers[GB_IO_NR10] & 0x70) && (gb->io_registers[GB_IO_NR10] & 0x07)) {
-                    gb->apu.square_channels[GB_SQUARE_1].sample_length =
-                    gb->apu.sweep_length_addend + gb->apu.shadow_sweep_sample_length + !!(gb->io_registers[GB_IO_NR10] & 0x8);
-                    gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
-                }
-                gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
-                gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
-
-                if (gb->io_registers[GB_IO_NR10] & 0x70) {
-                    /* Recalculation and overflow check only occurs after a delay */
-                    gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
-                }
-                
-                gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x70;
-
-                gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
-                if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
-            }
-        }
+        gb->apu.square_sweep_countdown++;
+        gb->apu.square_sweep_countdown &= 7;
+        trigger_sweep_calculation(gb);
     }
 }
 
@@ -433,7 +433,8 @@ void GB_apu_run(GB_gameboy_t *gb)
         gb->apu.lf_div ^= cycles & 1;
         gb->apu.noise_channel.alignment += cycles;
 
-        if (gb->apu.square_sweep_calculate_countdown) {
+        if (gb->apu.square_sweep_calculate_countdown &&
+            ((gb->io_registers[GB_IO_NR10] & 7) || gb->apu.square_sweep_calculate_countdown <= 7)) { // Calculation is paused if the lower bits
             if (gb->apu.square_sweep_calculate_countdown > cycles) {
                 gb->apu.square_sweep_calculate_countdown -= cycles;
             }
@@ -664,18 +665,16 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         break;
 
         /* Square channels */
-        case GB_IO_NR10:
-            if (gb->apu.shadow_sweep_sample_length + gb->apu.sweep_length_addend > 0x7FF && !(gb->io_registers[GB_IO_NR10] & 8)) {
+        case GB_IO_NR10:{
+            bool old_negate = gb->io_registers[GB_IO_NR10] & 8;
+            gb->io_registers[GB_IO_NR10] = value;
+            if (gb->apu.shadow_sweep_sample_length + gb->apu.sweep_length_addend + old_negate > 0x7FF && !(value & 8)) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, 0);
-                gb->apu.square_sweep_calculate_countdown = 0;
             }
-            if ((value & 0x70) == 0) {
-                /* Todo: what happens if we set period to 0 while a calculate event is scheduled, and then
-                         re-set it to non-zero? */
-                gb->apu.square_sweep_calculate_countdown = 0;
-            }
+            trigger_sweep_calculation(gb);
             break;
+        }
 
         case GB_IO_NR11:
         case GB_IO_NR21: {
@@ -737,11 +736,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (value & 0x80) {
-                if (index == GB_SQUARE_1) {
-                    gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
-                    gb->apu.shadow_sweep_sample_length = 0;
-                    gb->apu.sweep_enabled = gb->io_registers[GB_IO_NR10] & 0x70;
-                }
                 /* Current sample index remains unchanged when restarting channels 1 or 2. It is only reset by
                    turning the APU off. */
                 if (!gb->apu.is_active[index]) {
@@ -776,16 +770,17 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 if (index == GB_SQUARE_1) {
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
+                        gb->apu.shadow_sweep_sample_length = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
+                        gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
                     }
                     else {
-                        gb->apu.square_sweep_calculate_countdown = 0;
+                        gb->apu.shadow_sweep_sample_length = 0;
+                        gb->apu.sweep_length_addend = 0;
                     }
-                    gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7);
-                    if (!gb->apu.square_sweep_countdown) gb->apu.square_sweep_countdown = 8;
+                    gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
                 }
-
             }
 
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */

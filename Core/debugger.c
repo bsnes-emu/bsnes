@@ -1778,10 +1778,17 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
                gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
 
         if (channel == GB_SQUARE_1) {
-            GB_log(gb, "    Frequency sweep %s and %s (next in %u APU ticks)\n",
-                   gb->apu.sweep_enabled? "active" : "inactive",
-                   (gb->io_registers[GB_IO_NR10] & 0x8) ? "decreasing" : "increasing",
-                   gb->apu.square_sweep_calculate_countdown);
+            GB_log(gb, "    Frequency sweep %s and %s\n",
+                   ((gb->io_registers[GB_IO_NR10] & 0x7) && (gb->io_registers[GB_IO_NR10] & 0x70))? "active" : "inactive",
+                   (gb->io_registers[GB_IO_NR10] & 0x8) ? "decreasing" : "increasing");
+            if (gb->apu.square_sweep_calculate_countdown) {
+                GB_log(gb, "    On going frequency calculation will be ready in %u APU ticks\n",
+                       gb->apu.square_sweep_calculate_countdown);
+            }
+            else {
+                GB_log(gb, "    Shadow frequency register: 0x%03x\n", gb->apu.shadow_sweep_sample_length);
+                GB_log(gb, "    Sweep addend register: 0x%03x\n", gb->apu.sweep_length_addend);
+            }
         }
 
         if (gb->apu.square_channels[channel].length_enabled) {
