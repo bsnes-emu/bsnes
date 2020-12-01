@@ -120,6 +120,7 @@ typedef struct
     uint8_t skip_div_event;
     bool current_lfsr_sample;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
+    uint8_t channel_1_restart_hold;
 } GB_apu_t;
 
 typedef enum {

@@ -337,11 +337,13 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
             gb->apu.sweep_length_addend + gb->apu.shadow_sweep_sample_length + !!(gb->io_registers[GB_IO_NR10] & 0x8);
             gb->apu.square_channels[GB_SQUARE_1].sample_length &= 0x7FF;
         }
-        gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
-        gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
+        if (gb->apu.channel_1_restart_hold == 0) {
+            gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
+            gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
+        }
         
         /* Recalculation and overflow check only occurs after a delay */
-        gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
+        gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
         
         gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
     }
@@ -440,7 +442,9 @@ void GB_apu_run(GB_gameboy_t *gb)
             }
             else {
                 /* APU bug: sweep frequency is checked after adding the sweep delta twice */
-                gb->apu.shadow_sweep_sample_length = gb->apu.square_channels[GB_SQUARE_1].sample_length;
+                if (gb->apu.channel_1_restart_hold == 0) {
+                    gb->apu.shadow_sweep_sample_length = gb->apu.square_channels[GB_SQUARE_1].sample_length;
+                }
                 if (gb->io_registers[GB_IO_NR10] & 8) {
                     gb->apu.sweep_length_addend ^= 0x7FF;
                 }
@@ -449,6 +453,15 @@ void GB_apu_run(GB_gameboy_t *gb)
                     update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
                 }
                 gb->apu.square_sweep_calculate_countdown = 0;
+            }
+        }
+        
+        if (gb->apu.channel_1_restart_hold) {
+            if (gb->apu.channel_1_restart_hold > cycles) {
+                gb->apu.channel_1_restart_hold -= cycles;
+            }
+            else {
+                gb->apu.channel_1_restart_hold = 0;
             }
         }
 
@@ -665,7 +678,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR10:{
             bool old_negate = gb->io_registers[GB_IO_NR10] & 8;
             gb->io_registers[GB_IO_NR10] = value;
-            if (gb->apu.shadow_sweep_sample_length + gb->apu.sweep_length_addend + old_negate > 0x7FF && !(value & 8)) {
+            if (gb->apu.square_sweep_calculate_countdown == 0 &&
+                gb->apu.shadow_sweep_sample_length + gb->apu.sweep_length_addend + old_negate > 0x7FF &&
+                !(value & 8)) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, 0);
             }
@@ -765,17 +780,17 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
 
                 if (index == GB_SQUARE_1) {
+                    gb->apu.shadow_sweep_sample_length = 0;
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
-                        gb->apu.shadow_sweep_sample_length = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
                         gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
                     }
                     else {
-                        gb->apu.shadow_sweep_sample_length = 0;
                         gb->apu.sweep_length_addend = 0;
                     }
+                    gb->apu.channel_1_restart_hold = 4 - gb->apu.lf_div;
                     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
                 }
             }
