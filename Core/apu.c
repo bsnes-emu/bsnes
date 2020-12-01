@@ -633,11 +633,11 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             break;
         case GB_IO_NR52: {
 
-            uint8_t old_nrx1[] = {
-                gb->io_registers[GB_IO_NR11],
-                gb->io_registers[GB_IO_NR21],
-                gb->io_registers[GB_IO_NR31],
-                gb->io_registers[GB_IO_NR41]
+            uint8_t old_pulse_lengths[] = {
+                gb->apu.square_channels[0].pulse_length,
+                gb->apu.square_channels[1].pulse_length,
+                gb->apu.wave_channel.pulse_length,
+                gb->apu.noise_channel.pulse_length
             };
             if ((value & 0x80) && !gb->apu.global_enable) {
                 GB_apu_init(gb);
@@ -649,17 +649,14 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 memset(&gb->apu, 0, sizeof(gb->apu));
                 memset(gb->io_registers + GB_IO_NR10, 0, GB_IO_WAV_START - GB_IO_NR10);
-                old_nrx1[0] &= 0x3F;
-                old_nrx1[1] &= 0x3F;
-
                 gb->apu.global_enable = false;
             }
 
             if (!GB_is_cgb(gb) && (value & 0x80)) {
-                GB_apu_write(gb, GB_IO_NR11, old_nrx1[0]);
-                GB_apu_write(gb, GB_IO_NR21, old_nrx1[1]);
-                GB_apu_write(gb, GB_IO_NR31, old_nrx1[2]);
-                GB_apu_write(gb, GB_IO_NR41, old_nrx1[3]);
+                gb->apu.square_channels[0].pulse_length = old_pulse_lengths[0];
+                gb->apu.square_channels[1].pulse_length = old_pulse_lengths[1];
+                gb->apu.wave_channel.pulse_length = old_pulse_lengths[2];
+                gb->apu.noise_channel.pulse_length = old_pulse_lengths[3];
             }
         }
         break;
