@@ -351,6 +351,9 @@ static void leave_stop_mode(GB_gameboy_t *gb)
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
+        if (gb->cgb_double_speed && gb->io_registers[GB_IO_LCDC] & 0x80) {
+            GB_log(gb, "Returning from double speed mode while the PPU is on may trigger odd-mode\n");
+        }
         flush_pending_cycles(gb);
         bool needs_alignment = false;
         
