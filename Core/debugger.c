@@ -1821,7 +1821,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
 
     GB_log(gb, "\nCH4:\n");
-    GB_log(gb, "    Current volume: %u, current internal counter: 0x%x (next increase in %u ticks)\n",
+    GB_log(gb, "    Current volume: %u, current internal counter: 0x%04x (next increase in %u ticks)\n",
         gb->apu.noise_channel.current_volume,
         gb->apu.noise_channel.counter,
         gb->apu.noise_channel.counter_countdown);
