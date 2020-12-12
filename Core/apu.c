@@ -451,6 +451,22 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
+    bool start_ch4 = false;
+    if (gb->apu.channel_4_dmg_delayed_start) {
+        if (gb->apu.channel_4_dmg_delayed_start == cycles) {
+            gb->apu.channel_4_dmg_delayed_start = 0;
+            start_ch4 = true;
+        }
+        else if (gb->apu.channel_4_dmg_delayed_start > cycles) {
+            gb->apu.channel_4_dmg_delayed_start -= cycles;
+        }
+        else {
+            /* Split it into two */
+            cycles -= gb->apu.channel_4_dmg_delayed_start;
+            gb->apu.apu_cycles = gb->apu.channel_4_dmg_delayed_start * 2;
+            GB_apu_run(gb);
+        }
+    }
         
     if (likely(!gb->stopped || GB_is_cgb(gb))) {
         /* To align the square signal to 1MHz */
@@ -571,6 +587,9 @@ void GB_apu_run(GB_gameboy_t *gb)
             gb->apu_output.sample_cycles -= gb->apu_output.cycles_per_sample;
             render(gb);
         }
+    }
+    if (start_ch4) {
+        GB_apu_write(gb, GB_IO_NR44, gb->io_registers[GB_IO_NR44] | 0x80);
     }
 }
 void GB_apu_init(GB_gameboy_t *gb)
@@ -978,49 +997,54 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR44: {
             if (value & 0x80) {
-                unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
-                if (!divisor) divisor = 2;
-                gb->apu.channel_4_delta = 0;
-                gb->apu.noise_channel.counter_countdown = divisor + 4;
-                if (divisor == 2) {
-                    gb->apu.noise_channel.counter_countdown += 1 - gb->apu.lf_div;
+                if (!GB_is_cgb(gb) && (gb->apu.noise_channel.alignment & 3) != 0) {
+                    gb->apu.channel_4_dmg_delayed_start = 6;
                 }
                 else {
-                    gb->apu.noise_channel.counter_countdown += (uint8_t[]){2, 1, 0, 3}[gb->apu.noise_channel.alignment & 3];
-                    if (((gb->apu.noise_channel.alignment + 1) & 3) < 2) {
-                        if ((gb->io_registers[GB_IO_NR43] & 0x07) == 1) {
-                            gb->apu.noise_channel.counter_countdown -= 2;
-                            gb->apu.channel_4_delta = 2;
-                        }
-                        else {
-                            gb->apu.noise_channel.counter_countdown -= 4;
+                    unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
+                    if (!divisor) divisor = 2;
+                    gb->apu.channel_4_delta = 0;
+                    gb->apu.noise_channel.counter_countdown = divisor + 4;
+                    if (divisor == 2) {
+                        gb->apu.noise_channel.counter_countdown += 1 - gb->apu.lf_div;
+                    }
+                    else {
+                        gb->apu.noise_channel.counter_countdown += (uint8_t[]){2, 1, 0, 3}[gb->apu.noise_channel.alignment & 3];
+                        if (((gb->apu.noise_channel.alignment + 1) & 3) < 2) {
+                            if ((gb->io_registers[GB_IO_NR43] & 0x07) == 1) {
+                                gb->apu.noise_channel.counter_countdown -= 2;
+                                gb->apu.channel_4_delta = 2;
+                            }
+                            else {
+                                gb->apu.noise_channel.counter_countdown -= 4;
+                            }
                         }
                     }
-                }
 
-                gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
+                    gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
 
-                /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
-                 started sound). The playback itself is not instant which is why we don't update the sample for other
-                 cases. */
-                if (gb->apu.is_active[GB_NOISE]) {
-                    update_sample(gb, GB_NOISE,
-                                  gb->apu.current_lfsr_sample ?
-                                  gb->apu.noise_channel.current_volume : 0,
-                                  0);
-                }
-                gb->apu.noise_channel.lfsr = 0;
-                gb->apu.current_lfsr_sample = false;
-                gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
+                    /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
+                     started sound). The playback itself is not instant which is why we don't update the sample for other
+                     cases. */
+                    if (gb->apu.is_active[GB_NOISE]) {
+                        update_sample(gb, GB_NOISE,
+                                      gb->apu.current_lfsr_sample ?
+                                      gb->apu.noise_channel.current_volume : 0,
+                                      0);
+                    }
+                    gb->apu.noise_channel.lfsr = 0;
+                    gb->apu.current_lfsr_sample = false;
+                    gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
 
-                if (!gb->apu.is_active[GB_NOISE] && (gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
-                    gb->apu.is_active[GB_NOISE] = true;
-                    update_sample(gb, GB_NOISE, 0, 0);
-                }
+                    if (!gb->apu.is_active[GB_NOISE] && (gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
+                        gb->apu.is_active[GB_NOISE] = true;
+                        update_sample(gb, GB_NOISE, 0, 0);
+                    }
 
-                if (gb->apu.noise_channel.pulse_length == 0) {
-                    gb->apu.noise_channel.pulse_length = 0x40;
-                    gb->apu.noise_channel.length_enabled = false;
+                    if (gb->apu.noise_channel.pulse_length == 0) {
+                        gb->apu.noise_channel.pulse_length = 0x40;
+                        gb->apu.noise_channel.length_enabled = false;
+                    }
                 }
             }
 
