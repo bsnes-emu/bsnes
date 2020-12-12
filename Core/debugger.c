@@ -1821,10 +1821,10 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
 
     GB_log(gb, "\nCH4:\n");
-    GB_log(gb, "    Current volume: %u, current sample length: %u APU ticks (next in %u ticks)\n",
+    GB_log(gb, "    Current volume: %u, current internal counter: 0x%x (next increase in %u ticks)\n",
         gb->apu.noise_channel.current_volume,
-        gb->apu.noise_channel.sample_length * 4 + 3,
-        gb->apu.noise_channel.sample_countdown);
+        gb->apu.noise_channel.counter,
+        gb->apu.noise_channel.counter_countdown);
 
     GB_log(gb, "    %u 256 Hz ticks till next volume %screase (out of %u)\n",
         gb->apu.noise_channel.volume_countdown,

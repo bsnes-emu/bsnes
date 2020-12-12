@@ -422,6 +422,28 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 }
 
+static void step_lfsr(GB_gameboy_t *gb, unsigned cycles_offset)
+{
+    unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
+    bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
+    gb->apu.noise_channel.lfsr >>= 1;
+    
+    if (new_high_bit) {
+        gb->apu.noise_channel.lfsr |= high_bit_mask;
+    }
+    else {
+        /* This code is not redundent, it's relevant when switching LFSR widths */
+        gb->apu.noise_channel.lfsr &= ~high_bit_mask;
+    }
+    
+    gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+    if (gb->apu.is_active[GB_NOISE]) {
+        update_sample(gb, GB_NOISE,
+                      gb->apu.current_lfsr_sample ?
+                      gb->apu.noise_channel.current_volume : 0,
+                      cycles_offset);
+    }
+}
 
 void GB_apu_run(GB_gameboy_t *gb)
 {
@@ -506,39 +528,38 @@ void GB_apu_run(GB_gameboy_t *gb)
                 gb->apu.wave_channel.wave_form_just_read = false;
             }
         }
-
-        if (gb->apu.is_active[GB_NOISE]) {
+        
+        // The noise channel can step even if inactive on the DMG
+        if (gb->apu.is_active[GB_NOISE] || !GB_is_cgb(gb)) {
             uint8_t cycles_left = cycles;
-            while (unlikely(cycles_left > gb->apu.noise_channel.sample_countdown)) {
-                cycles_left -= gb->apu.noise_channel.sample_countdown + 1;
-                gb->apu.noise_channel.sample_countdown = gb->apu.noise_channel.sample_length * 4 + 3;
+            unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
+            if (!divisor) divisor = 2;
+            if (gb->apu.noise_channel.counter_countdown == 0) {
+                gb->apu.noise_channel.counter_countdown = divisor;
+            }
+            while (unlikely(cycles_left >= gb->apu.noise_channel.counter_countdown)) {
+                cycles_left -= gb->apu.noise_channel.counter_countdown;
+                gb->apu.noise_channel.counter_countdown = divisor + gb->apu.channel_4_delta;
+                gb->apu.channel_4_delta = 0;
+                bool old_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+                gb->apu.noise_channel.counter++;
+                gb->apu.noise_channel.counter &= 0x3FFF;
+                bool new_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
 
                 /* Step LFSR */
-                unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
-                bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
-                gb->apu.noise_channel.lfsr >>= 1;
-
-                if (new_high_bit) {
-                    gb->apu.noise_channel.lfsr |= high_bit_mask;
+                if (new_bit && !old_bit) {
+                    step_lfsr(gb, cycles - cycles_left);
+                    if (cycles_left == 0 && gb->apu.samples[GB_NOISE] == 0) {
+                        gb->apu.pcm_mask[1] &= 0x0F;
+                    }
                 }
-                else {
-                    /* This code is not redundent, it's relevant when switching LFSR widths */
-                    gb->apu.noise_channel.lfsr &= ~high_bit_mask;
-                }
-
-                gb->apu.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
-
-                if (cycles_left == 0 && gb->apu.samples[GB_NOISE] == 0) {
-                    gb->apu.pcm_mask[1] &= 0x0F;
-                }
-                
-                update_sample(gb, GB_NOISE,
-                              gb->apu.current_lfsr_sample ?
-                              gb->apu.noise_channel.current_volume : 0,
-                              0);
             }
             if (cycles_left) {
-                gb->apu.noise_channel.sample_countdown -= cycles_left;
+                gb->apu.noise_channel.counter_countdown -= cycles_left;
+                gb->apu.channel_4_countdown_reloaded = false;
+            }
+            else {
+                gb->apu.channel_4_countdown_reloaded = true;
             }
         }
     }
@@ -938,33 +959,43 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR43: {
             gb->apu.noise_channel.narrow = value & 8;
-            unsigned divisor = (value & 0x07) << 1;
-            if (!divisor) divisor = 1;
-            gb->apu.noise_channel.sample_length = (divisor << (value >> 4)) - 1;
-
-            /* Todo: changing the frequency sometimes delays the next sample. This is probably
-               due to how the frequency is actually calculated in the noise channel, which is probably
-               not by calculating the effective sample length and counting simiarly to the other channels.
-               This is not emulated correctly. */
+            bool old_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+            gb->io_registers[GB_IO_NR43] = value;
+            bool new_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+            if (gb->apu.channel_4_countdown_reloaded) {
+                unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
+                if (!divisor) divisor = 2;
+                 gb->apu.noise_channel.counter_countdown =
+                     divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 0, 3}[(gb->apu.noise_channel.alignment) & 3]);
+                 gb->apu.channel_4_delta = 0;
+            }
+            /* Step LFSR */
+            if (new_bit && !old_bit) {
+                step_lfsr(gb, 0);
+            }
             break;
         }
 
         case GB_IO_NR44: {
             if (value & 0x80) {
-                gb->apu.noise_channel.sample_countdown = (gb->apu.noise_channel.sample_length) * 2 + 6 - gb->apu.lf_div;
-
-                /* I'm COMPLETELY unsure about this logic, but it passes all relevant tests.
-                   See comment in NR43. */
-                if ((gb->io_registers[GB_IO_NR43] & 7) && (gb->apu.noise_channel.alignment & 2) == 0) {
-                    if ((gb->io_registers[GB_IO_NR43] & 7) == 1) {
-                        gb->apu.noise_channel.sample_countdown += 2;
-                    }
-                    else {
-                        gb->apu.noise_channel.sample_countdown -= 2;
-                    }
+                unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
+                if (!divisor) divisor = 2;
+                gb->apu.channel_4_delta = 0;
+                gb->apu.noise_channel.counter_countdown = divisor + 4;
+                if (divisor == 2) {
+                    gb->apu.noise_channel.counter_countdown += 1 - gb->apu.lf_div;
                 }
-                if (gb->apu.is_active[GB_NOISE]) {
-                    gb->apu.noise_channel.sample_countdown += 2;
+                else {
+                    gb->apu.noise_channel.counter_countdown += (uint8_t[]){2, 1, 0, 3}[gb->apu.noise_channel.alignment & 3];
+                    if (((gb->apu.noise_channel.alignment + 1) & 3) < 2) {
+                        if ((gb->io_registers[GB_IO_NR43] & 0x07) == 1) {
+                            gb->apu.noise_channel.counter_countdown -= 2;
+                            gb->apu.channel_4_delta = 2;
+                        }
+                        else {
+                            gb->apu.noise_channel.counter_countdown -= 4;
+                        }
+                    }
                 }
 
                 gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;

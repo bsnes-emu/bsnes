@@ -25,8 +25,11 @@ void GB_handle_rumble(GB_gameboy_t *gb)
             unsigned volume = (gb->io_registers[GB_IO_NR50] & 7) + 1 + ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
             unsigned ch4_volume = volume * (!!(gb->io_registers[GB_IO_NR51] & 8) + !!(gb->io_registers[GB_IO_NR51] & 0x80));
             unsigned ch1_volume = volume * (!!(gb->io_registers[GB_IO_NR51] & 1) + !!(gb->io_registers[GB_IO_NR51] & 0x10));
-            
-            double ch4_rumble = (MIN(gb->apu.noise_channel.sample_length * (gb->apu.noise_channel.narrow? 8 : 1) , 4096) * ((signed) gb->apu.noise_channel.current_volume * gb->apu.noise_channel.current_volume * ch4_volume / 32.0 - 50) - 2048) / 2048.0;
+            unsigned ch4_divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 1;
+            if (!ch4_divisor) ch4_divisor = 1;
+            unsigned ch4_sample_length = (ch4_divisor << (gb->io_registers[GB_IO_NR43] >> 4)) - 1;
+        
+            double ch4_rumble = (MIN(ch4_sample_length * (gb->apu.noise_channel.narrow? 8 : 1) , 4096) * ((signed) gb->apu.noise_channel.current_volume * gb->apu.noise_channel.current_volume * ch4_volume / 32.0 - 50) - 2048) / 2048.0;
             
             ch4_rumble = MIN(ch4_rumble, 1.0);
             ch4_rumble = MAX(ch4_rumble, 0.0);

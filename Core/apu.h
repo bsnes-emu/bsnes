@@ -105,8 +105,9 @@ typedef struct
         uint16_t lfsr;
         bool narrow;
 
-        uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length)
-        uint16_t sample_length; // From NR43, in APU ticks
+        uint8_t counter_countdown; // Counts from 0-7 to 0 to tick counter (Scaled from 512KHz to 2MHz)
+        uint8_t __padding;
+        uint16_t counter; // A bit from this 14-bit register ticks LFSR
         bool length_enabled; // NR44
 
         uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
@@ -121,6 +122,9 @@ typedef struct
     bool current_lfsr_sample;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
     uint8_t channel_1_restart_hold;
+    int8_t channel_4_delta;
+    bool channel_4_countdown_reloaded;
+    
 } GB_apu_t;
 
 typedef enum {
