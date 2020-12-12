@@ -474,7 +474,8 @@ void GB_apu_run(GB_gameboy_t *gb)
         gb->apu.noise_channel.alignment += cycles;
 
         if (gb->apu.square_sweep_calculate_countdown &&
-            ((gb->io_registers[GB_IO_NR10] & 7) || gb->apu.square_sweep_calculate_countdown <= 7)) { // Calculation is paused if the lower bits
+            ((gb->io_registers[GB_IO_NR10] & 7) ||
+             gb->apu.square_sweep_calculate_countdown <= (gb->model > GB_MODEL_CGB_C? 3 : 1))) { // Calculation is paused if the lower bits
             if (gb->apu.square_sweep_calculate_countdown > cycles) {
                 gb->apu.square_sweep_calculate_countdown -= cycles;
             }
@@ -823,7 +824,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.shadow_sweep_sample_length = 0;
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
-                        gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 7 - gb->apu.lf_div;
+                        gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
+                        if (gb->model > GB_MODEL_CGB_C) {
+                            gb->apu.square_sweep_calculate_countdown += 2;
+                        }
                         gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
                     }
