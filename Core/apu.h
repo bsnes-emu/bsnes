@@ -124,7 +124,7 @@ typedef struct
     uint8_t channel_1_restart_hold;
     int8_t channel_4_delta;
     bool channel_4_countdown_reloaded;
-    
+    uint8_t channel_4_dmg_delayed_start;
 } GB_apu_t;
 
 typedef enum {
