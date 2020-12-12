@@ -249,6 +249,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 // Todo: This is difference is because my timing is off in one of the models
                 if (gb->model > GB_MODEL_CGB_C) {
                     GB_advance_cycles(gb, gb->pending_cycles);
+                    GB_write_memory(gb, addr, value ^ 0x10); // Write with the old TILE_SET first
                     gb->tile_sel_glitch = true;
                     GB_advance_cycles(gb, 1);
                     gb->tile_sel_glitch = false;
@@ -257,6 +258,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 else {
                     GB_advance_cycles(gb, gb->pending_cycles - 1);
+                    GB_write_memory(gb, addr, value ^ 0x10); // Write with the old TILE_SET first
                     gb->tile_sel_glitch = true;
                     GB_advance_cycles(gb, 1);
                     gb->tile_sel_glitch = false;
