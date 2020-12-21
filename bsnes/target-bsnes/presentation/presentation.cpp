@@ -213,8 +213,8 @@ auto Presentation::create() -> void {
 
   iconLayout.setAlignment(0.0).setCollapsible();
   image icon{Resource::Icon};
-  icon.alphaBlend(0x000000);
-  iconCanvas.setIcon(icon);
+  iconCanvas.setIcon(icon, {0, 0, 0});
+  iconCanvas.setAlignment({0.0, 0.0});
   iconCanvas.setDroppable();
   iconCanvas.onDrop([&](auto locations) { onDrop(locations); });
 
@@ -250,7 +250,6 @@ auto Presentation::create() -> void {
   });
 
   setTitle({"bsnes v", Emulator::Version});
-  setBackgroundColor({0, 0, 0});
   resizeWindow();
   setAlignment(Alignment::Center);
 
