@@ -1206,7 +1206,7 @@ void run_gui(bool is_running)
             }
 
             case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
+                if (event_hotkey_code(&event) == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
                     if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
                         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                     }
@@ -1215,7 +1215,7 @@ void run_gui(bool is_running)
                     }
                     update_viewport();
                 }
-                if (event.key.keysym.scancode == SDL_SCANCODE_O) {
+                if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
                         char *filename = do_open_rom_dialog();
                         if (filename) {

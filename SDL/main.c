@@ -233,7 +233,7 @@ static void handle_events(GB_gameboy_t *gb)
            };
                 
             case SDL_KEYDOWN:
-                switch (event.key.keysym.scancode) {
+                switch (event_hotkey_code(&event)) {
                     case SDL_SCANCODE_ESCAPE: {
                         open_menu();
                         break;
@@ -241,7 +241,6 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDL_SCANCODE_C:
                         if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
                             GB_debugger_break(gb);
-                            
                         }
                         break;
                         

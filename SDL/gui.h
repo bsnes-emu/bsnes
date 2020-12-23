@@ -122,4 +122,13 @@ void connect_joypad(void);
 joypad_button_t get_joypad_button(uint8_t physical_button);
 joypad_axis_t get_joypad_axis(uint8_t physical_axis);
 
+static SDL_Scancode event_hotkey_code(SDL_Event *event)
+{
+    if (event->key.keysym.sym >= SDLK_a && event->key.keysym.sym < SDLK_z) {
+        return SDL_SCANCODE_A + event->key.keysym.sym - SDLK_a;
+    }
+    
+    return event->key.keysym.scancode;
+}
+
 #endif
