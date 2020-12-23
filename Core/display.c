@@ -821,7 +821,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
         GB_STATE(gb, display, 30);
-        // GB_STATE(gb, display, 31);
+        GB_STATE(gb, display, 31);
         GB_STATE(gb, display, 32);
         GB_STATE(gb, display, 33);
         GB_STATE(gb, display, 34);
@@ -853,13 +853,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     /* Handle mode 2 on the very first line 0 */
     gb->current_line = 0;
     gb->window_y = -1;
-    /* Todo: verify timings */
-    if (gb->io_registers[GB_IO_WY] == 0) {
-        gb->wy_triggered = true;
-    }
-    else {
-        gb->wy_triggered = false;
-    }
+    gb->wy_triggered = false;
     
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -910,11 +904,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* Lines 0 - 143 */
         gb->window_y = -1;
         for (; gb->current_line < LINES; gb->current_line++) {
-            /* Todo: verify timings */
-            if ((gb->io_registers[GB_IO_WY] == gb->current_line ||
-                (gb->current_line != 0 && gb->io_registers[GB_IO_WY] == gb->current_line - 1))) {
-                gb->wy_triggered = true;
-            }
             
             gb->oam_write_blocked = GB_is_cgb(gb) && !gb->cgb_double_speed;
             gb->accessed_oam_row = 0;
@@ -994,6 +983,12 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->cycles_for_line += 2;
             GB_SLEEP(gb, display, 32, 2);
         mode_3_start:
+            /* Todo: verify timings */
+            if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
+                (gb->io_registers[GB_IO_WY] == 0) &&
+                gb->current_line == 0) {
+                gb->wy_triggered = true;
+            }
 
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
@@ -1021,7 +1016,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
                     bool should_activate_window = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
                         static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
-                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7] && !GB_is_cgb(gb)) {
+                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
                     }
@@ -1243,7 +1238,17 @@ abort_fetching_object:
             if (gb->hdma_on_hblank) {
                 gb->hdma_starting = true;
             }
-            GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line);
+            GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line - 2);
+            /*
+             TODO: Verify double speed timing
+             TODO: Line 0 behaves differently when enabling the window during the transition between mode 2 to 3
+            */
+            if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
+                (gb->io_registers[GB_IO_WY] == gb->current_line ||
+                 gb->io_registers[GB_IO_WY] == gb->current_line + 1)) {
+                gb->wy_triggered = true;
+            }
+            GB_SLEEP(gb, display, 31, 2);
             gb->mode_for_interrupt = 2;
           
             // Todo: unverified timing
@@ -1337,14 +1342,7 @@ abort_fetching_object:
         
         
         gb->current_line = 0;
-        /* Todo: verify timings */
-        if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
-            (gb->io_registers[GB_IO_WY] == 0)) {
-            gb->wy_triggered = true;
-        }
-        else {
-            gb->wy_triggered = false;
-        }
+        gb->wy_triggered = false;
         
         // TODO: not the correct timing
         gb->current_lcd_line = 0;

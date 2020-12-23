@@ -380,9 +380,8 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     else {
         GB_timing_sync(gb);
         if ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF) {
-            /* HW Bug? When STOP is executed while a button is down, the CPU halts forever
-               yet the other hardware keeps running. */
-            gb->interrupt_enable = 0;
+            /* TODO: HW Bug? When STOP is executed while a button is down, the CPU enters halt
+               mode instead. Fine details not confirmed yet. */
             gb->halted = true;
         }
         else {
