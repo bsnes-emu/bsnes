@@ -47,7 +47,7 @@ auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setIcon(const image& icon) -> void {
+auto pCanvas::setIcon(const image& icon, Color padding) -> void {
   update();
 }
 
@@ -160,7 +160,10 @@ auto QtCanvas::paintEvent(QPaintEvent* event) -> void {
     height = geometry.height();
   }
 
+  Color padding = p.state().color;
+
   QPainter painter(p.qtCanvas);
+  painter.fillRect(0, 0, geometry.width(), geometry.height(), QColor(padding.red(), padding.green(), padding.blue(), padding.alpha()));
   painter.drawImage(dx, dy, *p.qtImage, sx, sy, width, height);
 }
 

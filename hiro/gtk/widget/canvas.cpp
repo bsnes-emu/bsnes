@@ -103,7 +103,7 @@ auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setIcon(const image& icon) -> void {
+auto pCanvas::setIcon(const image& icon, Color padding) -> void {
   update();
 }
 
@@ -136,7 +136,7 @@ auto pCanvas::_onDraw(cairo_t* context) -> void {
     dy = 0;
   }
 
-  cairo_set_source_rgba(context, 0.0, 0.0, 0.0, 0.0);
+  cairo_set_source_rgba(context, state().color.red() / 255.0, state().color.green() / 255.0, state().color.blue() / 255.0, state().color.alpha() / 255.0);
   cairo_paint(context);
   gdk_cairo_set_source_pixbuf(context, surface, dx - sx, dy - sy);
   cairo_rectangle(context, dx, dy, width, height);

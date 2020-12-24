@@ -236,7 +236,7 @@ struct Canvas : sCanvas {
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setColor(Color color) { return self().setColor(color), *this; }
   auto setGradient(Gradient gradient = {}) { return self().setGradient(gradient), *this; }
-  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
+  auto setIcon(const image& icon = {}, Color padding = {}) { return self().setIcon(icon, padding), *this; }
   auto setSize(Size size = {}) { return self().setSize(size), *this; }
   auto update() { return self().update(), *this; }
 };

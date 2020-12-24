@@ -42,7 +42,7 @@ auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setIcon(const image& icon) -> void {
+auto pCanvas::setIcon(const image& icon, Color padding) -> void {
   update();
 }
 
@@ -145,7 +145,13 @@ auto pCanvas::_paint() -> void {
 
   RECT rc;
   GetClientRect(hwnd, &rc);
-  DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+  Color padding = state().color;
+  if(padding.alpha() == 0) {  //GDI doesn't support real alpha fill
+    DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+  } else {
+    HBRUSH hbr = CreateSolidBrush(RGB(padding.red(), padding.green(), padding.blue()));
+    FillRect(ps.hdc, &rc, hbr);
+  }
 
   BLENDFUNCTION bf{AC_SRC_OVER, 0, (BYTE)255, AC_SRC_ALPHA};
   AlphaBlend(ps.hdc, dx, dy, width, height, hdc, 0, 0, width, height, bf);

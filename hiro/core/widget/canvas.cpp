@@ -48,11 +48,11 @@ auto mCanvas::setGradient(Gradient gradient) -> type& {
   return *this;
 }
 
-auto mCanvas::setIcon(const image& icon) -> type& {
-  state.color = {};
+auto mCanvas::setIcon(const image& icon, Color padding) -> type& {
+  state.color = padding;
   state.gradient = {};
   state.icon = icon;
-  signal(setIcon, icon);
+  signal(setIcon, icon, padding);
   return *this;
 }
 

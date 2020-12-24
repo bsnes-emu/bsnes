@@ -12,7 +12,7 @@ struct pCanvas : pWidget {
   auto setFocusable(bool focusable) -> void override;
   auto setGeometry(Geometry geometry) -> void;
   auto setGradient(Gradient gradient) -> void;
-  auto setIcon(const image& icon) -> void;
+  auto setIcon(const image& icon, Color padding) -> void;
   auto update() -> void;
 
   auto _rasterize() -> void;

@@ -10,7 +10,7 @@ struct mCanvas : mWidget {
   auto setAlignment(Alignment alignment = {}) -> type&;
   auto setColor(Color color = {}) -> type&;
   auto setGradient(Gradient gradient = {}) -> type&;
-  auto setIcon(const image& icon = {}) -> type&;
+  auto setIcon(const image& icon = {}, Color padding = {0,0,0,0}) -> type&;
   auto setSize(Size size = {}) -> type&;
   auto size() const -> Size;
   auto update() -> type&;
