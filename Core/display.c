@@ -983,10 +983,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->cycles_for_line += 2;
             GB_SLEEP(gb, display, 32, 2);
         mode_3_start:
-            /* Todo: verify timings */
+            /* TODO: Timing seems incorrect, might need an access conflict handling. */
             if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
-                (gb->io_registers[GB_IO_WY] == 0) &&
-                gb->current_line == 0) {
+                gb->io_registers[GB_IO_WY] == gb->current_line) {
                 gb->wy_triggered = true;
             }
 
@@ -1241,11 +1240,10 @@ abort_fetching_object:
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line - 2);
             /*
              TODO: Verify double speed timing
-             TODO: Line 0 behaves differently when enabling the window during the transition between mode 2 to 3
+             TODO: Timing differs on a DMG
             */
             if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
-                (gb->io_registers[GB_IO_WY] == gb->current_line ||
-                 gb->io_registers[GB_IO_WY] == gb->current_line + 1)) {
+                (gb->io_registers[GB_IO_WY] == gb->current_line)) {
                 gb->wy_triggered = true;
             }
             GB_SLEEP(gb, display, 31, 2);
