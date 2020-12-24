@@ -1,3 +1,7 @@
+# Always use LF line endings for shaders
+*.fsh text eol=lf
+*.metal text eol=lf
+
 HexFiend/* linguist-vendored
 *.inc linguist-language=C
 Core/*.h linguist-language=C
