@@ -332,6 +332,7 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode)
 
 static void enter_stop_mode(GB_gameboy_t *gb)
 {
+    GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
     gb->stopped = true;
     gb->oam_ppu_blocked = !gb->oam_read_blocked;
     gb->vram_ppu_blocked = !gb->vram_read_blocked;
@@ -340,30 +341,30 @@ static void enter_stop_mode(GB_gameboy_t *gb)
 
 static void leave_stop_mode(GB_gameboy_t *gb)
 {
-    /* The CPU takes more time to wake up then the other components */
-    for (unsigned i = 0x200; i--;) {
-        GB_advance_cycles(gb, 0x10);
-    }
     gb->stopped = false;
     gb->oam_ppu_blocked = false;
     gb->vram_ppu_blocked = false;
     gb->cgb_palettes_ppu_blocked = false;
+    /* The CPU takes more time to wake up then the other components */
+    for (unsigned i = 0x2000; i--;) {
+        GB_advance_cycles(gb, 0x10);
+    }
+    GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
 }
 
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->io_registers[GB_IO_KEY1] & 0x1) {
-        if (gb->cgb_double_speed && gb->io_registers[GB_IO_LCDC] & 0x80) {
-            GB_log(gb, "Returning from double speed mode while the PPU is on may trigger odd-mode\n");
-        }
         flush_pending_cycles(gb);
         bool needs_alignment = false;
         
         GB_advance_cycles(gb, 0x4);
         /* Make sure we keep the CPU ticks aligned correctly when returning from double speed mode */
+        
         if (gb->double_speed_alignment & 7) {
             GB_advance_cycles(gb, 0x4);
             needs_alignment = true;
+            GB_log(gb, "ROM triggered PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
         }
 
         gb->cgb_double_speed ^= true;
@@ -388,7 +389,6 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
             enter_stop_mode(gb);
         }
     }
-    
     /* Todo: is PC being actually read? */
     gb->pc++;
 }

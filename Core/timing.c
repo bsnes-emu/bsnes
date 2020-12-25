@@ -157,7 +157,9 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->stopped) {
-        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        if (GB_is_cgb(gb)) {
+            gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        }
         return;
     }
     
@@ -248,7 +250,9 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     }
     
     // Not affected by speed boost
-    gb->double_speed_alignment += cycles;
+    if (gb->io_registers[GB_IO_LCDC] & 0x80) {
+        gb->double_speed_alignment += cycles;
+    }
     gb->hdma_cycles += cycles;
     gb->apu_output.sample_cycles += cycles;
     gb->cycles_since_last_sync += cycles;
