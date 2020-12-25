@@ -218,6 +218,10 @@ auto Presentation::create() -> void {
   iconCanvas.setDroppable();
   iconCanvas.onDrop([&](auto locations) { onDrop(locations); });
 
+  iconPadding.setColor({0, 0, 0});
+  iconPadding.setDroppable();
+  iconPadding.onDrop([&](auto locations) { onDrop(locations); });
+
   if(!settings.general.statusBar) layout.remove(statusLayout);
 
   auto font = Font().setBold();
@@ -250,7 +254,6 @@ auto Presentation::create() -> void {
   });
 
   setTitle({"bsnes v", Emulator::Version});
-  setBackgroundColor({0, 0, 0});
   resizeWindow();
   setAlignment(Alignment::Center);
 
