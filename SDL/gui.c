@@ -211,7 +211,7 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
             continue;
         }
         
-        if (x > width - GLYPH_WIDTH || y == 0 || y - y_offset > 144 - GLYPH_HEIGHT) {
+        if (x > width - GLYPH_WIDTH || y == 0 || y - y_offset > 144 - GLYPH_HEIGHT || y <= y_offset) {
             break;
         }
         
@@ -1384,9 +1384,17 @@ void run_gui(bool is_running)
                     unsigned i = 0, y = 24;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
                         if (i == current_selection) {
-                            if (y < scroll) {
-                                scroll = y - 4;
-                                goto rerender;
+                            if (i == 0) {
+                                if (y < scroll) {
+                                    scroll = (y - 4) / 12 * 12;
+                                    goto rerender;
+                                }
+                            }
+                            else {
+                                if (y < scroll + 24) {
+                                    scroll = (y - 24) / 12 * 12;
+                                    goto rerender;
+                                }
                             }
                         }
                         if (i == current_selection && i == 0 && scroll != 0) {
@@ -1406,14 +1414,20 @@ void run_gui(bool is_running)
                                                i == current_selection && !item->value_getter ? DECORATION_SELECTION : DECORATION_NONE);
                             y += 12;
                             if (item->value_getter) {
-                                draw_text_centered(pixels, width, height, y + y_offset, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
+                                draw_text_centered(pixels, width, height, y + y_offset - 1, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
                                                    i == current_selection ? DECORATION_ARROWS : DECORATION_NONE);
                                 y += 12;
                             }
                         }
                         if (i == current_selection) {
-                            if (y > scroll + 144) {
-                                scroll = y - 144;
+                            if (item[1].string) {
+                                if (y > scroll + 120) {
+                                    scroll = (y - 120) / 12 * 12;
+                                    goto rerender;
+                                }
+                            }
+                            else if (y > scroll + 144) {
+                                scroll = (y - 144) / 12 * 12;
                                 goto rerender;
                             }
                         }
