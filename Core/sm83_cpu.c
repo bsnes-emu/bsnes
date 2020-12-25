@@ -346,9 +346,10 @@ static void leave_stop_mode(GB_gameboy_t *gb)
     gb->vram_ppu_blocked = false;
     gb->cgb_palettes_ppu_blocked = false;
     /* The CPU takes more time to wake up then the other components */
-    for (unsigned i = 0x2000; i--;) {
+    for (unsigned i = 0x1FFF; i--;) {
         GB_advance_cycles(gb, 0x10);
     }
+    GB_advance_cycles(gb, gb->cgb_double_speed? 0x10 : 0xF);
     GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
 }
 
