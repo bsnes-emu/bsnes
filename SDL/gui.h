@@ -110,6 +110,10 @@ typedef struct {
     GB_rumble_mode_t rumble_mode;
 
     uint8_t default_scale;
+    
+    /* v0.14 */
+    unsigned padding;
+    uint8_t color_temperature;
 } configuration_t;
 
 extern configuration_t configuration;

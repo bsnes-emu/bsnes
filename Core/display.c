@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 #include "gb.h"
 
 /* FIFO functions */
@@ -208,6 +209,26 @@ static void display_vblank(GB_gameboy_t *gb)
     GB_timing_sync(gb);
 }
 
+static inline void temperature_tint(double temperature, double *r, double *g, double *b)
+{
+    if (temperature >= 0) {
+        *r = 1;
+        *g = pow(1 - temperature, 0.375);
+        if (temperature >= 0.75) {
+            *b = 0;
+        }
+        else {
+            *b = sqrt(0.75 - temperature);
+        }
+    }
+    else {
+        *b = 1;
+        double squared = pow(temperature, 2);
+        *g = 0.125 * squared + 0.3 * temperature + 1.0;
+        *r = 0.21875 * squared + 0.5 * temperature + 1.0;
+    }
+}
+
 static inline uint8_t scale_channel(uint8_t x)
 {
     return (x << 3) | (x >> 2);
@@ -240,13 +261,12 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         g = scale_channel(g);
         b = scale_channel(b);
     }
+    else if (GB_is_sgb(gb) || for_border) {
+        r = scale_channel_with_curve_sgb(r);
+        g = scale_channel_with_curve_sgb(g);
+        b = scale_channel_with_curve_sgb(b);
+    }
     else {
-        if (GB_is_sgb(gb) || for_border) {
-            return gb->rgb_encode_callback(gb,
-                                           scale_channel_with_curve_sgb(r),
-                                           scale_channel_with_curve_sgb(g),
-                                           scale_channel_with_curve_sgb(b));
-        }
         bool agb = gb->model == GB_MODEL_AGB;
         r = agb? scale_channel_with_curve_agb(r) : scale_channel_with_curve(r);
         g = agb? scale_channel_with_curve_agb(g) : scale_channel_with_curve(g);
@@ -301,6 +321,14 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         }
     }
     
+    if (gb->light_temperature) {
+        double light_r, light_g, light_b;
+        temperature_tint(gb->light_temperature, &light_r, &light_g, &light_b);
+        r = round(light_r * r);
+        g = round(light_g * g);
+        b = round(light_b * b);
+    }
+    
     return gb->rgb_encode_callback(gb, r, g, b);
 }
 
@@ -316,6 +344,17 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode)
 {
     gb->color_correction_mode = mode;
+    if (GB_is_cgb(gb)) {
+        for (unsigned i = 0; i < 32; i++) {
+            GB_palette_changed(gb, false, i * 2);
+            GB_palette_changed(gb, true, i * 2);
+        }
+    }
+}
+
+void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
+{
+    gb->light_temperature = temperature;
     if (GB_is_cgb(gb)) {
         for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, false, i * 2);

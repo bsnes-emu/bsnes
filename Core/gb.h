@@ -573,6 +573,7 @@ struct GB_gameboy_internal_s {
         uint32_t sprite_palettes_rgb[0x20];
         const GB_palette_t *dmg_palette;
         GB_color_correction_mode_t color_correction_mode;
+        double light_temperature;
         bool keys[4][GB_KEY_MAX];
         GB_border_mode_t border_mode;
         GB_sgb_border_t borrowed_border;

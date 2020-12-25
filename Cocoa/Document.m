@@ -690,6 +690,11 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateLightTemperature)
+                                                 name:@"GBLightTemperatureChanged"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateFrameBlendingMode)
                                                  name:@"GBFrameBlendingModeChanged"
                                                object:nil];
@@ -1834,6 +1839,14 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
     }
 }
+
+- (void) updateLightTemperature
+{
+    if (GB_is_inited(&gb)) {
+        GB_set_light_temperature(&gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"]);
+    }
+}
+
 
 - (void) updateFrameBlendingMode
 {

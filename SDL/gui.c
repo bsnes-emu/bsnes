@@ -110,6 +110,7 @@ configuration_t configuration =
     .volume = 100,
     .rumble_mode = GB_RUMBLE_ALL_GAMES,
     .default_scale = 2,
+    .color_temperature = 10,
 };
 
 
@@ -453,6 +454,33 @@ const char *current_color_correction_mode(unsigned index)
         [configuration.color_correction_mode];
 }
 
+const char *current_color_temperature(unsigned index)
+{
+    return (const char *[]){"12000K",
+        "11450K",
+        "10900K",
+        "10350K",
+        "9800K",
+        "9250K",
+        "8700K",
+        "8150K",
+        "7600K",
+        "7050K",
+        "6500K (White)",
+        "5950K",
+        "5400K",
+        "4850K",
+        "4300K",
+        "3750K",
+        "3200K",
+        "2650K",
+        "2100K",
+        "1550K",
+        "1000K"}
+    [configuration.color_temperature];
+}
+
+
 const char *current_palette(unsigned index)
 {
     return (const char *[]){"Greyscale", "Lime (Game Boy)", "Olive (Pocket)", "Teal (Light)"}
@@ -530,6 +558,20 @@ static void cycle_color_correction_backwards(unsigned index)
     }
     else {
         configuration.color_correction_mode--;
+    }
+}
+
+static void decrease_color_temperature(unsigned index)
+{
+    if (configuration.color_temperature < 20) {
+        configuration.color_temperature++;
+    }
+}
+
+static void increase_color_temperature(unsigned index)
+{
+    if (configuration.color_temperature > 0) {
+        configuration.color_temperature--;
     }
 }
 
@@ -684,6 +726,7 @@ static const struct menu_item graphics_menu[] = {
     {"Default Window Scale:", cycle_default_scale, current_default_scale, cycle_default_scale_backwards},
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
+    {"Ambient Light:", decrease_color_temperature, current_color_temperature, increase_color_temperature},
     {"Frame Blending:", cycle_blending_mode, blending_mode_string, cycle_blending_mode_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},

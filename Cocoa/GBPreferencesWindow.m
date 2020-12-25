@@ -26,6 +26,7 @@
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
     NSPopUpButton *_preferredJoypadButton;
     NSPopUpButton *_rumbleModePopupButton;
+    NSSlider *_temperatureSlider;
 }
 
 + (NSArray *)filterList
@@ -91,11 +92,23 @@
     [_colorCorrectionPopupButton selectItemAtIndex:mode];
 }
 
+
 - (NSPopUpButton *)colorCorrectionPopupButton
 {
     return _colorCorrectionPopupButton;
 }
 
+- (void)setTemperatureSlider:(NSSlider *)temperatureSlider
+{
+    _temperatureSlider = temperatureSlider;
+    [temperatureSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"] * 256];
+    temperatureSlider.continuous = YES;
+}
+
+- (NSSlider *)temperatureSlider
+{
+    return _temperatureSlider;
+}
 - (void)setFrameBlendingModePopupButton:(NSPopUpButton *)frameBlendingModePopupButton
 {
     _frameBlendingModePopupButton = frameBlendingModePopupButton;
@@ -282,6 +295,13 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBColorCorrection"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
+}
+
+- (IBAction)lightTemperatureChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
+                                              forKey:@"GBLightTemperature"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBLightTemperatureChanged" object:nil];
 }
 
 - (IBAction)franeBlendingModeChanged:(id)sender

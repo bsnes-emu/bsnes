@@ -120,6 +120,7 @@ static void open_menu(void)
         GB_audio_set_paused(false);
     }
     GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+    GB_set_light_temperature(&gb, (configuration.color_temperature - 10.0) / 10.0);
     GB_set_border_mode(&gb, configuration.border_mode);
     update_palette();
     GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
@@ -496,6 +497,7 @@ restart:
         GB_set_rumble_mode(&gb, configuration.rumble_mode);
         GB_set_sample_rate(&gb, GB_audio_get_frequency());
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
+        GB_set_light_temperature(&gb, (configuration.color_temperature - 10.0) / 10.0);
         update_palette();
         if ((unsigned)configuration.border_mode <= GB_BORDER_ALWAYS) {
             GB_set_border_mode(&gb, configuration.border_mode);
@@ -646,6 +648,7 @@ int main(int argc, char **argv)
         configuration.dmg_palette %= 3;
         configuration.border_mode %= GB_BORDER_ALWAYS + 1;
         configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
+        configuration.color_temperature %= 21;
     }
     
     if (configuration.model >= MODEL_MAX) {
