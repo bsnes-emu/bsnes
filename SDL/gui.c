@@ -442,9 +442,50 @@ const char *current_rewind_string(unsigned index)
     return "Custom";
 }
 
+const char *current_bootrom_string(unsigned index)
+{
+    if (!configuration.bootrom_path[0]) {
+        return "Built-in Boot ROMs";
+    }
+    size_t length = strlen(configuration.bootrom_path);
+    static char ret[24] = {0,};
+    if (length <= 23) {
+        strcpy(ret, configuration.bootrom_path);
+    }
+    else {
+        memcpy(ret, configuration.bootrom_path, 11);
+        memcpy(ret + 12, configuration.bootrom_path + length - 11, 11);
+    }
+    for (unsigned i = 0; i < 24; i++) {
+        if (ret[i] < 0) {
+            ret[i] = MOJIBAKE_STRING[0];
+        }
+    }
+    if (length > 23) {
+        ret[11] = ELLIPSIS_STRING[0];
+    }
+    return ret;
+}
+
+static void toggle_bootrom(unsigned index)
+{
+    if (configuration.bootrom_path[0]) {
+        configuration.bootrom_path[0] = 0;
+    }
+    else {
+        char *folder = do_open_folder_dialog();
+        if (!folder) return;
+        if (strlen(folder) < sizeof(configuration.bootrom_path) - 1) {
+            strcpy(configuration.bootrom_path, folder);
+        }
+        free(folder);
+    }
+}
+
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
     {"SGB Revision:", cycle_sgb_revision, current_sgb_revision_string, cycle_sgb_revision_backwards},
+    {"Boot ROMs Folder:", toggle_bootrom, current_bootrom_string, toggle_bootrom},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
     {"Back", return_to_root_menu},
     {NULL,}
@@ -883,7 +924,7 @@ const char *current_joypad_name(unsigned index)
     // SDL returns a name with repeated and trailing spaces
     while (*orig_name && i < sizeof(name) - 2) {
         if (orig_name[0] != ' ' || orig_name[1] != ' ') {
-            name[i++] = *orig_name;
+            name[i++] = *orig_name > 0? *orig_name : MOJIBAKE_STRING[0];
         }
         orig_name++;
     }

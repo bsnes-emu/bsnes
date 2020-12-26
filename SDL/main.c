@@ -448,8 +448,6 @@ static bool handle_pending_command(void)
 
 static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
 {
-    bool error = false;
-    start_capturing_logs();
     static const char *const names[] = {
         [GB_BOOT_ROM_DMG0] = "dmg0_boot.bin",
         [GB_BOOT_ROM_DMG] = "dmg_boot.bin",
@@ -460,8 +458,17 @@ static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
         [GB_BOOT_ROM_CGB] = "cgb_boot.bin",
         [GB_BOOT_ROM_AGB] = "agb_boot.bin",
     };
-    GB_load_boot_rom(gb, resource_path(names[type]));
-    end_capturing_logs(true, error);
+    bool use_built_in = true;
+    if (configuration.bootrom_path[0]) {
+        static char path[4096];
+        snprintf(path, sizeof(path), "%s/%s", configuration.bootrom_path, names[type]);
+        use_built_in = GB_load_boot_rom(gb, path);
+    }
+    if (use_built_in) {
+        start_capturing_logs();
+        GB_load_boot_rom(gb, resource_path(names[type]));
+        end_capturing_logs(true, false);
+    }
 }
 
 static void run(void)
@@ -649,6 +656,7 @@ int main(int argc, char **argv)
         configuration.border_mode %= GB_BORDER_ALWAYS + 1;
         configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
         configuration.color_temperature %= 21;
+        configuration.bootrom_path[sizeof(configuration.bootrom_path) - 1] = 0;
     }
     
     if (configuration.model >= MODEL_MAX) {
