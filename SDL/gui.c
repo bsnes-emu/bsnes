@@ -197,7 +197,7 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
     }
 }
 
-static unsigned scroll = 0;
+static signed scroll = 0;
 static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color)
 {
     y -= scroll;
@@ -262,6 +262,10 @@ struct menu_item {
 };
 static const struct menu_item *current_menu = NULL;
 static const struct menu_item *root_menu = NULL;
+static unsigned menu_height;
+static unsigned scrollbar_size;
+static bool mouse_scroling = false;
+
 static unsigned current_selection = 0;
 
 static enum {
@@ -303,6 +307,23 @@ static void open_rom(unsigned index)
     }
 }
 
+static void recalculate_menu_height(void)
+{
+    menu_height = 24;
+    scrollbar_size = 0;
+    if (gui_state == SHOWING_MENU) {
+        for (const struct menu_item *item = current_menu; item->string; item++) {
+            menu_height += 12;
+            if (item->backwards_handler) {
+                menu_height += 12;
+            }
+        }
+    }
+    if (menu_height > 144) {
+        scrollbar_size = 144 * 140 / menu_height;
+    }
+}
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
@@ -323,6 +344,7 @@ static void return_to_root_menu(unsigned index)
     current_menu = root_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static void cycle_model(unsigned index)
@@ -434,6 +456,7 @@ static void enter_emulation_menu(unsigned index)
     current_menu = emulation_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 const char *current_scaling_mode(unsigned index)
@@ -739,6 +762,7 @@ static void enter_graphics_menu(unsigned index)
     current_menu = graphics_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 const char *highpass_filter_string(unsigned index)
@@ -800,6 +824,7 @@ static void enter_audio_menu(unsigned index)
     current_menu = audio_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static void modify_key(unsigned index)
@@ -841,6 +866,7 @@ static void enter_controls_menu(unsigned index)
     current_menu = controls_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static unsigned joypad_index = 0;
@@ -976,6 +1002,7 @@ static void enter_joypad_menu(unsigned index)
     current_menu = joypad_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 joypad_button_t get_joypad_button(uint8_t physical_button)
@@ -1060,6 +1087,7 @@ void run_gui(bool is_running)
     gui_state = is_running? SHOWING_MENU : SHOWING_DROP_MESSAGE;
     bool should_render = true;
     current_menu = root_menu = is_running? paused_menu : nonpaused_menu;
+    recalculate_menu_height();
     current_selection = 0;
     scroll = 0;
     do {
@@ -1247,6 +1275,23 @@ void run_gui(bool is_running)
                 }
                 break;
             }
+                
+            case SDL_MOUSEWHEEL: {
+                if (menu_height > 144) {
+                    scroll -= event.wheel.y;
+                    if (scroll < 0) {
+                        scroll = 0;
+                    }
+                    if (scroll >= menu_height - 144) {
+                        scroll = menu_height - 144;
+                    }
+
+                    mouse_scroling = true;
+                    should_render = true;
+                }
+                break;
+            }
+                
 
             case SDL_KEYDOWN:
                 if (event_hotkey_code(&event) == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
@@ -1295,18 +1340,22 @@ void run_gui(bool is_running)
                             gui_state = SHOWING_DROP_MESSAGE;
                         }
                         current_selection = 0;
+                        mouse_scroling = false;
                         scroll = 0;
                         current_menu = root_menu;
+                        recalculate_menu_height();
                         should_render = true;
                     }
                 }
                 else if (gui_state == SHOWING_MENU) {
                     if (event.key.keysym.scancode == SDL_SCANCODE_DOWN && current_menu[current_selection + 1].string) {
                         current_selection++;
+                        mouse_scroling = false;
                         should_render = true;
                     }
                     else if (event.key.keysym.scancode == SDL_SCANCODE_UP && current_selection) {
                         current_selection--;
+                        mouse_scroling = false;
                         should_render = true;
                     }
                     else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN  && !current_menu[current_selection].backwards_handler) {
@@ -1383,7 +1432,7 @@ void run_gui(bool is_running)
                     draw_text_centered(pixels, width, height, 8 + y_offset, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
                     unsigned i = 0, y = 24;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
-                        if (i == current_selection) {
+                        if (i == current_selection && !mouse_scroling) {
                             if (i == 0) {
                                 if (y < scroll) {
                                     scroll = (y - 4) / 12 * 12;
@@ -1397,7 +1446,7 @@ void run_gui(bool is_running)
                                 }
                             }
                         }
-                        if (i == current_selection && i == 0 && scroll != 0) {
+                        if (i == current_selection && i == 0 && scroll != 0 && !mouse_scroling) {
                             scroll = 0;
                             goto rerender;
                         }
@@ -1432,6 +1481,22 @@ void run_gui(bool is_running)
                             }
                         }
 
+                    }
+                    if (scrollbar_size) {
+                        unsigned scrollbar_offset = (140 - scrollbar_size) * scroll / (menu_height - 144);
+                        if (scrollbar_offset + scrollbar_size > 140) {
+                            scrollbar_offset = 140 - scrollbar_size;
+                        }
+                        for (unsigned y = 0; y < 140; y++) {
+                            uint32_t *pixel = pixels + x_offset + 156 + width * (y + y_offset + 2);
+                            if (y >= scrollbar_offset && y < scrollbar_offset + scrollbar_size) {
+                                pixel[0] = pixel[1]= gui_palette_native[2];
+                            }
+                            else {
+                                pixel[0] = pixel[1]= gui_palette_native[1];
+                            }
+                            
+                        }
                     }
                     break;
                 case SHOWING_HELP:
