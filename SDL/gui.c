@@ -1369,7 +1369,11 @@ void run_gui(bool is_running)
                     }
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                    if (is_running) {
+                    if (gui_state == SHOWING_MENU && current_menu != root_menu) {
+                        return_to_root_menu(0);
+                        should_render = true;
+                    }
+                    else if (is_running) {
                         return;
                     }
                     else {
