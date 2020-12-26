@@ -177,8 +177,7 @@ static void rescale_window(void)
     SDL_SetWindowSize(window, GB_get_screen_width(&gb) * configuration.default_scale, GB_get_screen_height(&gb) * configuration.default_scale);
 }
 
-/* Does NOT check for bounds! */
-static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigned char ch, uint32_t color)
+static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigned char ch, uint32_t color, uint32_t *mask_top, uint32_t *mask_bottom)
 {
     if (ch < ' ' || ch > font_max) {
         ch = '?';
@@ -188,7 +187,7 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
     
     for (unsigned y = GLYPH_HEIGHT; y--;) {
         for (unsigned x = GLYPH_WIDTH; x--;) {
-            if (*(data++)) {
+            if (*(data++) && buffer >= mask_top && buffer < mask_bottom) {
                 (*buffer) = color;
             }
             buffer++;
@@ -198,7 +197,7 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
 }
 
 static signed scroll = 0;
-static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color)
+static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color)
 {
     y -= scroll;
     unsigned orig_x = x;
@@ -211,17 +210,17 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
             continue;
         }
         
-        if (x > width - GLYPH_WIDTH || y == 0 || y - y_offset > 144 - GLYPH_HEIGHT || y <= y_offset) {
+        if (x > width - GLYPH_WIDTH) {
             break;
         }
         
-        draw_char(&buffer[x + width * y], width, height, *string, color);
+        draw_char(&buffer[(signed)(x + width * y)], width, height, *string, color, &buffer[width * y_offset], &buffer[width * (y_offset + 144)]);
         x += GLYPH_WIDTH;
         string++;
     }
 }
 
-static void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
+static void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, uint32_t border)
 {
     draw_unbordered_text(buffer, width, height, x - 1, y, string, border);
     draw_unbordered_text(buffer, width, height, x + 1, y, string, border);
@@ -1468,15 +1467,12 @@ void run_gui(bool is_running)
                                 y += 12;
                             }
                         }
-                        if (i == current_selection) {
-                            if (item[1].string) {
-                                if (y > scroll + 120) {
-                                    scroll = (y - 120) / 12 * 12;
-                                    goto rerender;
-                                }
-                            }
-                            else if (y > scroll + 144) {
+                        if (i == current_selection && !mouse_scroling) {
+                            if (y > scroll + 144) {
                                 scroll = (y - 144) / 12 * 12;
+                                if (scroll > menu_height - 144) {
+                                    scroll = menu_height - 144;
+                                }
                                 goto rerender;
                             }
                         }
