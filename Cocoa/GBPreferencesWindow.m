@@ -102,7 +102,6 @@
 {
     _temperatureSlider = temperatureSlider;
     [temperatureSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"] * 256];
-    temperatureSlider.continuous = YES;
 }
 
 - (NSSlider *)temperatureSlider

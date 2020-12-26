@@ -286,6 +286,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_color_correction_mode(&gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
+    GB_set_light_temperature(&gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"]);
     GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
     [self updatePalette];
     GB_set_rgb_encode_callback(&gb, rgbEncode);
