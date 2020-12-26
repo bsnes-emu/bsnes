@@ -305,6 +305,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     fread(gb->rom, 1, gb->rom_size, f);
     fclose(f);
     GB_configure_cart(gb);
+    gb->tried_loading_sgb_border = false;
     return 0;
 }
 
@@ -537,6 +538,7 @@ error:
         gb->rom_size = old_size;
     }
     fclose(f);
+    gb->tried_loading_sgb_border = false;
     return -1;
 }
 
@@ -557,6 +559,7 @@ void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t siz
     memset(gb->rom, 0xff, gb->rom_size);
     memcpy(gb->rom, buffer, size);
     GB_configure_cart(gb);
+    gb->tried_loading_sgb_border = false;
 }
 
 typedef struct {
