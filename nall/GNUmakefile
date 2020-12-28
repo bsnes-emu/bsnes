@@ -243,4 +243,5 @@ else
   bindir ?= $(prefix)/bin
   datarootdir ?= $(prefix)/share
   datadir ?= $(datarootdir)
+  flags += -DDATADIR=\"$(datadir)\"
 endif
