@@ -239,5 +239,8 @@ strne = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),1,)
 ifeq ($(platform),windows)
   prefix := $(subst $([space]),\$([space]),$(strip $(call strtr,$(LOCALAPPDATA),\,/)))
 else
-  prefix := $(HOME)/.local
+  prefix ?= /usr/local
+  bindir ?= $(prefix)/bin
+  datarootdir ?= $(prefix)/share
+  datadir ?= $(datarootdir)
 endif
