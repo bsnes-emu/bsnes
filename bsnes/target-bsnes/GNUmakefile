@@ -47,20 +47,20 @@ else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/Shaders/
 	cp -R out/$(name).app /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
-	mkdir -p $(prefix)/bin/
-	mkdir -p $(prefix)/share/applications/
-	mkdir -p $(prefix)/share/icons/hicolor/256x256/apps/
-	mkdir -p $(prefix)/share/icons/hicolor/scalable/apps/
-	mkdir -p $(prefix)/share/$(name)/
-	mkdir -p $(prefix)/share/$(name)/Database/
-	mkdir -p $(prefix)/share/$(name)/Firmware/
-	mkdir -p $(prefix)/share/$(name)/Shaders/
-	cp out/$(name) $(prefix)/bin/$(name)
-	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
-	cp $(ui)/resource/$(name).png $(prefix)/share/icons/hicolor/256x256/apps/$(name).png
-	cp $(ui)/resource/$(name).svg $(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
-	cp Database/* $(prefix)/share/$(name)/Database/
-	cp -r ../shaders/* $(prefix)/share/$(name)/Shaders/
+	mkdir -p $(DESTDIR)$(prefix)/bin/
+	mkdir -p $(DESTDIR)$(prefix)/share/applications/
+	mkdir -p $(DESTDIR)$(prefix)/share/icons/hicolor/256x256/apps/
+	mkdir -p $(DESTDIR)$(prefix)/share/icons/hicolor/scalable/apps/
+	mkdir -p $(DESTDIR)$(prefix)/share/$(name)/
+	mkdir -p $(DESTDIR)$(prefix)/share/$(name)/Database/
+	mkdir -p $(DESTDIR)$(prefix)/share/$(name)/Firmware/
+	mkdir -p $(DESTDIR)$(prefix)/share/$(name)/Shaders/
+	cp out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
+	cp $(ui)/resource/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+	cp $(ui)/resource/$(name).png $(DESTDIR)$(prefix)/share/icons/hicolor/256x256/apps/$(name).png
+	cp $(ui)/resource/$(name).svg $(DESTDIR)$(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
+	cp Database/* $(DESTDIR)$(prefix)/share/$(name)/Database/
+	cp -r ../shaders/* $(DESTDIR)$(prefix)/share/$(name)/Shaders/
 endif
 
 uninstall:
@@ -68,9 +68,9 @@ ifeq ($(platform),windows)
 else ifeq ($(platform),macos)
 	rm -rf /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
-	rm -f $(prefix)/bin/$(name)
-	rm -f $(prefix)/share/applications/$(name).desktop
-	rm -f $(prefix)/share/icons/hicolor/256x256/apps/$(name).png
-	rm -f $(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
-	rm -rf $(prefix)/share/$(name)
+	rm -f $(DESTDIR)$(prefix)/bin/$(name)
+	rm -f $(DESTDIR)$(prefix)/share/applications/$(name).desktop
+	rm -f $(DESTDIR)$(prefix)/share/icons/hicolor/256x256/apps/$(name).png
+	rm -f $(DESTDIR)$(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
+	rm -rf $(DESTDIR)$(prefix)/share/$(name)
 endif
