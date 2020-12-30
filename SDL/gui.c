@@ -789,7 +789,7 @@ static const struct menu_item graphics_menu[] = {
     {"Default Window Scale:", cycle_default_scale, current_default_scale, cycle_default_scale_backwards},
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
-    {"Ambient Light:", decrease_color_temperature, current_color_temperature, increase_color_temperature},
+    {"Ambient Light Temp.:", decrease_color_temperature, current_color_temperature, increase_color_temperature},
     {"Frame Blending:", cycle_blending_mode, blending_mode_string, cycle_blending_mode_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
@@ -852,9 +852,33 @@ void decrease_volume(unsigned index)
     }
 }
 
+const char *interference_volume_string(unsigned index)
+{
+    static char ret[5];
+    sprintf(ret, "%d%%", configuration.interference_volume);
+    return ret;
+}
+
+void increase_interference_volume(unsigned index)
+{
+    configuration.interference_volume += 5;
+    if (configuration.interference_volume > 100) {
+        configuration.interference_volume = 100;
+    }
+}
+
+void decrease_interference_volume(unsigned index)
+{
+    configuration.interference_volume -= 5;
+    if (configuration.interference_volume > 100) {
+        configuration.interference_volume = 0;
+    }
+}
+
 static const struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
     {"Volume:", increase_volume, volume_string, decrease_volume},
+    {"Interference Volume:", increase_interference_volume, interference_volume_string, decrease_interference_volume},
     {"Back", return_to_root_menu},
     {NULL,}
 };

@@ -137,6 +137,45 @@ static double smooth(double x)
     return 3*x*x - 2*x*x*x;
 }
 
+static signed interference(GB_gameboy_t *gb)
+{
+    /* These aren't scientifically measured, but based on ear based on several recordings */
+    signed ret = 0;
+    if (gb->halted) {
+        if (gb->model != GB_MODEL_AGB) {
+            ret -= MAX_CH_AMP / 5;
+        }
+        else {
+            ret -= MAX_CH_AMP / 12;
+        }
+    }
+    if (gb->io_registers[GB_IO_LCDC] & 0x80) {
+        ret += MAX_CH_AMP / 7;
+        if ((gb->io_registers[GB_IO_STAT] & 3) == 3 && gb->model != GB_MODEL_AGB) {
+            ret += MAX_CH_AMP / 14;
+        }
+        else if ((gb->io_registers[GB_IO_STAT] & 3) == 1) {
+            ret -= MAX_CH_AMP / 7;
+        }
+    }
+    
+    if (gb->apu.global_enable) {
+        ret += MAX_CH_AMP / 10;
+    }
+    
+    if (GB_is_cgb(gb) && gb->model < GB_MODEL_AGB && (gb->io_registers[GB_IO_RP] & 1)) {
+        ret += MAX_CH_AMP / 10;
+    }
+    
+    if (!GB_is_cgb(gb)) {
+        ret /= 4;
+    }
+    
+    ret += rand() % (MAX_CH_AMP / 12);
+    
+    return ret;
+}
+
 static void render(GB_gameboy_t *gb)
 {
     GB_sample_t output = {0, 0};
@@ -226,6 +265,17 @@ static void render(GB_gameboy_t *gb)
 
     }
     
+    
+    if (gb->apu_output.interference_volume) {
+        signed interference_bias = interference(gb);
+        int16_t interference_sample = (interference_bias - gb->apu_output.interference_highpass);
+        gb->apu_output.interference_highpass = gb->apu_output.interference_highpass * gb->apu_output.highpass_rate +
+        (1 - gb->apu_output.highpass_rate) * interference_sample;
+        interference_bias *= gb->apu_output.interference_volume;
+        
+        filtered_output.left = MAX(MIN(filtered_output.left + interference_bias, 0x7FFF), -0x8000);
+        filtered_output.right = MAX(MIN(filtered_output.right + interference_bias, 0x7FFF), -0x8000);
+    }
     assert(gb->apu_output.sample_callback);
     gb->apu_output.sample_callback(gb, &filtered_output);
 }
@@ -1121,4 +1171,9 @@ void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb)
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_per_sample = 2 * GB_get_clock_rate(gb) / (double)gb->apu_output.sample_rate; /* 2 * because we use 8MHz units */
     }
+}
+
+void GB_set_interference_volume(GB_gameboy_t *gb, double volume)
+{
+    gb->apu_output.interference_volume = volume;
 }

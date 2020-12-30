@@ -154,12 +154,16 @@ typedef struct {
     GB_sample_callback_t sample_callback;
     
     bool rate_set_in_clocks;
+    double interference_volume;
+    double interference_highpass;
 } GB_apu_output_t;
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
 void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
+void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
+
 #ifdef GB_INTERNAL
 bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);

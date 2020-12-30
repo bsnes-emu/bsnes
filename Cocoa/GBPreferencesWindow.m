@@ -27,6 +27,7 @@
     NSPopUpButton *_preferredJoypadButton;
     NSPopUpButton *_rumbleModePopupButton;
     NSSlider *_temperatureSlider;
+    NSSlider *_interferenceSlider;
 }
 
 + (NSArray *)filterList
@@ -108,6 +109,18 @@
 {
     return _temperatureSlider;
 }
+
+- (void)setInterferenceSlider:(NSSlider *)interferenceSlider
+{
+    _interferenceSlider = interferenceSlider;
+    [interferenceSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"] * 256];
+}
+
+- (NSSlider *)interferenceSlider
+{
+    return _interferenceSlider;
+}
+
 - (void)setFrameBlendingModePopupButton:(NSPopUpButton *)frameBlendingModePopupButton
 {
     _frameBlendingModePopupButton = frameBlendingModePopupButton;
@@ -301,6 +314,14 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBLightTemperature"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBLightTemperatureChanged" object:nil];
+}
+
+- (IBAction)volumeTemperatureChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
+                                              forKey:@"GBInterferenceVolume"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBInterferenceVolumeChanged" object:nil];
+
 }
 
 - (IBAction)franeBlendingModeChanged:(id)sender

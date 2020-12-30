@@ -73,6 +73,7 @@
                 <outlet property="frameBlendingModePopupButton" destination="lxk-db-Sxv" id="wzt-uo-TE6"/>
                 <outlet property="graphicsFilterPopupButton" destination="6pP-kK-EEC" id="LS7-HY-kHC"/>
                 <outlet property="highpassFilterPopupButton" destination="T69-6N-dhT" id="0p6-4m-hb1"/>
+                <outlet property="interferenceSlider" destination="FpE-5i-j5L" id="hfH-e8-7cx"/>
                 <outlet property="playerListButton" destination="gWx-7h-0xq" id="zo6-82-JId"/>
                 <outlet property="preferredJoypadButton" destination="0Az-0R-oNw" id="7JM-tw-BhK"/>
                 <outlet property="rewindPopupButton" destination="7fg-Ww-JjR" id="Ka2-TP-B1x"/>
@@ -174,7 +175,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lxk-db-Sxv">
-                    <rect key="frame" x="32" y="149" width="229" height="22"/>
+                    <rect key="frame" x="30" y="149" width="231" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="iHP-Yz-fiH" id="aQ6-HN-7Aj">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -264,7 +265,7 @@
                     </connections>
                 </button>
                 <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NuA-mL-AJZ">
-                    <rect key="frame" x="32" y="207" width="228" height="24"/>
+                    <rect key="frame" x="30" y="207" width="230" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="-256" maxValue="256" tickMarkPosition="below" numberOfTickMarks="3" sliderType="linear" id="KX7-G9-k0O"/>
                     <connections>
@@ -446,11 +447,11 @@
             <point key="canvasLocation" x="-176" y="848"/>
         </customView>
         <customView id="Zn1-Y5-RbR">
-            <rect key="frame" x="0.0" y="0.0" width="292" height="86"/>
+            <rect key="frame" x="0.0" y="0.0" width="292" height="134"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT">
-                    <rect key="frame" x="30" y="17" width="233" height="26"/>
+                    <rect key="frame" x="30" y="65" width="233" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled (Keep DC offset)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Fgo-0S-zUG" id="om2-Bn-43B">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -470,7 +471,7 @@
                     </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WU3-oV-KHO">
-                    <rect key="frame" x="18" y="49" width="256" height="17"/>
+                    <rect key="frame" x="18" y="97" width="256" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="High-pass filter:" id="YLF-RL-b2D">
                         <font key="font" metaFont="system"/>
@@ -478,8 +479,25 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GPt-9I-QBh">
+                    <rect key="frame" x="18" y="43" width="252" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Interference volume:" id="I2Q-6U-uIx">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FpE-5i-j5L">
+                    <rect key="frame" x="30" y="18" width="232" height="19"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" tickMarkPosition="below" sliderType="linear" id="Rbx-DU-xYf"/>
+                    <connections>
+                        <action selector="volumeTemperatureChanged:" target="QvC-M9-y7g" id="HFU-0q-hj1"/>
+                    </connections>
+                </slider>
             </subviews>
-            <point key="canvasLocation" x="-176" y="890"/>
+            <point key="canvasLocation" x="-176" y="914"/>
         </customView>
         <customView id="8TU-6J-NCg">
             <rect key="frame" x="0.0" y="0.0" width="292" height="467"/>

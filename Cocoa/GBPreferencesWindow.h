@@ -18,6 +18,7 @@
 @property (strong) IBOutlet NSPopUpButtonCell *bootROMsButton;
 @property (strong) IBOutlet NSPopUpButton *rumbleModePopupButton;
 @property (weak) IBOutlet NSSlider *temperatureSlider;
+@property (weak) IBOutlet NSSlider *interferenceSlider;
 @property (weak) IBOutlet NSPopUpButton *dmgPopupButton;
 @property (weak) IBOutlet NSPopUpButton *sgbPopupButton;
 @property (weak) IBOutlet NSPopUpButton *cgbPopupButton;

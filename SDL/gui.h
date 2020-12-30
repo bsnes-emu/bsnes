@@ -115,6 +115,7 @@ typedef struct {
     unsigned padding;
     uint8_t color_temperature;
     char bootrom_path[4096];
+    uint8_t interference_volume;
 } configuration_t;
 
 extern configuration_t configuration;

@@ -121,6 +121,7 @@ static void open_menu(void)
     }
     GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
     GB_set_light_temperature(&gb, (configuration.color_temperature - 10.0) / 10.0);
+    GB_set_interference_volume(&gb, configuration.interference_volume / 100.0);
     GB_set_border_mode(&gb, configuration.border_mode);
     update_palette();
     GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
@@ -505,6 +506,7 @@ restart:
         GB_set_sample_rate(&gb, GB_audio_get_frequency());
         GB_set_color_correction_mode(&gb, configuration.color_correction_mode);
         GB_set_light_temperature(&gb, (configuration.color_temperature - 10.0) / 10.0);
+        GB_set_interference_volume(&gb, configuration.interference_volume / 100.0);
         update_palette();
         if ((unsigned)configuration.border_mode <= GB_BORDER_ALWAYS) {
             GB_set_border_mode(&gb, configuration.border_mode);
