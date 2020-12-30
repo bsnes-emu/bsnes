@@ -1,3 +1,13 @@
+# function pkg_check(pkg_config_name, ruby_name)
+pkg_check = \
+  $(strip \
+    $(if $(shell pkg-config --exists $1 && echo yes), \
+      ruby += $2 \
+    , \
+      $(warning Package $1 not found, disabling driver) \
+    ) \
+  )
+
 ifeq ($(ruby),)
   ifeq ($(platform),windows)
     ruby += video.wgl video.direct3d video.directdraw video.gdi
@@ -9,12 +19,22 @@ ifeq ($(ruby),)
     ruby += input.quartz #input.carbon
   else ifeq ($(platform),linux)
     ruby += video.glx video.glx2 video.xvideo video.xshm
-    ruby += audio.oss audio.alsa audio.openal audio.pulseaudio audio.pulseaudiosimple audio.ao
-    ruby += input.sdl input.xlib input.udev
+    ruby += audio.oss audio.alsa
+    $(eval $(call pkg_check,openal,audio.openal))
+    $(eval $(call pkg_check,libpulse,audio.pulseaudio))
+    $(eval $(call pkg_check,libpulse,audio.pulseaudiosimple))
+    $(eval $(call pkg_check,ao,audio.ao))
+    ruby += input.xlib
+    $(eval $(call pkg_check,sdl2,input.sdl))
+    $(eval $(call pkg_check,udev,input.udev))
   else ifeq ($(platform),bsd)
     ruby += video.glx video.glx2 video.xvideo video.xshm
-    ruby += audio.oss audio.openal #audio.pulseaudio
-    ruby += input.sdl input.xlib
+    ruby += audio.oss
+    $(eval $(call pkg_check,openal,audio.openal))
+    $(eval $(call pkg_check,libpulse,audio.pulseaudio))
+    $(eval $(call pkg_check,libpulse,audio.pulseaudiosimple))
+    ruby += input.xlib
+    $(eval $(call pkg_check,sdl2,input.sdl))
   endif
 endif
 
