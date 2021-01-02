@@ -66,7 +66,7 @@ typedef struct
     uint8_t square_sweep_calculate_countdown; // In 2 MHz
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
-    GB_PADDING(bool, sweep_enabled);
+    bool unshifted_sweep;
     GB_PADDING(bool, sweep_decreasing);
 
     struct {

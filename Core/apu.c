@@ -394,7 +394,7 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
         
         /* Recalculation and overflow check only occurs after a delay */
         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
-        
+        gb->apu.unshifted_sweep = !(gb->io_registers[GB_IO_NR10] & 0x7);
         gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
     }
 }
@@ -524,7 +524,7 @@ void GB_apu_run(GB_gameboy_t *gb)
         gb->apu.noise_channel.alignment += cycles;
 
         if (gb->apu.square_sweep_calculate_countdown &&
-            ((gb->io_registers[GB_IO_NR10] & 7) ||
+            (((gb->io_registers[GB_IO_NR10] & 7) || gb->apu.unshifted_sweep) ||
              gb->apu.square_sweep_calculate_countdown <= (gb->model > GB_MODEL_CGB_C? 3 : 1))) { // Calculation is paused if the lower bits
             if (gb->apu.square_sweep_calculate_countdown > cycles) {
                 gb->apu.square_sweep_calculate_countdown -= cycles;
@@ -875,6 +875,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
+                        gb->apu.unshifted_sweep = false;
                         if (gb->model > GB_MODEL_CGB_C) {
                             gb->apu.square_sweep_calculate_countdown += 2;
                         }
@@ -884,7 +885,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     else {
                         gb->apu.sweep_length_addend = 0;
                     }
-                    gb->apu.channel_1_restart_hold = 4 - gb->apu.lf_div;
+                    gb->apu.channel_1_restart_hold = 2 - gb->apu.lf_div + GB_is_cgb(gb) * 2;
                     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
                 }
             }
