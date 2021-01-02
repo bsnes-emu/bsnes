@@ -821,7 +821,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR14:
         case GB_IO_NR24: {
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
-            
+            bool was_active = gb->apu.is_active[index];
             /* TODO: When the sample length changes right before being updated, the countdown should change to the
                      old length, but the current sample should not change. Because our write timing isn't accurate to
                      the T-cycle, we hack around it by stepping the sample index backwards. */
@@ -876,7 +876,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
                         gb->apu.unshifted_sweep = false;
-                        if (gb->model > GB_MODEL_CGB_C) {
+                        if (gb->model > GB_MODEL_CGB_C && !was_active) {
                             gb->apu.square_sweep_calculate_countdown += 2;
                         }
                         gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
