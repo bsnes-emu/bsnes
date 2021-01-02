@@ -846,6 +846,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 else {
                     /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.*/
+                    if (gb->apu.square_channels[index].sample_countdown <= 1) {
+                        gb->apu.square_channels[index].current_sample_index++;
+                        gb->apu.square_channels[index].current_sample_index &= 0x7;
+                    }
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
