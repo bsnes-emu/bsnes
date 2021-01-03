@@ -836,6 +836,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
             }
 
+            uint16_t old_sample_length = gb->apu.square_channels[index].sample_length;
             gb->apu.square_channels[index].sample_length &= 0xFF;
             gb->apu.square_channels[index].sample_length |= (value & 7) << 8;
             if (value & 0x80) {
@@ -845,12 +846,21 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                 }
                 else {
-                    /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.*/
-                    if (gb->apu.square_channels[index].sample_countdown <= 1) {
-                        gb->apu.square_channels[index].current_sample_index++;
-                        gb->apu.square_channels[index].current_sample_index &= 0x7;
+                    unsigned extra_delay = 0;
+                   if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */) {
+                       if ((!(value & 4) && ((gb->io_registers[reg] & 4) || old_sample_length == 0x3FF)) ||
+                           (old_sample_length == 0x7FF && gb->apu.square_channels[index].sample_length != 0x7FF)) {
+                            gb->apu.square_channels[index].current_sample_index++;
+                            gb->apu.square_channels[index].current_sample_index &= 0x7;
+                       }
+                       else if (gb->apu.square_channels[index].sample_length == 0x7FF &&
+                                old_sample_length != 0x7FF &&
+                                (gb->apu.square_channels[index].current_sample_index & 0x80)) {
+                           extra_delay += 2;
+                       }
                     }
-                    gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div;
+                    /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.*/
+                    gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 4 - gb->apu.lf_div + extra_delay;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
 
