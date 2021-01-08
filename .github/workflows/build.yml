@@ -24,7 +24,7 @@ jobs:
       run: |
         sudo apt-get update -y -qq
         sudo apt-get install \
-          libgtk2.0-dev libpulse-dev mesa-common-dev libgtksourceview2.0-dev libcairo2-dev \
+          libgtk2.0-dev libpulse-dev mesa-common-dev libcairo2-dev \
           libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
     - name: Make
       run: make -j4 -C bsnes local=false
