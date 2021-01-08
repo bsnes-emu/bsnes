@@ -77,7 +77,7 @@
 
 //platform-specific exclusions
 
-#if defined(HIRO_WINDOWS) || defined(HIRO_COCOA) || defined(HIRO_QT)
+#if defined(HIRO_WINDOWS) || defined(HIRO_COCOA) || defined(HIRO_QT) || defined(HIRO_NO_SOURCEVIEW)
   #undef Hiro_ComboEdit
   #undef Hiro_Console
   #undef Hiro_IconView

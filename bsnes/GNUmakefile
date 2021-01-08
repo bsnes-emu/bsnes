@@ -1,6 +1,7 @@
 target := bsnes
 binary := application
 build := performance
+sourceview := false
 openmp := true
 local := true
 flags += -I. -I..
@@ -10,6 +11,11 @@ flags += -I. -I..
 ifeq ($(profile),true)
   flags += -pg
   options += -pg
+endif
+
+# disable gtksourceview
+ifeq ($(sourceview),false)
+  flags += -DHIRO_NO_SOURCEVIEW
 endif
 
 # binaries built with this flag are faster, but are not portable to multiple machines.
