@@ -905,6 +905,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 else if (!(value & 0x80) && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     /* Sync after turning off LCD */
+                    gb->double_speed_alignment = 0;
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);
                 }
