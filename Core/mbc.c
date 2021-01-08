@@ -139,7 +139,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
             gb->mbc_ram = malloc(gb->mbc_ram_size);
         }
 
-        /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridges types? */
+        /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridge types? */
         memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
     }
 

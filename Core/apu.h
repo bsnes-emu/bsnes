@@ -67,7 +67,7 @@ typedef struct
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    GB_PADDING(bool, sweep_decreasing);
+    bool enable_zombie_calculate_stepping;
 
     struct {
         uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
@@ -125,6 +125,7 @@ typedef struct
     int8_t channel_4_delta;
     bool channel_4_countdown_reloaded;
     uint8_t channel_4_dmg_delayed_start;
+    uint16_t channel1_completed_addend;
 } GB_apu_t;
 
 typedef enum {

@@ -394,6 +394,7 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
         
         /* Recalculation and overflow check only occurs after a delay */
         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
+        gb->apu.enable_zombie_calculate_stepping = false;
         gb->apu.unshifted_sweep = !(gb->io_registers[GB_IO_NR10] & 0x7);
         gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
     }
@@ -501,31 +502,31 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
+    
     bool start_ch4 = false;
-    if (gb->apu.channel_4_dmg_delayed_start) {
-        if (gb->apu.channel_4_dmg_delayed_start == cycles) {
-            gb->apu.channel_4_dmg_delayed_start = 0;
-            start_ch4 = true;
-        }
-        else if (gb->apu.channel_4_dmg_delayed_start > cycles) {
-            gb->apu.channel_4_dmg_delayed_start -= cycles;
-        }
-        else {
-            /* Split it into two */
-            cycles -= gb->apu.channel_4_dmg_delayed_start;
-            gb->apu.apu_cycles = gb->apu.channel_4_dmg_delayed_start * 2;
-            GB_apu_run(gb);
-        }
-    }
-        
     if (likely(!gb->stopped || GB_is_cgb(gb))) {
+        if (gb->apu.channel_4_dmg_delayed_start) {
+            if (gb->apu.channel_4_dmg_delayed_start == cycles) {
+                gb->apu.channel_4_dmg_delayed_start = 0;
+                start_ch4 = true;
+            }
+            else if (gb->apu.channel_4_dmg_delayed_start > cycles) {
+                gb->apu.channel_4_dmg_delayed_start -= cycles;
+            }
+            else {
+                /* Split it into two */
+                cycles -= gb->apu.channel_4_dmg_delayed_start;
+                gb->apu.apu_cycles = gb->apu.channel_4_dmg_delayed_start * 2;
+                GB_apu_run(gb);
+            }
+        }
         /* To align the square signal to 1MHz */
         gb->apu.lf_div ^= cycles & 1;
         gb->apu.noise_channel.alignment += cycles;
 
         if (gb->apu.square_sweep_calculate_countdown &&
             (((gb->io_registers[GB_IO_NR10] & 7) || gb->apu.unshifted_sweep) ||
-             gb->apu.square_sweep_calculate_countdown <= (gb->model > GB_MODEL_CGB_C? 3 : 1))) { // Calculation is paused if the lower bits
+             gb->apu.square_sweep_calculate_countdown <= 3)) { // Calculation is paused if the lower bits are 0
             if (gb->apu.square_sweep_calculate_countdown > cycles) {
                 gb->apu.square_sweep_calculate_countdown -= cycles;
             }
@@ -541,6 +542,8 @@ void GB_apu_run(GB_gameboy_t *gb)
                     gb->apu.is_active[GB_SQUARE_1] = false;
                     update_sample(gb, GB_SQUARE_1, 0, gb->apu.square_sweep_calculate_countdown - cycles);
                 }
+                gb->apu.channel1_completed_addend = gb->apu.sweep_length_addend;
+                
                 gb->apu.square_sweep_calculate_countdown = 0;
             }
         }
@@ -643,6 +646,7 @@ void GB_apu_run(GB_gameboy_t *gb)
         GB_apu_write(gb, GB_IO_NR44, gb->io_registers[GB_IO_NR44] | 0x80);
     }
 }
+
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
@@ -769,8 +773,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR10:{
             bool old_negate = gb->io_registers[GB_IO_NR10] & 8;
             gb->io_registers[GB_IO_NR10] = value;
-            if (gb->apu.square_sweep_calculate_countdown == 0 &&
-                gb->apu.shadow_sweep_sample_length + gb->apu.sweep_length_addend + old_negate > 0x7FF &&
+            if (gb->apu.shadow_sweep_sample_length + gb->apu.channel1_completed_addend + old_negate > 0x7FF &&
                 !(value & 8)) {
                 gb->apu.is_active[GB_SQUARE_1] = false;
                 update_sample(gb, GB_SQUARE_1, 0, 0);
@@ -886,11 +889,13 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
                 if (index == GB_SQUARE_1) {
                     gb->apu.shadow_sweep_sample_length = 0;
+                    gb->apu.channel1_completed_addend = 0;
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
+                        gb->apu.enable_zombie_calculate_stepping = false;
                         gb->apu.unshifted_sweep = false;
-                        if (gb->model > GB_MODEL_CGB_C && !was_active) {
+                        if (!was_active) {
                             gb->apu.square_sweep_calculate_countdown += 2;
                         }
                         gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;

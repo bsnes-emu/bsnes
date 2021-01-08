@@ -1111,6 +1111,7 @@ bool GB_serial_get_data_bit(GB_gameboy_t *gb)
     }
     return gb->io_registers[GB_IO_SB] & 0x80;
 }
+
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data)
 {
     if (gb->io_registers[GB_IO_SC] & 1) {

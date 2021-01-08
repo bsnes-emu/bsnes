@@ -22,6 +22,7 @@ typedef enum {
     GB_CONFLICT_SGB_LCDC,
     GB_CONFLICT_WX,
     GB_CONFLICT_CGB_LCDC,
+    GB_CONFLICT_NR10,
 } GB_conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -33,6 +34,7 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
+    [GB_IO_NR10] = GB_CONFLICT_NR10,
     
     /* Todo: most values not verified, and probably differ between revisions */
 };
@@ -50,7 +52,8 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-
+    [GB_IO_NR10] = GB_CONFLICT_NR10,
+    
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
@@ -68,7 +71,8 @@ static const GB_conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-
+    [GB_IO_NR10] = GB_CONFLICT_NR10,
+    
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
 };
@@ -271,6 +275,23 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 GB_write_memory(gb, addr, value);
                 gb->pending_cycles = 4;
             }
+            return;
+        
+        case GB_CONFLICT_NR10:
+            /* Hack: Due to the coupling between DIV and the APU, GB_apu_run only runs at M-cycle
+                     resolutions, but this quirk requires 2MHz even in single speed mode. To work
+                     around this, we specifically just step the calculate countdown if needed. */
+            GB_advance_cycles(gb, gb->pending_cycles);
+            if (gb->model <= GB_MODEL_CGB_C) {
+                // TODO: Double speed mode? This logic is also a bit weird, it needs more tests
+                if (gb->apu.square_sweep_calculate_countdown > 3 && gb->apu.enable_zombie_calculate_stepping) {
+                    gb->apu.square_sweep_calculate_countdown -= 2;
+                }
+                gb->apu.enable_zombie_calculate_stepping = true;
+                GB_write_memory(gb, addr, 0xFF);
+            }
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 4;
             return;
 
     }
