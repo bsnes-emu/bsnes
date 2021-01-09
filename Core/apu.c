@@ -710,6 +710,119 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
     return gb->io_registers[reg] | read_mask[reg - GB_IO_NR10];
 }
 
+static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
+{
+    uint16_t effective_counter = gb->apu.noise_channel.counter;
+    /* Ladies and gentlemen, I present you the holy grail glitch of revision detection! */
+    switch (gb->model) {
+            /* Pre CGB revisions are assumed to be like CGB-C, A and 0 for the lack of a better guess.
+             TODO: It could be verified with audio based test ROMs. */
+#if 0
+        case GB_MODEL_CGB_B:
+            if (effective_counter & 8) {
+                effective_counter |= 0xE; // Seems to me F under some circumstances?
+            }
+            if (effective_counter & 0x80) {
+                effective_counter |= 0xFF;
+            }
+            if (effective_counter & 0x100) {
+                effective_counter |= 0x1;
+            }
+            if (effective_counter & 0x200) {
+                effective_counter |= 0x2;
+            }
+            if (effective_counter & 0x400) {
+                effective_counter |= 0x4;
+            }
+            if (effective_counter & 0x800) {
+                effective_counter |= 0x408;
+            }
+            if (effective_counter & 0x1000) {
+                effective_counter |= 0x10;
+            }
+            if (effective_counter & 0x2000) {
+                effective_counter |= 0x20;
+            }
+            break;
+#endif
+        case GB_MODEL_DMG_B:
+        case GB_MODEL_SGB_NTSC:
+        case GB_MODEL_SGB_PAL:
+        case GB_MODEL_SGB_NTSC_NO_SFC:
+        case GB_MODEL_SGB_PAL_NO_SFC:
+        case GB_MODEL_SGB2:
+        case GB_MODEL_SGB2_NO_SFC:
+            // case GB_MODEL_CGB_0:
+            // case GB_MODEL_CGB_A:
+        case GB_MODEL_CGB_C:
+            if (effective_counter & 8) {
+                effective_counter |= 0xE;
+            }
+            if (effective_counter & 0x80) {
+                effective_counter |= 0xFF;
+            }
+            if (effective_counter & 0x100) {
+                effective_counter |= 0x1;
+            }
+            if (effective_counter & 0x200) {
+                effective_counter |= 0x2;
+            }
+            if (effective_counter & 0x400) {
+                effective_counter |= 0x4;
+            }
+            if (effective_counter & 0x800) {
+                effective_counter |= 0x8;
+            }
+            if (effective_counter & 0x1000) {
+                effective_counter |= 0x10;
+            }
+            if (effective_counter & 0x2000) {
+                effective_counter |= 0x20;
+            }
+            break;
+#if 0
+        case GB_MODEL_CGB_D:
+            if (effective_counter & 0x40) {
+                effective_counter |= 0xFF;
+            }
+            if (effective_counter & 0x100) {
+                effective_counter |= 0x1;
+            }
+            if (effective_counter & 0x200) {
+                effective_counter |= 0x2;
+            }
+            if (effective_counter & 0x400) {
+                effective_counter |= 0x4;
+            }
+            if (effective_counter & 0x800) {
+                effective_counter |= 0x8;
+            }
+            if (effective_counter & 0x1000) {
+                effective_counter |= 0x10;
+            }
+            break;
+#endif
+        case GB_MODEL_CGB_E:
+            if (effective_counter & 0x40) {
+                effective_counter |= 0xFF;
+            }
+            if (effective_counter & 0x1000) {
+                effective_counter |= 0x10;
+            }
+            break;
+        case GB_MODEL_AGB:
+            /* TODO: AGBs are not affected, but AGSes are. They don't seem to follow a simple
+               pattern like the other revisions. */
+            /* For the most part, AGS seems to do:
+               0x20   -> 0xA0
+               0x200  -> 0xA00
+               0x1000 -> 0x1010
+             */
+            break;
+    }
+    return effective_counter;
+}
+
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
     if (!gb->apu.global_enable && reg != GB_IO_NR52 && reg < GB_IO_WAV_START && (GB_is_cgb(gb) ||
@@ -1068,9 +1181,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR43: {
             gb->apu.noise_channel.narrow = value & 8;
-            bool old_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+            uint16_t effective_counter = effective_channel4_counter(gb);
+            bool old_bit = (effective_counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
             gb->io_registers[GB_IO_NR43] = value;
-            bool new_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+            bool new_bit = (effective_counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
             if (gb->apu.channel_4_countdown_reloaded) {
                 unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
                 if (!divisor) divisor = 2;
@@ -1079,7 +1193,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                  gb->apu.channel_4_delta = 0;
             }
             /* Step LFSR */
-            if (new_bit && !old_bit) {
+            if (new_bit && (!old_bit || gb->model <= GB_MODEL_CGB_C)) {
                 step_lfsr(gb, 0);
             }
             break;
