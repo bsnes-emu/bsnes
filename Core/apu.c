@@ -735,7 +735,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
                 effective_counter |= 0x4;
             }
             if (effective_counter & 0x800) {
-                effective_counter |= 0x408;
+                effective_counter |= 0x408; // TODO: Only my CGB-B does that! Others behave like C!
             }
             if (effective_counter & 0x1000) {
                 effective_counter |= 0x10;
