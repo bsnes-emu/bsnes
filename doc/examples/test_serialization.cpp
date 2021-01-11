@@ -75,6 +75,11 @@ auto APU::leaf() -> void {
 }
 
 auto main() -> int {
+  if(!co_serializable()) {
+    printf("This implementation does not support serialization\n");
+    return 1;
+  }
+
   Memory::buffer = (uint8_t*)mmap(
     (void*)0x10'0000'0000, 2 * 65536,
     PROT_READ | PROT_WRITE | PROT_EXEC,

@@ -126,6 +126,19 @@ Passing handle of active cothread to this function is not allowed.
 
 Passing handle of primary cothread is not allowed.
 
+## co_serializable
+
+```c
+int co_serializable(void);
+```
+
+Returns non-zero if the implementation keeps the entire coroutine state in the
+buffer passed to `co_derive()`. That is, if `co_serializable()` returns
+non-zero, and if your cothread does not modify the heap or any process-wide
+state, then you can "snapshot" the cothread's state by taking a copy of the
+buffer originally passed to `co_derive()`, and "restore" a previous state
+by copying the snapshot back into the buffer it came from.
+
 ## co_switch
 ```c
 void co_switch(cothread_t cothread);
