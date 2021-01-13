@@ -327,7 +327,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     GB_set_pixels_output(&gb, self.view.pixels);
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
+            self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSWindowStyleMaskFullScreen) != 0;
             [self reloadVRAMData: nil];
         });
     }
@@ -408,14 +408,14 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
         NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
         for (NSUserNotification *notification in [center scheduledNotifications]) {
-            if ([notification.identifier isEqualToString:self.fileName]) {
+            if ([notification.identifier isEqualToString:self.fileURL.path]) {
                 [center removeScheduledNotification:notification];
                 break;
             }
         }
         
         for (NSUserNotification *notification in [center deliveredNotifications]) {
-            if ([notification.identifier isEqualToString:self.fileName]) {
+            if ([notification.identifier isEqualToString:self.fileURL.path]) {
                 [center removeDeliveredNotification:notification];
                 break;
             }
@@ -434,7 +434,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) run
 {
-    assert(!master);
+    assert(master == nil);
     running = true;
     [self preRun];
     if (slave) {
@@ -482,21 +482,21 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [self.audioClient stop];
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
-    GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
-    GB_save_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
+    GB_save_battery(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path UTF8String]);
+    GB_save_cheats(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path UTF8String]);
     unsigned time_to_alarm = GB_time_to_alarm(&gb);
     
     if (time_to_alarm) {
         [NSUserNotificationCenter defaultUserNotificationCenter].delegate = (id)[NSApp delegate];
         NSUserNotification *notification = [[NSUserNotification alloc] init];
-        NSString *friendlyName = [[self.fileName lastPathComponent] stringByDeletingPathExtension];
+        NSString *friendlyName = [[self.fileURL lastPathComponent] stringByDeletingPathExtension];
         NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
         friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
         friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         
         notification.title = [NSString stringWithFormat:@"%@ Played an Alarm", friendlyName];
         notification.informativeText = [NSString stringWithFormat:@"%@ requested your attention by playing a scheduled alarm", friendlyName];
-        notification.identifier = self.fileName;
+        notification.identifier = self.fileURL.path;
         notification.deliveryDate = [NSDate dateWithTimeIntervalSinceNow:time_to_alarm];
         notification.soundName = NSUserNotificationDefaultSoundName;
         [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
@@ -507,7 +507,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) start
 {
-    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
+    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSWindowStyleMaskFullScreen) != 0;
     if (master) {
         [master start];
         return;
@@ -667,7 +667,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     
     
     
-    self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[self.fileURL path] lastPathComponent]];
+    self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
     self.debuggerSplitView.dividerColor = [NSColor clearColor];
     if (@available(macOS 11.0, *)) {
         self.memoryWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
@@ -827,18 +827,18 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     NSString *rom_warnings = [self captureOutputForBlock:^{
         GB_debugger_clear_symbols(&gb);
         if ([[self.fileType pathExtension] isEqualToString:@"isx"]) {
-            GB_load_isx(&gb, [self.fileName UTF8String]);
-            GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"ram"] UTF8String]);
+            GB_load_isx(&gb, self.fileURL.path.UTF8String);
+            GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
 
         }
         else {
-            GB_load_rom(&gb, [self.fileName UTF8String]);
+            GB_load_rom(&gb, [self.fileURL.path UTF8String]);
         }
-        GB_load_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
-        GB_load_cheats(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"cht"] UTF8String]);
+        GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path.UTF8String);
+        GB_load_cheats(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path.UTF8String);
         [self.cheatWindowController cheatsUpdated];
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
-        GB_debugger_load_symbol_file(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
+        GB_debugger_load_symbol_file(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sym"].path.UTF8String);
     }];
     if (rom_warnings && !rom_warning_issued) {
         rom_warning_issued = true;
@@ -1144,7 +1144,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     bool __block success = false;
     [self performAtomicBlock:^{
-        success = GB_save_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]) == 0;
+        success = GB_save_state(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String) == 0;
     }];
     
     if (!success) {
@@ -1158,7 +1158,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     bool __block success = false;
     NSString *error =
     [self captureOutputForBlock:^{
-        success = GB_load_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]) == 0;
+        success = GB_load_state(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String) == 0;
     }];
     
     if (!success) {
@@ -1789,14 +1789,14 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     NSSavePanel * savePanel = [NSSavePanel savePanel];
     [savePanel setAllowedFileTypes:@[@"png"]];
     [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result) {
-        if (result == NSFileHandlingPanelOKButton) {
+        if (result == NSModalResponseOK) {
             [savePanel orderOut:self];
             CGImageRef cgRef = [self.feedImageView.image CGImageForProposedRect:NULL
                                                                         context:nil
                                                                           hints:nil];
             NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
             [imageRep setSize:(NSSize){160, self.feedImageView.image.size.height / 2}];
-            NSData *data = [imageRep representationUsingType:NSPNGFileType properties:@{}];
+            NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
             [data writeToURL:savePanel.URL atomically:NO];
             [self.printerFeedWindow setIsVisible:NO];
         }
@@ -2029,7 +2029,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (bool)isSlave
 {
-    return master;
+    return master != nil;
 }
 
 - (GB_gameboy_t *)gb
