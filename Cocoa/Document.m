@@ -434,7 +434,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) run
 {
-    assert(master == nil);
+    assert(!master);
     running = true;
     [self preRun];
     if (slave) {
@@ -2029,7 +2029,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (bool)isSlave
 {
-    return master != nil;
+    return master;
 }
 
 - (GB_gameboy_t *)gb
