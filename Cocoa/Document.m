@@ -1692,7 +1692,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         switch (columnIndex) {
             case 0:
                 return [Document imageFromData:[NSData dataWithBytesNoCopy:oamInfo[row].image
-                                                                    length:64 * 4
+                                                                    length:64 * 4 * 2
                                                              freeWhenDone:NO]
                                          width:8
                                         height:oamHeight
