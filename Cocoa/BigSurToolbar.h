@@ -18,7 +18,7 @@ typedef NS_ENUM(NSInteger, NSWindowToolbarStyle) {
 } API_AVAILABLE(macos(11.0));
 
 @interface NSWindow (toolbarStyle)
-@property NSWindowToolbarStyle toolbarStyle API_AVAILABLE(macos(11.0));
+@property (nonatomic) NSWindowToolbarStyle toolbarStyle API_AVAILABLE(macos(11.0));
 @end
 
 @interface NSImage (SFSymbols)
