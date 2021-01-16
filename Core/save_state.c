@@ -163,6 +163,16 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         }
     }
     
+    if (save->model & GB_MODEL_PAL_BIT_OLD) {
+        save->model &= ~GB_MODEL_PAL_BIT_OLD;
+        save->model |= GB_MODEL_PAL_BIT;
+    }
+    
+    if (save->model & GB_MODEL_NO_SFC_BIT_OLD) {
+        save->model &= ~GB_MODEL_NO_SFC_BIT_OLD;
+        save->model |= GB_MODEL_NO_SFC_BIT;
+    }
+    
     if (gb->version != save->version) {
         GB_log(gb, "The save state is for a different version of SameBoy.\n");
         return false;
