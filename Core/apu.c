@@ -712,6 +712,12 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 
 static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
 {
+    /*
+       TODO: On revisions  older than the CGB-D,  this behaves differently  when
+             the counter advanced this exact T-cycle.  Also, in these revisions,
+             it seems that "passive" changes (due to the temporary FF value NR43
+             has during writes) behave slightly different from non-passive ones.
+    */
     uint16_t effective_counter = gb->apu.noise_channel.counter;
     /* Ladies and gentlemen, I present you the holy grail glitch of revision detection! */
     switch (gb->model) {
