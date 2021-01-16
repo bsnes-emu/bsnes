@@ -1188,9 +1188,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if (gb->apu.channel_4_countdown_reloaded) {
                 unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
                 if (!divisor) divisor = 2;
-                 gb->apu.noise_channel.counter_countdown =
-                     divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 0, 3}[(gb->apu.noise_channel.alignment) & 3]);
-                 gb->apu.channel_4_delta = 0;
+                if (gb->model > GB_MODEL_CGB_C) {
+                    gb->apu.noise_channel.counter_countdown =
+                    divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 0, 3}[(gb->apu.noise_channel.alignment) & 3]);
+                }
+                else {
+                    gb->apu.noise_channel.counter_countdown =
+                    divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 4, 3}[(gb->apu.noise_channel.alignment) & 3]);
+                }
+                gb->apu.channel_4_delta = 0;
             }
             /* Step LFSR */
             if (new_bit && (!old_bit || gb->model <= GB_MODEL_CGB_C)) {
