@@ -1,7 +1,7 @@
 bsnes
 =====
 
-![bsnes logo](.assets/logo.png)
+![bsnes logo](bsnes/target-bsnes/resource/logo.png)
 
 bsnes is a multi-platform Super Nintendo (Super Famicom) emulator, originally
 developed by [byuu](https://byuu.org/about), which focuses on performance,
