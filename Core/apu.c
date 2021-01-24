@@ -762,7 +762,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             // case GB_MODEL_CGB_A:
         case GB_MODEL_CGB_C:
             if (effective_counter & 8) {
-                effective_counter |= 0xE;
+                effective_counter |= 0xE; // Sometimes F on some instances
             }
             if (effective_counter & 0x80) {
                 effective_counter |= 0xFF;
@@ -777,6 +777,9 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
                 effective_counter |= 0x4;
             }
             if (effective_counter & 0x800) {
+                if ((gb->io_registers[GB_IO_NR43] & 8)) {
+                    effective_counter |= 0x400;
+                }
                 effective_counter |= 0x8;
             }
             if (effective_counter & 0x1000) {
@@ -788,7 +791,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #if 0
         case GB_MODEL_CGB_D:
-            if (effective_counter & 0x40) {
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x80 : 0x40)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x100) {
@@ -809,7 +812,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #endif
         case GB_MODEL_CGB_E:
-            if (effective_counter & 0x40) {
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x80 : 0x40)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x1000) {
@@ -822,7 +825,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             /* For the most part, AGS seems to do:
                0x20   -> 0xA0
                0x200  -> 0xA00
-               0x1000 -> 0x1010
+               0x1000 -> 0x1010, but only if wide
              */
             break;
     }
@@ -1250,13 +1253,18 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         }
                     }
                     
-                    /* TODO: These two are quite weird. Verify further */
-                    if (gb->model <= GB_MODEL_CGB_C && gb->cgb_double_speed) {
-                        if (!(gb->io_registers[GB_IO_NR43] & 0xF0) && (gb->io_registers[GB_IO_NR43] & 0x07)) {
-                             gb->apu.noise_channel.counter_countdown -= 1;
+                    /* TODO: These are quite weird. Verify further */
+                    if (gb->model <= GB_MODEL_CGB_C) {
+                        if (gb->cgb_double_speed) {
+                            if (!(gb->io_registers[GB_IO_NR43] & 0xF0) && (gb->io_registers[GB_IO_NR43] & 0x07)) {
+                                 gb->apu.noise_channel.counter_countdown -= 1;
+                            }
+                            else if ((gb->io_registers[GB_IO_NR43] & 0xF0) && !(gb->io_registers[GB_IO_NR43] & 0x07)) {
+                                gb->apu.noise_channel.counter_countdown += 1;
+                            }
                         }
-                        else if ((gb->io_registers[GB_IO_NR43] & 0xF0) && !(gb->io_registers[GB_IO_NR43] & 0x07)) {
-                            gb->apu.noise_channel.counter_countdown += 1;
+                        else {
+                            gb->apu.noise_channel.counter_countdown -= 2;
                         }
                     }
    
