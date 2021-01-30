@@ -700,6 +700,18 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 		}
 
 	}
+	else if (string(game->path).endsWith(".bs"))
+	{
+		const char *system_dir;
+		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
+		string bs_full_path = string(system_dir, "/", "BS-X.bin").transform("\\", "/");
+		if (!file::exists(bs_full_path)) {
+			return false;
+		}
+
+		program->superFamicom.location = bs_full_path;
+		program->bsMemory.location = string(game->path);
+	}
 	else
 	{
 		program->superFamicom.location = string(game->path);
