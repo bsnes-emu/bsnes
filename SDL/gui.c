@@ -519,28 +519,10 @@ const char *current_color_correction_mode(unsigned index)
 
 const char *current_color_temperature(unsigned index)
 {
-    return (const char *[]){"12000K",
-        "11450K",
-        "10900K",
-        "10350K",
-        "9800K",
-        "9250K",
-        "8700K",
-        "8150K",
-        "7600K",
-        "7050K",
-        "6500K (White)",
-        "5950K",
-        "5400K",
-        "4850K",
-        "4300K",
-        "3750K",
-        "3200K",
-        "2650K",
-        "2100K",
-        "1550K",
-        "1000K"}
-    [configuration.color_temperature];
+    static char ret[22];
+    strcpy(ret, SLIDER_STRING);
+    ret[configuration.color_temperature] = SELECTED_SLIDER_STRING[configuration.color_temperature];
+    return ret;
 }
 
 
