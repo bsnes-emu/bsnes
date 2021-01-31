@@ -791,7 +791,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #if 0
         case GB_MODEL_CGB_D:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x80 : 0x40)) { // This is so weird
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x100) {
@@ -812,7 +812,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #endif
         case GB_MODEL_CGB_E:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x80 : 0x40)) { // This is so weird
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x1000) {
