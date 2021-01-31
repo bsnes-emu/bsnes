@@ -524,9 +524,9 @@ restart:
     char extension[4] = {0,};
     if (path_length > 4) {
         if (filename[path_length - 4] == '.') {
-            extension[0] = tolower(filename[path_length - 3]);
-            extension[1] = tolower(filename[path_length - 2]);
-            extension[2] = tolower(filename[path_length - 1]);
+            extension[0] = tolower((unsigned char)filename[path_length - 3]);
+            extension[1] = tolower((unsigned char)filename[path_length - 2]);
+            extension[2] = tolower((unsigned char)filename[path_length - 1]);
         }
     }
     if (strcmp(extension, "isx") == 0) {
