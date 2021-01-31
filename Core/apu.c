@@ -1209,7 +1209,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
             /* Step LFSR */
             if (new_bit && (!old_bit || gb->model <= GB_MODEL_CGB_C)) {
-                step_lfsr(gb, 0);
+                if (gb->model <= GB_MODEL_CGB_C) {
+                    bool previous_narrow = gb->apu.noise_channel.narrow;
+                    gb->apu.noise_channel.narrow = true;
+                    step_lfsr(gb, 0);
+                    gb->apu.noise_channel.narrow = previous_narrow;
+                }
+                else {
+                    step_lfsr(gb, 0);
+                }
             }
             break;
         }
