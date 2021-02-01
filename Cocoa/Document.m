@@ -381,7 +381,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             [audioLock wait];
         }
         
-        if (stopping) {
+        if (stopping || GB_debugger_is_stopped(&gb)) {
             memset(buffer, 0, nFrames * sizeof(*buffer));
             [audioLock unlock];
             return;
@@ -1105,6 +1105,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (char *) getDebuggerInput
 {
+    [audioLock signal];
     [self updateSideView];
     [self log:">"];
     in_sync_input = true;
