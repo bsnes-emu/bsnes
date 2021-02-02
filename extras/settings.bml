@@ -1,0 +1,272 @@
+Video
+  Monitor: Primary
+  Format: ARGB24
+  Exclusive: false
+  Blocking: false
+  Flush: false
+  Shader: None
+  Multiplier: 2
+  Output: Scale
+  AspectCorrection: true
+  Luminance: 100
+  Saturation: 100
+  Gamma: 150
+  Dimming: true
+  Snow: true
+  Overscan: false
+  Blur: false
+  Filter: None
+Audio
+  Exclusive: false
+  Blocking: true
+  Dynamic: false
+  Mute: false
+  MuteUnfocused: false
+  Skew: 0
+  Volume: 100
+  Balance: 50
+Input
+  Defocus: Pause
+Path
+  Games
+  Patches
+  Saves
+  Cheats
+  States
+  Screenshots
+  Recent
+    SuperFamicom
+    GameBoy
+    BSMemory
+    SufamiTurboA
+    SufamiTurboB
+FastForward
+  FrameSkip: 9
+  Limiter: 0
+  Mute: false
+Rewind
+  Frequency: 0
+  Length: 80
+  Mute: false
+Emulator
+  WarnOnUnverifiedGames: false
+  AutoSaveMemory
+    Enable: true
+    Interval: 30
+  AutoSaveStateOnUnload: false
+  AutoLoadStateOnLoad: false
+  Serialization
+    Method: Fast
+  RunAhead
+    Frames: 0
+  Hack
+    Hotfixes: true
+    Entropy: Low
+    CPU
+      Overclock: 100
+      FastMath: false
+    PPU
+      Fast: true
+      Deinterlace: true
+      NoSpriteLimit: false
+      NoVRAMBlocking: false
+      Mode7
+        Scale: 1
+        Perspective: true
+        Supersample: false
+        Mosaic: true
+    DSP
+      Fast: true
+      Cubic: false
+      EchoShadow: false
+    Coprocessor
+      DelayedSync: true
+      PreferHLE: false
+    SA1
+      Overclock: 100
+    SuperFX
+      Overclock: 100
+  Cheats
+    Enable: true
+General
+  StatusBar: true
+  ScreenSaver: false
+  ToolTips: true
+  Crashed: false
+  NativeFileDialogs: false
+SuperFamicom
+  ControllerPort1: Gamepad
+    Gamepad
+      Up: Keyboard/1/Button/Up
+      Down: Keyboard/1/Button/Down
+      Left: Keyboard/1/Button/Left
+      Right: Keyboard/1/Button/Right
+      Select: Keyboard/1/Button/Apostrophe
+      Start: Keyboard/1/Button/Return
+      A: Keyboard/1/Button/Z
+      B: Keyboard/1/Button/X
+      X: Keyboard/1/Button/A
+      Y: Keyboard/1/Button/S
+      L: Keyboard/1/Button/D
+      R: Keyboard/1/Button/C
+      Select: Keyboard/1/Button/Shift
+      Start: Keyboard/1/Button/Enter
+      TurboB
+      TurboA
+      TurboY
+      TurboX
+      TurboL
+      TurboR
+    Mouse
+      X-axis
+      Y-axis
+      Left
+      Right
+      TurboLeft
+      TurboRight
+  ControllerPort2: None
+    Gamepad
+      Up
+      Down
+      Left
+      Right
+      B
+      A
+      Y
+      X
+      L
+      R
+      Select
+      Start
+      TurboB
+      TurboA
+      TurboY
+      TurboX
+      TurboL
+      TurboR
+    Mouse
+      X-axis
+      Y-axis
+      Left
+      Right
+      TurboLeft
+      TurboRight
+    SuperMultitap
+      Port2-Up
+      Port2-Down
+      Port2-Left
+      Port2-Right
+      Port2-B
+      Port2-A
+      Port2-Y
+      Port2-X
+      Port2-L
+      Port2-R
+      Port2-Select
+      Port2-Start
+      Port3-Up
+      Port3-Down
+      Port3-Left
+      Port3-Right
+      Port3-B
+      Port3-A
+      Port3-Y
+      Port3-X
+      Port3-L
+      Port3-R
+      Port3-Select
+      Port3-Start
+      Port4-Up
+      Port4-Down
+      Port4-Left
+      Port4-Right
+      Port4-B
+      Port4-A
+      Port4-Y
+      Port4-X
+      Port4-L
+      Port4-R
+      Port4-Select
+      Port4-Start
+      Port5-Up
+      Port5-Down
+      Port5-Left
+      Port5-Right
+      Port5-B
+      Port5-A
+      Port5-Y
+      Port5-X
+      Port5-L
+      Port5-R
+      Port5-Select
+      Port5-Start
+      TurboPort2-B
+      TurboPort2-A
+      TurboPort2-Y
+      TurboPort2-X
+      TurboPort2-L
+      TurboPort2-R
+      TurboPort3-B
+      TurboPort3-A
+      TurboPort3-Y
+      TurboPort3-X
+      TurboPort3-L
+      TurboPort3-R
+      TurboPort4-B
+      TurboPort4-A
+      TurboPort4-Y
+      TurboPort4-X
+      TurboPort4-L
+      TurboPort4-R
+      TurboPort5-B
+      TurboPort5-A
+      TurboPort5-Y
+      TurboPort5-X
+      TurboPort5-L
+      TurboPort5-R
+    SuperScope
+      X-axis
+      Y-axis
+      Trigger
+      Cursor
+      Turbo
+      Pause
+    Justifier
+      X-axis
+      Y-axis
+      Trigger
+      Start
+    Justifiers
+      Port1-X-axis
+      Port1-Y-axis
+      Port1-Trigger
+      Port1-Start
+      Port2-X-axis
+      Port2-Y-axis
+      Port2-Trigger
+      Port2-Start
+  ExpansionPort: None
+Hotkey
+  ToggleFullscreen
+  TogglePseudo-Fullscreen
+  ToggleMouseCapture
+  ToggleCheatCodes
+  ToggleMute
+  Rewind
+  SaveState
+  LoadState
+  LoadUndoState
+  LoadRedoState
+  DecrementStateSlot
+  IncrementStateSlot
+  CaptureScreenshot
+  FastForward
+  PauseEmulation
+  FrameAdvance
+  DecreaseHDMode7
+  IncreaseHDMode7
+  ToggleSupersampling
+  ResetEmulation
+  PowerCycle
+  UnloadGame
+  QuitEmulator
