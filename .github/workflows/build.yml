@@ -80,6 +80,7 @@ jobs:
           cp -a ${srcdir}/bsnes/Database/* ${outdir}/Database
           cp -a ${srcdir}/shaders ${outdir}/Shaders
           cp -a ${srcdir}/GPLv3.txt ${outdir}
+          cp -a ${srcdir}/extras/* ${outdir}
           zip -r ../bsnes-${os}.zip ${outdir}
 
           cd -
