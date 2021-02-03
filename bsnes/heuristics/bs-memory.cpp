@@ -26,7 +26,7 @@ auto BSMemory::manifest() const -> string {
   output.append("  label:  ", Location::prefix(location), "\n");
   output.append("  name:   ", Location::prefix(location), "\n");
   output.append("  board\n");
-  output.append(Memory{}.type("Flash").size(data.size()).content("Program").text());
+  output.append(Memory{}.type("Flash").size(0x100000).content("Program").text());
   return output;
 }
 
