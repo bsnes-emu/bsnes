@@ -663,12 +663,12 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 
 	flush_variables();
 
-	if (string(game->path).endsWith(".gb"))
+	if (string(game->path).endsWith(".gb") || string(game->path).endsWith(".gbc"))
 	{
 		const char *system_dir;
 		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
 		string sgb_full_path = string(game->path).transform("\\", "/");
-		string sgb_full_path2 = string(sgb_full_path).replace(".gb", ".sfc");
+		string sgb_full_path2 = string(sgb_full_path).replace(".gbc", ".sfc").replace(".gb", ".sfc");
 		if (!file::exists(sgb_full_path2)) {
 			string sgb_full_path = string(system_dir, "/", sgb_bios).transform("\\", "/");
 			program->superFamicom.location = sgb_full_path;
@@ -680,25 +680,6 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 		if (!file::exists(program->superFamicom.location)) {
 			return false;
 		}
-	}
-	else if (string(game->path).endsWith(".gbc"))
-	{
-		const char *system_dir;
-		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
-		string sgb_full_path = string(game->path).transform("\\", "/");
-		string sgb_full_path2 = string(sgb_full_path).replace(".gbc", ".sfc");
-		if (!file::exists(sgb_full_path2)) {
-			string sgb_full_path = string(system_dir, "/", sgb_bios).transform("\\", "/");
-			program->superFamicom.location = sgb_full_path;
-		}
-        else {
-			program->superFamicom.location = sgb_full_path2;
-		}
-		program->gameBoy.location = string(game->path);
-		if (!file::exists(program->superFamicom.location)) {
-			return false;
-		}
-
 	}
 	else if (string(game->path).endsWith(".bs"))
 	{
