@@ -66,11 +66,22 @@ hiro.objects := \
   $(object.path)/hiro-$(hiro).o \
   $(if $(filter windows,$(hiro)),$(object.path)/hiro-resource.o)
 
+ifeq ($(universal),true)
+  compile.hiro = \
+    $(strip \
+      $(compiler) $(hiro.flags) $(flags.arm64) $(flags) $(flags.deps) -c $< -o $@.arm64 && \
+      $(compiler) $(hiro.flags) $(flags.amd64) $(flags) $(flags.deps) -c $< -o $@.amd64 && \
+      lipo -create -output $@ $@.arm64 $@.amd64 \
+    )
+else
+	compile.hiro = $(strip $(compiler) $(hiro.flags) $(flags) $(flags.deps) -c $< -o $@)
+endif
+
 $(object.path)/hiro-$(hiro).o: $(hiro.path)/hiro.cpp
 	$(if $(filter qt%,$(hiro)),$(info Compiling $(hiro.path)/qt/qt.moc ...))
 	$(if $(filter qt%,$(hiro)),@$(moc) -i -o $(hiro.path)/qt/qt.moc $(hiro.path)/qt/qt.hpp)
 	$(info Compiling $< ...)
-	@$(compiler) $(hiro.flags) $(flags) $(flags.deps) -c $< -o $@
+	@$(call compile.hiro)
 
 $(object.path)/hiro-resource.o: $(hiro.resource)
 	$(info Compiling $< ...)

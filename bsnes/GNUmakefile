@@ -60,5 +60,8 @@ include $(ui)/GNUmakefile
 -include obj/*.d
 
 clean:
+ifeq ($(platform),macos)
+	rm -rf out/$(name).app
+endif
 	$(call delete,obj/*)
 	$(call delete,out/*)
