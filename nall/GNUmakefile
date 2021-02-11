@@ -126,6 +126,7 @@ ifeq ($(platform),macos)
   options += -lc++ -lobjc
   flags.arm64 += -target x86_64-apple-macos10.12
   flags.amd64 += -target arm64-apple-macos11
+  universal := true
 endif
 
 # linux settings
