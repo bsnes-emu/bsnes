@@ -38,6 +38,9 @@ ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(hiro),gtk2)
     hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
     hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
+    ifeq ($(platform),bsd)
+      hiro.options += -lc++
+    endif
   endif
 
   ifeq ($(hiro),gtk3)
@@ -70,7 +73,7 @@ $(object.path)/hiro-$(hiro).o: $(hiro.path)/hiro.cpp
 	$(if $(filter qt%,$(hiro)),$(info Compiling $(hiro.path)/qt/qt.moc ...))
 	$(if $(filter qt%,$(hiro)),@$(moc) -i -o $(hiro.path)/qt/qt.moc $(hiro.path)/qt/qt.hpp)
 	$(info Compiling $< ...)
-	@$(compiler) $(hiro.flags) $(flags) $(flags.deps) -c $< -o $@
+	@$(compiler) $(hiro.flags) $(flags) $(flags.deps) $(hiro.options) -c $< -o $@
 
 $(object.path)/hiro-resource.o: $(hiro.resource)
 	$(info Compiling $< ...)
