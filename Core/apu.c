@@ -297,7 +297,7 @@ static void update_square_sample(GB_gameboy_t *gb, unsigned index)
    requires the PCM12 register. The behavior implemented here was verified on *my*
    CGB, which might behave differently from other CGB revisions, as well as from the
    DMG, MGB or SGB/2 */
-static void nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
+static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
 {
     if (value & 8) {
         (*volume)++;
@@ -316,6 +316,17 @@ static void nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
     }
 
     (*volume) &= 0xF;
+}
+
+static void nrx2_glitch(GB_gameboy_t *gb,uint8_t *volume, uint8_t value, uint8_t old_value)
+{
+    if (gb->model <= GB_MODEL_CGB_C) {
+        _nrx2_glitch(volume, 0xFF, old_value);
+        _nrx2_glitch(volume, value, 0xFF);
+    }
+    else {
+        _nrx2_glitch(volume, value, old_value);
+    }
 }
 
 static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
@@ -931,7 +942,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 update_sample(gb, index, 0, 0);
             }
             else if (gb->apu.is_active[index]) {
-                nrx2_glitch(&gb->apu.square_channels[index].current_volume, value, gb->io_registers[reg]);
+                nrx2_glitch(gb, &gb->apu.square_channels[index].current_volume, value, gb->io_registers[reg]);
                 update_square_sample(gb, index);
             }
 
@@ -1179,7 +1190,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 update_sample(gb, GB_NOISE, 0, 0);
             }
             else if (gb->apu.is_active[GB_NOISE]) {
-                nrx2_glitch(&gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
+                nrx2_glitch(gb, &gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
                 update_sample(gb, GB_NOISE,
                               gb->apu.current_lfsr_sample ?
                               gb->apu.noise_channel.current_volume : 0,
