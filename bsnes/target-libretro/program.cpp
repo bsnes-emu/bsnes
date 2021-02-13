@@ -243,7 +243,14 @@ auto Program::videoFrame(const uint16* data, uint pitch, uint width, uint height
 	{
 		uint multiplier = height / 240;
 		data += 8 * (pitch >> 1) * multiplier;
-		height -= 16 * multiplier;
+		if (program->gameBoy.program)
+		{
+			height -= 16.1 * multiplier;
+		}
+		else
+		{
+			height -= 16 * multiplier;
+		}
 	}
 	video_cb(data, width, height, pitch);
 }
