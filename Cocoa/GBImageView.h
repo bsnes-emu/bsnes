@@ -9,8 +9,8 @@
 @end
 
 @interface GBImageView : NSImageView
-@property (nonatomic, strong) NSArray *horizontalGrids;
-@property (nonatomic, strong) NSArray *verticalGrids;
+@property (nonatomic, strong) NSArray<GBImageViewGridConfiguration *> *horizontalGrids;
+@property (nonatomic, strong) NSArray<GBImageViewGridConfiguration *> *verticalGrids;
 @property (nonatomic) bool displayScrollRect;
 @property NSRect scrollRect;
 @property (nonatomic, weak) IBOutlet id<GBImageViewDelegate> delegate;
