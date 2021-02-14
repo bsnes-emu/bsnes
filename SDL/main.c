@@ -677,6 +677,10 @@ int main(int argc, char **argv)
 
     window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               160 * configuration.default_scale, 144 * configuration.default_scale, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    if (window == NULL) {
+        fputs(SDL_GetError(), stderr);
+        exit(1);
+    }
     SDL_SetWindowMinimumSize(window, 160, 144);
     
     if (fullscreen) {
