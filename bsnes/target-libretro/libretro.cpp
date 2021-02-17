@@ -667,13 +667,31 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 	{
 		const char *system_dir;
 		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
-		string sgb_full_path = string(system_dir, "/", sgb_bios).transform("\\", "/");
-		if (!file::exists(sgb_full_path)) {
+		string sgb_full_path = string(game->path).transform("\\", "/");
+		string sgb_full_path2 = string(sgb_full_path).replace(".gbc", ".sfc").replace(".gb", ".sfc");
+		if (!file::exists(sgb_full_path2)) {
+			string sgb_full_path = string(system_dir, "/", sgb_bios).transform("\\", "/");
+			program->superFamicom.location = sgb_full_path;
+		}
+        else {
+			program->superFamicom.location = sgb_full_path2;
+		}
+		program->gameBoy.location = string(game->path);
+		if (!file::exists(program->superFamicom.location)) {
+			return false;
+		}
+	}
+	else if (string(game->path).endsWith(".bs"))
+	{
+		const char *system_dir;
+		environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir);
+		string bs_full_path = string(system_dir, "/", "BS-X.bin").transform("\\", "/");
+		if (!file::exists(bs_full_path)) {
 			return false;
 		}
 
-		program->superFamicom.location = sgb_full_path;
-		program->gameBoy.location = string(game->path);
+		program->superFamicom.location = bs_full_path;
+		program->bsMemory.location = string(game->path);
 	}
 	else
 	{
