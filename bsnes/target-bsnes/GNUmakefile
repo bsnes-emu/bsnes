@@ -21,7 +21,13 @@ obj/ui-resource.o: $(ui)/resource/resource.cpp
 
 all: $(hiro.objects) $(ruby.objects) $(objects)
 	$(info Linking out/$(name) ...)
+ifeq ($(universal),true)
+	+@$(compiler) -o obj/$(name).arm64 $(hiro.objects) $(ruby.objects) $(objects) $(hiro.options) $(ruby.options) $(options) $(flags.arm64)
+	+@$(compiler) -o obj/$(name).amd64 $(hiro.objects) $(ruby.objects) $(objects) $(hiro.options) $(ruby.options) $(options) $(flags.amd64)
+	lipo -create -output out/$(name) obj/$(name).arm64 obj/$(name).amd64
+else
 	+@$(compiler) -o out/$(name) $(hiro.objects) $(ruby.objects) $(objects) $(hiro.options) $(ruby.options) $(options)
+endif
 ifeq ($(platform),macos)
 	rm -rf out/$(name).app
 	mkdir -p out/$(name).app/Contents/MacOS/

@@ -91,9 +91,20 @@ endif
 
 ruby.objects := $(object.path)/ruby.o
 
+ifeq ($(universal),true)
+  compile.ruby = \
+    $(strip \
+      $(compiler) $(ruby.flags) $(flags.arm64) $(flags) $(flags.deps) -c $< -o $@.arm64 && \
+      $(compiler) $(ruby.flags) $(flags.amd64) $(flags) $(flags.deps) -c $< -o $@.amd64 && \
+      lipo -create -output $@ $@.arm64 $@.amd64 \
+    )
+else
+	compile.ruby = $(strip $(compiler) $(ruby.flags) $(flags) $(flags.deps) -c $< -o $@)
+endif
+
 $(object.path)/ruby.o: $(ruby.path)/ruby.cpp $(call rwildcard,$(ruby.path))
 	$(info Compiling $< ...)
-	@$(compiler) $(ruby.flags) $(flags) $(flags.deps) -c $< -o $@
+	@$(call compile.ruby)
 
 ruby.verbose:
 	$(info ruby Drivers:)

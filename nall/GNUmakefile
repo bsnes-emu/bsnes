@@ -124,6 +124,9 @@ endif
 ifeq ($(platform),macos)
   flags   += -stdlib=libc++
   options += -lc++ -lobjc
+  flags.arm64 += -target x86_64-apple-macos10.12
+  flags.amd64 += -target arm64-apple-macos11
+  universal := true
 endif
 
 # linux settings
@@ -166,14 +169,28 @@ nall.verbose:
 	@$(call compile)
 
 # function compile([arguments])
-compile = \
-  $(strip \
-    $(if $(filter %.c,$<), \
-      $(compiler.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
-   ,$(if $(filter %.cpp,$<), \
-      $(compiler.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
-    )) \
-  )
+ifeq ($(universal),true)
+  compile = \
+    $(strip \
+      $(if $(filter %.c,$<), \
+        $(compiler.c)   $(flags.arm64) $(flags.deps) $(flags) $1 -c $< -o $@.arm64 && \
+        $(compiler.c)   $(flags.amd64) $(flags.deps) $(flags) $1 -c $< -o $@.amd64 && \
+    ,$(if $(filter %.cpp,$<), \
+        $(compiler.cpp) $(flags.arm64) $(flags.deps) $(flags) $1 -c $< -o $@.arm64 && \
+        $(compiler.cpp) $(flags.amd64) $(flags.deps) $(flags) $1 -c $< -o $@.amd64 && \
+      )) \
+      lipo -create -output $@ $@.arm64 $@.amd64 \
+    )
+else
+  compile = \
+    $(strip \
+      $(if $(filter %.c,$<), \
+        $(compiler.c)   $(flags.deps) $(flags) $1 -c $< -o $@ \
+    ,$(if $(filter %.cpp,$<), \
+        $(compiler.cpp) $(flags.deps) $(flags) $1 -c $< -o $@ \
+      )) \
+    )
+endif
 
 # function rwildcard(directory, pattern)
 rwildcard = \
