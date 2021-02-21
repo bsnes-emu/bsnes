@@ -333,30 +333,28 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
 {
     uint8_t nrx2 = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
     
-    if (!gb->apu.square_channels[index].volume_countdown || !--gb->apu.square_channels[index].volume_countdown) {
-        gb->apu.square_channels[index].volume_countdown = nrx2 & 7;
-        if (!(nrx2 & 7)) return;
-        if (gb->cgb_double_speed) {
-            if (index == GB_SQUARE_1) {
-                gb->apu.pcm_mask[0] &= gb->apu.square_channels[GB_SQUARE_1].current_volume | 0xF1;
-            }
-            else {
-                gb->apu.pcm_mask[0] &= (gb->apu.square_channels[GB_SQUARE_2].current_volume << 2) | 0x1F;
-            }
+    gb->apu.square_channels[index].volume_countdown = nrx2 & 7;
+    if (!(nrx2 & 7)) return;
+    if (gb->cgb_double_speed) {
+        if (index == GB_SQUARE_1) {
+            gb->apu.pcm_mask[0] &= gb->apu.square_channels[GB_SQUARE_1].current_volume | 0xF1;
         }
-        
-        if ((nrx2 & 8) && gb->apu.square_channels[index].current_volume < 0xF) {
-            gb->apu.square_channels[index].current_volume++;
+        else {
+            gb->apu.pcm_mask[0] &= (gb->apu.square_channels[GB_SQUARE_2].current_volume << 2) | 0x1F;
         }
+    }
+    
+    if ((nrx2 & 8) && gb->apu.square_channels[index].current_volume < 0xF) {
+        gb->apu.square_channels[index].current_volume++;
+    }
 
-        else if (!(nrx2 & 8) && gb->apu.square_channels[index].current_volume > 0) {
-            gb->apu.square_channels[index].current_volume--;
-        }
+    else if (!(nrx2 & 8) && gb->apu.square_channels[index].current_volume > 0) {
+        gb->apu.square_channels[index].current_volume--;
+    }
 
 
-        if (gb->apu.is_active[index]) {
-            update_square_sample(gb, index);
-        }
+    if (gb->apu.is_active[index]) {
+        update_square_sample(gb, index);
     }
 }
 
@@ -364,28 +362,25 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
 {
     uint8_t nr42 = gb->io_registers[GB_IO_NR42];
 
-    if (!gb->apu.noise_channel.volume_countdown || !--gb->apu.noise_channel.volume_countdown) {
-        gb->apu.noise_channel.volume_countdown = nr42 & 7;
-        if (!(nr42 & 7)) return;
+    if (!(nr42 & 7)) return;
 
-        if (gb->cgb_double_speed) {
-            gb->apu.pcm_mask[0] &= (gb->apu.noise_channel.current_volume << 2) | 0x1F;
-        }
-        if ((nr42 & 8) && gb->apu.noise_channel.current_volume < 0xF) {
-            gb->apu.noise_channel.current_volume++;
-        }
+    if (gb->cgb_double_speed) {
+        gb->apu.pcm_mask[0] &= (gb->apu.noise_channel.current_volume << 2) | 0x1F;
+    }
+    if ((nr42 & 8) && gb->apu.noise_channel.current_volume < 0xF) {
+        gb->apu.noise_channel.current_volume++;
+    }
 
-        else if (!(nr42 & 8) && gb->apu.noise_channel.current_volume > 0) {
-            gb->apu.noise_channel.current_volume--;
-        }
+    else if (!(nr42 & 8) && gb->apu.noise_channel.current_volume > 0) {
+        gb->apu.noise_channel.current_volume--;
+    }
 
 
-        if (gb->apu.is_active[GB_NOISE]) {
-            update_sample(gb, GB_NOISE,
-                          (gb->apu.noise_channel.lfsr & 1) ?
-                          gb->apu.noise_channel.current_volume : 0,
-                          0);
-        }
+    if (gb->apu.is_active[GB_NOISE]) {
+        update_sample(gb, GB_NOISE,
+                      (gb->apu.noise_channel.lfsr & 1) ?
+                      gb->apu.noise_channel.current_volume : 0,
+                      0);
     }
 }
 
@@ -428,28 +423,31 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 1) == 0) {
-        for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
-            if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0 && (nrx2 & 7)) {
+            if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
                 tick_square_envelope(gb, i);
+                gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
             }
         }
 
-        if (gb->apu.is_active[GB_NOISE] && gb->apu.noise_channel.volume_countdown == 0 && (gb->io_registers[GB_IO_NR42] & 7)) {
+        if (gb->apu.is_active[GB_NOISE] && gb->apu.noise_channel.volume_countdown == 0) {
             tick_noise_envelope(gb);
+            gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
         }
     }
 
-    if ((gb->apu.div_divider & 7) == 0) {
-        for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-            tick_square_envelope(gb, i);
+    if ((gb->apu.div_divider & 7) == 7) {
+        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+            gb->apu.square_channels[i].volume_countdown--;
+            gb->apu.square_channels[i].volume_countdown &= 7;
         }
-
-        tick_noise_envelope(gb);
+        gb->apu.noise_channel.volume_countdown--;
+        gb->apu.noise_channel.volume_countdown &= 7;
     }
 
     if ((gb->apu.div_divider & 1) == 1) {
-        for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             if (gb->apu.square_channels[i].length_enabled) {
                 if (gb->apu.square_channels[i].pulse_length) {
                     if (!--gb->apu.square_channels[i].pulse_length) {
