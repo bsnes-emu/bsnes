@@ -389,6 +389,12 @@ public:
   //
   Widget spacer{this, Size{~0, ~0}};
   Label note{this, Size{~0, 0}};
+  //
+  Label ppuModeLabel{this, Size{~0, 0}, 0};
+  Label ppuModeRequirements{this, Size{~0, 0}};
+  HorizontalLayout modeLayout{this, Size{~0, 0}};
+    Button accuracyMode{&modeLayout, Size{0, 0}};
+    Button performanceMode{&modeLayout, Size{0, 0}};
 };
 
 struct CompatibilitySettings : VerticalLayout {
