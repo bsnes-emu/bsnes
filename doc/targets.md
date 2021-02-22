@@ -9,7 +9,7 @@ C function call.
 ## libco.x86
 * **Overhead:** ~5x
 * **Supported processor(s):** 32-bit x86
-*** Supported compiler(s**): any
+* **Supported compiler(s):** any
 * **Supported operating system(s):**
   * Windows
   * Mac OS X
@@ -19,7 +19,7 @@ C function call.
 ##   libco.amd64
 * **Overhead:** ~10x (Windows), ~6x (all other platforms)
 * **Supported processor(s):** 64-bit amd64
-*** Supported compiler(s**): any
+* **Supported compiler(s):** any
 * **Supported operating system(s):**
   * Windows
   * Mac OS X
