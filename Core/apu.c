@@ -333,7 +333,7 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
 {
     uint8_t nrx2 = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
     
-    gb->apu.square_channels[index].volume_countdown = nrx2 & 7;
+    if (gb->apu.is_square_envelope_locked[index]) return;
     if (!(nrx2 & 7)) return;
     if (gb->cgb_double_speed) {
         if (index == GB_SQUARE_1) {
@@ -344,14 +344,22 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
         }
     }
     
-    if ((nrx2 & 8) && gb->apu.square_channels[index].current_volume < 0xF) {
-        gb->apu.square_channels[index].current_volume++;
+    if (nrx2 & 8) {
+        if (gb->apu.square_channels[index].current_volume < 0xF) {
+            gb->apu.square_channels[index].current_volume++;
+        }
+        else {
+            gb->apu.is_square_envelope_locked[index] = true;
+        }
     }
-
-    else if (!(nrx2 & 8) && gb->apu.square_channels[index].current_volume > 0) {
-        gb->apu.square_channels[index].current_volume--;
+    else {
+        if (gb->apu.square_channels[index].current_volume > 0) {
+            gb->apu.square_channels[index].current_volume--;
+        }
+        else {
+            gb->apu.is_square_envelope_locked[index] = true;
+        }
     }
-
 
     if (gb->apu.is_active[index]) {
         update_square_sample(gb, index);
@@ -362,19 +370,29 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
 {
     uint8_t nr42 = gb->io_registers[GB_IO_NR42];
 
+    if (gb->apu.is_noise_envelope_locked) return;
     if (!(nr42 & 7)) return;
 
     if (gb->cgb_double_speed) {
         gb->apu.pcm_mask[0] &= (gb->apu.noise_channel.current_volume << 2) | 0x1F;
     }
-    if ((nr42 & 8) && gb->apu.noise_channel.current_volume < 0xF) {
-        gb->apu.noise_channel.current_volume++;
+    
+    if (nr42 & 8) {
+        if (gb->apu.noise_channel.current_volume < 0xF) {
+            gb->apu.noise_channel.current_volume++;
+        }
+        else {
+            gb->apu.is_noise_envelope_locked = true;
+        }
     }
-
-    else if (!(nr42 & 8) && gb->apu.noise_channel.current_volume > 0) {
-        gb->apu.noise_channel.current_volume--;
+    else {
+        if (gb->apu.noise_channel.current_volume > 0) {
+            gb->apu.noise_channel.current_volume--;
+        }
+        else {
+            gb->apu.is_noise_envelope_locked = true;
+        }
     }
-
 
     if (gb->apu.is_active[GB_NOISE]) {
         update_sample(gb, GB_NOISE,
@@ -975,6 +993,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if (value & 0x80) {
                 /* Current sample index remains unchanged when restarting channels 1 or 2. It is only reset by
                    turning the APU off. */
+                gb->apu.is_square_envelope_locked[index] = false;
                 if (!gb->apu.is_active[index]) {
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                     if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
@@ -983,7 +1002,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 else {
                     unsigned extra_delay = 0;
-                   if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */) {
+                    if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */) {
                        if ((!(value & 4) && ((gb->io_registers[reg] & 4) || old_sample_length == 0x3FF)) ||
                            (old_sample_length == 0x7FF && gb->apu.square_channels[index].sample_length != 0x7FF)) {
                             gb->apu.square_channels[index].current_sample_index++;
@@ -1224,6 +1243,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR44: {
             if (value & 0x80) {
+                gb->apu.is_noise_envelope_locked = false;
                 if (!GB_is_cgb(gb) && (gb->apu.noise_channel.alignment & 3) != 0) {
                     gb->apu.channel_4_dmg_delayed_start = 6;
                 }

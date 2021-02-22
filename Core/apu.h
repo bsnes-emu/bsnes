@@ -126,6 +126,9 @@ typedef struct
     bool channel_4_countdown_reloaded;
     uint8_t channel_4_dmg_delayed_start;
     uint16_t channel1_completed_addend;
+    
+    bool is_square_envelope_locked[2];
+    bool is_noise_envelope_locked;
 } GB_apu_t;
 
 typedef enum {
