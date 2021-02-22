@@ -180,8 +180,7 @@ static void render(GB_gameboy_t *gb)
 {
     GB_sample_t output = {0, 0};
 
-    UNROLL
-    for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
+    unrolled for (unsigned i = 0; i < GB_N_CHANNELS; i++) {
         double multiplier = CH_STEP;
         
         if (gb->model < GB_MODEL_AGB) {
@@ -240,8 +239,7 @@ static void render(GB_gameboy_t *gb)
             unsigned mask = gb->io_registers[GB_IO_NR51];
             unsigned left_volume = 0;
             unsigned right_volume = 0;
-            UNROLL
-            for (unsigned i = GB_N_CHANNELS; i--;) {
+            unrolled for (unsigned i = GB_N_CHANNELS; i--;) {
                 if (gb->apu.is_active[i]) {
                     if (mask & 1) {
                         left_volume += (gb->io_registers[GB_IO_NR50] & 7) * CH_STEP * 0xF;
@@ -441,7 +439,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 1) == 0) {
-        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
             if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
                 tick_square_envelope(gb, i);
@@ -456,7 +454,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 7) == 7) {
-        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             gb->apu.square_channels[i].volume_countdown--;
             gb->apu.square_channels[i].volume_countdown &= 7;
         }
@@ -465,7 +463,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 1) == 1) {
-        UNROLL for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             if (gb->apu.square_channels[i].length_enabled) {
                 if (gb->apu.square_channels[i].pulse_length) {
                     if (!--gb->apu.square_channels[i].pulse_length) {
@@ -586,8 +584,7 @@ void GB_apu_run(GB_gameboy_t *gb)
             }
         }
 
-        UNROLL
-        for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
+        unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
             if (gb->apu.is_active[i]) {
                 uint8_t cycles_left = cycles;
                 while (unlikely(cycles_left > gb->apu.square_channels[i].sample_countdown)) {

@@ -41,11 +41,11 @@
 
 #ifdef GB_INTERNAL
 #if __clang__
-#define UNROLL _Pragma("unroll")
+#define unrolled _Pragma("unroll")
 #elif __GNUC__ >= 8
-#define UNROLL _Pragma("GCC unroll 8")
+#define unrolled _Pragma("GCC unroll 8")
 #else
-#define UNROLL
+#define unrolled
 #endif
 
 #endif
