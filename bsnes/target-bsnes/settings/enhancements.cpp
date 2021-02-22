@@ -133,6 +133,54 @@ auto EnhancementSettings::create() -> void {
   }).setChecked(settings.emulator.hack.hotfixes).onToggle([&] {
     settings.emulator.hack.hotfixes = hotfixes.checked();
   });
-
-  note.setText("Note: some settings do not take effect until after reloading games.");
+  
+  
+  ppuModeLabel.setText("Mode Presets:").setFont(Font().setBold());
+  ppuModeRequirements.setText(
+    "Accuracy Mode: Maximum hardware accuracy, disables performance shortcuts and all enhancements.\n"
+    "Performance Mode: Best compromise between hardware accuracy and performance."
+  );
+  accuracyMode.setText("Accuracy Mode").onActivate([&] {
+    runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
+    cpuClock.setPosition(0); cpuClock.doChange();
+    sa1Clock.setPosition(0); sa1Clock.doChange();
+    sfxClock.setPosition(0); sfxClock.doChange();
+    fastPPU.setChecked(false).doToggle();
+    fastDSP.setChecked(false).doToggle();
+    cubicInterpolation.setChecked(false).doToggle();
+    coprocessorDelayedSyncOption.setChecked(false).doToggle();
+    coprocessorPreferHLEOption.setChecked(false).doToggle();
+    hotfixes.setChecked(false).doToggle();
+	
+    if(!emulator->loaded()) return;
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Accuracy Mode applied.\n"
+      "You must reload the game in order for all changes to take effect."
+    }).information();
+  });
+	
+  performanceMode.setText("Performance Mode").onActivate([&] {
+    runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
+    cpuClock.setPosition(0); cpuClock.doChange();
+    sa1Clock.setPosition(0); sa1Clock.doChange();
+    sfxClock.setPosition(0); sfxClock.doChange();
+    fastPPU.setChecked(true).doToggle();
+    deinterlace.setChecked(true).doToggle();
+    noSpriteLimit.setChecked(false).doToggle();
+    mode7Scale.item(0).setSelected(); emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale = 1);
+    mode7Perspective.setChecked(true).doToggle();
+    mode7Supersample.setChecked(false).doToggle();
+    mode7Mosaic.setChecked(true).doToggle();
+    fastDSP.setChecked(true).doToggle();
+    cubicInterpolation.setChecked(false).doToggle();
+    coprocessorDelayedSyncOption.setChecked(true).doToggle();
+    coprocessorPreferHLEOption.setChecked(false).doToggle();
+    hotfixes.setChecked(true).doToggle();
+    
+    if(!emulator->loaded()) return;
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Performance Mode applied.\n"
+      "You must reload the game in order for all changes to take effect."
+    }).information();
+  });
 }
