@@ -349,6 +349,9 @@ public:
     Label cpuLabel{&overclockingLayout, Size{0, 0}};
     Label cpuValue{&overclockingLayout, Size{50_sx, 0}};
     HorizontalSlider cpuClock{&overclockingLayout, Size{~0, 0}};
+  //
+  Widget spacer{this, Size{~0, ~0}};
+    Label note{this, Size{~0, 0}};
   Canvas overclockingSpacer{this, Size{~0, 1}};
   //
     Label sa1Label{&overclockingLayout, Size{0, 0}};
@@ -385,10 +388,8 @@ public:
   Canvas coprocessorSpacer{this, Size{~0, 1}};
   //
   Label gameLabel{this, Size{~0, 0}, 2};
-  CheckLabel hotfixes{this, Size{0, 0}};
-  //
-  Widget spacer{this, Size{~0, ~0}};
-  Label note{this, Size{~0, 0}};
+    CheckLabel hotfixes{this, Size{0, 0}};
+  Canvas hotfixesSpacer{this, Size{~0, 1}};
   //
   Label ppuModeLabel{this, Size{~0, 0}, 0};
   Label ppuModeRequirements{this, Size{~0, 0}};
