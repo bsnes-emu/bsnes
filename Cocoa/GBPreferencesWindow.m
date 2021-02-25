@@ -19,6 +19,7 @@
     NSPopUpButton *_colorPalettePopupButton;
     NSPopUpButton *_displayBorderPopupButton;
     NSPopUpButton *_rewindPopupButton;
+    NSPopUpButton *_rtcPopupButton;
     NSButton *_aspectRatioCheckbox;
     NSButton *_analogControlsCheckbox;
     NSEventModifierFlags previousModifiers;
@@ -179,6 +180,18 @@
 - (NSPopUpButton *)rewindPopupButton
 {
     return _rewindPopupButton;
+}
+
+- (NSPopUpButton *)rtcPopupButton
+{
+    return _rtcPopupButton;
+}
+
+- (void)setRtcPopupButton:(NSPopUpButton *)rtcPopupButton
+{
+    _rtcPopupButton = rtcPopupButton;
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRTCMode"];
+    [_rtcPopupButton selectItemAtIndex:mode];
 }
 
 - (void)setHighpassFilterPopupButton:(NSPopUpButton *)highpassFilterPopupButton
@@ -358,6 +371,14 @@
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBRewindLength"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRewindLengthChanged" object:nil];
+}
+
+- (IBAction)rtcModeChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+                                              forKey:@"GBRTCMode"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRTCModeChanged" object:nil];
+
 }
 
 - (IBAction) configureJoypad:(id)sender

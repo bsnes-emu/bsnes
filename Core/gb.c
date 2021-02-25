@@ -664,9 +664,9 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
         rtc_save.vba64.rtc_latched.days = gb->rtc_latched.days;
         rtc_save.vba64.rtc_latched.high = gb->rtc_latched.high;
 #ifdef GB_BIG_ENDIAN
-        rtc_save.vba64.last_rtc_second = __builtin_bswap64(gb->last_rtc_second);
+        rtc_save.vba64.last_rtc_second = __builtin_bswap64(time(NULL));
 #else
-        rtc_save.vba64.last_rtc_second = gb->last_rtc_second;
+        rtc_save.vba64.last_rtc_second = time(NULL);
 #endif
         memcpy(buffer + gb->mbc_ram_size, &rtc_save.vba64, sizeof(rtc_save.vba64));
     }
@@ -728,9 +728,9 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
         rtc_save.vba64.rtc_latched.days = gb->rtc_latched.days;
         rtc_save.vba64.rtc_latched.high = gb->rtc_latched.high;
 #ifdef GB_BIG_ENDIAN
-        rtc_save.vba64.last_rtc_second = __builtin_bswap64(gb->last_rtc_second);
+        rtc_save.vba64.last_rtc_second = __builtin_bswap64(time(NULL));
 #else
-        rtc_save.vba64.last_rtc_second = gb->last_rtc_second;
+        rtc_save.vba64.last_rtc_second = time(NULL);
 #endif
         if (fwrite(&rtc_save.vba64, 1, sizeof(rtc_save.vba64), f) != sizeof(rtc_save.vba64)) {
             fclose(f);
@@ -976,7 +976,6 @@ uint8_t GB_run(GB_gameboy_t *gb)
     gb->cycles_since_run = 0;
     GB_cpu_run(gb);
     if (gb->vblank_just_occured) {
-        GB_rtc_run(gb);
         GB_debugger_handle_async_commands(gb);
         GB_rewind_push(gb);
     }
@@ -1530,15 +1529,20 @@ void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 {
-    if (gb->model & GB_MODEL_PAL_BIT) {
-        return SGB_PAL_FREQUENCY * gb->clock_multiplier;
-    }
-    if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
-        return SGB_NTSC_FREQUENCY * gb->clock_multiplier;
-    }
-    return CPU_FREQUENCY * gb->clock_multiplier;
+    return GB_get_unmultiplied_clock_rate(gb) * gb->clock_multiplier;
 }
 
+
+uint32_t GB_get_unmultiplied_clock_rate(GB_gameboy_t *gb)
+{
+    if (gb->model & GB_MODEL_PAL_BIT) {
+        return SGB_PAL_FREQUENCY;
+    }
+    if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
+        return SGB_NTSC_FREQUENCY;
+    }
+    return CPU_FREQUENCY;
+}
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode)
 {
     if (gb->border_mode > GB_BORDER_ALWAYS) return;
@@ -1622,4 +1626,13 @@ unsigned GB_time_to_alarm(GB_gameboy_t *gb)
     unsigned alarm_time = (gb->huc3_alarm_days & 0x1FFF) * 24 * 60 * 60 + gb->huc3_alarm_minutes * 60;
     if (current_time > alarm_time) return 0;
     return alarm_time - current_time;
+}
+
+void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode)
+{
+    if (gb->rtc_mode != mode) {
+        gb->rtc_mode = mode;
+        gb->rtc_cycles = 0;
+        gb->last_rtc_second = time(NULL);
+    }
 }

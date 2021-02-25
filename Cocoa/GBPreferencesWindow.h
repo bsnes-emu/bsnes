@@ -12,6 +12,7 @@
 @property (nonatomic, strong) IBOutlet NSPopUpButton *colorPalettePopupButton;
 @property (nonatomic, strong) IBOutlet NSPopUpButton *displayBorderPopupButton;
 @property (nonatomic, strong) IBOutlet NSPopUpButton *rewindPopupButton;
+@property (nonatomic, strong) IBOutlet NSPopUpButton *rtcPopupButton;
 @property (nonatomic, strong) IBOutlet NSButton *configureJoypadButton;
 @property (nonatomic, strong) IBOutlet NSButton *skipButton;
 @property (nonatomic, strong) IBOutlet NSMenuItem *bootROMsFolderItem;
