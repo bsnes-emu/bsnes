@@ -254,6 +254,10 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
             current_time = time(NULL);
             break;
         case GB_RTC_MODE_ACCURATE:
+            if (gb->cartridge_type->mbc_type != GB_HUC3 && (gb->rtc_real.high & 0x40)) {
+                gb->rtc_cycles -= cycles;
+                return;
+            }
             if (gb->rtc_cycles < GB_get_unmultiplied_clock_rate(gb) * 2) return;
             gb->rtc_cycles -= GB_get_unmultiplied_clock_rate(gb) * 2;
             current_time = gb->last_rtc_second + 1;
@@ -299,6 +303,8 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
             if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
                 gb->rtc_real.high |= 0x80; /* Overflow bit */
             }
+            
+            gb->rtc_real.high ^= 1;
         }
     }
 }

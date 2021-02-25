@@ -192,7 +192,10 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
         gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
         /* RTC read */
-        gb->rtc_latched.high |= ~0xC1; /* Not all bytes in RTC high are used. */
+        gb->rtc_latched.seconds &= 0x3F;
+        gb->rtc_latched.minutes &= 0x3F;
+        gb->rtc_latched.hours &= 0x1F;
+        gb->rtc_latched.high &= 0xC1;
         return gb->rtc_latched.data[gb->mbc_ram_bank];
     }
 
@@ -693,6 +696,9 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (gb->cartridge_type->has_rtc && gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
+        if (gb->mbc_ram_bank == 0) {
+            gb->rtc_cycles = 0;
+        }
         gb->rtc_latched.data[gb->mbc_ram_bank] = gb->rtc_real.data[gb->mbc_ram_bank] = value;
         return;
     }
