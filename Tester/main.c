@@ -22,6 +22,7 @@ static bool running = false;
 static char *filename;
 static char *bmp_filename;
 static char *log_filename;
+static char *sav_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower,
@@ -160,6 +161,9 @@ static void vblank(GB_gameboy_t *gb)
             if (is_screen_blank) {
                 GB_log(gb, "Game probably stuck with blank screen. \n");
             }
+            if (sav_filename) {
+                GB_save_battery(gb, sav_filename);
+            }
             running = false;
         }
     }
@@ -259,7 +263,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "SameBoy Tester v" xstr(VERSION) "\n");
 
     if (argc == 1) {
-        fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds] [--boot path to boot ROM]"
+        fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds] [--sav] [--boot path to boot ROM]"
 #ifndef _WIN32
                         " [--jobs number of tests to run simultaneously]"
 #endif
@@ -273,6 +277,7 @@ int main(int argc, char **argv)
 #endif
 
     bool dmg = false;
+    bool sav = false;
     const char *boot_rom_path = NULL;
     
     GB_random_set_enabled(false);
@@ -308,6 +313,12 @@ int main(int argc, char **argv)
             continue;
         }
         
+        if (strcmp(argv[i], "--sav") == 0) {
+            fprintf(stderr, "Saving a battery save\n");
+            sav = true;
+            continue;
+        }
+        
 #ifndef _WIN32
         if (strcmp(argv[i], "--jobs") == 0 && i != argc - 1) {
             max_forks = atoi(argv[++i]);
@@ -339,6 +350,12 @@ int main(int argc, char **argv)
         char log_path[path_length + 5];
         replace_extension(filename, path_length, log_path, ".log");
         log_filename = &log_path[0];
+        
+        char sav_path[path_length + 5];
+        if (sav) {
+            replace_extension(filename, path_length, sav_path, ".sav");
+            sav_filename = &sav_path[0];
+        }
         
         fprintf(stderr, "Testing ROM %s\n", filename);
         
