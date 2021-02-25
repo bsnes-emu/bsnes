@@ -190,13 +190,16 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
-        gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
+        gb->mbc3_rtc_mapped) {
         /* RTC read */
-        gb->rtc_latched.seconds &= 0x3F;
-        gb->rtc_latched.minutes &= 0x3F;
-        gb->rtc_latched.hours &= 0x1F;
-        gb->rtc_latched.high &= 0xC1;
-        return gb->rtc_latched.data[gb->mbc_ram_bank];
+        if (gb->mbc_ram_bank <= 4) {
+            gb->rtc_latched.seconds &= 0x3F;
+            gb->rtc_latched.minutes &= 0x3F;
+            gb->rtc_latched.hours &= 0x1F;
+            gb->rtc_latched.high &= 0xC1;
+            return gb->rtc_latched.data[gb->mbc_ram_bank];
+        }
+        return 0xFF;
     }
 
     if (gb->camera_registers_mapped) {
@@ -213,6 +216,9 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 
     uint8_t effective_bank = gb->mbc_ram_bank;
     if (gb->cartridge_type->mbc_type == GB_MBC3 && !gb->is_mbc30) {
+        if (gb->cartridge_type->has_rtc) {
+            if (effective_bank > 3) return 0xFF;
+        }
         effective_bank &= 0x3;
     }
     uint8_t ret = gb->mbc_ram[((addr & 0x1FFF) + effective_bank * 0x2000) & (gb->mbc_ram_size - 1)];
@@ -695,11 +701,13 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
-    if (gb->cartridge_type->has_rtc && gb->mbc3_rtc_mapped && gb->mbc_ram_bank <= 4) {
-        if (gb->mbc_ram_bank == 0) {
-            gb->rtc_cycles = 0;
+    if (gb->cartridge_type->has_rtc && gb->mbc3_rtc_mapped) {
+        if (gb->mbc_ram_bank <= 4) {
+            if (gb->mbc_ram_bank == 0) {
+                gb->rtc_cycles = 0;
+            }
+            gb->rtc_latched.data[gb->mbc_ram_bank] = gb->rtc_real.data[gb->mbc_ram_bank] = value;
         }
-        gb->rtc_latched.data[gb->mbc_ram_bank] = gb->rtc_real.data[gb->mbc_ram_bank] = value;
         return;
     }
 
@@ -709,6 +717,9 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     
     uint8_t effective_bank = gb->mbc_ram_bank;
     if (gb->cartridge_type->mbc_type == GB_MBC3 && !gb->is_mbc30) {
+        if (gb->cartridge_type->has_rtc) {
+            if (effective_bank > 3) return;
+        }
         effective_bank &= 0x3;
     }
 
