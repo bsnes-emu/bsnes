@@ -50,7 +50,7 @@ auto EnhancementSettings::create() -> void {
     emulator->configure("Hacks/SuperFX/Overclock", settings.emulator.hack.superfx.overclock);
     sfxValue.setText({settings.emulator.hack.superfx.overclock, "%"});
   }).doChange();
-
+  note.setText("Note: Enabling overclocking will break games, cause bugs and reduce performance.");
   overclockingSpacer.setColor({192, 192, 192});
 
   ppuLabel.setText("PPU (video)").setFont(Font().setBold());
@@ -133,8 +133,8 @@ auto EnhancementSettings::create() -> void {
   }).setChecked(settings.emulator.hack.hotfixes).onToggle([&] {
     settings.emulator.hack.hotfixes = hotfixes.checked();
   });
-  
-  
+  hotfixesSpacer.setColor({192, 192, 192});
+
   ppuModeLabel.setText("Mode Presets:").setFont(Font().setBold());
   ppuModeRequirements.setText(
     "Accuracy Mode: Maximum hardware accuracy, disables performance shortcuts and all enhancements.\n"
@@ -142,28 +142,28 @@ auto EnhancementSettings::create() -> void {
   );
   accuracyMode.setText("Accuracy Mode").onActivate([&] {
     runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
-    cpuClock.setPosition(0); cpuClock.doChange();
-    sa1Clock.setPosition(0); sa1Clock.doChange();
-    sfxClock.setPosition(0); sfxClock.doChange();
+    cpuClock.setPosition(0).doChange();
+    sa1Clock.setPosition(0).doChange();
+    sfxClock.setPosition(0).doChange();
     fastPPU.setChecked(false).doToggle();
     fastDSP.setChecked(false).doToggle();
     cubicInterpolation.setChecked(false).doToggle();
     coprocessorDelayedSyncOption.setChecked(false).doToggle();
     coprocessorPreferHLEOption.setChecked(false).doToggle();
     hotfixes.setChecked(false).doToggle();
-	
+
     if(!emulator->loaded()) return;
     MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
       "Accuracy Mode applied.\n"
       "You must reload the game in order for all changes to take effect."
     }).information();
   });
-	
+
   performanceMode.setText("Performance Mode").onActivate([&] {
     runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
-    cpuClock.setPosition(0); cpuClock.doChange();
-    sa1Clock.setPosition(0); sa1Clock.doChange();
-    sfxClock.setPosition(0); sfxClock.doChange();
+    cpuClock.setPosition(0).doChange();
+    sa1Clock.setPosition(0).doChange();
+    sfxClock.setPosition(0).doChange();
     fastPPU.setChecked(true).doToggle();
     deinterlace.setChecked(true).doToggle();
     noSpriteLimit.setChecked(false).doToggle();
@@ -176,7 +176,7 @@ auto EnhancementSettings::create() -> void {
     coprocessorDelayedSyncOption.setChecked(true).doToggle();
     coprocessorPreferHLEOption.setChecked(false).doToggle();
     hotfixes.setChecked(true).doToggle();
-    
+
     if(!emulator->loaded()) return;
     MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
       "Performance Mode applied.\n"
