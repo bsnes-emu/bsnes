@@ -34,10 +34,8 @@
 #define GB_MODEL_PAL_BIT 0x40
 #define GB_MODEL_NO_SFC_BIT 0x80
 
-#ifdef GB_INTERNAL
 #define GB_MODEL_PAL_BIT_OLD 0x1000
 #define GB_MODEL_NO_SFC_BIT_OLD 0x2000
-#endif
 
 #ifdef GB_INTERNAL
 #if __clang__

@@ -396,7 +396,7 @@
                         <menu key="menu" autoenablesItems="NO" id="czw-Hi-jyM">
                             <items>
                                 <menuItem title="Super Game Boy (NTSC)" state="on" tag="4" id="x5A-7f-ef9"/>
-                                <menuItem title="Super Game Boy (PAL)" tag="4100" id="Cix-n2-l4L"/>
+                                <menuItem title="Super Game Boy (PAL)" tag="68" id="Cix-n2-l4L"/>
                                 <menuItem title="Super Game Boy 2" tag="257" id="gZG-1g-KF0"/>
                             </items>
                         </menu>

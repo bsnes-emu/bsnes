@@ -237,8 +237,13 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         case MODEL_CGB:
             return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"];
             
-        case MODEL_SGB:
-            return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"];
+        case MODEL_SGB: {
+            GB_model_t model = (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"];
+            if (model == (GB_MODEL_SGB | GB_MODEL_PAL_BIT_OLD)) {
+                model = GB_MODEL_SGB_PAL;
+            }
+            return model;
+        }
         
         case MODEL_AGB:
             return GB_MODEL_AGB;
