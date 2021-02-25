@@ -137,19 +137,27 @@ static void increase_tima(GB_gameboy_t *gb)
     }
 }
 
-static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
+static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
     value &= INTERNAL_DIV_CYCLES - 1;
-    uint32_t triggers = gb->div_counter & ~value;
+    uint16_t triggers = gb->div_counter & ~value;
     if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & GB_TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
     }
     
     /* TODO: Can switching to double speed mode trigger an event? */
-    if (triggers & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
+    uint16_t apu_bit = gb->cgb_double_speed? 0x2000 : 0x1000;
+    if (triggers & apu_bit) {
         GB_apu_run(gb);
         GB_apu_div_event(gb);
+    }
+    else {
+        uint16_t secondary_triggers = ~gb->div_counter & value;
+        if (secondary_triggers & apu_bit) {
+            GB_apu_run(gb);
+            GB_apu_div_secondary_event(gb);
+        }
     }
     gb->div_counter = value;
 }

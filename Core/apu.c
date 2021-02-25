@@ -295,35 +295,73 @@ static void update_square_sample(GB_gameboy_t *gb, unsigned index)
    requires the PCM12 register. The behavior implemented here was verified on *my*
    CGB, which might behave differently from other CGB revisions, as well as from the
    DMG, MGB or SGB/2 */
-static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value)
+static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value, uint8_t *countdown, GB_envelope_clock_t *lock)
 {
-    if (value & 8) {
-        (*volume)++;
+    if (lock->clock) {
+        *countdown = value & 7;
     }
-
-    if (((value ^ old_value) & 8)) {
-        *volume = 0x10 - *volume;
+    bool should_tick = (value & 7) && !(old_value & 7) && !lock->locked;
+    bool should_invert = (value & 8) ^ (old_value & 8);
+    
+    if ((value & 0xF) == 8 && (old_value & 0xF) == 8 && !lock->locked) {
+        should_tick = true;
     }
-
-    if ((value & 7) && !(old_value & 7) && *volume && !(value & 8)) {
-        (*volume)--;
+    
+    if (should_invert) {
+        // The weird way and over-the-top way clocks for this counter are connected cause
+        // some weird ways for it to invert
+        if (value & 8) {
+            if (!(old_value & 7) && !lock->locked) {
+                *volume ^= 0xF;
+            }
+            else {
+                *volume = 0xE - *volume;
+                *volume &= 0xF;
+            }
+            should_tick = false; // Somehow prevents ticking?
+        }
+        else {
+            *volume = 0x10 - *volume;
+            *volume &= 0xF;
+        }
     }
-
-    if ((old_value & 7) && (value & 8)) {
-        (*volume)--;
+    if (should_tick) {
+        if (value & 8) {
+            (*volume)++;
+        }
+        else {
+            (*volume)--;
+        }
+        *volume &= 0xF;
     }
-
-    (*volume) &= 0xF;
+    else if (!(value & 7) && lock->clock) {
+        // *lock->locked = false; // Excepted from the schematics, but doesn't actually happen on any model?
+        if (!should_invert) {
+            if (*volume == 0xF && (value & 8)) {
+                lock->locked = true;
+            }
+            else if (*volume == 0 && !(value & 8)) {
+                lock->locked = true;
+            }
+        }
+        else if (*volume == 1 && !(value & 8)) {
+            lock->locked = true;
+        }
+        else if (*volume == 0xE && (value & 8)) {
+            lock->locked = true;
+        }
+        lock->clock = false;
+    }
 }
 
-static void nrx2_glitch(GB_gameboy_t *gb, uint8_t *volume, uint8_t value, uint8_t old_value)
+static void nrx2_glitch(GB_gameboy_t *gb, uint8_t *volume, uint8_t value, uint8_t old_value, uint8_t *countdown, GB_envelope_clock_t *lock)
 {
     if (gb->model <= GB_MODEL_CGB_C) {
-        _nrx2_glitch(volume, 0xFF, old_value);
-        _nrx2_glitch(volume, value, 0xFF);
+        _nrx2_glitch(volume, 0xFF, old_value, countdown, lock);
+        _nrx2_glitch(volume, value, 0xFF, countdown, lock);
     }
     else {
-        _nrx2_glitch(volume, value, old_value);
+        _nrx2_glitch(volume, value, old_value, countdown, lock);
     }
 }
 
@@ -331,7 +369,7 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
 {
     uint8_t nrx2 = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
     
-    if (gb->apu.is_square_envelope_locked[index]) return;
+    if (gb->apu.square_envelope_clock[index].locked) return;
     if (!(nrx2 & 7)) return;
     if (gb->cgb_double_speed) {
         if (index == GB_SQUARE_1) {
@@ -347,7 +385,7 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
             gb->apu.square_channels[index].current_volume++;
         }
         else {
-            gb->apu.is_square_envelope_locked[index] = true;
+            gb->apu.square_envelope_clock[index].locked = true;
         }
     }
     else {
@@ -355,7 +393,7 @@ static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
             gb->apu.square_channels[index].current_volume--;
         }
         else {
-            gb->apu.is_square_envelope_locked[index] = true;
+            gb->apu.square_envelope_clock[index].locked = true;
         }
     }
 
@@ -368,7 +406,7 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
 {
     uint8_t nr42 = gb->io_registers[GB_IO_NR42];
 
-    if (gb->apu.is_noise_envelope_locked) return;
+    if (gb->apu.noise_envelope_clock.locked) return;
     if (!(nr42 & 7)) return;
 
     if (gb->cgb_double_speed) {
@@ -380,7 +418,7 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
             gb->apu.noise_channel.current_volume++;
         }
         else {
-            gb->apu.is_noise_envelope_locked = true;
+            gb->apu.noise_envelope_clock.locked = true;
         }
     }
     else {
@@ -388,7 +426,7 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
             gb->apu.noise_channel.current_volume--;
         }
         else {
-            gb->apu.is_noise_envelope_locked = true;
+            gb->apu.noise_envelope_clock.locked = true;
         }
     }
 
@@ -438,30 +476,31 @@ void GB_apu_div_event(GB_gameboy_t *gb)
         gb->apu.div_divider++;
     }
 
-    if ((gb->apu.div_divider & 1) == 0) {
-        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-            uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
-            if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
-                tick_square_envelope(gb, i);
-                gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
-            }
-        }
-
-        if (gb->apu.is_active[GB_NOISE] && gb->apu.noise_channel.volume_countdown == 0) {
-            tick_noise_envelope(gb);
-            gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
-        }
-    }
-
     if ((gb->apu.div_divider & 7) == 7) {
         unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-            gb->apu.square_channels[i].volume_countdown--;
-            gb->apu.square_channels[i].volume_countdown &= 7;
+            if (!gb->apu.square_envelope_clock[i].clock) {
+                gb->apu.square_channels[i].volume_countdown--;
+                gb->apu.square_channels[i].volume_countdown &= 7;
+            }
         }
-        gb->apu.noise_channel.volume_countdown--;
-        gb->apu.noise_channel.volume_countdown &= 7;
+        if (!gb->apu.noise_envelope_clock.clock) {
+            gb->apu.noise_channel.volume_countdown--;
+            gb->apu.noise_channel.volume_countdown &= 7;
+        }
     }
 
+    unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        if (gb->apu.square_envelope_clock[i].clock) {
+            tick_square_envelope(gb, i);
+            gb->apu.square_envelope_clock[i].clock = false;
+        }
+    }
+    
+    if (gb->apu.noise_envelope_clock.clock) {
+        tick_noise_envelope(gb);
+        gb->apu.noise_envelope_clock.clock = false;
+    }
+    
     if ((gb->apu.div_divider & 1) == 1) {
         unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
             if (gb->apu.square_channels[i].length_enabled) {
@@ -497,6 +536,20 @@ void GB_apu_div_event(GB_gameboy_t *gb)
         gb->apu.square_sweep_countdown++;
         gb->apu.square_sweep_countdown &= 7;
         trigger_sweep_calculation(gb);
+    }
+}
+
+void GB_apu_div_secondary_event(GB_gameboy_t *gb)
+{
+    unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
+        if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
+            gb->apu.square_envelope_clock[i].clock = gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
+        }
+    }
+    
+    if (gb->apu.is_active[GB_NOISE] && gb->apu.noise_channel.volume_countdown == 0) {
+        gb->apu.noise_envelope_clock.clock = gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
     }
 }
 
@@ -950,7 +1003,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 update_sample(gb, index, 0, 0);
             }
             else if (gb->apu.is_active[index]) {
-                nrx2_glitch(gb, &gb->apu.square_channels[index].current_volume, value, gb->io_registers[reg]);
+                nrx2_glitch(gb, &gb->apu.square_channels[index].current_volume,
+                            value, gb->io_registers[reg], &gb->apu.square_channels[index].volume_countdown,
+                            &gb->apu.square_envelope_clock[index]);
                 update_square_sample(gb, index);
             }
 
@@ -990,7 +1045,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if (value & 0x80) {
                 /* Current sample index remains unchanged when restarting channels 1 or 2. It is only reset by
                    turning the APU off. */
-                gb->apu.is_square_envelope_locked[index] = false;
+                gb->apu.square_envelope_clock[index].locked = false;
+                gb->apu.square_envelope_clock[index].clock = false;
                 if (!gb->apu.is_active[index]) {
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 6 - gb->apu.lf_div;
                     if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
@@ -1019,7 +1075,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
-
                 /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
                    started sound). The playback itself is not instant which is why we don't update the sample for other
                    cases. */
@@ -1196,7 +1251,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 update_sample(gb, GB_NOISE, 0, 0);
             }
             else if (gb->apu.is_active[GB_NOISE]) {
-                nrx2_glitch(gb, &gb->apu.noise_channel.current_volume, value, gb->io_registers[reg]);
+                nrx2_glitch(gb, &gb->apu.noise_channel.current_volume,
+                            value, gb->io_registers[reg], &gb->apu.noise_channel.volume_countdown,
+                            &gb->apu.noise_envelope_clock);
                 update_sample(gb, GB_NOISE,
                               gb->apu.current_lfsr_sample ?
                               gb->apu.noise_channel.current_volume : 0,
@@ -1241,7 +1298,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR44: {
             if (value & 0x80) {
-                gb->apu.is_noise_envelope_locked = false;
+                gb->apu.noise_envelope_clock.locked = false;
+                gb->apu.noise_envelope_clock.clock = false;
                 if (!GB_is_cgb(gb) && (gb->apu.noise_channel.alignment & 3) != 0) {
                     gb->apu.channel_4_dmg_delayed_start = 6;
                 }
