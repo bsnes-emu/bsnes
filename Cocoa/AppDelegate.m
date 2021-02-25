@@ -120,8 +120,15 @@
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender
 {
+    /* Bring an existing panel to the foreground */
+    for (NSWindow *window in [[NSApplication sharedApplication] windows]) {
+        if ([window isKindOfClass:[NSOpenPanel class]]) {
+            [(NSOpenPanel *)window makeKeyAndOrderFront:nil];
+            return true;
+        }
+    }
     [[NSDocumentController sharedDocumentController] openDocument:self];
-    return YES;
+    return true;
 }
 
 - (void)userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification
