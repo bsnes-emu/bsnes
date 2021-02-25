@@ -544,12 +544,12 @@ void GB_apu_div_secondary_event(GB_gameboy_t *gb)
     unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
         uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
         if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
-            gb->apu.square_envelope_clock[i].clock = gb->apu.square_channels[i].volume_countdown = nrx2 & 7;
+            gb->apu.square_envelope_clock[i].clock = (gb->apu.square_channels[i].volume_countdown = nrx2 & 7);
         }
     }
     
     if (gb->apu.is_active[GB_NOISE] && gb->apu.noise_channel.volume_countdown == 0) {
-        gb->apu.noise_envelope_clock.clock = gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
+        gb->apu.noise_envelope_clock.clock = (gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7);
     }
 }
 
