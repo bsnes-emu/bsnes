@@ -125,6 +125,8 @@ static void open_menu(void)
     GB_set_border_mode(&gb, configuration.border_mode);
     update_palette();
     GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
+    GB_set_rewind_length(&gb, configuration.rewind_length);
+    GB_set_rtc_mode(&gb, configuration.rtc_mode);
     if (previous_width != GB_get_screen_width(&gb)) {
         screen_size_changed();
     }
@@ -513,6 +515,7 @@ restart:
         }
         GB_set_highpass_filter_mode(&gb, configuration.highpass_mode);
         GB_set_rewind_length(&gb, configuration.rewind_length);
+        GB_set_rtc_mode(&gb, configuration.rtc_mode);
         GB_set_update_input_hint_callback(&gb, handle_events);
         GB_apu_set_sample_callback(&gb, gb_audio_callback);
     }

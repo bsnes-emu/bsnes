@@ -116,6 +116,7 @@ typedef struct {
     uint8_t color_temperature;
     char bootrom_path[4096];
     uint8_t interference_volume;
+    GB_rtc_mode_t rtc_mode;
 } configuration_t;
 
 extern configuration_t configuration;
