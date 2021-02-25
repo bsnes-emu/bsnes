@@ -50,7 +50,7 @@ auto EnhancementSettings::create() -> void {
     emulator->configure("Hacks/SuperFX/Overclock", settings.emulator.hack.superfx.overclock);
     sfxValue.setText({settings.emulator.hack.superfx.overclock, "%"});
   }).doChange();
-  note.setText("Note: Enabling overclocking will break games, cause bugs and reduce performance.");
+  note.setText("Note: Overclocking will break games, cause bugs and reduce performance.");
   overclockingSpacer.setColor({192, 192, 192});
 
   ppuLabel.setText("PPU (video)").setFont(Font().setBold());
