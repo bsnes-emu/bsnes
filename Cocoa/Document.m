@@ -1105,7 +1105,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (char *) getDebuggerInput
 {
+    [audioLock lock];
     [audioLock signal];
+    [audioLock unlock];
     [self updateSideView];
     [self log:">"];
     in_sync_input = true;
