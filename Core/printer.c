@@ -11,7 +11,6 @@
 
 static void handle_command(GB_gameboy_t *gb)
 {
-    
     switch (gb->printer.command_id) {
         case GB_PRINTER_INIT_COMMAND:
             gb->printer.status = 0;
@@ -71,7 +70,7 @@ static void handle_command(GB_gameboy_t *gb)
 }
 
 
-static void byte_reieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
+static void byte_recieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
 {
     gb->printer.byte_to_send = 0;
     switch (gb->printer.command_state) {
@@ -189,11 +188,16 @@ static void byte_reieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
 
 static void serial_start(GB_gameboy_t *gb, bool bit_received)
 {
+    if (gb->printer.idle_time > GB_get_unmultiplied_clock_rate(gb)) {
+        gb->printer.command_state = GB_PRINTER_COMMAND_MAGIC1;
+        gb->printer.bits_received = 0;
+    }
+    gb->printer.idle_time = 0;
     gb->printer.byte_being_received <<= 1;
     gb->printer.byte_being_received |= bit_received;
     gb->printer.bits_received++;
     if (gb->printer.bits_received == 8) {
-        byte_reieve_completed(gb, gb->printer.byte_being_received);
+        byte_recieve_completed(gb, gb->printer.byte_being_received);
         gb->printer.bits_received = 0;
         gb->printer.byte_being_received = 0;
     }

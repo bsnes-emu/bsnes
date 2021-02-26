@@ -198,6 +198,9 @@ main:
 
 static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
 {
+    if (gb->printer.command_state || gb->printer.bits_received) {
+        gb->printer.idle_time += cycles;
+    }
     if (gb->serial_length == 0) {
         gb->serial_cycles += cycles;
         return;
