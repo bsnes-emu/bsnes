@@ -30,6 +30,14 @@ else
 DEFAULT := sdl
 endif
 
+ifneq ($(shell which xdg-open),)
+# Running on an FreeDesktop environment, configure for (optional) installation
+DESTDIR ?= 
+PREFIX ?= /usr/local
+DATA_DIR ?= $(PREFIX)/share/sameboy/
+CAN_INSTALL := true
+endif
+
 default: $(DEFAULT)
 
 ifeq ($(MAKECMDGOALS),)
@@ -420,6 +428,33 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 # Libretro Core (uses its own build system)
 libretro:
 	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro
+
+# install for Linux/FreeDesktop/etc.
+# Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
+# If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
+# fire of a desktop environment, open an issue or a pull request
+ifneq ($(CAN_INSTALL),)
+ICON_NAMES := apps/sameboy
+ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
+ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
+install: sdl $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop $(ICONS)(PREFIX)/share/mime/application/x-gameboy-color-rom.xml
+	mkdir -p $(DESTDIR)$(PREFIX)/share/sameboy/
+	cp -rf $(BIN)/SDL/* $(DESTDIR)$(PREFIX)/share/sameboy/
+	mv $(DESTDIR)$(PREFIX)/share/sameboy/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+ifeq ($(DESTDIR),)
+	-xdg-icon-resource forceupdate --mode system
+	-xdg-desktop-menu forceupdate --mode system
+endif
+
+$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/apps/sameboy.png: FreeDesktop/AppIcon/%.png
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+	
+    
+$(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop: FreeDesktop/sameboy.desktop
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+endif
 
 # Clean
 clean:
