@@ -437,13 +437,13 @@ ifneq ($(CAN_INSTALL),)
 ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
 ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
-install: sdl $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop $(ICONS) FreeDesktop/sameboy.xml
+install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
 	mkdir -p $(DESTDIR)$(PREFIX)/share/sameboy/
 	cp -rf $(BIN)/SDL/* $(DESTDIR)$(PREFIX)/share/sameboy/
 	mv $(DESTDIR)$(PREFIX)/share/sameboy/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
-	-update-mime-database -n $(PREFIX)/mime
-	-xdg-desktop-menu install --mode system FreeDesktop/sameboy.xml
+	-update-mime-database -n $(PREFIX)/share/mime
+	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
 	-xdg-icon-resource forceupdate --mode system
 	-xdg-desktop-menu forceupdate --mode system
 	-su $(SUDO_USER) -c "xdg-desktop-menu forceupdate --mode system"
@@ -461,7 +461,7 @@ $(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-color-rom.png: Fre
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
         
-$(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop: FreeDesktop/sameboy.desktop
+$(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml: FreeDesktop/sameboy.xml
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 endif
