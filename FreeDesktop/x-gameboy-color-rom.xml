@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+<mime-type type="application/x-gameboy-color-rom">
+  <comment>YOUR MOM</comment>
+  <icon name="application-x-gameboy-color-rom"/>
+  <glob pattern="*.gbc"/>
+  <glob pattern="*.cgb"/>
+  <glob pattern="*.quacky"/>
+</mime-type>
+</mime-info>
