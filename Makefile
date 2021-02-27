@@ -438,7 +438,7 @@ ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
 ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
 install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
-	mkdir -p $(DESTDIR)$(PREFIX)/share/sameboy/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/sameboy/ $(DESTDIR)$(PREFIX)/bin/
 	cp -rf $(BIN)/SDL/* $(DESTDIR)$(PREFIX)/share/sameboy/
 	mv $(DESTDIR)$(PREFIX)/share/sameboy/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
