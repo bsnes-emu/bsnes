@@ -131,30 +131,25 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
         symbol = NULL;
     }
 
-    /* Avoid overflow */
-    if (symbol && strlen(symbol->name) >= 240) {
-        symbol = NULL;
-    }
-
     if (!symbol) {
-        sprintf(output, "$%04x", value);
+        snprintf(output, sizeof output, "$%04x", value);
     }
 
     else if (symbol->addr == value) {
         if (prefer_name) {
-            sprintf(output, "%s ($%04x)", symbol->name, value);
+            snprintf(output, sizeof output, "%s ($%04x)", symbol->name, value);
         }
         else {
-            sprintf(output, "$%04x (%s)", value, symbol->name);
+            snprintf(output, sizeof output, "$%04x (%s)", value, symbol->name);
         }
     }
 
     else {
         if (prefer_name) {
-            sprintf(output, "%s+$%03x ($%04x)", symbol->name, value - symbol->addr, value);
+            snprintf(output, sizeof output, "%s+$%03x ($%04x)", symbol->name, value - symbol->addr, value);
         }
         else {
-            sprintf(output, "$%04x (%s+$%03x)", value, symbol->name, value - symbol->addr);
+            snprintf(output, sizeof output, "$%04x (%s+$%03x)", value, symbol->name, value - symbol->addr);
         }
     }
     return output;
@@ -171,30 +166,25 @@ static const char *debugger_value_to_string(GB_gameboy_t *gb, value_t value, boo
         symbol = NULL;
     }
 
-    /* Avoid overflow */
-    if (symbol && strlen(symbol->name) >= 240) {
-        symbol = NULL;
-    }
-
     if (!symbol) {
-        sprintf(output, "$%02x:$%04x", value.bank, value.value);
+        snprintf(output, sizeof output, "$%02x:$%04x", value.bank, value.value);
     }
 
     else if (symbol->addr == value.value) {
         if (prefer_name) {
-            sprintf(output, "%s ($%02x:$%04x)", symbol->name, value.bank, value.value);
+            snprintf(output, sizeof output, "%s ($%02x:$%04x)", symbol->name, value.bank, value.value);
         }
         else {
-            sprintf(output, "$%02x:$%04x (%s)", value.bank, value.value, symbol->name);
+            snprintf(output, sizeof output, "$%02x:$%04x (%s)", value.bank, value.value, symbol->name);
         }
     }
 
     else {
         if (prefer_name) {
-            sprintf(output, "%s+$%03x ($%02x:$%04x)", symbol->name, value.value - symbol->addr, value.bank, value.value);
+            snprintf(output, sizeof output, "%s+$%03x ($%02x:$%04x)", symbol->name, value.value - symbol->addr, value.bank, value.value);
         }
         else {
-            sprintf(output, "$%02x:$%04x (%s+$%03x)", value.bank, value.value, symbol->name, value.value - symbol->addr);
+            snprintf(output, sizeof output, "$%02x:$%04x (%s+$%03x)", value.bank, value.value, symbol->name, value.value - symbol->addr);
         }
     }
     return output;
