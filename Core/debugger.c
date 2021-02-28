@@ -125,7 +125,6 @@ static inline void switch_banking_state(GB_gameboy_t *gb, uint16_t bank)
 static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer_name)
 {
     static __thread char output[256];
-    output[sizeof(output) - 1] = 0; // Ensure termination
     const GB_bank_symbol_t *symbol = GB_debugger_find_symbol(gb, value);
 
     if (symbol && (value - symbol->addr > 0x1000 || symbol->addr == 0) ) {
@@ -133,24 +132,24 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
     }
 
     if (!symbol) {
-        snprintf(output, sizeof(output) - 1, "$%04x", value);
+        snprintf(output, sizeof(output), "$%04x", value);
     }
 
     else if (symbol->addr == value) {
         if (prefer_name) {
-            snprintf(output, sizeof(output) - 1, "%s ($%04x)", symbol->name, value);
+            snprintf(output, sizeof(output), "%s ($%04x)", symbol->name, value);
         }
         else {
-            snprintf(output, sizeof(output) - 1, "$%04x (%s)", value, symbol->name);
+            snprintf(output, sizeof(output), "$%04x (%s)", value, symbol->name);
         }
     }
 
     else {
         if (prefer_name) {
-            snprintf(output, sizeof(output) - 1, "%s+$%03x ($%04x)", symbol->name, value - symbol->addr, value);
+            snprintf(output, sizeof(output), "%s+$%03x ($%04x)", symbol->name, value - symbol->addr, value);
         }
         else {
-            snprintf(output, sizeof(output) - 1, "$%04x (%s+$%03x)", value, symbol->name, value - symbol->addr);
+            snprintf(output, sizeof(output), "$%04x (%s+$%03x)", value, symbol->name, value - symbol->addr);
         }
     }
     return output;
@@ -161,7 +160,6 @@ static const char *debugger_value_to_string(GB_gameboy_t *gb, value_t value, boo
     if (!value.has_bank) return value_to_string(gb, value.value, prefer_name);
 
     static __thread char output[256];
-    output[sizeof(output) - 1] = 0; // Ensure termination
     const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[value.bank], value.value);
 
     if (symbol && (value.value - symbol->addr > 0x1000 || symbol->addr == 0) ) {
@@ -169,24 +167,24 @@ static const char *debugger_value_to_string(GB_gameboy_t *gb, value_t value, boo
     }
 
     if (!symbol) {
-        snprintf(output, sizeof(output) - 1, "$%02x:$%04x", value.bank, value.value);
+        snprintf(output, sizeof(output), "$%02x:$%04x", value.bank, value.value);
     }
 
     else if (symbol->addr == value.value) {
         if (prefer_name) {
-            snprintf(output, sizeof(output) - 1, "%s ($%02x:$%04x)", symbol->name, value.bank, value.value);
+            snprintf(output, sizeof(output), "%s ($%02x:$%04x)", symbol->name, value.bank, value.value);
         }
         else {
-            snprintf(output, sizeof(output) - 1, "$%02x:$%04x (%s)", value.bank, value.value, symbol->name);
+            snprintf(output, sizeof(output), "$%02x:$%04x (%s)", value.bank, value.value, symbol->name);
         }
     }
 
     else {
         if (prefer_name) {
-            snprintf(output, sizeof(output) - 1, "%s+$%03x ($%02x:$%04x)", symbol->name, value.value - symbol->addr, value.bank, value.value);
+            snprintf(output, sizeof(output), "%s+$%03x ($%02x:$%04x)", symbol->name, value.value - symbol->addr, value.bank, value.value);
         }
         else {
-            snprintf(output, sizeof(output) - 1, "$%02x:$%04x (%s+$%03x)", value.bank, value.value, symbol->name, value.value - symbol->addr);
+            snprintf(output, sizeof(output), "$%02x:$%04x (%s+$%03x)", value.bank, value.value, symbol->name, value.value - symbol->addr);
         }
     }
     return output;
