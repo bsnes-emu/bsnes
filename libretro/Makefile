@@ -128,9 +128,6 @@ else ifneq (,$(findstring rpi4_64,$(platform)))
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
    CFLAGS += -O2 -march=armv8-a+crc+simd -mtune=cortex-a72
-   CXXFLAGS += $(CFLAGS)
-   CPPFLAGS += $(CFLAGS)
-   ASFLAGS += $(CFLAGS)
 ###########################
 
 #######################################
