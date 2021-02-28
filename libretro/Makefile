@@ -119,6 +119,20 @@ else ifeq ($(platform), classic_armv7_a7)
 	    LDFLAGS += -static-libgcc -static-libstdc++
 	  endif
 	endif
+
+###########################
+# Raspberry Pi 4 in 64 mode
+else ifneq (,$(findstring rpi4_64,$(platform)))
+   EXT ?= so
+   TARGET := $(TARGET_NAME)_libretro.$(EXT)
+   fpic := -fPIC
+   SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
+   CFLAGS += -O2 -march=armv8-a+crc+simd -mtune=cortex-a72
+   CXXFLAGS += $(CFLAGS)
+   CPPFLAGS += $(CFLAGS)
+   ASFLAGS += $(CFLAGS)
+###########################
+
 #######################################
 # Nintendo Switch (libtransistor)
 else ifeq ($(platform), switch)
