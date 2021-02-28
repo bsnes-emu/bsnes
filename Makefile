@@ -30,7 +30,7 @@ else
 DEFAULT := sdl
 endif
 
-ifneq ($(shell which xdg-open),)
+ifneq ($(shell which xdg-open)$(FREEDESKTOP),)
 # Running on an FreeDesktop environment, configure for (optional) installation
 DESTDIR ?= 
 PREFIX ?= /usr/local
