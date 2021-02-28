@@ -35,7 +35,7 @@ ifneq ($(shell which xdg-open),)
 DESTDIR ?= 
 PREFIX ?= /usr/local
 DATA_DIR ?= $(PREFIX)/share/sameboy/
-CAN_INSTALL := true
+FREEDESKTOP ?= true
 endif
 
 default: $(DEFAULT)
@@ -433,7 +433,7 @@ libretro:
 # Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
 # If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
 # fire of a desktop environment, open an issue or a pull request
-ifneq ($(CAN_INSTALL),)
+ifneq ($(FREEDESKTOP),)
 ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
 ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
