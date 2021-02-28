@@ -451,6 +451,7 @@ ifneq ($(SUDO_USER),)
 	-su $(SUDO_USER) -c "xdg-desktop-menu forceupdate --mode system"
 endif
 else
+	-@$(MKDIR) -p $(DESTDIR)$(PREFIX)/share/applications/
 	cp FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
 endif
 
