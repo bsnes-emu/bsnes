@@ -454,7 +454,7 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
         /* Recalculation and overflow check only occurs after a delay */
         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
         if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
-            gb->apu.square_sweep_calculate_countdown += 2;
+            // gb->apu.square_sweep_calculate_countdown += 2;
         }
         gb->apu.enable_zombie_calculate_stepping = false;
         gb->apu.unshifted_sweep = !(gb->io_registers[GB_IO_NR10] & 0x7);
@@ -867,7 +867,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #if 0
         case GB_MODEL_CGB_D:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x40 : 0x80)) { // This is so weird
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x100) {
@@ -888,7 +888,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #endif
         case GB_MODEL_CGB_E:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8) ?0x40 : 0x80)) { // This is so weird
+            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
             }
             if (effective_counter & 0x1000) {
@@ -1102,7 +1102,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = (gb->io_registers[GB_IO_NR10] & 0x7) * 2 + 5 - gb->apu.lf_div;
                         if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
-                            gb->apu.square_sweep_calculate_countdown += 2;
+                            /* TODO: I used to think this is correct, but it caused several regressions.
+                                     More research is needed to figure how calculation time is different
+                                     in models prior to CGB-D */
+                            // gb->apu.square_sweep_calculate_countdown += 2;
                         }
                         gb->apu.enable_zombie_calculate_stepping = false;
                         gb->apu.unshifted_sweep = false;
