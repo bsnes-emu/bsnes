@@ -9,4 +9,4 @@ Keywords=game;boy;gameboy;color;emulator
 Terminal=false
 StartupNotify=false
 Categories=Application;Game;
-MimeType=application/x-gameboy-rom;application/x-gameboy-color-rom
+MimeType=application/x-gameboy-rom;application/x-gameboy-color-rom;application/x-gameboy-isx
