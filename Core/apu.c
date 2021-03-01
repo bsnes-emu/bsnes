@@ -596,7 +596,7 @@ void GB_apu_run(GB_gameboy_t *gb)
             else {
                 /* Split it into two */
                 cycles -= gb->apu.channel_4_dmg_delayed_start;
-                gb->apu.apu_cycles = gb->apu.channel_4_dmg_delayed_start * 2;
+                gb->apu.apu_cycles = gb->apu.channel_4_dmg_delayed_start * 4;
                 GB_apu_run(gb);
             }
         }
