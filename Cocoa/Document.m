@@ -865,6 +865,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [[NSUserDefaults standardUserDefaults] setInteger:self.mainWindow.frame.size.height forKey:@"LastWindowHeight"];
     [self stop];
     [self.consoleWindow close];
+    [self.memoryWindow close];
+    [self.vramWindow close];
+    [self.printerFeedWindow close];
+    [self.cheatsWindow close];
     [super close];
 }
 
