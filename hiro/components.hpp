@@ -66,7 +66,7 @@
 #define Hiro_ProgressBar
 #define Hiro_RadioButton
 #define Hiro_RadioLabel
-#define Hiro_SourceEdit
+//#define Hiro_SourceEdit  //added via GNUmakefile
 #define Hiro_TabFrame
 #define Hiro_TableView
 #define Hiro_TextEdit
