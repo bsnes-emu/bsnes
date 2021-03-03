@@ -9,13 +9,13 @@ ifeq ($(platform),windows)
   endif
 
   ifeq ($(hiro),gtk2)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
-    hiro.options = $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0) -Wno-deprecated-declarations
+    hiro.options = $(shell pkg-config --libs gtk+-2.0)
   endif
 
   ifeq ($(hiro),gtk3)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0) -Wno-deprecated-declarations
-    hiro.options = $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0) -Wno-deprecated-declarations
+    hiro.options = $(shell pkg-config --libs gtk+-3.0)
   endif
 endif
 
@@ -26,7 +26,7 @@ ifeq ($(platform),macos)
 
   ifeq ($(hiro),cocoa)
     hiro.flags   = $(flags.objcpp) -w -DHIRO_COCOA
-    hiro.options = -framework Cocoa -framework Carbon -framework Security
+    hiro.options = -framework Cocoa -framework Carbon -framework IOKit -framework Security
   endif
 endif
 
@@ -36,11 +36,23 @@ ifneq ($(filter $(platform),linux bsd),)
   endif
 
   ifeq ($(hiro),gtk2)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0) -Wno-deprecated-declarations
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0)
+  endif
+
+  ifeq ($(hiro),gtk2-se)
+    flags       += -DHiro_SourceEdit
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0) -Wno-deprecated-declarations
     hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
   endif
 
   ifeq ($(hiro),gtk3)
+    hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0) -Wno-deprecated-declarations
+    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-3.0)
+  endif
+
+  ifeq ($(hiro),gtk3-se)
+    flags       += -DHiro_SourceEdit
     hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0 gtksourceview-3.0) -Wno-deprecated-declarations
     hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
   endif
@@ -69,11 +81,11 @@ hiro.objects := \
 $(object.path)/hiro-$(hiro).o: $(hiro.path)/hiro.cpp
 	$(if $(filter qt%,$(hiro)),$(info Compiling $(hiro.path)/qt/qt.moc ...))
 	$(if $(filter qt%,$(hiro)),@$(moc) -i -o $(hiro.path)/qt/qt.moc $(hiro.path)/qt/qt.hpp)
-	$(info Compiling $< ...)
+	$(info Compiling $(subst ../,,$<) ...)
 	@$(compiler) $(hiro.flags) $(flags) $(flags.deps) -c $< -o $@
 
 $(object.path)/hiro-resource.o: $(hiro.resource)
-	$(info Compiling $< ...)
+	$(info Compiling $(subst ../,,$<) ...)
 	@$(windres) $< $@
 
 hiro.verbose:
