@@ -31,7 +31,7 @@ ifeq ($(platform),macos)
 	mkdir -p out/$(name).app/Contents/Resources/
 	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
 	cp Database/* out/$(name).app/Contents/MacOS/Database/
-	cp -r ../shaders/* out/$(name).app/Contents/macOS/Shaders/
+	cp -r ../shaders/* out/$(name).app/Contents/MacOS/Shaders/
 	cp $(ui)/resource/$(name).plist out/$(name).app/Contents/Info.plist
 	sips -s format icns $(ui)/resource/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
