@@ -308,14 +308,14 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         return false;
     }
 #define READ_SECTION(gb, file, section) read_section(file, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
-    if (!READ_SECTION(&save, file, core_state)) return errno;
-    if (!READ_SECTION(&save, file, dma       )) return errno;
-    if (!READ_SECTION(&save, file, mbc       )) return errno;
-    if (!READ_SECTION(&save, file, hram      )) return errno;
-    if (!READ_SECTION(&save, file, timing    )) return errno;
-    if (!READ_SECTION(&save, file, apu       )) return errno;
-    if (!READ_SECTION(&save, file, rtc       )) return errno;
-    if (!READ_SECTION(&save, file, video     )) return errno;
+    if (!READ_SECTION(&save, file, core_state)) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, dma       )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, mbc       )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, hram      )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, timing    )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, apu       )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, rtc       )) return errno ?: EIO;
+    if (!READ_SECTION(&save, file, video     )) return errno ?: EIO;
 #undef READ_SECTION
     
     
@@ -324,30 +324,28 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     }
     
     if (GB_is_hle_sgb(gb)) {
-        if (!read_section(file, gb->sgb, sizeof(*gb->sgb), false)) return errno;
+        if (!read_section(file, gb->sgb, sizeof(*gb->sgb), false)) return errno ?: EIO;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
     if (file->read(file, gb->mbc_ram, save.mbc_ram_size) != save.mbc_ram_size) {
-        return errno;
+        return errno ?: EIO;
     }
     
     if (file->read(file, gb->ram, gb->ram_size) != gb->ram_size) {
-        return errno;
+        return errno ?: EIO;
     }
     
     /* Fix for 0.11 save states that allocate twice the amount of RAM in CGB instances */
     file->seek(file, save.ram_size - gb->ram_size, SEEK_CUR);
     
     if (file->read(file, gb->vram, gb->vram_size) != gb->vram_size) {
-        return errno;
+        return errno ?: EIO;
     }
     
     size_t orig_ram_size = gb->ram_size;
     memcpy(gb, &save, sizeof(save));
     gb->ram_size = orig_ram_size;
-    
-    errno = 0;
     
     sanitize_state(gb);
     
