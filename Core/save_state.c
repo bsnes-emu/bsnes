@@ -2,64 +2,78 @@
 #include <stdio.h>
 #include <errno.h>
 
-static bool dump_section(FILE *f, const void *src, uint32_t size)
+typedef struct virtual_file_s virtual_file_t;
+struct virtual_file_s
 {
-    if (fwrite(&size, 1, sizeof(size), f) != sizeof(size)) {
-        return false;
-    }
-    
-    if (fwrite(src, 1, size, f) != size) {
-        return false;
-    }
-    
-    return true;
+    size_t (*read)(virtual_file_t *file, void *dest, size_t length);
+    size_t (*write)(virtual_file_t *file, const void *dest, size_t length);
+    void (*seek)(virtual_file_t *file, ssize_t ammount, int origin);
+    union {
+        FILE *file;
+        struct {
+            uint8_t *buffer;
+            size_t position;
+            size_t size;
+        };
+    };
+};
+
+static size_t file_read(virtual_file_t *file, void *dest, size_t length)
+{
+    return fread(dest, 1, length, file->file);
 }
 
-#define DUMP_SECTION(gb, f, section) dump_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
-
-/* Todo: we need a sane and protable save state format. */
-int GB_save_state(GB_gameboy_t *gb, const char *path)
+static void file_seek(virtual_file_t *file, ssize_t ammount, int origin)
 {
-    FILE *f = fopen(path, "wb");
-    if (!f) {
-        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
-        return errno;
-    }
-    
-    if (fwrite(GB_GET_SECTION(gb, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
-    if (!DUMP_SECTION(gb, f, core_state)) goto error;
-    if (!DUMP_SECTION(gb, f, dma       )) goto error;
-    if (!DUMP_SECTION(gb, f, mbc       )) goto error;
-    if (!DUMP_SECTION(gb, f, hram      )) goto error;
-    if (!DUMP_SECTION(gb, f, timing    )) goto error;
-    if (!DUMP_SECTION(gb, f, apu       )) goto error;
-    if (!DUMP_SECTION(gb, f, rtc       )) goto error;
-    if (!DUMP_SECTION(gb, f, video     )) goto error;
-    
-    if (GB_is_hle_sgb(gb)) {
-        if (!dump_section(f, gb->sgb, sizeof(*gb->sgb))) goto error;
-    }
-    
-    if (fwrite(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
-        goto error;
-    }
-    
-    if (fwrite(gb->ram, 1, gb->ram_size, f) != gb->ram_size) {
-        goto error;
-    }
-    
-    if (fwrite(gb->vram, 1, gb->vram_size, f) != gb->vram_size) {
-        goto error;
-    }
-    
+    fseek(file->file, ammount, origin);
+}
+
+static size_t file_write(virtual_file_t *file, const void *src, size_t length)
+{
+    return fwrite(src, 1, length, file->file);
+}
+
+static size_t buffer_read(virtual_file_t *file, void *dest, size_t length)
+{
     errno = 0;
+    if (length > file->size - file->position) {
+        errno = EIO;
+        length = file->size - file->position;
+    }
     
-error:
-    fclose(f);
-    return errno;
+    memcpy(dest, file->buffer + file->position, length);
+    file->position += length;
+    
+    return length;
 }
 
-#undef DUMP_SECTION
+static void buffer_seek(virtual_file_t *file, ssize_t ammount, int origin)
+{
+    switch (origin) {
+        case SEEK_SET:
+            file->position = ammount;
+            break;
+        case SEEK_CUR:
+            file->position += ammount;
+            break;
+        case SEEK_END:
+            file->position = file->size + ammount;
+            break;
+        default:
+            break;
+    }
+    
+    if (file->position > file->size) {
+        file->position = file->size;
+    }
+}
+
+static size_t buffer_write(virtual_file_t *file, const void *src, size_t size)
+{
+    memcpy(file->buffer + file->position, src, size);
+    file->position += size;
+    return size;
+}
 
 size_t GB_get_save_state_size(GB_gameboy_t *gb)
 {
@@ -77,74 +91,6 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + gb->ram_size
     + gb->vram_size;
 }
-
-/* A write-line function for memory copying */
-static void buffer_write(const void *src, size_t size, uint8_t **dest)
-{
-    memcpy(*dest, src, size);
-    *dest += size;
-}
-
-static void buffer_dump_section(uint8_t **buffer, const void *src, uint32_t size)
-{
-    buffer_write(&size, sizeof(size), buffer);
-    buffer_write(src, size, buffer);
-}
-
-#define DUMP_SECTION(gb, buffer, section) buffer_dump_section(&buffer, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
-void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
-{
-    buffer_write(GB_GET_SECTION(gb, header), GB_SECTION_SIZE(header), &buffer);
-    DUMP_SECTION(gb, buffer, core_state);
-    DUMP_SECTION(gb, buffer, dma       );
-    DUMP_SECTION(gb, buffer, mbc       );
-    DUMP_SECTION(gb, buffer, hram      );
-    DUMP_SECTION(gb, buffer, timing    );
-    DUMP_SECTION(gb, buffer, apu       );
-    DUMP_SECTION(gb, buffer, rtc       );
-    DUMP_SECTION(gb, buffer, video     );
-    
-    if (GB_is_hle_sgb(gb)) {
-        buffer_dump_section(&buffer, gb->sgb, sizeof(*gb->sgb));
-    }
-    
-    
-    buffer_write(gb->mbc_ram, gb->mbc_ram_size, &buffer);
-    buffer_write(gb->ram, gb->ram_size, &buffer);
-    buffer_write(gb->vram, gb->vram_size, &buffer);
-}
-
-/* Best-effort read function for maximum future compatibility. */
-static bool read_section(FILE *f, void *dest, uint32_t size, bool fix_broken_windows_saves)
-{
-    uint32_t saved_size = 0;
-    if (fread(&saved_size, 1, sizeof(size), f) != sizeof(size)) {
-        return false;
-    }
-    
-    if (fix_broken_windows_saves) {
-        if (saved_size < 4) {
-            return false;
-        }
-        saved_size -= 4;
-        fseek(f, 4, SEEK_CUR);
-    }
-    
-    if (saved_size <= size) {
-        if (fread(dest, 1, saved_size, f) != saved_size) {
-            return false;
-        }
-    }
-    else {
-        if (fread(dest, 1, size, f) != size) {
-            return false;
-        }
-        fseek(f, saved_size - size, SEEK_CUR);
-    }
-    
-    return true;
-}
-#undef DUMP_SECTION
 
 static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save)
 {
@@ -229,9 +175,116 @@ static void sanitize_state(GB_gameboy_t *gb)
     }
 }
 
-#define READ_SECTION(gb, f, section) read_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
+static bool dump_section(virtual_file_t *file, const void *src, uint32_t size)
+{
+    if (file->write(file, &size, sizeof(size)) != sizeof(size)) {
+        return false;
+    }
+    
+    if (file->write(file, src, size) != size) {
+        return false;
+    }
+    
+    return true;
+}
 
-int GB_load_state(GB_gameboy_t *gb, const char *path)
+#define DUMP_SECTION(gb, f, section) dump_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
+
+static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
+{
+    if (file->write(file, GB_GET_SECTION(gb, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) goto error;
+    if (!DUMP_SECTION(gb, file, core_state)) goto error;
+    if (!DUMP_SECTION(gb, file, dma       )) goto error;
+    if (!DUMP_SECTION(gb, file, mbc       )) goto error;
+    if (!DUMP_SECTION(gb, file, hram      )) goto error;
+    if (!DUMP_SECTION(gb, file, timing    )) goto error;
+    if (!DUMP_SECTION(gb, file, apu       )) goto error;
+    if (!DUMP_SECTION(gb, file, rtc       )) goto error;
+    if (!DUMP_SECTION(gb, file, video     )) goto error;
+    
+    if (GB_is_hle_sgb(gb)) {
+        if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
+    }
+    
+    if (file->write(file, gb->mbc_ram, gb->mbc_ram_size) != gb->mbc_ram_size) {
+        goto error;
+    }
+    
+    if (file->write(file, gb->ram, gb->ram_size) != gb->ram_size) {
+        goto error;
+    }
+    
+    if (file->write(file, gb->vram, gb->vram_size) != gb->vram_size) {
+        goto error;
+    }
+    
+    errno = 0;
+    
+error:
+    return errno;
+}
+
+int GB_save_state(GB_gameboy_t *gb, const char *path)
+{
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
+        return errno;
+    }
+    virtual_file_t file = {
+        .write = file_write,
+        .seek = file_seek,
+        .file = f,
+    };
+    int ret = save_state_internal(gb, &file);
+    fclose(f);
+    return ret;
+}
+
+void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
+{
+    virtual_file_t file = {
+        .write = buffer_write,
+        .seek = buffer_seek,
+        .buffer = (uint8_t *)buffer,
+        .position = 0,
+    };
+    
+    save_state_internal(gb, &file);
+}
+
+
+static bool read_section(virtual_file_t *file, void *dest, uint32_t size, bool fix_broken_windows_saves)
+{
+    uint32_t saved_size = 0;
+    if (file->read(file, &saved_size, sizeof(size)) != sizeof(size)) {
+        return false;
+    }
+    
+    if (fix_broken_windows_saves) {
+        if (saved_size < 4) {
+            return false;
+        }
+        saved_size -= 4;
+        file->seek(file, 4, SEEK_CUR);
+    }
+    
+    if (saved_size <= size) {
+        if (file->read(file, dest, saved_size) != saved_size) {
+            return false;
+        }
+    }
+    else {
+        if (file->read(file, dest, size) != size) {
+            return false;
+        }
+        file->seek(file, saved_size - size, SEEK_CUR);
+    }
+    
+    return true;
+}
+
+static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
 {
     GB_gameboy_t save;
     
@@ -240,184 +293,93 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     /* ...Except ram size, we use it to detect old saves with incorrect ram sizes */
     save.ram_size = 0;
     
-    FILE *f = fopen(path, "rb");
-    if (!f) {
-        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
-        return errno;
-    }
-    
     bool fix_broken_windows_saves = false;
-    if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+    
+    if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
     if (save.magic == 0) {
-        /* Potentially legacy, broken Windows save state */
-        fseek(f, 4, SEEK_SET);
-        if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+        /* Potentially legacy, broken Windows save state*/
+        
+        file->seek(file, 4, SEEK_SET);
+        if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
         fix_broken_windows_saves = true;
     }
     if (gb->magic != save.magic) {
         GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
         return false;
     }
-    if (!READ_SECTION(&save, f, core_state)) goto error;
-    if (!READ_SECTION(&save, f, dma       )) goto error;
-    if (!READ_SECTION(&save, f, mbc       )) goto error;
-    if (!READ_SECTION(&save, f, hram      )) goto error;
-    if (!READ_SECTION(&save, f, timing    )) goto error;
-    if (!READ_SECTION(&save, f, apu       )) goto error;
-    if (!READ_SECTION(&save, f, rtc       )) goto error;
-    if (!READ_SECTION(&save, f, video     )) goto error;
+#define READ_SECTION(gb, file, section) read_section(file, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
+    if (!READ_SECTION(&save, file, core_state)) return errno;
+    if (!READ_SECTION(&save, file, dma       )) return errno;
+    if (!READ_SECTION(&save, file, mbc       )) return errno;
+    if (!READ_SECTION(&save, file, hram      )) return errno;
+    if (!READ_SECTION(&save, file, timing    )) return errno;
+    if (!READ_SECTION(&save, file, apu       )) return errno;
+    if (!READ_SECTION(&save, file, rtc       )) return errno;
+    if (!READ_SECTION(&save, file, video     )) return errno;
+#undef READ_SECTION
+    
     
     if (!verify_and_update_state_compatibility(gb, &save)) {
-        errno = -1;
-        goto error;
+        return errno;
     }
     
     if (GB_is_hle_sgb(gb)) {
-        if (!read_section(f, gb->sgb, sizeof(*gb->sgb), false)) goto error;
+        if (!read_section(file, gb->sgb, sizeof(*gb->sgb), false)) return errno;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
-    if (fread(gb->mbc_ram, 1, save.mbc_ram_size, f) != save.mbc_ram_size) {
-        fclose(f);
-        return EIO;
+    if (file->read(file, gb->mbc_ram, save.mbc_ram_size) != save.mbc_ram_size) {
+        return errno;
     }
     
-    if (fread(gb->ram, 1, gb->ram_size, f) != gb->ram_size) {
-        fclose(f);
-        return EIO;
+    if (file->read(file, gb->ram, gb->ram_size) != gb->ram_size) {
+        return errno;
     }
-
+    
     /* Fix for 0.11 save states that allocate twice the amount of RAM in CGB instances */
-    fseek(f, save.ram_size - gb->ram_size, SEEK_CUR);
+    file->seek(file, save.ram_size - gb->ram_size, SEEK_CUR);
     
-    if (fread(gb->vram, 1, gb->vram_size, f) != gb->vram_size) {
-        fclose(f);
-        return EIO;
+    if (file->read(file, gb->vram, gb->vram_size) != gb->vram_size) {
+        return errno;
     }
     
     size_t orig_ram_size = gb->ram_size;
     memcpy(gb, &save, sizeof(save));
     gb->ram_size = orig_ram_size;
-
+    
     errno = 0;
-    
-    sanitize_state(gb);
-    
-error:
-    fclose(f);
-    return errno;
-}
-
-#undef READ_SECTION
-
-/* An read-like function for buffer-copying */
-static size_t buffer_read(void *dest, size_t length, const uint8_t **buffer, size_t *buffer_length)
-{
-    if (length > *buffer_length) {
-        length = *buffer_length;
-    }
-    
-    memcpy(dest, *buffer, length);
-    *buffer += length;
-    *buffer_length -= length;
-    
-    return length;
-}
-
-static bool buffer_read_section(const uint8_t **buffer, size_t *buffer_length, void *dest, uint32_t size, bool fix_broken_windows_saves)
-{
-    uint32_t saved_size = 0;
-    if (buffer_read(&saved_size, sizeof(size), buffer, buffer_length) != sizeof(size)) {
-        return false;
-    }
-    
-    if (saved_size > *buffer_length) return false;
-    
-    if (fix_broken_windows_saves) {
-        if (saved_size < 4) {
-            return false;
-        }
-        saved_size -= 4;
-        *buffer += 4;
-    }
-    
-    if (saved_size <= size) {
-        if (buffer_read(dest, saved_size, buffer, buffer_length) != saved_size) {
-            return false;
-        }
-    }
-    else {
-        if (buffer_read(dest, size, buffer, buffer_length) != size) {
-            return false;
-        }
-        *buffer += saved_size - size;
-        *buffer_length -= saved_size - size;
-    }
-    
-    return true;
-}
-
-#define READ_SECTION(gb, buffer, length, section) buffer_read_section(&buffer, &length, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
-int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length)
-{
-    GB_gameboy_t save;
-    
-    /* Every unread value should be kept the same. */
-    memcpy(&save, gb, sizeof(save));
-    bool fix_broken_windows_saves = false;
-
-    if (buffer_read(GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header), &buffer, &length) != GB_SECTION_SIZE(header)) return -1;
-    if (save.magic == 0) {
-        /* Potentially legacy, broken Windows save state*/
-        buffer -= GB_SECTION_SIZE(header) - 4;
-        length += GB_SECTION_SIZE(header) - 4;
-        if (buffer_read(GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header), &buffer, &length) != GB_SECTION_SIZE(header)) return -1;
-        fix_broken_windows_saves = true;
-    }
-    if (gb->magic != save.magic) {
-        GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
-        return false;
-    }
-    if (!READ_SECTION(&save, buffer, length, core_state)) return -1;
-    if (!READ_SECTION(&save, buffer, length, dma       )) return -1;
-    if (!READ_SECTION(&save, buffer, length, mbc       )) return -1;
-    if (!READ_SECTION(&save, buffer, length, hram      )) return -1;
-    if (!READ_SECTION(&save, buffer, length, timing    )) return -1;
-    if (!READ_SECTION(&save, buffer, length, apu       )) return -1;
-    if (!READ_SECTION(&save, buffer, length, rtc       )) return -1;
-    if (!READ_SECTION(&save, buffer, length, video     )) return -1;
-
-    
-    if (!verify_and_update_state_compatibility(gb, &save)) {
-        return -1;
-    }
-    
-    if (GB_is_hle_sgb(gb)) {
-        if (!buffer_read_section(&buffer, &length, gb->sgb, sizeof(*gb->sgb), false)) return -1;
-    }
-    
-    memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
-    if (buffer_read(gb->mbc_ram, save.mbc_ram_size, &buffer, &length) != save.mbc_ram_size) {
-        return -1;
-    }
-    
-    if (buffer_read(gb->ram, gb->ram_size, &buffer, &length) != gb->ram_size) {
-        return -1;
-    }
-    
-    if (buffer_read(gb->vram, gb->vram_size, &buffer, &length) != gb->vram_size) {
-        return -1;
-    }
-    
-    /* Fix for 0.11 save states that allocate twice the amount of RAM in CGB instances */
-    buffer += save.ram_size - gb->ram_size;
-    length -= save.ram_size - gb->ram_size;
-    
-    memcpy(gb, &save, sizeof(save));
     
     sanitize_state(gb);
     
     return 0;
 }
 
-#undef READ_SECTION
+int GB_load_state(GB_gameboy_t *gb, const char *path)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
+        return errno;
+    }
+    virtual_file_t file = {
+        .read = file_read,
+        .seek = file_seek,
+        .file = f,
+    };
+    int ret = load_state_internal(gb, &file);
+    fclose(f);
+    return ret;
+}
+
+int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length)
+{
+    virtual_file_t file = {
+        .read = buffer_read,
+        .seek = buffer_seek,
+        .buffer = (uint8_t *)buffer,
+        .position = 0,
+        .size = length,
+    };
+    
+    return load_state_internal(gb, &file);
+}
