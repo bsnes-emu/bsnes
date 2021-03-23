@@ -1181,10 +1181,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }];
     
     if (!success) {
-        if (error) {
-            [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];
-        }
         NSBeep();
+    }
+    if (error) {
+        [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];
     }
 }
 
