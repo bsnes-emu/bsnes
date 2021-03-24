@@ -70,6 +70,24 @@ typedef struct __attribute__((packed)) {
     uint8_t sprite_palettes[0x40];
 } BESS_PALS_t;
 
+/* Same RTC format as used by VBA, BGB and SameBoy in battery saves*/
+typedef struct __attribute__((packed)){
+    BESS_block_t header;
+    struct {
+        uint8_t seconds;
+        uint8_t padding1[3];
+        uint8_t minutes;
+        uint8_t padding2[3];
+        uint8_t hours;
+        uint8_t padding3[3];
+        uint8_t days;
+        uint8_t padding4[3];
+        uint8_t high;
+        uint8_t padding5[3];
+    } real, latched;
+    uint64_t last_rtc_second;
+} BESS_RTC_t;
+
 typedef struct  __attribute__((packed)) {
     uint16_t address;
     uint8_t value;
@@ -79,9 +97,11 @@ typedef struct  __attribute__((packed)) {
 #ifdef GB_BIG_ENDIAN
 #define BESS16(x) __builtin_bswap16(x)
 #define BESS32(x) __builtin_bswap32(x)
+#define BESS64(x) __builtin_bswap64(x)
 #else
 #define BESS16(x) (x)
 #define BESS32(x) (x)
+#define BESS64(x) (x)
 #endif
 
 typedef struct virtual_file_s virtual_file_t;
@@ -181,7 +201,7 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
         case GB_MBC2:
             return sizeof(BESS_block_t) + 2 * sizeof(BESS_MBC_pair_t);
         case GB_MBC3:
-            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
+            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t) + (cart->has_rtc? sizeof(BESS_RTC_t) : 0);
         case GB_MBC5:
             return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
         case GB_HUC1:
@@ -212,7 +232,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + sizeof(BESS_NAME) - 1
     + sizeof(BESS_OAM_t)
     + (GB_is_cgb(gb)? sizeof(BESS_PALS_t) : 0)
-    + bess_size_for_cartridge(gb->cartridge_type) // MBC block
+    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC block
     + sizeof(BESS_block_t) // END block
     + sizeof(BESS_footer_t);
 }
@@ -497,6 +517,24 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     }
     
     save_bess_mbc_block(gb, file);
+    if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
+        BESS_RTC_t bess_rtc = {0,};
+        bess_rtc.header = (BESS_block_t){htonl('RTC '), BESS32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
+        bess_rtc.real.seconds = gb->rtc_real.seconds;
+        bess_rtc.real.minutes = gb->rtc_real.minutes;
+        bess_rtc.real.hours = gb->rtc_real.hours;
+        bess_rtc.real.days = gb->rtc_real.days;
+        bess_rtc.real.high = gb->rtc_real.high;
+        bess_rtc.latched.seconds = gb->rtc_latched.seconds;
+        bess_rtc.latched.minutes = gb->rtc_latched.minutes;
+        bess_rtc.latched.hours = gb->rtc_latched.hours;
+        bess_rtc.latched.days = gb->rtc_latched.days;
+        bess_rtc.latched.high = gb->rtc_latched.high;
+        bess_rtc.last_rtc_second = BESS64(gb->last_rtc_second);
+        if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
+            goto error;
+        }
+    }
     
     if (GB_is_cgb(gb)) {
         /* BESS PALS */
@@ -621,7 +659,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
     
     file->seek(file, BESS32(footer.start_offset), SEEK_SET);
     bool found_core = false;
-    BESS_CORE_t core;
+    BESS_CORE_t core = {0,};
     while (true) {
         BESS_block_t block;
         if (file->read(file, &block, sizeof(block)) != sizeof(block)) goto error;
@@ -772,6 +810,25 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     file->read(file, &pair, sizeof(pair));
                     if (BESS16(pair.address) >= 0x8000) goto parse_error;
                     GB_write_memory(&save, BESS16(pair.address), pair.value);
+                }
+                break;
+            case htonl('RTC '):
+                if (!found_core) goto parse_error;
+                BESS_RTC_t bess_rtc;
+                if (BESS32(block.size) != sizeof(bess_rtc) - sizeof(block)) goto parse_error;
+                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
+                    if (file->read(file, &bess_rtc.header + 1, BESS32(block.size)) != BESS32(block.size)) goto error;
+                    gb->rtc_real.seconds = bess_rtc.real.seconds;
+                    gb->rtc_real.minutes = bess_rtc.real.minutes;
+                    gb->rtc_real.hours = bess_rtc.real.hours;
+                    gb->rtc_real.days = bess_rtc.real.days;
+                    gb->rtc_real.high = bess_rtc.real.high;
+                    gb->rtc_latched.seconds = bess_rtc.latched.seconds;
+                    gb->rtc_latched.minutes = bess_rtc.latched.minutes;
+                    gb->rtc_latched.hours = bess_rtc.latched.hours;
+                    gb->rtc_latched.days = bess_rtc.latched.days;
+                    gb->rtc_latched.high = bess_rtc.latched.high;
+                    gb->last_rtc_second = BESS64(bess_rtc.last_rtc_second);
                 }
                 break;
             case htonl('END '):
