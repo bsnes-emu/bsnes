@@ -418,6 +418,18 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         .magic = htonl('BESS'),
     };
     
+    /* BESS NAME */
+    
+    static const BESS_block_t bess_name = {htonl('NAME'), BESS32(sizeof(BESS_NAME) - 1)};
+    
+    if (file->write(file, &bess_name, sizeof(bess_name)) != sizeof(bess_name)) {
+        goto error;
+    }
+    
+    if (file->write(file, BESS_NAME, sizeof(BESS_NAME) - 1) != sizeof(BESS_NAME) - 1) {
+        goto error;
+    }
+    
     /* BESS CORE */
     
     bess_core.header = (BESS_block_t){htonl('CORE'), BESS32(sizeof(bess_core) - sizeof(bess_core.header))};
@@ -472,19 +484,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     if (file->write(file, &bess_core, sizeof(bess_core)) != sizeof(bess_core)) {
         goto error;
     }
-    
-    /* BESS NAME */
-    
-    static const BESS_block_t bess_name = {htonl('NAME'), BESS32(sizeof(BESS_NAME) - 1)};
-    
-    if (file->write(file, &bess_name, sizeof(bess_name)) != sizeof(bess_name)) {
-        goto error;
-    }
-    
-    if (file->write(file, BESS_NAME, sizeof(BESS_NAME) - 1) != sizeof(BESS_NAME) - 1) {
-        goto error;
-    }
-    
+        
     /* BESS OAM */
     
     BESS_OAM_t bess_oam;
@@ -743,7 +743,6 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 
                 break;
             case htonl('NAME'):
-                if (!found_core) goto parse_error;
                 if (BESS32(block.size) > sizeof(emulator_name) - 1) {
                     file->seek(file, BESS32(block.size), SEEK_CUR);
                 }
