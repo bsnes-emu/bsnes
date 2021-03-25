@@ -439,9 +439,9 @@ ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
 install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
 	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
-	mkdir -p $(DESTDIR)$(PREFIX)/share/sameboy/ $(DESTDIR)$(PREFIX)/bin/
-	cp -rf $(BIN)/SDL/* $(DESTDIR)$(PREFIX)/share/sameboy/
-	mv $(DESTDIR)$(PREFIX)/share/sameboy/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
+	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
+	mv $(DESTDIR)$(PREFIX)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
 	-update-mime-database -n $(PREFIX)/share/mime
 	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
