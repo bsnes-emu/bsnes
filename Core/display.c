@@ -158,20 +158,20 @@ static void display_vblank(GB_gameboy_t *gb)
         uint32_t border_colors[16 * 4];
         
         if (!gb->has_sgb_border && GB_is_cgb(gb) && gb->model != GB_MODEL_AGB) {
-            static uint16_t colors[] = {
+            uint16_t colors[] = {
                 0x2095, 0x5129, 0x1EAF, 0x1EBA, 0x4648,
                 0x30DA, 0x69AD, 0x2B57, 0x2B5D, 0x632C,
                 0x1050, 0x3C84, 0x0E07, 0x0E18, 0x2964,
             };
             unsigned index = gb->rom? gb->rom[0x14e] % 5 : 0;
-            gb->borrowed_border.palette[0] = colors[index];
-            gb->borrowed_border.palette[10] = colors[5 + index];
-            gb->borrowed_border.palette[14] = colors[10 + index];
+            gb->borrowed_border.palette[0] = LE16(colors[index]);
+            gb->borrowed_border.palette[10] = LE16(colors[5 + index]);
+            gb->borrowed_border.palette[14] = LE16(colors[10 + index]);
 
         }
         
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = GB_convert_rgb15(gb, gb->borrowed_border.palette[i], true);
+            border_colors[i] = GB_convert_rgb15(gb, LE16(gb->borrowed_border.palette[i]), true);
         }
         
         for (unsigned tile_y = 0; tile_y < 28; tile_y++) {
@@ -179,7 +179,7 @@ static void display_vblank(GB_gameboy_t *gb)
                 if (tile_x >= 6 && tile_x < 26 && tile_y >= 5 && tile_y < 23) {
                     continue;
                 }
-                uint16_t tile = gb->borrowed_border.map[tile_x + tile_y * 32];
+                uint16_t tile = LE16(gb->borrowed_border.map[tile_x + tile_y * 32]);
                 uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
                 uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
                 uint8_t palette = (tile >> 10) & 3;

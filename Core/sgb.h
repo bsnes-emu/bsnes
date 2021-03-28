@@ -17,6 +17,8 @@ typedef struct {
 } GB_sgb_border_t;
 
 #ifdef GB_INTERNAL
+#define GB_SGB_INTRO_ANIMATION_LENGTH 200
+
 struct GB_sgb_s {
     uint8_t command[16 * 7];
     uint16_t command_write_index;
@@ -56,6 +58,8 @@ struct GB_sgb_s {
     
     /* Multiplayer (cont) */
     bool mlt_lock;
+    
+    bool little_endian; // True on save states created on 0.14.3 or newer
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);

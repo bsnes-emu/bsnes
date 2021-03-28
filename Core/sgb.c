@@ -7,8 +7,6 @@
   #define M_PI 3.14159265358979323846
 #endif
 
-#define INTRO_ANIMATION_LENGTH 200
-
 enum {
     PAL01    = 0x00,
     PAL23    = 0x01,
@@ -49,14 +47,14 @@ static inline void pal_command(GB_gameboy_t *gb, unsigned first, unsigned second
 {
     gb->sgb->effective_palettes[0] = gb->sgb->effective_palettes[4] =
         gb->sgb->effective_palettes[8] = gb->sgb->effective_palettes[12] =
-        gb->sgb->command[1] | (gb->sgb->command[2] << 8);
+        *(uint16_t *)&gb->sgb->command[1];
     
     for (unsigned i = 0; i < 3; i++) {
-        gb->sgb->effective_palettes[first * 4 + i + 1] = gb->sgb->command[3 + i * 2] | (gb->sgb->command[4 + i * 2] << 8);
+        gb->sgb->effective_palettes[first * 4 + i + 1] = *(uint16_t *)&gb->sgb->command[3 + i * 2];
     }
     
     for (unsigned i = 0; i < 3; i++) {
-        gb->sgb->effective_palettes[second * 4 + i + 1] = gb->sgb->command[9 + i * 2] | (gb->sgb->command[10 + i * 2] << 8);
+        gb->sgb->effective_palettes[second * 4 + i + 1] = *(uint16_t *)&gb->sgb->command[9 + i * 2];
     }
 }
 
@@ -172,10 +170,10 @@ static void command_ready(GB_gameboy_t *gb)
                 gb->sgb->disable_commands = true;
                 for (unsigned i = 0; i < sizeof(palette_assignments) / sizeof(palette_assignments[0]); i++) {
                     if (memcmp(palette_assignments[i].name, &gb->sgb->received_header[0x30], sizeof(palette_assignments[i].name)) == 0) {
-                        gb->sgb->effective_palettes[0] = built_in_palettes[palette_assignments[i].palette_index * 4 - 4];
-                        gb->sgb->effective_palettes[1] = built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4];
-                        gb->sgb->effective_palettes[2] = built_in_palettes[palette_assignments[i].palette_index * 4 + 2 - 4];
-                        gb->sgb->effective_palettes[3] = built_in_palettes[palette_assignments[i].palette_index * 4 + 3 - 4];
+                        gb->sgb->effective_palettes[0] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 - 4]);
+                        gb->sgb->effective_palettes[1] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4]);
+                        gb->sgb->effective_palettes[2] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 2 - 4]);
+                        gb->sgb->effective_palettes[3] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 3 - 4]);
                         break;
                     }
                 }
@@ -556,8 +554,8 @@ static void render_boot_animation (GB_gameboy_t *gb)
     else if (gb->sgb->intro_animation < 80) {
         fade_blue = 80 - gb->sgb->intro_animation;
     }
-    else if (gb->sgb->intro_animation > INTRO_ANIMATION_LENGTH - 32) {
-        fade_red = fade_blue = gb->sgb->intro_animation - INTRO_ANIMATION_LENGTH + 32;
+    else if (gb->sgb->intro_animation > GB_SGB_INTRO_ANIMATION_LENGTH - 32) {
+        fade_red = fade_blue = gb->sgb->intro_animation - GB_SGB_INTRO_ANIMATION_LENGTH + 32;
     }
     uint32_t colors[] = {
         convert_rgb15(gb, 0),
@@ -607,7 +605,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
         render_jingle(gb, gb->apu_output.sample_rate / GB_get_usual_frame_rate(gb));
     }
     
-    if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
+    if (gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
     
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
@@ -656,9 +654,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                             *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                         }
 #ifdef GB_BIG_ENDIAN
-                        if (gb->sgb->transfer_dest == TRANSFER_ATTRIBUTES) {
-                            *data = __builtin_bswap16(*data);
-                        }
+                        *data = __builtin_bswap16(*data);
 #endif
                         data++;
                     }
@@ -674,7 +670,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
 
     uint32_t colors[4 * 4];
     for (unsigned i = 0; i < 4 * 4; i++) {
-        colors[i] = convert_rgb15(gb, gb->sgb->effective_palettes[i]);
+        colors[i] = convert_rgb15(gb, LE16(gb->sgb->effective_palettes[i]));
     }
     
     if (gb->sgb->mask_mode != MASK_FREEZE) {
@@ -683,7 +679,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                sizeof(gb->sgb->effective_screen_buffer));
     }
     
-    if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) {
+    if (gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
         render_boot_animation(gb);
     }
     else {
@@ -735,21 +731,21 @@ void GB_sgb_render(GB_gameboy_t *gb)
     }
     
     uint32_t border_colors[16 * 4];
-    if (gb->sgb->border_animation == 0 || gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) {
+    if (gb->sgb->border_animation == 0 || gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15(gb, gb->sgb->border.palette[i]);
+            border_colors[i] = convert_rgb15(gb, LE16(gb->sgb->border.palette[i]));
         }
     }
     else if (gb->sgb->border_animation > 32) {
         gb->sgb->border_animation--;
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], 64 - gb->sgb->border_animation);
+            border_colors[i] = convert_rgb15_with_fade(gb, LE16(gb->sgb->border.palette[i]), 64 - gb->sgb->border_animation);
         }
     }
     else {
         gb->sgb->border_animation--;
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], gb->sgb->border_animation);
+            border_colors[i] = convert_rgb15_with_fade(gb, LE16(gb->sgb->border.palette[i]), gb->sgb->border_animation);
         }
     }
     
@@ -767,7 +763,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
             else if (gb->border_mode == GB_BORDER_NEVER) {
                 continue;
             }
-            uint16_t tile = gb->sgb->border.map[tile_x + tile_y * 32];
+            uint16_t tile = LE16(gb->sgb->border.map[tile_x + tile_y * 32]);
             uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
             uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
             uint8_t palette = (tile >> 10) & 3;
@@ -798,9 +794,18 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
 {
     
 #include "graphics/sgb_border.inc"
-    
+        
+#ifdef GB_BIG_ENDIAN
+    for (unsigned i = 0; i < sizeof(tilemap) / 2; i++) {
+        gb->sgb->border.map[i] = LE16(tilemap[i]);
+    }
+    for (unsigned i = 0; i < sizeof(palette) / 2; i++) {
+        gb->sgb->border.palette[i] = LE16(palette[i]);
+    }
+#else
     memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
     memcpy(gb->sgb->border.palette, palette, sizeof(palette));
+#endif
     
     /* Expand tileset */
     for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
@@ -825,10 +830,10 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
         /* Re-center */
         memmove(&gb->sgb->border.map[25 * 32 + 1], &gb->sgb->border.map[25 * 32], (32 * 3 - 1) * sizeof(gb->sgb->border.map[0]));
     }
-    gb->sgb->effective_palettes[0] = built_in_palettes[0];
-    gb->sgb->effective_palettes[1] = built_in_palettes[1];
-    gb->sgb->effective_palettes[2] = built_in_palettes[2];
-    gb->sgb->effective_palettes[3] = built_in_palettes[3];
+    gb->sgb->effective_palettes[0] = LE16(built_in_palettes[0]);
+    gb->sgb->effective_palettes[1] = LE16(built_in_palettes[1]);
+    gb->sgb->effective_palettes[2] = LE16(built_in_palettes[2]);
+    gb->sgb->effective_palettes[3] = LE16(built_in_palettes[3]);
 }
 
 static double fm_synth(double phase)
@@ -874,7 +879,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
         return;
     }
     
-    if (gb->sgb->intro_animation >= INTRO_ANIMATION_LENGTH) return;
+    if (gb->sgb->intro_animation >= GB_SGB_INTRO_ANIMATION_LENGTH) return;
     
     signed jingle_stage = (gb->sgb->intro_animation - 64) / 3;
     double sweep_cutoff_ratio = 2000.0 * pow(2, gb->sgb->intro_animation / 20.0) / gb->apu_output.sample_rate;
@@ -892,7 +897,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
             gb->sgb_intro_jingle_phases[f] += frequencies[f] / gb->apu_output.sample_rate;
         }
         if (gb->sgb->intro_animation > 100) {
-            sample *= pow((INTRO_ANIMATION_LENGTH - gb->sgb->intro_animation) / (INTRO_ANIMATION_LENGTH - 100.0), 3);
+            sample *= pow((GB_SGB_INTRO_ANIMATION_LENGTH - gb->sgb->intro_animation) / (GB_SGB_INTRO_ANIMATION_LENGTH - 100.0), 3);
         }
         
         if (gb->sgb->intro_animation < 120) {

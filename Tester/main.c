@@ -231,10 +231,17 @@ static char *executable_relative_path(const char *filename)
 
 static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
+#ifdef GB_BIG_ENDIAN
+    if (use_tga) {
+        return (r << 8) | (g << 16) | (b << 24);
+    }
+    return (r << 0) | (g << 8) | (b << 16);
+#else
     if (use_tga) {
         return (r << 16) | (g << 8) | (b);
     }
     return (r << 24) | (g << 16) | (b << 8);
+#endif
 }
 
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext)

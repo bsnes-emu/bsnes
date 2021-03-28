@@ -130,6 +130,15 @@ static void load_default_border(GB_gameboy_t *gb)
         }\
     } while (false);
     
+#ifdef GB_BIG_ENDIAN
+    for (unsigned i = 0; i < sizeof(gb->borrowed_border.map) / 2; i++) {
+        gb->borrowed_border.map[i] = LE16(gb->borrowed_border.map[i]);
+    }
+    for (unsigned i = 0; i < sizeof(gb->borrowed_border.palette) / 2; i++) {
+        gb->borrowed_border.palette[i] = LE16(gb->borrowed_border.palette[i]);
+    }
+#endif
+    
     if (gb->model == GB_MODEL_AGB) {
         #include "graphics/agb_border.inc"
         LOAD_BORDER();

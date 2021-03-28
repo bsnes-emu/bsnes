@@ -56,6 +56,25 @@
 #error Unable to detect endianess
 #endif
 
+#ifdef GB_INTERNAL
+/* Todo: similar macros are everywhere, clean this up and remove direct calls to bswap */
+#ifdef GB_BIG_ENDIAN
+#define LE16(x) __builtin_bswap16(x)
+#define LE32(x) __builtin_bswap32(x)
+#define LE64(x) __builtin_bswap64(x)
+#define BE16(x) (x)
+#define BE32(x) (x)
+#define BE64(x) (x)
+#else
+#define LE16(x) (x)
+#define LE32(x) (x)
+#define LE64(x) (x)
+#define BE16(x) __builtin_bswap16(x)
+#define BE32(x) __builtin_bswap32(x)
+#define BE64(x) __builtin_bswap64(x)
+#endif
+#endif
+
 #if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
 #define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
 #endif
