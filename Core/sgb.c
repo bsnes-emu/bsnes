@@ -609,64 +609,67 @@ void GB_sgb_render(GB_gameboy_t *gb)
     
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
-            if (gb->sgb->transfer_dest == TRANSFER_LOW_TILES || gb->sgb->transfer_dest == TRANSFER_HIGH_TILES) {
-                uint8_t *base = &gb->sgb->pending_border.tiles[gb->sgb->transfer_dest == TRANSFER_HIGH_TILES ? 0x80 * 8 * 8 : 0];
-                for (unsigned tile = 0; tile < 0x80; tile++) {
-                    unsigned tile_x = (tile % 10) * 16;
-                    unsigned tile_y = (tile / 10) * 8;
-                    for (unsigned y = 0; y < 0x8; y++) {
-                        for (unsigned x = 0; x < 0x8; x++) {
-                            base[tile * 8 * 8 + y * 8 + x] = gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] +
-                                                             gb->sgb->screen_buffer[(tile_x + x + 8) + (tile_y + y) * 160] * 4;
-                        }
-                    }
-                }
-                
+            unsigned size = 0;
+            uint16_t *data = NULL;
+            
+            switch (gb->sgb->transfer_dest) {
+                case TRANSFER_LOW_TILES:
+                    size = 0x100;
+                    data = (uint16_t *)gb->sgb->pending_border.tiles;
+                    break;
+                case TRANSFER_HIGH_TILES:
+                    size = 0x100;
+                    data = (uint16_t *)gb->sgb->pending_border.tiles + 0x800;
+                    break;
+                case TRANSFER_PALETTES:
+                    size = 0x100;
+                    data = gb->sgb->ram_palettes;
+                    break;
+                case TRANSFER_BORDER_DATA:
+                    size = 0x88;
+                    data = gb->sgb->pending_border.raw_data;
+                    break;
+                case TRANSFER_ATTRIBUTES:
+                    size = 0xFE;
+                    data = (uint16_t *)gb->sgb->attribute_files;
+                    break;
+                default:
+                    return; // Corrupt state?
             }
-            else {
-                unsigned size = 0;
-                uint16_t *data = NULL;
-                
-                switch (gb->sgb->transfer_dest) {
-                    case TRANSFER_PALETTES:
-                        size = 0x100;
-                        data = gb->sgb->ram_palettes;
-                        break;
-                    case TRANSFER_BORDER_DATA:
-                        size = 0x88;
-                        data = gb->sgb->pending_border.raw_data;
-                        break;
-                    case TRANSFER_ATTRIBUTES:
-                        size = 0xFE;
-                        data = (uint16_t *)gb->sgb->attribute_files;
-                        break;
-                    default:
-                        return; // Corrupt state?
-                }
-                
-                for (unsigned tile = 0; tile < size; tile++) {
-                    unsigned tile_x = (tile % 20) * 8;
-                    unsigned tile_y = (tile / 20) * 8;
-                    for (unsigned y = 0; y < 0x8; y++) {
-                        static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
-                        *data = 0;
-                        for (unsigned x = 0; x < 8; x++) {
-                            *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
-                        }
-#ifdef GB_BIG_ENDIAN
-                        *data = __builtin_bswap16(*data);
-#endif
-                        data++;
+            
+            for (unsigned tile = 0; tile < size; tile++) {
+                unsigned tile_x = (tile % 20) * 8;
+                unsigned tile_y = (tile / 20) * 8;
+                for (unsigned y = 0; y < 0x8; y++) {
+                    static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
+                    *data = 0;
+                    for (unsigned x = 0; x < 8; x++) {
+                        *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                     }
+#ifdef GB_BIG_ENDIAN
+                    *data = __builtin_bswap16(*data);
+#endif
+                    data++;
                 }
-                if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
-                    gb->sgb->border_animation = 64;
-                }
+            }
+            if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
+                gb->sgb->border_animation = 64;
             }
         }
     }
     
-    if (!gb->screen || !gb->rgb_encode_callback || gb->disable_rendering) return;
+    if (!gb->screen || !gb->rgb_encode_callback || gb->disable_rendering) {
+        if (gb->sgb->border_animation > 32) {
+            gb->sgb->border_animation--;
+        }
+        else if (gb->sgb->border_animation != 0) {
+            gb->sgb->border_animation--;
+        }
+        if (gb->sgb->border_animation == 32) {
+            memcpy(&gb->sgb->border, &gb->sgb->pending_border, sizeof(gb->sgb->border));
+        }
+        return;
+    }
 
     uint32_t colors[4 * 4];
     for (unsigned i = 0; i < 4 * 4; i++) {
@@ -764,12 +767,18 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 continue;
             }
             uint16_t tile = LE16(gb->sgb->border.map[tile_x + tile_y * 32]);
-            uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
-            uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
+            uint8_t flip_x = (tile & 0x4000)? 0:7;
+            uint8_t flip_y = (tile & 0x8000)? 7:0;
             uint8_t palette = (tile >> 10) & 3;
             for (unsigned y = 0; y < 8; y++) {
+                unsigned base = (tile & 0xFF) * 32 + (y ^ flip_y) * 2;
                 for (unsigned x = 0; x < 8; x++) {
-                    uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
+                    uint8_t bit = 1 << (x ^ flip_x);
+                    uint8_t color = ((gb->sgb->border.tiles[base] & bit)      ? 1: 0) |
+                                    ((gb->sgb->border.tiles[base + 1] & bit)  ? 2: 0) |
+                                    ((gb->sgb->border.tiles[base + 16] & bit) ? 4: 0) |
+                                    ((gb->sgb->border.tiles[base + 17] & bit) ? 8: 0);
+                    
                     uint32_t *output = gb->screen;
                     if (gb->border_mode == GB_BORDER_NEVER) {
                         output += (tile_x - 6) * 8 + x + ((tile_y - 5) * 8 + y) * 160;
@@ -806,19 +815,7 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
     memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
     memcpy(gb->sgb->border.palette, palette, sizeof(palette));
 #endif
-    
-    /* Expand tileset */
-    for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
-        for (unsigned y = 0; y < 8; y++) {
-            for (unsigned x = 0; x < 8; x++) {
-                gb->sgb->border.tiles[tile * 8 * 8 + y * 8 + x] =
-                    (tiles[tile * 32 + y * 2 +  0] & (1 << (7 ^ x)) ? 1 : 0) |
-                    (tiles[tile * 32 + y * 2 +  1] & (1 << (7 ^ x)) ? 2 : 0) |
-                    (tiles[tile * 32 + y * 2 + 16] & (1 << (7 ^ x)) ? 4 : 0) |
-                    (tiles[tile * 32 + y * 2 + 17] & (1 << (7 ^ x)) ? 8 : 0);
-            }
-        }
-    }
+    memcpy(gb->sgb->border.tiles, tiles, sizeof(tiles));
     
     if (gb->model != GB_MODEL_SGB2) {
         /* Delete the "2" */

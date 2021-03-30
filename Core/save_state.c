@@ -324,8 +324,8 @@ static void sanitize_state(GB_gameboy_t *gb)
     if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
         gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
     }
+    if (gb->sgb && !gb->sgb->v14_3) {
 #ifdef GB_BIG_ENDIAN
-    if (gb->sgb && !gb->sgb->little_endian) {
         for (unsigned i = 0; i < sizeof(gb->sgb->border.raw_data) / 2; i++) {
             gb->sgb->border.raw_data[i] = LE16(gb->sgb->border.raw_data[i]);
         }
@@ -341,8 +341,36 @@ static void sanitize_state(GB_gameboy_t *gb)
         for (unsigned i = 0; i < sizeof(gb->sgb->ram_palettes) / 2; i++) {
             gb->sgb->ram_palettes[i] = LE16(gb->sgb->ram_palettes[i]);
         }
-    }
 #endif
+        uint8_t converted_tiles[sizeof(gb->sgb->border.tiles)] = {0,};
+        for (unsigned tile = 0; tile < sizeof(gb->sgb->border.tiles_legacy) / 64; tile++) {
+            for (unsigned y = 0; y < 8; y++) {
+                unsigned base = tile * 32 + y * 2;
+                for (unsigned x = 0; x < 8; x++) {
+                    uint8_t pixel = gb->sgb->border.tiles_legacy[tile * 8 * 8 + y * 8 + x];
+                    if (pixel & 1) converted_tiles[base]      |= (1 << (7 ^ x));
+                    if (pixel & 2) converted_tiles[base + 1]  |= (1 << (7 ^ x));
+                    if (pixel & 4) converted_tiles[base + 16] |= (1 << (7 ^ x));
+                    if (pixel & 8) converted_tiles[base + 17] |= (1 << (7 ^ x));
+                }
+            }
+        }
+        memcpy(gb->sgb->border.tiles, converted_tiles, sizeof(converted_tiles));
+        memset(converted_tiles, 0, sizeof(converted_tiles));
+        for (unsigned tile = 0; tile < sizeof(gb->sgb->pending_border.tiles_legacy) / 64; tile++) {
+            for (unsigned y = 0; y < 8; y++) {
+                unsigned base = tile * 32 + y * 2;
+                for (unsigned x = 0; x < 8; x++) {
+                    uint8_t pixel = gb->sgb->pending_border.tiles_legacy[tile * 8 * 8 + y * 8 + x];
+                    if (pixel & 1) converted_tiles[base]      |= (1 << (7 ^ x));
+                    if (pixel & 2) converted_tiles[base + 1]  |= (1 << (7 ^ x));
+                    if (pixel & 4) converted_tiles[base + 16] |= (1 << (7 ^ x));
+                    if (pixel & 8) converted_tiles[base + 17] |= (1 << (7 ^ x));
+                }
+            }
+        }
+        memcpy(gb->sgb->pending_border.tiles, converted_tiles, sizeof(converted_tiles));
+    }
 }
 
 static bool dump_section(virtual_file_t *file, const void *src, uint32_t size)
@@ -437,7 +465,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     uint32_t sgb_offset = 0;
     
     if (GB_is_hle_sgb(gb)) {
-        gb->sgb->little_endian = true;
+        gb->sgb->v14_3 = true;
         sgb_offset = file->tell(file) + 4;
         if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
     }

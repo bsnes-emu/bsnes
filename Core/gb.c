@@ -115,19 +115,7 @@ static void load_default_border(GB_gameboy_t *gb)
     #define LOAD_BORDER() do { \
         memcpy(gb->borrowed_border.map, tilemap, sizeof(tilemap));\
         memcpy(gb->borrowed_border.palette, palette, sizeof(palette));\
-        \
-        /* Expand tileset */\
-        for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {\
-            for (unsigned y = 0; y < 8; y++) {\
-                for (unsigned x = 0; x < 8; x++) {\
-                    gb->borrowed_border.tiles[tile * 8 * 8 + y * 8 + x] =\
-                    (tiles[tile * 32 + y * 2 +  0] & (1 << (7 ^ x)) ? 1 : 0) |\
-                    (tiles[tile * 32 + y * 2 +  1] & (1 << (7 ^ x)) ? 2 : 0) |\
-                    (tiles[tile * 32 + y * 2 + 16] & (1 << (7 ^ x)) ? 4 : 0) |\
-                    (tiles[tile * 32 + y * 2 + 17] & (1 << (7 ^ x)) ? 8 : 0);\
-                }\
-            }\
-        }\
+        memcpy(gb->borrowed_border.tiles, tiles, sizeof(tiles));\
     } while (false);
     
 #ifdef GB_BIG_ENDIAN

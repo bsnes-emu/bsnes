@@ -180,12 +180,17 @@ static void display_vblank(GB_gameboy_t *gb)
                     continue;
                 }
                 uint16_t tile = LE16(gb->borrowed_border.map[tile_x + tile_y * 32]);
-                uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
-                uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
+                uint8_t flip_x = (tile & 0x4000)? 0:7;
+                uint8_t flip_y = (tile & 0x8000)? 7:0;
                 uint8_t palette = (tile >> 10) & 3;
                 for (unsigned y = 0; y < 8; y++) {
+                    unsigned base = (tile & 0xFF) * 32 + (y ^ flip_y) * 2;
                     for (unsigned x = 0; x < 8; x++) {
-                        uint8_t color = gb->borrowed_border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
+                        uint8_t bit = 1 << (x ^ flip_x);
+                        uint8_t color = ((gb->borrowed_border.tiles[base] & bit)      ? 1 : 0) |
+                                        ((gb->borrowed_border.tiles[base + 1] & bit)  ? 2 : 0) |
+                                        ((gb->borrowed_border.tiles[base + 16] & bit) ? 4 : 0) |
+                                        ((gb->borrowed_border.tiles[base + 17] & bit) ? 8 : 0);
                         uint32_t *output = gb->screen + tile_x * 8 + x + (tile_y * 8 + y) * 256;
                         if (color == 0) {
                             *output = border_colors[0];
