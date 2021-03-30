@@ -441,7 +441,7 @@ install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDe
 	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
 	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
 	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
-	mv $(DESTDIR)$(PREFIX)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
 	-update-mime-database -n $(PREFIX)/share/mime
 	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
