@@ -69,7 +69,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
         gb->last_sync += target_nanoseconds;
     }
     else {
-        if (-time_to_sleep < LCDC_PERIOD * 1200000000LL / GB_get_clock_rate(gb)) {
+        if (time_to_sleep < 0 && -time_to_sleep < LCDC_PERIOD * 1200000000LL / GB_get_clock_rate(gb)) {
             // We're running a bit too slow, but the difference is small enough,
             // just skip this sync and let it even out
             return;
