@@ -308,6 +308,129 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     return 0;
 }
 
+void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
+{
+    GB_reset(gb);
+    GB_write_memory(gb, 0xFF00 + GB_IO_LCDC, 0x80);
+    GB_write_memory(gb, 0xFF00 + GB_IO_TAC, gb->gbs_header.TAC);
+    GB_write_memory(gb, 0xFF00 + GB_IO_TMA, gb->gbs_header.TMA);
+    GB_write_memory(gb, 0xFF00 + GB_IO_NR52, 0x80);
+    GB_write_memory(gb, 0xFF00 + GB_IO_NR51, 0xFF);
+    GB_write_memory(gb, 0xFF00 + GB_IO_NR50, 0x77);
+    memset(gb->ram, 0, gb->ram_size);
+    memset(gb->hram, 0, sizeof(gb->hram));
+    memset(gb->oam, 0, sizeof(gb->oam));
+    if (gb->gbs_header.TAC || gb->gbs_header.TMA) {
+        GB_write_memory(gb, 0xFFFF, 0x04);
+    }
+    else {
+        GB_write_memory(gb, 0xFFFF, 0x01);
+    }
+    if (gb->gbs_header.TAC & 0x80) {
+        gb->cgb_double_speed = true; // Might mean double speed mode on a DMG
+    }
+    gb->sp = LE16(gb->gbs_header.sp);
+    gb->pc = 0x100;
+    gb->boot_rom_finished = true;
+    gb->a = track;
+    if (gb->sgb) {
+        gb->sgb->intro_animation = GB_SGB_INTRO_ANIMATION_LENGTH;
+        gb->sgb->disable_commands = true;
+    }
+}
+
+int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        GB_log(gb, "Could not open GBS: %s.\n", strerror(errno));
+        return errno;
+    }
+    fread(&gb->gbs_header, sizeof(gb->gbs_header), 1, f);
+    if (gb->gbs_header.magic != htonl('GBS\x01') ||
+        LE16(gb->gbs_header.load_address) < 0x400 ||
+        LE16(gb->gbs_header.load_address) >= 0x8000) {
+        GB_log(gb, "Not a valid GBS file: %s.\n", strerror(errno));
+        fclose(f);
+        return -1;
+    }
+    fseek(f, 0, SEEK_END);
+    size_t data_size = ftell(f) - sizeof(gb->gbs_header);
+    gb->rom_size = (data_size + LE16(gb->gbs_header.load_address) + 0x3FFF) & ~0x3FFF; /* Round to bank */
+    /* And then round to a power of two */
+    while (gb->rom_size & (gb->rom_size - 1)) {
+        /* I promise this works. */
+        gb->rom_size |= gb->rom_size >> 1;
+        gb->rom_size++;
+    }
+    
+    if (gb->rom_size == 0) {
+        gb->rom_size = 0x8000;
+    }
+    fseek(f, sizeof(gb->gbs_header), SEEK_SET);
+    if (gb->rom) {
+        free(gb->rom);
+    }
+    gb->rom = malloc(gb->rom_size);
+    memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
+    fread(gb->rom + LE16(gb->gbs_header.load_address), 1, data_size, f);
+    fclose(f);
+    
+    gb->cartridge_type = &GB_cart_defs[0x11];
+    if (gb->mbc_ram) {
+        free(gb->mbc_ram);
+        gb->mbc_ram = NULL;
+    }
+    
+    if (gb->cartridge_type->has_ram) {
+        gb->mbc_ram_size = 0x2000;
+        gb->mbc_ram = malloc(gb->mbc_ram_size);
+        memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
+    }
+    
+    // Generate interrupt handlers
+    for (unsigned i = 0; i <= 0x38; i += 8) {
+        gb->rom[i] = 0xc3; // jp $XXXX
+        gb->rom[i + 1] = (LE16(gb->gbs_header.load_address) + i);
+        gb->rom[i + 2] = (LE16(gb->gbs_header.load_address) + i) >> 8;
+    }
+    for (unsigned i = 0x40; i <= 0x60; i += 8) {
+        gb->rom[i] = 0xc9; // ret
+    }
+    
+    // Generate entry
+    memcpy(gb->rom + 0x100, (uint8_t[]) {
+        0xCD, // Call $XXXX
+        LE16(gb->gbs_header.init_address),
+        LE16(gb->gbs_header.init_address) >> 8,
+        0x76, // HALT
+        0x00, // NOP
+        0xAF, // XOR a
+        0xE0, // LDH [$FFXX], a
+        GB_IO_IF,
+        0xCD, // Call $XXXX
+        LE16(gb->gbs_header.play_address),
+        LE16(gb->gbs_header.play_address) >> 8,
+        0x18, // JR pc ± $XX
+        -10    // To HALT
+    }, 13);
+    
+    GB_gbs_switch_track(gb, gb->gbs_header.first_track - 1);
+    if (info) {
+        memset(info, 0, sizeof(*info));
+        info->first_track = gb->gbs_header.first_track - 1;
+        info->track_count = gb->gbs_header.track_count;
+        memcpy(info->title, gb->gbs_header.title, sizeof(gb->gbs_header.title));
+        memcpy(info->author, gb->gbs_header.author, sizeof(gb->gbs_header.author));
+        memcpy(info->copyright, gb->gbs_header.copyright, sizeof(gb->gbs_header.copyright));
+    }
+    
+    gb->tried_loading_sgb_border = true; // Don't even attempt on GBS files
+    gb->has_sgb_border = false;
+    load_default_border(gb);
+    return 0;
+}
+
 int GB_load_isx(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");

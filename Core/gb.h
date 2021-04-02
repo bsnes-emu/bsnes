@@ -325,6 +325,29 @@ typedef struct {
     uint8_t write_end;
 } GB_fifo_t;
 
+typedef struct {
+    uint32_t magic;
+    uint8_t track_count;
+    uint8_t first_track;
+    uint16_t load_address;
+    uint16_t init_address;
+    uint16_t play_address;
+    uint16_t sp;
+    uint8_t TMA;
+    uint8_t TAC;
+    char title[32];
+    char author[32];
+    char copyright[32];
+} GB_gbs_header_t;
+
+typedef struct {
+    uint8_t track_count;
+    uint8_t first_track;
+    char title[33];
+    char author[33];
+    char copyright[33];
+} GB_gbs_info_t;
+
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
    Some other changes might be "safe" as well.
@@ -718,6 +741,8 @@ struct GB_gameboy_internal_s {
         /* Temporary state */
         bool wx_just_changed;
         bool tile_sel_glitch;
+               
+        GB_gbs_header_t gbs_header;
    );
 };
     
@@ -777,7 +802,9 @@ void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer,
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size);
 int GB_load_isx(GB_gameboy_t *gb, const char *path);
-    
+int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info);
+void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track);
+
 int GB_save_battery_size(GB_gameboy_t *gb);
 int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size);
 int GB_save_battery(GB_gameboy_t *gb, const char *path);
