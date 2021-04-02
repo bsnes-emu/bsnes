@@ -126,7 +126,7 @@ static void display_vblank(GB_gameboy_t *gb)
     
     bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
     
-    if (!gb->disable_rendering  && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame)) {
+    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
@@ -153,7 +153,7 @@ static void display_vblank(GB_gameboy_t *gb)
         }
     }
     
-    if (gb->border_mode == GB_BORDER_ALWAYS && !GB_is_sgb(gb)) {
+    if (!gb->disable_rendering && gb->border_mode == GB_BORDER_ALWAYS && !GB_is_sgb(gb)) {
         GB_borrow_sgb_border(gb);
         uint32_t border_colors[16 * 4];
         
