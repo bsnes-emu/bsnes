@@ -125,6 +125,11 @@ void GB_configure_cart(GB_gameboy_t *gb)
     else if (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0) {
         GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
     }
+    
+    if (gb->mbc_ram) {
+        free(gb->mbc_ram);
+        gb->mbc_ram = NULL;
+    }
 
     if (gb->cartridge_type->has_ram) {
         if (gb->cartridge_type->mbc_type == GB_MBC2) {
