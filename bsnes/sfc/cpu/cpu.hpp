@@ -118,8 +118,6 @@ private:
     bool hdmaPending = 0;
     bool hdmaMode = 0;  //0 = init, 1 = run
 
-    bool autoJoypadActive = 0;
-    bool autoJoypadLatch = 0;
     uint autoJoypadCounter = 33;  //state machine; 4224 / 128 = 33 (inactive)
   } status;
 
