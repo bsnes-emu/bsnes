@@ -43,8 +43,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.hdmaPending);
   s.integer(status.hdmaMode);
 
-  s.integer(status.autoJoypadActive);
-  s.integer(status.autoJoypadLatch);
   s.integer(status.autoJoypadCounter);
 
   s.integer(io.wramAddress);
