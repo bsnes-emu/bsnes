@@ -770,7 +770,6 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [self.view screenSizeChanged];
     [self loadROM];
     [self reset:nil];
-
 }
 
 - (void) initMemoryView
@@ -875,6 +874,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [[NSBundle mainBundle] loadNibNamed:@"GBS" owner:self topLevelObjects:nil];
     [_mainWindow setContentSize:self.gbsPlayerView.bounds.size];
     _mainWindow.styleMask &= ~NSWindowStyleMaskResizable;
+    dispatch_async(dispatch_get_main_queue(), ^{ // Cocoa is weird, no clue why it's needed
+        [_mainWindow standardWindowButton:NSWindowZoomButton].enabled = false;
+    });
     [_mainWindow.contentView addSubview:self.gbsPlayerView];
     
     self.gbsTitle.stringValue = [NSString stringWithCString:info->title encoding:NSISOLatin1StringEncoding] ?: @"GBS Player";
@@ -913,7 +915,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
         }
         else if ([[[self.fileType pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
-            GB_gbs_info_t info;
+            __block GB_gbs_info_t info;
             GB_load_gbs(&gb, self.fileURL.path.UTF8String, &info);
             [self prepareGBSInterface:&info];
         }

@@ -412,7 +412,7 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
         LE16(gb->gbs_header.play_address),
         LE16(gb->gbs_header.play_address) >> 8,
         0x18, // JR pc ± $XX
-        -10    // To HALT
+        -10   // To HALT
     }, 13);
     
     GB_gbs_switch_track(gb, gb->gbs_header.first_track - 1);
