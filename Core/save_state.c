@@ -52,23 +52,20 @@ typedef struct __attribute__((packed)) {
     uint8_t execution_mode; // 0 = running; 1 = halted; 2 = stopped
     
     uint8_t io_registers[0x80];
-    uint8_t hram[0x7f];
     
     BESS_buffer_t ram;
     BESS_buffer_t vram;
     BESS_buffer_t mbc_ram;
+    BESS_buffer_t oam;
+    BESS_buffer_t hram;
+    BESS_buffer_t background_palettes;
+    BESS_buffer_t sprite_palettes;
 } BESS_CORE_t;
 
 typedef struct __attribute__((packed)) {
     BESS_block_t header;
-    uint8_t oam[256];
-} BESS_OAM_t;
-
-typedef struct __attribute__((packed)) {
-    BESS_block_t header;
-    uint8_t background_palettes[0x40];
-    uint8_t sprite_palettes[0x40];
-} BESS_PALS_t;
+    uint8_t extra_oam[96];
+} BESS_XOAM_t;
 
 typedef struct __attribute__((packed)) {
     BESS_block_t header;
@@ -233,8 +230,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + sizeof(BESS_CORE_t)
     + sizeof(BESS_block_t) // NAME
     + sizeof(BESS_NAME) - 1
-    + sizeof(BESS_OAM_t)
-    + (GB_is_cgb(gb)? sizeof(BESS_PALS_t) : 0)
+    + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
     + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC block
     + sizeof(BESS_block_t) // END block
@@ -456,10 +452,12 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     if (!DUMP_SECTION(gb, file, core_state)) goto error;
     if (!DUMP_SECTION(gb, file, dma       )) goto error;
     if (!DUMP_SECTION(gb, file, mbc       )) goto error;
+    uint32_t hram_offset = file->tell(file) + 4;
     if (!DUMP_SECTION(gb, file, hram      )) goto error;
     if (!DUMP_SECTION(gb, file, timing    )) goto error;
     if (!DUMP_SECTION(gb, file, apu       )) goto error;
     if (!DUMP_SECTION(gb, file, rtc       )) goto error;
+    uint32_t video_offset = file->tell(file) + 4;
     if (!DUMP_SECTION(gb, file, video     )) goto error;
     
     uint32_t sgb_offset = 0;
@@ -470,7 +468,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
     
-    BESS_CORE_t bess_core;
+    BESS_CORE_t bess_core = {0,};
     
     bess_core.mbc_ram.offset = LE32(file->tell(file));
     bess_core.mbc_ram.size = LE32(gb->mbc_ram_size);
@@ -555,21 +553,30 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     bess_core.io_registers[GB_IO_DIV] = gb->div_counter >> 8;
     bess_core.io_registers[GB_IO_BANK] = gb->boot_rom_finished;
     bess_core.io_registers[GB_IO_KEY1] |= gb->cgb_double_speed? 0x80 : 0;
-    memcpy(bess_core.hram, gb->hram, sizeof(gb->hram));
-    
+    bess_core.hram.size = LE32(sizeof(gb->hram));
+    bess_core.hram.offset = LE32(hram_offset + offsetof(GB_gameboy_t, hram) - GB_SECTION_OFFSET(hram));
+    bess_core.oam.size = LE32(sizeof(gb->oam));
+    bess_core.oam.offset = LE32(video_offset + offsetof(GB_gameboy_t, oam) - GB_SECTION_OFFSET(video));
+    if (GB_is_cgb(gb)) {
+        bess_core.background_palettes.size = LE32(sizeof(gb->background_palettes_data));
+        bess_core.background_palettes.offset = LE32(video_offset + offsetof(GB_gameboy_t, background_palettes_data) - GB_SECTION_OFFSET(video));
+        bess_core.sprite_palettes.size = LE32(sizeof(gb->sprite_palettes_data));
+        bess_core.sprite_palettes.offset = LE32(video_offset + offsetof(GB_gameboy_t, sprite_palettes_data) - GB_SECTION_OFFSET(video));
+    }
     
     if (file->write(file, &bess_core, sizeof(bess_core)) != sizeof(bess_core)) {
         goto error;
     }
         
-    /* BESS OAM */
+    /* BESS XOAM */
     
-    BESS_OAM_t bess_oam;
-    bess_oam.header = (BESS_block_t){BE32('OAM '), LE32(sizeof(bess_oam) - sizeof(bess_oam.header))};
-    memcpy(bess_oam.oam, gb->oam, sizeof(gb->oam));
-    memcpy(bess_oam.oam + sizeof(gb->oam), gb->extra_oam, sizeof(gb->extra_oam));
+    BESS_XOAM_t bess_xoam = {0,};
+    bess_xoam.header = (BESS_block_t){BE32('XOAM'), LE32(sizeof(bess_xoam) - sizeof(bess_xoam.header))};
+    if (GB_is_cgb(gb)) {
+        memcpy(bess_xoam.extra_oam, gb->extra_oam, sizeof(bess_xoam.extra_oam));
+    }
     
-    if (file->write(file, &bess_oam, sizeof(bess_oam)) != sizeof(bess_oam)) {
+    if (file->write(file, &bess_xoam, sizeof(bess_xoam)) != sizeof(bess_xoam)) {
         goto error;
     }
     
@@ -589,19 +596,6 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         bess_rtc.latched.high = gb->rtc_latched.high;
         bess_rtc.last_rtc_second = LE64(gb->last_rtc_second);
         if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
-            goto error;
-        }
-    }
-    
-    if (GB_is_cgb(gb)) {
-        /* BESS PALS */
-        
-        BESS_PALS_t bess_pals;
-        bess_pals.header = (BESS_block_t){BE32('PALS'), LE32(sizeof(bess_pals) - sizeof(bess_oam.header))};
-        memcpy(bess_pals.background_palettes, gb->background_palettes_data, sizeof(bess_pals.background_palettes));
-        memcpy(bess_pals.sprite_palettes, gb->sprite_palettes_data, sizeof(bess_pals.sprite_palettes));
-
-        if (file->write(file, &bess_pals, sizeof(bess_pals)) != sizeof(bess_pals)) {
             goto error;
         }
     }
@@ -807,9 +801,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 
                 save.halted = core.execution_mode == 1;
                 save.stopped = core.execution_mode == 2;
-                
-                memcpy(save.hram, core.hram, sizeof(save.hram));
-                
+                                
                 // CPU related
                 
                 // Determines DMG mode
@@ -884,19 +876,10 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     file->read(file, emulator_name, LE32(block.size));
                 }
                 break;
-            case BE32('OAM '):
+            case BE32('XOAM'):
                 if (!found_core) goto parse_error;
-                if (LE32(block.size) != 256 && LE32(block.size) != 160) goto parse_error;
-                file->read(file, save.oam, sizeof(save.oam));
-                if (LE32(block.size) == 256) {
-                    file->read(file, save.extra_oam, sizeof(save.extra_oam));
-                }
-                break;
-            case BE32('PALS'):
-                if (!found_core) goto parse_error;
-                if (LE32(block.size) != sizeof(BESS_PALS_t) - sizeof(block)) goto parse_error;
-                file->read(file, save.background_palettes_data, sizeof(save.background_palettes_data));
-                file->read(file, save.sprite_palettes_data, sizeof(save.sprite_palettes_data));
+                if (LE32(block.size) != 96) goto parse_error;
+                file->read(file, save.extra_oam, sizeof(save.extra_oam));
                 break;
             case BE32('MBC '):
                 if (!found_core) goto parse_error;
@@ -950,6 +933,10 @@ done:
     read_bess_buffer(&core.ram, file, gb->ram, gb->ram_size);
     read_bess_buffer(&core.vram, file, gb->vram, gb->vram_size);
     read_bess_buffer(&core.mbc_ram, file, gb->mbc_ram, gb->mbc_ram_size);
+    read_bess_buffer(&core.oam, file, gb->oam, sizeof(gb->oam));
+    read_bess_buffer(&core.hram, file, gb->hram, sizeof(gb->hram));
+    read_bess_buffer(&core.background_palettes, file, gb->background_palettes_data, sizeof(gb->background_palettes_data));
+    read_bess_buffer(&core.sprite_palettes, file, gb->sprite_palettes_data, sizeof(gb->sprite_palettes_data));
     if (gb->sgb) {
         memset(gb->sgb, 0, sizeof(*gb->sgb));
         GB_sgb_load_default_data(gb);
