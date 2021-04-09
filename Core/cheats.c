@@ -200,7 +200,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
         GB_cheat_hash_t **hash = &gb->cheat_hash[hash_addr(cheat->address)];
         for (unsigned i = 0; i < (*hash)->size; i++) {
             if ((*hash)->cheats[i] == cheat) {
-                (*hash)->cheats[i] = (*hash)->cheats[(*hash)->size--];
+                (*hash)->cheats[i] = (*hash)->cheats[--(*hash)->size];
                 if ((*hash)->size == 0) {
                     free(*hash);
                     *hash = NULL;

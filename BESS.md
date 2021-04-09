@@ -34,18 +34,18 @@ Every block is followed by another blocked, until the END block is reached.
 
 The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, except for the `NAME` block.
 
-The length of the CORE block is 0x12E bytes, but implementations are expected to ignore any excess bytes. Following the BESS block header, the structure is as follows:
+The length of the CORE block is 0xCF bytes, but implementations are expected to ignore any excess bytes. Following the BESS block header, the structure is as follows:
 
-| Offset | Content                                |
-|--------|----------------------------------------|
-| 0x000  | Major BESS version as a 16-bit integer |
-| 0x002  | Minor BESS version as a 16-bit integer |
+| Offset | Content                               |
+|--------|---------------------------------------|
+| 0x00  | Major BESS version as a 16-bit integer |
+| 0x02  | Minor BESS version as a 16-bit integer |
 
 Both major and minor versions should be 1. Implementations are expected to reject incompatible majors, but still attempt to read newer minor versions.
 
-| Offset | Content                                 |
-|--------|-----------------------------------------|
-| 0x004  | A four-character ASCII model identifier |
+| Offset | Content                                |
+|--------|----------------------------------------|
+| 0x04  | A four-character ASCII model identifier |
 
 BESS uses a four-character string to identify Game Boy models:
 
@@ -56,19 +56,18 @@ BESS uses a four-character string to identify Game Boy models:
 
 For example; `'GD  '` represents a DMG of an unspecified revision, `'S   '` represents some model of the SGB family, and `CCE ` represent a CGB using CPU revision E.
 
-| Offset | Content                                                |
-|--------|--------------------------------------------------------|
-| 0x008  | The value of the PC register                           |
-| 0x00A  | The value of the AF register                           |
-| 0x00C  | The value of the BC register                           |
-| 0x00E  | The value of the DE register                           |
-| 0x010  | The value of the HL register                           |
-| 0x012  | The value of the SP register                           |
-| 0x014  | The value of IME (0 or 1)                              |
-| 0x015  | The value of the IE register                           |
-| 0x016  | Execution state (0 = running; 1 = halted; 2 = stopped) |
-| 0x017  | The values of every memory-mapped register (128 bytes) |
-| 0x097  | The contents of HRAM (127 bytes)                       |
+| Offset | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x08  | The value of the PC register                           |
+| 0x0A  | The value of the AF register                           |
+| 0x0C  | The value of the BC register                           |
+| 0x0E  | The value of the DE register                           |
+| 0x10  | The value of the HL register                           |
+| 0x12  | The value of the SP register                           |
+| 0x14  | The value of IME (0 or 1)                              |
+| 0x15  | The value of the IE register                           |
+| 0x16  | Execution state (0 = running; 1 = halted; 2 = stopped) |
+| 0x17  | The values of every memory-mapped register (128 bytes) |
 
 The values of memory-mapped registers should be written 'as-is' to memory as if the actual ROM wrote them, with the following exceptions and note:
 * Unused registers have Don't-Care values which should be ignored
@@ -82,16 +81,24 @@ The values of memory-mapped registers should be written 'as-is' to memory as if 
 * The value store for DIV will be used to set the internal divisor to `DIV << 8`
 * Implementation should apply care when ordering the write operations (For example, writes to NR52 must come before writes to the other APU registers)
 
-|Offset | Content                                                  |
-|--------|--------------------------------------------------------|
-| 0x116  | The size of RAM (32-bit integer)                       |
-| 0x11A  | The offset of RAM from file start (32-bit integer)     |
-| 0x11E  | The size of VRAM (32-bit integer)                      |
-| 0x122  | The offset of VRAM from file start (32-bit integer)    |
-| 0x126  | The size of MBC RAM (32-bit integer)                   |
-| 0x12A  | The offset of MBC RAM from file start (32-bit integer) |
+|Offset | Content                                                            |
+|-------|--------------------------------------------------------------------|
+| 0x97  | The size of RAM (32-bit integer)                                   |
+| 0x9B  | The offset of RAM from file start (32-bit integer)                 |
+| 0x9F  | The size of VRAM (32-bit integer)                                  |
+| 0xA3  | The offset of VRAM from file start (32-bit integer)                |
+| 0xA7  | The size of MBC RAM (32-bit integer)                               |
+| 0xAB  | The offset of MBC RAM from file start (32-bit integer)             |
+| 0xAF  | The size of OAM (=0xA0, 32-bit integer)                            |
+| 0xB3  | The offset of OAM from file start (32-bit integer)                 |
+| 0xB7  | The size of HRAM (=0x7F, 32-bit integer)                           |
+| 0xBB  | The offset of HRAM from file start (32-bit integer)                |
+| 0xBF  | The size of background palettes (=0x40 or 0, 32-bit integer)       |
+| 0xC3  | The offset of background palettes from file start (32-bit integer) |
+| 0xC7  | The size of object palettes (=0x40 or 0, 32-bit integer)           |
+| 0xCB  | The offset of object palettes from file start (32-bit integer)     |
 
-The contents of large RAM sizes are stored outside of BESS structure so data from an implementation's native save state format can be reused. The offsets are absolute offsets from the save state file's start.
+The contents of large buffers are stored outside of BESS structure so data from an implementation's native save state format can be reused. The offsets are absolute offsets from the save state file's start. Background and object palette sizes must be 0 for models prior to Game Boy Color.
 
 
 #### NAME block
@@ -100,13 +107,10 @@ The NAME block uses the `'NAME'` identifier, and is an optional block that conta
 
 The length of the NAME block is variable, and it only contains the name and version of the originating emulator in ASCII.
 
-#### OAM block
+#### XOAM block
 
-The OAM block uses the `'OAM '` identifier, and is a required block that contains the data of OAM. This block length can be either 160 or 256. When 256 bytes of data are used, the addition bytes are used to set the values for the additional OAM range at `0xFEA0-0xFEFF`. Implementation that do not emulate that extra range are free to ignore the excess bytes.
+The XOAM block uses the `'XOAM'` identifier, and is an optional block that contains the data of extra OAM (addresses `0xFEA0-0xFEFF`). This block length must be `0x60`. Implementations that do not emulate this extra range are free to ignore the excess bytes, and to not create this block.
 
-#### PALS block
-
-The PALS block uses the `'PALS'` identifier, and is an optional block that is only used for GBC-compatible models. The length of this block is 0x80 bytes and it contains the contents of background palette RAM (0x40 bytes) followed by the contents of object palette RAM (another 0x40 bytes).
 
 #### MBC block
 
