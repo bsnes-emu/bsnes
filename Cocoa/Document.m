@@ -318,6 +318,11 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
 
 - (void) vblank
 {
+    if (_gbsVisualizer) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_gbsVisualizer setNeedsDisplay:YES];
+        });
+    }
     [self.view flip];
     if (borderModeChanged) {
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -344,6 +349,9 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
 
 - (void)gotNewSample:(GB_sample_t *)sample
 {
+    if (_gbsVisualizer) {
+        [_gbsVisualizer addSample:sample];
+    }
     [audioLock lock];
     if (self.audioClient.isPlaying) {
         if (audioBufferPosition == audioBufferSize) {
@@ -837,6 +845,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (IBAction)changeGBSTrack:(id)sender
 {
+    if (!running) {
+        [self start];
+    }
     [self performAtomicBlock:^{
         GB_gbs_switch_track(&gb, self.gbsTracks.indexOfSelectedItem);
     }];
@@ -878,7 +889,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         [_mainWindow standardWindowButton:NSWindowZoomButton].enabled = false;
     });
     [_mainWindow.contentView addSubview:self.gbsPlayerView];
-    
+    _mainWindow.movableByWindowBackground = true;
+    [_mainWindow setContentBorderThickness:24 forEdge:NSRectEdgeMinY];
+
     self.gbsTitle.stringValue = [NSString stringWithCString:info->title encoding:NSISOLatin1StringEncoding] ?: @"GBS Player";
     self.gbsAuthor.stringValue = [NSString stringWithCString:info->author encoding:NSISOLatin1StringEncoding] ?: @"Unknown Composer";
     NSString *copyright = [NSString stringWithCString:info->copyright encoding:NSISOLatin1StringEncoding];
