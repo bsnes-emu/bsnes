@@ -574,7 +574,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         else if (gb->model & GB_MODEL_NO_SFC_BIT) {
             if (gb->icd_pixel_callback) {
                 icd_pixel = pixel;
-              //gb->icd_pixel_callback(gb, pixel);
             }
         }
         else if (gb->cgb_palettes_ppu_blocked) {
