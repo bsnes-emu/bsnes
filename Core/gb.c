@@ -347,7 +347,7 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
         return errno;
     }
     fread(&gb->gbs_header, sizeof(gb->gbs_header), 1, f);
-    if (gb->gbs_header.magic != htonl('GBS\x01') ||
+    if (gb->gbs_header.magic != BE32('GBS\x01') ||
         LE16(gb->gbs_header.load_address) < 0x400 ||
         LE16(gb->gbs_header.load_address) >= 0x8000) {
         GB_log(gb, "Not a valid GBS file: %s.\n", strerror(errno));
