@@ -12,6 +12,7 @@ typedef struct {
         GB_MBC5,
         GB_HUC1,
         GB_HUC3,
+        GB_TPP1,
     } mbc_type;
     enum {
         GB_STANDARD_MBC,
