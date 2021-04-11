@@ -1523,7 +1523,9 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        GB_log(gb, "Cartridge includes%s RAM: $%x bytes\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
+        bool has_battery = gb->cartridge_type->has_battery &&
+                           (gb->cartridge_type->mbc_type != GB_TPP1 || (gb->rom[0x153] & 8));
+        GB_log(gb, "Cartridge includes%s RAM: $%x bytes\n", has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
         GB_log(gb, "No cartridge RAM\n");
@@ -1565,7 +1567,8 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "No MBC\n");
     }
 
-    if (cartridge->has_rumble) {
+    if (gb->cartridge_type->has_rumble &&
+       (gb->cartridge_type->mbc_type != GB_TPP1 || (gb->rom[0x153] & 1))) {
         GB_log(gb, "Cart contains a Rumble Pak\n");
     }
 
