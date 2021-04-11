@@ -108,6 +108,11 @@ auto pApplication::initialize() -> void {
   //Gtk: "gtk_widget_size_allocate(): attempt to allocate widget with (width or height < 1)"
   g_log_set_handler("Gtk", G_LOG_LEVEL_MASK, Log_Filter, nullptr);
 
+  //We still have a lot of hard-coded X11 dependencies
+  #if defined(DISPLAY_XORG) && HIRO_GTK==3
+  gdk_set_allowed_backends("x11");
+  #endif
+
   //set WM_CLASS to Application::name()
   auto name = Application::state().name ? Application::state().name : string{"hiro"};
   gdk_set_program_class(name);
