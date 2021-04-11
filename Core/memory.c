@@ -640,6 +640,13 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         case 0x19:
                             gb->rtc_real.high &= ~0x40;
                             break;
+                            
+                        case 0x20:
+                        case 0x21:
+                        case 0x22:
+                        case 0x23:
+                            gb->rumble_strength = value & 3;
+                            break;
                     }
             }
             break;
