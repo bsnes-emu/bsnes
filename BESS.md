@@ -73,7 +73,7 @@ For example; `'GD  '` represents a DMG of an unspecified revision, `'S   '` repr
 The values of memory-mapped registers should be written 'as-is' to memory as if the actual ROM wrote them, with the following exceptions and note:
 * Unused registers have Don't-Care values which should be ignored
 * Unused register bits have Don't-Care values which should be ignored
-* The value of KEY0 (FF4C) must be valid as it determines DMG mode when the model is CGB or newer
+* If the model is CGB or newer, the value of KEY0 (FF4C) must be valid as it determines DMG mode
 * Sprite priority is derived from KEY0 (FF4C) instead of OPRI (FF6C) because OPRI can be modified after booting, but only the value of OPRI during boot ROM execution takes effect
 * If a register doesn't exist on the emulated model (For example, KEY0 (FF4C) on a DMG), its value should be ignored.
 * BANK (FF50) should be 0 if the boot ROM is still mapped, and 1 otherwise, and must be valid.
