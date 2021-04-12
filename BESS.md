@@ -38,14 +38,14 @@ The length of the CORE block is 0xD0 bytes, but implementations are expected to 
 
 | Offset | Content                               |
 |--------|---------------------------------------|
-| 0x00  | Major BESS version as a 16-bit integer |
-| 0x02  | Minor BESS version as a 16-bit integer |
+| 0x00   | Major BESS version as a 16-bit integer |
+| 0x02   | Minor BESS version as a 16-bit integer |
 
 Both major and minor versions should be 1. Implementations are expected to reject incompatible majors, but still attempt to read newer minor versions.
 
 | Offset | Content                                |
 |--------|----------------------------------------|
-| 0x04  | A four-character ASCII model identifier |
+| 0x04   | A four-character ASCII model identifier |
 
 BESS uses a four-character string to identify Game Boy models:
 
@@ -58,23 +58,24 @@ For example; `'GD  '` represents a DMG of an unspecified revision, `'S   '` repr
 
 | Offset | Content                                               |
 |--------|-------------------------------------------------------|
-| 0x08  | The value of the PC register                           |
-| 0x0A  | The value of the AF register                           |
-| 0x0C  | The value of the BC register                           |
-| 0x0E  | The value of the DE register                           |
-| 0x10  | The value of the HL register                           |
-| 0x12  | The value of the SP register                           |
-| 0x14  | The value of IME (0 or 1)                              |
-| 0x15  | The value of the IE register                           |
-| 0x16  | Execution state (0 = running; 1 = halted; 2 = stopped) |
-| 0x17  | Reserved, must be 0                                    |
-| 0x18  | The values of every memory-mapped register (128 bytes) |
+| 0x08   | The value of the PC register                           |
+| 0x0A   | The value of the AF register                           |
+| 0x0C   | The value of the BC register                           |
+| 0x0E   | The value of the DE register                           |
+| 0x10   | The value of the HL register                           |
+| 0x12   | The value of the SP register                           |
+| 0x14   | The value of IME (0 or 1)                              |
+| 0x15   | The value of the IE register                           |
+| 0x16   | Execution state (0 = running; 1 = halted; 2 = stopped) |
+| 0x17   | Reserved, must be 0                                    |
+| 0x18   | The values of every memory-mapped register (128 bytes) |
 
 The values of memory-mapped registers should be written 'as-is' to memory as if the actual ROM wrote them, with the following exceptions and note:
 * Unused registers have Don't-Care values which should be ignored
 * Unused register bits have Don't-Care values which should be ignored
-* The value of KEY0 (FF4C) must be valid as it determines CGB mode
+* The value of KEY0 (FF4C) must be valid as it determines DMG mode when the model is CGB or newer
 * Sprite priority is derived from KEY0 (FF4C) instead of OPRI (FF6C) because OPRI can be modified after booting, but only the value of OPRI during boot ROM execution takes effect
+* If a register doesn't exist on the emulated model (For example, KEY0 (FF4C) on a DMG), its value should be ignored.
 * BANK (FF50) should be 0 if the boot ROM is still mapped, and 1 otherwise, and must be valid.
 * Implementations should not start a serial transfer when writing the value of SB
 * Similarly, no value of NRx4 should trigger a sound pulse on save state load
