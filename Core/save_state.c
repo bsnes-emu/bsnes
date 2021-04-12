@@ -50,6 +50,7 @@ typedef struct __attribute__((packed)) {
     uint8_t ime;
     uint8_t ie;
     uint8_t execution_mode; // 0 = running; 1 = halted; 2 = stopped
+    uint8_t _padding;
     
     uint8_t io_registers[0x80];
     
@@ -725,6 +726,10 @@ static void read_bess_buffer(const BESS_buffer_t *buffer, virtual_file_t *file, 
     file->seek(file, LE32(buffer->offset), SEEK_SET);
     file->read(file, dest, MIN(LE32(buffer->size), max_size));
     file->seek(file, pos, SEEK_SET);
+    
+    if (LE32(buffer->size) < max_size) {
+        memset(dest + LE32(buffer->size), 0, max_size - LE32(buffer->size));
+    }
 }
 
 static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_sameboy)
