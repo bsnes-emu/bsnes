@@ -51,7 +51,8 @@ struct GB_sgb_s {
     uint16_t effective_palettes[4 * 4];
     uint16_t ram_palettes[4 * 512];
     uint8_t attribute_map[20 * 18];
-    uint8_t attribute_files[0xFE0];
+    uint8_t attribute_files[0xFD2];
+    uint8_t attribute_files_padding[0xFE0 - 0xFD2];
     
     /* Intro */
     int16_t intro_animation;
