@@ -187,7 +187,7 @@ The length of this block is 0x39 bytes and it follows the following structure:
 | 0x24   | The offset of the RAM colorization palettes (LE 16-bit sequences, 32-bit integer)                |
 | 0x28   | The size of the attribute map (=0x168, 32-bit integer)                                           |
 | 0x2C   | The offset of the attribute map (32-bit integer)                                                 |
-| 0x30   | The size of the attribute files (=0xfe0, 32-bit integer)                                         |
+| 0x30   | The size of the attribute files (=0xfd2, 32-bit integer)                                         |
 | 0x34   | The offset of the attribute files (32-bit integer)                                               |
 | 0x38   | Multiplayer status (1 byte); high nibble is player count, low nibble is current player (0-based) |
 
