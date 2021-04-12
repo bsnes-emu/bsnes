@@ -100,6 +100,12 @@ typedef struct __attribute__((packed)){
     uint64_t last_rtc_second;
 } BESS_RTC_t;
 
+/* Same HuC3 RTC format as used by SameBoy and BGB in battery saves */
+typedef struct __attribute__((packed)){
+    BESS_block_t header;
+    GB_huc3_rtc_time_t data;
+} BESS_HUC3_t;
+
 typedef struct  __attribute__((packed)) {
     uint16_t address;
     uint8_t value;
@@ -208,7 +214,7 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
         case GB_HUC1:
             return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
         case GB_HUC3:
-            return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t);
+            return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_HUC3_t);
     }
 }
 
@@ -233,7 +239,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + sizeof(BESS_NAME) - 1
     + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
-    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC block
+    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3 block
     + sizeof(BESS_block_t) // END block
     + sizeof(BESS_footer_t);
 }
@@ -582,22 +588,40 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     }
     
     save_bess_mbc_block(gb, file);
-    if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
-        BESS_RTC_t bess_rtc = {0,};
-        bess_rtc.header = (BESS_block_t){BE32('RTC '), LE32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
-        bess_rtc.real.seconds = gb->rtc_real.seconds;
-        bess_rtc.real.minutes = gb->rtc_real.minutes;
-        bess_rtc.real.hours = gb->rtc_real.hours;
-        bess_rtc.real.days = gb->rtc_real.days;
-        bess_rtc.real.high = gb->rtc_real.high;
-        bess_rtc.latched.seconds = gb->rtc_latched.seconds;
-        bess_rtc.latched.minutes = gb->rtc_latched.minutes;
-        bess_rtc.latched.hours = gb->rtc_latched.hours;
-        bess_rtc.latched.days = gb->rtc_latched.days;
-        bess_rtc.latched.high = gb->rtc_latched.high;
-        bess_rtc.last_rtc_second = LE64(gb->last_rtc_second);
-        if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
-            goto error;
+    if (gb->cartridge_type->has_rtc) {
+        if (gb->cartridge_type ->mbc_type != GB_HUC3) {
+            BESS_RTC_t bess_rtc = {0,};
+            bess_rtc.header = (BESS_block_t){BE32('RTC '), LE32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
+            bess_rtc.real.seconds = gb->rtc_real.seconds;
+            bess_rtc.real.minutes = gb->rtc_real.minutes;
+            bess_rtc.real.hours = gb->rtc_real.hours;
+            bess_rtc.real.days = gb->rtc_real.days;
+            bess_rtc.real.high = gb->rtc_real.high;
+            bess_rtc.latched.seconds = gb->rtc_latched.seconds;
+            bess_rtc.latched.minutes = gb->rtc_latched.minutes;
+            bess_rtc.latched.hours = gb->rtc_latched.hours;
+            bess_rtc.latched.days = gb->rtc_latched.days;
+            bess_rtc.latched.high = gb->rtc_latched.high;
+            bess_rtc.last_rtc_second = LE64(gb->last_rtc_second);
+            if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
+                goto error;
+            }
+        }
+        else {
+            BESS_HUC3_t bess_huc3 = {0,};
+            bess_huc3.header = (BESS_block_t){BE32('HUC3'), LE32(sizeof(bess_huc3) - sizeof(bess_huc3.header))};
+
+            bess_huc3.data = (GB_huc3_rtc_time_t) {
+                LE64(gb->last_rtc_second),
+                LE16(gb->huc3_minutes),
+                LE16(gb->huc3_days),
+                LE16(gb->huc3_alarm_minutes),
+                LE16(gb->huc3_alarm_days),
+                gb->huc3_alarm_enabled,
+            };
+            if (file->write(file, &bess_huc3, sizeof(bess_huc3)) != sizeof(bess_huc3)) {
+                goto error;
+            }
         }
     }
     
@@ -900,8 +924,8 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 if (!found_core) goto parse_error;
                 BESS_RTC_t bess_rtc;
                 if (LE32(block.size) != sizeof(bess_rtc) - sizeof(block)) goto parse_error;
-                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
-                    if (file->read(file, &bess_rtc.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (file->read(file, &bess_rtc.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3) {
                     gb->rtc_real.seconds = bess_rtc.real.seconds;
                     gb->rtc_real.minutes = bess_rtc.real.minutes;
                     gb->rtc_real.hours = bess_rtc.real.hours;
@@ -913,6 +937,20 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     gb->rtc_latched.days = bess_rtc.latched.days;
                     gb->rtc_latched.high = bess_rtc.latched.high;
                     gb->last_rtc_second = LE64(bess_rtc.last_rtc_second);
+                }
+                break;
+            case BE32('HUC3'):
+                if (!found_core) goto parse_error;
+                BESS_HUC3_t bess_huc3;
+                if (LE32(block.size) != sizeof(bess_huc3) - sizeof(block)) goto parse_error;
+                if (file->read(file, &bess_huc3.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->mbc_type == GB_HUC3) {
+                    gb->last_rtc_second = LE64(bess_huc3.data.last_rtc_second);
+                    gb->huc3_minutes = LE16(bess_huc3.data.minutes);
+                    gb->huc3_days = LE16(bess_huc3.data.days);
+                    gb->huc3_alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
+                    gb->huc3_alarm_days = LE16(bess_huc3.data.alarm_days);
+                    gb->huc3_alarm_enabled = bess_huc3.data.alarm_enabled;
                 }
                 break;
             case BE32('SGB '):

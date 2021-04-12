@@ -135,7 +135,7 @@ This block contains an MBC-specific number of 3-byte-long pairs that represent t
 An implementation should parse this block as a series of writes to be made. Values outside the `0x0000-0x7FFF` range are not allowed.
 
 #### RTC block
-The RTC block uses the `'RTC '` identifier, and is an optional block that is used while emulating an MBC3 an RTC. The contents of this block are identical to 64-bit RTC saves from VBA, which are also used by SameBoy and different emulators such as BGB.
+The RTC block uses the `'RTC '` identifier, and is an optional block that is used while emulating an MBC3 with an RTC. The contents of this block are identical to 64-bit RTC saves from VBA, which are also used by SameBoy and different emulators such as BGB.
 
 The length of this block is 0x30 bytes long and it follows the following structure:
 
@@ -152,6 +152,20 @@ The length of this block is 0x30 bytes long and it follows the following structu
 | 0x20   | Latched days (1 byte), followed by 3 bytes of padding                  |
 | 0x24   | Latched high/overflow/running (1 byte), followed by 3 bytes of padding |
 | 0x28   | UNIX timestamp at the time of the save state (64-bit)                  |
+
+#### HUC3 block
+The HUC3 block uses the `'HUC3'` identifier, and is an optional block that is used while emulating an HuC3 cartridge to store RTC and alarm information. The contents of this block are identical to HuC3 RTC saves from SameBoy.
+
+The length of this block is 0x11 bytes long and it follows the following structure:
+
+|Offset  | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x00   | UNIX timestamp at the time of the save state (64-bit) |
+| 0x08   | RTC minutes (16-bit)                                  |
+| 0x0A   | RTC days (16-bit)                                     |
+| 0x0C   | Scheduled alarm time minutes (16-bit)                 |
+| 0x0E   | Scheduled alarm time days (16-bit)                    |
+| 0x10   | Alarm enabled flag (8-bits, either 0 or 1)            |
 
 #### SGB block
 

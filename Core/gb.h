@@ -101,6 +101,14 @@ typedef union {
     uint8_t data[5];
 } GB_rtc_time_t;
 
+typedef struct __attribute__((packed)) {
+    uint64_t last_rtc_second;
+    uint16_t minutes;
+    uint16_t days;
+    uint16_t alarm_minutes, alarm_days;
+    uint8_t alarm_enabled;
+} GB_huc3_rtc_time_t;
+
 typedef enum {
     // GB_MODEL_DMG_0 = 0x000,
     // GB_MODEL_DMG_A = 0x001,

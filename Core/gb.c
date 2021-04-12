@@ -578,14 +578,6 @@ typedef struct {
     uint8_t padding5[3];
 } GB_vba_rtc_time_t;
 
-typedef struct __attribute__((packed)) {
-    uint64_t last_rtc_second;
-    uint16_t minutes;
-    uint16_t days;
-    uint16_t alarm_minutes, alarm_days;
-    uint8_t alarm_enabled;
-} GB_huc3_rtc_time_t;
-
 typedef union {
     struct __attribute__((packed)) {
         GB_rtc_time_t rtc_real;
@@ -609,7 +601,7 @@ int GB_save_battery_size(GB_gameboy_t *gb)
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
-        return  gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
+        return gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
     }
     GB_rtc_save_t rtc_save_size;
     return gb->mbc_ram_size + (gb->cartridge_type->has_rtc ? sizeof(rtc_save_size.vba64) : 0);
