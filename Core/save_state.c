@@ -215,6 +215,8 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
             return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
         case GB_HUC3:
             return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_HUC3_t);
+        case GB_TPP1:
+            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_RTC_t);
     }
 }
 
@@ -442,6 +444,14 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
             pairs[1] = (BESS_MBC_pair_t){LE16(0x2000), gb->huc3.rom_bank};
             pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->huc3.ram_bank};
             mbc_block.size = 3 * sizeof(pairs[0]);
+            break;
+        
+        case GB_TPP1:
+            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->tpp1_rom_bank};
+            pairs[1] = (BESS_MBC_pair_t){LE16(0x0001), gb->tpp1_rom_bank >> 8};
+            pairs[2] = (BESS_MBC_pair_t){LE16(0x0002), gb->tpp1_rom_bank};
+            pairs[3] = (BESS_MBC_pair_t){LE16(0x0003), gb->tpp1_mode};
+            mbc_block.size = 4 * sizeof(pairs[0]);
             break;
     }
     
