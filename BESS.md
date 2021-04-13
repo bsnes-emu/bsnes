@@ -132,7 +132,7 @@ This block contains an MBC-specific number of 3-byte-long pairs that represent t
 | 0x9    | The value 0x4000 as a 16-bit integer  |
 | 0xB    | The current RAM bank                  |
 
-An implementation should parse this block as a series of writes to be made. Values outside the `0x0000-0x7FFF` range are not allowed.
+An implementation should parse this block as a series of writes to be made. Values outside the `0x0000-0x7FFF` and `0xA000-0xBFFF`  ranges are not allowed.
 
 #### RTC block
 The RTC block uses the `'RTC '` identifier, and is an optional block that is used while emulating an MBC3 with an RTC. The contents of this block are identical to 64-bit RTC saves from VBA, which are also used by SameBoy and different emulators such as BGB.

@@ -916,7 +916,8 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 for (unsigned i = LE32(block.size); i > 0;  i -= 3) {
                     BESS_MBC_pair_t pair;
                     file->read(file, &pair, sizeof(pair));
-                    if (LE16(pair.address) >= 0x8000) goto parse_error;
+                    if (LE16(pair.address) >= 0x8000 && LE16(pair.address) < 0xA000) goto parse_error;
+                    if (LE16(pair.address) >= 0xC000) goto parse_error;
                     GB_write_memory(&save, LE16(pair.address), pair.value);
                 }
                 break;
