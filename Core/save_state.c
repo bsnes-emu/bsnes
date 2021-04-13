@@ -987,6 +987,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 break;
             case BE32('SGB '):
                 if (!found_core) goto parse_error;
+                if (!gb->sgb) goto parse_error;
                 if (LE32(block.size) != sizeof(BESS_SGB_t) - sizeof(block)) goto parse_error;
                 file->read(file, &sgb.header + 1, sizeof(BESS_SGB_t) - sizeof(block));
                 found_sgb = true;
