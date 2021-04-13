@@ -108,7 +108,7 @@ static void state_decompress(const uint8_t *prev, uint8_t *data, uint8_t *dest, 
 
 void GB_rewind_push(GB_gameboy_t *gb)
 {
-    const size_t save_size = GB_get_save_state_size(gb);
+    const size_t save_size = GB_get_save_state_size_no_bess(gb);
     if (!gb->rewind_sequences) {
         if (gb->rewind_buffer_length) {
             gb->rewind_sequences = malloc(sizeof(*gb->rewind_sequences) * gb->rewind_buffer_length);
@@ -140,11 +140,11 @@ void GB_rewind_push(GB_gameboy_t *gb)
     
     if (!gb->rewind_sequences[gb->rewind_pos].key_state) {
         gb->rewind_sequences[gb->rewind_pos].key_state = malloc(save_size);
-        GB_save_state_to_buffer(gb, gb->rewind_sequences[gb->rewind_pos].key_state);
+        GB_save_state_to_buffer_no_bess(gb, gb->rewind_sequences[gb->rewind_pos].key_state);
     }
     else {
         uint8_t *save_state = malloc(save_size);
-        GB_save_state_to_buffer(gb, save_state);
+        GB_save_state_to_buffer_no_bess(gb, save_state);
         gb->rewind_sequences[gb->rewind_pos].compressed_states[gb->rewind_sequences[gb->rewind_pos].pos++] =
             state_compress(gb->rewind_sequences[gb->rewind_pos].key_state, save_state, save_size);
         free(save_state);
@@ -158,7 +158,7 @@ bool GB_rewind_pop(GB_gameboy_t *gb)
         return false;
     }
     
-    const size_t save_size = GB_get_save_state_size(gb);
+    const size_t save_size = GB_get_save_state_size_no_bess(gb);
     if (gb->rewind_sequences[gb->rewind_pos].pos == 0) {
         GB_load_state_from_buffer(gb, gb->rewind_sequences[gb->rewind_pos].key_state, save_size);
         free(gb->rewind_sequences[gb->rewind_pos].key_state);

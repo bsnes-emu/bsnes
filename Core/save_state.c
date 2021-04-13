@@ -218,7 +218,7 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
     }
 }
 
-size_t GB_get_save_state_size(GB_gameboy_t *gb)
+size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb)
 {
     return GB_SECTION_SIZE(header)
     + GB_SECTION_SIZE(core_state) + sizeof(uint32_t)
@@ -232,7 +232,12 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + (GB_is_hle_sgb(gb)? sizeof(*gb->sgb) + sizeof(uint32_t) : 0)
     + gb->mbc_ram_size
     + gb->ram_size
-    + gb->vram_size
+    + gb->vram_size;
+}
+
+size_t GB_get_save_state_size(GB_gameboy_t *gb)
+{
+    return GB_get_save_state_size_no_bess(gb) +
     // BESS
     + sizeof(BESS_CORE_t)
     + sizeof(BESS_block_t) // NAME
@@ -453,7 +458,7 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
     return 0;
 }
 
-static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
+static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool append_bess)
 {
     if (file->write(file, GB_GET_SECTION(gb, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) goto error;
     if (!DUMP_SECTION(gb, file, core_state)) goto error;
@@ -475,6 +480,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
     
+    
     BESS_CORE_t bess_core = {0,};
     
     bess_core.mbc_ram.offset = LE32(file->tell(file));
@@ -494,6 +500,8 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     if (file->write(file, gb->vram, gb->vram_size) != gb->vram_size) {
         goto error;
     }
+    
+    if (!append_bess) return 0;
     
     BESS_footer_t bess_footer = {
         .start_offset = LE32(file->tell(file)),
@@ -694,7 +702,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
         .tell = file_tell,
         .file = f,
     };
-    int ret = save_state_internal(gb, &file);
+    int ret = save_state_internal(gb, &file, true);
     fclose(f);
     return ret;
 }
@@ -709,10 +717,23 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
         .position = 0,
     };
     
-    save_state_internal(gb, &file);
+    save_state_internal(gb, &file, true);
     assert(file.position == GB_get_save_state_size(gb));
 }
 
+void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer)
+{
+    virtual_file_t file = {
+        .write = buffer_write,
+        .seek = buffer_seek,
+        .tell = buffer_tell,
+        .buffer = (uint8_t *)buffer,
+        .position = 0,
+    };
+    
+    save_state_internal(gb, &file, false);
+    assert(file.position == GB_get_save_state_size_no_bess(gb));
+}
 
 static bool read_section(virtual_file_t *file, void *dest, uint32_t size, bool fix_broken_windows_saves)
 {
