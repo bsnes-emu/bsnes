@@ -139,7 +139,7 @@ The RTC block uses the `'RTC '` identifier, and is an optional block that is use
 
 The length of this block is 0x30 bytes long and it follows the following structure:
 
-|Offset  | Content                                                                |
+| Offset | Content                                                                |
 |--------|------------------------------------------------------------------------|
 | 0x00   | Current seconds (1 byte), followed by 3 bytes of padding               |
 | 0x04   | Current minutes (1 byte), followed by 3 bytes of padding               |
@@ -158,7 +158,7 @@ The HUC3 block uses the `'HUC3'` identifier, and is an optional block that is us
 
 The length of this block is 0x11 bytes long and it follows the following structure:
 
-|Offset  | Content                                               |
+| Offset | Content                                               |
 |--------|-------------------------------------------------------|
 | 0x00   | UNIX timestamp at the time of the save state (64-bit) |
 | 0x08   | RTC minutes (16-bit)                                  |
@@ -173,23 +173,23 @@ The SGB block uses the `'SGB '` identifier, and is an optional block that is onl
 
 The length of this block is 0x39 bytes and it follows the following structure:
 
-|Offset  | Content                                                                                          |
-|--------|--------------------------------------------------------------------------------------------------|
-| 0x00   | The size of the border tile data (=0x2000, 32-bit integer)                                       |
-| 0x04   | The offset of the border tile data (SNES tile format, 32-bit integer)                            |
-| 0x08   | The size of the border tilemap (=0x800, 32-bit integer)                                          |
-| 0x0C   | The offset of the border tilemap (LE 16-bit sequences, 32-bit integer)                           |
-| 0x10   | The size of the border palettes (=0x80, 32-bit integer)                                          |
-| 0x14   | The offset of the border palettes (LE 16-bit sequences, 32-bit integer)                          |
-| 0x18   | The size of active colorization palettes (=0x20, 32-bit integer)                                 |
-| 0x1C   | The offset of the active colorization palettes (LE 16-bit sequences, 32-bit integer)             |
-| 0x20   | The size of RAM colorization palettes (=0x1000, 32-bit integer)                                  |
-| 0x24   | The offset of the RAM colorization palettes (LE 16-bit sequences, 32-bit integer)                |
-| 0x28   | The size of the attribute map (=0x168, 32-bit integer)                                           |
-| 0x2C   | The offset of the attribute map (32-bit integer)                                                 |
-| 0x30   | The size of the attribute files (=0xfd2, 32-bit integer)                                         |
-| 0x34   | The offset of the attribute files (32-bit integer)                                               |
-| 0x38   | Multiplayer status (1 byte); high nibble is player count, low nibble is current player (0-based) |
+| Offset | Content                                                                                                                  |
+|--------|--------------------------------------------------------------------------------------------------------------------------|
+| 0x00   | The size of the border tile data (=0x2000, 32-bit integer)                                                               |
+| 0x04   | The offset of the border tile data (SNES tile format, 32-bit integer)                                                    |
+| 0x08   | The size of the border tilemap (=0x800, 32-bit integer)                                                                  |
+| 0x0C   | The offset of the border tilemap (LE 16-bit sequences, 32-bit integer)                                                   |
+| 0x10   | The size of the border palettes (=0x80, 32-bit integer)                                                                  |
+| 0x14   | The offset of the border palettes (LE 16-bit sequences, 32-bit integer)                                                  |
+| 0x18   | The size of active colorization palettes (=0x20, 32-bit integer)                                                         |
+| 0x1C   | The offset of the active colorization palettes (LE 16-bit sequences, 32-bit integer)                                     |
+| 0x20   | The size of RAM colorization palettes (=0x1000, 32-bit integer)                                                          |
+| 0x24   | The offset of the RAM colorization palettes (LE 16-bit sequences, 32-bit integer)                                        |
+| 0x28   | The size of the attribute map (=0x168, 32-bit integer)                                                                   |
+| 0x2C   | The offset of the attribute map (32-bit integer)                                                                         |
+| 0x30   | The size of the attribute files (=0xfd2, 32-bit integer)                                                                 |
+| 0x34   | The offset of the attribute files (32-bit integer)                                                                       |
+| 0x38   | Multiplayer status (1 byte); high nibble is player count (1, 2 or 4), low nibble is current player (Where Player 1 is 0) |
 
 If only some of the size-offset pairs are available (for example, partial HLE SGB implementation), missing fields are allowed to have 0 as their size, and implementations are expected to fall back to a sane default.
 

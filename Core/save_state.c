@@ -1032,7 +1032,7 @@ done:
                 
                 gb->sgb->player_count = sgb.multiplayer_state >> 4;
                 gb->sgb->current_player = sgb.multiplayer_state & 0xF;
-                if (gb->sgb->player_count > 4 || gb->sgb->player_count == 3) {
+                if (gb->sgb->player_count > 4 || gb->sgb->player_count == 3 || gb->sgb->player_count == 0) {
                     gb->sgb->player_count = 1;
                     gb->sgb->current_player = 0;
                 }
