@@ -598,6 +598,8 @@ typedef union {
 int GB_save_battery_size(GB_gameboy_t *gb)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
+
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
@@ -610,6 +612,7 @@ int GB_save_battery_size(GB_gameboy_t *gb)
 int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
     if (size < GB_save_battery_size(gb)) return EIO;
@@ -667,6 +670,7 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 int GB_save_battery(GB_gameboy_t *gb, const char *path)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
     FILE *f = fopen(path, "wb");
     if (!f) {

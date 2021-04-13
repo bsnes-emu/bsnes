@@ -166,6 +166,7 @@ typedef union {
     double _sentRumbleAmp;
     unsigned _rumbleCounter;
     bool _deviceCantSendReports;
+    dispatch_queue_t _rumbleQueue;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device hacks:(NSDictionary *)hacks
@@ -490,8 +491,10 @@ typedef union {
                 {.timeEnabled =  0,    .dutyLength = 0,    .enabled = 0,    .dutyOff = 0, .dutyOn = 0},
             }
         };
-
     }
+    
+    _rumbleQueue = dispatch_queue_create([NSString stringWithFormat:@"Rumble Queue for %@", self.deviceName].UTF8String,
+                                         NULL);
     
     return self;
 }
@@ -564,7 +567,9 @@ typedef union {
             }
         }
     }
-    [self updateRumble];
+    dispatch_async(_rumbleQueue, ^{
+        [self updateRumble];
+    });
 }
 
 - (void)elementChanged:(IOHIDElementRef)element
@@ -699,7 +704,9 @@ typedef union {
     _physicallyConnected = false;
     [exposedControllers removeObject:self];
     [self setRumbleAmplitude:0];
-    [self updateRumble];
+    dispatch_sync(_rumbleQueue, ^{
+        [self updateRumble];
+    });
     _device = nil;
 }
 

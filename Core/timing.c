@@ -288,10 +288,22 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
         while (gb->last_rtc_second + 60 * 60 * 24 < current_time) {
             gb->last_rtc_second += 60 * 60 * 24;
             if (++gb->rtc_real.days == 0) {
-                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
-                    gb->rtc_real.high |= 0x80; /* Overflow bit */
+                if (gb->cartridge_type->mbc_type == GB_TPP1) {
+                    if ((gb->rtc_real.high & 7) >= 6) { /* Bit 8 of days*/
+                        gb->rtc_real.high &= 0x40;
+                        gb->rtc_real.high |= 0x80; /* Overflow bit */
+                    }
+                    else {
+                        gb->rtc_real.high++;
+                    }
                 }
-                gb->rtc_real.high ^= 1;
+                else {
+                    if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                        gb->rtc_real.high |= 0x80; /* Overflow bit */
+                    }
+                    
+                    gb->rtc_real.high ^= 1;
+                }
             }
         }
         
@@ -308,11 +320,22 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
             
             if (++gb->rtc_real.days != 0) continue;
             
-            if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
-                gb->rtc_real.high |= 0x80; /* Overflow bit */
+            if (gb->cartridge_type->mbc_type == GB_TPP1) {
+                if ((gb->rtc_real.high & 7) >= 6) { /* Bit 8 of days*/
+                    gb->rtc_real.high &= 0x40;
+                    gb->rtc_real.high |= 0x80; /* Overflow bit */
+                }
+                else {
+                    gb->rtc_real.high++;
+                }
             }
-            
-            gb->rtc_real.high ^= 1;
+            else {
+                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                    gb->rtc_real.high |= 0x80; /* Overflow bit */
+                }
+                
+                gb->rtc_real.high ^= 1;
+            }
         }
     }
 }
@@ -344,13 +367,9 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
     
-    if (gb->rumble_state) {
-        gb->rumble_on_cycles++;
-    }
-    else {
-        gb->rumble_off_cycles++;
-    }
-    
+    gb->rumble_on_cycles += gb->rumble_strength & 3;
+    gb->rumble_off_cycles += (gb->rumble_strength & 3) ^ 3;
+        
     if (!gb->stopped) { // TODO: Verify what happens in STOP mode
         GB_dma_run(gb);
         GB_hdma_run(gb);
