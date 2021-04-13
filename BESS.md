@@ -28,11 +28,11 @@ BESS uses a block format where each block contains the following header:
 | 0      | A four-letter ASCII identifier        |
 | 4      | Length of the block, excluding header |
 
-Every block is followed by another blocked, until the END block is reached.
+Every block is followed by another blocked, until the END block is reached. If an implementation encounters an unsupported block, it should be completely ignored (Should not have any effect and should not trigger a failure). 
 
 #### CORE block
 
-The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, except for the `NAME` block.
+The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, except for the `NAME` block (But an implementation should allow unknown blocks to appear before it for future compatibility).
 
 The length of the CORE block is 0xD0 bytes, but implementations are expected to ignore any excess bytes. Following the BESS block header, the structure is as follows:
 
@@ -194,5 +194,15 @@ The length of this block is 0x39 bytes and it follows the following structure:
 If only some of the size-offset pairs are available (for example, partial HLE SGB implementation), missing fields are allowed to have 0 as their size, and implementations are expected to fall back to a sane default.
 
 #### END block
-The END block uses the `'END '` identifier, and is a required block that marks the end of BESS data. Naturally, it must be the last block.
+The END block uses the `'END '` identifier, and is a required block that marks the end of BESS data. Naturally, it must be the last block. The length of the END block must be 0.
 
+## Validation and Failures
+
+Other than previously specified required fail conditions, an implementation is free to decide what format errors should abort the loading of a save file. Structural errors (e.g. a block with an invalid length, a file offset that is outside the file's range, or a missing END block) should be considered as irrecoverable errors. Other errors that are considered fatal by SameBoy's implementation:
+* Duplicate CORE block
+* A known block, other than NAME, appearing before CORE
+* An invalid length for the XOAM, RTC, SGB or HUC3 blocks
+* An invalid length of MBC (not a multiple of 3)
+* A write outside the $0000-$7FFF and $A000-$BFFF ranges in the MBC block
+* An SGB block on a save state targeting another model
+* An END block with non-zero length
