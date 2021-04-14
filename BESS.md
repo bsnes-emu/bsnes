@@ -30,9 +30,16 @@ BESS uses a block format where each block contains the following header:
 
 Every block is followed by another blocked, until the END block is reached. If an implementation encounters an unsupported block, it should be completely ignored (Should not have any effect and should not trigger a failure). 
 
+#### NAME block
+
+The NAME block uses the `'NAME'` identifier, and is an optional block that contains the name of the emulator that created this save state. While optional, it is highly recommended to be included in every implementation – it allows the user to know which emulator and version is compatible with the native save state format contained in this file. When used, this block should come first.
+
+The length of the NAME block is variable, and it only contains the name and version of the originating emulator in ASCII.
+
+
 #### CORE block
 
-The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, except for the `NAME` block (But an implementation should allow unknown blocks to appear before it for future compatibility).
+The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, unless the `NAME` block exists then it must be second. An implementation should not enforce block order on blocks unknown to it for future compatibility.
 
 The length of the CORE block is 0xD0 bytes, but implementations are expected to ignore any excess bytes. Following the BESS block header, the structure is as follows:
 
@@ -105,12 +112,6 @@ The contents of large buffers are stored outside of BESS structure so data from 
 
 An implementation needs handle size mismatches gracefully. For example, if too large MBC RAM size is specified, the superfluous data should be ignored. On the other hand, if a too small VRAM size is specified (For example, if it's a save state from an emulator emulating a CGB in DMG mode, and it didn't save the second CGB VRAM bank), the implementation is expected to set that extra bank to all zeros.
 
-#### NAME block
-
-The NAME block uses the `'NAME'` identifier, and is an optional block that contains the name of the emulator that created this save state. While optional, it is highly recommended to be included in every implementation – it allows the user to know which emulator and version is compatible with the native save state format contained in this file. When used, this block should come first.
-
-The length of the NAME block is variable, and it only contains the name and version of the originating emulator in ASCII.
-
 #### XOAM block
 
 The XOAM block uses the `'XOAM'` identifier, and is an optional block that contains the data of extra OAM (addresses `0xFEA0-0xFEFF`). This block length must be `0x60`. Implementations that do not emulate this extra range are free to ignore the excess bytes, and to not create this block.
@@ -172,7 +173,7 @@ The length of this block is 0x11 bytes long and it follows the following structu
 
 The SGB block uses the `'SGB '` identifier, and is an optional block that is only used while emulating an SGB or SGB2 *and* SGB commands enabled. Implementations must not save this block on other models or when SGB commands are disabled, and should assume SGB commands are disabled if this block is missing.
 
-The length of this block is 0x39 bytes and it follows the following structure:
+The length of this block is 0x39 bytes, but implementations should allow and ignore excess data in this block for extensions. The block follows the following structure:
 
 | Offset | Content                                                                                                                  |
 |--------|--------------------------------------------------------------------------------------------------------------------------|
