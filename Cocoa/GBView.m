@@ -142,6 +142,8 @@ static const uint8_t workboy_vk_to_key[] = {
 
 - (void) _init
 {
+    [self registerForDraggedTypes:[NSArray arrayWithObjects: NSPasteboardTypeFileURL, nil]];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
                                                   options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect
@@ -624,6 +626,31 @@ static const uint8_t workboy_vk_to_key[] = {
 - (uint32_t *)previousBuffer
 {
     return image_buffers[(current_buffer + 2) % self.numberOfBuffers];
+}
+
+-(NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender
+{
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    
+    if ( [[pboard types] containsObject:NSURLPboardType] ) {
+        NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
+        if (GB_is_stave_state(fileURL.fileSystemRepresentation)) {
+            return NSDragOperationGeneric;
+        }
+    }
+    return NSDragOperationNone;
+}
+
+-(BOOL)performDragOperation:(id<NSDraggingInfo>)sender
+{
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    
+    if ( [[pboard types] containsObject:NSURLPboardType] ) {
+        NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
+        return [_document loadStateFile:fileURL.fileSystemRepresentation];
+    }
+
+    return false;
 }
 
 @end

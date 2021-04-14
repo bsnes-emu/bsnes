@@ -142,8 +142,14 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
                 
             case SDL_DROPFILE: {
-                set_filename(event.drop.file, SDL_free);
-                pending_command = GB_SDL_NEW_FILE_COMMAND;
+                if (GB_is_stave_state(event.drop.file)) {
+                    dropped_state_file = event.drop.file;
+                    pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
+                }
+                else {
+                    set_filename(event.drop.file, SDL_free);
+                    pending_command = GB_SDL_NEW_FILE_COMMAND;
+                }
                 break;
             }
                 
@@ -433,6 +439,13 @@ static bool handle_pending_command(void)
             end_capturing_logs(true, false);
             return false;
         }
+    
+        case GB_SDL_LOAD_STATE_FROM_FILE_COMMAND:
+            start_capturing_logs();
+            GB_load_state(&gb, dropped_state_file);
+            end_capturing_logs(true, false);
+            SDL_free(dropped_state_file);
+            return false;
             
         case GB_SDL_NO_COMMAND:
             return false;

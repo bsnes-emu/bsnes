@@ -1170,3 +1170,36 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     
     return load_state_internal(gb, &file);
 }
+
+
+bool GB_is_stave_state(const char *path)
+{
+    bool ret = false;
+    FILE *f = fopen(path, "rb");
+    if (!f) return false;
+    uint32_t magic = 0;
+    fread(&magic, sizeof(magic), 1, f);
+    if (magic == state_magic()) {
+        ret = true;
+        goto exit;
+    }
+    
+    // Legacy corrupted Windows save state
+    if (magic == 0) {
+        fread(&magic, sizeof(magic), 1, f);
+        if (magic == state_magic()) {
+            ret = true;
+            goto exit;
+        }
+    }
+    
+    fseek(f, -sizeof(magic), SEEK_END);
+    fread(&magic, sizeof(magic), 1, f);
+    if (magic == BE32('BESS')) {
+        ret = true;
+    }
+    
+exit:
+    fclose(f);
+    return ret;
+}

@@ -44,5 +44,6 @@
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;
 -(void) performAtomicBlock: (void (^)())block;
 -(void) connectLinkCable:(NSMenuItem *)sender;
+- (bool)loadStateFile:(const char *)path;
 @end
 

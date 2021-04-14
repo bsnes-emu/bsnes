@@ -19,12 +19,6 @@
 #endif
 
 
-static inline uint32_t state_magic(void)
-{
-    if (sizeof(bool) == 1) return 'SAME';
-    return 'S4ME';
-}
-
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;

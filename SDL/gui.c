@@ -18,6 +18,7 @@ SDL_Texture *texture = NULL;
 SDL_PixelFormat *pixel_format = NULL;
 enum pending_command pending_command;
 unsigned command_parameter;
+char *dropped_state_file = NULL;
 
 #ifdef __APPLE__
 #define MODIFIER_NAME " " CMD_STRING
@@ -1300,9 +1301,15 @@ void run_gui(bool is_running)
                 break;
             }
             case SDL_DROPFILE: {
-                set_filename(event.drop.file, SDL_free);
-                pending_command = GB_SDL_NEW_FILE_COMMAND;
-                return;
+                if (GB_is_stave_state(event.drop.file)) {
+                    dropped_state_file = event.drop.file;
+                    pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
+                }
+                else {
+                    set_filename(event.drop.file, SDL_free);
+                    pending_command = GB_SDL_NEW_FILE_COMMAND;
+                    return;
+                }
             }
             case SDL_JOYBUTTONDOWN:
             {
