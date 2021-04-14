@@ -50,6 +50,7 @@ typedef struct __attribute__((packed)) {
     uint8_t ime;
     uint8_t ie;
     uint8_t execution_mode; // 0 = running; 1 = halted; 2 = stopped
+    uint8_t _padding;
     
     uint8_t io_registers[0x80];
     
@@ -98,6 +99,12 @@ typedef struct __attribute__((packed)){
     } real, latched;
     uint64_t last_rtc_second;
 } BESS_RTC_t;
+
+/* Same HuC3 RTC format as used by SameBoy and BGB in battery saves */
+typedef struct __attribute__((packed)){
+    BESS_block_t header;
+    GB_huc3_rtc_time_t data;
+} BESS_HUC3_t;
 
 typedef struct  __attribute__((packed)) {
     uint16_t address;
@@ -207,11 +214,13 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
         case GB_HUC1:
             return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
         case GB_HUC3:
-            return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t);
+            return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_HUC3_t);
+        case GB_TPP1:
+            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_RTC_t);
     }
 }
 
-size_t GB_get_save_state_size(GB_gameboy_t *gb)
+size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb)
 {
     return GB_SECTION_SIZE(header)
     + GB_SECTION_SIZE(core_state) + sizeof(uint32_t)
@@ -225,14 +234,19 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + (GB_is_hle_sgb(gb)? sizeof(*gb->sgb) + sizeof(uint32_t) : 0)
     + gb->mbc_ram_size
     + gb->ram_size
-    + gb->vram_size
+    + gb->vram_size;
+}
+
+size_t GB_get_save_state_size(GB_gameboy_t *gb)
+{
+    return GB_get_save_state_size_no_bess(gb) +
     // BESS
     + sizeof(BESS_CORE_t)
     + sizeof(BESS_block_t) // NAME
     + sizeof(BESS_NAME) - 1
     + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
-    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC block
+    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3 block
     + sizeof(BESS_block_t) // END block
     + sizeof(BESS_footer_t);
 }
@@ -431,6 +445,14 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
             pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->huc3.ram_bank};
             mbc_block.size = 3 * sizeof(pairs[0]);
             break;
+        
+        case GB_TPP1:
+            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->tpp1_rom_bank};
+            pairs[1] = (BESS_MBC_pair_t){LE16(0x0001), gb->tpp1_rom_bank >> 8};
+            pairs[2] = (BESS_MBC_pair_t){LE16(0x0002), gb->tpp1_rom_bank};
+            pairs[3] = (BESS_MBC_pair_t){LE16(0x0003), gb->tpp1_mode};
+            mbc_block.size = 4 * sizeof(pairs[0]);
+            break;
     }
     
     mbc_block.size = LE32(mbc_block.size);
@@ -446,7 +468,7 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
     return 0;
 }
 
-static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
+static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool append_bess)
 {
     if (file->write(file, GB_GET_SECTION(gb, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) goto error;
     if (!DUMP_SECTION(gb, file, core_state)) goto error;
@@ -468,6 +490,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
     
+    
     BESS_CORE_t bess_core = {0,};
     
     bess_core.mbc_ram.offset = LE32(file->tell(file));
@@ -487,6 +510,8 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     if (file->write(file, gb->vram, gb->vram_size) != gb->vram_size) {
         goto error;
     }
+    
+    if (!append_bess) return 0;
     
     BESS_footer_t bess_footer = {
         .start_offset = LE32(file->tell(file)),
@@ -581,22 +606,40 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     }
     
     save_bess_mbc_block(gb, file);
-    if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
-        BESS_RTC_t bess_rtc = {0,};
-        bess_rtc.header = (BESS_block_t){BE32('RTC '), LE32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
-        bess_rtc.real.seconds = gb->rtc_real.seconds;
-        bess_rtc.real.minutes = gb->rtc_real.minutes;
-        bess_rtc.real.hours = gb->rtc_real.hours;
-        bess_rtc.real.days = gb->rtc_real.days;
-        bess_rtc.real.high = gb->rtc_real.high;
-        bess_rtc.latched.seconds = gb->rtc_latched.seconds;
-        bess_rtc.latched.minutes = gb->rtc_latched.minutes;
-        bess_rtc.latched.hours = gb->rtc_latched.hours;
-        bess_rtc.latched.days = gb->rtc_latched.days;
-        bess_rtc.latched.high = gb->rtc_latched.high;
-        bess_rtc.last_rtc_second = LE64(gb->last_rtc_second);
-        if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
-            goto error;
+    if (gb->cartridge_type->has_rtc) {
+        if (gb->cartridge_type ->mbc_type != GB_HUC3) {
+            BESS_RTC_t bess_rtc = {0,};
+            bess_rtc.header = (BESS_block_t){BE32('RTC '), LE32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
+            bess_rtc.real.seconds = gb->rtc_real.seconds;
+            bess_rtc.real.minutes = gb->rtc_real.minutes;
+            bess_rtc.real.hours = gb->rtc_real.hours;
+            bess_rtc.real.days = gb->rtc_real.days;
+            bess_rtc.real.high = gb->rtc_real.high;
+            bess_rtc.latched.seconds = gb->rtc_latched.seconds;
+            bess_rtc.latched.minutes = gb->rtc_latched.minutes;
+            bess_rtc.latched.hours = gb->rtc_latched.hours;
+            bess_rtc.latched.days = gb->rtc_latched.days;
+            bess_rtc.latched.high = gb->rtc_latched.high;
+            bess_rtc.last_rtc_second = LE64(gb->last_rtc_second);
+            if (file->write(file, &bess_rtc, sizeof(bess_rtc)) != sizeof(bess_rtc)) {
+                goto error;
+            }
+        }
+        else {
+            BESS_HUC3_t bess_huc3 = {0,};
+            bess_huc3.header = (BESS_block_t){BE32('HUC3'), LE32(sizeof(bess_huc3) - sizeof(bess_huc3.header))};
+
+            bess_huc3.data = (GB_huc3_rtc_time_t) {
+                LE64(gb->last_rtc_second),
+                LE16(gb->huc3_minutes),
+                LE16(gb->huc3_days),
+                LE16(gb->huc3_alarm_minutes),
+                LE16(gb->huc3_alarm_days),
+                gb->huc3_alarm_enabled,
+            };
+            if (file->write(file, &bess_huc3, sizeof(bess_huc3)) != sizeof(bess_huc3)) {
+                goto error;
+            }
         }
     }
     
@@ -669,7 +712,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
         .tell = file_tell,
         .file = f,
     };
-    int ret = save_state_internal(gb, &file);
+    int ret = save_state_internal(gb, &file, true);
     fclose(f);
     return ret;
 }
@@ -684,10 +727,23 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
         .position = 0,
     };
     
-    save_state_internal(gb, &file);
+    save_state_internal(gb, &file, true);
     assert(file.position == GB_get_save_state_size(gb));
 }
 
+void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer)
+{
+    virtual_file_t file = {
+        .write = buffer_write,
+        .seek = buffer_seek,
+        .tell = buffer_tell,
+        .buffer = (uint8_t *)buffer,
+        .position = 0,
+    };
+    
+    save_state_internal(gb, &file, false);
+    assert(file.position == GB_get_save_state_size_no_bess(gb));
+}
 
 static bool read_section(virtual_file_t *file, void *dest, uint32_t size, bool fix_broken_windows_saves)
 {
@@ -725,6 +781,10 @@ static void read_bess_buffer(const BESS_buffer_t *buffer, virtual_file_t *file, 
     file->seek(file, LE32(buffer->offset), SEEK_SET);
     file->read(file, dest, MIN(LE32(buffer->size), max_size));
     file->seek(file, pos, SEEK_SET);
+    
+    if (LE32(buffer->size) < max_size) {
+        memset(dest + LE32(buffer->size), 0, max_size - LE32(buffer->size));
+    }
 }
 
 static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_sameboy)
@@ -887,7 +947,8 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 for (unsigned i = LE32(block.size); i > 0;  i -= 3) {
                     BESS_MBC_pair_t pair;
                     file->read(file, &pair, sizeof(pair));
-                    if (LE16(pair.address) >= 0x8000) goto parse_error;
+                    if (LE16(pair.address) >= 0x8000 && LE16(pair.address) < 0xA000) goto parse_error;
+                    if (LE16(pair.address) >= 0xC000) goto parse_error;
                     GB_write_memory(&save, LE16(pair.address), pair.value);
                 }
                 break;
@@ -895,8 +956,8 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 if (!found_core) goto parse_error;
                 BESS_RTC_t bess_rtc;
                 if (LE32(block.size) != sizeof(bess_rtc) - sizeof(block)) goto parse_error;
-                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type == GB_MBC3) {
-                    if (file->read(file, &bess_rtc.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (file->read(file, &bess_rtc.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3) {
                     gb->rtc_real.seconds = bess_rtc.real.seconds;
                     gb->rtc_real.minutes = bess_rtc.real.minutes;
                     gb->rtc_real.hours = bess_rtc.real.hours;
@@ -910,8 +971,23 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     gb->last_rtc_second = LE64(bess_rtc.last_rtc_second);
                 }
                 break;
+            case BE32('HUC3'):
+                if (!found_core) goto parse_error;
+                BESS_HUC3_t bess_huc3;
+                if (LE32(block.size) != sizeof(bess_huc3) - sizeof(block)) goto parse_error;
+                if (file->read(file, &bess_huc3.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->mbc_type == GB_HUC3) {
+                    gb->last_rtc_second = LE64(bess_huc3.data.last_rtc_second);
+                    gb->huc3_minutes = LE16(bess_huc3.data.minutes);
+                    gb->huc3_days = LE16(bess_huc3.data.days);
+                    gb->huc3_alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
+                    gb->huc3_alarm_days = LE16(bess_huc3.data.alarm_days);
+                    gb->huc3_alarm_enabled = bess_huc3.data.alarm_enabled;
+                }
+                break;
             case BE32('SGB '):
                 if (!found_core) goto parse_error;
+                if (!gb->sgb) goto parse_error;
                 if (LE32(block.size) != sizeof(BESS_SGB_t) - sizeof(block)) goto parse_error;
                 file->read(file, &sgb.header + 1, sizeof(BESS_SGB_t) - sizeof(block));
                 found_sgb = true;
@@ -957,7 +1033,7 @@ done:
                 
                 gb->sgb->player_count = sgb.multiplayer_state >> 4;
                 gb->sgb->current_player = sgb.multiplayer_state & 0xF;
-                if (gb->sgb->player_count > 4 || gb->sgb->player_count == 3) {
+                if (gb->sgb->player_count > 4 || gb->sgb->player_count == 3 || gb->sgb->player_count == 0) {
                     gb->sgb->player_count = 1;
                     gb->sgb->current_player = 0;
                 }
@@ -1093,4 +1169,37 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
     };
     
     return load_state_internal(gb, &file);
+}
+
+
+bool GB_is_stave_state(const char *path)
+{
+    bool ret = false;
+    FILE *f = fopen(path, "rb");
+    if (!f) return false;
+    uint32_t magic = 0;
+    fread(&magic, sizeof(magic), 1, f);
+    if (magic == state_magic()) {
+        ret = true;
+        goto exit;
+    }
+    
+    // Legacy corrupted Windows save state
+    if (magic == 0) {
+        fread(&magic, sizeof(magic), 1, f);
+        if (magic == state_magic()) {
+            ret = true;
+            goto exit;
+        }
+    }
+    
+    fseek(f, -sizeof(magic), SEEK_END);
+    fread(&magic, sizeof(magic), 1, f);
+    if (magic == BE32('BESS')) {
+        ret = true;
+    }
+    
+exit:
+    fclose(f);
+    return ret;
 }

@@ -1523,7 +1523,9 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        GB_log(gb, "Cartridge includes%s RAM: $%x bytes\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
+        bool has_battery = gb->cartridge_type->has_battery &&
+                           (gb->cartridge_type->mbc_type != GB_TPP1 || (gb->rom[0x153] & 8));
+        GB_log(gb, "Cartridge includes%s RAM: $%x bytes\n", has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
         GB_log(gb, "No cartridge RAM\n");
@@ -1565,7 +1567,8 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "No MBC\n");
     }
 
-    if (cartridge->has_rumble) {
+    if (gb->cartridge_type->has_rumble &&
+       (gb->cartridge_type->mbc_type != GB_TPP1 || (gb->rom[0x153] & 1))) {
         GB_log(gb, "Cart contains a Rumble Pak\n");
     }
 
@@ -1899,7 +1902,7 @@ static bool undo(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
         return true;
     }
     uint16_t pc = gb->pc;
-    GB_load_state_from_buffer(gb, gb->undo_state, GB_get_save_state_size(gb));
+    GB_load_state_from_buffer(gb, gb->undo_state, GB_get_save_state_size_no_bess(gb));
     GB_log(gb, "Reverted a \"%s\" command.\n", gb->undo_label);
     if (pc != gb->pc) {
         GB_cpu_disassemble(gb, gb->pc, 5);
@@ -2205,8 +2208,8 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
 
     const debugger_command_t *command = find_command(command_string);
     if (command) {
-        uint8_t *old_state = malloc(GB_get_save_state_size(gb));
-        GB_save_state_to_buffer(gb, old_state);
+        uint8_t *old_state = malloc(GB_get_save_state_size_no_bess(gb));
+        GB_save_state_to_buffer_no_bess(gb, old_state);
         bool ret = command->implementation(gb, arguments, modifiers, command);
         if (!ret) { // Command continues, save state in any case
             free(gb->undo_state);
@@ -2214,9 +2217,9 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
             gb->undo_label = command->command;
         }
         else {
-            uint8_t *new_state = malloc(GB_get_save_state_size(gb));
-            GB_save_state_to_buffer(gb, new_state);
-            if (memcmp(new_state, old_state, GB_get_save_state_size(gb)) != 0) {
+            uint8_t *new_state = malloc(GB_get_save_state_size_no_bess(gb));
+            GB_save_state_to_buffer_no_bess(gb, new_state);
+            if (memcmp(new_state, old_state, GB_get_save_state_size_no_bess(gb)) != 0) {
                 // State changed, save the old state as the new undo state
                 free(gb->undo_state);
                 gb->undo_state = old_state;
@@ -2306,8 +2309,8 @@ void GB_debugger_run(GB_gameboy_t *gb)
     if (gb->debug_disable) return;
     
     if (!gb->undo_state) {
-        gb->undo_state = malloc(GB_get_save_state_size(gb));
-        GB_save_state_to_buffer(gb, gb->undo_state);
+        gb->undo_state = malloc(GB_get_save_state_size_no_bess(gb));
+        GB_save_state_to_buffer_no_bess(gb, gb->undo_state);
     }
 
     char *input = NULL;
@@ -2355,9 +2358,9 @@ next_command:
         }
         else if (jump_to_result == JUMP_TO_NONTRIVIAL) {
             if (!gb->nontrivial_jump_state) {
-                gb->nontrivial_jump_state = malloc(GB_get_save_state_size(gb));
+                gb->nontrivial_jump_state = malloc(GB_get_save_state_size_no_bess(gb));
             }
-            GB_save_state_to_buffer(gb, gb->nontrivial_jump_state);
+            GB_save_state_to_buffer_no_bess(gb, gb->nontrivial_jump_state);
             gb->non_trivial_jump_breakpoint_occured = false;
             should_delete_state = false;
         }

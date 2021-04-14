@@ -101,6 +101,14 @@ typedef union {
     uint8_t data[5];
 } GB_rtc_time_t;
 
+typedef struct __attribute__((packed)) {
+    uint64_t last_rtc_second;
+    uint16_t minutes;
+    uint16_t days;
+    uint16_t alarm_minutes, alarm_days;
+    uint8_t alarm_enabled;
+} GB_huc3_rtc_time_t;
+
 typedef enum {
     // GB_MODEL_DMG_0 = 0x000,
     // GB_MODEL_DMG_A = 0x001,
@@ -483,10 +491,10 @@ struct GB_gameboy_internal_s {
         uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
-        bool rumble_state;
+        uint8_t rumble_strength;
         bool cart_ir;
         
-        // TODO: move to huc3/mbc3 struct when breaking save compat
+        // TODO: move to huc3/mbc3/tpp1 struct when breaking save compat
         uint8_t huc3_mode;
         uint8_t huc3_access_index;
         uint16_t huc3_minutes, huc3_days;
@@ -495,6 +503,9 @@ struct GB_gameboy_internal_s {
         uint8_t huc3_read;
         uint8_t huc3_access_flags;
         bool mbc3_rtc_mapped;
+        uint16_t tpp1_rom_bank;
+        uint8_t tpp1_ram_bank;
+        uint8_t tpp1_mode;
     );
 
 

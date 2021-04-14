@@ -19,12 +19,6 @@
 #endif
 
 
-static inline uint32_t state_magic(void)
-{
-    if (sizeof(bool) == 1) return 'SAME';
-    return 'S4ME';
-}
-
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
@@ -701,14 +695,6 @@ typedef struct {
     uint8_t padding5[3];
 } GB_vba_rtc_time_t;
 
-typedef struct __attribute__((packed)) {
-    uint64_t last_rtc_second;
-    uint16_t minutes;
-    uint16_t days;
-    uint16_t alarm_minutes, alarm_days;
-    uint8_t alarm_enabled;
-} GB_huc3_rtc_time_t;
-
 typedef union {
     struct __attribute__((packed)) {
         GB_rtc_time_t rtc_real;
@@ -729,10 +715,12 @@ typedef union {
 int GB_save_battery_size(GB_gameboy_t *gb)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
+
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
-        return  gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
+        return gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
     }
     GB_rtc_save_t rtc_save_size;
     return gb->mbc_ram_size + (gb->cartridge_type->has_rtc ? sizeof(rtc_save_size.vba64) : 0);
@@ -741,6 +729,7 @@ int GB_save_battery_size(GB_gameboy_t *gb)
 int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
 
     if (size < GB_save_battery_size(gb)) return EIO;
@@ -798,6 +787,7 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 int GB_save_battery(GB_gameboy_t *gb, const char *path)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->cartridge_type->mbc_type == GB_TPP1 && !(gb->rom[0x153] & 8)) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
     FILE *f = fopen(path, "wb");
     if (!f) {

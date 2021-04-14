@@ -1263,12 +1263,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
-- (IBAction)loadState:(id)sender
+- (bool)loadStateFile:(const char *)path
 {
     bool __block success = false;
     NSString *error =
     [self captureOutputForBlock:^{
-        success = GB_load_state(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String) == 0;
+        success = GB_load_state(&gb, path) == 0;
     }];
     
     if (!success) {
@@ -1277,6 +1277,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     if (error) {
         [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];
     }
+    return success;
+}
+
+- (IBAction)loadState:(id)sender
+{
+    [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String];
 }
 
 - (IBAction)clearConsole:(id)sender
