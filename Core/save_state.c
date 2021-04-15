@@ -112,6 +112,14 @@ typedef struct __attribute__((packed)){
     GB_huc3_rtc_time_t data;
 } BESS_HUC3_t;
 
+typedef struct __attribute__((packed)){
+    BESS_block_t header;
+    uint64_t last_rtc_second;
+    uint8_t real_rtc_data[4];
+    uint8_t latched_rtc_data[4];
+    uint8_t mr4;
+} BESS_TPP1_t;
+
 typedef struct  __attribute__((packed)) {
     uint16_t address;
     uint8_t value;
@@ -222,7 +230,7 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
         case GB_HUC3:
             return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_HUC3_t);
         case GB_TPP1:
-            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_RTC_t);
+            return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_TPP1_t);
     }
 }
 
@@ -253,7 +261,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + sizeof(BESS_CORE_t)
     + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
-    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3 block
+    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3/TPP1 block
     + sizeof(BESS_block_t) // END block
     + sizeof(BESS_footer_t);
 }
@@ -630,7 +638,22 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
     
     save_bess_mbc_block(gb, file);
     if (gb->cartridge_type->has_rtc) {
-        if (gb->cartridge_type ->mbc_type != GB_HUC3) {
+        if (gb->cartridge_type ->mbc_type == GB_TPP1) {
+            BESS_TPP1_t bess_tpp1 = {0,};
+            bess_tpp1.header = (BESS_block_t){BE32('TPP1'), LE32(sizeof(bess_tpp1) - sizeof(bess_tpp1.header))};
+            
+            bess_tpp1.last_rtc_second = LE64(gb->last_rtc_second);
+            unrolled for (unsigned i = 4; i--;) {
+                bess_tpp1.real_rtc_data[i] = gb->rtc_real.data[i ^ 3];
+                bess_tpp1.latched_rtc_data[i] = gb->rtc_latched.data[i ^ 3];
+            }
+            bess_tpp1.mr4 = gb->tpp1_mr4;
+
+            if (file->write(file, &bess_tpp1, sizeof(bess_tpp1)) != sizeof(bess_tpp1)) {
+                goto error;
+            }
+        }
+        else if (gb->cartridge_type ->mbc_type != GB_HUC3) {
             BESS_RTC_t bess_rtc = {0,};
             bess_rtc.header = (BESS_block_t){BE32('RTC '), LE32(sizeof(bess_rtc) - sizeof(bess_rtc.header))};
             bess_rtc.real.seconds = gb->rtc_real.seconds;
@@ -997,33 +1020,51 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 BESS_RTC_t bess_rtc;
                 if (LE32(block.size) != sizeof(bess_rtc) - sizeof(block)) goto parse_error;
                 if (file->read(file, &bess_rtc.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
-                if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3) {
-                    gb->rtc_real.seconds = bess_rtc.real.seconds;
-                    gb->rtc_real.minutes = bess_rtc.real.minutes;
-                    gb->rtc_real.hours = bess_rtc.real.hours;
-                    gb->rtc_real.days = bess_rtc.real.days;
-                    gb->rtc_real.high = bess_rtc.real.high;
-                    gb->rtc_latched.seconds = bess_rtc.latched.seconds;
-                    gb->rtc_latched.minutes = bess_rtc.latched.minutes;
-                    gb->rtc_latched.hours = bess_rtc.latched.hours;
-                    gb->rtc_latched.days = bess_rtc.latched.days;
-                    gb->rtc_latched.high = bess_rtc.latched.high;
-                    gb->last_rtc_second = LE64(bess_rtc.last_rtc_second);
+                if (!gb->cartridge_type->has_rtc || gb->cartridge_type->mbc_type != GB_MBC3) break;
+                save.rtc_real.seconds = bess_rtc.real.seconds;
+                save.rtc_real.minutes = bess_rtc.real.minutes;
+                save.rtc_real.hours = bess_rtc.real.hours;
+                save.rtc_real.days = bess_rtc.real.days;
+                save.rtc_real.high = bess_rtc.real.high;
+                save.rtc_latched.seconds = bess_rtc.latched.seconds;
+                save.rtc_latched.minutes = bess_rtc.latched.minutes;
+                save.rtc_latched.hours = bess_rtc.latched.hours;
+                save.rtc_latched.days = bess_rtc.latched.days;
+                save.rtc_latched.high = bess_rtc.latched.high;
+                if (gb->rtc_mode == GB_RTC_MODE_SYNC_TO_HOST) {
+                    save.last_rtc_second = MIN(LE64(bess_rtc.last_rtc_second), time(NULL));
                 }
+                
                 break;
             case BE32('HUC3'):
                 if (!found_core) goto parse_error;
                 BESS_HUC3_t bess_huc3;
                 if (LE32(block.size) != sizeof(bess_huc3) - sizeof(block)) goto parse_error;
                 if (file->read(file, &bess_huc3.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
-                if (gb->cartridge_type->mbc_type == GB_HUC3) {
-                    gb->last_rtc_second = LE64(bess_huc3.data.last_rtc_second);
-                    gb->huc3_minutes = LE16(bess_huc3.data.minutes);
-                    gb->huc3_days = LE16(bess_huc3.data.days);
-                    gb->huc3_alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
-                    gb->huc3_alarm_days = LE16(bess_huc3.data.alarm_days);
-                    gb->huc3_alarm_enabled = bess_huc3.data.alarm_enabled;
+                if (gb->cartridge_type->mbc_type != GB_HUC3) break;
+                if (gb->rtc_mode == GB_RTC_MODE_SYNC_TO_HOST) {
+                    save.last_rtc_second = MIN(LE64(bess_huc3.data.last_rtc_second), time(NULL));
                 }
+                save.huc3_minutes = LE16(bess_huc3.data.minutes);
+                save.huc3_days = LE16(bess_huc3.data.days);
+                save.huc3_alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
+                save.huc3_alarm_days = LE16(bess_huc3.data.alarm_days);
+                save.huc3_alarm_enabled = bess_huc3.data.alarm_enabled;
+                break;
+            case BE32('TPP1'):
+                if (!found_core) goto parse_error;
+                BESS_TPP1_t bess_tpp1;
+                if (LE32(block.size) != sizeof(bess_tpp1) - sizeof(block)) goto parse_error;
+                if (file->read(file, &bess_tpp1.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->mbc_type != GB_TPP1) break;
+                if (gb->rtc_mode == GB_RTC_MODE_SYNC_TO_HOST) {
+                    save.last_rtc_second = MIN(LE64(bess_tpp1.last_rtc_second), time(NULL));
+                }
+                unrolled for (unsigned i = 4; i--;) {
+                    save.rtc_real.data[i ^ 3] = bess_tpp1.real_rtc_data[i];
+                    save.rtc_latched.data[i ^ 3] = bess_tpp1.latched_rtc_data[i];
+                }
+                save.tpp1_mr4 = bess_tpp1.mr4;
                 break;
             case BE32('SGB '):
                 if (!found_core) goto parse_error;
