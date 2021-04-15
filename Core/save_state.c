@@ -82,6 +82,12 @@ typedef struct __attribute__((packed)) {
     uint8_t multiplayer_state;
 } BESS_SGB_t;
 
+typedef struct __attribute__((packed)){
+    BESS_block_t header;
+    char title[0x10];
+    uint8_t checksum[2];
+} BESS_INFO_t;
+
 /* Same RTC format as used by VBA, BGB and SameBoy in battery saves*/
 typedef struct __attribute__((packed)){
     BESS_block_t header;
@@ -241,9 +247,10 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
 {
     return GB_get_save_state_size_no_bess(gb) +
     // BESS
-    + sizeof(BESS_CORE_t)
     + sizeof(BESS_block_t) // NAME
     + sizeof(BESS_NAME) - 1
+    + sizeof(BESS_INFO_t) // INFO
+    + sizeof(BESS_CORE_t)
     + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
     + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3 block
@@ -527,6 +534,22 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
     }
     
     if (file->write(file, BESS_NAME, sizeof(BESS_NAME) - 1) != sizeof(BESS_NAME) - 1) {
+        goto error;
+    }
+    
+    /* BESS INFO */
+    
+    static const BESS_block_t bess_info = {BE32('INFO'), LE32(sizeof(BESS_INFO_t) - sizeof(BESS_block_t))};
+    
+    if (file->write(file, &bess_info, sizeof(bess_info)) != sizeof(bess_info)) {
+        goto error;
+    }
+    
+    if (file->write(file, gb->rom + 0x134, 0x10) != 0x10) {
+        goto error;
+    }
+    
+    if (file->write(file, gb->rom + 0x14e, 2) != 2) {
         goto error;
     }
     
@@ -936,6 +959,23 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     file->read(file, emulator_name, LE32(block.size));
                 }
                 break;
+            case BE32('INFO'): {
+                BESS_INFO_t bess_info = {0,};
+                if (LE32(block.size) != sizeof(bess_info) - sizeof(block)) goto parse_error;
+                if (file->read(file, &bess_info.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (memcmp(bess_info.title, gb->rom + 0x134, sizeof(bess_info.title))) {
+                    char ascii_title[0x11] = {0,};
+                    for (unsigned i = 0; i < 0x10; i++) {
+                        if (bess_info.title[i] < 0x20 || bess_info.title[i] > 0x7E) break;
+                        ascii_title[i] = bess_info.title[i];
+                    }
+                    GB_log(gb, "Save state was made on another ROM: '%s'\n", ascii_title);
+                }
+                else if (memcmp(bess_info.checksum, gb->rom + 0x14E, 2)) {
+                    GB_log(gb, "Save state was potentially made on another revision of the same ROM.\n");
+                }
+                break;
+            }
             case BE32('XOAM'):
                 if (!found_core) goto parse_error;
                 if (LE32(block.size) != 96) goto parse_error;
