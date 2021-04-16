@@ -30,14 +30,30 @@ BESS uses a block format where each block contains the following header:
 
 Every block is followed by another blocked, until the END block is reached. If an implementation encounters an unsupported block, it should be completely ignored (Should not have any effect and should not trigger a failure). 
 
+#### NAME block
+
+The NAME block uses the `'NAME'` identifier, and is an optional block that contains the name of the emulator that created this save state. While optional, it is highly recommended to be included in every implementation – it allows the user to know which emulator and version is compatible with the native save state format contained in this file. When used, this block should come first.
+
+The length of the NAME block is variable, and it only contains the name and version of the originating emulator in ASCII.
+
+
+#### INFO block
+
+The INFO block uses the `'INFO'` identifier, and is an optional block that contains information about the ROM this save state originates from. When used, this block should come before `CORE` but after `NAME`. This block is 0x12 bytes long, and it follows this structure:
+
+| Offset | Content                                          |
+|--------|--------------------------------------------------|
+| 0x00   | Bytes 0x134-0x143 from the ROM (Title)           |
+| 0x10   | Bytes 0x14E-0x14F from the ROM (Global checksum) |
+
 #### CORE block
 
-The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, except for the `NAME` block (But an implementation should allow unknown blocks to appear before it for future compatibility).
+The CORE block uses the `'CORE'` identifier, and is a required block that contains both core state information, as well as basic information about the BESS version used. This block must be the first block, unless the `NAME` or `INFO` blocks exist then it must come directly after them. An implementation should not enforce block order on blocks unknown to it for future compatibility.
 
 The length of the CORE block is 0xD0 bytes, but implementations are expected to ignore any excess bytes. Following the BESS block header, the structure is as follows:
 
-| Offset | Content                               |
-|--------|---------------------------------------|
+| Offset | Content                                |
+|--------|----------------------------------------|
 | 0x00   | Major BESS version as a 16-bit integer |
 | 0x02   | Minor BESS version as a 16-bit integer |
 
@@ -90,11 +106,11 @@ The values of memory-mapped registers should be written 'as-is' to memory as if 
 | 0x9C   | The offset of RAM from file start (32-bit integer)                 |
 | 0xA0   | The size of VRAM (32-bit integer)                                  |
 | 0xA4   | The offset of VRAM from file start (32-bit integer)                |
-| 0xA9   | The size of MBC RAM (32-bit integer)                               |
+| 0xA8   | The size of MBC RAM (32-bit integer)                               |
 | 0xAC   | The offset of MBC RAM from file start (32-bit integer)             |
 | 0xB0   | The size of OAM (=0xA0, 32-bit integer)                            |
 | 0xB4   | The offset of OAM from file start (32-bit integer)                 |
-| 0xB9   | The size of HRAM (=0x7F, 32-bit integer)                           |
+| 0xB8   | The size of HRAM (=0x7F, 32-bit integer)                           |
 | 0xBC   | The offset of HRAM from file start (32-bit integer)                |
 | 0xC0   | The size of background palettes (=0x40 or 0, 32-bit integer)       |
 | 0xC4   | The offset of background palettes from file start (32-bit integer) |
@@ -104,12 +120,6 @@ The values of memory-mapped registers should be written 'as-is' to memory as if 
 The contents of large buffers are stored outside of BESS structure so data from an implementation's native save state format can be reused. The offsets are absolute offsets from the save state file's start. Background and object palette sizes must be 0 for models prior to Game Boy Color.
 
 An implementation needs handle size mismatches gracefully. For example, if too large MBC RAM size is specified, the superfluous data should be ignored. On the other hand, if a too small VRAM size is specified (For example, if it's a save state from an emulator emulating a CGB in DMG mode, and it didn't save the second CGB VRAM bank), the implementation is expected to set that extra bank to all zeros.
-
-#### NAME block
-
-The NAME block uses the `'NAME'` identifier, and is an optional block that contains the name of the emulator that created this save state. While optional, it is highly recommended to be included in every implementation – it allows the user to know which emulator and version is compatible with the native save state format contained in this file. When used, this block should come first.
-
-The length of the NAME block is variable, and it only contains the name and version of the originating emulator in ASCII.
 
 #### XOAM block
 
@@ -172,7 +182,7 @@ The length of this block is 0x11 bytes long and it follows the following structu
 
 The SGB block uses the `'SGB '` identifier, and is an optional block that is only used while emulating an SGB or SGB2 *and* SGB commands enabled. Implementations must not save this block on other models or when SGB commands are disabled, and should assume SGB commands are disabled if this block is missing.
 
-The length of this block is 0x39 bytes and it follows the following structure:
+The length of this block is 0x39 bytes, but implementations should allow and ignore excess data in this block for extensions. The block follows the following structure:
 
 | Offset | Content                                                                                                                  |
 |--------|--------------------------------------------------------------------------------------------------------------------------|

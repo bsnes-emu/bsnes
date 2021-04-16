@@ -98,6 +98,13 @@ typedef union {
         uint8_t days;
         uint8_t high;
     };
+    struct {
+        uint8_t seconds;
+        uint8_t minutes;
+        uint8_t hours:5;
+        uint8_t weekday:3;
+        uint8_t weeks;
+    } tpp1;
     uint8_t data[5];
 } GB_rtc_time_t;
 
@@ -538,6 +545,7 @@ struct GB_gameboy_internal_s {
         uint64_t last_rtc_second;
         bool rtc_latch;
         uint32_t rtc_cycles;
+        uint8_t tpp1_mr4;
     );
 
     /* Video Display */
@@ -806,8 +814,6 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
 void *GB_get_user_data(GB_gameboy_t *gb);
 void GB_set_user_data(GB_gameboy_t *gb, void *data);
 
-
-
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer, size_t size);
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
@@ -877,5 +883,5 @@ unsigned GB_get_screen_width(GB_gameboy_t *gb);
 unsigned GB_get_screen_height(GB_gameboy_t *gb);
 double GB_get_usual_frame_rate(GB_gameboy_t *gb);
 unsigned GB_get_player_count(GB_gameboy_t *gb);
-
+    
 #endif /* GB_h */

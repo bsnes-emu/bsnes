@@ -267,7 +267,6 @@ static void command_ready(GB_gameboy_t *gb)
 #endif
             uint8_t x = command->x;
             uint8_t y = command->y;
-            count = MIN(count, 20 * 18);
             if (x >= 20 || y >= 18) {
                 /* TODO: Verify with the SFC BIOS */
                 break;
@@ -282,7 +281,7 @@ static void command_ready(GB_gameboy_t *gb)
                         x++;
                         y = 0;
                         if (x == 20) {
-                            x = 0;
+                            break;
                         }
                     }
                 }
@@ -292,7 +291,7 @@ static void command_ready(GB_gameboy_t *gb)
                         y++;
                         x = 0;
                         if (y == 18) {
-                            y = 0;
+                            break;
                         }
                     }
                 }

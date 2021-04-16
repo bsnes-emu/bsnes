@@ -58,7 +58,7 @@ static void start_capturing_logs(void)
     GB_set_log_callback(&gb, log_capture_callback);
 }
 
-static const char *end_capturing_logs(bool show_popup, bool should_exit)
+static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_t popup_flags)
 {
     GB_set_log_callback(&gb, NULL);
     if (captured_log[0] == 0) {
@@ -67,7 +67,7 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit)
     }
     else {
         if (show_popup) {
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", captured_log, window);
+            SDL_ShowSimpleMessageBox(popup_flags, "Error", captured_log, window);
         }
         if (should_exit) {
             exit(1);
@@ -430,20 +430,21 @@ static bool handle_pending_command(void)
             replace_extension(filename, strlen(filename), save_path, save_extension);
             
             start_capturing_logs();
+            bool success;
             if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
-                GB_load_state(&gb, save_path);
+                success = GB_load_state(&gb, save_path) == 0;
             }
             else {
-                GB_save_state(&gb, save_path);
+                success = GB_save_state(&gb, save_path) == 0;
             }
-            end_capturing_logs(true, false);
+            end_capturing_logs(true, false, success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR);
             return false;
         }
     
         case GB_SDL_LOAD_STATE_FROM_FILE_COMMAND:
             start_capturing_logs();
-            GB_load_state(&gb, dropped_state_file);
-            end_capturing_logs(true, false);
+            bool success = GB_load_state(&gb, dropped_state_file) == 0;
+            end_capturing_logs(true, false, success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR);
             SDL_free(dropped_state_file);
             return false;
             
@@ -483,7 +484,7 @@ static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
     if (use_built_in) {
         start_capturing_logs();
         GB_load_boot_rom(gb, resource_path(names[type]));
-        end_capturing_logs(true, false);
+        end_capturing_logs(true, false, SDL_MESSAGEBOX_ERROR);
     }
 }
 
@@ -556,7 +557,7 @@ restart:
     else {
         GB_load_rom(&gb, filename);
     }
-    end_capturing_logs(true, error);
+    end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING);
     
     
     /* Configure battery */

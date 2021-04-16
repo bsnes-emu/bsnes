@@ -185,30 +185,13 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
                     case 0: return gb->tpp1_rom_bank;
                     case 1: return gb->tpp1_rom_bank >> 8;
                     case 2: return gb->tpp1_ram_bank;
-                    case 3: return gb->rumble_strength | (((gb->rtc_real.high & 0xC0) ^ 0x40) >> 4);
+                    case 3: return gb->rumble_strength | gb->tpp1_mr4;
                 }
             case 2:
             case 3:
                 break; // Read RAM
             case 5:
-                switch (addr & 3) {
-                    case 0: { // Week count
-                        unsigned total_days = (((gb->rtc_latched.high & 7) << 8) + gb->rtc_latched.days);
-                        if (gb->rtc_latched.high & 0x20) {
-                            return total_days / 7 - 1;
-                        }
-                        return total_days / 7;
-                    }
-                    case 1: { // Week count
-                        unsigned total_days = (((gb->rtc_latched.high & 7) << 8) + gb->rtc_latched.days);
-                        if (gb->rtc_latched.high & 0x20) {
-                            return gb->rtc_latched.hours | 0xe0; // Hours and weekday
-                        }
-                        return gb->rtc_latched.hours | ((total_days % 7) << 5); // Hours and weekday
-                    }
-                    case 2: return gb->rtc_latched.minutes;
-                    case 3: return gb->rtc_latched.seconds;
-                }
+                return gb->rtc_latched.data[(addr & 3) ^ 3];
             default:
                 return 0xFF;
         }
@@ -625,20 +608,17 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                             memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
                             break;
                         case 0x11: {
-                            uint8_t flags = gb->rtc_real.high & 0xc0;
                             memcpy(&gb->rtc_real, &gb->rtc_latched, sizeof(gb->rtc_real));
-                            gb->rtc_real.high &= ~0xe0;
-                            gb->rtc_real.high |= flags;
                             break;
                         }
                         case 0x14:
-                            gb->rtc_real.high &= ~0x80;
+                            gb->tpp1_mr4 &= ~0x8;
                             break;
                         case 0x18:
-                            gb->rtc_real.high |= 0x40;
+                            gb->tpp1_mr4 &= ~0x4;
                             break;
                         case 0x19:
-                            gb->rtc_real.high &= ~0x40;
+                            gb->tpp1_mr4 |= 0x4;
                             break;
                             
                         case 0x20:
@@ -776,32 +756,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case 3:
                 break;
             case 5:
-                switch (addr & 3) {
-                    case 0: {
-                        unsigned total_days = (((gb->rtc_latched.high & 7) << 8) + gb->rtc_latched.days);
-                        total_days = total_days % 7 + value * 7;
-                        bool had_illegal_weekday = gb->rtc_latched.high & 0x20;
-                        gb->rtc_latched.days = total_days;
-                        gb->rtc_latched.high = total_days >> 8;
-                        if (had_illegal_weekday) {
-                            gb->rtc_latched.high |= 0x20;
-                        }
-                        return;
-                    }
-                    case 1: {
-                        unsigned total_days = (((gb->rtc_latched.high & 7) << 8) + gb->rtc_latched.days);
-                        total_days = total_days / 7 * 7 + (value >> 5);
-                        gb->rtc_latched.hours = value & 0x1F;
-                        gb->rtc_latched.days = total_days;
-                        gb->rtc_latched.high = total_days >> 8;
-                        if ((value & 0xE0) == 0xE0) { // Illegal weekday
-                            gb->rtc_latched.high |= 0x20;
-                        }
-                        return;
-                    }
-                    case 2: gb->rtc_latched.minutes = value; return;
-                    case 3: gb->rtc_latched.seconds = value; return;
-                }
+                gb->rtc_latched.data[(addr & 3) ^ 3] = value;
                 return;
             default:
                 return;

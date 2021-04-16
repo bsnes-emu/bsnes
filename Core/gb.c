@@ -695,6 +695,15 @@ typedef struct {
     uint8_t padding5[3];
 } GB_vba_rtc_time_t;
 
+typedef struct __attribute__((packed)) {
+    uint32_t magic;
+    uint16_t version;
+    uint8_t mr4;
+    uint8_t reserved;
+    uint64_t last_rtc_second;
+    uint8_t rtc_data[4];
+} GB_tpp1_rtc_save_t;
+
 typedef union {
     struct __attribute__((packed)) {
         GB_rtc_time_t rtc_real;
@@ -712,6 +721,18 @@ typedef union {
     } vba64;
 } GB_rtc_save_t;
 
+static void GB_fill_tpp1_save_data(GB_gameboy_t *gb, GB_tpp1_rtc_save_t *data)
+{
+    data->magic = BE32('TPP1');
+    data->version = BE16(0x100);
+    data->mr4 = gb->tpp1_mr4;
+    data->reserved = 0;
+    data->last_rtc_second = LE64(time(NULL));
+    unrolled for (unsigned i = 4; i--;) {
+        data->rtc_data[i] = gb->rtc_real.data[i ^ 3];
+    }
+}
+
 int GB_save_battery_size(GB_gameboy_t *gb)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
@@ -722,6 +743,11 @@ int GB_save_battery_size(GB_gameboy_t *gb)
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
         return gb->mbc_ram_size + sizeof(GB_huc3_rtc_time_t);
     }
+    
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        return gb->mbc_ram_size + sizeof(GB_tpp1_rtc_save_t);
+    }
+    
     GB_rtc_save_t rtc_save_size;
     return gb->mbc_ram_size + (gb->cartridge_type->has_rtc ? sizeof(rtc_save_size.vba64) : 0);
 }
@@ -736,7 +762,13 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
 
     memcpy(buffer, gb->mbc_ram, gb->mbc_ram_size);
 
-    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        buffer += gb->mbc_ram_size;
+        GB_tpp1_rtc_save_t rtc_save;
+        GB_fill_tpp1_save_data(gb, &rtc_save);
+        memcpy(buffer, &rtc_save, sizeof(rtc_save));
+    }
+    else if (gb->cartridge_type->mbc_type == GB_HUC3) {
         buffer += gb->mbc_ram_size;
 
 #ifdef GB_BIG_ENDIAN
@@ -799,7 +831,16 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
         fclose(f);
         return EIO;
     }
-    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        GB_tpp1_rtc_save_t rtc_save;
+        GB_fill_tpp1_save_data(gb, &rtc_save);
+        
+        if (fwrite(&rtc_save, sizeof(rtc_save), 1, f) != 1) {
+            fclose(f);
+            return EIO;
+        }
+    }
+    else if (gb->cartridge_type->mbc_type == GB_HUC3) {
 #ifdef GB_BIG_ENDIAN
         GB_huc3_rtc_time_t rtc_save = {
             __builtin_bswap64(gb->last_rtc_second),
@@ -854,11 +895,35 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
     return errno;
 }
 
+static void GB_load_tpp1_save_data(GB_gameboy_t *gb, const GB_tpp1_rtc_save_t *data)
+{
+    gb->last_rtc_second = LE64(data->last_rtc_second);
+    unrolled for (unsigned i = 4; i--;) {
+        gb->rtc_real.data[i ^ 3] = data->rtc_data[i];
+    }
+}
+
 void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size)
 {
     memcpy(gb->mbc_ram, buffer, MIN(gb->mbc_ram_size, size));
     if (size <= gb->mbc_ram_size) {
         goto reset_rtc;
+    }
+    
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        GB_tpp1_rtc_save_t rtc_save;
+        if (size - gb->mbc_ram_size < sizeof(rtc_save)) {
+            goto reset_rtc;
+        }
+        memcpy(&rtc_save, buffer + gb->mbc_ram_size, sizeof(rtc_save));
+        
+        GB_load_tpp1_save_data(gb, &rtc_save);
+        
+        if (gb->last_rtc_second > time(NULL)) {
+            /* We must reset RTC here, or it will not advance. */
+            goto reset_rtc;
+        }
+        return;
     }
     
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
@@ -968,6 +1033,21 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
 
     if (fread(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
         goto reset_rtc;
+    }
+    
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        GB_tpp1_rtc_save_t rtc_save;
+        if (fread(&rtc_save, sizeof(rtc_save), 1, f) != 1) {
+            goto reset_rtc;
+        }
+        
+        GB_load_tpp1_save_data(gb, &rtc_save);
+        
+        if (gb->last_rtc_second > time(NULL)) {
+            /* We must reset RTC here, or it will not advance. */
+            goto reset_rtc;
+        }
+        return;
     }
     
     if (gb->cartridge_type->mbc_type == GB_HUC3) {

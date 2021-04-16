@@ -283,27 +283,31 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
         }
         return;
     }
+    bool running = false;
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        running = gb->tpp1_mr4 & 0x4;
+    }
+    else {
+        running = (gb->rtc_real.high & 0x40) == 0;
+    }
     
-    if ((gb->rtc_real.high & 0x40) == 0) { /* is timer running? */
+    if (running) { /* is timer running? */
         while (gb->last_rtc_second + 60 * 60 * 24 < current_time) {
             gb->last_rtc_second += 60 * 60 * 24;
-            if (++gb->rtc_real.days == 0) {
-                if (gb->cartridge_type->mbc_type == GB_TPP1) {
-                    if ((gb->rtc_real.high & 7) >= 6) { /* Bit 8 of days*/
-                        gb->rtc_real.high &= 0x40;
-                        gb->rtc_real.high |= 0x80; /* Overflow bit */
-                    }
-                    else {
-                        gb->rtc_real.high++;
+            if (gb->cartridge_type->mbc_type == GB_TPP1) {
+                if (++gb->rtc_real.tpp1.weekday == 7) {
+                    gb->rtc_real.tpp1.weekday = 0;
+                    if (++gb->rtc_real.tpp1.weeks == 0) {
+                        gb->tpp1_mr4 |= 8; /* Overflow bit */
                     }
                 }
-                else {
-                    if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
-                        gb->rtc_real.high |= 0x80; /* Overflow bit */
-                    }
-                    
-                    gb->rtc_real.high ^= 1;
+            }
+            else if (++gb->rtc_real.days == 0) {
+                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                    gb->rtc_real.high |= 0x80; /* Overflow bit */
                 }
+                
+                gb->rtc_real.high ^= 1;
             }
         }
         
@@ -315,21 +319,21 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
             if (++gb->rtc_real.minutes != 60) continue;
             gb->rtc_real.minutes = 0;
             
-            if (++gb->rtc_real.hours != 24) continue;
-            gb->rtc_real.hours = 0;
-            
-            if (++gb->rtc_real.days != 0) continue;
-            
             if (gb->cartridge_type->mbc_type == GB_TPP1) {
-                if ((gb->rtc_real.high & 7) >= 6) { /* Bit 8 of days*/
-                    gb->rtc_real.high &= 0x40;
-                    gb->rtc_real.high |= 0x80; /* Overflow bit */
-                }
-                else {
-                    gb->rtc_real.high++;
+                if (++gb->rtc_real.tpp1.hours != 24) continue;
+                gb->rtc_real.tpp1.hours = 0;
+                if (++gb->rtc_real.tpp1.weekday != 7) continue;
+                gb->rtc_real.tpp1.weekday = 0;
+                if (++gb->rtc_real.tpp1.weeks == 0) {
+                    gb->tpp1_mr4 |= 8; /* Overflow bit */
                 }
             }
             else {
+                if (++gb->rtc_real.hours != 24) continue;
+                gb->rtc_real.hours = 0;
+                
+                if (++gb->rtc_real.days != 0) continue;
+                
                 if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
                     gb->rtc_real.high |= 0x80; /* Overflow bit */
                 }
