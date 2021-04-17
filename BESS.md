@@ -1,12 +1,10 @@
-# BESS – Best Effort Save State
+# BESS – Best Effort Save State 1.0
 
 ## Motivation
 
 BESS is a save state format specification designed to allow different emulators, as well as majorly different versions of the same emulator, to import save states from other BESS-compliant save states. BESS works by appending additional, implementation-agnostic information about the emulation state. This allows a single save state file to be read as both a fully-featured, implementation specific save state which includes detailed timing information; and as a portable "best effort" save state that represents a state accurately enough to be restored in casual use-cases.
 
 ## Specification
-
-**Note: This specification is currently under development and will potentially change in the near future**
 
 Every integer used in the BESS specification is stored in Little Endian encoding.
 
