@@ -1525,8 +1525,8 @@ static void cb_prefix(GB_gameboy_t *gb, uint8_t opcode)
 }
 
 static GB_opcode_t *opcodes[256] = {
-    /*  X0          X1          X2          X3          X4          X5          X6          X7                */
-    /*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
+/*  X0          X1          X2          X3          X4          X5          X6          X7                */
+/*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
     nop,        ld_rr_d16,  ld_drr_a,   inc_rr,     inc_hr,     dec_hr,     ld_hr_d8,   rlca,       /* 0X */
     ld_da16_sp, add_hl_rr,  ld_a_drr,   dec_rr,     inc_lr,     dec_lr,     ld_lr_d8,   rrca,
     stop,       ld_rr_d16,  ld_drr_a,   inc_rr,     inc_hr,     dec_hr,     ld_hr_d8,   rla,        /* 1X */
