@@ -1117,6 +1117,9 @@ done:
                 read_bess_buffer(&sgb.attribute_map, file, (void *)gb->sgb->attribute_map, sizeof(gb->sgb->attribute_map));
                 read_bess_buffer(&sgb.attribute_files, file, (void *)gb->sgb->attribute_files, sizeof(gb->sgb->attribute_files));
                 
+                gb->sgb->effective_palettes[12] = gb->sgb->effective_palettes[8] =
+                gb->sgb->effective_palettes[4] = gb->sgb->effective_palettes[0];
+                
                 gb->sgb->player_count = sgb.multiplayer_state >> 4;
                 gb->sgb->current_player = sgb.multiplayer_state & 0xF;
                 if (gb->sgb->player_count > 4 || gb->sgb->player_count == 3 || gb->sgb->player_count == 0) {

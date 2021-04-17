@@ -1302,8 +1302,14 @@ void run_gui(bool is_running)
             }
             case SDL_DROPFILE: {
                 if (GB_is_stave_state(event.drop.file)) {
-                    dropped_state_file = event.drop.file;
-                    pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
+                    if (GB_is_inited(&gb)) {
+                        dropped_state_file = event.drop.file;
+                        pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
+                    }
+                    else {
+                        SDL_free(event.drop.file);
+                    }
+                    break;
                 }
                 else {
                     set_filename(event.drop.file, SDL_free);
