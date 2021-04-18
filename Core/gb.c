@@ -302,6 +302,8 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     return 0;
 }
 
+#define GBS_ENTRY 0x61
+
 void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
 {
     GB_reset(gb);
@@ -324,7 +326,7 @@ void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
         gb->cgb_double_speed = true; // Might mean double speed mode on a DMG
     }
     gb->sp = LE16(gb->gbs_header.sp);
-    gb->pc = 0x100;
+    gb->pc = GBS_ENTRY;
     gb->boot_rom_finished = true;
     gb->a = track;
     if (gb->sgb) {
@@ -342,7 +344,7 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
     }
     fread(&gb->gbs_header, sizeof(gb->gbs_header), 1, f);
     if (gb->gbs_header.magic != BE32('GBS\x01') ||
-        LE16(gb->gbs_header.load_address) < 0x400 ||
+        LE16(gb->gbs_header.load_address) < 0x6e ||
         LE16(gb->gbs_header.load_address) >= 0x8000) {
         GB_log(gb, "Not a valid GBS file: %s.\n", strerror(errno));
         fclose(f);
@@ -393,20 +395,20 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
     }
     
     // Generate entry
-    memcpy(gb->rom + 0x100, (uint8_t[]) {
+    memcpy(gb->rom + GBS_ENTRY, (uint8_t[]) {
         0xCD, // Call $XXXX
-        LE16(gb->gbs_header.init_address),
-        LE16(gb->gbs_header.init_address) >> 8,
+            LE16(gb->gbs_header.init_address),
+            LE16(gb->gbs_header.init_address) >> 8,
         0x76, // HALT
         0x00, // NOP
         0xAF, // XOR a
         0xE0, // LDH [$FFXX], a
-        GB_IO_IF,
+            GB_IO_IF,
         0xCD, // Call $XXXX
-        LE16(gb->gbs_header.play_address),
-        LE16(gb->gbs_header.play_address) >> 8,
+            LE16(gb->gbs_header.play_address),
+            LE16(gb->gbs_header.play_address) >> 8,
         0x18, // JR pc ± $XX
-        -10   // To HALT
+            -10   // To HALT
     }, 13);
     
     GB_gbs_switch_track(gb, gb->gbs_header.first_track - 1);
