@@ -333,6 +333,9 @@ void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
         gb->sgb->intro_animation = GB_SGB_INTRO_ANIMATION_LENGTH;
         gb->sgb->disable_commands = true;
     }
+    if (gb->gbs_header.TAC & 0x40) {
+        gb->interrupt_enable = true;
+    }
 }
 
 int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
@@ -384,13 +387,15 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
         memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
     }
     
+    bool has_interrupts = gb->gbs_header.TAC & 0x40;
+    
     // Generate interrupt handlers
-    for (unsigned i = 0; i <= 0x38; i += 8) {
+    for (unsigned i = 0; i <= (has_interrupts? 0x50 : 0x38); i += 8) {
         gb->rom[i] = 0xc3; // jp $XXXX
         gb->rom[i + 1] = (LE16(gb->gbs_header.load_address) + i);
         gb->rom[i + 2] = (LE16(gb->gbs_header.load_address) + i) >> 8;
     }
-    for (unsigned i = 0x40; i <= 0x60; i += 8) {
+    for (unsigned i = has_interrupts? 0x58 : 0x40; i <= 0x60; i += 8) {
         gb->rom[i] = 0xc9; // ret
     }
     
