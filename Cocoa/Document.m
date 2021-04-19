@@ -776,8 +776,15 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [self initCommon];
     self.view.gb = &gb;
     [self.view screenSizeChanged];
-    [self loadROM];
-    [self reset:nil];
+    if ([self loadROM]) {
+        _mainWindow.alphaValue = 0; // Hack hack ugly hack
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self close];
+        });
+    }
+    else {
+        [self reset:nil];
+    }
 }
 
 - (void) initMemoryView
@@ -919,21 +926,22 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
-- (void) loadROM
+- (int) loadROM
 {
+    __block int ret = 0;
     NSString *rom_warnings = [self captureOutputForBlock:^{
         GB_debugger_clear_symbols(&gb);
         if ([[[self.fileType pathExtension] lowercaseString] isEqualToString:@"isx"]) {
-            GB_load_isx(&gb, self.fileURL.path.UTF8String);
+            ret = GB_load_isx(&gb, self.fileURL.path.UTF8String);
             GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
         }
         else if ([[[self.fileType pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
             __block GB_gbs_info_t info;
-            GB_load_gbs(&gb, self.fileURL.path.UTF8String, &info);
+            ret = GB_load_gbs(&gb, self.fileURL.path.UTF8String, &info);
             [self prepareGBSInterface:&info];
         }
         else {
-            GB_load_rom(&gb, [self.fileURL.path UTF8String]);
+            ret = GB_load_rom(&gb, [self.fileURL.path UTF8String]);
         }
         GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path.UTF8String);
         GB_load_cheats(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path.UTF8String);
@@ -941,10 +949,17 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sym"].path.UTF8String);
     }];
-    if (rom_warnings && !rom_warning_issued) {
+    if (ret) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:rom_warnings?: @"Could not load ROM"];
+        [alert setAlertStyle:NSAlertStyleCritical];
+        [alert runModal];
+    }
+    else if (rom_warnings && !rom_warning_issued) {
         rom_warning_issued = true;
         [GBWarningPopover popoverWithContents:rom_warnings onWindow:self.mainWindow];
     }
+    return ret;
 }
 
 - (void)close
