@@ -369,24 +369,25 @@ void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
     }
 }
 
-int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
+int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size, GB_gbs_info_t *info)
 {
-    FILE *f = fopen(path, "rb");
-    if (!f) {
-        GB_log(gb, "Could not open GBS: %s.\n", strerror(errno));
-        return errno;
+    if(size < sizeof(gb->gbs_header)) {
+        GB_log(gb, "Not a valid GBS file.\n");
+        return -1;
     }
-    fread(&gb->gbs_header, sizeof(gb->gbs_header), 1, f);
+
+    memcpy(&gb->gbs_header,buffer,sizeof(gb->gbs_header));
+
     if (gb->gbs_header.magic != BE32('GBS\x01') ||
         ((LE16(gb->gbs_header.load_address) < GBS_ENTRY + GBS_ENTRY_SIZE ||
         LE16(gb->gbs_header.load_address) >= 0x8000) &&
         LE16(gb->gbs_header.load_address) != 0)) {
         GB_log(gb, "Not a valid GBS file.\n");
-        fclose(f);
         return -1;
     }
-    fseek(f, 0, SEEK_END);
-    size_t data_size = ftell(f) - sizeof(gb->gbs_header);
+
+    size_t data_size = size - sizeof(gb->gbs_header);
+
     gb->rom_size = (data_size + LE16(gb->gbs_header.load_address) + 0x3FFF) & ~0x3FFF; /* Round to bank */
     /* And then round to a power of two */
     while (gb->rom_size & (gb->rom_size - 1)) {
@@ -398,14 +399,14 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
     if (gb->rom_size == 0) {
         gb->rom_size = 0x8000;
     }
-    fseek(f, sizeof(gb->gbs_header), SEEK_SET);
+
     if (gb->rom) {
         free(gb->rom);
     }
+
     gb->rom = malloc(gb->rom_size);
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
-    fread(gb->rom + LE16(gb->gbs_header.load_address), 1, data_size, f);
-    fclose(f);
+    memcpy(gb->rom + LE16(gb->gbs_header.load_address), buffer + sizeof(gb->gbs_header), data_size);
     
     gb->cartridge_type = &GB_cart_defs[0x11];
     if (gb->mbc_ram) {
@@ -451,6 +452,25 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
     gb->has_sgb_border = false;
     load_default_border(gb);
     return 0;
+}
+
+int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        GB_log(gb, "Could not open GBS: %s.\n", strerror(errno));
+        return errno;
+    }
+    fseek(f, 0, SEEK_END);
+    size_t file_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    uint8_t *file_data = malloc(file_size);
+    fread(file_data,1,file_size,f);
+    fclose(f);
+
+    int r = GB_load_gbs_from_buffer(gb,file_data,file_size,info);
+    free(file_data);
+    return r;
 }
 
 int GB_load_isx(GB_gameboy_t *gb, const char *path)
