@@ -541,10 +541,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->mbc3_rtc_mapped = value & 8;
                     break;
                 case 0x6000: case 0x7000:
-                    if (!gb->rtc_latch && (value & 1)) { /* Todo: verify condition is correct */
-                        memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
-                    }
-                    gb->rtc_latch = value & 1;
+                    memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
                     break;
             }
             break;
@@ -781,7 +778,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             if (gb->mbc_ram_bank == 0) {
                 gb->rtc_cycles = 0;
             }
-            gb->rtc_latched.data[gb->mbc_ram_bank] = gb->rtc_real.data[gb->mbc_ram_bank] = value;
+            gb->rtc_real.data[gb->mbc_ram_bank] = value;
         }
         return;
     }

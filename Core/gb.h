@@ -543,7 +543,7 @@ struct GB_gameboy_internal_s {
     GB_SECTION(rtc,
         GB_rtc_time_t rtc_real, rtc_latched;
         uint64_t last_rtc_second;
-        bool rtc_latch;
+        GB_PADDING(bool, rtc_latch);
         uint32_t rtc_cycles;
         uint8_t tpp1_mr4;
     );
