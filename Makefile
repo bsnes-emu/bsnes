@@ -122,6 +122,9 @@ endif
 CFLAGS += $(WARNINGS)
 
 CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+ifneq (,$(UPDATE_SUPPORT))
+CFLAGS += -DUPDATE_SUPPORT
+endif
 
 ifeq (,$(PKG_CONFIG))
 SDL_CFLAGS := $(shell sdl2-config --cflags)

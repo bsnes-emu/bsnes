@@ -29,6 +29,8 @@
     NSPopUpButton *_rumbleModePopupButton;
     NSSlider *_temperatureSlider;
     NSSlider *_interferenceSlider;
+    NSButton *_autoUpdatesCheckbox;
+
 }
 
 + (NSArray *)filterList
@@ -381,6 +383,12 @@
 
 }
 
+- (IBAction)changeAutoUpdates:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBAutoUpdatesEnabled"];
+}
+
 - (IBAction) configureJoypad:(id)sender
 {
     [self.configureJoypadButton setEnabled:NO];
@@ -704,5 +712,16 @@
         default_joypads[player_string] = [[sender selectedItem] identifier];
     }
     [[NSUserDefaults standardUserDefaults] setObject:default_joypads forKey:@"JoyKitDefaultControllers"];
+}
+
+- (NSButton *)autoUpdatesCheckbox
+{
+    return _autoUpdatesCheckbox;
+}
+
+- (void)setAutoUpdatesCheckbox:(NSButton *)autoUpdatesCheckbox
+{
+    _autoUpdatesCheckbox = autoUpdatesCheckbox;
+    [_autoUpdatesCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAutoUpdatesEnabled"]];
 }
 @end

@@ -1586,7 +1586,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void)cameraRequestUpdate
 {
-    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @try {
             if (!cameraSession) {
                 if (@available(macOS 10.14, *)) {

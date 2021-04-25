@@ -13,6 +13,9 @@
                 <outlet property="emulationTab" destination="ymk-46-SX7" id="ofG-ca-a5C"/>
                 <outlet property="graphicsTab" destination="sRK-wO-K6R" id="pfP-Di-i0Q"/>
                 <outlet property="preferencesWindow" destination="QvC-M9-y7g" id="kBg-fq-rZh"/>
+                <outlet property="updatesButton" destination="KnI-UA-Nlj" id="9Lw-d7-Qoj"/>
+                <outlet property="updatesSpinner" destination="fB8-sd-zrh" id="HbX-JT-8Su"/>
+                <outlet property="updatesTab" destination="ffn-ie-9C3" id="rti-eV-pIV"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -49,17 +52,24 @@
                             <action selector="switchPreferencesTab:" target="-2" id="Tio-D7-PaA"/>
                         </connections>
                     </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="EB7AB5BC-57B0-4639-A037-E28226866C80" label="Updates" paletteLabel="Updates" tag="4" image="AppIcon" autovalidates="NO" selectable="YES" id="lMV-68-ntz">
+                        <connections>
+                            <action selector="switchPreferencesTab:" target="-2" id="bfU-hc-FnN"/>
+                        </connections>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="zdp-Z7-yZM"/>
                     <toolbarItem reference="fCd-4a-SKR"/>
                     <toolbarItem reference="EMp-g1-eKu"/>
                     <toolbarItem reference="uNZ-j1-Dfx"/>
+                    <toolbarItem reference="lMV-68-ntz"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>
                 <outlet property="analogControlsCheckbox" destination="RuW-Db-dzW" id="FRE-hI-mnU"/>
                 <outlet property="aspectRatioCheckbox" destination="Vfj-tg-7OP" id="Yw0-xS-DBr"/>
+                <outlet property="autoUpdatesCheckbox" destination="ZVh-ob-6wl" id="qPS-53-3aW"/>
                 <outlet property="bootROMsButton" destination="T3Y-Ln-Onl" id="tdL-Yv-E2K"/>
                 <outlet property="bootROMsFolderItem" destination="Dzv-Gc-zoL" id="yhV-ZI-avD"/>
                 <outlet property="cgbPopupButton" destination="dlD-sk-SHO" id="4tg-SR-e17"/>
@@ -694,17 +704,6 @@
                         <action selector="changeAnalogControls:" target="QvC-M9-y7g" id="1xR-gY-WKo"/>
                     </connections>
                 </button>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qa7-Z7-yfO">
-                    <rect key="frame" x="26" y="13" width="169" height="32"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="push" title="Configure a Controller" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GdK-tQ-Wim">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="configureJoypad:" target="QvC-M9-y7g" id="IfY-Kc-PKU"/>
-                    </connections>
-                </button>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d2I-jU-sLb">
                     <rect key="frame" x="195" y="13" width="72" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -716,11 +715,56 @@
                         <action selector="skipButton:" target="QvC-M9-y7g" id="aw8-sw-yJw"/>
                     </connections>
                 </button>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qa7-Z7-yfO">
+                    <rect key="frame" x="27" y="13" width="172" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" title="Configure a controller" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GdK-tQ-Wim">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="configureJoypad:" target="QvC-M9-y7g" id="IfY-Kc-PKU"/>
+                    </connections>
+                </button>
             </subviews>
             <point key="canvasLocation" x="-159" y="1161.5"/>
         </customView>
+        <customView id="ffn-ie-9C3">
+            <rect key="frame" x="0.0" y="0.0" width="292" height="95"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZVh-ob-6wl">
+                    <rect key="frame" x="18" y="59" width="256" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Check for updates on launch" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="euw-4z-Urd">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="changeAutoUpdates:" target="QvC-M9-y7g" id="MrL-Zh-0Cc"/>
+                    </connections>
+                </button>
+                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="fB8-sd-zrh">
+                    <rect key="frame" x="257" y="23" width="16" height="16"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                </progressIndicator>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KnI-UA-Nlj">
+                    <rect key="frame" x="14" y="13" width="240" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" title="Check for updates now" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="j8a-EZ-Ef5">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="userCheckForUpdates:" target="-2" id="ACZ-SI-yTQ"/>
+                    </connections>
+                </button>
+            </subviews>
+            <point key="canvasLocation" x="-825" y="699.5"/>
+        </customView>
     </objects>
     <resources>
+        <image name="AppIcon" width="128" height="128"/>
         <image name="CPU" width="32" height="32"/>
         <image name="Display" width="32" height="32"/>
         <image name="Joypad" width="32" height="32"/>
