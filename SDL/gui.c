@@ -676,6 +676,7 @@ static void cycle_border_mode_backwards(unsigned index)
     }
 }
 
+extern bool uses_gl(void);
 struct shader_name {
     const char *file_name;
     const char *display_name;
@@ -699,6 +700,7 @@ struct shader_name {
 
 static void cycle_filter(unsigned index)
 {
+    if (!uses_gl()) return;
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -721,6 +723,7 @@ static void cycle_filter(unsigned index)
 
 static void cycle_filter_backwards(unsigned index)
 {
+    if (!uses_gl()) return;
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -742,6 +745,7 @@ static void cycle_filter_backwards(unsigned index)
 }
 const char *current_filter_name(unsigned index)
 {
+    if (!uses_gl()) return "Requires OpenGL 3.2+";
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -758,6 +762,7 @@ const char *current_filter_name(unsigned index)
 
 static void cycle_blending_mode(unsigned index)
 {
+        if (!uses_gl()) return;
     if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_ACCURATE) {
         configuration.blending_mode = GB_FRAME_BLENDING_MODE_DISABLED;
     }
@@ -768,6 +773,7 @@ static void cycle_blending_mode(unsigned index)
 
 static void cycle_blending_mode_backwards(unsigned index)
 {
+    if (!uses_gl()) return;
     if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_DISABLED) {
         configuration.blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE;
     }
@@ -778,6 +784,7 @@ static void cycle_blending_mode_backwards(unsigned index)
 
 const char *blending_mode_string(unsigned index)
 {
+    if (!uses_gl()) return "Requires OpenGL 3.2+";
     return (const char *[]){"Disabled", "Simple", "Accurate"}
     [configuration.blending_mode];
 }

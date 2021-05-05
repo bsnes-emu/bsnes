@@ -62,8 +62,11 @@ static GLuint create_program(const char *vsh, const char *fsh)
     return program;
 }
 
+extern bool uses_gl(void);
 bool init_shader_with_name(shader_t *shader, const char *name)
 {
+    if (!uses_gl()) return false;
+    
     GLint major = 0, minor = 0;
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);
@@ -187,6 +190,7 @@ void render_bitmap_with_shader(shader_t *shader, void *bitmap, void *previous,
 
 void free_shader(shader_t *shader)
 {
+    if (!uses_gl()) return;
     GLint major = 0, minor = 0;
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);

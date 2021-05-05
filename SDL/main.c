@@ -25,8 +25,13 @@ static double clock_mutliplier = 1.0;
 
 static char *filename = NULL;
 static typeof(free) *free_function = NULL;
-static char *battery_save_path_ptr;
+static char *battery_save_path_ptr = NULL;
+static SDL_GLContext gl_context = NULL;
 
+bool uses_gl(void)
+{
+    return gl_context;
+}
 
 void set_filename(const char *new_filename, typeof(free) *new_free_function)
 {
@@ -637,9 +642,10 @@ int main(int argc, char **argv)
     fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
     
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv);
+    bool nogl = get_arg_flag("--nogl", &argc, argv);
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [--fullscreen] [rom]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [--fullscreen] [--nogl] [rom]\n", argv[0]);
         exit(1);
     }
     
@@ -704,13 +710,15 @@ int main(int argc, char **argv)
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
     
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    gl_context = nogl? NULL : SDL_GL_CreateContext(window);
     
     GLint major = 0, minor = 0;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    if (gl_context) {
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+    }
     
-    if (major * 0x100 + minor < 0x302) {
+    if (gl_context && major * 0x100 + minor < 0x302) {
         SDL_GL_DeleteContext(gl_context);
         gl_context = NULL;
     }
