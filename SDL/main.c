@@ -644,7 +644,7 @@ int main(int argc, char **argv)
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
 
-    if (argc > 2) {
+    if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
         fprintf(stderr, "Usage: %s [--fullscreen] [--nogl] [rom]\n", argv[0]);
         exit(1);
     }
